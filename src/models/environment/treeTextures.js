@@ -1,4 +1,5 @@
 import * as THREE from 'three';
+import { createScaledCanvas as createCanvas, createBumpCanvas, toTexture as makeTexture } from '../textureQuality.js';
 
 /**
  * Procedural Hand-Painted Stylized PBR Texture Generator for Trees & Foliage in WarPoly
@@ -26,50 +27,10 @@ import * as THREE from 'three';
 const textureCache = new Map();
 
 /**
- * Canvas factory with safe mock fallback for headless / server / test environments
+ * Adaptador para a textura compartilhada (qualidade/mipmaps/anisotropia em ../textureQuality.js)
  */
-function createCanvas(width = 2048, height = 2048) {
-  let canvas, ctx;
-  if (typeof document !== 'undefined') {
-    canvas = document.createElement('canvas');
-    canvas.width = width;
-    canvas.height = height;
-    ctx = canvas.getContext('2d', { willReadFrequently: false });
-  } else {
-    // Headless / Node SSR mock
-    canvas = { width, height };
-    const noop = () => {};
-    const gradMock = { addColorStop: noop };
-    ctx = new Proxy({}, {
-      get: (target, prop) => {
-        if (prop === 'createLinearGradient' || prop === 'createRadialGradient') {
-          return () => gradMock;
-        }
-        return noop;
-      }
-    });
-  }
-  return { canvas, ctx, width, height };
-}
-
-/**
- * Converts HTML5 Canvas to a high-quality Three.js texture with proper color space & filtering
- */
-function toTexture(canvas, isSRGB = true, wrapRepeat = true) {
-  const tex = new THREE.CanvasTexture(canvas);
-  tex.colorSpace = isSRGB ? THREE.SRGBColorSpace : THREE.NoColorSpace;
-  tex.generateMipmaps = true;
-  tex.minFilter = THREE.LinearMipmapLinearFilter;
-  tex.magFilter = THREE.LinearFilter;
-  if (wrapRepeat) {
-    tex.wrapS = THREE.RepeatWrapping;
-    tex.wrapT = THREE.RepeatWrapping;
-  } else {
-    tex.wrapS = THREE.ClampToEdgeWrapping;
-    tex.wrapT = THREE.ClampToEdgeWrapping;
-  }
-  tex.needsUpdate = true;
-  return tex;
+function toTexture(canvas, isSRGB = true, isRepeat = true) {
+  return makeTexture(canvas, isSRGB, { wrapS: isRepeat ? THREE.RepeatWrapping : THREE.ClampToEdgeWrapping });
 }
 
 /**
@@ -100,7 +61,7 @@ export function getOakBarkTextures() {
   const { canvas: albC, ctx: alb, width: W, height: H } = createCanvas(2048, 2048);
   const { canvas: rghC, ctx: rgh } = createCanvas(2048, 2048);
   const { canvas: metC, ctx: met } = createCanvas(2048, 2048);
-  const { canvas: bmpC, ctx: bmp } = createCanvas(2048, 2048);
+  const { canvas: bmpC, ctx: bmp } = createBumpCanvas(2048, 2048);
 
   // 1.1 Base warm, light honey-amber cedar/oak gradient
   const baseGrad = alb.createLinearGradient(0, 0, W, 0);
@@ -234,8 +195,6 @@ export function getOakBarkTextures() {
   return texSet;
 }
 
-
-
 /* ==========================================================================
    2. PINE BARK TEXTURES (getPineBarkTextures)
    Weathered reddish-brown scaly pine bark plates, sap drippings, moss/lichen.
@@ -246,7 +205,7 @@ export function getPineBarkTextures() {
   const { canvas: albC, ctx: alb, width: W, height: H } = createCanvas(2048, 2048);
   const { canvas: rghC, ctx: rgh } = createCanvas(2048, 2048);
   const { canvas: metC, ctx: met } = createCanvas(2048, 2048);
-  const { canvas: bmpC, ctx: bmp } = createCanvas(2048, 2048);
+  const { canvas: bmpC, ctx: bmp } = createBumpCanvas(2048, 2048);
 
   // 2.1 Base warm terracotta / cinnamon pine wood tone
   const baseGrad = alb.createLinearGradient(0, 0, W, 0);
@@ -361,7 +320,7 @@ export function getOakFoliageTextures() {
   const { canvas: albC, ctx: alb, width: W, height: H } = createCanvas(2048, 2048);
   const { canvas: rghC, ctx: rgh } = createCanvas(2048, 2048);
   const { canvas: metC, ctx: met } = createCanvas(2048, 2048);
-  const { canvas: bmpC, ctx: bmp } = createCanvas(2048, 2048);
+  const { canvas: bmpC, ctx: bmp } = createBumpCanvas(2048, 2048);
 
   // 3.1 Fresh, bright spring green base gradient
   const baseGrad = alb.createRadialGradient(W * 0.5, H * 0.5, 100, W * 0.5, H * 0.5, W * 0.75);
@@ -457,7 +416,7 @@ export function getPineNeedleTextures() {
   const { canvas: albC, ctx: alb, width: W, height: H } = createCanvas(2048, 2048);
   const { canvas: rghC, ctx: rgh } = createCanvas(2048, 2048);
   const { canvas: metC, ctx: met } = createCanvas(2048, 2048);
-  const { canvas: bmpC, ctx: bmp } = createCanvas(2048, 2048);
+  const { canvas: bmpC, ctx: bmp } = createBumpCanvas(2048, 2048);
 
   // 4.1 Fresh, bright emerald evergreen base gradient
   const baseGrad = alb.createLinearGradient(0, 0, 0, H);
@@ -546,7 +505,7 @@ export function getAutumnOakFoliageTextures() {
   const { canvas: albC, ctx: alb, width: W, height: H } = createCanvas(2048, 2048);
   const { canvas: rghC, ctx: rgh } = createCanvas(2048, 2048);
   const { canvas: metC, ctx: met } = createCanvas(2048, 2048);
-  const { canvas: bmpC, ctx: bmp } = createCanvas(2048, 2048);
+  const { canvas: bmpC, ctx: bmp } = createBumpCanvas(2048, 2048);
 
   // 5.1 Warm, sunny amber / terracotta base gradient
   const baseGrad = alb.createRadialGradient(W * 0.5, H * 0.5, 100, W * 0.5, H * 0.5, W * 0.75);
@@ -649,7 +608,7 @@ export function getBirchBarkTextures() {
   const { canvas: albC, ctx: alb, width: W, height: H } = createCanvas(2048, 2048);
   const { canvas: rghC, ctx: rgh } = createCanvas(2048, 2048);
   const { canvas: metC, ctx: met } = createCanvas(2048, 2048);
-  const { canvas: bmpC, ctx: bmp } = createCanvas(2048, 2048);
+  const { canvas: bmpC, ctx: bmp } = createBumpCanvas(2048, 2048);
 
   // 6.1 Papery chalk-white and cream base
   const baseGrad = alb.createLinearGradient(0, 0, W, 0);
@@ -827,7 +786,7 @@ export function getBirchFoliageTextures() {
   const { canvas: albC, ctx: alb, width: W, height: H } = createCanvas(2048, 2048);
   const { canvas: rghC, ctx: rgh } = createCanvas(2048, 2048);
   const { canvas: metC, ctx: met } = createCanvas(2048, 2048);
-  const { canvas: bmpC, ctx: bmp } = createCanvas(2048, 2048);
+  const { canvas: bmpC, ctx: bmp } = createBumpCanvas(2048, 2048);
 
   // Deep lime-forest base
   const baseGrad = alb.createRadialGradient(W * 0.5, H * 0.5, 100, W * 0.5, H * 0.5, W * 0.75);

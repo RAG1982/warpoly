@@ -1,4 +1,5 @@
 import * as THREE from 'three';
+import { createScaledCanvas as createCanvas, createBumpCanvas, toTexture as makeTexture } from '../textureQuality.js';
 
 /**
  * Procedural Hand-Painted Stylized PBR Texture Generator for Human Forge (Forja dos Humanos)
@@ -11,30 +12,11 @@ import * as THREE from 'three';
 
 const textureCache = new Map();
 
-function createCanvas(width = 512, height = 512) {
-  const canvas = document.createElement('canvas');
-  canvas.width = width;
-  canvas.height = height;
-  const ctx = canvas.getContext('2d', { willReadFrequently: false });
-  return { canvas, ctx, width, height };
-}
-
 function toTexture(canvas, isSRGB = true, repeatX = 1, repeatY = 1) {
-  const tex = new THREE.CanvasTexture(canvas);
-  tex.colorSpace = isSRGB ? THREE.SRGBColorSpace : THREE.NoColorSpace;
-  tex.generateMipmaps = true;
-  tex.minFilter = THREE.LinearMipmapLinearFilter;
-  tex.magFilter = THREE.LinearFilter;
   if (repeatX > 1 || repeatY > 1) {
-    tex.wrapS = THREE.RepeatWrapping;
-    tex.wrapT = THREE.RepeatWrapping;
-    tex.repeat.set(repeatX, repeatY);
-  } else {
-    tex.wrapS = THREE.ClampToEdgeWrapping;
-    tex.wrapT = THREE.ClampToEdgeWrapping;
+    return makeTexture(canvas, isSRGB, { wrapS: THREE.RepeatWrapping, repeatX, repeatY });
   }
-  tex.needsUpdate = true;
-  return tex;
+  return makeTexture(canvas, isSRGB, { wrapS: THREE.ClampToEdgeWrapping });
 }
 
 /**
@@ -47,7 +29,7 @@ export function getHumanForgeStoneTextures() {
 
   const { canvas: diffCanvas, ctx: diffCtx, width: W, height: H } = createCanvas(512, 512);
   const { canvas: roughCanvas, ctx: roughCtx } = createCanvas(512, 512);
-  const { canvas: bumpCanvas, ctx: bumpCtx } = createCanvas(512, 512);
+  const { canvas: bumpCanvas, ctx: bumpCtx } = createBumpCanvas(512, 512);
 
   // Base stone tone: rich dark slate charcoal with warm undertones
   diffCtx.fillStyle = '#2f343b';
@@ -158,7 +140,7 @@ export function getHumanForgeWoodTextures() {
 
   const { canvas: diffCanvas, ctx: diffCtx, width: W, height: H } = createCanvas(512, 512);
   const { canvas: roughCanvas, ctx: roughCtx } = createCanvas(512, 512);
-  const { canvas: bumpCanvas, ctx: bumpCtx } = createCanvas(512, 512);
+  const { canvas: bumpCanvas, ctx: bumpCtx } = createBumpCanvas(512, 512);
 
   // Dark weathered oak brown base
   diffCtx.fillStyle = '#422817';

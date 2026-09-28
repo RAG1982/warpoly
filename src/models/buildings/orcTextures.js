@@ -1,4 +1,5 @@
 import * as THREE from 'three';
+import { createScaledCanvas as createCanvas, createBumpCanvas, toTexture as makeTexture } from '../textureQuality.js';
 
 /**
  * Procedural Hand-Painted Stylized PBR Texture Generator for the Orc Faction
@@ -15,29 +16,8 @@ import * as THREE from 'three';
 
 const textureCache = new Map();
 
-function createCanvas(width = 2048, height = 2048) {
-  const canvas = typeof document !== 'undefined' ? document.createElement('canvas') : { width, height, getContext: () => null };
-  canvas.width = width;
-  canvas.height = height;
-  const ctx = canvas.getContext ? canvas.getContext('2d', { willReadFrequently: false }) : null;
-  return { canvas, ctx, width, height };
-}
-
-function toTexture(canvas, isSRGB = true, wrapRepeat = true) {
-  const tex = new THREE.CanvasTexture(canvas);
-  tex.colorSpace = isSRGB ? THREE.SRGBColorSpace : THREE.NoColorSpace;
-  tex.generateMipmaps = true;
-  tex.minFilter = THREE.LinearMipmapLinearFilter;
-  tex.magFilter = THREE.LinearFilter;
-  if (wrapRepeat) {
-    tex.wrapS = THREE.RepeatWrapping;
-    tex.wrapT = THREE.RepeatWrapping;
-  } else {
-    tex.wrapS = THREE.ClampToEdgeWrapping;
-    tex.wrapT = THREE.ClampToEdgeWrapping;
-  }
-  tex.needsUpdate = true;
-  return tex;
+function toTexture(canvas, isSRGB = true, isRepeat = true) {
+  return makeTexture(canvas, isSRGB, { wrapS: isRepeat ? THREE.RepeatWrapping : THREE.ClampToEdgeWrapping });
 }
 
 function drawRivet(ctx, cx, cy, radius = 10, isDarkIron = true) {
@@ -86,7 +66,7 @@ export function getOrcDarkLogBarkTextures() {
   const albedo = createCanvas(2048, 2048);
   const rough = createCanvas(2048, 2048);
   const metal = createCanvas(2048, 2048);
-  const bump = createCanvas(2048, 2048);
+  const bump = createBumpCanvas(2048, 2048);
   const actx = albedo.ctx;
   const rctx = rough.ctx;
   const mctx = metal.ctx;
@@ -187,7 +167,7 @@ export function getOrcLogEndTextures() {
 
   const albedo = createCanvas(1024, 1024);
   const rough = createCanvas(1024, 1024);
-  const bump = createCanvas(1024, 1024);
+  const bump = createBumpCanvas(1024, 1024);
   const actx = albedo.ctx;
 
   if (actx) {
@@ -262,7 +242,7 @@ export function getOrcSplitRoofTextures() {
 
   const albedo = createCanvas(2048, 2048);
   const rough = createCanvas(2048, 2048);
-  const bump = createCanvas(2048, 2048);
+  const bump = createBumpCanvas(2048, 2048);
   const actx = albedo.ctx;
 
   if (actx) {
@@ -345,7 +325,7 @@ export function getOrcAnimalFurTextures() {
 
   const albedo = createCanvas(2048, 2048);
   const rough = createCanvas(2048, 2048);
-  const bump = createCanvas(2048, 2048);
+  const bump = createBumpCanvas(2048, 2048);
   const actx = albedo.ctx;
 
   if (actx) {
@@ -453,7 +433,7 @@ export function getOrcSpikedIronTextures() {
   const albedo = createCanvas(2048, 2048);
   const rough = createCanvas(2048, 2048);
   const metal = createCanvas(2048, 2048);
-  const bump = createCanvas(2048, 2048);
+  const bump = createBumpCanvas(2048, 2048);
   const actx = albedo.ctx;
 
   if (actx) {
@@ -551,7 +531,7 @@ export function getOrcBoneTuskTextures() {
 
   const albedo = createCanvas(1024, 1024);
   const rough = createCanvas(1024, 1024);
-  const bump = createCanvas(1024, 1024);
+  const bump = createBumpCanvas(1024, 1024);
   const actx = albedo.ctx;
 
   if (actx) {
@@ -610,7 +590,7 @@ export function getOrcHordeBannerTextures() {
 
   const albedo = createCanvas(1024, 2048);
   const rough = createCanvas(1024, 2048);
-  const bump = createCanvas(1024, 2048);
+  const bump = createBumpCanvas(1024, 2048);
   const actx = albedo.ctx;
 
   if (actx) {
@@ -750,7 +730,7 @@ export function getOrcBasaltStoneTextures() {
 
   const albedo = createCanvas(2048, 2048);
   const rough = createCanvas(2048, 2048);
-  const bump = createCanvas(2048, 2048);
+  const bump = createBumpCanvas(2048, 2048);
   const actx = albedo.ctx;
 
   if (actx) {
@@ -868,7 +848,7 @@ export function getOrcMudWaterTextures() {
 
   const albedo = createCanvas(2048, 2048);
   const rough = createCanvas(2048, 2048);
-  const bump = createCanvas(2048, 2048);
+  const bump = createBumpCanvas(2048, 2048);
   const actx = albedo.ctx;
   const rctx = rough.ctx;
 

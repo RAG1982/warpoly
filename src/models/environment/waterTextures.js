@@ -1,4 +1,5 @@
 import * as THREE from 'three';
+import { createScaledCanvas as createCanvas, createBumpCanvas, toTexture as makeTexture } from '../textureQuality.js';
 
 /**
  * Procedural Hand-Painted Stylized PBR Texture Generator for Water & Shoreline
@@ -15,25 +16,8 @@ import * as THREE from 'three';
 
 const textureCache = new Map();
 
-function createCanvas(width = 2048, height = 2048) {
-  const canvas = document.createElement('canvas');
-  canvas.width = width;
-  canvas.height = height;
-  const ctx = canvas.getContext('2d', { willReadFrequently: false });
-  return { canvas, ctx, width, height };
-}
-
 function toTexture(canvas, isSRGB = true, wrap = THREE.RepeatWrapping, repeatX = 1, repeatY = 1) {
-  const tex = new THREE.CanvasTexture(canvas);
-  tex.colorSpace = isSRGB ? THREE.SRGBColorSpace : THREE.NoColorSpace;
-  tex.generateMipmaps = true;
-  tex.minFilter = THREE.LinearMipmapLinearFilter;
-  tex.magFilter = THREE.LinearFilter;
-  tex.wrapS = wrap;
-  tex.wrapT = wrap;
-  tex.repeat.set(repeatX, repeatY);
-  tex.needsUpdate = true;
-  return tex;
+  return makeTexture(canvas, isSRGB, { wrapS: wrap, repeatX, repeatY });
 }
 
 /**
@@ -156,7 +140,7 @@ export function getWaterSurfaceTextures() {
 
   const { canvas: albCanvas, ctx: albCtx, width, height } = createCanvas(2048, 2048);
   const { canvas: roughCanvas, ctx: roughCtx } = createCanvas(2048, 2048);
-  const { canvas: bumpCanvas, ctx: bumpCtx } = createCanvas(2048, 2048);
+  const { canvas: bumpCanvas, ctx: bumpCtx } = createBumpCanvas(2048, 2048);
 
   // --- A. ALBEDO MAP ---
   // 1. Deep vibrant gradient base (Warcraft 2 / Valorant sea palette: Deep Sapphire to Aquamarine Cyan)

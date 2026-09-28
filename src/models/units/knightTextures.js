@@ -1,4 +1,5 @@
 import * as THREE from 'three';
+import { createScaledCanvas as createCanvas, createBumpCanvas, toTexture as makeTexture } from '../textureQuality.js';
 
 /**
  * Procedural Hand-Painted Stylized PBR Texture Generator for the Knight
@@ -18,24 +19,8 @@ import * as THREE from 'three';
 
 const textureCache = new Map();
 
-function createCanvas(width = 2048, height = 2048) {
-  const canvas = document.createElement('canvas');
-  canvas.width = width;
-  canvas.height = height;
-  const ctx = canvas.getContext('2d', { willReadFrequently: false });
-  return { canvas, ctx, width, height };
-}
-
 function toTexture(canvas, isSRGB = true) {
-  const tex = new THREE.CanvasTexture(canvas);
-  tex.colorSpace = isSRGB ? THREE.SRGBColorSpace : THREE.NoColorSpace;
-  tex.generateMipmaps = true;
-  tex.minFilter = THREE.LinearMipmapLinearFilter;
-  tex.magFilter = THREE.LinearFilter;
-  tex.wrapS = THREE.ClampToEdgeWrapping;
-  tex.wrapT = THREE.ClampToEdgeWrapping;
-  tex.needsUpdate = true;
-  return tex;
+  return makeTexture(canvas, isSRGB, { wrapS: THREE.ClampToEdgeWrapping });
 }
 
 /**
@@ -357,7 +342,7 @@ export function getKnightCuirassTextures() {
   const { canvas: albedo, ctx, width, height } = createCanvas(2048, 2048);
   const { canvas: rough, ctx: rCtx } = createCanvas(2048, 2048);
   const { canvas: metal, ctx: mCtx } = createCanvas(2048, 2048);
-  const { canvas: bump, ctx: bCtx } = createCanvas(2048, 2048);
+  const { canvas: bump, ctx: bCtx } = createBumpCanvas(2048, 2048);
 
   // Stylized Steel Gradient: Bright top-down lighting with warm bounce
   const steelGrad = ctx.createLinearGradient(0, 0, 0, height);
@@ -466,7 +451,7 @@ export function getKnightTunicTextures() {
   const { canvas: albedo, ctx, width, height } = createCanvas(2048, 2048);
   const { canvas: rough, ctx: rCtx } = createCanvas(2048, 2048);
   const { canvas: metal, ctx: mCtx } = createCanvas(2048, 2048);
-  const { canvas: bump, ctx: bCtx } = createCanvas(2048, 2048);
+  const { canvas: bump, ctx: bCtx } = createBumpCanvas(2048, 2048);
 
   // Rich Royal Cobalt Blue Fabric (High Contrast & Saturated)
   const blueGrad = ctx.createLinearGradient(0, 0, 0, height);
@@ -552,7 +537,7 @@ export function getKnightBeltTextures() {
   const { canvas: albedo, ctx, width, height } = createCanvas(2048, 2048);
   const { canvas: rough, ctx: rCtx } = createCanvas(2048, 2048);
   const { canvas: metal, ctx: mCtx } = createCanvas(2048, 2048);
-  const { canvas: bump, ctx: bCtx } = createCanvas(2048, 2048);
+  const { canvas: bump, ctx: bCtx } = createBumpCanvas(2048, 2048);
 
   // Deep Mahogany Stitched Leather
   const leatherGrad = ctx.createLinearGradient(0, 0, 0, height);
@@ -620,7 +605,7 @@ export function getKnightHelmetFaceTextures() {
   const { canvas: albedo, ctx, width, height } = createCanvas(2048, 2048);
   const { canvas: rough, ctx: rCtx } = createCanvas(2048, 2048);
   const { canvas: metal, ctx: mCtx } = createCanvas(2048, 2048);
-  const { canvas: bump, ctx: bCtx } = createCanvas(2048, 2048);
+  const { canvas: bump, ctx: bCtx } = createBumpCanvas(2048, 2048);
 
   // Polished Steel Faceplate
   const steelGrad = ctx.createLinearGradient(0, 0, 0, height);
@@ -718,7 +703,7 @@ export function getKnightPlumeTextures() {
   const { canvas: albedo, ctx, width, height } = createCanvas(2048, 2048);
   const { canvas: rough, ctx: rCtx } = createCanvas(2048, 2048);
   const { canvas: metal, ctx: mCtx } = createCanvas(2048, 2048);
-  const { canvas: bump, ctx: bCtx } = createCanvas(2048, 2048);
+  const { canvas: bump, ctx: bCtx } = createBumpCanvas(2048, 2048);
 
   // Rich cadmium red / scarlet / crimson gradient
   const plumeGrad = ctx.createLinearGradient(0, 0, width, height);
@@ -779,7 +764,7 @@ export function getKnightShieldFrontTextures() {
   const { canvas: albedo, ctx, width, height } = createCanvas(2048, 2048);
   const { canvas: rough, ctx: rCtx } = createCanvas(2048, 2048);
   const { canvas: metal, ctx: mCtx } = createCanvas(2048, 2048);
-  const { canvas: bump, ctx: bCtx } = createCanvas(2048, 2048);
+  const { canvas: bump, ctx: bCtx } = createBumpCanvas(2048, 2048);
 
   // Deep Royal Cobalt Blue Radial Field (bright vibrant heraldry)
   const cx = width / 2;
@@ -896,7 +881,7 @@ export function getKnightShieldBackTextures() {
   const { canvas: albedo, ctx, width, height } = createCanvas(2048, 2048);
   const { canvas: rough, ctx: rCtx } = createCanvas(2048, 2048);
   const { canvas: metal, ctx: mCtx } = createCanvas(2048, 2048);
-  const { canvas: bump, ctx: bCtx } = createCanvas(2048, 2048);
+  const { canvas: bump, ctx: bCtx } = createBumpCanvas(2048, 2048);
 
   // Vertical Aged Oak Wood Planks
   const woodGrad = ctx.createLinearGradient(0, 0, width, 0);
@@ -998,7 +983,7 @@ export function getKnightSwordBladeTextures() {
   const { canvas: albedo, ctx, width, height } = createCanvas(2048, 2048);
   const { canvas: rough, ctx: rCtx } = createCanvas(2048, 2048);
   const { canvas: metal, ctx: mCtx } = createCanvas(2048, 2048);
-  const { canvas: bump, ctx: bCtx } = createCanvas(2048, 2048);
+  const { canvas: bump, ctx: bCtx } = createBumpCanvas(2048, 2048);
 
   // Polished Steel Blade with Fuller Groove
   const cx = width / 2;
@@ -1077,7 +1062,7 @@ export function getKnightLimbsTextures() {
   const { canvas: albedo, ctx, width, height } = createCanvas(2048, 2048);
   const { canvas: rough, ctx: rCtx } = createCanvas(2048, 2048);
   const { canvas: metal, ctx: mCtx } = createCanvas(2048, 2048);
-  const { canvas: bump, ctx: bCtx } = createCanvas(2048, 2048);
+  const { canvas: bump, ctx: bCtx } = createBumpCanvas(2048, 2048);
 
   // Stylized Steel Plate Gradient
   const steelGrad = ctx.createLinearGradient(0, 0, 0, height);

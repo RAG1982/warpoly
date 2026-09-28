@@ -1,4 +1,5 @@
 import * as THREE from 'three';
+import { createScaledCanvas as createCanvas, createBumpCanvas, toTexture as makeTexture } from '../textureQuality.js';
 
 /**
  * Procedural Hand-Painted Stylized PBR Texture Generator for the Farm (Fazenda de Trigo)
@@ -16,25 +17,8 @@ import * as THREE from 'three';
 
 const textureCache = new Map();
 
-function createCanvas(width = 2048, height = 2048) {
-  const canvas = document.createElement('canvas');
-  canvas.width = width;
-  canvas.height = height;
-  const ctx = canvas.getContext('2d', { willReadFrequently: false });
-  return { canvas, ctx, width, height };
-}
-
 function toTexture(canvas, isSRGB = true, repeatX = 1, repeatY = 1) {
-  const tex = new THREE.CanvasTexture(canvas);
-  tex.colorSpace = isSRGB ? THREE.SRGBColorSpace : THREE.NoColorSpace;
-  tex.generateMipmaps = true;
-  tex.minFilter = THREE.LinearMipmapLinearFilter;
-  tex.magFilter = THREE.LinearFilter;
-  tex.wrapS = THREE.RepeatWrapping;
-  tex.wrapT = THREE.RepeatWrapping;
-  tex.repeat.set(repeatX, repeatY);
-  tex.needsUpdate = true;
-  return tex;
+  return makeTexture(canvas, isSRGB, { wrapS: THREE.RepeatWrapping, repeatX, repeatY });
 }
 
 // Pseudo-random deterministic generator for consistent painterly variation
@@ -61,7 +45,6 @@ function drawRoundRect(ctx, x, y, w, h, r = 8) {
     ctx.quadraticCurveTo(x, y, x + r, y);
   }
 }
-
 
 /**
  * Helper: Draw stylized iron square nail or rivet with drop shadow and specular dome
@@ -124,7 +107,7 @@ export function getTilledSoilTextures() {
   const { canvas: albedo, ctx, width, height } = createCanvas(2048, 2048);
   const { canvas: rough, ctx: rCtx } = createCanvas(2048, 2048);
   const { canvas: metal, ctx: mCtx } = createCanvas(2048, 2048);
-  const { canvas: bump, ctx: bCtx } = createCanvas(2048, 2048);
+  const { canvas: bump, ctx: bCtx } = createBumpCanvas(2048, 2048);
 
   // Metalness is completely zero for organic soil
   mCtx.fillStyle = '#000000';
@@ -323,7 +306,7 @@ export function getWheatCropsTextures() {
   const { canvas: albedo, ctx, width, height } = createCanvas(2048, 2048);
   const { canvas: rough, ctx: rCtx } = createCanvas(2048, 2048);
   const { canvas: metal, ctx: mCtx } = createCanvas(2048, 2048);
-  const { canvas: bump, ctx: bCtx } = createCanvas(2048, 2048);
+  const { canvas: bump, ctx: bCtx } = createBumpCanvas(2048, 2048);
 
   mCtx.fillStyle = '#000000';
   mCtx.fillRect(0, 0, width, height);
@@ -492,7 +475,7 @@ export function getBarnTimberTextures() {
   const { canvas: albedo, ctx, width, height } = createCanvas(2048, 2048);
   const { canvas: rough, ctx: rCtx } = createCanvas(2048, 2048);
   const { canvas: metal, ctx: mCtx } = createCanvas(2048, 2048);
-  const { canvas: bump, ctx: bCtx } = createCanvas(2048, 2048);
+  const { canvas: bump, ctx: bCtx } = createBumpCanvas(2048, 2048);
 
   // Warm rich rustic timber base
   ctx.fillStyle = '#53341e';
@@ -690,7 +673,7 @@ export function getThatchRoofTextures() {
   const { canvas: albedo, ctx, width, height } = createCanvas(2048, 2048);
   const { canvas: rough, ctx: rCtx } = createCanvas(2048, 2048);
   const { canvas: metal, ctx: mCtx } = createCanvas(2048, 2048);
-  const { canvas: bump, ctx: bCtx } = createCanvas(2048, 2048);
+  const { canvas: bump, ctx: bCtx } = createBumpCanvas(2048, 2048);
 
   mCtx.fillStyle = '#000000';
   mCtx.fillRect(0, 0, width, height);
@@ -814,7 +797,7 @@ export function getFenceWoodTextures() {
   const { canvas: albedo, ctx, width, height } = createCanvas(2048, 2048);
   const { canvas: rough, ctx: rCtx } = createCanvas(2048, 2048);
   const { canvas: metal, ctx: mCtx } = createCanvas(2048, 2048);
-  const { canvas: bump, ctx: bCtx } = createCanvas(2048, 2048);
+  const { canvas: bump, ctx: bCtx } = createBumpCanvas(2048, 2048);
 
   mCtx.fillStyle = '#000000';
   mCtx.fillRect(0, 0, width, height);
@@ -938,7 +921,7 @@ export function getStoneWellTextures() {
   const { canvas: albedo, ctx, width, height } = createCanvas(2048, 2048);
   const { canvas: rough, ctx: rCtx } = createCanvas(2048, 2048);
   const { canvas: metal, ctx: mCtx } = createCanvas(2048, 2048);
-  const { canvas: bump, ctx: bCtx } = createCanvas(2048, 2048);
+  const { canvas: bump, ctx: bCtx } = createBumpCanvas(2048, 2048);
 
   mCtx.fillStyle = '#000000';
   mCtx.fillRect(0, 0, width, height);
@@ -1081,7 +1064,7 @@ export function getBurlapPropsTextures() {
   const { canvas: albedo, ctx, width, height } = createCanvas(2048, 2048);
   const { canvas: rough, ctx: rCtx } = createCanvas(2048, 2048);
   const { canvas: metal, ctx: mCtx } = createCanvas(2048, 2048);
-  const { canvas: bump, ctx: bCtx } = createCanvas(2048, 2048);
+  const { canvas: bump, ctx: bCtx } = createBumpCanvas(2048, 2048);
 
   mCtx.fillStyle = '#000000';
   mCtx.fillRect(0, 0, width, height);

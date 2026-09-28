@@ -22,6 +22,7 @@ import { STARTING_RESOURCES, FACTIONS, getBuildingDef, isDropoffFor } from '../d
 import { Player } from '../sim/Player.js';
 import { PlayerRegistry } from '../sim/PlayerRegistry.js';
 import { EntityRegistry, NEUTRAL_OWNER_ID } from '../sim/EntityIds.js';
+import { SpatialGrid } from '../sim/SpatialGrid.js';
 import {
   MAP_START_SLOTS,
   DEFAULT_MAP_ID,
@@ -96,6 +97,17 @@ export class GameManager {
     this.pathfinder = new Pathfinder(this.terrain);
     this.terrain.pathfinder = this.pathfinder;
 
+    // Grade espacial (F1-06): unitGrid = unidades (dinâmica, sincronizada 1x/tick em update());
+    // blockerGrid = construções/depósitos/árvores vivas (inserida/removida em registerEntity/unregisterEntity).
+    this.unitGrid = new SpatialGrid();
+    this.blockerGrid = new SpatialGrid();
+    // Buffers reutilizados por canPlaceBuilding (evita alocar em toda pré-visualização do fantasma).
+    this._placeBuildingBuf = [];
+    this._placeTreeBuf = [];
+    this._placeDepositBuf = [];
+    this._blockerCollisionBuf = [];
+    this._unitCollisionBuf = [];
+
     this.initMapEntities();
   }
 
@@ -141,13 +153,36 @@ export class GameManager {
     return this._localPlayerId;
   }
 
-  /** Dá id/ownerId a uma entidade e a coloca em `entitiesById`. */
+  /** Dá id/ownerId a uma entidade, a coloca em `entitiesById` e na grade espacial (F1-06). */
   registerEntity(entity, ownerId = NEUTRAL_OWNER_ID) {
-    return this.entityRegistry.register(entity, ownerId);
+    this.entityRegistry.register(entity, ownerId);
+    this._insertIntoGrid(entity);
+    return entity;
   }
 
   unregisterEntity(entity) {
+    this._removeFromGrid(entity);
     this.entityRegistry.unregister(entity);
+  }
+
+  /** Unidade → `unitGrid`; Building/ResourceDeposit/Tree → `blockerGrid` (colisão/alvo/picking). */
+  _insertIntoGrid(entity) {
+    if (!entity || !entity.mesh) return;
+    const pos = entity.mesh.position;
+    if (entity instanceof Unit) {
+      this.unitGrid.insert(entity, pos.x, pos.z, entity.collisionRadius || 0);
+    } else if (entity instanceof Building || entity instanceof ResourceDeposit || entity instanceof Tree) {
+      this.blockerGrid.insert(entity, pos.x, pos.z, entity.collisionRadius || 0);
+    }
+  }
+
+  _removeFromGrid(entity) {
+    if (!entity) return;
+    if (entity instanceof Unit) {
+      this.unitGrid.remove(entity);
+    } else if (entity instanceof Building || entity instanceof ResourceDeposit || entity instanceof Tree) {
+      this.blockerGrid.remove(entity);
+    }
   }
 
   getEntity(id) {
@@ -309,6 +344,8 @@ export class GameManager {
     this.aiDirectors = [];
     this.aiDirector = null;
     this.entityRegistry.clear();
+    this.unitGrid.clear();
+    this.blockerGrid.clear();
 
     // Reset Fog of War shroud
     if (this.fogOfWar) {
@@ -576,53 +613,33 @@ export class GameManager {
     if (this.terrain.getHeight(x + sampleOffset, z - sampleOffset) < 1.8) return false;
     if (this.terrain.getHeight(x - sampleOffset, z - sampleOffset) < 1.8) return false;
 
-    // 2. Minimum distance to other buildings (fast AABB reject)
+    // 2. Minimum distance to other buildings (F1-06: blockerGrid.queryRadius já soma o raio
+    //    de cada construção encontrada; passamos radius + minBuildingGap como `r`).
     const minBuildingGap = 3.2;
-    for (let i = 0; i < this.buildings.length; i++) {
-      const b = this.buildings[i];
-      if (b === ignoreBuilding || b.isDead) continue;
-      const bRad = b.collisionRadius || 3.0;
-      const maxDist = radius + bRad + minBuildingGap;
-      const dx = x - b.mesh.position.x;
-      if (dx > maxDist || dx < -maxDist) continue;
-      const dz = z - b.mesh.position.z;
-      if (dz > maxDist || dz < -maxDist) continue;
-      if (dx * dx + dz * dz < maxDist * maxDist) {
-        return false;
-      }
-    }
+    const buildingHits = this.blockerGrid.queryRadius(
+      x, z, radius + minBuildingGap,
+      e => e instanceof Building && e !== ignoreBuilding && !e.isDead,
+      this._placeBuildingBuf
+    );
+    if (buildingHits.length > 0) return false;
 
-    // 3. Minimum distance to trees (fast AABB reject skips 98% of trees)
+    // 3. Minimum distance to trees (só árvores vivas com madeira)
     const minTreeGap = 3.5;
-    const maxTreeDist = radius + minTreeGap;
-    const maxTreeDistSq = maxTreeDist * maxTreeDist;
-    for (let i = 0; i < this.trees.length; i++) {
-      const t = this.trees[i];
-      if (t.isDead || t.woodRemaining <= 0) continue;
-      const dx = x - t.mesh.position.x;
-      if (dx > maxTreeDist || dx < -maxTreeDist) continue;
-      const dz = z - t.mesh.position.z;
-      if (dz > maxTreeDist || dz < -maxTreeDist) continue;
-      if (dx * dx + dz * dz < maxTreeDistSq) {
-        return false;
-      }
-    }
+    const treeHits = this.blockerGrid.queryRadius(
+      x, z, radius + minTreeGap,
+      e => e instanceof Tree && !e.isDead && e.woodRemaining > 0,
+      this._placeTreeBuf
+    );
+    if (treeHits.length > 0) return false;
 
-    // 4. Minimum distance to resource deposits (fast AABB reject)
+    // 4. Minimum distance to resource deposits (raio real de cada jazida, via blockerGrid)
     const minDepositGap = 3.0;
-    const maxDepDist = radius + 3.0 + minDepositGap;
-    const maxDepDistSq = maxDepDist * maxDepDist;
-    for (let i = 0; i < this.resourceDeposits.length; i++) {
-      const r = this.resourceDeposits[i];
-      if (r.resourcesRemaining <= 0) continue;
-      const dx = x - r.mesh.position.x;
-      if (dx > maxDepDist || dx < -maxDepDist) continue;
-      const dz = z - r.mesh.position.z;
-      if (dz > maxDepDist || dz < -maxDepDist) continue;
-      if (dx * dx + dz * dz < maxDepDistSq) {
-        return false;
-      }
-    }
+    const depositHits = this.blockerGrid.queryRadius(
+      x, z, radius + minDepositGap,
+      e => e instanceof ResourceDeposit && e.resourcesRemaining > 0,
+      this._placeDepositBuf
+    );
+    if (depositHits.length > 0) return false;
 
     // 5. Must not block the 3 strategic river crossings / fords
     const fords = [
@@ -831,44 +848,23 @@ export class GameManager {
     return b;
   }
 
+  /** Recurso mais próximo (árvore com madeira ou jazida do `type`), via `blockerGrid.nearest`. */
   findNearestResource(pos, type) {
-    let list = [];
     if (type === 'tree') {
-      list = this.trees.filter(t => !t.isDead && t.woodRemaining > 0);
-    } else {
-      list = this.resourceDeposits.filter(r => r.type === type && r.resourcesRemaining > 0);
+      return this.blockerGrid.nearest(pos.x, pos.z, Infinity, e => e instanceof Tree && !e.isDead && e.woodRemaining > 0);
     }
-
-    let nearest = null;
-    let minDist = Infinity;
-    list.forEach(item => {
-      const d = pos.distanceTo(item.mesh.position);
-      if (d < minDist) {
-        minDist = d;
-        nearest = item;
-      }
-    });
-    return nearest;
+    return this.blockerGrid.nearest(pos.x, pos.z, Infinity, e => e instanceof ResourceDeposit && e.type === type && e.resourcesRemaining > 0);
   }
 
-  /** Depósito de entrega mais próximo que pertence a `ownerId` (só o próprio dono, como no WC2). */
+  /**
+   * Depósito de entrega mais próximo que pertence a `ownerId` (só o próprio dono, como no WC2),
+   * via `blockerGrid.nearest`. `buildings` é mantido por compatibilidade (chamadores antigos
+   * passam sempre `gm.buildings`, que já é a mesma lista espelhada pelo `blockerGrid`).
+   */
   findNearestDropoff(pos, resourceType, buildings = this.buildings, ownerId = this._localPlayerId) {
-    const list = buildings || this.buildings || [];
-    const valid = list.filter(b => {
-      if (!b.isConstructed || b.ownerId !== ownerId || b.isDead) return false;
-      return isDropoffFor(b.type, resourceType);
-    });
-
-    let nearest = null;
-    let minDist = Infinity;
-    valid.forEach(b => {
-      const d = pos.distanceTo(b.mesh.position);
-      if (d < minDist) {
-        minDist = d;
-        nearest = b;
-      }
-    });
-    return nearest;
+    return this.blockerGrid.nearest(pos.x, pos.z, Infinity, b =>
+      b instanceof Building && b.isConstructed && !b.isDead && b.ownerId === ownerId && isDropoffFor(b.type, resourceType)
+    );
   }
 
   // --- SELECTION LOGIC ---
@@ -913,7 +909,7 @@ export class GameManager {
     const minY = Math.min(screenRect.y1, screenRect.y2);
     const maxY = Math.max(screenRect.y1, screenRect.y2);
 
-    this.units.forEach(u => {
+    this.getUnitsOf(this._localPlayerId).forEach(u => {
       if (u.isDead || u.ownerId !== this._localPlayerId) return;
       const screenPos = u.mesh.position.clone().project(camera);
       const sx = ((screenPos.x + 1) * window.innerWidth) / 2;
@@ -1066,8 +1062,12 @@ export class GameManager {
     // Check Win/Loss conditions
     if (this._updateVictoryConditions()) return;
 
-    // Update Trees
-    this.trees.forEach(t => t.update(dt, this.particleSystem));
+    // Update Trees (árvore cortada — isDead/woodRemaining <= 0 — sai do blockerGrid; remove()
+    // é no-op se já não estiver na grade, então repetir o teste em árvores já cortadas é barato)
+    this.trees.forEach(t => {
+      t.update(dt, this.particleSystem);
+      if (t.isDead || t.woodRemaining <= 0) this.blockerGrid.remove(t);
+    });
 
     // Update Projectiles
     for (let i = this.arrows.length - 1; i >= 0; i--) {
@@ -1096,8 +1096,18 @@ export class GameManager {
       }
     }
 
-    // Update Units (tamanho fixado: unidades criadas neste frame só atualizam no próximo)
+    // Sincroniza a grade espacial de unidades UMA vez por tick, antes de atualizar unidades
+    // (F1-06): colisão/alvo/picking deste tick usam a posição do início do tick.
     const unitCount = allUnits.length;
+    for (let i = 0; i < unitCount; i++) {
+      const u = allUnits[i];
+      if (!u.isDead) {
+        const p = u.mesh.position;
+        this.unitGrid.update(u, p.x, p.z, u.collisionRadius || 0.6);
+      }
+    }
+
+    // Update Units (tamanho fixado: unidades criadas neste frame só atualizam no próximo)
     for (let i = 0; i < unitCount; i++) {
       allUnits[i].update(dt, this, this.soundManager, this.particleSystem, this.arrows, allUnits, this.buildings);
     }
@@ -1196,54 +1206,47 @@ export class GameManager {
     }
   }
 
+  /**
+   * F1-06: em vez de varrer todas as construções/depósitos/árvores para toda unidade, consulta
+   * só o `blockerGrid` num raio `collisionRadius + 6` ao redor de cada unidade.
+   */
   resolveBuildingCollisions() {
-    const checkCollisionsForUnit = (unit) => {
-      if (unit.isDead) return;
-      // 1. Buildings
-      const bCount = this.buildings.length;
-      for (let i = 0; i < bCount; i++) {
-        this._checkUnitBlockerCollision(unit, this.buildings[i]);
-      }
-      // 2. Resource deposits
-      const rCount = this.resourceDeposits.length;
-      for (let i = 0; i < rCount; i++) {
-        this._checkUnitBlockerCollision(unit, this.resourceDeposits[i]);
-      }
-      // 3. Living trees
-      const tCount = this.trees.length;
-      for (let i = 0; i < tCount; i++) {
-        const t = this.trees[i];
-        if (!t.isDead && t.woodRemaining > 0) {
-          this._checkUnitBlockerCollision(unit, t);
-        }
-      }
-    };
-
+    const buf = this._blockerCollisionBuf;
     const all = this.allUnits;
     for (let i = 0; i < all.length; i++) {
-      checkCollisionsForUnit(all[i]);
+      const unit = all[i];
+      if (unit.isDead) continue;
+      const pos = unit.mesh.position;
+      const radius = (unit.collisionRadius || 0.6) + 6;
+      this.blockerGrid.queryRadius(pos.x, pos.z, radius, null, buf);
+      for (let j = 0; j < buf.length; j++) {
+        this._checkUnitBlockerCollision(unit, buf[j]);
+      }
     }
   }
 
+  /**
+   * F1-06: para cada unidade, consulta só o `unitGrid` num raio `r1 + unitGrid.maxRadius`
+   * (o próprio `queryRadius` já soma o raio de cada candidata encontrada) e resolve apenas os
+   * pares com `id` maior que o da unidade atual — cada par é resolvido uma única vez,
+   * independentemente da ordem de iteração da grade (determinismo por id).
+   */
   resolveUnitCollisions() {
-    if (!this._collisionUnits) this._collisionUnits = [];
-    const arr = this._collisionUnits;
-    arr.length = 0;
-
+    const buf = this._unitCollisionBuf;
     const all = this.allUnits;
-    for (let i = 0; i < all.length; i++) {
-      const u = all[i];
-      if (!u.isDead) arr.push(u);
-    }
+    const maxR = this.unitGrid.maxRadius;
 
-    const count = arr.length;
-    for (let i = 0; i < count; i++) {
-      const u1 = arr[i];
+    for (let i = 0; i < all.length; i++) {
+      const u1 = all[i];
+      if (u1.isDead) continue;
       const p1 = u1.mesh.position;
       const r1 = u1.collisionRadius || 0.6;
 
-      for (let j = i + 1; j < count; j++) {
-        const u2 = arr[j];
+      this.unitGrid.queryRadius(p1.x, p1.z, r1 + maxR, null, buf);
+      for (let k = 0; k < buf.length; k++) {
+        const u2 = buf[k];
+        if (u2 === u1 || u2.id <= u1.id || u2.isDead) continue;
+
         const p2 = u2.mesh.position;
         const r2 = u2.collisionRadius || 0.6;
         const minDist = r1 + r2;
@@ -1259,7 +1262,9 @@ export class GameManager {
         const dist = Math.sqrt(distSq);
         let nx, nz;
         if (dist < 0.001) {
-          const angle = Math.random() * Math.PI * 2;
+          // Ângulo derivado dos ids (determinístico) no lugar de Math.random() (F1-06).
+          const angleDeg = ((u1.id * 73856093) ^ (u2.id * 19349663)) % 360;
+          const angle = (angleDeg * Math.PI) / 180;
           nx = Math.cos(angle);
           nz = Math.sin(angle);
         } else {
@@ -1316,6 +1321,8 @@ export class GameManager {
     this.selectedBuilding = null;
     this.selectedResource = null;
     this.entityRegistry.clear();
+    this.unitGrid.clear();
+    this.blockerGrid.clear();
     if (this.terrain && this.terrain.pathfinder === this.pathfinder) this.terrain.pathfinder = null;
     this.uiManager = null;
     this.sceneManager = null;

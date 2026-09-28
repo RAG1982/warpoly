@@ -1,9 +1,40 @@
 import * as THREE from 'three';
 import { ModelFactory } from './ModelFactory.js';
 import { Arrow } from './Arrow.js';
+import { Building } from './Building.js';
 import { UnitAnimator } from '../inspector/unitAnimator.js';
 import { getUnitDef, getUnitStats as getUnitStatsFromData, WORKER_STATS } from '../data/index.js';
 import { legacyOwnerId } from '../sim/EntityIds.js';
+
+// Buffers de módulo reutilizados pelas buscas de alvo hostil (F1-06: unitGrid/blockerGrid),
+// evitando alocar um array novo por unidade a cada frame.
+const _combatBuf = [];
+const _unitBuf = [];
+const _towerBuf = [];
+const _buildingBuf = [];
+const _helpBuf = [];
+
+/**
+ * Entre os candidatos de `buf` (já ordenado por id crescente pelo SpatialGrid), retorna o mais
+ * próximo de `(x, z)`; em caso de empate de distância, o de menor id vence (por ser encontrado
+ * primeiro no array e a comparação usar `<` estrito).
+ */
+function pickNearestInBuf(buf, x, z) {
+  let best = null;
+  let bestDistSq = Infinity;
+  for (let i = 0; i < buf.length; i++) {
+    const e = buf[i];
+    const p = e.mesh.position;
+    const dx = x - p.x;
+    const dz = z - p.z;
+    const d = dx * dx + dz * dz;
+    if (d < bestDistSq) {
+      bestDistSq = d;
+      best = e;
+    }
+  }
+  return best;
+}
 
 // Shared Selection Ring Geometry & Materials
 const unitRingGeo = new THREE.RingGeometry(0.85, 1.05, 24);
@@ -368,23 +399,26 @@ export class Unit {
         }
       }
 
-      // Nearby friendly combat troops rush to assist!
-      if (allUnits && allUnits.length > 0) {
-        allUnits.forEach(u => {
-          if (!u.isDead && this.isAlliedWith(u) && u.isCombatUnit && u.isCombatUnit()) {
-            const isFriendlyTargetBuilding = u.attackTarget && (u.attackTarget.fullMesh || u.attackTarget.isConstructed !== undefined);
-            if (u.state === 'idle' || (u.state === 'attacking' && isFriendlyTargetBuilding)) {
-              const d = this.mesh.position.distanceTo(u.mesh.position);
-              if (d < this.helpRadius) {
-                const savedObjective = isFriendlyTargetBuilding ? u.attackTarget : u.objectiveTarget;
-                u.orderAttack(attacker, !!savedObjective);
-                if (savedObjective) {
-                  u.objectiveTarget = savedObjective;
-                }
-              }
+      // Nearby friendly combat troops rush to assist! (F1-06: unitGrid.queryRadius no lugar de
+      // varrer allUnits — o próprio raio da consulta já cobre `helpRadius + raio do aliado`)
+      const gm = this.gameManager;
+      if (gm && gm.unitGrid) {
+        const pos = this.mesh.position;
+        const self = this;
+        gm.unitGrid.queryRadius(pos.x, pos.z, this.helpRadius, u =>
+          !u.isDead && self.isAlliedWith(u) && u.isCombatUnit && u.isCombatUnit(),
+        _helpBuf);
+        for (let i = 0; i < _helpBuf.length; i++) {
+          const u = _helpBuf[i];
+          const isFriendlyTargetBuilding = u.attackTarget && (u.attackTarget.fullMesh || u.attackTarget.isConstructed !== undefined);
+          if (u.state === 'idle' || (u.state === 'attacking' && isFriendlyTargetBuilding)) {
+            const savedObjective = isFriendlyTargetBuilding ? u.attackTarget : u.objectiveTarget;
+            u.orderAttack(attacker, !!savedObjective);
+            if (savedObjective) {
+              u.objectiveTarget = savedObjective;
             }
           }
-        });
+        }
       }
     }
   }
@@ -933,56 +967,40 @@ export class Unit {
     }
   }
 
+  /**
+   * F1-06: `gm.unitGrid.queryRadius` no lugar de varrer `allUnits`. Mantém o parâmetro
+   * `allUnits` por compatibilidade com os chamadores existentes (não é mais usado).
+   */
   findNearestHostileCombatUnit(allUnits, maxDist = 14) {
-    if (!allUnits) return null;
-    let closestCombat = null;
-    let minCombatDist = maxDist;
-    const uPos = this.mesh.position;
-    const len = allUnits.length;
-
-    for (let i = 0; i < len; i++) {
-      const u = allUnits[i];
-      if (!u.isDead && u.hp > 0 && this.isHostileTo(u)) {
-        const dx = uPos.x - u.mesh.position.x;
-        const dz = uPos.z - u.mesh.position.z;
-        const d = Math.hypot(dx, dz);
-        if (d < minCombatDist) {
-          if (u.isCombatUnit && u.isCombatUnit()) {
-            minCombatDist = d;
-            closestCombat = u;
-          }
-        }
-      }
-    }
-    return closestCombat;
+    const gm = this.gameManager;
+    if (!gm || !gm.unitGrid) return null;
+    const pos = this.mesh.position;
+    const self = this;
+    gm.unitGrid.queryRadius(pos.x, pos.z, maxDist, u =>
+      !u.isDead && u.hp > 0 && self.isHostileTo(u) && u.isCombatUnit && u.isCombatUnit(),
+    _combatBuf);
+    return pickNearestInBuf(_combatBuf, pos.x, pos.z);
   }
 
   findNearestHostileUnit(allUnits, maxDist = 14) {
-    if (!allUnits) return null;
     const combatUnit = this.findNearestHostileCombatUnit(allUnits, maxDist);
     if (combatUnit) return combatUnit;
 
-    let closestWorker = null;
-    let minWorkerDist = maxDist;
-    const uPos = this.mesh.position;
-    const len = allUnits.length;
-
-    for (let i = 0; i < len; i++) {
-      const u = allUnits[i];
-      if (!u.isDead && u.hp > 0 && this.isHostileTo(u)) {
-        const dx = uPos.x - u.mesh.position.x;
-        const dz = uPos.z - u.mesh.position.z;
-        const d = Math.hypot(dx, dz);
-        if (d < minWorkerDist) {
-          minWorkerDist = d;
-          closestWorker = u;
-        }
-      }
-    }
-
-    return closestWorker;
+    const gm = this.gameManager;
+    if (!gm || !gm.unitGrid) return null;
+    const pos = this.mesh.position;
+    const self = this;
+    gm.unitGrid.queryRadius(pos.x, pos.z, maxDist, u =>
+      !u.isDead && u.hp > 0 && self.isHostileTo(u),
+    _unitBuf);
+    return pickNearestInBuf(_unitBuf, pos.x, pos.z);
   }
 
+  /**
+   * Prioridade preservada: combate > trabalhador (unidades) > torre > construção comum,
+   * menor distância dentro de cada classe, empate por menor id (via `pickNearestInBuf`,
+   * já que o `SpatialGrid` devolve os candidatos ordenados por id).
+   */
   findNearestHostile(allUnits, buildings, maxDist = 15) {
     // 1. High priority: hostile units (combat troops > workers)
     const hostileUnit = this.findNearestHostileUnit(allUnits, maxDist);
@@ -991,39 +1009,22 @@ export class Unit {
     }
 
     // 2. Secondary priority: buildings (defensive watchtowers > regular buildings)
-    if (buildings) {
-      let closestTower = null;
-      let minTowerDist = maxDist;
-      let closestBuilding = null;
-      let minBuildingDist = maxDist;
+    const gm = this.gameManager;
+    if (!gm || !gm.blockerGrid) return null;
+    const pos = this.mesh.position;
+    const self = this;
 
-      const uPos = this.mesh.position;
-      const len = buildings.length;
+    gm.blockerGrid.queryRadius(pos.x, pos.z, maxDist, b =>
+      b instanceof Building && !b.isDead && b.hp > 0 && self.isHostileTo(b) &&
+      (b.type === 'watchtower' || b.type === 'orc_watchtower'),
+    _towerBuf);
+    const closestTower = pickNearestInBuf(_towerBuf, pos.x, pos.z);
+    if (closestTower) return closestTower;
 
-      for (let i = 0; i < len; i++) {
-        const b = buildings[i];
-        if (!b.isDead && b.hp > 0 && this.isHostileTo(b)) {
-          const dx = uPos.x - b.mesh.position.x;
-          const dz = uPos.z - b.mesh.position.z;
-          const d = Math.hypot(dx, dz);
-          if (d < maxDist) {
-            const isTower = b.type === 'watchtower' || b.type === 'orc_watchtower';
-            if (isTower && d < minTowerDist) {
-              minTowerDist = d;
-              closestTower = b;
-            } else if (d < minBuildingDist) {
-              minBuildingDist = d;
-              closestBuilding = b;
-            }
-          }
-        }
-      }
-
-      if (closestTower) return closestTower;
-      if (closestBuilding) return closestBuilding;
-    }
-
-    return null;
+    gm.blockerGrid.queryRadius(pos.x, pos.z, maxDist, b =>
+      b instanceof Building && !b.isDead && b.hp > 0 && self.isHostileTo(b),
+    _buildingBuf);
+    return pickNearestInBuf(_buildingBuf, pos.x, pos.z);
   }
 
   dispose() {

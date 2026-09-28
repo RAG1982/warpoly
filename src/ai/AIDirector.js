@@ -73,6 +73,9 @@ export class AIDirector {
     // Sub-Managers
     this.economyManager = new AIEconomyManager(this);
     this.militaryManager = new AIMilitaryManager(this);
+
+    // Buffer reutilizado pela consulta de intrusos (F1-06: gm.unitGrid.queryRadius).
+    this._intruderBuf = [];
   }
 
   // --- Economia: tudo delega ao Player (F2-01) ---
@@ -163,22 +166,17 @@ export class AIDirector {
    */
   evaluateUtilities() {
     const enemies = this.getOwnUnits();
-    const playerUnits = this.getHostileUnits();
 
     // --- 1. Defense Utility (U_def) ---
-    // Detect hostile units threatening this AI's base territory (within 26 units of base center)
-    let intrudersNearBase = 0;
-    const numPlayerUnits = playerUnits.length;
-    for (let i = 0; i < numPlayerUnits; i++) {
-      const u = playerUnits[i];
-      if (!u.isDead) {
-        const dx = u.mesh.position.x - this.baseCenter.x;
-        const dz = u.mesh.position.z - this.baseCenter.y;
-        if ((dx * dx + dz * dz) < 676) { // 26^2
-          intrudersNearBase++;
-        }
-      }
-    }
+    // Detect hostile units threatening this AI's base territory (within 26 units of base center;
+    // F1-06: gm.unitGrid.queryRadius no lugar de varrer todas as unidades hostis do mapa)
+    const gm = this.gm;
+    const intruders = gm.unitGrid.queryRadius(
+      this.baseCenter.x, this.baseCenter.y, 26,
+      u => !u.isDead && gm.isHostile(this.playerId, u.ownerId),
+      this._intruderBuf
+    );
+    const intrudersNearBase = intruders.length;
 
     if (intrudersNearBase > 0) {
       this.utilities.def = Math.min(1.0, 0.4 + intrudersNearBase * 0.2);

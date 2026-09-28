@@ -46,6 +46,8 @@ src/
     PlayerRegistry.js         players[], getPlayer, localPlayer, isHostile/isAlly por time (matriz)
     EntityIds.js              Contador monotônico, EntityRegistry (id → entidade), NEUTRAL_OWNER_ID = −1
     MatchConfig.js            {mapId, seed, difficulty, players[]}, slots iniciais do mapa, layout da base inicial, withNewSeed
+    SpatialGrid.js            Grade espacial (spatial hash) uniforme: insert/update/remove/clear, queryRadius,
+                               queryRect, nearest (F1-06; testado em tests/unit/spatialGrid.test.js)
   ai/
     AIDirector.js             Utility AI (tick 1s): U_eco, U_housing, U_def, U_mil — um por jogador de IA (playerId)
     AIEconomyManager.js       Trabalhadores, construção, rebalanceamento de coleta
@@ -145,6 +147,13 @@ animate() [rAF da aplicação, delta máx 0.1s, sem timestep fixo; sem sessão (
 - Hostilidade: `Unit` (aggro, busca de alvo, retaliação, pedido de ajuda a aliados) e `Building` (torres) usam `gm.isHostile(this.ownerId, outro.ownerId)` / `isAlly`. Entrega de recursos só em construções do **mesmo dono**.
 - Listas: `gm.allUnits` é a lista única (fonte de verdade). `gm.getUnitsOf(ownerId)` (mantida em add/remove) e `gm.getHostileUnitsOf(ownerId)` (cache invalidado em add/remove) são visões derivadas. **Não modifique os arrays retornados.**
 - Bases iniciais: `initMapEntities` cria HQ + serraria + casa + 5 unidades por jogador a partir do slot (`MAP_START_SLOTS`: 0 = NE (32,−30), 1 = SW (−32,30); slots ≥ 2 = primeira posição candidata em que a base inteira passa em `canPlaceBuilding` e fica a ≥ 40 u das outras — hoje (−14,−46), já que (−32,−30) e (32,30) caem no rio). O layout (`START_LAYOUT`) é espelhado por slot e reproduz as posições antigas; os tipos vêm de `FACTIONS[f].startingBase`. Slots extras ganham 1 mina de ouro e 1 pedreira próprias.
+
+### Grade espacial (F1-06)
+- `SpatialGrid` (`src/sim/SpatialGrid.js`, lógica pura sem three.js) indexa entidades por célula (posição do centro, clampada aos limites do mapa) e responde `queryRadius`/`queryRect`/`nearest` sem alocar (buffers reutilizados pelos chamadores). `queryRadius` inclui a entidade quando `distância-centro ≤ r + raio da entidade`; `nearest` usa distância pura (sem raio) e desempata por menor `id`. Resultados de `queryRadius`/`queryRect` vêm ordenados por `id` (determinismo).
+- `gm.unitGrid` (unidades, dinâmica) é sincronizada **uma vez por tick**, em `GameManager.update`, antes do loop `Unit.update` — colisão/alvo/picking do tick usam a posição do início do tick. `gm.blockerGrid` (Building/ResourceDeposit/Tree) é mantida em `registerEntity`/`unregisterEntity`; árvore cortada (`isDead`/`woodRemaining <= 0`) sai da grade no próprio loop de `trees.forEach` do `update`.
+- Usos: `resolveBuildingCollisions`/`resolveUnitCollisions`/`_checkUnitBlockerCollision` (colisão), `Unit.findNearestHostile*`/`takeDamage` (alvo/aggro/ajuda), `Building` torre (`gm.unitGrid.nearest`), `AIDirector`/`AIMilitaryManager` (intrusos na base), `canPlaceBuilding`/`findNearestResource`/`findNearestDropoff` (colocação/coleta) e `InputManager.raycastScene` (picking do mouse, só as entidades perto do ponto do chão em vez de todas as meshes do jogo).
+- `resolveUnitCollisions` resolve cada par uma única vez comparando `id` (só o de maior `id` processa o par), e o empurrão em colisão exata (`dist < 0.001`) usa um ângulo determinístico derivado dos ids das duas unidades em vez de `Math.random()`.
+- DÍVIDA: o alcance efetivo de `queryRadius` cresce com o maior raio já visto pela grade (`SpatialGrid.maxRadius`, nunca diminui); em mapas com poucas construções grandes (castelo) isso alarga um pouco a busca em `resolveBuildingCollisions`/`canPlaceBuilding` — aceitável hoje, revisar se algum mapa futuro tiver construções muito maiores.
 
 ### Dívidas registradas (F2-01)
 - **Getter `faction`** em `Unit`/`Building`: `'player'` se o dono é o jogador local, `'enemy'` caso contrário. Mantido para `UIManager`, `InputManager` e o anel de seleção. Lógica nova deve usar `ownerId` + `isHostile/isAlly`. Remover quando a UI/Input migrarem (F6/F2-02).

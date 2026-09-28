@@ -36,32 +36,37 @@ export class AIMilitaryManager {
     // Pre-allocated squad buffers to eliminate Garbage Collector pauses
     this.readySquadBuffer = new Array(64);
     this.readySquadCount = 0;
+    // Buffer reutilizado pela consulta de intrusos (F1-06: gm.unitGrid.queryRadius).
+    this._intruderBuf = [];
   }
 
   /**
    * Evaluates base defense and commands combat units to repel invaders
-   * @param {number} uDef 
+   * @param {number} uDef
    */
   updateDefense(uDef) {
     if (uDef <= 0) return;
 
+    // F1-06: gm.unitGrid.queryRadius no lugar de varrer todas as unidades hostis do mapa.
     const baseCenter = this.director.baseCenter;
-    const playerUnits = this.director.getHostileUnits();
-    const lenP = playerUnits.length;
-    let closestIntruder = null;
-    let minIntruderDistSq = 676; // 26^2
+    const gm = this.gm;
+    const myId = this.director.playerId;
+    const intruders = gm.unitGrid.queryRadius(
+      baseCenter.x, baseCenter.y, 26,
+      u => !u.isDead && gm.isHostile(myId, u.ownerId),
+      this._intruderBuf
+    );
 
-    // Locate closest intruder
-    for (let i = 0; i < lenP; i++) {
-      const u = playerUnits[i];
-      if (!u.isDead) {
-        const dx = u.mesh.position.x - baseCenter.x;
-        const dz = u.mesh.position.z - baseCenter.y;
-        const dSq = dx * dx + dz * dz;
-        if (dSq < minIntruderDistSq) {
-          minIntruderDistSq = dSq;
-          closestIntruder = u;
-        }
+    let closestIntruder = null;
+    let minIntruderDistSq = Infinity;
+    for (let i = 0; i < intruders.length; i++) {
+      const u = intruders[i];
+      const dx = u.mesh.position.x - baseCenter.x;
+      const dz = u.mesh.position.z - baseCenter.y;
+      const dSq = dx * dx + dz * dz;
+      if (dSq < minIntruderDistSq) {
+        minIntruderDistSq = dSq;
+        closestIntruder = u;
       }
     }
 

@@ -38,7 +38,7 @@ class GameApp {
     // Serviços da aplicação (criados na 1ª partida: o menu não precisa de WebGL)
     this.sound = null;
     this.sceneManager = null;
-    this.clock = null;
+    this.timer = null;
     this.assetsReady = false; // preload feito (roda uma vez só)
 
     // Partida
@@ -196,7 +196,7 @@ class GameApp {
 
     this.session = new MatchSession({ sceneManager: this.sceneManager, sound: this.sound, matchConfig: config });
     this.matchCount++;
-    this.clock.getDelta(); // o tempo de carga não vira um delta gigante
+    this.timer.update(); // o tempo de carga não vira um delta gigante
 
     if (!(this.skipPreload && firstServices)) this._hideLoadingScreen(true);
     this.fsm.transition(S.IN_GAME);
@@ -246,7 +246,7 @@ class GameApp {
     window.addEventListener('click', unlockAudio);
     window.addEventListener('keydown', unlockAudio);
 
-    this.clock = new THREE.Clock();
+    this.timer = new THREE.Timer();
     requestAnimationFrame(this._animate);
   }
 
@@ -265,8 +265,9 @@ class GameApp {
 
   _animate() {
     requestAnimationFrame(this._animate);
-    const delta = Math.min(this.clock.getDelta(), 0.1);
-    const elapsedTime = this.clock.getElapsedTime();
+    this.timer.update();
+    const delta = Math.min(this.timer.getDelta(), 0.1);
+    const elapsedTime = this.timer.getElapsed();
 
     const session = this.session;
     if (!session) return; // menu/loading: nada para desenhar

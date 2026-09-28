@@ -608,7 +608,7 @@ class ModelInspectorApp {
     this.villagerCargo = 'none';
 
     // Clock
-    this.clock = new THREE.Clock();
+    this.timer = new THREE.Timer();
 
     this.initThree();
     this.initPedestal();
@@ -675,7 +675,7 @@ class ModelInspectorApp {
     this.renderer.setSize(width, height);
     this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
     this.renderer.shadowMap.enabled = true;
-    this.renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+    this.renderer.shadowMap.type = THREE.PCFShadowMap;
     this.renderer.toneMapping = THREE.ACESFilmicToneMapping;
     this.renderer.toneMappingExposure = 1.35;
 
@@ -1399,7 +1399,8 @@ class ModelInspectorApp {
   animate() {
     requestAnimationFrame(this.animate);
 
-    const dt = this.clock.getDelta();
+    this.timer.update();
+    const dt = this.timer.getDelta();
 
     // Turntable Auto-rotation
     if (this.autoRotate && this.currentModelObject) {

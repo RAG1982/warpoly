@@ -75,6 +75,7 @@ class GameApp {
   constructor(container, sound, sceneManager) {
     this.sound = sound;
     this.sceneManager = sceneManager;
+    this.quality = sceneManager.quality; // F1-04: presets de qualidade (window.game.quality)
 
     // 3. Environment & World
     this.terrain = new Terrain(this.sceneManager.scene);

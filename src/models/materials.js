@@ -42,16 +42,83 @@ export const materials = {
 };
 
 /**
- * Enable shadow casting & receiving on all child meshes
+ * Limiar (raio da bounding sphere, em coordenadas do objeto raiz) abaixo do qual uma peça
+ * não projeta sombra: parafusos, rebites, telhas pequenas, detalhes. F1-04.
+ */
+export const SHADOW_CAST_MIN_RADIUS = 0.4;
+/** Modelos pequenos (unidades) usam um limiar proporcional ao próprio raio, até este piso. */
+export const SHADOW_CAST_MIN_RADIUS_FLOOR = 0.12;
+/** Fração do raio do modelo usada como limiar em modelos pequenos. */
+export const SHADOW_CAST_RELATIVE = 0.12;
+/** Abaixo deste raio a peça também não recebe sombra (não se nota e poupa shader). */
+export const SHADOW_RECEIVE_MIN_RADIUS = 0.06;
+
+/**
+ * Opções globais de sombra dos modelos, ajustadas por QualitySettings.apply().
+ * `pointLightShadows`: PointLights dos modelos (lanternas, braseiros) projetam sombra?
+ * Cada uma custa 6 passadas extras (cubemap) e hoje redesenha as árvores instanciadas inteiras
+ * (esfera de culling cobre o mapa todo): desligado em todos os presets até a F1-02/03.
+ */
+export const shadowOptions = { pointLightShadows: false };
+
+const _rootInv = new THREE.Matrix4();
+const _rel = new THREE.Matrix4();
+const _sphere = new THREE.Sphere();
+
+function castsVisibleShadow(material) {
+  const mats = Array.isArray(material) ? material : [material];
+  // Materiais sem iluminação (chamas, cordas de arco) ou muito transparentes não projetam sombra
+  return mats.some(m => m && !m.isMeshBasicMaterial && !(m.transparent && m.opacity < 0.6));
+}
+
+/**
+ * Liga sombras de forma seletiva nos filhos do modelo:
+ * - `castShadow` só em peças cujo raio (coordenadas do raiz) ≥ limiar;
+ *   limiar = clamp(raioDoModelo × 0,12, 0,12, 0,4) — assim unidades mantêm torso/pernas/armas
+ *   e prédios descartam os detalhes miúdos;
+ * - `receiveShadow` em tudo que não seja minúsculo;
+ * - PointLights do modelo só projetam sombra se `shadowOptions.pointLightShadows`.
+ * Opções: `minCastRadius` (limiar absoluto), `all: true` (comportamento antigo: tudo projeta).
+ * Estatísticas da última chamada em `enableShadows.stats`.
  * @param {THREE.Object3D} obj
+ * @param {{minCastRadius?: number, all?: boolean}} [options]
  * @returns {THREE.Object3D}
  */
-export function enableShadows(obj) {
+export function enableShadows(obj, options = {}) {
+  obj.updateMatrixWorld(true);
+  _rootInv.copy(obj.matrixWorld).invert();
+
+  // 1ª passada: raio de cada malha no espaço do raiz + raio do modelo inteiro
+  const entries = [];
+  let modelRadius = 0;
   obj.traverse(child => {
-    if (child.isMesh) {
-      child.castShadow = true;
-      child.receiveShadow = true;
+    // Luzes locais dos modelos: lembra quem pediu sombra e aplica a opção do preset
+    if (child.isLight && !child.isDirectionalLight && (child.castShadow || child.userData.wantsShadow)) {
+      child.userData.wantsShadow = true;
+      child.castShadow = shadowOptions.pointLightShadows;
+      return;
     }
+    if (!child.isMesh) return;
+    const geo = child.geometry;
+    if (!geo) return;
+    if (!geo.boundingSphere) geo.computeBoundingSphere();
+    _rel.multiplyMatrices(_rootInv, child.matrixWorld);
+    _sphere.copy(geo.boundingSphere).applyMatrix4(_rel);
+    // InstancedMesh: a esfera da geometria não cobre as instâncias — sempre trata como grande
+    const radius = child.isInstancedMesh ? Infinity : _sphere.radius;
+    entries.push({ child, radius });
+    if (!child.isInstancedMesh) modelRadius = Math.max(modelRadius, _sphere.center.length() + _sphere.radius);
   });
+
+  const absMin = options.minCastRadius ?? SHADOW_CAST_MIN_RADIUS;
+  const castMin = options.all ? 0 : Math.min(absMin, Math.max(SHADOW_CAST_MIN_RADIUS_FLOOR, modelRadius * SHADOW_CAST_RELATIVE));
+
+  let cast = 0;
+  for (const { child, radius } of entries) {
+    child.castShadow = radius >= castMin && (options.all || castsVisibleShadow(child.material));
+    child.receiveShadow = radius >= SHADOW_RECEIVE_MIN_RADIUS;
+    if (child.castShadow) cast++;
+  }
+  enableShadows.stats = { meshes: entries.length, cast, castMin, modelRadius };
   return obj;
 }

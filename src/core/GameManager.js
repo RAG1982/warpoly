@@ -1118,8 +1118,8 @@ export class GameManager {
       const localId = this._localPlayerId;
       this.fogOfWar.update(
         dt,
-        this.units,
-        this.buildings.filter(b => b.ownerId === localId),
+        this.allUnits.filter(u => u.ownerId === localId || this.isAlly(localId, u.ownerId)),
+        this.buildings.filter(b => b.ownerId === localId || this.isAlly(localId, b.ownerId)),
         this.enemies,
         this.buildings.filter(b => this.isHostile(localId, b.ownerId))
       );
@@ -1302,15 +1302,8 @@ export class GameManager {
     this.arrows.forEach(a => (a.dispose ? a.dispose() : this.scene.remove(a.mesh)));
     this.treeManager?.dispose();
 
-    const fog = this.fogOfWar;
-    if (fog) {
-      if (typeof fog.dispose === 'function') {
-        fog.dispose();
-      } else {
-        if (fog.shroudMesh) this.scene.remove(fog.shroudMesh);
-        fog.fogTexture?.dispose();
-      }
-    }
+    // Névoa por shader (F1-05): sem plano sobreposto (shroudMesh) para remover.
+    this.fogOfWar?.dispose();
 
     this.allUnits = [];
     this._unitsByOwner.clear();

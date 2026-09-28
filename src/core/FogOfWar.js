@@ -1,7 +1,7 @@
 import * as THREE from 'three';
 import { VISION_RADII, DEFAULT_UNIT, DEFAULT_BUILDING } from '../data/index.js';
 import { FogGrid, BuildingMemory } from './FogGrid.js';
-import { fogUniforms, excludeFromFog, markFogGround } from '../render/fogOfWarShader.js';
+import { fogUniforms, excludeFromFog, markFogGround, resetFogTexture } from '../render/fogOfWarShader.js';
 import { QualitySettings } from './QualitySettings.js';
 import { ModelFactory } from '../entities/ModelFactory.js';
 
@@ -203,7 +203,20 @@ export class FogOfWar {
       this.updateTimer = 0;
       this._tickGrid(playerUnits, playerBuildings, enemyBuildings);
     }
+    this._excludeSelectionRingsFromFog(playerUnits, enemyUnits, playerBuildings, enemyBuildings);
     this.cullHiddenEnemies(enemyUnits, enemyBuildings);
+  }
+
+  /**
+   * Anéis de seleção (materiais compartilhados de `Unit`/`Building`, não exportados) não devem
+   * escurecer com a névoa. Como não podemos editar `Unit.js`/`Building.js`, marcamos os materiais
+   * a partir de uma instância viva; `excludeFromFog` é idempotente e barato (`userData.noFog`).
+   */
+  _excludeSelectionRingsFromFog(playerUnits, enemyUnits, playerBuildings, enemyBuildings) {
+    if (playerUnits[0]?.selectionRing) excludeFromFog(playerUnits[0].selectionRing);
+    if (enemyUnits[0]?.selectionRing) excludeFromFog(enemyUnits[0].selectionRing);
+    if (playerBuildings[0]?.selectionRing) excludeFromFog(playerBuildings[0].selectionRing);
+    if (enemyBuildings[0]?.selectionRing) excludeFromFog(enemyBuildings[0].selectionRing);
   }
 
   _tickGrid(playerUnits, playerBuildings, enemyBuildings) {
@@ -294,6 +307,10 @@ export class FogOfWar {
     for (const b of this.buildingMemory.clear()) this._removeGhost(b);
     if (this.ghostGroup.parent) this.ghostGroup.parent.remove(this.ghostGroup);
     if (this.fogTexture) this.fogTexture.dispose();
+    this.fogTexture = null;
+    // O uniform é compartilhado por todos os materiais com névoa (patch global): sem isto, a
+    // próxima partida (2ª MatchSession) herdaria a textura já descartada desta.
+    resetFogTexture();
     fogUniforms.fowParams.value.z = 0;
   }
 }

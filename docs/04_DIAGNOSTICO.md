@@ -27,8 +27,8 @@ Causas raiz, em ordem de impacto:
 
 | # | Problema | Onde |
 |---|---|---|
-| B1 | Névoa: inimigos ficam visíveis para sempre em área já explorada (usa `isExplored`, não `activeVision`) | `FogOfWar.cullUnexploredEnemies` |
-| B2 | Névoa é um plano a y=5,2: árvores/torres atravessam a névoa, unidades sob a névoa aparecem nas bordas | `FogOfWar.createShroudMesh` |
+| B1 | ~~Névoa: inimigos ficam visíveis para sempre em área já explorada (usa `isExplored`, não `activeVision`)~~ **Corrigido na F1-05**: `cullHiddenEnemies` usa `activeVision` (visão atual), não memória | `FogOfWar.cullHiddenEnemies` |
+| B2 | ~~Névoa é um plano a y=5,2: árvores/torres atravessam a névoa, unidades sob a névoa aparecem nas bordas~~ **Corrigido na F1-05**: névoa aplicada no shader dos materiais (sem plano sobreposto), objetos escondidos por origem no vertex shader | `src/render/fogOfWarShader.js` |
 | B3 | ~~Custos da IA divergem da tabela real (ranged IA: 60 madeira/35 ouro vs real 20/40) — IA decide com base errada~~ **Corrigido na F0-06**: `AIDirector.costs` agora é derivado de `src/data/` | `AIDirector.costs` vs `UNIT_TRAIN_CONFIG` |
 | B4 | ~~Custos de construção duplicados 3× (`BUILDING_BUILD_CONFIG`, `getBuildingStats`, `InputManager.getCost`)~~ **Corrigido na F0-06**: fonte única em `src/data/buildings.js` | vários |
 | B5 | Construções ignoram armadura; upgrades de defesa não afetam construções/torres | `Building.takeDamage` |

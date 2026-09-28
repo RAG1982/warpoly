@@ -50,6 +50,15 @@ export const fogUniforms = {
   fowShroud: { value: new THREE.Vector3(0.012, 0.016, 0.024) }
 };
 
+/**
+ * Devolve `fowMap` à textura neutra 1×1 (não escurece nada). Chamado por `FogOfWar.dispose()`
+ * para que a textura da partida anterior (já descartada) não continue referenciada pelo uniform
+ * compartilhado — a próxima `FogOfWar` (2ª partida) começa sem herdar estado da anterior.
+ */
+export function resetFogTexture() {
+  fogUniforms.fowMap.value = _neutral;
+}
+
 const CACHE_SUFFIX = '|wp-fow1';
 const CACHE_SUFFIX_GROUND = '|wp-fow1g';
 const CACHE_SUFFIX_DEPTH = '|wp-fow1d';

@@ -6,37 +6,37 @@
     {
       "name": "borda",
       "note": "borda da área explorada inicial",
-      "calls": 1588,
+      "calls": 1534,
       "programs": 63
     },
     {
       "name": "borda-perto",
       "note": "borda de perto, câmera girada",
-      "calls": 1151,
+      "calls": 1136,
       "programs": 63
     },
     {
       "name": "memoria",
       "note": "centro explorado e abandonado (memória)",
-      "calls": 1762,
+      "calls": 1719,
       "programs": 63
     },
     {
       "name": "inimigo-visivel",
       "note": "inimigo dentro da visão",
-      "calls": 1398,
+      "calls": 1351,
       "programs": 64
     },
     {
       "name": "inimigo-memoria",
       "note": "o mesmo inimigo parado numa área de memória",
-      "calls": 943,
+      "calls": 903,
       "programs": 64
     },
     {
       "name": "fantasma",
       "note": "base inimiga na memória; construção lateral destruída fora da visão",
-      "calls": 954,
+      "calls": 906,
       "programs": 64
     },
     {
@@ -45,7 +45,7 @@
     {
       "name": "fantasma-revisto",
       "note": "área revista: o fantasma some",
-      "calls": 1241,
+      "calls": 1249,
       "programs": 64
     }
   ],

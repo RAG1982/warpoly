@@ -1,0 +1,72 @@
+[
+  {
+    "label": "before",
+    "preset": "high",
+    "gpu": "ANGLE (AMD, Vulkan 1.4.318 (AMD Radeonâ¢ RX 7600 XT (RADV NAVI33) (0x00007480)), radv)",
+    "quality": null,
+    "initial": {
+      "fps": 17.1,
+      "callsPerFrame": 8727,
+      "shadowCallsPerPass": 6207,
+      "shadowPassesPerFrame": 1,
+      "trisPerFrame": 4685134,
+      "shadowTrisPerPass": 4415583,
+      "meshes": 5106,
+      "cast": 4914,
+      "receive": 4919,
+      "pixelRatio": 1,
+      "mapSize": 2048,
+      "shadowExtent": 90
+    },
+    "zoomOut": {
+      "fps": 15.2,
+      "callsPerFrame": 9222,
+      "shadowCallsPerPass": 6206,
+      "shadowPassesPerFrame": 1,
+      "trisPerFrame": 4694627,
+      "shadowTrisPerPass": 4415573,
+      "meshes": 5561,
+      "cast": 5362,
+      "receive": 5367,
+      "pixelRatio": 1,
+      "mapSize": 2048,
+      "shadowExtent": 90
+    },
+    "errors": []
+  },
+  {
+    "label": "before",
+    "preset": "low",
+    "gpu": "ANGLE (AMD, Vulkan 1.4.318 (AMD Radeonâ¢ RX 7600 XT (RADV NAVI33) (0x00007480)), radv)",
+    "quality": null,
+    "initial": {
+      "fps": 17,
+      "callsPerFrame": 8747,
+      "shadowCallsPerPass": 6249,
+      "shadowPassesPerFrame": 1,
+      "trisPerFrame": 4659147,
+      "shadowTrisPerPass": 4389752,
+      "meshes": 5158,
+      "cast": 4970,
+      "receive": 4975,
+      "pixelRatio": 1,
+      "mapSize": 2048,
+      "shadowExtent": 90
+    },
+    "zoomOut": {
+      "fps": 16.6,
+      "callsPerFrame": 9321,
+      "shadowCallsPerPass": 6249,
+      "shadowPassesPerFrame": 1,
+      "trisPerFrame": 4669945,
+      "shadowTrisPerPass": 4389752,
+      "meshes": 5613,
+      "cast": 5418,
+      "receive": 5423,
+      "pixelRatio": 1,
+      "mapSize": 2048,
+      "shadowExtent": 90
+    },
+    "errors": []
+  }
+]

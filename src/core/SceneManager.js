@@ -1,4 +1,15 @@
 import * as THREE from 'three';
+import { QualitySettings } from './QualitySettings.js';
+
+// Temporários da shadow camera dinâmica (evita alocação por frame)
+const _ndc = [[-1, -1], [1, -1], [1, 1], [-1, 1], [0, 0]];
+const _ray = new THREE.Vector3();
+const _pt = new THREE.Vector3();
+const _center = new THREE.Vector3();
+const _lightBasis = new THREE.Matrix4();
+const _lightBasisInv = new THREE.Matrix4();
+const _origin = new THREE.Vector3();
+const _up = new THREE.Vector3(0, 1, 0);
 
 export class SceneManager {
   constructor(canvasContainer) {
@@ -10,12 +21,13 @@ export class SceneManager {
     this.scene.background = new THREE.Color(this.skyColor);
     this.scene.fog = new THREE.Fog(this.skyColor, 95, 320);
 
-    // Renderer
-    this.renderer = new THREE.WebGLRenderer({ antialias: true, powerPreference: 'high-performance' });
+    // Renderer (antialias vem do preset: só muda recarregando a página)
+    this.quality = QualitySettings;
+    this.renderer = new THREE.WebGLRenderer({ antialias: QualitySettings.current.antialias, powerPreference: 'high-performance' });
     this.renderer.setSize(window.innerWidth, window.innerHeight);
-    this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    this.renderer.setPixelRatio(QualitySettings.maxPixelRatio());
     this.renderer.shadowMap.enabled = true;
-    this.renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+    this.renderer.shadowMap.type = THREE.PCFShadowMap;
     this.renderer.toneMapping = THREE.ACESFilmicToneMapping;
     this.renderer.toneMappingExposure = 1.38;
     this.container.appendChild(this.renderer.domElement);
@@ -35,8 +47,18 @@ export class SceneManager {
     this.cameraAngle = Math.PI / 4; // 45 degrees
     this.targetCameraAngle = Math.PI / 4;
 
+    // Sombra dinâmica: ajustada pelo QualitySettings
+    this.shadowUpdateInterval = 1;
+    this.maxShadowDistance = 90;
+    this._shadowFrame = 0;
+    this._shadowKey = '';
+    this._lastRenderTime = 0;
+
     // Lights
     this.setupLights();
+
+    // Presets de qualidade (DPR, sombras, tone mapping, resolução dinâmica)
+    QualitySettings.apply(this.renderer, this);
 
     // Time of day preset
     this.timeOfDay = 'day'; // 'day', 'sunset', 'night'
@@ -55,6 +77,10 @@ export class SceneManager {
 
     this.sunLight.position.set(-52, 68, -22);
     this.sunLight.castShadow = true;
+    // Direção do sol: a posição da luz passa a seguir a câmera em updateShadowCamera.
+    // Referência = alvo inicial da câmera (a luz antes era fixa e mirava esse alvo): mantém o ângulo das sombras.
+    this.sunAnchor = this.cameraTarget.clone();
+    this.sunDirection = this.sunLight.position.clone().sub(this.sunAnchor).normalize();
     
     // Shadow parameters for crisp low-poly shadows
     this.sunLight.shadow.mapSize.width = 2048;
@@ -69,6 +95,7 @@ export class SceneManager {
     this.sunLight.shadow.bias = -0.0003;
     this.sunLight.shadow.normalBias = 0.02;
     this.scene.add(this.sunLight);
+    this.scene.add(this.sunLight.target);
 
     // Ambient bounce fill from opposite angle
     this.fillLight = new THREE.DirectionalLight(0x8eb2d4, 0.45);
@@ -115,6 +142,8 @@ export class SceneManager {
       this.fillLight.color.set(0x19273c);
       this.fillLight.intensity = 0.2;
     }
+    this.sunDirection.copy(this.sunLight.position).sub(this.sunAnchor).normalize();
+    this.invalidateShadowFrustum();
   }
 
   updateCamera(delta) {
@@ -134,9 +163,85 @@ export class SceneManager {
     this.camera.position.set(camX, camY, camZ);
     this.camera.lookAt(this.cameraTarget);
 
-    // Keep sunlight shadow centered around camera target for optimal shadow quality
-    this.sunLight.target.position.copy(this.cameraTarget);
-    this.sunLight.target.updateMatrixWorld();
+    this.updateShadowCamera();
+  }
+
+  /** Força recalcular o frustum da luz e redesenhar o shadow map no próximo frame. */
+  invalidateShadowFrustum() {
+    this._shadowKey = '';
+  }
+
+  /**
+   * Ajusta o frustum ortográfico da luz à área visível (zoom + alvo da câmera).
+   * Texels estáveis: o raio é quantizado (invariante à rotação da câmera) e o centro
+   * é alinhado à grade de texels no espaço da luz, evitando shimmering ao mover a câmera.
+   */
+  updateShadowCamera() {
+    const light = this.sunLight;
+    if (!light || !this.sunDirection) return;
+    const cam = this.camera;
+    cam.updateMatrixWorld();
+
+    // Pegada da visão no chão (y = 0), limitada a maxShadowDistance a partir do alvo
+    const maxD = this.maxShadowDistance;
+    const groundY = 0;
+    let n = 0;
+    _center.set(0, 0, 0);
+    const pts = this._footprint || (this._footprint = _ndc.map(() => new THREE.Vector3()));
+    for (let i = 0; i < _ndc.length; i++) {
+      _ray.set(_ndc[i][0], _ndc[i][1], 0.5).unproject(cam).sub(cam.position).normalize();
+      const p = pts[i];
+      if (_ray.y < -1e-4) {
+        const t = (groundY - cam.position.y) / _ray.y;
+        p.copy(cam.position).addScaledVector(_ray, t);
+      } else {
+        p.copy(cam.position).addScaledVector(_ray, maxD * 2);
+        p.y = groundY;
+      }
+      // limita a distância horizontal ao alvo
+      _pt.set(p.x - this.cameraTarget.x, 0, p.z - this.cameraTarget.z);
+      const len = _pt.length();
+      if (len > maxD) p.set(this.cameraTarget.x + _pt.x / len * maxD, groundY, this.cameraTarget.z + _pt.z / len * maxD);
+      _center.add(p);
+      n++;
+    }
+    _center.divideScalar(n);
+
+    // Raio do círculo que cobre a pegada + margem para sombras de objetos altos fora da tela
+    let radius = 0;
+    for (let i = 0; i < n; i++) radius = Math.max(radius, _center.distanceTo(pts[i]));
+    radius = Math.min(radius + 8, maxD);
+    radius = Math.ceil(radius / 4) * 4; // quantizado: só muda em degraus
+
+    // Espaço da luz fixo (depende só da direção do sol)
+    _lightBasis.lookAt(this.sunDirection, _origin, _up);
+    _lightBasisInv.copy(_lightBasis).invert();
+    const shadow = light.shadow;
+    const texel = (2 * radius) / shadow.mapSize.x;
+    _pt.copy(_center).applyMatrix4(_lightBasisInv);
+    _pt.x = Math.round(_pt.x / texel) * texel;
+    _pt.y = Math.round(_pt.y / texel) * texel;
+    _pt.applyMatrix4(_lightBasis);
+
+    const key = `${_pt.x.toFixed(3)}|${_pt.y.toFixed(3)}|${_pt.z.toFixed(3)}|${radius}|${shadow.mapSize.x}`;
+    if (key === this._shadowKey) return;
+    this._shadowKey = key;
+
+    const lightDist = 120;
+    light.target.position.copy(_pt);
+    light.position.copy(_pt).addScaledVector(this.sunDirection, lightDist);
+    light.target.updateMatrixWorld();
+    light.updateMatrixWorld();
+
+    const sc = shadow.camera;
+    sc.left = -radius;
+    sc.right = radius;
+    sc.top = radius;
+    sc.bottom = -radius;
+    sc.near = 1;
+    sc.far = lightDist + radius + 40;
+    sc.updateProjectionMatrix();
+    this._shadowFrustumChanged = true;
   }
 
   panCamera(moveRight, moveForward) {
@@ -172,10 +277,27 @@ export class SceneManager {
     this.camera.aspect = window.innerWidth / window.innerHeight;
     this.camera.updateProjectionMatrix();
     this.renderer.setSize(window.innerWidth, window.innerHeight);
-    this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    this.renderer.setPixelRatio(QualitySettings.dynamic.pixelRatio || QualitySettings.maxPixelRatio());
+    this.invalidateShadowFrustum();
   }
 
   render() {
+    // Resolução dinâmica (desligável pelo preset)
+    const now = performance.now();
+    if (this._lastRenderTime) QualitySettings.tick((now - this._lastRenderTime) / 1000);
+    this._lastRenderTime = now;
+
+    // Sombra a cada N frames, ou imediatamente se o frustum da luz mudou
+    const sm = this.renderer.shadowMap;
+    if (sm.enabled && !sm.autoUpdate) {
+      this._shadowFrame++;
+      if (this._shadowFrustumChanged || this._shadowFrame >= this.shadowUpdateInterval) {
+        sm.needsUpdate = true;
+        this._shadowFrame = 0;
+      }
+    }
+    this._shadowFrustumChanged = false;
+
     this.renderer.render(this.scene, this.camera);
   }
 }

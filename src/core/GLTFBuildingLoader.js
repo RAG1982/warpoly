@@ -1,5 +1,6 @@
 import * as THREE from 'three';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
+import { enableShadows } from '../models/materials.js';
 
 /**
  * GLTFBuildingLoader — Carregador Central Otimizado de Modelos 3D (glTF/GLB)
@@ -75,13 +76,10 @@ export class GLTFBuildingLoader {
     const animNodes = new Map();
     const sockets = new Map();
 
-    rootMesh.traverse(child => {
-      // Habilita projeção de sombras
-      if (child.isMesh) {
-        child.castShadow = true;
-        child.receiveShadow = true;
-      }
+    // Sombras seletivas (F1-04): só peças com volume relevante projetam sombra
+    enableShadows(rootMesh);
 
+    rootMesh.traverse(child => {
       // Mapeia nós animados
       if (child.name && child.name.startsWith('Anim_')) {
         animNodes.set(child.name, child);

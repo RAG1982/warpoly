@@ -53,7 +53,8 @@ Opus escreve a spec em `docs/specs/<ID>.md`; agente **Sonnet** executa; Opus rev
 | Spec pronta | Tarefa | Executor |
 |---|---|---|
 | `docs/specs/F0-08-anti-swiftshader.md` | F0-08 bloquear navegador sem GPU — **DONE** | haiku |
-| `docs/specs/F1-05-nevoa-shader.md` | F1-05 (continuação da WIP `dd57a03`) | sonnet |
+| `docs/specs/F1-05-nevoa-shader.md` | F1-05 — **DONE** | sonnet |
+| `docs/specs/F7-00c-glb-padrao.md` | NEW-12 glb ligado por padrão | haiku |
 | `docs/specs/F1-03-unidades-por-osso.md` | F1-03 — **DONE parcial** | sonnet |
 | `docs/specs/F1-03b-unidades-skinned.md` | F1-03b SkinnedMesh rígido | sonnet |
 | `docs/specs/F1-06-grade-espacial.md` | F1-06 | sonnet |
@@ -63,7 +64,7 @@ Opus escreve a spec em `docs/specs/<ID>.md`; agente **Sonnet** executa; Opus rev
 | Fase | Total | TODO | DOING | DONE |
 |---|---|---|---|---|
 | F0 Fundação | 7 | 0 | 0 | 7 |
-| F1 Desempenho | 10 | 4 | 2 | 4 |
+| F1 Desempenho | 10 | 4 | 1 | 5 |
 | F2 Núcleo | 8 | 6 | 0 | 2 |
 | F3 Jogabilidade WC2 base | 11 | 11 | 0 | 0 |
 | F4 Jogabilidade WC2 expansão | 8 | 8 | 0 | 0 |
@@ -144,9 +145,10 @@ Opus escreve a spec em `docs/specs/<ID>.md`; agente **Sonnet** executa; Opus rev
 - **Aceite**: redução ≥ 50% de draw calls de sombra; sem artefatos visíveis.
 
 ### F1-05 · Névoa de guerra via shader (corrige B1, B2)
-- **Status**: `DOING(agente-onda2, 2026-09-28)` · Lane PERF · Onda 2 · Dep: —
+- **Status**: `DONE(e33d40e)` · Lane PERF · Onda 2 · Dep: —
 - **Fazer**: substituir o plano a y=5,2 por uma textura de visibilidade (2 canais: explorado / visível agora) amostrada no shader do terreno e dos objetos (`onBeforeCompile`) ou num passe de pós-processamento com reconstrução de posição; estados: preto (não explorado), cinza dessaturado (memória), claro (visível). Inimigos só aparecem em "visível agora"; construções inimigas vistas ficam como "fantasma" na memória (como no WC2).
 - **Aceite**: nenhum objeto atravessa a névoa; unidades inimigas somem ao sair da visão.
+- **Resultado**: `FogGrid.js` + `render/fogOfWarShader.js` (patch `onBeforeCompile`, instancing, chão/água); 3 estados, inimigos só com visão atual, fantasmas de construções, minimapa, visão de aliados. Bench: +1,9% frame time, +3–4 programas. B1/B2 corrigidos. Pendente → NEW-13.
 
 ### F1-06 · Grade espacial (spatial hash) para a simulação
 - **Status**: `DOING(agente-onda2, 2026-09-28)` · Lane PERF (arquivo novo) + CORE (integração) · Onda 2 · Dep: —
@@ -486,6 +488,7 @@ _(agentes adicionam aqui: `NEW-<n> · título · lane · motivo`)_
 - NEW-11 · Avisos de deprecação three 0.186: `THREE.Clock` → `THREE.Timer`; `PCFSoftShadowMap` removido (cai para PCF) — ajustar QualitySettings/main · PERF
 - ✅ F0-08 · `DONE(d17aaf5)` Scripts de navegador abortam sem GPU real (`tools/lib/assertGpu.mjs`); `safe-run.sh` agora reentrante (deadlock de safe-run aninhado corrigido)
 - NEW-12 · Ligar modelos .glb aprovados por padrão (`?glb=0` desliga) e carregar os .glb também com `?skipPreload` · ART/CORE · pequeno, executor haiku
+- NEW-13 · Névoa: chamas de construções inimigas na memória continuam animando (Building.js não checa visibilidade); céu azul aparece além da borda do mapa em área não explorada (fundo da cena deveria escurecer) · PERF/CORE
 - NEW-1 · Avaliar uso real de `GLTFBuildingLoader` em `GreatHall.js` e remover ou adotar no pipeline Blender (F7-00) · ART · ficou fora do escopo da F0-03
 
 ## Notas de integração

@@ -65,12 +65,6 @@ function getBirchFoliageMaterial() {
   );
 }
 
-function getPineconeMaterial() {
-  return getMaterial('pinecone', () =>
-    createTreeMaterial(getPineBarkTextures(), { bumpScale: 0.04, roughness: 0.85, flatShading: true })
-  );
-}
-
 /**
  * Helper to build an oriented cylinder segment between two 3D points
  * (used for organic roots and branch forks)
@@ -256,7 +250,6 @@ function createPineTree() {
 
   const barkMat = getPineBarkMaterial();
   const needleMat = getPineNeedleMaterial();
-  const coneMat = getPineconeMaterial();
 
   // 2.1 Tall Tapered Pine Trunk (Segmented)
   const lowerTrunk = new THREE.Mesh(new THREE.CylinderGeometry(0.36, 0.54, 2.2, 7), barkMat);

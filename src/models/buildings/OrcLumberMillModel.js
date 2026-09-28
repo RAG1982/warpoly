@@ -4,9 +4,7 @@ import {
   getOrcDarkLogBarkTextures,
   getOrcLogEndTextures,
   getOrcSplitRoofTextures,
-  getOrcSpikedIronTextures,
-  getOrcBoneTuskTextures,
-  getOrcBasaltStoneTextures
+  getOrcSpikedIronTextures
 } from './orcTextures.js';
 
 /**
@@ -48,8 +46,6 @@ export function createOrcLumberMill() {
   const logEndMat = createPBRMaterial(getOrcLogEndTextures(), { bumpScale: 0.06 });
   const ironRoofMat = createPBRMaterial(getOrcSplitRoofTextures(), { bumpScale: 0.08, metalness: 0.8 });
   const ironArmorMat = createPBRMaterial(getOrcSpikedIronTextures(), { bumpScale: 0.06, metalness: 0.9 });
-  const stoneMat = createPBRMaterial(getOrcBasaltStoneTextures(), { bumpScale: 0.08 });
-  const boneMat = createPBRMaterial(getOrcBoneTuskTextures(), { bumpScale: 0.05, roughness: 0.45 });
 
   const darkIronMat = new THREE.MeshStandardMaterial({
     color: 0x3c4350,

@@ -4,7 +4,6 @@ import {
   getOrcDarkLogBarkTextures,
   getOrcLogEndTextures,
   getOrcSplitRoofTextures,
-  getOrcSpikedIronTextures,
   getOrcBoneTuskTextures,
   getOrcBasaltStoneTextures,
   getOrcMudWaterTextures,
@@ -49,7 +48,6 @@ export function createPigFarm() {
   const barkMat = createPBRMaterial(getOrcDarkLogBarkTextures(), { bumpScale: 0.08 });
   const logEndMat = createPBRMaterial(getOrcLogEndTextures(), { bumpScale: 0.06 });
   const roofMat = createPBRMaterial(getOrcSplitRoofTextures(), { bumpScale: 0.08, metalness: 0.7 });
-  const ironMat = createPBRMaterial(getOrcSpikedIronTextures(), { bumpScale: 0.06, metalness: 0.9 });
   const boneMat = createPBRMaterial(getOrcBoneTuskTextures(), { bumpScale: 0.05, roughness: 0.45 });
   const pigMat = createPBRMaterial(getOrcPigSkinTextures(), { roughness: 0.65 });
 

@@ -4,8 +4,8 @@ import { enableShadows } from '../models/materials.js';
 
 /**
  * Modelos .glb gerados pelo pipeline Blender (tools/blender/, tarefa F7-00).
- * No jogo só são usados com ?glb=1 (ver ModelFactory); o inspetor sempre os
- * carrega para comparar com os procedurais.
+ * No jogo são usados por padrão (desde F7-00c); use ?glb=0 para desligar (ver ModelFactory).
+ * O inspetor sempre os carrega para comparar com os procedurais.
  * key -> { url, root: nome do nó raiz no .glb, type: tipo de unidade (ou null) }
  */
 const BASE = (import.meta.env && import.meta.env.BASE_URL) || '/';
@@ -16,9 +16,12 @@ export const GLB_MODELS = {
 
 export const glbEnabled = (() => {
   try {
-    return typeof window !== 'undefined' && new URLSearchParams(window.location.search).get('glb') === '1';
+    if (typeof window === 'undefined') return true;
+    const param = new URLSearchParams(window.location.search).get('glb');
+    // ?glb=0 desliga; ?glb=1 ativa (redundante, pois já está ativo por padrão)
+    return param !== '0';
   } catch (e) {
-    return false;
+    return true;
   }
 })();
 
@@ -49,6 +52,15 @@ export function loadGlbTemplates() {
 }
 
 /**
+ * Garante que os .glb foram carregados, memoizando a promessa.
+ * Chamada na preload (quando habilitada) e em caminhos com ?skipPreload.
+ * Falhas são registradas (console.warn) mas não impedem continuação com modelos procedurais.
+ */
+export function ensureGlbLoaded() {
+  return loadGlbTemplates();
+}
+
+/**
  * Cor de time: clona o material `TeamColor` da instância (a textura do atlas
  * continua compartilhada) e aplica a cor. Base para a F7-02.
  */
@@ -68,5 +80,6 @@ export function setTeamColor(obj, color) {
   return obj;
 }
 
-// Com ?glb=1 o download começa já na importação (o AssetPreloader aguarda a promessa).
+// Download começa já na importação (o AssetPreloader aguarda a promessa).
+// Com ?glb=0 pode ser desligado; caso contrário ativa por padrão.
 if (glbEnabled) loadGlbTemplates();

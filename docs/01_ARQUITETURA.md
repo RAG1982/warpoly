@@ -15,7 +15,7 @@
 | Testes / lint | Nenhum |
 | Dev server | `npx vite --port 5173` (config em `.claude/launch.json`, nome `warpoly-dev`) |
 
-Parâmetros de URL úteis: `?skipPreload` (pula o preloader), `?faction=orc` (joga de Orc), `?ffa=1` (FFA de teste: você × 2 IAs, 3 times), `?seed=N` (seed da MatchConfig; ainda não usada pela simulação — F2-03), `?settings=1` (abre painel de config).
+Parâmetros de URL úteis: `?skipPreload` (pula o preloader), `?glb=0` (desliga modelos Blender), `?faction=orc` (joga de Orc), `?ffa=1` (FFA de teste: você × 2 IAs, 3 times), `?seed=N` (seed da MatchConfig; ainda não usada pela simulação — F2-03), `?settings=1` (abre painel de config).
 Debug: `window.game` expõe o `GameApp` (ex.: `game.gameManager`, `game.sceneManager.renderer.info`, `game.state`); `window.warpoly` é a mesma instância, disponível já no menu. No inspetor: `window.inspectorApp`.
 
 ## Mapa de diretórios

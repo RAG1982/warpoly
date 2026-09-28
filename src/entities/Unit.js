@@ -3,6 +3,7 @@ import { ModelFactory } from './ModelFactory.js';
 import { Arrow } from './Arrow.js';
 import { UnitAnimator } from '../inspector/unitAnimator.js';
 import { getUnitDef, getUnitStats as getUnitStatsFromData, WORKER_STATS } from '../data/index.js';
+import { legacyOwnerId } from '../sim/EntityIds.js';
 
 // Shared Selection Ring Geometry & Materials
 const unitRingGeo = new THREE.RingGeometry(0.85, 1.05, 24);
@@ -38,11 +39,19 @@ const hpYellowMat = new THREE.MeshBasicMaterial({ color: 0xfacc15, depthTest: fa
 const hpRedMat = new THREE.MeshBasicMaterial({ color: 0xef4444, depthTest: false, depthWrite: false, side: THREE.DoubleSide });
 
 export class Unit {
-  constructor(scene, terrain, type, x, z, faction = 'player') {
+  /**
+   * @param {number|'player'|'enemy'} [owner]  ownerId do Player dono (F2-01)
+   * @param {import('../core/GameManager.js').GameManager|null} [gameManager]
+   */
+  constructor(scene, terrain, type, x, z, owner = 0, gameManager = null) {
     this.scene = scene;
     this.terrain = terrain;
     this.type = type; // 'villager', 'knight', 'archer', 'bandit'
-    this.faction = faction; // 'player' or 'enemy'
+    /** Id estável da entidade (atribuído por GameManager.registerEntity). */
+    this.id = undefined;
+    /** Id do Player dono (F2-01). */
+    this.ownerId = legacyOwnerId(owner);
+    this.gameManager = gameManager;
 
     // Stats configuration
     const stats = this.getUnitStats(type);
@@ -74,7 +83,6 @@ export class Unit {
     this.attackTarget = null;
 
     // Navigation & Waypoints
-    this.gameManager = null;
     this.waypoints = null;
     this.waypointIndex = 0;
     this.pathDestination = null;
@@ -108,6 +116,33 @@ export class Unit {
     this.createHealthBar();
 
     this.scene.add(this.mesh);
+  }
+
+  /**
+   * Lado relativo ao jogador local: 'player' se o dono é o jogador local, 'enemy' caso contrário.
+   * DÍVIDA (F2-01): getter de compatibilidade para UI/InputManager/névoa. Lógica nova deve usar
+   * ownerId + gameManager.isHostile/isAlly.
+   */
+  get faction() {
+    const gm = this.gameManager;
+    const localId = gm && typeof gm.localPlayerId === 'number' ? gm.localPlayerId : 0;
+    return this.ownerId === localId ? 'player' : 'enemy';
+  }
+
+  /** Dono de `other` é hostil ao dono desta unidade (por time). */
+  isHostileTo(other) {
+    if (!other) return false;
+    const gm = this.gameManager;
+    if (gm && gm.isHostile) return gm.isHostile(this.ownerId, other.ownerId);
+    return other.ownerId !== this.ownerId;
+  }
+
+  /** Mesmo dono ou mesmo time. */
+  isAlliedWith(other) {
+    if (!other) return false;
+    const gm = this.gameManager;
+    if (gm && gm.isAlly) return gm.isAlly(this.ownerId, other.ownerId);
+    return other.ownerId === this.ownerId;
   }
 
   getUnitStats(type) {
@@ -321,7 +356,7 @@ export class Unit {
     }
 
     // Retaliation & Call for help: combat troops strike back when attacked
-    if (attacker && !attacker.isDead && attacker.hp > 0 && attacker.faction !== this.faction) {
+    if (attacker && !attacker.isDead && attacker.hp > 0 && this.isHostileTo(attacker)) {
       if (this.isCombatUnit()) {
         const isTargetBuilding = this.attackTarget && (this.attackTarget.fullMesh || this.attackTarget.isConstructed !== undefined);
         if (this.state !== 'attacking' || isTargetBuilding) {
@@ -336,7 +371,7 @@ export class Unit {
       // Nearby friendly combat troops rush to assist!
       if (allUnits && allUnits.length > 0) {
         allUnits.forEach(u => {
-          if (!u.isDead && u.faction === this.faction && u.isCombatUnit && u.isCombatUnit()) {
+          if (!u.isDead && this.isAlliedWith(u) && u.isCombatUnit && u.isCombatUnit()) {
             const isFriendlyTargetBuilding = u.attackTarget && (u.attackTarget.fullMesh || u.attackTarget.isConstructed !== undefined);
             if (u.state === 'idle' || (u.state === 'attacking' && isFriendlyTargetBuilding)) {
               const d = this.mesh.position.distanceTo(u.mesh.position);
@@ -693,18 +728,15 @@ export class Unit {
 
   depositResources(gameManager, soundManager, particleSystem) {
     if (this.carrying.amount > 0) {
-      if (this.faction === 'enemy') {
-        const ai = gameManager.aiDirector || gameManager.enemyAI;
-        if (ai) ai.addResource(this.carrying.type, this.carrying.amount);
-      } else {
-        gameManager.addResource(this.carrying.type, this.carrying.amount);
-      }
+      const owner = gameManager.getPlayer ? gameManager.getPlayer(this.ownerId) : null;
+      if (owner) owner.add(this.carrying.type, this.carrying.amount);
+      const isLocal = !!(owner && owner.isLocal);
 
-      if (particleSystem && (this.faction === 'player' || (gameManager.fogOfWar && gameManager.fogOfWar.isExplored(this.mesh.position.x, this.mesh.position.z)))) {
+      if (particleSystem && (isLocal || (gameManager.fogOfWar && gameManager.fogOfWar.isExplored(this.mesh.position.x, this.mesh.position.z)))) {
         const color = this.carrying.type === 'gold' ? '#ffd700' : this.carrying.type === 'wood' ? '#68d391' : '#cbd5e1';
         particleSystem.spawnFloatingText(`+${this.carrying.amount} ${this.carrying.type.toUpperCase()}`, this.mesh.position, color);
       }
-      if (soundManager && this.faction === 'player') soundManager.playOrder();
+      if (soundManager && isLocal) soundManager.playOrder();
       this.carrying.amount = 0;
       this.updateCarryingVisuals(false);
     }
@@ -725,8 +757,8 @@ export class Unit {
   }
 
   updateReturning(delta, gameManager, soundManager, particleSystem, buildings) {
-    // Find nearest dropoff building for unit's faction
-    const dropoff = gameManager.findNearestDropoff(this.mesh.position, this.carrying.type, buildings || gameManager.buildings, this.faction);
+    // Find nearest dropoff building owned by this unit's player
+    const dropoff = gameManager.findNearestDropoff(this.mesh.position, this.carrying.type, buildings || gameManager.buildings, this.ownerId);
     if (!dropoff) {
       this.stop();
       return;
@@ -879,10 +911,12 @@ export class Unit {
         }
         const startPos = this.mesh.position.clone().add(new THREE.Vector3(0, 1.68, 0));
         const projType = this.projectileType;
-        arrows.push(new Arrow(this.scene, startPos, this.attackTarget, this.attack, (target, dmg, hitPos) => {
+        const arrow = new Arrow(this.scene, startPos, this.attackTarget, this.attack, (target, dmg, hitPos) => {
           target.takeDamage(dmg, particleSystem, this, allUnits);
           if (soundManager) soundManager.playArrowHit();
-        }, projType));
+        }, projType);
+        arrows.push(arrow);
+        if (this.gameManager && this.gameManager.registerEntity) this.gameManager.registerEntity(arrow, this.ownerId);
       }
     } else {
       // Melee units (Knight, Villager, Bandit, Grunt, Ogre) strike at apex (progress >= 0.45)
@@ -908,7 +942,7 @@ export class Unit {
 
     for (let i = 0; i < len; i++) {
       const u = allUnits[i];
-      if (!u.isDead && u.hp > 0 && u.faction !== this.faction) {
+      if (!u.isDead && u.hp > 0 && this.isHostileTo(u)) {
         const dx = uPos.x - u.mesh.position.x;
         const dz = uPos.z - u.mesh.position.z;
         const d = Math.hypot(dx, dz);
@@ -935,7 +969,7 @@ export class Unit {
 
     for (let i = 0; i < len; i++) {
       const u = allUnits[i];
-      if (!u.isDead && u.hp > 0 && u.faction !== this.faction) {
+      if (!u.isDead && u.hp > 0 && this.isHostileTo(u)) {
         const dx = uPos.x - u.mesh.position.x;
         const dz = uPos.z - u.mesh.position.z;
         const d = Math.hypot(dx, dz);
@@ -968,7 +1002,7 @@ export class Unit {
 
       for (let i = 0; i < len; i++) {
         const b = buildings[i];
-        if (!b.isDead && b.hp > 0 && b.faction !== this.faction) {
+        if (!b.isDead && b.hp > 0 && this.isHostileTo(b)) {
           const dx = uPos.x - b.mesh.position.x;
           const dz = uPos.z - b.mesh.position.z;
           const d = Math.hypot(dx, dz);

@@ -1,4 +1,5 @@
 import * as THREE from 'three';
+import { getBuildingDef } from '../data/index.js';
 
 /**
  * AIMilitaryManager (Gerenciador Militar e Ofensivo da IA)
@@ -45,7 +46,7 @@ export class AIMilitaryManager {
     if (uDef <= 0) return;
 
     const baseCenter = this.director.baseCenter;
-    const playerUnits = this.gm.units;
+    const playerUnits = this.director.getHostileUnits();
     const lenP = playerUnits.length;
     let closestIntruder = null;
     let minIntruderDistSq = 676; // 26^2
@@ -67,7 +68,7 @@ export class AIMilitaryManager {
     if (!closestIntruder) return;
 
     // Dispatch idle or moving combat troops to intercept the intruder
-    const enemies = this.gm.enemies;
+    const enemies = this.director.getOwnUnits();
     const lenE = enemies.length;
     const workerType = this.director.workerType;
 
@@ -117,7 +118,7 @@ export class AIMilitaryManager {
     if (barracks.queue && barracks.queue.length >= 2) return;
 
     // Assess army balance
-    const enemies = this.gm.enemies;
+    const enemies = this.director.getOwnUnits();
     const lenE = enemies.length;
     let meleeCount = 0;
     let rangedCount = 0;
@@ -170,7 +171,7 @@ export class AIMilitaryManager {
    * Gathers assembled troops without GC allocations and launches batch march orders
    */
   manageMilitaryExpedition() {
-    const enemies = this.gm.enemies;
+    const enemies = this.director.getOwnUnits();
     const lenE = enemies.length;
     const workerType = this.director.workerType;
 
@@ -195,11 +196,12 @@ export class AIMilitaryManager {
     const target = this.selectExpeditionTarget();
     if (!target) return;
 
-    // Trigger audible alarm and UI battle notification
-    if (this.gm.soundManager) {
+    // Trigger audible alarm and UI battle notification (só quando o alvo é do jogador local)
+    const targetsLocal = target.ownerId === this.gm.localPlayerId;
+    if (targetsLocal && this.gm.soundManager) {
       this.gm.soundManager.playAlarm();
     }
-    if (this.gm.uiManager) {
+    if (targetsLocal && this.gm.uiManager) {
       const factionName = this.director.faction === 'orc' ? 'Horda Orc' : 'Aliança Humana';
       this.gm.uiManager.showNotification(`⚔️ A ${factionName} reuniu um esquadrão de guerra (${this.readySquadCount} tropas) e avança contra sua base!`);
     }
@@ -218,36 +220,39 @@ export class AIMilitaryManager {
   }
 
   /**
-   * Prioritizes high-value tactical targets:
-   * 1. Forward Watchtowers / Outposts
-   * 2. Player Capital (Castle / Great Hall)
-   * 3. Any living player building
-   * 4. Any living player troop
+   * Prioritizes high-value tactical targets (entre os jogadores hostis a esta IA):
+   * 1. Forward Watchtowers / Outposts (a mais próxima da base da IA)
+   * 2. Hostile Capital (Castle / Great Hall) — a mais próxima
+   * 3. Any living hostile building
+   * 4. Any living hostile troop
    */
   selectExpeditionTarget() {
     const buildings = this.gm.buildings;
     const lenB = buildings.length;
     const enemyBase = this.director.baseCenter;
+    const myId = this.director.playerId;
 
     let closestTower = null;
     let minTowerDistSq = Infinity;
     let playerHQ = null;
+    let minHQDistSq = Infinity;
     let anyPlayerBuilding = null;
-    const targetHqType = this.director.faction === 'orc' ? 'castle' : 'great_hall';
 
     for (let i = 0; i < lenB; i++) {
       const b = buildings[i];
-      if (b.faction === 'player' && !b.isDead) {
+      if (!b.isDead && this.gm.isHostile(myId, b.ownerId)) {
         if (!anyPlayerBuilding) anyPlayerBuilding = b;
 
-        if (b.type === targetHqType) {
+        const dx = b.mesh.position.x - enemyBase.x;
+        const dz = b.mesh.position.z - enemyBase.y;
+        const dSq = dx * dx + dz * dz;
+
+        if (getBuildingDef(b.type).role === 'hq' && dSq < minHQDistSq) {
+          minHQDistSq = dSq;
           playerHQ = b;
         }
 
         if (b.type === 'watchtower' || b.type === 'orc_watchtower') {
-          const dx = b.mesh.position.x - enemyBase.x;
-          const dz = b.mesh.position.z - enemyBase.y;
-          const dSq = dx * dx + dz * dz;
           if (dSq < minTowerDistSq) {
             minTowerDistSq = dSq;
             closestTower = b;
@@ -261,8 +266,8 @@ export class AIMilitaryManager {
     if (playerHQ) return playerHQ;
     if (anyPlayerBuilding) return anyPlayerBuilding;
 
-    // Fallback: attack nearest player unit
-    const playerUnits = this.gm.units;
+    // Fallback: attack first living hostile unit
+    const playerUnits = this.director.getHostileUnits();
     const lenP = playerUnits.length;
     for (let i = 0; i < lenP; i++) {
       if (!playerUnits[i].isDead) {

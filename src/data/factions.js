@@ -4,6 +4,8 @@
  * Nomes provisórios conforme a decisão D2 (docs/07_DECISOES.md) até o glossário da F3-00.
  * `buildList` é a ordem dos botões no painel de construção do trabalhador.
  * `units` mapeia papéis (usados pela IA) para tipos de unidade.
+ * `startingBase` (F2-01) lista o que cada facção recebe no início da partida; as posições
+ * saem do slot inicial (src/sim/MatchConfig.js → START_LAYOUT).
  */
 
 export const FACTIONS = {
@@ -24,6 +26,10 @@ export const FACTIONS = {
       melee: 'knight',
       ranged: 'archer',
       siege: 'knight' // sem unidade de cerco humana ainda: a IA usa o Cavaleiro
+    },
+    startingBase: {
+      buildings: { hq: 'castle', lumber: 'lumber_camp', house: 'cottage' },
+      units: { worker: 'villager', melee: 'knight', ranged: 'archer' }
     }
   },
   orc: {
@@ -43,6 +49,10 @@ export const FACTIONS = {
       melee: 'grunt',
       ranged: 'axethrower',
       siege: 'ogre'
+    },
+    startingBase: {
+      buildings: { hq: 'great_hall', lumber: 'orc_lumber_mill', house: 'pig_farm' },
+      units: { worker: 'peon', melee: 'grunt', ranged: 'axethrower' }
     }
   }
 };

@@ -6,6 +6,7 @@ import { Water } from './world/Water.js';
 import { Decorations } from './world/Decorations.js';
 import { ParticleSystem } from './entities/ParticleSystem.js';
 import { GameManager } from './core/GameManager.js';
+import { matchConfigFromSearch } from './sim/MatchConfig.js';
 import { InputManager } from './core/InputManager.js';
 import { UIManager } from './ui/UIManager.js';
 import { AssetPreloader } from './core/AssetPreloader.js';
@@ -87,11 +88,14 @@ class GameApp {
     this.particleSystem = new ParticleSystem(this.sceneManager.scene);
 
     // 5. Game Logic & Entities (Castle, Lumber Camp, Gold Mine, Units)
+    // 5b. Partida a partir da URL (F2-01): ?faction=orc, ?ffa=1 (local × 2 IAs), ?seed=N
+    const urlParams = new URLSearchParams(window.location.search);
     this.gameManager = new GameManager(
       this.sceneManager.scene,
       this.terrain,
       this.sound,
-      this.particleSystem
+      this.particleSystem,
+      matchConfigFromSearch(window.location.search)
     );
 
     // 6. Input & Camera Controls
@@ -112,10 +116,8 @@ class GameApp {
     this.gameManager.sceneManager = this.sceneManager;
     this.inputManager.uiManager = this.uiManager;
 
-    const urlParams = new URLSearchParams(window.location.search);
-    if (urlParams.get('faction') === 'orc') {
-      this.gameManager.setPlayerFaction('orc');
-    }
+    // Câmera na base do jogador local (antes: setPlayerFaction('orc') recriava o mapa inteiro)
+    this.gameManager.focusCameraOnLocalBase();
     if (urlParams.get('settings') === '1' || urlParams.get('config') === '1') {
       const panel = document.getElementById('settings-panel');
       if (panel) panel.style.display = 'block';

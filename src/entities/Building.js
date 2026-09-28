@@ -2,6 +2,7 @@ import * as THREE from 'three';
 import { ModelFactory } from './ModelFactory.js';
 import { Arrow } from './Arrow.js';
 import { UPGRADE_CONFIG, FORGE_UPGRADES } from '../core/UpgradeConfig.js';
+import { legacyOwnerId } from '../sim/EntityIds.js';
 
 import {
   getBuildingDef,
@@ -52,11 +53,19 @@ const bldHpYellowMat = new THREE.MeshBasicMaterial({ color: 0xf59e0b, depthTest:
 const bldHpRedMat = new THREE.MeshBasicMaterial({ color: 0xef4444, depthTest: false, depthWrite: false, side: THREE.DoubleSide });
 
 export class Building {
-  constructor(scene, terrain, type, x, z, isConstructed = true, faction = 'player') {
+  /**
+   * @param {number|'player'|'enemy'} [owner]  ownerId do Player dono (F2-01); aceita o lado legado.
+   */
+  constructor(scene, terrain, type, x, z, isConstructed = true, owner = 0) {
     this.scene = scene;
     this.terrain = terrain;
     this.type = type; // 'castle', 'lumber_camp', 'cottage', 'barracks', 'watchtower', 'farm', 'bandit_camp'
-    this.faction = faction;
+    /** Id estável da entidade (atribuído por GameManager.registerEntity). */
+    this.id = undefined;
+    /** Id do Player dono (F2-01). */
+    this.ownerId = legacyOwnerId(owner);
+    /** Injetado pelo GameManager.createBuilding logo após a construção. */
+    this.gameManager = null;
     this.isConstructed = isConstructed;
     this.buildProgress = isConstructed ? 100 : 0;
     this.maxBuildProgress = 100;
@@ -129,6 +138,29 @@ export class Building {
   initCustomVFX() {}
   updateCustomVFX(delta, gameManager, soundManager, particleSystem) {}
   cleanupCustomVFX() {}
+
+  /**
+   * Lado relativo ao jogador local ('player' | 'enemy').
+   * DÍVIDA (F2-01): getter de compatibilidade para UI/InputManager/névoa; use ownerId + isHostile.
+   */
+  get faction() {
+    const gm = this.gameManager;
+    const localId = gm && typeof gm.localPlayerId === 'number' ? gm.localPlayerId : 0;
+    return this.ownerId === localId ? 'player' : 'enemy';
+  }
+
+  /** Dono de `other` é hostil ao dono desta construção (por time). */
+  isHostileTo(other) {
+    if (!other) return false;
+    const gm = this.gameManager;
+    if (gm && gm.isHostile) return gm.isHostile(this.ownerId, other.ownerId);
+    return other.ownerId !== this.ownerId;
+  }
+
+  /** Player dono (economia/pop/pesquisas), ou null fora de uma partida. */
+  getOwner(gameManager = this.gameManager) {
+    return gameManager && gameManager.getPlayer ? gameManager.getPlayer(this.ownerId) : null;
+  }
 
   static getBuildingStats(type) {
     return getBuildingStatsFromData(type);
@@ -425,15 +457,8 @@ export class Building {
       if (particleSystem) {
         particleSystem.spawnFloatingText('Constructed!', this.mesh.position, '#ffd700');
       }
-      if (gm) {
-        if (this.faction === 'player') {
-          gm.recalculatePopCap();
-        } else if (gm.aiDirector) {
-          gm.aiDirector.recalculatePop();
-        } else if (gm.enemyAI) {
-          gm.enemyAI.recalculatePop();
-        }
-      }
+      const owner = this.getOwner(gm);
+      if (owner) owner.recalculatePop(gm);
     } else {
       this.updateConstructionState();
     }
@@ -500,33 +525,24 @@ export class Building {
     if (!cfg) return false;
     const c = cfg.cost;
 
+    const gm = gameManager || this.gameManager;
+    const owner = this.getOwner(gm);
+    if (!owner) return false;
+
+    // Unidades já na fila de QUALQUER construção do mesmo dono contam para o teto de população
     let queuedCount = 0;
-    if (gameManager && gameManager.buildings) {
-      gameManager.buildings.forEach(bld => {
-        if (bld.faction === this.faction && bld.queue) {
+    if (gm.buildings) {
+      gm.buildings.forEach(bld => {
+        if (bld.ownerId === this.ownerId && bld.queue) {
           queuedCount += bld.queue.length;
         }
       });
     }
 
-    if (this.faction === 'enemy') {
-      const ai = gameManager.aiDirector || gameManager.enemyAI;
-      if (!ai) return false;
-      if (!ai.canAfford(c)) return false;
-      if (ai.population + queuedCount >= ai.maxPopulation) return false;
-      ai.deduct(c);
-      this.queue.push({
-        type: unitType,
-        progress: 0,
-        totalTime: c.time
-      });
-      return true;
-    }
+    if (!owner.canAfford(c)) return false;
+    if (owner.population + queuedCount >= owner.maxPopulation) return false;
 
-    if (!gameManager.canAfford(c)) return false;
-    if (gameManager.population + queuedCount >= gameManager.maxPopulation) return false;
-
-    gameManager.deductResources(c);
+    owner.deduct(c);
     this.queue.push({
       type: unitType,
       progress: 0,
@@ -539,10 +555,10 @@ export class Building {
     if (index < 0 || index >= this.queue.length) return false;
     const item = this.queue[index];
     const cfg = UNIT_TRAIN_CONFIG[item.type];
-    if (cfg && this.faction === 'player' && gameManager) {
-      if (cfg.cost.gold) gameManager.addResource('gold', cfg.cost.gold);
-      if (cfg.cost.wood) gameManager.addResource('wood', cfg.cost.wood);
-      if (cfg.cost.stone) gameManager.addResource('stone', cfg.cost.stone);
+    const owner = this.getOwner(gameManager || this.gameManager);
+    if (cfg && owner) {
+      // Reembolso integral ao dono (antes só o jogador era reembolsado; a IA nunca cancela)
+      owner.add(cfg.cost);
     }
     this.queue.splice(index, 1);
     return true;
@@ -560,19 +576,14 @@ export class Building {
     if (!gm) return false;
 
     // Check if already researched
-    if (gm.isUpgradeResearched(upgradeId, this.faction)) return false;
+    if (gm.isUpgradeResearched(upgradeId, this.ownerId)) return false;
 
     // Check if another forge is already researching this
-    if (gm.isUpgradeResearching(upgradeId, this.faction)) return false;
+    if (gm.isUpgradeResearching(upgradeId, this.ownerId)) return false;
 
-    if (this.faction === 'enemy') {
-      const ai = gm.aiDirector || gm.enemyAI;
-      if (!ai || !ai.canAfford(cfg.cost)) return false;
-      ai.deduct(cfg.cost);
-    } else {
-      if (!gm.canAfford(cfg.cost)) return false;
-      gm.deductResources(cfg.cost);
-    }
+    const owner = this.getOwner(gm);
+    if (!owner || !owner.canAfford(cfg.cost)) return false;
+    owner.deduct(cfg.cost);
 
     this.currentResearch = {
       id: upgradeId,
@@ -587,17 +598,19 @@ export class Building {
   cancelResearch(gameManager) {
     if (!this.currentResearch) return false;
     const cfg = this.currentResearch.cfg;
-    const gm = gameManager || this.gameManager;
-    if (cfg && this.faction === 'player' && gm) {
-      if (cfg.cost.gold) gm.addResource('gold', cfg.cost.gold);
-      if (cfg.cost.wood) gm.addResource('wood', cfg.cost.wood);
-      if (cfg.cost.stone) gm.addResource('stone', cfg.cost.stone);
+    const owner = this.getOwner(gameManager || this.gameManager);
+    if (cfg && owner) {
+      owner.add(cfg.cost);
     }
     this.currentResearch = null;
     return true;
   }
 
-  update(delta, gameManager, soundManager, particleSystem, arrows, enemies, allUnits = []) {
+  /**
+   * @param {Array} targets   unidades candidatas a alvo das torres (todas; filtradas por isHostile)
+   * @param {Array} allUnits  todas as unidades (repassado ao dano para retaliação/ajuda)
+   */
+  update(delta, gameManager, soundManager, particleSystem, arrows, targets, allUnits = []) {
     if (this.isDead) return;
     if (gameManager) this.gameManager = gameManager;
 
@@ -661,12 +674,8 @@ export class Building {
       this.passiveTimer += delta;
       if (this.passiveTimer >= passive.interval) {
         this.passiveTimer = 0;
-        if (this.faction === 'enemy') {
-          const ai = gameManager.aiDirector || gameManager.enemyAI;
-          if (ai) ai.addResource(passive.resource, passive.amount);
-        } else {
-          gameManager.addResource(passive.resource, passive.amount);
-        }
+        const owner = this.getOwner(gameManager);
+        if (owner) owner.add(passive.resource, passive.amount);
         if (particleSystem) {
           particleSystem.spawnFloatingText(`+${passive.amount} Gold`, this.mesh.position, '#ffd700');
         }
@@ -686,14 +695,14 @@ export class Building {
 
     // Watchtower & Orc Watchtower auto-attack
     const towerDef = getBuildingDef(this.type).tower;
-    if (this.isConstructed && towerDef && this.attackRange > 0 && enemies) {
+    if (this.isConstructed && towerDef && this.attackRange > 0 && targets) {
       this.attackTimer += delta;
       if (this.attackTimer >= this.attackCooldown) {
-        // Find closest enemy within range
+        // Find closest hostile unit within range
         let closest = null;
         let minDist = this.attackRange;
-        enemies.forEach(e => {
-          if (!e.isDead) {
+        targets.forEach(e => {
+          if (!e.isDead && this.isHostileTo(e)) {
             const d = this.mesh.position.distanceTo(e.mesh.position);
             if (d < minDist) {
               minDist = d;
@@ -710,10 +719,12 @@ export class Building {
           }
           const arrowStart = this.mesh.position.clone().add(new THREE.Vector3(0, towerDef.projectileOriginY, 0));
           const projType = towerDef.projectile;
-          arrows.push(new Arrow(this.scene, arrowStart, closest, this.attackDamage, (target, dmg, hitPos) => {
+          const arrow = new Arrow(this.scene, arrowStart, closest, this.attackDamage, (target, dmg, hitPos) => {
             target.takeDamage(dmg, particleSystem, this, allUnits);
             if (soundManager) soundManager.playArrowHit();
-          }, projType));
+          }, projType);
+          arrows.push(arrow);
+          if (gameManager && gameManager.registerEntity) gameManager.registerEntity(arrow, this.ownerId);
         }
       }
     }
@@ -728,7 +739,7 @@ export class Building {
         const spawnDist = this.collisionRadius + 1.2;
         const spawnX = this.mesh.position.x + (Math.random() - 0.5) * 1.5;
         const spawnZ = this.mesh.position.z + spawnDist;
-        gameManager.spawnUnit(current.type, spawnX, spawnZ, this.faction, this.rallyPoint);
+        gameManager.spawnUnit(current.type, spawnX, spawnZ, this.ownerId, this.rallyPoint);
         if (soundManager) soundManager.playOrder();
       }
     }
@@ -751,7 +762,7 @@ export class Building {
         this.currentResearch = null;
         const gm = gameManager || this.gameManager;
         if (gm) {
-          gm.completeUpgrade(completedId, this.faction);
+          gm.completeUpgrade(completedId, this.ownerId);
         }
         if (this.strikeAnvil) this.strikeAnvil(particleSystem);
         if (soundManager) soundManager.playBuildComplete();

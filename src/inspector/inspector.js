@@ -48,6 +48,7 @@ import {
 } from '../entities/buildings/orc/index.js';
 import { HumanForge } from '../entities/buildings/HumanForge.js';
 import { ParticleSystem } from '../entities/ParticleSystem.js';
+import { prepareStaticTemplate } from '../render/staticTemplates.js';
 
 /**
  * Model Catalog Definitions
@@ -835,7 +836,8 @@ class ModelInspectorApp {
     const created = item.create();
     let model;
     if (created instanceof THREE.Object3D) {
-      model = created;
+      // F1-02: mesma mescla estática do jogo (construções/depósitos/decorações; ?merge=0 desliga)
+      model = prepareStaticTemplate(item.id, created);
     } else if (created && created.mesh instanceof THREE.Object3D) {
       this.currentBuildingInstance = created;
       model = created.mesh;

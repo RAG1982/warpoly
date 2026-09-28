@@ -1,0 +1,539 @@
+{
+  "gpu": "ANGLE (AMD, Vulkan 1.4.318 (AMD Radeon\u00e2\u0084\u00a2 RX 7600 XT (RADV NAVI33) (0x00007480)), radv)",
+  "inspector": {
+    "merge": {
+      "rows": {
+        "castle": {
+          "components": 19,
+          "buildingMeshes": 19,
+          "lights": 0,
+          "materials": 14,
+          "tris": 7708,
+          "calls": 34,
+          "vfx": {},
+          "vfx2": null
+        },
+        "great_hall": {
+          "components": 27,
+          "buildingMeshes": 20,
+          "lights": 0,
+          "materials": 12,
+          "tris": 13566,
+          "calls": 36,
+          "vfx": {
+            "banners": 3,
+            "bannersFromTemplate": 3
+          },
+          "vfx2": {}
+        },
+        "farm": {
+          "components": 16,
+          "buildingMeshes": 16,
+          "lights": 0,
+          "materials": 13,
+          "tris": 7622,
+          "calls": 26,
+          "vfx": {},
+          "vfx2": null
+        },
+        "orc_forge": {
+          "components": 25,
+          "buildingMeshes": 14,
+          "lights": 0,
+          "materials": 9,
+          "tris": 700,
+          "calls": 34,
+          "vfx": {
+            "furnaceLight": 3.481
+          },
+          "vfx2": {
+            "furnaceLight": 2.281
+          }
+        },
+        "forge": {
+          "components": 23,
+          "buildingMeshes": 16,
+          "lights": 0,
+          "materials": 6,
+          "tris": 1046,
+          "calls": 33,
+          "vfx": {
+            "furnaceFlames": 4,
+            "anvilFlames": 3,
+            "furnaceLight": 2.458
+          },
+          "vfx2": {
+            "furnaceLight": 1.922,
+            "flameScaleY": 0.58
+          }
+        },
+        "barracks": {
+          "components": 21,
+          "buildingMeshes": 21,
+          "lights": 2,
+          "materials": 18,
+          "tris": 2254,
+          "calls": 38,
+          "vfx": {}
+        },
+        "cottage": {
+          "components": 25,
+          "buildingMeshes": 25,
+          "lights": 0,
+          "materials": 19,
+          "tris": 2656,
+          "calls": 40,
+          "vfx": {}
+        },
+        "lumber_camp": {
+          "components": 19,
+          "buildingMeshes": 19,
+          "lights": 1,
+          "materials": 14,
+          "tris": 3628,
+          "calls": 32,
+          "vfx": {}
+        },
+        "watchtower": {
+          "components": 16,
+          "buildingMeshes": 16,
+          "lights": 0,
+          "materials": 12,
+          "tris": 4842,
+          "calls": 27,
+          "vfx": {}
+        },
+        "gold_mine": {
+          "components": 22,
+          "buildingMeshes": 22,
+          "lights": 1,
+          "materials": 17,
+          "tris": 5502,
+          "calls": 39,
+          "vfx": {}
+        },
+        "stone_quarry": {
+          "components": 15,
+          "buildingMeshes": 15,
+          "lights": 0,
+          "materials": 9,
+          "tris": 3968,
+          "calls": 26,
+          "vfx": {}
+        },
+        "bandit_camp": {
+          "components": 46,
+          "buildingMeshes": 46,
+          "lights": 1,
+          "materials": 35,
+          "tris": 5476,
+          "calls": 69,
+          "vfx": {},
+          "vfx2": null
+        },
+        "orc_barracks": {
+          "components": 27,
+          "buildingMeshes": 20,
+          "lights": 0,
+          "materials": 11,
+          "tris": 4606,
+          "calls": 35,
+          "vfx": {
+            "dummyFromTemplate": true
+          },
+          "vfx2": {}
+        },
+        "pig_farm": {
+          "components": 53,
+          "buildingMeshes": 16,
+          "lights": 0,
+          "materials": 14,
+          "tris": 2353,
+          "calls": 57,
+          "vfx": {
+            "pigs": 3
+          },
+          "vfx2": {}
+        },
+        "orc_house": {
+          "components": 15,
+          "buildingMeshes": 8,
+          "lights": 0,
+          "materials": 8,
+          "tris": 3084,
+          "calls": 19,
+          "vfx": {}
+        },
+        "orc_lumber_mill": {
+          "components": 17,
+          "buildingMeshes": 10,
+          "lights": 0,
+          "materials": 7,
+          "tris": 1762,
+          "calls": 20,
+          "vfx": {
+            "sawFromTemplate": true,
+            "sawRotX": 5.477
+          },
+          "vfx2": {
+            "sawRotX": 10.321
+          }
+        },
+        "orc_watchtower": {
+          "components": 21,
+          "buildingMeshes": 12,
+          "lights": 0,
+          "materials": 8,
+          "tris": 3488,
+          "calls": 30,
+          "vfx": {}
+        },
+        "berry_bush": {
+          "components": 5,
+          "buildingMeshes": 5,
+          "lights": 0,
+          "materials": 3,
+          "tris": 3580,
+          "calls": 10,
+          "vfx": {}
+        },
+        "boulder": {
+          "components": 2,
+          "buildingMeshes": 2,
+          "lights": 0,
+          "materials": 1,
+          "tris": 396,
+          "calls": 6,
+          "vfx": {}
+        },
+        "mushroom_stump": {
+          "components": 10,
+          "buildingMeshes": 10,
+          "lights": 0,
+          "materials": 6,
+          "tris": 1258,
+          "calls": 19,
+          "vfx": {}
+        },
+        "water_lily": {
+          "components": 5,
+          "buildingMeshes": 5,
+          "lights": 0,
+          "materials": 4,
+          "tris": 728,
+          "calls": 11,
+          "vfx": {}
+        },
+        "flower_patch": {
+          "components": 9,
+          "buildingMeshes": 9,
+          "lights": 0,
+          "materials": 6,
+          "tris": 2302,
+          "calls": 15,
+          "vfx": {}
+        },
+        "grass_tuft": {
+          "components": 2,
+          "buildingMeshes": 2,
+          "lights": 0,
+          "materials": 1,
+          "tris": 102,
+          "calls": 6,
+          "vfx": {}
+        }
+      },
+      "errors": []
+    },
+    "nomerge": {
+      "rows": {
+        "castle": {
+          "components": 487,
+          "buildingMeshes": 487,
+          "lights": 0,
+          "materials": 14,
+          "tris": 7708,
+          "calls": 693,
+          "vfx": {},
+          "vfx2": null
+        },
+        "great_hall": {
+          "components": 740,
+          "buildingMeshes": 733,
+          "lights": 0,
+          "materials": 12,
+          "tris": 13566,
+          "calls": 1016,
+          "vfx": {
+            "banners": 3,
+            "bannersFromTemplate": 3
+          },
+          "vfx2": {}
+        },
+        "farm": {
+          "components": 471,
+          "buildingMeshes": 471,
+          "lights": 0,
+          "materials": 13,
+          "tris": 7622,
+          "calls": 630,
+          "vfx": {},
+          "vfx2": null
+        },
+        "orc_forge": {
+          "components": 66,
+          "buildingMeshes": 55,
+          "lights": 0,
+          "materials": 9,
+          "tris": 700,
+          "calls": 104,
+          "vfx": {
+            "furnaceLight": 3.177
+          },
+          "vfx2": {
+            "furnaceLight": 2.609
+          }
+        },
+        "forge": {
+          "components": 52,
+          "buildingMeshes": 45,
+          "lights": 0,
+          "materials": 6,
+          "tris": 1046,
+          "calls": 84,
+          "vfx": {
+            "furnaceFlames": 4,
+            "anvilFlames": 3,
+            "furnaceLight": 3.352
+          },
+          "vfx2": {
+            "furnaceLight": 3.557,
+            "flameScaleY": 1.147
+          }
+        },
+        "barracks": {
+          "components": 149,
+          "buildingMeshes": 149,
+          "lights": 2,
+          "materials": 18,
+          "tris": 2254,
+          "calls": 248,
+          "vfx": {}
+        },
+        "cottage": {
+          "components": 146,
+          "buildingMeshes": 146,
+          "lights": 0,
+          "materials": 19,
+          "tris": 2656,
+          "calls": 219,
+          "vfx": {}
+        },
+        "lumber_camp": {
+          "components": 212,
+          "buildingMeshes": 212,
+          "lights": 1,
+          "materials": 14,
+          "tris": 3628,
+          "calls": 332,
+          "vfx": {}
+        },
+        "watchtower": {
+          "components": 291,
+          "buildingMeshes": 291,
+          "lights": 0,
+          "materials": 12,
+          "tris": 4842,
+          "calls": 385,
+          "vfx": {}
+        },
+        "gold_mine": {
+          "components": 221,
+          "buildingMeshes": 221,
+          "lights": 1,
+          "materials": 17,
+          "tris": 5502,
+          "calls": 321,
+          "vfx": {}
+        },
+        "stone_quarry": {
+          "components": 183,
+          "buildingMeshes": 183,
+          "lights": 0,
+          "materials": 9,
+          "tris": 3968,
+          "calls": 277,
+          "vfx": {}
+        },
+        "bandit_camp": {
+          "components": 285,
+          "buildingMeshes": 285,
+          "lights": 1,
+          "materials": 35,
+          "tris": 5476,
+          "calls": 402,
+          "vfx": {},
+          "vfx2": null
+        },
+        "orc_barracks": {
+          "components": 411,
+          "buildingMeshes": 404,
+          "lights": 0,
+          "materials": 11,
+          "tris": 4606,
+          "calls": 534,
+          "vfx": {
+            "dummyFromTemplate": true
+          },
+          "vfx2": {}
+        },
+        "pig_farm": {
+          "components": 167,
+          "buildingMeshes": 130,
+          "lights": 0,
+          "materials": 14,
+          "tris": 2353,
+          "calls": 201,
+          "vfx": {
+            "pigs": 3
+          },
+          "vfx2": {}
+        },
+        "orc_house": {
+          "components": 216,
+          "buildingMeshes": 209,
+          "lights": 0,
+          "materials": 8,
+          "tris": 3084,
+          "calls": 300,
+          "vfx": {}
+        },
+        "orc_lumber_mill": {
+          "components": 140,
+          "buildingMeshes": 133,
+          "lights": 0,
+          "materials": 7,
+          "tris": 1762,
+          "calls": 196,
+          "vfx": {
+            "sawFromTemplate": true,
+            "sawRotX": 5.49
+          },
+          "vfx2": {
+            "sawRotX": 8.822
+          }
+        },
+        "orc_watchtower": {
+          "components": 179,
+          "buildingMeshes": 170,
+          "lights": 0,
+          "materials": 8,
+          "tris": 3488,
+          "calls": 266,
+          "vfx": {}
+        },
+        "berry_bush": {
+          "components": 71,
+          "buildingMeshes": 71,
+          "lights": 0,
+          "materials": 3,
+          "tris": 3820,
+          "calls": 83,
+          "vfx": {}
+        },
+        "boulder": {
+          "components": 11,
+          "buildingMeshes": 11,
+          "lights": 0,
+          "materials": 1,
+          "tris": 396,
+          "calls": 19,
+          "vfx": {}
+        },
+        "mushroom_stump": {
+          "components": 37,
+          "buildingMeshes": 37,
+          "lights": 0,
+          "materials": 6,
+          "tris": 1258,
+          "calls": 53,
+          "vfx": {}
+        },
+        "water_lily": {
+          "components": 35,
+          "buildingMeshes": 35,
+          "lights": 0,
+          "materials": 4,
+          "tris": 728,
+          "calls": 56,
+          "vfx": {}
+        },
+        "flower_patch": {
+          "components": 157,
+          "buildingMeshes": 157,
+          "lights": 0,
+          "materials": 7,
+          "tris": 2104,
+          "calls": 210,
+          "vfx": {}
+        },
+        "grass_tuft": {
+          "components": 15,
+          "buildingMeshes": 15,
+          "lights": 0,
+          "materials": 1,
+          "tris": 96,
+          "calls": 30,
+          "vfx": {}
+        }
+      },
+      "errors": []
+    }
+  },
+  "game": {
+    "merge": {
+      "human": {
+        "fps": 117.9,
+        "callsPerFrame": 1347,
+        "shadowCallsPerFrame": 402,
+        "mainPassCallsPerFrame": 945,
+        "shadowCallsPerPass": 402,
+        "sceneMeshes": 1924,
+        "geometries": 844,
+        "errors": []
+      },
+      "orc": {
+        "fps": 130.9,
+        "callsPerFrame": 1124,
+        "shadowCallsPerFrame": 439,
+        "mainPassCallsPerFrame": 685,
+        "shadowCallsPerPass": 439,
+        "sceneMeshes": 1901,
+        "geometries": 605,
+        "errors": []
+      }
+    },
+    "nomerge": {
+      "human": {
+        "fps": 49,
+        "callsPerFrame": 3870,
+        "shadowCallsPerFrame": 1370,
+        "mainPassCallsPerFrame": 2500,
+        "shadowCallsPerPass": 1370,
+        "sceneMeshes": 5143,
+        "geometries": 2142,
+        "errors": []
+      },
+      "orc": {
+        "fps": 48.3,
+        "callsPerFrame": 3838,
+        "shadowCallsPerFrame": 1469,
+        "mainPassCallsPerFrame": 2369,
+        "shadowCallsPerPass": 1469,
+        "sceneMeshes": 5198,
+        "geometries": 1895,
+        "errors": []
+      }
+    }
+  }
+}

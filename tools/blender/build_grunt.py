@@ -278,7 +278,7 @@ def build_arm(mats, torso, side):
     return mb.build(mats, parent=torso, location=(s * ARM_PIVOT_X, ARM_PIVOT_Y, 0.0))
 
 
-# O machado é modelado "em pé" (cabo em +y) e girado por AXE_PRE dentro do nó
+# O machado é modelado "em pé" (cabo em +y, gume em +z) e girado por AXE_PRE dentro do nó
 # Weapon, para que em repouso (Weapon.rotation.x = -45°) ele fique quase
 # vertical e à frente do corpo; as rotações do UnitAnimator somam a isso.
 AXE_PRE = M(r=(62, 0, 0)) @ M(r=(0, -15, 0))
@@ -371,6 +371,7 @@ def main():
         rig.render('34', (1.0, 0.95, 1.0), 30)          # 3/4 parecido com a câmera RTS
         rig.render('front', (0.0, 0.25, 1.0), 30)
         rig.render('back', (-0.6, 0.6, -1.0), 30)
+        rig.render('side', (1.0, 0.2, 0.0), 30)          # perfil: frente (+Z) fica à ESQUERDA
         # escala de jogo: câmera do SceneManager (offset 45,44,45; fov 32) e unidade x1.62
         rig.render('game', (45, 44, 45), 24, dist=78 / 1.62)
         C.set_team_color('#2f63e0')

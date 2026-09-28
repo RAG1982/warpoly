@@ -48,6 +48,11 @@ import {
 } from '../entities/buildings/orc/index.js';
 import { HumanForge } from '../entities/buildings/HumanForge.js';
 import { ParticleSystem } from '../entities/ParticleSystem.js';
+import { ModelFactory } from '../entities/ModelFactory.js';
+
+// Modelos do pipeline Blender (F7-00): sempre carregados no inspetor para comparação
+const glbPlaceholder = () => new THREE.Group();
+const createGlb = key => () => ModelFactory.createGlbModel(key) || glbPlaceholder();
 
 /**
  * Model Catalog Definitions
@@ -121,6 +126,19 @@ const MODEL_CATALOG = [
     create: createGrunt,
     description: 'A temível espinha dorsal da infantaria da Horda. Porte colossal com musculatura maciça, pintura de guerra carmesim, elmo spangenhelm com chifres recurvados de osso ancestral, ombreiras com espinhos de ferro forjado e machado de batalha de lâmina dupla gigantesco.',
     notes: 'Contraparte orc do Cavaleiro Humano. Animações de golpe circular violento (cleave) com torque total do tronco.'
+  },
+  {
+    id: 'grunt_glb',
+    name: 'Guerreiro Orc (Blender)',
+    category: 'units',
+    faction: 'orc',
+    type: 'grunt',
+    icon: '🪓',
+    glb: 'grunt',
+    sourceFile: 'tools/blender/build_grunt.py',
+    create: createGlb('grunt'),
+    description: 'Versão gerada pelo pipeline Blender headless (public/models/grunt.glb): 7 partes rígidas (Torso, Head, ArmL, ArmR, Weapon, LegL, LegR), atlas 512² com cor, AO e desgaste de bordas assados, capa e tanga em cor de time.',
+    notes: 'Compatível com o UnitAnimator atual (mesmos nós e pivôs nas articulações). 8 draw calls, ~4,4 mil triângulos, 1 textura. Esqueleto e AnimationMixer ficam para a F7-00b.'
   },
   {
     id: 'axethrower',
@@ -254,6 +272,18 @@ const MODEL_CATALOG = [
     create: createCastle,
     description: 'A colossal fortaleza central do reino. Possui muralhas de cantaria pesada, 4 torres de vigia com telhados cônicos azuis, torreão principal com coroa ameada e portal reforçado.',
     notes: 'Construção modular com múltiplos níveis de platô. Geometrias com flat-shading criam facetas nítidas com sombras suaves, transmitindo solidez medieval.'
+  },
+  {
+    id: 'castle_glb',
+    name: 'Castelo (Blender)',
+    category: 'buildings',
+    type: 'building',
+    icon: '🏯',
+    glb: 'castle',
+    sourceFile: 'tools/blender/build_castle.py',
+    create: createGlb('castle'),
+    description: 'Versão gerada pelo pipeline Blender headless (public/models/castle.glb): torres com telhados cônicos azuis, muralhas com ameias, portão em arco, torre de menagem, salão, madeira e estandartes em cor de time.',
+    notes: '2 draw calls (Static_Mesh + Anim_Banners), ~8,7 mil triângulos, atlas 1024² com bake de cor e AO. Mesma pegada (raio 5,5) e altura (~9,5) do castelo procedural. Sockets: Socket_UnitSpawn, Socket_Rally.'
   },
   {
     id: 'lumber_camp',
@@ -593,6 +623,18 @@ class ModelInspectorApp {
       this.applyLightingPreset(initialLight);
     }
     this.selectModel(initialModel);
+    ModelFactory.loadGlbModels().then(() => {
+      if (this.currentModelItem && this.currentModelItem.glb) {
+        this.selectModel(this.currentModelItem.id);
+        const q = new URLSearchParams(window.location.search);
+        const anim = q.get('anim');
+        if (this.animator && anim && anim !== 'idle') this.setUnitAnimation(anim);
+        if (this.animator && q.get('time') !== null) {
+          this.animator.pause();
+          this.animator.setTime(parseFloat(q.get('time')));
+        }
+      }
+    });
     if (this.animator && initialAnim !== 'idle') {
       this.setUnitAnimation(initialAnim);
     }

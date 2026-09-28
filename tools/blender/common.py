@@ -759,8 +759,6 @@ def finalize_materials(objs, img, team_default='#b81d24', roughness=0.78, out_pn
         tex.image = img
         bsdf.inputs['Roughness'].default_value = roughness
         bsdf.inputs['Metallic'].default_value = 0.0
-        if 'Specular IOR Level' in bsdf.inputs:
-            bsdf.inputs['Specular IOR Level'].default_value = 0.35
         if team:
             mix = nt.nodes.new('ShaderNodeMix')
             mix.data_type = 'RGBA'

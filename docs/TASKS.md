@@ -51,7 +51,7 @@
 
 | Fase | Total | TODO | DOING | DONE |
 |---|---|---|---|---|
-| F0 Fundação | 7 | 0 | 4 | 3 |
+| F0 Fundação | 7 | 0 | 3 | 4 |
 | F1 Desempenho | 10 | 8 | 2 | 0 |
 | F2 Núcleo | 8 | 8 | 0 | 0 |
 | F3 Jogabilidade WC2 base | 11 | 11 | 0 | 0 |
@@ -76,9 +76,10 @@
 - **Resultado**: `docs/01..06`, este `TASKS.md`, `CLAUDE.md` na raiz.
 
 ### F0-03 · Limpeza do repositório
-- **Status**: `DOING(agente-onda1, 2026-09-28)` · Lane FOUND · Onda 1 · Dep: —
+- **Status**: `DONE(48aa304)` · Lane FOUND · Onda 1 · Dep: —
 - **Fazer**: mover PNGs de referência (`modelo*.png`, `hudmodelo.png`, `dialogoBarracs.png`, `forjaHumanos.png`) para `docs/reference/`; apagar `screenshot_*.png`, `scratch_icon.html`, `temp_render.html` (já estão no backup); ícones duplicados da raiz (existem em `public/`); adicionar `dist/` ao `.gitignore` e removê-lo do índice; remover `src/core/EnemyAI.js` e `GLTFBuildingLoader.js` se não referenciados.
 - **Aceite**: `npm run build` ok; jogo e inspetor abrem; raiz só com arquivos de projeto.
+- **Resultado**: 37 screenshots e 23 ícones duplicados removidos, referências em `docs/reference/`, `dist/` fora do git, `EnemyAI.js` removido. `GLTFBuildingLoader.js` mantido (importado por `GreatHall.js`) → ver NEW-1.
 
 ### F0-04 · Harness de benchmark de desempenho
 - **Status**: `DOING(agente-onda1, 2026-09-28)` · Lane QA · Onda 1 · Dep: —
@@ -452,6 +453,8 @@
 
 ## Backlog descoberto
 _(agentes adicionam aqui: `NEW-<n> · título · lane · motivo`)_
+
+- NEW-1 · Avaliar uso real de `GLTFBuildingLoader` em `GreatHall.js` e remover ou adotar no pipeline Blender (F7-00) · ART · ficou fora do escopo da F0-03
 
 ## Notas de integração
 _(quando uma tarefa precisar tocar arquivo de outra lane, registrar aqui: `<ID>: arquivo — o que mudou`)_

@@ -14,6 +14,11 @@ export class AssetPreloader {
    * @param {Function} onProgress - Callback with { percent, current, total, name, estSeconds }
    */
   static async preloadAll(renderer = null, onProgress = null) {
+    // Pipeline Blender (?glb=1): aguarda os .glb antes de aquecer os modelos
+    if (ModelFactory.glbEnabled) {
+      if (onProgress) onProgress({ percent: 0, current: 0, total: 1, name: 'Modelos 3D (.glb)', estSeconds: 1 });
+      await ModelFactory.loadGlbModels();
+    }
     const assets = [
       { name: 'Aldeão Construtor', fn: () => ModelFactory.createVillager() },
       { name: 'Cavaleiro Real', fn: () => ModelFactory.createKnight() },

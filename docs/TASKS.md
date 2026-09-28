@@ -356,10 +356,11 @@
 ## F7 — Arte e Áudio
 
 ### F7-00 · Pipeline de arte com Blender (headless) — PoC
-- **Status**: `DOING(agente-onda1, 2026-09-28)` · Lane ART · Onda 1 · Dep: — · Blender: `/home/rafael/Downloads/blender-5.2.1-linux-x64/blender` (5.2.1 LTS, glTF ok, verificado 2026-09-28)
+- **Status**: `REVIEW(76d5d9e — aguardando aprovação visual do dono)` · Lane ART · Onda 1 · Dep: — · Blender: `/home/rafael/Downloads/blender-5.2.1-linux-x64/blender` (5.2.1 LTS, glTF ok, verificado 2026-09-28)
 - **Fazer**: `tools/blender/` com scripts Python (`blender -b --python build_<modelo>.py`) que modelam em bmesh (ou importam blocagem), aplicam materiais stylized, **bake** de cor/AO em atlas 512², juntam malhas por material, criam armature + actions (idle/walk/attack/gather/hurt/die) para unidades e exportam `.glb` (Draco/meshopt, KTX2 opcional) para `public/models/`. Máscara de team color no atlas. `ModelFactory` carrega `.glb` via `GLTFLoader` quando existir, com fallback para o modelo procedural atual. Inspetor lista as duas versões lado a lado.
 - **PoC**: 1 unidade (Grunt — hoje a mais pobre, 35 meshes) + 1 construção (Castelo — 487 meshes).
 - **Aceite**: Grunt ≤ 3 draw calls com animações por `AnimationMixer`; Castelo ≤ 6 draw calls; visual aprovado pelo dono comparando no inspetor; `npm run build` ok.
+- **Resultado**: `tools/blender/` (common.py, build_grunt.py, build_castle.py), `public/models/{grunt,castle}.glb` (meshopt+WebP), `src/entities/glbModels.js`, `?glb=1`. Grunt 35→8 draw calls, atlas 512²; Castelo 487→2 draw calls, atlas 1024². Inspetor: "Guerreiro Orc (Blender)" / "Castelo (Blender)". Pendente: decisão do dono sobre orientação do machado.
 
 ### F7-00b · Migração de todo o catálogo para o pipeline Blender
 - **Status**: `TODO` · Lane ART · Onda 2 · Dep: F7-00 aprovado
@@ -468,6 +469,8 @@ _(agentes adicionam aqui: `NEW-<n> · título · lane · motivo`)_
 - NEW-7 · `TreeManager`: InstancedMesh desenha sempre 120 instâncias (vagas com escala 0) e a esfera de culling cobre o mapa (~700k tris por passada de sombra) → ajustar `count`, dividir em chunks, LOD · PERF · achado na F1-04
 - NEW-8 · ✅ Rosto dos orcs (Peão, Grunt, Arremessador, Ogro) repetia nas 6 faces da cabeça → corrigido: textura só na face frontal (+Z). Regra para TODOS os modelos novos (inclusive Blender): textura de rosto só na frente da cabeça · ART · pedido do dono
 - NEW-9 · IA destruiu HQ de jogador parado em < 240 s nos testes da F2-01 — avaliar agressividade inicial ao criar dificuldades (F5-03) · AI
+- NEW-10 · Animação de ataque do UnitAnimator termina com punho atrás do corpo (afeta todos os modelos) · ART · achado na F7-00
+- NEW-11 · Avisos de deprecação three 0.186: `THREE.Clock` → `THREE.Timer`; `PCFSoftShadowMap` removido (cai para PCF) — ajustar QualitySettings/main · PERF
 - NEW-1 · Avaliar uso real de `GLTFBuildingLoader` em `GreatHall.js` e remover ou adotar no pipeline Blender (F7-00) · ART · ficou fora do escopo da F0-03
 
 ## Notas de integração

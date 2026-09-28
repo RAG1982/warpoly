@@ -38,6 +38,7 @@ import {
   createWaterLily
 } from '../models/index.js';
 import { prepareStaticTemplate } from '../render/staticTemplates.js';
+import { GLB_MODELS, glbEnabled, glbTemplates, loadGlbTemplates, setTeamColor } from './glbModels.js';
 
 /**
  * Fast and memory-safe Object3D clone helper.
@@ -60,6 +61,24 @@ function cloneModel(template) {
 export class ModelFactory {
   // Shared materials
   static materials = materials;
+
+  // Pipeline Blender (F7-00): .glb só com ?glb=1 (lógica em glbModels.js)
+  static glbEnabled = glbEnabled;
+  static loadGlbModels() { return loadGlbTemplates(); }
+  static setTeamColor(obj, color) { return setTeamColor(obj, color); }
+
+  /** Clone de um .glb já carregado (ou null), com nomes preservados e userData religado. */
+  static createGlbModel(key) {
+    const template = glbTemplates.get(key);
+    if (!template) return null;
+    const clone = cloneModel(template);
+    if (GLB_MODELS[key].type) this.rebindUserData(clone, GLB_MODELS[key].type);
+    return clone;
+  }
+
+  static _glbOr(key, fallback) {
+    return (glbEnabled && this.createGlbModel(key)) || fallback();
+  }
 
   // Template instances cache (loaded in memory once, cloned instantaneously)
   static templates = new Map();
@@ -230,7 +249,7 @@ export class ModelFactory {
 
   // --- Human Buildings ---
   static createCastle() {
-    return this.getOrCreateModel('castle', createCastle);
+    return this._glbOr('castle', () => this.getOrCreateModel('castle', createCastle));
   }
 
   static createLumberCamp() {
@@ -358,7 +377,7 @@ export class ModelFactory {
   }
 
   static createGrunt() {
-    return this.getOrCreateModel('grunt', createGrunt, 'grunt');
+    return this._glbOr('grunt', () => this.getOrCreateModel('grunt', createGrunt, 'grunt'));
   }
 
   static createAxethrower() {

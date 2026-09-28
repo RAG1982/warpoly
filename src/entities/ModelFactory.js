@@ -37,6 +37,7 @@ import {
   createMushroomStump,
   createWaterLily
 } from '../models/index.js';
+import { prepareStaticTemplate } from '../render/staticTemplates.js';
 
 /**
  * Fast and memory-safe Object3D clone helper.
@@ -141,7 +142,7 @@ export class ModelFactory {
    */
   static getOrCreateModel(key, generatorFn, type = null) {
     if (!this.templates.has(key)) {
-      const template = generatorFn();
+      const template = prepareStaticTemplate(key, generatorFn()); // F1-02 (?merge=0 desliga)
       this.templates.set(key, template);
     }
     const template = this.templates.get(key);

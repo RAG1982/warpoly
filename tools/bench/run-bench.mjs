@@ -7,6 +7,7 @@
  *   npm run bench -- --headless           # força headless (FPS NÃO representativo; draw calls/memória/load sim)
  *   npm run bench -- --scenarios=combate100,massa300
  *   npm run bench -- --url=http://localhost:5175 --width=1280 --height=720 --duration=10 --warmup=2
+ *   npm run bench -- --query=merge=0&texq=low   # parâmetros extras na URL do jogo
  *
  * Se não houver servidor em --url, sobe `npx vite --port 5175 --strictPort` e derruba ao final.
  * Salva em tools/bench/results/<AAAA-MM-DD-HHMM>.json.
@@ -21,8 +22,9 @@ const ROOT = resolve(__dirname, '../..');
 
 const args = Object.fromEntries(
   process.argv.slice(2).map((a) => {
-    const [k, v] = a.replace(/^--/, '').split('=');
-    return [k, v === undefined ? true : v];
+    const s = a.replace(/^--/, '');
+    const i = s.indexOf('=');
+    return i < 0 ? [s, true] : [s.slice(0, i), s.slice(i + 1)];
   })
 );
 
@@ -33,6 +35,8 @@ const HEIGHT = Number(args.height || 720);
 const WARMUP = Number(args.warmup || 2);
 const DURATION = Number(args.duration || 10);
 const TIMEOUT_MS = Number(args.timeout || 240000);
+// Parâmetros extras da URL do jogo, ex.: --query=merge=0&texq=low
+const EXTRA_QUERY = args.query ? `&${args.query}` : '';
 
 // Flags para tentar usar a GPU real (ANGLE/Vulkan). Sem GPU, cai para SwiftShader.
 const GPU_ARGS = [
@@ -109,7 +113,7 @@ async function runScenario(browser, name) {
   page.on('console', (m) => {
     if (m.type() === 'error') errors.push(m.text());
   });
-  const url = `${BASE_URL}/?bench=${name}&benchWarmup=${WARMUP}&benchDuration=${DURATION}`;
+  const url = `${BASE_URL}/?bench=${name}&benchWarmup=${WARMUP}&benchDuration=${DURATION}${EXTRA_QUERY}`;
   console.log(`[bench] ${name}: ${url}`);
   const t0 = Date.now();
   await page.goto(url, { waitUntil: 'domcontentloaded', timeout: TIMEOUT_MS });

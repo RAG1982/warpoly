@@ -6,7 +6,7 @@
 - Pedestal, grade, wireframe, presets de luz (Estúdio, Dia…), tela cheia.
 - Unidades: animações `Idle, Caminhando, Lutando, Coletando, Recebendo Golpe, Caindo`, linha do tempo, velocidade 0.25×–2×.
 - Construções: pré-visualização dos VFX customizados (forjas, chiqueiro etc.).
-- Painel de estatísticas: triângulos, vértices, componentes, materiais, bounding box, arquivo-fonte.
+- Painel de estatísticas: triângulos, vértices, componentes, materiais, bounding box, arquivo-fonte. "Componentes" conta as malhas já mescladas (F1-02); `inspector.html?merge=0` mostra o modelo original.
 - API de debug: `inspectorApp.selectModel('<id>')`, `inspectorApp.currentModelObject`.
 
 ## Medição por modelo (2026-09-28)
@@ -48,12 +48,44 @@
 | orc_forge | 66 | 910 | 14 | 18 |
 | forge | 52 | 1 214 | 8 | 10 |
 
+### Construções depois da F1-02 (mesclagem estática, 2026-09-28)
+
+Templates de construções, depósitos, acampamento e decorações não instanciadas são mesclados uma vez por tipo no `ModelFactory` (`src/render/mergeStaticTemplate.js` + configuração por tipo em `src/render/staticTemplates.js`); o inspetor aplica a mesma mescla. `?merge=0` desliga (jogo e inspetor) para comparar. Unidades, árvores, flecha e seixos **não** são mesclados.
+
+`draw calls` = malhas da construção (`fullMesh`, sem anel de seleção/andaime/VFX criados em tempo de execução) = chamadas por instância no passe principal. Triângulos idênticos antes/depois.
+
+| Modelo | Antes | Depois | Preservado (não mesclado) |
+|---|---:|---:|---|
+| great_hall | 733 | **20** | `Anim_WarBanners`, `Anim_WarBanner_0/1` (conteúdo de cada estandarte mesclado por material dentro do nó) |
+| castle | 487 | **19** | — |
+| farm | 471 | **16** | — |
+| orc_barracks | 404 | **20** | `Anim_TrainingDummy`, `Anim_WarBanner_0/1` (mesclados por dentro) |
+| watchtower | 291 | 16 | — |
+| bandit_camp | 285 | 46 | grupo de chamas (`userData.flame`, com `onBeforeRender`) e `fireLight`; 35 materiais |
+| gold_mine | 221 | 22 | lampião (PointLight) |
+| lumber_camp | 212 | 19 | lampião (PointLight) |
+| orc_house | 209 | 8 | — |
+| stone_quarry | 183 | 15 | — |
+| orc_watchtower | 170 | 12 | — |
+| barracks | 149 | 21 | tochas (PointLight) |
+| cottage | 146 | 25 | vidro/fumaça transparentes (19 materiais) |
+| orc_lumber_mill | 133 | 10 | `Anim_SawBlade` (mesclada por material dentro do nó; continua girando) |
+| pig_farm | 130 | 16 | porcos são criados em tempo de execução |
+| orc_forge | 55 | 14 | chamas/luz criadas em tempo de execução |
+| forge | 45 | 16 | `FurnaceFlames`, `AnvilFlames` (cones animados um a um) |
+
+Decorações: berry_bush 67 → 5 · flower_patch ~190 → 9 · mushroom_stump 37 → 10 · water_lily 35 → 5 · boulder 11 → 2 · grass_tuft 16 → 2.
+
+Regras da mescla: agrupa por material × `castShadow` (a regra de sombra por tamanho da F1-04 roda antes, no gerador); `receiveShadow` vira "OU" do grupo; peças sem sombra que somam ≤ 25 % dos triângulos do grupo com sombra do mesmo material entram nele (custo zero de draw call). Ficam de fora: nós da lista `keep`/prefixo `Anim_`, referências em `userData`, nós com `onBeforeRender`, luzes, sprites, InstancedMesh, `userData.noMerge`, material em array, morph targets, invisíveis e transparentes (salvo `mergeTransparent`, usado só nos braseiros do Grande Salão). Capturas e números: `tools/merge-compare/` (`capture.mjs`, `results.json`).
+
+Cena (1280×720, `?texq=low`, RX 7600 XT): passe principal da cena inicial **2 500 → 945** draw calls (total com sombra 3 870 → 1 347); `npm run bench` inicial 3 907 → 1 339 calls e 47 → 108 FPS; combate100 10 843 → 8 584 calls e 18 → 23 FPS (o resto é das unidades — F1-03).
+
 ### Ambiente
 oak 16m/476t · pine 12m/208t · autumn 16m/476t · birch 29m/904t · flower_patch 185m · berry_bush 65m · mushroom_stump 37m · water_lily 35m · boulder 11m · pebbles 6m · grass_tuft 14m · arrow 4m.
 
 ## Conclusões técnicas
 
-1. **Triângulos não são o problema** (modelos são leves). O problema é **quantidade de objetos**: um castelo = 487 draw calls (974 com passe de sombra). Nenhum template é mesclado (`mergeGeometries`) — deveria virar ~1 draw call por material (≈14).
+1. **Triângulos não são o problema** (modelos são leves). O problema é **quantidade de objetos**: um castelo tinha 487 draw calls (974 com passe de sombra). Desde a F1-02 os templates estáticos são mesclados por material (castelo 19, Grande Salão 20); as unidades continuam hierarquias de partes (F1-03).
 2. **Texturas**: 498 canvases 2048² ⇒ cada textura RGBA com mipmaps ≈ 21 MB de VRAM; 289 texturas vivas na cena inicial ⇒ ordem de **~6 GB de VRAM teórica** + tempo de CPU para pintar no load (~30 s medidos). Em modelos low-poly de 1–3 m na tela, 256–512 px bastam. Mapas de roughness/metalness/bump separados poderiam ser empacotados em um único canal ORM.
 3. Unidades são hierarquias de partes rígidas animadas proceduralmente pelo `UnitAnimator` (sem skinning). Para escalar a centenas de unidades: mesclar partes rígidas por "osso" (≈6–10 grupos por unidade) e, a longo prazo, **instancing + vertex animation texture (VAT)** ou `SkinnedMesh` com `InstancedMesh` por tipo.
 4. Não há cor de time (team color): a identidade da facção está baked nas texturas. Multiplayer/FFA exige tint por jogador.

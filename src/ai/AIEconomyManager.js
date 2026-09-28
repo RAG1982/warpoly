@@ -1,3 +1,5 @@
+import { getCost } from '../data/index.js';
+
 /**
  * AIEconomyManager (Gerenciador de Economia e Construção da IA)
  * 
@@ -660,7 +662,7 @@ export class AIEconomyManager {
 
     if (chosenX === null) {
       // Refund if no valid spot found this cycle
-      const cost = this.director.costs[type] || this.director.costs.farm;
+      const cost = getCost(type) || this.director.costs.farm;
       if (cost.wood) this.director.resources.wood += cost.wood;
       if (cost.stone) this.director.resources.stone += cost.stone;
       if (cost.gold) this.director.resources.gold += cost.gold;

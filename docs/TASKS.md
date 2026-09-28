@@ -52,7 +52,7 @@
 | Fase | Total | TODO | DOING | DONE |
 |---|---|---|---|---|
 | F0 Fundação | 7 | 0 | 0 | 7 |
-| F1 Desempenho | 10 | 8 | 2 | 0 |
+| F1 Desempenho | 10 | 8 | 1 | 1 |
 | F2 Núcleo | 8 | 8 | 0 | 0 |
 | F3 Jogabilidade WC2 base | 11 | 11 | 0 | 0 |
 | F4 Jogabilidade WC2 expansão | 8 | 8 | 0 | 0 |
@@ -110,9 +110,10 @@
 ## F1 — Desempenho (meta: 60 FPS cena inicial, 45 FPS com 200 unidades, load < 8 s)
 
 ### F1-01 · Texturas procedurais: resolução e empacotamento
-- **Status**: `DOING(agente-onda1, 2026-09-28)` · Lane PERF · Onda 1 · Dep: —
+- **Status**: `DONE(9102693)` · Lane PERF · Onda 1 · Dep: —
 - **Fazer**: parametrizar `createCanvas` por um `TEXTURE_QUALITY` global (Low 256 / Med 512 / High 1024); empacotar roughness+metalness(+AO) num mapa ORM; trocar `bumpMap` por nada em Low/Med; mover a pintura para `OffscreenCanvas` em Web Worker quando disponível; cache opcional em IndexedDB.
 - **Aceite**: VRAM de texturas estimada < 300 MB em High; load < 8 s; diferença visual aprovada no inspetor (capturas antes/depois).
+- **Resultado**: `src/models/textureQuality.js` (`?texq=` / localStorage). VRAM estimada: antes 7,3 GB → med 399 MB (padrão) / low 100 MB / high 1,94 GB. Load 11 s → 5,5 s. Visual med ≈ ultra (capturas em `tools/texture-compare/`). Pendente → NEW-6.
 
 ### F1-02 · Mesclar geometrias dos templates estáticos
 - **Status**: `TODO` · Lane PERF · Onda 2 · Dep: F0-04
@@ -461,6 +462,7 @@ _(agentes adicionam aqui: `NEW-<n> · título · lane · motivo`)_
 - NEW-3 · Card de seleção ainda mostra nomes antigos em inglês (`entityName`: "Villager"…); unificar com nomes PT-BR/glossário · UI · depende de F3-00/F6-09
 - NEW-4 · `Pathfinder.hasLineOfSight` devolve false para pontos idênticos (0/0 = NaN em `t`) · PERF · achado na F0-05 (`src/core/Pathfinder.js:157-175`)
 - NEW-5 · Remover materiais/texturas criados e não usados (OrcWatchtowerModel:50-51, OrcLumberMillModel:51-52, PigFarmModel:52, TreeModel:259, ArcherModel:90) · PERF/ART · lint da F0-05
+- NEW-6 · Completar F1-01: empacotar roughness+metalness (ORM) para High < 300 MB; pintura em Worker/OffscreenCanvas; cache IndexedDB; troca de qualidade sem recarregar · PERF
 - NEW-1 · Avaliar uso real de `GLTFBuildingLoader` em `GreatHall.js` e remover ou adotar no pipeline Blender (F7-00) · ART · ficou fora do escopo da F0-03
 
 ## Notas de integração

@@ -1,6 +1,6 @@
 import * as THREE from 'three';
 import { ModelFactory } from '../entities/ModelFactory.js';
-import { BUILDING_BUILD_CONFIG } from '../entities/Building.js';
+import { getCost } from '../data/index.js';
 
 export class InputManager {
   constructor(sceneManager, gameManager, terrain) {
@@ -322,24 +322,7 @@ export class InputManager {
   }
 
   getCost(type) {
-    if (BUILDING_BUILD_CONFIG && BUILDING_BUILD_CONFIG[type]?.cost) {
-      return { cost: BUILDING_BUILD_CONFIG[type].cost };
-    }
-    switch (type) {
-      case 'lumber_camp': return { cost: { wood: 80 } };
-      case 'orc_lumber_mill': return { cost: { wood: 85 } };
-      case 'cottage': return { cost: { wood: 50 } };
-      case 'pig_farm': return { cost: { wood: 55 } };
-      case 'orc_house': return { cost: { wood: 50 } };
-      case 'orc_forge': return { cost: { wood: 100, stone: 70, gold: 50 } };
-      case 'forge': return { cost: { wood: 100, stone: 70, gold: 50 } };
-      case 'barracks': return { cost: { wood: 120, stone: 60 } };
-      case 'orc_barracks': return { cost: { wood: 130, stone: 50 } };
-      case 'watchtower': return { cost: { wood: 80, stone: 40 } };
-      case 'orc_watchtower': return { cost: { wood: 85, stone: 40 } };
-      case 'farm': return { cost: { wood: 60 } };
-      default: return { cost: { wood: 50 } };
-    }
+    return { cost: getCost(type) };
   }
 
   update(delta) {

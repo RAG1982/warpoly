@@ -38,6 +38,7 @@ src/
     SoundManager.js           SFX e música procedurais
     GLTFBuildingLoader.js     (importado só por entities/buildings/orc/GreatHall.js)
     (EnemyAI.js removido em F0-03; substituído por ai/AIDirector)
+  data/                       FONTE ÚNICA de balanceamento (F0-06): units, buildings, upgrades, factions + helpers (index.js)
   ai/
     AIDirector.js             Utility AI (tick 1s): U_eco, U_housing, U_def, U_mil
     AIEconomyManager.js       Trabalhadores, construção, rebalanceamento de coleta

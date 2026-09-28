@@ -18,6 +18,7 @@ import { TreeManager } from '../world/TreeManager.js';
 import { Pathfinder } from './Pathfinder.js';
 import { HumanForge } from '../entities/buildings/HumanForge.js';
 import { UPGRADE_CONFIG } from './UpgradeConfig.js';
+import { STARTING_RESOURCES, isDropoffFor } from '../data/index.js';
 
 export class GameManager {
   constructor(scene, terrain, soundManager, particleSystem) {
@@ -30,11 +31,7 @@ export class GameManager {
     this.treeManager = new TreeManager(this.scene);
 
     // Economy & Pop
-    this.resources = {
-      wood: 240,
-      gold: 200,
-      stone: 120
-    };
+    this.resources = { ...STARTING_RESOURCES };
     this.population = 0;
     this.maxPopulation = 15;
 
@@ -114,7 +111,7 @@ export class GameManager {
     this.selectedUnits = [];
     this.selectedBuilding = null;
     this.selectedResource = null;
-    this.resources = { wood: 240, gold: 200, stone: 120 };
+    this.resources = { ...STARTING_RESOURCES };
     this.population = 0;
     this.isGameOver = false;
     this.gameWon = false;
@@ -646,9 +643,7 @@ export class GameManager {
     const list = buildings || this.buildings || [];
     const valid = list.filter(b => {
       if (!b.isConstructed || b.faction !== faction || b.isDead) return false;
-      if (b.type === 'castle' || b.type === 'great_hall') return true;
-      if (resourceType === 'wood' && (b.type === 'lumber_camp' || b.type === 'orc_lumber_mill')) return true;
-      return false;
+      return isDropoffFor(b.type, resourceType);
     });
 
     let nearest = null;
@@ -956,8 +951,7 @@ export class GameManager {
     uPos.y = this.terrain.getHeight(uPos.x, uPos.z);
 
     // Direct delivery upon colliding with dropoff building!
-    const isDropoff = (b.type === 'castle' || b.type === 'great_hall' ||
-      (unit.carrying && unit.carrying.type === 'wood' && (b.type === 'lumber_camp' || b.type === 'orc_lumber_mill'))) &&
+    const isDropoff = isDropoffFor(b.type, unit.carrying ? unit.carrying.type : null) &&
       (b.faction === unit.faction);
 
     if (unit.state === 'returning' && isDropoff) {

@@ -1,6 +1,8 @@
 # 02 — Mecânicas e Regras de Jogo (estado atual)
 
-> Valores extraídos do código em 2026-09-28. Quando o balanceamento for centralizado (tarefa **F0-06**), este documento deve apontar para `src/data/`.
+> **Fonte de verdade: `src/data/`** (F0-06). Todos os números de balanceamento vivem em `src/data/units.js`, `buildings.js`, `upgrades.js` e `factions.js` (helpers em `src/data/index.js`). As tabelas abaixo são um resumo para leitura; em caso de divergência, vale o código em `src/data/`. Para mudar um valor, edite só ali. `tools/check-data-parity.mjs` compara os valores com o snapshot anterior à centralização.
+>
+> Valores extraídos do código em 2026-09-28.
 
 ## Visão geral
 
@@ -95,6 +97,7 @@ Tick de 1s. Utilidades:
 - `U_def`: intrusos a < 26 da base → todas as tropas ociosas atacam o intruso mais próximo.
 - `U_housing/U_eco`: constrói casas perto do limite de pop; mantém 8–12 trabalhadores; emergência se < 3.
 - `U_mil`: quando tropas prontas ≥ limiar (4 → 5 → 6 → 3 …) envia onda contra torre mais próxima > HQ > qualquer construção.
+- Custos: a IA usa os **mesmos custos reais** de `src/data/` (bug B3 corrigido na F0-06; antes o arremessador custava 60 madeira/35 ouro para a IA contra 20/40 real, e o quartel/serraria/torre/chiqueiro orc e o "cerco" humano também estavam com valores próprios).
 - A IA é **onisciente** (lê `gm.units` diretamente), sem níveis de dificuldade, sem micro, sem scout, sem pesquisar melhorias de forma estratégica.
 
 ## Névoa de guerra

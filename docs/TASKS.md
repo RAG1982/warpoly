@@ -51,7 +51,7 @@
 
 | Fase | Total | TODO | DOING | DONE |
 |---|---|---|---|---|
-| F0 Fundação | 7 | 0 | 2 | 5 |
+| F0 Fundação | 7 | 0 | 1 | 6 |
 | F1 Desempenho | 10 | 8 | 2 | 0 |
 | F2 Núcleo | 8 | 8 | 0 | 0 |
 | F3 Jogabilidade WC2 base | 11 | 11 | 0 | 0 |
@@ -93,9 +93,10 @@
 - **Aceite**: `npm run lint && npm test && npm run smoke` passam.
 
 ### F0-06 · Centralizar dados de balanceamento
-- **Status**: `DOING(agente-onda1, 2026-09-28)` · Lane FOUND→CORE · Onda 1 · Dep: —
+- **Status**: `DONE(8e913f1)` · Lane FOUND→CORE · Onda 1 · Dep: —
 - **Fazer**: criar `src/data/units.js`, `buildings.js`, `upgrades.js`, `factions.js` como fonte única (stats, custos, tempo, visão, altura da barra de vida, colisão, quem treina o quê, lista de construção por trabalhador, ícones, nomes PT-BR). Refatorar `Unit.getUnitStats`, `Building.getBuildingStats`, `UNIT_TRAIN_CONFIG`, `BUILDING_BUILD_CONFIG`, `InputManager.getCost`, `AIDirector.costs`, `FogOfWar.visionRadii`, `getBuildingHeight`, `getHealthBarHeight`, `BUILDING_TRAINABLE_UNITS` para ler dali. Corrige bugs B3, B4.
 - **Aceite**: nenhum número de balanceamento duplicado (grep); jogo idêntico ao anterior exceto a correção de custos da IA; `02_MECANICAS.md` aponta para `src/data/`.
+- **Resultado**: `src/data/{units,buildings,upgrades,factions,index}.js`; 446 checagens de paridade OK (`node tools/check-data-parity.mjs`); B3 corrigido (7 custos da IA estavam errados, não só 1) e B4 corrigido.
 
 ### F0-07 · Registrar decisões de produto pendentes
 - **Status**: `DONE(ver docs/07_DECISOES.md)` · Lane FOUND · Dep: — · **Requer o dono do projeto**
@@ -455,6 +456,8 @@
 ## Backlog descoberto
 _(agentes adicionam aqui: `NEW-<n> · título · lane · motivo`)_
 
+- NEW-2 · IA reembolsa custo errado em `AIEconomyManager.placeBuilding` (usa `director.costs[tipoDaConstrução]`, mas `costs` é indexado por papel → devolve custo da fazenda) · AI · achado na F0-06
+- NEW-3 · Card de seleção ainda mostra nomes antigos em inglês (`entityName`: "Villager"…); unificar com nomes PT-BR/glossário · UI · depende de F3-00/F6-09
 - NEW-1 · Avaliar uso real de `GLTFBuildingLoader` em `GreatHall.js` e remover ou adotar no pipeline Blender (F7-00) · ART · ficou fora do escopo da F0-03
 
 ## Notas de integração

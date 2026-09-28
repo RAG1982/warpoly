@@ -55,6 +55,7 @@ Opus escreve a spec em `docs/specs/<ID>.md`; agente **Sonnet** executa; Opus rev
 | `docs/specs/F0-08-anti-swiftshader.md` | F0-08 bloquear navegador sem GPU — **DONE** | haiku |
 | `docs/specs/F1-05-nevoa-shader.md` | F1-05 — **DONE** | sonnet |
 | `docs/specs/F7-00c-glb-padrao.md` | NEW-12 glb ligado por padrão — **DONE** | haiku |
+| `docs/specs/F1-08-alocacoes-vazamentos.md` | F1-08 | sonnet |
 | `docs/specs/F1-03-unidades-por-osso.md` | F1-03 — **DONE parcial** | sonnet |
 | `docs/specs/F1-03b-unidades-skinned.md` | F1-03b SkinnedMesh rígido | sonnet |
 | `docs/specs/F1-06-grade-espacial.md` | F1-06 | sonnet |
@@ -64,7 +65,7 @@ Opus escreve a spec em `docs/specs/<ID>.md`; agente **Sonnet** executa; Opus rev
 | Fase | Total | TODO | DOING | DONE |
 |---|---|---|---|---|
 | F0 Fundação | 7 | 0 | 0 | 7 |
-| F1 Desempenho | 10 | 4 | 1 | 5 |
+| F1 Desempenho | 10 | 3 | 2 | 5 |
 | F2 Núcleo | 8 | 6 | 0 | 2 |
 | F3 Jogabilidade WC2 base | 11 | 11 | 0 | 0 |
 | F4 Jogabilidade WC2 expansão | 8 | 8 | 0 | 0 |
@@ -161,7 +162,7 @@ Opus escreve a spec em `docs/specs/<ID>.md`; agente **Sonnet** executa; Opus rev
 - **Aceite**: unidades contornam construções sem "deslizar" (B8); 50 ordens simultâneas sem queda de FPS.
 
 ### F1-08 · Eliminar alocações e vazamentos
-- **Status**: `TODO` · Lane PERF · Onda 2 · Dep: —
+- **Status**: `DOING(sonnet, 2026-09-28)` · Lane PERF · Onda 2 · Dep: —
 - **Fazer**: pool de textos flutuantes (atlas de dígitos ou sprites reutilizáveis); projétil de machado usar template compartilhado (vazamento atual); remover `new Vector3` em loops quentes; `raycastScene` com lista cacheada e raycast em bounding volumes/proxies em vez de 5 000 meshes.
 - **Aceite**: heap estável em 10 min de partida (sem crescimento contínuo); hover sem custo perceptível.
 

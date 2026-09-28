@@ -9,6 +9,10 @@ import { legacyOwnerId } from '../sim/EntityIds.js';
 const unitRingGeo = new THREE.RingGeometry(0.85, 1.05, 24);
 unitRingGeo.rotateX(-Math.PI / 2);
 
+// F1-08: vetor de módulo reutilizado para calcular a origem do projétil (Arrow clona o valor recebido)
+const _projectileOrigin = new THREE.Vector3();
+const _up168 = new THREE.Vector3(0, 1.68, 0);
+
 const playerRingMat = new THREE.MeshBasicMaterial({
   color: 0xdeb841,
   side: THREE.DoubleSide,
@@ -76,7 +80,9 @@ export class Unit {
 
     // State machine: 'idle', 'moving', 'gathering', 'returning', 'building', 'attacking', 'dying'
     this.state = 'idle';
-    this.targetPos = null;
+    // F1-08: targetPos é uma Vector3 fixa (nunca recriada); hasTargetPos indica se há destino válido.
+    this.targetPos = new THREE.Vector3();
+    this.hasTargetPos = false;
     this.targetEntity = null;
     this.gatherTarget = null;
     this.buildTarget = null;
@@ -242,9 +248,11 @@ export class Unit {
       this.waypoints = path;
       this.waypointIndex = 0;
       this.pathDestination = { x, z };
-      this.targetPos = new THREE.Vector3(path[0].x, 0, path[0].z);
+      this.targetPos.set(path[0].x, 0, path[0].z);
+      this.hasTargetPos = true;
     } else {
-      this.targetPos = new THREE.Vector3(x, 0, z);
+      this.targetPos.set(x, 0, z);
+      this.hasTargetPos = true;
       this.waypoints = null;
       this.waypointIndex = 0;
       this.pathDestination = null;
@@ -311,7 +319,7 @@ export class Unit {
   stop() {
     if (this.isDead || this.isDying || this.state === 'dying') return;
     this.state = 'idle';
-    this.targetPos = null;
+    this.hasTargetPos = false;
     this.targetEntity = null;
     this.gatherTarget = null;
     this.buildTarget = null;
@@ -398,7 +406,7 @@ export class Unit {
     this.deathTimer = 0;
     this.deathDuration = 1.6;
 
-    this.targetPos = null;
+    this.hasTargetPos = false;
     this.targetEntity = null;
     this.gatherTarget = null;
     this.buildTarget = null;
@@ -624,7 +632,7 @@ export class Unit {
   }
 
   updateMoving(delta, gameManager = this.gameManager) {
-    if (!this.targetPos) {
+    if (!this.hasTargetPos) {
       this.stop();
       return;
     }
@@ -640,7 +648,7 @@ export class Unit {
       if (this.waypoints && this.waypointIndex < this.waypoints.length - 1) {
         this.waypointIndex++;
         const nextWp = this.waypoints[this.waypointIndex];
-        this.targetPos = new THREE.Vector3(nextWp.x, 0, nextWp.z);
+        this.targetPos.set(nextWp.x, 0, nextWp.z);
         return;
       }
 
@@ -909,7 +917,7 @@ export class Unit {
           if (this.projectileType === 'axe') soundManager.playSword();
           else soundManager.playBow();
         }
-        const startPos = this.mesh.position.clone().add(new THREE.Vector3(0, 1.68, 0));
+        const startPos = _projectileOrigin.copy(this.mesh.position).add(_up168);
         const projType = this.projectileType;
         const arrow = new Arrow(this.scene, startPos, this.attackTarget, this.attack, (target, dmg, hitPos) => {
           target.takeDamage(dmg, particleSystem, this, allUnits);

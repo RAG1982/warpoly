@@ -52,6 +52,13 @@ const bldHpGreenMat = new THREE.MeshBasicMaterial({ color: 0x22c55e, depthTest: 
 const bldHpYellowMat = new THREE.MeshBasicMaterial({ color: 0xf59e0b, depthTest: false, depthWrite: false, side: THREE.DoubleSide });
 const bldHpRedMat = new THREE.MeshBasicMaterial({ color: 0xef4444, depthTest: false, depthWrite: false, side: THREE.DoubleSide });
 
+// F1-08: vetores de módulo reutilizados por frame (evita alocação em update/VFX)
+const _flameSmokePos = new THREE.Vector3();
+const _chimneyPos = new THREE.Vector3();
+const _chimneyOffsetGreatHall = new THREE.Vector3(-2.2, 9.8, -1.8);
+const _chimneyOffsetCottage = new THREE.Vector3(-2.1, 4.4, -0.6);
+const _towerArrowStart = new THREE.Vector3();
+
 export class Building {
   /**
    * @param {number|'player'|'enemy'} [owner]  ownerId do Player dono (F2-01); aceita o lado legado.
@@ -655,10 +662,9 @@ export class Building {
         this.flameSmokeTimer = 0;
         if (particleSystem && this.flameClusters.length > 0) {
           const cluster = this.flameClusters[Math.floor(Math.random() * this.flameClusters.length)];
-          const worldPos = new THREE.Vector3();
-          cluster.getWorldPosition(worldPos);
-          worldPos.y += 0.5;
-          particleSystem.spawnSmokePuff(worldPos);
+          cluster.getWorldPosition(_flameSmokePos);
+          _flameSmokePos.y += 0.5;
+          particleSystem.spawnSmokePuff(_flameSmokePos);
         }
       }
     }
@@ -687,9 +693,9 @@ export class Building {
       this.smokeTimer += delta;
       if (this.smokeTimer >= 0.8) {
         this.smokeTimer = 0;
-        const chimneyOffset = this.type === 'great_hall' ? new THREE.Vector3(-2.2, 9.8, -1.8) : new THREE.Vector3(-2.1, 4.4, -0.6);
-        const chimneyPos = this.mesh.position.clone().add(chimneyOffset);
-        particleSystem.spawnSmokePuff(chimneyPos);
+        const chimneyOffset = this.type === 'great_hall' ? _chimneyOffsetGreatHall : _chimneyOffsetCottage;
+        _chimneyPos.copy(this.mesh.position).add(chimneyOffset);
+        particleSystem.spawnSmokePuff(_chimneyPos);
       }
     }
 
@@ -717,9 +723,10 @@ export class Building {
             if (towerDef.projectile === 'axe') soundManager.playSword();
             else soundManager.playBow();
           }
-          const arrowStart = this.mesh.position.clone().add(new THREE.Vector3(0, towerDef.projectileOriginY, 0));
+          _towerArrowStart.copy(this.mesh.position);
+          _towerArrowStart.y += towerDef.projectileOriginY;
           const projType = towerDef.projectile;
-          const arrow = new Arrow(this.scene, arrowStart, closest, this.attackDamage, (target, dmg, hitPos) => {
+          const arrow = new Arrow(this.scene, _towerArrowStart, closest, this.attackDamage, (target, dmg, hitPos) => {
             target.takeDamage(dmg, particleSystem, this, allUnits);
             if (soundManager) soundManager.playArrowHit();
           }, projType);

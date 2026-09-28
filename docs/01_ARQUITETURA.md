@@ -36,8 +36,8 @@ src/
     UpgradeConfig.js          4 pesquisas da forja
     AssetPreloader.js         Constrói e compila todos os modelos/texturas antes do jogo (~35 itens)
     SoundManager.js           SFX e música procedurais
-    GLTFBuildingLoader.js     (não usado no fluxo principal)
-    EnemyAI.js                LEGADO — substituído por ai/AIDirector (código morto)
+    GLTFBuildingLoader.js     (importado só por entities/buildings/orc/GreatHall.js)
+    (EnemyAI.js removido em F0-03; substituído por ai/AIDirector)
   ai/
     AIDirector.js             Utility AI (tick 1s): U_eco, U_housing, U_def, U_mil
     AIEconomyManager.js       Trabalhadores, construção, rebalanceamento de coleta

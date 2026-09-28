@@ -13,7 +13,6 @@ import {
 import { Tree } from '../entities/Tree.js';
 import { ResourceDeposit } from '../entities/ResourceDeposit.js';
 import { FogOfWar } from './FogOfWar.js';
-import { EnemyAI } from './EnemyAI.js';
 import { AIDirector } from '../ai/AIDirector.js';
 import { TreeManager } from '../world/TreeManager.js';
 import { Pathfinder } from './Pathfinder.js';

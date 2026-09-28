@@ -19,7 +19,7 @@ Causas raiz, em ordem de impacto:
 2. **Sombras em tudo** — `enableShadows` liga cast/receive em todo filho; shadow camera fixa 180×180.
 3. **Texturas 2048² procedurais** pintadas na thread principal durante o load, 4 mapas por material.
 4. **Materiais demais** (14–35 por modelo, muitos quase idênticos) ⇒ 139 programas e trocas de estado.
-5. **CPU**: colisão unidade×unidade O(n²), unidade×(todas construções+árvores+depósitos) por frame; alvo/aggro faz varredura linear de todas as unidades por unidade (O(n²)); A* com open set em array + `includes` (O(n²)); `raycastScene` reconstrói lista e faz raycast recursivo em ~5 000 meshes a cada mousemove.
+5. **CPU**: ~~colisão unidade×unidade O(n²), unidade×(todas construções+árvores+depósitos) por frame; alvo/aggro faz varredura linear de todas as unidades por unidade (O(n²)); `raycastScene` reconstrói lista e faz raycast recursivo em ~5 000 meshes a cada mousemove~~ **Resolvido na F1-06**: `SpatialGrid` (`src/sim/SpatialGrid.js`, `gm.unitGrid`/`gm.blockerGrid`) substitui as varreduras lineares em colisão, alvo/aggro, colocação de construção e picking do mouse — ver `docs/01_ARQUITETURA.md`. A* com open set em array + `includes` (O(n²)) continua em aberto (fora do escopo da F1-06).
 6. **Alocações por frame**: `new THREE.Vector3` em loops quentes, canvas+`CanvasTexture` novo por texto flutuante (cada acerto), projétil de machado cria material/geometria novos e nunca os descarta (vazamento de GPU).
 7. **Sem timestep fixo** — simulação acoplada ao FPS; em 10 FPS a física e a IA ficam imprecisas.
 

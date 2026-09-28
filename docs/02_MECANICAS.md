@@ -102,7 +102,17 @@ Tick de 1s. Utilidades:
 
 ## Névoa de guerra
 
-Exploração permanente; unidades inimigas ficam visíveis em qualquer área **já explorada** (não há distinção entre "visível agora" e "memória"), o que anula boa parte da estratégia de informação.
+Névoa no estilo Warcraft II (F1-05), aplicada no próprio shader dos materiais do mundo (sem plano sobreposto — nada "atravessa" a névoa). Grade lógica 128² sobre o mapa, recalculada a 10 Hz, com 3 estados por célula:
+- **Não explorado**: preto.
+- **Memória** (já explorado, sem visão agora): terreno/água/árvores/construções escurecidos e dessaturados; unidades inimigas **não aparecem** (nem no minimapa).
+- **Visível agora**: normal.
+
+Regras por tipo de entidade:
+- **Unidades inimigas**: só desenham (mesh + barra de vida) com visão atual sobre a posição; somem ao saírem da visão. Unidades e construções aliadas/próprias são sempre visíveis.
+- **Construções inimigas**: uma vez vistas, ficam na memória (malha visível, escurecida; barra de vida oculta). Se destruídas fora da visão, um **fantasma** (clone do template, escurecido) permanece no lugar até a área ser revista — então some, revelando que a construção não existe mais.
+- **Minimapa**: mesmos 3 estados; inimigos só aparecem com visão atual; fantasmas de construção desenhados como construções.
+
+Nova partida (F2-04, sem recarregar a página) começa com a névoa zerada (`FogOfWar.dispose()` + `reset()`).
 
 ## Opções
 

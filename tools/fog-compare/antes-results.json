@@ -1,0 +1,59 @@
+{
+  "prefix": "antes",
+  "base": "http://localhost:5187",
+  "extra": "",
+  "shots": [
+    {
+      "name": "borda",
+      "note": "borda da área explorada inicial",
+      "calls": 1517,
+      "programs": 58
+    },
+    {
+      "name": "borda-perto",
+      "note": "borda de perto, câmera girada",
+      "calls": 1157,
+      "programs": 58
+    },
+    {
+      "name": "memoria",
+      "note": "centro explorado e abandonado (memória)",
+      "calls": 1684,
+      "programs": 59
+    },
+    {
+      "name": "inimigo-visivel",
+      "note": "inimigo dentro da visão",
+      "calls": 1341,
+      "programs": 61
+    },
+    {
+      "name": "inimigo-memoria",
+      "note": "o mesmo inimigo parado numa área de memória",
+      "calls": 958,
+      "programs": 61
+    },
+    {
+      "name": "fantasma",
+      "note": "base inimiga na memória; construção lateral destruída fora da visão",
+      "calls": 1007,
+      "programs": 61
+    },
+    {
+      "name": "minimapa"
+    },
+    {
+      "name": "fantasma-revisto",
+      "note": "área revista: o fantasma some",
+      "calls": 1144,
+      "programs": 61
+    }
+  ],
+  "errors": [],
+  "destroyed": {
+    "type": "pig_farm",
+    "x": -44,
+    "z": 30
+  },
+  "groundMeshes": null
+}

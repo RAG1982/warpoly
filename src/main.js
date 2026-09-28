@@ -1,4 +1,5 @@
 import * as THREE from 'three';
+import { installFogOfWarShader } from './render/fogOfWarShader.js';
 import { SceneManager } from './core/SceneManager.js';
 import { SoundManager } from './core/SoundManager.js';
 import { AssetPreloader } from './core/AssetPreloader.js';
@@ -10,6 +11,10 @@ import { shouldShowMainMenu, showMainMenu } from './ui/screens/MainMenu.js';
 import { PauseMenu } from './ui/screens/PauseMenu.js';
 
 const S = GameState;
+
+// Névoa de guerra por shader (F1-05): instala o patch global em `THREE.Material.prototype` antes de
+// qualquer material ser compilado (AssetPreloader / warmLiveScene). Idempotente.
+installFogOfWarShader();
 
 const nextFrame = () => new Promise((resolve) => requestAnimationFrame(() => resolve()));
 

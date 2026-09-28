@@ -52,7 +52,7 @@
 | Fase | Total | TODO | DOING | DONE |
 |---|---|---|---|---|
 | F0 Fundação | 7 | 0 | 0 | 7 |
-| F1 Desempenho | 10 | 6 | 2 | 2 |
+| F1 Desempenho | 10 | 6 | 1 | 3 |
 | F2 Núcleo | 8 | 7 | 1 | 0 |
 | F3 Jogabilidade WC2 base | 11 | 11 | 0 | 0 |
 | F4 Jogabilidade WC2 expansão | 8 | 8 | 0 | 0 |
@@ -116,9 +116,10 @@
 - **Resultado**: `src/models/textureQuality.js` (`?texq=` / localStorage). VRAM estimada: antes 7,3 GB → med 399 MB (padrão) / low 100 MB / high 1,94 GB. Load 11 s → 5,5 s. Visual med ≈ ultra (capturas em `tools/texture-compare/`). Pendente → NEW-6.
 
 ### F1-02 · Mesclar geometrias dos templates estáticos
-- **Status**: `DOING(agente-onda2, 2026-09-28)` · Lane PERF · Onda 2 · Dep: F0-04
+- **Status**: `DONE(2772628)` · Lane PERF · Onda 2 · Dep: F0-04
 - **Fazer**: utilitário `mergeStaticTemplate(group, {keepNamed:[...]})` que agrupa meshes por material via `BufferGeometryUtils.mergeGeometries`, preservando nós animados/VFX (bandeiras, rodas, chamas, portas) listados por modelo. Aplicar a todas as construções, depósitos e decorações.
 - **Aceite**: castelo ≤ 20 draw calls, Grande Salão ≤ 20; cena inicial < 1 500 draw calls; VFX das forjas/chiqueiro funcionam no inspetor e no jogo.
+- **Resultado**: `src/render/mergeStaticTemplate.js` + `staticTemplates.js` (`?merge=0` desliga). Castelo 487→19, Grande Salão 733→20. Cena inicial 3 907→1 339 draw calls; bench inicial 47→108 FPS. Unidades ainda dominam o combate (F1-03).
 
 ### F1-03 · Unidades: mesclar partes rígidas por "osso"
 - **Status**: `TODO` · Lane PERF · Onda 2 · Dep: F0-04

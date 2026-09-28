@@ -58,6 +58,9 @@ Opus escreve a spec em `docs/specs/<ID>.md`; agente **Sonnet** executa; Opus rev
 | `docs/specs/F1-08-alocacoes-vazamentos.md` | F1-08 — **DONE** | sonnet |
 | `docs/specs/F1-09-tick-fixo-lod-animacao.md` | F1-09 + NEW-14 (após F1-08, mesmos arquivos) | sonnet |
 | `docs/specs/F2-02-sistema-comandos.md` | F2-02 (após F1-09) | sonnet |
+| `docs/specs/BUGS-01-pequenos.md` | NEW-2, NEW-11, NEW-5, NEW-13 — **nuvem** (ver `docs/HANDOFF_CLOUD.md`) | sonnet (claude.ai/code) |
+| `docs/specs/F1-07-pathfinder.md` | F1-07 + B8 + NEW-4 — **nuvem** | sonnet (claude.ai/code) |
+| `docs/specs/F6-03-hud-responsiva.md` | F6-03 + B11 — **nuvem** | sonnet (claude.ai/code) |
 | `docs/specs/F1-03-unidades-por-osso.md` | F1-03 — **DONE parcial** | sonnet |
 | `docs/specs/F1-03b-unidades-skinned.md` | F1-03b SkinnedMesh rígido | sonnet |
 | `docs/specs/F1-06-grade-espacial.md` | F1-06 — **DONE parcial** | sonnet |

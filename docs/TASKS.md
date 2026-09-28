@@ -62,7 +62,7 @@ Opus escreve a spec em `docs/specs/<ID>.md`; agente **Sonnet** executa; Opus rev
 | `docs/specs/F1-07-pathfinder.md` | F1-07 + B8 + NEW-4 — **nuvem** | sonnet (claude.ai/code) |
 | `docs/specs/F6-03-hud-responsiva.md` | F6-03 + B11 — **nuvem** | sonnet (claude.ai/code) |
 | `docs/specs/F1-03-unidades-por-osso.md` | F1-03 — **DONE parcial** | sonnet |
-| `docs/specs/F1-03b-unidades-skinned.md` | F1-03b SkinnedMesh rígido | sonnet |
+| `docs/specs/F1-03b-unidades-skinned.md` | F1-03b SkinnedMesh rígido — **DONE (38c013b)** | sonnet |
 | `docs/specs/F1-06-grade-espacial.md` | F1-06 — **DONE parcial** | sonnet |
 
 ## Quadro resumo
@@ -498,6 +498,8 @@ _(agentes adicionam aqui: `NEW-<n> · título · lane · motivo`)_
 - ✅ NEW-12/F7-00c · `DONE(7d6f712)` modelos .glb ligados por padrão (`?glb=0` desliga), carregam também com `?skipPreload` (verificado no navegador)
 - NEW-13 · Névoa: chamas de construções inimigas na memória continuam animando (Building.js não checa visibilidade); céu azul aparece além da borda do mapa em área não explorada (fundo da cena deveria escurecer) · PERF/CORE
 - NEW-14 · `Unit.update` domina a CPU (~4,5 ms com 310 unidades): animação procedural roda para toda unidade todo frame. Otimizar: animar só unidades visíveis no frustum/névoa, reduzir taxa de animação por distância (LOD de animação), simulação em tick fixo 20 Hz (F1-09) · PERF
+- ✅ F1-03b · `DONE(38c013b)` unidades como SkinnedMesh rígido, 1 Skeleton por instância: knight 41→19, archer 54→25, grunt 25→12 draw calls; combate100 31→37,5 FPS, massa300 12→17 FPS. Aldeão 55→58 (nós de ferramenta)
+- NEW-15 · Meta 50 FPS em combate100 ainda não atingida (37,5): restam ~20 draw calls/unidade por muitos materiais PBR. Caminho: atlas de material por unidade (1–2 materiais) — naturalmente resolvido pela migração das unidades para o pipeline Blender (F7-00b, adiada) — e depois instancing por tipo/VAT · PERF/ART
 - NEW-1 · Avaliar uso real de `GLTFBuildingLoader` em `GreatHall.js` e remover ou adotar no pipeline Blender (F7-00) · ART · ficou fora do escopo da F0-03
 
 ## Notas de integração

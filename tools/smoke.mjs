@@ -15,6 +15,7 @@
  */
 import { chromium } from 'playwright';
 import { createServer } from 'vite';
+import { assertHardwareGpu } from './lib/assertGpu.mjs';
 
 const PORT = 5176;
 const TIMEOUT_MS = Number(process.env.SMOKE_TIMEOUT_MS || 90000);
@@ -90,6 +91,8 @@ async function checkPage(baseUrl, { path, ready, label }) {
     page.on('console', (msg) => {
       if (msg.type() === 'error') errors.push(`console.error: ${msg.text()}`);
     });
+    // Verifica GPU antes de navegar para o jogo (F0-08)
+    await assertHardwareGpu(page);
     const run = async () => {
       await page.goto(url, { waitUntil: 'load', timeout: TIMEOUT_MS });
       await page.waitForFunction(`!!(${ready})`, null, { timeout: TIMEOUT_MS });

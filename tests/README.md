@@ -22,6 +22,7 @@ Em 2026-09-28 um chrome-headless chegou a 10,8 GB e travou a máquina. Por isso:
 - `SMOKE_URL=http://localhost:4173`: reaproveita um servidor que já está rodando (ex.: `npx vite preview`) em vez de subir o Vite.
 - `SMOKE_TIMEOUT_MS=90000`: tempo limite por página (padrão 90 s). Com WebGL por software, o jogo leva cerca de 20 s para montar a cena; a primeira execução pode demorar mais por causa do pré-bundle do Vite. O timeout total do safe-run (240 s) continua valendo.
 - `SMOKE_HEADED=1`: abre o navegador com janela visível.
+- `ALLOW_SOFTWARE_GL=1`: permite rodar scripts de teste com WebGL por software (SwiftShader/llvmpipe) — **só para depuração pontual**, nunca em agentes automáticos. Sem essa flag, o smoke e bench abortam se detectarem software renderer.
 
 ## Escrevendo testes unitários
 - Arquivos em `tests/unit/<modulo>.test.js`, importando direto de `src/`.

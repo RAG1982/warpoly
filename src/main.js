@@ -161,5 +161,7 @@ class GameApp {
 
 // Start Game when DOM is ready
 window.addEventListener('DOMContentLoaded', () => {
-  GameApp.init();
+  GameApp.init().then((app) => {
+    if (new URLSearchParams(window.location.search).has('bench')) import('./debug/bench.js').then((m) => m.startBench(app));
+  });
 });

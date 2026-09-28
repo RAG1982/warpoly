@@ -1,0 +1,4 @@
+# Resultados locais do bench não são versionados; só a baseline oficial.
+*
+!.gitignore
+!baseline-*.json

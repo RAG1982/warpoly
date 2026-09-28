@@ -1,0 +1,101 @@
+{
+  "units": {
+    "knight": {
+      "antes": {
+        "meshes": 83,
+        "materials": 14,
+        "tris": 1512
+      },
+      "depois": {
+        "meshes": 41,
+        "materials": 14,
+        "tris": 1512
+      }
+    },
+    "archer": {
+      "antes": {
+        "meshes": 154,
+        "materials": 16,
+        "tris": 3188
+      },
+      "depois": {
+        "meshes": 54,
+        "materials": 16,
+        "tris": 3188
+      }
+    },
+    "villager": {
+      "antes": {
+        "meshes": 129,
+        "materials": 19,
+        "tris": 3384
+      },
+      "depois": {
+        "meshes": 55,
+        "materials": 19,
+        "tris": 3384
+      }
+    },
+    "bandit": {
+      "antes": {
+        "meshes": 145,
+        "materials": 17,
+        "tris": 2388
+      },
+      "depois": {
+        "meshes": 59,
+        "materials": 17,
+        "tris": 2388
+      }
+    },
+    "peon": {
+      "antes": {
+        "meshes": 38,
+        "materials": 11,
+        "tris": 652
+      },
+      "depois": {
+        "meshes": 21,
+        "materials": 11,
+        "tris": 652
+      }
+    },
+    "grunt": {
+      "antes": {
+        "meshes": 35,
+        "materials": 9,
+        "tris": 492
+      },
+      "depois": {
+        "meshes": 25,
+        "materials": 9,
+        "tris": 492
+      }
+    },
+    "axethrower": {
+      "antes": {
+        "meshes": 27,
+        "materials": 6,
+        "tris": 328
+      },
+      "depois": {
+        "meshes": 15,
+        "materials": 6,
+        "tris": 328
+      }
+    },
+    "ogre": {
+      "antes": {
+        "meshes": 25,
+        "materials": 7,
+        "tris": 284
+      },
+      "depois": {
+        "meshes": 12,
+        "materials": 7,
+        "tris": 284
+      }
+    }
+  },
+  "errors": []
+}

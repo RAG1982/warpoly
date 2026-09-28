@@ -205,7 +205,7 @@ function isMergeable(node, visible, mergeTransparent) {
 }
 
 /** Cópia da geometria já no espaço da raiz, indexada e com o sentido dos triângulos correto. */
-function bakeGeometry(source, matrix) {
+export function bakeGeometry(source, matrix) {
   const geo = new THREE.BufferGeometry();
   for (const [name, attr] of Object.entries(source.attributes)) {
     geo.setAttribute(name, toPlainFloat(attr));
@@ -256,7 +256,7 @@ function toPlainFloat(attr) {
  * position/normal/uv sempre (uv gerado com zeros se faltar), `color` só se o material usa
  * vertexColors e todas têm; demais atributos só se comuns a todas com o mesmo itemSize.
  */
-function unifyAttributes(geos, material) {
+export function unifyAttributes(geos, material) {
   for (const g of geos) {
     if (!g.attributes.uv) {
       g.setAttribute('uv', new THREE.BufferAttribute(new Float32Array(g.attributes.position.count * 2), 2));
@@ -276,7 +276,7 @@ function unifyAttributes(geos, material) {
   return keep.has('position') ? geos : null;
 }
 
-function pruneEmpty(node, protectedRoots) {
+export function pruneEmpty(node, protectedRoots) {
   for (let i = node.children.length - 1; i >= 0; i--) {
     const child = node.children[i];
     if (protectedRoots.has(child)) continue;

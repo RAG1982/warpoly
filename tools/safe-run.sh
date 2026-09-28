@@ -1,14 +1,14 @@
 #!/usr/bin/env bash
 # safe-run.sh — executa um processo PESADO (navegador/Playwright, Blender, bench) com proteção:
 #   - trava global: apenas UM processo pesado por vez na máquina (/tmp/warpoly-heavy.lock)
-#   - teto rígido de memória (padrão 6G, sem swap) via systemd-run --user --scope
+#   - teto rígido de memória (padrão 12G, sem swap) via systemd-run --user --scope
 #   - prioridade baixa de CPU e disco (nice/ionice)
 #   - tempo máximo (padrão 300 s)
 # Motivo: em 2026-09-28 um chrome-headless chegou a 10,8 GB e travou a máquina (OOM + swap).
 #
-# Uso: tools/safe-run.sh [--mem 6G] [--timeout 300] -- <comando> [args...]
+# Uso: tools/safe-run.sh [--mem 12G] [--timeout 300] -- <comando> [args...]
 set -euo pipefail
-MEM="6G"; TMO="300"
+MEM="12G"; TMO="300"
 while [[ $# -gt 0 ]]; do
   case "$1" in
     --mem) MEM="$2"; shift 2 ;;
@@ -17,7 +17,7 @@ while [[ $# -gt 0 ]]; do
     *) break ;;
   esac
 done
-[[ $# -gt 0 ]] || { echo "uso: $0 [--mem 6G] [--timeout 300] -- comando..." >&2; exit 2; }
+[[ $# -gt 0 ]] || { echo "uso: $0 [--mem 12G] [--timeout 300] -- comando..." >&2; exit 2; }
 exec 9>/tmp/warpoly-heavy.lock
 echo "[safe-run] aguardando trava global…" >&2
 flock 9

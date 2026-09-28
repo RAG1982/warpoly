@@ -15,10 +15,10 @@ RTS 3D low-poly no navegador (three.js + Vite, JS ES modules), inspirado em **Wa
 
 ## Regras de recursos da máquina (OBRIGATÓRIO — a máquina travou por OOM em 2026-09-28)
 - Todo processo pesado (Playwright/Chromium, Blender, `npm run bench`, `npm run smoke`) roda **somente** via
-  `/home/rafael/warpoly/tools/safe-run.sh [--mem 6G] [--timeout 300] -- <comando>` (trava global: 1 por vez; teto de RAM sem swap).
+  `/home/rafael/warpoly/tools/safe-run.sh [--mem 12G] [--timeout 300] -- <comando>` (trava global: 1 por vez; teto de RAM de 12G sem swap; máquina tem 32 GB).
 - No navegador de teste use `?texq=low` quando existir e `?skipPreload` sempre que a medição não for de load.
 - Encerre o dev server (vite) e navegadores ao terminar; nunca deixe processos órfãos.
-- No máximo 2 agentes em paralelo.
+- No máximo 3 agentes em paralelo (só 1 processo pesado por vez, garantido pela trava).
 
 ## Regras
 - Textos de UI em PT-BR (até existir i18n — F6-09).

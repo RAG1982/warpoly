@@ -54,7 +54,7 @@ Opus escreve a spec em `docs/specs/<ID>.md`; agente **Sonnet** executa; Opus rev
 |---|---|---|
 | `docs/specs/F0-08-anti-swiftshader.md` | F0-08 bloquear navegador sem GPU — **DONE** | haiku |
 | `docs/specs/F1-05-nevoa-shader.md` | F1-05 — **DONE** | sonnet |
-| `docs/specs/F7-00c-glb-padrao.md` | NEW-12 glb ligado por padrão | haiku |
+| `docs/specs/F7-00c-glb-padrao.md` | NEW-12 glb ligado por padrão — **DONE** | haiku |
 | `docs/specs/F1-03-unidades-por-osso.md` | F1-03 — **DONE parcial** | sonnet |
 | `docs/specs/F1-03b-unidades-skinned.md` | F1-03b SkinnedMesh rígido | sonnet |
 | `docs/specs/F1-06-grade-espacial.md` | F1-06 | sonnet |
@@ -487,7 +487,7 @@ _(agentes adicionam aqui: `NEW-<n> · título · lane · motivo`)_
 - NEW-10 · Animação de ataque do UnitAnimator termina com punho atrás do corpo (afeta todos os modelos) · ART · achado na F7-00
 - NEW-11 · Avisos de deprecação three 0.186: `THREE.Clock` → `THREE.Timer`; `PCFSoftShadowMap` removido (cai para PCF) — ajustar QualitySettings/main · PERF
 - ✅ F0-08 · `DONE(d17aaf5)` Scripts de navegador abortam sem GPU real (`tools/lib/assertGpu.mjs`); `safe-run.sh` agora reentrante (deadlock de safe-run aninhado corrigido)
-- NEW-12 · Ligar modelos .glb aprovados por padrão (`?glb=0` desliga) e carregar os .glb também com `?skipPreload` · ART/CORE · pequeno, executor haiku
+- ✅ NEW-12/F7-00c · `DONE(7d6f712)` modelos .glb ligados por padrão (`?glb=0` desliga), carregam também com `?skipPreload` (verificado no navegador)
 - NEW-13 · Névoa: chamas de construções inimigas na memória continuam animando (Building.js não checa visibilidade); céu azul aparece além da borda do mapa em área não explorada (fundo da cena deveria escurecer) · PERF/CORE
 - NEW-1 · Avaliar uso real de `GLTFBuildingLoader` em `GreatHall.js` e remover ou adotar no pipeline Blender (F7-00) · ART · ficou fora do escopo da F0-03
 

@@ -54,7 +54,8 @@ Opus escreve a spec em `docs/specs/<ID>.md`; agente **Sonnet** executa; Opus rev
 |---|---|---|
 | `docs/specs/F0-08-anti-swiftshader.md` | F0-08 bloquear navegador sem GPU — **DONE** | haiku |
 | `docs/specs/F1-05-nevoa-shader.md` | F1-05 (continuação da WIP `dd57a03`) | sonnet |
-| `docs/specs/F1-03-unidades-por-osso.md` | F1-03 | sonnet |
+| `docs/specs/F1-03-unidades-por-osso.md` | F1-03 — **DONE parcial** | sonnet |
+| `docs/specs/F1-03b-unidades-skinned.md` | F1-03b SkinnedMesh rígido | sonnet |
 | `docs/specs/F1-06-grade-espacial.md` | F1-06 | sonnet |
 
 ## Quadro resumo
@@ -62,7 +63,7 @@ Opus escreve a spec em `docs/specs/<ID>.md`; agente **Sonnet** executa; Opus rev
 | Fase | Total | TODO | DOING | DONE |
 |---|---|---|---|---|
 | F0 Fundação | 7 | 0 | 0 | 7 |
-| F1 Desempenho | 10 | 4 | 3 | 3 |
+| F1 Desempenho | 10 | 4 | 2 | 4 |
 | F2 Núcleo | 8 | 6 | 0 | 2 |
 | F3 Jogabilidade WC2 base | 11 | 11 | 0 | 0 |
 | F4 Jogabilidade WC2 expansão | 8 | 8 | 0 | 0 |
@@ -132,9 +133,10 @@ Opus escreve a spec em `docs/specs/<ID>.md`; agente **Sonnet** executa; Opus rev
 - **Resultado**: `src/render/mergeStaticTemplate.js` + `staticTemplates.js` (`?merge=0` desliga). Castelo 487→19, Grande Salão 733→20. Cena inicial 3 907→1 339 draw calls; bench inicial 47→108 FPS. Unidades ainda dominam o combate (F1-03).
 
 ### F1-03 · Unidades: mesclar partes rígidas por "osso"
-- **Status**: `DOING(agente-onda2, 2026-09-28)` · Lane PERF · Onda 2 · Dep: F0-04
+- **Status**: `DONE(3fd7fc2 — parcial, meta via F1-03b)` · Lane PERF · Onda 2 · Dep: F0-04
 - **Fazer**: mesclar filhos de cada nó animado (`Torso, Head, ArmL…`) em um mesh por material; manter os nomes que o `UnitAnimator` usa. Meta ≤ 15 draw calls por unidade.
 - **Aceite**: animações idênticas no inspetor; bench 100 unidades ≥ 50 FPS.
+- **Resultado**: `src/render/mergeUnitTemplate.js`; draw calls archer 154→54, knight 83→41, villager 129→55, ogre 25→12; combate100 18→32 FPS. Meta ≤15/unidade e 50 FPS não atingida (mescla não cruza ossos) → **F1-03b** (SkinnedMesh rígido, spec pronta).
 
 ### F1-04 · Sombras e renderer
 - **Status**: `DONE(f4fa447)` · Lane PERF · Onda 1 · Dep: —

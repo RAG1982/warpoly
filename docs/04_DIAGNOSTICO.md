@@ -33,7 +33,7 @@ Causas raiz, em ordem de impacto:
 | B4 | ~~Custos de construção duplicados 3× (`BUILDING_BUILD_CONFIG`, `getBuildingStats`, `InputManager.getCost`)~~ **Corrigido na F0-06**: fonte única em `src/data/buildings.js` | vários |
 | B5 | Construções ignoram armadura; upgrades de defesa não afetam construções/torres | `Building.takeDamage` |
 | B6 | Assimetria: Chiqueiro dá +5 pop e ouro, Fazenda humana só ouro; humanos sem 3ª unidade militar | configs |
-| B7 | `resetMap` não reseta pesquisas, projéteis, `gameTime`, filas; reinício real exige `location.reload()` | `GameManager.resetMap`, `UIManager` |
+| B7 | ~~`resetMap` não reseta pesquisas, projéteis, `gameTime`, filas; reinício real exige `location.reload()`~~ **Corrigido (F2-04)**: cada partida é uma `MatchSession` descartável criada do zero a partir da `MatchConfig`; Reiniciar/Jogar novamente/Menu não recarregam a página | `GameManager.resetMap`, `UIManager` |
 | B8 | Pathfinding ignora construções e árvores → unidades "deslizam" empurradas e travam em bases | `Pathfinder.buildGrid` |
 | B9 | IA onisciente (lê posições reais do jogador ignorando névoa) | `ai/*` |
 | B10 | Não é possível selecionar/inspecionar unidades inimigas | `GameManager.selectSingle` |

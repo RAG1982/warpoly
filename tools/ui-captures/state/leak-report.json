@@ -1,0 +1,314 @@
+{
+  "gpu": "ANGLE (AMD, Vulkan 1.4.318 (AMD Radeonâ¢ RX 7600 XT (RADV NAVI33) (0x00007480)), radv)",
+  "rows": [
+    {
+      "label": "P1 humano · início",
+      "state": "InGame",
+      "match": 1,
+      "faction": "human",
+      "seed": 1185831704,
+      "geometries": 844,
+      "textures": 212,
+      "programs": 95,
+      "heapMB": 75.3,
+      "sceneObjects": 2321,
+      "sceneChildren": 145,
+      "units": 10,
+      "buildings": 6,
+      "trees": 76,
+      "fx": 6,
+      "gameTime": 1.7
+    },
+    {
+      "label": "P1 humano · 20 s",
+      "state": "InGame",
+      "match": 1,
+      "faction": "human",
+      "seed": 1185831704,
+      "geometries": 862,
+      "textures": 212,
+      "programs": 97,
+      "heapMB": 77,
+      "sceneObjects": 2568,
+      "sceneChildren": 166,
+      "units": 13,
+      "buildings": 8,
+      "trees": 76,
+      "fx": 15,
+      "gameTime": 22.3
+    },
+    {
+      "label": "Menu após P1 (dispose)",
+      "state": "MainMenu",
+      "match": 1,
+      "faction": "-",
+      "seed": 1185831704,
+      "geometries": 493,
+      "textures": 211,
+      "programs": 68,
+      "heapMB": 63.6,
+      "sceneObjects": 5,
+      "sceneChildren": 4,
+      "units": 0,
+      "buildings": 0,
+      "trees": 0,
+      "fx": 0,
+      "gameTime": 0
+    },
+    {
+      "label": "P2 orc · início",
+      "state": "InGame",
+      "match": 2,
+      "faction": "orc",
+      "seed": 328166278,
+      "geometries": 925,
+      "textures": 262,
+      "programs": 98,
+      "heapMB": 76.8,
+      "sceneObjects": 2321,
+      "sceneChildren": 144,
+      "units": 10,
+      "buildings": 6,
+      "trees": 75,
+      "fx": 6,
+      "gameTime": 1.7
+    },
+    {
+      "label": "P2 orc · 20 s",
+      "state": "InGame",
+      "match": 2,
+      "faction": "orc",
+      "seed": 328166278,
+      "geometries": 1020,
+      "textures": 262,
+      "programs": 100,
+      "heapMB": 79.2,
+      "sceneObjects": 2886,
+      "sceneChildren": 165,
+      "units": 13,
+      "buildings": 8,
+      "trees": 75,
+      "fx": 15,
+      "gameTime": 22.3
+    },
+    {
+      "label": "P3 orc reinício · início",
+      "state": "InGame",
+      "match": 3,
+      "faction": "orc",
+      "seed": 328166278,
+      "geometries": 925,
+      "textures": 262,
+      "programs": 98,
+      "heapMB": 77,
+      "sceneObjects": 2318,
+      "sceneChildren": 142,
+      "units": 10,
+      "buildings": 6,
+      "trees": 73,
+      "fx": 6,
+      "gameTime": 2.2
+    },
+    {
+      "label": "P3 orc reinício · 20 s",
+      "state": "InGame",
+      "match": 3,
+      "faction": "orc",
+      "seed": 328166278,
+      "geometries": 1031,
+      "textures": 262,
+      "programs": 126,
+      "heapMB": 80.5,
+      "sceneObjects": 2887,
+      "sceneChildren": 167,
+      "units": 13,
+      "buildings": 8,
+      "trees": 73,
+      "fx": 19,
+      "gameTime": 22.5
+    },
+    {
+      "label": "P4 jogar novamente · início",
+      "state": "InGame",
+      "match": 4,
+      "faction": "orc",
+      "seed": 1807555713,
+      "geometries": 966,
+      "textures": 262,
+      "programs": 111,
+      "heapMB": 77.8,
+      "sceneObjects": 2305,
+      "sceneChildren": 145,
+      "units": 10,
+      "buildings": 6,
+      "trees": 76,
+      "fx": 6,
+      "gameTime": 2.2
+    },
+    {
+      "label": "P4 jogar novamente · 20 s",
+      "state": "InGame",
+      "match": 4,
+      "faction": "orc",
+      "seed": 1807555713,
+      "geometries": 1042,
+      "textures": 262,
+      "programs": 126,
+      "heapMB": 80.5,
+      "sceneObjects": 2874,
+      "sceneChildren": 170,
+      "units": 13,
+      "buildings": 8,
+      "trees": 76,
+      "fx": 19,
+      "gameTime": 22.6
+    },
+    {
+      "label": "Menu após P4 (dispose)",
+      "state": "MainMenu",
+      "match": 4,
+      "faction": "-",
+      "seed": 1807555713,
+      "geometries": 579,
+      "textures": 261,
+      "programs": 84,
+      "heapMB": 65.5,
+      "sceneObjects": 5,
+      "sceneChildren": 4,
+      "units": 0,
+      "buildings": 0,
+      "trees": 0,
+      "fx": 0,
+      "gameTime": 0
+    },
+    {
+      "label": "P5 humano · início",
+      "state": "InGame",
+      "match": 5,
+      "faction": "human",
+      "seed": 54864461,
+      "geometries": 930,
+      "textures": 262,
+      "programs": 111,
+      "heapMB": 78.6,
+      "sceneObjects": 2339,
+      "sceneChildren": 141,
+      "units": 10,
+      "buildings": 6,
+      "trees": 72,
+      "fx": 6,
+      "gameTime": 2
+    },
+    {
+      "label": "P5 humano · 20 s",
+      "state": "InGame",
+      "match": 5,
+      "faction": "human",
+      "seed": 54864461,
+      "geometries": 936,
+      "textures": 262,
+      "programs": 113,
+      "heapMB": 78.8,
+      "sceneObjects": 2641,
+      "sceneChildren": 175,
+      "units": 13,
+      "buildings": 8,
+      "trees": 72,
+      "fx": 28,
+      "gameTime": 22.5
+    },
+    {
+      "label": "Menu após P5 (dispose)",
+      "state": "MainMenu",
+      "match": 5,
+      "faction": "-",
+      "seed": 54864461,
+      "geometries": 579,
+      "textures": 261,
+      "programs": 84,
+      "heapMB": 65.1,
+      "sceneObjects": 5,
+      "sceneChildren": 4,
+      "units": 0,
+      "buildings": 0,
+      "trees": 0,
+      "fx": 0,
+      "gameTime": 0
+    }
+  ],
+  "report": [
+    {
+      "name": "Menu M5 vs M4 (pós-dispose)",
+      "diffs": {
+        "geometries": 0,
+        "textures": 0,
+        "sceneObjects": 0,
+        "heapMB": -0.6
+      }
+    },
+    {
+      "name": "Menu M5 vs M1 (objetos da cena, heap)",
+      "diffs": {
+        "sceneObjects": 0,
+        "heapMB": 2.4
+      }
+    },
+    {
+      "name": "P3 vs P2 (20 s)",
+      "diffs": {
+        "geometries": 1.1,
+        "textures": 0,
+        "heapMB": 1.6
+      }
+    },
+    {
+      "name": "P4 vs P2 (20 s)",
+      "diffs": {
+        "geometries": 2.2,
+        "textures": 0,
+        "heapMB": 1.6
+      }
+    },
+    {
+      "name": "P5 vs P1 (20 s, heap)",
+      "diffs": {
+        "heapMB": 2.3
+      }
+    },
+    {
+      "name": "P5 vs P2 (20 s, texturas)",
+      "diffs": {
+        "textures": 0
+      }
+    },
+    {
+      "name": "P5 vs P1 início [info]",
+      "diffs": {
+        "geometries": 10.2,
+        "sceneObjects": 0.8,
+        "trees": -5.3,
+        "fx": 0
+      }
+    },
+    {
+      "name": "P5 vs P1 20 s [info]",
+      "diffs": {
+        "geometries": 8.6,
+        "sceneObjects": 2.8,
+        "trees": -5.3,
+        "fx": 86.7
+      }
+    },
+    {
+      "name": "geometrias da partida (20 s − menu) [info]",
+      "diffs": {
+        "P1": 369,
+        "P2": 441,
+        "P3": 452,
+        "P4": 463,
+        "P5": 357
+      }
+    }
+  ],
+  "errors": []
+}

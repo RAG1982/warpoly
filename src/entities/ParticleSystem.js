@@ -229,7 +229,23 @@ export class ParticleSystem {
     }
   }
 
+  /** Remove da cena as partículas e os textos flutuantes vivos (fim da partida, F2-04). */
+  clear() {
+    for (const p of this.particles) {
+      this.scene.remove(p.mesh);
+      if (p.isSmoke && p.mesh.material) p.mesh.material.dispose();
+    }
+    this.particles.length = 0;
+    for (const ft of this.floatingTexts) {
+      this.scene.remove(ft.sprite);
+      ft.sprite.material.map?.dispose();
+      ft.sprite.material.dispose();
+    }
+    this.floatingTexts.length = 0;
+  }
+
   dispose() {
+    this.clear();
     this.chipGeo?.dispose();
     this.smokeGeo?.dispose();
     this.woodMat?.dispose();

@@ -1278,4 +1278,53 @@ export class GameManager {
       }
     }
   }
+
+  /**
+   * F2-04: fim da sessão de partida. Para as IAs, solta as entidades e descarta os
+   * recursos próprios da partida que não ficam na cena (textura da névoa, árvores
+   * instanciadas). As malhas que ainda estão na cena são descartadas pelo MatchSession.
+   */
+  dispose() {
+    if (this._disposed) return;
+    this._disposed = true;
+    this.isGameOver = true; // update() vira no-op se alguém ainda chamar
+    this.isPaused = true;
+
+    // IAs: nenhuma usa timers próprios; basta tirar do loop.
+    this.aiDirectors.forEach(d => d.dispose?.());
+    this.aiDirectors = [];
+    this.aiDirector = null;
+
+    this.allUnits.forEach(u => u.dispose?.());
+    this.buildings.forEach(b => (b.dispose ? b.dispose() : this.scene.remove(b.mesh)));
+    this.trees.forEach(t => (t.dispose ? t.dispose() : this.scene.remove(t.mesh)));
+    this.resourceDeposits.forEach(r => this.scene.remove(r.mesh));
+    this.arrows.forEach(a => (a.dispose ? a.dispose() : this.scene.remove(a.mesh)));
+    this.treeManager?.dispose();
+
+    const fog = this.fogOfWar;
+    if (fog) {
+      if (typeof fog.dispose === 'function') {
+        fog.dispose();
+      } else {
+        if (fog.shroudMesh) this.scene.remove(fog.shroudMesh);
+        fog.fogTexture?.dispose();
+      }
+    }
+
+    this.allUnits = [];
+    this._unitsByOwner.clear();
+    this._hostileUnitsCache.clear();
+    this.buildings = [];
+    this.trees = [];
+    this.resourceDeposits = [];
+    this.arrows = [];
+    this.selectedUnits = [];
+    this.selectedBuilding = null;
+    this.selectedResource = null;
+    this.entityRegistry.clear();
+    if (this.terrain && this.terrain.pathfinder === this.pathfinder) this.terrain.pathfinder = null;
+    this.uiManager = null;
+    this.sceneManager = null;
+  }
 }

@@ -16,7 +16,7 @@
 | Dev server | `npx vite --port 5173` (config em `.claude/launch.json`, nome `warpoly-dev`) |
 
 Parâmetros de URL úteis: `?skipPreload` (pula o preloader), `?faction=orc` (joga de Orc), `?ffa=1` (FFA de teste: você × 2 IAs, 3 times), `?seed=N` (seed da MatchConfig; ainda não usada pela simulação — F2-03), `?settings=1` (abre painel de config).
-Debug: `window.game` expõe o `GameApp` (ex.: `game.gameManager`, `game.sceneManager.renderer.info`). No inspetor: `window.inspectorApp`.
+Debug: `window.game` expõe o `GameApp` (ex.: `game.gameManager`, `game.sceneManager.renderer.info`, `game.state`); `window.warpoly` é a mesma instância, disponível já no menu. No inspetor: `window.inspectorApp`.
 
 ## Mapa de diretórios
 
@@ -26,8 +26,10 @@ inspector.html                Inspetor 3D de modelos e animações
 public/                       Ícones da HUD (png/svg)
 specs/orc_buildings/          Specs de arte das construções orc (direção de arte)
 src/
-  main.js                     GameApp: boot, preload, loop requestAnimationFrame
+  main.js                     GameApp: máquina de estados, serviços da aplicação, preload único, loop rAF (F2-04)
   core/
+    GameStateMachine.js       Estados Boot/MainMenu/MatchSetup/Loading/InGame/Paused/PostGame e transições válidas (F2-04)
+    MatchSession.js           Uma partida descartável: cria mundo + GameManager/Input/UI a partir da MatchConfig; dispose completo
     GameManager.js            Estado do jogo, spawn, seleção, ordens, colisões, vitória/derrota (GOD OBJECT)
     SceneManager.js           Cena, renderer, luzes, câmera RTS (pan/zoom/rotação), dia/pôr-do-sol/noite
     InputManager.js           Mouse/teclado, raycast, caixa de seleção, fantasma de construção
@@ -43,7 +45,7 @@ src/
     Player.js                 Jogador: facção, time, cor, recursos, população, pesquisas, derrota
     PlayerRegistry.js         players[], getPlayer, localPlayer, isHostile/isAlly por time (matriz)
     EntityIds.js              Contador monotônico, EntityRegistry (id → entidade), NEUTRAL_OWNER_ID = −1
-    MatchConfig.js            {mapId, seed, players[]}, slots iniciais do mapa, layout da base inicial
+    MatchConfig.js            {mapId, seed, difficulty, players[]}, slots iniciais do mapa, layout da base inicial, withNewSeed
   ai/
     AIDirector.js             Utility AI (tick 1s): U_eco, U_housing, U_def, U_mil — um por jogador de IA (playerId)
     AIEconomyManager.js       Trabalhadores, construção, rebalanceamento de coleta
@@ -62,23 +64,61 @@ src/
   world/
     Terrain.js                Altura = função analítica fixa (continente 140×140, rio diagonal, 3 vaus)
     Water.js, Decorations.js (instanced), TreeManager.js (instanced, 6 draw calls)
-  ui/UIManager.js             Atualiza HUD DOM, card de seleção, filas, minimapa (desenhado à mão)
+  ui/UIManager.js             Atualiza HUD DOM, card de seleção, filas, minimapa (desenhado à mão); dispose() por sessão
+  ui/screens/                 MainMenu (F6-01), PauseMenu + gameScreens.css (F2-04)
+  render/sceneDisposal.js     Descarte de objetos da partida preservando os caches do ModelFactory (F2-04)
   inspector/
     inspector.js              App do inspetor (catálogo de 37 modelos, luzes, wireframe, stats)
     unitAnimator.js           Animações procedurais (idle/walk/fight/gather/hurt/die) — USADO PELO JOGO
 ```
 
-## Loop principal (`src/main.js`)
+## Loop principal (`src/main.js`) e estados do jogo (F2-04)
 
 ```
-GameApp.init()
-  SoundManager → SceneManager → AssetPreloader.preloadAll() → new GameApp()
-     Terrain, Water, Decorations, ParticleSystem, GameManager, InputManager, UIManager
+GameApp (vive a página inteira)
+  GameStateMachine (src/core/GameStateMachine.js, lógica pura, testada em tests/unit/gameStateMachine.test.js)
+    Boot → MainMenu ⇄ MatchSetup → Loading → InGame ⇄ Paused → PostGame → (MainMenu | Loading)
+    Boot → Loading (atalhos de URL)   Paused → Loading (Reiniciar) | MainMenu (Menu Principal / Sair)
+    Loading → MainMenu (falha ao criar a partida)
+  serviços da aplicação, criados na 1ª partida: SoundManager, SceneManager (renderer, cena, luzes, câmera)
+  AssetPreloader.preloadAll() roda UMA vez (1ª partida, exceto com ?skipPreload); templates/texturas ficam em cache
+  MatchSession (src/core/MatchSession.js) — uma por partida, descartável:
+     Terrain, Water, Decorations, ParticleSystem, GameManager(MatchConfig), InputManager, UIManager
      warmLiveScene() (compila shaders)
-animate() [rAF, delta máx 0.1s, sem timestep fixo]
-  inputManager.update → sceneManager.updateCamera → water.update
-  → gameManager.update(delta*gameSpeed) → particleSystem.update → uiManager.update → render
+animate() [rAF da aplicação, delta máx 0.1s, sem timestep fixo; sem sessão (menu/loading) não desenha]
+  session.update(delta, elapsed, simulate = estado InGame):
+    inputManager.update → sceneManager.updateCamera → water.update
+    → [simulate] gameManager.update(delta*gameSpeed) → particleSystem.update
+    → uiManager.update
+  → sceneManager.render
+  → InGame e gameManager.isGameOver ⇒ PostGame
 ```
+
+- **Menu** (`ui/screens/MainMenu.js`): "Iniciar" chama `onStart({ faction, difficulty })`; a aplicação monta a
+  `MatchConfig` (`createMatchConfig`, com `difficulty` e seed nova) e vai para `Loading`. Abrir/fechar o painel
+  Escaramuça alterna `MainMenu ⇄ MatchSetup`. Nada recarrega a página.
+- **URL (compatibilidade)**: `?play`, `?skipMenu`, `?bench`, `?skipPreload` pulam o menu (`Boot → Loading` com
+  `matchConfigFromSearch`: `?faction`, `?ffa`, `?seed`, `?difficulty`); `?texq`, `?quality`, `?settings=1` e o bench
+  funcionam como antes. `window.game` = a `GameApp`, exposta ao entrar na 1ª partida; `gameManager`, `inputManager`,
+  `uiManager`, `terrain`… são getters da sessão atual (null fora de partida); `sceneManager` e `quality` são da
+  aplicação. `window.warpoly` = a mesma instância, já disponível no menu (`warpoly.state`, `warpoly.matchCount`).
+- **Pausa** (`ui/screens/PauseMenu.js`): Esc (quando não há colocação de construção nem seleção a limpar —
+  `InputManager.onPauseRequest`) ou o botão ❚❚ da HUD (`#btn-pause-menu`). Continuar / Reiniciar (mesma config e
+  seed) / Menu Principal / Sair (tenta `window.close()`, senão volta ao menu). Em `Paused` a simulação e as partículas
+  param; câmera (WASD/setas, com `InputManager.suspended`), água, HUD e render continuam. O interruptor "Pausa" do
+  painel de configurações continua sendo `gm.isPaused` (independente da máquina de estados).
+- **Fim de jogo**: `#game-over-modal` (texto pelo `UIManager`) com "Jogar novamente" (`withNewSeed(config)`) e
+  "Menu principal". Sem `location.reload()`.
+- **Descarte da sessão** (`MatchSession.dispose`): `InputManager.dispose` e `UIManager.dispose` removem os listeners
+  de window/DOM (AbortController) e o timer de notificação e devolvem a HUD estática ao estado inicial;
+  `ParticleSystem.dispose` limpa partículas e textos flutuantes; todo objeto que a sessão pôs na cena (tudo o que não
+  estava nela ao criar a sessão) é removido e suas geometrias/materiais descartados, exceto os dos caches do
+  `ModelFactory` (`render/sceneDisposal.js`: templates, fantasmas e materiais compartilhados). Texturas só são
+  descartadas por quem as cria por partida (névoa em `GameManager.dispose`, textos flutuantes); as texturas em cache
+  por módulo (terreno, árvores, flora, água) sobrevivem. `GameManager.dispose` tira as IAs do loop e solta entidades.
+  Teste de vazamento: `tools/ui-captures/state-flow.mjs` (patamar pós-dispose estável; ver relatório da F2-04).
+- `GameManager.resetMap/startMatch/setPlayerFaction` continuam existindo (compatibilidade), mas reiniciar a partida
+  agora é recriar a sessão — isso corrige o B7.
 
 `GameManager.update(dt)`:
 1. Vitória/derrota: jogador sem HQ (construção com `role: 'hq'`) fica `defeated`. Jogador local derrotado → derrota; só um time vivo → vitória.
@@ -92,8 +132,8 @@ animate() [rAF, delta máx 0.1s, sem timestep fixo]
 ## Modelo de dados (F2-01)
 
 ### Jogadores
-- `MatchConfig` (`src/sim/MatchConfig.js`): `{ mapId, seed, players: [{ id, name, factionId, team, color, isAI, isLocal, startSlot }] }`.
-  `main.js` monta a config a partir da URL (`matchConfigFromSearch`) e a passa ao `GameManager`. Padrão: 1×1, jogador local = `?faction` ou humano (id 0, time 0), IA = a outra facção (id 1, time 1). `?ffa=1` acrescenta a IA 2 (facção do jogador local, time 2, slot 2).
+- `MatchConfig` (`src/sim/MatchConfig.js`): `{ mapId, seed, difficulty, players: [{ id, name, factionId, team, color, isAI, isLocal, startSlot }] }`.
+  `main.js` monta a config a partir do menu (`createMatchConfig`) ou da URL (`matchConfigFromSearch`) e a `MatchSession` a passa ao `GameManager`. `difficulty` (`easy|normal|hard|brutal`) é guardada na config (a IA ainda não a lê); `withNewSeed(cfg)` gera a config de "Jogar novamente". Padrão: 1×1, jogador local = `?faction` ou humano (id 0, time 0), IA = a outra facção (id 1, time 1). `?ffa=1` acrescenta a IA 2 (facção do jogador local, time 2, slot 2).
 - `Player` (`src/sim/Player.js`): `resources {wood, gold, stone}`, `population`, `maxPopulation`, `researchedUpgrades: Set`, `defeated`, `startPos`; métodos `canAfford`, `deduct`, `add` (tipo ou custo inteiro), `recalculatePop(gm)`.
 - `PlayerRegistry`: `getPlayer(id)`, `localPlayer`, `isHostile(a, b)` (times diferentes; matriz pré-calculada, usada nas varreduras O(n²)), `isAlly(a, b)`, `aliveTeams()`. O dono neutro (−1) não é hostil nem aliado de ninguém.
 - `GameManager` expõe `players`, `getPlayer`, `localPlayer`, `localPlayerId`, `isHostile`, `isAlly`, `aiDirectors[]` (um `AIDirector(gm, playerId, baseCenter)` por IA; `aiDirector` = o primeiro).

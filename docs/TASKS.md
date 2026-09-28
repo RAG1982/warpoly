@@ -52,8 +52,8 @@
 | Fase | Total | TODO | DOING | DONE |
 |---|---|---|---|---|
 | F0 Fundação | 7 | 0 | 0 | 7 |
-| F1 Desempenho | 10 | 6 | 1 | 3 |
-| F2 Núcleo | 8 | 6 | 1 | 1 |
+| F1 Desempenho | 10 | 4 | 3 | 3 |
+| F2 Núcleo | 8 | 6 | 0 | 2 |
 | F3 Jogabilidade WC2 base | 11 | 11 | 0 | 0 |
 | F4 Jogabilidade WC2 expansão | 8 | 8 | 0 | 0 |
 | F5 IA | 6 | 6 | 0 | 0 |
@@ -122,7 +122,7 @@
 - **Resultado**: `src/render/mergeStaticTemplate.js` + `staticTemplates.js` (`?merge=0` desliga). Castelo 487→19, Grande Salão 733→20. Cena inicial 3 907→1 339 draw calls; bench inicial 47→108 FPS. Unidades ainda dominam o combate (F1-03).
 
 ### F1-03 · Unidades: mesclar partes rígidas por "osso"
-- **Status**: `TODO` · Lane PERF · Onda 2 · Dep: F0-04
+- **Status**: `DOING(agente-onda2, 2026-09-28)` · Lane PERF · Onda 2 · Dep: F0-04
 - **Fazer**: mesclar filhos de cada nó animado (`Torso, Head, ArmL…`) em um mesh por material; manter os nomes que o `UnitAnimator` usa. Meta ≤ 15 draw calls por unidade.
 - **Aceite**: animações idênticas no inspetor; bench 100 unidades ≥ 50 FPS.
 
@@ -137,7 +137,7 @@
 - **Aceite**: nenhum objeto atravessa a névoa; unidades inimigas somem ao sair da visão.
 
 ### F1-06 · Grade espacial (spatial hash) para a simulação
-- **Status**: `TODO` · Lane PERF (arquivo novo) + CORE (integração) · Onda 2 · Dep: —
+- **Status**: `DOING(agente-onda2, 2026-09-28)` · Lane PERF (arquivo novo) + CORE (integração) · Onda 2 · Dep: —
 - **Fazer**: `src/sim/SpatialGrid.js`; usar em colisões unidade×unidade, unidade×bloqueadores, busca de alvo/aggro, torres, seleção. Elimina O(n²).
 - **Aceite**: bench 300 unidades: tempo de `gameManager.update` < 4 ms.
 
@@ -182,9 +182,10 @@
 - **Aceite**: duas execuções com mesma seed e mesmos comandos → mesmo checksum após 10 min (teste automatizado).
 
 ### F2-04 · Máquina de estados do jogo
-- **Status**: `DOING(agente-onda2, 2026-09-28)` · Lane CORE · Onda 2 · Dep: —
+- **Status**: `DONE(ee1c289)` · Lane CORE · Onda 2 · Dep: —
 - **Fazer**: `Boot → MainMenu → MatchSetup → Loading → InGame ⇄ Paused → PostGame`; criar/destruir partida sem recarregar (dispose completo de cena, listeners, timers); `MatchConfig {mapId, players[], startingResources, victoryCondition, seed}`. Corrige B7.
 - **Aceite**: jogar 3 partidas seguidas sem reload; heap volta ao patamar inicial.
+- **Resultado**: `GameStateMachine.js` + `MatchSession.js` + `PauseMenu.js`; menu → partida → pausa → fim → jogar de novo sem reload; teste de vazamento (5 partidas) estável; 2ª partida carrega em ~2,6 s; B7 corrigido.
 
 ### F2-05 · Mapas orientados a dados
 - **Status**: `TODO` · Lane CORE + CONTENT · Onda 3 · Dep: F2-01

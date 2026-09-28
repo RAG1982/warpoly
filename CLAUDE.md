@@ -13,6 +13,13 @@ RTS 3D low-poly no navegador (three.js + Vite, JS ES modules), inspirado em **Wa
 - Debug no console: `window.game` (jogo), `window.inspectorApp` (inspetor); desempenho em `game.sceneManager.renderer.info`.
 - Blender headless (pipeline de arte): `/home/rafael/Downloads/blender-5.2.1-linux-x64/blender -b --python tools/blender/<script>.py`.
 
+## Regras de recursos da máquina (OBRIGATÓRIO — a máquina travou por OOM em 2026-09-28)
+- Todo processo pesado (Playwright/Chromium, Blender, `npm run bench`, `npm run smoke`) roda **somente** via
+  `/home/rafael/warpoly/tools/safe-run.sh [--mem 6G] [--timeout 300] -- <comando>` (trava global: 1 por vez; teto de RAM sem swap).
+- No navegador de teste use `?texq=low` quando existir e `?skipPreload` sempre que a medição não for de load.
+- Encerre o dev server (vite) e navegadores ao terminar; nunca deixe processos órfãos.
+- No máximo 2 agentes em paralelo.
+
 ## Regras
 - Textos de UI em PT-BR (até existir i18n — F6-09).
 - Nós nomeados dos modelos (`Torso`, `ArmL`, `Sword`…) são usados pelo `UnitAnimator` e `ModelFactory.rebindUserData`: não renomeie sem atualizar os dois.

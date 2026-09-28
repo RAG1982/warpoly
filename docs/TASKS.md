@@ -47,6 +47,16 @@
 
 ---
 
+## Fluxo de execução atual (2026-09-28)
+Opus escreve a spec em `docs/specs/<ID>.md`; agente **Sonnet** executa; Opus revisa relatório + testes e faz o merge. Tarefas de arte no Blender (F7-*) **adiadas até o código estar pronto**.
+
+| Spec pronta | Tarefa | Executor |
+|---|---|---|
+| `docs/specs/F0-08-anti-swiftshader.md` | F0-08 bloquear navegador sem GPU | haiku |
+| `docs/specs/F1-05-nevoa-shader.md` | F1-05 (continuação da WIP `dd57a03`) | sonnet |
+| `docs/specs/F1-03-unidades-por-osso.md` | F1-03 | sonnet |
+| `docs/specs/F1-06-grade-espacial.md` | F1-06 | sonnet |
+
 ## Quadro resumo
 
 | Fase | Total | TODO | DOING | DONE |
@@ -364,12 +374,12 @@
 - **Resultado**: `tools/blender/` (common.py, build_grunt.py, build_castle.py), `public/models/{grunt,castle}.glb` (meshopt+WebP), `src/entities/glbModels.js`, `?glb=1`. Grunt 35→8 draw calls, atlas 512²; Castelo 487→2 draw calls, atlas 1024². Inspetor: "Guerreiro Orc (Blender)" / "Castelo (Blender)". Pendente: decisão do dono sobre orientação do machado.
 
 ### F7-00b · Migração de todo o catálogo para o pipeline Blender
-- **Status**: `TODO` · Lane ART · Onda 2 · Dep: F7-00 aprovado
+- **Status**: `ADIADA(até o código estar pronto — decisão do dono)` · Lane ART · Onda 2 · Dep: F7-00 aprovado
 - **Fazer**: refazer os 37 modelos (prioridade: unidades orcs → construções grandes → ambiente), um agente por grupo de modelos em paralelo; remover `*Textures.js` procedurais substituídos. Substitui F1-02/F1-03/F1-01 para os modelos migrados.
 - **Aceite**: load < 5 s; cena inicial < 400 draw calls.
 
 ### F7-09 · Ícones, retratos e artes 2D renderizados no Blender
-- **Status**: `TODO` · Lane ART+UI · Onda 2 · Dep: F7-00
+- **Status**: `ADIADA(até o código estar pronto — decisão do dono)` · Lane ART+UI · Onda 2 · Dep: F7-00
 - **Fazer**: script que renderiza (Eevee) ícones de comando, retratos animáveis de unidades para o painel de seleção, arte do menu principal e da tela de loading a partir dos mesmos `.glb`; sprites em `public/ui/`.
 - **Aceite**: HUD usa os novos ícones; consistência visual com o jogo 3D.
 
@@ -472,6 +482,7 @@ _(agentes adicionam aqui: `NEW-<n> · título · lane · motivo`)_
 - NEW-9 · IA destruiu HQ de jogador parado em < 240 s nos testes da F2-01 — avaliar agressividade inicial ao criar dificuldades (F5-03) · AI
 - NEW-10 · Animação de ataque do UnitAnimator termina com punho atrás do corpo (afeta todos os modelos) · ART · achado na F7-00
 - NEW-11 · Avisos de deprecação three 0.186: `THREE.Clock` → `THREE.Timer`; `PCFSoftShadowMap` removido (cai para PCF) — ajustar QualitySettings/main · PERF
+- F0-08 · Scripts de navegador abortam sem GPU real (SwiftShader estourou 12 GB às 14:41) · QA · spec em docs/specs/F0-08-anti-swiftshader.md
 - NEW-1 · Avaliar uso real de `GLTFBuildingLoader` em `GreatHall.js` e remover ou adotar no pipeline Blender (F7-00) · ART · ficou fora do escopo da F0-03
 
 ## Notas de integração

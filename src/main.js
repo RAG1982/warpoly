@@ -9,6 +9,7 @@ import { GameManager } from './core/GameManager.js';
 import { InputManager } from './core/InputManager.js';
 import { UIManager } from './ui/UIManager.js';
 import { AssetPreloader } from './core/AssetPreloader.js';
+import { shouldShowMainMenu, showMainMenu } from './ui/screens/MainMenu.js';
 
 class GameApp {
   static async init() {
@@ -161,6 +162,8 @@ class GameApp {
 
 // Start Game when DOM is ready
 window.addEventListener('DOMContentLoaded', () => {
+  // F6-01: sem ?play/?skipMenu/?bench/?skipPreload, mostra o menu principal e não inicia o jogo.
+  if (shouldShowMainMenu()) { showMainMenu(); return; }
   GameApp.init().then((app) => {
     if (new URLSearchParams(window.location.search).has('bench')) import('./debug/bench.js').then((m) => m.startBench(app));
   });

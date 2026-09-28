@@ -18,9 +18,16 @@ while [[ $# -gt 0 ]]; do
   esac
 done
 [[ $# -gt 0 ]] || { echo "uso: $0 [--mem 12G] [--timeout 300] -- comando..." >&2; exit 2; }
+# Reentrante: se já estamos dentro de um safe-run (ex.: safe-run -- npm run smoke, e o smoke chama
+# safe-run de novo), não pega a trava outra vez — senão a chamada interna espera a externa para sempre.
+if [[ "${WARPOLY_HEAVY_LOCK_HELD:-}" == "1" ]]; then
+  echo "[safe-run] já dentro de safe-run; executando sem nova trava: $*" >&2
+  exec timeout --kill-after=10 "$TMO" "$@"
+fi
 exec 9>/tmp/warpoly-heavy.lock
 echo "[safe-run] aguardando trava global…" >&2
 flock 9
+export WARPOLY_HEAVY_LOCK_HELD=1
 echo "[safe-run] executando (mem=$MEM, timeout=${TMO}s): $*" >&2
 systemd-run --user --scope -q -p MemoryMax="$MEM" -p MemorySwapMax=0 \
   nice -n 10 ionice -c3 timeout --kill-after=10 "$TMO" "$@"

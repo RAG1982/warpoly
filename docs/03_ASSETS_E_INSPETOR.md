@@ -6,7 +6,7 @@
 - Pedestal, grade, wireframe, presets de luz (Estúdio, Dia…), tela cheia.
 - Unidades: animações `Idle, Caminhando, Lutando, Coletando, Recebendo Golpe, Caindo`, linha do tempo, velocidade 0.25×–2×.
 - Construções: pré-visualização dos VFX customizados (forjas, chiqueiro etc.).
-- Painel de estatísticas: triângulos, vértices, componentes, materiais, bounding box, arquivo-fonte. "Componentes" conta as malhas já mescladas (F1-02); `inspector.html?merge=0` mostra o modelo original.
+- Painel de estatísticas: triângulos, vértices, componentes, materiais, bounding box, arquivo-fonte. "Componentes" conta as malhas já mescladas (F1-02 construções/decorações, F1-03 unidades); `inspector.html?merge=0` mostra o modelo original.
 - API de debug: `inspectorApp.selectModel('<id>')`, `inspectorApp.currentModelObject`.
 
 ## Medição por modelo (2026-09-28)
@@ -79,6 +79,27 @@ Decorações: berry_bush 67 → 5 · flower_patch ~190 → 9 · mushroom_stump 3
 Regras da mescla: agrupa por material × `castShadow` (a regra de sombra por tamanho da F1-04 roda antes, no gerador); `receiveShadow` vira "OU" do grupo; peças sem sombra que somam ≤ 25 % dos triângulos do grupo com sombra do mesmo material entram nele (custo zero de draw call). Ficam de fora: nós da lista `keep`/prefixo `Anim_`, referências em `userData`, nós com `onBeforeRender`, luzes, sprites, InstancedMesh, `userData.noMerge`, material em array, morph targets, invisíveis e transparentes (salvo `mergeTransparent`, usado só nos braseiros do Grande Salão). Capturas e números: `tools/merge-compare/` (`capture.mjs`, `results.json`).
 
 Cena (1280×720, `?texq=low`, RX 7600 XT): passe principal da cena inicial **2 500 → 945** draw calls (total com sombra 3 870 → 1 347); `npm run bench` inicial 3 907 → 1 339 calls e 47 → 108 FPS; combate100 10 843 → 8 584 calls e 18 → 23 FPS (o resto é das unidades — F1-03).
+
+### Unidades depois da F1-03 (mesclagem por osso, 2026-09-28)
+
+Cada unidade procedural é mesclada uma vez por tipo no `ModelFactory` (`src/render/mergeUnitTemplate.js`), relativa a cada "osso" (nó animado por `UnitAnimator`/`ModelFactory.rebindUserData`), não à raiz — braços, cabeça, pernas e armas continuam se movendo de forma independente. O inspetor aplica a mesma mescla; `?merge=0` desliga (jogo e inspetor) para comparar. `grunt_glb` (pipeline Blender) já é otimizado e não passa por aqui.
+
+| Modelo | Antes | Depois |
+|---|---:|---:|
+| archer | 154 | 54 |
+| bandit | 145 | 59 |
+| villager | 129 | 55 |
+| knight | 83 | 41 |
+| peon | 38 | 21 |
+| grunt | 35 | 25 |
+| axethrower | 27 | **15** |
+| ogre | 25 | **12** |
+
+Redução de 45–66 % por unidade (triângulos idênticos antes/depois). **Não atinge a meta de ≤ 15 draw calls em todas as unidades** (só axethrower e ogre): cada "osso" precisa continuar com sua própria transformação, então malhas de ossos diferentes nunca podem ser mescladas entre si mesmo compartilhando material — o piso de draw calls por unidade é a soma, por osso, do número de materiais distintos usados nele. Cavaleiro/arqueiro/aldeão/bandido usam 9–12 ossos com vários materiais PBR dedicados por peça (couro, metal, ouro, tecido); reduzir mais sem violar "não mudar materiais/cores" exigiria consolidar materiais por osso (fora do escopo desta tarefa) ou reduzir o número de peças nos próprios modelos (F1-01, unidades orcs).
+
+Impacto em cena: `npm run bench` combate100 (RX 7600 XT, `?texq=low`) **18 FPS / 10 538 calls → 32,3 FPS / 5 775 calls** (`?merge=0` vs. mesclado); ainda abaixo dos 50 FPS da meta da F1-03. Capturas comparativas (`merge=0` vs. mesclado) em `tools/merge-compare/units/` (`capture.mjs`, `results.json`): knight/fight, archer/fight-tensioned, villager/gather-wood, grunt e ogre/fight+hurt-flash, peon/idle-face — nenhuma peça some, muda de lugar ou deixa de animar.
+
+Regras específicas de unidades: nós de visibilidade alternada (`Axe`, `Pickaxe`, `Hammer`, `Pack`, `WoodBundle`, `GoldSack`, `Plume`, `DrawnArrow`, `DrawnAxe`) são ossos (mescla interna, filhos do próprio nó — o toggle de `visible` continua funcionando); `BowStringTop/Bottom` nunca são mescladas (reposicionadas por `updateBowString`); malhas com material em array (cabeças dos orcs, rosto só na face frontal) ficam como estão (já são o mínimo: 1 draw call por material do array).
 
 ### Ambiente
 oak 16m/476t · pine 12m/208t · autumn 16m/476t · birch 29m/904t · flower_patch 185m · berry_bush 65m · mushroom_stump 37m · water_lily 35m · boulder 11m · pebbles 6m · grass_tuft 14m · arrow 4m.

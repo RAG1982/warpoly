@@ -37,7 +37,8 @@ import {
   createMushroomStump,
   createWaterLily
 } from '../models/index.js';
-import { prepareStaticTemplate } from '../render/staticTemplates.js';
+import { prepareStaticTemplate, isStaticMergeEnabled } from '../render/staticTemplates.js';
+import { mergeUnitTemplate } from '../render/mergeUnitTemplate.js';
 import { GLB_MODELS, glbEnabled, glbTemplates, loadGlbTemplates, setTeamColor } from './glbModels.js';
 
 /**
@@ -161,7 +162,8 @@ export class ModelFactory {
    */
   static getOrCreateModel(key, generatorFn, type = null) {
     if (!this.templates.has(key)) {
-      const template = prepareStaticTemplate(key, generatorFn()); // F1-02 (?merge=0 desliga)
+      let template = prepareStaticTemplate(key, generatorFn()); // F1-02 (?merge=0 desliga)
+      if (type && isStaticMergeEnabled()) template = mergeUnitTemplate(template); // F1-03
       this.templates.set(key, template);
     }
     const template = this.templates.get(key);

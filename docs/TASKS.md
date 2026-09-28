@@ -51,7 +51,7 @@
 
 | Fase | Total | TODO | DOING | DONE |
 |---|---|---|---|---|
-| F0 Fundação | 7 | 0 | 1 | 6 |
+| F0 Fundação | 7 | 0 | 0 | 7 |
 | F1 Desempenho | 10 | 8 | 2 | 0 |
 | F2 Núcleo | 8 | 8 | 0 | 0 |
 | F3 Jogabilidade WC2 base | 11 | 11 | 0 | 0 |
@@ -88,9 +88,10 @@
 - **Resultado**: `?bench=inicial|combate100|massa300` + `npm run bench` (Playwright, GPU real). Baseline: 15,7 / 5,3 / 1,6 FPS; 8,7k / 26k / 56k draw calls.
 
 ### F0-05 · Ferramentas de qualidade
-- **Status**: `DOING(agente-onda1, 2026-09-28)` · Lane QA · Onda 1 · Dep: —
+- **Status**: `DONE(c673a16)` · Lane QA · Onda 1 · Dep: —
 - **Fazer**: ESLint (flat config) + Prettier (sem reformatar tudo em massa — só `--check` em arquivos tocados), Vitest com 1 teste de exemplo (Pathfinder), `jsconfig.json` com `checkJs` opcional, scripts `lint`, `test`, `smoke` (Playwright abre `/` e `/inspector.html` sem erros de console).
 - **Aceite**: `npm run lint && npm test && npm run smoke` passam.
+- **Resultado**: ESLint 9 (0 erros, avisos de código morto), Prettier, Vitest (9 testes do Pathfinder), `npm run smoke` via safe-run com GPU real. Smoke em WebGL por software ainda estoura 6 GB até a F1-01.
 
 ### F0-06 · Centralizar dados de balanceamento
 - **Status**: `DONE(8e913f1)` · Lane FOUND→CORE · Onda 1 · Dep: —
@@ -458,6 +459,8 @@ _(agentes adicionam aqui: `NEW-<n> · título · lane · motivo`)_
 
 - NEW-2 · IA reembolsa custo errado em `AIEconomyManager.placeBuilding` (usa `director.costs[tipoDaConstrução]`, mas `costs` é indexado por papel → devolve custo da fazenda) · AI · achado na F0-06
 - NEW-3 · Card de seleção ainda mostra nomes antigos em inglês (`entityName`: "Villager"…); unificar com nomes PT-BR/glossário · UI · depende de F3-00/F6-09
+- NEW-4 · `Pathfinder.hasLineOfSight` devolve false para pontos idênticos (0/0 = NaN em `t`) · PERF · achado na F0-05 (`src/core/Pathfinder.js:157-175`)
+- NEW-5 · Remover materiais/texturas criados e não usados (OrcWatchtowerModel:50-51, OrcLumberMillModel:51-52, PigFarmModel:52, TreeModel:259, ArcherModel:90) · PERF/ART · lint da F0-05
 - NEW-1 · Avaliar uso real de `GLTFBuildingLoader` em `GreatHall.js` e remover ou adotar no pipeline Blender (F7-00) · ART · ficou fora do escopo da F0-03
 
 ## Notas de integração

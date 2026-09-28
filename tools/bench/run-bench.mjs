@@ -16,6 +16,7 @@ import { spawn } from 'node:child_process';
 import { mkdirSync, writeFileSync } from 'node:fs';
 import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { assertHardwareGpu } from '../lib/assertGpu.mjs';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const ROOT = resolve(__dirname, '../..');
@@ -86,7 +87,9 @@ async function launch(chromium) {
   const attempts = [];
   if (!wantHeadless && hasDisplay) attempts.push({ headless: false, args: GPU_ARGS });
   attempts.push({ headless: true, args: GPU_ARGS });
-  attempts.push({ headless: true, args: ['--use-angle=swiftshader', '--enable-unsafe-swiftshader'] });
+  if (process.env.ALLOW_SOFTWARE_GL === '1') {
+    attempts.push({ headless: true, args: ['--use-angle=swiftshader', '--enable-unsafe-swiftshader'] });
+  }
 
   let lastErr;
   for (const opt of attempts) {
@@ -152,6 +155,8 @@ async function main() {
     {
       const ctx = await browser.newContext();
       const pg = await ctx.newPage();
+      // Verifica GPU antes de navegar para o jogo (F0-08)
+      await assertHardwareGpu(pg);
       await pg.goto(`${BASE_URL}/?skipPreload`, { waitUntil: 'load', timeout: TIMEOUT_MS }).catch(() => {});
       await pg.waitForFunction(() => window.game, null, { timeout: 60000 }).catch(() => {});
       await ctx.close();

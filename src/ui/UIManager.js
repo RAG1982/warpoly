@@ -52,6 +52,13 @@ export class UIManager {
     this.notificationBox = document.getElementById('notification-box');
 
     this.lastSelectionKey = null;
+
+    // F2-04: os elementos da HUD vivem a aplicação inteira; os listeners desta instância
+    // saem em dispose() (a sessão de partida é recriada sem recarregar a página).
+    this._abort = new AbortController();
+    this._listenOpts = { signal: this._abort.signal };
+    this._notificationTimer = null;
+
     this.initControls();
     this.initMinimapEvents();
     this.initActionsEventDelegation();
@@ -67,12 +74,12 @@ export class UIManager {
         settingsPanel.style.display = isHidden ? 'block' : 'none';
         this.sound.playSelect();
       }
-    });
+    }, this._listenOpts);
 
     document.getElementById('btn-close-settings')?.addEventListener('click', () => {
       if (settingsPanel) settingsPanel.style.display = 'none';
       this.sound.playSelect();
-    });
+    }, this._listenOpts);
 
     // Speed Controls [1X] [2X] [3X]
     const speedPills = document.querySelectorAll('.speed-pill');
@@ -86,14 +93,14 @@ export class UIManager {
         const pauseToggle = document.getElementById('toggle-pause');
         if (pauseToggle) pauseToggle.checked = false;
         this.sound.playSelect();
-      });
+      }, this._listenOpts);
     });
 
     // Pause Switch Toggle
     document.getElementById('toggle-pause')?.addEventListener('change', (e) => {
       this.gm.isPaused = e.target.checked;
       this.sound.playSelect();
-    });
+    }, this._listenOpts);
 
     // Volume Sliders (SFX & Music)
     const sliderSfx = document.getElementById('slider-sfx');
@@ -102,7 +109,7 @@ export class UIManager {
       const val = parseInt(e.target.value, 10);
       if (valSfx) valSfx.innerText = `${val}%`;
       this.sound.setSfxVolume(val / 100);
-    });
+    }, this._listenOpts);
 
     const sliderMusic = document.getElementById('slider-music');
     const valMusic = document.getElementById('val-music');
@@ -110,7 +117,7 @@ export class UIManager {
       const val = parseInt(e.target.value, 10);
       if (valMusic) valMusic.innerText = `${val}%`;
       this.sound.setMusicVolume(val / 100);
-    });
+    }, this._listenOpts);
 
     // Atmosphere Time-of-Day Buttons (Day, Sunset, Night)
     const timePills = document.querySelectorAll('.time-pill');
@@ -119,35 +126,32 @@ export class UIManager {
       timePills.forEach(p => p.classList.remove('active'));
       e.target.classList.add('active');
       this.sound.playSelect();
-    });
+    }, this._listenOpts);
     document.getElementById('btn-time-sunset')?.addEventListener('click', (e) => {
       this.sm.setTimeOfDay('sunset');
       timePills.forEach(p => p.classList.remove('active'));
       e.target.classList.add('active');
       this.sound.playSelect();
-    });
+    }, this._listenOpts);
     document.getElementById('btn-time-night')?.addEventListener('click', (e) => {
       this.sm.setTimeOfDay('night');
       timePills.forEach(p => p.classList.remove('active'));
       e.target.classList.add('active');
       this.sound.playSelect();
-    });
+    }, this._listenOpts);
 
     // Help / Game Guide Modal
     const helpModal = document.getElementById('help-modal');
     document.getElementById('btn-open-guide')?.addEventListener('click', () => {
       if (helpModal) helpModal.style.display = 'flex';
       this.sound.playSelect();
-    });
+    }, this._listenOpts);
     document.getElementById('btn-close-help')?.addEventListener('click', () => {
       if (helpModal) helpModal.style.display = 'none';
       this.sound.resume();
-    });
+    }, this._listenOpts);
 
-    // Victory/Defeat restart
-    document.getElementById('btn-restart')?.addEventListener('click', () => {
-      window.location.reload();
-    });
+    // Fim de jogo: "Jogar novamente" / "Menu principal" são ligados pela aplicação (main.js, F2-04).
   }
 
   initMinimapEvents() {
@@ -166,7 +170,7 @@ export class UIManager {
       this.sm.cameraTarget.set(worldX, this.gm.terrain.getHeight(worldX, worldZ), worldZ);
     };
 
-    canvas.addEventListener('mousedown', handleMinimapClick);
+    canvas.addEventListener('mousedown', handleMinimapClick, this._listenOpts);
   }
 
   showNotification(msg, duration = 4000) {
@@ -175,7 +179,9 @@ export class UIManager {
     this.notificationBox.style.opacity = '1';
     this.notificationBox.style.transform = 'translateX(-50%) translateY(0)';
 
-    setTimeout(() => {
+    clearTimeout(this._notificationTimer);
+    this._notificationTimer = setTimeout(() => {
+      this._notificationTimer = null;
       this.notificationBox.style.opacity = '0';
       this.notificationBox.style.transform = 'translateX(-50%) translateY(-20px)';
     }, duration);
@@ -233,17 +239,17 @@ export class UIManager {
       if (modal && modal.style.display !== 'flex') {
         modal.style.display = 'flex';
         if (this.gm.gameWon) {
-          title.innerText = '🏆 GLORIOUS VICTORY 🏆';
+          title.innerText = '🏆 VITÓRIA GLORIOSA 🏆';
           title.style.color = '#ffd700';
           msg.innerText = this.gm.playerFaction === 'orc'
-            ? 'The Human Outpost has been crushed! The Horde claims dominion over the island!'
-            : 'The Orc Stronghold has been vanquished! Your kingdom thrives in peace and prosperity.';
+            ? 'O posto avançado humano foi esmagado! Os clãs dominam a ilha.'
+            : 'A fortaleza orc foi derrotada! Seu reino prospera em paz.';
         } else {
-          title.innerText = '💀 DEFEAT 💀';
+          title.innerText = '💀 DERROTA 💀';
           title.style.color = '#ef4444';
           msg.innerText = this.gm.playerFaction === 'orc'
-            ? 'Your Great Hall has fallen to the enemy raiders...'
-            : 'Your Castle has fallen to the enemy raiders...';
+            ? 'Seu Grande Salão caiu diante dos invasores...'
+            : 'Seu Castelo caiu diante dos invasores...';
         }
       }
     }
@@ -288,7 +294,7 @@ export class UIManager {
           }
         }
       }
-    });
+    }, this._listenOpts);
   }
 
   initBuildingEvents() {
@@ -394,7 +400,7 @@ export class UIManager {
           }
         }
       }
-    });
+    }, this._listenOpts);
   }
 
   updateSelectionCard() {
@@ -975,5 +981,37 @@ export class UIManager {
     ctx.strokeStyle = '#ffd700';
     ctx.lineWidth = 1.5;
     ctx.strokeRect(camPos.x - 8, camPos.y - 6, 16, 12);
+  }
+
+  /**
+   * F2-04: fim da sessão de partida. Remove os listeners desta instância, cancela o timer
+   * de notificação e devolve a HUD (elementos estáticos do index.html) ao estado inicial.
+   */
+  dispose() {
+    this._abort.abort();
+    clearTimeout(this._notificationTimer);
+    this._notificationTimer = null;
+
+    const hide = (id) => {
+      const el = document.getElementById(id);
+      if (el) el.style.display = 'none';
+    };
+    hide('game-over-modal');
+    hide('settings-panel');
+    hide('help-modal');
+    if (this.notificationBox) {
+      this.notificationBox.style.opacity = '0';
+      this.notificationBox.innerText = '';
+    }
+    if (this.selectionCard) this.selectionCard.style.display = 'none';
+    document.querySelectorAll('.speed-pill').forEach(p => p.classList.toggle('active', p.dataset.speed === '1'));
+    const pauseToggle = document.getElementById('toggle-pause');
+    if (pauseToggle) pauseToggle.checked = false;
+    document.querySelectorAll('.time-pill').forEach(p => p.classList.toggle('active', p.id === 'btn-time-day'));
+    if (this.minimapCtx) this.minimapCtx.clearRect(0, 0, this.minimapCanvas.width, this.minimapCanvas.height);
+
+    this.currentBuilding = null;
+    this.gm = null;
+    this.im = null;
   }
 }

@@ -1,7 +1,7 @@
 /**
  * MatchConfig.js — Configuração de partida (F2-01).
  *
- *   { mapId, seed, players: [{ id, name, factionId, team, color, isAI, isLocal, startSlot }] }
+ *   { mapId, seed, difficulty, players: [{ id, name, factionId, team, color, isAI, isLocal, startSlot }] }
  *
  * O GameManager cria as bases a partir dos slots daqui (initMapEntities). Enquanto os
  * mapas não forem orientados a dados (F2-05), os slots do mapa continental vivem em
@@ -78,6 +78,18 @@ export function layoutAt(pos, layout = START_LAYOUT) {
   return { buildings: layout.buildings.map(place), units: layout.units.map(place) };
 }
 
+/** Dificuldades da IA escolhidas no menu (F6-01). */
+export const DIFFICULTIES = Object.freeze(['easy', 'normal', 'hard', 'brutal']);
+export const DEFAULT_DIFFICULTY = 'normal';
+
+export function normalizeDifficulty(d) {
+  return DIFFICULTIES.includes(d) ? d : DEFAULT_DIFFICULTY;
+}
+
+export function randomSeed() {
+  return Math.floor(Math.random() * 0x7fffffff);
+}
+
 const otherFaction = (f) => (f === 'orc' ? 'human' : 'orc');
 /** Slot histórico de cada facção no mapa continental (humano NE, orc SW). */
 const homeSlot = (f) => (f === 'orc' ? 1 : 0);
@@ -89,7 +101,13 @@ const homeSlot = (f) => (f === 'orc' ? 1 : 0);
  * - `ffa: true`: jogador local × 2 IAs, cada um num time diferente (3 times).
  *   A 2ª IA usa a facção do jogador local e fica no slot 2.
  */
-export function createMatchConfig({ localFaction = 'human', ffa = false, seed = null, mapId = DEFAULT_MAP_ID } = {}) {
+export function createMatchConfig({
+  localFaction = 'human',
+  ffa = false,
+  seed = null,
+  mapId = DEFAULT_MAP_ID,
+  difficulty = DEFAULT_DIFFICULTY
+} = {}) {
   const local = localFaction === 'orc' ? 'orc' : 'human';
   const ai = otherFaction(local);
   const players = [
@@ -128,12 +146,24 @@ export function createMatchConfig({ localFaction = 'human', ffa = false, seed = 
   }
   return {
     mapId,
-    seed: seed ?? Math.floor(Math.random() * 0x7fffffff),
+    seed: seed ?? randomSeed(),
+    // F2-04: guardada na config; a IA ainda não lê a dificuldade (F5).
+    difficulty: normalizeDifficulty(difficulty),
     players
   };
 }
 
-/** Lê `?faction=orc` e `?ffa=1` (e `?seed=`) da query string. */
+/**
+ * Cópia da config com outra seed ("Jogar novamente", F2-04). Jogadores copiados
+ * (a config nova não compartilha objetos com a antiga).
+ */
+export function withNewSeed(cfg, seed = null) {
+  let next = seed ?? randomSeed();
+  if (seed === null && next === cfg.seed) next = (next + 1) % 0x7fffffff;
+  return { ...cfg, seed: next, players: cfg.players.map((p) => ({ ...p })) };
+}
+
+/** Lê `?faction=orc`, `?ffa=1`, `?seed=` e `?difficulty=` da query string. */
 export function matchConfigFromSearch(search = '') {
   const params = new URLSearchParams(search);
   const seedParam = params.get('seed');
@@ -142,7 +172,8 @@ export function matchConfigFromSearch(search = '') {
   return createMatchConfig({
     localFaction: params.get('faction') === 'orc' ? 'orc' : 'human',
     ffa: ffa === '1' || ffa === 'true',
-    seed
+    seed,
+    difficulty: params.get('difficulty') || DEFAULT_DIFFICULTY
   });
 }
 

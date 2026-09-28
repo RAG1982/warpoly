@@ -1,9 +1,12 @@
 // src/ui/screens/MainMenu.js
 // F6-01 · Menu principal + sub-painel "Escaramuça" (maquete da Onda 1).
 //
-// Fluxo provisório (até a F2-04 permitir iniciar a partida sem reload):
+// Fluxo (F2-04):
 //   - O menu aparece quando a URL NÃO tem ?play, ?skipMenu, ?bench nem ?skipPreload.
-//   - "Iniciar" navega para /?play&faction=<human|orc>, que dispara o loading + jogo atuais.
+//   - "Iniciar" chama `onStart({ faction, difficulty })`: a máquina de estados (main.js)
+//     monta a MatchConfig e inicia a partida sem recarregar a página. Sem `onStart`
+//     (uso isolado do menu), cai no fluxo antigo: navega para /?play&faction=<human|orc>.
+//   - Abrir/fechar o painel "Escaramuça" avisa `onSetupChange(true|false)` (estado MatchSetup).
 //
 // Fundo: cena em CSS/SVG + partículas em canvas 2D (sem three.js). As construções
 // 3D atuais geram texturas procedurais 2048² na criação, o que atrasaria o menu em
@@ -64,8 +67,16 @@ export function buildPlayUrl(faction, search = window.location.search) {
 const esc = (s) => String(s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 
 export class MainMenu {
-  constructor(parent = document.body) {
+  /**
+   * @param {HTMLElement} [parent]
+   * @param {object} [opts]
+   * @param {(choice: {faction: string, difficulty: string}) => void} [opts.onStart]
+   * @param {(open: boolean) => void} [opts.onSetupChange]
+   */
+  constructor(parent = document.body, { onStart = null, onSetupChange = null } = {}) {
     this.parent = parent;
+    this.onStart = onStart;
+    this.onSetupChange = onSetupChange;
     this.root = null;
     this.activePanel = null; // 'skirmish' | 'options' | null
     this.lastOpener = null;
@@ -104,6 +115,8 @@ export class MainMenu {
   }
 
   destroy() {
+    clearTimeout(this._startTimer);
+    this._startTimer = null;
     document.removeEventListener('keydown', this._onKeyDown);
     this._stopParticles();
     this.root?.remove();
@@ -336,7 +349,10 @@ export class MainMenu {
       this.root.querySelector(`#mm-${this.activePanel}`).hidden = true;
     }
     this.lastOpener = opener || null;
+    const wasSetup = this.activePanel === 'skirmish';
     this.activePanel = name;
+    if (name === 'skirmish' && !wasSetup) this.onSetupChange?.(true);
+    else if (name !== 'skirmish' && wasSetup) this.onSetupChange?.(false);
     panel.hidden = false;
     this.root.classList.add('mm-has-panel');
     this.root.dataset.panel = name;
@@ -352,7 +368,9 @@ export class MainMenu {
   closePanel() {
     if (!this.activePanel) return;
     this.root.querySelector(`#mm-${this.activePanel}`).hidden = true;
+    const wasSetup = this.activePanel === 'skirmish';
     this.activePanel = null;
+    if (wasSetup) this.onSetupChange?.(false);
     this.root.classList.remove('mm-has-panel');
     delete this.root.dataset.panel;
     this.root.querySelectorAll('[aria-controls].is-active').forEach((b) => b.classList.remove('is-active'));
@@ -377,8 +395,16 @@ export class MainMenu {
     this.root.classList.add('mm-leaving');
     const btn = this.root.querySelector('.mm-btn--start');
     if (btn) { btn.disabled = true; btn.querySelector('.mm-btn__label').textContent = 'Preparando…'; }
-    const url = buildPlayUrl(this.faction);
     const reduce = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
+    const choice = { faction: this.faction, difficulty: this.difficulty };
+    if (this.onStart) {
+      this._startTimer = setTimeout(() => {
+        this._startTimer = null;
+        this.onStart(choice);
+      }, reduce ? 0 : 380);
+      return;
+    }
+    const url = buildPlayUrl(this.faction);
     setTimeout(() => window.location.assign(url), reduce ? 0 : 380);
   }
 
@@ -458,10 +484,10 @@ export class MainMenu {
 }
 
 /** Monta o menu e esconde a tela de loading/HUD. Retorna a instância. */
-export function showMainMenu(parent = document.body) {
+export function showMainMenu(parent = document.body, opts = {}) {
   const loading = document.getElementById('loading-screen');
   if (loading) loading.style.display = 'none';
-  return new MainMenu(parent).mount();
+  return new MainMenu(parent, opts).mount();
 }
 
 // ------------------------------------------------------------------ artwork

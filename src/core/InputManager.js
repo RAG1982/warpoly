@@ -16,8 +16,18 @@ export class InputManager {
 
     // Keyboard state
     this.keys = {};
-    window.addEventListener('keydown', e => this.onKeyDown(e));
-    window.addEventListener('keyup', e => this.onKeyUp(e));
+
+    // F2-04: com `suspended` (menu de pausa aberto) só a câmera responde (WASD/setas);
+    // cliques e atalhos são ignorados. `onPauseRequest` é chamado no Esc sem nada a cancelar.
+    this.suspended = false;
+    this.onPauseRequest = null;
+
+    // Listeners de window/DOM removidos em dispose() (sessão de partida descartável).
+    this._abort = new AbortController();
+    const opts = { signal: this._abort.signal };
+    window.addEventListener('keydown', e => this.onKeyDown(e), opts);
+    window.addEventListener('keyup', e => this.onKeyUp(e), opts);
+    window.addEventListener('blur', () => { this.keys = {}; }, opts);
 
     // Mouse drag / selection box
     this.isLeftDown = false;
@@ -35,11 +45,11 @@ export class InputManager {
 
     // DOM events
     const dom = this.sm.renderer.domElement;
-    dom.addEventListener('mousedown', e => this.onMouseDown(e));
-    window.addEventListener('mousemove', e => this.onMouseMove(e));
-    window.addEventListener('mouseup', e => this.onMouseUp(e));
-    dom.addEventListener('wheel', e => this.onWheel(e), { passive: false });
-    dom.addEventListener('contextmenu', e => e.preventDefault());
+    dom.addEventListener('mousedown', e => this.onMouseDown(e), opts);
+    window.addEventListener('mousemove', e => this.onMouseMove(e), opts);
+    window.addEventListener('mouseup', e => this.onMouseUp(e), opts);
+    dom.addEventListener('wheel', e => this.onWheel(e), { passive: false, signal: this._abort.signal });
+    dom.addEventListener('contextmenu', e => e.preventDefault(), opts);
 
     // Selection marquee box element
     this.boxEl = document.getElementById('selection-box');
@@ -66,6 +76,7 @@ export class InputManager {
 
   onKeyDown(e) {
     this.keys[e.code] = true;
+    if (this.suspended) return;
 
     if (e.code === 'KeyH') {
       // Focus on Castle / Great Hall
@@ -75,10 +86,14 @@ export class InputManager {
         this.gm.selectSingle(hq);
       }
     } else if (e.code === 'Escape') {
+      // Esc: cancela a colocação; senão limpa a seleção; senão abre o menu de pausa (F2-04).
       if (this.placingBuildingType) {
         this.cancelPlacement();
-      } else {
+      } else if (this.gm.selectedUnits.length > 0 || this.gm.selectedBuilding || this.gm.selectedResource) {
         this.gm.clearSelection();
+      } else if (this.onPauseRequest) {
+        e.preventDefault();
+        this.onPauseRequest();
       }
     } else if (e.code === 'KeyQ') {
       this.sm.rotateCamera(Math.PI / 8);
@@ -93,11 +108,13 @@ export class InputManager {
 
   onWheel(e) {
     e.preventDefault();
+    if (this.suspended) return;
     const zoomDir = Math.sign(e.deltaY) * 0.12;
     this.sm.zoomCamera(zoomDir);
   }
 
   onMouseDown(e) {
+    if (this.suspended) return;
     if (e.target && e.target.closest && e.target.closest('#ui-layer')) {
       return;
     }
@@ -346,5 +363,22 @@ export class InputManager {
       this.clickDecal.scale.addScalar(delta * 2.5);
       this.clickDecal.material.opacity = Math.max(0, this.decalLife / 0.35);
     }
+  }
+
+  /** F2-04: remove listeners, fantasma de construção e o anel de clique (fim da sessão). */
+  dispose() {
+    this._abort.abort();
+    this.cancelPlacement();
+    if (this.boxEl) this.boxEl.style.display = 'none';
+    if (this.clickDecal) {
+      this.clickDecal.removeFromParent();
+      this.clickDecal.geometry.dispose();
+      this.clickDecal.material.dispose();
+      this.clickDecal = null;
+    }
+    this.keys = {};
+    this.hoveredEntity = null;
+    this.onPauseRequest = null;
+    this.uiManager = null;
   }
 }

@@ -77,7 +77,8 @@ export function createOgre() {
   headGroup.position.set(0, 0.82, 0.15);
 
   const headGeo = new THREE.BoxGeometry(0.72, 0.68, 0.72);
-  const headMesh = new THREE.Mesh(headGeo, faceMat);
+  // Rosto só na face frontal (+Z); demais faces com pele lisa (ordem BoxGeometry: +x,-x,+y,-y,+z,-z)
+  const headMesh = new THREE.Mesh(headGeo, [skinMat, skinMat, skinMat, skinMat, faceMat, skinMat]);
   headGroup.add(headMesh);
 
   // Single Ivory Horn on Forehead

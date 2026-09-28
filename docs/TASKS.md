@@ -52,12 +52,12 @@
 | Fase | Total | TODO | DOING | DONE |
 |---|---|---|---|---|
 | F0 Fundação | 7 | 0 | 0 | 7 |
-| F1 Desempenho | 10 | 8 | 1 | 1 |
+| F1 Desempenho | 10 | 8 | 0 | 2 |
 | F2 Núcleo | 8 | 8 | 0 | 0 |
 | F3 Jogabilidade WC2 base | 11 | 11 | 0 | 0 |
 | F4 Jogabilidade WC2 expansão | 8 | 8 | 0 | 0 |
 | F5 IA | 6 | 6 | 0 | 0 |
-| F6 HUD/UX | 9 | 8 | 1 | 0 |
+| F6 HUD/UX | 9 | 8 | 0 | 1 |
 | F7 Arte/Áudio | 11 | 10 | 1 | 0 |
 | F8 Conteúdo | 6 | 6 | 0 | 0 |
 | F9 Multiplayer | 5 | 5 | 0 | 0 |
@@ -126,7 +126,7 @@
 - **Aceite**: animações idênticas no inspetor; bench 100 unidades ≥ 50 FPS.
 
 ### F1-04 · Sombras e renderer
-- **Status**: `DOING(agente-onda1, 2026-09-28)` · Lane PERF · Onda 1 · Dep: —
+- **Status**: `DONE(f4fa447)` · Lane PERF · Onda 1 · Dep: —
 - **Fazer**: `castShadow` só em meshes com volume relevante (flag por modelo ou por tamanho da bbox); shadow camera ajustada ao frustum visível; `shadowMap.autoUpdate` com atualização a cada N frames para estáticos; presets de qualidade; limitar DPR por preset; resolução dinâmica se FPS < alvo.
 - **Aceite**: redução ≥ 50% de draw calls de sombra; sem artefatos visíveis.
 
@@ -323,7 +323,7 @@
 ## F6 — HUD / UX
 
 ### F6-01 · Menu principal
-- `DOING(agente-onda1, 2026-09-28)` · UI · Onda 1 (maquete) / Onda 2 (integração com F2-04) · Novo Jogo, Campanha, Multiplayer, Opções, Inspetor, Créditos; fundo 3D animado da cena; substitui parâmetros de URL.
+- `DONE(520dcc7)` · UI · Onda 1 (maquete) / Onda 2 (integração com F2-04) · Novo Jogo, Campanha, Multiplayer, Opções, Inspetor, Créditos; fundo 3D animado da cena; substitui parâmetros de URL.
 
 ### F6-02 · Tela de configuração de partida (Skirmish)
 - `TODO` · UI · Dep: F2-04 · Escolha de facção (Aliança/Horda com prévia 3D), mapa (miniatura), 1–7 oponentes IA, times, cores, dificuldade, recursos iniciais, condição de vitória, seed.
@@ -463,6 +463,8 @@ _(agentes adicionam aqui: `NEW-<n> · título · lane · motivo`)_
 - NEW-4 · `Pathfinder.hasLineOfSight` devolve false para pontos idênticos (0/0 = NaN em `t`) · PERF · achado na F0-05 (`src/core/Pathfinder.js:157-175`)
 - NEW-5 · Remover materiais/texturas criados e não usados (OrcWatchtowerModel:50-51, OrcLumberMillModel:51-52, PigFarmModel:52, TreeModel:259, ArcherModel:90) · PERF/ART · lint da F0-05
 - NEW-6 · Completar F1-01: empacotar roughness+metalness (ORM) para High < 300 MB; pintura em Worker/OffscreenCanvas; cache IndexedDB; troca de qualidade sem recarregar · PERF
+- NEW-7 · `TreeManager`: InstancedMesh desenha sempre 120 instâncias (vagas com escala 0) e a esfera de culling cobre o mapa (~700k tris por passada de sombra) → ajustar `count`, dividir em chunks, LOD · PERF · achado na F1-04
+- NEW-8 · ✅ Rosto dos orcs (Peão, Grunt, Arremessador, Ogro) repetia nas 6 faces da cabeça → corrigido: textura só na face frontal (+Z). Regra para TODOS os modelos novos (inclusive Blender): textura de rosto só na frente da cabeça · ART · pedido do dono
 - NEW-1 · Avaliar uso real de `GLTFBuildingLoader` em `GreatHall.js` e remover ou adotar no pipeline Blender (F7-00) · ART · ficou fora do escopo da F0-03
 
 ## Notas de integração

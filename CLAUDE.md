@@ -24,5 +24,6 @@ RTS 3D low-poly no navegador (three.js + Vite, JS ES modules), inspirado em **Wa
 - Textos de UI em PT-BR (até existir i18n — F6-09).
 - Nós nomeados dos modelos (`Torso`, `ArmL`, `Sword`…) são usados pelo `UnitAnimator` e `ModelFactory.rebindUserData`: não renomeie sem atualizar os dois.
 - Mudanças visuais: confira no jogo **e** no inspetor antes de entregar.
+- Texturas de rosto ficam **só na face frontal (+Z) da cabeça**; laterais, topo e nuca usam pele/material liso. Armas com gume voltado para a frente do personagem (+Z).
 - Orçamento por modelo novo: ≤ 20 draw calls e texturas ≤ 512².
 - Não use nomes próprios/lore da Blizzard em conteúdo novo (ver `docs/05_PARIDADE_WARCRAFT2.md`).

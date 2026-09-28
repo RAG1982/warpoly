@@ -93,7 +93,8 @@ export function createAxethrower() {
   headGroup.position.set(0, 0.66, 0.05);
 
   const headGeo = new THREE.BoxGeometry(0.48, 0.52, 0.52);
-  const headMesh = new THREE.Mesh(headGeo, faceMat);
+  // Rosto só na face frontal (+Z); demais faces com pele lisa (ordem BoxGeometry: +x,-x,+y,-y,+z,-z)
+  const headMesh = new THREE.Mesh(headGeo, [trollSkinMat, trollSkinMat, trollSkinMat, trollSkinMat, faceMat, trollSkinMat]);
   headGroup.add(headMesh);
 
   // Tall Flaming Mohawk Hair Crest

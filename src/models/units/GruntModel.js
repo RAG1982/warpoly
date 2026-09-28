@@ -96,7 +96,8 @@ export function createGrunt() {
   headGroup.position.set(0, 0.7, 0.08);
 
   const headGeo = new THREE.BoxGeometry(0.62, 0.6, 0.62);
-  const headMesh = new THREE.Mesh(headGeo, faceMat);
+  // Rosto só na face frontal (+Z); demais faces com pele lisa (ordem BoxGeometry: +x,-x,+y,-y,+z,-z)
+  const headMesh = new THREE.Mesh(headGeo, [orcSkinMat, orcSkinMat, orcSkinMat, orcSkinMat, faceMat, orcSkinMat]);
   headGroup.add(headMesh);
 
   // Spangenhelm Iron Helmet

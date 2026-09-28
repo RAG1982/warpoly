@@ -114,7 +114,8 @@ export function createPeon() {
 
   // Skull
   const skullGeo = new THREE.BoxGeometry(0.58, 0.56, 0.58);
-  const skullMesh = new THREE.Mesh(skullGeo, faceMat);
+  // Rosto só na face frontal (+Z); demais faces com pele lisa (ordem BoxGeometry: +x,-x,+y,-y,+z,-z)
+  const skullMesh = new THREE.Mesh(skullGeo, [orcSkinMat, orcSkinMat, orcSkinMat, orcSkinMat, faceMat, orcSkinMat]);
   headGroup.add(skullMesh);
 
   // Heavy Orc Brow ridge

@@ -1,8 +1,24 @@
 import * as THREE from 'three';
 import { Unit } from '../entities/Unit.js';
 import { Building } from '../entities/Building.js';
+import {
+  GreatHall,
+  OrcBarracks,
+  PigFarm,
+  OrcHouse,
+  OrcWatchtower,
+  OrcLumberMill,
+  OrcForge
+} from '../entities/buildings/orc/index.js';
 import { Tree } from '../entities/Tree.js';
 import { ResourceDeposit } from '../entities/ResourceDeposit.js';
+import { FogOfWar } from './FogOfWar.js';
+import { EnemyAI } from './EnemyAI.js';
+import { AIDirector } from '../ai/AIDirector.js';
+import { TreeManager } from '../world/TreeManager.js';
+import { Pathfinder } from './Pathfinder.js';
+import { HumanForge } from '../entities/buildings/HumanForge.js';
+import { UPGRADE_CONFIG } from './UpgradeConfig.js';
 
 export class GameManager {
   constructor(scene, terrain, soundManager, particleSystem) {
@@ -11,11 +27,14 @@ export class GameManager {
     this.soundManager = soundManager;
     this.particleSystem = particleSystem;
 
+    // Instanced Trees System (6 Draw Calls for all 180 Trees)
+    this.treeManager = new TreeManager(this.scene);
+
     // Economy & Pop
     this.resources = {
-      wood: 180,
-      gold: 140,
-      stone: 80
+      wood: 240,
+      gold: 200,
+      stone: 120
     };
     this.population = 0;
     this.maxPopulation = 15;
@@ -40,112 +59,392 @@ export class GameManager {
     this.isPaused = false;
     this.gameTime = 0;
 
-    // Raid / Wave defense
-    this.raidTimer = 75; // First bandit raid in 75s
-    this.raidInterval = 90;
-    this.raidWave = 0;
+    // Faction: 'human' or 'orc'
+    this.playerFaction = 'human';
+
+    // Researched Upgrades per faction (Forge Upgrades)
+    this.researchedUpgrades = { player: new Set(), enemy: new Set() };
+
+    // Fog of War (covers 160x160 continent)
+    this.fogOfWar = new FogOfWar(this.scene, 160, 160);
+
+    // Autonomous Computer Opponent AI (Utility AI Director)
+    this.aiDirector = null;
+    this.enemyAI = null;
+
+    // Terrain Navigation & Water Obstacle Pathfinder
+    this.pathfinder = new Pathfinder(this.terrain);
+    this.terrain.pathfinder = this.pathfinder;
+
+    this.initMapEntities();
+  }
+
+  setPlayerFaction(faction) {
+    if (this.playerFaction === faction) return;
+    this.playerFaction = faction;
+    this.resetMap();
+    if (this.sceneManager) {
+      if (faction === 'orc') {
+        this.sceneManager.cameraTarget.set(-32, 2.5, 30);
+      } else {
+        this.sceneManager.cameraTarget.set(32, 2.5, -30);
+      }
+    }
+  }
+
+  resetMap() {
+    this.units.forEach(u => this.scene.remove(u.mesh));
+    this.enemies.forEach(e => this.scene.remove(e.mesh));
+    this.buildings.forEach(b => {
+      this.scene.remove(b.mesh);
+      if (b.rallyGroup) this.scene.remove(b.rallyGroup);
+    });
+    this.trees.forEach(t => (t.dispose ? t.dispose() : this.scene.remove(t.mesh)));
+    this.resourceDeposits.forEach(r => this.scene.remove(r.mesh));
+
+    if (this.treeManager) {
+      this.treeManager.dispose();
+      this.treeManager = new TreeManager(this.scene);
+    }
+
+    this.units = [];
+    this.enemies = [];
+    this.buildings = [];
+    this.trees = [];
+    this.resourceDeposits = [];
+    this.selectedUnits = [];
+    this.selectedBuilding = null;
+    this.selectedResource = null;
+    this.resources = { wood: 240, gold: 200, stone: 120 };
+    this.population = 0;
+    this.isGameOver = false;
+    this.gameWon = false;
+    this.aiDirector = null;
+    this.enemyAI = null;
+
+    // Reset Fog of War shroud
+    if (this.fogOfWar) {
+      this.fogOfWar.explored.fill(0);
+      this.fogOfWar.activeVision.fill(0);
+      this.fogOfWar.needsUpdate = true;
+    }
 
     this.initMapEntities();
   }
 
   initMapEntities() {
-    // 1. Initial Buildings matching modelo.png
-    const castle = new Building(this.scene, this.terrain, 'castle', 0, -2, true, 'player');
-    this.buildings.push(castle);
+    const isOrc = this.playerFaction === 'orc';
 
-    const lumberCamp = new Building(this.scene, this.terrain, 'lumber_camp', -19, -4, true, 'player');
-    lumberCamp.mesh.rotation.y = Math.PI / 4;
-    this.buildings.push(lumberCamp);
+    // 1. Initial Player Base & Enemy AI Base (140x140 Continental Map)
+    // Enforces generous spacing between all buildings (at least 11-14 units apart)
+    if (!isOrc) {
+      // --- PLAYER: Human Alliance Kingdom (Northeast around 32, -30) ---
+      // 1 Town Center, 1 Lumber Mill, 1 House
+      const castle = this.createBuilding('castle', 32, -30, true, 'player');
+      this.buildings.push(castle);
 
-    const cottage = new Building(this.scene, this.terrain, 'cottage', 19, -7, true, 'player');
-    cottage.mesh.rotation.y = -Math.PI / 4;
-    this.buildings.push(cottage);
+      const lumberCamp = this.createBuilding('lumber_camp', 20, -34, true, 'player');
+      lumberCamp.mesh.rotation.y = Math.PI / 4;
+      this.buildings.push(lumberCamp);
 
-    const barracks = new Building(this.scene, this.terrain, 'barracks', 16, 13, true, 'player');
-    barracks.mesh.rotation.y = -Math.PI / 2;
-    this.buildings.push(barracks);
+      const cottage = this.createBuilding('cottage', 44, -30, true, 'player');
+      cottage.mesh.rotation.y = -Math.PI / 4;
+      this.buildings.push(cottage);
 
-    // Bandit Stronghold on the mini-island (bottom-left)
-    const banditCamp = new Building(this.scene, this.terrain, 'bandit_camp', -36, 32, true, 'enemy');
-    this.buildings.push(banditCamp);
+      // Player Initial Units: 2 Workers (Villagers), 3 Military Units (2 Knights, 1 Archer)
+      this.spawnUnit('villager', 28, -28, 'player');
+      this.spawnUnit('villager', 36, -32, 'player');
+      this.spawnUnit('knight', 30, -22, 'player');
+      this.spawnUnit('knight', 34, -22, 'player');
+      this.spawnUnit('archer', 24, -20, 'player');
 
-    // 2. Resource Deposits
-    // Gold Mine at (-11, 15) as in modelo.png
-    const goldMine = new ResourceDeposit(this.scene, this.terrain, 'gold', -11, 15);
-    this.resourceDeposits.push(goldMine);
+      // --- ENEMY AI: Orc Horde Stronghold (Southwest around -32, 30) ---
+      // 1 Town Center, 1 Lumber Mill, 1 House
+      const greatHall = this.createBuilding('great_hall', -32, 30, true, 'enemy');
+      this.buildings.push(greatHall);
 
-    // Additional Stone Quarry deposit
-    const stoneQuarry = new ResourceDeposit(this.scene, this.terrain, 'stone', 28, 6);
-    this.resourceDeposits.push(stoneQuarry);
+      const orcLumber = this.createBuilding('orc_lumber_mill', -20, 34, true, 'enemy');
+      orcLumber.mesh.rotation.y = Math.PI / 4;
+      this.buildings.push(orcLumber);
 
-    // 3. Trees matching layout in modelo.png
-    const treePositions = [
-      // Top left cluster (near lumber camp)
-      [-23, -16, 'oak'], [-27, -12, 'oak'], [-25, -20, 'pine'],
-      [-29, -5, 'autumn'], [-24, 4, 'oak'], [-32, -18, 'pine'],
-      // Top island edge
-      [-10, -25, 'oak'], [-3, -27, 'pine'], [8, -26, 'birch'], [15, -24, 'oak'],
-      // Near cottage & right side
-      [27, -18, 'autumn'], [32, -10, 'pine'], [30, -3, 'birch'], [34, 5, 'pine'],
-      // Lower clusters
-      [-19, 24, 'autumn'], [-25, 16, 'pine'], [5, 24, 'oak'], [12, 26, 'birch'],
-      // Mini island trees
-      [-32, 26, 'oak'], [-42, 30, 'pine'], [-38, 38, 'autumn']
-    ];
+      const pigFarm = this.createBuilding('pig_farm', -44, 30, true, 'enemy');
+      pigFarm.mesh.rotation.y = -Math.PI / 4;
+      this.buildings.push(pigFarm);
 
-    treePositions.forEach(([tx, tz, type]) => {
-      const tree = new Tree(this.scene, this.terrain, tx, tz, type);
-      this.trees.push(tree);
-    });
+      // Enemy AI Initial Units: 2 Workers (Peons), 3 Military Units (2 Grunts, 1 Axethrower)
+      this.spawnUnit('peon', -28, 28, 'enemy');
+      this.spawnUnit('peon', -36, 32, 'enemy');
+      this.spawnUnit('grunt', -30, 22, 'enemy');
+      this.spawnUnit('grunt', -34, 22, 'enemy');
+      this.spawnUnit('axethrower', -24, 20, 'enemy');
 
-    // 4. Initial Units matching modelo.png
-    // Left Knight (guarding lumber yard)
-    const k1 = this.spawnUnit('knight', -14, 4, 'player');
-    k1.mesh.rotation.y = Math.PI / 4;
+      // Initialize AI Opponent Director as Orcs
+      this.aiDirector = new AIDirector(this, 'orc', new THREE.Vector2(-32, 30));
+      this.enemyAI = this.aiDirector;
 
-    // Right Knight (near castle & cottage)
-    const k2 = this.spawnUnit('knight', 11, -1, 'player');
-    k2.mesh.rotation.y = -Math.PI / 6;
+      // Reveal Player's Kingdom in Fog of War
+      this.fogOfWar.revealArea(32, -30, 28);
+    } else {
+      // --- PLAYER: Orc Horde Stronghold (Southwest around -32, 30) ---
+      // 1 Town Center, 1 Lumber Mill, 1 House
+      const greatHall = this.createBuilding('great_hall', -32, 30, true, 'player');
+      this.buildings.push(greatHall);
 
-    // Center Path Archers (drawn bows in formation)
-    const a1 = this.spawnUnit('archer', -1, 6, 'player');
-    a1.mesh.rotation.y = 0.1;
-    const a2 = this.spawnUnit('archer', 3, 6, 'player');
-    a2.mesh.rotation.y = -0.1;
+      const orcLumber = this.createBuilding('orc_lumber_mill', -20, 34, true, 'player');
+      orcLumber.mesh.rotation.y = Math.PI / 4;
+      this.buildings.push(orcLumber);
 
-    // Lower Knight & Archer (near Barracks)
-    const k3 = this.spawnUnit('knight', 8, 12, 'player');
-    k3.mesh.rotation.y = -Math.PI / 4;
-    const a3 = this.spawnUnit('archer', 13, 16, 'player');
-    a3.mesh.rotation.y = -Math.PI / 3;
+      const pigFarm = this.createBuilding('pig_farm', -44, 30, true, 'player');
+      pigFarm.mesh.rotation.y = -Math.PI / 4;
+      this.buildings.push(pigFarm);
 
-    // Gold Miner Villager with pickaxe
-    const v1 = this.spawnUnit('villager', -7, 14, 'player');
-    v1.mesh.rotation.y = -Math.PI / 3;
-    if (v1.mesh.userData.pickaxe) {
-      v1.mesh.userData.pickaxe.visible = true;
-      if (v1.mesh.userData.axe) v1.mesh.userData.axe.visible = false;
+      // Player Initial Units: 2 Workers (Peons), 3 Military Units (2 Grunts, 1 Axethrower)
+      this.spawnUnit('peon', -28, 28, 'player');
+      this.spawnUnit('peon', -36, 32, 'player');
+      this.spawnUnit('grunt', -30, 22, 'player');
+      this.spawnUnit('grunt', -34, 22, 'player');
+      this.spawnUnit('axethrower', -24, 20, 'player');
+
+      // --- ENEMY AI: Human Alliance Kingdom (Northeast around 32, -30) ---
+      // 1 Town Center, 1 Lumber Mill, 1 House
+      const castle = this.createBuilding('castle', 32, -30, true, 'enemy');
+      this.buildings.push(castle);
+
+      const lumberCamp = this.createBuilding('lumber_camp', 20, -34, true, 'enemy');
+      lumberCamp.mesh.rotation.y = Math.PI / 4;
+      this.buildings.push(lumberCamp);
+
+      const cottage = this.createBuilding('cottage', 44, -30, true, 'enemy');
+      cottage.mesh.rotation.y = -Math.PI / 4;
+      this.buildings.push(cottage);
+
+      // Enemy AI Initial Units: 2 Workers (Villagers), 3 Military Units (2 Knights, 1 Archer)
+      this.spawnUnit('villager', 28, -28, 'enemy');
+      this.spawnUnit('villager', 36, -32, 'enemy');
+      this.spawnUnit('knight', 30, -22, 'enemy');
+      this.spawnUnit('knight', 34, -22, 'enemy');
+      this.spawnUnit('archer', 24, -20, 'enemy');
+
+      // Initialize AI Opponent Director as Humans
+      this.aiDirector = new AIDirector(this, 'human', new THREE.Vector2(32, -30));
+      this.enemyAI = this.aiDirector;
+
+      // Reveal Player's Stronghold in Fog of War
+      this.fogOfWar.revealArea(-32, 30, 28);
     }
 
-    // Woodchopper Villager with axe
-    const v2 = this.spawnUnit('villager', -15, -2, 'player');
-    v2.mesh.rotation.y = Math.PI / 2;
+    // 2. Resource Deposits (Gold Mines & Stone Quarries)
+    this.spawnResourceDeposits();
 
-    // Initial Bandit Guards near the mini-island camp
-    this.spawnUnit('bandit', -33, 30, 'enemy');
-    this.spawnUnit('bandit', -38, 33, 'enemy');
+    // 3. Harvestable Woodlands & Trees (Spacious wilderness forests, completely outside bases)
+    this.spawnWoodlands();
 
     this.recalculatePopCap();
+  }
+
+  /**
+   * Spawns strategic resource deposits across both kingdoms and the central plains
+   */
+  spawnResourceDeposits() {
+    // Human Realm Deposits
+    this.resourceDeposits.push(new ResourceDeposit(this.scene, this.terrain, 'gold', 30, -46));
+    this.resourceDeposits.push(new ResourceDeposit(this.scene, this.terrain, 'stone', 46, -46));
+    this.resourceDeposits.push(new ResourceDeposit(this.scene, this.terrain, 'gold', 16, -26));
+
+    // Orc Realm Deposits
+    this.resourceDeposits.push(new ResourceDeposit(this.scene, this.terrain, 'gold', -30, 46));
+    this.resourceDeposits.push(new ResourceDeposit(this.scene, this.terrain, 'stone', -46, 46));
+    this.resourceDeposits.push(new ResourceDeposit(this.scene, this.terrain, 'gold', -16, 26));
+
+    // Contested Central Plains Deposits
+    this.resourceDeposits.push(new ResourceDeposit(this.scene, this.terrain, 'gold', 8, -6));
+    this.resourceDeposits.push(new ResourceDeposit(this.scene, this.terrain, 'stone', -8, 6));
+  }
+
+  /**
+   * Spawns spaced-out clusters of harvestable trees with strict clearance from all buildings,
+   * base courtyards, resource deposits, and river crossings.
+   */
+  spawnWoodlands() {
+    const treeTypes = ['oak', 'pine', 'autumn'];
+    const minTreeSpacing = 4.4; // Generous distance between trees for open meadows
+
+    const spawnCluster = (centerX, centerZ, targetCount, radius, preferredType = 'oak') => {
+      let placed = 0;
+      let attempts = 0;
+      const maxAttempts = targetCount * 24;
+
+      while (placed < targetCount && attempts < maxAttempts) {
+        attempts++;
+        const ang = Math.random() * Math.PI * 2;
+        const dist = 2.0 + Math.random() * radius;
+        const x = centerX + Math.cos(ang) * dist;
+        const z = centerZ + Math.sin(ang) * dist;
+        const h = this.terrain.getHeight(x, z);
+
+        // 1. Only plant trees on solid elevated grass plateaus
+        if (h < 1.9) continue;
+
+        // 2. CRITICAL: Never spawn trees inside or near any building footprint (bRad + 7.5 units)
+        const nearBuilding = this.buildings.some(b => {
+          const bRad = b.collisionRadius || 3.0;
+          return Math.hypot(x - b.mesh.position.x, z - b.mesh.position.z) < (bRad + 7.5);
+        });
+        if (nearBuilding) continue;
+
+        // 3. Keep base courtyards and expansion zones completely clear of wild trees (26 unit radius)
+        const distHumanBase = Math.hypot(x - 32, z - (-30));
+        const distOrcBase = Math.hypot(x - (-32), z - 30);
+        if (distHumanBase < 26.0 || distOrcBase < 26.0) continue;
+
+        // 4. Never spawn on top of or hugging resource deposits (8.5 unit clearance)
+        const nearDeposit = this.resourceDeposits.some(r => {
+          return Math.hypot(x - r.mesh.position.x, z - r.mesh.position.z) < 8.5;
+        });
+        if (nearDeposit) continue;
+
+        // 5. Keep river crossings / fords completely clear
+        const fords = [{ x: -16, z: -16 }, { x: 0, z: 0 }, { x: 16, z: 16 }];
+        if (fords.some(f => Math.hypot(x - f.x, z - f.z) < 9.0)) continue;
+
+        // 6. Check minimum distance to all already placed trees
+        const tooCloseToTree = this.trees.some(t => {
+          const dx = t.mesh.position.x - x;
+          const dz = t.mesh.position.z - z;
+          return (dx * dx + dz * dz) < (minTreeSpacing * minTreeSpacing);
+        });
+        if (tooCloseToTree) continue;
+
+        const type = Math.random() < 0.65 ? preferredType : treeTypes[Math.floor(Math.random() * treeTypes.length)];
+        this.trees.push(new Tree(this.scene, this.terrain, x, z, type, this.treeManager));
+        placed++;
+      }
+    };
+
+    // Far Northern Wilderness (Far outside Human Kingdom)
+    spawnCluster(12, -54, 6, 6.0, 'pine');
+    spawnCluster(-12, -54, 6, 6.0, 'pine');
+
+    // Far Eastern Wilderness (East Coastline)
+    spawnCluster(54, 12, 6, 6.0, 'autumn');
+    spawnCluster(54, -2, 6, 6.0, 'autumn');
+
+    // Far Southern Wilderness (Far outside Orc Stronghold)
+    spawnCluster(-12, 54, 6, 6.0, 'pine');
+    spawnCluster(12, 54, 6, 6.0, 'pine');
+
+    // Far Western Wilderness (West Coastline)
+    spawnCluster(-54, -12, 6, 6.0, 'autumn');
+    spawnCluster(-54, 2, 6, 6.0, 'autumn');
+
+    // Central Wilderness & Riverbanks (well clear of the 3 fords)
+    spawnCluster(-28, -26, 6, 6.0, 'oak');
+    spawnCluster(28, 26, 6, 6.0, 'oak');
+    spawnCluster(26, 2, 5, 5.5, 'pine');
+    spawnCluster(-26, -2, 5, 5.5, 'pine');
+    spawnCluster(2, -26, 5, 5.5, 'oak');
+    spawnCluster(-2, 26, 5, 5.5, 'autumn');
+  }
+
+  /**
+   * Validates whether a building of given type can be placed at (x, z).
+   * Enforces:
+   * - Dry elevated terrain (not in water or river channel).
+   * - Minimum clearance from ALL other buildings (collisionRadius + bRad + 3.2).
+   * - Minimum clearance from ALL living trees (collisionRadius + 3.5).
+   * - Minimum clearance from resource deposits (gold mines & stone quarries).
+   * - Not blocking the 3 strategic river crossings.
+   */
+  canPlaceBuilding(type, x, z, ignoreBuilding = null) {
+    const stats = Building.getBuildingStats(type);
+    const radius = stats.collisionRadius || 3.0;
+
+    // 1. Terrain Height check at center and 4 footprint perimeter samples
+    const h = this.terrain.getHeight(x, z);
+    if (h < 1.8) return false;
+
+    const sampleOffset = radius * 0.75;
+    if (this.terrain.getHeight(x + sampleOffset, z + sampleOffset) < 1.8) return false;
+    if (this.terrain.getHeight(x - sampleOffset, z + sampleOffset) < 1.8) return false;
+    if (this.terrain.getHeight(x + sampleOffset, z - sampleOffset) < 1.8) return false;
+    if (this.terrain.getHeight(x - sampleOffset, z - sampleOffset) < 1.8) return false;
+
+    // 2. Minimum distance to other buildings (fast AABB reject)
+    const minBuildingGap = 3.2;
+    for (let i = 0; i < this.buildings.length; i++) {
+      const b = this.buildings[i];
+      if (b === ignoreBuilding || b.isDead) continue;
+      const bRad = b.collisionRadius || 3.0;
+      const maxDist = radius + bRad + minBuildingGap;
+      const dx = x - b.mesh.position.x;
+      if (dx > maxDist || dx < -maxDist) continue;
+      const dz = z - b.mesh.position.z;
+      if (dz > maxDist || dz < -maxDist) continue;
+      if (dx * dx + dz * dz < maxDist * maxDist) {
+        return false;
+      }
+    }
+
+    // 3. Minimum distance to trees (fast AABB reject skips 98% of trees)
+    const minTreeGap = 3.5;
+    const maxTreeDist = radius + minTreeGap;
+    const maxTreeDistSq = maxTreeDist * maxTreeDist;
+    for (let i = 0; i < this.trees.length; i++) {
+      const t = this.trees[i];
+      if (t.isDead || t.woodRemaining <= 0) continue;
+      const dx = x - t.mesh.position.x;
+      if (dx > maxTreeDist || dx < -maxTreeDist) continue;
+      const dz = z - t.mesh.position.z;
+      if (dz > maxTreeDist || dz < -maxTreeDist) continue;
+      if (dx * dx + dz * dz < maxTreeDistSq) {
+        return false;
+      }
+    }
+
+    // 4. Minimum distance to resource deposits (fast AABB reject)
+    const minDepositGap = 3.0;
+    const maxDepDist = radius + 3.0 + minDepositGap;
+    const maxDepDistSq = maxDepDist * maxDepDist;
+    for (let i = 0; i < this.resourceDeposits.length; i++) {
+      const r = this.resourceDeposits[i];
+      if (r.resourcesRemaining <= 0) continue;
+      const dx = x - r.mesh.position.x;
+      if (dx > maxDepDist || dx < -maxDepDist) continue;
+      const dz = z - r.mesh.position.z;
+      if (dz > maxDepDist || dz < -maxDepDist) continue;
+      if (dx * dx + dz * dz < maxDepDistSq) {
+        return false;
+      }
+    }
+
+    // 5. Must not block the 3 strategic river crossings / fords
+    const fords = [
+      { x: -16, z: -16 },
+      { x: 0, z: 0 },
+      { x: 16, z: 16 }
+    ];
+    for (let i = 0; i < 3; i++) {
+      const f = fords[i];
+      const dx = x - f.x;
+      if (dx > 10.0 || dx < -10.0) continue;
+      const dz = z - f.z;
+      if (dz > 10.0 || dz < -10.0) continue;
+      if (dx * dx + dz * dz < 100.0) {
+        return false;
+      }
+    }
+
+    return true;
   }
 
   recalculatePopCap() {
     let cap = 0;
     this.buildings.forEach(b => {
-      if (b.isConstructed && b.faction === 'player') {
-        cap += b.popGranted;
+      if (b.isConstructed && !b.isDead && b.faction === 'player') {
+        cap += (b.popGranted || 0);
       }
     });
-    this.maxPopulation = Math.max(10, cap);
+    this.maxPopulation = cap;
     this.population = this.units.filter(u => !u.isDead).length;
   }
 
@@ -169,35 +468,147 @@ export class GameManager {
   }
 
   spawnUnit(type, x, z, faction = 'player', rallyPoint = null) {
+    if (this.pathfinder && this.pathfinder.isWater(x, z)) {
+      const snapped = this.pathfinder.findNearestWalkable(x, z);
+      x = snapped.x;
+      z = snapped.z;
+    }
     const unit = new Unit(this.scene, this.terrain, type, x, z, faction);
+    unit.gameManager = this;
+
+    // Apply active forge upgrades for this faction to new units
+    if (this.researchedUpgrades[faction]) {
+      this.researchedUpgrades[faction].forEach(upgId => {
+        this.applyUpgradeToUnit(unit, upgId);
+      });
+    }
+
     if (faction === 'player') {
       this.units.push(unit);
       this.population++;
       if (rallyPoint) {
-        unit.moveTo(rallyPoint.x, rallyPoint.z);
+        unit.moveTo(rallyPoint.x, rallyPoint.z, this);
       }
     } else {
       this.enemies.push(unit);
+      if (this.enemyAI) this.enemyAI.recalculatePop();
     }
     return unit;
   }
 
+  isUpgradeResearched(upgradeId, faction = 'player') {
+    return this.researchedUpgrades[faction]?.has(upgradeId) || false;
+  }
+
+  isUpgradeResearching(upgradeId, faction = 'player') {
+    return this.buildings.some(b => b.faction === faction && b.currentResearch && b.currentResearch.id === upgradeId);
+  }
+
+  completeUpgrade(upgradeId, faction = 'player') {
+    if (!this.researchedUpgrades[faction]) {
+      this.researchedUpgrades[faction] = new Set();
+    }
+    this.researchedUpgrades[faction].add(upgradeId);
+
+    // Apply to all currently alive units of this faction
+    const list = faction === 'player' ? this.units : this.enemies;
+    list.forEach(u => {
+      if (!u.isDead) {
+        this.applyUpgradeToUnit(u, upgradeId);
+      }
+    });
+
+    if (faction === 'player') {
+      const cfg = UPGRADE_CONFIG[upgradeId];
+      const factionType = this.playerFaction === 'orc' ? 'orc' : 'human';
+      const upgName = cfg?.name[factionType] || upgradeId;
+      this.uiManager?.showNotification(`🔥 Melhoria forjada: ${upgName}!`);
+    }
+  }
+
+  applyUpgradeToUnit(unit, upgradeId = null) {
+    if (!upgradeId) {
+      const faction = unit.faction || 'player';
+      if (this.researchedUpgrades && this.researchedUpgrades[faction]) {
+        this.researchedUpgrades[faction].forEach(id => {
+          this.applyUpgradeToUnit(unit, id);
+        });
+      }
+      return;
+    }
+
+    const cfg = UPGRADE_CONFIG[upgradeId];
+    if (!cfg) return;
+    if (!cfg.appliesTo(unit.type)) return;
+
+    if (cfg.statType === 'attack') {
+      unit.attack += cfg.bonus;
+    } else if (cfg.statType === 'defense') {
+      unit.armor = (unit.armor || 0) + cfg.bonus;
+    }
+  }
+
+  createBuilding(type, x, z, isConstructed = true, faction = 'player') {
+    let b;
+    switch (type) {
+      case 'great_hall':
+        b = new GreatHall(this.scene, this.terrain, x, z, isConstructed, faction);
+        break;
+      case 'orc_barracks':
+        b = new OrcBarracks(this.scene, this.terrain, x, z, isConstructed, faction);
+        break;
+      case 'pig_farm':
+        b = new PigFarm(this.scene, this.terrain, x, z, isConstructed, faction);
+        break;
+      case 'orc_house':
+        b = new OrcHouse(this.scene, this.terrain, x, z, isConstructed, faction);
+        break;
+      case 'orc_watchtower':
+        b = new OrcWatchtower(this.scene, this.terrain, x, z, isConstructed, faction);
+        break;
+      case 'orc_lumber_mill':
+        b = new OrcLumberMill(this.scene, this.terrain, x, z, isConstructed, faction);
+        break;
+      case 'orc_forge':
+        b = new OrcForge(this.scene, this.terrain, x, z, isConstructed, faction);
+        break;
+      case 'forge':
+        b = new HumanForge(this.scene, this.terrain, x, z, isConstructed, faction);
+        break;
+      default:
+        b = new Building(this.scene, this.terrain, type, x, z, isConstructed, faction);
+        break;
+    }
+    b.gameManager = this;
+    return b;
+  }
+
   buildNewBuilding(type, x, z) {
-    const b = new Building(this.scene, this.terrain, type, x, z, false, 'player');
+    const b = this.createBuilding(type, x, z, false, 'player');
     this.buildings.push(b);
     this.soundManager.playBuildPlace();
     this.recalculatePopCap();
 
-    // Task villagers to construct it
-    const selectedVillagers = this.selectedUnits.filter(u => u.type === 'villager');
-    if (selectedVillagers.length > 0) {
-      selectedVillagers.forEach(v => v.orderBuild(b));
+    // Clean up any depleted tree stumps inside the building footprint so they do not poke through floors
+    const bRadius = b.collisionRadius || 3.0;
+    this.trees.forEach(t => {
+      if (t.isDead && t.stumpMesh) {
+        const d = Math.hypot(x - t.mesh.position.x, z - t.mesh.position.z);
+        if (d < bRadius + 0.5) {
+          t.dispose();
+        }
+      }
+    });
+
+    // Task workers (villagers or peons) to construct it
+    const selectedBuilders = this.selectedUnits.filter(u => u.type === 'villager' || u.type === 'peon');
+    if (selectedBuilders.length > 0) {
+      selectedBuilders.forEach(v => v.orderBuild(b));
     } else {
-      // Find nearest friendly villager
       let nearestV = null;
       let minDist = Infinity;
       this.units.forEach(u => {
-        if (!u.isDead && u.type === 'villager') {
+        if (!u.isDead && (u.type === 'villager' || u.type === 'peon')) {
           const d = u.mesh.position.distanceTo(b.mesh.position);
           if (d < minDist) {
             minDist = d;
@@ -232,12 +643,12 @@ export class GameManager {
     return nearest;
   }
 
-  findNearestDropoff(pos, resourceType, buildings = this.buildings) {
+  findNearestDropoff(pos, resourceType, buildings = this.buildings, faction = 'player') {
     const list = buildings || this.buildings || [];
     const valid = list.filter(b => {
-      if (!b.isConstructed || b.faction !== 'player' || b.isDead) return false;
-      if (b.type === 'castle') return true;
-      if (resourceType === 'wood' && b.type === 'lumber_camp') return true;
+      if (!b.isConstructed || b.faction !== faction || b.isDead) return false;
+      if (b.type === 'castle' || b.type === 'great_hall') return true;
+      if (resourceType === 'wood' && (b.type === 'lumber_camp' || b.type === 'orc_lumber_mill')) return true;
       return false;
     });
 
@@ -313,9 +724,12 @@ export class GameManager {
   }
 
   issueOrder(entityUnderCursor, groundPoint) {
+    this.selectedUnits = this.selectedUnits.filter(u => !u.isDead && !u.isDying && u.state !== 'dying');
     if (this.selectedUnits.length === 0) {
-      // If building selected, set rally point
       if (this.selectedBuilding && groundPoint) {
+        if (this.pathfinder && this.pathfinder.isWater(groundPoint.x, groundPoint.z)) {
+          groundPoint = this.pathfinder.findNearestWalkable(groundPoint.x, groundPoint.z);
+        }
         this.selectedBuilding.setRallyPoint(groundPoint);
         this.soundManager.playOrder();
       }
@@ -331,24 +745,42 @@ export class GameManager {
         this.selectedUnits.forEach(u => u.orderAttack(e));
         return;
       }
-      // Right-clicked a resource: Gather! (Villagers only)
+      // Right-clicked a resource: Gather! (Villagers and Peons)
       if (e instanceof Tree || e instanceof ResourceDeposit) {
-        this.selectedUnits.forEach(u => {
-          if (u.type === 'villager') u.orderGather(e);
-        });
+        const isDepleted = e.isDead || (e.woodRemaining !== undefined && e.woodRemaining <= 0) || (e.resourcesRemaining !== undefined && e.resourcesRemaining <= 0);
+        if (!isDepleted) {
+          let hasWorkers = false;
+          this.selectedUnits.forEach(u => {
+            if (u.type === 'villager' || u.type === 'peon') {
+              u.orderGather(e);
+              hasWorkers = true;
+            }
+          });
+          if (hasWorkers) return;
+        }
+        // If resource is depleted (e.g. cut stump with no wood) or non-workers selected, move units towards target
+        if (groundPoint) {
+          this.selectedUnits.forEach(u => u.moveTo(groundPoint.x, groundPoint.z, this));
+          return;
+        }
         return;
       }
       // Right-clicked an incomplete building: Build!
       if (e instanceof Building && !e.isConstructed && e.faction === 'player') {
         this.selectedUnits.forEach(u => {
-          if (u.type === 'villager') u.orderBuild(e);
+          if (u.type === 'villager' || u.type === 'peon') u.orderBuild(e);
         });
         return;
       }
     }
 
-    // Right-clicked ground: Move in formation
+    // Right-clicked ground: Move in formation avoiding water
     if (groundPoint) {
+      let centerTarget = groundPoint;
+      if (this.pathfinder && this.pathfinder.isWater(centerTarget.x, centerTarget.z)) {
+        centerTarget = this.pathfinder.findNearestWalkable(centerTarget.x, centerTarget.z);
+      }
+
       const count = this.selectedUnits.length;
       const cols = Math.ceil(Math.sqrt(count));
       const spacing = 1.6;
@@ -358,7 +790,13 @@ export class GameManager {
         const col = idx % cols;
         const offsetX = (col - (cols - 1) / 2) * spacing;
         const offsetZ = (row - (cols - 1) / 2) * spacing;
-        u.moveTo(groundPoint.x + offsetX, groundPoint.z + offsetZ);
+        let destX = centerTarget.x + offsetX;
+        let destZ = centerTarget.z + offsetZ;
+        if (this.pathfinder && this.pathfinder.isWater(destX, destZ)) {
+          destX = centerTarget.x;
+          destZ = centerTarget.z;
+        }
+        u.moveTo(destX, destZ, this);
       });
     }
   }
@@ -371,15 +809,15 @@ export class GameManager {
     this.gameTime += dt;
 
     // Check Win/Loss conditions
-    const castle = this.buildings.find(b => b.type === 'castle' && b.faction === 'player');
-    if (!castle || castle.isDead) {
+    const playerHQ = this.buildings.find(b => (b.type === 'castle' || b.type === 'great_hall') && b.faction === 'player');
+    if (!playerHQ || playerHQ.isDead) {
       this.isGameOver = true;
       this.gameWon = false;
       return;
     }
 
-    const banditCamp = this.buildings.find(b => b.type === 'bandit_camp');
-    if (!banditCamp || banditCamp.isDead) {
+    const enemyHQ = this.buildings.find(b => (b.type === 'castle' || b.type === 'great_hall') && b.faction === 'enemy');
+    if (!enemyHQ || enemyHQ.isDead) {
       if (!this.gameWon) {
         this.gameWon = true;
         this.isGameOver = true;
@@ -399,21 +837,29 @@ export class GameManager {
       }
     }
 
+    // Update Units and Buildings
+    if (!this._allUnits) this._allUnits = [];
+    const allUnits = this._allUnits;
+    allUnits.length = 0;
+    for (let i = 0; i < this.units.length; i++) allUnits.push(this.units[i]);
+    for (let i = 0; i < this.enemies.length; i++) allUnits.push(this.enemies[i]);
+
     // Update Buildings
     this.buildings.forEach(b => {
-      b.update(dt, this, this.soundManager, this.particleSystem, this.arrows, this.enemies);
+      b.update(dt, this, this.soundManager, this.particleSystem, this.arrows, b.faction === 'player' ? this.enemies : this.units, allUnits);
     });
 
     // Clean dead buildings
     for (let i = this.buildings.length - 1; i >= 0; i--) {
       if (this.buildings[i].isDead) {
-        this.buildings.splice(i, 1);
+        const deadB = this.buildings.splice(i, 1)[0];
+        if (deadB.dispose) deadB.dispose();
         this.recalculatePopCap();
+        if (this.enemyAI) this.enemyAI.recalculatePop();
       }
     }
 
     // Update Units
-    const allUnits = [...this.units, ...this.enemies];
     this.units.forEach(u => {
       u.update(dt, this, this.soundManager, this.particleSystem, this.arrows, allUnits, this.buildings);
     });
@@ -421,169 +867,190 @@ export class GameManager {
       e.update(dt, this, this.soundManager, this.particleSystem, this.arrows, allUnits, this.buildings);
     });
 
-    // Resolve Collisions: Units cannot walk through buildings or each other!
+    // Resolve Collisions: Units cannot walk through buildings, deposits, trees, or each other
     this.resolveBuildingCollisions();
     this.resolveUnitCollisions();
 
-    // Enemy AI & Raid Timer
-    this.updateEnemyAI(dt);
+    // Autonomous Computer Opponent AI (Utility AI Director)
+    if (this.aiDirector) {
+      this.aiDirector.update(dt);
+    } else if (this.enemyAI) {
+      this.enemyAI.update(dt);
+    }
+
+    // Update Fog of War (reveals explored territory & culls unexplored enemies)
+    if (this.fogOfWar) {
+      this.fogOfWar.update(
+        dt,
+        this.units,
+        this.buildings.filter(b => b.faction === 'player'),
+        this.enemies,
+        this.buildings.filter(b => b.faction === 'enemy')
+      );
+    }
+
+    // Clean dead units from selection
+    if (this.selectedUnits.length > 0) {
+      this.selectedUnits = this.selectedUnits.filter(u => !u.isDead && !u.isDying && u.state !== 'dying');
+    }
 
     // Clean dead units (waits for death collapse animation if canRemove is false)
     for (let i = this.units.length - 1; i >= 0; i--) {
       if (this.units[i].isDead && this.units[i].canRemove !== false) {
-        this.units.splice(i, 1);
+        const deadU = this.units.splice(i, 1)[0];
+        if (deadU.dispose) deadU.dispose();
         this.recalculatePopCap();
       }
     }
     for (let i = this.enemies.length - 1; i >= 0; i--) {
       if (this.enemies[i].isDead && this.enemies[i].canRemove !== false) {
-        this.enemies.splice(i, 1);
+        const deadE = this.enemies.splice(i, 1)[0];
+        if (deadE.dispose) deadE.dispose();
+        if (this.enemyAI) this.enemyAI.recalculatePop();
       }
+    }
+  }
+
+  warmLiveScene() {
+    if (!this.sceneManager || !this.sceneManager.renderer) return;
+    const unhideList = [];
+    this.scene.traverse(obj => {
+      if (obj.isMesh && !obj.visible) {
+        obj.visible = true;
+        unhideList.push(obj);
+      }
+    });
+    this.sceneManager.renderer.compile(this.scene, this.sceneManager.camera);
+    for (let i = 0; i < unhideList.length; i++) {
+      unhideList[i].visible = false;
+    }
+  }
+
+  _checkUnitBlockerCollision(unit, b) {
+    if (b.isDead) return;
+    const bPos = b.mesh.position;
+    const uPos = unit.mesh.position;
+    const uRad = unit.collisionRadius || 0.6;
+    const bRad = b.collisionRadius || (b.type === 'tree' ? 0.75 : 3.0);
+    const minDist = bRad + uRad;
+
+    const dx = uPos.x - bPos.x;
+    if (dx >= minDist || dx <= -minDist) return;
+    const dz = uPos.z - bPos.z;
+    if (dz >= minDist || dz <= -minDist) return;
+
+    const distSq = dx * dx + dz * dz;
+    if (distSq >= minDist * minDist) return;
+
+    const dist = Math.sqrt(distSq);
+    let nx, nz;
+    if (dist < 0.001) {
+      nx = 1;
+      nz = 0;
+    } else {
+      nx = dx / dist;
+      nz = dz / dist;
+    }
+    const push = minDist - dist;
+    uPos.x += nx * push;
+    uPos.z += nz * push;
+    uPos.y = this.terrain.getHeight(uPos.x, uPos.z);
+
+    // Direct delivery upon colliding with dropoff building!
+    const isDropoff = (b.type === 'castle' || b.type === 'great_hall' ||
+      (unit.carrying && unit.carrying.type === 'wood' && (b.type === 'lumber_camp' || b.type === 'orc_lumber_mill'))) &&
+      (b.faction === unit.faction);
+
+    if (unit.state === 'returning' && isDropoff) {
+      unit.depositResources(this, this.soundManager, this.particleSystem);
     }
   }
 
   resolveBuildingCollisions() {
-    const allEntities = [...this.units, ...this.enemies];
-    const livingTrees = this.trees.filter(t => !t.isDead && t.woodRemaining > 0);
-    const blockers = [...this.buildings, ...this.resourceDeposits, ...livingTrees];
-
-    allEntities.forEach(unit => {
+    const checkCollisionsForUnit = (unit) => {
       if (unit.isDead) return;
-      const uPos = unit.mesh.position;
-      const uRad = unit.collisionRadius || 0.6;
-
-      blockers.forEach(b => {
-        if (b.isDead) return;
-        const bPos = b.mesh.position;
-        const bRad = b.collisionRadius || (b.type === 'tree' ? 0.75 : 3.0);
-
-        const dx = uPos.x - bPos.x;
-        const dz = uPos.z - bPos.z;
-        const dist = Math.hypot(dx, dz);
-        const minDist = bRad + uRad;
-
-        if (dist < minDist) {
-          let nx, nz;
-          if (dist < 0.001) {
-            nx = 1;
-            nz = 0;
-          } else {
-            nx = dx / dist;
-            nz = dz / dist;
-          }
-          const push = minDist - dist;
-          uPos.x += nx * push;
-          uPos.z += nz * push;
-          uPos.y = this.terrain.getHeight(uPos.x, uPos.z);
-
-          // Direct delivery upon colliding with dropoff building!
-          if (unit.state === 'returning' && (b.type === 'castle' || (unit.carrying.type === 'wood' && b.type === 'lumber_camp'))) {
-            unit.depositResources(this, this.soundManager, this.particleSystem);
-          }
+      // 1. Buildings
+      const bCount = this.buildings.length;
+      for (let i = 0; i < bCount; i++) {
+        this._checkUnitBlockerCollision(unit, this.buildings[i]);
+      }
+      // 2. Resource deposits
+      const rCount = this.resourceDeposits.length;
+      for (let i = 0; i < rCount; i++) {
+        this._checkUnitBlockerCollision(unit, this.resourceDeposits[i]);
+      }
+      // 3. Living trees
+      const tCount = this.trees.length;
+      for (let i = 0; i < tCount; i++) {
+        const t = this.trees[i];
+        if (!t.isDead && t.woodRemaining > 0) {
+          this._checkUnitBlockerCollision(unit, t);
         }
-      });
-    });
+      }
+    };
+
+    for (let i = 0; i < this.units.length; i++) {
+      checkCollisionsForUnit(this.units[i]);
+    }
+    for (let i = 0; i < this.enemies.length; i++) {
+      checkCollisionsForUnit(this.enemies[i]);
+    }
   }
 
   resolveUnitCollisions() {
-    const allUnits = [...this.units, ...this.enemies].filter(u => !u.isDead);
-    const count = allUnits.length;
+    if (!this._collisionUnits) this._collisionUnits = [];
+    const arr = this._collisionUnits;
+    arr.length = 0;
 
+    for (let i = 0; i < this.units.length; i++) {
+      const u = this.units[i];
+      if (!u.isDead) arr.push(u);
+    }
+    for (let i = 0; i < this.enemies.length; i++) {
+      const e = this.enemies[i];
+      if (!e.isDead) arr.push(e);
+    }
+
+    const count = arr.length;
     for (let i = 0; i < count; i++) {
-      const u1 = allUnits[i];
+      const u1 = arr[i];
       const p1 = u1.mesh.position;
       const r1 = u1.collisionRadius || 0.6;
 
       for (let j = i + 1; j < count; j++) {
-        const u2 = allUnits[j];
+        const u2 = arr[j];
         const p2 = u2.mesh.position;
         const r2 = u2.collisionRadius || 0.6;
-
-        const dx = p2.x - p1.x;
-        const dz = p2.z - p1.z;
-        const dist = Math.hypot(dx, dz);
         const minDist = r1 + r2;
 
-        if (dist < minDist) {
-          let nx, nz;
-          if (dist < 0.001) {
-            const angle = Math.random() * Math.PI * 2;
-            nx = Math.cos(angle);
-            nz = Math.sin(angle);
-          } else {
-            nx = dx / dist;
-            nz = dz / dist;
-          }
+        const dx = p2.x - p1.x;
+        if (dx >= minDist || dx <= -minDist) continue;
+        const dz = p2.z - p1.z;
+        if (dz >= minDist || dz <= -minDist) continue;
 
-          const overlap = (minDist - dist) * 0.5;
-          p1.x -= nx * overlap;
-          p1.z -= nz * overlap;
-          p1.y = this.terrain.getHeight(p1.x, p1.z);
+        const distSq = dx * dx + dz * dz;
+        if (distSq >= minDist * minDist) continue;
 
-          p2.x += nx * overlap;
-          p2.z += nz * overlap;
-          p2.y = this.terrain.getHeight(p2.x, p2.z);
-        }
-      }
-    }
-  }
-
-  updateEnemyAI(dt) {
-    this.raidTimer -= dt;
-    if (this.raidTimer <= 0) {
-      this.raidWave++;
-      this.raidTimer = this.raidInterval;
-      this.soundManager.playAlarm();
-
-      // Spawn raiding party from mini-island bandit camp
-      const raidCount = 2 + Math.min(6, this.raidWave * 2);
-      for (let i = 0; i < raidCount; i++) {
-        const rx = -34 + (Math.random() - 0.5) * 4;
-        const rz = 30 + (Math.random() - 0.5) * 4;
-        const b = this.spawnUnit('bandit', rx, rz, 'enemy');
-
-        // Order raiders to march on Castle or nearest player structure
-        const targetB = this.buildings.find(b => b.type === 'castle') || this.buildings[0];
-        if (targetB) {
-          b.orderAttack(targetB);
-        }
-      }
-    }
-
-    // Idle enemies scan for nearby player units
-    this.enemies.forEach(enemy => {
-      if (enemy.state === 'idle') {
-        let closest = null;
-        let minDist = 14;
-        this.units.forEach(u => {
-          if (!u.isDead) {
-            const d = enemy.mesh.position.distanceTo(u.mesh.position);
-            if (d < minDist) {
-              minDist = d;
-              closest = u;
-            }
-          }
-        });
-
-        if (closest) {
-          enemy.orderAttack(closest);
+        const dist = Math.sqrt(distSq);
+        let nx, nz;
+        if (dist < 0.001) {
+          const angle = Math.random() * Math.PI * 2;
+          nx = Math.cos(angle);
+          nz = Math.sin(angle);
         } else {
-          // Attack nearest player building
-          const playerBuildings = this.buildings.filter(b => b.faction === 'player' && !b.isDead);
-          if (playerBuildings.length > 0) {
-            let nearestB = playerBuildings[0];
-            let minBDist = enemy.mesh.position.distanceTo(nearestB.mesh.position);
-            playerBuildings.forEach(b => {
-              const d = enemy.mesh.position.distanceTo(b.mesh.position);
-              if (d < minBDist) {
-                minBDist = d;
-                nearestB = b;
-              }
-            });
-            enemy.orderAttack(nearestB);
-          }
+          nx = dx / dist;
+          nz = dz / dist;
         }
+
+        const overlap = (minDist - dist) * 0.5;
+        p1.x -= nx * overlap;
+        p1.z -= nz * overlap;
+        p1.y = this.terrain.getHeight(p1.x, p1.z);
+
+        p2.x += nx * overlap;
+        p2.z += nz * overlap;
+        p2.y = this.terrain.getHeight(p2.x, p2.z);
       }
-    });
+    }
   }
 }

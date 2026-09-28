@@ -73,11 +73,20 @@ export class UnitAnimator {
       goldSack: ud.goldSack,
       plume: ud.plume,
       updateBowString: ud.updateBowString || (ud.bow && ud.bow.userData && ud.bow.userData.updateBowString) || null,
-      drawnArrow: ud.drawnArrow || (ud.bow && ud.bow.getObjectByName('DrawnArrow')) || null
+      drawnArrow: ud.drawnArrow || (ud.bow && ud.bow.getObjectByName('DrawnArrow')) || null,
+      weaponL: ud.weaponL,
+      weaponR: ud.weaponR,
+      drawnAxe: ud.drawnAxe,
+      horn: ud.horn,
+      mohawk: ud.mohawk
     };
 
-    // Clone model materials to isolate this unit so flashing never leaks to other units or buildings
-    this.cloneMaterials(model);
+    // Store original materials on userData for zero-clone damage flash
+    model.traverse(child => {
+      if (child.isMesh && child.material && !child.userData.origMaterial) {
+        child.userData.origMaterial = child.material;
+      }
+    });
 
     // Store base transforms for all limbs (model position and heading belong to world/game)
     for (const [key, obj] of Object.entries(this.meshParts)) {
@@ -85,21 +94,6 @@ export class UnitAnimator {
         this.storeBaseTransform(key, obj);
       }
     }
-
-    // Cache original material colors for damage flash
-    model.traverse(child => {
-      if (child.isMesh && child.material) {
-        const mats = Array.isArray(child.material) ? child.material : [child.material];
-        mats.forEach(m => {
-          if (m && !this.originalColors.has(m)) {
-            this.originalColors.set(m, {
-              color: m.color ? m.color.clone() : null,
-              emissive: m.emissive ? m.emissive.clone() : null
-            });
-          }
-        });
-      }
-    });
 
     this.setTime(0);
   }
@@ -392,10 +386,16 @@ export class UnitAnimator {
       this.applyArcherFight(progress, parts);
     } else if (uType === 'knight') {
       this.applyKnightFight(progress, parts);
-    } else if (uType === 'villager') {
+    } else if (uType === 'villager' || uType === 'peon') {
       this.applyVillagerFight(progress, parts);
     } else if (uType === 'bandit') {
       this.applyBanditFight(progress, parts);
+    } else if (uType === 'grunt') {
+      this.applyGruntFight(progress, parts);
+    } else if (uType === 'axethrower') {
+      this.applyAxethrowerFight(progress, parts);
+    } else if (uType === 'ogre') {
+      this.applyOgreFight(progress, parts);
     }
   }
 
@@ -753,6 +753,202 @@ export class UnitAnimator {
     }
   }
 
+  applyGruntFight(p, parts) {
+    // Grunt: Brutal two-handed battleaxe cleave with torso torque
+    if (p < 0.35) {
+      // Windup (0.0 -> 0.35) - heave axe back
+      const t = p / 0.35;
+      const ease = t * t;
+      if (parts.torso) {
+        parts.torso.rotation.y = ease * 0.65;
+        parts.torso.rotation.x = -ease * 0.15;
+      }
+      if (parts.armR) {
+        parts.armR.rotation.x = -ease * 1.55;
+        parts.armR.rotation.y = ease * 0.4;
+      }
+      if (parts.armL) {
+        parts.armL.rotation.x = -ease * 1.25;
+        parts.armL.rotation.y = ease * 0.3;
+      }
+      if (parts.weapon) {
+        parts.weapon.rotation.x = -0.78 - ease * 0.6;
+      }
+      if (parts.head) {
+        parts.head.rotation.y = -ease * 0.25;
+      }
+    } else if (p < 0.60) {
+      // Powerful Cleave Strike (0.35 -> 0.60)
+      const t = (p - 0.35) / 0.25;
+      const ease = Math.sin((t * Math.PI) / 2);
+      if (parts.torso) {
+        parts.torso.rotation.y = 0.65 - ease * 1.25; // snap torque to -0.6
+        parts.torso.rotation.x = -0.15 + ease * 0.45;
+      }
+      if (parts.armR) {
+        parts.armR.rotation.x = -1.55 + ease * 2.85; // slam axe forward to 1.3
+        parts.armR.rotation.y = 0.4 - ease * 0.7;
+      }
+      if (parts.armL) {
+        parts.armL.rotation.x = -1.25 + ease * 2.35;
+      }
+      if (parts.weapon) {
+        parts.weapon.rotation.x = -1.38 + ease * 2.5;
+      }
+      if (parts.head) {
+        parts.head.rotation.y = -0.25 + ease * 0.45;
+      }
+    } else if (p < 0.78) {
+      // Cleave follow-through & impact shudder (0.60 -> 0.78)
+      const shudder = Math.sin((p - 0.60) * 40) * 0.02;
+      if (parts.torso) parts.torso.rotation.y = -0.6 + shudder;
+      if (parts.armR) parts.armR.rotation.x = 1.3;
+      if (parts.weapon) parts.weapon.rotation.x = 1.12;
+    } else {
+      // Recovery (0.78 -> 1.0)
+      const t = (p - 0.78) / 0.22;
+      const ease = t * (2 - t);
+      if (parts.torso) {
+        parts.torso.rotation.y = -0.6 * (1 - ease);
+        parts.torso.rotation.x = 0.3 * (1 - ease);
+      }
+      if (parts.armR) parts.armR.rotation.x = 1.3 * (1 - ease);
+      if (parts.armL) parts.armL.rotation.x = 1.1 * (1 - ease);
+      if (parts.weapon) parts.weapon.rotation.x = 1.12 * (1 - ease) - 0.78 * ease;
+    }
+  }
+
+  applyAxethrowerFight(p, parts) {
+    // Troll Axethrower: Acrobatic ranged axe windup, throw fling, and reload
+    if (p < 0.38) {
+      // Windup (0.0 -> 0.38) - draws right arm back behind head
+      const t = p / 0.38;
+      const ease = t * t;
+      if (parts.torso) {
+        parts.torso.rotation.y = ease * 0.45;
+        parts.torso.rotation.x = -ease * 0.18;
+      }
+      if (parts.head) {
+        parts.head.rotation.y = -ease * 0.35; // keep eyes locked on target
+      }
+      if (parts.armR) {
+        parts.armR.rotation.x = -ease * 1.85; // rear back axe
+        parts.armR.rotation.z = ease * 0.35;
+      }
+      if (parts.armL) {
+        parts.armL.rotation.x = ease * 0.75; // aim forward with left hand
+        parts.armL.rotation.z = -ease * 0.25;
+      }
+      if (parts.weaponR) {
+        parts.weaponR.rotation.x = -0.78 - ease * 0.5;
+      }
+    } else if (p < 0.60) {
+      // Explosive Whip Throw (0.38 -> 0.60)
+      const t = (p - 0.38) / 0.22;
+      const ease = Math.sin((t * Math.PI) / 2);
+      if (parts.torso) {
+        parts.torso.rotation.y = 0.45 - ease * 0.85;
+        parts.torso.rotation.x = -0.18 + ease * 0.45;
+      }
+      if (parts.head) {
+        parts.head.rotation.y = -0.35 + ease * 0.45;
+      }
+      if (parts.armR) {
+        parts.armR.rotation.x = -1.85 + ease * 3.25; // snap forward to 1.4
+        parts.armR.rotation.z = 0.35 - ease * 0.45;
+      }
+      if (parts.armL) {
+        parts.armL.rotation.x = 0.75 - ease * 1.25; // counter-whip back
+      }
+      if (parts.weaponR) {
+        parts.weaponR.rotation.x = -1.28 + ease * 2.8;
+      }
+    } else if (p < 0.78) {
+      // Release follow-through & draw next axe
+      if (parts.armR) parts.armR.rotation.x = 1.4;
+      if (parts.torso) parts.torso.rotation.y = -0.4;
+    } else {
+      // Reset to agile ready crouch (0.78 -> 1.0)
+      const t = (p - 0.78) / 0.22;
+      const ease = t * (2 - t);
+      if (parts.torso) {
+        parts.torso.rotation.y = -0.4 * (1 - ease);
+        parts.torso.rotation.x = 0.27 * (1 - ease);
+      }
+      if (parts.head) {
+        parts.head.rotation.y = 0.1 * (1 - ease);
+      }
+      if (parts.armR) {
+        parts.armR.rotation.x = 1.4 * (1 - ease);
+      }
+      if (parts.armL) {
+        parts.armL.rotation.x = -0.5 * (1 - ease);
+      }
+      if (parts.weaponR) {
+        parts.weaponR.rotation.x = 1.52 * (1 - ease) - 0.78 * ease;
+      }
+    }
+  }
+
+  applyOgreFight(p, parts) {
+    // Ogre: Devastating two-handed overhead tree-trunk club ground slam
+    if (p < 0.42) {
+      // Hoist Overhead (0.0 -> 0.42)
+      const t = p / 0.42;
+      const ease = t * t;
+      if (parts.torso) {
+        parts.torso.rotation.x = -ease * 0.32;
+      }
+      if (parts.head) {
+        parts.head.rotation.x = -ease * 0.25;
+      }
+      if (parts.armR) {
+        parts.armR.rotation.x = -ease * 1.75;
+        parts.armR.rotation.z = -ease * 0.3;
+      }
+      if (parts.armL) {
+        parts.armL.rotation.x = -ease * 1.55;
+        parts.armL.rotation.z = ease * 0.3;
+      }
+      if (parts.weapon) {
+        parts.weapon.rotation.x = -0.78 - ease * 0.8;
+      }
+    } else if (p < 0.65) {
+      // Earth Shattering Slam (0.42 -> 0.65)
+      const t = (p - 0.42) / 0.23;
+      const ease = Math.sin((t * Math.PI) / 2);
+      if (parts.torso) {
+        parts.torso.rotation.x = -0.32 + ease * 0.82; // snap to 0.5 forward
+      }
+      if (parts.head) {
+        parts.head.rotation.x = -0.25 + ease * 0.65;
+      }
+      if (parts.armR) {
+        parts.armR.rotation.x = -1.75 + ease * 3.25; // smash down to 1.5
+      }
+      if (parts.armL) {
+        parts.armL.rotation.x = -1.55 + ease * 2.85;
+      }
+      if (parts.weapon) {
+        parts.weapon.rotation.x = -1.58 + ease * 2.9;
+      }
+    } else if (p < 0.82) {
+      // Impact shudder
+      const shudder = Math.sin((p - 0.65) * 35) * 0.035;
+      if (parts.torso) parts.torso.rotation.x = 0.5 + shudder;
+      if (parts.armR) parts.armR.rotation.x = 1.5;
+    } else {
+      // Heavy recovery
+      const t = (p - 0.82) / 0.18;
+      const ease = t * (2 - t);
+      if (parts.torso) parts.torso.rotation.x = 0.5 * (1 - ease);
+      if (parts.head) parts.head.rotation.x = 0.4 * (1 - ease);
+      if (parts.armR) parts.armR.rotation.x = 1.5 * (1 - ease);
+      if (parts.armL) parts.armL.rotation.x = 1.3 * (1 - ease);
+      if (parts.weapon) parts.weapon.rotation.x = 1.32 * (1 - ease) - 0.78 * ease;
+    }
+  }
+
   // --- 4. GATHER ANIMATION ---
   applyGather(time, progress, parts, uType) {
     // Fast rhythmic chopping / mining strikes
@@ -916,25 +1112,7 @@ export class UnitAnimator {
     }
   }
 
-  cloneMaterials(model) {
-    if (!model) return;
-    const matMap = new Map();
-    model.traverse(child => {
-      if (child.isMesh && child.material) {
-        if (Array.isArray(child.material)) {
-          child.material = child.material.map(m => {
-            if (!matMap.has(m)) matMap.set(m, m.clone());
-            return matMap.get(m);
-          });
-        } else {
-          if (!matMap.has(child.material)) {
-            matMap.set(child.material, child.material.clone());
-          }
-          child.material = matMap.get(child.material);
-        }
-      }
-    });
-  }
+  static sharedHurtMat = new THREE.MeshBasicMaterial({ color: 0xef4444 });
 
   // --- DAMAGE FLASH VISUAL ---
   setDamageFlash(flash) {
@@ -942,22 +1120,11 @@ export class UnitAnimator {
     this.isHurtFlashing = flash;
 
     if (!this.model) return;
+    const hurtMat = UnitAnimator.sharedHurtMat;
     this.model.traverse(child => {
-      if (child.isMesh && child.material) {
-        const mats = Array.isArray(child.material) ? child.material : [child.material];
-        mats.forEach(mat => {
-          if (!mat || !mat.emissive) return;
-          const orig = this.originalColors.get(mat);
-          if (flash) {
-            mat.emissive.setHex(0xc53030); // Vibrant red flash isolated to this unit
-          } else {
-            if (orig && orig.emissive) {
-              mat.emissive.copy(orig.emissive);
-            } else {
-              mat.emissive.setHex(0x000000);
-            }
-          }
-        });
+      if (child.isMesh && child.userData.origMaterial) {
+        if (child.name === 'SelectionRing' || child.name.startsWith('Health')) return;
+        child.material = flash ? hurtMat : child.userData.origMaterial;
       }
     });
   }

@@ -1,3 +1,13 @@
+import { UNIT_TRAIN_CONFIG, BUILDING_BUILD_CONFIG, WORKER_BUILD_LIST } from '../entities/Building.js';
+import { UPGRADE_CONFIG, FORGE_UPGRADES } from '../core/UpgradeConfig.js';
+
+export const BUILDING_TRAINABLE_UNITS = {
+  barracks: ['archer', 'knight'],
+  orc_barracks: ['grunt', 'axethrower', 'ogre'],
+  castle: ['villager'],
+  great_hall: ['peon']
+};
+
 export class UIManager {
   constructor(gameManager, sceneManager, inputManager, soundManager) {
     this.gm = gameManager;
@@ -10,14 +20,34 @@ export class UIManager {
     this.goldVal = document.getElementById('gold-val');
     this.stoneVal = document.getElementById('stone-val');
     this.popVal = document.getElementById('pop-val');
-    this.raidTimerVal = document.getElementById('raid-timer-val');
 
     this.selectionCard = document.getElementById('selection-card');
+
+    // Standard Selection View (Units & Resources)
+    this.standardView = document.getElementById('standard-selection-view');
     this.selectionTitle = document.getElementById('selection-title');
     this.selectionHp = document.getElementById('selection-hp');
     this.selectionHpBar = document.getElementById('selection-hp-fill');
     this.selectionStats = document.getElementById('selection-stats');
     this.selectionActions = document.getElementById('selection-actions');
+
+    // Building Selection View (Matches dialogoBarracs.png)
+    this.buildingView = document.getElementById('building-selection-view');
+    this.bldSelectionTitle = document.getElementById('bld-selection-title');
+    this.bldSelectionHp = document.getElementById('bld-selection-hp');
+    this.bldSelectionHpFill = document.getElementById('bld-selection-hp-fill');
+    this.bldExtraInfo = document.getElementById('bld-extra-info');
+    this.bldTrainSection = document.getElementById('bld-train-section');
+    this.bldTrainLabel = this.bldTrainSection ? this.bldTrainSection.querySelector('.bld-section-label') : null;
+    this.bldTrainButtons = document.getElementById('bld-train-buttons');
+    this.bldQueueSection = document.getElementById('bld-queue-section');
+    this.bldQueueLabel = this.bldQueueSection ? this.bldQueueSection.querySelector('.bld-section-label') : null;
+    this.bldQueueSlots = document.querySelectorAll('.bld-queue-slot');
+    this.bldQueueProgressBar = document.getElementById('bld-queue-progress-bar');
+    this.bldQueueProgressTrack = document.querySelector('.bld-queue-progress-track');
+    this.currentBuilding = null;
+    this.lastResearchedCount = 0;
+    this.lastResearchId = null;
 
     this.minimapCanvas = document.getElementById('minimap-canvas');
     this.minimapCtx = this.minimapCanvas ? this.minimapCanvas.getContext('2d') : null;
@@ -28,54 +58,92 @@ export class UIManager {
     this.initControls();
     this.initMinimapEvents();
     this.initActionsEventDelegation();
+    this.initBuildingEvents();
   }
 
   initControls() {
-    // Atmosphere buttons
-    document.getElementById('btn-time-day')?.addEventListener('click', () => {
+    // --- Config Panel Toggle (hudmodelo.png) ---
+    const settingsPanel = document.getElementById('settings-panel');
+    document.getElementById('btn-config')?.addEventListener('click', () => {
+      if (settingsPanel) {
+        const isHidden = settingsPanel.style.display === 'none' || !settingsPanel.style.display;
+        settingsPanel.style.display = isHidden ? 'block' : 'none';
+        this.sound.playSelect();
+      }
+    });
+
+    document.getElementById('btn-close-settings')?.addEventListener('click', () => {
+      if (settingsPanel) settingsPanel.style.display = 'none';
+      this.sound.playSelect();
+    });
+
+    // Speed Controls [1X] [2X] [3X]
+    const speedPills = document.querySelectorAll('.speed-pill');
+    speedPills.forEach(pill => {
+      pill.addEventListener('click', () => {
+        const speed = parseFloat(pill.dataset.speed || '1');
+        this.gm.gameSpeed = speed;
+        this.gm.isPaused = false;
+        speedPills.forEach(p => p.classList.remove('active'));
+        pill.classList.add('active');
+        const pauseToggle = document.getElementById('toggle-pause');
+        if (pauseToggle) pauseToggle.checked = false;
+        this.sound.playSelect();
+      });
+    });
+
+    // Pause Switch Toggle
+    document.getElementById('toggle-pause')?.addEventListener('change', (e) => {
+      this.gm.isPaused = e.target.checked;
+      this.sound.playSelect();
+    });
+
+    // Volume Sliders (SFX & Music)
+    const sliderSfx = document.getElementById('slider-sfx');
+    const valSfx = document.getElementById('val-sfx');
+    sliderSfx?.addEventListener('input', (e) => {
+      const val = parseInt(e.target.value, 10);
+      if (valSfx) valSfx.innerText = `${val}%`;
+      this.sound.setSfxVolume(val / 100);
+    });
+
+    const sliderMusic = document.getElementById('slider-music');
+    const valMusic = document.getElementById('val-music');
+    sliderMusic?.addEventListener('input', (e) => {
+      const val = parseInt(e.target.value, 10);
+      if (valMusic) valMusic.innerText = `${val}%`;
+      this.sound.setMusicVolume(val / 100);
+    });
+
+    // Atmosphere Time-of-Day Buttons (Day, Sunset, Night)
+    const timePills = document.querySelectorAll('.time-pill');
+    document.getElementById('btn-time-day')?.addEventListener('click', (e) => {
       this.sm.setTimeOfDay('day');
+      timePills.forEach(p => p.classList.remove('active'));
+      e.target.classList.add('active');
       this.sound.playSelect();
     });
-    document.getElementById('btn-time-sunset')?.addEventListener('click', () => {
+    document.getElementById('btn-time-sunset')?.addEventListener('click', (e) => {
       this.sm.setTimeOfDay('sunset');
+      timePills.forEach(p => p.classList.remove('active'));
+      e.target.classList.add('active');
       this.sound.playSelect();
     });
-    document.getElementById('btn-time-night')?.addEventListener('click', () => {
+    document.getElementById('btn-time-night')?.addEventListener('click', (e) => {
       this.sm.setTimeOfDay('night');
+      timePills.forEach(p => p.classList.remove('active'));
+      e.target.classList.add('active');
       this.sound.playSelect();
     });
 
-    // Sound and Music toggles
-    document.getElementById('btn-toggle-sound')?.addEventListener('click', (e) => {
-      const active = this.sound.toggleSound();
-      e.target.innerText = active ? '🔊 SFX' : '🔇 SFX';
-    });
-    document.getElementById('btn-toggle-music')?.addEventListener('click', (e) => {
-      const active = this.sound.toggleMusic();
-      e.target.innerText = active ? '🎵 Music' : '🎵 Off';
-    });
-
-    // Speed Controls
-    document.getElementById('btn-speed-1x')?.addEventListener('click', () => {
-      this.gm.gameSpeed = 1.0;
-      this.gm.isPaused = false;
-    });
-    document.getElementById('btn-speed-2x')?.addEventListener('click', () => {
-      this.gm.gameSpeed = 2.0;
-      this.gm.isPaused = false;
-    });
-    document.getElementById('btn-pause')?.addEventListener('click', () => {
-      this.gm.isPaused = !this.gm.isPaused;
-    });
-
-    // Help Modal
+    // Help / Game Guide Modal
     const helpModal = document.getElementById('help-modal');
-    document.getElementById('btn-help')?.addEventListener('click', () => {
-      helpModal.style.display = 'flex';
+    document.getElementById('btn-open-guide')?.addEventListener('click', () => {
+      if (helpModal) helpModal.style.display = 'flex';
       this.sound.playSelect();
     });
     document.getElementById('btn-close-help')?.addEventListener('click', () => {
-      helpModal.style.display = 'none';
+      if (helpModal) helpModal.style.display = 'none';
       this.sound.resume();
     });
 
@@ -94,9 +162,9 @@ export class UIManager {
       const clickX = e.clientX - rect.left;
       const clickY = e.clientY - rect.top;
 
-      // Map canvas coords (0 to 140) to world coordinates (-55 to 55)
-      const worldX = ((clickX / canvas.width) - 0.5) * 110;
-      const worldZ = ((clickY / canvas.height) - 0.5) * 110;
+      // Map canvas coords (0 to width) to world coordinates (-70 to 70)
+      const worldX = ((clickX / canvas.width) - 0.5) * 140;
+      const worldZ = ((clickY / canvas.height) - 0.5) * 140;
 
       this.sm.cameraTarget.set(worldX, this.gm.terrain.getHeight(worldX, worldZ), worldZ);
     };
@@ -116,24 +184,49 @@ export class UIManager {
     }, duration);
   }
 
-  update() {
-    // 1. Update Resources Bar
-    if (this.woodVal) this.woodVal.innerText = Math.floor(this.gm.resources.wood);
-    if (this.goldVal) this.goldVal.innerText = Math.floor(this.gm.resources.gold);
-    if (this.stoneVal) this.stoneVal.innerText = Math.floor(this.gm.resources.stone);
-    if (this.popVal) this.popVal.innerText = `${this.gm.population} / ${this.gm.maxPopulation}`;
-
-    // Raid Countdown
-    if (this.raidTimerVal) {
-      const sec = Math.max(0, Math.ceil(this.gm.raidTimer));
-      this.raidTimerVal.innerText = `Raid in ${sec}s`;
+  update(delta = 0.016) {
+    // 1. Update Resources Bar (dirty-checked to prevent layout thrashing and string allocations)
+    const wood = Math.floor(this.gm.resources.wood);
+    if (this._lastWood !== wood) {
+      this._lastWood = wood;
+      if (this.woodVal) this.woodVal.innerText = wood;
+    }
+    const gold = Math.floor(this.gm.resources.gold);
+    if (this._lastGold !== gold) {
+      this._lastGold = gold;
+      if (this.goldVal) this.goldVal.innerText = gold;
+    }
+    const stone = Math.floor(this.gm.resources.stone);
+    if (this._lastStone !== stone) {
+      this._lastStone = stone;
+      if (this.stoneVal) this.stoneVal.innerText = stone;
+    }
+    const pop = this.gm.population;
+    const maxPop = this.gm.maxPopulation;
+    if (this._lastPop !== pop || this._lastMaxPop !== maxPop) {
+      this._lastPop = pop;
+      this._lastMaxPop = maxPop;
+      if (this.popVal) {
+        this.popVal.innerText = `${pop} / ${maxPop}`;
+        if (pop >= maxPop) {
+          this.popVal.style.color = '#f87171'; // Red warning when population cap is reached
+        } else if (pop >= maxPop - 1) {
+          this.popVal.style.color = '#fb923c'; // Orange notice when nearly capped
+        } else {
+          this.popVal.style.color = '#fef08a'; // Normal golden color
+        }
+      }
     }
 
     // 2. Selection Card
     this.updateSelectionCard();
 
-    // 3. Minimap
-    this.drawMinimap();
+    // 3. Minimap (throttled to ~12.5 FPS to preserve CPU cycles during large battles)
+    this.minimapTimer = (this.minimapTimer || 0) + delta;
+    if (this.minimapTimer >= 0.08) {
+      this.minimapTimer = 0;
+      this.drawMinimap();
+    }
 
     // 4. Win/Loss Screen
     if (this.gm.isGameOver) {
@@ -145,11 +238,15 @@ export class UIManager {
         if (this.gm.gameWon) {
           title.innerText = '🏆 GLORIOUS VICTORY 🏆';
           title.style.color = '#ffd700';
-          msg.innerText = 'The Bandit Outpost has been destroyed! Your kingdom thrives in peace and prosperity.';
+          msg.innerText = this.gm.playerFaction === 'orc'
+            ? 'The Human Outpost has been crushed! The Horde claims dominion over the island!'
+            : 'The Orc Stronghold has been vanquished! Your kingdom thrives in peace and prosperity.';
         } else {
           title.innerText = '💀 DEFEAT 💀';
           title.style.color = '#ef4444';
-          msg.innerText = 'Your Castle has fallen to the enemy raiders...';
+          msg.innerText = this.gm.playerFaction === 'orc'
+            ? 'Your Great Hall has fallen to the enemy raiders...'
+            : 'Your Castle has fallen to the enemy raiders...';
         }
       }
     }
@@ -187,9 +284,116 @@ export class UIManager {
         } else {
           this.sound.playChop(); // buzz error
           if (this.gm.population >= this.gm.maxPopulation) {
-            this.showNotification('Population limit reached! Build more Cottages.');
+            const farmName = this.gm.playerFaction === 'orc' ? 'Pig Farms' : 'Cottages';
+            this.showNotification(`Population limit reached! Build more ${farmName}.`);
           } else {
             this.showNotification(`Not enough resources to train ${trainType}!`);
+          }
+        }
+      }
+    });
+  }
+
+  initBuildingEvents() {
+    if (!this.buildingView) return;
+
+    this.buildingView.addEventListener('click', (e) => {
+      // 1. Click on forge upgrade button
+      const upgradeBtn = e.target.closest('.bld-upgrade-btn');
+      if (upgradeBtn && this.gm.selectedBuilding) {
+        const b = this.gm.selectedBuilding;
+        const upgradeId = upgradeBtn.getAttribute('data-upgrade');
+        if (upgradeId) {
+          const cfg = UPGRADE_CONFIG[upgradeId];
+          const factionType = this.gm.playerFaction === 'orc' ? 'orc' : 'human';
+          const upgName = cfg ? cfg.name[factionType] : upgradeId;
+
+          if (this.gm.isUpgradeResearched(upgradeId, 'player')) {
+            this.sound.playChop();
+            this.showNotification(`Melhoria "${upgName}" já foi forjada!`);
+            return;
+          }
+
+          if (b.currentResearch) {
+            this.sound.playChop();
+            this.showNotification('A forja já está ocupada trabalhando em uma pesquisa!');
+            return;
+          }
+
+          if (this.gm.isUpgradeResearching(upgradeId, 'player')) {
+            this.sound.playChop();
+            this.showNotification('Esta melhoria já está sendo forjada em outra forja!');
+            return;
+          }
+
+          if (!this.gm.canAfford(cfg.cost)) {
+            this.sound.playChop();
+            this.showNotification(`Recursos insuficientes para forjar ${upgName}!`);
+            return;
+          }
+
+          const ok = b.startResearch(upgradeId, this.gm);
+          if (ok) {
+            this.sound.playHammer();
+            this.showNotification(`Iniciando forjamento: ${upgName}...`);
+            this.renderBuildingTrainButtons(b);
+            this.updateBuildingQueue(b);
+          }
+        }
+        return;
+      }
+
+      // 2. Click on unit train button
+      const trainBtn = e.target.closest('.bld-train-btn');
+      if (trainBtn && this.gm.selectedBuilding) {
+        const b = this.gm.selectedBuilding;
+        const trainType = trainBtn.getAttribute('data-train');
+        if (trainType) {
+          const cfg = UNIT_TRAIN_CONFIG[trainType];
+          if (b.queue.length >= 6) {
+            this.sound.playChop();
+            this.showNotification('Fila de treinamento cheia! (Máximo 6)');
+            return;
+          }
+          const ok = b.queueUnit(trainType, this.gm);
+          if (ok) {
+            this.sound.playSelect();
+            this.updateBuildingQueue(b);
+          } else {
+            this.sound.playChop();
+            if (this.gm.population >= this.gm.maxPopulation) {
+              const houseName = this.gm.playerFaction === 'orc' ? 'Tocas Orc' : 'Casas';
+              this.showNotification(`Limite de população atingido! Construa mais ${houseName}.`);
+            } else {
+              this.showNotification(`Recursos insuficientes para treinar ${cfg ? cfg.name : trainType}!`);
+            }
+          }
+        }
+        return;
+      }
+
+      // 3. Click on a filled slot in the queue to cancel and refund
+      const queueSlot = e.target.closest('.bld-queue-slot.filled');
+      if (queueSlot && this.gm.selectedBuilding) {
+        const b = this.gm.selectedBuilding;
+        if (b.type === 'forge' || b.type === 'orc_forge') {
+          if (b.currentResearch) {
+            b.cancelResearch(this.gm);
+            this.sound.playSelect();
+            this.showNotification('Pesquisa cancelada. Recursos reembolsados.');
+            this.renderBuildingTrainButtons(b);
+            this.updateBuildingQueue(b);
+          }
+          return;
+        }
+
+        const slotIdx = parseInt(queueSlot.getAttribute('data-slot'), 10);
+        if (!isNaN(slotIdx)) {
+          const ok = b.cancelQueuedUnit(slotIdx, this.gm);
+          if (ok) {
+            this.sound.playSelect();
+            this.showNotification('Treinamento cancelado. Recursos reembolsados.');
+            this.updateBuildingQueue(b);
           }
         }
       }
@@ -200,10 +404,15 @@ export class UIManager {
     if (!this.selectionCard) return;
 
     if (this.gm.selectedUnits.length > 0) {
+      this.currentBuilding = null;
+      if (this.buildingView) this.buildingView.style.display = 'none';
+      if (this.standardView) this.standardView.style.display = 'flex';
+      this.selectionCard.style.display = 'flex';
+
       const u = this.gm.selectedUnits[0];
       const count = this.gm.selectedUnits.length;
+      const isWorker = u.type === 'villager' || u.type === 'peon';
 
-      this.selectionCard.style.display = 'flex';
       this.selectionTitle.innerText = count > 1 ? `${count}x ${u.name}s` : u.name;
 
       // Health
@@ -216,112 +425,429 @@ export class UIManager {
         <span>⚔️ Atk: ${u.attack}</span>
         <span>🛡️ Def: ${u.armor || 0}</span>
         <span>🏃 Spd: ${u.speed}</span>
-        ${u.type === 'villager' ? `<span>🎒 Carry: ${u.carrying.amount}/${u.carrying.max} ${u.carrying.type || ''}</span>` : ''}
+        ${isWorker ? `<span>🎒 Carry: ${u.carrying.amount}/${u.carrying.max} ${u.carrying.type || ''}</span>` : ''}
       `;
 
-      const key = u.type === 'villager' ? 'villager_actions' : 'military_actions';
+      const key = isWorker ? `${u.type}_actions` : 'military_actions';
       if (this.lastSelectionKey !== key) {
         this.lastSelectionKey = key;
         this.renderSelectionActions(key);
       }
+      if (isWorker) {
+        this.updateWorkerBuildCosts(u.type);
+      }
     } else if (this.gm.selectedBuilding) {
       const b = this.gm.selectedBuilding;
+      if (this.standardView) this.standardView.style.display = 'none';
+      if (this.buildingView) this.buildingView.style.display = 'flex';
       this.selectionCard.style.display = 'flex';
-      this.selectionTitle.innerText = b.name + (!b.isConstructed ? ' (Under Construction)' : '');
 
-      const pct = Math.max(0, b.hp / b.maxHp) * 100;
-      this.selectionHpBar.style.width = `${pct}%`;
-      this.selectionHp.innerText = `${Math.round(b.hp)} / ${b.maxHp} HP`;
-
-      const currentTraining = (b.queue && b.queue.length > 0) ? b.queue[0] : null;
-      let trainingInfo = '';
-      if (currentTraining) {
-        const trainPct = Math.min(100, Math.round((currentTraining.progress / currentTraining.totalTime) * 100));
-        const remSec = Math.max(1, Math.ceil(currentTraining.totalTime - currentTraining.progress));
-        const trainIcon = currentTraining.type === 'villager' ? '👨‍🌾' : currentTraining.type === 'knight' ? '🛡️' : '🏹';
-        trainingInfo = `<span style="color: #ffd700; font-weight: bold;">${trainIcon} Training ${currentTraining.type.toUpperCase()}: ${trainPct}% (${remSec}s)</span>`;
+      // Header Title
+      if (this.bldSelectionTitle) {
+        let title = b.name.toUpperCase();
+        if (!b.isConstructed) title += ' (EM CONSTRUÇÃO)';
+        else if (b.faction === 'enemy') title += ' (INIMIGO)';
+        this.bldSelectionTitle.innerText = title;
       }
 
-      this.selectionStats.innerHTML = `
-        ${!b.isConstructed ? `<span>🔨 Build: ${Math.round(b.buildProgress)}%</span>` : ''}
-        ${b.popGranted ? `<span>👥 Pop: +${b.popGranted}</span>` : ''}
-        ${b.attackDamage ? `<span>🏹 Damage: ${b.attackDamage}</span>` : ''}
-        ${trainingInfo}
-      `;
-
-      const qLen = b.queue ? b.queue.length : 0;
-      const key = `bld_${b.type}_${b.isConstructed}_${qLen}`;
-      if (this.lastSelectionKey !== key) {
-        this.lastSelectionKey = key;
-        this.renderSelectionActions(key, b);
+      // Health Text & Fill Bar
+      if (this.bldSelectionHp) {
+        this.bldSelectionHp.innerText = `Vida: ${Math.round(b.hp)} / ${b.maxHp}`;
       }
+      if (this.bldSelectionHpFill) {
+        const pct = Math.max(0, Math.min(100, (b.hp / b.maxHp) * 100));
+        this.bldSelectionHpFill.style.width = `${pct}%`;
+      }
+
+      // Extra Info
+      if (this.bldExtraInfo) {
+        if (!b.isConstructed) {
+          this.bldExtraInfo.innerText = `🔨 Construindo: ${Math.round(b.buildProgress)}%`;
+        } else if (b.popGranted) {
+          this.bldExtraInfo.innerText = `👥 +${b.popGranted} População`;
+        } else if (b.attackDamage) {
+          this.bldExtraInfo.innerText = `🏹 Dano: ${b.attackDamage} | Alcance: ${b.attackRange}`;
+        } else {
+          this.bldExtraInfo.innerText = '';
+        }
+      }
+
+      // Render buttons when building changes or forge research state changes
+      const isForge = b.type === 'forge' || b.type === 'orc_forge';
+      const playerResearchedCount = this.gm.researchedUpgrades ? (this.gm.researchedUpgrades[b.faction || 'player']?.size || 0) : 0;
+      const researchId = b.currentResearch ? b.currentResearch.id : null;
+
+      if (this.currentBuilding !== b || (isForge && (this.lastResearchedCount !== playerResearchedCount || this.lastResearchId !== researchId))) {
+        this.currentBuilding = b;
+        this.lastResearchedCount = playerResearchedCount;
+        this.lastResearchId = researchId;
+        this.renderBuildingTrainButtons(b);
+      }
+
+      // Dynamic cost colors check every frame
+      if (b.faction === 'player' && b.isConstructed) {
+        this.updateBuildingCosts(b);
+      }
+
+      // Queue slots and horizontal progress bar
+      this.updateBuildingQueue(b);
     } else if (this.gm.selectedResource) {
-      const r = this.gm.selectedResource;
+      this.currentBuilding = null;
+      if (this.buildingView) this.buildingView.style.display = 'none';
+      if (this.standardView) this.standardView.style.display = 'flex';
       this.selectionCard.style.display = 'flex';
+
+      const r = this.gm.selectedResource;
       const isTree = r.type === 'tree';
-      this.selectionTitle.innerText = isTree ? 'Ancient Tree' : r.name;
+      const isDepletedTree = isTree && (r.isDead || r.woodRemaining <= 0);
+
+      this.selectionTitle.innerText = isDepletedTree ? 'Tronco Cortado' : (isTree ? 'Ancient Tree' : r.name);
 
       const remaining = isTree ? r.woodRemaining : r.resourcesRemaining;
       const max = isTree ? r.maxWood : r.maxResources;
-      const pct = (remaining / max) * 100;
+      const pct = max > 0 ? (remaining / max) * 100 : 0;
       this.selectionHpBar.style.width = `${pct}%`;
-      this.selectionHp.innerText = `${remaining} / ${max} Available`;
-      this.selectionStats.innerHTML = `<span>Assign Villagers to harvest resources</span>`;
+      this.selectionHp.innerText = isDepletedTree
+        ? '0 / 120 Madeira (Esgotada)'
+        : `${remaining} / ${max} Available`;
+      this.selectionStats.innerHTML = isDepletedTree
+        ? '<span>Tronco com cogumelos &bull; Madeira esgotada</span>'
+        : `<span>Assign Villagers to harvest resources</span>`;
 
       if (this.lastSelectionKey !== 'resource') {
         this.lastSelectionKey = 'resource';
         this.selectionActions.innerHTML = '';
       }
     } else {
+      this.currentBuilding = null;
       this.selectionCard.style.display = 'none';
       this.lastSelectionKey = 'none';
     }
   }
 
-  renderSelectionActions(key, building = null) {
-    if (key === 'villager_actions') {
-      this.selectionActions.innerHTML = `
-        <button class="gold-btn action-btn" data-build="cottage" title="Provides +5 population capacity">🏠 House (50W)</button>
-        <button class="gold-btn action-btn" data-build="lumber_camp" title="Wood drop-off camp">🌲 Lumber (80W)</button>
-        <button class="gold-btn action-btn" data-build="barracks" title="Trains military warriors">⚔️ Barracks (120W, 60S)</button>
-        <button class="gold-btn action-btn" data-build="watchtower" title="Defensive arrow turret">🏹 Tower (80W, 40S)</button>
-        <button class="gold-btn action-btn" data-build="farm" title="Generates food/gold income">🌾 Farm (60W)</button>
-        <button class="gold-btn action-btn secondary" data-action="stop">🛑 Stop</button>
+  renderBuildingTrainButtons(building) {
+    if (!this.bldTrainButtons) return;
+
+    const isForge = building.faction === 'player' && building.isConstructed && (building.type === 'forge' || building.type === 'orc_forge');
+    if (isForge) {
+      if (this.bldTrainLabel) this.bldTrainLabel.innerText = 'MELHORIAS DA FORJA:';
+      if (this.bldQueueLabel) this.bldQueueLabel.innerText = 'PROGRESSO DO FORJAMENTO:';
+      if (this.bldTrainSection) this.bldTrainSection.style.display = 'flex';
+      if (this.bldQueueSection) this.bldQueueSection.style.display = 'flex';
+
+      const factionType = this.gm.playerFaction === 'orc' ? 'orc' : 'human';
+
+      this.bldTrainButtons.innerHTML = FORGE_UPGRADES.map(upgId => {
+        const cfg = UPGRADE_CONFIG[upgId];
+        if (!cfg) return '';
+
+        const isResearched = this.gm.isUpgradeResearched(upgId, 'player');
+        const isResearchingThis = building.currentResearch && building.currentResearch.id === upgId;
+        const isResearchingAny = this.gm.isUpgradeResearching(upgId, 'player');
+        const upgName = cfg.name[factionType] || upgId;
+        const upgDesc = cfg.description[factionType] || '';
+
+        let btnClass = 'bld-train-btn bld-upgrade-btn';
+        let badge = '';
+        if (isResearched) {
+          btnClass += ' researched';
+          badge = '<span class="bld-upgrade-badge-check">✓</span>';
+        } else if (isResearchingThis || isResearchingAny) {
+          btnClass += ' researching';
+          badge = '<span class="bld-upgrade-badge-researching">🔨</span>';
+        }
+
+        return `
+          <button class="${btnClass}" data-upgrade="${upgId}" title="${upgName}" ${isResearched ? 'disabled' : ''}>
+            <img src="${cfg.icon}" class="bld-train-btn-icon" alt="${upgName}" />
+            ${badge}
+            <div class="bld-hint-bubble">
+              <div class="bld-hint-col">
+                <div class="bld-hint-header">
+                  <span class="bld-hint-title">${upgName}</span>
+                  <span class="bld-hint-desc">${upgDesc}</span>
+                </div>
+                <div class="bld-hint-footer">
+                  <span class="bld-cost-items" data-cost-upgrade="${upgId}"></span>
+                </div>
+              </div>
+            </div>
+          </button>
+        `;
+      }).join('');
+
+      this.updateBuildingCosts(building);
+      return;
+    }
+
+    if (this.bldTrainLabel) this.bldTrainLabel.innerText = 'TREINAR UNIDADE:';
+    if (this.bldQueueLabel) this.bldQueueLabel.innerText = 'FILA DE TREINAMENTO:';
+
+    const trainable = (building.faction === 'player' && building.isConstructed)
+      ? BUILDING_TRAINABLE_UNITS[building.type]
+      : null;
+
+    if (!trainable || trainable.length === 0) {
+      if (this.bldTrainSection) this.bldTrainSection.style.display = 'none';
+      if (this.bldQueueSection) this.bldQueueSection.style.display = 'none';
+      this.bldTrainButtons.innerHTML = '';
+      return;
+    }
+
+    if (this.bldTrainSection) this.bldTrainSection.style.display = 'flex';
+    if (this.bldQueueSection) this.bldQueueSection.style.display = 'flex';
+
+    this.bldTrainButtons.innerHTML = trainable.map(unitType => {
+      const cfg = UNIT_TRAIN_CONFIG[unitType];
+      if (!cfg) return '';
+      return `
+        <button class="bld-train-btn" data-train="${unitType}">
+          <img src="${cfg.icon}" class="bld-train-btn-icon" alt="${cfg.name}" />
+          <div class="bld-hint-bubble">
+            <span class="bld-hint-title">${cfg.name}</span> - Custo: <span class="bld-cost-items" data-cost-unit="${unitType}"></span>
+          </div>
+        </button>
       `;
+    }).join('');
+
+    this.updateBuildingCosts(building);
+  }
+
+  updateBuildingCosts(building) {
+    if (!this.bldTrainButtons) return;
+
+    const isForge = building.type === 'forge' || building.type === 'orc_forge';
+    if (isForge) {
+      FORGE_UPGRADES.forEach(upgId => {
+        const cfg = UPGRADE_CONFIG[upgId];
+        if (!cfg) return;
+        const costContainer = this.bldTrainButtons.querySelector(`[data-cost-upgrade="${upgId}"]`);
+        if (!costContainer) return;
+
+        const isResearched = this.gm.isUpgradeResearched(upgId, 'player');
+        if (isResearched) {
+          costContainer.innerHTML = '<span class="bld-cost-researched">✓ Pesquisado</span>';
+          return;
+        }
+
+        const isResearchingThis = building.currentResearch && building.currentResearch.id === upgId;
+        const isResearchingAny = this.gm.isUpgradeResearching(upgId, 'player');
+        if (isResearchingThis || isResearchingAny) {
+          costContainer.innerHTML = '<span class="bld-cost-researching">🔨 Forjando...</span>';
+          return;
+        }
+
+        const costParts = [];
+        if (cfg.cost.gold) {
+          const canAfford = this.gm.resources.gold >= cfg.cost.gold;
+          costParts.push(`<span class="bld-cost-item ${canAfford ? '' : 'cost-insufficient'}">${cfg.cost.gold} <img src="/icoouro.png" class="bld-cost-icon" alt="Ouro" /></span>`);
+        }
+        if (cfg.cost.wood) {
+          const canAfford = this.gm.resources.wood >= cfg.cost.wood;
+          costParts.push(`<span class="bld-cost-item ${canAfford ? '' : 'cost-insufficient'}">${cfg.cost.wood} <img src="/icomadeira.png" class="bld-cost-icon" alt="Madeira" /></span>`);
+        }
+        if (cfg.cost.stone) {
+          const canAfford = this.gm.resources.stone >= cfg.cost.stone;
+          costParts.push(`<span class="bld-cost-item ${canAfford ? '' : 'cost-insufficient'}">${cfg.cost.stone} <img src="/icopedra.png" class="bld-cost-icon" alt="Pedra" /></span>`);
+        }
+
+        costContainer.innerHTML = costParts.length > 0 ? costParts.join(', ') : 'Sem custo';
+      });
+      return;
+    }
+
+    const trainable = BUILDING_TRAINABLE_UNITS[building.type];
+    if (!trainable) return;
+
+    trainable.forEach(unitType => {
+      const cfg = UNIT_TRAIN_CONFIG[unitType];
+      if (!cfg) return;
+      const costContainer = this.bldTrainButtons.querySelector(`[data-cost-unit="${unitType}"]`);
+      if (!costContainer) return;
+
+      const costParts = [];
+      if (cfg.cost.gold) {
+        const canAfford = this.gm.resources.gold >= cfg.cost.gold;
+        costParts.push(`<span class="bld-cost-item ${canAfford ? '' : 'cost-insufficient'}">${cfg.cost.gold} <img src="/icoouro.png" class="bld-cost-icon" alt="Ouro" /></span>`);
+      }
+      if (cfg.cost.wood) {
+        const canAfford = this.gm.resources.wood >= cfg.cost.wood;
+        costParts.push(`<span class="bld-cost-item ${canAfford ? '' : 'cost-insufficient'}">${cfg.cost.wood} <img src="/icomadeira.png" class="bld-cost-icon" alt="Madeira" /></span>`);
+      }
+      if (cfg.cost.stone) {
+        const canAfford = this.gm.resources.stone >= cfg.cost.stone;
+        costParts.push(`<span class="bld-cost-item ${canAfford ? '' : 'cost-insufficient'}">${cfg.cost.stone} <img src="/icopedra.png" class="bld-cost-icon" alt="Pedra" /></span>`);
+      }
+
+      costContainer.innerHTML = costParts.join(', ');
+    });
+  }
+
+  updateBuildingQueue(b) {
+    if (!this.bldQueueSlots || this.bldQueueSlots.length === 0) return;
+
+    const isForge = b.type === 'forge' || b.type === 'orc_forge';
+    if (isForge) {
+      if (b.currentResearch) {
+        const r = b.currentResearch;
+        const cfg = r.cfg || UPGRADE_CONFIG[r.id];
+        const factionType = this.gm.playerFaction === 'orc' ? 'orc' : 'human';
+        const name = cfg ? cfg.name[factionType] : r.id;
+        const iconSrc = cfg ? cfg.icon : '/icoEspada.png';
+
+        const slot0 = this.bldQueueSlots[0];
+        if (slot0) {
+          slot0.className = 'bld-queue-slot filled active forge-slot';
+          slot0.innerHTML = `<img src="${iconSrc}" class="bld-slot-icon" alt="${name}" />`;
+          slot0.title = `${name} (Forjando...) - Clique para cancelar`;
+        }
+
+        for (let i = 1; i < 6; i++) {
+          const slotEl = this.bldQueueSlots[i];
+          if (!slotEl) continue;
+          slotEl.className = 'bld-queue-slot empty';
+          slotEl.innerHTML = '';
+          slotEl.title = 'Slot vazio';
+        }
+
+        const pct = Math.min(100, Math.max(0, (r.progress / r.totalTime) * 100));
+        if (this.bldQueueProgressBar) this.bldQueueProgressBar.style.width = `${pct}%`;
+        if (this.bldQueueProgressTrack) this.bldQueueProgressTrack.style.opacity = '1';
+      } else {
+        for (let i = 0; i < 6; i++) {
+          const slotEl = this.bldQueueSlots[i];
+          if (!slotEl) continue;
+          slotEl.className = 'bld-queue-slot empty';
+          slotEl.innerHTML = '';
+          slotEl.title = 'Slot vazio';
+        }
+        if (this.bldQueueProgressBar) this.bldQueueProgressBar.style.width = '0%';
+        if (this.bldQueueProgressTrack) this.bldQueueProgressTrack.style.opacity = '0.35';
+      }
+      return;
+    }
+
+    for (let i = 0; i < 6; i++) {
+      const slotEl = this.bldQueueSlots[i];
+      if (!slotEl) continue;
+
+      if (i < b.queue.length) {
+        const item = b.queue[i];
+        const cfg = UNIT_TRAIN_CONFIG[item.type];
+        const iconSrc = cfg ? cfg.icon : '/icoEspada.png';
+        const name = cfg ? cfg.name : item.type;
+        slotEl.className = 'bld-queue-slot filled' + (i === 0 ? ' active' : '');
+        slotEl.innerHTML = `<img src="${iconSrc}" class="bld-slot-icon" alt="${name}" />`;
+        slotEl.title = `${name} (${i === 0 ? 'Treinando' : 'Na fila'}) - Clique para cancelar`;
+      } else {
+        slotEl.className = 'bld-queue-slot empty';
+        slotEl.innerHTML = '';
+        slotEl.title = 'Slot vazio';
+      }
+    }
+
+    if (b.queue.length > 0) {
+      const cur = b.queue[0];
+      const pct = Math.min(100, Math.max(0, (cur.progress / cur.totalTime) * 100));
+      if (this.bldQueueProgressBar) this.bldQueueProgressBar.style.width = `${pct}%`;
+      if (this.bldQueueProgressTrack) this.bldQueueProgressTrack.style.opacity = '1';
+    } else {
+      if (this.bldQueueProgressBar) this.bldQueueProgressBar.style.width = '0%';
+      if (this.bldQueueProgressTrack) this.bldQueueProgressTrack.style.opacity = '0.35';
+    }
+  }
+
+  renderSelectionActions(key) {
+    if (key === 'villager_actions' || key === 'peon_actions') {
+      const workerType = key === 'villager_actions' ? 'villager' : 'peon';
+      const buildings = WORKER_BUILD_LIST[workerType] || [];
+
+      const buildButtonsHtml = buildings.map(bType => {
+        const cfg = BUILDING_BUILD_CONFIG[bType];
+        if (!cfg) return '';
+        return `
+          <button class="bld-train-btn action-build-btn" data-build="${bType}" title="${cfg.name}">
+            <img src="${cfg.icon}" class="bld-train-btn-icon" alt="${cfg.name}" />
+            <div class="bld-hint-bubble">
+              <div class="bld-hint-col">
+                <div class="bld-hint-header">
+                  <span class="bld-hint-title">${cfg.name}</span>
+                  ${cfg.description ? `<span class="bld-hint-desc">${cfg.description}</span>` : ''}
+                </div>
+                <div class="bld-hint-footer">
+                  Custo: <span class="bld-cost-items" data-cost-build="${bType}"></span>
+                </div>
+              </div>
+            </div>
+          </button>
+        `;
+      }).join('');
+
+      const stopButtonHtml = `
+        <button class="bld-train-btn action-stop-btn" data-action="stop" title="Parar Unidade (S)">
+          <span class="action-stop-icon">🛑</span>
+          <div class="bld-hint-bubble">
+            <span class="bld-hint-title">Parar</span> - Interromper ordens
+          </div>
+        </button>
+      `;
+
+      this.selectionActions.innerHTML = `
+        <div class="worker-actions-container">
+          <span class="bld-section-label">CONSTRUIR:</span>
+          <div class="worker-actions-group">
+            ${buildButtonsHtml}
+            ${stopButtonHtml}
+          </div>
+        </div>
+      `;
+      this.updateWorkerBuildCosts(workerType);
     } else if (key === 'military_actions') {
       this.selectionActions.innerHTML = `
-        <button class="gold-btn action-btn secondary" data-action="stop">🛑 Stop</button>
+        <div class="worker-actions-container">
+          <span class="bld-section-label">AÇÕES:</span>
+          <div class="worker-actions-group">
+            <button class="bld-train-btn action-stop-btn" data-action="stop" title="Parar Unidades (S)">
+              <span class="action-stop-icon">🛑</span>
+              <div class="bld-hint-bubble">
+                <span class="bld-hint-title">Parar</span> - Interromper combate / movimento
+              </div>
+            </button>
+          </div>
+        </div>
       `;
-    } else if (building && building.isConstructed) {
-      if (building.type === 'castle') {
-        const vCount = building.queue ? building.queue.filter(q => q.type === 'villager').length : 0;
-        const kCount = building.queue ? building.queue.filter(q => q.type === 'knight').length : 0;
-        const aCount = building.queue ? building.queue.filter(q => q.type === 'archer').length : 0;
-        const vText = vCount > 0 ? ` (${vCount})` : '';
-        const kText = kCount > 0 ? ` (${kCount})` : '';
-        const aText = aCount > 0 ? ` (${aCount})` : '';
-        this.selectionActions.innerHTML = `
-          <button class="gold-btn action-btn" data-train="villager" title="Gatherer & Builder">👨‍🌾 Train Villager (50W, 20G)${vText}</button>
-          <button class="gold-btn action-btn" data-train="knight" title="Armored Swordsman">🛡️ Train Knight (70W, 50G, 20S)${kText}</button>
-          <button class="gold-btn action-btn" data-train="archer" title="Ranged Bow Marksman">🏹 Train Archer (60W, 35G)${aText}</button>
-        `;
-      } else if (building.type === 'barracks') {
-        const kCount = building.queue ? building.queue.filter(q => q.type === 'knight').length : 0;
-        const aCount = building.queue ? building.queue.filter(q => q.type === 'archer').length : 0;
-        const kText = kCount > 0 ? ` (${kCount})` : '';
-        const aText = aCount > 0 ? ` (${aCount})` : '';
-        this.selectionActions.innerHTML = `
-          <button class="gold-btn action-btn" data-train="knight" title="Armored Swordsman">🛡️ Train Knight (70W, 50G, 20S)${kText}</button>
-          <button class="gold-btn action-btn" data-train="archer" title="Ranged Bow Marksman">🏹 Train Archer (60W, 35G)${aText}</button>
-        `;
-      } else {
-        this.selectionActions.innerHTML = `<span>Right-click ground to set rally point</span>`;
-      }
-    } else if (building && !building.isConstructed) {
-      this.selectionActions.innerHTML = `<span>Select a Villager and right-click to build</span>`;
     } else {
       this.selectionActions.innerHTML = '';
     }
+  }
+
+  updateWorkerBuildCosts(workerType) {
+    if (!this.selectionActions) return;
+    const buildings = WORKER_BUILD_LIST[workerType];
+    if (!buildings) return;
+
+    buildings.forEach(bType => {
+      const cfg = BUILDING_BUILD_CONFIG[bType];
+      if (!cfg || !cfg.cost) return;
+      const costContainer = this.selectionActions.querySelector(`[data-cost-build="${bType}"]`);
+      if (!costContainer) return;
+
+      const costParts = [];
+      if (cfg.cost.wood) {
+        const canAfford = (this.gm.resources.wood || 0) >= cfg.cost.wood;
+        costParts.push(`<span class="bld-cost-item ${canAfford ? '' : 'cost-insufficient'}">${cfg.cost.wood} <img src="/icomadeira.png" class="bld-cost-icon" alt="Madeira" /></span>`);
+      }
+      if (cfg.cost.stone) {
+        const canAfford = (this.gm.resources.stone || 0) >= cfg.cost.stone;
+        costParts.push(`<span class="bld-cost-item ${canAfford ? '' : 'cost-insufficient'}">${cfg.cost.stone} <img src="/icopedra.png" class="bld-cost-icon" alt="Pedra" /></span>`);
+      }
+      if (cfg.cost.gold) {
+        const canAfford = (this.gm.resources.gold || 0) >= cfg.cost.gold;
+        costParts.push(`<span class="bld-cost-item ${canAfford ? '' : 'cost-insufficient'}">${cfg.cost.gold} <img src="/icoouro.png" class="bld-cost-icon" alt="Ouro" /></span>`);
+      }
+
+      costContainer.innerHTML = costParts.length > 0 ? costParts.join(', ') : 'Sem custo';
+    });
   }
 
   drawMinimap() {
@@ -330,35 +856,72 @@ export class UIManager {
     const w = this.minimapCanvas.width;
     const h = this.minimapCanvas.height;
 
-    // Water background
-    ctx.fillStyle = '#3d94bd';
+    // Ocean Water background
+    ctx.fillStyle = '#1e4860';
     ctx.fillRect(0, 0, w, h);
 
-    // Island landmass (circle approximation)
-    ctx.fillStyle = '#65ab55';
-    ctx.beginPath();
-    ctx.arc(w / 2, h / 2, 42, 0, Math.PI * 2);
-    ctx.fill();
-
-    // Sand rim
-    ctx.strokeStyle = '#ebd49c';
-    ctx.lineWidth = 4;
-    ctx.stroke();
-
-    // Mini-island (bottom-left)
-    ctx.fillStyle = '#65ab55';
-    ctx.beginPath();
-    ctx.arc(28, 98, 14, 0, Math.PI * 2);
-    ctx.fill();
-    ctx.stroke();
-
     const toMap = (x, z) => ({
-      x: ((x / 110) + 0.5) * w,
-      y: ((z / 110) + 0.5) * h
+      x: ((x / 140) + 0.5) * w,
+      y: ((z / 140) + 0.5) * h
     });
 
-    // Draw Trees (green dots)
-    ctx.fillStyle = '#366e2c';
+    // 1. Continental Solid Landmass (>75% land, maxCoord <= 54)
+    const nw = toMap(-54, -54);
+    const se = toMap(54, 54);
+    const landW = se.x - nw.x;
+    const landH = se.y - nw.y;
+
+    // Sand coastline rim
+    const sandNW = toMap(-56, -56);
+    const sandSE = toMap(56, 56);
+    ctx.fillStyle = '#d4be83';
+    ctx.beginPath();
+    ctx.roundRect(sandNW.x, sandNW.y, sandSE.x - sandNW.x, sandSE.y - sandNW.y, 8);
+    ctx.fill();
+
+    // Continent Grass (gradient Orc earthy to Human emerald)
+    const landGrad = ctx.createLinearGradient(toMap(-40, 40).x, toMap(-40, 40).y, toMap(40, -40).x, toMap(40, -40).y);
+    landGrad.addColorStop(0.0, '#557a3e'); // Orc side
+    landGrad.addColorStop(0.5, '#629e46'); // Center valley
+    landGrad.addColorStop(1.0, '#68b44e'); // Human side
+    ctx.fillStyle = landGrad;
+    ctx.beginPath();
+    ctx.roundRect(nw.x, nw.y, landW, landH, 6);
+    ctx.fill();
+
+    // Natural Diagonal River
+    ctx.save();
+    ctx.strokeStyle = '#1e4860';
+    ctx.lineWidth = (6 / 140) * w;
+    ctx.lineCap = 'round';
+    ctx.beginPath();
+    for (let t = -54; t <= 54; t += 3) {
+      const bend = Math.sin(t * 0.16) * 5.5;
+      const rx = t + bend / Math.SQRT2;
+      const rz = t - bend / Math.SQRT2;
+      const pt = toMap(rx, rz);
+      if (t === -54) ctx.moveTo(pt.x, pt.y);
+      else ctx.lineTo(pt.x, pt.y);
+    }
+    ctx.stroke();
+    ctx.restore();
+
+    // 3 Strategic Crossings / Fords (draw as traversable land bridges)
+    const minimapFords = [
+      { x: -16, z: -16, r: 4.5 },
+      { x: 0, z: 0, r: 5.5 },
+      { x: 16, z: 16, r: 4.5 }
+    ];
+    minimapFords.forEach(f => {
+      const fc = toMap(f.x, f.z);
+      ctx.fillStyle = '#78a655';
+      ctx.beginPath();
+      ctx.arc(fc.x, fc.y, f.r, 0, Math.PI * 2);
+      ctx.fill();
+    });
+
+    // Draw Trees (dark green dots)
+    ctx.fillStyle = '#2d5e24';
     this.gm.trees.forEach(t => {
       if (!t.isDead) {
         const m = toMap(t.mesh.position.x, t.mesh.position.z);
@@ -369,18 +932,23 @@ export class UIManager {
     // Draw Resource Deposits (gold & gray)
     this.gm.resourceDeposits.forEach(r => {
       const m = toMap(r.mesh.position.x, r.mesh.position.z);
-      ctx.fillStyle = r.type === 'gold' ? '#f5b81a' : '#8c9194';
+      ctx.fillStyle = r.type === 'gold' ? '#ffd700' : '#a0aab2';
       ctx.fillRect(m.x - 2, m.y - 2, 4, 4);
     });
 
     // Draw Buildings
     this.gm.buildings.forEach(b => {
-      const m = toMap(b.mesh.position.x, b.mesh.position.z);
-      ctx.fillStyle = b.faction === 'player' ? '#2563eb' : '#dc2626';
-      ctx.fillRect(m.x - 3, m.y - 3, 6, 6);
+      if (!b.isDead) {
+        const isExplored = !this.gm.fogOfWar || this.gm.fogOfWar.isExplored(b.mesh.position.x, b.mesh.position.z);
+        if (b.faction === 'player' || isExplored) {
+          const m = toMap(b.mesh.position.x, b.mesh.position.z);
+          ctx.fillStyle = b.faction === 'player' ? '#2563eb' : '#dc2626';
+          ctx.fillRect(m.x - 3, m.y - 3, 6, 6);
+        }
+      }
     });
 
-    // Draw Units
+    // Draw Player Units (cyan dots)
     this.gm.units.forEach(u => {
       if (!u.isDead) {
         const m = toMap(u.mesh.position.x, u.mesh.position.z);
@@ -389,16 +957,23 @@ export class UIManager {
       }
     });
 
-    // Draw Enemies
+    // Draw Enemy Units (red dots, only if in explored territory)
     this.gm.enemies.forEach(e => {
       if (!e.isDead) {
-        const m = toMap(e.mesh.position.x, e.mesh.position.z);
-        ctx.fillStyle = '#ef4444';
-        ctx.fillRect(m.x - 1.5, m.y - 1.5, 3, 3);
+        if (!this.gm.fogOfWar || this.gm.fogOfWar.isExplored(e.mesh.position.x, e.mesh.position.z)) {
+          const m = toMap(e.mesh.position.x, e.mesh.position.z);
+          ctx.fillStyle = '#ef4444';
+          ctx.fillRect(m.x - 1.5, m.y - 1.5, 3, 3);
+        }
       }
     });
 
-    // Camera Viewport Box
+    // Fog of War Overlay on Minimap (shrouds unexplored territory in darkness)
+    if (this.gm.fogOfWar) {
+      this.gm.fogOfWar.drawMinimapFog(ctx, w, h);
+    }
+
+    // Camera Viewport Box on top of Fog
     const camPos = toMap(this.sm.cameraTarget.x, this.sm.cameraTarget.z);
     ctx.strokeStyle = '#ffd700';
     ctx.lineWidth = 1.5;

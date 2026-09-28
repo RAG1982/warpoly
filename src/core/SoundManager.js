@@ -54,6 +54,24 @@ export class SoundManager {
     return this.musicEnabled;
   }
 
+  setSfxVolume(val) {
+    this.sfxVolume = Math.max(0, Math.min(1, val));
+    if (this.sfxVolume === 0) {
+      this.enabled = false;
+    } else {
+      this.enabled = true;
+    }
+  }
+
+  setMusicVolume(val) {
+    this.musicVolume = Math.max(0, Math.min(1, val));
+    if (this.musicVolume === 0) {
+      this.stopMusic();
+    } else if (!this.isMusicPlaying && this.musicEnabled && this.enabled) {
+      this.startMusic();
+    }
+  }
+
   // Helper to create gain node with master SFX scaling
   createSfxGain(peak = 0.3) {
     if (!this.ctx || !this.enabled) return null;

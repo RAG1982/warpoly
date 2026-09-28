@@ -36,7 +36,7 @@ export class Water {
    * 1. Deep Water Base Plane (Abyssal sapphire / ocean navy foundation)
    */
   createDeepWaterBase() {
-    const geo = new THREE.PlaneGeometry(280, 280, 8, 8);
+    const geo = new THREE.PlaneGeometry(180, 180, 8, 8);
     geo.rotateX(-Math.PI / 2);
 
     const mat = new THREE.MeshStandardMaterial({
@@ -57,7 +57,7 @@ export class Water {
    * 2. Translucent Animated Surface Mesh with Caustic Ripples & Low-Poly Wave Facets
    */
   createWaterMesh() {
-    const size = 260;
+    const size = 150;
     const segments = 64;
     const geo = new THREE.PlaneGeometry(size, size, segments, segments);
     geo.rotateX(-Math.PI / 2);
@@ -95,15 +95,15 @@ export class Water {
     const reedGroup = new THREE.Group();
     reedGroup.name = 'WaterVegetationGroup';
 
-    // Shallow calm water reed clump locations
+    // Shallow calm water reed clump locations along river and coastlines
     const reedLocations = [
-      { x: 18, z: 27 },
-      { x: 22, z: 29 },
-      { x: 25, z: 25 },
-      { x: -16, z: 34 },
-      { x: -30, z: 18 },
-      { x: 32, z: 12 },
-      { x: -38, z: 24 }
+      { x: 10, z: 12 },
+      { x: 12, z: 15 },
+      { x: -10, z: -12 },
+      { x: -12, z: -15 },
+      { x: -15, z: 18 },
+      { x: 15, z: -18 },
+      { x: -20, z: 12 }
     ];
 
     const cattailTex = getCattailLotusTextures();

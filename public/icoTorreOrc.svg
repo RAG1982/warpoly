@@ -1,0 +1,28 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64">
+  <defs>
+    <linearGradient id="orcWood" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#78350f"/>
+      <stop offset="60%" stop-color="#451a03"/>
+      <stop offset="100%" stop-color="#1c0a02"/>
+    </linearGradient>
+    <filter id="shadowTowerOrc" x="-10%" y="-10%" width="120%" height="120%">
+      <feDropShadow dx="1" dy="3" stdDeviation="2" flood-color="#000" flood-opacity="0.6"/>
+    </filter>
+  </defs>
+  <!-- Timber Tower Main Posts (A-frame) -->
+  <polygon points="26,18 38,18 46,58 18,58" fill="url(#orcWood)" stroke="#1c0a02" stroke-width="2" filter="url(#shadowTowerOrc)"/>
+  
+  <!-- Cross Braces -->
+  <line x1="20" y1="52" x2="44" y2="30" stroke="#1c0a02" stroke-width="2.5"/>
+  <line x1="44" y1="52" x2="20" y2="30" stroke="#1c0a02" stroke-width="2.5"/>
+
+  <!-- Crow's Nest Platform with Spikes -->
+  <polygon points="14,18 50,18 46,12 18,12" fill="#78350f" stroke="#1c0a02" stroke-width="2" filter="url(#shadowTowerOrc)"/>
+  <polygon points="14,12 10,2 18,8" fill="#fef3c7" stroke="#78350f" stroke-width="1"/>
+  <polygon points="50,12 54,2 46,8" fill="#fef3c7" stroke="#78350f" stroke-width="1"/>
+  <polygon points="32,12 32,2 35,8" fill="#fef3c7" stroke="#78350f" stroke-width="1"/>
+
+  <!-- Red War Pennant on post -->
+  <line x1="42" y1="12" x2="42" y2="0" stroke="#ca8a04" stroke-width="1.5"/>
+  <polygon points="42,0 56,4 42,8" fill="#dc2626" stroke="#991b1b" stroke-width="0.8"/>
+</svg>

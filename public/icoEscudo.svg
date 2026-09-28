@@ -1,0 +1,52 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64">
+  <defs>
+    <linearGradient id="goldRim" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#ffe066"/>
+      <stop offset="40%" stop-color="#d4af37"/>
+      <stop offset="80%" stop-color="#996515"/>
+      <stop offset="100%" stop-color="#593b0b"/>
+    </linearGradient>
+    <linearGradient id="steelField" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#f1f5f9"/>
+      <stop offset="35%" stop-color="#94a3b8"/>
+      <stop offset="70%" stop-color="#475569"/>
+      <stop offset="100%" stop-color="#1e293b"/>
+    </linearGradient>
+    <linearGradient id="blueField" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#3b82f6"/>
+      <stop offset="60%" stop-color="#1d4ed8"/>
+      <stop offset="100%" stop-color="#0f172a"/>
+    </linearGradient>
+    <filter id="shadow" x="-10%" y="-10%" width="120%" height="120%">
+      <feDropShadow dx="1" dy="3" stdDeviation="2" flood-color="#000" flood-opacity="0.6"/>
+    </filter>
+  </defs>
+  <!-- Drop Shadow & Outer Rim -->
+  <path d="M10,8 L54,8 Q56,36 32,58 Q8,36 10,8 Z" fill="#1e1e1e" filter="url(#shadow)"/>
+  <path d="M10,8 L54,8 Q56,36 32,58 Q8,36 10,8 Z" fill="url(#goldRim)" stroke="#3e2704" stroke-width="2"/>
+  
+  <!-- Inner Shield Field -->
+  <path d="M16,14 L48,14 Q50,34 32,51 Q14,34 16,14 Z" fill="url(#steelField)" stroke="#1e293b" stroke-width="1.5"/>
+
+  <!-- Royal Quartering / Cross Motif -->
+  <path d="M16,14 L32,14 L32,32 L16,32 Z" fill="url(#blueField)" opacity="0.85"/>
+  <path d="M32,32 L48,32 Q46,42 32,51 L32,32 Z" fill="url(#blueField)" opacity="0.85"/>
+
+  <!-- Steel Cross Divider -->
+  <line x1="32" y1="14" x2="32" y2="51" stroke="#cbd5e1" stroke-width="2"/>
+  <line x1="16" y1="32" x2="48" y2="32" stroke="#cbd5e1" stroke-width="2"/>
+
+  <!-- Center Steel Boss & Gold Stud -->
+  <circle cx="32" cy="32" r="7" fill="#f8fafc" stroke="#334155" stroke-width="1.5"/>
+  <circle cx="32" cy="32" r="3.5" fill="#f59e0b" stroke="#78350f" stroke-width="1"/>
+
+  <!-- Golden Rivets on Rim -->
+  <circle cx="16" cy="11" r="1.8" fill="#fff" stroke="#996515" stroke-width="0.8"/>
+  <circle cx="32" cy="11" r="1.8" fill="#fff" stroke="#996515" stroke-width="0.8"/>
+  <circle cx="48" cy="11" r="1.8" fill="#fff" stroke="#996515" stroke-width="0.8"/>
+  <circle cx="13" cy="24" r="1.8" fill="#fff" stroke="#996515" stroke-width="0.8"/>
+  <circle cx="51" cy="24" r="1.8" fill="#fff" stroke="#996515" stroke-width="0.8"/>
+  <circle cx="20" cy="40" r="1.8" fill="#fff" stroke="#996515" stroke-width="0.8"/>
+  <circle cx="44" cy="40" r="1.8" fill="#fff" stroke="#996515" stroke-width="0.8"/>
+  <circle cx="32" cy="54" r="1.8" fill="#fff" stroke="#996515" stroke-width="0.8"/>
+</svg>

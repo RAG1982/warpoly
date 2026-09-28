@@ -1,27 +1,48 @@
 import * as THREE from 'three';
-
 import { ModelFactory } from './ModelFactory.js';
+import { getAxethrowerAxeTextures } from '../models/index.js';
 
 export class Arrow {
-  constructor(scene, startPos, target, damage, onHitCallback) {
+  constructor(scene, startPos, target, damage, onHitCallback, projectileType = 'arrow') {
     this.scene = scene;
     this.startPos = startPos.clone();
     this.target = target;
     this.targetPos = target.mesh.position.clone();
     this.damage = damage;
     this.onHitCallback = onHitCallback;
+    this.projectileType = projectileType;
 
     this.progress = 0;
-    this.speed = 18; // units per second
+    this.speed = projectileType === 'axe' ? 16 : 18; // units per second
     this.dist = this.startPos.distanceTo(this.targetPos);
     this.duration = Math.max(0.3, this.dist / this.speed);
     this.isDead = false;
 
-    this.createArrowMesh();
+    this.createProjectileMesh();
   }
 
-  createArrowMesh() {
-    this.mesh = ModelFactory.createArrow();
+  createProjectileMesh() {
+    if (this.projectileType === 'axe') {
+      const axeGrp = new THREE.Group();
+      const axeMat = new THREE.MeshStandardMaterial({
+        map: getAxethrowerAxeTextures().map,
+        roughness: 0.4,
+        metalness: 0.8
+      });
+
+      const haft = new THREE.Mesh(new THREE.CylinderGeometry(0.04, 0.04, 0.85, 6), axeMat);
+      axeGrp.add(haft);
+
+      const blade = new THREE.Mesh(new THREE.BoxGeometry(0.05, 0.38, 0.32), axeMat);
+      blade.position.set(0, 0.32, 0.12);
+      axeGrp.add(blade);
+
+      this.mesh = axeGrp;
+      this.mesh.scale.set(1.1, 1.1, 1.1);
+    } else {
+      this.mesh = ModelFactory.createArrow();
+    }
+
     this.mesh.position.copy(this.startPos);
     this.scene.add(this.mesh);
   }
@@ -48,13 +69,20 @@ export class Arrow {
     const arcHeight = Math.sin(t * Math.PI) * Math.min(4.5, this.dist * 0.25);
     current.y += arcHeight;
 
-    // Calculate tangent for realistic arrow orientation
+    // Calculate tangent for orientation
     const nextT = Math.min(1.0, t + 0.05);
     const nextPos = new THREE.Vector3().lerpVectors(this.startPos, this.targetPos, nextT);
     nextPos.y += Math.sin(nextT * Math.PI) * Math.min(4.5, this.dist * 0.25);
 
     this.mesh.position.copy(current);
-    this.mesh.lookAt(nextPos);
+
+    if (this.projectileType === 'axe') {
+      // End-over-end aerodynamic rotation
+      this.mesh.lookAt(nextPos);
+      this.mesh.rotateX(this.progress * Math.PI * 8);
+    } else {
+      this.mesh.lookAt(nextPos);
+    }
   }
 
   hit() {

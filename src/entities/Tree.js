@@ -1,8 +1,11 @@
 import * as THREE from 'three';
 import { ModelFactory } from './ModelFactory.js';
 
+// Shared invisible material for tree raycast/hit proxies
+const hitProxyMaterial = new THREE.MeshBasicMaterial({ visible: false });
+
 export class Tree {
-  constructor(scene, terrain, x, z, type = 'oak') {
+  constructor(scene, terrain, x, z, type = 'oak', treeManager = null) {
     this.scene = scene;
     this.terrain = terrain;
     this.type = 'tree';
@@ -12,23 +15,41 @@ export class Tree {
     this.isDead = false;
     this.fallProgress = 0;
     this.fallDir = new THREE.Vector3(Math.random() - 0.5, 0, Math.random() - 0.5).normalize();
+    this.treeManager = treeManager;
 
-    this.mesh = ModelFactory.createTree(type);
     const h = this.terrain.getHeight(x, z);
-    this.mesh.position.set(x, h, z);
-    this.mesh.rotation.y = Math.random() * Math.PI * 2;
+    const rotY = Math.random() * Math.PI * 2;
     const s = 0.85 + Math.random() * 0.35;
-    this.mesh.scale.set(s, s, s);
+    this.scale = s;
     this.collisionRadius = 0.75 * s;
 
-    // Attach entity reference for raycasting
-    this.mesh.userData.entity = this;
-    this.scene.add(this.mesh);
+    if (this.treeManager) {
+      // 1. Instanced Rendering Mode (Single draw call via TreeManager)
+      this.treeManager.registerTree(this, x, h, z, rotY, s, type);
 
-    // Initial position for shake effect
+      // Lightweight hit proxy for raycasting and position tracking
+      const hitGeo = new THREE.CylinderGeometry(0.85 * s, 1.1 * s, 4.5 * s, 6);
+      hitGeo.translate(0, 2.25 * s, 0);
+      this.mesh = new THREE.Mesh(hitGeo, hitProxyMaterial);
+      this.mesh.position.set(x, h, z);
+      this.mesh.userData.entity = this;
+      this.scene.add(this.mesh);
+    } else {
+      // Standalone Fallback Mode
+      this.mesh = ModelFactory.createTree(type);
+      this.mesh.position.set(x, h, z);
+      this.mesh.rotation.y = rotY;
+      this.mesh.scale.set(s, s, s);
+      this.mesh.userData.entity = this;
+      this.scene.add(this.mesh);
+    }
+
+    // Initial position for shake & fall effects
     this.basePos = this.mesh.position.clone();
-    this.baseRot = this.mesh.rotation.clone();
+    this.baseRotY = rotY;
     this.shakeTimer = 0;
+    this.fallingMesh = null;
+    this.stumpMesh = null;
   }
 
   chop(amount, particleSystem) {
@@ -37,35 +58,58 @@ export class Tree {
     const harvested = Math.min(amount, this.woodRemaining);
     this.woodRemaining -= harvested;
 
-    // Shake tree
-    this.shakeTimer = 0.25;
-
     // Spawn chips & leaves
     if (particleSystem) {
       particleSystem.spawnWoodChips(this.mesh.position);
     }
 
     if (this.woodRemaining <= 0) {
+      this.shakeTimer = 0;
       this.die(particleSystem);
+    } else {
+      // Shake tree only while living
+      this.shakeTimer = 0.25;
     }
 
     return harvested;
   }
 
   die(particleSystem) {
+    if (this.isDead) return;
     this.isDead = true;
     this.woodRemaining = 0;
     this.collisionRadius = 0;
+    this.shakeTimer = 0;
+
+    if (this.treeManager) {
+      // Permanently hide instanced tree
+      this.treeManager.hideTree(this);
+      this.fallingMesh = ModelFactory.createTree(this.treeType);
+      this.fallingMesh.position.copy(this.basePos);
+      this.fallingMesh.rotation.y = this.baseRotY;
+      this.fallingMesh.scale.set(this.scale, this.scale, this.scale);
+      this.scene.add(this.fallingMesh);
+    }
   }
 
   update(delta, particleSystem) {
-    // Shake effect when hit
-    if (this.shakeTimer > 0) {
+    // Shake effect when hit (only active on living standing trees)
+    if (!this.isDead && this.shakeTimer > 0) {
       this.shakeTimer -= delta;
       const angle = Math.sin(this.shakeTimer * 40) * 0.08;
-      this.mesh.rotation.z = this.baseRot.z + angle;
+
+      if (this.treeManager) {
+        this.treeManager.shakeTree(this, angle);
+      } else {
+        this.mesh.rotation.z = angle;
+      }
+
       if (this.shakeTimer <= 0) {
-        this.mesh.rotation.copy(this.baseRot);
+        if (this.treeManager) {
+          this.treeManager.resetTreeMatrix(this);
+        } else {
+          this.mesh.rotation.z = 0;
+        }
       }
     }
 
@@ -73,24 +117,72 @@ export class Tree {
     if (this.isDead && this.fallProgress < 1.0) {
       this.fallProgress += delta * 1.5;
       const tilt = (this.fallProgress * Math.PI) / 2;
-      this.mesh.rotation.x = this.fallDir.z * tilt;
-      this.mesh.rotation.z = -this.fallDir.x * tilt;
-      this.mesh.position.y = this.basePos.y - this.fallProgress * 0.6;
+      const targetMesh = this.fallingMesh || this.mesh;
+
+      targetMesh.rotation.x = this.fallDir.z * tilt;
+      targetMesh.rotation.z = -this.fallDir.x * tilt;
+      targetMesh.position.y = this.basePos.y - this.fallProgress * 0.6;
 
       if (this.fallProgress >= 1.0) {
-        // Leave stump, remove tree mesh
+        // Leave cut trunk with mushrooms, remove falling tree mesh
         this.createStump();
-        this.scene.remove(this.mesh);
+        if (this.fallingMesh) {
+          this.scene.remove(this.fallingMesh);
+          this.fallingMesh = null;
+        }
+        if (!this.treeManager && this.mesh && this.mesh !== this.stumpMesh) {
+          this.scene.remove(this.mesh);
+        }
+        if (particleSystem) {
+          particleSystem.spawnWoodChips(this.basePos);
+        }
       }
     }
   }
 
   createStump() {
-    const stumpMat = ModelFactory.materials.woodMedium;
-    const stump = new THREE.Mesh(new THREE.CylinderGeometry(0.35, 0.45, 0.4, 6), stumpMat);
-    stump.position.set(this.basePos.x, this.basePos.y + 0.2, this.basePos.z);
-    stump.castShadow = true;
-    stump.receiveShadow = true;
-    this.scene.add(stump);
+    if (this.stumpMesh) return;
+
+    // Cut tree trunk with mushrooms model (same as ambient decoration mushroom stump)
+    this.stumpMesh = ModelFactory.createMushroomStump();
+    this.stumpMesh.position.copy(this.basePos);
+    this.stumpMesh.rotation.y = this.baseRotY;
+    this.stumpMesh.scale.set(this.scale, this.scale, this.scale);
+    this.stumpMesh.userData.entity = this;
+
+    this.stumpMesh.traverse(child => {
+      if (child.isMesh) {
+        child.userData.entity = this;
+      }
+    });
+
+    this.scene.add(this.stumpMesh);
+
+    // Update hit proxy so clicking the stump has an accurate low bounding cylinder
+    if (this.mesh) {
+      if (this.mesh.geometry) this.mesh.geometry.dispose();
+      const stumpHitGeo = new THREE.CylinderGeometry(0.85 * this.scale, 0.95 * this.scale, 1.0 * this.scale, 6);
+      stumpHitGeo.translate(0, 0.5 * this.scale, 0);
+      this.mesh.geometry = stumpHitGeo;
+      this.mesh.position.copy(this.basePos);
+    }
+  }
+
+  dispose() {
+    if (this.treeManager) {
+      this.treeManager.hideTree(this);
+    }
+    if (this.mesh) {
+      this.scene.remove(this.mesh);
+      if (this.mesh.geometry) this.mesh.geometry.dispose();
+    }
+    if (this.fallingMesh) {
+      this.scene.remove(this.fallingMesh);
+      this.fallingMesh = null;
+    }
+    if (this.stumpMesh) {
+      this.scene.remove(this.stumpMesh);
+      this.stumpMesh = null;
+    }
   }
 }

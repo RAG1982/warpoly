@@ -1,5 +1,6 @@
 import * as THREE from 'three';
 import { ModelFactory } from '../entities/ModelFactory.js';
+import { BUILDING_BUILD_CONFIG } from '../entities/Building.js';
 
 export class InputManager {
   constructor(sceneManager, gameManager, terrain) {
@@ -67,11 +68,11 @@ export class InputManager {
     this.keys[e.code] = true;
 
     if (e.code === 'KeyH') {
-      // Focus on Castle
-      const castle = this.gm.buildings.find(b => b.type === 'castle');
-      if (castle) {
-        this.sm.cameraTarget.copy(castle.mesh.position);
-        this.gm.selectSingle(castle);
+      // Focus on Castle / Great Hall
+      const hq = this.gm.buildings.find(b => (b.type === 'castle' || b.type === 'great_hall') && b.faction === 'player');
+      if (hq) {
+        this.sm.cameraTarget.copy(hq.mesh.position);
+        this.gm.selectSingle(hq);
       }
     } else if (e.code === 'Escape') {
       if (this.placingBuildingType) {
@@ -132,6 +133,14 @@ export class InputManager {
       return;
     }
 
+    // Skip redundant raycasting on tiny sub-pixel mouse jitter
+    if (this.lastMoveX !== undefined && !this.isLeftDown && !this.placingBuildingType) {
+      const distSq = (e.clientX - this.lastMoveX) ** 2 + (e.clientY - this.lastMoveY) ** 2;
+      if (distSq < 9) return;
+    }
+    this.lastMoveX = e.clientX;
+    this.lastMoveY = e.clientY;
+
     this.updateMouseCoords(e);
     this.raycastScene();
 
@@ -146,10 +155,22 @@ export class InputManager {
       }
     }
 
-    // Update ghost building position
+    // Update ghost building position and validity color (Green = OK, Red = Obstructed)
     if (this.placingBuildingType && this.ghostMesh) {
-      const h = this.terrain.getHeight(this.groundIntersection.x, this.groundIntersection.z);
-      this.ghostMesh.position.set(this.groundIntersection.x, h, this.groundIntersection.z);
+      const gx = Math.round(this.groundIntersection.x * 2) / 2;
+      const gz = Math.round(this.groundIntersection.z * 2) / 2;
+
+      if (gx !== this.lastGhostGx || gz !== this.lastGhostGz) {
+        this.lastGhostGx = gx;
+        this.lastGhostGz = gz;
+
+        const h = this.terrain.getHeight(gx, gz);
+        this.ghostMesh.position.set(gx, h, gz);
+
+        const isValid = this.gm.canPlaceBuilding(this.placingBuildingType, gx, gz);
+        const targetMat = isValid ? ModelFactory.ghostValidMat : ModelFactory.ghostInvalidMat;
+        ModelFactory.setGhostMaterial(this.ghostMesh, targetMat);
+      }
     }
   }
 
@@ -222,11 +243,11 @@ export class InputManager {
 
     // Test entity intersection
     const allMeshes = [];
-    this.gm.units.forEach(u => allMeshes.push(u.mesh));
-    this.gm.enemies.forEach(e => allMeshes.push(e.mesh));
-    this.gm.buildings.forEach(b => allMeshes.push(b.mesh));
-    this.gm.trees.forEach(t => allMeshes.push(t.mesh));
-    this.gm.resourceDeposits.forEach(r => allMeshes.push(r.mesh));
+    this.gm.units.forEach(u => { if (u.mesh?.parent) allMeshes.push(u.mesh); });
+    this.gm.enemies.forEach(e => { if (e.mesh?.parent) allMeshes.push(e.mesh); });
+    this.gm.buildings.forEach(b => { if (b.mesh?.parent) allMeshes.push(b.mesh); });
+    this.gm.trees.forEach(t => { if (t.mesh?.parent) allMeshes.push(t.mesh); });
+    this.gm.resourceDeposits.forEach(r => { if (r.mesh?.parent) allMeshes.push(r.mesh); });
 
     const entityHits = this.raycaster.intersectObjects(allMeshes, true);
     if (entityHits.length > 0) {
@@ -246,50 +267,47 @@ export class InputManager {
     this.cancelPlacement();
     this.placingBuildingType = buildingType;
 
-    // Create ghost mesh preview
-    switch (buildingType) {
-      case 'lumber_camp': this.ghostMesh = ModelFactory.createLumberCamp(); break;
-      case 'cottage': this.ghostMesh = ModelFactory.createCottage(); break;
-      case 'barracks': this.ghostMesh = ModelFactory.createBarracks(); break;
-      case 'watchtower': this.ghostMesh = ModelFactory.createWatchtower(); break;
-      case 'farm': this.ghostMesh = ModelFactory.createFarm(); break;
-      default: this.ghostMesh = ModelFactory.createCottage(); break;
-    }
-
-    // Set semi-transparent green ghost material
-    const ghostMat = new THREE.MeshBasicMaterial({
-      color: 0x48bb78,
-      transparent: true,
-      opacity: 0.6,
-      wireframe: false
-    });
-
-    this.ghostMesh.traverse(c => {
-      if (c.isMesh) {
-        c.material = ghostMat;
-        c.castShadow = false;
-        c.receiveShadow = false;
-      }
-    });
-
+    this.ghostMesh = ModelFactory.getGhost(buildingType);
     this.sm.scene.add(this.ghostMesh);
+
+    if (this.groundIntersection && (this.groundIntersection.x !== 0 || this.groundIntersection.z !== 0)) {
+      const gx = Math.round(this.groundIntersection.x * 2) / 2;
+      const gz = Math.round(this.groundIntersection.z * 2) / 2;
+      const h = this.terrain.getHeight(gx, gz);
+      this.ghostMesh.position.set(gx, h, gz);
+      this.lastGhostGx = gx;
+      this.lastGhostGz = gz;
+
+      const isValid = this.gm.canPlaceBuilding(buildingType, gx, gz);
+      const targetMat = isValid ? ModelFactory.ghostValidMat : ModelFactory.ghostInvalidMat;
+      ModelFactory.setGhostMaterial(this.ghostMesh, targetMat);
+    } else {
+      ModelFactory.setGhostMaterial(this.ghostMesh, ModelFactory.ghostValidMat);
+      this.ghostMesh.position.set(0, -100, 0);
+      this.lastGhostGx = null;
+      this.lastGhostGz = null;
+    }
   }
 
   confirmPlacement() {
     if (!this.placingBuildingType) return;
     const stats = this.getCost(this.placingBuildingType);
     if (!this.gm.canAfford(stats.cost)) {
+      this.uiManager?.showNotification('⚠️ Recursos insuficientes!');
       return;
     }
 
-    // Valid placement check: height must be above water
-    const h = this.terrain.getHeight(this.groundIntersection.x, this.groundIntersection.z);
-    if (h < 1.2) {
-      return; // Too close to water
+    const gx = this.groundIntersection.x;
+    const gz = this.groundIntersection.z;
+
+    // Strict clearance check: dry terrain, distance to other buildings, trees, deposits, and fords
+    if (!this.gm.canPlaceBuilding(this.placingBuildingType, gx, gz)) {
+      this.uiManager?.showNotification('❌ Local obstruído! Mantenha distância de árvores e outras construções.');
+      return;
     }
 
     this.gm.deductResources(stats.cost);
-    this.gm.buildNewBuilding(this.placingBuildingType, this.groundIntersection.x, this.groundIntersection.z);
+    this.gm.buildNewBuilding(this.placingBuildingType, gx, gz);
     this.cancelPlacement();
   }
 
@@ -298,15 +316,27 @@ export class InputManager {
       this.sm.scene.remove(this.ghostMesh);
       this.ghostMesh = null;
     }
+    this.lastGhostGx = null;
+    this.lastGhostGz = null;
     this.placingBuildingType = null;
   }
 
   getCost(type) {
+    if (BUILDING_BUILD_CONFIG && BUILDING_BUILD_CONFIG[type]?.cost) {
+      return { cost: BUILDING_BUILD_CONFIG[type].cost };
+    }
     switch (type) {
       case 'lumber_camp': return { cost: { wood: 80 } };
+      case 'orc_lumber_mill': return { cost: { wood: 85 } };
       case 'cottage': return { cost: { wood: 50 } };
+      case 'pig_farm': return { cost: { wood: 55 } };
+      case 'orc_house': return { cost: { wood: 50 } };
+      case 'orc_forge': return { cost: { wood: 100, stone: 70, gold: 50 } };
+      case 'forge': return { cost: { wood: 100, stone: 70, gold: 50 } };
       case 'barracks': return { cost: { wood: 120, stone: 60 } };
+      case 'orc_barracks': return { cost: { wood: 130, stone: 50 } };
       case 'watchtower': return { cost: { wood: 80, stone: 40 } };
+      case 'orc_watchtower': return { cost: { wood: 85, stone: 40 } };
       case 'farm': return { cost: { wood: 60 } };
       default: return { cost: { wood: 50 } };
     }

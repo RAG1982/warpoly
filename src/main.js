@@ -45,19 +45,28 @@ class GameApp {
     const sceneManager = new SceneManager(container);
 
     // 3. Preload and warm all 3D models and procedural 2048x2048 textures
-    await AssetPreloader.preloadAll(sceneManager.renderer, (info) => {
-      updateLoadingUI(info);
-    });
+    const urlParams = new URLSearchParams(window.location.search);
+    const skipPreload = urlParams.has('skipPreload');
+
+    if (!skipPreload) {
+      await AssetPreloader.preloadAll(sceneManager.renderer, (info) => {
+        updateLoadingUI(info);
+      });
+    }
 
     // 4. Create App
     const app = new GameApp(container, sound, sceneManager);
 
     // 5. Smoothly fade out loading screen
     if (screenEl) {
-      screenEl.classList.add('fade-out');
-      setTimeout(() => {
+      if (skipPreload) {
         screenEl.style.display = 'none';
-      }, 650);
+      } else {
+        screenEl.classList.add('fade-out');
+        setTimeout(() => {
+          screenEl.style.display = 'none';
+        }, 650);
+      }
     }
 
     return app;
@@ -97,6 +106,21 @@ class GameApp {
       this.inputManager,
       this.sound
     );
+    this.gameManager.uiManager = this.uiManager;
+    this.gameManager.sceneManager = this.sceneManager;
+    this.inputManager.uiManager = this.uiManager;
+
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.get('faction') === 'orc') {
+      this.gameManager.setPlayerFaction('orc');
+    }
+    if (urlParams.get('settings') === '1' || urlParams.get('config') === '1') {
+      const panel = document.getElementById('settings-panel');
+      if (panel) panel.style.display = 'block';
+    }
+
+    // Warm and precompile live scene shaders before fog of war culls objects
+    this.gameManager.warmLiveScene();
 
     // Resume Audio on first user interaction
     const unlockAudio = () => {
@@ -128,7 +152,7 @@ class GameApp {
     this.water.update(elapsedTime);
     this.gameManager.update(delta);
     this.particleSystem.update(delta);
-    this.uiManager.update();
+    this.uiManager.update(delta);
 
     // Render 3D Scene
     this.sceneManager.render();

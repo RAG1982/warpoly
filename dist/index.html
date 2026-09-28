@@ -4,9 +4,11 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>WarPoly - 3D Low-Poly RTS</title>
-  <script type="module" crossorigin src="/assets/main-BNrogDEI.js"></script>
-  <link rel="modulepreload" crossorigin href="/assets/unitAnimator-8YXTYZsI.js">
-  <link rel="stylesheet" crossorigin href="/assets/main-CXoqvJ3e.css">
+  <script type="module" crossorigin src="/assets/main-9UA8b_mu.js"></script>
+  <link rel="modulepreload" crossorigin href="/assets/game-models-eEcVy1DX.js">
+  <link rel="modulepreload" crossorigin href="/assets/three-vendor-D9KRs7UC.js">
+  <link rel="modulepreload" crossorigin href="/assets/HumanForge-DmLIfZT0.js">
+  <link rel="stylesheet" crossorigin href="/assets/main-CQpVoMs0.css">
 </head>
 <body>
   <!-- Royal Loading Screen with Progress Bar -->
@@ -39,90 +41,183 @@
 
   <!-- AAA Gold Accents UI Overlay -->
   <div id="ui-layer">
-    <!-- Top Resource Bar -->
-    <header id="top-bar" class="interactive">
-      <div class="resource-group">
-        <div class="res-item" title="Wood: Harvested from trees">
-          <span class="res-icon">🪵</span>
-          <span id="wood-val">180</span>
+    <!-- Top Floating Resource Bar & Config Button (matching hudmodelo.png) -->
+    <header id="top-bar-container" class="interactive">
+      <div id="resource-bar">
+        <div class="res-item" title="Madeira: Coletada de árvores">
+          <img src="/icomadeira.png" class="res-badge-icon" alt="Madeira" />
+          <span id="wood-val">240</span>
         </div>
-        <div class="res-item" title="Gold: Mined from the Gold Deposit">
-          <span class="res-icon">🪙</span>
-          <span id="gold-val">140</span>
+        <div class="res-item" title="Ouro: Extraído de minas de ouro">
+          <img src="/icoouro.png" class="res-badge-icon" alt="Ouro" />
+          <span id="gold-val">212</span>
         </div>
-        <div class="res-item" title="Stone: Mined from the Stone Quarry">
-          <span class="res-icon">🪨</span>
-          <span id="stone-val">80</span>
+        <div class="res-item" title="Pedra: Extraída de pedreiras de pedra">
+          <img src="/icopedra.png" class="res-badge-icon" alt="Pedra" />
+          <span id="stone-val">120</span>
         </div>
-        <div class="res-item" title="Population: Build cottages to increase capacity">
-          <span class="res-icon">👥</span>
-          <span id="pop-val">6 / 15</span>
-        </div>
-        <div class="res-item" id="raid-timer-val" title="Bandit Raid Incoming!">
-          Raid in 75s
+        <div class="res-item" title="População: Unidades atuais / Capacidade máxima">
+          <img src="/icopopulacao.png" class="res-badge-icon" alt="População" />
+          <span id="pop-val">5 / 15</span>
         </div>
       </div>
 
-      <div class="header-actions">
-        <!-- Atmosphere presets -->
-        <button class="gold-btn secondary" id="btn-time-day" title="Sunny Day">☀️ Day</button>
-        <button class="gold-btn secondary" id="btn-time-sunset" title="Cozy Sunset">🌅 Sunset</button>
-        <button class="gold-btn secondary" id="btn-time-night" title="Moonlit Night">🌙 Night</button>
-
-        <!-- Speed -->
-        <button class="gold-btn secondary" id="btn-speed-1x" title="Normal Speed">1x</button>
-        <button class="gold-btn secondary" id="btn-speed-2x" title="Fast Forward">2x</button>
-        <button class="gold-btn secondary" id="btn-pause" title="Pause / Resume">⏸️</button>
-
-        <!-- Audio -->
-        <button class="gold-btn secondary" id="btn-toggle-sound" title="Toggle Sound FX">🔊 SFX</button>
-        <button class="gold-btn secondary" id="btn-toggle-music" title="Toggle Cozy Music">🎵 Music</button>
-
-        <!-- Help & Inspector -->
-        <button class="gold-btn" id="btn-help" title="Game Objectives & Controls">📜 Guide</button>
-        <a href="/inspector.html" class="gold-btn secondary" id="btn-inspector" title="Abrir Inspetor de Modelos 3D" style="text-decoration:none;">🔍 Inspetor 3D</a>
-      </div>
+      <!-- Settings gear button (icoconfig.png) -->
+      <button id="btn-config" class="config-circle-btn" title="Configurações do Jogo">
+        <img src="/icoconfig.png" class="config-badge-icon" alt="Configurações" />
+      </button>
     </header>
+
+    <!-- Settings Panel (Top Right - matching hudmodelo.png) -->
+    <div id="settings-panel" class="interactive" style="display: none;">
+      <div class="settings-header">
+        <span class="settings-title">CONFIGURAÇÕES</span>
+        <button id="btn-close-settings" class="settings-close-btn" title="Fechar">✕</button>
+      </div>
+
+      <div class="settings-body">
+        <!-- Velocidade -->
+        <div class="settings-row">
+          <span class="settings-label">Velocidade</span>
+          <div class="speed-btn-group">
+            <button class="speed-pill active" id="btn-speed-1x" data-speed="1">[1X]</button>
+            <button class="speed-pill" id="btn-speed-2x" data-speed="2">[2X]</button>
+            <button class="speed-pill" id="btn-speed-3x" data-speed="3">[3X]</button>
+          </div>
+        </div>
+
+        <!-- Pausar -->
+        <div class="settings-row">
+          <span class="settings-label">Pausar</span>
+          <label class="switch">
+            <input type="checkbox" id="toggle-pause" />
+            <span class="slider round"></span>
+          </label>
+        </div>
+
+        <!-- Efeitos Sonoros -->
+        <div class="settings-row">
+          <span class="settings-label">Efeitos Sonoros</span>
+          <div class="slider-group">
+            <input type="range" id="slider-sfx" min="0" max="100" value="70" class="gold-range" />
+            <span id="val-sfx" class="range-val">70%</span>
+          </div>
+        </div>
+
+        <!-- Música -->
+        <div class="settings-row">
+          <span class="settings-label">Música</span>
+          <div class="slider-group">
+            <input type="range" id="slider-music" min="0" max="100" value="50" class="gold-range" />
+            <span id="val-music" class="range-val">50%</span>
+          </div>
+        </div>
+
+        <!-- Iluminação / Clima -->
+        <div class="settings-row">
+          <span class="settings-label">Iluminação</span>
+          <div class="time-btn-group">
+            <button class="time-pill active" id="btn-time-day" title="Dia Ensolarado">☀️ Dia</button>
+            <button class="time-pill" id="btn-time-sunset" title="Pôr do Sol">🌅 Sunset</button>
+            <button class="time-pill" id="btn-time-night" title="Noite Enluarada">🌙 Noite</button>
+          </div>
+        </div>
+
+        <div class="settings-divider"></div>
+
+        <!-- Links / Ações -->
+        <button class="settings-link-row" id="btn-open-guide">
+          <span>Guia do Jogo</span>
+          <span class="arrow">›</span>
+        </button>
+        <a href="/inspector.html" class="settings-link-row" id="btn-open-inspector">
+          <span>Inspetor 3D</span>
+          <span class="arrow">›</span>
+        </a>
+      </div>
+    </div>
 
     <!-- Notification Banner -->
     <div id="notification-box"></div>
 
     <!-- Bottom HUD (Minimap, Selection Card, Hotkeys) -->
     <footer id="bottom-bar">
-      <!-- Minimap -->
+      <!-- Minimap with Golden Border matching hudmodelo.png -->
       <div id="minimap-wrapper" class="interactive">
+        <canvas id="minimap-canvas" width="140" height="140"></canvas>
         <span class="minimap-title">KINGDOM REALM</span>
-        <canvas id="minimap-canvas" width="130" height="130"></canvas>
       </div>
 
       <!-- Selection & Action Card -->
       <div id="selection-card" class="interactive">
-        <div class="card-header">
-          <span id="selection-title">Unit Name</span>
-          <div class="hp-container">
-            <span id="selection-hp">100 / 100 HP</span>
-            <div class="hp-bar-bg">
-              <div id="selection-hp-fill"></div>
+        <!-- Standard Selection View (Units & Resources) -->
+        <div id="standard-selection-view">
+          <div class="card-header">
+            <span id="selection-title">Unit Name</span>
+            <div class="hp-container">
+              <span id="selection-hp">100 / 100 HP</span>
+              <div class="hp-bar-bg">
+                <div id="selection-hp-fill"></div>
+              </div>
+            </div>
+          </div>
+          <div class="card-body">
+            <div id="selection-stats">
+              <!-- Dynamic stats inserted here -->
+            </div>
+            <div id="selection-actions">
+              <!-- Dynamic command & production buttons -->
             </div>
           </div>
         </div>
-        <div class="card-body">
-          <div id="selection-stats">
-            <!-- Dynamic stats inserted here -->
+
+        <!-- Building Selection View (Matches dialogoBarracs.png) -->
+        <div id="building-selection-view" style="display: none;">
+          <div class="bld-card-header">
+            <div class="bld-header-left">
+              <span id="bld-selection-title">QUARTEL DE INFANTARIA</span>
+              <div class="bld-hp-row">
+                <span id="bld-selection-hp">Vida: 850 / 850</span>
+                <div class="bld-hp-bar-bg">
+                  <div id="bld-selection-hp-fill"></div>
+                </div>
+              </div>
+            </div>
+            <div id="bld-extra-info"></div>
           </div>
-          <div id="selection-actions">
-            <!-- Dynamic command & production buttons -->
+
+          <!-- Train Units Section -->
+          <div id="bld-train-section" class="bld-section-row">
+            <span class="bld-section-label">TREINAR UNIDADES</span>
+            <div id="bld-train-buttons" class="bld-train-buttons">
+              <!-- Unit training icon buttons inserted here -->
+            </div>
+          </div>
+
+          <!-- Training Queue Section -->
+          <div id="bld-queue-section" class="bld-queue-section">
+            <span class="bld-section-label">FILA DE TREINAMENTO</span>
+            <div class="bld-queue-wrapper">
+              <div id="bld-queue-slots" class="bld-queue-slots">
+                <div class="bld-queue-slot empty" data-slot="0"></div>
+                <div class="bld-queue-slot empty" data-slot="1"></div>
+                <div class="bld-queue-slot empty" data-slot="2"></div>
+                <div class="bld-queue-slot empty" data-slot="3"></div>
+                <div class="bld-queue-slot empty" data-slot="4"></div>
+                <div class="bld-queue-slot empty" data-slot="5"></div>
+              </div>
+              <div class="bld-queue-progress-track">
+                <div id="bld-queue-progress-bar" class="bld-queue-progress-bar"></div>
+              </div>
+            </div>
           </div>
         </div>
       </div>
 
-      <!-- Quick Controls Guide -->
+      <!-- Quick Controls Guide matching hudmodelo.png -->
       <div id="quick-guide" class="interactive">
-        <div><span class="key">WASD / Arrows</span> Pan Camera</div>
-        <div><span class="key">Wheel</span> Zoom | <span class="key">Q / E</span> Rotate</div>
-        <div><span class="key">L-Click</span> Select / Drag Box</div>
-        <div><span class="key">R-Click</span> Move / Gather / Attack</div>
-        <div><span class="key">H</span> Center Town Castle</div>
+        <div class="guide-line-1"><span class="key-gold">WASD</span> Mover · Scroll Zoom · <span class="key-gold">C</span></div>
+        <div class="guide-line-2">Clique Selecionar · Direito Mover</div>
       </div>
     </footer>
   </div>

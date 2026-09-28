@@ -205,7 +205,9 @@ export class ParticleSystem {
 
       if (p.life <= 0) {
         this.scene.remove(p.mesh);
-        p.mesh.geometry?.dispose();
+        if (p.mesh.geometry && p.mesh.geometry !== this.chipGeo && p.mesh.geometry !== this.smokeGeo) {
+          p.mesh.geometry.dispose();
+        }
         if (p.isSmoke && p.mesh.material) p.mesh.material.dispose();
         this.particles.splice(i, 1);
       }
@@ -225,5 +227,16 @@ export class ParticleSystem {
         this.floatingTexts.splice(i, 1);
       }
     }
+  }
+
+  dispose() {
+    this.chipGeo?.dispose();
+    this.smokeGeo?.dispose();
+    this.woodMat?.dispose();
+    this.leafMat?.dispose();
+    this.goldMat?.dispose();
+    this.stoneMat?.dispose();
+    this.sparkMat?.dispose();
+    this.smokeMat?.dispose();
   }
 }

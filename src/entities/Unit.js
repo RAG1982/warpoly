@@ -3,6 +3,39 @@ import { ModelFactory } from './ModelFactory.js';
 import { Arrow } from './Arrow.js';
 import { UnitAnimator } from '../inspector/unitAnimator.js';
 
+// Shared Selection Ring Geometry & Materials
+const unitRingGeo = new THREE.RingGeometry(0.85, 1.05, 24);
+unitRingGeo.rotateX(-Math.PI / 2);
+
+const playerRingMat = new THREE.MeshBasicMaterial({
+  color: 0xdeb841,
+  side: THREE.DoubleSide,
+  transparent: true,
+  opacity: 0.85
+});
+const enemyRingMat = new THREE.MeshBasicMaterial({
+  color: 0xef4444,
+  side: THREE.DoubleSide,
+  transparent: true,
+  opacity: 0.85
+});
+
+// Shared 3D Health Bar Geometries & Materials (Zero Canvas, zero texture uploads)
+const hpBgGeo = new THREE.PlaneGeometry(1.34, 0.22);
+const hpFillGeo = new THREE.PlaneGeometry(1.28, 0.16);
+hpFillGeo.translate(0.64, 0, 0); // pivot at left edge so scale.x scales neatly
+
+const hpBgMat = new THREE.MeshBasicMaterial({
+  color: 0x0f172a,
+  side: THREE.DoubleSide,
+  depthTest: false,
+  depthWrite: false,
+  transparent: false
+});
+const hpGreenMat = new THREE.MeshBasicMaterial({ color: 0x22c55e, depthTest: false, depthWrite: false, side: THREE.DoubleSide });
+const hpYellowMat = new THREE.MeshBasicMaterial({ color: 0xfacc15, depthTest: false, depthWrite: false, side: THREE.DoubleSide });
+const hpRedMat = new THREE.MeshBasicMaterial({ color: 0xef4444, depthTest: false, depthWrite: false, side: THREE.DoubleSide });
+
 export class Unit {
   constructor(scene, terrain, type, x, z, faction = 'player') {
     this.scene = scene;
@@ -30,6 +63,12 @@ export class Unit {
     this.buildTarget = null;
     this.attackTarget = null;
 
+    // Navigation & Waypoints
+    this.gameManager = null;
+    this.waypoints = null;
+    this.waypointIndex = 0;
+    this.pathDestination = null;
+
     // Worker inventory
     this.carrying = { type: null, amount: 0, max: 15 };
     this.actionTimer = 0;
@@ -38,22 +77,23 @@ export class Unit {
     this.isDead = false;
     this.isDying = false;
     this.canRemove = false;
+    this.isDisposed = false;
     this.hurtTimer = 0;
     this.deathTimer = 0;
     this.deathDuration = 1.6;
     this.hasFiredThisAttack = false;
 
-    // Create 3D Model
+    // Create 3D Model (zero-cost clone sharing pre-compiled geometries and materials)
     this.mesh = this.createModel(type);
     const h = this.terrain.getHeight(x, z);
     this.mesh.position.set(x, h, z);
-    this.mesh.scale.set(1.35, 1.35, 1.35); // Heroic RTS proportions matching modelo.png
+    this.mesh.scale.set(1.62, 1.62, 1.62); // Scaled +20% for superior visibility and detail appreciation
     this.mesh.userData.entity = this;
 
     // Animator
     this.animator = new UnitAnimator(this.mesh, type);
 
-    // Selection ring
+    // Selection ring & 3D Health Bar
     this.createSelectionRing();
     this.createHealthBar();
 
@@ -63,119 +103,142 @@ export class Unit {
   getUnitStats(type) {
     switch (type) {
       case 'villager':
-        return { name: 'Villager', hp: 85, speed: 4.5, attack: 7, attackRange: 1.6, attackCooldown: 1.0, collisionRadius: 0.55 };
+        return { name: 'Villager', hp: 85, speed: 4.5, attack: 7, attackRange: 1.8, attackCooldown: 1.0, collisionRadius: 0.66 };
       case 'knight':
-        return { name: 'Knight', hp: 190, speed: 4.8, attack: 26, attackRange: 1.9, attackCooldown: 1.1, armor: 4, collisionRadius: 0.70 };
+        return { name: 'Knight', hp: 190, speed: 4.8, attack: 26, attackRange: 2.1, attackCooldown: 1.1, armor: 4, collisionRadius: 0.84 };
       case 'archer':
-        return { name: 'Archer', hp: 95, speed: 4.3, attack: 18, attackRange: 14.0, attackCooldown: 1.4, collisionRadius: 0.55 };
+        return { name: 'Archer', hp: 95, speed: 4.3, attack: 18, attackRange: 14.0, attackCooldown: 1.4, collisionRadius: 0.66 };
       case 'bandit':
-        return { name: 'Bandit Raider', hp: 125, speed: 4.4, attack: 16, attackRange: 1.9, attackCooldown: 1.2, armor: 1, collisionRadius: 0.70 };
+        return { name: 'Bandit Raider', hp: 125, speed: 4.4, attack: 16, attackRange: 2.1, attackCooldown: 1.2, armor: 1, collisionRadius: 0.84 };
+      case 'peon':
+        return { name: 'Orc Peon', hp: 90, speed: 4.5, attack: 8, attackRange: 1.8, attackCooldown: 1.0, collisionRadius: 0.66 };
+      case 'grunt':
+        return { name: 'Orc Grunt', hp: 205, speed: 4.7, attack: 28, attackRange: 2.1, attackCooldown: 1.15, armor: 4, collisionRadius: 0.86 };
+      case 'axethrower':
+        return { name: 'Troll Axethrower', hp: 100, speed: 4.4, attack: 19, attackRange: 13.5, attackCooldown: 1.35, collisionRadius: 0.66 };
+      case 'ogre':
+        return { name: 'Orc Ogre', hp: 320, speed: 4.0, attack: 42, attackRange: 2.5, attackCooldown: 1.5, armor: 5, collisionRadius: 1.08 };
       default:
-        return { name: 'Unit', hp: 100, speed: 4.0, attack: 10, attackRange: 1.5, attackCooldown: 1.0, collisionRadius: 0.60 };
+        return { name: 'Unit', hp: 100, speed: 4.0, attack: 10, attackRange: 1.8, attackCooldown: 1.0, collisionRadius: 0.72 };
     }
+  }
+
+  isCombatUnit() {
+    return this.type === 'knight' || this.type === 'archer' || this.type === 'bandit' ||
+           this.type === 'grunt' || this.type === 'axethrower' || this.type === 'ogre';
+  }
+
+  isWorker() {
+    return this.type === 'villager' || this.type === 'peon';
   }
 
   createModel(type) {
-    let model;
-    switch (type) {
-      case 'villager': model = ModelFactory.createVillager(); break;
-      case 'knight': model = ModelFactory.createKnight(); break;
-      case 'archer': model = ModelFactory.createArcher(); break;
-      case 'bandit': model = ModelFactory.createBandit(); break;
-      default: model = ModelFactory.createVillager(); break;
-    }
-    this.cloneMaterials(model);
-    return model;
-  }
-
-  cloneMaterials(model) {
-    if (!model) return;
-    const matMap = new Map();
-    model.traverse(child => {
-      if (child.isMesh && child.material) {
-        if (Array.isArray(child.material)) {
-          child.material = child.material.map(m => {
-            if (!matMap.has(m)) matMap.set(m, m.clone());
-            return matMap.get(m);
-          });
-        } else {
-          if (!matMap.has(child.material)) {
-            matMap.set(child.material, child.material.clone());
-          }
-          child.material = matMap.get(child.material);
-        }
-      }
-    });
+    return ModelFactory.createUnit(type);
   }
 
   createSelectionRing() {
-    const ringGeo = new THREE.RingGeometry(0.85, 1.05, 24);
-    ringGeo.rotateX(-Math.PI / 2);
-    const color = this.faction === 'player' ? 0xdeb841 : 0xef4444;
-    const ringMat = new THREE.MeshBasicMaterial({
-      color,
-      side: THREE.DoubleSide,
-      transparent: true,
-      opacity: 0.85
-    });
-    this.selectionRing = new THREE.Mesh(ringGeo, ringMat);
+    this.selectionRing = new THREE.Mesh(unitRingGeo, this.faction === 'player' ? playerRingMat : enemyRingMat);
+    this.selectionRing.name = 'SelectionRing';
     this.selectionRing.position.y = 0.05;
     this.selectionRing.visible = false;
     this.mesh.add(this.selectionRing);
   }
 
   createHealthBar() {
-    const canvas = document.createElement('canvas');
-    canvas.width = 64;
-    canvas.height = 12;
-    this.hpCanvas = canvas;
-    this.hpCtx = canvas.getContext('2d');
+    this.hpGroup = new THREE.Group();
+    this.hpGroup.name = 'HealthBar';
+    const h = this.getHealthBarHeight();
+    this.hpGroup.position.set(this.mesh.position.x, this.mesh.position.y + h, this.mesh.position.z);
 
-    this.hpTexture = new THREE.CanvasTexture(canvas);
-    const spriteMat = new THREE.SpriteMaterial({ map: this.hpTexture, transparent: true, depthTest: false });
-    this.hpSprite = new THREE.Sprite(spriteMat);
-    this.hpSprite.scale.set(1.4, 0.28, 1);
-    this.hpSprite.position.set(0, 2.3, 0);
-    this.hpSprite.visible = false;
-    this.mesh.add(this.hpSprite);
+    const bgMesh = new THREE.Mesh(hpBgGeo, hpBgMat);
+    bgMesh.name = 'HealthBg';
+    bgMesh.renderOrder = 1100;
+    this.hpGroup.add(bgMesh);
+
+    this.hpFillMesh = new THREE.Mesh(hpFillGeo, hpGreenMat);
+    this.hpFillMesh.name = 'HealthFill';
+    this.hpFillMesh.position.set(-0.64, 0, 0.005);
+    this.hpFillMesh.renderOrder = 1101;
+    this.hpGroup.add(this.hpFillMesh);
+
+    this.hpGroup.visible = false;
+    this.hpSprite = this.hpGroup; // backward compatibility alias
+    if (this.scene) {
+      this.scene.add(this.hpGroup);
+    }
     this.updateHealthBar();
   }
 
+  getHealthBarHeight() {
+    switch (this.type) {
+      case 'ogre': return 4.5;
+      case 'knight':
+      case 'grunt': return 3.9;
+      case 'bandit': return 3.6;
+      case 'archer':
+      case 'axethrower': return 3.4;
+      case 'villager':
+      case 'peon': return 3.1;
+      default: return 3.5;
+    }
+  }
+
   updateHealthBar() {
-    const ctx = this.hpCtx;
-    ctx.clearRect(0, 0, 64, 12);
-
-    // Background border
-    ctx.fillStyle = '#1e1c19';
-    ctx.fillRect(0, 0, 64, 12);
-
-    // HP fill
-    const pct = Math.max(0, this.hp / this.maxHp);
-    ctx.fillStyle = pct > 0.5 ? '#4ade80' : pct > 0.25 ? '#facc15' : '#ef4444';
-    ctx.fillRect(2, 2, Math.floor(60 * pct), 8);
-
-    this.hpTexture.needsUpdate = true;
+    if (!this.hpFillMesh) return;
+    const pct = Math.max(0, Math.min(1, this.hp / this.maxHp));
+    this.hpFillMesh.scale.x = Math.max(0.001, pct);
+    this.hpFillMesh.material = pct > 0.5 ? hpGreenMat : (pct > 0.25 ? hpYellowMat : hpRedMat);
   }
 
   setSelected(selected) {
+    this.isSelected = selected;
+    if (this.isDead || this.isDying || this.state === 'dying') {
+      if (this.selectionRing) this.selectionRing.visible = false;
+      if (this.hpGroup) this.hpGroup.visible = false;
+      return;
+    }
     this.selectionRing.visible = selected;
-    this.hpSprite.visible = selected || this.hp < this.maxHp;
+    if (this.hpGroup) {
+      this.hpGroup.visible = (this.mesh ? this.mesh.visible : true) && (selected || this.hp < this.maxHp);
+    }
   }
 
   // --- COMMANDS ---
 
-  moveTo(x, z) {
+  moveTo(x, z, gameManager = this.gameManager) {
+    if (this.isDead || this.isDying || this.state === 'dying') return;
+
     this.state = 'moving';
-    this.targetPos = new THREE.Vector3(x, 0, z);
     this.targetEntity = null;
     this.gatherTarget = null;
     this.buildTarget = null;
     this.attackTarget = null;
+    this.objectiveTarget = null;
+
+    const gm = gameManager || this.gameManager;
+    if (gm && gm.pathfinder) {
+      // Snap destination if clicked in water
+      if (gm.pathfinder.isWater(x, z)) {
+        const snapped = gm.pathfinder.findNearestWalkable(x, z);
+        x = snapped.x;
+        z = snapped.z;
+      }
+      const path = gm.pathfinder.findPath(this.mesh.position.x, this.mesh.position.z, x, z);
+      this.waypoints = path;
+      this.waypointIndex = 0;
+      this.pathDestination = { x, z };
+      this.targetPos = new THREE.Vector3(path[0].x, 0, path[0].z);
+    } else {
+      this.targetPos = new THREE.Vector3(x, 0, z);
+      this.waypoints = null;
+      this.waypointIndex = 0;
+      this.pathDestination = null;
+    }
   }
 
   orderGather(resource) {
-    if (this.type !== 'villager') return;
-    this.state = 'gathering';
+    if (this.isDead || this.isDying || this.state === 'dying') return;
+    if (this.type !== 'villager' && this.type !== 'peon') return;
     this.gatherTarget = resource;
     this.targetEntity = resource;
     this.buildTarget = null;
@@ -188,10 +251,19 @@ export class Unit {
       this.mesh.userData.pickaxe.visible = !isTree;
       if (this.mesh.userData.hammer) this.mesh.userData.hammer.visible = false;
     }
+
+    const resType = resource.type === 'tree' ? 'wood' : resource.type;
+    // If worker is carrying a different resource type, drop off at base first before harvesting new type
+    if (this.carrying.amount > 0 && this.carrying.type !== resType) {
+      this.state = 'returning';
+    } else {
+      this.state = 'gathering';
+    }
   }
 
   orderBuild(building) {
-    if (this.type !== 'villager') return;
+    if (this.isDead || this.isDying || this.state === 'dying') return;
+    if (this.type !== 'villager' && this.type !== 'peon') return;
     this.state = 'building';
     this.buildTarget = building;
     this.targetEntity = building;
@@ -205,22 +277,34 @@ export class Unit {
     }
   }
 
-  orderAttack(target) {
+  orderAttack(target, preserveObjective = false) {
+    if (this.isDead || this.isDying || this.state === 'dying') return;
     this.state = 'attacking';
     this.attackTarget = target;
     this.targetEntity = target;
     this.gatherTarget = null;
     this.buildTarget = null;
     this.hasFiredThisAttack = false;
+    const isBuilding = target && (target.fullMesh || target.isConstructed !== undefined);
+    if (isBuilding) {
+      this.objectiveTarget = target;
+    } else if (!preserveObjective) {
+      this.objectiveTarget = null;
+    }
   }
 
   stop() {
+    if (this.isDead || this.isDying || this.state === 'dying') return;
     this.state = 'idle';
     this.targetPos = null;
     this.targetEntity = null;
     this.gatherTarget = null;
     this.buildTarget = null;
     this.attackTarget = null;
+    this.objectiveTarget = null;
+    this.waypoints = null;
+    this.waypointIndex = 0;
+    this.pathDestination = null;
     this.hasFiredThisAttack = false;
     this.resetPose();
     if (this.animator) {
@@ -235,7 +319,9 @@ export class Unit {
     const effectiveDamage = Math.max(2, amount - this.armor);
     this.hp -= effectiveDamage;
     this.updateHealthBar();
-    this.hpSprite.visible = true;
+    if (this.hpGroup) {
+      this.hpGroup.visible = (this.mesh ? this.mesh.visible : true) && (this.isSelected || this.hp < this.maxHp);
+    }
 
     if (particleSystem) {
       particleSystem.spawnFloatingText(`-${Math.round(effectiveDamage)}`, this.mesh.position, '#ff4747');
@@ -254,25 +340,32 @@ export class Unit {
       this.animator.setAnimation('hurt', true);
     }
 
-    // Retaliation & Call for help: soldiers & bandits strike back when attacked
+    // Retaliation & Call for help: combat troops strike back when attacked
     if (attacker && !attacker.isDead && attacker.hp > 0 && attacker.faction !== this.faction) {
-      const isCombatUnit = this.type === 'knight' || this.type === 'archer' || this.type === 'bandit';
-      if (isCombatUnit) {
-        // If idle, moving, or attacking a passive structure, turn to engage the attacker!
-        const attackingBuilding = this.attackTarget && (this.attackTarget.type === 'castle' || this.attackTarget.type === 'lumber_camp' || this.attackTarget.type === 'cottage' || this.attackTarget.type === 'barracks' || this.attackTarget.type === 'watchtower' || this.attackTarget.type === 'farm' || this.attackTarget.type === 'bandit_camp');
-        if (this.state !== 'attacking' || attackingBuilding) {
-          this.orderAttack(attacker);
+      if (this.isCombatUnit()) {
+        const isTargetBuilding = this.attackTarget && (this.attackTarget.fullMesh || this.attackTarget.isConstructed !== undefined);
+        if (this.state !== 'attacking' || isTargetBuilding) {
+          const savedObjective = isTargetBuilding ? this.attackTarget : this.objectiveTarget;
+          this.orderAttack(attacker, !!savedObjective);
+          if (savedObjective) {
+            this.objectiveTarget = savedObjective;
+          }
         }
       }
 
-      // Nearby friendly soldiers & bandits rush to help!
+      // Nearby friendly combat troops rush to assist!
       if (allUnits && allUnits.length > 0) {
         allUnits.forEach(u => {
-          if (!u.isDead && u.faction === this.faction && (u.type === 'knight' || u.type === 'archer' || u.type === 'bandit')) {
-            if (u.state === 'idle') {
+          if (!u.isDead && u.faction === this.faction && u.isCombatUnit && u.isCombatUnit()) {
+            const isFriendlyTargetBuilding = u.attackTarget && (u.attackTarget.fullMesh || u.attackTarget.isConstructed !== undefined);
+            if (u.state === 'idle' || (u.state === 'attacking' && isFriendlyTargetBuilding)) {
               const d = this.mesh.position.distanceTo(u.mesh.position);
               if (d < 14) {
-                u.orderAttack(attacker);
+                const savedObjective = isFriendlyTargetBuilding ? u.attackTarget : u.objectiveTarget;
+                u.orderAttack(attacker, !!savedObjective);
+                if (savedObjective) {
+                  u.objectiveTarget = savedObjective;
+                }
               }
             }
           }
@@ -290,8 +383,25 @@ export class Unit {
     this.deathTimer = 0;
     this.deathDuration = 1.6;
 
+    this.targetPos = null;
+    this.targetEntity = null;
+    this.gatherTarget = null;
+    this.buildTarget = null;
+    this.attackTarget = null;
+    this.objectiveTarget = null;
+    this.waypoints = null;
+    this.waypointIndex = 0;
+    this.pathDestination = null;
+
+    if (this.gameManager && this.gameManager.selectedUnits) {
+      const idx = this.gameManager.selectedUnits.indexOf(this);
+      if (idx !== -1) {
+        this.gameManager.selectedUnits.splice(idx, 1);
+      }
+    }
+
     if (this.selectionRing) this.selectionRing.visible = false;
-    if (this.hpSprite) this.hpSprite.visible = false;
+    if (this.hpGroup) this.hpGroup.visible = false;
 
     if (this.animator) {
       this.animator.setAnimation('die', true);
@@ -314,20 +424,85 @@ export class Unit {
     if (ud.armR) ud.armR.rotation.x = 0;
   }
 
-  moveTowards(destX, destZ, delta) {
-    const currentPos = this.mesh.position;
-    const dir = new THREE.Vector3(destX - currentPos.x, 0, destZ - currentPos.z);
-    const dist = dir.length();
-    if (dist < 0.1) return;
+  stepTowards(targetX, targetZ, maxDist) {
+    const curX = this.mesh.position.x;
+    const curZ = this.mesh.position.z;
+    const dx = targetX - curX;
+    const dz = targetZ - curZ;
+    const dist = Math.hypot(dx, dz);
+    if (dist < 0.05) return true;
 
-    dir.normalize();
-    const step = Math.min(dist, this.speed * delta);
-    this.mesh.position.addScaledVector(dir, step);
+    const move = Math.min(dist, maxDist);
+    const dirX = dx / dist;
+    const dirZ = dz / dist;
 
-    const groundH = this.terrain.getHeight(this.mesh.position.x, this.mesh.position.z);
-    this.mesh.position.y = groundH;
+    const nextX = curX + dirX * move;
+    const nextZ = curZ + dirZ * move;
 
-    this.mesh.rotation.y = Math.atan2(dir.x, dir.z);
+    // WATER IMPASSABILITY: Units cannot enter or cross water!
+    const nextH = this.terrain.getHeight(nextX, nextZ);
+    if (nextH < 0.65) {
+      // Impassable water obstacle! Try sliding along X or Z if one direction is on dry land
+      const hX = this.terrain.getHeight(nextX, curZ);
+      const hZ = this.terrain.getHeight(curX, nextZ);
+      if (hX >= 0.65) {
+        this.mesh.position.x = nextX;
+      } else if (hZ >= 0.65) {
+        this.mesh.position.z = nextZ;
+      }
+      this.mesh.position.y = this.terrain.getHeight(this.mesh.position.x, this.mesh.position.z);
+      return false;
+    }
+
+    this.mesh.position.x = nextX;
+    this.mesh.position.z = nextZ;
+    this.mesh.position.y = nextH;
+
+    this.mesh.rotation.y = Math.atan2(dirX, dirZ);
+    return (dist - move) < 0.15;
+  }
+
+  moveTowards(destX, destZ, delta, gameManager = this.gameManager) {
+    const curX = this.mesh.position.x;
+    const curZ = this.mesh.position.z;
+    const distToFinal = Math.hypot(destX - curX, destZ - curZ);
+    if (distToFinal < 0.1) return;
+
+    let subTargetX = destX;
+    let subTargetZ = destZ;
+
+    const gm = gameManager || this.gameManager;
+    if (gm && gm.pathfinder) {
+      const los = gm.pathfinder.hasLineOfSight(curX, curZ, destX, destZ);
+      if (!los) {
+        // Direct line blocked by water! Route through waypoints / fords
+        const distFromLastDest = this.pathDestination
+          ? Math.hypot(destX - this.pathDestination.x, destZ - this.pathDestination.z)
+          : Infinity;
+
+        if (!this.waypoints || this.waypoints.length === 0 || distFromLastDest > 2.5) {
+          this.waypoints = gm.pathfinder.findPath(curX, curZ, destX, destZ);
+          this.waypointIndex = 0;
+          this.pathDestination = { x: destX, z: destZ };
+        }
+
+        if (this.waypoints && this.waypointIndex < this.waypoints.length) {
+          const wp = this.waypoints[this.waypointIndex];
+          const distToWp = Math.hypot(wp.x - curX, wp.z - curZ);
+          if (distToWp < 0.8 && this.waypointIndex < this.waypoints.length - 1) {
+            this.waypointIndex++;
+          }
+          const activeWp = this.waypoints[this.waypointIndex];
+          subTargetX = activeWp.x;
+          subTargetZ = activeWp.z;
+        }
+      } else {
+        this.waypoints = null;
+        this.pathDestination = null;
+      }
+    }
+
+    this.stepTowards(subTargetX, subTargetZ, this.speed * delta);
 
     // Walk animation (if not playing hurt stagger)
     this.hasFiredThisAttack = false;
@@ -339,8 +514,35 @@ export class Unit {
 
   update(delta, gameManager, soundManager, particleSystem, arrows, allUnits, buildings) {
     if (this.canRemove) return;
+    this.gameManager = gameManager;
 
-    if (this.state === 'dying') {
+    // Update 3D health bar position and billboard to face camera
+    if (this.hpGroup && this.scene) {
+      if (this.isDead || this.isDying || this.state === 'dying' || this.canRemove || (this.mesh && !this.mesh.visible)) {
+        this.hpGroup.visible = false;
+      } else {
+        const isVisible = this.isSelected || this.hp < this.maxHp;
+        this.hpGroup.visible = isVisible;
+        if (isVisible && gameManager && gameManager.sceneManager) {
+          const h = this.getHealthBarHeight();
+          this.hpGroup.position.set(this.mesh.position.x, this.mesh.position.y + h, this.mesh.position.z);
+          this.hpGroup.quaternion.copy(gameManager.sceneManager.camera.quaternion);
+        }
+      }
+    }
+
+    // Safety: ensure unit never stays submerged in water
+    if (this.terrain.getHeight(this.mesh.position.x, this.mesh.position.z) < 0.65) {
+      if (gameManager && gameManager.pathfinder) {
+        const safe = gameManager.pathfinder.findNearestWalkable(this.mesh.position.x, this.mesh.position.z);
+        this.mesh.position.x = safe.x;
+        this.mesh.position.z = safe.z;
+        this.mesh.position.y = this.terrain.getHeight(safe.x, safe.z);
+      }
+    }
+
+    if (this.isDead || this.isDying || this.state === 'dying') {
+      this.state = 'dying';
       this.deathTimer += delta;
       if (this.animator) {
         this.animator.update(delta);
@@ -350,12 +552,10 @@ export class Unit {
       }
       if (this.deathTimer >= this.deathDuration) {
         this.canRemove = true;
-        this.scene.remove(this.mesh);
+        this.dispose();
       }
       return;
     }
-
-    if (this.isDead) return;
 
     if (this.hurtTimer > 0) {
       this.hurtTimer -= delta;
@@ -375,7 +575,7 @@ export class Unit {
         this.updateIdle(delta, allUnits, buildings);
         break;
       case 'moving':
-        this.updateMoving(delta);
+        this.updateMoving(delta, gameManager);
         break;
       case 'gathering':
         this.updateGathering(delta, gameManager, soundManager, particleSystem, buildings);
@@ -384,10 +584,10 @@ export class Unit {
         this.updateReturning(delta, gameManager, soundManager, particleSystem, buildings);
         break;
       case 'building':
-        this.updateBuilding(delta, soundManager, particleSystem);
+        this.updateBuilding(delta, soundManager, particleSystem, gameManager);
         break;
       case 'attacking':
-        this.updateAttacking(delta, soundManager, particleSystem, arrows, allUnits, buildings);
+        this.updateAttacking(delta, soundManager, particleSystem, arrows, allUnits, buildings, gameManager);
         break;
     }
   }
@@ -399,51 +599,43 @@ export class Unit {
       this.animator.update(delta);
     }
 
-    // Auto-Aggro: Military units actively scan for and attack approaching enemies
-    if (this.faction === 'player' && (this.type === 'knight' || this.type === 'archer')) {
-      const scanRange = this.type === 'archer' ? 14 : 10;
+    // Auto-Aggro: Military combat units actively scan for and attack approaching enemies
+    if (this.isCombatUnit()) {
+      const scanRange = (this.type === 'archer' || this.type === 'axethrower') ? 14 : 11;
       const target = this.findNearestHostile(allUnits, buildings, scanRange);
-      if (target) {
-        this.orderAttack(target);
-      }
-    } else if (this.faction === 'enemy') {
-      const target = this.findNearestHostile(allUnits, buildings, 13);
       if (target) {
         this.orderAttack(target);
       }
     }
   }
 
-  updateMoving(delta) {
+  updateMoving(delta, gameManager = this.gameManager) {
     if (!this.targetPos) {
       this.stop();
       return;
     }
 
-    const currentPos = this.mesh.position;
-    const dest = this.targetPos.clone();
-    dest.y = currentPos.y;
+    const curX = this.mesh.position.x;
+    const curZ = this.mesh.position.z;
+    const targetX = this.targetPos.x;
+    const targetZ = this.targetPos.z;
+    const dist = Math.hypot(targetX - curX, targetZ - curZ);
 
-    const dist = currentPos.distanceTo(dest);
-    if (dist < 0.3) {
-      this.mesh.position.x = dest.x;
-      this.mesh.position.z = dest.z;
+    if (dist < 0.45) {
+      // Check if there are more waypoints along the route
+      if (this.waypoints && this.waypointIndex < this.waypoints.length - 1) {
+        this.waypointIndex++;
+        const nextWp = this.waypoints[this.waypointIndex];
+        this.targetPos = new THREE.Vector3(nextWp.x, 0, nextWp.z);
+        return;
+      }
+
       this.stop();
       return;
     }
 
-    // Direction and rotation
-    const dir = new THREE.Vector3().subVectors(dest, currentPos).normalize();
-    const moveDist = Math.min(dist, this.speed * delta);
-    this.mesh.position.addScaledVector(dir, moveDist);
-
-    // Stick to terrain surface height
-    const groundH = this.terrain.getHeight(this.mesh.position.x, this.mesh.position.z);
-    this.mesh.position.y = groundH;
-
-    // Rotate unit facing movement direction
-    const targetAngle = Math.atan2(dir.x, dir.z);
-    this.mesh.rotation.y = targetAngle;
+    // Move step towards current target waypoint
+    this.stepTowards(targetX, targetZ, this.speed * delta);
 
     // Walk animation cycle
     this.hasFiredThisAttack = false;
@@ -522,12 +714,18 @@ export class Unit {
 
   depositResources(gameManager, soundManager, particleSystem) {
     if (this.carrying.amount > 0) {
-      gameManager.addResource(this.carrying.type, this.carrying.amount);
-      if (particleSystem) {
+      if (this.faction === 'enemy') {
+        const ai = gameManager.aiDirector || gameManager.enemyAI;
+        if (ai) ai.addResource(this.carrying.type, this.carrying.amount);
+      } else {
+        gameManager.addResource(this.carrying.type, this.carrying.amount);
+      }
+
+      if (particleSystem && (this.faction === 'player' || (gameManager.fogOfWar && gameManager.fogOfWar.isExplored(this.mesh.position.x, this.mesh.position.z)))) {
         const color = this.carrying.type === 'gold' ? '#ffd700' : this.carrying.type === 'wood' ? '#68d391' : '#cbd5e1';
         particleSystem.spawnFloatingText(`+${this.carrying.amount} ${this.carrying.type.toUpperCase()}`, this.mesh.position, color);
       }
-      if (soundManager) soundManager.playOrder();
+      if (soundManager && this.faction === 'player') soundManager.playOrder();
       this.carrying.amount = 0;
       this.updateCarryingVisuals(false);
     }
@@ -536,14 +734,20 @@ export class Unit {
     if (this.gatherTarget && !this.gatherTarget.isDead && (this.gatherTarget.woodRemaining > 0 || this.gatherTarget.resourcesRemaining > 0)) {
       this.state = 'gathering';
       this.resetWalkPose();
+      if (this.mesh.userData.axe && this.mesh.userData.pickaxe) {
+        const isTree = this.gatherTarget.type === 'tree';
+        this.mesh.userData.axe.visible = isTree;
+        this.mesh.userData.pickaxe.visible = !isTree;
+        if (this.mesh.userData.hammer) this.mesh.userData.hammer.visible = false;
+      }
     } else {
       this.stop();
     }
   }
 
   updateReturning(delta, gameManager, soundManager, particleSystem, buildings) {
-    // Find nearest dropoff building (Castle or Lumber Camp for wood, Castle for gold/stone)
-    const dropoff = gameManager.findNearestDropoff(this.mesh.position, this.carrying.type, buildings || gameManager.buildings);
+    // Find nearest dropoff building for unit's faction
+    const dropoff = gameManager.findNearestDropoff(this.mesh.position, this.carrying.type, buildings || gameManager.buildings, this.faction);
     if (!dropoff) {
       this.stop();
       return;
@@ -558,6 +762,9 @@ export class Unit {
 
     // Delivery triggers upon colliding / contacting the dropoff building!
     if (dist <= contactDist) {
+      if (dropoff.processWoodDelivery && this.carrying.type === 'wood') {
+        dropoff.processWoodDelivery(particleSystem);
+      }
       this.depositResources(gameManager, soundManager, particleSystem);
       return;
     }
@@ -574,7 +781,7 @@ export class Unit {
     }
   }
 
-  updateBuilding(delta, soundManager, particleSystem) {
+  updateBuilding(delta, soundManager, particleSystem, gameManager) {
     if (!this.buildTarget || this.buildTarget.isDead || this.buildTarget.isConstructed) {
       this.stop();
       return;
@@ -603,22 +810,57 @@ export class Unit {
 
     if (this.actionTimer >= 0.8) {
       this.actionTimer = 0;
-      this.buildTarget.construct(10, soundManager, particleSystem);
+      const gm = gameManager || this.gameManager;
+      this.buildTarget.construct(10, soundManager, particleSystem, gm);
       if (soundManager) soundManager.playHammer();
     }
   }
 
   updateAttacking(delta, soundManager, particleSystem, arrows, allUnits, buildings) {
-    // 1. Target dead or invalid: find next closest hostile
+    // 1. Target dead or invalid: find next closest hostile or resume objective
     if (!this.attackTarget || this.attackTarget.isDead || this.attackTarget.hp <= 0) {
-      const nextTarget = this.findNearestHostile(allUnits, buildings, 16);
-      if (nextTarget) {
-        this.attackTarget = nextTarget;
-        this.targetEntity = nextTarget;
+      const nextUnit = this.findNearestHostileUnit(allUnits, 16);
+      if (nextUnit) {
+        this.attackTarget = nextUnit;
+        this.targetEntity = nextUnit;
+        this.hasFiredThisAttack = false;
+      } else if (this.objectiveTarget && !this.objectiveTarget.isDead && this.objectiveTarget.hp > 0) {
+        // Resume siege on strategic objective building after clearing defending troops
+        this.attackTarget = this.objectiveTarget;
+        this.targetEntity = this.objectiveTarget;
         this.hasFiredThisAttack = false;
       } else {
-        this.stop();
-        return;
+        const nextTarget = this.findNearestHostile(allUnits, buildings, 16);
+        if (nextTarget) {
+          this.attackTarget = nextTarget;
+          this.targetEntity = nextTarget;
+          this.hasFiredThisAttack = false;
+        } else {
+          this.objectiveTarget = null;
+          this.stop();
+          return;
+        }
+      }
+    }
+
+    // Dynamic Threat Scanning (Attack-Move logic):
+    // If our current target is a building (or worker), scan for nearby hostile combat units to prevent tunnel-visioning!
+    const isTargetBuilding = this.attackTarget && (this.attackTarget.fullMesh || this.attackTarget.isConstructed !== undefined);
+    const isTargetWorker = this.attackTarget && this.attackTarget.isWorker && this.attackTarget.isWorker();
+    if ((isTargetBuilding || isTargetWorker) && this.isCombatUnit() && allUnits) {
+      this.threatScanTimer = (this.threatScanTimer || 0) + delta;
+      if (this.threatScanTimer >= 0.35) {
+        this.threatScanTimer = 0;
+        const visionRange = (this.type === 'archer' || this.type === 'axethrower') ? 15 : 13;
+        const nearestHostile = isTargetWorker ? this.findNearestHostileCombatUnit(allUnits, visionRange) : this.findNearestHostileUnit(allUnits, visionRange);
+        if (nearestHostile) {
+          if (isTargetBuilding && !this.objectiveTarget) {
+            this.objectiveTarget = this.attackTarget;
+          }
+          this.attackTarget = nearestHostile;
+          this.targetEntity = nearestHostile;
+          this.hasFiredThisAttack = false;
+        }
       }
     }
 
@@ -648,19 +890,23 @@ export class Unit {
 
     const progress = Math.min(1.0, this.attackTimer / this.attackCooldown);
 
-    if (this.type === 'archer') {
-      // Archer: Bow draws from 0.25 to 0.65; release arrow shot at progress >= 0.65
-      if (progress >= 0.65 && !this.hasFiredThisAttack) {
+    if (this.type === 'archer' || this.type === 'axethrower') {
+      // Archer & Axethrower: Release projectile shot at progress >= 0.60
+      if (progress >= 0.60 && !this.hasFiredThisAttack) {
         this.hasFiredThisAttack = true;
-        if (soundManager) soundManager.playBow();
-        const startPos = this.mesh.position.clone().add(new THREE.Vector3(0, 1.4, 0));
+        if (soundManager) {
+          if (this.type === 'axethrower') soundManager.playSword();
+          else soundManager.playBow();
+        }
+        const startPos = this.mesh.position.clone().add(new THREE.Vector3(0, 1.68, 0));
+        const projType = this.type === 'axethrower' ? 'axe' : 'arrow';
         arrows.push(new Arrow(this.scene, startPos, this.attackTarget, this.attack, (target, dmg, hitPos) => {
           target.takeDamage(dmg, particleSystem, this, allUnits);
           if (soundManager) soundManager.playArrowHit();
-        }));
+        }, projType));
       }
     } else {
-      // Melee units (Knight, Villager, Bandit) strike at apex (progress >= 0.45)
+      // Melee units (Knight, Villager, Bandit, Grunt, Ogre) strike at apex (progress >= 0.45)
       if (progress >= 0.45 && !this.hasFiredThisAttack) {
         this.hasFiredThisAttack = true;
         if (soundManager) soundManager.playSword();
@@ -674,34 +920,107 @@ export class Unit {
     }
   }
 
+  findNearestHostileCombatUnit(allUnits, maxDist = 14) {
+    if (!allUnits) return null;
+    let closestCombat = null;
+    let minCombatDist = maxDist;
+    const uPos = this.mesh.position;
+    const len = allUnits.length;
+
+    for (let i = 0; i < len; i++) {
+      const u = allUnits[i];
+      if (!u.isDead && u.hp > 0 && u.faction !== this.faction) {
+        const dx = uPos.x - u.mesh.position.x;
+        const dz = uPos.z - u.mesh.position.z;
+        const d = Math.hypot(dx, dz);
+        if (d < minCombatDist) {
+          if (u.isCombatUnit && u.isCombatUnit()) {
+            minCombatDist = d;
+            closestCombat = u;
+          }
+        }
+      }
+    }
+    return closestCombat;
+  }
+
+  findNearestHostileUnit(allUnits, maxDist = 14) {
+    if (!allUnits) return null;
+    const combatUnit = this.findNearestHostileCombatUnit(allUnits, maxDist);
+    if (combatUnit) return combatUnit;
+
+    let closestWorker = null;
+    let minWorkerDist = maxDist;
+    const uPos = this.mesh.position;
+    const len = allUnits.length;
+
+    for (let i = 0; i < len; i++) {
+      const u = allUnits[i];
+      if (!u.isDead && u.hp > 0 && u.faction !== this.faction) {
+        const dx = uPos.x - u.mesh.position.x;
+        const dz = uPos.z - u.mesh.position.z;
+        const d = Math.hypot(dx, dz);
+        if (d < minWorkerDist) {
+          minWorkerDist = d;
+          closestWorker = u;
+        }
+      }
+    }
+
+    return closestWorker;
+  }
+
   findNearestHostile(allUnits, buildings, maxDist = 15) {
-    let closest = null;
-    let minDist = maxDist;
-
-    if (allUnits) {
-      allUnits.forEach(u => {
-        if (!u.isDead && u.hp > 0 && u.faction !== this.faction) {
-          const d = this.mesh.position.distanceTo(u.mesh.position);
-          if (d < minDist) {
-            minDist = d;
-            closest = u;
-          }
-        }
-      });
+    // 1. High priority: hostile units (combat troops > workers)
+    const hostileUnit = this.findNearestHostileUnit(allUnits, maxDist);
+    if (hostileUnit) {
+      return hostileUnit;
     }
 
+    // 2. Secondary priority: buildings (defensive watchtowers > regular buildings)
     if (buildings) {
-      buildings.forEach(b => {
+      let closestTower = null;
+      let minTowerDist = maxDist;
+      let closestBuilding = null;
+      let minBuildingDist = maxDist;
+
+      const uPos = this.mesh.position;
+      const len = buildings.length;
+
+      for (let i = 0; i < len; i++) {
+        const b = buildings[i];
         if (!b.isDead && b.hp > 0 && b.faction !== this.faction) {
-          const d = this.mesh.position.distanceTo(b.mesh.position);
-          if (d < minDist) {
-            minDist = d;
-            closest = b;
+          const dx = uPos.x - b.mesh.position.x;
+          const dz = uPos.z - b.mesh.position.z;
+          const d = Math.hypot(dx, dz);
+          if (d < maxDist) {
+            const isTower = b.type === 'watchtower' || b.type === 'orc_watchtower';
+            if (isTower && d < minTowerDist) {
+              minTowerDist = d;
+              closestTower = b;
+            } else if (d < minBuildingDist) {
+              minBuildingDist = d;
+              closestBuilding = b;
+            }
           }
         }
-      });
+      }
+
+      if (closestTower) return closestTower;
+      if (closestBuilding) return closestBuilding;
     }
 
-    return closest;
+    return null;
+  }
+
+  dispose() {
+    if (this.isDisposed) return;
+    this.isDisposed = true;
+    if (this.mesh && this.scene) {
+      this.scene.remove(this.mesh);
+    }
+    if (this.hpGroup && this.scene) {
+      this.scene.remove(this.hpGroup);
+    }
   }
 }

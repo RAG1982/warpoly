@@ -1,0 +1,46 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64">
+  <defs>
+    <linearGradient id="leatherGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#b45309"/>
+      <stop offset="35%" stop-color="#78350f"/>
+      <stop offset="70%" stop-color="#451a03"/>
+      <stop offset="100%" stop-color="#1f0a02"/>
+    </linearGradient>
+    <linearGradient id="ironPlate" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#e2e8f0"/>
+      <stop offset="50%" stop-color="#64748b"/>
+      <stop offset="100%" stop-color="#334155"/>
+    </linearGradient>
+    <filter id="shadowA" x="-10%" y="-10%" width="120%" height="120%">
+      <feDropShadow dx="1" dy="3" stdDeviation="2" flood-color="#000" flood-opacity="0.6"/>
+    </filter>
+  </defs>
+  <!-- Leather Cuirass Body -->
+  <path d="M20,8 L28,14 L36,14 L44,8 L54,18 L48,26 L46,56 L18,56 L16,26 L10,18 Z" fill="#180a03" filter="url(#shadowA)"/>
+  <path d="M20,8 L28,14 L36,14 L44,8 L54,18 L48,26 L46,56 L18,56 L16,26 L10,18 Z" fill="url(#leatherGrad)" stroke="#270e04" stroke-width="2"/>
+
+  <!-- Reinforced Steel Chest Plate / Gorget -->
+  <path d="M22,14 L42,14 L44,28 L32,36 L20,28 Z" fill="url(#ironPlate)" stroke="#1e293b" stroke-width="1.5"/>
+
+  <!-- Vertical Center Seam & Abdomen Bands -->
+  <line x1="32" y1="36" x2="32" y2="56" stroke="#270e04" stroke-width="2.5"/>
+  <path d="M20,42 L44,42" stroke="#270e04" stroke-width="2"/>
+  <path d="M20,49 L44,49" stroke="#270e04" stroke-width="2"/>
+
+  <!-- Steel Rivets / Studs -->
+  <circle cx="26" cy="22" r="1.8" fill="#f8fafc" stroke="#334155" stroke-width="0.8"/>
+  <circle cx="38" cy="22" r="1.8" fill="#f8fafc" stroke="#334155" stroke-width="0.8"/>
+  <circle cx="32" cy="28" r="2.0" fill="#f59e0b" stroke="#78350f" stroke-width="0.8"/>
+  
+  <circle cx="24" cy="45" r="1.6" fill="#f8fafc" stroke="#334155" stroke-width="0.8"/>
+  <circle cx="32" cy="45" r="1.6" fill="#f8fafc" stroke="#334155" stroke-width="0.8"/>
+  <circle cx="40" cy="45" r="1.6" fill="#f8fafc" stroke="#334155" stroke-width="0.8"/>
+
+  <circle cx="24" cy="52" r="1.6" fill="#f8fafc" stroke="#334155" stroke-width="0.8"/>
+  <circle cx="32" cy="52" r="1.6" fill="#f8fafc" stroke="#334155" stroke-width="0.8"/>
+  <circle cx="40" cy="52" r="1.6" fill="#f8fafc" stroke="#334155" stroke-width="0.8"/>
+
+  <!-- Shoulder Buckles -->
+  <rect x="18" y="14" width="6" height="4" fill="#d4af37" stroke="#3e2704" stroke-width="1"/>
+  <rect x="40" y="14" width="6" height="4" fill="#d4af37" stroke="#3e2704" stroke-width="1"/>
+</svg>

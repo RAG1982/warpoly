@@ -1,31 +1,11 @@
 import * as THREE from 'three';
-import {
-  createKnight,
-  createArcher,
-  createVillager,
-  createBandit,
-  createCastle,
-  createBarracks,
-  createCottage,
-  createFarm,
-  createLumberCamp,
-  createWatchtower,
-  createGoldMine,
-  createStoneQuarry,
-  createBanditCamp,
-  createTree,
-  createArrow,
-  createBerryBush,
-  createBoulder,
-  createMushroomStump,
-  createWaterLily,
-  createFlowerPatch
-} from '../models/index.js';
+import { ModelFactory } from '../entities/ModelFactory.js';
 import { getTerrainTextures } from '../models/environment/terrainTextures.js';
 
 /**
  * AssetPreloader - Preloads and warms all 3D models and procedural canvas textures
  * at startup to eliminate in-game construction stutters and lag.
+ * Populates ModelFactory templates so in-game instantiation is an instant zero-cost clone.
  */
 export class AssetPreloader {
   /**
@@ -35,30 +15,41 @@ export class AssetPreloader {
    */
   static async preloadAll(renderer = null, onProgress = null) {
     const assets = [
-      { name: 'Aldeão Construtor', fn: () => createVillager() },
-      { name: 'Cavaleiro Real', fn: () => createKnight() },
-      { name: 'Arqueiro de Precisão', fn: () => createArcher() },
-      { name: 'Saqueador Bandido', fn: () => createBandit() },
-      { name: 'Castelo da Fortaleza', fn: () => createCastle() },
-      { name: 'Quartel Militar', fn: () => createBarracks() },
-      { name: 'Casa Residencial', fn: () => createCottage() },
-      { name: 'Fazenda de Trigo', fn: () => createFarm() },
-      { name: 'Serraria Florestal', fn: () => createLumberCamp() },
-      { name: 'Torre de Vigia', fn: () => createWatchtower() },
-      { name: 'Mina de Ouro', fn: () => createGoldMine() },
-      { name: 'Pedreira Imperial', fn: () => createStoneQuarry() },
-      { name: 'Acampamento Bandido', fn: () => createBanditCamp() },
-      { name: 'Floresta de Carvalhos', fn: () => createTree('oak') },
-      { name: 'Pinheiros da Montanha', fn: () => createTree('pine') },
-      { name: 'Carvalho Dourado de Outono', fn: () => createTree('autumn') },
-      { name: 'Bétula Prateada Imperial', fn: () => createTree('birch') },
-      { name: 'Arbustos com Frutas Silvestres', fn: () => createBerryBush('red') },
-      { name: 'Rochas & Boulders Graníticos', fn: () => createBoulder('large') },
-      { name: 'Troncos & Cogumelos Silvestres', fn: () => createMushroomStump() },
-      { name: 'Vitórias-Régias & Lótus Aquáticas', fn: () => createWaterLily() },
-      { name: 'Canteiros de Flores Campestres', fn: () => createFlowerPatch('mixed') },
+      { name: 'Aldeão Construtor', fn: () => ModelFactory.createVillager() },
+      { name: 'Cavaleiro Real', fn: () => ModelFactory.createKnight() },
+      { name: 'Arqueiro de Precisão', fn: () => ModelFactory.createArcher() },
+      { name: 'Saqueador Bandido', fn: () => ModelFactory.createBandit() },
+      { name: 'Peon Trabalhador da Horda', fn: () => ModelFactory.createPeon() },
+      { name: 'Grunt Guerreiro Orc', fn: () => ModelFactory.createGrunt() },
+      { name: 'Arremessador Troll da Horda', fn: () => ModelFactory.createAxethrower() },
+      { name: 'Ogro Campeão da Horda', fn: () => ModelFactory.createOgre() },
+      { name: 'Castelo da Fortaleza', fn: () => ModelFactory.createCastle() },
+      { name: 'Quartel Militar', fn: () => ModelFactory.createBarracks() },
+      { name: 'Casa Residencial', fn: () => ModelFactory.createCottage() },
+      { name: 'Fazenda de Trigo', fn: () => ModelFactory.createFarm() },
+      { name: 'Serraria Florestal', fn: () => ModelFactory.createLumberCamp() },
+      { name: 'Torre de Vigia', fn: () => ModelFactory.createWatchtower() },
+      { name: 'Mina de Ouro', fn: () => ModelFactory.createGoldMine() },
+      { name: 'Pedreira Imperial', fn: () => ModelFactory.createStoneQuarry() },
+      { name: 'Grande Salão da Horda', fn: () => ModelFactory.createGreatHall() },
+      { name: 'Quartel dos Orcs', fn: () => ModelFactory.createOrcBarracks() },
+      { name: 'Chiqueiro & Fazenda de Porcos', fn: () => ModelFactory.createPigFarm() },
+      { name: 'Serraria Mecânica da Horda', fn: () => ModelFactory.createOrcLumberMill() },
+      { name: 'Torre de Vigia da Horda', fn: () => ModelFactory.createOrcWatchtower() },
+      { name: 'Forja Real dos Humanos', fn: () => ModelFactory.createHumanForge() },
+      { name: 'Forja de Guerra dos Orcs', fn: () => ModelFactory.createOrcForge() },
+      { name: 'Acampamento Bárbaro', fn: () => ModelFactory.createBanditCamp() },
+      { name: 'Floresta de Carvalhos', fn: () => ModelFactory.createTree('oak') },
+      { name: 'Pinheiros da Montanha', fn: () => ModelFactory.createTree('pine') },
+      { name: 'Carvalho Dourado de Outono', fn: () => ModelFactory.createTree('autumn') },
+      { name: 'Bétula Prateada Imperial', fn: () => ModelFactory.createTree('birch') },
+      { name: 'Arbustos com Frutas Silvestres', fn: () => ModelFactory.createBerryBush('red') },
+      { name: 'Rochas & Boulders Graníticos', fn: () => ModelFactory.createBoulder('large') },
+      { name: 'Troncos & Cogumelos Silvestres', fn: () => ModelFactory.createMushroomStump() },
+      { name: 'Vitórias-Régias & Lótus Aquáticas', fn: () => ModelFactory.createWaterLily() },
+      { name: 'Canteiros de Flores Campestres', fn: () => ModelFactory.createFlowerPatch('mixed') },
       { name: 'Texturas do Terreno do Reino', fn: () => getTerrainTextures() },
-      { name: 'Projéteis e Munições', fn: () => createArrow() }
+      { name: 'Projéteis e Munições', fn: () => ModelFactory.createArrow() }
     ];
 
     const total = assets.length;
@@ -88,11 +79,11 @@ export class AssetPreloader {
       }
 
       // Yield frame to render UI updates smoothly
-      await new Promise(resolve => setTimeout(resolve, 25));
+      await new Promise(resolve => setTimeout(resolve, 20));
 
       try {
         const model = asset.fn();
-        if (model && renderer) {
+        if (model && renderer && model instanceof THREE.Object3D) {
           tempScene.add(model);
           renderer.compile(tempScene, tempCamera);
           tempScene.remove(model);
@@ -101,6 +92,22 @@ export class AssetPreloader {
         console.warn(`[AssetPreloader] Warning warming ${asset.name}:`, err);
       }
     }
+
+    // Pre-warm building ghost previews (zero lag during in-game placement)
+    const placeableGhosts = [
+      'cottage', 'lumber_camp', 'farm', 'barracks', 'forge', 'watchtower',
+      'orc_house', 'pig_farm', 'orc_lumber_mill', 'orc_barracks', 'orc_forge', 'orc_watchtower'
+    ];
+    placeableGhosts.forEach(bType => {
+      try {
+        const ghost = ModelFactory.getGhost(bType);
+        if (ghost && renderer) {
+          tempScene.add(ghost);
+          renderer.compile(tempScene, tempCamera);
+          tempScene.remove(ghost);
+        }
+      } catch (e) {}
+    });
 
     if (onProgress) {
       onProgress({
@@ -112,6 +119,6 @@ export class AssetPreloader {
       });
     }
 
-    await new Promise(resolve => setTimeout(resolve, 150));
+    await new Promise(resolve => setTimeout(resolve, 100));
   }
 }

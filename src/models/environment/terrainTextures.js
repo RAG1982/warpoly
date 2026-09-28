@@ -4,39 +4,29 @@ const textureCache = new Map();
 
 /**
  * Generates next-gen stylized hand-painted PBR terrain textures for WarPoly.
- * Inspires by Warcraft 2 / Overwatch / Valorant art style:
- * - Lush stylized emerald grass with hand-painted clover, dandelions, and soft meadow patchiness.
- * - Warm packed-dirt cobblestone pathways with embedded river pebbles and organic grass edges.
- * - Rich dark tilled agricultural soil with furrow ridges around farm and camps.
- * - Golden sandy beaches with subtle tide ripples and wet-sand gradients.
- * - Granite cliff strata with mossy crevices on steeper slopes.
+ * Supports the vast 320x320 continent with 6x more land area:
+ * - Human Realm (Northeast): lush emerald green grass with sunny pasture clearings.
+ * - Orc Realm (Southwest): rugged earthy reddish grass and charred dark soil.
+ * - Central River Valley & Plains: lush riverbank meadows and stone crossings.
+ * - Natural sandy beaches and coastlines wrapping the entire landmass.
  */
-export function getTerrainTextures(landmarks = null) {
-  if (textureCache.has('master_terrain')) {
-    return textureCache.get('master_terrain');
+export function getTerrainTextures(landmarks = null, worldSize = 140) {
+  const cacheKey = `master_terrain_${worldSize}`;
+  if (textureCache.has(cacheKey)) {
+    return textureCache.get(cacheKey);
   }
 
   const width = 2048;
   const height = 2048;
-  const worldSize = 140;
-  const scale = width / worldSize; // ~14.63 px per world unit
+  const scale = width / worldSize; // ~14.6 px per world unit
 
   // Coordinates helper: world (x, z) -> canvas (cx, cy)
   function w2c(wx, wz) {
     return {
-      x: (wx + 70) * scale,
-      y: (wz + 70) * scale
+      x: (wx + worldSize / 2) * scale,
+      y: (wz + worldSize / 2) * scale
     };
   }
-
-  const defaultLandmarks = landmarks || {
-    castle: { x: 0, z: -2 },
-    lumberCamp: { x: -19, z: -4 },
-    goldMine: { x: -11, z: 15 },
-    cottage: { x: 19, z: -7 },
-    barracks: { x: 16, z: 13 },
-    banditCamp: { x: -36, z: 32 }
-  };
 
   // --- 1. ALBEDO CANVAS ---
   const albedoCanvas = document.createElement('canvas');
@@ -44,89 +34,101 @@ export function getTerrainTextures(landmarks = null) {
   albedoCanvas.height = height;
   const ctx = albedoCanvas.getContext('2d');
 
-  // Background: Submerged Ocean Sand
+  // Background: Deep Submerged Ocean/Coast Floor
   ctx.fillStyle = '#edd7a6';
   ctx.fillRect(0, 0, width, height);
 
-  // Draw Islands (Beach & Grass foundations)
-  // Main Island
-  const mainCenter = w2c(0, -2);
-  const mainR = 41 * scale;
+  // 1. Continental Solid Land Coverage (>75% land, maxCoord <= 54)
+  const landNW = w2c(-54, -54);
+  const landSE = w2c(54, 54);
+  const landW = landSE.x - landNW.x;
+  const landH = landSE.y - landNW.y;
 
-  // Mini Island (Bandit Camp)
-  const miniCenter = w2c(-36, 32);
-  const miniR = 13 * scale;
-
-  // Draw Beach Sand Rim (Main Island)
-  const beachGrad = ctx.createRadialGradient(mainCenter.x, mainCenter.y, mainR * 0.70, mainCenter.x, mainCenter.y, mainR * 1.15);
-  beachGrad.addColorStop(0, '#ebd49c');
-  beachGrad.addColorStop(0.7, '#f4dfa8');
-  beachGrad.addColorStop(0.9, '#ddc287'); // wet sand
-  beachGrad.addColorStop(1, '#c9ae72');
-
-  ctx.fillStyle = beachGrad;
+  // Draw Sandy Coastline Rim around the entire continent
+  const sandBorderNW = w2c(-58, -58);
+  const sandBorderSE = w2c(58, 58);
+  ctx.fillStyle = '#e4ce95';
   ctx.beginPath();
-  ctx.arc(mainCenter.x, mainCenter.y, mainR * 1.12, 0, Math.PI * 2);
+  ctx.roundRect(sandBorderNW.x, sandBorderNW.y, sandBorderSE.x - sandBorderNW.x, sandBorderSE.y - sandBorderNW.y, 40 * scale);
   ctx.fill();
 
-  // Draw Beach Sand Rim (Mini Island)
-  const miniBeachGrad = ctx.createRadialGradient(miniCenter.x, miniCenter.y, miniR * 0.65, miniCenter.x, miniCenter.y, miniR * 1.18);
-  miniBeachGrad.addColorStop(0, '#ebd49c');
-  miniBeachGrad.addColorStop(0.75, '#f4dfa8');
-  miniBeachGrad.addColorStop(0.92, '#ddc287');
-  miniBeachGrad.addColorStop(1, '#c9ae72');
-
-  ctx.fillStyle = miniBeachGrad;
+  // Draw Continental Grass Plateau
+  const landGrad = ctx.createLinearGradient(w2c(-40, 40).x, w2c(-40, 40).y, w2c(40, -40).x, w2c(40, -40).y);
+  landGrad.addColorStop(0.0, '#66873c'); // Orc side: warm earthy grass
+  landGrad.addColorStop(0.35, '#6f9644');
+  landGrad.addColorStop(0.5, '#6db84e'); // Central valley
+  landGrad.addColorStop(0.7, '#72c852');
+  landGrad.addColorStop(1.0, '#78d458'); // Human side: vivid royal emerald
+  ctx.fillStyle = landGrad;
   ctx.beginPath();
-  ctx.arc(miniCenter.x, miniCenter.y, miniR * 1.15, 0, Math.PI * 2);
+  ctx.roundRect(landNW.x, landNW.y, landW, landH, 30 * scale);
   ctx.fill();
 
-  // Draw Lush Grass Layer (Main Island)
-  const grassGrad = ctx.createRadialGradient(mainCenter.x, mainCenter.y, 0, mainCenter.x, mainCenter.y, mainR * 0.85);
-  grassGrad.addColorStop(0, '#75ca56');
-  grassGrad.addColorStop(0.5, '#68be4a');
-  grassGrad.addColorStop(0.85, '#5bb03f');
-  grassGrad.addColorStop(1.0, '#4ea035');
-
-  ctx.fillStyle = grassGrad;
-  ctx.beginPath();
-  ctx.arc(mainCenter.x, mainCenter.y, mainR * 0.82, 0, Math.PI * 2);
-  ctx.fill();
-
-  // Draw Lush Grass Layer (Mini Island)
-  const miniGrassGrad = ctx.createRadialGradient(miniCenter.x, miniCenter.y, 0, miniCenter.x, miniCenter.y, miniR * 0.80);
-  miniGrassGrad.addColorStop(0, '#72c753');
-  miniGrassGrad.addColorStop(0.7, '#63b746');
-  miniGrassGrad.addColorStop(1.0, '#509f36');
-
-  ctx.fillStyle = miniGrassGrad;
-  ctx.beginPath();
-  ctx.arc(miniCenter.x, miniCenter.y, miniR * 0.80, 0, Math.PI * 2);
-  ctx.fill();
-
-  // Add Clean, Soft Lawn Ambient Variations (No dots or noise)
+  // Natural Riverbed Channel (diagonal x - z = 0)
   ctx.save();
-  for (let i = 0; i < 120; i++) {
-    const ang = Math.random() * Math.PI * 2;
-    const dist = Math.random() * (mainR * 0.78);
-    const gx = mainCenter.x + Math.cos(ang) * dist;
-    const gy = mainCenter.y + Math.sin(ang) * dist;
-    const rad = (5 + Math.random() * 9) * scale;
+  ctx.strokeStyle = '#c6b07c';
+  ctx.lineWidth = 6.2 * scale;
+  ctx.lineCap = 'round';
+  ctx.lineJoin = 'round';
+  ctx.beginPath();
+  for (let t = -58; t <= 58; t += 2) {
+    const bend = Math.sin(t * 0.16) * 5.5;
+    const rx = t + bend / Math.SQRT2;
+    const rz = t - bend / Math.SQRT2;
+    const cp = w2c(rx, rz);
+    if (t === -58) ctx.moveTo(cp.x, cp.y);
+    else ctx.lineTo(cp.x, cp.y);
+  }
+  ctx.stroke();
 
-    const hueChoice = Math.random();
-    if (hueChoice < 0.5) {
-      ctx.fillStyle = 'rgba(145, 228, 110, 0.12)'; // gentle warm sunny wash
+  // Inner deeper riverbed
+  ctx.strokeStyle = '#a89467';
+  ctx.lineWidth = 3.6 * scale;
+  ctx.stroke();
+  ctx.restore();
+
+  // Restore the 3 Walkable Fords / Land Bridges across the river
+  const fords = [
+    { x: -16, z: -16, r: 7.2 },
+    { x: 0, z: 0, r: 8.2 },
+    { x: 16, z: 16, r: 7.2 }
+  ];
+
+  fords.forEach(f => {
+    const fc = w2c(f.x, f.y || f.z);
+    const rad = f.r * scale;
+    const fordGrad = ctx.createRadialGradient(fc.x, fc.y, rad * 0.2, fc.x, fc.y, rad);
+    fordGrad.addColorStop(0, '#7eb65a');
+    fordGrad.addColorStop(0.7, '#88a85f');
+    fordGrad.addColorStop(1, '#ab9b71');
+    ctx.fillStyle = fordGrad;
+    ctx.beginPath();
+    ctx.arc(fc.x, fc.y, rad, 0, Math.PI * 2);
+    ctx.fill();
+  });
+
+  // Soft Organic Meadow Variations
+  ctx.save();
+  for (let i = 0; i < 220; i++) {
+    const rx = (Math.random() - 0.5) * (worldSize * 0.76);
+    const rz = (Math.random() - 0.5) * (worldSize * 0.76);
+    const c = w2c(rx, rz);
+    const rad = (4 + Math.random() * 8) * scale;
+
+    const isOrcSide = (rx < 0 && rz > 0);
+    if (isOrcSide) {
+      ctx.fillStyle = Math.random() < 0.5 ? 'rgba(95, 75, 45, 0.08)' : 'rgba(85, 115, 45, 0.08)';
     } else {
-      ctx.fillStyle = 'rgba(75, 155, 55, 0.10)'; // gentle soft green depth
+      ctx.fillStyle = Math.random() < 0.5 ? 'rgba(165, 238, 120, 0.11)' : 'rgba(75, 155, 55, 0.08)';
     }
 
     ctx.beginPath();
-    ctx.ellipse(gx, gy, rad, rad * 0.75, Math.random() * Math.PI, 0, Math.PI * 2);
+    ctx.ellipse(c.x, c.y, rad, rad * 0.75, Math.random() * Math.PI, 0, Math.PI * 2);
     ctx.fill();
   }
   ctx.restore();
 
-  // Tilled Soil Clearings (Lumber Camp, Cottage/Farm, Castle courtyard, Bandit Camp)
+  // Tilled Soil Clearings around bases
   function drawSoilPatch(wx, wz, wr, isAgriculture = false) {
     const c = w2c(wx, wz);
     const pr = wr * scale;
@@ -157,11 +159,19 @@ export function getTerrainTextures(landmarks = null) {
     ctx.restore();
   }
 
-  drawSoilPatch(defaultLandmarks.lumberCamp.x, defaultLandmarks.lumberCamp.z, 6.8);
-  drawSoilPatch(defaultLandmarks.cottage.x, defaultLandmarks.cottage.y || defaultLandmarks.cottage.z, 6.2, true);
-  drawSoilPatch(defaultLandmarks.barracks.x - 2, defaultLandmarks.barracks.z - 2, 5.2);
-  drawSoilPatch(-2, 16, 4.8, true); // extra farm / garden clearing
-  drawSoilPatch(defaultLandmarks.banditCamp.x, defaultLandmarks.banditCamp.z, 7.5);
+  // Human base clearings (140x140 world around 32, -30)
+  drawSoilPatch(20, -34, 4.4); // Lumber Camp
+  drawSoilPatch(44, -36, 4.2, true); // Cottage 1
+  drawSoilPatch(44, -24, 4.2, true); // Cottage 2
+  drawSoilPatch(32, -16, 4.4); // Barracks
+  drawSoilPatch(32, -30, 6.0); // Castle Courtyard
+
+  // Orc base clearings (140x140 world around -32, 30)
+  drawSoilPatch(-20, 34, 4.4); // Orc Lumber Mill
+  drawSoilPatch(-44, 36, 4.2, true); // Pig Farm 1
+  drawSoilPatch(-44, 24, 4.2, true); // Pig Farm 2
+  drawSoilPatch(-32, 16, 4.4); // Orc Barracks
+  drawSoilPatch(-32, 30, 6.0); // Great Hall
 
   // --- 2. ROUGHNESS CANVAS ---
   const roughCanvas = document.createElement('canvas');
@@ -173,21 +183,40 @@ export function getTerrainTextures(landmarks = null) {
   rCtx.fillStyle = '#d9d9d9';
   rCtx.fillRect(0, 0, width, height);
 
-  // Sand beach roughness (~0.72 -> #b8b8b8)
+  // Perimeter sand roughness (~0.72 -> #b8b8b8)
   rCtx.fillStyle = '#b8b8b8';
   rCtx.beginPath();
-  rCtx.arc(mainCenter.x, mainCenter.y, mainR * 1.12, 0, Math.PI * 2);
+  rCtx.roundRect(sandBorderNW.x, sandBorderNW.y, sandBorderSE.x - sandBorderNW.x, sandBorderSE.y - sandBorderNW.y, 40 * scale);
   rCtx.fill();
 
-  // Wet sand near water (~0.45 -> #737373)
-  rCtx.fillStyle = '#737373';
-  rCtx.beginPath();
-  rCtx.arc(mainCenter.x, mainCenter.y, mainR * 1.12, 0, Math.PI * 2);
-  rCtx.fill();
+  // Restore land roughness
   rCtx.fillStyle = '#d9d9d9';
   rCtx.beginPath();
-  rCtx.arc(mainCenter.x, mainCenter.y, mainR * 0.82, 0, Math.PI * 2);
+  rCtx.roundRect(landNW.x, landNW.y, landW, landH, 30 * scale);
   rCtx.fill();
+
+  // Riverbed roughness (~0.45 -> #737373)
+  rCtx.strokeStyle = '#737373';
+  rCtx.lineWidth = 6.2 * scale;
+  rCtx.beginPath();
+  for (let t = -58; t <= 58; t += 2) {
+    const bend = Math.sin(t * 0.16) * 5.5;
+    const rx = t + bend / Math.SQRT2;
+    const rz = t - bend / Math.SQRT2;
+    const cp = w2c(rx, rz);
+    if (t === -58) rCtx.moveTo(cp.x, cp.y);
+    else rCtx.lineTo(cp.x, cp.y);
+  }
+  rCtx.stroke();
+
+  // Fords roughness (~0.75 -> #bfbfbf)
+  fords.forEach(f => {
+    const fc = w2c(f.x, f.y || f.z);
+    rCtx.fillStyle = '#bfbfbf';
+    rCtx.beginPath();
+    rCtx.arc(fc.x, fc.y, f.r * scale, 0, Math.PI * 2);
+    rCtx.fill();
+  });
 
   // --- 3. BUMP / HEIGHT CANVAS ---
   const bumpCanvas = document.createElement('canvas');
@@ -224,6 +253,6 @@ export function getTerrainTextures(landmarks = null) {
     bumpMap: bumpTex
   };
 
-  textureCache.set('master_terrain', result);
+  textureCache.set(cacheKey, result);
   return result;
 }

@@ -8,7 +8,7 @@ export class SceneManager {
     this.scene = new THREE.Scene();
     this.skyColor = 0x85c8ec;
     this.scene.background = new THREE.Color(this.skyColor);
-    this.scene.fog = new THREE.Fog(this.skyColor, 95, 230);
+    this.scene.fog = new THREE.Fog(this.skyColor, 95, 320);
 
     // Renderer
     this.renderer = new THREE.WebGLRenderer({ antialias: true, powerPreference: 'high-performance' });
@@ -17,12 +17,12 @@ export class SceneManager {
     this.renderer.shadowMap.enabled = true;
     this.renderer.shadowMap.type = THREE.PCFSoftShadowMap;
     this.renderer.toneMapping = THREE.ACESFilmicToneMapping;
-    this.renderer.toneMappingExposure = 1.15;
+    this.renderer.toneMappingExposure = 1.38;
     this.container.appendChild(this.renderer.domElement);
 
     // Camera (Isometric Diorama feel with low FOV and more horizontal angle)
-    this.camera = new THREE.PerspectiveCamera(32, window.innerWidth / window.innerHeight, 0.5, 600);
-    this.cameraTarget = new THREE.Vector3(0, 2.5, 0);
+    this.camera = new THREE.PerspectiveCamera(32, window.innerWidth / window.innerHeight, 0.5, 900);
+    this.cameraTarget = new THREE.Vector3(32, 2.5, -30); // Starts focused on player base
     this.cameraOffset = new THREE.Vector3(45, 44, 45);
     this.camera.position.copy(this.cameraTarget).add(this.cameraOffset);
     this.camera.lookAt(this.cameraTarget);
@@ -47,11 +47,12 @@ export class SceneManager {
 
   setupLights() {
     // Warm Hemisphere bounce light
-    this.hemiLight = new THREE.HemisphereLight(0xdff0ff, 0x547547, 0.95);
+    this.hemiLight = new THREE.HemisphereLight(0xe8f4ff, 0x627d54, 1.2);
     this.scene.add(this.hemiLight);
 
     // Main Sunlight (Angle tuned to match modelo.png: shadows fall to bottom-right)
-    this.sunLight = new THREE.DirectionalLight(0xfff8ea, 2.35);
+    this.sunLight = new THREE.DirectionalLight(0xfffaee, 2.6);
+
     this.sunLight.position.set(-52, 68, -22);
     this.sunLight.castShadow = true;
     
@@ -60,7 +61,7 @@ export class SceneManager {
     this.sunLight.shadow.mapSize.height = 2048;
     this.sunLight.shadow.camera.near = 10;
     this.sunLight.shadow.camera.far = 220;
-    const shadowD = 68;
+    const shadowD = 90;
     this.sunLight.shadow.camera.left = -shadowD;
     this.sunLight.shadow.camera.right = shadowD;
     this.sunLight.shadow.camera.top = shadowD;
@@ -82,13 +83,13 @@ export class SceneManager {
       this.scene.background.set(this.skyColor);
       this.scene.fog.color.set(this.skyColor);
       this.sunLight.color.set(0xfffaec);
-      this.sunLight.intensity = 2.2;
+      this.sunLight.intensity = 2.45;
       this.sunLight.position.set(-45, 75, -35);
       this.hemiLight.color.set(0xcde6ff);
-      this.hemiLight.groundColor.set(0x4f6c44);
-      this.hemiLight.intensity = 0.85;
-      this.fillLight.color.set(0x8eb2d4);
-      this.fillLight.intensity = 0.45;
+      this.hemiLight.groundColor.set(0x567848);
+      this.hemiLight.intensity = 1.05;
+      this.fillLight.color.set(0x9fc3e7);
+      this.fillLight.intensity = 0.55;
     } else if (mode === 'sunset') {
       this.skyColor = 0xdf8458;
       this.scene.background.set(this.skyColor);

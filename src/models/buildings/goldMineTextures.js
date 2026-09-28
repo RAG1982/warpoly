@@ -533,22 +533,22 @@ export function getGoldMineOreTextures() {
   const { canvas: metC, ctx: met } = createCanvas(2048, 2048);
   const { canvas: bmpC, ctx: bmp } = createCanvas(2048, 2048);
 
-  // 1. Radiant Molten Gold Base Gradient
+  // 1. Radiant Pure Gold Base Gradient (Warm, brilliant and free of copper/brown tones)
   const oreGrad = alb.createRadialGradient(W * 0.5, H * 0.5, 100, W * 0.5, H * 0.5, 1300);
-  oreGrad.addColorStop(0.0, '#fff4b0');
-  oreGrad.addColorStop(0.2, '#ffd54f');
-  oreGrad.addColorStop(0.5, '#f59e0b');
-  oreGrad.addColorStop(0.8, '#d97706');
-  oreGrad.addColorStop(1.0, '#92400e');
+  oreGrad.addColorStop(0.0, '#ffffff'); // Pure white-gold specular core
+  oreGrad.addColorStop(0.2, '#fff59d'); // Brilliant sunshine yellow-gold
+  oreGrad.addColorStop(0.45, '#ffd700'); // True royal vibrant gold
+  oreGrad.addColorStop(0.75, '#ffb300'); // Radiant amber gold
+  oreGrad.addColorStop(1.0, '#c68400'); // Deep golden shadow (warm gold, never copper)
   alb.fillStyle = oreGrad;
   alb.fillRect(0, 0, W, H);
 
-  // Base Roughness ~ 0.20 (slick metallic sheen)
-  rgh.fillStyle = '#333333';
+  // Base Roughness ~ 0.16 (slick metallic sheen)
+  rgh.fillStyle = '#292929';
   rgh.fillRect(0, 0, W, H);
 
-  // Base Metalness ~ 0.88
-  met.fillStyle = '#e0e0e0';
+  // Base Metalness ~ 0.94
+  met.fillStyle = '#f0f0f0';
   met.fillRect(0, 0, W, H);
 
   bmp.fillStyle = '#808080';
@@ -561,12 +561,12 @@ export function getGoldMineOreTextures() {
   const ch = H / cellRows;
 
   const facetShades = [
-    { fill: '#fff7b2', bump: '#dedede', rgh: '#1c1c1c', met: '#f5f5f5' }, // Ultra-bright reflection
-    { fill: '#ffdf4d', bump: '#c5c5c5', rgh: '#282828', met: '#ededed' }, // Bright facet
-    { fill: '#f59e0b', bump: '#9a9a9a', rgh: '#333333', met: '#e2e2e2' }, // Mid-gold facet
-    { fill: '#d97706', bump: '#707070', rgh: '#404040', met: '#d4d4d4' }, // Warm amber facet
-    { fill: '#b45309', bump: '#525252', rgh: '#555555', met: '#c0c0c0' }, // Deep copper occlusion
-    { fill: '#78350f', bump: '#383838', rgh: '#666666', met: '#a8a8a8' }  // Crevice seam
+    { fill: '#ffffff', bump: '#efefef', rgh: '#101010', met: '#fcfcfc' }, // Diamond specular reflection
+    { fill: '#fff59d', bump: '#dedede', rgh: '#181818', met: '#f5f5f5' }, // Ultra-bright light gold
+    { fill: '#ffd700', bump: '#c5c5c5', rgh: '#222222', met: '#ededed' }, // Pure sparkling 24k gold
+    { fill: '#ffca28', bump: '#a5a5a5', rgh: '#2a2a2a', met: '#e2e2e2' }, // Radiant mid-gold facet
+    { fill: '#f59e0b', bump: '#858585', rgh: '#333333', met: '#d8d8d8' }, // Rich warm gold facet
+    { fill: '#d97706', bump: '#656565', rgh: '#3d3d3d', met: '#c8c8c8' }  // Deep golden seam
   ];
 
   // Grid points jittered for organic crystalline structure
@@ -641,16 +641,16 @@ export function getGoldMineOreTextures() {
         met.fill();
 
         // Sharp golden facet edge highlight
-        alb.strokeStyle = '#fffbeb';
+        alb.strokeStyle = '#ffffff';
         alb.lineWidth = 3;
         alb.beginPath();
         alb.moveTo(tri[0][0], tri[0][1]);
         alb.lineTo(tri[1][0], tri[1][1]);
         alb.stroke();
 
-        // Dark amber occlusion between crystal planes
-        alb.strokeStyle = 'rgba(120, 53, 15, 0.45)';
-        alb.lineWidth = 4;
+        // Warm golden amber occlusion between crystal planes (no dark copper)
+        alb.strokeStyle = 'rgba(180, 115, 0, 0.35)';
+        alb.lineWidth = 3;
         alb.beginPath();
         alb.moveTo(tri[1][0], tri[1][1]);
         alb.lineTo(tri[2][0], tri[2][1]);
@@ -674,22 +674,22 @@ export function getGoldMineOreTextures() {
   ];
 
   nuggetCenters.forEach(nc => {
-    // Nugget ambient drop shadow
-    alb.fillStyle = 'rgba(69, 26, 3, 0.6)';
+    // Nugget ambient drop shadow (warm amber shadow)
+    alb.fillStyle = 'rgba(120, 60, 0, 0.45)';
     alb.beginPath();
     alb.arc(nc.x + 8, nc.y + 12, nc.r, 0, Math.PI * 2);
     alb.fill();
 
-    // Nugget radial dome
+    // Nugget radial dome (brilliant 24k radiant gold)
     const nugGrad = alb.createRadialGradient(
       nc.x - nc.r * 0.35, nc.y - nc.r * 0.35, 10,
       nc.x, nc.y, nc.r
     );
-    nugGrad.addColorStop(0.0, '#ffffff'); // Center shine
-    nugGrad.addColorStop(0.2, '#fff176'); // Pure light gold
-    nugGrad.addColorStop(0.55, '#f59e0b'); // Rich gold
-    nugGrad.addColorStop(0.85, '#d97706'); // Deep amber
-    nugGrad.addColorStop(1.0, '#78350f');  // Copper rim
+    nugGrad.addColorStop(0.0, '#ffffff'); // Center specular shine
+    nugGrad.addColorStop(0.2, '#fff9c4'); // Pure sunshine light gold
+    nugGrad.addColorStop(0.55, '#ffd700'); // True vibrant gold
+    nugGrad.addColorStop(0.82, '#ffb300'); // Warm rich gold
+    nugGrad.addColorStop(1.0, '#c68400');  // Gold rim (pure warm gold, zero copper)
     alb.fillStyle = nugGrad;
     alb.beginPath();
     alb.arc(nc.x, nc.y, nc.r, 0, Math.PI * 2);
@@ -1496,27 +1496,31 @@ export function getGoldMineMaterials() {
       flatShading: true
     }),
 
-    // Sparkling Gold Ore (Ultra-rich metallic gold)
+    // Sparkling Gold Ore (Ultra-rich vibrant 24k metallic gold)
     goldOre: new THREE.MeshStandardMaterial({
+      color: new THREE.Color('#fff9b0'),
+      emissive: new THREE.Color('#423002'),
       map: oreTex.map,
       roughnessMap: oreTex.roughnessMap,
       metalnessMap: oreTex.metalnessMap,
       bumpMap: oreTex.bumpMap,
       bumpScale: 0.08,
-      roughness: 0.22,
-      metalness: 0.88,
+      roughness: 0.14,
+      metalness: 0.94,
       flatShading: true
     }),
 
     // Brilliant sparkling gold ore crystal clusters & nuggets
     goldOreBright: new THREE.MeshStandardMaterial({
+      color: new THREE.Color('#ffffff'),
+      emissive: new THREE.Color('#5c4404'),
       map: oreTex.map,
       roughnessMap: oreTex.roughnessMap,
       metalnessMap: oreTex.metalnessMap,
       bumpMap: oreTex.bumpMap,
       bumpScale: 0.09,
-      roughness: 0.16,
-      metalness: 0.94,
+      roughness: 0.08,
+      metalness: 0.98,
       flatShading: true
     }),
 

@@ -468,12 +468,12 @@ export function getKnightTunicTextures() {
   const { canvas: metal, ctx: mCtx } = createCanvas(2048, 2048);
   const { canvas: bump, ctx: bCtx } = createCanvas(2048, 2048);
 
-  // Rich Royal Cobalt Blue Fabric
+  // Rich Royal Cobalt Blue Fabric (High Contrast & Saturated)
   const blueGrad = ctx.createLinearGradient(0, 0, 0, height);
-  blueGrad.addColorStop(0, '#1d4ed8');   // Vibrant royal blue
-  blueGrad.addColorStop(0.3, '#1e40af'); // Classic cobalt
-  blueGrad.addColorStop(0.7, '#1e3a8a'); // Deep navy
-  blueGrad.addColorStop(1, '#0f172a');   // Shadow hem
+  blueGrad.addColorStop(0, '#3b82f6');   // Radiant royal blue
+  blueGrad.addColorStop(0.3, '#2563eb'); // Classic cobalt
+  blueGrad.addColorStop(0.7, '#1d4ed8'); // Deep cobalt
+  blueGrad.addColorStop(1, '#1e3a8a');   // Base hem
 
   ctx.fillStyle = blueGrad;
   ctx.fillRect(0, 0, width, height);
@@ -483,10 +483,10 @@ export function getKnightTunicTextures() {
   for (let i = 0; i < 12; i++) {
     const px = i * pleatW;
     const pleat = ctx.createLinearGradient(px, 0, px + pleatW, 0);
-    pleat.addColorStop(0, 'rgba(10, 15, 35, 0.6)');
-    pleat.addColorStop(0.4, 'rgba(96, 165, 250, 0.35)');
-    pleat.addColorStop(0.6, 'rgba(147, 197, 253, 0.45)');
-    pleat.addColorStop(1, 'rgba(15, 23, 42, 0.55)');
+    pleat.addColorStop(0, 'rgba(15, 30, 80, 0.45)');
+    pleat.addColorStop(0.4, 'rgba(147, 197, 253, 0.45)');
+    pleat.addColorStop(0.6, 'rgba(191, 219, 254, 0.55)');
+    pleat.addColorStop(1, 'rgba(20, 35, 90, 0.4)');
 
     ctx.fillStyle = pleat;
     ctx.fillRect(px, 0, pleatW, height);
@@ -506,8 +506,8 @@ export function getKnightTunicTextures() {
     ctx.fillRect(0, y, width, 4);
   }
 
-  // Tunic fabric roughness: 0.90 (matte diffuse), metalness: 0.0
-  rCtx.fillStyle = '#e6e6e6';
+  // Tunic fabric roughness: ~0.55, metalness: 0.0
+  rCtx.fillStyle = '#8c9ba5';
   rCtx.fillRect(0, 0, width, height);
   mCtx.fillStyle = '#000000';
   mCtx.fillRect(0, 0, width, height);
@@ -751,8 +751,8 @@ export function getKnightPlumeTextures() {
     ctx.stroke();
   }
 
-  // Feather PBR: velvet soft diffuse (roughness: 0.88, metalness: 0.0)
-  rCtx.fillStyle = '#e0e0e0';
+  // Feather PBR: vibrant specular sheen (roughness: ~0.55, metalness: 0.0)
+  rCtx.fillStyle = '#8c9ba5';
   rCtx.fillRect(0, 0, width, height);
   mCtx.fillStyle = '#000000';
   mCtx.fillRect(0, 0, width, height);

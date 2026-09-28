@@ -36,35 +36,35 @@ export function createKnight() {
       metalnessMap: tex.metalnessMap,
       bumpMap: tex.bumpMap,
       bumpScale: opts.bumpScale || 0.05,
-      roughness: opts.roughness !== undefined ? opts.roughness : 1.0,
+      roughness: opts.roughness !== undefined ? opts.roughness : 0.65,
       metalness: opts.metalness !== undefined ? opts.metalness : 1.0,
       flatShading: opts.flatShading !== undefined ? opts.flatShading : false,
       ...opts
     });
   }
 
-  const cuirassMat = createPBRMaterial(getKnightCuirassTextures(), { bumpScale: 0.06 });
-  const tunicMat = createPBRMaterial(getKnightTunicTextures(), { bumpScale: 0.08 });
-  const beltMat = createPBRMaterial(getKnightBeltTextures(), { bumpScale: 0.06 });
-  const helmFaceMat = createPBRMaterial(getKnightHelmetFaceTextures(), { bumpScale: 0.05 });
-  const plumeMat = createPBRMaterial(getKnightPlumeTextures(), { bumpScale: 0.06 });
-  const shieldFrontMat = createPBRMaterial(getKnightShieldFrontTextures(), { bumpScale: 0.08 });
-  const shieldBackMat = createPBRMaterial(getKnightShieldBackTextures(), { bumpScale: 0.06 });
-  const swordBladeMat = createPBRMaterial(getKnightSwordBladeTextures(), { bumpScale: 0.06 });
-  const limbsMat = createPBRMaterial(getKnightLimbsTextures(), { bumpScale: 0.05 });
+  const cuirassMat = createPBRMaterial(getKnightCuirassTextures(), { bumpScale: 0.05, roughness: 0.28, metalness: 0.9 });
+  const tunicMat = createPBRMaterial(getKnightTunicTextures(), { bumpScale: 0.06, roughness: 0.55 });
+  const beltMat = createPBRMaterial(getKnightBeltTextures(), { bumpScale: 0.05, roughness: 0.6 });
+  const helmFaceMat = createPBRMaterial(getKnightHelmetFaceTextures(), { bumpScale: 0.05, roughness: 0.28, metalness: 0.9 });
+  const plumeMat = createPBRMaterial(getKnightPlumeTextures(), { bumpScale: 0.05, roughness: 0.52 });
+  const shieldFrontMat = createPBRMaterial(getKnightShieldFrontTextures(), { bumpScale: 0.06, roughness: 0.42, metalness: 0.35 });
+  const shieldBackMat = createPBRMaterial(getKnightShieldBackTextures(), { bumpScale: 0.05, roughness: 0.65 });
+  const swordBladeMat = createPBRMaterial(getKnightSwordBladeTextures(), { bumpScale: 0.05, roughness: 0.22, metalness: 0.92 });
+  const limbsMat = createPBRMaterial(getKnightLimbsTextures(), { bumpScale: 0.05, roughness: 0.32, metalness: 0.88 });
 
   // Pure gold & steel accents for 3D trims
   const goldAccentMat = new THREE.MeshStandardMaterial({
-    color: 0xf5b81a,
-    roughness: 0.22,
-    metalness: 0.85,
+    color: 0xfacc15,
+    roughness: 0.18,
+    metalness: 0.9,
     flatShading: true
   });
 
   const steelAccentMat = new THREE.MeshStandardMaterial({
-    color: 0xc8d2dc,
-    roughness: 0.28,
-    metalness: 0.75,
+    color: 0xe2e8f0,
+    roughness: 0.20,
+    metalness: 0.88,
     flatShading: true
   });
 

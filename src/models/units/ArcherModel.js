@@ -42,34 +42,34 @@ export function createArcher() {
       metalnessMap: tex.metalnessMap,
       bumpMap: tex.bumpMap,
       bumpScale: opts.bumpScale || 0.05,
-      roughness: opts.roughness !== undefined ? opts.roughness : 1.0,
+      roughness: opts.roughness !== undefined ? opts.roughness : 0.60,
       metalness: opts.metalness !== undefined ? opts.metalness : 1.0,
       flatShading: opts.flatShading !== undefined ? opts.flatShading : false,
       ...opts
     });
   }
 
-  const hoodClothMat = createPBRMaterial(getArcherHoodTextures(), { bumpScale: 0.06 });
-  const faceMat = createPBRMaterial(getArcherFaceTextures(), { bumpScale: 0.07 });
-  const featherMat = createPBRMaterial(getArcherFeatherTextures(), { bumpScale: 0.06 });
-  const tunicMat = createPBRMaterial(getArcherTunicTextures(), { bumpScale: 0.07 });
-  const bracersPauldronsMat = createPBRMaterial(getArcherBracersPauldronsTextures(), { bumpScale: 0.06 });
-  const legsBootsMat = createPBRMaterial(getArcherLegsBootsTextures(), { bumpScale: 0.06 });
-  const bowMat = createPBRMaterial(getArcherBowTextures(), { bumpScale: 0.06 });
-  const quiverMat = createPBRMaterial(getArcherQuiverTextures(), { bumpScale: 0.07 });
+  const hoodClothMat = createPBRMaterial(getArcherHoodTextures(), { bumpScale: 0.05, roughness: 0.55 });
+  const faceMat = createPBRMaterial(getArcherFaceTextures(), { bumpScale: 0.05, roughness: 0.55 });
+  const featherMat = createPBRMaterial(getArcherFeatherTextures(), { bumpScale: 0.05, roughness: 0.40, metalness: 0.5 });
+  const tunicMat = createPBRMaterial(getArcherTunicTextures(), { bumpScale: 0.05, roughness: 0.55 });
+  const bracersPauldronsMat = createPBRMaterial(getArcherBracersPauldronsTextures(), { bumpScale: 0.05, roughness: 0.32, metalness: 0.85 });
+  const legsBootsMat = createPBRMaterial(getArcherLegsBootsTextures(), { bumpScale: 0.05, roughness: 0.58 });
+  const bowMat = createPBRMaterial(getArcherBowTextures(), { bumpScale: 0.05, roughness: 0.45 });
+  const quiverMat = createPBRMaterial(getArcherQuiverTextures(), { bumpScale: 0.05, roughness: 0.55 });
 
   // Accent & Trim Materials
   const goldAccentMat = new THREE.MeshStandardMaterial({
-    color: 0xf5b81a,
-    roughness: 0.22,
-    metalness: 0.88,
+    color: 0xfacc15,
+    roughness: 0.18,
+    metalness: 0.90,
     flatShading: true
   });
 
   const steelAccentMat = new THREE.MeshStandardMaterial({
-    color: 0xc4cbd4,
-    roughness: 0.30,
-    metalness: 0.82,
+    color: 0xe2e8f0,
+    roughness: 0.22,
+    metalness: 0.88,
     flatShading: true
   });
 

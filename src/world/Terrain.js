@@ -1,93 +1,94 @@
 import * as THREE from 'three';
 import { getTerrainTextures } from '../models/environment/terrainTextures.js';
 
+/**
+ * Balanced RTS Continental Terrain System (Size: 140x140)
+ * 
+ * Features:
+ * 1. Dominant Land Continent (>75% land, <25% water):
+ *    Continuous solid landmass extending across |x| < 56, |z| < 56.
+ *    Only thin natural beach borders and shallow coastlines along the outer perimeter.
+ * 2. Human Kingdom (Northeast): Vast rolling emerald plains around (32, -30).
+ * 3. Orc Dominion (Southwest): Expansive rugged rustic plains around (-32, 30).
+ * 4. Central River Valley: Curving natural river channel along diagonal x - z = 0.
+ * 5. Three Strategic Crossings / Fords:
+ *    North Ford (-16, -16), Center Ford (0, 0), and South Ford (16, 16) - all wide, solid land bridges (y = 2.4).
+ */
 export class Terrain {
   constructor(scene) {
     this.scene = scene;
     this.width = 140;
     this.depth = 140;
-    this.segments = 96;
-    
-    // Landmarks for painting paths and dirt clearings
+    this.segments = 112;
+
+    // Key Realm Centers & Strategic Locations
     this.landmarks = {
-      castle: new THREE.Vector2(0, -2),
-      lumberCamp: new THREE.Vector2(-19, -4),
-      goldMine: new THREE.Vector2(-11, 15),
-      cottage: new THREE.Vector2(19, -7),
-      barracks: new THREE.Vector2(16, 13),
-      banditCamp: new THREE.Vector2(-36, 32) // mini-island
+      humanBase: new THREE.Vector2(32, -30),
+      orcBase: new THREE.Vector2(-32, 30),
+      centerFord: new THREE.Vector2(0, 0),
+      northFord: new THREE.Vector2(-16, -16),
+      southFord: new THREE.Vector2(16, 16)
     };
 
     this.createTerrainMesh();
   }
 
-  // Calculate terrain height for any (x, z) with natural terraces and gentle rolling knolls
+  /**
+   * Calculates terrain height for any (x, z) coordinate
+   */
   getHeight(x, z) {
-    const distToCenter = Math.hypot(x, z);
-    const miniX = -36;
-    const miniZ = 32;
-    const distToMini = Math.hypot(x - miniX, z - miniZ);
+    const maxCoord = Math.max(Math.abs(x), Math.abs(z));
 
-    let height = -2.0;
+    // Base continental plateau elevation with natural rolling knolls
+    const bumps = Math.sin(x * 0.3) * 0.2 + Math.cos(z * 0.3) * 0.2 + Math.sin((x + z) * 0.14) * 0.12;
+    let height = 2.6 + bumps;
 
-    // Main island falloff (radius ~ 42)
-    const mainRadius = 40 + Math.sin(x * 0.15) * 4 + Math.cos(z * 0.18) * 4;
-    if (distToCenter < mainRadius + 8) {
-      if (distToCenter < mainRadius - 10) {
-        // Upper grass plateau (smooth with subtle rolling low-poly bumps)
-        const bumps = Math.sin(x * 0.3) * 0.22 + Math.cos(z * 0.3) * 0.22 + Math.sin(x * 0.1 + z * 0.1) * 0.15;
-        height = 2.6 + bumps;
-      } else {
-        // Slope down to beach and water with subtle natural terrace step
-        const t = (distToCenter - (mainRadius - 10)) / 18;
-        const clampedT = Math.min(1, Math.max(0, t));
-        const factor = 1 - (clampedT * clampedT * (3 - 2 * clampedT));
-        height = -1.2 + factor * 3.8;
-      }
+    // Outer Coastline Perimeter Falloff (solid land up to 55 units, then slopes down to water at 65+)
+    if (maxCoord > 54) {
+      const t = Math.min(1, Math.max(0, (maxCoord - 54) / 12));
+      const falloff = t * t * (3 - 2 * t);
+      height = 2.6 - falloff * 4.4; // Drops smoothly to -1.8 (water level is 0.0)
     }
 
-    // Mini island (bottom left)
-    const miniRadius = 12 + Math.sin(x * 0.4) * 1.5;
-    if (distToMini < miniRadius + 5) {
-      if (distToMini < miniRadius - 4) {
-        const miniHeight = 2.2 + Math.sin(x * 0.5) * 0.18;
-        height = Math.max(height, miniHeight);
+    // Natural River Valley (diagonal along x - z = 0, with a gentle organic bend)
+    const riverBend = Math.sin((x + z) * 0.08) * 5.5;
+    const distToRiverLine = Math.abs(x - z - riverBend) / Math.SQRT2;
+
+    // River channel width ~ 6.0 units
+    if (distToRiverLine < 6.0 && maxCoord < 56) {
+      // Check if point is on one of the 3 Strategic Crossings / Fords
+      const dNorthFord = Math.hypot(x - this.landmarks.northFord.x, z - this.landmarks.northFord.y);
+      const dSouthFord = Math.hypot(x - this.landmarks.southFord.x, z - this.landmarks.southFord.y);
+      const dCenterFord = Math.hypot(x - this.landmarks.centerFord.x, z - this.landmarks.centerFord.y);
+
+      const isFord = (dNorthFord < 7.5) || (dSouthFord < 7.5) || (dCenterFord < 8.5);
+
+      if (isFord) {
+        // Dry, solid, fully walkable land bridge (elevation 2.35)
+        height = Math.max(height, 2.35 + Math.sin(x * 0.5) * 0.1);
       } else {
-        const t = (distToMini - (miniRadius - 4)) / 9;
-        const factor = 1 - Math.min(1, Math.max(0, t));
-        height = Math.max(height, -1.0 + factor * 3.2);
+        // Carve river channel down below water level
+        const riverDepthFactor = 1 - (distToRiverLine / 6.0);
+        const channelHeight = -0.6 - riverDepthFactor * 1.4;
+        height = Math.min(height, channelHeight);
       }
     }
 
     return height;
   }
 
-  // Determine ground type: 'path', 'tilled_dirt', 'grass', 'sand', 'water'
   getSurfaceType(x, z, h) {
     if (h < 0.2) return 'water';
     if (h < 1.4) return 'sand';
-
-    // Check tilled soil patches (brown dirt around Lumber Camp, Farm, and Castle base)
-    const dLumber = Math.hypot(x - this.landmarks.lumberCamp.x, z - this.landmarks.lumberCamp.y);
-    if (dLumber < 6.5) return 'tilled_dirt';
-
-    const dFarm = Math.hypot(x - this.landmarks.cottage.x, z - (this.landmarks.cottage.y + 4));
-    if (dFarm < 5.5) return 'tilled_dirt';
-
-    const dSoilPatch = Math.hypot(x - (-2), z - 17);
-    if (dSoilPatch < 4.2) return 'tilled_dirt';
-
     return 'grass';
   }
 
-  distanceToSegment(p, a, b) {
-    const ab = new THREE.Vector2().subVectors(b, a);
-    const ap = new THREE.Vector2().subVectors(p, a);
-    const abLenSq = ab.lengthSq();
-    if (abLenSq === 0) return ap.length();
-    const t = Math.max(0, Math.min(1, ap.dot(ab) / abLenSq));
-    const proj = new THREE.Vector2().copy(a).addScaledVector(ab, t);
-    return p.distanceTo(proj);
+  isWater(x, z) {
+    return this.getHeight(x, z) < 0.65;
+  }
+
+  isWalkable(x, z) {
+    return this.getHeight(x, z) >= 0.65;
   }
 
   createTerrainMesh() {
@@ -102,7 +103,7 @@ export class Terrain {
       pos.setY(i, h);
     }
 
-    // Convert to non-indexed so each triangle facet has unique vertices and flat shading
+    // Convert to non-indexed for crisp flat shading
     const nonIndexedGeo = geo.toNonIndexed();
     nonIndexedGeo.computeVertexNormals();
 
@@ -117,7 +118,7 @@ export class Terrain {
     }
     nonIndexedGeo.setAttribute('uv', new THREE.BufferAttribute(uvArray, 2));
 
-    // Multi-tone vertex modulation (subtle low-poly ambient facet shading)
+    // Multi-tone vertex modulation
     const colors = [];
     const normals = nonIndexedGeo.attributes.normal;
 
@@ -128,27 +129,34 @@ export class Terrain {
 
       const ny = (normals.getY(i) + normals.getY(i+1) + normals.getY(i+2)) / 3;
 
-      // Seed pseudo-random per face for subtle facet lighting
       const hash = Math.abs(Math.sin(cx * 12.9898 + cz * 78.233)) * 43758.5453;
       const rand = hash - Math.floor(hash);
 
       const triColor = new THREE.Color(1.0, 1.0, 1.0);
 
       if (cy < 0.2) {
-        // Submerged sand
-        triColor.setRGB(0.92, 0.90, 0.82);
+        // Submerged riverbed / sand
+        triColor.setRGB(0.90, 0.88, 0.78);
       } else if (cy < 1.4) {
         // Sandy shoreline slope
-        const sandTone = 0.96 + (rand - 0.5) * 0.05;
-        triColor.setRGB(sandTone, sandTone * 0.98, sandTone * 0.92);
+        const sandTone = 0.95 + (rand - 0.5) * 0.05;
+        triColor.setRGB(sandTone, sandTone * 0.97, sandTone * 0.90);
       } else if (ny < 0.65) {
         // Steep slope / rock cliff
         const cliffTone = 0.86 + (rand - 0.5) * 0.06;
         triColor.setRGB(cliffTone * 0.94, cliffTone * 0.92, cliffTone * 0.88);
       } else {
-        // Lush plateau: subtle facet modulation for hand-painted vibrancy
-        const grassTone = 0.98 + (rand - 0.5) * 0.06;
-        triColor.setRGB(grassTone * 0.98, grassTone, grassTone * 0.96);
+        // Lush plateau
+        const isOrcTerritory = (cx < -5 && cz > 5);
+        if (isOrcTerritory) {
+          // Earthy rustic grass for Orc dominion
+          const orcTone = 0.96 + (rand - 0.5) * 0.05;
+          triColor.setRGB(orcTone * 0.98, orcTone * 0.96, orcTone * 0.88);
+        } else {
+          // Lush emerald grass for Human kingdom
+          const grassTone = 0.98 + (rand - 0.5) * 0.06;
+          triColor.setRGB(grassTone * 0.98, grassTone, grassTone * 0.96);
+        }
       }
 
       for (let v = 0; v < 3; v++) {
@@ -159,7 +167,7 @@ export class Terrain {
     nonIndexedGeo.setAttribute('color', new THREE.Float32BufferAttribute(colors, 3));
 
     // Master Procedural PBR Terrain Material
-    const terrainTex = getTerrainTextures(this.landmarks);
+    const terrainTex = getTerrainTextures(this.landmarks, this.width);
 
     const mat = new THREE.MeshStandardMaterial({
       map: terrainTex.map,

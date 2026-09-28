@@ -7,6 +7,10 @@ import {
   createArcher,
   createVillager,
   createBandit,
+  createPeon,
+  createGrunt,
+  createAxethrower,
+  createOgre,
   createCastle,
   createLumberCamp,
   createGoldMine,
@@ -16,6 +20,11 @@ import {
   createWatchtower,
   createFarm,
   createBanditCamp,
+  createGreatHall,
+  createOrcBarracks,
+  createPigFarm,
+  createOrcLumberMill,
+  createOrcWatchtower,
   createTree,
   createFlowerPatch,
   createPebbles,
@@ -28,6 +37,17 @@ import {
 } from '../models/index.js';
 
 import { UnitAnimator, ANIMATION_DURATIONS } from './unitAnimator.js';
+import {
+  GreatHall,
+  OrcBarracks,
+  PigFarm,
+  OrcHouse,
+  OrcWatchtower,
+  OrcLumberMill,
+  OrcForge
+} from '../entities/buildings/orc/index.js';
+import { HumanForge } from '../entities/buildings/HumanForge.js';
+import { ParticleSystem } from '../entities/ParticleSystem.js';
 
 /**
  * Model Catalog Definitions
@@ -78,8 +98,152 @@ const MODEL_CATALOG = [
     description: 'Saqueador bárbaro temível com pintura de guerra carmesim, olhos furiosos luminescentes, elmo spangenhelm com chifres curvados de osso ancestral, brigandina tachada com fivela de crânio, ombreira de ferro espinhosa e clava com runas de sangue.',
     notes: 'Texturas PBR procedurais pintadas à mão (Warcraft 2 / Overwatch / Valorant). Rigging completo de membros, elmo, chifres e arma com suporte a todas as animações (Idle, Walk, Attack Slam, Death).'
   },
+  {
+    id: 'peon',
+    name: 'Peon (Aldeão Orc)',
+    category: 'units',
+    faction: 'orc',
+    type: 'peon',
+    icon: '🪓',
+    sourceFile: 'src/models/units/PeonModel.js',
+    create: createPeon,
+    description: 'Trabalhador incansável da Horda dos Orcs com postura curvada característica, pele verde-oliva, presas inferiores proeminentes, túnica de juta rústica com arreios de couro tachados, e ferramentas intercambiáveis (machado de corte, picareta de ferro e marreta de construtor).',
+    notes: 'Inspirado no Peon clássico de Warcraft 2. Rigging modular completo com mochila de toras e saco de minério de ouro.'
+  },
+  {
+    id: 'grunt',
+    name: 'Grunt (Guerreiro Orc)',
+    category: 'units',
+    faction: 'orc',
+    type: 'grunt',
+    icon: '⚔️',
+    sourceFile: 'src/models/units/GruntModel.js',
+    create: createGrunt,
+    description: 'A temível espinha dorsal da infantaria da Horda. Porte colossal com musculatura maciça, pintura de guerra carmesim, elmo spangenhelm com chifres recurvados de osso ancestral, ombreiras com espinhos de ferro forjado e machado de batalha de lâmina dupla gigantesco.',
+    notes: 'Contraparte orc do Cavaleiro Humano. Animações de golpe circular violento (cleave) com torque total do tronco.'
+  },
+  {
+    id: 'axethrower',
+    name: 'Arremessador Troll (Axethrower)',
+    category: 'units',
+    faction: 'orc',
+    type: 'axethrower',
+    icon: '🎯',
+    sourceFile: 'src/models/units/AxethrowerModel.js',
+    create: createAxethrower,
+    description: 'Atirador de elite ágil da Horda dos Orcs com silhueta acrobática e predadora. Pele verde-azulada (teal) vibrante, crista de cabelo moicano chamejante em laranja e carmesim, presas curvas de marfim, colar tribal de contas e machadinhas de arremesso afiadas.',
+    notes: 'Inspirado no Troll Axethrower icônico de Warcraft 2. Animação de recuo de mira, arremesso balístico e recarga.'
+  },
+  {
+    id: 'ogre',
+    name: 'Ogro da Horda (Ogre Brute)',
+    category: 'units',
+    faction: 'orc',
+    type: 'ogre',
+    icon: '👹',
+    sourceFile: 'src/models/units/OgreModel.js',
+    create: createOgre,
+    description: 'Campeão titânico da Horda com força descomunal. Pele ocre-amarelada enrijecida, chifre frontal de marfim, barriga proeminente com arreio de couro tachado e clava maciça feita de tronco de árvore cravada de espinhos de ferro.',
+    notes: 'Unidade gigante de elite (escala 1.5x) com golpe devastador de impacto sísmico no solo.'
+  },
 
   // --- CONSTRUÇÕES ---
+  {
+    id: 'great_hall',
+    name: 'Grande Salão da Horda (Great Hall)',
+    category: 'buildings',
+    faction: 'orc',
+    type: 'building',
+    icon: '🌋',
+    sourceFile: 'src/entities/buildings/orc/GreatHall.js',
+    create: () => new GreatHall(null, { getHeight: () => 0 }, 0, 0, true, 'player'),
+    description: 'A colossal fortaleza central da Horda Orc. Construída com pesadas toras de ferro, estacas defensivas pontiagudas, crânio de fera ancestral sobre o portal de entrada, quatro torreões de canto com braseiros de fogo ardente e estandartes de guerra vermelhos.',
+    notes: 'VFX: Estandartes de guerra da Horda com ondulação dinâmica ao vento e braseiro de entrada com PointLight animada e cintilação de calor.'
+  },
+  {
+    id: 'orc_barracks',
+    name: 'Quartel da Horda (Orc Barracks)',
+    category: 'buildings',
+    faction: 'orc',
+    type: 'building',
+    icon: '🛡️',
+    sourceFile: 'src/entities/buildings/orc/OrcBarracks.js',
+    create: () => new OrcBarracks(null, { getHeight: () => 0 }, 0, 0, true, 'player'),
+    description: 'Fortificação militar agressiva com toras entrecruzadas monumentais no cume do telhado, toldo de lona carmesim, pátio de treinamento com boneco de palha e estantes com machados de guerra afiados.',
+    notes: 'VFX: Simulação física de pêndulo harmônico amortecido no boneco de treino suspenso (Anim_TrainingDummy) com reação a pancadas.'
+  },
+  {
+    id: 'pig_farm',
+    name: 'Fazenda de Porcos (Pig Farm)',
+    category: 'buildings',
+    faction: 'orc',
+    type: 'building',
+    icon: '🐖',
+    sourceFile: 'src/entities/buildings/orc/PigFarm.js',
+    create: () => new PigFarm(null, { getHeight: () => 0 }, 0, 0, true, 'player'),
+    description: 'A emblemática fazenda dos Orcs em Warcraft 2. Cercado de toras rústicas com amarração de corda, chão de lama úmida com palha, cocho de comida, abrigo de palha e três javalis/porcos com rotinas autônomas fuçando e comendo no cercado.',
+    notes: 'VFX: 3 javalis com IA comportamental autônoma (vagam pelo cercado, comem no cocho, farejam o chão e balançam os rabos em espiral).'
+  },
+  {
+    id: 'orc_house',
+    name: 'Toca dos Peons (Orc Burrow)',
+    category: 'buildings',
+    faction: 'orc',
+    type: 'building',
+    icon: '🛖',
+    sourceFile: 'src/entities/buildings/orc/OrcHouse.js',
+    create: () => new OrcHouse(null, { getHeight: () => 0 }, 0, 0, true, 'player'),
+    description: 'Toca e habitação dos Peons Orcs construída com esteios de madeira robustos, telhado cônico assimétrico de peles curtidas costuradas com faixas de couro, presas de bestas nas bordas, pórtico baixo com crânio tribal e respiradouro de fumaça.',
+    notes: 'VFX: Fumaça suave saindo pelo respiradouro do teto e luz de fogueira interna (PointLight) escapando pelo vão da porta.'
+  },
+  {
+    id: 'orc_watchtower',
+    name: 'Torre de Vigia Orc (Orc Watchtower)',
+    category: 'buildings',
+    faction: 'orc',
+    type: 'building',
+    icon: '🏹',
+    sourceFile: 'src/entities/buildings/orc/OrcWatchtower.js',
+    create: () => new OrcWatchtower(null, { getHeight: () => 0 }, 0, 0, true, 'player'),
+    description: 'Atalaia defensiva de múltiplos andares com toras reforçadas por escoras diagonais, estacas de proteção na base, plataforma elevada de combate com paliçada dentada e braseiro ardente no topo.',
+    notes: 'VFX: Braseiro de ferro suspenso no cume ardendo com chamas 3D animadas, fagulhas e PointLight dinâmica de fogo.'
+  },
+  {
+    id: 'orc_lumber_mill',
+    name: 'Serraria da Horda (Orc Lumber Mill)',
+    category: 'buildings',
+    faction: 'orc',
+    type: 'building',
+    icon: '🪚',
+    sourceFile: 'src/entities/buildings/orc/OrcLumberMill.js',
+    create: () => new OrcLumberMill(null, { getHeight: () => 0 }, 0, 0, true, 'player'),
+    description: 'Oficina florestal pesada com plataforma de madeira elevada, mecanismo de serra circular giratória gigante de ferro serrilhado com marcas de resina, tora mestre sendo fatiada, montes de serragem e pilhas de toras.',
+    notes: 'VFX: Serra circular dentada (Anim_SawBlade) que gira continuamente em torno do seu eixo com aceleração dinâmica ao processar toras.'
+  },
+  {
+    id: 'orc_forge',
+    name: 'Forja de Guerra da Horda (Orc War Forge)',
+    category: 'buildings',
+    faction: 'orc',
+    type: 'building',
+    icon: '🔥',
+    sourceFile: 'src/entities/buildings/orc/OrcForge.js',
+    create: () => new OrcForge(null, { getHeight: () => 0 }, 0, 0, true, 'player'),
+    description: 'Centro de aprimoramentos bélicos e fundição da Horda. Erguida sobre blocos maciços de basalto vulcânico negro, possui fornalha abobadada com boca em arco e grades de ferro, chaminé monumental reforçada com anéis forjados, telhado parcial de chapas rebitadas, toco com bigorna de ferro fundido e tina de têmpera.',
+    notes: 'VFX: Fogo intenso na fornalha com malha de chamas animadas, PointLight de calor termodinâmico, chaminé alta expelindo fumaça preta e faíscas incandescentes na bigorna.'
+  },
+  {
+    id: 'forge',
+    name: 'Forja dos Humanos (Human Forge)',
+    category: 'buildings',
+    faction: 'human',
+    type: 'building',
+    icon: '🔨',
+    sourceFile: 'src/entities/buildings/HumanForge.js',
+    create: () => new HumanForge(null, { getHeight: () => 0 }, 0, 0, true, 'player'),
+    description: 'Centro de armaria e aprimoramento bélico dos humanos baseado fielmente em forjaHumanos.png. Fornalha de pedra rústica entalhada com arco de alvenaria e braseiro ardente, chaminé alta com anel expansivo expelindo fumaça, estação de bigorna sobre tora robusta com fogo ativo de forja, grande marreta encostada, cepo e ferramentas de ferreiro espalhadas.',
+    notes: 'VFX: Brasas e chamas ardendo na fornalha e sobre a bigorna com PointLights quentes dinâmicas, fumaça subindo pela chaminé e bigorna, e fagulhas ao forjar melhorias.'
+  },
   {
     id: 'castle',
     name: 'Castelo Real (Castle Keep)',
@@ -322,64 +486,65 @@ const LIGHT_PRESETS = {
   studio: {
     name: 'Estúdio',
     bg: 0x14161f,
-    ambientColor: 0x333644,
-    ambientIntensity: 0.8,
-    keyColor: 0xfff6ec,
-    keyIntensity: 2.2,
-    keyPos: [5, 8, 6],
-    fillColor: 0xb5d2ee,
-    fillIntensity: 1.1,
-    fillPos: [-6, 4, -4],
-    rimColor: 0xffd375,
-    rimIntensity: 1.8,
-    rimPos: [0, 7, -7]
+    ambientColor: 0x646a7d,
+    ambientIntensity: 1.4,
+    keyColor: 0xfff8ee,
+    keyIntensity: 2.8,
+    keyPos: [6, 9, 7],
+    fillColor: 0xbcd9f5,
+    fillIntensity: 1.6,
+    fillPos: [-7, 5, -5],
+    rimColor: 0xffdf88,
+    rimIntensity: 2.2,
+    rimPos: [0, 8, -8]
   },
   day: {
     name: 'Dia Ensolarado',
     bg: 0x76aed9,
-    ambientColor: 0x85c8ec,
-    ambientIntensity: 0.9,
+    ambientColor: 0x90d2f5,
+    ambientIntensity: 1.3,
     keyColor: 0xfffbe8,
-    keyIntensity: 2.6,
+    keyIntensity: 3.0,
     keyPos: [8, 12, 5],
-    fillColor: 0xa8d5ff,
-    fillIntensity: 0.7,
+    fillColor: 0xb5dcff,
+    fillIntensity: 1.2,
     fillPos: [-8, 6, -5],
     rimColor: 0xffecb3,
-    rimIntensity: 0.9,
+    rimIntensity: 1.2,
     rimPos: [3, 6, -7]
   },
   sunset: {
     name: 'Pôr do Sol',
     bg: 0x2b1c2b,
-    ambientColor: 0x42263d,
-    ambientIntensity: 0.85,
-    keyColor: 0xff7b38,
-    keyIntensity: 2.8,
+    ambientColor: 0x5a3452,
+    ambientIntensity: 1.2,
+    keyColor: 0xff8542,
+    keyIntensity: 3.2,
     keyPos: [10, 4, 3],
-    fillColor: 0xc084fc,
-    fillIntensity: 1.0,
+    fillColor: 0xc88efc,
+    fillIntensity: 1.3,
     fillPos: [-7, 5, -4],
     rimColor: 0xf43f5e,
-    rimIntensity: 1.9,
+    rimIntensity: 2.2,
     rimPos: [-4, 6, -7]
   },
   night: {
     name: 'Noite de Luar',
     bg: 0x0a0e17,
-    ambientColor: 0x121b2d,
-    ambientIntensity: 0.5,
-    keyColor: 0x7dd3fc,
-    keyIntensity: 1.6,
+    ambientColor: 0x1d2c48,
+    ambientIntensity: 0.9,
+    keyColor: 0x8ae0ff,
+    keyIntensity: 2.2,
     keyPos: [-6, 9, 5],
-    fillColor: 0x818cf8,
-    fillIntensity: 0.8,
+    fillColor: 0x939bfb,
+    fillIntensity: 1.2,
     fillPos: [6, 4, -4],
-    rimColor: 0xc084fc,
-    rimIntensity: 1.2,
+    rimColor: 0xc894fc,
+    rimIntensity: 1.6,
     rimPos: [0, 7, -6]
   }
 };
+
 
 /**
  * Main Inspector Application Class
@@ -392,6 +557,8 @@ class ModelInspectorApp {
     // State
     this.currentModelItem = null;
     this.currentModelObject = null;
+    this.currentBuildingInstance = null;
+    this.particleSystem = null;
     this.animator = null;
     this.activeCategory = 'all';
     this.searchQuery = '';
@@ -448,6 +615,9 @@ class ModelInspectorApp {
     this.scene = new THREE.Scene();
     this.scene.background = new THREE.Color(LIGHT_PRESETS.studio.bg);
 
+    // Particle System for live building VFX
+    this.particleSystem = new ParticleSystem(this.scene);
+
     // Camera
     this.camera = new THREE.PerspectiveCamera(45, width / height, 0.1, 200);
     this.camera.position.set(4.5, 3.2, 5.5);
@@ -463,7 +633,8 @@ class ModelInspectorApp {
     this.renderer.shadowMap.enabled = true;
     this.renderer.shadowMap.type = THREE.PCFSoftShadowMap;
     this.renderer.toneMapping = THREE.ACESFilmicToneMapping;
-    this.renderer.toneMappingExposure = 1.1;
+    this.renderer.toneMappingExposure = 1.35;
+
 
     // Controls
     this.controls = new OrbitControls(this.camera, this.renderer.domElement);
@@ -593,7 +764,14 @@ class ModelInspectorApp {
 
     const query = this.searchQuery.toLowerCase().trim();
     const filtered = MODEL_CATALOG.filter(item => {
-      const matchCat = (this.activeCategory === 'all' || item.category === this.activeCategory);
+      let matchCat = false;
+      if (this.activeCategory === 'all') {
+        matchCat = true;
+      } else if (this.activeCategory === 'orcs') {
+        matchCat = (item.faction === 'orc');
+      } else {
+        matchCat = (item.category === this.activeCategory);
+      }
       const matchQuery = !query || item.name.toLowerCase().includes(query) || item.description.toLowerCase().includes(query);
       return matchCat && matchQuery;
     });
@@ -630,6 +808,22 @@ class ModelInspectorApp {
 
     this.currentModelItem = item;
 
+    // Cleanup previous building VFX if any
+    if (this.currentBuildingInstance && this.currentBuildingInstance.cleanupCustomVFX) {
+      this.currentBuildingInstance.cleanupCustomVFX();
+      this.currentBuildingInstance = null;
+    }
+
+    // Clear particles
+    if (this.particleSystem) {
+      this.particleSystem.particles.forEach(p => this.scene.remove(p.mesh));
+      this.particleSystem.particles = [];
+      this.particleSystem.floatingTexts.forEach(t => {
+        if (t.element && t.element.parentNode) t.element.parentNode.removeChild(t.element);
+      });
+      this.particleSystem.floatingTexts = [];
+    }
+
     // Remove old model
     if (this.currentModelObject) {
       this.clearWireframeOverlays();
@@ -637,8 +831,18 @@ class ModelInspectorApp {
       this.currentModelObject = null;
     }
 
-    // Instantiate new model
-    const model = item.create();
+    // Instantiate new model or Building entity
+    const created = item.create();
+    let model;
+    if (created instanceof THREE.Object3D) {
+      model = created;
+    } else if (created && created.mesh instanceof THREE.Object3D) {
+      this.currentBuildingInstance = created;
+      model = created.mesh;
+    } else {
+      model = created;
+    }
+
     this.currentModelObject = model;
     this.scene.add(model);
 
@@ -672,13 +876,15 @@ class ModelInspectorApp {
     // Configure animation vs static model
     const animSection = document.getElementById('anim-section');
     const villagerOpts = document.getElementById('villager-options');
+    const buildingVfxSection = document.getElementById('building-vfx-section');
 
     if (item.category === 'units') {
       animSection.style.display = 'block';
+      if (buildingVfxSection) buildingVfxSection.style.display = 'none';
       this.animator = new UnitAnimator(model, item.type);
 
-      // Handle Villager extra controls
-      if (item.id === 'villager') {
+      // Handle Villager / Peon extra controls
+      if (item.id === 'villager' || item.id === 'peon') {
         villagerOpts.style.display = 'flex';
         this.animator.setVillagerTool(this.villagerTool);
         this.animator.setVillagerCargo(this.villagerCargo);
@@ -691,6 +897,13 @@ class ModelInspectorApp {
     } else {
       animSection.style.display = 'none';
       this.animator = null;
+
+      if (this.currentBuildingInstance && buildingVfxSection) {
+        buildingVfxSection.style.display = 'block';
+        this.updateBuildingVfxUI(item, this.currentBuildingInstance);
+      } else if (buildingVfxSection) {
+        buildingVfxSection.style.display = 'none';
+      }
     }
 
     // Reapply wireframe if toggled
@@ -1022,6 +1235,112 @@ class ModelInspectorApp {
     }, 2200);
   }
 
+  updateBuildingVfxUI(item, building) {
+    const descEl = document.getElementById('building-vfx-desc');
+    const actionsEl = document.getElementById('building-vfx-actions');
+    if (!descEl || !actionsEl) return;
+
+    actionsEl.innerHTML = '';
+
+    if (item.id === 'orc_lumber_mill') {
+      descEl.innerHTML = '🪚 <strong>Serraria Industrial da Horda:</strong> A serra circular dentada gira continuamente em torno do seu eixo. Entregas de toras aceleram a lâmina e projetam cavacos de madeira.';
+      const btn = document.createElement('button');
+      btn.className = 'gold-btn action-btn';
+      btn.innerHTML = '🪵 Processar Madeira (Acelerar Serra)';
+      btn.addEventListener('click', () => {
+        if (building.processWoodDelivery) {
+          building.processWoodDelivery(this.particleSystem);
+          this.showToast('Lote de toras processado! A rotação da serra acelerou.');
+        }
+      });
+      actionsEl.appendChild(btn);
+    } else if (item.id === 'orc_barracks') {
+      descEl.innerHTML = '⚔️ <strong>Quartel Militar:</strong> O boneco de palha suspenso oscila com física pendular harmônica amortecida com molas e reage a pancadas.';
+      const btn = document.createElement('button');
+      btn.className = 'gold-btn action-btn';
+      btn.innerHTML = '💥 Golpear Boneco de Treino';
+      btn.addEventListener('click', () => {
+        if (building.hitDummy) {
+          building.hitDummy(this.particleSystem);
+          this.showToast('Pancada desferida! O boneco oscila vigorosamente.');
+        }
+      });
+      actionsEl.appendChild(btn);
+    } else if (item.id === 'pig_farm') {
+      descEl.innerHTML = `🐖 <strong>Criatório de Javalis da Horda:</strong> 3 javalis/porcos com IA comportamental autônoma vagam pelo cercado, farejam a terra, comem no cocho e balançam o rabo.`;
+      const btn = document.createElement('button');
+      btn.className = 'gold-btn action-btn';
+      btn.innerHTML = '🌾 Chamar Javalis ao Cocho';
+      btn.addEventListener('click', () => {
+        if (building.pigs) {
+          building.pigs.forEach(p => {
+            p.state = 'eating';
+            p.timer = 5.0;
+          });
+          if (this.particleSystem) {
+            this.particleSystem.spawnFloatingText('Oink! Oink!', building.mesh.position, '#ffd700');
+          }
+          this.showToast('Javalis foram para o cocho se alimentar!');
+        }
+      });
+      actionsEl.appendChild(btn);
+    } else if (item.id === 'orc_forge') {
+      descEl.innerHTML = '🔥 <strong>Forja de Guerra & Fundição:</strong> Fornalha de basalto vulcânico com chamas animadas, PointLight pulsante, chaminé expelindo fumaça preta de carvão e bigorna.';
+      const btn = document.createElement('button');
+      btn.className = 'gold-btn action-btn';
+      btn.innerHTML = '🔨 Bater Martelo na Bigorna (Faíscas)';
+      btn.addEventListener('click', () => {
+        if (building.strikeAnvil) {
+          building.strikeAnvil(this.particleSystem);
+          this.showToast('Faíscas forjadas na bigorna de ferro!');
+        }
+      });
+      actionsEl.appendChild(btn);
+    } else if (item.id === 'great_hall') {
+      descEl.innerHTML = '🌋 <strong>Grande Salão da Horda:</strong> Estandartes carmesim com ondulação dinâmica de vento via equações senoidais, braseiro de entrada com PointLight animada e chaminé ativa.';
+      const btn = document.createElement('button');
+      btn.className = 'gold-btn action-btn';
+      btn.innerHTML = '💨 Baforada de Fumaça na Chaminé';
+      btn.addEventListener('click', () => {
+        if (this.particleSystem) {
+          const chimneyPos = building.mesh.position.clone().add(new THREE.Vector3(-2.2, 9.8, -1.8));
+          this.particleSystem.spawnSmokePuff(chimneyPos);
+          this.showToast('Fumaça espessa expelida pela chaminé!');
+        }
+      });
+      actionsEl.appendChild(btn);
+    } else if (item.id === 'orc_watchtower') {
+      descEl.innerHTML = '🏹 <strong>Torre de Vigia:</strong> Braseiro suspenso ardendo no cume com iluminação PointLight pulsante e labaredas cônicas em rotação e escala dinâmica.';
+      const btn = document.createElement('button');
+      btn.className = 'gold-btn action-btn';
+      btn.innerHTML = '🔥 Alimentar Braseiro com Óleo';
+      btn.addEventListener('click', () => {
+        if (building.brazierLight) {
+          building.brazierLight.intensity = 4.5;
+        }
+        if (this.particleSystem) {
+          const sparkPos = building.mesh.position.clone().add(building.brazierSocket || new THREE.Vector3(0, 8.5, 0));
+          this.particleSystem.spawnHitSparks(sparkPos);
+        }
+        this.showToast('Braseiro alimentado com óleo de batalha!');
+      });
+      actionsEl.appendChild(btn);
+    } else if (item.id === 'orc_house') {
+      descEl.innerHTML = '🛖 <strong>Toca dos Peons (Burrow):</strong> Telhado cônico de peles costuradas com fogueira interna acolhedora e respiradouro de fumaça de madeira no ápice.';
+      const btn = document.createElement('button');
+      btn.className = 'gold-btn action-btn';
+      btn.innerHTML = '💨 Soprar Fumaça pelo Respiradouro';
+      btn.addEventListener('click', () => {
+        if (this.particleSystem) {
+          const ventPos = building.mesh.position.clone().add(building.roofSmokeSocket || new THREE.Vector3(0, 4.2, 0));
+          this.particleSystem.spawnSmokePuff(ventPos);
+          this.showToast('Fumaça escapando pela chaminé cônica!');
+        }
+      });
+      actionsEl.appendChild(btn);
+    }
+  }
+
   onWindowResize() {
     const width = this.container.clientWidth;
     const height = this.container.clientHeight;
@@ -1046,6 +1365,16 @@ class ModelInspectorApp {
     if (this.animator) {
       this.animator.update(dt);
       this.updateTimelineUI();
+    }
+
+    // Building procedural animation & VFX update
+    if (this.currentBuildingInstance && this.currentBuildingInstance.updateCustomVFX) {
+      this.currentBuildingInstance.updateCustomVFX(dt, null, null, this.particleSystem);
+    }
+
+    // Particle System update
+    if (this.particleSystem) {
+      this.particleSystem.update(dt);
     }
 
     this.controls.update();

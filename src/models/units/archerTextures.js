@@ -146,12 +146,12 @@ export function getArcherHoodTextures() {
   const { canvas: metC, ctx: met } = createCanvas(2048, 2048);
   const { canvas: bmpC, ctx: bmp } = createCanvas(2048, 2048);
 
-  // Deep Forest Green Gradient
+  // Luminous Vibrant Emerald Green Gradient
   const hoodGrad = alb.createLinearGradient(0, 0, 0, H);
-  hoodGrad.addColorStop(0.0, '#2d6a3f');
-  hoodGrad.addColorStop(0.3, '#1e5231');
-  hoodGrad.addColorStop(0.7, '#143b23');
-  hoodGrad.addColorStop(1.0, '#0a2315');
+  hoodGrad.addColorStop(0.0, '#34d399');
+  hoodGrad.addColorStop(0.3, '#10b981');
+  hoodGrad.addColorStop(0.7, '#059669');
+  hoodGrad.addColorStop(1.0, '#047857');
   alb.fillStyle = hoodGrad;
   alb.fillRect(0, 0, W, H);
 
@@ -166,7 +166,7 @@ export function getArcherHoodTextures() {
   }
 
   // Hood Seam down center
-  alb.strokeStyle = '#081c15';
+  alb.strokeStyle = '#064e3b';
   alb.lineWidth = 10;
   alb.beginPath();
   alb.moveTo(W * 0.5, 0);
@@ -186,9 +186,9 @@ export function getArcherHoodTextures() {
   alb.fillRect(0, H - 120, W, 120);
 
   // Roughness Map
-  rgh.fillStyle = '#d5d5d5'; // Cloth ~ 0.84
+  rgh.fillStyle = '#8c9ba5'; // Cloth ~ 0.55
   rgh.fillRect(0, 0, W, H);
-  rgh.fillStyle = '#4d4d4d'; // Gold rim ~ 0.30
+  rgh.fillStyle = '#3a3a3a'; // Gold rim ~ 0.22
   rgh.fillRect(0, H - 120, W, 120);
 
   // Metalness Map
@@ -467,12 +467,12 @@ export function getArcherTunicTextures() {
   const { canvas: metC, ctx: met } = createCanvas(2048, 2048);
   const { canvas: bmpC, ctx: bmp } = createCanvas(2048, 2048);
 
-  // Deep Emerald Tunic Base
+  // Luminous Vibrant Emerald Tunic Base
   const tunicGrad = alb.createLinearGradient(0, 0, 0, H);
-  tunicGrad.addColorStop(0.0, '#266738');
-  tunicGrad.addColorStop(0.35, '#1a4e28');
-  tunicGrad.addColorStop(0.70, '#12391c');
-  tunicGrad.addColorStop(1.0, '#0a2311');
+  tunicGrad.addColorStop(0.0, '#34d399');
+  tunicGrad.addColorStop(0.35, '#10b981');
+  tunicGrad.addColorStop(0.70, '#059669');
+  tunicGrad.addColorStop(1.0, '#047857');
   alb.fillStyle = tunicGrad;
   alb.fillRect(0, 0, W, H);
 
@@ -513,9 +513,9 @@ export function getArcherTunicTextures() {
   alb.fillRect(W * 0.48, 100, W * 0.04, H - 240);
 
   // Roughness Map
-  rgh.fillStyle = '#d5d5d5'; // cloth ~ 0.84
+  rgh.fillStyle = '#8c9ba5'; // cloth ~ 0.55
   rgh.fillRect(0, 0, W, H);
-  rgh.fillStyle = '#4d4d4d'; // gold embroidery ~ 0.30
+  rgh.fillStyle = '#3a3a3a'; // gold embroidery ~ 0.22
   rgh.fillRect(0, 0, W, 100);
   rgh.fillRect(0, H - 140, W, 140);
 

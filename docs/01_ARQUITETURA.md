@@ -38,6 +38,7 @@ src/
     SoundManager.js           SFX e música procedurais
     GLTFBuildingLoader.js     (não usado no fluxo principal)
     EnemyAI.js                LEGADO — substituído por ai/AIDirector (código morto)
+  data/                       FONTE ÚNICA de balanceamento (F0-06): units, buildings, upgrades, factions + helpers (index.js)
   ai/
     AIDirector.js             Utility AI (tick 1s): U_eco, U_housing, U_def, U_mil
     AIEconomyManager.js       Trabalhadores, construção, rebalanceamento de coleta

@@ -1,4 +1,5 @@
 import * as THREE from 'three';
+import { VISION_RADII, DEFAULT_UNIT, DEFAULT_BUILDING } from '../data/index.js';
 
 /**
  * Fog of War (Névoa de Guerra & Exploração Permanente)
@@ -42,30 +43,8 @@ export class FogOfWar {
     this.fogTexture.magFilter = THREE.LinearFilter;
     this.fogTexture.generateMipmaps = false;
 
-    // Vision radii definitions by entity type (halved map 160x160)
-    this.visionRadii = {
-      // Human units
-      villager: 14,
-      knight: 16,
-      archer: 18,
-      // Orc units
-      peon: 14,
-      grunt: 16,
-      axethrower: 18,
-      ogre: 16,
-      // Buildings
-      castle: 26,
-      great_hall: 26,
-      watchtower: 28,
-      orc_watchtower: 28,
-      barracks: 18,
-      orc_barracks: 18,
-      cottage: 14,
-      pig_farm: 14,
-      lumber_camp: 14,
-      orc_lumber_mill: 14,
-      farm: 14
-    };
+    // Vision radii by entity type — src/data (units.js / buildings.js)
+    this.visionRadii = { ...VISION_RADII };
 
     this.needsUpdate = true;
     this.updateTimer = 0;
@@ -166,7 +145,7 @@ export class FogOfWar {
     for (let i = 0; i < playerUnits.length; i++) {
       const u = playerUnits[i];
       if (!u.isDead && u.mesh) {
-        const r = this.visionRadii[u.type] || 20;
+        const r = this.visionRadii[u.type] || DEFAULT_UNIT.visionRadius;
         this.revealArea(u.mesh.position.x, u.mesh.position.z, r);
       }
     }
@@ -175,7 +154,7 @@ export class FogOfWar {
     for (let i = 0; i < playerBuildings.length; i++) {
       const b = playerBuildings[i];
       if (!b.isDead && b.mesh) {
-        const r = this.visionRadii[b.type] || 22;
+        const r = this.visionRadii[b.type] || DEFAULT_BUILDING.visionRadius;
         this.revealArea(b.mesh.position.x, b.mesh.position.z, r);
       }
     }

@@ -3,152 +3,18 @@ import { ModelFactory } from './ModelFactory.js';
 import { Arrow } from './Arrow.js';
 import { UPGRADE_CONFIG, FORGE_UPGRADES } from '../core/UpgradeConfig.js';
 
-export const UNIT_TRAIN_CONFIG = {
-  archer: {
-    type: 'archer',
-    name: 'Arqueiro',
-    icon: '/icoArco.png',
-    cost: { gold: 40, wood: 20, time: 9 },
-    description: 'Atirador de flechas à distância'
-  },
-  knight: {
-    type: 'knight',
-    name: 'Cavaleiro',
-    icon: '/icoEspada.png',
-    cost: { gold: 70, wood: 50, stone: 5, time: 11 },
-    description: 'Infantaria pesada com espada e armadura'
-  },
-  villager: {
-    type: 'villager',
-    name: 'Aldeão',
-    icon: '/icopopulacao.png',
-    cost: { gold: 50, time: 7 },
-    description: 'Trabalhador, coletor e construtor'
-  },
-  peon: {
-    type: 'peon',
-    name: 'Peão',
-    icon: '/icopopulacao.png',
-    cost: { gold: 50, time: 7 },
-    description: 'Trabalhador e construtor orc'
-  },
-  grunt: {
-    type: 'grunt',
-    name: 'Guerreiro Grunt',
-    icon: '/icoEspada.png',
-    cost: { gold: 70, wood: 50, stone: 5, time: 11 },
-    description: 'Guerreiro orc com espada'
-  },
-  axethrower: {
-    type: 'axethrower',
-    name: 'Lançador de Machado',
-    icon: '/icoArco.png',
-    cost: { gold: 40, wood: 20, time: 9 },
-    description: 'Atirador de machados à distância'
-  },
-  ogre: {
-    type: 'ogre',
-    name: 'Ogro',
-    icon: '/icoEspada.png',
-    cost: { gold: 75, wood: 100, stone: 35, time: 14 },
-    description: 'Bruto colossal com clava'
-  }
-};
+import {
+  getBuildingDef,
+  getBuildingStats as getBuildingStatsFromData,
+  isWorkerType,
+  UNIT_TRAIN_CONFIG,
+  BUILDING_BUILD_CONFIG,
+  WORKER_BUILD_LIST
+} from '../data/index.js';
 
-export const BUILDING_BUILD_CONFIG = {
-  // --- Human Buildings ---
-  cottage: {
-    type: 'cottage',
-    name: 'Casa Residencial',
-    icon: '/icoCasa.svg',
-    cost: { wood: 50 },
-    description: 'Fornece +5 de capacidade populacional'
-  },
-  lumber_camp: {
-    type: 'lumber_camp',
-    name: 'Serraria Florestal',
-    icon: '/icoSerraria.svg',
-    cost: { wood: 80 },
-    description: 'Ponto de entrega de madeira'
-  },
-  farm: {
-    type: 'farm',
-    name: 'Fazenda de Trigo',
-    icon: '/icoFazenda.svg',
-    cost: { wood: 60 },
-    description: 'Produz colheita e sustento para o reino'
-  },
-  barracks: {
-    type: 'barracks',
-    name: 'Quartel de Infantaria',
-    icon: '/icoQuartel.svg',
-    cost: { wood: 120, stone: 60 },
-    description: 'Treina soldados, arqueiros e cavaleiros'
-  },
-  forge: {
-    type: 'forge',
-    name: 'Forja Real',
-    icon: '/icoForja.svg',
-    cost: { wood: 100, stone: 70, gold: 50 },
-    description: 'Pesquisa melhorias de armas e armaduras'
-  },
-  watchtower: {
-    type: 'watchtower',
-    name: 'Torre de Vigia',
-    icon: '/icoTorre.svg',
-    cost: { wood: 80, stone: 40 },
-    description: 'Torre defensiva com arqueiros'
-  },
-
-  // --- Orc Buildings ---
-  orc_house: {
-    type: 'orc_house',
-    name: 'Toca Orc',
-    icon: '/icoToca.svg',
-    cost: { wood: 50 },
-    description: 'Fornece +5 de capacidade populacional'
-  },
-  pig_farm: {
-    type: 'pig_farm',
-    name: 'Chiqueiro de Porcos',
-    icon: '/icoPorco.svg',
-    cost: { wood: 55 },
-    description: 'Alimento e +5 de capacidade populacional'
-  },
-  orc_lumber_mill: {
-    type: 'orc_lumber_mill',
-    name: 'Serraria Mecânica',
-    icon: '/icoSerrariaOrc.svg',
-    cost: { wood: 85 },
-    description: 'Ponto de entrega de madeira da Horda'
-  },
-  orc_barracks: {
-    type: 'orc_barracks',
-    name: 'Quartel da Horda',
-    icon: '/icoQuartelOrc.svg',
-    cost: { wood: 130, stone: 50 },
-    description: 'Treina grunts, lanceiros e guerreiros orcs'
-  },
-  orc_forge: {
-    type: 'orc_forge',
-    name: 'Forja de Guerra Orc',
-    icon: '/icoForjaOrc.svg',
-    cost: { wood: 100, stone: 70, gold: 50 },
-    description: 'Forja melhorias de combate para a Horda'
-  },
-  orc_watchtower: {
-    type: 'orc_watchtower',
-    name: 'Torre de Vigia Orc',
-    icon: '/icoTorreOrc.svg',
-    cost: { wood: 85, stone: 40 },
-    description: 'Torre defensiva com arremesso de machados'
-  }
-};
-
-export const WORKER_BUILD_LIST = {
-  villager: ['cottage', 'lumber_camp', 'farm', 'barracks', 'forge', 'watchtower'],
-  peon: ['orc_house', 'pig_farm', 'orc_lumber_mill', 'orc_barracks', 'orc_forge', 'orc_watchtower']
-};
+// Tabelas derivadas de src/data (F0-06). Reexportadas com os nomes legados porque
+// UIManager, InputManager e outros módulos importam daqui.
+export { UNIT_TRAIN_CONFIG, BUILDING_BUILD_CONFIG, WORKER_BUILD_LIST };
 
 // Shared Ring Geometries by building radius
 const bldRingGeoCastle = new THREE.RingGeometry(5.95, 6.2, 32);
@@ -205,7 +71,7 @@ export class Building {
     this.attackRange = stats.attackRange || 0;
     this.attackDamage = stats.attackDamage || 0;
     this.collisionRadius = stats.collisionRadius || 3.0;
-    this.attackCooldown = 1.4;
+    this.attackCooldown = stats.attackCooldown;
     this.attackTimer = 0;
 
     // Training / Production queue & Research
@@ -265,40 +131,7 @@ export class Building {
   cleanupCustomVFX() {}
 
   static getBuildingStats(type) {
-    switch (type) {
-      case 'castle':
-        return { name: 'Castelo Real', hp: 1600, cost: { wood: 200, stone: 150 }, popGranted: 5, collisionRadius: 5.5 };
-      case 'great_hall':
-        return { name: 'Grande Salão Orc', hp: 1750, cost: { wood: 220, stone: 140 }, popGranted: 5, collisionRadius: 5.5 };
-      case 'lumber_camp':
-        return { name: 'Campo de Madeira', hp: 550, cost: { wood: 80, gold: 0, stone: 0 }, collisionRadius: 3.2 };
-      case 'orc_lumber_mill':
-        return { name: 'Serraria Orc', hp: 580, cost: { wood: 85, gold: 0, stone: 0 }, collisionRadius: 3.2 };
-      case 'cottage':
-        return { name: 'Chalé / Casa', hp: 400, cost: { wood: 50, gold: 0, stone: 0 }, popGranted: 5, collisionRadius: 2.8 };
-      case 'pig_farm':
-        return { name: 'Fazenda de Porcos', hp: 420, cost: { wood: 55, gold: 0, stone: 0 }, popGranted: 5, collisionRadius: 2.8 };
-      case 'orc_house':
-        return { name: 'Toca Orc', hp: 450, cost: { wood: 50, gold: 0, stone: 0 }, popGranted: 5, collisionRadius: 2.8 };
-      case 'orc_forge':
-        return { name: 'Forja Orc', hp: 850, cost: { wood: 100, stone: 70, gold: 50 }, collisionRadius: 3.4 };
-      case 'forge':
-        return { name: 'Forja Real', hp: 850, cost: { wood: 100, stone: 70, gold: 50 }, collisionRadius: 3.4 };
-      case 'barracks':
-        return { name: 'Quartel de Infantaria', hp: 850, cost: { wood: 120, stone: 60 }, collisionRadius: 3.5 };
-      case 'orc_barracks':
-        return { name: 'Quartel Orc', hp: 900, cost: { wood: 130, stone: 50 }, collisionRadius: 3.6 };
-      case 'watchtower':
-        return { name: 'Torre de Vigia', hp: 650, cost: { wood: 80, stone: 40 }, attackRange: 18, attackDamage: 18, collisionRadius: 2.0 };
-      case 'orc_watchtower':
-        return { name: 'Torre de Vigia Orc', hp: 700, cost: { wood: 85, stone: 40 }, attackRange: 18, attackDamage: 19, collisionRadius: 2.0 };
-      case 'farm':
-        return { name: 'Fazenda de Trigo', hp: 350, cost: { wood: 60, gold: 0, stone: 0 }, collisionRadius: 2.8 };
-      case 'bandit_camp':
-        return { name: 'Acampamento de Bandidos', hp: 1400, cost: {}, collisionRadius: 4.2 };
-      default:
-        return { name: 'Construção', hp: 500, cost: { wood: 50 }, collisionRadius: 3.0 };
-    }
+    return getBuildingStatsFromData(type);
   }
 
   createBuildingMesh(type) {
@@ -377,24 +210,7 @@ export class Building {
   }
 
   getBuildingHeight() {
-    switch (this.type) {
-      case 'great_hall': return 10.5;
-      case 'castle': return 9.5;
-      case 'watchtower': return 9.5;
-      case 'orc_watchtower': return 10.0;
-      case 'barracks': return 7.0;
-      case 'orc_barracks': return 7.5;
-      case 'orc_forge': return 6.5;
-      case 'forge': return 6.8;
-      case 'cottage': return 5.4;
-      case 'orc_house': return 5.2;
-      case 'pig_farm': return 4.8;
-      case 'farm': return 4.5;
-      case 'lumber_camp': return 5.2;
-      case 'orc_lumber_mill': return 5.4;
-      case 'bandit_camp': return 7.0;
-      default: return 6.0;
-    }
+    return getBuildingDef(this.type).healthBarHeight;
   }
 
   createHealthBar() {
@@ -671,11 +487,12 @@ export class Building {
     }
 
     // Only workers can be trained at Town Centers (Castle / Great Hall)
-    if ((this.type === 'castle' || this.type === 'great_hall') && unitType !== 'villager' && unitType !== 'peon') {
+    const role = getBuildingDef(this.type).role;
+    if (role === 'hq' && !isWorkerType(unitType)) {
       return false;
     }
     // Only military units can be trained at Barracks
-    if ((this.type === 'barracks' || this.type === 'orc_barracks') && (unitType === 'villager' || unitType === 'peon')) {
+    if (role === 'barracks' && isWorkerType(unitType)) {
       return false;
     }
 
@@ -838,19 +655,20 @@ export class Building {
       this.updateCustomVFX(delta, gameManager, soundManager, particleSystem);
     }
 
-    // Passive production (Farm / Pig Farm gives +3 food/gold)
-    if (this.isConstructed && (this.type === 'farm' || this.type === 'pig_farm')) {
+    // Passive production (Farm / Pig Farm gives +3 food/gold) — valores em src/data/buildings.js
+    const passive = getBuildingDef(this.type).passiveIncome;
+    if (this.isConstructed && passive) {
       this.passiveTimer += delta;
-      if (this.passiveTimer >= 6.0) {
+      if (this.passiveTimer >= passive.interval) {
         this.passiveTimer = 0;
         if (this.faction === 'enemy') {
           const ai = gameManager.aiDirector || gameManager.enemyAI;
-          if (ai) ai.addResource('gold', 3);
+          if (ai) ai.addResource(passive.resource, passive.amount);
         } else {
-          gameManager.addResource('gold', 3);
+          gameManager.addResource(passive.resource, passive.amount);
         }
         if (particleSystem) {
-          particleSystem.spawnFloatingText('+3 Gold', this.mesh.position, '#ffd700');
+          particleSystem.spawnFloatingText(`+${passive.amount} Gold`, this.mesh.position, '#ffd700');
         }
       }
     }
@@ -867,7 +685,8 @@ export class Building {
     }
 
     // Watchtower & Orc Watchtower auto-attack
-    if (this.isConstructed && (this.type === 'watchtower' || this.type === 'orc_watchtower') && this.attackRange > 0 && enemies) {
+    const towerDef = getBuildingDef(this.type).tower;
+    if (this.isConstructed && towerDef && this.attackRange > 0 && enemies) {
       this.attackTimer += delta;
       if (this.attackTimer >= this.attackCooldown) {
         // Find closest enemy within range
@@ -886,11 +705,11 @@ export class Building {
         if (closest) {
           this.attackTimer = 0;
           if (soundManager) {
-            if (this.type === 'orc_watchtower') soundManager.playSword();
+            if (towerDef.projectile === 'axe') soundManager.playSword();
             else soundManager.playBow();
           }
-          const arrowStart = this.mesh.position.clone().add(new THREE.Vector3(0, this.type === 'orc_watchtower' ? 8.2 : 6.8, 0));
-          const projType = this.type === 'orc_watchtower' ? 'axe' : 'arrow';
+          const arrowStart = this.mesh.position.clone().add(new THREE.Vector3(0, towerDef.projectileOriginY, 0));
+          const projType = towerDef.projectile;
           arrows.push(new Arrow(this.scene, arrowStart, closest, this.attackDamage, (target, dmg, hitPos) => {
             target.takeDamage(dmg, particleSystem, this, allUnits);
             if (soundManager) soundManager.playArrowHit();

@@ -1,12 +1,9 @@
 import { UNIT_TRAIN_CONFIG, BUILDING_BUILD_CONFIG, WORKER_BUILD_LIST } from '../entities/Building.js';
 import { UPGRADE_CONFIG, FORGE_UPGRADES } from '../core/UpgradeConfig.js';
+import { BUILDING_TRAINABLE_UNITS } from '../data/index.js';
 
-export const BUILDING_TRAINABLE_UNITS = {
-  barracks: ['archer', 'knight'],
-  orc_barracks: ['grunt', 'axethrower', 'ogre'],
-  castle: ['villager'],
-  great_hall: ['peon']
-};
+// Quem treina o quê — derivado de src/data/buildings.js (campo `trains`)
+export { BUILDING_TRAINABLE_UNITS };
 
 export class UIManager {
   constructor(gameManager, sceneManager, inputManager, soundManager) {

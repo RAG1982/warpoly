@@ -29,8 +29,8 @@ Causas raiz, em ordem de impacto:
 |---|---|---|
 | B1 | Névoa: inimigos ficam visíveis para sempre em área já explorada (usa `isExplored`, não `activeVision`) | `FogOfWar.cullUnexploredEnemies` |
 | B2 | Névoa é um plano a y=5,2: árvores/torres atravessam a névoa, unidades sob a névoa aparecem nas bordas | `FogOfWar.createShroudMesh` |
-| B3 | Custos da IA divergem da tabela real (ranged IA: 60 madeira/35 ouro vs real 20/40) — IA decide com base errada | `AIDirector.costs` vs `UNIT_TRAIN_CONFIG` |
-| B4 | Custos de construção duplicados 3× (`BUILDING_BUILD_CONFIG`, `getBuildingStats`, `InputManager.getCost`) | vários |
+| B3 | ~~Custos da IA divergem da tabela real (ranged IA: 60 madeira/35 ouro vs real 20/40) — IA decide com base errada~~ **Corrigido na F0-06**: `AIDirector.costs` agora é derivado de `src/data/` | `AIDirector.costs` vs `UNIT_TRAIN_CONFIG` |
+| B4 | ~~Custos de construção duplicados 3× (`BUILDING_BUILD_CONFIG`, `getBuildingStats`, `InputManager.getCost`)~~ **Corrigido na F0-06**: fonte única em `src/data/buildings.js` | vários |
 | B5 | Construções ignoram armadura; upgrades de defesa não afetam construções/torres | `Building.takeDamage` |
 | B6 | Assimetria: Chiqueiro dá +5 pop e ouro, Fazenda humana só ouro; humanos sem 3ª unidade militar | configs |
 | B7 | `resetMap` não reseta pesquisas, projéteis, `gameTime`, filas; reinício real exige `location.reload()` | `GameManager.resetMap`, `UIManager` |

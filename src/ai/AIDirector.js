@@ -1,6 +1,7 @@
 import * as THREE from 'three';
 import { AIEconomyManager } from './AIEconomyManager.js';
 import { AIMilitaryManager } from './AIMilitaryManager.js';
+import { FACTIONS, STARTING_RESOURCES, getBuildingDef, getCost, getTrainCost } from '../data/index.js';
 
 /**
  * AIDirector (Diretor de IA Oponente - Utility AI System)
@@ -21,40 +22,38 @@ export class AIDirector {
     this.faction = faction;
     this.baseCenter = baseCenter;
 
-    // Faction archetypes
-    this.workerType = faction === 'orc' ? 'peon' : 'villager';
-    this.meleeType = faction === 'orc' ? 'grunt' : 'knight';
-    this.rangedType = faction === 'orc' ? 'axethrower' : 'archer';
-    this.siegeType = faction === 'orc' ? 'ogre' : 'knight';
+    // Faction archetypes (src/data/factions.js)
+    const f = faction === 'orc' ? FACTIONS.orc : FACTIONS.human;
+    this.workerType = f.units.worker;
+    this.meleeType = f.units.melee;
+    this.rangedType = f.units.ranged;
+    this.siegeType = f.units.siege;
 
-    this.hqType = faction === 'orc' ? 'great_hall' : 'castle';
-    this.barracksType = faction === 'orc' ? 'orc_barracks' : 'barracks';
-    this.farmType = faction === 'orc' ? 'pig_farm' : 'cottage';
-    this.houseType = faction === 'orc' ? 'orc_house' : 'cottage';
-    this.lumberType = faction === 'orc' ? 'orc_lumber_mill' : 'lumber_camp';
-    this.towerType = faction === 'orc' ? 'orc_watchtower' : 'watchtower';
-    this.forgeType = faction === 'orc' ? 'orc_forge' : 'forge';
+    this.hqType = f.hq;
+    this.barracksType = f.barracks;
+    // "Fazenda" da IA = construção de população: a fazenda da facção se ela der pop, senão a casa.
+    this.farmType = getBuildingDef(f.farm).popGranted > 0 ? f.farm : f.house;
+    this.houseType = f.house;
+    this.lumberType = f.lumber;
+    this.towerType = f.tower;
+    this.forgeType = f.forge;
 
-    // Costs configuration
+    // Costs configuration — derivados dos dados reais (corrige B3: antes eram números próprios da IA)
     this.costs = {
-      worker: { gold: 50, time: 7 },
-      melee: { gold: 70, wood: 50, stone: 5, time: 11 },
-      ranged: { wood: 60, gold: 35, time: 9 },
-      siege: { wood: 100, gold: 75, stone: 35, time: 14 },
-      farm: { wood: 50 },
-      house: { wood: 50 },
-      barracks: { wood: 120, stone: 60 },
-      lumber: { wood: 80 },
-      tower: { wood: 80, stone: 40 },
-      forge: { wood: 100, stone: 70, gold: 50 }
+      worker: getTrainCost(this.workerType),
+      melee: getTrainCost(this.meleeType),
+      ranged: getTrainCost(this.rangedType),
+      siege: getTrainCost(this.siegeType),
+      farm: getCost(this.farmType),
+      house: getCost(this.houseType),
+      barracks: getCost(this.barracksType),
+      lumber: getCost(this.lumberType),
+      tower: getCost(this.towerType),
+      forge: getCost(this.forgeType)
     };
 
-    // AI Economy starting resources (identical to player: 240 wood, 200 gold, 120 stone)
-    this.resources = {
-      wood: 240,
-      gold: 200,
-      stone: 120
-    };
+    // AI Economy starting resources (identical to player)
+    this.resources = { ...STARTING_RESOURCES };
 
     // Population State (starts at 5/15 with 1 HQ and 1 Farm/House)
     this.population = 5;

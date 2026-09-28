@@ -2,6 +2,7 @@ import * as THREE from 'three';
 import { ModelFactory } from './ModelFactory.js';
 import { Arrow } from './Arrow.js';
 import { UnitAnimator } from '../inspector/unitAnimator.js';
+import { getUnitDef, getUnitStats as getUnitStatsFromData, WORKER_STATS } from '../data/index.js';
 
 // Shared Selection Ring Geometry & Materials
 const unitRingGeo = new THREE.RingGeometry(0.85, 1.05, 24);
@@ -55,6 +56,15 @@ export class Unit {
     this.armor = stats.armor || 0;
     this.collisionRadius = stats.collisionRadius || 0.6;
 
+    // Raios de varredura / flags de papel (src/data/units.js)
+    const def = getUnitDef(type);
+    this.isRanged = def.isRanged;
+    this.projectileType = def.projectile;
+    this.aggroRange = def.aggroRange;
+    this.threatScanRange = def.threatScanRange;
+    this.retargetRange = def.retargetRange;
+    this.helpRadius = def.helpRadius;
+
     // State machine: 'idle', 'moving', 'gathering', 'returning', 'building', 'attacking', 'dying'
     this.state = 'idle';
     this.targetPos = null;
@@ -70,7 +80,7 @@ export class Unit {
     this.pathDestination = null;
 
     // Worker inventory
-    this.carrying = { type: null, amount: 0, max: 15 };
+    this.carrying = { type: null, amount: 0, max: WORKER_STATS.carryCapacity };
     this.actionTimer = 0;
     this.attackTimer = 0;
     this.walkTimer = 0;
@@ -101,35 +111,15 @@ export class Unit {
   }
 
   getUnitStats(type) {
-    switch (type) {
-      case 'villager':
-        return { name: 'Villager', hp: 85, speed: 4.5, attack: 7, attackRange: 1.8, attackCooldown: 1.0, collisionRadius: 0.66 };
-      case 'knight':
-        return { name: 'Knight', hp: 190, speed: 4.8, attack: 26, attackRange: 2.1, attackCooldown: 1.1, armor: 4, collisionRadius: 0.84 };
-      case 'archer':
-        return { name: 'Archer', hp: 95, speed: 4.3, attack: 18, attackRange: 14.0, attackCooldown: 1.4, collisionRadius: 0.66 };
-      case 'bandit':
-        return { name: 'Bandit Raider', hp: 125, speed: 4.4, attack: 16, attackRange: 2.1, attackCooldown: 1.2, armor: 1, collisionRadius: 0.84 };
-      case 'peon':
-        return { name: 'Orc Peon', hp: 90, speed: 4.5, attack: 8, attackRange: 1.8, attackCooldown: 1.0, collisionRadius: 0.66 };
-      case 'grunt':
-        return { name: 'Orc Grunt', hp: 205, speed: 4.7, attack: 28, attackRange: 2.1, attackCooldown: 1.15, armor: 4, collisionRadius: 0.86 };
-      case 'axethrower':
-        return { name: 'Troll Axethrower', hp: 100, speed: 4.4, attack: 19, attackRange: 13.5, attackCooldown: 1.35, collisionRadius: 0.66 };
-      case 'ogre':
-        return { name: 'Orc Ogre', hp: 320, speed: 4.0, attack: 42, attackRange: 2.5, attackCooldown: 1.5, armor: 5, collisionRadius: 1.08 };
-      default:
-        return { name: 'Unit', hp: 100, speed: 4.0, attack: 10, attackRange: 1.8, attackCooldown: 1.0, collisionRadius: 0.72 };
-    }
+    return getUnitStatsFromData(type);
   }
 
   isCombatUnit() {
-    return this.type === 'knight' || this.type === 'archer' || this.type === 'bandit' ||
-           this.type === 'grunt' || this.type === 'axethrower' || this.type === 'ogre';
+    return getUnitDef(this.type).isCombat;
   }
 
   isWorker() {
-    return this.type === 'villager' || this.type === 'peon';
+    return getUnitDef(this.type).isWorker;
   }
 
   createModel(type) {
@@ -170,17 +160,7 @@ export class Unit {
   }
 
   getHealthBarHeight() {
-    switch (this.type) {
-      case 'ogre': return 4.5;
-      case 'knight':
-      case 'grunt': return 3.9;
-      case 'bandit': return 3.6;
-      case 'archer':
-      case 'axethrower': return 3.4;
-      case 'villager':
-      case 'peon': return 3.1;
-      default: return 3.5;
-    }
+    return getUnitDef(this.type).healthBarHeight;
   }
 
   updateHealthBar() {
@@ -238,7 +218,7 @@ export class Unit {
 
   orderGather(resource) {
     if (this.isDead || this.isDying || this.state === 'dying') return;
-    if (this.type !== 'villager' && this.type !== 'peon') return;
+    if (!this.isWorker()) return;
     this.gatherTarget = resource;
     this.targetEntity = resource;
     this.buildTarget = null;
@@ -263,7 +243,7 @@ export class Unit {
 
   orderBuild(building) {
     if (this.isDead || this.isDying || this.state === 'dying') return;
-    if (this.type !== 'villager' && this.type !== 'peon') return;
+    if (!this.isWorker()) return;
     this.state = 'building';
     this.buildTarget = building;
     this.targetEntity = building;
@@ -360,7 +340,7 @@ export class Unit {
             const isFriendlyTargetBuilding = u.attackTarget && (u.attackTarget.fullMesh || u.attackTarget.isConstructed !== undefined);
             if (u.state === 'idle' || (u.state === 'attacking' && isFriendlyTargetBuilding)) {
               const d = this.mesh.position.distanceTo(u.mesh.position);
-              if (d < 14) {
+              if (d < this.helpRadius) {
                 const savedObjective = isFriendlyTargetBuilding ? u.attackTarget : u.objectiveTarget;
                 u.orderAttack(attacker, !!savedObjective);
                 if (savedObjective) {
@@ -601,8 +581,7 @@ export class Unit {
 
     // Auto-Aggro: Military combat units actively scan for and attack approaching enemies
     if (this.isCombatUnit()) {
-      const scanRange = (this.type === 'archer' || this.type === 'axethrower') ? 14 : 11;
-      const target = this.findNearestHostile(allUnits, buildings, scanRange);
+      const target = this.findNearestHostile(allUnits, buildings, this.aggroRange);
       if (target) {
         this.orderAttack(target);
       }
@@ -819,7 +798,7 @@ export class Unit {
   updateAttacking(delta, soundManager, particleSystem, arrows, allUnits, buildings) {
     // 1. Target dead or invalid: find next closest hostile or resume objective
     if (!this.attackTarget || this.attackTarget.isDead || this.attackTarget.hp <= 0) {
-      const nextUnit = this.findNearestHostileUnit(allUnits, 16);
+      const nextUnit = this.findNearestHostileUnit(allUnits, this.retargetRange);
       if (nextUnit) {
         this.attackTarget = nextUnit;
         this.targetEntity = nextUnit;
@@ -830,7 +809,7 @@ export class Unit {
         this.targetEntity = this.objectiveTarget;
         this.hasFiredThisAttack = false;
       } else {
-        const nextTarget = this.findNearestHostile(allUnits, buildings, 16);
+        const nextTarget = this.findNearestHostile(allUnits, buildings, this.retargetRange);
         if (nextTarget) {
           this.attackTarget = nextTarget;
           this.targetEntity = nextTarget;
@@ -851,7 +830,7 @@ export class Unit {
       this.threatScanTimer = (this.threatScanTimer || 0) + delta;
       if (this.threatScanTimer >= 0.35) {
         this.threatScanTimer = 0;
-        const visionRange = (this.type === 'archer' || this.type === 'axethrower') ? 15 : 13;
+        const visionRange = this.threatScanRange;
         const nearestHostile = isTargetWorker ? this.findNearestHostileCombatUnit(allUnits, visionRange) : this.findNearestHostileUnit(allUnits, visionRange);
         if (nearestHostile) {
           if (isTargetBuilding && !this.objectiveTarget) {
@@ -890,16 +869,16 @@ export class Unit {
 
     const progress = Math.min(1.0, this.attackTimer / this.attackCooldown);
 
-    if (this.type === 'archer' || this.type === 'axethrower') {
+    if (this.isRanged) {
       // Archer & Axethrower: Release projectile shot at progress >= 0.60
       if (progress >= 0.60 && !this.hasFiredThisAttack) {
         this.hasFiredThisAttack = true;
         if (soundManager) {
-          if (this.type === 'axethrower') soundManager.playSword();
+          if (this.projectileType === 'axe') soundManager.playSword();
           else soundManager.playBow();
         }
         const startPos = this.mesh.position.clone().add(new THREE.Vector3(0, 1.68, 0));
-        const projType = this.type === 'axethrower' ? 'axe' : 'arrow';
+        const projType = this.projectileType;
         arrows.push(new Arrow(this.scene, startPos, this.attackTarget, this.attack, (target, dmg, hitPos) => {
           target.takeDamage(dmg, particleSystem, this, allUnits);
           if (soundManager) soundManager.playArrowHit();

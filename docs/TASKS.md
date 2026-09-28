@@ -52,8 +52,8 @@
 | Fase | Total | TODO | DOING | DONE |
 |---|---|---|---|---|
 | F0 Fundação | 7 | 0 | 0 | 7 |
-| F1 Desempenho | 10 | 8 | 0 | 2 |
-| F2 Núcleo | 8 | 8 | 0 | 0 |
+| F1 Desempenho | 10 | 6 | 2 | 2 |
+| F2 Núcleo | 8 | 7 | 1 | 0 |
 | F3 Jogabilidade WC2 base | 11 | 11 | 0 | 0 |
 | F4 Jogabilidade WC2 expansão | 8 | 8 | 0 | 0 |
 | F5 IA | 6 | 6 | 0 | 0 |
@@ -116,7 +116,7 @@
 - **Resultado**: `src/models/textureQuality.js` (`?texq=` / localStorage). VRAM estimada: antes 7,3 GB → med 399 MB (padrão) / low 100 MB / high 1,94 GB. Load 11 s → 5,5 s. Visual med ≈ ultra (capturas em `tools/texture-compare/`). Pendente → NEW-6.
 
 ### F1-02 · Mesclar geometrias dos templates estáticos
-- **Status**: `TODO` · Lane PERF · Onda 2 · Dep: F0-04
+- **Status**: `DOING(agente-onda2, 2026-09-28)` · Lane PERF · Onda 2 · Dep: F0-04
 - **Fazer**: utilitário `mergeStaticTemplate(group, {keepNamed:[...]})` que agrupa meshes por material via `BufferGeometryUtils.mergeGeometries`, preservando nós animados/VFX (bandeiras, rodas, chamas, portas) listados por modelo. Aplicar a todas as construções, depósitos e decorações.
 - **Aceite**: castelo ≤ 20 draw calls, Grande Salão ≤ 20; cena inicial < 1 500 draw calls; VFX das forjas/chiqueiro funcionam no inspetor e no jogo.
 
@@ -131,7 +131,7 @@
 - **Aceite**: redução ≥ 50% de draw calls de sombra; sem artefatos visíveis.
 
 ### F1-05 · Névoa de guerra via shader (corrige B1, B2)
-- **Status**: `TODO` · Lane PERF · Onda 2 · Dep: —
+- **Status**: `DOING(agente-onda2, 2026-09-28)` · Lane PERF · Onda 2 · Dep: —
 - **Fazer**: substituir o plano a y=5,2 por uma textura de visibilidade (2 canais: explorado / visível agora) amostrada no shader do terreno e dos objetos (`onBeforeCompile`) ou num passe de pós-processamento com reconstrução de posição; estados: preto (não explorado), cinza dessaturado (memória), claro (visível). Inimigos só aparecem em "visível agora"; construções inimigas vistas ficam como "fantasma" na memória (como no WC2).
 - **Aceite**: nenhum objeto atravessa a névoa; unidades inimigas somem ao sair da visão.
 
@@ -165,7 +165,7 @@
 ## F2 — Núcleo do motor
 
 ### F2-01 · Modelo de jogadores e IDs de entidade
-- **Status**: `TODO` · Lane CORE · Onda 2 · Dep: F0-06
+- **Status**: `DOING(agente-onda2, 2026-09-28)` · Lane CORE · Onda 2 · Dep: F0-06
 - **Fazer**: `Player {id, name, faction, color, team, resources, pop, isAI, isLocal}`; toda entidade com `id` numérico estável e `ownerId`; substituir `'player'/'enemy'`, `gm.units/gm.enemies`, recursos duplicados em `AIDirector`; helper `isHostile(a,b)` por time.
 - **Aceite**: partida 1×1 idêntica; partida 1×2 IA (FFA) funciona via config de teste.
 

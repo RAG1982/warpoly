@@ -53,7 +53,7 @@
 |---|---|---|---|---|
 | F0 Fundação | 7 | 0 | 0 | 7 |
 | F1 Desempenho | 10 | 6 | 1 | 3 |
-| F2 Núcleo | 8 | 7 | 1 | 0 |
+| F2 Núcleo | 8 | 6 | 1 | 1 |
 | F3 Jogabilidade WC2 base | 11 | 11 | 0 | 0 |
 | F4 Jogabilidade WC2 expansão | 8 | 8 | 0 | 0 |
 | F5 IA | 6 | 6 | 0 | 0 |
@@ -166,9 +166,10 @@
 ## F2 — Núcleo do motor
 
 ### F2-01 · Modelo de jogadores e IDs de entidade
-- **Status**: `DOING(agente-onda2, 2026-09-28)` · Lane CORE · Onda 2 · Dep: F0-06
+- **Status**: `DONE(7c7860a)` · Lane CORE · Onda 2 · Dep: F0-06
 - **Fazer**: `Player {id, name, faction, color, team, resources, pop, isAI, isLocal}`; toda entidade com `id` numérico estável e `ownerId`; substituir `'player'/'enemy'`, `gm.units/gm.enemies`, recursos duplicados em `AIDirector`; helper `isHostile(a,b)` por time.
 - **Aceite**: partida 1×1 idêntica; partida 1×2 IA (FFA) funciona via config de teste.
+- **Resultado**: `src/sim/{Player,PlayerRegistry,EntityIds,MatchConfig}.js`; `gm.allUnits` fonte única (`units`/`enemies` derivadas); IA por `playerId`; `?ffa=1` (3 jogadores) funcional; 40 testes. Dívidas em 01_ARQUITETURA (getter `faction`, API econômica legada, cor do jogador não usada).
 
 ### F2-02 · Sistema de comandos
 - **Status**: `TODO` · Lane CORE · Onda 3 · Dep: F2-01
@@ -181,7 +182,7 @@
 - **Aceite**: duas execuções com mesma seed e mesmos comandos → mesmo checksum após 10 min (teste automatizado).
 
 ### F2-04 · Máquina de estados do jogo
-- **Status**: `TODO` · Lane CORE · Onda 2 · Dep: —
+- **Status**: `DOING(agente-onda2, 2026-09-28)` · Lane CORE · Onda 2 · Dep: —
 - **Fazer**: `Boot → MainMenu → MatchSetup → Loading → InGame ⇄ Paused → PostGame`; criar/destruir partida sem recarregar (dispose completo de cena, listeners, timers); `MatchConfig {mapId, players[], startingResources, victoryCondition, seed}`. Corrige B7.
 - **Aceite**: jogar 3 partidas seguidas sem reload; heap volta ao patamar inicial.
 
@@ -466,6 +467,7 @@ _(agentes adicionam aqui: `NEW-<n> · título · lane · motivo`)_
 - NEW-6 · Completar F1-01: empacotar roughness+metalness (ORM) para High < 300 MB; pintura em Worker/OffscreenCanvas; cache IndexedDB; troca de qualidade sem recarregar · PERF
 - NEW-7 · `TreeManager`: InstancedMesh desenha sempre 120 instâncias (vagas com escala 0) e a esfera de culling cobre o mapa (~700k tris por passada de sombra) → ajustar `count`, dividir em chunks, LOD · PERF · achado na F1-04
 - NEW-8 · ✅ Rosto dos orcs (Peão, Grunt, Arremessador, Ogro) repetia nas 6 faces da cabeça → corrigido: textura só na face frontal (+Z). Regra para TODOS os modelos novos (inclusive Blender): textura de rosto só na frente da cabeça · ART · pedido do dono
+- NEW-9 · IA destruiu HQ de jogador parado em < 240 s nos testes da F2-01 — avaliar agressividade inicial ao criar dificuldades (F5-03) · AI
 - NEW-1 · Avaliar uso real de `GLTFBuildingLoader` em `GreatHall.js` e remover ou adotar no pipeline Blender (F7-00) · ART · ficou fora do escopo da F0-03
 
 ## Notas de integração

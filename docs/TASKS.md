@@ -58,14 +58,14 @@ Opus escreve a spec em `docs/specs/<ID>.md`; agente **Sonnet** executa; Opus rev
 | `docs/specs/F1-08-alocacoes-vazamentos.md` | F1-08 | sonnet |
 | `docs/specs/F1-03-unidades-por-osso.md` | F1-03 — **DONE parcial** | sonnet |
 | `docs/specs/F1-03b-unidades-skinned.md` | F1-03b SkinnedMesh rígido | sonnet |
-| `docs/specs/F1-06-grade-espacial.md` | F1-06 | sonnet |
+| `docs/specs/F1-06-grade-espacial.md` | F1-06 — **DONE parcial** | sonnet |
 
 ## Quadro resumo
 
 | Fase | Total | TODO | DOING | DONE |
 |---|---|---|---|---|
 | F0 Fundação | 7 | 0 | 0 | 7 |
-| F1 Desempenho | 10 | 3 | 2 | 5 |
+| F1 Desempenho | 10 | 3 | 1 | 6 |
 | F2 Núcleo | 8 | 6 | 0 | 2 |
 | F3 Jogabilidade WC2 base | 11 | 11 | 0 | 0 |
 | F4 Jogabilidade WC2 expansão | 8 | 8 | 0 | 0 |
@@ -152,9 +152,10 @@ Opus escreve a spec em `docs/specs/<ID>.md`; agente **Sonnet** executa; Opus rev
 - **Resultado**: `FogGrid.js` + `render/fogOfWarShader.js` (patch `onBeforeCompile`, instancing, chão/água); 3 estados, inimigos só com visão atual, fantasmas de construções, minimapa, visão de aliados. Bench: +1,9% frame time, +3–4 programas. B1/B2 corrigidos. Pendente → NEW-13.
 
 ### F1-06 · Grade espacial (spatial hash) para a simulação
-- **Status**: `DOING(agente-onda2, 2026-09-28)` · Lane PERF (arquivo novo) + CORE (integração) · Onda 2 · Dep: —
+- **Status**: `DONE(bf87e23 — parcial, meta via NEW-14)` · Lane PERF (arquivo novo) + CORE (integração) · Onda 2 · Dep: —
 - **Fazer**: `src/sim/SpatialGrid.js`; usar em colisões unidade×unidade, unidade×bloqueadores, busca de alvo/aggro, torres, seleção. Elimina O(n²).
 - **Aceite**: bench 300 unidades: tempo de `gameManager.update` < 4 ms.
+- **Resultado**: `src/sim/SpatialGrid.js`; colisões, alvo, torre, IA, colocação, recursos e picking migrados; empurrão determinístico por id; 114 testes. `gm.update` massa300 7,19→6,85 ms (meta <4 ms não atingida: gargalo real é `Unit.update` ~4,5 ms, animação procedural por unidade) → NEW-14. Efeitos colaterais aceitos: tocos não selecionáveis; alcance de aggro/ajuda +raio da unidade-alvo (~0,6–1,2 u).
 
 ### F1-07 · Pathfinder de produção
 - **Status**: `TODO` · Lane PERF · Onda 2 · Dep: —
@@ -490,6 +491,7 @@ _(agentes adicionam aqui: `NEW-<n> · título · lane · motivo`)_
 - ✅ F0-08 · `DONE(d17aaf5)` Scripts de navegador abortam sem GPU real (`tools/lib/assertGpu.mjs`); `safe-run.sh` agora reentrante (deadlock de safe-run aninhado corrigido)
 - ✅ NEW-12/F7-00c · `DONE(7d6f712)` modelos .glb ligados por padrão (`?glb=0` desliga), carregam também com `?skipPreload` (verificado no navegador)
 - NEW-13 · Névoa: chamas de construções inimigas na memória continuam animando (Building.js não checa visibilidade); céu azul aparece além da borda do mapa em área não explorada (fundo da cena deveria escurecer) · PERF/CORE
+- NEW-14 · `Unit.update` domina a CPU (~4,5 ms com 310 unidades): animação procedural roda para toda unidade todo frame. Otimizar: animar só unidades visíveis no frustum/névoa, reduzir taxa de animação por distância (LOD de animação), simulação em tick fixo 20 Hz (F1-09) · PERF
 - NEW-1 · Avaliar uso real de `GLTFBuildingLoader` em `GreatHall.js` e remover ou adotar no pipeline Blender (F7-00) · ART · ficou fora do escopo da F0-03
 
 ## Notas de integração

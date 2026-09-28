@@ -5,6 +5,9 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>WarPoly - 3D Low-Poly RTS</title>
   <link rel="stylesheet" href="./style.css" />
+  <!-- F6-01: decide cedo se o menu principal vai abrir, para não piscar a tela de loading. -->
+  <script>if (!/[?&](play|skipMenu|bench|skipPreload)(=|&|$)/.test(location.search)) document.documentElement.classList.add('wp-menu');</script>
+  <style>html.wp-menu, html.wp-menu body { background: #080b12; } html.wp-menu #loading-screen, html.wp-menu #ui-layer { display: none !important; }</style>
 </head>
 <body>
   <!-- Royal Loading Screen with Progress Bar -->

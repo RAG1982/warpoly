@@ -61,7 +61,7 @@ Causas raiz, em ordem de impacto:
 
 ## 4. Pontos fortes a preservar
 
-- Direção de arte stylized low-poly coesa e bonita (vide `modelo.png`), UI dourada com identidade.
+- Direção de arte stylized low-poly coesa e bonita (vide `docs/reference/modelo.png`), UI dourada com identidade.
 - Zero dependência de assets externos → build pequeno e totalmente versionável.
 - Inspetor 3D excelente como ferramenta de produção — deve virar parte do pipeline (perf, team color, LOD).
 - IA utilitária já modular (Director + Economy + Military) — boa base para dificuldades.

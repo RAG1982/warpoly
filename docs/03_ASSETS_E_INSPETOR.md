@@ -64,4 +64,4 @@ oak 16m/476t · pine 12m/208t · autumn 16m/476t · birch 29m/904t · flower_pat
 - Nós que o `UnitAnimator`/`ModelFactory.rebindUserData` dependem (NÃO renomear sem atualizar ambos): `Torso, Head, ArmL, ArmR, LegL, LegR, Sword, ShieldGroup, Bow, Weapon, ToolGroup, Axe, Pickaxe, Hammer, Pack, WoodBundle, GoldSack, Plume, DrawnArrow, WeaponL, WeaponR, DrawnAxe, Horn, Mohawk, BowStringTop, BowStringBottom`.
 - Escala em jogo: unidades ×1.62.
 - Direção de arte orc: `specs/orc_buildings/00_ORC_ART_DIRECTION_PIPELINE.md`.
-- Referências visuais do dono do projeto: `modelo.png`, `modeloorcs.png`, `hudmodelo.png`, `dialogoBarracs.png`, `forjaHumanos.png` (raiz).
+- Referências visuais do dono do projeto: `modelo.png`, `modeloorcs.png`, `hudmodelo.png`, `dialogoBarracs.png`, `forjaHumanos.png` (em `docs/reference/`; comentários no código citam só o nome do arquivo).

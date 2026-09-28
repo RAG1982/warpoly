@@ -67,3 +67,21 @@ Causas raiz, em ordem de impacto:
 - IA utilitária já modular (Director + Economy + Military) — boa base para dificuldades.
 - Áudio procedural leve.
 - Instancing já aplicado a árvores e decorações (padrão a replicar).
+
+## 5. Baseline oficial (F0-04, `npm run bench`)
+
+Chromium 153 com janela, RX 7600 XT via ANGLE/Vulkan, 1280×720, DPR 1, dev server. Detalhes: `tools/bench/BASELINE.md`.
+
+| Métrica | inicial | combate100 | massa300 |
+|---|---:|---:|---:|
+| Unidades | 5+5 | 55+55 | 155+155 |
+| FPS médio | 15,7 | 5,3 | 1,6 |
+| Frame time médio (ms) | 63,9 | 189,4 | 620,3 |
+| `gm.update` médio (ms) | 0,28 | 4,82 | 7,29 |
+| Draw calls/frame | 8 691 | 25 982 | 56 240 |
+| Triângulos/frame | 4,91 M | 5,22 M | 5,76 M |
+| Texturas | 289 | 446 | 371 |
+| Heap JS (MB) | 124 | 134 | 156 |
+| Load (ms) | 7 725 | 7 603 | 6 725 |
+
+Conclusão: o gargalo é **draw call** (~170 por unidade), não a simulação (`gm.update` ≈ 7 ms com 310 unidades). As texturas crescem em combate por causa dos textos flutuantes (item 6).

@@ -51,7 +51,7 @@
 
 | Fase | Total | TODO | DOING | DONE |
 |---|---|---|---|---|
-| F0 Fundação | 7 | 0 | 3 | 4 |
+| F0 Fundação | 7 | 0 | 2 | 5 |
 | F1 Desempenho | 10 | 8 | 2 | 0 |
 | F2 Núcleo | 8 | 8 | 0 | 0 |
 | F3 Jogabilidade WC2 base | 11 | 11 | 0 | 0 |
@@ -82,9 +82,10 @@
 - **Resultado**: 37 screenshots e 23 ícones duplicados removidos, referências em `docs/reference/`, `dist/` fora do git, `EnemyAI.js` removido. `GLTFBuildingLoader.js` mantido (importado por `GreatHall.js`) → ver NEW-1.
 
 ### F0-04 · Harness de benchmark de desempenho
-- **Status**: `DOING(agente-onda1, 2026-09-28)` · Lane QA · Onda 1 · Dep: —
+- **Status**: `DONE(b4112e5)` · Lane QA · Onda 1 · Dep: —
 - **Fazer**: `?bench=<cenário>` que monta cenários fixos (inicial; 100 unidades em combate; 300 unidades) com seed fixa, câmera fixa, mede 10 s: FPS médio/p1, draw calls, triângulos, geometrias, texturas, programas, heap JS, tempo de load; imprime JSON e salva em `window.__bench`. Script `npm run bench` com Playwright que roda e grava em `tools/bench/results/<data>.json`.
 - **Aceite**: baseline registrada em `docs/04_DIAGNOSTICO.md` (seção Baseline).
+- **Resultado**: `?bench=inicial|combate100|massa300` + `npm run bench` (Playwright, GPU real). Baseline: 15,7 / 5,3 / 1,6 FPS; 8,7k / 26k / 56k draw calls.
 
 ### F0-05 · Ferramentas de qualidade
 - **Status**: `DOING(agente-onda1, 2026-09-28)` · Lane QA · Onda 1 · Dep: —

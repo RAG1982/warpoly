@@ -1,4 +1,5 @@
 import * as THREE from 'three';
+import { createScaledCanvas as createCanvas, createBumpCanvas, toTexture as makeTexture } from '../textureQuality.js';
 
 /**
  * Procedural Hand-Painted Stylized PBR Texture Generator for the Lumber Camp (Serraria)
@@ -17,29 +18,8 @@ import * as THREE from 'three';
 
 const textureCache = new Map();
 
-function createCanvas(width = 2048, height = 2048) {
-  const canvas = typeof document !== 'undefined' ? document.createElement('canvas') : { width, height, getContext: () => null };
-  canvas.width = width;
-  canvas.height = height;
-  const ctx = canvas.getContext ? canvas.getContext('2d', { willReadFrequently: false }) : null;
-  return { canvas, ctx, width, height };
-}
-
-function toTexture(canvas, isSRGB = true, wrapRepeat = false) {
-  const tex = new THREE.CanvasTexture(canvas);
-  tex.colorSpace = isSRGB ? THREE.SRGBColorSpace : THREE.NoColorSpace;
-  tex.generateMipmaps = true;
-  tex.minFilter = THREE.LinearMipmapLinearFilter;
-  tex.magFilter = THREE.LinearFilter;
-  if (wrapRepeat) {
-    tex.wrapS = THREE.RepeatWrapping;
-    tex.wrapT = THREE.RepeatWrapping;
-  } else {
-    tex.wrapS = THREE.ClampToEdgeWrapping;
-    tex.wrapT = THREE.ClampToEdgeWrapping;
-  }
-  tex.needsUpdate = true;
-  return tex;
+function toTexture(canvas, isSRGB = true, isRepeat = false) {
+  return makeTexture(canvas, isSRGB, { wrapS: isRepeat ? THREE.RepeatWrapping : THREE.ClampToEdgeWrapping });
 }
 
 /**
@@ -139,7 +119,7 @@ export function getLogBarkTextures() {
   const { canvas: albC, ctx: alb, width: W, height: H } = createCanvas(2048, 2048);
   const { canvas: rghC, ctx: rgh } = createCanvas(2048, 2048);
   const { canvas: metC, ctx: met } = createCanvas(2048, 2048);
-  const { canvas: bmpC, ctx: bmp } = createCanvas(2048, 2048);
+  const { canvas: bmpC, ctx: bmp } = createBumpCanvas(2048, 2048);
 
   // Base deep bark gradient
   const baseGrad = alb.createLinearGradient(0, 0, W, 0);
@@ -287,7 +267,7 @@ export function getLogEndTextures() {
   const { canvas: albC, ctx: alb, width: W, height: H } = createCanvas(2048, 2048);
   const { canvas: rghC, ctx: rgh } = createCanvas(2048, 2048);
   const { canvas: metC, ctx: met } = createCanvas(2048, 2048);
-  const { canvas: bmpC, ctx: bmp } = createCanvas(2048, 2048);
+  const { canvas: bmpC, ctx: bmp } = createBumpCanvas(2048, 2048);
 
   const cx = W / 2;
   const cy = H / 2;
@@ -474,7 +454,7 @@ export function getMilledTimberTextures() {
   const { canvas: albC, ctx: alb, width: W, height: H } = createCanvas(2048, 2048);
   const { canvas: rghC, ctx: rgh } = createCanvas(2048, 2048);
   const { canvas: metC, ctx: met } = createCanvas(2048, 2048);
-  const { canvas: bmpC, ctx: bmp } = createCanvas(2048, 2048);
+  const { canvas: bmpC, ctx: bmp } = createBumpCanvas(2048, 2048);
 
   const numPlanks = 8;
   const plankH = H / numPlanks;
@@ -598,7 +578,7 @@ export function getRoofShingleTextures() {
   const { canvas: albC, ctx: alb, width: W, height: H } = createCanvas(2048, 2048);
   const { canvas: rghC, ctx: rgh } = createCanvas(2048, 2048);
   const { canvas: metC, ctx: met } = createCanvas(2048, 2048);
-  const { canvas: bmpC, ctx: bmp } = createCanvas(2048, 2048);
+  const { canvas: bmpC, ctx: bmp } = createBumpCanvas(2048, 2048);
 
   const numTiers = 8;
   const tierH = H / numTiers;
@@ -702,7 +682,7 @@ export function getSawBladeTextures() {
   const { canvas: albC, ctx: alb, width: W, height: H } = createCanvas(2048, 2048);
   const { canvas: rghC, ctx: rgh } = createCanvas(2048, 2048);
   const { canvas: metC, ctx: met } = createCanvas(2048, 2048);
-  const { canvas: bmpC, ctx: bmp } = createCanvas(2048, 2048);
+  const { canvas: bmpC, ctx: bmp } = createBumpCanvas(2048, 2048);
 
   const cx = W / 2;
   const cy = H / 2;
@@ -875,7 +855,7 @@ export function getAxeAndToolsTextures() {
   const { canvas: albC, ctx: alb, width: W, height: H } = createCanvas(2048, 2048);
   const { canvas: rghC, ctx: rgh } = createCanvas(2048, 2048);
   const { canvas: metC, ctx: met } = createCanvas(2048, 2048);
-  const { canvas: bmpC, ctx: bmp } = createCanvas(2048, 2048);
+  const { canvas: bmpC, ctx: bmp } = createBumpCanvas(2048, 2048);
 
   // Background clear
   alb.fillStyle = '#1e293b';
@@ -1033,7 +1013,7 @@ export function getSawdustTextures() {
   const { canvas: albC, ctx: alb, width: W, height: H } = createCanvas(2048, 2048);
   const { canvas: rghC, ctx: rgh } = createCanvas(2048, 2048);
   const { canvas: metC, ctx: met } = createCanvas(2048, 2048);
-  const { canvas: bmpC, ctx: bmp } = createCanvas(2048, 2048);
+  const { canvas: bmpC, ctx: bmp } = createBumpCanvas(2048, 2048);
 
   // Base golden sawdust gradient
   const dustGrad = alb.createRadialGradient(W / 2, H / 2, 50, W / 2, H / 2, W * 0.5);

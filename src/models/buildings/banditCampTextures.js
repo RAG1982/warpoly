@@ -1,4 +1,5 @@
 import * as THREE from 'three';
+import { createScaledCanvas as createCanvas, createBumpCanvas, toTexture as makeTexture } from '../textureQuality.js';
 
 /**
  * Procedural Hand-Painted Stylized PBR Texture Generator for the Bandit Camp
@@ -13,24 +14,8 @@ import * as THREE from 'three';
 
 const textureCache = new Map();
 
-function createCanvas(width = 2048, height = 2048) {
-  const canvas = document.createElement('canvas');
-  canvas.width = width;
-  canvas.height = height;
-  const ctx = canvas.getContext('2d', { willReadFrequently: false });
-  return { canvas, ctx, width, height };
-}
-
-function toTexture(canvas, isSRGB = true, wrapRepeat = false) {
-  const tex = new THREE.CanvasTexture(canvas);
-  tex.colorSpace = isSRGB ? THREE.SRGBColorSpace : THREE.NoColorSpace;
-  tex.generateMipmaps = true;
-  tex.minFilter = THREE.LinearMipmapLinearFilter;
-  tex.magFilter = THREE.LinearFilter;
-  tex.wrapS = wrapRepeat ? THREE.RepeatWrapping : THREE.ClampToEdgeWrapping;
-  tex.wrapT = wrapRepeat ? THREE.RepeatWrapping : THREE.ClampToEdgeWrapping;
-  tex.needsUpdate = true;
-  return tex;
+function toTexture(canvas, isSRGB = true, isRepeat = false) {
+  return makeTexture(canvas, isSRGB, { wrapS: isRepeat ? THREE.RepeatWrapping : THREE.ClampToEdgeWrapping });
 }
 
 /**
@@ -314,7 +299,7 @@ export function getCrimsonWarCanvasTextures() {
   const { canvas: albedo, ctx, width, height } = createCanvas(2048, 2048);
   const { canvas: rough, ctx: rCtx } = createCanvas(2048, 2048);
   const { canvas: metal, ctx: mCtx } = createCanvas(2048, 2048);
-  const { canvas: bump, ctx: bCtx } = createCanvas(2048, 2048);
+  const { canvas: bump, ctx: bCtx } = createBumpCanvas(2048, 2048);
 
   // --- Base Canvas Fill: Deep Weathered War Crimson ---
   const baseGrad = ctx.createLinearGradient(0, 0, 0, height);
@@ -544,7 +529,7 @@ export function getPalisadeStakeTextures() {
   const { canvas: albedo, ctx, width, height } = createCanvas(2048, 2048);
   const { canvas: rough, ctx: rCtx } = createCanvas(2048, 2048);
   const { canvas: metal, ctx: mCtx } = createCanvas(2048, 2048);
-  const { canvas: bump, ctx: bCtx } = createCanvas(2048, 2048);
+  const { canvas: bump, ctx: bCtx } = createBumpCanvas(2048, 2048);
 
   // --- Base Rough Bark Fill ---
   const barkBase = ctx.createLinearGradient(0, 0, width, 0);
@@ -750,7 +735,7 @@ export function getCampfireTextures() {
   const { canvas: albedo, ctx, width, height } = createCanvas(2048, 2048);
   const { canvas: rough, ctx: rCtx } = createCanvas(2048, 2048);
   const { canvas: metal, ctx: mCtx } = createCanvas(2048, 2048);
-  const { canvas: bump, ctx: bCtx } = createCanvas(2048, 2048);
+  const { canvas: bump, ctx: bCtx } = createBumpCanvas(2048, 2048);
   const { canvas: emissive, ctx: eCtx } = createCanvas(2048, 2048);
 
   const cx = width / 2;
@@ -900,7 +885,7 @@ export function getLootAndSkullsTextures() {
   const { canvas: albedo, ctx, width, height } = createCanvas(2048, 2048);
   const { canvas: rough, ctx: rCtx } = createCanvas(2048, 2048);
   const { canvas: metal, ctx: mCtx } = createCanvas(2048, 2048);
-  const { canvas: bump, ctx: bCtx } = createCanvas(2048, 2048);
+  const { canvas: bump, ctx: bCtx } = createBumpCanvas(2048, 2048);
 
   // Background neutral fill
   ctx.fillStyle = '#1e293b';

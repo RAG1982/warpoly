@@ -1,4 +1,5 @@
 import * as THREE from 'three';
+import { createScaledCanvas as createCanvas, createBumpCanvas, toTexture as makeTexture } from '../textureQuality.js';
 
 /**
  * Procedural Hand-Painted Stylized PBR Texture Generator for the Bandit Raider (Bandido)
@@ -19,24 +20,8 @@ import * as THREE from 'three';
 
 const textureCache = new Map();
 
-function createCanvas(width = 2048, height = 2048) {
-  const canvas = document.createElement('canvas');
-  canvas.width = width;
-  canvas.height = height;
-  const ctx = canvas.getContext('2d', { willReadFrequently: false });
-  return { canvas, ctx, width, height };
-}
-
 function toTexture(canvas, isSRGB = true) {
-  const tex = new THREE.CanvasTexture(canvas);
-  tex.colorSpace = isSRGB ? THREE.SRGBColorSpace : THREE.NoColorSpace;
-  tex.generateMipmaps = true;
-  tex.minFilter = THREE.LinearMipmapLinearFilter;
-  tex.magFilter = THREE.LinearFilter;
-  tex.wrapS = THREE.ClampToEdgeWrapping;
-  tex.wrapT = THREE.ClampToEdgeWrapping;
-  tex.needsUpdate = true;
-  return tex;
+  return makeTexture(canvas, isSRGB, { wrapS: THREE.ClampToEdgeWrapping });
 }
 
 /**
@@ -334,7 +319,7 @@ export function getBanditFaceTextures() {
   const { canvas: albC, ctx: alb, width: W, height: H } = createCanvas(2048, 2048);
   const { canvas: rghC, ctx: rgh } = createCanvas(2048, 2048);
   const { canvas: metC, ctx: met } = createCanvas(2048, 2048);
-  const { canvas: bmpC, ctx: bmp } = createCanvas(2048, 2048);
+  const { canvas: bmpC, ctx: bmp } = createBumpCanvas(2048, 2048);
   const { canvas: emiC, ctx: emi } = createCanvas(2048, 2048);
 
   // Background tanned skin with ambient vignette
@@ -587,7 +572,7 @@ export function getBanditHelmetTextures() {
   const { canvas: albC, ctx: alb, width: W, height: H } = createCanvas(2048, 2048);
   const { canvas: rghC, ctx: rgh } = createCanvas(2048, 2048);
   const { canvas: metC, ctx: met } = createCanvas(2048, 2048);
-  const { canvas: bmpC, ctx: bmp } = createCanvas(2048, 2048);
+  const { canvas: bmpC, ctx: bmp } = createBumpCanvas(2048, 2048);
 
   // Dark Forged Iron Base
   const helmGrad = alb.createLinearGradient(0, 0, 0, H);
@@ -692,7 +677,7 @@ export function getBanditHornTextures() {
   const { canvas: albC, ctx: alb, width: W, height: H } = createCanvas(2048, 2048);
   const { canvas: rghC, ctx: rgh } = createCanvas(2048, 2048);
   const { canvas: metC, ctx: met } = createCanvas(2048, 2048);
-  const { canvas: bmpC, ctx: bmp } = createCanvas(2048, 2048);
+  const { canvas: bmpC, ctx: bmp } = createBumpCanvas(2048, 2048);
 
   const hornGrad = alb.createLinearGradient(0, H, 0, 0);
   hornGrad.addColorStop(0.0, '#4a331e');
@@ -787,7 +772,7 @@ export function getBanditBrigandineTextures() {
   const { canvas: albC, ctx: alb, width: W, height: H } = createCanvas(2048, 2048);
   const { canvas: rghC, ctx: rgh } = createCanvas(2048, 2048);
   const { canvas: metC, ctx: met } = createCanvas(2048, 2048);
-  const { canvas: bmpC, ctx: bmp } = createCanvas(2048, 2048);
+  const { canvas: bmpC, ctx: bmp } = createBumpCanvas(2048, 2048);
 
   // Dark weathered leather base
   const cuirassGrad = alb.createLinearGradient(0, 0, 0, H);
@@ -916,7 +901,7 @@ export function getBanditRaggedClothTextures() {
   const { canvas: albC, ctx: alb, width: W, height: H } = createCanvas(2048, 2048);
   const { canvas: rghC, ctx: rgh } = createCanvas(2048, 2048);
   const { canvas: metC, ctx: met } = createCanvas(2048, 2048);
-  const { canvas: bmpC, ctx: bmp } = createCanvas(2048, 2048);
+  const { canvas: bmpC, ctx: bmp } = createBumpCanvas(2048, 2048);
 
   const clothGrad = alb.createLinearGradient(0, 0, 0, H);
   clothGrad.addColorStop(0.0, '#991b1b');
@@ -996,7 +981,7 @@ export function getBanditArmsPauldronTextures() {
   const { canvas: albC, ctx: alb, width: W, height: H } = createCanvas(2048, 2048);
   const { canvas: rghC, ctx: rgh } = createCanvas(2048, 2048);
   const { canvas: metC, ctx: met } = createCanvas(2048, 2048);
-  const { canvas: bmpC, ctx: bmp } = createCanvas(2048, 2048);
+  const { canvas: bmpC, ctx: bmp } = createBumpCanvas(2048, 2048);
 
   const pauldronGrad = alb.createLinearGradient(0, 0, 0, H);
   pauldronGrad.addColorStop(0.0, '#3f4958');
@@ -1073,7 +1058,7 @@ export function getBanditLegsBootsTextures() {
   const { canvas: albC, ctx: alb, width: W, height: H } = createCanvas(2048, 2048);
   const { canvas: rghC, ctx: rgh } = createCanvas(2048, 2048);
   const { canvas: metC, ctx: met } = createCanvas(2048, 2048);
-  const { canvas: bmpC, ctx: bmp } = createCanvas(2048, 2048);
+  const { canvas: bmpC, ctx: bmp } = createBumpCanvas(2048, 2048);
 
   const trouserGrad = alb.createLinearGradient(0, 0, 0, H);
   trouserGrad.addColorStop(0.0, '#312b27');
@@ -1140,7 +1125,7 @@ export function getBanditFurTextures() {
   const { canvas: albC, ctx: alb, width: W, height: H } = createCanvas(2048, 2048);
   const { canvas: rghC, ctx: rgh } = createCanvas(2048, 2048);
   const { canvas: metC, ctx: met } = createCanvas(2048, 2048);
-  const { canvas: bmpC, ctx: bmp } = createCanvas(2048, 2048);
+  const { canvas: bmpC, ctx: bmp } = createBumpCanvas(2048, 2048);
 
   const fGrad = alb.createLinearGradient(0, 0, 0, H);
   fGrad.addColorStop(0.0, '#36281e');
@@ -1218,7 +1203,7 @@ export function getBanditWeaponTextures() {
   const { canvas: albC, ctx: alb, width: W, height: H } = createCanvas(2048, 2048);
   const { canvas: rghC, ctx: rgh } = createCanvas(2048, 2048);
   const { canvas: metC, ctx: met } = createCanvas(2048, 2048);
-  const { canvas: bmpC, ctx: bmp } = createCanvas(2048, 2048);
+  const { canvas: bmpC, ctx: bmp } = createBumpCanvas(2048, 2048);
   const { canvas: emiC, ctx: emi } = createCanvas(2048, 2048);
 
   const maceGrad = alb.createLinearGradient(0, 0, 0, H * 0.45);

@@ -1,4 +1,4 @@
-import * as THREE from 'three';
+import { createScaledCanvas as createCanvas, createBumpCanvas, toTexture } from '../textureQuality.js';
 
 /**
  * Procedural Hand-Painted Stylized PBR Texture Generator for the Orc Pig Farm (Fazenda de Porcos / Chiqueiro)
@@ -12,25 +12,7 @@ import * as THREE from 'three';
 
 const textureCache = new Map();
 
-function createCanvas(width = 2048, height = 2048) {
-  const canvas = document.createElement('canvas');
-  canvas.width = width;
-  canvas.height = height;
-  const ctx = canvas.getContext('2d', { willReadFrequently: false });
-  return { canvas, ctx, width, height };
-}
 
-function toTexture(canvas, isSRGB = true) {
-  const tex = new THREE.CanvasTexture(canvas);
-  tex.colorSpace = isSRGB ? THREE.SRGBColorSpace : THREE.NoColorSpace;
-  tex.generateMipmaps = true;
-  tex.minFilter = THREE.LinearMipmapLinearFilter;
-  tex.magFilter = THREE.LinearFilter;
-  tex.wrapS = THREE.RepeatWrapping;
-  tex.wrapT = THREE.RepeatWrapping;
-  tex.needsUpdate = true;
-  return tex;
-}
 
 // 1. MUD & STRAW
 export function getPigFarmMudTextures() {
@@ -72,7 +54,7 @@ export function getPigFarmMudTextures() {
   rough.ctx.fillStyle = '#999999';
   rough.ctx.fillRect(0, 0, 2048, 2048);
 
-  const bump = createCanvas(2048, 2048);
+  const bump = createBumpCanvas(2048, 2048);
   bump.ctx.fillStyle = '#808080';
   bump.ctx.fillRect(0, 0, 2048, 2048);
   bump.ctx.drawImage(albedo.canvas, 0, 0);
@@ -116,7 +98,7 @@ export function getPigSkinTextures() {
   rough.ctx.fillStyle = '#7a7a7a';
   rough.ctx.fillRect(0, 0, 2048, 2048);
 
-  const bump = createCanvas(2048, 2048);
+  const bump = createBumpCanvas(2048, 2048);
   bump.ctx.fillStyle = '#808080';
   bump.ctx.fillRect(0, 0, 2048, 2048);
   bump.ctx.drawImage(albedo.canvas, 0, 0);

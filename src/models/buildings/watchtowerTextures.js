@@ -1,4 +1,5 @@
 import * as THREE from 'three';
+import { createScaledCanvas as createCanvas, createBumpCanvas, toTexture as makeTexture } from '../textureQuality.js';
 
 /**
  * Procedural Hand-Painted Stylized PBR Texture Generator for the Watchtower (Torre de Vigia)
@@ -32,24 +33,8 @@ import * as THREE from 'three';
 const textureCache = new Map();
 const materialCache = new Map();
 
-function createCanvas(width = 2048, height = 2048) {
-  const canvas = document.createElement('canvas');
-  canvas.width = width;
-  canvas.height = height;
-  const ctx = canvas.getContext('2d', { willReadFrequently: false });
-  return { canvas, ctx, width, height };
-}
-
 function toTexture(canvas, isSRGB = true, wrapS = THREE.RepeatWrapping, wrapT = THREE.RepeatWrapping) {
-  const tex = new THREE.CanvasTexture(canvas);
-  tex.colorSpace = isSRGB ? THREE.SRGBColorSpace : THREE.NoColorSpace;
-  tex.generateMipmaps = true;
-  tex.minFilter = THREE.LinearMipmapLinearFilter;
-  tex.magFilter = THREE.LinearFilter;
-  tex.wrapS = wrapS;
-  tex.wrapT = wrapT;
-  tex.needsUpdate = true;
-  return tex;
+  return makeTexture(canvas, isSRGB, { wrapS, wrapT });
 }
 
 /**
@@ -276,7 +261,7 @@ export function getWatchtowerStoneTextures() {
   const { canvas: albC, ctx: alb, width: W, height: H } = createCanvas(2048, 2048);
   const { canvas: rghC, ctx: rgh } = createCanvas(2048, 2048);
   const { canvas: metC, ctx: met } = createCanvas(2048, 2048);
-  const { canvas: bmpC, ctx: bmp } = createCanvas(2048, 2048);
+  const { canvas: bmpC, ctx: bmp } = createBumpCanvas(2048, 2048);
 
   // Deep stone background / mortar base
   const bgGrad = alb.createLinearGradient(0, 0, 0, H);
@@ -584,7 +569,7 @@ export function getWatchtowerTimberTextures() {
   const { canvas: albC, ctx: alb, width: W, height: H } = createCanvas(2048, 2048);
   const { canvas: rghC, ctx: rgh } = createCanvas(2048, 2048);
   const { canvas: metC, ctx: met } = createCanvas(2048, 2048);
-  const { canvas: bmpC, ctx: bmp } = createCanvas(2048, 2048);
+  const { canvas: bmpC, ctx: bmp } = createBumpCanvas(2048, 2048);
 
   // Background deep aged oak wood
   const woodBaseGrad = alb.createLinearGradient(0, 0, W, 0);
@@ -785,7 +770,7 @@ export function getWatchtowerRoofTextures() {
   const { canvas: albC, ctx: alb, width: W, height: H } = createCanvas(2048, 2048);
   const { canvas: rghC, ctx: rgh } = createCanvas(2048, 2048);
   const { canvas: metC, ctx: met } = createCanvas(2048, 2048);
-  const { canvas: bmpC, ctx: bmp } = createCanvas(2048, 2048);
+  const { canvas: bmpC, ctx: bmp } = createBumpCanvas(2048, 2048);
 
   // Deep midnight sapphire base
   const roofBg = alb.createLinearGradient(0, 0, 0, H);

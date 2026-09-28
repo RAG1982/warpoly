@@ -1,4 +1,9 @@
 import * as THREE from 'three';
+import { createScaledCanvas, toTexture } from '../textureQuality.js';
+
+// O terreno é uma única textura que cobre o mapa inteiro: resolução maior que a
+// dos modelos (2× o lado do preset, mínimo 1024, máximo 2048).
+const TERRAIN_CANVAS_OPTIONS = { sideMultiplier: 2, minSide: 1024, maxSide: 2048 };
 
 const textureCache = new Map();
 
@@ -29,10 +34,7 @@ export function getTerrainTextures(landmarks = null, worldSize = 140) {
   }
 
   // --- 1. ALBEDO CANVAS ---
-  const albedoCanvas = document.createElement('canvas');
-  albedoCanvas.width = width;
-  albedoCanvas.height = height;
-  const ctx = albedoCanvas.getContext('2d');
+  const { canvas: albedoCanvas, ctx } = createScaledCanvas(width, height, TERRAIN_CANVAS_OPTIONS);
 
   // Background: Deep Submerged Ocean/Coast Floor
   ctx.fillStyle = '#edd7a6';
@@ -174,10 +176,7 @@ export function getTerrainTextures(landmarks = null, worldSize = 140) {
   drawSoilPatch(-32, 30, 6.0); // Great Hall
 
   // --- 2. ROUGHNESS CANVAS ---
-  const roughCanvas = document.createElement('canvas');
-  roughCanvas.width = width;
-  roughCanvas.height = height;
-  const rCtx = roughCanvas.getContext('2d');
+  const { canvas: roughCanvas, ctx: rCtx } = createScaledCanvas(width, height, TERRAIN_CANVAS_OPTIONS);
 
   // Base grass roughness (~0.85 -> #d9d9d9)
   rCtx.fillStyle = '#d9d9d9';
@@ -218,39 +217,18 @@ export function getTerrainTextures(landmarks = null, worldSize = 140) {
     rCtx.fill();
   });
 
-  // --- 3. BUMP / HEIGHT CANVAS ---
-  const bumpCanvas = document.createElement('canvas');
-  bumpCanvas.width = width;
-  bumpCanvas.height = height;
-  const bCtx = bumpCanvas.getContext('2d');
-
-  // Uniform smooth matte terrain bump
-  bCtx.fillStyle = '#808080';
-  bCtx.fillRect(0, 0, width, height);
+  // --- 3. BUMP ---
+  // O bump antigo era um canvas 2048² uniforme (#808080): gradiente zero, ou seja,
+  // nenhum efeito no sombreamento. Removido em todas as qualidades (−21 MB de VRAM).
 
   // Convert canvases to Three.js textures
-  const mapTex = new THREE.CanvasTexture(albedoCanvas);
-  mapTex.colorSpace = THREE.SRGBColorSpace;
-  mapTex.generateMipmaps = true;
-  mapTex.wrapS = THREE.ClampToEdgeWrapping;
-  mapTex.wrapT = THREE.ClampToEdgeWrapping;
-  mapTex.minFilter = THREE.LinearMipmapLinearFilter;
-  mapTex.magFilter = THREE.LinearFilter;
-
-  const roughTex = new THREE.CanvasTexture(roughCanvas);
-  roughTex.wrapS = THREE.ClampToEdgeWrapping;
-  roughTex.wrapT = THREE.ClampToEdgeWrapping;
-  roughTex.minFilter = THREE.LinearMipmapLinearFilter;
-
-  const bumpTex = new THREE.CanvasTexture(bumpCanvas);
-  bumpTex.wrapS = THREE.ClampToEdgeWrapping;
-  bumpTex.wrapT = THREE.ClampToEdgeWrapping;
-  bumpTex.minFilter = THREE.LinearMipmapLinearFilter;
+  const mapTex = toTexture(albedoCanvas, true, { wrapS: THREE.ClampToEdgeWrapping });
+  const roughTex = toTexture(roughCanvas, false, { wrapS: THREE.ClampToEdgeWrapping });
 
   const result = {
     map: mapTex,
     roughnessMap: roughTex,
-    bumpMap: bumpTex
+    bumpMap: null
   };
 
   textureCache.set(cacheKey, result);

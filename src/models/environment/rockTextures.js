@@ -1,4 +1,5 @@
 import * as THREE from 'three';
+import { createScaledCanvas as createCanvas, createBumpCanvas, toTexture as makeTexture } from '../textureQuality.js';
 
 /**
  * Procedural Hand-Painted Stylized PBR Texture Generator for Rocks & Stones
@@ -13,24 +14,8 @@ import * as THREE from 'three';
 
 const textureCache = new Map();
 
-function createCanvas(width = 2048, height = 2048) {
-  const canvas = document.createElement('canvas');
-  canvas.width = width;
-  canvas.height = height;
-  const ctx = canvas.getContext('2d', { willReadFrequently: false });
-  return { canvas, ctx, width, height };
-}
-
 function toTexture(canvas, isSRGB = true, isRepeat = true) {
-  const tex = new THREE.CanvasTexture(canvas);
-  tex.colorSpace = isSRGB ? THREE.SRGBColorSpace : THREE.NoColorSpace;
-  tex.generateMipmaps = true;
-  tex.minFilter = THREE.LinearMipmapLinearFilter;
-  tex.magFilter = THREE.LinearFilter;
-  tex.wrapS = isRepeat ? THREE.RepeatWrapping : THREE.ClampToEdgeWrapping;
-  tex.wrapT = isRepeat ? THREE.RepeatWrapping : THREE.ClampToEdgeWrapping;
-  tex.needsUpdate = true;
-  return tex;
+  return makeTexture(canvas, isSRGB, { wrapS: isRepeat ? THREE.RepeatWrapping : THREE.ClampToEdgeWrapping });
 }
 
 /* ==========================================================================
@@ -44,7 +29,7 @@ export function getGraniteBoulderTextures() {
   const { canvas: albC, ctx: alb, width: W, height: H } = createCanvas(2048, 2048);
   const { canvas: rghC, ctx: rgh } = createCanvas(2048, 2048);
   const { canvas: metC, ctx: met } = createCanvas(2048, 2048);
-  const { canvas: bmpC, ctx: bmp } = createCanvas(2048, 2048);
+  const { canvas: bmpC, ctx: bmp } = createBumpCanvas(2048, 2048);
 
   // --- 1. Albedo: Base Geological Granite Foundation ---
   const baseGrad = alb.createLinearGradient(0, 0, 0, H);
@@ -489,7 +474,7 @@ export function getRiverPebbleTextures() {
   const { canvas: albC, ctx: alb, width: W, height: H } = createCanvas(2048, 2048);
   const { canvas: rghC, ctx: rgh } = createCanvas(2048, 2048);
   const { canvas: metC, ctx: met } = createCanvas(2048, 2048);
-  const { canvas: bmpC, ctx: bmp } = createCanvas(2048, 2048);
+  const { canvas: bmpC, ctx: bmp } = createBumpCanvas(2048, 2048);
 
   // --- 1. Albedo: Water-Tumbled Silt & Multi-Hued River Stone Palette ---
   // Silky water-worn stone gradient

@@ -1,4 +1,5 @@
 import * as THREE from 'three';
+import { createScaledCanvas as createCanvas, createBumpCanvas, toTexture as makeTexture } from '../textureQuality.js';
 
 /**
  * Procedural Hand-Painted Stylized PBR Texture Generator for the Cottage
@@ -16,30 +17,11 @@ import * as THREE from 'three';
 
 const textureCache = new Map();
 
-function createCanvas(width = 2048, height = 2048) {
-  const canvas = document.createElement('canvas');
-  canvas.width = width;
-  canvas.height = height;
-  const ctx = canvas.getContext('2d', { willReadFrequently: false });
-  return { canvas, ctx, width, height };
-}
-
 function toTexture(canvas, isSRGB = true, repeatX = 1, repeatY = 1) {
-  const tex = new THREE.CanvasTexture(canvas);
-  tex.colorSpace = isSRGB ? THREE.SRGBColorSpace : THREE.NoColorSpace;
-  tex.generateMipmaps = true;
-  tex.minFilter = THREE.LinearMipmapLinearFilter;
-  tex.magFilter = THREE.LinearFilter;
   if (repeatX > 1 || repeatY > 1) {
-    tex.wrapS = THREE.RepeatWrapping;
-    tex.wrapT = THREE.RepeatWrapping;
-    tex.repeat.set(repeatX, repeatY);
-  } else {
-    tex.wrapS = THREE.ClampToEdgeWrapping;
-    tex.wrapT = THREE.ClampToEdgeWrapping;
+    return makeTexture(canvas, isSRGB, { wrapS: THREE.RepeatWrapping, repeatX, repeatY });
   }
-  tex.needsUpdate = true;
-  return tex;
+  return makeTexture(canvas, isSRGB, { wrapS: THREE.ClampToEdgeWrapping });
 }
 
 /**
@@ -128,7 +110,7 @@ export function getCottageTimberPlasterTextures() {
   const { canvas: albC, ctx: alb, width: W, height: H } = createCanvas(2048, 2048);
   const { canvas: rghC, ctx: rgh } = createCanvas(2048, 2048);
   const { canvas: metC, ctx: met } = createCanvas(2048, 2048);
-  const { canvas: bmpC, ctx: bmp } = createCanvas(2048, 2048);
+  const { canvas: bmpC, ctx: bmp } = createBumpCanvas(2048, 2048);
 
   // --- Base Plaster / Rustic Stucco ---
   // Warm ochre / cream plaster gradient
@@ -380,7 +362,7 @@ export function getCottageFoundationTextures() {
   const { canvas: albC, ctx: alb, width: W, height: H } = createCanvas(2048, 2048);
   const { canvas: rghC, ctx: rgh } = createCanvas(2048, 2048);
   const { canvas: metC, ctx: met } = createCanvas(2048, 2048);
-  const { canvas: bmpC, ctx: bmp } = createCanvas(2048, 2048);
+  const { canvas: bmpC, ctx: bmp } = createBumpCanvas(2048, 2048);
 
   // Dark charcoal/slate mortar background
   const mortarGrad = alb.createLinearGradient(0, 0, 0, H);
@@ -547,7 +529,7 @@ export function getCottageRoofTextures() {
   const { canvas: albC, ctx: alb, width: W, height: H } = createCanvas(2048, 2048);
   const { canvas: rghC, ctx: rgh } = createCanvas(2048, 2048);
   const { canvas: metC, ctx: met } = createCanvas(2048, 2048);
-  const { canvas: bmpC, ctx: bmp } = createCanvas(2048, 2048);
+  const { canvas: bmpC, ctx: bmp } = createBumpCanvas(2048, 2048);
 
   // Background deep midnight blue base
   const bgGrad = alb.createLinearGradient(0, 0, 0, H);
@@ -733,7 +715,7 @@ export function getCottageDoorTextures() {
   const { canvas: albC, ctx: alb, width: W, height: H } = createCanvas(2048, 2048);
   const { canvas: rghC, ctx: rgh } = createCanvas(2048, 2048);
   const { canvas: metC, ctx: met } = createCanvas(2048, 2048);
-  const { canvas: bmpC, ctx: bmp } = createCanvas(2048, 2048);
+  const { canvas: bmpC, ctx: bmp } = createBumpCanvas(2048, 2048);
 
   // Outer carved timber doorframe
   const frameGrad = alb.createLinearGradient(0, 0, W, 0);
@@ -953,7 +935,7 @@ export function getCottageWindowTextures() {
   const { canvas: albC, ctx: alb, width: W, height: H } = createCanvas(2048, 2048);
   const { canvas: rghC, ctx: rgh } = createCanvas(2048, 2048);
   const { canvas: metC, ctx: met } = createCanvas(2048, 2048);
-  const { canvas: bmpC, ctx: bmp } = createCanvas(2048, 2048);
+  const { canvas: bmpC, ctx: bmp } = createBumpCanvas(2048, 2048);
   const { canvas: emiC, ctx: emi } = createCanvas(2048, 2048);
 
   // Outer carved wooden frame
@@ -1132,7 +1114,7 @@ export function getCottageChimneyTextures() {
   const { canvas: albC, ctx: alb, width: W, height: H } = createCanvas(2048, 2048);
   const { canvas: rghC, ctx: rgh } = createCanvas(2048, 2048);
   const { canvas: metC, ctx: met } = createCanvas(2048, 2048);
-  const { canvas: bmpC, ctx: bmp } = createCanvas(2048, 2048);
+  const { canvas: bmpC, ctx: bmp } = createBumpCanvas(2048, 2048);
 
   // Weathered lime mortar base
   const mortarGrad = alb.createLinearGradient(0, 0, 0, H);
@@ -1230,7 +1212,7 @@ export function getCottageWoodTextures() {
   const { canvas: albC, ctx: alb, width: W, height: H } = createCanvas(2048, 2048);
   const { canvas: rghC, ctx: rgh } = createCanvas(2048, 2048);
   const { canvas: metC, ctx: met } = createCanvas(2048, 2048);
-  const { canvas: bmpC, ctx: bmp } = createCanvas(2048, 2048);
+  const { canvas: bmpC, ctx: bmp } = createBumpCanvas(2048, 2048);
 
   // Left half: Hewn oak planks with wood grain (0 to W * 0.5)
   const woodGrad = alb.createLinearGradient(0, 0, 0, H);

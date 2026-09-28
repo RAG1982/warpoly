@@ -1,4 +1,5 @@
 import * as THREE from 'three';
+import { createScaledCanvas as createCanvas, createBumpCanvas, toTexture as makeTexture } from '../textureQuality.js';
 
 /**
  * Procedural Hand-Painted Stylized PBR Texture Generator for the Gold Mine (Mina de Ouro)
@@ -16,46 +17,8 @@ import * as THREE from 'three';
 const textureCache = new Map();
 const materialCache = new Map();
 
-function createCanvas(width = 2048, height = 2048) {
-  if (typeof document === 'undefined') {
-    const dummyGradient = { addColorStop: () => {} };
-    const dummyCtx = new Proxy({}, {
-      get: (target, prop) => {
-        if (prop === 'createLinearGradient' || prop === 'createRadialGradient') {
-          return () => dummyGradient;
-        }
-        return () => {};
-      }
-    });
-    return {
-      canvas: { width, height, nodeType: 1 },
-      ctx: dummyCtx,
-      width,
-      height
-    };
-  }
-  const canvas = document.createElement('canvas');
-  canvas.width = width;
-  canvas.height = height;
-  const ctx = canvas.getContext('2d', { willReadFrequently: false });
-  return { canvas, ctx, width, height };
-}
-
 function toTexture(canvas, isSRGB = true, isRepeat = true) {
-  if (typeof document === 'undefined') {
-    const tex = new THREE.Texture();
-    tex.colorSpace = isSRGB ? THREE.SRGBColorSpace : THREE.NoColorSpace;
-    return tex;
-  }
-  const tex = new THREE.CanvasTexture(canvas);
-  tex.colorSpace = isSRGB ? THREE.SRGBColorSpace : THREE.NoColorSpace;
-  tex.generateMipmaps = true;
-  tex.minFilter = THREE.LinearMipmapLinearFilter;
-  tex.magFilter = THREE.LinearFilter;
-  tex.wrapS = isRepeat ? THREE.RepeatWrapping : THREE.ClampToEdgeWrapping;
-  tex.wrapT = isRepeat ? THREE.RepeatWrapping : THREE.ClampToEdgeWrapping;
-  tex.needsUpdate = true;
-  return tex;
+  return makeTexture(canvas, isSRGB, { wrapS: isRepeat ? THREE.RepeatWrapping : THREE.ClampToEdgeWrapping });
 }
 
 // =============================================================================
@@ -240,7 +203,7 @@ export function getGoldMineRockTextures() {
   const { canvas: albC, ctx: alb, width: W, height: H } = createCanvas(2048, 2048);
   const { canvas: rghC, ctx: rgh } = createCanvas(2048, 2048);
   const { canvas: metC, ctx: met } = createCanvas(2048, 2048);
-  const { canvas: bmpC, ctx: bmp } = createCanvas(2048, 2048);
+  const { canvas: bmpC, ctx: bmp } = createBumpCanvas(2048, 2048);
 
   // 1. Base Mountain Granite Gradient
   const bgGrad = alb.createLinearGradient(0, 0, W, H);
@@ -531,7 +494,7 @@ export function getGoldMineOreTextures() {
   const { canvas: albC, ctx: alb, width: W, height: H } = createCanvas(2048, 2048);
   const { canvas: rghC, ctx: rgh } = createCanvas(2048, 2048);
   const { canvas: metC, ctx: met } = createCanvas(2048, 2048);
-  const { canvas: bmpC, ctx: bmp } = createCanvas(2048, 2048);
+  const { canvas: bmpC, ctx: bmp } = createBumpCanvas(2048, 2048);
 
   // 1. Radiant Pure Gold Base Gradient (Warm, brilliant and free of copper/brown tones)
   const oreGrad = alb.createRadialGradient(W * 0.5, H * 0.5, 100, W * 0.5, H * 0.5, 1300);
@@ -789,7 +752,7 @@ export function getGoldMineTimberTextures() {
   const { canvas: albC, ctx: alb, width: W, height: H } = createCanvas(2048, 2048);
   const { canvas: rghC, ctx: rgh } = createCanvas(2048, 2048);
   const { canvas: metC, ctx: met } = createCanvas(2048, 2048);
-  const { canvas: bmpC, ctx: bmp } = createCanvas(2048, 2048);
+  const { canvas: bmpC, ctx: bmp } = createBumpCanvas(2048, 2048);
 
   // 1. Base Dark Oak Timber Gradient
   const woodGrad = alb.createLinearGradient(0, 0, 0, H);
@@ -959,7 +922,7 @@ export function getGoldMineCartTracksTextures() {
   const { canvas: albC, ctx: alb, width: W, height: H } = createCanvas(2048, 2048);
   const { canvas: rghC, ctx: rgh } = createCanvas(2048, 2048);
   const { canvas: metC, ctx: met } = createCanvas(2048, 2048);
-  const { canvas: bmpC, ctx: bmp } = createCanvas(2048, 2048);
+  const { canvas: bmpC, ctx: bmp } = createBumpCanvas(2048, 2048);
 
   // Background
   alb.fillStyle = '#22252c';
@@ -1213,7 +1176,7 @@ export function getGoldMinePropsTextures() {
   const { canvas: albC, ctx: alb, width: W, height: H } = createCanvas(2048, 2048);
   const { canvas: rghC, ctx: rgh } = createCanvas(2048, 2048);
   const { canvas: metC, ctx: met } = createCanvas(2048, 2048);
-  const { canvas: bmpC, ctx: bmp } = createCanvas(2048, 2048);
+  const { canvas: bmpC, ctx: bmp } = createBumpCanvas(2048, 2048);
   const { canvas: emiC, ctx: emi } = createCanvas(2048, 2048);
 
   // Background

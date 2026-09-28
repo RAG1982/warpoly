@@ -1,4 +1,5 @@
 import * as THREE from 'three';
+import { createScaledCanvas as createCanvas, createBumpCanvas, toTexture as makeTexture } from '../textureQuality.js';
 
 /**
  * Procedural Hand-Painted Stylized PBR Texture Generator for Flora & Ground Foliage
@@ -15,24 +16,8 @@ import * as THREE from 'three';
 
 const textureCache = new Map();
 
-function createCanvas(width = 2048, height = 2048) {
-  const canvas = document.createElement('canvas');
-  canvas.width = width;
-  canvas.height = height;
-  const ctx = canvas.getContext('2d', { willReadFrequently: false });
-  return { canvas, ctx, width, height };
-}
-
 function toTexture(canvas, isSRGB = true, isRepeat = true) {
-  const tex = new THREE.CanvasTexture(canvas);
-  tex.colorSpace = isSRGB ? THREE.SRGBColorSpace : THREE.NoColorSpace;
-  tex.generateMipmaps = true;
-  tex.minFilter = THREE.LinearMipmapLinearFilter;
-  tex.magFilter = THREE.LinearFilter;
-  tex.wrapS = isRepeat ? THREE.RepeatWrapping : THREE.ClampToEdgeWrapping;
-  tex.wrapT = isRepeat ? THREE.RepeatWrapping : THREE.ClampToEdgeWrapping;
-  tex.needsUpdate = true;
-  return tex;
+  return makeTexture(canvas, isSRGB, { wrapS: isRepeat ? THREE.RepeatWrapping : THREE.ClampToEdgeWrapping });
 }
 
 /* ==========================================================================
@@ -44,7 +29,7 @@ export function getFlowerTextures(type = 'pink') {
 
   const { canvas: albC, ctx: alb, width: W, height: H } = createCanvas(2048, 2048);
   const { canvas: rghC, ctx: rgh } = createCanvas(2048, 2048);
-  const { canvas: bmpC, ctx: bmp } = createCanvas(2048, 2048);
+  const { canvas: bmpC, ctx: bmp } = createBumpCanvas(2048, 2048);
 
   const palettes = {
     pink: {
@@ -162,7 +147,7 @@ export function getFlowerCenterTextures() {
 
   const { canvas: albC, ctx: alb, width: W, height: H } = createCanvas(1024, 1024);
   const { canvas: rghC, ctx: rgh } = createCanvas(1024, 1024);
-  const { canvas: bmpC, ctx: bmp } = createCanvas(1024, 1024);
+  const { canvas: bmpC, ctx: bmp } = createBumpCanvas(1024, 1024);
 
   const cx = W * 0.5;
   const cy = H * 0.5;
@@ -228,7 +213,7 @@ export function getBerryBushTextures(type = 'red') {
 
   const { canvas: albC, ctx: alb, width: W, height: H } = createCanvas(2048, 2048);
   const { canvas: rghC, ctx: rgh } = createCanvas(2048, 2048);
-  const { canvas: bmpC, ctx: bmp } = createCanvas(2048, 2048);
+  const { canvas: bmpC, ctx: bmp } = createBumpCanvas(2048, 2048);
 
   // Background deep foliage gradient
   const bgGrad = alb.createRadialGradient(W * 0.5, H * 0.5, 100, W * 0.5, H * 0.5, W * 0.7);
@@ -313,7 +298,7 @@ export function getBerryTextures(type = 'red') {
 
   const { canvas: albC, ctx: alb, width: W, height: H } = createCanvas(1024, 1024);
   const { canvas: rghC, ctx: rgh } = createCanvas(1024, 1024);
-  const { canvas: bmpC, ctx: bmp } = createCanvas(1024, 1024);
+  const { canvas: bmpC, ctx: bmp } = createBumpCanvas(1024, 1024);
 
   const isRed = type === 'red';
   const pal = isRed
@@ -372,7 +357,7 @@ export function getGrassBladeTextures() {
 
   const { canvas: albC, ctx: alb, width: W, height: H } = createCanvas(2048, 2048);
   const { canvas: rghC, ctx: rgh } = createCanvas(2048, 2048);
-  const { canvas: bmpC, ctx: bmp } = createCanvas(2048, 2048);
+  const { canvas: bmpC, ctx: bmp } = createBumpCanvas(2048, 2048);
 
   // Vertical gradient from dark moist soil-green at root (bottom) to sunny lime-green at tip (top)
   const grassGrad = alb.createLinearGradient(0, H, 0, 0);
@@ -448,7 +433,7 @@ export function getMushroomTextures(type = 'amanita') {
 
   const { canvas: albC, ctx: alb, width: W, height: H } = createCanvas(2048, 2048);
   const { canvas: rghC, ctx: rgh } = createCanvas(2048, 2048);
-  const { canvas: bmpC, ctx: bmp } = createCanvas(2048, 2048);
+  const { canvas: bmpC, ctx: bmp } = createBumpCanvas(2048, 2048);
 
   const isAmanita = type === 'amanita';
   const cx = W * 0.5;
@@ -536,7 +521,7 @@ export function getMushroomStemTextures() {
 
   const { canvas: albC, ctx: alb, width: W, height: H } = createCanvas(1024, 1024);
   const { canvas: rghC, ctx: rgh } = createCanvas(1024, 1024);
-  const { canvas: bmpC, ctx: bmp } = createCanvas(1024, 1024);
+  const { canvas: bmpC, ctx: bmp } = createBumpCanvas(1024, 1024);
 
   // Vertical fibrous stipe gradient
   const stemGrad = alb.createLinearGradient(0, 0, 0, H);
@@ -583,7 +568,7 @@ export function getMushroomGillsTextures() {
 
   const { canvas: albC, ctx: alb, width: W, height: H } = createCanvas(1024, 1024);
   const { canvas: rghC, ctx: rgh } = createCanvas(1024, 1024);
-  const { canvas: bmpC, ctx: bmp } = createCanvas(1024, 1024);
+  const { canvas: bmpC, ctx: bmp } = createBumpCanvas(1024, 1024);
 
   const cx = W * 0.5;
   const cy = H * 0.5;
@@ -652,7 +637,7 @@ export function getStumpBarkTextures() {
 
   const { canvas: albC, ctx: alb, width: W, height: H } = createCanvas(2048, 2048);
   const { canvas: rghC, ctx: rgh } = createCanvas(2048, 2048);
-  const { canvas: bmpC, ctx: bmp } = createCanvas(2048, 2048);
+  const { canvas: bmpC, ctx: bmp } = createBumpCanvas(2048, 2048);
 
   // Weathered vertical cork oak bark
   const barkGrad = alb.createLinearGradient(0, 0, 0, H);
@@ -714,7 +699,7 @@ export function getStumpTopTextures() {
 
   const { canvas: albC, ctx: alb, width: W, height: H } = createCanvas(2048, 2048);
   const { canvas: rghC, ctx: rgh } = createCanvas(2048, 2048);
-  const { canvas: bmpC, ctx: bmp } = createCanvas(2048, 2048);
+  const { canvas: bmpC, ctx: bmp } = createBumpCanvas(2048, 2048);
 
   const cx = W * 0.5;
   const cy = H * 0.5;
@@ -809,7 +794,7 @@ export function getWaterLilyTextures() {
 
   const { canvas: albC, ctx: alb, width: W, height: H } = createCanvas(2048, 2048);
   const { canvas: rghC, ctx: rgh } = createCanvas(2048, 2048);
-  const { canvas: bmpC, ctx: bmp } = createCanvas(2048, 2048);
+  const { canvas: bmpC, ctx: bmp } = createBumpCanvas(2048, 2048);
 
   const cx = W * 0.5;
   const cy = H * 0.5;
@@ -910,7 +895,7 @@ export function getLotusTextures() {
 
   const { canvas: albC, ctx: alb, width: W, height: H } = createCanvas(2048, 2048);
   const { canvas: rghC, ctx: rgh } = createCanvas(2048, 2048);
-  const { canvas: bmpC, ctx: bmp } = createCanvas(2048, 2048);
+  const { canvas: bmpC, ctx: bmp } = createBumpCanvas(2048, 2048);
 
   // Radiant lotus petals: pristine white tip to vibrant lotus pink/magenta base
   const petalGrad = alb.createLinearGradient(0, H, 0, 0);

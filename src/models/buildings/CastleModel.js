@@ -57,11 +57,14 @@ export function createCastle() {
     rMap.wrapT = THREE.RepeatWrapping;
     rMap.needsUpdate = true;
 
-    const bMap = base.bumpMap.clone();
-    bMap.repeat.set(repeatX, repeatY);
-    bMap.wrapS = THREE.RepeatWrapping;
-    bMap.wrapT = THREE.RepeatWrapping;
-    bMap.needsUpdate = true;
+    // bumpMap é null na qualidade de textura 'low' (F1-01)
+    const bMap = base.bumpMap ? base.bumpMap.clone() : null;
+    if (bMap) {
+      bMap.repeat.set(repeatX, repeatY);
+      bMap.wrapS = THREE.RepeatWrapping;
+      bMap.wrapT = THREE.RepeatWrapping;
+      bMap.needsUpdate = true;
+    }
 
     return new THREE.MeshStandardMaterial({
       map,
@@ -89,11 +92,14 @@ export function createCastle() {
     rMap.wrapT = THREE.RepeatWrapping;
     rMap.needsUpdate = true;
 
-    const bMap = base.bumpMap.clone();
-    bMap.repeat.set(repeatX, repeatY);
-    bMap.wrapS = THREE.RepeatWrapping;
-    bMap.wrapT = THREE.RepeatWrapping;
-    bMap.needsUpdate = true;
+    // bumpMap é null na qualidade de textura 'low' (F1-01)
+    const bMap = base.bumpMap ? base.bumpMap.clone() : null;
+    if (bMap) {
+      bMap.repeat.set(repeatX, repeatY);
+      bMap.wrapS = THREE.RepeatWrapping;
+      bMap.wrapT = THREE.RepeatWrapping;
+      bMap.needsUpdate = true;
+    }
 
     return new THREE.MeshStandardMaterial({
       map,

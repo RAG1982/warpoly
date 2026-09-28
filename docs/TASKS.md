@@ -52,7 +52,7 @@ Opus escreve a spec em `docs/specs/<ID>.md`; agente **Sonnet** executa; Opus rev
 
 | Spec pronta | Tarefa | Executor |
 |---|---|---|
-| `docs/specs/F0-08-anti-swiftshader.md` | F0-08 bloquear navegador sem GPU | haiku |
+| `docs/specs/F0-08-anti-swiftshader.md` | F0-08 bloquear navegador sem GPU — **DONE** | haiku |
 | `docs/specs/F1-05-nevoa-shader.md` | F1-05 (continuação da WIP `dd57a03`) | sonnet |
 | `docs/specs/F1-03-unidades-por-osso.md` | F1-03 | sonnet |
 | `docs/specs/F1-06-grade-espacial.md` | F1-06 | sonnet |
@@ -482,7 +482,7 @@ _(agentes adicionam aqui: `NEW-<n> · título · lane · motivo`)_
 - NEW-9 · IA destruiu HQ de jogador parado em < 240 s nos testes da F2-01 — avaliar agressividade inicial ao criar dificuldades (F5-03) · AI
 - NEW-10 · Animação de ataque do UnitAnimator termina com punho atrás do corpo (afeta todos os modelos) · ART · achado na F7-00
 - NEW-11 · Avisos de deprecação three 0.186: `THREE.Clock` → `THREE.Timer`; `PCFSoftShadowMap` removido (cai para PCF) — ajustar QualitySettings/main · PERF
-- F0-08 · Scripts de navegador abortam sem GPU real (SwiftShader estourou 12 GB às 14:41) · QA · spec em docs/specs/F0-08-anti-swiftshader.md
+- ✅ F0-08 · `DONE(d17aaf5)` Scripts de navegador abortam sem GPU real (`tools/lib/assertGpu.mjs`); `safe-run.sh` agora reentrante (deadlock de safe-run aninhado corrigido)
 - NEW-1 · Avaliar uso real de `GLTFBuildingLoader` em `GreatHall.js` e remover ou adotar no pipeline Blender (F7-00) · ART · ficou fora do escopo da F0-03
 
 ## Notas de integração

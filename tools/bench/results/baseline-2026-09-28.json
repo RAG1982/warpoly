@@ -1,0 +1,241 @@
+{
+  "createdAt": "2026-09-28T12:35:23.156Z",
+  "baseUrl": "http://localhost:5175",
+  "headless": false,
+  "browserArgs": [
+    "--enable-gpu",
+    "--ignore-gpu-blocklist",
+    "--enable-gpu-rasterization",
+    "--use-angle=vulkan",
+    "--enable-features=Vulkan",
+    "--disable-vulkan-surface",
+    "--disable-frame-rate-limit",
+    "--disable-gpu-vsync",
+    "--autoplay-policy=no-user-gesture-required"
+  ],
+  "browserVersion": "153.0.8010.12",
+  "viewport": [
+    1280,
+    720
+  ],
+  "warmupS": 2,
+  "durationS": 10,
+  "note": "Com janela (headed).",
+  "results": [
+    {
+      "ok": true,
+      "version": 1,
+      "scenario": "inicial",
+      "description": "Cena padrão do jogo (5 unidades por lado).",
+      "seed": 1592594996,
+      "timestamp": "2026-09-28T12:34:32.074Z",
+      "warmupS": 2,
+      "durationS": 10,
+      "frames": 157,
+      "fps": {
+        "avg": 15.7,
+        "p1Low": 4.6,
+        "p99FrameMs": 100.9,
+        "minFrameMs": 51.8,
+        "maxFrameMs": 218.1
+      },
+      "frameTimeMs": {
+        "avg": 63.88,
+        "median": 58.8
+      },
+      "gameUpdateMs": {
+        "avg": 0.282,
+        "frames": 157
+      },
+      "render": {
+        "callsAvg": 8691,
+        "callsMax": 8767,
+        "trianglesAvg": 4913040,
+        "trianglesMax": 4914554
+      },
+      "memory": {
+        "geometries": 2652,
+        "textures": 289,
+        "programs": 141,
+        "jsHeapUsedMB": 124
+      },
+      "load": {
+        "readyMs": 7725,
+        "firstFrameMs": 7849,
+        "domContentLoadedMs": 620,
+        "scenarioSetupMs": 0
+      },
+      "entities": {
+        "playerUnits": 5,
+        "enemyUnits": 5,
+        "buildings": 6,
+        "sceneObjects": 5890
+      },
+      "env": {
+        "gpu": {
+          "vendor": "Google Inc. (AMD)",
+          "renderer": "ANGLE (AMD, Vulkan 1.4.318 (AMD Radeonâ¢ RX 7600 XT (RADV NAVI33) (0x00007480)), radv)",
+          "webgl": "WebGL 2.0 (OpenGL ES 3.0 Chromium)"
+        },
+        "viewport": [
+          1280,
+          720
+        ],
+        "drawingBuffer": [
+          1280,
+          720
+        ],
+        "devicePixelRatio": 1,
+        "rendererPixelRatio": 1,
+        "userAgent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.0.0 Safari/537.36",
+        "hardwareConcurrency": 28
+      },
+      "wallClockS": 20,
+      "pageErrors": [
+        "Failed to load resource: the server responded with a status of 404 (Not Found)"
+      ]
+    },
+    {
+      "ok": true,
+      "version": 1,
+      "scenario": "combate100",
+      "description": "50 unidades por lado em combate no vau central (0,0).",
+      "seed": 1592594996,
+      "timestamp": "2026-09-28T12:34:53.584Z",
+      "warmupS": 2,
+      "durationS": 10,
+      "frames": 53,
+      "fps": {
+        "avg": 5.3,
+        "p1Low": 3.7,
+        "p99FrameMs": 272.8,
+        "minFrameMs": 156,
+        "maxFrameMs": 272.8
+      },
+      "frameTimeMs": {
+        "avg": 189.35,
+        "median": 182.2
+      },
+      "gameUpdateMs": {
+        "avg": 4.821,
+        "frames": 53
+      },
+      "render": {
+        "callsAvg": 25982,
+        "callsMax": 26326,
+        "trianglesAvg": 5221313,
+        "trianglesMax": 5230756
+      },
+      "memory": {
+        "geometries": 2816,
+        "textures": 446,
+        "programs": 145,
+        "jsHeapUsedMB": 134
+      },
+      "load": {
+        "readyMs": 7603,
+        "firstFrameMs": 8099,
+        "domContentLoadedMs": 773,
+        "scenarioSetupMs": 95.6
+      },
+      "entities": {
+        "playerUnits": 55,
+        "enemyUnits": 55,
+        "buildings": 6,
+        "sceneObjects": 14934
+      },
+      "env": {
+        "gpu": {
+          "vendor": "Google Inc. (AMD)",
+          "renderer": "ANGLE (AMD, Vulkan 1.4.318 (AMD Radeonâ¢ RX 7600 XT (RADV NAVI33) (0x00007480)), radv)",
+          "webgl": "WebGL 2.0 (OpenGL ES 3.0 Chromium)"
+        },
+        "viewport": [
+          1280,
+          720
+        ],
+        "drawingBuffer": [
+          1280,
+          720
+        ],
+        "devicePixelRatio": 1,
+        "rendererPixelRatio": 1,
+        "userAgent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.0.0 Safari/537.36",
+        "hardwareConcurrency": 28
+      },
+      "wallClockS": 20.7,
+      "pageErrors": []
+    },
+    {
+      "ok": true,
+      "version": 1,
+      "scenario": "massa300",
+      "description": "150 unidades por lado espalhadas pelo mapa, em movimento.",
+      "seed": 1592594996,
+      "timestamp": "2026-09-28T12:35:16.981Z",
+      "warmupS": 2,
+      "durationS": 10,
+      "frames": 17,
+      "fps": {
+        "avg": 1.6,
+        "p1Low": 1,
+        "p99FrameMs": 966.7,
+        "minFrameMs": 536.9,
+        "maxFrameMs": 966.7
+      },
+      "frameTimeMs": {
+        "avg": 620.26,
+        "median": 594.4
+      },
+      "gameUpdateMs": {
+        "avg": 7.294,
+        "frames": 17
+      },
+      "render": {
+        "callsAvg": 56240,
+        "callsMax": 56386,
+        "trianglesAvg": 5762730,
+        "trianglesMax": 5765416
+      },
+      "memory": {
+        "geometries": 2689,
+        "textures": 371,
+        "programs": 146,
+        "jsHeapUsedMB": 156.1
+      },
+      "load": {
+        "readyMs": 6725,
+        "firstFrameMs": 8253,
+        "domContentLoadedMs": 817,
+        "scenarioSetupMs": 370.4
+      },
+      "entities": {
+        "playerUnits": 155,
+        "enemyUnits": 155,
+        "buildings": 6,
+        "sceneObjects": 32005
+      },
+      "env": {
+        "gpu": {
+          "vendor": "Google Inc. (AMD)",
+          "renderer": "ANGLE (AMD, Vulkan 1.4.318 (AMD Radeonâ¢ RX 7600 XT (RADV NAVI33) (0x00007480)), radv)",
+          "webgl": "WebGL 2.0 (OpenGL ES 3.0 Chromium)"
+        },
+        "viewport": [
+          1280,
+          720
+        ],
+        "drawingBuffer": [
+          1280,
+          720
+        ],
+        "devicePixelRatio": 1,
+        "rendererPixelRatio": 1,
+        "userAgent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.0.0 Safari/537.36",
+        "hardwareConcurrency": 28
+      },
+      "wallClockS": 20.8,
+      "pageErrors": []
+    }
+  ]
+}

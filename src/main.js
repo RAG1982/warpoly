@@ -8,6 +8,7 @@ import { GameStateMachine, GameState } from './core/GameStateMachine.js';
 import { createMatchConfig, matchConfigFromSearch, withNewSeed } from './sim/MatchConfig.js';
 import { shouldShowMainMenu, showMainMenu } from './ui/screens/MainMenu.js';
 import { PauseMenu } from './ui/screens/PauseMenu.js';
+import { ensureGlbLoaded } from './entities/glbModels.js';
 
 const S = GameState;
 
@@ -175,6 +176,16 @@ class GameApp {
       await nextFrame();
       await nextFrame();
     }
+    // Carrega .glb se com ?skipPreload e não foram carregados ainda
+    if (this.skipPreload && !this.assetsReady) {
+      try {
+        await ensureGlbLoaded();
+      } catch (err) {
+        console.warn('[main.js] erro ao carregar .glb com skipPreload:', err);
+        // continua com modelos procedurais
+      }
+    }
+
     this.assetsReady = true;
     if (token !== this._loadToken || !this.fsm.is(S.LOADING)) return;
 

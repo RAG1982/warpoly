@@ -1,5 +1,6 @@
 import * as THREE from 'three';
 import { ModelFactory } from '../entities/ModelFactory.js';
+import { Building } from '../entities/Building.js';
 import { getCost } from '../data/index.js';
 
 export class InputManager {
@@ -53,6 +54,12 @@ export class InputManager {
 
     // Selection marquee box element
     this.boxEl = document.getElementById('selection-box');
+
+    // Buffers reutilizados pelo picking (F1-06: unitGrid/blockerGrid no lugar de montar a
+    // lista de todas as meshes do jogo a cada raycast).
+    this._pickUnitBuf = [];
+    this._pickBlockerBuf = [];
+    this._pickMeshBuf = [];
   }
 
   createClickDecal() {
@@ -253,19 +260,40 @@ export class InputManager {
   raycastScene() {
     this.raycaster.setFromCamera(this.mouse, this.sm.camera);
 
-    // Test terrain intersection
+    // Test terrain intersection. Sem terreno sob o mouse (céu): nenhuma entidade sob o cursor.
     const hits = this.raycaster.intersectObject(this.terrain.mesh);
-    if (hits.length > 0) {
-      this.groundIntersection.copy(hits[0].point);
+    if (hits.length === 0) {
+      this.hoveredEntity = null;
+      return;
     }
+    this.groundIntersection.copy(hits[0].point);
 
-    // Test entity intersection
-    const allMeshes = [];
-    this.gm.units.forEach(u => { if (u.mesh?.parent) allMeshes.push(u.mesh); });
-    this.gm.enemies.forEach(e => { if (e.mesh?.parent && e.mesh.visible) allMeshes.push(e.mesh); }); // F1-05: inimigo sob a névoa não é alvo
-    this.gm.buildings.forEach(b => { if (b.mesh?.parent && b.mesh.visible) allMeshes.push(b.mesh); });
-    this.gm.trees.forEach(t => { if (t.mesh?.parent) allMeshes.push(t.mesh); });
-    this.gm.resourceDeposits.forEach(r => { if (r.mesh?.parent) allMeshes.push(r.mesh); });
+    // F1-06: só as entidades perto do ponto do chão (unitGrid/blockerGrid), em vez de montar a
+    // lista de todas as meshes do jogo. Raio maior em construções/árvores/depósitos (12) para
+    // acertar o clique em alvos altos (torre) quando o ponto do chão fica longe do topo do modelo.
+    // F1-05 (preservado): unidade/construção hostil sob a névoa não é alvo de clique.
+    const gx = this.groundIntersection.x;
+    const gz = this.groundIntersection.z;
+    const localId = this.gm.localPlayerId;
+    this.gm.unitGrid.queryRadius(gx, gz, 6, null, this._pickUnitBuf);
+    this.gm.blockerGrid.queryRadius(gx, gz, 12, null, this._pickBlockerBuf);
+
+    const allMeshes = this._pickMeshBuf;
+    allMeshes.length = 0;
+    for (let i = 0; i < this._pickUnitBuf.length; i++) {
+      const u = this._pickUnitBuf[i];
+      const m = u.mesh;
+      if (!m?.parent) continue;
+      if (this.gm.isHostile(localId, u.ownerId) && !m.visible) continue;
+      allMeshes.push(m);
+    }
+    for (let i = 0; i < this._pickBlockerBuf.length; i++) {
+      const e = this._pickBlockerBuf[i];
+      const m = e.mesh;
+      if (!m?.parent) continue;
+      if (e instanceof Building && !m.visible) continue;
+      allMeshes.push(m);
+    }
 
     const entityHits = this.raycaster.intersectObjects(allMeshes, true);
     if (entityHits.length > 0) {

@@ -607,7 +607,8 @@ export class Building {
   }
 
   /**
-   * @param {Array} targets   unidades candidatas a alvo das torres (todas; filtradas por isHostile)
+   * @param {Array} targets   não usado desde a F1-06 (alvo das torres vem de `gm.unitGrid.nearest`);
+   *                          mantido por compatibilidade com o chamador (`GameManager.update`)
    * @param {Array} allUnits  todas as unidades (repassado ao dano para retaliação/ajuda)
    */
   update(delta, gameManager, soundManager, particleSystem, arrows, targets, allUnits = []) {
@@ -693,23 +694,18 @@ export class Building {
       }
     }
 
-    // Watchtower & Orc Watchtower auto-attack
+    // Watchtower & Orc Watchtower auto-attack (F1-06: gm.unitGrid.nearest no lugar de varrer
+    // `targets`; o parâmetro é mantido por compatibilidade com o chamador, mas não é mais usado)
     const towerDef = getBuildingDef(this.type).tower;
-    if (this.isConstructed && towerDef && this.attackRange > 0 && targets) {
+    if (this.isConstructed && towerDef && this.attackRange > 0) {
       this.attackTimer += delta;
       if (this.attackTimer >= this.attackCooldown) {
-        // Find closest hostile unit within range
-        let closest = null;
-        let minDist = this.attackRange;
-        targets.forEach(e => {
-          if (!e.isDead && this.isHostileTo(e)) {
-            const d = this.mesh.position.distanceTo(e.mesh.position);
-            if (d < minDist) {
-              minDist = d;
-              closest = e;
-            }
-          }
-        });
+        const gm = gameManager || this.gameManager;
+        const pos = this.mesh.position;
+        const self = this;
+        const closest = gm && gm.unitGrid
+          ? gm.unitGrid.nearest(pos.x, pos.z, this.attackRange, u => !u.isDead && self.isHostileTo(u))
+          : null;
 
         if (closest) {
           this.attackTimer = 0;

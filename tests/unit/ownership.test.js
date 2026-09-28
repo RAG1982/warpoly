@@ -10,14 +10,21 @@ import { describe, it, expect } from 'vitest';
 import { Building } from '../../src/entities/Building.js';
 import { Unit } from '../../src/entities/Unit.js';
 import { PlayerRegistry } from '../../src/sim/PlayerRegistry.js';
+import { SpatialGrid } from '../../src/sim/SpatialGrid.js';
 import { UNIT_TRAIN_CONFIG, UPGRADE_CONFIG, FORGE_UPGRADES } from '../../src/data/index.js';
 
-/** GameManager mínimo: jogadores + construções + as consultas usadas por Building. */
+/**
+ * GameManager mínimo: jogadores + construções + as consultas usadas por Building/Unit.
+ * F1-06: `unitGrid`/`blockerGrid` reais (as buscas de alvo hostil de Unit/Building passam
+ * a consultar a grade espacial em vez de varrer `allUnits`/`buildings`).
+ */
 function makeGm(specs) {
   const registry = new PlayerRegistry(specs);
   const gm = {
     buildings: [],
     allUnits: [],
+    unitGrid: new SpatialGrid(),
+    blockerGrid: new SpatialGrid(),
     localPlayerId: registry.localPlayer.id,
     getPlayer: (id) => registry.getPlayer(id),
     isHostile: (a, b) => registry.isHostile(a, b),
@@ -29,18 +36,23 @@ function makeGm(specs) {
   return gm;
 }
 
+let _nextEntityId = 1;
+
 function makeBuilding(gm, type, ownerId, extra = {}) {
   const b = Object.assign(Object.create(Building.prototype), {
+    id: _nextEntityId++,
     type,
     ownerId,
     queue: [],
     currentResearch: null,
     isConstructed: true,
     isDead: false,
+    collisionRadius: 3.0,
     gameManager: gm,
     ...extra
   });
   gm.buildings.push(b);
+  if (b.mesh) gm.blockerGrid.insert(b, b.mesh.position.x, b.mesh.position.z, b.collisionRadius);
   return b;
 }
 
@@ -140,14 +152,17 @@ describe('Unit: hostilidade por time', () => {
   const at = (x, z) => ({ position: { x, z } });
   function makeUnit(gm, ownerId, x, z, type = 'knight') {
     const u = Object.assign(Object.create(Unit.prototype), {
+      id: _nextEntityId++,
       type,
       ownerId,
       gameManager: gm,
       isDead: false,
       hp: 10,
+      collisionRadius: 0.6,
       mesh: at(x, z)
     });
     gm.allUnits.push(u);
+    gm.unitGrid.insert(u, x, z, u.collisionRadius);
     return u;
   }
 

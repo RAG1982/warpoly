@@ -8,7 +8,7 @@
 
 RTS 1×1 no estilo Warcraft II: **Aliança Humana** vs **Horda Orc**, jogador contra uma IA. Mapa único 140×140 (área jogável ±55): continente com rio diagonal e 3 vaus (norte −16,−16 / centro 0,0 / sul 16,16). Base humana em (32,−30), orc em (−32,30).
 
-**Vitória**: destruir o HQ inimigo (Castelo / Grande Salão). **Derrota**: perder o seu HQ. Reinício = recarregar a página.
+**Vitória**: ser o último time com HQ (Castelo / Grande Salão) de pé. **Derrota**: perder o seu HQ (o jogador fica `defeated`; em FFA a partida segue até restar um time). Reinício = recarregar a página.
 
 ## Recursos
 

@@ -51,7 +51,7 @@ export class AIEconomyManager {
    * @returns {number}
    */
   getLivingWorkerCount() {
-    const enemies = this.gm.enemies;
+    const enemies = this.director.getOwnUnits();
     const lenE = enemies.length;
     const workerType = this.director.workerType;
     let count = 0;
@@ -104,7 +104,7 @@ export class AIEconomyManager {
 
     for (let i = 0; i < lenB; i++) {
       const b = buildings[i];
-      if (b.faction === 'enemy' && !b.isDead && !b.isConstructed) {
+      if (b.ownerId === this.director.playerId && !b.isDead && !b.isConstructed) {
         incomplete = b;
         break;
       }
@@ -113,7 +113,7 @@ export class AIEconomyManager {
     if (!incomplete) return false;
 
     // Check if an enemy worker is actively building this scaffold
-    const enemies = this.gm.enemies;
+    const enemies = this.director.getOwnUnits();
     const lenE = enemies.length;
     let hasBuilder = false;
     let candidateWorker = null;
@@ -154,7 +154,7 @@ export class AIEconomyManager {
 
     for (let i = 0; i < lenB; i++) {
       const b = buildings[i];
-      if (b.faction === 'enemy' && b.type === this.director.hqType && b.isConstructed && !b.isDead) {
+      if (b.ownerId === this.director.playerId && b.type === this.director.hqType && b.isConstructed && !b.isDead) {
         hq = b;
         break;
       }
@@ -228,7 +228,7 @@ export class AIEconomyManager {
 
     for (let i = 0; i < lenB; i++) {
       const b = buildings[i];
-      if (b.faction === 'enemy' && !b.isDead) {
+      if (b.ownerId === this.director.playerId && !b.isDead) {
         if (b.type === this.director.barracksType) hasBarracks = true;
         if (b.type === this.director.lumberType) hasLumber = true;
         if (b.type === this.director.forgeType) hasForge = true;
@@ -297,7 +297,7 @@ export class AIEconomyManager {
     const buildings = this.gm.buildings;
     for (let i = 0; i < buildings.length; i++) {
       const b = buildings[i];
-      if (b.faction === 'enemy' && !b.isDead) {
+      if (b.ownerId === this.director.playerId && !b.isDead) {
         if (b.type === this.director.barracksType) {
           if (b.isConstructed) hasBarracks = true;
           else isBuildingBarracks = true;
@@ -440,7 +440,7 @@ export class AIEconomyManager {
    * workers are dynamically reassigned to satisfy the most urgent resource need.
    */
   rebalanceWorkforce() {
-    const enemies = this.gm.enemies;
+    const enemies = this.director.getOwnUnits();
     const lenE = enemies.length;
     const workerType = this.director.workerType;
 
@@ -668,12 +668,12 @@ export class AIEconomyManager {
     }
 
     // Instantiate scaffold in unconstructed state
-    const scaffold = this.gm.createBuilding(type, chosenX, chosenZ, false, 'enemy');
+    const scaffold = this.gm.createBuilding(type, chosenX, chosenZ, false, this.director.playerId);
     this.gm.buildings.push(scaffold);
     this.director.recalculatePop();
 
     // Assign nearest available worker to build using the official orderBuild API
-    const enemies = this.gm.enemies;
+    const enemies = this.director.getOwnUnits();
     const lenE = enemies.length;
     let nearestWorker = null;
     let minDistSq = Infinity;

@@ -18,10 +18,29 @@ import { TreeManager } from '../world/TreeManager.js';
 import { Pathfinder } from './Pathfinder.js';
 import { HumanForge } from '../entities/buildings/HumanForge.js';
 import { UPGRADE_CONFIG } from './UpgradeConfig.js';
-import { STARTING_RESOURCES, isDropoffFor } from '../data/index.js';
+import { STARTING_RESOURCES, FACTIONS, getBuildingDef, isDropoffFor } from '../data/index.js';
+import { Player } from '../sim/Player.js';
+import { PlayerRegistry } from '../sim/PlayerRegistry.js';
+import { EntityRegistry, NEUTRAL_OWNER_ID } from '../sim/EntityIds.js';
+import {
+  MAP_START_SLOTS,
+  DEFAULT_MAP_ID,
+  createMatchConfig,
+  layoutAt,
+  validateMatchConfig
+} from '../sim/MatchConfig.js';
+
+const EMPTY_LIST = Object.freeze([]);
 
 export class GameManager {
-  constructor(scene, terrain, soundManager, particleSystem) {
+  /**
+   * @param {THREE.Scene} scene
+   * @param {import('../world/Terrain.js').Terrain} terrain
+   * @param {*} soundManager
+   * @param {*} particleSystem
+   * @param {object|null} [matchConfig]  ver src/sim/MatchConfig.js (padrão: 1×1 humano local × IA orc)
+   */
+  constructor(scene, terrain, soundManager, particleSystem, matchConfig = null) {
     this.scene = scene;
     this.terrain = terrain;
     this.soundManager = soundManager;
@@ -30,14 +49,24 @@ export class GameManager {
     // Instanced Trees System (6 Draw Calls for all 180 Trees)
     this.treeManager = new TreeManager(this.scene);
 
-    // Economy & Pop
-    this.resources = { ...STARTING_RESOURCES };
-    this.population = 0;
-    this.maxPopulation = 15;
+    // Configuração da partida e jogadores (F2-01). Economia/pop/pesquisas vivem em Player.
+    this.matchConfig = validateMatchConfig(matchConfig || createMatchConfig());
+    /** @type {PlayerRegistry} */
+    this.playerRegistry = new PlayerRegistry();
+    this._localPlayerId = 0;
+
+    // IDs de entidade (F2-01): id numérico estável + ownerId em toda entidade.
+    this.entityRegistry = new EntityRegistry();
+    /** @type {Map<number, object>} id → entidade (Unit, Building, Tree, ResourceDeposit, projétil) */
+    this.entitiesById = this.entityRegistry.byId;
 
     // Entity collections
-    this.units = [];
-    this.enemies = [];
+    /** Lista única de unidades de todos os jogadores, em ordem de spawn. */
+    this.allUnits = [];
+    /** @type {Map<number, Array>} ownerId → unidades desse dono (mantido em add/remove) */
+    this._unitsByOwner = new Map();
+    /** @type {Map<number, {list: Array, dirty: boolean}>} ownerId → unidades hostis a ele (cache) */
+    this._hostileUnitsCache = new Map();
     this.buildings = [];
     this.trees = [];
     this.resourceDeposits = [];
@@ -55,18 +84,13 @@ export class GameManager {
     this.isPaused = false;
     this.gameTime = 0;
 
-    // Faction: 'human' or 'orc'
-    this.playerFaction = 'human';
-
-    // Researched Upgrades per faction (Forge Upgrades)
-    this.researchedUpgrades = { player: new Set(), enemy: new Set() };
-
     // Fog of War (covers 160x160 continent)
     this.fogOfWar = new FogOfWar(this.scene, 160, 160);
 
-    // Autonomous Computer Opponent AI (Utility AI Director)
+    // Um AIDirector por jogador de IA. `aiDirector` = o primeiro (compatibilidade: bench, UI).
+    /** @type {AIDirector[]} */
+    this.aiDirectors = [];
     this.aiDirector = null;
-    this.enemyAI = null;
 
     // Terrain Navigation & Water Obstacle Pathfinder
     this.pathfinder = new Pathfinder(this.terrain);
@@ -75,22 +99,190 @@ export class GameManager {
     this.initMapEntities();
   }
 
+  // --- JOGADORES (F2-01) ---
+
+  /** @returns {Player[]} */
+  get players() {
+    return this.playerRegistry.players;
+  }
+
+  /** @returns {Player|null} */
+  getPlayer(id) {
+    return this.playerRegistry.getPlayer(id);
+  }
+
+  /** @returns {Player} */
+  get localPlayer() {
+    return this.playerRegistry.localPlayer;
+  }
+
+  get localPlayerId() {
+    return this._localPlayerId;
+  }
+
+  isHostile(a, b) {
+    return this.playerRegistry.isHostile(a, b);
+  }
+
+  isAlly(a, b) {
+    return this.playerRegistry.isAlly(a, b);
+  }
+
+  /**
+   * Converte o "lado" legado em ownerId: número → ele mesmo; 'player'/undefined → jogador local;
+   * 'enemy' → primeiro jogador hostil ao local. DÍVIDA (F2-01): some quando UI/bench usarem ids.
+   */
+  resolveOwnerId(owner) {
+    if (typeof owner === 'number') return owner;
+    if (owner === 'enemy') {
+      const h = this.playerRegistry.firstHostileOf(this._localPlayerId);
+      return h ? h.id : NEUTRAL_OWNER_ID;
+    }
+    return this._localPlayerId;
+  }
+
+  /** Dá id/ownerId a uma entidade e a coloca em `entitiesById`. */
+  registerEntity(entity, ownerId = NEUTRAL_OWNER_ID) {
+    return this.entityRegistry.register(entity, ownerId);
+  }
+
+  unregisterEntity(entity) {
+    this.entityRegistry.unregister(entity);
+  }
+
+  getEntity(id) {
+    return this.entityRegistry.get(id);
+  }
+
+  // --- Compatibilidade com o modelo antigo de dois lados (DÍVIDA F2-01, ver docs/01_ARQUITETURA.md) ---
+  // UIManager, InputManager e FogOfWar ainda leem estes campos do "jogador"; todos apontam para o jogador local.
+
+  get playerFaction() {
+    return this.localPlayer ? this.localPlayer.factionId : 'human';
+  }
+
+  get resources() {
+    return this.localPlayer.resources;
+  }
+
+  get population() {
+    return this.localPlayer.population;
+  }
+
+  set population(v) {
+    this.localPlayer.population = v;
+  }
+
+  get maxPopulation() {
+    return this.localPlayer.maxPopulation;
+  }
+
+  set maxPopulation(v) {
+    this.localPlayer.maxPopulation = v;
+  }
+
+  /** { player: pesquisas do local, enemy: do primeiro hostil } — formato legado lido pela UI. */
+  get researchedUpgrades() {
+    const hostile = this.playerRegistry.firstHostileOf(this._localPlayerId);
+    return {
+      player: this.localPlayer.researchedUpgrades,
+      enemy: hostile ? hostile.researchedUpgrades : new Set()
+    };
+  }
+
+  /** Alias legado do primeiro diretor de IA. */
+  get enemyAI() {
+    return this.aiDirector;
+  }
+
+  /** Unidades do jogador local (visão derivada de `allUnits`, mantida em add/remove). */
+  get units() {
+    return this.getUnitsOf(this._localPlayerId);
+  }
+
+  /** Unidades hostis ao jogador local (visão derivada de `allUnits`, cacheada até a próxima mudança). */
+  get enemies() {
+    return this.getHostileUnitsOf(this._localPlayerId);
+  }
+
+  /** Unidades (vivas ou morrendo) de um dono. Não modifique o array retornado. */
+  getUnitsOf(ownerId) {
+    return this._unitsByOwner.get(ownerId) || EMPTY_LIST;
+  }
+
+  /** Unidades de donos hostis a `ownerId`. Não modifique o array retornado. */
+  getHostileUnitsOf(ownerId) {
+    let entry = this._hostileUnitsCache.get(ownerId);
+    if (!entry) {
+      entry = { list: [], dirty: true };
+      this._hostileUnitsCache.set(ownerId, entry);
+    }
+    if (entry.dirty) {
+      const list = entry.list;
+      list.length = 0;
+      const all = this.allUnits;
+      for (let i = 0; i < all.length; i++) {
+        if (this.playerRegistry.isHostile(ownerId, all[i].ownerId)) list.push(all[i]);
+      }
+      entry.dirty = false;
+    }
+    return entry.list;
+  }
+
+  _markUnitListsDirty() {
+    this._hostileUnitsCache.forEach(entry => { entry.dirty = true; });
+  }
+
+  _addUnit(unit) {
+    this.registerEntity(unit, unit.ownerId);
+    this.allUnits.push(unit);
+    let list = this._unitsByOwner.get(unit.ownerId);
+    if (!list) {
+      list = [];
+      this._unitsByOwner.set(unit.ownerId, list);
+    }
+    list.push(unit);
+    this._markUnitListsDirty();
+  }
+
+  _removeUnitAt(index) {
+    const unit = this.allUnits.splice(index, 1)[0];
+    const list = this._unitsByOwner.get(unit.ownerId);
+    if (list) {
+      const i = list.indexOf(unit);
+      if (i !== -1) list.splice(i, 1);
+    }
+    this.unregisterEntity(unit);
+    this._markUnitListsDirty();
+    return unit;
+  }
+
+  /**
+   * Troca a facção do jogador local mantendo o resto da config (1×1 ou FFA) e recria o mapa.
+   * Mantido para compatibilidade; o caminho normal é passar a MatchConfig no construtor.
+   */
   setPlayerFaction(faction) {
     if (this.playerFaction === faction) return;
-    this.playerFaction = faction;
+    const ffa = this.matchConfig.players.length > 2;
+    this.startMatch(createMatchConfig({ localFaction: faction, ffa, seed: this.matchConfig.seed, mapId: this.matchConfig.mapId }));
+  }
+
+  /** Recria o mapa com uma nova MatchConfig e centraliza a câmera na base do jogador local. */
+  startMatch(matchConfig) {
+    this.matchConfig = validateMatchConfig(matchConfig);
     this.resetMap();
-    if (this.sceneManager) {
-      if (faction === 'orc') {
-        this.sceneManager.cameraTarget.set(-32, 2.5, 30);
-      } else {
-        this.sceneManager.cameraTarget.set(32, 2.5, -30);
-      }
+    this.focusCameraOnLocalBase();
+  }
+
+  focusCameraOnLocalBase() {
+    const p = this.localPlayer;
+    if (this.sceneManager && p && p.startPos) {
+      this.sceneManager.cameraTarget.set(p.startPos.x, 2.5, p.startPos.z);
     }
   }
 
   resetMap() {
-    this.units.forEach(u => this.scene.remove(u.mesh));
-    this.enemies.forEach(e => this.scene.remove(e.mesh));
+    this.allUnits.forEach(u => this.scene.remove(u.mesh));
     this.buildings.forEach(b => {
       this.scene.remove(b.mesh);
       if (b.rallyGroup) this.scene.remove(b.rallyGroup);
@@ -103,20 +295,20 @@ export class GameManager {
       this.treeManager = new TreeManager(this.scene);
     }
 
-    this.units = [];
-    this.enemies = [];
+    this.allUnits = [];
+    this._unitsByOwner.clear();
+    this._hostileUnitsCache.clear();
     this.buildings = [];
     this.trees = [];
     this.resourceDeposits = [];
     this.selectedUnits = [];
     this.selectedBuilding = null;
     this.selectedResource = null;
-    this.resources = { ...STARTING_RESOURCES };
-    this.population = 0;
     this.isGameOver = false;
     this.gameWon = false;
+    this.aiDirectors = [];
     this.aiDirector = null;
-    this.enemyAI = null;
+    this.entityRegistry.clear();
 
     // Reset Fog of War shroud
     if (this.fogOfWar) {
@@ -128,109 +320,47 @@ export class GameManager {
     this.initMapEntities();
   }
 
+  /** Cria jogadores a partir da MatchConfig (recursos iniciais de src/data). */
+  _createPlayers() {
+    this.playerRegistry = new PlayerRegistry(
+      this.matchConfig.players.map(spec => new Player({ ...spec, resources: STARTING_RESOURCES }))
+    );
+    this._localPlayerId = this.playerRegistry.localPlayer.id;
+    this._unitsByOwner.clear();
+    this._hostileUnitsCache.clear();
+    this.players.forEach(p => this._unitsByOwner.set(p.id, []));
+  }
+
   initMapEntities() {
-    const isOrc = this.playerFaction === 'orc';
+    this._createPlayers();
+    const slots = MAP_START_SLOTS[this.matchConfig.mapId] || MAP_START_SLOTS[DEFAULT_MAP_ID];
 
-    // 1. Initial Player Base & Enemy AI Base (140x140 Continental Map)
-    // Enforces generous spacing between all buildings (at least 11-14 units apart)
-    if (!isOrc) {
-      // --- PLAYER: Human Alliance Kingdom (Northeast around 32, -30) ---
-      // 1 Town Center, 1 Lumber Mill, 1 House
-      const castle = this.createBuilding('castle', 32, -30, true, 'player');
-      this.buildings.push(castle);
+    // 1. Bases iniciais a partir dos slots da MatchConfig (slot 0 = NE, slot 1 = SW, extras validados).
+    // Mesmo layout e mesmas posições de antes da F2-01 para os slots 0 e 1.
+    // Slots fixos primeiro: as posições extras são validadas contra as bases já colocadas.
+    const ordered = [...this.players].sort((a, b) => {
+      const fa = a.startSlot < slots.fixed.length ? 0 : 1;
+      const fb = b.startSlot < slots.fixed.length ? 0 : 1;
+      return fa - fb;
+    });
+    // Jazidas fixas do mapa antes das bases, para que canPlaceBuilding as considere nos slots extras.
+    this.spawnResourceDeposits();
 
-      const lumberCamp = this.createBuilding('lumber_camp', 20, -34, true, 'player');
-      lumberCamp.mesh.rotation.y = Math.PI / 4;
-      this.buildings.push(lumberCamp);
-
-      const cottage = this.createBuilding('cottage', 44, -30, true, 'player');
-      cottage.mesh.rotation.y = -Math.PI / 4;
-      this.buildings.push(cottage);
-
-      // Player Initial Units: 2 Workers (Villagers), 3 Military Units (2 Knights, 1 Archer)
-      this.spawnUnit('villager', 28, -28, 'player');
-      this.spawnUnit('villager', 36, -32, 'player');
-      this.spawnUnit('knight', 30, -22, 'player');
-      this.spawnUnit('knight', 34, -22, 'player');
-      this.spawnUnit('archer', 24, -20, 'player');
-
-      // --- ENEMY AI: Orc Horde Stronghold (Southwest around -32, 30) ---
-      // 1 Town Center, 1 Lumber Mill, 1 House
-      const greatHall = this.createBuilding('great_hall', -32, 30, true, 'enemy');
-      this.buildings.push(greatHall);
-
-      const orcLumber = this.createBuilding('orc_lumber_mill', -20, 34, true, 'enemy');
-      orcLumber.mesh.rotation.y = Math.PI / 4;
-      this.buildings.push(orcLumber);
-
-      const pigFarm = this.createBuilding('pig_farm', -44, 30, true, 'enemy');
-      pigFarm.mesh.rotation.y = -Math.PI / 4;
-      this.buildings.push(pigFarm);
-
-      // Enemy AI Initial Units: 2 Workers (Peons), 3 Military Units (2 Grunts, 1 Axethrower)
-      this.spawnUnit('peon', -28, 28, 'enemy');
-      this.spawnUnit('peon', -36, 32, 'enemy');
-      this.spawnUnit('grunt', -30, 22, 'enemy');
-      this.spawnUnit('grunt', -34, 22, 'enemy');
-      this.spawnUnit('axethrower', -24, 20, 'enemy');
-
-      // Initialize AI Opponent Director as Orcs
-      this.aiDirector = new AIDirector(this, 'orc', new THREE.Vector2(-32, 30));
-      this.enemyAI = this.aiDirector;
-
-      // Reveal Player's Kingdom in Fog of War
-      this.fogOfWar.revealArea(32, -30, 28);
-    } else {
-      // --- PLAYER: Orc Horde Stronghold (Southwest around -32, 30) ---
-      // 1 Town Center, 1 Lumber Mill, 1 House
-      const greatHall = this.createBuilding('great_hall', -32, 30, true, 'player');
-      this.buildings.push(greatHall);
-
-      const orcLumber = this.createBuilding('orc_lumber_mill', -20, 34, true, 'player');
-      orcLumber.mesh.rotation.y = Math.PI / 4;
-      this.buildings.push(orcLumber);
-
-      const pigFarm = this.createBuilding('pig_farm', -44, 30, true, 'player');
-      pigFarm.mesh.rotation.y = -Math.PI / 4;
-      this.buildings.push(pigFarm);
-
-      // Player Initial Units: 2 Workers (Peons), 3 Military Units (2 Grunts, 1 Axethrower)
-      this.spawnUnit('peon', -28, 28, 'player');
-      this.spawnUnit('peon', -36, 32, 'player');
-      this.spawnUnit('grunt', -30, 22, 'player');
-      this.spawnUnit('grunt', -34, 22, 'player');
-      this.spawnUnit('axethrower', -24, 20, 'player');
-
-      // --- ENEMY AI: Human Alliance Kingdom (Northeast around 32, -30) ---
-      // 1 Town Center, 1 Lumber Mill, 1 House
-      const castle = this.createBuilding('castle', 32, -30, true, 'enemy');
-      this.buildings.push(castle);
-
-      const lumberCamp = this.createBuilding('lumber_camp', 20, -34, true, 'enemy');
-      lumberCamp.mesh.rotation.y = Math.PI / 4;
-      this.buildings.push(lumberCamp);
-
-      const cottage = this.createBuilding('cottage', 44, -30, true, 'enemy');
-      cottage.mesh.rotation.y = -Math.PI / 4;
-      this.buildings.push(cottage);
-
-      // Enemy AI Initial Units: 2 Workers (Villagers), 3 Military Units (2 Knights, 1 Archer)
-      this.spawnUnit('villager', 28, -28, 'enemy');
-      this.spawnUnit('villager', 36, -32, 'enemy');
-      this.spawnUnit('knight', 30, -22, 'enemy');
-      this.spawnUnit('knight', 34, -22, 'enemy');
-      this.spawnUnit('archer', 24, -20, 'enemy');
-
-      // Initialize AI Opponent Director as Humans
-      this.aiDirector = new AIDirector(this, 'human', new THREE.Vector2(32, -30));
-      this.enemyAI = this.aiDirector;
-
-      // Reveal Player's Stronghold in Fog of War
-      this.fogOfWar.revealArea(-32, 30, 28);
+    const extraSlotPositions = [];
+    for (const player of ordered) {
+      let pos;
+      if (player.startSlot < slots.fixed.length) {
+        pos = slots.fixed[player.startSlot];
+      } else {
+        pos = this._findExtraStartPosition(player.factionId, slots.extraCandidates);
+        extraSlotPositions.push(pos);
+      }
+      player.startPos = { x: pos.x, z: pos.z };
+      this._spawnStartingBase(player, pos);
     }
 
-    // 2. Resource Deposits (Gold Mines & Stone Quarries)
-    this.spawnResourceDeposits();
+    // 2. Jazidas próprias dos slots extras (o mapa continental só tem minas para 2 bases)
+    extraSlotPositions.forEach(pos => this._spawnExtraSlotDeposits(pos));
 
     // 3. Harvestable Woodlands & Trees (Spacious wilderness forests, completely outside bases)
     this.spawnWoodlands();
@@ -238,23 +368,99 @@ export class GameManager {
     this.recalculatePopCap();
   }
 
+  /** HQ + serraria + casa e 5 unidades iniciais da facção do jogador, espelhados para o slot. */
+  _spawnStartingBase(player, pos) {
+    const start = FACTIONS[player.factionId].startingBase;
+    const layout = layoutAt(pos);
+
+    layout.buildings.forEach(entry => {
+      const b = this.createBuilding(start.buildings[entry.role], entry.x, entry.z, true, player.id);
+      if (entry.rotY) b.mesh.rotation.y = entry.rotY;
+      this.buildings.push(b);
+    });
+
+    layout.units.forEach(entry => {
+      this.spawnUnit(start.units[entry.role], entry.x, entry.z, player.id);
+    });
+
+    if (player.isAI) {
+      const director = new AIDirector(this, player.id, new THREE.Vector2(pos.x, pos.z));
+      this.aiDirectors.push(director);
+      if (!this.aiDirector) this.aiDirector = director;
+    }
+
+    if (player.isLocal) {
+      // Reveal Player's base in Fog of War
+      this.fogOfWar.revealArea(pos.x, pos.z, 28);
+    }
+  }
+
+  /**
+   * Primeira posição candidata em que a base inteira (HQ, serraria, casa) passa em
+   * canPlaceBuilding e que fica a ≥ 40 u das outras bases.
+   */
+  _findExtraStartPosition(factionId, candidates) {
+    const start = FACTIONS[factionId].startingBase;
+    const taken = this.players.filter(p => p.startPos).map(p => p.startPos);
+    for (const c of candidates) {
+      if (taken.some(t => Math.hypot(t.x - c.x, t.z - c.z) < 40)) continue;
+      const layout = layoutAt(c);
+      const ok = layout.buildings.every(e => this.canPlaceBuilding(start.buildings[e.role], e.x, e.z));
+      if (ok) return c;
+    }
+    throw new Error('GameManager: nenhuma posição livre para o slot inicial extra');
+  }
+
+  /**
+   * Slots extras (FFA de teste) não têm minas próprias no mapa continental: coloca 1 mina de
+   * ouro e 1 pedreira a ~15 u do HQ, em terreno seco e longe de construções, vaus e outras jazidas.
+   * DÍVIDA: some com os mapas orientados a dados (F2-05).
+   */
+  _spawnExtraSlotDeposits(pos) {
+    const fords = [{ x: -16, z: -16 }, { x: 0, z: 0 }, { x: 16, z: 16 }];
+    const isFree = (x, z) => {
+      if (Math.max(Math.abs(x), Math.abs(z)) > 50) return false;
+      for (const [ox, oz] of [[0, 0], [3, 0], [-3, 0], [0, 3], [0, -3]]) {
+        if (this.terrain.getHeight(x + ox, z + oz) < 1.9) return false;
+      }
+      if (this.buildings.some(b => Math.hypot(x - b.mesh.position.x, z - b.mesh.position.z) < (b.collisionRadius || 3) + 7)) return false;
+      if (this.resourceDeposits.some(r => Math.hypot(x - r.mesh.position.x, z - r.mesh.position.z) < 10)) return false;
+      if (fords.some(f => Math.hypot(x - f.x, z - f.z) < 12)) return false;
+      return true;
+    };
+    for (const type of ['gold', 'stone']) {
+      for (let i = 0; i < 24; i++) {
+        const ang = (i / 24) * Math.PI * 2;
+        const x = pos.x + Math.cos(ang) * 15;
+        const z = pos.z + Math.sin(ang) * 15;
+        if (isFree(x, z)) {
+          this.resourceDeposits.push(this.registerEntity(new ResourceDeposit(this.scene, this.terrain, type, x, z)));
+          break;
+        }
+      }
+    }
+  }
+
   /**
    * Spawns strategic resource deposits across both kingdoms and the central plains
    */
   spawnResourceDeposits() {
+    const add = (type, x, z) => {
+      this.resourceDeposits.push(this.registerEntity(new ResourceDeposit(this.scene, this.terrain, type, x, z)));
+    };
     // Human Realm Deposits
-    this.resourceDeposits.push(new ResourceDeposit(this.scene, this.terrain, 'gold', 30, -46));
-    this.resourceDeposits.push(new ResourceDeposit(this.scene, this.terrain, 'stone', 46, -46));
-    this.resourceDeposits.push(new ResourceDeposit(this.scene, this.terrain, 'gold', 16, -26));
+    add('gold', 30, -46);
+    add('stone', 46, -46);
+    add('gold', 16, -26);
 
     // Orc Realm Deposits
-    this.resourceDeposits.push(new ResourceDeposit(this.scene, this.terrain, 'gold', -30, 46));
-    this.resourceDeposits.push(new ResourceDeposit(this.scene, this.terrain, 'stone', -46, 46));
-    this.resourceDeposits.push(new ResourceDeposit(this.scene, this.terrain, 'gold', -16, 26));
+    add('gold', -30, 46);
+    add('stone', -46, 46);
+    add('gold', -16, 26);
 
     // Contested Central Plains Deposits
-    this.resourceDeposits.push(new ResourceDeposit(this.scene, this.terrain, 'gold', 8, -6));
-    this.resourceDeposits.push(new ResourceDeposit(this.scene, this.terrain, 'stone', -8, 6));
+    add('gold', 8, -6);
+    add('stone', -8, 6);
   }
 
   /**
@@ -264,6 +470,12 @@ export class GameManager {
   spawnWoodlands() {
     const treeTypes = ['oak', 'pine', 'autumn'];
     const minTreeSpacing = 4.4; // Generous distance between trees for open meadows
+
+    const slots = MAP_START_SLOTS[this.matchConfig.mapId] || MAP_START_SLOTS[DEFAULT_MAP_ID];
+    const courtyards = [...slots.fixed];
+    this.players.forEach(p => {
+      if (p.startPos && !courtyards.some(c => c.x === p.startPos.x && c.z === p.startPos.z)) courtyards.push(p.startPos);
+    });
 
     const spawnCluster = (centerX, centerZ, targetCount, radius, preferredType = 'oak') => {
       let placed = 0;
@@ -289,9 +501,8 @@ export class GameManager {
         if (nearBuilding) continue;
 
         // 3. Keep base courtyards and expansion zones completely clear of wild trees (26 unit radius)
-        const distHumanBase = Math.hypot(x - 32, z - (-30));
-        const distOrcBase = Math.hypot(x - (-32), z - 30);
-        if (distHumanBase < 26.0 || distOrcBase < 26.0) continue;
+        // Sempre as duas bases históricas (NE/SW) + qualquer slot extra ocupado.
+        if (courtyards.some(c => Math.hypot(x - c.x, z - c.z) < 26.0)) continue;
 
         // 4. Never spawn on top of or hugging resource deposits (8.5 unit clearance)
         const nearDeposit = this.resourceDeposits.some(r => {
@@ -312,7 +523,7 @@ export class GameManager {
         if (tooCloseToTree) continue;
 
         const type = Math.random() < 0.65 ? preferredType : treeTypes[Math.floor(Math.random() * treeTypes.length)];
-        this.trees.push(new Tree(this.scene, this.terrain, x, z, type, this.treeManager));
+        this.trees.push(this.registerEntity(new Tree(this.scene, this.terrain, x, z, type, this.treeManager)));
         placed++;
       }
     };
@@ -433,90 +644,86 @@ export class GameManager {
     return true;
   }
 
+  /** Recalcula população e teto de TODOS os jogadores (poucos jogadores × entidades: barato). */
   recalculatePopCap() {
-    let cap = 0;
-    this.buildings.forEach(b => {
-      if (b.isConstructed && !b.isDead && b.faction === 'player') {
-        cap += (b.popGranted || 0);
-      }
-    });
-    this.maxPopulation = cap;
-    this.population = this.units.filter(u => !u.isDead).length;
-  }
-
-  canAfford(cost) {
-    if (cost.wood && this.resources.wood < cost.wood) return false;
-    if (cost.gold && this.resources.gold < cost.gold) return false;
-    if (cost.stone && this.resources.stone < cost.stone) return false;
-    return true;
-  }
-
-  deductResources(cost) {
-    if (cost.wood) this.resources.wood -= cost.wood;
-    if (cost.gold) this.resources.gold -= cost.gold;
-    if (cost.stone) this.resources.stone -= cost.stone;
-  }
-
-  addResource(type, amount) {
-    if (this.resources[type] !== undefined) {
-      this.resources[type] += amount;
+    const players = this.players;
+    for (let i = 0; i < players.length; i++) {
+      players[i].recalculatePop(this);
     }
   }
 
-  spawnUnit(type, x, z, faction = 'player', rallyPoint = null) {
+  // Economia do jogador local (API legada usada por UIManager/InputManager).
+  canAfford(cost) {
+    return this.localPlayer.canAfford(cost);
+  }
+
+  deductResources(cost) {
+    this.localPlayer.deduct(cost);
+  }
+
+  addResource(type, amount) {
+    this.localPlayer.add(type, amount);
+  }
+
+  /**
+   * @param {string} type
+   * @param {number} x
+   * @param {number} z
+   * @param {number|'player'|'enemy'} [owner]  ownerId (ou lado legado, ver resolveOwnerId)
+   * @param {THREE.Vector3|null} [rallyPoint]
+   */
+  spawnUnit(type, x, z, owner = 'player', rallyPoint = null) {
+    const ownerId = this.resolveOwnerId(owner);
     if (this.pathfinder && this.pathfinder.isWater(x, z)) {
       const snapped = this.pathfinder.findNearestWalkable(x, z);
       x = snapped.x;
       z = snapped.z;
     }
-    const unit = new Unit(this.scene, this.terrain, type, x, z, faction);
-    unit.gameManager = this;
+    const unit = new Unit(this.scene, this.terrain, type, x, z, ownerId, this);
+    this._addUnit(unit);
 
-    // Apply active forge upgrades for this faction to new units
-    if (this.researchedUpgrades[faction]) {
-      this.researchedUpgrades[faction].forEach(upgId => {
+    const player = this.getPlayer(ownerId);
+    if (player) {
+      // Apply active forge upgrades of the owner to new units
+      player.researchedUpgrades.forEach(upgId => {
         this.applyUpgradeToUnit(unit, upgId);
       });
-    }
-
-    if (faction === 'player') {
-      this.units.push(unit);
-      this.population++;
-      if (rallyPoint) {
+      player.recalculatePop(this);
+      // Ponto de reunião: só para jogadores humanos (a IA sempre ignorou o rally no spawn;
+      // mantido para a partida 1×1 continuar idêntica).
+      if (rallyPoint && !player.isAI) {
         unit.moveTo(rallyPoint.x, rallyPoint.z, this);
       }
-    } else {
-      this.enemies.push(unit);
-      if (this.enemyAI) this.enemyAI.recalculatePop();
     }
     return unit;
   }
 
-  isUpgradeResearched(upgradeId, faction = 'player') {
-    return this.researchedUpgrades[faction]?.has(upgradeId) || false;
+  isUpgradeResearched(upgradeId, owner = 'player') {
+    const player = this.getPlayer(this.resolveOwnerId(owner));
+    return player ? player.researchedUpgrades.has(upgradeId) : false;
   }
 
-  isUpgradeResearching(upgradeId, faction = 'player') {
-    return this.buildings.some(b => b.faction === faction && b.currentResearch && b.currentResearch.id === upgradeId);
+  isUpgradeResearching(upgradeId, owner = 'player') {
+    const ownerId = this.resolveOwnerId(owner);
+    return this.buildings.some(b => b.ownerId === ownerId && b.currentResearch && b.currentResearch.id === upgradeId);
   }
 
-  completeUpgrade(upgradeId, faction = 'player') {
-    if (!this.researchedUpgrades[faction]) {
-      this.researchedUpgrades[faction] = new Set();
-    }
-    this.researchedUpgrades[faction].add(upgradeId);
+  completeUpgrade(upgradeId, owner = 'player') {
+    const ownerId = this.resolveOwnerId(owner);
+    const player = this.getPlayer(ownerId);
+    if (!player) return;
+    player.researchedUpgrades.add(upgradeId);
 
-    // Apply to all currently alive units of this faction
-    const list = faction === 'player' ? this.units : this.enemies;
-    list.forEach(u => {
+    // Apply to all currently alive units of this owner
+    this.getUnitsOf(ownerId).forEach(u => {
       if (!u.isDead) {
         this.applyUpgradeToUnit(u, upgradeId);
       }
     });
 
-    if (faction === 'player') {
+    if (player.isLocal) {
       const cfg = UPGRADE_CONFIG[upgradeId];
-      const factionType = this.playerFaction === 'orc' ? 'orc' : 'human';
+      const factionType = player.factionId === 'orc' ? 'orc' : 'human';
       const upgName = cfg?.name[factionType] || upgradeId;
       this.uiManager?.showNotification(`🔥 Melhoria forjada: ${upgName}!`);
     }
@@ -524,9 +731,9 @@ export class GameManager {
 
   applyUpgradeToUnit(unit, upgradeId = null) {
     if (!upgradeId) {
-      const faction = unit.faction || 'player';
-      if (this.researchedUpgrades && this.researchedUpgrades[faction]) {
-        this.researchedUpgrades[faction].forEach(id => {
+      const player = this.getPlayer(unit.ownerId);
+      if (player) {
+        player.researchedUpgrades.forEach(id => {
           this.applyUpgradeToUnit(unit, id);
         });
       }
@@ -544,43 +751,48 @@ export class GameManager {
     }
   }
 
-  createBuilding(type, x, z, isConstructed = true, faction = 'player') {
+  /**
+   * @param {number|'player'|'enemy'} [owner]  ownerId (ou lado legado, ver resolveOwnerId)
+   */
+  createBuilding(type, x, z, isConstructed = true, owner = 'player') {
+    const ownerId = this.resolveOwnerId(owner);
     let b;
     switch (type) {
       case 'great_hall':
-        b = new GreatHall(this.scene, this.terrain, x, z, isConstructed, faction);
+        b = new GreatHall(this.scene, this.terrain, x, z, isConstructed, ownerId);
         break;
       case 'orc_barracks':
-        b = new OrcBarracks(this.scene, this.terrain, x, z, isConstructed, faction);
+        b = new OrcBarracks(this.scene, this.terrain, x, z, isConstructed, ownerId);
         break;
       case 'pig_farm':
-        b = new PigFarm(this.scene, this.terrain, x, z, isConstructed, faction);
+        b = new PigFarm(this.scene, this.terrain, x, z, isConstructed, ownerId);
         break;
       case 'orc_house':
-        b = new OrcHouse(this.scene, this.terrain, x, z, isConstructed, faction);
+        b = new OrcHouse(this.scene, this.terrain, x, z, isConstructed, ownerId);
         break;
       case 'orc_watchtower':
-        b = new OrcWatchtower(this.scene, this.terrain, x, z, isConstructed, faction);
+        b = new OrcWatchtower(this.scene, this.terrain, x, z, isConstructed, ownerId);
         break;
       case 'orc_lumber_mill':
-        b = new OrcLumberMill(this.scene, this.terrain, x, z, isConstructed, faction);
+        b = new OrcLumberMill(this.scene, this.terrain, x, z, isConstructed, ownerId);
         break;
       case 'orc_forge':
-        b = new OrcForge(this.scene, this.terrain, x, z, isConstructed, faction);
+        b = new OrcForge(this.scene, this.terrain, x, z, isConstructed, ownerId);
         break;
       case 'forge':
-        b = new HumanForge(this.scene, this.terrain, x, z, isConstructed, faction);
+        b = new HumanForge(this.scene, this.terrain, x, z, isConstructed, ownerId);
         break;
       default:
-        b = new Building(this.scene, this.terrain, type, x, z, isConstructed, faction);
+        b = new Building(this.scene, this.terrain, type, x, z, isConstructed, ownerId);
         break;
     }
     b.gameManager = this;
+    this.registerEntity(b, ownerId);
     return b;
   }
 
   buildNewBuilding(type, x, z) {
-    const b = this.createBuilding(type, x, z, false, 'player');
+    const b = this.createBuilding(type, x, z, false, this._localPlayerId);
     this.buildings.push(b);
     this.soundManager.playBuildPlace();
     this.recalculatePopCap();
@@ -639,10 +851,11 @@ export class GameManager {
     return nearest;
   }
 
-  findNearestDropoff(pos, resourceType, buildings = this.buildings, faction = 'player') {
+  /** Depósito de entrega mais próximo que pertence a `ownerId` (só o próprio dono, como no WC2). */
+  findNearestDropoff(pos, resourceType, buildings = this.buildings, ownerId = this._localPlayerId) {
     const list = buildings || this.buildings || [];
     const valid = list.filter(b => {
-      if (!b.isConstructed || b.faction !== faction || b.isDead) return false;
+      if (!b.isConstructed || b.ownerId !== ownerId || b.isDead) return false;
       return isDropoffFor(b.type, resourceType);
     });
 
@@ -674,11 +887,11 @@ export class GameManager {
     this.clearSelection();
     if (!entity) return;
 
-    if (entity instanceof Unit && entity.faction === 'player') {
+    if (entity instanceof Unit && entity.ownerId === this._localPlayerId) {
       entity.setSelected(true);
       this.selectedUnits.push(entity);
       this.soundManager.playSelect();
-    } else if (entity instanceof Building && entity.faction === 'player') {
+    } else if (entity instanceof Building && entity.ownerId === this._localPlayerId) {
       entity.setSelected(true);
       this.selectedBuilding = entity;
       this.soundManager.playSelect();
@@ -701,7 +914,7 @@ export class GameManager {
     const maxY = Math.max(screenRect.y1, screenRect.y2);
 
     this.units.forEach(u => {
-      if (u.isDead || u.faction !== 'player') return;
+      if (u.isDead || u.ownerId !== this._localPlayerId) return;
       const screenPos = u.mesh.position.clone().project(camera);
       const sx = ((screenPos.x + 1) * window.innerWidth) / 2;
       const sy = ((-screenPos.y + 1) * window.innerHeight) / 2;
@@ -734,8 +947,8 @@ export class GameManager {
 
     if (entityUnderCursor) {
       const e = entityUnderCursor;
-      // Right-clicked an enemy: Attack!
-      if ((e instanceof Unit && e.faction === 'enemy') || (e instanceof Building && e.faction === 'enemy')) {
+      // Right-clicked a hostile unit/building: Attack!
+      if ((e instanceof Unit || e instanceof Building) && this.isHostile(this._localPlayerId, e.ownerId)) {
         this.selectedUnits.forEach(u => u.orderAttack(e));
         return;
       }
@@ -760,7 +973,7 @@ export class GameManager {
         return;
       }
       // Right-clicked an incomplete building: Build!
-      if (e instanceof Building && !e.isConstructed && e.faction === 'player') {
+      if (e instanceof Building && !e.isConstructed && e.ownerId === this._localPlayerId) {
         this.selectedUnits.forEach(u => {
           if (u.type === 'villager' || u.type === 'peon') u.orderBuild(e);
         });
@@ -797,28 +1010,61 @@ export class GameManager {
 
   // --- GAME LOOP & AI ---
 
+  /** O jogador ainda tem um centro de comando (HQ) de pé? (regra de derrota atual) */
+  _hasLivingHQ(ownerId) {
+    const buildings = this.buildings;
+    for (let i = 0; i < buildings.length; i++) {
+      const b = buildings[i];
+      if (b.ownerId === ownerId && !b.isDead && getBuildingDef(b.type).role === 'hq') return true;
+    }
+    return false;
+  }
+
+  /**
+   * Derrota: jogador sem HQ. Fim de jogo: jogador local derrotado (derrota) ou só um time
+   * vivo (vitória do time local). Retorna true se a partida acabou neste frame.
+   */
+  _updateVictoryConditions() {
+    const newlyDefeated = [];
+    const players = this.players;
+    for (let i = 0; i < players.length; i++) {
+      const p = players[i];
+      if (!p.defeated && !this._hasLivingHQ(p.id)) {
+        p.defeated = true;
+        newlyDefeated.push(p);
+      }
+    }
+
+    const local = this.localPlayer;
+    if (local.defeated) {
+      this.isGameOver = true;
+      this.gameWon = false;
+      return true;
+    }
+
+    if (this.playerRegistry.aliveTeams().size <= 1) {
+      if (!this.gameWon) {
+        this.gameWon = true;
+        this.isGameOver = true;
+        this.soundManager.playVictory();
+      }
+      return true;
+    }
+
+    // Partida continua (FFA/times): avisa quem caiu. A IA derrotada para de jogar (ver update).
+    newlyDefeated.forEach(p => {
+      this.uiManager?.showNotification(`☠️ ${p.name} foi derrotado!`);
+    });
+    return false;
+  }
+
   update(delta) {
     if (this.isPaused || this.isGameOver) return;
     const dt = delta * this.gameSpeed;
     this.gameTime += dt;
 
     // Check Win/Loss conditions
-    const playerHQ = this.buildings.find(b => (b.type === 'castle' || b.type === 'great_hall') && b.faction === 'player');
-    if (!playerHQ || playerHQ.isDead) {
-      this.isGameOver = true;
-      this.gameWon = false;
-      return;
-    }
-
-    const enemyHQ = this.buildings.find(b => (b.type === 'castle' || b.type === 'great_hall') && b.faction === 'enemy');
-    if (!enemyHQ || enemyHQ.isDead) {
-      if (!this.gameWon) {
-        this.gameWon = true;
-        this.isGameOver = true;
-        this.soundManager.playVictory();
-      }
-      return;
-    }
+    if (this._updateVictoryConditions()) return;
 
     // Update Trees
     this.trees.forEach(t => t.update(dt, this.particleSystem));
@@ -827,20 +1073,17 @@ export class GameManager {
     for (let i = this.arrows.length - 1; i >= 0; i--) {
       this.arrows[i].update(dt);
       if (this.arrows[i].isDead) {
-        this.arrows.splice(i, 1);
+        const deadArrow = this.arrows.splice(i, 1)[0];
+        this.unregisterEntity(deadArrow);
       }
     }
 
-    // Update Units and Buildings
-    if (!this._allUnits) this._allUnits = [];
-    const allUnits = this._allUnits;
-    allUnits.length = 0;
-    for (let i = 0; i < this.units.length; i++) allUnits.push(this.units[i]);
-    for (let i = 0; i < this.enemies.length; i++) allUnits.push(this.enemies[i]);
+    // Lista única de unidades (todos os jogadores). Construções filtram alvos por isHostile.
+    const allUnits = this.allUnits;
 
     // Update Buildings
     this.buildings.forEach(b => {
-      b.update(dt, this, this.soundManager, this.particleSystem, this.arrows, b.faction === 'player' ? this.enemies : this.units, allUnits);
+      b.update(dt, this, this.soundManager, this.particleSystem, this.arrows, allUnits, allUnits);
     });
 
     // Clean dead buildings
@@ -848,38 +1091,37 @@ export class GameManager {
       if (this.buildings[i].isDead) {
         const deadB = this.buildings.splice(i, 1)[0];
         if (deadB.dispose) deadB.dispose();
+        this.unregisterEntity(deadB);
         this.recalculatePopCap();
-        if (this.enemyAI) this.enemyAI.recalculatePop();
       }
     }
 
-    // Update Units
-    this.units.forEach(u => {
-      u.update(dt, this, this.soundManager, this.particleSystem, this.arrows, allUnits, this.buildings);
-    });
-    this.enemies.forEach(e => {
-      e.update(dt, this, this.soundManager, this.particleSystem, this.arrows, allUnits, this.buildings);
-    });
+    // Update Units (tamanho fixado: unidades criadas neste frame só atualizam no próximo)
+    const unitCount = allUnits.length;
+    for (let i = 0; i < unitCount; i++) {
+      allUnits[i].update(dt, this, this.soundManager, this.particleSystem, this.arrows, allUnits, this.buildings);
+    }
 
     // Resolve Collisions: Units cannot walk through buildings, deposits, trees, or each other
     this.resolveBuildingCollisions();
     this.resolveUnitCollisions();
 
-    // Autonomous Computer Opponent AI (Utility AI Director)
-    if (this.aiDirector) {
-      this.aiDirector.update(dt);
-    } else if (this.enemyAI) {
-      this.enemyAI.update(dt);
+    // Autonomous Computer Opponent AI (Utility AI Director): um por jogador de IA ainda vivo
+    for (let i = 0; i < this.aiDirectors.length; i++) {
+      const director = this.aiDirectors[i];
+      if (director.player && director.player.defeated) continue;
+      director.update(dt);
     }
 
     // Update Fog of War (reveals explored territory & culls unexplored enemies)
     if (this.fogOfWar) {
+      const localId = this._localPlayerId;
       this.fogOfWar.update(
         dt,
         this.units,
-        this.buildings.filter(b => b.faction === 'player'),
+        this.buildings.filter(b => b.ownerId === localId),
         this.enemies,
-        this.buildings.filter(b => b.faction === 'enemy')
+        this.buildings.filter(b => this.isHostile(localId, b.ownerId))
       );
     }
 
@@ -889,18 +1131,13 @@ export class GameManager {
     }
 
     // Clean dead units (waits for death collapse animation if canRemove is false)
-    for (let i = this.units.length - 1; i >= 0; i--) {
-      if (this.units[i].isDead && this.units[i].canRemove !== false) {
-        const deadU = this.units.splice(i, 1)[0];
+    for (let i = allUnits.length - 1; i >= 0; i--) {
+      const u = allUnits[i];
+      if (u.isDead && u.canRemove !== false) {
+        const deadU = this._removeUnitAt(i);
         if (deadU.dispose) deadU.dispose();
-        this.recalculatePopCap();
-      }
-    }
-    for (let i = this.enemies.length - 1; i >= 0; i--) {
-      if (this.enemies[i].isDead && this.enemies[i].canRemove !== false) {
-        const deadE = this.enemies.splice(i, 1)[0];
-        if (deadE.dispose) deadE.dispose();
-        if (this.enemyAI) this.enemyAI.recalculatePop();
+        const owner = this.getPlayer(deadU.ownerId);
+        if (owner) owner.recalculatePop(this);
       }
     }
   }
@@ -952,7 +1189,7 @@ export class GameManager {
 
     // Direct delivery upon colliding with dropoff building!
     const isDropoff = isDropoffFor(b.type, unit.carrying ? unit.carrying.type : null) &&
-      (b.faction === unit.faction);
+      (b.ownerId === unit.ownerId);
 
     if (unit.state === 'returning' && isDropoff) {
       unit.depositResources(this, this.soundManager, this.particleSystem);
@@ -982,11 +1219,9 @@ export class GameManager {
       }
     };
 
-    for (let i = 0; i < this.units.length; i++) {
-      checkCollisionsForUnit(this.units[i]);
-    }
-    for (let i = 0; i < this.enemies.length; i++) {
-      checkCollisionsForUnit(this.enemies[i]);
+    const all = this.allUnits;
+    for (let i = 0; i < all.length; i++) {
+      checkCollisionsForUnit(all[i]);
     }
   }
 
@@ -995,13 +1230,10 @@ export class GameManager {
     const arr = this._collisionUnits;
     arr.length = 0;
 
-    for (let i = 0; i < this.units.length; i++) {
-      const u = this.units[i];
+    const all = this.allUnits;
+    for (let i = 0; i < all.length; i++) {
+      const u = all[i];
       if (!u.isDead) arr.push(u);
-    }
-    for (let i = 0; i < this.enemies.length; i++) {
-      const e = this.enemies[i];
-      if (!e.isDead) arr.push(e);
     }
 
     const count = arr.length;

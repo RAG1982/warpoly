@@ -17,6 +17,7 @@ import { InputManager } from '../src/core/InputManager.js';
 import { GameManager } from '../src/core/GameManager.js';
 import { BUILDING_TRAINABLE_UNITS } from '../src/ui/UIManager.js';
 import { AIDirector } from '../src/ai/AIDirector.js';
+import { Player } from '../src/sim/Player.js';
 import { UPGRADE_CONFIG, FORGE_UPGRADES } from '../src/core/UpgradeConfig.js';
 import {
   getUnitDef, getBuildingDef, getCost, VISION_RADII, DEFAULT_UNIT, DEFAULT_BUILDING,
@@ -340,13 +341,15 @@ for (const t of BUILDING_TYPES) {
     check(`GameManager.dropoff(${t}, ${r})`, OLD_isDropoff(t, r), GameManager.prototype.findNearestDropoff.call(
       { buildings: [] },
       { distanceTo: () => 1 }, r,
-      [{ type: t, isConstructed: true, faction: 'player', isDead: false, mesh: { position: {} } }],
-      'player'
+      [{ type: t, isConstructed: true, ownerId: 0, isDead: false, mesh: { position: {} } }],
+      0
     ) !== null);
   }
   for (const u of UNIT_TYPES) {
-    const fakeBld = { type: t, queue: [], faction: 'player' };
-    const gm = { buildings: [], canAfford: () => true, deductResources: () => {}, population: 0, maxPopulation: 99 };
+    // F2-01: queueUnit cobra do Player dono (gm.getPlayer(ownerId)), não mais do GameManager.
+    const fakeBld = Object.assign(Object.create(Building.prototype), { type: t, queue: [], ownerId: 0, gameManager: null });
+    const owner = { canAfford: () => true, deduct: () => {}, population: 0, maxPopulation: 99 };
+    const gm = { buildings: [], getPlayer: () => owner };
     const oldOk = OLD_queueAllowed(t, u) && !!OLD_UNIT_TRAIN_CONFIG[u];
     check(`Building.queueUnit(${t}, ${u})`, oldOk, Building.prototype.queueUnit.call(fakeBld, u, gm));
   }
@@ -370,7 +373,10 @@ for (const [id, o] of Object.entries(OLD_UPGRADES)) {
 // --- IA (B3: custos são a única diferença esperada) ---
 for (const faction of ['orc', 'human']) {
   const o = OLD_aiDirector(faction);
-  const ai = new AIDirector({}, faction);
+  // F2-01: a IA recebe um playerId e lê a facção do Player.
+  // Player real com os padrões (recursos iniciais de src/data) = o que o GameManager cria para a IA.
+  const aiPlayer = new Player({ id: 1, factionId: faction, isAI: true });
+  const ai = new AIDirector({ getPlayer: () => aiPlayer }, 1);
   for (const k of Object.keys(o)) {
     if (k === 'costs') continue;
     check(`AIDirector(${faction}).${k}`, o[k], ai[k]);

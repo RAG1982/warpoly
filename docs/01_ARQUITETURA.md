@@ -15,7 +15,7 @@
 | Testes / lint | Nenhum |
 | Dev server | `npx vite --port 5173` (config em `.claude/launch.json`, nome `warpoly-dev`) |
 
-Parâmetros de URL úteis: `?skipPreload` (pula o preloader), `?faction=orc` (joga de Orc), `?settings=1` (abre painel de config).
+Parâmetros de URL úteis: `?skipPreload` (pula o preloader), `?faction=orc` (joga de Orc), `?ffa=1` (FFA de teste: você × 2 IAs, 3 times), `?seed=N` (seed da MatchConfig; ainda não usada pela simulação — F2-03), `?settings=1` (abre painel de config).
 Debug: `window.game` expõe o `GameApp` (ex.: `game.gameManager`, `game.sceneManager.renderer.info`). No inspetor: `window.inspectorApp`.
 
 ## Mapa de diretórios
@@ -39,8 +39,13 @@ src/
     GLTFBuildingLoader.js     (importado só por entities/buildings/orc/GreatHall.js)
     (EnemyAI.js removido em F0-03; substituído por ai/AIDirector)
   data/                       FONTE ÚNICA de balanceamento (F0-06): units, buildings, upgrades, factions + helpers (index.js)
+  sim/                        Estado puro da simulação, sem three.js/DOM (F2-01; testado em tests/unit)
+    Player.js                 Jogador: facção, time, cor, recursos, população, pesquisas, derrota
+    PlayerRegistry.js         players[], getPlayer, localPlayer, isHostile/isAlly por time (matriz)
+    EntityIds.js              Contador monotônico, EntityRegistry (id → entidade), NEUTRAL_OWNER_ID = −1
+    MatchConfig.js            {mapId, seed, players[]}, slots iniciais do mapa, layout da base inicial
   ai/
-    AIDirector.js             Utility AI (tick 1s): U_eco, U_housing, U_def, U_mil
+    AIDirector.js             Utility AI (tick 1s): U_eco, U_housing, U_def, U_mil — um por jogador de IA (playerId)
     AIEconomyManager.js       Trabalhadores, construção, rebalanceamento de coleta
     AIMilitaryManager.js      Recrutamento, defesa, ondas de ataque (limiar 3–6 tropas)
   entities/
@@ -76,26 +81,43 @@ animate() [rAF, delta máx 0.1s, sem timestep fixo]
 ```
 
 `GameManager.update(dt)`:
-1. Checa vitória/derrota (só pela existência do HQ: `castle` / `great_hall`).
+1. Vitória/derrota: jogador sem HQ (construção com `role: 'hq'`) fica `defeated`. Jogador local derrotado → derrota; só um time vivo → vitória.
 2. Árvores → projéteis → construções (`Building.update`) → remove construções mortas.
-3. Unidades do jogador e inimigas (`Unit.update`).
+3. Todas as unidades (`gm.allUnits`, ordem de spawn) (`Unit.update`).
 4. `resolveBuildingCollisions` (unidade × todas construções/depósitos/árvores) e `resolveUnitCollisions` (**O(n²)**).
-5. `aiDirector.update(dt)`.
-6. `fogOfWar.update` (10 Hz).
-7. Limpeza de mortos.
+5. `aiDirectors[i].update(dt)` para cada IA não derrotada.
+6. `fogOfWar.update` (10 Hz) com as unidades/construções do jogador local e as hostis a ele.
+7. Limpeza de mortos (remove de `allUnits`, da lista do dono e de `entitiesById`).
 
-## Modelo de dados atual
+## Modelo de dados (F2-01)
 
-- **Somente dois lados**: strings `'player'` e `'enemy'`. Listas separadas `gm.units` / `gm.enemies`.
-- Recursos do jogador em `GameManager.resources`; recursos da IA em `AIDirector.resources` (código duplicado com `if (faction === 'enemy')` espalhado em `Building` e `Unit`).
-- Facção do jogador: `gm.playerFaction` (`'human'|'orc'`) — definida por URL, recria o mapa.
-- Estatísticas **duplicadas em vários lugares** (fonte de bugs):
-  - `Unit.getUnitStats()` (hp, dano, alcance…)
-  - `Building.getBuildingStats()` + `BUILDING_BUILD_CONFIG` + `InputManager.getCost()` (custos repetidos 3×)
-  - `UNIT_TRAIN_CONFIG` (custos de treino) vs `AIDirector.costs` (divergentes!)
-  - `FogOfWar.visionRadii`, `Building.getBuildingHeight()`, `Unit.getHealthBarHeight()`
-  - `UIManager.BUILDING_TRAINABLE_UNITS`, `WORKER_BUILD_LIST`
-- Mapa: coordenadas de bases, depósitos, clusters de árvores e vaus **hardcoded** em `GameManager` e `Terrain`; minimapa redesenha o rio/vaus manualmente.
+### Jogadores
+- `MatchConfig` (`src/sim/MatchConfig.js`): `{ mapId, seed, players: [{ id, name, factionId, team, color, isAI, isLocal, startSlot }] }`.
+  `main.js` monta a config a partir da URL (`matchConfigFromSearch`) e a passa ao `GameManager`. Padrão: 1×1, jogador local = `?faction` ou humano (id 0, time 0), IA = a outra facção (id 1, time 1). `?ffa=1` acrescenta a IA 2 (facção do jogador local, time 2, slot 2).
+- `Player` (`src/sim/Player.js`): `resources {wood, gold, stone}`, `population`, `maxPopulation`, `researchedUpgrades: Set`, `defeated`, `startPos`; métodos `canAfford`, `deduct`, `add` (tipo ou custo inteiro), `recalculatePop(gm)`.
+- `PlayerRegistry`: `getPlayer(id)`, `localPlayer`, `isHostile(a, b)` (times diferentes; matriz pré-calculada, usada nas varreduras O(n²)), `isAlly(a, b)`, `aliveTeams()`. O dono neutro (−1) não é hostil nem aliado de ninguém.
+- `GameManager` expõe `players`, `getPlayer`, `localPlayer`, `localPlayerId`, `isHostile`, `isAlly`, `aiDirectors[]` (um `AIDirector(gm, playerId, baseCenter)` por IA; `aiDirector` = o primeiro).
+- A IA não tem cópia própria de recursos/população: `AIDirector.resources/population/maxPopulation` são getters do `Player`.
+- Toda cobrança/crédito passa pelo dono: `Building.queueUnit/cancelQueuedUnit/startResearch/cancelResearch`, renda passiva, `Unit.depositResources`, construção concluída e `spawnUnit` usam `gm.getPlayer(ownerId)`. Pesquisas (`researchedUpgrades`) são por jogador.
+
+### Entidades
+- Toda `Unit`, `Building`, `Tree`, `ResourceDeposit` e projétil (`Arrow`) tem `id` numérico estável (contador monotônico, nunca reaproveitado na vida do `GameManager`) e `ownerId` (−1 = natureza/neutro). `gm.entitiesById` (Map) é mantido no spawn/criação e na remoção (morte, fim do projétil, `resetMap`).
+- Hostilidade: `Unit` (aggro, busca de alvo, retaliação, pedido de ajuda a aliados) e `Building` (torres) usam `gm.isHostile(this.ownerId, outro.ownerId)` / `isAlly`. Entrega de recursos só em construções do **mesmo dono**.
+- Listas: `gm.allUnits` é a lista única (fonte de verdade). `gm.getUnitsOf(ownerId)` (mantida em add/remove) e `gm.getHostileUnitsOf(ownerId)` (cache invalidado em add/remove) são visões derivadas. **Não modifique os arrays retornados.**
+- Bases iniciais: `initMapEntities` cria HQ + serraria + casa + 5 unidades por jogador a partir do slot (`MAP_START_SLOTS`: 0 = NE (32,−30), 1 = SW (−32,30); slots ≥ 2 = primeira posição candidata em que a base inteira passa em `canPlaceBuilding` e fica a ≥ 40 u das outras — hoje (−14,−46), já que (−32,−30) e (32,30) caem no rio). O layout (`START_LAYOUT`) é espelhado por slot e reproduz as posições antigas; os tipos vêm de `FACTIONS[f].startingBase`. Slots extras ganham 1 mina de ouro e 1 pedreira próprias.
+
+### Dívidas registradas (F2-01)
+- **Getter `faction`** em `Unit`/`Building`: `'player'` se o dono é o jogador local, `'enemy'` caso contrário. Mantido para `UIManager`, `InputManager` e o anel de seleção. Lógica nova deve usar `ownerId` + `isHostile/isAlly`. Remover quando a UI/Input migrarem (F6/F2-02).
+- **Visões derivadas `gm.units` / `gm.enemies`**: `units` = unidades do jogador local; `enemies` = unidades hostis ao local (aliados não locais não aparecem em nenhuma das duas). Usadas por UI, minimapa, `InputManager`, névoa e bench. Escolhidas em vez de trocar tudo para `allUnits` de uma vez para não mexer nos arquivos das lanes UI/GAME/PERF.
+- **API econômica legada no `GameManager`** (`resources`, `population`, `maxPopulation`, `canAfford`, `deductResources`, `addResource`, `playerFaction`, `researchedUpgrades {player, enemy}`, `enemyAI`): tudo delega ao jogador local (ou ao primeiro hostil, para `enemy`).
+- **Lado legado aceito como dono**: `spawnUnit`/`createBuilding`/`isUpgradeResearched`… aceitam `'player'`/`'enemy'` (`gm.resolveOwnerId`), e os construtores de `Unit`/`Building` aceitam `'player'`→0 / `'enemy'`→1 (`legacyOwnerId`, usado pelo inspetor e pelo bench).
+- **Rally no spawn só para jogadores não-IA**: a IA sempre ignorou o ponto de reunião ao treinar; mantido para a partida 1×1 ficar idêntica (revisar na F5).
+- **Jogador derrotado** em FFA para de ser controlado pela IA, mas as unidades restantes continuam no mapa (no WC2 elas somem). Sem modo espectador: se o jogador local cai, a partida acaba.
+- **Névoa** só considera a visão do jogador local (sem visão compartilhada com aliados). Cor do jogador (`Player.color`) ainda não é usada nos modelos/minimapa.
+- `MatchConfig.seed` é gerada/lida mas a simulação ainda usa `Math.random` (F2-03). Slots e jazidas extras ainda são código (F2-05 move para `src/data/maps`).
+
+### Ainda duplicado / hardcoded
+- Mapa: coordenadas de depósitos, clusters de árvores e vaus **hardcoded** em `GameManager` e `Terrain`; minimapa redesenha o rio/vaus manualmente (F2-05).
 
 ## Pipeline de assets
 
@@ -108,5 +130,5 @@ animate() [rAF, delta máx 0.1s, sem timestep fixo]
 
 - `Unit.js` importa `UnitAnimator` de `src/inspector/` (camada invertida).
 - `GameManager` recebe `uiManager` e `sceneManager` por atribuição posterior (`gm.uiManager = …`).
-- `Building`/`Unit` chamam `gameManager.aiDirector` diretamente para creditar/debitar recursos da IA.
+- `Building`/`Unit` precisam de `gameManager` (injetado em `createBuilding`/`spawnUnit`) para achar o `Player` dono e a diplomacia; sem ele caem em regras locais (dono igual/diferente).
 - HUD depende de IDs fixos do `index.html`.

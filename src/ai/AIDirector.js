@@ -1,7 +1,7 @@
 import * as THREE from 'three';
 import { AIEconomyManager } from './AIEconomyManager.js';
 import { AIMilitaryManager } from './AIMilitaryManager.js';
-import { FACTIONS, STARTING_RESOURCES, getBuildingDef, getCost, getTrainCost } from '../data/index.js';
+import { FACTIONS, getBuildingDef, getCost, getTrainCost } from '../data/index.js';
 
 /**
  * AIDirector (Diretor de IA Oponente - Utility AI System)
@@ -14,11 +14,17 @@ import { FACTIONS, STARTING_RESOURCES, getBuildingDef, getCost, getTrainCost } f
 export class AIDirector {
   /**
    * @param {import('../core/GameManager.js').GameManager} gameManager
-   * @param {'orc'|'human'} faction
+   * @param {number} playerId  id do Player controlado por esta IA (F2-01): facção, recursos e
+   *                           população vêm de `gm.getPlayer(playerId)` — sem cópia própria.
    * @param {THREE.Vector2} baseCenter
    */
-  constructor(gameManager, faction = 'orc', baseCenter = new THREE.Vector2(-32, 30)) {
+  constructor(gameManager, playerId, baseCenter = new THREE.Vector2(-32, 30)) {
     this.gm = gameManager;
+    this.playerId = playerId;
+    /** @type {import('../sim/Player.js').Player} */
+    this.player = gameManager.getPlayer(playerId);
+    if (!this.player) throw new Error(`AIDirector: jogador ${playerId} inexistente`);
+    const faction = this.player.factionId;
     this.faction = faction;
     this.baseCenter = baseCenter;
 
@@ -52,13 +58,6 @@ export class AIDirector {
       forge: getCost(this.forgeType)
     };
 
-    // AI Economy starting resources (identical to player)
-    this.resources = { ...STARTING_RESOURCES };
-
-    // Population State (starts at 5/15 with 1 HQ and 1 Farm/House)
-    this.population = 5;
-    this.maxPopulation = 15;
-
     // Tick Timer (Exact 1.0 second evaluation interval)
     this.tickTimer = 0;
     this.TICK_INTERVAL = 1.0;
@@ -76,31 +75,54 @@ export class AIDirector {
     this.militaryManager = new AIMilitaryManager(this);
   }
 
+  // --- Economia: tudo delega ao Player (F2-01) ---
+
+  /** Recursos do jogador da IA (mesmo objeto de Player.resources). */
+  get resources() {
+    return this.player.resources;
+  }
+
+  get population() {
+    return this.player.population;
+  }
+
+  get maxPopulation() {
+    return this.player.maxPopulation;
+  }
+
   canAfford(cost) {
-    if (cost.wood && this.resources.wood < cost.wood) return false;
-    if (cost.gold && this.resources.gold < cost.gold) return false;
-    if (cost.stone && this.resources.stone < cost.stone) return false;
-    return true;
+    return this.player.canAfford(cost);
   }
 
   deduct(cost) {
-    if (cost.wood) this.resources.wood -= cost.wood;
-    if (cost.gold) this.resources.gold -= cost.gold;
-    if (cost.stone) this.resources.stone -= cost.stone;
+    this.player.deduct(cost);
   }
 
   addResource(type, amount) {
-    if (this.resources[type] !== undefined) {
-      this.resources[type] += amount;
-    }
+    this.player.add(type, amount);
+  }
+
+  /** Unidades próprias (vivas ou morrendo). */
+  getOwnUnits() {
+    return this.gm.getUnitsOf(this.playerId);
+  }
+
+  /** Unidades de jogadores hostis a esta IA. */
+  getHostileUnits() {
+    return this.gm.getHostileUnitsOf(this.playerId);
+  }
+
+  /** Construção pertence a esta IA. */
+  owns(entity) {
+    return entity.ownerId === this.playerId;
   }
 
   /**
-   * Returns current count of living enemy combat units
+   * Returns current count of living own combat units
    * @returns {number}
    */
   getCombatUnitCount() {
-    const enemies = this.gm.enemies;
+    const enemies = this.getOwnUnits();
     const lenE = enemies.length;
     const workerType = this.workerType;
     let count = 0;
@@ -122,7 +144,7 @@ export class AIDirector {
     const lenB = buildings.length;
     for (let i = 0; i < lenB; i++) {
       const b = buildings[i];
-      if (b.faction === 'enemy' && b.type === this.barracksType && b.isConstructed && !b.isDead) {
+      if (b.ownerId === this.playerId && b.type === this.barracksType && b.isConstructed && !b.isDead) {
         return b;
       }
     }
@@ -133,42 +155,18 @@ export class AIDirector {
    * Recalculates total population and population capacity strictly from living entities
    */
   recalculatePop() {
-    let cap = 0;
-    const buildings = this.gm.buildings;
-    const lenB = buildings.length;
-
-    for (let i = 0; i < lenB; i++) {
-      const b = buildings[i];
-      if (b.faction === 'enemy' && !b.isDead && b.isConstructed) {
-        if (b.popGranted) {
-          cap += b.popGranted;
-        }
-      }
-    }
-
-    this.maxPopulation = cap;
-
-    let livingCount = 0;
-    const enemies = this.gm.enemies;
-    const lenE = enemies.length;
-    for (let i = 0; i < lenE; i++) {
-      if (!enemies[i].isDead) {
-        livingCount++;
-      }
-    }
-    this.population = livingCount;
+    this.player.recalculatePop(this.gm);
   }
 
   /**
    * Evaluates dynamic utility curves based on real-time game state
    */
   evaluateUtilities() {
-    const enemies = this.gm.enemies;
-    const playerUnits = this.gm.units;
-    const buildings = this.gm.buildings;
+    const enemies = this.getOwnUnits();
+    const playerUnits = this.getHostileUnits();
 
     // --- 1. Defense Utility (U_def) ---
-    // Detect player units threatening enemy base territory (within 26 units of base center)
+    // Detect hostile units threatening this AI's base territory (within 26 units of base center)
     let intrudersNearBase = 0;
     const numPlayerUnits = playerUnits.length;
     for (let i = 0; i < numPlayerUnits; i++) {

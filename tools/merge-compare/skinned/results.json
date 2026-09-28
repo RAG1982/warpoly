@@ -1,0 +1,117 @@
+{
+  "units": {
+    "knight": {
+      "skin0_f103": {
+        "meshes": 41,
+        "skinnedMeshes": 0,
+        "materials": 14,
+        "tris": 1512
+      },
+      "skin1_f103b": {
+        "meshes": 19,
+        "skinnedMeshes": 19,
+        "materials": 14,
+        "tris": 1512
+      }
+    },
+    "archer": {
+      "skin0_f103": {
+        "meshes": 54,
+        "skinnedMeshes": 0,
+        "materials": 16,
+        "tris": 3188
+      },
+      "skin1_f103b": {
+        "meshes": 25,
+        "skinnedMeshes": 20,
+        "materials": 16,
+        "tris": 3188
+      }
+    },
+    "villager": {
+      "skin0_f103": {
+        "meshes": 55,
+        "skinnedMeshes": 0,
+        "materials": 19,
+        "tris": 3384
+      },
+      "skin1_f103b": {
+        "meshes": 58,
+        "skinnedMeshes": 14,
+        "materials": 19,
+        "tris": 3384
+      }
+    },
+    "bandit": {
+      "skin0_f103": {
+        "meshes": 59,
+        "skinnedMeshes": 0,
+        "materials": 17,
+        "tris": 2388
+      },
+      "skin1_f103b": {
+        "meshes": 24,
+        "skinnedMeshes": 24,
+        "materials": 17,
+        "tris": 2388
+      }
+    },
+    "peon": {
+      "skin0_f103": {
+        "meshes": 21,
+        "skinnedMeshes": 0,
+        "materials": 11,
+        "tris": 652
+      },
+      "skin1_f103b": {
+        "meshes": 19,
+        "skinnedMeshes": 8,
+        "materials": 11,
+        "tris": 652
+      }
+    },
+    "grunt": {
+      "skin0_f103": {
+        "meshes": 25,
+        "skinnedMeshes": 0,
+        "materials": 9,
+        "tris": 492
+      },
+      "skin1_f103b": {
+        "meshes": 12,
+        "skinnedMeshes": 12,
+        "materials": 9,
+        "tris": 492
+      }
+    },
+    "axethrower": {
+      "skin0_f103": {
+        "meshes": 15,
+        "skinnedMeshes": 0,
+        "materials": 6,
+        "tris": 328
+      },
+      "skin1_f103b": {
+        "meshes": 9,
+        "skinnedMeshes": 9,
+        "materials": 6,
+        "tris": 328
+      }
+    },
+    "ogre": {
+      "skin0_f103": {
+        "meshes": 12,
+        "skinnedMeshes": 0,
+        "materials": 7,
+        "tris": 284
+      },
+      "skin1_f103b": {
+        "meshes": 7,
+        "skinnedMeshes": 7,
+        "materials": 7,
+        "tris": 284
+      }
+    }
+  },
+  "errors": []
+}

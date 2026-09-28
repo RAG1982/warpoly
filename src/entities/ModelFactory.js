@@ -1,4 +1,5 @@
 import * as THREE from 'three';
+import { clone as skeletonClone } from 'three/examples/jsm/utils/SkeletonUtils.js';
 import {
   materials,
   enableShadows,
@@ -39,6 +40,7 @@ import {
 } from '../models/index.js';
 import { prepareStaticTemplate, isStaticMergeEnabled } from '../render/staticTemplates.js';
 import { mergeUnitTemplate } from '../render/mergeUnitTemplate.js';
+import { skinUnitTemplate, isSkinEnabled } from '../render/skinUnitTemplate.js';
 import { GLB_MODELS, glbEnabled, glbTemplates, loadGlbTemplates, setTeamColor } from './glbModels.js';
 
 /**
@@ -48,15 +50,42 @@ import { GLB_MODELS, glbEnabled, glbTemplates, loadGlbTemplates, setTeamColor } 
  */
 function cloneModel(template) {
   const savedData = [];
+  let hasSkinnedMesh = false;
   template.traverse(obj => {
     savedData.push({ obj, userData: obj.userData });
     obj.userData = {};
+    if (obj.isSkinnedMesh) hasSkinnedMesh = true;
   });
-  const clone = template.clone(true);
+  // F1-03b: SkinnedMesh.clone() não religa o Skeleton aos ossos do clone; SkeletonUtils.clone
+  // clona bones + malhas em paralelo e reconstrói o Skeleton de cada SkinnedMesh do clone.
+  const clone = hasSkinnedMesh ? skeletonClone(template) : template.clone(true);
   for (let i = 0; i < savedData.length; i++) {
     savedData[i].obj.userData = savedData[i].userData;
   }
+  if (hasSkinnedMesh) unifySkeletons(clone);
   return clone;
+}
+
+/**
+ * F1-03b: `SkeletonUtils.clone` cria um `Skeleton` novo (com sua própria bone texture) para CADA
+ * SkinnedMesh do clone, mesmo quando todas compartilhavam o mesmo Skeleton no template (as várias
+ * malhas — 1 por material — de uma unidade sempre compartilham os mesmos ossos). Sem isso, cada
+ * material recalcularia/enviaria sua própria bone texture por quadro (custo ~N× sem ganho de
+ * FPS). Rebinda todas as SkinnedMesh do clone ao Skeleton da primeira (ossos idênticos, já que
+ * vieram do mesmo template) e descarta as demais (nunca chegaram a computar a bone texture).
+ */
+function unifySkeletons(root) {
+  let shared = null;
+  root.traverse(node => {
+    if (!node.isSkinnedMesh) return;
+    if (!shared) {
+      shared = node.skeleton;
+      return;
+    }
+    const redundant = node.skeleton;
+    node.bind(shared, node.bindMatrix);
+    if (redundant !== shared) redundant.dispose();
+  });
 }
 
 export class ModelFactory {
@@ -163,7 +192,11 @@ export class ModelFactory {
   static getOrCreateModel(key, generatorFn, type = null) {
     if (!this.templates.has(key)) {
       let template = prepareStaticTemplate(key, generatorFn()); // F1-02 (?merge=0 desliga)
-      if (type && isStaticMergeEnabled()) template = mergeUnitTemplate(template); // F1-03
+      if (type && isStaticMergeEnabled()) {
+        // F1-03b: skinning rígido (1 draw call por material da unidade); ?skin=0 volta à mescla
+        // por osso da F1-03 (para comparar).
+        template = isSkinEnabled() ? skinUnitTemplate(template) : mergeUnitTemplate(template);
+      }
       this.templates.set(key, template);
     }
     const template = this.templates.get(key);

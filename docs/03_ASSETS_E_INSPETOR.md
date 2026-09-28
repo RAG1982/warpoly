@@ -6,7 +6,7 @@
 - Pedestal, grade, wireframe, presets de luz (Estúdio, Dia…), tela cheia.
 - Unidades: animações `Idle, Caminhando, Lutando, Coletando, Recebendo Golpe, Caindo`, linha do tempo, velocidade 0.25×–2×.
 - Construções: pré-visualização dos VFX customizados (forjas, chiqueiro etc.).
-- Painel de estatísticas: triângulos, vértices, componentes, materiais, bounding box, arquivo-fonte. "Componentes" conta as malhas já mescladas (F1-02 construções/decorações, F1-03 unidades); `inspector.html?merge=0` mostra o modelo original.
+- Painel de estatísticas: triângulos, vértices, componentes, materiais, bounding box, arquivo-fonte. "Componentes" conta as malhas já mescladas/skinadas (F1-02 construções/decorações, F1-03b unidades); `inspector.html?merge=0` mostra o modelo original, `?skin=0` mostra a mescla por osso da F1-03 (sem skinning). Para unidades com `SkinnedMesh`, a caixa (bounding box) exibida usa a geometria em bind pose — pode ficar levemente diferente da silhueta animada em poses fora do idle (cosmético, não afeta o desenho).
 - API de debug: `inspectorApp.selectModel('<id>')`, `inspectorApp.currentModelObject`.
 
 ## Medição por modelo (2026-09-28)
@@ -101,6 +101,67 @@ Impacto em cena: `npm run bench` combate100 (RX 7600 XT, `?texq=low`) **18 FPS /
 
 Regras específicas de unidades: nós de visibilidade alternada (`Axe`, `Pickaxe`, `Hammer`, `Pack`, `WoodBundle`, `GoldSack`, `Plume`, `DrawnArrow`, `DrawnAxe`) são ossos (mescla interna, filhos do próprio nó — o toggle de `visible` continua funcionando); `BowStringTop/Bottom` nunca são mescladas (reposicionadas por `updateBowString`); malhas com material em array (cabeças dos orcs, rosto só na face frontal) ficam como estão (já são o mínimo: 1 draw call por material do array).
 
+### Unidades depois da F1-03b (skinning rígido, 2026-09-28)
+
+A F1-03 já não é o piso: cada "osso" só podia mesclar consigo mesmo, então o piso por unidade era
+Σ(ossos × materiais por osso). A F1-03b substitui essa mescla por **skinning rígido**
+(`src/render/skinUnitTemplate.js`): todas as malhas da unidade que compartilham material (e
+`castShadow`) — de qualquer osso — viram **uma** `THREE.SkinnedMesh`, cujos "ossos" são os mesmos
+nós-pivô de sempre (`Torso`, `ArmL`, `Weapon`…); cada vértice tem peso 1,0 no seu pivô (sem blend),
+então a animação por `UnitAnimator` gira os mesmos nós e fica idêntica. Draw calls por unidade caem
+para ≈ nº de materiais distintos + nós de visibilidade alternada (ferramentas/cargas/flecha puxada).
+`ModelFactory.getOrCreateModel` aplica no template uma vez por tipo e clona com
+`SkeletonUtils.clone` (`SkinnedMesh.clone()` nativo não religa o `Skeleton` aos ossos do clone); as
+várias `SkinnedMesh` de uma unidade compartilham **um único** `Skeleton` (por template e por clone,
+via `ModelFactory.unifySkeletons`) — sem isso, cada material recalcularia/enviaria sua própria bone
+texture por quadro, anulando o ganho de FPS. `grunt_glb` (pipeline Blender) não passa por aqui.
+`inspector.html?skin=0` e `?skin=0` no jogo voltam à mescla por osso da F1-03 (comparação); `?merge=0`
+desliga tudo.
+
+| Modelo | F1-03 (`?skin=0`) | F1-03b |
+|---|---:|---:|
+| archer | 54 | 25 |
+| bandit | 59 | 24 |
+| villager | 55 | 58 |
+| knight | 41 | 19 |
+| peon | 21 | 19 |
+| grunt | 25 | 12 |
+| axethrower | 15 | **9** |
+| ogre | 12 | **7** |
+
+Triângulos e materiais idênticos antes/depois em todos os casos. Redução adicional de 25–52 % na
+maioria das unidades; **villager é uma exceção** (55 → 58, regressão pequena): tem 5 nós de
+ferramenta/carga (`Pack`, `WoodBundle`, `GoldSack`, `Axe`, `Pickaxe`, `Hammer`) excluídos do
+skinning por definição da spec — cada um recebe uma mescla rígida comum (não-skinada) só dentro do
+próprio nó (`mergeStaticTemplate`), mas não mescla ferramentas/cargas de nós *diferentes* entre si
+mesmo compartilhando material, e isso pesa mais que o ganho do skinning no corpo. Não investigado
+mais a fundo (fora do escopo desta spec): exigiria mesclar os toggles entre si, o que quebraria a
+independência de visibilidade de cada um.
+
+Exclusões do skinning (mesmas de sempre, continuam `Mesh` normal): nós de visibilidade alternada
+(`Axe`, `Pickaxe`, `Hammer`, `Pack`, `WoodBundle`, `GoldSack`, `DrawnArrow`, `DrawnAxe`);
+`BowStringTop/Bottom` (reposicionadas por `updateBowString`); malhas transparentes;
+`SelectionRing`/`HealthBar*`. Malhas com material em array (cabeças dos orcs, rosto só na face
+frontal) são separadas por `geometry.groups` em uma peça por material antes de agrupar — cada peça
+entra no grupo do seu material como qualquer outra malha, preservando o rosto só nos triângulos
+corretos (testado com 6 materiais em `tests/unit/skinUnitTemplate.test.js`).
+
+Impacto em cena: `npm run bench` (RX 7600 XT, `?texq=low`) combate100 **17,7 FPS / 11 037 calls**
+(`?merge=0`) → **31,4 FPS / 5 942 calls** (F1-03, `?skin=0`) → **37,5 FPS / 3 596 calls** (F1-03b);
+massa300 **11,7 FPS / 16 158 calls** (F1-03) → **16,5–17,8 FPS / ~8 500 calls** (F1-03b). Melhora
+real sobre a F1-03 (+20 % combate100, +40–50 % massa300), mas **ainda abaixo da meta de 50 FPS em
+combate100**: o skinning tem custo de GPU/CPU próprio (atualização de bone matrices/textura por
+`Skeleton`, ainda que compartilhado por unidade) que consome parte do ganho de menos draw calls.
+Consolidar materiais por unidade (reduzir a contagem de materiais distintos, não só agrupá-los) ou
+instancing por tipo de unidade ficam fora do escopo desta tarefa.
+
+Capturas comparativas (`skin=0` vs. skinado) em `tools/merge-compare/skinned/`
+(`capture.mjs`, `results.json`): knight/fight, archer/fight-tensioned (corda do arco), villager/
+gather-wood, peon/idle-face (rosto), ogre/hurt-flash (flash vermelho), knight/die — nenhuma peça
+esticou, sumiu ou ficou para trás durante as animações. Verificado também no jogo: duas unidades do
+mesmo tipo com animações fora de fase (`walk` vs. `fight`, tempos diferentes) têm rotações de osso e
+objetos `Skeleton` distintos — não compartilham pose.
+
 ### Ambiente
 oak 16m/476t · pine 12m/208t · autumn 16m/476t · birch 29m/904t · flower_patch 185m · berry_bush 65m · mushroom_stump 37m · water_lily 35m · boulder 11m · pebbles 6m · grass_tuft 14m · arrow 4m.
 
@@ -108,7 +169,7 @@ oak 16m/476t · pine 12m/208t · autumn 16m/476t · birch 29m/904t · flower_pat
 
 1. **Triângulos não são o problema** (modelos são leves). O problema é **quantidade de objetos**: um castelo tinha 487 draw calls (974 com passe de sombra). Desde a F1-02 os templates estáticos são mesclados por material (castelo 19, Grande Salão 20); as unidades continuam hierarquias de partes (F1-03).
 2. **Texturas**: 498 canvases 2048² ⇒ cada textura RGBA com mipmaps ≈ 21 MB de VRAM; 289 texturas vivas na cena inicial ⇒ ordem de **~6 GB de VRAM teórica** + tempo de CPU para pintar no load (~30 s medidos). Em modelos low-poly de 1–3 m na tela, 256–512 px bastam. Mapas de roughness/metalness/bump separados poderiam ser empacotados em um único canal ORM.
-3. Unidades são hierarquias de partes rígidas animadas proceduralmente pelo `UnitAnimator` (sem skinning). Para escalar a centenas de unidades: mesclar partes rígidas por "osso" (≈6–10 grupos por unidade) e, a longo prazo, **instancing + vertex animation texture (VAT)** ou `SkinnedMesh` com `InstancedMesh` por tipo.
+3. Unidades são hierarquias de partes rígidas animadas proceduralmente pelo `UnitAnimator`, agora com **skinning rígido** (F1-03b, `src/render/skinUnitTemplate.js`): 1 draw call por material da unidade inteira, com peso 1,0 por vértice (sem blend entre ossos). Para escalar a centenas de unidades e chegar às metas de FPS: consolidar materiais por unidade e, a longo prazo, **instancing + vertex animation texture (VAT)** ou `SkinnedMesh` com `InstancedMesh` por tipo.
 4. Não há cor de time (team color): a identidade da facção está baked nas texturas. Multiplayer/FFA exige tint por jogador.
 5. Modelo `bandit` e `bandit_camp` estão prontos mas não são usados em partida — oportunidade para creeps neutros.
 

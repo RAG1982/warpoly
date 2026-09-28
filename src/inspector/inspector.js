@@ -50,6 +50,7 @@ import { HumanForge } from '../entities/buildings/HumanForge.js';
 import { ParticleSystem } from '../entities/ParticleSystem.js';
 import { prepareStaticTemplate, isStaticMergeEnabled } from '../render/staticTemplates.js';
 import { mergeUnitTemplate } from '../render/mergeUnitTemplate.js';
+import { skinUnitTemplate, isSkinEnabled } from '../render/skinUnitTemplate.js';
 import { ModelFactory } from '../entities/ModelFactory.js';
 
 // Modelos do pipeline Blender (F7-00): sempre carregados no inspetor para comparação
@@ -875,8 +876,11 @@ class ModelInspectorApp {
     let model;
     if (created instanceof THREE.Object3D) {
       if (item.category === 'units' && !item.glb) {
-        // F1-03: mesma mescla por osso do jogo, para "Componentes" refletir o custo real (?merge=0 desliga)
-        model = isStaticMergeEnabled() ? mergeUnitTemplate(created) : created;
+        // F1-03b: mesmo skinning rígido do jogo, para "Componentes" refletir o custo real
+        // (?merge=0 desliga tudo; ?skin=0 volta à mescla por osso da F1-03, para comparar)
+        model = isStaticMergeEnabled()
+          ? (isSkinEnabled() ? skinUnitTemplate(created) : mergeUnitTemplate(created))
+          : created;
       } else {
         // F1-02: mesma mescla estática do jogo (construções/depósitos/decorações; ?merge=0 desliga)
         model = prepareStaticTemplate(item.id, created);

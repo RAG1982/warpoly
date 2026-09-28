@@ -59,6 +59,7 @@ export class InputManager {
     const geo = new THREE.RingGeometry(0.5, 0.75, 24);
     geo.rotateX(-Math.PI / 2);
     const mat = new THREE.MeshBasicMaterial({ color: 0x68d391, side: THREE.DoubleSide, transparent: true, opacity: 0 });
+    mat.userData.noFog = true; // F1-05: marcador de clique não recebe névoa
     this.clickDecal = new THREE.Mesh(geo, mat);
     this.clickDecal.position.y = 0.1;
     this.sm.scene.add(this.clickDecal);
@@ -261,8 +262,8 @@ export class InputManager {
     // Test entity intersection
     const allMeshes = [];
     this.gm.units.forEach(u => { if (u.mesh?.parent) allMeshes.push(u.mesh); });
-    this.gm.enemies.forEach(e => { if (e.mesh?.parent) allMeshes.push(e.mesh); });
-    this.gm.buildings.forEach(b => { if (b.mesh?.parent) allMeshes.push(b.mesh); });
+    this.gm.enemies.forEach(e => { if (e.mesh?.parent && e.mesh.visible) allMeshes.push(e.mesh); }); // F1-05: inimigo sob a névoa não é alvo
+    this.gm.buildings.forEach(b => { if (b.mesh?.parent && b.mesh.visible) allMeshes.push(b.mesh); });
     this.gm.trees.forEach(t => { if (t.mesh?.parent) allMeshes.push(t.mesh); });
     this.gm.resourceDeposits.forEach(r => { if (r.mesh?.parent) allMeshes.push(r.mesh); });
 

@@ -1,246 +1,299 @@
 import * as THREE from 'three';
 import { VISION_RADII, DEFAULT_UNIT, DEFAULT_BUILDING } from '../data/index.js';
+import { FogGrid, BuildingMemory } from './FogGrid.js';
+import { fogUniforms, excludeFromFog, markFogGround } from '../render/fogOfWarShader.js';
+import { QualitySettings } from './QualitySettings.js';
+import { ModelFactory } from '../entities/ModelFactory.js';
 
 /**
- * Fog of War (Névoa de Guerra & Exploração Permanente)
- * 
- * Inspired by classic RTS games (Warcraft 2 / Age of Empires).
- * - Covers the vast 320x320 map in an unexplored shroud.
- * - Player units and buildings continuously reveal territory based on their vision radius.
- * - Exploration is PERMANENT: once revealed, the landscape remains explored.
- * - Renders a sleek 3D shroud over the world and overlays the dark fog on the minimap.
- * - Culls enemy units and structures that are hidden in the unexplored darkness.
+ * Configuração da textura de visibilidade por preset de qualidade (F1-04).
+ * `scale`: resolução da textura = grade lógica (128²) × scale; `blur`: raio do blur de caixa em texels.
+ */
+export const FOG_QUALITY = {
+  low: { scale: 1, blur: 0 },
+  med: { scale: 2, blur: 2 },
+  high: { scale: 2, blur: 2 },
+  ultra: { scale: 2, blur: 3 }
+};
+
+/**
+ * Névoa de guerra no estilo Warcraft II (F1-05).
+ *
+ * Três estados por célula da grade lógica 128² (atualizada a 10 Hz):
+ *   não explorado (preto) · memória (explorado sem visão: dessaturado/escuro) · visível agora (claro).
+ * O mundo é escurecido no próprio shader dos materiais (`src/render/fogOfWarShader.js`), sem plano sobreposto:
+ * nada "atravessa" a névoa. A textura de visibilidade só é reenviada à GPU quando a visão/exploração muda.
+ *
+ * Entidades inimigas:
+ *   - unidades só são desenhadas (e aparecem no minimapa) com visão atual; barras de vida idem;
+ *   - construções já vistas ficam na memória; se destruídas fora da visão, um fantasma permanece
+ *     até a área ser revista (como no WC2).
+ * Recursos e árvores exploradas seguem visíveis (escurecidos) na memória.
+ *
+ * API pública: `update(dt, playerUnits, playerBuildings, enemyUnits, enemyBuildings)`, `isExplored(x,z)`,
+ * `isVisible(x,z)`, `revealArea(x,z,r)`, `isBuildingKnown(b)`, `forEachGhostBuilding(cb)`, `drawMinimapFog(ctx,w,h)`,
+ * `reset()`, `dispose()`.
  */
 export class FogOfWar {
+  /** Raio (u) a partir do qual uma malha é tratada como chão pela névoa. */
+  static GROUND_MIN_RADIUS = 25;
+
   constructor(scene, worldWidth = 140, worldDepth = 140) {
     this.scene = scene;
     this.worldWidth = worldWidth;
     this.worldDepth = worldDepth;
 
-    // Grid resolution for exploration logic (128x128 covers 140x140 with ~1.1 unit precision)
-    this.gridSize = 128;
-    this.cellSize = worldWidth / this.gridSize;
-
-    // 2D Array: 0 = Unexplored (fog), 1 = Explored (permanently revealed)
-    this.explored = new Uint8Array(this.gridSize * this.gridSize);
-
-    // Active vision (currently visible right now)
-    this.activeVision = new Uint8Array(this.gridSize * this.gridSize);
-
-    // Canvas for 3D Shroud & Minimap Texture
-    this.canvas = document.createElement('canvas');
-    this.canvas.width = this.gridSize;
-    this.canvas.height = this.gridSize;
-    this.ctx = this.canvas.getContext('2d', { willReadFrequently: true });
-
-    // Initial fill: pitch-dark fog
-    this.ctx.fillStyle = '#0a0d14';
-    this.ctx.fillRect(0, 0, this.gridSize, this.gridSize);
-
-    // Three.js Texture from Canvas
-    this.fogTexture = new THREE.CanvasTexture(this.canvas);
-    this.fogTexture.minFilter = THREE.LinearFilter;
-    this.fogTexture.magFilter = THREE.LinearFilter;
-    this.fogTexture.generateMipmaps = false;
+    // Grade lógica (128² cobre 160×160 com 1,25 u por célula)
+    this.grid = new FogGrid(worldWidth, worldDepth, 128);
+    this.gridSize = this.grid.gridSize;
+    this.cellSize = this.grid.cellSize;
 
     // Vision radii by entity type — src/data (units.js / buildings.js)
     this.visionRadii = { ...VISION_RADII };
 
-    this.needsUpdate = true;
+    this.buildingMemory = new BuildingMemory();
+    /** Construções inimigas destruídas fora da visão, ainda lembradas */
+    this.ghostGroup = new THREE.Group();
+    this.ghostGroup.name = 'FogOfWarGhosts';
+    this.scene.add(this.ghostGroup);
+
     this.updateTimer = 0;
+    this.enabled = true;
 
-    // 3D Shroud Mesh in world
-    this.createShroudMesh();
-  }
+    // Camada do minimapa (128², 3 estados)
+    this.canvas = null;
+    this.ctx = null;
+    this._minimapImage = null;
+    this._minimapDirty = true;
+    if (typeof document !== 'undefined') {
+      this.canvas = document.createElement('canvas');
+      this.canvas.width = this.gridSize;
+      this.canvas.height = this.gridSize;
+      this.ctx = this.canvas.getContext('2d');
+      this._minimapImage = this.ctx.createImageData(this.gridSize, this.gridSize);
+    }
 
-  createShroudMesh() {
-    const geo = new THREE.PlaneGeometry(this.worldWidth, this.worldDepth, 1, 1);
-    geo.rotateX(-Math.PI / 2);
+    // Textura de visibilidade (RG: explorado / visível com blur; BA: os mesmos sem blur)
+    this.fogTexture = null;
+    this._quality = null;
+    this.applyQuality(QualitySettings.current);
 
-    // Custom shader material for soft ethereal shroud with animated mist tint
-    const shroudMat = new THREE.MeshBasicMaterial({
-      map: this.fogTexture,
-      transparent: true,
-      opacity: 0.94,
-      depthWrite: false
-    });
+    // Fantasma de posicionamento de construção nunca recebe névoa
+    excludeFromFog(ModelFactory.ghostValidMat);
+    excludeFromFog(ModelFactory.ghostInvalidMat);
+    // Terreno e água (malhas enormes centradas na origem) só escurecem por fragmento
+    this.markGroundMeshes(scene);
 
-    this.shroudMesh = new THREE.Mesh(geo, shroudMat);
-    this.shroudMesh.position.y = 5.2; // Hover above ground and buildings
-    this.shroudMesh.renderOrder = 999; // Render on top of terrain/decorations
-    this.shroudMesh.name = 'FogOfWarShroud';
-    this.scene.add(this.shroudMesh);
-  }
-
-  /**
-   * Converts world coordinates (wx, wz) to grid coordinates (gx, gz)
-   */
-  worldToGrid(wx, wz) {
-    const halfW = this.worldWidth / 2;
-    const halfD = this.worldDepth / 2;
-    const gx = Math.floor(((wx + halfW) / this.worldWidth) * this.gridSize);
-    const gz = Math.floor(((wz + halfD) / this.worldDepth) * this.gridSize);
-    return {
-      gx: Math.max(0, Math.min(this.gridSize - 1, gx)),
-      gz: Math.max(0, Math.min(this.gridSize - 1, gz))
-    };
+    fogUniforms.fowParams.value.set(1 / worldWidth, 1 / worldDepth, 1, 0.5);
   }
 
   /**
-   * Checks if a world position is explored
+   * Marca como "chão" as malhas não instanciadas cuja esfera envolvente é maior que `minRadius`
+   * (terreno, água, fundo do mar): a origem delas não representa a posição, então não podem ser recolhidas.
    */
-  isExplored(wx, wz) {
-    const { gx, gz } = this.worldToGrid(wx, wz);
-    return this.explored[gz * this.gridSize + gx] === 1;
-  }
-
-  /**
-   * Reveals an area centered at (wx, wz) with given world radius
-   */
-  revealArea(wx, wz, radius) {
-    const { gx: centerGx, gz: centerGz } = this.worldToGrid(wx, wz);
-    const gridRadius = Math.ceil(radius / this.cellSize);
-    const gridRadiusSq = gridRadius * gridRadius;
-
-    let anyNewExplored = false;
-
-    const minX = Math.max(0, centerGx - gridRadius);
-    const maxX = Math.min(this.gridSize - 1, centerGx + gridRadius);
-    const minZ = Math.max(0, centerGz - gridRadius);
-    const maxZ = Math.min(this.gridSize - 1, centerGz + gridRadius);
-
-    for (let gz = minZ; gz <= maxZ; gz++) {
-      const dz = gz - centerGz;
-      const dz2 = dz * dz;
-      for (let gx = minX; gx <= maxX; gx++) {
-        const dx = gx - centerGx;
-        if (dx * dx + dz2 <= gridRadiusSq) {
-          const idx = gz * this.gridSize + gx;
-          this.activeVision[idx] = 1;
-          if (this.explored[idx] === 0) {
-            this.explored[idx] = 1;
-            anyNewExplored = true;
-          }
-        }
+  markGroundMeshes(root, minRadius = FogOfWar.GROUND_MIN_RADIUS) {
+    const found = [];
+    root.traverse(o => {
+      if (!o.isMesh || o.isInstancedMesh || o.isBatchedMesh || !o.geometry) return;
+      const g = o.geometry;
+      if (!g.boundingSphere) g.computeBoundingSphere();
+      const scale = Math.max(o.scale.x, o.scale.y, o.scale.z);
+      if (g.boundingSphere.radius * scale >= minRadius) {
+        markFogGround(o);
+        found.push(o.name || o.uuid);
       }
-    }
+    });
+    this.groundMeshes = found;
+    return found;
+  }
 
-    if (anyNewExplored) {
-      this.needsUpdate = true;
+  // --- Compatibilidade: campos que o GameManager manipula diretamente -----------------------------
+  get explored() { return this.grid.explored; }
+  get activeVision() { return this.grid.activeVision; }
+  get needsUpdate() { return this.grid.needsUpdate; }
+  set needsUpdate(v) {
+    this.grid.needsUpdate = !!v;
+    if (v) this._minimapDirty = true;
+  }
+
+  /** (Re)cria a textura conforme o preset de qualidade (resolução e blur). */
+  applyQuality(preset) {
+    const cfg = FOG_QUALITY[preset && preset.name] || FOG_QUALITY.high;
+    this._quality = preset;
+    this._scale = cfg.scale;
+    this._blur = cfg.blur;
+    const size = this.gridSize * cfg.scale;
+    if (this.fogTexture && this.fogTexture.image.width === size) {
+      this.grid.needsUpdate = true;
+      return;
     }
+    if (this.fogTexture) this.fogTexture.dispose();
+    this.texData = new Uint8Array(size * size * 4);
+    const tex = new THREE.DataTexture(this.texData, size, size, THREE.RGBAFormat, THREE.UnsignedByteType);
+    tex.minFilter = THREE.LinearFilter;
+    tex.magFilter = THREE.LinearFilter;
+    tex.wrapS = THREE.ClampToEdgeWrapping;
+    tex.wrapT = THREE.ClampToEdgeWrapping;
+    tex.generateMipmaps = false;
+    tex.name = 'FogOfWarVisibility';
+    this.fogTexture = tex;
+    fogUniforms.fowMap.value = tex;
+    this.grid.needsUpdate = true;
+    this._uploadTexture();
+  }
+
+  _uploadTexture() {
+    this.grid.writeTexture(this.texData, this._scale, this._blur);
+    this.fogTexture.needsUpdate = true;
+    this._minimapDirty = true;
+  }
+
+  /** Liga/desliga a névoa (debug: `game.gameManager.fogOfWar.setEnabled(false)`). */
+  setEnabled(on) {
+    this.enabled = !!on;
+    fogUniforms.fowParams.value.z = this.enabled ? 1 : 0;
+  }
+
+  worldToGrid(wx, wz) {
+    return this.grid.worldToGrid(wx, wz);
+  }
+
+  /** A posição já foi explorada (visível agora ou memória)? */
+  isExplored(wx, wz) {
+    return !this.enabled || this.grid.isExplored(wx, wz);
+  }
+
+  /** A posição está sob visão atual do jogador? */
+  isVisible(wx, wz) {
+    return !this.enabled || this.grid.isVisible(wx, wz);
+  }
+
+  /** Revela uma área (visão atual + exploração permanente). */
+  revealArea(wx, wz, radius) {
+    if (this.grid.revealArea(wx, wz, radius)) this._minimapDirty = true;
+  }
+
+  /** Construção inimiga conhecida (visível agora ou lembrada)? */
+  isBuildingKnown(b) {
+    return !this.enabled || this.buildingMemory.isKnown(b);
+  }
+
+  /** Itera sobre fantasmas de construções destruídas fora da visão: cb(building, {x,z}). */
+  forEachGhostBuilding(cb) {
+    this.buildingMemory.forEachGhost(cb);
+  }
+
+  /** Esquece exploração, visão e memória (novo mapa). */
+  reset() {
+    this.grid.reset();
+    for (const b of this.buildingMemory.clear()) this._removeGhost(b);
+    this._minimapDirty = true;
   }
 
   /**
-   * Main update tick called by GameManager
+   * Tick principal (chamado pelo GameManager todo frame).
+   * A grade é recalculada a 10 Hz; a visibilidade das entidades é aplicada todo frame (barato),
+   * para as barras de vida não piscarem.
    */
   update(delta, playerUnits, playerBuildings, enemyUnits = [], enemyBuildings = []) {
+    if (this._quality !== QualitySettings.current) this.applyQuality(QualitySettings.current);
+
     this.updateTimer += delta;
-    if (this.updateTimer < 0.1) return; // Update 10 times per second for smooth performance
-    this.updateTimer = 0;
+    if (this.updateTimer >= 0.1) {
+      this.updateTimer = 0;
+      this._tickGrid(playerUnits, playerBuildings, enemyBuildings);
+    }
+    this.cullHiddenEnemies(enemyUnits, enemyBuildings);
+  }
 
-    // Reset active vision buffer
-    this.activeVision.fill(0);
+  _tickGrid(playerUnits, playerBuildings, enemyBuildings) {
+    const grid = this.grid;
+    // Reset externo (GameManager.resetMap zera `explored` direto): esquece a memória também
+    if (grid.needsUpdate && grid.detectExternalReset()) {
+      for (const b of this.buildingMemory.clear()) this._removeGhost(b);
+    }
 
-    // 1. Reveal fog around living player units
+    grid.beginVision();
     for (let i = 0; i < playerUnits.length; i++) {
       const u = playerUnits[i];
       if (!u.isDead && u.mesh) {
-        const r = this.visionRadii[u.type] || DEFAULT_UNIT.visionRadius;
-        this.revealArea(u.mesh.position.x, u.mesh.position.z, r);
+        grid.revealArea(u.mesh.position.x, u.mesh.position.z, this.visionRadii[u.type] || DEFAULT_UNIT.visionRadius);
       }
     }
-
-    // 2. Reveal fog around living player buildings
     for (let i = 0; i < playerBuildings.length; i++) {
       const b = playerBuildings[i];
       if (!b.isDead && b.mesh) {
-        const r = this.visionRadii[b.type] || DEFAULT_BUILDING.visionRadius;
-        this.revealArea(b.mesh.position.x, b.mesh.position.z, r);
+        grid.revealArea(b.mesh.position.x, b.mesh.position.z, this.visionRadii[b.type] || DEFAULT_BUILDING.visionRadius);
       }
     }
+    if (grid.endVision()) this._uploadTexture();
 
-    // 3. Update canvas texture if new territory was uncovered
-    if (this.needsUpdate) {
-      this.redrawCanvas();
-      this.fogTexture.needsUpdate = true;
-      this.needsUpdate = false;
-    }
+    // Memória de construções inimigas + fantasmas
+    const { newGhosts, removedGhosts } = this.buildingMemory.update(grid, enemyBuildings);
+    for (let i = 0; i < newGhosts.length; i++) this._addGhost(newGhosts[i]);
+    for (let i = 0; i < removedGhosts.length; i++) this._removeGhost(removedGhosts[i]);
+  }
 
-    // 4. Hide enemy units & buildings in unexplored darkness
-    this.cullUnexploredEnemies(enemyUnits, enemyBuildings);
+  /** Mantém o modelo da construção destruída na cena, como lembrança (não entra em listas de seleção). */
+  _addGhost(b) {
+    const mesh = b.mesh;
+    if (!mesh) return;
+    if (!mesh.parent) this.ghostGroup.add(mesh);
+    mesh.visible = true;
+    if (b.hpGroup) b.hpGroup.visible = false;
+    if (b.selectionRing) b.selectionRing.visible = false;
+  }
+
+  _removeGhost(b) {
+    const mesh = b.mesh;
+    if (mesh && mesh.parent === this.ghostGroup) this.ghostGroup.remove(mesh);
   }
 
   /**
-   * Redraws the 2D canvas representing the Fog texture
-   * Unexplored = Deep dark slate/mist with soft vignette
-   * Explored = Fully transparent
+   * Visibilidade das entidades inimigas (substitui o antigo `cullUnexploredEnemies`, bug B1):
+   * unidades só com visão atual; construções vistas ficam na memória, sem barra de vida.
    */
-  redrawCanvas() {
-    const imgData = this.ctx.createImageData(this.gridSize, this.gridSize);
-    const data = imgData.data;
-
-    for (let i = 0; i < this.gridSize * this.gridSize; i++) {
-      const isExp = this.explored[i] === 1;
-      const isVis = this.activeVision[i] === 1;
-
-      const p = i * 4;
-      if (isVis) {
-        // Active line of sight: totally transparent
-        data[p] = 10;
-        data[p + 1] = 13;
-        data[p + 2] = 20;
-        data[p + 3] = 0; // 100% transparent
-      } else if (isExp) {
-        // Explored but no current unit standing there: very faint memory mist
-        data[p] = 10;
-        data[p + 1] = 13;
-        data[p + 2] = 20;
-        data[p + 3] = 40; // ~15% subtle darkness
-      } else {
-        // Pitch-black unexplored Fog of War
-        data[p] = 10;
-        data[p + 1] = 13;
-        data[p + 2] = 20;
-        data[p + 3] = 245; // ~96% opaque dark fog
-      }
-    }
-
-    this.ctx.putImageData(imgData, 0, 0);
-  }
-
-  /**
-   * Culls enemy visibility: enemy units and buildings are invisible
-   * if they are standing in territory the player has never explored.
-   */
-  cullUnexploredEnemies(enemyUnits, enemyBuildings) {
+  cullHiddenEnemies(enemyUnits, enemyBuildings) {
+    const on = this.enabled;
     for (let i = 0; i < enemyUnits.length; i++) {
       const u = enemyUnits[i];
-      if (u && u.mesh) {
-        const explored = this.isExplored(u.mesh.position.x, u.mesh.position.z);
-        u.mesh.visible = explored;
-        if (!explored && u.hpGroup) {
-          u.hpGroup.visible = false;
-        }
-      }
+      if (!u || !u.mesh) continue;
+      const visible = !on || this.grid.isVisible(u.mesh.position.x, u.mesh.position.z);
+      u.mesh.visible = visible;
+      if (!visible && u.hpGroup) u.hpGroup.visible = false;
     }
-
     for (let i = 0; i < enemyBuildings.length; i++) {
       const b = enemyBuildings[i];
-      if (b && b.mesh) {
-        const explored = this.isExplored(b.mesh.position.x, b.mesh.position.z);
-        b.mesh.visible = explored;
-        if (!explored && b.hpGroup) {
-          b.hpGroup.visible = false;
-        }
-      }
+      if (!b || !b.mesh || b.isDead) continue;
+      const known = !on || this.buildingMemory.isKnown(b);
+      b.mesh.visible = known;
+      if (b.hpGroup && on && !this.buildingMemory.isVisibleNow(b)) b.hpGroup.visible = false;
     }
   }
 
-  /**
-   * Draws the fog overlay directly onto the 2D Minimap canvas
-   */
+  /** @deprecated nome antigo — use `cullHiddenEnemies`. */
+  cullUnexploredEnemies(enemyUnits, enemyBuildings) {
+    this.cullHiddenEnemies(enemyUnits, enemyBuildings);
+  }
+
+  /** Desenha a camada de névoa (3 estados) sobre o minimapa. */
   drawMinimapFog(minimapCtx, mapWidth, mapHeight) {
-    if (!this.canvas) return;
+    if (!this.canvas || !this.enabled) return;
+    if (this._minimapDirty) {
+      this.grid.writeMinimap(this._minimapImage.data);
+      this.ctx.putImageData(this._minimapImage, 0, 0);
+      this._minimapDirty = false;
+    }
+    minimapCtx.save();
+    minimapCtx.imageSmoothingEnabled = true;
     minimapCtx.drawImage(this.canvas, 0, 0, this.gridSize, this.gridSize, 0, 0, mapWidth, mapHeight);
+    minimapCtx.restore();
+  }
+
+  dispose() {
+    for (const b of this.buildingMemory.clear()) this._removeGhost(b);
+    if (this.ghostGroup.parent) this.ghostGroup.parent.remove(this.ghostGroup);
+    if (this.fogTexture) this.fogTexture.dispose();
+    fogUniforms.fowParams.value.z = 0;
   }
 }

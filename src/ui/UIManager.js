@@ -939,17 +939,25 @@ export class UIManager {
       ctx.fillRect(m.x - 2, m.y - 2, 4, 4);
     });
 
-    // Draw Buildings
+    // Draw Buildings (inimigas: só as já vistas — visíveis agora ou lembradas pela névoa)
+    const fog = this.gm.fogOfWar;
     this.gm.buildings.forEach(b => {
       if (!b.isDead) {
-        const isExplored = !this.gm.fogOfWar || this.gm.fogOfWar.isExplored(b.mesh.position.x, b.mesh.position.z);
-        if (b.faction === 'player' || isExplored) {
+        if (b.faction === 'player' || !fog || fog.isBuildingKnown(b)) {
           const m = toMap(b.mesh.position.x, b.mesh.position.z);
           ctx.fillStyle = b.faction === 'player' ? '#2563eb' : '#dc2626';
           ctx.fillRect(m.x - 3, m.y - 3, 6, 6);
         }
       }
     });
+    // Fantasmas: construções inimigas destruídas fora da visão continuam na memória até a área ser revista
+    if (fog) {
+      ctx.fillStyle = '#dc2626';
+      fog.forEachGhostBuilding((b, rec) => {
+        const m = toMap(rec.x, rec.z);
+        ctx.fillRect(m.x - 3, m.y - 3, 6, 6);
+      });
+    }
 
     // Draw Player Units (cyan dots)
     this.gm.units.forEach(u => {
@@ -960,10 +968,10 @@ export class UIManager {
       }
     });
 
-    // Draw Enemy Units (red dots, only if in explored territory)
+    // Draw Enemy Units (red dots, só com visão atual)
     this.gm.enemies.forEach(e => {
       if (!e.isDead) {
-        if (!this.gm.fogOfWar || this.gm.fogOfWar.isExplored(e.mesh.position.x, e.mesh.position.z)) {
+        if (!fog || fog.isVisible(e.mesh.position.x, e.mesh.position.z)) {
           const m = toMap(e.mesh.position.x, e.mesh.position.z);
           ctx.fillStyle = '#ef4444';
           ctx.fillRect(m.x - 1.5, m.y - 1.5, 3, 3);
@@ -971,9 +979,9 @@ export class UIManager {
       }
     });
 
-    // Fog of War Overlay on Minimap (shrouds unexplored territory in darkness)
-    if (this.gm.fogOfWar) {
-      this.gm.fogOfWar.drawMinimapFog(ctx, w, h);
+    // Névoa no minimapa: preto = não explorado, escurecido = memória, limpo = visível
+    if (fog) {
+      fog.drawMinimapFog(ctx, w, h);
     }
 
     // Camera Viewport Box on top of Fog

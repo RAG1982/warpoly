@@ -858,14 +858,9 @@ class ModelInspectorApp {
       this.currentBuildingInstance = null;
     }
 
-    // Clear particles
+    // Clear particles (F1-08: pools/cache vivem em ParticleSystem; clear() os desativa)
     if (this.particleSystem) {
-      this.particleSystem.particles.forEach(p => this.scene.remove(p.mesh));
-      this.particleSystem.particles = [];
-      this.particleSystem.floatingTexts.forEach(t => {
-        if (t.element && t.element.parentNode) t.element.parentNode.removeChild(t.element);
-      });
-      this.particleSystem.floatingTexts = [];
+      this.particleSystem.clear();
     }
 
     // Remove old model

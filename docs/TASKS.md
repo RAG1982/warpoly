@@ -63,6 +63,7 @@ Opus escreve a spec em `docs/specs/<ID>.md`; agente **Sonnet** executa; Opus rev
 | `docs/specs/F2-05-mapas-dados.md` | F2-05 + B16 — **DONE** | sonnet (local) |
 | `docs/specs/F3-01-controles-rts.md` | F3-01 + NEW-16 — **nuvem** | sonnet (claude.ai/code) |
 | `docs/specs/F6-08-opcoes.md` | F6-08 — **nuvem**, após F3-01 | sonnet (claude.ai/code) |
+| `docs/specs/F3-04-economia.md` | F3-04 economia WC2 — **DOING(sonnet local, 2026-09-29)**; toca GameManager/Unit/Building/ai → não vai para a nuvem | sonnet (local) |
 | `docs/specs/BUGS-01-pequenos.md` | NEW-2, NEW-11, NEW-5, NEW-13 — **nuvem** (ver `docs/HANDOFF_CLOUD.md`) | sonnet (claude.ai/code) |
 | `docs/specs/F1-07-pathfinder.md` | F1-07 + B8 + NEW-4 — **nuvem** | sonnet (claude.ai/code) |
 | `docs/specs/F6-03-hud-responsiva.md` | F6-03 + B11 — **nuvem** | sonnet (claude.ai/code) |
@@ -265,7 +266,7 @@ Opus escreve a spec em `docs/specs/<ID>.md`; agente **Sonnet** executa; Opus rev
 - **Aceite**: tabela de simulações em `docs/08_GAME_DESIGN.md` bate com testes unitários.
 
 ### F3-04 · Economia WC2
-- **Status**: `TODO` · Lane GAME · Onda 4 · Dep: F2-05
+- **Status**: `DOING(sonnet, 2026-09-29)` · spec `docs/specs/F3-04-economia.md` · Lane GAME · Onda 4 · Dep: F2-05
 - **Fazer**: trabalhador entra na mina (some ~1 s, 1 por vez, fila); florestas densas bloqueiam e abrem ao cortar; pedra permanece (D1); comida = suprimento de Fazenda/Chiqueiro; Serraria melhora rendimento de madeira; HQ upgrade melhora rendimento de ouro; minas esgotam com aviso.
 - **Aceite**: curva de economia documentada; IA continua funcional.
 

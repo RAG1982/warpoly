@@ -30,7 +30,7 @@ import {
   layoutAt,
   validateMatchConfig
 } from '../sim/MatchConfig.js';
-import { SIM_DT, MAX_STEPS } from '../sim/constants.js';
+import { SIM_DT, MAX_STEPS, animationLodStep } from '../sim/constants.js';
 
 const EMPTY_LIST = Object.freeze([]);
 
@@ -1313,16 +1313,13 @@ export class GameManager {
           lodStep = 1;
         } else {
           const dist = camTarget.distanceTo(mesh.position);
-          if (dist <= 60) {
-            lodStep = 1;
-          } else if (dist <= 100) {
-            const animates = (this._frameIndex + u.id) % 2 === 0;
-            lodStep = animates ? 1 : 0;
-            animDelta = animates ? frameDelta * 2 : 0;
-          } else {
-            const animates = (this._frameIndex + u.id) % 4 === 0;
-            lodStep = animates ? 1 : 0;
-            animDelta = animates ? frameDelta * 4 : 0;
+          lodStep = animationLodStep(dist, this._frameIndex, u.id);
+          if (lodStep && dist > 60) {
+            // Anima só a cada k frames (k=2 até 100, k=4 acima) — entrega de uma vez o delta
+            // de k frames para não parecer mais lento que o normal.
+            animDelta = frameDelta * (dist <= 100 ? 2 : 4);
+          } else if (!lodStep) {
+            animDelta = 0;
           }
         }
       }

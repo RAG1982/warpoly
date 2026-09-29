@@ -19,3 +19,17 @@ export function lerpAngle(a, b, t) {
   else if (diff < -Math.PI) diff += Math.PI * 2;
   return a + diff * t;
 }
+
+/**
+ * LOD de animação (F1-09 item 4): decide, para uma unidade dentro do frustum e visível, se ela
+ * anima neste frame renderizado. `frameIndex` é o contador de frames de `GameManager.renderUpdate`
+ * e `id` o id estável da unidade — juntos espalham a carga entre unidades em vez de todas
+ * animarem/pausarem no mesmo frame. Retorna `1` (anima este frame) ou `0` (pula).
+ * Unidades fora do frustum/invisíveis são tratadas separadamente por `GameManager.renderUpdate`
+ * (acumulam o delta perdido em `_animAcc` em vez de usar esta função).
+ */
+export function animationLodStep(distance, frameIndex, id) {
+  if (distance <= 60) return 1;
+  if (distance <= 100) return (frameIndex + id) % 2 === 0 ? 1 : 0;
+  return (frameIndex + id) % 4 === 0 ? 1 : 0;
+}

@@ -34,7 +34,9 @@ function expectPathOnLand(pf, startX, startZ, path) {
 
 describe('Pathfinder', () => {
   describe('terreno seco', () => {
-    const pf = new Pathfinder(dryTerrain);
+    // F2-05: bounds vem de mapDef.playable/2 em uso real; aqui fixamos 55 (limite jogável
+    // histórico do mapa continental) explicitamente, já que `dryTerrain` não tem `mapDef`.
+    const pf = new Pathfinder(dryTerrain, 55);
 
     it('tem linha de visão direta entre dois pontos', () => {
       expect(pf.hasLineOfSight(-20, -20, 20, 20)).toBe(true);
@@ -45,7 +47,7 @@ describe('Pathfinder', () => {
       expect(path).toEqual([{ x: 20, z: 15 }]);
     });
 
-    it('bordas do continente (|coord| >= 55) não são caminháveis', () => {
+    it('bordas do mapa (|coord| >= bounds) não são caminháveis', () => {
       const { c, r } = pf.toGrid(56, 0);
       expect(pf.isWalkable(c, r)).toBe(false);
       const center = pf.toGrid(0, 0);

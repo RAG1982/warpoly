@@ -73,16 +73,20 @@ const PATH_CACHE_LIMIT = 256;
 export class Pathfinder {
   /**
    * @param {import('../world/Terrain.js').Terrain} terrain
-   * @param {number} [bounds] Meia-largura do território navegável — padrão: `mapDef.playable / 2`
-   *   (F2-05: cada mapa define seu próprio tamanho jogável em `src/data/maps/<id>.json`).
+   * @param {number} [bounds] Meia-largura da área jogável (limiar de altura caminhável) — padrão:
+   *   `mapDef.playable / 2` (F2-05: cada mapa define seu tamanho jogável em
+   *   `src/data/maps/<id>.json`). A grade física é um pouco maior (`+ GRID_MARGIN`) que esse
+   *   limiar para que consultas perto da borda (ex.: clique no minimapa) caiam numa célula real
+   *   e corretamente intransponível, em vez de grudar (clamp) numa célula de terra válida.
    * @param {number} cellSize Size of each navigation grid tile in world units
    */
   constructor(terrain, bounds = terrain.mapDef ? terrain.mapDef.playable / 2 : 58, cellSize = 1.5) {
+    const GRID_MARGIN = 3;
     this.terrain = terrain;
     this.cellSize = cellSize;
     this.bounds = bounds;
-    this.minCoord = -bounds;
-    this.maxCoord = bounds;
+    this.minCoord = -(bounds + GRID_MARGIN);
+    this.maxCoord = bounds + GRID_MARGIN;
     this.cols = Math.round((this.maxCoord - this.minCoord) / cellSize);
     this.rows = this.cols;
     this.numCells = this.cols * this.rows;

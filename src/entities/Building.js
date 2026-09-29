@@ -614,65 +614,20 @@ export class Building {
   }
 
   /**
+   * F1-09: lógica de jogo (fila de treino, pesquisa, torre atirando, produção passiva,
+   * underAttackTimer) — roda em `GameManager.simStep`, no tick fixo. VFX/billboard ficam em
+   * `renderUpdate` (rodam a cada frame renderizado).
    * @param {Array} targets   não usado desde a F1-06 (alvo das torres vem de `gm.unitGrid.nearest`);
-   *                          mantido por compatibilidade com o chamador (`GameManager.update`)
+   *                          mantido por compatibilidade com o chamador (`GameManager.simStep`)
    * @param {Array} allUnits  todas as unidades (repassado ao dano para retaliação/ajuda)
    */
-  update(delta, gameManager, soundManager, particleSystem, arrows, targets, allUnits = []) {
+  simUpdate(delta, gameManager, soundManager, particleSystem, arrows, targets, allUnits = []) {
     if (this.isDead) return;
     if (gameManager) this.gameManager = gameManager;
-
-    // Billboard 3D health bar to face camera and maintain world position
-    if (this.hpGroup && this.scene) {
-      if (this.isDead || (this.mesh && !this.mesh.visible)) {
-        this.hpGroup.visible = false;
-      } else {
-        const isVisible = this.isSelected || this.hp < this.maxHp || (this.underAttackTimer && this.underAttackTimer > 0);
-        this.hpGroup.visible = isVisible;
-        if (isVisible && gameManager && gameManager.sceneManager) {
-          this.hpGroup.position.set(this.mesh.position.x, this.mesh.position.y + this.getBuildingHeight() + 0.8, this.mesh.position.z);
-          this.hpGroup.quaternion.copy(gameManager.sceneManager.camera.quaternion);
-        }
-      }
-    }
 
     // Under attack timer
     if (this.underAttackTimer > 0) {
       this.underAttackTimer -= delta;
-    }
-
-    // Animate damage flames and smoke if active
-    if (this.flamesGroup && this.flamesGroup.visible) {
-      this.flameTime = (this.flameTime || 0) + delta;
-      const t = this.flameTime;
-      for (let i = 0; i < this.flameTongues.length; i++) {
-        const tongue = this.flameTongues[i];
-        const f = Math.sin(t * 14 + tongue.offset);
-        const f2 = Math.cos(t * 11 + tongue.offset);
-        tongue.mesh.scale.y = tongue.baseScaleY * (0.8 + 0.35 * f);
-        tongue.mesh.scale.x = tongue.baseScaleX * (0.9 + 0.2 * f2);
-        tongue.mesh.rotation.z = tongue.baseRotZ + f * 0.12;
-      }
-
-      if (this.flamesGroup.userData && this.flamesGroup.userData.fireLight) {
-        this.flamesGroup.userData.fireLight.intensity = 1.3 + 0.5 * Math.sin(t * 18);
-      }
-
-      this.flameSmokeTimer = (this.flameSmokeTimer || 0) + delta;
-      if (this.flameSmokeTimer >= 0.7) {
-        this.flameSmokeTimer = 0;
-        if (particleSystem && this.flameClusters.length > 0) {
-          const cluster = this.flameClusters[Math.floor(Math.random() * this.flameClusters.length)];
-          cluster.getWorldPosition(_flameSmokePos);
-          _flameSmokePos.y += 0.5;
-          particleSystem.spawnSmokePuff(_flameSmokePos);
-        }
-      }
-    }
-
-    // Subclass custom procedural animation and VFX update
-    if (this.isConstructed) {
-      this.updateCustomVFX(delta, gameManager, soundManager, particleSystem);
     }
 
     // Passive production (Farm / Pig Farm gives +3 food/gold) — valores em src/data/buildings.js
@@ -686,17 +641,6 @@ export class Building {
         if (particleSystem) {
           particleSystem.spawnFloatingText(`+${passive.amount} Gold`, this.mesh.position, '#ffd700');
         }
-      }
-    }
-
-    // Cottage & Great Hall chimney smoke
-    if (this.isConstructed && (this.type === 'cottage' || this.type === 'great_hall') && particleSystem) {
-      this.smokeTimer += delta;
-      if (this.smokeTimer >= 0.8) {
-        this.smokeTimer = 0;
-        const chimneyOffset = this.type === 'great_hall' ? _chimneyOffsetGreatHall : _chimneyOffsetCottage;
-        _chimneyPos.copy(this.mesh.position).add(chimneyOffset);
-        particleSystem.spawnSmokePuff(_chimneyPos);
       }
     }
 
@@ -772,6 +716,74 @@ export class Building {
         if (particleSystem) {
           particleSystem.spawnFloatingText('Melhoria Forjada!', this.mesh.position, '#ffd700');
         }
+      }
+    }
+  }
+
+  /**
+   * F1-09: parte visual — billboard da barra de vida, chamas/fumaça de dano, fumaça de chaminé
+   * e VFX customizado das subclasses (forjas, chiqueiro, serraria, bandeiras). Roda a cada frame
+   * renderizado (`frameDelta`), não a cada passo de simulação.
+   */
+  renderUpdate(frameDelta, gameManager, soundManager, particleSystem) {
+    if (this.isDead) return;
+
+    // Billboard 3D health bar to face camera and maintain world position
+    if (this.hpGroup && this.scene) {
+      if (this.isDead || (this.mesh && !this.mesh.visible)) {
+        this.hpGroup.visible = false;
+      } else {
+        const isVisible = this.isSelected || this.hp < this.maxHp || (this.underAttackTimer && this.underAttackTimer > 0);
+        this.hpGroup.visible = isVisible;
+        if (isVisible && gameManager && gameManager.sceneManager) {
+          this.hpGroup.position.set(this.mesh.position.x, this.mesh.position.y + this.getBuildingHeight() + 0.8, this.mesh.position.z);
+          this.hpGroup.quaternion.copy(gameManager.sceneManager.camera.quaternion);
+        }
+      }
+    }
+
+    // Animate damage flames and smoke if active
+    if (this.flamesGroup && this.flamesGroup.visible) {
+      this.flameTime = (this.flameTime || 0) + frameDelta;
+      const t = this.flameTime;
+      for (let i = 0; i < this.flameTongues.length; i++) {
+        const tongue = this.flameTongues[i];
+        const f = Math.sin(t * 14 + tongue.offset);
+        const f2 = Math.cos(t * 11 + tongue.offset);
+        tongue.mesh.scale.y = tongue.baseScaleY * (0.8 + 0.35 * f);
+        tongue.mesh.scale.x = tongue.baseScaleX * (0.9 + 0.2 * f2);
+        tongue.mesh.rotation.z = tongue.baseRotZ + f * 0.12;
+      }
+
+      if (this.flamesGroup.userData && this.flamesGroup.userData.fireLight) {
+        this.flamesGroup.userData.fireLight.intensity = 1.3 + 0.5 * Math.sin(t * 18);
+      }
+
+      this.flameSmokeTimer = (this.flameSmokeTimer || 0) + frameDelta;
+      if (this.flameSmokeTimer >= 0.7) {
+        this.flameSmokeTimer = 0;
+        if (particleSystem && this.flameClusters.length > 0) {
+          const cluster = this.flameClusters[Math.floor(Math.random() * this.flameClusters.length)];
+          cluster.getWorldPosition(_flameSmokePos);
+          _flameSmokePos.y += 0.5;
+          particleSystem.spawnSmokePuff(_flameSmokePos);
+        }
+      }
+    }
+
+    // Subclass custom procedural animation and VFX update
+    if (this.isConstructed) {
+      this.updateCustomVFX(frameDelta, gameManager, soundManager, particleSystem);
+    }
+
+    // Cottage & Great Hall chimney smoke
+    if (this.isConstructed && (this.type === 'cottage' || this.type === 'great_hall') && particleSystem) {
+      this.smokeTimer += frameDelta;
+      if (this.smokeTimer >= 0.8) {
+        this.smokeTimer = 0;
+        const chimneyOffset = this.type === 'great_hall' ? _chimneyOffsetGreatHall : _chimneyOffsetCottage;
+        _chimneyPos.copy(this.mesh.position).add(chimneyOffset);
+        particleSystem.spawnSmokePuff(_chimneyPos);
       }
     }
   }

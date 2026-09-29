@@ -87,14 +87,17 @@ GameApp (vive a página inteira)
   MatchSession (src/core/MatchSession.js) — uma por partida, descartável:
      Terrain, Water, Decorations, ParticleSystem, GameManager(MatchConfig), InputManager, UIManager
      warmLiveScene() (compila shaders)
-animate() [rAF da aplicação, delta máx 0.1s, sem timestep fixo; sem sessão (menu/loading) não desenha]
+animate() [rAF da aplicação, delta máx 0.1s; sem sessão (menu/loading) não desenha]
   session.update(delta, elapsed, simulate = estado InGame):
     inputManager.update → sceneManager.updateCamera → water.update
-    → [simulate] gameManager.update(delta*gameSpeed) → particleSystem.update
+    → [simulate] alpha = gameManager.advance(delta) → gameManager.renderUpdate(delta, alpha) → particleSystem.update
+    → [!simulate] gameManager.renderUpdate(0, 1)   // pausado: sem avançar, billboards seguem a câmera
     → uiManager.update
   → sceneManager.render
   → InGame e gameManager.isGameOver ⇒ PostGame
 ```
+- F1-09: a simulação em si roda em passos fixos de `SIM_DT = 0,05 s` (20 Hz) dentro de `advance`,
+  independente do FPS de renderização — ver "Loop: tick fixo, interpolação e LOD de animação" abaixo.
 
 - **Menu** (`ui/screens/MainMenu.js`): "Iniciar" chama `onStart({ faction, difficulty })`; a aplicação monta a
   `MatchConfig` (`createMatchConfig`, com `difficulty` e seed nova) e vai para `Loading`. Abrir/fechar o painel
@@ -122,14 +125,56 @@ animate() [rAF da aplicação, delta máx 0.1s, sem timestep fixo; sem sessão (
 - `GameManager.resetMap/startMatch/setPlayerFaction` continuam existindo (compatibilidade), mas reiniciar a partida
   agora é recriar a sessão — isso corrige o B7.
 
-`GameManager.update(dt)`:
-1. Vitória/derrota: jogador sem HQ (construção com `role: 'hq'`) fica `defeated`. Jogador local derrotado → derrota; só um time vivo → vitória.
-2. Árvores → projéteis → construções (`Building.update`) → remove construções mortas.
-3. Todas as unidades (`gm.allUnits`, ordem de spawn) (`Unit.update`).
-4. `resolveBuildingCollisions` (unidade × todas construções/depósitos/árvores) e `resolveUnitCollisions` (**O(n²)**).
-5. `aiDirectors[i].update(dt)` para cada IA não derrotada.
-6. `fogOfWar.update` (10 Hz) com as unidades/construções do jogador local e as hostis a ele.
-7. Limpeza de mortos (remove de `allUnits`, da lista do dono e de `entitiesById`).
+### Loop: tick fixo, interpolação e LOD de animação (F1-09)
+- A simulação roda em passos fixos de `SIM_DT = 0.05 s` (20 Hz; `MAX_STEPS = 8` por chamada, evita
+  espiral de morte em frames muito lentos — `src/sim/constants.js`), determinística em relação ao
+  FPS de renderização. `MatchSession.update(frameDelta, elapsed, simulate)`:
+  ```
+  input.update(frameDelta); camera.updateCamera(frameDelta); water.update(elapsed)
+  if simulate:
+     alpha = gameManager.advance(frameDelta)      // roda 0..N passos fixos, devolve alpha ∈ [0,1)
+     gameManager.renderUpdate(frameDelta, alpha)   // interpolação + animação + VFX
+     particleSystem.update(frameDelta)
+  else:
+     gameManager.renderUpdate(0, 1)                // pausado (menu): mantém pose, billboards seguem a câmera
+  ```
+- `GameManager.advance(frameDelta)`: acumula `frameDelta * gameSpeed`; antes de rodar qualquer passo,
+  restaura `mesh.position`/`mesh.rotation.y` de toda unidade e projétil para a última pose
+  **simulada** (`_simPos`/`_simRotY`, desfazendo a interpolação visual do frame anterior); depois
+  roda `simStep(SIM_DT)` em laço (capturando `_prevPos`/`_prevRotY` antes e `_simPos`/`_simRotY`
+  depois de cada passo) até o acumulador ficar abaixo de `SIM_DT` ou atingir `MAX_STEPS` (nesse
+  caso o acumulador é zerado). Devolve `alpha` = fração do próximo passo ainda não simulada.
+- `GameManager.simStep(dt)` é o corpo antigo de `update(delta)`, com `dt` sempre igual a `SIM_DT`
+  (sem chamadas de animação/visual):
+  1. Vitória/derrota: jogador sem HQ (construção com `role: 'hq'`) fica `defeated`. Jogador local derrotado → derrota; só um time vivo → vitória.
+  2. Árvores → projéteis (`Arrow.simStep`) → construções (`Building.simUpdate`) → remove construções mortas.
+  3. Todas as unidades (`gm.allUnits`, ordem de spawn) (`Unit.update`).
+  4. `resolveBuildingCollisions` (unidade × todas construções/depósitos/árvores) e `resolveUnitCollisions` (**O(n²)**).
+  5. `aiDirectors[i].update(dt)` para cada IA não derrotada.
+  6. `fogOfWar.update` (10 Hz) com as unidades/construções do jogador local e as hostis a ele.
+  7. Limpeza de mortos (remove de `allUnits`, da lista do dono e de `entitiesById`).
+- `GameManager.renderUpdate(frameDelta, alpha)` roda a cada quadro renderizado (não a cada passo de
+  simulação): interpola a pose de projéteis (`Arrow.renderUpdate` — posição + quaternion completo,
+  já que a trajetória balística usa `lookAt`/pitch), atualiza VFX/billboard de construções
+  (`Building.renderUpdate`) e, para cada unidade, aplica o **LOD de animação** por
+  frustum/visibilidade/distância antes de chamar `Unit.renderUpdate(frameDelta, alpha, lodStep)`:
+  unidade invisível (névoa) ou fora do frustum da câmera não anima (acumula o delta perdido em
+  `unit._animAcc`, até 0,5 s, entregue de uma vez quando ela reaparece); a ≤60 u da câmera-alvo
+  anima todo quadro; 60–100 u, 1 a cada 2 quadros; >100 u, 1 a cada 4 (`animationLodStep(distance,
+  frameIndex, id)` em `src/sim/constants.js`, testável isoladamente — usa `id % k` para espalhar a
+  carga entre unidades em vez de todas animarem/pausarem no mesmo quadro).
+- `Unit.renderUpdate` interpola `mesh.position`/`mesh.rotation.y` entre `_prevPos/_prevRotY` e
+  `_simPos/_simRotY` (menor arco via `lerpAngle`), move o billboard da barra de vida e o
+  afundamento visual pós-morte para fora do tick fixo, e sincroniza a animação `fight` com o
+  cooldown de ataque de forma contínua (usa `alpha`) para não haver "degrau" a 20 Hz. `Unit.update`
+  (chamado por `simStep`) só troca de animação (`setAnimation`) e avança timers — a reprodução
+  (`animator.update`/`setTime`) é toda em `renderUpdate`. `Building.simUpdate` mantém fila de
+  treino/pesquisa/tiro de torre/produção passiva; `Building.renderUpdate` move billboard, chamas de
+  dano, fumaça de chaminé e o `updateCustomVFX` das subclasses (forjas, chiqueiro, bandeiras) para
+  fora do tick fixo. `GameManager.update(delta)` continua existindo como wrapper legado
+  (`advance` + `renderUpdate`) para chamadores antigos (testes, bench com delta variável).
+- `src/debug/bench.js` mede o tempo de `advance` ("sim ms/frame" no rótulo; chave JSON
+  `gameUpdateMs`, mantida por compatibilidade com `tools/bench/run-bench.mjs`/`tools/fog-compare`).
 
 ## Modelo de dados (F2-01)
 
@@ -150,7 +195,7 @@ animate() [rAF da aplicação, delta máx 0.1s, sem timestep fixo; sem sessão (
 
 ### Grade espacial (F1-06)
 - `SpatialGrid` (`src/sim/SpatialGrid.js`, lógica pura sem three.js) indexa entidades por célula (posição do centro, clampada aos limites do mapa) e responde `queryRadius`/`queryRect`/`nearest` sem alocar (buffers reutilizados pelos chamadores). `queryRadius` inclui a entidade quando `distância-centro ≤ r + raio da entidade`; `nearest` usa distância pura (sem raio) e desempata por menor `id`. Resultados de `queryRadius`/`queryRect` vêm ordenados por `id` (determinismo).
-- `gm.unitGrid` (unidades, dinâmica) é sincronizada **uma vez por tick**, em `GameManager.update`, antes do loop `Unit.update` — colisão/alvo/picking do tick usam a posição do início do tick. `gm.blockerGrid` (Building/ResourceDeposit/Tree) é mantida em `registerEntity`/`unregisterEntity`; árvore cortada (`isDead`/`woodRemaining <= 0`) sai da grade no próprio loop de `trees.forEach` do `update`.
+- `gm.unitGrid` (unidades, dinâmica) é sincronizada **uma vez por tick**, em `GameManager.simStep` (F1-09), antes do loop `Unit.update` — colisão/alvo/picking do tick usam a posição do início do tick. `gm.blockerGrid` (Building/ResourceDeposit/Tree) é mantida em `registerEntity`/`unregisterEntity`; árvore cortada (`isDead`/`woodRemaining <= 0`) sai da grade no próprio loop de `trees.forEach` do `simStep`.
 - Usos: `resolveBuildingCollisions`/`resolveUnitCollisions`/`_checkUnitBlockerCollision` (colisão), `Unit.findNearestHostile*`/`takeDamage` (alvo/aggro/ajuda), `Building` torre (`gm.unitGrid.nearest`), `AIDirector`/`AIMilitaryManager` (intrusos na base), `canPlaceBuilding`/`findNearestResource`/`findNearestDropoff` (colocação/coleta) e `InputManager.raycastScene` (picking do mouse, só as entidades perto do ponto do chão em vez de todas as meshes do jogo).
 - `resolveUnitCollisions` resolve cada par uma única vez comparando `id` (só o de maior `id` processa o par), e o empurrão em colisão exata (`dist < 0.001`) usa um ângulo determinístico derivado dos ids das duas unidades em vez de `Math.random()`.
 - DÍVIDA: o alcance efetivo de `queryRadius` cresce com o maior raio já visto pela grade (`SpatialGrid.maxRadius`, nunca diminui); em mapas com poucas construções grandes (castelo) isso alarga um pouco a busca em `resolveBuildingCollisions`/`canPlaceBuilding` — aceitável hoje, revisar se algum mapa futuro tiver construções muito maiores.

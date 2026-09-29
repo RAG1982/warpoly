@@ -30,8 +30,14 @@ import {
   layoutAt,
   validateMatchConfig
 } from '../sim/MatchConfig.js';
+import { SIM_DT, MAX_STEPS, animationLodStep } from '../sim/constants.js';
 
 const EMPTY_LIST = Object.freeze([]);
+
+// F1-09: buffers de módulo reutilizados pelo LOD de animação em renderUpdate (sem alocação/frame).
+const _lodFrustum = new THREE.Frustum();
+const _lodProjScreenMatrix = new THREE.Matrix4();
+const _lodSphere = new THREE.Sphere(new THREE.Vector3(), 3);
 
 export class GameManager {
   /**
@@ -84,6 +90,12 @@ export class GameManager {
     this.gameSpeed = 1.0;
     this.isPaused = false;
     this.gameTime = 0;
+
+    // F1-09: tick fixo — acumulador de tempo de simulação e contador de frames renderizados
+    // (usado para espalhar o LOD de animação entre unidades via `id % k`).
+    this._acc = 0;
+    this._lastAlpha = 0;
+    this._frameIndex = 0;
 
     // Fog of War (covers 160x160 continent)
     this.fogOfWar = new FogOfWar(this.scene, 160, 160);
@@ -1054,9 +1066,101 @@ export class GameManager {
     return false;
   }
 
-  update(delta) {
-    if (this.isPaused || this.isGameOver) return;
-    const dt = delta * this.gameSpeed;
+  /**
+   * F1-09: avança a simulação em passos fixos de `SIM_DT` (20 Hz), determinístico em relação ao
+   * FPS. `frameDelta` é o delta do frame renderizado (já limitado); internamente é multiplicado
+   * por `gameSpeed` e acumulado — cada passo de `simStep` sempre recebe exatamente `SIM_DT`.
+   * Retorna `alpha` ∈ [0,1): fração do próximo passo ainda não simulada, usada por
+   * `renderUpdate` para interpolar a pose visual entre o passo anterior e o atual.
+   */
+  advance(frameDelta) {
+    if (this.isPaused || this.isGameOver) return this._lastAlpha;
+
+    // Desfaz a interpolação visual do frame anterior: a simulação sempre parte da última pose
+    // simulada real (`_simPos`/`_simRotY`), nunca da pose interpolada exibida na tela.
+    this._restoreSimPose();
+
+    this._acc += frameDelta * this.gameSpeed;
+    let steps = 0;
+    // Épsilon evita perder/ganhar um passo por erro de arredondamento de ponto flutuante
+    // (ex.: somar 1/30 sessenta vezes fica ligeiramente abaixo de 2.0, não exatamente 2.0).
+    while (this._acc >= SIM_DT - 1e-9 && steps < MAX_STEPS) {
+      this._snapshotPrevPose();
+      this.simStep(SIM_DT);
+      this._snapshotSimPose();
+      this._acc -= SIM_DT;
+      steps++;
+    }
+    // Frame(s) muito lentos: evita espiral de morte (acumulador cresce mais rápido do que a
+    // simulação consegue consumir) descartando o excedente.
+    if (steps >= MAX_STEPS) this._acc = 0;
+
+    // Clamp: o épsilon do laço acima pode deixar `_acc` ligeiramente negativo por arredondamento.
+    if (this._acc < 0) this._acc = 0;
+    this._lastAlpha = this._acc / SIM_DT;
+    return this._lastAlpha;
+  }
+
+  /** Pose visual (interpolada) → pose de simulação, antes de rodar `simStep` neste frame. */
+  _restoreSimPose() {
+    const all = this.allUnits;
+    for (let i = 0; i < all.length; i++) {
+      const u = all[i];
+      if (!u._simPos) continue;
+      u.mesh.position.copy(u._simPos);
+      u.mesh.rotation.y = u._simRotY;
+    }
+    const arrows = this.arrows;
+    for (let i = 0; i < arrows.length; i++) {
+      const a = arrows[i];
+      if (!a._simPos) continue;
+      a.mesh.position.copy(a._simPos);
+      a.mesh.quaternion.copy(a._simQuat);
+    }
+  }
+
+  /** Pose atual (antes de rodar um passo de simulação) → `_prevPos`/`_prevRotY`. */
+  _snapshotPrevPose() {
+    const all = this.allUnits;
+    for (let i = 0; i < all.length; i++) {
+      const u = all[i];
+      if (!u._prevPos) continue;
+      u._prevPos.copy(u.mesh.position);
+      u._prevRotY = u.mesh.rotation.y;
+    }
+    const arrows = this.arrows;
+    for (let i = 0; i < arrows.length; i++) {
+      const a = arrows[i];
+      if (!a._prevPos) continue;
+      a._prevPos.copy(a.mesh.position);
+      a._prevQuat.copy(a.mesh.quaternion);
+    }
+  }
+
+  /** Pose atual (depois de rodar um passo de simulação) → `_simPos`/`_simRotY`. */
+  _snapshotSimPose() {
+    const all = this.allUnits;
+    for (let i = 0; i < all.length; i++) {
+      const u = all[i];
+      if (!u._simPos) continue;
+      u._simPos.copy(u.mesh.position);
+      u._simRotY = u.mesh.rotation.y;
+    }
+    const arrows = this.arrows;
+    for (let i = 0; i < arrows.length; i++) {
+      const a = arrows[i];
+      if (!a._simPos) continue;
+      a._simPos.copy(a.mesh.position);
+      a._simQuat.copy(a.mesh.quaternion);
+    }
+  }
+
+  /**
+   * F1-09: um passo de simulação de `dt` segundos fixos (sempre `SIM_DT`, exceto em testes).
+   * Corpo antigo de `update(delta)`: vitória, árvores, projéteis, construções, unidades,
+   * colisões, IA, névoa, limpeza. Sem chamadas de animação/visual (ver `renderUpdate`).
+   */
+  simStep(dt) {
     this.gameTime += dt;
 
     // Check Win/Loss conditions
@@ -1071,7 +1175,7 @@ export class GameManager {
 
     // Update Projectiles
     for (let i = this.arrows.length - 1; i >= 0; i--) {
-      this.arrows[i].update(dt);
+      this.arrows[i].simStep(dt);
       if (this.arrows[i].isDead) {
         const deadArrow = this.arrows.splice(i, 1)[0];
         this.unregisterEntity(deadArrow);
@@ -1081,9 +1185,9 @@ export class GameManager {
     // Lista única de unidades (todos os jogadores). Construções filtram alvos por isHostile.
     const allUnits = this.allUnits;
 
-    // Update Buildings
+    // Update Buildings (lógica de jogo; VFX/billboard vão em renderUpdate)
     this.buildings.forEach(b => {
-      b.update(dt, this, this.soundManager, this.particleSystem, this.arrows, allUnits, allUnits);
+      b.simUpdate(dt, this, this.soundManager, this.particleSystem, this.arrows, allUnits, allUnits);
     });
 
     // Clean dead buildings
@@ -1150,6 +1254,91 @@ export class GameManager {
         if (owner) owner.recalculatePop(this);
       }
     }
+  }
+
+  /**
+   * F1-09: parte visual do quadro — roda a cada frame renderizado (não a cada passo de
+   * simulação). Interpola posição/rotação de unidades e projéteis entre a pose anterior e a
+   * atual (`alpha`), aplica o LOD de animação por distância/frustum/visibilidade e atualiza
+   * VFX/billboards de construções.
+   * @param {number} frameDelta  segundos reais desde o último frame renderizado
+   * @param {number} alpha  fração ∈ [0,1) do próximo passo de simulação ainda não ocorrida
+   */
+  renderUpdate(frameDelta, alpha) {
+    if (this.isPaused || this.isGameOver) return;
+
+    // Projéteis: pose interpolada (posição + quaternion completo — trajetória balística).
+    const arrows = this.arrows;
+    for (let i = 0; i < arrows.length; i++) {
+      arrows[i].renderUpdate(alpha);
+    }
+
+    // Construções: billboards, chamas, fumaça e VFX customizado das subclasses.
+    this.buildings.forEach(b => {
+      b.renderUpdate(frameDelta, this, this.soundManager, this.particleSystem);
+    });
+
+    // LOD de animação por unidade (F1-09 item 4): frustum + distância à câmera-alvo.
+    this._frameIndex++;
+    const sm = this.sceneManager;
+    const camera = sm && sm.camera;
+    let frustum = null;
+    let camTarget = null;
+    if (camera && sm) {
+      _lodProjScreenMatrix.multiplyMatrices(camera.projectionMatrix, camera.matrixWorldInverse);
+      frustum = _lodFrustum.setFromProjectionMatrix(_lodProjScreenMatrix);
+      camTarget = sm.cameraTarget;
+    }
+
+    const all = this.allUnits;
+    for (let i = 0; i < all.length; i++) {
+      const u = all[i];
+      if (u.canRemove) continue;
+
+      let animDelta = frameDelta;
+      let lodStep = 1;
+
+      if (frustum) {
+        const mesh = u.mesh;
+        const visible = mesh.visible !== false;
+        _lodSphere.center.copy(mesh.position);
+        const inView = visible && frustum.intersectsSphere(_lodSphere);
+
+        if (!visible || !inView) {
+          // Fora de tela/névoa: não anima; acumula o delta perdido (até 0,5s) para não
+          // "saltar" a animação quando a unidade reaparecer.
+          u._animAcc = Math.min(0.5, (u._animAcc || 0) + frameDelta);
+          animDelta = 0;
+          lodStep = 0;
+        } else if (u._animAcc) {
+          // Reapareceu: entrega de uma vez o delta acumulado enquanto estava oculta.
+          animDelta = frameDelta + u._animAcc;
+          u._animAcc = 0;
+          lodStep = 1;
+        } else {
+          const dist = camTarget.distanceTo(mesh.position);
+          lodStep = animationLodStep(dist, this._frameIndex, u.id);
+          if (lodStep && dist > 60) {
+            // Anima só a cada k frames (k=2 até 100, k=4 acima) — entrega de uma vez o delta
+            // de k frames para não parecer mais lento que o normal.
+            animDelta = frameDelta * (dist <= 100 ? 2 : 4);
+          } else if (!lodStep) {
+            animDelta = 0;
+          }
+        }
+      }
+
+      u.renderUpdate(animDelta, alpha, lodStep);
+    }
+  }
+
+  /**
+   * Wrapper legado: `advance` + `renderUpdate` num só frame renderizado = o antigo `update(delta)`
+   * com delta variável (F1-09). Mantido para testes/bench antigos que não distinguem sim/render.
+   */
+  update(delta) {
+    const alpha = this.advance(delta);
+    this.renderUpdate(delta, alpha);
   }
 
   warmLiveScene() {

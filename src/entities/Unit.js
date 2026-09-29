@@ -5,6 +5,7 @@ import { Building } from './Building.js';
 import { UnitAnimator } from '../inspector/unitAnimator.js';
 import { getUnitDef, getUnitStats as getUnitStatsFromData, WORKER_STATS } from '../data/index.js';
 import { legacyOwnerId } from '../sim/EntityIds.js';
+import { SIM_DT, lerpAngle } from '../sim/constants.js';
 
 // Buffers de módulo reutilizados pelas buscas de alvo hostil (F1-06: unitGrid/blockerGrid),
 // evitando alocar um array novo por unidade a cada frame.
@@ -144,6 +145,18 @@ export class Unit {
     this.mesh.position.set(x, h, z);
     this.mesh.scale.set(1.62, 1.62, 1.62); // Scaled +20% for superior visibility and detail appreciation
     this.mesh.userData.entity = this;
+
+    // F1-09: tick fixo — pose de simulação (posição/rotação Y) do início e do fim do último
+    // passo, para `renderUpdate` interpolar visualmente entre eles. Unidade recém-criada não
+    // "voa" da origem: as duas poses começam iguais à posição inicial.
+    this._prevPos = this.mesh.position.clone();
+    this._simPos = this.mesh.position.clone();
+    this._prevRotY = this.mesh.rotation.y;
+    this._simRotY = this.mesh.rotation.y;
+    // Delta de animação acumulado enquanto a unidade estava fora do frustum/invisível (LOD).
+    this._animAcc = 0;
+    // Deslocamento vertical acumulado do afundamento visual pós-morte (renderUpdate).
+    this._deathSinkOffset = 0;
 
     // Animator
     this.animator = new UnitAnimator(this.mesh, type);
@@ -439,6 +452,7 @@ export class Unit {
     this.state = 'dying';
     this.deathTimer = 0;
     this.deathDuration = 1.6;
+    this._deathSinkOffset = 0;
 
     this.hasTargetPos = false;
     this.targetEntity = null;
@@ -561,32 +575,16 @@ export class Unit {
 
     this.stepTowards(subTargetX, subTargetZ, this.speed * delta);
 
-    // Walk animation (if not playing hurt stagger)
+    // Walk animation (troca de estado só; a reprodução em si roda em renderUpdate — F1-09)
     this.hasFiredThisAttack = false;
     if (this.animator && this.hurtTimer <= 0) {
       this.animator.setAnimation('walk');
-      this.animator.update(delta);
     }
   }
 
   update(delta, gameManager, soundManager, particleSystem, arrows, allUnits, buildings) {
     if (this.canRemove) return;
     this.gameManager = gameManager;
-
-    // Update 3D health bar position and billboard to face camera
-    if (this.hpGroup && this.scene) {
-      if (this.isDead || this.isDying || this.state === 'dying' || this.canRemove || (this.mesh && !this.mesh.visible)) {
-        this.hpGroup.visible = false;
-      } else {
-        const isVisible = this.isSelected || this.hp < this.maxHp;
-        this.hpGroup.visible = isVisible;
-        if (isVisible && gameManager && gameManager.sceneManager) {
-          const h = this.getHealthBarHeight();
-          this.hpGroup.position.set(this.mesh.position.x, this.mesh.position.y + h, this.mesh.position.z);
-          this.hpGroup.quaternion.copy(gameManager.sceneManager.camera.quaternion);
-        }
-      }
-    }
 
     // Safety: ensure unit never stays submerged in water
     if (this.terrain.getHeight(this.mesh.position.x, this.mesh.position.z) < 0.65) {
@@ -601,12 +599,8 @@ export class Unit {
     if (this.isDead || this.isDying || this.state === 'dying') {
       this.state = 'dying';
       this.deathTimer += delta;
-      if (this.animator) {
-        this.animator.update(delta);
-      }
-      if (this.deathTimer >= 1.0) {
-        this.mesh.position.y -= delta * 0.35;
-      }
+      // Animação 'die' e o afundamento visual (mesh.position.y) rodam em renderUpdate (F1-09):
+      // aqui só a lógica de simulação (timer que decide quando a unidade pode ser removida).
       if (this.deathTimer >= this.deathDuration) {
         this.canRemove = true;
         this.dispose();
@@ -616,9 +610,7 @@ export class Unit {
 
     if (this.hurtTimer > 0) {
       this.hurtTimer -= delta;
-      if (this.animator) {
-        this.animator.update(delta);
-      }
+      // A reprodução da animação de 'hurt' roda em renderUpdate (F1-09); aqui só o timer.
       if (this.hurtTimer <= 0 && this.animator) {
         this.animator.reset();
       }
@@ -649,11 +641,65 @@ export class Unit {
     }
   }
 
+  /**
+   * F1-09: parte visual, rodada uma vez por frame renderizado (não por passo de simulação).
+   * Interpola `mesh.position`/`mesh.rotation.y` entre a pose anterior e a atual do tick fixo,
+   * atualiza o billboard da barra de vida e reproduz a animação (com o LOD por distância que
+   * `GameManager.renderUpdate` calcula em `lodStep`/`frameDelta`).
+   * @param {number} frameDelta  segundos reais desde o último frame (0 = pausado; já pode vir
+   *   com o delta acumulado do LOD — ver GameManager.renderUpdate)
+   * @param {number} alpha  fração ∈ [0,1) do próximo passo de simulação ainda não ocorrida
+   * @param {number} lodStep  1 = anima este frame, 0 = pula (unidade oculta/distante)
+   */
+  renderUpdate(frameDelta, alpha, lodStep) {
+    if (this.canRemove) return;
+
+    // Interpolação de transform (item 2 da spec F1-09): a lógica de simulação continua
+    // escrevendo em mesh.position/mesh.rotation.y; aqui só suavizamos a exibição entre poses.
+    this.mesh.position.lerpVectors(this._prevPos, this._simPos, alpha);
+    this.mesh.rotation.y = lerpAngle(this._prevRotY, this._simRotY, alpha);
+
+    // Billboard da barra de vida (movido de update() para renderUpdate() — precisa da câmera).
+    if (this.hpGroup && this.scene) {
+      if (this.isDead || this.isDying || this.state === 'dying' || (this.mesh && !this.mesh.visible)) {
+        this.hpGroup.visible = false;
+      } else {
+        const isVisible = this.isSelected || this.hp < this.maxHp;
+        this.hpGroup.visible = isVisible;
+        if (isVisible && this.gameManager && this.gameManager.sceneManager) {
+          const h = this.getHealthBarHeight();
+          this.hpGroup.position.set(this.mesh.position.x, this.mesh.position.y + h, this.mesh.position.z);
+          this.hpGroup.quaternion.copy(this.gameManager.sceneManager.camera.quaternion);
+        }
+      }
+    }
+
+    if (this.isDying) {
+      // Afundamento visual pós-colapso (mesh.position.y), com frameDelta real — não o tick fixo.
+      if (this.deathTimer >= 1.0) {
+        this._deathSinkOffset += frameDelta * 0.35;
+        this.mesh.position.y -= this._deathSinkOffset;
+      }
+      if (this.animator && lodStep > 0) this.animator.update(frameDelta);
+      return;
+    }
+
+    if (!this.animator || lodStep <= 0) return;
+
+    if (this.state === 'attacking' && this.hurtTimer <= 0 && this.animator.currentAnim === 'fight') {
+      // Progresso contínuo do ataque (attackTimer do último tick + fração do próximo ainda não
+      // simulada) — evita o "degrau" de 20 Hz na animação de ataque.
+      const t = Math.min(1, (this.attackTimer + alpha * SIM_DT) / this.attackCooldown);
+      this.animator.setTime(t);
+    } else {
+      this.animator.update(frameDelta * lodStep);
+    }
+  }
+
   updateIdle(delta, allUnits, buildings) {
     this.hasFiredThisAttack = false;
     if (this.animator && this.hurtTimer <= 0) {
       this.animator.setAnimation('idle');
-      this.animator.update(delta);
     }
 
     // Auto-Aggro: Military combat units actively scan for and attack approaching enemies
@@ -697,7 +743,6 @@ export class Unit {
     this.hasFiredThisAttack = false;
     if (this.animator && this.hurtTimer <= 0) {
       this.animator.setAnimation('walk');
-      this.animator.update(delta);
     }
   }
 
@@ -738,7 +783,6 @@ export class Unit {
     this.hasFiredThisAttack = false;
     if (this.animator && this.hurtTimer <= 0) {
       this.animator.setAnimation('gather');
-      this.animator.update(delta);
     }
 
     // Extract resource ticks (every 0.9s)
@@ -858,7 +902,6 @@ export class Unit {
     this.hasFiredThisAttack = false;
     if (this.animator && this.hurtTimer <= 0) {
       this.animator.setAnimation('gather');
-      this.animator.update(delta);
     }
 
     if (this.actionTimer >= 0.8) {
@@ -935,10 +978,10 @@ export class Unit {
     const dirZ = targetPos.z - this.mesh.position.z;
     this.mesh.rotation.y = Math.atan2(dirX, dirZ);
 
+    // Animação 'fight': troca de estado só; o tempo é sincronizado com o cooldown em
+    // renderUpdate (F1-09), de forma contínua (usa `alpha` para não "degrau" a 20 Hz).
     if (this.animator && this.hurtTimer <= 0) {
       this.animator.setAnimation('fight');
-      const progress = Math.min(1.0, this.attackTimer / this.attackCooldown);
-      this.animator.setTime(progress * 1.0);
     }
 
     const progress = Math.min(1.0, this.attackTimer / this.attackCooldown);

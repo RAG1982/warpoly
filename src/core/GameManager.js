@@ -1082,7 +1082,9 @@ export class GameManager {
 
     this._acc += frameDelta * this.gameSpeed;
     let steps = 0;
-    while (this._acc >= SIM_DT && steps < MAX_STEPS) {
+    // Épsilon evita perder/ganhar um passo por erro de arredondamento de ponto flutuante
+    // (ex.: somar 1/30 sessenta vezes fica ligeiramente abaixo de 2.0, não exatamente 2.0).
+    while (this._acc >= SIM_DT - 1e-9 && steps < MAX_STEPS) {
       this._snapshotPrevPose();
       this.simStep(SIM_DT);
       this._snapshotSimPose();
@@ -1093,6 +1095,8 @@ export class GameManager {
     // simulação consegue consumir) descartando o excedente.
     if (steps >= MAX_STEPS) this._acc = 0;
 
+    // Clamp: o épsilon do laço acima pode deixar `_acc` ligeiramente negativo por arredondamento.
+    if (this._acc < 0) this._acc = 0;
     this._lastAlpha = this._acc / SIM_DT;
     return this._lastAlpha;
   }

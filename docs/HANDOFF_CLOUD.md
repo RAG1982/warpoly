@@ -38,7 +38,7 @@ Para saber qual é a "próxima pendente": verifique se já existe branch `cloud/
 
 ## 4. O que está rodando localmente (não duplique)
 - **F3-04 — economia WC2** (local, 2026-09-29): `GameManager`, `Unit`, `Building`, `ResourceDeposit`, `src/ai/**`, `src/sim/**`, `src/data/buildings.js`; toca **mínimo** o card/aviso em `UIManager` (a F3-01 da nuvem também mexe em UIManager/InputManager: faça mudanças localizadas para evitar conflito).
-- Em seguida, localmente: F3-03 (combate), F3-06 (níveis do Centro).
+- Em seguida, localmente e **em sequência** (mesmos arquivos): F3-03 (combate) → F3-06 (níveis do Centro). Ambas tocam `UIManager` de forma mínima.
 - Já concluídas: F1-03/F1-03b, F1-05, F1-06, F1-08, F1-09, F2-02, F2-03, F2-05, F2-07.
 - Arte no Blender: **adiada** até o código estar pronto.
 

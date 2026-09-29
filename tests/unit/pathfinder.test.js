@@ -216,5 +216,30 @@ describe('Pathfinder', () => {
       pf.processQueue(50);
       expect(resolved).toBe(1);
     });
+
+    // F2-03: orçamento por nós expandidos, não por performance.now() (mesmo limite em toda
+    // máquina). Usa o terreno com rio para forçar busca A* real (nós > 0 por pedido) em vez do
+    // atalho de linha de visão direta.
+    it('orçamento por nós: 200 pedidos que exigem A* real resolvem em várias chamadas de processQueue', () => {
+      const pf = new Pathfinder(riverTerrain);
+      let resolved = 0;
+      for (let i = 0; i < 200; i++) {
+        // Origem e destino em margens opostas do rio: força contorno pelo vau (busca A* real).
+        pf.requestPath(fakeUnit(-20, i * 0.05), 20, i * 0.05, () => { resolved++; });
+      }
+
+      let calls = 0;
+      let guard = 0;
+      while (resolved < 200 && guard < 10000) {
+        pf.processQueue(100); // orçamento pequeno (< 1 busca A* real, ~700 nós) força várias chamadas
+        calls++;
+        guard++;
+      }
+
+      expect(resolved).toBe(200);
+      // Nenhum pedido usa performance.now(): o orçamento é por nós, então mais de 1 chamada
+      // deve ter sido necessária para 200 buscas reais de A*.
+      expect(calls).toBeGreaterThan(1);
+    });
   });
 });

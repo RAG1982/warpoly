@@ -221,7 +221,7 @@ export class AIEconomyManager {
     // F2-02: sem dedução aqui — o custo é cobrado no CommandExecutor (PLACE_BUILDING).
     if (uHousing >= 0.85 || this.director.population >= this.director.maxPopulation) {
       if (this.director.canAfford(this.director.costs.farm)) {
-        const chosenType = (this.director.faction === 'orc' && Math.random() < 0.45)
+        const chosenType = (this.director.faction === 'orc' && this.director.rng.next() < 0.45)
           ? this.director.houseType
           : this.director.farmType;
         this.placeBuilding(chosenType);
@@ -262,7 +262,7 @@ export class AIEconomyManager {
 
     // 4. SECONDARY HOUSING: Maintain population headroom as army grows
     if (this.director.population >= this.director.maxPopulation - 3 && this.director.canAfford(this.director.costs.farm)) {
-      const chosenType = (this.director.faction === 'orc' && Math.random() < 0.5)
+      const chosenType = (this.director.faction === 'orc' && this.director.rng.next() < 0.5)
         ? this.director.houseType
         : this.director.farmType;
       this.placeBuilding(chosenType);
@@ -656,8 +656,8 @@ export class AIEconomyManager {
 
     // Search radially around base center for a valid placement location
     for (let attempt = 0; attempt < 45; attempt++) {
-      const angle = (attempt * 0.45) + (Math.random() * 0.3);
-      const dist = 11.5 + (attempt % 3) * 4.5 + Math.random() * 3.0;
+      const angle = (attempt * 0.45) + (this.director.rng.next() * 0.3);
+      const dist = 11.5 + (attempt % 3) * 4.5 + this.director.rng.next() * 3.0;
       const testX = baseCenter.x + Math.cos(angle) * dist;
       const testZ = baseCenter.y + Math.sin(angle) * dist;
 

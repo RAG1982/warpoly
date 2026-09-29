@@ -684,7 +684,8 @@ export class Building {
         // Spawn Unit outside building walls
         this.queue.shift();
         const spawnDist = this.collisionRadius + 1.2;
-        const spawnX = this.mesh.position.x + (Math.random() - 0.5) * 1.5;
+        const rng = gameManager && gameManager.rng ? gameManager.rng : null;
+        const spawnX = this.mesh.position.x + ((rng ? rng.next() : Math.random()) - 0.5) * 1.5;
         const spawnZ = this.mesh.position.z + spawnDist;
         gameManager.spawnUnit(current.type, spawnX, spawnZ, this.ownerId, this.rallyPoint);
         if (soundManager) soundManager.playOrder();
@@ -763,7 +764,7 @@ export class Building {
       if (this.flameSmokeTimer >= 0.7) {
         this.flameSmokeTimer = 0;
         if (particleSystem && this.flameClusters.length > 0) {
-          const cluster = this.flameClusters[Math.floor(Math.random() * this.flameClusters.length)];
+          const cluster = this.flameClusters[Math.floor(Math.random() * this.flameClusters.length)]; // visual: não afeta o estado
           cluster.getWorldPosition(_flameSmokePos);
           _flameSmokePos.y += 0.5;
           particleSystem.spawnSmokePuff(_flameSmokePos);

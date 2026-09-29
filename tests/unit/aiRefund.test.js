@@ -1,5 +1,6 @@
 import { describe, it, expect, vi } from 'vitest';
 import { AIEconomyManager } from '../../src/ai/AIEconomyManager.js';
+import { createRng } from '../../src/sim/rng.js';
 
 /**
  * NEW-2 (histórico): `placeBuilding` chegou a reembolsar pelo custo da fazenda
@@ -18,6 +19,7 @@ function fakeDirector() {
     costs: { farm: { wood: 999, stone: 999, gold: 999 } },
     resources: { wood: 0, stone: 0, gold: 0 },
     baseCenter: { x: 0, y: 0 },
+    rng: createRng(1), // F2-03: placeBuilding sorteia ângulo/distância de tentativa via director.rng
     getOwnUnits: () => [],
     gm: { canPlaceBuilding: () => false, issue: vi.fn() }
   };

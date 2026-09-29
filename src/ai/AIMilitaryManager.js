@@ -153,7 +153,7 @@ export class AIMilitaryManager {
       }
     } else {
       // Balanced tactical recruitment
-      if (canSiege && Math.random() < 0.25) {
+      if (canSiege && this.director.rng.next() < 0.25) {
         recruitType = this.director.siegeType;
       } else if (rangedCount < meleeCount && canRanged) {
         recruitType = this.director.rangedType;

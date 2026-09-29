@@ -5,7 +5,13 @@ import { ModelFactory } from './ModelFactory.js';
 const hitProxyMaterial = new THREE.MeshBasicMaterial({ visible: false });
 
 export class Tree {
-  constructor(scene, terrain, x, z, type = 'oak', treeManager = null) {
+  /**
+   * @param {object|null} [rng]  F2-03: RNG de simulação (`gm.rngMap`) usado para `rotY`/escala,
+   *   para o mapa ficar idêntico entre execuções da mesma seed (visual, mas assim evita divergir
+   *   entre replays/testes de determinismo). `fallDir` continua em `Math.random` (puramente
+   *   visual — não afeta posição/colisão). Sem `rng` (compatibilidade), cai em `Math.random`.
+   */
+  constructor(scene, terrain, x, z, type = 'oak', treeManager = null, rng = null) {
     this.scene = scene;
     this.terrain = terrain;
     this.type = 'tree';
@@ -14,12 +20,12 @@ export class Tree {
     this.maxWood = 120;
     this.isDead = false;
     this.fallProgress = 0;
-    this.fallDir = new THREE.Vector3(Math.random() - 0.5, 0, Math.random() - 0.5).normalize();
+    this.fallDir = new THREE.Vector3(Math.random() - 0.5, 0, Math.random() - 0.5).normalize(); // visual: não afeta o estado
     this.treeManager = treeManager;
 
     const h = this.terrain.getHeight(x, z);
-    const rotY = Math.random() * Math.PI * 2;
-    const s = 0.85 + Math.random() * 0.35;
+    const rotY = (rng ? rng.next() : Math.random()) * Math.PI * 2;
+    const s = 0.85 + (rng ? rng.next() : Math.random()) * 0.35;
     this.scale = s;
     this.collisionRadius = 0.75 * s;
 

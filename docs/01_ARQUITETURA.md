@@ -281,6 +281,45 @@ e IA não chamam mais `Unit`/`Building` diretamente — emitem comandos via `gm.
   de reunião ao spawnar (efeito interno da simulação); `src/debug/bench.js` continua chamando
   `orderAttack`/`moveTo` direto (ferramenta de teste de performance, sem UI).
 
+## Determinismo (F2-03)
+
+Multiplayer lockstep (F9) e replays (F9-05) exigem que a mesma seed + o mesmo log de comandos
+(F2-02) produzam sempre o mesmo estado, em qualquer máquina/motor JS.
+
+- **RNG de simulação vs. visual**: `gm.rng` (`src/sim/rng.js`, `mulberry32(seed)`) é o único RNG
+  que pode alterar estado de jogo — posição/tipo de árvore num cluster (`gm.rngMap =
+  gm.rng.fork('map')`), spot/tipo de construção e recrutamento da IA (`director.rng =
+  gm.rng.fork('ai:'+playerId)`), leve variação no ponto de spawn de unidade treinada
+  (`gm.rng`). `Math.random` continua livre para tudo puramente visual (partículas, som,
+  decoração, animação, `Tree.fallDir`) — comentado `// visual: não afeta o estado` nos
+  pontos que ficaram em `Math.random` por decisão deliberada (ver spec F2-03 para a lista
+  completa classificada). `RNG.fork(label)` deriva uma seed por hash (FNV-1a) da seed do pai +
+  `label`: sub-RNGs não compartilham sequência entre si nem avançam o estado do pai.
+- **Sem relógio na simulação**: `Pathfinder.processQueue(maxNodes = 4000)` orça por nós de
+  grade expandidos pelo A* (`Pathfinder._lastNodesExpanded`), não por `performance.now()` —
+  o mesmo orçamento produz o mesmo número de buscas resolvidas por tick em qualquer máquina.
+  `_searchAStar` já usava um teto por iterações (determinístico) desde antes da F2-03; só o
+  dreno da fila entre ticks usava relógio.
+- **Ordem de iteração**: laços que alteram estado percorrem `allUnits`/`buildings`/`trees` em
+  ordem de `id` (arrays mantidos em ordem de inserção; remoção via `splice`, nunca troca de
+  posição). `SpatialGrid.queryRadius` já ordena por id (F1-06).
+- **Checksum** (`src/sim/checksum.js`, `stateChecksum(gm)`): hash FNV-1a de 32 bits sobre, em
+  ordem de id, unidades (`id, type, ownerId, x, z` arredondados a 1e-3, `hp`, `state`),
+  construções (`id, type, ownerId, hp, buildProgress`, tamanho da fila) e recursos de cada
+  jogador + `currentTick`. `GameManager.simStep` chama `recordChecksum(gm)` a cada 20 ticks;
+  `gm.checksums` guarda os últimos 100 (`{tick, hash}`). Não inclui nada visual.
+- **Modo headless** (`MatchConfig.headless`, testes de determinismo em Node sem DOM/WebGL):
+  `GameManager` liga `ModelFactory.headless = true`, e `ModelFactory.getOrCreateModel` (usado
+  por todo `createXxx()` de unidade/construção/mina/pedreira/flecha) devolve um
+  `THREE.Group()` vazio em vez de rodar o gerador procedural (que pintaria texturas em
+  `document.createElement('canvas')`, inexistente em Node). Não afeta a simulação:
+  posição/estado/colisão de nenhuma entidade dependem da malha visual.
+- **Ponto de atenção (não implementado — proposto para F9-03)**: `Math.sin/cos/exp` são
+  determinísticos no mesmo motor/mesma versão do V8, mas podem divergir entre navegadores
+  diferentes num multiplayer real (não entre replays da mesma máquina). Se isso importar para
+  lockstep entre navegadores distintos, F9-03 deve avaliar uma tabela ou implementação própria
+  de trigonometria fixa.
+
 ## Pipeline de assets
 
 - Cada `*Textures.js` tem funções `getXTextures()` memoizadas que pintam canvases (map, roughness, metalness, bump) — **498 chamadas `createCanvas(2048…)`**, 41 de 1024, 17 de 512.

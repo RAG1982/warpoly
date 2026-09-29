@@ -100,13 +100,17 @@ const homeSlot = (f) => (f === 'orc' ? 1 : 0);
  *   cada um no slot histórico da sua facção — idêntico ao comportamento anterior.
  * - `ffa: true`: jogador local × 2 IAs, cada um num time diferente (3 times).
  *   A 2ª IA usa a facção do jogador local e fica no slot 2.
+ * - `headless: true` (F2-03): partida sem DOM/WebGL (testes de determinismo em Node) — o
+ *   GameManager liga `ModelFactory.headless`, que devolve `THREE.Group()` vazio em vez de gerar
+ *   malhas/texturas procedurais. Não afeta a simulação (posição/estado/colisão).
  */
 export function createMatchConfig({
   localFaction = 'human',
   ffa = false,
   seed = null,
   mapId = DEFAULT_MAP_ID,
-  difficulty = DEFAULT_DIFFICULTY
+  difficulty = DEFAULT_DIFFICULTY,
+  headless = false
 } = {}) {
   const local = localFaction === 'orc' ? 'orc' : 'human';
   const ai = otherFaction(local);
@@ -149,6 +153,7 @@ export function createMatchConfig({
     seed: seed ?? randomSeed(),
     // F2-04: guardada na config; a IA ainda não lê a dificuldade (F5).
     difficulty: normalizeDifficulty(difficulty),
+    headless: !!headless,
     players
   };
 }

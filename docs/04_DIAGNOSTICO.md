@@ -40,7 +40,7 @@ Causas raiz, em ordem de impacto:
 | B11 | ~~HUD inferior cortada em 1024×768 (card de seleção sai da tela, minimapa sobreposto)~~ **Corrigido na F6-03** (validação visual pendente localmente): `#bottom-bar` virou grid de 3 colunas (`minmax(0,1fr)` no card) em vez de 3 blocos com `position:fixed`/`left` absolutos; `--ui-scale` e `@media (max-width: 1100px)` | `style.css`, `src/ui/uiScale.js` |
 | B12 | Textos misturados PT/EN ("Constructed!", "GLORIOUS VICTORY", "+3 Gold", nomes de unidades em inglês) | vários |
 | B13 | `EnemyAI.js` e `GLTFBuildingLoader.js` mortos; `Unit.js` importa animador de `src/inspector/` | core |
-| B14 | `Math.random()` usado em 69 pontos da simulação — impossibilita replays/multiplayer determinístico | core/entities/ai |
+| B14 | ~~`Math.random()` usado em 69 pontos da simulação — impossibilita replays/multiplayer determinístico~~ **Corrigido na F2-03**: RNG de simulação com seed (`gm.rng`/`fork`, `src/sim/rng.js`) separado do RNG visual; `Math.random` só sobra onde comentado `// visual: não afeta o estado`; checksum (`src/sim/checksum.js`) + testes de determinismo (`tests/unit/determinism.test.js`, 12 000 ticks) provam a paridade entre execuções | core/entities/ai |
 | B15 | Barra de vida HTML inicial "5 / 15" diverge do cap real 10 até o 1º update | `index.html` |
 | B16 | Minimapa desenha rio/vaus com fórmula própria (difere do terreno real) e retângulo de câmera fixo | `UIManager.drawMinimap` |
 | B17 | `dist/` versionado no git e dezenas de screenshots/PNGs de referência soltos na raiz | repo |

@@ -28,6 +28,11 @@ export class AIDirector {
     this.faction = faction;
     this.baseCenter = baseCenter;
 
+    // F2-03: RNG determinístico próprio desta IA, derivado de `gm.rng` — todas as decisões da
+    // IA que envolvem sorteio (tipo de construção, posição de tentativa, unidade a treinar)
+    // usam `this.rng`, nunca `Math.random`.
+    this.rng = gameManager.rng ? gameManager.rng.fork('ai:' + playerId) : null;
+
     // Faction archetypes (src/data/factions.js)
     const f = faction === 'orc' ? FACTIONS.orc : FACTIONS.human;
     this.workerType = f.units.worker;

@@ -58,7 +58,7 @@ Opus escreve a spec em `docs/specs/<ID>.md`; agente **Sonnet** executa; Opus rev
 | `docs/specs/F1-08-alocacoes-vazamentos.md` | F1-08 — **DONE** | sonnet |
 | `docs/specs/F1-09-tick-fixo-lod-animacao.md` | F1-09 + NEW-14 (após F1-08, mesmos arquivos) | sonnet |
 | `docs/specs/F2-02-sistema-comandos.md` | F2-02 — **DONE** | sonnet |
-| `docs/specs/F2-03-determinismo.md` | F2-03 + B14 | sonnet (local) |
+| `docs/specs/F2-03-determinismo.md` | F2-03 + B14 — **DONE** | sonnet (local) |
 | `docs/specs/F3-01-controles-rts.md` | F3-01 + NEW-16 — **nuvem** | sonnet (claude.ai/code) |
 | `docs/specs/F6-08-opcoes.md` | F6-08 — **nuvem**, após F3-01 | sonnet (claude.ai/code) |
 | `docs/specs/BUGS-01-pequenos.md` | NEW-2, NEW-11, NEW-5, NEW-13 — **nuvem** (ver `docs/HANDOFF_CLOUD.md`) | sonnet (claude.ai/code) |
@@ -74,7 +74,7 @@ Opus escreve a spec em `docs/specs/<ID>.md`; agente **Sonnet** executa; Opus rev
 |---|---|---|---|---|
 | F0 Fundação | 7 | 0 | 0 | 7 |
 | F1 Desempenho | 10 | 1 | 0 | 9 |
-| F2 Núcleo | 8 | 5 | 0 | 3 |
+| F2 Núcleo | 8 | 4 | 0 | 4 |
 | F3 Jogabilidade WC2 base | 11 | 11 | 0 | 0 |
 | F4 Jogabilidade WC2 expansão | 8 | 8 | 0 | 0 |
 | F5 IA | 6 | 6 | 0 | 0 |
@@ -205,9 +205,10 @@ Opus escreve a spec em `docs/specs/<ID>.md`; agente **Sonnet** executa; Opus rev
 - **Resultado**: `src/sim/{commands,CommandQueue,CommandExecutor}.js`; UI/input/IA emitem comandos (custo cobrado no executor); estados hold/attack-move/patrol; shift-queue; log de comandos JSON puro (replay). 174 testes. Teclas ficam para F3-01.
 
 ### F2-03 · Determinismo
-- **Status**: `DOING(sonnet, 2026-09-29)` · Lane CORE · Onda 3 · Dep: F2-01, F1-09
+- **Status**: `DONE(32b5fa9)` · Lane CORE · Onda 3 · Dep: F2-01, F1-09
 - **Fazer**: RNG com seed (`mulberry32`) em `src/sim/rng.js`; remover `Math.random` da simulação (69 ocorrências — visuais podem manter); iteração em ordem de ID; evitar dependência de ordem de `Set`/objetos; checksum de estado por tick.
 - **Aceite**: duas execuções com mesma seed e mesmos comandos → mesmo checksum após 10 min (teste automatizado).
+- **Resultado**: `src/sim/rng.js` (mulberry32 + fork), RNGs de mapa/IA, Pathfinder com orçamento por nós, `src/sim/checksum.js`, modo headless (`MatchConfig.headless`). Teste: 2 partidas IA×IA de 10 min com seed 42 → checksums idênticos (~1 s de simulação). B14 corrigido. Trigonometria entre navegadores: proposta para F9-03.
 
 ### F2-04 · Máquina de estados do jogo
 - **Status**: `DONE(ee1c289)` · Lane CORE · Onda 2 · Dep: —

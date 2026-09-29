@@ -4,6 +4,7 @@ import { BUILDING_TRAINABLE_UNITS, getUnitDef } from '../data/index.js';
 import { initUiScale } from './uiScale.js';
 import { getBuildHotkey, getTrainHotkey, getResearchHotkey } from './hotkeys.js';
 import { buildCostHtml } from './Tooltip.js';
+import { CMD } from '../sim/commands.js';
 
 // Quem treina o quê — derivado de src/data/buildings.js (campo `trains`)
 export { BUILDING_TRAINABLE_UNITS };
@@ -291,30 +292,42 @@ export class UIManager {
         return;
       }
 
-      // 2. Unit stop command
+      // 2. Unit stop command (F2-02: comando STOP)
       const action = btn.getAttribute('data-action');
       if (action === 'stop') {
-        this.gm.selectedUnits.forEach(u => u.stop());
+        this.gm.issue({
+          type: CMD.STOP,
+          playerId: this.gm.localPlayerId,
+          unitIds: this.gm.selectedUnits.map(u => u.id)
+        });
         return;
       }
 
-      // 3. Train units
+      // 3. Train units (F2-02: comando TRAIN — pré-checks aqui só dão feedback imediato de
+      // UI; a validação autoritativa (custo/fila/pop) acontece no CommandExecutor no tick).
       const trainType = btn.getAttribute('data-train');
       if (trainType && this.gm.selectedBuilding) {
         const b = this.gm.selectedBuilding;
-        const ok = b.queueUnit(trainType, this.gm);
-        if (ok) {
-          this.sound.playSelect();
-          this.lastSelectionKey = null; // force immediate re-render of queue counters
-        } else {
-          this.sound.playChop(); // buzz error
-          if (this.gm.population >= this.gm.maxPopulation) {
-            const farmName = this.gm.playerFaction === 'orc' ? 'Pig Farms' : 'Cottages';
-            this.showNotification(`Population limit reached! Build more ${farmName}.`);
-          } else {
-            this.showNotification(`Not enough resources to train ${trainType}!`);
-          }
+        const cfg = UNIT_TRAIN_CONFIG[trainType];
+        if (b.queue.length >= 6) {
+          this.sound.playChop();
+          this.showNotification('Fila de treinamento cheia! (Máximo 6)');
+          return;
         }
+        if (this.gm.population >= this.gm.maxPopulation) {
+          this.sound.playChop();
+          const farmName = this.gm.playerFaction === 'orc' ? 'Pig Farms' : 'Cottages';
+          this.showNotification(`Population limit reached! Build more ${farmName}.`);
+          return;
+        }
+        if (cfg && !this.gm.canAfford(cfg.cost)) {
+          this.sound.playChop();
+          this.showNotification(`Not enough resources to train ${trainType}!`);
+          return;
+        }
+        this.gm.issue({ type: CMD.TRAIN, playerId: this.gm.localPlayerId, buildingId: b.id, unitType: trainType });
+        this.sound.playSelect();
+        this.lastSelectionKey = null; // force immediate re-render of queue counters
       }
     }, this._listenOpts);
   }
@@ -357,13 +370,13 @@ export class UIManager {
             return;
           }
 
-          const ok = b.startResearch(upgradeId, this.gm);
-          if (ok) {
-            this.sound.playHammer();
-            this.showNotification(`Iniciando forjamento: ${upgName}...`);
-            this.renderBuildingTrainButtons(b);
-            this.updateBuildingQueue(b);
-          }
+          // F2-02: comando RESEARCH — os checks acima (já pesquisado/ocupado/sem recursos)
+          // seguem client-side para feedback imediato; a validação final é do executor.
+          this.gm.issue({ type: CMD.RESEARCH, playerId: this.gm.localPlayerId, buildingId: b.id, upgradeId });
+          this.sound.playHammer();
+          this.showNotification(`Iniciando forjamento: ${upgName}...`);
+          this.renderBuildingTrainButtons(b);
+          this.updateBuildingQueue(b);
         }
         return;
       }
@@ -380,19 +393,21 @@ export class UIManager {
             this.showNotification('Fila de treinamento cheia! (Máximo 6)');
             return;
           }
-          const ok = b.queueUnit(trainType, this.gm);
-          if (ok) {
-            this.sound.playSelect();
-            this.updateBuildingQueue(b);
-          } else {
+          if (this.gm.population >= this.gm.maxPopulation) {
             this.sound.playChop();
-            if (this.gm.population >= this.gm.maxPopulation) {
-              const houseName = this.gm.playerFaction === 'orc' ? 'Tocas Orc' : 'Casas';
-              this.showNotification(`Limite de população atingido! Construa mais ${houseName}.`);
-            } else {
-              this.showNotification(`Recursos insuficientes para treinar ${cfg ? cfg.name : trainType}!`);
-            }
+            const houseName = this.gm.playerFaction === 'orc' ? 'Tocas Orc' : 'Casas';
+            this.showNotification(`Limite de população atingido! Construa mais ${houseName}.`);
+            return;
           }
+          if (cfg && !this.gm.canAfford(cfg.cost)) {
+            this.sound.playChop();
+            this.showNotification(`Recursos insuficientes para treinar ${cfg ? cfg.name : trainType}!`);
+            return;
+          }
+          // F2-02: comando TRAIN — validação autoritativa (custo/fila/pop) no CommandExecutor.
+          this.gm.issue({ type: CMD.TRAIN, playerId: this.gm.localPlayerId, buildingId: b.id, unitType: trainType });
+          this.sound.playSelect();
+          this.updateBuildingQueue(b);
         }
         return;
       }
@@ -403,7 +418,7 @@ export class UIManager {
         const b = this.gm.selectedBuilding;
         if (b.type === 'forge' || b.type === 'orc_forge') {
           if (b.currentResearch) {
-            b.cancelResearch(this.gm);
+            this.gm.issue({ type: CMD.CANCEL_RESEARCH, playerId: this.gm.localPlayerId, buildingId: b.id });
             this.sound.playSelect();
             this.showNotification('Pesquisa cancelada. Recursos reembolsados.');
             this.renderBuildingTrainButtons(b);
@@ -414,12 +429,10 @@ export class UIManager {
 
         const slotIdx = parseInt(queueSlot.getAttribute('data-slot'), 10);
         if (!isNaN(slotIdx)) {
-          const ok = b.cancelQueuedUnit(slotIdx, this.gm);
-          if (ok) {
-            this.sound.playSelect();
-            this.showNotification('Treinamento cancelado. Recursos reembolsados.');
-            this.updateBuildingQueue(b);
-          }
+          this.gm.issue({ type: CMD.CANCEL_TRAIN, playerId: this.gm.localPlayerId, buildingId: b.id, slot: slotIdx });
+          this.sound.playSelect();
+          this.showNotification('Treinamento cancelado. Recursos reembolsados.');
+          this.updateBuildingQueue(b);
         }
       }
     }, this._listenOpts);

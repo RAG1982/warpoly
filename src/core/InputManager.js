@@ -2,6 +2,7 @@ import * as THREE from 'three';
 import { ModelFactory } from '../entities/ModelFactory.js';
 import { Building } from '../entities/Building.js';
 import { getCost } from '../data/index.js';
+import { CMD } from '../sim/commands.js';
 
 export class InputManager {
   constructor(sceneManager, gameManager, terrain) {
@@ -335,6 +336,12 @@ export class InputManager {
     }
   }
 
+  /**
+   * F2-02: emite PLACE_BUILDING em vez de construir direto — a dedução de recursos e a
+   * criação da construção acontecem no `CommandExecutor`/`GameManager.placeBuilding`, no
+   * tick de execução. Os checks abaixo (custo/obstrução) são só feedback imediato de UI;
+   * o executor valida o custo de novo (autoritativo) antes de gastar.
+   */
   confirmPlacement() {
     if (!this.placingBuildingType) return;
     const stats = this.getCost(this.placingBuildingType);
@@ -352,8 +359,18 @@ export class InputManager {
       return;
     }
 
-    this.gm.deductResources(stats.cost);
-    this.gm.buildNewBuilding(this.placingBuildingType, gx, gz);
+    const builderIds = this.gm.selectedUnits
+      .filter(u => u.type === 'villager' || u.type === 'peon')
+      .map(u => u.id);
+
+    this.gm.issue({
+      type: CMD.PLACE_BUILDING,
+      playerId: this.gm.localPlayerId,
+      buildingType: this.placingBuildingType,
+      x: gx,
+      z: gz,
+      unitIds: builderIds
+    });
     this.cancelPlacement();
   }
 

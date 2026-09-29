@@ -1,5 +1,6 @@
 import * as THREE from 'three';
 import { getBuildingDef } from '../data/index.js';
+import { CMD } from '../sim/commands.js';
 
 /**
  * AIMilitaryManager (Gerenciador Militar e Ofensivo da IA)
@@ -81,7 +82,7 @@ export class AIMilitaryManager {
       const e = enemies[i];
       if (!e.isDead && e.type !== workerType) {
         if (e.state === 'idle' || e.state === 'moving') {
-          e.orderAttack(closestIntruder);
+          gm.issue({ type: CMD.ATTACK, playerId: myId, unitIds: [e.id], targetId: closestIntruder.id });
         }
       }
     }
@@ -165,11 +166,16 @@ export class AIMilitaryManager {
       }
     }
 
-    // Official queueUnit call
-    const queued = barracks.queueUnit(recruitType, this.gm);
-    if (queued) {
-      barracks.setRallyPoint(this.assemblyRallyPoint);
-    }
+    // F2-02: TRAIN + RALLY via comandos (a IA emite com o próprio playerId).
+    const playerId = this.director.playerId;
+    this.gm.issue({ type: CMD.TRAIN, playerId, buildingId: barracks.id, unitType: recruitType });
+    this.gm.issue({
+      type: CMD.RALLY,
+      playerId,
+      buildingId: barracks.id,
+      x: this.assemblyRallyPoint.x,
+      z: this.assemblyRallyPoint.z
+    });
   }
 
   /**
@@ -211,12 +217,15 @@ export class AIMilitaryManager {
       this.gm.uiManager.showNotification(`⚔️ A ${factionName} reuniu um esquadrão de guerra (${this.readySquadCount} tropas) e avança contra sua base!`);
     }
 
-    // BATCH DISPATCH: Fast indexed loop without allocating closures or arrays
+    // BATCH DISPATCH (F2-02): um único comando ATTACK com todos os ids (mesmo formato do
+    // tradutor do jogador humano em GameManager.issueOrder).
     const count = this.readySquadCount;
+    const unitIds = new Array(count);
     for (let i = 0; i < count; i++) {
-      this.readySquadBuffer[i].orderAttack(target);
+      unitIds[i] = this.readySquadBuffer[i].id;
       this.readySquadBuffer[i] = null; // Clear reference for GC hygiene
     }
+    this.gm.issue({ type: CMD.ATTACK, playerId: this.director.playerId, unitIds, targetId: target.id });
     this.readySquadCount = 0;
 
     // Update threshold for subsequent wave

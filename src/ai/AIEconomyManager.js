@@ -1,4 +1,4 @@
-import { getCost } from '../data/index.js';
+import { CMD } from '../sim/commands.js';
 
 /**
  * AIEconomyManager (Gerenciador de Economia e Construção da IA)
@@ -134,8 +134,14 @@ export class AIEconomyManager {
     }
 
     // If no worker is building the incomplete structure, order candidate worker to build it
+    // (F2-02: comando BUILD).
     if (!hasBuilder && candidateWorker) {
-      candidateWorker.orderBuild(incomplete);
+      this.gm.issue({
+        type: CMD.BUILD,
+        playerId: this.director.playerId,
+        unitIds: [candidateWorker.id],
+        buildingId: incomplete.id
+      });
     }
 
     return true;
@@ -191,8 +197,14 @@ export class AIEconomyManager {
     if (totalWorkers >= maxDesiredWorkers) return;
 
     // Queue worker if queue is not full (< 2 units) and resources are available
+    // (F2-02: comando TRAIN — a dedução real acontece no executor).
     if (hq.queue && hq.queue.length < 2 && this.director.canAfford(this.director.costs.worker)) {
-      hq.queueUnit(this.director.workerType, this.gm);
+      this.gm.issue({
+        type: CMD.TRAIN,
+        playerId: this.director.playerId,
+        buildingId: hq.id,
+        unitType: this.director.workerType
+      });
     }
   }
 
@@ -206,10 +218,9 @@ export class AIEconomyManager {
     const workerCount = this.getLivingWorkerCount();
 
     // 1. POPULATION UNLOCK: Pig Farm or Orc House (Maximum priority when population is near/at cap)
+    // F2-02: sem dedução aqui — o custo é cobrado no CommandExecutor (PLACE_BUILDING).
     if (uHousing >= 0.85 || this.director.population >= this.director.maxPopulation) {
-      const farmCost = this.director.costs.farm;
-      if (this.director.canAfford(farmCost)) {
-        this.director.deduct(farmCost);
+      if (this.director.canAfford(this.director.costs.farm)) {
         const chosenType = (this.director.faction === 'orc' && Math.random() < 0.45)
           ? this.director.houseType
           : this.director.farmType;
@@ -239,21 +250,18 @@ export class AIEconomyManager {
     }
 
     if (!hasBarracks && this.director.canAfford(this.director.costs.barracks)) {
-      this.director.deduct(this.director.costs.barracks);
       this.placeBuilding(this.director.barracksType);
       return;
     }
 
     // 3. LUMBER MILL: Enhanced wood harvesting & dropoff (requires at least 4 workers)
     if (workerCount >= 4 && !hasLumber && this.director.canAfford(this.director.costs.lumber)) {
-      this.director.deduct(this.director.costs.lumber);
       this.placeBuilding(this.director.lumberType);
       return;
     }
 
     // 4. SECONDARY HOUSING: Maintain population headroom as army grows
     if (this.director.population >= this.director.maxPopulation - 3 && this.director.canAfford(this.director.costs.farm)) {
-      this.director.deduct(this.director.costs.farm);
       const chosenType = (this.director.faction === 'orc' && Math.random() < 0.5)
         ? this.director.houseType
         : this.director.farmType;
@@ -263,14 +271,12 @@ export class AIEconomyManager {
 
     // 5. WAR FORGE: Orc arms workshop for advanced units (requires at least 5 workers)
     if (workerCount >= 5 && this.director.faction === 'orc' && hasBarracks && !hasForge && this.director.canAfford(this.director.costs.forge)) {
-      this.director.deduct(this.director.costs.forge);
       this.placeBuilding(this.director.forgeType);
       return;
     }
 
     // 6. WATCHTOWERS: Perimeter defense against player incursions (requires at least 5 workers)
     if (workerCount >= 5 && towerCount < 2 && this.director.canAfford(this.director.costs.tower)) {
-      this.director.deduct(this.director.costs.tower);
       this.placeBuilding(this.director.towerType);
       return;
     }
@@ -537,7 +543,7 @@ export class AIEconomyManager {
       cur[bestType]++;
       const resEntity = getTargetForType(w.mesh.position, bestType);
       if (resEntity) {
-        w.orderGather(resEntity);
+        this.gm.issue({ type: CMD.GATHER, playerId: this.director.playerId, unitIds: [w.id], targetId: resEntity.id });
       }
     }
 
@@ -581,7 +587,7 @@ export class AIEconomyManager {
 
       const resEntity = getTargetForType(candidate.mesh.position, deficitType);
       if (resEntity) {
-        candidate.orderGather(resEntity);
+        this.gm.issue({ type: CMD.GATHER, playerId: this.director.playerId, unitIds: [candidate.id], targetId: resEntity.id });
       }
     }
   }
@@ -638,8 +644,10 @@ export class AIEconomyManager {
   }
 
   /**
-   * Finds an unobstructed, valid placement spot around the base and orders a worker to construct it
-   * @param {string} type 
+   * Finds an unobstructed, valid placement spot around the base and orders a worker to
+   * construct it. F2-02: emite PLACE_BUILDING em vez de `createBuilding`+push — a construção
+   * (e a dedução do custo) só acontece de fato no `CommandExecutor`, no tick de execução.
+   * @param {string} type
    */
   placeBuilding(type) {
     let chosenX = null;
@@ -660,21 +668,11 @@ export class AIEconomyManager {
       }
     }
 
-    if (chosenX === null) {
-      // Refund if no valid spot found this cycle
-      const cost = getCost(type) || this.director.costs.farm;
-      if (cost.wood) this.director.resources.wood += cost.wood;
-      if (cost.stone) this.director.resources.stone += cost.stone;
-      if (cost.gold) this.director.resources.gold += cost.gold;
-      return;
-    }
+    // Nenhum local livre neste ciclo: nada foi deduzido ainda, então não há reembolso a fazer.
+    if (chosenX === null) return;
 
-    // Instantiate scaffold in unconstructed state
-    const scaffold = this.gm.createBuilding(type, chosenX, chosenZ, false, this.director.playerId);
-    this.gm.buildings.push(scaffold);
-    this.director.recalculatePop();
-
-    // Assign nearest available worker to build using the official orderBuild API
+    // Escolhe o construtor mais próximo (mesmo critério de antes) para já mandar no comando;
+    // o executor cai de volta no vilão/peão mais próximo do dono se `unitIds` vier vazio.
     const enemies = this.director.getOwnUnits();
     const lenE = enemies.length;
     let nearestWorker = null;
@@ -696,8 +694,13 @@ export class AIEconomyManager {
       }
     }
 
-    if (nearestWorker) {
-      nearestWorker.orderBuild(scaffold);
-    }
+    this.gm.issue({
+      type: CMD.PLACE_BUILDING,
+      playerId: this.director.playerId,
+      buildingType: type,
+      x: chosenX,
+      z: chosenZ,
+      unitIds: nearestWorker ? [nearestWorker.id] : []
+    });
   }
 }

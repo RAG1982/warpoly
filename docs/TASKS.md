@@ -59,7 +59,7 @@ Opus escreve a spec em `docs/specs/<ID>.md`; agente **Sonnet** executa; Opus rev
 | `docs/specs/F1-09-tick-fixo-lod-animacao.md` | F1-09 + NEW-14 (após F1-08, mesmos arquivos) | sonnet |
 | `docs/specs/F2-02-sistema-comandos.md` | F2-02 — **DONE** | sonnet |
 | `docs/specs/F2-03-determinismo.md` | F2-03 + B14 — **DONE** | sonnet (local) |
-| `docs/specs/F2-07-event-bus.md` | F2-07 + B13 | sonnet (local) |
+| `docs/specs/F2-07-event-bus.md` | F2-07 + B13 — **DONE** | sonnet (local) |
 | `docs/specs/F3-01-controles-rts.md` | F3-01 + NEW-16 — **nuvem** | sonnet (claude.ai/code) |
 | `docs/specs/F6-08-opcoes.md` | F6-08 — **nuvem**, após F3-01 | sonnet (claude.ai/code) |
 | `docs/specs/BUGS-01-pequenos.md` | NEW-2, NEW-11, NEW-5, NEW-13 — **nuvem** (ver `docs/HANDOFF_CLOUD.md`) | sonnet (claude.ai/code) |
@@ -75,7 +75,7 @@ Opus escreve a spec em `docs/specs/<ID>.md`; agente **Sonnet** executa; Opus rev
 |---|---|---|---|---|
 | F0 Fundação | 7 | 0 | 0 | 7 |
 | F1 Desempenho | 10 | 1 | 0 | 9 |
-| F2 Núcleo | 8 | 4 | 0 | 4 |
+| F2 Núcleo | 8 | 3 | 0 | 5 |
 | F3 Jogabilidade WC2 base | 11 | 11 | 0 | 0 |
 | F4 Jogabilidade WC2 expansão | 8 | 8 | 0 | 0 |
 | F5 IA | 6 | 6 | 0 | 0 |
@@ -228,9 +228,10 @@ Opus escreve a spec em `docs/specs/<ID>.md`; agente **Sonnet** executa; Opus rev
 - **Aceite**: salvar no minuto 5, carregar e continuar sem diferenças visíveis.
 
 ### F2-07 · Barramento de eventos e desacoplamento
-- **Status**: `DOING(sonnet, 2026-09-29)` · Lane CORE · Onda 2 · Dep: —
+- **Status**: `DONE(13fc992)` · Lane CORE · Onda 2 · Dep: —
 - **Fazer**: `EventBus` (unitDied, buildingCompleted, underAttack, researchDone, resourceDepleted…) consumido por UI, áudio, IA, estatísticas; mover `UnitAnimator` de `src/inspector/` para `src/animation/` (inspetor passa a importar de lá).
 - **Aceite**: `Unit`/`Building` não referenciam `uiManager`/`soundManager` diretamente.
+- **Resultado**: `src/sim/EventBus.js` + `events.js`; ouvintes `audio/AudioEvents.js`, `render/VfxEvents.js`, `ui/UiEvents.js` (não criados em headless); zero chamadas diretas de som/VFX/UI na simulação; `UnitAnimator` em `src/animation/`. Determinismo intacto. 197 testes. B13 corrigido.
 
 ### F2-08 · Separação sim/render
 - **Status**: `TODO` · Lane CORE · Onda 4 · Dep: F2-02, F2-03

@@ -25,8 +25,6 @@ import { PlayerRegistry } from '../sim/PlayerRegistry.js';
 import { EntityRegistry, NEUTRAL_OWNER_ID } from '../sim/EntityIds.js';
 import { SpatialGrid } from '../sim/SpatialGrid.js';
 import {
-  MAP_START_SLOTS,
-  DEFAULT_MAP_ID,
   createMatchConfig,
   layoutAt,
   validateMatchConfig
@@ -128,8 +126,10 @@ export class GameManager {
     // determinismo/replay). Não inclui nada visual.
     this.checksums = [];
 
-    // Fog of War (covers 160x160 continent)
-    this.fogOfWar = new FogOfWar(this.scene, 160, 160);
+    // Fog of War (F2-05: tamanho do mundo a partir do mapa — mesma margem de 20 u que o
+    // mapa continental (140+20=160) sempre teve em relação à área jogável).
+    const fogWorldSize = this.terrain.mapDef.size + 20;
+    this.fogOfWar = new FogOfWar(this.scene, fogWorldSize, fogWorldSize);
 
     // Um AIDirector por jogador de IA. `aiDirector` = o primeiro (compatibilidade: bench, UI).
     /** @type {AIDirector[]} */
@@ -439,34 +439,19 @@ export class GameManager {
 
   initMapEntities() {
     this._createPlayers();
-    const slots = MAP_START_SLOTS[this.matchConfig.mapId] || MAP_START_SLOTS[DEFAULT_MAP_ID];
+    // F2-05: mapa orientado a dados — slots, jazidas e florestas vêm de src/data/maps/<id>.json
+    // (ver Terrain.mapDef; validateMatchConfig já garantiu que todo startSlot existe no mapa).
+    const mapDef = this.terrain.mapDef;
 
-    // 1. Bases iniciais a partir dos slots da MatchConfig (slot 0 = NE, slot 1 = SW, extras validados).
-    // Mesmo layout e mesmas posições de antes da F2-01 para os slots 0 e 1.
-    // Slots fixos primeiro: as posições extras são validadas contra as bases já colocadas.
-    const ordered = [...this.players].sort((a, b) => {
-      const fa = a.startSlot < slots.fixed.length ? 0 : 1;
-      const fb = b.startSlot < slots.fixed.length ? 0 : 1;
-      return fa - fb;
-    });
-    // Jazidas fixas do mapa antes das bases, para que canPlaceBuilding as considere nos slots extras.
+    // 1. Jazidas fixas do mapa antes das bases, para que canPlaceBuilding as considere.
     this.spawnResourceDeposits();
 
-    const extraSlotPositions = [];
-    for (const player of ordered) {
-      let pos;
-      if (player.startSlot < slots.fixed.length) {
-        pos = slots.fixed[player.startSlot];
-      } else {
-        pos = this._findExtraStartPosition(player.factionId, slots.extraCandidates);
-        extraSlotPositions.push(pos);
-      }
-      player.startPos = { x: pos.x, z: pos.z };
-      this._spawnStartingBase(player, pos);
+    // 2. Bases iniciais a partir dos slots do mapa (mesmo layout de antes da F2-01/F2-05).
+    for (const player of this.players) {
+      const slot = mapDef.startSlots[player.startSlot];
+      player.startPos = { x: slot.x, z: slot.z };
+      this._spawnStartingBase(player, slot);
     }
-
-    // 2. Jazidas próprias dos slots extras (o mapa continental só tem minas para 2 bases)
-    extraSlotPositions.forEach(pos => this._spawnExtraSlotDeposits(pos));
 
     // 3. Harvestable Woodlands & Trees (Spacious wilderness forests, completely outside bases)
     this.spawnWoodlands();
@@ -502,86 +487,31 @@ export class GameManager {
   }
 
   /**
-   * Primeira posição candidata em que a base inteira (HQ, serraria, casa) passa em
-   * canPlaceBuilding e que fica a ≥ 40 u das outras bases.
-   */
-  _findExtraStartPosition(factionId, candidates) {
-    const start = FACTIONS[factionId].startingBase;
-    const taken = this.players.filter(p => p.startPos).map(p => p.startPos);
-    for (const c of candidates) {
-      if (taken.some(t => Math.hypot(t.x - c.x, t.z - c.z) < 40)) continue;
-      const layout = layoutAt(c);
-      const ok = layout.buildings.every(e => this.canPlaceBuilding(start.buildings[e.role], e.x, e.z));
-      if (ok) return c;
-    }
-    throw new Error('GameManager: nenhuma posição livre para o slot inicial extra');
-  }
-
-  /**
-   * Slots extras (FFA de teste) não têm minas próprias no mapa continental: coloca 1 mina de
-   * ouro e 1 pedreira a ~15 u do HQ, em terreno seco e longe de construções, vaus e outras jazidas.
-   * DÍVIDA: some com os mapas orientados a dados (F2-05).
-   */
-  _spawnExtraSlotDeposits(pos) {
-    const fords = [{ x: -16, z: -16 }, { x: 0, z: 0 }, { x: 16, z: 16 }];
-    const isFree = (x, z) => {
-      if (Math.max(Math.abs(x), Math.abs(z)) > 50) return false;
-      for (const [ox, oz] of [[0, 0], [3, 0], [-3, 0], [0, 3], [0, -3]]) {
-        if (this.terrain.getHeight(x + ox, z + oz) < 1.9) return false;
-      }
-      if (this.buildings.some(b => Math.hypot(x - b.mesh.position.x, z - b.mesh.position.z) < (b.collisionRadius || 3) + 7)) return false;
-      if (this.resourceDeposits.some(r => Math.hypot(x - r.mesh.position.x, z - r.mesh.position.z) < 10)) return false;
-      if (fords.some(f => Math.hypot(x - f.x, z - f.z) < 12)) return false;
-      return true;
-    };
-    for (const type of ['gold', 'stone']) {
-      for (let i = 0; i < 24; i++) {
-        const ang = (i / 24) * Math.PI * 2;
-        const x = pos.x + Math.cos(ang) * 15;
-        const z = pos.z + Math.sin(ang) * 15;
-        if (isFree(x, z)) {
-          this.resourceDeposits.push(this.registerEntity(new ResourceDeposit(this.scene, this.terrain, type, x, z)));
-          break;
-        }
-      }
-    }
-  }
-
-  /**
-   * Spawns strategic resource deposits across both kingdoms and the central plains
+   * Jazidas fixas do mapa (`mapDef.resources`). Uma entrada com `slot: N` só é criada se algum
+   * jogador desta partida usar `startSlot === N` (jazidas extras de um slot de teste/FFA que não
+   * faz parte do layout padrão do mapa — F2-05, ver `src/data/maps/README.md`).
    */
   spawnResourceDeposits() {
-    const add = (type, x, z) => {
-      this.resourceDeposits.push(this.registerEntity(new ResourceDeposit(this.scene, this.terrain, type, x, z)));
-    };
-    // Human Realm Deposits
-    add('gold', 30, -46);
-    add('stone', 46, -46);
-    add('gold', 16, -26);
-
-    // Orc Realm Deposits
-    add('gold', -30, 46);
-    add('stone', -46, 46);
-    add('gold', -16, 26);
-
-    // Contested Central Plains Deposits
-    add('gold', 8, -6);
-    add('stone', -8, 6);
+    const mapDef = this.terrain.mapDef;
+    const usedSlots = new Set(this.players.map(p => p.startSlot));
+    for (const r of mapDef.resources) {
+      if (r.slot !== undefined && !usedSlots.has(r.slot)) continue;
+      this.resourceDeposits.push(this.registerEntity(new ResourceDeposit(this.scene, this.terrain, r.type, r.x, r.z)));
+    }
   }
 
   /**
    * Spawns spaced-out clusters of harvestable trees with strict clearance from all buildings,
-   * base courtyards, resource deposits, and river crossings.
+   * base courtyards, resource deposits, and river crossings. Clusters vêm de `mapDef.forests`.
    */
   spawnWoodlands() {
     const treeTypes = ['oak', 'pine', 'autumn'];
     const minTreeSpacing = 4.4; // Generous distance between trees for open meadows
 
-    const slots = MAP_START_SLOTS[this.matchConfig.mapId] || MAP_START_SLOTS[DEFAULT_MAP_ID];
-    const courtyards = [...slots.fixed];
-    this.players.forEach(p => {
-      if (p.startPos && !courtyards.some(c => c.x === p.startPos.x && c.z === p.startPos.z)) courtyards.push(p.startPos);
-    });
+    const mapDef = this.terrain.mapDef;
+    const fords = mapDef.fords || [];
+    // Pátios das bases realmente usadas nesta partida (F2-05: slots vêm do mapa).
+    const courtyards = this.players.map(p => p.startPos);
 
     const spawnCluster = (centerX, centerZ, targetCount, radius, preferredType = 'oak') => {
       let placed = 0;
@@ -617,7 +547,6 @@ export class GameManager {
         if (nearDeposit) continue;
 
         // 5. Keep river crossings / fords completely clear
-        const fords = [{ x: -16, z: -16 }, { x: 0, z: 0 }, { x: 16, z: 16 }];
         if (fords.some(f => Math.hypot(x - f.x, z - f.z) < 9.0)) continue;
 
         // 6. Check minimum distance to all already placed trees
@@ -634,29 +563,11 @@ export class GameManager {
       }
     };
 
-    // Far Northern Wilderness (Far outside Human Kingdom)
-    spawnCluster(12, -54, 6, 6.0, 'pine');
-    spawnCluster(-12, -54, 6, 6.0, 'pine');
-
-    // Far Eastern Wilderness (East Coastline)
-    spawnCluster(54, 12, 6, 6.0, 'autumn');
-    spawnCluster(54, -2, 6, 6.0, 'autumn');
-
-    // Far Southern Wilderness (Far outside Orc Stronghold)
-    spawnCluster(-12, 54, 6, 6.0, 'pine');
-    spawnCluster(12, 54, 6, 6.0, 'pine');
-
-    // Far Western Wilderness (West Coastline)
-    spawnCluster(-54, -12, 6, 6.0, 'autumn');
-    spawnCluster(-54, 2, 6, 6.0, 'autumn');
-
-    // Central Wilderness & Riverbanks (well clear of the 3 fords)
-    spawnCluster(-28, -26, 6, 6.0, 'oak');
-    spawnCluster(28, 26, 6, 6.0, 'oak');
-    spawnCluster(26, 2, 5, 5.5, 'pine');
-    spawnCluster(-26, -2, 5, 5.5, 'pine');
-    spawnCluster(2, -26, 5, 5.5, 'oak');
-    spawnCluster(-2, 26, 5, 5.5, 'autumn');
+    // F2-05: clusters vêm de mapDef.forests, na mesma ordem de chamadas do JSON — preserva o
+    // checksum de determinismo (mesma sequência de consumo de rngMap) para o mapa continental.
+    for (const f of mapDef.forests) {
+      spawnCluster(f.x, f.z, f.count, f.radius, f.species);
+    }
   }
 
   /**
@@ -710,13 +621,9 @@ export class GameManager {
     );
     if (depositHits.length > 0) return false;
 
-    // 5. Must not block the 3 strategic river crossings / fords
-    const fords = [
-      { x: -16, z: -16 },
-      { x: 0, z: 0 },
-      { x: 16, z: 16 }
-    ];
-    for (let i = 0; i < 3; i++) {
+    // 5. Must not block any of the map's river crossings / fords
+    const fords = this.terrain.mapDef.fords || [];
+    for (let i = 0; i < fords.length; i++) {
       const f = fords[i];
       const dx = x - f.x;
       if (dx > 10.0 || dx < -10.0) continue;

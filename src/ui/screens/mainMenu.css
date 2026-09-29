@@ -445,7 +445,12 @@ legend.mm-field__label + * { clear: both; }
 }
 .mm-seg input:focus-visible + span { box-shadow: var(--mm-focus); }
 
-/* mapa */
+/* mapa (F2-05: lista real via listMaps(), 1 cartão por mapa) */
+.mm-maps { display: flex; flex-direction: column; gap: 8px; }
+.mm-map-card { position: relative; display: block; cursor: pointer; }
+.mm-map-card input {
+  position: absolute; opacity: 0; width: 1px; height: 1px; pointer-events: none;
+}
 .mm-map {
   display: flex; align-items: center; gap: 14px;
   min-height: 60px;
@@ -453,22 +458,25 @@ legend.mm-field__label + * { clear: both; }
   border-radius: 12px;
   border: 1.5px solid rgba(212, 175, 55, 0.55);
   background: rgba(6, 10, 16, 0.75);
+  transition: border-color 0.2s, box-shadow 0.2s, background 0.2s;
 }
+.mm-map-card:hover .mm-map { background: rgba(212, 175, 55, 0.08); }
+.mm-map-card input:checked + .mm-map {
+  border-color: var(--mm-gold-1);
+  box-shadow: 0 0 0 1px var(--mm-gold-1), 0 8px 18px rgba(0, 0, 0, 0.5);
+  background: rgba(212, 175, 55, 0.14);
+}
+.mm-map-card input:focus-visible + .mm-map { box-shadow: var(--mm-focus); }
 .mm-map__thumb {
   flex: none; width: 72px; height: 48px;
   border-radius: 7px; overflow: hidden;
   border: 1.5px solid var(--mm-gold-2);
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.6);
 }
-.mm-map__thumb svg { display: block; width: 100%; height: 100%; }
+.mm-map__thumb svg, .mm-map__thumb canvas { display: block; width: 100%; height: 100%; }
 .mm-map__info { display: flex; flex-direction: column; gap: 2px; flex: 1; min-width: 0; }
 .mm-map__name { font-family: 'Cinzel', serif; font-weight: 700; font-size: 16px; color: #fff1c7; }
 .mm-map__meta { font-size: 12.5px; color: var(--mm-muted); font-weight: 600; }
-.mm-map__only {
-  font-size: 10.5px; font-weight: 800; letter-spacing: 0.12em; text-transform: uppercase;
-  color: #ffe6a6; padding: 3px 9px; border-radius: 999px;
-  border: 1px solid rgba(212, 175, 55, 0.6);
-}
 
 /* opções placeholder */
 .mm-placeholder { font-size: 15px; line-height: 1.5; color: #d6cdb6; }

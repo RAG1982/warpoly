@@ -5,7 +5,8 @@
  * rotas seguras através dos vãos e pontes de terra (North Ford, Center Ford, South Ford).
  *
  * Características:
- * 1. Grade 2D estática de navegação baseada na elevação do terreno (área jogável [-58, 58]).
+ * 1. Grade 2D estática de navegação baseada na elevação do terreno (área jogável do mapa,
+ *    F2-05: `[-mapDef.playable/2, mapDef.playable/2]`).
  * 2. Barreira estrita de água: qualquer ponto com altura < 0.65 é considerado água intransponível.
  * 3. Camada dinâmica (`dynamicBlock`): contador de bloqueios por célula (construções, árvores vivas)
  *    somado à camada estática — uma célula só é caminhável se as duas permitirem (F1-07).
@@ -72,15 +73,20 @@ const PATH_CACHE_LIMIT = 256;
 export class Pathfinder {
   /**
    * @param {import('../world/Terrain.js').Terrain} terrain
-   * @param {number} bounds Half-width of navigable territory
+   * @param {number} [bounds] Meia-largura da área jogável (limiar de altura caminhável) — padrão:
+   *   `mapDef.playable / 2` (F2-05: cada mapa define seu tamanho jogável em
+   *   `src/data/maps/<id>.json`). A grade física é um pouco maior (`+ GRID_MARGIN`) que esse
+   *   limiar para que consultas perto da borda (ex.: clique no minimapa) caiam numa célula real
+   *   e corretamente intransponível, em vez de grudar (clamp) numa célula de terra válida.
    * @param {number} cellSize Size of each navigation grid tile in world units
    */
-  constructor(terrain, bounds = 58, cellSize = 1.5) {
+  constructor(terrain, bounds = terrain.mapDef ? terrain.mapDef.playable / 2 : 58, cellSize = 1.5) {
+    const GRID_MARGIN = 3;
     this.terrain = terrain;
     this.cellSize = cellSize;
     this.bounds = bounds;
-    this.minCoord = -bounds;
-    this.maxCoord = bounds;
+    this.minCoord = -(bounds + GRID_MARGIN);
+    this.maxCoord = bounds + GRID_MARGIN;
     this.cols = Math.round((this.maxCoord - this.minCoord) / cellSize);
     this.rows = this.cols;
     this.numCells = this.cols * this.rows;
@@ -124,8 +130,8 @@ export class Pathfinder {
         const maxCoord = Math.max(Math.abs(x), Math.abs(z));
 
         // Dry land above water table (water level = 0.5; dry land threshold >= 0.68)
-        // and strictly within continental borders (maxCoord < 55)
-        if (h >= 0.68 && maxCoord < 55) {
+        // and strictly within the map's playable border (F2-05: this.bounds = mapDef.playable/2)
+        if (h >= 0.68 && maxCoord < this.bounds) {
           this.staticGrid[r * this.cols + c] = 1;
         } else {
           this.staticGrid[r * this.cols + c] = 0;

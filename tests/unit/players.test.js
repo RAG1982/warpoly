@@ -6,9 +6,9 @@ import {
   createMatchConfig,
   matchConfigFromSearch,
   validateMatchConfig,
-  layoutAt,
-  MAP_START_SLOTS
+  layoutAt
 } from '../../src/sim/MatchConfig.js';
+import { getMap } from '../../src/data/maps/index.js';
 import { STARTING_RESOURCES } from '../../src/data/index.js';
 
 describe('Player: economia', () => {
@@ -189,7 +189,7 @@ describe('MatchConfig', () => {
   });
 
   it('layoutAt reproduz as posições fixas antigas das duas bases', () => {
-    const [ne, sw] = MAP_START_SLOTS.continental.fixed;
+    const [ne, sw] = getMap('continental-1v1').startSlots;
     const a = layoutAt(ne);
     expect(a.buildings.map((b) => [b.role, b.x, b.z])).toEqual([
       ['hq', 32, -30],

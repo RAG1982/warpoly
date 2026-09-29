@@ -1,80 +1,44 @@
 import * as THREE from 'three';
 import { getTerrainTextures } from '../models/environment/terrainTextures.js';
+import { getMap, DEFAULT_MAP_ID } from '../data/maps/index.js';
+import { getHeightForMap } from './terrainGenerators.js';
 
 /**
- * Balanced RTS Continental Terrain System (Size: 140x140)
- * 
- * Features:
- * 1. Dominant Land Continent (>75% land, <25% water):
- *    Continuous solid landmass extending across |x| < 56, |z| < 56.
- *    Only thin natural beach borders and shallow coastlines along the outer perimeter.
- * 2. Human Kingdom (Northeast): Vast rolling emerald plains around (32, -30).
- * 3. Orc Dominion (Southwest): Expansive rugged rustic plains around (-32, 30).
- * 4. Central River Valley: Curving natural river channel along diagonal x - z = 0.
- * 5. Three Strategic Crossings / Fords:
- *    North Ford (-16, -16), Center Ford (0, 0), and South Ford (16, 16) - all wide, solid land bridges (y = 2.4).
+ * Terreno orientado a dados (F2-05): tamanho, segmentos, altura, vaus e slots vêm de `mapDef`
+ * (ver `src/data/maps/README.md`) em vez de constantes fixas. `getHeight` delega para o gerador
+ * registrado em `terrainGenerators.js` (`mapDef.terrain.generator`).
+ *
+ * `landmarks` (compatibilidade com `getTerrainTextures`, que pinta o rio/vaus/bases do mapa
+ * continental) é derivado de `mapDef.fords`/`startSlots` — mapas sem esses dados (ex.: islands)
+ * simplesmente não têm vau/base marcados na textura.
  */
 export class Terrain {
-  constructor(scene) {
+  constructor(scene, mapDef = getMap(DEFAULT_MAP_ID)) {
     this.scene = scene;
-    this.width = 140;
-    this.depth = 140;
-    this.segments = 112;
+    this.mapDef = mapDef;
+    this.width = mapDef.size;
+    this.depth = mapDef.size;
+    this.segments = Math.round(mapDef.size * 0.8);
 
-    // Key Realm Centers & Strategic Locations
+    // Compatibilidade com getTerrainTextures (pinta rio/vaus/bases do mapa continental).
+    const [ford0, ford1, ford2] = mapDef.fords || [];
+    const [slot0, slot1] = mapDef.startSlots || [];
     this.landmarks = {
-      humanBase: new THREE.Vector2(32, -30),
-      orcBase: new THREE.Vector2(-32, 30),
-      centerFord: new THREE.Vector2(0, 0),
-      northFord: new THREE.Vector2(-16, -16),
-      southFord: new THREE.Vector2(16, 16)
+      humanBase: slot0 ? new THREE.Vector2(slot0.x, slot0.z) : new THREE.Vector2(0, 0),
+      orcBase: slot1 ? new THREE.Vector2(slot1.x, slot1.z) : new THREE.Vector2(0, 0),
+      centerFord: ford1 ? new THREE.Vector2(ford1.x, ford1.z) : new THREE.Vector2(0, 0),
+      northFord: ford0 ? new THREE.Vector2(ford0.x, ford0.z) : new THREE.Vector2(0, 0),
+      southFord: ford2 ? new THREE.Vector2(ford2.x, ford2.z) : new THREE.Vector2(0, 0)
     };
 
     this.createTerrainMesh();
   }
 
   /**
-   * Calculates terrain height for any (x, z) coordinate
+   * Altura do terreno em (x, z), delegada ao gerador do mapa (`terrainGenerators.js`).
    */
   getHeight(x, z) {
-    const maxCoord = Math.max(Math.abs(x), Math.abs(z));
-
-    // Base continental plateau elevation with natural rolling knolls
-    const bumps = Math.sin(x * 0.3) * 0.2 + Math.cos(z * 0.3) * 0.2 + Math.sin((x + z) * 0.14) * 0.12;
-    let height = 2.6 + bumps;
-
-    // Outer Coastline Perimeter Falloff (solid land up to 55 units, then slopes down to water at 65+)
-    if (maxCoord > 54) {
-      const t = Math.min(1, Math.max(0, (maxCoord - 54) / 12));
-      const falloff = t * t * (3 - 2 * t);
-      height = 2.6 - falloff * 4.4; // Drops smoothly to -1.8 (water level is 0.0)
-    }
-
-    // Natural River Valley (diagonal along x - z = 0, with a gentle organic bend)
-    const riverBend = Math.sin((x + z) * 0.08) * 5.5;
-    const distToRiverLine = Math.abs(x - z - riverBend) / Math.SQRT2;
-
-    // River channel width ~ 6.0 units
-    if (distToRiverLine < 6.0 && maxCoord < 56) {
-      // Check if point is on one of the 3 Strategic Crossings / Fords
-      const dNorthFord = Math.hypot(x - this.landmarks.northFord.x, z - this.landmarks.northFord.y);
-      const dSouthFord = Math.hypot(x - this.landmarks.southFord.x, z - this.landmarks.southFord.y);
-      const dCenterFord = Math.hypot(x - this.landmarks.centerFord.x, z - this.landmarks.centerFord.y);
-
-      const isFord = (dNorthFord < 7.5) || (dSouthFord < 7.5) || (dCenterFord < 8.5);
-
-      if (isFord) {
-        // Dry, solid, fully walkable land bridge (elevation 2.35)
-        height = Math.max(height, 2.35 + Math.sin(x * 0.5) * 0.1);
-      } else {
-        // Carve river channel down below water level
-        const riverDepthFactor = 1 - (distToRiverLine / 6.0);
-        const channelHeight = -0.6 - riverDepthFactor * 1.4;
-        height = Math.min(height, channelHeight);
-      }
-    }
-
-    return height;
+    return getHeightForMap(this.mapDef, x, z);
   }
 
   getSurfaceType(x, z, h) {

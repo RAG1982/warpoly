@@ -5,6 +5,8 @@ import { initUiScale } from './uiScale.js';
 import { getBuildHotkey, getTrainHotkey, getResearchHotkey } from './hotkeys.js';
 import { buildCostHtml } from './Tooltip.js';
 import { CMD } from '../sim/commands.js';
+import { worldToMinimap, minimapToWorld } from './minimapCoords.js';
+import { renderTerrainImage } from './terrainMinimapImage.js';
 
 // Quem treina o quê — derivado de src/data/buildings.js (campo `trains`)
 export { BUILDING_TRAINABLE_UNITS };
@@ -185,9 +187,9 @@ export class UIManager {
       const clickX = e.clientX - rect.left;
       const clickY = e.clientY - rect.top;
 
-      // Map canvas coords (0 to width) to world coordinates (-70 to 70)
-      const worldX = ((clickX / canvas.width) - 0.5) * 140;
-      const worldZ = ((clickY / canvas.height) - 0.5) * 140;
+      // F2-05: tamanho do mapa vem de mapDef (era 140 fixo).
+      const mapSize = this.gm.terrain.mapDef.size;
+      const { x: worldX, z: worldZ } = minimapToWorld(clickX, clickY, mapSize, canvas.width, canvas.height);
 
       this.sm.cameraTarget.set(worldX, this.gm.terrain.getHeight(worldX, worldZ), worldZ);
     };
@@ -902,70 +904,18 @@ export class UIManager {
     const ctx = this.minimapCtx;
     const w = this.minimapCanvas.width;
     const h = this.minimapCanvas.height;
+    const mapDef = this.gm.terrain.mapDef;
 
-    // Ocean Water background
-    ctx.fillStyle = '#1e4860';
-    ctx.fillRect(0, 0, w, h);
-
-    const toMap = (x, z) => ({
-      x: ((x / 140) + 0.5) * w,
-      y: ((z / 140) + 0.5) * h
-    });
-
-    // 1. Continental Solid Landmass (>75% land, maxCoord <= 54)
-    const nw = toMap(-54, -54);
-    const se = toMap(54, 54);
-    const landW = se.x - nw.x;
-    const landH = se.y - nw.y;
-
-    // Sand coastline rim
-    const sandNW = toMap(-56, -56);
-    const sandSE = toMap(56, 56);
-    ctx.fillStyle = '#d4be83';
-    ctx.beginPath();
-    ctx.roundRect(sandNW.x, sandNW.y, sandSE.x - sandNW.x, sandSE.y - sandNW.y, 8);
-    ctx.fill();
-
-    // Continent Grass (gradient Orc earthy to Human emerald)
-    const landGrad = ctx.createLinearGradient(toMap(-40, 40).x, toMap(-40, 40).y, toMap(40, -40).x, toMap(40, -40).y);
-    landGrad.addColorStop(0.0, '#557a3e'); // Orc side
-    landGrad.addColorStop(0.5, '#629e46'); // Center valley
-    landGrad.addColorStop(1.0, '#68b44e'); // Human side
-    ctx.fillStyle = landGrad;
-    ctx.beginPath();
-    ctx.roundRect(nw.x, nw.y, landW, landH, 6);
-    ctx.fill();
-
-    // Natural Diagonal River
-    ctx.save();
-    ctx.strokeStyle = '#1e4860';
-    ctx.lineWidth = (6 / 140) * w;
-    ctx.lineCap = 'round';
-    ctx.beginPath();
-    for (let t = -54; t <= 54; t += 3) {
-      const bend = Math.sin(t * 0.16) * 5.5;
-      const rx = t + bend / Math.SQRT2;
-      const rz = t - bend / Math.SQRT2;
-      const pt = toMap(rx, rz);
-      if (t === -54) ctx.moveTo(pt.x, pt.y);
-      else ctx.lineTo(pt.x, pt.y);
+    // F2-05: o terreno (água/areia/grama/rocha) é renderizado uma única vez por partida, num
+    // canvas offscreen (ver src/ui/terrainMinimapImage.js); por quadro só desenhamos essa
+    // imagem + entidades + névoa + câmera (era tudo redesenhado à mão, com o rio/vaus fixos).
+    if (!this._minimapTerrainImage || this._minimapTerrainMapId !== mapDef.id) {
+      this._minimapTerrainImage = renderTerrainImage(mapDef, w, h, (x, z) => this.gm.terrain.getHeight(x, z));
+      this._minimapTerrainMapId = mapDef.id;
     }
-    ctx.stroke();
-    ctx.restore();
+    ctx.drawImage(this._minimapTerrainImage, 0, 0);
 
-    // 3 Strategic Crossings / Fords (draw as traversable land bridges)
-    const minimapFords = [
-      { x: -16, z: -16, r: 4.5 },
-      { x: 0, z: 0, r: 5.5 },
-      { x: 16, z: 16, r: 4.5 }
-    ];
-    minimapFords.forEach(f => {
-      const fc = toMap(f.x, f.z);
-      ctx.fillStyle = '#78a655';
-      ctx.beginPath();
-      ctx.arc(fc.x, fc.y, f.r, 0, Math.PI * 2);
-      ctx.fill();
-    });
+    const toMap = (x, z) => worldToMinimap(x, z, mapDef.size, w, h);
 
     // Draw Trees (dark green dots)
     ctx.fillStyle = '#2d5e24';

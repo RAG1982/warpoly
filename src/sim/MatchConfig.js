@@ -3,12 +3,12 @@
  *
  *   { mapId, seed, difficulty, players: [{ id, name, factionId, team, color, isAI, isLocal, startSlot }] }
  *
- * O GameManager cria as bases a partir dos slots daqui (initMapEntities). Enquanto os
- * mapas não forem orientados a dados (F2-05), os slots do mapa continental vivem em
- * MAP_START_SLOTS abaixo. Sem three.js nem DOM: testável em Node.
+ * O GameManager cria as bases a partir dos slots do mapa (`initMapEntities`, `startSlots` de
+ * `src/data/maps/<mapId>.json` — F2-05). Sem three.js nem DOM: testável em Node.
  */
+import { getMap, DEFAULT_MAP_ID } from '../data/maps/index.js';
 
-export const DEFAULT_MAP_ID = 'continental';
+export { DEFAULT_MAP_ID };
 
 /** Cores de jogador (índice = id). Azul, vermelho, verde, amarelo, roxo, laranja, ciano, rosa. */
 export const PLAYER_COLORS = Object.freeze([
@@ -21,29 +21,6 @@ export const PLAYER_COLORS = Object.freeze([
   '#0891b2',
   '#db2777'
 ]);
-
-/**
- * Slots iniciais por mapa. `fixed` são as bases históricas (slot 0 = NE, slot 1 = SW).
- * `extraCandidates` são posições tentadas, em ordem, para slots ≥ 2: o GameManager
- * usa a primeira em que a base inteira passa em `canPlaceBuilding`.
- * (As diagonais (−32,−30) e (32,30) caem sobre o rio x = z e são descartadas.)
- */
-export const MAP_START_SLOTS = {
-  continental: {
-    fixed: [
-      { x: 32, z: -30 }, // 0: NE (base humana histórica)
-      { x: -32, z: 30 } // 1: SW (base orc histórica)
-    ],
-    extraCandidates: [
-      { x: -32, z: -30 },
-      { x: 32, z: 30 },
-      { x: -14, z: -46 },
-      { x: 14, z: 46 },
-      { x: -44, z: -12 },
-      { x: 44, z: 12 }
-    ]
-  }
-};
 
 /**
  * Layout da base inicial no referencial do slot NE (32, −30): offsets (dx, dz) em
@@ -71,9 +48,12 @@ export function slotMirror(pos) {
   return { mx: pos.x >= 0 ? 1 : -1, mz: pos.z <= 0 ? 1 : -1 };
 }
 
-/** Posições absolutas de construções e unidades iniciais para um slot. */
+/**
+ * Posições absolutas de construções e unidades iniciais para um slot. `pos.mirror: [mx, mz]`
+ * (F2-05, `startSlots` do mapa) tem prioridade; sem ele, o espelhamento é calculado por `slotMirror`.
+ */
 export function layoutAt(pos, layout = START_LAYOUT) {
-  const { mx, mz } = slotMirror(pos);
+  const { mx, mz } = pos.mirror ? { mx: pos.mirror[0], mz: pos.mirror[1] } : slotMirror(pos);
   const place = (e) => ({ ...e, x: pos.x + e.dx * mx, z: pos.z + e.dz * mz });
   return { buildings: layout.buildings.map(place), units: layout.units.map(place) };
 }
@@ -168,24 +148,35 @@ export function withNewSeed(cfg, seed = null) {
   return { ...cfg, seed: next, players: cfg.players.map((p) => ({ ...p })) };
 }
 
-/** Lê `?faction=orc`, `?ffa=1`, `?seed=` e `?difficulty=` da query string. */
+/** Lê `?faction=orc`, `?ffa=1`, `?seed=`, `?difficulty=` e `?map=` da query string. */
 export function matchConfigFromSearch(search = '') {
   const params = new URLSearchParams(search);
   const seedParam = params.get('seed');
   const seed = seedParam !== null && seedParam !== '' && Number.isFinite(Number(seedParam)) ? Number(seedParam) : null;
   const ffa = params.get('ffa');
+  const mapParam = params.get('map');
   return createMatchConfig({
     localFaction: params.get('faction') === 'orc' ? 'orc' : 'human',
     ffa: ffa === '1' || ffa === 'true',
     seed,
+    mapId: mapParam && getMap(mapParam) ? mapParam : DEFAULT_MAP_ID,
     difficulty: params.get('difficulty') || DEFAULT_DIFFICULTY
   });
 }
 
-/** Valida a config; lança Error com a primeira inconsistência encontrada. */
+/**
+ * Valida a config; lança Error com a primeira inconsistência encontrada.
+ * F2-05: também valida contra o mapa (`cfg.mapId`) — jogadores demais ou `startSlot` fora do
+ * array `startSlots` do mapa.
+ */
 export function validateMatchConfig(cfg) {
   if (!cfg || !Array.isArray(cfg.players) || cfg.players.length < 2) {
     throw new Error('MatchConfig: pelo menos 2 jogadores');
+  }
+  const mapDef = getMap(cfg.mapId);
+  if (!mapDef) throw new Error(`MatchConfig: mapa desconhecido "${cfg.mapId}"`);
+  if (cfg.players.length > mapDef.maxPlayers) {
+    throw new Error(`MatchConfig: mapa "${cfg.mapId}" aceita no máximo ${mapDef.maxPlayers} jogadores`);
   }
   const ids = new Set();
   const slots = new Set();
@@ -198,6 +189,9 @@ export function validateMatchConfig(cfg) {
       throw new Error(`MatchConfig: facção inválida ${p.factionId}`);
     if (slots.has(p.startSlot)) throw new Error(`MatchConfig: slot repetido ${p.startSlot}`);
     slots.add(p.startSlot);
+    if (!mapDef.startSlots[p.startSlot]) {
+      throw new Error(`MatchConfig: slot ${p.startSlot} não existe no mapa "${cfg.mapId}"`);
+    }
     if (p.isLocal) locals++;
   }
   if (locals !== 1) throw new Error('MatchConfig: exatamente um jogador local');

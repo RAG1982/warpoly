@@ -43,11 +43,12 @@ src/
     GLTFBuildingLoader.js     (importado só por entities/buildings/orc/GreatHall.js)
     (EnemyAI.js removido em F0-03; substituído por ai/AIDirector)
   data/                       FONTE ÚNICA de balanceamento (F0-06): units, buildings, upgrades, factions + helpers (index.js)
+    maps/                     Mapas orientados a dados (F2-05): <id>.json (getMap/listMaps em index.js) — ver README.md
   sim/                        Estado puro da simulação, sem three.js/DOM (F2-01; testado em tests/unit)
     Player.js                 Jogador: facção, time, cor, recursos, população, pesquisas, derrota
     PlayerRegistry.js         players[], getPlayer, localPlayer, isHostile/isAlly por time (matriz)
     EntityIds.js              Contador monotônico, EntityRegistry (id → entidade), NEUTRAL_OWNER_ID = −1
-    MatchConfig.js            {mapId, seed, difficulty, players[]}, slots iniciais do mapa, layout da base inicial, withNewSeed
+    MatchConfig.js            {mapId, seed, difficulty, players[]}, layout da base inicial (layoutAt, slots vêm do mapa), withNewSeed
     SpatialGrid.js            Grade espacial (spatial hash) uniforme: insert/update/remove/clear, queryRadius,
                                queryRect, nearest (F1-06; testado em tests/unit/spatialGrid.test.js)
   ai/
@@ -69,9 +70,12 @@ src/
     environment/*                        árvores, rochas, flora, água, terreno, flecha
     materials.js, index.js
   world/
-    Terrain.js                Altura = função analítica fixa (continente 140×140, rio diagonal, 3 vaus)
+    Terrain.js                Orientado a dados (F2-05): tamanho/altura/vaus vêm de mapDef (src/data/maps)
+    terrainGenerators.js      Geradores de altura puros (continental, islands) por mapDef.terrain.generator — testáveis em Node
     Water.js, Decorations.js (instanced), TreeManager.js (instanced, 6 draw calls)
-  ui/UIManager.js             Atualiza HUD DOM, card de seleção, filas, minimapa (desenhado à mão); dispose() por sessão
+  ui/UIManager.js             Atualiza HUD DOM, card de seleção, filas, minimapa; dispose() por sessão
+  ui/minimapCoords.js         Conversão mundo↔minimapa por mapDef.size (F2-05)
+  ui/terrainMinimapImage.js   Imagem do terreno (água/areia/grama/rocha) pré-renderizada 1×/partida para o minimapa e as miniaturas do menu (F2-05)
   ui/UiEvents.js              Ouvinte: eventos → UIManager.showNotification (F2-07)
   ui/screens/                 MainMenu (F6-01), PauseMenu + gameScreens.css (F2-04)
   render/sceneDisposal.js     Descarte de objetos da partida preservando os caches do ModelFactory (F2-04)
@@ -187,7 +191,7 @@ animate() [rAF da aplicação, delta máx 0.1s; sem sessão (menu/loading) não 
 
 ### Jogadores
 - `MatchConfig` (`src/sim/MatchConfig.js`): `{ mapId, seed, difficulty, players: [{ id, name, factionId, team, color, isAI, isLocal, startSlot }] }`.
-  `main.js` monta a config a partir do menu (`createMatchConfig`) ou da URL (`matchConfigFromSearch`) e a `MatchSession` a passa ao `GameManager`. `difficulty` (`easy|normal|hard|brutal`) é guardada na config (a IA ainda não a lê); `withNewSeed(cfg)` gera a config de "Jogar novamente". Padrão: 1×1, jogador local = `?faction` ou humano (id 0, time 0), IA = a outra facção (id 1, time 1). `?ffa=1` acrescenta a IA 2 (facção do jogador local, time 2, slot 2).
+  `main.js` monta a config a partir do menu (`createMatchConfig`) ou da URL (`matchConfigFromSearch`, agora também lê `?map=`) e a `MatchSession` a passa ao `GameManager`. `difficulty` (`easy|normal|hard|brutal`) é guardada na config (a IA ainda não a lê); `withNewSeed(cfg)` gera a config de "Jogar novamente". Padrão: 1×1, jogador local = `?faction` ou humano (id 0, time 0), IA = a outra facção (id 1, time 1). `?ffa=1` acrescenta a IA 2 (facção do jogador local, time 2, slot 2). `validateMatchConfig` (F2-05) valida contra o mapa: `players.length <= mapDef.maxPlayers` e todo `startSlot` existe em `mapDef.startSlots`.
 - `Player` (`src/sim/Player.js`): `resources {wood, gold, stone}`, `population`, `maxPopulation`, `researchedUpgrades: Set`, `defeated`, `startPos`; métodos `canAfford`, `deduct`, `add` (tipo ou custo inteiro), `recalculatePop(gm)`.
 - `PlayerRegistry`: `getPlayer(id)`, `localPlayer`, `isHostile(a, b)` (times diferentes; matriz pré-calculada, usada nas varreduras O(n²)), `isAlly(a, b)`, `aliveTeams()`. O dono neutro (−1) não é hostil nem aliado de ninguém.
 - `GameManager` expõe `players`, `getPlayer`, `localPlayer`, `localPlayerId`, `isHostile`, `isAlly`, `aiDirectors[]` (um `AIDirector(gm, playerId, baseCenter)` por IA; `aiDirector` = o primeiro).
@@ -198,7 +202,7 @@ animate() [rAF da aplicação, delta máx 0.1s; sem sessão (menu/loading) não 
 - Toda `Unit`, `Building`, `Tree`, `ResourceDeposit` e projétil (`Arrow`) tem `id` numérico estável (contador monotônico, nunca reaproveitado na vida do `GameManager`) e `ownerId` (−1 = natureza/neutro). `gm.entitiesById` (Map) é mantido no spawn/criação e na remoção (morte, fim do projétil, `resetMap`).
 - Hostilidade: `Unit` (aggro, busca de alvo, retaliação, pedido de ajuda a aliados) e `Building` (torres) usam `gm.isHostile(this.ownerId, outro.ownerId)` / `isAlly`. Entrega de recursos só em construções do **mesmo dono**.
 - Listas: `gm.allUnits` é a lista única (fonte de verdade). `gm.getUnitsOf(ownerId)` (mantida em add/remove) e `gm.getHostileUnitsOf(ownerId)` (cache invalidado em add/remove) são visões derivadas. **Não modifique os arrays retornados.**
-- Bases iniciais: `initMapEntities` cria HQ + serraria + casa + 5 unidades por jogador a partir do slot (`MAP_START_SLOTS`: 0 = NE (32,−30), 1 = SW (−32,30); slots ≥ 2 = primeira posição candidata em que a base inteira passa em `canPlaceBuilding` e fica a ≥ 40 u das outras — hoje (−14,−46), já que (−32,−30) e (32,30) caem no rio). O layout (`START_LAYOUT`) é espelhado por slot e reproduz as posições antigas; os tipos vêm de `FACTIONS[f].startingBase`. Slots extras ganham 1 mina de ouro e 1 pedreira próprias.
+- Bases iniciais (F2-05): `initMapEntities` cria HQ + serraria + casa + 5 unidades por jogador a partir de `mapDef.startSlots[player.startSlot]` (`src/data/maps/<mapId>.json` — no mapa continental, slot 0 = NE (32,−30), slot 1 = SW (−32,30), slot 2 = (−14,−46), só usado em partidas FFA de teste). O layout (`START_LAYOUT`) é espelhado por `slot.mirror` (ou, se ausente, por `slotMirror`) e reproduz as posições antigas; os tipos vêm de `FACTIONS[f].startingBase`. Recursos do mapa com `resources[].slot === N` só são criados se algum jogador usar `startSlot === N`.
 
 ### Grade espacial (F1-06)
 - `SpatialGrid` (`src/sim/SpatialGrid.js`, lógica pura sem three.js) indexa entidades por célula (posição do centro, clampada aos limites do mapa) e responde `queryRadius`/`queryRect`/`nearest` sem alocar (buffers reutilizados pelos chamadores). `queryRadius` inclui a entidade quando `distância-centro ≤ r + raio da entidade`; `nearest` usa distância pura (sem raio) e desempata por menor `id`. Resultados de `queryRadius`/`queryRect` vêm ordenados por `id` (determinismo).
@@ -222,10 +226,26 @@ animate() [rAF da aplicação, delta máx 0.1s; sem sessão (menu/loading) não 
 - **Rally no spawn só para jogadores não-IA**: a IA sempre ignorou o ponto de reunião ao treinar; mantido para a partida 1×1 ficar idêntica (revisar na F5).
 - **Jogador derrotado** em FFA para de ser controlado pela IA, mas as unidades restantes continuam no mapa (no WC2 elas somem). Sem modo espectador: se o jogador local cai, a partida acaba.
 - **Névoa** só considera a visão do jogador local (sem visão compartilhada com aliados). Cor do jogador (`Player.color`) ainda não é usada nos modelos/minimapa.
-- `MatchConfig.seed` é gerada/lida mas a simulação ainda usa `Math.random` (F2-03). Slots e jazidas extras ainda são código (F2-05 move para `src/data/maps`).
+- `MatchConfig.seed` é gerada/lida mas a simulação ainda usa `Math.random` (F2-03).
 
-### Ainda duplicado / hardcoded
-- Mapa: coordenadas de depósitos, clusters de árvores e vaus **hardcoded** em `GameManager` e `Terrain`; minimapa redesenha o rio/vaus manualmente (F2-05).
+### Mapas orientados a dados (F2-05)
+- Cada mapa é um JSON em `src/data/maps/<id>.json` (formato e campos em `src/data/maps/README.md`),
+  registrado em `index.js` (`getMap(id)`, `listMaps()`, `DEFAULT_MAP_ID`). Nenhuma coordenada/
+  tamanho de mapa fica hardcoded em `Terrain`/`Pathfinder`/`FogOfWar`/`GameManager`/`UIManager`/
+  `MatchConfig` — tudo vem de `mapDef`.
+- `Terrain(scene, mapDef)`: tamanho, segmentos (`round(size*0.8)`) e altura (`getHeight`, delegado
+  a `terrainGenerators.getHeightForMap`) vêm do mapa. `Pathfinder` usa `mapDef.playable/2` como
+  meia-largura da área jogável (a grade física é um pouco maior, `+3`, para consultas na borda não
+  grudarem numa célula válida). `FogOfWar` usa `mapDef.size + 20` (mesma margem que o mapa
+  continental sempre teve).
+- Dois mapas hoje: `continental-1v1` ("Vale do Rio", histórico — checksum de determinismo
+  idêntico ao de antes da F2-05) e `ilhas-4p` ("Ilhas Gêmeas", novo: 4 slots, 2 ilhas ligadas por
+  2 pontes de terra, gerador `"islands"`). Menu de escaramuça lista os mapas via `listMaps()`
+  (miniatura = mesmo renderizador do minimapa, `terrainMinimapImage.js`); `?map=<id>` na URL.
+- Minimapa (`UIManager.drawMinimap`): o terreno (água/areia/grama/rocha por altura) é renderizado
+  **uma vez por partida** num canvas offscreen (`terrainMinimapImage.js`); por quadro só desenha
+  essa imagem + entidades + névoa + câmera. Conversão mundo↔minimapa em `ui/minimapCoords.js`
+  (`mapDef.size`, não mais `140` fixo).
 
 ## Comandos (F2-02)
 

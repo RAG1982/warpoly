@@ -245,7 +245,7 @@ Opus escreve a spec em `docs/specs/<ID>.md`; agente **Sonnet** executa; Opus rev
 ## F3 — Jogabilidade WC2 (base)
 
 ### F3-00 · Documento de design de paridade (tabelas finais)
-- **Status**: `TODO` · Lane GAME · Onda 2 · Dep: F0-07
+- **Status**: `REVIEW(proposta v1 em docs/08_GAME_DESIGN.md — aguarda dono)` · Lane GAME · Onda 2 · Dep: F0-07
 - **Fazer**: **glossário oficial de nomes próprios** (facções, unidades, construções, magias — decisão D2) e `docs/08_GAME_DESIGN.md` com a árvore tecnológica completa das 2 facções (tiers, construções, unidades, pesquisas, magias), stats iniciais e tabela de contra-unidades, baseado em [05_PARIDADE_WARCRAFT2](05_PARIDADE_WARCRAFT2.md) com nomes originais.
 - **Aceite**: aprovado pelo dono do projeto.
 

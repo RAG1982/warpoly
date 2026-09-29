@@ -11,6 +11,7 @@ RTS 3D low-poly para navegador (three.js + Vite), inspirado em **Warcraft II**. 
 | [05_PARIDADE_WARCRAFT2](05_PARIDADE_WARCRAFT2.md) | Matriz de recursos do WC2: existe / parcial / falta |
 | [06_ROADMAP_AAA](06_ROADMAP_AAA.md) | Visão, fases F0–F10, caminho crítico, decisões de arquitetura |
 | [07_DECISOES](07_DECISOES.md) | Decisões do dono: recursos, nomes próprios, alvos de hardware |
+| [08_GAME_DESIGN](08_GAME_DESIGN.md) | Design de jogo F3-00 (facções, economia, níveis, unidades, magias) — proposta v1 |
 | [HANDOFF_CLOUD](HANDOFF_CLOUD.md) | Roteiro para executar tarefas no Claude Code online (nuvem) |
 | [specs/](specs/) | Especificações detalhadas por tarefa (executadas por Sonnet/Haiku) |
 | [TASKS](TASKS.md) | **Lista de tarefas controlada**: protocolo, lanes/agentes, ondas paralelas, status |

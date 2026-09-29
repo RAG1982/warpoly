@@ -83,18 +83,30 @@ Estados: `idle, moving, gathering, returning, building, attacking, dying`.
 - **Projéteis**: sempre acertam (teleguiados).
 - **Movimento**: A* só desvia de água; construções/árvores resolvidas por empurrão de colisão. Formação = grade quadrada simples.
 
-## Controles existentes
+## Controles (F3-01)
+
+Toda ordem passa por `gm.issue` (comandos F2-02). Lógica pura em `src/core/Hotkeys.js` e `src/core/ControlGroups.js`.
 
 | Ação | Input |
 |---|---|
-| Selecionar / caixa | Clique esquerdo / arrastar |
+| Selecionar / caixa (máx. `SELECTION_LIMIT`=24, as mais próximas do centro da caixa) | Clique esquerdo / arrastar |
+| Alternar unidade / somar caixa | `Shift`+clique / `Shift`+caixa |
+| Todas as unidades do mesmo tipo na tela | Duplo clique numa unidade própria |
 | Ordem contextual (mover, atacar, coletar, construir, rally) | Clique direito |
-| Câmera | WASD/setas, scroll zoom, Q/E rotaciona |
-| Ir ao HQ | H |
-| Cancelar | Esc |
-| Minimapa | Clique move câmera |
+| Enfileirar qualquer ordem | Segurar `Shift` (`queued: true`) |
+| Grupos de controle | `Ctrl+1..9` grava · `1..9` seleciona · duplo toque (<350 ms) centraliza · `Shift+1..9` adiciona |
+| Parar / Segurar posição | `S` / `H` (`CMD.STOP` / `CMD.HOLD`) |
+| Atacar-movendo / Patrulhar | `A` / `P`, depois clique esquerdo (Esc ou clique direito cancela) |
+| Atalhos do card (construir C/L/F/B/K/T, treinar Q/W/E, pesquisa R/A/S/D) | Letra mostrada no botão; vale com construção selecionada ou trabalhador (construir) |
+| Trabalhador ocioso | `.` (cicla) |
+| Último alerta / HQ | `Espaço` (construção sob ataque, senão HQ) / `Backspace` (seleciona o HQ) |
+| Câmera | WASD/setas, borda da janela (≤8 px; desliga com `localStorage['warpoly.edgePan']='0'`), botão do meio arrasta, scroll zoom, Q/E rotaciona |
+| Minimapa | Clique esquerdo move a câmera; clique direito com unidades selecionadas = `CMD.MOVE` |
+| Cancelar | Esc (modo alvo → colocação → seleção → pausa) |
 
-**Não existem**: grupos de controle, shift-queue, attack-move, stop/hold/patrol, duplo clique por tipo, atalhos do card de comandos, pan pela borda da tela, seleção de inimigos para inspeção.
+Prioridade de teclas: modo alvo bloqueia letras; com unidades e **sem** construção selecionada, `S/H/A/P` são comandos; com construção selecionada valem as letras do card. Teclas consumidas por comando não movem a câmera (ex.: `S` não recua a câmera). Q/E só rotacionam se não houver botão do card com essa letra.
+
+**Ainda não existem**: seleção de inimigos para inspeção.
 
 ## IA (AIDirector)
 

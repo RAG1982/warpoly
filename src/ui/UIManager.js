@@ -182,19 +182,35 @@ export class UIManager {
     if (!this.minimapCanvas) return;
     const canvas = this.minimapCanvas;
 
-    const handleMinimapClick = (e) => {
+    const minimapWorldPoint = (e) => {
       const rect = canvas.getBoundingClientRect();
       const clickX = e.clientX - rect.left;
       const clickY = e.clientY - rect.top;
 
       // F2-05: tamanho do mapa vem de mapDef (era 140 fixo).
       const mapSize = this.gm.terrain.mapDef.size;
-      const { x: worldX, z: worldZ } = minimapToWorld(clickX, clickY, mapSize, canvas.width, canvas.height);
+      return minimapToWorld(clickX, clickY, mapSize, canvas.width, canvas.height);
+    };
 
+    const handleMinimapClick = (e) => {
+      const { x: worldX, z: worldZ } = minimapWorldPoint(e);
+      if (e.button === 2) {
+        // F3-01: clique direito no minimapa com unidades selecionadas → MOVE (Shift = enfileirar)
+        e.preventDefault();
+        const unitIds = this.gm.selectedUnits.filter(u => !u.isDead && !u.isDying).map(u => u.id);
+        if (unitIds.length === 0) return;
+        const cmd = { type: CMD.MOVE, playerId: this.gm.localPlayerId, unitIds, x: worldX, z: worldZ };
+        if (e.shiftKey) cmd.queued = true;
+        this.gm.issue(cmd);
+        this.gm.soundManager?.playOrder();
+        return;
+      }
+      if (e.button !== 0) return;
       this.sm.cameraTarget.set(worldX, this.gm.terrain.getHeight(worldX, worldZ), worldZ);
     };
 
     canvas.addEventListener('mousedown', handleMinimapClick, this._listenOpts);
+    canvas.addEventListener('contextmenu', (e) => e.preventDefault(), this._listenOpts);
   }
 
   showNotification(msg, duration = 4000) {

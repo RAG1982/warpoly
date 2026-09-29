@@ -1,5 +1,7 @@
 import * as THREE from 'three';
 import { ModelFactory } from './ModelFactory.js';
+import { EVT } from '../sim/events.js';
+import { NEUTRAL_OWNER_ID } from '../sim/EntityIds.js';
 
 // Shared invisible material for tree raycast/hit proxies
 const hitProxyMaterial = new THREE.MeshBasicMaterial({ visible: false });
@@ -58,20 +60,20 @@ export class Tree {
     this.stumpMesh = null;
   }
 
-  chop(amount, particleSystem) {
+  /**
+   * F2-07: só a lógica de estado (madeira restante). O VFX de lasca de madeira ao golpear a
+   * árvore sai como evento `WORKER_HAMMER`/`WORKER_CHOP` emitido pelo chamador (`Unit.js`, que
+   * conhece o `ownerId` de quem está cortando) — ver `Unit.updateGathering`.
+   */
+  chop(amount) {
     if (this.isDead) return 0;
 
     const harvested = Math.min(amount, this.woodRemaining);
     this.woodRemaining -= harvested;
 
-    // Spawn chips & leaves
-    if (particleSystem) {
-      particleSystem.spawnWoodChips(this.mesh.position);
-    }
-
     if (this.woodRemaining <= 0) {
       this.shakeTimer = 0;
-      this.die(particleSystem);
+      this.die();
     } else {
       // Shake tree only while living
       this.shakeTimer = 0.25;
@@ -80,7 +82,7 @@ export class Tree {
     return harvested;
   }
 
-  die(particleSystem) {
+  die() {
     if (this.isDead) return;
     this.isDead = true;
     this.woodRemaining = 0;
@@ -98,7 +100,13 @@ export class Tree {
     }
   }
 
-  update(delta, particleSystem) {
+  /**
+   * @param {number} delta
+   * @param {import('../sim/EventBus.js').EventBus|null} [events]  F2-07: no lugar de
+   *   `particleSystem` — emite `WORKER_CHOP` quando a queda termina (lascas finais); o ouvinte
+   *   de VFX decide se/como desenhar (sem condição de dono: sempre tocava, ver F2-07).
+   */
+  update(delta, events = null) {
     // Shake effect when hit (only active on living standing trees)
     if (!this.isDead && this.shakeTimer > 0) {
       this.shakeTimer -= delta;
@@ -139,8 +147,11 @@ export class Tree {
         if (!this.treeManager && this.mesh && this.mesh !== this.stumpMesh) {
           this.scene.remove(this.mesh);
         }
-        if (particleSystem) {
-          particleSystem.spawnWoodChips(this.basePos);
+        if (events) {
+          events.emit(EVT.WORKER_CHOP, {
+            pos: { x: this.basePos.x, y: this.basePos.y, z: this.basePos.z },
+            ownerId: NEUTRAL_OWNER_ID
+          });
         }
       }
     }

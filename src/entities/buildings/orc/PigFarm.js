@@ -121,7 +121,7 @@ export class PigFarm extends Building {
     return pig;
   }
 
-  updateCustomVFX(delta, gameManager, soundManager, particleSystem) {
+  updateCustomVFX(delta, gameManager) {
     // Atualiza a IA e animação de cada porco no cercado
     this.pigs.forEach(p => {
       p.timer -= delta;

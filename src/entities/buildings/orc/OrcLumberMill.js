@@ -1,5 +1,6 @@
 import * as THREE from 'three';
 import { Building } from '../../Building.js';
+import { EVT } from '../../../sim/events.js';
 
 /**
  * OrcLumberMill — Serraria e Centro Madeireiro Industrial da Horda Orc
@@ -74,17 +75,19 @@ export class OrcLumberMill extends Building {
   }
 
   /**
-   * Acionado quando um Peon entrega um lote de madeira na serraria
+   * Acionado quando um Peon entrega um lote de madeira na serraria. `fx` vem do ouvinte de VFX
+   * (evento `BUILDING_VFX`, kind `sawdust`, emitido por `Unit.updateReturning` — F2-07) ou,
+   * fora de partida, do inspetor.
    */
-  processWoodDelivery(particleSystem) {
+  processWoodDelivery(fx) {
     this.targetSawSpeed = 22.0; // Acelera o giro da serra
-    if (particleSystem) {
+    if (fx) {
       const worldPos = this.mesh.position.clone().add(this.sawDustSocket);
-      particleSystem.spawnWoodChips(worldPos);
+      fx.spawnWoodChips(worldPos);
     }
   }
 
-  updateCustomVFX(delta, gameManager, soundManager, particleSystem) {
+  updateCustomVFX(delta, gameManager) {
     // 1. Interpolação suave da velocidade da serra
     this.sawSpeed = THREE.MathUtils.lerp(this.sawSpeed, this.targetSawSpeed, delta * 4.0);
     this.targetSawSpeed = THREE.MathUtils.lerp(this.targetSawSpeed, 6.0, delta * 1.5);
@@ -95,12 +98,18 @@ export class OrcLumberMill extends Building {
     }
 
     // 3. Emissão contínua de serragem sutil se a serra estiver em alta velocidade
-    if (this.sawSpeed > 10.0 && particleSystem) {
+    const gmEvents = gameManager && gameManager.events;
+    if (this.sawSpeed > 10.0 && gmEvents) {
       this.sawdustTimer += delta;
       if (this.sawdustTimer >= 0.2) {
         this.sawdustTimer = 0;
         const worldPos = this.mesh.position.clone().add(this.sawDustSocket);
-        particleSystem.spawnWoodChips(worldPos);
+        gmEvents.emit(EVT.BUILDING_VFX, {
+          buildingId: this.id,
+          ownerId: this.ownerId,
+          pos: { x: worldPos.x, y: worldPos.y, z: worldPos.z },
+          kind: 'sawdust'
+        });
       }
     }
   }

@@ -7,6 +7,9 @@ import { GameManager } from './GameManager.js';
 import { InputManager } from './InputManager.js';
 import { UIManager } from '../ui/UIManager.js';
 import { collectSharedResources, disposeObjectTree } from '../render/sceneDisposal.js';
+import { createAudioEvents } from '../audio/AudioEvents.js';
+import { createVfxEvents } from '../render/VfxEvents.js';
+import { createUiEvents } from '../ui/UiEvents.js';
 
 /**
  * MatchSession — uma partida descartável (F2-04).
@@ -61,6 +64,17 @@ export class MatchSession {
     this.gameManager.focusCameraOnLocalBase();
     // Compila os shaders da cena viva antes de a névoa esconder objetos
     this.gameManager.warmLiveScene();
+
+    // F2-07: ouvintes de apresentação (áudio/VFX/UI) do barramento de eventos da simulação —
+    // nunca em modo headless (`MatchConfig.headless`: sem DOM/WebGL/Web Audio em Node).
+    this._disposeAudioEvents = null;
+    this._disposeVfxEvents = null;
+    this._disposeUiEvents = null;
+    if (!this.gameManager.headless) {
+      this._disposeAudioEvents = createAudioEvents(this.gameManager, sound);
+      this._disposeVfxEvents = createVfxEvents(this.gameManager, this.particleSystem);
+      this._disposeUiEvents = createUiEvents(this.gameManager, this.uiManager);
+    }
   }
 
   /** Câmera e hora do dia voltam ao padrão (o SceneManager sobrevive entre partidas). */
@@ -108,6 +122,12 @@ export class MatchSession {
     if (this.disposed) return;
     this.disposed = true;
     const scene = this.sceneManager.scene;
+
+    // 0. Ouvintes do barramento de eventos (F2-07) — antes de tudo, para não reagir a eventos
+    // emitidos durante o próprio dispose (ex.: Building.dispose não emite, mas por segurança).
+    this._disposeAudioEvents?.();
+    this._disposeVfxEvents?.();
+    this._disposeUiEvents?.();
 
     // 1. Entrada e HUD primeiro: nada mais reage a eventos desta partida.
     this.inputManager.dispose();

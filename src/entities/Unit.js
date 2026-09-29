@@ -2,11 +2,17 @@ import * as THREE from 'three';
 import { ModelFactory } from './ModelFactory.js';
 import { Arrow } from './Arrow.js';
 import { Building } from './Building.js';
-import { UnitAnimator } from '../inspector/unitAnimator.js';
+import { UnitAnimator } from '../animation/UnitAnimator.js';
 import { getUnitDef, getUnitStats as getUnitStatsFromData, WORKER_STATS } from '../data/index.js';
 import { legacyOwnerId } from '../sim/EntityIds.js';
 import { SIM_DT, lerpAngle } from '../sim/constants.js';
 import { CMD } from '../sim/commands.js';
+import { EVT } from '../sim/events.js';
+
+/** Vector3 → objeto plano `{x,y,z}` (payload de evento: nunca referências a objetos three.js). */
+function posOf(v) {
+  return { x: v.x, y: v.y, z: v.z };
+}
 
 // F2-02: estados em que a unidade está caminhando por `waypoints`/`pathDestination` via
 // pathfinder assíncrono (moveTo). O callback de `requestPath` precisa reconhecer todos eles
@@ -525,7 +531,7 @@ export class Unit {
     this.stop();
   }
 
-  takeDamage(amount, particleSystem, attacker = null, allUnits = []) {
+  takeDamage(amount, attacker = null, allUnits = []) {
     if (this.isDead || this.isDying) return;
 
     const effectiveDamage = Math.max(2, amount - this.armor);
@@ -535,14 +541,19 @@ export class Unit {
       this.hpGroup.visible = (this.mesh ? this.mesh.visible : true) && (this.isSelected || this.hp < this.maxHp);
     }
 
-    if (particleSystem) {
-      particleSystem.spawnFloatingText(`-${Math.round(effectiveDamage)}`, this.mesh.position, '#ff4747');
-      particleSystem.spawnHitSparks(this.mesh.position);
+    const gmEvents = this.gameManager && this.gameManager.events;
+    if (gmEvents) {
+      gmEvents.emit(EVT.UNIT_DAMAGED, {
+        unitId: this.id,
+        ownerId: this.ownerId,
+        pos: posOf(this.mesh.position),
+        amount: effectiveDamage
+      });
     }
 
     if (this.hp <= 0) {
       this.hp = 0;
-      this.die(particleSystem);
+      this.die();
       return;
     }
 
@@ -589,7 +600,7 @@ export class Unit {
     }
   }
 
-  die(particleSystem) {
+  die() {
     if (this.isDying) return;
     this.isDying = true;
     this.isDead = true;
@@ -598,6 +609,16 @@ export class Unit {
     this.deathTimer = 0;
     this.deathDuration = 1.6;
     this._deathSinkOffset = 0;
+
+    const gmEvents = this.gameManager && this.gameManager.events;
+    if (gmEvents) {
+      gmEvents.emit(EVT.UNIT_DIED, {
+        unitId: this.id,
+        ownerId: this.ownerId,
+        pos: posOf(this.mesh.position),
+        unitType: this.type
+      });
+    }
 
     this.hasTargetPos = false;
     this.targetEntity = null;
@@ -737,7 +758,7 @@ export class Unit {
     }
   }
 
-  update(delta, gameManager, soundManager, particleSystem, arrows, allUnits, buildings) {
+  update(delta, gameManager, arrows, allUnits, buildings) {
     if (this.canRemove) return;
     this.gameManager = gameManager;
 
@@ -782,16 +803,16 @@ export class Unit {
         this.updateMoving(delta, gameManager);
         break;
       case 'gathering':
-        this.updateGathering(delta, gameManager, soundManager, particleSystem, buildings);
+        this.updateGathering(delta, gameManager, buildings);
         break;
       case 'returning':
-        this.updateReturning(delta, gameManager, soundManager, particleSystem, buildings);
+        this.updateReturning(delta, gameManager, buildings);
         break;
       case 'building':
-        this.updateBuilding(delta, soundManager, particleSystem, gameManager);
+        this.updateBuilding(delta, gameManager);
         break;
       case 'attacking':
-        this.updateAttacking(delta, soundManager, particleSystem, arrows, allUnits, buildings, gameManager);
+        this.updateAttacking(delta, gameManager, arrows, allUnits, buildings);
         break;
       case 'holding':
         this.updateHolding(delta, allUnits, buildings);
@@ -990,7 +1011,7 @@ export class Unit {
     }
   }
 
-  updateGathering(delta, gameManager, soundManager, particleSystem, buildings) {
+  updateGathering(delta, gameManager, buildings) {
     if (!this.gatherTarget || this.gatherTarget.isDead || (this.gatherTarget.resourcesRemaining <= 0 && this.gatherTarget.woodRemaining <= 0)) {
       // Find another nearby resource of same type if possible
       const nextResource = gameManager.findNearestResource(this.mesh.position, this.gatherTarget ? this.gatherTarget.type : 'tree');
@@ -1034,18 +1055,16 @@ export class Unit {
       this.actionTimer = 0;
       const resType = this.gatherTarget.type === 'tree' ? 'wood' : this.gatherTarget.type;
       this.carrying.type = resType;
+      const gmEvents = this.gameManager && this.gameManager.events;
 
       if (resType === 'wood') {
-        const harvested = this.gatherTarget.chop(3, particleSystem);
+        const harvested = this.gatherTarget.chop(3);
         this.carrying.amount += harvested;
-        if (soundManager) soundManager.playChop();
+        if (gmEvents) gmEvents.emit(EVT.WORKER_CHOP, { pos: posOf(this.mesh.position), ownerId: this.ownerId });
       } else {
-        const harvested = this.gatherTarget.mine(3, particleSystem);
+        const harvested = this.gatherTarget.mine(3);
         this.carrying.amount += harvested;
-        if (soundManager) {
-          if (resType === 'gold') soundManager.playMineGold();
-          else soundManager.playMineStone();
-        }
+        if (gmEvents) gmEvents.emit(EVT.WORKER_MINE, { pos: posOf(this.mesh.position), ownerId: this.ownerId, resource: resType });
       }
 
       // If full capacity reached, return to base
@@ -1056,17 +1075,20 @@ export class Unit {
     }
   }
 
-  depositResources(gameManager, soundManager, particleSystem) {
+  depositResources(gameManager) {
     if (this.carrying.amount > 0) {
       const owner = gameManager.getPlayer ? gameManager.getPlayer(this.ownerId) : null;
       if (owner) owner.add(this.carrying.type, this.carrying.amount);
-      const isLocal = !!(owner && owner.isLocal);
 
-      if (particleSystem && (isLocal || (gameManager.fogOfWar && gameManager.fogOfWar.isExplored(this.mesh.position.x, this.mesh.position.z)))) {
-        const color = this.carrying.type === 'gold' ? '#ffd700' : this.carrying.type === 'wood' ? '#68d391' : '#cbd5e1';
-        particleSystem.spawnFloatingText(`+${this.carrying.amount} ${this.carrying.type.toUpperCase()}`, this.mesh.position, color);
+      const gmEvents = gameManager && gameManager.events;
+      if (gmEvents) {
+        gmEvents.emit(EVT.RESOURCE_GATHERED, {
+          type: this.carrying.type,
+          amount: this.carrying.amount,
+          pos: posOf(this.mesh.position),
+          ownerId: this.ownerId
+        });
       }
-      if (soundManager && isLocal) soundManager.playOrder();
       this.carrying.amount = 0;
       this.updateCarryingVisuals(false);
     }
@@ -1086,7 +1108,7 @@ export class Unit {
     }
   }
 
-  updateReturning(delta, gameManager, soundManager, particleSystem, buildings) {
+  updateReturning(delta, gameManager, buildings) {
     // Find nearest dropoff building owned by this unit's player
     const dropoff = gameManager.findNearestDropoff(this.mesh.position, this.carrying.type, buildings || gameManager.buildings, this.ownerId);
     if (!dropoff) {
@@ -1096,7 +1118,7 @@ export class Unit {
 
     const targetPos = dropoff.mesh.position;
     const dist = Math.hypot(this.mesh.position.x - targetPos.x, this.mesh.position.z - targetPos.z);
-    
+
     // Contact / collision perimeter of dropoff building
     const dropoffRadius = dropoff.collisionRadius || (dropoff.type === 'castle' ? 5.5 : 3.2);
     const contactDist = dropoffRadius + this.collisionRadius + 0.25;
@@ -1104,9 +1126,17 @@ export class Unit {
     // Delivery triggers upon colliding / contacting the dropoff building!
     if (dist <= contactDist) {
       if (dropoff.processWoodDelivery && this.carrying.type === 'wood') {
-        dropoff.processWoodDelivery(particleSystem);
+        const gmEvents = gameManager && gameManager.events;
+        if (gmEvents) {
+          gmEvents.emit(EVT.BUILDING_VFX, {
+            buildingId: dropoff.id,
+            ownerId: dropoff.ownerId,
+            pos: posOf(dropoff.mesh.position),
+            kind: 'sawdust'
+          });
+        }
       }
-      this.depositResources(gameManager, soundManager, particleSystem);
+      this.depositResources(gameManager);
       return;
     }
 
@@ -1122,7 +1152,7 @@ export class Unit {
     }
   }
 
-  updateBuilding(delta, soundManager, particleSystem, gameManager) {
+  updateBuilding(delta, gameManager) {
     if (!this.buildTarget || this.buildTarget.isDead || this.buildTarget.isConstructed) {
       this.stop();
       return;
@@ -1151,12 +1181,14 @@ export class Unit {
     if (this.actionTimer >= 0.8) {
       this.actionTimer = 0;
       const gm = gameManager || this.gameManager;
-      this.buildTarget.construct(10, soundManager, particleSystem, gm);
-      if (soundManager) soundManager.playHammer();
+      this.buildTarget.construct(10, gm);
+      if (gm && gm.events) {
+        gm.events.emit(EVT.WORKER_HAMMER, { pos: posOf(this.buildTarget.mesh.position), ownerId: this.ownerId });
+      }
     }
   }
 
-  updateAttacking(delta, soundManager, particleSystem, arrows, allUnits, buildings) {
+  updateAttacking(delta, gameManager, arrows, allUnits, buildings) {
     // F2-02: unidade em HOLD só re-adquire alvo dentro do próprio attackRange (nunca persegue
     // além dele — ver o passo 3 abaixo); as demais mantêm o retargetRange de sempre.
     const scanRange = this._isHolding ? this.attackRange : this.retargetRange;
@@ -1240,19 +1272,18 @@ export class Unit {
 
     const progress = Math.min(1.0, this.attackTimer / this.attackCooldown);
 
+    const gmEvents = this.gameManager && this.gameManager.events;
+
     if (this.isRanged) {
       // Archer & Axethrower: Release projectile shot at progress >= 0.60
       if (progress >= 0.60 && !this.hasFiredThisAttack) {
         this.hasFiredThisAttack = true;
-        if (soundManager) {
-          if (this.projectileType === 'axe') soundManager.playSword();
-          else soundManager.playBow();
-        }
         const startPos = _projectileOrigin.copy(this.mesh.position).add(_up168);
         const projType = this.projectileType;
+        if (gmEvents) gmEvents.emit(EVT.PROJECTILE_FIRED, { kind: projType, from: posOf(startPos), ownerId: this.ownerId });
         const arrow = new Arrow(this.scene, startPos, this.attackTarget, this.attack, (target, dmg, hitPos) => {
-          target.takeDamage(dmg, particleSystem, this, allUnits);
-          if (soundManager) soundManager.playArrowHit();
+          target.takeDamage(dmg, this, allUnits);
+          if (gmEvents) gmEvents.emit(EVT.PROJECTILE_HIT, { kind: projType, pos: posOf(hitPos), ownerId: this.ownerId });
         }, projType);
         arrows.push(arrow);
         if (this.gameManager && this.gameManager.registerEntity) this.gameManager.registerEntity(arrow, this.ownerId);
@@ -1261,8 +1292,8 @@ export class Unit {
       // Melee units (Knight, Villager, Bandit, Grunt, Ogre) strike at apex (progress >= 0.45)
       if (progress >= 0.45 && !this.hasFiredThisAttack) {
         this.hasFiredThisAttack = true;
-        if (soundManager) soundManager.playSword();
-        this.attackTarget.takeDamage(this.attack, particleSystem, this, allUnits);
+        if (gmEvents) gmEvents.emit(EVT.MELEE_HIT, { pos: posOf(this.mesh.position), ownerId: this.ownerId });
+        this.attackTarget.takeDamage(this.attack, this, allUnits);
       }
     }
 

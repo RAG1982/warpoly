@@ -60,6 +60,9 @@ src/
     buildings/HumanForge.js, buildings/orc/*.js   Subclasses com VFX (initCustomVFX/updateCustomVFX)
     Tree.js, ResourceDeposit.js, Arrow.js, ParticleSystem.js
     ModelFactory.js           Cache de templates + clone; rebind de nós nomeados para animação
+  animation/UnitAnimator.js  Animações procedurais (idle/walk/fight/gather/hurt/die) — F2-07: movido de src/inspector/
+  sim/EventBus.js, sim/events.js   Barramento de eventos da simulação (F2-07: ver seção "Eventos")
+  audio/AudioEvents.js       Ouvinte: eventos → SoundManager (F2-07)
   models/
     units/*Model.js + *Textures.js       8 unidades (4 humanas incl. bandido, 4 orcs)
     buildings/*Model.js + *Textures.js   17 construções
@@ -69,11 +72,13 @@ src/
     Terrain.js                Altura = função analítica fixa (continente 140×140, rio diagonal, 3 vaus)
     Water.js, Decorations.js (instanced), TreeManager.js (instanced, 6 draw calls)
   ui/UIManager.js             Atualiza HUD DOM, card de seleção, filas, minimapa (desenhado à mão); dispose() por sessão
+  ui/UiEvents.js              Ouvinte: eventos → UIManager.showNotification (F2-07)
   ui/screens/                 MainMenu (F6-01), PauseMenu + gameScreens.css (F2-04)
   render/sceneDisposal.js     Descarte de objetos da partida preservando os caches do ModelFactory (F2-04)
+  render/VfxEvents.js         Ouvinte: eventos → ParticleSystem (F2-07)
   inspector/
     inspector.js              App do inspetor (catálogo de 37 modelos, luzes, wireframe, stats)
-    unitAnimator.js           Animações procedurais (idle/walk/fight/gather/hurt/die) — USADO PELO JOGO
+    unitAnimator.js           F2-07: reexport de 1 linha de `../animation/UnitAnimator.js` (compatibilidade)
 ```
 
 ## Loop principal (`src/main.js`) e estados do jogo (F2-04)
@@ -320,6 +325,42 @@ Multiplayer lockstep (F9) e replays (F9-05) exigem que a mesma seed + o mesmo lo
   lockstep entre navegadores distintos, F9-03 deve avaliar uma tabela ou implementação própria
   de trigonometria fixa.
 
+## Eventos (F2-07)
+
+A simulação (`Unit`/`Building`/`Tree`/`ResourceDeposit`/`GameManager.simStep`/`src/ai/**`) não
+chama `soundManager`/`particleSystem`/`uiManager` diretamente — emite eventos em `gm.events`
+(`EventBus`, `src/sim/EventBus.js`), despachados só em `flush()` para os ouvintes de
+apresentação. Isso permite rodar a simulação headless (testes de determinismo, F2-03) sem DOM/
+Web Audio, e destrava replays futuros (F9-05): o log de comandos reproduz o estado, e os efeitos
+visuais/sonoros nunca são "re-disparados" porque o `EventBus` tem `muted` (ainda sem uso).
+
+- **`EventBus`** (`src/sim/EventBus.js`, puro): `on(type, fn) → off`, `off(type, fn)`,
+  `emit(type, payload)` (enfileira; `payload` só dados — ids, `pos:{x,y,z}` copiada, números —
+  nunca referências a objetos three.js; congelado em `emit`), `flush()` (despacha a fila para
+  os ouvintes, na ordem de emissão, e a esvazia), `clear()`.
+- **Catálogo** (`src/sim/events.js`, `EVT`): `UNIT_TRAINED`, `UNIT_DIED`, `UNIT_DAMAGED`,
+  `BUILDING_PLACED`, `BUILDING_COMPLETED`, `BUILDING_DESTROYED`, `BUILDING_DAMAGED`,
+  `RESEARCH_DONE`, `RESOURCE_GATHERED`, `RESOURCE_DEPLETED`, `WORKER_CHOP`/`WORKER_MINE`/
+  `WORKER_HAMMER`, `PROJECTILE_FIRED`/`PROJECTILE_HIT`, `MELEE_HIT`, `UNDER_ATTACK`, `NOTIFY`,
+  `PLAYER_DEFEATED`, `MATCH_WON`, `MATCH_LOST` — mais `BUILDING_VFX` (decisão da execução, ver
+  `events.js`: cobre o VFX ambiente de construção — chaminé, faíscas de forja, serragem, boneco
+  de treino orc — que não estava no catálogo original da spec mas também precisou sair da
+  simulação). JSDoc do payload de cada um no próprio arquivo.
+- **Fluxo**: `gm.events = new EventBus()` (construtor do `GameManager`); `simStep` chama
+  `this.events.flush()` no fim (depois do checksum, para nunca influenciar o estado
+  determinístico) — inclusive nos `return` antecipados (fim de partida). `renderUpdate`
+  (VFX fora do tick fixo — fumaça de chaminé, faíscas) também chama `flush()` no fim do quadro,
+  para não esperar até 50 ms pelo próximo `simStep`.
+- **Ouvintes** (camada de apresentação, criados por `MatchSession` — nunca em modo headless):
+  `src/audio/AudioEvents.js` → `SoundManager`; `src/render/VfxEvents.js` → `ParticleSystem`
+  (respeitando névoa via `fogOfWar.isExplored` e `ownerId === localPlayerId` onde a simulação
+  antiga já checava isso); `src/ui/UiEvents.js` → `UIManager.showNotification`. Cada um exporta
+  `create*Events(gm, manager) → dispose`; `MatchSession.dispose()` chama os três `dispose` antes
+  de desligar `InputManager`/`UIManager`.
+- **`UnitAnimator`** mora em `src/animation/UnitAnimator.js` (F2-07; antes em
+  `src/inspector/`, camada invertida — ver B13 em `04_DIAGNOSTICO.md`); `src/inspector/
+  unitAnimator.js` é um reexport de 1 linha para compatibilidade.
+
 ## Pipeline de assets
 
 - Cada `*Textures.js` tem funções `getXTextures()` memoizadas que pintam canvases (map, roughness, metalness, bump) — **498 chamadas `createCanvas(2048…)`**, 41 de 1024, 17 de 512.
@@ -329,7 +370,6 @@ Multiplayer lockstep (F9) e replays (F9-05) exigem que a mesma seed + o mesmo lo
 
 ## Pontos de acoplamento a conhecer antes de mexer
 
-- `Unit.js` importa `UnitAnimator` de `src/inspector/` (camada invertida).
 - `GameManager` recebe `uiManager` e `sceneManager` por atribuição posterior (`gm.uiManager = …`).
 - `Building`/`Unit` precisam de `gameManager` (injetado em `createBuilding`/`spawnUnit`) para achar o `Player` dono e a diplomacia; sem ele caem em regras locais (dono igual/diferente).
 - HUD depende de IDs fixos do `index.html`.

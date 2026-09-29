@@ -1,5 +1,10 @@
 import * as THREE from 'three';
 import { Building } from '../Building.js';
+import { EVT } from '../../sim/events.js';
+
+function posOf(v) {
+  return { x: v.x, y: v.y, z: v.z };
+}
 
 /**
  * HumanForge — Forja Real, Armaria e Fundição da Aliança Humana
@@ -62,14 +67,20 @@ export class HumanForge extends Building {
   /**
    * Acionado quando uma melhoria é forjada ou a bigorna é golpeada
    */
-  strikeAnvil(particleSystem) {
-    if (particleSystem) {
+  /**
+   * F2-07: `fx` é o `ParticleSystem` da partida, entregue pelo ouvinte de VFX
+   * (`src/render/VfxEvents.js`) ao reagir ao evento `BUILDING_VFX` (kind `anvil_spark`) —
+   * `Building.simUpdate` não chama este método direto nem passa `particleSystem` (sim não toca
+   * a camada de apresentação).
+   */
+  strikeAnvil(fx) {
+    if (fx) {
       const worldPos = this.mesh.position.clone().add(this.anvilSocket);
-      particleSystem.spawnHitSparks(worldPos);
+      fx.spawnHitSparks(worldPos);
     }
   }
 
-  updateCustomVFX(delta, gameManager, soundManager, particleSystem) {
+  updateCustomVFX(delta, gameManager) {
     this.flickerTimer += delta * 12.0;
 
     // 1. Cintilação térmica da luz da fornalha
@@ -105,12 +116,13 @@ export class HumanForge extends Building {
     }
 
     // 5. Fumaça cinza subindo da chaminé
-    if (particleSystem) {
+    const gmEvents = gameManager && gameManager.events;
+    if (gmEvents) {
       this.smokeTimer += delta;
       if (this.smokeTimer >= 0.5) {
         this.smokeTimer = 0;
         const worldPos = this.mesh.position.clone().add(this.chimneySocket);
-        particleSystem.spawnSmokePuff(worldPos);
+        gmEvents.emit(EVT.BUILDING_VFX, { buildingId: this.id, ownerId: this.ownerId, pos: posOf(worldPos), kind: 'chimney_smoke' });
       }
 
       // Fumaça sutil da bigorna
@@ -118,7 +130,7 @@ export class HumanForge extends Building {
       if (this.anvilSmokeTimer >= 1.2) {
         this.anvilSmokeTimer = 0;
         const worldPos = this.mesh.position.clone().add(this.anvilSocket);
-        particleSystem.spawnSmokePuff(worldPos);
+        gmEvents.emit(EVT.BUILDING_VFX, { buildingId: this.id, ownerId: this.ownerId, pos: posOf(worldPos), kind: 'anvil_smoke' });
       }
     }
   }

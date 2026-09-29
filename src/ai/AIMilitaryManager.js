@@ -1,6 +1,7 @@
 import * as THREE from 'three';
 import { getBuildingDef } from '../data/index.js';
 import { CMD } from '../sim/commands.js';
+import { EVT } from '../sim/events.js';
 
 /**
  * AIMilitaryManager (Gerenciador Militar e Ofensivo da IA)
@@ -207,14 +208,20 @@ export class AIMilitaryManager {
     const target = this.selectExpeditionTarget();
     if (!target) return;
 
-    // Trigger audible alarm and UI battle notification (só quando o alvo é do jogador local)
-    const targetsLocal = target.ownerId === this.gm.localPlayerId;
-    if (targetsLocal && this.gm.soundManager) {
-      this.gm.soundManager.playAlarm();
-    }
-    if (targetsLocal && this.gm.uiManager) {
+    // Alarme sonoro + notificação de UI (só quando o alvo é do jogador local): F2-07, sai como
+    // evento (`UNDER_ATTACK` toca o alarme; `NOTIFY` mostra o texto) — a IA não chama
+    // `soundManager`/`uiManager` direto.
+    if (this.gm.events) {
+      const targetPos = target.mesh ? target.mesh.position : null;
+      this.gm.events.emit(EVT.UNDER_ATTACK, {
+        ownerId: target.ownerId,
+        pos: targetPos ? { x: targetPos.x, y: targetPos.y, z: targetPos.z } : { x: 0, y: 0, z: 0 }
+      });
       const factionName = this.director.faction === 'orc' ? 'Horda Orc' : 'Aliança Humana';
-      this.gm.uiManager.showNotification(`⚔️ A ${factionName} reuniu um esquadrão de guerra (${this.readySquadCount} tropas) e avança contra sua base!`);
+      this.gm.events.emit(EVT.NOTIFY, {
+        ownerId: target.ownerId,
+        text: `⚔️ A ${factionName} reuniu um esquadrão de guerra (${this.readySquadCount} tropas) e avança contra sua base!`
+      });
     }
 
     // BATCH DISPATCH (F2-02): um único comando ATTACK com todos os ids (mesmo formato do

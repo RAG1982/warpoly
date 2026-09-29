@@ -1,5 +1,10 @@
 import * as THREE from 'three';
 import { Building } from '../../Building.js';
+import { EVT } from '../../../sim/events.js';
+
+function posOf(v) {
+  return { x: v.x, y: v.y, z: v.z };
+}
 
 /**
  * OrcForge — Forja de Guerra, Armaria e Fundição da Horda Orc
@@ -75,14 +80,15 @@ export class OrcForge extends Building {
    * Acionado quando uma melhoria de ataque/defesa é forjada
    */
 
-  strikeAnvil(particleSystem) {
-    if (particleSystem) {
+  /** F2-07: `fx` vem do ouvinte de VFX ao reagir ao evento `BUILDING_VFX` (`anvil_spark`). */
+  strikeAnvil(fx) {
+    if (fx) {
       const worldPos = this.mesh.position.clone().add(this.anvilSocket);
-      particleSystem.spawnHitSparks(worldPos);
+      fx.spawnHitSparks(worldPos);
     }
   }
 
-  updateCustomVFX(delta, gameManager, soundManager, particleSystem) {
+  updateCustomVFX(delta, gameManager) {
     this.flickerTimer += delta * 14.0;
 
     // 1. Cintilação termodinâmica da fornalha
@@ -102,12 +108,13 @@ export class OrcForge extends Building {
     }
 
     // 3. Fumaça preta espessa de carvão saindo da chaminé alta
-    if (particleSystem) {
+    const gmEvents = gameManager && gameManager.events;
+    if (gmEvents) {
       this.smokeTimer += delta;
       if (this.smokeTimer >= 0.45) {
         this.smokeTimer = 0;
         const worldPos = this.mesh.position.clone().add(this.chimneySocket);
-        particleSystem.spawnSmokePuff(worldPos);
+        gmEvents.emit(EVT.BUILDING_VFX, { buildingId: this.id, ownerId: this.ownerId, pos: posOf(worldPos), kind: 'chimney_smoke' });
       }
     }
   }

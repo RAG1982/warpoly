@@ -1,6 +1,11 @@
 import * as THREE from 'three';
 import { Building } from '../../Building.js';
 import { GLTFBuildingLoader } from '../../../core/GLTFBuildingLoader.js';
+import { EVT } from '../../../sim/events.js';
+
+function posOf(v) {
+  return { x: v.x, y: v.y, z: v.z };
+}
 
 /**
  * GreatHall — Fortaleza e Centro Comunitário da Facção Orc (Tier 1)
@@ -78,7 +83,7 @@ export class GreatHall extends Building {
     return bannerGroup;
   }
 
-  updateCustomVFX(delta, gameManager, soundManager, particleSystem) {
+  updateCustomVFX(delta, gameManager) {
     this.bannerOscillationTimer += delta * 3.6;
 
     // 1. Animação procedural dos estandartes (onda senoidal simulando brisa)
@@ -102,12 +107,13 @@ export class GreatHall extends Building {
     }
 
     // 3. Emissão de fumaça da chaminé
-    if (particleSystem) {
+    const gmEvents = gameManager && gameManager.events;
+    if (gmEvents) {
       this.smokePuffTimer += delta;
       if (this.smokePuffTimer >= 0.75) {
         this.smokePuffTimer = 0;
         const worldPos = this.mesh.position.clone().add(this.chimneySocket);
-        particleSystem.spawnSmokePuff(worldPos);
+        gmEvents.emit(EVT.BUILDING_VFX, { buildingId: this.id, ownerId: this.ownerId, pos: posOf(worldPos), kind: 'chimney_smoke' });
       }
     }
   }

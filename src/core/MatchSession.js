@@ -74,6 +74,9 @@ export class MatchSession {
 
   /**
    * Um quadro da partida.
+   * F1-09: a simulação roda em passos fixos de `SIM_DT` (20 Hz) via `gameManager.advance()`;
+   * `renderUpdate()` interpola a pose visual entre o passo anterior e o atual (`alpha`) e roda
+   * a cada quadro renderizado, independente de quantos passos de simulação ocorreram nele.
    * @param {number} delta  segundos (já limitado)
    * @param {number} elapsed  tempo total do relógio da aplicação
    * @param {boolean} simulate  false no menu de pausa: câmera, água e HUD continuam
@@ -84,8 +87,12 @@ export class MatchSession {
     this.sceneManager.updateCamera(delta);
     this.water.update(elapsed);
     if (simulate) {
-      this.gameManager.update(delta);
+      const alpha = this.gameManager.advance(delta);
+      this.gameManager.renderUpdate(delta, alpha);
       this.particleSystem.update(delta);
+    } else {
+      // Pausado: mantém a pose de simulação (sem avançar), billboards seguem a câmera.
+      this.gameManager.renderUpdate(0, 1);
     }
     this.uiManager.update(delta);
   }

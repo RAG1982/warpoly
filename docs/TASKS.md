@@ -70,12 +70,12 @@ Opus escreve a spec em `docs/specs/<ID>.md`; agente **Sonnet** executa; Opus rev
 | Fase | Total | TODO | DOING | DONE |
 |---|---|---|---|---|
 | F0 Fundação | 7 | 0 | 0 | 7 |
-| F1 Desempenho | 10 | 3 | 0 | 7 |
+| F1 Desempenho | 10 | 1 | 0 | 9 |
 | F2 Núcleo | 8 | 6 | 0 | 2 |
 | F3 Jogabilidade WC2 base | 11 | 11 | 0 | 0 |
 | F4 Jogabilidade WC2 expansão | 8 | 8 | 0 | 0 |
 | F5 IA | 6 | 6 | 0 | 0 |
-| F6 HUD/UX | 9 | 8 | 0 | 1 |
+| F6 HUD/UX | 9 | 7 | 0 | 2 |
 | F7 Arte/Áudio | 11 | 10 | 0 | 1 |
 | F8 Conteúdo | 6 | 6 | 0 | 0 |
 | F9 Multiplayer | 5 | 5 | 0 | 0 |
@@ -163,9 +163,10 @@ Opus escreve a spec em `docs/specs/<ID>.md`; agente **Sonnet** executa; Opus rev
 - **Resultado**: `src/sim/SpatialGrid.js`; colisões, alvo, torre, IA, colocação, recursos e picking migrados; empurrão determinístico por id; 114 testes. `gm.update` massa300 7,19→6,85 ms (meta <4 ms não atingida: gargalo real é `Unit.update` ~4,5 ms, animação procedural por unidade) → NEW-14. Efeitos colaterais aceitos: tocos não selecionáveis; alcance de aggro/ajuda +raio da unidade-alvo (~0,6–1,2 u).
 
 ### F1-07 · Pathfinder de produção
-- **Status**: `TODO` · Lane PERF · Onda 2 · Dep: —
+- **Status**: `DONE(PR#2)` · Lane PERF · Onda 2 · Dep: —
 - **Fazer**: heap binário no open set; construções/florestas marcadas na grade (dinâmico ao construir/cortar); orçamento de N buscas por frame com fila; flow field para ordens de grupo grandes; cache de caminhos.
 - **Aceite**: unidades contornam construções sem "deslizar" (B8); 50 ordens simultâneas sem queda de FPS.
+- **Resultado**: Nuvem. Heap binário, camada de bloqueio dinâmico (construções/árvores), `requestPath` com orçamento por frame, cache; B8 e NEW-4 corrigidos. Obs.: orçamento usa `performance.now()` → não determinístico; trocar por limite de nós na F2-03.
 
 ### F1-08 · Eliminar alocações e vazamentos
 - **Status**: `DONE(70fea77)` · Lane PERF · Onda 2 · Dep: —
@@ -174,9 +175,10 @@ Opus escreve a spec em `docs/specs/<ID>.md`; agente **Sonnet** executa; Opus rev
 - **Resultado**: `FloatingTextPool.js` (pool 64 + cache LRU de texturas), pools de partículas/fumaça, template do machado compartilhado, vetores reutilizados. 10 min de combate: texturas/geometrias constantes, heap sem crescimento. combate100 36→39 FPS (1% low 11→18).
 
 ### F1-09 · Timestep fixo e interpolação
-- **Status**: `TODO` · Lane CORE · Onda 3 · Dep: F2-01
+- **Status**: `DONE(5dca95c)` · Lane CORE · Onda 3 · Dep: F2-01
 - **Fazer**: simulação a 20 Hz fixos (acumulador), render interpola posições/rotações; `gameSpeed` altera ticks por segundo.
 - **Aceite**: comportamento idêntico a 30, 60 e 144 FPS.
+- **Resultado**: `src/sim/constants.js` (SIM_DT 0,05, MAX_STEPS 8); `GameManager.advance/simStep/renderUpdate`; interpolação de unidades/projéteis; animação e VFX fora da simulação; LOD de animação por frustum/névoa/distância. Sim ms/frame massa300 5,3→3,6 ms; gameTime idêntico a 30 e 144 FPS.
 
 ### F1-10 · LOD e culling
 - **Status**: `TODO` · Lane PERF · Onda 3 · Dep: F1-02, F1-03
@@ -354,7 +356,7 @@ Opus escreve a spec em `docs/specs/<ID>.md`; agente **Sonnet** executa; Opus rev
 - `TODO` · UI · Dep: F2-04 · Escolha de facção (Aliança/Horda com prévia 3D), mapa (miniatura), 1–7 oponentes IA, times, cores, dificuldade, recursos iniciais, condição de vitória, seed.
 
 ### F6-03 · HUD responsiva estilo WC2 (corrige B11)
-- `TODO` · UI · Dep: F0-06 · Layout que funciona de 1024×768 a 4K (escala de UI); painel de seleção com retrato; seleção múltipla em grade com barras de vida; card de comandos 3×3 com atalhos visíveis; tooltips com custo, requisitos e descrição.
+- `DONE(PR#3)` · UI · Dep: F0-06 · Layout que funciona de 1024×768 a 4K (escala de UI); painel de seleção com retrato; seleção múltipla em grade com barras de vida; card de comandos 3×3 com atalhos visíveis; tooltips com custo, requisitos e descrição.
 
 ### F6-04 · Minimapa de produção
 - `TODO` · UI · Dep: F2-05, F1-05 · Renderizado a partir do mapa/terreno real, trapézio do frustum da câmera, pings de ataque, ordens por clique direito, cores de jogador.
@@ -383,6 +385,7 @@ Opus escreve a spec em `docs/specs/<ID>.md`; agente **Sonnet** executa; Opus rev
 - **Fazer**: `tools/blender/` com scripts Python (`blender -b --python build_<modelo>.py`) que modelam em bmesh (ou importam blocagem), aplicam materiais stylized, **bake** de cor/AO em atlas 512², juntam malhas por material, criam armature + actions (idle/walk/attack/gather/hurt/die) para unidades e exportam `.glb` (Draco/meshopt, KTX2 opcional) para `public/models/`. Máscara de team color no atlas. `ModelFactory` carrega `.glb` via `GLTFLoader` quando existir, com fallback para o modelo procedural atual. Inspetor lista as duas versões lado a lado.
 - **PoC**: 1 unidade (Grunt — hoje a mais pobre, 35 meshes) + 1 construção (Castelo — 487 meshes).
 - **Aceite**: Grunt ≤ 3 draw calls com animações por `AnimationMixer`; Castelo ≤ 6 draw calls; visual aprovado pelo dono comparando no inspetor; `npm run build` ok.
+- **Resultado**: Nuvem. `uiScale.js`, `hotkeys.js`, `Tooltip.js`, card 3×3 com atalhos, seleção múltipla. Validado em 1024×768: card cabe, sem cortes (B11 ok). Regressão: população mostra só o atual ("5"), sem o máximo, abaixo de 1100 px → NEW-16.
 - **Resultado**: `tools/blender/` (common.py, build_grunt.py, build_castle.py), `public/models/{grunt,castle}.glb` (meshopt+WebP), `src/entities/glbModels.js`, `?glb=1`. Grunt 35→8 draw calls, atlas 512²; Castelo 487→2 draw calls, atlas 1024². Inspetor: "Guerreiro Orc (Blender)" / "Castelo (Blender)". Aprovado pelo dono (visual e machado ok).
 
 ### F7-00b · Migração de todo o catálogo para o pipeline Blender
@@ -500,6 +503,8 @@ _(agentes adicionam aqui: `NEW-<n> · título · lane · motivo`)_
 - NEW-14 · `Unit.update` domina a CPU (~4,5 ms com 310 unidades): animação procedural roda para toda unidade todo frame. Otimizar: animar só unidades visíveis no frustum/névoa, reduzir taxa de animação por distância (LOD de animação), simulação em tick fixo 20 Hz (F1-09) · PERF
 - ✅ F1-03b · `DONE(38c013b)` unidades como SkinnedMesh rígido, 1 Skeleton por instância: knight 41→19, archer 54→25, grunt 25→12 draw calls; combate100 31→37,5 FPS, massa300 12→17 FPS. Aldeão 55→58 (nós de ferramenta)
 - NEW-15 · Meta 50 FPS em combate100 ainda não atingida (37,5): restam ~20 draw calls/unidade por muitos materiais PBR. Caminho: atlas de material por unidade (1–2 materiais) — naturalmente resolvido pela migração das unidades para o pipeline Blender (F7-00b, adiada) — e depois instancing por tipo/VAT · PERF/ART
+- ✅ BUGS-01 (PR#1, nuvem): NEW-2 reembolso IA, NEW-11 Clock→Timer/PCFShadowMap, NEW-5 materiais não usados (lint 32→25 avisos), NEW-13 fundo além do mapa escurece com a névoa
+- NEW-16 · HUD < 1100 px esconde o máximo de população (mostra "5" em vez de "5 / 10") · UI
 - NEW-1 · Avaliar uso real de `GLTFBuildingLoader` em `GreatHall.js` e remover ou adotar no pipeline Blender (F7-00) · ART · ficou fora do escopo da F0-03
 
 ## Notas de integração

@@ -8,11 +8,8 @@
  */
 import { CMD } from './commands.js';
 
-const DEV = typeof process === 'undefined' || process.env.NODE_ENV !== 'production';
-
+/** `console.warn` (sem gate de build — ver `_COMUM.md`: mais simples, sem custo em produção). */
 function warnForeign(cmd, kind, id) {
-  if (!DEV) return;
-  // eslint-disable-next-line no-console
   console.warn(`[CommandExecutor] comando '${cmd.type}' do jogador ${cmd.playerId} ignorado: ${kind} ${id} não é seu.`);
 }
 

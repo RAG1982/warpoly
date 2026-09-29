@@ -3,8 +3,6 @@ import { enableShadows } from '../materials.js';
 import {
   getOrcDarkLogBarkTextures,
   getOrcLogEndTextures,
-  getOrcSplitRoofTextures,
-  getOrcSpikedIronTextures,
   getOrcBoneTuskTextures,
   getOrcHordeBannerTextures,
   getOrcBasaltStoneTextures,
@@ -47,8 +45,6 @@ export function createOrcWatchtower() {
 
   const barkMat = createPBRMaterial(getOrcDarkLogBarkTextures(), { bumpScale: 0.08 });
   const logEndMat = createPBRMaterial(getOrcLogEndTextures(), { bumpScale: 0.06 });
-  const ironRoofMat = createPBRMaterial(getOrcSplitRoofTextures(), { bumpScale: 0.08, metalness: 0.8 });
-  const ironArmorMat = createPBRMaterial(getOrcSpikedIronTextures(), { bumpScale: 0.06, metalness: 0.9 });
   const boneMat = createPBRMaterial(getOrcBoneTuskTextures(), { bumpScale: 0.05, roughness: 0.45 });
   const bannerMat = createPBRMaterial(getOrcHordeBannerTextures(), { bumpScale: 0.04, side: THREE.DoubleSide });
   const stoneMat = createPBRMaterial(getOrcBasaltStoneTextures(), { bumpScale: 0.08 });

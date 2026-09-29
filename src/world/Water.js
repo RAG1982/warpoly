@@ -4,6 +4,7 @@ import {
   getCattailLotusTextures
 } from '../models/environment/waterTextures.js';
 import { enableShadows } from '../models/materials.js';
+import { markFogGround } from '../render/fogOfWarShader.js';
 
 /**
  * Next-Gen Stylized Water & Shoreline System for WarPoly
@@ -36,7 +37,10 @@ export class Water {
    * 1. Deep Water Base Plane (Abyssal sapphire / ocean navy foundation)
    */
   createDeepWaterBase() {
-    const geo = new THREE.PlaneGeometry(180, 180, 8, 8);
+    // Estende bem além do mapa (±250 u) para que, com a câmera olhando para fora da área
+    // jogável, a névoa de guerra escureça esse "oceano distante" em vez de mostrar o
+    // scene.background azul do céu na borda (NEW-13).
+    const geo = new THREE.PlaneGeometry(500, 500, 8, 8);
     geo.rotateX(-Math.PI / 2);
 
     const mat = new THREE.MeshStandardMaterial({
@@ -45,6 +49,7 @@ export class Water {
       metalness: 0.08,
       flatShading: true
     });
+    markFogGround(mat);
 
     this.deepWaterMesh = new THREE.Mesh(geo, mat);
     this.deepWaterMesh.position.y = -1.8;

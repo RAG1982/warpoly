@@ -87,13 +87,6 @@ export function createArcher() {
     flatShading: true
   });
 
-  const beardMat = new THREE.MeshStandardMaterial({
-    color: 0x6b4c28,
-    roughness: 0.85,
-    metalness: 0.0,
-    flatShading: true
-  });
-
   const emeraldGemMat = new THREE.MeshStandardMaterial({
     color: 0x10b981,
     emissive: 0x047857,

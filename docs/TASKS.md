@@ -60,6 +60,7 @@ Opus escreve a spec em `docs/specs/<ID>.md`; agente **Sonnet** executa; Opus rev
 | `docs/specs/F2-02-sistema-comandos.md` | F2-02 — **DONE** | sonnet |
 | `docs/specs/F2-03-determinismo.md` | F2-03 + B14 — **DONE** | sonnet (local) |
 | `docs/specs/F2-07-event-bus.md` | F2-07 + B13 — **DONE** | sonnet (local) |
+| `docs/specs/F2-05-mapas-dados.md` | F2-05 + B16 | sonnet (local) |
 | `docs/specs/F3-01-controles-rts.md` | F3-01 + NEW-16 — **nuvem** | sonnet (claude.ai/code) |
 | `docs/specs/F6-08-opcoes.md` | F6-08 — **nuvem**, após F3-01 | sonnet (claude.ai/code) |
 | `docs/specs/BUGS-01-pequenos.md` | NEW-2, NEW-11, NEW-5, NEW-13 — **nuvem** (ver `docs/HANDOFF_CLOUD.md`) | sonnet (claude.ai/code) |
@@ -218,7 +219,7 @@ Opus escreve a spec em `docs/specs/<ID>.md`; agente **Sonnet** executa; Opus rev
 - **Resultado**: `GameStateMachine.js` + `MatchSession.js` + `PauseMenu.js`; menu → partida → pausa → fim → jogar de novo sem reload; teste de vazamento (5 partidas) estável; 2ª partida carrega em ~2,6 s; B7 corrigido.
 
 ### F2-05 · Mapas orientados a dados
-- **Status**: `TODO` · Lane CORE + CONTENT · Onda 3 · Dep: F2-01
+- **Status**: `DOING(sonnet, 2026-09-29)` · Lane CORE + CONTENT · Onda 3 · Dep: F2-01
 - **Fazer**: formato `src/data/maps/<id>.json` (tamanho, tileset, heightmap ou parâmetros, água, vaus/pontes, posições iniciais 2–8, minas, florestas, neutros, decorações). `Terrain`, `Pathfinder`, minimapa e spawns leem do mapa. Converter o mapa atual em `continental-1v1.json`.
 - **Aceite**: nenhuma coordenada de mapa hardcoded em `GameManager`/`Terrain`/`UIManager` (B16).
 

@@ -105,6 +105,9 @@ export class Pathfinder {
     this._pathCache = new Map();
     /** Fila de pedidos de caminho pendentes (`requestPath`), resolvidos por `processQueue`. */
     this._queue = [];
+    // F2-03: nós expandidos pela última `_searchAStar` (0 nos caminhos rápidos: LOS direto,
+    // mesma célula, cache) — usado por `processQueue` para um orçamento por nós, não por relógio.
+    this._lastNodesExpanded = 0;
 
     this.buildGrid();
   }
@@ -324,6 +327,7 @@ export class Pathfinder {
 
     // Fast-path: Direct Line of Sight without crossing water/obstacles
     if (this.hasLineOfSight(startX, startZ, destX, destZ)) {
+      this._lastNodesExpanded = 0;
       return [{ x: destX, z: destZ }];
     }
 
@@ -336,6 +340,7 @@ export class Pathfinder {
     const destIndex = dest.r * this.cols + dest.c;
 
     if (startIndex === destIndex) {
+      this._lastNodesExpanded = 0;
       return [{ x: destX, z: destZ }];
     }
 
@@ -347,6 +352,7 @@ export class Pathfinder {
       this._pathCache.set(cacheKey, cached);
       const path = cached.map(p => ({ x: p.x, z: p.z }));
       path[path.length - 1] = { x: destX, z: destZ };
+      this._lastNodesExpanded = 0;
       return path;
     }
 
@@ -429,6 +435,8 @@ export class Pathfinder {
       }
     }
 
+    this._lastNodesExpanded = iterations;
+
     if (!foundDest) {
       // Fallback: direct destination point
       return [{ x: destX, z: destZ }];
@@ -478,18 +486,22 @@ export class Pathfinder {
   }
 
   /**
-   * Resolve pedidos enfileirados em `requestPath` até estourar o orçamento `maxMs` (medido com
-   * `performance.now()`); o restante fica para a próxima chamada (chamado uma vez por passo de
-   * simulação). Pedidos de unidades já mortas/removidas são descartados sem chamar o callback.
-   * @param {number} maxMs
+   * Resolve pedidos enfileirados em `requestPath` até estourar o orçamento `maxNodes` (soma de
+   * nós de grade expandidos pelo A* nesta chamada — não por relógio: `performance.now()` varia
+   * por máquina e quebraria o determinismo do F2-03); o restante fica para a próxima chamada
+   * (chamado uma vez por passo de simulação). Pedidos de unidades já mortas/removidas são
+   * descartados sem chamar o callback. Sempre resolve ao menos 1 pedido, mesmo que ele sozinho
+   * já ultrapasse `maxNodes` (evita fila crescendo sem nunca ser atendida).
+   * @param {number} maxNodes
    */
-  processQueue(maxMs = 2) {
-    const startTime = performance.now();
-    while (this._queue.length > 0 && (performance.now() - startTime) < maxMs) {
+  processQueue(maxNodes = 4000) {
+    let nodesUsed = 0;
+    while (this._queue.length > 0 && nodesUsed < maxNodes) {
       const req = this._queue.shift();
       if (!req.unit || req.unit.isDead || req.unit.canRemove) continue;
       const pos = req.unit.mesh.position;
       const path = this.findPath(pos.x, pos.z, req.destX, req.destZ);
+      nodesUsed += this._lastNodesExpanded;
       req.callback(path);
     }
   }

@@ -12,6 +12,7 @@ import {
 } from '../entities/buildings/orc/index.js';
 import { Tree } from '../entities/Tree.js';
 import { ResourceDeposit } from '../entities/ResourceDeposit.js';
+import { ModelFactory } from '../entities/ModelFactory.js';
 import { FogOfWar } from './FogOfWar.js';
 import { AIDirector } from '../ai/AIDirector.js';
 import { TreeManager } from '../world/TreeManager.js';
@@ -34,6 +35,8 @@ import { SIM_DT, MAX_STEPS, animationLodStep } from '../sim/constants.js';
 import { CMD, makeCommand } from '../sim/commands.js';
 import { CommandQueue, COMMAND_DELAY_TICKS } from '../sim/CommandQueue.js';
 import { CommandExecutor } from '../sim/CommandExecutor.js';
+import { createRng } from '../sim/rng.js';
+import { recordChecksum } from '../sim/checksum.js';
 
 const EMPTY_LIST = Object.freeze([]);
 
@@ -61,9 +64,18 @@ export class GameManager {
 
     // Configuração da partida e jogadores (F2-01). Economia/pop/pesquisas vivem em Player.
     this.matchConfig = validateMatchConfig(matchConfig || createMatchConfig());
+    // F2-03: partida headless (testes de determinismo em Node, sem DOM/WebGL) — nenhuma malha
+    // procedural (textura em canvas) é criada; ver ModelFactory.getOrCreateModel.
+    this.headless = !!this.matchConfig.headless;
+    ModelFactory.headless = this.headless;
     /** @type {PlayerRegistry} */
     this.playerRegistry = new PlayerRegistry();
     this._localPlayerId = 0;
+
+    // F2-03: RNG de simulação — determinístico, derivado da seed da partida. Tudo que altera
+    // estado de jogo usa `this.rng` (ou um fork dele); RNG visual (Math.random) continua livre.
+    this.rng = createRng(this.matchConfig.seed);
+    this.rngMap = this.rng.fork('map');
 
     // IDs de entidade (F2-01): id numérico estável + ownerId em toda entidade.
     this.entityRegistry = new EntityRegistry();
@@ -105,6 +117,9 @@ export class GameManager {
     // no tick `currentTick + COMMAND_DELAY_TICKS` (0 agora — ver src/sim/CommandQueue.js).
     this.commands = new CommandQueue();
     this.currentTick = 0;
+    // F2-03: checksum de estado (src/sim/checksum.js) a cada 20 ticks — últimos 100 (teste de
+    // determinismo/replay). Não inclui nada visual.
+    this.checksums = [];
 
     // Fog of War (covers 160x160 continent)
     this.fogOfWar = new FogOfWar(this.scene, 160, 160);
@@ -345,6 +360,10 @@ export class GameManager {
   /** Recria o mapa com uma nova MatchConfig e centraliza a câmera na base do jogador local. */
   startMatch(matchConfig) {
     this.matchConfig = validateMatchConfig(matchConfig);
+    this.headless = !!this.matchConfig.headless;
+    ModelFactory.headless = this.headless;
+    this.rng = createRng(this.matchConfig.seed);
+    this.rngMap = this.rng.fork('map');
     this.resetMap();
     this.focusCameraOnLocalBase();
   }
@@ -388,6 +407,7 @@ export class GameManager {
     this.blockerGrid.clear();
     this.commands = new CommandQueue();
     this.currentTick = 0;
+    this.checksums = [];
 
     // Reset Fog of War shroud
     if (this.fogOfWar) {
@@ -563,8 +583,8 @@ export class GameManager {
 
       while (placed < targetCount && attempts < maxAttempts) {
         attempts++;
-        const ang = Math.random() * Math.PI * 2;
-        const dist = 2.0 + Math.random() * radius;
+        const ang = this.rngMap.next() * Math.PI * 2;
+        const dist = 2.0 + this.rngMap.next() * radius;
         const x = centerX + Math.cos(ang) * dist;
         const z = centerZ + Math.sin(ang) * dist;
         const h = this.terrain.getHeight(x, z);
@@ -601,8 +621,8 @@ export class GameManager {
         });
         if (tooCloseToTree) continue;
 
-        const type = Math.random() < 0.65 ? preferredType : treeTypes[Math.floor(Math.random() * treeTypes.length)];
-        this.trees.push(this.registerEntity(new Tree(this.scene, this.terrain, x, z, type, this.treeManager)));
+        const type = this.rngMap.next() < 0.65 ? preferredType : this.rngMap.pick(treeTypes);
+        this.trees.push(this.registerEntity(new Tree(this.scene, this.terrain, x, z, type, this.treeManager, this.rngMap)));
         placed++;
       }
     };
@@ -1216,7 +1236,8 @@ export class GameManager {
     if (this._updateVictoryConditions()) return;
 
     // Orçamento de A* por passo de simulação (F1-07): resolve pedidos pendentes de requestPath.
-    if (this.pathfinder) this.pathfinder.processQueue(2);
+    // F2-03: orçamento por nós expandidos (não por relógio) — mesmo limite em todas as máquinas.
+    if (this.pathfinder) this.pathfinder.processQueue(4000);
 
     // Update Trees (árvore cortada — isDead/woodRemaining <= 0 — sai do blockerGrid; remove()
     // é no-op se já não estiver na grade, então repetir o teste em árvores já cortadas é barato)
@@ -1312,6 +1333,9 @@ export class GameManager {
         if (owner) owner.recalculatePop(this);
       }
     }
+
+    // F2-03: checksum de estado a cada 20 ticks (teste de determinismo/replay).
+    if (this.currentTick % 20 === 0) recordChecksum(this);
   }
 
   /**

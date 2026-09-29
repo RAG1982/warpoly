@@ -34,7 +34,7 @@ Causas raiz, em ordem de impacto:
 | B5 | Construções ignoram armadura; upgrades de defesa não afetam construções/torres | `Building.takeDamage` |
 | B6 | Assimetria: Chiqueiro dá +5 pop e ouro, Fazenda humana só ouro; humanos sem 3ª unidade militar | configs |
 | B7 | ~~`resetMap` não reseta pesquisas, projéteis, `gameTime`, filas; reinício real exige `location.reload()`~~ **Corrigido (F2-04)**: cada partida é uma `MatchSession` descartável criada do zero a partir da `MatchConfig`; Reiniciar/Jogar novamente/Menu não recarregam a página | `GameManager.resetMap`, `UIManager` |
-| B8 | Pathfinding ignora construções e árvores → unidades "deslizam" empurradas e travam em bases | `Pathfinder.buildGrid` |
+| B8 | ~~Pathfinding ignora construções e árvores → unidades "deslizam" empurradas e travam em bases~~ **Corrigido na F1-07**: camada dinâmica (`dynamicBlock`) marcada por `GameManager` em `blockCircle`; A* contorna construções e árvores vivas | `Pathfinder.blockCircle` |
 | B9 | IA onisciente (lê posições reais do jogador ignorando névoa) | `ai/*` |
 | B10 | Não é possível selecionar/inspecionar unidades inimigas | `GameManager.selectSingle` |
 | B11 | HUD inferior cortada em 1024×768 (card de seleção sai da tela, minimapa sobreposto) | `style.css` |

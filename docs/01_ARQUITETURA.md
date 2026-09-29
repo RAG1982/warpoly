@@ -33,7 +33,9 @@ src/
     GameManager.js            Estado do jogo, spawn, seleção, ordens, colisões, vitória/derrota (GOD OBJECT)
     SceneManager.js           Cena, renderer, luzes, câmera RTS (pan/zoom/rotação), dia/pôr-do-sol/noite
     InputManager.js           Mouse/teclado, raycast, caixa de seleção, fantasma de construção
-    Pathfinder.js             Grade 1.5u, A* (open set em array linear), string-pulling; só considera ÁGUA
+    Pathfinder.js             Grade 1.5u, A* com heap binário (MinHeap) + camada dinâmica (dynamicBlock:
+                              construções/árvores vivas, além da água), string-pulling, fila com orçamento
+                              por frame (requestPath/processQueue) e cache de caminhos por par de células (F1-07)
     FogOfWar.js               Grade 128², canvas → textura num plano a y=5.2
     UpgradeConfig.js          4 pesquisas da forja
     AssetPreloader.js         Constrói e compila todos os modelos/texturas antes do jogo (~35 itens)
@@ -199,6 +201,13 @@ animate() [rAF da aplicação, delta máx 0.1s; sem sessão (menu/loading) não 
 - Usos: `resolveBuildingCollisions`/`resolveUnitCollisions`/`_checkUnitBlockerCollision` (colisão), `Unit.findNearestHostile*`/`takeDamage` (alvo/aggro/ajuda), `Building` torre (`gm.unitGrid.nearest`), `AIDirector`/`AIMilitaryManager` (intrusos na base), `canPlaceBuilding`/`findNearestResource`/`findNearestDropoff` (colocação/coleta) e `InputManager.raycastScene` (picking do mouse, só as entidades perto do ponto do chão em vez de todas as meshes do jogo).
 - `resolveUnitCollisions` resolve cada par uma única vez comparando `id` (só o de maior `id` processa o par), e o empurrão em colisão exata (`dist < 0.001`) usa um ângulo determinístico derivado dos ids das duas unidades em vez de `Math.random()`.
 - DÍVIDA: o alcance efetivo de `queryRadius` cresce com o maior raio já visto pela grade (`SpatialGrid.maxRadius`, nunca diminui); em mapas com poucas construções grandes (castelo) isso alarga um pouco a busca em `resolveBuildingCollisions`/`canPlaceBuilding` — aceitável hoje, revisar se algum mapa futuro tiver construções muito maiores.
+
+### Pathfinder (F1-07)
+- Duas camadas por célula (grade 1,5u): `staticGrid` (água/bordas, do heightmap do terreno, imutável) e `dynamicBlock` (`Uint16Array`, contador de bloqueios sobrepostos); caminhável = `staticGrid===1 && dynamicBlock===0`. `GameManager._insertIntoGrid`/`_removeFromGrid` chamam `pathfinder.blockCircle(x, z, collisionRadius, ±1)` para Building/Tree viva (árvore cortada é desbloqueada no próprio loop de `trees.forEach`); `blockCircle` usa `radius - 0.3` para não fechar passagens estreitas e incrementa `version` (invalida o cache).
+- A* usa `MinHeap` (heap binário, arrays tipados) em vez do antigo open set em array linear (O(log n) por push/pop em vez de O(n) por scan); entradas obsoletas (chave desatualizada) são descartadas via `closedSet` na hora do pop, sem precisar de decrease-key.
+- Origem sempre tratada como caminhável (mesmo com `dynamicBlock` na própria célula — unidade encostada numa construção não fica sem caminho); destino bloqueado usa `findNearestWalkable` considerando as duas camadas. `hasLineOfSight` com pontos coincidentes (`dist ~0`) devolve o estado caminhável do próprio ponto em vez de `NaN` (NEW-4).
+- Fila com orçamento por frame: `requestPath(unit, destX, destZ, callback)` enfileira; `GameManager.update` chama `processQueue(2)` uma vez por passo, resolvendo pedidos até estourar ~2 ms (`performance.now()`); o resto fica para o próximo frame. `Unit.moveTo`/`moveTowards` usam `requestPath` (nunca `findPath` direto); enquanto o pedido está pendente a unidade anda reto se tiver linha de visão e fica parada caso contrário (não cancela a ordem).
+- Cache de caminhos por `(célula origem, célula destino, version)`, limite de 256 entradas (LRU simples via `Map`); só cobre a busca A* completa (o atalho de linha de visão direta já é O(passos), não precisa de cache).
 
 ### Dívidas registradas (F2-01)
 - **Getter `faction`** em `Unit`/`Building`: `'player'` se o dono é o jogador local, `'enemy'` caso contrário. Mantido para `UIManager`, `InputManager` e o anel de seleção. Lógica nova deve usar `ownerId` + `isHostile/isAlly`. Remover quando a UI/Input migrarem (F6/F2-02).

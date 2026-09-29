@@ -1,16 +1,73 @@
 /**
  * Pathfinder.js (Sistema de Navegação e Pathfinding da Grade de Terreno)
- * 
+ *
  * Garante que unidades terrestres NÃO possam atravessar rios ou oceanos e encontrem
  * rotas seguras através dos vãos e pontes de terra (North Ford, Center Ford, South Ford).
- * 
+ *
  * Características:
  * 1. Grade 2D estática de navegação baseada na elevação do terreno (área jogável [-58, 58]).
  * 2. Barreira estrita de água: qualquer ponto com altura < 0.65 é considerado água intransponível.
- * 3. Teste rápido de Linha de Visada (Line of Sight - LOS) para movimentos diretos em O(1).
- * 4. A* otimizado com arrays tipados para desvio inteligente de rios através das travessias.
- * 5. String-pulling (suavização de caminho) para remover zig-zag e criar trajetos naturais.
+ * 3. Camada dinâmica (`dynamicBlock`): contador de bloqueios por célula (construções, árvores vivas)
+ *    somado à camada estática — uma célula só é caminhável se as duas permitirem (F1-07).
+ * 4. Teste rápido de Linha de Visada (Line of Sight - LOS) para movimentos diretos em O(1).
+ * 5. A* com heap binário e arrays tipados para desvio inteligente de rios/obstáculos (F1-07).
+ * 6. String-pulling (suavização de caminho) para remover zig-zag e criar trajetos naturais.
+ * 7. Fila de pedidos com orçamento por frame (`requestPath`/`processQueue`) e cache de caminhos
+ *    recentes (por par de células + versão da camada dinâmica).
  */
+
+/** Heap binário mínimo, com arrays tipados, usado pelo A* (chave = prioridade/fScore). */
+export class MinHeap {
+  constructor(capacity) {
+    this.priorities = new Float32Array(capacity);
+    this.items = new Int32Array(capacity);
+    this.size = 0;
+  }
+
+  clear() {
+    this.size = 0;
+  }
+
+  push(item, priority) {
+    let i = this.size++;
+    this.items[i] = item;
+    this.priorities[i] = priority;
+    while (i > 0) {
+      const parent = (i - 1) >> 1;
+      if (this.priorities[parent] <= this.priorities[i]) break;
+      this._swap(parent, i);
+      i = parent;
+    }
+  }
+
+  pop() {
+    const top = this.items[0];
+    this.size--;
+    if (this.size > 0) {
+      this.items[0] = this.items[this.size];
+      this.priorities[0] = this.priorities[this.size];
+      let i = 0;
+      for (;;) {
+        const l = i * 2 + 1;
+        const r = l + 1;
+        let smallest = i;
+        if (l < this.size && this.priorities[l] < this.priorities[smallest]) smallest = l;
+        if (r < this.size && this.priorities[r] < this.priorities[smallest]) smallest = r;
+        if (smallest === i) break;
+        this._swap(smallest, i);
+        i = smallest;
+      }
+    }
+    return top;
+  }
+
+  _swap(a, b) {
+    const ti = this.items[a]; this.items[a] = this.items[b]; this.items[b] = ti;
+    const tp = this.priorities[a]; this.priorities[a] = this.priorities[b]; this.priorities[b] = tp;
+  }
+}
+
+const PATH_CACHE_LIMIT = 256;
 
 export class Pathfinder {
   /**
@@ -28,15 +85,26 @@ export class Pathfinder {
     this.rows = this.cols;
     this.numCells = this.cols * this.rows;
 
-    // 0 = Impassable (Water / Outer Abyss), 1 = Walkable Dry Land
-    this.grid = new Uint8Array(this.numCells);
+    // 0 = Impassable (Water / Outer Abyss), 1 = Walkable Dry Land (camada estática, do terreno)
+    this.staticGrid = new Uint8Array(this.numCells);
+    // Contador de bloqueios dinâmicos (construções, árvores vivas) por célula (F1-07).
+    this.dynamicBlock = new Uint16Array(this.numCells);
+    // Incrementada a cada mudança na camada dinâmica; invalida o cache de caminhos.
+    this.version = 0;
 
     // Pre-allocated A* buffers to eliminate GC churn during path queries
     this.gScore = new Float32Array(this.numCells);
     this.fScore = new Float32Array(this.numCells);
     this.cameFrom = new Int32Array(this.numCells);
     this.closedSet = new Uint8Array(this.numCells);
-    this.openSet = [];
+    // Capacidade generosa: uma célula pode ser empurrada de novo a cada relaxamento (até 8
+    // vizinhos por nó expandido); entradas obsoletas são descartadas na hora do pop (ver closedSet).
+    this._heap = new MinHeap(this.numCells * 8 + 8);
+
+    /** Cache de caminhos recentes: chave "startIdx|destIdx|version" → waypoints (limite 256). */
+    this._pathCache = new Map();
+    /** Fila de pedidos de caminho pendentes (`requestPath`), resolvidos por `processQueue`. */
+    this._queue = [];
 
     this.buildGrid();
   }
@@ -55,9 +123,9 @@ export class Pathfinder {
         // Dry land above water table (water level = 0.5; dry land threshold >= 0.68)
         // and strictly within continental borders (maxCoord < 55)
         if (h >= 0.68 && maxCoord < 55) {
-          this.grid[r * this.cols + c] = 1;
+          this.staticGrid[r * this.cols + c] = 1;
         } else {
-          this.grid[r * this.cols + c] = 0;
+          this.staticGrid[r * this.cols + c] = 0;
         }
       }
     }
@@ -65,8 +133,8 @@ export class Pathfinder {
 
   /**
    * Checks whether a specific world coordinate is in water
-   * @param {number} x 
-   * @param {number} z 
+   * @param {number} x
+   * @param {number} z
    * @returns {boolean}
    */
   isWater(x, z) {
@@ -76,8 +144,8 @@ export class Pathfinder {
 
   /**
    * Maps world coordinates (x, z) to grid coordinates (c, r)
-   * @param {number} x 
-   * @param {number} z 
+   * @param {number} x
+   * @param {number} z
    * @returns {{ c: number, r: number }}
    */
   toGrid(x, z) {
@@ -91,8 +159,8 @@ export class Pathfinder {
 
   /**
    * Maps grid coordinates (c, r) to center world coordinates (x, z)
-   * @param {number} c 
-   * @param {number} r 
+   * @param {number} c
+   * @param {number} r
    * @returns {{ x: number, z: number }}
    */
   toWorld(c, r) {
@@ -103,20 +171,63 @@ export class Pathfinder {
   }
 
   /**
-   * Verifies if a cell is walkable dry land
-   * @param {number} c 
-   * @param {number} r 
+   * Verifica se uma célula é caminhável: terreno seco (camada estática) E sem bloqueio
+   * dinâmico (construção/árvore viva) por cima (F1-07).
+   * @param {number} c
+   * @param {number} r
    * @returns {boolean}
    */
   isWalkable(c, r) {
     if (c < 0 || c >= this.cols || r < 0 || r >= this.rows) return false;
-    return this.grid[r * this.cols + c] === 1;
+    const i = r * this.cols + c;
+    return this.staticGrid[i] === 1 && this.dynamicBlock[i] === 0;
+  }
+
+  /** Caminhável no ponto do mundo (x, z): nem água nem bloqueio dinâmico. */
+  isWalkableWorld(x, z) {
+    if (this.isWater(x, z)) return false;
+    const { c, r } = this.toGrid(x, z);
+    return this.isWalkable(c, r);
+  }
+
+  /**
+   * Marca/desmarca um círculo de células como bloqueadas dinamicamente (construções, árvores
+   * vivas). `delta` é tipicamente +1 (bloquear) ou -1 (desbloquear); o contador por célula
+   * suporta sobreposição de vários bloqueadores. Usa `radius - 0.3` para não fechar passagens
+   * estreitas entre construções vizinhas. Incrementa `version` (invalida o cache de caminhos).
+   * @param {number} x
+   * @param {number} z
+   * @param {number} radius
+   * @param {1|-1} delta
+   */
+  blockCircle(x, z, radius, delta) {
+    const effRadius = radius - 0.3;
+    if (effRadius <= 0) return;
+    const center = this.toGrid(x, z);
+    const cellRadius = Math.ceil(effRadius / this.cellSize) + 1;
+    const rSq = effRadius * effRadius;
+
+    for (let dr = -cellRadius; dr <= cellRadius; dr++) {
+      const nr = center.r + dr;
+      if (nr < 0 || nr >= this.rows) continue;
+      for (let dc = -cellRadius; dc <= cellRadius; dc++) {
+        const nc = center.c + dc;
+        if (nc < 0 || nc >= this.cols) continue;
+        const w = this.toWorld(nc, nr);
+        const dSq = (w.x - x) ** 2 + (w.z - z) ** 2;
+        if (dSq > rSq) continue;
+        const i = nr * this.cols + nc;
+        const next = this.dynamicBlock[i] + delta;
+        this.dynamicBlock[i] = next < 0 ? 0 : next;
+      }
+    }
+    this.version++;
   }
 
   /**
    * Snaps a coordinate in water to the nearest walkable land tile
-   * @param {number} x 
-   * @param {number} z 
+   * @param {number} x
+   * @param {number} z
    * @returns {{ x: number, z: number }}
    */
   findNearestWalkable(x, z) {
@@ -148,14 +259,18 @@ export class Pathfinder {
 
   /**
    * Checks whether the direct line segment between two points is entirely on dry land
-   * @param {number} x0 
-   * @param {number} z0 
-   * @param {number} x1 
-   * @param {number} z1 
+   * and free of dynamic obstacles.
+   * @param {number} x0
+   * @param {number} z0
+   * @param {number} x1
+   * @param {number} z1
    * @returns {boolean}
    */
   hasLineOfSight(x0, z0, x1, z1) {
     const dist = Math.hypot(x1 - x0, z1 - z0);
+    // Pontos coincidentes (dist ~0): sem segmento a testar, só o próprio ponto (NEW-4).
+    if (dist < 1e-6) return this.isWalkableWorld(x0, z0);
+
     const stepSize = this.cellSize * 0.45;
     const steps = Math.ceil(dist / stepSize);
 
@@ -167,7 +282,7 @@ export class Pathfinder {
       // 1. Direct height check
       if (this.isWater(x, z)) return false;
 
-      // 2. Grid cell check
+      // 2. Grid cell check (camada estática + dinâmica)
       const { c, r } = this.toGrid(x, z);
       if (!this.isWalkable(c, r)) return false;
     }
@@ -176,52 +291,91 @@ export class Pathfinder {
   }
 
   /**
-   * Computes an optimal, smoothed path of waypoints avoiding water obstacles
-   * @param {number} startX 
-   * @param {number} startZ 
-   * @param {number} destX 
-   * @param {number} destZ 
+   * Computes an optimal, smoothed path of waypoints avoiding water and dynamic obstacles.
+   * A origem é sempre tratada como caminhável, mesmo se um bloqueio dinâmico cobrir a célula
+   * onde a unidade já está parada (encostada numa construção) — evita ficar sem caminho.
+   * @param {number} startX
+   * @param {number} startZ
+   * @param {number} destX
+   * @param {number} destZ
    * @returns {Array<{ x: number, z: number }>}
    */
   findPath(startX, startZ, destX, destZ) {
-    // Snap destination to nearest land if clicked in water
-    if (this.isWater(destX, destZ)) {
+    const start = this.toGrid(startX, startZ);
+    const startIndex = start.r * this.cols + start.c;
+
+    // Trata a célula de origem como livre (unidade pode estar encostada num bloqueio dinâmico).
+    const startBlockCount = this.dynamicBlock[startIndex];
+    if (startBlockCount > 0) this.dynamicBlock[startIndex] = 0;
+    try {
+      return this._findPath(startX, startZ, destX, destZ, start, startIndex);
+    } finally {
+      if (startBlockCount > 0) this.dynamicBlock[startIndex] = startBlockCount;
+    }
+  }
+
+  _findPath(startX, startZ, destX, destZ, start, startIndex) {
+    // Snap destination to nearest land/free tile if clicked in water or sobre um bloqueio
+    if (!this.isWalkableWorld(destX, destZ)) {
       const snapped = this.findNearestWalkable(destX, destZ);
       destX = snapped.x;
       destZ = snapped.z;
     }
 
-    // Fast-path: Direct Line of Sight without crossing water
+    // Fast-path: Direct Line of Sight without crossing water/obstacles
     if (this.hasLineOfSight(startX, startZ, destX, destZ)) {
       return [{ x: destX, z: destZ }];
     }
 
-    const start = this.toGrid(startX, startZ);
     let dest = this.toGrid(destX, destZ);
-
     if (!this.isWalkable(dest.c, dest.r)) {
       const snapped = this.findNearestWalkable(destX, destZ);
       dest = this.toGrid(snapped.x, snapped.z);
     }
 
-    const startIndex = start.r * this.cols + start.c;
     const destIndex = dest.r * this.cols + dest.c;
 
     if (startIndex === destIndex) {
       return [{ x: destX, z: destZ }];
     }
 
-    // Reset A* arrays
+    const cacheKey = `${startIndex}|${destIndex}|${this.version}`;
+    const cached = this._pathCache.get(cacheKey);
+    if (cached) {
+      // Reordena para o fim (LRU) e devolve uma cópia com o destino exato pedido.
+      this._pathCache.delete(cacheKey);
+      this._pathCache.set(cacheKey, cached);
+      const path = cached.map(p => ({ x: p.x, z: p.z }));
+      path[path.length - 1] = { x: destX, z: destZ };
+      return path;
+    }
+
+    const smoothPath = this._searchAStar(start, dest, startIndex, destIndex, destX, destZ);
+
+    if (this._pathCache.size >= PATH_CACHE_LIMIT) {
+      const oldestKey = this._pathCache.keys().next().value;
+      this._pathCache.delete(oldestKey);
+    }
+    this._pathCache.set(cacheKey, smoothPath.map(p => ({ x: p.x, z: p.z })));
+
+    // Replace final waypoint with exact destination coordinates
+    smoothPath[smoothPath.length - 1] = { x: destX, z: destZ };
+    return smoothPath;
+  }
+
+  /** Busca A* com heap binário; devolve o caminho suavizado (string-pulling) até `dest`. */
+  _searchAStar(start, dest, startIndex, destIndex, destX, destZ) {
+    // Reset A* buffers
     this.gScore.fill(Infinity);
     this.fScore.fill(Infinity);
     this.cameFrom.fill(-1);
     this.closedSet.fill(0);
-    this.openSet.length = 0;
+    this._heap.clear();
 
     this.gScore[startIndex] = 0;
     const h = (c, r) => Math.hypot(c - dest.c, r - dest.r);
     this.fScore[startIndex] = h(start.c, start.r);
-    this.openSet.push(startIndex);
+    this._heap.push(startIndex, this.fScore[startIndex]);
 
     // 8-direction movement deltas: [dc, dr, cost]
     const dirs = [
@@ -233,27 +387,17 @@ export class Pathfinder {
     let iterations = 0;
     const maxIterations = 3200;
 
-    while (this.openSet.length > 0 && iterations < maxIterations) {
+    while (this._heap.size > 0 && iterations < maxIterations) {
       iterations++;
 
-      // Pop lowest fScore
-      let bestIdx = 0;
-      let bestF = this.fScore[this.openSet[0]];
-      for (let i = 1; i < this.openSet.length; i++) {
-        const f = this.fScore[this.openSet[i]];
-        if (f < bestF) {
-          bestF = f;
-          bestIdx = i;
-        }
-      }
+      const current = this._heap.pop();
+      if (this.closedSet[current]) continue; // entrada obsoleta (chave antiga já reprocessada)
 
-      const current = this.openSet[bestIdx];
       if (current === destIndex) {
         foundDest = true;
         break;
       }
 
-      this.openSet.splice(bestIdx, 1);
       this.closedSet[current] = 1;
 
       const curC = current % this.cols;
@@ -268,7 +412,7 @@ export class Pathfinder {
         const neighbor = nr * this.cols + nc;
         if (this.closedSet[neighbor] || !this.isWalkable(nc, nr)) continue;
 
-        // Diagonal corner-cutting prevention across water boundaries
+        // Diagonal corner-cutting prevention across water/obstacle boundaries
         if (d >= 4) {
           if (!this.isWalkable(curC + dirs[d][0], curR) || !this.isWalkable(curC, curR + dirs[d][1])) {
             continue;
@@ -280,10 +424,7 @@ export class Pathfinder {
           this.cameFrom[neighbor] = current;
           this.gScore[neighbor] = tentativeG;
           this.fScore[neighbor] = tentativeG + h(nc, nr);
-
-          if (!this.openSet.includes(neighbor)) {
-            this.openSet.push(neighbor);
-          }
+          this._heap.push(neighbor, this.fScore[neighbor]);
         }
       }
     }
@@ -320,8 +461,36 @@ export class Pathfinder {
       currentIdx = furthest;
     }
 
-    // Replace final waypoint with exact destination coordinates
-    smoothPath[smoothPath.length - 1] = { x: destX, z: destZ };
     return smoothPath;
+  }
+
+  /**
+   * Enfileira um pedido de caminho para ser resolvido em `processQueue` (orçamento por frame).
+   * `unit` precisa expor `mesh.position.{x,z}`, lida no momento do processamento (não agora),
+   * para refletir a posição atual mesmo se a unidade se mover enquanto espera na fila.
+   * @param {{ mesh: { position: { x: number, z: number } }, isDead?: boolean, canRemove?: boolean }} unit
+   * @param {number} destX
+   * @param {number} destZ
+   * @param {(path: Array<{ x: number, z: number }>) => void} callback
+   */
+  requestPath(unit, destX, destZ, callback) {
+    this._queue.push({ unit, destX, destZ, callback });
+  }
+
+  /**
+   * Resolve pedidos enfileirados em `requestPath` até estourar o orçamento `maxMs` (medido com
+   * `performance.now()`); o restante fica para a próxima chamada (chamado uma vez por passo de
+   * simulação). Pedidos de unidades já mortas/removidas são descartados sem chamar o callback.
+   * @param {number} maxMs
+   */
+  processQueue(maxMs = 2) {
+    const startTime = performance.now();
+    while (this._queue.length > 0 && (performance.now() - startTime) < maxMs) {
+      const req = this._queue.shift();
+      if (!req.unit || req.unit.isDead || req.unit.canRemove) continue;
+      const pos = req.unit.mesh.position;
+      const path = this.findPath(pos.x, pos.z, req.destX, req.destZ);
+      req.callback(path);
+    }
   }
 }

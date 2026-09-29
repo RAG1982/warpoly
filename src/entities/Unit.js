@@ -124,6 +124,9 @@ export class Unit {
     this.waypoints = null;
     this.waypointIndex = 0;
     this.pathDestination = null;
+    // F1-07: true enquanto um requestPath desta unidade está na fila do Pathfinder.
+    this.pathPending = false;
+    this._chaseRequestPending = false;
 
     // Worker inventory
     this.carrying = { type: null, amount: 0, max: WORKER_STATS.carryCapacity };
@@ -288,12 +291,18 @@ export class Unit {
         x = snapped.x;
         z = snapped.z;
       }
-      const path = gm.pathfinder.findPath(this.mesh.position.x, this.mesh.position.z, x, z);
-      this.waypoints = path;
-      this.waypointIndex = 0;
       this.pathDestination = { x, z };
-      this.targetPos.set(path[0].x, 0, path[0].z);
-      this.hasTargetPos = true;
+      this.hasTargetPos = false;
+      this.pathPending = true;
+      gm.pathfinder.requestPath(this, x, z, (path) => {
+        this.pathPending = false;
+        // Descarta callback obsoleto (ordem já mudou enquanto o pedido esperava na fila).
+        if (this.state !== 'moving' || !this.pathDestination || this.pathDestination.x !== x || this.pathDestination.z !== z) return;
+        this.waypoints = path;
+        this.waypointIndex = 0;
+        this.targetPos.set(path[0].x, 0, path[0].z);
+        this.hasTargetPos = true;
+      });
     } else {
       this.targetPos.set(x, 0, z);
       this.hasTargetPos = true;
@@ -551,10 +560,14 @@ export class Unit {
           ? Math.hypot(destX - this.pathDestination.x, destZ - this.pathDestination.z)
           : Infinity;
 
-        if (!this.waypoints || this.waypoints.length === 0 || distFromLastDest > 2.5) {
-          this.waypoints = gm.pathfinder.findPath(curX, curZ, destX, destZ);
-          this.waypointIndex = 0;
+        if ((!this.waypoints || this.waypoints.length === 0 || distFromLastDest > 2.5) && !this._chaseRequestPending) {
           this.pathDestination = { x: destX, z: destZ };
+          this._chaseRequestPending = true;
+          gm.pathfinder.requestPath(this, destX, destZ, (path) => {
+            this._chaseRequestPending = false;
+            this.waypoints = path;
+            this.waypointIndex = 0;
+          });
         }
 
         if (this.waypoints && this.waypointIndex < this.waypoints.length) {
@@ -566,6 +579,10 @@ export class Unit {
           const activeWp = this.waypoints[this.waypointIndex];
           subTargetX = activeWp.x;
           subTargetZ = activeWp.z;
+        } else {
+          // Aguardando o caminho chegar da fila (F1-07): fica parada em vez de atravessar o obstáculo.
+          subTargetX = curX;
+          subTargetZ = curZ;
         }
       } else {
         this.waypoints = null;
@@ -713,6 +730,7 @@ export class Unit {
 
   updateMoving(delta, gameManager = this.gameManager) {
     if (!this.hasTargetPos) {
+      if (this.pathPending) return; // aguardando requestPath (F1-07): fica parada, não cancela a ordem
       this.stop();
       return;
     }

@@ -215,19 +215,22 @@ export function startBench(app) {
   scenario.setup(gm, rng, state);
   const setupMs = performance.now() - setupT0;
 
-  // 4. Instrumenta gameManager.update (só no modo bench).
-  const origUpdate = gm.update.bind(gm);
+  // 4. Instrumenta gameManager.advance — só o tempo de simulação em tick fixo (F1-09), sem
+  // renderUpdate (interpolação/LOD/VFX). `gm.update(delta)` (legado) chama advance internamente,
+  // então basta interceptar advance para medir o "sim ms/frame" em qualquer chamador.
+  const origAdvance = gm.advance.bind(gm);
   let updAcc = 0;
   let updCount = 0;
   let measuring = false;
-  gm.update = (delta) => {
+  gm.advance = (frameDelta) => {
     scenario.tick(gm, rng, state);
     const t0 = performance.now();
-    origUpdate(delta);
+    const alpha = origAdvance(frameDelta);
     if (measuring) {
       updAcc += performance.now() - t0;
       updCount++;
     }
+    return alpha;
   };
 
   // 5. Loop de amostragem.
@@ -273,6 +276,8 @@ export function startBench(app) {
         maxFrameMs: round(sorted[sorted.length - 1] || 0),
       },
       frameTimeMs: { avg: round(meanFt), median: round(percentile(sorted, 50)) },
+      // Chave JSON mantida como `gameUpdateMs` (lida por tools/bench/run-bench.mjs e
+      // tools/fog-compare/profile.mjs); mede agora o tempo de `advance` — "sim ms/frame" (F1-09).
       gameUpdateMs: { avg: round(updCount ? updAcc / updCount : 0, 3), frames: updCount },
       render: {
         callsAvg: Math.round(avg(calls)),
@@ -315,7 +320,7 @@ export function startBench(app) {
     overlay.textContent =
       `BENCH ${name} · concluído\n` +
       `FPS médio ${result.fps.avg} · 1% low ${result.fps.p1Low}\n` +
-      `frame ${result.frameTimeMs.avg} ms · gm.update ${result.gameUpdateMs.avg} ms\n` +
+      `frame ${result.frameTimeMs.avg} ms · sim ms/frame ${result.gameUpdateMs.avg} ms\n` +
       `draw calls ${result.render.callsAvg} (máx ${result.render.callsMax})\n` +
       `triângulos ${result.render.trianglesAvg.toLocaleString('pt-BR')}\n` +
       `geo ${result.memory.geometries} · tex ${result.memory.textures} · prog ${result.memory.programs}\n` +

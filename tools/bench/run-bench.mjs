@@ -169,7 +169,7 @@ async function main() {
         results.push(r);
         console.log(
           `[bench] ${name}: FPS ${r.fps?.avg} (1% low ${r.fps?.p1Low}) · calls ${r.render?.callsAvg} · ` +
-            `tris ${r.render?.trianglesAvg} · load ${r.load?.readyMs} ms · gm.update ${r.gameUpdateMs?.avg} ms`
+            `tris ${r.render?.trianglesAvg} · load ${r.load?.readyMs} ms · sim ms/frame ${r.gameUpdateMs?.avg} ms`
         );
       } catch (err) {
         console.error(`[bench] ${name} falhou: ${err.message}`);

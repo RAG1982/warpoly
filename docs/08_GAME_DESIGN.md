@@ -1,6 +1,6 @@
 # 08 — Documento de Design de Jogo (F3-00) — PROPOSTA v1
 
-> Status: **proposta para aprovação do dono** (2026-09-29). Tudo aqui vira dados em `src/data/` e tarefas F3/F4. Onde houver ⚖️ há uma decisão que o dono precisa tomar (resumo no fim).
+> Status: **APROVADO pelo dono em 2026-09-29** (decisões D4–D7 em `07_DECISOES.md`). Tudo aqui vira dados em `src/data/` e tarefas F3/F4. Onde houver ⚖️ há uma decisão que o dono precisa tomar (resumo no fim).
 > Regras respeitadas: D1 (pedra permanece; **petróleo só após Centro da Cidade nível 2**), D2 (**nomes próprios**, nada de marcas da Blizzard), D3 (hardware). Mecânicas de referência: Warcraft II (ver `05_PARIDADE_WARCRAFT2.md`).
 
 ---
@@ -11,14 +11,12 @@
 
 | | Humanos | Orcs |
 |---|---|---|
-| Nome da facção (proposta A) ⚖️ | **Coroa de Aldária** | **Clãs de Gorthak** |
-| Alternativa B | Reino de Valmont | Tribos de Kharzul |
-| Alternativa C | Liga de Vaeloria | Legião de Cinzas |
+| Nome da facção | **Coroa de Aldária** | **Clãs de Gorthak** |
 | Cor de identidade | azul e dourado | vermelho e ferro |
 | Tom | ordem, fé, engenharia | fúria, xamanismo, força bruta |
 | Líder (campanha) | Rainha Elyra Valcourt | Chefe Guerreiro Drogath Punho-de-Brasa |
 
-Os textos de UI, nomes de unidades e construções abaixo usam a proposta A.
+
 
 ---
 
@@ -30,11 +28,11 @@ Os textos de UI, nomes de unidades e construções abaixo usam a proposta A.
 | **Madeira** | Florestas (bloqueiam passagem, abrem ao cortar) | Centro ou Serraria | construções, unidades à distância, navios |
 | **Pedra** | Pedreira (como mina, mas 2 trabalhadores simultâneos) | Centro ou Canteiro | **níveis do Centro**, torres, muralhas, blindagem (armaduras), fortificação |
 | **Petróleo** 🔒 | Plataforma sobre poço no mar — **liberado só no Centro nível 2** (D1) | Refinaria/Estaleiro | navios, upgrades navais, cerco nível 2 |
-| **Suprimento** (população) | Fazenda (+5), Centro (+5) | — | limite de exército (máx. 150) |
+| **Suprimento** (população) | Casa/Toca (+5), Fazenda/Chiqueiro (+5), Centro (+5) | — | limite de exército (máx. 150) |
 
 - Carga por viagem: 10 ouro · 10 madeira · 8 pedra · 100 petróleo (petroleiro).
 - Bônus: Serraria nível 2 (+25% madeira); Centro nível 2/3 (+10%/+20% ouro); Canteiro (+20% pedra).
-- ⚖️ **Casa/Toca e ouro passivo das fazendas**: proposta é **remover a Casa/Toca** (no WC2 só a Fazenda dá suprimento) e **remover o +3 ouro passivo** das fazendas. O modelo 3D da Casa pode virar decoração/variação visual da Fazenda.
+- **Decisão D5**: Casa/Toca **permanecem** (+5 suprimento, 50 madeira, nível 1); o **ouro passivo das fazendas foi removido** — ouro só vem de minas. Fazenda/Chiqueiro: +5 suprimento e desbloqueiam o Quartel (requisito), como no WC2.
 
 ---
 
@@ -55,7 +53,8 @@ Modelos: o Castelo atual (Blender) vira o **nível 3** humano; os níveis 1–2 
 | Função (WC2) | Humanos | Orcs | Custo (ouro/madeira/pedra) | PV | Nível |
 |---|---|---|---|---|---|
 | Centro | Paço Real / Fortaleza / Castelo | Salão do Clã / Bastião / Cidadela de Ferro | — | 1600 / 2200 / 2800 | 1/2/3 |
-| Fazenda (+5 supr.) | Fazenda | Chiqueiro | 80 / 30 / 0 | 400 | 1 |
+| Casa (+5 supr.) | Casa | Toca | 0 / 50 / 0 | 400 | 1 |
+| Fazenda (+5 supr., requisito do Quartel) | Fazenda | Chiqueiro | 80 / 30 / 0 | 400 | 1 |
 | Quartel | Quartel | Acampamento de Guerra | 160 / 60 / 40 | 900 | 1 |
 | Serraria | Serraria | Serraria do Clã | 120 / 40 / 0 | 600 | 1 |
 | Ferraria | Ferraria Real | Forja de Guerra | 160 / 50 / 60 | 800 | 1 |
@@ -102,8 +101,16 @@ Upgrades de classe: Patrulheiro/Enfurecido (Serraria, nível 2): +alcance/+visã
 | Pesado | **Couraçado** | **Leviatã de Ferro** | longo alcance, destrói costa | 3 (+Fundição) |
 | Submerso | **Submersível** | **Tartaruga Colossal** | invisível exceto a batedores aéreos | 3 |
 
-### 5.3 Heróis (só campanha)
+### 5.3 Heróis (campanha **e** escaramuça — decisão D6)
 Humanos: Rainha Elyra (Templária), Mestre Arcano Oren, Capitão Brann. Orcs: Drogath Punho-de-Brasa (Talhador), Vozgul a Profetisa (Necromante), Grok Quebra-Muros (Ogro Feiticeiro).
+
+Regras na escaramuça:
+- **1 herói vivo por jogador**, escolhido entre os 3 da facção, invocado no **Centro nível 2** (300 ouro · 100 madeira · 50 pedra · 5 suprimento · 45 s).
+- Níveis 1–5 por experiência (abates próximos); cada nível +10% PV/dano e 1 ponto de habilidade.
+- 3 habilidades por herói (2 ativas + 1 aura), desbloqueadas nos níveis 1, 3 e 5 (definição em `src/data/heroes.js`).
+- Morte: pode ser **revivido** no Centro por 50% do custo e 30 s; perde nenhum nível.
+- Opção da partida "Sem heróis" (clássico WC2) no setup de escaramuça.
+- Campanha usa os mesmos heróis com níveis fixos por missão.
 
 ### 5.4 Neutros
 Bandoleiros (modelos prontos: Bandido + Acampamento) guardam minas extras; critters decorativos (ovelhas, porcos, focas).
@@ -176,8 +183,8 @@ Bandoleiros (modelos prontos: Bandido + Acampamento) guardam minas extras; critt
 
 ---
 
-## Decisões pendentes do dono (resumo)
-1. Nome das facções (A, B, C ou outro).
-2. Remover Casa/Toca e o ouro passivo das fazendas? (proposta: sim)
-3. Nomes das unidades/construções da tabela — aprovar ou trocar pontualmente.
-4. Heróis só na campanha (proposta) ou também na escaramuça?
+## Decisões do dono (2026-09-29)
+- D4: facções **Coroa de Aldária** (humanos) e **Clãs de Gorthak** (orcs).
+- D5: Casa/Toca mantidas; ouro passivo das fazendas removido.
+- D6: heróis na campanha **e** na escaramuça (1 por jogador, opção "Sem heróis").
+- D7: nomes de unidades e construções deste documento aprovados.

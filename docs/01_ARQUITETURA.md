@@ -210,7 +210,7 @@ animate() [rAF da aplicação, delta máx 0.1s; sem sessão (menu/loading) não 
 - Cache de caminhos por `(célula origem, célula destino, version)`, limite de 256 entradas (LRU simples via `Map`); só cobre a busca A* completa (o atalho de linha de visão direta já é O(passos), não precisa de cache).
 
 ### Dívidas registradas (F2-01)
-- **Getter `faction`** em `Unit`/`Building`: `'player'` se o dono é o jogador local, `'enemy'` caso contrário. Mantido para `UIManager`, `InputManager` e o anel de seleção. Lógica nova deve usar `ownerId` + `isHostile/isAlly`. Remover quando a UI/Input migrarem (F6/F2-02).
+- **Getter `faction`** em `Unit`/`Building`: `'player'` se o dono é o jogador local, `'enemy'` caso contrário. Mantido para `UIManager`, `InputManager` e o anel de seleção (destaque visual/picking — leitura, não altera estado). Lógica nova deve usar `ownerId` + `isHostile/isAlly`. A F2-02 migrou só os pontos que **alteravam** o estado do jogo (agora comandos, ver seção "Comandos" abaixo); esses usos de leitura continuam com `faction`. Remover quando a UI/Input migrarem.
 - **Visões derivadas `gm.units` / `gm.enemies`**: `units` = unidades do jogador local; `enemies` = unidades hostis ao local (aliados não locais não aparecem em nenhuma das duas). Usadas por UI, minimapa, `InputManager`, névoa e bench. Escolhidas em vez de trocar tudo para `allUnits` de uma vez para não mexer nos arquivos das lanes UI/GAME/PERF.
 - **API econômica legada no `GameManager`** (`resources`, `population`, `maxPopulation`, `canAfford`, `deductResources`, `addResource`, `playerFaction`, `researchedUpgrades {player, enemy}`, `enemyAI`): tudo delega ao jogador local (ou ao primeiro hostil, para `enemy`).
 - **Lado legado aceito como dono**: `spawnUnit`/`createBuilding`/`isUpgradeResearched`… aceitam `'player'`/`'enemy'` (`gm.resolveOwnerId`), e os construtores de `Unit`/`Building` aceitam `'player'`→0 / `'enemy'`→1 (`legacyOwnerId`, usado pelo inspetor e pelo bench).
@@ -221,6 +221,65 @@ animate() [rAF da aplicação, delta máx 0.1s; sem sessão (menu/loading) não 
 
 ### Ainda duplicado / hardcoded
 - Mapa: coordenadas de depósitos, clusters de árvores e vaus **hardcoded** em `GameManager` e `Terrain`; minimapa redesenha o rio/vaus manualmente (F2-05).
+
+## Comandos (F2-02)
+
+Multiplayer lockstep (F9), replays (F9-05) e IA justa exigem que **toda** mudança de estado
+do jogo venha de um comando serializável (JSON puro — só números/strings/arrays, nunca
+referências a entidades), aplicado num tick de simulação conhecido. Desde a F2-02, UI, input
+e IA não chamam mais `Unit`/`Building` diretamente — emitem comandos via `gm.issue(...)`.
+
+- **Formato** (`src/sim/commands.js`): `{ tick, playerId, type, unitIds?, targetId?, x?, z?,
+  buildingType?, buildingId?, unitType?, upgradeId?, slot?, queued? }`. `CMD` enumera os 13
+  tipos (`move`, `attack`, `attackMove`, `gather`, `build`, `placeBuilding`, `train`,
+  `cancelTrain`, `research`, `cancelResearch`, `rally`, `stop`, `hold`, `patrol`).
+  `makeCommand(fields)` valida os campos obrigatórios por tipo e congela o objeto;
+  `validateCommand` faz o mesmo sem lançar (`{ok, reason}`); `serialize`/`deserialize` são
+  `JSON.stringify`/`JSON.parse` (o formato já é JSON puro por construção).
+- **Fila** (`src/sim/CommandQueue.js`): `enqueue(cmd)` guarda por `cmd.tick` e atribui
+  `seqNo` (ordem de chegada); `drain(tick)` devolve e remove os comandos daquele tick,
+  ordenados por `(playerId, seqNo)` — determinístico, independente da ordem de chegada
+  pela rede (lockstep). `log` acumula todo comando já drenado (executado), na ordem de
+  execução — é o que um replay (F9-05) reaplica. `COMMAND_DELAY_TICKS = 0` hoje (execução
+  local); lockstep vai aumentar esse valor para dar tempo de os comandos de outros clientes
+  chegarem antes do tick de execução.
+- **Executor** (`src/sim/CommandExecutor.js`): resolve os ids via `gm.entitiesById`, verifica
+  autoria (a unidade/construção precisa pertencer a `cmd.playerId`; senão descarta com
+  `console.warn` e segue) e chama os métodos já existentes das entidades
+  (`Unit.moveTo/orderAttack/orderGather/orderBuild/stop/hold/orderAttackMove/orderPatrol`,
+  `Building.queueUnit/cancelQueuedUnit/startResearch/cancelResearch/setRallyPoint`,
+  `gm.placeBuilding(...)`). Comandos para entidades mortas/inexistentes são ignorados. MOVE
+  com várias unidades: o comando carrega só o ponto clicado — a formação (grade + offsets) é
+  calculada aqui, não no tradutor.
+- **Integração no `GameManager`**: `gm.commands` (`CommandQueue`) e `gm.currentTick`
+  (incrementa a cada `simStep`, 20 Hz). No início de `simStep`, `gm.commands.drain(tick)` é
+  executado via `CommandExecutor` antes do resto do passo. `gm.issue(fields)` =
+  `commands.enqueue(makeCommand({ ...fields, tick: currentTick + COMMAND_DELAY_TICKS }))` —
+  API pública para emitir um comando.
+- **`GameManager.issueOrder`** (clique direito) é só um tradutor: decide o tipo de comando
+  (MOVE/ATTACK/GATHER/BUILD/RALLY) a partir da seleção e do que está sob o cursor, e emite um
+  único comando com os ids envolvidos. `InputManager.confirmPlacement` e `UIManager` (treinar,
+  cancelar treino, pesquisar, cancelar pesquisa, parar) fazem o mesmo — os checks de custo/fila
+  que sobraram no lado do cliente são só feedback imediato de UI; a validação autoritativa
+  (custo, fila, autoria) acontece no executor, no tick de execução.
+- **IA**: `AIEconomyManager`/`AIMilitaryManager` emitem com o próprio `playerId` (mesmos tipos
+  de comando do jogador humano — inclusive `PLACE_BUILDING`, que agora cobra o custo no
+  executor em vez de `deduct`/refund locais no `AIEconomyManager`).
+- **Estados novos em `Unit`** (ainda sem tecla — F3-01 adiciona os atalhos): `stop` (já
+  existia), `holding` (não se move; ataca sozinha só dentro do próprio `attackRange`),
+  `attackMoving` (anda ao destino via `moveTo`; ataca sozinha hostis em `aggroRange` e retoma
+  a marcha ao limpar a área) e `patrolling` (alterna entre a posição de origem e o destino,
+  com o mesmo comportamento de varredura do attack-move). `Unit._giveUpAttack()` decide, ao
+  perder o alvo em combate, se a unidade volta a `idle`, `hold`, retoma o attack-move ou o
+  trecho de patrulha.
+- **Fila de ordens (`unit.orderQueue`, shift-queue)**: só para MOVE/ATTACK_MOVE/GATHER/BUILD.
+  `CommandExecutor` empilha a ordem resolvida em `orderQueue` quando `cmd.queued`; sem
+  `queued`, limpa a fila e executa direto (`Unit.runQueuedOrder`). `Unit.updateIdle` consome o
+  próximo item da fila assim que a unidade fica `idle` (STOP/HOLD explícitos limpam a fila).
+- **Exceções documentadas** (chamadas diretas às entidades, não convertidas para comando —
+  não são ordens de jogador): `GameManager.spawnUnit` chama `unit.moveTo` direto para o ponto
+  de reunião ao spawnar (efeito interno da simulação); `src/debug/bench.js` continua chamando
+  `orderAttack`/`moveTo` direto (ferramenta de teste de performance, sem UI).
 
 ## Pipeline de assets
 

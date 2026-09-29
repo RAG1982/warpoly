@@ -37,7 +37,7 @@ Causas raiz, em ordem de impacto:
 | B8 | Pathfinding ignora construções e árvores → unidades "deslizam" empurradas e travam em bases | `Pathfinder.buildGrid` |
 | B9 | IA onisciente (lê posições reais do jogador ignorando névoa) | `ai/*` |
 | B10 | Não é possível selecionar/inspecionar unidades inimigas | `GameManager.selectSingle` |
-| B11 | HUD inferior cortada em 1024×768 (card de seleção sai da tela, minimapa sobreposto) | `style.css` |
+| B11 | ~~HUD inferior cortada em 1024×768 (card de seleção sai da tela, minimapa sobreposto)~~ **Corrigido na F6-03** (validação visual pendente localmente): `#bottom-bar` virou grid de 3 colunas (`minmax(0,1fr)` no card) em vez de 3 blocos com `position:fixed`/`left` absolutos; `--ui-scale` e `@media (max-width: 1100px)` | `style.css`, `src/ui/uiScale.js` |
 | B12 | Textos misturados PT/EN ("Constructed!", "GLORIOUS VICTORY", "+3 Gold", nomes de unidades em inglês) | vários |
 | B13 | `EnemyAI.js` e `GLTFBuildingLoader.js` mortos; `Unit.js` importa animador de `src/inspector/` | core |
 | B14 | `Math.random()` usado em 69 pontos da simulação — impossibilita replays/multiplayer determinístico | core/entities/ai |

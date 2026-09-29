@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { Pathfinder } from '../../src/core/Pathfinder.js';
+import { Pathfinder, MinHeap } from '../../src/core/Pathfinder.js';
 
 const DRY = 1.0;
 const WATER = 0.2;
@@ -118,6 +118,103 @@ describe('Pathfinder', () => {
       expect(pf.isWater(last.x, last.z)).toBe(false);
       expect(Math.hypot(last.x - destX, last.z - destZ)).toBeLessThan(4);
       expectPathOnLand(pf, -20, -10, path);
+    });
+  });
+
+  describe('hasLineOfSight com pontos idênticos (NEW-4)', () => {
+    it('devolve true em terreno seco (dist=0 não gera NaN)', () => {
+      const pf = new Pathfinder(dryTerrain);
+      expect(pf.hasLineOfSight(5, 5, 5, 5)).toBe(true);
+    });
+
+    it('devolve false se o próprio ponto está na água', () => {
+      const pf = new Pathfinder(riverTerrain);
+      expect(pf.hasLineOfSight(0, 0, 0, 0)).toBe(false);
+    });
+  });
+
+  describe('obstáculos dinâmicos (blockCircle, F1-07/B8)', () => {
+    it('caminho contorna uma construção entre origem e destino; remover o bloqueio volta ao caminho reto', () => {
+      const pf = new Pathfinder(dryTerrain);
+      expect(pf.hasLineOfSight(-10, 0, 10, 0)).toBe(true);
+
+      pf.blockCircle(0, 0, 3, +1);
+      expect(pf.hasLineOfSight(-10, 0, 10, 0)).toBe(false);
+
+      const path = pf.findPath(-10, 0, 10, 0);
+      expect(path[path.length - 1]).toEqual({ x: 10, z: 0 });
+      // Nenhum waypoint (nem o trecho até ele) cai dentro do círculo bloqueado.
+      let px = -10, pz = 0;
+      for (const wp of path) {
+        const midX = (px + wp.x) / 2, midZ = (pz + wp.z) / 2;
+        expect(Math.hypot(midX, midZ)).toBeGreaterThan(2.5);
+        px = wp.x; pz = wp.z;
+      }
+
+      pf.blockCircle(0, 0, 3, -1);
+      expect(pf.hasLineOfSight(-10, 0, 10, 0)).toBe(true);
+      const straight = pf.findPath(-10, 0, 10, 0);
+      expect(straight).toEqual([{ x: 10, z: 0 }]);
+    });
+
+    it('origem dentro de um bloqueio dinâmico ainda encontra caminho', () => {
+      const pf = new Pathfinder(dryTerrain);
+      pf.blockCircle(0, 0, 3, +1);
+      const path = pf.findPath(0, 0, 15, 0);
+      expect(path.length).toBeGreaterThan(0);
+      expect(path[path.length - 1]).toEqual({ x: 15, z: 0 });
+    });
+  });
+
+  describe('MinHeap (heap binário do A*)', () => {
+    it('1000 inserções aleatórias saem ordenadas', () => {
+      const heap = new MinHeap(1000);
+      const priorities = [];
+      for (let i = 0; i < 1000; i++) {
+        const p = Math.random() * 100000;
+        priorities.push(p);
+        heap.push(i, p);
+      }
+
+      const sorted = [...priorities].sort((a, b) => a - b);
+      const out = [];
+      while (heap.size > 0) {
+        const idx = heap.pop();
+        out.push(priorities[idx]);
+      }
+
+      expect(out).toEqual(sorted);
+    });
+  });
+
+  describe('requestPath / processQueue (orçamento por frame)', () => {
+    function fakeUnit(x, z) {
+      return { mesh: { position: { x, z } } };
+    }
+
+    it('resolve 200 pedidos ao longo de várias chamadas, sem perder nenhum callback', () => {
+      const pf = new Pathfinder(dryTerrain);
+      let resolved = 0;
+      for (let i = 0; i < 200; i++) {
+        pf.requestPath(fakeUnit(i * 0.01, 0), 20, 20, () => { resolved++; });
+      }
+
+      let guard = 0;
+      while (resolved < 200 && guard < 10000) {
+        pf.processQueue(2);
+        guard++;
+      }
+
+      expect(resolved).toBe(200);
+    });
+
+    it('descarta pedidos de unidades mortas sem travar a fila', () => {
+      const pf = new Pathfinder(dryTerrain);
+      let resolved = 0;
+      pf.requestPath({ mesh: { position: { x: 0, z: 0 } }, isDead: true }, 5, 5, () => { resolved++; });
+      pf.requestPath(fakeUnit(0, 0), 5, 5, () => { resolved++; });
+      pf.processQueue(50);
+      expect(resolved).toBe(1);
     });
   });
 });

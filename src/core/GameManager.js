@@ -173,6 +173,10 @@ export class GameManager {
       this.unitGrid.insert(entity, pos.x, pos.z, entity.collisionRadius || 0);
     } else if (entity instanceof Building || entity instanceof ResourceDeposit || entity instanceof Tree) {
       this.blockerGrid.insert(entity, pos.x, pos.z, entity.collisionRadius || 0);
+      if (this.pathfinder && (entity instanceof Building || entity instanceof Tree)) {
+        this.pathfinder.blockCircle(pos.x, pos.z, entity.collisionRadius || 0, +1);
+        entity._pathBlocked = true;
+      }
     }
   }
 
@@ -182,6 +186,10 @@ export class GameManager {
       this.unitGrid.remove(entity);
     } else if (entity instanceof Building || entity instanceof ResourceDeposit || entity instanceof Tree) {
       this.blockerGrid.remove(entity);
+      if (this.pathfinder && entity._pathBlocked) {
+        this.pathfinder.blockCircle(entity.mesh.position.x, entity.mesh.position.z, entity.collisionRadius || 0, -1);
+        entity._pathBlocked = false;
+      }
     }
   }
 
@@ -1062,11 +1070,20 @@ export class GameManager {
     // Check Win/Loss conditions
     if (this._updateVictoryConditions()) return;
 
+    // Orçamento de A* por passo de simulação (F1-07): resolve pedidos pendentes de requestPath.
+    if (this.pathfinder) this.pathfinder.processQueue(2);
+
     // Update Trees (árvore cortada — isDead/woodRemaining <= 0 — sai do blockerGrid; remove()
     // é no-op se já não estiver na grade, então repetir o teste em árvores já cortadas é barato)
     this.trees.forEach(t => {
       t.update(dt, this.particleSystem);
-      if (t.isDead || t.woodRemaining <= 0) this.blockerGrid.remove(t);
+      if (t.isDead || t.woodRemaining <= 0) {
+        this.blockerGrid.remove(t);
+        if (this.pathfinder && t._pathBlocked) {
+          this.pathfinder.blockCircle(t.mesh.position.x, t.mesh.position.z, t.collisionRadius || 0, -1);
+          t._pathBlocked = false;
+        }
+      }
     });
 
     // Update Projectiles

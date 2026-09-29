@@ -48,6 +48,14 @@ export class Arrow {
     this.isDead = false;
 
     this.createProjectileMesh();
+
+    // F1-09: tick fixo — pose de simulação (posição + quaternion completo, já que a trajetória
+    // balística usa lookAt/pitch, não só rotation.y) do início e do fim do último passo, para
+    // GameManager.renderUpdate interpolar visualmente entre eles.
+    this._prevPos = this.mesh.position.clone();
+    this._simPos = this.mesh.position.clone();
+    this._prevQuat = this.mesh.quaternion.clone();
+    this._simQuat = this.mesh.quaternion.clone();
   }
 
   createProjectileMesh() {
@@ -62,7 +70,8 @@ export class Arrow {
     this.scene.add(this.mesh);
   }
 
-  update(delta) {
+  /** F1-09: lógica de simulação (progresso, acerto, dano) — pose interpolada em `renderUpdate`. */
+  simStep(delta) {
     if (this.isDead) return;
 
     this.progress += delta / this.duration;
@@ -98,6 +107,13 @@ export class Arrow {
     } else {
       this.mesh.lookAt(_nextPos);
     }
+  }
+
+  /** F1-09: interpola posição + orientação entre a pose do início e do fim do último passo. */
+  renderUpdate(alpha) {
+    if (this.isDead) return;
+    this.mesh.position.lerpVectors(this._prevPos, this._simPos, alpha);
+    this.mesh.quaternion.slerpQuaternions(this._prevQuat, this._simQuat, alpha);
   }
 
   hit() {

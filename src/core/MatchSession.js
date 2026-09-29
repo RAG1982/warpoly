@@ -1,4 +1,5 @@
 import { Terrain } from '../world/Terrain.js';
+import { getMap } from '../data/maps/index.js';
 import { Water } from '../world/Water.js';
 import { Decorations } from '../world/Decorations.js';
 import { ParticleSystem } from '../entities/ParticleSystem.js';
@@ -45,8 +46,8 @@ export class MatchSession {
 
     this._resetView();
 
-    // Mundo
-    this.terrain = new Terrain(scene);
+    // Mundo (F2-05: mapa orientado a dados — ver src/data/maps/README.md)
+    this.terrain = new Terrain(scene, getMap(matchConfig.mapId));
     this.water = new Water(scene, this.terrain);
     this.decorations = new Decorations(scene, this.terrain);
     this.particleSystem = new ParticleSystem(scene);

@@ -58,6 +58,7 @@ Opus escreve a spec em `docs/specs/<ID>.md`; agente **Sonnet** executa; Opus rev
 | `docs/specs/F1-08-alocacoes-vazamentos.md` | F1-08 — **DONE** | sonnet |
 | `docs/specs/F1-09-tick-fixo-lod-animacao.md` | F1-09 + NEW-14 (após F1-08, mesmos arquivos) | sonnet |
 | `docs/specs/F2-02-sistema-comandos.md` | F2-02 — **DONE** | sonnet |
+| `docs/specs/F2-03-determinismo.md` | F2-03 + B14 | sonnet (local) |
 | `docs/specs/BUGS-01-pequenos.md` | NEW-2, NEW-11, NEW-5, NEW-13 — **nuvem** (ver `docs/HANDOFF_CLOUD.md`) | sonnet (claude.ai/code) |
 | `docs/specs/F1-07-pathfinder.md` | F1-07 + B8 + NEW-4 — **nuvem** | sonnet (claude.ai/code) |
 | `docs/specs/F6-03-hud-responsiva.md` | F6-03 + B11 — **nuvem** | sonnet (claude.ai/code) |
@@ -202,7 +203,7 @@ Opus escreve a spec em `docs/specs/<ID>.md`; agente **Sonnet** executa; Opus rev
 - **Resultado**: `src/sim/{commands,CommandQueue,CommandExecutor}.js`; UI/input/IA emitem comandos (custo cobrado no executor); estados hold/attack-move/patrol; shift-queue; log de comandos JSON puro (replay). 174 testes. Teclas ficam para F3-01.
 
 ### F2-03 · Determinismo
-- **Status**: `TODO` · Lane CORE · Onda 3 · Dep: F2-01, F1-09
+- **Status**: `DOING(sonnet, 2026-09-29)` · Lane CORE · Onda 3 · Dep: F2-01, F1-09
 - **Fazer**: RNG com seed (`mulberry32`) em `src/sim/rng.js`; remover `Math.random` da simulação (69 ocorrências — visuais podem manter); iteração em ordem de ID; evitar dependência de ordem de `Set`/objetos; checksum de estado por tick.
 - **Aceite**: duas execuções com mesma seed e mesmos comandos → mesmo checksum após 10 min (teste automatizado).
 

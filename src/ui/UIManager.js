@@ -1,6 +1,9 @@
 import { UNIT_TRAIN_CONFIG, BUILDING_BUILD_CONFIG, WORKER_BUILD_LIST } from '../entities/Building.js';
 import { UPGRADE_CONFIG, FORGE_UPGRADES } from '../core/UpgradeConfig.js';
-import { BUILDING_TRAINABLE_UNITS } from '../data/index.js';
+import { BUILDING_TRAINABLE_UNITS, getUnitDef } from '../data/index.js';
+import { initUiScale } from './uiScale.js';
+import { getBuildHotkey, getTrainHotkey, getResearchHotkey } from './hotkeys.js';
+import { buildCostHtml } from './Tooltip.js';
 
 // Quem treina o quê — derivado de src/data/buildings.js (campo `trains`)
 export { BUILDING_TRAINABLE_UNITS };
@@ -46,8 +49,14 @@ export class UIManager {
     this.lastResearchedCount = 0;
     this.lastResearchId = null;
 
+    this.selectionPortraits = document.getElementById('selection-portraits');
+    this.lastPortraitKey = null;
+
     this.minimapCanvas = document.getElementById('minimap-canvas');
     this.minimapCtx = this.minimapCanvas ? this.minimapCanvas.getContext('2d') : null;
+
+    // F6-03: --ui-scale (HUD responsiva); listener de resize removido em dispose().
+    this._disposeUiScale = initUiScale();
 
     this.notificationBox = document.getElementById('notification-box');
 
@@ -63,6 +72,18 @@ export class UIManager {
     this.initMinimapEvents();
     this.initActionsEventDelegation();
     this.initBuildingEvents();
+    this.initPortraitEvents();
+  }
+
+  /** F6-03: clique num retrato da grade de seleção múltipla seleciona só aquela unidade. */
+  initPortraitEvents() {
+    if (!this.selectionPortraits) return;
+    this.selectionPortraits.addEventListener('click', (e) => {
+      const el = e.target.closest('[data-portrait-id]');
+      if (!el) return;
+      const entity = this.gm.getEntity(Number(el.getAttribute('data-portrait-id')));
+      if (entity) this.gm.selectSingle(entity);
+    }, this._listenOpts);
   }
 
   initControls() {
@@ -210,7 +231,8 @@ export class UIManager {
       this._lastPop = pop;
       this._lastMaxPop = maxPop;
       if (this.popVal) {
-        this.popVal.innerText = `${pop} / ${maxPop}`;
+        // F6-03: "/ maxPop" num <span> à parte para poder escondê-lo em telas estreitas (<1100px).
+        this.popVal.innerHTML = `${pop} <span class="pop-secondary">/ ${maxPop}</span>`;
         if (pop >= maxPop) {
           this.popVal.style.color = '#f87171'; // Red warning when population cap is reached
         } else if (pop >= maxPop - 1) {
@@ -417,6 +439,7 @@ export class UIManager {
       const isWorker = u.type === 'villager' || u.type === 'peon';
 
       this.selectionTitle.innerText = count > 1 ? `${count}x ${u.name}s` : u.name;
+      this.updateSelectionPortraits(this.gm.selectedUnits);
 
       // Health
       const pct = Math.max(0, u.hp / u.maxHp) * 100;
@@ -444,6 +467,7 @@ export class UIManager {
       if (this.standardView) this.standardView.style.display = 'none';
       if (this.buildingView) this.buildingView.style.display = 'flex';
       this.selectionCard.style.display = 'flex';
+      this.updateSelectionPortraits([]);
 
       // Header Title
       if (this.bldSelectionTitle) {
@@ -521,11 +545,54 @@ export class UIManager {
         this.lastSelectionKey = 'resource';
         this.selectionActions.innerHTML = '';
       }
+      this.updateSelectionPortraits([]);
     } else {
       this.currentBuilding = null;
       this.selectionCard.style.display = 'none';
       this.lastSelectionKey = 'none';
+      this.updateSelectionPortraits([]);
     }
+  }
+
+  /**
+   * F6-03: grade de retratos da seleção múltipla (`gm.selectedUnits.length > 1`, até 24),
+   * ícone do tipo + barra de vida; clique seleciona só aquela unidade (`initPortraitEvents`).
+   */
+  updateSelectionPortraits(units) {
+    if (!this.selectionPortraits) return;
+
+    if (units.length <= 1) {
+      this.selectionPortraits.style.display = 'none';
+      this.lastPortraitKey = null;
+      return;
+    }
+
+    const shown = units.slice(0, 24);
+    const key = shown.map(u => u.id).join(',');
+
+    if (this.lastPortraitKey === key) {
+      // Mesmo conjunto de unidades: só atualiza as barras de vida.
+      this.selectionPortraits.querySelectorAll('[data-portrait-id]').forEach((el) => {
+        const unit = shown.find(u => String(u.id) === el.getAttribute('data-portrait-id'));
+        if (!unit) return;
+        const fill = el.querySelector('.selection-portrait-hp-fill');
+        if (fill) fill.style.width = `${Math.max(0, unit.hp / unit.maxHp) * 100}%`;
+      });
+      return;
+    }
+
+    this.lastPortraitKey = key;
+    this.selectionPortraits.style.display = 'grid';
+    this.selectionPortraits.innerHTML = shown.map(unit => {
+      const icon = getUnitDef(unit.type).icon;
+      const pct = Math.max(0, unit.hp / unit.maxHp) * 100;
+      return `
+        <button type="button" class="selection-portrait" data-portrait-id="${unit.id}" title="${unit.name}">
+          <img src="${icon}" class="selection-portrait-icon" alt="${unit.name}" />
+          <div class="selection-portrait-hp-bg"><div class="selection-portrait-hp-fill" style="width: ${pct}%"></div></div>
+        </button>
+      `;
+    }).join('');
   }
 
   renderBuildingTrainButtons(building) {
@@ -540,7 +607,7 @@ export class UIManager {
 
       const factionType = this.gm.playerFaction === 'orc' ? 'orc' : 'human';
 
-      this.bldTrainButtons.innerHTML = FORGE_UPGRADES.map(upgId => {
+      this.bldTrainButtons.innerHTML = FORGE_UPGRADES.map((upgId, i) => {
         const cfg = UPGRADE_CONFIG[upgId];
         if (!cfg) return '';
 
@@ -549,6 +616,7 @@ export class UIManager {
         const isResearchingAny = this.gm.isUpgradeResearching(upgId, 'player');
         const upgName = cfg.name[factionType] || upgId;
         const upgDesc = cfg.description[factionType] || '';
+        const hotkey = getResearchHotkey(i);
 
         let btnClass = 'bld-train-btn bld-upgrade-btn';
         let badge = '';
@@ -561,13 +629,14 @@ export class UIManager {
         }
 
         return `
-          <button class="${btnClass}" data-upgrade="${upgId}" title="${upgName}" ${isResearched ? 'disabled' : ''}>
+          <button class="${btnClass}" data-upgrade="${upgId}" title="${upgName}${hotkey ? ` (${hotkey})` : ''}" ${isResearched ? 'disabled' : ''}>
+            ${hotkey ? `<span class="bld-hotkey-badge">${hotkey}</span>` : ''}
             <img src="${cfg.icon}" class="bld-train-btn-icon" alt="${upgName}" />
             ${badge}
             <div class="bld-hint-bubble">
               <div class="bld-hint-col">
                 <div class="bld-hint-header">
-                  <span class="bld-hint-title">${upgName}</span>
+                  <span class="bld-hint-title">${upgName}${hotkey ? ` <span class="bld-hint-hotkey">(${hotkey})</span>` : ''}</span>
                   <span class="bld-hint-desc">${upgDesc}</span>
                 </div>
                 <div class="bld-hint-footer">
@@ -600,14 +669,16 @@ export class UIManager {
     if (this.bldTrainSection) this.bldTrainSection.style.display = 'flex';
     if (this.bldQueueSection) this.bldQueueSection.style.display = 'flex';
 
-    this.bldTrainButtons.innerHTML = trainable.map(unitType => {
+    this.bldTrainButtons.innerHTML = trainable.map((unitType, i) => {
       const cfg = UNIT_TRAIN_CONFIG[unitType];
       if (!cfg) return '';
+      const hotkey = getTrainHotkey(i);
       return `
-        <button class="bld-train-btn" data-train="${unitType}">
+        <button class="bld-train-btn" data-train="${unitType}" title="${cfg.name}${hotkey ? ` (${hotkey})` : ''}">
+          ${hotkey ? `<span class="bld-hotkey-badge">${hotkey}</span>` : ''}
           <img src="${cfg.icon}" class="bld-train-btn-icon" alt="${cfg.name}" />
           <div class="bld-hint-bubble">
-            <span class="bld-hint-title">${cfg.name}</span> - Custo: <span class="bld-cost-items" data-cost-unit="${unitType}"></span>
+            <span class="bld-hint-title">${cfg.name}${hotkey ? ` <span class="bld-hint-hotkey">(${hotkey})</span>` : ''}</span> - Custo: <span class="bld-cost-items" data-cost-unit="${unitType}"></span>
           </div>
         </button>
       `;
@@ -640,21 +711,7 @@ export class UIManager {
           return;
         }
 
-        const costParts = [];
-        if (cfg.cost.gold) {
-          const canAfford = this.gm.resources.gold >= cfg.cost.gold;
-          costParts.push(`<span class="bld-cost-item ${canAfford ? '' : 'cost-insufficient'}">${cfg.cost.gold} <img src="/icoouro.png" class="bld-cost-icon" alt="Ouro" /></span>`);
-        }
-        if (cfg.cost.wood) {
-          const canAfford = this.gm.resources.wood >= cfg.cost.wood;
-          costParts.push(`<span class="bld-cost-item ${canAfford ? '' : 'cost-insufficient'}">${cfg.cost.wood} <img src="/icomadeira.png" class="bld-cost-icon" alt="Madeira" /></span>`);
-        }
-        if (cfg.cost.stone) {
-          const canAfford = this.gm.resources.stone >= cfg.cost.stone;
-          costParts.push(`<span class="bld-cost-item ${canAfford ? '' : 'cost-insufficient'}">${cfg.cost.stone} <img src="/icopedra.png" class="bld-cost-icon" alt="Pedra" /></span>`);
-        }
-
-        costContainer.innerHTML = costParts.length > 0 ? costParts.join(', ') : 'Sem custo';
+        costContainer.innerHTML = buildCostHtml(cfg.cost, this.gm.resources);
       });
       return;
     }
@@ -668,21 +725,7 @@ export class UIManager {
       const costContainer = this.bldTrainButtons.querySelector(`[data-cost-unit="${unitType}"]`);
       if (!costContainer) return;
 
-      const costParts = [];
-      if (cfg.cost.gold) {
-        const canAfford = this.gm.resources.gold >= cfg.cost.gold;
-        costParts.push(`<span class="bld-cost-item ${canAfford ? '' : 'cost-insufficient'}">${cfg.cost.gold} <img src="/icoouro.png" class="bld-cost-icon" alt="Ouro" /></span>`);
-      }
-      if (cfg.cost.wood) {
-        const canAfford = this.gm.resources.wood >= cfg.cost.wood;
-        costParts.push(`<span class="bld-cost-item ${canAfford ? '' : 'cost-insufficient'}">${cfg.cost.wood} <img src="/icomadeira.png" class="bld-cost-icon" alt="Madeira" /></span>`);
-      }
-      if (cfg.cost.stone) {
-        const canAfford = this.gm.resources.stone >= cfg.cost.stone;
-        costParts.push(`<span class="bld-cost-item ${canAfford ? '' : 'cost-insufficient'}">${cfg.cost.stone} <img src="/icopedra.png" class="bld-cost-icon" alt="Pedra" /></span>`);
-      }
-
-      costContainer.innerHTML = costParts.join(', ');
+      costContainer.innerHTML = buildCostHtml(cfg.cost, this.gm.resources);
     });
   }
 
@@ -768,13 +811,15 @@ export class UIManager {
       const buildButtonsHtml = buildings.map(bType => {
         const cfg = BUILDING_BUILD_CONFIG[bType];
         if (!cfg) return '';
+        const hotkey = getBuildHotkey(bType);
         return `
-          <button class="bld-train-btn action-build-btn" data-build="${bType}" title="${cfg.name}">
+          <button class="bld-train-btn action-build-btn" data-build="${bType}" title="${cfg.name}${hotkey ? ` (${hotkey})` : ''}">
+            ${hotkey ? `<span class="bld-hotkey-badge">${hotkey}</span>` : ''}
             <img src="${cfg.icon}" class="bld-train-btn-icon" alt="${cfg.name}" />
             <div class="bld-hint-bubble">
               <div class="bld-hint-col">
                 <div class="bld-hint-header">
-                  <span class="bld-hint-title">${cfg.name}</span>
+                  <span class="bld-hint-title">${cfg.name}${hotkey ? ` <span class="bld-hint-hotkey">(${hotkey})</span>` : ''}</span>
                   ${cfg.description ? `<span class="bld-hint-desc">${cfg.description}</span>` : ''}
                 </div>
                 <div class="bld-hint-footer">
@@ -835,21 +880,7 @@ export class UIManager {
       const costContainer = this.selectionActions.querySelector(`[data-cost-build="${bType}"]`);
       if (!costContainer) return;
 
-      const costParts = [];
-      if (cfg.cost.wood) {
-        const canAfford = (this.gm.resources.wood || 0) >= cfg.cost.wood;
-        costParts.push(`<span class="bld-cost-item ${canAfford ? '' : 'cost-insufficient'}">${cfg.cost.wood} <img src="/icomadeira.png" class="bld-cost-icon" alt="Madeira" /></span>`);
-      }
-      if (cfg.cost.stone) {
-        const canAfford = (this.gm.resources.stone || 0) >= cfg.cost.stone;
-        costParts.push(`<span class="bld-cost-item ${canAfford ? '' : 'cost-insufficient'}">${cfg.cost.stone} <img src="/icopedra.png" class="bld-cost-icon" alt="Pedra" /></span>`);
-      }
-      if (cfg.cost.gold) {
-        const canAfford = (this.gm.resources.gold || 0) >= cfg.cost.gold;
-        costParts.push(`<span class="bld-cost-item ${canAfford ? '' : 'cost-insufficient'}">${cfg.cost.gold} <img src="/icoouro.png" class="bld-cost-icon" alt="Ouro" /></span>`);
-      }
-
-      costContainer.innerHTML = costParts.length > 0 ? costParts.join(', ') : 'Sem custo';
+      costContainer.innerHTML = buildCostHtml(cfg.cost, this.gm.resources);
     });
   }
 
@@ -997,6 +1028,7 @@ export class UIManager {
    */
   dispose() {
     this._abort.abort();
+    if (this._disposeUiScale) this._disposeUiScale();
     clearTimeout(this._notificationTimer);
     this._notificationTimer = null;
 

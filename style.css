@@ -2,6 +2,8 @@
 @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700;900&family=Nunito:wght@400;600;700&display=swap');
 
 :root {
+  /* F6-03: escala do HUD (definida em JS por src/ui/uiScale.js; 1 é o valor de projeto/1920x1080) */
+  --ui-scale: 1;
   --gold-light: #ffea9f;
   --gold-primary: #d4af37;
   --gold-dark: #8c6a1e;
@@ -58,39 +60,45 @@ body, html {
 }
 
 /* --- TOP FLOATING RESOURCE BAR & CONFIG BUTTON (hudmodelo.png) --- */
+/* F6-03 (B11): centralizada e com `max-width`/`flex-wrap` para não cortar em telas estreitas;
+   tamanhos em calc(px * var(--ui-scale)) para acompanhar a escala do HUD. */
 #top-bar-container {
   position: fixed;
-  top: 18px;
+  top: calc(18px * var(--ui-scale));
   left: 50%;
   transform: translateX(-50%);
   display: flex;
   align-items: center;
-  gap: 16px;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: calc(16px * var(--ui-scale));
+  max-width: calc(100vw - 32px);
   z-index: 100;
 }
 
 #resource-bar {
   display: flex;
   align-items: center;
-  gap: 22px;
+  flex-wrap: wrap;
+  gap: calc(22px * var(--ui-scale));
   background: linear-gradient(180deg, rgba(16, 28, 44, 0.88) 0%, rgba(9, 17, 27, 0.94) 100%);
   backdrop-filter: blur(10px);
   border: 1.5px solid rgba(212, 175, 55, 0.65);
   border-radius: 40px;
-  padding: 4px 22px 4px 6px;
+  padding: calc(4px * var(--ui-scale)) calc(22px * var(--ui-scale)) calc(4px * var(--ui-scale)) calc(6px * var(--ui-scale));
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.65), inset 0 1px 1px rgba(255, 235, 170, 0.35);
 }
 
 .res-item {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: calc(10px * var(--ui-scale));
   user-select: none;
 }
 
 .res-badge-icon {
-  width: 42px;
-  height: 42px;
+  width: calc(42px * var(--ui-scale));
+  height: calc(42px * var(--ui-scale));
   border-radius: 50%;
   object-fit: contain;
   filter: drop-shadow(0 2px 5px rgba(0, 0, 0, 0.6));
@@ -423,24 +431,29 @@ input:checked + .slider.round:before {
 }
 
 /* --- BOTTOM HUD (MINIMAP + SELECTION CARD) --- */
+/* F6-03 (B11): grid de 3 colunas em vez de 3 blocos com `position:fixed`/`left` absolutos —
+   o card de seleção nunca mais é cortado nem sobrepõe o minimapa/guia em telas estreitas. */
 #bottom-bar {
   position: fixed;
   bottom: 0;
   left: 0;
   width: 100%;
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: end;
+  gap: calc(12px * var(--ui-scale));
+  padding: 0 calc(16px * var(--ui-scale)) calc(16px * var(--ui-scale));
+  box-sizing: border-box;
   pointer-events: none;
   z-index: 100;
 }
 
 /* Minimap Frame (hudmodelo.png) */
 #minimap-wrapper {
-  position: fixed;
-  bottom: 20px;
-  left: 20px;
   background: #0f1824;
   border: 2px solid #c8a356;
   border-radius: 14px;
-  padding: 4px;
+  padding: calc(4px * var(--ui-scale));
   box-shadow: 0 8px 30px rgba(0, 0, 0, 0.75), inset 0 0 10px rgba(0, 0, 0, 0.6);
   display: flex;
   flex-direction: column;
@@ -451,8 +464,8 @@ input:checked + .slider.round:before {
 }
 
 #minimap-canvas {
-  width: 140px;
-  height: 140px;
+  width: calc(140px * var(--ui-scale));
+  height: calc(140px * var(--ui-scale));
   border-radius: 10px;
   background: #3d94bd;
   cursor: crosshair;
@@ -478,20 +491,19 @@ input:checked + .slider.round:before {
   white-space: nowrap;
 }
 
-/* Selection / Action Card (Fixed at Bottom next to Minimap) */
+/* Selection / Action Card — coluna central flexível do grid de #bottom-bar (F6-03/B11):
+   preenche o espaço entre o minimapa e o guia rápido, nunca ultrapassa a tela. */
 #selection-card {
   display: none;
-  position: fixed;
-  bottom: 20px;
-  left: 186px;
   background: var(--panel-bg);
   border: 2px solid var(--gold-primary);
   border-radius: 12px;
   box-shadow: var(--panel-shadow);
-  padding: 14px 20px;
-  width: 580px;
-  max-width: calc(100vw - 440px);
-  min-height: 135px;
+  padding: calc(14px * var(--ui-scale)) calc(20px * var(--ui-scale));
+  width: 100%;
+  max-width: calc(640px * var(--ui-scale));
+  min-width: 0;
+  min-height: calc(135px * var(--ui-scale));
   backdrop-filter: blur(10px);
   flex-direction: column;
   gap: 10px;
@@ -594,16 +606,18 @@ input:checked + .slider.round:before {
   white-space: nowrap;
 }
 
+/* F6-03: grade 3×3 de 56px × escala (em vez de uma fileira em `flex`) — cabe mais botões sem
+   estourar a largura do card, do jeito que WC2 organiza construir/treinar/pesquisar. */
 .bld-train-buttons {
-  display: flex;
-  align-items: center;
-  gap: 10px;
+  display: grid;
+  grid-template-columns: repeat(3, calc(56px * var(--ui-scale)));
+  gap: calc(8px * var(--ui-scale));
 }
 
 .bld-train-btn {
   position: relative;
-  width: 44px;
-  height: 44px;
+  width: calc(56px * var(--ui-scale));
+  height: calc(56px * var(--ui-scale));
   background: rgba(14, 23, 36, 0.85);
   border: 1.5px solid var(--gold-primary);
   border-radius: 8px;
@@ -625,6 +639,33 @@ input:checked + .slider.round:before {
 
 .bld-train-btn:active {
   transform: translateY(1px) scale(0.96);
+}
+
+.bld-train-btn:disabled,
+.bld-train-btn.disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+  filter: grayscale(0.6);
+}
+
+.bld-train-btn:disabled:hover,
+.bld-train-btn.disabled:hover {
+  transform: none;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5), inset 0 0 8px rgba(0, 0, 0, 0.6);
+}
+
+/* Letra de atalho (F6-03) no canto do botão — só exibe, a tecla em si é ligada na F3-01. */
+.bld-hotkey-badge {
+  position: absolute;
+  top: 2px;
+  left: 3px;
+  font-family: 'Cinzel', serif;
+  font-size: 10px;
+  font-weight: 800;
+  color: #fef08a;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.95);
+  pointer-events: none;
+  line-height: 1;
 }
 
 .bld-train-btn-icon {
@@ -696,6 +737,17 @@ input:checked + .slider.round:before {
 .bld-hint-title {
   color: #fef08a;
   font-weight: 700;
+}
+
+.bld-hint-hotkey {
+  color: #94a3b8;
+  font-weight: 600;
+}
+
+.bld-hint-missing {
+  font-size: 11px;
+  font-weight: 700;
+  color: #ef4444;
 }
 
 .bld-cost-items {
@@ -965,6 +1017,60 @@ input:checked + .slider.round:before {
   width: 100%;
 }
 
+/* F6-03: grade de retratos da seleção múltipla (até 24; clique seleciona só aquela unidade). */
+#selection-portraits {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, calc(40px * var(--ui-scale)));
+  gap: calc(4px * var(--ui-scale));
+  width: 100%;
+  max-height: calc(88px * var(--ui-scale));
+  overflow-y: auto;
+}
+
+.selection-portrait {
+  position: relative;
+  width: calc(40px * var(--ui-scale));
+  height: calc(40px * var(--ui-scale));
+  background: rgba(14, 23, 36, 0.85);
+  border: 1.5px solid var(--gold-primary);
+  border-radius: 6px;
+  cursor: pointer;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.1s ease;
+}
+
+.selection-portrait:hover {
+  border-color: #fef08a;
+  transform: translateY(-1px);
+}
+
+.selection-portrait-icon {
+  width: 70%;
+  height: 70%;
+  object-fit: contain;
+  pointer-events: none;
+}
+
+.selection-portrait-hp-bg {
+  position: absolute;
+  left: 2px;
+  right: 2px;
+  bottom: 2px;
+  height: 3px;
+  background: rgba(0, 0, 0, 0.6);
+  border-radius: 2px;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.selection-portrait-hp-fill {
+  height: 100%;
+  background: #4ade80;
+}
+
 #selection-stats {
   display: flex;
   gap: 16px;
@@ -993,11 +1099,11 @@ input:checked + .slider.round:before {
   width: 100%;
 }
 
+/* F6-03: mesma grade 3×3 dos botões de construção/treino/pesquisa. */
 .worker-actions-group {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  flex-wrap: wrap;
+  display: grid;
+  grid-template-columns: repeat(3, calc(56px * var(--ui-scale)));
+  gap: calc(8px * var(--ui-scale));
 }
 
 .action-stop-btn {
@@ -1041,22 +1147,36 @@ input:checked + .slider.round:before {
   font-size: 12px;
 }
 
-/* Quick Controls Guide (hudmodelo.png - Bottom Right) */
+/* Quick Controls Guide — 3ª coluna do grid de #bottom-bar (F6-03/B11), sem `position:fixed`. */
 #quick-guide {
-  position: fixed;
-  bottom: 20px;
-  right: 20px;
   background: rgba(14, 23, 36, 0.88);
   backdrop-filter: blur(8px);
   border: 1px solid rgba(212, 175, 55, 0.35);
   border-radius: 10px;
-  padding: 8px 16px;
-  font-size: 12px;
+  padding: calc(8px * var(--ui-scale)) calc(16px * var(--ui-scale));
+  font-size: calc(12px * var(--ui-scale));
   color: #cbd5e1;
   line-height: 1.55;
   box-shadow: 0 6px 20px rgba(0, 0, 0, 0.65);
   text-align: right;
+  white-space: nowrap;
   z-index: 100;
+}
+
+/* < 1100px: esconde textos secundários (guia rápido, título do minimapa, "/ pop máx.") para
+   abrir espaço ao card de seleção e à barra de recursos (F6-03/B11). */
+@media (max-width: 1100px) {
+  #quick-guide .guide-line-2 {
+    display: none;
+  }
+
+  .pop-secondary {
+    display: none;
+  }
+
+  .minimap-title {
+    display: none;
+  }
 }
 
 #quick-guide .key-gold {

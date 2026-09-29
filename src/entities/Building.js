@@ -3,6 +3,12 @@ import { ModelFactory } from './ModelFactory.js';
 import { Arrow } from './Arrow.js';
 import { UPGRADE_CONFIG, FORGE_UPGRADES } from '../core/UpgradeConfig.js';
 import { legacyOwnerId } from '../sim/EntityIds.js';
+import { EVT } from '../sim/events.js';
+
+/** Vector3 → objeto plano `{x,y,z}` (payload de evento: nunca referências a objetos three.js). */
+function posOf(v) {
+  return { x: v.x, y: v.y, z: v.z };
+}
 
 import {
   getBuildingDef,
@@ -143,7 +149,7 @@ export class Building {
 
   // Base virtual methods for custom VFX/animations
   initCustomVFX() {}
-  updateCustomVFX(delta, gameManager, soundManager, particleSystem) {}
+  updateCustomVFX(delta, gameManager) {}
   cleanupCustomVFX() {}
 
   /**
@@ -447,22 +453,23 @@ export class Building {
     }
   }
 
-  construct(amount, soundManager, particleSystem, gameManager) {
+  construct(amount, gameManager) {
     if (this.isConstructed) return;
     const gm = gameManager || this.gameManager;
     this.buildProgress += amount;
-    if (particleSystem) {
-      particleSystem.spawnWoodChips(this.mesh.position);
-    }
     if (this.buildProgress >= 100) {
       this.buildProgress = 100;
       this.isConstructed = true;
       this.updateConstructionState();
       this.updateHealthBar();
       this.updateDamageFlames();
-      if (soundManager) soundManager.playBuildComplete();
-      if (particleSystem) {
-        particleSystem.spawnFloatingText('Constructed!', this.mesh.position, '#ffd700');
+      if (gm && gm.events) {
+        gm.events.emit(EVT.BUILDING_COMPLETED, {
+          buildingId: this.id,
+          ownerId: this.ownerId,
+          pos: posOf(this.mesh.position),
+          buildingType: this.type
+        });
       }
       const owner = this.getOwner(gm);
       if (owner) owner.recalculatePop(gm);
@@ -471,7 +478,7 @@ export class Building {
     }
   }
 
-  takeDamage(amount, particleSystem, attacker = null) {
+  takeDamage(amount, attacker = null) {
     this.hp -= amount;
     this.underAttackTimer = 6.0;
     this.updateHealthBar();
@@ -480,9 +487,14 @@ export class Building {
     }
     this.updateDamageFlames();
 
-    if (particleSystem) {
-      particleSystem.spawnFloatingText(`-${Math.round(amount)}`, this.mesh.position, '#ff4d4d');
-      particleSystem.spawnHitSparks(this.mesh.position);
+    const gmEvents = this.gameManager && this.gameManager.events;
+    if (gmEvents) {
+      gmEvents.emit(EVT.BUILDING_DAMAGED, {
+        buildingId: this.id,
+        ownerId: this.ownerId,
+        pos: posOf(this.mesh.position),
+        amount
+      });
     }
     if (this.hp <= 0) {
       this.hp = 0;
@@ -494,6 +506,15 @@ export class Building {
     this.isDead = true;
     if (this.hpGroup) this.hpGroup.visible = false;
     if (this.flamesGroup) this.flamesGroup.visible = false;
+    const gmEvents = this.gameManager && this.gameManager.events;
+    if (gmEvents) {
+      gmEvents.emit(EVT.BUILDING_DESTROYED, {
+        buildingId: this.id,
+        ownerId: this.ownerId,
+        pos: posOf(this.mesh.position),
+        buildingType: this.type
+      });
+    }
     this.dispose();
   }
 
@@ -621,9 +642,10 @@ export class Building {
    *                          mantido por compatibilidade com o chamador (`GameManager.simStep`)
    * @param {Array} allUnits  todas as unidades (repassado ao dano para retaliação/ajuda)
    */
-  simUpdate(delta, gameManager, soundManager, particleSystem, arrows, targets, allUnits = []) {
+  simUpdate(delta, gameManager, arrows, targets, allUnits = []) {
     if (this.isDead) return;
     if (gameManager) this.gameManager = gameManager;
+    const gmEvents = gameManager && gameManager.events;
 
     // Under attack timer
     if (this.underAttackTimer > 0) {
@@ -638,8 +660,14 @@ export class Building {
         this.passiveTimer = 0;
         const owner = this.getOwner(gameManager);
         if (owner) owner.add(passive.resource, passive.amount);
-        if (particleSystem) {
-          particleSystem.spawnFloatingText(`+${passive.amount} Gold`, this.mesh.position, '#ffd700');
+        if (gmEvents) {
+          gmEvents.emit(EVT.RESOURCE_GATHERED, {
+            type: passive.resource,
+            amount: passive.amount,
+            pos: posOf(this.mesh.position),
+            ownerId: this.ownerId,
+            passive: true
+          });
         }
       }
     }
@@ -659,16 +687,15 @@ export class Building {
 
         if (closest) {
           this.attackTimer = 0;
-          if (soundManager) {
-            if (towerDef.projectile === 'axe') soundManager.playSword();
-            else soundManager.playBow();
-          }
+          const projType = towerDef.projectile;
           _towerArrowStart.copy(this.mesh.position);
           _towerArrowStart.y += towerDef.projectileOriginY;
-          const projType = towerDef.projectile;
+          if (gmEvents) {
+            gmEvents.emit(EVT.PROJECTILE_FIRED, { kind: projType, from: posOf(_towerArrowStart), ownerId: this.ownerId });
+          }
           const arrow = new Arrow(this.scene, _towerArrowStart, closest, this.attackDamage, (target, dmg, hitPos) => {
-            target.takeDamage(dmg, particleSystem, this, allUnits);
-            if (soundManager) soundManager.playArrowHit();
+            target.takeDamage(dmg, this, allUnits);
+            if (gmEvents) gmEvents.emit(EVT.PROJECTILE_HIT, { kind: projType, pos: posOf(hitPos), ownerId: this.ownerId });
           }, projType);
           arrows.push(arrow);
           if (gameManager && gameManager.registerEntity) gameManager.registerEntity(arrow, this.ownerId);
@@ -687,8 +714,15 @@ export class Building {
         const rng = gameManager && gameManager.rng ? gameManager.rng : null;
         const spawnX = this.mesh.position.x + ((rng ? rng.next() : Math.random()) - 0.5) * 1.5;
         const spawnZ = this.mesh.position.z + spawnDist;
-        gameManager.spawnUnit(current.type, spawnX, spawnZ, this.ownerId, this.rallyPoint);
-        if (soundManager) soundManager.playOrder();
+        const spawned = gameManager.spawnUnit(current.type, spawnX, spawnZ, this.ownerId, this.rallyPoint);
+        if (gmEvents) {
+          gmEvents.emit(EVT.UNIT_TRAINED, {
+            unitId: spawned.id,
+            ownerId: this.ownerId,
+            pos: posOf(spawned.mesh.position),
+            unitType: current.type
+          });
+        }
       }
     }
 
@@ -701,8 +735,9 @@ export class Building {
       this.researchSoundTimer = (this.researchSoundTimer || 0) + delta;
       if (this.researchSoundTimer >= 2.2) {
         this.researchSoundTimer = 0;
-        if (this.strikeAnvil) this.strikeAnvil(particleSystem);
-        if (soundManager) soundManager.playHammer();
+        if (gmEvents) {
+          gmEvents.emit(EVT.BUILDING_VFX, { buildingId: this.id, ownerId: this.ownerId, pos: posOf(this.mesh.position), kind: 'anvil_spark' });
+        }
       }
 
       if (r.progress >= r.totalTime) {
@@ -712,10 +747,9 @@ export class Building {
         if (gm) {
           gm.completeUpgrade(completedId, this.ownerId);
         }
-        if (this.strikeAnvil) this.strikeAnvil(particleSystem);
-        if (soundManager) soundManager.playBuildComplete();
-        if (particleSystem) {
-          particleSystem.spawnFloatingText('Melhoria Forjada!', this.mesh.position, '#ffd700');
+        if (gmEvents) {
+          gmEvents.emit(EVT.BUILDING_VFX, { buildingId: this.id, ownerId: this.ownerId, pos: posOf(this.mesh.position), kind: 'anvil_spark' });
+          gmEvents.emit(EVT.RESEARCH_DONE, { ownerId: this.ownerId, upgradeId: completedId, pos: posOf(this.mesh.position) });
         }
       }
     }
@@ -726,8 +760,9 @@ export class Building {
    * e VFX customizado das subclasses (forjas, chiqueiro, serraria, bandeiras). Roda a cada frame
    * renderizado (`frameDelta`), não a cada passo de simulação.
    */
-  renderUpdate(frameDelta, gameManager, soundManager, particleSystem) {
+  renderUpdate(frameDelta, gameManager) {
     if (this.isDead) return;
+    const gmEvents = gameManager && gameManager.events;
 
     // Billboard 3D health bar to face camera and maintain world position
     if (this.hpGroup && this.scene) {
@@ -763,28 +798,28 @@ export class Building {
       this.flameSmokeTimer = (this.flameSmokeTimer || 0) + frameDelta;
       if (this.flameSmokeTimer >= 0.7) {
         this.flameSmokeTimer = 0;
-        if (particleSystem && this.flameClusters.length > 0) {
+        if (gmEvents && this.flameClusters.length > 0) {
           const cluster = this.flameClusters[Math.floor(Math.random() * this.flameClusters.length)]; // visual: não afeta o estado
           cluster.getWorldPosition(_flameSmokePos);
           _flameSmokePos.y += 0.5;
-          particleSystem.spawnSmokePuff(_flameSmokePos);
+          gmEvents.emit(EVT.BUILDING_VFX, { buildingId: this.id, ownerId: this.ownerId, pos: posOf(_flameSmokePos), kind: 'chimney_smoke' });
         }
       }
     }
 
     // Subclass custom procedural animation and VFX update
     if (this.isConstructed) {
-      this.updateCustomVFX(frameDelta, gameManager, soundManager, particleSystem);
+      this.updateCustomVFX(frameDelta, gameManager);
     }
 
     // Cottage & Great Hall chimney smoke
-    if (this.isConstructed && (this.type === 'cottage' || this.type === 'great_hall') && particleSystem) {
+    if (this.isConstructed && (this.type === 'cottage' || this.type === 'great_hall') && gmEvents) {
       this.smokeTimer += frameDelta;
       if (this.smokeTimer >= 0.8) {
         this.smokeTimer = 0;
         const chimneyOffset = this.type === 'great_hall' ? _chimneyOffsetGreatHall : _chimneyOffsetCottage;
         _chimneyPos.copy(this.mesh.position).add(chimneyOffset);
-        particleSystem.spawnSmokePuff(_chimneyPos);
+        gmEvents.emit(EVT.BUILDING_VFX, { buildingId: this.id, ownerId: this.ownerId, pos: posOf(_chimneyPos), kind: 'chimney_smoke' });
       }
     }
   }

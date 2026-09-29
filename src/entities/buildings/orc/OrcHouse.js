@@ -1,5 +1,6 @@
 import * as THREE from 'three';
 import { Building } from '../../Building.js';
+import { EVT } from '../../../sim/events.js';
 
 /**
  * OrcHouse — Toca e Habitação dos Peons Orcs (Orc Burrow)
@@ -28,7 +29,7 @@ export class OrcHouse extends Building {
     this.roofSmokeSocket = new THREE.Vector3(-1.6, 5.2, -1.5);
   }
 
-  updateCustomVFX(delta, gameManager, soundManager, particleSystem) {
+  updateCustomVFX(delta, gameManager) {
     this.flickerTimer += delta * 6.0;
 
     // 1. Cintilação suave da fogueira interna
@@ -37,12 +38,18 @@ export class OrcHouse extends Building {
     }
 
     // 2. Fumaça saindo pela chaminé de pedra
-    if (particleSystem) {
+    const gmEvents = gameManager && gameManager.events;
+    if (gmEvents) {
       this.smokeTimer += delta;
       if (this.smokeTimer >= 0.85) {
         this.smokeTimer = 0;
         const worldPos = this.mesh.position.clone().add(this.roofSmokeSocket);
-        particleSystem.spawnSmokePuff(worldPos);
+        gmEvents.emit(EVT.BUILDING_VFX, {
+          buildingId: this.id,
+          ownerId: this.ownerId,
+          pos: { x: worldPos.x, y: worldPos.y, z: worldPos.z },
+          kind: 'chimney_smoke'
+        });
       }
     }
   }

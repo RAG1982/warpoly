@@ -1,5 +1,6 @@
 import * as THREE from 'three';
 import { Building } from '../../Building.js';
+import { EVT } from '../../../sim/events.js';
 
 /**
  * OrcWatchtower — Torre de Vigia, Sentinela e Baluarte Defensivo da Horda
@@ -57,7 +58,7 @@ export class OrcWatchtower extends Building {
     return flameGroup;
   }
 
-  updateCustomVFX(delta, gameManager, soundManager, particleSystem) {
+  updateCustomVFX(delta, gameManager) {
     this.flickerTimer += delta * 12.0;
 
     // 1. Cintilação realista da luz de fogo
@@ -76,12 +77,18 @@ export class OrcWatchtower extends Building {
     }
 
     // 3. Emissão de fagulhas/brasas e fumaça ao ar livre
-    if (particleSystem) {
+    const gmEvents = gameManager && gameManager.events;
+    if (gmEvents) {
       this.fireTimer += delta;
       if (this.fireTimer >= 0.5) {
         this.fireTimer = 0;
         const sparkPos = this.mesh.position.clone().add(this.brazierSocket);
-        particleSystem.spawnHitSparks(sparkPos);
+        gmEvents.emit(EVT.BUILDING_VFX, {
+          buildingId: this.id,
+          ownerId: this.ownerId,
+          pos: { x: sparkPos.x, y: sparkPos.y, z: sparkPos.z },
+          kind: 'brazier_spark'
+        });
       }
     }
   }

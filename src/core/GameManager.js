@@ -37,6 +37,8 @@ import { CommandQueue, COMMAND_DELAY_TICKS } from '../sim/CommandQueue.js';
 import { CommandExecutor } from '../sim/CommandExecutor.js';
 import { createRng } from '../sim/rng.js';
 import { recordChecksum } from '../sim/checksum.js';
+import { EventBus } from '../sim/EventBus.js';
+import { EVT } from '../sim/events.js';
 
 const EMPTY_LIST = Object.freeze([]);
 
@@ -58,6 +60,11 @@ export class GameManager {
     this.terrain = terrain;
     this.soundManager = soundManager;
     this.particleSystem = particleSystem;
+    // F2-07: barramento de eventos da simulação — nem `simStep` nem as entidades chamam
+    // `soundManager`/`particleSystem`/`uiManager` direto; emitem eventos aqui, despachados só em
+    // `flush()` (fim do passo/quadro) para os ouvintes (`src/audio/AudioEvents.js`,
+    // `src/render/VfxEvents.js`, `src/ui/UiEvents.js`), criados pela `MatchSession`.
+    this.events = new EventBus();
 
     // Instanced Trees System (6 Draw Calls for all 180 Trees)
     this.treeManager = new TreeManager(this.scene);
@@ -799,13 +806,9 @@ export class GameManager {
         this.applyUpgradeToUnit(u, upgradeId);
       }
     });
-
-    if (player.isLocal) {
-      const cfg = UPGRADE_CONFIG[upgradeId];
-      const factionType = player.factionId === 'orc' ? 'orc' : 'human';
-      const upgName = cfg?.name[factionType] || upgradeId;
-      this.uiManager?.showNotification(`🔥 Melhoria forjada: ${upgName}!`);
-    }
+    // F2-07: a notificação "Melhoria forjada" sai do evento RESEARCH_DONE (emitido por
+    // `Building.simUpdate` ao concluir a pesquisa, junto com este `completeUpgrade`) — ver
+    // `src/ui/UiEvents.js`.
   }
 
   applyUpgradeToUnit(unit, upgradeId = null) {
@@ -883,14 +886,19 @@ export class GameManager {
 
     const stats = getBuildingDef(type);
     if (!owner.canAfford(stats.cost)) {
-      if (owner.isLocal) this.uiManager?.showNotification('⚠️ Recursos insuficientes!');
+      if (owner.isLocal) this.events.emit(EVT.NOTIFY, { ownerId, text: '⚠️ Recursos insuficientes!' });
       return null;
     }
     owner.deduct(stats.cost);
 
     const b = this.createBuilding(type, x, z, false, ownerId);
     this.buildings.push(b);
-    if (owner.isLocal) this.soundManager.playBuildPlace();
+    this.events.emit(EVT.BUILDING_PLACED, {
+      buildingId: b.id,
+      ownerId,
+      pos: { x: b.mesh.position.x, y: b.mesh.position.y, z: b.mesh.position.z },
+      buildingType: type
+    });
     this.recalculatePopCap();
 
     // Clean up any depleted tree stumps inside the building footprint so they do not poke through floors
@@ -1113,14 +1121,14 @@ export class GameManager {
       if (!this.gameWon) {
         this.gameWon = true;
         this.isGameOver = true;
-        this.soundManager.playVictory();
+        this.events.emit(EVT.MATCH_WON, { ownerId: local.id });
       }
       return true;
     }
 
     // Partida continua (FFA/times): avisa quem caiu. A IA derrotada para de jogar (ver update).
     newlyDefeated.forEach(p => {
-      this.uiManager?.showNotification(`☠️ ${p.name} foi derrotado!`);
+      this.events.emit(EVT.PLAYER_DEFEATED, { ownerId: p.id, name: p.name });
     });
     return false;
   }
@@ -1233,7 +1241,10 @@ export class GameManager {
     this.gameTime += dt;
 
     // Check Win/Loss conditions
-    if (this._updateVictoryConditions()) return;
+    if (this._updateVictoryConditions()) {
+      this.events.flush();
+      return;
+    }
 
     // Orçamento de A* por passo de simulação (F1-07): resolve pedidos pendentes de requestPath.
     // F2-03: orçamento por nós expandidos (não por relógio) — mesmo limite em todas as máquinas.
@@ -1242,7 +1253,7 @@ export class GameManager {
     // Update Trees (árvore cortada — isDead/woodRemaining <= 0 — sai do blockerGrid; remove()
     // é no-op se já não estiver na grade, então repetir o teste em árvores já cortadas é barato)
     this.trees.forEach(t => {
-      t.update(dt, this.particleSystem);
+      t.update(dt, this.events);
       if (t.isDead || t.woodRemaining <= 0) {
         this.blockerGrid.remove(t);
         if (this.pathfinder && t._pathBlocked) {
@@ -1266,7 +1277,7 @@ export class GameManager {
 
     // Update Buildings (lógica de jogo; VFX/billboard vão em renderUpdate)
     this.buildings.forEach(b => {
-      b.simUpdate(dt, this, this.soundManager, this.particleSystem, this.arrows, allUnits, allUnits);
+      b.simUpdate(dt, this, this.arrows, allUnits, allUnits);
     });
 
     // Clean dead buildings
@@ -1292,7 +1303,7 @@ export class GameManager {
 
     // Update Units (tamanho fixado: unidades criadas neste frame só atualizam no próximo)
     for (let i = 0; i < unitCount; i++) {
-      allUnits[i].update(dt, this, this.soundManager, this.particleSystem, this.arrows, allUnits, this.buildings);
+      allUnits[i].update(dt, this, this.arrows, allUnits, this.buildings);
     }
 
     // Resolve Collisions: Units cannot walk through buildings, deposits, trees, or each other
@@ -1336,6 +1347,10 @@ export class GameManager {
 
     // F2-03: checksum de estado a cada 20 ticks (teste de determinismo/replay).
     if (this.currentTick % 20 === 0) recordChecksum(this);
+
+    // F2-07: despacha os eventos emitidos neste passo para os ouvintes (áudio/VFX/UI) — depois
+    // do checksum, para nunca influenciar o estado determinístico.
+    this.events.flush();
   }
 
   /**
@@ -1357,7 +1372,7 @@ export class GameManager {
 
     // Construções: billboards, chamas, fumaça e VFX customizado das subclasses.
     this.buildings.forEach(b => {
-      b.renderUpdate(frameDelta, this, this.soundManager, this.particleSystem);
+      b.renderUpdate(frameDelta, this);
     });
 
     // LOD de animação por unidade (F1-09 item 4): frustum + distância à câmera-alvo.
@@ -1412,6 +1427,10 @@ export class GameManager {
 
       u.renderUpdate(animDelta, alpha, lodStep);
     }
+
+    // F2-07: VFX ambiente (fumaça de chaminé, faíscas…) emitido durante o quadro renderizado
+    // (fora do tick fixo) — despacha já aqui em vez de esperar o próximo `simStep` (até 50 ms).
+    this.events.flush();
   }
 
   /**
@@ -1473,7 +1492,7 @@ export class GameManager {
       (b.ownerId === unit.ownerId);
 
     if (unit.state === 'returning' && isDropoff) {
-      unit.depositResources(this, this.soundManager, this.particleSystem);
+      unit.depositResources(this);
     }
   }
 

@@ -1,5 +1,6 @@
 import * as THREE from 'three';
 import { Building } from '../../Building.js';
+import { EVT } from '../../../sim/events.js';
 
 /**
  * OrcBarracks — Quartel de Recrutamento e Treinamento Militar dos Orcs
@@ -67,17 +68,19 @@ export class OrcBarracks extends Building {
   }
 
   /**
-   * Dispara um golpe no boneco de treino quando um guerreiro é recrutado
+   * Dispara um golpe no boneco de treino quando um guerreiro é recrutado. `fx` é o
+   * `ParticleSystem` (uso direto pelo inspetor, fora de uma partida — F2-07); dentro da
+   * simulação o impulso roda em `updateCustomVFX` e o VFX sai como evento `BUILDING_VFX`.
    */
-  hitDummy(particleSystem) {
+  hitDummy(fx) {
     this.dummyVelocity = 0.75; // Impulso angular
-    if (particleSystem) {
+    if (fx) {
       const dummyWorld = this.trainingDummy.getWorldPosition(new THREE.Vector3());
-      particleSystem.spawnWoodChips(dummyWorld);
+      fx.spawnWoodChips(dummyWorld);
     }
   }
 
-  updateCustomVFX(delta, gameManager, soundManager, particleSystem) {
+  updateCustomVFX(delta, gameManager) {
     this.ambientTime += delta;
 
     if (this.trainingDummy) {
@@ -95,7 +98,12 @@ export class OrcBarracks extends Building {
 
     // Se estiver treinando tropas, há chance de pancadas periódicas
     if (this.queue.length > 0 && Math.random() < delta * 0.6) {
-      this.hitDummy(particleSystem);
+      this.dummyVelocity = 0.75; // Impulso angular (mesmo efeito de hitDummy, sem tocar particleSystem)
+      const gmEvents = gameManager && gameManager.events;
+      if (gmEvents && this.trainingDummy) {
+        const dummyWorld = this.trainingDummy.getWorldPosition(new THREE.Vector3());
+        gmEvents.emit(EVT.BUILDING_VFX, { buildingId: this.id, ownerId: this.ownerId, pos: { x: dummyWorld.x, y: dummyWorld.y, z: dummyWorld.z }, kind: 'dummy_hit' });
+      }
     }
   }
 

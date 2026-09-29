@@ -36,7 +36,7 @@ import {
   createArrow
 } from '../models/index.js';
 
-import { UnitAnimator, ANIMATION_DURATIONS } from './unitAnimator.js';
+import { UnitAnimator, ANIMATION_DURATIONS } from '../animation/UnitAnimator.js';
 import {
   GreatHall,
   OrcBarracks,

@@ -108,7 +108,7 @@ try {
     // destrói a de maior |x| (fazenda/chiqueiro lateral)
     const target = enemyB.sort((a, b) => Math.abs(b.mesh.position.x) - Math.abs(a.mesh.position.x))[0];
     window.__fog.destroyed = { type: target.type, x: target.mesh.position.x, z: target.mesh.position.z };
-    target.takeDamage(1e6, gm.particleSystem);
+    target.takeDamage(1e6); // F2-07: takeDamage não recebe mais particleSystem (evento BUILDING_DAMAGED)
     await wait(400);
     f.cam(-34, 26, 1.0);
   });

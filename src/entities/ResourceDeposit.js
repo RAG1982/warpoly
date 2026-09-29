@@ -29,18 +29,14 @@ export class ResourceDeposit {
     return ModelFactory.createStoneQuarry();
   }
 
-  mine(amount, particleSystem) {
+  /**
+   * F2-07: só a lógica de estado (recurso restante). O VFX de poeira/brilho ao minerar sai como
+   * evento `WORKER_MINE` emitido pelo chamador (`Unit.js`, que conhece o `ownerId` de quem está
+   * minerando) — ver `Unit.updateGathering`.
+   */
+  mine(amount) {
     const harvested = Math.min(amount, this.resourcesRemaining);
     this.resourcesRemaining -= harvested;
-
-    if (particleSystem) {
-      if (this.type === 'gold') {
-        particleSystem.spawnGoldGlitter(this.mesh.position);
-      } else {
-        particleSystem.spawnStoneDust(this.mesh.position);
-      }
-    }
-
     return harvested;
   }
 }

@@ -12,6 +12,7 @@ import {
 } from '../entities/buildings/orc/index.js';
 import { Tree } from '../entities/Tree.js';
 import { ResourceDeposit } from '../entities/ResourceDeposit.js';
+import { ModelFactory } from '../entities/ModelFactory.js';
 import { FogOfWar } from './FogOfWar.js';
 import { AIDirector } from '../ai/AIDirector.js';
 import { TreeManager } from '../world/TreeManager.js';
@@ -34,6 +35,7 @@ import { SIM_DT, MAX_STEPS, animationLodStep } from '../sim/constants.js';
 import { CMD, makeCommand } from '../sim/commands.js';
 import { CommandQueue, COMMAND_DELAY_TICKS } from '../sim/CommandQueue.js';
 import { CommandExecutor } from '../sim/CommandExecutor.js';
+import { createRng } from '../sim/rng.js';
 
 const EMPTY_LIST = Object.freeze([]);
 
@@ -61,9 +63,18 @@ export class GameManager {
 
     // Configuração da partida e jogadores (F2-01). Economia/pop/pesquisas vivem em Player.
     this.matchConfig = validateMatchConfig(matchConfig || createMatchConfig());
+    // F2-03: partida headless (testes de determinismo em Node, sem DOM/WebGL) — nenhuma malha
+    // procedural (textura em canvas) é criada; ver ModelFactory.getOrCreateModel.
+    this.headless = !!this.matchConfig.headless;
+    ModelFactory.headless = this.headless;
     /** @type {PlayerRegistry} */
     this.playerRegistry = new PlayerRegistry();
     this._localPlayerId = 0;
+
+    // F2-03: RNG de simulação — determinístico, derivado da seed da partida. Tudo que altera
+    // estado de jogo usa `this.rng` (ou um fork dele); RNG visual (Math.random) continua livre.
+    this.rng = createRng(this.matchConfig.seed);
+    this.rngMap = this.rng.fork('map');
 
     // IDs de entidade (F2-01): id numérico estável + ownerId em toda entidade.
     this.entityRegistry = new EntityRegistry();
@@ -345,6 +356,10 @@ export class GameManager {
   /** Recria o mapa com uma nova MatchConfig e centraliza a câmera na base do jogador local. */
   startMatch(matchConfig) {
     this.matchConfig = validateMatchConfig(matchConfig);
+    this.headless = !!this.matchConfig.headless;
+    ModelFactory.headless = this.headless;
+    this.rng = createRng(this.matchConfig.seed);
+    this.rngMap = this.rng.fork('map');
     this.resetMap();
     this.focusCameraOnLocalBase();
   }

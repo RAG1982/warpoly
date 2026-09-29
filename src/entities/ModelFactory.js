@@ -186,10 +186,20 @@ export class ModelFactory {
   }
 
   /**
+   * F2-03 (modo headless): partidas headless (`MatchConfig.headless`, testes de determinismo em
+   * Node, sem DOM/WebGL) não podem gerar texturas procedurais (`document.createElement('canvas')`).
+   * Com a flag ligada, todo `createXxx()` que passa por aqui (unidades, construções, minas,
+   * pedreiras, flechas) devolve um `THREE.Group()` vazio em vez de rodar o gerador procedural —
+   * a simulação (posição/estado/colisão) não depende da malha visual.
+   */
+  static headless = false;
+
+  /**
    * Retrieves a model from the preloaded template cache and returns a zero-cost clone,
    * sharing GPU geometries and materials.
    */
   static getOrCreateModel(key, generatorFn, type = null) {
+    if (this.headless) return new THREE.Group();
     if (!this.templates.has(key)) {
       let template = prepareStaticTemplate(key, generatorFn()); // F1-02 (?merge=0 desliga)
       if (type && isStaticMergeEnabled()) {

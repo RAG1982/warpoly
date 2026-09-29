@@ -9,6 +9,8 @@ import { InputManager } from './InputManager.js';
 import { UIManager } from '../ui/UIManager.js';
 import { collectSharedResources, disposeObjectTree } from '../render/sceneDisposal.js';
 import { createAudioEvents } from '../audio/AudioEvents.js';
+import { RuinsManager } from '../render/RuinsManager.js';
+import { QualitySettings } from './QualitySettings.js';
 import { createVfxEvents } from '../render/VfxEvents.js';
 import { createUiEvents } from '../ui/UiEvents.js';
 
@@ -71,10 +73,14 @@ export class MatchSession {
     this._disposeAudioEvents = null;
     this._disposeVfxEvents = null;
     this._disposeUiEvents = null;
+    this.ruins = null;
     if (!this.gameManager.headless) {
       this._disposeAudioEvents = createAudioEvents(this.gameManager, sound);
       this._disposeVfxEvents = createVfxEvents(this.gameManager, this.particleSystem);
       this._disposeUiEvents = createUiEvents(this.gameManager, this.uiManager);
+      // NEW-19: ruínas visuais (só apresentação)
+      this.ruins = new RuinsManager(this.gameManager, scene, QualitySettings);
+      this.ruins.attach();
     }
   }
 
@@ -105,6 +111,7 @@ export class MatchSession {
       const alpha = this.gameManager.advance(delta);
       this.gameManager.renderUpdate(delta, alpha);
       this.particleSystem.update(delta);
+      this.ruins?.update(delta);
     } else {
       // Pausado: mantém a pose de simulação (sem avançar), billboards seguem a câmera.
       this.gameManager.renderUpdate(0, 1);
@@ -129,6 +136,7 @@ export class MatchSession {
     this._disposeAudioEvents?.();
     this._disposeVfxEvents?.();
     this._disposeUiEvents?.();
+    this.ruins?.dispose();
 
     // 1. Entrada e HUD primeiro: nada mais reage a eventos desta partida.
     this.inputManager.dispose();

@@ -29,7 +29,6 @@ import {
   layoutAt,
   validateMatchConfig
 } from '../sim/MatchConfig.js';
-import { getMap } from '../data/maps/index.js';
 import { SIM_DT, MAX_STEPS, animationLodStep } from '../sim/constants.js';
 import { CMD, makeCommand } from '../sim/commands.js';
 import { CommandQueue, COMMAND_DELAY_TICKS } from '../sim/CommandQueue.js';

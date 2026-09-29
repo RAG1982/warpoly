@@ -138,12 +138,13 @@ class GameApp {
     });
   }
 
-  _onMenuStart({ faction, difficulty }) {
+  _onMenuStart({ faction, difficulty, mapId }) {
     if (this.fsm.is(S.MAIN_MENU)) this.fsm.transition(S.MATCH_SETUP);
     if (!this.fsm.is(S.MATCH_SETUP)) return;
     const config = createMatchConfig({
       localFaction: faction,
       difficulty,
+      mapId,
       ffa: ['1', 'true'].includes(this.params.get('ffa'))
     });
     this.fsm.transition(S.LOADING, { config });

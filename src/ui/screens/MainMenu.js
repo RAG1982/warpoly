@@ -12,10 +12,14 @@
 // 3D atuais geram texturas procedurais 2048² na criação, o que atrasaria o menu em
 // vários segundos; o fundo 3D animado fica para quando houver assets leves (F7/F1).
 import './mainMenu.css';
+import { listMaps, DEFAULT_MAP_ID } from '../../data/maps/index.js';
+import { renderTerrainImage } from '../terrainMinimapImage.js';
 
 const BYPASS_PARAMS = ['play', 'skipMenu', 'bench', 'skipPreload'];
 const STORAGE_DIFFICULTY = 'warpoly.difficulty';
 const STORAGE_FACTION = 'warpoly.faction';
+const STORAGE_MAP = 'warpoly.map';
+const MAP_THUMB_SIZE = { w: 96, h: 64 };
 
 const FACTIONS = [
   {
@@ -56,12 +60,15 @@ export function shouldShowMainMenu(search = window.location.search) {
   return !BYPASS_PARAMS.some((p) => params.has(p));
 }
 
-/** URL que inicia a partida com a facção escolhida (fluxo atual via reload). */
-export function buildPlayUrl(faction, search = window.location.search) {
+/** URL que inicia a partida com a facção (e mapa) escolhidos (fluxo atual via reload). */
+export function buildPlayUrl(faction, search = window.location.search, mapId = null) {
   const f = faction === 'orc' ? 'orc' : 'human';
   // Repassa a qualidade de textura (F1-01) se veio na URL do menu.
   const texq = new URLSearchParams(search).get('texq');
-  return `/?play&faction=${f}` + (texq ? `&texq=${encodeURIComponent(texq)}` : '');
+  let url = `/?play&faction=${f}`;
+  if (texq) url += `&texq=${encodeURIComponent(texq)}`;
+  if (mapId && mapId !== DEFAULT_MAP_ID) url += `&map=${encodeURIComponent(mapId)}`;
+  return url;
 }
 
 const esc = (s) => String(s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
@@ -70,7 +77,7 @@ export class MainMenu {
   /**
    * @param {HTMLElement} [parent]
    * @param {object} [opts]
-   * @param {(choice: {faction: string, difficulty: string}) => void} [opts.onStart]
+   * @param {(choice: {faction: string, difficulty: string, mapId: string}) => void} [opts.onStart]
    * @param {(open: boolean) => void} [opts.onSetupChange]
    */
   constructor(parent = document.body, { onStart = null, onSetupChange = null } = {}) {
@@ -90,6 +97,17 @@ export class MainMenu {
     const storedDiff = safeGet(STORAGE_DIFFICULTY);
     this.difficulty = DIFFICULTIES.some((d) => d.id === storedDiff) ? storedDiff : 'normal';
 
+    // F2-05: mapa escolhido no painel de escaramuça — lista real via listMaps().
+    this.maps = listMaps();
+    const urlMap = new URLSearchParams(window.location.search).get('map');
+    const storedMap = safeGet(STORAGE_MAP);
+    this.mapId = this.maps.some((m) => m.id === urlMap)
+      ? urlMap
+      : this.maps.some((m) => m.id === storedMap)
+        ? storedMap
+        : DEFAULT_MAP_ID;
+    this._mapThumbCache = new Map();
+
     this._onKeyDown = this._onKeyDown.bind(this);
   }
 
@@ -104,6 +122,7 @@ export class MainMenu {
 
     this._bind();
     this._startParticles();
+    this._renderMapThumbnails();
     document.addEventListener('keydown', this._onKeyDown);
 
     requestAnimationFrame(() => {
@@ -145,6 +164,19 @@ export class MainMenu {
       <label class="mm-seg mm-seg--${d.id}">
         <input type="radio" name="mm-difficulty" value="${d.id}" ${this.difficulty === d.id ? 'checked' : ''} />
         <span>${esc(d.label)}</span>
+      </label>`).join('');
+
+    // F2-05: lista real de mapas (miniatura gerada pelo mesmo renderizador do minimapa).
+    const mapCards = this.maps.map((m) => `
+      <label class="mm-map-card">
+        <input type="radio" name="mm-map" value="${esc(m.id)}" ${this.mapId === m.id ? 'checked' : ''} />
+        <span class="mm-map">
+          <span class="mm-map__thumb" aria-hidden="true" data-map-thumb="${esc(m.id)}"></span>
+          <span class="mm-map__info">
+            <span class="mm-map__name">${esc(m.name)}</span>
+            <span class="mm-map__meta">${m.maxPlayers}× jogadores · ${m.size}×${m.size}</span>
+          </span>
+        </span>
       </label>`).join('');
 
     return `
@@ -209,17 +241,10 @@ export class MainMenu {
                 <div class="mm-segmented">${diffs}</div>
               </fieldset>
 
-              <div class="mm-field mm-field--grow">
-                <span class="mm-field__label" id="mm-map-label">Mapa</span>
-                <div class="mm-map" role="group" aria-labelledby="mm-map-label">
-                  <span class="mm-map__thumb" aria-hidden="true">${MAP_THUMB_SVG}</span>
-                  <span class="mm-map__info">
-                    <span class="mm-map__name">Vale do Rio</span>
-                    <span class="mm-map__meta">1×1 · 2 jogadores · Médio</span>
-                  </span>
-                  <span class="mm-map__only">Único</span>
-                </div>
-              </div>
+              <fieldset class="mm-field mm-field--grow">
+                <legend class="mm-field__label" id="mm-map-label">Mapa</legend>
+                <div class="mm-maps" role="group" aria-labelledby="mm-map-label">${mapCards}</div>
+              </fieldset>
             </div>
           </div>
 
@@ -311,6 +336,14 @@ export class MainMenu {
       });
     });
 
+    root.querySelectorAll('input[name="mm-map"]').forEach((input) => {
+      input.addEventListener('change', () => {
+        if (!input.checked) return;
+        this.mapId = input.value;
+        safeSet(STORAGE_MAP, this.mapId);
+      });
+    });
+
     // Setas ↑/↓ percorrem os botões do menu principal.
     const nav = root.querySelector('.mm-nav');
     nav.addEventListener('keydown', (e) => {
@@ -392,11 +425,12 @@ export class MainMenu {
   start() {
     safeSet(STORAGE_FACTION, this.faction);
     safeSet(STORAGE_DIFFICULTY, this.difficulty);
+    safeSet(STORAGE_MAP, this.mapId);
     this.root.classList.add('mm-leaving');
     const btn = this.root.querySelector('.mm-btn--start');
     if (btn) { btn.disabled = true; btn.querySelector('.mm-btn__label').textContent = 'Preparando…'; }
     const reduce = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
-    const choice = { faction: this.faction, difficulty: this.difficulty };
+    const choice = { faction: this.faction, difficulty: this.difficulty, mapId: this.mapId };
     if (this.onStart) {
       this._startTimer = setTimeout(() => {
         this._startTimer = null;
@@ -404,8 +438,27 @@ export class MainMenu {
       }, reduce ? 0 : 380);
       return;
     }
-    const url = buildPlayUrl(this.faction);
+    const url = buildPlayUrl(this.faction, window.location.search, this.mapId);
     setTimeout(() => window.location.assign(url), reduce ? 0 : 380);
+  }
+
+  /**
+   * F2-05: miniaturas dos mapas — mesmo renderizador (por altura) do minimapa em jogo
+   * (`terrainMinimapImage.js`). Cada mapa só aparece uma vez na lista: o canvas gerado é
+   * anexado direto (sem clone — `<canvas>` não copia o desenho por `cloneNode`).
+   */
+  _renderMapThumbnails() {
+    this.root.querySelectorAll('[data-map-thumb]').forEach((el) => {
+      const id = el.dataset.mapThumb;
+      let canvas = this._mapThumbCache.get(id);
+      if (!canvas) {
+        const mapDef = this.maps.find((m) => m.id === id);
+        if (!mapDef) return;
+        canvas = renderTerrainImage(mapDef, MAP_THUMB_SIZE.w, MAP_THUMB_SIZE.h);
+        this._mapThumbCache.set(id, canvas);
+      }
+      el.replaceChildren(canvas);
+    });
   }
 
   // --------------------------------------------------------------- particles
@@ -595,16 +648,4 @@ const BACKDROP_SVG = `
       <path d="M1520 730 L1544 650 L1568 730 Z M1480 740 L1502 670 L1524 740 Z M1010 720 L1030 660 L1050 720 Z"/>
     </g>
   </g>
-</svg>`;
-
-const MAP_THUMB_SVG = `
-<svg viewBox="0 0 96 64" xmlns="http://www.w3.org/2000/svg">
-  <rect width="96" height="64" rx="6" fill="#3f6b3a"/>
-  <path d="M0 0 H96 V64 H0 Z" fill="none"/>
-  <path d="M40 0 C44 14 36 24 46 34 C56 44 50 54 56 64 H66 C60 52 66 42 56 32 C48 24 54 12 50 0 Z" fill="#3b86b5"/>
-  <circle cx="18" cy="16" r="9" fill="#2f5a30"/><circle cx="80" cy="50" r="9" fill="#2f5a30"/>
-  <circle cx="72" cy="12" r="5" fill="#2f5a30"/><circle cx="24" cy="50" r="5" fill="#2f5a30"/>
-  <rect x="12" y="40" width="10" height="10" rx="2" fill="#2f5fb3" stroke="#ffe7a3" stroke-width="1.2"/>
-  <rect x="74" y="12" width="10" height="10" rx="2" fill="#a3281c" stroke="#ffe7a3" stroke-width="1.2"/>
-  <circle cx="30" cy="28" r="3" fill="#f5c542"/><circle cx="68" cy="36" r="3" fill="#f5c542"/>
 </svg>`;

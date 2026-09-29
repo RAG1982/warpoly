@@ -6,6 +6,13 @@ import { UnitAnimator } from '../inspector/unitAnimator.js';
 import { getUnitDef, getUnitStats as getUnitStatsFromData, WORKER_STATS } from '../data/index.js';
 import { legacyOwnerId } from '../sim/EntityIds.js';
 import { SIM_DT, lerpAngle } from '../sim/constants.js';
+import { CMD } from '../sim/commands.js';
+
+// F2-02: estados em que a unidade está caminhando por `waypoints`/`pathDestination` via
+// pathfinder assíncrono (moveTo). O callback de `requestPath` precisa reconhecer todos eles
+// para não descartar um caminho que chegou depois de `orderAttackMove`/`orderPatrol` trocarem
+// `state` de 'moving' para o estado derivado (ver `moveTo`).
+const MOVEY_STATES = new Set(['moving', 'attackMoving']);
 
 // Buffers de módulo reutilizados pelas buscas de alvo hostil (F1-06: unitGrid/blockerGrid),
 // evitando alocar um array novo por unidade a cada frame.
@@ -273,8 +280,50 @@ export class Unit {
 
   // --- COMMANDS ---
 
+  /**
+   * F2-02: limpa a memória dos estados derivados de attack-move/patrol/hold (`_amDest`,
+   * `_returnToPatrol`, `_patrolA/_patrolB`, `_isHolding`) — chamado no início de toda ordem
+   * explícita (moveTo/orderGather/orderBuild/orderAttack/stop/hold) para que uma nova ordem
+   * do jogador sempre substitua a anterior, mesmo quando ela viria de um "retorno" automático
+   * (ver `_giveUpAttack`).
+   */
+  _clearOrderModes() {
+    this._isHolding = false;
+    this._amDest = null;
+    this._returnToPatrol = false;
+    this._patrolA = null;
+    this._patrolB = null;
+  }
+
+  /**
+   * F2-02: executa uma ordem já resolvida (entidades reais, não ids) — usada tanto pelo
+   * `CommandExecutor` (execução imediata) quanto por `updateIdle` (próximo item de
+   * `orderQueue`, ver item 4 da spec: shift-queue para MOVE/ATTACK_MOVE/GATHER/BUILD).
+   * `order.type` reaproveita os valores de `CMD` (`src/sim/commands.js`).
+   */
+  runQueuedOrder(order) {
+    const gm = this.gameManager;
+    switch (order.type) {
+      case CMD.MOVE:
+        this.moveTo(order.x, order.z, gm);
+        break;
+      case CMD.ATTACK_MOVE:
+        this.orderAttackMove(order.x, order.z, gm);
+        break;
+      case CMD.GATHER:
+        this.orderGather(order.target);
+        break;
+      case CMD.BUILD:
+        this.orderBuild(order.target);
+        break;
+      default:
+        break;
+    }
+  }
+
   moveTo(x, z, gameManager = this.gameManager) {
     if (this.isDead || this.isDying || this.state === 'dying') return;
+    this._clearOrderModes();
 
     this.state = 'moving';
     this.targetEntity = null;
@@ -297,7 +346,7 @@ export class Unit {
       gm.pathfinder.requestPath(this, x, z, (path) => {
         this.pathPending = false;
         // Descarta callback obsoleto (ordem já mudou enquanto o pedido esperava na fila).
-        if (this.state !== 'moving' || !this.pathDestination || this.pathDestination.x !== x || this.pathDestination.z !== z) return;
+        if (!MOVEY_STATES.has(this.state) || !this.pathDestination || this.pathDestination.x !== x || this.pathDestination.z !== z) return;
         this.waypoints = path;
         this.waypointIndex = 0;
         this.targetPos.set(path[0].x, 0, path[0].z);
@@ -315,6 +364,7 @@ export class Unit {
   orderGather(resource) {
     if (this.isDead || this.isDying || this.state === 'dying') return;
     if (!this.isWorker()) return;
+    this._clearOrderModes();
     this.gatherTarget = resource;
     this.targetEntity = resource;
     this.buildTarget = null;
@@ -340,6 +390,7 @@ export class Unit {
   orderBuild(building) {
     if (this.isDead || this.isDying || this.state === 'dying') return;
     if (!this.isWorker()) return;
+    this._clearOrderModes();
     this.state = 'building';
     this.buildTarget = building;
     this.targetEntity = building;
@@ -355,6 +406,7 @@ export class Unit {
 
   orderAttack(target, preserveObjective = false) {
     if (this.isDead || this.isDying || this.state === 'dying') return;
+    this._clearOrderModes();
     this.state = 'attacking';
     this.attackTarget = target;
     this.targetEntity = target;
@@ -387,6 +439,90 @@ export class Unit {
       this.animator.setAnimation('idle');
       this.animator.reset();
     }
+  }
+
+  /**
+   * F2-02 (comando HOLD): fica parada nesta posição; unidades de combate atacam sozinhas,
+   * mas só alvos dentro do próprio `attackRange` (nunca perseguem — ver `updateAttacking`).
+   */
+  hold() {
+    if (this.isDead || this.isDying || this.state === 'dying') return;
+    this.state = 'holding';
+    this._isHolding = true;
+    this._amDest = null;
+    this._returnToPatrol = false;
+    this.hasTargetPos = false;
+    this.targetEntity = null;
+    this.gatherTarget = null;
+    this.buildTarget = null;
+    this.attackTarget = null;
+    this.objectiveTarget = null;
+    this.waypoints = null;
+    this.waypointIndex = 0;
+    this.pathDestination = null;
+    this.hasFiredThisAttack = false;
+    this.resetPose();
+    if (this.animator) {
+      this.animator.setAnimation('idle');
+      this.animator.reset();
+    }
+  }
+
+  /**
+   * F2-02 (comando ATTACK_MOVE): anda até (x, z) via `moveTo` (reaproveitado); ao longo do
+   * caminho, unidades de combate atacam sozinhas qualquer hostil dentro de `aggroRange`
+   * (ver `updateAttackMoving`) e retomam a marcha ao destino quando não sobrar alvo
+   * (`_giveUpAttack`).
+   */
+  orderAttackMove(x, z, gameManager = this.gameManager) {
+    if (this.isDead || this.isDying || this.state === 'dying') return;
+    this.moveTo(x, z, gameManager); // já chama _clearOrderModes()
+    this.state = 'attackMoving';
+    this._amDest = { x, z };
+  }
+
+  /**
+   * F2-02 (comando PATROL): alterna entre a posição atual e (x, z), com comportamento de
+   * attack-move em cada trecho (ver `updatePatrolling`).
+   */
+  orderPatrol(x, z, gameManager = this.gameManager) {
+    if (this.isDead || this.isDying || this.state === 'dying') return;
+    this._clearOrderModes();
+    this._patrolA = { x: this.mesh.position.x, z: this.mesh.position.z };
+    this._patrolB = { x, z };
+    this._patrolToB = true;
+    this.state = 'patrolling';
+    this.targetEntity = null;
+    this.gatherTarget = null;
+    this.buildTarget = null;
+    this.attackTarget = null;
+    this.objectiveTarget = null;
+    this.hasFiredThisAttack = false;
+    this.gameManager = gameManager || this.gameManager;
+  }
+
+  /**
+   * F2-02: chamado quando `updateAttacking` não tem mais alvo (morto/fora de alcance sem
+   * substituto). Unidades comuns voltam a `idle` (`stop`); unidades em HOLD voltam a `hold`
+   * (sem se mover); unidades em ATTACK_MOVE/PATROL retomam a marcha/o trecho de patrulha.
+   */
+  _giveUpAttack() {
+    if (this._isHolding) {
+      this.hold();
+      return;
+    }
+    if (this._returnToPatrol) {
+      this._returnToPatrol = false;
+      this.state = 'patrolling';
+      return;
+    }
+    if (this._amDest) {
+      const dest = this._amDest;
+      this._amDest = null;
+      this.orderAttackMove(dest.x, dest.z, this.gameManager);
+      return;
+    }
+    this.stop();
   }
 
   takeDamage(amount, particleSystem, attacker = null, allUnits = []) {
@@ -472,6 +608,8 @@ export class Unit {
     this.waypoints = null;
     this.waypointIndex = 0;
     this.pathDestination = null;
+    this.orderQueue = null;
+    this._clearOrderModes();
 
     if (this.gameManager && this.gameManager.selectedUnits) {
       const idx = this.gameManager.selectedUnits.indexOf(this);
@@ -655,6 +793,15 @@ export class Unit {
       case 'attacking':
         this.updateAttacking(delta, soundManager, particleSystem, arrows, allUnits, buildings, gameManager);
         break;
+      case 'holding':
+        this.updateHolding(delta, allUnits, buildings);
+        break;
+      case 'attackMoving':
+        this.updateAttackMoving(delta, gameManager, allUnits, buildings);
+        break;
+      case 'patrolling':
+        this.updatePatrolling(delta, gameManager, allUnits, buildings);
+        break;
     }
   }
 
@@ -714,6 +861,14 @@ export class Unit {
   }
 
   updateIdle(delta, allUnits, buildings) {
+    // F2-02 item 4 (shift-queue): próxima ordem empilhada por CommandExecutor/runQueuedOrder
+    // roda assim que a unidade fica idle (MOVE/ATTACK_MOVE/GATHER/BUILD).
+    if (this.orderQueue && this.orderQueue.length > 0) {
+      const next = this.orderQueue.shift();
+      this.runQueuedOrder(next);
+      return;
+    }
+
     this.hasFiredThisAttack = false;
     if (this.animator && this.hurtTimer <= 0) {
       this.animator.setAnimation('idle');
@@ -726,6 +881,77 @@ export class Unit {
         this.orderAttack(target);
       }
     }
+  }
+
+  /**
+   * F2-02 (comando HOLD): não se move; ataca sozinha só alvos dentro do próprio `attackRange`
+   * (nunca do `aggroRange`, mais largo). Ao contrário de `updateIdle`, não consome `orderQueue`
+   * (HOLD é uma ordem "fim de linha" — cancela a fila em `CommandExecutor`).
+   */
+  updateHolding(delta, allUnits, buildings) {
+    this.hasFiredThisAttack = false;
+    if (this.animator && this.hurtTimer <= 0) {
+      this.animator.setAnimation('idle');
+    }
+    if (!this.isCombatUnit()) return;
+    const target = this.findNearestHostile(allUnits, buildings, this.attackRange);
+    if (target) {
+      this.state = 'attacking';
+      this.attackTarget = target;
+      this.targetEntity = target;
+      this.hasFiredThisAttack = false;
+    }
+  }
+
+  /**
+   * F2-02 (comando ATTACK_MOVE): anda ao destino (`updateMoving`, reaproveitado) enquanto varre
+   * hostis em `aggroRange`; ao achar um, ataca (via 'attacking') e retoma a marcha ao limpar
+   * a área (`_giveUpAttack`, chamado por `updateAttacking`).
+   */
+  updateAttackMoving(delta, gameManager, allUnits, buildings) {
+    if (this.isCombatUnit()) {
+      const target = this.findNearestHostile(allUnits, buildings, this.aggroRange);
+      if (target) {
+        this.state = 'attacking';
+        this.attackTarget = target;
+        this.targetEntity = target;
+        this.hasFiredThisAttack = false;
+        return;
+      }
+    }
+    this.updateMoving(delta, gameManager);
+  }
+
+  /**
+   * F2-02 (comando PATROL): alterna entre `_patrolA`/`_patrolB` com o mesmo comportamento de
+   * varredura de attack-move; ao chegar numa ponta, inverte o sentido em vez de parar.
+   */
+  updatePatrolling(delta, gameManager, allUnits, buildings) {
+    if (this.isCombatUnit()) {
+      const target = this.findNearestHostile(allUnits, buildings, this.aggroRange);
+      if (target) {
+        this.state = 'attacking';
+        this.attackTarget = target;
+        this.targetEntity = target;
+        this.hasFiredThisAttack = false;
+        this._returnToPatrol = true;
+        return;
+      }
+    }
+
+    const dest = this._patrolToB ? this._patrolB : this._patrolA;
+    if (!dest) {
+      this.stop();
+      return;
+    }
+    const curX = this.mesh.position.x;
+    const curZ = this.mesh.position.z;
+    const dist = Math.hypot(dest.x - curX, dest.z - curZ);
+    if (dist < 0.5) {
+      this._patrolToB = !this._patrolToB;
+      return;
+    }
+    this.moveTowards(dest.x, dest.z, delta, gameManager);
   }
 
   updateMoving(delta, gameManager = this.gameManager) {
@@ -931,9 +1157,13 @@ export class Unit {
   }
 
   updateAttacking(delta, soundManager, particleSystem, arrows, allUnits, buildings) {
+    // F2-02: unidade em HOLD só re-adquire alvo dentro do próprio attackRange (nunca persegue
+    // além dele — ver o passo 3 abaixo); as demais mantêm o retargetRange de sempre.
+    const scanRange = this._isHolding ? this.attackRange : this.retargetRange;
+
     // 1. Target dead or invalid: find next closest hostile or resume objective
     if (!this.attackTarget || this.attackTarget.isDead || this.attackTarget.hp <= 0) {
-      const nextUnit = this.findNearestHostileUnit(allUnits, this.retargetRange);
+      const nextUnit = this.findNearestHostileUnit(allUnits, scanRange);
       if (nextUnit) {
         this.attackTarget = nextUnit;
         this.targetEntity = nextUnit;
@@ -944,14 +1174,15 @@ export class Unit {
         this.targetEntity = this.objectiveTarget;
         this.hasFiredThisAttack = false;
       } else {
-        const nextTarget = this.findNearestHostile(allUnits, buildings, this.retargetRange);
+        const nextTarget = this.findNearestHostile(allUnits, buildings, scanRange);
         if (nextTarget) {
           this.attackTarget = nextTarget;
           this.targetEntity = nextTarget;
           this.hasFiredThisAttack = false;
         } else {
           this.objectiveTarget = null;
-          this.stop();
+          // F2-02: idle comum (stop) ou retorna ao modo anterior (hold/attack-move/patrol).
+          this._giveUpAttack();
           return;
         }
       }
@@ -985,7 +1216,12 @@ export class Unit {
     const effectiveRange = this.attackRange + targetRadius;
 
     // 3. Pursuit: If outside effective attack range, chase the moving target every frame!
+    // F2-02: unidade em HOLD nunca sai da posição — desiste do alvo em vez de perseguir.
     if (dist > effectiveRange) {
+      if (this._isHolding) {
+        this._giveUpAttack();
+        return;
+      }
       this.hasFiredThisAttack = false;
       this.moveTowards(targetPos.x, targetPos.z, delta);
       return;

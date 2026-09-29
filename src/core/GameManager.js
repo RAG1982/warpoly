@@ -31,6 +31,9 @@ import {
   validateMatchConfig
 } from '../sim/MatchConfig.js';
 import { SIM_DT, MAX_STEPS, animationLodStep } from '../sim/constants.js';
+import { CMD, makeCommand } from '../sim/commands.js';
+import { CommandQueue, COMMAND_DELAY_TICKS } from '../sim/CommandQueue.js';
+import { CommandExecutor } from '../sim/CommandExecutor.js';
 
 const EMPTY_LIST = Object.freeze([]);
 
@@ -96,6 +99,12 @@ export class GameManager {
     this._acc = 0;
     this._lastAlpha = 0;
     this._frameIndex = 0;
+
+    // F2-02: sistema de comandos — única forma de alterar o estado do jogo. `currentTick`
+    // incrementa a cada `simStep` (20 Hz); comandos emitidos por `issue()` são executados
+    // no tick `currentTick + COMMAND_DELAY_TICKS` (0 agora — ver src/sim/CommandQueue.js).
+    this.commands = new CommandQueue();
+    this.currentTick = 0;
 
     // Fog of War (covers 160x160 continent)
     this.fogOfWar = new FogOfWar(this.scene, 160, 160);
@@ -207,6 +216,17 @@ export class GameManager {
 
   getEntity(id) {
     return this.entityRegistry.get(id);
+  }
+
+  /**
+   * F2-02: API pública para emitir um comando (única forma de alterar o estado do jogo,
+   * fora do efeito interno documentado em `spawnUnit`/`src/debug/bench.js`). `fields` é o
+   * mesmo objeto que `makeCommand` espera (`type`, `playerId`, + campos do tipo — ver
+   * `src/sim/commands.js`); `tick` é preenchido aqui.
+   */
+  issue(fields) {
+    const cmd = makeCommand({ ...fields, tick: this.currentTick + COMMAND_DELAY_TICKS });
+    return this.commands.enqueue(cmd);
   }
 
   // --- Compatibilidade com o modelo antigo de dois lados (DÍVIDA F2-01, ver docs/01_ARQUITETURA.md) ---
@@ -366,6 +386,8 @@ export class GameManager {
     this.entityRegistry.clear();
     this.unitGrid.clear();
     this.blockerGrid.clear();
+    this.commands = new CommandQueue();
+    this.currentTick = 0;
 
     // Reset Fog of War shroud
     if (this.fogOfWar) {
@@ -828,10 +850,27 @@ export class GameManager {
     return b;
   }
 
-  buildNewBuilding(type, x, z) {
-    const b = this.createBuilding(type, x, z, false, this._localPlayerId);
+  /**
+   * F2-02: executor do comando PLACE_BUILDING (chamado só por `CommandExecutor`, nunca
+   * direto pela UI/IA — ver `GameManager.issue`). Valida o custo aqui (não no clique):
+   * se `ownerId` não puder pagar, descarta e notifica o jogador local (se for ele).
+   * `unitIds` são os construtores pré-selecionados (podem vir vazios: usa o vilão/peão
+   * vivo mais próximo do dono).
+   */
+  placeBuilding(type, x, z, unitIds, ownerId) {
+    const owner = this.getPlayer(ownerId);
+    if (!owner) return null;
+
+    const stats = getBuildingDef(type);
+    if (!owner.canAfford(stats.cost)) {
+      if (owner.isLocal) this.uiManager?.showNotification('⚠️ Recursos insuficientes!');
+      return null;
+    }
+    owner.deduct(stats.cost);
+
+    const b = this.createBuilding(type, x, z, false, ownerId);
     this.buildings.push(b);
-    this.soundManager.playBuildPlace();
+    if (owner.isLocal) this.soundManager.playBuildPlace();
     this.recalculatePopCap();
 
     // Clean up any depleted tree stumps inside the building footprint so they do not poke through floors
@@ -845,14 +884,17 @@ export class GameManager {
       }
     });
 
-    // Task workers (villagers or peons) to construct it
-    const selectedBuilders = this.selectedUnits.filter(u => u.type === 'villager' || u.type === 'peon');
-    if (selectedBuilders.length > 0) {
-      selectedBuilders.forEach(v => v.orderBuild(b));
+    // Task workers (villagers or peons) to construct it — só os do próprio dono.
+    const builders = (unitIds || [])
+      .map(id => this.entitiesById.get(id))
+      .filter(u => u && !u.isDead && u.ownerId === ownerId && (u.type === 'villager' || u.type === 'peon'));
+
+    if (builders.length > 0) {
+      builders.forEach(v => v.orderBuild(b));
     } else {
       let nearestV = null;
       let minDist = Infinity;
-      this.units.forEach(u => {
+      this.getUnitsOf(ownerId).forEach(u => {
         if (!u.isDead && (u.type === 'villager' || u.type === 'peon')) {
           const d = u.mesh.position.distanceTo(b.mesh.position);
           if (d < minDist) {
@@ -946,81 +988,70 @@ export class GameManager {
     }
   }
 
+  /**
+   * F2-02: tradutor do clique direito → emite um comando (MOVE/ATTACK/GATHER/BUILD/RALLY;
+   * ver `src/sim/commands.js`) em vez de chamar as entidades diretamente. A formação de
+   * MOVE (offsets por unidade) é calculada pelo `CommandExecutor`, não aqui: o comando
+   * carrega só o ponto clicado.
+   */
   issueOrder(entityUnderCursor, groundPoint) {
     this.selectedUnits = this.selectedUnits.filter(u => !u.isDead && !u.isDying && u.state !== 'dying');
     if (this.selectedUnits.length === 0) {
       if (this.selectedBuilding && groundPoint) {
-        if (this.pathfinder && this.pathfinder.isWater(groundPoint.x, groundPoint.z)) {
-          groundPoint = this.pathfinder.findNearestWalkable(groundPoint.x, groundPoint.z);
+        let rallyPoint = groundPoint;
+        if (this.pathfinder && this.pathfinder.isWater(rallyPoint.x, rallyPoint.z)) {
+          rallyPoint = this.pathfinder.findNearestWalkable(rallyPoint.x, rallyPoint.z);
         }
-        this.selectedBuilding.setRallyPoint(groundPoint);
+        this.issue({
+          type: CMD.RALLY,
+          playerId: this._localPlayerId,
+          buildingId: this.selectedBuilding.id,
+          x: rallyPoint.x,
+          z: rallyPoint.z
+        });
         this.soundManager.playOrder();
       }
       return;
     }
 
     this.soundManager.playOrder();
+    const unitIds = this.selectedUnits.map(u => u.id);
 
     if (entityUnderCursor) {
       const e = entityUnderCursor;
       // Right-clicked a hostile unit/building: Attack!
       if ((e instanceof Unit || e instanceof Building) && this.isHostile(this._localPlayerId, e.ownerId)) {
-        this.selectedUnits.forEach(u => u.orderAttack(e));
+        this.issue({ type: CMD.ATTACK, playerId: this._localPlayerId, unitIds, targetId: e.id });
         return;
       }
       // Right-clicked a resource: Gather! (Villagers and Peons)
       if (e instanceof Tree || e instanceof ResourceDeposit) {
         const isDepleted = e.isDead || (e.woodRemaining !== undefined && e.woodRemaining <= 0) || (e.resourcesRemaining !== undefined && e.resourcesRemaining <= 0);
         if (!isDepleted) {
-          let hasWorkers = false;
-          this.selectedUnits.forEach(u => {
-            if (u.type === 'villager' || u.type === 'peon') {
-              u.orderGather(e);
-              hasWorkers = true;
-            }
-          });
-          if (hasWorkers) return;
+          const workerIds = this.selectedUnits.filter(u => u.type === 'villager' || u.type === 'peon').map(u => u.id);
+          if (workerIds.length > 0) {
+            this.issue({ type: CMD.GATHER, playerId: this._localPlayerId, unitIds: workerIds, targetId: e.id });
+            return;
+          }
         }
         // If resource is depleted (e.g. cut stump with no wood) or non-workers selected, move units towards target
         if (groundPoint) {
-          this.selectedUnits.forEach(u => u.moveTo(groundPoint.x, groundPoint.z, this));
+          this.issue({ type: CMD.MOVE, playerId: this._localPlayerId, unitIds, x: groundPoint.x, z: groundPoint.z });
           return;
         }
         return;
       }
       // Right-clicked an incomplete building: Build!
       if (e instanceof Building && !e.isConstructed && e.ownerId === this._localPlayerId) {
-        this.selectedUnits.forEach(u => {
-          if (u.type === 'villager' || u.type === 'peon') u.orderBuild(e);
-        });
+        const workerIds = this.selectedUnits.filter(u => u.type === 'villager' || u.type === 'peon').map(u => u.id);
+        this.issue({ type: CMD.BUILD, playerId: this._localPlayerId, unitIds: workerIds, buildingId: e.id });
         return;
       }
     }
 
-    // Right-clicked ground: Move in formation avoiding water
+    // Right-clicked ground: Move (o executor calcula a formação e evita água)
     if (groundPoint) {
-      let centerTarget = groundPoint;
-      if (this.pathfinder && this.pathfinder.isWater(centerTarget.x, centerTarget.z)) {
-        centerTarget = this.pathfinder.findNearestWalkable(centerTarget.x, centerTarget.z);
-      }
-
-      const count = this.selectedUnits.length;
-      const cols = Math.ceil(Math.sqrt(count));
-      const spacing = 1.6;
-
-      this.selectedUnits.forEach((u, idx) => {
-        const row = Math.floor(idx / cols);
-        const col = idx % cols;
-        const offsetX = (col - (cols - 1) / 2) * spacing;
-        const offsetZ = (row - (cols - 1) / 2) * spacing;
-        let destX = centerTarget.x + offsetX;
-        let destZ = centerTarget.z + offsetZ;
-        if (this.pathfinder && this.pathfinder.isWater(destX, destZ)) {
-          destX = centerTarget.x;
-          destZ = centerTarget.z;
-        }
-        u.moveTo(destX, destZ, this);
-      });
+      this.issue({ type: CMD.MOVE, playerId: this._localPlayerId, unitIds, x: groundPoint.x, z: groundPoint.z });
     }
   }
 
@@ -1169,6 +1200,16 @@ export class GameManager {
    * colisões, IA, névoa, limpeza. Sem chamadas de animação/visual (ver `renderUpdate`).
    */
   simStep(dt) {
+    // F2-02: drena e executa os comandos agendados para este tick (única forma de alterar o
+    // estado do jogo). Incrementa `currentTick` já aqui, antes do resto do passo, para que o
+    // contador sempre avance mesmo num `return` antecipado (fim de partida) mais abaixo.
+    const tick = this.currentTick;
+    this.currentTick = tick + 1;
+    const dueCommands = this.commands.drain(tick);
+    for (let i = 0; i < dueCommands.length; i++) {
+      CommandExecutor.execute(this, dueCommands[i]);
+    }
+
     this.gameTime += dt;
 
     // Check Win/Loss conditions

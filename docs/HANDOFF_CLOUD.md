@@ -32,6 +32,7 @@ Fluxo do projeto: specs detalhadas em `docs/specs/<ID>.md`; o executor segue a s
 | 3 | ~~F6-03~~ | — | ✅ mesclada (PR #3) |
 | 4 | F3-01 — controles RTS completos + NEW-16 (população "5 / 10") | `docs/specs/F3-01-controles-rts.md` | Tudo via `gm.issue` (comandos F2-02) |
 | 5 | F6-08 — menu de Opções completo | `docs/specs/F6-08-opcoes.md` | Rode **depois** da F3-01 (ambas tocam InputManager/UIManager) |
+| 6 | NEW-19 — ruínas/clareira (construção destruída / mina esgotada) | `docs/specs/NEW-19-ruinas.md` | Só `src/render/**`; independente das anteriores |
 
 Para saber qual é a "próxima pendente": verifique se já existe branch `cloud/<ID>` ou PR aberto/mesclado com esse ID (`git ls-remote --heads origin 'cloud/*'` e o histórico do `master`). Pegue a primeira da tabela sem branch/PR.
 

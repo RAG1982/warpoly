@@ -42,7 +42,7 @@ Causas raiz, em ordem de impacto:
 | B13 | ~~`EnemyAI.js` e `GLTFBuildingLoader.js` mortos; `Unit.js` importa animador de `src/inspector/`~~ **Corrigido na F2-07**: `EnemyAI.js` já não existe (removido na F0-03); `UnitAnimator` mora em `src/animation/UnitAnimator.js`, `Unit.js`/`inspector.js` importam de lá (`src/inspector/unitAnimator.js` é reexport de 1 linha). `GLTFBuildingLoader.js` continua vivo (usado por `GreatHall.js`) — não estava morto, a nota original é que estava desatualizada | core |
 | B14 | ~~`Math.random()` usado em 69 pontos da simulação — impossibilita replays/multiplayer determinístico~~ **Corrigido na F2-03**: RNG de simulação com seed (`gm.rng`/`fork`, `src/sim/rng.js`) separado do RNG visual; `Math.random` só sobra onde comentado `// visual: não afeta o estado`; checksum (`src/sim/checksum.js`) + testes de determinismo (`tests/unit/determinism.test.js`, 12 000 ticks) provam a paridade entre execuções | core/entities/ai |
 | B15 | Barra de vida HTML inicial "5 / 15" diverge do cap real 10 até o 1º update | `index.html` |
-| B16 | Minimapa desenha rio/vaus com fórmula própria (difere do terreno real) e retângulo de câmera fixo | `UIManager.drawMinimap` |
+| B16 | ~~Minimapa desenha rio/vaus com fórmula própria (difere do terreno real)~~ **Corrigido na F2-05**: o terreno do minimapa é renderizado a partir da altura real (`terrain.getHeight`, mesma fonte da malha 3D), num canvas offscreen pré-renderizado 1×/partida (`terrainMinimapImage.js`). Retângulo de câmera de tamanho fixo (16×12 px) não mudou — fora do escopo da F2-05 | `UIManager.drawMinimap` |
 | B17 | `dist/` versionado no git e dezenas de screenshots/PNGs de referência soltos na raiz | repo |
 
 ## 3. Lacunas frente a um RTS AAA

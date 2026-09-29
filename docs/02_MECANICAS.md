@@ -6,11 +6,16 @@
 
 ## Visão geral
 
-RTS 1×1 no estilo Warcraft II: **Aliança Humana** vs **Horda Orc**, jogador contra uma IA. Mapa único 140×140 (área jogável ±55): continente com rio diagonal e 3 vaus (norte −16,−16 / centro 0,0 / sul 16,16). Base humana em (32,−30), orc em (−32,30).
+RTS no estilo Warcraft II: **Aliança Humana** vs **Horda Orc**, jogador contra uma ou mais IAs. Mapas orientados a dados (F2-05, `src/data/maps/<id>.json`, escolha em `?map=` ou no menu de escaramuça):
+
+- **`continental-1v1`** ("Vale do Rio", padrão, 1×1): 140×140 (área jogável ±55), continente com rio diagonal e 3 vaus (norte −16,−16 / centro 0,0 / sul 16,16). Base humana em (32,−30), orc em (−32,30). Slot extra (−14,−46) só usado em partidas FFA de teste (`?ffa=1`).
+- **`ilhas-4p`** ("Ilhas Gêmeas", novo): 128×128, FFA de 4 jogadores — 2 ilhas ligadas por 2 pontes de terra, 2 slots por ilha. Jogue com `?map=ilhas-4p&ffa=1`.
 
 **Vitória**: ser o último time com HQ (Castelo / Grande Salão) de pé. **Derrota**: perder o seu HQ (o jogador fica `defeated`; em FFA a partida segue até restar um time). Reinício = recarregar a página.
 
 ## Recursos
+
+Tabela para `continental-1v1` (jazidas/florestas vêm de `mapDef.resources`/`mapDef.forests` — F2-05; `ilhas-4p` tem sua própria contagem, ver `src/data/maps/ilhas-4p.json`).
 
 | Recurso | Fonte | Entrega |
 |---|---|---|

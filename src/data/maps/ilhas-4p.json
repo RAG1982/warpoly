@@ -1,0 +1,53 @@
+{
+  "id": "ilhas-4p",
+  "name": "Ilhas Gêmeas",
+  "size": 128,
+  "playable": 116,
+  "tileset": "ilhas",
+  "waterLevel": 0.5,
+  "maxPlayers": 4,
+  "terrain": {
+    "generator": "islands",
+    "params": {
+      "baseHeight": 2.4,
+      "coast": { "falloff": 10 },
+      "islands": [
+        { "x": -30, "z": 0, "rx": 28, "rz": 40 },
+        { "x": 30, "z": 0, "rx": 28, "rz": 40 }
+      ],
+      "bridges": [
+        { "x1": -4, "z1": -15, "x2": 4, "z2": -15, "width": 8 },
+        { "x1": -4, "z1": 15, "x2": 4, "z2": 15, "width": 8 }
+      ]
+    }
+  },
+  "fords": [],
+  "startSlots": [
+    { "x": -30, "z": -25, "mirror": [-1, 1] },
+    { "x": -30, "z": 25, "mirror": [-1, -1] },
+    { "x": 30, "z": -25, "mirror": [1, 1] },
+    { "x": 30, "z": 25, "mirror": [1, -1] }
+  ],
+  "resources": [
+    { "type": "gold", "x": -45, "z": -25 },
+    { "type": "stone", "x": -30, "z": -38 },
+    { "type": "gold", "x": -45, "z": 25 },
+    { "type": "stone", "x": -30, "z": 38 },
+    { "type": "gold", "x": 45, "z": -25 },
+    { "type": "stone", "x": 30, "z": -38 },
+    { "type": "gold", "x": 45, "z": 25 },
+    { "type": "stone", "x": 30, "z": 38 },
+    { "type": "gold", "x": -10, "z": 0 },
+    { "type": "stone", "x": 10, "z": 0 }
+  ],
+  "forests": [
+    { "x": -45, "z": 0, "count": 6, "radius": 8.0, "species": "oak" },
+    { "x": 45, "z": 0, "count": 6, "radius": 8.0, "species": "oak" },
+    { "x": -15, "z": -32, "count": 4, "radius": 5.0, "species": "pine" },
+    { "x": 15, "z": 32, "count": 4, "radius": 5.0, "species": "pine" },
+    { "x": -15, "z": 32, "count": 4, "radius": 5.0, "species": "autumn" },
+    { "x": 15, "z": -32, "count": 4, "radius": 5.0, "species": "autumn" }
+  ],
+  "neutrals": [],
+  "decorationDensity": 1.0
+}

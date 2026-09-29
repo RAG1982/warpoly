@@ -1,0 +1,57 @@
+{
+  "id": "continental-1v1",
+  "name": "Vale do Rio",
+  "size": 140,
+  "playable": 110,
+  "tileset": "verdejante",
+  "waterLevel": 0.5,
+  "maxPlayers": 3,
+  "terrain": {
+    "generator": "continental",
+    "params": {
+      "baseHeight": 2.6,
+      "river": { "bendAmp": 5.5, "bendFreq": 0.08, "halfWidth": 6.0 },
+      "coast": { "start": 54, "falloff": 12 }
+    }
+  },
+  "fords": [
+    { "x": -16, "z": -16, "r": 7.5 },
+    { "x": 0, "z": 0, "r": 8.5 },
+    { "x": 16, "z": 16, "r": 7.5 }
+  ],
+  "startSlots": [
+    { "x": 32, "z": -30, "mirror": [1, 1] },
+    { "x": -32, "z": 30, "mirror": [-1, -1] },
+    { "x": -14, "z": -46, "mirror": [-1, 1] }
+  ],
+  "resources": [
+    { "type": "gold", "x": 30, "z": -46 },
+    { "type": "stone", "x": 46, "z": -46 },
+    { "type": "gold", "x": 16, "z": -26 },
+    { "type": "gold", "x": -30, "z": 46 },
+    { "type": "stone", "x": -46, "z": 46 },
+    { "type": "gold", "x": -16, "z": 26 },
+    { "type": "gold", "x": 8, "z": -6 },
+    { "type": "stone", "x": -8, "z": 6 },
+    { "type": "gold", "x": -3.4, "z": -35.4, "slot": 2 },
+    { "type": "stone", "x": -14, "z": -31, "slot": 2 }
+  ],
+  "forests": [
+    { "x": 12, "z": -54, "count": 6, "radius": 6.0, "species": "pine" },
+    { "x": -12, "z": -54, "count": 6, "radius": 6.0, "species": "pine" },
+    { "x": 54, "z": 12, "count": 6, "radius": 6.0, "species": "autumn" },
+    { "x": 54, "z": -2, "count": 6, "radius": 6.0, "species": "autumn" },
+    { "x": -12, "z": 54, "count": 6, "radius": 6.0, "species": "pine" },
+    { "x": 12, "z": 54, "count": 6, "radius": 6.0, "species": "pine" },
+    { "x": -54, "z": -12, "count": 6, "radius": 6.0, "species": "autumn" },
+    { "x": -54, "z": 2, "count": 6, "radius": 6.0, "species": "autumn" },
+    { "x": -28, "z": -26, "count": 6, "radius": 6.0, "species": "oak" },
+    { "x": 28, "z": 26, "count": 6, "radius": 6.0, "species": "oak" },
+    { "x": 26, "z": 2, "count": 5, "radius": 5.5, "species": "pine" },
+    { "x": -26, "z": -2, "count": 5, "radius": 5.5, "species": "pine" },
+    { "x": 2, "z": -26, "count": 5, "radius": 5.5, "species": "oak" },
+    { "x": -2, "z": 26, "count": 5, "radius": 5.5, "species": "autumn" }
+  ],
+  "neutrals": [],
+  "decorationDensity": 1.0
+}

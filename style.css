@@ -1163,14 +1163,10 @@ input:checked + .slider.round:before {
   z-index: 100;
 }
 
-/* < 1100px: esconde textos secundários (guia rápido, título do minimapa, "/ pop máx.") para
+/* < 1100px: esconde textos secundários (guia rápido, título do minimapa; a população mantém "5 / 10" — NEW-16) para
    abrir espaço ao card de seleção e à barra de recursos (F6-03/B11). */
 @media (max-width: 1100px) {
   #quick-guide .guide-line-2 {
-    display: none;
-  }
-
-  .pop-secondary {
     display: none;
   }
 

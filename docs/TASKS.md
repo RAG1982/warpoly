@@ -60,7 +60,7 @@ Opus escreve a spec em `docs/specs/<ID>.md`; agente **Sonnet** executa; Opus rev
 | `docs/specs/F2-02-sistema-comandos.md` | F2-02 — **DONE** | sonnet |
 | `docs/specs/F2-03-determinismo.md` | F2-03 + B14 — **DONE** | sonnet (local) |
 | `docs/specs/F2-07-event-bus.md` | F2-07 + B13 — **DONE** | sonnet (local) |
-| `docs/specs/F2-05-mapas-dados.md` | F2-05 + B16 | sonnet (local) |
+| `docs/specs/F2-05-mapas-dados.md` | F2-05 + B16 — **DONE** | sonnet (local) |
 | `docs/specs/F3-01-controles-rts.md` | F3-01 + NEW-16 — **nuvem** | sonnet (claude.ai/code) |
 | `docs/specs/F6-08-opcoes.md` | F6-08 — **nuvem**, após F3-01 | sonnet (claude.ai/code) |
 | `docs/specs/BUGS-01-pequenos.md` | NEW-2, NEW-11, NEW-5, NEW-13 — **nuvem** (ver `docs/HANDOFF_CLOUD.md`) | sonnet (claude.ai/code) |
@@ -76,7 +76,7 @@ Opus escreve a spec em `docs/specs/<ID>.md`; agente **Sonnet** executa; Opus rev
 |---|---|---|---|---|
 | F0 Fundação | 7 | 0 | 0 | 7 |
 | F1 Desempenho | 10 | 1 | 0 | 9 |
-| F2 Núcleo | 8 | 3 | 0 | 5 |
+| F2 Núcleo | 8 | 2 | 0 | 6 |
 | F3 Jogabilidade WC2 base | 11 | 11 | 0 | 0 |
 | F4 Jogabilidade WC2 expansão | 8 | 8 | 0 | 0 |
 | F5 IA | 6 | 6 | 0 | 0 |
@@ -219,9 +219,10 @@ Opus escreve a spec em `docs/specs/<ID>.md`; agente **Sonnet** executa; Opus rev
 - **Resultado**: `GameStateMachine.js` + `MatchSession.js` + `PauseMenu.js`; menu → partida → pausa → fim → jogar de novo sem reload; teste de vazamento (5 partidas) estável; 2ª partida carrega em ~2,6 s; B7 corrigido.
 
 ### F2-05 · Mapas orientados a dados
-- **Status**: `DOING(sonnet, 2026-09-29)` · Lane CORE + CONTENT · Onda 3 · Dep: F2-01
+- **Status**: `DONE(110c125)` · Lane CORE + CONTENT · Onda 3 · Dep: F2-01
 - **Fazer**: formato `src/data/maps/<id>.json` (tamanho, tileset, heightmap ou parâmetros, água, vaus/pontes, posições iniciais 2–8, minas, florestas, neutros, decorações). `Terrain`, `Pathfinder`, minimapa e spawns leem do mapa. Converter o mapa atual em `continental-1v1.json`.
 - **Aceite**: nenhuma coordenada de mapa hardcoded em `GameManager`/`Terrain`/`UIManager` (B16).
+- **Resultado**: `src/data/maps/{continental-1v1,ilhas-4p}.json`, `world/terrainGenerators.js`, minimapa pré-renderizado do terreno real, lista de mapas com miniatura no menu. Checksum de determinismo idêntico ao master. 222 testes. B16 corrigido. Pendências visuais → NEW-17, NEW-18.
 
 ### F2-06 · Save / Load
 - **Status**: `TODO` · Lane CORE · Onda 3 · Dep: F2-01, F2-04
@@ -513,6 +514,8 @@ _(agentes adicionam aqui: `NEW-<n> · título · lane · motivo`)_
 - NEW-15 · Meta 50 FPS em combate100 ainda não atingida (37,5): restam ~20 draw calls/unidade por muitos materiais PBR. Caminho: atlas de material por unidade (1–2 materiais) — naturalmente resolvido pela migração das unidades para o pipeline Blender (F7-00b, adiada) — e depois instancing por tipo/VAT · PERF/ART
 - ✅ BUGS-01 (PR#1, nuvem): NEW-2 reembolso IA, NEW-11 Clock→Timer/PCFShadowMap, NEW-5 materiais não usados (lint 32→25 avisos), NEW-13 fundo além do mapa escurece com a névoa
 - NEW-16 · HUD < 1100 px esconde o máximo de população (mostra "5" em vez de "5 / 10") · UI
+- NEW-17 · `terrainTextures.js` pinta a paleta/regiões do mapa continental em qualquer mapa: em `ilhas-4p` a água aparece com padrão rachado e manchas de terra fora de lugar — pintor deve derivar de `getHeight` do mapa (água/areia/grama/rocha por altura) · ART/CORE
+- NEW-18 · HUD (F6-03): barra/card inferior vazio aparece esticado na tela inteira quando nada está selecionado — esconder o card sem seleção · UI
 - NEW-1 · Avaliar uso real de `GLTFBuildingLoader` em `GreatHall.js` e remover ou adotar no pipeline Blender (F7-00) · ART · ficou fora do escopo da F0-03
 
 ## Notas de integração

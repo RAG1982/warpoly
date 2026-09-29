@@ -57,7 +57,7 @@ Opus escreve a spec em `docs/specs/<ID>.md`; agente **Sonnet** executa; Opus rev
 | `docs/specs/F7-00c-glb-padrao.md` | NEW-12 glb ligado por padrão — **DONE** | haiku |
 | `docs/specs/F1-08-alocacoes-vazamentos.md` | F1-08 — **DONE** | sonnet |
 | `docs/specs/F1-09-tick-fixo-lod-animacao.md` | F1-09 + NEW-14 (após F1-08, mesmos arquivos) | sonnet |
-| `docs/specs/F2-02-sistema-comandos.md` | F2-02 (após F1-09) | sonnet |
+| `docs/specs/F2-02-sistema-comandos.md` | F2-02 — **DONE** | sonnet |
 | `docs/specs/BUGS-01-pequenos.md` | NEW-2, NEW-11, NEW-5, NEW-13 — **nuvem** (ver `docs/HANDOFF_CLOUD.md`) | sonnet (claude.ai/code) |
 | `docs/specs/F1-07-pathfinder.md` | F1-07 + B8 + NEW-4 — **nuvem** | sonnet (claude.ai/code) |
 | `docs/specs/F6-03-hud-responsiva.md` | F6-03 + B11 — **nuvem** | sonnet (claude.ai/code) |
@@ -71,7 +71,7 @@ Opus escreve a spec em `docs/specs/<ID>.md`; agente **Sonnet** executa; Opus rev
 |---|---|---|---|---|
 | F0 Fundação | 7 | 0 | 0 | 7 |
 | F1 Desempenho | 10 | 1 | 0 | 9 |
-| F2 Núcleo | 8 | 6 | 0 | 2 |
+| F2 Núcleo | 8 | 5 | 0 | 3 |
 | F3 Jogabilidade WC2 base | 11 | 11 | 0 | 0 |
 | F4 Jogabilidade WC2 expansão | 8 | 8 | 0 | 0 |
 | F5 IA | 6 | 6 | 0 | 0 |
@@ -196,9 +196,10 @@ Opus escreve a spec em `docs/specs/<ID>.md`; agente **Sonnet** executa; Opus rev
 - **Resultado**: `src/sim/{Player,PlayerRegistry,EntityIds,MatchConfig}.js`; `gm.allUnits` fonte única (`units`/`enemies` derivadas); IA por `playerId`; `?ffa=1` (3 jogadores) funcional; 40 testes. Dívidas em 01_ARQUITETURA (getter `faction`, API econômica legada, cor do jogador não usada).
 
 ### F2-02 · Sistema de comandos
-- **Status**: `TODO` · Lane CORE · Onda 3 · Dep: F2-01
+- **Status**: `DONE(b5ca827)` · Lane CORE · Onda 3 · Dep: F2-01
 - **Fazer**: `Command {tick, playerId, type, entityIds, target, queued}`; `CommandQueue`; toda ação de jogador/IA/UI passa por comandos (mover, atacar, attack-move, coletar, construir, treinar, pesquisar, cancelar, rally, stop, hold, patrol, habilidade).
 - **Aceite**: nenhum chamada direta `unit.moveTo/orderAttack` fora do executor de comandos; log de comandos reproduz a partida.
+- **Resultado**: `src/sim/{commands,CommandQueue,CommandExecutor}.js`; UI/input/IA emitem comandos (custo cobrado no executor); estados hold/attack-move/patrol; shift-queue; log de comandos JSON puro (replay). 174 testes. Teclas ficam para F3-01.
 
 ### F2-03 · Determinismo
 - **Status**: `TODO` · Lane CORE · Onda 3 · Dep: F2-01, F1-09

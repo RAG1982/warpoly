@@ -1,6 +1,6 @@
-# 08 — Documento de Design de Jogo (F3-00) — PROPOSTA v1
+# 08 — Documento de Design de Jogo (F3-00) — v1 aprovada
 
-> Status: **APROVADO pelo dono em 2026-09-29** (decisões D4–D7 em `07_DECISOES.md`). Tudo aqui vira dados em `src/data/` e tarefas F3/F4. Onde houver ⚖️ há uma decisão que o dono precisa tomar (resumo no fim).
+> Status: **APROVADO pelo dono em 2026-09-29** (decisões D4–D7 em `07_DECISOES.md`). Tudo aqui vira dados em `src/data/` e tarefas F3/F4.
 > Regras respeitadas: D1 (pedra permanece; **petróleo só após Centro da Cidade nível 2**), D2 (**nomes próprios**, nada de marcas da Blizzard), D3 (hardware). Mecânicas de referência: Warcraft II (ver `05_PARIDADE_WARCRAFT2.md`).
 
 ---

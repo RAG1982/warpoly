@@ -1,7 +1,7 @@
 import * as THREE from 'three';
 import { ModelFactory } from '../entities/ModelFactory.js';
 import { Building } from '../entities/Building.js';
-import { getCost } from '../data/index.js';
+import { getCost, getBuildingDef, WALL_STEP, WALL_MAX_POINTS } from '../data/index.js';
 import { CMD } from '../sim/commands.js';
 
 export class InputManager {
@@ -41,6 +41,12 @@ export class InputManager {
     // Ghost building placement
     this.placingBuildingType = null;
     this.ghostMesh = null;
+    // F3-08: colocação de muralha por arrasto (ponto A fixado no botão pressionado).
+    this.wallAnchor = null;
+    this.wallGhosts = [];
+    this._wallPreview = [];
+    this._wallLabel = null;
+    this._wallLastKey = null;
 
     // Click feedback ring on ground
     this.createClickDecal();
@@ -137,7 +143,11 @@ export class InputManager {
       this.leftDownPos = { x: e.clientX, y: e.clientY };
 
       if (this.placingBuildingType) {
-        this.confirmPlacement();
+        if (this.isWallType(this.placingBuildingType)) {
+          this.beginWallDrag();
+        } else {
+          this.confirmPlacement();
+        }
       }
     } else if (e.button === 2) {
       // Right Click
@@ -181,6 +191,12 @@ export class InputManager {
       }
     }
 
+    // F3-08: muralha — pré-visualização em linha A→B (ou 1 segmento seguindo o cursor).
+    if (this.placingBuildingType && this.isWallType(this.placingBuildingType)) {
+      this.updateWallPreview();
+      return;
+    }
+
     // Update ghost building position and validity color (Green = OK, Red = Obstructed)
     if (this.placingBuildingType && this.ghostMesh) {
       const gx = Math.round(this.groundIntersection.x * 2) / 2;
@@ -211,6 +227,13 @@ export class InputManager {
           this.isDraggingBox = false;
           if (this.boxEl) this.boxEl.style.display = 'none';
         }
+        return;
+      }
+
+      if (this.placingBuildingType && this.isWallType(this.placingBuildingType)) {
+        // Soltar o botão confirma os segmentos válidos (F3-08); soltar sem ter começado
+        // (ex.: o mousedown caiu na UI) não faz nada.
+        if (this.wallAnchor) this.confirmWall();
         return;
       }
 
@@ -310,9 +333,151 @@ export class InputManager {
 
   // --- GHOST BUILDING PLACEMENT ---
 
+  isWallType(type) {
+    return getBuildingDef(type).role === 'wall';
+  }
+
+  /** Ponto do chão sob o cursor, encaixado na grade de 0,5. */
+  _snappedGround() {
+    return {
+      x: Math.round(this.groundIntersection.x * 2) / 2,
+      z: Math.round(this.groundIntersection.z * 2) / 2
+    };
+  }
+
+  /**
+   * F3-08: pontos dos segmentos ao longo de A→B — snap a 8 direções, passo `WALL_STEP`,
+   * no máximo `WALL_MAX_POINTS`. Clique simples (B ≈ A) = 1 ponto.
+   */
+  computeWallPoints(a, b) {
+    const dx = b.x - a.x;
+    const dz = b.z - a.z;
+    const len = Math.hypot(dx, dz);
+    if (len < WALL_STEP * 0.5) return [{ x: a.x, z: a.z }];
+    const ang = Math.round(Math.atan2(dz, dx) / (Math.PI / 4)) * (Math.PI / 4);
+    const ux = Math.cos(ang);
+    const uz = Math.sin(ang);
+    const proj = Math.max(0, dx * ux + dz * uz);
+    const n = Math.min(WALL_MAX_POINTS, Math.floor(proj / WALL_STEP + 0.0001) + 1);
+    const pts = [];
+    for (let i = 0; i < n; i++) {
+      pts.push({
+        x: Math.round((a.x + ux * WALL_STEP * i) * 100) / 100,
+        z: Math.round((a.z + uz * WALL_STEP * i) * 100) / 100
+      });
+    }
+    return pts;
+  }
+
+  beginWallDrag() {
+    this.wallAnchor = this._snappedGround();
+    this._wallLastKey = null;
+    this.updateWallPreview();
+  }
+
+  updateWallPreview() {
+    if (!this.placingBuildingType || !this.groundIntersection) return;
+    const c = this._snappedGround();
+    const key = `${c.x},${c.z},${this.wallAnchor ? 'a' : 'n'}`;
+    if (key === this._wallLastKey) return;
+    this._wallLastKey = key;
+
+    const type = this.placingBuildingType;
+    const pts = this.wallAnchor ? this.computeWallPoints(this.wallAnchor, c) : [c];
+    const owner = this.gm.localPlayerId;
+    const preview = [];
+    let validCount = 0;
+    for (let i = 0; i < pts.length; i++) {
+      const ok = this.gm.canPlaceBuilding(type, pts[i].x, pts[i].z, null, owner);
+      if (ok) validCount++;
+      preview.push({ x: pts[i].x, z: pts[i].z, valid: ok });
+    }
+    this._wallPreview = preview;
+
+    while (this.wallGhosts.length < preview.length) {
+      const g = ModelFactory.createGhost(type, ModelFactory.ghostValidMat);
+      this.sm.scene.add(g);
+      this.wallGhosts.push(g);
+    }
+    for (let i = 0; i < this.wallGhosts.length; i++) {
+      const g = this.wallGhosts[i];
+      if (i >= preview.length) {
+        g.visible = false;
+        continue;
+      }
+      const p = preview[i];
+      g.visible = true;
+      g.position.set(p.x, this.terrain.getHeight(p.x, p.z), p.z);
+      ModelFactory.setGhostMaterial(g, p.valid ? ModelFactory.ghostValidMat : ModelFactory.ghostInvalidMat);
+    }
+
+    // Total do arrasto (só os segmentos válidos), no rótulo que segue o cursor.
+    if (!this._wallLabel) {
+      const el = document.createElement('div');
+      el.style.cssText = 'position:fixed;z-index:60;pointer-events:none;padding:2px 8px;border-radius:6px;' +
+        'background:rgba(15,23,42,.85);color:#e2e8f0;font:600 12px sans-serif;white-space:nowrap;display:none;';
+      document.body.appendChild(el);
+      this._wallLabel = el;
+    }
+    const unit = getCost(type);
+    const parts = [];
+    if (unit.wood) parts.push(`${unit.wood * validCount} madeira`);
+    if (unit.stone) parts.push(`${unit.stone * validCount} pedra`);
+    if (unit.gold) parts.push(`${unit.gold * validCount} ouro`);
+    this._wallLabel.textContent = `${validCount} ${validCount === 1 ? 'segmento' : 'segmentos'} — ${parts.join(', ')}`;
+    this._wallLabel.style.display = 'block';
+    this._wallLabel.style.left = `${this.currentMousePos.x + 16}px`;
+    this._wallLabel.style.top = `${this.currentMousePos.y + 16}px`;
+  }
+
+  /** F3-08: solta o botão — emite PLACE_WALL com os segmentos válidos do arrasto. */
+  confirmWall() {
+    const type = this.placingBuildingType;
+    this._wallLastKey = null;
+    this.updateWallPreview(); // garante o traço no ponto final do mouseup
+    const points = this._wallPreview.filter(p => p.valid).map(p => ({ x: p.x, z: p.z }));
+    if (points.length === 0) {
+      this.uiManager?.showNotification('⚠️ Muralha: sem pontos válidos');
+      this.wallAnchor = null;
+      this._wallLastKey = null;
+      this.updateWallPreview();
+      return;
+    }
+    const unit = getCost(type);
+    const total = {};
+    for (const k of Object.keys(unit)) total[k] = unit[k] * points.length;
+    if (!this.gm.canAfford(total)) {
+      this.uiManager?.showNotification('⚠️ Recursos insuficientes!');
+      this.wallAnchor = null;
+      this._wallLastKey = null;
+      this.updateWallPreview();
+      return;
+    }
+    const builderIds = this.gm.selectedUnits
+      .filter(u => u.type === 'villager' || u.type === 'peon')
+      .map(u => u.id);
+    this.gm.issue({
+      type: CMD.PLACE_WALL,
+      playerId: this.gm.localPlayerId,
+      buildingType: type,
+      points,
+      unitIds: builderIds
+    });
+    this.cancelPlacement();
+  }
+
   startPlacement(buildingType) {
     this.cancelPlacement();
     this.placingBuildingType = buildingType;
+
+    if (this.isWallType(buildingType)) {
+      this.wallAnchor = null;
+      this._wallLastKey = null;
+      if (this.groundIntersection && (this.groundIntersection.x !== 0 || this.groundIntersection.z !== 0)) {
+        this.updateWallPreview();
+      }
+      return;
+    }
 
     this.ghostMesh = ModelFactory.getGhost(buildingType);
     this.sm.scene.add(this.ghostMesh);
@@ -382,6 +547,15 @@ export class InputManager {
     this.lastGhostGx = null;
     this.lastGhostGz = null;
     this.placingBuildingType = null;
+    // F3-08: limpa o traço de muralha (fantasmas em pool, âncora e rótulo).
+    this.wallAnchor = null;
+    this._wallPreview = [];
+    this._wallLastKey = null;
+    if (this.wallGhosts.length > 0) {
+      for (const g of this.wallGhosts) this.sm.scene.remove(g);
+      this.wallGhosts = [];
+    }
+    if (this._wallLabel) this._wallLabel.style.display = 'none';
   }
 
   getCost(type) {
@@ -421,6 +595,10 @@ export class InputManager {
       this.clickDecal.geometry.dispose();
       this.clickDecal.material.dispose();
       this.clickDecal = null;
+    }
+    if (this._wallLabel) {
+      this._wallLabel.remove();
+      this._wallLabel = null;
     }
     this.keys = {};
     this.hoveredEntity = null;

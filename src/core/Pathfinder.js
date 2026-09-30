@@ -463,9 +463,9 @@ export class Pathfinder {
 
     this._lastNodesExpanded = iterations;
 
-    // F3-08: "sem caminho" de verdade = a busca esgotou a fronteira sem achar o destino (não
-    // apenas estourou o limite de iterações). Sinalizado em `path.noPath` (ver `findPath`).
-    const exhausted = !foundDest && this._heap.size === 0;
+    // F3-08: sem caminho ao destino exato (fronteira esgotada ou limite de iterações) — sinalizado
+    // em `path.noPath` (ver `findPath`); o limite estourado conta como "sem caminho" também.
+    const exhausted = !foundDest;
 
     if (!foundDest) {
       // Sem caminho para o destino exato (ex.: anel fechado). Devolve caminho até o ponto

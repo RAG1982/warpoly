@@ -8,7 +8,7 @@
  * Módulo puro: sem three.js nem DOM, importável em Node (ver tools/check-data-parity.mjs).
  */
 import { UNITS, DEFAULT_UNIT, WORKER_STATS } from './units.js';
-import { BUILDINGS, DEFAULT_BUILDING, DEFAULT_BUILDING_ATTACK_COOLDOWN } from './buildings.js';
+import { BUILDINGS, DEFAULT_BUILDING, DEFAULT_BUILDING_ATTACK_COOLDOWN, WALL_STEP, WALL_MAX_POINTS } from './buildings.js';
 import {
   UPGRADE_CONFIG, FORGE_UPGRADES, RESEARCH, researchIdsFor, getMaxResearchLevel, researchName,
   researchEffect, promotedType, describeLevel
@@ -23,7 +23,7 @@ import { RESOURCE_NAMES, getResourceName } from './names.js';
 
 export {
   UNITS, DEFAULT_UNIT, WORKER_STATS,
-  BUILDINGS, DEFAULT_BUILDING, DEFAULT_BUILDING_ATTACK_COOLDOWN,
+  BUILDINGS, DEFAULT_BUILDING, DEFAULT_BUILDING_ATTACK_COOLDOWN, WALL_STEP, WALL_MAX_POINTS,
   UPGRADE_CONFIG, FORGE_UPGRADES, RESEARCH, researchIdsFor, getMaxResearchLevel, researchName,
   researchEffect, promotedType, describeLevel,
   FACTIONS, STARTING_RESOURCES,

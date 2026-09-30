@@ -24,6 +24,7 @@ export { createPeon } from './units/PeonModel.js';
 export { createGrunt } from './units/GruntModel.js';
 export { createAxethrower } from './units/AxethrowerModel.js';
 export { createOgre } from './units/OgreModel.js';
+export { createCavalier } from './units/CavalierModel.js';
 export { getPeonFaceTextures, getPeonTunicHarnessTextures, getPeonPantsBootsTextures, getPeonToolTextures } from './units/peonTextures.js';
 export { getGruntFaceTextures, getGruntArmorTextures, getGruntAxeTextures } from './units/gruntTextures.js';
 export { getAxethrowerFaceTextures, getAxethrowerHarnessTextures, getAxethrowerAxeTextures } from './units/axethrowerTextures.js';
@@ -53,6 +54,8 @@ export { createOrcLumberMill } from './buildings/OrcLumberMillModel.js';
 export { createOrcWatchtower } from './buildings/OrcWatchtowerModel.js';
 export { createOrcHouse } from './buildings/OrcHouseModel.js';
 export { createOrcForge } from './buildings/OrcForgeModel.js';
+export { createStable } from './buildings/StableModel.js';
+export { createOgreDen } from './buildings/OgreDenModel.js';
 export { createHumanForge } from './buildings/HumanForgeModel.js';
 export {
   getOrcDarkLogBarkTextures,

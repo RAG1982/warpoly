@@ -78,7 +78,12 @@ export class UnitAnimator {
       weaponR: ud.weaponR,
       drawnAxe: ud.drawnAxe,
       horn: ud.horn,
-      mohawk: ud.mohawk
+      mohawk: ud.mohawk,
+      // F4-01: pernas do cavalo (só o modelo `cavalier`)
+      horseLegFL: ud.horseLegs ? ud.horseLegs[0] : null,
+      horseLegFR: ud.horseLegs ? ud.horseLegs[1] : null,
+      horseLegBL: ud.horseLegs ? ud.horseLegs[2] : null,
+      horseLegBR: ud.horseLegs ? ud.horseLegs[3] : null
     };
 
     // Store original materials on userData for zero-clone damage flash
@@ -222,7 +227,8 @@ export class UnitAnimator {
     const parts = this.meshParts;
     const dur = this.getDuration();
     const progress = Math.min(1.0, Math.max(0.0, time / dur));
-    const uType = this.unitType;
+    // F4-01: o cavaleiro usa o tronco do Espadachim — mesmas poses de braço/espada/escudo.
+    const uType = this.unitType === 'cavalier' ? 'knight' : this.unitType;
 
     switch (this.currentAnim) {
       case 'idle':
@@ -324,6 +330,19 @@ export class UnitAnimator {
     if (parts.legR) {
       parts.legR.rotation.x = -legSwing;
       parts.legR.position.y += Math.max(0, Math.sin(phase)) * 0.05;
+    }
+
+    // F4-01: galope do cavalo — diagonais em fase (FL+BR contra FR+BL), com elevação do casco
+    if (parts.horseLegFL) {
+      const gallop = Math.sin(phase) * 0.7;
+      parts.horseLegFL.rotation.x = gallop;
+      parts.horseLegBR.rotation.x = gallop;
+      parts.horseLegFR.rotation.x = -gallop;
+      parts.horseLegBL.rotation.x = -gallop;
+      parts.horseLegFL.position.y += Math.max(0, -Math.sin(phase)) * 0.06;
+      parts.horseLegBR.position.y += Math.max(0, -Math.sin(phase)) * 0.06;
+      parts.horseLegFR.position.y += Math.max(0, Math.sin(phase)) * 0.06;
+      parts.horseLegBL.position.y += Math.max(0, Math.sin(phase)) * 0.06;
     }
 
     // Torso vertical bounce (two bounces per full stride cycle!) and hip sway

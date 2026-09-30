@@ -11,6 +11,9 @@ import {
   createGrunt,
   createAxethrower,
   createOgre,
+  createCavalier,
+  createStable,
+  createOgreDen,
   createCastle,
   createLumberCamp,
   createGoldMine,
@@ -85,6 +88,18 @@ const MODEL_CATALOG = [
     create: createGlb('knight'),
     description: 'Versão gerada pelo pipeline Blender headless (public/models/knight.glb) a partir da referência soldado.png: armadura de placas de aço com frisos dourados, elmo aberto, capa e mangas azuis em cor de time, espada longa. 7 partes rígidas (Torso, Head, ArmL, ArmR, LegL, LegR, Sword), atlas 512².',
     notes: 'Rig plana idêntica à do KnightModel.js procedural (o UnitAnimator anima Sword/braços com rotações independentes). Sem escudo (a referência não tem). 10 draw calls, ~4,2 mil triângulos, 213 KB. Rosto só na face frontal (+Z).'
+  },
+  {
+    id: 'cavalier',
+    name: 'Cavaleiro Montado (Cavalier)',
+    category: 'units',
+    faction: 'human',
+    type: 'cavalier',
+    icon: '🐎',
+    sourceFile: 'src/models/units/CavalierModel.js',
+    create: createCavalier,
+    description: 'Cavalaria pesada humana (F4-01): cavalo low-poly em caixas (tronco, pescoço, cabeça, crina, cauda, sela e manta azul) com o tronco do Espadachim montado na sela. Modelo procedural provisório; o modelo final do Blender vem na F7.',
+    notes: 'Pernas do cavalo (HorseLegFL/FR/BL/BR) balançam em diagonais alternadas na animação de andar; braços, espada e escudo usam as mesmas poses do Espadachim.'
   },
   {
     id: 'archer',
@@ -341,6 +356,30 @@ const MODEL_CATALOG = [
     create: () => new OrcForge(null, { getHeight: () => 0 }, 0, 0, true, 'player'),
     description: 'Centro de aprimoramentos bélicos e fundição da Horda. Erguida sobre blocos maciços de basalto vulcânico negro, possui fornalha abobadada com boca em arco e grades de ferro, chaminé monumental reforçada com anéis forjados, telhado parcial de chapas rebitadas, toco com bigorna de ferro fundido e tina de têmpera.',
     notes: 'VFX: Fogo intenso na fornalha com malha de chamas animadas, PointLight de calor termodinâmico, chaminé alta expelindo fumaça preta e faíscas incandescentes na bigorna.'
+  },
+  {
+    id: 'stable',
+    name: 'Estábulo Real (Stable)',
+    category: 'buildings',
+    faction: 'human',
+    type: 'building',
+    icon: '🐴',
+    sourceFile: 'src/models/buildings/StableModel.js',
+    create: createStable,
+    description: 'Estábulo humano (F4-01): galpão de madeira aberto na frente sobre base de pedra, telhado de duas águas azul com cumeeira dourada, baias com feno, cocho, cerca e estandarte.',
+    notes: 'Modelo procedural provisório sem texturas de canvas (materiais compartilhados).'
+  },
+  {
+    id: 'ogre_den',
+    name: 'Covil dos Ogros (Ogre Den)',
+    category: 'buildings',
+    faction: 'orc',
+    type: 'building',
+    icon: '🦴',
+    sourceFile: 'src/models/buildings/OgreDenModel.js',
+    create: createOgreDen,
+    description: 'Covil orc (F4-01): paliçada de troncos escuros sobre basalto, portão largo com caveira e ossos cruzados, telhado de peles, espetos nos cantos e estandarte de guerra.',
+    notes: 'Modelo procedural provisório sem texturas de canvas (materiais compartilhados).'
   },
   {
     id: 'forge',

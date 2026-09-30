@@ -440,6 +440,7 @@ visuais/sonoros nunca são "re-disparados" porque o `EventBus` tem `muted` (aind
 - **`UnitAnimator`** mora em `src/animation/UnitAnimator.js` (F2-07; antes em
   `src/inspector/`, camada invertida — ver B13 em `04_DIAGNOSTICO.md`); `src/inspector/
   unitAnimator.js` é um reexport de 1 linha para compatibilidade.
+- **Cavalaria (F4-01):** construções com `role:'stable'` (`stable`, `ogre_den`; classe base `Building`, modelos procedurais `StableModel.js`/`OgreDenModel.js`). O `cavalier` usa `CavalierModel.js` (cavalo em caixas + tronco do Espadachim): `UnitAnimator` trata `cavalier` como `knight` nas poses e, se `userData.horseLegs` existir (nós `HorseLegFL/FR/BL/BR`, religados por `ModelFactory.rebindUserData`), balança as pernas do cavalo em diagonais no `walk`. Os nomes `HorseLeg*` estão em `ANIMATED_NODE_NAMES` (pivôs do skinning rígido).
 
 ### Vitória e estatísticas (F3-09)
 - `src/sim/victory.js`: `isPlayerDefeated(mode, ownedBuildings)` (função pura) e textos PT-BR; `GameManager._updateVictoryConditions` aplica a regra por jogador a cada passo e, ao terminar a partida, congela `gm.result` (`matchStats.snapshot()`, depois de despachar os eventos pendentes).

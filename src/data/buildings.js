@@ -5,7 +5,7 @@
  * - name          Nome PT-BR exibido no painel de construção do trabalhador (D2: provisório até a F3-00).
  * - entityName    Rótulo atual do card de seleção (legado; unificar com `name` na F3-00/F6-09).
  * - faction       'human' | 'orc' | 'neutral'.
- * - role          'hq' | 'house' | 'farm' | 'lumber' | 'barracks' | 'forge' | 'tower' | 'wall' | 'camp'.
+ * - role          'hq' | 'house' | 'farm' | 'lumber' | 'barracks' | 'stable' | 'forge' | 'tower' | 'wall' | 'camp'.
  * - hp, cost {gold, wood, stone}, collisionRadius, popGranted.
  * - armor         F3-03: armadura da construção (corrige B5 — antes não existia). HQ/torres
  *                  20, muralhas 10 (quando existirem), demais 15 (design §6).
@@ -131,7 +131,7 @@ export const BUILDINGS = {
     trains: ['archer', 'knight'],
     dropoff: [],
     icon: '/icoQuartel.svg',
-    description: 'Treina soldados, arqueiros e cavaleiros'
+    description: 'Treina espadachins e arqueiros'
   },
   forge: {
     type: 'forge',
@@ -152,6 +152,27 @@ export const BUILDINGS = {
     dropoff: [],
     icon: '/icoForja.svg',
     description: 'Pesquisa melhorias de armas e armaduras'
+  },
+  stable: {
+    type: 'stable',
+    name: 'Estábulo Real',
+    entityName: 'Estábulo Real',
+    faction: 'human',
+    role: 'stable',
+    hp: 900,
+    armor: 15,
+    cost: { gold: 200, wood: 60, stone: 40 },
+    collisionRadius: 3.6,
+    popGranted: 0,
+    visionRadius: 22,
+    healthBarHeight: 6.4,
+    tower: null,
+    passiveIncome: null,
+    requires: ['barracks', { hq: 2 }],
+    trains: ['cavalier'],
+    dropoff: [],
+    icon: '/icoQuartel.svg',
+    description: 'Treina cavaleiros (requer Centro nível 2)'
   },
   watchtower: {
     type: 'watchtower',
@@ -293,10 +314,10 @@ export const BUILDINGS = {
     tower: null,
     passiveIncome: null,
     requires: ['pig_farm'],
-    trains: ['grunt', 'axethrower', 'ogre'],
+    trains: ['grunt', 'axethrower'],
     dropoff: [],
     icon: '/icoQuartelOrc.svg',
-    description: 'Treina grunts, lanceiros e guerreiros orcs'
+    description: 'Treina talhadores e lanceiros-machado'
   },
   orc_forge: {
     type: 'orc_forge',
@@ -317,6 +338,27 @@ export const BUILDINGS = {
     dropoff: [],
     icon: '/icoForjaOrc.svg',
     description: 'Forja melhorias de combate para a Horda'
+  },
+  ogre_den: {
+    type: 'ogre_den',
+    name: 'Covil dos Ogros',
+    entityName: 'Covil dos Ogros',
+    faction: 'orc',
+    role: 'stable',
+    hp: 900,
+    armor: 15,
+    cost: { gold: 200, wood: 60, stone: 40 },
+    collisionRadius: 3.6,
+    popGranted: 0,
+    visionRadius: 22,
+    healthBarHeight: 6.4,
+    tower: null,
+    passiveIncome: null,
+    requires: ['orc_barracks', { hq: 2 }],
+    trains: ['ogre'],
+    dropoff: [],
+    icon: '/icoQuartelOrc.svg',
+    description: 'Treina ogros, a cavalaria da Horda (requer Centro nível 2)'
   },
   orc_watchtower: {
     type: 'orc_watchtower',

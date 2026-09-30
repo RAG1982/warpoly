@@ -22,6 +22,7 @@ export class AssetPreloader {
     const assets = [
       { name: 'Aldeão Construtor', fn: () => ModelFactory.createVillager() },
       { name: 'Cavaleiro Real', fn: () => ModelFactory.createKnight() },
+      { name: 'Cavaleiro Montado', fn: () => ModelFactory.createCavalier() },
       { name: 'Arqueiro de Precisão', fn: () => ModelFactory.createArcher() },
       { name: 'Saqueador Bandido', fn: () => ModelFactory.createBandit() },
       { name: 'Peon Trabalhador da Horda', fn: () => ModelFactory.createPeon() },
@@ -101,7 +102,8 @@ export class AssetPreloader {
     // Pre-warm building ghost previews (zero lag during in-game placement)
     const placeableGhosts = [
       'cottage', 'lumber_camp', 'farm', 'barracks', 'forge', 'watchtower',
-      'orc_house', 'pig_farm', 'orc_lumber_mill', 'orc_barracks', 'orc_forge', 'orc_watchtower'
+      'orc_house', 'pig_farm', 'orc_lumber_mill', 'orc_barracks', 'orc_forge', 'orc_watchtower',
+      'stable', 'ogre_den'
     ];
     placeableGhosts.forEach(bType => {
       try {

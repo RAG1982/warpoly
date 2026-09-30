@@ -14,6 +14,7 @@ function posOf(v) {
 
 import {
   getBuildingDef,
+  getUnitDef,
   getBuildingStats as getBuildingStatsFromData,
   isWorkerType,
   UNIT_TRAIN_CONFIG,
@@ -212,6 +213,8 @@ export class Building {
       case 'orc_house': return ModelFactory.createOrcHouse ? ModelFactory.createOrcHouse() : ModelFactory.createCottage();
       case 'orc_forge': return ModelFactory.createOrcForge ? ModelFactory.createOrcForge() : ModelFactory.createOrcBarracks();
       case 'forge': return ModelFactory.createHumanForge ? ModelFactory.createHumanForge() : ModelFactory.createBarracks();
+      case 'stable': return ModelFactory.createStable();
+      case 'ogre_den': return ModelFactory.createOgreDen();
       case 'barracks': return ModelFactory.createBarracks();
       case 'orc_barracks': return ModelFactory.createOrcBarracks();
       case 'watchtower': return ModelFactory.createWatchtower();
@@ -625,6 +628,9 @@ export class Building {
       return false;
     }
 
+    // F4-01: construção em obra não treina.
+    if (!this.isConstructed) return false;
+
     // F3-06: Centro em upgrade de nível não treina (a fila fica pausada; ver `startTierUpgrade`).
     if (this.tierUpgrade) {
       return false;
@@ -647,6 +653,12 @@ export class Building {
     const cfg = UNIT_TRAIN_CONFIG[unitType];
     if (!cfg) return false;
     const c = cfg.cost;
+
+    // F4-01: cada construção só treina o que está em `BUILDINGS[type].trains` (classe avançada
+    // conta pelo `modelOf` da unidade base: Patrulheiro no lugar do Arqueiro).
+    const trains = getBuildingDef(this.type).trains || [];
+    const base = getUnitDef(unitType).modelOf || unitType;
+    if (!trains.includes(unitType) && !trains.includes(base)) return false;
 
     const owner = this.getOwner(gm);
     if (!owner) return false;

@@ -32,16 +32,17 @@ População: soma de `popGranted` (HQ 5, Casa/Toca 5, Chiqueiro 5). Início = 10
 
 | Tipo | Facção | HP | Vel | Dano | Alcance | Cooldown | Armadura | Custo (ouro/madeira/pedra) | Tempo | Treina em |
 |---|---|---|---|---|---|---|---|---|---|---|
-| Aldeão | Humano | 85 | 4.5 | 7 | 1.8 | 1.0 | 0 | 50/–/– | 7 | Castelo |
-| Cavaleiro | Humano | 200 | 4.8 | 27 | 2.1 | 1.1 | 4 | 70/50/5 | 11 | Quartel |
+| Camponês | Humano | 85 | 4.5 | 7 | 1.8 | 1.0 | 0 | 50/–/– | 7 | Castelo |
+| Espadachim (`knight`) | Humano | 200 | 4.8 | 27 | 2.1 | 1.1 | 4 | 70/50/5 | 11 | Quartel |
+| Cavaleiro (`cavalier`, cavalaria — F4-01) | Humano | 300 | 6.2 | 34 | 2.3 | 1.2 | 4 | 120/60/20 | 14 | Estábulo Real (Centro nível 2) |
 | Arqueiro | Humano | 97 | 4.3 | 18 | 14.0 | 1.4 | 0 | 40/20/– | 9 | Quartel |
-| Peão | Orc | 90 | 4.5 | 8 | 1.8 | 1.0 | 0 | 50/–/– | 7 | Grande Salão |
-| Grunt | Orc | 198 | 4.7 | 28 | 2.1 | 1.15 | 4 | 70/50/5 | 11 | Quartel Orc |
-| Lançador de Machado | Orc | 100 | 4.4 | 19 | 13.5 | 1.35 | 0 | 40/20/– | 9 | Quartel Orc |
-| Ogro | Orc | 320 | 4.0 | 42 | 2.5 | 1.5 | 5 | 75/100/35 | 14 | Quartel Orc |
+| Lacaio | Orc | 90 | 4.5 | 8 | 1.8 | 1.0 | 0 | 50/–/– | 7 | Grande Salão |
+| Talhador (`grunt`) | Orc | 198 | 4.7 | 28 | 2.1 | 1.15 | 4 | 70/50/5 | 11 | Quartel Orc |
+| Lanceiro-Machado | Orc | 100 | 4.4 | 19 | 13.5 | 1.35 | 0 | 40/20/– | 9 | Quartel Orc |
+| Ogro (cavalaria orc — F4-01) | Orc | 320 | 5.4 | 42 | 2.5 | 1.5 | 5 | 75/100/35 | 14 | Covil dos Ogros (Centro nível 2) |
 | Bandido | Neutro | 125 | 4.4 | 16 | 2.1 | 1.2 | 1 | — | — | (não usado no jogo) |
 
-Dano efetivo em unidade = `max(2, dano − armadura)`. Construções **ignoram armadura**. Humanos têm 2 tipos militares; Orcs têm 3 (Ogro sem equivalente humano — IA humana usa Cavaleiro como "cerco").
+Dano efetivo em unidade = `max(2, dano − armadura)`. Construções **ignoram armadura**. **Cavalaria (F4-01):** Cavaleiro (humano) e Ogro (orc) são treinados no **Estábulo Real / Covil dos Ogros**, que exigem Quartel + Centro nível 2 (`requires: [quartel, {hq: 2}]`; a unidade também exige `{hq: 2}`). Dano normal, sem bônus; `melee_weapons`/`melee_armor` valem para Espadachim/Talhador/Cavaleiro/Ogro. O Quartel não treina cavalaria (`Building.queueUnit` só aceita o que está em `trains`, e só em construção concluída). Suprimento: 1 por unidade como as demais (o jogo não tem custo de suprimento por unidade). Nomes D7 nos dados: Espadachim, Talhador, Lanceiro-Machado, Camponês, Lacaio (ids internos inalterados). A IA usa `FACTIONS.*.units.cavalry`; o cerco humano continua `knight` e o orc `ogre` até a F4-02.
 
 ## Construções
 
@@ -58,6 +59,7 @@ Dano efetivo em unidade = `max(2, dano − armadura)`. Construções **ignoram a
 | Quartel | H | 850 | 120 / 60 | Treina militares |
 | Quartel Orc | O | 900 | 130 / 50 | Treina militares |
 | Forja | H/O | 850 | 100 / 70 / 50 | Pesquisas |
+| Estábulo Real / Covil dos Ogros (`role:'stable'`) | H / O | 900 (armadura 15) | 60 / 40 / 200 | Treina cavalaria; exige Quartel + Centro nível 2 (F4-01). IA: constrói com Centro nível 2, ≥ 600 de ouro e ≥ 6 combatentes; recruta 1 cavaleiro para cada 3 combatentes de linha |
 | Torre de Vigia | H | 650 | 80 / 40 | Ataca: alcance 18, dano 18, cd 1.4 |
 | Torre Orc | O | 700 | 85 / 40 | Alcance 18, dano 19 |
 | Muralha de Pedra / Paliçada de Ferro | H / O | 250 (armadura 10) | 10 / 20 por segmento | Segmento de muralha (F3-08): bloqueia o caminho até ser destruído; disponível no nível 1 |

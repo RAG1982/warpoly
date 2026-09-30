@@ -21,7 +21,7 @@ export const RESEARCH = {
       { cost: { gold: 200, wood: 100 }, time: 30, bonus: { basic: 2 }, requires: [] },
       { cost: { gold: 400, wood: 200 }, time: 45, bonus: { basic: 2 }, requires: [{ hq: 2 }] }
     ],
-    appliesTo: ['knight', 'grunt', 'ogre'],
+    appliesTo: ['knight', 'grunt', 'cavalier', 'ogre'], // TODO F4-04: Templário / Ogro Feiticeiro entram aqui
     icon: '/icoEspada.png',
     name: { human: 'Armas Forjadas', orc: 'Lâminas de Guerra' }
   },
@@ -31,7 +31,7 @@ export const RESEARCH = {
       { cost: { gold: 150, wood: 100, stone: 80 }, time: 30, bonus: { armor: 2 }, requires: [] },
       { cost: { gold: 300, wood: 200, stone: 160 }, time: 45, bonus: { armor: 2 }, requires: [{ hq: 2 }] }
     ],
-    appliesTo: ['knight', 'grunt', 'ogre'],
+    appliesTo: ['knight', 'grunt', 'cavalier', 'ogre'],
     icon: '/icoEscudo.png',
     name: { human: 'Escudos Reforçados', orc: 'Placas de Ferro' }
   },

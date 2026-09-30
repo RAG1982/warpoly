@@ -39,6 +39,7 @@ export class AIDirector {
     this.meleeType = f.units.melee;
     this.rangedType = f.units.ranged;
     this.siegeType = f.units.siege;
+    this.cavalryType = f.units.cavalry; // F4-01
 
     this.hqType = f.hq;
     this.barracksType = f.barracks;
@@ -48,6 +49,7 @@ export class AIDirector {
     this.lumberType = f.lumber;
     this.towerType = f.tower;
     this.forgeType = f.forge;
+    this.stableType = f.stable; // F4-01: Estábulo Real / Covil dos Ogros
 
     // Costs configuration — derivados dos dados reais (corrige B3: antes eram números próprios da IA)
     this.costs = {
@@ -55,12 +57,14 @@ export class AIDirector {
       melee: getTrainCost(this.meleeType),
       ranged: getTrainCost(this.rangedType),
       siege: getTrainCost(this.siegeType),
+      cavalry: getTrainCost(this.cavalryType),
       farm: getCost(this.farmType),
       house: getCost(this.houseType),
       barracks: getCost(this.barracksType),
       lumber: getCost(this.lumberType),
       tower: getCost(this.towerType),
-      forge: getCost(this.forgeType)
+      forge: getCost(this.forgeType),
+      stable: getCost(this.stableType)
     };
 
     // Tick Timer (Exact 1.0 second evaluation interval)
@@ -155,6 +159,16 @@ export class AIDirector {
       if (b.ownerId === this.playerId && b.type === this.barracksType && b.isConstructed && !b.isDead) {
         return b;
       }
+    }
+    return null;
+  }
+
+  /** F4-01: Estábulo/Covil concluído e vivo da IA (ou null). */
+  getConstructedStable() {
+    const buildings = this.gm.buildings;
+    for (let i = 0; i < buildings.length; i++) {
+      const b = buildings[i];
+      if (b.ownerId === this.playerId && b.type === this.stableType && b.isConstructed && !b.isDead) return b;
     }
     return null;
   }

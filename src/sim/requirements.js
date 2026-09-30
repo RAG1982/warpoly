@@ -10,6 +10,7 @@
  * `GameManager.placeBuilding`/`Building.queueUnit`/`Building.startResearch` já têm.
  */
 import { getBuildingDef, getUnitDef, RESEARCH, researchName } from '../data/index.js';
+import { getTierName } from '../data/tiers.js';
 
 /** Construção `type` concluída de `playerId` existe em `buildings`? */
 function hasBuildingType(playerId, type, buildings) {
@@ -47,17 +48,17 @@ export function evalRequirements(requires, playerId, gm) {
 }
 
 /** Texto amigável (PT-BR) de um requisito faltante — para tooltip da HUD. */
-export function formatRequirement(req, factionId = 'human') {
+export function formatRequirement(req, factionId = null) {
   if (typeof req === 'string') return getBuildingDef(req).name;
-  if (req && typeof req.hq === 'number') return `Centro nível ${req.hq}`;
+  if (req && typeof req.hq === 'number') return factionId ? `Centro nível ${req.hq} (${getTierName(factionId, req.hq)})` : `Centro nível ${req.hq}`;
   if (req && typeof req.research === 'string') {
-    return researchName(req.research, factionId) + (req.level > 1 ? ` ${req.level}` : '');
+    return researchName(req.research, factionId || 'human') + (req.level > 1 ? ` ${req.level}` : '');
   }
   return String(req);
 }
 
 /** `[formatRequirement(r), ...]` já unido — atalho comum na HUD ("Requer: A, B"). */
-export function formatRequirementList(missing, factionId = 'human') {
+export function formatRequirementList(missing, factionId = null) {
   return missing.map(r => formatRequirement(r, factionId)).join(', ');
 }
 

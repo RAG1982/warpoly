@@ -32,6 +32,8 @@ export const STATIC_MERGE_CONFIG = {
   lumber_camp: { keep: [] },
   watchtower: { keep: [] },
   forge: { keep: ['FurnaceFlames', 'AnvilFlames'] },
+  stable: { keep: [] },
+  ogre_den: { keep: [] },
   // Orcs
   // Os 4 braseiros (fogo transparente) ficam em cantos distantes: mesclá-los não afeta a ordenação
   great_hall: {

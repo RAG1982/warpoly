@@ -1098,7 +1098,7 @@ export class UIManager {
       const missing = missingRequirements(ownerId, bType, this.gm);
       if (missing.length > 0) {
         btn.disabled = true;
-        btn.title = `Requer: ${formatRequirementList(missing)}`;
+        btn.title = `Requer: ${formatRequirementList(missing, this.gm.playerFaction === 'orc' ? 'orc' : 'human')}`;
         btn.classList.add('bld-requirement-missing');
       } else {
         btn.disabled = false;

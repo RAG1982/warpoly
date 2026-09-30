@@ -47,4 +47,17 @@ describe('commands.js (F2-02)', () => {
     const roundTripped = deserialize(serialize(cmd));
     expect(roundTripped).toEqual(cmd);
   });
+
+  it('PLACE_WALL (F3-08): valida campos, formato dos pontos e o limite de 60', () => {
+    const base = { type: CMD.PLACE_WALL, playerId: 0, buildingType: 'wall_human', unitIds: [1] };
+    expect(validateCommand({ ...base, points: [{ x: 1, z: 2 }] })).toEqual({ ok: true });
+    expect(validateCommand({ ...base }).ok).toBe(false); // falta points
+    expect(validateCommand({ ...base, points: [] }).ok).toBe(false);
+    expect(validateCommand({ ...base, points: [{ x: 1 }] }).ok).toBe(false);
+    expect(validateCommand({ ...base, points: 'x' }).ok).toBe(false);
+    const sixty = Array.from({ length: 60 }, (_, i) => ({ x: i, z: 0 }));
+    expect(validateCommand({ ...base, points: sixty })).toEqual({ ok: true });
+    expect(validateCommand({ ...base, points: [...sixty, { x: 99, z: 0 }] }).ok).toBe(false);
+    expect(() => makeCommand({ ...base, points: [{ x: 1, z: 2 }], tick: 3 })).not.toThrow();
+  });
 });

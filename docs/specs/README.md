@@ -9,6 +9,16 @@ Cada spec tem na 3ª linha `> **Status: ...**`. Regras comuns a todas: [`_COMUM.
 | [F3-05-reparo-cancelamento.md](F3-05-reparo-cancelamento.md) | local | sonnet | Reparo/cancelar obra (5204), após F3-08 |
 | [F3-09-vitoria-estatisticas.md](F3-09-vitoria-estatisticas.md) | local | sonnet | Modos de vitória + MatchStats (5205) |
 | [F3-10-neutros-critters.md](F3-10-neutros-critters.md) | local | sonnet | Bandoleiros/critters (5206), após F3-09 |
+| [F4-01-cavalaria.md](F4-01-cavalaria.md) | local | sonnet | Cavalaria + nomes D7 (5207) |
+| [F4-02-cerco.md](F4-02-cerco.md) | local | sonnet | Cerco + Oficina + projétil balístico (5208), após F4-01 |
+| [F4-03-mana-habilidades.md](F4-03-mana-habilidades.md) | local | sonnet | Framework de mana/habilidades (5209), após F4-02 |
+| [F4-04-conjuradores-magias.md](F4-04-conjuradores-magias.md) | local | sonnet | Mago/Necromante + mecânicas (5210), após F4-03 |
+| [F4-04b-templo-magias-restantes.md](F4-04b-templo-magias-restantes.md) | local | sonnet | Templo/Altar, Templário/Ogro Feiticeiro (5211) |
+| [F4-05-sapadores.md](F4-05-sapadores.md) | local | sonnet | Sapadores (5212), após F4-02 |
+| [F4-06-aereo.md](F4-06-aereo.md) | local | sonnet | Camada aérea (5213) |
+| [F4-07a-petroleo-estaleiro.md](F4-07a-petroleo-estaleiro.md) | local | sonnet | Petróleo, Estaleiro, naval (5214) |
+| [F4-07b-navios-de-guerra.md](F4-07b-navios-de-guerra.md) | local | sonnet | Navios, transporte, Fundição (5215) |
+| [F4-08-herois.md](F4-08-herois.md) | local | sonnet | Heróis D6 (5216) — **porta 5216 também usada pela arte; ajuste se rodarem juntas** |
 | [F3-11-balanceamento-base.md](F3-11-balanceamento-base.md) | local (Node, sem navegador) | sonnet | Lote IA×IA, só depois de F3-05/07/08/09/10 |
 | [F3-01-controles-rts.md](F3-01-controles-rts.md) | nuvem (item 4) | sonnet | Controles RTS + NEW-16 |
 | [F6-08-opcoes.md](F6-08-opcoes.md) | nuvem (item 5) | sonnet | Depois da F3-01 |

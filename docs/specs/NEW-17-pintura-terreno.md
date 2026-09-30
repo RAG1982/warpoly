@@ -1,5 +1,7 @@
 # NEW-17 · Textura do terreno pintada a partir da altura do mapa (mapas não continentais)
 
+> **Status: ✅ PRONTA — DONE (297a07e)**
+
 Leia antes: `docs/specs/_COMUM.md`, `CLAUDE.md`, `src/data/maps/README.md`. Executor: **haiku**. Worktree isolada. Porta do vite **5199**.
 
 ## Sintoma

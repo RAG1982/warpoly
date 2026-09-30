@@ -1,5 +1,7 @@
 # NEW-20 · Teste intermitente (timeout com cache frio)
 
+> **Status: ⏸ ADIADA pelo dono (agente sem permissão para npx vitest)**
+
 Leia antes: `docs/specs/_COMUM.md`, `CLAUDE.md`. Executor: **haiku**. Worktree isolada. Sem navegador.
 
 ## Sintoma

@@ -1,5 +1,7 @@
 # F7-00c · Modelos .glb aprovados ligados por padrão
 
+> **Status: ✅ PRONTA — DONE (7d6f712)**
+
 Leia antes: `docs/specs/_COMUM.md`, `CLAUDE.md`.
 Worktree: nova (isolada). Porta do vite: **5189**.
 

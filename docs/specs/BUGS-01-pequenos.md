@@ -1,5 +1,7 @@
 # BUGS-01 · Lote de correções pequenas do backlog
 
+> **Status: ✅ PRONTA — DONE (PR #1, nuvem)**
+
 Leia antes: `docs/specs/_COMUM.md` (na nuvem, veja também `docs/HANDOFF_CLOUD.md`), `CLAUDE.md`, seção "Backlog descoberto" de `docs/TASKS.md`.
 Um commit por item (mensagens indicadas). Mudanças mínimas, sem reformatar arquivos.
 

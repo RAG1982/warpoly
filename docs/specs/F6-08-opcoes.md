@@ -1,5 +1,7 @@
 # F6-08 · Menu de Opções completo
 
+> **Status: ⏳ A FAZER — fila da nuvem (item 5), depois da F3-01**
+
 Leia antes: `docs/specs/_COMUM.md` (na nuvem: `docs/HANDOFF_CLOUD.md`), `CLAUDE.md`, `docs/07_DECISOES.md` (D3 hardware), `src/core/QualitySettings.js` (API: `QualitySettings.current`, `set(preset)` → `{requiresReload}`, `QUALITY_PRESETS`), `src/models/textureQuality.js` (`localStorage['warpoly.textureQuality']`), `src/ui/uiScale.js` (`localStorage['warpoly.uiScale']`), `src/ui/screens/MainMenu.js` (painel placeholder `#mm-options` ~linha 234) e o painel de config in-game (`#settings-panel` em `index.html`).
 
 ## "Pronto"

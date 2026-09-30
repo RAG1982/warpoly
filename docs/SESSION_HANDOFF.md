@@ -51,9 +51,9 @@
 - Nuvem cria branch `cloud/<ID>` + PR; **o coordenador local faz o merge** (`git fetch origin && git merge --no-ff origin/cloud/<ID>`), verifica, fecha o PR se o GitHub não fechar sozinho, e atualiza `HANDOFF_CLOUD.md` (fila) e `TASKS.md`.
 - Fila atual da nuvem (ainda **não iniciada**): **F3-01** controles RTS + NEW-16 (`docs/specs/F3-01-controles-rts.md`) → **F6-08** menu de opções (`docs/specs/F6-08-opcoes.md`). Mantenha a tabela "O que está rodando localmente" do handoff da nuvem atualizada para evitar conflitos.
 
-## 5. Estado atual (master `e1ec049`, tudo no GitHub)
-Quadro: F0 7/7 · F1 9/10 · F2 6/8 · F3 1/11 (F3-00 design aprovado) · F6 2/9 · F7 1/11 (Blender PoC aprovado) · demais 0.
-Testes: **222** passando; lint 0 erros (~25 avisos antigos); build ok; smoke ok.
+## 5. Estado atual (2026-09-30, tudo no GitHub)
+Quadro: F0 7/7 · F1 9/10 · F2 6/8 · F3 4/11 (design, economia, combate, níveis do Centro) · F6 2/9 · F7 1/11 · demais 0.
+Testes: **298** passando; lint 0 erros (~25 avisos antigos); build ok; smoke ok.
 
 Entregas principais já no master:
 - Desempenho: texturas por qualidade (`?texq=`), presets gráficos (`?quality=`), sombras seletivas, mesclagem estática (`?merge=0`), unidades SkinnedMesh rígido (`?skin=0`), pools/sem vazamentos, grade espacial, pathfinder com heap/obstáculos dinâmicos/orçamento por nós, **tick fixo 20 Hz** com interpolação e LOD de animação. Cena inicial ~120 FPS; combate100 ~37–43 FPS (meta 50 → NEW-15); massa300 ~19 FPS (limitado por draw calls das unidades).
@@ -65,20 +65,15 @@ Parâmetros de URL úteis: `?play&faction=orc`, `?skipPreload`, `?texq=low`, `?q
 ## 6. Decisões do dono (resumo — detalhes em `docs/07_DECISOES.md`)
 D1 pedra permanece; petróleo só com Centro nível 2 · D2 nomes próprios (nada Blizzard) · D3 hardware fraco sem perder qualidade · D4 facções **Coroa de Aldária** / **Clãs de Gorthak** · D5 Casa/Toca mantidas, **sem ouro passivo** nas fazendas · D6 heróis na campanha **e** escaramuça (1 por jogador, Centro nível 2, opção "Sem heróis") · D7 nomes de `08_GAME_DESIGN.md` aprovados.
 
-## 7. Próximos passos (ordem recomendada)
-1. **F3-04 Economia WC2** — o dono pediu para começar. Escrever `docs/specs/F3-04-economia.md` a partir de `08_GAME_DESIGN.md` §2/§4:
-   - trabalhador **entra na mina** (~1,5 s, 1 por vez, fila; mina esgota com aviso); pedreira 2 simultâneos;
-   - florestas densas **bloqueiam passagem** e abrem ao cortar (integrar com `Pathfinder.blockCircle` da F1-07 e `blockerGrid` da F1-06);
-   - **remover ouro passivo** de Fazenda/Chiqueiro (`passiveIncome` em `src/data/buildings.js`); Casa/Toca mantidas;
-   - Fazenda/Chiqueiro como **requisito do Quartel** (campo `requires` novo em `src/data/buildings.js`, validado no `CommandExecutor` e no card da HUD);
-   - carga por viagem 10/10/8; bônus de Serraria/Centro previstos (deixar campos de multiplicador em dados);
-   - manter determinismo (`tests/unit/determinism.test.js` pode mudar os valores esperados — regravar baseline e justificar);
-   - IA (`src/ai/**`) adaptada às novas regras (esperar Fazenda antes do Quartel, lidar com fila da mina).
-   Executor: **sonnet**. Evitar conflito com F3-01 da nuvem (InputManager/UIManager) — mudanças mínimas no card.
-2. **F3-03 Combate** (fórmula básico+perfurante com `gm.rng`, tipos de dano, armadura em construções → B5).
-3. **F3-06 Níveis do Centro + requisitos** e **NEW-3/F6-09**: nomes novos (`src/data/names.js`) na UI.
-4. Em seguida: F3-07 pesquisas em níveis → F3-08 muralhas → F3-05 reparo → F3-09 vitória/estatísticas → F3-10 neutros → F4 (cavalaria, cerco, magias, aéreo, naval/petróleo, heróis) → F5 IA (dificuldades, build orders, micro, névoa) → F6 restante → F8 conteúdo → F9 multiplayer → F10 release. Blender (F7-00b…) só no fim.
-5. Pendências pequenas boas para **haiku** ou nuvem: NEW-18 (card vazio esticado), NEW-17 (pintura do terreno por altura), NEW-10 (animação de ataque), NEW-1 (GLTFBuildingLoader), NEW-6 (ORM de texturas).
+## 7. Próximos passos (atualizado 2026-09-30)
+Índice de todas as specs com status: **`docs/specs/README.md`**.
+1. **F3-07 pesquisas em níveis** — spec pronta (`docs/specs/F3-07-pesquisas-niveis.md`), **não disparada**. Disparar com `model: "sonnet"`, worktree (depende de F3-03 e F3-06, já no master).
+2. Nuvem (fila em `docs/HANDOFF_CLOUD.md`): F3-01 controles → F6-08 opções → NEW-19 ruínas.
+3. Escrever specs seguintes da F3: F3-08 muralhas → F3-05 reparo → F3-09 vitória/estatísticas → F3-10 neutros → F3-11 balanceamento (usa simulação headless). Depois F4 (cavalaria, cerco + NEW-23, magias, aéreo, naval/petróleo, heróis D6), F5 IA, F6 restante, F8, F9, F10.
+4. Pequenas para **haiku**: NEW-21 (rota através de floresta fechada), NEW-22/NEW-3 (textos em inglês no card), NEW-6 (ORM de texturas).
+5. Adiadas: F7-00d Lacaio e demais Blender (só Opus, no fim); NEW-20 (dono adiou).
+
+Estado ao escrever: master com F3-03, F3-04, F3-06, NEW-10, NEW-17, NEW-18 mesclados; **298 testes**; nenhum agente rodando.
 
 ## 8. Estado operacional ao encerrar
 - Nenhum agente rodando; dev server local parado (subir com `npx vite --port 5173` em background se precisar mostrar algo ao dono).

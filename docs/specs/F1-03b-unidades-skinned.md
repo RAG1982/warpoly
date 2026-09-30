@@ -1,5 +1,7 @@
 # F1-03b · Unidades: SkinnedMesh rígido (1 draw call por material na unidade inteira)
 
+> **Status: ✅ PRONTA — DONE (38c013b); meta 50 FPS pendente em NEW-15**
+
 Leia antes: `docs/specs/_COMUM.md`, `CLAUDE.md`, seção "Unidades depois da F1-03" em `docs/03_ASSETS_E_INSPETOR.md`.
 Worktree: nova (isolada). Porta do vite: **5188**.
 

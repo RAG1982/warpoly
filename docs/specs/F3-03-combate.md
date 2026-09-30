@@ -1,5 +1,7 @@
 # F3-03 — Modelo de combate WC2 (básico + perfurante, armadura, tipos de dano, RNG determinístico)
 
+> **Status: ✅ PRONTA — DONE (2b345d6)**
+
 > Leia antes: `CLAUDE.md`, `docs/specs/_COMUM.md`, `docs/08_GAME_DESIGN.md` §5 e §6. Executor: **sonnet**, worktree, porta do vite **5198**. **Rode depois da F3-04 estar mesclada** (ambas editam `Unit.js`, `Building.js`, `GameManager.js`, `src/ai/**`).
 
 ## Por quê

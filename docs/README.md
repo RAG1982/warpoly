@@ -14,7 +14,7 @@ RTS 3D low-poly para navegador (three.js + Vite), inspirado em **Warcraft II**. 
 | [08_GAME_DESIGN](08_GAME_DESIGN.md) | Design de jogo F3-00 (facções, economia, níveis, unidades, magias) — proposta v1 |
 | [SESSION_HANDOFF](SESSION_HANDOFF.md) | **Comece aqui numa sessão nova**: estado, regras, fluxo de agentes, próximos passos |
 | [HANDOFF_CLOUD](HANDOFF_CLOUD.md) | Roteiro para executar tarefas no Claude Code online (nuvem) |
-| [specs/](specs/) | Especificações detalhadas por tarefa (executadas por Sonnet/Haiku) |
+| [specs/](specs/README.md) | Especificações por tarefa com status (índice em `specs/README.md`) |
 | [TASKS](TASKS.md) | **Lista de tarefas controlada**: protocolo, lanes/agentes, ondas paralelas, status |
 
 Backups: `~/warpoly_backups/warpoly_full_2026-09-28.tar.gz` e branch `backup/pre-aaa-2026-09-28`.

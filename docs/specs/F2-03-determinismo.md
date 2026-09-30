@@ -1,5 +1,7 @@
 # F2-03 · Simulação determinística (seed, sem relógio, checksum)
 
+> **Status: ✅ PRONTA — DONE (32b5fa9)**
+
 Leia antes: `docs/specs/_COMUM.md`, `CLAUDE.md`, `docs/01_ARQUITETURA.md` (tick fixo F1-09, comandos F2-02, `MatchConfig.seed`).
 Worktree: nova. **Primeiro `git merge master`** (precisa conter F2-02). Porta do vite: **5193**.
 

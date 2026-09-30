@@ -1,5 +1,7 @@
 # F1-09 · Simulação em tick fixo (20 Hz) + interpolação + LOD de animação
 
+> **Status: ✅ PRONTA — DONE (5dca95c)**
+
 Leia antes: `docs/specs/_COMUM.md`, `CLAUDE.md`, `docs/01_ARQUITETURA.md` (loop, `MatchSession`, SpatialGrid), NEW-14 em `docs/TASKS.md`.
 Worktree: nova. **Primeiro `git merge master`.** Porta do vite: **5191**.
 

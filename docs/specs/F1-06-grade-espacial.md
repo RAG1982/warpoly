@@ -1,5 +1,7 @@
 # F1-06 · Grade espacial (spatial hash) para a simulação
 
+> **Status: ✅ PRONTA — DONE parcial (bf87e23); gargalo restante em NEW-14/F1-09**
+
 Leia antes: `docs/specs/_COMUM.md`, `CLAUDE.md`, `docs/01_ARQUITETURA.md` (modelo de jogadores F2-01: `gm.allUnits`, `ownerId`, `gm.isHostile`, `gm.entitiesById`).
 Worktree: nova (isolada). Porta do vite: **5187**.
 

@@ -1,5 +1,7 @@
 # F2-05 · Mapas orientados a dados
 
+> **Status: ✅ PRONTA — DONE (110c125)**
+
 Leia antes: `docs/specs/_COMUM.md`, `CLAUDE.md`, `docs/01_ARQUITETURA.md` (MatchConfig, determinismo com `rngMap`, headless), `docs/05_PARIDADE_WARCRAFT2.md` §6.
 Worktree: nova. **Primeiro `git merge master`** (precisa conter F2-07). Porta do vite: **5195**.
 

@@ -1,5 +1,7 @@
 # NEW-18 · Guia rápido esticado na base da HUD quando nada está selecionado
 
+> **Status: ✅ PRONTA — DONE (640dff1)**
+
 Leia antes: `docs/specs/_COMUM.md`, `CLAUDE.md`. Executor: **haiku**. Worktree isolada. Sem dev server obrigatório.
 
 ## Sintoma

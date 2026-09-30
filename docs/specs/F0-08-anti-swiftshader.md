@@ -1,5 +1,7 @@
 # F0-08 · Bloquear testes de navegador sem GPU
 
+> **Status: ✅ PRONTA — DONE (d17aaf5)**
+
 Leia antes: `docs/specs/_COMUM.md`.
 Worktree: nova (isolada), branch sugerida `task/F0-08`. Porta do vite: não precisa.
 

@@ -1,5 +1,7 @@
 # F2-02 · Sistema de comandos (única forma de alterar o estado do jogo)
 
+> **Status: ✅ PRONTA — DONE (b5ca827)**
+
 Leia antes: `docs/specs/_COMUM.md`, `CLAUDE.md`, `docs/01_ARQUITETURA.md` (jogadores/IDs F2-01, `entitiesById`, loop de tick fixo da F1-09 se já mesclada).
 Worktree: nova. **Primeiro `git merge master`.** Porta do vite: **5192**.
 **Dependência**: só comece se o master já contiver a F1-09 (`git log master --oneline | grep F1-09`). Se não, pare e reporte.

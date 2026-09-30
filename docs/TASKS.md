@@ -66,6 +66,7 @@ Opus escreve a spec em `docs/specs/<ID>.md`; agente **Sonnet** executa; Opus rev
 | `docs/specs/F7-00d-lacaio-blender.md` | F7-00d Lacaio no Blender — **ADIADA** (modelagem só com Opus; cancelada a execução por Sonnet) | opus (futuro) |
 | `docs/specs/F3-04-economia.md` | F3-04 economia WC2 — **DONE (5b8a72e)**; toca GameManager/Unit/Building/ai → não vai para a nuvem | sonnet (local) |
 | `docs/specs/F3-03-combate.md` | F3-03 — spec pronta; **local, depois da F3-04** | sonnet (local) |
+| `docs/specs/F3-07-pesquisas-niveis.md` | F3-07 — spec pronta, **não disparada** (próxima local) | sonnet (local) |
 | `docs/specs/F3-06-niveis-centro.md` | F3-06 — spec pronta; **local, depois da F3-04 (e F3-03)** | sonnet (local) |
 | `docs/specs/NEW-19-ruinas.md` | NEW-19 ruínas — **nuvem** | sonnet (claude.ai/code) |
 | `docs/specs/BUGS-01-pequenos.md` | NEW-2, NEW-11, NEW-5, NEW-13 — **nuvem** (ver `docs/HANDOFF_CLOUD.md`) | sonnet (claude.ai/code) |
@@ -288,7 +289,7 @@ Opus escreve a spec em `docs/specs/<ID>.md`; agente **Sonnet** executa; Opus rev
 - **Resultado**: `src/data/tiers.js` (3 níveis, PV 1600/2200/2800, custos nv2/nv3, ouro ×1,0/1,1/1,2), comandos `UPGRADE_HQ`/`CANCEL_UPGRADE_HQ`, evento `HQ_TIER_CHANGED`, requisitos `{hq:N}` em construções/unidades/pesquisas, card "NÍVEL N — nome" com botão Evoluir e progresso, IA evolui o Centro. Grande Salão PV 1750→1600 (tabela única). Petróleo do nv3 declarado, cobrança fica para F4-07. 298 testes.
 
 ### F3-07 · Pesquisas em níveis
-- **Status**: `TODO` · Lane GAME · Onda 4 · Dep: F3-06
+- **Status**: `TODO(spec pronta: docs/specs/F3-07-pesquisas-niveis.md)` · Lane GAME · Onda 4 · Dep: F3-06
 - **Fazer**: ataque/armadura corpo a corpo 2 níveis (Forja), projéteis 2 níveis (Serraria), cerco 2 níveis, upgrades de classe (Arqueiro→Patrulheiro, Lançador→Berserker), torres Guarda/Canhão.
 - **Aceite**: dados em `src/data/upgrades.js`; UI da forja/serraria mostra níveis.
 

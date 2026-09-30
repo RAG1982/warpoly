@@ -1,5 +1,7 @@
 # F1-05 · Névoa de guerra por shader (continuação)
 
+> **Status: ✅ PRONTA — DONE (e33d40e)**
+
 Leia antes: `docs/specs/_COMUM.md`, `CLAUDE.md`, seção "Névoa de guerra" de `docs/02_MECANICAS.md`, bugs B1/B2 em `docs/04_DIAGNOSTICO.md`.
 
 ## Onde trabalhar

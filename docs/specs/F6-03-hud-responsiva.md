@@ -1,5 +1,7 @@
 # F6-03 · HUD responsiva estilo WC2 (corrige B11)
 
+> **Status: ✅ PRONTA — DONE (PR #3, nuvem)**
+
 Leia antes: `docs/specs/_COMUM.md` (na nuvem, veja também `docs/HANDOFF_CLOUD.md`), `CLAUDE.md`, referências visuais `docs/reference/hudmodelo.png` e `docs/reference/dialogoBarracs.png`, `src/ui/screens/mainMenu.css` (identidade dourada já usada no menu).
 
 ## Por quê

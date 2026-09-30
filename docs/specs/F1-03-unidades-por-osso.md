@@ -1,5 +1,7 @@
 # F1-03 · Unidades: mesclar partes rígidas por "osso"
 
+> **Status: ✅ PRONTA — DONE parcial (3fd7fc2); meta completada via F1-03b**
+
 Leia antes: `docs/specs/_COMUM.md`, `CLAUDE.md`, `docs/03_ASSETS_E_INSPETOR.md`.
 Worktree: nova (isolada). Porta do vite: **5186**.
 

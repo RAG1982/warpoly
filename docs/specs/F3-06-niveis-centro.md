@@ -1,5 +1,7 @@
 # F3-06 — Níveis do Centro da Cidade + requisitos (tiers)
 
+> **Status: ✅ PRONTA — DONE (369cc38)**
+
 > Leia antes: `CLAUDE.md`, `docs/specs/_COMUM.md`, `docs/08_GAME_DESIGN.md` §3, §4 e §10. Executor: **sonnet**, worktree, porta do vite **5199**. **Rode depois da F3-04** (reusa `src/sim/requirements.js`) e, de preferência, depois da F3-03 (mesmos arquivos: `Building.js`, `GameManager.js`, `UIManager.js`, `src/ai/**`).
 
 ## Por quê

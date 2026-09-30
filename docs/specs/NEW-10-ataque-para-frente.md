@@ -1,5 +1,7 @@
 # NEW-10 · Golpe das animações de ataque termina atrás do corpo
 
+> **Status: ✅ PRONTA — DONE (944b6ee)**
+
 Leia antes: `docs/specs/_COMUM.md`, `CLAUDE.md` (regra: armas com gume para a frente, +Z). Executor: **haiku**. Worktree isolada. Porta do vite **5200**.
 
 ## Causa (confirmada por cálculo)

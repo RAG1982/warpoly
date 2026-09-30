@@ -1,5 +1,7 @@
 # F2-07 · Barramento de eventos + animador fora do inspetor
 
+> **Status: ✅ PRONTA — DONE (13fc992)**
+
 Leia antes: `docs/specs/_COMUM.md`, `CLAUDE.md`, `docs/01_ARQUITETURA.md` (tick fixo, comandos, determinismo/headless).
 Worktree: nova. **Primeiro `git merge master`** (precisa conter F2-03). Porta do vite: **5194**.
 

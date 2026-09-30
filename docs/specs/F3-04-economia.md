@@ -1,5 +1,7 @@
 # F3-04 — Economia WC2 (mina com entrada/fila, florestas que bloqueiam, sem ouro passivo, requisito do Quartel)
 
+> **Status: ✅ PRONTA — DONE (5b8a72e)**
+
 > Leia antes: `CLAUDE.md`, `docs/specs/_COMUM.md`, `docs/08_GAME_DESIGN.md` §2 e §4, `docs/07_DECISOES.md` (D1, D5). Executor: **sonnet**, worktree, porta do vite **5196**.
 
 ## Por quê

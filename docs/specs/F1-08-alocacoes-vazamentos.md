@@ -1,5 +1,7 @@
 # F1-08 · Eliminar alocações por frame e vazamentos de GPU
 
+> **Status: ✅ PRONTA — DONE (70fea77)**
+
 Leia antes: `docs/specs/_COMUM.md`, `CLAUDE.md`, item 6 da seção 1 de `docs/04_DIAGNOSTICO.md`.
 Worktree: nova (isolada). **Antes de começar, rode `git log -1 --oneline master` e confirme que a worktree contém esse commit; se não, `git merge master`.** Porta do vite: **5190**.
 

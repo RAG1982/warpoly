@@ -34,7 +34,7 @@ try {
   await page.waitForFunction(() => window.game && window.game.gameManager && window.game.gameManager.buildings.length > 0, null, { timeout: 90000 });
   await page.waitForTimeout(1500);
 
-  const setup = await page.evaluate(() => {
+  await page.evaluate(() => {
     const gm = window.game.gameManager;
     const id = gm.localPlayerId;
     const hq = gm.buildings.find(b => b.ownerId === id && b.role === 'hq');

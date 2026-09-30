@@ -110,6 +110,14 @@ Tick de 1s. Utilidades:
 - Custos: a IA usa os **mesmos custos reais** de `src/data/` (bug B3 corrigido na F0-06; antes o arremessador custava 60 madeira/35 ouro para a IA contra 20/40 real, e o quartel/serraria/torre/chiqueiro orc e o "cerco" humano também estavam com valores próprios).
 - A IA é **onisciente** (lê `gm.units` diretamente), sem níveis de dificuldade, sem micro, sem scout, sem pesquisar melhorias de forma estratégica.
 
+## Condições de vitória (F3-09)
+
+`MatchConfig.victoryMode` (`?victory=regicide`, seletor no menu de escaramuça, chave `warpoly.victory`):
+- **Destruir tudo** (`conquest`, padrão): o jogador é derrotado quando não resta nenhuma construção viva dele. Contam construções em obra e torres; **muralhas (`role:'wall'`) não contam**. Unidades sem construção não salvam o jogador.
+- **Regicídio** (`regicide`): derrotado quando não resta Centro (`role:'hq'`) vivo.
+- Vitória quando `aliveTeams().size <= 1`; derrota se o jogador local cair. Um jogador derrotado emite `PLAYER_DEFEATED` uma vez; suas unidades e construções **permanecem no mapa, inertes** (não recebem ordens, não atacam, não produzem) e podem ser destruídas.
+- O modal de fim de jogo mostra a mensagem do modo, tempo, unidades mortas/perdidas e construções destruídas/perdidas.
+
 ## Névoa de guerra
 
 Névoa no estilo Warcraft II (F1-05), aplicada no próprio shader dos materiais do mundo (sem plano sobreposto — nada "atravessa" a névoa). Grade lógica 128² sobre o mapa, recalculada a 10 Hz, com 3 estados por célula:

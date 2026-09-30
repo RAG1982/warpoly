@@ -223,6 +223,7 @@ contras acima. Números de exemplo (seed 42), não normativos — o balanceament
 
 ## 9. Condições de vitória e modos
 - Padrão (WC2): **destruir todas as construções** do inimigo. Opcional: Regicídio (Centro), Tempo (maior pontuação em N min).
+- **Implementado (F3-09)**: Destruir tudo (padrão) e Regicídio, com estatísticas da partida (`MatchStats`); Tempo continua pendente. Ver `docs/02_MECANICAS.md`.
 - Escaramuça 1×1 a 8 jogadores (times), campanha (2 × 8+ missões), multiplayer lockstep.
 
 ---

@@ -35,19 +35,19 @@ PALETTE = {
     'skin': dict(base='#c99b76', var='#a97a58', var_scale=6.0, var_amt=0.6, fine=0.06, top=0.2,
                  edge='#e8bf9a', edge_amt=0.3, edge_r=0.02, ao=(0.2, 0.55)),
     'stubble': dict(base='#7d5d47', var='#5f4432', var_scale=25.0, fine=0.2, top=0.15, ao=(0.2, 0.5)),
-    'linen': dict(base='#c4bb9c', var='#9a9074', var_scale=7.0, var_amt=0.9, fine=0.12, top=0.22,
+    'linen': dict(base='#dcd2b0', var='#a89c78', var_scale=7.0, var_amt=0.9, fine=0.12, top=0.22,
                   edge='#c9c1a2', edge_amt=0.35, edge_r=0.02, ao=(0.25, 0.6), grad=(0.0, 1.9, 0.25)),
-    'vest': dict(base='#94623a', var='#6b4526', var_scale=6.0, var_amt=1.0, fine=0.16, top=0.2,
+    'vest': dict(base='#9a5a2c', var='#5c3217', var_scale=6.0, var_amt=1.0, fine=0.16, top=0.2,
                  edge='#a0724a', edge_amt=0.6, edge_r=0.015, ao=(0.22, 0.6), grad=(0.0, 1.9, 0.2)),
     'leather': dict(base='#7a4c28', var='#583319', var_scale=6.0, fine=0.12, top=0.2,
                     edge='#b98552', edge_amt=0.55, edge_r=0.015, ao=(0.22, 0.55)),
-    'dark': dict(base='#33261c', var='#241a12', var_scale=6.0, fine=0.12, top=0.18,
+    'dark': dict(base='#2a1f17', var='#1b130d', var_scale=6.0, fine=0.12, top=0.18,
                  edge='#6a5038', edge_amt=0.5, edge_r=0.015, ao=(0.22, 0.55)),
     'patch': dict(base='#6d6a3c', var='#565430', var_scale=8.0, fine=0.12, top=0.2,
                   edge='#9c9860', edge_amt=0.5, edge_r=0.012, ao=(0.2, 0.5)),
-    'cloak': dict(base='#7a6a55', var='#57493a', var_scale=6.0, var_amt=0.9, fine=0.15, top=0.25,
+    'cloak': dict(base='#6a5a48', var='#3f352a', var_scale=6.0, var_amt=0.9, fine=0.15, top=0.25,
                   edge='#7a6d58', edge_amt=0.4, edge_r=0.02, ao=(0.25, 0.6), grad=(0.0, 2.0, 0.2)),
-    'pants': dict(base='#5d6474', var='#454c5a', var_scale=5.0, fine=0.12, top=0.15,
+    'pants': dict(base='#4f6288', var='#37476a', var_scale=5.0, fine=0.12, top=0.15,
                   edge='#7a6350', edge_amt=0.3, edge_r=0.015, ao=(0.25, 0.6), grad=(0.0, 1.0, 0.3)),
     'patch2': dict(base='#b48f34', var='#8f6f25', var_scale=8.0, fine=0.12, top=0.2, edge='#dcc063', edge_amt=0.5, edge_r=0.012, ao=(0.2, 0.5)),
     'patch3': dict(base='#9a4432', var='#742f22', var_scale=8.0, fine=0.12, top=0.2, edge='#c9705a', edge_amt=0.5, edge_r=0.012, ao=(0.2, 0.5)),
@@ -57,6 +57,10 @@ PALETTE = {
                  edge='#c3cad6', edge_amt=0.9, edge_r=0.015, edge_gain=12.0, ao=(0.22, 0.5)),
     'rust': dict(base='#6d4a36', var='#3b2c25', var_scale=9.0, var_amt=1.0, fine=0.2, top=0.3,
                  edge='#b58a62', edge_amt=0.7, edge_r=0.015, ao=(0.22, 0.55)),
+    'rope': dict(base='#c9a96c', var='#9d7d48', var_scale=45.0, var_amt=1.0, fine=0.18, fine_scale=90.0, top=0.3,
+                 edge='#f0d8a0', edge_amt=0.5, edge_r=0.01, ao=(0.0, 0.3)),
+    'rope_dk': dict(base='#8a6b3c', var='#64492a', var_scale=45.0, var_amt=1.0, fine=0.18, fine_scale=90.0, top=0.2,
+                    ao=(0.0, 0.3)),
     'wood': dict(base='#6a4a2e', var='#4a3220', var_scale=5.0, var_amt=1.0, fine=0.12, coord='object',
                  streaks=(40.0, 2.0, 0.3), edge='#a67d52', edge_amt=0.45, edge_r=0.012, ao=(0.22, 0.5)),
     'bone': dict(base='#e0d3a8', var='#bba876', var_scale=5.0, fine=0.08, top=0.15,
@@ -169,10 +173,18 @@ def build_torso(mats, root):
     mb.add(prim_box(0.16, 0.06, 0.11), 'vest', M((0.25, -0.23, 0.06), (0, 0, -5)), bevel=0.012)
     mb.add(prim_sphere(0.022, 0.022, 0.016, 5, 3), 'iron', M((0.25, -0.24, 0.115)), smooth=60)
     mb.add(prim_box(0.05, 0.06, 0.012), 'patch', M((0.22, -0.32, 0.112), (0, 0, 8)), bevel=0.003)
-    # corda enrolada no quadril esquerdo e segunda bolsa
-    mb.add(prim_cyl(0.09, 0.09, 0.09, 10, base=False), 'linen', M((-0.28, -0.27, 0.06), (0, 0, 90)) @ M(r=(90, 0, 0)), smooth=30)
-    for dz in (-0.05, 0.0, 0.05):
-        mb.add(prim_cyl(0.096, 0.096, 0.012, 10, base=False), 'dark', M((-0.28, -0.27, 0.06 + dz), (0, 0, 90)) @ M(r=(90, 0, 0)), smooth=30)
+    # corda enrolada no quadril esquerdo: rolo horizontal de voltas claras e escuras (eixo para fora, +/-x)
+    CX, CY, CZ = -0.295, -0.27, 0.05
+    for k in range(6):
+        dx = -0.06 + k * 0.024
+        mb.add(prim_cyl(0.092 + (0.004 if k % 2 else 0.0), 0.092 + (0.004 if k % 2 else 0.0), 0.022, 10, base=False,
+                        cap0=False, cap1=False),
+               'rope' if k % 2 == 0 else 'rope_dk', M((CX + dx, CY, CZ), (0, 0, 90)), smooth=30)
+    for sg in (-1, 1):   # tampas com o miolo do rolo
+        mb.add(prim_cyl(0.088, 0.088, 0.008, 10, base=False), 'rope_dk', M((CX + sg * 0.072, CY, CZ), (0, 0, 90)), smooth=30)
+    # ponta solta e nó de amarração
+    mb.add(prim_box(0.02, 0.10, 0.02), 'rope', M((CX + 0.0, CY - 0.10, CZ + 0.085), (8, 0, 6)), bevel=0.0)
+    mb.add(prim_sphere(0.026, 0.022, 0.026, 5, 3), 'rope_dk', M((CX, CY + 0.02, CZ + 0.095)), smooth=60)
     mb.add(prim_box(0.10, 0.11, 0.08), 'leather', M((0.06, -0.31, 0.15), (8, 0, 0)), bevel=0.015, smooth=30)
     mb.add(prim_box(0.03, 0.03, 0.01), 'iron', M((0.06, -0.27, 0.195)))
     # saco pequeno pendurado nas costas + corda
@@ -337,21 +349,27 @@ def build_leg(mats, root, side):
 def build_weapon(mats, root):
     """Porrete: cabo em y≈0 (mão), cabeça grossa em +Y com pregos; 'gume'(fileira de pregos) em +Z."""
     mb = MeshBuilder('Weapon')
-    mb.add(prim_cyl(0.034, 0.038, 0.62, 7, base=False), 'wood', M((0, 0.12, 0)), smooth=50)
-    mb.add(prim_cyl(0.042, 0.042, 0.24, 7, base=False), 'dark', M((0, 0.0, 0)), smooth=45)   # empunhadura
+    # o modelo da clava é pré-girado para fora e reduzido (pivô/nó Weapon inalterados): não cobre mais o torso
+    PRE = M(r=(0, 0, -24)) @ M(s=(0.80, 0.84, 0.80))
+
+    def A(prim, mat, m=None, **kw):
+        return mb.add(prim, mat, PRE if m is None else PRE @ m, **kw)
+
+    A(prim_cyl(0.034, 0.038, 0.62, 7, base=False), 'wood', M((0, 0.12, 0)), smooth=50)
+    A(prim_cyl(0.042, 0.042, 0.24, 7, base=False), 'dark', M((0, 0.0, 0)), smooth=45)   # empunhadura
     for y in (-0.08, -0.03, 0.02, 0.07):
-        mb.add(prim_cyl(0.045, 0.045, 0.014, 7, base=False), 'leather', M((0, y, 0)), smooth=30)
-    mb.add(prim_cyl(0.05, 0.05, 0.03, 7, base=False), 'iron', M((0, -0.13, 0)), smooth=30)
-    mb.add(prim_sphere(0.05, 0.04, 0.05, 6, 3), 'wood', M((0, -0.155, 0)), smooth=60)
+        A(prim_cyl(0.045, 0.045, 0.014, 7, base=False), 'leather', M((0, y, 0)), smooth=30)
+    A(prim_cyl(0.05, 0.05, 0.03, 7, base=False), 'iron', M((0, -0.13, 0)), smooth=30)
+    A(prim_sphere(0.05, 0.04, 0.05, 6, 3), 'wood', M((0, -0.155, 0)), smooth=60)
     # cabeça de tronco cônico, irregular
     hr = [ring_h(0.28, 0.045, 0.045, 8), ring_h(0.42, 0.09, 0.09, 8), ring_h(0.60, 0.14, 0.14, 8),
           ring_h(0.76, 0.152, 0.152, 8), ring_h(0.88, 0.12, 0.12, 8), ring_h(0.94, 0.06, 0.06, 8)]
-    mb.add(prim_rings(hr), 'wood', smooth=60)
+    A(prim_rings(hr), 'wood', smooth=60)
     # cinta de ferro enferrujada e corda enrolada
-    mb.add(prim_cyl(0.157, 0.157, 0.04, 8, base=False), 'rust', M((0, 0.68, 0)), smooth=30)
-    mb.add(prim_cyl(0.10, 0.10, 0.03, 8, base=False), 'rust', M((0, 0.46, 0)), smooth=30)
+    A(prim_cyl(0.157, 0.157, 0.04, 8, base=False), 'rust', M((0, 0.68, 0)), smooth=30)
+    A(prim_cyl(0.10, 0.10, 0.03, 8, base=False), 'rust', M((0, 0.46, 0)), smooth=30)
     for y in (0.30, 0.335, 0.37):
-        mb.add(prim_cyl(0.056, 0.056, 0.018, 7, base=False), 'linen', M((0, y, 0)), smooth=30)
+        A(prim_cyl(0.056, 0.056, 0.018, 7, base=False), 'linen', M((0, y, 0)), smooth=30)
     # pregos radiais (mais numerosos na face +Z)
     import mathutils
     for (y, r, cnt, off, ln) in ((0.52, 0.12, 4, 45, 0.12), (0.64, 0.14, 5, 20, 0.14), (0.78, 0.148, 5, 55, 0.14)):
@@ -360,15 +378,15 @@ def build_weapon(mats, root):
             ca, sa = math.cos(a), math.sin(a)
             d = mathutils.Vector((ca, 0.3, sa)).normalized()
             q = mathutils.Vector((0, 1, 0)).rotation_difference(d).to_euler('XYZ')
-            mb.add(prim_cone(0.021, ln, 4), 'iron',
+            A(prim_cone(0.021, ln, 4), 'iron',
                    M((ca * (r - 0.012), y, sa * (r - 0.012)), (math.degrees(q.x), math.degrees(q.y), math.degrees(q.z))),
                    smooth=50)
-    mb.add(prim_cone(0.035, 0.16, 4), 'iron', M((0, 0.92, 0)), smooth=50)
+    A(prim_cone(0.035, 0.16, 4), 'iron', M((0, 0.92, 0)), smooth=50)
     # fileira de pregos grandes na face de impacto (+Z)
     for (y, ln) in ((0.55, 0.14), (0.68, 0.16), (0.80, 0.15)):
-        mb.add(prim_cone(0.028, ln, 4), 'iron', M((0, y, 0.135), (90, 0, 0)), smooth=50)
+        A(prim_cone(0.028, ln, 4), 'iron', M((0, y, 0.135), (90, 0, 0)), smooth=50)
     # tira de tecido (cor de time) pendurada abaixo da cabeça
-    mb.add(cloth_panel((-0.03, 0.30, 0.055), (0.03, 0.30, 0.055), (-0.04, 0.10, 0.075), (0.04, 0.10, 0.075),
+    A(cloth_panel((-0.03, 0.30, 0.055), (0.03, 0.30, 0.055), (-0.04, 0.10, 0.075), (0.04, 0.10, 0.075),
                        nx=2, ny=3, thick=0.012, wave=0.015, jag=0.02), 'team', smooth=50)
     w = mb.build(mats, parent=root, location=WEAPON_PIVOT)
     C.set_rot_game(w, WEAPON_REST_DEG)

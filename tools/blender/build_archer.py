@@ -29,6 +29,10 @@ import common as C  # noqa: E402
 from common import (MeshBuilder, M, prim_box, prim_rings, ring_h, prim_cyl, prim_cone,  # noqa: E402
                     prim_sphere, prim_extrude, limb_rings, bezier)
 
+import worker_common as W  # noqa: E402
+from worker_common import stitches  # noqa: E402
+W.install_bevel_budget()
+
 TORSO_PIVOT = (0.0, 1.05, 0.0)
 HEAD_PIVOT = (0.0, 1.58, 0.0)
 ARM_PIVOT = (0.38, 1.25, 0.0)
@@ -51,6 +55,9 @@ PALETTE = {
                     edge='#c08a52', edge_amt=0.55, edge_r=0.02, ao=(0.25, 0.6)),
     'leather_dk': dict(base='#553219', var='#3f2410', var_scale=7.0, fine=0.12, top=0.2,
                        edge='#8a5c36', edge_amt=0.45, edge_r=0.02, ao=(0.25, 0.6)),
+    'plate': dict(base='#6e3f1c', var='#4a2810', var_scale=7.0, var_amt=0.9, fine=0.14, top=0.3,
+                  edge='#d6a36a', edge_amt=0.9, edge_r=0.016, edge_gain=11.0, ao=(0.25, 0.55)),
+    'thread': dict(base='#cfb27e', var='#b09560', fine=0.05, top=0.1),
     'bronze': dict(base='#c9963a', var='#a67622', var_scale=9.0, var_amt=0.7, fine=0.06, top=0.4,
                    edge='#ffe6a0', edge_amt=1.0, edge_r=0.016, edge_gain=12.0, ao=(0.2, 0.45)),
     'steel': dict(base='#a7b0bf', var='#8792a4', var_scale=8.0, var_amt=0.7, fine=0.08, top=0.35,
@@ -182,6 +189,24 @@ def build_torso(mats, root):
         for y in (0.20, 0.06):
             mb.add(prim_sphere(0.014, 0.014, 0.014, 4, 2), 'bronze',
                    M((sx * 0.293, y, 0.06)), smooth=60)
+    # placas de couro fervido (lamelas sobrepostas) nas laterais do peito + costuras
+    for sx in (-1, 1):
+        for k in range(3):
+            px, py = sx * 0.20, 0.255 - k * 0.088
+            pz = chest_surface_z(px, py, 0.008)
+            mb.add(prim_box(0.095, 0.095, 0.016), 'plate', M((px, py, pz), (0, sx * -24, sx * -5)), bevel=0.004)
+            mb.add(prim_cone(0.012, 0.014, 4), 'bronze', M((px - sx * 0.022, py + 0.012, pz + 0.014), (90, 0, 0)))
+            mb.add(prim_cone(0.012, 0.014, 4), 'bronze', M((px + sx * 0.022, py + 0.012, pz + 0.014), (90, 0, 0)))
+        stitches(mb, (sx * 0.10, 0.28, 0.218), (sx * 0.105, -0.06, 0.212), 7, 'thread', size=(0.028, 0.008, 0.008))
+    # segunda correia cruzada (ombro esquerdo -> quadril direito), mais fina, formando um X no peito
+    path2 = []
+    for i in range(7):
+        t = i / 6
+        x = -0.17 + (0.23 + 0.17) * t
+        y = 0.35 + (-0.16 - 0.35) * t
+        path2.append((x, y, chest_surface_z(x, y, 0.016)))
+    mb.add(prim_rings(limb_rings(path2, [(0.028, 0.011)] * len(path2), 5, up=(0, 0, 1))), 'leather', smooth=60)
+    stitches(mb, path2[1], path2[-2], 8, 'thread', size=(0.026, 0.007, 0.007), hint=(0, 0, 1))
     # cinto largo + fivela de bronze
     mb.add(prim_rings([ring_h(-0.235, 0.278, 0.205, 14), ring_h(-0.115, 0.284, 0.209, 14)]), 'leather_dk',
            smooth=45, bevel=0.004)
@@ -218,8 +243,10 @@ def build_torso(mats, root):
     mb.add(prim_rings([ring_h(0.305, 0.352, 0.258, 12), ring_h(0.285, 0.372, 0.268, 12)], cap0=False, cap1=False),
            'leather_dk', smooth=30)
     # capa curta nas costas (cor de time) presa aos ombros por dois fechos de bronze com gema
-    mb.add(cloth_panel((0.24, 0.32, -0.19), (-0.24, 0.32, -0.19), (0.34, -0.42, -0.27), (-0.34, -0.42, -0.27),
-                       nx=6, ny=5, thick=0.03, bulge=(0, 0, -0.06), wave=0.045, jag=0.06), 'team', smooth=50)
+    mb.add(cloth_panel((0.24, 0.32, -0.19), (-0.24, 0.32, -0.19), (0.36, -0.42, -0.30), (-0.36, -0.42, -0.30),
+                       nx=10, ny=5, thick=0.03, bulge=(0, 0, -0.09), wave=0.12, jag=0.09), 'team', smooth=30)
+    # prega central da capa e cordão do colar (costuras em cor de couro)
+    stitches(mb, (0.10, 0.28, -0.232), (0.12, -0.36, -0.30), 8, 'thread', size=(0.03, 0.008, 0.008), hint=(0, 0.2, -1))
     for sx in (-1, 1):
         mb.add(prim_cyl(0.034, 0.034, 0.02, 8), 'bronze', M((sx * 0.20, 0.34, 0.15), (78, 0, 0)), smooth=30)
         mb.add(prim_sphere(0.02, 0.02, 0.014, 6, 3), 'gem', M((sx * 0.20, 0.35, 0.165), (0, 0, 0)), smooth=70)
@@ -305,8 +332,11 @@ def hand_grip(mb, s, ox=0.0):
 def hand_open(mb, s):
     """Mão que puxa a corda: dedos meio dobrados, com dedeira de couro."""
     mb.add(prim_box(0.10, 0.09, 0.09, taper=(0.9, 0.9)), 'skin', M((0, -0.55, 0.02)), bevel=0.02, smooth=40)
-    for k, dx in enumerate((-0.036, -0.012, 0.012, 0.036)):
-        mb.add(prim_box(0.024, 0.075, 0.03), 'skin', M((dx, -0.615, 0.045), (-18, 0, 0)), bevel=0.006, smooth=30)
+    for k, dx in enumerate((-0.036, -0.012, 0.012, 0.036)):   # dedos com duas falanges, curvados sobre a corda
+        ln = 1.0 - 0.1 * abs(k - 1.5)
+        mb.add(prim_box(0.022, 0.05 * ln, 0.028), 'skin', M((dx, -0.600, 0.035), (-8, 0, 0)), smooth=30)
+        mb.add(prim_box(0.020, 0.042 * ln, 0.026), 'skin', M((dx, -0.640, 0.062), (-52, 0, 0)), smooth=30)
+        mb.add(prim_sphere(0.012, 0.012, 0.012, 4, 2), 'skin', M((dx, -0.628, 0.04)), smooth=60)   # nó do dedo
     mb.add(prim_box(0.10, 0.03, 0.05), 'leather_dk', M((0, -0.595, 0.05), (-18, 0, 0)), bevel=0.006)
     mb.add(prim_box(0.045, 0.07, 0.04), 'skin', M((-s * 0.06, -0.55, 0.06), (0, 0, s * 25)), bevel=0.01, smooth=30)
 

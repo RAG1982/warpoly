@@ -529,10 +529,12 @@ export class UnitAnimator {
         parts.bow.rotation.z = -ease * 0.15; // natural slight archer cant
       }
       if (parts.armR) {
-        parts.armR.rotation.x = -ease * 1.25; // raise draw arm forward towards string
-        parts.armR.rotation.y = -ease * 0.55;
-        parts.armR.rotation.z = ease * 0.50;
-        parts.armR.position.z -= ease * 0.16;
+        // Draw hand crosses the chest towards the string nock (DrawnArrow)
+        parts.armR.rotation.x = -ease * 1.33;
+        parts.armR.rotation.y = -ease * 0.22;
+        parts.armR.rotation.z = -ease * 0.92;
+        parts.armR.position.x -= ease * 0.12;
+        parts.armR.position.z += ease * 0.05;
       }
     } else if (p < 0.65) {
       // Draw String back to ear/cheek (0.25 -> 0.65)
@@ -563,10 +565,11 @@ export class UnitAnimator {
       }
       if (parts.armR) {
         // Hand pulls right up to cheek / string draw
-        parts.armR.rotation.x = -1.25 - ease * 0.15;
-        parts.armR.rotation.y = -0.55 - ease * 0.15;
-        parts.armR.rotation.z = 0.50 + ease * 0.20;
-        parts.armR.position.z -= (0.16 + ease * 0.12);
+        parts.armR.rotation.x = -1.33 + ease * 0.02;
+        parts.armR.rotation.y = -0.22 - ease * 0.07;
+        parts.armR.rotation.z = -0.92 - ease * 0.09;
+        parts.armR.position.x -= 0.12;
+        parts.armR.position.z += 0.05 - ease * 0.066;
       }
     } else if (p < 0.75) {
       // Arrow Release Snap & Recoil (0.65 -> 0.75) - string returns to straight, arrow shoots
@@ -576,10 +579,11 @@ export class UnitAnimator {
       }
       if (parts.armR) {
         // Fingers release forward snap!
-        parts.armR.rotation.x = -1.40 + t * 0.40;
-        parts.armR.rotation.y = -0.70 + t * 0.25;
-        parts.armR.rotation.z = 0.70 - t * 0.30;
-        parts.armR.position.z = -0.28 + t * 0.15;
+        parts.armR.rotation.x = -1.31 + t * 0.31;
+        parts.armR.rotation.y = -0.29 - t * 0.16;
+        parts.armR.rotation.z = -1.01 + t * 1.41;
+        parts.armR.position.x -= 0.12 * (1 - t);
+        parts.armR.position.z = -0.016 - t * 0.114;
       }
       if (parts.armL) {
         // Bow kicks upward/backward from string snap

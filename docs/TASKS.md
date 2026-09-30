@@ -518,7 +518,7 @@ _(agentes adicionam aqui: `NEW-<n> · título · lane · motivo`)_
 - NEW-15 · Meta 50 FPS em combate100 ainda não atingida (37,5): restam ~20 draw calls/unidade por muitos materiais PBR. Caminho: atlas de material por unidade (1–2 materiais) — naturalmente resolvido pela migração das unidades para o pipeline Blender (F7-00b, adiada) — e depois instancing por tipo/VAT · PERF/ART
 - ✅ BUGS-01 (PR#1, nuvem): NEW-2 reembolso IA, NEW-11 Clock→Timer/PCFShadowMap, NEW-5 materiais não usados (lint 32→25 avisos), NEW-13 fundo além do mapa escurece com a névoa
 - NEW-16 · HUD < 1100 px esconde o máximo de população (mostra "5" em vez de "5 / 10") · UI
-- NEW-17 · `terrainTextures.js` pinta a paleta/regiões do mapa continental em qualquer mapa: em `ilhas-4p` a água aparece com padrão rachado e manchas de terra fora de lugar — pintor deve derivar de `getHeight` do mapa (água/areia/grama/rocha por altura) · ART/CORE
+- ✅ NEW-17 · `DONE(297a07e)` textura do terreno pintada pela altura em mapas não continentais (`getTerrainTexturesFromHeight`); continental inalterado · haiku. Obs.: o padrão "rachado" restante na água é a textura do `Water.js` (cáusticas), não do terreno
 - ✅ NEW-18 · `DONE(640dff1)` guia rápido não estica sem seleção (grid-column fixo nos filhos de #bottom-bar) · haiku
 - NEW-19 · Ruínas/clareira ao destruir construção ou esgotar mina (como no WC2), procedural, só render · VFX · spec `docs/specs/NEW-19-ruinas.md` · **nuvem** (após F3-01/F6-08; parte da mina depende do evento `RESOURCE_DEPLETED` da F3-04)
 - NEW-1 · Avaliar uso real de `GLTFBuildingLoader` em `GreatHall.js` e remover ou adotar no pipeline Blender (F7-00) · ART · ficou fora do escopo da F0-03

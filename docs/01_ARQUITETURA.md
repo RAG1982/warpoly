@@ -465,3 +465,10 @@ visuais/sonoros nunca são "re-disparados" porque o `EventBus` tem `muted` (aind
 ## F3-05: comandos e evento de reparo
 
 `CMD.REPAIR {unitIds, buildingId, queued?}` e `CMD.CANCEL_CONSTRUCTION {buildingId}` (CommandExecutor); estado `repairing` em `Unit.updateRepairing`; `Building.repairHit`/`cancelConstruction`; `EVT.BUILDING_CANCELLED`; constantes/funções puras em `src/sim/repair.js`; contagem por `GameManager.countWorkersOn`.
+
+## F4-03: mana, habilidades e status
+
+- **Dados**: `src/data/abilities.js` (`ABILITIES`, `getAbility(id,{debug})`; schema documentado no cabeçalho) e campos opcionais `maxMana/startMana/manaRegen/abilities` em `units.js`.
+- **Sim (puro)**: `src/sim/abilities.js` (`canCast`, `applyAbility`, `findAutocastTarget`, `pickCaster`, `selectionAbilityUnits`) e `src/sim/statuses.js` (`STATUS_DEFS`, slots fixos, `mods` cacheado). `Unit` ganha `mana/abilities/cooldowns/autocast/statuses/mods`, o estado `casting` (`orderCast`/`updateCasting`), `effAttackCooldown`/`getEffDamage` e `setupMana` (reposição completa).
+- **Comandos/eventos**: `CMD.CAST {unitIds, abilityId, targetId?|x,z, queued?}` e `CMD.SET_AUTOCAST {unitIds, abilityId, enabled}` (`CommandExecutor`); `EVT.ABILITY_CAST`, `EVT.ABILITY_EFFECT`, `EVT.MANA_CHANGED` (só ao gastar). `checksum.js` inclui `mana` e `statuses`.
+- **Apresentação**: `InputManager.targetMode = {kind:'repair'|'cast', abilityId}` (generaliza o antigo `repairMode`), botões em `UIManager` (`renderAbilityButtons`/`updateAbilityButtons`), VFX por `vfx.kind` em `VfxEvents` + `ParticleSystem` (`spawnAbility*`), som genérico em `AudioEvents`, pose `cast` em `UnitAnimator`.

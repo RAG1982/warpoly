@@ -212,6 +212,8 @@ contras acima. Números de exemplo (seed 42), não normativos — o balanceament
 
 ## 8. Magias (mana: máx. 255, regenera 1/s)
 
+> **Framework pronto (F4-03):** mana, recarga, alvos, status, auto-cast, modo-alvo e VFX genérico existem orientados a dados (`src/data/abilities.js`). As magias da tabela abaixo entram na F4-04.
+
 | Humanos | Mana | Efeito | Orcs | Mana | Efeito |
 |---|---|---|---|---|---|
 | **Templário:** Vista Sagrada | 70 | revela área distante | **Ogro Feiticeiro:** Olho Vigia | 70 | invoca olho voador batedor |

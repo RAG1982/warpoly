@@ -64,7 +64,7 @@ export const EVT = Object.freeze({
  * EVT.BUILDING_DAMAGED   {buildingId:number, ownerId:number, pos:Pos, amount:number}
  * EVT.BUILDING_VFX       {buildingId:number, ownerId:number, pos:Pos, kind:string}
  *
- * EVT.RESEARCH_DONE    {ownerId:number, upgradeId:string}
+ * EVT.RESEARCH_DONE    {ownerId:number, upgradeId:string, level:number}
  * EVT.HQ_TIER_CHANGED  {buildingId:number, ownerId:number, pos:Pos, tier:number}
  *
  * EVT.RESOURCE_GATHERED {type:string, amount:number, pos:Pos, ownerId:number}

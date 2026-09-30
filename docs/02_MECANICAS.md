@@ -63,16 +63,21 @@ Dano efetivo em unidade = `max(2, dano − armadura)`. Construções **ignoram a
 
 Fila de treino: até 6 itens; cancelar reembolsa 100%. Posicionamento: terreno seco, folga de 3,2 de outras construções, 3,5 de árvores, fora dos vaus.
 
-## Pesquisas (Forja)
+## Pesquisas (Forja e Serraria) — F3-07
 
-| ID | Efeito | Custo | Tempo |
-|---|---|---|---|
-| infantry_attack | +5 ataque (Cavaleiro/Grunt/Ogro) | 100 ouro, 50 madeira | 14s |
-| infantry_defense | +3 armadura | 80 ouro, 70 pedra | 14s |
-| ranged_attack | +4 ataque (Arqueiro/Lançador) | 90 ouro, 60 madeira | 14s |
-| ranged_defense | +2 armadura | 70 ouro, 50 madeira | 14s |
+Catálogo `RESEARCH` em `src/data/upgrades.js`; nível por jogador em `Player.researchLevels`. Pesquisa-se o **próximo nível** na construção de `role` correspondente (Forja/Forja de Guerra = `forge`; Serraria/Serraria do Clã = `lumber`); uma pesquisa por construção e nunca a mesma em duas construções do jogador. Nível 2 exige Centro nível 2 (`{hq:2}`). Cancelar reembolsa 100%.
 
-Nível único, sem pré-requisitos, sem tiers.
+| ID (onde) | Níveis | Efeito por nível | Custo nv1 / nv2 | Tempo |
+|---|---|---|---|---|
+| melee_weapons (Forja) | 2 | +2 dano básico (Cavaleiro/Grunt/Ogro) | 200o 100m · 400o 200m | 30 / 45 s |
+| melee_armor (Forja) | 2 | +2 armadura | 150o 100m 80p · 300o 200m 160p | 30 / 45 s |
+| ranged_ammo (Serraria) | 2 | +1 perfurante (atiradores e classe avançada) | 200o 100m · 400o 200m | 30 / 45 s |
+| woodcutting (Serraria) | 1 | +25% madeira entregue | 300o 150m | 40 s |
+| ranged_class (Serraria, Centro 2) | 1 | promove Arqueiro→Patrulheiro / Lanceiro→Enfurecido (vivos e novos; Quartel passa a treinar a classe avançada) | 800o | 60 s |
+| ranger_longbow / ranger_sight / ranger_marksman (humano) | 1 cada | +2 alcance / +4 visão / +3 perfurante | 500o / 1500o / 2500o | 40 / 50 / 60 s |
+| berserker_range / berserker_regen / berserker_fury (orc) | 1 cada | +2 alcance / regenera 1 PV/s / +3 perfurante | 500o / 1500o / 2500o | 40 / 50 / 60 s |
+
+Classe avançada exige `ranged_class`. Patrulheiro/Enfurecido (`src/data/units.js`, `modelOf`) = atirador +10% PV, +1 perfurante, com o modelo 3D do atirador base (arte nova é F7). Cerco e naval ficam para F4. IA: `AIEconomyManager.considerResearch`.
 
 ## Comportamento das unidades
 

@@ -29,7 +29,7 @@ function makeGm(specs) {
     getPlayer: (id) => registry.getPlayer(id),
     isHostile: (a, b) => registry.isHostile(a, b),
     isAlly: (a, b) => registry.isAlly(a, b),
-    isUpgradeResearched: (id, ownerId) => registry.getPlayer(ownerId).researchedUpgrades.has(id),
+    isUpgradeResearched: (id, ownerId) => registry.getPlayer(ownerId).getResearchLevel(id) >= 1,
     isUpgradeResearching: (id, ownerId) =>
       gm.buildings.some((b) => b.ownerId === ownerId && b.currentResearch && b.currentResearch.id === id)
   };
@@ -143,7 +143,7 @@ describe('Building.queueUnit debita do dono correto', () => {
     expect(gm.getPlayer(1).resources).toEqual({ wood: 500, gold: 500, stone: 500 });
 
     // já pesquisado pelo jogador 1 → bloqueado só para ele
-    gm.getPlayer(1).researchedUpgrades.add(upg);
+    gm.getPlayer(1).setResearchLevel(upg, 2); // nível máximo (F3-07)
     expect(orcForge.startResearch(upg, gm)).toBe(false);
   });
 });

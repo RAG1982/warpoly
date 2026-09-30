@@ -53,7 +53,20 @@ export class Player {
 
     /** @type {Set<string>} ids de pesquisas concluídas (forja) */
     this.researchedUpgrades = new Set();
+    /** F3-07: nível concluído por pesquisa (0 = nada). `researchedUpgrades` é derivado (nível >= 1). */
+    this.researchLevels = new Map();
     this.defeated = false;
+  }
+
+  /** Nível concluído da pesquisa `id` (0 se nenhum). */
+  getResearchLevel(id) {
+    return this.researchLevels.get(id) || 0;
+  }
+
+  /** Registra a conclusão do próximo nível de `id`; mantém `researchedUpgrades` derivado. */
+  setResearchLevel(id, level) {
+    this.researchLevels.set(id, level);
+    if (level >= 1) this.researchedUpgrades.add(id);
   }
 
   /** @param {{wood?:number,gold?:number,stone?:number}} cost */

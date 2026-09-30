@@ -9,7 +9,7 @@
  * `isConstructed`, `isDead`, e para HQ `tier`) — o mesmo objeto que
  * `GameManager.placeBuilding`/`Building.queueUnit`/`Building.startResearch` já têm.
  */
-import { getBuildingDef, getUnitDef, UPGRADE_CONFIG } from '../data/index.js';
+import { getBuildingDef, getUnitDef, RESEARCH, researchName } from '../data/index.js';
 
 /** Construção `type` concluída de `playerId` existe em `buildings`? */
 function hasBuildingType(playerId, type, buildings) {
@@ -37,20 +37,28 @@ export function evalRequirements(requires, playerId, gm) {
   return requires.filter(req => {
     if (typeof req === 'string') return !hasBuildingType(playerId, req, buildings);
     if (req && typeof req.hq === 'number') return !hasHqTier(playerId, req.hq, buildings);
+    if (req && typeof req.research === 'string') {
+      const player = gm && gm.getPlayer ? gm.getPlayer(playerId) : null;
+      const lv = player && player.researchLevels ? (player.researchLevels.get(req.research) || 0) : 0;
+      return lv < (req.level || 1);
+    }
     return false;
   });
 }
 
 /** Texto amigável (PT-BR) de um requisito faltante — para tooltip da HUD. */
-export function formatRequirement(req) {
+export function formatRequirement(req, factionId = 'human') {
   if (typeof req === 'string') return getBuildingDef(req).name;
   if (req && typeof req.hq === 'number') return `Centro nível ${req.hq}`;
+  if (req && typeof req.research === 'string') {
+    return researchName(req.research, factionId) + (req.level > 1 ? ` ${req.level}` : '');
+  }
   return String(req);
 }
 
 /** `[formatRequirement(r), ...]` já unido — atalho comum na HUD ("Requer: A, B"). */
-export function formatRequirementList(missing) {
-  return missing.map(formatRequirement).join(', ');
+export function formatRequirementList(missing, factionId = 'human') {
+  return missing.map(r => formatRequirement(r, factionId)).join(', ');
 }
 
 /**
@@ -70,8 +78,17 @@ export function missingUnitRequirements(playerId, unitType, gm) {
   return evalRequirements(getUnitDef(unitType).requires, playerId, gm);
 }
 
-/** F3-06: requisitos de pesquisa de `upgradeId` (`UPGRADE_CONFIG[id].requires`) ainda não satisfeitos. */
-export function missingUpgradeRequirements(playerId, upgradeId, gm) {
-  const cfg = UPGRADE_CONFIG[upgradeId];
-  return evalRequirements(cfg && cfg.requires, playerId, gm);
+/**
+ * F3-06/F3-07: requisitos de pesquisa de `upgradeId` ainda não satisfeitos — do próximo nível
+ * (`level`, padrão: nível concluído + 1) em `RESEARCH[id].levels[level-1].requires`.
+ */
+export function missingUpgradeRequirements(playerId, upgradeId, gm, level = null) {
+  const cfg = RESEARCH[upgradeId];
+  if (!cfg) return [];
+  if (level === null) {
+    const player = gm && gm.getPlayer ? gm.getPlayer(playerId) : null;
+    level = (player && player.researchLevels ? player.researchLevels.get(upgradeId) || 0 : 0) + 1;
+  }
+  const lv = cfg.levels[Math.min(level, cfg.levels.length) - 1];
+  return evalRequirements(lv && lv.requires, playerId, gm);
 }

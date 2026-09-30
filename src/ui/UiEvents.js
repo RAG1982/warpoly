@@ -24,13 +24,14 @@ export function createUiEvents(gm, uiManager) {
   });
 
   // Melhoria forjada: mesma mensagem/condição de `GameManager.completeUpgrade` antes da F2-07.
-  on(EVT.RESEARCH_DONE, ({ ownerId, upgradeId }) => {
+  on(EVT.RESEARCH_DONE, ({ ownerId, upgradeId, level }) => {
     if (!isLocal(ownerId)) return;
     const player = gm.getPlayer(ownerId);
     const cfg = UPGRADE_CONFIG[upgradeId];
     const factionType = player && player.factionId === 'orc' ? 'orc' : 'human';
     const upgName = cfg?.name?.[factionType] || upgradeId;
-    uiManager.showNotification(`🔥 Melhoria forjada: ${upgName}!`);
+    const lvText = cfg && cfg.maxLevel > 1 && level ? ` ${level}/${cfg.maxLevel}` : '';
+    uiManager.showNotification(`🔥 Pesquisa concluída: ${upgName}${lvText}!`);
   });
 
   // F3-06: Centro evoluiu de nível — aviso PT-BR (só para o jogador local, dono do Centro).

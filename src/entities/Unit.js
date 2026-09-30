@@ -116,6 +116,9 @@ export class Unit {
     this.attackCooldown = stats.attackCooldown;
     this.armor = stats.armor || 0;
     this.collisionRadius = stats.collisionRadius || 0.6;
+    /** F3-07: bônus de visão (pesquisa `sight`) somado ao raio da névoa; `regen` = PV/s. */
+    this.sightBonus = 0;
+    this.regen = 0;
 
     // Raios de varredura / flags de papel (src/data/units.js)
     const def = getUnitDef(type);
@@ -162,7 +165,7 @@ export class Unit {
     this.hasFiredThisAttack = false;
 
     // Create 3D Model (zero-cost clone sharing pre-compiled geometries and materials)
-    this.mesh = this.createModel(type);
+    this.mesh = this.createModel(def.modelOf || type);
     const h = this.terrain.getHeight(x, z);
     this.mesh.position.set(x, h, z);
     this.mesh.scale.set(1.62, 1.62, 1.62); // Scaled +20% for superior visibility and detail appreciation
@@ -181,7 +184,7 @@ export class Unit {
     this._deathSinkOffset = 0;
 
     // Animator
-    this.animator = new UnitAnimator(this.mesh, type);
+    this.animator = new UnitAnimator(this.mesh, def.modelOf || type);
 
     // Selection ring & 3D Health Bar
     this.createSelectionRing();
@@ -1215,6 +1218,11 @@ export class Unit {
   depositResources(gameManager) {
     if (this.carrying.amount > 0) {
       const owner = gameManager.getPlayer ? gameManager.getPlayer(this.ownerId) : null;
+      // F3-07: madeira entregue × `woodMultiplier` (Ofício do Lenhador); ouro/pedra já saem
+      // multiplicados da mina (`updateInsideMine`).
+      if (this.carrying.type === 'wood') {
+        this.carrying.amount = Math.round(this.carrying.amount * gatherMultiplier(this.ownerId, 'wood', gameManager));
+      }
       if (owner) owner.add(this.carrying.type, this.carrying.amount);
 
       const gmEvents = gameManager && gameManager.events;

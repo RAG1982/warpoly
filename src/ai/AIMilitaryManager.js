@@ -1,5 +1,5 @@
 import * as THREE from 'three';
-import { getBuildingDef } from '../data/index.js';
+import { getBuildingDef, getUnitDef } from '../data/index.js';
 import { CMD } from '../sim/commands.js';
 import { EVT } from '../sim/events.js';
 
@@ -134,7 +134,8 @@ export class AIMilitaryManager {
       const e = enemies[i];
       if (!e.isDead) {
         if (e.type === this.director.meleeType) meleeCount++;
-        else if (e.type === this.director.rangedType) rangedCount++;
+        // F3-07: a classe avançada (ranger/berserker, `modelOf`) conta como atirador.
+        else if (e.type === this.director.rangedType || getUnitDef(e.type).modelOf === this.director.rangedType) rangedCount++;
       }
     }
 

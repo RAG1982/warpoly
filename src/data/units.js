@@ -146,6 +146,45 @@ export const UNITS = {
     isWorker: false, isRanged: false, isCombat: true, projectile: null
   },
 
+  // --- Classe avançada do atirador (F3-07): só via pesquisa `ranged_class`; modelo 3D do
+  // arqueiro/lançador (`modelOf`) até a arte nova (F7). Base = atirador +10% PV, +1 perfurante.
+  ranger: {
+    type: 'ranger',
+    modelOf: 'archer',
+    requires: [{ research: 'ranged_class' }],
+    name: 'Patrulheiro',
+    entityName: 'Patrulheiro',
+    faction: 'human',
+    hp: 105, speed: 4.3, damage: { basic: 6, piercing: 13, type: 'piercing' }, attackRange: 14.0, attackCooldown: 1.4, armor: 0,
+    collisionRadius: 0.66,
+    visionRadius: 18,
+    ...RANGED_SCAN,
+    healthBarHeight: 3.4,
+    cost: { gold: 40, wood: 20, stone: 0 },
+    trainTime: 9,
+    icon: '/icoArco.png',
+    description: 'Arqueiro de elite, mais resistente e certeiro',
+    isWorker: false, isRanged: true, isCombat: true, projectile: 'arrow'
+  },
+  berserker: {
+    type: 'berserker',
+    modelOf: 'axethrower',
+    requires: [{ research: 'ranged_class' }],
+    name: 'Enfurecido',
+    entityName: 'Enfurecido',
+    faction: 'orc',
+    hp: 110, speed: 4.4, damage: { basic: 7, piercing: 13, type: 'piercing' }, attackRange: 13.5, attackCooldown: 1.35, armor: 0,
+    collisionRadius: 0.66,
+    visionRadius: 18,
+    ...RANGED_SCAN,
+    healthBarHeight: 3.4,
+    cost: { gold: 40, wood: 20, stone: 0 },
+    trainTime: 9,
+    icon: '/icoArco.png',
+    description: 'Lançador de machados em fúria, mais resistente e certeiro',
+    isWorker: false, isRanged: true, isCombat: true, projectile: 'axe'
+  },
+
   // --- Neutro ---
   bandit: {
     type: 'bandit',

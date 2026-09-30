@@ -1,6 +1,8 @@
 import { UNIT_TRAIN_CONFIG, BUILDING_BUILD_CONFIG, WORKER_BUILD_LIST } from '../entities/Building.js';
-import { UPGRADE_CONFIG, FORGE_UPGRADES } from '../core/UpgradeConfig.js';
-import { BUILDING_TRAINABLE_UNITS, getUnitDef, getBuildingDef, getHqUpgradeCost, getTierName, getResourceName } from '../data/index.js';
+import {
+  UPGRADE_CONFIG, RESEARCH, researchIdsFor, getMaxResearchLevel, describeLevel,
+  BUILDING_TRAINABLE_UNITS, getUnitDef, getBuildingDef, getHqUpgradeCost, getTierName, getResourceName
+} from '../data/index.js';
 import {
   missingRequirements, missingUnitRequirements, missingUpgradeRequirements, formatRequirementList
 } from '../sim/requirements.js';
@@ -13,6 +15,12 @@ import { renderTerrainImage } from './terrainMinimapImage.js';
 
 // Quem treina o quê — derivado de src/data/buildings.js (campo `trains`)
 export { BUILDING_TRAINABLE_UNITS };
+
+/** F3-07: role de pesquisa ('forge' | 'lumber') da construção, ou null se ela não pesquisa. */
+function researchRoleOf(b) {
+  const role = getBuildingDef(b.type).role;
+  return role === 'forge' || role === 'lumber' ? role : null;
+}
 
 export class UIManager {
   constructor(gameManager, sceneManager, inputManager, soundManager) {
@@ -385,25 +393,27 @@ export class UIManager {
 
           if (this.gm.isUpgradeResearched(upgradeId, 'player')) {
             this.sound.playChop();
-            this.showNotification(`Melhoria "${upgName}" já foi forjada!`);
+            this.showNotification(`Pesquisa "${upgName}" já está no nível máximo!`);
             return;
           }
 
           if (b.currentResearch) {
             this.sound.playChop();
-            this.showNotification('A forja já está ocupada trabalhando em uma pesquisa!');
+            this.showNotification('Esta construção já está ocupada com uma pesquisa!');
             return;
           }
 
           if (this.gm.isUpgradeResearching(upgradeId, 'player')) {
             this.sound.playChop();
-            this.showNotification('Esta melhoria já está sendo forjada em outra forja!');
+            this.showNotification('Esta pesquisa já está em andamento em outra construção!');
             return;
           }
 
-          if (!this.gm.canAfford(cfg.cost)) {
+          const nextLv = this.gm.getResearchLevel(upgradeId, 'player') + 1;
+          const nextCost = RESEARCH[upgradeId].levels[nextLv - 1].cost;
+          if (!this.gm.canAfford(nextCost)) {
             this.sound.playChop();
-            this.showNotification(`Recursos insuficientes para forjar ${upgName}!`);
+            this.showNotification(`Recursos insuficientes para pesquisar ${upgName}!`);
             return;
           }
 
@@ -411,7 +421,7 @@ export class UIManager {
           // seguem client-side para feedback imediato; a validação final é do executor.
           this.gm.issue({ type: CMD.RESEARCH, playerId: this.gm.localPlayerId, buildingId: b.id, upgradeId });
           this.sound.playHammer();
-          this.showNotification(`Iniciando forjamento: ${upgName}...`);
+          this.showNotification(`Iniciando pesquisa: ${upgName}...`);
           this.renderBuildingTrainButtons(b);
           this.updateBuildingQueue(b);
         }
@@ -453,7 +463,7 @@ export class UIManager {
       const queueSlot = e.target.closest('.bld-queue-slot.filled');
       if (queueSlot && this.gm.selectedBuilding) {
         const b = this.gm.selectedBuilding;
-        if (b.type === 'forge' || b.type === 'orc_forge') {
+        if (researchRoleOf(b)) {
           if (b.currentResearch) {
             this.gm.issue({ type: CMD.CANCEL_RESEARCH, playerId: this.gm.localPlayerId, buildingId: b.id });
             this.sound.playSelect();
@@ -550,11 +560,13 @@ export class UIManager {
       }
 
       // Render buttons when building changes or forge research state changes
-      const isForge = b.type === 'forge' || b.type === 'orc_forge';
-      const playerResearchedCount = this.gm.researchedUpgrades ? (this.gm.researchedUpgrades[b.faction || 'player']?.size || 0) : 0;
+      const isForge = !!researchRoleOf(b);
+      // F3-07: assinatura dos níveis concluídos (muda a cada nível, não só a cada pesquisa nova).
+      let playerResearchedCount = 0;
+      if (this.gm.localPlayer) for (const lv of this.gm.localPlayer.researchLevels.values()) playerResearchedCount += lv;
       const researchId = b.currentResearch ? b.currentResearch.id : null;
 
-      if (this.currentBuilding !== b || (isForge && (this.lastResearchedCount !== playerResearchedCount || this.lastResearchId !== researchId))) {
+      if (this.currentBuilding !== b || (this.lastResearchedCount !== playerResearchedCount || (isForge && this.lastResearchId !== researchId))) {
         this.currentBuilding = b;
         this.lastResearchedCount = playerResearchedCount;
         this.lastResearchId = researchId;
@@ -651,16 +663,17 @@ export class UIManager {
   renderBuildingTrainButtons(building) {
     if (!this.bldTrainButtons) return;
 
-    const isForge = building.faction === 'player' && building.isConstructed && (building.type === 'forge' || building.type === 'orc_forge');
+    const researchRole = researchRoleOf(building);
+    const isForge = building.faction === 'player' && building.isConstructed && !!researchRole;
     if (isForge) {
-      if (this.bldTrainLabel) this.bldTrainLabel.innerText = 'MELHORIAS DA FORJA:';
-      if (this.bldQueueLabel) this.bldQueueLabel.innerText = 'PROGRESSO DO FORJAMENTO:';
+      if (this.bldTrainLabel) this.bldTrainLabel.innerText = researchRole === 'forge' ? 'MELHORIAS DA FORJA:' : 'PESQUISAS DA SERRARIA:';
+      if (this.bldQueueLabel) this.bldQueueLabel.innerText = 'PROGRESSO DA PESQUISA:';
       if (this.bldTrainSection) this.bldTrainSection.style.display = 'flex';
       if (this.bldQueueSection) this.bldQueueSection.style.display = 'flex';
 
       const factionType = this.gm.playerFaction === 'orc' ? 'orc' : 'human';
 
-      this.bldTrainButtons.innerHTML = FORGE_UPGRADES.map((upgId, i) => {
+      this.bldTrainButtons.innerHTML = researchIdsFor(researchRole, factionType).map((upgId, i) => {
         const cfg = UPGRADE_CONFIG[upgId];
         if (!cfg) return '';
 
@@ -668,7 +681,11 @@ export class UIManager {
         const isResearchingThis = building.currentResearch && building.currentResearch.id === upgId;
         const isResearchingAny = this.gm.isUpgradeResearching(upgId, 'player');
         const upgName = cfg.name[factionType] || upgId;
-        const upgDesc = cfg.description[factionType] || '';
+        const curLv = this.gm.getResearchLevel(upgId, 'player');
+        const maxLv = getMaxResearchLevel(upgId);
+        const nextLv = Math.min(curLv + 1, maxLv);
+        const upgDesc = describeLevel(upgId, nextLv);
+        const lvLabel = maxLv > 1 ? ` ${curLv}/${maxLv}` : '';
         const hotkey = getResearchHotkey(i);
 
         let btnClass = 'bld-train-btn bld-upgrade-btn';
@@ -682,14 +699,14 @@ export class UIManager {
         }
 
         return `
-          <button class="${btnClass}" data-upgrade="${upgId}" title="${upgName}${hotkey ? ` (${hotkey})` : ''}" ${isResearched ? 'disabled' : ''}>
+          <button class="${btnClass}" data-upgrade="${upgId}" title="${upgName}${lvLabel}${hotkey ? ` (${hotkey})` : ''}" ${isResearched ? 'disabled' : ''}>
             ${hotkey ? `<span class="bld-hotkey-badge">${hotkey}</span>` : ''}
             <img src="${cfg.icon}" class="bld-train-btn-icon" alt="${upgName}" />
             ${badge}
             <div class="bld-hint-bubble">
               <div class="bld-hint-col">
                 <div class="bld-hint-header">
-                  <span class="bld-hint-title">${upgName}${hotkey ? ` <span class="bld-hint-hotkey">(${hotkey})</span>` : ''}</span>
+                  <span class="bld-hint-title">${upgName}${lvLabel}${hotkey ? ` <span class="bld-hint-hotkey">(${hotkey})</span>` : ''}</span>
                   <span class="bld-hint-desc">${upgDesc}</span>
                 </div>
                 <div class="bld-hint-footer">
@@ -722,7 +739,8 @@ export class UIManager {
     if (this.bldTrainSection) this.bldTrainSection.style.display = 'flex';
     if (this.bldQueueSection) this.bldQueueSection.style.display = 'flex';
 
-    this.bldTrainButtons.innerHTML = trainable.map((unitType, i) => {
+    this.bldTrainButtons.innerHTML = trainable.map((baseType, i) => {
+      const unitType = this.gm.resolveTrainType(baseType, 'player');
       const cfg = UNIT_TRAIN_CONFIG[unitType];
       if (!cfg) return '';
       const hotkey = getTrainHotkey(i);
@@ -744,9 +762,10 @@ export class UIManager {
     if (!this.bldTrainButtons) return;
     const ownerId = building.ownerId;
 
-    const isForge = building.type === 'forge' || building.type === 'orc_forge';
-    if (isForge) {
-      FORGE_UPGRADES.forEach(upgId => {
+    const researchRole = researchRoleOf(building);
+    if (researchRole) {
+      const factionId = this.gm.playerFaction === 'orc' ? 'orc' : 'human';
+      researchIdsFor(researchRole, factionId).forEach(upgId => {
         const cfg = UPGRADE_CONFIG[upgId];
         if (!cfg) return;
         const costContainer = this.bldTrainButtons.querySelector(`[data-cost-upgrade="${upgId}"]`);
@@ -754,14 +773,14 @@ export class UIManager {
 
         const isResearched = this.gm.isUpgradeResearched(upgId, 'player');
         if (isResearched) {
-          if (costContainer) costContainer.innerHTML = '<span class="bld-cost-researched">✓ Pesquisado</span>';
+          if (costContainer) costContainer.innerHTML = '<span class="bld-cost-researched">✓ Nível máximo</span>';
           return;
         }
 
         const isResearchingThis = building.currentResearch && building.currentResearch.id === upgId;
         const isResearchingAny = this.gm.isUpgradeResearching(upgId, 'player');
         if (isResearchingThis || isResearchingAny) {
-          if (costContainer) costContainer.innerHTML = '<span class="bld-cost-researching">🔨 Forjando...</span>';
+          if (costContainer) costContainer.innerHTML = '<span class="bld-cost-researching">🔨 Pesquisando...</span>';
           return;
         }
 
@@ -771,14 +790,15 @@ export class UIManager {
           if (missing.length > 0) {
             btn.disabled = true;
             btn.classList.add('bld-requirement-missing');
-            btn.title = `Requer: ${formatRequirementList(missing)}`;
+            btn.title = `Requer: ${formatRequirementList(missing, factionId)}`;
           } else {
             btn.disabled = false;
             btn.classList.remove('bld-requirement-missing');
           }
         }
 
-        if (costContainer) costContainer.innerHTML = buildCostHtml(cfg.cost, this.gm.resources);
+        const nextCost = RESEARCH[upgId].levels[Math.min(this.gm.getResearchLevel(upgId, 'player'), getMaxResearchLevel(upgId) - 1)].cost;
+        if (costContainer) costContainer.innerHTML = buildCostHtml(nextCost, this.gm.resources);
       });
       return;
     }
@@ -786,7 +806,8 @@ export class UIManager {
     const trainable = BUILDING_TRAINABLE_UNITS[building.type];
     if (!trainable) return;
 
-    trainable.forEach(unitType => {
+    trainable.forEach(baseType => {
+      const unitType = this.gm.resolveTrainType(baseType, 'player');
       const cfg = UNIT_TRAIN_CONFIG[unitType];
       if (!cfg) return;
       const costContainer = this.bldTrainButtons.querySelector(`[data-cost-unit="${unitType}"]`);
@@ -799,7 +820,7 @@ export class UIManager {
         if (missing.length > 0) {
           btn.disabled = true;
           btn.classList.add('bld-requirement-missing');
-          btn.title = `Requer: ${formatRequirementList(missing)}`;
+          btn.title = `Requer: ${formatRequirementList(missing, this.gm.playerFaction === 'orc' ? 'orc' : 'human')}`;
         } else {
           btn.disabled = false;
           btn.classList.remove('bld-requirement-missing');
@@ -813,8 +834,7 @@ export class UIManager {
   updateBuildingQueue(b) {
     if (!this.bldQueueSlots || this.bldQueueSlots.length === 0) return;
 
-    const isForge = b.type === 'forge' || b.type === 'orc_forge';
-    if (isForge) {
+    if (researchRoleOf(b)) {
       if (b.currentResearch) {
         const r = b.currentResearch;
         const cfg = r.cfg || UPGRADE_CONFIG[r.id];
@@ -826,7 +846,7 @@ export class UIManager {
         if (slot0) {
           slot0.className = 'bld-queue-slot filled active forge-slot';
           slot0.innerHTML = `<img src="${iconSrc}" class="bld-slot-icon" alt="${name}" />`;
-          slot0.title = `${name} (Forjando...) - Clique para cancelar`;
+          slot0.title = `${name}${r.level && getMaxResearchLevel(r.id) > 1 ? ` ${r.level}/${getMaxResearchLevel(r.id)}` : ''} (Pesquisando...) - Clique para cancelar`;
         }
 
         for (let i = 1; i < 6; i++) {

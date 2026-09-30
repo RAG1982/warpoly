@@ -265,7 +265,7 @@ Opus escreve a spec em `docs/specs/<ID>.md`; agente **Sonnet** executa; Opus rev
 - **Aceite**: 40 unidades atravessam um vau sem travar.
 
 ### F3-03 · Modelo de combate
-- **Status**: `TODO` · Lane GAME · Onda 4 · Dep: F0-06
+- **Status**: `DOING(sonnet, 2026-09-29)` · Lane GAME · Onda 4 · Dep: F0-06
 - **Fazer**: fórmula estilo WC2 (dano básico − armadura + dano perfurante, variação 50–100%); armadura em construções; tipos de dano (normal/perfurante/cerco/mágico); projéteis podem errar alvo em movimento; alcance mínimo para cerco; bônus de altura opcional.
 - **Aceite**: tabela de simulações em `docs/08_GAME_DESIGN.md` bate com testes unitários.
 

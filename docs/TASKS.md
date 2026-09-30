@@ -333,7 +333,7 @@ Sonnet 5.5 escreve a spec em `docs/specs/<ID>.md`; agente **Sonnet** executa; o 
 - `DONE(19c7eae)` (spec: docs/specs/F4-03-mana-habilidades.md) · GAME · Dep: F2-02 · Mana com regeneração, habilidades com alvo (unidade/área/auto-cast), cooldown, pesquisa que libera magia, UI no card de comandos, VFX genéricos.
 
 ### F4-04 · Conjuradores e magias
-- `TODO` · GAME+ART · Dep: F4-03 · Humano: Mago (Bola de fogo/Lentidão/Invisibilidade/Polimorfia/Nevasca), Paladino (Cura/Visão sagrada/Exorcismo). Orc: equivalentes originais do Cavaleiro da Morte e Ogro-Mago (Sede de Sangue/Runas/Olho vigilante/Ressuscitar mortos/Redemoinho). Construções: Igreja/Altar, Torre de Magos/Templo.
+- `DOING(sonnet, 2026-09-30)` (spec: docs/specs/F4-04-conjuradores-magias.md) · GAME+ART · Dep: F4-03 · Humano: Mago (Bola de fogo/Lentidão/Invisibilidade/Polimorfia/Nevasca), Paladino (Cura/Visão sagrada/Exorcismo). Orc: equivalentes originais do Cavaleiro da Morte e Ogro-Mago (Sede de Sangue/Runas/Olho vigilante/Ressuscitar mortos/Redemoinho). Construções: Igreja/Altar, Torre de Magos/Templo.
 
 ### F4-05 · Sapadores
 - `DONE(19c7eae)` (spec: docs/specs/F4-05-sapadores.md) · GAME+ART · Dep: F3-08 · Unidade suicida que destrói muralhas/rochas/construções.
@@ -549,6 +549,7 @@ _(agentes adicionam aqui: `NEW-<n> · título · lane · motivo`)_
 - ✅ NEW-23 · `DONE(f419963)` projétil balístico com mira preditiva (F4-02) · GAME
 - NEW-34 · Escolta de cerco pela IA (o cerco, mais lento, chega depois do exército) e alvo colado dentro do alcance mínimo só resolvido via recuo · AI
 - NEW-35 · Ataque no chão do cerco (clique direito no chão) · GAME/UI
+- NEW-37 · `DOING` Refazer Espadachim e Cavaleiro (feedback do dono 2026-09-30: demasiado simples, sem força, elmo mais fechado, mais encorpado/rebuscado, conforme soldado.png) · ART
 - NEW-36 · `DOING(sonnet, 2026-09-30)` Arte Blender: Balista, Catapulta, Oficinas (hoje procedurais) · ART
 - NEW-1 · Avaliar uso real de `GLTFBuildingLoader` em `GreatHall.js` e remover ou adotar no pipeline Blender (F7-00) · ART · ficou fora do escopo da F0-03
 

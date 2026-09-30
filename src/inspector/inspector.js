@@ -130,6 +130,19 @@ const MODEL_CATALOG = [
     notes: 'Nó SiegeArm arma e lança na animação fight; WheelL/WheelR giram ao andar.'
   },
   {
+    id: 'cavalier_glb',
+    name: 'Cavaleiro Montado (Blender)',
+    category: 'units',
+    faction: 'human',
+    type: 'cavalier',
+    icon: '🐎',
+    glb: 'cavalier',
+    sourceFile: 'tools/blender/build_cavalier.py',
+    create: createGlb('cavalier'),
+    description: 'Cavalaria pesada humana gerada pelo pipeline Blender headless (public/models/cavalier.glb): cavalo de guerra low-poly anatômico (pescoço arqueado, crina, cauda, focinho com estrela, olhos, ferraduras), sela de couro, estribos, peitoral, rédeas, gualdrapa heráldica e penacho em cor de time; o cavaleiro usa a linguagem do Espadachim (armadura de placas com frisos dourados, elmo aberto, capa azul em cor de time, espada longa erguida e mão esquerda nas rédeas).',
+    notes: 'Rig plana: Horse (corpo + arreios + pernas do cavaleiro, estático), HorseLegFL/FR/BL/BR (pivô no ombro/quadril; galope em diagonais pelo UnitAnimator), Torso, Head, ArmL, ArmR, Sword (mesmos nós do Espadachim). Sem escudo, para manter a silhueta limpa. 14 draw calls, ~8 mil triângulos, atlas 512². Rosto do cavaleiro só na face frontal (+Z); olhos do cavalo nas laterais (anatomia equina).'
+  },
+  {
     id: 'archer',
     name: 'Arqueiro (Archer)',
     category: 'units',
@@ -432,6 +445,32 @@ const MODEL_CATALOG = [
     create: createOrcWorkshop,
     description: 'Oficina orc (F4-02): paliçada de troncos sobre basalto, portão com caveira, telhado de peles, engrenagem de ferro, catapulta em montagem e pilha de pedras.',
     notes: 'Modelo procedural provisório sem texturas de canvas (materiais compartilhados).'
+  },
+  {
+    id: 'stable_glb',
+    name: 'Estábulo Real (Blender)',
+    category: 'buildings',
+    faction: 'human',
+    type: 'building',
+    icon: '🐴',
+    glb: 'stable',
+    sourceFile: 'tools/blender/build_stable.py',
+    create: createGlb('stable'),
+    description: 'Estábulo humano gerado pelo pipeline Blender (public/models/stable.glb): celeiro de empena frontal com estrutura de madeira aparente e reboco sobre pé de pedra, baias com meias-portas e cavalos espiando, portão central aberto, sótão de feno com talha, telhado azul com cumeeira dourada e cúpula com cata-vento, pátio com cocho, cerca, fardos, rack de sela, lanternas e mastros com bandeirolas.',
+    notes: '2 draw calls (Static_Mesh + Anim_Banners em cor de time), ~5 mil triângulos, atlas 1024². Pegada ~7,3 x 7,3 (raio de colisão 3,6), altura ~6. Sockets: Socket_UnitSpawn, Socket_Rally.'
+  },
+  {
+    id: 'ogre_den_glb',
+    name: 'Covil dos Ogros (Blender)',
+    category: 'buildings',
+    faction: 'orc',
+    type: 'building',
+    icon: '🦴',
+    glb: 'ogre_den',
+    sourceFile: 'tools/blender/build_ogre_den.py',
+    create: createGlb('ogre_den'),
+    description: 'Covil orc gerado pelo pipeline Blender (public/models/ogre_den.glb): paliçada de toras pontiagudas com travessas de ferro, teto de peles sobre costelas gigantes de osso, portão largo de troncos pontiagudos aberto, crânio de ogro com chifres sobre o portão, crânios nas colunas e nos totens, braseiros acesos, estandartes rasgados em cor de time, peles esticadas, ossadas e clavas.',
+    notes: '2 draw calls (Static_Mesh + Anim_Banners em cor de time), ~8,6 mil triângulos, atlas 1024². Pegada ~7,3 x 7,3 (raio de colisão 3,6), altura ~5,4. Sockets: Socket_UnitSpawn, Socket_Rally.'
   },
   {
     id: 'forge',

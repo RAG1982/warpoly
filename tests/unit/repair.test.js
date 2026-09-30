@@ -26,8 +26,9 @@ function makeGm(seed = 7, keepAi = false) {
 
 function freeSpot(gm, type, ownerId = 0) {
   const base = gm.getPlayer(ownerId).startPos;
-  for (let dz = -40; dz <= 40; dz += 4) {
-    for (let dx = -40; dx <= 40; dx += 4) {
+  // ≤ 24 da base: longe dos acampamentos neutros (F3-10), que atacariam a torre de teste
+  for (let dz = -24; dz <= 24; dz += 4) {
+    for (let dx = -24; dx <= 24; dx += 4) {
       if (gm.canPlaceBuilding(type, base.x + dx, base.z + dz, null, ownerId)) return { x: base.x + dx, z: base.z + dz };
     }
   }

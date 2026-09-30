@@ -3,6 +3,7 @@ import { ModelFactory } from '../entities/ModelFactory.js';
 import { Building } from '../entities/Building.js';
 import { getCost, getBuildingDef, WALL_STEP, WALL_MAX_POINTS } from '../data/index.js';
 import { CMD } from '../sim/commands.js';
+import { EVT } from '../sim/events.js';
 
 export class InputManager {
   constructor(sceneManager, gameManager, terrain) {
@@ -23,6 +24,9 @@ export class InputManager {
     // cliques e atalhos são ignorados. `onPauseRequest` é chamado no Esc sem nada a cancelar.
     this.suspended = false;
     this.onPauseRequest = null;
+
+    /** F3-05: modo alvo do botão/tecla "Reparar" — o próximo clique numa construção própria emite REPAIR. */
+    this.repairMode = false;
 
     // Listeners de window/DOM removidos em dispose() (sessão de partida descartável).
     this._abort = new AbortController();
@@ -102,7 +106,9 @@ export class InputManager {
       }
     } else if (e.code === 'Escape') {
       // Esc: cancela a colocação; senão limpa a seleção; senão abre o menu de pausa (F2-04).
-      if (this.placingBuildingType) {
+      if (this.repairMode) {
+        this.repairMode = false;
+      } else if (this.placingBuildingType) {
         this.cancelPlacement();
       } else if (this.gm.selectedUnits.length > 0 || this.gm.selectedBuilding || this.gm.selectedResource) {
         this.gm.clearSelection();
@@ -110,11 +116,40 @@ export class InputManager {
         e.preventDefault();
         this.onPauseRequest();
       }
+    } else if (e.code === 'KeyR' && !e.ctrlKey && !e.metaKey && !e.altKey) {
+      this.startRepairMode();
     } else if (e.code === 'KeyQ') {
       this.sm.rotateCamera(Math.PI / 8);
     } else if (e.code === 'KeyE') {
       this.sm.rotateCamera(-Math.PI / 8);
     }
+  }
+
+  /** F3-05: arma o modo "Reparar" (só com trabalhadores próprios selecionados). */
+  startRepairMode() {
+    const workers = this.gm.selectedUnits.filter(u => !u.isDead && (u.type === 'villager' || u.type === 'peon'));
+    if (workers.length === 0) return;
+    this.repairMode = true;
+    this.gm.events.emit(EVT.NOTIFY, { ownerId: this.gm.localPlayerId, text: 'Clique numa construção sua para reparar (custa recursos).' });
+  }
+
+  /** F3-05: consome o clique esquerdo em modo Reparar. Retorna true se tratou o clique. */
+  _handleRepairClick() {
+    if (!this.repairMode) return false;
+    this.repairMode = false;
+    const e = this.hoveredEntity;
+    const local = this.gm.localPlayerId;
+    if (!(e instanceof Building) || e.ownerId !== local) return true;
+    if (!e.isConstructed || e.hp >= e.maxHp) {
+      this.gm.events.emit(EVT.NOTIFY, { ownerId: local, text: 'Esta construção não precisa de reparo.' });
+      return true;
+    }
+    const unitIds = this.gm.selectedUnits.filter(u => u.type === 'villager' || u.type === 'peon').map(u => u.id);
+    if (unitIds.length === 0) return true;
+    this.playClickDecal(e.mesh.position, 0xdeb841);
+    this.gm.issue({ type: CMD.REPAIR, playerId: local, unitIds, buildingId: e.id });
+    this.gm.soundManager.playOrder();
+    return true;
   }
 
   onKeyUp(e) {
@@ -152,7 +187,9 @@ export class InputManager {
     } else if (e.button === 2) {
       // Right Click
       this.isRightDown = true;
-      if (this.placingBuildingType) {
+      if (this.repairMode) {
+        this.repairMode = false;
+      } else if (this.placingBuildingType) {
         this.cancelPlacement();
       } else {
         const targetColor = (this.hoveredEntity && this.hoveredEntity.faction === 'enemy') ? 0xef4444 : 0xdeb841;
@@ -234,6 +271,13 @@ export class InputManager {
         // Soltar o botão confirma os segmentos válidos (F3-08); soltar sem ter começado
         // (ex.: o mousedown caiu na UI) não faz nada.
         if (this.wallAnchor) this.confirmWall();
+        return;
+      }
+
+      if (this.repairMode) {
+        this.isDraggingBox = false;
+        if (this.boxEl) this.boxEl.style.display = 'none';
+        this._handleRepairClick();
         return;
       }
 

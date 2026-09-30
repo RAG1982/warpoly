@@ -9,6 +9,7 @@ import { legacyOwnerId } from '../sim/EntityIds.js';
 import { SIM_DT, lerpAngle } from '../sim/constants.js';
 import { CMD } from '../sim/commands.js';
 import { EVT } from '../sim/events.js';
+import { REPAIR_INTERVAL, MAX_WORKERS_PER_BUILDING } from '../sim/repair.js';
 
 /** Vector3 → objeto plano `{x,y,z}` (payload de evento: nunca referências a objetos three.js). */
 function posOf(v) {
@@ -134,7 +135,7 @@ export class Unit {
     this.retargetRange = def.retargetRange;
     this.helpRadius = def.helpRadius;
 
-    // State machine: 'idle', 'moving', 'gathering', 'returning', 'building', 'attacking', 'dying'
+    // State machine: 'idle', 'moving', 'gathering', 'returning', 'building', 'repairing', 'attacking', 'dying'
     this.state = 'idle';
     // F1-08: targetPos é uma Vector3 fixa (nunca recriada); hasTargetPos indica se há destino válido.
     this.targetPos = new THREE.Vector3();
@@ -142,6 +143,8 @@ export class Unit {
     this.targetEntity = null;
     this.gatherTarget = null;
     this.buildTarget = null;
+    /** F3-05: construção que o trabalhador está reparando (estado 'repairing'). */
+    this.repairTarget = null;
     this.attackTarget = null;
 
     // Navigation & Waypoints
@@ -366,6 +369,9 @@ export class Unit {
       case CMD.BUILD:
         this.orderBuild(order.target);
         break;
+      case CMD.REPAIR:
+        this.orderRepair(order.target);
+        break;
       default:
         break;
     }
@@ -379,6 +385,7 @@ export class Unit {
     this.targetEntity = null;
     this.gatherTarget = null;
     this.buildTarget = null;
+    this.repairTarget = null;
     this.attackTarget = null;
     this.objectiveTarget = null;
 
@@ -458,6 +465,7 @@ export class Unit {
     this.gatherTarget = resource;
     this.targetEntity = resource;
     this.buildTarget = null;
+    this.repairTarget = null;
     this.attackTarget = null;
 
     // Update active tool visibility on model
@@ -477,12 +485,49 @@ export class Unit {
     }
   }
 
+  /**
+   * F3-05: trabalhador pode juntar-se a `building`? Máx. 4 trabalhadores simultâneos por
+   * construção; se lotada, avisa o dono local e o trabalhador fica parado (`stop`).
+   */
+  _acceptWorkSlot(building) {
+    const gm = this.gameManager;
+    if (!gm || typeof gm.countWorkersOn !== 'function') return true;
+    if (gm.countWorkersOn(building, this) < MAX_WORKERS_PER_BUILDING) return true;
+    const owner = gm.getPlayer ? gm.getPlayer(this.ownerId) : null;
+    if (owner && owner.isLocal) gm.events.emit(EVT.NOTIFY, { ownerId: this.ownerId, text: '⚠️ Muitos trabalhadores nesta obra' });
+    this.stop();
+    return false;
+  }
+
   orderBuild(building) {
     if (this.isDead || this.isDying || this.state === 'dying') return;
     if (!this.isWorker()) return;
+    if (!this._acceptWorkSlot(building)) return;
     this._clearOrderModes();
     this.state = 'building';
+    this.repairTarget = null;
     this.buildTarget = building;
+    this.targetEntity = building;
+    this.gatherTarget = null;
+    this.attackTarget = null;
+
+    if (this.mesh.userData.hammer) {
+      this.mesh.userData.hammer.visible = true;
+      if (this.mesh.userData.axe) this.mesh.userData.axe.visible = false;
+      if (this.mesh.userData.pickaxe) this.mesh.userData.pickaxe.visible = false;
+    }
+  }
+
+  /** F3-05: ordem de reparo de uma construção (só trabalhadores; mesma regra de 4 por obra). */
+  orderRepair(building) {
+    if (this.isDead || this.isDying || this.state === 'dying') return;
+    if (!this.isWorker()) return;
+    if (!building || building.isDead || !building.isConstructed || building.hp >= building.maxHp) return;
+    if (!this._acceptWorkSlot(building)) return;
+    this._clearOrderModes();
+    this.state = 'repairing';
+    this.repairTarget = building;
+    this.buildTarget = null;
     this.targetEntity = building;
     this.gatherTarget = null;
     this.attackTarget = null;
@@ -502,6 +547,7 @@ export class Unit {
     this.targetEntity = target;
     this.gatherTarget = null;
     this.buildTarget = null;
+    this.repairTarget = null;
     this.hasFiredThisAttack = false;
     const isBuilding = target && (target.fullMesh || target.isConstructed !== undefined);
     if (isBuilding) {
@@ -519,6 +565,7 @@ export class Unit {
     this.targetEntity = null;
     this.gatherTarget = null;
     this.buildTarget = null;
+    this.repairTarget = null;
     this.attackTarget = null;
     this.objectiveTarget = null;
     this.waypoints = null;
@@ -547,6 +594,7 @@ export class Unit {
     this.targetEntity = null;
     this.gatherTarget = null;
     this.buildTarget = null;
+    this.repairTarget = null;
     this.attackTarget = null;
     this.objectiveTarget = null;
     this.waypoints = null;
@@ -587,6 +635,7 @@ export class Unit {
     this.targetEntity = null;
     this.gatherTarget = null;
     this.buildTarget = null;
+    this.repairTarget = null;
     this.attackTarget = null;
     this.objectiveTarget = null;
     this.hasFiredThisAttack = false;
@@ -718,6 +767,7 @@ export class Unit {
     this.targetEntity = null;
     this.gatherTarget = null;
     this.buildTarget = null;
+    this.repairTarget = null;
     this.attackTarget = null;
     this.objectiveTarget = null;
     this.waypoints = null;
@@ -924,6 +974,9 @@ export class Unit {
         break;
       case 'building':
         this.updateBuilding(delta, gameManager);
+        break;
+      case 'repairing':
+        this.updateRepairing(delta, gameManager);
         break;
       case 'attacking':
         this.updateAttacking(delta, gameManager, arrows, allUnits, buildings);
@@ -1424,6 +1477,45 @@ export class Unit {
       this.buildTarget.construct(10, gm);
       if (gm && gm.events) {
         gm.events.emit(EVT.WORKER_HAMMER, { pos: posOf(this.buildTarget.mesh.position), ownerId: this.ownerId });
+      }
+    }
+  }
+
+  /** F3-05: reparo — vai até o contato e a cada 0,8 s restaura 5 % do PV (custo por golpe). */
+  updateRepairing(delta, gameManager) {
+    const t = this.repairTarget;
+    if (!t || t.isDead || !t.isConstructed || t.hp >= t.maxHp) {
+      this.stop();
+      return;
+    }
+
+    const targetPos = t.mesh.position;
+    const dist = Math.hypot(this.mesh.position.x - targetPos.x, this.mesh.position.z - targetPos.z);
+    const contactDist = (t.collisionRadius || 3.0) + this.collisionRadius + 0.25;
+    if (dist > contactDist) {
+      this.moveTowards(targetPos.x, targetPos.z, delta);
+      return;
+    }
+
+    this.mesh.rotation.y = Math.atan2(targetPos.x - this.mesh.position.x, targetPos.z - this.mesh.position.z);
+    this.hasFiredThisAttack = false;
+    if (this.animator && this.hurtTimer <= 0) {
+      this.animator.setAnimation('gather');
+    }
+
+    if (this.actionTimer >= REPAIR_INTERVAL) {
+      this.actionTimer = 0;
+      const gm = gameManager || this.gameManager;
+      const res = t.repairHit(gm);
+      if (res === 'nofunds') {
+        const owner = gm.getPlayer ? gm.getPlayer(t.ownerId) : null;
+        if (owner && owner.isLocal) gm.events.emit(EVT.NOTIFY, { ownerId: t.ownerId, text: '⚠️ Recursos insuficientes para reparar' });
+        this.orderQueue = null;
+        this.stop();
+      } else if (res === 'full') {
+        this.stop();
+      } else if (gm && gm.events) {
+        gm.events.emit(EVT.WORKER_HAMMER, { pos: posOf(t.mesh.position), ownerId: this.ownerId });
       }
     }
   }

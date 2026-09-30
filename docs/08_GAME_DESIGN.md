@@ -245,3 +245,6 @@ contras acima. Números de exemplo (seed 42), não normativos — o balanceament
 - D5: Casa/Toca mantidas; ouro passivo das fazendas removido.
 - D6: heróis na campanha **e** na escaramuça (1 por jogador, opção "Sem heróis").
 - D7: nomes de unidades e construções deste documento aprovados.
+
+### F3-05 (implementado)
+Reparo custa 50% do custo original para 100% de PV; cancelar obra reembolsa 75%; máx. 4 trabalhadores por construção. Ver `docs/02_MECANICAS.md`.

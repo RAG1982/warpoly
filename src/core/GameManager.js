@@ -259,6 +259,21 @@ export class GameManager {
   }
 
   /**
+   * F3-05: nº de unidades (exceto `except`) vivas que têm `building` como alvo de obra/reparo.
+   * Varredura determinística sobre `allUnits` (sem estado extra).
+   */
+  countWorkersOn(building, except = null) {
+    const units = this.allUnits;
+    let n = 0;
+    for (let i = 0; i < units.length; i++) {
+      const u = units[i];
+      if (u === except || u.isDead) continue;
+      if (u.buildTarget === building || u.repairTarget === building) n++;
+    }
+    return n;
+  }
+
+  /**
    * F2-02: API pública para emitir um comando (única forma de alterar o estado do jogo,
    * fora do efeito interno documentado em `spawnUnit`/`src/debug/bench.js`). `fields` é o
    * mesmo objeto que `makeCommand` espera (`type`, `playerId`, + campos do tipo — ver
@@ -1313,6 +1328,14 @@ export class GameManager {
         this.issue({ type: CMD.BUILD, playerId: this._localPlayerId, unitIds: workerIds, buildingId: e.id });
         return;
       }
+      // F3-05: clique direito em construção própria concluída e danificada: Reparar (custa recursos).
+      if (e instanceof Building && e.isConstructed && e.hp < e.maxHp && e.ownerId === this._localPlayerId) {
+        const workerIds = this.selectedUnits.filter(u => u.type === 'villager' || u.type === 'peon').map(u => u.id);
+        if (workerIds.length > 0) {
+          this.issue({ type: CMD.REPAIR, playerId: this._localPlayerId, unitIds: workerIds, buildingId: e.id });
+          return;
+        }
+      }
     }
 
     // Right-clicked ground: Move (o executor calcula a formação e evita água)
@@ -1537,6 +1560,15 @@ export class GameManager {
 
     // Lista única de unidades (todos os jogadores). Construções filtram alvos por isHostile.
     const allUnits = this.allUnits;
+
+    // F3-05: recalcula `workerCount` (trabalhadores com obra/reparo como alvo) por varredura.
+    for (let i = 0; i < this.buildings.length; i++) this.buildings[i].workerCount = 0;
+    for (let i = 0; i < allUnits.length; i++) {
+      const u = allUnits[i];
+      if (u.isDead) continue;
+      const t = u.buildTarget || u.repairTarget;
+      if (t) t.workerCount = (t.workerCount || 0) + 1;
+    }
 
     // Update Buildings (lógica de jogo; VFX/billboard vão em renderUpdate)
     this.buildings.forEach(b => {

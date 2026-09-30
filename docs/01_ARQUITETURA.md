@@ -459,3 +459,7 @@ visuais/sonoros nunca são "re-disparados" porque o `EventBus` tem `muted` (aind
 - `GameManager` recebe `uiManager` e `sceneManager` por atribuição posterior (`gm.uiManager = …`).
 - `Building`/`Unit` precisam de `gameManager` (injetado em `createBuilding`/`spawnUnit`) para achar o `Player` dono e a diplomacia; sem ele caem em regras locais (dono igual/diferente).
 - HUD depende de IDs fixos do `index.html`.
+
+## F3-05: comandos e evento de reparo
+
+`CMD.REPAIR {unitIds, buildingId, queued?}` e `CMD.CANCEL_CONSTRUCTION {buildingId}` (CommandExecutor); estado `repairing` em `Unit.updateRepairing`; `Building.repairHit`/`cancelConstruction`; `EVT.BUILDING_CANCELLED`; constantes/funções puras em `src/sim/repair.js`; contagem por `GameManager.countWorkersOn`.

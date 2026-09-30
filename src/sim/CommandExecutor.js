@@ -142,6 +142,23 @@ export const CommandExecutor = {
         break;
       }
 
+      case CMD.REPAIR: {
+        const building = resolveOwnedBuilding(gm, cmd, cmd.buildingId);
+        if (!building) break;
+        const units = resolveOwnedUnits(gm, cmd);
+        for (let i = 0; i < units.length; i++) {
+          dispatchOrder(units[i], { type: CMD.REPAIR, target: building }, !!cmd.queued);
+        }
+        break;
+      }
+
+      case CMD.CANCEL_CONSTRUCTION: {
+        const building = resolveOwnedBuilding(gm, cmd, cmd.buildingId);
+        if (!building) break;
+        building.cancelConstruction(gm);
+        break;
+      }
+
       case CMD.PLACE_BUILDING: {
         gm.placeBuilding(cmd.buildingType, cmd.x, cmd.z, cmd.unitIds || [], cmd.playerId);
         break;

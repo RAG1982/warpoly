@@ -56,6 +56,7 @@ export class UIManager {
 
     // F3-06: card de nível do Centro (só role: 'hq')
     this.bldHqTierSection = document.getElementById('bld-hq-tier-section');
+    this.bldCancelSection = document.getElementById('bld-cancel-section');
     this.bldHqTierLabel = document.getElementById('bld-hq-tier-label');
     this.bldHqUpgradeBtn = document.getElementById('bld-hq-upgrade-btn');
     this.bldHqUpgradeBtnLabel = document.getElementById('bld-hq-upgrade-btn-label');
@@ -315,6 +316,11 @@ export class UIManager {
 
       // 2. Unit stop command (F2-02: comando STOP)
       const action = btn.getAttribute('data-action');
+      if (action === 'repair') {
+        this.im.startRepairMode();
+        this.sound.playSelect();
+        return;
+      }
       if (action === 'stop') {
         this.gm.issue({
           type: CMD.STOP,
@@ -357,6 +363,17 @@ export class UIManager {
     if (!this.buildingView) return;
 
     this.buildingView.addEventListener('click', (e) => {
+      // F3-05: cancelar obra em andamento (reembolsa 75 %)
+      if (e.target.closest('#bld-cancel-construction-btn') && this.gm.selectedBuilding) {
+        const b = this.gm.selectedBuilding;
+        if (!b.isConstructed && b.ownerId === this.gm.localPlayerId) {
+          this.gm.issue({ type: CMD.CANCEL_CONSTRUCTION, playerId: this.gm.localPlayerId, buildingId: b.id });
+          this.sound.playSelect();
+          this.showNotification('Obra cancelada. 75% dos recursos reembolsados.');
+        }
+        return;
+      }
+
       // 0. Click on the HQ tier-upgrade button (F3-06)
       const hqUpgradeBtn = e.target.closest('#bld-hq-upgrade-btn');
       if (hqUpgradeBtn && this.gm.selectedBuilding) {
@@ -594,6 +611,11 @@ export class UIManager {
 
       // Queue slots and horizontal progress bar
       this.updateBuildingQueue(b);
+
+      // F3-05: botão "Cancelar obra" só em construção própria em obra
+      if (this.bldCancelSection) {
+        this.bldCancelSection.style.display = (!b.isConstructed && b.ownerId === this.gm.localPlayerId) ? 'flex' : 'none';
+      }
 
       // F3-06: card de nível do Centro (`role: 'hq'`)
       this.updateHqTierCard(b);
@@ -1017,11 +1039,22 @@ export class UIManager {
         </button>
       `;
 
+      const repairButtonHtml = `
+        <button class="bld-train-btn action-stop-btn" data-action="repair" title="Reparar (R)">
+          <span class="bld-hotkey-badge">R</span>
+          <span class="action-stop-icon">🔧</span>
+          <div class="bld-hint-bubble">
+            <span class="bld-hint-title">Reparar <span class="bld-hint-hotkey">(R)</span></span> - Reparar construção (custa recursos)
+          </div>
+        </button>
+      `;
+
       this.selectionActions.innerHTML = `
         <div class="worker-actions-container">
           <span class="bld-section-label">CONSTRUIR:</span>
           <div class="worker-actions-group">
             ${buildButtonsHtml}
+            ${repairButtonHtml}
             ${stopButtonHtml}
           </div>
         </div>

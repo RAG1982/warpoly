@@ -5,6 +5,7 @@ import { UPGRADE_CONFIG, RESEARCH } from '../data/index.js';
 import { legacyOwnerId } from '../sim/EntityIds.js';
 import { EVT } from '../sim/events.js';
 import { computeDamage } from '../sim/combat.js';
+import { repairCostFor, cancelRefundFor, REPAIR_HP_FRACTION, CONSTRUCTION_MIN_HP_FRACTION } from '../sim/repair.js';
 
 /** Vector3 → objeto plano `{x,y,z}` (payload de evento: nunca referências a objetos three.js). */
 function posOf(v) {
@@ -94,6 +95,10 @@ export class Building {
     this.role = getBuildingDef(type).role || null;
     this.hp = stats.hp;
     this.maxHp = stats.hp;
+    // F3-05: obra nasce com 10 % do PV e ganha PV proporcional ao progresso (ver `construct`).
+    if (!isConstructed) this.hp = Math.max(1, Math.round(stats.hp * CONSTRUCTION_MIN_HP_FRACTION));
+    /** F3-05: nº de trabalhadores com esta construção como alvo (recalculado por tick no GameManager). */
+    this.workerCount = 0;
     this.cost = stats.cost;
     this.popGranted = stats.popGranted || 0;
     // F3-03: armadura da construção (corrige B5 — antes não existia). `towerDamage` é o
@@ -473,7 +478,12 @@ export class Building {
   construct(amount, gameManager) {
     if (this.isConstructed) return;
     const gm = gameManager || this.gameManager;
+    const before = this.buildProgress;
     this.buildProgress += amount;
+    // F3-05: PV sobe com o progresso (de 10 % a 100 % de hpMax), preservando o dano já sofrido.
+    const gained = (Math.min(100, this.buildProgress) - before) / 100 * this.maxHp * (1 - CONSTRUCTION_MIN_HP_FRACTION);
+    this.hp = Math.min(this.maxHp, this.hp + gained);
+    this.updateHealthBar();
     if (this.buildProgress >= 100) {
       this.buildProgress = 100;
       this.isConstructed = true;
@@ -493,6 +503,61 @@ export class Building {
     } else {
       this.updateConstructionState();
     }
+  }
+
+  /**
+   * F3-05: um golpe de reparo (chamado por `Unit.updateRepairing`). Restaura até 5 % de hpMax e
+   * cobra `repairCostFor` do dono. Retorna 'ok' | 'full' (nada a reparar/em obra) | 'nofunds'.
+   */
+  repairHit(gameManager) {
+    const gm = gameManager || this.gameManager;
+    if (this.isDead || !this.isConstructed || this.hp >= this.maxHp) return 'full';
+    const restored = Math.min(this.maxHp * REPAIR_HP_FRACTION, this.maxHp - this.hp);
+    const cost = repairCostFor({ hp: this.maxHp, cost: this.cost }, restored);
+    const owner = this.getOwner(gm);
+    if (!owner) return 'full';
+    if (!owner.canAfford(cost)) return 'nofunds';
+    owner.deduct(cost);
+    this.hp = Math.min(this.maxHp, this.hp + restored);
+    this.updateHealthBar();
+    this.updateDamageFlames();
+    return 'ok';
+  }
+
+  /**
+   * F3-05: cancela uma obra em andamento (só do próprio dono; construção concluída é ignorada).
+   * Devolve 75 % do custo, emite BUILDING_CANCELLED (não é baixa de combate) e marca a
+   * construção como morta para o `GameManager` liberar pathfinder/grade/população.
+   * @returns {boolean} true se cancelou.
+   */
+  cancelConstruction(gameManager) {
+    if (this.isConstructed || this.isDead) return false;
+    const gm = gameManager || this.gameManager;
+    const owner = this.getOwner(gm);
+    if (owner) owner.add(cancelRefundFor(this.cost));
+    // Trabalhadores que miravam esta obra param.
+    const units = gm && gm.allUnits ? gm.allUnits : [];
+    for (let i = 0; i < units.length; i++) {
+      const u = units[i];
+      if (u.buildTarget === this || u.repairTarget === this) {
+        u.orderQueue = null;
+        u.stop();
+      }
+    }
+    this.isDead = true;
+    if (this.hpGroup) this.hpGroup.visible = false;
+    if (this.flamesGroup) this.flamesGroup.visible = false;
+    if (gm && gm.events) {
+      gm.events.emit(EVT.BUILDING_CANCELLED, {
+        buildingId: this.id,
+        ownerId: this.ownerId,
+        pos: posOf(this.mesh.position),
+        buildingType: this.type
+      });
+    }
+    this.dispose();
+    if (owner) owner.recalculatePop(gm);
+    return true;
   }
 
   /** F3-03: `amount` já é o dano final (calculado por `computeDamage` no chamador). */

@@ -1,6 +1,6 @@
 {
   "version": "0.0.1",
   "configurations": [
-    { "name": "warpoly-dev", "runtimeExecutable": "npx", "runtimeArgs": ["vite", "--port", "5196", "--strictPort"], "port": 5196 }
+    { "name": "warpoly-dev", "runtimeExecutable": "npx", "runtimeArgs": ["vite", "--port", "5199", "--strictPort"], "port": 5199 }
   ]
 }

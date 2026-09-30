@@ -67,6 +67,15 @@ variar ligeiramente com o RNG do mapa/IA vizinha.
 
 Modelos: o Castelo atual (Blender) vira o **nível 3** humano; os níveis 1–2 precisam de modelos novos (F7). O Grande Salão atual vira o nível 2 orc.
 
+> **Implementado (F3-06):** `src/data/tiers.js` (nomes, PV, custo/tempo do upgrade, multiplicador
+> de ouro); `CMD.UPGRADE_HQ`/`CMD.CANCEL_UPGRADE_HQ` (`Building.startTierUpgrade`/
+> `cancelTierUpgrade`, PV proporcional ao subir, fila de treino pausada durante o upgrade,
+> evento `EVT.HQ_TIER_CHANGED`); requisitos generalizados (`src/sim/requirements.js`) aceitam
+> `{hq:N}` além de tipo de construção, aplicados em `placeBuilding`/`queueUnit`/`startResearch`;
+> IA evolui o Centro com Quartel+Forja concluídos e ≥8 trabalhadores. **Pendente:** modelo 3D por
+> nível (F7 — `modelByTier` fica `null`), petróleo (`oil` só declarado, F4-07), pesquisas em
+> níveis (F3-07), construções novas de nível 2/3 (F4).
+
 ---
 
 ## 4. Construções

@@ -628,6 +628,9 @@ export class Building {
       return false;
     }
 
+    // F4-01: construção em obra não treina.
+    if (!this.isConstructed) return false;
+
     // F3-06: Centro em upgrade de nível não treina (a fila fica pausada; ver `startTierUpgrade`).
     if (this.tierUpgrade) {
       return false;

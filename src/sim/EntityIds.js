@@ -13,6 +13,13 @@
 export const NEUTRAL_OWNER_ID = -1;
 
 /**
+ * F3-10: id do jogador especial "neutro hostil" (bandoleiros e acampamentos). Hostil a todos os
+ * jogadores normais (`team: 99`), fora de vitória/derrota/pop/HUD/IA/estatísticas. Só existe
+ * quando o mapa tem `neutrals`.
+ */
+export const NEUTRAL_HOSTILE_ID = 99;
+
+/**
  * Converte o dono passado a Unit/Building em ownerId numérico. Aceita o lado legado
  * ('player' → 0, 'enemy' → 1: os ids da MatchConfig padrão) usado por chamadas antigas
  * (inspetor, bench, testes). DÍVIDA (F2-01): remover quando ninguém mais passar strings.

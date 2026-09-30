@@ -5,6 +5,11 @@
  * do mesmo time são aliados. O dono neutro (NEUTRAL_OWNER_ID = −1: árvores,
  * minas) não é hostil nem aliado de ninguém.
  *
+ * F3-10: o jogador "neutro hostil" (`isNeutralHostile`, id 99, time 99) participa da matriz de
+ * hostilidade e de `getPlayer`, mas NÃO aparece em `players`/`size`/iteração/`alivePlayers`/
+ * `aliveTeams` (nunca é derrotado, não conta para vitória, HUD, pop, IA nem estatísticas);
+ * acesse-o por `neutralHostile`.
+ *
  * Sem three.js nem DOM: testável em Node.
  */
 import { Player } from './Player.js';
@@ -13,8 +18,12 @@ import { NEUTRAL_OWNER_ID } from './EntityIds.js';
 export class PlayerRegistry {
   /** @param {Array<Player|object>} players  instâncias de Player ou specs ({id, factionId, team, …}) */
   constructor(players = []) {
-    /** @type {Player[]} */
+    /** @type {Player[]} jogadores normais (exclui o neutro hostil) */
     this.players = [];
+    /** @type {Player|null} F3-10 */
+    this.neutralHostile = null;
+    /** @type {Player[]} normais + neutro hostil (base da matriz de hostilidade) */
+    this._all = [];
     /** @type {Map<number, Player>} */
     this._byId = new Map();
     /** @type {Player|null} */
@@ -28,7 +37,9 @@ export class PlayerRegistry {
   add(p) {
     const player = p instanceof Player ? p : new Player(p);
     if (this._byId.has(player.id)) throw new Error(`PlayerRegistry: id duplicado ${player.id}`);
-    this.players.push(player);
+    if (player.isNeutralHostile) this.neutralHostile = player;
+    else this.players.push(player);
+    this._all.push(player);
     this._byId.set(player.id, player);
     this._local = this.players.find((p) => p.isLocal) || this.players.find((p) => !p.isAI) || this.players[0] || null;
     this.rebuildDiplomacy();
@@ -38,10 +49,10 @@ export class PlayerRegistry {
   /** Recalcula a matriz de hostilidade. Chame de novo se `team` de algum jogador mudar. */
   rebuildDiplomacy() {
     this._hostile = [];
-    for (const a of this.players) {
+    for (const a of this._all) {
       if (a.id < 0) continue;
       const row = [];
-      for (const b of this.players) {
+      for (const b of this._all) {
         if (b.id >= 0) row[b.id] = a.id !== b.id && a.team !== b.team ? 1 : 0;
       }
       this._hostile[a.id] = row;

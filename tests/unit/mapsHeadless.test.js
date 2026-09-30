@@ -43,7 +43,7 @@ describe('mapa ilhas-4p (F2-05, headless)', () => {
     const gm = new GameManager(scene, terrain, null, null, cfg);
 
     const initialUnits = gm.allUnits.length;
-    expect(initialUnits).toBe(4 * 5); // 2 workers + 2 melee + 1 ranged por jogador (START_LAYOUT)
+    expect(initialUnits).toBe(4 * 5 + 8); // 2 workers + 2 melee + 1 ranged por jogador (START_LAYOUT) + 8 bandidos (F3-10: 2 acampamentos × 4)
 
     expect(() => {
       for (let i = 0; i < 2000; i++) gm.simStep(SIM_DT);

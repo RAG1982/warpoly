@@ -175,6 +175,38 @@ export function matchConfigFromSearch(search = '') {
   });
 }
 
+/** F3-10: espécies de critters e tipos de jazida aceitos em `neutrals`. */
+export const CRITTER_SPECIES = Object.freeze(['sheep', 'pig']);
+const DEPOSIT_TYPES = Object.freeze(['gold', 'stone']);
+
+/**
+ * F3-10: valida `mapDef.neutrals` (kind ∈ {camp, critters}, coordenadas dentro de `playable`,
+ * `guards` 1..8, espécie/contagem de critters). Lança Error com a primeira inconsistência.
+ */
+export function validateNeutrals(mapDef) {
+  const list = mapDef.neutrals || [];
+  const half = (mapDef.playable ?? mapDef.size) / 2;
+  const inside = (x, z) => typeof x === 'number' && typeof z === 'number' && Math.abs(x) <= half && Math.abs(z) <= half;
+  list.forEach((n, i) => {
+    const tag = `MatchConfig: neutrals[${i}] do mapa "${mapDef.id}"`;
+    if (!n || (n.kind !== 'camp' && n.kind !== 'critters')) throw new Error(`${tag}: kind inválido "${n && n.kind}"`);
+    if (!inside(n.x, n.z)) throw new Error(`${tag}: fora da área jogável`);
+    if (n.kind === 'camp') {
+      if (!Number.isInteger(n.guards) || n.guards < 1 || n.guards > 8) throw new Error(`${tag}: guards deve ser 1..8`);
+      if (n.deposit) {
+        if (!DEPOSIT_TYPES.includes(n.deposit.type)) throw new Error(`${tag}: deposit.type inválido`);
+        if (!(n.deposit.amount > 0)) throw new Error(`${tag}: deposit.amount inválido`);
+      }
+    } else {
+      if (!CRITTER_SPECIES.includes(n.species)) throw new Error(`${tag}: espécie inválida "${n.species}"`);
+      if (!Number.isInteger(n.count) || n.count < 1 || n.count > 40) throw new Error(`${tag}: count deve ser 1..40`);
+    }
+  });
+  const total = list.reduce((s, n) => s + (n.kind === 'critters' ? n.count : 0), 0);
+  if (total > 40) throw new Error(`MatchConfig: mapa "${mapDef.id}" tem mais de 40 critters`);
+  return mapDef;
+}
+
 /**
  * Valida a config; lança Error com a primeira inconsistência encontrada.
  * F2-05: também valida contra o mapa (`cfg.mapId`) — jogadores demais ou `startSlot` fora do
@@ -189,6 +221,7 @@ export function validateMatchConfig(cfg) {
   if (cfg.players.length > mapDef.maxPlayers) {
     throw new Error(`MatchConfig: mapa "${cfg.mapId}" aceita no máximo ${mapDef.maxPlayers} jogadores`);
   }
+  validateNeutrals(mapDef);
   const ids = new Set();
   const slots = new Set();
   let locals = 0;

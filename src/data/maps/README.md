@@ -15,7 +15,7 @@ Cada mapa é um JSON em `src/data/maps/<id>.json`, registrado em `index.js` (`ge
   "startSlots": [ { "x": 32, "z": -30, "mirror": [1, 1] }, ... ],
   "resources": [ { "type": "gold", "x": 30, "z": -46 }, ... ],
   "forests":   [ { "x": 12, "z": -54, "count": 6, "radius": 6, "species": "pine" }, ... ],
-  "neutrals": [],
+  "neutrals": [ { "kind": "camp", "x": 40, "z": 20, "guards": 4, "reward": { "gold": 300 }, "deposit": { "type": "gold", "amount": 3000 } }, ... ],
   "decorationDensity": 1.0
 }
 ```
@@ -46,8 +46,18 @@ Cada mapa é um JSON em `src/data/maps/<id>.json`, registrado em `index.js` (`ge
 - **`forests`**: clusters de árvores (`GameManager.spawnWoodlands`, usando `rngMap` — determinístico
   pela seed da partida). `species` é o tipo preferido (~65% das árvores do cluster); o resto
   sorteia entre `oak`/`pine`/`autumn`.
-- **`decorationDensity`** e **`neutrals`**: reservados (decorações não-jogáveis e criaturas/
-  campos neutros); não usados ainda.
+- **`neutrals`** (F3-10): entidades neutras, criadas por `GameManager.spawnNeutrals()` com RNG
+  determinístico (`rng.fork('neutrals')`). Só quando o mapa tem alguma entrada existe o jogador
+  neutro hostil (`NEUTRAL_HOSTILE_ID = 99`, time 99). `validateNeutrals` (MatchConfig.js) valida:
+  - `{ "kind": "camp", "x", "z", "guards": 1..8, "reward": { "gold"?, "wood"?, "stone"? },
+    "deposit": { "type": "gold"|"stone", "amount" } }` — 1 `bandit_camp` (PV 1400) + `guards`
+    bandidos em círculo (raio 5, leash 22) + a jazida `deposit` a ~9 do acampamento. Destruir o
+    acampamento credita `reward` a quem deu o último golpe (`EVT.CAMP_CLEARED`).
+  - `{ "kind": "critters", "species": "sheep"|"pig", "x", "z", "count", "radius" }` — critters
+    decorativos (no máximo 40 por mapa; `x`/`z` dentro de `playable`).
+  Convenção: acampamentos em terra firme, ≥ 25 de qualquer `startSlot`; em mapas 1×1 os pares
+  são espelhados (ponto → oposto).
+- **`decorationDensity`**: reservado (decorações não-jogáveis); não usado ainda.
 
 ## Mapas
 

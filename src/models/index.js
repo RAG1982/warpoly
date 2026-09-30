@@ -19,6 +19,7 @@ export {
   getVillagerGoldSackTextures
 } from './units/villagerTextures.js';
 export { createBandit } from './units/BanditModel.js';
+export { createCritter } from './units/CritterModel.js';
 export { createPeon } from './units/PeonModel.js';
 export { createGrunt } from './units/GruntModel.js';
 export { createAxethrower } from './units/AxethrowerModel.js';

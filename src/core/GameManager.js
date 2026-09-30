@@ -24,7 +24,8 @@ import {
 } from '../data/index.js';
 import { Player } from '../sim/Player.js';
 import { PlayerRegistry } from '../sim/PlayerRegistry.js';
-import { EntityRegistry, NEUTRAL_OWNER_ID } from '../sim/EntityIds.js';
+import { EntityRegistry, NEUTRAL_OWNER_ID, NEUTRAL_HOSTILE_ID } from '../sim/EntityIds.js';
+import { Critter } from '../entities/Critter.js';
 import { SpatialGrid } from '../sim/SpatialGrid.js';
 import {
   createMatchConfig,
@@ -110,6 +111,10 @@ export class GameManager {
     this.trees = [];
     this.resourceDeposits = [];
     this.arrows = [];
+    /** F3-10: critters decorativos (Critter, fora de `allUnits`/grades) e acampamentos neutros. */
+    this.critters = [];
+    /** @type {Map<number, {remaining:number, reward:object, pos:{x:number,z:number}}>} campId → cluster */
+    this._camps = new Map();
 
     // Selected entities
     this.selectedUnits = [];
@@ -404,6 +409,7 @@ export class GameManager {
     });
     this.trees.forEach(t => (t.dispose ? t.dispose() : this.scene.remove(t.mesh)));
     this.resourceDeposits.forEach(r => this.scene.remove(r.mesh));
+    this.critters.forEach(c => c.dispose());
 
     if (this.treeManager) {
       this.treeManager.dispose();
@@ -416,6 +422,8 @@ export class GameManager {
     this.buildings = [];
     this.trees = [];
     this.resourceDeposits = [];
+    this.critters = [];
+    this._camps = new Map();
     this.selectedUnits = [];
     this.selectedBuilding = null;
     this.selectedResource = null;
@@ -447,6 +455,20 @@ export class GameManager {
     this.playerRegistry = new PlayerRegistry(
       this.matchConfig.players.map(spec => new Player({ ...spec, resources: STARTING_RESOURCES }))
     );
+    // F3-10: jogador neutro hostil (id 99) só existe quando o mapa tem `neutrals`.
+    const neutrals = this.terrain.mapDef.neutrals;
+    if (neutrals && neutrals.length > 0) {
+      this.playerRegistry.add(new Player({
+        id: NEUTRAL_HOSTILE_ID,
+        name: 'Bandoleiros',
+        factionId: 'human',
+        team: NEUTRAL_HOSTILE_ID,
+        color: '#f97316',
+        isNeutralHostile: true,
+        startSlot: -1,
+        resources: { wood: 0, gold: 0, stone: 0 }
+      }));
+    }
     this._localPlayerId = this.playerRegistry.localPlayer.id;
     this.playerRegistry.players.forEach(p => { p.events = this.events; });
     this.matchStats.reset();
@@ -470,6 +492,9 @@ export class GameManager {
       player.startPos = { x: slot.x, z: slot.z };
       this._spawnStartingBase(player, slot);
     }
+
+    // 2b. F3-10: acampamentos de bandidos e critters (antes das florestas: elas evitam o acampamento).
+    this.spawnNeutrals();
 
     // 3. Harvestable Woodlands & Trees (Spacious wilderness forests, completely outside bases)
     this.spawnWoodlands();
@@ -515,6 +540,98 @@ export class GameManager {
     for (const r of mapDef.resources) {
       if (r.slot !== undefined && !usedSlots.has(r.slot)) continue;
       this.resourceDeposits.push(this.registerEntity(new ResourceDeposit(this.scene, this.terrain, r.type, r.x, r.z)));
+    }
+  }
+
+  /**
+   * F3-10: entidades neutras do mapa (`mapDef.neutrals`, ver src/data/maps/README.md).
+   * - `camp`: 1 `bandit_camp` (dono `NEUTRAL_HOSTILE_ID`, já concluído), `guards` bandidos em
+   *   círculo (raio 5, com leash — ver `Unit._updateGuardLeash`) e a jazida `deposit` a ~9 unidades.
+   * - `critters`: `count` ovelhas/porcos passeando ao redor de (x, z).
+   * Usa um fork determinístico de `this.rng` (nunca `Math.random`; não consome `rngMap`).
+   */
+  spawnNeutrals() {
+    const list = this.terrain.mapDef.neutrals || [];
+    if (list.length === 0) return;
+    const rng = this.rng.fork('neutrals');
+    let campSeq = 0;
+    let critterSeq = 0;
+    const isLand = (x, z) => this.terrain.getHeight(x, z) >= 1.9 && !(this.pathfinder && this.pathfinder.isWater(x, z));
+
+    for (const n of list) {
+      if (n.kind === 'camp') {
+        const campId = ++campSeq;
+        const camp = this.createBuilding('bandit_camp', n.x, n.z, true, NEUTRAL_HOSTILE_ID);
+        camp.campId = campId;
+        this.buildings.push(camp);
+        this._camps.set(campId, { remaining: 1, reward: { ...(n.reward || {}) }, pos: { x: n.x, z: n.z } });
+
+        const phase = rng.next() * Math.PI * 2;
+        for (let i = 0; i < n.guards; i++) {
+          const ang = phase + (i / n.guards) * Math.PI * 2;
+          const bandit = this.spawnUnit('bandit', n.x + Math.cos(ang) * 5, n.z + Math.sin(ang) * 5, NEUTRAL_HOSTILE_ID);
+          bandit.homePos = { x: bandit.mesh.position.x, z: bandit.mesh.position.z };
+        }
+
+        if (n.deposit) {
+          let dx = n.x + 9;
+          let dz = n.z;
+          for (let tries = 0; tries < 16; tries++) {
+            const ang = rng.next() * Math.PI * 2;
+            const x = n.x + Math.cos(ang) * 9;
+            const z = n.z + Math.sin(ang) * 9;
+            if (isLand(x, z)) { dx = x; dz = z; break; }
+          }
+          const dep = new ResourceDeposit(this.scene, this.terrain, n.deposit.type, dx, dz);
+          dep.resourcesRemaining = n.deposit.amount;
+          dep.maxResources = n.deposit.amount;
+          this.resourceDeposits.push(this.registerEntity(dep));
+        }
+      } else if (n.kind === 'critters') {
+        for (let i = 0; i < n.count; i++) {
+          let x = n.x;
+          let z = n.z;
+          for (let tries = 0; tries < 8; tries++) {
+            const ang = rng.next() * Math.PI * 2;
+            const d = rng.next() * (n.radius || 6);
+            const cx = n.x + Math.cos(ang) * d;
+            const cz = n.z + Math.sin(ang) * d;
+            if (isLand(cx, cz)) { x = cx; z = cz; break; }
+          }
+          const critter = new Critter(this, n.species, x, z, rng.fork(`critter:${critterSeq++}`), n.radius || 6);
+          this.registerEntity(critter, NEUTRAL_OWNER_ID);
+          this.critters.push(critter);
+        }
+      }
+    }
+  }
+
+  /** F3-10: último acampamento do cluster caiu — credita a recompensa a quem deu o último golpe. */
+  _onCampDestroyed(camp) {
+    const c = this._camps.get(camp.campId);
+    if (!c) return;
+    c.remaining--;
+    if (c.remaining > 0) return;
+    const by = camp.lastAttackerOwnerId; // mesmo valor de `killerOwnerId` em BUILDING_DESTROYED (F3-09)
+    const player = typeof by === 'number' ? this.getPlayer(by) : null;
+    const credited = player && !player.isNeutralHostile ? player : null;
+    const reward = c.reward || {};
+    if (credited) credited.add(reward);
+    this.events.emit(EVT.CAMP_CLEARED, {
+      campId: camp.campId,
+      byOwnerId: credited ? credited.id : null,
+      pos: { x: c.pos.x, y: camp.mesh.position.y, z: c.pos.z },
+      reward: { ...reward }
+    });
+    if (credited) {
+      const parts = [];
+      if (reward.gold) parts.push(`+${reward.gold} de ouro`);
+      if (reward.wood) parts.push(`+${reward.wood} de madeira`);
+      if (reward.stone) parts.push(`+${reward.stone} de pedra`);
+      this.events.emit(EVT.NOTIFY, {
+        ownerId: credited.id,
+        text: `Acampamento de bandidos destruído!${parts.length ? ' ' + parts.join(' ') : ''}`
+      });
     }
   }
 
@@ -965,6 +1082,11 @@ export class GameManager {
       entity.setSelected(true);
       this.selectedBuilding = entity;
       this.soundManager.playSelect();
+    } else if (entity instanceof Building && entity.ownerId === NEUTRAL_HOSTILE_ID) {
+      // F3-10: acampamento neutro — card apenas informativo (sem comandos).
+      entity.setSelected(true);
+      this.selectedBuilding = entity;
+      this.soundManager.playSelect();
     } else if (entity instanceof Tree || entity instanceof ResourceDeposit) {
       this.selectedResource = entity;
       this.soundManager.playSelect();
@@ -1009,7 +1131,7 @@ export class GameManager {
   issueOrder(entityUnderCursor, groundPoint) {
     this.selectedUnits = this.selectedUnits.filter(u => !u.isDead && !u.isDying && u.state !== 'dying');
     if (this.selectedUnits.length === 0) {
-      if (this.selectedBuilding && groundPoint) {
+      if (this.selectedBuilding && this.selectedBuilding.ownerId === this._localPlayerId && groundPoint) {
         let rallyPoint = groundPoint;
         if (this.pathfinder && this.pathfinder.isWater(rallyPoint.x, rallyPoint.z)) {
           rallyPoint = this.pathfinder.findNearestWalkable(rallyPoint.x, rallyPoint.z);
@@ -1033,6 +1155,11 @@ export class GameManager {
       const e = entityUnderCursor;
       // Right-clicked a hostile unit/building: Attack!
       if ((e instanceof Unit || e instanceof Building) && this.isHostile(this._localPlayerId, e.ownerId)) {
+        this.issue({ type: CMD.ATTACK, playerId: this._localPlayerId, unitIds, targetId: e.id });
+        return;
+      }
+      // F3-10: critter só é atacado por ordem explícita (nunca por auto-aquisição).
+      if (e instanceof Critter && !e.isDead) {
         this.issue({ type: CMD.ATTACK, playerId: this._localPlayerId, unitIds, targetId: e.id });
         return;
       }
@@ -1296,6 +1423,7 @@ export class GameManager {
         const deadB = this.buildings.splice(i, 1)[0];
         if (deadB.dispose) deadB.dispose();
         this.unregisterEntity(deadB);
+        if (deadB.campId) this._onCampDestroyed(deadB);
         this.recalculatePopCap();
       }
     }
@@ -1321,6 +1449,17 @@ export class GameManager {
         u.hp = Math.min(u.maxHp, u.hp + u.regen * dt);
       }
       u.update(dt, this, this.arrows, allUnits, this.buildings);
+    }
+
+    // F3-10: critters (passeio/fuga/carcaça); removidos ao fim da carcaça.
+    for (let i = this.critters.length - 1; i >= 0; i--) {
+      const c = this.critters[i];
+      c.update(dt);
+      if (c.canRemove) {
+        this.critters.splice(i, 1);
+        c.dispose();
+        this.unregisterEntity(c);
+      }
     }
 
     // Resolve Collisions: Units cannot walk through buildings, deposits, trees, or each other
@@ -1613,6 +1752,8 @@ export class GameManager {
     this.trees.forEach(t => (t.dispose ? t.dispose() : this.scene.remove(t.mesh)));
     this.resourceDeposits.forEach(r => this.scene.remove(r.mesh));
     this.arrows.forEach(a => (a.dispose ? a.dispose() : this.scene.remove(a.mesh)));
+    this.critters.forEach(c => c.dispose());
+    this.critters = [];
     this.treeManager?.dispose();
 
     // Névoa por shader (F1-05): sem plano sobreposto (shroudMesh) para remover.

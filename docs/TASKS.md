@@ -314,9 +314,10 @@ Sonnet 5.5 escreve a spec em `docs/specs/<ID>.md`; agente **Sonnet** executa; o 
 - **Resultado**: `NEUTRAL_HOSTILE_ID=99`, `neutrals` validados nos mapas (2 acampamentos cada), `spawnNeutrals`, leash/regen dos bandidos, recompensa + `CAMP_CLEARED`, critters (ovelha/porco), minimapa laranja, card do acampamento. Pendências → NEW-25/26/27. 360 testes.
 
 ### F3-11 · Revisão de balanceamento base
-- **Status**: `DOING(sonnet, 2026-09-30)` (spec: docs/specs/F3-11-balanceamento-base.md) · Lane GAME + QA · Onda 5 · Dep: F3-03..F3-07, F8-? headless
+- **Status**: `DONE(a048317)` (spec: docs/specs/F3-11-balanceamento-base.md) · Lane GAME + QA · Onda 5 · Dep: F3-03..F3-07, F8-? headless
 - **Fazer**: simulações IA×IA headless (F2-08) em lote para medir taxa de vitória por facção; ajustar dados.
 - **Aceite**: 45–55% de vitória por facção em 200 partidas IA Difícil × IA Difícil.
+- **Resultado**: `tools/balance-sim.mjs` + `balance-audit.mjs` + `docs/BALANCEAMENTO.md`; 200 partidas IA×IA (continental-1v1): humano 51,7 % / orc 48,3 % das decididas, empates 14 %. Causa raiz do baseline 0/100: Fazenda humana com `popGranted` 0 (IA nunca construía Quartel) → 5. Ajustes de PV em Cavaleiro/Arqueiro/Grunt/Patrulheiro/Enfurecido. Mede só o nível 1 (a IA não evolui Centro/pesquisa/Ogro): repetir com a F5. 377 testes.
 
 ---
 
@@ -540,6 +541,10 @@ _(agentes adicionam aqui: `NEW-<n> · título · lane · motivo`)_
 - NEW-26 · Card/seleção de unidade neutra (bandido) · UI
 - NEW-27 · Medir draw calls dos neutros vs master (997→1387 com câmera no acampamento, não isolado) · PERF
 - NEW-28 · Verificar reparo/cancelar obra manualmente no jogo (2 aldeões reparando torre; capturas em tools/ui-captures/repair/) · QA
+- NEW-29 · Renomear construções existentes para os nomes D7 (Paço Real, Salão do Clã, Ferraria Real…) · UI/DATA · haiku
+- NEW-30 · Repetir o lote de balanceamento (F3-11) quando a F5 (IA Difícil) e a F4 chegarem; paridade dos atiradores ficou +14,8 % (orc) · QA
+- NEW-31 · `tools/check-data-parity.mjs` quebrado (`blockerGrid` indefinido no mock) · QA · haiku
+- NEW-32 · Arte: refino de pontos fracos (olhos do Camponês, pele do Lacaio, ombreira do troll, clava do Bandido) e poses do arqueiro (mão na corda, projétil da mão) · ART
 - NEW-23 · Projéteis de cerco balísticos que podem errar alvo em movimento — implementar junto com a F4-02 (cerco) · GAME
 - NEW-1 · Avaliar uso real de `GLTFBuildingLoader` em `GreatHall.js` e remover ou adotar no pipeline Blender (F7-00) · ART · ficou fora do escopo da F0-03
 

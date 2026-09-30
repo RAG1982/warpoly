@@ -63,6 +63,7 @@ Opus escreve a spec em `docs/specs/<ID>.md`; agente **Sonnet** executa; Opus rev
 | `docs/specs/F2-05-mapas-dados.md` | F2-05 + B16 — **DONE** | sonnet (local) |
 | `docs/specs/F3-01-controles-rts.md` | F3-01 + NEW-16 — **nuvem** | sonnet (claude.ai/code) |
 | `docs/specs/F6-08-opcoes.md` | F6-08 — **nuvem**, após F3-01 | sonnet (claude.ai/code) |
+| `docs/specs/F7-00d-lacaio-blender.md` | F7-00d Lacaio no Blender (liberado pelo dono como teste com Sonnet) | sonnet (local) |
 | `docs/specs/F3-04-economia.md` | F3-04 economia WC2 — **DOING(sonnet local, 2026-09-29)**; toca GameManager/Unit/Building/ai → não vai para a nuvem | sonnet (local) |
 | `docs/specs/F3-03-combate.md` | F3-03 — spec pronta; **local, depois da F3-04** | sonnet (local) |
 | `docs/specs/F3-06-niveis-centro.md` | F3-06 — spec pronta; **local, depois da F3-04 (e F3-03)** | sonnet (local) |

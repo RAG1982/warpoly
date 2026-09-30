@@ -161,7 +161,8 @@ describe('Pathfinder', () => {
 
     it('origem dentro de um bloqueio dinâmico ainda encontra caminho', () => {
       const pf = new Pathfinder(dryTerrain);
-      pf.blockCircle(0, 0, 3, +1);
+      // Usa raio 1.8 para que alguns vizinhos (> 2.12 cells) escapem do bloqueio dinâmico
+      pf.blockCircle(0, 0, 1.8, +1);
       const path = pf.findPath(0, 0, 15, 0);
       expect(path.length).toBeGreaterThan(0);
       expect(path[path.length - 1]).toEqual({ x: 15, z: 0 });
@@ -186,6 +187,49 @@ describe('Pathfinder', () => {
       }
 
       expect(out).toEqual(sorted);
+    });
+  });
+
+  describe('destino inacessível: anel fechado (NEW-21)', () => {
+    /**
+     * Terreno com um anel fechado de água: um círculo de água cortando o terreno,
+     * sem nenhuma passagem seca. Qualquer destino dentro do anel é inacessível.
+     */
+    const closedRingTerrain = {
+      getHeight(x, z) {
+        const distFromCenter = Math.hypot(x, z);
+        // Água em forma de anel: raio 15–18 é água, dentro/fora é seco
+        const inRing = distFromCenter >= 15 && distFromCenter <= 18;
+        return inRing ? WATER : DRY;
+      }
+    };
+
+    it('retorna caminho vazio (não atravessa bloqueio) quando origem é inacessível', () => {
+      const pf = new Pathfinder(closedRingTerrain);
+      // Origem fora do anel, destino dentro: sem caminho para o destino exato,
+      // e nenhum vizinho alcançável, logo retorna []
+      const path = pf.findPath(-30, 0, 5, 0);
+      expect(path).toEqual([]);
+    });
+
+    it('não gera caminho reto através do bloqueio', () => {
+      const pf = new Pathfinder(closedRingTerrain);
+      const path = pf.findPath(-30, 0, 5, 0);
+      // Não deve haver nenhum segmento que atravesse o anel de água
+      if (path.length > 0) {
+        let px = -30, pz = 0;
+        for (const wp of path) {
+          // Cada ponto do segmento deve estar em terra seca (não água)
+          expect(pf.isWater((px + wp.x) / 2, (pz + wp.z) / 2)).toBe(false);
+          px = wp.x; pz = wp.z;
+        }
+      }
+    });
+
+    it('comportamento simétrico: origem dentro, destino fora também inacessível', () => {
+      const pf = new Pathfinder(closedRingTerrain);
+      const path = pf.findPath(5, 0, -30, 0);
+      expect(path).toEqual([]);
     });
   });
 

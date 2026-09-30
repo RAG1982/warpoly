@@ -370,12 +370,16 @@ export class Pathfinder {
     }
     this._pathCache.set(cacheKey, smoothPath.map(p => ({ x: p.x, z: p.z })));
 
-    // Replace final waypoint with exact destination coordinates
-    smoothPath[smoothPath.length - 1] = { x: destX, z: destZ };
+    // Replace final waypoint with exact destination coordinates (ou nada se sem caminho)
+    if (smoothPath.length > 0) {
+      smoothPath[smoothPath.length - 1] = { x: destX, z: destZ };
+    }
     return smoothPath;
   }
 
-  /** Busca A* com heap binário; devolve o caminho suavizado (string-pulling) até `dest`. */
+  /** Busca A* com heap binário; devolve o caminho suavizado (string-pulling) até `dest`.
+   * Se não há caminho, devolve [] (sem caminho — unidade permanece parada ou no ponto alcançável
+   * mais próximo). */
   _searchAStar(start, dest, startIndex, destIndex, destX, destZ) {
     // Reset A* buffers
     this.gScore.fill(Infinity);
@@ -396,6 +400,8 @@ export class Pathfinder {
     ];
 
     let foundDest = false;
+    let bestNode = startIndex; // Nó mais próximo ao destino encontrado (se não há caminho)
+    let bestHeuristic = this.fScore[startIndex];
     let iterations = 0;
     const maxIterations = 3200;
 
@@ -414,6 +420,12 @@ export class Pathfinder {
 
       const curC = current % this.cols;
       const curR = Math.floor(current / this.cols);
+
+      // Atualiza o melhor nó visto até agora (mais próximo ao destino pela heurística)
+      if (this.fScore[current] < bestHeuristic) {
+        bestHeuristic = this.fScore[current];
+        bestNode = current;
+      }
 
       for (let d = 0; d < 8; d++) {
         const nc = curC + dirs[d][0];
@@ -444,8 +456,41 @@ export class Pathfinder {
     this._lastNodesExpanded = iterations;
 
     if (!foundDest) {
-      // Fallback: direct destination point
-      return [{ x: destX, z: destZ }];
+      // Sem caminho para o destino exato (ex.: anel fechado). Devolve caminho até o ponto
+      // alcançável mais próximo (bestNode). Se ainda estivéssemos na origem (bestNode === startIndex),
+      // devolve vazio (unidade parada). Isto evita o fallback original que atravessava bloqueios (NEW-21).
+      if (bestNode === startIndex) {
+        return [];
+      }
+
+      // Reconstrói o caminho até o melhor nó encontrado
+      const rawPath = [];
+      let curr = bestNode;
+      while (curr !== -1) {
+        const c = curr % this.cols;
+        const r = Math.floor(curr / this.cols);
+        rawPath.push(this.toWorld(c, r));
+        curr = this.cameFrom[curr];
+      }
+      rawPath.reverse();
+
+      // String-pulling do caminho até bestNode
+      const smoothPath = [];
+      let currentIdx = 0;
+
+      while (currentIdx < rawPath.length - 1) {
+        let furthest = currentIdx + 1;
+        for (let next = rawPath.length - 1; next > currentIdx + 1; next--) {
+          if (this.hasLineOfSight(rawPath[currentIdx].x, rawPath[currentIdx].z, rawPath[next].x, rawPath[next].z)) {
+            furthest = next;
+            break;
+          }
+        }
+        smoothPath.push(rawPath[furthest]);
+        currentIdx = furthest;
+      }
+
+      return smoothPath;
     }
 
     // Reconstruct raw cell path

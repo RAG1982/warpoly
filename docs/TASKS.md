@@ -63,6 +63,10 @@ Opus escreve a spec em `docs/specs/<ID>.md`; agente **Sonnet** executa; Opus rev
 | `docs/specs/F2-05-mapas-dados.md` | F2-05 + B16 — **DONE** | sonnet (local) |
 | `docs/specs/F3-01-controles-rts.md` | F3-01 + NEW-16 — **nuvem** | sonnet (claude.ai/code) |
 | `docs/specs/F6-08-opcoes.md` | F6-08 — **nuvem**, após F3-01 | sonnet (claude.ai/code) |
+| `docs/specs/F3-04-economia.md` | F3-04 economia WC2 — **DOING(sonnet local, 2026-09-29)**; toca GameManager/Unit/Building/ai → não vai para a nuvem | sonnet (local) |
+| `docs/specs/F3-03-combate.md` | F3-03 — spec pronta; **local, depois da F3-04** | sonnet (local) |
+| `docs/specs/F3-06-niveis-centro.md` | F3-06 — spec pronta; **local, depois da F3-04 (e F3-03)** | sonnet (local) |
+| `docs/specs/NEW-19-ruinas.md` | NEW-19 ruínas — **nuvem** | sonnet (claude.ai/code) |
 | `docs/specs/BUGS-01-pequenos.md` | NEW-2, NEW-11, NEW-5, NEW-13 — **nuvem** (ver `docs/HANDOFF_CLOUD.md`) | sonnet (claude.ai/code) |
 | `docs/specs/F1-07-pathfinder.md` | F1-07 + B8 + NEW-4 — **nuvem** | sonnet (claude.ai/code) |
 | `docs/specs/F6-03-hud-responsiva.md` | F6-03 + B11 — **nuvem** | sonnet (claude.ai/code) |
@@ -265,7 +269,7 @@ Opus escreve a spec em `docs/specs/<ID>.md`; agente **Sonnet** executa; Opus rev
 - **Aceite**: tabela de simulações em `docs/08_GAME_DESIGN.md` bate com testes unitários.
 
 ### F3-04 · Economia WC2
-- **Status**: `TODO` · Lane GAME · Onda 4 · Dep: F2-05
+- **Status**: `DOING(sonnet, 2026-09-29)` · spec `docs/specs/F3-04-economia.md` · Lane GAME · Onda 4 · Dep: F2-05
 - **Fazer**: trabalhador entra na mina (some ~1 s, 1 por vez, fila); florestas densas bloqueiam e abrem ao cortar; pedra permanece (D1); comida = suprimento de Fazenda/Chiqueiro; Serraria melhora rendimento de madeira; HQ upgrade melhora rendimento de ouro; minas esgotam com aviso.
 - **Aceite**: curva de economia documentada; IA continua funcional.
 
@@ -516,6 +520,7 @@ _(agentes adicionam aqui: `NEW-<n> · título · lane · motivo`)_
 - NEW-16 · HUD < 1100 px esconde o máximo de população (mostra "5" em vez de "5 / 10") · UI
 - NEW-17 · `terrainTextures.js` pinta a paleta/regiões do mapa continental em qualquer mapa: em `ilhas-4p` a água aparece com padrão rachado e manchas de terra fora de lugar — pintor deve derivar de `getHeight` do mapa (água/areia/grama/rocha por altura) · ART/CORE
 - NEW-18 · HUD (F6-03): barra/card inferior vazio aparece esticado na tela inteira quando nada está selecionado — esconder o card sem seleção · UI
+- NEW-19 · Ruínas/clareira ao destruir construção ou esgotar mina (como no WC2), procedural, só render · VFX · spec `docs/specs/NEW-19-ruinas.md` · **nuvem** (após F3-01/F6-08; parte da mina depende do evento `RESOURCE_DEPLETED` da F3-04)
 - NEW-1 · Avaliar uso real de `GLTFBuildingLoader` em `GreatHall.js` e remover ou adotar no pipeline Blender (F7-00) · ART · ficou fora do escopo da F0-03
 
 ## Notas de integração

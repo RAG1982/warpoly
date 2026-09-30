@@ -32,13 +32,14 @@ Fluxo do projeto: specs detalhadas em `docs/specs/<ID>.md`; o executor segue a s
 | 3 | ~~F6-03~~ | — | ✅ mesclada (PR #3) |
 | 4 | F3-01 — controles RTS completos + NEW-16 (população "5 / 10") | `docs/specs/F3-01-controles-rts.md` | Tudo via `gm.issue` (comandos F2-02) |
 | 5 | F6-08 — menu de Opções completo | `docs/specs/F6-08-opcoes.md` | Rode **depois** da F3-01 (ambas tocam InputManager/UIManager) |
+| 6 | NEW-19 — ruínas/clareira (construção destruída / mina esgotada) | `docs/specs/NEW-19-ruinas.md` | Só `src/render/**`; independente das anteriores |
 
 Para saber qual é a "próxima pendente": verifique se já existe branch `cloud/<ID>` ou PR aberto/mesclado com esse ID (`git ls-remote --heads origin 'cloud/*'` e o histórico do `master`). Pegue a primeira da tabela sem branch/PR.
 
 ## 4. O que está rodando localmente (não duplique)
-- F2-03 — determinismo (RNG com seed, checksum, modo headless): `GameManager`, `Unit`, `Building`, `Tree`, `src/ai/**`, `src/sim/**`, `Pathfinder`, `ModelFactory`.
-- Depois, localmente: F2-07 (event bus), F2-05 (mapas por dados).
-- Já concluídas: F1-03/F1-03b, F1-05, F1-06, F1-08, F1-09, F2-02.
+- **F3-04 — economia WC2** (local, 2026-09-29): `GameManager`, `Unit`, `Building`, `ResourceDeposit`, `src/ai/**`, `src/sim/**`, `src/data/buildings.js`; toca **mínimo** o card/aviso em `UIManager` (a F3-01 da nuvem também mexe em UIManager/InputManager: faça mudanças localizadas para evitar conflito).
+- Em seguida, localmente e **em sequência** (mesmos arquivos): F3-03 (combate) → F3-06 (níveis do Centro). Ambas tocam `UIManager` de forma mínima.
+- Já concluídas: F1-03/F1-03b, F1-05, F1-06, F1-08, F1-09, F2-02, F2-03, F2-05, F2-07.
 - Arte no Blender: **adiada** até o código estar pronto.
 
 ## 5. Relatório (corpo do PR, ≤ 25 linhas)

@@ -968,6 +968,26 @@ input:checked + .slider.round:before {
   transition: width 0.1s linear;
 }
 
+/* F3-06: card de nível do Centro (Paço Real → Fortaleza → Castelo de Aldária / equivalentes orcs) */
+#bld-hq-tier-section {
+  flex-wrap: wrap;
+}
+
+.bld-hq-upgrade-btn {
+  width: auto;
+  height: calc(32px * var(--ui-scale));
+  padding: 0 12px;
+  white-space: nowrap;
+  font-family: 'Cinzel', serif;
+  font-size: 12px;
+  font-weight: 700;
+  color: #fef08a;
+}
+
+#bld-hq-upgrade-progress-track {
+  width: 100%;
+}
+
 .card-header {
   display: flex;
   justify-content: space-between;

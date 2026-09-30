@@ -1,5 +1,6 @@
 import { CMD } from '../sim/commands.js';
 import { missingRequirements } from '../sim/requirements.js';
+import { getHqUpgradeCost } from '../data/index.js';
 
 /**
  * AIEconomyManager (Gerenciador de Economia e Construção da IA)
@@ -47,6 +48,38 @@ export class AIEconomyManager {
 
     // 4. Dynamic Workforce Rebalancing: Actively direct gatherers to the most immediate needed resource
     this.rebalanceWorkforce();
+
+    // 5. F3-06: evolui o Centro (HQ) quando a economia já está madura
+    this.considerHqUpgrade();
+  }
+
+  /**
+   * F3-06: evolui o Centro para o próximo nível quando a base já tem Quartel + Forja
+   * concluídos, ≥8 trabalhadores vivos e sobram recursos para o custo do upgrade. Nunca
+   * enfileira treino no Centro enquanto ele estiver em upgrade (`manageWorkerRecruitment`
+   * já barra isso via `hq.tierUpgrade`).
+   */
+  considerHqUpgrade() {
+    const buildings = this.gm.buildings;
+    const lenB = buildings.length;
+    let hq = null;
+    let hasForge = false;
+    for (let i = 0; i < lenB; i++) {
+      const b = buildings[i];
+      if (b.ownerId === this.director.playerId && !b.isDead) {
+        if (!hq && b.type === this.director.hqType && b.isConstructed) hq = b;
+        if (b.type === this.director.forgeType && b.isConstructed) hasForge = true;
+      }
+    }
+    if (!hq || hq.tier >= 3 || hq.tierUpgrade) return;
+    if (this.getLivingWorkerCount() < 8) return;
+    if (!this.director.getConstructedBarracks() || !hasForge) return;
+
+    const cost = getHqUpgradeCost(hq.tier + 1);
+    if (!cost || !this.director.canAfford(cost)) return;
+
+    // F2-02: comando UPGRADE_HQ — o débito/validação final é do executor.
+    this.gm.issue({ type: CMD.UPGRADE_HQ, playerId: this.director.playerId, buildingId: hq.id });
   }
 
   /**
@@ -170,6 +203,8 @@ export class AIEconomyManager {
     }
 
     if (!hq) return;
+    // F3-06: Centro em upgrade de nível não treina (fila pausada — ver `Building.queueUnit`).
+    if (hq.tierUpgrade) return;
 
     const queuedWorkers = (hq.queue ? hq.queue.length : 0);
     const totalWorkers = workerCount + queuedWorkers;
@@ -282,8 +317,9 @@ export class AIEconomyManager {
       return;
     }
 
-    // 5. WAR FORGE: Orc arms workshop for advanced units (requires at least 5 workers)
-    if (workerCount >= 5 && this.director.faction === 'orc' && hasBarracks && !hasForge && this.director.canAfford(this.director.costs.forge)) {
+    // 5. WAR FORGE: forja de pesquisas — necessária para o Centro evoluir (F3-06,
+    // `considerHqUpgrade`); antes só a IA orc construía, agora as duas facções (requer ≥5 workers).
+    if (workerCount >= 5 && hasBarracks && !hasForge && this.director.canAfford(this.director.costs.forge)) {
       this.placeBuilding(this.director.forgeType);
       return;
     }

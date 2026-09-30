@@ -175,6 +175,20 @@ export const CommandExecutor = {
         break;
       }
 
+      case CMD.UPGRADE_HQ: {
+        const building = resolveOwnedBuilding(gm, cmd, cmd.buildingId);
+        if (!building) break;
+        building.startTierUpgrade(gm);
+        break;
+      }
+
+      case CMD.CANCEL_UPGRADE_HQ: {
+        const building = resolveOwnedBuilding(gm, cmd, cmd.buildingId);
+        if (!building) break;
+        building.cancelTierUpgrade(gm);
+        break;
+      }
+
       case CMD.RALLY: {
         const building = resolveOwnedBuilding(gm, cmd, cmd.buildingId);
         if (!building) break;

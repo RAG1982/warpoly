@@ -403,7 +403,8 @@ visuais/sonoros nunca são "re-disparados" porque o `EventBus` tem `muted` (aind
   os ouvintes, na ordem de emissão, e a esvazia), `clear()`.
 - **Catálogo** (`src/sim/events.js`, `EVT`): `UNIT_TRAINED`, `UNIT_DIED`, `UNIT_DAMAGED`,
   `BUILDING_PLACED`, `BUILDING_COMPLETED`, `BUILDING_DESTROYED`, `BUILDING_DAMAGED`,
-  `RESEARCH_DONE`, `RESOURCE_GATHERED`, `RESOURCE_DEPLETED`, `WORKER_CHOP`/`WORKER_MINE`/
+  `RESEARCH_DONE`, `HQ_TIER_CHANGED` (F3-06: Centro concluiu upgrade de nível — ver
+  `Building.startTierUpgrade`/`src/data/tiers.js`), `RESOURCE_GATHERED`, `RESOURCE_DEPLETED`, `WORKER_CHOP`/`WORKER_MINE`/
   `WORKER_HAMMER`, `PROJECTILE_FIRED`/`PROJECTILE_HIT`, `MELEE_HIT`, `UNDER_ATTACK`, `NOTIFY`,
   `PLAYER_DEFEATED`, `MATCH_WON`, `MATCH_LOST` — mais `BUILDING_VFX` (decisão da execução, ver
   `events.js`: cobre o VFX ambiente de construção — chaminé, faíscas de forja, serragem, boneco

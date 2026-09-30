@@ -5,6 +5,7 @@
  */
 import { EVT } from '../sim/events.js';
 import { UPGRADE_CONFIG } from '../core/UpgradeConfig.js';
+import { getTierName } from '../data/index.js';
 
 /**
  * @param {import('../core/GameManager.js').GameManager} gm
@@ -30,6 +31,14 @@ export function createUiEvents(gm, uiManager) {
     const factionType = player && player.factionId === 'orc' ? 'orc' : 'human';
     const upgName = cfg?.name?.[factionType] || upgradeId;
     uiManager.showNotification(`🔥 Melhoria forjada: ${upgName}!`);
+  });
+
+  // F3-06: Centro evoluiu de nível — aviso PT-BR (só para o jogador local, dono do Centro).
+  on(EVT.HQ_TIER_CHANGED, ({ ownerId, tier }) => {
+    if (!isLocal(ownerId)) return;
+    const player = gm.getPlayer(ownerId);
+    const factionType = player && player.factionId === 'orc' ? 'orc' : 'human';
+    uiManager.showNotification(`🏰 ${getTierName(factionType, tier)} concluído!`);
   });
 
   // Jogador derrotado: mostrado para qualquer jogador (era assim antes — sem filtro de dono).

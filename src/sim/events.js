@@ -26,6 +26,8 @@ export const EVT = Object.freeze({
   BUILDING_VFX: 'building_vfx',
 
   RESEARCH_DONE: 'research_done',
+  /** F3-06: Centro (`role:'hq'`) concluiu upgrade de nível — ver `Building.simUpdate`. */
+  HQ_TIER_CHANGED: 'hq_tier_changed',
 
   RESOURCE_GATHERED: 'resource_gathered',
   RESOURCE_DEPLETED: 'resource_depleted',
@@ -63,6 +65,7 @@ export const EVT = Object.freeze({
  * EVT.BUILDING_VFX       {buildingId:number, ownerId:number, pos:Pos, kind:string}
  *
  * EVT.RESEARCH_DONE    {ownerId:number, upgradeId:string}
+ * EVT.HQ_TIER_CHANGED  {buildingId:number, ownerId:number, pos:Pos, tier:number}
  *
  * EVT.RESOURCE_GATHERED {type:string, amount:number, pos:Pos, ownerId:number}
  * EVT.RESOURCE_DEPLETED {resourceId:number, pos:Pos, resourceType:string}

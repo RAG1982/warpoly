@@ -12,13 +12,19 @@ import { BUILDINGS, DEFAULT_BUILDING, DEFAULT_BUILDING_ATTACK_COOLDOWN } from '.
 import { UPGRADE_CONFIG, FORGE_UPGRADES } from './upgrades.js';
 import { FACTIONS, STARTING_RESOURCES } from './factions.js';
 import { CARRY, MINE_ENTER_TIME, MINE_SLOTS, RATE_BONUS, gatherMultiplier } from './economy.js';
+import {
+  TIER_NAMES, HQ_TIER_HP, HQ_TIER_ARMOR, HQ_TIER_GOLD_MULT, HQ_UPGRADE_COST, HQ_TIER_MODEL,
+  getTierName, getHqUpgradeCost
+} from './tiers.js';
 
 export {
   UNITS, DEFAULT_UNIT, WORKER_STATS,
   BUILDINGS, DEFAULT_BUILDING, DEFAULT_BUILDING_ATTACK_COOLDOWN,
   UPGRADE_CONFIG, FORGE_UPGRADES,
   FACTIONS, STARTING_RESOURCES,
-  CARRY, MINE_ENTER_TIME, MINE_SLOTS, RATE_BONUS, gatherMultiplier
+  CARRY, MINE_ENTER_TIME, MINE_SLOTS, RATE_BONUS, gatherMultiplier,
+  TIER_NAMES, HQ_TIER_HP, HQ_TIER_ARMOR, HQ_TIER_GOLD_MULT, HQ_UPGRADE_COST, HQ_TIER_MODEL,
+  getTierName, getHqUpgradeCost
 };
 
 export const RESOURCE_TYPES = ['gold', 'wood', 'stone'];
@@ -148,7 +154,10 @@ export const UNIT_TRAIN_CONFIG = Object.fromEntries(
       name: u.name,
       icon: u.icon,
       cost: getTrainCost(u.type),
-      description: u.description
+      description: u.description,
+      // F3-06: requisitos generalizados (src/sim/requirements.js) — [] quando a unidade não
+      // declara `requires` em src/data/units.js.
+      requires: u.requires || []
     }])
 );
 

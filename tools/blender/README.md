@@ -8,8 +8,8 @@ os `.glb` em `public/models/` são artefatos reproduzíveis.
 |---|---|---|
 | `build_grunt.py` | `public/models/grunt.glb` | guerreiro orc: 7 partes rígidas, 4,4 mil tris, 8 draw calls, atlas 512² |
 | `build_knight.py` | `public/models/knight.glb` | Espadachim humano (ref. `soldado.png`): 7 partes rígidas, 4,2 mil tris, 10 draw calls, atlas 512², 213 KB |
-| `build_ogre.py` | `public/models/ogre.glb` | Ogro orc: 7 partes rígidas (rig aninhada), 6,7 mil tris, 11 draw calls, atlas 512², 285 KB |
-| `build_bandit.py` | `public/models/bandit.glb` | Bandido neutro: 7 partes rígidas (rig plana), 5,1 mil tris, 12 draw calls, atlas 512², 250 KB |
+| `build_ogre.py` | `public/models/ogre.glb` | Ogro orc: 7 partes rígidas (rig aninhada), 6,9 mil tris, 11 draw calls, atlas 512², 297 KB |
+| `build_bandit.py` | `public/models/bandit.glb` | Bandido neutro: 7 partes rígidas (rig plana), 5,7 mil tris, 12 draw calls, atlas 512², 274 KB |
 | `build_castle.py` | `public/models/castle.glb` | castelo humano: 2 draw calls, 8,7 mil tris, atlas 1024² |
 | `common.py` | — | helpers (primitivas bmesh, materiais de pintura, UV atlas, bake, export, render) |
 

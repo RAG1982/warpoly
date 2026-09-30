@@ -200,11 +200,25 @@ def build_torso(mats, root):
     for sx in (-1, 1):
         mb.add(prim_sphere(0.05, 0.05, 0.04, 5, 3), 'iron', M((sx * 0.30, -0.47, 0.83)), smooth=60)
     # corrente na cintura e ossos/crânios pendurados
-    chain(mb, [(-0.42, -0.62, 0.78), (-0.50, -0.76, 0.78), (-0.56, -0.90, 0.72)], link=0.075)
+    chain(mb, [(-0.42, -0.62, 0.78), (-0.50, -0.76, 0.78), (-0.56, -0.90, 0.72)], link=0.11)
     mb.add(prim_sphere(0.10, 0.11, 0.09, 6, 4), 'bone', M((-0.58, -1.02, 0.70), (0, 0, 15)), smooth=60)
-    chain(mb, [(0.52, -0.62, 0.76), (0.58, -0.76, 0.72)], link=0.07)
+    chain(mb, [(0.52, -0.62, 0.76), (0.58, -0.76, 0.72)], link=0.10)
     mb.add(prim_box(0.16, 0.17, 0.14), 'leather', M((0.60, -0.90, 0.68), (0, 0, -8)), bevel=0.03, smooth=30)
 
+    # colar de presas/dentes de osso no pescoço e crânios extras no cinto
+    for k in range(9):
+        a = math.radians(-80 + k * 20)
+        px, pz = math.sin(a) * 0.46, 0.30 + math.cos(a) * 0.20
+        py = 0.86 - 0.10 * math.cos(a)
+        mb.add(prim_cone(0.045, 0.17, 4), 'bone', M((px, py, pz), (180 - 12, 0, 0)), smooth=40)
+    mb.add(prim_rings(limb_rings([(math.sin(math.radians(-80 + k * 20)) * 0.44, 0.86 - 0.08 * math.cos(math.radians(-80 + k * 20)),
+                                   0.29 + math.cos(math.radians(-80 + k * 20)) * 0.19) for k in range(9)], [0.022] * 9, 5),
+                      cap0=True, cap1=True), 'leather', smooth=40)
+    for sx in (-1, 1):
+        mb.add(prim_sphere(0.075, 0.08, 0.065, 6, 3), 'bone', M((sx * 0.62, -0.50, 0.74), (0, sx * 20, 0)), smooth=60)
+        mb.add(prim_box(0.05, 0.05, 0.04), 'mouth', M((sx * 0.62 - sx * 0.02, -0.49, 0.80)))
+    # anel de ferro pendurado + corda enrolada no cinto (costas)
+    mb.add(prim_cyl(0.16, 0.16, 0.10, 10, base=False), 'hide', M((0.35, -0.50, -0.60), (90, 0, 0)), smooth=30)
     # saiote de pele (barra irregular) e tanga (frente/trás) em cor de time
     kr = []
     for (y, rx, rz, jag) in ((-0.56, 0.72, 0.62, 0.0), (-0.74, 0.80, 0.68, 0.0), (-0.88, 0.82, 0.70, 0.10)):

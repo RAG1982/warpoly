@@ -43,6 +43,13 @@ export function createVfxEvents(gm, particleSystem) {
     particleSystem.spawnHitSparks(toVec(pos));
   });
 
+  // --- F4-05: explosão de sapador — clarão, anel, fagulhas, fumaça e tremor curto da câmera ---
+  on(EVT.EXPLOSION, ({ pos, radius }) => {
+    particleSystem.spawnExplosion(toVec(pos), radius);
+    const sm = gm.sceneManager;
+    if (sm && sm.shake) sm.shake(pos);
+  });
+
   // --- Coleta / renda passiva: texto só se local ou já explorado pela névoa (worker); renda
   // passiva sempre mostrava (sem condição na simulação original). ---
   on(EVT.RESOURCE_GATHERED, ({ type, amount, pos, ownerId, passive }) => {

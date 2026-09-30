@@ -88,13 +88,13 @@ describe('dados do cerco (F4-02)', () => {
   });
 
   it('Oficinas: papel workshop, requisitos, treino e listas das facções', () => {
-    for (const [type, barracks, unit] of [['workshop', 'barracks', 'ballista'], ['orc_workshop', 'orc_barracks', 'catapult']]) {
+    for (const [type, barracks, unit, suicide] of [['workshop', 'barracks', 'ballista', 'sapper'], ['orc_workshop', 'orc_barracks', 'catapult', 'arsonist']]) {
       const d = getBuildingDef(type);
       expect(d.role).toBe('workshop');
       expect(d.hp).toBe(700);
       expect(d.cost).toEqual({ gold: 180, wood: 100, stone: 40 });
       expect(d.requires).toEqual([barracks, { hq: 2 }]);
-      expect(d.trains).toEqual([unit]);
+      expect(d.trains).toEqual([unit, suicide]); // F4-05: sapadores também saem da Oficina
     }
     expect(FACTIONS.human.buildList.indexOf('workshop')).toBeGreaterThan(FACTIONS.human.buildList.indexOf('stable'));
     expect(FACTIONS.orc.buildList).toContain('orc_workshop');

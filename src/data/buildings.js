@@ -190,10 +190,10 @@ export const BUILDINGS = {
     tower: null,
     passiveIncome: null,
     requires: ['barracks', { hq: 2 }],
-    trains: ['ballista'],
+    trains: ['ballista', 'sapper'],
     dropoff: [],
     icon: '/icoForja.svg',
-    description: 'Constrói balistas de cerco (requer Centro nível 2)'
+    description: 'Constrói balistas de cerco e sapadores (requer Centro nível 2)'
   },
   watchtower: {
     type: 'watchtower',
@@ -397,10 +397,10 @@ export const BUILDINGS = {
     tower: null,
     passiveIncome: null,
     requires: ['orc_barracks', { hq: 2 }],
-    trains: ['catapult'],
+    trains: ['catapult', 'arsonist'],
     dropoff: [],
     icon: '/icoForja.svg',
-    description: 'Constrói catapultas de cerco (requer Centro nível 2)'
+    description: 'Constrói catapultas de cerco e incendiários (requer Centro nível 2)'
   },
   orc_watchtower: {
     type: 'orc_watchtower',

@@ -16,6 +16,8 @@ import {
   createOgreDen,
   createBallista,
   createCatapult,
+  createSapper,
+  createArsonist,
   createWorkshop,
   createOrcWorkshop,
   createCastle,
@@ -128,6 +130,30 @@ const MODEL_CATALOG = [
     create: createCatapult,
     description: 'Cerco orc (F4-02): chassi de troncos sobre duas rodas, braço de arremesso com concha e pedra, peles e estandarte vermelho. Modelo procedural provisório; o final do Blender vem na F7.',
     notes: 'Nó SiegeArm arma e lança na animação fight; WheelL/WheelR giram ao andar.'
+  },
+  {
+    id: 'sapper',
+    name: 'Sapadores de Pólvora (Sapper)',
+    category: 'units',
+    faction: 'human',
+    type: 'sapper',
+    icon: '💣',
+    sourceFile: 'src/models/units/SapperModel.js',
+    create: createSapper,
+    description: 'Unidade suicida humana (F4-05): humanoide com barril de pólvora nas costas e pavio aceso. Modelo procedural provisório; o final do Blender vem na F7.',
+    notes: 'Nó Fuse (pavio) pisca nas animações walk/fight; fight = corrida acelerada.'
+  },
+  {
+    id: 'arsonist',
+    name: 'Incendiários (Arsonist)',
+    category: 'units',
+    faction: 'orc',
+    type: 'arsonist',
+    icon: '🔥',
+    sourceFile: 'src/models/units/ArsonistModel.js',
+    create: createArsonist,
+    description: 'Unidade suicida orc (F4-05): orc com botijas de óleo nas costas e pavio aceso. Modelo procedural provisório; o final do Blender vem na F7.',
+    notes: 'Nó Fuse (pavio) pisca nas animações walk/fight; fight = corrida acelerada.'
   },
   {
     id: 'cavalier_glb',

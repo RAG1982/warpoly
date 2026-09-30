@@ -25,6 +25,8 @@ export class AssetPreloader {
       { name: 'Cavaleiro Montado', fn: () => ModelFactory.createCavalier() },
       { name: 'Balista de Cerco', fn: () => ModelFactory.createBallista() },
       { name: 'Catapulta da Horda', fn: () => ModelFactory.createCatapult() },
+      { name: 'Sapador de Pólvora', fn: () => ModelFactory.createSapper() },
+      { name: 'Incendiário da Horda', fn: () => ModelFactory.createArsonist() },
       { name: 'Arqueiro de Precisão', fn: () => ModelFactory.createArcher() },
       { name: 'Saqueador Bandido', fn: () => ModelFactory.createBandit() },
       { name: 'Peon Trabalhador da Horda', fn: () => ModelFactory.createPeon() },

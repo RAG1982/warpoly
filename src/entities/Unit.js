@@ -138,6 +138,8 @@ export class Unit {
     this.splashRadius = def.splashRadius || 0;
     /** F4-02: projétil balístico (`bolt`/`boulder`): não persegue, mira a posição prevista. */
     this.isBallistic = def.projectile === 'bolt' || def.projectile === 'boulder';
+    /** F4-05: unidade suicida (Sapadores/Incendiários) — detona no alcance (`_detonate`). */
+    this.suicide = !!def.suicide;
     /** F4-02: velocidade estimada (u/s) medida pelo `GameManager` a cada tick — mira preditiva do cerco. */
     this.velX = 0;
     this.velZ = 0;
@@ -720,7 +722,8 @@ export class Unit {
     if (attacker && !attacker.isDead && attacker.hp > 0 && this.isHostileTo(attacker)) {
       if (this.isCombatUnit()) {
         const isTargetBuilding = this.attackTarget && (this.attackTarget.fullMesh || this.attackTarget.isConstructed !== undefined);
-        if (this.state !== 'attacking' || isTargetBuilding) {
+        // F4-05: suicida já em ataque mantém o alvo (não troca a construção por quem o acertou)
+        if (this.suicide ? this.state !== 'attacking' : (this.state !== 'attacking' || isTargetBuilding)) {
           const savedObjective = isTargetBuilding ? this.attackTarget : this.objectiveTarget;
           this.orderAttack(attacker, !!savedObjective);
           if (savedObjective) {
@@ -736,7 +739,7 @@ export class Unit {
         const pos = this.mesh.position;
         const self = this;
         gm.unitGrid.queryRadius(pos.x, pos.z, this.helpRadius, u =>
-          !u.isDead && self.isAlliedWith(u) && u.isCombatUnit && u.isCombatUnit(),
+          !u.isDead && self.isAlliedWith(u) && u.isCombatUnit && u.isCombatUnit() && !u.suicide,
         _helpBuf);
         for (let i = 0; i < _helpBuf.length; i++) {
           const u = _helpBuf[i];
@@ -1633,6 +1636,12 @@ export class Unit {
       return;
     }
 
+    // 4a. F4-05: unidade suicida detona ao entrar em alcance (sem animação de golpe)
+    if (this.suicide) {
+      this._detonate(gameManager || this.gameManager, allUnits);
+      return;
+    }
+
     // 4. In range: Face target, drive attack animation synchronized with cooldown
     const dirX = targetPos.x - this.mesh.position.x;
     const dirZ = targetPos.z - this.mesh.position.z;
@@ -1704,6 +1713,40 @@ export class Unit {
   }
 
   /**
+   * F4-05: detonação da unidade suicida. `EVT.EXPLOSION`, dano em área em TODAS as entidades hostis
+   * no `splashRadius` (queda 100 % → 40 %, 1 RNG por entidade em ordem de id) e morte sem cadáver.
+   * O kill das vítimas vai ao dono (`takeDamage(attacker = this)`); a própria morte conta como
+   * baixa (`UNIT_DIED` → `MatchStats.unitsLost`) mas não dá kill a ninguém.
+   */
+  _detonate(gm, allUnits) {
+    if (this.isDead || this.isDying) return;
+    // A explosão é centrada no alvo (o sapador para a `attackRange` + raio do alvo do centro dele) e a
+    // distância é medida até a superfície: atinge o alvo inteiro e os vizinhos encostados (muralhas).
+    const pos = this.attackTarget && this.attackTarget.mesh ? this.attackTarget.mesh.position : this.mesh.position;
+    const gmEvents = gm && gm.events;
+    if (gmEvents) gmEvents.emit(EVT.EXPLOSION, { pos: posOf(pos), radius: this.splashRadius, ownerId: this.ownerId });
+    if (gm && gm.unitGrid && gm.blockerGrid) {
+      applySplashDamage(gm, this, this.damage, pos, this.splashRadius, allUnits, 0.4, true);
+    }
+    this.lastAttackerOwnerId = null;
+    this.die();
+    this.deathDuration = 0; // sem cadáver: removida no próximo tick
+    if (this.mesh) this.mesh.visible = false;
+  }
+
+  /** F4-05: construção/muralha hostil mais próxima em `maxDist` (alvo padrão dos sapadores). */
+  _nearestStructure(maxDist) {
+    const gm = this.gameManager;
+    if (!gm || !gm.blockerGrid) return null;
+    const pos = this.mesh.position;
+    const self = this;
+    gm.blockerGrid.queryRadius(pos.x, pos.z, maxDist, b =>
+      b instanceof Building && !b.isDead && b.hp > 0 && self.isHostileTo(b),
+    _buildingBuf);
+    return pickNearestInBuf(_buildingBuf, pos.x, pos.z);
+  }
+
+  /**
    * F4-02: `e` pode ser escolhido numa auto-aquisição? Só o cerco filtra: alvo aéreo nunca
    * (F4-06 usa `layer === 'air'`) e alvo a menos de `minAttackRange` (distância de borda) não.
    */
@@ -1724,6 +1767,7 @@ export class Unit {
    * `allUnits` por compatibilidade com os chamadores existentes (não é mais usado).
    */
   findNearestHostileCombatUnit(allUnits, maxDist = 14) {
+    if (this.suicide && !this._isHolding) return null; // F4-05: não auto-adquire unidades
     const gm = this.gameManager;
     if (!gm || !gm.unitGrid) return null;
     const pos = this.mesh.position;
@@ -1735,6 +1779,7 @@ export class Unit {
   }
 
   findNearestHostileUnit(allUnits, maxDist = 14) {
+    if (this.suicide && !this._isHolding) return null; // F4-05
     const combatUnit = this.findNearestHostileCombatUnit(allUnits, maxDist);
     if (combatUnit) return combatUnit;
 
@@ -1754,6 +1799,11 @@ export class Unit {
    * já que o `SpatialGrid` devolve os candidatos ordenados por id).
    */
   findNearestHostile(allUnits, buildings, maxDist = 15) {
+    // F4-05: suicidas preferem a construção/muralha mais próxima; unidades só sob `hold`.
+    if (this.suicide) {
+      const s = this._nearestStructure(maxDist);
+      if (s || !this._isHolding) return s;
+    }
     // 1. High priority: hostile units (combat troops > workers)
     const hostileUnit = this.findNearestHostileUnit(allUnits, maxDist);
     if (hostileUnit) {

@@ -198,6 +198,22 @@ export class AIMilitaryManager {
       }
     }
 
+    // F4-05: sapadores na Oficina (até 3 vivos) quando o inimigo tem ≥ 4 muralhas ou Centro nível ≥ 2;
+    // saem no próximo ATTACK junto do exército (mais rápidos que a infantaria: chegam à frente).
+    if (workshop && recruitType !== this.director.cavalryType && recruitType !== this.director.siegeType &&
+        (!workshop.queue || workshop.queue.length < 1) && this.director.suicideType) {
+      let suicideCount = 0;
+      for (let i = 0; i < lenE; i++) {
+        if (!enemies[i].isDead && enemies[i].type === this.director.suicideType) suicideCount++;
+      }
+      if (suicideCount < 3 && meleeCount + rangedCount >= 3 && this._enemyFortified() &&
+          this.director.canAfford(this.director.costs.suicide) &&
+          missingUnitRequirements(this.director.playerId, this.director.suicideType, this.gm).length === 0) {
+        recruitType = this.director.suicideType;
+        trainAt = workshop;
+      }
+    }
+
     // F2-02: TRAIN + RALLY via comandos (a IA emite com o próprio playerId).
     const playerId = this.director.playerId;
     this.gm.issue({ type: CMD.TRAIN, playerId, buildingId: trainAt.id, unitType: recruitType });
@@ -208,6 +224,21 @@ export class AIMilitaryManager {
       x: this.assemblyRallyPoint.x,
       z: this.assemblyRallyPoint.z
     });
+  }
+
+  /** F4-05: algum inimigo hostil tem ≥ 4 muralhas ou um Centro nível ≥ 2? */
+  _enemyFortified() {
+    const buildings = this.gm.buildings;
+    const myId = this.director.playerId;
+    let walls = 0;
+    for (let i = 0; i < buildings.length; i++) {
+      const b = buildings[i];
+      if (b.isDead || b.ownerId === NEUTRAL_HOSTILE_ID || !this.gm.isHostile(myId, b.ownerId)) continue;
+      const role = getBuildingDef(b.type).role;
+      if (role === 'wall') walls++;
+      else if (role === 'hq' && (b.tier || 1) >= 2) return true;
+    }
+    return walls >= 4;
   }
 
   /**

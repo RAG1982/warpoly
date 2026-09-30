@@ -28,6 +28,9 @@
  * - splashRadius    F4-02: raio de dano em área no impacto (0/ausente = sem). 100% no centro → 50%
  *   na borda; só entidades hostis ao dono (sem fogo amigo). Projéteis `bolt`/`boulder` são
  *   balísticos: não perseguem o alvo, miram a posição prevista (`src/entities/BallisticProjectile.js`).
+ * - suicide        F4-05: unidade suicida (Sapadores/Incendiários). Ao entrar no `attackRange` do alvo
+ *   detona (`Unit._detonate`): dano `damage` em área (`splashRadius`, queda 100% → 40% na borda, só
+ *   hostis), morre sem cadáver. Não auto-adquire unidades (só construções/muralhas; em `hold` sim).
  */
 
 // Raios de varredura compartilhados (antes hardcoded em Unit.js: 11/14, 13/15, 16, 14).
@@ -209,6 +212,45 @@ export const UNITS = {
     icon: '/icoArco.png',
     description: 'Cerco: lança pedras em arco alto com dano em área (alcance mínimo 4)',
     isWorker: false, isRanged: true, isCombat: true, projectile: 'boulder'
+  },
+
+  // F4-05: unidades suicidas (Oficina, Centro nível 2). Detonam ao chegar ao alvo: `damage` siege em
+  // área (`splashRadius`, 100% → 40% na borda), ×1,5 contra construções e ×0,5 contra unidades.
+  sapper: {
+    type: 'sapper',
+    name: 'Sapadores de Pólvora',
+    entityName: 'Sapadores de Pólvora',
+    faction: 'human',
+    requires: [{ hq: 2 }],
+    hp: 60, speed: 5.0, damage: { basic: 400, piercing: 0, type: 'siege' }, attackRange: 1.2, attackCooldown: 0.1, armor: 0,
+    splashRadius: 2.2, suicide: true,
+    collisionRadius: 0.7,
+    visionRadius: 16,
+    ...MELEE_SCAN,
+    healthBarHeight: 3.4,
+    cost: { gold: 70, wood: 25, stone: 0 },
+    trainTime: 10,
+    icon: '/icoEspada.png', // provisório
+    description: 'Suicida: corre até uma construção e explode em área (forte contra muralhas)',
+    isWorker: false, isRanged: false, isCombat: true, projectile: null
+  },
+  arsonist: {
+    type: 'arsonist',
+    name: 'Incendiários',
+    entityName: 'Incendiários',
+    faction: 'orc',
+    requires: [{ hq: 2 }],
+    hp: 60, speed: 5.0, damage: { basic: 400, piercing: 0, type: 'siege' }, attackRange: 1.2, attackCooldown: 0.1, armor: 0,
+    splashRadius: 2.2, suicide: true,
+    collisionRadius: 0.7,
+    visionRadius: 16,
+    ...MELEE_SCAN,
+    healthBarHeight: 3.4,
+    cost: { gold: 70, wood: 25, stone: 0 },
+    trainTime: 10,
+    icon: '/icoEspada.png', // provisório
+    description: 'Suicida: corre até uma construção e explode em área (forte contra muralhas)',
+    isWorker: false, isRanged: false, isCombat: true, projectile: null
   },
 
   // --- Classe avançada do atirador (F3-07): só via pesquisa `ranged_class`; modelo 3D do

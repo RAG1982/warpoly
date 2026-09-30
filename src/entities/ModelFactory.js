@@ -25,6 +25,8 @@ import {
   createCavalier,
   createBallista,
   createCatapult,
+  createSapper,
+  createArsonist,
   createWorkshop,
   createOrcWorkshop,
   createTree,
@@ -178,6 +180,8 @@ export class ModelFactory {
     ud.siegeArm = clone.getObjectByName('SiegeArm') || ud.siegeArm;
     ud.wheelL = clone.getObjectByName('WheelL') || ud.wheelL;
     ud.wheelR = clone.getObjectByName('WheelR') || ud.wheelR;
+    // F4-05: pavio dos sapadores (pisca na animação)
+    ud.fuse = clone.getObjectByName('Fuse') || ud.fuse;
 
     // Archer dynamic bow string closure rebinding
     const sTop = clone.getObjectByName('BowStringTop');
@@ -509,6 +513,16 @@ export class ModelFactory {
     return this._glbOr('ogre', () => this.getOrCreateModel('ogre', createOgre, 'ogre'));
   }
 
+  /** F4-05: Sapadores de Pólvora (humano, procedural). */
+  static createSapper() {
+    return this.getOrCreateModel('sapper', createSapper, 'sapper');
+  }
+
+  /** F4-05: Incendiários (orc, procedural). */
+  static createArsonist() {
+    return this.getOrCreateModel('arsonist', createArsonist, 'arsonist');
+  }
+
   static createUnit(type) {
     switch (type) {
       case 'villager': return this.createVillager();
@@ -522,6 +536,8 @@ export class ModelFactory {
       case 'cavalier': return this.createCavalier();
       case 'ballista': return this.createBallista();
       case 'catapult': return this.createCatapult();
+      case 'sapper': return this.createSapper();
+      case 'arsonist': return this.createArsonist();
       default: return this.createVillager();
     }
   }

@@ -40,7 +40,8 @@ export const ANIMATED_NODE_NAMES = [
   'ToolGroup', 'Axe', 'Pickaxe', 'Hammer', 'Pack', 'WoodBundle', 'GoldSack', 'Plume', 'DrawnArrow',
   'WeaponL', 'WeaponR', 'DrawnAxe', 'Horn', 'Mohawk',
   'HorseLegFL', 'HorseLegFR', 'HorseLegBL', 'HorseLegBR',
-  'SiegeArm', 'WheelL', 'WheelR'
+  'SiegeArm', 'WheelL', 'WheelR',
+  'Fuse'
 ];
 
 /** Nunca mesclar: reposicionadas por `updateBowString` a cada quadro. */

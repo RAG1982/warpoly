@@ -5,7 +5,10 @@ Cada spec tem na 3ª linha `> **Status: ...**`. Regras comuns a todas: [`_COMUM.
 ## ⏳ A FAZER
 | Spec | Onde rodar | Executor | Observação |
 |---|---|---|---|
-| [F3-07-pesquisas-niveis.md](F3-07-pesquisas-niveis.md) | **local** | sonnet | Pesquisas em 2 níveis (Ferraria/Serraria), classe avançada do atirador. Próxima tarefa local. |
+| [F3-08-muralhas.md](F3-08-muralhas.md) | local | sonnet | Muralhas em arrasto (porta 5203). Próxima. |
+| [F3-05-reparo-cancelamento.md](F3-05-reparo-cancelamento.md) | local | sonnet | Reparo/cancelar obra (5204), após F3-08 |
+| [F3-09-vitoria-estatisticas.md](F3-09-vitoria-estatisticas.md) | local | sonnet | Modos de vitória + MatchStats (5205) |
+| [F3-10-neutros-critters.md](F3-10-neutros-critters.md) | local | sonnet | Bandoleiros/critters (5206), após F3-09 |
 | [F3-01-controles-rts.md](F3-01-controles-rts.md) | nuvem (item 4) | sonnet | Controles RTS + NEW-16 |
 | [F6-08-opcoes.md](F6-08-opcoes.md) | nuvem (item 5) | sonnet | Depois da F3-01 |
 | [NEW-19-ruinas.md](NEW-19-ruinas.md) | nuvem (item 6) | sonnet | Ruínas/clareiras, só render |
@@ -13,12 +16,13 @@ Cada spec tem na 3ª linha `> **Status: ...**`. Regras comuns a todas: [`_COMUM.
 ## ⏸ ADIADA
 | Spec | Motivo |
 |---|---|
-| [F7-00d-lacaio-blender.md](F7-00d-lacaio-blender.md) | Modelagem 3D só com **Opus**, e só depois do código pronto |
+| [F7-00d-lacaio-blender.md](F7-00d-lacaio-blender.md) | Modelagem 3D por **Sonnet 5.5**, e só depois do código pronto |
 | [NEW-20-teste-intermitente.md](NEW-20-teste-intermitente.md) | Adiada pelo dono (executor sem permissão para `npx vitest`) |
 
 ## ✅ PRONTAS (mescladas no master)
 | Spec | Commit |
 |---|---|
+| [F3-07-pesquisas-niveis.md](F3-07-pesquisas-niveis.md) | 15f7969 |
 | [F0-08-anti-swiftshader.md](F0-08-anti-swiftshader.md) | d17aaf5 |
 | [F1-03-unidades-por-osso.md](F1-03-unidades-por-osso.md) | 3fd7fc2 (parcial → F1-03b) |
 | [F1-03b-unidades-skinned.md](F1-03b-unidades-skinned.md) | 38c013b (meta 50 FPS → NEW-15) |

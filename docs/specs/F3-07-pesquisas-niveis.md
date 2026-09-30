@@ -1,6 +1,6 @@
 # F3-07 · Pesquisas em níveis (Ferraria/Forja e Serraria) e classe avançada do atirador
 
-> **Status: ⏳ A FAZER** (spec pronta 2026-09-30; não disparada).
+> **Status: ✅ PRONTA (mesclada)**
 > Leia antes: `CLAUDE.md`, `docs/specs/_COMUM.md`, `docs/08_GAME_DESIGN.md` §5.1, §6, §7, `docs/07_DECISOES.md` (D2 nomes próprios, D7).
 > Executor: **sonnet**, worktree, porta do vite **5202**. Depende de F3-03 (dano básico/perfurante) e F3-06 (requisitos `{hq:N}`) — ambas já no master.
 

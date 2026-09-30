@@ -3,7 +3,7 @@
  *
  * `stateChecksum(gm)`: hash FNV-1a de 32 bits sobre o estado de jogo relevante à simulação, em
  * ordem de `id` (arrays já mantidos em ordem de criação — ver GameManager): unidades
- * (`id, type, ownerId, x, z` arredondados a 1e-3, `hp`, `state`), construções (`id, type,
+ * (`id, type, ownerId, x, z` arredondados a 1e-3, `hp`, `state`, e — F4-03 — `mana` e `statuses`), construções (`id, type,
  * ownerId, hp, buildProgress, tamanho da fila`), recursos de cada jogador e `currentTick`.
  *
  * Não inclui nada puramente visual (rotação de malha, partículas, som, animação): duas
@@ -42,6 +42,12 @@ export function stateChecksum(gm) {
       h,
       `u:${u.id}:${u.type}:${u.ownerId}:${round3(p.x)}:${round3(p.z)}:${round3(u.hp)}:${u.state}|`
     );
+    // F4-03: mana e status (só unidades que os têm, para não custar string por unidade comum).
+    if (u.maxMana > 0) h = fnv1aStep(h, `m:${round3(u.mana)}|`);
+    const st = u.statuses;
+    for (let k = 0; k < st.length; k++) {
+      if (st[k].id !== null) h = fnv1aStep(h, `s:${st[k].id}:${round3(st[k].remaining)}|`);
+    }
   }
 
   const buildings = gm.buildings;

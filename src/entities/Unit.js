@@ -12,6 +12,8 @@ import { SIM_DT, lerpAngle } from '../sim/constants.js';
 import { CMD } from '../sim/commands.js';
 import { EVT } from '../sim/events.js';
 import { REPAIR_INTERVAL, MAX_WORKERS_PER_BUILDING } from '../sim/repair.js';
+import { createStatusSlots, createMods, tickStatuses, clearStatuses } from '../sim/statuses.js';
+import { resolveAbility, canCast, needsEntityTarget, targetProblem, applyAbility, emitCastStart, findAutocastTarget } from '../sim/abilities.js';
 
 /** Vector3 → objeto plano `{x,y,z}` (payload de evento: nunca referências a objetos three.js). */
 function posOf(v) {
@@ -96,6 +98,8 @@ const hpBgMat = new THREE.MeshBasicMaterial({
 const hpGreenMat = new THREE.MeshBasicMaterial({ color: 0x22c55e, depthTest: false, depthWrite: false, side: THREE.DoubleSide });
 const hpYellowMat = new THREE.MeshBasicMaterial({ color: 0xfacc15, depthTest: false, depthWrite: false, side: THREE.DoubleSide });
 const hpRedMat = new THREE.MeshBasicMaterial({ color: 0xef4444, depthTest: false, depthWrite: false, side: THREE.DoubleSide });
+// F4-03: barra de mana azul (mesma geometria/fundo da barra de vida; só o material do preenchimento é novo)
+const manaBlueMat = new THREE.MeshBasicMaterial({ color: 0x3b82f6, depthTest: false, depthWrite: false, side: THREE.DoubleSide });
 
 export class Unit {
   /**
@@ -128,6 +132,22 @@ export class Unit {
     /** F3-07: bônus de visão (pesquisa `sight`) somado ao raio da névoa; `regen` = PV/s. */
     this.sightBonus = 0;
     this.regen = 0;
+
+    // F4-03: mana, habilidades, recargas, auto-cast e status (só muda em `simStep`). `statuses` é um
+    // array fixo de slots (sem alocação por passo); `mods` é o agregado cacheado (ver sim/statuses.js).
+    this.maxMana = 0;
+    this.mana = 0;
+    this.manaRegen = 1;
+    this.abilities = [];
+    this.cooldowns = {};
+    this.autocast = {};
+    this.statuses = createStatusSlots();
+    this.mods = createMods();
+    /** F4-03: segundos de vida de unidades invocadas (0 = permanente). */
+    this.lifetime = 0;
+    this._cast = null;
+    this._manaFill = -1;
+    this._effDamage = { basic: 0, piercing: 0, type: 'normal' };
 
     // Raios de varredura / flags de papel (src/data/units.js)
     const def = getUnitDef(type);
@@ -213,6 +233,7 @@ export class Unit {
     // Selection ring & 3D Health Bar
     this.createSelectionRing();
     this.createHealthBar();
+    if (def.maxMana > 0 || (def.abilities && def.abilities.length > 0)) this.setupMana(def);
 
     this.scene.add(this.mesh);
   }
@@ -251,6 +272,22 @@ export class Unit {
   /** F3-03: dano total legado (`basic + piercing`), derivado — leitura por AI/HUD; nunca escrito. */
   get attack() {
     return this.damage.basic + this.damage.piercing;
+  }
+
+  /** F4-03: cooldown de ataque efetivo (status `attackSpeedMul` divide o cooldown). */
+  get effAttackCooldown() {
+    return this.attackCooldown / this.mods.attackSpeedMul;
+  }
+
+  /** F4-03: dano efetivo (status `damageMul`); sem status devolve `this.damage` (sem alocar). */
+  getEffDamage() {
+    const m = this.mods.damageMul;
+    if (m === 1) return this.damage;
+    const d = this._effDamage;
+    d.basic = this.damage.basic * m;
+    d.piercing = this.damage.piercing * m;
+    d.type = this.damage.type;
+    return d;
   }
 
   isCombatUnit() {
@@ -298,6 +335,51 @@ export class Unit {
     this.updateHealthBar();
   }
 
+  /**
+   * F4-03: configura mana/habilidades (a partir de `src/data/units.js` no construtor; também
+   * usável via console/testes). `cfg`: `{maxMana, startMana?, manaRegen?, abilities?}`.
+   * Reposição completa: zera recargas, auto-cast e status (idempotente; seguro ao reciclar).
+   */
+  setupMana(cfg) {
+    this.maxMana = cfg.maxMana || 0;
+    this.mana = Math.min(this.maxMana, cfg.startMana !== undefined ? cfg.startMana : this.maxMana);
+    this.manaRegen = cfg.manaRegen !== undefined ? cfg.manaRegen : 1;
+    this.abilities = cfg.abilities ? cfg.abilities.slice(0, 4) : [];
+    this.cooldowns = {};
+    this.autocast = {};
+    this._cast = null;
+    clearStatuses(this);
+    if (this.maxMana > 0) this._ensureManaBar();
+  }
+
+  /** F4-03: cria a barra de mana (filhos do `hpGroup`, geometria e fundo compartilhados). */
+  _ensureManaBar() {
+    if (this.manaFillMesh || !this.hpGroup) return;
+    this.manaBgMesh = new THREE.Mesh(hpBgGeo, hpBgMat);
+    this.manaBgMesh.name = 'ManaBg';
+    this.manaBgMesh.position.set(0, -0.26, 0);
+    this.manaBgMesh.renderOrder = 1100;
+    this.hpGroup.add(this.manaBgMesh);
+    this.manaFillMesh = new THREE.Mesh(hpFillGeo, manaBlueMat);
+    this.manaFillMesh.name = 'ManaFill';
+    this.manaFillMesh.position.set(-0.64, -0.26, 0.005);
+    this.manaFillMesh.renderOrder = 1101;
+    this.hpGroup.add(this.manaFillMesh);
+    this.updateManaBar();
+  }
+
+  updateManaBar() {
+    if (!this.manaFillMesh) return;
+    const pct = this.maxMana > 0 ? Math.max(0, Math.min(1, this.mana / this.maxMana)) : 0;
+    this.manaFillMesh.scale.x = Math.max(0.001, pct);
+    this._manaFill = Math.round(pct * 200);
+  }
+
+  /** F4-03: barras (vida/mana) visíveis? Selecionada, ferida ou com mana incompleta. */
+  _barsVisible() {
+    return !!this.isSelected || this.hp < this.maxHp || (this.maxMana > 0 && this.mana < this.maxMana);
+  }
+
   getHealthBarHeight() {
     return getUnitDef(this.type).healthBarHeight;
   }
@@ -318,7 +400,7 @@ export class Unit {
     }
     this.selectionRing.visible = selected;
     if (this.hpGroup) {
-      this.hpGroup.visible = (this.mesh ? this.mesh.visible : true) && (selected || this.hp < this.maxHp);
+      this.hpGroup.visible = (this.mesh ? this.mesh.visible : true) && (selected || this._barsVisible());
     }
   }
 
@@ -332,6 +414,7 @@ export class Unit {
    * (ver `_giveUpAttack`).
    */
   _clearOrderModes() {
+    this._cast = null;
     this._exitMine();
     this._isHolding = false;
     this._amDest = null;
@@ -383,6 +466,9 @@ export class Unit {
         break;
       case CMD.REPAIR:
         this.orderRepair(order.target);
+        break;
+      case CMD.CAST:
+        this.orderCast(order);
         break;
       default:
         break;
@@ -571,6 +657,7 @@ export class Unit {
 
   stop() {
     if (this.isDead || this.isDying || this.state === 'dying') return;
+    this._cast = null;
     this._exitMine();
     this.state = 'idle';
     this.hasTargetPos = false;
@@ -597,6 +684,7 @@ export class Unit {
    */
   hold() {
     if (this.isDead || this.isDying || this.state === 'dying') return;
+    this._cast = null;
     this._exitMine();
     this.state = 'holding';
     this._isHolding = true;
@@ -684,6 +772,7 @@ export class Unit {
    */
   takeDamage(amount, attacker = null, allUnits = []) {
     if (this.isDead || this.isDying) return;
+    if (this.mods.invulnerable) return; // F4-03: status invulnerable zera o dano
     // F3-09: atribuição de kills (lida em die()).
     if (attacker && typeof attacker.ownerId === 'number') this.lastAttackerOwnerId = attacker.ownerId;
 
@@ -691,7 +780,7 @@ export class Unit {
     this.hp -= effectiveDamage;
     this.updateHealthBar();
     if (this.hpGroup) {
-      this.hpGroup.visible = (this.mesh ? this.mesh.visible : true) && (this.isSelected || this.hp < this.maxHp);
+      this.hpGroup.visible = (this.mesh ? this.mesh.visible : true) && this._barsVisible();
     }
 
     const gmEvents = this.gameManager && this.gameManager.events;
@@ -718,7 +807,7 @@ export class Unit {
 
     // Retaliation & Call for help: combat troops strike back when attacked
     if (attacker && !attacker.isDead && attacker.hp > 0 && this.isHostileTo(attacker)) {
-      if (this.isCombatUnit()) {
+      if (this.isCombatUnit() && this.state !== 'casting') {
         const isTargetBuilding = this.attackTarget && (this.attackTarget.fullMesh || this.attackTarget.isConstructed !== undefined);
         if (this.state !== 'attacking' || isTargetBuilding) {
           const savedObjective = isTargetBuilding ? this.attackTarget : this.objectiveTarget;
@@ -758,6 +847,7 @@ export class Unit {
     this._exitMine();
     this.isDying = true;
     this.isDead = true;
+    this._cast = null;
     this.canRemove = false;
     this.state = 'dying';
     this.deathTimer = 0;
@@ -916,7 +1006,7 @@ export class Unit {
       }
     }
 
-    this.stepTowards(subTargetX, subTargetZ, this.speed * delta);
+    this.stepTowards(subTargetX, subTargetZ, this.speed * this.mods.speedMul * delta);
 
     // Walk animation (troca de estado só; a reprodução em si roda em renderUpdate — F1-09)
     this.hasFiredThisAttack = false;
@@ -962,6 +1052,9 @@ export class Unit {
     this.attackTimer += delta;
     this.actionTimer += delta;
 
+    this._updateAbilityTimers(delta, gameManager);
+    if (this.isDead) return;
+
     // F3-10: guarda neutro com leash (bandoleiros) — volta à origem se se afastar demais.
     if (this.homePos) this._updateGuardLeash(delta);
 
@@ -1002,6 +1095,133 @@ export class Unit {
       case 'patrolling':
         this.updatePatrolling(delta, gameManager, allUnits, buildings);
         break;
+      case 'casting':
+        this.updateCasting(delta, gameManager);
+        break;
+    }
+  }
+
+  // --- F4-03: mana, recargas, status, auto-cast e lançamento de habilidades ---
+
+  /** Regenera mana, avança recargas/status/vida de invocação e roda o auto-cast (1 s, escalonado por id). */
+  _updateAbilityTimers(delta, gm) {
+    if (this.maxMana > 0 && this.mana < this.maxMana) {
+      this.mana = Math.min(this.maxMana, this.mana + this.manaRegen * delta);
+    }
+    for (const id in this.cooldowns) {
+      if (this.cooldowns[id] > 0) this.cooldowns[id] = Math.max(0, this.cooldowns[id] - delta);
+    }
+    tickStatuses(this, delta);
+    if (this.lifetime > 0) {
+      this.lifetime -= delta;
+      if (this.lifetime <= 0) {
+        this.lifetime = 0;
+        this.die();
+        return;
+      }
+    }
+    if (this.abilities.length > 0 && gm && (this.state === 'idle' || this.state === 'attackMoving') &&
+        (gm.currentTick + this.id) % 20 === 0) {
+      this._autocastScan(gm);
+    }
+  }
+
+  _autocastScan(gm) {
+    for (let i = 0; i < this.abilities.length; i++) {
+      const id = this.abilities[i];
+      if (!this.autocast[id]) continue;
+      const ab = resolveAbility(gm, id);
+      if (!ab || !ab.autocast || !canCast(gm, this, ab).ok) continue;
+      const found = findAutocastTarget(gm, this, ab);
+      if (!found) continue;
+      const resume = this.state === 'attackMoving' && this._amDest ? { x: this._amDest.x, z: this._amDest.z } : null;
+      this.orderCast({ type: CMD.CAST, abilityId: id, target: found.target, resume });
+      return;
+    }
+  }
+
+  /** Ordem `cast` (já validada por `CommandExecutor`): anda até o alcance, lança e volta a `idle`. */
+  orderCast(order) {
+    if (this.isDead || this.isDying || this.state === 'dying') return;
+    const gm = this.gameManager;
+    const ab = resolveAbility(gm, order.abilityId);
+    if (!ab || !this.abilities.includes(ab.id)) return;
+    this._clearOrderModes();
+    this.state = 'casting';
+    this.targetEntity = null;
+    this.gatherTarget = null;
+    this.buildTarget = null;
+    this.repairTarget = null;
+    this.attackTarget = null;
+    this.objectiveTarget = null;
+    this.hasTargetPos = false;
+    this.waypoints = null;
+    this.waypointIndex = 0;
+    this.pathDestination = null;
+    this.hasFiredThisAttack = false;
+    this._cast = { ab, target: order.target || null, x: order.x, z: order.z, phase: 0, timer: 0, resume: order.resume || null };
+  }
+
+  _endCast() {
+    const c = this._cast;
+    this._cast = null;
+    this.stop();
+    if (c && c.resume) this.orderAttackMove(c.resume.x, c.resume.z, this.gameManager);
+  }
+
+  updateCasting(delta, gm) {
+    const c = this._cast;
+    if (!c) { this.stop(); return; }
+    const ab = c.ab;
+    const t = c.target;
+    let tx;
+    let tz;
+    if (needsEntityTarget(ab)) {
+      if (targetProblem(this, ab, t)) { this._endCast(); return; }
+      tx = t.mesh.position.x;
+      tz = t.mesh.position.z;
+    } else if (ab.target === 'ground') {
+      tx = c.x;
+      tz = c.z;
+    } else {
+      tx = this.mesh.position.x;
+      tz = this.mesh.position.z;
+    }
+    const dist = Math.hypot(tx - this.mesh.position.x, tz - this.mesh.position.z) - ((t && t.collisionRadius) || 0);
+
+    if (c.phase === 0) {
+      if (dist > ab.range) {
+        this.moveTowards(tx, tz, delta, gm);
+        return;
+      }
+      const check = canCast(gm, this, ab);
+      if (!check.ok) {
+        if (gm.events) gm.events.emit(EVT.NOTIFY, { ownerId: this.ownerId, text: check.reason });
+        this._endCast();
+        return;
+      }
+      c.phase = 1;
+      c.timer = 0;
+      emitCastStart(gm, this, ab, t);
+      if (this.animator && this.hurtTimer <= 0) this.animator.setAnimation('cast');
+    } else if (dist > ab.range + 1.5) {
+      c.phase = 0; // alvo fugiu durante o lançamento: reperseguir (recomeça o castTime)
+      return;
+    } else {
+      c.timer += delta;
+    }
+
+    if (tx !== this.mesh.position.x || tz !== this.mesh.position.z) {
+      this.mesh.rotation.y = Math.atan2(tx - this.mesh.position.x, tz - this.mesh.position.z);
+    }
+    if (c.timer + 1e-9 >= (ab.castTime || 0)) {
+      const check = canCast(gm, this, ab);
+      if (check.ok) {
+        applyAbility(gm, this, ab, t, c.x, c.z);
+      } else if (gm.events) {
+        gm.events.emit(EVT.NOTIFY, { ownerId: this.ownerId, text: check.reason });
+      }
+      this._endCast();
     }
   }
 
@@ -1028,8 +1248,9 @@ export class Unit {
       if (this.isDead || this.isDying || this.state === 'dying' || (this.mesh && !this.mesh.visible)) {
         this.hpGroup.visible = false;
       } else {
-        const isVisible = this.isSelected || this.hp < this.maxHp;
+        const isVisible = this._barsVisible();
         this.hpGroup.visible = isVisible;
+        if (isVisible && this.manaFillMesh && Math.round(this.mana / this.maxMana * 200) !== this._manaFill) this.updateManaBar();
         if (isVisible && this.gameManager && this.gameManager.sceneManager) {
           const h = this.getHealthBarHeight();
           this.hpGroup.position.set(this.mesh.position.x, this.mesh.position.y + h, this.mesh.position.z);
@@ -1053,7 +1274,7 @@ export class Unit {
     if (this.state === 'attacking' && this.hurtTimer <= 0 && this.animator.currentAnim === 'fight') {
       // Progresso contínuo do ataque (attackTimer do último tick + fração do próximo ainda não
       // simulada) — evita o "degrau" de 20 Hz na animação de ataque.
-      const t = Math.min(1, (this.attackTimer + alpha * SIM_DT) / this.attackCooldown);
+      const t = Math.min(1, (this.attackTimer + alpha * SIM_DT) / this.effAttackCooldown);
       this.animator.setTime(t);
     } else {
       this.animator.update(frameDelta * lodStep);
@@ -1210,7 +1431,7 @@ export class Unit {
     }
 
     // Move step towards current target waypoint
-    this.stepTowards(targetX, targetZ, this.speed * delta);
+    this.stepTowards(targetX, targetZ, this.speed * this.mods.speedMul * delta);
 
     // Walk animation cycle
     this.hasFiredThisAttack = false;
@@ -1615,7 +1836,7 @@ export class Unit {
         const al = Math.hypot(ax, az);
         if (al < 0.001) { ax = -Math.sin(this.mesh.rotation.y); az = -Math.cos(this.mesh.rotation.y); } else { ax /= al; az /= al; }
         this.hasFiredThisAttack = false;
-        this.stepTowards(this.mesh.position.x + ax * 2, this.mesh.position.z + az * 2, this.speed * delta);
+        this.stepTowards(this.mesh.position.x + ax * 2, this.mesh.position.z + az * 2, this.speed * this.mods.speedMul * delta);
         if (this.animator && this.hurtTimer <= 0) this.animator.setAnimation('walk');
         return;
       }
@@ -1644,7 +1865,7 @@ export class Unit {
       this.animator.setAnimation('fight');
     }
 
-    const progress = Math.min(1.0, this.attackTimer / this.attackCooldown);
+    const progress = Math.min(1.0, this.attackTimer / this.effAttackCooldown);
 
     const gm = gameManager || this.gameManager;
     const gmEvents = gm && gm.events;
@@ -1664,7 +1885,7 @@ export class Unit {
         if (gmEvents) gmEvents.emit(EVT.PROJECTILE_FIRED, { kind, from: posOf(startPos), ownerId: this.ownerId });
         const owner = this;
         const projectile = new BallisticProjectile(this.scene, startPos, _impactPoint, kind, (pos) => {
-          if (gm && gm.unitGrid && gm.blockerGrid) applySplashDamage(gm, owner, owner.damage, pos, owner.splashRadius, allUnits);
+          if (gm && gm.unitGrid && gm.blockerGrid) applySplashDamage(gm, owner, owner.getEffDamage(), pos, owner.splashRadius, allUnits);
           if (gmEvents) gmEvents.emit(EVT.PROJECTILE_HIT, { kind, pos: posOf(pos), ownerId: owner.ownerId, splashRadius: owner.splashRadius });
         });
         arrows.push(projectile);
@@ -1679,7 +1900,7 @@ export class Unit {
         if (gmEvents) gmEvents.emit(EVT.PROJECTILE_FIRED, { kind: projType, from: posOf(startPos), ownerId: this.ownerId });
         // F3-03: o dano final (computeDamage, 1 valor de RNG) é calculado no impacto — a
         // armadura/tipo do alvo naquele instante decidem o resultado, não na hora do disparo.
-        const arrow = new Arrow(this.scene, startPos, this.attackTarget, this.damage, (target, dmgObj, hitPos) => {
+        const arrow = new Arrow(this.scene, startPos, this.attackTarget, this.getEffDamage(), (target, dmgObj, hitPos) => {
           const dmg = computeDamage(dmgObj, target, gm.combatRng);
           target.takeDamage(dmg, this, allUnits);
           if (gmEvents) gmEvents.emit(EVT.PROJECTILE_HIT, { kind: projType, pos: posOf(hitPos), ownerId: this.ownerId });
@@ -1692,12 +1913,12 @@ export class Unit {
       if (progress >= 0.45 && !this.hasFiredThisAttack) {
         this.hasFiredThisAttack = true;
         if (gmEvents) gmEvents.emit(EVT.MELEE_HIT, { pos: posOf(this.mesh.position), ownerId: this.ownerId });
-        const dmg = computeDamage(this.damage, this.attackTarget, gm.combatRng);
+        const dmg = computeDamage(this.getEffDamage(), this.attackTarget, gm.combatRng);
         this.attackTarget.takeDamage(dmg, this, allUnits);
       }
     }
 
-    if (this.attackTimer >= this.attackCooldown) {
+    if (this.attackTimer >= this.effAttackCooldown) {
       this.attackTimer = 0;
       this.hasFiredThisAttack = false;
     }

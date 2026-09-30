@@ -50,6 +50,13 @@ export const EVT = Object.freeze({
   /** F3-10: último acampamento neutro de um cluster destruído (recompensa creditada). */
   CAMP_CLEARED: 'camp_cleared',
 
+  /** F4-03: início do lançamento (já na posição, começa o `castTime`). */
+  ABILITY_CAST: 'ability_cast',
+  /** F4-03: efeitos da habilidade aplicados. */
+  ABILITY_EFFECT: 'ability_effect',
+  /** F4-03: mana gasta por uma habilidade (nunca por passo de regeneração). */
+  MANA_CHANGED: 'mana_changed',
+
   PLAYER_DEFEATED: 'player_defeated',
   MATCH_WON: 'match_won',
   MATCH_LOST: 'match_lost'
@@ -91,6 +98,10 @@ export const EVT = Object.freeze({
  * EVT.NOTIFY        {ownerId:number, text:string}
  *
  * EVT.CAMP_CLEARED   {campId:number, byOwnerId:number|null, pos:Pos, reward:{gold?:number,wood?:number,stone?:number}}  (F3-10; byOwnerId null = sem crédito)
+ *
+ * EVT.ABILITY_CAST    {unitId:number, ownerId:number, abilityId:string, targetId?:number, pos:Pos}  (F4-03)
+ * EVT.ABILITY_EFFECT  {abilityId:string, ownerId:number, pos:Pos, radius?:number, unitId?:number, targetId?:number}  (F4-03)
+ * EVT.MANA_CHANGED    {unitId:number, ownerId:number, mana:number}  (F4-03; só ao gastar)
  *
  * EVT.PLAYER_DEFEATED {ownerId:number, name:string}
  * EVT.MATCH_WON       {ownerId:number}

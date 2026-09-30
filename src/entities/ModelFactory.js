@@ -422,7 +422,7 @@ export class ModelFactory {
   }
 
   static createBandit() {
-    return this.getOrCreateModel('bandit', createBandit, 'bandit');
+    return this._glbOr('bandit', () => this.getOrCreateModel('bandit', createBandit, 'bandit'));
   }
 
   // --- Orc Units ---
@@ -439,7 +439,7 @@ export class ModelFactory {
   }
 
   static createOgre() {
-    return this.getOrCreateModel('ogre', createOgre, 'ogre');
+    return this._glbOr('ogre', () => this.getOrCreateModel('ogre', createOgre, 'ogre'));
   }
 
   static createUnit(type) {

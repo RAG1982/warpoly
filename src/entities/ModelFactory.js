@@ -155,8 +155,11 @@ export class ModelFactory {
     const sTop = clone.getObjectByName('BowStringTop');
     const sBot = clone.getObjectByName('BowStringBottom');
     if (sTop && sBot) {
-      const topTipPos = new THREE.Vector3(0, 0.95, -0.05);
-      const botTipPos = new THREE.Vector3(0, -0.95, -0.05);
+      // extremidades da corda: empties BowTipTop/BowTipBottom do .glb (arco Blender); senão ±0.95
+      const tipT = clone.getObjectByName('BowTipTop');
+      const tipB = clone.getObjectByName('BowTipBottom');
+      const topTipPos = tipT ? tipT.position.clone() : new THREE.Vector3(0, 0.95, -0.05);
+      const botTipPos = tipB ? tipB.position.clone() : new THREE.Vector3(0, -0.95, -0.05);
       const upVec = new THREE.Vector3(0, 1, 0);
       const dArrow = clone.getObjectByName('DrawnArrow');
       ud.updateBowString = function(drawDist = 0) {
@@ -182,6 +185,7 @@ export class ModelFactory {
           }
         }
       };
+      ud.updateBowString(0);
     }
 
     return clone;
@@ -409,7 +413,7 @@ export class ModelFactory {
   }
 
   static createArcher() {
-    return this.getOrCreateModel('archer', createArcher, 'archer');
+    return this._glbOr('archer', () => this.getOrCreateModel('archer', createArcher, 'archer'));
   }
 
   static createVillager() {
@@ -435,7 +439,7 @@ export class ModelFactory {
   }
 
   static createAxethrower() {
-    return this.getOrCreateModel('axethrower', createAxethrower, 'axethrower');
+    return this._glbOr('axethrower', () => this.getOrCreateModel('axethrower', createAxethrower, 'axethrower'));
   }
 
   static createOgre() {

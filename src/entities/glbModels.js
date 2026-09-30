@@ -12,6 +12,8 @@ const BASE = (import.meta.env && import.meta.env.BASE_URL) || '/';
 export const GLB_MODELS = {
   grunt: { url: `${BASE}models/grunt.glb`, root: 'Grunt', type: 'grunt' },
   knight: { url: `${BASE}models/knight.glb`, root: 'Knight', type: 'knight' },
+  archer: { url: `${BASE}models/archer.glb`, root: 'Archer', type: 'archer' },
+  axethrower: { url: `${BASE}models/axethrower.glb`, root: 'Axethrower', type: 'axethrower' },
   castle: { url: `${BASE}models/castle.glb`, root: 'Castle', type: null }
 };
 

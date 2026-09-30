@@ -98,6 +98,19 @@ const MODEL_CATALOG = [
     notes: 'Arco e corda modelados com CatmullRomCurve3. A aljava e flechas no dorso acompanham a inclinação lateral do torso durante a puxada da corda.'
   },
   {
+    id: 'archer_glb',
+    name: 'Arqueiro (Blender)',
+    category: 'units',
+    faction: 'human',
+    type: 'archer',
+    icon: '🏹',
+    glb: 'archer',
+    sourceFile: 'tools/blender/build_archer.py',
+    create: createGlb('archer'),
+    description: 'Versão gerada pelo pipeline Blender headless (public/models/archer.glb): capuz e manto em cor de time (verde-oliva), gibão de couro sobre túnica, braçadeiras, aljava cheia de flechas com penas, arco composto com empunhadura de couro e corda de dois segmentos, adaga e bolsas.',
+    notes: 'Rig plana igual à do ArcherModel.js (Torso, Head, ArmL, ArmR, LegL, LegR; Bow em ArmL com BowStringTop/BowStringBottom, BowTipTop/BowTipBottom e DrawnArrow). O ModelFactory recria updateBowString a partir desses nós. Também é o modelo do Ranger.'
+  },
+  {
     id: 'villager',
     name: 'Aldeão (Villager)',
     category: 'units',
@@ -167,6 +180,19 @@ const MODEL_CATALOG = [
     create: createAxethrower,
     description: 'Atirador de elite ágil da Horda dos Orcs com silhueta acrobática e predadora. Pele verde-azulada (teal) vibrante, crista de cabelo moicano chamejante em laranja e carmesim, presas curvas de marfim, colar tribal de contas e machadinhas de arremesso afiadas.',
     notes: 'Inspirado no Troll Axethrower icônico de Warcraft 2. Animação de recuo de mira, arremesso balístico e recarga.'
+  },
+  {
+    id: 'axethrower_glb',
+    name: 'Lanceiro-Machado Troll (Blender)',
+    category: 'units',
+    faction: 'orc',
+    type: 'axethrower',
+    icon: '🪓',
+    glb: 'axethrower',
+    sourceFile: 'tools/blender/build_axethrower.py',
+    create: createGlb('axethrower'),
+    description: 'Versão gerada pelo pipeline Blender headless (public/models/axethrower.glb): troll alto e musculoso de pele verde-acinzentada com pintura de guerra, moicano laranja, presas, colar de contas, bandoleira e cinturão de machados de arremesso, ombreira de pele, tanga em cor de time e dois machados de arremesso nas mãos.',
+    notes: 'Rig aninhada igual à do AxethrowerModel.js (Torso > Head/ArmL/ArmR > WeaponL/WeaponR; LegL/LegR na raiz; Mohawk em Head). Também é o modelo do Berserker.'
   },
   {
     id: 'ogre',

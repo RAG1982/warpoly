@@ -8,6 +8,8 @@ os `.glb` em `public/models/` são artefatos reproduzíveis.
 |---|---|---|
 | `build_grunt.py` | `public/models/grunt.glb` | guerreiro orc: 7 partes rígidas, 4,4 mil tris, 8 draw calls, atlas 512² |
 | `build_knight.py` | `public/models/knight.glb` | Espadachim humano (ref. `soldado.png`): 7 partes rígidas, 4,2 mil tris, 10 draw calls, atlas 512², 213 KB |
+| `build_archer.py` | `public/models/archer.glb` | Arqueiro humano: capuz/manto/capa em cor de time, gibão de couro, aljava com flechas, arco composto + corda de 2 segmentos + flecha (`DrawnArrow`); rig plana, 6,8 mil tris, 12 draw calls, atlas 512² |
+| `build_axethrower.py` | `public/models/axethrower.glb` | Lanceiro-Machado troll: pele verde-acinzentada com pintura de guerra, moicano, presas, bandoleira/cinturão de machadinhas, 2 machados de arremesso; rig aninhada, 6,9 mil tris, 12 draw calls, atlas 512² |
 | `build_castle.py` | `public/models/castle.glb` | castelo humano: 2 draw calls, 8,7 mil tris, atlas 1024² |
 | `common.py` | — | helpers (primitivas bmesh, materiais de pintura, UV atlas, bake, export, render) |
 
@@ -83,6 +85,7 @@ python3 tools/blender/compose_compare.py     # gera renders/compare_*.png (antig
 - `ModelFactory`: com `?glb=1`, `createGrunt()`/`createCastle()` devolvem clones do `.glb`
   (nomes preservados, `rebindUserData`, sombras ligadas); sem o parâmetro nada muda e, se o
   `.glb` falhar, o procedural é o fallback. `AssetPreloader` aguarda os `.glb` só com `?glb=1`.
+- Arqueiro: `BowTipTop`/`BowTipBottom` (empties nas pontas do arco) definem os extremos da corda em `rebindUserData`; `BowStringTop`/`BowStringBottom` são cilindros de altura 1 centrados (o `updateBowString` os posiciona, escala e gira). Capturas de animação/jogo: `capture_ranged.mjs` (vite em `:5217`).
 - Inspetor: entradas "Guerreiro Orc (Blender)" (`grunt_glb`, animações do `UnitAnimator`) e
   "Castelo (Blender)" (`castle_glb`), carregadas sempre, para comparar lado a lado.
 

@@ -18,7 +18,10 @@ export const GLB_MODELS = {
   peon: { url: `${BASE}models/peon.glb`, root: 'Peon', type: 'peon' },
   ogre: { url: `${BASE}models/ogre.glb`, root: 'Ogre', type: 'ogre' },
   bandit: { url: `${BASE}models/bandit.glb`, root: 'Bandit', type: 'bandit' },
-  castle: { url: `${BASE}models/castle.glb`, root: 'Castle', type: null }
+  castle: { url: `${BASE}models/castle.glb`, root: 'Castle', type: null },
+  cavalier: { url: `${BASE}models/cavalier.glb`, root: 'Cavalier', type: 'cavalier' },
+  stable: { url: `${BASE}models/stable.glb`, root: 'Stable', type: null },
+  ogre_den: { url: `${BASE}models/ogre_den.glb`, root: 'OgreDen', type: null }
 };
 
 export const glbEnabled = (() => {

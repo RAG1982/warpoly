@@ -33,6 +33,10 @@ LEG_PIVOT = (0.16, 0.68, 0.0)
 SWORD_PIVOT = (0.48, 0.75, 0.25)
 SWORD_REST_DEG = (math.degrees(0.5), 0.0, math.degrees(-0.1))
 TEAM_DEFAULT = '#2f63e0'  # azul da referência (multiplica a área cinza)
+# Ganchos usados por build_cavalier.py (o valor padrão reproduz o Espadachim a pé)
+SKIRT = True
+CAPE_FOLD = ((0, 0, -0.10), 0.05)   # (bulge, onda)
+CAPE = ((0.27, 0.38, -0.19), (-0.27, 0.38, -0.19), (0.36, -0.86, -0.40), (-0.36, -0.86, -0.40))
 
 PALETTE = {
     'skin': dict(base='#d9a273', var='#c48857', var_scale=6.0, var_amt=0.5, fine=0.05,
@@ -134,13 +138,14 @@ def build_torso(mats, root):
                M((sx * 0.19, -0.34, 0.15), (-8, sx * -12, sx * -8)), bevel=0.008)
         mb.add(prim_box(0.16, 0.025, 0.036), 'gold', M((sx * 0.20, -0.435, 0.163), (-8, sx * -12, sx * -8)))
     # saiote azul (frente/atrás) em cor de time — sobra do gibão, com barra recortada
-    mb.add(cloth_panel((-0.16, -0.30, 0.19), (0.16, -0.30, 0.19), (-0.19, -0.66, 0.2), (0.19, -0.66, 0.2),
-                       nx=4, ny=3, bulge=(0, 0, 0.03), jag=0.03), 'team', smooth=50)
-    mb.add(cloth_panel((0.2, -0.30, -0.17), (-0.2, -0.30, -0.17), (0.23, -0.68, -0.2), (-0.23, -0.68, -0.2),
-                       nx=4, ny=3, bulge=(0, 0, -0.03), jag=0.03), 'team', smooth=50)
+    if SKIRT:
+        mb.add(cloth_panel((-0.16, -0.30, 0.19), (0.16, -0.30, 0.19), (-0.19, -0.66, 0.2), (0.19, -0.66, 0.2),
+                           nx=4, ny=3, bulge=(0, 0, 0.03), jag=0.03), 'team', smooth=50)
+        mb.add(cloth_panel((0.2, -0.30, -0.17), (-0.2, -0.30, -0.17), (0.23, -0.68, -0.2), (-0.23, -0.68, -0.2),
+                           nx=4, ny=3, bulge=(0, 0, -0.03), jag=0.03), 'team', smooth=50)
     # capa azul (cor de time) presa por dois grampos dourados nos ombros
-    mb.add(cloth_panel((0.27, 0.38, -0.19), (-0.27, 0.38, -0.19), (0.36, -0.86, -0.40), (-0.36, -0.86, -0.40),
-                       nx=6, ny=5, thick=0.035, bulge=(0, 0, -0.10), wave=0.05, jag=0.06), 'team', smooth=50)
+    mb.add(cloth_panel(*CAPE,
+                       nx=6, ny=5, thick=0.035, bulge=CAPE_FOLD[0], wave=CAPE_FOLD[1], jag=0.06), 'team', smooth=50)
     mb.add(prim_box(0.50, 0.04, 0.07, taper=(0.9, 1.0)), 'gold', M((0, 0.37, -0.18)), bevel=0.01)
     for sx in (-1, 1):
         mb.add(prim_sphere(0.045, 0.045, 0.04, 6, 4), 'gold', M((sx * 0.2, 0.36, 0.0)), smooth=60)
@@ -270,4 +275,5 @@ def main():
         C.set_team_color(TEAM_DEFAULT)
 
 
-main()
+if __name__ == '__main__':
+    main()

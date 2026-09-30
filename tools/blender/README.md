@@ -16,6 +16,10 @@ os `.glb` em `public/models/` são artefatos reproduzíveis.
 | `build_ogre.py` | `public/models/ogre.glb` | Ogro orc: 7 partes rígidas (rig aninhada), 6,9 mil tris, 11 draw calls, atlas 512², 297 KB |
 | `build_bandit.py` | `public/models/bandit.glb` | Bandido neutro: 7 partes rígidas (rig plana), 5,7 mil tris, 12 draw calls, atlas 512², 274 KB |
 | `build_castle.py` | `public/models/castle.glb` | castelo humano: 2 draw calls, 8,7 mil tris, atlas 1024² |
+| `build_cavalier.py` | `public/models/cavalier.glb` | Cavaleiro montado humano (F4-01/NEW-33): cavalo anatômico + tronco do Espadachim; rig plana com `HorseLegFL/FR/BL/BR`, 8,0 mil tris, 14 draw calls, atlas 512², 323 KB |
+| `build_stable.py` | `public/models/stable.glb` | Estábulo Real: celeiro de empena frontal, baias com cavalos, 2 draw calls, 5,1 mil tris, atlas 1024², 389 KB |
+| `build_ogre_den.py` | `public/models/ogre_den.glb` | Covil dos Ogros: paliçada, teto de peles e costelas, portão e crânio, 2 draw calls, 8,6 mil tris, atlas 1024², 415 KB |
+| `bld_common.py` | — | helpers das construções (viga/tubo/tora entre pontos, cabeça de cavalo, crânio de ogro, bbox) |
 | `common.py` | — | helpers (primitivas bmesh, materiais de pintura, UV atlas, bake, export, render) |
 
 ## Como rodar

@@ -370,7 +370,7 @@ export class ModelFactory {
   }
 
   static createStable() {
-    return this.getOrCreateModel('stable', createStable);
+    return this._glbOr('stable', () => this.getOrCreateModel('stable', createStable));
   }
 
   static createWorkshop() {
@@ -382,7 +382,7 @@ export class ModelFactory {
   }
 
   static createOgreDen() {
-    return this.getOrCreateModel('ogre_den', createOgreDen);
+    return this._glbOr('ogre_den', () => this.getOrCreateModel('ogre_den', createOgreDen));
   }
 
   static createHumanForge() {
@@ -460,9 +460,9 @@ export class ModelFactory {
     return this._glbOr('knight', () => this.getOrCreateModel('knight', createKnight, 'knight'));
   }
 
-  /** F4-01: cavaleiro (modelo procedural: cavalo + tronco do Espadachim). */
+  /** F4-01/NEW-33: cavaleiro montado (.glb do Blender; fallback procedural: cavalo de caixas + tronco do Espadachim). */
   static createCavalier() {
-    return this.getOrCreateModel('cavalier', createCavalier, 'cavalier');
+    return this._glbOr('cavalier', () => this.getOrCreateModel('cavalier', createCavalier, 'cavalier'));
   }
 
   /** F4-02: balista (cerco humano, procedural). */

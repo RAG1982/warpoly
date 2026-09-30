@@ -116,7 +116,7 @@ export class AIEconomyManager {
       const def = getBuildingDef(b.type);
       const role = def.role;
       let plan = null;
-      if (role === 'forge') plan = ['melee_weapons', 'melee_armor'];
+      if (role === 'forge') plan = ['melee_weapons', 'melee_armor', 'siege_damage']; // F4-02: siege_damage exige Oficina
       else if (role === 'lumber') plan = ['ranged_class', 'ranged_ammo', 'woodcutting'];
       if (!plan) continue;
       for (const id of plan) {
@@ -357,6 +357,7 @@ export class AIEconomyManager {
     let hasLumber = false;
     let hasForge = false;
     let hasStable = false;
+    let hasWorkshop = false;
     let towerCount = 0;
 
     for (let i = 0; i < lenB; i++) {
@@ -366,6 +367,7 @@ export class AIEconomyManager {
         if (b.type === this.director.lumberType) hasLumber = true;
         if (b.type === this.director.forgeType) hasForge = true;
         if (b.type === this.director.stableType) hasStable = true;
+        if (b.type === this.director.workshopType) hasWorkshop = true;
         if (b.type === this.director.towerType) towerCount++;
       }
     }
@@ -415,6 +417,14 @@ export class AIEconomyManager {
         this.director.getCombatUnitCount() >= 6 && this.director.canAfford(this.director.costs.stable) &&
         missingRequirements(this.director.playerId, this.director.stableType, this.gm).length === 0) {
       this.placeBuilding(this.director.stableType);
+      return;
+    }
+
+    // 5c. F4-02: Oficina (cerco) com Centro nível 2 e ≥ 8 combatentes.
+    if (hasBarracks && !hasWorkshop && this.director.getCombatUnitCount() >= 8 &&
+        this.director.canAfford(this.director.costs.workshop) &&
+        missingRequirements(this.director.playerId, this.director.workshopType, this.gm).length === 0) {
+      this.placeBuilding(this.director.workshopType);
       return;
     }
 

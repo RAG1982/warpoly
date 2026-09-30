@@ -116,7 +116,7 @@ Formato: PV · dano (básico + perfurante) · armadura · alcance · visão · v
 | Infantaria | **Espadachim** | **Talhador** | 190 | 6+3 | 4 | 2,1 | 4,5 | 70/20/5 | 10 | 1 | Quartel |
 | Atirador | **Arqueiro** → **Patrulheiro** | **Lanceiro-Machado** → **Enfurecido** | 95 | 3+6 | 0 | 14 | 4,5 | 60/40/0 | 9 | 1 (→2) | Quartel |
 | Cavalaria ✅ F4-01 (Templário/Ogro Feiticeiro: F4-04/F4-08) | **Cavaleiro** → **Templário** | **Ogro** → **Ogro Feiticeiro** | 320 | 8+4 | 4 | 2,3 | 5,6 | 120/60/20 | 14 | 2 (→3) | Quartel + Estábulo/Covil |
-| Cerco | **Balista** | **Catapulta** | 220 | 80+0 (área r1,5) | 0 | 20 (mín. 4) | 3,0 | 90/200/40 | 18 | 2 | Quartel + Oficina |
+| Cerco ✅ F4-02 | **Balista** | **Catapulta** | 220 | 80+0 (área r1,5) | 0 | 20 (mín. 4) | 3,0 | 90/200/40 | 18 | 2 | Quartel + Oficina |
 | Sapadores | **Sapadores de Pólvora** | **Incendiários** | 60 | 400 (suicida, área) | 0 | 1 | 5,0 | 70/25/0 | 10 | 2 | Oficina |
 | Conjurador | **Mago Arcano** | **Necromante das Cinzas** | 60 | 0+9 (mágico) | 0 | 8 | 4,2 | 120/0/0 | 12 | 3 | Torre Arcana / Santuário |
 
@@ -181,6 +181,8 @@ regenerar HP entre golpes); "tempo p/ matar" = golpes × cooldown de ataque do a
 | Cavaleiro × Castelo | 6,08 | 4 | 8 | 264 | 290,4 s |
 | Arqueiro × Castelo | 12,12 | 8 | 16 | 133 | 186,2 s |
 | Torre de Vigia × Cavaleiro | 14,07 | 9 | 19 | 14 | 19,6 s |
+| Balista/Catapulta × Castelo (F4-02; no centro da área) | 89,68 | 60 | 120 | 18 | 57,6 s |
+| Balista/Catapulta × Cavaleiro (F4-02; alvo no centro da área) | 37,91 | 25 | 51 | 6 | 19,2 s |
 
 Cavalaria (dano normal) perde bruto contra construções (armadura 20 sem componente perfurante
 relevante); arqueiros/torres (perfurantes) sofrem menos com armadura alta — a mesma lógica do

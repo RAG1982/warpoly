@@ -50,6 +50,7 @@ export class AIDirector {
     this.towerType = f.tower;
     this.forgeType = f.forge;
     this.stableType = f.stable; // F4-01: Estábulo Real / Covil dos Ogros
+    this.workshopType = f.workshop; // F4-02: Oficina de Engenharia / dos Engenhoqueiros
 
     // Costs configuration — derivados dos dados reais (corrige B3: antes eram números próprios da IA)
     this.costs = {
@@ -64,7 +65,8 @@ export class AIDirector {
       lumber: getCost(this.lumberType),
       tower: getCost(this.towerType),
       forge: getCost(this.forgeType),
-      stable: getCost(this.stableType)
+      stable: getCost(this.stableType),
+      workshop: getCost(this.workshopType)
     };
 
     // Tick Timer (Exact 1.0 second evaluation interval)
@@ -169,6 +171,16 @@ export class AIDirector {
     for (let i = 0; i < buildings.length; i++) {
       const b = buildings[i];
       if (b.ownerId === this.playerId && b.type === this.stableType && b.isConstructed && !b.isDead) return b;
+    }
+    return null;
+  }
+
+  /** F4-02: Oficina concluída e viva da IA (ou null). */
+  getConstructedWorkshop() {
+    const buildings = this.gm.buildings;
+    for (let i = 0; i < buildings.length; i++) {
+      const b = buildings[i];
+      if (b.ownerId === this.playerId && b.type === this.workshopType && b.isConstructed && !b.isDead) return b;
     }
     return null;
   }

@@ -23,6 +23,10 @@ import {
   createStable,
   createOgreDen,
   createCavalier,
+  createBallista,
+  createCatapult,
+  createWorkshop,
+  createOrcWorkshop,
   createTree,
   createKnight,
   createArcher,
@@ -170,6 +174,10 @@ export class ModelFactory {
     // F4-01: pernas do cavalo (cavalier) — balançam em fase alternada no `UnitAnimator`
     const horseLegs = HORSE_LEG_NAMES.map(n => clone.getObjectByName(n));
     if (horseLegs.every(Boolean)) ud.horseLegs = horseLegs;
+    // F4-02: cerco (Balista/Catapulta) — braço que recua/arremessa e rodas
+    ud.siegeArm = clone.getObjectByName('SiegeArm') || ud.siegeArm;
+    ud.wheelL = clone.getObjectByName('WheelL') || ud.wheelL;
+    ud.wheelR = clone.getObjectByName('WheelR') || ud.wheelR;
 
     // Archer dynamic bow string closure rebinding
     const sTop = clone.getObjectByName('BowStringTop');
@@ -310,6 +318,8 @@ export class ModelFactory {
       case 'forge': return this.createHumanForge();
       case 'stable': return this.createStable();
       case 'ogre_den': return this.createOgreDen();
+      case 'workshop': return this.createWorkshop();
+      case 'orc_workshop': return this.createOrcWorkshop();
       case 'wall_human': return createWallSegment('human');
       case 'wall_orc': return createWallSegment('orc');
       case 'barracks': return this.createBarracks();
@@ -361,6 +371,14 @@ export class ModelFactory {
 
   static createStable() {
     return this.getOrCreateModel('stable', createStable);
+  }
+
+  static createWorkshop() {
+    return this.getOrCreateModel('workshop', createWorkshop);
+  }
+
+  static createOrcWorkshop() {
+    return this.getOrCreateModel('orc_workshop', createOrcWorkshop);
   }
 
   static createOgreDen() {
@@ -447,6 +465,16 @@ export class ModelFactory {
     return this.getOrCreateModel('cavalier', createCavalier, 'cavalier');
   }
 
+  /** F4-02: balista (cerco humano, procedural). */
+  static createBallista() {
+    return this.getOrCreateModel('ballista', createBallista, 'ballista');
+  }
+
+  /** F4-02: catapulta (cerco orc, procedural). */
+  static createCatapult() {
+    return this.getOrCreateModel('catapult', createCatapult, 'catapult');
+  }
+
   static createArcher() {
     return this._glbOr('archer', () => this.getOrCreateModel('archer', createArcher, 'archer'));
   }
@@ -492,6 +520,8 @@ export class ModelFactory {
       case 'axethrower': return this.createAxethrower();
       case 'ogre': return this.createOgre();
       case 'cavalier': return this.createCavalier();
+      case 'ballista': return this.createBallista();
+      case 'catapult': return this.createCatapult();
       default: return this.createVillager();
     }
   }

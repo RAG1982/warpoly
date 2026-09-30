@@ -23,6 +23,8 @@ export class AssetPreloader {
       { name: 'Aldeão Construtor', fn: () => ModelFactory.createVillager() },
       { name: 'Cavaleiro Real', fn: () => ModelFactory.createKnight() },
       { name: 'Cavaleiro Montado', fn: () => ModelFactory.createCavalier() },
+      { name: 'Balista de Cerco', fn: () => ModelFactory.createBallista() },
+      { name: 'Catapulta da Horda', fn: () => ModelFactory.createCatapult() },
       { name: 'Arqueiro de Precisão', fn: () => ModelFactory.createArcher() },
       { name: 'Saqueador Bandido', fn: () => ModelFactory.createBandit() },
       { name: 'Peon Trabalhador da Horda', fn: () => ModelFactory.createPeon() },
@@ -103,7 +105,7 @@ export class AssetPreloader {
     const placeableGhosts = [
       'cottage', 'lumber_camp', 'farm', 'barracks', 'forge', 'watchtower',
       'orc_house', 'pig_farm', 'orc_lumber_mill', 'orc_barracks', 'orc_forge', 'orc_watchtower',
-      'stable', 'ogre_den'
+      'stable', 'ogre_den', 'workshop', 'orc_workshop'
     ];
     placeableGhosts.forEach(bType => {
       try {

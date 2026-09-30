@@ -21,13 +21,14 @@ export const FACTIONS = {
     tower: 'watchtower',
     forge: 'forge',
     stable: 'stable',
-    buildList: ['cottage', 'lumber_camp', 'farm', 'barracks', 'forge', 'stable', 'watchtower', 'wall_human'],
+    workshop: 'workshop',
+    buildList: ['cottage', 'lumber_camp', 'farm', 'barracks', 'forge', 'stable', 'workshop', 'watchtower', 'wall_human'],
     units: {
       worker: 'villager',
       melee: 'knight',
       ranged: 'archer',
       cavalry: 'cavalier',
-      siege: 'knight' // sem unidade de cerco humana ainda: a IA usa o Cavaleiro
+      siege: 'ballista' // F4-02
     },
     startingBase: {
       buildings: { hq: 'castle', lumber: 'lumber_camp', house: 'cottage' },
@@ -46,13 +47,14 @@ export const FACTIONS = {
     tower: 'orc_watchtower',
     forge: 'orc_forge',
     stable: 'ogre_den',
-    buildList: ['orc_house', 'pig_farm', 'orc_lumber_mill', 'orc_barracks', 'orc_forge', 'ogre_den', 'orc_watchtower', 'wall_orc'],
+    workshop: 'orc_workshop',
+    buildList: ['orc_house', 'pig_farm', 'orc_lumber_mill', 'orc_barracks', 'orc_forge', 'ogre_den', 'orc_workshop', 'orc_watchtower', 'wall_orc'],
     units: {
       worker: 'peon',
       melee: 'grunt',
       ranged: 'axethrower',
       cavalry: 'ogre',
-      siege: 'ogre'
+      siege: 'catapult' // F4-02
     },
     startingBase: {
       buildings: { hq: 'great_hall', lumber: 'orc_lumber_mill', house: 'pig_farm' },

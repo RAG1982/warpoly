@@ -42,7 +42,7 @@ População: soma de `popGranted` (HQ 5, Casa/Toca 5, Chiqueiro 5). Início = 10
 | Ogro (cavalaria orc — F4-01) | Orc | 320 | 5.4 | 42 | 2.5 | 1.5 | 5 | 75/100/35 | 14 | Covil dos Ogros (Centro nível 2) |
 | Bandido | Neutro | 125 | 4.4 | 16 | 2.1 | 1.2 | 1 | — | — | (não usado no jogo) |
 
-Dano efetivo em unidade = `max(2, dano − armadura)`. Construções **ignoram armadura**. **Cavalaria (F4-01):** Cavaleiro (humano) e Ogro (orc) são treinados no **Estábulo Real / Covil dos Ogros**, que exigem Quartel + Centro nível 2 (`requires: [quartel, {hq: 2}]`; a unidade também exige `{hq: 2}`). Dano normal, sem bônus; `melee_weapons`/`melee_armor` valem para Espadachim/Talhador/Cavaleiro/Ogro. O Quartel não treina cavalaria (`Building.queueUnit` só aceita o que está em `trains`, e só em construção concluída). Suprimento: 1 por unidade como as demais (o jogo não tem custo de suprimento por unidade). Nomes D7 nos dados: Espadachim, Talhador, Lanceiro-Machado, Camponês, Lacaio (ids internos inalterados). A IA usa `FACTIONS.*.units.cavalry`; o cerco humano continua `knight` e o orc `ogre` até a F4-02.
+Dano efetivo em unidade = `max(2, dano − armadura)`. Construções **ignoram armadura**. **Cavalaria (F4-01):** Cavaleiro (humano) e Ogro (orc) são treinados no **Estábulo Real / Covil dos Ogros**, que exigem Quartel + Centro nível 2 (`requires: [quartel, {hq: 2}]`; a unidade também exige `{hq: 2}`). Dano normal, sem bônus; `melee_weapons`/`melee_armor` valem para Espadachim/Talhador/Cavaleiro/Ogro. O cerco (F4-02) sai da **Oficina** (ver abaixo). O Quartel não treina cavalaria (`Building.queueUnit` só aceita o que está em `trains`, e só em construção concluída). Suprimento: 1 por unidade como as demais (o jogo não tem custo de suprimento por unidade). Nomes D7 nos dados: Espadachim, Talhador, Lanceiro-Machado, Camponês, Lacaio (ids internos inalterados). A IA usa `FACTIONS.*.units.cavalry` e `FACTIONS.*.units.siege` (`ballista`/`catapult`, F4-02).
 
 ## Construções
 
@@ -59,6 +59,7 @@ Dano efetivo em unidade = `max(2, dano − armadura)`. Construções **ignoram a
 | Quartel | H | 850 | 120 / 60 | Treina militares |
 | Quartel Orc | O | 900 | 130 / 50 | Treina militares |
 | Forja | H/O | 850 | 100 / 70 / 50 | Pesquisas |
+| Oficina de Engenharia / dos Engenhoqueiros (`role:'workshop'`, F4-02) | H / O | 700 (armadura 15) | 100 / 40 / 180 | Treina Balista/Catapulta; exige Quartel + Centro nível 2. IA: constrói com Centro nível 2 e ≥ 8 combatentes; mantém 1–3 cercos (mais com mais tropas de linha) e os manda junto do exército no mesmo ATTACK (escolta melhor: NEW-30) |
 | Estábulo Real / Covil dos Ogros (`role:'stable'`) | H / O | 900 (armadura 15) | 60 / 40 / 200 | Treina cavalaria; exige Quartel + Centro nível 2 (F4-01). IA: constrói com Centro nível 2, ≥ 600 de ouro e ≥ 6 combatentes; recruta 1 cavaleiro para cada 3 combatentes de linha |
 | Torre de Vigia | H | 650 | 80 / 40 | Ataca: alcance 18, dano 18, cd 1.4 |
 | Torre Orc | O | 700 | 85 / 40 | Alcance 18, dano 19 |
@@ -73,6 +74,15 @@ Dano efetivo em unidade = `max(2, dano − armadura)`. Construções **ignoram a
 
 Fila de treino: até 6 itens; cancelar reembolsa 100%. Posicionamento: terreno seco, folga de 3,2 de outras construções, 3,5 de árvores, fora dos vaus.
 
+## Cerco (F4-02)
+
+- **Balista** (humana) e **Catapulta** (orc): PV 220, vel. 3,0, armadura 0, dano `siege` 80, alcance 20, **alcance mínimo 4**, recarga 3,2 s, **área r 1,5**, 90 ouro/200 madeira/40 pedra, 18 s, exigem `{hq: 2}` e saem da **Oficina**. Mesmos números; só o projétil muda (`bolt`: rápido e raso, 22 u/s; `boulder`: pedra em arco alto, 14 u/s).
+- **Dano em área**: no impacto, toda entidade **hostil** (unidades e construções) com o centro a ≤ `splashRadius` do ponto sofre `computeDamage` × queda linear (100 % no centro → 50 % na borda). Sem fogo amigo. Contrato de RNG: 1 valor por entidade atingida, em ordem crescente de `id`. `siege` = ×1,5 contra construções e ×0,5 contra unidades.
+- **Projétil balístico** (`BallisticProjectile`): não persegue; mira a **posição prevista** (posição + velocidade × tempo de voo; a velocidade de cada unidade é medida a cada tick em `GameManager`). Parábola com pico `clamp(dist × 0,35, 2, 9)`. Se o alvo saiu do raio antes do impacto, o míssil erra (e atinge quem estiver na área).
+- **Alcance mínimo**: alvo a menos de `minAttackRange` (distância de borda) não é atacável; a unidade troca para outro alvo dentro da janela [min, max] ou **recua** até `min + 0,5`. A auto-aquisição só escolhe alvos dentro da janela. Cerco não ataca alvos aéreos (`layer === 'air'`, F4-06) e não ataca em movimento.
+- **Pesquisa** `siege_damage` (Forja, 2 níveis): +15 dano básico por nível; nível 1 exige a Oficina construída (`{role:'workshop'}`). Nomes: "Munição Explosiva" / "Pedras Incendiárias".
+- Medições (F4-02, `tools/combat-table.mjs`): Catapulta × Grande Salão ≈ 81 s na simulação (contra 290 s do Cavaleiro × Castelo); ver §6.1 do design.
+
 ## Pesquisas (Forja e Serraria) — F3-07
 
 Catálogo `RESEARCH` em `src/data/upgrades.js`; nível por jogador em `Player.researchLevels`. Pesquisa-se o **próximo nível** na construção de `role` correspondente (Forja/Forja de Guerra = `forge`; Serraria/Serraria do Clã = `lumber`); uma pesquisa por construção e nunca a mesma em duas construções do jogador. Nível 2 exige Centro nível 2 (`{hq:2}`). Cancelar reembolsa 100%.
@@ -81,6 +91,7 @@ Catálogo `RESEARCH` em `src/data/upgrades.js`; nível por jogador em `Player.re
 |---|---|---|---|---|
 | melee_weapons (Forja) | 2 | +2 dano básico (Cavaleiro/Grunt/Ogro) | 200o 100m · 400o 200m | 30 / 45 s |
 | melee_armor (Forja) | 2 | +2 armadura | 150o 100m 80p · 300o 200m 160p | 30 / 45 s |
+| siege_damage (Forja; nv1 exige Oficina) | 2 | +15 dano básico (Balista/Catapulta) | 300o 300m · 600o 500m | 40 / 60 s |
 | ranged_ammo (Serraria) | 2 | +1 perfurante (atiradores e classe avançada) | 200o 100m · 400o 200m | 30 / 45 s |
 | woodcutting (Serraria) | 1 | +25% madeira entregue | 300o 150m | 40 s |
 | ranged_class (Serraria, Centro 2) | 1 | promove Arqueiro→Patrulheiro / Lanceiro→Enfurecido (vivos e novos; Quartel passa a treinar a classe avançada) | 800o | 60 s |

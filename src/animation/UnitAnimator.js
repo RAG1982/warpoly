@@ -83,7 +83,11 @@ export class UnitAnimator {
       horseLegFL: ud.horseLegs ? ud.horseLegs[0] : null,
       horseLegFR: ud.horseLegs ? ud.horseLegs[1] : null,
       horseLegBL: ud.horseLegs ? ud.horseLegs[2] : null,
-      horseLegBR: ud.horseLegs ? ud.horseLegs[3] : null
+      horseLegBR: ud.horseLegs ? ud.horseLegs[3] : null,
+      // F4-02: cerco (Balista/Catapulta)
+      siegeArm: ud.siegeArm,
+      wheelL: ud.wheelL,
+      wheelR: ud.wheelR
     };
 
     // Store original materials on userData for zero-clone damage flash
@@ -345,6 +349,10 @@ export class UnitAnimator {
       parts.horseLegBL.position.y += Math.max(0, Math.sin(phase)) * 0.06;
     }
 
+    // F4-02: rodas do cerco giram em X (1 volta por ciclo de 0,8 s)
+    if (parts.wheelL) parts.wheelL.rotation.x += phase;
+    if (parts.wheelR) parts.wheelR.rotation.x += phase;
+
     // Torso vertical bounce (two bounces per full stride cycle!) and hip sway
     if (parts.torso) {
       parts.torso.position.y += verticalBounce - 0.02;
@@ -401,6 +409,11 @@ export class UnitAnimator {
 
   // --- 3. FIGHT / ATTACK ANIMATION ---
   applyFight(time, progress, parts, uType) {
+    // F4-02: cerco — o braço recua/arremessa (disparo em progress 0,6, igual ao `Unit.updateAttacking`)
+    if (parts.siegeArm) {
+      this.applySiegeFight(progress, parts, uType);
+      return;
+    }
     if (uType === 'archer') {
       this.applyArcherFight(progress, parts);
     } else if (uType === 'knight') {
@@ -925,6 +938,28 @@ export class UnitAnimator {
       if (parts.weaponR) {
         parts.weaponR.rotation.x = mirrorX(1.52 * (1 - ease) - 0.78 * ease, weaponRRest);
       }
+    }
+  }
+
+  /**
+   * F4-02: Balista recua a besta ao soltar o virote; Catapulta arma (abaixa) o braço e o lança
+   * para a frente. Mantém `progress` 0,6 como instante do disparo.
+   */
+  applySiegeFight(p, parts, uType) {
+    const arm = parts.siegeArm;
+    const ease = t => t * t * (3 - 2 * t);
+    if (uType === 'catapult') {
+      let rx;
+      if (p < 0.5) rx = 0.5 * ease(p / 0.5); // arma: braço desce
+      else if (p < 0.62) rx = 0.5 - 1.5 * ease((p - 0.5) / 0.12); // lança: sobe e vai para a frente
+      else rx = -1.0 * (1 - ease((p - 0.62) / 0.38)); // volta ao repouso
+      arm.rotation.x += rx;
+    } else {
+      let dz;
+      if (p < 0.6) dz = -0.12 * ease(p / 0.6); // puxa a corda
+      else if (p < 0.72) dz = -0.12 - 0.3 * ease((p - 0.6) / 0.12); // coice ao disparar
+      else dz = -0.42 * (1 - ease((p - 0.72) / 0.28));
+      arm.position.z += dz;
     }
   }
 

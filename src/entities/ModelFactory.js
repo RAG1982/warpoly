@@ -38,6 +38,7 @@ import {
   createMushroomStump,
   createWaterLily
 } from '../models/index.js';
+import { createWallSegment } from '../models/buildings/WallModel.js';
 import { prepareStaticTemplate, isStaticMergeEnabled } from '../render/staticTemplates.js';
 import { mergeUnitTemplate } from '../render/mergeUnitTemplate.js';
 import { skinUnitTemplate, isSkinEnabled } from '../render/skinUnitTemplate.js';
@@ -282,6 +283,8 @@ export class ModelFactory {
       case 'orc_house': return this.createOrcHouse();
       case 'orc_forge': return this.createOrcForge();
       case 'forge': return this.createHumanForge();
+      case 'wall_human': return createWallSegment('human');
+      case 'wall_orc': return createWallSegment('orc');
       case 'barracks': return this.createBarracks();
       case 'orc_barracks': return this.createOrcBarracks();
       case 'watchtower': return this.createWatchtower();

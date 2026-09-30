@@ -90,6 +90,8 @@ export class Building {
     // Stats config
     const stats = Building.getBuildingStats(type);
     this.name = stats.name;
+    /** Papel da construção (`hq`, `house`, `wall`…), de src/data/buildings.js. */
+    this.role = getBuildingDef(type).role || null;
     this.hp = stats.hp;
     this.maxHp = stats.hp;
     this.cost = stats.cost;

@@ -14,7 +14,8 @@ export const BUILD_HOTKEY_BY_ROLE = {
   farm: 'F',
   barracks: 'B',
   forge: 'K',
-  tower: 'T'
+  tower: 'T',
+  wall: 'M'
 };
 
 /** Treinar unidades: posicional, na ordem dos botões (até 3 unidades treináveis por construção). */

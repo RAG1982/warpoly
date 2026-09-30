@@ -5,7 +5,7 @@
  * - name          Nome PT-BR exibido no painel de construção do trabalhador (D2: provisório até a F3-00).
  * - entityName    Rótulo atual do card de seleção (legado; unificar com `name` na F3-00/F6-09).
  * - faction       'human' | 'orc' | 'neutral'.
- * - role          'hq' | 'house' | 'farm' | 'lumber' | 'barracks' | 'forge' | 'tower' | 'camp'.
+ * - role          'hq' | 'house' | 'farm' | 'lumber' | 'barracks' | 'forge' | 'tower' | 'wall' | 'camp'.
  * - hp, cost {gold, wood, stone}, collisionRadius, popGranted.
  * - armor         F3-03: armadura da construção (corrige B5 — antes não existia). HQ/torres
  *                  20, muralhas 10 (quando existirem), demais 15 (design §6).
@@ -21,6 +21,11 @@
  * - dropoff       Recursos aceitos como ponto de entrega ([] = não é ponto de entrega).
  * - icon, description.
  */
+
+/** F3-08: distância entre centros de segmentos de muralha colocados em arrasto. */
+export const WALL_STEP = 2.4;
+/** F3-08: máximo de segmentos por comando PLACE_WALL. */
+export const WALL_MAX_POINTS = 60;
 
 const HQ_DROPOFF = ['wood', 'gold', 'stone'];
 const LUMBER_DROPOFF = ['wood'];
@@ -169,6 +174,28 @@ export const BUILDINGS = {
     description: 'Torre defensiva com arqueiros'
   },
 
+  wall_human: {
+    type: 'wall_human',
+    name: 'Muralha de Pedra',
+    entityName: 'Muralha de Pedra',
+    faction: 'human',
+    role: 'wall',
+    hp: 250,
+    armor: 10,
+    cost: { gold: 0, wood: 10, stone: 20 },
+    collisionRadius: 1.5,
+    popGranted: 0,
+    visionRadius: 6,
+    healthBarHeight: 2.6,
+    tower: null,
+    passiveIncome: null,
+    trains: [],
+    dropoff: [],
+    requires: [],
+    icon: '/icoTorre.svg',
+    description: 'Segmento de muralha: bloqueia a passagem até ser destruído'
+  },
+
   // --- Clãs Orcs ---
   great_hall: {
     type: 'great_hall',
@@ -310,6 +337,28 @@ export const BUILDINGS = {
     dropoff: [],
     icon: '/icoTorreOrc.svg',
     description: 'Torre defensiva com arremesso de machados'
+  },
+
+  wall_orc: {
+    type: 'wall_orc',
+    name: 'Paliçada de Ferro',
+    entityName: 'Paliçada de Ferro',
+    faction: 'orc',
+    role: 'wall',
+    hp: 250,
+    armor: 10,
+    cost: { gold: 0, wood: 10, stone: 20 },
+    collisionRadius: 1.5,
+    popGranted: 0,
+    visionRadius: 6,
+    healthBarHeight: 2.6,
+    tower: null,
+    passiveIncome: null,
+    trains: [],
+    dropoff: [],
+    requires: [],
+    icon: '/icoTorreOrc.svg',
+    description: 'Segmento de paliçada: bloqueia a passagem até ser destruído'
   },
 
   // --- Neutro ---

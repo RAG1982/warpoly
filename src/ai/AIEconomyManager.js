@@ -1,6 +1,6 @@
 import { CMD } from '../sim/commands.js';
 import { missingRequirements, missingUpgradeRequirements } from '../sim/requirements.js';
-import { getHqUpgradeCost, getBuildingDef, getUnitDef, RESEARCH } from '../data/index.js';
+import { getHqUpgradeCost, getBuildingDef, getUnitDef, RESEARCH, WALL_STEP } from '../data/index.js';
 
 /**
  * AIEconomyManager (Gerenciador de Economia e Construção da IA)
@@ -27,6 +27,9 @@ export class AIEconomyManager {
     this.director = director;
     this.gm = director.gm;
     this.currentGoal = 'BUILD_WORKFORCE';
+    /** F3-08: no máx. 1 linha de muralha por partida (`_wallAttempts` limita tentativas sem espaço). */
+    this._wallLineDone = false;
+    this._wallAttempts = 0;
   }
 
   /**
@@ -373,6 +376,71 @@ export class AIEconomyManager {
       this.placeBuilding(this.director.towerType);
       return;
     }
+
+    // 7. WALL LINE (F3-08): com trabalhadores e recursos sobrando, uma linha curta de muralha na
+    // frente do Centro, na direção do inimigo (só nas dificuldades Normal/Difícil/Brutal).
+    if (workerCount >= 8 && hasBarracks && towerCount >= 1) {
+      this.considerWallLine();
+    }
+  }
+
+  /**
+   * F3-08: constrói (uma única vez por partida) uma linha de até 6 segmentos de muralha a ~16
+   * unidades do Centro, perpendicular à direção do Centro inimigo mais próximo. Só com sobra de
+   * madeira/pedra (não compete com Quartel/Forja/Torres, que vêm antes em `manageBuildingPlacement`).
+   */
+  considerWallLine() {
+    if (this._wallLineDone || this._wallAttempts >= 3) return;
+    const diff = this.gm.matchConfig ? this.gm.matchConfig.difficulty : 'normal';
+    if (diff === 'easy') return;
+
+    const wallType = this.director.faction === 'orc' ? 'wall_orc' : 'wall_human';
+    const unit = getBuildingDef(wallType).cost;
+    const SEGMENTS = 6;
+    const res = this.director.resources;
+    if (res.wood < unit.wood * SEGMENTS + 120 || res.stone < unit.stone * SEGMENTS + 80) return;
+
+    const me = this.director.baseCenter;
+    const myId = this.director.playerId;
+    let enemyHq = null;
+    let best = Infinity;
+    for (const b of this.gm.buildings) {
+      if (b.isDead || b.role !== 'hq' || !this.gm.isHostile(myId, b.ownerId)) continue;
+      const d = Math.hypot(b.mesh.position.x - me.x, b.mesh.position.z - me.y);
+      if (d < best) { best = d; enemyHq = b; }
+    }
+    if (!enemyHq) return;
+    this._wallAttempts++;
+
+    const dx = enemyHq.mesh.position.x - me.x;
+    const dz = enemyHq.mesh.position.z - me.y;
+    const len = Math.hypot(dx, dz) || 1;
+    const fx = dx / len;
+    const fz = dz / len;
+    const px = -fz; // perpendicular à direção do inimigo
+    const pz = fx;
+    const cx = me.x + fx * 16;
+    const cz = me.y + fz * 16;
+    const points = [];
+    for (let i = 0; i < SEGMENTS; i++) {
+      const off = (i - (SEGMENTS - 1) / 2) * WALL_STEP;
+      const x = Math.round((cx + px * off) * 100) / 100;
+      const z = Math.round((cz + pz * off) * 100) / 100;
+      if (this.gm.canPlaceBuilding(wallType, x, z, null, myId)) points.push({ x, z });
+    }
+    if (points.length < 3) return;
+
+    const workers = this.director.getOwnUnits()
+      .filter(w => !w.isDead && w.type === this.director.workerType)
+      .sort((a, b) => {
+        const da = Math.hypot(a.mesh.position.x - cx, a.mesh.position.z - cz) + (a.state === 'idle' ? 0 : 50);
+        const db = Math.hypot(b.mesh.position.x - cx, b.mesh.position.z - cz) + (b.state === 'idle' ? 0 : 50);
+        return da - db || a.id - b.id;
+      })
+      .slice(0, 2)
+      .map(w => w.id);
+    this.gm.issue({ type: CMD.PLACE_WALL, playerId: myId, buildingType: wallType, points, unitIds: workers });
+    this._wallLineDone = true;
   }
 
   /**

@@ -204,32 +204,40 @@ describe('Pathfinder', () => {
       }
     };
 
-    it('retorna caminho vazio (não atravessa bloqueio) quando origem é inacessível', () => {
+    it('destino dentro do anel: caminho até a margem mais próxima, marcado noPath (F3-08)', () => {
       const pf = new Pathfinder(closedRingTerrain);
-      // Origem fora do anel, destino dentro: sem caminho para o destino exato,
-      // e nenhum vizinho alcançável, logo retorna []
+      // Origem fora do anel, destino dentro: sem caminho ao destino exato. F3-08: a busca devolve
+      // o caminho até o ponto alcançável mais próximo do destino (a margem), não [].
       const path = pf.findPath(-30, 0, 5, 0);
-      expect(path).toEqual([]);
+      expect(path.noPath).toBe(true);
+      expect(path.length).toBeGreaterThan(0);
+      const last = path[path.length - 1];
+      expect(Math.hypot(last.x, last.z)).toBeGreaterThanOrEqual(18); // margem externa do anel
     });
 
     it('não gera caminho reto através do bloqueio', () => {
       const pf = new Pathfinder(closedRingTerrain);
       const path = pf.findPath(-30, 0, 5, 0);
       // Não deve haver nenhum segmento que atravesse o anel de água
-      if (path.length > 0) {
-        let px = -30, pz = 0;
-        for (const wp of path) {
-          // Cada ponto do segmento deve estar em terra seca (não água)
-          expect(pf.isWater((px + wp.x) / 2, (pz + wp.z) / 2)).toBe(false);
-          px = wp.x; pz = wp.z;
-        }
+      expect(path.length).toBeGreaterThan(0);
+      let px = -30, pz = 0;
+      for (const wp of path) {
+        expect(pf.isWater((px + wp.x) / 2, (pz + wp.z) / 2)).toBe(false);
+        px = wp.x; pz = wp.z;
       }
     });
 
-    it('comportamento simétrico: origem dentro, destino fora também inacessível', () => {
+    it('comportamento simétrico: origem dentro, destino fora também vai só até a margem', () => {
       const pf = new Pathfinder(closedRingTerrain);
       const path = pf.findPath(5, 0, -30, 0);
-      expect(path).toEqual([]);
+      expect(path.noPath).toBe(true);
+      const last = path[path.length - 1];
+      expect(Math.hypot(last.x, last.z)).toBeLessThanOrEqual(15);
+    });
+
+    it('destino alcançável não é marcado noPath', () => {
+      const pf = new Pathfinder(closedRingTerrain);
+      expect(pf.findPath(-30, 0, -40, 10).noPath).toBeFalsy();
     });
   });
 

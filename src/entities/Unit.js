@@ -1720,11 +1720,13 @@ export class Unit {
    */
   _detonate(gm, allUnits) {
     if (this.isDead || this.isDying) return;
-    const pos = this.mesh.position;
+    // A explosão é centrada no alvo (o sapador para a `attackRange` + raio do alvo do centro dele) e a
+    // distância é medida até a superfície: atinge o alvo inteiro e os vizinhos encostados (muralhas).
+    const pos = this.attackTarget && this.attackTarget.mesh ? this.attackTarget.mesh.position : this.mesh.position;
     const gmEvents = gm && gm.events;
     if (gmEvents) gmEvents.emit(EVT.EXPLOSION, { pos: posOf(pos), radius: this.splashRadius, ownerId: this.ownerId });
     if (gm && gm.unitGrid && gm.blockerGrid) {
-      applySplashDamage(gm, this, this.damage, pos, this.splashRadius, allUnits, 0.4);
+      applySplashDamage(gm, this, this.damage, pos, this.splashRadius, allUnits, 0.4, true);
     }
     this.lastAttackerOwnerId = null;
     this.die();

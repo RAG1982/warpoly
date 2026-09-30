@@ -29,9 +29,11 @@ export function splashFalloff(dist, radius, edge = 0.5) {
  * @param {number} radius
  * @param {Array} allUnits
  * @param {number} [edge=0.5]  multiplicador de dano na borda do raio
+ * @param {boolean} [surface=false]  mede a distância até a SUPERFÍCIE da entidade (centro − `collisionRadius`),
+ *   não até o centro (F4-05: a explosão do sapador alcança segmentos de muralha vizinhos)
  * @returns {number} quantas entidades foram atingidas
  */
-export function applySplashDamage(gm, owner, damage, pos, radius, allUnits, edge = 0.5) {
+export function applySplashDamage(gm, owner, damage, pos, radius, allUnits, edge = 0.5, surface = false) {
   _all.length = 0;
   const alive = e => !e.isDead && !e.isDying && e.hp > 0 && owner.isHostileTo(e);
   gm.unitGrid.queryRadius(pos.x, pos.z, radius, alive, _units);
@@ -43,7 +45,8 @@ export function applySplashDamage(gm, owner, damage, pos, radius, allUnits, edge
   let hits = 0;
   for (let i = 0; i < _all.length; i++) {
     const e = _all[i];
-    const d = Math.hypot(e.mesh.position.x - pos.x, e.mesh.position.z - pos.z);
+    const d0 = Math.hypot(e.mesh.position.x - pos.x, e.mesh.position.z - pos.z);
+    const d = surface ? Math.max(0, d0 - (e.collisionRadius || 0)) : d0;
     if (d > radius) continue;
     const dmg = Math.max(1, Math.round(computeDamage(damage, e, gm.combatRng) * splashFalloff(d, radius, edge)));
     e.takeDamage(dmg, owner, allUnits);

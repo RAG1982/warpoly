@@ -28,6 +28,7 @@ const ATTACKERS = {
   knight: attackerFrom(UNITS.knight.damage, UNITS.knight.attackCooldown),
   archer: attackerFrom(UNITS.archer.damage, UNITS.archer.attackCooldown),
   grunt: attackerFrom(UNITS.grunt.damage, UNITS.grunt.attackCooldown),
+  ballista: attackerFrom(UNITS.ballista.damage, UNITS.ballista.attackCooldown), // F4-02 (catapult = mesmos números)
   watchtower: attackerFrom(BUILDINGS.watchtower.tower.damage, BUILDINGS.watchtower.tower.cooldown)
 };
 
@@ -45,7 +46,9 @@ const PAIRS = [
   ['grunt', 'archer'],
   ['knight', 'castle'],
   ['archer', 'castle'],
-  ['watchtower', 'knight']
+  ['watchtower', 'knight'],
+  ['ballista', 'castle'], // F4-02: cerco × construção (×1,5)
+  ['ballista', 'knight'] // F4-02: cerco × unidade (×0,5), 1 alvo no centro da área
 ];
 
 function measure(attackerKey, targetKey, rng) {

@@ -187,6 +187,8 @@ contras acima. Números de exemplo (seed 42), não normativos — o balanceament
 
 ## 7. Pesquisas
 
+> **Implementado (F3-07):** Armas, Escudos/Placas, Flechas/Machados, Ofício do lenhador, Classe avançada e as 6 pesquisas da classe avançada. Faltam Cerco, Templo/Altar, Fundição e Magias (F4).
+
 | Onde | Pesquisa | Níveis | Efeito | Custo nível 1 / 2 |
 |---|---|---|---|---|
 | Ferraria/Forja | Armas | 2 | +2 dano básico infantaria/cavalaria (por nível) | 200/100/0 · 400/200/0 |

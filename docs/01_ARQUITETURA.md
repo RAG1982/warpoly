@@ -37,7 +37,7 @@ src/
                               construções/árvores vivas, além da água), string-pulling, fila com orçamento
                               por frame (requestPath/processQueue) e cache de caminhos por par de células (F1-07)
     FogOfWar.js               Grade 128², canvas → textura num plano a y=5.2
-    UpgradeConfig.js          4 pesquisas da forja
+    UpgradeConfig.js          reexporta UPGRADE_CONFIG/FORGE_UPGRADES (derivados de RESEARCH)
     AssetPreloader.js         Constrói e compila todos os modelos/texturas antes do jogo (~35 itens)
     SoundManager.js           SFX e música procedurais
     GLTFBuildingLoader.js     (importado só por entities/buildings/orc/GreatHall.js)
@@ -192,11 +192,11 @@ animate() [rAF da aplicação, delta máx 0.1s; sem sessão (menu/loading) não 
 ### Jogadores
 - `MatchConfig` (`src/sim/MatchConfig.js`): `{ mapId, seed, difficulty, players: [{ id, name, factionId, team, color, isAI, isLocal, startSlot }] }`.
   `main.js` monta a config a partir do menu (`createMatchConfig`) ou da URL (`matchConfigFromSearch`, agora também lê `?map=`) e a `MatchSession` a passa ao `GameManager`. `difficulty` (`easy|normal|hard|brutal`) é guardada na config (a IA ainda não a lê); `withNewSeed(cfg)` gera a config de "Jogar novamente". Padrão: 1×1, jogador local = `?faction` ou humano (id 0, time 0), IA = a outra facção (id 1, time 1). `?ffa=1` acrescenta a IA 2 (facção do jogador local, time 2, slot 2). `validateMatchConfig` (F2-05) valida contra o mapa: `players.length <= mapDef.maxPlayers` e todo `startSlot` existe em `mapDef.startSlots`.
-- `Player` (`src/sim/Player.js`): `resources {wood, gold, stone}`, `population`, `maxPopulation`, `researchedUpgrades: Set`, `defeated`, `startPos`; métodos `canAfford`, `deduct`, `add` (tipo ou custo inteiro), `recalculatePop(gm)`.
+- `Player` (`src/sim/Player.js`): `resources {wood, gold, stone}`, `population`, `maxPopulation`, `researchLevels: Map<id, nível>` (F3-07; `researchedUpgrades: Set` derivado, nível ≥ 1), `defeated`, `startPos`; métodos `canAfford`, `deduct`, `add` (tipo ou custo inteiro), `recalculatePop(gm)`.
 - `PlayerRegistry`: `getPlayer(id)`, `localPlayer`, `isHostile(a, b)` (times diferentes; matriz pré-calculada, usada nas varreduras O(n²)), `isAlly(a, b)`, `aliveTeams()`. O dono neutro (−1) não é hostil nem aliado de ninguém.
 - `GameManager` expõe `players`, `getPlayer`, `localPlayer`, `localPlayerId`, `isHostile`, `isAlly`, `aiDirectors[]` (um `AIDirector(gm, playerId, baseCenter)` por IA; `aiDirector` = o primeiro).
 - A IA não tem cópia própria de recursos/população: `AIDirector.resources/population/maxPopulation` são getters do `Player`.
-- Toda cobrança/crédito passa pelo dono: `Building.queueUnit/cancelQueuedUnit/startResearch/cancelResearch`, renda passiva, `Unit.depositResources`, construção concluída e `spawnUnit` usam `gm.getPlayer(ownerId)`. Pesquisas (`researchedUpgrades`) são por jogador.
+- Toda cobrança/crédito passa pelo dono: `Building.queueUnit/cancelQueuedUnit/startResearch/cancelResearch`, renda passiva, `Unit.depositResources`, construção concluída e `spawnUnit` usam `gm.getPlayer(ownerId)`. Pesquisas são por jogador (`Player.researchLevels`). F3-07: `RESEARCH` (`src/data/upgrades.js`) = `{building:'forge'|'lumber', faction?, levels:[{cost,time,bonus?,effect?,requires}], appliesTo?, name}`; `gm.completeUpgrade` aplica o bônus do nível às unidades vivas (`applyResearchLevelToUnit`), `applyUpgradeToUnit` aplica os níveis acumulados às treinadas depois, `effect.promote` troca o `type` (`promoteUnit`) e `gm.resolveTrainType` faz o Quartel treinar a classe avançada. Requisitos aceitam `{research:'id', level?}`.
 
 ### Entidades
 - Toda `Unit`, `Building`, `Tree`, `ResourceDeposit` e projétil (`Arrow`) tem `id` numérico estável (contador monotônico, nunca reaproveitado na vida do `GameManager`) e `ownerId` (−1 = natureza/neutro). `gm.entitiesById` (Map) é mantido no spawn/criação e na remoção (morte, fim do projétil, `resetMap`).

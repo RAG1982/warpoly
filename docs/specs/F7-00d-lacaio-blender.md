@@ -1,7 +1,7 @@
 # F7-00d · Lacaio (trabalhador orc) no pipeline Blender
 
 Leia antes: `docs/specs/_COMUM.md`, `CLAUDE.md` (regras de rosto só em +Z e gume para +Z; orçamento ≤ 20 draw calls, texturas ≤ 512²), `tools/blender/README.md` (pipeline F7-00), `tools/blender/build_grunt.py` (**modelo de referência — copie a estrutura**), `docs/08_GAME_DESIGN.md` (Lacaio = trabalhador dos Clãs de Gorthak), referências de arte `docs/reference/modeloorcs.png` e `specs/orc_buildings/00_ORC_ART_DIRECTION_PIPELINE.md`.
-Executor: **sonnet**. Worktree isolada. Porta do vite **5201**. Blender: `/home/rafael/Downloads/blender-5.2.1-linux-x64/blender`.
+Executor: **Opus** (decisão do dono: modelagem 3D nunca com Sonnet/Haiku). Worktree isolada. Porta do vite **5201**. Blender: `/home/rafael/Downloads/blender-5.2.1-linux-x64/blender`.
 
 ## Objetivo
 Substituir o trabalhador orc procedural (`src/models/units/PeonModel.js`, tipo interno `peon`, 38 meshes) por um `.glb` gerado por script no mesmo estilo e qualidade do Grunt aprovado pelo dono (`public/models/grunt.glb`). O Lacaio é mais baixo e magro que o guerreiro, costas curvadas, avental de couro, cinto de ferramentas, pele verde-oliva, presas pequenas, olhos âmbar, sem armadura pesada.

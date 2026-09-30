@@ -1089,6 +1089,13 @@ export class GameManager {
     return isPlayerDefeated(this.matchConfig.victoryMode, scratch);
   }
 
+  /** F3-09: despacha eventos pendentes (kills do último tick) e congela o snapshot final. */
+  _freezeResult() {
+    if (this.result) return;
+    this.events.flush();
+    this.result = this.matchStats.snapshot();
+  }
+
   /**
    * Derrota por modo (`conquest`: sem construções; `regicide`: sem Centro). Cada derrotado emite
    * `PLAYER_DEFEATED` uma vez; suas entidades continuam no mapa, inertes (ver `simStep`).
@@ -1109,7 +1116,7 @@ export class GameManager {
     if (local.defeated) {
       this.isGameOver = true;
       this.gameWon = false;
-      if (!this.result) this.result = this.matchStats.snapshot();
+      this._freezeResult();
       return true;
     }
 
@@ -1119,7 +1126,7 @@ export class GameManager {
         this.isGameOver = true;
         this.events.emit(EVT.MATCH_WON, { ownerId: local.id });
       }
-      if (!this.result) this.result = this.matchStats.snapshot();
+      this._freezeResult();
       return true;
     }
     return false;

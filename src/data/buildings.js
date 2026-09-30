@@ -176,7 +176,7 @@ export const BUILDINGS = {
     entityName: 'Grande Salão Orc',
     faction: 'orc',
     role: 'hq',
-    hp: 1750,
+    hp: 1600, // F3-06 NEW-24: alinhado a HQ_TIER_HP[1] (src/data/tiers.js) — antes 1750.
     armor: 20,
     cost: { gold: 0, wood: 220, stone: 140 },
     collisionRadius: 5.5,

@@ -1,7 +1,9 @@
 import { UNIT_TRAIN_CONFIG, BUILDING_BUILD_CONFIG, WORKER_BUILD_LIST } from '../entities/Building.js';
 import { UPGRADE_CONFIG, FORGE_UPGRADES } from '../core/UpgradeConfig.js';
-import { BUILDING_TRAINABLE_UNITS, getUnitDef, getBuildingDef } from '../data/index.js';
-import { missingRequirements } from '../sim/requirements.js';
+import { BUILDING_TRAINABLE_UNITS, getUnitDef, getBuildingDef, getHqUpgradeCost, getTierName } from '../data/index.js';
+import {
+  missingRequirements, missingUnitRequirements, missingUpgradeRequirements, formatRequirementList
+} from '../sim/requirements.js';
 import { initUiScale } from './uiScale.js';
 import { getBuildHotkey, getTrainHotkey, getResearchHotkey } from './hotkeys.js';
 import { buildCostHtml } from './Tooltip.js';
@@ -41,6 +43,15 @@ export class UIManager {
     this.bldSelectionHp = document.getElementById('bld-selection-hp');
     this.bldSelectionHpFill = document.getElementById('bld-selection-hp-fill');
     this.bldExtraInfo = document.getElementById('bld-extra-info');
+
+    // F3-06: card de nível do Centro (só role: 'hq')
+    this.bldHqTierSection = document.getElementById('bld-hq-tier-section');
+    this.bldHqTierLabel = document.getElementById('bld-hq-tier-label');
+    this.bldHqUpgradeBtn = document.getElementById('bld-hq-upgrade-btn');
+    this.bldHqUpgradeBtnLabel = document.getElementById('bld-hq-upgrade-btn-label');
+    this.bldHqUpgradeProgressBar = document.getElementById('bld-hq-upgrade-progress-bar');
+    this.bldHqUpgradeProgressTrack = document.getElementById('bld-hq-upgrade-progress-track');
+
     this.bldTrainSection = document.getElementById('bld-train-section');
     this.bldTrainLabel = this.bldTrainSection ? this.bldTrainSection.querySelector('.bld-section-label') : null;
     this.bldTrainButtons = document.getElementById('bld-train-buttons');
@@ -339,6 +350,29 @@ export class UIManager {
     if (!this.buildingView) return;
 
     this.buildingView.addEventListener('click', (e) => {
+      // 0. Click on the HQ tier-upgrade button (F3-06)
+      const hqUpgradeBtn = e.target.closest('#bld-hq-upgrade-btn');
+      if (hqUpgradeBtn && this.gm.selectedBuilding) {
+        const b = this.gm.selectedBuilding;
+        if (b.tierUpgrade) {
+          // Upgrade em andamento: clique cancela e reembolsa 100%.
+          this.gm.issue({ type: CMD.CANCEL_UPGRADE_HQ, playerId: this.gm.localPlayerId, buildingId: b.id });
+          this.sound.playSelect();
+          this.showNotification('Upgrade cancelado. Recursos reembolsados.');
+          return;
+        }
+        if (b.tier >= 3) return;
+        const cost = getHqUpgradeCost(b.tier + 1);
+        if (cost && !this.gm.canAfford(cost)) {
+          this.sound.playChop();
+          this.showNotification('⚠️ Recursos insuficientes!');
+          return;
+        }
+        this.gm.issue({ type: CMD.UPGRADE_HQ, playerId: this.gm.localPlayerId, buildingId: b.id });
+        this.sound.playHammer();
+        return;
+      }
+
       // 1. Click on forge upgrade button
       const upgradeBtn = e.target.closest('.bld-upgrade-btn');
       if (upgradeBtn && this.gm.selectedBuilding) {
@@ -534,6 +568,9 @@ export class UIManager {
 
       // Queue slots and horizontal progress bar
       this.updateBuildingQueue(b);
+
+      // F3-06: card de nível do Centro (`role: 'hq'`)
+      this.updateHqTierCard(b);
     } else if (this.gm.selectedResource) {
       this.currentBuilding = null;
       if (this.buildingView) this.buildingView.style.display = 'none';
@@ -819,6 +856,68 @@ export class UIManager {
     }
   }
 
+  /**
+   * F3-06: card de nível do Centro (`role: 'hq'`) — nome do nível atual, botão "Evoluir para
+   * <próximo nome>" (custo no tooltip, desabilitado com o motivo) e barra de progresso do
+   * upgrade. Escondido para qualquer outra construção.
+   */
+  updateHqTierCard(b) {
+    if (!this.bldHqTierSection) return;
+    const isHq = getBuildingDef(b.type).role === 'hq';
+    if (!isHq || !b.isConstructed) {
+      this.bldHqTierSection.style.display = 'none';
+      return;
+    }
+    this.bldHqTierSection.style.display = 'flex';
+
+    const factionType = this.gm.playerFaction === 'orc' ? 'orc' : 'human';
+    const tierName = getTierName(factionType, b.tier);
+    if (this.bldHqTierLabel) this.bldHqTierLabel.innerText = `NÍVEL ${b.tier} — ${tierName.toUpperCase()}`;
+
+    const btn = this.bldHqUpgradeBtn;
+    if (!btn) return;
+
+    if (b.tierUpgrade) {
+      // Upgrade em andamento: botão vira "cancelar", barra mostra o progresso.
+      btn.disabled = false;
+      btn.classList.remove('bld-requirement-missing');
+      if (this.bldHqUpgradeBtnLabel) this.bldHqUpgradeBtnLabel.innerText = 'Cancelar';
+      btn.title = 'Cancelar upgrade (reembolsa 100%)';
+      const pct = Math.min(100, Math.max(0, (b.tierUpgrade.progress / b.tierUpgrade.totalTime) * 100));
+      if (this.bldHqUpgradeProgressBar) this.bldHqUpgradeProgressBar.style.width = `${pct}%`;
+      if (this.bldHqUpgradeProgressTrack) this.bldHqUpgradeProgressTrack.style.opacity = '1';
+      return;
+    }
+
+    if (this.bldHqUpgradeProgressBar) this.bldHqUpgradeProgressBar.style.width = '0%';
+    if (this.bldHqUpgradeProgressTrack) this.bldHqUpgradeProgressTrack.style.opacity = '0.35';
+
+    if (b.tier >= 3) {
+      btn.disabled = true;
+      btn.classList.remove('bld-requirement-missing');
+      if (this.bldHqUpgradeBtnLabel) this.bldHqUpgradeBtnLabel.innerText = 'Nível máximo';
+      btn.title = 'Nível máximo atingido';
+      return;
+    }
+
+    const nextTier = b.tier + 1;
+    const nextName = getTierName(factionType, nextTier);
+    const cost = getHqUpgradeCost(nextTier);
+    const canAfford = !cost || this.gm.canAfford(cost);
+    if (this.bldHqUpgradeBtnLabel) this.bldHqUpgradeBtnLabel.innerText = `Evoluir para ${nextName}`;
+
+    if (!canAfford) {
+      btn.disabled = true;
+      btn.classList.add('bld-requirement-missing');
+      const costTxt = cost ? buildCostHtml(cost, this.gm.resources).replace(/<[^>]+>/g, ' ').trim() : '';
+      btn.title = `Recursos insuficientes! Custo: ${costTxt}`;
+    } else {
+      btn.disabled = false;
+      btn.classList.remove('bld-requirement-missing');
+      btn.title = `Evoluir para ${nextName} (${cost.gold} ouro, ${cost.wood} madeira, ${cost.stone} pedra, ${cost.time}s)`;
+    }
+  }
+
   renderSelectionActions(key) {
     if (key === 'villager_actions' || key === 'peon_actions') {
       const workerType = key === 'villager_actions' ? 'villager' : 'peon';
@@ -903,9 +1002,8 @@ export class UIManager {
       if (!btn) return;
       const missing = missingRequirements(ownerId, bType, this.gm);
       if (missing.length > 0) {
-        const names = missing.map(t => getBuildingDef(t).name).join(', ');
         btn.disabled = true;
-        btn.title = `Requer: ${names}`;
+        btn.title = `Requer: ${formatRequirementList(missing)}`;
         btn.classList.add('bld-requirement-missing');
       } else {
         btn.disabled = false;

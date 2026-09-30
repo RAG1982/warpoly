@@ -17,8 +17,11 @@ import {
   isWorkerType,
   UNIT_TRAIN_CONFIG,
   BUILDING_BUILD_CONFIG,
-  WORKER_BUILD_LIST
+  WORKER_BUILD_LIST,
+  HQ_TIER_HP,
+  getHqUpgradeCost
 } from '../data/index.js';
+import { missingUnitRequirements, missingUpgradeRequirements } from '../sim/requirements.js';
 
 // Tabelas derivadas de src/data (F0-06). Reexportadas com os nomes legados porque
 // UIManager, InputManager e outros módulos importam daqui.
@@ -106,6 +109,12 @@ export class Building {
     this.queue = [];
     this.currentResearch = null;
     this.researchSoundTimer = 0;
+
+    // F3-06: nível do Centro (`role: 'hq'`). Outras construções ficam em `tier: 1` fixo
+    // (campo presente por uniformidade, nunca sobe).
+    this.tier = 1;
+    /** @type {{targetTier:number, progress:number, totalTime:number, cost:object}|null} */
+    this.tierUpgrade = null;
     const rallyDist = this.collisionRadius + 2.5;
     this.rallyPoint = new THREE.Vector3(x + (this.type === 'castle' ? 0 : 2.0), 0, z + rallyDist);
     this.rallyPoint.y = this.terrain.getHeight(this.rallyPoint.x, this.rallyPoint.z);
@@ -546,6 +555,11 @@ export class Building {
       return false;
     }
 
+    // F3-06: Centro em upgrade de nível não treina (a fila fica pausada; ver `startTierUpgrade`).
+    if (this.tierUpgrade) {
+      return false;
+    }
+
     // Only workers can be trained at Town Centers (Castle / Great Hall)
     const role = getBuildingDef(this.type).role;
     if (role === 'hq' && !isWorkerType(unitType)) {
@@ -563,6 +577,11 @@ export class Building {
     const gm = gameManager || this.gameManager;
     const owner = this.getOwner(gm);
     if (!owner) return false;
+
+    // F3-06: requisitos generalizados (construção/{hq:N}) — falha silenciosa, sem debitar.
+    if (missingUnitRequirements(this.ownerId, unitType, gm).length > 0) {
+      return false;
+    }
 
     // Unidades já na fila de QUALQUER construção do mesmo dono contam para o teto de população
     let queuedCount = 0;
@@ -616,6 +635,9 @@ export class Building {
     // Check if another forge is already researching this
     if (gm.isUpgradeResearching(upgradeId, this.ownerId)) return false;
 
+    // F3-06: requisitos generalizados (construção/{hq:N}) — falha silenciosa, sem debitar.
+    if (missingUpgradeRequirements(this.ownerId, upgradeId, gm).length > 0) return false;
+
     const owner = this.getOwner(gm);
     if (!owner || !owner.canAfford(cfg.cost)) return false;
     owner.deduct(cfg.cost);
@@ -638,6 +660,49 @@ export class Building {
       owner.add(cfg.cost);
     }
     this.currentResearch = null;
+    return true;
+  }
+
+  /**
+   * F3-06: inicia o upgrade de nível do Centro (`role: 'hq'`). Valida tipo/tier/custo/estado
+   * e debita o custo; a evolução real (`tier++`, PV, evento) acontece em `simUpdate` quando
+   * `tierUpgrade.progress >= totalTime`. Enquanto em andamento, `queueUnit` recusa treino
+   * (fila pausada) mas o Centro continua sendo ponto de entrega normalmente.
+   */
+  startTierUpgrade(gameManager) {
+    if (getBuildingDef(this.type).role !== 'hq') return false;
+    if (!this.isConstructed || this.isDead) return false;
+    if (this.tier >= 3) return false;
+    if (this.tierUpgrade) return false;
+
+    const nextTier = this.tier + 1;
+    const cost = getHqUpgradeCost(nextTier);
+    if (!cost) return false;
+
+    const gm = gameManager || this.gameManager;
+    if (!gm) return false;
+    const owner = this.getOwner(gm);
+    if (!owner || !owner.canAfford(cost)) return false;
+
+    owner.deduct(cost);
+    this.tierUpgrade = {
+      targetTier: nextTier,
+      progress: 0,
+      totalTime: cost.time,
+      cost
+    };
+    return true;
+  }
+
+  /** F3-06: cancela o upgrade em andamento e devolve 100% do custo (símétrico a `cancelResearch`). */
+  cancelTierUpgrade(gameManager) {
+    if (!this.tierUpgrade) return false;
+    const cost = this.tierUpgrade.cost;
+    const owner = this.getOwner(gameManager || this.gameManager);
+    if (cost && owner) {
+      owner.add(cost);
+    }
+    this.tierUpgrade = null;
     return true;
   }
 
@@ -759,6 +824,33 @@ export class Building {
         if (gmEvents) {
           gmEvents.emit(EVT.BUILDING_VFX, { buildingId: this.id, ownerId: this.ownerId, pos: posOf(this.mesh.position), kind: 'anvil_spark' });
           gmEvents.emit(EVT.RESEARCH_DONE, { ownerId: this.ownerId, upgradeId: completedId, pos: posOf(this.mesh.position) });
+        }
+      }
+    }
+
+    // F3-06: progresso do upgrade de nível do Centro (fila de treino já recusa novos pedidos
+    // via `queueUnit`; o item já em treino quando o upgrade começou continua até o fim).
+    if (this.isConstructed && this.tierUpgrade) {
+      const t = this.tierUpgrade;
+      t.progress += delta;
+      if (t.progress >= t.totalTime) {
+        const newTier = t.targetTier;
+        this.tierUpgrade = null;
+        this.tier = newTier;
+
+        // PV máximo sobe para o valor do nível preservando a proporção de PV atual.
+        const pct = this.maxHp > 0 ? this.hp / this.maxHp : 1;
+        this.maxHp = HQ_TIER_HP[newTier] || this.maxHp;
+        this.hp = Math.min(this.maxHp, Math.round(this.maxHp * pct));
+        this.updateHealthBar();
+
+        if (gmEvents) {
+          gmEvents.emit(EVT.HQ_TIER_CHANGED, {
+            buildingId: this.id,
+            ownerId: this.ownerId,
+            pos: posOf(this.mesh.position),
+            tier: newTier
+          });
         }
       }
     }

@@ -8,9 +8,12 @@
  *                     (mesh invisível, sem colisão/seleção — ver `Unit.js` estado `insideMine`).
  * - MINE_SLOTS       Nº máximo de trabalhadores simultaneamente dentro, por tipo de jazida
  *                     (`ResourceDeposit`). Madeira não usa slot: o corte continua fora da árvore.
- * - RATE_BONUS       Multiplicadores por melhoria (chegam na F3-06/F3-04-forge); hoje só
- *                     declarados e lidos por `gatherMultiplier`, que devolve 1 sempre.
+ * - RATE_BONUS       Multiplicadores por melhoria; `gatherMultiplier` já liga `hq_lv2`/`hq_lv3`
+ *                     (via `HQ_TIER_GOLD_MULT`, F3-06). Madeira (Serraria nv2) e pedra
+ *                     (Pedreira) continuam só declarados, sem ligação ainda.
  */
+import { BUILDINGS } from './buildings.js';
+import { HQ_TIER_GOLD_MULT } from './tiers.js';
 
 export const CARRY = { gold: 10, wood: 10, stone: 8 };
 
@@ -25,13 +28,24 @@ export const RATE_BONUS = {
 };
 
 /**
- * Multiplicador de coleta de `resource` para `playerId` (níveis de construção chegam na
- * F3-06: por ora não há melhoria nenhuma aplicada, então devolve sempre 1).
+ * Multiplicador de coleta de `resource` para `playerId`. F3-06: ouro usa o nível do Centro
+ * do dono (`HQ_TIER_GOLD_MULT`, `src/data/tiers.js`) — 1.0/1.10/1.20 nos níveis 1/2/3.
+ * Madeira/pedra continuam em 1 (Serraria nível 2/Pedreira chegam depois — RATE_BONUS só
+ * declarado, sem ligação ainda).
  * @param {number} playerId
  * @param {'gold'|'wood'|'stone'} resource
  * @param {import('../core/GameManager.js').GameManager} gm
  * @returns {number}
  */
 export function gatherMultiplier(playerId, resource, gm) {
-  return 1;
+  if (resource !== 'gold' || !gm || !gm.buildings) return 1;
+  let tier = 1;
+  for (let i = 0; i < gm.buildings.length; i++) {
+    const b = gm.buildings[i];
+    const def = BUILDINGS[b.type];
+    if (b.ownerId === playerId && !b.isDead && b.tier > 0 && def && def.role === 'hq') {
+      tier = Math.max(tier, b.tier);
+    }
+  }
+  return HQ_TIER_GOLD_MULT[tier] || 1;
 }

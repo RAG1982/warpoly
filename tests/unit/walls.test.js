@@ -340,3 +340,35 @@ describe('exército derruba a muralha e chega ao alvo (F3-08, headless)', () => 
     expect(arrived).toBe(true);
   }, 60000);
 });
+
+describe('IA constrói uma linha curta de muralha (F3-08)', () => {
+  it('com recursos sobrando emite PLACE_WALL uma única vez por partida (<= 8 segmentos)', () => {
+    const scene = new THREE.Scene();
+    const terrain = new Terrain(scene);
+    const gm = new GameManager(scene, terrain, null, null, createMatchConfig({ seed: 7, headless: true }));
+    const director = gm.aiDirectors[0];
+    const eco = director.economyManager;
+    const p = gm.getPlayer(director.playerId);
+    p.resources.wood = 2000; p.resources.stone = 2000; p.resources.gold = 2000;
+    eco.considerWallLine();
+    for (let i = 0; i < 3; i++) gm.simStep(SIM_DT);
+    const mine = gm.buildings.filter(b => b.ownerId === director.playerId && b.role === 'wall');
+    expect(mine.length).toBeGreaterThanOrEqual(3);
+    expect(mine.length).toBeLessThanOrEqual(8);
+    eco.considerWallLine();
+    for (let i = 0; i < 3; i++) gm.simStep(SIM_DT);
+    expect(gm.buildings.filter(b => b.ownerId === director.playerId && b.role === 'wall').length).toBe(mine.length);
+  });
+
+  it('não constrói na dificuldade fácil', () => {
+    const scene = new THREE.Scene();
+    const terrain = new Terrain(scene);
+    const gm = new GameManager(scene, terrain, null, null, createMatchConfig({ seed: 7, headless: true, difficulty: 'easy' }));
+    const director = gm.aiDirectors[0];
+    const p = gm.getPlayer(director.playerId);
+    p.resources.wood = 2000; p.resources.stone = 2000;
+    director.economyManager.considerWallLine();
+    for (let i = 0; i < 3; i++) gm.simStep(SIM_DT);
+    expect(gm.buildings.filter(b => b.role === 'wall').length).toBe(0);
+  });
+});

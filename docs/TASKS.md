@@ -330,13 +330,13 @@ Sonnet 5.5 escreve a spec em `docs/specs/<ID>.md`; agente **Sonnet** executa; o 
 - `DONE(f419963)` (spec: docs/specs/F4-02-cerco.md) · GAME+ART · Dep: F3-03, F3-06 · Oficina (Inventor/Alquimista); dano em área, alcance mínimo, projétil balístico visível.
 
 ### F4-03 · Sistema de mana e habilidades
-- `DOING(sonnet, 2026-09-30)` (spec: docs/specs/F4-03-mana-habilidades.md) · GAME · Dep: F2-02 · Mana com regeneração, habilidades com alvo (unidade/área/auto-cast), cooldown, pesquisa que libera magia, UI no card de comandos, VFX genéricos.
+- `DONE(19c7eae)` (spec: docs/specs/F4-03-mana-habilidades.md) · GAME · Dep: F2-02 · Mana com regeneração, habilidades com alvo (unidade/área/auto-cast), cooldown, pesquisa que libera magia, UI no card de comandos, VFX genéricos.
 
 ### F4-04 · Conjuradores e magias
 - `TODO` · GAME+ART · Dep: F4-03 · Humano: Mago (Bola de fogo/Lentidão/Invisibilidade/Polimorfia/Nevasca), Paladino (Cura/Visão sagrada/Exorcismo). Orc: equivalentes originais do Cavaleiro da Morte e Ogro-Mago (Sede de Sangue/Runas/Olho vigilante/Ressuscitar mortos/Redemoinho). Construções: Igreja/Altar, Torre de Magos/Templo.
 
 ### F4-05 · Sapadores
-- `DOING(sonnet, 2026-09-30)` (spec: docs/specs/F4-05-sapadores.md) · GAME+ART · Dep: F3-08 · Unidade suicida que destrói muralhas/rochas/construções.
+- `DONE(19c7eae)` (spec: docs/specs/F4-05-sapadores.md) · GAME+ART · Dep: F3-08 · Unidade suicida que destrói muralhas/rochas/construções.
 
 ### F4-06 · Unidades aéreas
 - `TODO` · GAME+ART · Dep: F3-06 · Batedor aéreo (máquina voadora/zepelim) e atacante aéreo (grifo/dragão); camada de voo ignora terreno; só atingível por distância/torres.

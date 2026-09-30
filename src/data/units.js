@@ -33,8 +33,8 @@ export const UNITS = {
   // --- Reino Humano ---
   villager: {
     type: 'villager',
-    name: 'Aldeão',
-    entityName: 'Aldeão',
+    name: 'Camponês',
+    entityName: 'Camponês',
     faction: 'human',
     hp: 85, speed: 4.5, damage: { basic: 5, piercing: 2, type: 'normal' }, attackRange: 1.8, attackCooldown: 1.0, armor: 0,
     collisionRadius: 0.66,
@@ -49,8 +49,8 @@ export const UNITS = {
   },
   knight: {
     type: 'knight',
-    name: 'Cavaleiro',
-    entityName: 'Cavaleiro',
+    name: 'Espadachim',
+    entityName: 'Espadachim',
     faction: 'human',
     hp: 200, speed: 4.8, damage: { basic: 20, piercing: 7, type: 'normal' }, attackRange: 2.1, attackCooldown: 1.1, armor: 4,
     collisionRadius: 0.84,
@@ -61,6 +61,23 @@ export const UNITS = {
     trainTime: 11,
     icon: '/icoEspada.png',
     description: 'Infantaria pesada com espada e armadura',
+    isWorker: false, isRanged: false, isCombat: true, projectile: null
+  },
+  cavalier: {
+    type: 'cavalier',
+    name: 'Cavaleiro',
+    entityName: 'Cavaleiro',
+    faction: 'human',
+    requires: [{ hq: 2 }], // F4-01: cavalaria, treinada no Estábulo Real (Centro nível 2)
+    hp: 300, speed: 6.2, damage: { basic: 26, piercing: 8, type: 'normal' }, attackRange: 2.3, attackCooldown: 1.2, armor: 4,
+    collisionRadius: 1.0,
+    visionRadius: 18,
+    ...MELEE_SCAN,
+    healthBarHeight: 4.6,
+    cost: { gold: 120, wood: 60, stone: 20 },
+    trainTime: 14,
+    icon: '/icoEspada.png',
+    description: 'Cavalaria pesada: rápida e mortal em campo aberto',
     isWorker: false, isRanged: false, isCombat: true, projectile: null
   },
   archer: {
@@ -83,8 +100,8 @@ export const UNITS = {
   // --- Clãs Orcs ---
   peon: {
     type: 'peon',
-    name: 'Peão',
-    entityName: 'Peão',
+    name: 'Lacaio',
+    entityName: 'Lacaio',
     faction: 'orc',
     hp: 90, speed: 4.5, damage: { basic: 6, piercing: 2, type: 'normal' }, attackRange: 1.8, attackCooldown: 1.0, armor: 0,
     collisionRadius: 0.66,
@@ -99,8 +116,8 @@ export const UNITS = {
   },
   grunt: {
     type: 'grunt',
-    name: 'Guerreiro Grunt',
-    entityName: 'Guerreiro Grunt',
+    name: 'Talhador',
+    entityName: 'Talhador',
     faction: 'orc',
     hp: 198, speed: 4.7, damage: { basic: 22, piercing: 6, type: 'normal' }, attackRange: 2.1, attackCooldown: 1.15, armor: 4,
     collisionRadius: 0.86,
@@ -115,8 +132,8 @@ export const UNITS = {
   },
   axethrower: {
     type: 'axethrower',
-    name: 'Lançador de Machado',
-    entityName: 'Lançador de Machado',
+    name: 'Lanceiro-Machado',
+    entityName: 'Lanceiro-Machado',
     faction: 'orc',
     hp: 100, speed: 4.4, damage: { basic: 7, piercing: 12, type: 'piercing' }, attackRange: 13.5, attackCooldown: 1.35, armor: 0,
     collisionRadius: 0.66,
@@ -134,7 +151,8 @@ export const UNITS = {
     name: 'Ogro',
     entityName: 'Ogro',
     faction: 'orc',
-    hp: 320, speed: 4.0, damage: { basic: 32, piercing: 10, type: 'normal' }, attackRange: 2.5, attackCooldown: 1.5, armor: 5,
+    requires: [{ hq: 2 }], // F4-01: cavalaria orc, treinada no Covil dos Ogros (Centro nível 2)
+    hp: 320, speed: 5.4, damage: { basic: 32, piercing: 10, type: 'normal' }, attackRange: 2.5, attackCooldown: 1.5, armor: 5,
     collisionRadius: 1.08,
     visionRadius: 16,
     ...MELEE_SCAN,
@@ -142,7 +160,7 @@ export const UNITS = {
     cost: { gold: 75, wood: 100, stone: 35 },
     trainTime: 14,
     icon: '/icoEspada.png',
-    description: 'Bruto colossal com clava',
+    description: 'Cavalaria orc: bruto colossal veloz com clava',
     isWorker: false, isRanged: false, isCombat: true, projectile: null
   },
 

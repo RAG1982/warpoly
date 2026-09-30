@@ -14,6 +14,7 @@ function posOf(v) {
 
 import {
   getBuildingDef,
+  getUnitDef,
   getBuildingStats as getBuildingStatsFromData,
   isWorkerType,
   UNIT_TRAIN_CONFIG,
@@ -647,6 +648,12 @@ export class Building {
     const cfg = UNIT_TRAIN_CONFIG[unitType];
     if (!cfg) return false;
     const c = cfg.cost;
+
+    // F4-01: cada construção só treina o que está em `BUILDINGS[type].trains` (classe avançada
+    // conta pelo `modelOf` da unidade base: Patrulheiro no lugar do Arqueiro).
+    const trains = getBuildingDef(this.type).trains || [];
+    const base = getUnitDef(unitType).modelOf || unitType;
+    if (!trains.includes(unitType) && !trains.includes(base)) return false;
 
     const owner = this.getOwner(gm);
     if (!owner) return false;

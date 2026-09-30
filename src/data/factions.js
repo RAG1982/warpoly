@@ -20,11 +20,13 @@ export const FACTIONS = {
     lumber: 'lumber_camp',
     tower: 'watchtower',
     forge: 'forge',
-    buildList: ['cottage', 'lumber_camp', 'farm', 'barracks', 'forge', 'watchtower', 'wall_human'],
+    stable: 'stable',
+    buildList: ['cottage', 'lumber_camp', 'farm', 'barracks', 'forge', 'stable', 'watchtower', 'wall_human'],
     units: {
       worker: 'villager',
       melee: 'knight',
       ranged: 'archer',
+      cavalry: 'cavalier',
       siege: 'knight' // sem unidade de cerco humana ainda: a IA usa o Cavaleiro
     },
     startingBase: {
@@ -43,11 +45,13 @@ export const FACTIONS = {
     lumber: 'orc_lumber_mill',
     tower: 'orc_watchtower',
     forge: 'orc_forge',
-    buildList: ['orc_house', 'pig_farm', 'orc_lumber_mill', 'orc_barracks', 'orc_forge', 'orc_watchtower', 'wall_orc'],
+    stable: 'ogre_den',
+    buildList: ['orc_house', 'pig_farm', 'orc_lumber_mill', 'orc_barracks', 'orc_forge', 'ogre_den', 'orc_watchtower', 'wall_orc'],
     units: {
       worker: 'peon',
       melee: 'grunt',
       ranged: 'axethrower',
+      cavalry: 'ogre',
       siege: 'ogre'
     },
     startingBase: {

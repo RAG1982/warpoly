@@ -43,7 +43,7 @@ import { EventBus } from '../sim/EventBus.js';
 import { EVT } from '../sim/events.js';
 import { MatchStats } from '../sim/MatchStats.js';
 import { isPlayerDefeated } from '../sim/victory.js';
-import { missingRequirements } from '../sim/requirements.js';
+import { missingRequirements, formatRequirementList } from '../sim/requirements.js';
 
 const EMPTY_LIST = Object.freeze([]);
 
@@ -1023,7 +1023,7 @@ export class GameManager {
     const missing = missingRequirements(ownerId, type, this);
     if (missing.length > 0) {
       if (owner.isLocal) {
-        const names = missing.map(t => getBuildingDef(t).name).join(', ');
+        const names = formatRequirementList(missing, owner.factionId);
         this.events.emit(EVT.NOTIFY, { ownerId, text: `⚠️ Requer: ${names}` });
       }
       return null;
@@ -1116,7 +1116,7 @@ export class GameManager {
     const missing = missingRequirements(ownerId, type, this);
     if (missing.length > 0) {
       if (owner.isLocal) {
-        const names = missing.map(t => getBuildingDef(t).name).join(', ');
+        const names = formatRequirementList(missing, owner.factionId);
         this.events.emit(EVT.NOTIFY, { ownerId, text: `⚠️ Requer: ${names}` });
       }
       return [];

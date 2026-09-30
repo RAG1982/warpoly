@@ -14,6 +14,7 @@ export const BUILD_HOTKEY_BY_ROLE = {
   farm: 'F',
   barracks: 'B',
   forge: 'K',
+  stable: 'V',
   tower: 'T',
   wall: 'M'
 };

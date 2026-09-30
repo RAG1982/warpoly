@@ -1,5 +1,6 @@
 import * as THREE from 'three';
 import { getBuildingDef, getUnitDef } from '../data/index.js';
+import { missingUnitRequirements } from '../sim/requirements.js';
 import { CMD } from '../sim/commands.js';
 import { EVT } from '../sim/events.js';
 import { NEUTRAL_HOSTILE_ID } from '../sim/EntityIds.js';
@@ -130,17 +131,20 @@ export class AIMilitaryManager {
     const lenE = enemies.length;
     let meleeCount = 0;
     let rangedCount = 0;
+    let cavalryCount = 0;
 
     for (let i = 0; i < lenE; i++) {
       const e = enemies[i];
       if (!e.isDead) {
         if (e.type === this.director.meleeType) meleeCount++;
+        else if (e.type === this.director.cavalryType) cavalryCount++;
         // F3-07: a classe avançada (ranger/berserker, `modelOf`) conta como atirador.
         else if (e.type === this.director.rangedType || getUnitDef(e.type).modelOf === this.director.rangedType) rangedCount++;
       }
     }
 
     let recruitType = null;
+    let trainAt = barracks;
     const canMelee = this.director.canAfford(this.director.costs.melee);
     const canRanged = this.director.canAfford(this.director.costs.ranged);
     const canSiege = this.director.canAfford(this.director.costs.siege);
@@ -156,7 +160,8 @@ export class AIMilitaryManager {
       }
     } else {
       // Balanced tactical recruitment
-      if (canSiege && this.director.rng.next() < 0.25) {
+      // F4-01: o tipo de cerco só é recrutado aqui se o Quartel o treina (o Ogro orc agora sai do Covil).
+      if (canSiege && this.director.rng.next() < 0.25 && getBuildingDef(barracks.type).trains.includes(this.director.siegeType)) {
         recruitType = this.director.siegeType;
       } else if (rangedCount < meleeCount && canRanged) {
         recruitType = this.director.rangedType;
@@ -169,13 +174,23 @@ export class AIMilitaryManager {
       }
     }
 
+    // F4-01: cavalaria no Estábulo/Covil, 1 para cada 3 combatentes de linha (melee + atiradores).
+    const stable = this.director.getConstructedStable();
+    if (stable && (!stable.queue || stable.queue.length < 2) &&
+        this.director.canAfford(this.director.costs.cavalry) &&
+        missingUnitRequirements(this.director.playerId, this.director.cavalryType, this.gm).length === 0 &&
+        meleeCount + rangedCount >= 3 * (cavalryCount + 1)) {
+      recruitType = this.director.cavalryType;
+      trainAt = stable;
+    }
+
     // F2-02: TRAIN + RALLY via comandos (a IA emite com o próprio playerId).
     const playerId = this.director.playerId;
-    this.gm.issue({ type: CMD.TRAIN, playerId, buildingId: barracks.id, unitType: recruitType });
+    this.gm.issue({ type: CMD.TRAIN, playerId, buildingId: trainAt.id, unitType: recruitType });
     this.gm.issue({
       type: CMD.RALLY,
       playerId,
-      buildingId: barracks.id,
+      buildingId: trainAt.id,
       x: this.assemblyRallyPoint.x,
       z: this.assemblyRallyPoint.z
     });

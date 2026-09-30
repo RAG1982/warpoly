@@ -356,6 +356,7 @@ export class AIEconomyManager {
     let hasBarracks = false;
     let hasLumber = false;
     let hasForge = false;
+    let hasStable = false;
     let towerCount = 0;
 
     for (let i = 0; i < lenB; i++) {
@@ -364,6 +365,7 @@ export class AIEconomyManager {
         if (b.type === this.director.barracksType) hasBarracks = true;
         if (b.type === this.director.lumberType) hasLumber = true;
         if (b.type === this.director.forgeType) hasForge = true;
+        if (b.type === this.director.stableType) hasStable = true;
         if (b.type === this.director.towerType) towerCount++;
       }
     }
@@ -404,6 +406,15 @@ export class AIEconomyManager {
     // `considerHqUpgrade`); antes só a IA orc construía, agora as duas facções (requer ≥5 workers).
     if (workerCount >= 5 && hasBarracks && !hasForge && this.director.canAfford(this.director.costs.forge)) {
       this.placeBuilding(this.director.forgeType);
+      return;
+    }
+
+    // 5b. F4-01: Estábulo/Covil quando o Centro é nível 2 (requisito checado por
+    // `missingRequirements`), sobra ≥ 600 de ouro e já há ≥ 6 combatentes.
+    if (hasBarracks && !hasStable && this.director.resources.gold >= 600 &&
+        this.director.getCombatUnitCount() >= 6 && this.director.canAfford(this.director.costs.stable) &&
+        missingRequirements(this.director.playerId, this.director.stableType, this.gm).length === 0) {
+      this.placeBuilding(this.director.stableType);
       return;
     }
 

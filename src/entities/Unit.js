@@ -1,6 +1,8 @@
 import * as THREE from 'three';
 import { ModelFactory } from './ModelFactory.js';
 import { Arrow } from './Arrow.js';
+import { BallisticProjectile, ballisticFlightTime } from './BallisticProjectile.js';
+import { applySplashDamage } from './splash.js';
 import { Building } from './Building.js';
 import { UnitAnimator } from '../animation/UnitAnimator.js';
 import { getUnitDef, getUnitStats as getUnitStatsFromData, CARRY, MINE_ENTER_TIME, gatherMultiplier } from '../data/index.js';
@@ -64,6 +66,7 @@ unitRingGeo.rotateX(-Math.PI / 2);
 // F1-08: vetor de módulo reutilizado para calcular a origem do projétil (Arrow clona o valor recebido)
 const _projectileOrigin = new THREE.Vector3();
 const _up168 = new THREE.Vector3(0, 1.68, 0);
+const _impactPoint = new THREE.Vector3(); // F4-02: ponto previsto do cerco (BallisticProjectile copia o valor)
 
 const playerRingMat = new THREE.MeshBasicMaterial({
   color: 0xdeb841,
@@ -130,6 +133,15 @@ export class Unit {
     const def = getUnitDef(type);
     this.isRanged = def.isRanged;
     this.projectileType = def.projectile;
+    /** F4-02: cerco — alcance mínimo (distância de borda) e raio de dano em área; 0 = sem. */
+    this.minAttackRange = def.minAttackRange || 0;
+    this.splashRadius = def.splashRadius || 0;
+    /** F4-02: projétil balístico (`bolt`/`boulder`): não persegue, mira a posição prevista. */
+    this.isBallistic = def.projectile === 'bolt' || def.projectile === 'boulder';
+    /** F4-02: velocidade estimada (u/s) medida pelo `GameManager` a cada tick — mira preditiva do cerco. */
+    this.velX = 0;
+    this.velZ = 0;
+    this._siegeRetreating = false;
     this.aggroRange = def.aggroRange;
     this.threatScanRange = def.threatScanRange;
     this.retargetRange = def.retargetRange;
@@ -1579,6 +1591,36 @@ export class Unit {
     const targetRadius = this.attackTarget.collisionRadius || (this.attackTarget.fullMesh ? 3.0 : 0.6);
     const effectiveRange = this.attackRange + targetRadius;
 
+    // 2b. F4-02: alcance mínimo do cerco. Alvo a < minAttackRange (distância de borda) não é
+    // atacável: tenta outro alvo dentro da janela [min, max]; senão recua até min + 0,5.
+    if (this.minAttackRange > 0) {
+      const edge = dist - targetRadius;
+      if (edge < this.minAttackRange) this._siegeRetreating = true;
+      else if (edge >= this.minAttackRange + 0.5) this._siegeRetreating = false;
+      if (this._siegeRetreating) {
+        if (this._isHolding) {
+          this._giveUpAttack();
+          return;
+        }
+        const other = this.findNearestHostile(allUnits, buildings, this.attackRange);
+        if (other && other !== this.attackTarget) {
+          this.attackTarget = other;
+          this.targetEntity = other;
+          this.hasFiredThisAttack = false;
+          this._siegeRetreating = false;
+          return;
+        }
+        let ax = this.mesh.position.x - targetPos.x;
+        let az = this.mesh.position.z - targetPos.z;
+        const al = Math.hypot(ax, az);
+        if (al < 0.001) { ax = -Math.sin(this.mesh.rotation.y); az = -Math.cos(this.mesh.rotation.y); } else { ax /= al; az /= al; }
+        this.hasFiredThisAttack = false;
+        this.stepTowards(this.mesh.position.x + ax * 2, this.mesh.position.z + az * 2, this.speed * delta);
+        if (this.animator && this.hurtTimer <= 0) this.animator.setAnimation('walk');
+        return;
+      }
+    }
+
     // 3. Pursuit: If outside effective attack range, chase the moving target every frame!
     // F2-02: unidade em HOLD nunca sai da posição — desiste do alvo em vez de perseguir.
     if (dist > effectiveRange) {
@@ -1607,7 +1649,28 @@ export class Unit {
     const gm = gameManager || this.gameManager;
     const gmEvents = gm && gm.events;
 
-    if (this.isRanged) {
+    if (this.isBallistic) {
+      // F4-02: cerco (Balista/Catapulta): projétil balístico que mira a posição PREVISTA do alvo
+      // (posição + velocidade × tempo de voo), não persegue, e causa dano em área no impacto.
+      if (progress >= 0.60 && !this.hasFiredThisAttack) {
+        this.hasFiredThisAttack = true;
+        const kind = this.projectileType;
+        const startPos = _projectileOrigin.copy(this.mesh.position).add(_up168);
+        const tgt = this.attackTarget;
+        const flight = ballisticFlightTime(Math.hypot(tgt.mesh.position.x - startPos.x, tgt.mesh.position.z - startPos.z), kind);
+        _impactPoint.x = tgt.mesh.position.x + (tgt.velX || 0) * flight;
+        _impactPoint.y = tgt.mesh.position.y;
+        _impactPoint.z = tgt.mesh.position.z + (tgt.velZ || 0) * flight;
+        if (gmEvents) gmEvents.emit(EVT.PROJECTILE_FIRED, { kind, from: posOf(startPos), ownerId: this.ownerId });
+        const owner = this;
+        const projectile = new BallisticProjectile(this.scene, startPos, _impactPoint, kind, (pos) => {
+          if (gm && gm.unitGrid && gm.blockerGrid) applySplashDamage(gm, owner, owner.damage, pos, owner.splashRadius, allUnits);
+          if (gmEvents) gmEvents.emit(EVT.PROJECTILE_HIT, { kind, pos: posOf(pos), ownerId: owner.ownerId, splashRadius: owner.splashRadius });
+        });
+        arrows.push(projectile);
+        if (this.gameManager && this.gameManager.registerEntity) this.gameManager.registerEntity(projectile, this.ownerId);
+      }
+    } else if (this.isRanged) {
       // Archer & Axethrower: Release projectile shot at progress >= 0.60
       if (progress >= 0.60 && !this.hasFiredThisAttack) {
         this.hasFiredThisAttack = true;
@@ -1641,6 +1704,22 @@ export class Unit {
   }
 
   /**
+   * F4-02: `e` pode ser escolhido numa auto-aquisição? Só o cerco filtra: alvo aéreo nunca
+   * (F4-06 usa `layer === 'air'`) e alvo a menos de `minAttackRange` (distância de borda) não.
+   */
+  _canEngage(e) {
+    if (!this.isBallistic && this.minAttackRange <= 0) return true;
+    if (e.layer === 'air') return false;
+    if (this.minAttackRange > 0) {
+      const p = this.mesh.position;
+      const q = e.mesh.position;
+      const edge = Math.hypot(p.x - q.x, p.z - q.z) - (e.collisionRadius || (e.fullMesh ? 3.0 : 0.6));
+      if (edge < this.minAttackRange) return false;
+    }
+    return true;
+  }
+
+  /**
    * F1-06: `gm.unitGrid.queryRadius` no lugar de varrer `allUnits`. Mantém o parâmetro
    * `allUnits` por compatibilidade com os chamadores existentes (não é mais usado).
    */
@@ -1650,7 +1729,7 @@ export class Unit {
     const pos = this.mesh.position;
     const self = this;
     gm.unitGrid.queryRadius(pos.x, pos.z, maxDist, u =>
-      !u.isDead && u.hp > 0 && self.isHostileTo(u) && u.isCombatUnit && u.isCombatUnit(),
+      !u.isDead && u.hp > 0 && self.isHostileTo(u) && u.isCombatUnit && u.isCombatUnit() && self._canEngage(u),
     _combatBuf);
     return pickNearestInBuf(_combatBuf, pos.x, pos.z);
   }
@@ -1664,7 +1743,7 @@ export class Unit {
     const pos = this.mesh.position;
     const self = this;
     gm.unitGrid.queryRadius(pos.x, pos.z, maxDist, u =>
-      !u.isDead && u.hp > 0 && self.isHostileTo(u),
+      !u.isDead && u.hp > 0 && self.isHostileTo(u) && self._canEngage(u),
     _unitBuf);
     return pickNearestInBuf(_unitBuf, pos.x, pos.z);
   }
@@ -1689,13 +1768,13 @@ export class Unit {
 
     gm.blockerGrid.queryRadius(pos.x, pos.z, maxDist, b =>
       b instanceof Building && !b.isDead && b.hp > 0 && self.isHostileTo(b) &&
-      (b.type === 'watchtower' || b.type === 'orc_watchtower'),
+      (b.type === 'watchtower' || b.type === 'orc_watchtower') && self._canEngage(b),
     _towerBuf);
     const closestTower = pickNearestInBuf(_towerBuf, pos.x, pos.z);
     if (closestTower) return closestTower;
 
     gm.blockerGrid.queryRadius(pos.x, pos.z, maxDist, b =>
-      b instanceof Building && !b.isDead && b.hp > 0 && b.role !== 'wall' && self.isHostileTo(b),
+      b instanceof Building && !b.isDead && b.hp > 0 && b.role !== 'wall' && self.isHostileTo(b) && self._canEngage(b),
     _buildingBuf);
     return pickNearestInBuf(_buildingBuf, pos.x, pos.z);
   }

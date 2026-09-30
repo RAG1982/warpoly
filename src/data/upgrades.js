@@ -8,7 +8,7 @@
  * - `bonus`  soma em stats da unidade: basic → damage.basic, piercing → damage.piercing,
  *            armor → armor, range → attackRange, sight → sightBonus (raio de visão).
  * - `effect` woodMultiplier (coleta de madeira), regen (PV/s), promote ({archer:'ranger',...}).
- * - `requires` no formato de `src/sim/requirements.js` ({hq:N}, {research:'id', level?}, tipo de construção).
+ * - `requires` no formato de `src/sim/requirements.js` ({hq:N}, {research:'id', level?}, {role:'workshop'} (F4-02: construção concluída de qualquer tipo com esse `role`), tipo de construção).
  *
  * `UPGRADE_CONFIG`/`FORGE_UPGRADES` continuam exportados, derivados de `RESEARCH`, para os
  * consumidores antigos (UI/eventos). Valores iniciais — balanceamento na F3-11.
@@ -34,6 +34,17 @@ export const RESEARCH = {
     appliesTo: ['knight', 'grunt', 'cavalier', 'ogre'],
     icon: '/icoEscudo.png',
     name: { human: 'Escudos Reforçados', orc: 'Placas de Ferro' }
+  },
+  // F4-02: cerco (Balista/Catapulta); o nível 1 exige a Oficina da facção construída.
+  siege_damage: {
+    building: 'forge',
+    levels: [
+      { cost: { gold: 300, wood: 300 }, time: 40, bonus: { basic: 15 }, requires: [{ role: 'workshop' }] },
+      { cost: { gold: 600, wood: 500 }, time: 60, bonus: { basic: 15 }, requires: [{ hq: 2 }] }
+    ],
+    appliesTo: ['ballista', 'catapult'],
+    icon: '/icoEspada.png',
+    name: { human: 'Munição Explosiva', orc: 'Pedras Incendiárias' }
   },
   ranged_ammo: {
     building: 'lumber',

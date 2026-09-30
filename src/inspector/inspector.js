@@ -14,6 +14,10 @@ import {
   createCavalier,
   createStable,
   createOgreDen,
+  createBallista,
+  createCatapult,
+  createWorkshop,
+  createOrcWorkshop,
   createCastle,
   createLumberCamp,
   createGoldMine,
@@ -100,6 +104,30 @@ const MODEL_CATALOG = [
     create: createCavalier,
     description: 'Cavalaria pesada humana (F4-01): cavalo low-poly em caixas (tronco, pescoço, cabeça, crina, cauda, sela e manta azul) com o tronco do Espadachim montado na sela. Modelo procedural provisório; o modelo final do Blender vem na F7.',
     notes: 'Pernas do cavalo (HorseLegFL/FR/BL/BR) balançam em diagonais alternadas na animação de andar; braços, espada e escudo usam as mesmas poses do Espadachim.'
+  },
+  {
+    id: 'ballista',
+    name: 'Balista (Ballista)',
+    category: 'units',
+    faction: 'human',
+    type: 'ballista',
+    icon: '🏹',
+    sourceFile: 'src/models/units/BallistaModel.js',
+    create: createBallista,
+    description: 'Cerco humano (F4-02): chassi de madeira sobre duas rodas com besta gigante, virote e estandarte azul. Modelo procedural provisório; o final do Blender vem na F7.',
+    notes: 'Nó SiegeArm recua ao disparar (animação fight); WheelL/WheelR giram ao andar.'
+  },
+  {
+    id: 'catapult',
+    name: 'Catapulta (Catapult)',
+    category: 'units',
+    faction: 'orc',
+    type: 'catapult',
+    icon: '🪨',
+    sourceFile: 'src/models/units/CatapultModel.js',
+    create: createCatapult,
+    description: 'Cerco orc (F4-02): chassi de troncos sobre duas rodas, braço de arremesso com concha e pedra, peles e estandarte vermelho. Modelo procedural provisório; o final do Blender vem na F7.',
+    notes: 'Nó SiegeArm arma e lança na animação fight; WheelL/WheelR giram ao andar.'
   },
   {
     id: 'archer',
@@ -379,6 +407,30 @@ const MODEL_CATALOG = [
     sourceFile: 'src/models/buildings/OgreDenModel.js',
     create: createOgreDen,
     description: 'Covil orc (F4-01): paliçada de troncos escuros sobre basalto, portão largo com caveira e ossos cruzados, telhado de peles, espetos nos cantos e estandarte de guerra.',
+    notes: 'Modelo procedural provisório sem texturas de canvas (materiais compartilhados).'
+  },
+  {
+    id: 'workshop',
+    name: 'Oficina de Engenharia (Workshop)',
+    category: 'buildings',
+    faction: 'human',
+    type: 'building',
+    icon: '⚙️',
+    sourceFile: 'src/models/buildings/WorkshopModel.js',
+    create: createWorkshop,
+    description: 'Oficina humana (F4-02): galpão de madeira sobre base de pedra, telhado azul com chaminé, engrenagem grande, bancada com bigorna e balista em montagem.',
+    notes: 'Modelo procedural provisório sem texturas de canvas (materiais compartilhados).'
+  },
+  {
+    id: 'orc_workshop',
+    name: 'Oficina dos Engenhoqueiros (Orc Workshop)',
+    category: 'buildings',
+    faction: 'orc',
+    type: 'building',
+    icon: '⚙️',
+    sourceFile: 'src/models/buildings/OrcWorkshopModel.js',
+    create: createOrcWorkshop,
+    description: 'Oficina orc (F4-02): paliçada de troncos sobre basalto, portão com caveira, telhado de peles, engrenagem de ferro, catapulta em montagem e pilha de pedras.',
     notes: 'Modelo procedural provisório sem texturas de canvas (materiais compartilhados).'
   },
   {

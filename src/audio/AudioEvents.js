@@ -37,7 +37,11 @@ export function createAudioEvents(gm, soundManager) {
     if (kind === 'axe') soundManager.playSword();
     else soundManager.playBow();
   });
-  on(EVT.PROJECTILE_HIT, () => soundManager.playArrowHit());
+  // F4-02: impacto do cerco (bolt/boulder) soa como pedra/ferro em vez do estalo de flecha.
+  on(EVT.PROJECTILE_HIT, ({ kind }) => {
+    if (kind === 'bolt' || kind === 'boulder') soundManager.playMineStone();
+    else soundManager.playArrowHit();
+  });
   on(EVT.MELEE_HIT, () => soundManager.playSword());
 
   // Construção: colocação só se local; treino e conclusão sempre tocavam.

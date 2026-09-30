@@ -1594,6 +1594,13 @@ export class GameManager {
       const u = allUnits[i];
       if (!u.isDead) {
         const p = u.mesh.position;
+        // F4-02: velocidade (u/s) entre ticks — mira preditiva do cerco (não entra no checksum).
+        if (u._lastSyncX !== undefined && dt > 0) {
+          u.velX = (p.x - u._lastSyncX) / dt;
+          u.velZ = (p.z - u._lastSyncZ) / dt;
+        }
+        u._lastSyncX = p.x;
+        u._lastSyncZ = p.z;
         this.unitGrid.update(u, p.x, p.z, u.collisionRadius || 0.6);
       }
     }

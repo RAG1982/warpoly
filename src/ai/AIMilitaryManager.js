@@ -147,7 +147,6 @@ export class AIMilitaryManager {
     let trainAt = barracks;
     const canMelee = this.director.canAfford(this.director.costs.melee);
     const canRanged = this.director.canAfford(this.director.costs.ranged);
-    const canSiege = this.director.canAfford(this.director.costs.siege);
 
     // Defense priority: If base has ZERO combat units, train whatever combat unit is affordable!
     if (meleeCount === 0 && rangedCount === 0) {
@@ -160,10 +159,8 @@ export class AIMilitaryManager {
       }
     } else {
       // Balanced tactical recruitment
-      // F4-01: o tipo de cerco só é recrutado aqui se o Quartel o treina (o Ogro orc agora sai do Covil).
-      if (canSiege && this.director.rng.next() < 0.25 && getBuildingDef(barracks.type).trains.includes(this.director.siegeType)) {
-        recruitType = this.director.siegeType;
-      } else if (rangedCount < meleeCount && canRanged) {
+      // F4-02: o cerco não sai mais do Quartel (vem da Oficina, abaixo).
+      if (rangedCount < meleeCount && canRanged) {
         recruitType = this.director.rangedType;
       } else if (canMelee) {
         recruitType = this.director.meleeType;
@@ -182,6 +179,23 @@ export class AIMilitaryManager {
         meleeCount + rangedCount >= 3 * (cavalryCount + 1)) {
       recruitType = this.director.cavalryType;
       trainAt = stable;
+    }
+
+    // F4-02: cerco na Oficina — mantém 1–3 unidades vivas (mais com mais tropas de linha), só com
+    // ≥ 8 combatentes de linha; segue junto do exército no próximo ataque (todos os prontos saem no mesmo ATTACK).
+    const workshop = this.director.getConstructedWorkshop();
+    if (workshop && recruitType !== this.director.cavalryType && (!workshop.queue || workshop.queue.length < 1)) {
+      let siegeCount = 0;
+      for (let i = 0; i < lenE; i++) {
+        if (!enemies[i].isDead && enemies[i].type === this.director.siegeType) siegeCount++;
+      }
+      const siegeCap = Math.min(3, 1 + Math.floor((meleeCount + rangedCount) / 8));
+      if (siegeCount < siegeCap && meleeCount + rangedCount >= 8 &&
+          this.director.canAfford(this.director.costs.siege) &&
+          missingUnitRequirements(this.director.playerId, this.director.siegeType, this.gm).length === 0) {
+        recruitType = this.director.siegeType;
+        trainAt = workshop;
+      }
     }
 
     // F2-02: TRAIN + RALLY via comandos (a IA emite com o próprio playerId).

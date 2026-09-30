@@ -542,6 +542,8 @@ export class UIManager {
         <span>⚔️ Ataque: ${u.damage.basic}+${u.damage.piercing}</span>
         <span>🛡️ Defesa: ${u.armor || 0}</span>
         <span>🏃 Vel: ${u.speed}</span>
+        ${u.minAttackRange > 0 ? `<span>🎯 Alcance: ${u.minAttackRange}–${u.attackRange}</span>` : ''}
+        ${u.splashRadius > 0 ? `<span>💥 Área: ${u.splashRadius}</span>` : ''}
         ${isWorker ? `<span>🎒 Carga: ${u.carrying.amount}/${u.carrying.max} ${getResourceName(u.carrying.type) || ''}</span>` : ''}
       `;
 

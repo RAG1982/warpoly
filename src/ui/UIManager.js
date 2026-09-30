@@ -1,6 +1,6 @@
 import { UNIT_TRAIN_CONFIG, BUILDING_BUILD_CONFIG, WORKER_BUILD_LIST } from '../entities/Building.js';
 import { UPGRADE_CONFIG, FORGE_UPGRADES } from '../core/UpgradeConfig.js';
-import { BUILDING_TRAINABLE_UNITS, getUnitDef, getBuildingDef, getHqUpgradeCost, getTierName } from '../data/index.js';
+import { BUILDING_TRAINABLE_UNITS, getUnitDef, getBuildingDef, getHqUpgradeCost, getTierName, getResourceName } from '../data/index.js';
 import {
   missingRequirements, missingUnitRequirements, missingUpgradeRequirements, formatRequirementList
 } from '../sim/requirements.js';
@@ -330,13 +330,13 @@ export class UIManager {
         }
         if (this.gm.population >= this.gm.maxPopulation) {
           this.sound.playChop();
-          const farmName = this.gm.playerFaction === 'orc' ? 'Pig Farms' : 'Cottages';
-          this.showNotification(`Population limit reached! Build more ${farmName}.`);
+          const farmName = this.gm.playerFaction === 'orc' ? 'Chiqueiros' : 'Casas';
+          this.showNotification(`Limite de população atingido! Construa mais ${farmName}.`);
           return;
         }
         if (cfg && !this.gm.canAfford(cfg.cost)) {
           this.sound.playChop();
-          this.showNotification(`Not enough resources to train ${trainType}!`);
+          this.showNotification(`Recursos insuficientes para treinar ${cfg ? cfg.name : trainType}!`);
           return;
         }
         this.gm.issue({ type: CMD.TRAIN, playerId: this.gm.localPlayerId, buildingId: b.id, unitType: trainType });
@@ -498,10 +498,10 @@ export class UIManager {
 
       // Stats
       this.selectionStats.innerHTML = `
-        <span>⚔️ Atk: ${u.damage.basic}+${u.damage.piercing}</span>
-        <span>🛡️ Def: ${u.armor || 0}</span>
-        <span>🏃 Spd: ${u.speed}</span>
-        ${isWorker ? `<span>🎒 Carry: ${u.carrying.amount}/${u.carrying.max} ${u.carrying.type || ''}</span>` : ''}
+        <span>⚔️ Ataque: ${u.damage.basic}+${u.damage.piercing}</span>
+        <span>🛡️ Defesa: ${u.armor || 0}</span>
+        <span>🏃 Vel: ${u.speed}</span>
+        ${isWorker ? `<span>🎒 Carga: ${u.carrying.amount}/${u.carrying.max} ${getResourceName(u.carrying.type) || ''}</span>` : ''}
       `;
 
       const key = isWorker ? `${u.type}_actions` : 'military_actions';
@@ -581,7 +581,7 @@ export class UIManager {
       const isTree = r.type === 'tree';
       const isDepletedTree = isTree && (r.isDead || r.woodRemaining <= 0);
 
-      this.selectionTitle.innerText = isDepletedTree ? 'Tronco Cortado' : (isTree ? 'Ancient Tree' : r.name);
+      this.selectionTitle.innerText = isDepletedTree ? 'Tronco Cortado' : (isTree ? 'Árvore Antiga' : r.name);
 
       const remaining = isTree ? r.woodRemaining : r.resourcesRemaining;
       const max = isTree ? r.maxWood : r.maxResources;
@@ -589,10 +589,10 @@ export class UIManager {
       this.selectionHpBar.style.width = `${pct}%`;
       this.selectionHp.innerText = isDepletedTree
         ? '0 / 120 Madeira (Esgotada)'
-        : `${remaining} / ${max} Available`;
+        : `${remaining} / ${max} Disponível`;
       this.selectionStats.innerHTML = isDepletedTree
         ? '<span>Tronco com cogumelos &bull; Madeira esgotada</span>'
-        : `<span>Assign Villagers to harvest resources</span>`;
+        : `<span>Designe Aldeões para colher recursos</span>`;
 
       if (this.lastSelectionKey !== 'resource') {
         this.lastSelectionKey = 'resource';

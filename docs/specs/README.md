@@ -9,7 +9,7 @@ Cada spec tem na 3ª linha `> **Status: ...**`. Regras comuns a todas: [`_COMUM.
 | [F3-05-reparo-cancelamento.md](F3-05-reparo-cancelamento.md) | local | sonnet | Reparo/cancelar obra (5204), após F3-08 |
 | [F3-09-vitoria-estatisticas.md](F3-09-vitoria-estatisticas.md) | local | sonnet | Modos de vitória + MatchStats (5205) |
 | [F3-10-neutros-critters.md](F3-10-neutros-critters.md) | local | sonnet | Bandoleiros/critters (5206), após F3-09 |
-| [F4-01-cavalaria.md](F4-01-cavalaria.md) | local | sonnet | Cavalaria + nomes D7 (5207) |
+| [F4-01-cavalaria.md](F4-01-cavalaria.md) | local | sonnet | Cavalaria + nomes D7 (5207) — implementada na branch de execução (aguarda merge) |
 | [F4-02-cerco.md](F4-02-cerco.md) | local | sonnet | Cerco + Oficina + projétil balístico (5208), após F4-01 |
 | [F4-03-mana-habilidades.md](F4-03-mana-habilidades.md) | local | sonnet | Framework de mana/habilidades (5209), após F4-02 |
 | [F4-04-conjuradores-magias.md](F4-04-conjuradores-magias.md) | local | sonnet | Mago/Necromante + mecânicas (5210), após F4-03 |

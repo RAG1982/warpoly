@@ -307,7 +307,9 @@ export class Pathfinder {
    * @param {number} startZ
    * @param {number} destX
    * @param {number} destZ
-   * @returns {Array<{ x: number, z: number }>}
+   * F3-08: quando o destino é inalcançável (anel/parede fechada), devolve o caminho até o ponto
+   * alcançável mais próximo (ou `[]`) com a propriedade `noPath = true` no array.
+   * @returns {Array<{ x: number, z: number }> & { noPath?: boolean }}
    */
   findPath(startX, startZ, destX, destZ) {
     const start = this.toGrid(startX, startZ);
@@ -357,7 +359,8 @@ export class Pathfinder {
       this._pathCache.delete(cacheKey);
       this._pathCache.set(cacheKey, cached);
       const path = cached.map(p => ({ x: p.x, z: p.z }));
-      path[path.length - 1] = { x: destX, z: destZ };
+      if (path.length > 0) path[path.length - 1] = { x: destX, z: destZ };
+      if (cached.noPath) path.noPath = true;
       this._lastNodesExpanded = 0;
       return path;
     }
@@ -368,10 +371,12 @@ export class Pathfinder {
       const oldestKey = this._pathCache.keys().next().value;
       this._pathCache.delete(oldestKey);
     }
-    this._pathCache.set(cacheKey, smoothPath.map(p => ({ x: p.x, z: p.z })));
+    const toCache = smoothPath.map(p => ({ x: p.x, z: p.z }));
+    if (smoothPath.noPath) toCache.noPath = true;
+    this._pathCache.set(cacheKey, toCache);
 
     // Replace final waypoint with exact destination coordinates (ou nada se sem caminho)
-    if (smoothPath.length > 0) {
+    if (smoothPath.length > 0 && !smoothPath.noPath) {
       smoothPath[smoothPath.length - 1] = { x: destX, z: destZ };
     }
     return smoothPath;
@@ -401,7 +406,7 @@ export class Pathfinder {
 
     let foundDest = false;
     let bestNode = startIndex; // Nó mais próximo ao destino encontrado (se não há caminho)
-    let bestHeuristic = this.fScore[startIndex];
+    let bestHeuristic = h(start.c, start.r);
     let iterations = 0;
     const maxIterations = 3200;
 
@@ -421,9 +426,12 @@ export class Pathfinder {
       const curC = current % this.cols;
       const curR = Math.floor(current / this.cols);
 
-      // Atualiza o melhor nó visto até agora (mais próximo ao destino pela heurística)
-      if (this.fScore[current] < bestHeuristic) {
-        bestHeuristic = this.fScore[current];
+      // Atualiza o melhor nó visto até agora: o mais PRÓXIMO do destino (heurística pura `h`).
+      // F3-08: antes comparava `fScore` (= g + h), que nunca é menor que h(origem) — o "ponto
+      // alcançável mais próximo" acabava sempre sendo a própria origem (caminho vazio).
+      const curH = h(curC, curR);
+      if (curH < bestHeuristic) {
+        bestHeuristic = curH;
         bestNode = current;
       }
 
@@ -455,12 +463,18 @@ export class Pathfinder {
 
     this._lastNodesExpanded = iterations;
 
+    // F3-08: "sem caminho" de verdade = a busca esgotou a fronteira sem achar o destino (não
+    // apenas estourou o limite de iterações). Sinalizado em `path.noPath` (ver `findPath`).
+    const exhausted = !foundDest && this._heap.size === 0;
+
     if (!foundDest) {
       // Sem caminho para o destino exato (ex.: anel fechado). Devolve caminho até o ponto
       // alcançável mais próximo (bestNode). Se ainda estivéssemos na origem (bestNode === startIndex),
       // devolve vazio (unidade parada). Isto evita o fallback original que atravessava bloqueios (NEW-21).
       if (bestNode === startIndex) {
-        return [];
+        const empty = [];
+        empty.noPath = exhausted;
+        return empty;
       }
 
       // Reconstrói o caminho até o melhor nó encontrado
@@ -490,6 +504,7 @@ export class Pathfinder {
         currentIdx = furthest;
       }
 
+      smoothPath.noPath = exhausted;
       return smoothPath;
     }
 

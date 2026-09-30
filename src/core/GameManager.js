@@ -1,6 +1,7 @@
 import * as THREE from 'three';
 import { Unit } from '../entities/Unit.js';
 import { Building } from '../entities/Building.js';
+import { Wall, WallBatch } from '../entities/Wall.js';
 import {
   GreatHall,
   OrcBarracks,
@@ -20,7 +21,7 @@ import { Pathfinder } from './Pathfinder.js';
 import { HumanForge } from '../entities/buildings/HumanForge.js';
 
 import {
-  STARTING_RESOURCES, FACTIONS, getBuildingDef, getUnitDef, isDropoffFor, RESEARCH, getMaxResearchLevel, promotedType
+  STARTING_RESOURCES, FACTIONS, WALL_STEP, WALL_MAX_POINTS, getBuildingDef, getUnitDef, isDropoffFor, RESEARCH, getMaxResearchLevel, promotedType
 } from '../data/index.js';
 import { Player } from '../sim/Player.js';
 import { PlayerRegistry } from '../sim/PlayerRegistry.js';
@@ -397,6 +398,10 @@ export class GameManager {
     });
     this.trees.forEach(t => (t.dispose ? t.dispose() : this.scene.remove(t.mesh)));
     this.resourceDeposits.forEach(r => this.scene.remove(r.mesh));
+    if (this._wallBatches) {
+      Object.values(this._wallBatches).forEach(wb => wb.dispose());
+      this._wallBatches = null;
+    }
 
     if (this.treeManager) {
       this.treeManager.dispose();
@@ -586,7 +591,7 @@ export class GameManager {
    * - Minimum clearance from resource deposits (gold mines & stone quarries).
    * - Not blocking the 3 strategic river crossings.
    */
-  canPlaceBuilding(type, x, z, ignoreBuilding = null) {
+  canPlaceBuilding(type, x, z, ignoreBuilding = null, ownerId = this._localPlayerId) {
     const stats = Building.getBuildingStats(type);
     const radius = stats.collisionRadius || 3.0;
 
@@ -608,7 +613,24 @@ export class GameManager {
       e => e instanceof Building && e !== ignoreBuilding && !e.isDead,
       this._placeBuildingBuf
     );
-    if (buildingHits.length > 0) return false;
+    if (buildingHits.length > 0) {
+      if (getBuildingDef(type).role !== 'wall') return false;
+      // F3-08: muralha — o gap de 3,2 não vale contra muralhas do mesmo dono (distância mínima
+      // entre centros 2,0, permite o passo WALL_STEP = 2,4) e cai para 0,5 contra torre/Centro
+      // do mesmo dono; contra as demais construções (ou de outros donos) vale como sempre.
+      for (let i = 0; i < buildingHits.length; i++) {
+        const e = buildingHits[i];
+        const d = Math.hypot(e.mesh.position.x - x, e.mesh.position.z - z);
+        const er = e.collisionRadius || 3.0;
+        let gap = minBuildingGap;
+        if (e.ownerId === ownerId) {
+          const role = getBuildingDef(e.type).role;
+          if (role === 'wall') gap = -1.0;
+          else if (role === 'tower' || role === 'hq') gap = 0.5;
+        }
+        if (d < radius + er + gap) return false;
+      }
+    }
 
     // 3. Minimum distance to trees (só árvores vivas com madeira)
     const minTreeGap = 3.5;
@@ -827,6 +849,12 @@ export class GameManager {
       case 'forge':
         b = new HumanForge(this.scene, this.terrain, x, z, isConstructed, ownerId);
         break;
+      case 'wall_human':
+      case 'wall_orc':
+        b = new Wall(this.scene, this.terrain, type, x, z, isConstructed, ownerId);
+        b.gameManager = this;
+        if (!this.headless) b.attachToBatch(this.getWallBatch(type === 'wall_orc' ? 'orc' : 'human'));
+        break;
       default:
         b = new Building(this.scene, this.terrain, type, x, z, isConstructed, ownerId);
         break;
@@ -864,26 +892,7 @@ export class GameManager {
     }
     owner.deduct(stats.cost);
 
-    const b = this.createBuilding(type, x, z, false, ownerId);
-    this.buildings.push(b);
-    this.events.emit(EVT.BUILDING_PLACED, {
-      buildingId: b.id,
-      ownerId,
-      pos: { x: b.mesh.position.x, y: b.mesh.position.y, z: b.mesh.position.z },
-      buildingType: type
-    });
-    this.recalculatePopCap();
-
-    // Clean up any depleted tree stumps inside the building footprint so they do not poke through floors
-    const bRadius = b.collisionRadius || 3.0;
-    this.trees.forEach(t => {
-      if (t.isDead && t.stumpMesh) {
-        const d = Math.hypot(x - t.mesh.position.x, z - t.mesh.position.z);
-        if (d < bRadius + 0.5) {
-          t.dispose();
-        }
-      }
-    });
+    const b = this._createPlacedBuilding(type, x, z, ownerId);
 
     // Task workers (villagers or peons) to construct it — só os do próprio dono.
     const builders = (unitIds || [])
@@ -909,6 +918,124 @@ export class GameManager {
       }
     }
     return b;
+  }
+
+  /**
+   * Cria (em obra) e registra uma construção posicionada por jogador — parte comum de
+   * `placeBuilding` e `placeWall` (sem cobrança nem ordem de construção).
+   */
+  _createPlacedBuilding(type, x, z, ownerId) {
+    const b = this.createBuilding(type, x, z, false, ownerId);
+    this.buildings.push(b);
+    this.events.emit(EVT.BUILDING_PLACED, {
+      buildingId: b.id,
+      ownerId,
+      pos: { x: b.mesh.position.x, y: b.mesh.position.y, z: b.mesh.position.z },
+      buildingType: type
+    });
+    this.recalculatePopCap();
+
+    // Clean up any depleted tree stumps inside the building footprint so they do not poke through floors
+    const bRadius = b.collisionRadius || 3.0;
+    this.trees.forEach(t => {
+      if (t.isDead && t.stumpMesh) {
+        const d = Math.hypot(x - t.mesh.position.x, z - t.mesh.position.z);
+        if (d < bRadius + 0.5) {
+          t.dispose();
+        }
+      }
+    });
+    return b;
+  }
+
+  /** F3-08: InstancedMesh compartilhado dos segmentos de muralha da facção ('human' | 'orc'). */
+  getWallBatch(faction) {
+    if (!this._wallBatches) this._wallBatches = {};
+    if (!this._wallBatches[faction]) this._wallBatches[faction] = new WallBatch(this.scene, faction);
+    return this._wallBatches[faction];
+  }
+
+  /**
+   * F3-08: executor do comando PLACE_WALL. `points` = [{x,z}] (≤ WALL_MAX_POINTS). Valida cada
+   * ponto na ordem (`canPlaceBuilding` + distância mínima entre os próprios pontos do comando),
+   * cobra `n × custo` só dos válidos (tudo ou nada: sem recursos para todos, nada é criado) e
+   * cria um segmento por ponto válido (1 BUILDING_PLACED por segmento). Os aldeões/peões
+   * escolhidos (ou o mais próximo) recebem os segmentos numa fila de obras, cada um começando
+   * num segmento diferente para trabalharem em paralelo.
+   * @returns {Wall[]} segmentos criados
+   */
+  placeWall(type, points, unitIds, ownerId) {
+    const owner = this.getPlayer(ownerId);
+    if (!owner || !Array.isArray(points)) return [];
+    const stats = getBuildingDef(type);
+    if (stats.role !== 'wall') return [];
+
+    const missing = missingRequirements(ownerId, type, this);
+    if (missing.length > 0) {
+      if (owner.isLocal) {
+        const names = missing.map(t => getBuildingDef(t).name).join(', ');
+        this.events.emit(EVT.NOTIFY, { ownerId, text: `⚠️ Requer: ${names}` });
+      }
+      return [];
+    }
+
+    const list = points.length > WALL_MAX_POINTS ? points.slice(0, WALL_MAX_POINTS) : points;
+    const minSelfDist = WALL_STEP * 0.8;
+    const valid = [];
+    for (let i = 0; i < list.length; i++) {
+      const p = list[i];
+      if (!p || !Number.isFinite(p.x) || !Number.isFinite(p.z)) continue;
+      let clash = false;
+      for (let j = 0; j < valid.length; j++) {
+        if (Math.hypot(valid[j].x - p.x, valid[j].z - p.z) < minSelfDist) { clash = true; break; }
+      }
+      if (clash) continue;
+      if (!this.canPlaceBuilding(type, p.x, p.z, null, ownerId)) continue;
+      valid.push({ x: p.x, z: p.z });
+    }
+
+    if (valid.length === 0) {
+      if (owner.isLocal) this.events.emit(EVT.NOTIFY, { ownerId, text: '⚠️ Muralha: sem pontos válidos' });
+      return [];
+    }
+
+    const total = {};
+    for (const k of Object.keys(stats.cost)) total[k] = stats.cost[k] * valid.length;
+    if (!owner.canAfford(total)) {
+      if (owner.isLocal) this.events.emit(EVT.NOTIFY, { ownerId, text: '⚠️ Recursos insuficientes!' });
+      return [];
+    }
+    owner.deduct(total);
+
+    const created = valid.map(p => this._createPlacedBuilding(type, p.x, p.z, ownerId));
+
+    let builders = (unitIds || [])
+      .map(id => this.entitiesById.get(id))
+      .filter(u => u && !u.isDead && u.ownerId === ownerId && (u.type === 'villager' || u.type === 'peon'));
+    if (builders.length === 0) {
+      let nearest = null;
+      let minDist = Infinity;
+      const first = created[0].mesh.position;
+      this.getUnitsOf(ownerId).forEach(u => {
+        if (!u.isDead && (u.type === 'villager' || u.type === 'peon')) {
+          const d = u.mesh.position.distanceTo(first);
+          if (d < minDist) { minDist = d; nearest = u; }
+        }
+      });
+      if (nearest) builders = [nearest];
+    }
+    const n = created.length;
+    for (let bi = 0; bi < builders.length; bi++) {
+      const worker = builders[bi];
+      const start = bi % n;
+      worker.orderQueue = null;
+      worker.orderBuild(created[start]);
+      for (let k = 1; k < n; k++) {
+        if (!worker.orderQueue) worker.orderQueue = [];
+        worker.orderQueue.push({ type: CMD.BUILD, target: created[(start + k) % n] });
+      }
+    }
+    return created;
   }
 
   /** Recurso mais próximo (árvore com madeira ou jazida do `type`), via `blockerGrid.nearest`. */
@@ -1574,6 +1701,10 @@ export class GameManager {
     this.resourceDeposits.forEach(r => this.scene.remove(r.mesh));
     this.arrows.forEach(a => (a.dispose ? a.dispose() : this.scene.remove(a.mesh)));
     this.treeManager?.dispose();
+    if (this._wallBatches) {
+      Object.values(this._wallBatches).forEach(wb => wb.dispose());
+      this._wallBatches = null;
+    }
 
     // Névoa por shader (F1-05): sem plano sobreposto (shroudMesh) para remover.
     this.fogOfWar?.dispose();

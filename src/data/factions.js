@@ -20,7 +20,7 @@ export const FACTIONS = {
     lumber: 'lumber_camp',
     tower: 'watchtower',
     forge: 'forge',
-    buildList: ['cottage', 'lumber_camp', 'farm', 'barracks', 'forge', 'watchtower'],
+    buildList: ['cottage', 'lumber_camp', 'farm', 'barracks', 'forge', 'watchtower', 'wall_human'],
     units: {
       worker: 'villager',
       melee: 'knight',
@@ -43,7 +43,7 @@ export const FACTIONS = {
     lumber: 'orc_lumber_mill',
     tower: 'orc_watchtower',
     forge: 'orc_forge',
-    buildList: ['orc_house', 'pig_farm', 'orc_lumber_mill', 'orc_barracks', 'orc_forge', 'orc_watchtower'],
+    buildList: ['orc_house', 'pig_farm', 'orc_lumber_mill', 'orc_barracks', 'orc_forge', 'orc_watchtower', 'wall_orc'],
     units: {
       worker: 'peon',
       melee: 'grunt',

@@ -147,6 +147,11 @@ export const CommandExecutor = {
         break;
       }
 
+      case CMD.PLACE_WALL: {
+        gm.placeWall(cmd.buildingType, cmd.points, cmd.unitIds || [], cmd.playerId);
+        break;
+      }
+
       case CMD.TRAIN: {
         const building = resolveOwnedBuilding(gm, cmd, cmd.buildingId);
         if (!building) break;

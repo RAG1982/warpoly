@@ -27,6 +27,7 @@ const _combatBuf = [];
 const _unitBuf = [];
 const _towerBuf = [];
 const _buildingBuf = [];
+const _wallBuf = [];
 const _helpBuf = [];
 
 /**
@@ -390,6 +391,13 @@ export class Unit {
         if (!MOVEY_STATES.has(this.state) || !this.pathDestination || this.pathDestination.x !== x || this.pathDestination.z !== z) return;
         this.waypoints = path;
         this.waypointIndex = 0;
+        // F3-08: destino inalcançável (parede fechada) em attack-move — ataca a muralha que bloqueia.
+        if (path.noPath && this.state === 'attackMoving' && this._attackBlockingWall(gm, path, x, z)) return;
+        if (path.length === 0) {
+          this.hasTargetPos = false;
+          this.stop();
+          return;
+        }
         this.targetPos.set(path[0].x, 0, path[0].z);
         this.hasTargetPos = true;
       });
@@ -400,6 +408,29 @@ export class Unit {
       this.waypointIndex = 0;
       this.pathDestination = null;
     }
+  }
+
+  /**
+   * F3-08: `requestPath` de um attack-move terminou sem caminho até o destino. Escolhe a muralha
+   * hostil mais próxima do ponto alcançável mais próximo do destino (fim do caminho parcial, ou a
+   * própria posição se não há caminho parcial) e a ataca; a marcha é retomada (`_amDest`) quando
+   * ela cair. Devolve true se passou a atacar uma muralha.
+   */
+  _attackBlockingWall(gm, path, destX, destZ) {
+    if (!gm || !gm.blockerGrid || !this.isCombatUnit()) return false;
+    const end = path.length > 0 ? path[path.length - 1] : this.mesh.position;
+    const self = this;
+    const isWall = b => b instanceof Building && !b.isDead && b.hp > 0 && b.role === 'wall' && self.isHostileTo(b);
+    gm.blockerGrid.queryRadius(end.x, end.z, 14, isWall, _wallBuf);
+    let wall = pickNearestInBuf(_wallBuf, end.x, end.z);
+    if (!wall) {
+      gm.blockerGrid.queryRadius(destX, destZ, 40, isWall, _wallBuf);
+      wall = pickNearestInBuf(_wallBuf, destX, destZ);
+    }
+    if (!wall) return false;
+    this.orderAttack(wall);
+    this._amDest = { x: destX, z: destZ };
+    return true;
   }
 
   orderGather(resource) {
@@ -1508,7 +1539,7 @@ export class Unit {
     if (closestTower) return closestTower;
 
     gm.blockerGrid.queryRadius(pos.x, pos.z, maxDist, b =>
-      b instanceof Building && !b.isDead && b.hp > 0 && self.isHostileTo(b),
+      b instanceof Building && !b.isDead && b.hp > 0 && b.role !== 'wall' && self.isHostileTo(b),
     _buildingBuf);
     return pickNearestInBuf(_buildingBuf, pos.x, pos.z);
   }

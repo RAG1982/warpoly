@@ -8,6 +8,8 @@
  * e aplica os efeitos.
  */
 
+import { WALL_MAX_POINTS } from '../data/buildings.js';
+
 /** Tipos de comando suportados. */
 export const CMD = Object.freeze({
   MOVE: 'move',
@@ -16,6 +18,7 @@ export const CMD = Object.freeze({
   GATHER: 'gather',
   BUILD: 'build',
   PLACE_BUILDING: 'placeBuilding',
+  PLACE_WALL: 'placeWall',
   TRAIN: 'train',
   CANCEL_TRAIN: 'cancelTrain',
   RESEARCH: 'research',
@@ -42,6 +45,7 @@ const REQUIRED_FIELDS = {
   [CMD.GATHER]: ['unitIds', 'targetId'],
   [CMD.BUILD]: ['unitIds', 'buildingId'],
   [CMD.PLACE_BUILDING]: ['buildingType', 'x', 'z', 'unitIds'],
+  [CMD.PLACE_WALL]: ['buildingType', 'points', 'unitIds'],
   [CMD.TRAIN]: ['buildingId', 'unitType'],
   [CMD.CANCEL_TRAIN]: ['buildingId', 'slot'],
   [CMD.RESEARCH]: ['buildingId', 'upgradeId'],
@@ -68,6 +72,17 @@ export function validateCommand(fields) {
   for (const key of required) {
     if (fields[key] === undefined) {
       return { ok: false, reason: `campo obrigatório '${key}' faltando para o comando '${fields.type}'` };
+    }
+  }
+
+  if (fields.type === CMD.PLACE_WALL) {
+    // F3-08: `points` = [{x, z}, ...] com 1..WALL_MAX_POINTS pontos numéricos.
+    const pts = fields.points;
+    if (!Array.isArray(pts) || pts.length === 0) return { ok: false, reason: "'points' precisa ser um array não vazio" };
+    if (pts.length > WALL_MAX_POINTS) return { ok: false, reason: `'points' excede o limite de ${WALL_MAX_POINTS} pontos` };
+    for (let i = 0; i < pts.length; i++) {
+      const p = pts[i];
+      if (!p || typeof p.x !== 'number' || typeof p.z !== 'number') return { ok: false, reason: `ponto ${i} inválido em 'points'` };
     }
   }
   return { ok: true };

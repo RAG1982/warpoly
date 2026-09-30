@@ -60,6 +60,14 @@ Dano efetivo em unidade = `max(2, dano − armadura)`. Construções **ignoram a
 | Forja | H/O | 850 | 100 / 70 / 50 | Pesquisas |
 | Torre de Vigia | H | 650 | 80 / 40 | Ataca: alcance 18, dano 18, cd 1.4 |
 | Torre Orc | O | 700 | 85 / 40 | Alcance 18, dano 19 |
+| Muralha de Pedra / Paliçada de Ferro | H / O | 250 (armadura 10) | 10 / 20 por segmento | Segmento de muralha (F3-08): bloqueia o caminho até ser destruído; disponível no nível 1 |
+
+### Muralhas (F3-08)
+- **Colocação por arrasto:** escolha "Muralha de Pedra" (humano) / "Paliçada de Ferro" (orc) no painel do aldeão/peão (tecla M), pressione o botão esquerdo no ponto A e arraste; o traço segue a linha reta A→B (8 direções, um segmento a cada `WALL_STEP` = 2,4 unidades) e soltar confirma **todos os segmentos válidos** (custo n × 10 madeira / 20 pedra, só dos válidos; sem recursos para todos, nada é criado). Clique simples = 1 segmento; Esc/botão direito cancela. Segmentos vermelhos (terreno, árvore, outra construção, vau) são ignorados. Máximo de 60 segmentos por comando (`PLACE_WALL`).
+- **Regras de posição:** o afastamento de 3,2 entre construções não vale entre muralhas do mesmo dono (passo 2,4 permitido) e cai para 0,5 contra torre/Centro do mesmo dono; contra as demais construções vale como sempre.
+- **Bloqueio:** segmento em obra ou concluído bloqueia o pathfinder (raio 1,5; uma fileira com passo 2,4 não deixa fresta, inclusive na diagonal); destruir um segmento reabre a passagem. **Não há portão** nesta versão: a lacuna é uma abertura que o jogador deixa de propósito (não coloca segmento ali). Portão e conexões visuais entre segmentos ficam para NEW-24.
+- **Unidades e muralha inimiga:** ordem direta de ataque (clique direito) funciona; muralhas **não** são alvo de auto-aquisição (unidades ociosas, em patrulha, em hold ou em attack-move não as escolhem por conta própria). Quando o caminho ao alvo/destino fica fechado por muralha (pathfinder marca `path.noPath`), a unidade em **ataque** ou **attack-move** ataca a muralha hostil mais próxima do ponto alcançável mais próximo e retoma o objetivo quando ela cair; em ordem de **movimento** ela vai até o ponto alcançável mais próximo.
+- **Visual:** modelo procedural (bloco de pedra clara / madeira escura com ferro), desenhado por um `InstancedMesh` por facção (`Wall`/`WallBatch` em `src/entities/Wall.js`, teto de 400 instâncias): 40 segmentos custam +2 draw calls (principal + sombra) em vez de 40.
 
 Fila de treino: até 6 itens; cancelar reembolsa 100%. Posicionamento: terreno seco, folga de 3,2 de outras construções, 3,5 de árvores, fora dos vaus.
 
@@ -106,6 +114,7 @@ Estados: `idle, moving, gathering, returning, building, attacking, dying`.
 Tick de 1s. Utilidades:
 - `U_def`: intrusos a < 26 da base → todas as tropas ociosas atacam o intruso mais próximo.
 - `U_housing/U_eco`: constrói casas perto do limite de pop; mantém 8–12 trabalhadores; emergência se < 3.
+- Muralha (F3-08): nas dificuldades normal/difícil/brutal, com ≥ 8 trabalhadores, Quartel, ≥ 1 torre e sobra de madeira/pedra, a IA constrói **uma** linha de 6 segmentos a ~16 unidades do Centro, perpendicular à direção do Centro inimigo. Suas tropas derrubam a muralha inimiga que fechar o caminho (comportamento da unidade, ver "Muralhas").
 - `U_mil`: quando tropas prontas ≥ limiar (4 → 5 → 6 → 3 …) envia onda contra torre mais próxima > HQ > qualquer construção.
 - Custos: a IA usa os **mesmos custos reais** de `src/data/` (bug B3 corrigido na F0-06; antes o arremessador custava 60 madeira/35 ouro para a IA contra 20/40 real, e o quartel/serraria/torre/chiqueiro orc e o "cerco" humano também estavam com valores próprios).
 - A IA é **onisciente** (lê `gm.units` diretamente), sem níveis de dificuldade, sem micro, sem scout, sem pesquisar melhorias de forma estratégica.

@@ -290,7 +290,7 @@ e IA não chamam mais `Unit`/`Building` diretamente — emitem comandos via `gm.
 
 - **Formato** (`src/sim/commands.js`): `{ tick, playerId, type, unitIds?, targetId?, x?, z?,
   buildingType?, buildingId?, unitType?, upgradeId?, slot?, queued? }`. `CMD` enumera os 13
-  tipos (`move`, `attack`, `attackMove`, `gather`, `build`, `placeBuilding`, `train`,
+  tipos (`move`, `attack`, `attackMove`, `gather`, `build`, `placeBuilding`, `placeWall`, `train`,
   `cancelTrain`, `research`, `cancelResearch`, `rally`, `stop`, `hold`, `patrol`).
   `makeCommand(fields)` valida os campos obrigatórios por tipo e congela o objeto;
   `validateCommand` faz o mesmo sem lançar (`{ok, reason}`); `serialize`/`deserialize` são
@@ -310,6 +310,17 @@ e IA não chamam mais `Unit`/`Building` diretamente — emitem comandos via `gm.
   `gm.placeBuilding(...)`). Comandos para entidades mortas/inexistentes são ignorados. MOVE
   com várias unidades: o comando carrega só o ponto clicado — a formação (grade + offsets) é
   calculada aqui, não no tradutor.
+- **`PLACE_WALL` / `WALL_STEP` (F3-08):** `{ buildingType, points: [{x,z}, …≤60], unitIds }`
+  (`WALL_STEP = 2.4` e `WALL_MAX_POINTS = 60` em `src/data/buildings.js`). O executor chama
+  `gm.placeWall(type, points, unitIds, ownerId)`: valida cada ponto (`canPlaceBuilding` com o
+  `ownerId`, mais distância mínima entre os pontos do próprio comando), cobra n × custo só dos
+  válidos (tudo ou nada), cria um `Wall` por ponto via o helper `_createPlacedBuilding`
+  (compartilhado com `placeBuilding`; 1 `BUILDING_PLACED` por segmento) e enfileira as obras
+  (`orderBuild` + `orderQueue`) nos aldeões escolhidos. `Wall` (`src/entities/Wall.js`) estende
+  `Building`, mas o corpo visual vive num `InstancedMesh` por facção (`gm.getWallBatch`).
+  `Pathfinder.findPath` marca `path.noPath` quando o destino é inalcançável (o caminho devolvido
+  vai até o ponto alcançável mais próximo, ou `[]`); `Unit` usa isso para atacar a muralha
+  bloqueadora (`_findBlockingWall`).
 - **Integração no `GameManager`**: `gm.commands` (`CommandQueue`) e `gm.currentTick`
   (incrementa a cada `simStep`, 20 Hz). No início de `simStep`, `gm.commands.drain(tick)` é
   executado via `CommandExecutor` antes do resto do passo. `gm.issue(fields)` =

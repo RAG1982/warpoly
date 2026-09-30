@@ -101,6 +101,8 @@ Modelos: o Castelo atual (Blender) vira o **nível 3** humano; os níveis 1–2 
 | Torre de magia | Torre Arcana | Santuário das Cinzas | 250 / 80 / 80 | 800 | 3 |
 | Aéreo | Aviário de Grifos | Ninho das Serpes | 300 / 150 / 60 | 900 | 3 |
 
+> **Implementado (F3-08):** Muralha de Pedra / Paliçada de Ferro (`wall_human`/`wall_orc`, PV 250, armadura 10, 10 madeira + 20 pedra por segmento, nível 1): colocação por arrasto (`PLACE_WALL`, `WALL_STEP` 2,4), bloqueio de caminho, destruíveis, ataque de unidades/IA à muralha que fecha o caminho. Sem portão nem conexões visuais (v2 = NEW-24). Ver `docs/02_MECANICAS.md` (Muralhas).
+
 ---
 
 ## 5. Unidades

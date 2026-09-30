@@ -324,7 +324,7 @@ Sonnet 5.5 escreve a spec em `docs/specs/<ID>.md`; agente **Sonnet** executa; o 
 ## F4 — Jogabilidade WC2 (expansão)
 
 ### F4-01 · Cavalaria (Estábulo / Covil de Ogros)
-- `TODO` · GAME+ART · Dep: F3-06 · Cavaleiro real (humano) e ajuste do Ogro; Cavaleiro→Paladino com upgrade.
+- `DOING(sonnet, 2026-09-30)` (spec: docs/specs/F4-01-cavalaria.md) · GAME+ART · Dep: F3-06 · Cavaleiro real (humano) e ajuste do Ogro; Cavaleiro→Paladino com upgrade.
 
 ### F4-02 · Unidades de cerco (Balista / Catapulta)
 - `TODO` · GAME+ART · Dep: F3-03, F3-06 · Oficina (Inventor/Alquimista); dano em área, alcance mínimo, projétil balístico visível.

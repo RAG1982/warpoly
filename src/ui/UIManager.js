@@ -464,7 +464,7 @@ export class UIManager {
 
       // Stats
       this.selectionStats.innerHTML = `
-        <span>⚔️ Atk: ${u.attack}</span>
+        <span>⚔️ Atk: ${u.damage.basic}+${u.damage.piercing}</span>
         <span>🛡️ Def: ${u.armor || 0}</span>
         <span>🏃 Spd: ${u.speed}</span>
         ${isWorker ? `<span>🎒 Carry: ${u.carrying.amount}/${u.carrying.max} ${u.carrying.type || ''}</span>` : ''}
@@ -508,10 +508,10 @@ export class UIManager {
           this.bldExtraInfo.innerText = `🔨 Construindo: ${Math.round(b.buildProgress)}%`;
         } else if (b.popGranted) {
           this.bldExtraInfo.innerText = `👥 +${b.popGranted} População`;
-        } else if (b.attackDamage) {
-          this.bldExtraInfo.innerText = `🏹 Dano: ${b.attackDamage} | Alcance: ${b.attackRange}`;
+        } else if (b.towerDamage) {
+          this.bldExtraInfo.innerText = `🏹 Dano: ${b.towerDamage.basic}+${b.towerDamage.piercing} | Alcance: ${b.attackRange} | 🛡️ ${b.armor || 0}`;
         } else {
-          this.bldExtraInfo.innerText = '';
+          this.bldExtraInfo.innerText = b.armor ? `🛡️ Def: ${b.armor}` : '';
         }
       }
 

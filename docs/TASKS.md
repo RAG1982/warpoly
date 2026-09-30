@@ -412,7 +412,7 @@ Sonnet 5.5 escreve a spec em `docs/specs/<ID>.md`; agente **Sonnet** executa; o 
 - **Resultado**: `tools/blender/` (common.py, build_grunt.py, build_castle.py), `public/models/{grunt,castle}.glb` (meshopt+WebP), `src/entities/glbModels.js`, `?glb=1`. Grunt 35→8 draw calls, atlas 512²; Castelo 487→2 draw calls, atlas 1024². Inspetor: "Guerreiro Orc (Blender)" / "Castelo (Blender)". Aprovado pelo dono (visual e machado ok).
 
 ### F7-00b · Migração de todo o catálogo para o pipeline Blender
-- **Status**: `ADIADA(até o código estar pronto — decisão do dono)` · Lane ART · Onda 2 · Dep: F7-00 aprovado
+- **Status**: `DOING(parcial, 2026-09-30)` — Sonnet 5.5 modela (dono revogou "só Opus"). Feitos: Grunt, Castelo, **Espadachim** (knight.glb). Em andamento (3 agentes): Camponês+Lacaio, Arqueiro+Lanceiro-Machado, Ogro+Bandido. Pendentes: modelos das unidades/construções novas da F4 (só depois do código de cada uma), construções restantes, ambiente · Lane ART · Onda 2 · Dep: F7-00 aprovado
 - **Fazer**: refazer os 37 modelos (prioridade: unidades orcs → construções grandes → ambiente), um agente por grupo de modelos em paralelo; remover `*Textures.js` procedurais substituídos. Substitui F1-02/F1-03/F1-01 para os modelos migrados.
 - **Aceite**: load < 5 s; cena inicial < 400 draw calls.
 

@@ -1,4 +1,5 @@
 import { CMD } from '../sim/commands.js';
+import { repairCostFor, REPAIR_HP_FRACTION } from '../sim/repair.js';
 import { missingRequirements, missingUpgradeRequirements } from '../sim/requirements.js';
 import { getHqUpgradeCost, getBuildingDef, getUnitDef, RESEARCH, WALL_STEP } from '../data/index.js';
 
@@ -57,6 +58,41 @@ export class AIEconomyManager {
 
     // 6. F3-07: pesquisas da Forja/Serraria quando sobra ouro
     this.considerResearch();
+
+    // 7. F3-05: repara construções danificadas
+    this.considerRepair();
+  }
+
+  /**
+   * F3-05: construção concluída com PV < 70 %, sem ataque nos últimos 6 s e sem reparador,
+   * recebe 1 trabalhador ocioso (CMD.REPAIR). Só age se o dono pagar ao menos um golpe.
+   */
+  considerRepair() {
+    const pid = this.director.playerId;
+    const owner = this.gm.getPlayer(pid);
+    if (!owner) return;
+    const buildings = this.gm.buildings;
+    const units = this.director.getOwnUnits();
+    const assigned = new Set();
+    for (let i = 0; i < buildings.length; i++) {
+      const b = buildings[i];
+      if (b.ownerId !== pid || b.isDead || !b.isConstructed) continue;
+      if (b.hp >= b.maxHp * 0.7 || b.underAttackTimer > 0) continue;
+      if (this.gm.countWorkersOn(b) > 0) continue;
+      const hit = repairCostFor({ hp: b.maxHp, cost: b.cost }, b.maxHp * REPAIR_HP_FRACTION);
+      if (!owner.canAfford(hit)) continue;
+      let worker = null;
+      for (let j = 0; j < units.length; j++) {
+        const u = units[j];
+        if (!u.isDead && u.type === this.director.workerType && u.state === 'idle' && !assigned.has(u.id)) {
+          worker = u;
+          break;
+        }
+      }
+      if (!worker) return;
+      assigned.add(worker.id);
+      this.gm.issue({ type: CMD.REPAIR, playerId: pid, unitIds: [worker.id], buildingId: b.id });
+    }
   }
 
   /**
@@ -635,8 +671,8 @@ export class AIEconomyManager {
       if (!e.isDead && e.type === workerType) {
         livingWorkers.push(e);
 
-        if (e.state === 'building') {
-          // Worker is busy building scaffold; do not interrupt active construction
+        if (e.state === 'building' || e.state === 'repairing') {
+          // Worker is busy building scaffold (or repairing, F3-05); do not interrupt
           continue;
         }
 

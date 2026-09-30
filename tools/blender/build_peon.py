@@ -38,12 +38,15 @@ LEG_PIVOT = (0.25, 0.85, -0.05)
 TEAM_DEFAULT = '#d23a2c'  # vermelho da Horda (multiplica a área cinza)
 
 PALETTE = {
-    'skin': dict(base='#7a9639', var='#5f7a2c', var_scale=4.0, var_amt=0.6, fine=0.07,
-                 grad=(0.0, 2.4, 0.28), top=0.22, edge='#a9cf62', edge_amt=0.33, edge_r=0.03,
-                 ao=(0.26, 0.65), coord='world'),
-    'skin_dark': dict(base='#4f6a2a', var='#3f5620', var_scale=4.0, fine=0.05, grad=(0.0, 2.4, 0.2),
+    'skin': dict(base='#77843f', var='#52622c', var_scale=3.2, var_amt=0.95, fine=0.12,
+                 grad=(0.0, 2.4, 0.34), top=0.2, edge='#98a45a', edge_amt=0.3, edge_r=0.03,
+                 ao=(0.28, 0.7), coord='world'),
+    'skin_dark': dict(base='#435227', var='#36441f', var_scale=4.0, fine=0.05, grad=(0.0, 2.4, 0.2),
                       top=0.15, ao=(0.25, 0.6)),
-    'scar': dict(base='#9db56a', var='#8aa259', var_scale=20.0, fine=0.1, top=0.15),
+    'scar': dict(base='#c4c48e', var='#b0b07c', var_scale=20.0, fine=0.1, top=0.15),
+    'bruise': dict(base='#5a5a3a', var='#4a4a34', var_scale=9.0, var_amt=1.0, fine=0.14, top=0.1, ao=(0.3, 0.6)),
+    'mud': dict(base='#5a4c33', var='#3f3422', var_scale=14.0, var_amt=1.0, fine=0.25, fine_scale=50.0, top=0.1,
+                ao=(0.3, 0.7)),
     'leather': dict(base='#71452a', var='#54301a', var_scale=6.0, var_amt=0.9, fine=0.14, top=0.2,
                     edge='#a97a4c', edge_amt=0.55, edge_r=0.02, ao=(0.25, 0.6), grad=(0.0, 2.2, 0.15)),
     'leather_dk': dict(base='#48291a', var='#341c10', var_scale=6.0, fine=0.12, top=0.18,
@@ -105,6 +108,12 @@ def build_torso(mats, root):
     for sx in (-1, 1):
         mb.add(prim_sphere(0.20, 0.13, 0.11, 8, 3), 'skin', M((sx * 0.17, 0.2, 0.25), (8, sx * 10, sx * -6)), smooth=70)
         mb.add(prim_box(0.02, 0.16, 0.012), 'scar', M((sx * 0.3, 0.05, 0.27), (0, 0, sx * -25)))
+    # cicatrizes cruzadas no peito/ombro e hematomas
+    mb.add(prim_box(0.018, 0.17, 0.010), 'scar', M((0.14, 0.27, 0.318), (0, 0, 40)))
+    mb.add(prim_box(0.018, 0.12, 0.010), 'scar', M((0.15, 0.25, 0.322), (0, 0, -35)))
+    mb.add(prim_box(0.018, 0.14, 0.010), 'scar', M((-0.30, 0.22, 0.26), (0, 0, 70)))
+    mb.add(prim_sphere(0.09, 0.06, 0.03, 6, 2), 'bruise', M((-0.15, 0.12, 0.30), (0, 0, 20)), smooth=60)
+    mb.add(prim_sphere(0.08, 0.05, 0.03, 6, 2), 'mud', M((0.34, 0.12, 0.22), (0, 50, 10)), smooth=60)
     # avental de couro (peitilho + saia) com rebites, remendos e queimaduras
     mb.add(cloth_panel((-0.22, 0.26, 0.315), (0.22, 0.26, 0.315), (-0.30, -0.24, 0.33), (0.30, -0.24, 0.33),
                        nx=4, ny=4, thick=0.04, bulge=(0, 0, 0.02), wave=0.01, jag=0.0), 'leather', smooth=45)
@@ -181,6 +190,9 @@ def build_head(mats, torso):
         # olhos âmbar em fenda
         mb.add(prim_sphere(0.066, 0.03, 0.03, 6, 3), 'eye', M((sx * 0.105, 0.075, 0.252), (0, 0, sx * 16)), smooth=80)
         mb.add(prim_box(0.15, 0.06, 0.05, taper=(0.9, 0.9)), 'skin_dark', M((sx * 0.105, 0.075, 0.225), (0, 0, sx * 16)))
+    # cicatriz sobre o olho direito e cheiro de lama na bochecha (só frente)
+    mb.add(prim_box(0.015, 0.15, 0.012), 'scar', M((-0.105, 0.11, 0.255), (8, 0, -28)))
+    mb.add(prim_sphere(0.05, 0.03, 0.02, 6, 2), 'mud', M((0.12, -0.03, 0.262), (0, 20, 0)), smooth=60)
     # nariz achatado com narinas
     mb.add(prim_box(0.16, 0.09, 0.08, taper=(0.5, 0.55)), 'skin', M((0, 0.02, 0.265), (-15, 0, 0)), bevel=0.02)
     for sx in (-1, 1):
@@ -220,6 +232,8 @@ def build_arm(mats, torso, side):
         wrist = (0.0, -0.76, 0.10)
         hand = (0.0, -0.88, 0.12)
     tube(mb, [(s * 0.015, -0.42, 0.0), (s * 0.01, -0.55, 0.03), wrist], [0.10, 0.105, 0.078], 'skin', 9, smooth=72)
+    mb.add(prim_box(0.016, 0.16, 0.010), 'scar', M((s * 0.06, -0.3, 0.117), (0, 0, s * 25)))
+    mb.add(prim_sphere(0.075, 0.05, 0.05, 6, 2), 'mud', M((-s * 0.06, -0.50, 0.07), (0, 0, 0)), smooth=60)
     # bracelete de couro com rebites e faixas de pano no antebraço
     tube(mb, [(s * 0.01, -0.60, 0.05), (wrist[0], wrist[1] + 0.02, wrist[2] - 0.01)], [0.108, 0.085], 'leather_dk', 9,
          smooth=40)

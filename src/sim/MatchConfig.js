@@ -66,6 +66,14 @@ export function normalizeDifficulty(d) {
   return DIFFICULTIES.includes(d) ? d : DEFAULT_DIFFICULTY;
 }
 
+/** F3-09: modos de vitória — 'conquest' (destruir tudo, padrão) e 'regicide' (derrubar o Centro). */
+export const VICTORY_MODES = Object.freeze(['conquest', 'regicide']);
+export const DEFAULT_VICTORY_MODE = 'conquest';
+
+export function normalizeVictoryMode(m) {
+  return VICTORY_MODES.includes(m) ? m : DEFAULT_VICTORY_MODE;
+}
+
 export function randomSeed() {
   return Math.floor(Math.random() * 0x7fffffff);
 }
@@ -90,6 +98,7 @@ export function createMatchConfig({
   seed = null,
   mapId = DEFAULT_MAP_ID,
   difficulty = DEFAULT_DIFFICULTY,
+  victoryMode = DEFAULT_VICTORY_MODE,
   headless = false
 } = {}) {
   const local = localFaction === 'orc' ? 'orc' : 'human';
@@ -133,6 +142,7 @@ export function createMatchConfig({
     seed: seed ?? randomSeed(),
     // F2-04: guardada na config; a IA ainda não lê a dificuldade (F5).
     difficulty: normalizeDifficulty(difficulty),
+    victoryMode: normalizeVictoryMode(victoryMode),
     headless: !!headless,
     players
   };
@@ -148,7 +158,7 @@ export function withNewSeed(cfg, seed = null) {
   return { ...cfg, seed: next, players: cfg.players.map((p) => ({ ...p })) };
 }
 
-/** Lê `?faction=orc`, `?ffa=1`, `?seed=`, `?difficulty=` e `?map=` da query string. */
+/** Lê `?faction=orc`, `?ffa=1`, `?seed=`, `?difficulty=`, `?victory=` e `?map=` da query string. */
 export function matchConfigFromSearch(search = '') {
   const params = new URLSearchParams(search);
   const seedParam = params.get('seed');
@@ -160,7 +170,8 @@ export function matchConfigFromSearch(search = '') {
     ffa: ffa === '1' || ffa === 'true',
     seed,
     mapId: mapParam && getMap(mapParam) ? mapParam : DEFAULT_MAP_ID,
-    difficulty: params.get('difficulty') || DEFAULT_DIFFICULTY
+    difficulty: params.get('difficulty') || DEFAULT_DIFFICULTY,
+    victoryMode: params.get('victory') || DEFAULT_VICTORY_MODE
   });
 }
 

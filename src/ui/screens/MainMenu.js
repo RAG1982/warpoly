@@ -18,6 +18,7 @@ import { renderTerrainImage } from '../terrainMinimapImage.js';
 const BYPASS_PARAMS = ['play', 'skipMenu', 'bench', 'skipPreload'];
 const STORAGE_DIFFICULTY = 'warpoly.difficulty';
 const STORAGE_FACTION = 'warpoly.faction';
+const STORAGE_VICTORY = 'warpoly.victory';
 const STORAGE_MAP = 'warpoly.map';
 const MAP_THUMB_SIZE = { w: 96, h: 64 };
 
@@ -40,6 +41,10 @@ const FACTIONS = [
   },
 ];
 
+const VICTORY_MODES = [
+  { id: 'conquest', label: 'Destruir tudo' },
+  { id: 'regicide', label: 'Regicídio (Centro)' }
+];
 const DIFFICULTIES = [
   { id: 'easy', label: 'Fácil' },
   { id: 'normal', label: 'Normal' },
@@ -77,7 +82,7 @@ export class MainMenu {
   /**
    * @param {HTMLElement} [parent]
    * @param {object} [opts]
-   * @param {(choice: {faction: string, difficulty: string, mapId: string}) => void} [opts.onStart]
+   * @param {(choice: {faction: string, difficulty: string, mapId: string, victoryMode: string}) => void} [opts.onStart]
    * @param {(open: boolean) => void} [opts.onSetupChange]
    */
   constructor(parent = document.body, { onStart = null, onSetupChange = null } = {}) {
@@ -96,6 +101,8 @@ export class MainMenu {
       : (stored === 'orc' ? 'orc' : 'human');
     const storedDiff = safeGet(STORAGE_DIFFICULTY);
     this.difficulty = DIFFICULTIES.some((d) => d.id === storedDiff) ? storedDiff : 'normal';
+    const storedVictory = safeGet(STORAGE_VICTORY);
+    this.victoryMode = VICTORY_MODES.some((v) => v.id === storedVictory) ? storedVictory : 'conquest';
 
     // F2-05: mapa escolhido no painel de escaramuça — lista real via listMaps().
     this.maps = listMaps();
@@ -164,6 +171,12 @@ export class MainMenu {
       <label class="mm-seg mm-seg--${d.id}">
         <input type="radio" name="mm-difficulty" value="${d.id}" ${this.difficulty === d.id ? 'checked' : ''} />
         <span>${esc(d.label)}</span>
+      </label>`).join('');
+
+    const victories = VICTORY_MODES.map((v) => `
+      <label class="mm-seg">
+        <input type="radio" name="mm-victory" value="${v.id}" ${this.victoryMode === v.id ? 'checked' : ''} />
+        <span>${esc(v.label)}</span>
       </label>`).join('');
 
     // F2-05: lista real de mapas (miniatura gerada pelo mesmo renderizador do minimapa).
@@ -246,6 +259,11 @@ export class MainMenu {
                 <div class="mm-maps" role="group" aria-labelledby="mm-map-label">${mapCards}</div>
               </fieldset>
             </div>
+
+            <fieldset class="mm-field">
+              <legend class="mm-field__label">Condição de vitória</legend>
+              <div class="mm-segmented" style="grid-template-columns: repeat(2, 1fr)">${victories}</div>
+            </fieldset>
           </div>
 
           <footer class="mm-panel__foot">
@@ -333,6 +351,14 @@ export class MainMenu {
         if (!input.checked) return;
         this.difficulty = input.value;
         safeSet(STORAGE_DIFFICULTY, this.difficulty);
+      });
+    });
+
+    root.querySelectorAll('input[name="mm-victory"]').forEach((input) => {
+      input.addEventListener('change', () => {
+        if (!input.checked) return;
+        this.victoryMode = input.value;
+        safeSet(STORAGE_VICTORY, this.victoryMode);
       });
     });
 
@@ -426,11 +452,12 @@ export class MainMenu {
     safeSet(STORAGE_FACTION, this.faction);
     safeSet(STORAGE_DIFFICULTY, this.difficulty);
     safeSet(STORAGE_MAP, this.mapId);
+    safeSet(STORAGE_VICTORY, this.victoryMode);
     this.root.classList.add('mm-leaving');
     const btn = this.root.querySelector('.mm-btn--start');
     if (btn) { btn.disabled = true; btn.querySelector('.mm-btn__label').textContent = 'Preparando…'; }
     const reduce = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
-    const choice = { faction: this.faction, difficulty: this.difficulty, mapId: this.mapId };
+    const choice = { faction: this.faction, difficulty: this.difficulty, mapId: this.mapId, victoryMode: this.victoryMode };
     if (this.onStart) {
       this._startTimer = setTimeout(() => {
         this._startTimer = null;

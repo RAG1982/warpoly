@@ -156,6 +156,7 @@ export class Unit {
     this.attackTimer = 0;
     this.walkTimer = 0;
     this.isDead = false;
+    this.lastAttackerOwnerId = null; // F3-09
     this.isDying = false;
     this.canRemove = false;
     this.isDisposed = false;
@@ -574,6 +575,8 @@ export class Unit {
    */
   takeDamage(amount, attacker = null, allUnits = []) {
     if (this.isDead || this.isDying) return;
+    // F3-09: atribuição de kills (lida em die()).
+    if (attacker && typeof attacker.ownerId === 'number') this.lastAttackerOwnerId = attacker.ownerId;
 
     const effectiveDamage = amount;
     this.hp -= effectiveDamage;
@@ -658,7 +661,8 @@ export class Unit {
         unitId: this.id,
         ownerId: this.ownerId,
         pos: posOf(this.mesh.position),
-        unitType: this.type
+        unitType: this.type,
+        killerOwnerId: this.lastAttackerOwnerId ?? null
       });
     }
 

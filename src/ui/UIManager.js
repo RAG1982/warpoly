@@ -1,6 +1,7 @@
 import { UNIT_TRAIN_CONFIG, BUILDING_BUILD_CONFIG, WORKER_BUILD_LIST } from '../entities/Building.js';
 import { UPGRADE_CONFIG, FORGE_UPGRADES } from '../core/UpgradeConfig.js';
-import { BUILDING_TRAINABLE_UNITS, getUnitDef } from '../data/index.js';
+import { BUILDING_TRAINABLE_UNITS, getUnitDef, getBuildingDef } from '../data/index.js';
+import { missingRequirements } from '../sim/requirements.js';
 import { initUiScale } from './uiScale.js';
 import { getBuildHotkey, getTrainHotkey, getResearchHotkey } from './hotkeys.js';
 import { buildCostHtml } from './Tooltip.js';
@@ -889,13 +890,29 @@ export class UIManager {
     const buildings = WORKER_BUILD_LIST[workerType];
     if (!buildings) return;
 
+    const ownerId = this.gm.localPlayerId;
     buildings.forEach(bType => {
       const cfg = BUILDING_BUILD_CONFIG[bType];
       if (!cfg || !cfg.cost) return;
       const costContainer = this.selectionActions.querySelector(`[data-cost-build="${bType}"]`);
-      if (!costContainer) return;
+      if (costContainer) costContainer.innerHTML = buildCostHtml(cfg.cost, this.gm.resources);
 
-      costContainer.innerHTML = buildCostHtml(cfg.cost, this.gm.resources);
+      // F3-04: requisito de construção (ex.: Quartel exige Fazenda) — botão desabilitado com
+      // tooltip listando o que falta, sem UI nova (reaproveita o próprio botão/hint bubble).
+      const btn = this.selectionActions.querySelector(`[data-build="${bType}"]`);
+      if (!btn) return;
+      const missing = missingRequirements(ownerId, bType, this.gm);
+      if (missing.length > 0) {
+        const names = missing.map(t => getBuildingDef(t).name).join(', ');
+        btn.disabled = true;
+        btn.title = `Requer: ${names}`;
+        btn.classList.add('bld-requirement-missing');
+      } else {
+        btn.disabled = false;
+        btn.classList.remove('bld-requirement-missing');
+        const hotkey = getBuildHotkey(bType);
+        btn.title = `${cfg.name}${hotkey ? ` (${hotkey})` : ''}`;
+      }
     });
   }
 

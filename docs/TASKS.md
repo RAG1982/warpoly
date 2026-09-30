@@ -314,7 +314,7 @@ Sonnet 5.5 escreve a spec em `docs/specs/<ID>.md`; agente **Sonnet** executa; o 
 - **Resultado**: `NEUTRAL_HOSTILE_ID=99`, `neutrals` validados nos mapas (2 acampamentos cada), `spawnNeutrals`, leash/regen dos bandidos, recompensa + `CAMP_CLEARED`, critters (ovelha/porco), minimapa laranja, card do acampamento. Pendências → NEW-25/26/27. 360 testes.
 
 ### F3-11 · Revisão de balanceamento base
-- **Status**: `TODO(spec pronta: docs/specs/F3-11-balanceamento-base.md)` · Lane GAME + QA · Onda 5 · Dep: F3-03..F3-07, F8-? headless
+- **Status**: `DOING(sonnet, 2026-09-30)` (spec: docs/specs/F3-11-balanceamento-base.md) · Lane GAME + QA · Onda 5 · Dep: F3-03..F3-07, F8-? headless
 - **Fazer**: simulações IA×IA headless (F2-08) em lote para medir taxa de vitória por facção; ajustar dados.
 - **Aceite**: 45–55% de vitória por facção em 200 partidas IA Difícil × IA Difícil.
 

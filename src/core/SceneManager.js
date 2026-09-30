@@ -11,6 +11,14 @@ const _lightBasisInv = new THREE.Matrix4();
 const _origin = new THREE.Vector3();
 const _up = new THREE.Vector3(0, 1, 0);
 
+/** F4-05: tremor de câmera das explosões — ligado por padrão; `?shake=0` desliga. */
+const SHAKE_DURATION = 0.15;
+const SHAKE_AMPLITUDE = 0.3;
+const SHAKE_MAX_DIST = 50;
+const SHAKE_ENABLED = (() => {
+  try { return new URLSearchParams(globalThis.location ? globalThis.location.search : '').get('shake') !== '0'; } catch (e) { return true; }
+})();
+
 export class SceneManager {
   constructor(canvasContainer) {
     this.container = canvasContainer;
@@ -146,6 +154,15 @@ export class SceneManager {
     this.invalidateShadowFrustum();
   }
 
+  /** F4-05: tremor curto (0,15 s) se a explosão em `pos` está perto do alvo da câmera. Sem alocação. */
+  shake(pos) {
+    if (!SHAKE_ENABLED) return;
+    const dx = pos.x - this.cameraTarget.x;
+    const dz = pos.z - this.cameraTarget.z;
+    if (dx * dx + dz * dz > SHAKE_MAX_DIST * SHAKE_MAX_DIST) return;
+    this._shakeTime = SHAKE_DURATION;
+  }
+
   updateCamera(delta) {
     // Smooth zoom interpolation
     this.zoomLevel = THREE.MathUtils.lerp(this.zoomLevel, this.targetZoomLevel, delta * 10);
@@ -162,6 +179,13 @@ export class SceneManager {
 
     this.camera.position.set(camX, camY, camZ);
     this.camera.lookAt(this.cameraTarget);
+
+    if (this._shakeTime > 0) {
+      this._shakeTime -= delta;
+      const k = Math.max(0, this._shakeTime / SHAKE_DURATION) * SHAKE_AMPLITUDE;
+      this.camera.position.x += (Math.random() - 0.5) * 2 * k;
+      this.camera.position.y += (Math.random() - 0.5) * 2 * k;
+    }
 
     this.updateShadowCamera();
   }

@@ -28,7 +28,8 @@ export const FACTIONS = {
       melee: 'knight',
       ranged: 'archer',
       cavalry: 'cavalier',
-      siege: 'ballista' // F4-02
+      siege: 'ballista', // F4-02
+      suicide: 'sapper' // F4-05
     },
     startingBase: {
       buildings: { hq: 'castle', lumber: 'lumber_camp', house: 'cottage' },
@@ -54,7 +55,8 @@ export const FACTIONS = {
       melee: 'grunt',
       ranged: 'axethrower',
       cavalry: 'ogre',
-      siege: 'catapult' // F4-02
+      siege: 'catapult', // F4-02
+      suicide: 'arsonist' // F4-05
     },
     startingBase: {
       buildings: { hq: 'great_hall', lumber: 'orc_lumber_mill', house: 'pig_farm' },

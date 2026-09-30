@@ -43,6 +43,8 @@ export function createAudioEvents(gm, soundManager) {
     else soundManager.playArrowHit();
   });
   on(EVT.MELEE_HIT, () => soundManager.playSword());
+  // F4-05: explosão de sapador = impacto pesado (reaproveita o som do cerco)
+  on(EVT.EXPLOSION, () => soundManager.playMineStone());
 
   // Construção: colocação só se local; treino e conclusão sempre tocavam.
   on(EVT.BUILDING_PLACED, ({ ownerId }) => {

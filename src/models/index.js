@@ -27,6 +27,8 @@ export { createOgre } from './units/OgreModel.js';
 export { createCavalier } from './units/CavalierModel.js';
 export { createBallista } from './units/BallistaModel.js';
 export { createCatapult } from './units/CatapultModel.js';
+export { createSapper } from './units/SapperModel.js';
+export { createArsonist } from './units/ArsonistModel.js';
 export { getPeonFaceTextures, getPeonTunicHarnessTextures, getPeonPantsBootsTextures, getPeonToolTextures } from './units/peonTextures.js';
 export { getGruntFaceTextures, getGruntArmorTextures, getGruntAxeTextures } from './units/gruntTextures.js';
 export { getAxethrowerFaceTextures, getAxethrowerHarnessTextures, getAxethrowerAxeTextures } from './units/axethrowerTextures.js';

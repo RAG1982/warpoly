@@ -87,7 +87,9 @@ export class UnitAnimator {
       // F4-02: cerco (Balista/Catapulta)
       siegeArm: ud.siegeArm,
       wheelL: ud.wheelL,
-      wheelR: ud.wheelR
+      wheelR: ud.wheelR,
+      // F4-05: pavio dos sapadores
+      fuse: ud.fuse
     };
 
     // Store original materials on userData for zero-clone damage flash
@@ -378,6 +380,8 @@ export class UnitAnimator {
       parts.armR.rotation.z = 0.05 + rollSway;
     }
 
+    if (parts.fuse) this.flickerFuse(time, parts.fuse, 2.5 * Math.PI * 2);
+
     // Held items motion during walking
     if (uType === 'knight') {
       if (parts.shieldGroup) {
@@ -409,6 +413,11 @@ export class UnitAnimator {
 
   // --- 3. FIGHT / ATTACK ANIMATION ---
   applyFight(time, progress, parts, uType) {
+    // F4-05: sapadores — corrida acelerada com o pavio piscando
+    if (uType === 'sapper' || uType === 'arsonist') {
+      this.applySapperRun(time, parts);
+      return;
+    }
     // F4-02: cerco — o braço recua/arremessa (disparo em progress 0,6, igual ao `Unit.updateAttacking`)
     if (parts.siegeArm) {
       this.applySiegeFight(progress, parts, uType);
@@ -961,6 +970,25 @@ export class UnitAnimator {
       else dz = -0.42 * (1 - ease((p - 0.72) / 0.28));
       arm.position.z += dz;
     }
+  }
+
+  /** F4-05: pavio pisca (escala oscilante); `freq` em rad/s. */
+  flickerFuse(time, fuse, freq) {
+    const s = 0.75 + 0.45 * Math.abs(Math.sin(time * freq));
+    fuse.scale.set(s, s, s);
+  }
+
+  /** F4-05: 'fight' dos sapadores = corrida a 2× a cadência da marcha, tronco inclinado, pavio aceso. */
+  applySapperRun(time, parts) {
+    const phase = time * (Math.PI * 2 / 0.5);
+    const swing = Math.sin(phase);
+    if (parts.legL) parts.legL.rotation.x = swing * 0.9;
+    if (parts.legR) parts.legR.rotation.x = -swing * 0.9;
+    if (parts.armL) parts.armL.rotation.x = -swing * 0.8;
+    if (parts.armR) parts.armR.rotation.x = swing * 0.8;
+    if (parts.torso) parts.torso.rotation.x = 0.25;
+    if (parts.head) parts.head.rotation.x = 0.12;
+    if (parts.fuse) this.flickerFuse(time, parts.fuse, 8 * Math.PI);
   }
 
   applyOgreFight(p, parts) {

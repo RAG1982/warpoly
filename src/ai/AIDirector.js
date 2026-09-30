@@ -40,6 +40,7 @@ export class AIDirector {
     this.rangedType = f.units.ranged;
     this.siegeType = f.units.siege;
     this.cavalryType = f.units.cavalry; // F4-01
+    this.suicideType = f.units.suicide; // F4-05: Sapadores / Incendiários
 
     this.hqType = f.hq;
     this.barracksType = f.barracks;
@@ -59,6 +60,7 @@ export class AIDirector {
       ranged: getTrainCost(this.rangedType),
       siege: getTrainCost(this.siegeType),
       cavalry: getTrainCost(this.cavalryType),
+      suicide: getTrainCost(this.suicideType),
       farm: getCost(this.farmType),
       house: getCost(this.houseType),
       barracks: getCost(this.barracksType),

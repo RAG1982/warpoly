@@ -4,6 +4,8 @@ import { FloatingTextPool } from './FloatingTextPool.js';
 // F1-08: capacidade dos pools (concurrent máximo antes de reciclar o item mais antigo).
 const CHIP_POOL_SIZE = 140; // wood chips + leaves + gold glitter + stone dust + hit sparks (mesma geometria)
 const SMOKE_POOL_SIZE = 28;
+const BLAST_POOL_SIZE = 6; // F4-05: clarão (esfera) + anel de choque das explosões
+const BLAST_LIFE = 0.45;
 
 // F1-08: vetores/objetos de módulo reutilizados por chamada de spawn (nunca alocados por partícula/frame)
 const _tmpOffset = new THREE.Vector3();
@@ -123,6 +125,25 @@ export class ParticleSystem {
       createTexture: (text, color) => this._createTextTexture(text, color)
     });
     for (const slot of this.floatingTextPool.slots) this.scene.add(slot.sprite);
+
+    // F4-05: explosões — partículas de fogo/cinza (chipPool) + clarão e anel (pool próprio de 6)
+    this.fireMat = new THREE.MeshBasicMaterial({ color: 0xff8a1f });
+    this.ashMat = new THREE.MeshBasicMaterial({ color: 0x3a3430 });
+    this.blastFlashGeo = new THREE.SphereGeometry(1, 10, 8);
+    this.blastRingGeo = new THREE.RingGeometry(0.85, 1, 24);
+    this.blasts = [];
+    for (let i = 0; i < BLAST_POOL_SIZE; i++) {
+      const flashMat = new THREE.MeshBasicMaterial({ color: 0xffd27a, transparent: true, opacity: 0, depthWrite: false });
+      const ringMat = new THREE.MeshBasicMaterial({ color: 0xffb347, transparent: true, opacity: 0, depthWrite: false, side: THREE.DoubleSide });
+      const flash = new THREE.Mesh(this.blastFlashGeo, flashMat);
+      const ring = new THREE.Mesh(this.blastRingGeo, ringMat);
+      ring.rotation.x = -Math.PI / 2;
+      flash.visible = false;
+      ring.visible = false;
+      this.scene.add(flash);
+      this.scene.add(ring);
+      this.blasts.push({ flash, ring, flashMat, ringMat, life: 0, radius: 1, active: false });
+    }
   }
 
   _createTextTexture(text, color) {
@@ -210,6 +231,39 @@ export class ParticleSystem {
     }
   }
 
+  /**
+   * F4-05: explosão de sapador — clarão + anel de choque (pool de 6), esfera de fagulhas/cinza
+   * (chipPool) e fumaça. Sem alocação por chamada.
+   */
+  spawnExplosion(pos, radius = 2.2) {
+    let b = this.blasts.find(x => !x.active);
+    if (!b) {
+      b = this.blasts[0];
+      for (const c of this.blasts) if (c.life < b.life) b = c;
+    }
+    b.active = true;
+    b.life = BLAST_LIFE;
+    b.radius = radius;
+    b.flash.position.set(pos.x, pos.y + 0.8, pos.z);
+    b.ring.position.set(pos.x, pos.y + 0.15, pos.z);
+    b.flash.visible = true;
+    b.ring.visible = true;
+    for (let i = 0; i < 14; i++) {
+      // direção uniforme numa esfera (hemisfério superior favorecido)
+      const a = Math.random() * Math.PI * 2;
+      const up = 0.2 + Math.random() * 0.8;
+      const h = Math.sqrt(1 - up * up);
+      const sp = 3 + Math.random() * 4;
+      this._spawnChip(
+        pos, i % 3 === 0 ? this.ashMat : this.fireMat,
+        0, 0.6, 0,
+        Math.cos(a) * h * sp, up * sp, Math.sin(a) * h * sp,
+        9.0, 0.35 + Math.random() * 0.3, 0.65
+      );
+    }
+    for (let i = 0; i < 3; i++) this.spawnSmokePuff(pos);
+  }
+
   // Chimney smoke puffs rising from cottages
   spawnSmokePuff(pos) {
     const e = this.smokePool.acquire();
@@ -259,6 +313,25 @@ export class ParticleSystem {
       if (e.life <= 0) this.smokePool.release(e);
     }
 
+    // F4-05: clarões/anéis de explosão
+    for (const b of this.blasts) {
+      if (!b.active) continue;
+      b.life -= delta;
+      if (b.life <= 0) {
+        b.active = false;
+        b.flash.visible = false;
+        b.ring.visible = false;
+        continue;
+      }
+      const t = 1 - b.life / BLAST_LIFE;
+      const fs = b.radius * (0.35 + 0.65 * t);
+      b.flash.scale.set(fs, fs, fs);
+      b.flashMat.opacity = 0.85 * (1 - t) * (1 - t);
+      const rs = b.radius * (0.4 + 1.0 * t);
+      b.ring.scale.set(rs, rs, rs);
+      b.ringMat.opacity = 0.8 * (1 - t);
+    }
+
     // Update floating text sprites
     this.floatingTextPool.update(delta);
   }
@@ -268,6 +341,11 @@ export class ParticleSystem {
     for (const e of this.chipPool.entries) this.chipPool.release(e);
     for (const e of this.smokePool.entries) this.smokePool.release(e);
     this.floatingTextPool.clear();
+    for (const b of this.blasts) {
+      b.active = false;
+      b.flash.visible = false;
+      b.ring.visible = false;
+    }
   }
 
   dispose() {
@@ -276,6 +354,16 @@ export class ParticleSystem {
     for (const e of this.smokePool.entries) this.scene.remove(e.mesh);
     for (const slot of this.floatingTextPool.slots) this.scene.remove(slot.sprite);
 
+    for (const b of this.blasts) {
+      this.scene.remove(b.flash);
+      this.scene.remove(b.ring);
+      b.flashMat.dispose();
+      b.ringMat.dispose();
+    }
+    this.blastFlashGeo.dispose();
+    this.blastRingGeo.dispose();
+    this.fireMat.dispose();
+    this.ashMat.dispose();
     this.smokePool.dispose();
     this.floatingTextPool.dispose();
 

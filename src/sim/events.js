@@ -43,6 +43,8 @@ export const EVT = Object.freeze({
   PROJECTILE_FIRED: 'projectile_fired',
   PROJECTILE_HIT: 'projectile_hit',
   MELEE_HIT: 'melee_hit',
+  /** F4-05: detonação de unidade suicida (Sapadores/Incendiários). */
+  EXPLOSION: 'explosion',
 
   UNDER_ATTACK: 'under_attack',
   NOTIFY: 'notify',
@@ -86,6 +88,7 @@ export const EVT = Object.freeze({
  * EVT.PROJECTILE_FIRED {kind:'arrow'|'axe'|'bolt'|'boulder', from:Pos, ownerId:number}
  * EVT.PROJECTILE_HIT   {kind:'arrow'|'axe'|'bolt'|'boulder', pos:Pos, ownerId:number, splashRadius?:number}  (F4-02: bolt/boulder = cerco, impacto em área)
  * EVT.MELEE_HIT        {pos:Pos, ownerId:number}
+ * EVT.EXPLOSION        {pos:Pos, radius:number, ownerId:number}  (F4-05)
  *
  * EVT.UNDER_ATTACK  {ownerId:number, pos:Pos}
  * EVT.NOTIFY        {ownerId:number, text:string}

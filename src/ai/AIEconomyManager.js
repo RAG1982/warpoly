@@ -1,4 +1,5 @@
 import { CMD } from '../sim/commands.js';
+import { missingRequirements } from '../sim/requirements.js';
 
 /**
  * AIEconomyManager (Gerenciador de Economia e Construção da IA)
@@ -249,9 +250,21 @@ export class AIEconomyManager {
       }
     }
 
-    if (!hasBarracks && this.director.canAfford(this.director.costs.barracks)) {
-      this.placeBuilding(this.director.barracksType);
-      return;
+    // F3-04: Quartel exige Fazenda/Chiqueiro concluída (`missingRequirements` — mesma regra
+    // que `GameManager.placeBuilding` valida). Se faltar, a IA constrói a Fazenda primeiro em
+    // vez de insistir num Quartel que `placeBuilding` vai recusar sem consumir recursos.
+    if (!hasBarracks) {
+      const missing = missingRequirements(this.director.playerId, this.director.barracksType, this.gm);
+      if (missing.length > 0) {
+        if (this.director.canAfford(this.director.costs.farm)) {
+          this.placeBuilding(this.director.farmType);
+        }
+        return;
+      }
+      if (this.director.canAfford(this.director.costs.barracks)) {
+        this.placeBuilding(this.director.barracksType);
+        return;
+      }
     }
 
     // 3. LUMBER MILL: Enhanced wood harvesting & dropoff (requires at least 4 workers)
@@ -437,6 +450,15 @@ export class AIEconomyManager {
         targetGold = 1;
         targetWood = remaining - 1;
       }
+    }
+
+    // F3-04: mina de ouro só tem 1 vaga por vez (`MINE_SLOTS.gold`) — excedente de mineiros só
+    // ficaria esperando na fila sem coletar. Limita ~5 por mina (folga para revezar viagens) e
+    // manda o excedente para madeira em vez de empilhar peões ociosos na fila.
+    const GOLD_WORKERS_PER_MINE_CAP = 5;
+    if (targetGold > GOLD_WORKERS_PER_MINE_CAP) {
+      targetWood += targetGold - GOLD_WORKERS_PER_MINE_CAP;
+      targetGold = GOLD_WORKERS_PER_MINE_CAP;
     }
 
     return { wood: targetWood, gold: targetGold, stone: targetStone };

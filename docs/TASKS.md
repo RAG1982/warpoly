@@ -295,9 +295,10 @@ Sonnet 5.5 escreve a spec em `docs/specs/<ID>.md`; agente **Sonnet** executa; o 
 - **Resultado**: catálogo `RESEARCH` (11 pesquisas, 2 níveis, Forja/Serraria), `Player.researchLevels`, requisitos `{research}`, classe avançada (Patrulheiro/Enfurecido, modelo do atirador base), IA pesquisa, HUD com nível N/M. Cerco/naval ficam para F4. 312 testes, smoke ok.
 
 ### F3-08 · Muralhas
-- **Status**: `DOING(sonnet, 2026-09-30)` (spec: docs/specs/F3-08-muralhas.md) · Lane GAME · Onda 4 · Dep: F1-07
+- **Status**: `DONE(db969c7)` (spec: docs/specs/F3-08-muralhas.md) · Lane GAME · Onda 4 · Dep: F1-07
 - **Fazer**: colocação por arrasto em grade, segmentos que se conectam, bloqueiam pathfinding, podem ser destruídos.
 - **Aceite**: IA encontra caminho alternativo ou ataca a muralha.
+- **Resultado**: `wall_human/wall_orc`, `CMD.PLACE_WALL`, arrasto em 8 direções, `Wall`/`WallBatch` (InstancedMesh, +2 draw calls com 43 segmentos), pathfinder com `noPath` e correções, unidades atacam muralha que bloqueia, IA constrói linha de 6. 327 testes.
 
 ### F3-09 · Condições de vitória e estatísticas
 - **Status**: `DONE(fcf0c73)` (spec: docs/specs/F3-09-vitoria-estatisticas.md) · Lane GAME · Onda 4 · Dep: F2-04, F2-07
@@ -532,6 +533,7 @@ _(agentes adicionam aqui: `NEW-<n> · título · lane · motivo`)_
 - ✅ NEW-21 · `DONE(4b67cb1)` Pathfinder._searchAStar não atravessa bloqueios; sem caminho retorna até o ponto alcançável mais próximo (ou para se nenhum vizinho) · PERF/GAME · haiku
 - ✅ NEW-22 · `DONE(3ed0b17)` Textos em inglês no card de seleção ("Carry: 0/10 gold") traduzidos para PT-BR; glossário de nomes em `src/data/names.js`; labels Atk→Ataque, Def→Defesa, Spd→Vel, Carry→Carga; tipos de recursos traduzidos · UI
 - ✅ NEW-3 · `DONE(3ed0b17 — parte simples)` Card de seleção mostra nomes PT-BR unificados com `entityName` em `units.js` e `buildings.js`; tradução de labels e tipos de recursos. Parte de i18n completa fica para F6-09. · UI
+- NEW-24 · Muralha: portão e conexões visuais entre segmentos; segmentos no minimapa · GAME/ART
 - NEW-23 · Projéteis de cerco balísticos que podem errar alvo em movimento — implementar junto com a F4-02 (cerco) · GAME
 - NEW-1 · Avaliar uso real de `GLTFBuildingLoader` em `GreatHall.js` e remover ou adotar no pipeline Blender (F7-00) · ART · ficou fora do escopo da F0-03
 

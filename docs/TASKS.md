@@ -544,7 +544,7 @@ _(agentes adicionam aqui: `NEW-<n> · título · lane · motivo`)_
 - NEW-29 · Renomear construções existentes para os nomes D7 (Paço Real, Salão do Clã, Ferraria Real…) · UI/DATA · haiku
 - NEW-30 · Repetir o lote de balanceamento (F3-11) quando a F5 (IA Difícil) e a F4 chegarem; paridade dos atiradores ficou +14,8 % (orc) · QA
 - NEW-31 · `tools/check-data-parity.mjs` quebrado (`blockerGrid` indefinido no mock) · QA · haiku
-- NEW-32 · Arte: refino de pontos fracos (olhos do Camponês, pele do Lacaio, ombreira do troll, clava do Bandido) e poses do arqueiro (mão na corda, projétil da mão) · ART
+- ✅ NEW-32 · `DONE(refino: Camponês, Lacaio, troll, Bandido, Arqueiro, Ogro; mão do arqueiro na corda)` — pendências menores: runas do troll leem como riscos, cicatrizes do Lacaio, face do Camponês simples, pose de tiro do arqueiro é compromisso · Arte: refino de pontos fracos (olhos do Camponês, pele do Lacaio, ombreira do troll, clava do Bandido) e poses do arqueiro (mão na corda, projétil da mão) · ART
 - NEW-33 · Arte Blender: Cavaleiro montado, Estábulo Real, Covil dos Ogros (hoje procedurais provisórios; cavaleiro herda texturas 2048² do Espadachim procedural) · ART
 - NEW-23 · Projéteis de cerco balísticos que podem errar alvo em movimento — implementar junto com a F4-02 (cerco) · GAME
 - NEW-1 · Avaliar uso real de `GLTFBuildingLoader` em `GreatHall.js` e remover ou adotar no pipeline Blender (F7-00) · ART · ficou fora do escopo da F0-03

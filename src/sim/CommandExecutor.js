@@ -7,6 +7,8 @@
  * silenciosamente (autoria só gera `console.warn` em dev — ver `_warnForeign`).
  */
 import { CMD } from './commands.js';
+import { EVT } from './events.js';
+import { resolveAbility, needsEntityTarget, targetProblem, canCast, pickCaster } from './abilities.js';
 
 /** `console.warn` (sem gate de build — ver `_COMUM.md`: mais simples, sem custo em produção). */
 function warnForeign(cmd, kind, id) {
@@ -82,6 +84,49 @@ function moveInFormation(gm, units, x, z, queued) {
       destZ = cz;
     }
     dispatchOrder(units[idx], { type: CMD.MOVE, x: destX, z: destZ }, queued);
+  }
+}
+
+/** F4-03: NOTIFY de erro de lançamento ao dono do comando. */
+function notifyCast(gm, cmd, text) {
+  gm.events.emit(EVT.NOTIFY, { ownerId: cmd.playerId, text });
+}
+
+/**
+ * F4-03: CMD.CAST — valida alvo/requisitos/recarga/mana e emite a ordem `cast`. Habilidades
+ * `none`/`self` lançam em todas as unidades capazes; as demais, em UMA unidade (a de maior mana
+ * com recarga pronta — regra WC2).
+ */
+function executeCast(gm, cmd) {
+  const ab = resolveAbility(gm, cmd.abilityId);
+  if (!ab) return;
+  const units = resolveOwnedUnits(gm, cmd).filter(u => u.abilities.includes(ab.id));
+  if (units.length === 0) return;
+
+  let target = null;
+  if (needsEntityTarget(ab)) {
+    target = gm.entitiesById.get(cmd.targetId);
+    const problem = targetProblem(units[0], ab, target);
+    if (problem) { notifyCast(gm, cmd, problem); return; }
+  } else if (ab.target === 'ground' && (typeof cmd.x !== 'number' || typeof cmd.z !== 'number')) {
+    notifyCast(gm, cmd, 'Alvo inválido.');
+    return;
+  }
+
+  let casters;
+  if (ab.target === 'none' || ab.target === 'self') {
+    casters = units.filter(u => canCast(gm, u, ab).ok);
+  } else {
+    const one = pickCaster(gm, units, ab);
+    casters = one ? [one] : [];
+  }
+  if (casters.length === 0) {
+    const first = canCast(gm, units[0], ab);
+    notifyCast(gm, cmd, first.ok ? '⚠️ Habilidade em recarga' : first.reason);
+    return;
+  }
+  for (let i = 0; i < casters.length; i++) {
+    dispatchOrder(casters[i], { type: CMD.CAST, abilityId: ab.id, target, x: cmd.x, z: cmd.z }, !!cmd.queued);
   }
 }
 
@@ -232,6 +277,20 @@ export const CommandExecutor = {
         for (let i = 0; i < units.length; i++) {
           units[i].orderQueue = null;
           units[i].hold();
+        }
+        break;
+      }
+
+      case CMD.CAST:
+        executeCast(gm, cmd);
+        break;
+
+      case CMD.SET_AUTOCAST: {
+        const units = resolveOwnedUnits(gm, cmd);
+        const ab = resolveAbility(gm, cmd.abilityId);
+        if (!ab || !ab.autocast) break;
+        for (let i = 0; i < units.length; i++) {
+          if (units[i].abilities.includes(ab.id)) units[i].autocast[ab.id] = !!cmd.enabled;
         }
         break;
       }

@@ -8,6 +8,7 @@
  * (`pos`/`ownerId`).
  */
 import { EVT } from '../sim/events.js';
+import { resolveAbility } from '../sim/abilities.js';
 
 const RESOURCE_COLOR = { gold: '#ffd700', wood: '#68d391', stone: '#cbd5e1' };
 
@@ -48,6 +49,26 @@ export function createVfxEvents(gm, particleSystem) {
     particleSystem.spawnExplosion(toVec(pos), radius);
     const sm = gm.sceneManager;
     if (sm && sm.shake) sm.shake(pos);
+  });
+
+  // --- F4-03: habilidades — o `vfx.kind` da definição decide (burst | ring | beam | aura) ---
+  on(EVT.ABILITY_EFFECT, ({ abilityId, ownerId, pos, radius, unitId }) => {
+    const ab = resolveAbility(gm, abilityId);
+    if (!ab || !ab.vfx) return;
+    if (!isLocalOrExplored(ownerId, pos)) return;
+    const { kind, color = '#ffffff' } = ab.vfx;
+    const at = toVec(pos);
+    if (kind === 'ring') {
+      particleSystem.spawnAbilityRing(at, color, radius || ab.vfx.radius || 2);
+    } else if (kind === 'beam') {
+      const caster = unitId !== undefined ? gm.entitiesById.get(unitId) : null;
+      if (caster && caster.mesh) particleSystem.spawnAbilityBeam(caster.mesh.position, at, color);
+      particleSystem.spawnAbilityBurst(at, color);
+    } else if (kind === 'aura') {
+      particleSystem.spawnAbilityAura(at, color, ab.vfx.duration || 1);
+    } else {
+      particleSystem.spawnAbilityBurst(at, color);
+    }
   });
 
   // --- Coleta / renda passiva: texto só se local ou já explorado pela névoa (worker); renda

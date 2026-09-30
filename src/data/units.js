@@ -31,6 +31,9 @@
  * - suicide        F4-05: unidade suicida (Sapadores/Incendiários). Ao entrar no `attackRange` do alvo
  *   detona (`Unit._detonate`): dano `damage` em área (`splashRadius`, queda 100% → 40% na borda, só
  *   hostis), morre sem cadáver. Não auto-adquire unidades (só construções/muralhas; em `hold` sim).
+ * - maxMana, startMana, manaRegen, abilities   F4-03 (todos opcionais): `maxMana` 0/ausente = sem mana (design:
+ *   máx. 255); `startMana` (padrão = maxMana); `manaRegen` mana/s (padrão 1); `abilities` ids de
+ *   `src/data/abilities.js`, na ordem do card 3×3 (máx. 4). Nenhuma unidade de jogo usa isso ainda (F4-04/F4-08).
  */
 
 // Raios de varredura compartilhados (antes hardcoded em Unit.js: 11/14, 13/15, 16, 14).

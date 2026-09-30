@@ -60,4 +60,16 @@ describe('commands.js (F2-02)', () => {
     expect(validateCommand({ ...base, points: [...sixty, { x: 99, z: 0 }] }).ok).toBe(false);
     expect(() => makeCommand({ ...base, points: [{ x: 1, z: 2 }], tick: 3 })).not.toThrow();
   });
+
+  it('CAST e SET_AUTOCAST (F4-03): validam campos obrigatórios', () => {
+    const cast = { type: CMD.CAST, playerId: 0, unitIds: [1], abilityId: 'debug_bolt' };
+    expect(validateCommand({ ...cast, targetId: 5 })).toEqual({ ok: true });
+    expect(validateCommand({ ...cast, x: 1, z: 2, queued: true })).toEqual({ ok: true });
+    expect(validateCommand({ type: CMD.CAST, playerId: 0, unitIds: [1] }).ok).toBe(false); // sem abilityId
+    expect(validateCommand({ type: CMD.CAST, playerId: 0, abilityId: 'x' }).ok).toBe(false); // sem unitIds
+    const auto = { type: CMD.SET_AUTOCAST, playerId: 0, unitIds: [1], abilityId: 'debug_heal', enabled: true };
+    expect(validateCommand(auto)).toEqual({ ok: true });
+    expect(validateCommand({ ...auto, enabled: undefined }).ok).toBe(false);
+    expect(() => makeCommand({ ...auto, tick: 1 })).not.toThrow();
+  });
 });

@@ -30,7 +30,11 @@ export const CMD = Object.freeze({
   RALLY: 'rally',
   STOP: 'stop',
   HOLD: 'hold',
-  PATROL: 'patrol'
+  PATROL: 'patrol',
+  /** F4-03: lança uma habilidade (`abilityId`; alvo `targetId` ou `x`/`z` conforme `ABILITIES[id].target`). */
+  CAST: 'cast',
+  /** F4-03: liga/desliga o auto-cast de uma habilidade nas unidades. */
+  SET_AUTOCAST: 'setAutocast'
 });
 
 const ALL_TYPES = new Set(Object.values(CMD));
@@ -59,7 +63,9 @@ const REQUIRED_FIELDS = {
   [CMD.RALLY]: ['buildingId', 'x', 'z'],
   [CMD.STOP]: ['unitIds'],
   [CMD.HOLD]: ['unitIds'],
-  [CMD.PATROL]: ['unitIds', 'x', 'z']
+  [CMD.PATROL]: ['unitIds', 'x', 'z'],
+  [CMD.CAST]: ['unitIds', 'abilityId'],
+  [CMD.SET_AUTOCAST]: ['unitIds', 'abilityId', 'enabled']
 };
 
 /**

@@ -46,6 +46,12 @@ export function createAudioEvents(gm, soundManager) {
   // F4-05: explosão de sapador = impacto pesado (reaproveita o som do cerco)
   on(EVT.EXPLOSION, () => soundManager.playMineStone());
 
+  // F4-03: som genérico de habilidade (reusa o som de construção concluída; sem assets novos).
+  // Só para o jogador local ou alvo explorado — a condição de névoa fica no ouvinte de VFX.
+  on(EVT.ABILITY_CAST, ({ ownerId }) => {
+    if (isLocal(ownerId)) soundManager.playBuildComplete();
+  });
+
   // Construção: colocação só se local; treino e conclusão sempre tocavam.
   on(EVT.BUILDING_PLACED, ({ ownerId }) => {
     if (isLocal(ownerId)) soundManager.playBuildPlace();

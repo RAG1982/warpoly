@@ -9,7 +9,8 @@ export const ANIMATION_DURATIONS = {
   fight: 1.0,
   gather: 0.9,
   hurt: 0.5,
-  die: 1.4
+  die: 1.4,
+  cast: 1.0
 };
 
 /**
@@ -255,7 +256,26 @@ export class UnitAnimator {
       case 'die':
         this.applyDie(time, progress, parts, uType);
         break;
+      case 'cast':
+        this.applyCast(time, progress, parts);
+        break;
     }
+  }
+
+  // --- F4-03: lançamento de habilidade (braços erguidos, leve inclinação para trás; em loop) ---
+  applyCast(time, progress, parts) {
+    const raise = Math.min(1, progress * 4) * 0.5 + 0.5;
+    const sway = Math.sin(time * Math.PI * 2) * 0.06;
+    if (parts.armL) {
+      parts.armL.rotation.x = -2.3 * raise;
+      parts.armL.rotation.z = -0.25 + sway;
+    }
+    if (parts.armR) {
+      parts.armR.rotation.x = -2.3 * raise;
+      parts.armR.rotation.z = 0.25 - sway;
+    }
+    if (parts.torso) parts.torso.rotation.x = -0.12 * raise;
+    if (parts.head) parts.head.rotation.x = -0.25 * raise;
   }
 
   // --- 1. IDLE ANIMATION ---

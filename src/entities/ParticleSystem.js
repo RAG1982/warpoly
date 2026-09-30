@@ -9,6 +9,44 @@ const BLAST_LIFE = 0.45;
 
 // F1-08: vetores/objetos de módulo reutilizados por chamada de spawn (nunca alocados por partícula/frame)
 const _tmpOffset = new THREE.Vector3();
+const _fxA = new THREE.Vector3();
+const _fxB = new THREE.Vector3();
+
+// F4-03: efeitos de habilidade (anel no chão e raio/feixe), pools fixos com material próprio por slot.
+const FX_POOL_SIZE = 8;
+const FX_RING_LIFE = 0.6;
+const FX_BEAM_LIFE = 0.25;
+
+class FxPool {
+  constructor(size, geometry, scene) {
+    this.entries = [];
+    for (let i = 0; i < size; i++) {
+      const mat = new THREE.MeshBasicMaterial({ color: 0xffffff, transparent: true, opacity: 0, side: THREE.DoubleSide, depthWrite: false });
+      const mesh = new THREE.Mesh(geometry, mat);
+      mesh.visible = false;
+      scene.add(mesh);
+      this.entries.push({ mesh, mat, life: 0, maxLife: 0, radius: 1, active: false, order: 0 });
+    }
+    this._order = 0;
+  }
+
+  acquire() {
+    let e = this.entries.find(x => !x.active);
+    if (!e) {
+      e = this.entries[0];
+      for (const c of this.entries) if (c.order < e.order) e = c;
+    }
+    e.active = true;
+    e.order = ++this._order;
+    e.mesh.visible = true;
+    return e;
+  }
+
+  release(e) {
+    e.active = false;
+    e.mesh.visible = false;
+  }
+}
 
 /** Pool genérico de meshes que compartilham geometria; material é reatribuído (referência), nunca clonado. */
 class ChipPool {
@@ -117,6 +155,16 @@ export class ParticleSystem {
     this.smokePool = new SmokePool(SMOKE_POOL_SIZE, this.smokeGeo, this.smokeMat);
     for (const e of this.chipPool.entries) this.scene.add(e.mesh);
     for (const e of this.smokePool.entries) this.scene.add(e.mesh);
+
+    // F4-03: materiais de partícula por cor (cache; conjunto pequeno e fixo de cores de `vfx.color`),
+    // anel expansivo no chão e feixe (pools fixos).
+    this._colorMats = new Map();
+    const ringGeo = new THREE.RingGeometry(0.85, 1, 32);
+    ringGeo.rotateX(-Math.PI / 2);
+    this.fxRingGeo = ringGeo;
+    this.fxBeamGeo = new THREE.BoxGeometry(0.12, 0.12, 1);
+    this.fxRings = new FxPool(FX_POOL_SIZE, this.fxRingGeo, this.scene);
+    this.fxBeams = new FxPool(FX_POOL_SIZE, this.fxBeamGeo, this.scene);
 
     // F1-08: pool de sprites de texto flutuante + cache de textura por texto+cor (LRU, 128 entradas)
     this.floatingTextPool = new FloatingTextPool({
@@ -283,6 +331,70 @@ export class ParticleSystem {
     e.maxLife = 2.2;
   }
 
+  /** F4-03: material de partícula da cor `color` (CSS), criado uma vez por cor. */
+  _colorMat(color) {
+    let m = this._colorMats.get(color);
+    if (!m) {
+      m = new THREE.MeshBasicMaterial({ color: new THREE.Color(color) });
+      this._colorMats.set(color, m);
+    }
+    return m;
+  }
+
+  /** F4-03: explosão de partículas coloridas (`vfx.kind = 'burst'`). */
+  spawnAbilityBurst(pos, color) {
+    const mat = this._colorMat(color);
+    for (let i = 0; i < 12; i++) {
+      this._spawnChip(
+        pos, mat,
+        0, 0.9, 0,
+        (Math.random() - 0.5) * 5, 1.5 + Math.random() * 3, (Math.random() - 0.5) * 5,
+        8.0, 0.4 + Math.random() * 0.3, 0.7
+      );
+    }
+  }
+
+  /** F4-03: partículas subindo em volta do alvo por `duration` s (`vfx.kind = 'aura'`). */
+  spawnAbilityAura(pos, color, duration = 1) {
+    const mat = this._colorMat(color);
+    for (let i = 0; i < 10; i++) {
+      const ang = (i / 10) * Math.PI * 2;
+      this._spawnChip(
+        pos, mat,
+        Math.cos(ang) * 0.7, 0.1 + Math.random() * 0.3, Math.sin(ang) * 0.7,
+        0, 1.2 + Math.random() * 0.8, 0,
+        0, duration * (0.6 + Math.random() * 0.4), duration
+      );
+    }
+  }
+
+  /** F4-03: anel que se expande no chão até `radius` (`vfx.kind = 'ring'`). */
+  spawnAbilityRing(pos, color, radius = 2) {
+    const e = this.fxRings.acquire();
+    e.mat.color.set(color);
+    e.radius = Math.max(0.5, radius);
+    e.life = FX_RING_LIFE;
+    e.maxLife = FX_RING_LIFE;
+    e.mesh.position.set(pos.x, pos.y + 0.15, pos.z);
+    e.mesh.scale.set(0.3, 1, 0.3);
+    e.mat.opacity = 0.9;
+  }
+
+  /** F4-03: feixe efêmero entre dois pontos (`vfx.kind = 'beam'`). */
+  spawnAbilityBeam(from, to, color) {
+    const e = this.fxBeams.acquire();
+    e.mat.color.set(color);
+    e.life = FX_BEAM_LIFE;
+    e.maxLife = FX_BEAM_LIFE;
+    _fxA.set(from.x, from.y + 1.6, from.z);
+    _fxB.set(to.x, to.y + 1.2, to.z);
+    const len = Math.max(0.01, _fxA.distanceTo(_fxB));
+    e.mesh.position.copy(_fxA).lerp(_fxB, 0.5);
+    e.mesh.lookAt(_fxB);
+    e.mesh.scale.set(1, 1, len);
+    e.mat.opacity = 0.95;
+  }
+
   // Floating 3D billboard text (+15 Wood, +10 Gold, -18)
   spawnFloatingText(text, pos, color = '#ffd700') {
     this.floatingTextPool.spawn(text, pos, color);
@@ -331,6 +443,22 @@ export class ParticleSystem {
       b.ring.scale.set(rs, rs, rs);
       b.ringMat.opacity = 0.8 * (1 - t);
     }
+    // F4-03: anéis e feixes de habilidade
+    for (const e of this.fxRings.entries) {
+      if (!e.active) continue;
+      e.life -= delta;
+      const t = 1 - Math.max(0, e.life) / e.maxLife;
+      const r = 0.3 + (e.radius - 0.3) * t;
+      e.mesh.scale.set(r, 1, r);
+      e.mat.opacity = 0.9 * (1 - t);
+      if (e.life <= 0) this.fxRings.release(e);
+    }
+    for (const e of this.fxBeams.entries) {
+      if (!e.active) continue;
+      e.life -= delta;
+      e.mat.opacity = 0.95 * Math.max(0, e.life / e.maxLife);
+      if (e.life <= 0) this.fxBeams.release(e);
+    }
 
     // Update floating text sprites
     this.floatingTextPool.update(delta);
@@ -346,6 +474,8 @@ export class ParticleSystem {
       b.flash.visible = false;
       b.ring.visible = false;
     }
+    for (const e of this.fxRings.entries) this.fxRings.release(e);
+    for (const e of this.fxBeams.entries) this.fxBeams.release(e);
   }
 
   dispose() {
@@ -364,6 +494,13 @@ export class ParticleSystem {
     this.blastRingGeo.dispose();
     this.fireMat.dispose();
     this.ashMat.dispose();
+    for (const e of this.fxRings.entries) { this.scene.remove(e.mesh); e.mat.dispose(); }
+    for (const e of this.fxBeams.entries) { this.scene.remove(e.mesh); e.mat.dispose(); }
+    this.fxRingGeo.dispose();
+    this.fxBeamGeo.dispose();
+    for (const m of this._colorMats.values()) m.dispose();
+    this._colorMats.clear();
+
     this.smokePool.dispose();
     this.floatingTextPool.dispose();
 

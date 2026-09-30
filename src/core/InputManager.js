@@ -4,6 +4,7 @@ import { Building } from '../entities/Building.js';
 import { getCost, getBuildingDef, WALL_STEP, WALL_MAX_POINTS } from '../data/index.js';
 import { CMD } from '../sim/commands.js';
 import { EVT } from '../sim/events.js';
+import { resolveAbility, needsEntityTarget, targetProblem, canCast, pickCaster, selectionAbilityUnits } from '../sim/abilities.js';
 
 export class InputManager {
   constructor(sceneManager, gameManager, terrain) {
@@ -25,8 +26,12 @@ export class InputManager {
     this.suspended = false;
     this.onPauseRequest = null;
 
-    /** F3-05: modo alvo do botão/tecla "Reparar" — o próximo clique numa construção própria emite REPAIR. */
-    this.repairMode = false;
+    /**
+     * Modo-alvo (F3-05 Reparar, generalizado na F4-03): `{kind:'repair'}` (o próximo clique numa construção
+     * própria emite REPAIR) ou `{kind:'cast', abilityId}` (o próximo clique escolhe o alvo da habilidade).
+     * Botão direito/Esc cancelam; o cursor vira mira (crosshair) enquanto ativo.
+     */
+    this.targetMode = null;
 
     // Listeners de window/DOM removidos em dispose() (sessão de partida descartável).
     this._abort = new AbortController();
@@ -106,8 +111,8 @@ export class InputManager {
       }
     } else if (e.code === 'Escape') {
       // Esc: cancela a colocação; senão limpa a seleção; senão abre o menu de pausa (F2-04).
-      if (this.repairMode) {
-        this.repairMode = false;
+      if (this.targetMode) {
+        this.setTargetMode(null);
       } else if (this.placingBuildingType) {
         this.cancelPlacement();
       } else if (this.gm.selectedUnits.length > 0 || this.gm.selectedBuilding || this.gm.selectedResource) {
@@ -116,6 +121,8 @@ export class InputManager {
         e.preventDefault();
         this.onPauseRequest();
       }
+    } else if (this._tryAbilityHotkey(e)) {
+      // F4-03: atalho de habilidade do card (consumido)
     } else if (e.code === 'KeyR' && !e.ctrlKey && !e.metaKey && !e.altKey) {
       this.startRepairMode();
     } else if (e.code === 'KeyQ') {
@@ -129,14 +136,96 @@ export class InputManager {
   startRepairMode() {
     const workers = this.gm.selectedUnits.filter(u => !u.isDead && (u.type === 'villager' || u.type === 'peon'));
     if (workers.length === 0) return;
-    this.repairMode = true;
+    this.setTargetMode({ kind: 'repair' });
     this.gm.events.emit(EVT.NOTIFY, { ownerId: this.gm.localPlayerId, text: 'Clique numa construção sua para reparar (custa recursos).' });
   }
 
-  /** F3-05: consome o clique esquerdo em modo Reparar. Retorna true se tratou o clique. */
+  /** F4-03: liga/desliga o modo-alvo e ajusta o cursor (mira). */
+  setTargetMode(mode) {
+    this.targetMode = mode;
+    const dom = this.sm && this.sm.renderer ? this.sm.renderer.domElement : null;
+    if (dom) dom.style.cursor = mode ? 'crosshair' : '';
+  }
+
+  /** F4-03: atalho de teclado de uma habilidade do card atual (letra de `ABILITIES[id].hotkey`). */
+  _tryAbilityHotkey(e) {
+    if (e.ctrlKey || e.metaKey || e.altKey) return false;
+    const units = selectionAbilityUnits(this.gm.selectedUnits);
+    if (units.length === 0 || !e.code.startsWith('Key')) return false;
+    const letter = e.code.slice(3);
+    for (const id of units[0].abilities) {
+      const ab = resolveAbility(this.gm, id);
+      if (ab && ab.hotkey === letter) {
+        this.beginAbility(id);
+        return true;
+      }
+    }
+    return false;
+  }
+
+  /**
+   * F4-03: clique no botão/atalho de uma habilidade. `none`/`self` lançam já (todas as unidades capazes);
+   * as demais entram em modo-alvo. Sem ninguém pronto para lançar: avisa o motivo e não entra no modo.
+   */
+  beginAbility(abilityId) {
+    const gm = this.gm;
+    const ab = resolveAbility(gm, abilityId);
+    if (!ab) return;
+    const units = selectionAbilityUnits(gm.selectedUnits).filter(u => u.abilities.includes(abilityId));
+    if (units.length === 0) return;
+    const local = gm.localPlayerId;
+    if (!pickCaster(gm, units, ab)) {
+      const why = canCast(gm, units[0], ab);
+      gm.events.emit(EVT.NOTIFY, { ownerId: local, text: why.ok ? '⚠️ Habilidade em recarga' : why.reason });
+      return;
+    }
+    if (ab.target === 'none' || ab.target === 'self') {
+      gm.issue({ type: CMD.CAST, playerId: local, unitIds: units.map(u => u.id), abilityId });
+      return;
+    }
+    this.setTargetMode({ kind: 'cast', abilityId });
+    gm.events.emit(EVT.NOTIFY, { ownerId: local, text: ab.target === 'ground' ? 'Clique no chão para lançar.' : 'Clique num alvo para lançar.' });
+  }
+
+  /** F4-03: clique esquerdo em modo-alvo de habilidade. Alvo inválido: avisa e mantém o modo. */
+  _handleCastClick() {
+    const gm = this.gm;
+    const local = gm.localPlayerId;
+    const ab = resolveAbility(gm, this.targetMode.abilityId);
+    const units = selectionAbilityUnits(gm.selectedUnits).filter(u => ab && u.abilities.includes(ab.id));
+    if (!ab || units.length === 0) { this.setTargetMode(null); return true; }
+    const cmd = { type: CMD.CAST, playerId: local, unitIds: units.map(u => u.id), abilityId: ab.id };
+    let markPos = this.groundIntersection;
+    if (needsEntityTarget(ab)) {
+      const e = this.hoveredEntity;
+      const problem = targetProblem(units[0], ab, e);
+      if (problem) {
+        gm.events.emit(EVT.NOTIFY, { ownerId: local, text: problem });
+        return true;
+      }
+      cmd.targetId = e.id;
+      markPos = e.mesh.position;
+    } else {
+      cmd.x = this.groundIntersection.x;
+      cmd.z = this.groundIntersection.z;
+    }
+    this.playClickDecal(markPos, 0x60a5fa);
+    gm.issue(cmd);
+    gm.soundManager.playOrder();
+    this.setTargetMode(null);
+    return true;
+  }
+
+  /** F3-05/F4-03: consome o clique esquerdo em modo-alvo. Retorna true se tratou o clique. */
+  _handleTargetClick() {
+    if (!this.targetMode) return false;
+    if (this.targetMode.kind === 'cast') return this._handleCastClick();
+    return this._handleRepairClick();
+  }
+
+  /** F3-05: clique esquerdo em modo Reparar. */
   _handleRepairClick() {
-    if (!this.repairMode) return false;
-    this.repairMode = false;
+    this.setTargetMode(null);
     const e = this.hoveredEntity;
     const local = this.gm.localPlayerId;
     if (!(e instanceof Building) || e.ownerId !== local) return true;
@@ -187,8 +276,8 @@ export class InputManager {
     } else if (e.button === 2) {
       // Right Click
       this.isRightDown = true;
-      if (this.repairMode) {
-        this.repairMode = false;
+      if (this.targetMode) {
+        this.setTargetMode(null);
       } else if (this.placingBuildingType) {
         this.cancelPlacement();
       } else {
@@ -274,10 +363,10 @@ export class InputManager {
         return;
       }
 
-      if (this.repairMode) {
+      if (this.targetMode) {
         this.isDraggingBox = false;
         if (this.boxEl) this.boxEl.style.display = 'none';
-        this._handleRepairClick();
+        this._handleTargetClick();
         return;
       }
 

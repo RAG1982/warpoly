@@ -20,6 +20,7 @@ import {
   getTierName, getHqUpgradeCost
 } from './tiers.js';
 import { RESOURCE_NAMES, getResourceName } from './names.js';
+import { ABILITIES, getAbility, abilityName, isDebugUrl } from './abilities.js';
 
 export {
   UNITS, DEFAULT_UNIT, WORKER_STATS,
@@ -30,7 +31,8 @@ export {
   CARRY, MINE_ENTER_TIME, MINE_SLOTS, RATE_BONUS, gatherMultiplier,
   TIER_NAMES, HQ_TIER_HP, HQ_TIER_ARMOR, HQ_TIER_GOLD_MULT, HQ_UPGRADE_COST, HQ_TIER_MODEL,
   getTierName, getHqUpgradeCost,
-  RESOURCE_NAMES, getResourceName
+  RESOURCE_NAMES, getResourceName,
+  ABILITIES, getAbility, abilityName, isDebugUrl
 };
 
 export const RESOURCE_TYPES = ['gold', 'wood', 'stone'];

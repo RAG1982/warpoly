@@ -204,6 +204,40 @@ animate() [rAF da aplicação, delta máx 0.1s; sem sessão (menu/loading) não 
 - Listas: `gm.allUnits` é a lista única (fonte de verdade). `gm.getUnitsOf(ownerId)` (mantida em add/remove) e `gm.getHostileUnitsOf(ownerId)` (cache invalidado em add/remove) são visões derivadas. **Não modifique os arrays retornados.**
 - Bases iniciais (F2-05): `initMapEntities` cria HQ + serraria + casa + 5 unidades por jogador a partir de `mapDef.startSlots[player.startSlot]` (`src/data/maps/<mapId>.json` — no mapa continental, slot 0 = NE (32,−30), slot 1 = SW (−32,30), slot 2 = (−14,−46), só usado em partidas FFA de teste). O layout (`START_LAYOUT`) é espelhado por `slot.mirror` (ou, se ausente, por `slotMirror`) e reproduz as posições antigas; os tipos vêm de `FACTIONS[f].startingBase`. Recursos do mapa com `resources[].slot === N` só são criados se algum jogador usar `startSlot === N`.
 
+### Economia WC2 (F3-04): mina com fila, requisitos, sem ouro passivo
+- `src/data/economy.js`: `CARRY {gold:10, wood:10, stone:8}` (carga por viagem — `Unit.carrying.max`
+  passa a ser fixado por recurso ao começar a coletar, em vez do antigo `WORKER_STATS.carryCapacity`
+  único, que deixou de ser lido), `MINE_ENTER_TIME` (1,5 s), `MINE_SLOTS {gold:1, stone:2}` e
+  `RATE_BONUS` (multiplicadores por melhoria — só declarados; níveis chegam na F3-06) lidos por
+  `gatherMultiplier(playerId, resource, gm)`, que hoje sempre devolve 1.
+- `ResourceDeposit` (mina/pedreira) ganhou `slots`/`inside[]`/`queue[]` e `requestEnter(unit)`/
+  `release(unit)` — gargalo real (1 ou 2 trabalhadores dentro por vez; fila por ordem de chegada,
+  desempate implícito pela ordem de `gm.allUnits`, sem `Math.random`/relógio). `mine(amount)` marca
+  `_justDepleted` na primeira vez que `resourcesRemaining` chega a 0; `consumeDepletedFlag()` é
+  consumida uma única vez pelo chamador para emitir `EVT.RESOURCE_DEPLETED`.
+- `Unit` ganhou os estados `waitingMine` (parado junto à jazida, tentando `requestEnter` a cada
+  tick) e `insideMine` (`mesh.visible=false`, fora do `unitGrid` — `gm._removeFromGrid`/
+  `_insertIntoGrid`, os mesmos hooks de registro — por `MINE_ENTER_TIME`; ao sair, carrega
+  `min(CARRY[recurso], restante) * gatherMultiplier` e libera o slot). Madeira continua cortada
+  "de fora" (sem entrar na árvore) — só ouro/pedra usam o mecanismo de mina. `Unit._exitMine()`
+  (chamado por `_clearOrderModes`, e explicitamente por `stop`/`hold`, que não passam por ela)
+  libera o slot/fila e reaparece sem carga quando uma nova ordem interrompe `waitingMine`/`insideMine`.
+- Fazenda/Chiqueiro: `passiveIncome: null` no schema (campo mantido; o bloco em `Building.simUpdate`
+  fica código morto, guardado por `passive &&`). Ouro só sai de mina/pedreira.
+- `src/sim/requirements.js`: `missingRequirements(playerId, buildingType, gm)` (puro, só lê
+  `gm.buildings`) — `BUILDINGS[type].requires` (ex.: `barracks.requires = ['farm']`,
+  `orc_barracks.requires = ['pig_farm']`) exige construção **concluída** do dono. Validado em
+  `GameManager.placeBuilding` (antes do custo; recusa sem debitar, `EVT.NOTIFY` "Requer: …") e no
+  botão de construir do trabalhador (`UIManager.updateWorkerBuildCosts`, `disabled` + tooltip —
+  sem UI nova).
+- `EVT.RESOURCE_DEPLETED {resourceId, pos, resourceType}`: emitido por `Unit.updateInsideMine` ao
+  esgotar; `UiEvents` mostra "Mina de ouro esgotada"/"Pedreira esgotada" via `showNotification`
+  (mesmo mecanismo de `EVT.NOTIFY`, sem filtro de `ownerId` — jazida é neutra).
+- `tools/eco-curve.mjs`: mede ouro/min por nº de trabalhadores numa mina de 1 vaga (headless);
+  precisa de `node --import tools/lib/register-json-loader.mjs` (Node 22 exige atributo de tipo
+  em import de `.json`; `src/data/maps/index.js` não usa esse atributo — funciona em Vite/Vitest,
+  não em Node puro sem o loader). Ver curva medida em `docs/08_GAME_DESIGN.md` §2.1.
+
 ### Grade espacial (F1-06)
 - `SpatialGrid` (`src/sim/SpatialGrid.js`, lógica pura sem three.js) indexa entidades por célula (posição do centro, clampada aos limites do mapa) e responde `queryRadius`/`queryRect`/`nearest` sem alocar (buffers reutilizados pelos chamadores). `queryRadius` inclui a entidade quando `distância-centro ≤ r + raio da entidade`; `nearest` usa distância pura (sem raio) e desempata por menor `id`. Resultados de `queryRadius`/`queryRect` vêm ordenados por `id` (determinismo).
 - `gm.unitGrid` (unidades, dinâmica) é sincronizada **uma vez por tick**, em `GameManager.simStep` (F1-09), antes do loop `Unit.update` — colisão/alvo/picking do tick usam a posição do início do tick. `gm.blockerGrid` (Building/ResourceDeposit/Tree) é mantida em `registerEntity`/`unregisterEntity`; árvore cortada (`isDead`/`woodRemaining <= 0`) sai da grade no próprio loop de `trees.forEach` do `simStep`.

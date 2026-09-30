@@ -1,5 +1,5 @@
 import * as THREE from 'three';
-import { getTerrainTextures } from '../models/environment/terrainTextures.js';
+import { getTerrainTextures, getTerrainTexturesFromHeight } from '../models/environment/terrainTextures.js';
 import { getMap, DEFAULT_MAP_ID } from '../data/maps/index.js';
 import { getHeightForMap } from './terrainGenerators.js';
 
@@ -131,7 +131,18 @@ export class Terrain {
     nonIndexedGeo.setAttribute('color', new THREE.Float32BufferAttribute(colors, 3));
 
     // Master Procedural PBR Terrain Material
-    const terrainTex = getTerrainTextures(this.landmarks, this.width);
+    let terrainTex;
+    if (this.mapDef.terrain?.generator === 'continental') {
+      terrainTex = getTerrainTextures(this.landmarks, this.width);
+    } else {
+      terrainTex = getTerrainTexturesFromHeight({
+        id: this.mapDef.id,
+        size: this.width,
+        getHeight: (x, z) => this.getHeight(x, z),
+        waterLevel: this.mapDef.waterLevel ?? 0.5,
+        startSlots: this.mapDef.startSlots || []
+      });
+    }
 
     const mat = new THREE.MeshStandardMaterial({
       map: terrainTex.map,

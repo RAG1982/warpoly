@@ -22,10 +22,10 @@ export const TIER_NAMES = {
  * ver spec F3-06 item 1). NEW-24: alinha `great_hall.hp` (antes 1750) a 1600 no nível 1,
  * igual ao `castle` humano, para as duas facções compartilharem esta tabela.
  */
-export const HQ_TIER_HP = { 1: 1600, 2: 2200, 3: 2800 };
+export const HQ_TIER_HP = { 1: 1400, 2: 1900, 3: 2400 };
 
 /** Armadura do Centro em qualquer nível (igual à armadura atual de `castle`/`great_hall`). */
-export const HQ_TIER_ARMOR = 20;
+export const HQ_TIER_ARMOR = 17;
 
 /** Multiplicador de coleta de ouro por nível — consumido por `gatherMultiplier` (F3-04). */
 export const HQ_TIER_GOLD_MULT = { 1: 1.0, 2: 1.10, 3: 1.20 };

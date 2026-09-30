@@ -67,19 +67,23 @@ def horse_head(mb, T, scale=1.0):
 
 
 def skull(mb, T, s=1.0, mat='bone'):
-    """Crânio de ogro (cranium + testa + órbitas + mandíbula com presas). Frente = +z local."""
-    mb.add(prim_sphere(0.40 * s, 0.34 * s, 0.42 * s, 10, 5), mat, T @ M((0, 0.06 * s, -0.02 * s)), smooth=65)
+    """Crânio de ogro (cranium + testa + órbitas + mandíbula com presas). Frente = +z local.
+    Crânios pequenos (s < 0.6) usam versão simplificada (sem chifres/presas, menos dentes)."""
+    small = s < 0.6
+    mb.add(prim_sphere(0.40 * s, 0.34 * s, 0.42 * s, 8 if small else 10, 4 if small else 5), mat, T @ M((0, 0.06 * s, -0.02 * s)), smooth=65)
     mb.add(prim_box(0.62 * s, 0.10 * s, 0.22 * s, taper=(0.95, 0.8)), mat, T @ M((0, 0.03 * s, 0.30 * s)), bevel=0.012 * s)
     for sx in (-1, 1):
         mb.add(prim_sphere(0.115 * s, 0.11 * s, 0.09 * s, 7, 4), 'dark', T @ M((sx * 0.19 * s, -0.04 * s, 0.33 * s)), smooth=80)
     mb.add(prim_box(0.10 * s, 0.14 * s, 0.10 * s, taper=(0.6, 0.6)), 'dark', T @ M((0, -0.16 * s, 0.40 * s)))
     # focinho/maxilar + dentes
     mb.add(prim_box(0.40 * s, 0.17 * s, 0.30 * s, taper=(0.85, 0.9)), mat, T @ M((0, -0.21 * s, 0.26 * s)), bevel=0.012 * s)
-    for i in range(6):
-        x = (i - 2.5) * 0.065 * s
+    for i in range(4 if small else 6):
+        x = (i - (1.5 if small else 2.5)) * (0.09 if small else 0.065) * s
         mb.add(prim_box(0.04 * s, 0.07 * s, 0.035 * s, taper=(0.7, 0.7)), mat, T @ M((x, -0.33 * s, 0.39 * s)))
     # mandíbula
     mb.add(prim_box(0.42 * s, 0.11 * s, 0.34 * s, taper=(0.9, 0.85)), mat, T @ M((0, -0.42 * s, 0.22 * s)), bevel=0.012 * s)
+    if small:
+        return
     for sx in (-1, 1):
         # presas curvas para cima
         pts = bezier((sx * 0.15 * s, -0.42 * s, 0.38 * s), (sx * 0.22 * s, -0.25 * s, 0.56 * s), (sx * 0.19 * s, -0.05 * s, 0.50 * s), 3)

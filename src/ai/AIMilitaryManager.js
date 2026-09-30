@@ -182,15 +182,15 @@ export class AIMilitaryManager {
     }
 
     // F4-02: cerco na Oficina — mantém 1–3 unidades vivas (mais com mais tropas de linha), só com
-    // ≥ 8 combatentes de linha; segue junto do exército no próximo ataque (todos os prontos saem no mesmo ATTACK).
+    // ≥ 4 combatentes de linha vivos; segue junto do exército no próximo ataque (todos os prontos saem no mesmo ATTACK).
     const workshop = this.director.getConstructedWorkshop();
     if (workshop && recruitType !== this.director.cavalryType && (!workshop.queue || workshop.queue.length < 1)) {
       let siegeCount = 0;
       for (let i = 0; i < lenE; i++) {
         if (!enemies[i].isDead && enemies[i].type === this.director.siegeType) siegeCount++;
       }
-      const siegeCap = Math.min(3, 1 + Math.floor((meleeCount + rangedCount) / 8));
-      if (siegeCount < siegeCap && meleeCount + rangedCount >= 8 &&
+      const siegeCap = Math.min(3, 1 + Math.floor((meleeCount + rangedCount) / 6));
+      if (siegeCount < siegeCap && meleeCount + rangedCount >= 4 &&
           this.director.canAfford(this.director.costs.siege) &&
           missingUnitRequirements(this.director.playerId, this.director.siegeType, this.gm).length === 0) {
         recruitType = this.director.siegeType;

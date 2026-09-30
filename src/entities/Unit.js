@@ -3,7 +3,7 @@ import { ModelFactory } from './ModelFactory.js';
 import { Arrow } from './Arrow.js';
 import { Building } from './Building.js';
 import { UnitAnimator } from '../animation/UnitAnimator.js';
-import { getUnitDef, getUnitStats as getUnitStatsFromData, WORKER_STATS } from '../data/index.js';
+import { getUnitDef, getUnitStats as getUnitStatsFromData, CARRY, MINE_ENTER_TIME, gatherMultiplier } from '../data/index.js';
 import { legacyOwnerId } from '../sim/EntityIds.js';
 import { SIM_DT, lerpAngle } from '../sim/constants.js';
 import { CMD } from '../sim/commands.js';
@@ -141,8 +141,11 @@ export class Unit {
     this.pathPending = false;
     this._chaseRequestPending = false;
 
-    // Worker inventory
-    this.carrying = { type: null, amount: 0, max: WORKER_STATS.carryCapacity };
+    // Worker inventory (F3-04: `max` passa a ser por recurso — ver `src/data/economy.js` CARRY;
+    // fixado quando a unidade começa a coletar, em vez de um valor único fixo).
+    this.carrying = { type: null, amount: 0, max: CARRY.wood };
+    // F3-04: timer de "dentro da mina/pedreira" (estado `insideMine`) — ver `updateInsideMine`.
+    this._mineTimer = 0;
     this.actionTimer = 0;
     this.attackTimer = 0;
     this.walkTimer = 0;
@@ -294,11 +297,32 @@ export class Unit {
    * (ver `_giveUpAttack`).
    */
   _clearOrderModes() {
+    this._exitMine();
     this._isHolding = false;
     this._amDest = null;
     this._returnToPatrol = false;
     this._patrolA = null;
     this._patrolB = null;
+  }
+
+  /**
+   * F3-04: sai da mina/pedreira quando uma nova ordem chega enquanto a unidade está em
+   * `waitingMine` (fila) ou `insideMine` (dentro, invisível) — libera o slot/lugar na fila
+   * (`ResourceDeposit.release`) e reaparece sem carga (item 4 da spec). Chamado por
+   * `_clearOrderModes` (moveTo/orderGather/orderBuild/orderAttack/orderPatrol/die) e
+   * explicitamente por `stop`/`hold`, que não passam por `_clearOrderModes`.
+   */
+  _exitMine() {
+    if (this.state !== 'waitingMine' && this.state !== 'insideMine') return;
+    const deposit = this.gatherTarget;
+    if (deposit && typeof deposit.release === 'function') deposit.release(this);
+    if (this.mesh && !this.mesh.visible) {
+      this.mesh.visible = true;
+      if (this.gameManager && typeof this.gameManager._insertIntoGrid === 'function') {
+        this.gameManager._insertIntoGrid(this);
+      }
+    }
+    this._mineTimer = 0;
   }
 
   /**
@@ -429,6 +453,7 @@ export class Unit {
 
   stop() {
     if (this.isDead || this.isDying || this.state === 'dying') return;
+    this._exitMine();
     this.state = 'idle';
     this.hasTargetPos = false;
     this.targetEntity = null;
@@ -453,6 +478,7 @@ export class Unit {
    */
   hold() {
     if (this.isDead || this.isDying || this.state === 'dying') return;
+    this._exitMine();
     this.state = 'holding';
     this._isHolding = true;
     this._amDest = null;
@@ -602,6 +628,7 @@ export class Unit {
 
   die() {
     if (this.isDying) return;
+    this._exitMine();
     this.isDying = true;
     this.isDead = true;
     this.canRemove = false;
@@ -804,6 +831,12 @@ export class Unit {
         break;
       case 'gathering':
         this.updateGathering(delta, gameManager, buildings);
+        break;
+      case 'waitingMine':
+        this.updateWaitingMine(delta, gameManager);
+        break;
+      case 'insideMine':
+        this.updateInsideMine(delta, gameManager);
         break;
       case 'returning':
         this.updateReturning(delta, gameManager, buildings);
@@ -1039,12 +1072,20 @@ export class Unit {
       return;
     }
 
-    // In contact / collided with resource: begin harvesting immediately at the collision point!
+    // In contact / collided with resource: face it.
     const dirX = targetPos.x - this.mesh.position.x;
     const dirZ = targetPos.z - this.mesh.position.z;
     this.mesh.rotation.y = Math.atan2(dirX, dirZ);
 
-    // Chop / Mine Animation
+    // F3-04: madeira continua cortada "de fora" (corte contínuo). Ouro/pedra passam a exigir
+    // entrar na mina/pedreira — ver `updateWaitingMine`/`updateInsideMine` (item 2 da spec).
+    if (this.gatherTarget.type !== 'tree') {
+      this.actionTimer = 0;
+      this.state = 'waitingMine';
+      return;
+    }
+
+    // Chop Animation
     this.hasFiredThisAttack = false;
     if (this.animator && this.hurtTimer <= 0) {
       this.animator.setAnimation('gather');
@@ -1053,24 +1094,108 @@ export class Unit {
     // Extract resource ticks (every 0.9s)
     if (this.actionTimer >= 0.9) {
       this.actionTimer = 0;
-      const resType = this.gatherTarget.type === 'tree' ? 'wood' : this.gatherTarget.type;
-      this.carrying.type = resType;
+      this.carrying.type = 'wood';
+      if (this.carrying.amount === 0) this.carrying.max = CARRY.wood;
       const gmEvents = this.gameManager && this.gameManager.events;
 
-      if (resType === 'wood') {
-        const harvested = this.gatherTarget.chop(3);
-        this.carrying.amount += harvested;
-        if (gmEvents) gmEvents.emit(EVT.WORKER_CHOP, { pos: posOf(this.mesh.position), ownerId: this.ownerId });
-      } else {
-        const harvested = this.gatherTarget.mine(3);
-        this.carrying.amount += harvested;
-        if (gmEvents) gmEvents.emit(EVT.WORKER_MINE, { pos: posOf(this.mesh.position), ownerId: this.ownerId, resource: resType });
-      }
+      const harvested = this.gatherTarget.chop(3);
+      this.carrying.amount += harvested;
+      if (gmEvents) gmEvents.emit(EVT.WORKER_CHOP, { pos: posOf(this.mesh.position), ownerId: this.ownerId });
 
       // If full capacity reached, return to base
       if (this.carrying.amount >= this.carrying.max) {
         this.state = 'returning';
         this.updateCarryingVisuals(true);
+      }
+    }
+  }
+
+  /**
+   * F3-04: unidade parada junto à mina/pedreira, tentando um lugar (`ResourceDeposit.slots`).
+   * Fila determinística: ordem de chegada (primeira chamada de `requestEnter` enfileira; ver
+   * `ResourceDeposit`), sem `Math.random`/relógio.
+   */
+  updateWaitingMine(delta, gameManager) {
+    if (!this.gatherTarget || this.gatherTarget.isDead || this.gatherTarget.resourcesRemaining <= 0) {
+      const gm = gameManager || this.gameManager;
+      const depletedType = this.gatherTarget ? this.gatherTarget.type : 'gold';
+      if (this.gatherTarget && typeof this.gatherTarget.release === 'function') this.gatherTarget.release(this);
+      const nextResource = gm ? gm.findNearestResource(this.mesh.position, depletedType) : null;
+      if (nextResource) {
+        this.gatherTarget = nextResource;
+        this.state = 'gathering';
+      } else {
+        this.stop();
+      }
+      return;
+    }
+
+    this.hasFiredThisAttack = false;
+    if (this.animator && this.hurtTimer <= 0) {
+      this.animator.setAnimation('idle');
+    }
+
+    if (this.gatherTarget.requestEnter(this)) {
+      this.state = 'insideMine';
+      this._mineTimer = 0;
+      this.mesh.visible = false;
+      const gm = gameManager || this.gameManager;
+      if (gm && typeof gm._removeFromGrid === 'function') gm._removeFromGrid(this);
+    }
+  }
+
+  /**
+   * F3-04: unidade "dentro" da mina/pedreira (`mesh.visible = false`, fora do `unitGrid`
+   * — alvo/seleção ignoram) por `MINE_ENTER_TIME` segundos; ao sair, carrega
+   * `min(CARRY[recurso], restante) * gatherMultiplier` e libera o slot.
+   */
+  updateInsideMine(delta, gameManager) {
+    const gm = gameManager || this.gameManager;
+    const deposit = this.gatherTarget;
+    if (!deposit || deposit.isDead) {
+      this._exitMine();
+      this.stop();
+      return;
+    }
+
+    this._mineTimer += delta;
+    if (this._mineTimer < MINE_ENTER_TIME) return;
+    this._mineTimer = 0;
+
+    const resType = deposit.type;
+    const mult = gatherMultiplier(this.ownerId, resType, gm);
+    const harvested = deposit.mine(CARRY[resType] * mult);
+
+    this.carrying.type = resType;
+    this.carrying.max = CARRY[resType];
+    this.carrying.amount = harvested;
+
+    if (deposit.consumeDepletedFlag()) {
+      const gmEvents = gm && gm.events;
+      if (gmEvents) {
+        gmEvents.emit(EVT.RESOURCE_DEPLETED, {
+          resourceId: deposit.id,
+          pos: posOf(deposit.mesh.position),
+          resourceType: resType
+        });
+      }
+    }
+
+    deposit.release(this);
+    this.mesh.visible = true;
+    if (gm && typeof gm._insertIntoGrid === 'function') gm._insertIntoGrid(this);
+
+    if (harvested > 0) {
+      this.state = 'returning';
+      this.updateCarryingVisuals(true);
+    } else {
+      // Esgotou entre a entrada e a saída: procura outra jazida do mesmo tipo, sem carga.
+      const nextResource = gm ? gm.findNearestResource(this.mesh.position, resType) : null;
+      if (nextResource) {
+        this.gatherTarget = nextResource;
+        this.state = 'gathering';
+      } else {
+        this.stop();
       }
     }
   }

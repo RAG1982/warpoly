@@ -34,6 +34,27 @@
 - Bônus: Serraria nível 2 (+25% madeira); Centro nível 2/3 (+10%/+20% ouro); Canteiro (+20% pedra).
 - **Decisão D5**: Casa/Toca **permanecem** (+5 suprimento, 50 madeira, nível 1); o **ouro passivo das fazendas foi removido** — ouro só vem de minas. Fazenda/Chiqueiro: +5 suprimento e desbloqueiam o Quartel (requisito), como no WC2.
 
+### 2.1 Curva de economia (medida — F3-04)
+
+Ouro/min por nº de trabalhadores minerando **a mesma mina** (1 vaga), medido headless com
+`tools/eco-curve.mjs` (3 min simulados, ponto de entrega colado à mina para isolar o gargalo
+do slot — sem tempo de viagem até a base):
+
+| Trabalhadores na mina | Ouro/min |
+|---|---|
+| 1 | ~333 |
+| 3 | ~387 |
+| 5 | ~383 |
+| 8 | ~383 |
+| 12 | ~377 |
+
+A mina satura a partir de ~3 trabalhadores: com 1 vaga e 1,5 s de entrada + carga de 10 ouro
+por viagem, o throughput físico do gargalo já é atingido por 2-3 trabalhadores alternando —
+os demais só esperam na fila (`Unit` estado `waitingMine`) sem aumentar a receita. Excedente
+de mineiros de ouro deve ir para madeira/outra jazida (ver `AIEconomyManager`, que limita a
+~5 mineiros por mina). Números de exemplo, não normativos — cada execução do script pode
+variar ligeiramente com o RNG do mapa/IA vizinha.
+
 ---
 
 ## 3. Níveis do Centro da Cidade (tiers)

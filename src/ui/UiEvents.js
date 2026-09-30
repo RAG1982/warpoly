@@ -37,6 +37,13 @@ export function createUiEvents(gm, uiManager) {
     uiManager.showNotification(`☠️ ${name} foi derrotado!`);
   });
 
+  // F3-04: mina/pedreira esgotada — sem `ownerId` no payload (jazida é neutra), mostrado a
+  // qualquer jogador local como as demais notificações genéricas.
+  on(EVT.RESOURCE_DEPLETED, ({ resourceType }) => {
+    const label = resourceType === 'stone' ? 'Pedreira' : 'Mina de ouro';
+    uiManager.showNotification(`⛏️ ${label} esgotada`);
+  });
+
   return function dispose() {
     offs.forEach(off => off());
     offs.length = 0;

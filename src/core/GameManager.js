@@ -37,6 +37,7 @@ import { createRng } from '../sim/rng.js';
 import { recordChecksum } from '../sim/checksum.js';
 import { EventBus } from '../sim/EventBus.js';
 import { EVT } from '../sim/events.js';
+import { missingRequirements } from '../sim/requirements.js';
 
 const EMPTY_LIST = Object.freeze([]);
 
@@ -792,6 +793,16 @@ export class GameManager {
     if (!owner) return null;
 
     const stats = getBuildingDef(type);
+
+    const missing = missingRequirements(ownerId, type, this);
+    if (missing.length > 0) {
+      if (owner.isLocal) {
+        const names = missing.map(t => getBuildingDef(t).name).join(', ');
+        this.events.emit(EVT.NOTIFY, { ownerId, text: `⚠️ Requer: ${names}` });
+      }
+      return null;
+    }
+
     if (!owner.canAfford(stats.cost)) {
       if (owner.isLocal) this.events.emit(EVT.NOTIFY, { ownerId, text: '⚠️ Recursos insuficientes!' });
       return null;

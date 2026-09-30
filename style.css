@@ -450,6 +450,7 @@ input:checked + .slider.round:before {
 
 /* Minimap Frame (hudmodelo.png) */
 #minimap-wrapper {
+  grid-column: 1;
   background: #0f1824;
   border: 2px solid #c8a356;
   border-radius: 14px;
@@ -494,6 +495,7 @@ input:checked + .slider.round:before {
 /* Selection / Action Card — coluna central flexível do grid de #bottom-bar (F6-03/B11):
    preenche o espaço entre o minimapa e o guia rápido, nunca ultrapassa a tela. */
 #selection-card {
+  grid-column: 2;
   display: none;
   background: var(--panel-bg);
   border: 2px solid var(--gold-primary);
@@ -1149,6 +1151,8 @@ input:checked + .slider.round:before {
 
 /* Quick Controls Guide — 3ª coluna do grid de #bottom-bar (F6-03/B11), sem `position:fixed`. */
 #quick-guide {
+  grid-column: 3;
+  justify-self: end;
   background: rgba(14, 23, 36, 0.88);
   backdrop-filter: blur(8px);
   border: 1px solid rgba(212, 175, 55, 0.35);

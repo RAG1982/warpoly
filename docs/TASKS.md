@@ -278,9 +278,10 @@ Sonnet 5.5 escreve a spec em `docs/specs/<ID>.md`; agente **Sonnet** executa; o 
 - **Resultado**: `src/data/economy.js` (carga 10/10/8, entrada na mina 1,5 s, 1 slot ouro / 2 pedra), fila de mina em `ResourceDeposit`, estados `waitingMine/insideMine`, sem ouro passivo, Quartel requer Fazenda/Chiqueiro (`src/sim/requirements.js`, botão desabilitado com motivo), `RESOURCE_DEPLETED` + aviso PT-BR, IA constrói Fazenda antes do Quartel. Curva: 1 mina satura com ~3 trabalhadores (~385 ouro/min). 264 testes.
 
 ### F3-05 · Reparo e cancelamento de construção
-- **Status**: `DOING(sonnet, 2026-09-30)` (spec: docs/specs/F3-05-reparo-cancelamento.md) · Lane GAME · Onda 4 · Dep: F2-02
+- **Status**: `DONE(bad98e7)` (spec: docs/specs/F3-05-reparo-cancelamento.md) · Lane GAME · Onda 4 · Dep: F2-02
 - **Fazer**: trabalhadores reparam construções/máquinas (custo proporcional); cancelar construção devolve 75%; vários trabalhadores aceleram a obra.
 - **Aceite**: testes manuais + unidade.
+- **Resultado**: `CMD.REPAIR`/`CANCEL_CONSTRUCTION`, `src/sim/repair.js` (reparo 50% do custo, cancelar 75%), máx. 4 trabalhadores por obra, obra nasce com 10% de PV, IA repara, botão Reparar (R) e Cancelar obra. Só o próprio dono repara. Verificação manual no jogo pendente → NEW-28. 360 testes.
 
 ### F3-06 · Tiers de HQ e árvore tecnológica
 - **Status**: `DONE(369cc38)` · Lane GAME · Onda 4 · Dep: F3-00
@@ -538,6 +539,7 @@ _(agentes adicionam aqui: `NEW-<n> · título · lane · motivo`)_
 - NEW-25 · IA ataca acampamentos neutros (dificuldade ≥ normal, ≥ 8 combatentes) · AI
 - NEW-26 · Card/seleção de unidade neutra (bandido) · UI
 - NEW-27 · Medir draw calls dos neutros vs master (997→1387 com câmera no acampamento, não isolado) · PERF
+- NEW-28 · Verificar reparo/cancelar obra manualmente no jogo (2 aldeões reparando torre; capturas em tools/ui-captures/repair/) · QA
 - NEW-23 · Projéteis de cerco balísticos que podem errar alvo em movimento — implementar junto com a F4-02 (cerco) · GAME
 - NEW-1 · Avaliar uso real de `GLTFBuildingLoader` em `GreatHall.js` e remover ou adotar no pipeline Blender (F7-00) · ART · ficou fora do escopo da F0-03
 

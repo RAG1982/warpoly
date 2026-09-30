@@ -50,7 +50,7 @@ export const BUILDINGS = {
   cottage: {
     type: 'cottage',
     name: 'Casa Residencial',
-    entityName: 'Chalé / Casa',
+    entityName: 'Casa Residencial',
     faction: 'human',
     role: 'house',
     hp: 400,
@@ -70,7 +70,7 @@ export const BUILDINGS = {
   lumber_camp: {
     type: 'lumber_camp',
     name: 'Serraria Florestal',
-    entityName: 'Campo de Madeira',
+    entityName: 'Serraria Florestal',
     faction: 'human',
     role: 'lumber',
     hp: 550,
@@ -213,7 +213,7 @@ export const BUILDINGS = {
   pig_farm: {
     type: 'pig_farm',
     name: 'Chiqueiro de Porcos',
-    entityName: 'Fazenda de Porcos',
+    entityName: 'Chiqueiro de Porcos',
     faction: 'orc',
     role: 'farm',
     hp: 420,
@@ -233,7 +233,7 @@ export const BUILDINGS = {
   orc_lumber_mill: {
     type: 'orc_lumber_mill',
     name: 'Serraria Mecânica',
-    entityName: 'Serraria Orc',
+    entityName: 'Serraria Mecânica',
     faction: 'orc',
     role: 'lumber',
     hp: 580,
@@ -253,7 +253,7 @@ export const BUILDINGS = {
   orc_barracks: {
     type: 'orc_barracks',
     name: 'Quartel da Horda',
-    entityName: 'Quartel Orc',
+    entityName: 'Quartel da Horda',
     faction: 'orc',
     role: 'barracks',
     hp: 900,
@@ -274,7 +274,7 @@ export const BUILDINGS = {
   orc_forge: {
     type: 'orc_forge',
     name: 'Forja de Guerra Orc',
-    entityName: 'Forja Orc',
+    entityName: 'Forja de Guerra Orc',
     faction: 'orc',
     role: 'forge',
     hp: 850,

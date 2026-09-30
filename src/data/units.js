@@ -34,7 +34,7 @@ export const UNITS = {
   villager: {
     type: 'villager',
     name: 'Aldeão',
-    entityName: 'Villager',
+    entityName: 'Aldeão',
     faction: 'human',
     hp: 85, speed: 4.5, damage: { basic: 5, piercing: 2, type: 'normal' }, attackRange: 1.8, attackCooldown: 1.0, armor: 0,
     collisionRadius: 0.66,
@@ -50,7 +50,7 @@ export const UNITS = {
   knight: {
     type: 'knight',
     name: 'Cavaleiro',
-    entityName: 'Knight',
+    entityName: 'Cavaleiro',
     faction: 'human',
     hp: 190, speed: 4.8, damage: { basic: 20, piercing: 6, type: 'normal' }, attackRange: 2.1, attackCooldown: 1.1, armor: 4,
     collisionRadius: 0.84,
@@ -66,7 +66,7 @@ export const UNITS = {
   archer: {
     type: 'archer',
     name: 'Arqueiro',
-    entityName: 'Archer',
+    entityName: 'Arqueiro',
     faction: 'human',
     hp: 95, speed: 4.3, damage: { basic: 6, piercing: 12, type: 'piercing' }, attackRange: 14.0, attackCooldown: 1.4, armor: 0,
     collisionRadius: 0.66,
@@ -84,7 +84,7 @@ export const UNITS = {
   peon: {
     type: 'peon',
     name: 'Peão',
-    entityName: 'Orc Peon',
+    entityName: 'Peão',
     faction: 'orc',
     hp: 90, speed: 4.5, damage: { basic: 6, piercing: 2, type: 'normal' }, attackRange: 1.8, attackCooldown: 1.0, armor: 0,
     collisionRadius: 0.66,
@@ -100,7 +100,7 @@ export const UNITS = {
   grunt: {
     type: 'grunt',
     name: 'Guerreiro Grunt',
-    entityName: 'Orc Grunt',
+    entityName: 'Guerreiro Grunt',
     faction: 'orc',
     hp: 205, speed: 4.7, damage: { basic: 22, piercing: 6, type: 'normal' }, attackRange: 2.1, attackCooldown: 1.15, armor: 4,
     collisionRadius: 0.86,
@@ -116,7 +116,7 @@ export const UNITS = {
   axethrower: {
     type: 'axethrower',
     name: 'Lançador de Machado',
-    entityName: 'Troll Axethrower',
+    entityName: 'Lançador de Machado',
     faction: 'orc',
     hp: 100, speed: 4.4, damage: { basic: 7, piercing: 12, type: 'piercing' }, attackRange: 13.5, attackCooldown: 1.35, armor: 0,
     collisionRadius: 0.66,
@@ -132,7 +132,7 @@ export const UNITS = {
   ogre: {
     type: 'ogre',
     name: 'Ogro',
-    entityName: 'Orc Ogre',
+    entityName: 'Ogro',
     faction: 'orc',
     hp: 320, speed: 4.0, damage: { basic: 32, piercing: 10, type: 'normal' }, attackRange: 2.5, attackCooldown: 1.5, armor: 5,
     collisionRadius: 1.08,
@@ -150,7 +150,7 @@ export const UNITS = {
   bandit: {
     type: 'bandit',
     name: 'Bandido',
-    entityName: 'Bandit Raider',
+    entityName: 'Bandido',
     faction: 'neutral',
     hp: 125, speed: 4.4, damage: { basic: 12, piercing: 4, type: 'normal' }, attackRange: 2.1, attackCooldown: 1.2, armor: 1,
     collisionRadius: 0.84,
@@ -169,7 +169,7 @@ export const UNITS = {
 export const DEFAULT_UNIT = {
   type: 'unit',
   name: 'Unidade',
-  entityName: 'Unit',
+  entityName: 'Unidade',
   faction: 'neutral',
   hp: 100, speed: 4.0, damage: { basic: 10, piercing: 0, type: 'normal' }, attackRange: 1.8, attackCooldown: 1.0, armor: 0,
   collisionRadius: 0.72,

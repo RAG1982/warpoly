@@ -204,4 +204,22 @@ export function findAutocastTarget(gm, caster, ability) {
   return best ? { target: best } : null;
 }
 
+/**
+ * Unidades da seleção que definem o card de habilidades: as do tipo mais numeroso entre as que têm
+ * habilidades (empate: o tipo que aparece primeiro). Vazio se ninguém tem habilidades.
+ */
+export function selectionAbilityUnits(selected) {
+  const counts = new Map();
+  for (let i = 0; i < selected.length; i++) {
+    const u = selected[i];
+    if (u.isDead || !u.abilities || u.abilities.length === 0) continue;
+    counts.set(u.type, (counts.get(u.type) || 0) + 1);
+  }
+  let bestType = null;
+  let bestN = 0;
+  for (const [type, n] of counts) if (n > bestN) { bestN = n; bestType = type; }
+  if (bestType === null) return [];
+  return selected.filter(u => !u.isDead && u.type === bestType && u.abilities && u.abilities.length > 0);
+}
+
 export { abilityName };

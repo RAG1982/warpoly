@@ -28,6 +28,9 @@
  * - splashRadius    F4-02: raio de dano em área no impacto (0/ausente = sem). 100% no centro → 50%
  *   na borda; só entidades hostis ao dono (sem fogo amigo). Projéteis `bolt`/`boulder` são
  *   balísticos: não perseguem o alvo, miram a posição prevista (`src/entities/BallisticProjectile.js`).
+ * - maxMana, startMana, manaRegen, abilities   F4-03 (todos opcionais): `maxMana` 0/ausente = sem mana (design:
+ *   máx. 255); `startMana` (padrão = maxMana); `manaRegen` mana/s (padrão 1); `abilities` ids de
+ *   `src/data/abilities.js`, na ordem do card 3×3 (máx. 4). Nenhuma unidade de jogo usa isso ainda (F4-04/F4-08).
  */
 
 // Raios de varredura compartilhados (antes hardcoded em Unit.js: 11/14, 13/15, 16, 14).

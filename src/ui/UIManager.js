@@ -10,6 +10,8 @@ import { initUiScale } from './uiScale.js';
 import { getBuildHotkey, getTrainHotkey, getResearchHotkey } from './hotkeys.js';
 import { buildCostHtml } from './Tooltip.js';
 import { CMD } from '../sim/commands.js';
+import { resolveAbility, canCast, selectionAbilityUnits } from '../sim/abilities.js';
+import { abilityName } from '../data/abilities.js';
 import { victoryMessage, defeatMessage } from '../sim/victory.js';
 import { worldToMinimap, minimapToWorld } from './minimapCoords.js';
 import { NEUTRAL_HOSTILE_ID } from '../sim/EntityIds.js';
@@ -97,6 +99,7 @@ export class UIManager {
     this.initControls();
     this.initMinimapEvents();
     this.initActionsEventDelegation();
+    this.initAbilityContextMenu();
     this.initBuildingEvents();
     this.initPortraitEvents();
   }
@@ -321,6 +324,13 @@ export class UIManager {
         this.sound.playSelect();
         return;
       }
+      // F4-03: habilidade do card (modo-alvo ou lançamento imediato — ver InputManager.beginAbility)
+      const abilityId = btn.getAttribute('data-ability');
+      if (abilityId) {
+        this.im.beginAbility(abilityId);
+        this.sound.playSelect();
+        return;
+      }
       if (action === 'stop') {
         this.gm.issue({
           type: CMD.STOP,
@@ -357,6 +367,100 @@ export class UIManager {
         this.lastSelectionKey = null; // force immediate re-render of queue counters
       }
     }, this._listenOpts);
+  }
+
+  /** F4-03: clique direito num botão de habilidade liga/desliga o auto-cast (quando suportado). */
+  initAbilityContextMenu() {
+    if (!this.selectionActions) return;
+    this.selectionActions.addEventListener('contextmenu', (e) => {
+      const btn = e.target.closest('button[data-ability]');
+      if (!btn) return;
+      e.preventDefault();
+      const id = btn.getAttribute('data-ability');
+      const ab = resolveAbility(this.gm, id);
+      if (!ab || !ab.autocast) return;
+      const units = selectionAbilityUnits(this.gm.selectedUnits).filter(u => u.abilities.includes(id));
+      if (units.length === 0) return;
+      const enable = !units[0].autocast[id];
+      this.gm.issue({ type: CMD.SET_AUTOCAST, playerId: this.gm.localPlayerId, unitIds: units.map(u => u.id), abilityId: id, enabled: enable });
+      btn.classList.toggle('ability-autocast-on', enable); // feedback imediato (o comando roda no próximo tick)
+      this.sound.playSelect();
+    }, this._listenOpts);
+  }
+
+  /**
+   * F4-03: HTML dos botões de habilidade (até 4) das unidades do card. O estado dinâmico (mana, recarga,
+   * desabilitado, auto-cast) é atualizado por `updateAbilityButtons` sem recriar o DOM.
+   */
+  renderAbilityButtons(abilityIds) {
+    const faction = this.gm.playerFaction === 'orc' ? 'orc' : 'human';
+    return abilityIds.map(id => {
+      const ab = resolveAbility(this.gm, id);
+      if (!ab) return '';
+      const name = abilityName(ab, faction);
+      const icon = typeof ab.icon === 'string' && ab.icon.startsWith('/')
+        ? `<img src="${ab.icon}" class="bld-train-btn-icon" alt="${name}" />`
+        : `<span class="action-stop-icon">${ab.icon}</span>`;
+      const cost = (ab.manaCost || 0) + (ab.manaPerHp > 0 ? ` +${ab.manaPerHp}/PV` : '');
+      return `
+        <button class="bld-train-btn ability-btn" data-ability="${id}" title="${name}${ab.hotkey ? ` (${ab.hotkey})` : ''}">
+          ${ab.hotkey ? `<span class="bld-hotkey-badge">${ab.hotkey}</span>` : ''}
+          ${icon}
+          <span class="ability-mana">${cost}</span>
+          <span class="ability-cd" data-cd="${id}"></span>
+          <div class="bld-hint-bubble">
+            <div class="bld-hint-col">
+              <div class="bld-hint-header">
+                <span class="bld-hint-title">${name}${ab.hotkey ? ` <span class="bld-hint-hotkey">(${ab.hotkey})</span>` : ''}</span>
+                <span class="bld-hint-desc">${ab.description || ''}</span>
+              </div>
+              <div class="bld-hint-footer">
+                Mana: ${cost} &bull; Alcance: ${ab.range || 0} &bull; Recarga: ${ab.cooldown || 0}s${ab.autocast ? ' &bull; Botão direito: auto-cast' : ''}
+                <span class="ability-req" data-req="${id}"></span>
+              </div>
+            </div>
+          </div>
+        </button>
+      `;
+    }).join('');
+  }
+
+  /** F4-03: atualiza desabilitado/recarga/auto-cast dos botões de habilidade (dirty-checked por botão). */
+  updateAbilityButtons() {
+    if (!this.selectionActions) return;
+    const units = selectionAbilityUnits(this.gm.selectedUnits);
+    if (units.length === 0) return;
+    const faction = this.gm.playerFaction === 'orc' ? 'orc' : 'human';
+    const buttons = this.selectionActions.querySelectorAll('button[data-ability]');
+    for (let i = 0; i < buttons.length; i++) {
+      const btn = buttons[i];
+      const id = btn.getAttribute('data-ability');
+      const ab = resolveAbility(this.gm, id);
+      if (!ab) continue;
+      let ready = false;
+      let minCd = Infinity;
+      let reason = '';
+      for (let k = 0; k < units.length; k++) {
+        const u = units[k];
+        if (!u.abilities.includes(id)) continue;
+        const r = canCast(this.gm, u, ab);
+        if (r.ok) ready = true; else if (!reason) reason = r.reason;
+        const cd = u.cooldowns[id] || 0;
+        if (cd < minCd) minCd = cd;
+      }
+      if (minCd === Infinity) minCd = 0;
+      const pct = ab.cooldown > 0 ? Math.round(Math.min(1, minCd / ab.cooldown) * 100) : 0;
+      const sig = `${ready ? 1 : 0}|${pct}|${units[0].autocast[id] ? 1 : 0}|${reason}`;
+      if (btn._abSig === sig) continue;
+      btn._abSig = sig;
+      btn.disabled = !ready;
+      btn.classList.toggle('ability-autocast-on', !!units[0].autocast[id]);
+      const cd = btn.querySelector('.ability-cd');
+      if (cd) cd.style.height = `${pct}%`;
+      const req = btn.querySelector('.ability-req');
+      if (req) req.innerHTML = !ready && reason.includes('Requer') ? `<br>${reason.replace('⚠️ ', '')}` : (!ready && reason ? `<br>${reason.replace('⚠️ ', '')}` : '');
+      btn.title = `${abilityName(ab, faction)}${ab.hotkey ? ` (${ab.hotkey})` : ''}`;
+    }
   }
 
   initBuildingEvents() {
@@ -544,14 +648,20 @@ export class UIManager {
         <span>🏃 Vel: ${u.speed}</span>
         ${u.minAttackRange > 0 ? `<span>🎯 Alcance: ${u.minAttackRange}–${u.attackRange}</span>` : ''}
         ${u.splashRadius > 0 ? `<span>💥 Área: ${u.splashRadius}</span>` : ''}
+        ${u.maxMana > 0 ? `<span>💧 Mana: ${Math.floor(u.mana)} / ${u.maxMana}</span>` : ''}
         ${isWorker ? `<span>🎒 Carga: ${u.carrying.amount}/${u.carrying.max} ${getResourceName(u.carrying.type) || ''}</span>` : ''}
       `;
 
-      const key = isWorker ? `${u.type}_actions` : 'military_actions';
+      // F4-03: o card de habilidades muda a chave (recria o DOM só quando o conjunto muda)
+      const abUnits = isWorker ? [] : selectionAbilityUnits(this.gm.selectedUnits);
+      const key = isWorker
+        ? `${u.type}_actions`
+        : (abUnits.length > 0 ? `military_actions|${abUnits[0].abilities.join(',')}|${abUnits[0].type}` : 'military_actions');
       if (this.lastSelectionKey !== key) {
         this.lastSelectionKey = key;
         this.renderSelectionActions(key);
       }
+      if (abUnits.length > 0) this.updateAbilityButtons();
       if (isWorker) {
         this.updateWorkerBuildCosts(u.type);
       }
@@ -1062,7 +1172,8 @@ export class UIManager {
         </div>
       `;
       this.updateWorkerBuildCosts(workerType);
-    } else if (key === 'military_actions') {
+    } else if (key.startsWith('military_actions')) {
+      const abilityIds = key.includes('|') ? key.split('|')[1].split(',').filter(Boolean) : [];
       this.selectionActions.innerHTML = `
         <div class="worker-actions-container">
           <span class="bld-section-label">AÇÕES:</span>
@@ -1073,6 +1184,7 @@ export class UIManager {
                 <span class="bld-hint-title">Parar</span> - Interromper combate / movimento
               </div>
             </button>
+            ${this.renderAbilityButtons(abilityIds)}
           </div>
         </div>
       `;

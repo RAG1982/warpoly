@@ -93,14 +93,19 @@ export function isDropoffFor(buildingType, resourceType) {
   return accepted.includes(resourceType);
 }
 
-/** Stats no formato legado de Unit.getUnitStats(). */
+/**
+ * Stats no formato legado de Unit.getUnitStats(). F3-03: `damage` (objeto {basic, piercing,
+ * type}) é a fonte real do dano; `attack` continua aqui só como soma derivada, para leitura
+ * legada (AI/HUD) — nenhum código novo lê `attack` para calcular dano (ver `Unit.attack`, getter).
+ */
 export function getUnitStats(type) {
   const d = getUnitDef(type);
   return {
     name: d.entityName,
     hp: d.hp,
     speed: d.speed,
-    attack: d.attack,
+    damage: { ...d.damage },
+    attack: d.damage.basic + d.damage.piercing,
     attackRange: d.attackRange,
     attackCooldown: d.attackCooldown,
     armor: d.armor,
@@ -108,17 +113,24 @@ export function getUnitStats(type) {
   };
 }
 
-/** Stats no formato legado de Building.getBuildingStats(). */
+/**
+ * Stats no formato legado de Building.getBuildingStats(). F3-03: construções ganham `armor`
+ * (corrige B5) e `towerDamage` (objeto {basic, piercing, type}); `attackDamage` continua como
+ * soma derivada para leitura legada (HUD).
+ */
 export function getBuildingStats(type) {
   const d = getBuildingDef(type);
+  const towerDamage = d.tower ? d.tower.damage : null;
   return {
     name: d.entityName,
     hp: d.hp,
+    armor: d.armor || 0,
     cost: compactCost(d.cost),
     popGranted: d.popGranted,
     collisionRadius: d.collisionRadius,
     attackRange: d.tower ? d.tower.range : 0,
-    attackDamage: d.tower ? d.tower.damage : 0,
+    towerDamage: towerDamage ? { ...towerDamage } : null,
+    attackDamage: towerDamage ? towerDamage.basic + towerDamage.piercing : 0,
     attackCooldown: d.tower ? d.tower.cooldown : DEFAULT_BUILDING_ATTACK_COOLDOWN
   };
 }

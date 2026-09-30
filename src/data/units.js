@@ -9,7 +9,11 @@
  * - name          Nome PT-BR exibido nos menus de treino (ver D2: será trocado pelo glossário da F3-00).
  * - entityName    Rótulo atual do card de seleção (legado; unificar com `name` na F3-00/F6-09).
  * - faction       'human' | 'orc' | 'neutral'.
- * - hp, speed, attack, attackRange, attackCooldown, armor, collisionRadius.
+ * - hp, speed, attackRange, attackCooldown, armor, collisionRadius.
+ * - damage {basic, piercing, type}  F3-03: substitui o antigo campo `attack` plano. `type` é
+ *   um de `DAMAGE_TYPES` (`src/sim/combat.js`): 'normal' | 'piercing' | 'siege' | 'magic'.
+ *   `getUnitStats` (`src/data/index.js`) deriva `attack = basic + piercing` para leitura
+ *   legada (AI/HUD) — nenhum código novo lê `attack` para calcular dano.
  * - visionRadius  Raio revelado na névoa de guerra.
  * - aggroRange    Raio de auto-aggro quando ocioso (unidades de combate).
  * - threatScanRange  Raio de reescaneamento de ameaças ao atacar construção/trabalhador.
@@ -32,7 +36,7 @@ export const UNITS = {
     name: 'Aldeão',
     entityName: 'Villager',
     faction: 'human',
-    hp: 85, speed: 4.5, attack: 7, attackRange: 1.8, attackCooldown: 1.0, armor: 0,
+    hp: 85, speed: 4.5, damage: { basic: 5, piercing: 2, type: 'normal' }, attackRange: 1.8, attackCooldown: 1.0, armor: 0,
     collisionRadius: 0.66,
     visionRadius: 14,
     ...MELEE_SCAN,
@@ -48,7 +52,7 @@ export const UNITS = {
     name: 'Cavaleiro',
     entityName: 'Knight',
     faction: 'human',
-    hp: 190, speed: 4.8, attack: 26, attackRange: 2.1, attackCooldown: 1.1, armor: 4,
+    hp: 190, speed: 4.8, damage: { basic: 20, piercing: 6, type: 'normal' }, attackRange: 2.1, attackCooldown: 1.1, armor: 4,
     collisionRadius: 0.84,
     visionRadius: 16,
     ...MELEE_SCAN,
@@ -64,7 +68,7 @@ export const UNITS = {
     name: 'Arqueiro',
     entityName: 'Archer',
     faction: 'human',
-    hp: 95, speed: 4.3, attack: 18, attackRange: 14.0, attackCooldown: 1.4, armor: 0,
+    hp: 95, speed: 4.3, damage: { basic: 6, piercing: 12, type: 'piercing' }, attackRange: 14.0, attackCooldown: 1.4, armor: 0,
     collisionRadius: 0.66,
     visionRadius: 18,
     ...RANGED_SCAN,
@@ -82,7 +86,7 @@ export const UNITS = {
     name: 'Peão',
     entityName: 'Orc Peon',
     faction: 'orc',
-    hp: 90, speed: 4.5, attack: 8, attackRange: 1.8, attackCooldown: 1.0, armor: 0,
+    hp: 90, speed: 4.5, damage: { basic: 6, piercing: 2, type: 'normal' }, attackRange: 1.8, attackCooldown: 1.0, armor: 0,
     collisionRadius: 0.66,
     visionRadius: 14,
     ...MELEE_SCAN,
@@ -98,7 +102,7 @@ export const UNITS = {
     name: 'Guerreiro Grunt',
     entityName: 'Orc Grunt',
     faction: 'orc',
-    hp: 205, speed: 4.7, attack: 28, attackRange: 2.1, attackCooldown: 1.15, armor: 4,
+    hp: 205, speed: 4.7, damage: { basic: 22, piercing: 6, type: 'normal' }, attackRange: 2.1, attackCooldown: 1.15, armor: 4,
     collisionRadius: 0.86,
     visionRadius: 16,
     ...MELEE_SCAN,
@@ -114,7 +118,7 @@ export const UNITS = {
     name: 'Lançador de Machado',
     entityName: 'Troll Axethrower',
     faction: 'orc',
-    hp: 100, speed: 4.4, attack: 19, attackRange: 13.5, attackCooldown: 1.35, armor: 0,
+    hp: 100, speed: 4.4, damage: { basic: 7, piercing: 12, type: 'piercing' }, attackRange: 13.5, attackCooldown: 1.35, armor: 0,
     collisionRadius: 0.66,
     visionRadius: 18,
     ...RANGED_SCAN,
@@ -130,7 +134,7 @@ export const UNITS = {
     name: 'Ogro',
     entityName: 'Orc Ogre',
     faction: 'orc',
-    hp: 320, speed: 4.0, attack: 42, attackRange: 2.5, attackCooldown: 1.5, armor: 5,
+    hp: 320, speed: 4.0, damage: { basic: 32, piercing: 10, type: 'normal' }, attackRange: 2.5, attackCooldown: 1.5, armor: 5,
     collisionRadius: 1.08,
     visionRadius: 16,
     ...MELEE_SCAN,
@@ -148,7 +152,7 @@ export const UNITS = {
     name: 'Bandido',
     entityName: 'Bandit Raider',
     faction: 'neutral',
-    hp: 125, speed: 4.4, attack: 16, attackRange: 2.1, attackCooldown: 1.2, armor: 1,
+    hp: 125, speed: 4.4, damage: { basic: 12, piercing: 4, type: 'normal' }, attackRange: 2.1, attackCooldown: 1.2, armor: 1,
     collisionRadius: 0.84,
     visionRadius: 20,
     ...MELEE_SCAN,
@@ -167,7 +171,7 @@ export const DEFAULT_UNIT = {
   name: 'Unidade',
   entityName: 'Unit',
   faction: 'neutral',
-  hp: 100, speed: 4.0, attack: 10, attackRange: 1.8, attackCooldown: 1.0, armor: 0,
+  hp: 100, speed: 4.0, damage: { basic: 10, piercing: 0, type: 'normal' }, attackRange: 1.8, attackCooldown: 1.0, armor: 0,
   collisionRadius: 0.72,
   visionRadius: 20,
   ...MELEE_SCAN,

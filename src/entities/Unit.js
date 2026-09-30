@@ -4,6 +4,7 @@ import { Arrow } from './Arrow.js';
 import { Building } from './Building.js';
 import { UnitAnimator } from '../animation/UnitAnimator.js';
 import { getUnitDef, getUnitStats as getUnitStatsFromData, CARRY, MINE_ENTER_TIME, gatherMultiplier } from '../data/index.js';
+import { computeDamage } from '../sim/combat.js';
 import { legacyOwnerId } from '../sim/EntityIds.js';
 import { SIM_DT, lerpAngle } from '../sim/constants.js';
 import { CMD } from '../sim/commands.js';
@@ -108,7 +109,9 @@ export class Unit {
     this.hp = stats.hp;
     this.maxHp = stats.hp;
     this.speed = stats.speed;
-    this.attack = stats.attack;
+    // F3-03: dano básico+perfurante (substitui o antigo `attack` plano); `this.attack` (getter,
+    // abaixo) deriva `basic + piercing` para leitura legada (AI/HUD) — nunca é escrito direto.
+    this.damage = { ...stats.damage };
     this.attackRange = stats.attackRange;
     this.attackCooldown = stats.attackCooldown;
     this.armor = stats.armor || 0;
@@ -216,6 +219,11 @@ export class Unit {
 
   getUnitStats(type) {
     return getUnitStatsFromData(type);
+  }
+
+  /** F3-03: dano total legado (`basic + piercing`), derivado — leitura por AI/HUD; nunca escrito. */
+  get attack() {
+    return this.damage.basic + this.damage.piercing;
   }
 
   isCombatUnit() {
@@ -557,10 +565,14 @@ export class Unit {
     this.stop();
   }
 
+  /**
+   * F3-03: `amount` já é o dano final (calculado por `computeDamage` no chamador, que consome
+   * o RNG de combate) — esta função não subtrai mais armadura nem força mínimo 2.
+   */
   takeDamage(amount, attacker = null, allUnits = []) {
     if (this.isDead || this.isDying) return;
 
-    const effectiveDamage = Math.max(2, amount - this.armor);
+    const effectiveDamage = amount;
     this.hp -= effectiveDamage;
     this.updateHealthBar();
     if (this.hpGroup) {
@@ -1397,7 +1409,8 @@ export class Unit {
 
     const progress = Math.min(1.0, this.attackTimer / this.attackCooldown);
 
-    const gmEvents = this.gameManager && this.gameManager.events;
+    const gm = gameManager || this.gameManager;
+    const gmEvents = gm && gm.events;
 
     if (this.isRanged) {
       // Archer & Axethrower: Release projectile shot at progress >= 0.60
@@ -1406,7 +1419,10 @@ export class Unit {
         const startPos = _projectileOrigin.copy(this.mesh.position).add(_up168);
         const projType = this.projectileType;
         if (gmEvents) gmEvents.emit(EVT.PROJECTILE_FIRED, { kind: projType, from: posOf(startPos), ownerId: this.ownerId });
-        const arrow = new Arrow(this.scene, startPos, this.attackTarget, this.attack, (target, dmg, hitPos) => {
+        // F3-03: o dano final (computeDamage, 1 valor de RNG) é calculado no impacto — a
+        // armadura/tipo do alvo naquele instante decidem o resultado, não na hora do disparo.
+        const arrow = new Arrow(this.scene, startPos, this.attackTarget, this.damage, (target, dmgObj, hitPos) => {
+          const dmg = computeDamage(dmgObj, target, gm.combatRng);
           target.takeDamage(dmg, this, allUnits);
           if (gmEvents) gmEvents.emit(EVT.PROJECTILE_HIT, { kind: projType, pos: posOf(hitPos), ownerId: this.ownerId });
         }, projType);
@@ -1418,7 +1434,8 @@ export class Unit {
       if (progress >= 0.45 && !this.hasFiredThisAttack) {
         this.hasFiredThisAttack = true;
         if (gmEvents) gmEvents.emit(EVT.MELEE_HIT, { pos: posOf(this.mesh.position), ownerId: this.ownerId });
-        this.attackTarget.takeDamage(this.attack, this, allUnits);
+        const dmg = computeDamage(this.damage, this.attackTarget, gm.combatRng);
+        this.attackTarget.takeDamage(dmg, this, allUnits);
       }
     }
 

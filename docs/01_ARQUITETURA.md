@@ -354,6 +354,15 @@ Multiplayer lockstep (F9) e replays (F9-05) exigem que a mesma seed + o mesmo lo
   pontos que ficaram em `Math.random` por decisão deliberada (ver spec F2-03 para a lista
   completa classificada). `RNG.fork(label)` deriva uma seed por hash (FNV-1a) da seed do pai +
   `label`: sub-RNGs não compartilham sequência entre si nem avançam o estado do pai.
+- **Combate (F3-03)**: `gm.combatRng = gm.rng.fork('combat')` (criado junto de `gm.rngMap`, nos
+  dois pontos em que `gm.rng` é atribuído — construtor e `startMatch`). `computeDamage(damage,
+  target, rng)` (`src/sim/combat.js`, módulo puro — fórmula estilo WC2: `max(0, básico −
+  armadura) + perfurante`, tipos `NORMAL/PIERCING/SIEGE/MAGIC`, `× DAMAGE_SCALE` de
+  `src/data/combat.js`) consome **exatamente 1** valor de `rng.next()` por golpe — mudar isso
+  muda o checksum. Golpe corpo a corpo chama `computeDamage` de imediato; flecha/machado e torre
+  chamam no **impacto** (não no disparo), para a armadura/tipo do alvo valerem no instante do
+  golpe. `Unit.takeDamage`/`Building.takeDamage` recebem o dano já calculado (não subtraem mais
+  armadura nem forçam mínimo 2 — o mínimo 1 já vem de `computeDamage`).
 - **Sem relógio na simulação**: `Pathfinder.processQueue(maxNodes = 4000)` orça por nós de
   grade expandidos pelo A* (`Pathfinder._lastNodesExpanded`), não por `performance.now()` —
   o mesmo orçamento produz o mesmo número de buscas resolvidas por tick em qualquer máquina.

@@ -4,6 +4,7 @@ import { Arrow } from './Arrow.js';
 import { UPGRADE_CONFIG, FORGE_UPGRADES } from '../core/UpgradeConfig.js';
 import { legacyOwnerId } from '../sim/EntityIds.js';
 import { EVT } from '../sim/events.js';
+import { computeDamage } from '../sim/combat.js';
 
 /** Vector3 → objeto plano `{x,y,z}` (payload de evento: nunca referências a objetos three.js). */
 function posOf(v) {
@@ -90,7 +91,12 @@ export class Building {
     this.maxHp = stats.hp;
     this.cost = stats.cost;
     this.popGranted = stats.popGranted || 0;
+    // F3-03: armadura da construção (corrige B5 — antes não existia). `towerDamage` é o
+    // dano da torre em {basic, piercing, type}; `attackDamage` continua como soma derivada
+    // (leitura legada da HUD).
+    this.armor = stats.armor || 0;
     this.attackRange = stats.attackRange || 0;
+    this.towerDamage = stats.towerDamage ? { ...stats.towerDamage } : null;
     this.attackDamage = stats.attackDamage || 0;
     this.collisionRadius = stats.collisionRadius || 3.0;
     this.attackCooldown = stats.attackCooldown;
@@ -478,6 +484,7 @@ export class Building {
     }
   }
 
+  /** F3-03: `amount` já é o dano final (calculado por `computeDamage` no chamador). */
   takeDamage(amount, attacker = null) {
     this.hp -= amount;
     this.underAttackTimer = 6.0;
@@ -693,7 +700,9 @@ export class Building {
           if (gmEvents) {
             gmEvents.emit(EVT.PROJECTILE_FIRED, { kind: projType, from: posOf(_towerArrowStart), ownerId: this.ownerId });
           }
-          const arrow = new Arrow(this.scene, _towerArrowStart, closest, this.attackDamage, (target, dmg, hitPos) => {
+          // F3-03: dano final calculado no impacto (computeDamage, 1 valor de RNG de gm.combatRng).
+          const arrow = new Arrow(this.scene, _towerArrowStart, closest, this.towerDamage, (target, dmgObj, hitPos) => {
+            const dmg = computeDamage(dmgObj, target, gm.combatRng);
             target.takeDamage(dmg, this, allUnits);
             if (gmEvents) gmEvents.emit(EVT.PROJECTILE_HIT, { kind: projType, pos: posOf(hitPos), ownerId: this.ownerId });
           }, projType);

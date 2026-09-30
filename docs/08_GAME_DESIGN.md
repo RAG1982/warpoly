@@ -153,6 +153,27 @@ Bandoleiros (modelos prontos: Bandido + Acampamento) guardam minas extras; critt
 | Cerco | ✔ (grupos) | ✔ (grupos) | ✘ | = | — | — |
 | Conjurador | ✔ (área) | ✔ (área) | ✔ (lentidão) | — | = | ✔ |
 
+### 6.1 Tabela de simulação (medida — F3-03)
+
+`computeDamage` (`src/sim/combat.js`) aplicado 1000 vezes por par, headless, com
+`tools/combat-table.mjs` (sem navegador; seed 42; mesma fórmula do jogo, DAMAGE_SCALE 1,333 —
+`src/data/combat.js`). "Golpes p/ matar" = HP do alvo ÷ dano médio (arredondado para cima, sem
+regenerar HP entre golpes); "tempo p/ matar" = golpes × cooldown de ataque do atacante (duelo
+1×1, atacante sempre em alcance):
+
+| Par (atacante × alvo) | Dano médio | Mín | Máx | Golpes p/ matar | Tempo p/ matar |
+|---|---|---|---|---|---|
+| Cavaleiro × Grunt | 21,98 | 15 | 29 | 10 | 11,0 s |
+| Arqueiro × Cavaleiro | 13,84 | 9 | 19 | 14 | 19,6 s |
+| Grunt × Arqueiro | 27,91 | 19 | 37 | 4 | 4,6 s |
+| Cavaleiro × Castelo | 6,08 | 4 | 8 | 264 | 290,4 s |
+| Arqueiro × Castelo | 12,12 | 8 | 16 | 133 | 186,2 s |
+| Torre de Vigia × Cavaleiro | 14,07 | 9 | 19 | 14 | 19,6 s |
+
+Cavalaria (dano normal) perde bruto contra construções (armadura 20 sem componente perfurante
+relevante); arqueiros/torres (perfurantes) sofrem menos com armadura alta — a mesma lógica do
+contras acima. Números de exemplo (seed 42), não normativos — o balanceamento fino é a F3-11.
+
 ---
 
 ## 7. Pesquisas

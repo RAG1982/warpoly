@@ -82,6 +82,9 @@ export class GameManager {
     // estado de jogo usa `this.rng` (ou um fork dele); RNG visual (Math.random) continua livre.
     this.rng = createRng(this.matchConfig.seed);
     this.rngMap = this.rng.fork('map');
+    // F3-03: RNG do modelo de combate (computeDamage) — fork isolado para não perturbar
+    // outros consumidores (mapa, IA, etc.) nem ser perturbado por eles.
+    this.combatRng = this.rng.fork('combat');
 
     // IDs de entidade (F2-01): id numérico estável + ownerId em toda entidade.
     this.entityRegistry = new EntityRegistry();
@@ -372,6 +375,7 @@ export class GameManager {
     ModelFactory.headless = this.headless;
     this.rng = createRng(this.matchConfig.seed);
     this.rngMap = this.rng.fork('map');
+    this.combatRng = this.rng.fork('combat');
     this.resetMap();
     this.focusCameraOnLocalBase();
   }
@@ -735,7 +739,8 @@ export class GameManager {
     if (!cfg.appliesTo(unit.type)) return;
 
     if (cfg.statType === 'attack') {
-      unit.attack += cfg.bonus;
+      // F3-03: `attack` é getter derivado (basic + piercing) — o bônus soma no básico.
+      unit.damage.basic += cfg.bonus;
     } else if (cfg.statType === 'defense') {
       unit.armor = (unit.armor || 0) + cfg.bonus;
     }

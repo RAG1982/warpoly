@@ -306,7 +306,7 @@ Sonnet 5.5 escreve a spec em `docs/specs/<ID>.md`; agente **Sonnet** executa; o 
 - **Resultado**: `victoryMode` conquest/regicide (menu + `?victory=`), `src/sim/victory.js`, `MatchStats` (kills via `killerOwnerId`, `RESOURCES_SPENT`, série 10 s, score, APM), `gm.result`, modal com resumo. Derrotado fica inerte. APM da IA = 0 (IA não usa `gm.issue`). 327 testes.
 
 ### F3-10 · Neutros e critters
-- **Status**: `TODO(spec pronta: docs/specs/F3-10-neutros-critters.md)` · Lane GAME · Onda 4 · Dep: F2-01
+- **Status**: `DOING(sonnet, 2026-09-30)` (spec: docs/specs/F3-10-neutros-critters.md) · Lane GAME · Onda 4 · Dep: F2-01
 - **Fazer**: jogador neutro hostil com Acampamento de Bandidos (modelos prontos) que guarda recursos e dá recompensa; critters decorativos (ovelhas/porcos) que podem ser mortos.
 - **Aceite**: mapa com 2 acampamentos neutros jogável.
 

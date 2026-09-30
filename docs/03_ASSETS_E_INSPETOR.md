@@ -182,6 +182,8 @@ oak 16m/476t · pine 12m/208t · autumn 16m/476t · birch 29m/904t · flower_pat
 
 
 ## Espadachim (Blender) — `knight.glb`
+`tools/blender/build_villager.py` (Camponês, rig plana como o `VillagerModel.js`) e `build_peon.py` (Lacaio orc, rig aninhada como o `PeonModel.js`) geram `villager.glb` (~6,0 mil tris, 278 KB) e `peon.glb` (~5,6 mil tris, 267 KB), atlas 512², 14 draw calls no total (~10 visíveis; ferramentas/carga alternam `visible`). O glTF não guarda `visible`: `ModelFactory._workerGlbDefaults` deixa só o machado visível e Pack/WoodBundle/GoldSack ocultos. Ligados por padrão (`?glb=0` volta ao procedural); no inspetor: "Camponês (Blender)" e "Lacaio (Blender)". Capturas: `tools/blender/capture_workers.mjs` (GPU real).
+
 `tools/blender/build_knight.py` gera `public/models/knight.glb` a partir da referência `soldado.png` (armadura de placas com frisos dourados, elmo aberto, capa/mangas azuis em cor de time, espada longa). Rig **plana** idêntica à do `KnightModel.js` (Torso, Head, ArmL, ArmR, LegL, LegR, Sword; o `UnitAnimator` usa posições absolutas na raiz), sem escudo. 10 draw calls, ~4,2 mil tris, 213 KB, atlas 512². Ligado por padrão (`?glb=0` volta ao procedural); no inspetor: "Espadachim (Blender)". Capturas: `tools/blender/capture_knight.mjs` (GPU real).
 
 ## Arqueiro e Lanceiro-Machado (Blender) — `archer.glb`, `axethrower.glb`

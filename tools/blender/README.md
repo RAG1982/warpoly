@@ -10,6 +10,9 @@ os `.glb` em `public/models/` são artefatos reproduzíveis.
 | `build_knight.py` | `public/models/knight.glb` | Espadachim humano (ref. `soldado.png`): 7 partes rígidas, 4,2 mil tris, 10 draw calls, atlas 512², 213 KB |
 | `build_archer.py` | `public/models/archer.glb` | Arqueiro humano: capuz/manto/capa em cor de time, gibão de couro, aljava com flechas, arco composto + corda de 2 segmentos + flecha (`DrawnArrow`); rig plana, 6,8 mil tris, 12 draw calls, atlas 512² |
 | `build_axethrower.py` | `public/models/axethrower.glb` | Lanceiro-Machado troll: pele verde-acinzentada com pintura de guerra, moicano, presas, bandoleira/cinturão de machadinhas, 2 machados de arremesso; rig aninhada, 6,9 mil tris, 12 draw calls, atlas 512² |
+| `build_villager.py` | `public/models/villager.glb` | Camponês humano: rig plana (ToolGroup > Axe/Pickaxe/Hammer, Pack > WoodBundle/GoldSack), 6,0 mil tris, 14 draw calls no total (~10 visíveis), atlas 512², 278 KB |
+| `build_peon.py` | `public/models/peon.glb` | Lacaio orc: rig aninhada (Torso > Head, ArmL, ArmR > ToolGroup; Pack no Torso), 5,6 mil tris, 14 draw calls no total, atlas 512², 267 KB |
+| `worker_common.py` | — | helpers dos trabalhadores (painel de tecido, costuras, orçamento de bisel) |
 | `build_castle.py` | `public/models/castle.glb` | castelo humano: 2 draw calls, 8,7 mil tris, atlas 1024² |
 | `common.py` | — | helpers (primitivas bmesh, materiais de pintura, UV atlas, bake, export, render) |
 

@@ -155,8 +155,7 @@ def build_torso(mats, root):
     for dx in (-0.07, 0.0, 0.07):
         mb.add(prim_box(0.03, 0.30, 0.025), 'scar', M((-0.28 + dx, 0.50 - dx * 0.4, 0.695 - abs(dx) * 0.2),
                                                         (12, 0, -28)), bevel=0.005)
-    mb.add(prim_box(0.34, 0.035, 0.03), 'scar', M((0.16, -0.14, 0.82), (-10, 0, 18)), bevel=0.006)
-    mb.add(prim_box(0.035, 0.22, 0.03), 'scar', M((0.10, -0.06, 0.82), (-6, 0, 10)), bevel=0.006)
+    mb.add(prim_box(0.03, 0.30, 0.025), 'scar', M((0.20, -0.16, 0.815), (-8, 0, 32)), bevel=0.005)
     # pescoço grosso com gola de pelo
     mb.add(prim_rings([ring_h(0.96, 0.62, 0.46, 12, cz=-0.06), ring_h(1.06, 0.54, 0.40, 12, cz=-0.04),
                        ring_h(1.12, 0.36, 0.30, 12, cz=0.02)], cap0=False, cap1=False), 'fur', smooth=60)
@@ -335,7 +334,6 @@ def build_arm(mats, torso, side):
     if s < 0:
         # corrente quebrada presa ao punho (algema)
         mb.add(prim_cyl(0.20, 0.20, 0.05, 10), 'iron', M((s * 0.06, -0.92, 0.19), (-14, 0, 0)), smooth=30)
-        chain(mb, [(s * 0.06, -1.24, 0.22), (s * 0.10, -1.38, 0.16), (s * 0.12, -1.52, 0.18)], link=0.10)
     else:
         # faixa de tecido (cor de time) no bíceps
         mb.add(prim_rings(limb_rings([(s * 0.05, -0.34, 0.02), (s * 0.055, -0.46, 0.02)], [(0.365, 0.335), (0.36, 0.33)], 8),

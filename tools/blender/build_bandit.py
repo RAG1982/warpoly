@@ -45,7 +45,7 @@ PALETTE = {
                  edge='#6a5038', edge_amt=0.5, edge_r=0.015, ao=(0.22, 0.55)),
     'patch': dict(base='#6d6a3c', var='#565430', var_scale=8.0, fine=0.12, top=0.2,
                   edge='#9c9860', edge_amt=0.5, edge_r=0.012, ao=(0.2, 0.5)),
-    'cloak': dict(base='#56613c', var='#39432a', var_scale=6.0, var_amt=0.9, fine=0.15, top=0.25,
+    'cloak': dict(base='#4a3b38', var='#2f2523', var_scale=6.0, var_amt=0.9, fine=0.15, top=0.25,
                   edge='#7a6d58', edge_amt=0.4, edge_r=0.02, ao=(0.25, 0.6), grad=(0.0, 2.0, 0.2)),
     'pants': dict(base='#514032', var='#3b2e23', var_scale=5.0, fine=0.12, top=0.15,
                   edge='#7a6350', edge_amt=0.3, edge_r=0.015, ao=(0.25, 0.6), grad=(0.0, 1.0, 0.3)),
@@ -133,18 +133,14 @@ def build_torso(mats, root):
     # colete de couro remendado (barra irregular), aberto em V na frente
     vest_rings = []
     for (y, rx, rz, jag) in ((-0.20, 0.225, 0.168, 0.05), (-0.04, 0.245, 0.178, 0.0), (0.14, 0.29, 0.20, 0.0),
-                             (0.30, 0.305, 0.19, 0.0)):
+                             (0.30, 0.305, 0.19, 0.0), (0.40, 0.25, 0.16, 0.0)):
         ring = ring_h(y, rx, rz, 12)
         if jag:
             ring = [(x, yy + (jag if i % 2 else -jag), z) for i, (x, yy, z) in enumerate(ring)]
         vest_rings.append(ring)
     mb.add(prim_rings(vest_rings, cap0=False, cap1=False), 'vest', smooth=60)
-    # gola/capuz caído sobre os ombros (cobre a gola da camisa)
-    cowl = [ring_h(0.20, 0.31, 0.215, 12), ring_h(0.33, 0.30, 0.205, 12, cz=-0.005), ring_h(0.43, 0.20, 0.155, 12),
-            ring_h(0.48, 0.15, 0.125, 12)]
-    mb.add(prim_rings(cowl, cap0=False, cap1=False), 'cloak', smooth=60)
     # abertura em V: cunha de camisa por cima e cordão de couro cruzado
-    tri = [(-0.10, 0.37), (0.10, 0.37), (0.0, 0.08)]
+    tri = [(-0.09, 0.36), (0.09, 0.36), (0.0, 0.10)]
     mb.add(prim_extrude(tri, 0.03, axis='z'), 'linen', M((0, 0, 0.192), (-4, 0, 0)))
     for k, (y, w) in enumerate(((0.28, 0.07), (0.20, 0.052), (0.13, 0.034))):
         mb.add(prim_box(w * 2.0, 0.012, 0.012), 'dark', M((0, y, 0.213), (0, 0, 14 if k % 2 else -14)))
@@ -328,17 +324,17 @@ def build_weapon(mats, root):
     mb.add(prim_cyl(0.05, 0.05, 0.03, 7, base=False), 'iron', M((0, -0.13, 0)), smooth=30)
     mb.add(prim_sphere(0.05, 0.04, 0.05, 6, 3), 'wood', M((0, -0.155, 0)), smooth=60)
     # cabeça de tronco cônico, irregular
-    hr = [ring_h(0.28, 0.04, 0.04, 8), ring_h(0.42, 0.075, 0.075, 8), ring_h(0.58, 0.115, 0.115, 8),
-          ring_h(0.72, 0.125, 0.125, 8), ring_h(0.82, 0.10, 0.10, 8), ring_h(0.87, 0.05, 0.05, 8)]
+    hr = [ring_h(0.28, 0.045, 0.045, 8), ring_h(0.42, 0.09, 0.09, 8), ring_h(0.60, 0.14, 0.14, 8),
+          ring_h(0.76, 0.152, 0.152, 8), ring_h(0.88, 0.12, 0.12, 8), ring_h(0.94, 0.06, 0.06, 8)]
     mb.add(prim_rings(hr), 'wood', smooth=60)
     # cinta de ferro enferrujada e corda enrolada
-    mb.add(prim_cyl(0.13, 0.13, 0.04, 8, base=False), 'rust', M((0, 0.66, 0)), smooth=30)
-    mb.add(prim_cyl(0.083, 0.083, 0.03, 8, base=False), 'rust', M((0, 0.45, 0)), smooth=30)
+    mb.add(prim_cyl(0.157, 0.157, 0.04, 8, base=False), 'rust', M((0, 0.68, 0)), smooth=30)
+    mb.add(prim_cyl(0.10, 0.10, 0.03, 8, base=False), 'rust', M((0, 0.46, 0)), smooth=30)
     for y in (0.30, 0.335, 0.37):
         mb.add(prim_cyl(0.056, 0.056, 0.018, 7, base=False), 'linen', M((0, y, 0)), smooth=30)
     # pregos radiais (mais numerosos na face +Z)
     import mathutils
-    for (y, r, cnt, off, ln) in ((0.52, 0.10, 4, 45, 0.11), (0.62, 0.118, 5, 20, 0.13), (0.74, 0.122, 5, 55, 0.13)):
+    for (y, r, cnt, off, ln) in ((0.52, 0.12, 4, 45, 0.12), (0.64, 0.14, 5, 20, 0.14), (0.78, 0.148, 5, 55, 0.14)):
         for i in range(cnt):
             a = math.radians(off + 360 * i / cnt)
             ca, sa = math.cos(a), math.sin(a)
@@ -347,10 +343,10 @@ def build_weapon(mats, root):
             mb.add(prim_cone(0.021, ln, 4), 'iron',
                    M((ca * (r - 0.012), y, sa * (r - 0.012)), (math.degrees(q.x), math.degrees(q.y), math.degrees(q.z))),
                    smooth=50)
-    mb.add(prim_cone(0.03, 0.14, 4), 'iron', M((0, 0.86, 0)), smooth=50)
+    mb.add(prim_cone(0.035, 0.16, 4), 'iron', M((0, 0.92, 0)), smooth=50)
     # fileira de pregos grandes na face de impacto (+Z)
-    for (y, ln) in ((0.55, 0.13), (0.65, 0.15), (0.75, 0.14)):
-        mb.add(prim_cone(0.026, ln, 4), 'iron', M((0, y, 0.115), (90, 0, 0)), smooth=50)
+    for (y, ln) in ((0.55, 0.14), (0.68, 0.16), (0.80, 0.15)):
+        mb.add(prim_cone(0.028, ln, 4), 'iron', M((0, y, 0.135), (90, 0, 0)), smooth=50)
     # tira de tecido (cor de time) pendurada abaixo da cabeça
     mb.add(cloth_panel((-0.03, 0.30, 0.055), (0.03, 0.30, 0.055), (-0.04, 0.10, 0.075), (0.04, 0.10, 0.075),
                        nx=2, ny=3, thick=0.012, wave=0.015, jag=0.02), 'team', smooth=50)

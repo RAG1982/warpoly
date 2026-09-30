@@ -51,17 +51,19 @@ try {
     await page.waitForTimeout(3000);
     const info = await page.evaluate(() => {
       const gm = window.game.gameManager;
-      const c = gm.sceneManager.cameraTarget;
-      const list = [['ogre', 'player'], ['grunt', 'player'], ['knight', 'player'], ['bandit', 'enemy'], ['ogre', 'enemy']];
+      const c = gm.sceneManager.cameraTarget.clone();
+      const list = [['ogre', 'player'], ['grunt', 'player'], ['knight', 'player'], ['bandit', 'player'], ['ogre', 'player']];
       const out = [];
+      gm.sceneManager.cameraTarget.set(c.x - 3, 2.5, c.z + 16);
+      gm.sceneManager.targetZoomLevel = 0.42;
       list.forEach(([t, o], i) => {
-        const u = gm.spawnUnit(t, c.x - 6 + i * 3.2, c.z + 2, o);
+        const u = gm.spawnUnit(t, c.x - 11 + i * 5.5, c.z + 16, o);
         out.push({ t, glb: !!(u.mesh.getObjectByName('Weapon') || u.mesh.getObjectByName('Sword')), kids: u.mesh.children.length });
       });
       return out;
     });
     console.log('GAME', JSON.stringify(info));
-    await page.waitForTimeout(2500);
+    await page.waitForTimeout(1200);
     await page.screenshot({ path: path.join(OUT, 'game_ogre_bandit.png') });
   }
 } finally {

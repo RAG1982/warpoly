@@ -307,9 +307,10 @@ Sonnet 5.5 escreve a spec em `docs/specs/<ID>.md`; agente **Sonnet** executa; o 
 - **Resultado**: `victoryMode` conquest/regicide (menu + `?victory=`), `src/sim/victory.js`, `MatchStats` (kills via `killerOwnerId`, `RESOURCES_SPENT`, série 10 s, score, APM), `gm.result`, modal com resumo. Derrotado fica inerte. APM da IA = 0 (IA não usa `gm.issue`). 327 testes.
 
 ### F3-10 · Neutros e critters
-- **Status**: `DOING(sonnet, 2026-09-30)` (spec: docs/specs/F3-10-neutros-critters.md) · Lane GAME · Onda 4 · Dep: F2-01
+- **Status**: `DONE(05b8740)` (spec: docs/specs/F3-10-neutros-critters.md) · Lane GAME · Onda 4 · Dep: F2-01
 - **Fazer**: jogador neutro hostil com Acampamento de Bandidos (modelos prontos) que guarda recursos e dá recompensa; critters decorativos (ovelhas/porcos) que podem ser mortos.
 - **Aceite**: mapa com 2 acampamentos neutros jogável.
+- **Resultado**: `NEUTRAL_HOSTILE_ID=99`, `neutrals` validados nos mapas (2 acampamentos cada), `spawnNeutrals`, leash/regen dos bandidos, recompensa + `CAMP_CLEARED`, critters (ovelha/porco), minimapa laranja, card do acampamento. Pendências → NEW-25/26/27. 360 testes.
 
 ### F3-11 · Revisão de balanceamento base
 - **Status**: `TODO(spec pronta: docs/specs/F3-11-balanceamento-base.md)` · Lane GAME + QA · Onda 5 · Dep: F3-03..F3-07, F8-? headless
@@ -534,6 +535,9 @@ _(agentes adicionam aqui: `NEW-<n> · título · lane · motivo`)_
 - ✅ NEW-22 · `DONE(3ed0b17)` Textos em inglês no card de seleção ("Carry: 0/10 gold") traduzidos para PT-BR; glossário de nomes em `src/data/names.js`; labels Atk→Ataque, Def→Defesa, Spd→Vel, Carry→Carga; tipos de recursos traduzidos · UI
 - ✅ NEW-3 · `DONE(3ed0b17 — parte simples)` Card de seleção mostra nomes PT-BR unificados com `entityName` em `units.js` e `buildings.js`; tradução de labels e tipos de recursos. Parte de i18n completa fica para F6-09. · UI
 - NEW-24 · Muralha: portão e conexões visuais entre segmentos; segmentos no minimapa · GAME/ART
+- NEW-25 · IA ataca acampamentos neutros (dificuldade ≥ normal, ≥ 8 combatentes) · AI
+- NEW-26 · Card/seleção de unidade neutra (bandido) · UI
+- NEW-27 · Medir draw calls dos neutros vs master (997→1387 com câmera no acampamento, não isolado) · PERF
 - NEW-23 · Projéteis de cerco balísticos que podem errar alvo em movimento — implementar junto com a F4-02 (cerco) · GAME
 - NEW-1 · Avaliar uso real de `GLTFBuildingLoader` em `GreatHall.js` e remover ou adotar no pipeline Blender (F7-00) · ART · ficou fora do escopo da F0-03
 

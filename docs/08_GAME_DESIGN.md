@@ -144,6 +144,7 @@ Regras na escaramuça:
 
 ### 5.4 Neutros
 Bandoleiros (modelos prontos: Bandido + Acampamento) guardam minas extras; critters decorativos (ovelhas, porcos, focas).
+**Implementado (F3-10):** acampamentos de bandidos (4 guardas com leash de 22, jazida de ouro própria, recompensa de 300 de ouro ao destruir o acampamento) e critters (ovelha/porco) definidos por `neutrals` nos mapas; jogador neutro hostil (id 99) fora de vitória/HUD/IA. Focas e ataque da IA a acampamentos (NEW-25) ficam para depois.
 
 ---
 

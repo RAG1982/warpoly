@@ -118,6 +118,14 @@ Tick de 1s. Utilidades:
 - Vitória quando `aliveTeams().size <= 1`; derrota se o jogador local cair. Um jogador derrotado emite `PLAYER_DEFEATED` uma vez; suas unidades e construções **permanecem no mapa, inertes** (não recebem ordens, não atacam, não produzem) e podem ser destruídas.
 - O modal de fim de jogo mostra a mensagem do modo, tempo, unidades mortas/perdidas e construções destruídas/perdidas.
 
+## Neutros hostis e critters (F3-10)
+- Mapas com `neutrals` criam o jogador neutro hostil (`NEUTRAL_HOSTILE_ID = 99`, time 99): hostil a todos, mas fora de vitória/derrota, população, HUD, IA e estatísticas.
+- **Acampamento de bandidos**: `bandit_camp` (PV 1400) com 4 bandidos em círculo (raio 5) e uma jazida de ouro própria (3000) a ~9 unidades. Os bandidos guardam por auto-aquisição (`aggroRange`) e têm **leash de 22** da origem: ao se afastarem mais que isso largam o alvo, voltam (`Unit._updateGuardLeash`) e recuperam 5 % do PV máximo por segundo. A jazida só é minerada por jogadores normais; guardas vivos atacam os mineradores próximos.
+- **Recompensa**: destruir o (último) acampamento do cluster credita `reward` (300 de ouro nos mapas atuais) a quem deu o último golpe e emite `EVT.CAMP_CLEARED` + aviso "Acampamento de bandidos destruído! +300 de ouro".
+- **Critters** (ovelha/porco, `src/entities/Critter.js`): decorativos, `hp 8`, vagam ao redor da origem, fogem 4 s ao serem feridos, só são atacados por ordem explícita (clique direito), deixam carcaça por 3 s e não dão recursos nem contam em estatísticas. Não aparecem no minimapa; parados fora da visão não se movem.
+- Névoa/minimapa: bandidos e acampamento só aparecem em área visível; no minimapa os pontos neutros hostis são laranja. Clicar no acampamento mostra um card informativo (sem comandos).
+- A IA não ataca acampamentos (NEW-25 no backlog).
+
 ## Névoa de guerra
 
 Névoa no estilo Warcraft II (F1-05), aplicada no próprio shader dos materiais do mundo (sem plano sobreposto — nada "atravessa" a névoa). Grade lógica 128² sobre o mapa, recalculada a 10 Hz, com 3 estados por célula:

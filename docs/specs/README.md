@@ -9,6 +9,7 @@ Cada spec tem na 3ª linha `> **Status: ...**`. Regras comuns a todas: [`_COMUM.
 | [F3-05-reparo-cancelamento.md](F3-05-reparo-cancelamento.md) | local | sonnet | Reparo/cancelar obra (5204), após F3-08 |
 | [F3-09-vitoria-estatisticas.md](F3-09-vitoria-estatisticas.md) | local | sonnet | Modos de vitória + MatchStats (5205) |
 | [F3-10-neutros-critters.md](F3-10-neutros-critters.md) | local | sonnet | Bandoleiros/critters (5206), após F3-09 |
+| [F3-11-balanceamento-base.md](F3-11-balanceamento-base.md) | local (Node, sem navegador) | sonnet | Lote IA×IA, só depois de F3-05/07/08/09/10 |
 | [F3-01-controles-rts.md](F3-01-controles-rts.md) | nuvem (item 4) | sonnet | Controles RTS + NEW-16 |
 | [F6-08-opcoes.md](F6-08-opcoes.md) | nuvem (item 5) | sonnet | Depois da F3-01 |
 | [NEW-19-ruinas.md](NEW-19-ruinas.md) | nuvem (item 6) | sonnet | Ruínas/clareiras, só render |

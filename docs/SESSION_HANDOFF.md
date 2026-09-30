@@ -66,14 +66,15 @@ Parâmetros de URL úteis: `?play&faction=orc`, `?skipPreload`, `?texq=low`, `?q
 D1 pedra permanece; petróleo só com Centro nível 2 · D2 nomes próprios (nada Blizzard) · D3 hardware fraco sem perder qualidade · D4 facções **Coroa de Aldária** / **Clãs de Gorthak** · D5 Casa/Toca mantidas, **sem ouro passivo** nas fazendas · D6 heróis na campanha **e** escaramuça (1 por jogador, Centro nível 2, opção "Sem heróis") · D7 nomes de `08_GAME_DESIGN.md` aprovados.
 
 ## 7. Próximos passos (atualizado 2026-09-30)
-Índice de todas as specs com status: **`docs/specs/README.md`**.
-1. **F3-07 pesquisas em níveis** — spec pronta (`docs/specs/F3-07-pesquisas-niveis.md`), **não disparada**. Disparar com `model: "sonnet"`, worktree (depende de F3-03 e F3-06, já no master).
-2. Nuvem (fila em `docs/HANDOFF_CLOUD.md`): F3-01 controles → F6-08 opções → NEW-19 ruínas.
-3. Escrever specs seguintes da F3: F3-08 muralhas → F3-05 reparo → F3-09 vitória/estatísticas → F3-10 neutros → F3-11 balanceamento (usa simulação headless). Depois F4 (cavalaria, cerco + NEW-23, magias, aéreo, naval/petróleo, heróis D6), F5 IA, F6 restante, F8, F9, F10.
-4. Pequenas para **haiku**: NEW-21 (rota através de floresta fechada), NEW-22/NEW-3 (textos em inglês no card), NEW-6 (ORM de texturas).
-5. Adiadas: F7-00d Lacaio e demais Blender (Sonnet 5.5, no fim); NEW-20 (dono adiou).
+Índice de specs com status: **`docs/specs/README.md`**. Coordenação e specs agora por **Sonnet 5.5** (decisão do dono).
+1. **Em andamento** (worktrees): F3-08 muralhas (5203) e F3-09 vitória/estatísticas (porta 5205; F3-05 usa 5204). Ao terminar: `git merge --no-ff`, `npm test && npm run lint && vite build && npm run smoke`, conflitos em `TASKS.md`/`UIManager.js` resolvem-se à mão (viram rotina).
+2. **Specs prontas, não disparadas** (ordem): F3-05 reparo (após F3-08) → F3-10 neutros (após F3-09) → F3-11 balanceamento (após todas; IA ainda sem dificuldade — F5).
+3. Nuvem (fila em `docs/HANDOFF_CLOUD.md`): F3-01 controles → F6-08 opções → NEW-19 ruínas.
+4. **Specs a escrever**: F4 (cavalaria F4-01, cerco F4-02 + NEW-23, mana F4-03, magias F4-04, sapadores F4-05, aéreo F4-06, naval/petróleo F4-07, heróis D6), F5 IA, F6 restante, F8, F9, F10.
+5. Pequenas para **haiku**: NEW-6 (ORM de texturas — grande, precisa de spec). NEW-3/22/21 já feitos.
+6. **Blender**: modelagem agora com **Sonnet 5.5** (decisão do dono), ainda adiada até o código estar pronto: F7-00b, F7-00d Lacaio (spec pronta), F7-09 etc. NEW-20 adiada pelo dono.
 
-Estado ao escrever: master com F3-03, F3-04, F3-06, NEW-10, NEW-17, NEW-18 mesclados; **298 testes**; nenhum agente rodando.
+Estado ao escrever: master com F3-03..F3-07, NEW-10/17/18/21/22/3 mesclados; **312 testes**.
 
 ## 8. Estado operacional ao encerrar
 - Nenhum agente rodando; dev server local parado (subir com `npx vite --port 5173` em background se precisar mostrar algo ao dono).

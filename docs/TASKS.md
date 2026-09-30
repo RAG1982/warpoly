@@ -278,7 +278,7 @@ Sonnet 5.5 escreve a spec em `docs/specs/<ID>.md`; agente **Sonnet** executa; o 
 - **Resultado**: `src/data/economy.js` (carga 10/10/8, entrada na mina 1,5 s, 1 slot ouro / 2 pedra), fila de mina em `ResourceDeposit`, estados `waitingMine/insideMine`, sem ouro passivo, Quartel requer Fazenda/Chiqueiro (`src/sim/requirements.js`, botão desabilitado com motivo), `RESOURCE_DEPLETED` + aviso PT-BR, IA constrói Fazenda antes do Quartel. Curva: 1 mina satura com ~3 trabalhadores (~385 ouro/min). 264 testes.
 
 ### F3-05 · Reparo e cancelamento de construção
-- **Status**: `TODO` · Lane GAME · Onda 4 · Dep: F2-02
+- **Status**: `TODO(spec pronta: docs/specs/F3-05-reparo-cancelamento.md)` · Lane GAME · Onda 4 · Dep: F2-02
 - **Fazer**: trabalhadores reparam construções/máquinas (custo proporcional); cancelar construção devolve 75%; vários trabalhadores aceleram a obra.
 - **Aceite**: testes manuais + unidade.
 
@@ -305,12 +305,12 @@ Sonnet 5.5 escreve a spec em `docs/specs/<ID>.md`; agente **Sonnet** executa; o 
 - **Aceite**: dados alimentam a tela F6-07.
 
 ### F3-10 · Neutros e critters
-- **Status**: `TODO` · Lane GAME · Onda 4 · Dep: F2-01
+- **Status**: `TODO(spec pronta: docs/specs/F3-10-neutros-critters.md)` · Lane GAME · Onda 4 · Dep: F2-01
 - **Fazer**: jogador neutro hostil com Acampamento de Bandidos (modelos prontos) que guarda recursos e dá recompensa; critters decorativos (ovelhas/porcos) que podem ser mortos.
 - **Aceite**: mapa com 2 acampamentos neutros jogável.
 
 ### F3-11 · Revisão de balanceamento base
-- **Status**: `TODO` · Lane GAME + QA · Onda 5 · Dep: F3-03..F3-07, F8-? headless
+- **Status**: `TODO(spec pronta: docs/specs/F3-11-balanceamento-base.md)` · Lane GAME + QA · Onda 5 · Dep: F3-03..F3-07, F8-? headless
 - **Fazer**: simulações IA×IA headless (F2-08) em lote para medir taxa de vitória por facção; ajustar dados.
 - **Aceite**: 45–55% de vitória por facção em 200 partidas IA Difícil × IA Difícil.
 

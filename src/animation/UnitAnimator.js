@@ -402,6 +402,9 @@ export class UnitAnimator {
   applyKnightFight(p, parts) {
     // Knight: Windup, explosive diagonal/horizontal slash with body torque, shield brace, recovery
     // Pure torso twist/rotation: Torso stays rock-solid at waist height with NO vertical dipping!
+    const swordRest = 0.5;
+    const mirrorX = (v, rest = 0) => 2 * rest - v;
+
     if (p < 0.35) {
       // Windup (0.0 -> 0.35) - body winds up to the right
       const t = p / 0.35;
@@ -410,12 +413,12 @@ export class UnitAnimator {
         parts.torso.rotation.y = ease * 0.45;
       }
       if (parts.armR) {
-        parts.armR.rotation.x = -ease * 1.35;
+        parts.armR.rotation.x = mirrorX(-ease * 1.35);
         parts.armR.rotation.y = ease * 0.3;
         parts.armR.rotation.z = ease * 0.2;
       }
       if (parts.sword) {
-        parts.sword.rotation.x = 0.5 - ease * 0.8;
+        parts.sword.rotation.x = mirrorX(0.5 - ease * 0.8, swordRest);
       }
       if (parts.shieldGroup) {
         parts.shieldGroup.rotation.y = -0.3 + ease * 0.55;
@@ -431,12 +434,12 @@ export class UnitAnimator {
         parts.torso.rotation.y = 0.45 - ease * 0.95; // Full torso torque to -0.5
       }
       if (parts.armR) {
-        parts.armR.rotation.x = -1.35 + ease * 2.5; // swings forward to +1.15
+        parts.armR.rotation.x = mirrorX(-1.35 + ease * 2.5); // swings forward to +1.15
         parts.armR.rotation.y = 0.3 - ease * 0.7;
         parts.armR.rotation.z = 0.2 - ease * 0.5;
       }
       if (parts.sword) {
-        parts.sword.rotation.x = -0.3 + ease * 1.6;
+        parts.sword.rotation.x = mirrorX(-0.3 + ease * 1.6, swordRest);
       }
       if (parts.shieldGroup) {
         parts.shieldGroup.rotation.y = 0.25 - ease * 0.75; // Brace backward
@@ -450,11 +453,11 @@ export class UnitAnimator {
         parts.torso.rotation.y = -0.5;
       }
       if (parts.armR) {
-        parts.armR.rotation.x = 1.15;
+        parts.armR.rotation.x = mirrorX(1.15);
         parts.armR.rotation.y = -0.4;
       }
       if (parts.sword) {
-        parts.sword.rotation.x = 1.3;
+        parts.sword.rotation.x = mirrorX(1.3, swordRest);
       }
       if (parts.shieldGroup) {
         parts.shieldGroup.rotation.y = -0.5;
@@ -467,11 +470,11 @@ export class UnitAnimator {
         parts.torso.rotation.y = -0.5 + ease * 0.5;
       }
       if (parts.armR) {
-        parts.armR.rotation.x = 1.15 - ease * 1.15;
+        parts.armR.rotation.x = mirrorX(1.15 - ease * 1.15);
         parts.armR.rotation.y = -0.4 + ease * 0.4;
       }
       if (parts.sword) {
-        parts.sword.rotation.x = 1.3 - ease * 0.8;
+        parts.sword.rotation.x = mirrorX(1.3 - ease * 0.8, swordRest);
       }
       if (parts.shieldGroup) {
         parts.shieldGroup.rotation.y = -0.5 + ease * 0.2;
@@ -607,6 +610,9 @@ export class UnitAnimator {
 
   applyVillagerFight(p, parts) {
     // Villager: Heavy two-handed tool hoist overhead and massive downward slam
+    const toolRest = 0; // toolGroup rests at 0
+    const mirrorX = (v, rest = 0) => 2 * rest - v;
+
     if (p < 0.45) {
       // Hoist Overhead (0.0 -> 0.45)
       const t = p / 0.45;
@@ -618,7 +624,7 @@ export class UnitAnimator {
         parts.head.rotation.x = -ease * 0.2;
       }
       if (parts.armR) {
-        parts.armR.rotation.x = -ease * 1.55;
+        parts.armR.rotation.x = mirrorX(-ease * 1.55);
         parts.armR.rotation.z = -ease * 0.2;
       }
       if (parts.armL) {
@@ -626,7 +632,7 @@ export class UnitAnimator {
         parts.armL.rotation.z = ease * 0.2;
       }
       if (parts.toolGroup) {
-        parts.toolGroup.rotation.x = -ease * 0.6;
+        parts.toolGroup.rotation.x = mirrorX(-ease * 0.6, toolRest);
       }
     } else if (p < 0.65) {
       // Downward Strike (0.45 -> 0.65)
@@ -639,13 +645,13 @@ export class UnitAnimator {
         parts.head.rotation.x = -0.2 + ease * 0.5;
       }
       if (parts.armR) {
-        parts.armR.rotation.x = -1.55 + ease * 2.85; // slam forward to 1.3
+        parts.armR.rotation.x = mirrorX(-1.55 + ease * 2.85); // slam forward to 1.3
       }
       if (parts.armL) {
         parts.armL.rotation.x = -1.35 + ease * 2.45;
       }
       if (parts.toolGroup) {
-        parts.toolGroup.rotation.x = -0.6 + ease * 1.6;
+        parts.toolGroup.rotation.x = mirrorX(-0.6 + ease * 1.6, toolRest);
       }
     } else if (p < 0.80) {
       // Impact shudder (0.65 -> 0.80)
@@ -653,9 +659,9 @@ export class UnitAnimator {
       if (parts.torso) {
         parts.torso.rotation.x = 0.4 + shudder;
       }
-      if (parts.armR) parts.armR.rotation.x = 1.3;
+      if (parts.armR) parts.armR.rotation.x = mirrorX(1.3);
       if (parts.armL) parts.armL.rotation.x = 1.1;
-      if (parts.toolGroup) parts.toolGroup.rotation.x = 1.0;
+      if (parts.toolGroup) parts.toolGroup.rotation.x = mirrorX(1.0, toolRest);
     } else {
       // Recovery (0.80 -> 1.0)
       const t = (p - 0.80) / 0.2;
@@ -667,19 +673,22 @@ export class UnitAnimator {
         parts.head.rotation.x = 0.3 * (1 - ease);
       }
       if (parts.armR) {
-        parts.armR.rotation.x = 1.3 * (1 - ease);
+        parts.armR.rotation.x = mirrorX(1.3 * (1 - ease));
       }
       if (parts.armL) {
         parts.armL.rotation.x = 1.1 * (1 - ease);
       }
       if (parts.toolGroup) {
-        parts.toolGroup.rotation.x = 1.0 * (1 - ease);
+        parts.toolGroup.rotation.x = mirrorX(1.0 * (1 - ease), toolRest);
       }
     }
   }
 
   applyBanditFight(p, parts) {
     // Bandit: Savage windup with spiky club, leaping lunge, brutal ground smash
+    const weaponRest = 0.5;
+    const mirrorX = (v, rest = 0) => 2 * rest - v;
+
     if (p < 0.40) {
       // Savage Windup (0.0 -> 0.40)
       const t = p / 0.40;
@@ -689,11 +698,11 @@ export class UnitAnimator {
         parts.torso.rotation.x = -ease * 0.2;
       }
       if (parts.armR) {
-        parts.armR.rotation.x = -ease * 1.65;
+        parts.armR.rotation.x = mirrorX(-ease * 1.65);
         parts.armR.rotation.y = ease * 0.35;
       }
       if (parts.weapon) {
-        parts.weapon.rotation.x = 0.5 - ease * 0.7;
+        parts.weapon.rotation.x = mirrorX(0.5 - ease * 0.7, weaponRest);
       }
       if (parts.armL) {
         parts.armL.rotation.x = ease * 0.4;
@@ -712,11 +721,11 @@ export class UnitAnimator {
         parts.torso.rotation.x = -0.2 + ease * 0.65;
       }
       if (parts.armR) {
-        parts.armR.rotation.x = -1.65 + ease * 3.0; // slam club down to +1.35
+        parts.armR.rotation.x = mirrorX(-1.65 + ease * 3.0); // slam club down to +1.35
         parts.armR.rotation.y = 0.35 - ease * 0.5;
       }
       if (parts.weapon) {
-        parts.weapon.rotation.x = -0.2 + ease * 1.5;
+        parts.weapon.rotation.x = mirrorX(-0.2 + ease * 1.5, weaponRest);
       }
       if (parts.armL) {
         parts.armL.rotation.x = 0.4 - ease * 0.7;
@@ -730,8 +739,8 @@ export class UnitAnimator {
       if (parts.torso) {
         parts.torso.rotation.x = 0.45 + shudder;
       }
-      if (parts.armR) parts.armR.rotation.x = 1.35;
-      if (parts.weapon) parts.weapon.rotation.x = 1.3;
+      if (parts.armR) parts.armR.rotation.x = mirrorX(1.35);
+      if (parts.weapon) parts.weapon.rotation.x = mirrorX(1.3, weaponRest);
       if (parts.head) parts.head.rotation.x = 0.35;
     } else {
       // Menacing recovery back to aggressive stance (0.80 -> 1.0)
@@ -742,10 +751,10 @@ export class UnitAnimator {
         parts.torso.rotation.x = 0.45 * (1 - ease) + 0.08 * ease;
       }
       if (parts.armR) {
-        parts.armR.rotation.x = 1.35 * (1 - ease);
+        parts.armR.rotation.x = mirrorX(1.35 * (1 - ease));
       }
       if (parts.weapon) {
-        parts.weapon.rotation.x = 1.3 * (1 - ease) + 0.5 * ease;
+        parts.weapon.rotation.x = mirrorX(1.3 * (1 - ease) + 0.5 * ease, weaponRest);
       }
       if (parts.head) {
         parts.head.rotation.x = 0.35 * (1 - ease);
@@ -755,6 +764,9 @@ export class UnitAnimator {
 
   applyGruntFight(p, parts) {
     // Grunt: Brutal two-handed battleaxe cleave with torso torque
+    const weaponRest = -0.78;
+    const mirrorX = (v, rest = 0) => 2 * rest - v;
+
     if (p < 0.35) {
       // Windup (0.0 -> 0.35) - heave axe back
       const t = p / 0.35;
@@ -764,7 +776,7 @@ export class UnitAnimator {
         parts.torso.rotation.x = -ease * 0.15;
       }
       if (parts.armR) {
-        parts.armR.rotation.x = -ease * 1.55;
+        parts.armR.rotation.x = mirrorX(-ease * 1.55);
         parts.armR.rotation.y = ease * 0.4;
       }
       if (parts.armL) {
@@ -772,7 +784,7 @@ export class UnitAnimator {
         parts.armL.rotation.y = ease * 0.3;
       }
       if (parts.weapon) {
-        parts.weapon.rotation.x = -0.78 - ease * 0.6;
+        parts.weapon.rotation.x = mirrorX(-0.78 - ease * 0.6, weaponRest);
       }
       if (parts.head) {
         parts.head.rotation.y = -ease * 0.25;
@@ -786,14 +798,14 @@ export class UnitAnimator {
         parts.torso.rotation.x = -0.15 + ease * 0.45;
       }
       if (parts.armR) {
-        parts.armR.rotation.x = -1.55 + ease * 2.85; // slam axe forward to 1.3
+        parts.armR.rotation.x = mirrorX(-1.55 + ease * 2.85); // slam axe forward to 1.3
         parts.armR.rotation.y = 0.4 - ease * 0.7;
       }
       if (parts.armL) {
         parts.armL.rotation.x = -1.25 + ease * 2.35;
       }
       if (parts.weapon) {
-        parts.weapon.rotation.x = -1.38 + ease * 2.5;
+        parts.weapon.rotation.x = mirrorX(-1.38 + ease * 2.5, weaponRest);
       }
       if (parts.head) {
         parts.head.rotation.y = -0.25 + ease * 0.45;
@@ -802,8 +814,8 @@ export class UnitAnimator {
       // Cleave follow-through & impact shudder (0.60 -> 0.78)
       const shudder = Math.sin((p - 0.60) * 40) * 0.02;
       if (parts.torso) parts.torso.rotation.y = -0.6 + shudder;
-      if (parts.armR) parts.armR.rotation.x = 1.3;
-      if (parts.weapon) parts.weapon.rotation.x = 1.12;
+      if (parts.armR) parts.armR.rotation.x = mirrorX(1.3);
+      if (parts.weapon) parts.weapon.rotation.x = mirrorX(1.12, weaponRest);
     } else {
       // Recovery (0.78 -> 1.0)
       const t = (p - 0.78) / 0.22;
@@ -812,14 +824,17 @@ export class UnitAnimator {
         parts.torso.rotation.y = -0.6 * (1 - ease);
         parts.torso.rotation.x = 0.3 * (1 - ease);
       }
-      if (parts.armR) parts.armR.rotation.x = 1.3 * (1 - ease);
+      if (parts.armR) parts.armR.rotation.x = mirrorX(1.3 * (1 - ease));
       if (parts.armL) parts.armL.rotation.x = 1.1 * (1 - ease);
-      if (parts.weapon) parts.weapon.rotation.x = 1.12 * (1 - ease) - 0.78 * ease;
+      if (parts.weapon) parts.weapon.rotation.x = mirrorX(1.12 * (1 - ease) - 0.78 * ease, weaponRest);
     }
   }
 
   applyAxethrowerFight(p, parts) {
     // Troll Axethrower: Acrobatic ranged axe windup, throw fling, and reload
+    const weaponRRest = -0.78;
+    const mirrorX = (v, rest = 0) => 2 * rest - v;
+
     if (p < 0.38) {
       // Windup (0.0 -> 0.38) - draws right arm back behind head
       const t = p / 0.38;
@@ -832,7 +847,7 @@ export class UnitAnimator {
         parts.head.rotation.y = -ease * 0.35; // keep eyes locked on target
       }
       if (parts.armR) {
-        parts.armR.rotation.x = -ease * 1.85; // rear back axe
+        parts.armR.rotation.x = mirrorX(-ease * 1.85); // rear back axe
         parts.armR.rotation.z = ease * 0.35;
       }
       if (parts.armL) {
@@ -840,7 +855,7 @@ export class UnitAnimator {
         parts.armL.rotation.z = -ease * 0.25;
       }
       if (parts.weaponR) {
-        parts.weaponR.rotation.x = -0.78 - ease * 0.5;
+        parts.weaponR.rotation.x = mirrorX(-0.78 - ease * 0.5, weaponRRest);
       }
     } else if (p < 0.60) {
       // Explosive Whip Throw (0.38 -> 0.60)
@@ -854,18 +869,18 @@ export class UnitAnimator {
         parts.head.rotation.y = -0.35 + ease * 0.45;
       }
       if (parts.armR) {
-        parts.armR.rotation.x = -1.85 + ease * 3.25; // snap forward to 1.4
+        parts.armR.rotation.x = mirrorX(-1.85 + ease * 3.25); // snap forward to 1.4
         parts.armR.rotation.z = 0.35 - ease * 0.45;
       }
       if (parts.armL) {
         parts.armL.rotation.x = 0.75 - ease * 1.25; // counter-whip back
       }
       if (parts.weaponR) {
-        parts.weaponR.rotation.x = -1.28 + ease * 2.8;
+        parts.weaponR.rotation.x = mirrorX(-1.28 + ease * 2.8, weaponRRest);
       }
     } else if (p < 0.78) {
       // Release follow-through & draw next axe
-      if (parts.armR) parts.armR.rotation.x = 1.4;
+      if (parts.armR) parts.armR.rotation.x = mirrorX(1.4);
       if (parts.torso) parts.torso.rotation.y = -0.4;
     } else {
       // Reset to agile ready crouch (0.78 -> 1.0)
@@ -879,19 +894,22 @@ export class UnitAnimator {
         parts.head.rotation.y = 0.1 * (1 - ease);
       }
       if (parts.armR) {
-        parts.armR.rotation.x = 1.4 * (1 - ease);
+        parts.armR.rotation.x = mirrorX(1.4 * (1 - ease));
       }
       if (parts.armL) {
         parts.armL.rotation.x = -0.5 * (1 - ease);
       }
       if (parts.weaponR) {
-        parts.weaponR.rotation.x = 1.52 * (1 - ease) - 0.78 * ease;
+        parts.weaponR.rotation.x = mirrorX(1.52 * (1 - ease) - 0.78 * ease, weaponRRest);
       }
     }
   }
 
   applyOgreFight(p, parts) {
     // Ogre: Devastating two-handed overhead tree-trunk club ground slam
+    const weaponRest = -0.78;
+    const mirrorX = (v, rest = 0) => 2 * rest - v;
+
     if (p < 0.42) {
       // Hoist Overhead (0.0 -> 0.42)
       const t = p / 0.42;
@@ -903,7 +921,7 @@ export class UnitAnimator {
         parts.head.rotation.x = -ease * 0.25;
       }
       if (parts.armR) {
-        parts.armR.rotation.x = -ease * 1.75;
+        parts.armR.rotation.x = mirrorX(-ease * 1.75);
         parts.armR.rotation.z = -ease * 0.3;
       }
       if (parts.armL) {
@@ -911,7 +929,7 @@ export class UnitAnimator {
         parts.armL.rotation.z = ease * 0.3;
       }
       if (parts.weapon) {
-        parts.weapon.rotation.x = -0.78 - ease * 0.8;
+        parts.weapon.rotation.x = mirrorX(-0.78 - ease * 0.8, weaponRest);
       }
     } else if (p < 0.65) {
       // Earth Shattering Slam (0.42 -> 0.65)
@@ -924,28 +942,28 @@ export class UnitAnimator {
         parts.head.rotation.x = -0.25 + ease * 0.65;
       }
       if (parts.armR) {
-        parts.armR.rotation.x = -1.75 + ease * 3.25; // smash down to 1.5
+        parts.armR.rotation.x = mirrorX(-1.75 + ease * 3.25); // smash down to 1.5
       }
       if (parts.armL) {
         parts.armL.rotation.x = -1.55 + ease * 2.85;
       }
       if (parts.weapon) {
-        parts.weapon.rotation.x = -1.58 + ease * 2.9;
+        parts.weapon.rotation.x = mirrorX(-1.58 + ease * 2.9, weaponRest);
       }
     } else if (p < 0.82) {
       // Impact shudder
       const shudder = Math.sin((p - 0.65) * 35) * 0.035;
       if (parts.torso) parts.torso.rotation.x = 0.5 + shudder;
-      if (parts.armR) parts.armR.rotation.x = 1.5;
+      if (parts.armR) parts.armR.rotation.x = mirrorX(1.5);
     } else {
       // Heavy recovery
       const t = (p - 0.82) / 0.18;
       const ease = t * (2 - t);
       if (parts.torso) parts.torso.rotation.x = 0.5 * (1 - ease);
       if (parts.head) parts.head.rotation.x = 0.4 * (1 - ease);
-      if (parts.armR) parts.armR.rotation.x = 1.5 * (1 - ease);
+      if (parts.armR) parts.armR.rotation.x = mirrorX(1.5 * (1 - ease));
       if (parts.armL) parts.armL.rotation.x = 1.3 * (1 - ease);
-      if (parts.weapon) parts.weapon.rotation.x = 1.32 * (1 - ease) - 0.78 * ease;
+      if (parts.weapon) parts.weapon.rotation.x = mirrorX(1.32 * (1 - ease) - 0.78 * ease, weaponRest);
     }
   }
 
@@ -955,6 +973,10 @@ export class UnitAnimator {
     const cycle = (time * 5.0) % (Math.PI * 2);
     const strike = Math.sin(cycle);
     const forwardLean = 0.18;
+    const mirrorX = (v, rest = 0) => 2 * rest - v;
+    const toolRest = 0;
+    const swordRest = 0.5;
+    const weaponRest = 0.5;
 
     if (parts.torso) {
       parts.torso.rotation.x = forwardLean + strike * 0.12;
@@ -967,20 +989,20 @@ export class UnitAnimator {
 
     if (parts.armR) {
       // Swings forward and back in rhythm
-      parts.armR.rotation.x = strike * 0.85;
+      parts.armR.rotation.x = mirrorX(strike * 0.85);
     }
     if (parts.armL) {
       parts.armL.rotation.x = -strike * 0.35;
     }
 
     if (parts.toolGroup) {
-      parts.toolGroup.rotation.x = strike * 0.9;
+      parts.toolGroup.rotation.x = mirrorX(strike * 0.9, toolRest);
     }
     if (parts.sword) {
-      parts.sword.rotation.x = strike * 0.8;
+      parts.sword.rotation.x = mirrorX(strike * 0.8, swordRest);
     }
     if (parts.weapon) {
-      parts.weapon.rotation.x = strike * 0.8;
+      parts.weapon.rotation.x = mirrorX(strike * 0.8, weaponRest);
     }
   }
 

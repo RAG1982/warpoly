@@ -42,6 +42,7 @@ PALETTE = {
     'skin': dict(base='#eab08a', var='#d99a74', var_scale=6.0, var_amt=0.5, fine=0.05, top=0.2,
                  ao=(0.2, 0.5), edge='#f8d0b0', edge_amt=0.25, edge_r=0.02),
     'cheek': dict(base='#e58f7c', var='#d97b68', var_scale=8.0, fine=0.04, top=0.2, ao=(0.2, 0.4)),
+    'lid': dict(base='#c98f6e', var='#b97c5c', var_scale=12.0, fine=0.04, top=0.2, ao=(0.0, 0.2)),
     'stubble': dict(base='#b8866a', var='#a3735a', var_scale=30.0, var_amt=1.0, fine=0.3, fine_scale=90.0,
                     top=0.15, ao=(0.2, 0.4)),
     'hair': dict(base='#5a3a20', var='#3c2412', var_scale=12.0, fine=0.18, top=0.25, ao=(0.2, 0.55),
@@ -123,14 +124,22 @@ def build_torso(mats, root):
     for sx in (-1, 1):
         mb.add(prim_box(0.055, 0.15, 0.03), 'linen', M((sx * 0.055, 0.28, 0.145), (-10, 0, sx * -24)), bevel=0.008)
     stitches(mb, (-0.055, 0.19, 0.155), (0.055, 0.19, 0.155), 3, 'leather_dk', size=(0.02, 0.008, 0.008))
-    # ombros: costura da cava (fios de linha)
+    # costuras verticais da túnica nos flancos + cordão do decote
+    for sx in (-1, 1):
+        stitches(mb, (sx * 0.272, 0.12, 0.06), (sx * 0.30, -0.30, 0.06), 6, 'thread', size=(0.022, 0.007, 0.007),
+                 hint=(sx, 0, 0))
+    tube(mb, [(-0.05, 0.30, 0.148), (-0.02, 0.255, 0.165), (0.0, 0.22, 0.17)], [0.007] * 3, 'leather_dk', 4, smooth=50)
+    tube(mb, [(0.05, 0.30, 0.148), (0.02, 0.255, 0.165), (0.0, 0.22, 0.17)], [0.007] * 3, 'leather_dk', 4, smooth=50)
 
     # avental de tecido (cor de time): peitilho + saia, com dobras
     mb.add(cloth_panel((-0.135, 0.205, 0.198), (0.135, 0.205, 0.198), (-0.20, -0.12, 0.222), (0.20, -0.12, 0.222),
                        nx=4, ny=3, thick=0.03, bulge=(0, 0, 0.012), wave=0.006, jag=0.0), 'team', smooth=45)
     mb.add(cloth_panel((-0.20, -0.14, 0.235), (0.20, -0.14, 0.235), (-0.245, -0.55, 0.265), (0.245, -0.55, 0.265),
                        nx=5, ny=4, thick=0.03, bulge=(0, 0, 0.04), wave=0.02, jag=0.03), 'team', smooth=50)
-    # bainha do avental (fita de linho) + costuras
+    # bainha do avental: pontos e remendo de pano no canto
+    stitches(mb, (-0.22, -0.50, 0.262), (0.22, -0.50, 0.262), 8, 'thread', size=(0.026, 0.007, 0.007))
+    mb.add(prim_box(0.085, 0.085, 0.012), 'patch_b', M((0.12, -0.42, 0.262), (0, 0, -10)), bevel=0.003)
+    stitches(mb, (0.08, -0.46, 0.27), (0.16, -0.47, 0.27), 3, 'thread', size=(0.018, 0.006, 0.006))
     # bolso de couro com pontos, lápis e chave
     mb.add(prim_box(0.20, 0.13, 0.03, taper=(1.0, 1.0)), 'leather', M((0, -0.02, 0.222)), bevel=0.008)
     mb.add(prim_box(0.21, 0.035, 0.036), 'leather_dk', M((0, 0.035, 0.226)), bevel=0.006)
@@ -192,18 +201,20 @@ def build_head(mats, root):
     mb.add(prim_sphere(0.115, 0.075, 0.105, 10, 4), 'skin', M((0, -0.125, 0.06)), smooth=80)
     # olhos: branco + íris âmbar + pupila + brilho
     for sx in (-1, 1):
-        mb.add(prim_sphere(0.036, 0.031, 0.014, 8, 3), 'eye_white', M((sx * 0.066, 0.005, 0.166), (0, sx * 8, 0)),
+        mb.add(prim_sphere(0.030, 0.019, 0.012, 8, 3), 'eye_white', M((sx * 0.066, 0.002, 0.167), (0, sx * 8, 0)),
                smooth=80)
-        mb.add(prim_sphere(0.026, 0.026, 0.008, 12, 2), 'iris', M((sx * 0.063, 0.003, 0.178), (0, sx * 6, 0)), smooth=80)
-        mb.add(prim_sphere(0.013, 0.013, 0.006, 10, 2), 'pupil', M((sx * 0.063, 0.003, 0.185)), smooth=80)
-        mb.add(prim_sphere(0.005, 0.005, 0.004, 4, 2), 'eye_white', M((sx * 0.055, 0.012, 0.19)), smooth=80)
-        # pálpebra superior sutil
-        mb.add(prim_box(0.075, 0.014, 0.02), 'skin', M((sx * 0.066, 0.033, 0.168), (0, 0, sx * -6)), bevel=0.004)
-        # sobrancelha espessa (levemente arqueada, amigável)
-        mb.add(prim_box(0.088, 0.03, 0.03, taper=(0.9, 0.8)), 'hair',
-               M((sx * 0.07, 0.062, 0.167), (-8, sx * 8, sx * -10)), bevel=0.008)
+        mb.add(prim_sphere(0.016, 0.016, 0.006, 10, 2), 'iris', M((sx * 0.062, 0.0, 0.177), (0, sx * 6, 0)), smooth=80)
+        mb.add(prim_sphere(0.008, 0.008, 0.004, 8, 2), 'pupil', M((sx * 0.062, 0.0, 0.181)), smooth=80)
+        mb.add(prim_sphere(0.004, 0.004, 0.003, 4, 2), 'eye_white', M((sx * 0.056, 0.006, 0.184)), smooth=80)
+        # pálpebra superior pesada (olhar cansado) cobrindo o topo da íris + prega
+        mb.add(prim_box(0.072, 0.016, 0.022), 'skin', M((sx * 0.066, 0.016, 0.171), (-8, 0, sx * -7)), bevel=0.004)
+        # olheira / pálpebra inferior
+        mb.add(prim_box(0.060, 0.012, 0.014), 'lid', M((sx * 0.065, -0.020, 0.165), (0, 0, sx * 5)), bevel=0.003)
+        # sobrancelha fina, arqueada e caída nas pontas (amigável e cansado)
+        mb.add(prim_box(0.080, 0.018, 0.022, taper=(0.9, 0.8)), 'hair',
+               M((sx * 0.07, 0.055, 0.167), (-8, sx * 8, sx * -12)), bevel=0.005)
         # bochecha corada
-        mb.add(prim_sphere(0.045, 0.032, 0.022, 5, 2), 'cheek', M((sx * 0.105, -0.07, 0.14), (0, sx * 30, 0)),
+        mb.add(prim_sphere(0.034, 0.024, 0.018, 5, 2), 'cheek', M((sx * 0.105, -0.07, 0.14), (0, sx * 30, 0)),
                smooth=80)
     # nariz batatudo: ponte + bulbo + narinas
     mb.add(prim_box(0.035, 0.08, 0.04, taper=(0.75, 0.8)), 'skin', M((0, -0.012, 0.172), (-6, 0, 0)), bevel=0.008)
@@ -284,6 +295,11 @@ def build_arm(mats, root, side):
     mb.add(prim_rings([ring_h(-0.19, 0.108, 0.108, 10, cx=s * 0.02, cz=0.02), ring_h(-0.215, 0.116, 0.116, 10, cx=s * 0.02, cz=0.022),
                        ring_h(-0.245, 0.104, 0.104, 10, cx=s * 0.02, cz=0.026)]), 'tunic', smooth=60)
     stitches(mb, (s * 0.02 - 0.12, -0.215, 0.02), (s * 0.02 + 0.12, -0.215, 0.02), 1, 'thread')
+    # remendo de cotovelo + pontos na manga
+    mb.add(prim_box(0.085, 0.06, 0.012), 'patch_a' if s > 0 else 'patch_b', M((s * 0.02, -0.12, -0.092), (0, 0, s * 6)),
+           bevel=0.003)
+    stitches(mb, (s * 0.02 - 0.03, -0.09, -0.099), (s * 0.02 + 0.03, -0.09, -0.099), 3, 'thread',
+             size=(0.018, 0.006, 0.006), hint=(0, 0, -1))
     # antebraço nu com pelinhos (pele)
     if s > 0:
         fa = [(s * 0.02, -0.24, 0.025), (s * 0.02, -0.31, 0.075), (s * 0.02, -0.365, 0.135)]

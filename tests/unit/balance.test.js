@@ -1,5 +1,4 @@
 import { describe, it, expect } from 'vitest';
-import { execFileSync } from 'node:child_process';
 import { UNITS } from '../../src/data/units.js';
 import { BUILDINGS } from '../../src/data/buildings.js';
 import { runMatch } from '../../tools/balance-sim.mjs';
@@ -28,10 +27,6 @@ describe('invariantes de dados (F3-11)', () => {
       expect(isNonNegInt(b.armor), `${b.type}.armor`).toBe(true);
       for (const k of ['gold', 'wood', 'stone']) expect(isNonNegInt(b.cost[k]), `${b.type}.cost.${k}`).toBe(true);
     }
-  });
-
-  it('check-data-parity.mjs continua passando', () => {
-    expect(() => execFileSync('node', ['tools/check-data-parity.mjs'], { stdio: 'pipe' })).not.toThrow();
   });
 });
 

@@ -742,6 +742,7 @@ export class UIManager {
 
   updateBuildingCosts(building) {
     if (!this.bldTrainButtons) return;
+    const ownerId = building.ownerId;
 
     const isForge = building.type === 'forge' || building.type === 'orc_forge';
     if (isForge) {
@@ -749,22 +750,35 @@ export class UIManager {
         const cfg = UPGRADE_CONFIG[upgId];
         if (!cfg) return;
         const costContainer = this.bldTrainButtons.querySelector(`[data-cost-upgrade="${upgId}"]`);
-        if (!costContainer) return;
+        const btn = this.bldTrainButtons.querySelector(`[data-upgrade="${upgId}"]`);
 
         const isResearched = this.gm.isUpgradeResearched(upgId, 'player');
         if (isResearched) {
-          costContainer.innerHTML = '<span class="bld-cost-researched">✓ Pesquisado</span>';
+          if (costContainer) costContainer.innerHTML = '<span class="bld-cost-researched">✓ Pesquisado</span>';
           return;
         }
 
         const isResearchingThis = building.currentResearch && building.currentResearch.id === upgId;
         const isResearchingAny = this.gm.isUpgradeResearching(upgId, 'player');
         if (isResearchingThis || isResearchingAny) {
-          costContainer.innerHTML = '<span class="bld-cost-researching">🔨 Forjando...</span>';
+          if (costContainer) costContainer.innerHTML = '<span class="bld-cost-researching">🔨 Forjando...</span>';
           return;
         }
 
-        costContainer.innerHTML = buildCostHtml(cfg.cost, this.gm.resources);
+        // F3-06: requisitos generalizados (ex.: {hq:2}) — botão desabilitado com o motivo.
+        const missing = missingUpgradeRequirements(ownerId, upgId, this.gm);
+        if (btn) {
+          if (missing.length > 0) {
+            btn.disabled = true;
+            btn.classList.add('bld-requirement-missing');
+            btn.title = `Requer: ${formatRequirementList(missing)}`;
+          } else {
+            btn.disabled = false;
+            btn.classList.remove('bld-requirement-missing');
+          }
+        }
+
+        if (costContainer) costContainer.innerHTML = buildCostHtml(cfg.cost, this.gm.resources);
       });
       return;
     }
@@ -776,9 +790,23 @@ export class UIManager {
       const cfg = UNIT_TRAIN_CONFIG[unitType];
       if (!cfg) return;
       const costContainer = this.bldTrainButtons.querySelector(`[data-cost-unit="${unitType}"]`);
-      if (!costContainer) return;
+      const btn = this.bldTrainButtons.querySelector(`[data-train="${unitType}"]`);
 
-      costContainer.innerHTML = buildCostHtml(cfg.cost, this.gm.resources);
+      // F3-06: requisitos generalizados de treino (`UNITS[type].requires`) — botão desabilitado
+      // com o motivo no tooltip (mudança mínima: cada construção existente segue sem `requires`).
+      const missing = missingUnitRequirements(ownerId, unitType, this.gm);
+      if (btn) {
+        if (missing.length > 0) {
+          btn.disabled = true;
+          btn.classList.add('bld-requirement-missing');
+          btn.title = `Requer: ${formatRequirementList(missing)}`;
+        } else {
+          btn.disabled = false;
+          btn.classList.remove('bld-requirement-missing');
+        }
+      }
+
+      if (costContainer) costContainer.innerHTML = buildCostHtml(cfg.cost, this.gm.resources);
     });
   }
 

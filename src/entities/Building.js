@@ -213,6 +213,8 @@ export class Building {
       case 'orc_house': return ModelFactory.createOrcHouse ? ModelFactory.createOrcHouse() : ModelFactory.createCottage();
       case 'orc_forge': return ModelFactory.createOrcForge ? ModelFactory.createOrcForge() : ModelFactory.createOrcBarracks();
       case 'forge': return ModelFactory.createHumanForge ? ModelFactory.createHumanForge() : ModelFactory.createBarracks();
+      case 'stable': return ModelFactory.createStable();
+      case 'ogre_den': return ModelFactory.createOgreDen();
       case 'barracks': return ModelFactory.createBarracks();
       case 'orc_barracks': return ModelFactory.createOrcBarracks();
       case 'watchtower': return ModelFactory.createWatchtower();

@@ -20,6 +20,9 @@ import {
   createOrcHouse,
   createOrcForge,
   createHumanForge,
+  createStable,
+  createOgreDen,
+  createCavalier,
   createTree,
   createKnight,
   createArcher,
@@ -50,6 +53,8 @@ import { GLB_MODELS, glbEnabled, glbTemplates, loadGlbTemplates, setTeamColor } 
  * Temporarily clears userData containing circular / non-serializable Object3D references
  * to avoid Three.js JSON.stringify warnings, while preserving shared GPU geometries and materials.
  */
+const HORSE_LEG_NAMES = ['HorseLegFL', 'HorseLegFR', 'HorseLegBL', 'HorseLegBR'];
+
 function cloneModel(template) {
   const savedData = [];
   let hasSkinnedMesh = false;
@@ -162,6 +167,9 @@ export class ModelFactory {
     ud.drawnAxe = clone.getObjectByName('DrawnAxe') || ud.drawnAxe;
     ud.horn = clone.getObjectByName('Horn') || ud.horn;
     ud.mohawk = clone.getObjectByName('Mohawk') || ud.mohawk;
+    // F4-01: pernas do cavalo (cavalier) — balançam em fase alternada no `UnitAnimator`
+    const horseLegs = HORSE_LEG_NAMES.map(n => clone.getObjectByName(n));
+    if (horseLegs.every(Boolean)) ud.horseLegs = horseLegs;
 
     // Archer dynamic bow string closure rebinding
     const sTop = clone.getObjectByName('BowStringTop');
@@ -300,6 +308,8 @@ export class ModelFactory {
       case 'orc_house': return this.createOrcHouse();
       case 'orc_forge': return this.createOrcForge();
       case 'forge': return this.createHumanForge();
+      case 'stable': return this.createStable();
+      case 'ogre_den': return this.createOgreDen();
       case 'wall_human': return createWallSegment('human');
       case 'wall_orc': return createWallSegment('orc');
       case 'barracks': return this.createBarracks();
@@ -347,6 +357,14 @@ export class ModelFactory {
 
   static createBanditCamp() {
     return this.getOrCreateModel('bandit_camp', createBanditCamp);
+  }
+
+  static createStable() {
+    return this.getOrCreateModel('stable', createStable);
+  }
+
+  static createOgreDen() {
+    return this.getOrCreateModel('ogre_den', createOgreDen);
   }
 
   static createHumanForge() {
@@ -424,6 +442,11 @@ export class ModelFactory {
     return this._glbOr('knight', () => this.getOrCreateModel('knight', createKnight, 'knight'));
   }
 
+  /** F4-01: cavaleiro (modelo procedural: cavalo + tronco do Espadachim). */
+  static createCavalier() {
+    return this.getOrCreateModel('cavalier', createCavalier, 'cavalier');
+  }
+
   static createArcher() {
     return this._glbOr('archer', () => this.getOrCreateModel('archer', createArcher, 'archer'));
   }
@@ -468,6 +491,7 @@ export class ModelFactory {
       case 'grunt': return this.createGrunt();
       case 'axethrower': return this.createAxethrower();
       case 'ogre': return this.createOgre();
+      case 'cavalier': return this.createCavalier();
       default: return this.createVillager();
     }
   }

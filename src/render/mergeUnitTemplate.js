@@ -38,7 +38,8 @@ import { bakeGeometry, unifyAttributes, pruneEmpty } from './mergeStaticTemplate
 export const ANIMATED_NODE_NAMES = [
   'Torso', 'Head', 'ArmL', 'ArmR', 'LegL', 'LegR', 'Sword', 'ShieldGroup', 'Bow', 'Weapon',
   'ToolGroup', 'Axe', 'Pickaxe', 'Hammer', 'Pack', 'WoodBundle', 'GoldSack', 'Plume', 'DrawnArrow',
-  'WeaponL', 'WeaponR', 'DrawnAxe', 'Horn', 'Mohawk'
+  'WeaponL', 'WeaponR', 'DrawnAxe', 'Horn', 'Mohawk',
+  'HorseLegFL', 'HorseLegFR', 'HorseLegBL', 'HorseLegBR'
 ];
 
 /** Nunca mesclar: reposicionadas por `updateBowString` a cada quadro. */

@@ -10,7 +10,10 @@
  * - visionRadius  Raio revelado na névoa de guerra.
  * - healthBarHeight  Altura do topo do modelo (a barra de vida fica 0,8 acima).
  * - tower         { range, damage, cooldown, projectile, projectileOriginY } ou null.
- * - passiveIncome { resource, amount, interval } ou null.
+ * - passiveIncome { resource, amount, interval } ou null (F3-04: sempre null — ouro só sai de
+ *   mina/pedreira; campo mantido no schema para não quebrar `getBuildingDef`/`Building.simUpdate`).
+ * - requires      Tipos de construção que o dono precisa ter concluída (≥1) para erguer esta
+ *                  (F3-04, `src/sim/requirements.js`); [] ou ausente = sem requisito.
  * - trains        Tipos de unidade treináveis (ordem = ordem dos botões na HUD).
  * - dropoff       Recursos aceitos como ponto de entrega ([] = não é ponto de entrega).
  * - icon, description.
@@ -91,7 +94,7 @@ export const BUILDINGS = {
     visionRadius: 14,
     healthBarHeight: 4.5,
     tower: null,
-    passiveIncome: { resource: 'gold', amount: 3, interval: 6.0 },
+    passiveIncome: null,
     trains: [],
     dropoff: [],
     icon: '/icoFazenda.svg',
@@ -111,6 +114,7 @@ export const BUILDINGS = {
     healthBarHeight: 7.0,
     tower: null,
     passiveIncome: null,
+    requires: ['farm'],
     trains: ['archer', 'knight'],
     dropoff: [],
     icon: '/icoQuartel.svg',
@@ -207,7 +211,7 @@ export const BUILDINGS = {
     visionRadius: 14,
     healthBarHeight: 4.8,
     tower: null,
-    passiveIncome: { resource: 'gold', amount: 3, interval: 6.0 },
+    passiveIncome: null,
     trains: [],
     dropoff: [],
     icon: '/icoPorco.svg',
@@ -246,6 +250,7 @@ export const BUILDINGS = {
     healthBarHeight: 7.5,
     tower: null,
     passiveIncome: null,
+    requires: ['pig_farm'],
     trains: ['grunt', 'axethrower', 'ogre'],
     dropoff: [],
     icon: '/icoQuartelOrc.svg',

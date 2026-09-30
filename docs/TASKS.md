@@ -48,7 +48,7 @@
 ---
 
 ## Fluxo de execução atual (2026-09-28)
-Opus escreve a spec em `docs/specs/<ID>.md`; agente **Sonnet** executa; Opus revisa relatório + testes e faz o merge. Tarefas de arte no Blender (F7-*) **adiadas até o código estar pronto**.
+Sonnet 5.5 escreve a spec em `docs/specs/<ID>.md`; agente **Sonnet** executa; o coordenador revisa relatório + testes e faz o merge. Tarefas de arte no Blender (F7-*) **adiadas até o código estar pronto**.
 
 | Spec pronta | Tarefa | Executor |
 |---|---|---|
@@ -63,7 +63,7 @@ Opus escreve a spec em `docs/specs/<ID>.md`; agente **Sonnet** executa; Opus rev
 | `docs/specs/F2-05-mapas-dados.md` | F2-05 + B16 — **DONE** | sonnet (local) |
 | `docs/specs/F3-01-controles-rts.md` | F3-01 + NEW-16 — **nuvem** | sonnet (claude.ai/code) |
 | `docs/specs/F6-08-opcoes.md` | F6-08 — **nuvem**, após F3-01 | sonnet (claude.ai/code) |
-| `docs/specs/F7-00d-lacaio-blender.md` | F7-00d Lacaio no Blender — **ADIADA** (modelagem só com Opus; cancelada a execução por Sonnet) | opus (futuro) |
+| `docs/specs/F7-00d-lacaio-blender.md` | F7-00d Lacaio no Blender — **ADIADA** (modelagem por Sonnet 5.5 no fim) | sonnet 5.5 (futuro) |
 | `docs/specs/F3-04-economia.md` | F3-04 economia WC2 — **DONE (5b8a72e)**; toca GameManager/Unit/Building/ai → não vai para a nuvem | sonnet (local) |
 | `docs/specs/F3-03-combate.md` | F3-03 — spec pronta; **local, depois da F3-04** | sonnet (local) |
 | `docs/specs/F3-07-pesquisas-niveis.md` | F3-07 — spec pronta, **DOING** (sonnet, 2026-09-30) | sonnet (local) |

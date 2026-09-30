@@ -14,7 +14,7 @@
 - Máquina: 32 GB RAM, GPU AMD RX 7600 XT, Linux. Blender 5.2.1 em `/home/rafael/Downloads/blender-5.2.1-linux-x64/blender`.
 
 ## 2. Regras de trabalho (decididas pelo dono — obrigatórias)
-1. **Opus (a sessão coordenadora) só planeja e escreve especificações.** Não implementa código (exceto correções operacionais de 1–3 linhas em ferramentas, ex. `tools/safe-run.sh`).
+1. **Sonnet 5.5 (a sessão coordenadora, decisão do dono 2026-09-30) planeja e escreve especificações.** Não implementa código (exceto correções operacionais de 1–3 linhas em ferramentas, ex. `tools/safe-run.sh`).
 2. **Implementação sempre por agentes com modelo menor**, via ferramenta `Agent`:
    - `model: "sonnet"` para tarefas normais de código;
    - `model: "haiku"` para tarefas mecânicas/pequenas (ex.: F0-08, F7-00c funcionaram bem);
@@ -23,7 +23,7 @@
      ```
      Projeto WarPoly, em /home/rafael/warpoly. Você está numa git worktree isolada. Primeiro rode `git merge master` (confira que contém <ID-anterior> com `git log --oneline | grep <ID>`). Depois leia `CLAUDE.md`, `docs/specs/_COMUM.md` e `docs/specs/<ARQUIVO>.md` e execute a spec <ID> literalmente. Escreva em PT-BR. Faça commits intermediários ("<ID> wip: ...") a cada etapa concluída. Atenção: `npm run smoke` e `npm run bench` já chamam tools/safe-run.sh por dentro — rode-os direto, sem envolver em outro safe-run. Entregue commit final e relatório curto.
      ```
-3. **Modelagem no Blender: somente Opus, nunca Sonnet/Haiku** (reafirmado pelo dono). Adiada até todo o código estar pronto (F7-00b, F7-00d Lacaio — spec pronta, F7-09 e demais ART em `ADIADA`).
+3. **Modelagem no Blender: Sonnet 5.5, nunca Haiku** (dono revogou a regra "só Opus" em 2026-09-30). Adiada até todo o código estar pronto (F7-00b, F7-00d Lacaio — spec pronta, F7-09 e demais ART em `ADIADA`).
 4. **Máximo 3 agentes em paralelo.** Evite dois agentes editando os mesmos arquivos (principalmente `GameManager.js`, `Unit.js`, `Building.js`, `UIManager.js`, `InputManager.js`).
 5. **Recursos da máquina** (a máquina já travou por OOM): todo navegador/Playwright/Blender/bench roda via `tools/safe-run.sh` (trava global, 12 GB, sem swap). `tools/safe-run.sh` é **reentrante** (variável `WARPOLY_HEAVY_LOCK_HELD`). Scripts de navegador abortam sem GPU real (`tools/lib/assertGpu.mjs`). Nunca use `ALLOW_SOFTWARE_GL=1` em agentes.
 
@@ -71,7 +71,7 @@ D1 pedra permanece; petróleo só com Centro nível 2 · D2 nomes próprios (nad
 2. Nuvem (fila em `docs/HANDOFF_CLOUD.md`): F3-01 controles → F6-08 opções → NEW-19 ruínas.
 3. Escrever specs seguintes da F3: F3-08 muralhas → F3-05 reparo → F3-09 vitória/estatísticas → F3-10 neutros → F3-11 balanceamento (usa simulação headless). Depois F4 (cavalaria, cerco + NEW-23, magias, aéreo, naval/petróleo, heróis D6), F5 IA, F6 restante, F8, F9, F10.
 4. Pequenas para **haiku**: NEW-21 (rota através de floresta fechada), NEW-22/NEW-3 (textos em inglês no card), NEW-6 (ORM de texturas).
-5. Adiadas: F7-00d Lacaio e demais Blender (só Opus, no fim); NEW-20 (dono adiou).
+5. Adiadas: F7-00d Lacaio e demais Blender (Sonnet 5.5, no fim); NEW-20 (dono adiou).
 
 Estado ao escrever: master com F3-03, F3-04, F3-06, NEW-10, NEW-17, NEW-18 mesclados; **298 testes**; nenhum agente rodando.
 

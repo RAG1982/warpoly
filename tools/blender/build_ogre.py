@@ -23,6 +23,9 @@ import common as C  # noqa: E402
 from common import (MeshBuilder, M, prim_box, prim_rings, ring_h, prim_cyl, prim_cone,  # noqa: E402
                     prim_sphere, prim_extrude, limb_rings, bezier)
 
+import worker_common as W  # noqa: E402
+W.install_bevel_budget(0.05)
+
 TORSO_PIVOT = (0.0, 1.5, 0.0)
 HEAD_PIVOT = (0.0, 0.92, 0.22)       # relativo ao Torso
 ARM_PIVOT = (0.98, 0.66, 0.0)        # relativo ao Torso (x espelhado)
@@ -205,15 +208,20 @@ def build_torso(mats, root):
     chain(mb, [(0.52, -0.62, 0.76), (0.58, -0.76, 0.72)], link=0.10)
     mb.add(prim_box(0.16, 0.17, 0.14), 'leather', M((0.60, -0.90, 0.68), (0, 0, -8)), bevel=0.03, smooth=30)
 
-    # colar de presas/dentes de osso no pescoço e crânios extras no cinto
+    # colar de presas/dentes de osso e corrente grossa, bem visível sobre o peitoral (em V)
+    NK = []
     for k in range(9):
         a = math.radians(-80 + k * 20)
-        px, pz = math.sin(a) * 0.46, 0.30 + math.cos(a) * 0.20
-        py = 0.86 - 0.10 * math.cos(a)
-        mb.add(prim_cone(0.045, 0.17, 4), 'bone', M((px, py, pz), (180 - 12, 0, 0)), smooth=40)
-    mb.add(prim_rings(limb_rings([(math.sin(math.radians(-80 + k * 20)) * 0.44, 0.86 - 0.08 * math.cos(math.radians(-80 + k * 20)),
-                                   0.29 + math.cos(math.radians(-80 + k * 20)) * 0.19) for k in range(9)], [0.022] * 9, 5),
-                      cap0=True, cap1=True), 'leather', smooth=40)
+        px, pz = math.sin(a) * 0.52, 0.52 + math.cos(a) * 0.16
+        py = 0.80 - 0.20 * math.cos(a)
+        NK.append((px * 0.94, py + 0.06, pz - 0.03))
+        mb.add(prim_cone(0.05, 0.22 if k == 4 else 0.17, 4), 'bone', M((px, py - 0.02, pz), (180 - 12, 0, 0)), smooth=40)
+    mb.add(prim_rings(limb_rings(NK, [0.03] * 9, 5), cap0=True, cap1=True), 'leather', smooth=40)
+    mb.add(prim_sphere(0.085, 0.09, 0.07, 6, 3), 'bone', M((0, 0.50, 0.74), (0, 0, 0)), smooth=60)   # crânio no centro
+    for sx in (-1, 1):
+        mb.add(prim_cone(0.022, 0.05, 4), 'mouth', M((sx * 0.03, 0.51, 0.80), (90, 0, 0)))
+    chain(mb, [(-0.40, 0.88, 0.52), (-0.46, 0.80, 0.62), (-0.30, 0.64, 0.74), (0.0, 0.58, 0.77), (0.30, 0.64, 0.74),
+               (0.46, 0.80, 0.62), (0.40, 0.88, 0.52)], link=0.07)
     for sx in (-1, 1):
         mb.add(prim_sphere(0.075, 0.08, 0.065, 6, 3), 'bone', M((sx * 0.62, -0.50, 0.74), (0, sx * 20, 0)), smooth=60)
         mb.add(prim_box(0.05, 0.05, 0.04), 'mouth', M((sx * 0.62 - sx * 0.02, -0.49, 0.80)))

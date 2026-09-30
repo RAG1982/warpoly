@@ -117,7 +117,7 @@ Formato: PV · dano (básico + perfurante) · armadura · alcance · visão · v
 | Atirador | **Arqueiro** → **Patrulheiro** | **Lanceiro-Machado** → **Enfurecido** | 95 | 3+6 | 0 | 14 | 4,5 | 60/40/0 | 9 | 1 (→2) | Quartel |
 | Cavalaria ✅ F4-01 (Templário/Ogro Feiticeiro: F4-04/F4-08) | **Cavaleiro** → **Templário** | **Ogro** → **Ogro Feiticeiro** | 320 | 8+4 | 4 | 2,3 | 5,6 | 120/60/20 | 14 | 2 (→3) | Quartel + Estábulo/Covil |
 | Cerco ✅ F4-02 | **Balista** | **Catapulta** | 220 | 80+0 (área r1,5) | 0 | 20 (mín. 4) | 3,0 | 90/200/40 | 18 | 2 | Quartel + Oficina |
-| Sapadores | **Sapadores de Pólvora** | **Incendiários** | 60 | 400 (suicida, área) | 0 | 1 | 5,0 | 70/25/0 | 10 | 2 | Oficina |
+| Sapadores ✅ F4-05 | **Sapadores de Pólvora** | **Incendiários** | 60 | 400 (suicida, área r2,2) | 0 | 1 | 5,0 | 70/25/0 | 10 | 2 | Oficina |
 | Conjurador | **Mago Arcano** | **Necromante das Cinzas** | 60 | 0+9 (mágico) | 0 | 8 | 4,2 | 120/0/0 | 12 | 3 | Torre Arcana / Santuário |
 
 Upgrades de classe: Patrulheiro/Enfurecido (Serraria, nível 2): +alcance/+visão ou +regeneração; Templário/Ogro Feiticeiro (Templo/Altar, nível 3): ganha mana e magias.

@@ -1,6 +1,7 @@
 import * as THREE from 'three';
 import { materials as M, enableShadows } from '../materials.js';
 import { createKnight } from './KnightModel.js';
+import { getKnightBeltTextures, getKnightShieldBackTextures, getKnightLimbsTextures } from './knightTextures.js';
 
 /**
  * F4-01 — Cavaleiro (cavalaria pesada humana). Modelo PROCEDURAL provisório (o modelo final do
@@ -30,6 +31,36 @@ export function createCavalier() {
   // --- Materiais do cavalo (poucos, compartilhados) ---
   const coat = new THREE.MeshStandardMaterial({ color: 0x7a4a2b, flatShading: true, roughness: 0.75 });
   const dark = new THREE.MeshStandardMaterial({ color: 0x24170f, flatShading: true, roughness: 0.85 });
+  const leather = M.leatherBrown;
+
+  // Orçamento de ≤ 20 draw calls: o Espadachim procedural tem ~14 materiais; aqui os secundários
+  // (cinto, verso do escudo, couro, aço liso, rubi, fenda do elmo) colapsam em couro/aço/ouro/escuro.
+  const beltMap = getKnightBeltTextures().map;
+  const shieldBackMap = getKnightShieldBackTextures().map;
+  const limbsMat = (() => {
+    let found = null;
+    const limbsMap = getKnightLimbsTextures().map;
+    root.traverse(o => { if (!found && o.isMesh && o.material && o.material.map === limbsMap) found = o.material; });
+    return found;
+  })();
+  const colorOf = m => (m && !m.map && m.color ? m.color.getHex() : -1);
+  const goldMat = (() => {
+    let found = null;
+    root.traverse(o => { if (!found && o.isMesh && colorOf(o.material) === 0xfacc15) found = o.material; });
+    return found;
+  })();
+  const remap = m => {
+    if (Array.isArray(m)) return m.map(remap);
+    if (!m) return m;
+    if (m.map && (m.map === beltMap || m.map === shieldBackMap)) return leather;
+    const c = colorOf(m);
+    if (c === 0x5a2d16) return leather;
+    if (c === 0xe2e8f0 && limbsMat) return limbsMat;
+    if (c === 0xbe123c && goldMat) return goldMat;
+    if (c === 0x05070a) return dark;
+    return m;
+  };
+  root.traverse(o => { if (o.isMesh) o.material = remap(o.material); });
 
   const add = (parent, geo, mat, x, y, z, rx = 0, ry = 0, rz = 0) => {
     const m = new THREE.Mesh(geo, mat);
@@ -54,9 +85,9 @@ export function createCavalier() {
   add(root, B(0.14, 0.7, 0.14), dark, 0, 0.92, -0.98, -0.35, 0, 0);
   // Sela e manta azul do reino
   add(root, B(0.86, 0.06, 0.62), M.bannerBlue, 0, 1.38, 0.0);
-  add(root, B(0.52, 0.1, 0.42), M.leatherBrown, 0, 1.44, -0.05);
+  add(root, B(0.52, 0.1, 0.42), leather, 0, 1.44, -0.05);
   // Rédeas douradas
-  add(root, B(0.05, 0.05, 0.5), M.roofGold, 0, 1.62, 1.1, 0.3, 0, 0);
+  add(root, B(0.05, 0.05, 0.5), goldMat || M.roofGold, 0, 1.62, 1.1, 0.3, 0, 0);
 
   // Pernas do cavalo (pivô no quadril; balançam em X)
   const legNames = [
@@ -75,9 +106,12 @@ export function createCavalier() {
   });
 
   // Pernas do cavaleiro penduradas nos flancos (fixas; não animadas)
-  add(root, B(0.16, 0.5, 0.22), M.steelDark, -0.43, 1.12, 0.05, 0, 0, 0.12);
-  add(root, B(0.16, 0.5, 0.22), M.steelDark, 0.43, 1.12, 0.05, 0, 0, -0.12);
+  add(root, B(0.16, 0.5, 0.22), limbsMat || M.steelDark, -0.43, 1.12, 0.05, 0, 0, 0.12);
+  add(root, B(0.16, 0.5, 0.22), limbsMat || M.steelDark, 0.43, 1.12, 0.05, 0, 0, -0.12);
 
   root.userData = { ...rider, legL: null, legR: null, horseLegs };
-  return enableShadows(root);
+  enableShadows(root);
+  // Todas as peças projetam sombra: uma única combinação (material × castShadow) por material.
+  root.traverse(o => { if (o.isMesh) o.castShadow = true; });
+  return root;
 }

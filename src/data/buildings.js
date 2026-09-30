@@ -5,7 +5,7 @@
  * - name          Nome PT-BR exibido no painel de construção do trabalhador (D2: provisório até a F3-00).
  * - entityName    Rótulo atual do card de seleção (legado; unificar com `name` na F3-00/F6-09).
  * - faction       'human' | 'orc' | 'neutral'.
- * - role          'hq' | 'house' | 'farm' | 'lumber' | 'barracks' | 'stable' | 'forge' | 'tower' | 'wall' | 'camp'.
+ * - role          'hq' | 'house' | 'farm' | 'lumber' | 'barracks' | 'stable' | 'workshop' | 'forge' | 'tower' | 'wall' | 'camp'.
  * - hp, cost {gold, wood, stone}, collisionRadius, popGranted.
  * - armor         F3-03: armadura da construção (corrige B5 — antes não existia). HQ/torres
  *                  20, muralhas 10 (quando existirem), demais 15 (design §6).
@@ -173,6 +173,27 @@ export const BUILDINGS = {
     dropoff: [],
     icon: '/icoQuartel.svg',
     description: 'Treina cavaleiros (requer Centro nível 2)'
+  },
+  workshop: {
+    type: 'workshop',
+    name: 'Oficina de Engenharia',
+    entityName: 'Oficina de Engenharia',
+    faction: 'human',
+    role: 'workshop',
+    hp: 700,
+    armor: 15,
+    cost: { gold: 180, wood: 100, stone: 40 },
+    collisionRadius: 3.6,
+    popGranted: 0,
+    visionRadius: 22,
+    healthBarHeight: 6.0,
+    tower: null,
+    passiveIncome: null,
+    requires: ['barracks', { hq: 2 }],
+    trains: ['ballista'],
+    dropoff: [],
+    icon: '/icoForja.svg',
+    description: 'Constrói balistas de cerco (requer Centro nível 2)'
   },
   watchtower: {
     type: 'watchtower',
@@ -359,6 +380,27 @@ export const BUILDINGS = {
     dropoff: [],
     icon: '/icoQuartelOrc.svg',
     description: 'Treina ogros, a cavalaria da Horda (requer Centro nível 2)'
+  },
+  orc_workshop: {
+    type: 'orc_workshop',
+    name: 'Oficina dos Engenhoqueiros',
+    entityName: 'Oficina dos Engenhoqueiros',
+    faction: 'orc',
+    role: 'workshop',
+    hp: 700,
+    armor: 15,
+    cost: { gold: 180, wood: 100, stone: 40 },
+    collisionRadius: 3.6,
+    popGranted: 0,
+    visionRadius: 22,
+    healthBarHeight: 6.0,
+    tower: null,
+    passiveIncome: null,
+    requires: ['orc_barracks', { hq: 2 }],
+    trains: ['catapult'],
+    dropoff: [],
+    icon: '/icoForja.svg',
+    description: 'Constrói catapultas de cerco (requer Centro nível 2)'
   },
   orc_watchtower: {
     type: 'orc_watchtower',

@@ -22,7 +22,12 @@
  * - healthBarHeight  Altura da barra de vida 3D acima do pé do modelo.
  * - cost {gold, wood, stone}, trainTime (s). `null` = não treinável.
  * - icon, description.
- * - isWorker, isRanged, isCombat, projectile ('arrow' | 'axe' | null).
+ * - isWorker, isRanged, isCombat, projectile ('arrow' | 'axe' | 'bolt' | 'boulder' | null).
+ * - minAttackRange  F4-02: alcance mínimo (distância de borda; 0/ausente = sem). Alvo mais perto que
+ *   isso não pode ser atacado: a unidade recua até `minAttackRange + 0,5` (cerco).
+ * - splashRadius    F4-02: raio de dano em área no impacto (0/ausente = sem). 100% no centro → 50%
+ *   na borda; só entidades hostis ao dono (sem fogo amigo). Projéteis `bolt`/`boulder` são
+ *   balísticos: não perseguem o alvo, miram a posição prevista (`src/entities/BallisticProjectile.js`).
  */
 
 // Raios de varredura compartilhados (antes hardcoded em Unit.js: 11/14, 13/15, 16, 14).
@@ -97,6 +102,27 @@ export const UNITS = {
     isWorker: false, isRanged: true, isCombat: true, projectile: 'arrow'
   },
 
+  // F4-02: cerco humano, treinado na Oficina de Engenharia (Centro nível 2). Dano 'siege':
+  // ×1,5 contra construções e ×0,5 contra unidades (`src/sim/combat.js`).
+  ballista: {
+    type: 'ballista',
+    name: 'Balista',
+    entityName: 'Balista',
+    faction: 'human',
+    requires: [{ hq: 2 }],
+    hp: 220, speed: 3.0, damage: { basic: 80, piercing: 0, type: 'siege' }, attackRange: 20, attackCooldown: 3.2, armor: 0,
+    minAttackRange: 4, splashRadius: 1.5,
+    collisionRadius: 1.3,
+    visionRadius: 18,
+    ...RANGED_SCAN,
+    healthBarHeight: 3.6,
+    cost: { gold: 90, wood: 200, stone: 40 },
+    trainTime: 18,
+    icon: '/icoArco.png',
+    description: 'Cerco: besta gigante de longo alcance com dano em área (alcance mínimo 4)',
+    isWorker: false, isRanged: true, isCombat: true, projectile: 'bolt'
+  },
+
   // --- Clãs Orcs ---
   peon: {
     type: 'peon',
@@ -162,6 +188,27 @@ export const UNITS = {
     icon: '/icoEspada.png',
     description: 'Cavalaria orc: bruto colossal veloz com clava',
     isWorker: false, isRanged: false, isCombat: true, projectile: null
+  },
+
+  // F4-02: cerco orc, treinado na Oficina dos Engenhoqueiros (Centro nível 2). Mesmos números
+  // da Balista; só o projétil muda (pedra em arco alto e lento).
+  catapult: {
+    type: 'catapult',
+    name: 'Catapulta',
+    entityName: 'Catapulta',
+    faction: 'orc',
+    requires: [{ hq: 2 }],
+    hp: 220, speed: 3.0, damage: { basic: 80, piercing: 0, type: 'siege' }, attackRange: 20, attackCooldown: 3.2, armor: 0,
+    minAttackRange: 4, splashRadius: 1.5,
+    collisionRadius: 1.3,
+    visionRadius: 18,
+    ...RANGED_SCAN,
+    healthBarHeight: 3.6,
+    cost: { gold: 90, wood: 200, stone: 40 },
+    trainTime: 18,
+    icon: '/icoArco.png',
+    description: 'Cerco: lança pedras em arco alto com dano em área (alcance mínimo 4)',
+    isWorker: false, isRanged: true, isCombat: true, projectile: 'boulder'
   },
 
   // --- Classe avançada do atirador (F3-07): só via pesquisa `ranged_class`; modelo 3D do

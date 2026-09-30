@@ -38,6 +38,9 @@ export function evalRequirements(requires, playerId, gm) {
   return requires.filter(req => {
     if (typeof req === 'string') return !hasBuildingType(playerId, req, buildings);
     if (req && typeof req.hq === 'number') return !hasHqTier(playerId, req.hq, buildings);
+    if (req && typeof req.role === 'string') {
+      return !buildings.some(b => b.ownerId === playerId && !b.isDead && b.isConstructed && getBuildingDef(b.type).role === req.role);
+    }
     if (req && typeof req.research === 'string') {
       const player = gm && gm.getPlayer ? gm.getPlayer(playerId) : null;
       const lv = player && player.researchLevels ? (player.researchLevels.get(req.research) || 0) : 0;
@@ -51,6 +54,7 @@ export function evalRequirements(requires, playerId, gm) {
 export function formatRequirement(req, factionId = null) {
   if (typeof req === 'string') return getBuildingDef(req).name;
   if (req && typeof req.hq === 'number') return factionId ? `Centro nível ${req.hq} (${getTierName(factionId, req.hq)})` : `Centro nível ${req.hq}`;
+  if (req && typeof req.role === 'string') return req.role === 'workshop' ? 'Oficina' : req.role;
   if (req && typeof req.research === 'string') {
     return researchName(req.research, factionId || 'human') + (req.level > 1 ? ` ${req.level}` : '');
   }

@@ -36,6 +36,13 @@ export function createVfxEvents(gm, particleSystem) {
     particleSystem.spawnHitSparks(toVec(pos));
   });
 
+  // --- F4-02: impacto do cerco — poeira de pedra + faíscas no ponto de queda ---
+  on(EVT.PROJECTILE_HIT, ({ kind, pos }) => {
+    if (kind !== 'bolt' && kind !== 'boulder') return;
+    particleSystem.spawnStoneDust(toVec(pos));
+    particleSystem.spawnHitSparks(toVec(pos));
+  });
+
   // --- Coleta / renda passiva: texto só se local ou já explorado pela névoa (worker); renda
   // passiva sempre mostrava (sem condição na simulação original). ---
   on(EVT.RESOURCE_GATHERED, ({ type, amount, pos, ownerId, passive }) => {

@@ -107,7 +107,8 @@ export function runMatch(seed, swap, minutes = MINUTES, mapId = MAP) {
   }
   const per = {};
   for (const p of real) per[p.factionId] = { ...p, trained: trained[p.factionId], lost: lost[p.factionId] };
-  return { seed, swap, winner, winnerSlot, minutes: r.elapsed / 60, per, research, tiers, snaps };
+  const finalRes = gm.players.filter((p) => !isNeutral(p)).map((p) => ({ ...p.resources }));
+  return { seed, swap, winner, winnerSlot, minutes: r.elapsed / 60, per, research, tiers, snaps, finalRes };
 }
 
 const q = (arr, p) => {

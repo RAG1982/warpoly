@@ -82,7 +82,7 @@ Opus escreve a spec em `docs/specs/<ID>.md`; agente **Sonnet** executa; Opus rev
 | F0 Fundação | 7 | 0 | 0 | 7 |
 | F1 Desempenho | 10 | 1 | 0 | 9 |
 | F2 Núcleo | 8 | 2 | 0 | 6 |
-| F3 Jogabilidade WC2 base | 11 | 9 | 0 | 2 |
+| F3 Jogabilidade WC2 base | 11 | 8 | 0 | 3 |
 | F4 Jogabilidade WC2 expansão | 8 | 8 | 0 | 0 |
 | F5 IA | 6 | 6 | 0 | 0 |
 | F6 HUD/UX | 9 | 7 | 0 | 2 |
@@ -265,9 +265,10 @@ Opus escreve a spec em `docs/specs/<ID>.md`; agente **Sonnet** executa; Opus rev
 - **Aceite**: 40 unidades atravessam um vau sem travar.
 
 ### F3-03 · Modelo de combate
-- **Status**: `DOING(sonnet, 2026-09-29)` · Lane GAME · Onda 4 · Dep: F0-06
+- **Status**: `DONE(2b345d6)` · Lane GAME · Onda 4 · Dep: F0-06
 - **Fazer**: fórmula estilo WC2 (dano básico − armadura + dano perfurante, variação 50–100%); armadura em construções; tipos de dano (normal/perfurante/cerco/mágico); projéteis podem errar alvo em movimento; alcance mínimo para cerco; bônus de altura opcional.
 - **Aceite**: tabela de simulações em `docs/08_GAME_DESIGN.md` bate com testes unitários.
+- **Resultado**: `src/sim/combat.js` (`computeDamage`: básico−armadura + perfurante, tipos NORMAL/PIERCING/SIEGE/MAGIC, ×0,5–1,0 via `gm.combatRng`, `DAMAGE_SCALE` 1,333), `damage:{basic,piercing,type}` em `src/data/units.js`, armadura em construções (B5 corrigido), card mostra básico+perfurante. Tabela de simulação em `08_GAME_DESIGN.md` §6.1. 281 testes. Projéteis que erram → NEW-23.
 
 ### F3-04 · Economia WC2
 - **Status**: `DONE(5b8a72e)` · spec `docs/specs/F3-04-economia.md` · Lane GAME · Onda 4 · Dep: F2-05
@@ -281,7 +282,7 @@ Opus escreve a spec em `docs/specs/<ID>.md`; agente **Sonnet** executa; Opus rev
 - **Aceite**: testes manuais + unidade.
 
 ### F3-06 · Tiers de HQ e árvore tecnológica
-- **Status**: `TODO` · Lane GAME · Onda 4 · Dep: F3-00
+- **Status**: `DOING(sonnet, 2026-09-29)` · Lane GAME · Onda 4 · Dep: F3-00
 - **Fazer**: HQ T1→T2→T3 (Salão→Fortaleza→Castelo / equivalentes orcs) com upgrade in-place e modelo novo por tier; requisitos de construção/unidade/pesquisa; UI mostra requisitos faltantes.
 - **Aceite**: não é possível treinar/construir sem requisitos; IA respeita.
 
@@ -526,6 +527,7 @@ _(agentes adicionam aqui: `NEW-<n> · título · lane · motivo`)_
 - NEW-20 · Teste intermitente: 1 falha na 1ª execução de `npm test` após o merge da F3-04 (5 execuções seguintes 264/264) — provável timeout de teste pesado (determinismo/headless) com cache frio; aumentar `testTimeout` desses testes · QA · haiku
 - NEW-21 · `Pathfinder._searchAStar`: sem caminho (ex.: anel de árvores fechado) cai no fallback de linha reta atravessando o bloqueio; deveria devolver "sem caminho" e a unidade parar/ir ao ponto alcançável mais próximo · PERF/GAME
 - NEW-22 · Textos em inglês no card de seleção ("Carry: 0/10 gold") — incluir em NEW-3/F6-09 · UI
+- NEW-23 · Projéteis de cerco balísticos que podem errar alvo em movimento — implementar junto com a F4-02 (cerco) · GAME
 - NEW-1 · Avaliar uso real de `GLTFBuildingLoader` em `GreatHall.js` e remover ou adotar no pipeline Blender (F7-00) · ART · ficou fora do escopo da F0-03
 
 ## Notas de integração

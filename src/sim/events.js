@@ -22,6 +22,8 @@ export const EVT = Object.freeze({
   BUILDING_COMPLETED: 'building_completed',
   BUILDING_DESTROYED: 'building_destroyed',
   BUILDING_DAMAGED: 'building_damaged',
+  /** F3-05: obra cancelada pelo dono (NÃO é baixa em combate — não dispara BUILDING_DESTROYED). */
+  BUILDING_CANCELLED: 'building_cancelled',
   /** VFX ambiente de construção (chaminé, faíscas, serragem…) — ver nota acima. */
   BUILDING_VFX: 'building_vfx',
 
@@ -64,6 +66,7 @@ export const EVT = Object.freeze({
  * EVT.BUILDING_COMPLETED {buildingId:number, ownerId:number, pos:Pos, buildingType:string}
  * EVT.BUILDING_DESTROYED {buildingId:number, ownerId:number, pos:Pos, buildingType:string, killerOwnerId?:number|null}
  * EVT.BUILDING_DAMAGED   {buildingId:number, ownerId:number, pos:Pos, amount:number}
+ * EVT.BUILDING_CANCELLED {buildingId:number, ownerId:number, pos:Pos, buildingType:string}  (F3-05)
  * EVT.BUILDING_VFX       {buildingId:number, ownerId:number, pos:Pos, kind:string}
  *
  * EVT.RESEARCH_DONE    {ownerId:number, upgradeId:string, level:number}

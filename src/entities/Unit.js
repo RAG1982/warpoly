@@ -417,20 +417,30 @@ export class Unit {
    * ela cair. Devolve true se passou a atacar uma muralha.
    */
   _attackBlockingWall(gm, path, destX, destZ) {
-    if (!gm || !gm.blockerGrid || !this.isCombatUnit()) return false;
+    const wall = this._findBlockingWall(gm, path, destX, destZ, true);
+    if (!wall) return false;
+    this.orderAttack(wall);
+    this._amDest = { x: destX, z: destZ };
+    return true;
+  }
+
+  /**
+   * F3-08: muralha hostil mais próxima do fim do caminho parcial `path` (ponto alcançável mais
+   * próximo do destino; a própria posição se o caminho é vazio). Com `allowFar`, se não há muralha
+   * perto desse ponto, tenta a mais próxima do destino (raio 30).
+   */
+  _findBlockingWall(gm, path, destX, destZ, allowFar = false) {
+    if (!gm || !gm.blockerGrid || !this.isCombatUnit()) return null;
     const end = path.length > 0 ? path[path.length - 1] : this.mesh.position;
     const self = this;
     const isWall = b => b instanceof Building && !b.isDead && b.hp > 0 && b.role === 'wall' && self.isHostileTo(b);
     gm.blockerGrid.queryRadius(end.x, end.z, 14, isWall, _wallBuf);
     let wall = pickNearestInBuf(_wallBuf, end.x, end.z);
-    if (!wall) {
-      gm.blockerGrid.queryRadius(destX, destZ, 40, isWall, _wallBuf);
+    if (!wall && allowFar) {
+      gm.blockerGrid.queryRadius(destX, destZ, 30, isWall, _wallBuf);
       wall = pickNearestInBuf(_wallBuf, destX, destZ);
     }
-    if (!wall) return false;
-    this.orderAttack(wall);
-    this._amDest = { x: destX, z: destZ };
-    return true;
+    return wall;
   }
 
   orderGather(resource) {
@@ -799,6 +809,17 @@ export class Unit {
             this._chaseRequestPending = false;
             this.waypoints = path;
             this.waypointIndex = 0;
+            // F3-08: perseguindo um alvo sem caminho (parede fechada no meio) — ataca a muralha
+            // que bloqueia e retoma o alvo original (`objectiveTarget`) quando ela cair.
+            if (path.noPath && this.state === 'attacking' && this.attackTarget && this.attackTarget.role !== 'wall') {
+              const wall = this._findBlockingWall(gm, path, destX, destZ);
+              if (wall) {
+                if (!this.objectiveTarget) this.objectiveTarget = this.attackTarget;
+                this.attackTarget = wall;
+                this.targetEntity = wall;
+                this.hasFiredThisAttack = false;
+              }
+            }
           });
         }
 

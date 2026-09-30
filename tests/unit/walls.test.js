@@ -275,3 +275,68 @@ describe('combate contra muralhas (F3-08)', () => {
     expect(wall.hp).toBeLessThan(wall.maxHp);
   });
 });
+
+describe('exército derruba a muralha e chega ao alvo (F3-08, headless)', () => {
+  it('ATTACK no Centro cercado por muralha: grunts atacam a muralha que bloqueia e depois o Centro (<= 5 min)', () => {
+    const gm = makeGm(11);
+    const hq = gm.buildings.find(b => b.ownerId === 0 && b.role === 'hq');
+    const hx = hq.mesh.position.x;
+    const hz = hq.mesh.position.z;
+    // Anel fechado de muralhas (raio 10, passo ~2,3 < 2,4) em volta do Centro do jogador 0.
+    const R = 10;
+    const n = Math.ceil((2 * Math.PI * R) / 2.3);
+    const ring = [];
+    for (let i = 0; i < n; i++) {
+      const a = (i / n) * Math.PI * 2;
+      const w = gm.createBuilding('wall_human', hx + Math.cos(a) * R, hz + Math.sin(a) * R, true, 0);
+      gm.buildings.push(w);
+      ring.push(w);
+    }
+    // Remove os defensores do jogador 0 para isolar o comportamento de chegada.
+    gm.getUnitsOf(0).forEach(u => { u.hp = 0; u.isDead = true; });
+    // O anel precisa ser mesmo fechado para o pathfinder (ponto dentro inalcançável por fora).
+    const grunts = [];
+    for (let i = 0; i < 4; i++) grunts.push(gm.spawnUnit('grunt', hx + 20 + i, hz + 2, 1));
+    const totalHp = ring.reduce((a, w) => a + w.hp, 0);
+    gm.issue({ type: CMD.ATTACK, playerId: 1, unitIds: grunts.map(g => g.id), targetId: hq.id });
+    let tick = 0;
+    let reachedHq = false;
+    for (; tick < 6000; tick++) {
+      gm.simStep(SIM_DT);
+      if (hq.hp < hq.maxHp) { reachedHq = true; break; }
+    }
+    const deadWalls = ring.filter(w => w.isDead).length;
+    expect(deadWalls).toBeGreaterThan(0);
+    expect(ring.reduce((a, w) => a + w.hp, 0)).toBeLessThan(totalHp);
+    expect(reachedHq).toBe(true);
+    expect(tick).toBeLessThan(6000);
+  }, 60000);
+
+  it('ATTACK_MOVE para um ponto dentro do anel: ataca a muralha e entra no anel (<= 5 min)', () => {
+    const gm = makeGm(11);
+    const hq = gm.buildings.find(b => b.ownerId === 0 && b.role === 'hq');
+    const hx = hq.mesh.position.x;
+    const hz = hq.mesh.position.z;
+    const R = 10;
+    const n = Math.ceil((2 * Math.PI * R) / 2.3);
+    const ring = [];
+    for (let i = 0; i < n; i++) {
+      const a = (i / n) * Math.PI * 2;
+      const w = gm.createBuilding('wall_human', hx + Math.cos(a) * R, hz + Math.sin(a) * R, true, 0);
+      gm.buildings.push(w);
+      ring.push(w);
+    }
+    gm.getUnitsOf(0).forEach(u => { u.hp = 0; u.isDead = true; });
+    const grunt = gm.spawnUnit('grunt', hx + 20, hz + 2, 1);
+    gm.issue({ type: CMD.ATTACK_MOVE, playerId: 1, unitIds: [grunt.id], x: hx, z: hz + 7 });
+    let arrived = false;
+    for (let t = 0; t < 6000 && !arrived; t++) {
+      gm.simStep(SIM_DT);
+      // Dentro do anel (raio 10): ele já derrubou uma muralha e passou. (Em attack-move ele ainda
+      // ataca as construções que encontra no caminho — Casa/Castelo —, por isso não exigimos o ponto exato.)
+      arrived = Math.hypot(grunt.mesh.position.x - hx, grunt.mesh.position.z - hz) < R - 1 && ring.some(w => w.isDead);
+    }
+    expect(ring.some(w => w.isDead)).toBe(true);
+    expect(arrived).toBe(true);
+  }, 60000);
+});

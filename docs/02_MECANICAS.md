@@ -144,3 +144,10 @@ Nova partida (F2-04, sem recarregar a página) começa com a névoa zerada (`Fog
 ## Opções
 
 Velocidade 1×/2×/3×, pausa, volume SFX/música, iluminação (dia/pôr-do-sol/noite), guia, link para o inspetor.
+
+## Reparo, cancelamento de obra e obra cooperativa (F3-05)
+
+- **Reparo** (`CMD.REPAIR`, estado `repairing` do trabalhador): a cada 0,8 s restaura 5% do PV máximo (20 golpes = 100%) e cobra `ceil(custo × 0,5 × PV restaurado/PV máx.)` por recurso, por golpe (`src/sim/repair.js`). Sem recursos o trabalhador para e o dono local é avisado. Vale para toda construção própria concluída e danificada, muralhas incluídas. Só o próprio dono repara (aliados: fora do escopo). A IA repara construções com PV < 70% (1 ocioso por construção, sem ataque nos últimos 6 s); o jogador humano só por ordem (clique direito, botão/tecla R).
+- **Cancelar obra** (`CMD.CANCEL_CONSTRUCTION`): devolve 75% do custo total (independe do progresso), libera população/bloqueio de caminho, os trabalhadores param e emite `BUILDING_CANCELLED` (não é baixa em combate). Construção concluída não pode ser cancelada.
+- **Obra cooperativa**: cada trabalhador soma seu golpe (linear); máximo de 4 trabalhadores por construção (obra ou reparo) — o 5º é recusado com aviso e fica parado. `building.workerCount` é recalculado por tick.
+- **PV da obra**: nasce com 10% do PV máximo e sobe proporcionalmente ao progresso até 100%.

@@ -64,7 +64,7 @@ Opus escreve a spec em `docs/specs/<ID>.md`; agente **Sonnet** executa; Opus rev
 | `docs/specs/F3-01-controles-rts.md` | F3-01 + NEW-16 — **nuvem** | sonnet (claude.ai/code) |
 | `docs/specs/F6-08-opcoes.md` | F6-08 — **nuvem**, após F3-01 | sonnet (claude.ai/code) |
 | `docs/specs/F7-00d-lacaio-blender.md` | F7-00d Lacaio no Blender — **ADIADA** (modelagem só com Opus; cancelada a execução por Sonnet) | opus (futuro) |
-| `docs/specs/F3-04-economia.md` | F3-04 economia WC2 — **DOING(sonnet local, 2026-09-29)**; toca GameManager/Unit/Building/ai → não vai para a nuvem | sonnet (local) |
+| `docs/specs/F3-04-economia.md` | F3-04 economia WC2 — **DONE (5b8a72e)**; toca GameManager/Unit/Building/ai → não vai para a nuvem | sonnet (local) |
 | `docs/specs/F3-03-combate.md` | F3-03 — spec pronta; **local, depois da F3-04** | sonnet (local) |
 | `docs/specs/F3-06-niveis-centro.md` | F3-06 — spec pronta; **local, depois da F3-04 (e F3-03)** | sonnet (local) |
 | `docs/specs/NEW-19-ruinas.md` | NEW-19 ruínas — **nuvem** | sonnet (claude.ai/code) |
@@ -82,7 +82,7 @@ Opus escreve a spec em `docs/specs/<ID>.md`; agente **Sonnet** executa; Opus rev
 | F0 Fundação | 7 | 0 | 0 | 7 |
 | F1 Desempenho | 10 | 1 | 0 | 9 |
 | F2 Núcleo | 8 | 2 | 0 | 6 |
-| F3 Jogabilidade WC2 base | 11 | 10 | 0 | 1 |
+| F3 Jogabilidade WC2 base | 11 | 9 | 0 | 2 |
 | F4 Jogabilidade WC2 expansão | 8 | 8 | 0 | 0 |
 | F5 IA | 6 | 6 | 0 | 0 |
 | F6 HUD/UX | 9 | 7 | 0 | 2 |
@@ -270,9 +270,10 @@ Opus escreve a spec em `docs/specs/<ID>.md`; agente **Sonnet** executa; Opus rev
 - **Aceite**: tabela de simulações em `docs/08_GAME_DESIGN.md` bate com testes unitários.
 
 ### F3-04 · Economia WC2
-- **Status**: `DOING(sonnet, 2026-09-29)` · spec `docs/specs/F3-04-economia.md` · Lane GAME · Onda 4 · Dep: F2-05
+- **Status**: `DONE(5b8a72e)` · spec `docs/specs/F3-04-economia.md` · Lane GAME · Onda 4 · Dep: F2-05
 - **Fazer**: trabalhador entra na mina (some ~1 s, 1 por vez, fila); florestas densas bloqueiam e abrem ao cortar; pedra permanece (D1); comida = suprimento de Fazenda/Chiqueiro; Serraria melhora rendimento de madeira; HQ upgrade melhora rendimento de ouro; minas esgotam com aviso.
 - **Aceite**: curva de economia documentada; IA continua funcional.
+- **Resultado**: `src/data/economy.js` (carga 10/10/8, entrada na mina 1,5 s, 1 slot ouro / 2 pedra), fila de mina em `ResourceDeposit`, estados `waitingMine/insideMine`, sem ouro passivo, Quartel requer Fazenda/Chiqueiro (`src/sim/requirements.js`, botão desabilitado com motivo), `RESOURCE_DEPLETED` + aviso PT-BR, IA constrói Fazenda antes do Quartel. Curva: 1 mina satura com ~3 trabalhadores (~385 ouro/min). 264 testes.
 
 ### F3-05 · Reparo e cancelamento de construção
 - **Status**: `TODO` · Lane GAME · Onda 4 · Dep: F2-02
@@ -522,6 +523,9 @@ _(agentes adicionam aqui: `NEW-<n> · título · lane · motivo`)_
 - ✅ NEW-17 · `DONE(297a07e)` textura do terreno pintada pela altura em mapas não continentais (`getTerrainTexturesFromHeight`); continental inalterado · haiku. Obs.: o padrão "rachado" restante na água é a textura do `Water.js` (cáusticas), não do terreno
 - ✅ NEW-18 · `DONE(640dff1)` guia rápido não estica sem seleção (grid-column fixo nos filhos de #bottom-bar) · haiku
 - NEW-19 · Ruínas/clareira ao destruir construção ou esgotar mina (como no WC2), procedural, só render · VFX · spec `docs/specs/NEW-19-ruinas.md` · **nuvem** (após F3-01/F6-08; parte da mina depende do evento `RESOURCE_DEPLETED` da F3-04)
+- NEW-20 · Teste intermitente: 1 falha na 1ª execução de `npm test` após o merge da F3-04 (5 execuções seguintes 264/264) — provável timeout de teste pesado (determinismo/headless) com cache frio; aumentar `testTimeout` desses testes · QA · haiku
+- NEW-21 · `Pathfinder._searchAStar`: sem caminho (ex.: anel de árvores fechado) cai no fallback de linha reta atravessando o bloqueio; deveria devolver "sem caminho" e a unidade parar/ir ao ponto alcançável mais próximo · PERF/GAME
+- NEW-22 · Textos em inglês no card de seleção ("Carry: 0/10 gold") — incluir em NEW-3/F6-09 · UI
 - NEW-1 · Avaliar uso real de `GLTFBuildingLoader` em `GreatHall.js` e remover ou adotar no pipeline Blender (F7-00) · ART · ficou fora do escopo da F0-03
 
 ## Notas de integração

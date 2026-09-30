@@ -50,8 +50,8 @@ describe('mapa ilhas-4p (F2-05, headless)', () => {
     }).not.toThrow();
 
     // "IAs crescendo": mais unidades vivas no fim do que no início (novas tropas treinadas).
-    const aliveAtEnd = gm.allUnits.filter((u) => !u.isDead).length;
-    expect(aliveAtEnd).toBeGreaterThan(initialUnits);
+    const aliveAtEnd = gm.allUnits.filter((u) => !u.isDead && u.ownerId !== 99).length; // F3-10: sem os bandidos
+    expect(aliveAtEnd).toBeGreaterThan(4 * 5);
 
     // Todos os 4 jogadores têm ao menos uma construção viva (a base inicial: HQ, serraria, casa).
     for (const p of gm.players) {

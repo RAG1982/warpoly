@@ -48,6 +48,13 @@
     { "x": -15, "z": 32, "count": 4, "radius": 5.0, "species": "autumn" },
     { "x": 15, "z": -32, "count": 4, "radius": 5.0, "species": "autumn" }
   ],
-  "neutrals": [],
+  "neutrals": [
+    { "kind": "camp", "x": -22, "z": 0, "guards": 4, "reward": { "gold": 300 }, "deposit": { "type": "gold", "amount": 3000 } },
+    { "kind": "camp", "x": 22, "z": 0, "guards": 4, "reward": { "gold": 300 }, "deposit": { "type": "gold", "amount": 3000 } },
+    { "kind": "critters", "species": "sheep", "x": -40, "z": -10, "count": 5, "radius": 6 },
+    { "kind": "critters", "species": "sheep", "x": 40, "z": 10, "count": 5, "radius": 6 },
+    { "kind": "critters", "species": "pig", "x": -18, "z": -30, "count": 4, "radius": 5 },
+    { "kind": "critters", "species": "pig", "x": 18, "z": 30, "count": 4, "radius": 5 }
+  ],
   "decorationDensity": 1.0
 }

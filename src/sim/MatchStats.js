@@ -104,6 +104,9 @@ export class MatchStats {
     if (kid === null || kid === undefined) return null;
     const reg = this.gm.playerRegistry;
     if (!reg || !reg.isHostile(kid, e.ownerId)) return null;
+    // F3-10: o neutro hostil (bandoleiros/acampamentos) não conta para pontuação nem estatística.
+    const victim = reg.getPlayer(e.ownerId);
+    if (victim && victim.isNeutralHostile) return null;
     return this._get(kid);
   }
 

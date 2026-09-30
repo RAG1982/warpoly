@@ -38,7 +38,13 @@ export const materials = {
   pebble: new THREE.MeshStandardMaterial({ color: 0x9fa4a6, flatShading: true, roughness: 0.9 }),
   grass: new THREE.MeshStandardMaterial({ color: 0x56a644, flatShading: true }),
   flowerLeaf: new THREE.MeshStandardMaterial({ color: 0x489639, flatShading: true }),
-  flowerCenter: new THREE.MeshStandardMaterial({ color: 0xfacc15, flatShading: true })
+  flowerCenter: new THREE.MeshStandardMaterial({ color: 0xfacc15, flatShading: true }),
+
+  // F3-10: critters (ovelha/porco)
+  critterWool: new THREE.MeshStandardMaterial({ color: 0xf1efe6, flatShading: true, roughness: 0.95 }),
+  critterDark: new THREE.MeshStandardMaterial({ color: 0x3b3a38, flatShading: true, roughness: 0.9 }),
+  critterPink: new THREE.MeshStandardMaterial({ color: 0xf2a7b1, flatShading: true, roughness: 0.8 }),
+  critterPinkDark: new THREE.MeshStandardMaterial({ color: 0xc9707d, flatShading: true, roughness: 0.8 })
 };
 
 /**

@@ -12,6 +12,7 @@ import { buildCostHtml } from './Tooltip.js';
 import { CMD } from '../sim/commands.js';
 import { victoryMessage, defeatMessage } from '../sim/victory.js';
 import { worldToMinimap, minimapToWorld } from './minimapCoords.js';
+import { NEUTRAL_HOSTILE_ID } from '../sim/EntityIds.js';
 import { renderTerrainImage } from './terrainMinimapImage.js';
 
 // Quem treina o quê — derivado de src/data/buildings.js (campo `trains`)
@@ -1115,7 +1116,7 @@ export class UIManager {
       if (!b.isDead) {
         if (b.faction === 'player' || !fog || fog.isBuildingKnown(b)) {
           const m = toMap(b.mesh.position.x, b.mesh.position.z);
-          ctx.fillStyle = b.faction === 'player' ? '#2563eb' : '#dc2626';
+          ctx.fillStyle = b.faction === 'player' ? '#2563eb' : (b.ownerId === NEUTRAL_HOSTILE_ID ? '#f97316' : '#dc2626');
           ctx.fillRect(m.x - 3, m.y - 3, 6, 6);
         }
       }
@@ -1143,7 +1144,8 @@ export class UIManager {
       if (!e.isDead) {
         if (!fog || fog.isVisible(e.mesh.position.x, e.mesh.position.z)) {
           const m = toMap(e.mesh.position.x, e.mesh.position.z);
-          ctx.fillStyle = '#ef4444';
+          // F3-10: neutros hostis (bandoleiros) em laranja, só quando visíveis.
+          ctx.fillStyle = e.ownerId === NEUTRAL_HOSTILE_ID ? '#f97316' : '#ef4444';
           ctx.fillRect(m.x - 1.5, m.y - 1.5, 3, 3);
         }
       }

@@ -2,6 +2,7 @@ import * as THREE from 'three';
 import { getBuildingDef, getUnitDef } from '../data/index.js';
 import { CMD } from '../sim/commands.js';
 import { EVT } from '../sim/events.js';
+import { NEUTRAL_HOSTILE_ID } from '../sim/EntityIds.js';
 
 /**
  * AIMilitaryManager (Gerenciador Militar e Ofensivo da IA)
@@ -262,7 +263,8 @@ export class AIMilitaryManager {
 
     for (let i = 0; i < lenB; i++) {
       const b = buildings[i];
-      if (!b.isDead && this.gm.isHostile(myId, b.ownerId)) {
+      // F3-10: acampamentos neutros nunca são alvo da expedição (NEW-25: atacá-los é opcional/futuro).
+      if (!b.isDead && b.ownerId !== NEUTRAL_HOSTILE_ID && this.gm.isHostile(myId, b.ownerId)) {
         if (!anyPlayerBuilding) anyPlayerBuilding = b;
 
         const dx = b.mesh.position.x - enemyBase.x;
@@ -292,7 +294,7 @@ export class AIMilitaryManager {
     const playerUnits = this.director.getHostileUnits();
     const lenP = playerUnits.length;
     for (let i = 0; i < lenP; i++) {
-      if (!playerUnits[i].isDead) {
+      if (!playerUnits[i].isDead && playerUnits[i].ownerId !== NEUTRAL_HOSTILE_ID) {
         return playerUnits[i];
       }
     }

@@ -21,6 +21,10 @@ function posOf(v) {
 // `state` de 'moving' para o estado derivado (ver `moveTo`).
 const MOVEY_STATES = new Set(['moving', 'attackMoving']);
 
+/** F3-10: distância máxima da origem para guardas neutros e regeneração (fração do PV/s) no retorno. */
+export const GUARD_LEASH = 22;
+const GUARD_REGEN = 0.05;
+
 // Buffers de módulo reutilizados pelas buscas de alvo hostil (F1-06: unitGrid/blockerGrid),
 // evitando alocar um array novo por unidade a cada frame.
 const _combatBuf = [];
@@ -158,6 +162,9 @@ export class Unit {
     this.walkTimer = 0;
     this.isDead = false;
     this.lastAttackerOwnerId = null; // F3-09
+    /** F3-10: origem do guarda neutro ({x, z}) — `null` para unidades normais. */
+    this.homePos = null;
+    this._returningHome = false;
     this.isDying = false;
     this.canRemove = false;
     this.isDisposed = false;
@@ -893,6 +900,9 @@ export class Unit {
     this.attackTimer += delta;
     this.actionTimer += delta;
 
+    // F3-10: guarda neutro com leash (bandoleiros) — volta à origem se se afastar demais.
+    if (this.homePos) this._updateGuardLeash(delta);
+
     switch (this.state) {
       case 'idle':
         this.updateIdle(delta, allUnits, buildings);
@@ -982,6 +992,35 @@ export class Unit {
       this.animator.setTime(t);
     } else {
       this.animator.update(frameDelta * lodStep);
+    }
+  }
+
+  /**
+   * F3-10: leash dos guardas neutros (`homePos` definido por `GameManager.spawnNeutrals`).
+   * Se a unidade se afastar mais de `GUARD_LEASH` da origem, larga o alvo e volta (`moveTo`),
+   * recuperando 5 % do PV máximo por segundo até chegar; durante o retorno ordens de ataque
+   * automáticas (retaliação/auto-aquisição) são sobrescritas — não persegue além do leash.
+   */
+  _updateGuardLeash(delta) {
+    const p = this.mesh.position;
+    const h = this.homePos;
+    const d = Math.hypot(p.x - h.x, p.z - h.z);
+    if (!this._returningHome) {
+      if (d > GUARD_LEASH) {
+        this._returningHome = true;
+        this.moveTo(h.x, h.z, this.gameManager);
+      }
+      return;
+    }
+    if (this.hp < this.maxHp) {
+      this.hp = Math.min(this.maxHp, this.hp + this.maxHp * GUARD_REGEN * delta);
+      this.updateHealthBar();
+    }
+    if (d < 2.5) {
+      this._returningHome = false;
+      this.stop();
+    } else if (this.state !== 'moving') {
+      this.moveTo(h.x, h.z, this.gameManager);
     }
   }
 

@@ -319,6 +319,13 @@ export class InputManager {
       allMeshes.push(m);
     }
 
+    // F3-10: critters (≤ 40, fora das grades espaciais) também são clicáveis (alvo de ordem).
+    const critters = this.gm.critters;
+    for (let i = 0; i < critters.length; i++) {
+      const m = critters[i].mesh;
+      if (m?.parent && m.visible) allMeshes.push(m);
+    }
+
     const entityHits = this.raycaster.intersectObjects(allMeshes, true);
     if (entityHits.length > 0) {
       let cur = entityHits[0].object;

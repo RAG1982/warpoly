@@ -43,15 +43,15 @@ describe('mapa ilhas-4p (F2-05, headless)', () => {
     const gm = new GameManager(scene, terrain, null, null, cfg);
 
     const initialUnits = gm.allUnits.length;
-    expect(initialUnits).toBe(4 * 5); // 2 workers + 2 melee + 1 ranged por jogador (START_LAYOUT)
+    expect(initialUnits).toBe(4 * 5 + 8); // 2 workers + 2 melee + 1 ranged por jogador (START_LAYOUT) + 8 bandidos (F3-10: 2 acampamentos × 4)
 
     expect(() => {
       for (let i = 0; i < 2000; i++) gm.simStep(SIM_DT);
     }).not.toThrow();
 
     // "IAs crescendo": mais unidades vivas no fim do que no início (novas tropas treinadas).
-    const aliveAtEnd = gm.allUnits.filter((u) => !u.isDead).length;
-    expect(aliveAtEnd).toBeGreaterThan(initialUnits);
+    const aliveAtEnd = gm.allUnits.filter((u) => !u.isDead && u.ownerId !== 99).length; // F3-10: sem os bandidos
+    expect(aliveAtEnd).toBeGreaterThan(4 * 5);
 
     // Todos os 4 jogadores têm ao menos uma construção viva (a base inicial: HQ, serraria, casa).
     for (const p of gm.players) {

@@ -21,6 +21,7 @@ export class Player {
    * @param {string} [opts.color]            cor do time (CSS hex)
    * @param {number} [opts.team]             jogadores do mesmo time são aliados
    * @param {boolean} [opts.isAI]
+   * @param {boolean} [opts.isNeutralHostile]  F3-10: bandoleiros/acampamentos (id 99, sem HUD/IA)
    * @param {boolean} [opts.isLocal]         jogador controlado por este cliente (HUD, seleção, névoa)
    * @param {number} [opts.startSlot]        posição inicial no mapa (MatchConfig)
    * @param {{wood:number,gold:number,stone:number}} [opts.resources]
@@ -33,6 +34,7 @@ export class Player {
     team = id,
     isAI = false,
     isLocal = false,
+    isNeutralHostile = false,
     startSlot = id,
     resources = STARTING_RESOURCES
   } = {}) {
@@ -44,6 +46,8 @@ export class Player {
     this.team = team;
     this.isAI = isAI;
     this.isLocal = isLocal;
+    /** F3-10: jogador neutro hostil (id 99) — ver PlayerRegistry.neutralHostile. */
+    this.isNeutralHostile = isNeutralHostile;
     this.startSlot = startSlot;
     /** Posição {x, z} do HQ inicial, resolvida pelo GameManager a partir do slot. */
     this.startPos = null;

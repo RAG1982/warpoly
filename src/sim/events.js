@@ -45,6 +45,9 @@ export const EVT = Object.freeze({
   UNDER_ATTACK: 'under_attack',
   NOTIFY: 'notify',
 
+  /** F3-10: último acampamento neutro de um cluster destruído (recompensa creditada). */
+  CAMP_CLEARED: 'camp_cleared',
+
   PLAYER_DEFEATED: 'player_defeated',
   MATCH_WON: 'match_won',
   MATCH_LOST: 'match_lost'
@@ -83,6 +86,8 @@ export const EVT = Object.freeze({
  *
  * EVT.UNDER_ATTACK  {ownerId:number, pos:Pos}
  * EVT.NOTIFY        {ownerId:number, text:string}
+ *
+ * EVT.CAMP_CLEARED   {campId:number, byOwnerId:number|null, pos:Pos, reward:{gold?:number,wood?:number,stone?:number}}  (F3-10; byOwnerId null = sem crédito)
  *
  * EVT.PLAYER_DEFEATED {ownerId:number, name:string}
  * EVT.MATCH_WON       {ownerId:number}

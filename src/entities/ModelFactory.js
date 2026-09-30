@@ -25,6 +25,7 @@ import {
   createArcher,
   createVillager,
   createBandit,
+  createCritter,
   createPeon,
   createGrunt,
   createAxethrower,
@@ -413,6 +414,11 @@ export class ModelFactory {
 
   static createVillager() {
     return this.getOrCreateModel('villager', createVillager, 'villager');
+  }
+
+  /** F3-10: critter decorativo (`sheep` | `pig`). */
+  static createCritter(species = 'sheep') {
+    return this.getOrCreateModel(`critter_${species}`, () => createCritter(species));
   }
 
   static createBandit() {

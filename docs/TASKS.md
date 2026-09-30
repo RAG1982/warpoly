@@ -545,7 +545,7 @@ _(agentes adicionam aqui: `NEW-<n> · título · lane · motivo`)_
 - NEW-30 · Repetir o lote de balanceamento (F3-11) quando a F5 (IA Difícil) e a F4 chegarem; paridade dos atiradores ficou +14,8 % (orc) · QA
 - NEW-31 · `tools/check-data-parity.mjs` quebrado (`blockerGrid` indefinido no mock) · QA · haiku
 - ✅ NEW-32 · `DONE(refino: Camponês, Lacaio, troll, Bandido, Arqueiro, Ogro; mão do arqueiro na corda)` — pendências menores: runas do troll leem como riscos, cicatrizes do Lacaio, face do Camponês simples, pose de tiro do arqueiro é compromisso · Arte: refino de pontos fracos (olhos do Camponês, pele do Lacaio, ombreira do troll, clava do Bandido) e poses do arqueiro (mão na corda, projétil da mão) · ART
-- NEW-33 · `DOING(sonnet, 2026-09-30)` Arte Blender: Cavaleiro montado, Estábulo Real, Covil dos Ogros (hoje procedurais provisórios; cavaleiro herda texturas 2048² do Espadachim procedural) · ART
+- ✅ NEW-33 · `DONE` (Cavaleiro 7/10, Estábulo 8/10, Covil 7,5/10 — autoavaliação; pendências: cor de time não se aplica a .glb de construção → F7-02, cavalos das baias só cabeça) Arte Blender: Cavaleiro montado, Estábulo Real, Covil dos Ogros (hoje procedurais provisórios; cavaleiro herda texturas 2048² do Espadachim procedural) · ART
 - ✅ NEW-23 · `DONE(f419963)` projétil balístico com mira preditiva (F4-02) · GAME
 - NEW-34 · Escolta de cerco pela IA (o cerco, mais lento, chega depois do exército) e alvo colado dentro do alcance mínimo só resolvido via recuo · AI
 - NEW-35 · Ataque no chão do cerco (clique direito no chão) · GAME/UI

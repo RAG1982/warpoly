@@ -20,11 +20,15 @@ O machado é modelado "em pé" e girado por AXE_PRE dentro do nó Weapon*, para 
 import os
 import sys
 import math
+from mathutils import Vector
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import common as C  # noqa: E402
 from common import (MeshBuilder, M, prim_box, prim_rings, ring_h, prim_cyl, prim_cone,  # noqa: E402
                     prim_sphere, prim_extrude, limb_rings, bezier)
+
+import worker_common as W  # noqa: E402
+from worker_common import stitches  # noqa: E402
 
 TORSO_PIVOT = (0.0, 1.3, 0.0)
 HEAD_PIVOT = (0.0, 0.66, 0.05)      # relativo ao Torso (centro da cabeça)
@@ -55,9 +59,15 @@ PALETTE = {
     'hide': dict(base='#c07a2e', var='#3d2612', var_scale=5.0, var_amt=1.0, fine=0.15, fine_scale=26.0,
                  streaks=(11.0, 1.4, 0.5), coord='object', top=0.22, edge='#e6b061', edge_amt=0.4,
                  edge_r=0.03, ao=(0.25, 0.6)),
-    'fur': dict(base='#7a5a3a', var='#3f2b1a', var_scale=9.0, var_amt=1.0, fine=0.25, fine_scale=40.0,
-                streaks=(3.0, 40.0, 0.25), top=0.3, edge='#c5b08c', edge_amt=0.5, edge_r=0.03,
+    'fur': dict(base='#8a6a42', var='#2c1d10', var_scale=9.0, var_amt=1.0, fine=0.3, fine_scale=40.0,
+                streaks=(3.0, 40.0, 0.4), top=0.3, edge='#d6c19a', edge_amt=0.6, edge_r=0.03,
                 ao=(0.25, 0.6), coord='object'),
+    'fur_lt': dict(base='#b39a72', var='#6a5034', var_scale=10.0, var_amt=1.0, fine=0.25, fine_scale=40.0, top=0.3,
+                   edge='#f0e2c0', edge_amt=0.5, edge_r=0.03, ao=(0.25, 0.6)),
+    'rune': dict(base='#e9d9a6', var='#d3bd7f', var_scale=12.0, top=0.1),
+    'rune_red': dict(base='#b3301f', var='#8a2114', var_scale=12.0, top=0.1),
+    'rust': dict(base='#6d5a4a', var='#4d3c2e', var_scale=11.0, var_amt=1.0, fine=0.25, top=0.3,
+                 edge='#b89a78', edge_amt=0.6, edge_r=0.02, ao=(0.2, 0.5)),
     'iron': dict(base='#3d434f', var='#2d323b', var_scale=7.0, var_amt=0.8, fine=0.14, top=0.35,
                  edge='#c3cad6', edge_amt=0.95, edge_r=0.022, edge_gain=12.0, ao=(0.25, 0.55)),
     'blade': dict(base='#616b80', var='#4a5366', var_scale=6.0, fine=0.1, top=0.4,
@@ -172,19 +182,49 @@ def axe_blade(poly_zy, thick, taper_from, taper_to):
     return out, faces
 
 
-BLADE = [(0.05, 0.64), (0.13, 0.72), (0.21, 0.79), (0.29, 0.73), (0.35, 0.63), (0.385, 0.52), (0.37, 0.40),
-         (0.31, 0.29), (0.235, 0.19), (0.215, 0.29), (0.15, 0.35), (0.05, 0.38)]
-EDGE = [(0.21, 0.79), (0.29, 0.73), (0.35, 0.63), (0.385, 0.52), (0.37, 0.40), (0.31, 0.29), (0.235, 0.19),
-        (0.25, 0.30), (0.325, 0.41), (0.345, 0.52), (0.322, 0.62), (0.27, 0.70)]
+BLADE = [(0.05, 0.64), (0.13, 0.72), (0.21, 0.79), (0.29, 0.73), (0.35, 0.63), (0.318, 0.585), (0.385, 0.52),
+         (0.37, 0.40), (0.335, 0.36), (0.352, 0.335), (0.31, 0.29), (0.235, 0.19), (0.215, 0.29), (0.15, 0.35),
+         (0.05, 0.38)]
+EDGE = [(0.21, 0.79), (0.29, 0.73), (0.35, 0.63), (0.318, 0.585), (0.385, 0.52), (0.37, 0.40), (0.335, 0.36),
+        (0.352, 0.335), (0.31, 0.29), (0.235, 0.19), (0.25, 0.30), (0.29, 0.40), (0.293, 0.52), (0.285, 0.60),
+        (0.27, 0.70)]
+
+
+def blade_half(zs, thick=0.05):
+    t = min(1.0, max(0.0, (zs - 0.05) / 0.28))
+    return thick / 2 * (1.0 - 0.82 * t)
+
+
+# runas pintadas (traços) em (z, y) da lâmina, antes do escalonamento de z
+RUNES = [  # cada runa: lista de traços ((z0,y0),(z1,y1))
+    [((0.17, 0.62), (0.17, 0.50)), ((0.17, 0.56), (0.24, 0.62)), ((0.17, 0.52), (0.24, 0.46))],
+    [((0.27, 0.56), (0.27, 0.44)), ((0.22, 0.52), (0.32, 0.52))],
+    [((0.13, 0.46), (0.20, 0.40)), ((0.20, 0.40), (0.14, 0.34)), ((0.14, 0.34), (0.22, 0.30))],
+]
+
+
+def blade_runes(mb, P, side_x):
+    """Runas pintadas nas duas faces da lâmina (quads de 2 tris, cor de sangue/osso)."""
+    for ri, rune in enumerate(RUNES):
+        mat = 'rune_red' if ri != 1 else 'rune'
+        for (a, b) in rune:
+            for sx in (-1, 1):
+                pts = []
+                for (z, y) in (a, b):
+                    zs = z * 0.86
+                    pts.append(tuple(P @ Vector((sx * (blade_half(zs) + 0.001), y, zs))))
+                nrm = tuple((P.to_3x3() @ Vector((sx, 0, 0))))
+                d = Vector(pts[1]) - Vector(pts[0])
+                stitches(mb, pts[0], pts[1], 1, mat, size=(d.length + 0.01, 0.014, 0.01), hint=nrm)
 
 
 def mini_axe(mb, m):
     """Machadinha de cinto/bandoleira: cabo ao longo de +Y, gume em +Z. Comprimento ~0.30."""
     mb.add(prim_cyl(0.017, 0.02, 0.27, 6, base=False), 'wood', m @ M((0, 0.03, 0)), smooth=50)
-    mb.add(prim_box(0.05, 0.075, 0.055), 'iron', m @ M((0, 0.155, 0)), bevel=0.006)
+    mb.add(prim_box(0.05, 0.075, 0.055), 'iron', m @ M((0, 0.155, 0)))
     poly = [(0.03, 0.05), (0.075, 0.075), (0.115, 0.03), (0.125, -0.02), (0.11, -0.075), (0.07, -0.05), (0.03, -0.035)]
     v, f = axe_blade(poly, 0.02, 0.03, 0.125)
-    mb.add((v, f), 'blade', m @ M((0, 0.165, 0)), bevel=0.004)
+    mb.add((v, f), 'blade', m @ M((0, 0.165, 0)))
 
 
 # ---------------------------------------------------------------------------
@@ -377,6 +417,24 @@ def build_arm(mats, torso, side):
         mb.add(prim_rings(pr, cap0=False, cap1=True), 'fur', smooth=60)
         for (dz, h, dx) in ((-0.10, 0.22, 0.10), (0.11, 0.19, 0.12)):
             mb.add(prim_cone(0.06, h, 6), 'bone', M((s * dx, 0.14, dz), (0, 0, -s * 34)), smooth=60)
+        mb.add(prim_cone(0.035, 0.12, 5), 'bone', M((s * 0.20, 0.03, 0.17), (0, 0, -s * 62)), smooth=60)
+        # camadas de pele: duas franjas em mechas penduradas (fasas deslocadas) por cima do pad
+        for li, (y0, rr, ph) in enumerate(((0.02, 0.335, 0.0), (-0.05, 0.36, 0.5))):
+            n = 10
+            top = [ring_h(y0 + 0.02 - li * 0.0, rr - 0.03, rr - 0.05, n, cx=s * 0.12, phase=ph * math.pi / n)]
+            low = ring_h(y0 - 0.10, rr, rr - 0.02, n, cx=s * 0.12, phase=ph * math.pi / n)
+            low = [(x, yy - (0.13 if i % 2 else 0.0), z) for i, (x, yy, z) in enumerate(low)]
+            mb.add(prim_rings(top + [low], cap0=False, cap1=False), 'fur' if li == 0 else 'hide', smooth=30)
+        # tufos (cones de pelo) no topo do pad
+        for k in range(8):
+            a = 2 * math.pi * k / 8 + 0.3
+            mb.add(prim_cone(0.034, 0.14, 4), 'fur_lt', M((s * 0.06 + math.cos(a) * 0.17, 0.17, math.sin(a) * 0.16),
+                                                        (math.sin(a) * 25, 0, -math.cos(a) * 25)), smooth=0)
+        # tira de couro costurada na base do pad
+        mb.add(prim_rings([ring_h(-0.085, 0.322, 0.302, 12, cx=s * 0.12), ring_h(-0.115, 0.318, 0.298, 12, cx=s * 0.12)],
+                          cap0=False, cap1=False), 'leather_dk', smooth=30)
+        stitches(mb, (s * 0.12 - 0.22, -0.10, 0.24), (s * 0.12 + 0.22, -0.10, 0.24), 6, 'fur_lt', size=(0.03, 0.01, 0.01),
+                 hint=(0, 0, 1))
     else:
         # ombro direito: aro de ferro com espinho + tira de couro
         mb.add(prim_sphere(0.20, 0.17, 0.2, 8, 4, y_min=0.0), 'iron', M((s * 0.04, 0.03, 0.0), (0, 0, -s * 22)),
@@ -409,6 +467,7 @@ def build_weapon(mats, arm, side):
     mb.add(prim_cone(0.04, 0.17, 5), 'steel', P @ M((0, 0.53, -0.07), (-90, 0, 0)))
     v, f = axe_blade([(z * 0.86, y) for (z, y) in BLADE], 0.05, 0.05, 0.33)
     mb.add((v, f), 'blade', P, bevel=0.007)
+    blade_runes(mb, P, 1)
     v, f = axe_blade([(z * 0.86, y) for (z, y) in EDGE], 0.036, 0.20, 0.33)
     mb.add((v, f), 'steel', P)
     w = mb.build(mats, parent=arm, location=WEAPON_POS)

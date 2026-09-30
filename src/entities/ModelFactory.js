@@ -405,7 +405,7 @@ export class ModelFactory {
 
   // --- Human Units ---
   static createKnight() {
-    return this.getOrCreateModel('knight', createKnight, 'knight');
+    return this._glbOr('knight', () => this.getOrCreateModel('knight', createKnight, 'knight'));
   }
 
   static createArcher() {

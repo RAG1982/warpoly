@@ -179,3 +179,7 @@ oak 16m/476t · pine 12m/208t · autumn 16m/476t · birch 29m/904t · flower_pat
 - Escala em jogo: unidades ×1.62.
 - Direção de arte orc: `specs/orc_buildings/00_ORC_ART_DIRECTION_PIPELINE.md`.
 - Referências visuais do dono do projeto: `modelo.png`, `modeloorcs.png`, `hudmodelo.png`, `dialogoBarracs.png`, `forjaHumanos.png` (em `docs/reference/`; comentários no código citam só o nome do arquivo).
+
+
+## Espadachim (Blender) — `knight.glb`
+`tools/blender/build_knight.py` gera `public/models/knight.glb` a partir da referência `soldado.png` (armadura de placas com frisos dourados, elmo aberto, capa/mangas azuis em cor de time, espada longa). Rig **plana** idêntica à do `KnightModel.js` (Torso, Head, ArmL, ArmR, LegL, LegR, Sword; o `UnitAnimator` usa posições absolutas na raiz), sem escudo. 10 draw calls, ~4,2 mil tris, 213 KB, atlas 512². Ligado por padrão (`?glb=0` volta ao procedural); no inspetor: "Espadachim (Blender)". Capturas: `tools/blender/capture_knight.mjs` (GPU real).

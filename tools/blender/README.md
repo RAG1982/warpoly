@@ -7,6 +7,7 @@ os `.glb` em `public/models/` são artefatos reproduzíveis.
 | Script | Saída | Resultado |
 |---|---|---|
 | `build_grunt.py` | `public/models/grunt.glb` | guerreiro orc: 7 partes rígidas, 4,4 mil tris, 8 draw calls, atlas 512² |
+| `build_knight.py` | `public/models/knight.glb` | Espadachim humano (ref. `soldado.png`): 7 partes rígidas, 4,2 mil tris, 10 draw calls, atlas 512², 213 KB |
 | `build_castle.py` | `public/models/castle.glb` | castelo humano: 2 draw calls, 8,7 mil tris, atlas 1024² |
 | `common.py` | — | helpers (primitivas bmesh, materiais de pintura, UV atlas, bake, export, render) |
 

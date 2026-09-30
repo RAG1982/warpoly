@@ -74,6 +74,19 @@ const MODEL_CATALOG = [
     notes: 'Articulação modular completa (cabeça, torso, braços, pernas, ombreiras, escudo e espada). Escudo e espada vinculados aos braços com rotações independentes.'
   },
   {
+    id: 'knight_glb',
+    name: 'Espadachim (Blender)',
+    category: 'units',
+    faction: 'human',
+    type: 'knight',
+    icon: '🗡️',
+    glb: 'knight',
+    sourceFile: 'tools/blender/build_knight.py',
+    create: createGlb('knight'),
+    description: 'Versão gerada pelo pipeline Blender headless (public/models/knight.glb) a partir da referência soldado.png: armadura de placas de aço com frisos dourados, elmo aberto, capa e mangas azuis em cor de time, espada longa. 7 partes rígidas (Torso, Head, ArmL, ArmR, LegL, LegR, Sword), atlas 512².',
+    notes: 'Rig plana idêntica à do KnightModel.js procedural (o UnitAnimator anima Sword/braços com rotações independentes). Sem escudo (a referência não tem). 10 draw calls, ~4,2 mil triângulos, 213 KB. Rosto só na face frontal (+Z).'
+  },
+  {
     id: 'archer',
     name: 'Arqueiro (Archer)',
     category: 'units',

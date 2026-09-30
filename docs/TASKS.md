@@ -295,12 +295,12 @@ Sonnet 5.5 escreve a spec em `docs/specs/<ID>.md`; agente **Sonnet** executa; o 
 - **Resultado**: catálogo `RESEARCH` (11 pesquisas, 2 níveis, Forja/Serraria), `Player.researchLevels`, requisitos `{research}`, classe avançada (Patrulheiro/Enfurecido, modelo do atirador base), IA pesquisa, HUD com nível N/M. Cerco/naval ficam para F4. 312 testes, smoke ok.
 
 ### F3-08 · Muralhas
-- **Status**: `TODO` · Lane GAME · Onda 4 · Dep: F1-07
+- **Status**: `DOING(sonnet, 2026-09-30)` (spec: docs/specs/F3-08-muralhas.md) · Lane GAME · Onda 4 · Dep: F1-07
 - **Fazer**: colocação por arrasto em grade, segmentos que se conectam, bloqueiam pathfinding, podem ser destruídos.
 - **Aceite**: IA encontra caminho alternativo ou ataca a muralha.
 
 ### F3-09 · Condições de vitória e estatísticas
-- **Status**: `TODO` · Lane GAME · Onda 4 · Dep: F2-04, F2-07
+- **Status**: `DOING(sonnet, 2026-09-30)` (spec: docs/specs/F3-09-vitoria-estatisticas.md) · Lane GAME · Onda 4 · Dep: F2-04, F2-07
 - **Fazer**: modos "Destruir tudo" (padrão WC2) e "Regicídio (HQ)"; coleta de estatísticas (unidades treinadas/perdidas/mortas, construções, recursos coletados, APM, tempo).
 - **Aceite**: dados alimentam a tela F6-07.
 

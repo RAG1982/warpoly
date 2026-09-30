@@ -8,6 +8,7 @@
  * Sem three.js nem DOM: testável em Node.
  */
 import { STARTING_RESOURCES } from '../data/index.js';
+import { EVT } from './events.js';
 
 export const RESOURCE_TYPES = Object.freeze(['wood', 'gold', 'stone']);
 
@@ -56,6 +57,8 @@ export class Player {
     /** F3-07: nível concluído por pesquisa (0 = nada). `researchedUpgrades` é derivado (nível >= 1). */
     this.researchLevels = new Map();
     this.defeated = false;
+    /** F3-09: barramento de eventos (definido pelo GameManager); `deduct` emite RESOURCES_SPENT. */
+    this.events = null;
   }
 
   /** Nível concluído da pesquisa `id` (0 se nenhum). */
@@ -83,6 +86,12 @@ export class Player {
     if (!cost) return;
     for (const r of RESOURCE_TYPES) {
       if (cost[r]) this.resources[r] -= cost[r];
+    }
+    if (this.events) {
+      this.events.emit(EVT.RESOURCES_SPENT, {
+        ownerId: this.id,
+        cost: { gold: cost.gold || 0, wood: cost.wood || 0, stone: cost.stone || 0 }
+      });
     }
   }
 

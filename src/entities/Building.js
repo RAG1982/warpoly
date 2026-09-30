@@ -495,6 +495,8 @@ export class Building {
 
   /** F3-03: `amount` já é o dano final (calculado por `computeDamage` no chamador). */
   takeDamage(amount, attacker = null) {
+    // F3-09: atribuição de kills (lida em die()).
+    if (attacker && typeof attacker.ownerId === 'number') this.lastAttackerOwnerId = attacker.ownerId;
     this.hp -= amount;
     this.underAttackTimer = 6.0;
     this.updateHealthBar();
@@ -528,7 +530,8 @@ export class Building {
         buildingId: this.id,
         ownerId: this.ownerId,
         pos: posOf(this.mesh.position),
-        buildingType: this.type
+        buildingType: this.type,
+        killerOwnerId: this.lastAttackerOwnerId ?? null
       });
     }
     this.dispose();

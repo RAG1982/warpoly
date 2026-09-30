@@ -31,6 +31,8 @@ export const EVT = Object.freeze({
 
   RESOURCE_GATHERED: 'resource_gathered',
   RESOURCE_DEPLETED: 'resource_depleted',
+  /** F3-09: custo debitado de um jogador (treino, construção, pesquisa, upgrade de Centro). */
+  RESOURCES_SPENT: 'resources_spent',
 
   WORKER_CHOP: 'worker_chop',
   WORKER_MINE: 'worker_mine',
@@ -55,12 +57,12 @@ export const EVT = Object.freeze({
  * @typedef {{x:number,y:number,z:number}} Pos
  *
  * EVT.UNIT_TRAINED     {unitId:number, ownerId:number, pos:Pos, unitType:string}
- * EVT.UNIT_DIED        {unitId:number, ownerId:number, pos:Pos, unitType:string}
+ * EVT.UNIT_DIED        {unitId:number, ownerId:number, pos:Pos, unitType:string, killerOwnerId?:number|null}  (F3-09: null/ausente = causa desconhecida, não conta kill)
  * EVT.UNIT_DAMAGED     {unitId:number, ownerId:number, pos:Pos, amount:number}
  *
  * EVT.BUILDING_PLACED    {buildingId:number, ownerId:number, pos:Pos, buildingType:string}
  * EVT.BUILDING_COMPLETED {buildingId:number, ownerId:number, pos:Pos, buildingType:string}
- * EVT.BUILDING_DESTROYED {buildingId:number, ownerId:number, pos:Pos, buildingType:string}
+ * EVT.BUILDING_DESTROYED {buildingId:number, ownerId:number, pos:Pos, buildingType:string, killerOwnerId?:number|null}
  * EVT.BUILDING_DAMAGED   {buildingId:number, ownerId:number, pos:Pos, amount:number}
  * EVT.BUILDING_VFX       {buildingId:number, ownerId:number, pos:Pos, kind:string}
  *
@@ -69,6 +71,7 @@ export const EVT = Object.freeze({
  *
  * EVT.RESOURCE_GATHERED {type:string, amount:number, pos:Pos, ownerId:number}
  * EVT.RESOURCE_DEPLETED {resourceId:number, pos:Pos, resourceType:string}
+ * EVT.RESOURCES_SPENT   {ownerId:number, cost:{gold:number,wood:number,stone:number}}  (F3-09)
  *
  * EVT.WORKER_CHOP    {pos:Pos, ownerId:number}
  * EVT.WORKER_MINE    {pos:Pos, ownerId:number, resource:'gold'|'stone'}

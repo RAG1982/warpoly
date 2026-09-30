@@ -425,6 +425,12 @@ visuais/sonoros nunca são "re-disparados" porque o `EventBus` tem `muted` (aind
   `src/inspector/`, camada invertida — ver B13 em `04_DIAGNOSTICO.md`); `src/inspector/
   unitAnimator.js` é um reexport de 1 linha para compatibilidade.
 
+### Vitória e estatísticas (F3-09)
+- `src/sim/victory.js`: `isPlayerDefeated(mode, ownedBuildings)` (função pura) e textos PT-BR; `GameManager._updateVictoryConditions` aplica a regra por jogador a cada passo e, ao terminar a partida, congela `gm.result` (`matchStats.snapshot()`, depois de despachar os eventos pendentes).
+- `src/sim/MatchStats.js` (`gm.matchStats`): só assina `gm.events` (nunca altera a simulação). Por jogador: `unitsTrained/Lost/Killed`, `buildingsBuilt/Lost/Destroyed`, `resources` (coletados), `spent`, `commands` (contados em `gm.issue`; a IA não passa por `issue`, então seu APM é 0), `apm` e `score` (`computeScore`). Série a cada 10 s simulados (≤ 720 pontos): `{t, players:{id:{gold,wood,stone,units,buildings,kills}}}`. `snapshot()` é serializável.
+- Novos campos/eventos: `EVT.UNIT_DIED` e `EVT.BUILDING_DESTROYED` ganham `killerOwnerId?: number|null` (de `lastAttackerOwnerId`, gravado em `takeDamage`; só conta kill se killer e vítima são hostis); `EVT.RESOURCES_SPENT {ownerId, cost}` emitido por `Player.deduct` (o `GameManager` liga `player.events = gm.events` em `_createPlayers`).
+- Headless: `npx vite-node tools/headless-victory.mjs` roda 5 partidas IA×IA por modo; `tools/capture-victory.mjs` (via safe-run) captura o modal em `tools/ui-captures/victory/`.
+
 ## Pipeline de assets
 
 - Cada `*Textures.js` tem funções `getXTextures()` memoizadas que pintam canvases (map, roughness, metalness, bump) — **498 chamadas `createCanvas(2048…)`**, 41 de 1024, 17 de 512.

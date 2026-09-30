@@ -39,6 +39,8 @@ import { createRng } from '../sim/rng.js';
 import { recordChecksum } from '../sim/checksum.js';
 import { EventBus } from '../sim/EventBus.js';
 import { EVT } from '../sim/events.js';
+import { MatchStats } from '../sim/MatchStats.js';
+import { isPlayerDefeated } from '../sim/victory.js';
 import { missingRequirements } from '../sim/requirements.js';
 
 const EMPTY_LIST = Object.freeze([]);
@@ -66,6 +68,10 @@ export class GameManager {
     // `flush()` (fim do passo/quadro) para os ouvintes (`src/audio/AudioEvents.js`,
     // `src/render/VfxEvents.js`, `src/ui/UiEvents.js`), criados pela `MatchSession`.
     this.events = new EventBus();
+    // F3-09: estatísticas da partida (só lê eventos) e resultado congelado ao fim da partida.
+    this.matchStats = new MatchStats(this);
+    /** @type {object|null} snapshot de `matchStats` tirado quando a partida termina */
+    this.result = null;
 
     // Instanced Trees System (6 Draw Calls for all 180 Trees)
     this.treeManager = new TreeManager(this.scene);
@@ -254,6 +260,7 @@ export class GameManager {
    */
   issue(fields) {
     const cmd = makeCommand({ ...fields, tick: this.currentTick + COMMAND_DELAY_TICKS });
+    this.matchStats.countCommand(fields.playerId);
     return this.commands.enqueue(cmd);
   }
 
@@ -367,7 +374,7 @@ export class GameManager {
   setPlayerFaction(faction) {
     if (this.playerFaction === faction) return;
     const ffa = this.matchConfig.players.length > 2;
-    this.startMatch(createMatchConfig({ localFaction: faction, ffa, seed: this.matchConfig.seed, mapId: this.matchConfig.mapId }));
+    this.startMatch(createMatchConfig({ localFaction: faction, ffa, seed: this.matchConfig.seed, mapId: this.matchConfig.mapId, victoryMode: this.matchConfig.victoryMode }));
   }
 
   /** Recria o mapa com uma nova MatchConfig e centraliza a câmera na base do jogador local. */
@@ -414,6 +421,8 @@ export class GameManager {
     this.selectedResource = null;
     this.isGameOver = false;
     this.gameWon = false;
+    this.result = null;
+    this.gameTime = 0;
     this.aiDirectors = [];
     this.aiDirector = null;
     this.entityRegistry.clear();
@@ -439,6 +448,8 @@ export class GameManager {
       this.matchConfig.players.map(spec => new Player({ ...spec, resources: STARTING_RESOURCES }))
     );
     this._localPlayerId = this.playerRegistry.localPlayer.id;
+    this.playerRegistry.players.forEach(p => { p.events = this.events; });
+    this.matchStats.reset();
     this._unitsByOwner.clear();
     this._hostileUnitsCache.clear();
     this.players.forEach(p => this._unitsByOwner.set(p.id, []));
@@ -1058,28 +1069,39 @@ export class GameManager {
 
   // --- GAME LOOP & AI ---
 
-  /** O jogador ainda tem um centro de comando (HQ) de pé? (regra de derrota atual) */
-  _hasLivingHQ(ownerId) {
+  /**
+   * F3-09: o jogador está derrotado segundo o modo de vitória da partida? (`src/sim/victory.js`).
+   * Reutiliza uma lista de wrappers `{role,isDead}` para não alocar por tick.
+   */
+  _isDefeatedByRule(ownerId) {
+    const scratch = this._victoryScratch || (this._victoryScratch = []);
+    let n = 0;
     const buildings = this.buildings;
     for (let i = 0; i < buildings.length; i++) {
       const b = buildings[i];
-      if (b.ownerId === ownerId && !b.isDead && getBuildingDef(b.type).role === 'hq') return true;
+      if (b.ownerId !== ownerId) continue;
+      const w = scratch[n] || (scratch[n] = { role: '', isDead: false });
+      w.role = getBuildingDef(b.type).role;
+      w.isDead = !!b.isDead;
+      n++;
     }
-    return false;
+    scratch.length = n;
+    return isPlayerDefeated(this.matchConfig.victoryMode, scratch);
   }
 
   /**
-   * Derrota: jogador sem HQ. Fim de jogo: jogador local derrotado (derrota) ou só um time
-   * vivo (vitória do time local). Retorna true se a partida acabou neste frame.
+   * Derrota por modo (`conquest`: sem construções; `regicide`: sem Centro). Cada derrotado emite
+   * `PLAYER_DEFEATED` uma vez; suas entidades continuam no mapa, inertes (ver `simStep`).
+   * Fim de jogo: jogador local derrotado (derrota) ou só um time vivo (vitória do time local).
+   * Ao terminar, congela `this.result` (snapshot de `matchStats`). Retorna true se acabou.
    */
   _updateVictoryConditions() {
-    const newlyDefeated = [];
     const players = this.players;
     for (let i = 0; i < players.length; i++) {
       const p = players[i];
-      if (!p.defeated && !this._hasLivingHQ(p.id)) {
+      if (!p.defeated && this._isDefeatedByRule(p.id)) {
         p.defeated = true;
-        newlyDefeated.push(p);
+        this.events.emit(EVT.PLAYER_DEFEATED, { ownerId: p.id, name: p.name });
       }
     }
 
@@ -1087,6 +1109,7 @@ export class GameManager {
     if (local.defeated) {
       this.isGameOver = true;
       this.gameWon = false;
+      if (!this.result) this.result = this.matchStats.snapshot();
       return true;
     }
 
@@ -1096,13 +1119,9 @@ export class GameManager {
         this.isGameOver = true;
         this.events.emit(EVT.MATCH_WON, { ownerId: local.id });
       }
+      if (!this.result) this.result = this.matchStats.snapshot();
       return true;
     }
-
-    // Partida continua (FFA/times): avisa quem caiu. A IA derrotada para de jogar (ver update).
-    newlyDefeated.forEach(p => {
-      this.events.emit(EVT.PLAYER_DEFEATED, { ownerId: p.id, name: p.name });
-    });
     return false;
   }
 
@@ -1139,6 +1158,12 @@ export class GameManager {
     if (this._acc < 0) this._acc = 0;
     this._lastAlpha = this._acc / SIM_DT;
     return this._lastAlpha;
+  }
+
+  /** F3-09: o dono é um jogador já derrotado? (neutro → false) */
+  _isOwnerDefeated(ownerId) {
+    const p = this.playerRegistry.getPlayer(ownerId);
+    return !!p && p.defeated;
   }
 
   /** Pose visual (interpolada) → pose de simulação, antes de rodar `simStep` neste frame. */
@@ -1208,10 +1233,14 @@ export class GameManager {
     this.currentTick = tick + 1;
     const dueCommands = this.commands.drain(tick);
     for (let i = 0; i < dueCommands.length; i++) {
+      // F3-09: jogador derrotado não recebe ordens.
+      const owner = this.playerRegistry.getPlayer(dueCommands[i].playerId);
+      if (owner && owner.defeated) continue;
       CommandExecutor.execute(this, dueCommands[i]);
     }
 
     this.gameTime += dt;
+    this.matchStats.update(this.gameTime);
 
     // Check Win/Loss conditions
     if (this._updateVictoryConditions()) {
@@ -1250,6 +1279,7 @@ export class GameManager {
 
     // Update Buildings (lógica de jogo; VFX/billboard vão em renderUpdate)
     this.buildings.forEach(b => {
+      if (this._isOwnerDefeated(b.ownerId)) return; // F3-09: entidades de derrotado ficam inertes
       b.simUpdate(dt, this, this.arrows, allUnits, allUnits);
     });
 
@@ -1277,6 +1307,8 @@ export class GameManager {
     // Update Units (tamanho fixado: unidades criadas neste frame só atualizam no próximo)
     for (let i = 0; i < unitCount; i++) {
       const u = allUnits[i];
+      // F3-09: unidades de jogador derrotado ficam paradas (as que morrem continuam a animação).
+      if (!u.isDead && !u.isDying && this._isOwnerDefeated(u.ownerId)) continue;
       // F3-07: regeneração de pesquisa (`effect.regen`, PV/s) — nunca passa do máximo.
       if (u.regen > 0 && !u.isDead && !u.isDying && u.hp < u.maxHp) {
         u.hp = Math.min(u.maxHp, u.hp + u.regen * dt);
@@ -1567,6 +1599,7 @@ export class GameManager {
     this.aiDirectors.forEach(d => d.dispose?.());
     this.aiDirectors = [];
     this.aiDirector = null;
+    this.matchStats.dispose();
 
     this.allUnits.forEach(u => u.dispose?.());
     this.buildings.forEach(b => (b.dispose ? b.dispose() : this.scene.remove(b.mesh)));

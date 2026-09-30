@@ -10,6 +10,7 @@ import { initUiScale } from './uiScale.js';
 import { getBuildHotkey, getTrainHotkey, getResearchHotkey } from './hotkeys.js';
 import { buildCostHtml } from './Tooltip.js';
 import { CMD } from '../sim/commands.js';
+import { victoryMessage, defeatMessage } from '../sim/victory.js';
 import { worldToMinimap, minimapToWorld } from './minimapCoords.js';
 import { renderTerrainImage } from './terrainMinimapImage.js';
 
@@ -283,18 +284,15 @@ export class UIManager {
       const msg = document.getElementById('game-over-msg');
       if (modal && modal.style.display !== 'flex') {
         modal.style.display = 'flex';
+        msg.style.whiteSpace = 'pre-line';
         if (this.gm.gameWon) {
           title.innerText = '🏆 VITÓRIA GLORIOSA 🏆';
           title.style.color = '#ffd700';
-          msg.innerText = this.gm.playerFaction === 'orc'
-            ? 'O posto avançado humano foi esmagado! Os clãs dominam a ilha.'
-            : 'A fortaleza orc foi derrotada! Seu reino prospera em paz.';
+          msg.innerText = this._gameOverText(true);
         } else {
           title.innerText = '💀 DERROTA 💀';
           title.style.color = '#ef4444';
-          msg.innerText = this.gm.playerFaction === 'orc'
-            ? 'Seu Grande Salão caiu diante dos invasores...'
-            : 'Seu Castelo caiu diante dos invasores...';
+          msg.innerText = this._gameOverText(false);
         }
       }
     }
@@ -483,6 +481,21 @@ export class UIManager {
         }
       }
     }, this._listenOpts);
+  }
+
+  /** F3-09: texto do modal de fim de jogo — mensagem do modo + 3 linhas de resumo (PT-BR). */
+  _gameOverText(won) {
+    const gm = this.gm;
+    const r = gm.result || gm.matchStats.snapshot();
+    const me = r.players.find(p => p.id === gm.localPlayerId) || {};
+    const mm = Math.floor(r.elapsed / 60);
+    const ss = String(Math.floor(r.elapsed % 60)).padStart(2, '0');
+    return [
+      won ? victoryMessage(r.mode) : defeatMessage(r.mode),
+      `Tempo de partida: ${mm}:${ss}`,
+      `Unidades: ${me.unitsKilled || 0} mortas / ${me.unitsLost || 0} perdidas`,
+      `Construções: ${me.buildingsDestroyed || 0} destruídas / ${me.buildingsLost || 0} perdidas`
+    ].join('\n');
   }
 
   updateSelectionCard() {

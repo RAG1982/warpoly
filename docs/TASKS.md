@@ -524,7 +524,7 @@ _(agentes adicionam aqui: `NEW-<n> · título · lane · motivo`)_
 - ✅ NEW-17 · `DONE(297a07e)` textura do terreno pintada pela altura em mapas não continentais (`getTerrainTexturesFromHeight`); continental inalterado · haiku. Obs.: o padrão "rachado" restante na água é a textura do `Water.js` (cáusticas), não do terreno
 - ✅ NEW-18 · `DONE(640dff1)` guia rápido não estica sem seleção (grid-column fixo nos filhos de #bottom-bar) · haiku
 - NEW-19 · Ruínas/clareira ao destruir construção ou esgotar mina (como no WC2), procedural, só render · VFX · spec `docs/specs/NEW-19-ruinas.md` · **nuvem** (após F3-01/F6-08; parte da mina depende do evento `RESOURCE_DEPLETED` da F3-04)
-- NEW-20 · Teste intermitente: 1 falha na 1ª execução de `npm test` após o merge da F3-04 (5 execuções seguintes 264/264) — provável timeout de teste pesado (determinismo/headless) com cache frio; aumentar `testTimeout` desses testes · QA · haiku
+- ⏸ NEW-20 · **ADIADA pelo dono** (agente Haiku bloqueado sem permissão para `npx vitest`; spec pronta em `docs/specs/NEW-20-teste-intermitente.md`) · Teste intermitente: 1 falha na 1ª execução de `npm test` após o merge da F3-04 (5 execuções seguintes 264/264) — provável timeout de teste pesado (determinismo/headless) com cache frio; aumentar `testTimeout` desses testes · QA · haiku
 - NEW-21 · `Pathfinder._searchAStar`: sem caminho (ex.: anel de árvores fechado) cai no fallback de linha reta atravessando o bloqueio; deveria devolver "sem caminho" e a unidade parar/ir ao ponto alcançável mais próximo · PERF/GAME
 - NEW-22 · Textos em inglês no card de seleção ("Carry: 0/10 gold") — incluir em NEW-3/F6-09 · UI
 - NEW-23 · Projéteis de cerco balísticos que podem errar alvo em movimento — implementar junto com a F4-02 (cerco) · GAME

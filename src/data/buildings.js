@@ -38,8 +38,8 @@ export const BUILDINGS = {
     entityName: 'Castelo Real',
     faction: 'human',
     role: 'hq',
-    hp: 1400,
-    armor: 17,
+    hp: 1600,
+    armor: 20,
     cost: { gold: 0, wood: 200, stone: 150 },
     collisionRadius: 5.5,
     popGranted: 5,
@@ -203,8 +203,8 @@ export const BUILDINGS = {
     entityName: 'Grande Salão Orc',
     faction: 'orc',
     role: 'hq',
-    hp: 1400, // F3-06 NEW-24: alinhado a HQ_TIER_HP[1] (src/data/tiers.js) — antes 1750.
-    armor: 17,
+    hp: 1600, // F3-06 NEW-24: alinhado a HQ_TIER_HP[1] (src/data/tiers.js) — antes 1750.
+    armor: 20,
     cost: { gold: 0, wood: 220, stone: 140 },
     collisionRadius: 5.5,
     popGranted: 5,

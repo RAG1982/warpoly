@@ -82,7 +82,7 @@ Opus escreve a spec em `docs/specs/<ID>.md`; agente **Sonnet** executa; Opus rev
 | F0 Fundação | 7 | 0 | 0 | 7 |
 | F1 Desempenho | 10 | 1 | 0 | 9 |
 | F2 Núcleo | 8 | 2 | 0 | 6 |
-| F3 Jogabilidade WC2 base | 11 | 8 | 0 | 3 |
+| F3 Jogabilidade WC2 base | 11 | 7 | 0 | 4 |
 | F4 Jogabilidade WC2 expansão | 8 | 8 | 0 | 0 |
 | F5 IA | 6 | 6 | 0 | 0 |
 | F6 HUD/UX | 9 | 7 | 0 | 2 |
@@ -282,9 +282,10 @@ Opus escreve a spec em `docs/specs/<ID>.md`; agente **Sonnet** executa; Opus rev
 - **Aceite**: testes manuais + unidade.
 
 ### F3-06 · Tiers de HQ e árvore tecnológica
-- **Status**: `DOING(sonnet, 2026-09-29)` · Lane GAME · Onda 4 · Dep: F3-00
+- **Status**: `DONE(369cc38)` · Lane GAME · Onda 4 · Dep: F3-00
 - **Fazer**: HQ T1→T2→T3 (Salão→Fortaleza→Castelo / equivalentes orcs) com upgrade in-place e modelo novo por tier; requisitos de construção/unidade/pesquisa; UI mostra requisitos faltantes.
 - **Aceite**: não é possível treinar/construir sem requisitos; IA respeita.
+- **Resultado**: `src/data/tiers.js` (3 níveis, PV 1600/2200/2800, custos nv2/nv3, ouro ×1,0/1,1/1,2), comandos `UPGRADE_HQ`/`CANCEL_UPGRADE_HQ`, evento `HQ_TIER_CHANGED`, requisitos `{hq:N}` em construções/unidades/pesquisas, card "NÍVEL N — nome" com botão Evoluir e progresso, IA evolui o Centro. Grande Salão PV 1750→1600 (tabela única). Petróleo do nv3 declarado, cobrança fica para F4-07. 298 testes.
 
 ### F3-07 · Pesquisas em níveis
 - **Status**: `TODO` · Lane GAME · Onda 4 · Dep: F3-06

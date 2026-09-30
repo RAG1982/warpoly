@@ -278,7 +278,7 @@ Sonnet 5.5 escreve a spec em `docs/specs/<ID>.md`; agente **Sonnet** executa; o 
 - **Resultado**: `src/data/economy.js` (carga 10/10/8, entrada na mina 1,5 s, 1 slot ouro / 2 pedra), fila de mina em `ResourceDeposit`, estados `waitingMine/insideMine`, sem ouro passivo, Quartel requer Fazenda/Chiqueiro (`src/sim/requirements.js`, botão desabilitado com motivo), `RESOURCE_DEPLETED` + aviso PT-BR, IA constrói Fazenda antes do Quartel. Curva: 1 mina satura com ~3 trabalhadores (~385 ouro/min). 264 testes.
 
 ### F3-05 · Reparo e cancelamento de construção
-- **Status**: `TODO(spec pronta: docs/specs/F3-05-reparo-cancelamento.md)` · Lane GAME · Onda 4 · Dep: F2-02
+- **Status**: `DOING(sonnet, 2026-09-30)` (spec: docs/specs/F3-05-reparo-cancelamento.md) · Lane GAME · Onda 4 · Dep: F2-02
 - **Fazer**: trabalhadores reparam construções/máquinas (custo proporcional); cancelar construção devolve 75%; vários trabalhadores aceleram a obra.
 - **Aceite**: testes manuais + unidade.
 

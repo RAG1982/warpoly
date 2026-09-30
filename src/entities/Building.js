@@ -1,7 +1,7 @@
 import * as THREE from 'three';
 import { ModelFactory } from './ModelFactory.js';
 import { Arrow } from './Arrow.js';
-import { UPGRADE_CONFIG, FORGE_UPGRADES } from '../core/UpgradeConfig.js';
+import { UPGRADE_CONFIG, RESEARCH } from '../data/index.js';
 import { legacyOwnerId } from '../sim/EntityIds.js';
 import { EVT } from '../sim/events.js';
 import { computeDamage } from '../sim/combat.js';
@@ -570,11 +570,14 @@ export class Building {
       return false;
     }
 
+    const gm = gameManager || this.gameManager;
+    // F3-07: após `ranged_class`, o Quartel treina a classe avançada no lugar do atirador base.
+    if (gm && typeof gm.resolveTrainType === 'function') unitType = gm.resolveTrainType(unitType, this.ownerId);
+
     const cfg = UNIT_TRAIN_CONFIG[unitType];
     if (!cfg) return false;
     const c = cfg.cost;
 
-    const gm = gameManager || this.gameManager;
     const owner = this.getOwner(gm);
     if (!owner) return false;
 
@@ -618,35 +621,47 @@ export class Building {
     return true;
   }
 
+  /**
+   * F3-07: inicia o PRÓXIMO nível de `upgradeId` (`RESEARCH`). Só constrói/pesquisa na construção
+   * cujo `role` bate com `RESEARCH[id].building` (Forja → 'forge', Serraria → 'lumber') e, se a
+   * pesquisa for de uma facção, só nessa facção. Falha silenciosa (sem debitar) se já no máximo,
+   * ocupada, duplicada em outra construção, requisito faltando ou sem recursos.
+   */
   startResearch(upgradeId, gameManager) {
-    if (this.type !== 'forge' && this.type !== 'orc_forge') return false;
     if (!this.isConstructed || this.isDead) return false;
     if (this.currentResearch) return false;
 
-    const cfg = UPGRADE_CONFIG[upgradeId];
-    if (!cfg) return false;
+    const research = RESEARCH[upgradeId];
+    if (!research) return false;
+    const def = getBuildingDef(this.type);
+    if (def.role !== research.building) return false;
+    if (research.faction && def.faction !== research.faction) return false;
 
     const gm = gameManager || this.gameManager;
     if (!gm) return false;
+    const owner = this.getOwner(gm);
+    if (!owner) return false;
 
-    // Check if already researched
-    if (gm.isUpgradeResearched(upgradeId, this.ownerId)) return false;
+    const nextLevel = owner.getResearchLevel(upgradeId) + 1;
+    if (nextLevel > research.levels.length) return false;
 
-    // Check if another forge is already researching this
+    // Outra construção do mesmo jogador já pesquisa o mesmo id?
     if (gm.isUpgradeResearching(upgradeId, this.ownerId)) return false;
 
-    // F3-06: requisitos generalizados (construção/{hq:N}) — falha silenciosa, sem debitar.
-    if (missingUpgradeRequirements(this.ownerId, upgradeId, gm).length > 0) return false;
+    // F3-06/F3-07: requisitos do nível (construção/{hq:N}/{research:id}) — sem debitar.
+    if (missingUpgradeRequirements(this.ownerId, upgradeId, gm, nextLevel).length > 0) return false;
 
-    const owner = this.getOwner(gm);
-    if (!owner || !owner.canAfford(cfg.cost)) return false;
-    owner.deduct(cfg.cost);
+    const lv = research.levels[nextLevel - 1];
+    if (!owner.canAfford(lv.cost)) return false;
+    owner.deduct(lv.cost);
 
     this.currentResearch = {
       id: upgradeId,
+      level: nextLevel,
       progress: 0,
-      totalTime: cfg.cost.time,
-      cfg: cfg
+      totalTime: lv.time,
+      cost: { ...lv.cost },
+      cfg: UPGRADE_CONFIG[upgradeId]
     };
     this.researchSoundTimer = 0;
     return true;
@@ -654,10 +669,9 @@ export class Building {
 
   cancelResearch(gameManager) {
     if (!this.currentResearch) return false;
-    const cfg = this.currentResearch.cfg;
     const owner = this.getOwner(gameManager || this.gameManager);
-    if (cfg && owner) {
-      owner.add(cfg.cost);
+    if (owner) {
+      owner.add(this.currentResearch.cost);
     }
     this.currentResearch = null;
     return true;
@@ -816,6 +830,7 @@ export class Building {
 
       if (r.progress >= r.totalTime) {
         const completedId = r.id;
+        const completedLevel = r.level || 1;
         this.currentResearch = null;
         const gm = gameManager || this.gameManager;
         if (gm) {
@@ -823,7 +838,7 @@ export class Building {
         }
         if (gmEvents) {
           gmEvents.emit(EVT.BUILDING_VFX, { buildingId: this.id, ownerId: this.ownerId, pos: posOf(this.mesh.position), kind: 'anvil_spark' });
-          gmEvents.emit(EVT.RESEARCH_DONE, { ownerId: this.ownerId, upgradeId: completedId, pos: posOf(this.mesh.position) });
+          gmEvents.emit(EVT.RESEARCH_DONE, { ownerId: this.ownerId, upgradeId: completedId, level: completedLevel, pos: posOf(this.mesh.position) });
         }
       }
     }

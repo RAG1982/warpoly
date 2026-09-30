@@ -230,7 +230,7 @@ export class FogOfWar {
     for (let i = 0; i < playerUnits.length; i++) {
       const u = playerUnits[i];
       if (!u.isDead && u.mesh) {
-        grid.revealArea(u.mesh.position.x, u.mesh.position.z, this.visionRadii[u.type] || DEFAULT_UNIT.visionRadius);
+        grid.revealArea(u.mesh.position.x, u.mesh.position.z, (this.visionRadii[u.type] || DEFAULT_UNIT.visionRadius) + (u.sightBonus || 0));
       }
     }
     for (let i = 0; i < playerBuildings.length; i++) {

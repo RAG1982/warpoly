@@ -14,6 +14,7 @@
  */
 import { BUILDINGS } from './buildings.js';
 import { HQ_TIER_GOLD_MULT } from './tiers.js';
+import { researchEffect } from './upgrades.js';
 
 export const CARRY = { gold: 10, wood: 10, stone: 8 };
 
@@ -38,6 +39,11 @@ export const RATE_BONUS = {
  * @returns {number}
  */
 export function gatherMultiplier(playerId, resource, gm) {
+  // F3-07: madeira usa o efeito `woodMultiplier` das pesquisas concluídas (Ofício do Lenhador).
+  if (resource === 'wood') {
+    const player = gm && gm.getPlayer ? gm.getPlayer(playerId) : null;
+    return player && player.researchLevels ? researchEffect(player.researchLevels, 'woodMultiplier', 1) : 1;
+  }
   if (resource !== 'gold' || !gm || !gm.buildings) return 1;
   let tier = 1;
   for (let i = 0; i < gm.buildings.length; i++) {

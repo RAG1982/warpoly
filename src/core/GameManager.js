@@ -18,8 +18,10 @@ import { AIDirector } from '../ai/AIDirector.js';
 import { TreeManager } from '../world/TreeManager.js';
 import { Pathfinder } from './Pathfinder.js';
 import { HumanForge } from '../entities/buildings/HumanForge.js';
-import { UPGRADE_CONFIG } from './UpgradeConfig.js';
-import { STARTING_RESOURCES, FACTIONS, getBuildingDef, isDropoffFor } from '../data/index.js';
+
+import {
+  STARTING_RESOURCES, FACTIONS, getBuildingDef, getUnitDef, isDropoffFor, RESEARCH, getMaxResearchLevel, promotedType
+} from '../data/index.js';
 import { Player } from '../sim/Player.js';
 import { PlayerRegistry } from '../sim/PlayerRegistry.js';
 import { EntityRegistry, NEUTRAL_OWNER_ID } from '../sim/EntityIds.js';
@@ -682,10 +684,8 @@ export class GameManager {
 
     const player = this.getPlayer(ownerId);
     if (player) {
-      // Apply active forge upgrades of the owner to new units
-      player.researchedUpgrades.forEach(upgId => {
-        this.applyUpgradeToUnit(unit, upgId);
-      });
+      // Aplica as pesquisas já concluídas (todos os níveis) do dono à unidade recém-treinada
+      this.applyUpgradeToUnit(unit);
       player.recalculatePop(this);
       // Ponto de reunião: só para jogadores humanos (a IA sempre ignorou o rally no spawn;
       // mantido para a partida 1×1 continuar idêntica).
@@ -696,9 +696,16 @@ export class GameManager {
     return unit;
   }
 
+  /** F3-07: `true` quando a pesquisa já está no nível máximo (desabilita o botão na HUD). */
   isUpgradeResearched(upgradeId, owner = 'player') {
     const player = this.getPlayer(this.resolveOwnerId(owner));
-    return player ? player.researchedUpgrades.has(upgradeId) : false;
+    return player ? player.getResearchLevel(upgradeId) >= getMaxResearchLevel(upgradeId) : false;
+  }
+
+  /** F3-07: nível concluído (0..máx) da pesquisa para o dono. */
+  getResearchLevel(upgradeId, owner = 'player') {
+    const player = this.getPlayer(this.resolveOwnerId(owner));
+    return player ? player.getResearchLevel(upgradeId) : 0;
   }
 
   isUpgradeResearching(upgradeId, owner = 'player') {
@@ -706,43 +713,86 @@ export class GameManager {
     return this.buildings.some(b => b.ownerId === ownerId && b.currentResearch && b.currentResearch.id === upgradeId);
   }
 
+  /** F3-07: tipo efetivamente treinado para `unitType` (arqueiro → patrulheiro após `ranged_class`). */
+  resolveTrainType(unitType, owner = 'player') {
+    const player = this.getPlayer(this.resolveOwnerId(owner));
+    if (!player) return unitType;
+    return promotedType(unitType, player.researchLevels, t => getUnitDef(t).faction, player.factionId);
+  }
+
+  /** Conclui o próximo nível de `upgradeId` e aplica seu bônus/efeito às unidades vivas do dono. */
   completeUpgrade(upgradeId, owner = 'player') {
     const ownerId = this.resolveOwnerId(owner);
     const player = this.getPlayer(ownerId);
-    if (!player) return;
-    player.researchedUpgrades.add(upgradeId);
+    const research = RESEARCH[upgradeId];
+    if (!player || !research) return;
+    const level = Math.min(player.getResearchLevel(upgradeId) + 1, research.levels.length);
+    player.setResearchLevel(upgradeId, level);
+    const lv = research.levels[level - 1];
 
-    // Apply to all currently alive units of this owner
+    // Promoção de classe (F3-07): converte as unidades vivas ANTES de aplicar bônus de nível.
+    if (lv.effect && lv.effect.promote) {
+      this.getUnitsOf(ownerId).forEach(u => {
+        if (u.isDead) return;
+        const to = lv.effect.promote[u.type];
+        if (to && getUnitDef(to).faction === player.factionId) this.promoteUnit(u, to);
+      });
+    }
+    // Aplica só o delta deste nível às unidades vivas.
     this.getUnitsOf(ownerId).forEach(u => {
-      if (!u.isDead) {
-        this.applyUpgradeToUnit(u, upgradeId);
-      }
+      if (!u.isDead) this.applyResearchLevelToUnit(u, upgradeId, level);
     });
     // F2-07: a notificação "Melhoria forjada" sai do evento RESEARCH_DONE (emitido por
-    // `Building.simUpdate` ao concluir a pesquisa, junto com este `completeUpgrade`) — ver
-    // `src/ui/UiEvents.js`.
+    // `Building.simUpdate` ao concluir a pesquisa) — ver `src/ui/UiEvents.js`.
   }
 
-  applyUpgradeToUnit(unit, upgradeId = null) {
-    if (!upgradeId) {
-      const player = this.getPlayer(unit.ownerId);
-      if (player) {
-        player.researchedUpgrades.forEach(id => {
-          this.applyUpgradeToUnit(unit, id);
-        });
-      }
-      return;
+  /**
+   * F3-07: troca o tipo da unidade viva (classe avançada). Mantém % de PV e os bônus de pesquisa
+   * já aplicados (soma só a diferença entre as definições base); o modelo 3D não muda.
+   */
+  promoteUnit(unit, toType) {
+    const from = getUnitDef(unit.type);
+    const to = getUnitDef(toType);
+    const pct = unit.maxHp > 0 ? unit.hp / unit.maxHp : 1;
+    unit.type = toType;
+    unit.name = to.entityName;
+    unit.maxHp += to.hp - from.hp;
+    unit.hp = Math.max(1, unit.maxHp * pct);
+    unit.damage.basic += to.damage.basic - from.damage.basic;
+    unit.damage.piercing += to.damage.piercing - from.damage.piercing;
+    unit.armor = (unit.armor || 0) + ((to.armor || 0) - (from.armor || 0));
+    unit.attackRange += to.attackRange - from.attackRange;
+  }
+
+  /** Aplica o bônus de UM nível de uma pesquisa à unidade (se ela for afetada). */
+  applyResearchLevelToUnit(unit, upgradeId, level) {
+    const research = RESEARCH[upgradeId];
+    const lv = research && research.levels[level - 1];
+    if (!lv) return;
+    if (research.appliesTo && !research.appliesTo.includes(unit.type)) return;
+    const b = lv.bonus;
+    if (b) {
+      // F3-03: `attack` é getter derivado (basic + piercing) — bônus soma nos campos reais.
+      if (b.basic) unit.damage.basic += b.basic;
+      if (b.piercing) unit.damage.piercing += b.piercing;
+      if (b.armor) unit.armor = (unit.armor || 0) + b.armor;
+      if (b.range) unit.attackRange += b.range;
+      if (b.sight) unit.sightBonus = (unit.sightBonus || 0) + b.sight;
     }
+    if (lv.effect && lv.effect.regen && research.appliesTo) unit.regen = (unit.regen || 0) + lv.effect.regen;
+  }
 
-    const cfg = UPGRADE_CONFIG[upgradeId];
-    if (!cfg) return;
-    if (!cfg.appliesTo(unit.type)) return;
-
-    if (cfg.statType === 'attack') {
-      // F3-03: `attack` é getter derivado (basic + piercing) — o bônus soma no básico.
-      unit.damage.basic += cfg.bonus;
-    } else if (cfg.statType === 'defense') {
-      unit.armor = (unit.armor || 0) + cfg.bonus;
+  /**
+   * Aplica à unidade todos os níveis já concluídos (ou só `upgradeId`, todos os níveis
+   * concluídos dele) do dono. Usado ao treinar unidades novas.
+   */
+  applyUpgradeToUnit(unit, upgradeId = null) {
+    const player = this.getPlayer(unit.ownerId);
+    if (!player) return;
+    const ids = upgradeId ? [upgradeId] : Object.keys(RESEARCH);
+    for (const id of ids) {
+      const lvls = player.getResearchLevel(id);
+      for (let l = 1; l <= lvls; l++) this.applyResearchLevelToUnit(unit, id, l);
     }
   }
 
@@ -1226,7 +1276,12 @@ export class GameManager {
 
     // Update Units (tamanho fixado: unidades criadas neste frame só atualizam no próximo)
     for (let i = 0; i < unitCount; i++) {
-      allUnits[i].update(dt, this, this.arrows, allUnits, this.buildings);
+      const u = allUnits[i];
+      // F3-07: regeneração de pesquisa (`effect.regen`, PV/s) — nunca passa do máximo.
+      if (u.regen > 0 && !u.isDead && !u.isDying && u.hp < u.maxHp) {
+        u.hp = Math.min(u.maxHp, u.hp + u.regen * dt);
+      }
+      u.update(dt, this, this.arrows, allUnits, this.buildings);
     }
 
     // Resolve Collisions: Units cannot walk through buildings, deposits, trees, or each other

@@ -16,6 +16,8 @@ export const GLB_MODELS = {
   axethrower: { url: `${BASE}models/axethrower.glb`, root: 'Axethrower', type: 'axethrower' },
   villager: { url: `${BASE}models/villager.glb`, root: 'Villager', type: 'villager' },
   peon: { url: `${BASE}models/peon.glb`, root: 'Peon', type: 'peon' },
+  ogre: { url: `${BASE}models/ogre.glb`, root: 'Ogre', type: 'ogre' },
+  bandit: { url: `${BASE}models/bandit.glb`, root: 'Bandit', type: 'bandit' },
   castle: { url: `${BASE}models/castle.glb`, root: 'Castle', type: null }
 };
 

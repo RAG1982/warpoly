@@ -145,6 +145,18 @@ const MODEL_CATALOG = [
     notes: 'Texturas PBR procedurais pintadas à mão (Warcraft 2 / Overwatch / Valorant). Rigging completo de membros, elmo, chifres e arma com suporte a todas as animações (Idle, Walk, Attack Slam, Death).'
   },
   {
+    id: 'bandit_glb',
+    name: 'Bandido (Blender)',
+    category: 'units',
+    type: 'bandit',
+    icon: '🗡️',
+    glb: 'bandit',
+    sourceFile: 'tools/blender/build_bandit.py',
+    create: createGlb('bandit'),
+    description: 'Versão gerada pelo pipeline Blender headless (public/models/bandit.glb): saqueador magro e mal-encarado com capuz e bandana, colete de couro remendado, cinto com facas e bolsa, luvas sem dedos, botas gastas e porrete cravejado de pregos. 7 partes rígidas (Torso, Head, ArmL, ArmR, LegL, LegR, Weapon), atlas 512².',
+    notes: 'Rig plana idêntica à do BanditModel.js (Weapon é irmã dos braços). Neutro: o TeamColor guarda só o trapo/bandana (vermelho-sujo). Rosto só na face frontal (+Z).'
+  },
+  {
     id: 'peon',
     name: 'Peon (Aldeão Orc)',
     category: 'units',
@@ -230,6 +242,19 @@ const MODEL_CATALOG = [
     create: createOgre,
     description: 'Campeão titânico da Horda com força descomunal. Pele ocre-amarelada enrijecida, chifre frontal de marfim, barriga proeminente com arreio de couro tachado e clava maciça feita de tronco de árvore cravada de espinhos de ferro.',
     notes: 'Unidade gigante de elite (escala 1.5x) com golpe devastador de impacto sísmico no solo.'
+  },
+  {
+    id: 'ogre_glb',
+    name: 'Ogro (Blender)',
+    category: 'units',
+    faction: 'orc',
+    type: 'ogre',
+    icon: '👹',
+    glb: 'ogre',
+    sourceFile: 'tools/blender/build_ogre.py',
+    create: createGlb('ogre'),
+    description: 'Versão gerada pelo pipeline Blender headless (public/models/ogre.glb): brutamontes colossal com barrigão, ombros largos, cabeça pequena de mandíbula proeminente e chifre, pele acinzentada com cicatrizes, ombreiras de ferro, correntes e clava gigante cravejada de espigões. 7 partes rígidas (Torso, Head, ArmL, ArmR, Weapon, LegL, LegR), atlas 512².',
+    notes: 'Rig aninhada idêntica à do OgreModel.js (Head/ArmL/ArmR em Torso, Weapon em ArmR). Faixas, tanga, capa e trapo da clava em cor de time. Rosto só na face frontal (+Z).'
   },
 
   // --- CONSTRUÇÕES ---

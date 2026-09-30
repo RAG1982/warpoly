@@ -175,7 +175,7 @@ describe('promoção (ranged_class) e classe avançada', () => {
       expect(a.type).toBe('ranger');
       expect(a.name).toBe('Patrulheiro');
     }
-    expect(archers[0].maxHp).toBe(105);
+    expect(archers[0].maxHp).toBe(106);
     expect(archers[0].hp / archers[0].maxHp).toBeCloseTo(0.5, 5);
     expect(archers[0].damage.piercing).toBe(pierce + 1); // +1 da classe, mantém +1 da pesquisa
 

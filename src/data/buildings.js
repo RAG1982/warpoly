@@ -102,7 +102,7 @@ export const BUILDINGS = {
     armor: 15,
     cost: { gold: 0, wood: 60, stone: 0 },
     collisionRadius: 2.8,
-    popGranted: 0,
+    popGranted: 5,
     visionRadius: 14,
     healthBarHeight: 4.5,
     tower: null,

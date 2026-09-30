@@ -83,7 +83,7 @@ describe('computeDamage (F3-03)', () => {
 describe('migração attack → damage (F3-03, item 2 da spec)', () => {
   const EXPECTED_ATTACK = {
     villager: 7, peon: 8,
-    knight: 26, grunt: 28,
+    knight: 27, grunt: 28,
     archer: 18, axethrower: 19,
     ogre: 42,
     bandit: 16

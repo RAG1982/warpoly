@@ -33,10 +33,10 @@ População: soma de `popGranted` (HQ 5, Casa/Toca 5, Chiqueiro 5). Início = 10
 | Tipo | Facção | HP | Vel | Dano | Alcance | Cooldown | Armadura | Custo (ouro/madeira/pedra) | Tempo | Treina em |
 |---|---|---|---|---|---|---|---|---|---|---|
 | Aldeão | Humano | 85 | 4.5 | 7 | 1.8 | 1.0 | 0 | 50/–/– | 7 | Castelo |
-| Cavaleiro | Humano | 190 | 4.8 | 26 | 2.1 | 1.1 | 4 | 70/50/5 | 11 | Quartel |
-| Arqueiro | Humano | 95 | 4.3 | 18 | 14.0 | 1.4 | 0 | 40/20/– | 9 | Quartel |
+| Cavaleiro | Humano | 200 | 4.8 | 27 | 2.1 | 1.1 | 4 | 70/50/5 | 11 | Quartel |
+| Arqueiro | Humano | 97 | 4.3 | 18 | 14.0 | 1.4 | 0 | 40/20/– | 9 | Quartel |
 | Peão | Orc | 90 | 4.5 | 8 | 1.8 | 1.0 | 0 | 50/–/– | 7 | Grande Salão |
-| Grunt | Orc | 205 | 4.7 | 28 | 2.1 | 1.15 | 4 | 70/50/5 | 11 | Quartel Orc |
+| Grunt | Orc | 198 | 4.7 | 28 | 2.1 | 1.15 | 4 | 70/50/5 | 11 | Quartel Orc |
 | Lançador de Machado | Orc | 100 | 4.4 | 19 | 13.5 | 1.35 | 0 | 40/20/– | 9 | Quartel Orc |
 | Ogro | Orc | 320 | 4.0 | 42 | 2.5 | 1.5 | 5 | 75/100/35 | 14 | Quartel Orc |
 | Bandido | Neutro | 125 | 4.4 | 16 | 2.1 | 1.2 | 1 | — | — | (não usado no jogo) |
@@ -53,8 +53,8 @@ Dano efetivo em unidade = `max(2, dano − armadura)`. Construções **ignoram a
 | Toca Orc | O | 450 | 50 | +5 pop |
 | Serraria | H | 550 | 80 | Entrega de madeira |
 | Serraria Orc | O | 580 | 85 | Entrega de madeira |
-| Fazenda | H | 350 | 60 | +3 ouro / 6s (**não dá pop**) |
-| Chiqueiro | O | 420 | 55 | +3 ouro / 6s **e +5 pop** (assimetria) |
+| Fazenda | H | 350 | 60 | +5 pop (F3-11: era 0; sem ouro passivo) |
+| Chiqueiro | O | 420 | 55 | +5 pop |
 | Quartel | H | 850 | 120 / 60 | Treina militares |
 | Quartel Orc | O | 900 | 130 / 50 | Treina militares |
 | Forja | H/O | 850 | 100 / 70 / 50 | Pesquisas |

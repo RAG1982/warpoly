@@ -8,6 +8,9 @@ os `.glb` em `public/models/` são artefatos reproduzíveis.
 |---|---|---|
 | `build_grunt.py` | `public/models/grunt.glb` | guerreiro orc: 7 partes rígidas, 4,4 mil tris, 8 draw calls, atlas 512² |
 | `build_knight.py` | `public/models/knight.glb` | Espadachim humano (ref. `soldado.png`): 7 partes rígidas, 4,2 mil tris, 10 draw calls, atlas 512², 213 KB |
+| `build_villager.py` | `public/models/villager.glb` | Camponês humano: rig plana (ToolGroup > Axe/Pickaxe/Hammer, Pack > WoodBundle/GoldSack), 6,0 mil tris, 14 draw calls no total (~10 visíveis), atlas 512², 278 KB |
+| `build_peon.py` | `public/models/peon.glb` | Lacaio orc: rig aninhada (Torso > Head, ArmL, ArmR > ToolGroup; Pack no Torso), 5,6 mil tris, 14 draw calls no total, atlas 512², 267 KB |
+| `worker_common.py` | — | helpers dos trabalhadores (painel de tecido, costuras, orçamento de bisel) |
 | `build_castle.py` | `public/models/castle.glb` | castelo humano: 2 draw calls, 8,7 mil tris, atlas 1024² |
 | `common.py` | — | helpers (primitivas bmesh, materiais de pintura, UV atlas, bake, export, render) |
 

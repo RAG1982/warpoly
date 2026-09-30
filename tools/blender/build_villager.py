@@ -105,13 +105,13 @@ def build_torso(mats, root):
     mb = MeshBuilder('Torso')
     # túnica de lã ocre: loft do quadril ao pescoço (barra irregular)
     rings = [
-        jag_ring(ring_h(-0.37, 0.320, 0.235, 14, cz=0.00), 0.035),
-        ring_h(-0.22, 0.290, 0.215, 14, cz=0.01),
-        ring_h(-0.06, 0.270, 0.208, 14, cz=0.02),
-        ring_h(0.10, 0.285, 0.205, 14, cz=0.01),
-        ring_h(0.22, 0.305, 0.190, 14, cz=-0.01),
-        ring_h(0.29, 0.235, 0.150, 14, cz=0.00),
-        ring_h(0.33, 0.130, 0.110, 14, cz=0.01),
+        jag_ring(ring_h(-0.37, 0.320, 0.235, 12, cz=0.00), 0.035),
+        ring_h(-0.22, 0.290, 0.215, 12, cz=0.01),
+        ring_h(-0.06, 0.270, 0.208, 12, cz=0.02),
+        ring_h(0.10, 0.285, 0.205, 12, cz=0.01),
+        ring_h(0.22, 0.305, 0.190, 12, cz=-0.01),
+        ring_h(0.29, 0.235, 0.150, 12, cz=0.00),
+        ring_h(0.33, 0.130, 0.110, 12, cz=0.01),
     ]
     mb.add(prim_rings(rings), 'tunic', smooth=75)
     # pescoço + gola de linho aberta (V) + cordinhas
@@ -148,8 +148,8 @@ def build_torso(mats, root):
         mb.add(prim_box(0.04, 0.02, 0.03), 'leather_dk', M((sx * 0.115, 0.17, 0.222)), bevel=0.004)
         rivets(mb, [(sx * 0.115, 0.1, 0.212)], 'brass', 0.014)
     # cinto largo + fivela grande (com pino) e furos
-    mb.add(prim_rings([jag_ring(ring_h(-0.205, 0.286, 0.222, 16, cz=0.01), 0.0),
-                       ring_h(-0.08, 0.288, 0.224, 16, cz=0.01)]), 'leather', smooth=45)
+    mb.add(prim_rings([jag_ring(ring_h(-0.205, 0.286, 0.222, 12, cz=0.01), 0.0),
+                       ring_h(-0.08, 0.288, 0.224, 12, cz=0.01)]), 'leather', smooth=45)
     mb.add(prim_box(0.13, 0.115, 0.036), 'brass', M((0, -0.145, 0.245)), bevel=0.012)
     mb.add(prim_box(0.075, 0.062, 0.04), 'leather_dk', M((0, -0.145, 0.252)), bevel=0.006)
     mb.add(prim_box(0.02, 0.09, 0.02), 'brass', M((0, -0.145, 0.275)), bevel=0.004)
@@ -179,7 +179,7 @@ def build_torso(mats, root):
     for sx in (-1, 1):
         mb.add(prim_box(0.06, 0.20, 0.018, taper=(0.7, 1.0)), 'team',
                M((sx * 0.05, -0.24, -0.238), (10, 0, sx * -14)), bevel=0.004)
-    mb.add(prim_rings([ring_h(-0.09, 0.283, 0.220, 16, cz=0.0), ring_h(-0.11, 0.285, 0.222, 16, cz=0.0)],
+    mb.add(prim_rings([ring_h(-0.09, 0.283, 0.220, 12, cz=0.0), ring_h(-0.11, 0.285, 0.222, 12, cz=0.0)],
                       cap0=False, cap1=False), 'leather_dk', smooth=30)
     return mb.build(mats, parent=root, location=TORSO_PIVOT)
 
@@ -187,15 +187,15 @@ def build_torso(mats, root):
 def build_head(mats, root):
     mb = MeshBuilder('Head')
     # crânio/rosto: esfera achatada (traços só na frente +Z)
-    mb.add(prim_sphere(0.168, 0.185, 0.172, 12, 6), 'skin', M((0, -0.02, 0.008)), smooth=80)
+    mb.add(prim_sphere(0.168, 0.185, 0.172, 10, 5), 'skin', M((0, -0.02, 0.008)), smooth=80)
     # queixo e mandíbula levemente marcados
     mb.add(prim_sphere(0.115, 0.075, 0.105, 10, 4), 'skin', M((0, -0.125, 0.06)), smooth=80)
     # olhos: branco + íris âmbar + pupila + brilho
     for sx in (-1, 1):
-        mb.add(prim_sphere(0.038, 0.033, 0.014, 8, 3), 'eye_white', M((sx * 0.066, 0.005, 0.166), (0, sx * 8, 0)),
+        mb.add(prim_sphere(0.036, 0.031, 0.014, 8, 3), 'eye_white', M((sx * 0.066, 0.005, 0.166), (0, sx * 8, 0)),
                smooth=80)
-        mb.add(prim_sphere(0.024, 0.025, 0.008, 8, 2), 'iris', M((sx * 0.063, 0.003, 0.178), (0, sx * 6, 0)), smooth=80)
-        mb.add(prim_sphere(0.012, 0.013, 0.006, 6, 2), 'pupil', M((sx * 0.063, 0.003, 0.185)), smooth=80)
+        mb.add(prim_sphere(0.026, 0.026, 0.008, 12, 2), 'iris', M((sx * 0.063, 0.003, 0.178), (0, sx * 6, 0)), smooth=80)
+        mb.add(prim_sphere(0.013, 0.013, 0.006, 10, 2), 'pupil', M((sx * 0.063, 0.003, 0.185)), smooth=80)
         mb.add(prim_sphere(0.005, 0.005, 0.004, 4, 2), 'eye_white', M((sx * 0.055, 0.012, 0.19)), smooth=80)
         # pálpebra superior sutil
         mb.add(prim_box(0.075, 0.014, 0.02), 'skin', M((sx * 0.066, 0.033, 0.168), (0, 0, sx * -6)), bevel=0.004)
@@ -203,7 +203,7 @@ def build_head(mats, root):
         mb.add(prim_box(0.088, 0.03, 0.03, taper=(0.9, 0.8)), 'hair',
                M((sx * 0.07, 0.062, 0.167), (-8, sx * 8, sx * -10)), bevel=0.008)
         # bochecha corada
-        mb.add(prim_sphere(0.045, 0.032, 0.022, 6, 2), 'cheek', M((sx * 0.105, -0.07, 0.14), (0, sx * 30, 0)),
+        mb.add(prim_sphere(0.045, 0.032, 0.022, 5, 2), 'cheek', M((sx * 0.105, -0.07, 0.14), (0, sx * 30, 0)),
                smooth=80)
     # nariz batatudo: ponte + bulbo + narinas
     mb.add(prim_box(0.035, 0.08, 0.04, taper=(0.75, 0.8)), 'skin', M((0, -0.012, 0.172), (-6, 0, 0)), bevel=0.008)
@@ -211,8 +211,8 @@ def build_head(mats, root):
     for sx in (-1, 1):
         mb.add(prim_sphere(0.017, 0.013, 0.014, 5, 3), 'skin', M((sx * 0.032, -0.07, 0.178)), smooth=70)
     # sorriso: arco de boca + covinhas
-    smile = bezier((-0.062, -0.108, 0.166), (0.0, -0.138, 0.18), (0.062, -0.108, 0.166), 6)
-    tube(mb, smile, [0.008] * 7, 'mouth', 5, smooth=60, up=(0, 0, 1))
+    smile = bezier((-0.062, -0.108, 0.166), (0.0, -0.138, 0.18), (0.062, -0.108, 0.166), 4)
+    tube(mb, smile, [0.008] * 5, 'mouth', 4, smooth=60, up=(0, 0, 1))
     for sx in (-1, 1):
         mb.add(prim_sphere(0.010, 0.010, 0.008, 5, 3), 'mouth', M((sx * 0.068, -0.103, 0.163)), smooth=60)
     # barba por fazer no queixo (só na frente) + bigode
@@ -232,12 +232,12 @@ def build_head(mats, root):
     # barrete de feltro (cor de time), tombado para o lado, com aba de linho e ilhoses de latão
     CAPY = 0.135
     cap_rings = [
-        ring_h(CAPY + 0.00, 0.192, 0.202, 14, cz=0.0),
-        ring_h(CAPY + 0.05, 0.226, 0.236, 14, cx=-0.005, cz=-0.01),
-        ring_h(CAPY + 0.10, 0.242, 0.250, 14, cx=-0.01, cz=-0.02),
-        ring_h(CAPY + 0.145, 0.216, 0.224, 14, cx=-0.02, cz=-0.03),
-        ring_h(CAPY + 0.178, 0.130, 0.138, 14, cx=-0.03, cz=-0.04),
-        ring_h(CAPY + 0.192, 0.045, 0.05, 14, cx=-0.04, cz=-0.05),
+        ring_h(CAPY + 0.00, 0.192, 0.202, 12, cz=0.0),
+        ring_h(CAPY + 0.05, 0.226, 0.236, 12, cx=-0.005, cz=-0.01),
+        ring_h(CAPY + 0.10, 0.242, 0.250, 12, cx=-0.01, cz=-0.02),
+        ring_h(CAPY + 0.145, 0.216, 0.224, 12, cx=-0.02, cz=-0.03),
+        ring_h(CAPY + 0.178, 0.130, 0.138, 12, cx=-0.03, cz=-0.04),
+        ring_h(CAPY + 0.192, 0.045, 0.05, 12, cx=-0.04, cz=-0.05),
     ]
     mb.add(prim_rings(cap_rings, cap0=False), 'team', smooth=70)
     # ponta caída (aba mole) para trás e para o lado, com pompom de linho
@@ -245,13 +245,13 @@ def build_head(mats, root):
               (-0.215, CAPY + 0.09, -0.20)], [0.06, 0.05, 0.038, 0.026], 'team', 7, smooth=70)
     mb.add(prim_sphere(0.032, 0.032, 0.032, 6, 3), 'cap_band', M((-0.22, CAPY + 0.075, -0.205)), smooth=60)
     # barra de linho (dobra) com costura e ilhoses
-    mb.add(prim_rings([ring_h(CAPY - 0.06, 0.197, 0.207, 14), ring_h(CAPY + 0.02, 0.205, 0.215, 14)]),
+    mb.add(prim_rings([ring_h(CAPY - 0.06, 0.197, 0.207, 12), ring_h(CAPY + 0.02, 0.205, 0.215, 12)]),
            'cap_band', smooth=45)
-    mb.add(prim_rings([ring_h(CAPY + 0.02, 0.205, 0.215, 14), ring_h(CAPY + 0.035, 0.199, 0.209, 14)],
+    mb.add(prim_rings([ring_h(CAPY + 0.02, 0.205, 0.215, 12), ring_h(CAPY + 0.035, 0.199, 0.209, 12)],
                       cap0=False, cap1=False), 'leather', smooth=35)
-    for k in range(7):
-        a_ = math.radians(-60 + k * 20)
-        mb.add(prim_sphere(0.012, 0.012, 0.008, 5, 2), 'brass',
+    for k in range(6):
+        a_ = math.radians(-55 + k * 22)
+        mb.add(prim_sphere(0.012, 0.012, 0.008, 4, 2), 'brass',
                M((math.sin(a_) * 0.207, CAPY - 0.02, math.cos(a_) * 0.217)), smooth=60)
     return mb.build(mats, parent=root, location=HEAD_PIVOT)
 
@@ -307,7 +307,7 @@ def build_leg(mats, root, side):
     mb = MeshBuilder('LegR' if s > 0 else 'LegL')
     # calça de tecido rústico (remendos e costuras), dobra para dentro da bota
     tube(mb, [(0, -0.03, 0), (s * 0.003, -0.20, 0.012), (s * 0.006, -0.34, 0.01)],
-         [(0.112, 0.115), (0.108, 0.112), (0.094, 0.098)], 'pants', 10, smooth=75, cap0=False)
+         [(0.112, 0.115), (0.108, 0.112), (0.094, 0.098)], 'pants', 8, smooth=75, cap0=False)
     # remendos: joelho (couro) + coxa (pano) com pontos
     mb.add(prim_box(0.115, 0.115, 0.03), 'patch_a', M((s * 0.006, -0.25, 0.102), (-4, 0, s * 4)), bevel=0.006)
     stitches(mb, (s * 0.006 - 0.05, -0.30, 0.118), (s * 0.006 + 0.05, -0.30, 0.118), 4, 'thread', size=(0.018, 0.006, 0.006))
@@ -315,7 +315,7 @@ def build_leg(mats, root, side):
     mb.add(prim_box(0.075, 0.075, 0.02), 'patch_b', M((s * 0.075, -0.11, 0.08), (0, 25, s * -8)), bevel=0.004)
     # bota: cano de couro + dobra + tira com fivela
     tube(mb, [(s * 0.006, -0.36, 0.01), (s * 0.006, -0.47, 0.01), (s * 0.008, -0.56, 0.015)],
-         [(0.104, 0.108), (0.092, 0.094), (0.084, 0.086)], 'leather', 10, smooth=60)
+         [(0.104, 0.108), (0.092, 0.094), (0.084, 0.086)], 'leather', 8, smooth=60)
     mb.add(prim_rings([ring_h(-0.40, 0.119, 0.122, 12, cx=s * 0.006, cz=0.01),
                        ring_h(-0.345, 0.122, 0.125, 12, cx=s * 0.006, cz=0.01)]), 'leather_dk', smooth=40)
     stitches(mb, (s * 0.006 - 0.10, -0.372, 0.13), (s * 0.006 + 0.10, -0.372, 0.13), 5, 'thread',
@@ -329,8 +329,6 @@ def build_leg(mats, root, side):
     mb.add(prim_sphere(0.078, 0.05, 0.075, 8, 4, y_min=0.0), 'leather_dk', M((s * 0.008, -0.585, 0.175)), smooth=60)
     mb.add(prim_box(0.18, 0.045, 0.31, taper=(0.9, 0.85), base=True), 'sole', M((s * 0.008, -0.65, 0.05)),
            bevel=0.012, smooth=25)
-    for k in range(3):
-        mb.add(prim_box(0.10, 0.012, 0.014), 'thread', M((s * 0.008, -0.55 + k * 0.0, 0.14 - k * 0.0 + 0.0)))
     return mb.build(mats, parent=root, location=(s * LEG_PIVOT[0], LEG_PIVOT[1], LEG_PIVOT[2]))
 
 
@@ -433,13 +431,13 @@ def build_pack(mats, root):
     mb.add(prim_box(0.38, 0.14, 0.22), 'leather', M((0, 0.09, -0.06)), bevel=0.02, smooth=30)   # aba
     mb.add(prim_box(0.05, 0.10, 0.03), 'leather_dk', M((0, 0.04, -0.175)), bevel=0.006)
     rivets(mb, [(0, 0.015, -0.185)], 'brass', 0.016)
-    mb.add(prim_cyl(0.075, 0.075, 0.46, 10, base=False), 'linen', M((0, 0.26, -0.03), (0, 0, 90)), smooth=60)
+    mb.add(prim_cyl(0.075, 0.075, 0.46, 8, base=False), 'linen', M((0, 0.26, -0.03), (0, 0, 90)), smooth=60)
     for bx in (-0.14, 0.14):
-        mb.add(prim_cyl(0.083, 0.083, 0.03, 10, base=False), 'leather', M((bx, 0.26, -0.03), (0, 0, 90)), smooth=40)
+        mb.add(prim_cyl(0.083, 0.083, 0.03, 8, base=False), 'leather', M((bx, 0.26, -0.03), (0, 0, 90)), smooth=40)
     # alças de ombro
     for sx in (-1, 1):
         path = [(sx * 0.13, 0.15, -0.03), (sx * 0.135, 0.27, 0.02), (sx * 0.14, 0.30, 0.20), (sx * 0.125, 0.22, 0.42)]
-        tube(mb, path, [(0.038, 0.012)] * 4, 'leather', 6, smooth=50, up=(0, 1, 0))
+        tube(mb, path, [(0.038, 0.012)] * 4, 'leather', 4, smooth=50, up=(0, 1, 0))
     fr = mb.build(mats, parent=pack, location=(0, 0, 0))
 
     # feixe de lenha: 3 toras com anéis de crescimento, cascas ásperas e cordas de cânhamo

@@ -105,7 +105,19 @@ export class ModelFactory {
     if (!template) return null;
     const clone = cloneModel(template);
     if (GLB_MODELS[key].type) this.rebindUserData(clone, GLB_MODELS[key].type);
+    this._workerGlbDefaults(clone); // glTF não tem `visible`: estado inicial dos trabalhadores
     return clone;
+  }
+
+  /** Trabalhadores (.glb): só o machado visível; mochila e cargas ocultas (igual aos procedurais). */
+  static _workerGlbDefaults(clone) {
+    const ud = clone.userData;
+    if (!ud || !ud.toolGroup || !ud.pack) return;
+    if (ud.pickaxe) ud.pickaxe.visible = false;
+    if (ud.hammer) ud.hammer.visible = false;
+    ud.pack.visible = false;
+    if (ud.woodBundle) ud.woodBundle.visible = false;
+    if (ud.goldSack) ud.goldSack.visible = false;
   }
 
   static _glbOr(key, fallback) {
@@ -413,7 +425,7 @@ export class ModelFactory {
   }
 
   static createVillager() {
-    return this.getOrCreateModel('villager', createVillager, 'villager');
+    return this._glbOr('villager', () => this.getOrCreateModel('villager', createVillager, 'villager'));
   }
 
   /** F3-10: critter decorativo (`sheep` | `pig`). */
@@ -427,7 +439,7 @@ export class ModelFactory {
 
   // --- Orc Units ---
   static createPeon() {
-    return this.getOrCreateModel('peon', createPeon, 'peon');
+    return this._glbOr('peon', () => this.getOrCreateModel('peon', createPeon, 'peon'));
   }
 
   static createGrunt() {

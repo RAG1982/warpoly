@@ -109,6 +109,18 @@ const MODEL_CATALOG = [
     notes: 'Texturas procedurais hand-painted em 2048x2048 com mapas de albedo, roughness, metalness e bump gerados via Canvas. Rigging completo compatível com todas as animações de coleta, marcha e ataque tanto no inspector quanto no jogo.'
   },
   {
+    id: 'villager_glb',
+    name: 'Camponês (Blender)',
+    category: 'units',
+    type: 'villager',
+    icon: '🌾',
+    glb: 'villager',
+    sourceFile: 'tools/blender/build_villager.py',
+    create: createGlb('villager'),
+    description: 'Versão gerada pelo pipeline Blender headless (public/models/villager.glb): barrete de feltro e avental em cor de time, túnica de lã com mangas arregaçadas, luvas e botas de couro, cinto com ferramentas, machado/picareta/marreta separados e mochila com feixe de lenha ou saco de ouro.',
+    notes: 'Rig plana idêntica à do VillagerModel.js (Torso, Head, ArmL, ArmR, LegL, LegR, ToolGroup > Axe/Pickaxe/Hammer, Pack > WoodBundle/GoldSack). Atlas 512², rosto só em +Z.'
+  },
+  {
     id: 'bandit',
     name: 'Bandido (Bandit Raider)',
     category: 'units',
@@ -130,6 +142,19 @@ const MODEL_CATALOG = [
     create: createPeon,
     description: 'Trabalhador incansável da Horda dos Orcs com postura curvada característica, pele verde-oliva, presas inferiores proeminentes, túnica de juta rústica com arreios de couro tachados, e ferramentas intercambiáveis (machado de corte, picareta de ferro e marreta de construtor).',
     notes: 'Inspirado no Peon clássico de Warcraft 2. Rigging modular completo com mochila de toras e saco de minério de ouro.'
+  },
+  {
+    id: 'peon_glb',
+    name: 'Lacaio (Blender)',
+    category: 'units',
+    faction: 'orc',
+    type: 'peon',
+    icon: '🪓',
+    glb: 'peon',
+    sourceFile: 'tools/blender/build_peon.py',
+    create: createGlb('peon'),
+    description: 'Versão gerada pelo pipeline Blender headless (public/models/peon.glb): trabalhador orc curvado de pele verde-oliva, presas pequenas, olhos âmbar, avental de couro, cinto de ferramentas, faixa/bandoleira em cor de time e ferramentas rudimentares (machado, picareta, marreta) com mochila de lenha/ouro.',
+    notes: 'Rig aninhada idêntica à do PeonModel.js (Torso > Head, ArmL, ArmR > ToolGroup > Axe/Pickaxe/Hammer; Pack no Torso; LegL/LegR na raiz). Atlas 512².'
   },
   {
     id: 'grunt',
@@ -946,7 +971,7 @@ class ModelInspectorApp {
       this.animator = new UnitAnimator(model, item.type);
 
       // Handle Villager / Peon extra controls
-      if (item.id === 'villager' || item.id === 'peon') {
+      if (item.type === 'villager' || item.type === 'peon') {
         villagerOpts.style.display = 'flex';
         this.animator.setVillagerTool(this.villagerTool);
         this.animator.setVillagerCargo(this.villagerCargo);

@@ -1,6 +1,6 @@
 import { CMD } from '../sim/commands.js';
-import { missingRequirements } from '../sim/requirements.js';
-import { getHqUpgradeCost } from '../data/index.js';
+import { missingRequirements, missingUpgradeRequirements } from '../sim/requirements.js';
+import { getHqUpgradeCost, getBuildingDef, getUnitDef, RESEARCH } from '../data/index.js';
 
 /**
  * AIEconomyManager (Gerenciador de Economia e Construção da IA)
@@ -51,6 +51,50 @@ export class AIEconomyManager {
 
     // 5. F3-06: evolui o Centro (HQ) quando a economia já está madura
     this.considerHqUpgrade();
+
+    // 6. F3-07: pesquisas da Forja/Serraria quando sobra ouro
+    this.considerResearch();
+  }
+
+  /**
+   * F3-07: com Forja/Serraria concluídas e ociosas, pesquisa (nível 1 com ouro > 400 de sobra;
+   * nível 2 exige Centro nível 2 — checado pelos requisitos). `ranged_class` com ≥ 4 atiradores
+   * e Centro nível 2. O débito/validação final é do executor (CMD.RESEARCH).
+   */
+  considerResearch() {
+    const buildings = this.gm.buildings;
+    const pid = this.director.playerId;
+    const player = this.director.player;
+    let rangedCount = 0;
+    const units = this.director.getOwnUnits();
+    for (let i = 0; i < units.length; i++) {
+      const u = units[i];
+      if (!u.isDead && getUnitDef(u.type).isRanged) rangedCount++;
+    }
+    for (let i = 0; i < buildings.length; i++) {
+      const b = buildings[i];
+      if (b.ownerId !== pid || b.isDead || !b.isConstructed || b.currentResearch) continue;
+      const def = getBuildingDef(b.type);
+      const role = def.role;
+      let plan = null;
+      if (role === 'forge') plan = ['melee_weapons', 'melee_armor'];
+      else if (role === 'lumber') plan = ['ranged_class', 'ranged_ammo', 'woodcutting'];
+      if (!plan) continue;
+      for (const id of plan) {
+        const research = RESEARCH[id];
+        if (!research || (research.faction && research.faction !== def.faction)) continue;
+        const lv = player.getResearchLevel(id);
+        if (lv >= research.levels.length) continue;
+        if (this.gm.isUpgradeResearching(id, pid)) continue;
+        if (id === 'ranged_class' && rangedCount < 4) continue;
+        if (missingUpgradeRequirements(pid, id, this.gm, lv + 1).length > 0) continue;
+        const cost = research.levels[lv].cost;
+        if (!this.director.canAfford(cost)) continue;
+        if (id !== 'ranged_class' && player.resources.gold <= 400) continue;
+        this.gm.issue({ type: CMD.RESEARCH, playerId: pid, buildingId: b.id, upgradeId: id });
+        break;
+      }
+    }
   }
 
   /**

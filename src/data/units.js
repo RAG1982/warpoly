@@ -398,10 +398,10 @@ export const UNITS = {
     cost: { gold: 120, wood: 0, stone: 0 },
     trainTime: 12,
     icon: '/icoEscudo.png', // provisório (ícone novo na F7)
-    description: 'Conjurador: toque da morte, pressa, erguer mortos, armadura profana e nuvem de cinzas',
+    description: 'Conjurador: toque da morte, pressa, erguer mortos, armadura profana, nuvem de cinzas e redemoinho',
     isWorker: false, isRanged: true, isCombat: true, projectile: 'bolt',
     maxMana: 255, startMana: 85, manaRegen: 1,
-    abilities: ['death_touch', 'haste_spell', 'raise_dead', 'unholy_armor', 'ash_cloud']
+    abilities: ['death_touch', 'haste_spell', 'raise_dead', 'unholy_armor', 'ash_cloud', 'whirlwind']
   },
   // Invocado por Erguer Mortos (não treinável, não consome suprimento... ver `lifetime`); morto-vivo.
   skeleton: {

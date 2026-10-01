@@ -1383,8 +1383,7 @@ export class Unit {
       applyAbility(gm, this, ab, t, c.x, c.z);
       // F4-04b: `repeat` (Cura) — continua no mesmo alvo enquanto ele estiver ferido e houver mana.
       if (ab.repeat && t && !targetProblem(this, ab, t) && t.hp < t.maxHp && canCast(gm, this, ab).ok) {
-        c.timer = 0;
-        emitCastStart(gm, this, ab, t);
+        c.timer = 0; // sem novo ABILITY_CAST (evita repetir o som a cada ciclo)
         return;
       }
       this._endCast();

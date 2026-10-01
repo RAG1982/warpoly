@@ -10,6 +10,7 @@ import { UIManager } from '../ui/UIManager.js';
 import { collectSharedResources, disposeObjectTree } from '../render/sceneDisposal.js';
 import { createAudioEvents } from '../audio/AudioEvents.js';
 import { createVfxEvents } from '../render/VfxEvents.js';
+import { HazardView } from '../render/HazardView.js';
 import { createUiEvents } from '../ui/UiEvents.js';
 
 /**
@@ -74,6 +75,7 @@ export class MatchSession {
     if (!this.gameManager.headless) {
       this._disposeAudioEvents = createAudioEvents(this.gameManager, sound);
       this._disposeVfxEvents = createVfxEvents(this.gameManager, this.particleSystem);
+      this.gameManager.hazardView = new HazardView(this.gameManager.scene, this.gameManager); // F4-04b
       this._disposeUiEvents = createUiEvents(this.gameManager, this.uiManager);
     }
   }
@@ -128,6 +130,7 @@ export class MatchSession {
     // emitidos durante o próprio dispose (ex.: Building.dispose não emite, mas por segurança).
     this._disposeAudioEvents?.();
     this._disposeVfxEvents?.();
+    if (this.gameManager.hazardView) { this.gameManager.hazardView.dispose(); this.gameManager.hazardView = null; }
     this._disposeUiEvents?.();
 
     // 1. Entrada e HUD primeiro: nada mais reage a eventos desta partida.

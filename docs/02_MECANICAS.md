@@ -108,7 +108,7 @@ Estados: `idle, moving, gathering, returning, building, attacking, dying`.
 - **Ataque**: persegue a cada frame; ao matar alvo procura outro num raio 16; alvo prioritário = unidade de combate > trabalhador > torre > construção. Enquanto ataca construção, reescaneia ameaças a cada 0,35s.
 - **Retaliação**: quando atingida, contra-ataca; aliados de combate ociosos num raio 14 ajudam.
 - **Projéteis**: sempre acertam (teleguiados).
-- **Movimento**: A* só desvia de água; construções/árvores resolvidas por empurrão de colisão. Formação = grade quadrada simples.
+- **Movimento (F3-02)**: A* contorna água, construções e árvores. Ordens de MOVE/ATTACK_MOVE com várias unidades formam uma **formação** em linhas voltadas para a marcha (largura:profundidade ≈ 1,6:1, espaçamento pelo raio médio, mín. 1,6 u); cada unidade recebe o lugar que preserva a ordem relativa em que já estava (sem cruzar caminhos). O **grupo anda na velocidade da unidade mais lenta** (cavalaria não se descola do cerco). Em marcha as unidades **desviam das vizinhas por steering** (separação suave) em vez de só serem empurradas; unidades parada(s) cedem menos que quem chega e a tolerância de chegada cresce com as vizinhas já assentadas — a formação não "dança". Grupos de 6+ unidades e unidades grandes (raio ≥ 1) usam caminho com folga (evitam frestas de ~1 u entre lago e mina). Unidade presa é detectada (sem progresso por ~0,7 s): perto do destino/waypoint ela assenta/avança, longe pede caminho novo (até 8 vezes). Empurrões de colisão nunca jogam unidades na água.
 
 ## Controles (F3-01)
 

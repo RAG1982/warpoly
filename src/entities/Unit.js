@@ -10,6 +10,7 @@ import { computeDamage } from '../sim/combat.js';
 import { legacyOwnerId } from '../sim/EntityIds.js';
 import { SIM_DT, lerpAngle } from '../sim/constants.js';
 import { CMD } from '../sim/commands.js';
+import { steerDirection, SEP_MARGIN } from '../sim/steering.js';
 import { EVT } from '../sim/events.js';
 import { REPAIR_INTERVAL, MAX_WORKERS_PER_BUILDING } from '../sim/repair.js';
 import { createStatusSlots, createMods, tickStatuses, clearStatuses, removeStatus, STATUS_DEFS } from '../sim/statuses.js';
@@ -41,6 +42,13 @@ const GUARD_REGEN = 0.05;
 // Buffers de módulo reutilizados pelas buscas de alvo hostil (F1-06: unitGrid/blockerGrid),
 // evitando alocar um array novo por unidade a cada frame.
 const _combatBuf = [];
+// F3-02: vizinhos para o steering de separação (consulta + lista de {x,z,radius,stationary}).
+const _steerBuf = [];
+const _steerNb = [];
+/** F3-02: raio (u) em que um waypoint intermediário conta como alcançado. */
+const WAYPOINT_RADIUS = 1.4;
+/** F3-02: a partir de quantas unidades no comando o caminho usa folga extra (modo largo do Pathfinder). */
+const WIDE_GROUP_SIZE = 6;
 const _unitBuf = [];
 const _towerBuf = [];
 const _buildingBuf = [];
@@ -202,6 +210,14 @@ export class Unit {
     // F1-07: true enquanto um requestPath desta unidade está na fila do Pathfinder.
     this.pathPending = false;
     this._chaseRequestPending = false;
+    // F3-02: movimento em grupo — velocidade efetiva do grupo (0 = sem limite), detecção de travamento.
+    this._groupSpeed = 0;
+    this._groupSize = 0;
+    this._widePath = false;
+    this._stuckT = 0;
+    this._repaths = 0;
+    this._mvLastX = NaN;
+    this._mvLastZ = NaN;
 
     // Worker inventory (F3-04: `max` passa a ser por recurso — ver `src/data/economy.js` CARRY;
     // fixado quando a unidade começa a coletar, em vez de um valor único fixo).
@@ -474,10 +490,10 @@ export class Unit {
     const gm = this.gameManager;
     switch (order.type) {
       case CMD.MOVE:
-        this.moveTo(order.x, order.z, gm);
+        this.moveTo(order.x, order.z, gm, order.groupSpeed || 0, order.groupSize || 0);
         break;
       case CMD.ATTACK_MOVE:
-        this.orderAttackMove(order.x, order.z, gm);
+        this.orderAttackMove(order.x, order.z, gm, order.groupSpeed || 0, order.groupSize || 0);
         break;
       case CMD.GATHER:
         this.orderGather(order.target);
@@ -496,7 +512,11 @@ export class Unit {
     }
   }
 
-  moveTo(x, z, gameManager = this.gameManager) {
+  /**
+   * `groupSpeed` (F3-02): velocidade efetiva do grupo (u/s) quando a ordem veio de um comando com várias
+   * unidades — a unidade nunca anda mais rápido que ela. 0 = sem limite (ordem individual).
+   */
+  moveTo(x, z, gameManager = this.gameManager, groupSpeed = 0, groupSize = 0) {
     if (this.isDead || this.isDying || this.state === 'dying') return;
     this._clearOrderModes();
 
@@ -507,6 +527,13 @@ export class Unit {
     this.repairTarget = null;
     this.attackTarget = null;
     this.objectiveTarget = null;
+    this._groupSpeed = groupSpeed;
+    this._groupSize = groupSize;
+    // Caminho com folga (evita frestas estreitas): unidades grandes e grupos numerosos.
+    this._widePath = (this.collisionRadius || 0.6) >= 1.0 || groupSize >= WIDE_GROUP_SIZE;
+    this._stuckT = 0;
+    this._repaths = 0;
+    this._mvLastX = NaN;
 
     const gm = gameManager || this.gameManager;
     if (gm && gm.pathfinder) {
@@ -516,25 +543,7 @@ export class Unit {
         x = snapped.x;
         z = snapped.z;
       }
-      this.pathDestination = { x, z };
-      this.hasTargetPos = false;
-      this.pathPending = true;
-      gm.pathfinder.requestPath(this, x, z, (path) => {
-        this.pathPending = false;
-        // Descarta callback obsoleto (ordem já mudou enquanto o pedido esperava na fila).
-        if (!MOVEY_STATES.has(this.state) || !this.pathDestination || this.pathDestination.x !== x || this.pathDestination.z !== z) return;
-        this.waypoints = path;
-        this.waypointIndex = 0;
-        // F3-08: destino inalcançável (parede fechada) em attack-move — ataca a muralha que bloqueia.
-        if (path.noPath && this.state === 'attackMoving' && this._attackBlockingWall(gm, path, x, z)) return;
-        if (path.length === 0) {
-          this.hasTargetPos = false;
-          this.stop();
-          return;
-        }
-        this.targetPos.set(path[0].x, 0, path[0].z);
-        this.hasTargetPos = true;
-      });
+      this._requestMovePath(gm, x, z);
     } else {
       this.targetPos.set(x, 0, z);
       this.hasTargetPos = true;
@@ -542,6 +551,29 @@ export class Unit {
       this.waypointIndex = 0;
       this.pathDestination = null;
     }
+  }
+
+  /** Pede ao pathfinder o caminho até (x, z) e o aplica quando chegar (descarta se a ordem mudou). */
+  _requestMovePath(gm, x, z) {
+    this.pathDestination = { x, z };
+    this.hasTargetPos = false;
+    this.pathPending = true;
+    gm.pathfinder.requestPath(this, x, z, (path) => {
+      this.pathPending = false;
+      // Descarta callback obsoleto (ordem já mudou enquanto o pedido esperava na fila).
+      if (!MOVEY_STATES.has(this.state) || !this.pathDestination || this.pathDestination.x !== x || this.pathDestination.z !== z) return;
+      this.waypoints = path;
+      this.waypointIndex = 0;
+      // F3-08: destino inalcançável (parede fechada) em attack-move — ataca a muralha que bloqueia.
+      if (path.noPath && this.state === 'attackMoving' && this._attackBlockingWall(gm, path, x, z)) return;
+      if (path.length === 0) {
+        this.hasTargetPos = false;
+        this.stop();
+        return;
+      }
+      this.targetPos.set(path[0].x, 0, path[0].z);
+      this.hasTargetPos = true;
+    }, this._widePath);
   }
 
   /**
@@ -691,6 +723,7 @@ export class Unit {
     this.waypoints = null;
     this.waypointIndex = 0;
     this.pathDestination = null;
+    this._groupSpeed = 0;
     this.hasFiredThisAttack = false;
     this.resetPose();
     if (this.animator) {
@@ -735,9 +768,9 @@ export class Unit {
    * (ver `updateAttackMoving`) e retomam a marcha ao destino quando não sobrar alvo
    * (`_giveUpAttack`).
    */
-  orderAttackMove(x, z, gameManager = this.gameManager) {
+  orderAttackMove(x, z, gameManager = this.gameManager, groupSpeed = this._groupSpeed || 0, groupSize = this._groupSize || 0) {
     if (this.isDead || this.isDying || this.state === 'dying') return;
-    this.moveTo(x, z, gameManager); // já chama _clearOrderModes()
+    this.moveTo(x, z, gameManager, groupSpeed, groupSize); // já chama _clearOrderModes()
     this.state = 'attackMoving';
     this._amDest = { x, z };
   }
@@ -1595,13 +1628,33 @@ export class Unit {
       return;
     }
 
+    const gm = gameManager || this.gameManager;
     const curX = this.mesh.position.x;
     const curZ = this.mesh.position.z;
     const targetX = this.targetPos.x;
     const targetZ = this.targetPos.z;
     const dist = Math.hypot(targetX - curX, targetZ - curZ);
+    const isLastLeg = !this.waypoints || this.waypointIndex >= this.waypoints.length - 1;
 
-    if (dist < 0.45) {
+    // F3-02: velocidade efetiva (grupo anda na da unidade mais lenta).
+    let speed = this.speed * this.mods.speedMul;
+    if (this._groupSpeed > 0 && this._groupSpeed < speed) speed = this._groupSpeed;
+    const step = speed * delta;
+
+    // F3-02: progresso real desde o tick anterior (inclui empurrões da colisão) — detecta travamento.
+    if (this._mvLastX === this._mvLastX) {
+      const moved = Math.hypot(curX - this._mvLastX, curZ - this._mvLastZ);
+      if (moved < step * 0.3) this._stuckT += delta;
+      else this._stuckT = Math.max(0, this._stuckT - delta);
+    }
+    this._mvLastX = curX;
+    this._mvLastZ = curZ;
+
+    // Chegada: tolerância cresce com as unidades já paradas em volta do lugar (formação cheia não "dança").
+    // Waypoint intermediário: raio maior (a multidão não precisa tocar o canto exato — evita engarrafar nas quinas).
+    let arriveR = isLastLeg ? 0.45 : WAYPOINT_RADIUS;
+    if (isLastLeg && dist < 4 && gm && gm.unitGrid) arriveR += this._settleSlack(gm, targetX, targetZ);
+    if (dist < arriveR) {
       // Check if there are more waypoints along the route
       if (this.waypoints && this.waypointIndex < this.waypoints.length - 1) {
         this.waypointIndex++;
@@ -1614,14 +1667,85 @@ export class Unit {
       return;
     }
 
-    // Move step towards current target waypoint
-    this.stepTowards(targetX, targetZ, this.speed * this.mods.speedMul * delta);
+    if (this._stuckT > 0.5 && !isLastLeg && dist < 3.5) {
+      // Preso perto de um waypoint intermediário (quina que a colisão não deixa uma unidade grande alcançar): pula para o próximo.
+      this.waypointIndex++;
+      const nextWp = this.waypoints[this.waypointIndex];
+      this.targetPos.set(nextWp.x, 0, nextWp.z);
+      this._stuckT = 0;
+      return;
+    }
+    if (this._stuckT > 0.7 && isLastLeg && dist < 4) {
+      // Preso perto do lugar (vizinhas ocupando-o): considera chegado.
+      this.stop();
+      return;
+    }
+    if (this._stuckT > 1.5 && gm && gm.pathfinder && this.pathDestination && !this.pathPending) {
+      // Preso longe do destino: pede um caminho novo a partir daqui (algumas vezes), depois desiste se estiver perto.
+      this._stuckT = 0;
+      this._repaths++;
+      if (this._repaths > 8) {
+        this.stop();
+        return;
+      }
+      this._requestMovePath(gm, this.pathDestination.x, this.pathDestination.z);
+      return;
+    }
+
+    // Move step towards current target waypoint, desviando das vizinhas (steering de separação).
+    if (!this._steerStep(gm, targetX, targetZ, dist, step, isLastLeg)) {
+      this.stepTowards(targetX, targetZ, step);
+    }
 
     // Walk animation cycle
     this.hasFiredThisAttack = false;
     if (this.animator && this.hurtTimer <= 0) {
       this.animator.setAnimation('walk');
     }
+  }
+
+  /**
+   * F3-02: folga de chegada = 0,45 por vizinha parada (idle/holding) encostada no lugar de destino
+   * (máx. 2,0). Impede que o último a chegar fique empurrando a formação já assentada.
+   */
+  _settleSlack(gm, tx, tz) {
+    const buf = _steerBuf;
+    gm.unitGrid.queryRadius(tx, tz, this.collisionRadius + SEP_MARGIN, null, buf);
+    let n = 0;
+    for (let i = 0; i < buf.length; i++) {
+      const u = buf[i];
+      if (u === this || u.isDead || (u.state !== 'idle' && u.state !== 'holding')) continue;
+      n++;
+    }
+    return Math.min(2.0, n * 0.45);
+  }
+
+  /**
+   * F3-02: um passo em direção a (tx, tz) desviando das unidades vizinhas (`steerDirection`).
+   * Devolve false (sem mover) quando não há ninguém por perto, para o chamador usar `stepTowards` comum.
+   */
+  _steerStep(gm, tx, tz, dist, step, isLastLeg) {
+    if (!gm || !gm.unitGrid || dist < 1e-4) return false;
+    const px = this.mesh.position.x;
+    const pz = this.mesh.position.z;
+    const r = this.collisionRadius || 0.6;
+    const buf = _steerBuf;
+    gm.unitGrid.queryRadius(px, pz, r + SEP_MARGIN, null, buf);
+    const nb = _steerNb;
+    nb.length = 0;
+    for (let i = 0; i < buf.length; i++) {
+      const u = buf[i];
+      if (u === this || u.isDead || u.isDying || u.layer === 'air' || this.layer === 'air') continue; // sem checar `mesh.visible` (névoa é visual; a sim não pode depender dela)
+      const p = u.mesh.position;
+      nb.push({ x: p.x, z: p.z, radius: u.collisionRadius || 0.6, stationary: u.state === 'idle' || u.state === 'holding' });
+    }
+    if (nb.length === 0) return false;
+    const dir = steerDirection((tx - px) / dist, (tz - pz) / dist, px, pz, r, nb, isLastLeg && dist < 3 ? 0.5 : 1);
+    const move = Math.min(step, dist);
+    // O desvio nunca leva à água: se o passo desviado cair na água, usa o passo normal até o waypoint.
+    if (this.terrain.getHeight(px + dir.x * move, pz + dir.z * move) < 0.65) return false;
+    this.stepTowards(px + dir.x * 10, pz + dir.z * 10, move);
+    return true;
   }
 
   updateGathering(delta, gameManager, buildings) {

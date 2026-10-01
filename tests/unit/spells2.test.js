@@ -307,7 +307,8 @@ describe('magias orcs', () => {
     void lost0;
     run(gm, 64);
     expect(gm.allUnits.includes(eye)).toBe(false);
-    expect(gm.corpses.count).toBe(0);
+    // F3-02: a IA joga durante os 64 s e outros mortos podem aparecer; o que importa é que o Olho não deixa cadáver.
+    expect(gm.corpses.items.filter(c => c.active && c.type === 'watching_eye').length).toBe(0);
   });
 
   it('regra mínima de camada aérea: só atacantes à distância não-cerco engajam', () => {

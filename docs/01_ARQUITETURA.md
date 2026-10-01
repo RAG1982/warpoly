@@ -435,6 +435,23 @@ Salvar partida **por replay determinístico** (não por snapshot de entidades): 
   saves, IA fora do log, rejeição de saves inválidos, `SaveStore`); navegador real/IndexedDB:
   `bash tools/safe-run.sh --timeout 500 -- node tools/save-load-check.mjs 6000`.
 
+## Movimento em grupo e formações (F3-02)
+
+- `src/sim/formation.js` (puro): `planFormation(members, dest)` → Map `id → lugar` (linhas voltadas para o destino; atribuição por
+  projeção ao longo da marcha e posição lateral, preservando a ordem relativa) e `groupSpeed(members)` (menor velocidade efetiva).
+- `src/sim/steering.js` (puro): `steerDirection` soma à direção desejada uma força de separação (espaço pessoal = raios + `SEP_MARGIN`);
+  vizinhos parados pesam 0,6; nunca anula o avanço (`MIN_FORWARD`).
+- `CommandExecutor.moveInFormation` (MOVE e ATTACK_MOVE) calcula os lugares e emite, por unidade, a ordem com `groupSpeed` e
+  `groupSize`; `Unit.moveTo(x, z, gm, groupSpeed, groupSize)` guarda o limite de velocidade e liga o caminho "largo" (grupo ≥ 6 ou raio ≥ 1).
+  `Unit.updateMoving` aplica: velocidade de grupo, `_steerStep` (steering, nunca para a água), raio de waypoint intermediário 1,4 u,
+  tolerância de chegada por vizinhas paradas (`_settleSlack`), detecção de travamento (`_stuckT`) e repath.
+- `Pathfinder`: `findPath(..., wide)` / `requestPath(..., wide)` — no modo largo uma célula só vale com as 4 vizinhas caminháveis e fora
+  de `softBlock` (minas, registradas por `GameManager.registerEntity` com `blockCircle(..., soft=true)`); sem caminho largo volta ao normal.
+- `GameManager.resolveUnitCollisions/_checkUnitBlockerCollision` usam `_pushDry` (empurrão nunca entra na água) e dividem o empurrão
+  80/20 quando só uma das unidades está de passagem (a outra está idle/holding).
+- Testes: `formation.test.js`, `pathfinder.test.js` (modo largo), `groupMove.test.js` (40 unidades atravessam o vau, velocidade de grupo,
+  chegada sem dança, ordem lateral, determinismo). Medido: 40 unidades mistas cruzam o vau central em 35,7 s simulados (limitadas pela balista, 3 u/s); antes da F3-02, 11 das 40 ficavam presas na margem do lago/mina após 60 s.
+
 ## Eventos (F2-07)
 
 A simulação (`Unit`/`Building`/`Tree`/`ResourceDeposit`/`GameManager.simStep`/`src/ai/**`) não

@@ -821,7 +821,7 @@ export class AIEconomyManager {
 
   /**
    * Finds closest living tree with remaining wood to a given position
-   * @param {THREE.Vector3} pos 
+   * @param {{x:number,y:number,z:number}} pos 
    */
   findNearestLivingTree(pos) {
     const trees = this.gm.trees;
@@ -846,7 +846,7 @@ export class AIEconomyManager {
 
   /**
    * Finds closest resource deposit of a specific type (gold or stone) with remaining resources
-   * @param {THREE.Vector3} pos 
+   * @param {{x:number,y:number,z:number}} pos 
    * @param {'gold'|'stone'} type 
    */
   findNearestResource(pos, type) {

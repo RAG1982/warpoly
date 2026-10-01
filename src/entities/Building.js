@@ -1,7 +1,7 @@
 import * as THREE from 'three';
 import { isDetectedBy } from '../sim/detection.js';
 import { ModelFactory } from './ModelFactory.js';
-import { Arrow } from './Arrow.js';
+import { Projectile } from '../sim/projectiles.js';
 import { UPGRADE_CONFIG, RESEARCH } from '../data/index.js';
 import { legacyOwnerId } from '../sim/EntityIds.js';
 import { EVT } from '../sim/events.js';
@@ -869,11 +869,11 @@ export class Building {
             gmEvents.emit(EVT.PROJECTILE_FIRED, { kind: projType, from: posOf(_towerArrowStart), ownerId: this.ownerId });
           }
           // F3-03: dano final calculado no impacto (computeDamage, 1 valor de RNG de gm.combatRng).
-          const arrow = new Arrow(this.scene, _towerArrowStart, closest, this.towerDamage, (target, dmgObj, hitPos) => {
+          const arrow = new Projectile({ kind: projType, from: _towerArrowStart, target: closest, damage: this.towerDamage, onHit: (target, dmgObj, hitPos) => {
             const dmg = computeDamage(dmgObj, target, gm.combatRng);
             target.takeDamage(dmg, this, allUnits);
             if (gmEvents) gmEvents.emit(EVT.PROJECTILE_HIT, { kind: projType, pos: posOf(hitPos), ownerId: this.ownerId });
-          }, projType);
+          } });
           arrows.push(arrow);
           if (gameManager && gameManager.registerEntity) gameManager.registerEntity(arrow, this.ownerId);
         }

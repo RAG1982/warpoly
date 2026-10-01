@@ -6,14 +6,13 @@
  * Catálogo de dados: `src/data/abilities.js`; status: `src/sim/statuses.js`.
  */
 import { getAbility, isDebugUrl, abilityName } from '../data/abilities.js';
-import * as THREE from 'three';
 import { UNITS } from '../data/units.js';
-import { BallisticProjectile, ballisticFlightTime } from '../entities/BallisticProjectile.js';
+import { Projectile, ballisticFlightTime } from './projectiles.js';
 import { computeDamage } from './combat.js';
 import { evalRequirements, formatRequirementList } from './requirements.js';
 import { addStatus, dispelStatuses } from './statuses.js';
 import { EVT } from './events.js';
-import { applySplashDamage } from '../entities/splash.js';
+import { applySplashDamage } from './splash.js';
 import { getUnitDef } from '../data/index.js';
 
 const CHANNEL_FX = fx => fx.kind === 'channel';
@@ -245,10 +244,9 @@ function fireLine(gm, caster, fx, target) {
   if (dist < 1e-6) { dx = 0; dz = 1; }
   const impact = { x: tp.x, y: tp.y, z: tp.z };
   const onImpact = () => lineDamage(gm, caster, fx, impact.x, impact.z, dx, dz);
-  if (!gm.arrows || !caster.scene) { onImpact(); return; }
+  if (!gm.arrows) { onImpact(); return; }
   const kind = fx.projectile || 'bolt';
-  const start = new THREE.Vector3(from.x, from.y, from.z);
-  const proj = new BallisticProjectile(caster.scene, start, impact, kind, onImpact);
+  const proj = new Projectile({ kind, from, impact, onHit: onImpact });
   proj.duration = Math.min(proj.duration, ballisticFlightTime(dist, kind));
   gm.arrows.push(proj);
   if (gm.registerEntity) gm.registerEntity(proj, caster.ownerId);

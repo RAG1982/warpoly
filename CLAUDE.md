@@ -10,6 +10,7 @@ RTS 3D low-poly no navegador (three.js + Vite, JS ES modules), inspirado em **Wa
 ## Comandos
 - Dev: `npx vite --port 5173` (launch config `warpoly-dev`). URLs: `/` jogo, `/inspector.html` inspetor 3D. Parâmetros: `?skipPreload`, `?faction=orc`.
 - Build: `npm run build`.
+- Partida IA×IA headless (Node puro, F2-08): `node tools/headless-match.js --seed 1` (ver `docs/01_ARQUITETURA.md`, "Separação sim/render").
 - Debug no console: `window.game` (jogo), `window.inspectorApp` (inspetor); desempenho em `game.sceneManager.renderer.info`.
 - Blender headless (pipeline de arte): `/home/rafael/Downloads/blender-5.2.1-linux-x64/blender -b --python tools/blender/<script>.py`.
 

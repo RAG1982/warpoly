@@ -50,6 +50,8 @@ src/
     EntityIds.js              Contador monotônico, EntityRegistry (id → entidade), NEUTRAL_OWNER_ID = −1
     MatchConfig.js            {mapId, seed, difficulty, players[]}, layout da base inicial (layoutAt, slots vêm do mapa), withNewSeed
     SaveGame.js               Save/Load por replay determinístico (F2-06): captureSave, fastForward, parseSave
+
+    projectiles.js, splash.js Projéteis como dados (F2-08) e dano em área (movido de entities/)
     SpatialGrid.js            Grade espacial (spatial hash) uniforme: insert/update/remove/clear, queryRadius,
                                queryRect, nearest (F1-06; testado em tests/unit/spatialGrid.test.js)
   ai/
@@ -60,7 +62,7 @@ src/
     Unit.js                   Máquina de estados da unidade + stats hardcoded
     Building.js               Construção, fila de treino, pesquisa, torre, chamas + UNIT_TRAIN_CONFIG / BUILDING_BUILD_CONFIG
     buildings/HumanForge.js, buildings/orc/*.js   Subclasses com VFX (initCustomVFX/updateCustomVFX)
-    Tree.js, ResourceDeposit.js, Arrow.js, ParticleSystem.js
+    Tree.js, ResourceDeposit.js, ParticleSystem.js   (projéteis: sim/projectiles.js + render/ProjectileViews.js, F2-08)
     ModelFactory.js           Cache de templates + clone; rebind de nós nomeados para animação
   animation/UnitAnimator.js  Animações procedurais (idle/walk/fight/gather/hurt/die) — F2-07: movido de src/inspector/
   sim/EventBus.js, sim/events.js   Barramento de eventos da simulação (F2-07: ver seção "Eventos")
@@ -81,6 +83,7 @@ src/
   ui/screens/                 MainMenu (F6-01), PauseMenu + gameScreens.css (F2-04)
   render/sceneDisposal.js     Descarte de objetos da partida preservando os caches do ModelFactory (F2-04)
   render/VfxEvents.js         Ouvinte: eventos → ParticleSystem (F2-07)
+  render/ProjectileViews.js   Malhas dos projéteis da sim (F2-08)
   inspector/
     inspector.js              App do inspetor (catálogo de 37 modelos, luzes, wireframe, stats)
     unitAnimator.js           F2-07: reexport de 1 linha de `../animation/UnitAnimator.js` (compatibilidade)
@@ -159,14 +162,14 @@ animate() [rAF da aplicação, delta máx 0.1s; sem sessão (menu/loading) não 
 - `GameManager.simStep(dt)` é o corpo antigo de `update(delta)`, com `dt` sempre igual a `SIM_DT`
   (sem chamadas de animação/visual):
   1. Vitória/derrota: jogador sem HQ (construção com `role: 'hq'`) fica `defeated`. Jogador local derrotado → derrota; só um time vivo → vitória.
-  2. Árvores → projéteis (`Arrow.simStep`) → construções (`Building.simUpdate`) → remove construções mortas.
+  2. Árvores → projéteis (`Projectile.simStep`, `src/sim/projectiles.js`) → construções (`Building.simUpdate`) → remove construções mortas.
   3. Todas as unidades (`gm.allUnits`, ordem de spawn) (`Unit.update`).
   4. `resolveBuildingCollisions` (unidade × todas construções/depósitos/árvores) e `resolveUnitCollisions` (**O(n²)**).
   5. `aiDirectors[i].update(dt)` para cada IA não derrotada.
   6. `fogOfWar.update` (10 Hz) com as unidades/construções do jogador local e as hostis a ele.
   7. Limpeza de mortos (remove de `allUnits`, da lista do dono e de `entitiesById`).
 - `GameManager.renderUpdate(frameDelta, alpha)` roda a cada quadro renderizado (não a cada passo de
-  simulação): interpola a pose de projéteis (`Arrow.renderUpdate` — posição + quaternion completo,
+  simulação): interpola a pose de projéteis (agora em `render/ProjectileViews` a partir de `prev`/`pos` — F2-08; antes `Arrow.renderUpdate`: posição + quaternion completo,
   já que a trajetória balística usa `lookAt`/pitch), atualiza VFX/billboard de construções
   (`Building.renderUpdate`) e, para cada unidade, aplica o **LOD de animação** por
   frustum/visibilidade/distância antes de chamar `Unit.renderUpdate(frameDelta, alpha, lodStep)`:
@@ -205,7 +208,7 @@ animate() [rAF da aplicação, delta máx 0.1s; sem sessão (menu/loading) não 
 - `Critter` (`src/entities/Critter.js`): classe leve, sem `Unit`, em `gm.critters` + `entitiesById` (ownerId −1), fora das grades espaciais e de `getUnitsOf`; picking via `InputManager.raycastScene` (lista própria ≤ 40). Validação do formato: `validateNeutrals` (`MatchConfig.js`); ver `src/data/maps/README.md`.
 
 ### Entidades
-- Toda `Unit`, `Building`, `Tree`, `ResourceDeposit` e projétil (`Arrow`) tem `id` numérico estável (contador monotônico, nunca reaproveitado na vida do `GameManager`) e `ownerId` (−1 = natureza/neutro). `gm.entitiesById` (Map) é mantido no spawn/criação e na remoção (morte, fim do projétil, `resetMap`).
+- Toda `Unit`, `Building`, `Tree`, `ResourceDeposit` e projétil (`Projectile`) tem `id` numérico estável (contador monotônico, nunca reaproveitado na vida do `GameManager`) e `ownerId` (−1 = natureza/neutro). `gm.entitiesById` (Map) é mantido no spawn/criação e na remoção (morte, fim do projétil, `resetMap`).
 - Hostilidade: `Unit` (aggro, busca de alvo, retaliação, pedido de ajuda a aliados) e `Building` (torres) usam `gm.isHostile(this.ownerId, outro.ownerId)` / `isAlly`. Entrega de recursos só em construções do **mesmo dono**.
 - Listas: `gm.allUnits` é a lista única (fonte de verdade). `gm.getUnitsOf(ownerId)` (mantida em add/remove) e `gm.getHostileUnitsOf(ownerId)` (cache invalidado em add/remove) são visões derivadas. **Não modifique os arrays retornados.**
 - Bases iniciais (F2-05): `initMapEntities` cria HQ + serraria + casa + 5 unidades por jogador a partir de `mapDef.startSlots[player.startSlot]` (`src/data/maps/<mapId>.json` — no mapa continental, slot 0 = NE (32,−30), slot 1 = SW (−32,30), slot 2 = (−14,−46), só usado em partidas FFA de teste). O layout (`START_LAYOUT`) é espelhado por `slot.mirror` (ou, se ausente, por `slotMirror`) e reproduz as posições antigas; os tipos vêm de `FACTIONS[f].startingBase`. Recursos do mapa com `resources[].slot === N` só são criados se algum jogador usar `startSlot === N`.
@@ -452,6 +455,35 @@ Salvar partida **por replay determinístico** (não por snapshot de entidades): 
 - Testes: `formation.test.js`, `pathfinder.test.js` (modo largo), `groupMove.test.js` (40 unidades atravessam o vau, velocidade de grupo,
   chegada sem dança, ordem lateral, determinismo). Medido: 40 unidades mistas cruzam o vau central em 35,7 s simulados (limitadas pela balista, 3 u/s); antes da F3-02, 11 das 40 ficavam presas na margem do lago/mina após 60 s.
 
+## Separação sim/render (F2-08)
+
+Camadas e regra de dependência (verificada por `tests/unit/layers.test.js`):
+
+| Camada | Pode importar | Não pode |
+|---|---|---|
+| `src/sim`, `src/ai`, `src/data` (**puras**) | só `src/sim` e `src/data` (a IA importa o mesmo) | `three`, `entities/`, `core/`, `world/`, `ui/`, `render/`, `audio/`, `models/`, DOM/WebGL/`localStorage` |
+| `src/entities`, `src/core`, `src/world` (simulação **com malha**, dívida abaixo) | tudo | — |
+| `src/render`, `src/ui`, `src/audio` (**apresentação**) | lê a simulação (`gm`, eventos), nunca escreve nela | — |
+
+- **Feito**: projéteis viraram dados — `src/sim/projectiles.js` (`Projectile`: homing flecha/machado, balístico virote/pedra; `simStep`,
+  `pos/prev/aim/spin`, `onHit`) e a view `src/render/ProjectileViews.js` (malha por projétil em `gm.arrows`, interpolação `prev→pos`
+  com o `alpha` do tick fixo, criada/removida pela `MatchSession`; `Arrow.js` e `BallisticProjectile.js` foram removidos).
+  `splash.js` (dano em área) foi para `src/sim/` (`entities/splash.js` só reexporta). `src/sim/abilities.js` e `src/ai/*` não usam mais
+  `three` (a IA usa `{x,y}`/`{x,y,z}` simples). Os ouvintes de eventos de apresentação (`audio/AudioEvents`, `render/VfxEvents`,
+  `ui/UiEvents`, `render/HazardView`) já seguiam o padrão "view lê a sim".
+- **Partida headless em Node puro**: `node tools/headless-match.js --seed 1 [--map id] [--difficulty d] [--victory modo] [--ffa]
+  [--max-minutes N] [--json]` — todos os jogadores IA, passos fixos de 20 Hz até alguém vencer (código de saída 0; 2 = estourou o
+  limite; 1 = erro), imprime resumo e checksum final. Seed 1 (1×1): termina aos 7,3 min simulados em ~11 s (≈800 ticks/s). Funciona
+  porque `MatchConfig.headless` faz `ModelFactory` devolver `Group` vazio (F2-03) e o hook `tools/lib/jsonImportLoader.mjs` resolve os
+  `.json` dos mapas. Teste: `tests/unit/headlessMatch.test.js` (processo separado; determinismo entre processos).
+- **Dívida (F2-08b)**: `Unit`, `Building`, `Tree`, `ResourceDeposit`, `Critter`, `Wall`, `GameManager` (em `src/core`), `FogOfWar` e
+  `TreeManager` ainda criam/seguram `THREE.Object3D` (a posição de simulação é `mesh.position`; barras de vida, anel de seleção,
+  animador e billboards vivem dentro de `Unit`/`Building`). Para mover essas classes para `src/sim` é preciso: (1) posição/rotação como
+  números (`x,y,z,rotY`) em vez de `mesh.position`; (2) extrair `UnitView`/`BuildingView`/`TreeView` (malha, animador, barras,
+  billboards, seleção) para `src/render/`, criados por evento `*_SPAWNED`/lista da `gm`; (3) `FogOfWar` separar a grade lógica
+  (`FogGrid`, já pura) da textura/shader; (4) `GameManager` sem `scene`/`terrain.mesh` (altura via `terrain.getHeight` puro).
+  Hoje o headless funciona justamente porque as malhas são `Group` vazios — a simulação ainda paga o custo (pequeno) do three em Node.
+
 ## Eventos (F2-07)
 
 A simulação (`Unit`/`Building`/`Tree`/`ResourceDeposit`/`GameManager.simStep`/`src/ai/**`) não
@@ -488,7 +520,7 @@ visuais/sonoros nunca são "re-disparados" porque o `EventBus` tem `muted` (aind
 - **`UnitAnimator`** mora em `src/animation/UnitAnimator.js` (F2-07; antes em
   `src/inspector/`, camada invertida — ver B13 em `04_DIAGNOSTICO.md`); `src/inspector/
   unitAnimator.js` é um reexport de 1 linha para compatibilidade.
-- **Cerco (F4-02):** `UNITS.ballista`/`catapult` ganham `minAttackRange` e `splashRadius` (documentados no cabeçalho de `units.js`) e `projectile: 'bolt'|'boulder'`. `Unit` marca `isBallistic`; no disparo (`updateAttacking`, progresso 0,6) cria um `BallisticProjectile` (`src/entities/BallisticProjectile.js`; mesmo contrato de tick fixo/interpolação da `Arrow`, vive em `gm.arrows`) que voa até a posição **prevista** (`velX/velZ`, medidos por `GameManager` ao sincronizar o `unitGrid` a cada tick) e, no impacto, chama `applySplashDamage` (`src/entities/splash.js`: unidades + construções hostis, queda linear 100→50 %, 1 `computeDamage` por entidade em ordem de `id`). Alcance mínimo: `Unit._canEngage` filtra as buscas de alvo e o passo 2b de `updateAttacking` recua/troca de alvo. Oficinas (`role:'workshop'`, `WorkshopModel.js`/`OrcWorkshopModel.js`); `BallistaModel.js`/`CatapultModel.js` expõem `SiegeArm`/`WheelL`/`WheelR` (em `ANIMATED_NODE_NAMES`; animação `fight` do `UnitAnimator` via `parts.siegeArm`). Requisito novo `{role:'workshop'}` em `src/sim/requirements.js`. Eventos `PROJECTILE_FIRED/HIT` com `kind` `bolt`/`boulder`.
+- **Cerco (F4-02):** `UNITS.ballista`/`catapult` ganham `minAttackRange` e `splashRadius` (documentados no cabeçalho de `units.js`) e `projectile: 'bolt'|'boulder'`. `Unit` marca `isBallistic`; no disparo (`updateAttacking`, progresso 0,6) cria um `Projectile` balístico (`src/sim/projectiles.js` desde a F2-08; vive em `gm.arrows`) que voa até a posição **prevista** (`velX/velZ`, medidos por `GameManager` ao sincronizar o `unitGrid` a cada tick) e, no impacto, chama `applySplashDamage` (`src/sim/splash.js`: unidades + construções hostis, queda linear 100→50 %, 1 `computeDamage` por entidade em ordem de `id`). Alcance mínimo: `Unit._canEngage` filtra as buscas de alvo e o passo 2b de `updateAttacking` recua/troca de alvo. Oficinas (`role:'workshop'`, `WorkshopModel.js`/`OrcWorkshopModel.js`); `BallistaModel.js`/`CatapultModel.js` expõem `SiegeArm`/`WheelL`/`WheelR` (em `ANIMATED_NODE_NAMES`; animação `fight` do `UnitAnimator` via `parts.siegeArm`). Requisito novo `{role:'workshop'}` em `src/sim/requirements.js`. Eventos `PROJECTILE_FIRED/HIT` com `kind` `bolt`/`boulder`.
 - **Sapadores (F4-05):** `UNITS.sapper`/`arsonist` (campo `suicide`, `splashRadius: 2.2`; treinados nas Oficinas). `Unit.suicide` desativa a auto-aquisição de unidades (`findNearestHostileUnit`/`CombatUnit` devolvem `null`, salvo em `hold`) e faz `findNearestHostile` preferir a construção/muralha hostil mais próxima (`_nearestStructure`); no passo 4 de `updateAttacking`, em vez de golpear, chama `_detonate`: emite `EVT.EXPLOSION {pos, radius, ownerId}`, `applySplashDamage(..., edge 0,4, surface true)` centrado no alvo (distância medida até a superfície, por isso a explosão pega os segmentos de muralha vizinhos), zera `lastAttackerOwnerId` (a morte do sapador não dá kill a ninguém, mas conta em `unitsLost`) e morre sem cadáver (`deathDuration = 0`, malha oculta). `applySplashDamage` ganhou os parâmetros opcionais `edge` (padrão 0,5: cerco) e `surface` (padrão `false`). VFX: `ParticleSystem.spawnExplosion` (clarão + anel em pool de 6, fagulhas no `chipPool`, fumaça) e `SceneManager.shake` (0,15 s; `?shake=0` desliga) via `VfxEvents`; som via `AudioEvents`. Modelos procedurais `SapperModel.js`/`ArsonistModel.js` (nó `Fuse` em `ANIMATED_NODE_NAMES`; `UnitAnimator.applySapperRun`). IA: `FACTIONS.*.units.suicide`; `AIMilitaryManager` mantém até 3 na Oficina quando o inimigo tem ≥ 4 muralhas ou Centro nível ≥ 2.
 - **Cavalaria (F4-01):** construções com `role:'stable'` (`stable`, `ogre_den`; classe base `Building`, modelos procedurais `StableModel.js`/`OgreDenModel.js`). O `cavalier` usa `CavalierModel.js` (cavalo em caixas + tronco do Espadachim): `UnitAnimator` trata `cavalier` como `knight` nas poses e, se `userData.horseLegs` existir (nós `HorseLegFL/FR/BL/BR`, religados por `ModelFactory.rebindUserData`), balança as pernas do cavalo em diagonais no `walk`. Os nomes `HorseLeg*` estão em `ANIMATED_NODE_NAMES` (pivôs do skinning rígido).
 

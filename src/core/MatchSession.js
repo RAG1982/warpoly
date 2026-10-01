@@ -11,6 +11,7 @@ import { collectSharedResources, disposeObjectTree } from '../render/sceneDispos
 import { createAudioEvents } from '../audio/AudioEvents.js';
 import { createVfxEvents } from '../render/VfxEvents.js';
 import { HazardView } from '../render/HazardView.js';
+import { ProjectileViews } from '../render/ProjectileViews.js';
 import { createUiEvents } from '../ui/UiEvents.js';
 
 /**
@@ -76,6 +77,7 @@ export class MatchSession {
       this._disposeAudioEvents = createAudioEvents(this.gameManager, sound);
       this._disposeVfxEvents = createVfxEvents(this.gameManager, this.particleSystem);
       this.gameManager.hazardView = new HazardView(this.gameManager.scene, this.gameManager); // F4-04b
+      this.projectileViews = new ProjectileViews(this.gameManager, scene); // F2-08: malhas dos projéteis
       this._disposeUiEvents = createUiEvents(this.gameManager, this.uiManager);
     }
   }
@@ -106,10 +108,12 @@ export class MatchSession {
     if (simulate) {
       const alpha = this.gameManager.advance(delta);
       this.gameManager.renderUpdate(delta, alpha);
+      this.projectileViews?.update(alpha);
       this.particleSystem.update(delta);
     } else {
       // Pausado: mantém a pose de simulação (sem avançar), billboards seguem a câmera.
       this.gameManager.renderUpdate(0, 1);
+      this.projectileViews?.update(1);
     }
     this.uiManager.update(delta);
   }
@@ -131,6 +135,8 @@ export class MatchSession {
     this._disposeAudioEvents?.();
     this._disposeVfxEvents?.();
     if (this.gameManager.hazardView) { this.gameManager.hazardView.dispose(); this.gameManager.hazardView = null; }
+    this.projectileViews?.dispose();
+    this.projectileViews = null;
     this._disposeUiEvents?.();
 
     // 1. Entrada e HUD primeiro: nada mais reage a eventos desta partida.

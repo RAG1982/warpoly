@@ -9,7 +9,7 @@ import { computeDamage } from '../../src/sim/combat.js';
 import { getUnitDef, getBuildingDef, UNITS, FACTIONS } from '../../src/data/index.js';
 import { RESEARCH } from '../../src/data/upgrades.js';
 import { applySplashDamage, splashFalloff } from '../../src/entities/splash.js';
-import { BallisticProjectile, ballisticPeak, ballisticFlightTime } from '../../src/entities/BallisticProjectile.js';
+import { Projectile, ballisticPeak, ballisticFlightTime } from '../../src/sim/projectiles.js';
 
 /**
  * siege.test.js — F4-02: Balista/Catapulta, Oficina, projétil balístico, alcance mínimo, dano em
@@ -267,7 +267,8 @@ describe('alcance mínimo e míssil balístico (F4-02)', () => {
     while (gm.arrows.length === 0 && guard++ < 200) gm.simStep(SIM_DT);
     expect(gm.arrows.length).toBe(1);
     const proj = gm.arrows[0];
-    expect(proj).toBeInstanceOf(BallisticProjectile);
+    expect(proj).toBeInstanceOf(Projectile);
+    expect(proj.kind).toBe('bolt');
     place(target, x + 12, z + 15); // foge para longe do ponto previsto
     const hpBefore = target.hp;
     guard = 0;

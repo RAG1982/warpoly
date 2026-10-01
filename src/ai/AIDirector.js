@@ -1,4 +1,3 @@
-import * as THREE from 'three';
 import { AIEconomyManager } from './AIEconomyManager.js';
 import { AIMilitaryManager } from './AIMilitaryManager.js';
 import { FACTIONS, getBuildingDef, getCost, getTrainCost } from '../data/index.js';
@@ -16,9 +15,9 @@ export class AIDirector {
    * @param {import('../core/GameManager.js').GameManager} gameManager
    * @param {number} playerId  id do Player controlado por esta IA (F2-01): facção, recursos e
    *                           população vêm de `gm.getPlayer(playerId)` — sem cópia própria.
-   * @param {THREE.Vector2} baseCenter
+   * @param {{x:number,y:number}} baseCenter  centro da base no plano (`y` = coordenada Z do mundo)
    */
-  constructor(gameManager, playerId, baseCenter = new THREE.Vector2(-32, 30)) {
+  constructor(gameManager, playerId, baseCenter = { x: -32, y: 30 }) {
     this.gm = gameManager;
     this.playerId = playerId;
     /** @type {import('../sim/Player.js').Player} */

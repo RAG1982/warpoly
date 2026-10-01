@@ -83,20 +83,26 @@ try {
         p.resources.gold = 5000; p.resources.wood = 5000; p.resources.stone = 5000; p.maxPopulation = 100;
         const hq = gm.buildings.find(b => b.ownerId === id && b.role === 'hq');
         hq.tier = 3;
-        const at = (dx, dz) => ({ x: hq.mesh.position.x + dx, z: hq.mesh.position.z + dz });
-        const mk = (type, dx, dz, done = true) => {
-          const c = at(dx, dz); const b = gm.createBuilding(type, c.x, c.z, done, id); gm.buildings.push(b); return b;
-        };
         const arcType = faction === 'orc' ? 'ash_sanctum' : 'arcane_tower';
-        const arc = mk(arcType, 14, 4);
-        const wip = mk(arcType, 14, -12, false);
+        // procura clareiras (canPlaceBuilding) ao redor do QG para obra, construção pronta e unidades
+        const free = [];
+        for (const r of [12, 16, 20, 24, 28]) {
+          for (let a = 0; a < 360; a += 20) {
+            const x = hq.mesh.position.x + r * Math.cos(a * Math.PI / 180), z = hq.mesh.position.z + r * Math.sin(a * Math.PI / 180);
+            if (gm.canPlaceBuilding(arcType, x, z) && gm.canPlaceBuilding(arcType, x, z + 8) && gm.canPlaceBuilding(arcType, x + 8, z)) free.push({ x, z });
+          }
+        }
+        const mkAt = (type, p, done = true) => { const b = gm.createBuilding(type, p.x, p.z, done, id); gm.buildings.push(b); return b; };
+        const pA = free[0];
+        const pW = free.find(p => Math.hypot(p.x - pA.x, p.z - pA.z) > 12) || free[1];
+        const arc = mkAt(arcType, pA);
+        const wip = mkAt(arcType, pW, false);
         wip.buildProgress = 45; wip.updateConstructionState();
         const types = faction === 'orc' ? ['necromancer', 'skeleton', 'arsonist'] : ['mage', 'knight', 'sapper'];
-        const c = at(0, 12);
-        const us = types.map((t, i) => gm.spawnUnit(t, c.x + i * 2.4, c.z, id));
-        us[2].orderMove && us[2].orderMove({ x: c.x + 4.8, y: 0, z: c.z + 14 });
+        const us = types.map((t, i) => gm.spawnUnit(t, pA.x - 3 + i * 2.4, pA.z + 7, id));
+        us[2].orderMove && us[2].orderMove({ x: pA.x + 3, y: 0, z: pA.z + 12 });
         window.__cap = { arc, wip, us, hq };
-        return { arcType: arc.type, types };
+        return { arcType: arc.type, types, free: free.length };
       }, faction);
       console.log(faction, JSON.stringify(res));
       await page.evaluate(() => { window.game.gameManager.sceneManager.targetZoomLevel = 0.42; return true; });

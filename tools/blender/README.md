@@ -23,6 +23,14 @@ os `.glb` em `public/models/` são artefatos reproduzíveis.
 | `build_catapult.py` | `public/models/catapult.glb` | Catapulta orc (NEW-36): toras, ossos, peles, contrapeso e concha com carga; mesma rig, 6 draw calls, 6,6 mil tris, atlas 512², 290 KB |
 | `build_workshop.py` | `public/models/workshop.glb` | Oficina de Engenharia: enxaimel, engrenagens, guindaste, chaminé de tijolos, 2 draw calls, 7,3 mil tris, atlas 1024², 380 KB |
 | `build_orc_workshop.py` | `public/models/orc_workshop.glb` | Oficina dos Engenhoqueiros: galpão de sucata, forja ardente, engrenagens toscas, 2 draw calls, 9,2 mil tris, atlas 1024², 430 KB |
+| `build_mage.py` | `public/models/mage.glb` | Mago Arcano (NEW-39): chapéu pontudo, barba, túnica pesada, manto, capa/estola em time, cajado com `Crystal`; rig plana, 6,8 mil tris, 9 draw calls, atlas 512², ~290 KB |
+| `build_necromancer.py` | `public/models/necromancer.glb` | Necromante das Cinzas orc: capuz chifrudo, ombreiras de crânios, ossos, manto esfarrapado, cajado de crânio com `Crystal` verde; 6,8 mil tris, 12 draw calls, ~300 KB |
+| `build_skeleton.py` | `public/models/skeleton.glb` | Esqueleto de combate: ossos, couraça/elmo enferrujados, trapos em time, `Weapon` dentro de `ArmR`; 5,9 mil tris, 8 draw calls, ~280 KB |
+| `build_sapper.py` | `public/models/sapper.glb` | Sapador humano: barril de pólvora, bandoleira de bombas, óculos, nó `Fuse` (filho do Torso); 5,1 mil tris, 8 draw calls, ~245 KB |
+| `build_arsonist.py` | `public/models/arsonist.glb` | Incendiário orc: rack de 3 botijas, óculos de solda, nó `Fuse`; 5,7 mil tris, 8 draw calls, ~260 KB |
+| `build_arcane_tower.py` | `public/models/arcane_tower.glb` | Torre Arcana: torre octogonal, escada em espiral, balcão, pavilhão com cristal e astrolábio (`Anim_Crystal`); 7,3 mil tris, atlas 1024², ~460 KB, altura ~9,6 |
+| `build_ash_sanctum.py` | `public/models/ash_sanctum.glb` | Santuário das Cinzas: zigurate de basalto, totens de crânios, braseiro com gaiola de costelas, obelisco, `Anim_Flame` (chamas e fumaça); 8,1 mil tris, atlas 1024², ~440 KB |
+| `unit_common.py` | — | helpers dos humanoides de rig plana (painel de tecido, tubo, mão, pipeline de bake/export/render) |
 | `siege_common.py` | — | helpers do cerco e das oficinas (rodas, correntes, engrenagens, proxy `Xf`) |
 | `bld_common.py` | — | helpers das construções (viga/tubo/tora entre pontos, cabeça de cavalo, crânio de ogro, bbox) |
 | `common.py` | — | helpers (primitivas bmesh, materiais de pintura, UV atlas, bake, export, render) |

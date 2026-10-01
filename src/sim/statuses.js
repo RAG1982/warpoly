@@ -5,8 +5,9 @@
  * `id === null`) — nenhum objeto é alocado por passo. O efeito agregado (`unit.mods`) é cacheado e
  * recalculado só quando um status entra/sai. Só multiplicadores/flags; a regra de jogo vive em
  * `Unit.js` (`speedMul` no movimento, `attackSpeedMul` no cooldown, `damageMul` no dano,
- * `invulnerable` em `takeDamage`). `invisible`/`polymorph`/`shielded` estão declarados sem
- * comportamento (F4-04).
+ * `invulnerable` em `takeDamage`). F4-04: `invisible` (detecção em `src/sim/detection.js`),
+ * `flameshield` (golpe corpo a corpo devolve dano), `unholy_armor` (invulnerável + perde 50 % do PV atual
+ * ao expirar — `onExpire`). `polymorph` (marcador) e `shielded` seguem declarados sem comportamento.
  */
 
 export const STATUS_CAPACITY = 8;
@@ -17,6 +18,8 @@ export const STATUS_DEFS = Object.freeze({
   bloodlust: { damageMul: 1.5, attackSpeedMul: 1.5, speedMul: 1.25, dispellable: true },
   invisible: { invisible: true, dispellable: true },
   invulnerable: { invulnerable: true, dispellable: false },
+  flameshield: { flameshield: true, dispellable: true },
+  unholy_armor: { invulnerable: true, dispellable: false, onEndHpLoss: 0.5 },
   polymorph: { polymorph: true, dispellable: true },
   shielded: { shielded: true, dispellable: true }
 });
@@ -30,7 +33,7 @@ export function createStatusSlots() {
 
 /** Objeto de modificadores neutros (um por unidade; reescrito em `recalcMods`). */
 export function createMods() {
-  return { speedMul: 1, attackSpeedMul: 1, damageMul: 1, invulnerable: false, invisible: false, polymorph: false, shielded: false };
+  return { speedMul: 1, attackSpeedMul: 1, damageMul: 1, invulnerable: false, invisible: false, polymorph: false, shielded: false, flameshield: false };
 }
 
 /** Reagrega `unit.mods` a partir dos slots ativos. Multiplicadores se acumulam (produto). */
@@ -43,6 +46,7 @@ export function recalcMods(unit) {
   m.invisible = false;
   m.polymorph = false;
   m.shielded = false;
+  m.flameshield = false;
   const slots = unit.statuses;
   for (let i = 0; i < slots.length; i++) {
     const s = slots[i];
@@ -56,6 +60,7 @@ export function recalcMods(unit) {
     if (def.invisible) m.invisible = true;
     if (def.polymorph) m.polymorph = true;
     if (def.shielded) m.shielded = true;
+    if (def.flameshield) m.flameshield = true;
   }
 }
 
@@ -108,6 +113,21 @@ export function dispelStatuses(unit) {
   return n;
 }
 
+/** Remove o status `id` (sem `onExpire`). Retorna true se estava ativo. */
+export function removeStatus(unit, id) {
+  const slots = unit.statuses;
+  for (let i = 0; i < slots.length; i++) {
+    const s = slots[i];
+    if (s.id === id) {
+      s.id = null;
+      s.remaining = 0;
+      recalcMods(unit);
+      return true;
+    }
+  }
+  return false;
+}
+
 /** Limpa todos os slots (reposição ao reciclar a unidade). */
 export function clearStatuses(unit) {
   const slots = unit.statuses;
@@ -119,19 +139,29 @@ export function clearStatuses(unit) {
   recalcMods(unit);
 }
 
-/** Avança `dt` s; expira status cujo tempo acabou (e recalcula `mods` se algum saiu). */
-export function tickStatuses(unit, dt) {
+/**
+ * Avança `dt` s; expira status cujo tempo acabou (e recalcula `mods` se algum saiu).
+ * `onExpire(unit, id)` (opcional; F4-04) roda DEPOIS de `mods` recalculado, uma vez por status que expirou.
+ */
+export function tickStatuses(unit, dt, onExpire = null) {
   const slots = unit.statuses;
   let changed = false;
+  let expired = null; // só aloca quando há expiração e callback (raro)
   for (let i = 0; i < slots.length; i++) {
     const s = slots[i];
     if (s.id === null) continue;
     s.remaining -= dt;
     if (s.remaining <= 0) {
+      const id = s.id;
       s.id = null;
       s.remaining = 0;
       changed = true;
+      if (onExpire) {
+        if (expired === null) expired = [];
+        expired.push(id);
+      }
     }
   }
   if (changed) recalcMods(unit);
+  if (expired !== null) for (let i = 0; i < expired.length; i++) onExpire(unit, expired[i]);
 }

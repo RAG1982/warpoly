@@ -17,6 +17,11 @@ import {
   createBallista,
   createCatapult,
   createSapper,
+  createMage,
+  createNecromancer,
+  createSkeleton,
+  createArcaneTower,
+  createAshSanctum,
   createArsonist,
   createWorkshop,
   createOrcWorkshop,
@@ -130,6 +135,33 @@ const MODEL_CATALOG = [
     create: createCatapult,
     description: 'Cerco orc (F4-02): chassi de troncos sobre duas rodas, braço de arremesso com concha e pedra, peles e estandarte vermelho. Modelo procedural provisório; o final do Blender vem na F7.',
     notes: 'Nó SiegeArm arma e lança na animação fight; WheelL/WheelR giram ao andar.'
+  },
+  {
+    id: 'mage', name: 'Mago Arcano (Mage)', category: 'units', faction: 'human', type: 'mage', icon: '🧙',
+    sourceFile: 'src/models/units/MageModel.js', create: createMage,
+    description: 'Conjurador humano (F4-04): túnica azul-marinho, capuz e cajado com cristal azul. Procedural provisório; o final do Blender vem na F7.',
+    notes: 'Nós Weapon e Crystal; o cristal pulsa na animação cast.'
+  },
+  {
+    id: 'necromancer', name: 'Necromante das Cinzas (Necromancer)', category: 'units', faction: 'orc', type: 'necromancer', icon: '☠️',
+    sourceFile: 'src/models/units/NecromancerModel.js', create: createNecromancer,
+    description: 'Conjurador orc (F4-04): manto cinza-escuro, capuz e cajado com crânio e cristal verde. Procedural provisório.',
+    notes: 'Nós Weapon e Crystal; o cristal pulsa na animação cast.'
+  },
+  {
+    id: 'skeleton', name: 'Esqueleto (Skeleton)', category: 'units', faction: 'orc', type: 'skeleton', icon: '🦴',
+    sourceFile: 'src/models/units/SkeletonModel.js', create: createSkeleton,
+    description: 'Morto-vivo invocado por Erguer Mortos (F4-04). Procedural simples.', notes: 'Rig humanoide plana + Weapon.'
+  },
+  {
+    id: 'arcane_tower', name: 'Torre Arcana (Arcane Tower)', category: 'buildings', faction: 'human', type: 'building', icon: '🔮',
+    sourceFile: 'src/models/buildings/ArcaneTowerModel.js', create: createArcaneTower,
+    description: 'Torre de magos humana (F4-04): fuste de pedra esguio, anéis dourados, telhado azul e cristal flutuante.', notes: 'Procedural provisório.'
+  },
+  {
+    id: 'ash_sanctum', name: 'Santuário das Cinzas (Ash Sanctum)', category: 'buildings', faction: 'orc', type: 'building', icon: '🔥',
+    sourceFile: 'src/models/buildings/AshSanctumModel.js', create: createAshSanctum,
+    description: 'Santuário orc (F4-04): plataforma de basalto, pilares com crânios, braseiro verde-ácido e estandarte.', notes: 'Procedural provisório.'
   },
   {
     id: 'sapper',

@@ -39,6 +39,7 @@ import { CommandQueue, COMMAND_DELAY_TICKS } from '../sim/CommandQueue.js';
 import { CommandExecutor } from '../sim/CommandExecutor.js';
 import { createRng } from '../sim/rng.js';
 import { recordChecksum } from '../sim/checksum.js';
+import { CorpsePool } from '../sim/corpses.js';
 import { EventBus } from '../sim/EventBus.js';
 import { EVT } from '../sim/events.js';
 import { MatchStats } from '../sim/MatchStats.js';
@@ -114,6 +115,8 @@ export class GameManager {
     this.arrows = [];
     /** F3-10: critters decorativos (Critter, fora de `allUnits`/grades) e acampamentos neutros. */
     this.critters = [];
+    /** F4-04: pool fixo de cadáveres (só dados; `src/sim/corpses.js`) — consumidos por Erguer Mortos. */
+    this.corpses = new CorpsePool();
     /** @type {Map<number, {remaining:number, reward:object, pos:{x:number,z:number}}>} campId → cluster */
     this._camps = new Map();
 
@@ -443,6 +446,7 @@ export class GameManager {
     this.trees = [];
     this.resourceDeposits = [];
     this.critters = [];
+    this.corpses.clear();
     this._camps = new Map();
     this.selectedUnits = [];
     this.selectedBuilding = null;
@@ -927,6 +931,20 @@ export class GameManager {
     unit.damage.piercing += to.damage.piercing - from.damage.piercing;
     unit.armor = (unit.armor || 0) + ((to.armor || 0) - (from.armor || 0));
     unit.attackRange += to.attackRange - from.attackRange;
+  }
+
+  /**
+   * F4-04: Transmutação — a unidade vira `sheep` para sempre (mantém dono e id). Reaproveita `promoteUnit`
+   * (tipo/nome/stats) e depois `Unit.applyPolymorph` (modelo, ordens, mana, PV ≤ PV da ovelha).
+   * Não afeta heróis, cerco nem construções (ver `canPolymorph`); devolve false se não pôde.
+   */
+  polymorphUnit(unit, toType = 'sheep') {
+    if (!unit || unit.isDead || unit.isDying || unit.type === toType) return false;
+    this.promoteUnit(unit, toType);
+    unit.applyPolymorph(toType);
+    const owner = this.getPlayer(unit.ownerId);
+    if (owner) owner.recalculatePop(this);
+    return true;
   }
 
   /** Aplica o bônus de UM nível de uma pesquisa à unidade (se ela for afetada). */
@@ -1524,6 +1542,7 @@ export class GameManager {
     }
 
     this.gameTime += dt;
+    this.corpses.prune(this.gameTime); // F4-04
     this.matchStats.update(this.gameTime);
 
     // Check Win/Loss conditions

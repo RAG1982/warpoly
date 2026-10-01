@@ -1,4 +1,5 @@
 import * as THREE from 'three';
+import { isDetectedBy } from '../sim/detection.js';
 import { ModelFactory } from './ModelFactory.js';
 import { Arrow } from './Arrow.js';
 import { UPGRADE_CONFIG, RESEARCH } from '../data/index.js';
@@ -215,6 +216,8 @@ export class Building {
       case 'forge': return ModelFactory.createHumanForge ? ModelFactory.createHumanForge() : ModelFactory.createBarracks();
       case 'stable': return ModelFactory.createStable();
       case 'ogre_den': return ModelFactory.createOgreDen();
+      case 'arcane_tower':
+      case 'ash_sanctum': return ModelFactory.createBuildingByType(type);
       case 'workshop': return ModelFactory.createWorkshop();
       case 'orc_workshop': return ModelFactory.createOrcWorkshop();
       case 'barracks': return ModelFactory.createBarracks();
@@ -852,7 +855,7 @@ export class Building {
         const pos = this.mesh.position;
         const self = this;
         const closest = gm && gm.unitGrid
-          ? gm.unitGrid.nearest(pos.x, pos.z, this.attackRange, u => !u.isDead && self.isHostileTo(u))
+          ? gm.unitGrid.nearest(pos.x, pos.z, this.attackRange, u => !u.isDead && self.isHostileTo(u) && (!u.mods || !u.mods.invisible || isDetectedBy(gm, u, self.ownerId)))
           : null;
 
         if (closest) {

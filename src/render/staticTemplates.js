@@ -35,6 +35,8 @@ export const STATIC_MERGE_CONFIG = {
   stable: { keep: [] },
   ogre_den: { keep: [] },
   workshop: { keep: [] },
+  arcane_tower: { keep: [] },
+  ash_sanctum: { keep: [] },
   orc_workshop: { keep: [] },
   // Orcs
   // Os 4 braseiros (fogo transparente) ficam em cantos distantes: mesclá-los não afeta a ordenação

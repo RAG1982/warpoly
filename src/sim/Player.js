@@ -136,7 +136,7 @@ export class Player {
     const units = gm.allUnits || [];
     for (let i = 0; i < units.length; i++) {
       const u = units[i];
-      if (u.ownerId === this.id && !u.isDead) pop++;
+      if (u.ownerId === this.id && !u.isDead && !u.summoned) pop++; // F4-04: invocações não consomem suprimento
     }
     this.maxPopulation = cap;
     this.population = pop;

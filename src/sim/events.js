@@ -71,7 +71,7 @@ export const EVT = Object.freeze({
  * @typedef {{x:number,y:number,z:number}} Pos
  *
  * EVT.UNIT_TRAINED     {unitId:number, ownerId:number, pos:Pos, unitType:string}
- * EVT.UNIT_DIED        {unitId:number, ownerId:number, pos:Pos, unitType:string, killerOwnerId?:number|null}  (F3-09: null/ausente = causa desconhecida, não conta kill)
+ * EVT.UNIT_DIED        {unitId:number, ownerId:number, pos:Pos, unitType:string, killerOwnerId?:number|null, expired?:boolean}  (F3-09: null/ausente = causa desconhecida, não conta kill)
  * EVT.UNIT_DAMAGED     {unitId:number, ownerId:number, pos:Pos, amount:number}
  *
  * EVT.BUILDING_PLACED    {buildingId:number, ownerId:number, pos:Pos, buildingType:string}

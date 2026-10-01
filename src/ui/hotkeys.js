@@ -16,6 +16,7 @@ export const BUILD_HOTKEY_BY_ROLE = {
   forge: 'K',
   stable: 'V',
   workshop: 'O',
+  arcane: 'G',
   tower: 'T',
   wall: 'M'
 };

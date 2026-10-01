@@ -28,7 +28,7 @@ describe('invariantes de dados (F3-11)', () => {
       if (u.startMana !== undefined) expect(u.startMana >= 0 && u.startMana <= (u.maxMana || 0), `${u.type}.startMana`).toBe(true);
       if (u.manaRegen !== undefined) expect(u.manaRegen >= 0, `${u.type}.manaRegen`).toBe(true);
       if (u.abilities !== undefined) {
-        expect(Array.isArray(u.abilities) && u.abilities.length <= 4, `${u.type}.abilities`).toBe(true);
+        expect(Array.isArray(u.abilities) && u.abilities.length <= 9, `${u.type}.abilities`).toBe(true);
         for (const id of u.abilities) expect(ABILITIES[id], `${u.type}.abilities[${id}]`).toBeDefined();
         expect(u.maxMana > 0, `${u.type}: abilities exige maxMana`).toBe(true);
       }

@@ -19,7 +19,7 @@ const RESOURCE_COLOR = { gold: '#ffd700', wood: '#68d391', stone: '#cbd5e1' };
  */
 export function createVfxEvents(gm, particleSystem) {
   const offs = [];
-  const on = (type, fn) => offs.push(gm.events.on(type, fn));
+  const on = (type, fn) => offs.push(gm.events.on(type, fn, true)); // true = apresentação (F2-06)
   const toVec = pos => ({ x: pos.x, y: pos.y, z: pos.z });
   const isLocalOrExplored = (ownerId, pos) => {
     if (ownerId === gm.localPlayerId) return true;

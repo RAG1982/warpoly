@@ -10,6 +10,10 @@ import { createMatchConfig, matchConfigFromSearch, withNewSeed } from './sim/Mat
 import { shouldShowMainMenu, showMainMenu } from './ui/screens/MainMenu.js';
 import { PauseMenu } from './ui/screens/PauseMenu.js';
 import { ensureGlbLoaded } from './entities/glbModels.js';
+import { SaveLoadDialog } from './ui/screens/SaveLoadDialog.js';
+import { SaveStore, AUTOSAVE_SLOT } from './core/SaveStore.js';
+import { captureSave, applySaveCommands, fastForward, finishFastForward } from './sim/SaveGame.js';
+import { SIM_DT } from './sim/constants.js';
 
 const S = GameState;
 
@@ -48,7 +52,18 @@ class GameApp {
     this._loadToken = 0;
 
     this.menu = null;
+    // F2-06: save/load em slots (IndexedDB) + autosave opcional (`?autosave=<min>` ou localStorage 'warpoly.autosave').
+    this.saves = new SaveStore();
+    this.saveDialog = new SaveLoadDialog({
+      store: this.saves,
+      onSave: (slot) => this.saveToSlot(slot),
+      onLoad: (slot) => this.loadFromSlot(slot)
+    });
+    this._autosaveMinutes = this._readAutosaveMinutes();
+    this._nextAutosaveTick = Infinity;
     this.pauseMenu = new PauseMenu({
+      onSave: () => this.saveDialog.open('save'),
+      onLoad: () => this.saveDialog.open('load'),
       onResume: () => this.resume(),
       onRestart: () => this.restartMatch(),
       onMainMenu: () => this.goToMainMenu(),
@@ -113,6 +128,103 @@ class GameApp {
     }
   }
 
+  // ------------------------------------------------------------------ save / load (F2-06)
+  _readAutosaveMinutes() {
+    try {
+      const q = this.params.get('autosave');
+      if (q !== null) localStorage.setItem('warpoly.autosave', String(Number(q) || 0));
+      return Math.max(0, Number(localStorage.getItem('warpoly.autosave')) || 0);
+    } catch {
+      return 0;
+    }
+  }
+
+  /** Estado de apresentação restaurado depois do load: câmera, hora do dia, seleção e grupos. */
+  _captureView() {
+    const sm = this.sceneManager;
+    const gm = this.gameManager;
+    const im = this.inputManager;
+    return {
+      cameraTarget: { x: sm.cameraTarget.x, y: sm.cameraTarget.y, z: sm.cameraTarget.z },
+      zoom: sm.targetZoomLevel,
+      angle: sm.targetCameraAngle,
+      timeOfDay: sm.timeOfDay,
+      selected: gm.selectedUnits.map((u) => u.id),
+      selectedBuilding: gm.selectedBuilding ? gm.selectedBuilding.id : null,
+      groups: im?.controlGroups ? [...im.controlGroups.groups.entries()] : [] // grupos de controle (F3-01), se existirem
+    };
+  }
+
+  _restoreView(view) {
+    if (!view) return;
+    const sm = this.sceneManager;
+    const gm = this.gameManager;
+    const im = this.inputManager;
+    if (view.cameraTarget) sm.cameraTarget.set(view.cameraTarget.x, view.cameraTarget.y, view.cameraTarget.z);
+    if (view.zoom) sm.zoomLevel = sm.targetZoomLevel = view.zoom;
+    if (view.angle !== undefined) sm.cameraAngle = sm.targetCameraAngle = view.angle;
+    if (view.timeOfDay && sm.timeOfDay !== view.timeOfDay) sm.setTimeOfDay(view.timeOfDay);
+    if (im?.controlGroups) for (const [n, ids] of view.groups || []) im.controlGroups.set(n, ids);
+    const sel = (view.selected || []).map((id) => gm.entitiesById.get(id)).filter((u) => u && !u.isDead);
+    if (sel.length > 0) {
+      sel.forEach((u) => u.setSelected(true));
+      gm.selectedUnits = sel;
+    } else if (view.selectedBuilding != null) {
+      const b = gm.entitiesById.get(view.selectedBuilding);
+      if (b && !b.isDead) { b.setSelected(true); gm.selectedBuilding = b; }
+    }
+  }
+
+  /** Salva a partida atual no slot (`slot1..3` ou `autosave`). */
+  async saveToSlot(slot) {
+    const gm = this.gameManager;
+    if (!gm) throw new Error('Nenhuma partida em andamento.');
+    const label = slot === AUTOSAVE_SLOT ? 'Autosave' : `Slot ${slot.replace('slot', '')}`;
+    await this.saves.put(slot, captureSave(gm, { name: label, view: this._captureView() }));
+  }
+
+  /** Carrega um slot: recria a partida pela config do save e a reproduz até o tick salvo. */
+  async loadFromSlot(slot) {
+    const save = await this.saves.get(slot);
+    if (!save) throw new Error('Slot vazio.');
+    this.saveDialog.close();
+    if (this.fsm.is(S.MAIN_MENU)) this.fsm.transition(S.MATCH_SETUP);
+    if (!this.fsm.can(S.LOADING)) return;
+    this.fsm.transition(S.LOADING, { config: save.config, save });
+  }
+
+  _autosaveTick(session) {
+    const gm = session.gameManager;
+    if (this._autosaveMinutes <= 0 || gm.isGameOver || gm.currentTick < this._nextAutosaveTick) return;
+    this._nextAutosaveTick = gm.currentTick + Math.round((this._autosaveMinutes * 60) / SIM_DT);
+    this.saveToSlot(AUTOSAVE_SLOT).catch((err) => console.warn('[WarPoly] autosave falhou:', err));
+  }
+
+  /** Reaplica comandos e avança a simulação por quadros (com progresso) até o tick do save. */
+  async _restoreSave(save, token) {
+    const gm = this.session.gameManager;
+    applySaveCommands(gm, save);
+    const status = document.getElementById('loading-status');
+    const est = document.getElementById('loading-est');
+    let left = save.tick - gm.currentTick;
+    while (left > 0) {
+      left = fastForward(gm, save, 400);
+      const pct = Math.round(((save.tick - left) / Math.max(1, save.tick)) * 100);
+      this._updateLoadingUI({ percent: pct, current: 1, total: 1, name: 'partida', estSeconds: 1 });
+      if (status) status.textContent = 'Restaurando a partida salva...';
+      if (est) est.textContent = `Reproduzindo ${Math.floor(save.tick * SIM_DT / 60)} min de jogo (${pct}%)`;
+      await nextFrame();
+      if (token !== this._loadToken || !this.fsm.is(S.LOADING)) { gm.events.presentationMuted = false; return false; }
+    }
+    const res = finishFastForward(gm, save);
+    if (!res.ok) {
+      console.warn('[WarPoly] save: o checksum não bate (versão do jogo diferente?)', res);
+      this._saveMismatch = true;
+    }
+    this._restoreView(save.view);
+    return true;
+  }
+
   goToMainMenu() {
     if (this.fsm.can(S.MAIN_MENU)) this.fsm.transition(S.MAIN_MENU);
   }
@@ -131,6 +243,7 @@ class GameApp {
     if (this.menu) return; // voltando do painel Escaramuça (MatchSetup)
     this.menu = showMainMenu(document.body, {
       onStart: (choice) => this._onMenuStart(choice),
+      onLoadGame: () => this.saveDialog.open('load'),
       onSetupChange: (open) => {
         if (open && this.fsm.is(S.MAIN_MENU)) this.fsm.transition(S.MATCH_SETUP);
         else if (!open && this.fsm.is(S.MATCH_SETUP)) this.fsm.transition(S.MAIN_MENU);
@@ -151,7 +264,7 @@ class GameApp {
     this.fsm.transition(S.LOADING, { config });
   }
 
-  _enterLoading({ config }) {
+  _enterLoading({ config, save = null }) {
     const token = ++this._loadToken;
     this.pauseMenu.hide();
     this._disposeSession();
@@ -160,18 +273,18 @@ class GameApp {
       this.menu = null;
     }
     this.matchConfig = config;
-    this._loadMatch(config, token).catch((err) => {
+    this._loadMatch(config, token, save).catch((err) => {
       console.error('[WarPoly] falha ao carregar a partida:', err);
       if (token === this._loadToken && this.fsm.is(S.LOADING)) this.fsm.transition(S.MAIN_MENU);
     });
   }
 
-  async _loadMatch(config, token) {
+  async _loadMatch(config, token, save = null) {
     const firstServices = !this.sceneManager;
     this._ensureServices();
 
     const needsPreload = !this.assetsReady && !this.skipPreload;
-    if (this.skipPreload && firstServices) {
+    if (this.skipPreload && firstServices && !save) {
       // Comportamento histórico do ?skipPreload: sem tela de loading, partida na hora.
       this._hideLoadingScreen(false);
     } else {
@@ -198,10 +311,22 @@ class GameApp {
 
     this.session = new MatchSession({ sceneManager: this.sceneManager, sound: this.sound, matchConfig: config });
     this.matchCount++;
+    this._saveMismatch = false;
+    if (save) {
+      if (this.skipPreload && firstServices) this._showLoadingScreen(false);
+      const ok = await this._restoreSave(save, token);
+      if (!ok) return;
+    }
+    this._nextAutosaveTick = this._autosaveMinutes > 0
+      ? this.session.gameManager.currentTick + Math.round((this._autosaveMinutes * 60) / SIM_DT)
+      : Infinity;
     this.timer.update(); // o tempo de carga não vira um delta gigante
 
-    if (!(this.skipPreload && firstServices)) this._hideLoadingScreen(true);
+    if (!(this.skipPreload && firstServices && !save)) this._hideLoadingScreen(true);
     this.fsm.transition(S.IN_GAME);
+    if (this._saveMismatch) {
+      this.session.uiManager.showNotification('⚠️ Este save foi feito numa versão diferente do jogo e pode não ser idêntico.', 7000);
+    }
   }
 
   _enterInGame(from) {
@@ -276,6 +401,7 @@ class GameApp {
 
     const simulate = this.fsm.is(S.IN_GAME);
     session.update(delta, elapsedTime, simulate);
+    if (simulate) this._autosaveTick(session);
     this.sceneManager.render();
 
     if (simulate && session.gameManager.isGameOver) this.fsm.transition(S.POST_GAME);

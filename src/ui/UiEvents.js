@@ -14,7 +14,7 @@ import { getTierName } from '../data/index.js';
  */
 export function createUiEvents(gm, uiManager) {
   const offs = [];
-  const on = (type, fn) => offs.push(gm.events.on(type, fn));
+  const on = (type, fn) => offs.push(gm.events.on(type, fn, true)); // true = apresentação (F2-06)
   const isLocal = ownerId => ownerId === gm.localPlayerId;
 
   // Notificações genéricas (recursos insuficientes ao colocar construção, esquadrão de ataque

@@ -7,6 +7,8 @@ import './gameScreens.css';
 
 const ACTIONS = [
   { id: 'resume', label: 'Continuar', hint: '<kbd>Esc</kbd>', primary: true },
+  { id: 'save', label: 'Salvar partida', hint: 'Slots 1–3' },
+  { id: 'load', label: 'Carregar partida' },
   { id: 'restart', label: 'Reiniciar', hint: 'Mesma partida' },
   { id: 'main-menu', label: 'Menu Principal' },
   { id: 'quit', label: 'Sair' }
@@ -14,7 +16,7 @@ const ACTIONS = [
 
 export class PauseMenu {
   /**
-   * @param {object} handlers  { onResume, onRestart, onMainMenu, onQuit }
+   * @param {object} handlers  { onResume, onSave, onLoad, onRestart, onMainMenu, onQuit }
    * @param {HTMLElement} [parent]
    */
   constructor(handlers = {}, parent = document.body) {
@@ -67,13 +69,15 @@ export class PauseMenu {
   _run(action) {
     const h = this.handlers;
     if (action === 'resume') h.onResume?.();
+    else if (action === 'save') h.onSave?.();
+    else if (action === 'load') h.onLoad?.();
     else if (action === 'restart') h.onRestart?.();
     else if (action === 'main-menu') h.onMainMenu?.();
     else if (action === 'quit') h.onQuit?.();
   }
 
   _onKeyDown(e) {
-    if (!this.isOpen) return;
+    if (!this.isOpen || document.getElementById('save-dialog')?.hidden === false) return;
     if (e.key === 'Escape') {
       e.preventDefault();
       e.stopPropagation();

@@ -16,7 +16,7 @@ import { EVT } from '../sim/events.js';
  */
 export function createAudioEvents(gm, soundManager) {
   const offs = [];
-  const on = (type, fn) => offs.push(gm.events.on(type, fn));
+  const on = (type, fn) => offs.push(gm.events.on(type, fn, true)); // true = apresentação (F2-06)
   const isLocal = ownerId => ownerId === gm.localPlayerId;
 
   // Coleta de recursos: som só quando é o próprio jogador local que entrega (era `isLocal`).

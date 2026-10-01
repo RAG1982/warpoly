@@ -31,14 +31,23 @@ export class EventBus {
     this._queue = [];
     /** Replays futuros (F9-05): ignora ouvintes sem deixar de aceitar `emit`/`flush`. */
     this.muted = false;
+    /**
+     * F2-06: com `presentationMuted`, só os ouvintes da simulação (ex.: `MatchStats`) rodam; os de
+     * apresentação (registrados com `presentation = true`: áudio, VFX, UI) são ignorados. Usado ao
+     * avançar rápido a simulação para restaurar um save.
+     */
+    this.presentationMuted = false;
+    this._presentation = new WeakSet();
   }
 
   /**
    * @param {string} type
    * @param {(payload: object) => void} fn
+   * @param {boolean} [presentation]  ouvinte de apresentação (áudio/VFX/UI) — ver `presentationMuted`
    * @returns {() => void} `off` — remove este ouvinte.
    */
-  on(type, fn) {
+  on(type, fn, presentation = false) {
+    if (presentation) this._presentation.add(fn);
     let set = this._listeners.get(type);
     if (!set) {
       set = new Set();
@@ -68,7 +77,11 @@ export class EventBus {
       const { type, payload } = queue[i];
       const set = this._listeners.get(type);
       if (!set || set.size === 0) continue;
-      set.forEach(fn => fn(payload));
+      const skipPresentation = this.presentationMuted;
+      set.forEach(fn => {
+        if (skipPresentation && this._presentation.has(fn)) return;
+        fn(payload);
+      });
     }
   }
 

@@ -26,7 +26,15 @@ export const GLB_MODELS = {
   ballista: { url: `${BASE}models/ballista.glb`, root: 'Ballista', type: 'ballista' },
   catapult: { url: `${BASE}models/catapult.glb`, root: 'Catapult', type: 'catapult' },
   workshop: { url: `${BASE}models/workshop.glb`, root: 'Workshop', type: null },
-  orc_workshop: { url: `${BASE}models/orc_workshop.glb`, root: 'OrcWorkshop', type: null }
+  orc_workshop: { url: `${BASE}models/orc_workshop.glb`, root: 'OrcWorkshop', type: null },
+  // NEW-39: conjuradores, esqueleto, sapadores e construções arcanas (Blender)
+  mage: { url: `${BASE}models/mage.glb`, root: 'Mage', type: 'mage' },
+  necromancer: { url: `${BASE}models/necromancer.glb`, root: 'Necromancer', type: 'necromancer' },
+  skeleton: { url: `${BASE}models/skeleton.glb`, root: 'Skeleton', type: 'skeleton' },
+  sapper: { url: `${BASE}models/sapper.glb`, root: 'Sapper', type: 'sapper' },
+  arsonist: { url: `${BASE}models/arsonist.glb`, root: 'Arsonist', type: 'arsonist' },
+  arcane_tower: { url: `${BASE}models/arcane_tower.glb`, root: 'ArcaneTower', type: null },
+  ash_sanctum: { url: `${BASE}models/ash_sanctum.glb`, root: 'AshSanctum', type: null }
 };
 
 export const glbEnabled = (() => {

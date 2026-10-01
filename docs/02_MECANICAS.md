@@ -110,18 +110,30 @@ Estados: `idle, moving, gathering, returning, building, attacking, dying`.
 - **Projéteis**: sempre acertam (teleguiados).
 - **Movimento**: A* só desvia de água; construções/árvores resolvidas por empurrão de colisão. Formação = grade quadrada simples.
 
-## Controles existentes
+## Controles (F3-01)
+
+Lógica pura em `src/core/Hotkeys.js` (`resolveKey`) e `src/core/ControlGroups.js`; execução em `InputManager` — tudo emite **comandos** (`gm.issue`). Testes: `tests/unit/hotkeys.test.js`, `controlGroups.test.js`.
 
 | Ação | Input |
 |---|---|
-| Selecionar / caixa | Clique esquerdo / arrastar |
-| Ordem contextual (mover, atacar, coletar, construir, rally) | Clique direito |
-| Câmera | WASD/setas, scroll zoom, Q/E rotaciona |
-| Ir ao HQ | H |
-| Cancelar | Esc |
-| Minimapa | Clique move câmera |
+| Selecionar / caixa | Clique esquerdo / arrastar (máx. `SELECTION_LIMIT = 24`: as mais próximas do centro da caixa) |
+| Alternar unidade / adicionar caixa | `Shift`+clique / `Shift`+caixa |
+| Todas do mesmo tipo na tela | Duplo clique numa unidade própria (< 350 ms) |
+| Ordem contextual (mover, atacar, coletar, construir, rally) | Clique direito; com `Shift` enfileira (`queued`) |
+| Grupos de controle | `Ctrl+1..9` grava · `1..9` seleciona · duplo toque (< 350 ms) centraliza · `Shift+1..9` adiciona |
+| Parar / Segurar posição | `S` / `H` (STOP / HOLD) |
+| Atacar-movendo / Patrulhar | `A` / `P`, depois clique esquerdo (ATTACK_MOVE sobre o chão; ATTACK se clicar num inimigo; PATROL); Esc ou clique direito cancela |
+| Atalhos do card | Letras exibidas nos botões (construir C/L/F/B/K/V/O/G/J/T/M, treinar Q/W/E, pesquisa R/A/S/D, reparar R, habilidades Z/X/C/V/B/N) acionam o botão visível |
+| Trabalhador ocioso | `.` (próximo, em ciclo; centraliza) |
+| Último alerta | `Espaço` (último dano sofrido; senão o HQ) |
+| Ir ao HQ | `Backspace` (antes era `H`) |
+| Câmera | WASD/setas, scroll zoom, Q/E rotaciona, botão do meio arrasta, mouse a ≤ 8 px da borda (`localStorage['warpoly.edgePan']='0'` desliga) |
+| Minimapa | Clique esquerdo move a câmera; clique direito com unidades selecionadas = MOVE (`Shift` enfileira) |
+| Cancelar | Esc (modo-alvo → colocação → seleção → menu de pausa) |
 
-**Não existem**: grupos de controle, shift-queue, attack-move, stop/hold/patrol, duplo clique por tipo, atalhos do card de comandos, pan pela borda da tela, seleção de inimigos para inspeção.
+**Prioridade de teclas**: com **unidades** selecionadas (sem construção) `S/H/A/P` são ordens e não movem a câmera (use as setas); as demais letras acionam o card se existir ali. Com **construção** selecionada valem as letras do card (`Q/W/E` treino, `R/A/S/D` pesquisa), então essas teclas não movem/rotacionam a câmera. Em modo-alvo (atacar-movendo, patrulhar, reparar, habilidade) ou colocação de construção, letras de ordem e do card ficam bloqueadas; grupos e Backspace continuam. Teclas são ignoradas com foco em campo de texto.
+
+**Ainda não existem**: seleção de inimigos para inspeção, rebind de teclas (F6-08).
 
 ## IA (AIDirector)
 

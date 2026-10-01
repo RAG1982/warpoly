@@ -209,6 +209,7 @@ export class UIManager {
     const canvas = this.minimapCanvas;
 
     const handleMinimapClick = (e) => {
+      if (e.button !== 0) return; // F3-01: o direito move as unidades (abaixo)
       const rect = canvas.getBoundingClientRect();
       const clickX = e.clientX - rect.left;
       const clickY = e.clientY - rect.top;
@@ -221,6 +222,18 @@ export class UIManager {
     };
 
     canvas.addEventListener('mousedown', handleMinimapClick, this._listenOpts);
+
+    // F3-01: clique direito no minimapa com unidades selecionadas = MOVE para o ponto.
+    canvas.addEventListener('contextmenu', (e) => {
+      e.preventDefault();
+      const units = this.gm.selectedUnits.filter(u => !u.isDead && !u.isDying);
+      if (units.length === 0) return;
+      const rect = canvas.getBoundingClientRect();
+      const mapSize = this.gm.terrain.mapDef.size;
+      const { x, z } = minimapToWorld(e.clientX - rect.left, e.clientY - rect.top, mapSize, canvas.width, canvas.height);
+      this.gm.issue({ type: CMD.MOVE, playerId: this.gm.localPlayerId, unitIds: units.map(u => u.id), x, z, ...(e.shiftKey ? { queued: true } : {}) });
+      this.sound.playOrder();
+    }, this._listenOpts);
   }
 
   showNotification(msg, duration = 4000) {

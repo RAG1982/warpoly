@@ -82,9 +82,9 @@ Sonnet 5.5 escreve a spec em `docs/specs/<ID>.md`; agente **Sonnet** executa; o 
 |---|---|---|---|---|
 | F0 Fundação | 7 | 0 | 0 | 7 |
 | F1 Desempenho | 10 | 1 | 0 | 9 |
-| F2 Núcleo | 8 | 2 | 0 | 6 |
-| F3 Jogabilidade WC2 base | 11 | 7 | 0 | 4 |
-| F4 Jogabilidade WC2 expansão | 8 | 8 | 0 | 0 |
+| F2 Núcleo | 8 | 0 | 2 | 6 |
+| F3 Jogabilidade WC2 base | 12 | 0 | 2 | 10 |
+| F4 Jogabilidade WC2 expansão | 8 | 3 | 0 | 5 |
 | F5 IA | 6 | 6 | 0 | 0 |
 | F6 HUD/UX | 9 | 7 | 0 | 2 |
 | F7 Arte/Áudio | 11 | 10 | 0 | 1 |
@@ -231,7 +231,7 @@ Sonnet 5.5 escreve a spec em `docs/specs/<ID>.md`; agente **Sonnet** executa; o 
 - **Resultado**: `src/data/maps/{continental-1v1,ilhas-4p}.json`, `world/terrainGenerators.js`, minimapa pré-renderizado do terreno real, lista de mapas com miniatura no menu. Checksum de determinismo idêntico ao master. 222 testes. B16 corrigido. Pendências visuais → NEW-17, NEW-18.
 
 ### F2-06 · Save / Load
-- **Status**: `TODO` · Lane CORE · Onda 3 · Dep: F2-01, F2-04
+- **Status**: `DOING(sonnet, 2026-10-01)` · Lane CORE · Onda 3 · Dep: F2-01, F2-04
 - **Fazer**: serializar estado da simulação (JSON compacto) em slots no IndexedDB; autosave opcional.
 - **Aceite**: salvar no minuto 5, carregar e continuar sem diferenças visíveis.
 
@@ -242,7 +242,7 @@ Sonnet 5.5 escreve a spec em `docs/specs/<ID>.md`; agente **Sonnet** executa; o 
 - **Resultado**: `src/sim/EventBus.js` + `events.js`; ouvintes `audio/AudioEvents.js`, `render/VfxEvents.js`, `ui/UiEvents.js` (não criados em headless); zero chamadas diretas de som/VFX/UI na simulação; `UnitAnimator` em `src/animation/`. Determinismo intacto. 197 testes. B13 corrigido.
 
 ### F2-08 · Separação sim/render
-- **Status**: `TODO` · Lane CORE · Onda 4 · Dep: F2-02, F2-03
+- **Status**: `DOING(sonnet, 2026-10-01)` · Lane CORE · Onda 4 · Dep: F2-02, F2-03
 - **Fazer**: `src/sim/` sem import de three.js; `src/render/` com views por entidade; permitir rodar a simulação headless (Node) para testes e IA×IA.
 - **Aceite**: `node tools/headless-match.js --seed 1` roda uma partida IA×IA até o fim.
 
@@ -256,12 +256,12 @@ Sonnet 5.5 escreve a spec em `docs/specs/<ID>.md`; agente **Sonnet** executa; o 
 - **Aceite**: aprovado pelo dono do projeto.
 
 ### F3-01 · Controles RTS completos
-- **Status**: `TODO` · Lane GAME · Onda 3 · Dep: F2-02
+- **Status**: `DOING(sonnet, 2026-10-01)` · Lane GAME · Onda 3 · Dep: F2-02
 - **Fazer**: grupos Ctrl+1..9 (duplo toque centraliza), Shift adiciona/remove da seleção, duplo clique seleciona todos do tipo na tela, Shift+ordem enfileira, A=attack-move, S=stop, H=hold (HQ vira Backspace), P=patrol, pan pela borda, arrastar com botão do meio, clique direito no minimapa, tecla de trabalhador ocioso (`.`), barra de espaço vai ao último alerta, limite de seleção configurável (WC2 = 9; padrão sugerido 24).
 - **Aceite**: checklist de controles testada manualmente e com teste de input automatizado.
 
 ### F3-02 · Movimento em grupo e formações
-- **Status**: `TODO` · Lane GAME · Onda 3 · Dep: F1-07
+- **Status**: `DOING(sonnet, 2026-10-01)` · Lane GAME · Onda 3 · Dep: F1-07
 - **Fazer**: steering com separação (em vez de empurrão rígido), grupo anda na velocidade do mais lento, formação preserva forma relativa, chegada sem "dança".
 - **Aceite**: 40 unidades atravessam um vau sem travar.
 

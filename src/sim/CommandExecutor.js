@@ -7,6 +7,7 @@
  * silenciosamente (autoria só gera `console.warn` em dev — ver `_warnForeign`).
  */
 import { CMD } from './commands.js';
+import { isDetectedBy } from './detection.js';
 import { EVT } from './events.js';
 import { resolveAbility, needsEntityTarget, targetProblem, canCast, pickCaster } from './abilities.js';
 
@@ -159,6 +160,7 @@ export const CommandExecutor = {
       case CMD.ATTACK: {
         const target = gm.entitiesById.get(cmd.targetId);
         if (!target || target.isDead) break;
+        if (target.mods && target.mods.invisible && !isDetectedBy(gm, target, cmd.playerId)) break; // F4-04
         const units = resolveOwnedUnits(gm, cmd);
         for (let i = 0; i < units.length; i++) {
           units[i].orderQueue = null;

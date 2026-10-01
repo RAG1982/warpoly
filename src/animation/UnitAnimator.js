@@ -90,7 +90,8 @@ export class UnitAnimator {
       wheelL: ud.wheelL,
       wheelR: ud.wheelR,
       // F4-05: pavio dos sapadores
-      fuse: ud.fuse
+      fuse: ud.fuse,
+      crystal: ud.crystal
     };
 
     // Store original materials on userData for zero-clone damage flash
@@ -274,6 +275,7 @@ export class UnitAnimator {
       parts.armR.rotation.x = -2.3 * raise;
       parts.armR.rotation.z = 0.25 - sway;
     }
+    if (parts.crystal) { const k = 1 + 0.35 * Math.abs(Math.sin(time * Math.PI * 3)); parts.crystal.scale.set(k, k, k); }
     if (parts.torso) parts.torso.rotation.x = -0.12 * raise;
     if (parts.head) parts.head.rotation.x = -0.25 * raise;
   }
@@ -1241,6 +1243,21 @@ export class UnitAnimator {
   }
 
   static sharedHurtMat = new THREE.MeshBasicMaterial({ color: 0xef4444 });
+  // F4-04: material compartilhado da invisibilidade (aliados veem a unidade semi-transparente)
+  static sharedGhostMat = new THREE.MeshBasicMaterial({ color: 0xa5b4fc, transparent: true, opacity: 0.35, depthWrite: false });
+
+  /** F4-04: liga/desliga o visual fantasma (sem clonar materiais; o flash de dano tem prioridade). */
+  setGhost(on) {
+    if (this.isGhost === on) return;
+    this.isGhost = on;
+    if (!this.model || this.isHurtFlashing) return;
+    this.model.traverse(child => {
+      if (child.isMesh && child.userData.origMaterial) {
+        if (child.name === 'SelectionRing' || child.name.startsWith('Health')) return;
+        child.material = on ? UnitAnimator.sharedGhostMat : child.userData.origMaterial;
+      }
+    });
+  }
 
   // --- DAMAGE FLASH VISUAL ---
   setDamageFlash(flash) {
@@ -1252,7 +1269,7 @@ export class UnitAnimator {
     this.model.traverse(child => {
       if (child.isMesh && child.userData.origMaterial) {
         if (child.name === 'SelectionRing' || child.name.startsWith('Health')) return;
-        child.material = flash ? hurtMat : child.userData.origMaterial;
+        child.material = flash ? hurtMat : (this.isGhost ? UnitAnimator.sharedGhostMat : child.userData.origMaterial);
       }
     });
   }

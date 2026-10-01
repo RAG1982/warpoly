@@ -41,7 +41,7 @@ export const ANIMATED_NODE_NAMES = [
   'WeaponL', 'WeaponR', 'DrawnAxe', 'Horn', 'Mohawk',
   'HorseLegFL', 'HorseLegFR', 'HorseLegBL', 'HorseLegBR',
   'SiegeArm', 'WheelL', 'WheelR',
-  'Fuse'
+  'Fuse', 'Crystal'
 ];
 
 /** Nunca mesclar: reposicionadas por `updateBowString` a cada quadro. */

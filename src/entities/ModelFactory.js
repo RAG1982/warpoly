@@ -26,6 +26,11 @@ import {
   createBallista,
   createCatapult,
   createSapper,
+  createMage,
+  createNecromancer,
+  createSkeleton,
+  createArcaneTower,
+  createAshSanctum,
   createArsonist,
   createWorkshop,
   createOrcWorkshop,
@@ -182,6 +187,8 @@ export class ModelFactory {
     ud.wheelR = clone.getObjectByName('WheelR') || ud.wheelR;
     // F4-05: pavio dos sapadores (pisca na animação)
     ud.fuse = clone.getObjectByName('Fuse') || ud.fuse;
+    // F4-04: cristal do cajado dos conjuradores (pulsa na 'cast')
+    ud.crystal = clone.getObjectByName('Crystal') || ud.crystal;
 
     // Archer dynamic bow string closure rebinding
     const sTop = clone.getObjectByName('BowStringTop');
@@ -322,6 +329,8 @@ export class ModelFactory {
       case 'forge': return this.createHumanForge();
       case 'stable': return this.createStable();
       case 'ogre_den': return this.createOgreDen();
+      case 'arcane_tower': return this.getOrCreateModel('arcane_tower', createArcaneTower);
+      case 'ash_sanctum': return this.getOrCreateModel('ash_sanctum', createAshSanctum);
       case 'workshop': return this.createWorkshop();
       case 'orc_workshop': return this.createOrcWorkshop();
       case 'wall_human': return createWallSegment('human');
@@ -536,6 +545,10 @@ export class ModelFactory {
       case 'cavalier': return this.createCavalier();
       case 'ballista': return this.createBallista();
       case 'catapult': return this.createCatapult();
+      case 'mage': return this.getOrCreateModel('mage', createMage, 'mage');
+      case 'necromancer': return this.getOrCreateModel('necromancer', createNecromancer, 'necromancer');
+      case 'skeleton': return this.getOrCreateModel('skeleton', createSkeleton, 'skeleton');
+      case 'sheep': return this.createCritter('sheep');
       case 'sapper': return this.createSapper();
       case 'arsonist': return this.createArsonist();
       default: return this.createVillager();

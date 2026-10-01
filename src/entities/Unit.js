@@ -1238,6 +1238,20 @@ export class Unit {
     }
   }
 
+  _updateInvisibleVisual() {
+    const gm = this.gameManager;
+    const localId = gm && typeof gm.localPlayerId === 'number' ? gm.localPlayerId : 0;
+    const inv = this.mods.invisible && !this.isDead;
+    const seen = !inv || isDetectedBy(gm, this, localId);
+    const own = inv && (this.ownerId === localId || (gm && gm.isAlly && gm.isAlly(localId, this.ownerId)));
+    if (inv && !seen) this.mesh.visible = false;
+    const ghost = !!own || (inv && seen);
+    if (ghost !== !!this._ghost) {
+      this._ghost = ghost;
+      if (this.animator) this.animator.setGhost(ghost);
+    }
+  }
+
   /** F4-04: troca o modelo 3D (mesma posição/escala/rotação), sem vazar malhas: remove o antigo da cena. */
   _swapModel(modelType) {
     const old = this.mesh;
@@ -1395,6 +1409,9 @@ export class Unit {
     // escrevendo em mesh.position/mesh.rotation.y; aqui só suavizamos a exibição entre poses.
     this.mesh.position.lerpVectors(this._prevPos, this._simPos, alpha);
     this.mesh.rotation.y = lerpAngle(this._prevRotY, this._simRotY, alpha);
+
+    // F4-04: invisibilidade — aliados do jogador local veem a unidade semi-transparente; inimigos não detectados, nada.
+    if (this._ghost || (this.mods && this.mods.invisible)) this._updateInvisibleVisual();
 
     // Billboard da barra de vida (movido de update() para renderUpdate() — precisa da câmera).
     if (this.hpGroup && this.scene) {

@@ -43,6 +43,7 @@ export function stateChecksum(gm) {
       `u:${u.id}:${u.type}:${u.ownerId}:${round3(p.x)}:${round3(p.z)}:${round3(u.hp)}:${u.state}|`
     );
     // F4-03: mana e status (só unidades que os têm, para não custar string por unidade comum).
+    if (u.lifetime > 0) h = fnv1aStep(h, `l:${round3(u.lifetime)}|`); // F4-04
     if (u.maxMana > 0) h = fnv1aStep(h, `m:${round3(u.mana)}|`);
     const st = u.statuses;
     for (let k = 0; k < st.length; k++) {

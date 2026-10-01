@@ -51,6 +51,7 @@ export class MatchStats {
       if (s) s.unitsTrained++;
     });
     on(EVT.UNIT_DIED, (e) => {
+      if (e.expired) return; // F4-04: fim de invocação não é baixa
       const s = this._get(e.ownerId);
       if (s) s.unitsLost++;
       const k = this._killer(e);

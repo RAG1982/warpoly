@@ -21,7 +21,7 @@ os `.glb` em `public/models/` são artefatos reproduzíveis.
 | `build_ogre_den.py` | `public/models/ogre_den.glb` | Covil dos Ogros: paliçada, teto de peles e costelas, portão e crânio, 2 draw calls, 8,6 mil tris, atlas 1024², 415 KB |
 | `build_ballista.py` | `public/models/ballista.glb` | Balista humana (NEW-36): besta gigante laminada + carreta de 2 rodas raiadas; rig plana `Body`/`SiegeArm`/`WheelL`/`WheelR`, 6 draw calls, 5,1 mil tris, atlas 512², 250 KB |
 | `build_catapult.py` | `public/models/catapult.glb` | Catapulta orc (NEW-36): toras, ossos, peles, contrapeso e concha com carga; mesma rig, 6 draw calls, 6,6 mil tris, atlas 512², 290 KB |
-| `build_workshop.py` | `public/models/workshop.glb` | Oficina de Engenharia: enxaimel, engrenagens, guindaste, chaminé de tijolos, 2 draw calls, 8,1 mil tris, atlas 1024², 420 KB |
+| `build_workshop.py` | `public/models/workshop.glb` | Oficina de Engenharia: enxaimel, engrenagens, guindaste, chaminé de tijolos, 2 draw calls, 7,3 mil tris, atlas 1024², 380 KB |
 | `build_orc_workshop.py` | `public/models/orc_workshop.glb` | Oficina dos Engenhoqueiros: galpão de sucata, forja ardente, engrenagens toscas, 2 draw calls, 9,2 mil tris, atlas 1024², 430 KB |
 | `siege_common.py` | — | helpers do cerco e das oficinas (rodas, correntes, engrenagens, proxy `Xf`) |
 | `bld_common.py` | — | helpers das construções (viga/tubo/tora entre pontos, cabeça de cavalo, crânio de ogro, bbox) |

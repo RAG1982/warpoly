@@ -483,7 +483,7 @@ const MODEL_CATALOG = [
     sourceFile: 'tools/blender/build_workshop.py',
     create: createGlb('workshop'),
     description: 'Oficina humana gerada pelo pipeline Blender (public/models/workshop.glb): galpão de enxaimel sobre pé de pedra com telhado azul de duas águas e cumeeira dourada com cata-vento de engrenagem, chaminé alta de tijolos, engrenagens de ferro e ouro na fachada, portão em arco aberto com forja acesa ao fundo, projetos de máquinas pendurados, guindaste de madeira com caixote, bancada com bigorna, balista inacabada, tábuas, barris, roda sobressalente, lanternas e mastros com bandeirolas.',
-    notes: '2 draw calls (Static_Mesh + Anim_Banners em cor de time), ~8 mil triângulos, atlas 1024². Pegada ~7,3 x 7,3 (raio de colisão 3,6), altura ~6,8 com a chaminé. Sockets: Socket_UnitSpawn, Socket_Rally.'
+    notes: '2 draw calls (Static_Mesh + Anim_Banners em cor de time), ~7,3 mil triângulos, atlas 1024². Pegada ~7,3 x 7,3 (raio de colisão 3,6), altura ~6,8 com a chaminé. Sockets: Socket_UnitSpawn, Socket_Rally.'
   },
   {
     id: 'orc_workshop_glb',

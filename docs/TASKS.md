@@ -84,7 +84,7 @@ Sonnet 5.5 escreve a spec em `docs/specs/<ID>.md`; agente **Sonnet** executa; o 
 | F1 Desempenho | 10 | 1 | 0 | 9 |
 | F2 Núcleo | 8 | 0 | 1 | 7 |
 | F3 Jogabilidade WC2 base | 12 | 0 | 0 | 12 |
-| F4 Jogabilidade WC2 expansão | 8 | 3 | 0 | 5 |
+| F4 Jogabilidade WC2 expansão | 8 | 2 | 1 | 5 |
 | F5 IA | 6 | 6 | 0 | 0 |
 | F6 HUD/UX | 9 | 7 | 0 | 2 |
 | F7 Arte/Áudio | 11 | 10 | 0 | 1 |
@@ -342,7 +342,7 @@ Sonnet 5.5 escreve a spec em `docs/specs/<ID>.md`; agente **Sonnet** executa; o 
 - `DONE(19c7eae)` (spec: docs/specs/F4-05-sapadores.md) · GAME+ART · Dep: F3-08 · Unidade suicida que destrói muralhas/rochas/construções.
 
 ### F4-06 · Unidades aéreas
-- `TODO` · GAME+ART · Dep: F3-06 · Batedor aéreo (máquina voadora/zepelim) e atacante aéreo (grifo/dragão); camada de voo ignora terreno; só atingível por distância/torres.
+- `DOING(sonnet, 2026-10-01)` · GAME+ART · Dep: F3-06 · Batedor aéreo (máquina voadora/zepelim) e atacante aéreo (grifo/dragão); camada de voo ignora terreno; só atingível por distância/torres.
 
 ### F4-07 · Naval + Petróleo
 - `TODO` · GAME+ART+CONTENT · Dep: F2-05, F3-06 · **Petróleo só é liberado após o Centro da Cidade T2 (decisão D1).** Estaleiro, Fundição, Refinaria, Plataforma em poço de petróleo; petroleiro, destróier, transporte, encouraçado, submarino/tartaruga; navegação em água (grade separada), desembarque.
@@ -355,19 +355,19 @@ Sonnet 5.5 escreve a spec em `docs/specs/<ID>.md`; agente **Sonnet** executa; o 
 ## F5 — Inteligência Artificial
 
 ### F5-01 · Refatorar IA para jogadores + comandos
-- `TODO` · AI · Onda 3 · Dep: F2-01 (F2-02 quando pronto) · Remover `EnemyAI.js`; `AIDirector` por `playerId`, emitindo comandos; várias IAs simultâneas (FFA/times).
+- `DOING(sonnet, 2026-10-01)` · AI · Onda 3 · Dep: F2-01 (F2-02 quando pronto) · Remover `EnemyAI.js`; `AIDirector` por `playerId`, emitindo comandos; várias IAs simultâneas (FFA/times).
 
 ### F5-02 · Percepção sob a névoa
-- `TODO` · AI · Dep: F1-05, F5-01 · IA só "sabe" o que suas unidades viram (memória de última posição); scout ativo. Dificuldade Brutal pode trapacear (opcional).
+- `DOING(sonnet, 2026-10-01)` · AI · Dep: F1-05, F5-01 · IA só "sabe" o que suas unidades viram (memória de última posição); scout ativo. Dificuldade Brutal pode trapacear (opcional).
 
 ### F5-03 · Níveis de dificuldade
-- `TODO` · AI · Dep: F5-01 · Fácil / Normal / Difícil / Brutal: APM máximo, atraso de reação, qualidade de micro, bônus de recursos só no Brutal; configurado no setup da partida.
+- `DOING(sonnet, 2026-10-01)` · AI · Dep: F5-01 · Fácil / Normal / Difícil / Brutal: APM máximo, atraso de reação, qualidade de micro, bônus de recursos só no Brutal; configurado no setup da partida.
 
 ### F5-04 · Estratégias e build orders
-- `TODO` · AI · Dep: F3-06 · Perfis (rush, boom econômico, tartaruga, tech aéreo) por facção; escolha aleatória por seed; adaptação à composição do inimigo (contra-unidades).
+- `DOING(sonnet, 2026-10-01)` · AI · Dep: F3-06 · Perfis (rush, boom econômico, tartaruga, tech aéreo) por facção; escolha aleatória por seed; adaptação à composição do inimigo (contra-unidades).
 
 ### F5-05 · Micro tático
-- `TODO` · AI · Dep: F3-03 · Recuar feridos, focar fogo, kiting de ranged, proteger cerco, flanquear, atacar trabalhadores, usar magias (após F4-04).
+- `DOING(sonnet, 2026-10-01)` · AI · Dep: F3-03 · Recuar feridos, focar fogo, kiting de ranged, proteger cerco, flanquear, atacar trabalhadores, usar magias (após F4-04).
 
 ### F5-06 · IA de campanha/gatilhos
 - `TODO` · AI+CONTENT · Dep: F8-04 · Ondas scriptadas, defensores fixos, ataques programados por gatilho.

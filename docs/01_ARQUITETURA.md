@@ -52,6 +52,7 @@ src/
     SaveGame.js               Save/Load por replay determinístico (F2-06): captureSave, fastForward, parseSave
 
     projectiles.js, splash.js Projéteis como dados (F2-08) e dano em área (movido de entities/)
+    targeting.js              F4-06: `canTarget(attacker, target)` (camadas ground/air, `canHitAir`/`canHitGround`/`immune`) e `defaultCanHitAir`
     SpatialGrid.js            Grade espacial (spatial hash) uniforme: insert/update/remove/clear, queryRadius,
                                queryRect, nearest (F1-06; testado em tests/unit/spatialGrid.test.js)
   ai/
@@ -559,3 +560,5 @@ visuais/sonoros nunca são "re-disparados" porque o `EventBus` tem `muted` (aind
 
 ## F4-04b: Templo/Altar e perigos de chão
 `gm.hazards` (`HazardPool`, `src/sim/hazards.js`: runas e redemoinhos, só dados, passo em `simStep`, entram no checksum; eventos `HAZARD_SPAWNED/REMOVED`), `src/render/HazardView.js` (apresentação, pool de malhas; runas só para dono/aliados), `FogOfWar.revealArea(x,z,r,ttl)` (revelações temporárias, pool de 16), efeitos `reveal`/`exorcism`/`runes`/`whirlwind` e campos `autocastDefault`/`autocastBelow`/`repeat` em `abilities.js`, `unit.layer`/`unit.immune`, `GameManager.promoteUnit` configura mana/habilidades da classe avançada, `role:'temple'` em `RESEARCH.building`.
+
+- **Camada de voo (F4-06):** `layer:'air'` + `flyHeight` em `units.js`; `Unit` guarda `layer/flyHeight/canHitAir/canHitGround`. Aéreos pulam o pathfinder (`moveTo` direto), `resolveBuildingCollisions` e a colisão com terrestres; Y suavizado por `_updateFlightHeight`. Regras de alvo centralizadas em `src/sim/targeting.js` (`canTarget`). Modelos procedurais `GliderModel/BalloonModel/GryphonRiderModel/WarSerpentModel` (+ `AviaryModel/SerpentNestModel`) com nós `Torso/Head/WingL/WingR/Rotor` (em `ANIMATED_NODE_NAMES`; ramo `applyAir` do `UnitAnimator`). Testes: `tests/unit/air.test.js`.

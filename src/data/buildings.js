@@ -5,14 +5,14 @@
  * - name          Nome PT-BR exibido no painel de construção do trabalhador (D2: provisório até a F3-00).
  * - entityName    Rótulo atual do card de seleção (legado; unificar com `name` na F3-00/F6-09).
  * - faction       'human' | 'orc' | 'neutral'.
- * - role          'hq' | 'house' | 'farm' | 'lumber' | 'barracks' | 'stable' | 'workshop' | 'arcane' | 'temple' | 'forge' | 'tower' | 'wall' | 'camp'.
+ * - role          'hq' | 'house' | 'farm' | 'lumber' | 'barracks' | 'stable' | 'workshop' | 'aerie' | 'arcane' | 'temple' | 'forge' | 'tower' | 'wall' | 'camp'.
  * - hp, cost {gold, wood, stone}, collisionRadius, popGranted.
  * - armor         F3-03: armadura da construção (corrige B5 — antes não existia). HQ/torres
  *                  20, muralhas 10 (quando existirem), demais 15 (design §6).
  * - visionRadius  Raio revelado na névoa de guerra.
  * - healthBarHeight  Altura do topo do modelo (a barra de vida fica 0,8 acima).
  * - tower         { range, damage: {basic, piercing, type}, cooldown, projectile,
- *                  projectileOriginY } ou null. F3-03: `damage` era um número plano.
+ *                  projectileOriginY, hitsAir } ou null. F4-06: `hitsAir:true` (torres de arqueiros) permite mirar aéreos. F3-03: `damage` era um número plano.
  * - passiveIncome { resource, amount, interval } ou null (F3-04: sempre null — ouro só sai de
  *   mina/pedreira; campo mantido no schema para não quebrar `getBuildingDef`/`Building.simUpdate`).
  * - requires      Tipos de construção que o dono precisa ter concluída (≥1) para erguer esta
@@ -190,10 +190,31 @@ export const BUILDINGS = {
     tower: null,
     passiveIncome: null,
     requires: ['barracks', { hq: 2 }],
-    trains: ['ballista', 'sapper'],
+    trains: ['ballista', 'sapper', 'glider'],
     dropoff: [],
     icon: '/icoForja.svg',
-    description: 'Constrói balistas de cerco e sapadores (requer Centro nível 2)'
+    description: 'Constrói balistas, sapadores e planadores batedores (requer Centro nível 2)'
+  },
+  aviary: {
+    type: 'aviary',
+    name: 'Aviário de Grifos',
+    entityName: 'Aviário de Grifos',
+    faction: 'human',
+    role: 'aerie',
+    hp: 900,
+    armor: 15,
+    cost: { gold: 300, wood: 150, stone: 60 },
+    collisionRadius: 3.4,
+    popGranted: 0,
+    visionRadius: 24,
+    healthBarHeight: 7.0,
+    tower: null,
+    passiveIncome: null,
+    requires: ['barracks', { hq: 3 }],
+    trains: ['gryphon_rider'],
+    dropoff: [],
+    icon: '/icoQuartel.svg',
+    description: 'Treina Cavaleiros Grifo, a força aérea do reino (requer Quartel e Centro nível 3)'
   },
   arcane_tower: {
     type: 'arcane_tower',
@@ -250,7 +271,7 @@ export const BUILDINGS = {
     popGranted: 0,
     visionRadius: 28,
     healthBarHeight: 9.5,
-    tower: { range: 18, damage: { basic: 6, piercing: 12, type: 'piercing' }, cooldown: 1.4, projectile: 'arrow', projectileOriginY: 6.8 },
+    tower: { range: 18, damage: { basic: 6, piercing: 12, type: 'piercing' }, cooldown: 1.4, projectile: 'arrow', projectileOriginY: 6.8, hitsAir: true },
     passiveIncome: null,
     trains: [],
     dropoff: [],
@@ -439,10 +460,31 @@ export const BUILDINGS = {
     tower: null,
     passiveIncome: null,
     requires: ['orc_barracks', { hq: 2 }],
-    trains: ['catapult', 'arsonist'],
+    trains: ['catapult', 'arsonist', 'war_balloon'],
     dropoff: [],
     icon: '/icoForja.svg',
-    description: 'Constrói catapultas de cerco e incendiários (requer Centro nível 2)'
+    description: 'Constrói catapultas, incendiários e balões de guerra (requer Centro nível 2)'
+  },
+  serpent_nest: {
+    type: 'serpent_nest',
+    name: 'Ninho das Serpes',
+    entityName: 'Ninho das Serpes',
+    faction: 'orc',
+    role: 'aerie',
+    hp: 900,
+    armor: 15,
+    cost: { gold: 300, wood: 150, stone: 60 },
+    collisionRadius: 3.4,
+    popGranted: 0,
+    visionRadius: 24,
+    healthBarHeight: 7.0,
+    tower: null,
+    passiveIncome: null,
+    requires: ['orc_barracks', { hq: 3 }],
+    trains: ['war_serpent'],
+    dropoff: [],
+    icon: '/icoQuartel.svg',
+    description: 'Treina Serpes de Guerra, a força aérea da Horda (requer Quartel e Centro nível 3)'
   },
   ash_sanctum: {
     type: 'ash_sanctum',
@@ -499,7 +541,7 @@ export const BUILDINGS = {
     popGranted: 0,
     visionRadius: 28,
     healthBarHeight: 10.0,
-    tower: { range: 18, damage: { basic: 7, piercing: 12, type: 'piercing' }, cooldown: 1.4, projectile: 'axe', projectileOriginY: 8.2 },
+    tower: { range: 18, damage: { basic: 7, piercing: 12, type: 'piercing' }, cooldown: 1.4, projectile: 'axe', projectileOriginY: 8.2, hitsAir: true },
     passiveIncome: null,
     trains: [],
     dropoff: [],

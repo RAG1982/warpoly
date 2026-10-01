@@ -1,4 +1,5 @@
 import { computeDamage } from './combat.js';
+import { canTarget } from './targeting.js';
 
 /**
  * F4-02 — dano em área do cerco (F2-08: movido de `src/entities/` para a camada pura da simulação).
@@ -34,7 +35,7 @@ export function splashFalloff(dist, radius, edge = 0.5) {
  */
 export function applySplashDamage(gm, owner, damage, pos, radius, allUnits, edge = 0.5, surface = false) {
   _all.length = 0;
-  const alive = e => !e.isDead && !e.isDying && e.hp > 0 && owner.isHostileTo(e);
+  const alive = e => !e.isDead && !e.isDying && e.hp > 0 && owner.isHostileTo(e) && canTarget(owner, e); // F4-06: cerco/terrestres não ferem aéreos
   gm.unitGrid.queryRadius(pos.x, pos.z, radius, alive, _units);
   gm.blockerGrid.queryRadius(pos.x, pos.z, radius, e => 'isConstructed' in e && alive(e) /* só construções (Building) */, _blds);
   for (let i = 0; i < _units.length; i++) _all.push(_units[i]);

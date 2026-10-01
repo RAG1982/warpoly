@@ -3,6 +3,10 @@ import { missingUnitRequirements } from '../sim/requirements.js';
 import { CMD } from '../sim/commands.js';
 import { EVT } from '../sim/events.js';
 import { NEUTRAL_HOSTILE_ID } from '../sim/EntityIds.js';
+import { canTarget } from '../sim/targeting.js';
+
+/** F4-06: atacante terrestre genérico (não atinge aéreos) — escolha de alvo da expedição. */
+const LAND_ATTACKER = { canHitAir: false, canHitGround: true };
 
 /**
  * AIMilitaryManager (Gerenciador Militar e Ofensivo da IA)
@@ -352,11 +356,15 @@ export class AIMilitaryManager {
     // Fallback: attack first living hostile unit
     const playerUnits = this.director.getHostileUnits();
     const lenP = playerUnits.length;
+    let anyUnit = null;
     for (let i = 0; i < lenP; i++) {
-      if (!playerUnits[i].isDead && playerUnits[i].ownerId !== NEUTRAL_HOSTILE_ID) {
-        return playerUnits[i];
+      const u = playerUnits[i];
+      if (!u.isDead && u.ownerId !== NEUTRAL_HOSTILE_ID) {
+        if (canTarget(LAND_ATTACKER, u)) return u; // F4-06: prefere alvo que o exército terrestre consegue atingir
+        if (!anyUnit) anyUnit = u;
       }
     }
+    if (anyUnit) return anyUnit;
 
     return null;
   }

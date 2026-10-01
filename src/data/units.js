@@ -34,10 +34,14 @@
  * - maxMana, startMana, manaRegen, abilities   F4-03 (todos opcionais): `maxMana` 0/ausente = sem mana (design:
  *   máx. 255); `startMana` (padrão = maxMana); `manaRegen` mana/s (padrão 1); `abilities` ids de
  *   `src/data/abilities.js`, na ordem do card 3×3 (máx. 9). F4-04: Mago Arcano e Necromante das Cinzas usam isso.
- * - detector        F4-04: detecta unidades invisíveis num raio (`DETECT_RADIUS`). Nenhuma unidade tem ainda (F4-06: Planador).
+ * - detector        F4-04: detecta unidades invisíveis num raio (`DETECT_RADIUS`). F4-06: Planador/Balão de Guerra (e o Olho Vigia).
  * - undead          F4-04: marcador de morto-vivo (esqueleto; alvo do Exorcismo na F4-04b).
  * - corpseless      F4-04: não deixa cadáver ao morrer (cerco, suicidas, esqueletos, ovelhas).
  * - layer / immune   F4-04b: `layer:'air'` (unidade voadora mínima — só atingível por atacantes à distância não-cerco; F4-06 estende) e `immune` (ignora todo dano e nunca é escolhida como alvo).
+ * - layer / flyHeight / canHitAir / canHitGround   F4-06: camada de voo. `layer:'air'` = voo em linha reta (sem pathfinder,
+ *   sem colisão com terreno/construções/terrestres), Y = terreno + `flyHeight` (padrão 4,5; o Olho Vigia usa 0 porque o
+ *   modelo já flutua). Alvo aéreo só é atingível por atacantes com `canHitAir` (padrão: unidade à distância não-cerco);
+ *   `canHitGround:false` impede atacar o solo (batedores aéreos não atacam: ambos false). Ver `src/sim/targeting.js`.
  * - isSiege         F4-04: unidade de cerco (imune à Transmutação). `isHero` idem (heróis na F4-08).
  */
 
@@ -261,7 +265,85 @@ export const UNITS = {
     icon: '/icoArco.png',
     description: 'Olho voador invocado (dura 60 s): enxerga longe e revela unidades invisíveis',
     isWorker: false, isRanged: false, isCombat: false, projectile: null,
-    layer: 'air', detector: true, immune: true, corpseless: true
+    layer: 'air', flyHeight: 0, detector: true, immune: true, corpseless: true
+  },
+
+  // --- F4-06: unidades aéreas (camada de voo). Modelos procedurais provisórios; ícones provisórios (arte na F7). ---
+  // Batedor aéreo: sem ataque, visão 30, detecta invisíveis. Treinado na Oficina (Centro nível 2).
+  glider: {
+    type: 'glider',
+    name: 'Planador de Engenho',
+    entityName: 'Planador de Engenho',
+    faction: 'human',
+    requires: [{ hq: 2 }],
+    hp: 120, speed: 7.0, damage: { basic: 0, piercing: 0, type: 'normal' }, attackRange: 0, attackCooldown: 1.0, armor: 0,
+    collisionRadius: 0.8,
+    visionRadius: 30,
+    ...MELEE_SCAN,
+    healthBarHeight: 3.2,
+    cost: { gold: 110, wood: 60, stone: 20 },
+    trainTime: 14,
+    icon: '/icoArco.png',
+    description: 'Aéreo. Batedor: sem ataque, enxerga longe e revela unidades invisíveis. Só atingido por atiradores e torres',
+    isWorker: false, isRanged: false, isCombat: false, projectile: null,
+    layer: 'air', canHitAir: false, canHitGround: false, detector: true, corpseless: true
+  },
+  war_balloon: {
+    type: 'war_balloon',
+    name: 'Balão de Guerra',
+    entityName: 'Balão de Guerra',
+    faction: 'orc',
+    requires: [{ hq: 2 }],
+    hp: 120, speed: 7.0, damage: { basic: 0, piercing: 0, type: 'normal' }, attackRange: 0, attackCooldown: 1.0, armor: 0,
+    collisionRadius: 0.9,
+    visionRadius: 30,
+    ...MELEE_SCAN,
+    healthBarHeight: 3.6,
+    cost: { gold: 110, wood: 60, stone: 20 },
+    trainTime: 14,
+    icon: '/icoArco.png',
+    description: 'Aéreo. Batedor: sem ataque, enxerga longe e revela unidades invisíveis. Só atingido por atiradores e torres',
+    isWorker: false, isRanged: false, isCombat: false, projectile: null,
+    layer: 'air', canHitAir: false, canHitGround: false, detector: true, corpseless: true
+  },
+  // Ataque aéreo: dano mágico em área curta (ignora armadura), atinge solo e ar. Treinado no Aviário/Ninho (Centro nível 3).
+  gryphon_rider: {
+    type: 'gryphon_rider',
+    name: 'Cavaleiro Grifo',
+    entityName: 'Cavaleiro Grifo',
+    faction: 'human',
+    requires: [{ hq: 3 }],
+    hp: 350, speed: 6.2, damage: { basic: 0, piercing: 38, type: 'magic' }, attackRange: 2.5, attackCooldown: 1.6, armor: 2,
+    splashRadius: 1.2,
+    collisionRadius: 1.0,
+    visionRadius: 20,
+    ...MELEE_SCAN,
+    healthBarHeight: 4.0,
+    cost: { gold: 250, wood: 100, stone: 0 },
+    trainTime: 22,
+    icon: '/icoEspada.png',
+    description: 'Aéreo. Cavaleiro voador: dano mágico em área curta contra solo e ar. Imune a corpo a corpo e cerco',
+    isWorker: false, isRanged: false, isCombat: true, projectile: null,
+    layer: 'air', canHitAir: true, canHitGround: true, corpseless: true
+  },
+  war_serpent: {
+    type: 'war_serpent',
+    name: 'Serpe de Guerra',
+    entityName: 'Serpe de Guerra',
+    faction: 'orc',
+    requires: [{ hq: 3 }],
+    hp: 350, speed: 6.2, damage: { basic: 0, piercing: 38, type: 'magic' }, attackRange: 2.5, attackCooldown: 1.6, armor: 2,
+    splashRadius: 1.2,
+    collisionRadius: 1.0,
+    visionRadius: 20,
+    ...MELEE_SCAN,
+    healthBarHeight: 4.0,
+    cost: { gold: 250, wood: 100, stone: 0 },
+    trainTime: 22,
+    icon: '/icoEspada.png',
+    description: 'Aéreo. Serpente alada: dano mágico em área curta contra solo e ar. Imune a corpo a corpo e cerco',
+    isWorker: false, isRanged: false, isCombat: true, projectile: null,
+    layer: 'air', canHitAir: true, canHitGround: true, corpseless: true
   },
 
   // F4-02: cerco orc, treinado na Oficina dos Engenhoqueiros (Centro nível 2). Mesmos números

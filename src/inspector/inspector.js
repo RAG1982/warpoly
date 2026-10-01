@@ -25,6 +25,12 @@ import {
   createTemple,
   createStormAltar,
   createWatchingEye,
+  createGlider,
+  createWarBalloon,
+  createGryphonRider,
+  createWarSerpent,
+  createAviary,
+  createSerpentNest,
   createArsonist,
   createWorkshop,
   createOrcWorkshop,
@@ -180,6 +186,36 @@ const MODEL_CATALOG = [
     id: 'watching_eye', name: 'Olho Vigia (Watching Eye)', category: 'units', faction: 'orc', type: 'watching_eye', icon: '👁️',
     sourceFile: 'src/models/units/WatchingEyeModel.js', create: createWatchingEye,
     description: 'Olho voador invocado (F4-04b): globo violeta com íris dourada na frente (+Z) e tentáculos.', notes: 'Sem rig humanoide.'
+  },
+  {
+    id: 'glider', name: 'Planador de Engenho (Glider)', category: 'units', faction: 'human', type: 'glider', icon: '🪁',
+    sourceFile: 'src/models/units/GliderModel.js', create: createGlider,
+    description: 'Batedor aéreo humano (F4-06): planador de madeira com asas de pano e piloto. Modelo procedural provisório (Blender na F7).', notes: 'Nós Torso/Head/WingL/WingR; animação de voo (bob + batida de asas).'
+  },
+  {
+    id: 'war_balloon', name: 'Balão de Guerra (War Balloon)', category: 'units', faction: 'orc', type: 'war_balloon', icon: '🎈',
+    sourceFile: 'src/models/units/BalloonModel.js', create: createWarBalloon,
+    description: 'Batedor aéreo orc (F4-06): balão de couro remendado e cesta com braseiro. Modelo procedural provisório.', notes: 'Nós Torso/Head/Rotor.'
+  },
+  {
+    id: 'gryphon_rider', name: 'Cavaleiro Grifo (Gryphon Rider)', category: 'units', faction: 'human', type: 'gryphon_rider', icon: '🦅',
+    sourceFile: 'src/models/units/GryphonRiderModel.js', create: createGryphonRider,
+    description: 'Ataque aéreo humano (F4-06): grifo com cavaleiro de armadura azul. Modelo procedural provisório.', notes: 'Nós Torso/Head/WingL/WingR.'
+  },
+  {
+    id: 'war_serpent', name: 'Serpe de Guerra (War Serpent)', category: 'units', faction: 'orc', type: 'war_serpent', icon: '🐉',
+    sourceFile: 'src/models/units/WarSerpentModel.js', create: createWarSerpent,
+    description: 'Ataque aéreo orc (F4-06): serpente alada de membrana vermelha, presas e olhos âmbar. Modelo procedural provisório.', notes: 'Nós Torso/Head/WingL/WingR.'
+  },
+  {
+    id: 'aviary', name: 'Aviário de Grifos (Aviary)', category: 'buildings', faction: 'human', type: 'building', icon: '🪺',
+    sourceFile: 'src/models/buildings/AviaryModel.js', create: createAviary,
+    description: 'Aviário humano (F4-06): torre de pedra com plataforma de pouso, ninho de palha e poleiros.', notes: 'Procedural provisório.'
+  },
+  {
+    id: 'serpent_nest', name: 'Ninho das Serpes (Serpent Nest)', category: 'buildings', faction: 'orc', type: 'building', icon: '🥚',
+    sourceFile: 'src/models/buildings/SerpentNestModel.js', create: createSerpentNest,
+    description: 'Ninho orc (F4-06): montículo de rocha, espinhos de osso e ovos verdes brilhantes.', notes: 'Procedural provisório.'
   },
   {
     id: 'sapper',

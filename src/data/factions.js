@@ -24,7 +24,8 @@ export const FACTIONS = {
     workshop: 'workshop',
     arcane: 'arcane_tower', // F4-04
     temple: 'temple', // F4-04b
-    buildList: ['cottage', 'lumber_camp', 'farm', 'barracks', 'forge', 'stable', 'workshop', 'arcane_tower', 'temple', 'watchtower', 'wall_human'],
+    aerie: 'aviary', // F4-06
+    buildList: ['cottage', 'lumber_camp', 'farm', 'barracks', 'forge', 'stable', 'workshop', 'arcane_tower', 'temple', 'aviary', 'watchtower', 'wall_human'],
     units: {
       worker: 'villager',
       melee: 'knight',
@@ -32,7 +33,9 @@ export const FACTIONS = {
       cavalry: 'cavalier',
       siege: 'ballista', // F4-02
       suicide: 'sapper', // F4-05
-      caster: 'mage' // F4-04
+      caster: 'mage', // F4-04
+      flyer: 'gryphon_rider', // F4-06
+      scoutAir: 'glider'
     },
     startingBase: {
       buildings: { hq: 'castle', lumber: 'lumber_camp', house: 'cottage' },
@@ -54,7 +57,8 @@ export const FACTIONS = {
     workshop: 'orc_workshop',
     arcane: 'ash_sanctum', // F4-04
     temple: 'storm_altar', // F4-04b
-    buildList: ['orc_house', 'pig_farm', 'orc_lumber_mill', 'orc_barracks', 'orc_forge', 'ogre_den', 'orc_workshop', 'ash_sanctum', 'storm_altar', 'orc_watchtower', 'wall_orc'],
+    aerie: 'serpent_nest', // F4-06
+    buildList: ['orc_house', 'pig_farm', 'orc_lumber_mill', 'orc_barracks', 'orc_forge', 'ogre_den', 'orc_workshop', 'ash_sanctum', 'storm_altar', 'serpent_nest', 'orc_watchtower', 'wall_orc'],
     units: {
       worker: 'peon',
       melee: 'grunt',
@@ -62,7 +66,9 @@ export const FACTIONS = {
       cavalry: 'ogre',
       siege: 'catapult', // F4-02
       suicide: 'arsonist', // F4-05
-      caster: 'necromancer' // F4-04
+      caster: 'necromancer', // F4-04
+      flyer: 'war_serpent', // F4-06
+      scoutAir: 'war_balloon'
     },
     startingBase: {
       buildings: { hq: 'great_hall', lumber: 'orc_lumber_mill', house: 'pig_farm' },

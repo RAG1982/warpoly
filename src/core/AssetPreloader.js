@@ -29,6 +29,10 @@ export class AssetPreloader {
       { name: 'Necromante das Cinzas', fn: () => ModelFactory.createUnit('necromancer') },
       { name: 'Esqueleto', fn: () => ModelFactory.createUnit('skeleton') },
       { name: 'Olho Vigia', fn: () => ModelFactory.createUnit('watching_eye') },
+      { name: 'Planador de Engenho', fn: () => ModelFactory.createUnit('glider') },
+      { name: 'Balão de Guerra', fn: () => ModelFactory.createUnit('war_balloon') },
+      { name: 'Cavaleiro Grifo', fn: () => ModelFactory.createUnit('gryphon_rider') },
+      { name: 'Serpe de Guerra', fn: () => ModelFactory.createUnit('war_serpent') },
       { name: 'Sapador de Pólvora', fn: () => ModelFactory.createSapper() },
       { name: 'Incendiário da Horda', fn: () => ModelFactory.createArsonist() },
       { name: 'Arqueiro de Precisão', fn: () => ModelFactory.createArcher() },
@@ -111,7 +115,7 @@ export class AssetPreloader {
     const placeableGhosts = [
       'cottage', 'lumber_camp', 'farm', 'barracks', 'forge', 'watchtower',
       'orc_house', 'pig_farm', 'orc_lumber_mill', 'orc_barracks', 'orc_forge', 'orc_watchtower',
-      'stable', 'ogre_den', 'workshop', 'orc_workshop', 'arcane_tower', 'ash_sanctum', 'temple', 'storm_altar'
+      'stable', 'ogre_den', 'workshop', 'orc_workshop', 'arcane_tower', 'ash_sanctum', 'temple', 'storm_altar', 'aviary', 'serpent_nest'
     ];
     placeableGhosts.forEach(bType => {
       try {

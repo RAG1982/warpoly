@@ -21,6 +21,7 @@
  *   requires      [ ... ] mesma sintaxe de `src/sim/requirements.js` (ids de construção, {hq:N}, {research,level}…)
  *   effects       [ {kind, ...} ] aplicados em ordem (ver abaixo)
  *   vfx           {kind:'burst'|'ring'|'beam'|'aura', color:'#rrggbb', radius?, duration?}
+ *   hitsAir       (opcional, padrão true) F4-06: `false` = não pode ter como alvo unidades aéreas (`targetProblem`)
  *   debugOnly     (opcional) só existe com `?debug` na URL (ou `{debug:true}` nos testes)
  *
  * Tipos de efeito:

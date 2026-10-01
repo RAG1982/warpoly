@@ -41,7 +41,8 @@ export const ANIMATED_NODE_NAMES = [
   'WeaponL', 'WeaponR', 'DrawnAxe', 'Horn', 'Mohawk',
   'HorseLegFL', 'HorseLegFR', 'HorseLegBL', 'HorseLegBR',
   'SiegeArm', 'WheelL', 'WheelR',
-  'Fuse', 'Crystal'
+  'Fuse', 'Crystal',
+  'WingL', 'WingR', 'Rotor' // F4-06: asas e hélice dos aéreos
 ];
 
 /** Nunca mesclar: reposicionadas por `updateBowString` a cada quadro. */

@@ -13,6 +13,9 @@ export const ANIMATION_DURATIONS = {
   cast: 1.0
 };
 
+/** F4-06: tipos de modelo com a animação de voo (`applyAir`). */
+const AIR_TYPES = new Set(['glider', 'war_balloon', 'gryphon_rider', 'war_serpent']);
+
 /**
  * Class representing a modular animation controller for WarPoly units
  */
@@ -91,7 +94,11 @@ export class UnitAnimator {
       wheelR: ud.wheelR,
       // F4-05: pavio dos sapadores
       fuse: ud.fuse,
-      crystal: ud.crystal
+      crystal: ud.crystal,
+      // F4-06: aéreos (asas/hélice)
+      wingL: ud.wingL || model.getObjectByName('WingL'),
+      wingR: ud.wingR || model.getObjectByName('WingR'),
+      rotor: ud.rotor || model.getObjectByName('Rotor')
     };
 
     // Store original materials on userData for zero-clone damage flash
@@ -238,6 +245,12 @@ export class UnitAnimator {
     // F4-01: o cavaleiro usa o tronco do Espadachim — mesmas poses de braço/espada/escudo.
     const uType = this.unitType === 'cavalier' ? 'knight' : this.unitType;
 
+    // F4-06: aéreos — balanço senoidal + batida de asas (ramo próprio; 'hurt'/'die' seguem o fluxo comum)
+    if (AIR_TYPES.has(uType) && this.currentAnim !== 'hurt' && this.currentAnim !== 'die') {
+      this.applyAir(time, parts, this.currentAnim);
+      return;
+    }
+
     switch (this.currentAnim) {
       case 'idle':
         this.applyIdle(time, parts, uType);
@@ -268,6 +281,26 @@ export class UnitAnimator {
       parts.weapon.rotation.x -= parts.armR.rotation.x;
       parts.weapon.rotation.z -= parts.armR.rotation.z;
     }
+  }
+
+  /**
+   * F4-06: pose das unidades aéreas. `Torso` balança em y (bob) e inclina de leve ao avançar; `WingL`/`WingR` batem em z
+   * (mais rápido ao andar/atacar); `Rotor` (balão) gira. A posição do modelo raiz pertence ao jogo (voo = `flyHeight`).
+   */
+  applyAir(time, parts, anim) {
+    const fast = anim === 'walk' || anim === 'fight';
+    const phase = (time / this.getDuration()) % 1; // 0..1 por ciclo => laço sem emenda
+    const TAU = Math.PI * 2;
+    if (parts.torso) {
+      parts.torso.position.y += Math.sin(TAU * phase * (fast ? 2 : 1)) * (fast ? 0.12 : 0.08);
+      if (anim === 'walk') parts.torso.rotation.x = 0.08;
+      if (anim === 'fight') parts.torso.rotation.x = -0.25 * Math.sin(phase * Math.PI);
+    }
+    const flap = Math.sin(TAU * phase * (fast ? 4 : 2)) * (fast ? 0.55 : 0.3);
+    if (parts.wingL) parts.wingL.rotation.z = flap;
+    if (parts.wingR) parts.wingR.rotation.z = -flap;
+    if (parts.rotor) parts.rotor.rotation.z = TAU * phase * (fast ? 4 : 1);
+    if (parts.head && anim === 'fight') parts.head.rotation.x = 0.35 * Math.sin(phase * Math.PI);
   }
 
   // --- F4-03: lançamento de habilidade (braços erguidos, leve inclinação para trás; em loop) ---

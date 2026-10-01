@@ -333,7 +333,7 @@ Sonnet 5.5 escreve a spec em `docs/specs/<ID>.md`; agente **Sonnet** executa; o 
 - `DONE(19c7eae)` (spec: docs/specs/F4-03-mana-habilidades.md) · GAME · Dep: F2-02 · Mana com regeneração, habilidades com alvo (unidade/área/auto-cast), cooldown, pesquisa que libera magia, UI no card de comandos, VFX genéricos.
 
 ### F4-04 · Conjuradores e magias
-- `DOING(sonnet, 2026-09-30)` (spec: docs/specs/F4-04-conjuradores-magias.md) · GAME+ART · Dep: F4-03 · Humano: Mago (Bola de fogo/Lentidão/Invisibilidade/Polimorfia/Nevasca), Paladino (Cura/Visão sagrada/Exorcismo). Orc: equivalentes originais do Cavaleiro da Morte e Ogro-Mago (Sede de Sangue/Runas/Olho vigilante/Ressuscitar mortos/Redemoinho). Construções: Igreja/Altar, Torre de Magos/Templo.
+- `DONE(48d6b14)` (spec: docs/specs/F4-04-conjuradores-magias.md) · GAME+ART · Dep: F4-03 · Humano: Mago (Bola de fogo/Lentidão/Invisibilidade/Polimorfia/Nevasca), Paladino (Cura/Visão sagrada/Exorcismo). Orc: equivalentes originais do Cavaleiro da Morte e Ogro-Mago (Sede de Sangue/Runas/Olho vigilante/Ressuscitar mortos/Redemoinho). Construções: Igreja/Altar, Torre de Magos/Templo.
 
 ### F4-05 · Sapadores
 - `DONE(19c7eae)` (spec: docs/specs/F4-05-sapadores.md) · GAME+ART · Dep: F3-08 · Unidade suicida que destrói muralhas/rochas/construções.

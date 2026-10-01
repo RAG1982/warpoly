@@ -8,6 +8,7 @@
  */
 import { CMD } from './commands.js';
 import { isDetectedBy } from './detection.js';
+import { canTarget } from './targeting.js';
 import { EVT } from './events.js';
 import { planFormation, groupSpeed } from './formation.js';
 import { resolveAbility, needsEntityTarget, targetProblem, canCast, pickCaster } from './abilities.js';
@@ -67,9 +68,25 @@ function dispatchOrder(unit, order, queued) {
  * próximo (ou para o centro, se não houver).
  */
 function moveInFormation(gm, units, x, z, queued, type = CMD.MOVE) {
+  // F4-06: grupo misto — aéreos voam em linha reta (formação própria, sem pathfinder/água); a formação terrestre
+  // não os inclui (não quebra a marcha em fileiras dos terrestres).
+  let ground = units;
+  let air = null;
+  for (let i = 0; i < units.length; i++) {
+    if (units[i].layer === 'air') {
+      air = units.filter(u => u.layer === 'air');
+      ground = units.filter(u => u.layer !== 'air');
+      break;
+    }
+  }
+  if (air) formationOrders(gm, air, x, z, queued, type, true);
+  if (ground.length > 0) formationOrders(gm, ground, x, z, queued, type, false);
+}
+
+function formationOrders(gm, units, x, z, queued, type, flying) {
   let cx = x;
   let cz = z;
-  if (gm.pathfinder && gm.pathfinder.isWater(cx, cz)) {
+  if (!flying && gm.pathfinder && gm.pathfinder.isWater(cx, cz)) {
     const snapped = gm.pathfinder.findNearestWalkable(cx, cz);
     cx = snapped.x;
     cz = snapped.z;
@@ -95,7 +112,7 @@ function moveInFormation(gm, units, x, z, queued, type = CMD.MOVE) {
     const slot = slots.get(units[idx].id);
     let destX = slot.x;
     let destZ = slot.z;
-    if (gm.pathfinder && !gm.pathfinder.isWalkableWorld(destX, destZ)) {
+    if (!flying && gm.pathfinder && !gm.pathfinder.isWalkableWorld(destX, destZ)) {
       const near = gm.pathfinder.findNearestWalkable(destX, destZ);
       if (gm.pathfinder.isWalkableWorld(near.x, near.z)) {
         destX = near.x;
@@ -183,8 +200,7 @@ export const CommandExecutor = {
         if (target.immune) break; // F4-04b: Olho Vigia
         const units = resolveOwnedUnits(gm, cmd);
         for (let i = 0; i < units.length; i++) {
-          // F4-04b: alvo aéreo só por atacantes à distância que não sejam cerco
-          if (target.layer === 'air' && (!units[i].isRanged || units[i].isBallistic)) continue;
+          if (!canTarget(units[i], target)) continue; // F4-06: camada aérea/terrestre (`src/sim/targeting.js`)
           units[i].orderQueue = null;
           units[i].orderAttack(target);
         }

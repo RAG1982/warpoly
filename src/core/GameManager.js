@@ -1845,7 +1845,7 @@ export class GameManager {
     const all = this.allUnits;
     for (let i = 0; i < all.length; i++) {
       const unit = all[i];
-      if (unit.isDead) continue;
+      if (unit.isDead || unit.layer === 'air') continue; // F4-06: aéreo sobrevoa construções/árvores
       const pos = unit.mesh.position;
       const radius = (unit.collisionRadius || 0.6) + 6;
       this.blockerGrid.queryRadius(pos.x, pos.z, radius, null, buf);
@@ -1895,6 +1895,8 @@ export class GameManager {
       for (let k = 0; k < buf.length; k++) {
         const u2 = buf[k];
         if (u2 === u1 || u2.id <= u1.id || u2.isDead) continue;
+        const air1 = u1.layer === 'air';
+        if (air1 !== (u2.layer === 'air')) continue; // F4-06: camadas distintas não colidem
 
         const p2 = u2.mesh.position;
         const r2 = u2.collisionRadius || 0.6;
@@ -1930,6 +1932,13 @@ export class GameManager {
         const p2Still = u2.state === 'idle' || u2.state === 'holding';
         const w1 = m1 && p2Still ? 0.8 : (m2 && p1Still ? 0.2 : 0.5);
         const overlap = minDist - dist;
+        if (air1) {
+          // F4-06: aéreos se afastam de leve (repulsão suave; sem água/relevo — o Y é do voo).
+          const push = overlap * 0.25;
+          p1.x -= nx * push; p1.z -= nz * push;
+          p2.x += nx * push; p2.z += nz * push;
+          continue;
+        }
         this._pushDry(p1, -nx * overlap * w1, -nz * overlap * w1);
         this._pushDry(p2, nx * overlap * (1 - w1), nz * overlap * (1 - w1));
       }

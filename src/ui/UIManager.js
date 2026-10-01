@@ -660,6 +660,7 @@ export class UIManager {
         <span>🛡️ Defesa: ${u.armor || 0}</span>
         <span>🏃 Vel: ${u.speed}</span>
         ${u.minAttackRange > 0 ? `<span>🎯 Alcance: ${u.minAttackRange}–${u.attackRange}</span>` : ''}
+        ${u.layer === 'air' ? `<span>🪽 Aéreo</span>` : ''}
         ${u.suicide ? `<span>💣 Suicida</span>` : ''}
         ${u.splashRadius > 0 ? `<span>💥 Área: ${u.splashRadius}</span>` : ''}
         ${u.maxMana > 0 ? `<span>💧 Mana: ${Math.floor(u.mana)} / ${u.maxMana}</span>` : ''}

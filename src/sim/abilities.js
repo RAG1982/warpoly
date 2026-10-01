@@ -53,6 +53,7 @@ export function targetProblem(caster, ability, target) {
   } else if (target.fullMesh || target.isConstructed !== undefined) {
     return 'Alvo inválido: precisa ser uma unidade.';
   }
+  if (target.layer === 'air' && ability.hitsAir === false) return 'Alvo inválido: não atinge unidades aéreas.'; // F4-06
   if (ability.effects.some(e => e.kind === 'polymorph') && !canPolymorph(target)) return 'Alvo inválido: não pode ser transmutado.';
   if (ability.effects.some(e => e.kind === 'exorcism') && !getUnitDef(target.type).undead) return 'Alvo inválido: só funciona contra mortos-vivos.';
   return null;

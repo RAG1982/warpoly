@@ -14,6 +14,7 @@ import { EVT } from '../sim/events.js';
 import { REPAIR_INTERVAL, MAX_WORKERS_PER_BUILDING } from '../sim/repair.js';
 import { createStatusSlots, createMods, tickStatuses, clearStatuses, removeStatus, STATUS_DEFS } from '../sim/statuses.js';
 import { isDetectedBy } from '../sim/detection.js';
+import { canTarget, defaultCanHitAir } from '../sim/targeting.js';
 import { FLAMESHIELD_DAMAGE } from '../data/combat.js';
 import { getAbility } from '../data/abilities.js';
 import { resolveAbility, canCast, needsEntityTarget, targetProblem, applyAbility, emitCastStart, findAutocastTarget, getChannel, applyChannelWave } from '../sim/abilities.js';
@@ -181,6 +182,10 @@ export class Unit {
     /** F4-04b: camada ('ground' | 'air') e imunidade total a dano (Olho Vigia). F4-06 estende `layer`. */
     this.layer = def.layer || 'ground';
     this.immune = !!def.immune;
+    /** F4-06: voo (`flyHeight` acima do terreno) e regras de alvo (`canTarget`, `src/sim/targeting.js`). */
+    this.flyHeight = this.layer === 'air' ? (typeof def.flyHeight === 'number' ? def.flyHeight : 4.5) : 0;
+    this.canHitAir = defaultCanHitAir(def);
+    this.canHitGround = def.canHitGround !== false;
     /** F4-02: velocidade estimada (u/s) medida pelo `GameManager` a cada tick — mira preditiva do cerco. */
     this.velX = 0;
     this.velZ = 0;
@@ -243,7 +248,7 @@ export class Unit {
     this.mesh = this.createModel(ModelFactory.visualType(type, def));
     this._applyTeamColor(this.mesh);
     const h = this.terrain.getHeight(x, z);
-    this.mesh.position.set(x, h, z);
+    this.mesh.position.set(x, h + this.flyHeight, z);
     this.mesh.scale.set(1.62, 1.62, 1.62); // Scaled +20% for superior visibility and detail appreciation
     this.mesh.userData.entity = this;
 
@@ -337,7 +342,7 @@ export class Unit {
   createSelectionRing() {
     this.selectionRing = new THREE.Mesh(unitRingGeo, this.faction === 'player' ? playerRingMat : enemyRingMat);
     this.selectionRing.name = 'SelectionRing';
-    this.selectionRing.position.y = 0.05;
+    this.selectionRing.position.y = 0.05 - (this.flyHeight || 0) / 1.62; // F4-06: aéreo — anel no chão, sob a unidade
     this.selectionRing.visible = false;
     this.mesh.add(this.selectionRing);
   }
@@ -536,7 +541,7 @@ export class Unit {
     this._mvLastX = NaN;
 
     const gm = gameManager || this.gameManager;
-    if (gm && gm.pathfinder) {
+    if (gm && gm.pathfinder && this.layer !== 'air') { // F4-06: aéreo voa em linha reta (sem pathfinder, sem ajuste de água)
       // Snap destination if clicked in water
       if (gm.pathfinder.isWater(x, z)) {
         const snapped = gm.pathfinder.findNearestWalkable(x, z);
@@ -692,6 +697,7 @@ export class Unit {
 
   orderAttack(target, preserveObjective = false) {
     if (this.isDead || this.isDying || this.state === 'dying') return;
+    if (target && !canTarget(this, target)) return; // F4-06: melee/cerco não atingem aéreos; batedores não atacam
     this._clearOrderModes();
     this.state = 'attacking';
     this.attackTarget = target;
@@ -985,6 +991,14 @@ export class Unit {
     const nextX = curX + dirX * move;
     const nextZ = curZ + dirZ * move;
 
+    // F4-06: voo — ignora água/relevo (o Y suaviza em `_updateFlightHeight`).
+    if (this.layer === 'air') {
+      this.mesh.position.x = nextX;
+      this.mesh.position.z = nextZ;
+      this.mesh.rotation.y = Math.atan2(dirX, dirZ);
+      return (dist - move) < 0.15;
+    }
+
     // WATER IMPASSABILITY: Units cannot enter or cross water!
     const nextH = this.terrain.getHeight(nextX, nextZ);
     if (nextH < 0.65) {
@@ -1018,7 +1032,7 @@ export class Unit {
     let subTargetZ = destZ;
 
     const gm = gameManager || this.gameManager;
-    if (gm && gm.pathfinder) {
+    if (gm && gm.pathfinder && this.layer !== 'air') {
       const los = gm.pathfinder.hasLineOfSight(curX, curZ, destX, destZ);
       if (!los) {
         // Direct line blocked by water! Route through waypoints / fords
@@ -1076,12 +1090,19 @@ export class Unit {
     }
   }
 
+  /** F4-06: Y alvo = terreno (mín. nível da água) + `flyHeight`, suavizado (sobe/desce relevo sem trancos). */
+  _updateFlightHeight(delta) {
+    const p = this.mesh.position;
+    const target = Math.max(this.terrain.getHeight(p.x, p.z), 0.65) + this.flyHeight;
+    p.y += (target - p.y) * Math.min(1, 4 * delta);
+  }
+
   update(delta, gameManager, arrows, allUnits, buildings) {
     if (this.canRemove) return;
     this.gameManager = gameManager;
 
     // Safety: ensure unit never stays submerged in water
-    if (this.terrain.getHeight(this.mesh.position.x, this.mesh.position.z) < 0.65) {
+    if (this.layer !== 'air' && this.terrain.getHeight(this.mesh.position.x, this.mesh.position.z) < 0.65) {
       if (gameManager && gameManager.pathfinder) {
         const safe = gameManager.pathfinder.findNearestWalkable(this.mesh.position.x, this.mesh.position.z);
         this.mesh.position.x = safe.x;
@@ -1112,6 +1133,7 @@ export class Unit {
 
     this.attackTimer += delta;
     this.actionTimer += delta;
+    if (this.layer === 'air') this._updateFlightHeight(delta);
 
     this._updateAbilityTimers(delta, gameManager);
     if (this.isDead) return;
@@ -1267,6 +1289,11 @@ export class Unit {
     this.splashRadius = def.splashRadius || 0;
     this.isBallistic = false;
     this.suicide = false;
+    this.layer = def.layer || 'ground'; // F4-06: a ovelha (e qualquer forma terrestre) desce ao chão
+    this.flyHeight = this.layer === 'air' ? (typeof def.flyHeight === 'number' ? def.flyHeight : 4.5) : 0;
+    this.canHitAir = defaultCanHitAir(def);
+    this.canHitGround = def.canHitGround !== false;
+    this.mesh.position.y = this.terrain.getHeight(this.mesh.position.x, this.mesh.position.z) + this.flyHeight;
     this.regen = 0;
     this.setupMana({ maxMana: 0 });
     this.mana = 0;
@@ -2239,8 +2266,13 @@ export class Unit {
         if (gmEvents) gmEvents.emit(EVT.MELEE_HIT, { pos: posOf(this.mesh.position), ownerId: this.ownerId });
         if (this.mods.invisible) this.breakInvisibility();
         const target = this.attackTarget;
-        const dmg = computeDamage(this.getEffDamage(), target, gm.combatRng);
-        target.takeDamage(dmg, this, allUnits);
+        if (this.splashRadius > 0 && gm && gm.unitGrid && gm.blockerGrid) {
+          // F4-06: golpe mágico em área curta (Grifo/Serpe) centrado no alvo — atinge hostis vizinhos (`canTarget`).
+          applySplashDamage(gm, this, this.getEffDamage(), target.mesh.position, this.splashRadius, allUnits, 0.5, true);
+        } else {
+          const dmg = computeDamage(this.getEffDamage(), target, gm.combatRng);
+          target.takeDamage(dmg, this, allUnits);
+        }
         // F4-04: Escudo de Chamas — quem golpeia corpo a corpo um alvo com o status sofre dano mágico fixo.
         if (target.mods && target.mods.flameshield && !this.isDead && !this.isDying) {
           this.takeDamage(FLAMESHIELD_DAMAGE, target, allUnits);
@@ -2289,13 +2321,11 @@ export class Unit {
   }
 
   /**
-   * F4-02: `e` pode ser escolhido numa auto-aquisição? Só o cerco filtra: alvo aéreo nunca
-   * (F4-06 usa `layer === 'air'`) e alvo a menos de `minAttackRange` (distância de borda) não.
+   * F4-02: `e` pode ser escolhido numa auto-aquisição? `canTarget` (camada) e, só no cerco, alvo a menos de `minAttackRange` (distância de borda) não.
    */
   _canEngage(e) {
-    if (e.immune) return false; // F4-04b: Olho Vigia
-    if (e.layer === 'air' && (!this.isRanged || this.isBallistic)) return false; // F4-04b: aéreo só por atacantes à distância não-cerco
-    if (!this.isBallistic && this.minAttackRange <= 0) return true;
+    if (!canTarget(this, e)) return false; // F4-06: imune (Olho Vigia), camada aérea/terrestre (`src/sim/targeting.js`)
+    if (this.minAttackRange <= 0) return true;
     if (this.minAttackRange > 0) {
       const p = this.mesh.position;
       const q = e.mesh.position;

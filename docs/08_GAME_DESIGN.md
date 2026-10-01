@@ -125,8 +125,8 @@ Upgrades de classe: Patrulheiro/Enfurecido (Serraria, nível 2): +alcance/+visã
 ### 5.2 Aéreas e navais
 | Papel | Humanos | Orcs | Notas | Nível |
 |---|---|---|---|---|
-| Batedor aéreo | **Planador de Engenho** | **Balão de Guerra** | sem ataque; visão 30; detecta submersos | 2 (Oficina) |
-| Ataque aéreo | **Cavaleiro Grifo** | **Serpe de Guerra** | PV 350, dano mágico em área curta; só atingível por atiradores/torres/navios | 3 (Aviário/Ninho) |
+| Batedor aéreo ✅ F4-06 | **Planador de Engenho** | **Balão de Guerra** | sem ataque; visão 30; detecta invisíveis/submersos; 110/60/20, PV 120 | 2 (Oficina) |
+| Ataque aéreo ✅ F4-06 | **Cavaleiro Grifo** | **Serpe de Guerra** | PV 350, 38 mágico em área r1,2, 250/100/0; só atingível por atiradores/torres/navios/magias | 3 (Aviário/Ninho) |
 | Petroleiro | Petroleiro | Petroleiro | coleta petróleo, constrói plataforma | 2 |
 | Destróier | **Fragata** | **Galé de Guerra** | anti-ar e anti-navio | 2 |
 | Transporte | Barcaça | Barcaça | 6 unidades | 2 |

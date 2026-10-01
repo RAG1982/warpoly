@@ -1,5 +1,6 @@
 import * as THREE from 'three';
 import { isDetectedBy } from '../sim/detection.js';
+import { canTarget } from '../sim/targeting.js';
 import { ModelFactory } from './ModelFactory.js';
 import { Projectile } from '../sim/projectiles.js';
 import { UPGRADE_CONFIG, RESEARCH } from '../data/index.js';
@@ -109,6 +110,10 @@ export class Building {
     this.armor = stats.armor || 0;
     this.attackRange = stats.attackRange || 0;
     this.towerDamage = stats.towerDamage ? { ...stats.towerDamage } : null;
+    /** F4-06: torres de arqueiros (`tower.hitsAir`) atingem aéreos (`canTarget`). Construções não atacam por outro meio. */
+    const towerCfg = getBuildingDef(type).tower;
+    this.canHitAir = !!(towerCfg && towerCfg.hitsAir);
+    this.canHitGround = true;
     this.attackDamage = stats.attackDamage || 0;
     this.collisionRadius = stats.collisionRadius || 3.0;
     this.attackCooldown = stats.attackCooldown;
@@ -229,7 +234,9 @@ export class Building {
       case 'arcane_tower':
       case 'ash_sanctum':
       case 'temple':
-      case 'storm_altar': return ModelFactory.createBuildingByType(type);
+      case 'storm_altar':
+      case 'aviary':
+      case 'serpent_nest': return ModelFactory.createBuildingByType(type);
       case 'workshop': return ModelFactory.createWorkshop();
       case 'orc_workshop': return ModelFactory.createOrcWorkshop();
       case 'barracks': return ModelFactory.createBarracks();
@@ -867,7 +874,7 @@ export class Building {
         const pos = this.mesh.position;
         const self = this;
         const closest = gm && gm.unitGrid
-          ? gm.unitGrid.nearest(pos.x, pos.z, this.attackRange, u => !u.isDead && self.isHostileTo(u) && (!u.mods || !u.mods.invisible || isDetectedBy(gm, u, self.ownerId)))
+          ? gm.unitGrid.nearest(pos.x, pos.z, this.attackRange, u => !u.isDead && self.isHostileTo(u) && canTarget(self, u) && (!u.mods || !u.mods.invisible || isDetectedBy(gm, u, self.ownerId)))
           : null;
 
         if (closest) {

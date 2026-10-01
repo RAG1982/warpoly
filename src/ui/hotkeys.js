@@ -18,6 +18,7 @@ export const BUILD_HOTKEY_BY_ROLE = {
   workshop: 'O',
   arcane: 'G',
   temple: 'J',
+  aerie: 'Y',
   tower: 'T',
   wall: 'M'
 };

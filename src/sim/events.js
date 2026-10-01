@@ -58,6 +58,9 @@ export const EVT = Object.freeze({
   ABILITY_EFFECT: 'ability_effect',
   /** F4-03: mana gasta por uma habilidade (nunca por passo de regeneração). */
   MANA_CHANGED: 'mana_changed',
+  /** F4-04b: perigo de chão (runa/redemoinho) criado/removido — só apresentação. */
+  HAZARD_SPAWNED: 'hazard_spawned',
+  HAZARD_REMOVED: 'hazard_removed',
 
   PLAYER_DEFEATED: 'player_defeated',
   MATCH_WON: 'match_won',
@@ -105,6 +108,8 @@ export const EVT = Object.freeze({
  * EVT.ABILITY_CAST    {unitId:number, ownerId:number, abilityId:string, targetId?:number, pos:Pos}  (F4-03)
  * EVT.ABILITY_EFFECT  {abilityId:string, ownerId:number, pos:Pos, radius?:number, unitId?:number, targetId?:number}  (F4-03)
  * EVT.MANA_CHANGED    {unitId:number, ownerId:number, mana:number}  (F4-03; só ao gastar)
+ * EVT.HAZARD_SPAWNED {hazardId:number, kind:'rune'|'whirlwind', ownerId:number, pos:Pos}  (F4-04b)
+ * EVT.HAZARD_REMOVED {hazardId:number, kind:string, ownerId:number, pos:Pos, triggered:boolean}  (F4-04b)
  *
  * EVT.PLAYER_DEFEATED {ownerId:number, name:string}
  * EVT.MATCH_WON       {ownerId:number}

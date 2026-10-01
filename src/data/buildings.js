@@ -5,7 +5,7 @@
  * - name          Nome PT-BR exibido no painel de construção do trabalhador (D2: provisório até a F3-00).
  * - entityName    Rótulo atual do card de seleção (legado; unificar com `name` na F3-00/F6-09).
  * - faction       'human' | 'orc' | 'neutral'.
- * - role          'hq' | 'house' | 'farm' | 'lumber' | 'barracks' | 'stable' | 'workshop' | 'arcane' | 'forge' | 'tower' | 'wall' | 'camp'.
+ * - role          'hq' | 'house' | 'farm' | 'lumber' | 'barracks' | 'stable' | 'workshop' | 'arcane' | 'temple' | 'forge' | 'tower' | 'wall' | 'camp'.
  * - hp, cost {gold, wood, stone}, collisionRadius, popGranted.
  * - armor         F3-03: armadura da construção (corrige B5 — antes não existia). HQ/torres
  *                  20, muralhas 10 (quando existirem), demais 15 (design §6).
@@ -215,6 +215,27 @@ export const BUILDINGS = {
     dropoff: [],
     icon: '/icoTorre.svg',
     description: 'Treina magos e pesquisa magias; detecta unidades invisíveis (requer Centro nível 3)'
+  },
+  temple: {
+    type: 'temple',
+    name: 'Templo da Luz',
+    entityName: 'Templo da Luz',
+    faction: 'human',
+    role: 'temple',
+    hp: 900,
+    armor: 15,
+    cost: { gold: 250, wood: 100, stone: 80 },
+    collisionRadius: 3.4,
+    popGranted: 0,
+    visionRadius: 24,
+    healthBarHeight: 7.6,
+    tower: null,
+    passiveIncome: null,
+    requires: ['stable', { hq: 3 }],
+    trains: [],
+    dropoff: [],
+    icon: '/icoTorre.svg',
+    description: 'Pesquisa a Ordenação (Cavaleiro vira Templário) e as magias sagradas (requer Estábulo Real e Centro nível 3)'
   },
   watchtower: {
     type: 'watchtower',
@@ -443,6 +464,27 @@ export const BUILDINGS = {
     dropoff: [],
     icon: '/icoTorreOrc.svg',
     description: 'Treina necromantes e pesquisa magias; detecta unidades invisíveis (requer Centro nível 3)'
+  },
+  storm_altar: {
+    type: 'storm_altar',
+    name: 'Altar das Tempestades',
+    entityName: 'Altar das Tempestades',
+    faction: 'orc',
+    role: 'temple',
+    hp: 900,
+    armor: 15,
+    cost: { gold: 250, wood: 100, stone: 80 },
+    collisionRadius: 3.4,
+    popGranted: 0,
+    visionRadius: 24,
+    healthBarHeight: 7.6,
+    tower: null,
+    passiveIncome: null,
+    requires: ['ogre_den', { hq: 3 }],
+    trains: [],
+    dropoff: [],
+    icon: '/icoTorreOrc.svg',
+    description: 'Pesquisa o Ritual das Tempestades (Ogro vira Ogro Feiticeiro) e as magias xamânicas (requer Covil dos Ogros e Centro nível 3)'
   },
   orc_watchtower: {
     type: 'orc_watchtower',

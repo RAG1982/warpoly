@@ -37,6 +37,7 @@
  * - detector        F4-04: detecta unidades invisíveis num raio (`DETECT_RADIUS`). Nenhuma unidade tem ainda (F4-06: Planador).
  * - undead          F4-04: marcador de morto-vivo (esqueleto; alvo do Exorcismo na F4-04b).
  * - corpseless      F4-04: não deixa cadáver ao morrer (cerco, suicidas, esqueletos, ovelhas).
+ * - layer / immune   F4-04b: `layer:'air'` (unidade voadora mínima — só atingível por atacantes à distância não-cerco; F4-06 estende) e `immune` (ignora todo dano e nunca é escolhida como alvo).
  * - isSiege         F4-04: unidade de cerco (imune à Transmutação). `isHero` idem (heróis na F4-08).
  */
 
@@ -199,6 +200,68 @@ export const UNITS = {
     icon: '/icoEspada.png',
     description: 'Cavalaria orc: bruto colossal veloz com clava',
     isWorker: false, isRanged: false, isCombat: true, projectile: null
+  },
+
+  // --- F4-04b: classe avançada da cavalaria (só via pesquisa `cavalry_class`, no Templo/Altar). Usam o
+  // modelo 3D do cavaleiro/ogro (`modelOf`; arte própria na F7). Base +15 % (Templário) / +10 % PV (Ogro Feiticeiro).
+  templar: {
+    type: 'templar',
+    modelOf: 'cavalier',
+    requires: [{ research: 'cavalry_class' }],
+    name: 'Templário',
+    entityName: 'Templário',
+    faction: 'human',
+    hp: 345, speed: 6.2, damage: { basic: 30, piercing: 9, type: 'normal' }, attackRange: 2.3, attackCooldown: 1.2, armor: 4,
+    collisionRadius: 1.0,
+    visionRadius: 18,
+    ...MELEE_SCAN,
+    healthBarHeight: 4.6,
+    cost: { gold: 120, wood: 60, stone: 20 },
+    trainTime: 14,
+    icon: '/icoEspada.png',
+    description: 'Cavaleiro consagrado: combate corpo a corpo e conjura Vista Sagrada, Cura e Exorcismo',
+    isWorker: false, isRanged: false, isCombat: true, projectile: null,
+    maxMana: 255, startMana: 85, manaRegen: 1,
+    abilities: ['holy_vision', 'heal', 'exorcism']
+  },
+  ogre_mage: {
+    type: 'ogre_mage',
+    modelOf: 'ogre',
+    requires: [{ research: 'cavalry_class' }],
+    name: 'Ogro Feiticeiro',
+    entityName: 'Ogro Feiticeiro',
+    faction: 'orc',
+    hp: 352, speed: 5.4, damage: { basic: 32, piercing: 10, type: 'normal' }, attackRange: 2.5, attackCooldown: 1.5, armor: 5,
+    collisionRadius: 1.08,
+    visionRadius: 16,
+    ...MELEE_SCAN,
+    healthBarHeight: 4.5,
+    cost: { gold: 75, wood: 100, stone: 35 },
+    trainTime: 14,
+    icon: '/icoEspada.png',
+    description: 'Ogro xamã: combate corpo a corpo e conjura Olho Vigia, Sede de Batalha e Runas Explosivas',
+    isWorker: false, isRanged: false, isCombat: true, projectile: null,
+    maxMana: 255, startMana: 85, manaRegen: 1,
+    abilities: ['eye_of_watch', 'bloodlust', 'runes']
+  },
+  // Invocado por Olho Vigia: unidade voadora (`layer:'air'`, F4-06 estende), PV 1 mas imune a dano, sem ataque,
+  // detector de invisíveis. Não consome suprimento (`summoned`) e some após `lifetime`.
+  watching_eye: {
+    type: 'watching_eye',
+    name: 'Olho Vigia',
+    entityName: 'Olho Vigia',
+    faction: 'orc',
+    hp: 1, speed: 6, damage: { basic: 0, piercing: 0, type: 'normal' }, attackRange: 0, attackCooldown: 1.0, armor: 0,
+    collisionRadius: 0.5,
+    visionRadius: 30,
+    ...MELEE_SCAN,
+    healthBarHeight: 3.2,
+    cost: null,
+    trainTime: null,
+    icon: '/icoArco.png',
+    description: 'Olho voador invocado (dura 60 s): enxerga longe e revela unidades invisíveis',
+    isWorker: false, isRanged: false, isCombat: false, projectile: null,
+    layer: 'air', detector: true, immune: true, corpseless: true
   },
 
   // F4-02: cerco orc, treinado na Oficina dos Engenhoqueiros (Centro nível 2). Mesmos números

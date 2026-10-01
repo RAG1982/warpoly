@@ -217,7 +217,9 @@ export class Building {
       case 'stable': return ModelFactory.createStable();
       case 'ogre_den': return ModelFactory.createOgreDen();
       case 'arcane_tower':
-      case 'ash_sanctum': return ModelFactory.createBuildingByType(type);
+      case 'ash_sanctum':
+      case 'temple':
+      case 'storm_altar': return ModelFactory.createBuildingByType(type);
       case 'workshop': return ModelFactory.createWorkshop();
       case 'orc_workshop': return ModelFactory.createOrcWorkshop();
       case 'barracks': return ModelFactory.createBarracks();

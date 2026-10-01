@@ -1,7 +1,7 @@
 /**
  * upgrades.js — Pesquisas em níveis (F3-07; substitui as 4 pesquisas de nível único da F0-06).
  *
- * `RESEARCH[id]` = { building: 'forge'|'lumber'|'arcane' (role da construção que pesquisa), faction?
+ * `RESEARCH[id]` = { building: 'forge'|'lumber'|'arcane'|'temple' (role da construção que pesquisa), faction?
  * ('human'|'orc' — ausente = ambas), levels: [{cost, time, bonus?, effect?, requires}], appliesTo?
  * (tipos de unidade afetados), name: {human, orc} }.
  *
@@ -21,7 +21,7 @@ export const RESEARCH = {
       { cost: { gold: 200, wood: 100 }, time: 30, bonus: { basic: 2 }, requires: [] },
       { cost: { gold: 400, wood: 200 }, time: 45, bonus: { basic: 2 }, requires: [{ hq: 2 }] }
     ],
-    appliesTo: ['knight', 'grunt', 'cavalier', 'ogre'], // TODO F4-04: Templário / Ogro Feiticeiro entram aqui
+    appliesTo: ['knight', 'grunt', 'cavalier', 'ogre', 'templar', 'ogre_mage'],
     icon: '/icoEspada.png',
     name: { human: 'Armas Forjadas', orc: 'Lâminas de Guerra' }
   },
@@ -31,7 +31,7 @@ export const RESEARCH = {
       { cost: { gold: 150, wood: 100, stone: 80 }, time: 30, bonus: { armor: 2 }, requires: [] },
       { cost: { gold: 300, wood: 200, stone: 160 }, time: 45, bonus: { armor: 2 }, requires: [{ hq: 2 }] }
     ],
-    appliesTo: ['knight', 'grunt', 'cavalier', 'ogre'],
+    appliesTo: ['knight', 'grunt', 'cavalier', 'ogre', 'templar', 'ogre_mage'],
     icon: '/icoEscudo.png',
     name: { human: 'Escudos Reforçados', orc: 'Placas de Ferro' }
   },
@@ -160,6 +160,48 @@ export const RESEARCH = {
     levels: [{ cost: { gold: 600 }, time: 60, effect: { unlock: 'ash_cloud' }, requires: [] }],
     icon: '/icoEscudo.png', name: { orc: 'Nuvem de Cinzas' }
   },
+  spell_whirlwind: {
+    building: 'arcane', faction: 'orc',
+    levels: [{ cost: { gold: 800 }, time: 60, effect: { unlock: 'whirlwind' }, requires: [] }],
+    icon: '/icoEscudo.png', name: { orc: 'Redemoinho' }
+  },
+  // F4-04b: Templo da Luz / Altar das Tempestades (`role: 'temple'`). `cavalry_class` promove Cavaleiro → Templário e
+  // Ogro → Ogro Feiticeiro (mecanismo `promote`); as magias dos novos conjuradores exigem a classe.
+  cavalry_class: {
+    building: 'temple',
+    levels: [{ cost: { gold: 1000 }, time: 60, effect: { promote: { cavalier: 'templar', ogre: 'ogre_mage' } }, requires: [{ hq: 3 }] }],
+    icon: '/icoEspada.png', name: { human: 'Ordenação', orc: 'Ritual das Tempestades' }
+  },
+  spell_holy_vision: {
+    building: 'temple', faction: 'human',
+    levels: [{ cost: { gold: 500 }, time: 40, effect: { unlock: 'holy_vision' }, requires: [{ research: 'cavalry_class' }] }],
+    icon: '/icoArco.png', name: { human: 'Vista Sagrada' }
+  },
+  spell_heal: {
+    building: 'temple', faction: 'human',
+    levels: [{ cost: { gold: 700 }, time: 45, effect: { unlock: 'heal' }, requires: [{ research: 'cavalry_class' }] }],
+    icon: '/icoEscudo.png', name: { human: 'Cura' }
+  },
+  spell_exorcism: {
+    building: 'temple', faction: 'human',
+    levels: [{ cost: { gold: 1000 }, time: 60, effect: { unlock: 'exorcism' }, requires: [{ research: 'cavalry_class' }] }],
+    icon: '/icoEspada.png', name: { human: 'Exorcismo' }
+  },
+  spell_eye: {
+    building: 'temple', faction: 'orc',
+    levels: [{ cost: { gold: 500 }, time: 40, effect: { unlock: 'eye_of_watch' }, requires: [{ research: 'cavalry_class' }] }],
+    icon: '/icoArco.png', name: { orc: 'Olho Vigia' }
+  },
+  spell_bloodlust: {
+    building: 'temple', faction: 'orc',
+    levels: [{ cost: { gold: 700 }, time: 45, effect: { unlock: 'bloodlust' }, requires: [{ research: 'cavalry_class' }] }],
+    icon: '/icoEspada.png', name: { orc: 'Sede de Batalha' }
+  },
+  spell_runes: {
+    building: 'temple', faction: 'orc',
+    levels: [{ cost: { gold: 1000 }, time: 60, effect: { unlock: 'runes' }, requires: [{ research: 'cavalry_class' }] }],
+    icon: '/icoEscudo.png', name: { orc: 'Runas Explosivas' }
+  },
 };
 
 /** Ids das pesquisas de uma construção (`role`) para a facção dada (ausente = todas). */
@@ -236,7 +278,7 @@ export function describeLevel(id, level) {
   const e = lv.effect || {};
   if (e.woodMultiplier) parts.push(`+${Math.round((e.woodMultiplier - 1) * 100)}% madeira coletada`);
   if (e.regen) parts.push(`regenera ${e.regen} PV/s`);
-  if (e.promote) parts.push('promove atiradores à classe avançada');
+  if (e.promote) parts.push('promove as unidades à classe avançada');
   if (e.unlock) parts.push('libera a magia para os conjuradores');
   return parts.join(', ');
 }

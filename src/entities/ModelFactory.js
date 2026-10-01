@@ -31,6 +31,9 @@ import {
   createSkeleton,
   createArcaneTower,
   createAshSanctum,
+  createTemple,
+  createStormAltar,
+  createWatchingEye,
   createArsonist,
   createWorkshop,
   createOrcWorkshop,
@@ -331,6 +334,8 @@ export class ModelFactory {
       case 'ogre_den': return this.createOgreDen();
       case 'arcane_tower': return this.getOrCreateModel('arcane_tower', createArcaneTower);
       case 'ash_sanctum': return this.getOrCreateModel('ash_sanctum', createAshSanctum);
+      case 'temple': return this.getOrCreateModel('temple', createTemple);
+      case 'storm_altar': return this.getOrCreateModel('storm_altar', createStormAltar);
       case 'workshop': return this.createWorkshop();
       case 'orc_workshop': return this.createOrcWorkshop();
       case 'wall_human': return createWallSegment('human');
@@ -549,6 +554,7 @@ export class ModelFactory {
       case 'necromancer': return this.getOrCreateModel('necromancer', createNecromancer, 'necromancer');
       case 'skeleton': return this.getOrCreateModel('skeleton', createSkeleton, 'skeleton');
       case 'sheep': return this.createCritter('sheep');
+      case 'watching_eye': return this.getOrCreateModel('watching_eye', createWatchingEye);
       case 'sapper': return this.createSapper();
       case 'arsonist': return this.createArsonist();
       default: return this.createVillager();

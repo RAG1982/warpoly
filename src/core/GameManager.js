@@ -40,6 +40,7 @@ import { CommandExecutor } from '../sim/CommandExecutor.js';
 import { createRng } from '../sim/rng.js';
 import { recordChecksum } from '../sim/checksum.js';
 import { CorpsePool } from '../sim/corpses.js';
+import { HazardPool } from '../sim/hazards.js';
 import { EventBus } from '../sim/EventBus.js';
 import { EVT } from '../sim/events.js';
 import { MatchStats } from '../sim/MatchStats.js';
@@ -117,6 +118,8 @@ export class GameManager {
     this.critters = [];
     /** F4-04: pool fixo de cadáveres (só dados; `src/sim/corpses.js`) — consumidos por Erguer Mortos. */
     this.corpses = new CorpsePool();
+    /** F4-04b: runas explosivas e redemoinhos (só dados; `src/sim/hazards.js`). */
+    this.hazards = new HazardPool(this);
     /** @type {Map<number, {remaining:number, reward:object, pos:{x:number,z:number}}>} campId → cluster */
     this._camps = new Map();
 
@@ -447,6 +450,7 @@ export class GameManager {
     this.resourceDeposits = [];
     this.critters = [];
     this.corpses.clear();
+    this.hazards.clear();
     this._camps = new Map();
     this.selectedUnits = [];
     this.selectedBuilding = null;
@@ -931,6 +935,11 @@ export class GameManager {
     unit.damage.piercing += to.damage.piercing - from.damage.piercing;
     unit.armor = (unit.armor || 0) + ((to.armor || 0) - (from.armor || 0));
     unit.attackRange += to.attackRange - from.attackRange;
+    // F4-04b: a classe avançada ganha mana e habilidades (Templário / Ogro Feiticeiro); quem já tinha mana mantém.
+    if (to.maxMana > 0 && !(from.maxMana > 0) && unit.setupMana) {
+      unit.setupMana(to);
+      unit.updateHealthBar();
+    }
   }
 
   /**
@@ -1651,6 +1660,8 @@ export class GameManager {
     this.resolveBuildingCollisions();
     this.resolveUnitCollisions();
 
+    this.hazards.step(dt); // F4-04b: runas e redemoinhos
+
     // Autonomous Computer Opponent AI (Utility AI Director): um por jogador de IA ainda vivo
     for (let i = 0; i < this.aiDirectors.length; i++) {
       const director = this.aiDirectors[i];
@@ -1710,6 +1721,8 @@ export class GameManager {
     for (let i = 0; i < arrows.length; i++) {
       arrows[i].renderUpdate(alpha);
     }
+
+    if (this.hazardView) this.hazardView.update(frameDelta); // F4-04b
 
     // Construções: billboards, chamas, fumaça e VFX customizado das subclasses.
     this.buildings.forEach(b => {

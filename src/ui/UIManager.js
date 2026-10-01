@@ -23,7 +23,7 @@ export { BUILDING_TRAINABLE_UNITS };
 /** F3-07: role de pesquisa ('forge' | 'lumber') da construção, ou null se ela não pesquisa. */
 function researchRoleOf(b) {
   const role = getBuildingDef(b.type).role;
-  return role === 'forge' || role === 'lumber' || role === 'arcane' ? role : null;
+  return role === 'forge' || role === 'lumber' || role === 'arcane' || role === 'temple' ? role : null;
 }
 
 export class UIManager {
@@ -815,7 +815,7 @@ export class UIManager {
     const researchRole = researchRoleOf(building);
     const isForge = building.faction === 'player' && building.isConstructed && !!researchRole;
     if (isForge) {
-      if (this.bldTrainLabel) this.bldTrainLabel.innerText = researchRole === 'forge' ? 'MELHORIAS DA FORJA:' : researchRole === 'arcane' ? 'MAGIAS:' : 'PESQUISAS DA SERRARIA:';
+      if (this.bldTrainLabel) this.bldTrainLabel.innerText = researchRole === 'forge' ? 'MELHORIAS DA FORJA:' : researchRole === 'arcane' ? 'MAGIAS:' : researchRole === 'temple' ? 'CLASSE E MAGIAS SAGRADAS:' : 'PESQUISAS DA SERRARIA:';
       if (this.bldQueueLabel) this.bldQueueLabel.innerText = 'PROGRESSO DA PESQUISA:';
       if (this.bldTrainSection) this.bldTrainSection.style.display = 'flex';
       if (this.bldQueueSection) this.bldQueueSection.style.display = 'flex';

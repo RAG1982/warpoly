@@ -37,6 +37,8 @@ export const FOG_QUALITY = {
 export class FogOfWar {
   /** Raio (u) a partir do qual uma malha é tratada como chão pela névoa. */
   static GROUND_MIN_RADIUS = 25;
+  /** F4-04b: máximo de revelações temporárias simultâneas (a mais antiga é substituída). */
+  static MAX_TIMED_REVEALS = 16;
 
   constructor(scene, worldWidth = 140, worldDepth = 140) {
     this.scene = scene;
@@ -59,6 +61,9 @@ export class FogOfWar {
 
     this.updateTimer = 0;
     this.enabled = true;
+    /** F4-04b: revelações temporárias (Vista Sagrada) — pool fixo, sem alocar por quadro. */
+    this._timedReveals = [];
+    for (let i = 0; i < FogOfWar.MAX_TIMED_REVEALS; i++) this._timedReveals.push({ x: 0, z: 0, r: 0, ttl: 0 });
 
     // Camada do minimapa (128², 3 estados)
     this.canvas = null;
@@ -168,9 +173,28 @@ export class FogOfWar {
     return !this.enabled || this.grid.isVisible(wx, wz);
   }
 
-  /** Revela uma área (visão atual + exploração permanente). */
-  revealArea(wx, wz, radius) {
+  /**
+   * Revela uma área (visão atual + exploração permanente). F4-04b: com `ttl` (s) a visão atual da área persiste
+   * por esse tempo (Vista Sagrada), reaplicada a cada tick da grade; sem `ttl`, vale só até o próximo tick.
+   */
+  revealArea(wx, wz, radius, ttl = 0) {
+    if (ttl > 0) {
+      const list = this._timedReveals;
+      let slot = list[0];
+      for (let i = 0; i < list.length; i++) {
+        if (list[i].ttl <= 0) { slot = list[i]; break; }
+        if (list[i].ttl < slot.ttl) slot = list[i];
+      }
+      slot.x = wx; slot.z = wz; slot.r = radius; slot.ttl = ttl;
+      this.grid.needsUpdate = true;
+    }
     if (this.grid.revealArea(wx, wz, radius)) this._minimapDirty = true;
+  }
+
+  /** F4-04b: há revelações temporárias ativas? */
+  get hasTimedReveals() {
+    for (let i = 0; i < this._timedReveals.length; i++) if (this._timedReveals[i].ttl > 0) return true;
+    return false;
   }
 
   /** Construção inimiga conhecida (visível agora ou lembrada)? */
@@ -198,6 +222,10 @@ export class FogOfWar {
   update(delta, playerUnits, playerBuildings, enemyUnits = [], enemyBuildings = []) {
     if (this._quality !== QualitySettings.current) this.applyQuality(QualitySettings.current);
 
+    for (let i = 0; i < this._timedReveals.length; i++) {
+      const t = this._timedReveals[i];
+      if (t.ttl > 0) t.ttl -= delta;
+    }
     this.updateTimer += delta;
     if (this.updateTimer >= 0.1) {
       this.updateTimer = 0;
@@ -238,6 +266,10 @@ export class FogOfWar {
       if (!b.isDead && b.mesh) {
         grid.revealArea(b.mesh.position.x, b.mesh.position.z, this.visionRadii[b.type] || DEFAULT_BUILDING.visionRadius);
       }
+    }
+    for (let i = 0; i < this._timedReveals.length; i++) {
+      const t = this._timedReveals[i];
+      if (t.ttl > 0) grid.revealArea(t.x, t.z, t.r);
     }
     if (grid.endVision()) this._uploadTexture();
 

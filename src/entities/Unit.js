@@ -241,6 +241,7 @@ export class Unit {
 
     // Create 3D Model (zero-cost clone sharing pre-compiled geometries and materials)
     this.mesh = this.createModel(ModelFactory.visualType(type, def));
+    this._applyTeamColor(this.mesh);
     const h = this.terrain.getHeight(x, z);
     this.mesh.position.set(x, h, z);
     this.mesh.scale.set(1.62, 1.62, 1.62); // Scaled +20% for superior visibility and detail appreciation
@@ -1293,10 +1294,18 @@ export class Unit {
     }
   }
 
+  /** F7-02: tinge o material `TeamColor` dos .glb com a cor do dono (no-op para modelos procedurais). */
+  _applyTeamColor(mesh) {
+    const gm = this.gameManager;
+    const owner = gm && gm.getPlayer ? gm.getPlayer(this.ownerId) : null;
+    if (owner && owner.color) ModelFactory.setTeamColor(mesh, owner.color);
+  }
+
   /** F4-04: troca o modelo 3D (mesma posição/escala/rotação), sem vazar malhas: remove o antigo da cena. */
   _swapModel(modelType, animType = modelType) {
     const old = this.mesh;
     const mesh = this.createModel(modelType);
+    this._applyTeamColor(mesh);
     mesh.position.copy(old.position);
     mesh.rotation.y = old.rotation.y;
     mesh.scale.copy(old.scale);

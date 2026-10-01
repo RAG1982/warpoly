@@ -194,6 +194,16 @@ export class Building {
     return other.ownerId !== this.ownerId;
   }
 
+  /** gameManager injetado após a construção (GameManager.createBuilding); ao recebê-lo aplica a cor do dono (F7-02). */
+  get gameManager() { return this._gameManager; }
+  set gameManager(gm) {
+    this._gameManager = gm;
+    if (gm && this.fullMesh && !this._teamTinted) {
+      const owner = gm.getPlayer ? gm.getPlayer(this.ownerId) : null;
+      if (owner && owner.color) { ModelFactory.setTeamColor(this.fullMesh, owner.color); this._teamTinted = true; }
+    }
+  }
+
   /** Player dono (economia/pop/pesquisas), ou null fora de uma partida. */
   getOwner(gameManager = this.gameManager) {
     return gameManager && gameManager.getPlayer ? gameManager.getPlayer(this.ownerId) : null;

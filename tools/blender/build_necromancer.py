@@ -10,7 +10,7 @@ Hierarquia PLANA (igual a NecromancerModel.js procedural / MageModel.js):
   ├─ Head    pivô (0, 1.60, 0)   capuz com chifres; rosto orc (presas, olhos verdes brilhantes) só em +Z
   ├─ ArmL / ArmR  pivô (∓0.52, 1.27, 0)
   ├─ LegL / LegR  pivô (∓0.18, 0.66, 0)   (cada perna leva meio saiote esfarrapado)
-  ├─ Weapon  pivô (0.66, 0.70, 0.19)  cajado com crânio chifrudo
+  ├─ (ArmR > Weapon) pivô mundo (0.70, 0.70, 0.20)  cajado com crânio chifrudo; o animador contra-gira
   └─ Crystal filho de Weapon: chama/cristal de alma verde-ácido (pulsa na 'cast')
 """
 import os
@@ -236,7 +236,7 @@ def build_arm(mats, root, side):
     return mb.build(mats, parent=root, location=(s * ARM_PIVOT[0], ARM_PIVOT[1], ARM_PIVOT[2]))
 
 
-def build_weapon(mats, root):
+def build_weapon(mats, arm_r):
     mb = MeshBuilder('Weapon')
     y0, y1 = -0.70, 1.72
     # haste de osso/madeira nodosa
@@ -262,7 +262,9 @@ def build_weapon(mats, root):
     # pendurados: ossinhos e crânio pequeno
     for k, y in enumerate((0.9, 1.0)):
         mb.add(prim_cone(0.025, 0.12, 4), 'bone', M((0.07, y, 0.0), (180, 0, 8)))
-    w = mb.build(mats, parent=root, location=WEAPON_PIVOT)
+    # filho de ArmR (o cajado acompanha a mão): posição local = pivô do cajado - pivô do braço
+    wloc = (WEAPON_PIVOT[0] - ARM_PIVOT[0], WEAPON_PIVOT[1] - ARM_PIVOT[1], WEAPON_PIVOT[2] - ARM_PIVOT[2])
+    w = mb.build(mats, parent=arm_r, location=wloc)
     cb = MeshBuilder('Crystal')
     # chama de alma: gota alta facetada + núcleo claro + fagulhas
     cb.add(prim_cone(0.2, 0.46, 6), 'flame', M((0, 0.0, 0)), smooth=0, bevel=0.004)
@@ -285,7 +287,7 @@ def main():
     arm_r = build_arm(mats, root, 1)
     leg_l = build_leg(mats, root, -1)
     leg_r = build_leg(mats, root, 1)
-    weapon, crystal = build_weapon(mats, root)
+    weapon, crystal = build_weapon(mats, arm_r)
     parts = [torso, head, arm_l, arm_r, leg_l, leg_r, weapon, crystal]
     finish_unit('necromancer', 'necromancer.glb', 'necromancer_atlas', root, parts,
                 {'Head': 1.6, 'Torso': 1.2, 'Weapon': 0.9, 'LegL': 0.7, 'LegR': 0.7, 'ArmL': 1.0, 'ArmR': 1.0, 'Crystal': 0.6},

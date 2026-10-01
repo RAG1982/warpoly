@@ -9,10 +9,10 @@ e escala `Crystal` no 'cast'):
   Mage (raiz)
   ├─ Torso   pivô (0, 1.05, 0)   túnica pesada + capa + estola (cor de time)
   ├─ Head    pivô (0, 1.62, 0)   chapéu pontudo, barba, rosto severo só em +Z
-  ├─ ArmL / ArmR  pivô (∓0.47, 1.27, 0)
-  ├─ LegL / LegR  pivô (∓0.16, 0.66, 0)  (cada perna leva meio saiote da túnica)
-  ├─ Weapon  pivô (0.55, 0.70, 0.17)  cajado em pé (a mão direita o empunha)
-  └─ Crystal pivô no centro do cristal, filho de Weapon (pulsa na 'cast')
+  ├─ ArmL / ArmR  pivô (∓0.47, 1.27, 0)   (ArmR > Weapon: o cajado acompanha a mão; o animador contra-gira)
+  │   └─ Weapon  pivô mundo (0.62, 0.70, 0.19)  cajado em pé
+  │       └─ Crystal pivô no centro do cristal (pulsa na 'cast')
+  └─ LegL / LegR  pivô (∓0.16, 0.66, 0)  (cada perna leva meio saiote da túnica)
 """
 import os
 import sys
@@ -270,7 +270,7 @@ def build_arm(mats, root, side):
     return mb.build(mats, parent=root, location=(s * ARM_PIVOT[0], ARM_PIVOT[1], ARM_PIVOT[2]))
 
 
-def build_weapon(mats, root):
+def build_weapon(mats, arm_r):
     """Cajado arcano: haste de madeira com anéis dourados, cabeça em garras de ouro e cristal flutuante (Crystal)."""
     mb = MeshBuilder('Weapon')
     y0, y1 = -0.70, 1.78
@@ -295,7 +295,9 @@ def build_weapon(mats, root):
     # contrapesos/ornamentos: penas e fita de time? (fita de couro com pingentes)
     for k, y in enumerate((0.9, 1.0)):
         mb.add(prim_sphere(0.04, 0.05, 0.04, 6, 3), 'crystal' if k else 'gold', M((0.07, y, 0.02)), smooth=60)
-    w = mb.build(mats, parent=root, location=WEAPON_PIVOT)
+    # filho de ArmR (o cajado acompanha a mão): posição local = pivô do cajado - pivô do braço
+    wloc = (WEAPON_PIVOT[0] - ARM_PIVOT[0], WEAPON_PIVOT[1] - ARM_PIVOT[1], WEAPON_PIVOT[2] - ARM_PIVOT[2])
+    w = mb.build(mats, parent=arm_r, location=wloc)
     # Crystal: filho de Weapon, pivô no centro do cristal (escala pulsa no 'cast')
     cb = MeshBuilder('Crystal')
     cb.add(prim_cone(0.17, 0.30, 6), 'crystal', M((0, 0.0, 0)), smooth=0, bevel=0.004)
@@ -322,7 +324,7 @@ def main():
     arm_r = build_arm(mats, root, 1)
     leg_l = build_leg(mats, root, -1)
     leg_r = build_leg(mats, root, 1)
-    weapon, crystal = build_weapon(mats, root)
+    weapon, crystal = build_weapon(mats, arm_r)
     parts = [torso, head, arm_l, arm_r, leg_l, leg_r, weapon, crystal]
     finish_unit('mage', 'mage.glb', 'mage_atlas', root, parts,
                 {'Head': 1.6, 'Torso': 1.2, 'Weapon': 0.8, 'LegL': 0.7, 'LegR': 0.7, 'ArmL': 1.0, 'ArmR': 1.0, 'Crystal': 0.6},

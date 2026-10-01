@@ -261,6 +261,13 @@ export class UnitAnimator {
         this.applyCast(time, progress, parts);
         break;
     }
+
+    // Cajado do Mago/Necromante: `Weapon` é filho de ArmR (empunhado); contra-gira o braço para o cajado
+    // seguir a mão sem tombar (permanece na vertical enquanto a mão balança/ergue).
+    if ((uType === 'mage' || uType === 'necromancer') && parts.weapon && parts.armR && parts.weapon.parent === parts.armR) {
+      parts.weapon.rotation.x -= parts.armR.rotation.x;
+      parts.weapon.rotation.z -= parts.armR.rotation.z;
+    }
   }
 
   // --- F4-03: lançamento de habilidade (braços erguidos, leve inclinação para trás; em loop) ---
@@ -447,7 +454,8 @@ export class UnitAnimator {
     }
     if (uType === 'archer') {
       this.applyArcherFight(progress, parts);
-    } else if (uType === 'knight') {
+    } else if (uType === 'knight' || uType === 'skeleton') {
+      // Esqueleto: mesmo golpe de espada do Espadachim (sem escudo/espada nomeados; o cutelo `Weapon` está em ArmR)
       this.applyKnightFight(progress, parts);
     } else if (uType === 'villager' || uType === 'peon') {
       this.applyVillagerFight(progress, parts);

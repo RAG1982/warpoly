@@ -115,7 +115,7 @@ Formato: PV · dano (básico + perfurante) · armadura · alcance · visão · v
 | Trabalhador | **Camponês** | **Lacaio** | 85 | 3+2 | 0 | 1,8 | 4,5 | 60/0/0 | 7 | 1 | Centro |
 | Infantaria | **Espadachim** | **Talhador** | 190 | 6+3 | 4 | 2,1 | 4,5 | 70/20/5 | 10 | 1 | Quartel |
 | Atirador | **Arqueiro** → **Patrulheiro** | **Lanceiro-Machado** → **Enfurecido** | 95 | 3+6 | 0 | 14 | 4,5 | 60/40/0 | 9 | 1 (→2) | Quartel |
-| Cavalaria ✅ F4-01 (Templário/Ogro Feiticeiro: F4-04/F4-08) | **Cavaleiro** → **Templário** | **Ogro** → **Ogro Feiticeiro** | 320 | 8+4 | 4 | 2,3 | 5,6 | 120/60/20 | 14 | 2 (→3) | Quartel + Estábulo/Covil |
+| Cavalaria ✅ F4-01 (Templário/Ogro Feiticeiro ✅ F4-04b) | **Cavaleiro** → **Templário** | **Ogro** → **Ogro Feiticeiro** | 320 | 8+4 | 4 | 2,3 | 5,6 | 120/60/20 | 14 | 2 (→3) | Quartel + Estábulo/Covil |
 | Cerco ✅ F4-02 | **Balista** | **Catapulta** | 220 | 80+0 (área r1,5) | 0 | 20 (mín. 4) | 3,0 | 90/200/40 | 18 | 2 | Quartel + Oficina |
 | Sapadores ✅ F4-05 | **Sapadores de Pólvora** | **Incendiários** | 60 | 400 (suicida, área r2,2) | 0 | 1 | 5,0 | 70/25/0 | 10 | 2 | Oficina |
 | Conjurador | **Mago Arcano** | **Necromante das Cinzas** | 60 | 0+9 (mágico) | 0 | 8 | 4,2 | 120/0/0 | 12 | 3 | Torre Arcana / Santuário |
@@ -253,4 +253,4 @@ contras acima. Números de exemplo (seed 42), não normativos — o balanceament
 ### F3-05 (implementado)
 Reparo custa 50% do custo original para 100% de PV; cancelar obra reembolsa 75%; máx. 4 trabalhadores por construção. Ver `docs/02_MECANICAS.md`.
 
-> F4-04 feito: Torre Arcana, Santuário das Cinzas, Mago, Necromante, Esqueleto e 11 magias (ver 02_MECANICAS). Pendente na F4-04b: Templário/Ogro Feiticeiro, Templo/Altar, Cura, Exorcismo, Olho Vigia, Sede de Batalha, Runas, Redemoinho.
+> F4-04 feito: Torre Arcana, Santuário das Cinzas, Mago, Necromante, Esqueleto e 11 magias (ver 02_MECANICAS). F4-04b feito: Templo/Altar, Templário/Ogro Feiticeiro, Vista Sagrada, Cura, Exorcismo, Olho Vigia, Sede de Batalha, Runas Explosivas e Redemoinho.

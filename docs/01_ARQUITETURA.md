@@ -476,3 +476,6 @@ visuais/sonoros nunca são "re-disparados" porque o `EventBus` tem `muted` (aind
 
 ## F4-04: conjuradores
 `gm.corpses` (CorpsePool), `unit.lifetime` (invocações; `unit.summoned` não conta suprimento; entra no checksum), `undead`/`corpseless`/`detector`/`isSiege` em `units.js`, `src/sim/detection.js` (`isDetectedBy`), status `flameshield`/`unholy_armor` (+ `onExpire` em `tickStatuses`), efeitos `line_damage`/`polymorph`/`raise_dead`/`channel` em `src/sim/abilities.js`, `Unit.applyPolymorph`, `UnitAnimator.setGhost`.
+
+## F4-04b: Templo/Altar e perigos de chão
+`gm.hazards` (`HazardPool`, `src/sim/hazards.js`: runas e redemoinhos, só dados, passo em `simStep`, entram no checksum; eventos `HAZARD_SPAWNED/REMOVED`), `src/render/HazardView.js` (apresentação, pool de malhas; runas só para dono/aliados), `FogOfWar.revealArea(x,z,r,ttl)` (revelações temporárias, pool de 16), efeitos `reveal`/`exorcism`/`runes`/`whirlwind` e campos `autocastDefault`/`autocastBelow`/`repeat` em `abilities.js`, `unit.layer`/`unit.immune`, `GameManager.promoteUnit` configura mana/habilidades da classe avançada, `role:'temple'` em `RESEARCH.building`.

@@ -33,6 +33,7 @@ import siege_common as S  # noqa: E402
 from siege_common import chain, rock, lash  # noqa: E402
 from build_ogre_den import PALETTE as OD  # noqa: E402
 
+SCALE = 0.85   # escala final (compatível com collisionRadius 1.3 e com os procedurais)
 TEAM_DEFAULT = '#b81d24'
 WHEEL_R = 0.72
 AXLE = (0.0, WHEEL_R, 0.0)
@@ -213,6 +214,7 @@ def main():
     wl = build_wheel(mats, root, 'WheelL', -1)
     wr = build_wheel(mats, root, 'WheelR', 1)
     parts = [body, arm, wl, wr]
+    C.scale_parts(parts, SCALE)
     bpy.context.view_layer.update()
     C.uv_atlas(parts, weights={'Body': 1.0, 'SiegeArm': 1.1, 'WheelL': 0.8, 'WheelR': 0.8}, margin=0.006)
     img = C.bake_atlas(parts, 'catapult_atlas', 512, samples=int(os.environ.get('BAKE_SAMPLES', 32)), margin=4)

@@ -169,6 +169,32 @@ const MODEL_CATALOG = [
     notes: 'Rig plana: Horse (corpo + arreios + pernas do cavaleiro, estático), HorseLegFL/FR/BL/BR (pivô no ombro/quadril; galope em diagonais pelo UnitAnimator), Torso, Head, ArmL, ArmR, Sword (mesmos nós do Espadachim). Sem escudo, para manter a silhueta limpa. 14 draw calls, ~8 mil triângulos, atlas 512². Rosto do cavaleiro só na face frontal (+Z); olhos do cavalo nas laterais (anatomia equina).'
   },
   {
+    id: 'ballista_glb',
+    name: 'Balista (Blender)',
+    category: 'units',
+    faction: 'human',
+    type: 'ballista',
+    icon: '🏹',
+    glb: 'ballista',
+    sourceFile: 'tools/blender/build_ballista.py',
+    create: createGlb('ballista'),
+    description: 'Balista humana gerada pelo pipeline Blender (public/models/ballista.glb): besta gigante de braços laminados (madeira + tendão) com pontas de ferro e corda de tendão em V, virote enorme com penas em cor de time, carreta de madeira e ferro com 2 rodas raiadas de aro de ferro e perna de apoio traseira, trilho central, cabrestante com manivelas e catraca, escudo frontal com faixas azuis e brasão dourado e estandarte. Sem tripulação.',
+    notes: 'Rig plana: Body, SiegeArm (pivô (0, 1.84, 0); recua em −Z ao disparar), WheelL/WheelR (pivô no eixo; giram em X ao andar). 6 draw calls, ~5 mil triângulos, atlas 512². Cor de time: penas do virote, faixas dos braços, escudo e estandarte.'
+  },
+  {
+    id: 'catapult_glb',
+    name: 'Catapulta (Blender)',
+    category: 'units',
+    faction: 'orc',
+    type: 'catapult',
+    icon: '🪨',
+    glb: 'catapult',
+    sourceFile: 'tools/blender/build_catapult.py',
+    create: createGlb('catapult'),
+    description: 'Catapulta orc gerada pelo pipeline Blender (public/models/catapult.glb): engenho de toras grosseiras amarradas com corda e ferro sobre 2 rodas maciças de pranchas com espigões, cavaletes em A com peles esticadas, correntes, ossos e crânios, espigões de ferro na frente, cabrestante de ossos, braço longo com concha carregada (rocha e crânios) e contrapeso em gaiola de toras cheia de pedras. Faixas vermelhas em cor de time. Sem operador.',
+    notes: 'Rig plana: Body, SiegeArm (pivô (0, 2.25, −0.1); gira em X: + arma, − lança; repouso com a ponta 14° acima, já na geometria), WheelL/WheelR (giram em X ao andar). 6 draw calls, ~6,5 mil triângulos, atlas 512².'
+  },
+  {
     id: 'archer',
     name: 'Arqueiro (Archer)',
     category: 'units',
@@ -471,6 +497,32 @@ const MODEL_CATALOG = [
     create: createOrcWorkshop,
     description: 'Oficina orc (F4-02): paliçada de troncos sobre basalto, portão com caveira, telhado de peles, engrenagem de ferro, catapulta em montagem e pilha de pedras.',
     notes: 'Modelo procedural provisório sem texturas de canvas (materiais compartilhados).'
+  },
+  {
+    id: 'workshop_glb',
+    name: 'Oficina de Engenharia (Blender)',
+    category: 'buildings',
+    faction: 'human',
+    type: 'building',
+    icon: '⚙️',
+    glb: 'workshop',
+    sourceFile: 'tools/blender/build_workshop.py',
+    create: createGlb('workshop'),
+    description: 'Oficina humana gerada pelo pipeline Blender (public/models/workshop.glb): galpão de enxaimel sobre pé de pedra com telhado azul de duas águas e cumeeira dourada com cata-vento de engrenagem, chaminé alta de tijolos, engrenagens de ferro e ouro na fachada, portão em arco aberto com forja acesa ao fundo, projetos de máquinas pendurados, guindaste de madeira com caixote, bancada com bigorna, balista inacabada, tábuas, barris, roda sobressalente, lanternas e mastros com bandeirolas.',
+    notes: '2 draw calls (Static_Mesh + Anim_Banners em cor de time), ~7,3 mil triângulos, atlas 1024². Pegada ~7,3 x 7,3 (raio de colisão 3,6), altura ~6,8 com a chaminé. Sockets: Socket_UnitSpawn, Socket_Rally.'
+  },
+  {
+    id: 'orc_workshop_glb',
+    name: 'Oficina dos Engenhoqueiros (Blender)',
+    category: 'buildings',
+    faction: 'orc',
+    type: 'building',
+    icon: '⚙️',
+    glb: 'orc_workshop',
+    sourceFile: 'tools/blender/build_orc_workshop.py',
+    create: createGlb('orc_workshop'),
+    description: 'Oficina orc gerada pelo pipeline Blender (public/models/orc_workshop.glb): galpão bruto de meia-água com toras, chapas remendadas de ferro enferrujado, peles e costelas de osso, baia esquerda aberta com forja ardente, fole e bigorna, chaminé torta de ferro com chama, baia direita de chapas rebitadas com portão de ferro, engrenagens toscas (inclusive uma gigante sobre o telhado), catapulta inacabada, sucata, barris, pedras, ossos, crânios, espigões e estandartes rasgados.',
+    notes: '2 draw calls (Static_Mesh + Anim_Banners em cor de time), ~9 mil triângulos, atlas 1024². Pegada ~7,3 x 7,3 (raio de colisão 3,6), altura ~7 com a chaminé. Sockets: Socket_UnitSpawn, Socket_Rally.'
   },
   {
     id: 'stable_glb',

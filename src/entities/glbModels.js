@@ -21,7 +21,12 @@ export const GLB_MODELS = {
   castle: { url: `${BASE}models/castle.glb`, root: 'Castle', type: null },
   cavalier: { url: `${BASE}models/cavalier.glb`, root: 'Cavalier', type: 'cavalier' },
   stable: { url: `${BASE}models/stable.glb`, root: 'Stable', type: null },
-  ogre_den: { url: `${BASE}models/ogre_den.glb`, root: 'OgreDen', type: null }
+  ogre_den: { url: `${BASE}models/ogre_den.glb`, root: 'OgreDen', type: null },
+  // NEW-36: cerco e oficinas (Blender)
+  ballista: { url: `${BASE}models/ballista.glb`, root: 'Ballista', type: 'ballista' },
+  catapult: { url: `${BASE}models/catapult.glb`, root: 'Catapult', type: 'catapult' },
+  workshop: { url: `${BASE}models/workshop.glb`, root: 'Workshop', type: null },
+  orc_workshop: { url: `${BASE}models/orc_workshop.glb`, root: 'OrcWorkshop', type: null }
 };
 
 export const glbEnabled = (() => {

@@ -378,11 +378,11 @@ export class ModelFactory {
   }
 
   static createWorkshop() {
-    return this.getOrCreateModel('workshop', createWorkshop);
+    return this._glbOr('workshop', () => this.getOrCreateModel('workshop', createWorkshop));
   }
 
   static createOrcWorkshop() {
-    return this.getOrCreateModel('orc_workshop', createOrcWorkshop);
+    return this._glbOr('orc_workshop', () => this.getOrCreateModel('orc_workshop', createOrcWorkshop));
   }
 
   static createOgreDen() {
@@ -471,12 +471,12 @@ export class ModelFactory {
 
   /** F4-02: balista (cerco humano, procedural). */
   static createBallista() {
-    return this.getOrCreateModel('ballista', createBallista, 'ballista');
+    return this._glbOr('ballista', () => this.getOrCreateModel('ballista', createBallista, 'ballista'));
   }
 
   /** F4-02: catapulta (cerco orc, procedural). */
   static createCatapult() {
-    return this.getOrCreateModel('catapult', createCatapult, 'catapult');
+    return this._glbOr('catapult', () => this.getOrCreateModel('catapult', createCatapult, 'catapult'));
   }
 
   static createArcher() {

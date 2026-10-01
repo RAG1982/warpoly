@@ -788,6 +788,14 @@ def finalize_materials(objs, img, team_default='#b81d24', roughness=0.78, out_pn
     return atlas, team
 
 
+def scale_parts(objs, k):
+    """Escala uniformemente (em torno da origem da raiz) malhas e pivôs das partes já construídas."""
+    for o in objs:
+        if o.type == 'MESH':
+            o.data.transform(Matrix.Scale(k, 4))
+        o.location = o.location * k
+
+
 def join_objects(objs, name):
     select_only(objs, active=objs[0])
     bpy.ops.object.join()

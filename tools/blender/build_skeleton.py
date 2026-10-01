@@ -155,7 +155,6 @@ def build_head(mats, root):
            mat_fn=lambda c, n: 'rust' if (c[0] < -0.03 or c[2] < -0.05) else None)
     for sx in (-1, 1):   # bochechas
         mb.add(prim_box(0.05, 0.2, 0.14, taper=(0.8, 0.9)), 'iron', M((sx * 0.185, 0.05, 0.06), (0, sx * -8, sx * 10)), bevel=0.01)
-    mb.add(prim_box(0.34, 0.05, 0.06), 'rust', M((0, 0.22, 0.2), (-8, 0, 0)), bevel=0.01)
     mb.add(prim_cyl(0.215, 0.21, 0.05, 12), 'iron', M((0, 0.15, 0.0)), smooth=35)
     mb.add(prim_box(0.045, 0.2, 0.04), 'rust', M((0, 0.1, 0.19), (6, 0, 0)), bevel=0.01)
     mb.add(prim_box(0.04, 0.08, 0.34, taper=(0.4, 0.9)), 'iron', M((0, 0.35, 0.0)), bevel=0.01)

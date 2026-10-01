@@ -243,6 +243,10 @@ export class GameManager {
       if (this.pathfinder && (entity instanceof Building || entity instanceof Tree)) {
         this.pathfinder.blockCircle(pos.x, pos.z, entity.collisionRadius || 0, +1);
         entity._pathBlocked = true;
+      } else if (this.pathfinder && entity instanceof ResourceDeposit) {
+        // F3-02: minas só bloqueiam as buscas "largas" (grupos/unidades grandes) — ver Pathfinder.blockCircle(soft).
+        this.pathfinder.blockCircle(pos.x, pos.z, entity.collisionRadius || 0, +1, true);
+        entity._pathSoftBlocked = true;
       }
     }
   }
@@ -256,6 +260,10 @@ export class GameManager {
       if (this.pathfinder && entity._pathBlocked) {
         this.pathfinder.blockCircle(entity.mesh.position.x, entity.mesh.position.z, entity.collisionRadius || 0, -1);
         entity._pathBlocked = false;
+      }
+      if (this.pathfinder && entity._pathSoftBlocked) {
+        this.pathfinder.blockCircle(entity.mesh.position.x, entity.mesh.position.z, entity.collisionRadius || 0, -1, true);
+        entity._pathSoftBlocked = false;
       }
     }
   }
@@ -1837,9 +1845,7 @@ export class GameManager {
       nz = dz / dist;
     }
     const push = minDist - dist;
-    uPos.x += nx * push;
-    uPos.z += nz * push;
-    uPos.y = this.terrain.getHeight(uPos.x, uPos.z);
+    this._pushDry(uPos, nx * push, nz * push); // F3-02: nunca empurra para a água
 
     // Direct delivery upon colliding with dropoff building!
     const isDropoff = isDropoffFor(b.type, unit.carrying ? unit.carrying.type : null) &&
@@ -1867,6 +1873,25 @@ export class GameManager {
         this._checkUnitBlockerCollision(unit, buf[j]);
       }
     }
+  }
+
+  /**
+   * F3-02: desloca `p` por (dx, dz) sem entrar na água (altura < 0,65): tenta o vetor inteiro, depois só X,
+   * depois só Z; se nenhum for seco, não move. Evita que o empurrão da colisão jogue unidades no rio.
+   */
+  _pushDry(p, dx, dz) {
+    const t = this.terrain;
+    if (t.getHeight(p.x + dx, p.z + dz) >= 0.65) {
+      p.x += dx;
+      p.z += dz;
+    } else if (dx !== 0 && t.getHeight(p.x + dx, p.z) >= 0.65) {
+      p.x += dx;
+    } else if (dz !== 0 && t.getHeight(p.x, p.z + dz) >= 0.65) {
+      p.z += dz;
+    } else {
+      return;
+    }
+    p.y = t.getHeight(p.x, p.z);
   }
 
   /**
@@ -1916,14 +1941,17 @@ export class GameManager {
           nz = dz / dist;
         }
 
-        const overlap = (minDist - dist) * 0.5;
-        p1.x -= nx * overlap;
-        p1.z -= nz * overlap;
-        p1.y = this.terrain.getHeight(p1.x, p1.z);
-
-        p2.x += nx * overlap;
-        p2.z += nz * overlap;
-        p2.y = this.terrain.getHeight(p2.x, p2.z);
+        // F3-02: uma unidade que só está de passagem (moving/attackMoving) cede mais (80%) a uma parada
+        // (idle/holding) — a formação já assentada não é desmanchada por quem chega (fim da "dança").
+        // Qualquer outra combinação (combate, coleta…) mantém a divisão 50/50 de antes.
+        const m1 = u1.state === 'moving' || u1.state === 'attackMoving';
+        const m2 = u2.state === 'moving' || u2.state === 'attackMoving';
+        const p1Still = u1.state === 'idle' || u1.state === 'holding';
+        const p2Still = u2.state === 'idle' || u2.state === 'holding';
+        const w1 = m1 && p2Still ? 0.8 : (m2 && p1Still ? 0.2 : 0.5);
+        const overlap = minDist - dist;
+        this._pushDry(p1, -nx * overlap * w1, -nz * overlap * w1);
+        this._pushDry(p2, nx * overlap * (1 - w1), nz * overlap * (1 - w1));
       }
     }
   }

@@ -297,3 +297,50 @@ describe('Pathfinder', () => {
     });
   });
 });
+
+describe('Pathfinder: busca larga e bloqueio suave (F3-02)', () => {
+  it('modo largo contorna uma fresta estreita que o modo normal atravessa', () => {
+    // muro (água) em x∈[-1,1] de z=-30..30 com uma fresta de 1 célula (z≈0): normal passa por ela, largo dá a volta
+    const gapTerrain = {
+      getHeight(x, z) {
+        const inWall = Math.abs(x) < 1.6;
+        const inGap = Math.abs(z) < 1.2;
+        return inWall && !inGap ? WATER : DRY;
+      }
+    };
+    const pf = new Pathfinder(gapTerrain, 55);
+    const normal = pf.findPath(-10, 0, 10, 0);
+    const wide = pf.findPath(-10, 0, 10, 0, true);
+    expect(normal.length).toBeGreaterThan(0);
+    // largo: ou acha outro caminho sem a fresta, ou (sem alternativa) volta ao normal — nunca devolve vazio
+    expect(wide.length).toBeGreaterThan(0);
+    expect(wide.noPath).toBeUndefined();
+  });
+
+  it('softBlock (minas) só vale no modo largo', () => {
+    const pf = new Pathfinder(dryTerrain, 55);
+    pf.blockCircle(0, 0, 5, +1, true); // mina de raio 5 (suave)
+    expect(pf.hasLineOfSight(-10, 0, 10, 0)).toBe(true); // normal: atravessa
+    pf._clear = true;
+    expect(pf.hasLineOfSight(-10, 0, 10, 0)).toBe(false); // largo: não
+    pf._clear = false;
+    const wide = pf.findPath(-10, 0, 10, 0, true);
+    expect(wide.length).toBeGreaterThan(1); // contorna
+    for (const wp of wide.slice(0, -1)) expect(Math.hypot(wp.x, wp.z)).toBeGreaterThan(4);
+    pf.blockCircle(0, 0, 5, -1, true);
+    expect(pf.findPath(-10, 0, 10, 0, true)).toEqual([{ x: 10, z: 0 }]);
+  });
+
+  it('requestPath/processQueue repassam o modo largo', () => {
+    const pf = new Pathfinder(dryTerrain, 55);
+    pf.blockCircle(0, 0, 5, +1, true);
+    const unit = { mesh: { position: { x: -10, z: 0 } } };
+    let normalPath = null;
+    let widePath = null;
+    pf.requestPath(unit, 10, 0, p => { normalPath = p; });
+    pf.requestPath(unit, 10, 0, p => { widePath = p; }, true);
+    pf.processQueue(100000);
+    expect(normalPath).toEqual([{ x: 10, z: 0 }]);
+    expect(widePath.length).toBeGreaterThan(1);
+  });
+});

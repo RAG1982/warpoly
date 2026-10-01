@@ -114,6 +114,12 @@ export class Pathfinder {
     // F2-03: nós expandidos pela última `_searchAStar` (0 nos caminhos rápidos: LOS direto,
     // mesma célula, cache) — usado por `processQueue` para um orçamento por nós, não por relógio.
     this._lastNodesExpanded = 0;
+    // F3-02: modo "largo" (unidades grandes / grupos): célula só vale se as 4 vizinhas também forem caminháveis
+    // (folga de 1 célula) — evita rotas por frestas de ~1 u entre construções e margens de lago.
+    this._clear = false;
+    this._startIdx = -1;
+    /** F3-02: bloqueio "suave" (minas): só vale nas buscas largas — trabalhadores continuam chegando à mina. */
+    this.softBlock = new Uint16Array(this.numCells);
 
     this.buildGrid();
   }
@@ -192,6 +198,17 @@ export class Pathfinder {
     return this.staticGrid[i] === 1 && this.dynamicBlock[i] === 0;
   }
 
+  /**
+   * F3-02: caminhável para a busca atual — no modo largo (`_clear`) exige também as 4 vizinhas
+   * caminháveis (exceto na célula de origem, para a unidade poder sair de onde está).
+   */
+  _free(c, r) {
+    if (!this.isWalkable(c, r)) return false;
+    if (!this._clear || r * this.cols + c === this._startIdx) return true;
+    if (this.softBlock[r * this.cols + c] > 0) return false;
+    return this.isWalkable(c - 1, r) && this.isWalkable(c + 1, r) && this.isWalkable(c, r - 1) && this.isWalkable(c, r + 1);
+  }
+
   /** Caminhável no ponto do mundo (x, z): nem água nem bloqueio dinâmico. */
   isWalkableWorld(x, z) {
     if (this.isWater(x, z)) return false;
@@ -208,8 +225,10 @@ export class Pathfinder {
    * @param {number} z
    * @param {number} radius
    * @param {1|-1} delta
+   * @param {boolean} [soft]  F3-02: marca só `softBlock` (vale apenas nas buscas largas)
    */
-  blockCircle(x, z, radius, delta) {
+  blockCircle(x, z, radius, delta, soft = false) {
+    const layer = soft ? this.softBlock : this.dynamicBlock;
     const effRadius = radius - 0.3;
     if (effRadius <= 0) return;
     const center = this.toGrid(x, z);
@@ -226,8 +245,8 @@ export class Pathfinder {
         const dSq = (w.x - x) ** 2 + (w.z - z) ** 2;
         if (dSq > rSq) continue;
         const i = nr * this.cols + nc;
-        const next = this.dynamicBlock[i] + delta;
-        this.dynamicBlock[i] = next < 0 ? 0 : next;
+        const next = layer[i] + delta;
+        layer[i] = next < 0 ? 0 : next;
       }
     }
     this.version++;
@@ -293,7 +312,7 @@ export class Pathfinder {
 
       // 2. Grid cell check (camada estática + dinâmica)
       const { c, r } = this.toGrid(x, z);
-      if (!this.isWalkable(c, r)) return false;
+      if (!this._free(c, r)) return false;
     }
 
     return true;
@@ -311,7 +330,7 @@ export class Pathfinder {
    * alcançável mais próximo (ou `[]`) com a propriedade `noPath = true` no array.
    * @returns {Array<{ x: number, z: number }> & { noPath?: boolean }}
    */
-  findPath(startX, startZ, destX, destZ) {
+  findPath(startX, startZ, destX, destZ, wide = false) {
     const start = this.toGrid(startX, startZ);
     const startIndex = start.r * this.cols + start.c;
 
@@ -319,6 +338,24 @@ export class Pathfinder {
     const startBlockCount = this.dynamicBlock[startIndex];
     if (startBlockCount > 0) this.dynamicBlock[startIndex] = 0;
     try {
+      if (wide) {
+        // F3-02: tenta primeiro com folga; sem caminho (ou vazio) volta ao modo normal.
+        this._clear = true;
+        this._startIdx = startIndex;
+        let nodes = 0;
+        let path;
+        try {
+          path = this._findPath(startX, startZ, destX, destZ, start, startIndex);
+          nodes = this._lastNodesExpanded;
+        } finally {
+          this._clear = false;
+          this._startIdx = -1;
+        }
+        if (path.length > 0 && !path.noPath) return path;
+        const normal = this._findPath(startX, startZ, destX, destZ, start, startIndex);
+        this._lastNodesExpanded += nodes;
+        return normal;
+      }
       return this._findPath(startX, startZ, destX, destZ, start, startIndex);
     } finally {
       if (startBlockCount > 0) this.dynamicBlock[startIndex] = startBlockCount;
@@ -352,7 +389,7 @@ export class Pathfinder {
       return [{ x: destX, z: destZ }];
     }
 
-    const cacheKey = `${startIndex}|${destIndex}|${this.version}`;
+    const cacheKey = `${startIndex}|${destIndex}|${this.version}${this._clear ? 'w' : ''}`;
     const cached = this._pathCache.get(cacheKey);
     if (cached) {
       // Reordena para o fim (LRU) e devolve uma cópia com o destino exato pedido.
@@ -442,11 +479,11 @@ export class Pathfinder {
 
         if (nc < 0 || nc >= this.cols || nr < 0 || nr >= this.rows) continue;
         const neighbor = nr * this.cols + nc;
-        if (this.closedSet[neighbor] || !this.isWalkable(nc, nr)) continue;
+        if (this.closedSet[neighbor] || !this._free(nc, nr)) continue;
 
         // Diagonal corner-cutting prevention across water/obstacle boundaries
         if (d >= 4) {
-          if (!this.isWalkable(curC + dirs[d][0], curR) || !this.isWalkable(curC, curR + dirs[d][1])) {
+          if (!this._free(curC + dirs[d][0], curR) || !this._free(curC, curR + dirs[d][1])) {
             continue;
           }
         }
@@ -546,9 +583,10 @@ export class Pathfinder {
    * @param {number} destX
    * @param {number} destZ
    * @param {(path: Array<{ x: number, z: number }>) => void} callback
+   * @param {boolean} [wide]  F3-02: busca com folga (unidade grande/grupo) — ver `findPath`
    */
-  requestPath(unit, destX, destZ, callback) {
-    this._queue.push({ unit, destX, destZ, callback });
+  requestPath(unit, destX, destZ, callback, wide = false) {
+    this._queue.push({ unit, destX, destZ, callback, wide });
   }
 
   /**
@@ -566,7 +604,7 @@ export class Pathfinder {
       const req = this._queue.shift();
       if (!req.unit || req.unit.isDead || req.unit.canRemove) continue;
       const pos = req.unit.mesh.position;
-      const path = this.findPath(pos.x, pos.z, req.destX, req.destZ);
+      const path = this.findPath(pos.x, pos.z, req.destX, req.destZ, req.wide);
       nodesUsed += this._lastNodesExpanded;
       req.callback(path);
     }

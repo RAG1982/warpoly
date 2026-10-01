@@ -9,6 +9,7 @@
 import { CMD } from './commands.js';
 import { isDetectedBy } from './detection.js';
 import { EVT } from './events.js';
+import { planFormation, groupSpeed } from './formation.js';
 import { resolveAbility, needsEntityTarget, targetProblem, canCast, pickCaster } from './abilities.js';
 
 /** `console.warn` (sem gate de build — ver `_COMUM.md`: mais simples, sem custo em produção). */
@@ -59,8 +60,13 @@ function dispatchOrder(unit, order, queued) {
   }
 }
 
-/** Formação em grade (mesmo cálculo do antigo `GameManager.issueOrder`), uma unidade por vez. */
-function moveInFormation(gm, units, x, z, queued) {
+/**
+ * F3-02: formação de grupo — lugares em linhas voltadas para a marcha (`planFormation`, ordem relativa
+ * preservada) e velocidade do grupo = a da unidade mais lenta (`groupSpeed`). Serve a MOVE e ATTACK_MOVE;
+ * `type` é o tipo da ordem de cada unidade. Um lugar fora do caminhável vai para o ponto andável mais
+ * próximo (ou para o centro, se não houver).
+ */
+function moveInFormation(gm, units, x, z, queued, type = CMD.MOVE) {
   let cx = x;
   let cz = z;
   if (gm.pathfinder && gm.pathfinder.isWater(cx, cz)) {
@@ -70,21 +76,36 @@ function moveInFormation(gm, units, x, z, queued) {
   }
 
   const count = units.length;
-  const cols = Math.ceil(Math.sqrt(count));
-  const spacing = 1.6;
+  const members = new Array(count);
+  for (let i = 0; i < count; i++) {
+    const u = units[i];
+    const pos = u.mesh ? u.mesh.position : { x: 0, z: 0 }; // (fakes de teste podem não ter malha)
+    members[i] = {
+      id: u.id,
+      x: pos.x,
+      z: pos.z,
+      radius: u.collisionRadius || 0.6,
+      speed: (u.speed || 0) * (u.mods ? u.mods.speedMul : 1)
+    };
+  }
+  const slots = planFormation(members, { x: cx, z: cz });
+  const speed = count > 1 ? groupSpeed(members) : 0;
 
   for (let idx = 0; idx < count; idx++) {
-    const row = Math.floor(idx / cols);
-    const col = idx % cols;
-    const offsetX = (col - (cols - 1) / 2) * spacing;
-    const offsetZ = (row - (cols - 1) / 2) * spacing;
-    let destX = cx + offsetX;
-    let destZ = cz + offsetZ;
-    if (gm.pathfinder && gm.pathfinder.isWater(destX, destZ)) {
-      destX = cx;
-      destZ = cz;
+    const slot = slots.get(units[idx].id);
+    let destX = slot.x;
+    let destZ = slot.z;
+    if (gm.pathfinder && !gm.pathfinder.isWalkableWorld(destX, destZ)) {
+      const near = gm.pathfinder.findNearestWalkable(destX, destZ);
+      if (gm.pathfinder.isWalkableWorld(near.x, near.z)) {
+        destX = near.x;
+        destZ = near.z;
+      } else {
+        destX = cx;
+        destZ = cz;
+      }
     }
-    dispatchOrder(units[idx], { type: CMD.MOVE, x: destX, z: destZ }, queued);
+    dispatchOrder(units[idx], { type, x: destX, z: destZ, groupSpeed: speed, groupSize: count }, queued);
   }
 }
 
@@ -142,9 +163,7 @@ export const CommandExecutor = {
 
       case CMD.ATTACK_MOVE: {
         const units = resolveOwnedUnits(gm, cmd);
-        for (let i = 0; i < units.length; i++) {
-          dispatchOrder(units[i], { type: CMD.ATTACK_MOVE, x: cmd.x, z: cmd.z }, !!cmd.queued);
-        }
+        if (units.length > 0) moveInFormation(gm, units, cmd.x, cmd.z, !!cmd.queued, CMD.ATTACK_MOVE); // F3-02
         break;
       }
 

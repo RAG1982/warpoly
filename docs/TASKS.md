@@ -554,8 +554,9 @@ _(agentes adicionam aqui: `NEW-<n> · título · lane · motivo`)_
 - NEW-35 · Ataque no chão do cerco (clique direito no chão) · GAME/UI
 - ✅ NEW-37 · `DONE` (Espadachim 8/10, Cavaleiro 7,5/10) Refazer Espadachim e Cavaleiro (feedback do dono 2026-09-30: demasiado simples, sem força, elmo mais fechado, mais encorpado/rebuscado, conforme soldado.png) · ART
 - ✅ NEW-36 · `DONE` (balista/oficina humana boas; oficina orc a mais fraca: telhado domina; concha da catapulta lembra maça) Arte Blender: Balista, Catapulta, Oficinas (hoje procedurais) · ART
+- NEW-40 · Arte Blender: Templo da Luz, Altar das Tempestades, Olho Vigia; Templário e Ogro Feiticeiro com tinta/emblema próprio · ART
 - NEW-38 · Verificar manualmente as 6 magias do Mago/Necromante no jogo, capturas em tools/ui-captures/spells/, bench combate100; ícones de magia são emojis provisórios · QA/UI
-- NEW-39 · `DOING(sonnet, 2026-10-01)` Arte Blender: Mago Arcano, Necromante, Esqueleto, Torre Arcana, Santuário das Cinzas, Sapadores/Incendiários (hoje procedurais) · ART
+- ✅ NEW-39 · `DONE` (Mago, Necromante, Torre Arcana fortes; pendências no UnitAnimator: esqueleto sem ramo `fight` (sugestão: mapear para applyKnightFight), Weapon do Mago/Necromante fixo na raiz) Arte Blender: Mago Arcano, Necromante, Esqueleto, Torre Arcana, Santuário das Cinzas, Sapadores/Incendiários (hoje procedurais) · ART
 - NEW-1 · Avaliar uso real de `GLTFBuildingLoader` em `GreatHall.js` e remover ou adotar no pipeline Blender (F7-00) · ART · ficou fora do escopo da F0-03
 
 ## Notas de integração

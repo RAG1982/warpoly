@@ -1,12 +1,11 @@
 import * as THREE from 'three';
 import { ModelFactory } from './ModelFactory.js';
-import { Arrow } from './Arrow.js';
-import { BallisticProjectile, ballisticFlightTime } from './BallisticProjectile.js';
-import { applySplashDamage } from './splash.js';
+import { applySplashDamage } from '../sim/splash.js';
 import { Building } from './Building.js';
 import { UnitAnimator } from '../animation/UnitAnimator.js';
 import { getUnitDef, getUnitStats as getUnitStatsFromData, CARRY, MINE_ENTER_TIME, gatherMultiplier } from '../data/index.js';
 import { computeDamage } from '../sim/combat.js';
+import { Projectile, ballisticFlightTime } from '../sim/projectiles.js';
 import { legacyOwnerId } from '../sim/EntityIds.js';
 import { SIM_DT, lerpAngle } from '../sim/constants.js';
 import { CMD } from '../sim/commands.js';
@@ -2075,10 +2074,10 @@ export class Unit {
         _impactPoint.z = tgt.mesh.position.z + (tgt.velZ || 0) * flight;
         if (gmEvents) gmEvents.emit(EVT.PROJECTILE_FIRED, { kind, from: posOf(startPos), ownerId: this.ownerId });
         const owner = this;
-        const projectile = new BallisticProjectile(this.scene, startPos, _impactPoint, kind, (pos) => {
+        const projectile = new Projectile({ kind, from: startPos, impact: _impactPoint, onHit: (pos) => {
           if (gm && gm.unitGrid && gm.blockerGrid) applySplashDamage(gm, owner, owner.getEffDamage(), pos, owner.splashRadius, allUnits);
           if (gmEvents) gmEvents.emit(EVT.PROJECTILE_HIT, { kind, pos: posOf(pos), ownerId: owner.ownerId, splashRadius: owner.splashRadius });
-        });
+        } });
         arrows.push(projectile);
         if (this.gameManager && this.gameManager.registerEntity) this.gameManager.registerEntity(projectile, this.ownerId);
       }
@@ -2092,11 +2091,11 @@ export class Unit {
         if (gmEvents) gmEvents.emit(EVT.PROJECTILE_FIRED, { kind: projType, from: posOf(startPos), ownerId: this.ownerId });
         // F3-03: o dano final (computeDamage, 1 valor de RNG) é calculado no impacto — a
         // armadura/tipo do alvo naquele instante decidem o resultado, não na hora do disparo.
-        const arrow = new Arrow(this.scene, startPos, this.attackTarget, this.getEffDamage(), (target, dmgObj, hitPos) => {
+        const arrow = new Projectile({ kind: projType, from: startPos, target: this.attackTarget, damage: this.getEffDamage(), onHit: (target, dmgObj, hitPos) => {
           const dmg = computeDamage(dmgObj, target, gm.combatRng);
           target.takeDamage(dmg, this, allUnits);
           if (gmEvents) gmEvents.emit(EVT.PROJECTILE_HIT, { kind: projType, pos: posOf(hitPos), ownerId: this.ownerId });
-        }, projType);
+        } });
         arrows.push(arrow);
         if (this.gameManager && this.gameManager.registerEntity) this.gameManager.registerEntity(arrow, this.ownerId);
       }

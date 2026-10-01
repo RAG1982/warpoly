@@ -1,4 +1,3 @@
-import * as THREE from 'three';
 import { getBuildingDef, getUnitDef } from '../data/index.js';
 import { missingUnitRequirements } from '../sim/requirements.js';
 import { CMD } from '../sim/commands.js';
@@ -27,11 +26,11 @@ export class AIMilitaryManager {
 
     // Staging rally point outside base gates
     const baseCenter = director.baseCenter;
-    this.assemblyRallyPoint = new THREE.Vector3(
-      baseCenter.x + (baseCenter.x < 0 ? 12 : -12),
-      0,
-      baseCenter.y + (baseCenter.y < 0 ? 12 : -12)
-    );
+    this.assemblyRallyPoint = {
+      x: baseCenter.x + (baseCenter.x < 0 ? 12 : -12),
+      y: 0,
+      z: baseCenter.y + (baseCenter.y < 0 ? 12 : -12)
+    };
 
     // Dynamic expedition threshold (starts with 4 troops, cycles 4 -> 5 -> 6 -> 4...)
     this.attackThreshold = 4;

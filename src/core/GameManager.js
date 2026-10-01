@@ -113,6 +113,7 @@ export class GameManager {
     this.buildings = [];
     this.trees = [];
     this.resourceDeposits = [];
+    /** Projéteis em voo: `Projectile`s de `src/sim/projectiles.js` (nome legado `arrows`); malhas em `render/ProjectileViews`. */
     this.arrows = [];
     /** F3-10: critters decorativos (Critter, fora de `allUnits`/grades) e acampamentos neutros. */
     this.critters = [];
@@ -546,7 +547,7 @@ export class GameManager {
     });
 
     if (player.isAI) {
-      const director = new AIDirector(this, player.id, new THREE.Vector2(pos.x, pos.z));
+      const director = new AIDirector(this, player.id, { x: pos.x, y: pos.z });
       this.aiDirectors.push(director);
       if (!this.aiDirector) this.aiDirector = director;
     }
@@ -1486,13 +1487,6 @@ export class GameManager {
       u.mesh.position.copy(u._simPos);
       u.mesh.rotation.y = u._simRotY;
     }
-    const arrows = this.arrows;
-    for (let i = 0; i < arrows.length; i++) {
-      const a = arrows[i];
-      if (!a._simPos) continue;
-      a.mesh.position.copy(a._simPos);
-      a.mesh.quaternion.copy(a._simQuat);
-    }
   }
 
   /** Pose atual (antes de rodar um passo de simulação) → `_prevPos`/`_prevRotY`. */
@@ -1504,13 +1498,6 @@ export class GameManager {
       u._prevPos.copy(u.mesh.position);
       u._prevRotY = u.mesh.rotation.y;
     }
-    const arrows = this.arrows;
-    for (let i = 0; i < arrows.length; i++) {
-      const a = arrows[i];
-      if (!a._prevPos) continue;
-      a._prevPos.copy(a.mesh.position);
-      a._prevQuat.copy(a.mesh.quaternion);
-    }
   }
 
   /** Pose atual (depois de rodar um passo de simulação) → `_simPos`/`_simRotY`. */
@@ -1521,13 +1508,6 @@ export class GameManager {
       if (!u._simPos) continue;
       u._simPos.copy(u.mesh.position);
       u._simRotY = u.mesh.rotation.y;
-    }
-    const arrows = this.arrows;
-    for (let i = 0; i < arrows.length; i++) {
-      const a = arrows[i];
-      if (!a._simPos) continue;
-      a._simPos.copy(a.mesh.position);
-      a._simQuat.copy(a.mesh.quaternion);
     }
   }
 
@@ -1716,11 +1696,8 @@ export class GameManager {
   renderUpdate(frameDelta, alpha) {
     if (this.isPaused || this.isGameOver) return;
 
-    // Projéteis: pose interpolada (posição + quaternion completo — trajetória balística).
-    const arrows = this.arrows;
-    for (let i = 0; i < arrows.length; i++) {
-      arrows[i].renderUpdate(alpha);
-    }
+    // Projéteis (F2-08): são dados de simulação (`src/sim/projectiles.js`); a malha e a interpolação
+    // `prev → pos` ficam em `src/render/ProjectileViews.js` (chamado pela MatchSession).
 
     if (this.hazardView) this.hazardView.update(frameDelta); // F4-04b
 
@@ -1949,7 +1926,6 @@ export class GameManager {
     this.buildings.forEach(b => (b.dispose ? b.dispose() : this.scene.remove(b.mesh)));
     this.trees.forEach(t => (t.dispose ? t.dispose() : this.scene.remove(t.mesh)));
     this.resourceDeposits.forEach(r => this.scene.remove(r.mesh));
-    this.arrows.forEach(a => (a.dispose ? a.dispose() : this.scene.remove(a.mesh)));
     this.critters.forEach(c => c.dispose());
     this.critters = [];
     this.treeManager?.dispose();

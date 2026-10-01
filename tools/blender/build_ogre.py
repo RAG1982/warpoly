@@ -448,11 +448,11 @@ def build_leg(mats, root, side):
     return mb.build(mats, parent=root, location=(s * LEG_PIVOT[0], LEG_PIVOT[1], LEG_PIVOT[2]))
 
 
-def main():
+def main(root_name='Ogre', out_name='ogre'):
     args = C.script_args()
     C.reset_scene()
     mats = C.make_paint_set(PALETTE)
-    root = C.make_empty('Ogre')
+    root = C.make_empty(root_name)
     torso = build_torso(mats, root)
     head = build_head(mats, torso)
     arm_l = build_arm(mats, torso, -1)
@@ -466,15 +466,15 @@ def main():
 
     C.uv_atlas(parts, weights={'Head': 1.6, 'Torso': 1.0, 'Weapon': 1.0, 'ArmL': 0.9, 'ArmR': 0.9,
                                'LegL': 0.75, 'LegR': 0.75}, margin=0.008)
-    img = C.bake_atlas(parts, 'ogre_atlas', 512, samples=int(os.environ.get('BAKE_SAMPLES', 32)), margin=4)
+    img = C.bake_atlas(parts, f'{out_name}_atlas', 512, samples=int(os.environ.get('BAKE_SAMPLES', 32)), margin=4)
     C.finalize_materials(parts, img, team_default=TEAM_DEFAULT,
-                         out_png=os.path.join(C.BUILD_DIR, 'ogre_atlas.png'))
-    out = os.path.join(C.OUT_MODELS, 'ogre.glb')
+                         out_png=os.path.join(C.BUILD_DIR, f'{out_name}_atlas.png'))
+    out = os.path.join(C.OUT_MODELS, f'{out_name}.glb')
     C.export_glb(root, out)
     st = C.stats(root, out)
-    print('STATS ogre', st)
+    print(f'STATS {out_name}', st)
     if '--no-render' not in args:
-        rig = C.RenderRig(root, 'ogre', res=int(os.environ.get('RENDER_RES', 800)), samples=24)
+        rig = C.RenderRig(root, out_name, res=int(os.environ.get('RENDER_RES', 800)), samples=24)
         rig.render('34', (1.0, 0.95, 1.0), 30)
         rig.render('front', (0.0, 0.25, 1.0), 30)
         rig.render('back', (-0.6, 0.6, -1.0), 30)
@@ -490,4 +490,5 @@ def main():
         C.set_team_color(TEAM_DEFAULT)
 
 
-main()
+if __name__ == '__main__':
+    main()

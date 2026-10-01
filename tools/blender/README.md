@@ -30,6 +30,11 @@ os `.glb` em `public/models/` são artefatos reproduzíveis.
 | `build_arsonist.py` | `public/models/arsonist.glb` | Incendiário orc: rack de 3 botijas, óculos de solda, nó `Fuse`; 5,7 mil tris, 8 draw calls, ~260 KB |
 | `build_arcane_tower.py` | `public/models/arcane_tower.glb` | Torre Arcana: torre octogonal, escada em espiral, balcão, pavilhão com cristal e astrolábio (`Anim_Crystal`); 7,3 mil tris, atlas 1024², ~460 KB, altura ~9,6 |
 | `build_ash_sanctum.py` | `public/models/ash_sanctum.glb` | Santuário das Cinzas: zigurate de basalto, totens de crânios, braseiro com gaiola de costelas, obelisco, `Anim_Flame` (chamas e fumaça); 8,1 mil tris, atlas 1024², ~440 KB |
+| `build_temple.py` | `public/models/temple.glb` | Templo da Luz (NEW-40): capela cruciforme de mármore, pórtico de 4 colunas, telhado azul, vitrais, rosácea, cúpula dourada com lanterna e sol; 2 draw calls, 5,8 mil tris, atlas 1024², ~370 KB, altura ~9,4 |
+| `build_storm_altar.py` | `public/models/storm_altar.glb` | Altar das Tempestades orc (NEW-40): praça de basalto com runas ciano, seis menires com crânios e cristais, altar com cristais em anel de ferro, pilão com chifres, raios congelados; 2 draw calls, 7,7 mil tris, atlas 1024², ~460 KB, altura ~8,5 |
+| `build_watching_eye.py` | `public/models/watching_eye.glb` | Olho Vigia (NEW-40): globo violeta flutuando a 2,4 u, íris dourada em +Z, tentáculos (`Tentacle0..4`), `Body`, `Fin` em time; 1,5 mil tris, 7 draw calls, ~100 KB |
+| `build_templar.py` | `public/models/templar.glb` | Templário (NEW-40): reaproveita `build_cavalier.py` (`main('Templar','templar')`) com armadura branca/ouro, cavalo branco, emblema de sol e crista de plumas; mesma rig do Cavaleiro; 9 mil tris, 14 draw calls, ~360 KB |
+| `build_ogre_mage.py` | `public/models/ogre_mage.glb` | Ogro Feiticeiro (NEW-40): reaproveita `build_ogre.py` (`main('OgreMage','ogre_mage')`) com pele azulada, tinta de raio luminosa, penacho e cajado de xamã em `Weapon`; 7 mil tris, 11 draw calls, ~300 KB |
 | `unit_common.py` | — | helpers dos humanoides de rig plana (painel de tecido, tubo, mão, pipeline de bake/export/render) |
 | `siege_common.py` | — | helpers do cerco e das oficinas (rodas, correntes, engrenagens, proxy `Xf`) |
 | `bld_common.py` | — | helpers das construções (viga/tubo/tora entre pontos, cabeça de cavalo, crânio de ogro, bbox) |

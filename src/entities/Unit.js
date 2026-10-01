@@ -225,7 +225,7 @@ export class Unit {
     this.hasFiredThisAttack = false;
 
     // Create 3D Model (zero-cost clone sharing pre-compiled geometries and materials)
-    this.mesh = this.createModel(def.modelOf || type);
+    this.mesh = this.createModel(ModelFactory.visualType(type, def));
     const h = this.terrain.getHeight(x, z);
     this.mesh.position.set(x, h, z);
     this.mesh.scale.set(1.62, 1.62, 1.62); // Scaled +20% for superior visibility and detail appreciation
@@ -1240,7 +1240,7 @@ export class Unit {
     if (this.manaFillMesh) { this.manaFillMesh.visible = false; this.manaBgMesh.visible = false; }
     this.lifetime = 0;
     this.updateHealthBar();
-    this._swapModel(def.modelOf || toType);
+    this._swapModel(ModelFactory.visualType(toType, def), def.modelOf || toType);
     if (this.gameManager && this.gameManager.unitGrid) {
       const p = this.mesh.position;
       this.gameManager.unitGrid.update(this, p.x, p.z, this.collisionRadius);
@@ -1262,7 +1262,7 @@ export class Unit {
   }
 
   /** F4-04: troca o modelo 3D (mesma posição/escala/rotação), sem vazar malhas: remove o antigo da cena. */
-  _swapModel(modelType) {
+  _swapModel(modelType, animType = modelType) {
     const old = this.mesh;
     const mesh = this.createModel(modelType);
     mesh.position.copy(old.position);
@@ -1279,7 +1279,7 @@ export class Unit {
       this.scene.add(mesh);
     }
     this.mesh = mesh;
-    this.animator = new UnitAnimator(mesh, modelType);
+    this.animator = new UnitAnimator(mesh, animType);
     this._ghost = false;
   }
 

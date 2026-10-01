@@ -37,6 +37,7 @@ SWORD_REST_DEG = (math.degrees(0.5), 0.0, math.degrees(-0.1))
 TEAM_DEFAULT = '#1f4ac8'  # azul profundo (multiplica a área cinza)
 # Ganchos usados por build_cavalier.py (o valor padrão reproduz o Espadachim a pé)
 SKIRT = True
+TAB = dict(top=0.04, bot=-0.78, topz=0.265, botz=0.30, emb=-0.30, back=True)
 CAPE_FOLD = ((0, 0, -0.12), 0.06)   # (bulge, onda)
 CAPE = ((0.34, 0.40, -0.22), (-0.34, 0.40, -0.22), (0.46, -0.92, -0.46), (-0.46, -0.92, -0.46))
 SHIELD_SCALE = 1.0
@@ -152,21 +153,23 @@ def build_torso(mats, root):
                    M((sx * (0.255 + 0.015 * k), y - 0.055, 0.145 - 0.008 * k), (-8 - k * 4, sx * -22, sx * -10 - k * 4)))
     # sobreveste (tabardo) azul de time sobre a couraça, com borda e brasão de ouro
     if SKIRT:
-        mb.add(cloth_panel((-0.175, 0.04, 0.265), (0.175, 0.04, 0.265), (-0.22, -0.78, 0.30), (0.22, -0.78, 0.30),
+        t, bt, tz, bz, em = TAB['top'], TAB['bot'], TAB['topz'], TAB['botz'], TAB['emb']
+        mb.add(cloth_panel((-0.175, t, tz), (0.175, t, tz), (-0.22, bt, bz), (0.22, bt, bz),
                            nx=4, ny=5, thick=0.035, bulge=(0, 0, 0.035), wave=0.02, jag=0.02), 'team', smooth=50)
-        mb.add(cloth_panel((0.21, 0.04, -0.20), (-0.21, 0.04, -0.20), (0.25, -0.80, -0.24), (-0.25, -0.80, -0.24),
-                           nx=4, ny=5, thick=0.035, bulge=(0, 0, -0.035), wave=0.02, jag=0.02), 'team', smooth=50)
+        if TAB['back']:
+            mb.add(cloth_panel((0.21, t, -0.20), (-0.21, t, -0.20), (0.25, bt - 0.02, -0.24), (-0.25, bt - 0.02, -0.24),
+                               nx=4, ny=5, thick=0.035, bulge=(0, 0, -0.035), wave=0.02, jag=0.02), 'team', smooth=50)
         for sx in (-1, 1):
-            mb.add(prim_box(0.022, 0.80, 0.014), 'gold', M((sx * 0.172, -0.37, 0.305), (0, 0, sx * -3)))
-        mb.add(prim_box(0.41, 0.03, 0.02), 'gold', M((0, -0.77, 0.325)))
-        mb.add(prim_box(0.075, 0.36, 0.022), 'gold', M((0, -0.36, 0.322)))
-        mb.add(prim_box(0.26, 0.075, 0.022), 'gold', M((0, -0.30, 0.322)))
+            mb.add(prim_box(0.022, t - bt, 0.014), 'gold', M((sx * 0.172, (t + bt) / 2, (tz + bz) / 2 + 0.005)))
+        mb.add(prim_box(0.41, 0.03, 0.02), 'gold', M((0, bt + 0.01, bz + 0.025)))
+        mb.add(prim_box(0.075, 0.36, 0.022), 'gold', M((0, em - 0.06, bz + 0.022)))
+        mb.add(prim_box(0.26, 0.075, 0.022), 'gold', M((0, em, bz + 0.022)))
         for dy in (0.20, -0.20):
-            mb.add(prim_box(0.14, 0.05, 0.022), 'gold', M((0, -0.36 + dy, 0.322)))
+            mb.add(prim_box(0.14, 0.05, 0.022), 'gold', M((0, em - 0.06 + dy, bz + 0.022)))
         for dx in (-0.16, 0.16):
-            mb.add(prim_box(0.05, 0.14, 0.022), 'gold', M((dx, -0.30, 0.322)))
+            mb.add(prim_box(0.05, 0.14, 0.022), 'gold', M((dx, em, bz + 0.022)))
         mb.add(prim_extrude([(0, 0.06), (0.05, 0), (0, -0.06), (-0.05, 0)], 0.022, axis='z'), 'steel_dark',
-               M((0, -0.30, 0.335)), bevel=0.005)
+               M((0, em, bz + 0.035)), bevel=0.005)
     # capa longa e volumosa presa por grampos dourados
     mb.add(cloth_panel(*CAPE, nx=7, ny=6, thick=0.04, bulge=CAPE_FOLD[0], wave=CAPE_FOLD[1], jag=0.07), 'team', smooth=50)
     mb.add(prim_box(0.62, 0.05, 0.08, taper=(0.9, 1.0)), 'gold', M((0, 0.40, -0.22)))

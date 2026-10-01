@@ -335,6 +335,9 @@ Sonnet 5.5 escreve a spec em `docs/specs/<ID>.md`; agente **Sonnet** executa; o 
 ### F4-04 · Conjuradores e magias
 - `DONE(48d6b14)` (spec: docs/specs/F4-04-conjuradores-magias.md) · GAME+ART · Dep: F4-03 · Humano: Mago (Bola de fogo/Lentidão/Invisibilidade/Polimorfia/Nevasca), Paladino (Cura/Visão sagrada/Exorcismo). Orc: equivalentes originais do Cavaleiro da Morte e Ogro-Mago (Sede de Sangue/Runas/Olho vigilante/Ressuscitar mortos/Redemoinho). Construções: Igreja/Altar, Torre de Magos/Templo.
 
+### F4-04b · Templo/Altar, Templário e Ogro Feiticeiro, magias restantes
+- **Status**: `DOING(sonnet, 2026-10-01)` (spec: docs/specs/F4-04b-templo-magias-restantes.md) · GAME · Dep: F4-01, F4-04
+
 ### F4-05 · Sapadores
 - `DONE(19c7eae)` (spec: docs/specs/F4-05-sapadores.md) · GAME+ART · Dep: F3-08 · Unidade suicida que destrói muralhas/rochas/construções.
 

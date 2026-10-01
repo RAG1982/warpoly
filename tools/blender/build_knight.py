@@ -22,40 +22,41 @@ import sys
 import math
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+from mathutils import Vector, Matrix  # noqa: E402
 import common as C  # noqa: E402
 from common import (MeshBuilder, M, prim_box, prim_rings, ring_h, prim_cyl, prim_cone,  # noqa: E402
                     prim_sphere, prim_extrude, limb_rings, bezier)
 
 TORSO_PIVOT = (0.0, 1.05, 0.0)
 HEAD_PIVOT = (0.0, 1.62, 0.0)
-ARM_PIVOT = (0.38, 1.25, 0.0)
-LEG_PIVOT = (0.16, 0.68, 0.0)
-SWORD_PIVOT = (0.48, 0.75, 0.25)
+ARM_PIVOT = (0.50, 1.27, 0.0)
+LEG_PIVOT = (0.22, 0.68, 0.0)
+SWORD_PIVOT = (0.66, 0.72, 0.30)
+SHIELD_PIVOT = (-0.64, 0.95, 0.30)
 SWORD_REST_DEG = (math.degrees(0.5), 0.0, math.degrees(-0.1))
-TEAM_DEFAULT = '#2f63e0'  # azul da referência (multiplica a área cinza)
+TEAM_DEFAULT = '#1f4ac8'  # azul profundo (multiplica a área cinza)
 # Ganchos usados por build_cavalier.py (o valor padrão reproduz o Espadachim a pé)
 SKIRT = True
-CAPE_FOLD = ((0, 0, -0.10), 0.05)   # (bulge, onda)
-CAPE = ((0.27, 0.38, -0.19), (-0.27, 0.38, -0.19), (0.36, -0.86, -0.40), (-0.36, -0.86, -0.40))
+CAPE_FOLD = ((0, 0, -0.12), 0.06)   # (bulge, onda)
+CAPE = ((0.34, 0.40, -0.22), (-0.34, 0.40, -0.22), (0.46, -0.92, -0.46), (-0.46, -0.92, -0.46))
+SHIELD_SCALE = 1.0
 
 PALETTE = {
-    'skin': dict(base='#d9a273', var='#c48857', var_scale=6.0, var_amt=0.5, fine=0.05,
-                 top=0.2, ao=(0.2, 0.5)),
-    'hair': dict(base='#5a3a20', var='#3f2714', var_scale=10.0, fine=0.15, top=0.2, ao=(0.2, 0.5)),
-    'steel': dict(base='#a7b0bf', var='#8792a4', var_scale=8.0, var_amt=0.7, fine=0.08, top=0.35,
-                  edge='#f4f8ff', edge_amt=1.0, edge_r=0.02, edge_gain=12.0, ao=(0.22, 0.5),
-                  grad=(0.0, 2.0, 0.18)),
-    'steel_dark': dict(base='#6d7686', var='#586170', var_scale=7.0, fine=0.1, top=0.3,
-                       edge='#d9e0ea', edge_amt=0.9, edge_r=0.02, edge_gain=12.0, ao=(0.22, 0.55)),
-    'gold': dict(base='#dba52a', var='#b98318', var_scale=9.0, var_amt=0.7, fine=0.06, top=0.4,
-                 edge='#ffe9a0', edge_amt=1.0, edge_r=0.018, edge_gain=12.0, ao=(0.2, 0.45)),
-    'leather': dict(base='#7a4a26', var='#5c3419', var_scale=6.0, fine=0.12, top=0.2,
-                    edge='#b07a48', edge_amt=0.5, edge_r=0.02, ao=(0.25, 0.6)),
-    'blade': dict(base='#c5cedb', var='#a3aebf', var_scale=6.0, fine=0.06, top=0.4,
+    'steel': dict(base='#8791a3', var='#4a5263', var_scale=7.0, var_amt=0.75, fine=0.08, top=0.35,
+                  edge='#f4f8ff', edge_amt=1.0, edge_r=0.02, edge_gain=12.0, ao=(0.25, 0.6),
+                  grad=(0.0, 2.0, 0.22)),
+    'steel_hi': dict(base='#c9d2df', var='#9da7b6', var_scale=8.0, fine=0.06, top=0.4,
+                     edge='#ffffff', edge_amt=1.0, edge_r=0.015, edge_gain=12.0, ao=(0.2, 0.5)),
+    'steel_dark': dict(base='#474e5d', var='#2f3540', var_scale=6.0, fine=0.1, top=0.3,
+                       edge='#c4ccd9', edge_amt=0.9, edge_r=0.02, edge_gain=12.0, ao=(0.25, 0.65)),
+    'gold': dict(base='#e3a522', var='#b5780f', var_scale=9.0, var_amt=0.7, fine=0.06, top=0.4,
+                 edge='#ffe9a0', edge_amt=1.0, edge_r=0.018, edge_gain=12.0, ao=(0.2, 0.5)),
+    'leather': dict(base='#6d4022', var='#4c2912', var_scale=6.0, fine=0.12, top=0.2,
+                    edge='#a8703c', edge_amt=0.5, edge_r=0.02, ao=(0.25, 0.6)),
+    'fur': dict(base='#ece6d6', var='#b9b09a', var_scale=14.0, var_amt=0.8, fine=0.18, top=0.3, ao=(0.3, 0.5)),
+    'blade': dict(base='#d2dae6', var='#9aa6b8', var_scale=6.0, fine=0.06, top=0.4,
                   edge='#ffffff', edge_amt=1.0, edge_r=0.02, edge_gain=14.0, ao=(0.2, 0.4)),
-    'eye': dict(base='#2a4d7a', var='#1c3556', var_scale=20.0),
-    'mouth': dict(base='#7a3b30', var='#5a2a22'),
-    'brow': dict(base='#4a2d18', var='#33200f'),
+    'dark': dict(base='#07090d', var='#07090d'),
     'team': dict(base='#b8b0a4', var='#9d9589', var_scale=5.0, fine=0.08, top=0.25,
                  edge='#d8d2c8', edge_amt=0.3, edge_r=0.03, ao=(0.3, 0.65), team=True),
 }
@@ -100,142 +101,233 @@ def cloth_panel(top_l, top_r, bot_l, bot_r, nx=5, ny=4, thick=0.03, bulge=(0, 0,
 
 
 # ---------------------------------------------------------------------------
+def orient(d):
+    return Vector((0, 1, 0)).rotation_difference(Vector(d).normalized()).to_matrix().to_4x4()
+
+
 def build_torso(mats, root):
     mb = MeshBuilder('Torso')
-    # gibão azul (mangas/saiote) sob a couraça: cilindro de tronco em cor de time
-    tunic = [ring_h(-0.22, 0.25, 0.19, 12), ring_h(-0.05, 0.26, 0.20, 12), ring_h(0.15, 0.30, 0.21, 12),
-             ring_h(0.33, 0.32, 0.20, 12)]
-    mb.add(prim_rings(tunic), 'team', smooth=70)
-    # couraça de placas: peitoral em quilha (afunilado na cintura) + placa das costas
-    breast = [ring_h(-0.16, 0.245, 0.185, 14, cz=0.02), ring_h(0.02, 0.29, 0.215, 14, cz=0.03),
-              ring_h(0.18, 0.335, 0.235, 14, cz=0.03), ring_h(0.33, 0.325, 0.20, 14, cz=0.01),
-              ring_h(0.40, 0.25, 0.16, 14, cz=0.0)]
-    mb.add(prim_rings(breast), 'steel', smooth=60, bevel=0.008)
-    # quilha central e frisos dourados
-    mb.add(prim_box(0.05, 0.50, 0.06, taper=(0.5, 0.6)), 'steel_dark', M((0, 0.14, 0.235)), bevel=0.01)
-    # friso dourado da cintura (colado à couraça, sem passar da largura do peitoral)
-    mb.add(prim_rings([ring_h(-0.135, 0.252, 0.192, 14, cz=0.02), ring_h(-0.105, 0.258, 0.196, 14, cz=0.02)],
+    # gibão de malha sob a couraça
+    tunic = [ring_h(-0.32, 0.27, 0.20, 14), ring_h(-0.10, 0.29, 0.21, 14), ring_h(0.20, 0.40, 0.23, 14),
+             ring_h(0.36, 0.40, 0.22, 14)]
+    mb.add(prim_rings(tunic), 'steel_dark', smooth=60)
+    # couraça larga em V: cintura estreita, peito e ombros volumosos, quilha e nervuras
+    breast = [ring_h(-0.18, 0.27, 0.205, 12, cz=0.02), ring_h(0.00, 0.35, 0.24, 12, cz=0.035),
+              ring_h(0.17, 0.435, 0.265, 12, cz=0.04), ring_h(0.32, 0.455, 0.245, 12, cz=0.02),
+              ring_h(0.41, 0.33, 0.18, 12)]
+    mb.add(prim_rings(breast), 'steel', smooth=55, bevel=0.008)
+    mb.add(prim_box(0.065, 0.62, 0.075, taper=(0.5, 0.6)), 'steel_hi', M((0, 0.11, 0.285)))
+    # frisos dourados: cintura, cava dos braços, gola, peito (volutas)
+    mb.add(prim_rings([ring_h(-0.175, 0.272, 0.208, 12, cz=0.02), ring_h(-0.14, 0.282, 0.212, 12, cz=0.02)],
                       cap0=False, cap1=False), 'gold', smooth=30)
-    # bordas douradas do peitoral (gola) e das cavas dos braços
-    mb.add(prim_rings([ring_h(0.385, 0.262, 0.168, 14), ring_h(0.405, 0.255, 0.163, 14)], cap0=False, cap1=False),
+    mb.add(prim_rings([ring_h(0.385, 0.34, 0.19, 12), ring_h(0.41, 0.335, 0.185, 12)], cap0=False, cap1=False),
            'gold', smooth=30)
-    # gorjal (colar de placas) com aro dourado
-    mb.add(prim_rings([ring_h(0.36, 0.20, 0.17, 12), ring_h(0.43, 0.17, 0.15, 12)], cap0=False, cap1=False),
-           'steel', smooth=40)
-    mb.add(prim_rings([ring_h(0.425, 0.185, 0.16, 12), ring_h(0.445, 0.185, 0.16, 12)], cap0=False, cap1=False),
-           'gold', smooth=30)
-    # cinto de couro com fivela dourada + bolsa
-    mb.add(prim_rings([ring_h(-0.24, 0.27, 0.205, 14), ring_h(-0.12, 0.275, 0.21, 14)]), 'leather', smooth=40)
-    mb.add(prim_box(0.15, 0.13, 0.05), 'gold', M((0, -0.18, 0.215)), bevel=0.015)
-    mb.add(prim_box(0.08, 0.07, 0.04), 'steel_dark', M((0, -0.18, 0.238)), bevel=0.01)
-    mb.add(prim_box(0.13, 0.15, 0.10), 'leather', M((0.30, -0.2, 0.05), (0, 0, -6)), bevel=0.02, smooth=30)
-    mb.add(prim_box(0.14, 0.05, 0.11), 'leather', M((0.30, -0.13, 0.05)), bevel=0.012)
-    # tassetes (saiote de placas nas coxas) — 3 lâminas de aço com barra dourada
-    for k, (w, y, z) in enumerate(((0.20, -0.32, 0.20), (0.17, -0.42, 0.205))):
-        mb.add(prim_box(w, 0.10, 0.03, taper=(0.9, 1.0)), 'steel', M((0, y, z), (-6 - k * 3, 0, 0)), bevel=0.008)
     for sx in (-1, 1):
-        mb.add(prim_box(0.16, 0.20, 0.03, taper=(0.85, 1.0)), 'steel',
-               M((sx * 0.19, -0.34, 0.15), (-8, sx * -12, sx * -8)), bevel=0.008)
-        mb.add(prim_box(0.16, 0.025, 0.036), 'gold', M((sx * 0.20, -0.435, 0.163), (-8, sx * -12, sx * -8)))
-    # saiote azul (frente/atrás) em cor de time — sobra do gibão, com barra recortada
+        mb.add(prim_box(0.05, 0.24, 0.05), 'gold', M((sx * 0.43, 0.28, 0.03), (0, 0, sx * -10)))
+        for k in (0, 1):
+            mb.add(prim_sphere(0.028, 0.028, 0.028, 6, 3), 'gold', M((sx * (0.17 + k * 0.1), 0.39 - k * 0.04, 0.22)), smooth=60)
+    # volutas douradas gravadas no peitoral
+    for sx in (-1, 1):
+        for i, (dx, dy, r) in enumerate(((0.16, 0.28, 50), (0.21, 0.23, 20), (0.13, 0.05, -35))):
+            z = 0.04 + 0.255 * math.sqrt(max(0.0, 1 - (dx / 0.40) ** 2)) + 0.006
+            mb.add(prim_box(0.12, 0.02, 0.014), 'gold', M((sx * dx, dy, z), (0, sx * -dx * 70, sx * r)))
+    # gorjal em lâminas + gola de pele (arminho)
+    for k, (y, rx, rz) in enumerate(((0.36, 0.25, 0.20), (0.41, 0.22, 0.18))):
+        mb.add(prim_rings([ring_h(y - 0.045, rx, rz, 14), ring_h(y + 0.045, rx - 0.012, rz - 0.01, 14)], cap0=False,
+                          cap1=False), 'steel_dark', smooth=40)
+    mb.add(prim_rings([ring_h(0.33, 0.35, 0.26, 14), ring_h(0.40, 0.33, 0.245, 14), ring_h(0.47, 0.26, 0.20, 14),
+                       ring_h(0.49, 0.20, 0.16, 14)], cap0=False, cap1=False), 'fur', smooth=70)
+    # cinto largo com fivela grande, rebites e bolsa
+    mb.add(prim_rings([ring_h(-0.30, 0.285, 0.215, 12), ring_h(-0.12, 0.29, 0.22, 12)]), 'leather', smooth=40)
+    mb.add(prim_box(0.24, 0.17, 0.05), 'gold', M((0, -0.21, 0.23)))
+    mb.add(prim_box(0.14, 0.09, 0.04), 'steel_dark', M((0, -0.21, 0.255)), bevel=0.012)
+    mb.add(prim_sphere(0.03, 0.03, 0.02, 6, 3), 'gold', M((0, -0.21, 0.28)), smooth=60)
+    for i in range(7):
+        a = math.radians(-70 + i * 23)
+        mb.add(prim_sphere(0.022, 0.022, 0.018, 5, 3), 'gold', M((math.sin(a) * 0.285, -0.27, math.cos(a) * 0.215)), smooth=60)
+    mb.add(prim_box(0.15, 0.17, 0.11), 'leather', M((0.33, -0.25, 0.04), (0, 0, -8)), smooth=30)
+    # tassetes em camadas (laterais) com barra dourada
+    for sx in (-1, 1):
+        for k in range(3):
+            y = -0.31 - 0.095 * k
+            mb.add(prim_box(0.22 - 0.01 * k, 0.11, 0.035, taper=(0.9, 1.0)), 'steel',
+                   M((sx * 0.25, y, 0.13 - 0.008 * k), (-8 - k * 4, sx * -22, sx * -10 - k * 4)), bevel=0.008)
+            mb.add(prim_box(0.22 - 0.01 * k, 0.022, 0.04), 'gold',
+                   M((sx * (0.255 + 0.015 * k), y - 0.055, 0.145 - 0.008 * k), (-8 - k * 4, sx * -22, sx * -10 - k * 4)))
+    # sobreveste (tabardo) azul de time sobre a couraça, com borda e brasão de ouro
     if SKIRT:
-        mb.add(cloth_panel((-0.16, -0.30, 0.19), (0.16, -0.30, 0.19), (-0.19, -0.66, 0.2), (0.19, -0.66, 0.2),
-                           nx=4, ny=3, bulge=(0, 0, 0.03), jag=0.03), 'team', smooth=50)
-        mb.add(cloth_panel((0.2, -0.30, -0.17), (-0.2, -0.30, -0.17), (0.23, -0.68, -0.2), (-0.23, -0.68, -0.2),
-                           nx=4, ny=3, bulge=(0, 0, -0.03), jag=0.03), 'team', smooth=50)
-    # capa azul (cor de time) presa por dois grampos dourados nos ombros
-    mb.add(cloth_panel(*CAPE,
-                       nx=6, ny=5, thick=0.035, bulge=CAPE_FOLD[0], wave=CAPE_FOLD[1], jag=0.06), 'team', smooth=50)
-    mb.add(prim_box(0.50, 0.04, 0.07, taper=(0.9, 1.0)), 'gold', M((0, 0.37, -0.18)), bevel=0.01)
+        mb.add(cloth_panel((-0.175, 0.04, 0.265), (0.175, 0.04, 0.265), (-0.22, -0.78, 0.30), (0.22, -0.78, 0.30),
+                           nx=4, ny=5, thick=0.035, bulge=(0, 0, 0.035), wave=0.02, jag=0.02), 'team', smooth=50)
+        mb.add(cloth_panel((0.21, 0.04, -0.20), (-0.21, 0.04, -0.20), (0.25, -0.80, -0.24), (-0.25, -0.80, -0.24),
+                           nx=4, ny=5, thick=0.035, bulge=(0, 0, -0.035), wave=0.02, jag=0.02), 'team', smooth=50)
+        for sx in (-1, 1):
+            mb.add(prim_box(0.022, 0.80, 0.014), 'gold', M((sx * 0.172, -0.37, 0.305), (0, 0, sx * -3)))
+        mb.add(prim_box(0.41, 0.03, 0.02), 'gold', M((0, -0.77, 0.325)))
+        mb.add(prim_box(0.075, 0.36, 0.022), 'gold', M((0, -0.36, 0.322)))
+        mb.add(prim_box(0.26, 0.075, 0.022), 'gold', M((0, -0.30, 0.322)))
+        for dy in (0.20, -0.20):
+            mb.add(prim_box(0.14, 0.05, 0.022), 'gold', M((0, -0.36 + dy, 0.322)))
+        for dx in (-0.16, 0.16):
+            mb.add(prim_box(0.05, 0.14, 0.022), 'gold', M((dx, -0.30, 0.322)))
+        mb.add(prim_extrude([(0, 0.06), (0.05, 0), (0, -0.06), (-0.05, 0)], 0.022, axis='z'), 'steel_dark',
+               M((0, -0.30, 0.335)), bevel=0.005)
+    # capa longa e volumosa presa por grampos dourados
+    mb.add(cloth_panel(*CAPE, nx=7, ny=6, thick=0.04, bulge=CAPE_FOLD[0], wave=CAPE_FOLD[1], jag=0.07), 'team', smooth=50)
+    mb.add(prim_box(0.62, 0.05, 0.08, taper=(0.9, 1.0)), 'gold', M((0, 0.40, -0.22)))
     for sx in (-1, 1):
-        mb.add(prim_sphere(0.045, 0.045, 0.04, 6, 4), 'gold', M((sx * 0.2, 0.36, 0.0)), smooth=60)
+        mb.add(prim_sphere(0.055, 0.055, 0.045, 7, 4), 'gold', M((sx * 0.30, 0.38, -0.06)), smooth=60)
     return mb.build(mats, parent=root, location=TORSO_PIVOT)
 
 
 def build_head(mats, root):
+    """Armet fechado de aço: viseira baixada com fenda em T (o único 'rosto' fica na frente, +Z)."""
     mb = MeshBuilder('Head')
-    # rosto (só a face frontal +Z tem traços; laterais/nuca ficam lisas)
-    mb.add(prim_sphere(0.145, 0.175, 0.155, 12, 6), 'skin', M((0, -0.02, 0.01)), smooth=75)
-    mb.add(prim_cyl(0.075, 0.09, 0.12, 8), 'skin', M((0, -0.25, 0.0)), smooth=60)   # pescoço
-    # traços frontais
+    rings = [ring_h(0.285, 0.06, 0.07, 12), ring_h(0.23, 0.15, 0.17, 12), ring_h(0.15, 0.20, 0.22, 12),
+             ring_h(0.04, 0.21, 0.24, 12, cz=0.01), ring_h(-0.07, 0.205, 0.25, 12, cz=0.035),
+             ring_h(-0.17, 0.175, 0.245, 12, cz=0.055), ring_h(-0.27, 0.13, 0.18, 12, cz=0.03)]
+    mb.add(prim_rings(rings), 'steel', smooth=50, bevel=0.005)
+    # viseira: placa frontal com fenda em T e furos de ventilação
+    mb.add(prim_box(0.34, 0.27, 0.05, taper=(0.75, 1.0)), 'steel_dark', M((0, -0.04, 0.262), (-4, 0, 0)), bevel=0.012)
+    mb.add(prim_box(0.25, 0.034, 0.03), 'dark', M((0, 0.03, 0.29)))
+    mb.add(prim_box(0.034, 0.15, 0.03), 'dark', M((0, -0.06, 0.29)))
     for sx in (-1, 1):
-        mb.add(prim_sphere(0.026, 0.02, 0.014, 6, 3), 'eye', M((sx * 0.062, 0.005, 0.148)), smooth=80)
-        mb.add(prim_box(0.075, 0.02, 0.02), 'brow', M((sx * 0.062, 0.042, 0.148), (0, 0, sx * -8)), bevel=0.005)
-    mb.add(prim_box(0.035, 0.07, 0.04, taper=(0.7, 0.8)), 'skin', M((0, -0.04, 0.155), (-8, 0, 0)), bevel=0.008)
-    mb.add(prim_box(0.075, 0.014, 0.014), 'mouth', M((0, -0.115, 0.147)), bevel=0.003)
-    # cabelo castanho aparecendo sob o elmo (nuca)
-    mb.add(prim_sphere(0.15, 0.115, 0.15, 10, 4, y_max=0.2), 'hair', M((0, -0.07, -0.035)), smooth=70)
-    # elmo aberto: calota + aba + protetor nasal + bochechas + cobre-nuca + crista dourada
-    mb.add(prim_sphere(0.195, 0.195, 0.215, 12, 5, y_min=-0.05), 'steel', M((0, 0.06, 0.0)), smooth=60)
-    mb.add(prim_rings([ring_h(0.045, 0.2, 0.22, 14), ring_h(0.075, 0.195, 0.215, 14)]), 'gold', smooth=30)
-    mb.add(prim_box(0.045, 0.16, 0.035, taper=(0.75, 1.0)), 'steel', M((0, -0.01, 0.205), (4, 0, 0)), bevel=0.008)
+        for k in range(3):
+            mb.add(prim_box(0.022, 0.022, 0.03), 'dark', M((sx * 0.085, -0.03 - k * 0.05, 0.285 + 0.005 * k)))
+    # arco de ouro na borda da viseira, aro na testa e dobradiças laterais
+    mb.add(prim_box(0.36, 0.022, 0.03), 'gold', M((0, 0.10, 0.275)))
+    mb.add(prim_box(0.30, 0.022, 0.03), 'gold', M((0, -0.175, 0.29)))
+    mb.add(prim_rings([ring_h(0.12, 0.208, 0.225, 12), ring_h(0.145, 0.205, 0.222, 12)], cap0=False, cap1=False),
+           'gold', smooth=30)
     for sx in (-1, 1):
-        mb.add(prim_box(0.035, 0.15, 0.17, taper=(0.9, 0.8)), 'steel', M((sx * 0.155, -0.05, 0.0)), bevel=0.01)
-        mb.add(prim_box(0.012, 0.15, 0.012), 'gold', M((sx * 0.176, -0.05, 0.095)))
-    mb.add(prim_box(0.30, 0.12, 0.04, taper=(0.85, 1.0)), 'steel', M((0, -0.05, -0.185), (12, 0, 0)), bevel=0.01)
-    mb.add(prim_box(0.03, 0.04, 0.34, taper=(0.5, 0.9)), 'gold', M((0, 0.235, 0.0)), bevel=0.008)
+        mb.add(prim_cyl(0.05, 0.05, 0.03, 10), 'gold', M((sx * 0.205, -0.02, 0.06), (0, 0, 90)), smooth=30)
+        mb.add(prim_box(0.02, 0.36, 0.03), 'gold', M((sx * 0.2, -0.0, 0.14), (0, sx * 18, 0)))
+    # crista dourada com plumagem de lâminas + espigão
+    mb.add(prim_box(0.045, 0.06, 0.46, taper=(0.8, 1.0)), 'gold', M((0, 0.285, 0.0)))
+    for i in range(6):
+        z = 0.17 - i * 0.075
+        mb.add(prim_box(0.03, 0.15 - i * 0.012, 0.085), 'gold', M((0, 0.35 - i * 0.004, z), (-18 - i * 5, 0, 0)))
+    mb.add(prim_cone(0.022, 0.12, 6), 'gold', M((0, 0.29, 0.24)))
+    # gorjal (aba de pescoço) em lâminas com friso dourado
+    for k, (y, rx, rz) in enumerate(((-0.26, 0.19, 0.2), (-0.32, 0.22, 0.225), (-0.38, 0.25, 0.25))):
+        mb.add(prim_rings([ring_h(y + 0.04, rx, rz, 14), ring_h(y - 0.04, rx + 0.01, rz + 0.01, 14)], cap0=False,
+                          cap1=False), 'steel_dark', smooth=40)
+    mb.add(prim_rings([ring_h(-0.415, 0.255, 0.255, 14), ring_h(-0.43, 0.26, 0.26, 14)], cap0=False, cap1=False),
+           'gold', smooth=30)
     return mb.build(mats, parent=root, location=HEAD_PIVOT)
 
 
-def build_arm(mats, root, side):
-    """side = +1 (ArmR) ou −1 (ArmL); pivô no ombro, repouso pendendo em −Y."""
+def build_arm(mats, root, side, elbow=None, wrist=None):
+    """side = +1 (ArmR) ou −1 (ArmL); pivô no ombro. Braço afastado do corpo: ombreira de 3 lâminas com
+    espigão, cotoveleira grande e manopla. elbow/wrist (relativos ao ombro) permitem poses dobradas."""
     s = side
     mb = MeshBuilder('ArmR' if s > 0 else 'ArmL')
-    # ombreira: domo de aço com lâminas sobrepostas e friso dourado
-    mb.add(prim_sphere(0.16, 0.13, 0.17, 10, 4, y_min=0.0), 'steel', M((s * 0.02, 0.05, 0.0), (0, 0, -s * 18)),
-           smooth=50, bevel=0.006)
-    mb.add(prim_sphere(0.15, 0.10, 0.16, 10, 3, y_min=0.0), 'steel', M((s * 0.05, -0.04, 0.0), (0, 0, -s * 30)),
-           smooth=50)
-    mb.add(prim_cyl(0.16, 0.155, 0.03, 10), 'gold', M((s * 0.02, 0.045, 0.0), (0, 0, -s * 18)), smooth=30)
-    # manga azul (cor de time) + braçal de aço no antebraço
-    up = [(s * 0.01, -0.06, 0.0), (s * 0.015, -0.20, 0.0), (s * 0.02, -0.32, 0.0)]
-    mb.add(prim_rings(limb_rings(up, [0.085, 0.09, 0.08], 8)), 'team', smooth=70)
-    mb.add(prim_sphere(0.075, 0.075, 0.075, 8, 4), 'steel', M((s * 0.02, -0.33, 0.0)), smooth=50)    # cotovelo
-    fa = [(s * 0.02, -0.34, 0.0), (s * 0.025, -0.46, 0.015), (s * 0.03, -0.58, 0.03)]
-    mb.add(prim_rings(limb_rings(fa, [0.07, 0.075, 0.06], 8)), 'steel', smooth=60, bevel=0.005)
-    mb.add(prim_cyl(0.078, 0.078, 0.02, 8), 'gold', M((s * 0.024, -0.42, 0.01), (-12, 0, 0)), smooth=30)
-    # manopla
-    mb.add(prim_box(0.09, 0.11, 0.10, taper=(0.9, 0.85)), 'steel_dark', M((s * 0.03, -0.64, 0.04)), bevel=0.014)
-    mb.add(prim_box(0.08, 0.05, 0.06), 'steel_dark', M((s * 0.03, -0.71, 0.07)), bevel=0.01)
+    for i, (rx, ry, rz, y, tilt) in enumerate(((0.185, 0.15, 0.20, 0.05, 20), (0.18, 0.12, 0.19, -0.06, 28),
+                                                (0.17, 0.10, 0.18, -0.16, 36))):
+        T = M((s * (0.03 + 0.03 * i), y, 0.0), (0, 0, -s * tilt))
+        mb.add(prim_sphere(rx, ry, rz, 12, 4, y_min=0.0), 'steel' if i != 1 else 'steel_hi', T, smooth=50)
+        mb.add(prim_cyl(rx * 0.99, rx * 0.97, 0.026, 12), 'gold', T, smooth=30)
+    mb.add(prim_cone(0.045, 0.17, 6), 'gold', M((s * 0.11, 0.17, 0.0), (0, 0, -s * 42)))
+    mb.add(prim_sphere(0.05, 0.05, 0.05, 6, 3), 'gold', M((s * 0.07, 0.12, 0.0)), smooth=60)
+    e = Vector(elbow) if elbow else Vector((s * 0.12, -0.38, 0.0))
+    w = Vector(wrist) if wrist else Vector((s * 0.15, -0.68, 0.08))
+    sh = Vector((s * 0.05, -0.14, 0.0))
+    up = [tuple(sh), tuple(sh.lerp(e, 0.5)), tuple(e)]
+    mb.add(prim_rings(limb_rings(up, [0.10, 0.105, 0.095], 8)), 'steel', smooth=60, bevel=0.005)
+    mb.add(prim_cyl(0.11, 0.11, 0.025, 10), 'gold', Matrix.Translation(sh.lerp(e, 0.45)) @ orient(e - sh), smooth=30)
+    mb.add(prim_sphere(0.115, 0.11, 0.11, 8, 4), 'steel_hi', M(tuple(e)), smooth=50)
+    mb.add(prim_cone(0.04, 0.12, 6), 'gold', Matrix.Translation(e + Vector((s * 0.09, -0.02, -0.03))) @
+           orient((s * 1, 0, -0.3)))
+    fa = [tuple(e), tuple(e.lerp(w, 0.5)), tuple(w)]
+    mb.add(prim_rings(limb_rings(fa, [0.085, 0.092, 0.075], 8)), 'steel', smooth=60, bevel=0.005)
+    for t in (0.35, 0.7):
+        mb.add(prim_cyl(0.096, 0.096, 0.02, 10), 'gold', Matrix.Translation(e.lerp(w, t)) @ orient(w - e), smooth=30)
+    d = (w - e).normalized()
+    Tg = Matrix.Translation(w + d * 0.07) @ orient(d)
+    mb.add(prim_box(0.13, 0.15, 0.14, taper=(0.9, 0.85)), 'steel_dark', Tg, bevel=0.016)
+    mb.add(prim_box(0.14, 0.03, 0.15), 'gold', Matrix.Translation(w) @ orient(d))
+    mb.add(prim_box(0.12, 0.05, 0.10), 'steel_hi', Tg @ M((0, -0.08, 0.03)))
     return mb.build(mats, parent=root, location=(s * ARM_PIVOT[0], ARM_PIVOT[1], ARM_PIVOT[2]))
 
 
 def build_leg(mats, root, side):
     s = side
     mb = MeshBuilder('LegR' if s > 0 else 'LegL')
-    # coxote de aço, joelheira com espigão, grevas e bota de couro com peito do pé articulado
-    th = [(0, -0.02, 0), (s * 0.005, -0.18, 0.01), (s * 0.01, -0.34, 0.01)]
-    mb.add(prim_rings(limb_rings(th, [(0.115, 0.12), (0.12, 0.125), (0.095, 0.10)], 8)), 'steel', smooth=60, bevel=0.005)
-    mb.add(prim_cyl(0.118, 0.118, 0.02, 10), 'gold', M((0, -0.07, 0.0)), smooth=30)
-    mb.add(prim_sphere(0.10, 0.09, 0.09, 8, 4), 'steel', M((s * 0.01, -0.36, 0.05)), smooth=50)
-    mb.add(prim_cone(0.03, 0.06, 6), 'gold', M((s * 0.01, -0.36, 0.13), (90, 0, 0)))
-    sh = [(s * 0.01, -0.38, 0.02), (s * 0.015, -0.50, 0.01), (s * 0.02, -0.62, 0.0)]
-    mb.add(prim_rings(limb_rings(sh, [0.09, 0.095, 0.075], 8)), 'steel', smooth=60, bevel=0.005)
-    mb.add(prim_cyl(0.098, 0.098, 0.02, 10), 'gold', M((s * 0.013, -0.47, 0.01)), smooth=30)
-    mb.add(prim_box(0.17, 0.09, 0.30, taper=(0.85, 0.7), base=True), 'leather', M((s * 0.02, -0.68, 0.06)),
-           bevel=0.02, smooth=35)
-    mb.add(prim_box(0.15, 0.05, 0.13, base=True), 'steel_dark', M((s * 0.02, -0.62, 0.17)), bevel=0.015)
+    th = [(0, -0.02, 0), (s * 0.005, -0.20, 0.015), (s * 0.01, -0.36, 0.02)]
+    mb.add(prim_rings(limb_rings(th, [(0.15, 0.16), (0.145, 0.155), (0.115, 0.125)], 10)), 'steel', smooth=60, bevel=0.005)
+    for y in (-0.09, -0.30):
+        mb.add(prim_cyl(0.155, 0.155, 0.022, 12), 'gold', M((s * 0.004, y, 0.01)), smooth=30)
+    mb.add(prim_sphere(0.13, 0.115, 0.115, 10, 4), 'steel_hi', M((s * 0.012, -0.385, 0.06)), smooth=50)
+    mb.add(prim_cyl(0.125, 0.125, 0.022, 10), 'gold', M((s * 0.012, -0.385, 0.06), (90, 0, 0)), smooth=30)
+    mb.add(prim_cone(0.045, 0.12, 6), 'gold', M((s * 0.012, -0.385, 0.175), (90, 0, 0)))
+    sh = [(s * 0.012, -0.41, 0.03), (s * 0.016, -0.53, 0.015), (s * 0.02, -0.64, 0.0)]
+    mb.add(prim_rings(limb_rings(sh, [(0.105, 0.115), (0.11, 0.115), (0.085, 0.09)], 10)), 'steel', smooth=60, bevel=0.005)
+    mb.add(prim_box(0.035, 0.22, 0.03), 'steel_hi', M((s * 0.014, -0.52, 0.125), (8, 0, 0)))
+    mb.add(prim_cyl(0.118, 0.118, 0.022, 10), 'gold', M((s * 0.014, -0.45, 0.02)), smooth=30)
+    # sabatão de aço com bico e rebites dourados
+    mb.add(prim_box(0.20, 0.10, 0.33, taper=(0.8, 0.6), base=True), 'steel_dark', M((s * 0.02, -0.70, 0.07)), bevel=0.02,
+           smooth=35)
+    mb.add(prim_box(0.15, 0.06, 0.14, base=True), 'steel', M((s * 0.02, -0.63, 0.19)), bevel=0.015)
+    mb.add(prim_cone(0.05, 0.12, 5), 'steel_dark', M((s * 0.02, -0.66, 0.36), (90, 0, 0)))
+    for k in range(3):
+        mb.add(prim_sphere(0.018, 0.018, 0.018, 5, 3), 'gold', M((s * 0.02, -0.62, 0.12 + k * 0.06)), smooth=60)
     return mb.build(mats, parent=root, location=(s * LEG_PIVOT[0], LEG_PIVOT[1], LEG_PIVOT[2]))
 
 
 def build_sword(mats, root):
-    """Espada longa: empunhadura em y≈0, lâmina em +Y com o gume voltado para ±Z (frente = +Z),
-    plano da lâmina em X (fino)."""
+    """Montante robusto: empunhadura em y≈0, lâmina larga em +Y com o gume voltado para ±Z (frente = +Z)."""
     mb = MeshBuilder('Sword')
-    mb.add(prim_cyl(0.026, 0.026, 0.22, 8, base=False), 'leather', M((0, -0.10, 0)), smooth=50)
-    for y in (-0.16, -0.10, -0.04):
-        mb.add(prim_cyl(0.03, 0.03, 0.012, 8, base=False), 'gold', M((0, y, 0)))
-    mb.add(prim_sphere(0.05, 0.05, 0.05, 8, 4), 'gold', M((0, -0.25, 0)), smooth=60)
-    mb.add(prim_box(0.36, 0.05, 0.06), 'gold', M((0, 0.04, 0)), bevel=0.012)
+    mb.add(prim_cyl(0.03, 0.03, 0.27, 8, base=False), 'leather', M((0, -0.12, 0)), smooth=50)
+    for y in (-0.22, -0.15, -0.08, -0.01):
+        mb.add(prim_cyl(0.036, 0.036, 0.014, 8, base=False), 'gold', M((0, y, 0)))
+    mb.add(prim_sphere(0.065, 0.065, 0.065, 8, 4), 'gold', M((0, -0.30, 0)), smooth=60)
+    mb.add(prim_sphere(0.03, 0.03, 0.03, 6, 3), 'steel_hi', M((0, -0.355, 0)), smooth=60)
+    # guarda ornamentada: barra com volutas, cabeça central e quilhões
+    mb.add(prim_box(0.52, 0.06, 0.075), 'gold', M((0, 0.05, 0)))
     for sx in (-1, 1):
-        mb.add(prim_sphere(0.028, 0.028, 0.03, 6, 3), 'gold', M((sx * 0.19, 0.04, 0)), smooth=60)
-        mb.add(prim_box(0.08, 0.04, 0.045), 'gold', M((sx * 0.13, 0.075, 0), (0, 0, sx * -25)), bevel=0.008)
-    mb.add(prim_box(0.036, 0.82, 0.115, taper=(0.9, 0.85), base=True), 'blade', M((0, 0.065, 0)), bevel=0.006)
-    mb.add(prim_box(0.02, 0.56, 0.03, taper=(0.6, 0.6), base=True), 'steel_dark', M((0.014, 0.12, 0)))
-    mb.add(prim_cone(0.058, 0.16, 4, base=True), 'blade', M((0, 0.885, 0), (0, 45, 0), (0.30, 1.0, 1.0)))
+        mb.add(prim_sphere(0.04, 0.04, 0.045, 7, 4), 'gold', M((sx * 0.27, 0.05, 0)), smooth=60)
+        mb.add(prim_box(0.14, 0.05, 0.06), 'gold', M((sx * 0.20, 0.11, 0), (0, 0, sx * -30)))
+        mb.add(prim_box(0.12, 0.045, 0.055), 'gold', M((sx * 0.22, -0.01, 0), (0, 0, sx * 28)))
+    mb.add(prim_sphere(0.07, 0.07, 0.06, 8, 4), 'gold', M((0, 0.06, 0.03)), smooth=60)
+    mb.add(prim_box(0.06, 0.06, 0.04), 'steel_dark', M((0, 0.08, 0.075)), bevel=0.008)
+    mb.add(prim_box(0.05, 0.11, 0.17, taper=(1.0, 0.9)), 'gold', M((0, 0.13, 0.0)))
+    # lâmina larga com sulco central e ponta
+    mb.add(prim_box(0.042, 1.02, 0.17, taper=(0.9, 0.78), base=True), 'blade', M((0, 0.17, 0)), bevel=0.008)
+    mb.add(prim_box(0.05, 0.72, 0.045, taper=(0.6, 0.6), base=True), 'steel_dark', M((0.012, 0.23, 0)))
+    mb.add(prim_cone(0.087, 0.22, 4, base=True), 'blade', M((0, 1.19, 0), (0, 45, 0), (0.30, 1.0, 1.0)))
     sw = mb.build(mats, parent=root, location=SWORD_PIVOT)
     C.set_rot_game(sw, SWORD_REST_DEG)
     return sw
+
+
+KITE = [(-0.30, 0.44), (-0.15, 0.475), (0.15, 0.475), (0.30, 0.44), (0.315, 0.10), (0.26, -0.22), (0.11, -0.45),
+        (0.0, -0.56), (-0.11, -0.45), (-0.26, -0.22), (-0.315, 0.10)]
+
+
+def build_shield(mats, root, scale=1.0, pivot=None):
+    """Escudo de pavês/kite: aro de aço, friso de ouro, campo azul de time com brasão e umbo dourado.
+    Nó ShieldGroup (o UnitAnimator gira em y; repouso rot y −0,3)."""
+    k = scale
+    mb = MeshBuilder('ShieldGroup')
+    for (f, depth, mat) in ((1.0, 0.055, 'steel_dark'), (0.93, 0.075, 'gold'), (0.85, 0.095, 'team')):
+        poly = [(x * f * k, y * f * k) for (x, y) in KITE]
+        mb.add(prim_extrude(poly, depth, axis='z'), mat, M((0, 0, 0)))
+    # verso de couro
+    mb.add(prim_box(0.10 * k, 0.56 * k, 0.03), 'leather', M((0, 0.05 * k, -0.04)))
+    mb.add(prim_box(0.36 * k, 0.07 * k, 0.03), 'leather', M((0, -0.12 * k, -0.04)))
+    # brasão: cruz pattée dourada e umbo central
+    z = 0.055
+    mb.add(prim_box(0.10 * k, 0.74 * k, 0.03), 'gold', M((0, -0.02 * k, z)))
+    mb.add(prim_box(0.44 * k, 0.10 * k, 0.03), 'gold', M((0, 0.14 * k, z)))
+    for (dx, dy, w, h) in ((0, 0.36, 0.2, 0.06), (0, -0.38, 0.14, 0.05), (-0.23, 0.14, 0.06, 0.2), (0.23, 0.14, 0.06, 0.2)):
+        mb.add(prim_box(w * k, h * k, 0.03), 'gold', M((dx * k, dy * k, z)))
+    mb.add(prim_sphere(0.10 * k, 0.10 * k, 0.055, 10, 5), 'steel_hi', M((0, 0.14 * k, z + 0.03)), smooth=60)
+    mb.add(prim_cyl(0.105 * k, 0.105 * k, 0.02, 10, base=False), 'gold', M((0, 0.14 * k, z + 0.012), (90, 0, 0)), smooth=30)
+    for (x, y) in ((-0.25, 0.42), (0.25, 0.42), (-0.29, 0.05), (0.29, 0.05), (-0.19, -0.26), (0.19, -0.26)):
+        mb.add(prim_sphere(0.022 * k, 0.022 * k, 0.02, 5, 3), 'steel_hi', M((x * k, y * k, 0.05)), smooth=60)
+    sh = mb.build(mats, parent=root, location=pivot or SHIELD_PIVOT)
+    C.set_rot_game(sh, (0.0, math.degrees(-0.3), 0.0))
+    return sh
+
 
 
 def main():
@@ -250,12 +342,13 @@ def main():
     leg_l = build_leg(mats, root, -1)
     leg_r = build_leg(mats, root, 1)
     sword = build_sword(mats, root)
-    parts = [torso, head, arm_l, arm_r, leg_l, leg_r, sword]
+    shield = build_shield(mats, root)
+    parts = [torso, head, arm_l, arm_r, leg_l, leg_r, sword, shield]
     import bpy
     bpy.context.view_layer.update()
 
     C.uv_atlas(parts, weights={'Head': 1.5, 'Torso': 1.2, 'Sword': 0.8, 'LegL': 0.8, 'LegR': 0.8,
-                               'ArmL': 0.8, 'ArmR': 0.8}, margin=0.008)
+                               'ArmL': 0.9, 'ArmR': 0.9, 'ShieldGroup': 0.9}, margin=0.006)
     img = C.bake_atlas(parts, 'knight_atlas', 512, samples=int(os.environ.get('BAKE_SAMPLES', 32)), margin=4)
     C.finalize_materials(parts, img, team_default=TEAM_DEFAULT,
                          out_png=os.path.join(C.BUILD_DIR, 'knight_atlas.png'))

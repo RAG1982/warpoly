@@ -329,8 +329,8 @@ export class ModelFactory {
       case 'forge': return this.createHumanForge();
       case 'stable': return this.createStable();
       case 'ogre_den': return this.createOgreDen();
-      case 'arcane_tower': return this.getOrCreateModel('arcane_tower', createArcaneTower);
-      case 'ash_sanctum': return this.getOrCreateModel('ash_sanctum', createAshSanctum);
+      case 'arcane_tower': return this._glbOr('arcane_tower', () => this.getOrCreateModel('arcane_tower', createArcaneTower));
+      case 'ash_sanctum': return this._glbOr('ash_sanctum', () => this.getOrCreateModel('ash_sanctum', createAshSanctum));
       case 'workshop': return this.createWorkshop();
       case 'orc_workshop': return this.createOrcWorkshop();
       case 'wall_human': return createWallSegment('human');
@@ -522,14 +522,14 @@ export class ModelFactory {
     return this._glbOr('ogre', () => this.getOrCreateModel('ogre', createOgre, 'ogre'));
   }
 
-  /** F4-05: Sapadores de Pólvora (humano, procedural). */
+  /** F4-05: Sapadores de Pólvora (humano; .glb do Blender, fallback procedural). */
   static createSapper() {
-    return this.getOrCreateModel('sapper', createSapper, 'sapper');
+    return this._glbOr('sapper', () => this.getOrCreateModel('sapper', createSapper, 'sapper'));
   }
 
-  /** F4-05: Incendiários (orc, procedural). */
+  /** F4-05: Incendiários (orc; .glb do Blender, fallback procedural). */
   static createArsonist() {
-    return this.getOrCreateModel('arsonist', createArsonist, 'arsonist');
+    return this._glbOr('arsonist', () => this.getOrCreateModel('arsonist', createArsonist, 'arsonist'));
   }
 
   static createUnit(type) {
@@ -545,9 +545,9 @@ export class ModelFactory {
       case 'cavalier': return this.createCavalier();
       case 'ballista': return this.createBallista();
       case 'catapult': return this.createCatapult();
-      case 'mage': return this.getOrCreateModel('mage', createMage, 'mage');
-      case 'necromancer': return this.getOrCreateModel('necromancer', createNecromancer, 'necromancer');
-      case 'skeleton': return this.getOrCreateModel('skeleton', createSkeleton, 'skeleton');
+      case 'mage': return this._glbOr('mage', () => this.getOrCreateModel('mage', createMage, 'mage'));
+      case 'necromancer': return this._glbOr('necromancer', () => this.getOrCreateModel('necromancer', createNecromancer, 'necromancer'));
+      case 'skeleton': return this._glbOr('skeleton', () => this.getOrCreateModel('skeleton', createSkeleton, 'skeleton'));
       case 'sheep': return this.createCritter('sheep');
       case 'sapper': return this.createSapper();
       case 'arsonist': return this.createArsonist();

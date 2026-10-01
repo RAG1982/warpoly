@@ -3,8 +3,13 @@ import { ModelFactory } from '../entities/ModelFactory.js';
 import { Building } from '../entities/Building.js';
 import { getCost, getBuildingDef, WALL_STEP, WALL_MAX_POINTS } from '../data/index.js';
 import { CMD } from '../sim/commands.js';
+import { ControlGroups } from './ControlGroups.js';
+import { resolveKey, limitByDistance, SELECTION_LIMIT } from './Hotkeys.js';
 import { EVT } from '../sim/events.js';
 import { resolveAbility, needsEntityTarget, targetProblem, canCast, pickCaster, selectionAbilityUnits } from '../sim/abilities.js';
+
+/** Distância (px) da borda da janela que ativa o pan pela borda (F3-01). */
+const EDGE_PX = 8;
 
 export class InputManager {
   constructor(sceneManager, gameManager, terrain) {
@@ -33,12 +38,29 @@ export class InputManager {
      */
     this.targetMode = null;
 
+    // F3-01: grupos de controle, alerta, trabalhador ocioso, pan pela borda, câmera arrastada.
+    this.controlGroups = new ControlGroups();
+    this._consumed = {};          // teclas já tratadas como atalho (não movem a câmera)
+    this._lastClick = { t: -Infinity, id: -1 };
+    this._idleCursor = -1;
+    this.lastAlertPos = null;
+    this._hasMouse = false;
+    this._isMiddleDown = false;
+    this.edgePan = true;
+    try { this.edgePan = localStorage.getItem('warpoly.edgePan') !== '0'; } catch { /* sem storage */ }
+    const ev = this.gm.events;
+    this._offAlerts = ev ? [
+      ev.on(EVT.UNDER_ATTACK, p => this._noteAlert(p)),
+      ev.on(EVT.UNIT_DAMAGED, p => this._noteAlert(p)),
+      ev.on(EVT.BUILDING_DAMAGED, p => this._noteAlert(p))
+    ] : [];
+
     // Listeners de window/DOM removidos em dispose() (sessão de partida descartável).
     this._abort = new AbortController();
     const opts = { signal: this._abort.signal };
     window.addEventListener('keydown', e => this.onKeyDown(e), opts);
     window.addEventListener('keyup', e => this.onKeyUp(e), opts);
-    window.addEventListener('blur', () => { this.keys = {}; }, opts);
+    window.addEventListener('blur', () => { this.keys = {}; this._consumed = {}; this._isMiddleDown = false; }, opts);
 
     // Mouse drag / selection box
     this.isLeftDown = false;
@@ -64,6 +86,7 @@ export class InputManager {
     const dom = this.sm.renderer.domElement;
     dom.addEventListener('mousedown', e => this.onMouseDown(e), opts);
     window.addEventListener('mousemove', e => this.onMouseMove(e), opts);
+    document.addEventListener('mouseleave', () => { this._hasMouse = false; }, opts);
     window.addEventListener('mouseup', e => this.onMouseUp(e), opts);
     dom.addEventListener('wheel', e => this.onWheel(e), { passive: false, signal: this._abort.signal });
     dom.addEventListener('contextmenu', e => e.preventDefault(), opts);
@@ -98,18 +121,17 @@ export class InputManager {
     this.decalLife = 0.35;
   }
 
+  _noteAlert(p) {
+    if (p && p.ownerId === this.gm.localPlayerId && p.pos) this.lastAlertPos = { x: p.pos.x, z: p.pos.z };
+  }
+
   onKeyDown(e) {
     this.keys[e.code] = true;
     if (this.suspended) return;
+    const t = e.target;
+    if (t && (t.tagName === 'INPUT' || t.tagName === 'TEXTAREA' || t.tagName === 'SELECT' || t.isContentEditable)) return;
 
-    if (e.code === 'KeyH') {
-      // Focus on Castle / Great Hall
-      const hq = this.gm.buildings.find(b => (b.type === 'castle' || b.type === 'great_hall') && b.faction === 'player');
-      if (hq) {
-        this.sm.cameraTarget.copy(hq.mesh.position);
-        this.gm.selectSingle(hq);
-      }
-    } else if (e.code === 'Escape') {
+    if (e.code === 'Escape') {
       // Esc: cancela a colocação; senão limpa a seleção; senão abre o menu de pausa (F2-04).
       if (this.targetMode) {
         this.setTargetMode(null);
@@ -121,8 +143,13 @@ export class InputManager {
         e.preventDefault();
         this.onPauseRequest();
       }
+      return;
+    }
+    if (this._handleHotkey(e)) {
+      this._consumed[e.code] = true;
+      if (e.code === 'Space' || e.code === 'Backspace') e.preventDefault();
     } else if (this._tryAbilityHotkey(e)) {
-      // F4-03: atalho de habilidade do card (consumido)
+      this._consumed[e.code] = true; // F4-03: atalho de habilidade do card (consumido)
     } else if (e.code === 'KeyR' && !e.ctrlKey && !e.metaKey && !e.altKey) {
       this.startRepairMode();
     } else if (e.code === 'KeyQ') {
@@ -130,6 +157,184 @@ export class InputManager {
     } else if (e.code === 'KeyE') {
       this.sm.rotateCamera(-Math.PI / 8);
     }
+  }
+
+  /** Botões visíveis do card (letra → botão), lidos do badge de atalho (`.bld-hotkey-badge`). */
+  _cardButtons() {
+    const map = new Map();
+    const ui = this.uiManager;
+    if (!ui) return map;
+    for (const root of [ui.selectionActions, ui.bldTrainButtons]) {
+      if (!root) continue;
+      for (const btn of root.querySelectorAll('button')) {
+        const badge = btn.querySelector('.bld-hotkey-badge');
+        const letter = badge ? badge.textContent.trim().toUpperCase() : '';
+        if (letter && !map.has(letter) && btn.offsetParent !== null) map.set(letter, btn);
+      }
+    }
+    return map;
+  }
+
+  /** F3-01: atalhos do RTS (ver `Hotkeys.resolveKey`). Devolve true se a tecla foi consumida. */
+  _handleHotkey(e) {
+    const gm = this.gm;
+    const cards = this._cardButtons();
+    const action = resolveKey(
+      { code: e.code, ctrl: e.ctrlKey, shift: e.shiftKey, alt: e.altKey, meta: e.metaKey },
+      {
+        hasUnits: gm.selectedUnits.length > 0,
+        hasBuilding: !!gm.selectedBuilding,
+        targetMode: this.targetMode || this.placingBuildingType,
+        cardLetters: new Set(cards.keys())
+      }
+    );
+    if (!action) return false;
+    if (e.repeat) return true; // atalho consumido, mas não repete ao segurar
+    switch (action.type) {
+      case 'group': this._groupAction(action); break;
+      case 'order': this._orderAction(action.order); break;
+      case 'card': {
+        const btn = cards.get(action.letter);
+        if (btn) btn.click();
+        break;
+      }
+      case 'idleWorker': this.selectNextIdleWorker(); break;
+      case 'lastAlert': this.centerOnLastAlert(); break;
+      case 'hq': this.centerOnHq(); break;
+      default: return false;
+    }
+    return true;
+  }
+
+  _isAlive(id) {
+    const u = this.gm.entitiesById.get(id);
+    return !!u && !u.isDead && !u.isDying && u.state !== 'dying' && u.ownerId === this.gm.localPlayerId;
+  }
+
+  _groupAction({ op, n }) {
+    const gm = this.gm;
+    const cg = this.controlGroups;
+    const ids = gm.selectedUnits.filter(u => !u.isDead).map(u => u.id);
+    if (ids.length === 0 && gm.selectedBuilding && gm.selectedBuilding.ownerId === gm.localPlayerId) ids.push(gm.selectedBuilding.id);
+    if (op === 'set') { cg.set(n, ids); return; }
+    if (op === 'add') { cg.add(n, ids); return; }
+    const { ids: members, center } = cg.recall(n, performance.now(), id => this._isAlive(id));
+    const ents = members.map(id => gm.entitiesById.get(id));
+    if (ents.length === 0) return;
+    const units = ents.filter(en => !('isConstructed' in en)); // construções têm isConstructed
+    if (units.length > 0) this.selectUnits(units.slice(0, SELECTION_LIMIT), { additive: false });
+    else gm.selectSingle(ents[0]);
+    if (center) this._centerOn(ents);
+  }
+
+  _centerOn(ents) {
+    let x = 0, z = 0, n = 0;
+    for (const en of ents) {
+      if (!en.mesh) continue;
+      x += en.mesh.position.x; z += en.mesh.position.z; n++;
+    }
+    if (n === 0) return;
+    this.sm.cameraTarget.set(x / n, this.terrain.getHeight(x / n, z / n), z / n);
+  }
+
+  _orderAction(order) {
+    const gm = this.gm;
+    gm.selectedUnits = gm.selectedUnits.filter(u => !u.isDead && !u.isDying && u.state !== 'dying');
+    const unitIds = gm.selectedUnits.map(u => u.id);
+    if (unitIds.length === 0) return;
+    const playerId = gm.localPlayerId;
+    if (order === 'stop') {
+      gm.issue({ type: CMD.STOP, playerId, unitIds });
+      gm.soundManager.playOrder();
+    } else if (order === 'hold') {
+      gm.issue({ type: CMD.HOLD, playerId, unitIds });
+      gm.soundManager.playOrder();
+    } else {
+      this.setTargetMode({ kind: order });
+      gm.events.emit(EVT.NOTIFY, { ownerId: playerId, text: order === 'attackMove' ? 'Atacar-movendo: clique no destino.' : 'Patrulhar: clique no destino.' });
+    }
+  }
+
+  /** `.`: seleciona o próximo trabalhador ocioso do jogador local e centraliza a câmera. */
+  selectNextIdleWorker() {
+    const gm = this.gm;
+    const idle = gm.getUnitsOf(gm.localPlayerId)
+      .filter(u => (u.type === 'villager' || u.type === 'peon') && u.state === 'idle' && !u.isDead && !u.isDying)
+      .sort((a, b) => a.id - b.id);
+    if (idle.length === 0) {
+      gm.events.emit(EVT.NOTIFY, { ownerId: gm.localPlayerId, text: 'Nenhum trabalhador ocioso.' });
+      return null;
+    }
+    this._idleCursor = idle.findIndex(u => u.id > this._idleCursor);
+    if (this._idleCursor < 0) this._idleCursor = 0;
+    const u = idle[this._idleCursor];
+    this._idleCursor = u.id;
+    this.selectUnits([u], { additive: false });
+    this._centerOn([u]);
+    return u;
+  }
+
+  centerOnLastAlert() {
+    const p = this.lastAlertPos;
+    if (p) this.sm.cameraTarget.set(p.x, this.terrain.getHeight(p.x, p.z), p.z);
+    else this.centerOnHq();
+  }
+
+  centerOnHq() {
+    const hq = this.gm.buildings.find(b => (b.type === 'castle' || b.type === 'great_hall') && b.ownerId === this.gm.localPlayerId);
+    if (hq) {
+      this.sm.cameraTarget.copy(hq.mesh.position);
+      this.gm.selectSingle(hq);
+    }
+  }
+
+  _screenPos(u) {
+    const p = u.mesh.position.clone().project(this.sm.camera);
+    return { id: u.id, u, x: ((p.x + 1) * window.innerWidth) / 2, y: ((-p.y + 1) * window.innerHeight) / 2 };
+  }
+
+  /** Seleciona `units` (próprias). `additive` mantém a seleção atual (sem passar de SELECTION_LIMIT). */
+  selectUnits(units, { additive = false } = {}) {
+    const gm = this.gm;
+    if (!additive || gm.selectedBuilding) gm.clearSelection();
+    gm.selectedResource = null;
+    for (const u of units) {
+      if (gm.selectedUnits.length >= SELECTION_LIMIT) break;
+      if (gm.selectedUnits.includes(u)) continue;
+      u.setSelected(true);
+      gm.selectedUnits.push(u);
+    }
+    if (gm.selectedUnits.length > 0) gm.soundManager.playSelect();
+  }
+
+  /** Caixa de seleção (F3-01): limite de 24 (mais próximas do centro da caixa); `additive` com Shift. */
+  selectInBox(rect, additive) {
+    const gm = this.gm;
+    const minX = Math.min(rect.x1, rect.x2), maxX = Math.max(rect.x1, rect.x2);
+    const minY = Math.min(rect.y1, rect.y2), maxY = Math.max(rect.y1, rect.y2);
+    const inside = [];
+    for (const u of gm.getUnitsOf(gm.localPlayerId)) {
+      if (u.isDead || u.isDying || u.ownerId !== gm.localPlayerId) continue;
+      const s = this._screenPos(u);
+      if (s.x >= minX && s.x <= maxX && s.y >= minY && s.y <= maxY) inside.push(s);
+    }
+    const picked = limitByDistance(inside, { x: (minX + maxX) / 2, y: (minY + maxY) / 2 });
+    if (!additive) gm.clearSelection();
+    this.selectUnits(picked.map(s => s.u), { additive: true });
+  }
+
+  /** Duplo clique: todas as unidades próprias do mesmo tipo visíveis na tela (até o limite). */
+  selectSameTypeOnScreen(unit, additive) {
+    const gm = this.gm;
+    const found = [];
+    for (const u of gm.getUnitsOf(gm.localPlayerId)) {
+      if (u.isDead || u.isDying || u.type !== unit.type) continue;
+      const s = this._screenPos(u);
+      if (s.x >= 0 && s.x <= window.innerWidth && s.y >= 0 && s.y <= window.innerHeight) found.push(s);
+    }
+    const origin = this._screenPos(unit);
+    const picked = limitByDistance(found, origin);
+    this.selectUnits(picked.map(s => s.u), { additive });
   }
 
   /** F3-05: arma o modo "Reparar" (só com trabalhadores próprios selecionados). */
@@ -220,7 +425,33 @@ export class InputManager {
   _handleTargetClick() {
     if (!this.targetMode) return false;
     if (this.targetMode.kind === 'cast') return this._handleCastClick();
+    if (this.targetMode.kind === 'attackMove' || this.targetMode.kind === 'patrol') return this._handleOrderClick(this._lastShift);
     return this._handleRepairClick();
+  }
+
+  /** F3-01: clique esquerdo em modo Atacar-movendo (A) ou Patrulhar (P). Shift enfileira. */
+  _handleOrderClick(shift) {
+    const gm = this.gm;
+    const kind = this.targetMode.kind;
+    const local = gm.localPlayerId;
+    this.setTargetMode(null);
+    gm.selectedUnits = gm.selectedUnits.filter(u => !u.isDead && !u.isDying && u.state !== 'dying');
+    const unitIds = gm.selectedUnits.map(u => u.id);
+    if (unitIds.length === 0) return true;
+    const e = this.hoveredEntity;
+    const g = this.groundIntersection;
+    if (kind === 'attackMove' && e && e.id !== undefined && gm.isHostile(local, e.ownerId) && e.mesh) {
+      this.playClickDecal(e.mesh.position, 0xef4444);
+      gm.issue({ type: CMD.ATTACK, playerId: local, unitIds, targetId: e.id });
+    } else if (kind === 'attackMove') {
+      this.playClickDecal(g, 0xef4444);
+      gm.issue({ type: CMD.ATTACK_MOVE, playerId: local, unitIds, x: g.x, z: g.z, ...(shift ? { queued: true } : {}) });
+    } else {
+      this.playClickDecal(g, 0x60a5fa);
+      gm.issue({ type: CMD.PATROL, playerId: local, unitIds, x: g.x, z: g.z });
+    }
+    gm.soundManager.playOrder();
+    return true;
   }
 
   /** F3-05: clique esquerdo em modo Reparar. */
@@ -243,6 +474,7 @@ export class InputManager {
 
   onKeyUp(e) {
     this.keys[e.code] = false;
+    this._consumed[e.code] = false;
   }
 
   onWheel(e) {
@@ -261,6 +493,12 @@ export class InputManager {
     this.updateMouseCoords(e);
     this.raycastScene();
 
+    if (e.button === 1) {
+      // F3-01: botão do meio arrasta a câmera
+      e.preventDefault();
+      this._isMiddleDown = true;
+      return;
+    }
     if (e.button === 0) {
       // Left Click
       this.isLeftDown = true;
@@ -283,12 +521,20 @@ export class InputManager {
       } else {
         const targetColor = (this.hoveredEntity && this.hoveredEntity.faction === 'enemy') ? 0xef4444 : 0xdeb841;
         this.playClickDecal(this.groundIntersection, targetColor);
-        this.gm.issueOrder(this.hoveredEntity, this.groundIntersection);
+        this.gm.issueOrder(this.hoveredEntity, this.groundIntersection, { queued: e.shiftKey });
       }
     }
   }
 
   onMouseMove(e) {
+    // F3-01: arrastar a câmera com o botão do meio (px → unidades de mundo, escala pelo zoom).
+    if (this._isMiddleDown && !this.suspended) {
+      const dx = e.clientX - this.currentMousePos.x;
+      const dy = e.clientY - this.currentMousePos.y;
+      const k = 0.06 * this.sm.zoomLevel;
+      this.sm.panCamera(-dx * k, dy * k);
+    }
+    this._hasMouse = true;
     this.currentMousePos = { x: e.clientX, y: e.clientY };
 
     if (e.target && e.target.closest && e.target.closest('#ui-layer')) {
@@ -366,6 +612,7 @@ export class InputManager {
       if (this.targetMode) {
         this.isDraggingBox = false;
         if (this.boxEl) this.boxEl.style.display = 'none';
+        this._lastShift = e.shiftKey;
         this._handleTargetClick();
         return;
       }
@@ -373,22 +620,43 @@ export class InputManager {
       if (this.isDraggingBox) {
         this.isDraggingBox = false;
         if (this.boxEl) this.boxEl.style.display = 'none';
-        this.gm.selectUnitsInBox({
+        this.selectInBox({
           x1: this.leftDownPos.x,
           y1: this.leftDownPos.y,
           x2: e.clientX,
           y2: e.clientY
-        }, this.sm.camera);
+        }, e.shiftKey);
       } else if (!this.placingBuildingType) {
-        // If military units are selected and player clicks on an enemy, issue attack command!
-        if (this.gm.selectedUnits.length > 0 && this.hoveredEntity && this.hoveredEntity.faction === 'enemy') {
-          this.playClickDecal(this.hoveredEntity.mesh.position, 0xef4444);
-          this.gm.issueOrder(this.hoveredEntity, this.hoveredEntity.mesh.position);
+        const ent = this.hoveredEntity;
+        const local = this.gm.localPlayerId;
+        const own = ent && ent.ownerId === local && !('isConstructed' in ent) && ent.mesh && ent.setSelected && ent.type !== undefined && this.gm.selectedResource !== ent;
+        const now = performance.now();
+        const dbl = own && this._lastClick.id === ent.id && now - this._lastClick.t < 350;
+        this._lastClick = { t: own ? now : -Infinity, id: own ? ent.id : -1 };
+        if (dbl) {
+          // F3-01: duplo clique — todas as unidades do mesmo tipo na tela
+          this.selectSameTypeOnScreen(ent, e.shiftKey);
+          this._lastClick = { t: -Infinity, id: -1 };
+        } else if (e.shiftKey && own) {
+          // F3-01: Shift+clique alterna a unidade na seleção
+          const sel = this.gm.selectedUnits;
+          if (sel.includes(ent)) {
+            ent.setSelected(false);
+            this.gm.selectedUnits = sel.filter(u => u !== ent);
+          } else {
+            this.selectUnits([ent], { additive: true });
+          }
+        } else if (this.gm.selectedUnits.length > 0 && ent && ent.faction === 'enemy') {
+          // Unidades selecionadas e clique num inimigo: ataca
+          this.playClickDecal(ent.mesh.position, 0xef4444);
+          this.gm.issueOrder(ent, ent.mesh.position, { queued: e.shiftKey });
         } else {
-          // Standard single selection
-          this.gm.selectSingle(this.hoveredEntity);
+          // Seleção simples
+          this.gm.selectSingle(ent);
         }
       }
+    } else if (e.button === 1) {
+      this._isMiddleDown = false;
     } else if (e.button === 2) {
       if (!this.isRightDown) return;
       this.isRightDown = false;
@@ -708,10 +976,20 @@ export class InputManager {
     let moveForward = 0;
     let moveRight = 0;
 
-    if (this.keys['KeyW'] || this.keys['ArrowUp']) moveForward += panSpeed;
-    if (this.keys['KeyS'] || this.keys['ArrowDown']) moveForward -= panSpeed;
-    if (this.keys['KeyA'] || this.keys['ArrowLeft']) moveRight -= panSpeed;
-    if (this.keys['KeyD'] || this.keys['ArrowRight']) moveRight += panSpeed;
+    const k = (code) => this.keys[code] && !this._consumed[code];
+    if (k('KeyW') || this.keys['ArrowUp']) moveForward += panSpeed;
+    if (k('KeyS') || this.keys['ArrowDown']) moveForward -= panSpeed;
+    if (k('KeyA') || this.keys['ArrowLeft']) moveRight -= panSpeed;
+    if (k('KeyD') || this.keys['ArrowRight']) moveRight += panSpeed;
+
+    // F3-01: pan pela borda da janela (≤ 8 px), mesma velocidade do WASD.
+    if (this.edgePan && this._hasMouse && !this.suspended && !this._isMiddleDown && document.hasFocus()) {
+      const { x, y } = this.currentMousePos;
+      if (x <= EDGE_PX) moveRight -= panSpeed;
+      else if (x >= window.innerWidth - EDGE_PX) moveRight += panSpeed;
+      if (y <= EDGE_PX) moveForward += panSpeed;
+      else if (y >= window.innerHeight - EDGE_PX) moveForward -= panSpeed;
+    }
 
     if (moveForward !== 0 || moveRight !== 0) {
       this.sm.panCamera(moveRight, moveForward);
@@ -728,6 +1006,8 @@ export class InputManager {
   /** F2-04: remove listeners, fantasma de construção e o anel de clique (fim da sessão). */
   dispose() {
     this._abort.abort();
+    for (const off of this._offAlerts || []) if (typeof off === 'function') off();
+    this._offAlerts = [];
     this.cancelPlacement();
     if (this.boxEl) this.boxEl.style.display = 'none';
     if (this.clickDecal) {

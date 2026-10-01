@@ -1297,7 +1297,9 @@ export class GameManager {
    * MOVE (offsets por unidade) é calculada pelo `CommandExecutor`, não aqui: o comando
    * carrega só o ponto clicado.
    */
-  issueOrder(entityUnderCursor, groundPoint) {
+  issueOrder(entityUnderCursor, groundPoint, { queued = false } = {}) {
+    // F3-01: Shift = enfileira (MOVE/GATHER/BUILD/REPAIR; ATTACK ignora `queued`).
+    const q = queued ? { queued: true } : null;
     this.selectedUnits = this.selectedUnits.filter(u => !u.isDead && !u.isDying && u.state !== 'dying');
     if (this.selectedUnits.length === 0) {
       if (this.selectedBuilding && this.selectedBuilding.ownerId === this._localPlayerId && groundPoint) {
@@ -1338,13 +1340,13 @@ export class GameManager {
         if (!isDepleted) {
           const workerIds = this.selectedUnits.filter(u => u.type === 'villager' || u.type === 'peon').map(u => u.id);
           if (workerIds.length > 0) {
-            this.issue({ type: CMD.GATHER, playerId: this._localPlayerId, unitIds: workerIds, targetId: e.id });
+            this.issue({ type: CMD.GATHER, playerId: this._localPlayerId, unitIds: workerIds, targetId: e.id, ...q });
             return;
           }
         }
         // If resource is depleted (e.g. cut stump with no wood) or non-workers selected, move units towards target
         if (groundPoint) {
-          this.issue({ type: CMD.MOVE, playerId: this._localPlayerId, unitIds, x: groundPoint.x, z: groundPoint.z });
+          this.issue({ type: CMD.MOVE, playerId: this._localPlayerId, unitIds, x: groundPoint.x, z: groundPoint.z, ...q });
           return;
         }
         return;
@@ -1352,7 +1354,7 @@ export class GameManager {
       // Right-clicked an incomplete building: Build!
       if (e instanceof Building && !e.isConstructed && e.ownerId === this._localPlayerId) {
         const workerIds = this.selectedUnits.filter(u => u.type === 'villager' || u.type === 'peon').map(u => u.id);
-        this.issue({ type: CMD.BUILD, playerId: this._localPlayerId, unitIds: workerIds, buildingId: e.id });
+        this.issue({ type: CMD.BUILD, playerId: this._localPlayerId, unitIds: workerIds, buildingId: e.id, ...q });
         return;
       }
       // F3-05: clique direito em construção própria concluída e danificada: Reparar (custa recursos).
@@ -1367,7 +1369,7 @@ export class GameManager {
 
     // Right-clicked ground: Move (o executor calcula a formação e evita água)
     if (groundPoint) {
-      this.issue({ type: CMD.MOVE, playerId: this._localPlayerId, unitIds, x: groundPoint.x, z: groundPoint.z });
+      this.issue({ type: CMD.MOVE, playerId: this._localPlayerId, unitIds, x: groundPoint.x, z: groundPoint.z, ...q });
     }
   }
 

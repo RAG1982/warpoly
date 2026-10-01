@@ -55,4 +55,12 @@ export class CommandQueue {
     for (let i = 0; i < list.length; i++) this.log.push(list[i]);
     return list;
   }
+
+  /** F2-06: comandos já emitidos mas ainda não executados (agendados), ordenados por tick/seqNo. */
+  pending() {
+    const out = [];
+    for (const list of this._byTick.values()) for (let i = 0; i < list.length; i++) out.push(list[i]);
+    out.sort((a, b) => (a.tick - b.tick) || (a.seqNo - b.seqNo));
+    return out;
+  }
 }

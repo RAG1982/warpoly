@@ -84,9 +84,11 @@ export class MainMenu {
    * @param {object} [opts]
    * @param {(choice: {faction: string, difficulty: string, mapId: string, victoryMode: string}) => void} [opts.onStart]
    * @param {(open: boolean) => void} [opts.onSetupChange]
+   * @param {() => void} [opts.onLoadGame]  F2-06
    */
-  constructor(parent = document.body, { onStart = null, onSetupChange = null } = {}) {
+  constructor(parent = document.body, { onStart = null, onSetupChange = null, onLoadGame = null } = {}) {
     this.parent = parent;
+    this.onLoadGame = onLoadGame; // F2-06: abre o diálogo de slots de save
     this.onStart = onStart;
     this.onSetupChange = onSetupChange;
     this.root = null;
@@ -213,6 +215,9 @@ export class MainMenu {
             <button type="button" class="mm-btn mm-btn--primary" data-action="new-game" aria-haspopup="dialog" aria-controls="mm-skirmish">
               <span class="mm-btn__label">Novo Jogo</span><span class="mm-btn__hint">Escaramuça</span>
             </button>
+            <button type="button" class="mm-btn" data-action="load-game">
+              <span class="mm-btn__label">Carregar Jogo</span><span class="mm-btn__hint">Saves</span>
+            </button>
             <button type="button" class="mm-btn" disabled aria-describedby="mm-soon-note">
               <span class="mm-btn__label">Campanha</span><span class="mm-badge">Em breve</span>
             </button>
@@ -329,6 +334,7 @@ export class MainMenu {
       if (!el || !root.contains(el)) return;
       const action = el.dataset.action;
       if (action === 'new-game') this.openPanel('skirmish', el);
+      else if (action === 'load-game') this.onLoadGame?.();
       else if (action === 'options') this.openPanel('options', el);
       else if (action === 'credits') this.openCredits(el);
       else if (action === 'close') this.closePanel();

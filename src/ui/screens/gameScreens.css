@@ -118,3 +118,9 @@
 @media (prefers-reduced-motion: reduce) {
   .gs-overlay, .gs-card { animation: none; }
 }
+
+/* ------------------------------------------------ diálogo de slots de save (F2-06) */
+.gs-card--wide { width: min(520px, 100%); }
+.gs-slots .mm-btn { justify-content: space-between; text-align: left; }
+.gs-slots .mm-btn__hint { font-size: 12px; opacity: 0.85; text-align: right; }
+.gs-slots .mm-btn[disabled] { opacity: 0.5; }

@@ -49,6 +49,7 @@ src/
     PlayerRegistry.js         players[], getPlayer, localPlayer, isHostile/isAlly por time (matriz)
     EntityIds.js              Contador monotônico, EntityRegistry (id → entidade), NEUTRAL_OWNER_ID = −1
     MatchConfig.js            {mapId, seed, difficulty, players[]}, layout da base inicial (layoutAt, slots vêm do mapa), withNewSeed
+    SaveGame.js               Save/Load por replay determinístico (F2-06): captureSave, fastForward, parseSave
     SpatialGrid.js            Grade espacial (spatial hash) uniforme: insert/update/remove/clear, queryRadius,
                                queryRect, nearest (F1-06; testado em tests/unit/spatialGrid.test.js)
   ai/
@@ -403,6 +404,36 @@ Multiplayer lockstep (F9) e replays (F9-05) exigem que a mesma seed + o mesmo lo
   diferentes num multiplayer real (não entre replays da mesma máquina). Se isso importar para
   lockstep entre navegadores distintos, F9-03 deve avaliar uma tabela ou implementação própria
   de trigonometria fixa.
+
+## Save / Load (F2-06)
+
+Salvar partida **por replay determinístico** (não por snapshot de entidades): como a simulação é determinística
+(F2-03), o save guarda só o necessário para reproduzir o estado — `src/sim/SaveGame.js` (puro, testado em Node).
+
+- **Formato** (JSON, alguns KB): `{version: SAVE_VERSION, name, savedAt, tick, gameTime, checksum, config, commands, summary, view}`.
+  `config` = `MatchConfig` (com a seed); `commands` = comandos dos jogadores **humanos** já executados (`gm.commands.log`)
+  ou agendados (`CommandQueue.pending()`), sem `seqNo`; as IAs **não** entram no log (regeneram os próprios comandos
+  deterministicamente); `checksum` = `stateChecksum(gm)` no tick salvo; `view` = só apresentação (câmera, zoom, ângulo,
+  hora do dia, seleção, grupos de controle) — não faz parte do checksum.
+- **Carregar**: recria a partida pela `config` do save (nova `MatchSession`), reenfileira os comandos (`applySaveCommands`) e
+  avança a simulação com `fastForward(gm, save, maxSteps)` até `save.tick` (em lotes de 400 passos por quadro, com barra de
+  progresso na tela de loading); `finishFastForward` alinha as poses de interpolação e confere o checksum (divergência →
+  aviso na HUD, a partida segue). Durante o avanço os ouvintes de **apresentação** (áudio/VFX/UI, registrados com
+  `events.on(type, fn, true)`) ficam mudos (`EventBus.presentationMuted`); `MatchStats` continua contando. Custo ≈ 0,4 ms por
+  tick (minuto 5 ≈ 2 s; 20 min ≈ 10 s).
+  - **Armadilha**: entre os lotes o quadro renderizado reescreve `mesh.position` a partir de `_prevPos/_simPos`; por isso o
+    avanço usa o mesmo protocolo de `advance` (`_restoreSimPose` → `_snapshotPrevPose` → `simStep` → `_snapshotSimPose`).
+- **Armazenamento** (`src/core/SaveStore.js`): `SaveStore` com backend IndexedDB (`warpoly`/`saves`, keyPath `slot`) ou memória
+  (testes). Slots: `slot1..slot3` + `autosave`. UI: `ui/screens/SaveLoadDialog.js` — botões "Salvar partida"/"Carregar partida"
+  no menu de pausa e "Carregar Jogo" no menu principal. API de depuração: `game.saveToSlot(slot)`, `game.loadFromSlot(slot)`.
+- **Autosave** (opcional, desligado por padrão): `?autosave=<minutos>` (grava em `localStorage['warpoly.autosave']`) ou
+  essa chave direta; salva no slot `autosave` a cada N minutos de jogo.
+- **Limites**: um save só reproduz com a versão do código/dados que o gerou (`SAVE_VERSION` + checksum); qualquer mutação de
+  estado fora de `gm.issue` (cheats/bench que escrevem direto em recursos, `spawnUnit` manual) **não** é capturada.
+  O formato é o mesmo de um replay (F9-05).
+- **Testes**: `tests/unit/saveGame.test.js` (round-trip no minuto 5 com continuação idêntica por 1000 ticks, encadeamento de
+  saves, IA fora do log, rejeição de saves inválidos, `SaveStore`); navegador real/IndexedDB:
+  `bash tools/safe-run.sh --timeout 500 -- node tools/save-load-check.mjs 6000`.
 
 ## Eventos (F2-07)
 

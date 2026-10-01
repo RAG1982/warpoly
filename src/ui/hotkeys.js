@@ -16,6 +16,7 @@ export const BUILD_HOTKEY_BY_ROLE = {
   forge: 'K',
   stable: 'V',
   workshop: 'O',
+  arcane: 'G',
   tower: 'T',
   wall: 'M'
 };
@@ -24,7 +25,7 @@ export const BUILD_HOTKEY_BY_ROLE = {
 export const TRAIN_SLOT_HOTKEYS = ['Q', 'W', 'E'];
 
 /** Pesquisas da forja: posicional, sequência própria para não colidir com o treino (até 4 melhorias). */
-export const RESEARCH_SLOT_HOTKEYS = ['R', 'A', 'S', 'D'];
+export const RESEARCH_SLOT_HOTKEYS = ['R', 'A', 'S', 'D', 'F', 'G'];
 
 /** Tecla de atalho de um botão "construir" a partir do tipo de construção (`orc_barracks`, `cottage`…). */
 export function getBuildHotkey(buildingType) {

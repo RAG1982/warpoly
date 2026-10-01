@@ -33,7 +33,11 @@
  *   hostis), morre sem cadáver. Não auto-adquire unidades (só construções/muralhas; em `hold` sim).
  * - maxMana, startMana, manaRegen, abilities   F4-03 (todos opcionais): `maxMana` 0/ausente = sem mana (design:
  *   máx. 255); `startMana` (padrão = maxMana); `manaRegen` mana/s (padrão 1); `abilities` ids de
- *   `src/data/abilities.js`, na ordem do card 3×3 (máx. 4). Nenhuma unidade de jogo usa isso ainda (F4-04/F4-08).
+ *   `src/data/abilities.js`, na ordem do card 3×3 (máx. 9). F4-04: Mago Arcano e Necromante das Cinzas usam isso.
+ * - detector        F4-04: detecta unidades invisíveis num raio (`DETECT_RADIUS`). Nenhuma unidade tem ainda (F4-06: Planador).
+ * - undead          F4-04: marcador de morto-vivo (esqueleto; alvo do Exorcismo na F4-04b).
+ * - corpseless      F4-04: não deixa cadáver ao morrer (cerco, suicidas, esqueletos, ovelhas).
+ * - isSiege         F4-04: unidade de cerco (imune à Transmutação). `isHero` idem (heróis na F4-08).
  */
 
 // Raios de varredura compartilhados (antes hardcoded em Unit.js: 11/14, 13/15, 16, 14).
@@ -126,7 +130,8 @@ export const UNITS = {
     trainTime: 18,
     icon: '/icoArco.png',
     description: 'Cerco: besta gigante de longo alcance com dano em área (alcance mínimo 4)',
-    isWorker: false, isRanged: true, isCombat: true, projectile: 'bolt'
+    isWorker: false, isRanged: true, isCombat: true, projectile: 'bolt',
+    isSiege: true, corpseless: true
   },
 
   // --- Clãs Orcs ---
@@ -214,7 +219,8 @@ export const UNITS = {
     trainTime: 18,
     icon: '/icoArco.png',
     description: 'Cerco: lança pedras em arco alto com dano em área (alcance mínimo 4)',
-    isWorker: false, isRanged: true, isCombat: true, projectile: 'boulder'
+    isWorker: false, isRanged: true, isCombat: true, projectile: 'boulder',
+    isSiege: true, corpseless: true
   },
 
   // F4-05: unidades suicidas (Oficina, Centro nível 2). Detonam ao chegar ao alvo: `damage` siege em
@@ -226,7 +232,7 @@ export const UNITS = {
     faction: 'human',
     requires: [{ hq: 2 }],
     hp: 60, speed: 5.0, damage: { basic: 400, piercing: 0, type: 'siege' }, attackRange: 1.2, attackCooldown: 0.1, armor: 0,
-    splashRadius: 2.2, suicide: true,
+    splashRadius: 2.2, suicide: true, corpseless: true,
     collisionRadius: 0.7,
     visionRadius: 16,
     ...MELEE_SCAN,
@@ -244,7 +250,7 @@ export const UNITS = {
     faction: 'orc',
     requires: [{ hq: 2 }],
     hp: 60, speed: 5.0, damage: { basic: 400, piercing: 0, type: 'siege' }, attackRange: 1.2, attackCooldown: 0.1, armor: 0,
-    splashRadius: 2.2, suicide: true,
+    splashRadius: 2.2, suicide: true, corpseless: true,
     collisionRadius: 0.7,
     visionRadius: 16,
     ...MELEE_SCAN,
@@ -293,6 +299,82 @@ export const UNITS = {
     icon: '/icoArco.png',
     description: 'Lançador de machados em fúria, mais resistente e certeiro',
     isWorker: false, isRanged: true, isCombat: true, projectile: 'axe'
+  },
+
+  // --- F4-04: conjuradores (Torre Arcana / Santuário das Cinzas; Centro nível 3) ---
+  mage: {
+    type: 'mage',
+    name: 'Mago Arcano',
+    entityName: 'Mago Arcano',
+    faction: 'human',
+    requires: [{ hq: 3 }],
+    hp: 60, speed: 4.2, damage: { basic: 0, piercing: 20, type: 'magic' }, attackRange: 8, attackCooldown: 1.8, armor: 0,
+    collisionRadius: 0.7,
+    visionRadius: 18,
+    ...RANGED_SCAN,
+    healthBarHeight: 3.5,
+    cost: { gold: 120, wood: 0, stone: 0 },
+    trainTime: 12,
+    icon: '/icoEscudo.png', // provisório (ícone novo na F7)
+    description: 'Conjurador: bola de fogo, lentidão, escudo de chamas, invisibilidade, transmutação e nevasca',
+    isWorker: false, isRanged: true, isCombat: true, projectile: 'bolt',
+    maxMana: 255, startMana: 85, manaRegen: 1,
+    abilities: ['fireball', 'slow', 'flameshield', 'invisibility', 'polymorph', 'blizzard']
+  },
+  necromancer: {
+    type: 'necromancer',
+    name: 'Necromante das Cinzas',
+    entityName: 'Necromante das Cinzas',
+    faction: 'orc',
+    requires: [{ hq: 3 }],
+    hp: 60, speed: 4.2, damage: { basic: 0, piercing: 20, type: 'magic' }, attackRange: 8, attackCooldown: 1.8, armor: 0,
+    collisionRadius: 0.7,
+    visionRadius: 18,
+    ...RANGED_SCAN,
+    healthBarHeight: 3.5,
+    cost: { gold: 120, wood: 0, stone: 0 },
+    trainTime: 12,
+    icon: '/icoEscudo.png', // provisório (ícone novo na F7)
+    description: 'Conjurador: toque da morte, pressa, erguer mortos, armadura profana e nuvem de cinzas',
+    isWorker: false, isRanged: true, isCombat: true, projectile: 'bolt',
+    maxMana: 255, startMana: 85, manaRegen: 1,
+    abilities: ['death_touch', 'haste_spell', 'raise_dead', 'unholy_armor', 'ash_cloud']
+  },
+  // Invocado por Erguer Mortos (não treinável, não consome suprimento... ver `lifetime`); morto-vivo.
+  skeleton: {
+    type: 'skeleton',
+    name: 'Esqueleto',
+    entityName: 'Esqueleto',
+    faction: 'orc',
+    hp: 60, speed: 4.5, damage: { basic: 8, piercing: 2, type: 'normal' }, attackRange: 1.8, attackCooldown: 1.0, armor: 0,
+    collisionRadius: 0.66,
+    visionRadius: 14,
+    ...MELEE_SCAN,
+    healthBarHeight: 3.2,
+    cost: null,
+    trainTime: null,
+    icon: '/icoEspada.png',
+    description: 'Morto-vivo invocado (dura 60 s)',
+    isWorker: false, isRanged: false, isCombat: true, projectile: null,
+    undead: true, corpseless: true
+  },
+  // Resultado da Transmutação: a unidade vira ovelha (modelo do critter da F3-10 em escala de unidade).
+  sheep: {
+    type: 'sheep',
+    name: 'Ovelha',
+    entityName: 'Ovelha',
+    faction: 'neutral',
+    hp: 20, speed: 3.0, damage: { basic: 0, piercing: 0, type: 'normal' }, attackRange: 1.8, attackCooldown: 1.0, armor: 0,
+    collisionRadius: 0.6,
+    visionRadius: 10,
+    ...MELEE_SCAN,
+    healthBarHeight: 2.4,
+    cost: null,
+    trainTime: null,
+    icon: '/icopopulacao.png',
+    description: 'Vítima de Transmutação',
+    isWorker: false, isRanged: false, isCombat: false, projectile: null,
+    corpseless: true
   },
 
   // --- Neutro ---

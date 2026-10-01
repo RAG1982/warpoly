@@ -1,7 +1,7 @@
 /**
  * upgrades.js — Pesquisas em níveis (F3-07; substitui as 4 pesquisas de nível único da F0-06).
  *
- * `RESEARCH[id]` = { building: 'forge'|'lumber' (role da construção que pesquisa), faction?
+ * `RESEARCH[id]` = { building: 'forge'|'lumber'|'arcane' (role da construção que pesquisa), faction?
  * ('human'|'orc' — ausente = ambas), levels: [{cost, time, bonus?, effect?, requires}], appliesTo?
  * (tipos de unidade afetados), name: {human, orc} }.
  *
@@ -102,7 +102,64 @@ export const RESEARCH = {
     building: 'lumber', faction: 'orc',
     levels: [{ cost: { gold: 2500 }, time: 60, bonus: { piercing: 3 }, requires: [{ research: 'ranged_class' }] }],
     appliesTo: ['berserker'], icon: '/icoArco.png', name: { orc: 'Fúria' }
-  }
+  },
+  // F4-04: magias (Torre Arcana / Santuário das Cinzas, `role: 'arcane'`). Cada pesquisa libera uma
+  // habilidade (`effect.unlock` = id em `src/data/abilities.js`; o requisito real é `{research}` da habilidade).
+  spell_fireball: {
+    building: 'arcane', faction: 'human',
+    levels: [{ cost: { gold: 300 }, time: 40, effect: { unlock: 'fireball' }, requires: [] }],
+    icon: '/icoEspada.png', name: { human: 'Bola de Fogo' }
+  },
+  spell_slow: {
+    building: 'arcane', faction: 'human',
+    levels: [{ cost: { gold: 250 }, time: 35, effect: { unlock: 'slow' }, requires: [] }],
+    icon: '/icoEscudo.png', name: { human: 'Lentidão' }
+  },
+  spell_flameshield: {
+    building: 'arcane', faction: 'human',
+    levels: [{ cost: { gold: 350 }, time: 45, effect: { unlock: 'flameshield' }, requires: [] }],
+    icon: '/icoEscudo.png', name: { human: 'Escudo de Chamas' }
+  },
+  spell_invisibility: {
+    building: 'arcane', faction: 'human',
+    levels: [{ cost: { gold: 500 }, time: 50, effect: { unlock: 'invisibility' }, requires: [] }],
+    icon: '/icoEscudo.png', name: { human: 'Invisibilidade' }
+  },
+  spell_polymorph: {
+    building: 'arcane', faction: 'human',
+    levels: [{ cost: { gold: 500 }, time: 50, effect: { unlock: 'polymorph' }, requires: [] }],
+    icon: '/icoEscudo.png', name: { human: 'Transmutação' }
+  },
+  spell_blizzard: {
+    building: 'arcane', faction: 'human',
+    levels: [{ cost: { gold: 600 }, time: 60, effect: { unlock: 'blizzard' }, requires: [] }],
+    icon: '/icoEscudo.png', name: { human: 'Nevasca' }
+  },
+  spell_death_touch: {
+    building: 'arcane', faction: 'orc',
+    levels: [{ cost: { gold: 300 }, time: 40, effect: { unlock: 'death_touch' }, requires: [] }],
+    icon: '/icoEspada.png', name: { orc: 'Toque da Morte' }
+  },
+  spell_haste: {
+    building: 'arcane', faction: 'orc',
+    levels: [{ cost: { gold: 250 }, time: 35, effect: { unlock: 'haste_spell' }, requires: [] }],
+    icon: '/icoEscudo.png', name: { orc: 'Pressa' }
+  },
+  spell_raise_dead: {
+    building: 'arcane', faction: 'orc',
+    levels: [{ cost: { gold: 400 }, time: 45, effect: { unlock: 'raise_dead' }, requires: [] }],
+    icon: '/icoEscudo.png', name: { orc: 'Erguer Mortos' }
+  },
+  spell_unholy_armor: {
+    building: 'arcane', faction: 'orc',
+    levels: [{ cost: { gold: 400 }, time: 45, effect: { unlock: 'unholy_armor' }, requires: [] }],
+    icon: '/icoEscudo.png', name: { orc: 'Armadura Profana' }
+  },
+  spell_ash_cloud: {
+    building: 'arcane', faction: 'orc',
+    levels: [{ cost: { gold: 600 }, time: 60, effect: { unlock: 'ash_cloud' }, requires: [] }],
+    icon: '/icoEscudo.png', name: { orc: 'Nuvem de Cinzas' }
+  },
 };
 
 /** Ids das pesquisas de uma construção (`role`) para a facção dada (ausente = todas). */
@@ -180,6 +237,7 @@ export function describeLevel(id, level) {
   if (e.woodMultiplier) parts.push(`+${Math.round((e.woodMultiplier - 1) * 100)}% madeira coletada`);
   if (e.regen) parts.push(`regenera ${e.regen} PV/s`);
   if (e.promote) parts.push('promove atiradores à classe avançada');
+  if (e.unlock) parts.push('libera a magia para os conjuradores');
   return parts.join(', ');
 }
 

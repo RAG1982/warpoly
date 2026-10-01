@@ -22,14 +22,16 @@ export const FACTIONS = {
     forge: 'forge',
     stable: 'stable',
     workshop: 'workshop',
-    buildList: ['cottage', 'lumber_camp', 'farm', 'barracks', 'forge', 'stable', 'workshop', 'watchtower', 'wall_human'],
+    arcane: 'arcane_tower', // F4-04
+    buildList: ['cottage', 'lumber_camp', 'farm', 'barracks', 'forge', 'stable', 'workshop', 'arcane_tower', 'watchtower', 'wall_human'],
     units: {
       worker: 'villager',
       melee: 'knight',
       ranged: 'archer',
       cavalry: 'cavalier',
       siege: 'ballista', // F4-02
-      suicide: 'sapper' // F4-05
+      suicide: 'sapper', // F4-05
+      caster: 'mage' // F4-04
     },
     startingBase: {
       buildings: { hq: 'castle', lumber: 'lumber_camp', house: 'cottage' },
@@ -49,14 +51,16 @@ export const FACTIONS = {
     forge: 'orc_forge',
     stable: 'ogre_den',
     workshop: 'orc_workshop',
-    buildList: ['orc_house', 'pig_farm', 'orc_lumber_mill', 'orc_barracks', 'orc_forge', 'ogre_den', 'orc_workshop', 'orc_watchtower', 'wall_orc'],
+    arcane: 'ash_sanctum', // F4-04
+    buildList: ['orc_house', 'pig_farm', 'orc_lumber_mill', 'orc_barracks', 'orc_forge', 'ogre_den', 'orc_workshop', 'ash_sanctum', 'orc_watchtower', 'wall_orc'],
     units: {
       worker: 'peon',
       melee: 'grunt',
       ranged: 'axethrower',
       cavalry: 'ogre',
       siege: 'catapult', // F4-02
-      suicide: 'arsonist' // F4-05
+      suicide: 'arsonist', // F4-05
+      caster: 'necromancer' // F4-04
     },
     startingBase: {
       buildings: { hq: 'great_hall', lumber: 'orc_lumber_mill', house: 'pig_farm' },

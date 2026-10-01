@@ -5,7 +5,7 @@
  * - name          Nome PT-BR exibido no painel de construção do trabalhador (D2: provisório até a F3-00).
  * - entityName    Rótulo atual do card de seleção (legado; unificar com `name` na F3-00/F6-09).
  * - faction       'human' | 'orc' | 'neutral'.
- * - role          'hq' | 'house' | 'farm' | 'lumber' | 'barracks' | 'stable' | 'workshop' | 'forge' | 'tower' | 'wall' | 'camp'.
+ * - role          'hq' | 'house' | 'farm' | 'lumber' | 'barracks' | 'stable' | 'workshop' | 'arcane' | 'forge' | 'tower' | 'wall' | 'camp'.
  * - hp, cost {gold, wood, stone}, collisionRadius, popGranted.
  * - armor         F3-03: armadura da construção (corrige B5 — antes não existia). HQ/torres
  *                  20, muralhas 10 (quando existirem), demais 15 (design §6).
@@ -194,6 +194,27 @@ export const BUILDINGS = {
     dropoff: [],
     icon: '/icoForja.svg',
     description: 'Constrói balistas de cerco e sapadores (requer Centro nível 2)'
+  },
+  arcane_tower: {
+    type: 'arcane_tower',
+    name: 'Torre Arcana',
+    entityName: 'Torre Arcana',
+    faction: 'human',
+    role: 'arcane',
+    hp: 800,
+    armor: 15,
+    cost: { gold: 250, wood: 80, stone: 80 },
+    collisionRadius: 3.2,
+    popGranted: 0,
+    visionRadius: 24,
+    healthBarHeight: 8.0,
+    tower: null,
+    passiveIncome: null,
+    requires: ['barracks', { hq: 3 }],
+    trains: ['mage'],
+    dropoff: [],
+    icon: '/icoTorre.svg',
+    description: 'Treina magos e pesquisa magias; detecta unidades invisíveis (requer Centro nível 3)'
   },
   watchtower: {
     type: 'watchtower',
@@ -401,6 +422,27 @@ export const BUILDINGS = {
     dropoff: [],
     icon: '/icoForja.svg',
     description: 'Constrói catapultas de cerco e incendiários (requer Centro nível 2)'
+  },
+  ash_sanctum: {
+    type: 'ash_sanctum',
+    name: 'Santuário das Cinzas',
+    entityName: 'Santuário das Cinzas',
+    faction: 'orc',
+    role: 'arcane',
+    hp: 800,
+    armor: 15,
+    cost: { gold: 250, wood: 80, stone: 80 },
+    collisionRadius: 3.2,
+    popGranted: 0,
+    visionRadius: 24,
+    healthBarHeight: 8.0,
+    tower: null,
+    passiveIncome: null,
+    requires: ['orc_barracks', { hq: 3 }],
+    trains: ['necromancer'],
+    dropoff: [],
+    icon: '/icoTorreOrc.svg',
+    description: 'Treina necromantes e pesquisa magias; detecta unidades invisíveis (requer Centro nível 3)'
   },
   orc_watchtower: {
     type: 'orc_watchtower',

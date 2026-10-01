@@ -30,11 +30,25 @@
  *        com `manaPerHp` (na habilidade) cobra mana × PV curados; `perManaHp` = PV curados por mana gasta.
  *   {kind:'status', id, duration}  aplica um status de `STATUS_DEFS` (alvo, ou o lançador se não há alvo).
  *   {kind:'dispel'}  remove statuses removíveis do alvo (ou do lançador).
- *   {kind:'summon', unitType, count=1, lifetime}  (stub para F4-04) cria unidades temporárias ao lado do lançador.
+ *   {kind:'summon', unitType, count=1, lifetime}  cria unidades temporárias (F4-04) em anel de raio 1,5 ao redor do
+ *        ponto-alvo (ou do lançador); `unit.lifetime` decrementa em `simStep`; não consomem suprimento e somem sem cadáver.
+ *   {kind:'damage', ..., lifesteal}  (F4-04) `lifesteal` = fração do dano causado que cura o lançador (Toque da Morte).
+ *   {kind:'line_damage', amount, damageType, length, maxTargets, radius, projectile}  (F4-04, Bola de Fogo) projétil
+ *        balístico do lançador até o alvo; no impacto atinge até `maxTargets` hostis numa linha de `length` a partir do
+ *        impacto, na direção do voo (distância à linha ≤ `radius`); 1 `computeDamage` por alvo em ordem de id.
+ *   {kind:'polymorph', unitType:'sheep'}  (F4-04) o alvo (não herói/cerco/construção) vira `unitType` permanentemente
+ *        (mantém dono e id; perde ordens/habilidades/mana; PV ≤ PV da nova unidade).
+ *   {kind:'raise_dead', unitType, radius, maxCorpses, lifetime}  (F4-04) consome os cadáveres mais antigos em `radius`
+ *        do lançador e cria 1 `unitType` temporário por cadáver (até `maxCorpses`). Sem cadáver = não lança.
+ *   {kind:'channel', waves, interval, wave:{kind:'damage', amount, damageType, radius}}  (F4-04) canalização: o
+ *        conjurador fica em `casting` por `waves × interval` s; cada onda cobra `manaCost` (por onda) e para se faltar
+ *        mana; nova ordem cancela (onda paga não é reembolsada). Alvo `ground`.
+ *
+ * Status de `STATUS_DEFS` usados: slow, haste, invisible, flameshield (Escudo de Chamas), unholy_armor (Armadura Profana).
  */
 
 export const ABILITY_TARGETS = ['none', 'self', 'unit', 'ally', 'enemy', 'ground'];
-export const EFFECT_KINDS = ['damage', 'heal', 'status', 'dispel', 'summon'];
+export const EFFECT_KINDS = ['damage', 'heal', 'status', 'dispel', 'summon', 'line_damage', 'polymorph', 'raise_dead', 'channel'];
 
 export const ABILITIES = {
   debug_bolt: {
@@ -70,6 +84,185 @@ export const ABILITIES = {
     effects: [{ kind: 'heal', amount: 40 }],
     vfx: { kind: 'aura', color: '#4ade80', duration: 1 },
     debugOnly: true
+  },
+  // ===== F4-04: magias do Mago Arcano (humano) — pesquisadas na Torre Arcana =====
+  fireball: {
+    id: 'fireball',
+    name: 'Bola de Fogo',
+    icon: '🔥',
+    description: 'Lança uma bola de fogo que atravessa e queima até 3 inimigos em linha.',
+    hotkey: 'Z',
+    target: 'enemy',
+    range: 14,
+    castTime: 0.6,
+    manaCost: 25,
+    cooldown: 2,
+    autocast: false,
+    requires: [{ research: 'spell_fireball' }],
+    effects: [{ kind: 'line_damage', amount: 45, damageType: 'magic', length: 4, maxTargets: 3, radius: 1.5, projectile: 'bolt' }],
+    vfx: { kind: 'burst', color: '#fb923c' }
+  },
+  slow: {
+    id: 'slow',
+    name: 'Lentidão',
+    icon: '🐌',
+    description: 'Reduz pela metade a velocidade de um inimigo por 30 s.',
+    hotkey: 'X',
+    target: 'enemy',
+    range: 12,
+    castTime: 0.5,
+    manaCost: 50,
+    cooldown: 1,
+    autocast: false,
+    requires: [{ research: 'spell_slow' }],
+    effects: [{ kind: 'status', id: 'slow', duration: 30 }],
+    vfx: { kind: 'beam', color: '#38bdf8' }
+  },
+  flameshield: {
+    id: 'flameshield',
+    name: 'Escudo de Chamas',
+    icon: '🛡️',
+    description: 'Envolve um aliado em chamas por 30 s: quem o atacar corpo a corpo sofre 8 de dano mágico por golpe.',
+    hotkey: 'C',
+    target: 'ally',
+    range: 10,
+    castTime: 0.5,
+    manaCost: 80,
+    cooldown: 1,
+    autocast: false,
+    requires: [{ research: 'spell_flameshield' }],
+    effects: [{ kind: 'status', id: 'flameshield', duration: 30 }],
+    vfx: { kind: 'aura', color: '#f97316', duration: 1.2 }
+  },
+  invisibility: {
+    id: 'invisibility',
+    name: 'Invisibilidade',
+    icon: '👻',
+    description: 'Torna um aliado invisível até atacar, lançar ou sofrer dano. Inimigos só o veem de perto ou com detectores.',
+    hotkey: 'V',
+    target: 'ally',
+    range: 10,
+    castTime: 0.5,
+    manaCost: 200,
+    cooldown: 1,
+    autocast: false,
+    requires: [{ research: 'spell_invisibility' }],
+    effects: [{ kind: 'status', id: 'invisible', duration: 600 }],
+    vfx: { kind: 'aura', color: '#c4b5fd', duration: 1.2 }
+  },
+  polymorph: {
+    id: 'polymorph',
+    name: 'Transmutação',
+    icon: '🐑',
+    description: 'Transforma um inimigo (exceto heróis, cerco e construções) numa ovelha indefesa, para sempre.',
+    hotkey: 'B',
+    target: 'enemy',
+    range: 10,
+    castTime: 0.8,
+    manaCost: 200,
+    cooldown: 1,
+    autocast: false,
+    requires: [{ research: 'spell_polymorph' }],
+    effects: [{ kind: 'polymorph', unitType: 'sheep' }],
+    vfx: { kind: 'burst', color: '#f9a8d4' }
+  },
+  blizzard: {
+    id: 'blizzard',
+    name: 'Nevasca',
+    icon: '❄️',
+    description: 'Canaliza uma tempestade de gelo numa área: 8 ondas de dano mágico, 25 de mana por onda. Nova ordem interrompe.',
+    hotkey: 'N',
+    target: 'ground',
+    range: 12,
+    castTime: 0.6,
+    manaCost: 25,
+    cooldown: 4,
+    autocast: false,
+    requires: [{ research: 'spell_blizzard' }],
+    effects: [{ kind: 'channel', waves: 8, interval: 1, wave: { kind: 'damage', amount: 8, damageType: 'magic', radius: 3.5 } }],
+    vfx: { kind: 'ring', color: '#bae6fd', radius: 3.5 }
+  },
+
+  // ===== F4-04: magias do Necromante das Cinzas (orc) — pesquisadas no Santuário das Cinzas =====
+  death_touch: {
+    id: 'death_touch',
+    name: 'Toque da Morte',
+    icon: '💀',
+    description: 'Drena a vida de um inimigo; o necromante recupera 50% do dano causado.',
+    hotkey: 'Z',
+    target: 'enemy',
+    range: 9,
+    castTime: 0.6,
+    manaCost: 100,
+    cooldown: 1,
+    autocast: false,
+    requires: [{ research: 'spell_death_touch' }],
+    effects: [{ kind: 'damage', amount: 60, damageType: 'magic', lifesteal: 0.5 }],
+    vfx: { kind: 'beam', color: '#a855f7' }
+  },
+  haste_spell: {
+    id: 'haste_spell',
+    name: 'Pressa',
+    icon: '⚡',
+    description: 'Acelera um aliado (movimento e ataque +50%) por 30 s.',
+    hotkey: 'X',
+    target: 'ally',
+    range: 10,
+    castTime: 0.5,
+    manaCost: 50,
+    cooldown: 1,
+    autocast: false,
+    requires: [{ research: 'spell_haste' }],
+    effects: [{ kind: 'status', id: 'haste', duration: 30 }],
+    vfx: { kind: 'aura', color: '#facc15', duration: 1 }
+  },
+  raise_dead: {
+    id: 'raise_dead',
+    name: 'Erguer Mortos',
+    icon: '🦴',
+    description: 'Consome até 2 cadáveres num raio de 6 e ergue 1 esqueleto por cadáver (dura 60 s).',
+    hotkey: 'C',
+    target: 'self',
+    range: 0,
+    castTime: 0.8,
+    manaCost: 50,
+    cooldown: 2,
+    autocast: false,
+    requires: [{ research: 'spell_raise_dead' }],
+    effects: [{ kind: 'raise_dead', unitType: 'skeleton', radius: 6, maxCorpses: 2, lifetime: 60 }],
+    vfx: { kind: 'ring', color: '#84cc16', radius: 3 }
+  },
+  unholy_armor: {
+    id: 'unholy_armor',
+    name: 'Armadura Profana',
+    icon: '🛡️',
+    description: 'Torna um aliado invulnerável por 6 s; ao final ele perde 50% da vida atual.',
+    hotkey: 'V',
+    target: 'ally',
+    range: 10,
+    castTime: 0.5,
+    manaCost: 100,
+    cooldown: 1,
+    autocast: false,
+    requires: [{ research: 'spell_unholy_armor' }],
+    effects: [{ kind: 'status', id: 'unholy_armor', duration: 6 }],
+    vfx: { kind: 'aura', color: '#7c3aed', duration: 1.2 }
+  },
+  ash_cloud: {
+    id: 'ash_cloud',
+    name: 'Nuvem de Cinzas',
+    icon: '🌫️',
+    description: 'Canaliza uma nuvem de cinzas numa área: 8 ondas de dano mágico, 25 de mana por onda. Nova ordem interrompe.',
+    hotkey: 'B',
+    target: 'ground',
+    range: 12,
+    castTime: 0.6,
+    manaCost: 25,
+    cooldown: 4,
+    autocast: false,
+    requires: [{ research: 'spell_ash_cloud' }],
+    effects: [{ kind: 'channel', waves: 8, interval: 1, wave: { kind: 'damage', amount: 8, damageType: 'magic', radius: 3.5 } }],
+    vfx: { kind: 'ring', color: '#9ca3af', radius: 3.5 }
   }
 };
 

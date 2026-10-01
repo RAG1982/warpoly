@@ -12,8 +12,15 @@ import { SIM_DT, lerpAngle } from '../sim/constants.js';
 import { CMD } from '../sim/commands.js';
 import { EVT } from '../sim/events.js';
 import { REPAIR_INTERVAL, MAX_WORKERS_PER_BUILDING } from '../sim/repair.js';
-import { createStatusSlots, createMods, tickStatuses, clearStatuses } from '../sim/statuses.js';
-import { resolveAbility, canCast, needsEntityTarget, targetProblem, applyAbility, emitCastStart, findAutocastTarget } from '../sim/abilities.js';
+import { createStatusSlots, createMods, tickStatuses, clearStatuses, removeStatus, STATUS_DEFS } from '../sim/statuses.js';
+import { isDetectedBy } from '../sim/detection.js';
+import { FLAMESHIELD_DAMAGE } from '../data/combat.js';
+import { resolveAbility, canCast, needsEntityTarget, targetProblem, applyAbility, emitCastStart, findAutocastTarget, getChannel, applyChannelWave } from '../sim/abilities.js';
+
+/** F4-04: callback de expiração de status (módulo: sem closure por unidade). */
+function onStatusExpire(unit, id) {
+  unit._statusExpired(id);
+}
 
 /** Vector3 → objeto plano `{x,y,z}` (payload de evento: nunca referências a objetos three.js). */
 function posOf(v) {
@@ -145,6 +152,9 @@ export class Unit {
     this.mods = createMods();
     /** F4-03: segundos de vida de unidades invocadas (0 = permanente). */
     this.lifetime = 0;
+    /** F4-04: invocada (Erguer Mortos): não consome suprimento; ao expirar morre sem cadáver nem baixa. */
+    this.summoned = false;
+    this._expired = false;
     this._cast = null;
     this._manaFill = -1;
     this._effDamage = { basic: 0, piercing: 0, type: 'normal' };
@@ -157,7 +167,7 @@ export class Unit {
     this.minAttackRange = def.minAttackRange || 0;
     this.splashRadius = def.splashRadius || 0;
     /** F4-02: projétil balístico (`bolt`/`boulder`): não persegue, mira a posição prevista. */
-    this.isBallistic = def.projectile === 'bolt' || def.projectile === 'boulder';
+    this.isBallistic = (def.projectile === 'bolt' || def.projectile === 'boulder') && def.splashRadius > 0; // F4-04: 'bolt' sem área (Mago) é projétil comum
     /** F4-05: unidade suicida (Sapadores/Incendiários) — detona no alcance (`_detonate`). */
     this.suicide = !!def.suicide;
     /** F4-02: velocidade estimada (u/s) medida pelo `GameManager` a cada tick — mira preditiva do cerco. */
@@ -346,7 +356,7 @@ export class Unit {
     this.maxMana = cfg.maxMana || 0;
     this.mana = Math.min(this.maxMana, cfg.startMana !== undefined ? cfg.startMana : this.maxMana);
     this.manaRegen = cfg.manaRegen !== undefined ? cfg.manaRegen : 1;
-    this.abilities = cfg.abilities ? cfg.abilities.slice(0, 4) : [];
+    this.abilities = cfg.abilities ? cfg.abilities.slice(0, 9) : [];
     this.cooldowns = {};
     this.autocast = {};
     this._cast = null;
@@ -775,6 +785,7 @@ export class Unit {
   takeDamage(amount, attacker = null, allUnits = []) {
     if (this.isDead || this.isDying) return;
     if (this.mods.invulnerable) return; // F4-03: status invulnerable zera o dano
+    if (this.mods.invisible) this.breakInvisibility(); // F4-04: dano revela
     // F3-09: atribuição de kills (lida em die()).
     if (attacker && typeof attacker.ownerId === 'number') this.lastAttackerOwnerId = attacker.ownerId;
 
@@ -864,8 +875,13 @@ export class Unit {
         ownerId: this.ownerId,
         pos: posOf(this.mesh.position),
         unitType: this.type,
-        killerOwnerId: this.lastAttackerOwnerId ?? null
+        killerOwnerId: this.lastAttackerOwnerId ?? null,
+        expired: this._expired // F4-04: fim de `lifetime` — não conta como baixa
       });
+    }
+    // F4-04: registra o cadáver (só dados) para Erguer Mortos — sem cadáver: invocações expiradas, cerco, suicidas, ovelhas.
+    if (!this._expired && !getUnitDef(this.type).corpseless && this.gameManager && this.gameManager.corpses) {
+      this.gameManager.corpses.add(this.mesh.position.x, this.mesh.position.z, this.ownerId, this.type, this.gameManager.gameTime);
     }
 
     this.hasTargetPos = false;
@@ -1114,11 +1130,12 @@ export class Unit {
     for (const id in this.cooldowns) {
       if (this.cooldowns[id] > 0) this.cooldowns[id] = Math.max(0, this.cooldowns[id] - delta);
     }
-    tickStatuses(this, delta);
+    tickStatuses(this, delta, onStatusExpire);
     if (this.lifetime > 0) {
       this.lifetime -= delta;
       if (this.lifetime <= 0) {
         this.lifetime = 0;
+        this._expired = true;
         this.die();
         return;
       }
@@ -1141,6 +1158,106 @@ export class Unit {
       this.orderCast({ type: CMD.CAST, abilityId: id, target: found.target, resume });
       return;
     }
+  }
+
+  /** F4-04: um status expirou (NOTIFY de invisibilidade; Armadura Profana cobra metade do PV atual). */
+  _statusExpired(id) {
+    if (this.isDead || this.isDying) return;
+    if (id === 'invisible') this._notifyInvisibleEnded();
+    const def = STATUS_DEFS[id];
+    if (def && def.onEndHpLoss > 0) {
+      this.hp = Math.max(1, this.hp * (1 - def.onEndHpLoss));
+      this.updateHealthBar();
+    }
+  }
+
+  _notifyInvisibleEnded() {
+    const gm = this.gameManager;
+    if (gm && gm.events) gm.events.emit(EVT.NOTIFY, { ownerId: this.ownerId, text: 'Invisibilidade terminou' });
+  }
+
+  /** F4-04: invisibilidade acaba (ao atacar, lançar ou sofrer dano). */
+  breakInvisibility() {
+    if (removeStatus(this, 'invisible')) this._notifyInvisibleEnded();
+  }
+
+  /** F4-04: este jogador/unidade consegue enxergar/mirar `e`? (invisíveis só com detecção — `src/sim/detection.js`). */
+  _canSee(e) {
+    if (!e.mods || !e.mods.invisible) return true;
+    return isDetectedBy(this.gameManager, e, this.ownerId);
+  }
+
+  /**
+   * F4-04: Transmutação já aplicada por `GameManager.polymorphUnit` (que rodou `promoteUnit`): ajusta o que
+   * `promoteUnit` não cobre — atributos da nova definição, modelo 3D (ovelha), ordens, mana/habilidades e
+   * PV ≤ PV da nova unidade. Mantém dono, id, posição, barra de vida e anel de seleção.
+   */
+  applyPolymorph(toType) {
+    const def = getUnitDef(toType);
+    this._clearOrderModes();
+    this.orderQueue = null;
+    this.state = 'idle';
+    this.targetEntity = null;
+    this.gatherTarget = null;
+    this.buildTarget = null;
+    this.repairTarget = null;
+    this.attackTarget = null;
+    this.objectiveTarget = null;
+    this.hasTargetPos = false;
+    this.waypoints = null;
+    this.waypointIndex = 0;
+    this.pathDestination = null;
+    this.carrying.type = null;
+    this.carrying.amount = 0;
+    this.maxHp = def.hp;
+    this.hp = Math.min(this.hp, def.hp);
+    this.speed = def.speed;
+    this.damage.basic = def.damage.basic;
+    this.damage.piercing = def.damage.piercing;
+    this.damage.type = def.damage.type;
+    this.armor = def.armor || 0;
+    this.attackRange = def.attackRange;
+    this.attackCooldown = def.attackCooldown;
+    this.collisionRadius = def.collisionRadius;
+    this.isRanged = def.isRanged;
+    this.projectileType = def.projectile;
+    this.minAttackRange = def.minAttackRange || 0;
+    this.splashRadius = def.splashRadius || 0;
+    this.isBallistic = false;
+    this.suicide = false;
+    this.regen = 0;
+    this.setupMana({ maxMana: 0 });
+    this.mana = 0;
+    if (this.manaFillMesh) { this.manaFillMesh.visible = false; this.manaBgMesh.visible = false; }
+    this.lifetime = 0;
+    this.updateHealthBar();
+    this._swapModel(def.modelOf || toType);
+    if (this.gameManager && this.gameManager.unitGrid) {
+      const p = this.mesh.position;
+      this.gameManager.unitGrid.update(this, p.x, p.z, this.collisionRadius);
+    }
+  }
+
+  /** F4-04: troca o modelo 3D (mesma posição/escala/rotação), sem vazar malhas: remove o antigo da cena. */
+  _swapModel(modelType) {
+    const old = this.mesh;
+    const mesh = this.createModel(modelType);
+    mesh.position.copy(old.position);
+    mesh.rotation.y = old.rotation.y;
+    mesh.scale.copy(old.scale);
+    mesh.visible = old.visible;
+    mesh.userData.entity = this;
+    if (this.selectionRing) {
+      old.remove(this.selectionRing);
+      mesh.add(this.selectionRing);
+    }
+    if (this.scene) {
+      this.scene.remove(old);
+      this.scene.add(mesh);
+    }
+    this.mesh = mesh;
+    this.animator = new UnitAnimator(mesh, modelType);
+    this._ghost = false;
   }
 
   /** Ordem `cast` (já validada por `CommandExecutor`): anda até o alcance, lança e volta a `idle`. */
@@ -1177,6 +1294,11 @@ export class Unit {
     if (!c) { this.stop(); return; }
     const ab = c.ab;
     const t = c.target;
+    // F4-04: fase 2 = canalização em curso (Nevasca/Nuvem de Cinzas): o conjurador fica parado, pagando mana por onda.
+    if (c.phase === 2) {
+      this._updateChannel(delta, gm, c);
+      return;
+    }
     let tx;
     let tz;
     if (needsEntityTarget(ab)) {
@@ -1219,13 +1341,41 @@ export class Unit {
     }
     if (c.timer + 1e-9 >= (ab.castTime || 0)) {
       const check = canCast(gm, this, ab);
-      if (check.ok) {
-        applyAbility(gm, this, ab, t, c.x, c.z);
-      } else if (gm.events) {
-        gm.events.emit(EVT.NOTIFY, { ownerId: this.ownerId, text: check.reason });
+      if (!check.ok) {
+        if (gm.events) gm.events.emit(EVT.NOTIFY, { ownerId: this.ownerId, text: check.reason });
+        this._endCast();
+        return;
       }
+      if (this.mods.invisible) this.breakInvisibility(); // F4-04: lançar revela
+      const channel = getChannel(ab);
+      if (channel) {
+        // F4-04: canalização — a recarga começa já; as ondas (mana por onda) rodam em `_updateChannel`.
+        this.cooldowns[ab.id] = ab.cooldown || 0;
+        c.phase = 2;
+        c.wave = 0;
+        c.waveTimer = channel.interval; // 1ª onda imediata
+        c.channel = channel;
+        return;
+      }
+      applyAbility(gm, this, ab, t, c.x, c.z);
       this._endCast();
     }
+  }
+
+  /** F4-04: uma onda por `interval` s; cada onda cobra `manaCost`; para sem mana ou após `waves` ondas. */
+  _updateChannel(delta, gm, c) {
+    const ch = c.channel;
+    if (c.wave >= ch.waves) { this._endCast(); return; }
+    c.waveTimer += delta;
+    if (c.waveTimer + 1e-9 < ch.interval) return;
+    c.waveTimer = 0;
+    if (!applyChannelWave(gm, this, c.ab, ch, c.x, c.z)) { // sem mana: interrompe
+      if (gm.events) gm.events.emit(EVT.NOTIFY, { ownerId: this.ownerId, text: '⚠️ Mana insuficiente' });
+      this._endCast();
+      return;
+    }
+    c.wave++;
+    if (c.wave >= ch.waves) this._endCast();
   }
 
   /**
@@ -1762,7 +1912,7 @@ export class Unit {
     const scanRange = this._isHolding ? this.attackRange : this.retargetRange;
 
     // 1. Target dead or invalid: find next closest hostile or resume objective
-    if (!this.attackTarget || this.attackTarget.isDead || this.attackTarget.hp <= 0) {
+    if (!this.attackTarget || this.attackTarget.isDead || this.attackTarget.hp <= 0 || !this._canSee(this.attackTarget)) { // F4-04: alvo invisível não detectado = perdido
       const nextUnit = this.findNearestHostileUnit(allUnits, scanRange);
       if (nextUnit) {
         this.attackTarget = nextUnit;
@@ -1884,6 +2034,7 @@ export class Unit {
       // (posição + velocidade × tempo de voo), não persegue, e causa dano em área no impacto.
       if (progress >= 0.60 && !this.hasFiredThisAttack) {
         this.hasFiredThisAttack = true;
+        if (this.mods.invisible) this.breakInvisibility();
         const kind = this.projectileType;
         const startPos = _projectileOrigin.copy(this.mesh.position).add(_up168);
         const tgt = this.attackTarget;
@@ -1904,6 +2055,7 @@ export class Unit {
       // Archer & Axethrower: Release projectile shot at progress >= 0.60
       if (progress >= 0.60 && !this.hasFiredThisAttack) {
         this.hasFiredThisAttack = true;
+        if (this.mods.invisible) this.breakInvisibility();
         const startPos = _projectileOrigin.copy(this.mesh.position).add(_up168);
         const projType = this.projectileType;
         if (gmEvents) gmEvents.emit(EVT.PROJECTILE_FIRED, { kind: projType, from: posOf(startPos), ownerId: this.ownerId });
@@ -1922,8 +2074,14 @@ export class Unit {
       if (progress >= 0.45 && !this.hasFiredThisAttack) {
         this.hasFiredThisAttack = true;
         if (gmEvents) gmEvents.emit(EVT.MELEE_HIT, { pos: posOf(this.mesh.position), ownerId: this.ownerId });
-        const dmg = computeDamage(this.getEffDamage(), this.attackTarget, gm.combatRng);
-        this.attackTarget.takeDamage(dmg, this, allUnits);
+        if (this.mods.invisible) this.breakInvisibility();
+        const target = this.attackTarget;
+        const dmg = computeDamage(this.getEffDamage(), target, gm.combatRng);
+        target.takeDamage(dmg, this, allUnits);
+        // F4-04: Escudo de Chamas — quem golpeia corpo a corpo um alvo com o status sofre dano mágico fixo.
+        if (target.mods && target.mods.flameshield && !this.isDead && !this.isDying) {
+          this.takeDamage(FLAMESHIELD_DAMAGE, target, allUnits);
+        }
       }
     }
 
@@ -1994,7 +2152,7 @@ export class Unit {
     const pos = this.mesh.position;
     const self = this;
     gm.unitGrid.queryRadius(pos.x, pos.z, maxDist, u =>
-      !u.isDead && u.hp > 0 && self.isHostileTo(u) && u.isCombatUnit && u.isCombatUnit() && self._canEngage(u),
+      !u.isDead && u.hp > 0 && self.isHostileTo(u) && u.isCombatUnit && u.isCombatUnit() && self._canEngage(u) && self._canSee(u),
     _combatBuf);
     return pickNearestInBuf(_combatBuf, pos.x, pos.z);
   }
@@ -2009,7 +2167,7 @@ export class Unit {
     const pos = this.mesh.position;
     const self = this;
     gm.unitGrid.queryRadius(pos.x, pos.z, maxDist, u =>
-      !u.isDead && u.hp > 0 && self.isHostileTo(u) && self._canEngage(u),
+      !u.isDead && u.hp > 0 && self.isHostileTo(u) && self._canEngage(u) && self._canSee(u),
     _unitBuf);
     return pickNearestInBuf(_unitBuf, pos.x, pos.z);
   }

@@ -15,6 +15,7 @@ import { REPAIR_INTERVAL, MAX_WORKERS_PER_BUILDING } from '../sim/repair.js';
 import { createStatusSlots, createMods, tickStatuses, clearStatuses, removeStatus, STATUS_DEFS } from '../sim/statuses.js';
 import { isDetectedBy } from '../sim/detection.js';
 import { FLAMESHIELD_DAMAGE } from '../data/combat.js';
+import { getAbility } from '../data/abilities.js';
 import { resolveAbility, canCast, needsEntityTarget, targetProblem, applyAbility, emitCastStart, findAutocastTarget, getChannel, applyChannelWave } from '../sim/abilities.js';
 
 /** F4-04: callback de expiração de status (módulo: sem closure por unidade). */
@@ -170,6 +171,9 @@ export class Unit {
     this.isBallistic = (def.projectile === 'bolt' || def.projectile === 'boulder') && def.splashRadius > 0; // F4-04: 'bolt' sem área (Mago) é projétil comum
     /** F4-05: unidade suicida (Sapadores/Incendiários) — detona no alcance (`_detonate`). */
     this.suicide = !!def.suicide;
+    /** F4-04b: camada ('ground' | 'air') e imunidade total a dano (Olho Vigia). F4-06 estende `layer`. */
+    this.layer = def.layer || 'ground';
+    this.immune = !!def.immune;
     /** F4-02: velocidade estimada (u/s) medida pelo `GameManager` a cada tick — mira preditiva do cerco. */
     this.velX = 0;
     this.velZ = 0;
@@ -359,6 +363,11 @@ export class Unit {
     this.abilities = cfg.abilities ? cfg.abilities.slice(0, 9) : [];
     this.cooldowns = {};
     this.autocast = {};
+    // F4-04b: habilidades com `autocastDefault` (Cura) já nascem com o auto-cast ligado.
+    for (let i = 0; i < this.abilities.length; i++) {
+      const ab = getAbility(this.abilities[i], { debug: true });
+      if (ab && ab.autocast && ab.autocastDefault) this.autocast[ab.id] = true;
+    }
     this._cast = null;
     clearStatuses(this);
     if (this.maxMana > 0) this._ensureManaBar();
@@ -784,7 +793,7 @@ export class Unit {
    */
   takeDamage(amount, attacker = null, allUnits = []) {
     if (this.isDead || this.isDying) return;
-    if (this.mods.invulnerable) return; // F4-03: status invulnerable zera o dano
+    if (this.immune || this.mods.invulnerable) return; // F4-03: status invulnerable zera o dano (F4-04b: `immune` idem)
     if (this.mods.invisible) this.breakInvisibility(); // F4-04: dano revela
     // F3-09: atribuição de kills (lida em die()).
     if (attacker && typeof attacker.ownerId === 'number') this.lastAttackerOwnerId = attacker.ownerId;
@@ -1372,6 +1381,11 @@ export class Unit {
         return;
       }
       applyAbility(gm, this, ab, t, c.x, c.z);
+      // F4-04b: `repeat` (Cura) — continua no mesmo alvo enquanto ele estiver ferido e houver mana.
+      if (ab.repeat && t && !targetProblem(this, ab, t) && t.hp < t.maxHp && canCast(gm, this, ab).ok) {
+        c.timer = 0; // sem novo ABILITY_CAST (evita repetir o som a cada ciclo)
+        return;
+      }
       this._endCast();
     }
   }
@@ -2147,8 +2161,9 @@ export class Unit {
    * (F4-06 usa `layer === 'air'`) e alvo a menos de `minAttackRange` (distância de borda) não.
    */
   _canEngage(e) {
+    if (e.immune) return false; // F4-04b: Olho Vigia
+    if (e.layer === 'air' && (!this.isRanged || this.isBallistic)) return false; // F4-04b: aéreo só por atacantes à distância não-cerco
     if (!this.isBallistic && this.minAttackRange <= 0) return true;
-    if (e.layer === 'air') return false;
     if (this.minAttackRange > 0) {
       const p = this.mesh.position;
       const q = e.mesh.position;

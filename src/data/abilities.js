@@ -44,11 +44,21 @@
  *        conjurador fica em `casting` por `waves × interval` s; cada onda cobra `manaCost` (por onda) e para se faltar
  *        mana; nova ordem cancela (onda paga não é reembolsada). Alvo `ground`.
  *
+ *   {kind:'reveal', radius, duration}  (F4-04b, Vista Sagrada) revela a área (`FogOfWar.revealArea(x,z,r,ttl)`) ao
+ *        dono por `duration` s; só tem efeito visível no jogador local (a névoa é de apresentação).
+ *   {kind:'exorcism', manaPerHp}  (F4-04b) dano mágico SÓ contra `undead`: `min(PV do alvo, mana/manaPerHp)`; cobra
+ *        `manaPerHp` por PV de dano. Alvo vivo → "Alvo inválido".
+ *   {kind:'runes', count, radius, lifetime, triggerRadius, blastRadius, damage, maxActive}  (F4-04b) cria `count` runas
+ *        num círculo de `radius` (ver `src/sim/hazards.js`).
+ *   {kind:'whirlwind', duration, wander, retarget, dps, radius, speed}  (F4-04b) cria um redemoinho errante.
+ *   campos opcionais da habilidade: `autocastDefault` (auto-cast já ligado), `autocastBelow` (só cura aliados abaixo
+ *        dessa fração de PV), `repeat` (a conjuração se repete no mesmo alvo enquanto ele precisar e houver mana).
+ *
  * Status de `STATUS_DEFS` usados: slow, haste, invisible, flameshield (Escudo de Chamas), unholy_armor (Armadura Profana).
  */
 
 export const ABILITY_TARGETS = ['none', 'self', 'unit', 'ally', 'enemy', 'ground'];
-export const EFFECT_KINDS = ['damage', 'heal', 'status', 'dispel', 'summon', 'line_damage', 'polymorph', 'raise_dead', 'channel'];
+export const EFFECT_KINDS = ['damage', 'heal', 'status', 'dispel', 'summon', 'line_damage', 'polymorph', 'raise_dead', 'channel', 'reveal', 'exorcism', 'runes', 'whirlwind'];
 
 export const ABILITIES = {
   debug_bolt: {
@@ -263,6 +273,129 @@ export const ABILITIES = {
     requires: [{ research: 'spell_ash_cloud' }],
     effects: [{ kind: 'channel', waves: 8, interval: 1, wave: { kind: 'damage', amount: 8, damageType: 'magic', radius: 3.5 } }],
     vfx: { kind: 'ring', color: '#9ca3af', radius: 3.5 }
+  },
+
+  // ===== F4-04b: Necromante — Redemoinho (Santuário das Cinzas) =====
+  whirlwind: {
+    id: 'whirlwind',
+    name: 'Redemoinho',
+    icon: '🌪️',
+    description: 'Invoca um redemoinho que vaga por 12 s causando 12 de dano mágico por segundo a unidades terrestres (amigas também).',
+    hotkey: 'N',
+    target: 'ground',
+    range: 10,
+    castTime: 0.7,
+    manaCost: 100,
+    cooldown: 2,
+    autocast: false,
+    requires: [{ research: 'spell_whirlwind' }],
+    effects: [{ kind: 'whirlwind', duration: 12, wander: 6, retarget: 2, dps: 12, radius: 2, speed: 3 }],
+    vfx: { kind: 'ring', color: '#a8a29e', radius: 2 }
+  },
+
+  // ===== F4-04b: Templário (humano) — pesquisadas no Templo da Luz, exigem `cavalry_class` =====
+  holy_vision: {
+    id: 'holy_vision',
+    name: 'Vista Sagrada',
+    icon: '👁️',
+    description: 'Revela uma área (raio 10) do mapa por 20 s, mostrando unidades e construções ali.',
+    hotkey: 'Z',
+    target: 'ground',
+    range: 40,
+    castTime: 0.6,
+    manaCost: 70,
+    cooldown: 2,
+    autocast: false,
+    requires: [{ research: 'spell_holy_vision' }],
+    effects: [{ kind: 'reveal', radius: 10, duration: 20 }],
+    vfx: { kind: 'ring', color: '#fde68a', radius: 10 }
+  },
+  heal: {
+    id: 'heal',
+    name: 'Cura',
+    icon: '✚',
+    description: 'Cura um aliado (5 PV por segundo, 6 de mana por PV) enquanto ele estiver ferido e houver mana. Auto-cast: cura aliados abaixo de 60% de PV.',
+    hotkey: 'X',
+    target: 'ally',
+    range: 8,
+    castTime: 1,
+    manaCost: 0,
+    manaPerHp: 6,
+    cooldown: 0,
+    autocast: true,
+    autocastDefault: true,
+    autocastBelow: 0.6,
+    repeat: true,
+    requires: [{ research: 'spell_heal' }],
+    effects: [{ kind: 'heal', amount: 5 }],
+    vfx: { kind: 'aura', color: '#4ade80', duration: 1 }
+  },
+  exorcism: {
+    id: 'exorcism',
+    name: 'Exorcismo',
+    icon: '☀️',
+    description: 'Fere só mortos-vivos: causa até o PV do alvo em dano mágico, 4 de mana por PV.',
+    hotkey: 'C',
+    target: 'enemy',
+    range: 8,
+    castTime: 0.6,
+    manaCost: 0,
+    manaPerHp: 4,
+    cooldown: 1,
+    autocast: false,
+    requires: [{ research: 'spell_exorcism' }],
+    effects: [{ kind: 'exorcism', manaPerHp: 4 }],
+    vfx: { kind: 'beam', color: '#fef08a' }
+  },
+
+  // ===== F4-04b: Ogro Feiticeiro (orc) — pesquisadas no Altar das Tempestades, exigem `cavalry_class` =====
+  eye_of_watch: {
+    id: 'eye_of_watch',
+    name: 'Olho Vigia',
+    icon: '👁️',
+    description: 'Invoca um olho voador (60 s): enxerga longe e revela unidades invisíveis. Imune a dano; controlável.',
+    hotkey: 'Z',
+    target: 'ground',
+    range: 20,
+    castTime: 0.6,
+    manaCost: 70,
+    cooldown: 2,
+    autocast: false,
+    requires: [{ research: 'spell_eye' }],
+    effects: [{ kind: 'summon', unitType: 'watching_eye', count: 1, lifetime: 60 }],
+    vfx: { kind: 'burst', color: '#a78bfa' }
+  },
+  bloodlust: {
+    id: 'bloodlust',
+    name: 'Sede de Batalha',
+    icon: '🩸',
+    description: 'Enfurece um aliado por 20 s: dano +50%, velocidade de ataque +50% e movimento +25%.',
+    hotkey: 'X',
+    target: 'ally',
+    range: 10,
+    castTime: 0.5,
+    manaCost: 50,
+    cooldown: 1,
+    autocast: false,
+    requires: [{ research: 'spell_bloodlust' }],
+    effects: [{ kind: 'status', id: 'bloodlust', duration: 20 }],
+    vfx: { kind: 'aura', color: '#ef4444', duration: 1 }
+  },
+  runes: {
+    id: 'runes',
+    name: 'Runas Explosivas',
+    icon: '🔣',
+    description: 'Espalha 6 runas (invisíveis para inimigos) num círculo; cada uma explode ao ser pisada (60 de dano mágico em área). Duram 60 s; máx. 12 ativas.',
+    hotkey: 'C',
+    target: 'ground',
+    range: 10,
+    castTime: 0.8,
+    manaCost: 200,
+    cooldown: 2,
+    autocast: false,
+    requires: [{ research: 'spell_runes' }],
+    effects: [{ kind: 'runes', count: 6, radius: 2.5, lifetime: 60, triggerRadius: 1.2, blastRadius: 1.5, damage: 60, maxActive: 12 }],
+    vfx: { kind: 'ring', color: '#c084fc', radius: 2.5 }
   }
 };
 

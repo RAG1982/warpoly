@@ -51,6 +51,13 @@ export function stateChecksum(gm) {
     }
   }
 
+  // F4-04b: runas/redemoinhos
+  const hz = gm.hazards ? gm.hazards.items : [];
+  for (let i = 0; i < hz.length; i++) {
+    const hh = hz[i];
+    h = fnv1aStep(h, `z:${hh.id}:${hh.kind}:${hh.ownerId}:${round3(hh.x)}:${round3(hh.z)}:${round3(hh.life)}|`);
+  }
+
   const buildings = gm.buildings;
   for (let i = 0; i < buildings.length; i++) {
     const b = buildings[i];

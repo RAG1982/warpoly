@@ -161,8 +161,11 @@ export const CommandExecutor = {
         const target = gm.entitiesById.get(cmd.targetId);
         if (!target || target.isDead) break;
         if (target.mods && target.mods.invisible && !isDetectedBy(gm, target, cmd.playerId)) break; // F4-04
+        if (target.immune) break; // F4-04b: Olho Vigia
         const units = resolveOwnedUnits(gm, cmd);
         for (let i = 0; i < units.length; i++) {
+          // F4-04b: alvo aéreo só por atacantes à distância que não sejam cerco
+          if (target.layer === 'air' && (!units[i].isRanged || units[i].isBallistic)) continue;
           units[i].orderQueue = null;
           units[i].orderAttack(target);
         }

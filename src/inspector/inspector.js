@@ -22,6 +22,9 @@ import {
   createSkeleton,
   createArcaneTower,
   createAshSanctum,
+  createTemple,
+  createStormAltar,
+  createWatchingEye,
   createArsonist,
   createWorkshop,
   createOrcWorkshop,
@@ -162,6 +165,21 @@ const MODEL_CATALOG = [
     id: 'ash_sanctum', name: 'Santuário das Cinzas (Ash Sanctum)', category: 'buildings', faction: 'orc', type: 'building', icon: '🔥',
     sourceFile: 'src/models/buildings/AshSanctumModel.js', create: createAshSanctum,
     description: 'Santuário orc (F4-04): plataforma de basalto, pilares com crânios, braseiro verde-ácido e estandarte.', notes: 'Procedural provisório.'
+  },
+  {
+    id: 'temple', name: 'Templo da Luz (Temple)', category: 'buildings', faction: 'human', type: 'building', icon: '⛪',
+    sourceFile: 'src/models/buildings/TempleModel.js', create: createTemple,
+    description: 'Templo humano (F4-04b): base escalonada, anel de colunas, cúpula dourada e esfera de luz.', notes: 'Procedural provisório.'
+  },
+  {
+    id: 'storm_altar', name: 'Altar das Tempestades (Storm Altar)', category: 'buildings', faction: 'orc', type: 'building', icon: '⚡',
+    sourceFile: 'src/models/buildings/StormAltarModel.js', create: createStormAltar,
+    description: 'Altar orc (F4-04b): plataforma escura, altar central com relâmpagos e quatro totens com chifres.', notes: 'Procedural provisório.'
+  },
+  {
+    id: 'watching_eye', name: 'Olho Vigia (Watching Eye)', category: 'units', faction: 'orc', type: 'watching_eye', icon: '👁️',
+    sourceFile: 'src/models/units/WatchingEyeModel.js', create: createWatchingEye,
+    description: 'Olho voador invocado (F4-04b): globo violeta com íris dourada na frente (+Z) e tentáculos.', notes: 'Sem rig humanoide.'
   },
   {
     id: 'sapper',

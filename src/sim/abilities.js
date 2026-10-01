@@ -55,6 +55,7 @@ export function targetProblem(caster, ability, target) {
     return 'Alvo inválido: precisa ser uma unidade.';
   }
   if (ability.effects.some(e => e.kind === 'polymorph') && !canPolymorph(target)) return 'Alvo inválido: não pode ser transmutado.';
+  if (ability.effects.some(e => e.kind === 'exorcism') && !getUnitDef(target.type).undead) return 'Alvo inválido: só funciona contra mortos-vivos.';
   return null;
 }
 
@@ -170,6 +171,28 @@ export function applyAbility(gm, caster, ability, target, x, z) {
         break;
       case 'polymorph':
         if (isAlive(target) && canPolymorph(target)) gm.polymorphUnit(target, fx.unitType || 'sheep');
+        break;
+      case 'reveal':
+        // Vista Sagrada: a névoa é de apresentação (só o jogador local/aliados enxergam o efeito).
+        if (gm.fogOfWar && gm.fogOfWar.revealArea && (caster.ownerId === gm.localPlayerId || (gm.isAlly && gm.isAlly(gm.localPlayerId, caster.ownerId)))) {
+          gm.fogOfWar.revealArea(px, pz, fx.radius, fx.duration);
+        }
+        radius = fx.radius;
+        break;
+      case 'exorcism': {
+        if (!isAlive(target) || !getUnitDef(target.type).undead) break;
+        const dealt = Math.max(1, Math.floor(Math.min(target.hp, Math.max(0, caster.mana - cost) / fx.manaPerHp)));
+        if (caster.mana - cost + 1e-6 < dealt * fx.manaPerHp) break;
+        cost += dealt * fx.manaPerHp;
+        target.takeDamage(dealt, caster, gm.allUnits);
+        break;
+      }
+      case 'runes':
+        if (gm.hazards) gm.hazards.spawnRunes(caster.ownerId, px, pz, fx);
+        radius = fx.radius;
+        break;
+      case 'whirlwind':
+        if (gm.hazards) gm.hazards.spawnWhirlwind(caster.ownerId, px, pz, fx);
         break;
       case 'raise_dead': {
         const spots = [];
@@ -307,6 +330,7 @@ export function findAutocastTarget(gm, caster, ability) {
     } else if (ability.target === 'ally' || ability.target === 'unit') {
       if (!caster.isAlliedWith(u)) continue;
       if (heals && u.hp >= u.maxHp) continue;
+      if (ability.autocastBelow > 0 && u.hp / u.maxHp >= ability.autocastBelow) continue; // F4-04b: Cura só abaixo de 60 %
       score = u.hp / u.maxHp;
     } else continue;
     if (score < bestScore) { bestScore = score; best = u; }

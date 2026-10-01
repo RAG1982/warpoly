@@ -1608,6 +1608,7 @@ export class GameManager {
     for (let i = this.buildings.length - 1; i >= 0; i--) {
       if (this.buildings[i].isDead) {
         const deadB = this.buildings.splice(i, 1)[0];
+        if (this.selectedBuilding === deadB) this.selectedBuilding = null; // QA NEW-28: não deixa o card da obra cancelada/destruída preso
         if (deadB.dispose) deadB.dispose();
         this.unregisterEntity(deadB);
         if (deadB.campId) this._onCampDestroyed(deadB);

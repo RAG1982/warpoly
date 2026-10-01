@@ -252,3 +252,5 @@ contras acima. Números de exemplo (seed 42), não normativos — o balanceament
 
 ### F3-05 (implementado)
 Reparo custa 50% do custo original para 100% de PV; cancelar obra reembolsa 75%; máx. 4 trabalhadores por construção. Ver `docs/02_MECANICAS.md`.
+
+> F4-04 feito: Torre Arcana, Santuário das Cinzas, Mago, Necromante, Esqueleto e 11 magias (ver 02_MECANICAS). Pendente na F4-04b: Templário/Ogro Feiticeiro, Templo/Altar, Cura, Exorcismo, Olho Vigia, Sede de Batalha, Runas, Redemoinho.

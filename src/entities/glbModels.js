@@ -1,3 +1,4 @@
+import * as THREE from 'three';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 import { MeshoptDecoder } from 'three/examples/jsm/libs/meshopt_decoder.module.js';
 import { enableShadows } from '../models/materials.js';
@@ -89,22 +90,33 @@ export function ensureGlbLoaded() {
   return loadGlbTemplates();
 }
 
+// Materiais de time já tintados, compartilhados por (material de origem, cor): N unidades/construções do
+// mesmo jogador usam o mesmo material (sem 1 clone por instância).
+const teamMatCache = new Map();
+
 /**
- * Cor de time: clona o material `TeamColor` da instância (a textura do atlas
- * continua compartilhada) e aplica a cor. Base para a F7-02.
+ * Cor de time (F7-02): troca o material `TeamColor` de cada malha da instância por uma variante tintada
+ * com a cor do dono (a textura do atlas continua compartilhada). Vale para unidades e construções .glb;
+ * modelos procedurais não têm `TeamColor` e passam intactos. Idempotente.
  */
 export function setTeamColor(obj, color) {
-  const cache = new Map();
+  if (!obj || !color) return obj;
+  const key = new THREE.Color(color).getHexString();
   obj.traverse(child => {
     if (!child.isMesh || !child.material || child.material.name !== 'TeamColor') return;
-    const src = child.userData.origMaterial || child.material;
-    if (!cache.has(src)) {
-      const m = src.clone();
+    const src = child.userData.teamSrcMaterial || child.userData.origMaterial || child.material;
+    let byColor = teamMatCache.get(src);
+    if (!byColor) { byColor = new Map(); teamMatCache.set(src, byColor); }
+    let m = byColor.get(key);
+    if (!m) {
+      m = src.clone();
+      m.name = 'TeamColor';
       m.color.set(color);
-      cache.set(src, m);
+      byColor.set(key, m);
     }
-    child.material = cache.get(src);
-    if (child.userData.origMaterial) child.userData.origMaterial = child.material;
+    child.userData.teamSrcMaterial = src;
+    child.material = m;
+    if (child.userData.origMaterial) child.userData.origMaterial = m;
   });
   return obj;
 }

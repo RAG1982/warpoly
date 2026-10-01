@@ -7,7 +7,7 @@ os `.glb` em `public/models/` são artefatos reproduzíveis.
 | Script | Saída | Resultado |
 |---|---|---|
 | `build_grunt.py` | `public/models/grunt.glb` | guerreiro orc: 7 partes rígidas, 4,4 mil tris, 8 draw calls, atlas 512² |
-| `build_knight.py` | `public/models/knight.glb` | Espadachim humano (ref. `soldado.png`): 7 partes rígidas, 4,2 mil tris, 10 draw calls, atlas 512², 213 KB |
+| `build_knight.py` | `public/models/knight.glb` | Espadachim humano (ref. `soldado.png`), refeito mais forte: armet fechado com viseira em T, ombreiras de 3 lâminas com espigão, tabardo azul com brasão, gola de pele, capa longa, montante e escudo kite (`ShieldGroup`); 8 partes rígidas, 6,4 mil tris, 10 draw calls, atlas 512², 278 KB |
 | `build_archer.py` | `public/models/archer.glb` | Arqueiro humano: capuz/manto/capa em cor de time, gibão de couro, aljava com flechas, arco composto + corda de 2 segmentos + flecha (`DrawnArrow`); rig plana, 6,8 mil tris, 12 draw calls, atlas 512² |
 | `build_axethrower.py` | `public/models/axethrower.glb` | Lanceiro-Machado troll: pele verde-acinzentada com pintura de guerra, moicano, presas, bandoleira/cinturão de machadinhas, 2 machados de arremesso; rig aninhada, 6,9 mil tris, 12 draw calls, atlas 512² |
 | `build_villager.py` | `public/models/villager.glb` | Camponês humano: rig plana (ToolGroup > Axe/Pickaxe/Hammer, Pack > WoodBundle/GoldSack), 6,0 mil tris, 14 draw calls no total (~10 visíveis), atlas 512², 278 KB |
@@ -16,7 +16,7 @@ os `.glb` em `public/models/` são artefatos reproduzíveis.
 | `build_ogre.py` | `public/models/ogre.glb` | Ogro orc: 7 partes rígidas (rig aninhada), 6,9 mil tris, 11 draw calls, atlas 512², 297 KB |
 | `build_bandit.py` | `public/models/bandit.glb` | Bandido neutro: 7 partes rígidas (rig plana), 5,7 mil tris, 12 draw calls, atlas 512², 274 KB |
 | `build_castle.py` | `public/models/castle.glb` | castelo humano: 2 draw calls, 8,7 mil tris, atlas 1024² |
-| `build_cavalier.py` | `public/models/cavalier.glb` | Cavaleiro montado humano (F4-01/NEW-33): cavalo anatômico + tronco do Espadachim; rig plana com `HorseLegFL/FR/BL/BR`, 8,0 mil tris, 14 draw calls, atlas 512², 323 KB |
+| `build_cavalier.py` | `public/models/cavalier.glb` | Cavaleiro montado humano (F4-01/NEW-33): cavalo anatômico + tronco do Espadachim; rig plana com `HorseLegFL/FR/BL/BR`, 8,5 mil tris, 14 draw calls, atlas 512², 333 KB (reusa o novo cavaleiro-rider do Espadachim; escudo menor) |
 | `build_stable.py` | `public/models/stable.glb` | Estábulo Real: celeiro de empena frontal, baias com cavalos, 2 draw calls, 5,1 mil tris, atlas 1024², 389 KB |
 | `build_ogre_den.py` | `public/models/ogre_den.glb` | Covil dos Ogros: paliçada, teto de peles e costelas, portão e crânio, 2 draw calls, 8,6 mil tris, atlas 1024², 415 KB |
 | `build_ballista.py` | `public/models/ballista.glb` | Balista humana (NEW-36): besta gigante laminada + carreta de 2 rodas raiadas; rig plana `Body`/`SiegeArm`/`WheelL`/`WheelR`, 6 draw calls, 5,1 mil tris, atlas 512², 250 KB |

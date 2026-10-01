@@ -131,10 +131,10 @@ def build_horse(mats, root):
     mb = MeshBuilder('Horse')
     # ---- tronco: loft em U ao longo de z -----------------------------------------------------
     path = [(0, s[1], s[0]) for s in BODY]
-    mb.add(prim_rings(limb_rings(path, [(s[2], s[3]) for s in BODY], 14, up=(0, 1, 0))), 'coat', smooth=70)
+    mb.add(prim_rings(limb_rings(path, [(s[2], s[3]) for s in BODY], 12, up=(0, 1, 0))), 'coat', smooth=70)
     for sx in (-1, 1):   # massa muscular: garupa e ombro
-        mb.add(prim_sphere(0.11, 0.18, 0.22, 8, 4), 'coat', M((sx * 0.21, 1.22, -0.58)), smooth=70)
-        mb.add(prim_sphere(0.10, 0.19, 0.17, 8, 4), 'coat', M((sx * 0.23, 1.12, 0.42)), smooth=70)
+        mb.add(prim_sphere(0.11, 0.18, 0.22, 6, 4), 'coat', M((sx * 0.21, 1.22, -0.58)), smooth=70)
+        mb.add(prim_sphere(0.10, 0.19, 0.17, 6, 4), 'coat', M((sx * 0.23, 1.12, 0.42)), smooth=70)
     # ---- pescoço arqueado + cabeça -----------------------------------------------------------
     npts = bezier(*NECK_BEZ, 4)
     mb.add(prim_rings(limb_rings(npts, NECK_R, 10, up=(0, 1, 0))), 'coat', smooth=70)
@@ -149,8 +149,7 @@ def build_horse(mats, root):
         mb.add(prim_sphere(0.028, 0.034, 0.03, 6, 4), 'iris', M((sx * 0.106, 1.895, 1.05)), smooth=80)
         mb.add(prim_sphere(0.013, 0.018, 0.016, 5, 3), 'pupil', M((sx * 0.128, 1.895, 1.055)), smooth=80)
         # sobrancelha / órbita e orelhas
-        mb.add(prim_box(0.03, 0.05, 0.11, taper=(0.8, 0.8)), 'coat', M((sx * 0.09, 1.945, 1.03), (-30, 0, sx * -15)),
-               bevel=0.006)
+        mb.add(prim_box(0.03, 0.05, 0.11, taper=(0.8, 0.8)), 'coat', M((sx * 0.09, 1.945, 1.03), (-30, 0, sx * -15)))
         mb.add(prim_cone(0.038, 0.16, 5), 'coat', M((sx * 0.065, 2.03, 0.93), (16, 0, sx * -9), (0.7, 1, 1.2)),
                smooth=40)
         mb.add(prim_cone(0.022, 0.10, 5), 'muzzle', M((sx * 0.065, 2.04, 0.945), (16, 0, sx * -9), (0.6, 1, 0.9)))
@@ -161,8 +160,8 @@ def build_horse(mats, root):
         pos = p + n * (r * 0.92) + Vector((0.05, 0, 0))
         ang = math.degrees(math.atan2(d.z, d.y)) + 12
         mb.add(prim_box(0.05, 0.19, 0.13, taper=(0.5, 0.6)), 'mane',
-               M(tuple(pos + Vector((0, 0.0, -0.02))), (ang, 0, -24 + 6 * (k % 2))), bevel=0.008, smooth=30)
-    mb.add(prim_box(0.06, 0.15, 0.08, taper=(0.5, 0.5)), 'mane', M((0, 2.05, 1.0), (40, 0, 0)), bevel=0.006)
+               M(tuple(pos + Vector((0, 0.0, -0.02))), (ang, 0, -24 + 6 * (k % 2))), smooth=30)
+    mb.add(prim_box(0.06, 0.15, 0.08, taper=(0.5, 0.5)), 'mane', M((0, 2.05, 1.0), (40, 0, 0)))
     tail_pts = bezier((0, 1.40, -0.86), (0, 1.36, -1.32), (0, 0.80, -1.22), 5)
     mb.add(prim_rings(limb_rings(tail_pts, [(0.05, 0.05), (0.085, 0.08), (0.11, 0.09), (0.10, 0.08), (0.07, 0.05),
                                             (0.03, 0.03)], 8, up=(0, 1, 0))), 'mane', smooth=60)
@@ -199,29 +198,27 @@ def build_horse(mats, root):
     for sx in (-1, 1):
         hx, hy = horse_hem_pt(-0.03, 22, off=0.048)
         crest = [(0.0, 0.15), (0.11, 0.02), (0.0, -0.13), (-0.11, 0.02)]
-        mb.add(prim_extrude(crest, 0.022, axis='x'), 'gold', M((sx * (hx + 0.012), hy + 0.05, -0.03)), bevel=0.006)
+        mb.add(prim_extrude(crest, 0.022, axis='x'), 'gold', M((sx * (hx + 0.012), hy + 0.05, -0.03)))
         mb.add(prim_extrude([(0, 0.07), (0.05, 0), (0, -0.07), (-0.05, 0)], 0.026, axis='x'), 'team',
                M((sx * (hx + 0.022), hy + 0.05, -0.03)))
     # ---- sela de couro, estribos, cilha, peitoral ---------------------------------------------
-    mb.add(prim_box(0.34, 0.07, 0.56, taper=(0.9, 0.95), base=True), 'leather', M((0, SEAT_Y - 0.075, -0.05)),
-           bevel=0.02, smooth=30)
-    mb.add(prim_box(0.24, 0.15, 0.06, taper=(0.85, 1)), 'leather', M((0, SEAT_Y + 0.04, 0.22), (-8, 0, 0)), bevel=0.015)
-    mb.add(prim_box(0.30, 0.17, 0.06, taper=(0.9, 1)), 'leather', M((0, SEAT_Y + 0.05, -0.30), (10, 0, 0)), bevel=0.015)
+    mb.add(prim_box(0.34, 0.07, 0.56, taper=(0.9, 0.95), base=True), 'leather', M((0, SEAT_Y - 0.075, -0.05)), smooth=30)
+    mb.add(prim_box(0.24, 0.15, 0.06, taper=(0.85, 1)), 'leather', M((0, SEAT_Y + 0.04, 0.22), (-8, 0, 0)))
+    mb.add(prim_box(0.30, 0.17, 0.06, taper=(0.9, 1)), 'leather', M((0, SEAT_Y + 0.05, -0.30), (10, 0, 0)))
     mb.add(prim_sphere(0.04, 0.04, 0.04, 6, 3), 'gold', M((0, SEAT_Y + 0.13, 0.225)), smooth=60)
     for sx in (-1, 1):
-        mb.add(prim_box(0.03, 0.22, 0.30, taper=(1.0, 0.9)), 'leather', M((sx * 0.31, SEAT_Y - 0.13, 0.0), (0, 0, sx * -8)),
-               bevel=0.01)
-        beam(mb, (sx * 0.31, SEAT_Y - 0.05, 0.12), (sx * 0.40, 1.03, 0.25), 0.035, 0.012, 'leather')
+        mb.add(prim_box(0.03, 0.22, 0.30, taper=(1.0, 0.9)), 'leather', M((sx * 0.31, SEAT_Y - 0.13, 0.0), (0, 0, sx * -8)))
+        beam(mb, (sx * 0.31, SEAT_Y - 0.05, 0.12), (sx * 0.44, 1.03, 0.25), 0.035, 0.012, 'leather')
         # estribo de ferro
-        mb.add(prim_box(0.12, 0.022, 0.10), 'iron', M((sx * 0.40, 0.89, 0.27)), bevel=0.006)
+        mb.add(prim_box(0.12, 0.022, 0.10), 'iron', M((sx * 0.44, 0.89, 0.27)))
         for zz in (0.225, 0.315):
-            mb.add(prim_box(0.12, 0.13, 0.016), 'iron', M((sx * 0.40, 0.96, zz)), bevel=0.004)
-        mb.add(prim_box(0.05, 0.04, 0.05), 'iron', M((sx * 0.40, 1.03, 0.25)), bevel=0.006)
+            mb.add(prim_box(0.12, 0.13, 0.016), 'iron', M((sx * 0.44, 0.96, zz)))
+        mb.add(prim_box(0.05, 0.04, 0.05), 'iron', M((sx * 0.44, 1.03, 0.25)))
     # peitoral: tiras do arção ao peito + medalhão dourado
     for sx in (-1, 1):
         beam(mb, (sx * 0.27, 1.40, 0.36), (sx * 0.05, 1.06, 0.80), 0.045, 0.014, 'leather')
         beam(mb, (sx * 0.29, 1.30, -0.50), (sx * 0.28, 1.10, -0.80), 0.04, 0.012, 'leather')
-    mb.add(prim_cyl(0.065, 0.065, 0.028, 10, base=False), 'gold', M((0, 1.06, 0.795), (90, 0, 0)), smooth=30, bevel=0.005)
+    mb.add(prim_cyl(0.065, 0.065, 0.028, 10, base=False), 'gold', M((0, 1.06, 0.795), (90, 0, 0)), smooth=30)
     mb.add(prim_cyl(0.035, 0.035, 0.032, 6, base=False), 'team', M((0, 1.06, 0.80), (90, 0, 0)))
     # ---- arreios da cabeça, bridão e rédeas -------------------------------------------------------
     mb.add(prim_rings(limb_rings([(0, 1.625, 1.335), (0, 1.60, 1.36)], [(0.078, 0.096), (0.078, 0.096)], 12,
@@ -239,18 +236,17 @@ def build_horse(mats, root):
            M((0.0, 2.0, 0.95), (25, 0, 0)))
     # ---- pernas do cavaleiro (estáticas, presas ao flanco) -------------------------------------------
     for sx in (-1, 1):
-        hip, mid, knee = (sx * 0.17, 1.60, -0.04), (sx * 0.27, 1.49, 0.11), (sx * 0.36, 1.36, 0.26)
-        mb.add(prim_rings(limb_rings([hip, mid, knee], [(0.115, 0.12), (0.105, 0.11), (0.088, 0.092)], 8)),
-               'steel', smooth=60, bevel=0.005)
-        mb.add(prim_sphere(0.095, 0.09, 0.09, 8, 4), 'steel', M((sx * 0.37, 1.35, 0.30)), smooth=50)
-        mb.add(prim_cone(0.03, 0.06, 6), 'gold', M((sx * 0.37, 1.35, 0.385), (90, 0, 0)))
+        hip, mid, knee = (sx * 0.20, 1.60, -0.04), (sx * 0.31, 1.49, 0.11), (sx * 0.42, 1.36, 0.26)
+        mb.add(prim_rings(limb_rings([hip, mid, knee], [(0.14, 0.145), (0.125, 0.13), (0.10, 0.105)], 8)),
+               'steel', smooth=60)
+        mb.add(prim_sphere(0.115, 0.105, 0.105, 8, 4), 'steel_hi', M((sx * 0.43, 1.35, 0.30)), smooth=50)
+        mb.add(prim_cone(0.03, 0.06, 6), 'gold', M((sx * 0.43, 1.35, 0.405), (90, 0, 0)))
         mb.add(prim_cyl(0.10, 0.10, 0.02, 10), 'gold', M((sx * 0.30, 1.43, 0.17), (0, 0, sx * 58)), smooth=30)
-        ank = (sx * 0.40, 0.99, 0.24)
-        mb.add(prim_rings(limb_rings([(sx * 0.375, 1.33, 0.29), (sx * 0.39, 1.15, 0.265), ank],
-                                     [(0.085, 0.09), (0.085, 0.09), (0.065, 0.07)], 8)), 'steel', smooth=60, bevel=0.005)
-        mb.add(prim_cyl(0.092, 0.092, 0.02, 10), 'gold', M((sx * 0.385, 1.2, 0.27)), smooth=30)
-        mb.add(prim_box(0.14, 0.09, 0.27, taper=(0.85, 0.7), base=True), 'leather', M((sx * 0.40, 0.88, 0.31)),
-               bevel=0.02, smooth=35)
+        ank = (sx * 0.44, 0.99, 0.24)
+        mb.add(prim_rings(limb_rings([(sx * 0.43, 1.33, 0.29), (sx * 0.44, 1.15, 0.265), ank],
+                                     [(0.085, 0.09), (0.085, 0.09), (0.065, 0.07)], 8)), 'steel', smooth=60)
+        mb.add(prim_cyl(0.092, 0.092, 0.02, 10), 'gold', M((sx * 0.44, 1.2, 0.27)), smooth=30)
+        mb.add(prim_box(0.14, 0.09, 0.27, taper=(0.85, 0.7), base=True), 'leather', M((sx * 0.44, 0.88, 0.31)), smooth=35)
     return mb.build(mats, parent=root)
 
 
@@ -275,34 +271,12 @@ def build_leg(mats, root, name, sx, z, hind):
     end = low[-1]
     # casco + ferradura
     mb.add(prim_cyl(0.10, 0.072, 0.115, 10, base=True), 'hoof', M((0, -0.945, end[2] + 0.04 + (0.0 if not hind else 0.0))),
-           smooth=40, bevel=0.004)
+           smooth=40)
     mb.add(prim_cyl(0.105, 0.105, 0.022, 10, base=True), 'iron', M((0, -0.95, end[2] + 0.04)), smooth=30)
     return mb.build(mats, parent=root, location=(sx * 0.19, LEG_PIVOT_Y, z))
 
 
 # ---------------------------------------------------------------------------
-def build_arm_bent(mats, root, side, elbow, wrist):
-    """Braço do Espadachim com antebraço dobrado à frente (pivô no ombro; tudo relativo ao ombro)."""
-    s = side
-    mb = MeshBuilder('ArmR' if s > 0 else 'ArmL')
-    mb.add(prim_sphere(0.16, 0.13, 0.17, 10, 4, y_min=0.0), 'steel', M((s * 0.02, 0.05, 0.0), (0, 0, -s * 18)),
-           smooth=50, bevel=0.006)
-    mb.add(prim_sphere(0.15, 0.10, 0.16, 10, 3, y_min=0.0), 'steel', M((s * 0.05, -0.04, 0.0), (0, 0, -s * 30)), smooth=50)
-    mb.add(prim_cyl(0.16, 0.155, 0.03, 10), 'gold', M((s * 0.02, 0.045, 0.0), (0, 0, -s * 18)), smooth=30)
-    e, w = Vector(elbow), Vector(wrist)
-    sh = Vector((s * 0.01, -0.06, 0.0))
-    up = [tuple(sh), tuple(sh.lerp(e, 0.5)), tuple(e)]
-    mb.add(prim_rings(limb_rings(up, [0.085, 0.09, 0.08], 8)), 'team', smooth=70)
-    mb.add(prim_sphere(0.075, 0.075, 0.075, 8, 4), 'steel', M(tuple(e)), smooth=50)
-    fa = [tuple(e), tuple(e.lerp(w, 0.5)), tuple(w)]
-    mb.add(prim_rings(limb_rings(fa, [0.07, 0.075, 0.06], 8)), 'steel', smooth=60, bevel=0.005)
-    mb.add(prim_cyl(0.078, 0.078, 0.02, 8), 'gold', M(tuple(e.lerp(w, 0.45)), (0, 0, 0)) @ orient(w - e) , smooth=30)
-    dirv = (w - e).normalized()
-    mb.add(prim_box(0.09, 0.11, 0.10, taper=(0.9, 0.85)), 'steel_dark', Matrix.Translation(w + dirv * 0.05) @ orient(dirv),
-           bevel=0.014)
-    return mb.build(mats, parent=root, location=(s * 0.38, 1.25 + DY, 0.0))
-
-
 def main():
     args = C.script_args()
     C.reset_scene()
@@ -314,19 +288,21 @@ def main():
     # cavaleiro: tronco/cabeça/espada do Espadachim deslocados para a sela
     K.TORSO_PIVOT = (0.0, TORSO_Y, 0.0)
     K.HEAD_PIVOT = (0.0, 1.62 + DY, 0.0)
-    K.SWORD_PIVOT = (0.50, 1.62, 0.40)
-    K.SKIRT = False
+    K.ARM_PIVOT = (0.50, 1.27 + DY, 0.0)
+    K.SWORD_PIVOT = (0.62, 1.64, 0.42)
+    K.TAB = dict(top=0.30, bot=-0.22, topz=0.31, botz=0.31, emb=0.04, back=False)
     K.CAPE_FOLD = ((0, 0.04, -0.24), 0.09)
-    K.CAPE = ((0.27, 0.40, -0.19), (-0.27, 0.40, -0.19), (0.52, -0.22, -0.64), (-0.52, -0.22, -0.64))
+    K.CAPE = ((0.34, 0.40, -0.22), (-0.34, 0.40, -0.22), (0.54, -0.22, -0.66), (-0.54, -0.22, -0.66))
     torso = K.build_torso(mats, root)
     head = K.build_head(mats, root)
-    arm_l = build_arm_bent(mats, root, -1, (-0.03, -0.30, 0.02), (0.16, -0.30, 0.26))
-    arm_r = build_arm_bent(mats, root, 1, (0.10, -0.30, 0.04), (0.12, -0.34, 0.36))
+    arm_l = K.build_arm(mats, root, -1, elbow=(-0.06, -0.32, 0.02), wrist=(0.26, -0.30, 0.24))
+    arm_r = K.build_arm(mats, root, 1, elbow=(0.14, -0.32, 0.04), wrist=(0.12, -0.36, 0.36))
     sword = K.build_sword(mats, root)
-    parts = [horse] + legs + [torso, head, arm_l, arm_r, sword]
+    shield = K.build_shield(mats, root, scale=0.62, pivot=(-0.68, 1.74, 0.16))
+    parts = [horse] + legs + [torso, head, arm_l, arm_r, sword, shield]
     bpy.context.view_layer.update()
 
-    C.uv_atlas(parts, weights={'Head': 1.6, 'Torso': 1.0, 'Sword': 0.8, 'Horse': 0.9, 'ArmL': 0.7, 'ArmR': 0.7,
+    C.uv_atlas(parts, weights={'Head': 1.6, 'Torso': 1.0, 'Sword': 0.8, 'Horse': 0.9, 'ArmL': 0.8, 'ArmR': 0.8, 'ShieldGroup': 0.7,
                                'HorseLegFL': 0.8, 'HorseLegFR': 0.8, 'HorseLegBL': 0.8, 'HorseLegBR': 0.8},
                margin=0.006)
     img = C.bake_atlas(parts, 'cavalier_atlas', 512, samples=int(os.environ.get('BAKE_SAMPLES', 32)), margin=4)

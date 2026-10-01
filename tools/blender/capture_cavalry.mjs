@@ -3,7 +3,7 @@
  * NEW-33 — capturas do Cavaleiro / Estábulo Real / Covil dos Ogros (Blender) no inspetor e no jogo.
  * GPU real obrigatória (assertHardwareGpu). Rode SOMENTE via safe-run:
  *   bash tools/safe-run.sh --timeout 600 -- node tools/blender/capture_cavalry.mjs
- * Sobe o Vite na porta EXCLUSIVA 5220 (encerrado no finally).
+ * Sobe o Vite na porta 5222 (PORT_VITE) (encerrado no finally).
  */
 import { chromium } from 'playwright';
 import { createServer } from 'vite';
@@ -12,7 +12,7 @@ import { fileURLToPath } from 'node:url';
 import { assertHardwareGpu } from '../lib/assertGpu.mjs';
 
 const OUT = path.join(path.dirname(fileURLToPath(import.meta.url)), 'renders');
-const PORT = 5220;
+const PORT = Number(process.env.PORT_VITE || 5222);
 const ARGS = [
   '--use-angle=vulkan', '--enable-features=Vulkan', '--enable-gpu', '--ignore-gpu-blocklist',
   '--js-flags=--max-old-space-size=2048', '--renderer-process-limit=1', '--disable-dev-shm-usage', '--disable-extensions'
@@ -44,6 +44,10 @@ try {
       ['cavalier_glb', 'walk', 0.3, 'insp_cavalier_walk_b'],
       ['cavalier_glb', 'fight', 0.35, 'insp_cavalier_fight'],
       ['cavalier_glb', 'die', 1.4, 'insp_cavalier_die'],
+      ['knight_glb', 'idle', null, 'insp_knight_idle'],
+      ['knight_glb', 'walk', 0.2, 'insp_knight_walk'],
+      ['knight_glb', 'fight', 0.55, 'insp_knight_fight'],
+      ['knight_glb', 'die', 1.4, 'insp_knight_die'],
       ['stable_glb', 'idle', null, 'insp_stable'],
       ['ogre_den_glb', 'idle', null, 'insp_ogre_den']
     ];

@@ -116,7 +116,7 @@ def build_torso(mats, root):
               ring_h(0.17, 0.435, 0.265, 12, cz=0.04), ring_h(0.32, 0.455, 0.245, 12, cz=0.02),
               ring_h(0.41, 0.33, 0.18, 12)]
     mb.add(prim_rings(breast), 'steel', smooth=55, bevel=0.008)
-    mb.add(prim_box(0.065, 0.62, 0.075, taper=(0.5, 0.6)), 'steel_hi', M((0, 0.11, 0.285)))
+    mb.add(prim_box(0.06, 0.60, 0.05, taper=(0.5, 0.6)), 'steel_hi', M((0, 0.11, 0.268)))
     # frisos dourados: cintura, cava dos braços, gola, peito (volutas)
     mb.add(prim_rings([ring_h(-0.175, 0.272, 0.208, 12, cz=0.02), ring_h(-0.14, 0.282, 0.212, 12, cz=0.02)],
                       cap0=False, cap1=False), 'gold', smooth=30)
@@ -124,13 +124,9 @@ def build_torso(mats, root):
            'gold', smooth=30)
     for sx in (-1, 1):
         mb.add(prim_box(0.05, 0.24, 0.05), 'gold', M((sx * 0.43, 0.28, 0.03), (0, 0, sx * -10)))
-        for k in (0, 1):
-            mb.add(prim_sphere(0.028, 0.028, 0.028, 6, 3), 'gold', M((sx * (0.17 + k * 0.1), 0.39 - k * 0.04, 0.22)), smooth=60)
-    # volutas douradas gravadas no peitoral
-    for sx in (-1, 1):
-        for i, (dx, dy, r) in enumerate(((0.16, 0.28, 50), (0.21, 0.23, 20), (0.13, 0.05, -35))):
-            z = 0.04 + 0.255 * math.sqrt(max(0.0, 1 - (dx / 0.40) ** 2)) + 0.006
-            mb.add(prim_box(0.12, 0.02, 0.014), 'gold', M((sx * dx, dy, z), (0, sx * -dx * 70, sx * r)))
+    for (y, rx, rz, cz) in ((0.215, 0.443, 0.272, 0.04), (0.035, 0.357, 0.246, 0.035)):
+        mb.add(prim_rings([ring_h(y, rx, rz, 12, cz=cz), ring_h(y + 0.022, rx + 0.004, rz + 0.004, 12, cz=cz)],
+                          cap0=False, cap1=False), 'gold', smooth=30)
     # gorjal em lâminas + gola de pele (arminho)
     for k, (y, rx, rz) in enumerate(((0.36, 0.25, 0.20), (0.41, 0.22, 0.18))):
         mb.add(prim_rings([ring_h(y - 0.045, rx, rz, 14), ring_h(y + 0.045, rx - 0.012, rz - 0.01, 14)], cap0=False,
@@ -267,7 +263,6 @@ def build_leg(mats, root, side):
     mb.add(prim_box(0.20, 0.10, 0.33, taper=(0.8, 0.6), base=True), 'steel_dark', M((s * 0.02, -0.70, 0.07)), bevel=0.02,
            smooth=35)
     mb.add(prim_box(0.15, 0.06, 0.14, base=True), 'steel', M((s * 0.02, -0.63, 0.19)), bevel=0.015)
-    mb.add(prim_cone(0.05, 0.12, 5), 'steel_dark', M((s * 0.02, -0.66, 0.36), (90, 0, 0)))
     for k in range(3):
         mb.add(prim_sphere(0.018, 0.018, 0.018, 5, 3), 'gold', M((s * 0.02, -0.62, 0.12 + k * 0.06)), smooth=60)
     return mb.build(mats, parent=root, location=(s * LEG_PIVOT[0], LEG_PIVOT[1], LEG_PIVOT[2]))

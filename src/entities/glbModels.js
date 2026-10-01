@@ -34,7 +34,13 @@ export const GLB_MODELS = {
   sapper: { url: `${BASE}models/sapper.glb`, root: 'Sapper', type: 'sapper' },
   arsonist: { url: `${BASE}models/arsonist.glb`, root: 'Arsonist', type: 'arsonist' },
   arcane_tower: { url: `${BASE}models/arcane_tower.glb`, root: 'ArcaneTower', type: null },
-  ash_sanctum: { url: `${BASE}models/ash_sanctum.glb`, root: 'AshSanctum', type: null }
+  ash_sanctum: { url: `${BASE}models/ash_sanctum.glb`, root: 'AshSanctum', type: null },
+  // NEW-40: Templo da Luz, Altar das Tempestades, Olho Vigia, Templário e Ogro Feiticeiro (Blender)
+  temple: { url: `${BASE}models/temple.glb`, root: 'Temple', type: null },
+  storm_altar: { url: `${BASE}models/storm_altar.glb`, root: 'StormAltar', type: null },
+  watching_eye: { url: `${BASE}models/watching_eye.glb`, root: 'WatchingEye', type: 'watching_eye' },
+  templar: { url: `${BASE}models/templar.glb`, root: 'Templar', type: 'cavalier' },
+  ogre_mage: { url: `${BASE}models/ogre_mage.glb`, root: 'OgreMage', type: 'ogre' }
 };
 
 export const glbEnabled = (() => {

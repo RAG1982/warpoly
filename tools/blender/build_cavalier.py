@@ -277,11 +277,11 @@ def build_leg(mats, root, name, sx, z, hind):
 
 
 # ---------------------------------------------------------------------------
-def main():
+def main(root_name='Cavalier', out_name='cavalier'):
     args = C.script_args()
     C.reset_scene()
     mats = C.make_paint_set(PALETTE)
-    root = C.make_empty('Cavalier')
+    root = C.make_empty(root_name)
     horse = build_horse(mats, root)
     legs = [build_leg(mats, root, 'HorseLegFL', -1, 0.42, False), build_leg(mats, root, 'HorseLegFR', 1, 0.42, False),
             build_leg(mats, root, 'HorseLegBL', -1, -0.55, True), build_leg(mats, root, 'HorseLegBR', 1, -0.55, True)]
@@ -305,13 +305,13 @@ def main():
     C.uv_atlas(parts, weights={'Head': 1.6, 'Torso': 1.0, 'Sword': 0.8, 'Horse': 0.9, 'ArmL': 0.8, 'ArmR': 0.8, 'ShieldGroup': 0.7,
                                'HorseLegFL': 0.8, 'HorseLegFR': 0.8, 'HorseLegBL': 0.8, 'HorseLegBR': 0.8},
                margin=0.006)
-    img = C.bake_atlas(parts, 'cavalier_atlas', 512, samples=int(os.environ.get('BAKE_SAMPLES', 32)), margin=4)
-    C.finalize_materials(parts, img, team_default=TEAM_DEFAULT, out_png=os.path.join(C.BUILD_DIR, 'cavalier_atlas.png'))
-    out = os.path.join(C.OUT_MODELS, 'cavalier.glb')
+    img = C.bake_atlas(parts, f'{out_name}_atlas', 512, samples=int(os.environ.get('BAKE_SAMPLES', 32)), margin=4)
+    C.finalize_materials(parts, img, team_default=TEAM_DEFAULT, out_png=os.path.join(C.BUILD_DIR, f'{out_name}_atlas.png'))
+    out = os.path.join(C.OUT_MODELS, f'{out_name}.glb')
     C.export_glb(root, out)
-    print('STATS cavalier', C.stats(root, out))
+    print(f'STATS {out_name}', C.stats(root, out))
     if '--no-render' not in args:
-        rig = C.RenderRig(root, 'cavalier', res=int(os.environ.get('RENDER_RES', 800)), samples=24)
+        rig = C.RenderRig(root, out_name, res=int(os.environ.get('RENDER_RES', 800)), samples=24)
         rig.render('34', (1.0, 0.95, 1.0), 30)
         rig.render('front', (0.0, 0.25, 1.0), 30)
         rig.render('back', (-0.6, 0.6, -1.0), 30)

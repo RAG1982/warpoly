@@ -143,6 +143,16 @@ export class ModelFactory {
     return (glbEnabled && this.createGlbModel(key)) || fallback();
   }
 
+  /**
+   * NEW-40: chave do modelo 3D de uma unidade. Classes avançadas (`modelOf`) usam o .glb próprio quando
+   * ele está carregado (Templário, Ogro Feiticeiro); senão herdam o modelo da unidade base. O animador
+   * continua usando `modelOf` (mesma rig).
+   */
+  static visualType(type, def) {
+    if (def && def.modelOf && glbEnabled && glbTemplates.has(type)) return type;
+    return (def && def.modelOf) || type;
+  }
+
   // Template instances cache (loaded in memory once, cloned instantaneously)
   static templates = new Map();
 
@@ -334,8 +344,8 @@ export class ModelFactory {
       case 'ogre_den': return this.createOgreDen();
       case 'arcane_tower': return this._glbOr('arcane_tower', () => this.getOrCreateModel('arcane_tower', createArcaneTower));
       case 'ash_sanctum': return this._glbOr('ash_sanctum', () => this.getOrCreateModel('ash_sanctum', createAshSanctum));
-      case 'temple': return this.getOrCreateModel('temple', createTemple);
-      case 'storm_altar': return this.getOrCreateModel('storm_altar', createStormAltar);
+      case 'temple': return this._glbOr('temple', () => this.getOrCreateModel('temple', createTemple));
+      case 'storm_altar': return this._glbOr('storm_altar', () => this.getOrCreateModel('storm_altar', createStormAltar));
       case 'workshop': return this.createWorkshop();
       case 'orc_workshop': return this.createOrcWorkshop();
       case 'wall_human': return createWallSegment('human');
@@ -554,7 +564,10 @@ export class ModelFactory {
       case 'necromancer': return this._glbOr('necromancer', () => this.getOrCreateModel('necromancer', createNecromancer, 'necromancer'));
       case 'skeleton': return this._glbOr('skeleton', () => this.getOrCreateModel('skeleton', createSkeleton, 'skeleton'));
       case 'sheep': return this.createCritter('sheep');
-      case 'watching_eye': return this.getOrCreateModel('watching_eye', createWatchingEye);
+      case 'watching_eye': return this._glbOr('watching_eye', () => this.getOrCreateModel('watching_eye', createWatchingEye));
+      // NEW-40: classes avançadas com .glb próprio (sem .glb, caem no modelo da unidade base)
+      case 'templar': return this._glbOr('templar', () => this.createCavalier());
+      case 'ogre_mage': return this._glbOr('ogre_mage', () => this.createOgre());
       case 'sapper': return this.createSapper();
       case 'arsonist': return this.createArsonist();
       default: return this.createVillager();

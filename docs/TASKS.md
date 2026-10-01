@@ -550,7 +550,7 @@ _(agentes adicionam aqui: `NEW-<n> · título · lane · motivo`)_
 - NEW-34 · Escolta de cerco pela IA (o cerco, mais lento, chega depois do exército) e alvo colado dentro do alcance mínimo só resolvido via recuo · AI
 - NEW-35 · Ataque no chão do cerco (clique direito no chão) · GAME/UI
 - NEW-37 · `DOING` Refazer Espadachim e Cavaleiro (feedback do dono 2026-09-30: demasiado simples, sem força, elmo mais fechado, mais encorpado/rebuscado, conforme soldado.png) · ART
-- NEW-36 · `DOING(sonnet, 2026-09-30)` Arte Blender: Balista, Catapulta, Oficinas (hoje procedurais) · ART
+- ✅ NEW-36 · `DONE` (balista/oficina humana boas; oficina orc a mais fraca: telhado domina; concha da catapulta lembra maça) Arte Blender: Balista, Catapulta, Oficinas (hoje procedurais) · ART
 - NEW-1 · Avaliar uso real de `GLTFBuildingLoader` em `GreatHall.js` e remover ou adotar no pipeline Blender (F7-00) · ART · ficou fora do escopo da F0-03
 
 ## Notas de integração

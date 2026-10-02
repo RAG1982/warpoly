@@ -104,6 +104,8 @@ export class Building {
     this.mesh.userData.entity = this;
 
     this.isSelected = false;
+    /** Já sofreu dano de combate (obra em andamento só mostra chamas de dano depois disso). */
+    this.wasDamaged = false;
     this.isDead = false;
     this.isDisposed = false;
     this.underAttackTimer = 0;
@@ -236,6 +238,7 @@ export class Building {
     // F3-09: atribuição de kills (lida em die()).
     if (attacker && typeof attacker.ownerId === 'number') this.lastAttackerOwnerId = attacker.ownerId;
     this.hp -= amount;
+    this.wasDamaged = true;
     this.underAttackTimer = 6.0;
 
     const gmEvents = this.gameManager && this.gameManager.events;

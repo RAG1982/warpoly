@@ -66,6 +66,9 @@ try {
     return { a, b, ids: { wip: wip.id, forge: forge.id, smith: smith.id, mill: mill.id, w1: w1.id }, n: live.length };
   });
   console.log('setup', JSON.stringify(setup));
+  stats.hist = await page.evaluate(() => {
+    const h = {}; window.game.gameManager.sceneManager.scene.traverse(o => { const k = o.type + ':' + (o.name || ''); h[k] = (h[k] || 0) + 1; }); return h;
+  });
   stats.entities = await page.evaluate(() => {
     const gm = window.game.gameManager;
     const f = e => `${e.type}@${e.mesh.position.x.toFixed(1)},${e.mesh.position.z.toFixed(1)}#${e.ownerId}`;
@@ -105,6 +108,31 @@ try {
   });
   await page.waitForTimeout(6000);
   await shot('combat', (setup.a.x + setup.b.x) / 2, (setup.a.z + setup.b.z) / 2, 1.0);
+
+  // ---------------- interação: clique seleciona unidade/construção (raycast nas views) ----------------
+  await page.evaluate(() => { const gm = window.game.gameManager; gm.clearSelection(); });
+  await shot('interaction', setup.a.x + 4, setup.a.z + 8, 1.0);
+  const pick = async (kind) => {
+    const pos = await page.evaluate((kind) => {
+      const g = window.game; const gm = g.gameManager; const sm = gm.sceneManager;
+      const e = kind === 'unit' ? gm.allUnits.find(u => u.ownerId === 0 && u.type === 'knight') : gm.buildings.find(b => b.ownerId === 0 && b.role === 'hq');
+      const root = (gm.entityViews && gm.entityViews.rootOf(e)) || e.mesh;
+      const v = root.position.clone(); v.y += kind === 'unit' ? 1.5 : 2;
+      v.project(sm.camera);
+      return { x: (v.x + 1) / 2 * window.innerWidth, y: (1 - v.y) / 2 * window.innerHeight, id: e.id };
+    }, kind);
+    await page.mouse.move(pos.x, pos.y);
+    await page.waitForTimeout(250);
+    await page.mouse.click(pos.x, pos.y);
+    await page.waitForTimeout(300);
+    return page.evaluate((id) => {
+      const gm = window.game.gameManager;
+      return { selectedUnits: gm.selectedUnits.map(u => u.id), selectedBuilding: gm.selectedBuilding?.id ?? null, hovered: window.game.inputManager.hoveredEntity?.id ?? null, expect: id };
+    }, pos.id);
+  };
+  stats.pickUnit = await pick('unit');
+  stats.pickBuilding = await pick('building');
+  console.log('pick', JSON.stringify(stats.pickUnit), JSON.stringify(stats.pickBuilding));
 
   // ---------------- inspetor ----------------
   await page.goto(`http://127.0.0.1:${PORT}/inspector.html`, { waitUntil: 'load', timeout: 90000 });

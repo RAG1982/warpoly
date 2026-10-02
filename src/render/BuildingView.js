@@ -366,7 +366,9 @@ export class BuildingView {
 
   /** Destroi/oculta as chamas conforme o PV (`hp < 50 %`, em pé). */
   updateDamageFlames() {
-    const isDamagedOver50 = this.entity.hp < this.entity.maxHp * 0.5 && !this.entity.isDead;
+    const e = this.entity;
+    // Obra em andamento nasce com 10 % do PV: só mostra chamas de dano se levou dano de combate.
+    const isDamagedOver50 = e.hp < e.maxHp * 0.5 && !e.isDead && (e.isConstructed || e.wasDamaged);
     if (isDamagedOver50) {
       if (!this.flamesGroup) {
         this.createDamageFlames();

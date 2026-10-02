@@ -1,0 +1,41 @@
+{
+  "id": "tutorial",
+  "name": "Campo de Treino",
+  "hidden": true,
+  "size": 104,
+  "playable": 92,
+  "tileset": "verdejante",
+  "waterLevel": 0.5,
+  "maxPlayers": 2,
+  "terrain": {
+    "generator": "islands",
+    "params": {
+      "baseHeight": 2.4,
+      "coast": { "falloff": 10 },
+      "islands": [{ "x": 0, "z": 0, "rx": 66, "rz": 66 }],
+      "bridges": []
+    }
+  },
+  "fords": [],
+  "startSlots": [
+    { "x": -22, "z": 20, "mirror": [-1, -1] },
+    { "x": 30, "z": -34, "mirror": [1, 1] }
+  ],
+  "resources": [
+    { "type": "gold", "x": -20, "z": 36 },
+    { "type": "stone", "x": -36, "z": 36 },
+    { "type": "gold", "x": -6, "z": 16 }
+  ],
+  "forests": [
+    { "x": -38, "z": 8, "count": 8, "radius": 5.5, "species": "oak" },
+    { "x": -26, "z": 2, "count": 6, "radius": 5, "species": "pine" },
+    { "x": 0, "z": 30, "count": 6, "radius": 5, "species": "pine" },
+    { "x": 24, "z": 8, "count": 6, "radius": 5, "species": "autumn" },
+    { "x": 34, "z": -10, "count": 5, "radius": 5, "species": "oak" }
+  ],
+  "neutrals": [
+    { "kind": "camp", "x": 4, "z": -8, "guards": 2, "reward": { "gold": 200 }, "deposit": { "type": "gold", "amount": 1500 } },
+    { "kind": "critters", "species": "sheep", "x": -34, "z": 22, "count": 4, "radius": 5 }
+  ],
+  "decorationDensity": 1.0
+}

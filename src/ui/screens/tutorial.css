@@ -1,0 +1,60 @@
+/* F6-09 — painel de objetivo, seta e destaque do tutorial. Camada acima do HUD, abaixo dos modais. */
+#tutorial-panel {
+  position: fixed;
+  top: calc(76px * var(--ui-scale, 1));
+  left: calc(16px * var(--ui-scale, 1));
+  width: min(calc(320px * var(--ui-scale, 1)), 30vw);
+  min-width: 220px;
+  padding: 12px 14px 10px;
+  background: var(--panel-bg, rgba(18, 16, 13, 0.92));
+  border: 1.5px solid var(--panel-border, rgba(212, 175, 55, 0.65));
+  border-radius: 10px;
+  box-shadow: var(--panel-shadow, 0 10px 30px rgba(0, 0, 0, 0.65));
+  color: var(--text-gold, #f5e4b2);
+  font-size: calc(13px * var(--ui-scale, 1));
+  line-height: 1.4;
+  z-index: 900;
+  pointer-events: auto;
+}
+#tutorial-panel[hidden] { display: none; }
+#tutorial-panel .tut-head { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; margin-bottom: 4px; }
+#tutorial-panel .tut-kicker { font-family: 'Cinzel', serif; font-size: 0.8em; letter-spacing: 0.14em; text-transform: uppercase; color: var(--gold-primary, #d4af37); }
+#tutorial-panel .tut-count { font-size: 0.8em; opacity: 0.8; }
+#tutorial-panel .tut-title { font-family: 'Cinzel', serif; font-size: 1.15em; font-weight: 700; color: var(--text-bright, #fff); margin: 0 0 4px; }
+#tutorial-panel .tut-text { margin: 0 0 8px; color: #e8dcc0; }
+#tutorial-panel .tut-dots { display: flex; gap: 4px; margin: 6px 0 8px; }
+#tutorial-panel .tut-dots i { flex: 1; height: 4px; border-radius: 2px; background: rgba(245, 228, 178, 0.18); }
+#tutorial-panel .tut-dots i.is-done { background: #4ade80; }
+#tutorial-panel .tut-dots i.is-current { background: var(--gold-primary, #d4af37); }
+#tutorial-panel .tut-progress { margin: 0 0 8px; }
+#tutorial-panel .tut-progress[hidden] { display: none; }
+#tutorial-panel .tut-bar { height: 6px; border-radius: 3px; background: rgba(0, 0, 0, 0.45); overflow: hidden; }
+#tutorial-panel .tut-bar > div { height: 100%; width: 0; background: var(--gold-bevel, #d4af37); transition: width 0.25s ease; }
+#tutorial-panel .tut-progress-label { display: block; margin-top: 2px; font-size: 0.85em; opacity: 0.9; }
+#tutorial-panel .tut-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+#tutorial-panel button {
+  font: inherit; cursor: pointer; padding: 5px 12px; border-radius: 6px;
+  border: 1px solid rgba(212, 175, 55, 0.5); background: rgba(212, 175, 55, 0.12); color: var(--text-gold, #f5e4b2);
+}
+#tutorial-panel button:hover, #tutorial-panel button:focus-visible { background: rgba(212, 175, 55, 0.3); outline: none; }
+#tutorial-panel button.tut-primary { background: var(--gold-primary, #d4af37); color: #1a1408; font-weight: 700; }
+
+#tutorial-marker {
+  position: fixed; left: 0; top: 0; pointer-events: none; z-index: 880; display: none;
+  font-size: 34px; line-height: 1; color: #ffd24a; text-shadow: 0 2px 6px rgba(0, 0, 0, 0.9), 0 0 14px rgba(255, 210, 74, 0.9);
+  transform: translate(-50%, -50%);
+}
+#tutorial-marker.is-world { animation: tut-bob 0.9s ease-in-out infinite alternate; }
+@keyframes tut-bob { from { margin-top: -6px; } to { margin-top: 8px; } }
+#tutorial-ring {
+  position: fixed; pointer-events: none; z-index: 880; display: none; border-radius: 8px;
+  border: 3px solid #ffd24a; box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.6), 0 0 18px 4px rgba(255, 210, 74, 0.85);
+  animation: tut-pulse 1s ease-in-out infinite alternate;
+}
+@keyframes tut-pulse { from { opacity: 0.55; transform: scale(1); } to { opacity: 1; transform: scale(1.08); } }
+@media (prefers-reduced-motion: reduce) {
+  #tutorial-marker.is-world, #tutorial-ring { animation: none; }
+}
+@media (max-width: 900px) {
+  #tutorial-panel { width: min(260px, 46vw); font-size: 12px; }
+}

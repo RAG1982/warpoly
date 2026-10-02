@@ -93,6 +93,8 @@ src/
   ui/optionsStore.js          Persistência pura das opções (localStorage injetável; espelho `runtime`) — F6-08
   ui/optionsApply.js          Aplica opções salvas ao áudio/teclas/escala/daltonismo — F6-08
   ui/uiText.js                Textos de UI derivados de dados (nomes/requisitos/mensagens da sim já localizados) — F6-09
+  ui/tutorial.js              Lógica pura do tutorial (passos por eventos do EventBus, `createTutorialConfig`) — F6-09
+  ui/TutorialController.js    Painel de objetivo + seta/destaque do tutorial (DOM; só em partidas com `matchConfig.tutorial`) — F6-09
   i18n/index.js, pt-BR.json, en.json   `t(key, params)`, idioma (localStorage `warpoly.lang`, detecção do navegador), `applyI18n` (data-i18n*) — F6-09
   render/sceneDisposal.js     Descarte de objetos da partida preservando os caches do ModelFactory (F2-04)
   render/VfxEvents.js         Ouvinte: eventos → ParticleSystem (F2-07)
@@ -302,6 +304,17 @@ animate() [rAF da aplicação, delta máx 0.1s; sem sessão (menu/loading) não 
 - Teste de guarda `tests/unit/i18n.test.js`: mesmas chaves e mesmos `{parâmetros}` nos dois idiomas; toda `t('…')`/`data-i18n` usada
   existe; **nenhuma string literal PT-BR** (acentos ou palavras típicas) em `src/ui/**`, `src/i18n/**`, `InputManager`, `VfxEvents`,
   `main.js` e `index.html` (heurística e lista `ALLOW` documentadas no próprio teste). Texto novo de UI = chave nos dois JSON.
+
+### Tutorial (F6-09)
+- Menu principal › **Tutorial** inicia `createTutorialConfig()` (`ui/tutorial.js`): mapa oculto `tutorial` (`hidden: true` em
+  `src/data/maps/tutorial.json`; `listMaps()` não o lista, `getMap('tutorial')` sim), seed fixa, humano local × **rival passivo**
+  (`isAI:false, isLocal:false` — sem IA, só para a partida ter 2 times), recursos iniciais 330/260/120 e 1 acampamento de bandidos
+  (2 guardas) como alvo. `MatchConfig.tutorial = true` faz a `MatchSession` criar o `TutorialController`.
+- `Tutorial` (puro): 8 passos encadeados por eventos do `EventBus` (+ 1 por seleção): selecionar trabalhador → madeira (40) → ouro (40) →
+  casa → fazenda → quartel → treinar 2 soldados (`UNIT_TRAINED` de unidade `isCombat`) → destruir o acampamento (`CAMP_CLEARED`/
+  `BUILDING_DESTROYED`). Painel de objetivo (progresso, Pular), seta no mundo (projetada na câmera; presa à borda se fora da tela) ou
+  anel pulsante num botão da HUD (`focus`/`fallback` de cada passo). Concluir mostra "Continuar jogando"/"Menu principal"; Pular some com o
+  painel e a partida segue livre. Testes: `tests/unit/tutorial.test.js` (lógica + percurso completo na sim headless: ~2 min de jogo).
 
 ### Mapas orientados a dados (F2-05)
 - Cada mapa é um JSON em `src/data/maps/<id>.json` (formato e campos em `src/data/maps/README.md`),

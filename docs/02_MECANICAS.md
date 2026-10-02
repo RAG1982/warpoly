@@ -210,11 +210,14 @@ Nova partida (F2-04, sem recarregar a página) começa com a névoa zerada (`Fog
 
 Painel "Novo Jogo" do menu: facção do jogador (cartões + prévia 3D), mapa (miniatura; limite de oponentes = `maxPlayers − 1` do mapa, hoje 2 e 3), oponentes IA (facção Humano/Orc/Aleatória, dificuldade Fácil/Normal/Difícil/Brutal → `players[i].difficulty`, time 1–8, cor única entre as 8 de `PLAYER_COLORS`), posição inicial do jogador, recursos iniciais por jogador (Poucos ½× · Padrão · Muitos 2× · Fartos 4× de `STARTING_RESOURCES` → `MatchConfig.startingResources`), condição de vitória e semente (vazio = aleatória; número ou texto). É preciso haver ≥ 2 times diferentes (senão "Iniciar" fica desabilitado). Facção "Aleatória" resolve-se pela semente (determinístico). Lógica e testes: `ui/skirmishSetup.js`, `tests/unit/skirmishSetup.test.js`.
 
-## Idioma (F6-09)
+## Idioma e tutorial (F6-09)
 
 - **Idioma**: pt-BR (padrão/fallback) e English. Primeiro uso = idioma do navegador; trocar em Opções › Interface › Idioma ou no botão **EN/PT-BR** do
   rodapé do menu (vale na hora, inclusive no meio da partida e do tutorial). Todo texto de UI, nomes de unidades/construções/magias/pesquisas, mensagens
   e o guia do jogo vêm de `src/i18n/*.json` (ver `01_ARQUITETURA.md`). Nomes em inglês são originais (Villager, Swordsman, Horseman, Slasher, Axe Thrower…).
+- **Tutorial** (menu principal › Tutorial, "missão 0"): mapa pequeno com rival passivo; 8 objetivos guiados (selecionar, coletar madeira e ouro, construir
+  casa/fazenda/quartel, treinar 2 soldados, destruir o Acampamento de Bandidos) com painel, setas e botão Pular; leva ~2 min de jogo com um jogador
+  roteirizado (meta humana ≤ 8 min).
 
 ## Opções
 

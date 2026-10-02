@@ -402,6 +402,7 @@ class GameApp {
     document.getElementById('btn-pause-menu')?.addEventListener('click', () => this.pause());
     document.getElementById('btn-play-again')?.addEventListener('click', () => this.playAgain());
     document.getElementById('btn-go-main-menu')?.addEventListener('click', () => this.goToMainMenu());
+    document.addEventListener('warpoly:tutorial-exit', () => this.goToMainMenu()); // F6-09
   }
 
   _animate() {

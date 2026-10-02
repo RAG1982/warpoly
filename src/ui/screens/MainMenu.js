@@ -23,6 +23,7 @@ import {
 } from '../skirmishSetup.js';
 
 import { t, onLanguageChange, getLanguage, setLanguage, mapName, factionName } from '../../i18n/index.js';
+import { createTutorialConfig } from '../tutorial.js';
 
 const BYPASS_PARAMS = ['play', 'skipMenu', 'bench', 'skipPreload'];
 const MAP_THUMB_SIZE = { w: 96, h: 64 };
@@ -139,6 +140,19 @@ export class MainMenu {
     if (panel === 'skirmish') this.openPanel('skirmish', this.root.querySelector('[data-action="new-game"]'));
   }
 
+  /** F6-09: tutorial = partida guiada pequena (mapa `tutorial`, rival passivo). */
+  startTutorial() {
+    const config = createTutorialConfig();
+    this.root.classList.add('mm-leaving');
+    const reduce = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
+    const choice = { config, faction: 'human', difficulty: 'easy', mapId: config.mapId, victoryMode: config.victoryMode, tutorial: true };
+    this._startTimer = setTimeout(() => {
+      this._startTimer = null;
+      this._disposePreview();
+      this.onStart?.(choice);
+    }, reduce ? 0 : 380);
+  }
+
   destroy() {
     this._offLang?.();
     this._disposePreview();
@@ -213,6 +227,9 @@ export class MainMenu {
           <nav class="mm-nav" aria-label="${t('menu.nav')}">
             <button type="button" class="mm-btn mm-btn--primary" data-action="new-game" aria-haspopup="dialog" aria-controls="mm-skirmish">
               <span class="mm-btn__label">${t('menu.newGame')}</span><span class="mm-btn__hint">${t('menu.skirmish')}</span>
+            </button>
+            <button type="button" class="mm-btn" data-action="tutorial">
+              <span class="mm-btn__label">${t('menu.tutorial')}</span><span class="mm-btn__hint">${t('menu.tutorialHint')}</span>
             </button>
             <button type="button" class="mm-btn" data-action="load-game">
               <span class="mm-btn__label">${t('menu.loadGame')}</span><span class="mm-btn__hint">${t('menu.saves')}</span>
@@ -340,6 +357,7 @@ export class MainMenu {
       else if (action === 'close') this.closePanel();
       else if (action === 'close-modal') this.closeCredits();
       else if (action === 'lang') setLanguage(getLanguage() === 'en' ? 'pt-BR' : 'en');
+      else if (action === 'tutorial') this.startTutorial();
       else if (action === 'start') this.start();
       else if (action === 'add-ai') this._apply(addAI(this.setup), { focus: '[data-sk="remove"]:last-of-type' });
       else if (action === 'roll-seed') {

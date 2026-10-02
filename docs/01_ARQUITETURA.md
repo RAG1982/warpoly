@@ -92,6 +92,8 @@ src/
   ui/FactionPreview.js        Prévia 3D (three.js leve, .glb do QG+unidade) da facção no painel de Escaramuça (F6-02)
   ui/optionsStore.js          Persistência pura das opções (localStorage injetável; espelho `runtime`) — F6-08
   ui/optionsApply.js          Aplica opções salvas ao áudio/teclas/escala/daltonismo — F6-08
+  ui/uiText.js                Textos de UI derivados de dados (nomes/requisitos/mensagens da sim já localizados) — F6-09
+  i18n/index.js, pt-BR.json, en.json   `t(key, params)`, idioma (localStorage `warpoly.lang`, detecção do navegador), `applyI18n` (data-i18n*) — F6-09
   render/sceneDisposal.js     Descarte de objetos da partida preservando os caches do ModelFactory (F2-04)
   render/VfxEvents.js         Ouvinte: eventos → ParticleSystem (F2-07)
   render/ProjectileViews.js   Malhas dos projéteis da sim (F2-08)
@@ -283,6 +285,23 @@ animate() [rAF da aplicação, delta máx 0.1s; sem sessão (menu/loading) não 
 - **Jogador derrotado** em FFA para de ser controlado pela IA, mas as unidades restantes continuam no mapa (no WC2 elas somem). Sem modo espectador: se o jogador local cai, a partida acaba.
 - **Névoa** só considera a visão do jogador local (sem visão compartilhada com aliados). Cor do jogador (`Player.color`) ainda não é usada nos modelos/minimapa.
 - `MatchConfig.seed` é gerada/lida mas a simulação ainda usa `Math.random` (F2-03).
+
+### Internacionalização (F6-09)
+- `src/i18n/{pt-BR,en}.json` (chaves planas; **pt-BR é a base e o fallback**) + `src/i18n/index.js`: `t(key, params)` interpola `{nome}`
+  e escolhe plural por `params.count` (`chave.one`/`chave.other`); idioma em `localStorage['warpoly.lang']` (sem valor: detecta
+  `navigator.language`, `pt*` → pt-BR, resto → en; só grava quando o jogador escolhe em Opções › Interface ou no botão do rodapé do
+  menu); `onLanguageChange(cb)` refaz as telas (menu e diálogos se reconstroem, HUD zera o cache do card de seleção, `applyI18n`
+  preenche o `index.html` via `data-i18n`, `data-i18n-html`, `data-i18n-title`, `data-i18n-alt`, `data-i18n-aria`).
+- **Dados**: `src/data/*` mantém o nome/descrição pt-BR nos defs (a sim e as ferramentas headless não dependem de i18n); a UI nunca
+  lê `def.name`: usa `unitName/buildingName/abilityName/researchName/tierName/factionName/mapName` (`i18n/index.js`) ou
+  `ui/uiText.js` (`unitLabel`, `requirementText`…), cujas chaves `unit.<id>.name|desc`, `building.*`, `ability.*`, `research.<id>.<human|orc>`,
+  `tier.<facção>.<n>`, `faction.*`, `map.<id>.name` existem nos dois JSON (testes comparam pt-BR com o def). Nome novo no def = chave nova.
+- **Mensagens da simulação** (`src/sim/**` emite PT-BR literal em `EVT.NOTIFY`, `targetProblem`, `canCast`…): a sim continua sem i18n;
+  na exibição, `localizeSimText` (`ui/uiText.js`, `UIManager.showNotification`) faz busca reversa nas chaves `sim.*` do pt-BR e trata
+  "Requer: …", a recompensa do acampamento e o aviso de onda da IA. Mensagem nova na sim: adicionar `sim.<chave>` (sem emoji).
+- Teste de guarda `tests/unit/i18n.test.js`: mesmas chaves e mesmos `{parâmetros}` nos dois idiomas; toda `t('…')`/`data-i18n` usada
+  existe; **nenhuma string literal PT-BR** (acentos ou palavras típicas) em `src/ui/**`, `src/i18n/**`, `InputManager`, `VfxEvents`,
+  `main.js` e `index.html` (heurística e lista `ALLOW` documentadas no próprio teste). Texto novo de UI = chave nos dois JSON.
 
 ### Mapas orientados a dados (F2-05)
 - Cada mapa é um JSON em `src/data/maps/<id>.json` (formato e campos em `src/data/maps/README.md`),

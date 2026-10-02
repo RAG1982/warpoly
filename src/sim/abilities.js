@@ -73,7 +73,7 @@ export function canCast(gm, unit, ability) {
   const missing = evalRequirements(ability.requires, unit.ownerId, gm);
   if (missing.length > 0) {
     const player = gm.getPlayer ? gm.getPlayer(unit.ownerId) : null;
-    return { ok: false, reason: `⚠️ Requer: ${formatRequirementList(missing, player ? player.factionId : null)}` };
+    return { ok: false, code: 'requires', missing, factionId: player ? player.factionId : null, reason: `⚠️ Requer: ${formatRequirementList(missing, player ? player.factionId : null)}` };
   }
   const rd = ability.effects.find(e => e.kind === 'raise_dead');
   if (rd && gm.corpses && gm.corpses.countNear(unit.mesh.position.x, unit.mesh.position.z, rd.radius) === 0) {

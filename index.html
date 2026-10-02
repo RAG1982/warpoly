@@ -15,7 +15,7 @@
     <div class="loading-container">
       <div class="loading-crest">⚔️</div>
       <h1 class="loading-title">WARPOLY</h1>
-      <p class="loading-subtitle">Construindo o Reino...</p>
+      <p class="loading-subtitle" data-i18n="loading.subtitle">Construindo o Reino...</p>
 
       <div class="loading-bar-wrapper">
         <div class="loading-bar-bg">
@@ -24,11 +24,11 @@
       </div>
 
       <div class="loading-info">
-        <span id="loading-status">Inicializando modelos e texturas 3D...</span>
+        <span id="loading-status" data-i18n="loading.initModels">Inicializando modelos e texturas 3D...</span>
         <span id="loading-percentage">0%</span>
       </div>
 
-      <div class="loading-est" id="loading-est">Tempo estimado: calculando...</div>
+      <div class="loading-est" id="loading-est" data-i18n="loading.calculating">Tempo estimado: calculando...</div>
     </div>
   </div>
 
@@ -43,32 +43,32 @@
     <!-- Top Floating Resource Bar & Config Button (matching hudmodelo.png) -->
     <header id="top-bar-container" class="interactive">
       <div id="resource-bar">
-        <div class="res-item" title="Madeira: Coletada de árvores">
-          <img src="/icomadeira.png" class="res-badge-icon" alt="Madeira" />
+        <div class="res-item" data-i18n-title="hud.res.wood.tip" title="Madeira: Coletada de árvores">
+          <img src="/icomadeira.png" class="res-badge-icon" data-i18n-alt="res.wood" alt="Madeira" />
           <span id="wood-val">240</span>
         </div>
-        <div class="res-item" title="Ouro: Extraído de minas de ouro">
-          <img src="/icoouro.png" class="res-badge-icon" alt="Ouro" />
+        <div class="res-item" data-i18n-title="hud.res.gold.tip" title="Ouro: Extraído de minas de ouro">
+          <img src="/icoouro.png" class="res-badge-icon" data-i18n-alt="res.gold" alt="Ouro" />
           <span id="gold-val">212</span>
         </div>
-        <div class="res-item" title="Pedra: Extraída de pedreiras de pedra">
-          <img src="/icopedra.png" class="res-badge-icon" alt="Pedra" />
+        <div class="res-item" data-i18n-title="hud.res.stone.tip" title="Pedra: Extraída de pedreiras de pedra">
+          <img src="/icopedra.png" class="res-badge-icon" data-i18n-alt="res.stone" alt="Pedra" />
           <span id="stone-val">120</span>
         </div>
-        <div class="res-item" title="População: Unidades atuais / Capacidade máxima">
-          <img src="/icopopulacao.png" class="res-badge-icon" alt="População" />
+        <div class="res-item" data-i18n-title="hud.res.pop.tip" title="População: Unidades atuais / Capacidade máxima">
+          <img src="/icopopulacao.png" class="res-badge-icon" data-i18n-alt="hud.population" alt="População" />
           <span id="pop-val">5 / 15</span>
         </div>
       </div>
 
       <!-- F2-04: menu de pausa (também abre com Esc) -->
-      <button id="btn-pause-menu" class="config-circle-btn hud-pause-btn" title="Pausa (Esc)" aria-label="Pausar a partida">
+      <button id="btn-pause-menu" class="config-circle-btn hud-pause-btn" data-i18n-title="hud.pauseBtn" title="Pausa (Esc)" data-i18n-aria="hud.pauseAria" aria-label="Pausar a partida">
         <span class="hud-pause-icon" aria-hidden="true"></span>
       </button>
 
       <!-- Settings gear button (icoconfig.png) -->
-      <button id="btn-config" class="config-circle-btn" title="Configurações do Jogo">
-        <img src="/icoconfig.png" class="config-badge-icon" alt="Configurações" />
+      <button id="btn-config" class="config-circle-btn" data-i18n-title="hud.settingsBtn" title="Configurações do Jogo">
+        <img src="/icoconfig.png" class="config-badge-icon" data-i18n-alt="hud.settings" alt="Configurações" />
       </button>
     </header>
 
@@ -80,7 +80,7 @@
       <!-- Minimap with Golden Border matching hudmodelo.png -->
       <div id="minimap-wrapper" class="interactive">
         <canvas id="minimap-canvas" width="140" height="140"></canvas>
-        <span class="minimap-title">KINGDOM REALM</span>
+        <span class="minimap-title" data-i18n="hud.minimapTitle">KINGDOM REALM</span>
       </div>
 
       <!-- Selection & Action Card -->
@@ -88,9 +88,9 @@
         <!-- Standard Selection View (Units & Resources) -->
         <div id="standard-selection-view">
           <div class="card-header">
-            <span id="selection-title">Unit Name</span>
+            <span id="selection-title"></span>
             <div class="hp-container">
-              <span id="selection-hp">100 / 100 HP</span>
+              <span id="selection-hp"></span>
               <div class="hp-bar-bg">
                 <div id="selection-hp-fill"></div>
               </div>
@@ -113,9 +113,9 @@
         <div id="building-selection-view" style="display: none;">
           <div class="bld-card-header">
             <div class="bld-header-left">
-              <span id="bld-selection-title">QUARTEL DE INFANTARIA</span>
+              <span id="bld-selection-title"></span>
               <div class="bld-hp-row">
-                <span id="bld-selection-hp">Vida: 850 / 850</span>
+                <span id="bld-selection-hp"></span>
                 <div class="bld-hp-bar-bg">
                   <div id="bld-selection-hp-fill"></div>
                 </div>
@@ -126,9 +126,9 @@
 
           <!-- F3-06: Nível do Centro (só visível para role: 'hq') -->
           <div id="bld-hq-tier-section" class="bld-section-row" style="display: none;">
-            <span class="bld-section-label" id="bld-hq-tier-label">NÍVEL 1</span>
+            <span class="bld-section-label" id="bld-hq-tier-label"></span>
             <button id="bld-hq-upgrade-btn" class="bld-train-btn bld-hq-upgrade-btn" data-action="upgrade-hq">
-              <span id="bld-hq-upgrade-btn-label">Evoluir</span>
+              <span id="bld-hq-upgrade-btn-label"></span>
             </button>
             <div class="bld-queue-progress-track" id="bld-hq-upgrade-progress-track">
               <div id="bld-hq-upgrade-progress-bar" class="bld-queue-progress-bar" style="width: 0%;"></div>
@@ -137,14 +137,14 @@
 
           <!-- F3-05: Cancelar obra (só visível em construção em obra) -->
           <div id="bld-cancel-section" class="bld-section-row" style="display: none;">
-            <button id="bld-cancel-construction-btn" class="bld-train-btn bld-hq-upgrade-btn" data-action="cancel-construction" title="Cancelar obra (reembolsa 75%)">
-              <span>Cancelar obra (reembolsa 75%)</span>
+            <button id="bld-cancel-construction-btn" class="bld-train-btn bld-hq-upgrade-btn" data-action="cancel-construction" data-i18n-title="hud.cancelBuild" title="Cancelar obra (reembolsa 75%)">
+              <span data-i18n="hud.cancelBuild">Cancelar obra (reembolsa 75%)</span>
             </button>
           </div>
 
           <!-- Train Units Section -->
           <div id="bld-train-section" class="bld-section-row">
-            <span class="bld-section-label">TREINAR UNIDADES</span>
+            <span class="bld-section-label" data-i18n="hud.section.train">TREINAR UNIDADES</span>
             <div id="bld-train-buttons" class="bld-train-buttons">
               <!-- Unit training icon buttons inserted here -->
             </div>
@@ -152,7 +152,7 @@
 
           <!-- Training Queue Section -->
           <div id="bld-queue-section" class="bld-queue-section">
-            <span class="bld-section-label">FILA DE TREINAMENTO</span>
+            <span class="bld-section-label" data-i18n="hud.section.queue">FILA DE TREINAMENTO</span>
             <div class="bld-queue-wrapper">
               <div id="bld-queue-slots" class="bld-queue-slots">
                 <div class="bld-queue-slot empty" data-slot="0"></div>
@@ -172,8 +172,8 @@
 
       <!-- Quick Controls Guide matching hudmodelo.png -->
       <div id="quick-guide" class="interactive">
-        <div class="guide-line-1"><span class="key-gold">WASD</span> Mover · Scroll Zoom · <span class="key-gold">C</span></div>
-        <div class="guide-line-2">Clique Selecionar · Direito Mover</div>
+        <div class="guide-line-1" data-i18n-html="hud.guide1"><span class="key-gold">WASD</span> Mover · Scroll Zoom · <span class="key-gold">C</span></div>
+        <div class="guide-line-2" data-i18n="hud.guide2">Clique Selecionar · Direito Mover</div>
       </div>
     </footer>
   </div>
@@ -181,30 +181,30 @@
   <!-- Help & Objectives Modal -->
   <div id="help-modal" class="modal-overlay" style="display: none;">
     <div class="modal-card">
-      <h2 class="modal-title">⚔️ Kingdom of WarPoly ⚔️</h2>
+      <h2 class="modal-title" data-i18n="help.title">⚔️ Kingdom of WarPoly ⚔️</h2>
       <div class="modal-content">
-        <p>Welcome, Commander! Build your low-poly realm, expand your economy, train an army, and protect the realm from bandit raiders!</p>
+        <p data-i18n="help.intro">Welcome, Commander!</p>
         <br />
         <ul>
-          <li>🪓 <strong>Chop Trees:</strong> Select a Villager and Right-Click on any tree to harvest wood. When full, they automatically deliver wood to the Castle or Lumber Camp!</li>
-          <li>⛏️ <strong>Mine Gold & Stone:</strong> Select a Villager and Right-Click the Gold Mine or Stone Quarry to extract precious minerals.</li>
-          <li>🏠 <strong>Construct Buildings:</strong> Select a Villager to open the Build Menu (House, Lumber Camp, Barracks, Watchtower, Farm).</li>
-          <li>🛡️ <strong>Train Warriors:</strong> Select your Barracks to train heavily armored Knights and sharpshooting Archers.</li>
-          <li>🏹 <strong>Defense & Victory:</strong> Bandits raid from the southern outpost! Build Watchtowers to defend, or march your army across the waters to destroy the Bandit Camp for VICTORY!</li>
+          <li data-i18n-html="help.chop"></li>
+          <li data-i18n-html="help.mine"></li>
+          <li data-i18n-html="help.build"></li>
+          <li data-i18n-html="help.train"></li>
+          <li data-i18n-html="help.defend"></li>
         </ul>
       </div>
-      <button class="gold-btn" id="btn-close-help" style="padding: 10px 28px; font-size: 15px;">Enter the Realm</button>
+      <button class="gold-btn" id="btn-close-help" style="padding: 10px 28px; font-size: 15px;" data-i18n="help.close">Enter the Realm</button>
     </div>
   </div>
 
   <!-- Victory / Defeat Modal -->
   <div id="game-over-modal" class="modal-overlay gs-vars" style="display: none;" role="dialog" aria-modal="true" aria-labelledby="game-over-title">
     <div class="modal-card">
-      <h2 class="modal-title" id="game-over-title">🏆 VITÓRIA 🏆</h2>
+      <h2 class="modal-title" id="game-over-title"></h2>
       <p class="modal-content" id="game-over-msg" style="text-align: center; margin-bottom: 24px;"></p>
       <div class="gs-actions gs-actions--row">
-        <button type="button" class="mm-btn mm-btn--primary" id="btn-play-again"><span class="mm-btn__label">Jogar novamente</span></button>
-        <button type="button" class="mm-btn mm-btn--ghost" id="btn-go-main-menu"><span class="mm-btn__label">Menu principal</span></button>
+        <button type="button" class="mm-btn mm-btn--primary" id="btn-play-again"><span class="mm-btn__label" data-i18n="hud.playAgain">Jogar novamente</span></button>
+        <button type="button" class="mm-btn mm-btn--ghost" id="btn-go-main-menu"><span class="mm-btn__label" data-i18n="hud.mainMenu">Menu principal</span></button>
       </div>
     </div>
   </div>

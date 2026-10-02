@@ -1076,6 +1076,68 @@ const MODEL_CATALOG = [
     description: 'Acampamento hostil neutro gerado pelo pipeline Blender (public/models/bandit_camp.glb): paliçada circular de toras pontiagudas inclinadas, portão flanqueado por totens de crânios com chifres, tenda de guerra carmesim, abrigo de peles, fogueira com espeto e caldeirão, baú de saque aberto, rack de armas e faixas esfarrapadas.',
     notes: '2 draw calls (Static_Mesh + Anim_Banners TeamColor), ~6,2 mil triângulos, atlas 1024², ~354 KB. Pegada ~8,6 (raio 4,2), altura ~6,8.'
   },
+  {
+    id: 'tree_oak_glb',
+    name: 'Carvalho (Blender)',
+    category: 'environment',
+    type: 'nature',
+    icon: '🌳',
+    glb: 'tree_oak',
+    sourceFile: 'tools/blender/build_trees.py',
+    create: createGlb('tree_oak'),
+    description: 'Carvalho do mapa gerado pelo pipeline Blender (public/models/tree_oak.glb): tronco com raízes e galhos e sete copas facetadas com luz e sombra pintadas. Usado em InstancedMesh pelo TreeManager.',
+    notes: '1 draw call (uma malha, atlas 512²), ~570 triângulos, ~56 KB. Substitui as 2 malhas procedurais (tronco e copa, ~480 triângulos) e as texturas de 2048² geradas no carregamento. `?glbtrees=0` volta ao procedural.'
+  },
+  {
+    id: 'tree_pine_glb',
+    name: 'Pinheiro (Blender)',
+    category: 'environment',
+    type: 'nature',
+    icon: '🌲',
+    glb: 'tree_pine',
+    sourceFile: 'tools/blender/build_trees.py',
+    create: createGlb('tree_pine'),
+    description: 'Pinheiro do mapa gerado pelo pipeline Blender (public/models/tree_pine.glb): tronco com raízes e cinco camadas de agulhas facetadas com ponta.',
+    notes: '1 draw call, ~160 triângulos, atlas 512², ~31 KB.'
+  },
+  {
+    id: 'tree_autumn_glb',
+    name: 'Carvalho de Outono (Blender)',
+    category: 'environment',
+    type: 'nature',
+    icon: '🍂',
+    glb: 'tree_autumn',
+    sourceFile: 'tools/blender/build_trees.py',
+    create: createGlb('tree_autumn'),
+    description: 'Carvalho de outono (mesma malha do carvalho, copas alaranjadas) gerado pelo pipeline Blender (public/models/tree_autumn.glb).',
+    notes: '1 draw call, ~570 triângulos, atlas 512², ~64 KB.'
+  },
+  {
+    id: 'wall_human_glb',
+    name: 'Muralha de Pedra (Blender)',
+    category: 'buildings',
+    faction: 'human',
+    type: 'building',
+    icon: '🧱',
+    glb: 'wall_human',
+    sourceFile: 'tools/blender/build_walls.py',
+    create: createGlb('wall_human'),
+    description: 'Bloco de muralha humana gerado pelo pipeline Blender (public/models/wall_human.glb): pé escuro, corpo de alvenaria com seteiras, cornija e quatro ameias. O WallBatch instancia a geometria e o material deste .glb.',
+    notes: '1 draw call, ~356 triângulos, atlas 512², ~34 KB. Bloco de 2,2 × 2,4 × 2,2.'
+  },
+  {
+    id: 'wall_orc_glb',
+    name: 'Paliçada Orc (Blender)',
+    category: 'buildings',
+    faction: 'orc',
+    type: 'building',
+    icon: '🪵',
+    glb: 'wall_orc',
+    sourceFile: 'tools/blender/build_walls.py',
+    create: createGlb('wall_orc'),
+    description: 'Bloco de paliçada orc gerado pelo pipeline Blender (public/models/wall_orc.glb): base de pedra bruta, anel de toras pontiagudas, duas cintas de ferro e espinhos de canto.',
+    notes: '1 draw call, ~468 triângulos, atlas 512², ~41 KB. Bloco de 2,2 × 2,5 × 2,2.'
+  },
   // F7-00b lote 1 (fim)
   {
     id: 'forge',

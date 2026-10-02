@@ -460,7 +460,7 @@ export class ModelFactory {
 
   // --- Environment & Props ---
   static createTree(type = 'oak') {
-    return this.getOrCreateModel('tree_' + type, () => createTree(type));
+    return this._glbOr('tree_' + type, () => this.getOrCreateModel('tree_' + type, () => createTree(type)));
   }
 
   static createArrow() {

@@ -50,6 +50,12 @@ const CFG = {
     insp: { gold_mine_glb: ['idle'], stone_quarry_glb: ['idle'], bandit_camp_glb: ['idle'] },
     human: { buildings: ['bandit_camp'], units: [], deposits: ['gold', 'stone'] },
     orc: null
+  },
+  // F7-00b lote 2, grupo 3: árvores instanciadas e blocos de muralha instanciados
+  5: {
+    insp: { tree_oak_glb: ['idle'], tree_pine_glb: ['idle'], tree_autumn_glb: ['idle'], wall_human_glb: ['idle'], wall_orc_glb: ['idle'] },
+    human: { buildings: ['wall_human'], units: [], trees: true },
+    orc: { buildings: ['wall_orc'], units: [] }
   }
 }[GROUP];
 
@@ -146,6 +152,19 @@ try {
         await page.evaluate(() => { const c = window.__cap; const w = c.wip; if (w) { window.game.gameManager.sceneManager.targetZoomLevel = 0.5; window.game.gameManager.sceneManager.cameraTarget.set(w.mesh.position.x, 2.0, w.mesh.position.z + 3); } });
         await page.waitForTimeout(1400);
         await page.screenshot({ path: path.join(OUT, `game_${faction}_obra_g${GROUP}.png`) });
+      }
+      if (cfg.trees) {
+        for (const t of ['oak', 'pine', 'autumn']) {
+          const ok = await page.evaluate(tt => {
+            const gm = window.game.gameManager; const tr = gm.trees.find(x => x.treeType === tt && !x.isDead);
+            if (!tr) return false;
+            gm.sceneManager.targetZoomLevel = 0.5; gm.sceneManager.cameraTarget.set(tr.basePos.x, 2.0, tr.basePos.z + 3);
+            return true;
+          }, t);
+          if (!ok) continue;
+          await page.waitForTimeout(1400);
+          await page.screenshot({ path: path.join(OUT, `game_tree_${t}.png`) });
+        }
       }
       for (const dep of cfg.deposits || []) {
         await page.evaluate(d => {

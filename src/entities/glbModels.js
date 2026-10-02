@@ -67,7 +67,14 @@ export const GLB_MODELS = {
   // F7-00b lote 2 (grupo 2): jazidas neutras e acampamento bandido
   gold_mine: { url: `${BASE}models/gold_mine.glb`, root: 'GoldMine', type: null },
   stone_quarry: { url: `${BASE}models/stone_quarry.glb`, root: 'StoneQuarry', type: null },
-  bandit_camp: { url: `${BASE}models/bandit_camp.glb`, root: 'BanditCamp', type: null }
+  bandit_camp: { url: `${BASE}models/bandit_camp.glb`, root: 'BanditCamp', type: null },
+  // F7-00b lote 2 (grupo 3): árvores instanciadas
+  tree_oak: { url: `${BASE}models/tree_oak.glb`, root: 'TreeOak', type: null },
+  tree_pine: { url: `${BASE}models/tree_pine.glb`, root: 'TreePine', type: null },
+  tree_autumn: { url: `${BASE}models/tree_autumn.glb`, root: 'TreeAutumn', type: null },
+  // F7-00b lote 2 (grupo 3): blocos de muralha instanciados (`WallBatch`)
+  wall_human: { url: `${BASE}models/wall_human.glb`, root: 'WallHuman', type: null },
+  wall_orc: { url: `${BASE}models/wall_orc.glb`, root: 'WallOrc', type: null }
 };
 
 export const glbEnabled = (() => {

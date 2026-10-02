@@ -86,8 +86,9 @@ export class MainMenu {
    * @param {(open: boolean) => void} [opts.onSetupChange]
    * @param {() => void} [opts.onLoadGame]  F2-06
    */
-  constructor(parent = document.body, { onStart = null, onSetupChange = null, onLoadGame = null } = {}) {
+  constructor(parent = document.body, { onStart = null, onSetupChange = null, onLoadGame = null, onOptions = null } = {}) {
     this.parent = parent;
+    this.onOptions = onOptions; // F6-08
     this.onLoadGame = onLoadGame; // F2-06: abre o diálogo de slots de save
     this.onStart = onStart;
     this.onSetupChange = onSetupChange;
@@ -224,7 +225,7 @@ export class MainMenu {
             <button type="button" class="mm-btn" disabled aria-describedby="mm-soon-note">
               <span class="mm-btn__label">Multiplayer</span><span class="mm-badge">Em breve</span>
             </button>
-            <button type="button" class="mm-btn" data-action="options" aria-haspopup="dialog" aria-controls="mm-options">
+            <button type="button" class="mm-btn" data-action="options" aria-haspopup="dialog">
               <span class="mm-btn__label">Opções</span>
             </button>
             <a class="mm-btn" href="/inspector.html">
@@ -278,30 +279,6 @@ export class MainMenu {
             </button>
           </footer>
         </section>
-
-        <!-- Painel placeholder: Opções (F6-08) -->
-        <section id="mm-options" class="mm-panel mm-panel--options" role="dialog" aria-modal="false" aria-labelledby="mm-op-title" hidden>
-          <header class="mm-panel__head">
-            <div>
-              <p class="mm-panel__kicker">Configurações</p>
-              <h2 id="mm-op-title" class="mm-panel__title">Opções</h2>
-            </div>
-            <button type="button" class="mm-close" data-action="close" aria-label="Voltar ao menu">✕</button>
-          </header>
-          <div class="mm-panel__scroll">
-            <p class="mm-placeholder">Em construção. Esta tela vai reunir as opções completas do jogo:</p>
-            <ul class="mm-options-list">
-              <li><span>Gráficos</span><em>Predefinições, sombras, texturas, resolução</em></li>
-              <li><span>Áudio</span><em>Volume por canal</em></li>
-              <li><span>Controles</span><em>Atalhos e velocidade de rolagem</em></li>
-              <li><span>Interface</span><em>Escala da HUD e modo daltônico</em></li>
-            </ul>
-            <p class="mm-placeholder mm-placeholder--small">Durante a partida, velocidade, pausa e volume continuam na engrenagem da HUD.</p>
-          </div>
-          <footer class="mm-panel__foot">
-            <button type="button" class="mm-btn mm-btn--ghost" data-action="close">Voltar</button>
-          </footer>
-        </section>
       </div>
 
       <footer class="mm-footer">
@@ -335,7 +312,7 @@ export class MainMenu {
       const action = el.dataset.action;
       if (action === 'new-game') this.openPanel('skirmish', el);
       else if (action === 'load-game') this.onLoadGame?.();
-      else if (action === 'options') this.openPanel('options', el);
+      else if (action === 'options') this.onOptions?.(); // F6-08: OptionsPanel (diálogo único)
       else if (action === 'credits') this.openCredits(el);
       else if (action === 'close') this.closePanel();
       else if (action === 'close-modal') this.closeCredits();

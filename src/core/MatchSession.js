@@ -14,6 +14,7 @@ import { HazardView } from '../render/HazardView.js';
 import { ProjectileViews } from '../render/ProjectileViews.js';
 import { EntityViews } from '../render/EntityViews.js';
 import { createUiEvents } from '../ui/UiEvents.js';
+import { options } from '../ui/optionsStore.js';
 
 /**
  * MatchSession — uma partida descartável (F2-04).
@@ -57,6 +58,7 @@ export class MatchSession {
 
     // Simulação (jogadores e bases a partir da MatchConfig, F2-01)
     this.gameManager = new GameManager(scene, this.terrain, sound, this.particleSystem, matchConfig);
+    if (!this.gameManager.headless) this.gameManager.gameSpeed = options.get('defaultSpeed'); // F6-08
 
     // Entrada e HUD
     this.inputManager = new InputManager(sceneManager, this.gameManager, this.terrain);

@@ -9,6 +9,7 @@ const ACTIONS = [
   { id: 'resume', label: 'Continuar', hint: '<kbd>Esc</kbd>', primary: true },
   { id: 'save', label: 'Salvar partida', hint: 'Slots 1–3' },
   { id: 'load', label: 'Carregar partida' },
+  { id: 'options', label: 'Opções' },
   { id: 'restart', label: 'Reiniciar', hint: 'Mesma partida' },
   { id: 'main-menu', label: 'Menu Principal' },
   { id: 'quit', label: 'Sair' }
@@ -71,6 +72,7 @@ export class PauseMenu {
     if (action === 'resume') h.onResume?.();
     else if (action === 'save') h.onSave?.();
     else if (action === 'load') h.onLoad?.();
+    else if (action === 'options') h.onOptions?.();
     else if (action === 'restart') h.onRestart?.();
     else if (action === 'main-menu') h.onMainMenu?.();
     else if (action === 'quit') h.onQuit?.();
@@ -78,6 +80,7 @@ export class PauseMenu {
 
   _onKeyDown(e) {
     if (!this.isOpen || document.getElementById('save-dialog')?.hidden === false) return;
+    if (document.getElementById('options-panel')?.hidden === false) return; // F6-08: Esc fecha só as opções
     if (e.key === 'Escape') {
       e.preventDefault();
       e.stopPropagation();

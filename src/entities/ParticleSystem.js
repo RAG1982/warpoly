@@ -1,5 +1,6 @@
 import * as THREE from 'three';
 import { FloatingTextPool } from './FloatingTextPool.js';
+import { runtime as optionsRuntime } from '../ui/optionsStore.js';
 
 // F1-08: capacidade dos pools (concurrent máximo antes de reciclar o item mais antigo).
 const CHIP_POOL_SIZE = 140; // wood chips + leaves + gold glitter + stone dust + hit sparks (mesma geometria)
@@ -397,6 +398,7 @@ export class ParticleSystem {
 
   // Floating 3D billboard text (+15 Wood, +10 Gold, -18)
   spawnFloatingText(text, pos, color = '#ffd700') {
+    if (!optionsRuntime.floatingText) return; // F6-08: Opções > Jogo > textos de dano
     this.floatingTextPool.spawn(text, pos, color);
   }
 

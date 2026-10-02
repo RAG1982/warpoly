@@ -127,13 +127,13 @@ Lógica pura em `src/core/Hotkeys.js` (`resolveKey`) e `src/core/ControlGroups.j
 | Trabalhador ocioso | `.` (próximo, em ciclo; centraliza) |
 | Último alerta | `Espaço` (último dano sofrido; senão o HQ) |
 | Ir ao HQ | `Backspace` (antes era `H`) |
-| Câmera | WASD/setas, scroll zoom, Q/E rotaciona, botão do meio arrasta, mouse a ≤ 8 px da borda (`localStorage['warpoly.edgePan']='0'` desliga) |
+| Câmera | WASD/setas, scroll zoom, Q/E rotaciona, botão do meio arrasta, mouse a ≤ 8 px da borda (Opções > Controles: liga/desliga e velocidade) |
 | Minimapa | Clique esquerdo move a câmera; clique direito com unidades selecionadas = MOVE (`Shift` enfileira) |
 | Cancelar | Esc (modo-alvo → colocação → seleção → menu de pausa) |
 
 **Prioridade de teclas**: com **unidades** selecionadas (sem construção) `S/H/A/P` são ordens e não movem a câmera (use as setas); as demais letras acionam o card se existir ali. Com **construção** selecionada valem as letras do card (`Q/W/E` treino, `R/A/S/D` pesquisa), então essas teclas não movem/rotacionam a câmera. Em modo-alvo (atacar-movendo, patrulhar, reparar, habilidade) ou colocação de construção, letras de ordem e do card ficam bloqueadas; grupos e Backspace continuam. Teclas são ignoradas com foco em campo de texto.
 
-**Ainda não existem**: seleção de inimigos para inspeção, rebind de teclas (F6-08).
+**Ainda não existem**: seleção de inimigos para inspeção. Rebind das ações de ordem/alerta: Opções > Controles (F6-08).
 
 ## IA (AIDirector) — F5-01..F5-05
 
@@ -204,7 +204,13 @@ Nova partida (F2-04, sem recarregar a página) começa com a névoa zerada (`Fog
 
 ## Opções
 
-Velocidade 1×/2×/3×, pausa, volume SFX/música, iluminação (dia/pôr-do-sol/noite), guia, link para o inspetor.
+**F6-08** — diálogo único `ui/screens/OptionsPanel.js` (menu principal, menu de pausa e engrenagem da HUD; o antigo `#settings-panel` foi removido). Abas:
+- **Gráficos**: predefinição (Baixo/Médio/Alto/Ultra, `QualitySettings.set`) + avançado (textura, sombras, resolução dinâmica, FPS alvo/limite, escala de resolução máx.) via `QualitySettings.setOverride` (persistido em `warpoly.qualityOverrides`; escolher um preset descarta os ajustes). Textura exige recarregar a página (aviso). Iluminação dia/pôr-do-sol/noite aparece só com partida ativa.
+- **Áudio**: geral × efeitos / música (`warpoly.volMaster/volSfx/volMusic`; efetivo = canal × geral, `ui/optionsApply.js`).
+- **Controles**: velocidade de rolagem 0,5–2× (`warpoly.panSpeed`), rolagem pela borda, **remapeamento** das ações `stop/hold/attackMove/patrol/idleWorker/lastAlert/hq` (`warpoly.keybinds`, JSON; `Hotkeys.setBindings`; conflitos e teclas reservadas — dígitos, Esc, Enter, Tab, setas, F-keys, W/D — são recusados). Letras do card e grupos 1–9 não são remapeáveis.
+- **Interface**: escala da UI 0,75–1,5× (`warpoly.uiScale`), modo daltônico (`warpoly.colorblind` + `data-colorblind` no `<html>`; paletas de time = F7-02).
+- **Jogo**: velocidade padrão 1×/2×/3× (`warpoly.defaultSpeed`, aplicada a cada nova partida e à atual), textos de dano (`warpoly.floatingText`), guia do jogo.
+Persistência pura em `ui/optionsStore.js` (valores inválidos → padrão; espelho `runtime` lido por `InputManager`/`ParticleSystem`); botão "Restaurar padrão" por aba. Testes: `tests/unit/optionsStore.test.js`.
 
 ## Reparo, cancelamento de obra e obra cooperativa (F3-05)
 

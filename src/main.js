@@ -14,6 +14,11 @@ import { SaveLoadDialog } from './ui/screens/SaveLoadDialog.js';
 import { SaveStore, AUTOSAVE_SLOT } from './core/SaveStore.js';
 import { captureSave, applySaveCommands, fastForward, finishFastForward } from './sim/SaveGame.js';
 import { SIM_DT } from './sim/constants.js';
+import { bootOptions, applyAudio } from './ui/optionsApply.js';
+import { OptionsPanel } from './ui/screens/OptionsPanel.js';
+
+// F6-08: opções salvas (teclas, escala de UI, daltonismo, pan…) antes de qualquer tela.
+bootOptions();
 
 const S = GameState;
 
@@ -61,7 +66,12 @@ class GameApp {
     });
     this._autosaveMinutes = this._readAutosaveMinutes();
     this._nextAutosaveTick = Infinity;
+    // F6-08: tela de Opções única (menu principal e pausa/engrenagem). Aplica áudio ao vivo.
+    this.optionsPanel = new OptionsPanel({
+      getContext: () => ({ sound: this.sound, sceneManager: this.sceneManager, gameManager: this.gameManager })
+    });
     this.pauseMenu = new PauseMenu({
+      onOptions: () => this.optionsPanel.open(),
       onSave: () => this.saveDialog.open('save'),
       onLoad: () => this.saveDialog.open('load'),
       onResume: () => this.resume(),
@@ -242,6 +252,7 @@ class GameApp {
     this._hideLoadingScreen(false);
     if (this.menu) return; // voltando do painel Escaramuça (MatchSetup)
     this.menu = showMainMenu(document.body, {
+      onOptions: () => this.optionsPanel.open(),
       onStart: (choice) => this._onMenuStart(choice),
       onLoadGame: () => this.saveDialog.open('load'),
       onSetupChange: (open) => {
@@ -362,6 +373,7 @@ class GameApp {
   _ensureServices() {
     if (this.sceneManager) return;
     this.sound = new SoundManager();
+    applyAudio(this.sound);
     this.sceneManager = new SceneManager(this.container);
 
     // Libera o áudio na primeira interação (política de autoplay)
@@ -392,6 +404,13 @@ class GameApp {
 
   _animate() {
     requestAnimationFrame(this._animate);
+    // F6-08: limite de FPS (Opções > Gráficos). 0 = sem limite.
+    const cap = QualitySettings.current.fpsCap;
+    if (cap > 0) {
+      const now = performance.now();
+      if (this._lastFrameAt && now - this._lastFrameAt < 1000 / cap - 1) return;
+      this._lastFrameAt = now;
+    }
     this.timer.update();
     const delta = Math.min(this.timer.getDelta(), 0.1);
     const elapsedTime = this.timer.getElapsed();

@@ -173,11 +173,53 @@ function resolveInitialPreset() {
   return { name: detectDefaultPreset(), source: 'detect' };
 }
 
+const OVERRIDES_KEY = 'warpoly.qualityOverrides';
+const TEXTURE_LEVELS = ['low', 'med', 'high', 'ultra'];
+
+/**
+ * F6-08: ajustes avançados sobre o preset (persistidos em `warpoly.qualityOverrides`, JSON).
+ * Chaves: shadows (bool), dynamicResolution (bool), targetFps (15..240), maxPixelRatio (0,5..2),
+ * textureQuality (low|med|high|ultra) e fpsCap (0 = sem limite; senão 15..240 quadros/s).
+ * Valores inválidos são descartados.
+ */
+export function sanitizeOverrides(raw) {
+  const out = {};
+  if (!raw || typeof raw !== 'object' || Array.isArray(raw)) return out;
+  const num = (v, lo, hi) => (typeof v === 'number' && Number.isFinite(v) ? Math.min(hi, Math.max(lo, v)) : undefined);
+  if (typeof raw.shadows === 'boolean') out.shadows = raw.shadows;
+  if (typeof raw.dynamicResolution === 'boolean') out.dynamicResolution = raw.dynamicResolution;
+  const fps = num(raw.targetFps, 15, 240);
+  if (fps !== undefined) out.targetFps = fps;
+  const dpr = num(raw.maxPixelRatio, 0.5, 2);
+  if (dpr !== undefined) out.maxPixelRatio = Math.round(dpr * 100) / 100;
+  if (TEXTURE_LEVELS.includes(raw.textureQuality)) out.textureQuality = raw.textureQuality;
+  if (raw.fpsCap === 0) out.fpsCap = 0;
+  else { const cap = num(raw.fpsCap, 15, 240); if (cap !== undefined) out.fpsCap = Math.round(cap); }
+  return out;
+}
+
+/** Preset + ajustes avançados → configuração efetiva (`fpsCap` 0 = sem limite). */
+export function mergePreset(preset, overrides = {}) {
+  const o = sanitizeOverrides(overrides);
+  const merged = { ...preset, fpsCap: 0, ...o };
+  if (merged.minPixelRatio > merged.maxPixelRatio) merged.minPixelRatio = merged.maxPixelRatio;
+  return merged;
+}
+
+function readOverrides() {
+  const raw = safeGet(OVERRIDES_KEY);
+  if (!raw) return {};
+  try { return sanitizeOverrides(JSON.parse(raw)); } catch { return {}; }
+}
+
 const initial = resolveInitialPreset();
+const initialOverrides = readOverrides();
 
 export const QualitySettings = {
   /** @type {QualityPreset} */
-  current: QUALITY_PRESETS[initial.name],
+  current: mergePreset(QUALITY_PRESETS[initial.name], initialOverrides),
+  /** F6-08: ajustes avançados ativos (sobre o preset). */
+  overrides: initialOverrides,
   /** De onde veio o preset atual: 'url' | 'storage' | 'detect' | 'user' */
   source: initial.source,
   presets: QUALITY_PRESETS,
@@ -271,14 +313,42 @@ export const QualitySettings = {
   set(preset) {
     const p = QUALITY_PRESETS[preset];
     if (!p) throw new Error(`Preset de qualidade desconhecido: ${preset}`);
-    const requiresReload = p.antialias !== this.current.antialias || p.textureQuality !== this.current.textureQuality ||
-      (p.pointLightShadows && !this.current.pointLightShadows);
-    this.current = p;
+    const next = mergePreset(p, {}); // escolher um preset descarta os ajustes avançados
+    const requiresReload = next.antialias !== this.current.antialias || next.textureQuality !== this.current.textureQuality ||
+      (next.pointLightShadows && !this.current.pointLightShadows);
+    this.current = next;
+    this.overrides = {};
     this.source = 'user';
     safeSet(STORAGE_KEY, p.name);
-    safeSet(TEXTURE_KEY, p.textureQuality);
+    safeSet(OVERRIDES_KEY, '{}');
+    safeSet(TEXTURE_KEY, next.textureQuality);
     if (this._renderer) this.apply(this._renderer, this._sceneManager);
-    return { preset: p, requiresReload };
+    return { preset: next, requiresReload };
+  },
+
+  /**
+   * F6-08: ajuste avançado individual sobre o preset atual (`value` `undefined`/`null` remove o ajuste).
+   * @returns {{preset: QualityPreset, requiresReload: boolean}} requiresReload = textura mudou
+   */
+  setOverride(key, value) {
+    const base = QUALITY_PRESETS[this.current.name];
+    const nextOv = { ...this.overrides };
+    if (value === undefined || value === null) delete nextOv[key]; else nextOv[key] = value;
+    const clean = sanitizeOverrides(nextOv);
+    const next = mergePreset(base, clean);
+    const requiresReload = next.textureQuality !== this.current.textureQuality;
+    this.current = next;
+    this.overrides = clean;
+    this.source = 'user';
+    safeSet(OVERRIDES_KEY, JSON.stringify(clean));
+    safeSet(TEXTURE_KEY, next.textureQuality);
+    if (this._renderer) this.apply(this._renderer, this._sceneManager);
+    return { preset: next, requiresReload };
+  },
+
+  /** F6-08: remove todos os ajustes avançados (mantém o preset). */
+  clearOverrides() {
+    return this.set(this.current.name);
   },
 
   /**

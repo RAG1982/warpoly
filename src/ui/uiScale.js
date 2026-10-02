@@ -53,14 +53,14 @@ export function computeUiScale(innerWidth, innerHeight, userScale = 1) {
  * `userScale` salvo, e registra um listener de `resize` para mantê-la atualizada.
  * @returns {() => void} função para remover o listener (uso em testes/dispose)
  */
+export function applyUiScale() {
+  const scale = computeUiScale(window.innerWidth, window.innerHeight, getUserScale());
+  document.documentElement.style.setProperty('--ui-scale', String(scale));
+  return scale;
+}
+
 export function initUiScale() {
-  const root = document.documentElement;
-
-  const apply = () => {
-    const scale = computeUiScale(window.innerWidth, window.innerHeight, getUserScale());
-    root.style.setProperty('--ui-scale', String(scale));
-  };
-
+  const apply = applyUiScale;
   apply();
   window.addEventListener('resize', apply);
   return () => window.removeEventListener('resize', apply);

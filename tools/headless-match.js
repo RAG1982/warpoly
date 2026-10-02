@@ -12,7 +12,7 @@
  * (`src/sim/checksum.js`) permite comparar execuções (determinismo: mesma seed ⇒ mesma saída).
  *
  * Opções: --seed N (1)  --map <id>  --difficulty easy|normal|hard  --victory conquest|regicide  --ffa
- *         --max-minutes N (60)  --json (uma linha JSON)  --quiet (só o resumo final)
+ *         --difficulties d0,d1[,d2]  (dificuldade por jogador, F5-03)  --max-minutes N (60)  --json (uma linha JSON)  --quiet (só o resumo final)
  */
 import { register } from 'node:module';
 
@@ -26,13 +26,14 @@ const err = console.error.bind(console);
 console.error = (...a) => { if (typeof a[0] === 'string' && a[0].startsWith('[glbModels]')) return; err(...a); };
 
 function parseArgs(argv) {
-  const o = { seed: 1, map: null, difficulty: null, victory: null, ffa: false, maxMinutes: 60, json: false, quiet: false };
+  const o = { seed: 1, map: null, difficulty: null, difficulties: null, victory: null, ffa: false, maxMinutes: 60, json: false, quiet: false };
   for (let i = 0; i < argv.length; i++) {
     const a = argv[i];
     const next = () => argv[++i];
     if (a === '--seed') o.seed = Number(next());
     else if (a === '--map') o.map = next();
     else if (a === '--difficulty') o.difficulty = next();
+    else if (a === '--difficulties') o.difficulties = next().split(',');
     else if (a === '--victory') o.victory = next();
     else if (a === '--ffa') o.ffa = true;
     else if (a === '--max-minutes') o.maxMinutes = Number(next());
@@ -65,7 +66,10 @@ async function main() {
   if (opts.difficulty) spec.difficulty = opts.difficulty;
   if (opts.victory) spec.victoryMode = opts.victory;
   const cfg = createMatchConfig(spec);
-  cfg.players.forEach((p) => { p.isAI = true; });
+  cfg.players.forEach((p, i) => {
+    p.isAI = true;
+    if (opts.difficulties && opts.difficulties[i]) p.difficulty = opts.difficulties[i];
+  });
 
   const scene = new THREE.Scene();
   const gm = new GameManager(scene, new Terrain(scene, getMap(cfg.mapId)), null, null, cfg);
@@ -98,6 +102,7 @@ async function main() {
     ticksPerSecond: Math.round(tick / Math.max(0.001, wallMs / 1000)),
     winnerTeam: snap.winnerTeam ?? null,
     checksum: stateChecksum(gm),
+    ai: gm.aiDirectors.map(d => ({ id: d.playerId, difficulty: d.difficulty, strategy: d.strategy.id, commands: d.commandsIssued, dropped: d.commandsDropped, apm: Math.round(d.commandsIssued / Math.max(1, tick * SIM_DT / 60)) })),
     perPlayer: snap.players.map(p => ({ id: p.id, name: p.name, faction: p.factionId, defeated: !!p.defeated, kills: p.unitsKilled, lost: p.unitsLost, buildingsDestroyed: p.buildingsDestroyed, buildingsLost: p.buildingsLost, score: Math.round(p.score) }))
   };
 
@@ -107,6 +112,7 @@ async function main() {
     console.log(`Partida IA×IA ${finished ? 'terminou' : 'NÃO terminou (limite de tempo)'} — seed ${summary.seed}, mapa ${summary.map}, ${summary.players} jogadores`);
     console.log(`  ${summary.ticks} ticks = ${summary.simMinutes} min simulados em ${(wallMs / 1000).toFixed(1)} s (${summary.ticksPerSecond} ticks/s)`);
     console.log(`  vencedor: time ${summary.winnerTeam === null ? '—' : summary.winnerTeam} · checksum ${summary.checksum}`);
+    for (const a of summary.ai) console.log(`  IA P${a.id}: ${a.difficulty}/${a.strategy}, ${a.commands} comandos (~${a.apm} APM, ${a.dropped} adiados)`);
     for (const p of summary.perPlayer) {
       console.log(`  P${p.id} ${p.name} (${p.faction})${p.defeated ? ' [derrotado]' : ''}: ${p.kills} abates / ${p.lost} baixas, ${p.buildingsDestroyed} destruídas / ${p.buildingsLost} perdidas, pontos ${p.score}`);
     }

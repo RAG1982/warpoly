@@ -262,10 +262,11 @@ class GameApp {
     });
   }
 
-  _onMenuStart({ faction, difficulty, mapId, victoryMode }) {
+  /** F6-02: o menu entrega a MatchConfig completa (`choice.config`); sem ela cai no createMatchConfig legado. */
+  _onMenuStart({ config: chosen, faction, difficulty, mapId, victoryMode }) {
     if (this.fsm.is(S.MAIN_MENU)) this.fsm.transition(S.MATCH_SETUP);
     if (!this.fsm.is(S.MATCH_SETUP)) return;
-    const config = createMatchConfig({
+    const config = chosen || createMatchConfig({
       localFaction: faction,
       difficulty,
       mapId,

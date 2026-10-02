@@ -86,6 +86,8 @@ src/
   ui/terrainMinimapImage.js   Imagem do terreno (água/areia/grama/rocha) pré-renderizada 1×/partida para o minimapa e as miniaturas do menu (F2-05)
   ui/UiEvents.js              Ouvinte: eventos → UIManager.showNotification (F2-07)
   ui/screens/                 MainMenu (F6-01), PauseMenu + gameScreens.css (F2-04), OptionsPanel (F6-08)
+  ui/skirmishSetup.js         Lógica pura da tela de Escaramuça: estado do formulário → MatchConfig validada (F6-02)
+  ui/FactionPreview.js        Prévia 3D (three.js leve, .glb do QG+unidade) da facção no painel de Escaramuça (F6-02)
   ui/optionsStore.js          Persistência pura das opções (localStorage injetável; espelho `runtime`) — F6-08
   ui/optionsApply.js          Aplica opções salvas ao áudio/teclas/escala/daltonismo — F6-08
   render/sceneDisposal.js     Descarte de objetos da partida preservando os caches do ModelFactory (F2-04)
@@ -121,8 +123,10 @@ animate() [rAF da aplicação, delta máx 0.1s; sem sessão (menu/loading) não 
 - F1-09: a simulação em si roda em passos fixos de `SIM_DT = 0,05 s` (20 Hz) dentro de `advance`,
   independente do FPS de renderização — ver "Loop: tick fixo, interpolação e LOD de animação" abaixo.
 
-- **Menu** (`ui/screens/MainMenu.js`): "Iniciar" chama `onStart({ faction, difficulty })`; a aplicação monta a
-  `MatchConfig` (`createMatchConfig`, com `difficulty` e seed nova) e vai para `Loading`. Abrir/fechar o painel
+- **Menu** (`ui/screens/MainMenu.js`): "Iniciar" chama `onStart({ config, … })` com a `MatchConfig` completa montada
+  por `ui/skirmishSetup.js` (F6-02: facção, mapa, 1…7 IAs com facção/dificuldade/time/cor, posição, recursos
+  iniciais `startingResources`, vitória, seed; persistido em `warpoly.skirmish`; prévia 3D em `ui/FactionPreview.js`);
+  sem `config` (uso legado) a aplicação cai em `createMatchConfig`. Depois vai para `Loading`. Abrir/fechar o painel
   Escaramuça alterna `MainMenu ⇄ MatchSetup`. Nada recarrega a página.
 - **URL (compatibilidade)**: `?play`, `?skipMenu`, `?bench`, `?skipPreload` pulam o menu (`Boot → Loading` com
   `matchConfigFromSearch`: `?faction`, `?ffa`, `?seed`, `?difficulty`); `?texq`, `?quality`, `?settings=1` e o bench

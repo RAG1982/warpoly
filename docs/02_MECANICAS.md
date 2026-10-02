@@ -202,6 +202,10 @@ Regras por tipo de entidade:
 
 Nova partida (F2-04, sem recarregar a página) começa com a névoa zerada (`FogOfWar.dispose()` + `reset()`).
 
+## Escaramuça — configuração de partida (F6-02)
+
+Painel "Novo Jogo" do menu: facção do jogador (cartões + prévia 3D), mapa (miniatura; limite de oponentes = `maxPlayers − 1` do mapa, hoje 2 e 3), oponentes IA (facção Humano/Orc/Aleatória, dificuldade Fácil/Normal/Difícil/Brutal → `players[i].difficulty`, time 1–8, cor única entre as 8 de `PLAYER_COLORS`), posição inicial do jogador, recursos iniciais por jogador (Poucos ½× · Padrão · Muitos 2× · Fartos 4× de `STARTING_RESOURCES` → `MatchConfig.startingResources`), condição de vitória e semente (vazio = aleatória; número ou texto). É preciso haver ≥ 2 times diferentes (senão "Iniciar" fica desabilitado). Facção "Aleatória" resolve-se pela semente (determinístico). Lógica e testes: `ui/skirmishSetup.js`, `tests/unit/skirmishSetup.test.js`.
+
 ## Opções
 
 **F6-08** — diálogo único `ui/screens/OptionsPanel.js` (menu principal, menu de pausa e engrenagem da HUD; o antigo `#settings-panel` foi removido). Abas:

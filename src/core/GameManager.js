@@ -498,7 +498,7 @@ export class GameManager {
   /** Cria jogadores a partir da MatchConfig (recursos iniciais de src/data). */
   _createPlayers() {
     this.playerRegistry = new PlayerRegistry(
-      this.matchConfig.players.map(spec => new Player({ ...spec, resources: STARTING_RESOURCES }))
+      this.matchConfig.players.map(spec => new Player({ ...spec, resources: this.matchConfig.startingResources || STARTING_RESOURCES })) // F6-02: recursos iniciais da config
     );
     // F3-10: jogador neutro hostil (id 99) só existe quando o mapa tem `neutrals`.
     const neutrals = this.terrain.mapDef.neutrals;

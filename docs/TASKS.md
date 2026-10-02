@@ -85,7 +85,7 @@ Sonnet 5.5 escreve a spec em `docs/specs/<ID>.md`; agente **Sonnet** executa; o 
 | F2 Núcleo | 8 | 0 | 1 | 7 |
 | F3 Jogabilidade WC2 base | 12 | 0 | 0 | 12 |
 | F4 Jogabilidade WC2 expansão | 8 | 2 | 0 | 6 |
-| F5 IA | 6 | 6 | 0 | 0 |
+| F5 IA | 6 | 1 | 1 | 4 |
 | F6 HUD/UX | 9 | 7 | 0 | 2 |
 | F7 Arte/Áudio | 11 | 10 | 0 | 1 |
 | F8 Conteúdo | 6 | 6 | 0 | 0 |
@@ -355,19 +355,19 @@ Sonnet 5.5 escreve a spec em `docs/specs/<ID>.md`; agente **Sonnet** executa; o 
 ## F5 — Inteligência Artificial
 
 ### F5-01 · Refatorar IA para jogadores + comandos
-- `DOING(sonnet, 2026-10-01)` · AI · Onda 3 · Dep: F2-01 (F2-02 quando pronto) · Remover `EnemyAI.js`; `AIDirector` por `playerId`, emitindo comandos; várias IAs simultâneas (FFA/times).
+- `DONE(2026-10-02)` · AI · Onda 3 · Dep: F2-01 (F2-02 quando pronto) · Remover `EnemyAI.js`; `AIDirector` por `playerId`, emitindo comandos; várias IAs simultâneas (FFA/times).
 
 ### F5-02 · Percepção sob a névoa
-- `DOING(sonnet, 2026-10-01)` · AI · Dep: F1-05, F5-01 · IA só "sabe" o que suas unidades viram (memória de última posição); scout ativo. Dificuldade Brutal pode trapacear (opcional).
+- `DONE(2026-10-02)` · AI · Dep: F1-05, F5-01 · IA só "sabe" o que suas unidades viram (memória de última posição); scout ativo. Dificuldade Brutal pode trapacear (opcional).
 
 ### F5-03 · Níveis de dificuldade
-- `DOING(sonnet, 2026-10-01)` · AI · Dep: F5-01 · Fácil / Normal / Difícil / Brutal: APM máximo, atraso de reação, qualidade de micro, bônus de recursos só no Brutal; configurado no setup da partida.
+- `DOING(parcial, 2026-10-02)` (perfis, APM e bônus Brutal prontos; meta Difícil×Normal ≥ 60 % NÃO atingida: 48 % em 20 partidas pareadas; falta vantagem estrutural da Difícil — expansão/economia; adiado a pedido do dono) · AI · Dep: F5-01 · Fácil / Normal / Difícil / Brutal: APM máximo, atraso de reação, qualidade de micro, bônus de recursos só no Brutal; configurado no setup da partida.
 
 ### F5-04 · Estratégias e build orders
-- `DOING(sonnet, 2026-10-01)` · AI · Dep: F3-06 · Perfis (rush, boom econômico, tartaruga, tech aéreo) por facção; escolha aleatória por seed; adaptação à composição do inimigo (contra-unidades).
+- `DONE(2026-10-02)` · AI · Dep: F3-06 · Perfis (rush, boom econômico, tartaruga, tech aéreo) por facção; escolha aleatória por seed; adaptação à composição do inimigo (contra-unidades).
 
 ### F5-05 · Micro tático
-- `DOING(sonnet, 2026-10-01)` · AI · Dep: F3-03 · Recuar feridos, focar fogo, kiting de ranged, proteger cerco, flanquear, atacar trabalhadores, usar magias (após F4-04).
+- `DONE(2026-10-02)` · AI · Dep: F3-03 · Recuar feridos, focar fogo, kiting de ranged, proteger cerco, flanquear, atacar trabalhadores, usar magias (após F4-04).
 
 ### F5-06 · IA de campanha/gatilhos
 - `TODO` · AI+CONTENT · Dep: F8-04 · Ondas scriptadas, defensores fixos, ataques programados por gatilho.
@@ -545,7 +545,7 @@ _(agentes adicionam aqui: `NEW-<n> · título · lane · motivo`)_
 - NEW-27 · Medir draw calls dos neutros vs master (997→1387 com câmera no acampamento, não isolado) · PERF
 - ✅ NEW-28 · `DONE` (bug do card preso corrigido; botão R+clique não testado) Verificar reparo/cancelar obra manualmente no jogo (2 aldeões reparando torre; capturas em tools/ui-captures/repair/) · QA
 - NEW-29 · Renomear construções existentes para os nomes D7 (Paço Real, Salão do Clã, Ferraria Real…) · UI/DATA · haiku
-- NEW-30 · Repetir o lote de balanceamento (F3-11) quando a F5 (IA Difícil) e a F4 chegarem; paridade dos atiradores ficou +14,8 % (orc) · QA
+- NEW-30 · (F5 pronta; F4 pronta) Repetir o lote de balanceamento (F3-11) quando a F5 (IA Difícil) e a F4 chegarem; paridade dos atiradores ficou +14,8 % (orc) · QA
 - NEW-31 · `tools/check-data-parity.mjs` quebrado (`blockerGrid` indefinido no mock) · QA · haiku
 - ✅ NEW-32 · `DONE(refino: Camponês, Lacaio, troll, Bandido, Arqueiro, Ogro; mão do arqueiro na corda)` — pendências menores: runas do troll leem como riscos, cicatrizes do Lacaio, face do Camponês simples, pose de tiro do arqueiro é compromisso · Arte: refino de pontos fracos (olhos do Camponês, pele do Lacaio, ombreira do troll, clava do Bandido) e poses do arqueiro (mão na corda, projétil da mão) · ART
 - ✅ NEW-33 · `DONE` (Cavaleiro 7/10, Estábulo 8/10, Covil 7,5/10 — autoavaliação; pendências: cor de time não se aplica a .glb de construção → F7-02, cavalos das baias só cabeça) Arte Blender: Cavaleiro montado, Estábulo Real, Covil dos Ogros (hoje procedurais provisórios; cavaleiro herda texturas 2048² do Espadachim procedural) · ART

@@ -824,6 +824,32 @@ const MODEL_CATALOG = [
     notes: 'Nós: Hull, Hose, Flag, Anim_Smoke.'
   },
   {
+    id: 'ship_dock_glb',
+    name: 'Doca do Clã (Blender)',
+    category: 'buildings',
+    faction: 'orc',
+    type: 'building',
+    icon: '⚓',
+    glb: 'ship_dock',
+    sourceFile: 'tools/blender/build_ship_dock.py',
+    create: createGlb('ship_dock'),
+    description: 'Doca do Clã orc (public/models/ship_dock.glb): guindastes de toras e ossos com ganchos, presas de marfim com tiras de ferro, casco de pele e ossos em construção sobre rampa de tábuas com estacas, torre de vigia com telhado pontudo, estandarte de caveira, pilhas de toras. ~18 mil tris, 5 draw calls, atlas 1024².',
+    notes: 'Nós: Static_Mesh, Anim_Banners, Anim_Crane, Anim_Crane_2. Sockets: Socket_UnitSpawn (mar, +Z), Socket_Rally.'
+  },
+  {
+    id: 'orc_oil_platform_glb',
+    name: 'Plataforma de Petróleo Orc (Blender)',
+    category: 'buildings',
+    faction: 'orc',
+    type: 'building',
+    icon: '🛢️',
+    glb: 'orc_oil_platform',
+    sourceFile: 'tools/blender/build_orc_oil_platform.py',
+    create: createGlb('orc_oil_platform'),
+    description: 'Plataforma orc (public/models/orc_oil_platform.glb): convés de tábuas e placas de ferro sobre pilares de madeira, torre de perfuração em treliça com chifres e chama, bomba cavalo-de-pau, barris, mangueira, torre de vigia com caveira. ~14 mil tris, 5 draw calls, atlas 1024².',
+    notes: 'Nós: Static_Mesh, Anim_Banners, Anim_Smoke, Anim_Crane, Anim_Drill. Sockets: Socket_UnitSpawn, Socket_Rally.'
+  },
+  {
     id: 'shipyard_glb',
     name: 'Estaleiro (Blender)',
     category: 'buildings',

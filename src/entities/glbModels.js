@@ -78,6 +78,8 @@ export const GLB_MODELS = {
   // ART-naval-buildings: construções navais humanas (Blender)
   shipyard: { url: `${BASE}models/shipyard.glb`, root: 'Shipyard', type: null },
   oil_platform: { url: `${BASE}models/oil_platform.glb`, root: 'OilPlatform', type: null },
+  ship_dock: { url: `${BASE}models/ship_dock.glb`, root: 'ShipDock', type: null },
+  orc_oil_platform: { url: `${BASE}models/orc_oil_platform.glb`, root: 'OrcOilPlatform', type: null },
   // ART-naval-ships: navios humanos (Blender)
   frigate: { url: `${BASE}models/frigate.glb`, root: 'Frigate', type: 'frigate' },
   barge: { url: `${BASE}models/barge.glb`, root: 'Barge', type: 'barge' },

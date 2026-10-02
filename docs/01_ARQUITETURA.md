@@ -489,13 +489,23 @@ Camadas e regra de dependência (verificada por `tests/unit/layers.test.js`):
   a cada quadro, `MatchSession`); picking usa `gm.entityViews.rootOf(entidade)`. `FogView` (textura/shader, minimapa, fantasmas, esconder malhas
   inimigas) lê os sinais `fog.textureDirty/minimapDirty/newGhosts/removedGhosts`; `gm.fogView` é criado no construtor do `GameManager`
   (fora do headless) e atualizado em `renderUpdate`.
-- **Dívida restante (F2-08c)**: `Unit`, `Building`, `Wall` e `GameManager` (em `src/core`) ainda criam/seguram `THREE.Object3D` (a posição de
-  simulação é `mesh.position`; barras de vida, anel de seleção, animador e billboards vivem dentro de `Unit`/`Building`, e o estado de
-  animação/`userData` de ferramentas — `axe/pickaxe/hammer` — é escrito pela lógica). Plano: (1) `Unit`/`Building` ganham `Body` (`position`, `rotY`)
-  e a malha real passa a ser `UnitView`/`BuildingView` (animador, barras, billboards, seleção, cor de time, flash, `flyHeight`), sincronizados
-  por `EntityViews` a cada quadro; (2) a lógica deixa de tocar `userData.axe/hammer…` (expor `unit.tool = 'axe'|'pickaxe'|'hammer'|null` e o view
-  decide); (3) `GameManager` sem `scene`/`terrain.mesh` (altura via `terrain.getHeight` puro) e depois move para `src/sim`.
-  Hoje o headless funciona porque as malhas são `Group` vazios — a simulação ainda paga o custo (pequeno) do three em Node para `Unit`/`Building`.
+- **F2-08c (branch `task/F2-08c`)**: `Unit`, `Building`, `Wall`, `Terrain`, `Pathfinder` e o `GameManager` agora vivem em `src/sim/` sem three.js/DOM
+  (`tests/unit/layers.test.js`; `src/core/GameManager.js`, `src/entities/{Unit,Building}.js`, `src/world/Terrain.js`, `src/core/Pathfinder.js` e
+  `src/world/terrainGenerators.js` são só reexports de compatibilidade). `unit.mesh`/`building.mesh` são `Body` (`position`, `rotation.y`, `visible`);
+  a malha real é `UnitView`/`BuildingView`/`WallView` (+ subclasses por tipo em `src/render/buildings/**`, criadas por `createBuildingView`) em `src/render/`,
+  criadas/removidas por `EntityViews` (diff de `gm.allUnits/buildings`) e atualizadas a cada quadro com `update(frameDelta, ctx)` (`ctx` = `EntityViews`:
+  `gm`, `camera`, `alpha`, frustum/alvo do LOD de animação). A view interpola `prev → sim` (`_prevPos/_simPos`; o corpo de sim nunca recebe a pose interpolada,
+  então `GameManager._restoreSimPose` não existe mais), segura o animador, anel de seleção, barras de vida/mana, cor do time, flash/fantasma, afundamento
+  pós-morte e a raiz 3D usada no picking (`gm.entityViews.rootOf(e)`). A simulação só pede efeitos por estado: `unit.tool` (`'axe'|'pickaxe'|'hammer'|null`),
+  `unit.carryVisible`, `unit.anim` + contadores `animRestartSeq/animResetSeq/poseResetSeq/walkResetSeq` (via `_setAnim/_resetAnim/resetPose`),
+  `unit.visualBase/modelSeq` (Transmutação) e `building.rallyShown/wasDamaged`. A névoa só esconde a view (`view.fogHidden`, escrito pela `FogView`);
+  `Body.visible` é de simulação (dentro da mina, explosão). `GameManager` não tem `scene`: `new GameManager(terrain, sound, particles, matchConfig)`;
+  `TerrainView` (malha; picking em `InputManager.terrainView.mesh`), `FogView`, `EntityViews` (também dono do `TreeManager` e dos `WallBatch`),
+  warm-up de shaders, câmera na base (`gm.onMatchStarted`) e a apresentação do quadro (`MatchSession._presentFrame`) saíram do `GameManager`.
+  `gm.renderUpdate` só despacha eventos. Ganchos de apresentação (`fogView`, `hazardView`, `entityViews`, `sceneManager`, `uiManager`) são campos preenchidos pela
+  `MatchSession`, nunca lidos pela lógica. Dívida restante: `GameManager.selectSingle/issueOrder/...` ainda chamam `soundManager` (campo injetado, sem import) e a
+  `Terrain` de teste ainda é criada com `getMap`; o inspetor monta `new Building(...)` + `XxxView(building, null)` para mostrar as construções.
+  `ModelFactory.headless` não é mais ligado pelo `GameManager` (a sim não cria malhas): testes que criam views em Node devem ligá-lo.
 
 ## Eventos (F2-07)
 

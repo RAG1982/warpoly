@@ -66,6 +66,21 @@ try {
     return { a, b, ids: { wip: wip.id, forge: forge.id, smith: smith.id, mill: mill.id, w1: w1.id }, n: live.length };
   });
   console.log('setup', JSON.stringify(setup));
+  stats.desc = await page.evaluate(() => {
+    const gm = window.game.gameManager; const out = {};
+    const count = o => { let n = 0, m = 0; o.traverse(c => { n++; if (c.isMesh) m++; }); return `${n}/${m}`; };
+    for (const e of [...gm.allUnits, ...gm.buildings]) {
+      const root = (gm.entityViews && gm.entityViews.rootOf(e)) || e.mesh;
+      const k = `${e.type}#${e.ownerId}`;
+      (out[k] = out[k] || []).push(root && root.traverse ? count(root) : 'none');
+    }
+    return out;
+  });
+  stats.top = await page.evaluate(() => {
+    const h = {};
+    window.game.gameManager.sceneManager.scene.children.forEach(o => { let n = 0, m = 0; o.traverse(c => { n++; if (c.isMesh) m++; }); const k = `${o.type}:${o.name || ''}:${n}/${m}`; h[k] = (h[k] || 0) + 1; });
+    return h;
+  });
   stats.hist = await page.evaluate(() => {
     const h = {}; window.game.gameManager.sceneManager.scene.traverse(o => { const k = o.type + ':' + (o.name || ''); h[k] = (h[k] || 0) + 1; }); return h;
   });

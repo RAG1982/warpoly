@@ -7,6 +7,7 @@ import {
   missingRequirements, missingUnitRequirements, missingUpgradeRequirements, formatRequirementList
 } from '../sim/requirements.js';
 import { initUiScale } from './uiScale.js';
+import { drawMinimapPings } from './minimapPings.js';
 import { getBuildHotkey, getTrainHotkey, getResearchHotkey } from './hotkeys.js';
 import { buildCostHtml } from './Tooltip.js';
 import { CMD } from '../sim/commands.js';
@@ -116,77 +117,9 @@ export class UIManager {
   }
 
   initControls() {
-    // --- Config Panel Toggle (hudmodelo.png) ---
-    const settingsPanel = document.getElementById('settings-panel');
+    // F6-08: a engrenagem abre o OptionsPanel (velocidade, volumes, iluminação, escala… estão lá).
     document.getElementById('btn-config')?.addEventListener('click', () => {
-      if (settingsPanel) {
-        const isHidden = settingsPanel.style.display === 'none' || !settingsPanel.style.display;
-        settingsPanel.style.display = isHidden ? 'block' : 'none';
-        this.sound.playSelect();
-      }
-    }, this._listenOpts);
-
-    document.getElementById('btn-close-settings')?.addEventListener('click', () => {
-      if (settingsPanel) settingsPanel.style.display = 'none';
-      this.sound.playSelect();
-    }, this._listenOpts);
-
-    // Speed Controls [1X] [2X] [3X]
-    const speedPills = document.querySelectorAll('.speed-pill');
-    speedPills.forEach(pill => {
-      pill.addEventListener('click', () => {
-        const speed = parseFloat(pill.dataset.speed || '1');
-        this.gm.gameSpeed = speed;
-        this.gm.isPaused = false;
-        speedPills.forEach(p => p.classList.remove('active'));
-        pill.classList.add('active');
-        const pauseToggle = document.getElementById('toggle-pause');
-        if (pauseToggle) pauseToggle.checked = false;
-        this.sound.playSelect();
-      }, this._listenOpts);
-    });
-
-    // Pause Switch Toggle
-    document.getElementById('toggle-pause')?.addEventListener('change', (e) => {
-      this.gm.isPaused = e.target.checked;
-      this.sound.playSelect();
-    }, this._listenOpts);
-
-    // Volume Sliders (SFX & Music)
-    const sliderSfx = document.getElementById('slider-sfx');
-    const valSfx = document.getElementById('val-sfx');
-    sliderSfx?.addEventListener('input', (e) => {
-      const val = parseInt(e.target.value, 10);
-      if (valSfx) valSfx.innerText = `${val}%`;
-      this.sound.setSfxVolume(val / 100);
-    }, this._listenOpts);
-
-    const sliderMusic = document.getElementById('slider-music');
-    const valMusic = document.getElementById('val-music');
-    sliderMusic?.addEventListener('input', (e) => {
-      const val = parseInt(e.target.value, 10);
-      if (valMusic) valMusic.innerText = `${val}%`;
-      this.sound.setMusicVolume(val / 100);
-    }, this._listenOpts);
-
-    // Atmosphere Time-of-Day Buttons (Day, Sunset, Night)
-    const timePills = document.querySelectorAll('.time-pill');
-    document.getElementById('btn-time-day')?.addEventListener('click', (e) => {
-      this.sm.setTimeOfDay('day');
-      timePills.forEach(p => p.classList.remove('active'));
-      e.target.classList.add('active');
-      this.sound.playSelect();
-    }, this._listenOpts);
-    document.getElementById('btn-time-sunset')?.addEventListener('click', (e) => {
-      this.sm.setTimeOfDay('sunset');
-      timePills.forEach(p => p.classList.remove('active'));
-      e.target.classList.add('active');
-      this.sound.playSelect();
-    }, this._listenOpts);
-    document.getElementById('btn-time-night')?.addEventListener('click', (e) => {
-      this.sm.setTimeOfDay('night');
-      timePills.forEach(p => p.classList.remove('active'));
-      e.target.classList.add('active');
+      document.dispatchEvent(new CustomEvent('warpoly:open-options'));
       this.sound.playSelect();
     }, this._listenOpts);
 
@@ -236,9 +169,11 @@ export class UIManager {
     }, this._listenOpts);
   }
 
-  showNotification(msg, duration = 4000) {
+  /** `severity` (F6-05): 'danger' | 'warn' | 'good' colore a borda do banner. */
+  showNotification(msg, duration = 4000, severity = null) {
     if (!this.notificationBox) return;
     this.notificationBox.innerText = msg;
+    this.notificationBox.dataset.severity = severity || '';
     this.notificationBox.style.opacity = '1';
     this.notificationBox.style.transform = 'translateX(-50%) translateY(0)';
 
@@ -365,9 +300,7 @@ export class UIManager {
           return;
         }
         if (this.gm.population >= this.gm.maxPopulation) {
-          this.sound.playChop();
-          const farmName = this.gm.playerFaction === 'orc' ? 'Chiqueiros' : 'Casas';
-          this.showNotification(`Limite de população atingido! Construa mais ${farmName}.`);
+          this.alerts ? this.alerts.raise('food') : this.showNotification('Não há comida suficiente!');
           return;
         }
         if (cfg && !this.gm.canAfford(cfg.cost)) {
@@ -574,9 +507,7 @@ export class UIManager {
             return;
           }
           if (this.gm.population >= this.gm.maxPopulation) {
-            this.sound.playChop();
-            const houseName = this.gm.playerFaction === 'orc' ? 'Tocas Orc' : 'Casas';
-            this.showNotification(`Limite de população atingido! Construa mais ${houseName}.`);
+            this.alerts ? this.alerts.raise('food') : this.showNotification('Não há comida suficiente!');
             return;
           }
           if (cfg && !this.gm.canAfford(cfg.cost)) {
@@ -1318,6 +1249,9 @@ export class UIManager {
       this.gm.fogView.drawMinimapFog(ctx, w, h);
     }
 
+    // F6-05: pings de alerta (ataque, mina esgotada) sobre a névoa
+    if (this.alerts) drawMinimapPings(ctx, this.alerts.activePings(), toMap);
+
     // Camera Viewport Box on top of Fog
     const camPos = toMap(this.sm.cameraTarget.x, this.sm.cameraTarget.z);
     ctx.strokeStyle = '#ffd700';
@@ -1340,7 +1274,6 @@ export class UIManager {
       if (el) el.style.display = 'none';
     };
     hide('game-over-modal');
-    hide('settings-panel');
     hide('help-modal');
     if (this.notificationBox) {
       this.notificationBox.style.opacity = '0';

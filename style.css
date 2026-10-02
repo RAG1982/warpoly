@@ -430,6 +430,11 @@ input:checked + .slider.round:before {
   z-index: 1000;
 }
 
+/* F6-05: severidade dos alertas (ataque / aviso / concluído) */
+#notification-box[data-severity="danger"] { border-color: #ef4444; color: #fecaca; box-shadow: 0 8px 25px rgba(0, 0, 0, 0.7), 0 0 20px rgba(239, 68, 68, 0.55); }
+#notification-box[data-severity="warn"] { border-color: #f59e0b; color: #fde68a; }
+#notification-box[data-severity="good"] { border-color: #4ade80; color: #dcfce7; box-shadow: 0 8px 25px rgba(0, 0, 0, 0.7), 0 0 16px rgba(74, 222, 128, 0.35); }
+
 /* --- BOTTOM HUD (MINIMAP + SELECTION CARD) --- */
 /* F6-03 (B11): grid de 3 colunas em vez de 3 blocos com `position:fixed`/`left` absolutos —
    o card de seleção nunca mais é cortado nem sobrepõe o minimapa/guia em telas estreitas. */

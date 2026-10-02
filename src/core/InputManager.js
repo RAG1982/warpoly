@@ -5,6 +5,7 @@ import { getCost, getBuildingDef, WALL_STEP, WALL_MAX_POINTS } from '../data/ind
 import { CMD } from '../sim/commands.js';
 import { ControlGroups } from './ControlGroups.js';
 import { resolveKey, limitByDistance, SELECTION_LIMIT } from './Hotkeys.js';
+import { runtime as optionsRuntime } from '../ui/optionsStore.js';
 import { EVT } from '../sim/events.js';
 import { resolveAbility, needsEntityTarget, targetProblem, canCast, pickCaster, selectionAbilityUnits } from '../sim/abilities.js';
 
@@ -46,8 +47,7 @@ export class InputManager {
     this.lastAlertPos = null;
     this._hasMouse = false;
     this._isMiddleDown = false;
-    this.edgePan = true;
-    try { this.edgePan = localStorage.getItem('warpoly.edgePan') !== '0'; } catch { /* sem storage */ }
+    // F6-08: pan pela borda e velocidade de rolagem vêm de `optionsRuntime` (Opções > Controles).
     const ev = this.gm.events;
     this._offAlerts = ev ? [
       ev.on(EVT.UNDER_ATTACK, p => this._noteAlert(p)),
@@ -275,7 +275,9 @@ export class InputManager {
   }
 
   centerOnLastAlert() {
-    const p = this.lastAlertPos;
+    // F6-05: histórico do AlertCenter (Espaço novo → antigo); sem ele, o último dano sofrido.
+    const a = this.uiManager?.alerts?.jump();
+    const p = a ? a.pos : this.lastAlertPos;
     if (p) this.sm.cameraTarget.set(p.x, this.terrain.getHeight(p.x, p.z), p.z);
     else this.centerOnHq();
   }
@@ -972,7 +974,7 @@ export class InputManager {
 
   update(delta) {
     // Camera Panning via WASD / Arrow Keys
-    const panSpeed = 40 * delta * this.sm.zoomLevel;
+    const panSpeed = 40 * delta * this.sm.zoomLevel * optionsRuntime.panSpeed;
     let moveForward = 0;
     let moveRight = 0;
 
@@ -983,7 +985,7 @@ export class InputManager {
     if (k('KeyD') || this.keys['ArrowRight']) moveRight += panSpeed;
 
     // F3-01: pan pela borda da janela (≤ 8 px), mesma velocidade do WASD.
-    if (this.edgePan && this._hasMouse && !this.suspended && !this._isMiddleDown && document.hasFocus()) {
+    if (optionsRuntime.edgePan && this._hasMouse && !this.suspended && !this._isMiddleDown && document.hasFocus()) {
       const { x, y } = this.currentMousePos;
       if (x <= EDGE_PX) moveRight -= panSpeed;
       else if (x >= window.innerWidth - EDGE_PX) moveRight += panSpeed;

@@ -16,8 +16,95 @@
 /** Máximo de unidades selecionadas por caixa/duplo clique (as mais próximas do centro da caixa). */
 export const SELECTION_LIMIT = 24;
 
-/** Letras de ordens (com unidades selecionadas e sem construção). */
+/** Letras de ordens (com unidades selecionadas e sem construção) — padrão; ver `getBindings()`. */
 export const ORDER_KEYS = { KeyS: 'stop', KeyH: 'hold', KeyA: 'attackMove', KeyP: 'patrol' };
+
+/**
+ * F6-08: ações remapeáveis → `KeyboardEvent.code` padrão. Letras do card de comandos
+ * (construir/treinar/pesquisar) e grupos de controle (1..9) não são remapeáveis.
+ */
+export const DEFAULT_BINDINGS = Object.freeze({
+  stop: 'KeyS',
+  hold: 'KeyH',
+  attackMove: 'KeyA',
+  patrol: 'KeyP',
+  idleWorker: 'Period',
+  lastAlert: 'Space',
+  hq: 'Backspace'
+});
+
+/** Nomes (PT-BR) das ações remapeáveis, na ordem da tela de opções. */
+export const BINDING_LABELS = Object.freeze({
+  stop: 'Parar',
+  hold: 'Manter posição',
+  attackMove: 'Atacar-movendo',
+  patrol: 'Patrulhar',
+  idleWorker: 'Próximo trabalhador ocioso',
+  lastAlert: 'Ir ao último alerta',
+  hq: 'Centralizar no Centro'
+});
+
+/** Teclas que não podem ser atribuídas (dígitos = grupos; Esc/Enter/Tab/setas/modificadoras). */
+const RESERVED = /^(Digit[0-9]|Numpad[0-9]|Escape|Enter|Tab|Arrow(Up|Down|Left|Right)|Shift(Left|Right)|Control(Left|Right)|Alt(Left|Right)|Meta(Left|Right)|F[0-9]{1,2})$/;
+
+/** Letras fixas do card (construir/treinar/pesquisar + WASD da câmera) — também reservadas. */
+const FIXED_LETTERS = new Set(['KeyW', 'KeyD']);
+
+let bindings = { ...DEFAULT_BINDINGS };
+let codeToAction = invert(bindings);
+
+function invert(b) {
+  const m = new Map();
+  for (const [action, code] of Object.entries(b)) if (code) m.set(code, action);
+  return m;
+}
+
+/** Atribuições atuais (cópia). */
+export function getBindings() { return { ...bindings }; }
+
+/** Código que não pode ser atribuído a nenhuma ação. */
+export function isReservedCode(code) { return RESERVED.test(code || '') || FIXED_LETTERS.has(code); }
+
+/** Ação já usando `code` (ignorando `exceptAction`), ou null. */
+export function findConflict(code, exceptAction = null, map = bindings) {
+  for (const [action, c] of Object.entries(map)) if (c === code && action !== exceptAction) return action;
+  return null;
+}
+
+/**
+ * Aplica um mapa parcial `{ ação: code }` sobre o padrão. Entradas inválidas (ação desconhecida,
+ * código reservado ou duplicado) são ignoradas, mantendo o padrão da ação. Devolve as atribuições efetivas.
+ */
+export function setBindings(overrides = {}) {
+  const next = {};
+  const used = new Set();
+  const actions = Object.keys(DEFAULT_BINDINGS);
+  // 1) atribuições do usuário válidas e únicas
+  for (const a of actions) {
+    const code = overrides && overrides[a];
+    if (code && !isReservedCode(code) && !used.has(code)) { next[a] = code; used.add(code); }
+  }
+  // 2) o resto volta ao padrão se a tecla padrão estiver livre; senão fica sem tecla (null)
+  for (const a of actions) {
+    if (next[a]) continue;
+    const def = DEFAULT_BINDINGS[a];
+    if (!used.has(def)) { next[a] = def; used.add(def); } else next[a] = null;
+  }
+  bindings = next;
+  codeToAction = invert(bindings);
+  return getBindings();
+}
+
+/** Texto curto de uma tecla para mostrar na UI (`KeyS` → `S`, `Space` → `Espaço`). */
+export function codeLabel(code) {
+  if (!code) return '';
+  const m = /^Key([A-Z])$/.exec(code);
+  if (m) return m[1];
+  const d = /^(?:Digit|Numpad)([0-9])$/.exec(code);
+  if (d) return d[1];
+  const names = { Space: 'Espaço', Period: '.', Comma: ',', Backspace: 'Backspace', Minus: '-', Equal: '=', Slash: '/', Semicolon: ';', Quote: "'", BracketLeft: '[', BracketRight: ']', Backslash: '\\', Backquote: '`', Home: 'Home', End: 'End', Insert: 'Insert', Delete: 'Delete', PageUp: 'PageUp', PageDown: 'PageDown' };
+  return names[code] || code;
+}
 
 export function digitOf(code) {
   const m = /^(?:Digit|Numpad)([1-9])$/.exec(code || '');
@@ -47,15 +134,17 @@ export function resolveKey(key, ctx) {
   }
   if (key.ctrl || key.meta || key.alt) return null;
 
-  if (code === 'Period') return { type: 'idleWorker' };
-  if (code === 'Space') return { type: 'lastAlert' };
-  if (code === 'Backspace') return { type: 'hq' };
+  const bound = codeToAction.get(code);
+  if (bound === 'idleWorker' || bound === 'lastAlert' || bound === 'hq') return { type: bound };
 
   const letter = letterOf(code);
-  if (!letter || ctx.targetMode) return null;
+  if (ctx.targetMode) return null;
 
   const unitsOnly = ctx.hasUnits && !ctx.hasBuilding;
-  if (unitsOnly && ORDER_KEYS[code]) return { type: 'order', order: ORDER_KEYS[code] };
+  if (unitsOnly && (bound === 'stop' || bound === 'hold' || bound === 'attackMove' || bound === 'patrol')) {
+    return { type: 'order', order: bound };
+  }
+  if (!letter) return null;
   if (ctx.cardLetters && ctx.cardLetters.has(letter)) return { type: 'card', letter };
   return null;
 }

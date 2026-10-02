@@ -248,6 +248,14 @@ export function validateMatchConfig(cfg) {
     if (p.isLocal) locals++;
   }
   if (locals !== 1) throw new Error('MatchConfig: exatamente um jogador local');
+  if (cfg.startingResources !== undefined) {
+    const r = cfg.startingResources;
+    for (const k of ['wood', 'gold', 'stone']) {
+      if (!r || typeof r[k] !== 'number' || !(r[k] >= 0) || !Number.isFinite(r[k])) {
+        throw new Error(`MatchConfig: startingResources.${k} inválido`);
+      }
+    }
+  }
   const teams = new Set(cfg.players.map((p) => p.team));
   if (teams.size < 2) throw new Error('MatchConfig: pelo menos 2 times');
   return cfg;

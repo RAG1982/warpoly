@@ -12,14 +12,17 @@
 // 3D atuais geram texturas procedurais 2048² na criação, o que atrasaria o menu em
 // vários segundos; o fundo 3D animado fica para quando houver assets leves (F7/F1).
 import './mainMenu.css';
+import './skirmish.css';
 import { listMaps, DEFAULT_MAP_ID } from '../../data/maps/index.js';
 import { renderTerrainImage } from '../terrainMinimapImage.js';
+import { PLAYER_COLORS, randomSeed } from '../../sim/MatchConfig.js';
+import { getMap } from '../../data/maps/index.js';
+import {
+  loadSetup, saveSetup, normalizeSetup, setMap, addAI, removeAI, pickColor, maxAIs,
+  validateSetup, buildMatchConfig, RESOURCE_PRESETS, MAX_TEAMS, otherFaction
+} from '../skirmishSetup.js';
 
 const BYPASS_PARAMS = ['play', 'skipMenu', 'bench', 'skipPreload'];
-const STORAGE_DIFFICULTY = 'warpoly.difficulty';
-const STORAGE_FACTION = 'warpoly.faction';
-const STORAGE_VICTORY = 'warpoly.victory';
-const STORAGE_MAP = 'warpoly.map';
 const MAP_THUMB_SIZE = { w: 96, h: 64 };
 
 const FACTIONS = [
@@ -52,13 +55,6 @@ const DIFFICULTIES = [
   { id: 'brutal', label: 'Brutal' },
 ];
 
-function safeGet(key) {
-  try { return window.localStorage.getItem(key); } catch { return null; }
-}
-function safeSet(key, value) {
-  try { window.localStorage.setItem(key, value); } catch { /* armazenamento indisponível */ }
-}
-
 /** true quando a URL atual deve abrir o menu em vez de iniciar o jogo direto. */
 export function shouldShowMainMenu(search = window.location.search) {
   const params = new URLSearchParams(search);
@@ -86,8 +82,9 @@ export class MainMenu {
    * @param {(open: boolean) => void} [opts.onSetupChange]
    * @param {() => void} [opts.onLoadGame]  F2-06
    */
-  constructor(parent = document.body, { onStart = null, onSetupChange = null, onLoadGame = null } = {}) {
+  constructor(parent = document.body, { onStart = null, onSetupChange = null, onLoadGame = null, onOptions = null } = {}) {
     this.parent = parent;
+    this.onOptions = onOptions; // F6-08
     this.onLoadGame = onLoadGame; // F2-06: abre o diálogo de slots de save
     this.onStart = onStart;
     this.onSetupChange = onSetupChange;
@@ -96,26 +93,19 @@ export class MainMenu {
     this.lastOpener = null;
     this.particles = null;
 
-    const urlFaction = new URLSearchParams(window.location.search).get('faction');
-    const stored = safeGet(STORAGE_FACTION);
-    this.faction = urlFaction === 'orc' || urlFaction === 'human'
-      ? urlFaction
-      : (stored === 'orc' ? 'orc' : 'human');
-    const storedDiff = safeGet(STORAGE_DIFFICULTY);
-    this.difficulty = DIFFICULTIES.some((d) => d.id === storedDiff) ? storedDiff : 'normal';
-    const storedVictory = safeGet(STORAGE_VICTORY);
-    this.victoryMode = VICTORY_MODES.some((v) => v.id === storedVictory) ? storedVictory : 'conquest';
-
-    // F2-05: mapa escolhido no painel de escaramuça — lista real via listMaps().
+    // F6-02: estado do formulário de Escaramuça (persistido em `warpoly.skirmish`); `?faction=` e
+    // `?map=` da URL ainda têm prioridade (mesmo comportamento do menu da F6-01).
     this.maps = listMaps();
-    const urlMap = new URLSearchParams(window.location.search).get('map');
-    const storedMap = safeGet(STORAGE_MAP);
-    this.mapId = this.maps.some((m) => m.id === urlMap)
-      ? urlMap
-      : this.maps.some((m) => m.id === storedMap)
-        ? storedMap
-        : DEFAULT_MAP_ID;
+    const params = new URLSearchParams(window.location.search);
+    let setup = loadSetup();
+    const urlFaction = params.get('faction');
+    if (urlFaction === 'orc' || urlFaction === 'human') {
+      setup = { ...setup, localFaction: urlFaction, ai: setup.ai.map((a) => ({ ...a, faction: otherFaction(urlFaction) })) };
+    }
+    if (this.maps.some((m) => m.id === params.get('map'))) setup = setMap(setup, params.get('map'));
+    this.setup = normalizeSetup(setup);
     this._mapThumbCache = new Map();
+    this.preview = null; // FactionPreview (prévia 3D), criada ao abrir o painel
 
     this._onKeyDown = this._onKeyDown.bind(this);
   }
@@ -130,6 +120,7 @@ export class MainMenu {
     document.documentElement.classList.add('wp-menu');
 
     this._bind();
+    this._syncSkirmish();
     this._startParticles();
     this._renderMapThumbnails();
     document.addEventListener('keydown', this._onKeyDown);
@@ -143,6 +134,7 @@ export class MainMenu {
   }
 
   destroy() {
+    this._disposePreview();
     clearTimeout(this._startTimer);
     this._startTimer = null;
     document.removeEventListener('keydown', this._onKeyDown);
@@ -156,7 +148,7 @@ export class MainMenu {
   _template() {
     const factionCards = FACTIONS.map((f) => `
       <label class="mm-faction mm-faction--${f.id}">
-        <input type="radio" name="mm-faction" value="${f.id}" ${this.faction === f.id ? 'checked' : ''} />
+        <input type="radio" name="mm-faction" value="${f.id}" />
         <span class="mm-faction__card">
           <span class="mm-faction__emblem"><img src="${f.icon}" alt="" width="64" height="64" /></span>
           <span class="mm-faction__body">
@@ -169,27 +161,27 @@ export class MainMenu {
         </span>
       </label>`).join('');
 
-    const diffs = DIFFICULTIES.map((d) => `
-      <label class="mm-seg mm-seg--${d.id}">
-        <input type="radio" name="mm-difficulty" value="${d.id}" ${this.difficulty === d.id ? 'checked' : ''} />
-        <span>${esc(d.label)}</span>
+    const resources = Object.values(RESOURCE_PRESETS).map((r) => `
+      <label class="mm-seg" title="${r.amounts.wood} madeira · ${r.amounts.gold} ouro · ${r.amounts.stone} pedra">
+        <input type="radio" name="mm-resources" value="${r.id}" />
+        <span>${esc(r.label)}</span>
       </label>`).join('');
 
     const victories = VICTORY_MODES.map((v) => `
       <label class="mm-seg">
-        <input type="radio" name="mm-victory" value="${v.id}" ${this.victoryMode === v.id ? 'checked' : ''} />
+        <input type="radio" name="mm-victory" value="${v.id}" />
         <span>${esc(v.label)}</span>
       </label>`).join('');
 
     // F2-05: lista real de mapas (miniatura gerada pelo mesmo renderizador do minimapa).
     const mapCards = this.maps.map((m) => `
       <label class="mm-map-card">
-        <input type="radio" name="mm-map" value="${esc(m.id)}" ${this.mapId === m.id ? 'checked' : ''} />
+        <input type="radio" name="mm-map" value="${esc(m.id)}" />
         <span class="mm-map">
           <span class="mm-map__thumb" aria-hidden="true" data-map-thumb="${esc(m.id)}"></span>
           <span class="mm-map__info">
             <span class="mm-map__name">${esc(m.name)}</span>
-            <span class="mm-map__meta">${m.maxPlayers}× jogadores · ${m.size}×${m.size}</span>
+            <span class="mm-map__meta">até ${m.maxPlayers} jogadores · ${m.size}×${m.size}</span>
           </span>
         </span>
       </label>`).join('');
@@ -224,7 +216,7 @@ export class MainMenu {
             <button type="button" class="mm-btn" disabled aria-describedby="mm-soon-note">
               <span class="mm-btn__label">Multiplayer</span><span class="mm-badge">Em breve</span>
             </button>
-            <button type="button" class="mm-btn" data-action="options" aria-haspopup="dialog" aria-controls="mm-options">
+            <button type="button" class="mm-btn" data-action="options" aria-haspopup="dialog">
               <span class="mm-btn__label">Opções</span>
             </button>
             <a class="mm-btn" href="/inspector.html">
@@ -248,27 +240,51 @@ export class MainMenu {
           </header>
 
           <div class="mm-panel__scroll">
+            <div class="mm-sk-top">
+              <fieldset class="mm-field">
+                <legend class="mm-field__label">Sua facção</legend>
+                <div class="mm-factions mm-factions--stack">${factionCards}</div>
+              </fieldset>
+              <div class="mm-sk-preview" aria-label="Prévia 3D da facção">
+                <canvas class="mm-sk-preview__canvas" id="mm-preview-canvas"></canvas>
+                <img class="mm-sk-preview__fallback" id="mm-preview-fallback" alt="" hidden />
+                <span class="mm-sk-preview__caption" id="mm-preview-caption"></span>
+              </div>
+            </div>
+
             <fieldset class="mm-field">
-              <legend class="mm-field__label">Facção</legend>
-              <div class="mm-factions">${factionCards}</div>
+              <legend class="mm-field__label" id="mm-map-label">Mapa</legend>
+              <div class="mm-maps mm-maps--grid" role="group" aria-labelledby="mm-map-label">${mapCards}</div>
+            </fieldset>
+
+            <fieldset class="mm-field">
+              <legend class="mm-field__label">Jogadores <span class="mm-field__count" id="mm-sk-count"></span></legend>
+              <div class="mm-players" id="mm-sk-players"></div>
+              <div class="mm-sk-add">
+                <button type="button" class="mm-btn mm-btn--ghost" data-action="add-ai" id="mm-sk-add-ai">+ Adicionar oponente</button>
+              </div>
             </fieldset>
 
             <div class="mm-row">
               <fieldset class="mm-field mm-field--grow">
-                <legend class="mm-field__label">Dificuldade da IA</legend>
-                <div class="mm-segmented">${diffs}</div>
+                <legend class="mm-field__label">Recursos iniciais</legend>
+                <div class="mm-segmented">${resources}</div>
               </fieldset>
-
               <fieldset class="mm-field mm-field--grow">
-                <legend class="mm-field__label" id="mm-map-label">Mapa</legend>
-                <div class="mm-maps" role="group" aria-labelledby="mm-map-label">${mapCards}</div>
+                <legend class="mm-field__label">Condição de vitória</legend>
+                <div class="mm-segmented" style="grid-template-columns: repeat(2, 1fr)">${victories}</div>
               </fieldset>
             </div>
 
-            <fieldset class="mm-field">
-              <legend class="mm-field__label">Condição de vitória</legend>
-              <div class="mm-segmented" style="grid-template-columns: repeat(2, 1fr)">${victories}</div>
-            </fieldset>
+            <div class="mm-field">
+              <label class="mm-field__label" for="mm-seed">Semente do mapa</label>
+              <div class="mm-seed">
+                <input type="text" id="mm-seed" class="mm-input" maxlength="24" placeholder="Aleatória" autocomplete="off" spellcheck="false" />
+                <button type="button" class="mm-btn mm-btn--ghost" data-action="roll-seed">Sortear</button>
+              </div>
+              <p class="mm-hint">Número ou palavra. A mesma semente no mesmo mapa gera a mesma partida.</p>
+            </div>
+            <p class="mm-sk-error" id="mm-sk-error" role="alert" hidden></p>
           </div>
 
           <footer class="mm-panel__foot">
@@ -276,30 +292,6 @@ export class MainMenu {
             <button type="button" class="mm-btn mm-btn--primary mm-btn--start" data-action="start">
               <span class="mm-btn__label">Iniciar</span>
             </button>
-          </footer>
-        </section>
-
-        <!-- Painel placeholder: Opções (F6-08) -->
-        <section id="mm-options" class="mm-panel mm-panel--options" role="dialog" aria-modal="false" aria-labelledby="mm-op-title" hidden>
-          <header class="mm-panel__head">
-            <div>
-              <p class="mm-panel__kicker">Configurações</p>
-              <h2 id="mm-op-title" class="mm-panel__title">Opções</h2>
-            </div>
-            <button type="button" class="mm-close" data-action="close" aria-label="Voltar ao menu">✕</button>
-          </header>
-          <div class="mm-panel__scroll">
-            <p class="mm-placeholder">Em construção. Esta tela vai reunir as opções completas do jogo:</p>
-            <ul class="mm-options-list">
-              <li><span>Gráficos</span><em>Predefinições, sombras, texturas, resolução</em></li>
-              <li><span>Áudio</span><em>Volume por canal</em></li>
-              <li><span>Controles</span><em>Atalhos e velocidade de rolagem</em></li>
-              <li><span>Interface</span><em>Escala da HUD e modo daltônico</em></li>
-            </ul>
-            <p class="mm-placeholder mm-placeholder--small">Durante a partida, velocidade, pausa e volume continuam na engrenagem da HUD.</p>
-          </div>
-          <footer class="mm-panel__foot">
-            <button type="button" class="mm-btn mm-btn--ghost" data-action="close">Voltar</button>
           </footer>
         </section>
       </div>
@@ -335,45 +327,59 @@ export class MainMenu {
       const action = el.dataset.action;
       if (action === 'new-game') this.openPanel('skirmish', el);
       else if (action === 'load-game') this.onLoadGame?.();
-      else if (action === 'options') this.openPanel('options', el);
+      else if (action === 'options') this.onOptions?.(); // F6-08: OptionsPanel (diálogo único)
       else if (action === 'credits') this.openCredits(el);
       else if (action === 'close') this.closePanel();
       else if (action === 'close-modal') this.closeCredits();
       else if (action === 'start') this.start();
+      else if (action === 'add-ai') this._apply(addAI(this.setup), { focus: '[data-sk="remove"]:last-of-type' });
+      else if (action === 'roll-seed') {
+        const input = this.root.querySelector('#mm-seed');
+        input.value = String(randomSeed());
+        this._apply({ ...this.setup, seed: input.value });
+      }
     });
 
+    // F6-02: campos da Escaramuça (delegação; o estado vive em `this.setup`).
     root.querySelectorAll('input[name="mm-faction"]').forEach((input) => {
       input.addEventListener('change', () => {
         if (!input.checked) return;
-        this.faction = input.value;
-        safeSet(STORAGE_FACTION, this.faction);
-        root.dataset.faction = this.faction;
+        const prev = this.setup.localFaction;
+        // IAs que estavam na facção "oposta" acompanham a troca (comportamento da F6-01).
+        const ai = this.setup.ai.map((a) => (a.faction === otherFaction(prev) ? { ...a, faction: otherFaction(input.value) } : a));
+        this._apply({ ...this.setup, localFaction: input.value, ai });
       });
     });
-    root.dataset.faction = this.faction;
-
-    root.querySelectorAll('input[name="mm-difficulty"]').forEach((input) => {
-      input.addEventListener('change', () => {
-        if (!input.checked) return;
-        this.difficulty = input.value;
-        safeSet(STORAGE_DIFFICULTY, this.difficulty);
-      });
-    });
-
-    root.querySelectorAll('input[name="mm-victory"]').forEach((input) => {
-      input.addEventListener('change', () => {
-        if (!input.checked) return;
-        this.victoryMode = input.value;
-        safeSet(STORAGE_VICTORY, this.victoryMode);
-      });
-    });
-
     root.querySelectorAll('input[name="mm-map"]').forEach((input) => {
-      input.addEventListener('change', () => {
-        if (!input.checked) return;
-        this.mapId = input.value;
-        safeSet(STORAGE_MAP, this.mapId);
-      });
+      input.addEventListener('change', () => { if (input.checked) this._apply(setMap(this.setup, input.value)); });
+    });
+    root.querySelectorAll('input[name="mm-resources"]').forEach((input) => {
+      input.addEventListener('change', () => { if (input.checked) this._apply({ ...this.setup, resources: input.value }); });
+    });
+    root.querySelectorAll('input[name="mm-victory"]').forEach((input) => {
+      input.addEventListener('change', () => { if (input.checked) this._apply({ ...this.setup, victoryMode: input.value }); });
+    });
+    const seed = root.querySelector('#mm-seed');
+    seed.addEventListener('input', () => { this.setup = { ...this.setup, seed: seed.value }; saveSetup(this.setup); });
+    const players = root.querySelector('#mm-sk-players');
+    players.addEventListener('click', (e) => {
+      const el = e.target.closest('[data-sk]');
+      if (!el) return;
+      const who = Number(el.dataset.who);
+      if (el.dataset.sk === 'color') this._apply(pickColor(this.setup, who, Number(el.dataset.color)));
+      else if (el.dataset.sk === 'remove') this._apply(removeAI(this.setup, who));
+    });
+    players.addEventListener('change', (e) => {
+      const el = e.target.closest('[data-sk]');
+      if (!el) return;
+      const who = Number(el.dataset.who);
+      const v = el.value;
+      if (el.dataset.sk === 'ai-faction') this._apply({ ...this.setup, ai: this.setup.ai.map((a, i) => (i === who ? { ...a, faction: v } : a)) });
+      else if (el.dataset.sk === 'ai-diff') this._apply({ ...this.setup, ai: this.setup.ai.map((a, i) => (i === who ? { ...a, difficulty: v } : a)) });
+      else if (el.dataset.sk === 'team') {
+        const team = Number(v);
+        this._apply(who < 0 ? { ...this.setup, localTeam: team } : { ...this.setup, ai: this.setup.ai.map((a, i) => (i === who ? { ...a, team } : a)) });
+      } else if (el.dataset.sk === 'slot') this._apply({ ...this.setup, localSlot: Number(v) });
     });
 
     // Setas ↑/↓ percorrem os botões do menu principal.
@@ -421,6 +427,7 @@ export class MainMenu {
     panel.hidden = false;
     this.root.classList.add('mm-has-panel');
     this.root.dataset.panel = name;
+    if (name === 'skirmish') { this._syncSkirmish(); this._ensurePreview(); }
     this.root.querySelectorAll('[aria-controls]').forEach((b) => b.classList.toggle('is-active', b.getAttribute('aria-controls') === `mm-${name}`));
     requestAnimationFrame(() => {
       const target = name === 'skirmish'
@@ -435,7 +442,7 @@ export class MainMenu {
     this.root.querySelector(`#mm-${this.activePanel}`).hidden = true;
     const wasSetup = this.activePanel === 'skirmish';
     this.activePanel = null;
-    if (wasSetup) this.onSetupChange?.(false);
+    if (wasSetup) { this._disposePreview(); this.onSetupChange?.(false); }
     this.root.classList.remove('mm-has-panel');
     delete this.root.dataset.panel;
     this.root.querySelectorAll('[aria-controls].is-active').forEach((b) => b.classList.remove('is-active'));
@@ -455,24 +462,150 @@ export class MainMenu {
   }
 
   start() {
-    safeSet(STORAGE_FACTION, this.faction);
-    safeSet(STORAGE_DIFFICULTY, this.difficulty);
-    safeSet(STORAGE_MAP, this.mapId);
-    safeSet(STORAGE_VICTORY, this.victoryMode);
+    let config;
+    try {
+      config = buildMatchConfig(this.setup);
+    } catch (err) {
+      this._renderErrors([err.message]);
+      return;
+    }
+    saveSetup(this.setup);
     this.root.classList.add('mm-leaving');
     const btn = this.root.querySelector('.mm-btn--start');
     if (btn) { btn.disabled = true; btn.querySelector('.mm-btn__label').textContent = 'Preparando…'; }
     const reduce = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
-    const choice = { faction: this.faction, difficulty: this.difficulty, mapId: this.mapId, victoryMode: this.victoryMode };
+    const choice = { config, faction: this.setup.localFaction, difficulty: this.setup.ai[0].difficulty, mapId: this.setup.mapId, victoryMode: this.setup.victoryMode };
     if (this.onStart) {
       this._startTimer = setTimeout(() => {
         this._startTimer = null;
+        this._disposePreview();
         this.onStart(choice);
       }, reduce ? 0 : 380);
       return;
     }
-    const url = buildPlayUrl(this.faction, window.location.search, this.mapId);
+    const url = buildPlayUrl(this.setup.localFaction, window.location.search, this.setup.mapId);
     setTimeout(() => window.location.assign(url), reduce ? 0 : 380);
+  }
+
+  // ------------------------------------------------------- Escaramuça (F6-02)
+  /** Aplica uma mudança no formulário: normaliza, salva e redesenha. */
+  _apply(next, { focus = null } = {}) {
+    this.setup = normalizeSetup(next);
+    saveSetup(this.setup);
+    this._syncSkirmish();
+    if (focus) this.root.querySelector(`#mm-sk-players ${focus}`)?.focus({ preventScroll: true });
+  }
+
+  _syncSkirmish() {
+    const root = this.root;
+    if (!root) return;
+    const s = this.setup;
+    const check = (name, value) => root.querySelectorAll(`input[name="${name}"]`).forEach((i) => { i.checked = i.value === value; });
+    check('mm-faction', s.localFaction);
+    check('mm-map', s.mapId);
+    check('mm-resources', s.resources);
+    check('mm-victory', s.victoryMode);
+    root.dataset.faction = s.localFaction;
+    const seed = root.querySelector('#mm-seed');
+    if (seed && document.activeElement !== seed) seed.value = s.seed;
+    this._renderPlayers();
+    this._renderErrors(validateSetup(s));
+    const f = FACTIONS.find((x) => x.id === s.localFaction);
+    const cap = root.querySelector('#mm-preview-caption');
+    if (cap && f) cap.textContent = f.name;
+    const fb = root.querySelector('#mm-preview-fallback');
+    if (fb && f) fb.src = f.icon;
+    this.preview?.setFaction(s.localFaction);
+    this.preview?.setColor(PLAYER_COLORS[s.localColor]);
+  }
+
+  _renderPlayers() {
+    const s = this.setup;
+    const mapDef = getMap(s.mapId);
+    const factionOpt = (sel) => [['human', 'Reino Humano'], ['orc', 'Clãs Orcs'], ['random', 'Aleatória']]
+      .map(([v, l]) => `<option value="${v}" ${v === sel ? 'selected' : ''}>${l}</option>`).join('');
+    const diffOpt = (sel) => DIFFICULTIES.map((d) => `<option value="${d.id}" ${d.id === sel ? 'selected' : ''}>${d.label}</option>`).join('');
+    const teamOpt = (sel) => Array.from({ length: MAX_TEAMS }, (_, t) => `<option value="${t}" ${t === sel ? 'selected' : ''}>Time ${t + 1}</option>`).join('');
+    const colors = (who, cur) => PLAYER_COLORS.map((c, i) => `
+      <button type="button" class="mm-swatch${i === cur ? ' is-on' : ''}" style="--sw:${c}" data-sk="color" data-who="${who}" data-color="${i}"
+        aria-label="Cor ${i + 1}${i === cur ? ' (atual)' : ''}" aria-pressed="${i === cur}"></button>`).join('');
+    const slotOpt = mapDef.startSlots.map((_, i) => `<option value="${i}" ${i === s.localSlot ? 'selected' : ''}>Posição ${i + 1}</option>`).join('');
+
+    const rows = [`
+      <div class="mm-player mm-player--you">
+        <span class="mm-player__name">Você <em>${s.localFaction === 'orc' ? 'Clãs Orcs' : 'Reino Humano'}</em></span>
+        <label class="mm-player__cell"><span class="mm-sr">Posição inicial</span><select class="mm-select" data-sk="slot" data-who="-1">${slotOpt}</select></label>
+        <label class="mm-player__cell"><span class="mm-sr">Time</span><select class="mm-select" data-sk="team" data-who="-1">${teamOpt(s.localTeam)}</select></label>
+        <span class="mm-player__colors" role="group" aria-label="Cor do jogador">${colors(-1, s.localColor)}</span>
+        <span class="mm-player__end"></span>
+      </div>`];
+    s.ai.forEach((a, i) => {
+      rows.push(`
+      <div class="mm-player">
+        <span class="mm-player__name">IA ${i + 1}</span>
+        <label class="mm-player__cell"><span class="mm-sr">Facção da IA ${i + 1}</span><select class="mm-select" data-sk="ai-faction" data-who="${i}">${factionOpt(a.faction)}</select></label>
+        <label class="mm-player__cell"><span class="mm-sr">Dificuldade da IA ${i + 1}</span><select class="mm-select mm-select--diff-${a.difficulty}" data-sk="ai-diff" data-who="${i}">${diffOpt(a.difficulty)}</select></label>
+        <label class="mm-player__cell"><span class="mm-sr">Time da IA ${i + 1}</span><select class="mm-select" data-sk="team" data-who="${i}">${teamOpt(a.team)}</select></label>
+        <span class="mm-player__colors" role="group" aria-label="Cor da IA ${i + 1}">${colors(i, a.color)}</span>
+        <span class="mm-player__end">${s.ai.length > 1 ? `<button type="button" class="mm-close mm-close--sm" data-sk="remove" data-who="${i}" aria-label="Remover IA ${i + 1}">✕</button>` : ''}</span>
+      </div>`);
+    });
+    const box = this.root.querySelector('#mm-sk-players');
+    // Preserva o foco do controle ao redesenhar (mesmo data-sk/data-who/data-color).
+    const ae = document.activeElement;
+    const key = ae && box.contains(ae) ? ['sk', 'who', 'color'].map((k) => ae.dataset[k] ?? '').join('|') : null;
+    box.innerHTML = rows.join('');
+    if (key) {
+      const match = [...box.querySelectorAll('[data-sk]')].find((el) => ['sk', 'who', 'color'].map((k) => el.dataset[k] ?? '').join('|') === key);
+      match?.focus({ preventScroll: true });
+    }
+    const max = maxAIs(mapDef);
+    this.root.querySelector('#mm-sk-count').textContent = `${s.ai.length}/${max} oponente${max > 1 ? 's' : ''}`;
+    const add = this.root.querySelector('#mm-sk-add-ai');
+    add.disabled = s.ai.length >= max;
+    add.title = add.disabled ? `Este mapa comporta no máximo ${max} oponente${max > 1 ? 's' : ''}.` : '';
+  }
+
+  _renderErrors(errors) {
+    const el = this.root.querySelector('#mm-sk-error');
+    el.hidden = errors.length === 0;
+    el.textContent = errors[0] || '';
+    const start = this.root.querySelector('.mm-btn--start');
+    if (start && !this.root.classList.contains('mm-leaving')) start.disabled = errors.length > 0;
+  }
+
+  /** Prévia 3D (lazy): só cria ao abrir o painel; sem WebGL cai no emblema. */
+  async _ensurePreview() {
+    if (this.preview || this._previewLoading) return;
+    this._previewLoading = true;
+    const canvas = this.root?.querySelector('#mm-preview-canvas');
+    const fb = this.root?.querySelector('#mm-preview-fallback');
+    try {
+      const { FactionPreview } = await import('../FactionPreview.js');
+      if (!this.root || this.activePanel !== 'skirmish') return;
+      const pv = FactionPreview.create(canvas);
+      if (pv) {
+        this.preview = pv;
+        canvas.hidden = false;
+        fb.hidden = true;
+        pv.setFaction(this.setup.localFaction);
+        pv.setColor(PLAYER_COLORS[this.setup.localColor]);
+      } else {
+        canvas.hidden = true;
+        fb.hidden = false;
+      }
+    } catch (err) {
+      console.warn('[MainMenu] prévia 3D indisponível:', err);
+      if (canvas) canvas.hidden = true;
+      if (fb) fb.hidden = false;
+    } finally {
+      this._previewLoading = false;
+    }
+  }
+
+  _disposePreview() {
+    this.preview?.dispose();
+    this.preview = null;
   }
 
   /**

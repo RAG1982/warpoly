@@ -1,5 +1,6 @@
 import * as THREE from 'three';
 import { mergeGeometries } from 'three/examples/jsm/utils/BufferGeometryUtils.js';
+import { glbEnabled, glbTemplates } from '../../entities/glbModels.js';
 
 /**
  * F3-08 — Modelo procedural simples de um segmento de muralha (bloco ~2,2 × 2,4 × 2,2).
@@ -38,12 +39,37 @@ function build(parts) {
 }
 
 const _geoCache = new Map();
+const _glbCache = new Map();
+
+/**
+ * F7-00b lote 2: bloco de muralha do Blender (`wall_human`/`wall_orc`.glb, atlas 512², 1 malha). Mesma pegada e altura do
+ * procedural; a geometria e o material do .glb alimentam o mesmo `InstancedMesh` do `WallBatch`. `null` sem .glb (ou `?glb=0`).
+ */
+function getGlbWall(faction) {
+  if (!glbEnabled) return null;
+  const key = faction === 'orc' ? 'wall_orc' : 'wall_human';
+  if (_glbCache.has(key)) return _glbCache.get(key);
+  const template = glbTemplates.get(key);
+  if (!template) return null; // ainda não carregado: não memoriza (cai no procedural só desta vez)
+  template.updateMatrixWorld(true);
+  let mesh = null;
+  template.traverse(o => { if (!mesh && o.isMesh) mesh = o; });
+  if (!mesh) return null;
+  const geo = mesh.geometry.clone().applyMatrix4(mesh.matrixWorld);
+  geo.computeBoundingSphere();
+  geo.computeBoundingBox();
+  const src = { geo, mat: mesh.material };
+  _glbCache.set(key, src);
+  return src;
+}
 
 /**
  * @param {'human'|'orc'} faction
  * @returns {THREE.BufferGeometry} geometria compartilhada (não descarte)
  */
 export function getWallGeometry(faction) {
+  const glb = getGlbWall(faction);
+  if (glb) return glb.geo;
   if (_geoCache.has(faction)) return _geoCache.get(faction);
   let geo;
   if (faction === 'orc') {
@@ -82,6 +108,8 @@ const _matCache = new Map();
 
 /** Material (com cor por vértice) compartilhado por facção. */
 export function getWallMaterial(faction) {
+  const glb = getGlbWall(faction);
+  if (glb) return glb.mat;
   if (_matCache.has(faction)) return _matCache.get(faction);
   const mat = new THREE.MeshStandardMaterial({
     vertexColors: true,

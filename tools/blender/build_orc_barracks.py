@@ -26,13 +26,14 @@ from mathutils import Vector, Matrix  # noqa: E402
 import common as C  # noqa: E402
 from common import (MeshBuilder, M, prim_box, prim_rings, ring_h, prim_cyl, prim_cone,  # noqa: E402
                     prim_sphere, prim_extrude, bezier)
-from bld_common import beam, tube, log, skull, finish_building  # noqa: E402
+from bld_common import beam, tube, log, skull, finish_building, squash_xz  # noqa: E402
 import bld_orc as O  # noqa: E402
 import build_ogre_den as D  # noqa: E402
 
 TEAM_DEFAULT = '#b81d24'
 Y0 = 0.30
 DUMMY_PIVOT = (2.8, 3.8, 1.4)
+FOOT = 0.88         # fator de encolhimento da pegada
 PAL = 3.2           # meia-largura da paliçada
 
 PALETTE = dict(D.PALETTE)
@@ -194,6 +195,7 @@ def main():
     yard = build_yard(mats, root, bmb)
     dummy = build_dummy(mats, root)
     banners = build_banners(mats, root, bmb)
+    squash_xz([base, walls, hall, yard, dummy, banners], FOOT)   # pegada 8,2 -> ~7,2 (raio de colisão 3,6)
     finish_building(root, 'orc_barracks', 'orc_barracks.glb', 'orc_barracks_atlas', [base, walls, hall, yard], banners,
                     {'Base': 0.6, 'Walls': 1.0, 'Hall': 1.0, 'Yard': 1.1, 'Anim_TrainingDummy': 0.7, 'Anim_Banners': 0.8},
                     TEAM_DEFAULT, args, spawn=(0, 0, 4.6), rally=(0, 0, 6.6), extra_anim=[dummy])

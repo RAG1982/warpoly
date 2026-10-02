@@ -382,11 +382,11 @@ export class ModelFactory {
   }
 
   static createGoldMine() {
-    return this.getOrCreateModel('gold_mine', createGoldMine);
+    return this._glbOr('gold_mine', () => this.getOrCreateModel('gold_mine', createGoldMine));
   }
 
   static createStoneQuarry() {
-    return this.getOrCreateModel('stone_quarry', createStoneQuarry);
+    return this._glbOr('stone_quarry', () => this.getOrCreateModel('stone_quarry', createStoneQuarry));
   }
 
   static createCottage() {
@@ -406,7 +406,7 @@ export class ModelFactory {
   }
 
   static createBanditCamp() {
-    return this.getOrCreateModel('bandit_camp', createBanditCamp);
+    return this._glbOr('bandit_camp', () => this.getOrCreateModel('bandit_camp', createBanditCamp));
   }
 
   static createStable() {
@@ -460,7 +460,7 @@ export class ModelFactory {
 
   // --- Environment & Props ---
   static createTree(type = 'oak') {
-    return this.getOrCreateModel('tree_' + type, () => createTree(type));
+    return this._glbOr('tree_' + type, () => this.getOrCreateModel('tree_' + type, () => createTree(type)));
   }
 
   static createArrow() {

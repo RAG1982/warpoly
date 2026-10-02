@@ -817,7 +817,7 @@ const MODEL_CATALOG = [
     sourceFile: 'tools/blender/build_war_balloon.py',
     create: createGlb('war_balloon'),
     description: 'Batedor aéreo orc gerado pelo pipeline Blender (public/models/war_balloon.glb): envelope em gomos de couro com faixa equatorial em cor de time, rede de cordas e espinhos de osso, braseiro aceso na boca, cesta de vime com crânio, orc vigia e hélice de popa de ossos.',
-    notes: 'Nós Torso, Head (vigia), Rotor (gira em z). ~3,9 mil triângulos, 4 draw calls, atlas 512², ~195 KB.'
+    notes: 'Nós Torso, Head (vigia), Rotor (gira em z). ~4,5 mil triângulos, 4 draw calls, atlas 512², ~211 KB (cesta de vime 1,9 × 1,9 com piso aberto, envelope menor, hélice em z −1,3).'
   },
   {
     id: 'gryphon_rider_glb',
@@ -960,7 +960,7 @@ const MODEL_CATALOG = [
     sourceFile: 'tools/blender/build_great_hall.py',
     create: createGlb('great_hall'),
     description: 'QG orc gerado pelo pipeline Blender (public/models/great_hall.glb): salão monumental de toras com telhado de placas de ferro e crista de chifres, pátio de paliçada com quatro bastiões, portão de presas com crânio, braseiros e racks de armas.',
-    notes: '5 draw calls (estática + 4 nós Anim_WarBanner_* animados pelo GreatHall.js), ~13,8 mil triângulos, atlas 1024², ~557 KB. Pegada ~12 (raio 5,5), altura ~10.'
+    notes: '5 draw calls (estática + 4 nós Anim_WarBanner_* animados pelo GreatHall.js), ~13,8 mil triângulos, atlas 1024², ~560 KB. Pegada ~11 (raio 5,5; paliçada de meia-largura 4,2), altura ~10,2.'
   },
   {
     id: 'orc_barracks_glb',
@@ -973,7 +973,7 @@ const MODEL_CATALOG = [
     sourceFile: 'tools/blender/build_orc_barracks.py',
     create: createGlb('orc_barracks'),
     description: 'Quartel orc gerado pelo pipeline Blender (public/models/orc_barracks.glb): arena de treino com paliçada, plataformas de guarda, portão de presas, salão de toras com telhado de peles, racks, pedra de afiar e forca com o boneco Anim_TrainingDummy.',
-    notes: '3 draw calls, ~8,4 mil triângulos, atlas 1024², ~390 KB. Pegada ~8 (raio 3,6), altura ~5,3. Nó Anim_TrainingDummy (pivô (2,8; 3,8; 1,4)).'
+    notes: '3 draw calls, ~8,4 mil triângulos, atlas 1024², ~390 KB. Pegada ~7,2 (raio 3,6; pegada encolhida por 0,88), altura ~5,3. Nó Anim_TrainingDummy (pivô (2,5; 3,8; 1,2)).'
   },
   {
     id: 'orc_forge_glb',
@@ -1039,6 +1039,104 @@ const MODEL_CATALOG = [
     create: createGlb('orc_watchtower'),
     description: 'Torre orc gerada pelo pipeline Blender (public/models/orc_watchtower.glb): quatro troncos inclinados com travessas e escoras, paredes de tábuas e toras, plataforma de arqueiros com parapeito de espinhos e braseiro central.',
     notes: '2 draw calls, ~6,3 mil triângulos, atlas 1024², ~326 KB. Pegada ~4,5 (raio 2), altura ~10; chama animada em (0; 8,4; 0) pelo OrcWatchtower.js.'
+  },
+  {
+    id: 'gold_mine_glb',
+    name: 'Mina de Ouro (Blender)',
+    category: 'buildings',
+    type: 'building',
+    icon: '🪙',
+    glb: 'gold_mine',
+    sourceFile: 'tools/blender/build_gold_mine.py',
+    create: createGlb('gold_mine'),
+    description: 'Mina de ouro neutra gerada pelo pipeline Blender (public/models/gold_mine.glb): morro de rocha escura em ferradura com picos facetados, veios e cristais de ouro, portal de vigas de carvalho com dossel e túnel negro, trilhos com vagoneta transbordando de pepitas, lanterna acesa, caixotes, barril, picaretas e pá.',
+    notes: '1 draw call (sem cor de time), ~5,4 mil triângulos, atlas 1024², ~353 KB. Pegada ~7 (raio de colisão 3,4), altura ~4,6. Usada pelo ResourceDepositView.'
+  },
+  {
+    id: 'stone_quarry_glb',
+    name: 'Pedreira (Blender)',
+    category: 'buildings',
+    type: 'building',
+    icon: '🪨',
+    glb: 'stone_quarry',
+    sourceFile: 'tools/blender/build_stone_quarry.py',
+    create: createGlb('stone_quarry'),
+    description: 'Pedreira neutra gerada pelo pipeline Blender (public/models/stone_quarry.glb): paredão de calcário em três patamares com estratos e faces recém-cortadas, penhasco escuro, derrick de madeira com talha e bloco em linga, cabrestante, pilha de blocos aparelhados, bloco rachado com cunhas, carrinho de mão, escada e ferramentas.',
+    notes: '1 draw call (sem cor de time), ~2,7 mil triângulos, atlas 1024², ~232 KB. Pegada ~6,4 (raio de colisão 3,0), altura ~4,7.'
+  },
+  {
+    id: 'bandit_camp_glb',
+    name: 'Acampamento Bandido (Blender)',
+    category: 'buildings',
+    type: 'building',
+    icon: '⛺',
+    glb: 'bandit_camp',
+    sourceFile: 'tools/blender/build_bandit_camp.py',
+    create: createGlb('bandit_camp'),
+    description: 'Acampamento hostil neutro gerado pelo pipeline Blender (public/models/bandit_camp.glb): paliçada circular de toras pontiagudas inclinadas, portão flanqueado por totens de crânios com chifres, tenda de guerra carmesim, abrigo de peles, fogueira com espeto e caldeirão, baú de saque aberto, rack de armas e faixas esfarrapadas.',
+    notes: '2 draw calls (Static_Mesh + Anim_Banners TeamColor), ~6,2 mil triângulos, atlas 1024², ~354 KB. Pegada ~8,6 (raio 4,2), altura ~6,8.'
+  },
+  {
+    id: 'tree_oak_glb',
+    name: 'Carvalho (Blender)',
+    category: 'environment',
+    type: 'nature',
+    icon: '🌳',
+    glb: 'tree_oak',
+    sourceFile: 'tools/blender/build_trees.py',
+    create: createGlb('tree_oak'),
+    description: 'Carvalho do mapa gerado pelo pipeline Blender (public/models/tree_oak.glb): tronco com raízes e galhos e sete copas facetadas com luz e sombra pintadas. Usado em InstancedMesh pelo TreeManager.',
+    notes: '1 draw call (uma malha, atlas 512²), ~570 triângulos, ~56 KB. Substitui as 2 malhas procedurais (tronco e copa, ~480 triângulos) e as texturas de 2048² geradas no carregamento. `?glbtrees=0` volta ao procedural.'
+  },
+  {
+    id: 'tree_pine_glb',
+    name: 'Pinheiro (Blender)',
+    category: 'environment',
+    type: 'nature',
+    icon: '🌲',
+    glb: 'tree_pine',
+    sourceFile: 'tools/blender/build_trees.py',
+    create: createGlb('tree_pine'),
+    description: 'Pinheiro do mapa gerado pelo pipeline Blender (public/models/tree_pine.glb): tronco com raízes e cinco camadas de agulhas facetadas com ponta.',
+    notes: '1 draw call, ~160 triângulos, atlas 512², ~31 KB.'
+  },
+  {
+    id: 'tree_autumn_glb',
+    name: 'Carvalho de Outono (Blender)',
+    category: 'environment',
+    type: 'nature',
+    icon: '🍂',
+    glb: 'tree_autumn',
+    sourceFile: 'tools/blender/build_trees.py',
+    create: createGlb('tree_autumn'),
+    description: 'Carvalho de outono (mesma malha do carvalho, copas alaranjadas) gerado pelo pipeline Blender (public/models/tree_autumn.glb).',
+    notes: '1 draw call, ~570 triângulos, atlas 512², ~64 KB.'
+  },
+  {
+    id: 'wall_human_glb',
+    name: 'Muralha de Pedra (Blender)',
+    category: 'buildings',
+    faction: 'human',
+    type: 'building',
+    icon: '🧱',
+    glb: 'wall_human',
+    sourceFile: 'tools/blender/build_walls.py',
+    create: createGlb('wall_human'),
+    description: 'Bloco de muralha humana gerado pelo pipeline Blender (public/models/wall_human.glb): pé escuro, corpo de alvenaria com seteiras, cornija e quatro ameias. O WallBatch instancia a geometria e o material deste .glb.',
+    notes: '1 draw call, ~356 triângulos, atlas 512², ~34 KB. Bloco de 2,2 × 2,4 × 2,2.'
+  },
+  {
+    id: 'wall_orc_glb',
+    name: 'Paliçada Orc (Blender)',
+    category: 'buildings',
+    faction: 'orc',
+    type: 'building',
+    icon: '🪵',
+    glb: 'wall_orc',
+    sourceFile: 'tools/blender/build_walls.py',
+    create: createGlb('wall_orc'),
+    description: 'Bloco de paliçada orc gerado pelo pipeline Blender (public/models/wall_orc.glb): base de pedra bruta, anel de toras pontiagudas, duas cintas de ferro e espinhos de canto.',
+    notes: '1 draw call, ~468 triângulos, atlas 512², ~41 KB. Bloco de 2,2 × 2,5 × 2,2.'
   },
   // F7-00b lote 1 (fim)
   {

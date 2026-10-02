@@ -15,7 +15,7 @@ Saída (public/models/great_hall.glb), coordenadas do jogo, origem no centro da 
   │                    `GreatHall.js` balança o `rotation.y` de todo nó com "Banner" no nome)
   ├─ Socket_UnitSpawn  saída (frente do portão)
   └─ Socket_Rally      ponto de reunião padrão
-Pegada ~11 x 11 (raio de colisão 5,5), altura ~10,6. 6 draw calls.
+Pegada ~11 x 11 (paliçada de meia-largura 4,2) (raio de colisão 5,5), altura ~10,6. 6 draw calls.
 """
 import os
 import sys
@@ -33,11 +33,11 @@ import build_ogre_den as D  # noqa: E402
 
 TEAM_DEFAULT = '#b81d24'
 Y0 = 0.40
-PAL = 5.2                       # meia-largura da paliçada
+PAL = 4.2                       # meia-largura da paliçada
 HX, HZ, CZ = 3.5, 2.7, -1.9     # salão
 FT = Y0 + 0.9                   # topo do pé de basalto
 WT = FT + 3.0                   # topo das paredes
-BANNERS = [(-2.2, 3.2), (2.2, 3.2), (-4.4, 3.9), (4.4, 3.9)]   # (x, z) dos mastros; pivô em y = 6,6
+BANNERS = [(-2.2, 3.0), (2.2, 3.0), (-3.6, 2.8), (3.6, 2.8)]   # (x, z) dos mastros; pivô em y = 6,6
 POLE_H = 3.4
 
 PALETTE = dict(D.PALETTE)
@@ -51,14 +51,14 @@ PALETTE['iron_plate'] = dict(base='#3d434f', var='#2a2e38', var_scale=1.2, var_a
 
 def build_base(mats, root):
     mb = MeshBuilder('Base')
-    mb.add(prim_box(11.2, Y0, 11.2, taper=(0.98, 0.98), base=True), 'rock', bevel=0.09)
-    mb.add(prim_box(10.8, 0.06, 10.8, base=True), 'mud', M((0, Y0, 0)))
+    mb.add(prim_box(10.6, Y0, 10.6, taper=(0.98, 0.98), base=True), 'rock', bevel=0.09)
+    mb.add(prim_box(10.2, 0.06, 10.2, base=True), 'mud', M((0, Y0, 0)))
     # rochas nos cantos
-    for (x, z, s, r) in ((-5.0, -5.0, 0.7, 20), (5.0, -5.0, 0.8, -10), (-5.2, 5.0, 0.6, 40), (5.2, 4.9, 0.7, 5)):
+    for (x, z, s, r) in ((-4.7, -4.7, 0.7, 20), (4.7, -4.7, 0.8, -10), (-4.8, 4.7, 0.6, 40), (4.8, 4.6, 0.7, 5)):
         mb.add(prim_sphere(s, s * 0.7, s * 0.9, 7, 4, y_min=-0.2), 'rock_plain', M((x, Y0, z), (0, r, 0)), smooth=0)
     # trilha de pedra do portão ao salão
     for k in range(5):
-        mb.add(prim_box(1.5 - 0.07 * k, 0.06, 0.8, base=True), 'rock', M((0.12 * (k % 2), Y0 + 0.06, 5.0 - 1.1 * k)), bevel=0.02)
+        mb.add(prim_box(1.5 - 0.07 * k, 0.06, 0.8, base=True), 'rock', M((0.12 * (k % 2), Y0 + 0.06, 4.6 - 1.0 * k)), bevel=0.02)
     return mb.build(mats, parent=root)
 
 
@@ -205,7 +205,7 @@ def build_props(mats, root):
     O.brazier(mb, -2.4, Y0, 3.6, 1.1)
     # racks de armas encostados na paliçada esquerda e direita
     for sx in (-1, 1):
-        x, z = sx * 4.5, 0.6
+        x, z = sx * 3.6, 1.9
         for dz in (-1.1, 1.1):
             mb.add(prim_box(0.2, 1.7, 0.2, base=True), 'bark', M((x, Y0, z + dz)), bevel=0.02)
         mb.add(prim_box(0.16, 0.16, 2.4), 'bark', M((x, Y0 + 1.5, z)))
@@ -219,8 +219,8 @@ def build_props(mats, root):
                 mb.add(prim_cone(0.07, 0.35, 4), 'steel', M((x + sx * 0.12, Y0 + 2.7, zz)))
     # barricadas de estacas cruzadas (frente, dos dois lados do caminho)
     for sx in (-1, 1):
-        for k in range(3):
-            x = sx * (2.2 + 0.9 * k)
+        for k in range(2):
+            x = sx * (2.2 + 0.85 * k)
             for dz in (-0.2, 0.2):
                 beam(mb, (x - 0.35, Y0, 4.2 + dz), (x + 0.35, Y0 + 1.0, 4.2 + dz), 0.1, 0.1, 'bark')
                 beam(mb, (x + 0.35, Y0, 4.2 + dz), (x - 0.35, Y0 + 1.0, 4.2 + dz), 0.1, 0.1, 'bark')
@@ -233,7 +233,7 @@ def build_props(mats, root):
     skull(mb, M((-3.4, Y0 + 0.12, 3.6), (0, 25, 0)), 0.3, 'bone')
     for r in range(3):
         for k in range(4 - r):
-            log(mb, (-4.6 + 0.0, Y0 + 0.12 + 0.2 * r, -3.0 + 0.23 * k + 0.11 * r), (-3.9, Y0 + 0.12 + 0.2 * r, -3.0 + 0.23 * k + 0.11 * r), 0.1, 'bark', n=6)
+            log(mb, (-3.8 + 0.0, Y0 + 0.12 + 0.2 * r, -3.0 + 0.23 * k + 0.11 * r), (-3.1, Y0 + 0.12 + 0.2 * r, -3.0 + 0.23 * k + 0.11 * r), 0.1, 'bark', n=6)
     # postes dos estandartes de guerra (os panos são nós `Anim_WarBanner_*`)
     for (x, z) in BANNERS:
         log(mb, (x, Y0, z), (x, Y0 + POLE_H + 3.0, z), 0.085, 'bark', n=6)
@@ -270,7 +270,7 @@ def main():
     weights = {'Base': 0.6, 'Hall': 1.2, 'Roof': 1.0, 'Courtyard': 1.0, 'Props': 0.9}
     weights.update({b.name: 0.4 for b in banners})
     finish_building(root, 'great_hall', 'great_hall.glb', 'great_hall_atlas', [base, hall, roof, court, props], banners,
-                    weights, TEAM_DEFAULT, args, spawn=(0, 0, 7.2), rally=(0, 0, 9.4), game_dist=105)
+                    weights, TEAM_DEFAULT, args, spawn=(0, 0, 6.2), rally=(0, 0, 8.4), game_dist=105)
 
 
 if __name__ == '__main__':

@@ -8,8 +8,33 @@ import {
   getAutumnOakFoliageTextures,
   createTreeMaterial
 } from '../models/environment/treeTextures.js';
+import { glbEnabled, glbTemplates } from '../entities/glbModels.js';
 
 let cachedTreeGeometries = null;
+
+/** `?glbtrees=0` volta às árvores procedurais mesmo com os demais .glb ligados (comparação de desempenho). */
+function glbTreesEnabled() {
+  try {
+    return typeof window === 'undefined' || new URLSearchParams(window.location.search).get('glbtrees') !== '0';
+  } catch (e) {
+    return true;
+  }
+}
+
+/**
+ * F7-00b lote 2: geometria + material (atlas 512²) de uma árvore .glb (`tree_oak|tree_pine|tree_autumn`), com a
+ * transformação do nó aplicada na cópia da geometria. `null` quando o .glb não está carregado (ou `?glb=0`).
+ */
+function getGlbTreeSource(key) {
+  if (!glbEnabled || !glbTreesEnabled()) return null;
+  const template = glbTemplates.get(key);
+  if (!template) return null;
+  template.updateMatrixWorld(true);
+  let mesh = null;
+  template.traverse(o => { if (!mesh && o.isMesh) mesh = o; });
+  if (!mesh) return null;
+  return { geo: mesh.geometry.clone().applyMatrix4(mesh.matrixWorld), mat: mesh.material };
+}
 
 function getOrCreateTreeGeometries() {
   if (cachedTreeGeometries) return cachedTreeGeometries;
@@ -144,33 +169,39 @@ export class TreeManager {
     this.pineCount = 0;
     this.autumnCount = 0;
 
-    const geos = getOrCreateTreeGeometries();
+    // Cada tipo usa o .glb do Blender (1 InstancedMesh: tronco e copa na mesma malha/atlas) quando disponível;
+    // senão, o par procedural tronco + copa (2 InstancedMesh por tipo).
+    const glbOak = getGlbTreeSource('tree_oak');
+    const glbPine = getGlbTreeSource('tree_pine');
+    const glbAutumn = getGlbTreeSource('tree_autumn');
+    const needProc = !glbOak || !glbPine || !glbAutumn;
+    const geos = needProc ? getOrCreateTreeGeometries() : null;
+    const pair = (glb, cap, procTrunk, procFoliage) => {
+      if (glb) {
+        const m = new THREE.InstancedMesh(glb.geo, glb.mat, cap);
+        return [m, m];
+      }
+      return [procTrunk(), procFoliage()];
+    };
 
-    // Materials
-    this.oakBarkMat = createTreeMaterial(getOakBarkTextures(), { bumpScale: 0.02, roughness: 0.85, flatShading: false });
-    this.oakFoliageMat = createTreeMaterial(getOakFoliageTextures(), { bumpScale: 0.015, roughness: 0.72, flatShading: true });
-    this.pineBarkMat = createTreeMaterial(getPineBarkTextures(), { bumpScale: 0.02, roughness: 0.85, flatShading: false });
-    this.pineNeedleMat = createTreeMaterial(getPineNeedleTextures(), { bumpScale: 0.015, roughness: 0.70, flatShading: true });
-    this.autumnFoliageMat = createTreeMaterial(getAutumnOakFoliageTextures(), { bumpScale: 0.015, roughness: 0.72, flatShading: true });
+    [this.oakTrunkMesh, this.oakFoliageMesh] = pair(glbOak, this.maxOaks,
+      () => new THREE.InstancedMesh(geos.oakTrunkGeo, this._mat('oakBark', () => createTreeMaterial(getOakBarkTextures(), { bumpScale: 0.02, roughness: 0.85, flatShading: false })), this.maxOaks),
+      () => new THREE.InstancedMesh(geos.oakFoliageGeo, this._mat('oakFoliage', () => createTreeMaterial(getOakFoliageTextures(), { bumpScale: 0.015, roughness: 0.72, flatShading: true })), this.maxOaks));
+    [this.pineTrunkMesh, this.pineNeedlesMesh] = pair(glbPine, this.maxPines,
+      () => new THREE.InstancedMesh(geos.pineTrunkGeo, this._mat('pineBark', () => createTreeMaterial(getPineBarkTextures(), { bumpScale: 0.02, roughness: 0.85, flatShading: false })), this.maxPines),
+      () => new THREE.InstancedMesh(geos.pineNeedlesGeo, this._mat('pineNeedle', () => createTreeMaterial(getPineNeedleTextures(), { bumpScale: 0.015, roughness: 0.70, flatShading: true })), this.maxPines));
+    [this.autumnTrunkMesh, this.autumnFoliageMesh] = pair(glbAutumn, this.maxAutumn,
+      () => new THREE.InstancedMesh(geos.oakTrunkGeo, this._mat('oakBark', () => createTreeMaterial(getOakBarkTextures(), { bumpScale: 0.02, roughness: 0.85, flatShading: false })), this.maxAutumn),
+      () => new THREE.InstancedMesh(geos.oakFoliageGeo, this._mat('autumnFoliage', () => createTreeMaterial(getAutumnOakFoliageTextures(), { bumpScale: 0.015, roughness: 0.72, flatShading: true })), this.maxAutumn));
 
-    // 6 InstancedMeshes covering all trees
-    this.oakTrunkMesh = new THREE.InstancedMesh(geos.oakTrunkGeo, this.oakBarkMat, this.maxOaks);
-    this.oakFoliageMesh = new THREE.InstancedMesh(geos.oakFoliageGeo, this.oakFoliageMat, this.maxOaks);
-
-    this.pineTrunkMesh = new THREE.InstancedMesh(geos.pineTrunkGeo, this.pineBarkMat, this.maxPines);
-    this.pineNeedlesMesh = new THREE.InstancedMesh(geos.pineNeedlesGeo, this.pineNeedleMat, this.maxPines);
-
-    this.autumnTrunkMesh = new THREE.InstancedMesh(geos.oakTrunkGeo, this.oakBarkMat, this.maxAutumn);
-    this.autumnFoliageMesh = new THREE.InstancedMesh(geos.oakFoliageGeo, this.autumnFoliageMat, this.maxAutumn);
-
-    this.instancedMeshes = [
+    this.instancedMeshes = [...new Set([
       this.oakTrunkMesh,
       this.oakFoliageMesh,
       this.pineTrunkMesh,
       this.pineNeedlesMesh,
       this.autumnTrunkMesh,
       this.autumnFoliageMesh
-    ];
+    ])];
 
     this.instancedMeshes.forEach(im => {
       im.castShadow = true;
@@ -181,6 +212,12 @@ export class TreeManager {
     });
 
     this.zeroMatrix = new THREE.Matrix4().makeScale(0, 0, 0);
+  }
+
+  /** Material procedural criado sob demanda (as texturas de 2048² só são geradas se o .glb faltar). */
+  _mat(key, make) {
+    this._procMats = this._procMats || {};
+    return (this._procMats[key] = this._procMats[key] || make());
   }
 
   registerTree(tree, x, y, z, rotY, scale, type) {

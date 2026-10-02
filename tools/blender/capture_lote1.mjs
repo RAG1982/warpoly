@@ -4,7 +4,7 @@
  * humanas/orcs migradas para Blender, no inspetor e no jogo. GPU real obrigatória (assertHardwareGpu).
  * Rode SOMENTE via safe-run:
  *   GROUP=1 bash tools/safe-run.sh --timeout 900 -- node tools/blender/capture_lote1.mjs
- * GROUP = 1 (aéreos + Aviário/Ninho), 2 (humanas base), 3 (orcs base). ONLY=insp|game filtra a etapa.
+ * GROUP = 1 (aéreos + Aviário/Ninho), 2 (humanas base), 3 (orcs base), 4 (jazidas + Acampamento Bandido). ONLY=insp|game filtra a etapa.
  * Sobe o Vite na porta 5271 (PORT_VITE) e o encerra no finally.
  */
 import { chromium } from 'playwright';
@@ -44,6 +44,18 @@ const CFG = {
     insp: { great_hall_glb: ['idle'], orc_barracks_glb: ['idle'], orc_forge_glb: ['idle'], orc_house_glb: ['idle'], pig_farm_glb: ['idle'], orc_lumber_mill_glb: ['idle'], orc_watchtower_glb: ['idle'] },
     human: null,
     orc: { buildings: ['great_hall', 'orc_barracks', 'orc_forge', 'orc_house', 'pig_farm', 'orc_lumber_mill', 'orc_watchtower'], units: [] }
+  },
+  // F7-00b lote 2, grupo 2: jazidas neutras (fotografadas no mapa) e acampamento bandido
+  4: {
+    insp: { gold_mine_glb: ['idle'], stone_quarry_glb: ['idle'], bandit_camp_glb: ['idle'] },
+    human: { buildings: ['bandit_camp'], units: [], deposits: ['gold', 'stone'] },
+    orc: null
+  },
+  // F7-00b lote 2, grupo 3: árvores instanciadas e blocos de muralha instanciados
+  5: {
+    insp: { tree_oak_glb: ['idle'], tree_pine_glb: ['idle'], tree_autumn_glb: ['idle'], wall_human_glb: ['idle'], wall_orc_glb: ['idle'] },
+    human: { buildings: ['wall_human'], units: [], trees: true },
+    orc: { buildings: ['wall_orc'], units: [] }
   }
 }[GROUP];
 
@@ -140,6 +152,27 @@ try {
         await page.evaluate(() => { const c = window.__cap; const w = c.wip; if (w) { window.game.gameManager.sceneManager.targetZoomLevel = 0.5; window.game.gameManager.sceneManager.cameraTarget.set(w.mesh.position.x, 2.0, w.mesh.position.z + 3); } });
         await page.waitForTimeout(1400);
         await page.screenshot({ path: path.join(OUT, `game_${faction}_obra_g${GROUP}.png`) });
+      }
+      if (cfg.trees) {
+        for (const t of ['oak', 'pine', 'autumn']) {
+          const ok = await page.evaluate(tt => {
+            const gm = window.game.gameManager; const tr = gm.trees.find(x => x.treeType === tt && !x.isDead);
+            if (!tr) return false;
+            gm.sceneManager.targetZoomLevel = 0.5; gm.sceneManager.cameraTarget.set(tr.basePos.x, 2.0, tr.basePos.z + 3);
+            return true;
+          }, t);
+          if (!ok) continue;
+          await page.waitForTimeout(1400);
+          await page.screenshot({ path: path.join(OUT, `game_tree_${t}.png`) });
+        }
+      }
+      for (const dep of cfg.deposits || []) {
+        await page.evaluate(d => {
+          const gm = window.game.gameManager; const r = gm.resourceDeposits.find(x => x.type === d);
+          gm.sceneManager.targetZoomLevel = 0.5; gm.sceneManager.cameraTarget.set(r.position.x, 2.0, r.position.z + 3);
+        }, dep);
+        await page.waitForTimeout(1400);
+        await page.screenshot({ path: path.join(OUT, `game_deposit_${dep}.png`) });
       }
       console.log(`game_${faction}`, errors.length ? `ERROS: ${errors.join(' | ')}` : 'ok');
       await close();

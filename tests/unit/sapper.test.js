@@ -264,6 +264,8 @@ describe('IA e sapadores (F4-05)', () => {
     const hq = hqOf(gm, 1);
     hq.tier = 2;
     hqOf(gm, 0).tier = 2; // inimigo com Centro nível ≥ 2
+    // F5-02: a IA só reage ao que conhece — visão total para isolar a decisão dos sapadores.
+    gm.aiDirectors.find(d => d.playerId === 1).perception.cheat = true;
     ai.resources.gold = 9000; ai.resources.wood = 9000; ai.resources.stone = 5000;
     ai.maxPopulation = 150;
     for (let i = 0; i < 6; i++) build(gm, 'orc_house', 1, hq.mesh.position.x + 12 + (i % 3) * 6, hq.mesh.position.z - 12 - Math.floor(i / 3) * 6);

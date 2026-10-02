@@ -1,5 +1,11 @@
 import { AIEconomyManager } from './AIEconomyManager.js';
 import { AIMilitaryManager } from './AIMilitaryManager.js';
+import { AIPerception } from './AIPerception.js';
+import { AIMicroManager } from './AIMicroManager.js';
+import { getAIProfile } from './AIProfile.js';
+import { pickStrategy } from './AIStrategy.js';
+import { SIM_DT } from '../sim/constants.js';
+import { EVT } from '../sim/events.js';
 import { FACTIONS, getBuildingDef, getCost, getTrainCost } from '../data/index.js';
 
 /**
@@ -16,8 +22,9 @@ export class AIDirector {
    * @param {number} playerId  id do Player controlado por esta IA (F2-01): facção, recursos e
    *                           população vêm de `gm.getPlayer(playerId)` — sem cópia própria.
    * @param {{x:number,y:number}} baseCenter  centro da base no plano (`y` = coordenada Z do mundo)
+   * @param {string} [difficulty]  'easy' | 'normal' | 'hard' | 'brutal' (F5-03; ver `AIProfile.js`)
    */
-  constructor(gameManager, playerId, baseCenter = { x: -32, y: 30 }) {
+  constructor(gameManager, playerId, baseCenter = { x: -32, y: 30 }, difficulty = 'normal') {
     this.gm = gameManager;
     this.playerId = playerId;
     /** @type {import('../sim/Player.js').Player} */
@@ -31,6 +38,20 @@ export class AIDirector {
     // IA que envolvem sorteio (tipo de construção, posição de tentativa, unidade a treinar)
     // usam `this.rng`, nunca `Math.random`.
     this.rng = gameManager.rng ? gameManager.rng.fork('ai:' + playerId) : null;
+
+    // F5-03: perfil de dificuldade (APM, reação, micro, bônus) e F5-04: estratégia sorteada pelo RNG da IA.
+    this.profile = getAIProfile(difficulty);
+    this.difficulty = this.profile.id;
+    this.strategy = pickStrategy(this.rng, this.profile);
+    /** F5-03: balde de fichas de APM (1 comando = 1 ficha; reposição `maxApm/60` por segundo). */
+    this._apmCap = Math.max(4, this.profile.maxApm / 6);
+    this._apmTokens = this._apmCap;
+    this.commandsIssued = 0;
+    this.commandsDropped = 0;
+    /** Unidades reservadas (explorador, assédio) que o exército principal não deve mexer. */
+    this._reserved = new Set();
+    this.simTime = 0;
+    this._lastEco = -1e9;
 
     // Faction archetypes (src/data/factions.js)
     const f = faction === 'orc' ? FACTIONS.orc : FACTIONS.human;
@@ -51,6 +72,8 @@ export class AIDirector {
     this.forgeType = f.forge;
     this.stableType = f.stable; // F4-01: Estábulo Real / Covil dos Ogros
     this.workshopType = f.workshop; // F4-02: Oficina de Engenharia / dos Engenhoqueiros
+    this.arcaneType = f.arcane; // F4-04: Torre Arcana / Santuário das Cinzas
+    this.casterType = f.units.caster; // F4-04: Mago / Necromante
 
     // Costs configuration — derivados dos dados reais (corrige B3: antes eram números próprios da IA)
     this.costs = {
@@ -67,12 +90,14 @@ export class AIDirector {
       tower: getCost(this.towerType),
       forge: getCost(this.forgeType),
       stable: getCost(this.stableType),
-      workshop: getCost(this.workshopType)
+      workshop: getCost(this.workshopType),
+      arcane: getCost(this.arcaneType),
+      caster: getTrainCost(this.casterType)
     };
 
     // Tick Timer (Exact 1.0 second evaluation interval)
     this.tickTimer = 0;
-    this.TICK_INTERVAL = 1.0;
+    this.TICK_INTERVAL = this.profile.tickInterval;
 
     // Utility Scores (0.0 to 1.0)
     this.utilities = {
@@ -83,11 +108,53 @@ export class AIDirector {
     };
 
     // Sub-Managers
+    this.perception = new AIPerception(this); // F5-02
     this.economyManager = new AIEconomyManager(this);
     this.militaryManager = new AIMilitaryManager(this);
+    this.microManager = new AIMicroManager(this); // F5-05
+
+    // F5-03: bônus de coleta (só Brutal) — soma uma fração de cada coleta do próprio jogador.
+    this._bonusAcc = { gold: 0, wood: 0, stone: 0 };
+    this._onGather = null;
+    if (this.profile.resourceBonus > 0 && gameManager.events) {
+      this._onGather = (e) => {
+        if (e.ownerId !== this.playerId || e.passive || !(e.amount > 0)) return;
+        const acc = this._bonusAcc;
+        if (acc[e.type] === undefined) return;
+        acc[e.type] += e.amount * this.profile.resourceBonus;
+        const whole = Math.floor(acc[e.type]);
+        if (whole > 0) { acc[e.type] -= whole; this.player.add(e.type, whole); }
+      };
+      gameManager.events.on(EVT.RESOURCE_GATHERED, this._onGather);
+    }
 
     // Buffer reutilizado pela consulta de intrusos (F1-06: gm.unitGrid.queryRadius).
     this._intruderBuf = [];
+  }
+
+  // --- Comandos (F5-01/F5-03): única saída da IA para a simulação ---
+
+  /**
+   * Emite um comando com o `playerId` desta IA, respeitando o orçamento de APM da dificuldade.
+   * Devolve o retorno de `gm.issue` ou `null` se o orçamento acabou (a decisão é refeita no próximo tick).
+   */
+  issue(fields) {
+    if (this._apmTokens < 1) { this.commandsDropped++; return null; }
+    this._apmTokens -= 1;
+    this.commandsIssued++;
+    return this.gm.issue(fields.playerId === undefined ? { ...fields, playerId: this.playerId } : fields);
+  }
+
+  reserve(id) { this._reserved.add(id); }
+  unreserve(id) { this._reserved.delete(id); }
+  isReserved(id) { return this._reserved.has(id); }
+
+  /** Ponto de reunião do exército (fora dos portões). */
+  militaryRally() { return this.militaryManager.assemblyRallyPoint; }
+
+  dispose() {
+    if (this._onGather && this.gm.events) this.gm.events.off(EVT.RESOURCE_GATHERED, this._onGather);
+    this._onGather = null;
   }
 
   // --- Economia: tudo delega ao Player (F2-01) ---
@@ -162,6 +229,27 @@ export class AIDirector {
       if (b.ownerId === this.playerId && b.type === this.barracksType && b.isConstructed && !b.isDead) {
         return b;
       }
+    }
+    return null;
+  }
+
+  /** F5-04: todos os quartéis concluídos e vivos da IA (ordem de `gm.buildings`). */
+  getConstructedBarracksList() {
+    const out = [];
+    const buildings = this.gm.buildings;
+    for (let i = 0; i < buildings.length; i++) {
+      const b = buildings[i];
+      if (b.ownerId === this.playerId && b.type === this.barracksType && b.isConstructed && !b.isDead) out.push(b);
+    }
+    return out;
+  }
+
+  /** F4-04: Torre Arcana/Santuário concluído e vivo da IA (ou null). */
+  getConstructedArcane() {
+    const buildings = this.gm.buildings;
+    for (let i = 0; i < buildings.length; i++) {
+      const b = buildings[i];
+      if (b.ownerId === this.playerId && b.type === this.arcaneType && b.isConstructed && !b.isDead) return b;
     }
     return null;
   }
@@ -268,8 +356,14 @@ export class AIDirector {
    */
   update(dt) {
     this.tickTimer += dt;
+    this._apmTokens = Math.min(this._apmCap, this._apmTokens + dt * this.profile.maxApm / 60);
     if (this.tickTimer < this.TICK_INTERVAL) return;
     this.tickTimer = 0;
+    this.simTime = this.gm.currentTick * SIM_DT;
+
+    // 0. F5-02: atualiza o conhecimento sob a névoa e gerencia o explorador
+    this.perception.update();
+    this.perception.manageScout();
 
     // 1. Recalculate population limit and head count
     this.recalculatePop();
@@ -280,10 +374,17 @@ export class AIDirector {
     // 3. Coordinate Homeland Defense
     this.militaryManager.updateDefense(this.utilities.def);
 
-    // 4. Coordinate Economy, Gathering, and City Construction
-    this.economyManager.update(this.utilities.eco, this.utilities.housing);
+    // 4. Coordinate Economy, Gathering, and City Construction — cadência própria (>= 1 s): reagir mais rápido
+    // não deve significar mexer mais nos trabalhadores (o atraso de reação vale para defesa/micro/ataque).
+    if (this.simTime - this._lastEco >= 1.0 - 1e-6) {
+      this._lastEco = this.simTime;
+      this.economyManager.update(this.utilities.eco, this.utilities.housing);
+    }
 
     // 5. Coordinate Army Recruitment & Military Assault Expeditions
     this.militaryManager.update(this.utilities.mil);
+
+    // 6. F5-05: micro tático
+    this.microManager.update();
   }
 }

@@ -21,7 +21,8 @@ function fakeDirector() {
     baseCenter: { x: 0, y: 0 },
     rng: createRng(1), // F2-03: placeBuilding sorteia ângulo/distância de tentativa via director.rng
     getOwnUnits: () => [],
-    gm: { canPlaceBuilding: () => false, issue: vi.fn() }
+    gm: { canPlaceBuilding: () => false, issue: vi.fn() },
+    issue(f) { return this.gm.issue(f); } // F5-01: saída única de comandos da IA
   };
 }
 

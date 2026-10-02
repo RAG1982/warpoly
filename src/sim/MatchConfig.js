@@ -66,6 +66,12 @@ export function normalizeDifficulty(d) {
   return DIFFICULTIES.includes(d) ? d : DEFAULT_DIFFICULTY;
 }
 
+/** F5-03: dificuldade da IA do jogador `playerId` — `players[i].difficulty` sobrepõe `cfg.difficulty`. */
+export function difficultyOf(cfg, playerId) {
+  const p = cfg && cfg.players ? cfg.players.find((q) => q.id === playerId) : null;
+  return normalizeDifficulty(p && p.difficulty ? p.difficulty : cfg && cfg.difficulty);
+}
+
 /** F3-09: modos de vitória — 'conquest' (destruir tudo, padrão) e 'regicide' (derrubar o Centro). */
 export const VICTORY_MODES = Object.freeze(['conquest', 'regicide']);
 export const DEFAULT_VICTORY_MODE = 'conquest';
@@ -140,7 +146,7 @@ export function createMatchConfig({
   return {
     mapId,
     seed: seed ?? randomSeed(),
-    // F2-04: guardada na config; a IA ainda não lê a dificuldade (F5).
+    // F2-04/F5-03: dificuldade padrão das IAs (cada jogador pode sobrepor com `players[i].difficulty`).
     difficulty: normalizeDifficulty(difficulty),
     victoryMode: normalizeVictoryMode(victoryMode),
     headless: !!headless,
@@ -235,6 +241,9 @@ export function validateMatchConfig(cfg) {
     slots.add(p.startSlot);
     if (!mapDef.startSlots[p.startSlot]) {
       throw new Error(`MatchConfig: slot ${p.startSlot} não existe no mapa "${cfg.mapId}"`);
+    }
+    if (p.difficulty !== undefined && !DIFFICULTIES.includes(p.difficulty)) {
+      throw new Error(`MatchConfig: dificuldade inválida ${p.difficulty}`);
     }
     if (p.isLocal) locals++;
   }

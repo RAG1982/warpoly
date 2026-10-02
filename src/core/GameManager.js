@@ -31,7 +31,8 @@ import { SpatialGrid } from '../sim/SpatialGrid.js';
 import {
   createMatchConfig,
   layoutAt,
-  validateMatchConfig
+  validateMatchConfig,
+  difficultyOf
 } from '../sim/MatchConfig.js';
 import { SIM_DT, MAX_STEPS, animationLodStep } from '../sim/constants.js';
 import { CMD, makeCommand } from '../sim/commands.js';
@@ -555,7 +556,7 @@ export class GameManager {
     });
 
     if (player.isAI) {
-      const director = new AIDirector(this, player.id, { x: pos.x, y: pos.z });
+      const director = new AIDirector(this, player.id, { x: pos.x, y: pos.z }, difficultyOf(this.matchConfig, player.id));
       this.aiDirectors.push(director);
       if (!this.aiDirector) this.aiDirector = director;
     }

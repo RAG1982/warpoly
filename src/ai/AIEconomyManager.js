@@ -91,7 +91,7 @@ export class AIEconomyManager {
       }
       if (!worker) return;
       assigned.add(worker.id);
-      this.gm.issue({ type: CMD.REPAIR, playerId: pid, unitIds: [worker.id], buildingId: b.id });
+      this.director.issue({ type: CMD.REPAIR, playerId: pid, unitIds: [worker.id], buildingId: b.id });
     }
   }
 
@@ -118,6 +118,12 @@ export class AIEconomyManager {
       let plan = null;
       if (role === 'forge') plan = ['melee_weapons', 'melee_armor', 'siege_damage']; // F4-02: siege_damage exige Oficina
       else if (role === 'lumber') plan = ['ranged_class', 'ranged_ammo', 'woodcutting'];
+      else if (role === 'arcane' && this.director.profile.casters) {
+        // F5-05: magias úteis para a IA (ordem de prioridade por facção).
+        plan = this.director.faction === 'orc'
+          ? ['spell_haste', 'spell_death_touch', 'spell_unholy_armor', 'spell_raise_dead']
+          : ['spell_fireball', 'spell_slow', 'spell_flameshield', 'spell_polymorph', 'spell_blizzard'];
+      }
       if (!plan) continue;
       for (const id of plan) {
         const research = RESEARCH[id];
@@ -129,8 +135,8 @@ export class AIEconomyManager {
         if (missingUpgradeRequirements(pid, id, this.gm, lv + 1).length > 0) continue;
         const cost = research.levels[lv].cost;
         if (!this.director.canAfford(cost)) continue;
-        if (id !== 'ranged_class' && player.resources.gold <= 400) continue;
-        this.gm.issue({ type: CMD.RESEARCH, playerId: pid, buildingId: b.id, upgradeId: id });
+        if (id !== 'ranged_class' && player.resources.gold <= this.director.profile.research) continue;
+        this.director.issue({ type: CMD.RESEARCH, playerId: pid, buildingId: b.id, upgradeId: id });
         break;
       }
     }
@@ -155,14 +161,17 @@ export class AIEconomyManager {
       }
     }
     if (!hq || hq.tier >= 3 || hq.tierUpgrade) return;
-    if (this.getLivingWorkerCount() < 8) return;
+    // F5-04: a estratégia define quando evoluir (rush só depois de 8 min); `hqUpgradeAt` trabalhadores vivos.
+    if (this.director.simTime <= 480 && this.director.strategy.hqUpgradeAt >= 99) return;
+    const need = this.director.simTime > 480 ? Math.min(8, this.director.strategy.hqUpgradeAt) : this.director.strategy.hqUpgradeAt;
+    if (this.getLivingWorkerCount() < Math.min(need, 8 + Math.max(0, this.director.profile.workerBonus))) return;
     if (!this.director.getConstructedBarracks() || !hasForge) return;
 
     const cost = getHqUpgradeCost(hq.tier + 1);
     if (!cost || !this.director.canAfford(cost)) return;
 
     // F2-02: comando UPGRADE_HQ — o débito/validação final é do executor.
-    this.gm.issue({ type: CMD.UPGRADE_HQ, playerId: this.director.playerId, buildingId: hq.id });
+    this.director.issue({ type: CMD.UPGRADE_HQ, playerId: this.director.playerId, buildingId: hq.id });
   }
 
   /**
@@ -253,7 +262,7 @@ export class AIEconomyManager {
     // If no worker is building the incomplete structure, order candidate worker to build it
     // (F2-02: comando BUILD).
     if (!hasBuilder && candidateWorker) {
-      this.gm.issue({
+      this.director.issue({
         type: CMD.BUILD,
         playerId: this.director.playerId,
         unitIds: [candidateWorker.id],
@@ -308,9 +317,12 @@ export class AIEconomyManager {
 
     // Normal workforce target: 8 workers.
     // Booming economy target: up to 12 workers if resources are abundant
-    let maxDesiredWorkers = 8;
+    // F5-04: alvo de trabalhadores da estratégia (+ bônus da dificuldade).
+    const st = this.director.strategy;
+    const wb = this.director.profile.workerBonus;
+    let maxDesiredWorkers = st.workers + wb;
     if (this.director.resources.wood >= 150 && this.director.resources.gold >= 80) {
-      maxDesiredWorkers = 12;
+      maxDesiredWorkers = st.richWorkers + wb;
     }
 
     if (totalWorkers >= maxDesiredWorkers) return;
@@ -318,7 +330,7 @@ export class AIEconomyManager {
     // Queue worker if queue is not full (< 2 units) and resources are available
     // (F2-02: comando TRAIN — a dedução real acontece no executor).
     if (hq.queue && hq.queue.length < 2 && this.director.canAfford(this.director.costs.worker)) {
-      this.gm.issue({
+      this.director.issue({
         type: CMD.TRAIN,
         playerId: this.director.playerId,
         buildingId: hq.id,
@@ -335,6 +347,9 @@ export class AIEconomyManager {
     const buildings = this.gm.buildings;
     const lenB = buildings.length;
     const workerCount = this.getLivingWorkerCount();
+
+    // 0. F5-01 (anti-colapso): com a força de trabalho quase zerada, o ouro é reservado para recriar peões.
+    if (workerCount < 3 && this.director.resources.gold < 150) return;
 
     // 1. POPULATION UNLOCK: Pig Farm or Orc House (Maximum priority when population is near/at cap)
     // F2-02: sem dedução aqui — o custo é cobrado no CommandExecutor (PLACE_BUILDING).
@@ -354,7 +369,10 @@ export class AIEconomyManager {
 
     // 2. BARRACKS: Military training foundation (requires at least 3 workers)
     let hasBarracks = false;
+    let barracksCount = 0;
+    let hasArcane = false;
     let hasLumber = false;
+    let lumberCount = 0;
     let hasForge = false;
     let hasStable = false;
     let hasWorkshop = false;
@@ -363,8 +381,9 @@ export class AIEconomyManager {
     for (let i = 0; i < lenB; i++) {
       const b = buildings[i];
       if (b.ownerId === this.director.playerId && !b.isDead) {
-        if (b.type === this.director.barracksType) hasBarracks = true;
-        if (b.type === this.director.lumberType) hasLumber = true;
+        if (b.type === this.director.barracksType) { hasBarracks = true; barracksCount++; }
+        if (b.type === this.director.arcaneType) hasArcane = true;
+        if (b.type === this.director.lumberType) { hasLumber = true; lumberCount++; }
         if (b.type === this.director.forgeType) hasForge = true;
         if (b.type === this.director.stableType) hasStable = true;
         if (b.type === this.director.workshopType) hasWorkshop = true;
@@ -392,6 +411,17 @@ export class AIEconomyManager {
     // 3. LUMBER MILL: Enhanced wood harvesting & dropoff (requires at least 4 workers)
     if (workerCount >= 4 && !hasLumber && this.director.canAfford(this.director.costs.lumber)) {
       this.placeBuilding(this.director.lumberType);
+      return;
+    }
+
+    // 3b. F5-04: 2º quartel (rush) com ≥ 5 trabalhadores.
+    // Difícil+ também reinveste ouro parado em quartéis extras (produção em paralelo).
+    const surplusBarracks = this.director.profile.micro >= 2 && workerCount >= 7 && this.director.resources.gold >= 300
+      ? (this.director.profile.micro >= 3 ? 2 : 1) : 0;
+    if (hasBarracks && barracksCount < this.director.strategy.barracks + surplusBarracks && workerCount >= 5 &&
+        this.director.canAfford(this.director.costs.barracks) &&
+        missingRequirements(this.director.playerId, this.director.barracksType, this.gm).length === 0) {
+      this.placeBuilding(this.director.barracksType);
       return;
     }
 
@@ -428,8 +458,25 @@ export class AIEconomyManager {
       return;
     }
 
+    // 5d. F5-05: Torre Arcana/Santuário (conjuradores) — dificuldades com `casters`, estratégias de tech,
+    // Centro nível 3 (checado por `missingRequirements`), sobra de ouro e ≥ 6 combatentes.
+    if (this.director.profile.casters && this.director.strategy.tech && hasBarracks && !hasArcane &&
+        this.director.resources.gold >= 450 && this.director.getCombatUnitCount() >= 6 &&
+        this.director.canAfford(this.director.costs.arcane) &&
+        missingRequirements(this.director.playerId, this.director.arcaneType, this.gm).length === 0) {
+      this.placeBuilding(this.director.arcaneType);
+      return;
+    }
+
+    // 5e. F5-03: Difícil+ constrói uma 2ª serraria junto de um aglomerado denso de árvores longe das serrarias
+    // existentes (as árvores perto do Centro acabam e o trajeto de coleta cresce).
+    if (this.director.profile.micro >= 2 && hasLumber && workerCount >= 6 && lumberCount < (this.director.profile.micro >= 3 ? 3 : 2) &&
+        this.director.canAfford(this.director.costs.lumber) && this.placeForwardLumber()) {
+      return;
+    }
+
     // 6. WATCHTOWERS: Perimeter defense against player incursions (requires at least 5 workers)
-    if (workerCount >= 5 && towerCount < 2 && this.director.canAfford(this.director.costs.tower)) {
+    if (workerCount >= 5 && towerCount < this.director.strategy.towers && this.director.canAfford(this.director.costs.tower)) {
       this.placeBuilding(this.director.towerType);
       return;
     }
@@ -448,8 +495,7 @@ export class AIEconomyManager {
    */
   considerWallLine() {
     if (this._wallLineDone || this._wallAttempts >= 3) return;
-    const diff = this.gm.matchConfig ? this.gm.matchConfig.difficulty : 'normal';
-    if (diff === 'easy') return;
+    if (!this.director.profile.walls) return; // F5-03: Fácil não constrói muralha
 
     const wallType = this.director.faction === 'orc' ? 'wall_orc' : 'wall_human';
     const unit = getBuildingDef(wallType).cost;
@@ -459,18 +505,13 @@ export class AIEconomyManager {
 
     const me = this.director.baseCenter;
     const myId = this.director.playerId;
-    let enemyHq = null;
-    let best = Infinity;
-    for (const b of this.gm.buildings) {
-      if (b.isDead || b.role !== 'hq' || !this.gm.isHostile(myId, b.ownerId)) continue;
-      const d = Math.hypot(b.mesh.position.x - me.x, b.mesh.position.z - me.y);
-      if (d < best) { best = d; enemyHq = b; }
-    }
+    // F5-02: só o Centro inimigo CONHECIDO (memória da percepção) define a direção da muralha.
+    const enemyHq = this.director.perception.nearestBuilding(me.x, me.y, k => k.role === 'hq');
     if (!enemyHq) return;
     this._wallAttempts++;
 
-    const dx = enemyHq.mesh.position.x - me.x;
-    const dz = enemyHq.mesh.position.z - me.y;
+    const dx = enemyHq.x - me.x;
+    const dz = enemyHq.z - me.y;
     const len = Math.hypot(dx, dz) || 1;
     const fx = dx / len;
     const fz = dz / len;
@@ -496,7 +537,7 @@ export class AIEconomyManager {
       })
       .slice(0, 2)
       .map(w => w.id);
-    this.gm.issue({ type: CMD.PLACE_WALL, playerId: myId, buildingType: wallType, points, unitIds: workers });
+    this.director.issue({ type: CMD.PLACE_WALL, playerId: myId, buildingType: wallType, points, unitIds: workers });
     this._wallLineDone = true;
   }
 
@@ -675,6 +716,9 @@ export class AIEconomyManager {
    * workers are dynamically reassigned to satisfy the most urgent resource need.
    */
   rebalanceWorkforce() {
+    const now = this.director.simTime;
+    // Realocar trabalhadores já ocupados custa tempo de caminhada: só a cada 6 s (idle é tarefado sempre).
+    const allowTransfer = now - (this._lastTransfer ?? -1e9) >= 6;
     const enemies = this.director.getOwnUnits();
     const lenE = enemies.length;
     const workerType = this.director.workerType;
@@ -770,12 +814,14 @@ export class AIEconomyManager {
       cur[bestType]++;
       const resEntity = getTargetForType(w.mesh.position, bestType);
       if (resEntity) {
-        this.gm.issue({ type: CMD.GATHER, playerId: this.director.playerId, unitIds: [w.id], targetId: resEntity.id });
+        this.director.issue({ type: CMD.GATHER, playerId: this.director.playerId, unitIds: [w.id], targetId: resEntity.id });
       }
     }
 
     // 2. Active Rebalancing across all 3 resources:
     // Dynamically transfer surplus workers to deficit resources
+    if (!allowTransfer) return;
+    let transferred = false;
     while (true) {
       // Find surplus resource with largest excess
       let surplusType = null;
@@ -811,12 +857,14 @@ export class AIEconomyManager {
       const candidate = workerPools[surplusType].pop();
       cur[surplusType]--;
       cur[deficitType]++;
+      transferred = true;
 
       const resEntity = getTargetForType(candidate.mesh.position, deficitType);
       if (resEntity) {
-        this.gm.issue({ type: CMD.GATHER, playerId: this.director.playerId, unitIds: [candidate.id], targetId: resEntity.id });
+        this.director.issue({ type: CMD.GATHER, playerId: this.director.playerId, unitIds: [candidate.id], targetId: resEntity.id });
       }
     }
+    if (transferred) this._lastTransfer = now;
   }
 
   /**
@@ -876,6 +924,55 @@ export class AIEconomyManager {
    * (e a dedução do custo) só acontece de fato no `CommandExecutor`, no tick de execução.
    * @param {string} type
    */
+  /**
+   * Procura o aglomerado de árvores mais denso (≥ 4 árvores num raio de 7) entre 14 e 55 unidades de distância
+   * de qualquer ponto de entrega (Centro/serrarias) e emite PLACE_BUILDING da serraria ao lado dele.
+   * Poucas tentativas por partida (`_forwardTries`). @returns {boolean} comando emitido
+   */
+  placeForwardLumber() {
+    if ((this._forwardTries || 0) >= 5) return false;
+    this._forwardTries = (this._forwardTries || 0) + 1;
+    const dir = this.director;
+    const base = dir.baseCenter;
+    const drops = [{ x: base.x, z: base.y }];
+    for (const b of this.gm.buildings) {
+      if (b.ownerId === dir.playerId && !b.isDead && b.type === dir.lumberType) drops.push({ x: b.mesh.position.x, z: b.mesh.position.z });
+    }
+    const trees = [];
+    for (const t of this.gm.trees) if (!t.isDead && t.woodRemaining > 0) trees.push(t.mesh.position);
+    let best = null;
+    let bestScore = -Infinity;
+    for (let i = 0; i < trees.length; i++) {
+      const p = trees[i];
+      let dmin = Infinity;
+      for (let k = 0; k < drops.length; k++) dmin = Math.min(dmin, Math.hypot(p.x - drops[k].x, p.z - drops[k].z));
+      if (dmin < 14 || Math.hypot(p.x - base.x, p.z - base.y) > 55) continue;
+      let n = 0; let cx = 0; let cz = 0;
+      for (let j = 0; j < trees.length; j++) {
+        if (Math.hypot(trees[j].x - p.x, trees[j].z - p.z) <= 7) { n++; cx += trees[j].x; cz += trees[j].z; }
+      }
+      if (n < 4) continue;
+      const score = n * 6 - Math.hypot(p.x - base.x, p.z - base.y) - i * 1e-6;
+      if (score > bestScore) { bestScore = score; best = { x: cx / n, z: cz / n }; }
+    }
+    if (!best) return false;
+    for (let a = 0; a < 12; a++) {
+      const ang = a * (Math.PI / 6);
+      const r = 4 + (a % 2) * 2;
+      const x = best.x + Math.cos(ang) * r;
+      const z = best.z + Math.sin(ang) * r;
+      if (!this.gm.canPlaceBuilding(dir.lumberType, x, z)) continue;
+      let w = null; let wd = Infinity;
+      for (const u of dir.getOwnUnits()) {
+        if (u.isDead || u.type !== dir.workerType) continue;
+        const d = Math.hypot(u.mesh.position.x - x, u.mesh.position.z - z) + (u.state === 'idle' ? 0 : 50);
+        if (d < wd) { wd = d; w = u; }
+      }
+      return !!dir.issue({ type: CMD.PLACE_BUILDING, playerId: dir.playerId, buildingType: dir.lumberType, x, z, unitIds: w ? [w.id] : [] });
+    }
+    return false;
+  }
+
   placeBuilding(type) {
     let chosenX = null;
     let chosenZ = null;
@@ -921,7 +1018,7 @@ export class AIEconomyManager {
       }
     }
 
-    this.gm.issue({
+    this.director.issue({
       type: CMD.PLACE_BUILDING,
       playerId: this.director.playerId,
       buildingType: type,

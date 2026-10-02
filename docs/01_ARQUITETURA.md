@@ -477,13 +477,21 @@ Camadas e regra de dependência (verificada por `tests/unit/layers.test.js`):
   limite; 1 = erro), imprime resumo e checksum final. Seed 1 (1×1): termina aos 7,3 min simulados em ~11 s (≈800 ticks/s). Funciona
   porque `MatchConfig.headless` faz `ModelFactory` devolver `Group` vazio (F2-03) e o hook `tools/lib/jsonImportLoader.mjs` resolve os
   `.json` dos mapas. Teste: `tests/unit/headlessMatch.test.js` (processo separado; determinismo entre processos).
-- **Dívida (F2-08b)**: `Unit`, `Building`, `Tree`, `ResourceDeposit`, `Critter`, `Wall`, `GameManager` (em `src/core`), `FogOfWar` e
-  `TreeManager` ainda criam/seguram `THREE.Object3D` (a posição de simulação é `mesh.position`; barras de vida, anel de seleção,
-  animador e billboards vivem dentro de `Unit`/`Building`). Para mover essas classes para `src/sim` é preciso: (1) posição/rotação como
-  números (`x,y,z,rotY`) em vez de `mesh.position`; (2) extrair `UnitView`/`BuildingView`/`TreeView` (malha, animador, barras,
-  billboards, seleção) para `src/render/`, criados por evento `*_SPAWNED`/lista da `gm`; (3) `FogOfWar` separar a grade lógica
-  (`FogGrid`, já pura) da textura/shader; (4) `GameManager` sem `scene`/`terrain.mesh` (altura via `terrain.getHeight` puro).
-  Hoje o headless funciona justamente porque as malhas são `Group` vazios — a simulação ainda paga o custo (pequeno) do three em Node.
+- **F2-08b (parcial, branch `task/F2-08b`)**: `Tree`, `ResourceDeposit`, `Critter` (`src/sim/`) e `FogOfWar` + `FogGrid` (`src/sim/`) são
+  puros (sem three.js/DOM; verificado por `tests/unit/layers.test.js`). Posição como números: `entity.position` (`Vec3`, `src/sim/Body.js`);
+  `entity.mesh` virou um `Body` de simulação (compat: `mesh.position/rotation/visible/userData.entity`), **não** um `Object3D`.
+  As malhas vivem em `src/render/`: `TreeView` (instância no `TreeManager`, hit-proxy, tremor, queda, toco), `ResourceDepositView`,
+  `CritterView` (copia pose/visibilidade do `Body`), todas criadas/removidas por `EntityViews` (diff das listas `gm.trees/resourceDeposits/critters`
+  a cada quadro, `MatchSession`); picking usa `gm.entityViews.rootOf(entidade)`. `FogView` (textura/shader, minimapa, fantasmas, esconder malhas
+  inimigas) lê os sinais `fog.textureDirty/minimapDirty/newGhosts/removedGhosts`; `gm.fogView` é criado no construtor do `GameManager`
+  (fora do headless) e atualizado em `renderUpdate`.
+- **Dívida restante (F2-08c)**: `Unit`, `Building`, `Wall` e `GameManager` (em `src/core`) ainda criam/seguram `THREE.Object3D` (a posição de
+  simulação é `mesh.position`; barras de vida, anel de seleção, animador e billboards vivem dentro de `Unit`/`Building`, e o estado de
+  animação/`userData` de ferramentas — `axe/pickaxe/hammer` — é escrito pela lógica). Plano: (1) `Unit`/`Building` ganham `Body` (`position`, `rotY`)
+  e a malha real passa a ser `UnitView`/`BuildingView` (animador, barras, billboards, seleção, cor de time, flash, `flyHeight`), sincronizados
+  por `EntityViews` a cada quadro; (2) a lógica deixa de tocar `userData.axe/hammer…` (expor `unit.tool = 'axe'|'pickaxe'|'hammer'|null` e o view
+  decide); (3) `GameManager` sem `scene`/`terrain.mesh` (altura via `terrain.getHeight` puro) e depois move para `src/sim`.
+  Hoje o headless funciona porque as malhas são `Group` vazios — a simulação ainda paga o custo (pequeno) do three em Node para `Unit`/`Building`.
 
 ## Eventos (F2-07)
 

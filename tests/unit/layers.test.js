@@ -52,14 +52,15 @@ describe('camadas puras (F2-08)', () => {
     expect(offenders).toEqual([]);
   });
 
-  it('src/sim só importa de src/sim, src/data e src/ai (a IA, pura, só importa sim/data)', () => {
+  it('src/sim só importa de src/sim e src/data (nunca ../ai, ../audio, ../ui, ../render, ../core) e não referencia gerenciadores de apresentação (F2-08d)', () => {
     const bad = [];
     for (const f of listJs(join(ROOT, 'sim'))) {
       const code = stripComments(readFileSync(f, 'utf8'));
-      for (const m of code.matchAll(/from\s+['"](\.\.?\/[^'"]+)['"]/g)) {
+      for (const m of code.matchAll(/(?:from|import)\s*\(?\s*['"](\.\.?\/[^'"]+)['"]/g)) {
         const target = m[1];
-        if (!target.startsWith('./') && !target.startsWith('../data/') && !target.startsWith('../ai/')) bad.push(`${relative(ROOT, f)} → ${target}`);
+        if (!target.startsWith('./') && !target.startsWith('../data/')) bad.push(`${relative(ROOT, f)} → ${target}`);
       }
+      if (/\b(soundManager|uiManager|particleSystem|sceneManager)\b/.test(code)) bad.push(`${relative(ROOT, f)}: referencia soundManager/uiManager/particleSystem/sceneManager`);
     }
     expect(bad).toEqual([]);
   });

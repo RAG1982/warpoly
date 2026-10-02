@@ -7,6 +7,7 @@ import { Decorations } from '../world/Decorations.js';
 import { ParticleSystem } from '../entities/ParticleSystem.js';
 import { ModelFactory } from '../entities/ModelFactory.js';
 import { GameManager } from '../sim/GameManager.js';
+import '../ai/registerAI.js'; // F2-08d: fábrica do AIDirector
 import { InputManager } from './InputManager.js';
 import { UIManager } from '../ui/UIManager.js';
 import { collectSharedResources, disposeObjectTree } from '../render/sceneDisposal.js';
@@ -66,6 +67,7 @@ export class MatchSession {
     // Entrada e HUD
     this.inputManager = new InputManager(sceneManager, this.gameManager, this.terrain, this.terrainView);
     this.uiManager = new UIManager(this.gameManager, sceneManager, this.inputManager, sound);
+    this.gameManager.soundManager = sound; // F2-08d: gancho de apresentação (lido só pelo InputManager)
     this.gameManager.uiManager = this.uiManager;
     this.gameManager.sceneManager = sceneManager;
     this.inputManager.uiManager = this.uiManager;

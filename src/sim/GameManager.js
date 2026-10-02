@@ -4,7 +4,7 @@ import { Wall } from './Wall.js';
 import { Tree } from './Tree.js';
 import { ResourceDeposit } from './ResourceDeposit.js';
 import { FogOfWar } from './FogOfWar.js';
-import { AIDirector } from '../ai/AIDirector.js';
+import { createAIDirector } from './aiRegistry.js';
 import { Pathfinder } from './Pathfinder.js';
 
 import {
@@ -40,19 +40,17 @@ const EMPTY_LIST = Object.freeze([]);
 export class GameManager {
   /**
    * F2-08c: simulação pura — sem cena/three.js/DOM. As malhas vivem nas views (`src/render/EntityViews.js`, criada
-   * pela `MatchSession`); `fogView`/`hazardView`/`entityViews`/`sceneManager`/`uiManager` são apenas ganchos de
+   * pela `MatchSession`); `fogView`/`hazardView`/`entityViews` e os ganchos de HUD/áudio/cena são apenas ganchos de
    * apresentação preenchidos por quem monta a partida (nunca lidos pela lógica de simulação).
    * @param {import('./Terrain.js').Terrain} terrain
-   * @param {*} soundManager
-   * @param {*} particleSystem
+   * @param {*} [_sound]  legado (F2-08d): ignorado — a sim não conhece áudio; ouvintes em `src/audio/AudioEvents.js`
+   * @param {*} [_particles]  legado (F2-08d): ignorado — VFX via `src/render/VfxEvents.js`
    * @param {object|null} [matchConfig]  ver src/sim/MatchConfig.js (padrão: 1×1 humano local × IA orc)
    */
-  constructor(terrain, soundManager, particleSystem, matchConfig = null) {
+  constructor(terrain, _sound = null, _particles = null, matchConfig = null) {
     this.terrain = terrain;
-    this.soundManager = soundManager;
-    this.particleSystem = particleSystem;
     // F2-07: barramento de eventos da simulação — nem `simStep` nem as entidades chamam
-    // `soundManager`/`particleSystem`/`uiManager` direto; emitem eventos aqui, despachados só em
+    // som/partículas/HUD direto; emitem eventos aqui, despachados só em
     // `flush()` (fim do passo/quadro) para os ouvintes (`src/audio/AudioEvents.js`,
     // `src/render/VfxEvents.js`, `src/ui/UiEvents.js`), criados pela `MatchSession`.
     this.events = new EventBus();
@@ -139,7 +137,7 @@ export class GameManager {
     this._fogLists = { playerUnits: [], playerBuildings: [], enemyUnits: [], enemyBuildings: [] };
 
     // Um AIDirector por jogador de IA. `aiDirector` = o primeiro (compatibilidade: bench, UI).
-    /** @type {AIDirector[]} */
+    /** @type {any[]} */
     this.aiDirectors = [];
     this.aiDirector = null;
 
@@ -517,7 +515,7 @@ export class GameManager {
     });
 
     if (player.isAI) {
-      const director = new AIDirector(this, player.id, { x: pos.x, y: pos.z }, difficultyOf(this.matchConfig, player.id));
+      const director = createAIDirector(this, player.id, { x: pos.x, y: pos.z }, difficultyOf(this.matchConfig, player.id));
       this.aiDirectors.push(director);
       if (!this.aiDirector) this.aiDirector = director;
     }
@@ -1177,19 +1175,19 @@ export class GameManager {
     if (entity instanceof Unit && entity.ownerId === this._localPlayerId) {
       entity.setSelected(true);
       this.selectedUnits.push(entity);
-      this.soundManager.playSelect();
+      this.events.emit(EVT.SELECTED, { entityId: entity.id, ownerId: entity.ownerId });
     } else if (entity instanceof Building && entity.ownerId === this._localPlayerId) {
       entity.setSelected(true);
       this.selectedBuilding = entity;
-      this.soundManager.playSelect();
+      this.events.emit(EVT.SELECTED, { entityId: entity.id, ownerId: entity.ownerId });
     } else if (entity instanceof Building && entity.ownerId === NEUTRAL_HOSTILE_ID) {
       // F3-10: acampamento neutro — card apenas informativo (sem comandos).
       entity.setSelected(true);
       this.selectedBuilding = entity;
-      this.soundManager.playSelect();
+      this.events.emit(EVT.SELECTED, { entityId: entity.id, ownerId: entity.ownerId });
     } else if (entity instanceof Tree || entity instanceof ResourceDeposit) {
       this.selectedResource = entity;
-      this.soundManager.playSelect();
+      this.events.emit(EVT.SELECTED, { entityId: entity.id, ownerId: entity.ownerId });
     }
   }
 
@@ -1216,12 +1214,12 @@ export class GameManager {
           x: rallyPoint.x,
           z: rallyPoint.z
         });
-        this.soundManager.playOrder();
+        this.events.emit(EVT.ORDER_ISSUED, { ownerId: this._localPlayerId });
       }
       return;
     }
 
-    this.soundManager.playOrder();
+    this.events.emit(EVT.ORDER_ISSUED, { ownerId: this._localPlayerId });
     const unitIds = this.selectedUnits.map(u => u.id);
 
     if (entityUnderCursor) {
@@ -1778,7 +1776,5 @@ export class GameManager {
     this.unitGrid.clear();
     this.blockerGrid.clear();
     if (this.terrain && this.terrain.pathfinder === this.pathfinder) this.terrain.pathfinder = null;
-    this.uiManager = null;
-    this.sceneManager = null;
   }
 }

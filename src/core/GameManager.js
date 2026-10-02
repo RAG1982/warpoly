@@ -11,8 +11,8 @@ import {
   OrcLumberMill,
   OrcForge
 } from '../entities/buildings/orc/index.js';
-import { Tree } from '../entities/Tree.js';
-import { ResourceDeposit } from '../entities/ResourceDeposit.js';
+import { Tree } from '../sim/Tree.js';
+import { ResourceDeposit } from '../sim/ResourceDeposit.js';
 import { ModelFactory } from '../entities/ModelFactory.js';
 import { FogOfWar } from './FogOfWar.js';
 import { AIDirector } from '../ai/AIDirector.js';
@@ -26,7 +26,7 @@ import {
 import { Player } from '../sim/Player.js';
 import { PlayerRegistry } from '../sim/PlayerRegistry.js';
 import { EntityRegistry, NEUTRAL_OWNER_ID, NEUTRAL_HOSTILE_ID } from '../sim/EntityIds.js';
-import { Critter } from '../entities/Critter.js';
+import { Critter } from '../sim/Critter.js';
 import { SpatialGrid } from '../sim/SpatialGrid.js';
 import {
   createMatchConfig,
@@ -79,6 +79,8 @@ export class GameManager {
 
     // Instanced Trees System (6 Draw Calls for all 180 Trees)
     this.treeManager = new TreeManager(this.scene);
+    /** F2-08b: `render/EntityViews` (criado pela MatchSession fora do headless); picking de árvores/minas/critters. */
+    this.entityViews = null;
 
     // Configuração da partida e jogadores (F2-01). Economia/pop/pesquisas vivem em Player.
     this.matchConfig = validateMatchConfig(matchConfig || createMatchConfig());
@@ -438,9 +440,8 @@ export class GameManager {
       this.scene.remove(b.mesh);
       if (b.rallyGroup) this.scene.remove(b.rallyGroup);
     });
-    this.trees.forEach(t => (t.dispose ? t.dispose() : this.scene.remove(t.mesh)));
-    this.resourceDeposits.forEach(r => this.scene.remove(r.mesh));
-    if (this._wallBatches) {
+    this.trees.forEach(t => t.dispose());
+        if (this._wallBatches) {
       Object.values(this._wallBatches).forEach(wb => wb.dispose());
       this._wallBatches = null;
     }
@@ -576,7 +577,7 @@ export class GameManager {
     const usedSlots = new Set(this.players.map(p => p.startSlot));
     for (const r of mapDef.resources) {
       if (r.slot !== undefined && !usedSlots.has(r.slot)) continue;
-      this.resourceDeposits.push(this.registerEntity(new ResourceDeposit(this.scene, this.terrain, r.type, r.x, r.z)));
+      this.resourceDeposits.push(this.registerEntity(new ResourceDeposit(this.terrain, r.type, r.x, r.z)));
     }
   }
 
@@ -619,7 +620,7 @@ export class GameManager {
             const z = n.z + Math.sin(ang) * 9;
             if (isLand(x, z)) { dx = x; dz = z; break; }
           }
-          const dep = new ResourceDeposit(this.scene, this.terrain, n.deposit.type, dx, dz);
+          const dep = new ResourceDeposit(this.terrain, n.deposit.type, dx, dz);
           dep.resourcesRemaining = n.deposit.amount;
           dep.maxResources = n.deposit.amount;
           this.resourceDeposits.push(this.registerEntity(dep));
@@ -730,7 +731,7 @@ export class GameManager {
         if (tooCloseToTree) continue;
 
         const type = this.rngMap.next() < 0.65 ? preferredType : this.rngMap.pick(treeTypes);
-        this.trees.push(this.registerEntity(new Tree(this.scene, this.terrain, x, z, type, this.treeManager, this.rngMap)));
+        this.trees.push(this.registerEntity(new Tree(this.terrain, x, z, type, this.rngMap)));
         placed++;
       }
     };
@@ -1117,7 +1118,7 @@ export class GameManager {
     // Clean up any depleted tree stumps inside the building footprint so they do not poke through floors
     const bRadius = b.collisionRadius || 3.0;
     this.trees.forEach(t => {
-      if (t.isDead && t.stumpMesh) {
+      if (t.hasStump) {
         const d = Math.hypot(x - t.mesh.position.x, z - t.mesh.position.z);
         if (d < bRadius + 0.5) {
           t.dispose();
@@ -1964,9 +1965,8 @@ export class GameManager {
 
     this.allUnits.forEach(u => u.dispose?.());
     this.buildings.forEach(b => (b.dispose ? b.dispose() : this.scene.remove(b.mesh)));
-    this.trees.forEach(t => (t.dispose ? t.dispose() : this.scene.remove(t.mesh)));
-    this.resourceDeposits.forEach(r => this.scene.remove(r.mesh));
-    this.critters.forEach(c => c.dispose());
+    this.trees.forEach(t => t.dispose());
+        this.critters.forEach(c => c.dispose());
     this.critters = [];
     this.treeManager?.dispose();
     if (this._wallBatches) {

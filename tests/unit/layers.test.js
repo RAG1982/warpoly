@@ -41,6 +41,17 @@ describe('camadas puras (F2-08)', () => {
     });
   }
 
+  // F2-08b: entidades migradas para src/sim (sem three.js; malha em src/render/*View.js).
+  it('entidades de simulação migradas (Tree, ResourceDeposit, Critter, Body) não importam three.js nem usam Object3D', () => {
+    const offenders = [];
+    for (const name of ['Tree', 'ResourceDeposit', 'Critter', 'Body']) {
+      const code = stripComments(readFileSync(join(ROOT, 'sim', `${name}.js`), 'utf8'));
+      if (/\bTHREE\b|from\s+['"]three/.test(code)) offenders.push(`${name}.js: three.js`);
+      if (/\b(scene\.(add|remove)|Object3D|ModelFactory)\b/.test(code)) offenders.push(`${name}.js: malha/cena`);
+    }
+    expect(offenders).toEqual([]);
+  });
+
   it('src/sim só importa de src/sim e src/data', () => {
     const bad = [];
     for (const f of listJs(join(ROOT, 'sim'))) {

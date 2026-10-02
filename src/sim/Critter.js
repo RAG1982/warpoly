@@ -1,5 +1,5 @@
-import { ModelFactory } from './ModelFactory.js';
-import { NEUTRAL_OWNER_ID } from '../sim/EntityIds.js';
+import { NEUTRAL_OWNER_ID } from './EntityIds.js';
+import { Body } from './Body.js';
 
 /**
  * F3-10: critter decorativo (ovelha/porco). Classe leve, SEM `Unit`: sem animador, sem barra de
@@ -29,7 +29,6 @@ export class Critter {
    */
   constructor(gm, species, x, z, rng, radius = 6) {
     this.gameManager = gm;
-    this.scene = gm.scene;
     this.terrain = gm.terrain;
     this.species = species;
     this.type = `critter_${species}`;
@@ -59,12 +58,11 @@ export class Critter {
     this._fleeDz = 1;
     this._bob = rng.next() * Math.PI * 2;
 
-    this.mesh = ModelFactory.createCritter(species);
-    this.mesh.position.set(x, this.terrain.getHeight(x, z), z);
+    // Corpo de simulação (a malha vive em `render/CritterView`, que copia posição/rotação/visibilidade).
+    this.mesh = new Body(x, this.terrain.getHeight(x, z), z);
     this.mesh.rotation.y = rng.next() * Math.PI * 2;
-    this.mesh.scale.setScalar(1.4);
     this.mesh.userData.entity = this;
-    this.scene.add(this.mesh);
+    this.position = this.mesh.position;
   }
 
   /** Critters nunca são "inimigos" (clique esquerdo apenas seleciona; ataque é por ordem explícita). */
@@ -185,6 +183,5 @@ export class Critter {
   dispose() {
     if (this.isDisposed) return;
     this.isDisposed = true;
-    if (this.mesh && this.scene) this.scene.remove(this.mesh);
   }
 }

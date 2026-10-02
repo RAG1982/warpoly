@@ -80,7 +80,7 @@ try {
     const r = window.game.sceneManager.renderer;
     const gm = window.game.gameManager;
     const calls = r.info.render.calls;
-    const batches = Object.values(gm._wallBatches || {});
+    const batches = Object.values(gm.entityViews?._wallBatches || {});
     batches.forEach(b => { b.mesh.visible = false; });
     return new Promise(res => requestAnimationFrame(() => requestAnimationFrame(() => {
       const callsHidden = r.info.render.calls;

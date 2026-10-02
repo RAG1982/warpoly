@@ -41,10 +41,10 @@ describe('camadas puras (F2-08)', () => {
     });
   }
 
-  // F2-08b: entidades migradas para src/sim (sem three.js; malha em src/render/*View.js).
-  it('entidades de simulação migradas (Tree, ResourceDeposit, Critter, Body, FogOfWar, FogGrid) não importam three.js nem usam Object3D', () => {
+  // F2-08b/c: entidades migradas para src/sim (sem three.js; malha em src/render/*View.js).
+  it('entidades de simulação migradas (Tree, ResourceDeposit, Critter, Unit, Building, Wall, Terrain, Pathfinder, GameManager, Body, FogOfWar, FogGrid) não importam three.js nem usam Object3D', () => {
     const offenders = [];
-    for (const name of ['Tree', 'ResourceDeposit', 'Critter', 'Body', 'FogOfWar', 'FogGrid']) {
+    for (const name of ['Tree', 'ResourceDeposit', 'Critter', 'Unit', 'Building', 'Wall', 'Terrain', 'Pathfinder', 'GameManager', 'Body', 'FogOfWar', 'FogGrid']) {
       const code = stripComments(readFileSync(join(ROOT, 'sim', `${name}.js`), 'utf8'));
       if (/\bTHREE\b|from\s+['"]three/.test(code)) offenders.push(`${name}.js: three.js`);
       if (/\b(scene\.(add|remove)|Object3D|ModelFactory)\b/.test(code)) offenders.push(`${name}.js: malha/cena`);
@@ -52,13 +52,13 @@ describe('camadas puras (F2-08)', () => {
     expect(offenders).toEqual([]);
   });
 
-  it('src/sim só importa de src/sim e src/data', () => {
+  it('src/sim só importa de src/sim, src/data e src/ai (a IA, pura, só importa sim/data)', () => {
     const bad = [];
     for (const f of listJs(join(ROOT, 'sim'))) {
       const code = stripComments(readFileSync(f, 'utf8'));
       for (const m of code.matchAll(/from\s+['"](\.\.?\/[^'"]+)['"]/g)) {
         const target = m[1];
-        if (!target.startsWith('./') && !target.startsWith('../data/')) bad.push(`${relative(ROOT, f)} → ${target}`);
+        if (!target.startsWith('./') && !target.startsWith('../data/') && !target.startsWith('../ai/')) bad.push(`${relative(ROOT, f)} → ${target}`);
       }
     }
     expect(bad).toEqual([]);

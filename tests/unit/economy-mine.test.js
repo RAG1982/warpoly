@@ -17,9 +17,9 @@ import { CARRY, MINE_ENTER_TIME, MINE_SLOTS } from '../../src/data/index.js';
  */
 function makeGm(seed = 7) {
   const scene = new THREE.Scene();
-  const terrain = new Terrain(scene);
+  const terrain = new Terrain();
   const cfg = createMatchConfig({ seed, headless: true });
-  return new GameManager(scene, terrain, null, null, cfg);
+  return new GameManager(terrain, null, null, cfg);
 }
 
 function tick(gm, workers, n = 1) {

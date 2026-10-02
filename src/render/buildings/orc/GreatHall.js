@@ -1,5 +1,5 @@
 import * as THREE from 'three';
-import { Building } from '../../Building.js';
+import { BuildingView } from '../../BuildingView.js';
 import { GLTFBuildingLoader } from '../../../core/GLTFBuildingLoader.js';
 import { EVT } from '../../../sim/events.js';
 
@@ -11,17 +11,13 @@ function posOf(v) {
  * GreatHall — Fortaleza e Centro Comunitário da Facção Orc (Tier 1)
  *
  * Arquitetura (Engine & Gameplay):
- * - Extende a classe base Building.
+ * - Extende `BuildingView` (a entidade de simulação é `Building`, em src/sim).
  * - Suporta carregamento de modelo glTF (great_hall_orc.glb) com fallback procedural AAA.
  * - VFX: Estandartes de guerra da Horda com ondulação dinâmica de vento via código senoidal.
  * - VFX: Chaminé do conselho expelindo baforadas contínuas de fumaça.
  * - VFX: Braseiro da entrada com PointLight animada e cintilação de calor.
  */
-export class GreatHall extends Building {
-  constructor(scene, terrain, x, z, isConstructed = true, faction = 'enemy') {
-    super(scene, terrain, 'great_hall', x, z, isConstructed, faction);
-  }
-
+export class GreatHall extends BuildingView {
   initCustomVFX() {
     this.bannerOscillationTimer = Math.random() * Math.PI * 2;
     this.smokePuffTimer = 0;

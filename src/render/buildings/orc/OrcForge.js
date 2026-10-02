@@ -1,5 +1,5 @@
 import * as THREE from 'three';
-import { Building } from '../../Building.js';
+import { BuildingView } from '../../BuildingView.js';
 import { EVT } from '../../../sim/events.js';
 
 function posOf(v) {
@@ -10,18 +10,14 @@ function posOf(v) {
  * OrcForge — Forja de Guerra, Armaria e Fundição da Horda Orc
  *
  * Arquitetura (Engine & Gameplay):
- * - Extende a classe base Building.
+ * - Extende `BuildingView` (a entidade de simulação é `Building`, em src/sim).
  * - Centro de aprimoramentos bélicos (+Dano de armas, +Armadura de placas).
  * - VFX: Fogo intenso na fornalha aberta com Shader/Malha de chamas animadas.
  * - VFX: PointLight incandescente de alta potência com cintilação de calor termodinâmico.
  * - VFX: Chaminé alta de basalto expelindo fumaça preta espessa de carvão.
  * - VFX: Faíscas brilhantes de metal incandescente na bigorna durante a forja.
  */
-export class OrcForge extends Building {
-  constructor(scene, terrain, x, z, isConstructed = true, faction = 'enemy') {
-    super(scene, terrain, 'orc_forge', x, z, isConstructed, faction);
-  }
-
+export class OrcForge extends BuildingView {
   initCustomVFX() {
     this.flickerTimer = Math.random() * 10;
     this.smokeTimer = 0;

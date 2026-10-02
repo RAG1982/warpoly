@@ -96,9 +96,9 @@ describe('GameManager.placeBuilding valida requisitos (integração leve)', () =
     const { createMatchConfig } = await import('../../src/sim/MatchConfig.js');
 
     const scene = new THREE.Scene();
-    const terrain = new Terrain(scene);
+    const terrain = new Terrain();
     const cfg = createMatchConfig({ seed: 3, headless: true });
-    const gm = new GameManager(scene, terrain, null, null, cfg);
+    const gm = new GameManager(terrain, null, null, cfg);
 
     const owner = gm.getPlayer(0);
     owner.resources.wood = 500;
@@ -119,9 +119,9 @@ describe('GameManager.placeBuilding valida requisitos (integração leve)', () =
     const { createMatchConfig } = await import('../../src/sim/MatchConfig.js');
 
     const scene = new THREE.Scene();
-    const terrain = new Terrain(scene);
+    const terrain = new Terrain();
     const cfg = createMatchConfig({ seed: 3, headless: true });
-    const gm = new GameManager(scene, terrain, null, null, cfg);
+    const gm = new GameManager(terrain, null, null, cfg);
 
     const owner = gm.getPlayer(0);
     owner.resources.wood = 500;

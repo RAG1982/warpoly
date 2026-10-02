@@ -18,8 +18,8 @@ import { SaveStore, createMemoryBackend } from '../../src/core/SaveStore.js';
  */
 function newGm(seed = 7) {
   const scene = new THREE.Scene();
-  const terrain = new Terrain(scene);
-  return new GameManager(scene, terrain, null, null, createMatchConfig({ seed, headless: true }));
+  const terrain = new Terrain();
+  return new GameManager(terrain, null, null, createMatchConfig({ seed, headless: true }));
 }
 
 /** Script do jogador local: depende só do estado e do tick (reprodutível em qualquer instância). */
@@ -63,7 +63,7 @@ describe('save/load (F2-06)', () => {
 
     // restaura numa partida nova criada a partir da config do save
     const scene = new THREE.Scene();
-    const gm = new GameManager(scene, new Terrain(scene), null, null, { ...save.config, headless: true });
+    const gm = new GameManager(new Terrain(), null, null, { ...save.config, headless: true });
     const res = restoreSync(gm, save);
     expect(res.ok).toBe(true);
     expect(stateChecksum(gm)).toBe(save.checksum);
@@ -79,13 +79,13 @@ describe('save/load (F2-06)', () => {
     run(a, 1500);
     const s1 = captureSave(a);
     const scene = new THREE.Scene();
-    const b = new GameManager(scene, new Terrain(scene), null, null, { ...s1.config, headless: true });
+    const b = new GameManager(new Terrain(), null, null, { ...s1.config, headless: true });
     expect(restoreSync(b, s1).ok).toBe(true);
     run(b, 2500);
     const s2 = captureSave(b);
     expect(s2.commands.length).toBeGreaterThanOrEqual(s1.commands.length);
     const scene2 = new THREE.Scene();
-    const c = new GameManager(scene2, new Terrain(scene2), null, null, { ...s2.config, headless: true });
+    const c = new GameManager(new Terrain(), null, null, { ...s2.config, headless: true });
     expect(restoreSync(c, s2).ok).toBe(true);
   }, 60000);
 
@@ -103,7 +103,7 @@ describe('save/load (F2-06)', () => {
     run(a, 400);
     const save = captureSave(a);
     const scene = new THREE.Scene();
-    const gm = new GameManager(scene, new Terrain(scene), null, null, { ...save.config, headless: true });
+    const gm = new GameManager(new Terrain(), null, null, { ...save.config, headless: true });
     expect(restoreSync(gm, { ...save, checksum: save.checksum ^ 1 }).ok).toBe(false);
     expect(() => parseSave('{não é json')).toThrow(/corrompido/);
     expect(() => parseSave({ ...save, version: 999 })).toThrow(/incompatível/);

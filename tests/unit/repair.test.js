@@ -11,9 +11,9 @@ import { getBuildingDef } from '../../src/data/index.js';
 
 function makeGm(seed = 7, keepAi = false) {
   const scene = new THREE.Scene();
-  const terrain = new Terrain(scene);
+  const terrain = new Terrain();
   const cfg = createMatchConfig({ seed, headless: true });
-  const gm = new GameManager(scene, terrain, null, null, cfg);
+  const gm = new GameManager(terrain, null, null, cfg);
   if (!keepAi) {
     gm.aiDirectors.forEach(d => d.dispose?.());
     gm.aiDirectors = [];

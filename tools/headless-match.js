@@ -72,7 +72,7 @@ async function main() {
   });
 
   const scene = new THREE.Scene();
-  const gm = new GameManager(scene, new Terrain(scene, getMap(cfg.mapId)), null, null, cfg);
+  const gm = new GameManager(new Terrain(getMap(cfg.mapId)), null, null, cfg);
 
   const maxTicks = Math.round((opts.maxMinutes * 60) / SIM_DT);
   const t0 = Date.now();

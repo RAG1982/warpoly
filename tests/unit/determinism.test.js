@@ -16,9 +16,9 @@ import { SIM_DT } from '../../src/sim/constants.js';
  */
 function runHeadless(seed, ticks) {
   const scene = new THREE.Scene();
-  const terrain = new Terrain(scene);
+  const terrain = new Terrain();
   const cfg = createMatchConfig({ seed, headless: true });
-  const gm = new GameManager(scene, terrain, null, null, cfg);
+  const gm = new GameManager(terrain, null, null, cfg);
   for (let i = 0; i < ticks; i++) gm.simStep(SIM_DT);
   return gm.checksums.map(c => c.hash);
 }

@@ -1,5 +1,5 @@
 import * as THREE from 'three';
-import { Building } from '../Building.js';
+import { BuildingView } from '../BuildingView.js';
 import { EVT } from '../../sim/events.js';
 
 function posOf(v) {
@@ -10,7 +10,7 @@ function posOf(v) {
  * HumanForge — Forja Real, Armaria e Fundição da Aliança Humana
  *
  * Arquitetura (Engine & Gameplay):
- * - Extende a classe base Building.
+ * - Extende `BuildingView` (a entidade de simulação é `Building`, em src/sim).
  * - Centro de pesquisas e aprimoramentos bélicos (+Ataque, +Defesa para Infantaria e Arqueiros).
  * - Visual fiel a forjaHumanos.png:
  *   - Fornalha semicircular de pedra com lareira aberta e braseiro ardente.
@@ -23,11 +23,7 @@ function posOf(v) {
  * - VFX: Chamas procedurais animadas no interior da lareira e sobre a bigorna.
  * - VFX: Fumaça subindo da chaminé e faíscas brilhantes ao forjar melhorias.
  */
-export class HumanForge extends Building {
-  constructor(scene, terrain, x, z, isConstructed = true, faction = 'player') {
-    super(scene, terrain, 'forge', x, z, isConstructed, faction);
-  }
-
+export class HumanForge extends BuildingView {
   initCustomVFX() {
     this.flickerTimer = Math.random() * 10;
     this.smokeTimer = 0;

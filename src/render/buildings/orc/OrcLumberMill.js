@@ -1,21 +1,17 @@
 import * as THREE from 'three';
-import { Building } from '../../Building.js';
+import { BuildingView } from '../../BuildingView.js';
 import { EVT } from '../../../sim/events.js';
 
 /**
  * OrcLumberMill — Serraria e Centro Madeireiro Industrial da Horda Orc
  *
  * Arquitetura (Engine & Gameplay):
- * - Extende a classe base Building.
+ * - Extende `BuildingView` (a entidade de simulação é `Building`, em src/sim).
  * - Ponto de entrega de madeira para os Peons Orcs.
  * - VFX: Enorme serra circular dentada (Anim_SawBlade) que gira constantemente em torno do seu eixo no update().
  * - VFX: Aceleração da serra e jatos de cavacos de madeira quando toras são processadas.
  */
-export class OrcLumberMill extends Building {
-  constructor(scene, terrain, x, z, isConstructed = true, faction = 'enemy') {
-    super(scene, terrain, 'orc_lumber_mill', x, z, isConstructed, faction);
-  }
-
+export class OrcLumberMill extends BuildingView {
   initCustomVFX() {
     this.sawSpeed = 6.0; // Velocidade base em radianos/segundo
     this.targetSawSpeed = 6.0;

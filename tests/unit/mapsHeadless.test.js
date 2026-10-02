@@ -38,9 +38,9 @@ describe('mapa ilhas-4p (F2-05, headless)', () => {
 
   it('FFA de 4 jogadores roda 2000 ticks sem exceção e as IAs crescem', () => {
     const scene = new THREE.Scene();
-    const terrain = new Terrain(scene, getMap('ilhas-4p'));
+    const terrain = new Terrain(getMap('ilhas-4p'));
     const cfg = ffaConfig(7);
-    const gm = new GameManager(scene, terrain, null, null, cfg);
+    const gm = new GameManager(terrain, null, null, cfg);
 
     const initialUnits = gm.allUnits.length;
     expect(initialUnits).toBe(4 * 5 + 8); // 2 workers + 2 melee + 1 ranged por jogador (START_LAYOUT) + 8 bandidos (F3-10: 2 acampamentos × 4)

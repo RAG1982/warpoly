@@ -15,9 +15,9 @@ import { EVT } from '../../src/sim/events.js';
  */
 function runHeadlessCountingEvents(seed, ticks) {
   const scene = new THREE.Scene();
-  const terrain = new Terrain(scene);
+  const terrain = new Terrain();
   const cfg = createMatchConfig({ seed, headless: true });
-  const gm = new GameManager(scene, terrain, null, null, cfg);
+  const gm = new GameManager(terrain, null, null, cfg);
 
   const counts = {
     [EVT.UNIT_TRAINED]: 0,

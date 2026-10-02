@@ -16,9 +16,9 @@ import { Critter } from '../../src/sim/Critter.js';
 /** F3-10 — neutros hostis (acampamento de bandidos) e critters. Partidas headless. */
 function makeGm(seed = 42, mapId = 'continental-1v1') {
   const scene = new THREE.Scene();
-  const terrain = new Terrain(scene, getMap(mapId));
+  const terrain = new Terrain(getMap(mapId));
   const cfg = createMatchConfig({ seed, headless: true, mapId });
-  return new GameManager(scene, terrain, null, null, cfg);
+  return new GameManager(terrain, null, null, cfg);
 }
 
 function step(gm, n) {

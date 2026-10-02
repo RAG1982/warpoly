@@ -431,31 +431,31 @@ export class ModelFactory {
 
   // --- Orc Buildings ---
   static createGreatHall() {
-    return this.getOrCreateModel('great_hall', createGreatHall);
+    return this._glbOr('great_hall', () => this.getOrCreateModel('great_hall', createGreatHall));
   }
 
   static createOrcBarracks() {
-    return this.getOrCreateModel('orc_barracks', createOrcBarracks);
+    return this._glbOr('orc_barracks', () => this.getOrCreateModel('orc_barracks', createOrcBarracks));
   }
 
   static createPigFarm() {
-    return this.getOrCreateModel('pig_farm', createPigFarm);
+    return this._glbOr('pig_farm', () => this.getOrCreateModel('pig_farm', createPigFarm));
   }
 
   static createOrcLumberMill() {
-    return this.getOrCreateModel('orc_lumber_mill', createOrcLumberMill);
+    return this._glbOr('orc_lumber_mill', () => this.getOrCreateModel('orc_lumber_mill', createOrcLumberMill));
   }
 
   static createOrcWatchtower() {
-    return this.getOrCreateModel('orc_watchtower', createOrcWatchtower);
+    return this._glbOr('orc_watchtower', () => this.getOrCreateModel('orc_watchtower', createOrcWatchtower));
   }
 
   static createOrcHouse() {
-    return this.getOrCreateModel('orc_house', createOrcHouse);
+    return this._glbOr('orc_house', () => this.getOrCreateModel('orc_house', createOrcHouse));
   }
 
   static createOrcForge() {
-    return this.getOrCreateModel('orc_forge', createOrcForge);
+    return this._glbOr('orc_forge', () => this.getOrCreateModel('orc_forge', createOrcForge));
   }
 
   // --- Environment & Props ---

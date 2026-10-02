@@ -55,6 +55,7 @@ async function main() {
 
   const THREE = await import('three');
   const { GameManager } = await import('../src/core/GameManager.js');
+  await import('../src/ai/registerAI.js');
   const { Terrain } = await import('../src/world/Terrain.js');
   const { createMatchConfig } = await import('../src/sim/MatchConfig.js');
   const { getMap } = await import('../src/data/maps/index.js');

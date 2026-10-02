@@ -62,6 +62,10 @@ export const EVT = Object.freeze({
   HAZARD_SPAWNED: 'hazard_spawned',
   HAZARD_REMOVED: 'hazard_removed',
 
+  /** F2-08d: seleção local feita (som de seleção) / ordem emitida pelo jogador local (som de ordem) — só apresentação. */
+  SELECTED: 'selected',
+  ORDER_ISSUED: 'order_issued',
+
   PLAYER_DEFEATED: 'player_defeated',
   MATCH_WON: 'match_won',
   MATCH_LOST: 'match_lost'
@@ -99,6 +103,9 @@ export const EVT = Object.freeze({
  * EVT.PROJECTILE_HIT   {kind:'arrow'|'axe'|'bolt'|'boulder', pos:Pos, ownerId:number, splashRadius?:number}  (F4-02: bolt/boulder = cerco, impacto em área)
  * EVT.MELEE_HIT        {pos:Pos, ownerId:number}
  * EVT.EXPLOSION        {pos:Pos, radius:number, ownerId:number}  (F4-05)
+ *
+ * EVT.SELECTED      {entityId:number, ownerId:number}  (F2-08d)
+ * EVT.ORDER_ISSUED  {ownerId:number}  (F2-08d)
  *
  * EVT.UNDER_ATTACK  {ownerId:number, pos:Pos}
  * EVT.NOTIFY        {ownerId:number, text:string}

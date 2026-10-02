@@ -19,6 +19,10 @@ export function createAudioEvents(gm, soundManager) {
   const on = (type, fn) => offs.push(gm.events.on(type, fn, true)); // true = apresentação (F2-06)
   const isLocal = ownerId => ownerId === gm.localPlayerId;
 
+  // F2-08d: sons de seleção/ordem do jogador local (antes chamados direto por `GameManager.selectSingle/issueOrder`).
+  on(EVT.SELECTED, () => soundManager.playSelect());
+  on(EVT.ORDER_ISSUED, () => soundManager.playOrder());
+
   // Coleta de recursos: som só quando é o próprio jogador local que entrega (era `isLocal`).
   on(EVT.RESOURCE_GATHERED, ({ ownerId }) => {
     if (isLocal(ownerId)) soundManager.playOrder();

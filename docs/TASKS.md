@@ -82,11 +82,11 @@ Sonnet 5.5 escreve a spec em `docs/specs/<ID>.md`; agente **Sonnet** executa; o 
 |---|---|---|---|---|
 | F0 Fundação | 7 | 0 | 0 | 7 |
 | F1 Desempenho | 10 | 1 | 0 | 9 |
-| F2 Núcleo | 8 | 0 | 1 | 7 |
+| F2 Núcleo | 8 | 0 | 0 | 8 |
 | F3 Jogabilidade WC2 base | 12 | 0 | 0 | 12 |
 | F4 Jogabilidade WC2 expansão | 8 | 2 | 0 | 6 |
 | F5 IA | 6 | 1 | 1 | 4 |
-| F6 HUD/UX | 9 | 7 | 0 | 2 |
+| F6 HUD/UX | 9 | 4 | 0 | 5 |
 | F7 Arte/Áudio | 11 | 10 | 0 | 1 |
 | F8 Conteúdo | 6 | 6 | 0 | 0 |
 | F9 Multiplayer | 5 | 5 | 0 | 0 |
@@ -242,7 +242,7 @@ Sonnet 5.5 escreve a spec em `docs/specs/<ID>.md`; agente **Sonnet** executa; o 
 - **Resultado**: `src/sim/EventBus.js` + `events.js`; ouvintes `audio/AudioEvents.js`, `render/VfxEvents.js`, `ui/UiEvents.js` (não criados em headless); zero chamadas diretas de som/VFX/UI na simulação; `UnitAnimator` em `src/animation/`. Determinismo intacto. 197 testes. B13 corrigido.
 
 ### F2-08 · Separação sim/render
-- **Status**: `DOING(parcial, 2026-10-01)` — sim/ai/data sem three.js, projéteis em dados, `headless-match` roda; F2-08b feita (Tree/ResourceDeposit/Critter/FogOfWar em src/sim, views em src/render; checksum 544996273 igual). Falta F2-08c: Unit/Building ainda seguram THREE.Object3D (UnitView/BuildingView, unit.tool, Wall, GameManager sem scene) (plano em docs/01_ARQUITETURA.md) · Lane CORE · Onda 4 · Dep: F2-02, F2-03
+- **Status**: `DONE(2026-10-02, com ressalva)` — F2-08/08b/08c: sim/ai/data/Unit/Building/Wall/Terrain/GameManager sem three.js (guardado por layers.test.js); headless-match checksum igual. Pendência F2-08d: `GameManager.selectSingle/issueOrder` ainda chamam o soundManager injetado; sim ainda importa `../ai/` (GameManager cria AIDirector)
 - **Fazer**: `src/sim/` sem import de three.js; `src/render/` com views por entidade; permitir rodar a simulação headless (Node) para testes e IA×IA.
 - **Aceite**: `node tools/headless-match.js --seed 1` roda uma partida IA×IA até o fim.
 
@@ -380,7 +380,7 @@ Sonnet 5.5 escreve a spec em `docs/specs/<ID>.md`; agente **Sonnet** executa; o 
 - `DONE(520dcc7)` · UI · Onda 1 (maquete) / Onda 2 (integração com F2-04) · Novo Jogo, Campanha, Multiplayer, Opções, Inspetor, Créditos; fundo 3D animado da cena; substitui parâmetros de URL.
 
 ### F6-02 · Tela de configuração de partida (Skirmish)
-- `DOING(sonnet, 2026-10-02)` · UI · Dep: F2-04 · Escolha de facção (Aliança/Horda com prévia 3D), mapa (miniatura), 1–7 oponentes IA, times, cores, dificuldade, recursos iniciais, condição de vitória, seed.
+- `DONE(2026-10-02)` · UI · Dep: F2-04 · Escolha de facção (Aliança/Horda com prévia 3D), mapa (miniatura), 1–7 oponentes IA, times, cores, dificuldade, recursos iniciais, condição de vitória, seed.
 
 ### F6-03 · HUD responsiva estilo WC2 (corrige B11)
 - `DONE(PR#3)` · UI · Dep: F0-06 · Layout que funciona de 1024×768 a 4K (escala de UI); painel de seleção com retrato; seleção múltipla em grade com barras de vida; card de comandos 3×3 com atalhos visíveis; tooltips com custo, requisitos e descrição.
@@ -389,7 +389,7 @@ Sonnet 5.5 escreve a spec em `docs/specs/<ID>.md`; agente **Sonnet** executa; o 
 - `TODO` · UI · Dep: F2-05, F1-05 · Renderizado a partir do mapa/terreno real, trapézio do frustum da câmera, pings de ataque, ordens por clique direito, cores de jogador.
 
 ### F6-05 · Alertas e feedback
-- `DOING(sonnet, 2026-10-02)` · UI+AUDIO · Dep: F2-07 · "Estamos sob ataque", "Mina esgotada", "Pesquisa concluída", "Construção concluída", "Não há comida suficiente"; ping no minimapa; Espaço vai ao alerta.
+- `DONE(2026-10-02)` · UI+AUDIO · Dep: F2-07 · "Estamos sob ataque", "Mina esgotada", "Pesquisa concluída", "Construção concluída", "Não há comida suficiente"; ping no minimapa; Espaço vai ao alerta.
 
 ### F6-06 · Cursores contextuais e destaque
 - `TODO` · UI+PERF · Dep: F2-02 · Cursor de atacar/coletar/construir/inválido/alvo de magia; contorno (outline) na entidade sob o mouse.
@@ -398,7 +398,7 @@ Sonnet 5.5 escreve a spec em `docs/specs/<ID>.md`; agente **Sonnet** executa; o 
 - `TODO` · UI · Dep: F3-09 · Pontuação estilo WC2 (unidades, construções, recursos, ranking), gráficos de evolução, botões Jogar de novo / Menu.
 
 ### F6-08 · Opções completas
-- `DOING(sonnet, 2026-10-02)` · UI · Dep: F1-04, F1-01 · Gráficos (presets + avançado: sombras, texturas, DPR, pós-proc., FPS alvo), áudio por canal, remapeamento de teclas, velocidade de rolagem, escala de UI, modo daltônico para cores de time. Persistência em localStorage.
+- `DONE(2026-10-02)` · UI · Dep: F1-04, F1-01 · Gráficos (presets + avançado: sombras, texturas, DPR, pós-proc., FPS alvo), áudio por canal, remapeamento de teclas, velocidade de rolagem, escala de UI, modo daltônico para cores de time. Persistência em localStorage.
 
 ### F6-09 · Internacionalização + tutorial (corrige B12)
 - `TODO` · UI · Dep: F6-03 · `src/i18n/{pt-BR,en}.json`, nenhum texto hardcoded; tutorial jogável (missão 0) ensinando coleta, construção, treino, combate.
@@ -416,7 +416,7 @@ Sonnet 5.5 escreve a spec em `docs/specs/<ID>.md`; agente **Sonnet** executa; o 
 - **Resultado**: `tools/blender/` (common.py, build_grunt.py, build_castle.py), `public/models/{grunt,castle}.glb` (meshopt+WebP), `src/entities/glbModels.js`, `?glb=1`. Grunt 35→8 draw calls, atlas 512²; Castelo 487→2 draw calls, atlas 1024². Inspetor: "Guerreiro Orc (Blender)" / "Castelo (Blender)". Aprovado pelo dono (visual e machado ok).
 
 ### F7-00b · Migração de todo o catálogo para o pipeline Blender
-- **Status**: `DOING(sonnet, 2026-10-01)` — Sonnet 5.5 modela. Feitos: unidades orcs/humanas base, cerco, conjuradores, cavalaria, Castelo, Estábulo, Covil, Torre Arcana, Santuário, Templo, Altar, Olho Vigia, Templário, Ogro Feiticeiro. Lote 1 (2026-10-02, mergeado): 4 aéreos, Aviário, Ninho, 6 construções humanas base (Quartel, Forja, Casa, Fazenda, Serraria, Torre de Vigia) e 7 orcs (Grande Salão, Quartel, Forja, Toca, Pocilga, Serraria, Torre de Vigia). Pendentes: muralha (WallBatch, cor por vértice), ambiente (árvores, minas, pedreira, neutros), ajuste de healthBarHeight/pegadas (Grande Salão, Quartel orc), Balão de Guerra fraco (6/10); demais construções, ambiente · Lane ART · Onda 2 · Dep: F7-00 aprovado
+- **Status**: `DOING(sonnet, 2026-10-01)` — Sonnet 5.5 modela. Feitos: unidades orcs/humanas base, cerco, conjuradores, cavalaria, Castelo, Estábulo, Covil, Torre Arcana, Santuário, Templo, Altar, Olho Vigia, Templário, Ogro Feiticeiro. Lote 1 (2026-10-02, mergeado): 4 aéreos, Aviário, Ninho, 6 construções humanas base (Quartel, Forja, Casa, Fazenda, Serraria, Torre de Vigia) e 7 orcs (Grande Salão, Quartel, Forja, Toca, Pocilga, Serraria, Torre de Vigia). Lote 2 (2026-10-02, mergeado): Balão refeito, Grande Salão/Quartel orc ajustados, healthBarHeight de 24 construções, Mina de Ouro, Pedreira, Acampamento Bandido, 3 árvores (oak/autumn/pine; bétula segue procedural), muralhas humana e orc. Pendentes: Acampamento (6,5/10) e Balão (7/10) a melhorar, bétula, capturas de balão em voo e fileira de muralhas, remover *Textures.js/modelos procedurais substituídos (hoje fallback ?glb=0)
 - **Fazer**: refazer os 37 modelos (prioridade: unidades orcs → construções grandes → ambiente), um agente por grupo de modelos em paralelo; remover `*Textures.js` procedurais substituídos. Substitui F1-02/F1-03/F1-01 para os modelos migrados.
 - **Aceite**: load < 5 s; cena inicial < 400 draw calls.
 

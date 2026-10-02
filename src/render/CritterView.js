@@ -4,6 +4,7 @@ import { ModelFactory } from '../entities/ModelFactory.js';
 export class CritterView {
   constructor(critter, scene) {
     this.critter = critter;
+    this.entity = critter;
     this.scene = scene;
     this.root = ModelFactory.createCritter(critter.species);
     this.root.scale.setScalar(1.4);

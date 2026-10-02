@@ -4,6 +4,7 @@ import { ModelFactory } from '../entities/ModelFactory.js';
 export class ResourceDepositView {
   constructor(deposit, scene) {
     this.deposit = deposit;
+    this.entity = deposit;
     this.scene = scene;
     this.root = deposit.type === 'gold' ? ModelFactory.createGoldMine() : ModelFactory.createStoneQuarry();
     const p = deposit.position;

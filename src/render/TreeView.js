@@ -17,6 +17,7 @@ export class TreeView {
    */
   constructor(tree, scene, treeManager) {
     this.tree = tree;
+    this.entity = tree;
     this.scene = scene;
     this.treeManager = treeManager;
     this.disposed = false;

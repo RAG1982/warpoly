@@ -84,7 +84,7 @@ Sonnet 5.5 escreve a spec em `docs/specs/<ID>.md`; agente **Sonnet** executa; o 
 | F1 Desempenho | 10 | 1 | 0 | 9 |
 | F2 Núcleo | 8 | 0 | 0 | 8 |
 | F3 Jogabilidade WC2 base | 12 | 0 | 0 | 12 |
-| F4 Jogabilidade WC2 expansão | 8 | 2 | 0 | 6 |
+| F4 Jogabilidade WC2 expansão | 8 | 1 | 1 | 6 |
 | F5 IA | 6 | 1 | 1 | 4 |
 | F6 HUD/UX | 9 | 0 | 0 | 9 |
 | F7 Arte/Áudio | 11 | 10 | 0 | 1 |
@@ -345,7 +345,7 @@ Sonnet 5.5 escreve a spec em `docs/specs/<ID>.md`; agente **Sonnet** executa; o 
 - `DONE(2026-10-01)` · GAME+ART · Dep: F3-06 · Batedor aéreo (máquina voadora/zepelim) e atacante aéreo (grifo/dragão); camada de voo ignora terreno; só atingível por distância/torres.
 
 ### F4-07 · Naval + Petróleo
-- `TODO` · GAME+ART+CONTENT · Dep: F2-05, F3-06 · **Petróleo só é liberado após o Centro da Cidade T2 (decisão D1).** Estaleiro, Fundição, Refinaria, Plataforma em poço de petróleo; petroleiro, destróier, transporte, encouraçado, submarino/tartaruga; navegação em água (grade separada), desembarque.
+- `DOING(sonnet, 2026-10-02)` (specs F4-07a/F4-07b; arte humana naval em paralelo a partir de docs/refs/naval/; arte orc aguarda referências do dono) · GAME+ART+CONTENT · Dep: F2-05, F3-06 · **Petróleo só é liberado após o Centro da Cidade T2 (decisão D1).** Estaleiro, Fundição, Refinaria, Plataforma em poço de petróleo; petroleiro, destróier, transporte, encouraçado, submarino/tartaruga; navegação em água (grade separada), desembarque.
 
 ### F4-08 · Heróis de campanha
 - `TODO` · GAME · Dep: F8-04 · Unidades únicas com stats maiores usadas em missões.

@@ -48,7 +48,14 @@ export const GLB_MODELS = {
   gryphon_rider: { url: `${BASE}models/gryphon_rider.glb`, root: 'GryphonRider', type: 'gryphon_rider' },
   war_serpent: { url: `${BASE}models/war_serpent.glb`, root: 'WarSerpent', type: 'war_serpent' },
   aviary: { url: `${BASE}models/aviary.glb`, root: 'Aviary', type: null },
-  serpent_nest: { url: `${BASE}models/serpent_nest.glb`, root: 'SerpentNest', type: null }
+  serpent_nest: { url: `${BASE}models/serpent_nest.glb`, root: 'SerpentNest', type: null },
+  // F7-00b lote 1 (grupo 2)
+  barracks: { url: `${BASE}models/barracks.glb`, root: 'Barracks', type: null },
+  forge: { url: `${BASE}models/forge.glb`, root: 'Forge', type: null },
+  cottage: { url: `${BASE}models/cottage.glb`, root: 'Cottage', type: null },
+  farm: { url: `${BASE}models/farm.glb`, root: 'Farm', type: null },
+  lumber_camp: { url: `${BASE}models/lumber_camp.glb`, root: 'LumberCamp', type: null },
+  watchtower: { url: `${BASE}models/watchtower.glb`, root: 'Watchtower', type: null }
 };
 
 export const glbEnabled = (() => {

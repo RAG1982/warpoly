@@ -378,7 +378,7 @@ export class ModelFactory {
   }
 
   static createLumberCamp() {
-    return this.getOrCreateModel('lumber_camp', createLumberCamp);
+    return this._glbOr('lumber_camp', () => this.getOrCreateModel('lumber_camp', createLumberCamp));
   }
 
   static createGoldMine() {
@@ -390,19 +390,19 @@ export class ModelFactory {
   }
 
   static createCottage() {
-    return this.getOrCreateModel('cottage', createCottage);
+    return this._glbOr('cottage', () => this.getOrCreateModel('cottage', createCottage));
   }
 
   static createBarracks() {
-    return this.getOrCreateModel('barracks', createBarracks);
+    return this._glbOr('barracks', () => this.getOrCreateModel('barracks', createBarracks));
   }
 
   static createWatchtower() {
-    return this.getOrCreateModel('watchtower', createWatchtower);
+    return this._glbOr('watchtower', () => this.getOrCreateModel('watchtower', createWatchtower));
   }
 
   static createFarm() {
-    return this.getOrCreateModel('farm', createFarm);
+    return this._glbOr('farm', () => this.getOrCreateModel('farm', createFarm));
   }
 
   static createBanditCamp() {
@@ -426,7 +426,7 @@ export class ModelFactory {
   }
 
   static createHumanForge() {
-    return this.getOrCreateModel('forge', createHumanForge);
+    return this._glbOr('forge', () => this.getOrCreateModel('forge', createHumanForge));
   }
 
   // --- Orc Buildings ---

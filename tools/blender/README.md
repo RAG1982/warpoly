@@ -42,6 +42,7 @@ os `.glb` em `public/models/` são artefatos reproduzíveis.
 | `build_aviary.py` | `public/models/aviary.glb` | Aviário de Grifos: torre de pedra, escada em espiral, plataforma de pouso com ninho e dossel; 2 draw calls, 7,4 mil tris, atlas 1024², ~410 KB |
 | `build_serpent_nest.py` | `public/models/serpent_nest.glb` | Ninho das Serpes: anel de basalto, ovos brilhantes, covil de costelas; 2 draw calls, 6,2 mil tris, ~345 KB |
 | `air_common.py` | — | helpers dos aéreos (asa de pano, membrana em leque, pena) |
+| `build_barracks.py` `build_forge.py` `build_cottage.py` `build_farm.py` `build_lumber_camp.py` `build_watchtower.py` | `public/models/{barracks,forge,cottage,farm,lumber_camp,watchtower}.glb` | construções base humanas (F7-00b): 2 draw calls cada, 3,3–6,3 mil tris, atlas 1024², 237–371 KB (helpers em `bld_house.py`) |
 | `unit_common.py` | — | helpers dos humanoides de rig plana (painel de tecido, tubo, mão, pipeline de bake/export/render) |
 | `siege_common.py` | — | helpers do cerco e das oficinas (rodas, correntes, engrenagens, proxy `Xf`) |
 | `bld_common.py` | — | helpers das construções (viga/tubo/tora entre pontos, cabeça de cavalo, crânio de ogro, bbox) |

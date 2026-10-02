@@ -144,3 +144,13 @@ def finish_building(root, name, glb, atlas_name, static_parts, banners, weights,
         rig.render('34_vermelho' if human else '34_azul', (1.0, 0.95, 1.0), 30)
         C.set_team_color(team_default)
     return st
+
+
+def squash_xz(objs, s):
+    """Encolhe a pegada (x e z do jogo = x e y do Blender) por `s` mantendo a altura: malha e posição do objeto."""
+    from mathutils import Matrix
+    for o in objs:
+        if o.type == 'MESH':
+            o.data.transform(Matrix.Diagonal((s, s, 1.0, 1.0)))
+        o.location.x *= s
+        o.location.y *= s

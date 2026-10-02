@@ -817,7 +817,7 @@ const MODEL_CATALOG = [
     sourceFile: 'tools/blender/build_war_balloon.py',
     create: createGlb('war_balloon'),
     description: 'Batedor aéreo orc gerado pelo pipeline Blender (public/models/war_balloon.glb): envelope em gomos de couro com faixa equatorial em cor de time, rede de cordas e espinhos de osso, braseiro aceso na boca, cesta de vime com crânio, orc vigia e hélice de popa de ossos.',
-    notes: 'Nós Torso, Head (vigia), Rotor (gira em z). ~3,9 mil triângulos, 4 draw calls, atlas 512², ~195 KB.'
+    notes: 'Nós Torso, Head (vigia), Rotor (gira em z). ~4,5 mil triângulos, 4 draw calls, atlas 512², ~211 KB (cesta de vime 1,9 × 1,9 com piso aberto, envelope menor, hélice em z −1,3).'
   },
   {
     id: 'gryphon_rider_glb',
@@ -960,7 +960,7 @@ const MODEL_CATALOG = [
     sourceFile: 'tools/blender/build_great_hall.py',
     create: createGlb('great_hall'),
     description: 'QG orc gerado pelo pipeline Blender (public/models/great_hall.glb): salão monumental de toras com telhado de placas de ferro e crista de chifres, pátio de paliçada com quatro bastiões, portão de presas com crânio, braseiros e racks de armas.',
-    notes: '5 draw calls (estática + 4 nós Anim_WarBanner_* animados pelo GreatHall.js), ~13,8 mil triângulos, atlas 1024², ~557 KB. Pegada ~12 (raio 5,5), altura ~10.'
+    notes: '5 draw calls (estática + 4 nós Anim_WarBanner_* animados pelo GreatHall.js), ~13,8 mil triângulos, atlas 1024², ~560 KB. Pegada ~11 (raio 5,5; paliçada de meia-largura 4,2), altura ~10,2.'
   },
   {
     id: 'orc_barracks_glb',
@@ -973,7 +973,7 @@ const MODEL_CATALOG = [
     sourceFile: 'tools/blender/build_orc_barracks.py',
     create: createGlb('orc_barracks'),
     description: 'Quartel orc gerado pelo pipeline Blender (public/models/orc_barracks.glb): arena de treino com paliçada, plataformas de guarda, portão de presas, salão de toras com telhado de peles, racks, pedra de afiar e forca com o boneco Anim_TrainingDummy.',
-    notes: '3 draw calls, ~8,4 mil triângulos, atlas 1024², ~390 KB. Pegada ~8 (raio 3,6), altura ~5,3. Nó Anim_TrainingDummy (pivô (2,8; 3,8; 1,4)).'
+    notes: '3 draw calls, ~8,4 mil triângulos, atlas 1024², ~390 KB. Pegada ~7,2 (raio 3,6; pegada encolhida por 0,88), altura ~5,3. Nó Anim_TrainingDummy (pivô (2,5; 3,8; 1,2)).'
   },
   {
     id: 'orc_forge_glb',

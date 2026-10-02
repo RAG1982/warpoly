@@ -20,8 +20,9 @@ try {
       obj[name] = (...a) => { const t = performance.now(); const r = orig(...a); arr.push(performance.now() - t); return r; };
     };
     wrap(fog, '_tickGrid', P.tick);
-    wrap(fog, 'cullHiddenEnemies', P.cull);
-    wrap(fog, '_uploadTexture', P.tex);
+    const view = window.game.gameManager.fogView;
+    wrap(view, 'cullHiddenEnemies', P.cull);
+    wrap(view, '_uploadTexture', P.tex);
     wrap(fog.buildingMemory, 'update', P.mem);
     wrap(fog, 'update', P.upd);
   });
@@ -31,7 +32,7 @@ try {
     const P = window.__fogProf;
     const b = window.__bench;
     return { tick: s(P.tick), cull: s(P.cull), tex: s(P.tex), mem: s(P.mem), update: s(P.upd), fps: b.fps, gmUpdate: b.gameUpdateMs,
-      quality: window.game.quality?.name, texSize: window.game.gameManager.fogOfWar.fogTexture.image.width };
+      quality: window.game.quality?.name, texSize: window.game.gameManager.fogView.fogTexture.image.width };
   });
   console.log(JSON.stringify(out, null, 1));
 } finally {

@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { FogGrid, BuildingMemory, FOG_UNEXPLORED, FOG_MEMORY, FOG_VISIBLE, MINIMAP_STYLE } from '../../src/core/FogGrid.js';
+import { FogGrid, BuildingMemory, FOG_UNEXPLORED, FOG_MEMORY, FOG_VISIBLE, MINIMAP_STYLE } from '../../src/sim/FogGrid.js';
 
 /** Um tick de 10 Hz com as posições de visão dadas: [[x, z, raio], ...] */
 function tick(grid, viewers) {

@@ -714,7 +714,7 @@ export class InputManager {
     }
     for (let i = 0; i < this._pickBlockerBuf.length; i++) {
       const e = this._pickBlockerBuf[i];
-      const m = e.mesh;
+      const m = this.gm.entityViews?.rootOf(e) ?? e.mesh; // árvores/minas: malha na view (F2-08b)
       if (!m?.parent) continue;
       if (e instanceof Building && !m.visible) continue;
       allMeshes.push(m);
@@ -723,7 +723,7 @@ export class InputManager {
     // F3-10: critters (≤ 40, fora das grades espaciais) também são clicáveis (alvo de ordem).
     const critters = this.gm.critters;
     for (let i = 0; i < critters.length; i++) {
-      const m = critters[i].mesh;
+      const m = this.gm.entityViews?.rootOf(critters[i]);
       if (m?.parent && m.visible) allMeshes.push(m);
     }
 

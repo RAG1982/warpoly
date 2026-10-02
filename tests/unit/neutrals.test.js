@@ -11,7 +11,7 @@ import { EVT } from '../../src/sim/events.js';
 import { CMD } from '../../src/sim/commands.js';
 import { SIM_DT } from '../../src/sim/constants.js';
 import { GUARD_LEASH } from '../../src/entities/Unit.js';
-import { Critter } from '../../src/entities/Critter.js';
+import { Critter } from '../../src/sim/Critter.js';
 
 /** F3-10 — neutros hostis (acampamento de bandidos) e critters. Partidas headless. */
 function makeGm(seed = 42, mapId = 'continental-1v1') {

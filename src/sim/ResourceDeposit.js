@@ -1,10 +1,8 @@
-import * as THREE from 'three';
-import { ModelFactory } from './ModelFactory.js';
 import { MINE_SLOTS } from '../data/index.js';
+import { Body } from './Body.js';
 
 export class ResourceDeposit {
-  constructor(scene, terrain, type, x, z) {
-    this.scene = scene;
+  constructor(terrain, type, x, z) {
     this.terrain = terrain;
     this.type = type; // 'gold' or 'stone'
     this.resourcesRemaining = 2500;
@@ -19,24 +17,15 @@ export class ResourceDeposit {
     this._depletedEmitted = false;
     this._justDepleted = false;
 
-    if (type === 'gold') {
-      this.name = 'Gold Mine';
-      this.mesh = ModelFactory.createGoldMine();
-    } else {
-      this.name = 'Stone Quarry';
-      this.mesh = ModelFactory.createStoneQuarry();
-    }
+    this.name = type === 'gold' ? 'Gold Mine' : 'Stone Quarry';
 
     this.collisionRadius = type === 'gold' ? 3.4 : 3.0;
 
     const h = this.terrain.getHeight(x, z);
-    this.mesh.position.set(x, h, z);
+    // Compat legado: `deposit.mesh.position` (corpo de simulação; a malha vive em `render/ResourceDepositView`).
+    this.mesh = new Body(x, h, z);
     this.mesh.userData.entity = this;
-    this.scene.add(this.mesh);
-  }
-
-  createQuarryMesh() {
-    return ModelFactory.createStoneQuarry();
+    this.position = this.mesh.position;
   }
 
   /**

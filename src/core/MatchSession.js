@@ -12,6 +12,7 @@ import { createAudioEvents } from '../audio/AudioEvents.js';
 import { createVfxEvents } from '../render/VfxEvents.js';
 import { HazardView } from '../render/HazardView.js';
 import { ProjectileViews } from '../render/ProjectileViews.js';
+import { EntityViews } from '../render/EntityViews.js';
 import { createUiEvents } from '../ui/UiEvents.js';
 
 /**
@@ -64,6 +65,13 @@ export class MatchSession {
     this.gameManager.sceneManager = sceneManager;
     this.inputManager.uiManager = this.uiManager;
 
+    // F2-08b: malhas das entidades de simulação puras (árvores, minas, critters) — antes do warm-up de shaders.
+    if (!this.gameManager.headless) {
+      this.entityViews = new EntityViews(this.gameManager, scene);
+      this.gameManager.entityViews = this.entityViews;
+      this.entityViews.update();
+    }
+
     this.gameManager.focusCameraOnLocalBase();
     // Compila os shaders da cena viva antes de a névoa esconder objetos
     this.gameManager.warmLiveScene();
@@ -108,11 +116,13 @@ export class MatchSession {
     if (simulate) {
       const alpha = this.gameManager.advance(delta);
       this.gameManager.renderUpdate(delta, alpha);
+      this.entityViews?.update();
       this.projectileViews?.update(alpha);
       this.particleSystem.update(delta);
     } else {
       // Pausado: mantém a pose de simulação (sem avançar), billboards seguem a câmera.
       this.gameManager.renderUpdate(0, 1);
+      this.entityViews?.update();
       this.projectileViews?.update(1);
     }
     this.uiManager.update(delta);
@@ -137,6 +147,8 @@ export class MatchSession {
     if (this.gameManager.hazardView) { this.gameManager.hazardView.dispose(); this.gameManager.hazardView = null; }
     this.projectileViews?.dispose();
     this.projectileViews = null;
+    this.entityViews?.dispose();
+    this.entityViews = null;
     this._disposeUiEvents?.();
 
     // 1. Entrada e HUD primeiro: nada mais reage a eventos desta partida.

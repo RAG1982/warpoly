@@ -242,7 +242,7 @@ Sonnet 5.5 escreve a spec em `docs/specs/<ID>.md`; agente **Sonnet** executa; o 
 - **Resultado**: `src/sim/EventBus.js` + `events.js`; ouvintes `audio/AudioEvents.js`, `render/VfxEvents.js`, `ui/UiEvents.js` (não criados em headless); zero chamadas diretas de som/VFX/UI na simulação; `UnitAnimator` em `src/animation/`. Determinismo intacto. 197 testes. B13 corrigido.
 
 ### F2-08 · Separação sim/render
-- **Status**: `DOING(parcial, 2026-10-01)` — sim/ai/data sem three.js, projéteis em dados, `headless-match` roda; falta F2-08b: Unit/Building/Tree/ResourceDeposit/Critter/GameManager/FogOfWar ainda seguram THREE.Object3D (plano em docs/01_ARQUITETURA.md) · Lane CORE · Onda 4 · Dep: F2-02, F2-03
+- **Status**: `DOING(parcial, 2026-10-01)` — sim/ai/data sem three.js, projéteis em dados, `headless-match` roda; F2-08b feita (Tree/ResourceDeposit/Critter/FogOfWar em src/sim, views em src/render; checksum 544996273 igual). Falta F2-08c: Unit/Building ainda seguram THREE.Object3D (UnitView/BuildingView, unit.tool, Wall, GameManager sem scene) (plano em docs/01_ARQUITETURA.md) · Lane CORE · Onda 4 · Dep: F2-02, F2-03
 - **Fazer**: `src/sim/` sem import de three.js; `src/render/` com views por entidade; permitir rodar a simulação headless (Node) para testes e IA×IA.
 - **Aceite**: `node tools/headless-match.js --seed 1` roda uma partida IA×IA até o fim.
 

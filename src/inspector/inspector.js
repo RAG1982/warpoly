@@ -792,6 +792,86 @@ const MODEL_CATALOG = [
     description: 'Ogro xamã gerado a partir do Ogro (public/models/ogre_mage.glb): pele cinza-azulada com tinta ritual de raio luminosa, olhos elétricos, cabelo branco, cristal na testa, penacho de ossos e penas, colar de presas e cajado de xamã com cristal de raio no lugar da clava.',
     notes: 'Mesma rig aninhada do Ogro (Weapon em ArmR). ~7 mil triângulos, 11 draw calls, atlas 512². Rosto só na face frontal (+Z).'
   },
+  // F7-00b lote 1 (início)
+  {
+    id: 'glider_glb',
+    name: 'Planador de Engenho (Blender)',
+    category: 'units',
+    faction: 'human',
+    type: 'glider',
+    icon: '🪁',
+    glb: 'glider',
+    sourceFile: 'tools/blender/build_glider.py',
+    create: createGlb('glider'),
+    description: 'Batedor aéreo humano gerado pelo pipeline Blender (public/models/glider.glb): casco de madeira em forma de barco com quilha e esqui, bico de latão com hélice, mastro com cordame, duas asas de pano em cor de time com nervuras, cauda com leme e piloto de capacete e óculos.',
+    notes: 'Nós Torso (raiz), Head, WingL, WingR (batida de asas e bob do UnitAnimator.applyAir). ~2,9 mil triângulos, 7 draw calls, atlas 512², ~170 KB. Rosto só na frente (+Z).'
+  },
+  {
+    id: 'war_balloon_glb',
+    name: 'Balão de Guerra (Blender)',
+    category: 'units',
+    faction: 'orc',
+    type: 'war_balloon',
+    icon: '🎈',
+    glb: 'war_balloon',
+    sourceFile: 'tools/blender/build_war_balloon.py',
+    create: createGlb('war_balloon'),
+    description: 'Batedor aéreo orc gerado pelo pipeline Blender (public/models/war_balloon.glb): envelope em gomos de couro com faixa equatorial em cor de time, rede de cordas e espinhos de osso, braseiro aceso na boca, cesta de vime com crânio, orc vigia e hélice de popa de ossos.',
+    notes: 'Nós Torso, Head (vigia), Rotor (gira em z). ~3,9 mil triângulos, 4 draw calls, atlas 512², ~195 KB.'
+  },
+  {
+    id: 'gryphon_rider_glb',
+    name: 'Cavaleiro Grifo (Blender)',
+    category: 'units',
+    faction: 'human',
+    type: 'gryphon_rider',
+    icon: '🦅',
+    glb: 'gryphon_rider',
+    sourceFile: 'tools/blender/build_gryphon_rider.py',
+    create: createGlb('gryphon_rider'),
+    description: 'Ataque aéreo humano gerado pelo pipeline Blender (public/models/gryphon_rider.glb): grifo com corpo de leão, peito emplumado, cabeça de águia com bico em gancho, asas de penas em leque, sela com manta em cor de time e cavaleiro de aço com lança e flâmula.',
+    notes: 'Nós Torso, Head, WingL, WingR. ~5,1 mil triângulos, 7 draw calls, atlas 512², ~270 KB.'
+  },
+  {
+    id: 'war_serpent_glb',
+    name: 'Serpe de Guerra (Blender)',
+    category: 'units',
+    faction: 'orc',
+    type: 'war_serpent',
+    icon: '🐉',
+    glb: 'war_serpent',
+    sourceFile: 'tools/blender/build_war_serpent.py',
+    create: createGlb('war_serpent'),
+    description: 'Ataque aéreo orc gerado pelo pipeline Blender (public/models/war_serpent.glb): serpente alada de escamas verdes com ventre claro, crista dorsal de osso, couraça de ossos e ferro, sela com manta em cor de time, cabeça com presas, chifres e olhos âmbar na frente (+Z), asas de morcego com membrana em cor de time e ferrão de aço.',
+    notes: 'Nós Torso, Head, WingL, WingR. ~2,1 mil triângulos, 8 draw calls, atlas 512², ~165 KB.'
+  },
+  {
+    id: 'aviary_glb',
+    name: 'Aviário de Grifos (Blender)',
+    category: 'buildings',
+    faction: 'human',
+    type: 'building',
+    icon: '🪺',
+    glb: 'aviary',
+    sourceFile: 'tools/blender/build_aviary.py',
+    create: createGlb('aviary'),
+    description: 'Aviário humano gerado pelo pipeline Blender (public/models/aviary.glb): torre de pedra com portão em arco e janelas de vitral, escada externa em espiral, plataforma de pouso de madeira com parapeito e dossel azul, ninho de gravetos com ovos, poleiros, grifos de pedra no portão, cochos e fardos.',
+    notes: '2 draw calls (Static_Mesh + Anim_Banners em cor de time), ~7,4 mil triângulos, atlas 1024², ~410 KB. Pegada ~7 (raio de colisão 3,4), altura ~8,6. Sockets: Socket_UnitSpawn, Socket_Rally.'
+  },
+  {
+    id: 'serpent_nest_glb',
+    name: 'Ninho das Serpes (Blender)',
+    category: 'buildings',
+    faction: 'orc',
+    type: 'building',
+    icon: '🥚',
+    glb: 'serpent_nest',
+    sourceFile: 'tools/blender/build_serpent_nest.py',
+    create: createGlb('serpent_nest'),
+    description: 'Ninho orc gerado pelo pipeline Blender (public/models/serpent_nest.glb): anel de pilares de basalto, cratera de cinzas com leito de ossos e couro, ovos verdes brilhantes, presas gigantes, covil em arco de costelas com crânio, esqueleto de serpe, totens de crânios e estandartes esfarrapados.',
+    notes: '2 draw calls (Static_Mesh + Anim_Banners em cor de time), ~6,2 mil triângulos, atlas 1024², ~345 KB. Pegada ~7 (raio de colisão 3,4), altura ~4,8. Sockets: Socket_UnitSpawn, Socket_Rally.'
+  },
+  // F7-00b lote 1 (fim)
   {
     id: 'forge',
     name: 'Forja dos Humanos (Human Forge)',

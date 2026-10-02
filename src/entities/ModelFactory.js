@@ -356,8 +356,8 @@ export class ModelFactory {
       case 'ash_sanctum': return this._glbOr('ash_sanctum', () => this.getOrCreateModel('ash_sanctum', createAshSanctum));
       case 'temple': return this._glbOr('temple', () => this.getOrCreateModel('temple', createTemple));
       case 'storm_altar': return this._glbOr('storm_altar', () => this.getOrCreateModel('storm_altar', createStormAltar));
-      case 'aviary': return this.getOrCreateModel('aviary', createAviary); // F4-06
-      case 'serpent_nest': return this.getOrCreateModel('serpent_nest', createSerpentNest);
+      case 'aviary': return this._glbOr('aviary', () => this.getOrCreateModel('aviary', createAviary)); // F4-06
+      case 'serpent_nest': return this._glbOr('serpent_nest', () => this.getOrCreateModel('serpent_nest', createSerpentNest));
       case 'workshop': return this.createWorkshop();
       case 'orc_workshop': return this.createOrcWorkshop();
       case 'wall_human': return createWallSegment('human');
@@ -581,10 +581,10 @@ export class ModelFactory {
       case 'templar': return this._glbOr('templar', () => this.createCavalier());
       case 'ogre_mage': return this._glbOr('ogre_mage', () => this.createOgre());
       // F4-06: aéreos (procedurais provisórios; Blender na F7)
-      case 'glider': return this.getOrCreateModel('glider', createGlider, 'glider');
-      case 'war_balloon': return this.getOrCreateModel('war_balloon', createWarBalloon, 'war_balloon');
-      case 'gryphon_rider': return this.getOrCreateModel('gryphon_rider', createGryphonRider, 'gryphon_rider');
-      case 'war_serpent': return this.getOrCreateModel('war_serpent', createWarSerpent, 'war_serpent');
+      case 'glider': return this._glbOr('glider', () => this.getOrCreateModel('glider', createGlider, 'glider'));
+      case 'war_balloon': return this._glbOr('war_balloon', () => this.getOrCreateModel('war_balloon', createWarBalloon, 'war_balloon'));
+      case 'gryphon_rider': return this._glbOr('gryphon_rider', () => this.getOrCreateModel('gryphon_rider', createGryphonRider, 'gryphon_rider'));
+      case 'war_serpent': return this._glbOr('war_serpent', () => this.getOrCreateModel('war_serpent', createWarSerpent, 'war_serpent'));
       case 'sapper': return this.createSapper();
       case 'arsonist': return this.createArsonist();
       default: return this.createVillager();

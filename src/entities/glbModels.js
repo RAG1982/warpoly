@@ -41,7 +41,14 @@ export const GLB_MODELS = {
   storm_altar: { url: `${BASE}models/storm_altar.glb`, root: 'StormAltar', type: null },
   watching_eye: { url: `${BASE}models/watching_eye.glb`, root: 'WatchingEye', type: 'watching_eye' },
   templar: { url: `${BASE}models/templar.glb`, root: 'Templar', type: 'cavalier' },
-  ogre_mage: { url: `${BASE}models/ogre_mage.glb`, root: 'OgreMage', type: 'ogre' }
+  ogre_mage: { url: `${BASE}models/ogre_mage.glb`, root: 'OgreMage', type: 'ogre' },
+  // F7-00b lote 1 (grupo 1)
+  glider: { url: `${BASE}models/glider.glb`, root: 'Glider', type: 'glider' },
+  war_balloon: { url: `${BASE}models/war_balloon.glb`, root: 'WarBalloon', type: 'war_balloon' },
+  gryphon_rider: { url: `${BASE}models/gryphon_rider.glb`, root: 'GryphonRider', type: 'gryphon_rider' },
+  war_serpent: { url: `${BASE}models/war_serpent.glb`, root: 'WarSerpent', type: 'war_serpent' },
+  aviary: { url: `${BASE}models/aviary.glb`, root: 'Aviary', type: null },
+  serpent_nest: { url: `${BASE}models/serpent_nest.glb`, root: 'SerpentNest', type: null }
 };
 
 export const glbEnabled = (() => {

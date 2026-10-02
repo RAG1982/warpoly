@@ -78,6 +78,11 @@ export const GLB_MODELS = {
   // ART-naval-buildings: construções navais humanas (Blender)
   shipyard: { url: `${BASE}models/shipyard.glb`, root: 'Shipyard', type: null },
   oil_platform: { url: `${BASE}models/oil_platform.glb`, root: 'OilPlatform', type: null },
+  // ART-naval-ships: navios humanos (Blender)
+  frigate: { url: `${BASE}models/frigate.glb`, root: 'Frigate', type: 'frigate' },
+  barge: { url: `${BASE}models/barge.glb`, root: 'Barge', type: 'barge' },
+  dreadnought: { url: `${BASE}models/dreadnought.glb`, root: 'Dreadnought', type: 'dreadnought' },
+  tanker: { url: `${BASE}models/tanker.glb`, root: 'Tanker', type: 'tanker' },
 };
 
 export const glbEnabled = (() => {

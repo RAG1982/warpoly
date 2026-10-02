@@ -720,6 +720,58 @@ const MODEL_CATALOG = [
     notes: 'Sockets: Socket_UnitSpawn, Socket_Rally.'
   },
   {
+    id: 'frigate_glb',
+    name: 'Fragata (Blender)',
+    category: 'units',
+    faction: 'human',
+    type: 'frigate',
+    icon: '🚢',
+    glb: 'frigate',
+    sourceFile: 'tools/blender/build_frigate.py',
+    create: createGlb('frigate'),
+    description: 'Fragata humana (public/models/frigate.glb): casco de aço azul rebitado com bordo creme e friso dourado, escudos heráldicos, duas torres de canos gêmeos (proa e popa), passadiço com janelas, chaminé, mastro com gávea, velas e flâmula.',
+    notes: 'Nós: Hull, Turret1/Cannon1 (proa), Turret2/Cannon2 (popa), Sail, Flag, Anim_Smoke. Proa = +Z, y=0 na linha d\'água.'
+  },
+  {
+    id: 'barge_glb',
+    name: 'Barcaça de Transporte (Blender)',
+    category: 'units',
+    faction: 'human',
+    type: 'barge',
+    icon: '⛵',
+    glb: 'barge',
+    sourceFile: 'tools/blender/build_barge.py',
+    create: createGlb('barge'),
+    description: 'Barcaça humana (public/models/barge.glb): casco bojudo de tábuas claras, convés com escotilha, castelo de popa com torre, guindaste com gancho, rampa de proa articulada, âncora, canhões de bordo e bandeira.',
+    notes: 'Nós: Hull, Crane/Hook, Ramp (articulada), Flag. Proa = +Z.'
+  },
+  {
+    id: 'dreadnought_glb',
+    name: 'Couraçado (Blender)',
+    category: 'units',
+    faction: 'human',
+    type: 'dreadnought',
+    icon: '⚓',
+    glb: 'dreadnought',
+    sourceFile: 'tools/blender/build_dreadnought.py',
+    create: createGlb('dreadnought'),
+    description: 'Couraçado humano (public/models/dreadnought.glb): galeão blindado dourado e azul de 3 mastros com velas, fileira de canhões, esporão de aço, duas torres de canos gêmeos, castelo de popa de pedra e canhão giratório.',
+    notes: 'Nós: Hull, Turret1/Cannon1, Turret2/Cannon2, Cannon3, Sail1..3, Flag. Proa = +Z.'
+  },
+  {
+    id: 'tanker_glb',
+    name: 'Petroleiro (Blender)',
+    category: 'units',
+    faction: 'human',
+    type: 'tanker',
+    icon: '🛢️',
+    glb: 'tanker',
+    sourceFile: 'tools/blender/build_tanker.py',
+    create: createGlb('tanker'),
+    description: 'Petroleiro humano (public/models/tanker.glb): casco de chapas laranja-ferrugem, três tanques com cintas, tubulação e válvulas, mangueira de carga, cabine de popa, antena e chaminé com faixa.',
+    notes: 'Nós: Hull, Hose, Flag, Anim_Smoke. Compartilhado pelas duas facções até haver a versão orc.'
+  },
+  {
     id: 'shipyard_glb',
     name: 'Estaleiro (Blender)',
     category: 'buildings',

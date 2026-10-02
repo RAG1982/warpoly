@@ -41,7 +41,29 @@ export const GLB_MODELS = {
   storm_altar: { url: `${BASE}models/storm_altar.glb`, root: 'StormAltar', type: null },
   watching_eye: { url: `${BASE}models/watching_eye.glb`, root: 'WatchingEye', type: 'watching_eye' },
   templar: { url: `${BASE}models/templar.glb`, root: 'Templar', type: 'cavalier' },
-  ogre_mage: { url: `${BASE}models/ogre_mage.glb`, root: 'OgreMage', type: 'ogre' }
+  ogre_mage: { url: `${BASE}models/ogre_mage.glb`, root: 'OgreMage', type: 'ogre' },
+  // F7-00b lote 1 (grupo 1)
+  glider: { url: `${BASE}models/glider.glb`, root: 'Glider', type: 'glider' },
+  war_balloon: { url: `${BASE}models/war_balloon.glb`, root: 'WarBalloon', type: 'war_balloon' },
+  gryphon_rider: { url: `${BASE}models/gryphon_rider.glb`, root: 'GryphonRider', type: 'gryphon_rider' },
+  war_serpent: { url: `${BASE}models/war_serpent.glb`, root: 'WarSerpent', type: 'war_serpent' },
+  aviary: { url: `${BASE}models/aviary.glb`, root: 'Aviary', type: null },
+  serpent_nest: { url: `${BASE}models/serpent_nest.glb`, root: 'SerpentNest', type: null },
+  // F7-00b lote 1 (grupo 2)
+  barracks: { url: `${BASE}models/barracks.glb`, root: 'Barracks', type: null },
+  forge: { url: `${BASE}models/forge.glb`, root: 'Forge', type: null },
+  cottage: { url: `${BASE}models/cottage.glb`, root: 'Cottage', type: null },
+  farm: { url: `${BASE}models/farm.glb`, root: 'Farm', type: null },
+  lumber_camp: { url: `${BASE}models/lumber_camp.glb`, root: 'LumberCamp', type: null },
+  watchtower: { url: `${BASE}models/watchtower.glb`, root: 'Watchtower', type: null },
+  // F7-00b lote 1 (grupo 3)
+  great_hall: { url: `${BASE}models/great_hall.glb`, root: 'GreatHall', type: null },
+  orc_barracks: { url: `${BASE}models/orc_barracks.glb`, root: 'OrcBarracks', type: null },
+  orc_forge: { url: `${BASE}models/orc_forge.glb`, root: 'OrcForge', type: null },
+  orc_house: { url: `${BASE}models/orc_house.glb`, root: 'OrcHouse', type: null },
+  pig_farm: { url: `${BASE}models/pig_farm.glb`, root: 'PigFarm', type: null },
+  orc_lumber_mill: { url: `${BASE}models/orc_lumber_mill.glb`, root: 'OrcLumberMill', type: null },
+  orc_watchtower: { url: `${BASE}models/orc_watchtower.glb`, root: 'OrcWatchtower', type: null }
 };
 
 export const glbEnabled = (() => {

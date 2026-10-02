@@ -103,3 +103,44 @@ def bbox_game(root):
     lo = (min(p.x for p in pts), min(p.z for p in pts), min(-p.y for p in pts))
     hi = (max(p.x for p in pts), max(p.z for p in pts), max(-p.y for p in pts))
     return tuple(round(v, 2) for v in lo), tuple(round(v, 2) for v in hi)
+
+
+def finish_building(root, name, glb, atlas_name, static_parts, banners, weights, team_default, args,
+                    spawn=(0, 0, 4.6), rally=(0, 0, 6.6), extra_nodes=None, extra_anim=None, game_dist=78, quality=80,
+                    banner_name='Anim_Banners'):
+    """Pipeline comum das construções: UV atlas 1024² -> bake -> materiais -> junta `Static_Mesh` -> sockets ->
+    export -> renders. `static_parts` = malhas estáticas; `banners` = malha(s) em TeamColor (nome Anim_Banners);
+    `extra_anim` = malhas animáveis extras (já nomeadas Anim_*) que ficam separadas do Static_Mesh."""
+    import os
+    import bpy
+    import common as C
+    banners = [banners] if banners is not None and not isinstance(banners, (list, tuple)) else (banners or [])
+    extra_anim = extra_anim or []
+    bake_set = list(static_parts) + list(banners) + list(extra_anim)
+    bpy.context.view_layer.update()
+    C.uv_atlas(bake_set, weights=weights, margin=0.004, angle=50.0)
+    img = C.bake_atlas(bake_set, atlas_name, int(os.environ.get('ATLAS', 1024)),
+                       samples=int(os.environ.get('BAKE_SAMPLES', 32)), margin=6)
+    C.finalize_materials(bake_set, img, team_default=team_default, out_png=os.path.join(C.BUILD_DIR, atlas_name + '.png'))
+    static = C.join_objects(list(static_parts), 'Static_Mesh')
+    static.parent = root
+    C.make_empty('Socket_UnitSpawn', spawn, parent=root)
+    C.make_empty('Socket_Rally', rally, parent=root)
+    bpy.context.view_layer.update()
+    out = os.path.join(C.OUT_MODELS, glb)
+    C.export_glb(root, out, quality=quality)
+    st = C.stats(root, out)
+    print('STATS', name, st)
+    print('BBOX', bbox_game(root))
+    if '--no-render' not in args:
+        rig = C.RenderRig(root, name, res=int(os.environ.get('RENDER_RES', 800)), samples=24)
+        rig.render('34', (1.0, 0.95, 1.0), 30)
+        rig.render('front', (0.0, 0.35, 1.0), 30)
+        rig.render('back', (-0.8, 0.8, -1.0), 30)
+        rig.render('side', (1.0, 0.25, 0.0), 30)
+        rig.render('game', (45, 44, 45), 30, dist=game_dist)
+        human = team_default.lower().startswith('#3')
+        C.set_team_color('#d23a2c' if human else '#3a66d6')
+        rig.render('34_vermelho' if human else '34_azul', (1.0, 0.95, 1.0), 30)
+        C.set_team_color(team_default)
+    return st

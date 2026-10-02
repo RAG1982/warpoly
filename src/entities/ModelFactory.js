@@ -356,8 +356,8 @@ export class ModelFactory {
       case 'ash_sanctum': return this._glbOr('ash_sanctum', () => this.getOrCreateModel('ash_sanctum', createAshSanctum));
       case 'temple': return this._glbOr('temple', () => this.getOrCreateModel('temple', createTemple));
       case 'storm_altar': return this._glbOr('storm_altar', () => this.getOrCreateModel('storm_altar', createStormAltar));
-      case 'aviary': return this.getOrCreateModel('aviary', createAviary); // F4-06
-      case 'serpent_nest': return this.getOrCreateModel('serpent_nest', createSerpentNest);
+      case 'aviary': return this._glbOr('aviary', () => this.getOrCreateModel('aviary', createAviary)); // F4-06
+      case 'serpent_nest': return this._glbOr('serpent_nest', () => this.getOrCreateModel('serpent_nest', createSerpentNest));
       case 'workshop': return this.createWorkshop();
       case 'orc_workshop': return this.createOrcWorkshop();
       case 'wall_human': return createWallSegment('human');
@@ -378,7 +378,7 @@ export class ModelFactory {
   }
 
   static createLumberCamp() {
-    return this.getOrCreateModel('lumber_camp', createLumberCamp);
+    return this._glbOr('lumber_camp', () => this.getOrCreateModel('lumber_camp', createLumberCamp));
   }
 
   static createGoldMine() {
@@ -390,19 +390,19 @@ export class ModelFactory {
   }
 
   static createCottage() {
-    return this.getOrCreateModel('cottage', createCottage);
+    return this._glbOr('cottage', () => this.getOrCreateModel('cottage', createCottage));
   }
 
   static createBarracks() {
-    return this.getOrCreateModel('barracks', createBarracks);
+    return this._glbOr('barracks', () => this.getOrCreateModel('barracks', createBarracks));
   }
 
   static createWatchtower() {
-    return this.getOrCreateModel('watchtower', createWatchtower);
+    return this._glbOr('watchtower', () => this.getOrCreateModel('watchtower', createWatchtower));
   }
 
   static createFarm() {
-    return this.getOrCreateModel('farm', createFarm);
+    return this._glbOr('farm', () => this.getOrCreateModel('farm', createFarm));
   }
 
   static createBanditCamp() {
@@ -426,36 +426,36 @@ export class ModelFactory {
   }
 
   static createHumanForge() {
-    return this.getOrCreateModel('forge', createHumanForge);
+    return this._glbOr('forge', () => this.getOrCreateModel('forge', createHumanForge));
   }
 
   // --- Orc Buildings ---
   static createGreatHall() {
-    return this.getOrCreateModel('great_hall', createGreatHall);
+    return this._glbOr('great_hall', () => this.getOrCreateModel('great_hall', createGreatHall));
   }
 
   static createOrcBarracks() {
-    return this.getOrCreateModel('orc_barracks', createOrcBarracks);
+    return this._glbOr('orc_barracks', () => this.getOrCreateModel('orc_barracks', createOrcBarracks));
   }
 
   static createPigFarm() {
-    return this.getOrCreateModel('pig_farm', createPigFarm);
+    return this._glbOr('pig_farm', () => this.getOrCreateModel('pig_farm', createPigFarm));
   }
 
   static createOrcLumberMill() {
-    return this.getOrCreateModel('orc_lumber_mill', createOrcLumberMill);
+    return this._glbOr('orc_lumber_mill', () => this.getOrCreateModel('orc_lumber_mill', createOrcLumberMill));
   }
 
   static createOrcWatchtower() {
-    return this.getOrCreateModel('orc_watchtower', createOrcWatchtower);
+    return this._glbOr('orc_watchtower', () => this.getOrCreateModel('orc_watchtower', createOrcWatchtower));
   }
 
   static createOrcHouse() {
-    return this.getOrCreateModel('orc_house', createOrcHouse);
+    return this._glbOr('orc_house', () => this.getOrCreateModel('orc_house', createOrcHouse));
   }
 
   static createOrcForge() {
-    return this.getOrCreateModel('orc_forge', createOrcForge);
+    return this._glbOr('orc_forge', () => this.getOrCreateModel('orc_forge', createOrcForge));
   }
 
   // --- Environment & Props ---
@@ -581,10 +581,10 @@ export class ModelFactory {
       case 'templar': return this._glbOr('templar', () => this.createCavalier());
       case 'ogre_mage': return this._glbOr('ogre_mage', () => this.createOgre());
       // F4-06: aéreos (procedurais provisórios; Blender na F7)
-      case 'glider': return this.getOrCreateModel('glider', createGlider, 'glider');
-      case 'war_balloon': return this.getOrCreateModel('war_balloon', createWarBalloon, 'war_balloon');
-      case 'gryphon_rider': return this.getOrCreateModel('gryphon_rider', createGryphonRider, 'gryphon_rider');
-      case 'war_serpent': return this.getOrCreateModel('war_serpent', createWarSerpent, 'war_serpent');
+      case 'glider': return this._glbOr('glider', () => this.getOrCreateModel('glider', createGlider, 'glider'));
+      case 'war_balloon': return this._glbOr('war_balloon', () => this.getOrCreateModel('war_balloon', createWarBalloon, 'war_balloon'));
+      case 'gryphon_rider': return this._glbOr('gryphon_rider', () => this.getOrCreateModel('gryphon_rider', createGryphonRider, 'gryphon_rider'));
+      case 'war_serpent': return this._glbOr('war_serpent', () => this.getOrCreateModel('war_serpent', createWarSerpent, 'war_serpent'));
       case 'sapper': return this.createSapper();
       case 'arsonist': return this.createArsonist();
       default: return this.createVillager();

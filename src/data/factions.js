@@ -25,7 +25,11 @@ export const FACTIONS = {
     arcane: 'arcane_tower', // F4-04
     temple: 'temple', // F4-04b
     aerie: 'aviary', // F4-06
-    buildList: ['cottage', 'lumber_camp', 'farm', 'barracks', 'forge', 'stable', 'workshop', 'arcane_tower', 'temple', 'aviary', 'watchtower', 'wall_human'],
+    shipyard: 'shipyard', // F4-07
+    refinery: 'refinery',
+    buildList: ['cottage', 'lumber_camp', 'farm', 'barracks', 'forge', 'stable', 'workshop', 'arcane_tower', 'temple', 'aviary', 'shipyard', 'refinery', 'watchtower', 'wall_human'],
+    /** F4-07a: construções do Petroleiro (`WORKER_BUILD_LIST.tanker`). */
+    tankerBuildList: ['oil_platform'],
     units: {
       worker: 'villager',
       melee: 'knight',
@@ -35,7 +39,8 @@ export const FACTIONS = {
       suicide: 'sapper', // F4-05
       caster: 'mage', // F4-04
       flyer: 'gryphon_rider', // F4-06
-      scoutAir: 'glider'
+      scoutAir: 'glider',
+      tanker: 'tanker' // F4-07
     },
     startingBase: {
       buildings: { hq: 'castle', lumber: 'lumber_camp', house: 'cottage' },
@@ -58,7 +63,10 @@ export const FACTIONS = {
     arcane: 'ash_sanctum', // F4-04
     temple: 'storm_altar', // F4-04b
     aerie: 'serpent_nest', // F4-06
-    buildList: ['orc_house', 'pig_farm', 'orc_lumber_mill', 'orc_barracks', 'orc_forge', 'ogre_den', 'orc_workshop', 'ash_sanctum', 'storm_altar', 'serpent_nest', 'orc_watchtower', 'wall_orc'],
+    shipyard: 'ship_dock', // F4-07
+    refinery: 'ash_cauldron',
+    buildList: ['orc_house', 'pig_farm', 'orc_lumber_mill', 'orc_barracks', 'orc_forge', 'ogre_den', 'orc_workshop', 'ash_sanctum', 'storm_altar', 'serpent_nest', 'ship_dock', 'ash_cauldron', 'orc_watchtower', 'wall_orc'],
+    tankerBuildList: ['oil_platform'],
     units: {
       worker: 'peon',
       melee: 'grunt',
@@ -68,7 +76,8 @@ export const FACTIONS = {
       suicide: 'arsonist', // F4-05
       caster: 'necromancer', // F4-04
       flyer: 'war_serpent', // F4-06
-      scoutAir: 'war_balloon'
+      scoutAir: 'war_balloon',
+      tanker: 'tanker' // F4-07
     },
     startingBase: {
       buildings: { hq: 'great_hall', lumber: 'orc_lumber_mill', house: 'pig_farm' },
@@ -78,4 +87,4 @@ export const FACTIONS = {
 };
 
 /** Recursos iniciais (jogador e IA). */
-export const STARTING_RESOURCES = Object.freeze({ wood: 240, gold: 200, stone: 120 });
+export const STARTING_RESOURCES = Object.freeze({ wood: 240, gold: 200, stone: 120 }); // petróleo inicial = 0 (D1; `Player` zera o 4º recurso)

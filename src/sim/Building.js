@@ -5,6 +5,7 @@ import { UPGRADE_CONFIG, RESEARCH } from '../data/index.js';
 import { legacyOwnerId } from './EntityIds.js';
 import { EVT } from './events.js';
 import { computeDamage } from './combat.js';
+import { WATER_LEVEL } from '../data/combat.js';
 import { repairCostFor, cancelRefundFor, REPAIR_HP_FRACTION, CONSTRUCTION_MIN_HP_FRACTION } from './repair.js';
 
 /** Vector3 → objeto plano `{x,y,z}` (payload de evento: nunca referências a objetos three.js). */
@@ -58,6 +59,11 @@ export class Building {
     this.name = stats.name;
     /** Papel da construção (`hq`, `house`, `wall`…), de src/data/buildings.js. */
     this.role = getBuildingDef(type).role || null;
+    /** F4-07a: construção costeira (Estaleiro/Refinaria/Fundição — bloqueia a grade naval) e ponto de saída dos navios (`GameManager.getDockPoint`). */
+    this.coastal = !!getBuildingDef(type).coastal;
+    this.dockPoint = null;
+    /** F4-07a: poço (`ResourceDeposit`) sob uma plataforma de petróleo. */
+    this.deposit = null;
     this.hp = stats.hp;
     this.maxHp = stats.hp;
     // F3-05: obra nasce com 10 % do PV e ganha PV proporcional ao progresso (ver `construct`).
@@ -76,6 +82,7 @@ export class Building {
     const towerCfg = getBuildingDef(type).tower;
     this.canHitAir = !!(towerCfg && towerCfg.hitsAir);
     this.canHitGround = true;
+    this.canHitNaval = !!towerCfg; // F4-07: torres atingem navios ao alcance
     this.attackDamage = stats.attackDamage || 0;
     this.collisionRadius = stats.collisionRadius || 3.0;
     this.attackCooldown = stats.attackCooldown;
@@ -100,7 +107,8 @@ export class Building {
     this.passiveTimer = 0;
 
     // Corpo de simulação (a malha 3D é da `BuildingView`).
-    this.mesh = new Body(x, this.terrain.getHeight(x, z), z);
+    // F4-07a: a plataforma fica no mar — a base do modelo é o nível da água (o fundo do mar é fundo demais para o Y).
+    this.mesh = new Body(x, this.role === 'platform' ? WATER_LEVEL : this.terrain.getHeight(x, z), z);
     this.mesh.userData.entity = this;
 
     this.isSelected = false;
@@ -317,6 +325,12 @@ export class Building {
     const owner = this.getOwner(gm);
     if (!owner) return false;
 
+    // F4-07a: navio precisa de saída para o mar (célula navegável junto ao cais) — senão recusa sem debitar.
+    if (getUnitDef(unitType).layer === 'naval' && !gm.getDockPoint(this)) {
+      if (owner.isLocal) gm.events.emit(EVT.NOTIFY, { ownerId: this.ownerId, text: '⚠️ Sem saída para o mar' });
+      return false;
+    }
+
     // F3-06: requisitos generalizados (construção/{hq:N}) — falha silenciosa, sem debitar.
     if (missingUnitRequirements(this.ownerId, unitType, gm).length > 0) {
       return false;
@@ -426,11 +440,10 @@ export class Building {
     if (this.tierUpgrade) return false;
 
     const nextTier = this.tier + 1;
-    const cost = getHqUpgradeCost(nextTier);
-    if (!cost) return false;
-
     const gm = gameManager || this.gameManager;
     if (!gm) return false;
+    const cost = typeof gm.hqUpgradeCost === 'function' ? gm.hqUpgradeCost(nextTier) : getHqUpgradeCost(nextTier); // F4-07a: petróleo do nível 3
+    if (!cost) return false;
     const owner = this.getOwner(gm);
     if (!owner || !owner.canAfford(cost)) return false;
 
@@ -536,9 +549,18 @@ export class Building {
         // Spawn Unit outside building walls
         this.queue.shift();
         const spawnDist = this.collisionRadius + 1.2;
-        const rng = gameManager && gameManager.rng ? gameManager.rng : null;
-        const spawnX = this.mesh.position.x + ((rng ? rng.next() : Math.random()) - 0.5) * 1.5;
-        const spawnZ = this.mesh.position.z + spawnDist;
+        let spawnX;
+        let spawnZ;
+        const dock = getUnitDef(current.type).layer === 'naval' ? gameManager.getDockPoint(this) : null;
+        if (dock) {
+          // F4-07a: navio nasce na água, no cais da construção (sem consumir o RNG de simulação).
+          spawnX = dock.x;
+          spawnZ = dock.z;
+        } else {
+          const rng = gameManager && gameManager.rng ? gameManager.rng : null;
+          spawnX = this.mesh.position.x + ((rng ? rng.next() : Math.random()) - 0.5) * 1.5;
+          spawnZ = this.mesh.position.z + spawnDist;
+        }
         const spawned = gameManager.spawnUnit(current.type, spawnX, spawnZ, this.ownerId, this.rallyPoint);
         if (gmEvents) {
           gmEvents.emit(EVT.UNIT_TRAINED, {

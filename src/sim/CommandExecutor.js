@@ -69,25 +69,29 @@ function dispatchOrder(unit, order, queued) {
  */
 function moveInFormation(gm, units, x, z, queued, type = CMD.MOVE) {
   // F4-06: grupo misto — aéreos voam em linha reta (formação própria, sem pathfinder/água); a formação terrestre
-  // não os inclui (não quebra a marcha em fileiras dos terrestres).
+  // não os inclui (não quebra a marcha em fileiras dos terrestres). F4-07a: navios têm formação própria sobre a grade naval.
   let ground = units;
   let air = null;
+  let naval = null;
   for (let i = 0; i < units.length; i++) {
-    if (units[i].layer === 'air') {
+    if (units[i].layer === 'air' || units[i].layer === 'naval') {
       air = units.filter(u => u.layer === 'air');
-      ground = units.filter(u => u.layer !== 'air');
+      naval = units.filter(u => u.layer === 'naval');
+      ground = units.filter(u => u.layer !== 'air' && u.layer !== 'naval');
       break;
     }
   }
-  if (air) formationOrders(gm, air, x, z, queued, type, true);
-  if (ground.length > 0) formationOrders(gm, ground, x, z, queued, type, false);
+  if (air && air.length > 0) formationOrders(gm, air, x, z, queued, type, null);
+  if (naval && naval.length > 0 && gm.navalPathfinder) formationOrders(gm, naval, x, z, queued, type, gm.navalPathfinder);
+  if (ground.length > 0) formationOrders(gm, ground, x, z, queued, type, gm.pathfinder);
 }
 
-function formationOrders(gm, units, x, z, queued, type, flying) {
+/** `pf`: pathfinder da camada do grupo (terrestre/naval) ou `null` (aéreos: linha reta, sem ajuste de água). */
+function formationOrders(gm, units, x, z, queued, type, pf) {
   let cx = x;
   let cz = z;
-  if (!flying && gm.pathfinder && gm.pathfinder.isWater(cx, cz)) {
-    const snapped = gm.pathfinder.findNearestWalkable(cx, cz);
+  if (pf && pf._terrainBlocked(cx, cz)) {
+    const snapped = pf.findNearestWalkable(cx, cz);
     cx = snapped.x;
     cz = snapped.z;
   }
@@ -112,9 +116,9 @@ function formationOrders(gm, units, x, z, queued, type, flying) {
     const slot = slots.get(units[idx].id);
     let destX = slot.x;
     let destZ = slot.z;
-    if (!flying && gm.pathfinder && !gm.pathfinder.isWalkableWorld(destX, destZ)) {
-      const near = gm.pathfinder.findNearestWalkable(destX, destZ);
-      if (gm.pathfinder.isWalkableWorld(near.x, near.z)) {
+    if (pf && !pf.isWalkableWorld(destX, destZ)) {
+      const near = pf.findNearestWalkable(destX, destZ);
+      if (pf.isWalkableWorld(near.x, near.z)) {
         destX = near.x;
         destZ = near.z;
       } else {

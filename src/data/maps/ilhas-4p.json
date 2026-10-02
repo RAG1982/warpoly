@@ -38,7 +38,9 @@
     { "type": "gold", "x": 45, "z": 25 },
     { "type": "stone", "x": 30, "z": 38 },
     { "type": "gold", "x": -10, "z": 0 },
-    { "type": "stone", "x": 10, "z": 0 }
+    { "type": "stone", "x": 10, "z": 0 },
+    { "type": "oil", "x": -30, "z": 50, "amount": 5000 },
+    { "type": "oil", "x": 30, "z": -50, "amount": 5000 }
   ],
   "forests": [
     { "x": -45, "z": 0, "count": 6, "radius": 8.0, "species": "oak" },

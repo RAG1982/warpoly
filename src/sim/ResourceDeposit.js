@@ -1,12 +1,18 @@
 import { MINE_SLOTS } from '../data/index.js';
 import { Body } from './Body.js';
 
+/** Quantidade padrão de cada tipo de jazida (petróleo: poço no mar, F4-07a). */
+const DEFAULT_AMOUNT = { gold: 2500, stone: 2500, oil: 5000 };
+
 export class ResourceDeposit {
-  constructor(terrain, type, x, z) {
+  /** @param {number} [amount]  quantidade inicial (padrão por tipo; `mapDef.resources[].amount`) */
+  constructor(terrain, type, x, z, amount = DEFAULT_AMOUNT[type] || 2500) {
     this.terrain = terrain;
-    this.type = type; // 'gold' or 'stone'
-    this.resourcesRemaining = 2500;
-    this.maxResources = 2500;
+    this.type = type; // 'gold', 'stone' or 'oil' (F4-07a: poço de petróleo, em água rasa)
+    this.resourcesRemaining = amount;
+    this.maxResources = amount;
+    /** F4-07a: plataforma (`Building`, role 'platform') erguida sobre este poço, ou null. Só o petróleo usa. */
+    this.platform = null;
 
     // F3-04: mina/pedreira como gargalo — só `slots` trabalhadores dentro por vez (`inside`),
     // os demais esperam em `queue` (ordem de chegada). Ver `requestEnter`/`release` e
@@ -17,9 +23,9 @@ export class ResourceDeposit {
     this._depletedEmitted = false;
     this._justDepleted = false;
 
-    this.name = type === 'gold' ? 'Gold Mine' : 'Stone Quarry';
+    this.name = type === 'gold' ? 'Gold Mine' : (type === 'oil' ? 'Oil Well' : 'Stone Quarry');
 
-    this.collisionRadius = type === 'gold' ? 3.4 : 3.0;
+    this.collisionRadius = type === 'gold' ? 3.4 : (type === 'oil' ? 2.6 : 3.0);
 
     const h = this.terrain.getHeight(x, z);
     // Compat legado: `deposit.mesh.position` (corpo de simulação; a malha vive em `render/ResourceDepositView`).

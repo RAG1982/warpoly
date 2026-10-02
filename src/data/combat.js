@@ -17,3 +17,19 @@ export const DETECT_RADIUS = 12;
 export const DETECT_CONTACT_RADIUS = 2;
 /** F4-04: dano fixo do Escudo de Chamas por golpe corpo a corpo recebido. */
 export const FLAMESHIELD_DAMAGE = 8;
+
+// --- F4-07: petróleo e navegação naval ---
+/** Nível da água (Water.js / `mapDef.waterLevel`). */
+export const WATER_LEVEL = 0.5;
+/** F4-07a: profundidade mínima (`waterLevel − altura`) para uma célula/ponto ser navegável por navios. */
+export const NAVAL_MIN_DEPTH = 0.4;
+/** F4-07a: altura máxima do terreno em que um navio pode estar (`WATER_LEVEL − NAVAL_MIN_DEPTH`). */
+export const NAVAL_MAX_HEIGHT = WATER_LEVEL - NAVAL_MIN_DEPTH;
+/** F4-07a: segundos que o petroleiro leva para encher o tanque junto à plataforma (`carry_time`). */
+export const OIL_LOAD_TIME = 3;
+/** F4-07b: navios só atingem terra/construções a até esta distância (u) da margem navegável. */
+export const SHORE_REACH = 2;
+/** F4-07b: distância máxima (borda a borda) entre a margem do terrestre e a barcaça para embarcar. */
+export const BOARD_DISTANCE = 3;
+/** F4-07b: segundos sem atacar até o submersível voltar a mergulhar (invisível). */
+export const SUBMERGE_DELAY = 4;

@@ -1,7 +1,7 @@
 import { UNIT_TRAIN_CONFIG, BUILDING_BUILD_CONFIG, WORKER_BUILD_LIST } from '../entities/Building.js';
 import {
   UPGRADE_CONFIG, RESEARCH, researchIdsFor, getMaxResearchLevel,
-  BUILDING_TRAINABLE_UNITS, getUnitDef, getBuildingDef, getHqUpgradeCost
+  BUILDING_TRAINABLE_UNITS, getUnitDef, getBuildingDef
 } from '../data/index.js';
 import {
   missingRequirements, missingUnitRequirements, missingUpgradeRequirements
@@ -50,6 +50,8 @@ export class UIManager {
     this.woodVal = document.getElementById('wood-val');
     this.goldVal = document.getElementById('gold-val');
     this.stoneVal = document.getElementById('stone-val');
+    this.oilVal = document.getElementById('oil-val'); // F4-07a
+    this.oilItem = document.getElementById('res-oil');
     this.popVal = document.getElementById('pop-val');
 
     this.selectionCard = document.getElementById('selection-card');
@@ -235,6 +237,19 @@ export class UIManager {
     if (this._lastStone !== stone) {
       this._lastStone = stone;
       if (this.stoneVal) this.stoneVal.innerText = stone;
+    }
+    // F4-07a: petróleo (aparece só quando a partida tem poços no mapa ou o jogador tem > 0)
+    const oil = Math.floor(this.gm.resources.oil || 0);
+    if (this._lastOil !== oil) {
+      this._lastOil = oil;
+      if (this.oilVal) this.oilVal.innerText = oil;
+    }
+    if (this.oilItem) {
+      const showOil = oil > 0 || this.gm.hasOilWells;
+      if (this._oilShown !== showOil) {
+        this._oilShown = showOil;
+        this.oilItem.style.display = showOil ? '' : 'none';
+      }
     }
     const pop = this.gm.population;
     const maxPop = this.gm.maxPopulation;
@@ -456,7 +471,7 @@ export class UIManager {
           return;
         }
         if (b.tier >= 3) return;
-        const cost = getHqUpgradeCost(b.tier + 1);
+        const cost = this.gm.hqUpgradeCost(b.tier + 1); // F4-07a: inclui o petróleo do nível 3 (dispensado em mapas sem poços)
         if (cost && !this.gm.canAfford(cost)) {
           this.sound.playChop();
           this.showNotification(`⚠️ ${t('sim.noResources')}`);
@@ -589,6 +604,7 @@ export class UIManager {
       const u = this.gm.selectedUnits[0];
       const count = this.gm.selectedUnits.length;
       const isWorker = u.type === 'villager' || u.type === 'peon';
+      const isTanker = !!u.isTanker; // F4-07a: petroleiro (constrói a plataforma; coleta petróleo)
 
       this.selectionTitle.innerText = count > 1 ? t('hud.multiSelect', { count, name: unitLabel(u.type) }) : unitLabel(u.type);
       this.updateSelectionPortraits(this.gm.selectedUnits);
@@ -605,23 +621,25 @@ export class UIManager {
         <span>🏃 ${t('hud.stat.speed')}: ${u.speed}</span>
         ${u.minAttackRange > 0 ? `<span>🎯 ${t('hud.stat.range')}: ${u.minAttackRange}–${u.attackRange}</span>` : ''}
         ${u.layer === 'air' ? `<span>🪽 ${t('hud.stat.air')}</span>` : ''}
+        ${u.layer === 'naval' ? `<span>⚓ ${t('hud.stat.naval')}</span>` : ''}
         ${u.suicide ? `<span>💣 ${t('hud.stat.suicide')}</span>` : ''}
         ${u.splashRadius > 0 ? `<span>💥 ${t('hud.stat.area')}: ${u.splashRadius}</span>` : ''}
         ${u.maxMana > 0 ? `<span>💧 ${t('hud.stat.mana')}: ${Math.floor(u.mana)} / ${u.maxMana}</span>` : ''}
-        ${isWorker ? `<span>🎒 ${t('hud.stat.carry')}: ${u.carrying.amount}/${u.carrying.max} ${resourceName(u.carrying.type)}</span>` : ''}
+        ${isWorker || isTanker ? `<span>🎒 ${t('hud.stat.carry')}: ${u.carrying.amount}/${u.carrying.max} ${resourceName(isTanker ? 'oil' : u.carrying.type)}</span>` : ''}
       `;
 
       // F4-03: o card de habilidades muda a chave (recria o DOM só quando o conjunto muda)
-      const abUnits = isWorker ? [] : selectionAbilityUnits(this.gm.selectedUnits);
+      const abUnits = isWorker || isTanker ? [] : selectionAbilityUnits(this.gm.selectedUnits);
       const key = isWorker
         ? `${u.type}_actions`
+        : isTanker ? 'tanker_actions'
         : (abUnits.length > 0 ? `military_actions|${abUnits[0].abilities.join(',')}|${abUnits[0].type}` : 'military_actions');
       if (this.lastSelectionKey !== key) {
         this.lastSelectionKey = key;
         this.renderSelectionActions(key);
       }
       if (abUnits.length > 0) this.updateAbilityButtons();
-      if (isWorker) {
+      if (isWorker || isTanker) {
         this.updateWorkerBuildCosts(u.type);
       }
     } else if (this.gm.selectedBuilding) {
@@ -1057,7 +1075,7 @@ export class UIManager {
 
     const nextTier = b.tier + 1;
     const nextName = tierNameT(factionType, nextTier);
-    const cost = getHqUpgradeCost(nextTier);
+    const cost = this.gm.hqUpgradeCost(nextTier);
     const canAfford = !cost || this.gm.canAfford(cost);
     if (this.bldHqUpgradeBtnLabel) this.bldHqUpgradeBtnLabel.innerText = t('hud.upgradeTo', { name: nextName });
 
@@ -1069,13 +1087,13 @@ export class UIManager {
     } else {
       btn.disabled = false;
       btn.classList.remove('bld-requirement-missing');
-      btn.title = t('hud.upgradeToCost', { name: nextName, gold: cost.gold, wood: cost.wood, stone: cost.stone, time: cost.time });
+      btn.title = t(cost.oil ? 'hud.upgradeToCostOil' : 'hud.upgradeToCost', { name: nextName, gold: cost.gold, wood: cost.wood, stone: cost.stone, oil: cost.oil || 0, time: cost.time });
     }
   }
 
   renderSelectionActions(key) {
-    if (key === 'villager_actions' || key === 'peon_actions') {
-      const workerType = key === 'villager_actions' ? 'villager' : 'peon';
+    if (key === 'villager_actions' || key === 'peon_actions' || key === 'tanker_actions') {
+      const workerType = key === 'villager_actions' ? 'villager' : (key === 'peon_actions' ? 'peon' : 'tanker');
       const buildings = WORKER_BUILD_LIST[workerType] || [];
 
       const buildButtonsHtml = buildings.map(bType => {
@@ -1110,7 +1128,7 @@ export class UIManager {
         </button>
       `;
 
-      const repairButtonHtml = `
+      const repairButtonHtml = workerType === 'tanker' ? '' : `
         <button class="bld-train-btn action-stop-btn" data-action="repair" title="${t('hud.repair')} (R)">
           <span class="bld-hotkey-badge">R</span>
           <span class="action-stop-icon">🔧</span>
@@ -1211,9 +1229,15 @@ export class UIManager {
 
     // Draw Resource Deposits (gold & gray)
     this.gm.resourceDeposits.forEach(r => {
+      if (r.type === 'oil' && r.resourcesRemaining <= 0) return; // F4-07a: poço esgotado some do minimapa
       const m = toMap(r.mesh.position.x, r.mesh.position.z);
-      ctx.fillStyle = r.type === 'gold' ? '#ffd700' : '#a0aab2';
+      ctx.fillStyle = r.type === 'gold' ? '#ffd700' : (r.type === 'oil' ? '#0b0f14' : '#a0aab2'); // F4-07a: poço = ponto escuro
       ctx.fillRect(m.x - 2, m.y - 2, 4, 4);
+      if (r.type === 'oil') {
+        ctx.strokeStyle = 'rgba(148,163,184,0.8)';
+        ctx.lineWidth = 1;
+        ctx.strokeRect(m.x - 2.5, m.y - 2.5, 5, 5);
+      }
     });
 
     // Cores por jogador (F6-04): cada dono usa a cor escolhida na partida.

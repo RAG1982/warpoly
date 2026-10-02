@@ -19,12 +19,16 @@ export const BUILD_HOTKEY_BY_ROLE = {
   arcane: 'G',
   temple: 'J',
   aerie: 'Y',
+  shipyard: 'N', // F4-07
+  refinery: 'U',
+  foundry: 'I',
+  platform: 'X',
   tower: 'T',
   wall: 'M'
 };
 
-/** Treinar unidades: posicional, na ordem dos botões (até 3 unidades treináveis por construção). */
-export const TRAIN_SLOT_HOTKEYS = ['Q', 'W', 'E'];
+/** Treinar unidades: posicional, na ordem dos botões (até 5 unidades treináveis por construção — F4-07: Estaleiro). */
+export const TRAIN_SLOT_HOTKEYS = ['Q', 'W', 'E', 'Z', 'X'];
 
 /** Pesquisas da forja: posicional, sequência própria para não colidir com o treino (até 4 melhorias). */
 export const RESEARCH_SLOT_HOTKEYS = ['R', 'A', 'S', 'D'];

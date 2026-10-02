@@ -144,7 +144,12 @@ export class BuildingView {
       case 'temple':
       case 'storm_altar':
       case 'aviary':
-      case 'serpent_nest': return ModelFactory.createBuildingByType(type);
+      case 'serpent_nest':
+      case 'shipyard': // F4-07: naval/petróleo
+      case 'ship_dock':
+      case 'refinery':
+      case 'ash_cauldron':
+      case 'oil_platform': return ModelFactory.createBuildingByType(type);
       case 'workshop': return ModelFactory.createWorkshop();
       case 'orc_workshop': return ModelFactory.createOrcWorkshop();
       case 'barracks': return ModelFactory.createBarracks();

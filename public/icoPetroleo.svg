@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64">
+  <defs>
+    <linearGradient id="oilDrop" x1="20%" y1="0%" x2="80%" y2="100%">
+      <stop offset="0%" stop-color="#4b5563"/>
+      <stop offset="45%" stop-color="#1f2937"/>
+      <stop offset="100%" stop-color="#030712"/>
+    </linearGradient>
+  </defs>
+  <path d="M32 6 C32 6 12 28 12 41 A20 20 0 0 0 52 41 C52 28 32 6 32 6 Z" fill="url(#oilDrop)" stroke="#0f172a" stroke-width="2.5"/>
+  <path d="M22 40 A10 10 0 0 0 30 52" fill="none" stroke="#94a3b8" stroke-width="3" stroke-linecap="round" opacity="0.8"/>
+  <ellipse cx="38" cy="30" rx="3" ry="5" fill="#e2e8f0" opacity="0.35"/>
+</svg>

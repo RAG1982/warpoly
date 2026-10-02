@@ -1,6 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import { listMaps, getMap, DEFAULT_MAP_ID } from '../../src/data/maps/index.js';
 import { getHeightForMap } from '../../src/world/terrainGenerators.js';
+import { NAVAL_MAX_HEIGHT } from '../../src/data/combat.js';
 
 const DRY = 1.8; // mesmo limiar de "terra seca" usado por GameManager.canPlaceBuilding
 
@@ -13,6 +14,15 @@ describe('mapas (src/data/maps/*.json)', () => {
     const ids = listMaps().map((m) => m.id);
     expect(ids).toContain('continental-1v1');
     expect(ids).toContain('ilhas-4p');
+  });
+
+  it('F4-07a: estreito-1v1 está registrado e tem 2 poços de petróleo; ilhas-4p ganhou 1 por margem', () => {
+    expect(listMaps().map((m) => m.id)).toContain('estreito-1v1');
+    const oil = (id) => getMap(id).resources.filter((r) => r.type === 'oil');
+    expect(oil('estreito-1v1').length).toBe(2);
+    expect(oil('ilhas-4p').length).toBe(2);
+    expect(getMap('estreito-1v1')).toMatchObject({ size: 140, maxPlayers: 2 });
+    expect(getMap('estreito-1v1').terrain.generator).toBe('islands');
   });
 
   for (const mapDef of listMaps()) {
@@ -46,11 +56,20 @@ describe('mapas (src/data/maps/*.json)', () => {
         }
       });
 
-      it('todo recurso (gold/stone) fica em terra seca', () => {
+      it('todo recurso (gold/stone) fica em terra seca e todo poço (oil) em água navegável (F4-07a)', () => {
+        const half = mapDef.playable / 2;
         for (const r of mapDef.resources) {
-          expect(['gold', 'stone']).toContain(r.type);
+          expect(['gold', 'stone', 'oil']).toContain(r.type);
           const h = getHeightForMap(mapDef, r.x, r.z);
-          expect(h, `recurso ${r.type} (${r.x}, ${r.z}) altura=${h}`).toBeGreaterThanOrEqual(DRY);
+          if (r.type === 'oil') {
+            expect(h, `poço (${r.x}, ${r.z}) altura=${h}`).toBeLessThan(mapDef.waterLevel);
+            expect(h, `poço (${r.x}, ${r.z}) precisa de profundidade navegável`).toBeLessThanOrEqual(NAVAL_MAX_HEIGHT);
+            expect(Math.abs(r.x)).toBeLessThan(half);
+            expect(Math.abs(r.z)).toBeLessThan(half);
+            if (r.amount !== undefined) expect(r.amount).toBeGreaterThan(0);
+          } else {
+            expect(h, `recurso ${r.type} (${r.x}, ${r.z}) altura=${h}`).toBeGreaterThanOrEqual(DRY);
+          }
         }
       });
 

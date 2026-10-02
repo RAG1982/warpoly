@@ -16,6 +16,9 @@ export const ANIMATION_DURATIONS = {
 /** F4-06: tipos de modelo com a animação de voo (`applyAir`). */
 const AIR_TYPES = new Set(['glider', 'war_balloon', 'gryphon_rider', 'war_serpent']);
 
+/** F4-07: tipos de modelo naval (`applyNaval`: balanço de ondas no nó `Hull`, panos/bandeira, recuo dos canhões). */
+const NAVAL_TYPES = new Set(['tanker', 'frigate', 'war_galley', 'barge', 'dreadnought', 'iron_leviathan', 'submersible', 'colossal_turtle']);
+
 /**
  * Class representing a modular animation controller for WarPoly units
  */
@@ -100,6 +103,21 @@ export class UnitAnimator {
       wingR: ud.wingR || model.getObjectByName('WingR'),
       rotor: ud.rotor || model.getObjectByName('Rotor')
     };
+    // F4-07: navios — `Hull` (casco; balança), `Flag`/`Sail*` (panos e bandeira), `Cannon*`/`Turret*` (recuo/giro). Chaves numeradas
+    // entram em `meshParts` para o reset de transformações (`resetTransforms`) tratá-las como as demais partes.
+    if (NAVAL_TYPES.has(this.unitType)) {
+      this.meshParts.hull = model.getObjectByName('Hull');
+      this.meshParts.flag = model.getObjectByName('Flag');
+      let sails = 0;
+      let cannons = 0;
+      let turrets = 0;
+      model.traverse(node => {
+        const n = node.name || '';
+        if (n.startsWith('Sail')) this.meshParts[`sail${sails++}`] = node;
+        else if (n.startsWith('Cannon')) this.meshParts[`cannon${cannons++}`] = node;
+        else if (n.startsWith('Turret')) this.meshParts[`turret${turrets++}`] = node;
+      });
+    }
 
     // Store original materials on userData for zero-clone damage flash
     model.traverse(child => {
@@ -251,6 +269,12 @@ export class UnitAnimator {
       return;
     }
 
+    // F4-07: navios — balanço de ondas (bob + inclinação) no casco; panos/bandeira ao vento; canhões recuam ao atacar.
+    if (NAVAL_TYPES.has(uType) && this.currentAnim !== 'hurt' && this.currentAnim !== 'die') {
+      this.applyNaval(time, progress, parts, this.currentAnim);
+      return;
+    }
+
     switch (this.currentAnim) {
       case 'idle':
         this.applyIdle(time, parts, uType);
@@ -301,6 +325,30 @@ export class UnitAnimator {
     if (parts.wingR) parts.wingR.rotation.z = -flap;
     if (parts.rotor) parts.rotor.rotation.z = TAU * phase * (fast ? 4 : 1);
     if (parts.head && anim === 'fight') parts.head.rotation.x = 0.35 * Math.sin(phase * Math.PI);
+  }
+
+  /**
+   * F4-07: pose dos navios. `Hull` sobe/desce (bob) e inclina (rolagem em z, arfagem em x; mais forte ao navegar); `Flag`/`Sail*` ondulam
+   * em y; ao atacar (`fight`), `Cannon*` recuam em z e `Turret*` giram de leve. A posição/rumo do modelo raiz pertencem ao jogo.
+   */
+  applyNaval(time, progress, parts, anim) {
+    const TAU = Math.PI * 2;
+    const phase = (time / this.getDuration()) % 1; // 0..1 por ciclo => laço sem emenda
+    const moving = anim === 'walk' || anim === 'fight';
+    const k = moving ? 1.6 : 1;
+    if (parts.hull) {
+      parts.hull.position.y += Math.sin(TAU * phase * (moving ? 2 : 1)) * 0.07 * k;
+      parts.hull.rotation.z = Math.sin(TAU * phase + 0.6) * 0.05 * k;
+      parts.hull.rotation.x = Math.sin(TAU * phase * 2) * 0.03 * k + (anim === 'walk' ? -0.03 : 0);
+    }
+    if (parts.flag) parts.flag.rotation.y = Math.sin(TAU * phase * 3) * 0.25;
+    for (const key of Object.keys(parts)) {
+      const node = parts[key];
+      if (!node) continue;
+      if (key.startsWith('sail')) node.rotation.y += Math.sin(TAU * phase * 2 + key.length) * 0.06;
+      else if (key.startsWith('cannon') && anim === 'fight') node.position.z -= 0.18 * Math.max(0, Math.sin(Math.min(1, progress * 1.6) * Math.PI));
+      else if (key.startsWith('turret') && anim === 'fight') node.rotation.y += Math.sin(TAU * phase) * 0.12;
+    }
   }
 
   // --- F4-03: lançamento de habilidade (braços erguidos, leve inclinação para trás; em loop) ---

@@ -41,6 +41,13 @@ import {
   createAviary,
   createSerpentNest,
   createArsonist,
+  createTanker,
+  createShipyard,
+  createShipDock,
+  createRefinery,
+  createCauldron,
+  createPlatform,
+  createOilWell,
   createWorkshop,
   createOrcWorkshop,
   createTree,
@@ -358,6 +365,12 @@ export class ModelFactory {
       case 'storm_altar': return this._glbOr('storm_altar', () => this.getOrCreateModel('storm_altar', createStormAltar));
       case 'aviary': return this._glbOr('aviary', () => this.getOrCreateModel('aviary', createAviary)); // F4-06
       case 'serpent_nest': return this._glbOr('serpent_nest', () => this.getOrCreateModel('serpent_nest', createSerpentNest));
+      // F4-07: naval/petróleo (procedurais provisórios; o .glb do Blender substitui via `_glbOr` com a mesma chave)
+      case 'shipyard': return this._glbOr('shipyard', () => this.getOrCreateModel('shipyard', createShipyard));
+      case 'ship_dock': return this._glbOr('ship_dock', () => this.getOrCreateModel('ship_dock', createShipDock));
+      case 'refinery': return this._glbOr('refinery', () => this.getOrCreateModel('refinery', createRefinery));
+      case 'ash_cauldron': return this._glbOr('ash_cauldron', () => this.getOrCreateModel('ash_cauldron', createCauldron));
+      case 'oil_platform': return this._glbOr('oil_platform', () => this.getOrCreateModel('oil_platform', createPlatform));
       case 'workshop': return this.createWorkshop();
       case 'orc_workshop': return this.createOrcWorkshop();
       case 'wall_human': return createWallSegment('human');
@@ -559,6 +572,11 @@ export class ModelFactory {
     return this._glbOr('arsonist', () => this.getOrCreateModel('arsonist', createArsonist, 'arsonist'));
   }
 
+  /** F4-07a: poço de petróleo no mar (jazida `oil`). */
+  static createOilWell() {
+    return this._glbOr('oil_well', () => this.getOrCreateModel('oil_well', createOilWell));
+  }
+
   static createUnit(type) {
     switch (type) {
       case 'villager': return this.createVillager();
@@ -585,6 +603,8 @@ export class ModelFactory {
       case 'war_balloon': return this._glbOr('war_balloon', () => this.getOrCreateModel('war_balloon', createWarBalloon, 'war_balloon'));
       case 'gryphon_rider': return this._glbOr('gryphon_rider', () => this.getOrCreateModel('gryphon_rider', createGryphonRider, 'gryphon_rider'));
       case 'war_serpent': return this._glbOr('war_serpent', () => this.getOrCreateModel('war_serpent', createWarSerpent, 'war_serpent'));
+      // F4-07: naval (procedurais provisórios; .glb via `_glbOr` com a mesma chave)
+      case 'tanker': return this._glbOr('tanker', () => this.getOrCreateModel('tanker', createTanker));
       case 'sapper': return this.createSapper();
       case 'arsonist': return this.createArsonist();
       default: return this.createVillager();

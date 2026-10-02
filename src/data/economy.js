@@ -16,11 +16,11 @@ import { BUILDINGS } from './buildings.js';
 import { HQ_TIER_GOLD_MULT } from './tiers.js';
 import { researchEffect } from './upgrades.js';
 
-export const CARRY = { gold: 10, wood: 10, stone: 8 };
+export const CARRY = { gold: 10, wood: 10, stone: 8, oil: 100 }; // F4-07a: petróleo — 1 viagem do petroleiro
 
 export const MINE_ENTER_TIME = 1.5;
 
-export const MINE_SLOTS = { gold: 1, stone: 2 };
+export const MINE_SLOTS = { gold: 1, stone: 2, oil: 1 };
 
 export const RATE_BONUS = {
   wood: { lumber_lv2: 1.25 },

@@ -11,6 +11,7 @@ import { QualitySettings } from './QualitySettings.js';
 import { classifyHover, cursorKindFor, cursorCss, CursorController } from '../ui/cursors.js';
 import { HoverOutline } from '../ui/HoverOutline.js';
 import { EVT } from '../sim/events.js';
+import { WATER_LEVEL } from '../data/combat.js';
 import { resolveAbility, needsEntityTarget, targetProblem, canCast, pickCaster, selectionAbilityUnits } from '../sim/abilities.js';
 
 /** Distância (px) da borda da janela que ativa o pan pela borda (F3-01). */
@@ -623,10 +624,10 @@ export class InputManager {
         this.lastGhostGx = gx;
         this.lastGhostGz = gz;
 
-        const h = this.terrain.getHeight(gx, gz);
-        this.ghostMesh.position.set(gx, h, gz);
+        const pp = this._placePoint(this.placingBuildingType, gx, gz);
+        this.ghostMesh.position.set(pp.x, pp.y, pp.z);
 
-        const isValid = this.gm.canPlaceBuilding(this.placingBuildingType, gx, gz);
+        const isValid = this.gm.canPlaceBuilding(this.placingBuildingType, pp.x, pp.z);
         this._ghostValid = isValid;
         const targetMat = isValid ? ModelFactory.ghostValidMat : ModelFactory.ghostInvalidMat;
         ModelFactory.setGhostMaterial(this.ghostMesh, targetMat);
@@ -920,6 +921,18 @@ export class InputManager {
     this.cancelPlacement();
   }
 
+  /**
+   * F4-07a: ponto de colocação da construção sob o cursor — a plataforma encaixa no poço livre mais próximo (≤ 4 u) e fica no
+   * nível da água; as demais usam o ponto dado, na altura do terreno.
+   */
+  _placePoint(type, gx, gz) {
+    if (getBuildingDef(type).role === 'platform') {
+      const dep = this.gm.findFreeOilDeposit(gx, gz, 4);
+      return { x: dep ? dep.mesh.position.x : gx, y: WATER_LEVEL, z: dep ? dep.mesh.position.z : gz };
+    }
+    return { x: gx, y: this.terrain.getHeight(gx, gz), z: gz };
+  }
+
   startPlacement(buildingType) {
     this.cancelPlacement();
     this.placingBuildingType = buildingType;
@@ -940,12 +953,12 @@ export class InputManager {
     if (this.groundIntersection && (this.groundIntersection.x !== 0 || this.groundIntersection.z !== 0)) {
       const gx = Math.round(this.groundIntersection.x * 2) / 2;
       const gz = Math.round(this.groundIntersection.z * 2) / 2;
-      const h = this.terrain.getHeight(gx, gz);
-      this.ghostMesh.position.set(gx, h, gz);
+      const pp = this._placePoint(buildingType, gx, gz);
+      this.ghostMesh.position.set(pp.x, pp.y, pp.z);
       this.lastGhostGx = gx;
       this.lastGhostGz = gz;
 
-      const isValid = this.gm.canPlaceBuilding(buildingType, gx, gz);
+      const isValid = this.gm.canPlaceBuilding(buildingType, pp.x, pp.z);
       this._ghostValid = isValid;
       const targetMat = isValid ? ModelFactory.ghostValidMat : ModelFactory.ghostInvalidMat;
       ModelFactory.setGhostMaterial(this.ghostMesh, targetMat);
@@ -971,8 +984,14 @@ export class InputManager {
       return;
     }
 
-    const gx = this.groundIntersection.x;
-    const gz = this.groundIntersection.z;
+    let gx = this.groundIntersection.x;
+    let gz = this.groundIntersection.z;
+    const isPlatform = getBuildingDef(this.placingBuildingType).role === 'platform';
+    if (isPlatform) { // F4-07a: a plataforma encaixa no poço de petróleo livre mais próximo do cursor
+      const pp = this._placePoint(this.placingBuildingType, gx, gz);
+      gx = pp.x;
+      gz = pp.z;
+    }
 
     // Strict clearance check: dry terrain, distance to other buildings, trees, deposits, and fords
     if (!this.gm.canPlaceBuilding(this.placingBuildingType, gx, gz)) {
@@ -981,7 +1000,7 @@ export class InputManager {
     }
 
     const builderIds = this.gm.selectedUnits
-      .filter(u => u.type === 'villager' || u.type === 'peon')
+      .filter(u => isPlatform ? u.isTanker : (u.type === 'villager' || u.type === 'peon'))
       .map(u => u.id);
 
     this.gm.issue({

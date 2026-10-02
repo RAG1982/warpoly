@@ -15,7 +15,12 @@
  * 6. String-pulling (suavização de caminho) para remover zig-zag e criar trajetos naturais.
  * 7. Fila de pedidos com orçamento por frame (`requestPath`/`processQueue`) e cache de caminhos
  *    recentes (por par de células + versão da camada dinâmica).
+ * 8. F4-07a: modo `'naval'` (navios): mesma API/A*, mas a célula é navegável quando é ÁGUA com profundidade
+ *    `waterLevel − altura ≥ NAVAL_MIN_DEPTH` (`src/data/combat.js`) e livre de bloqueios (plataformas, poços,
+ *    construções costeiras). `new Pathfinder(terrain)` continua terrestre; o `GameManager` cria uma segunda
+ *    instância `navalPathfinder` (fila e cache próprios).
  */
+import { NAVAL_MAX_HEIGHT } from '../data/combat.js';
 
 /** Heap binário mínimo, com arrays tipados, usado pelo A* (chave = prioridade/fScore). */
 export class MinHeap {
@@ -79,10 +84,13 @@ export class Pathfinder {
    *   limiar para que consultas perto da borda (ex.: clique no minimapa) caiam numa célula real
    *   e corretamente intransponível, em vez de grudar (clamp) numa célula de terra válida.
    * @param {number} cellSize Size of each navigation grid tile in world units
+   * @param {'land'|'naval'} [mode]  F4-07a: `'naval'` = grade de navios (água profunda); padrão terrestre
    */
-  constructor(terrain, bounds = terrain.mapDef ? terrain.mapDef.playable / 2 : 58, cellSize = 1.5) {
+  constructor(terrain, bounds = terrain.mapDef ? terrain.mapDef.playable / 2 : 58, cellSize = 1.5, mode = 'land') {
     const GRID_MARGIN = 3;
     this.terrain = terrain;
+    this.mode = mode;
+    this.naval = mode === 'naval';
     this.cellSize = cellSize;
     this.bounds = bounds;
     this.minCoord = -(bounds + GRID_MARGIN);
@@ -137,7 +145,8 @@ export class Pathfinder {
 
         // Dry land above water table (water level = 0.5; dry land threshold >= 0.68)
         // and strictly within the map's playable border (F2-05: this.bounds = mapDef.playable/2)
-        if (h >= 0.68 && maxCoord < this.bounds) {
+        // F4-07a: modo naval — água com profundidade suficiente (`h <= NAVAL_MAX_HEIGHT`).
+        if ((this.naval ? h <= NAVAL_MAX_HEIGHT : h >= 0.68) && maxCoord < this.bounds) {
           this.staticGrid[r * this.cols + c] = 1;
         } else {
           this.staticGrid[r * this.cols + c] = 0;
@@ -155,6 +164,15 @@ export class Pathfinder {
   isWater(x, z) {
     const h = this.terrain.getHeight(x, z);
     return h < 0.65;
+  }
+
+  /**
+   * F4-07a: o terreno em (x, z) é intransponível NESTE modo? Terrestre = água (< 0,65); naval = qualquer
+   * ponto raso ou seco (altura > `NAVAL_MAX_HEIGHT`). Substitui `isWater` nos testes internos de linha de visada.
+   */
+  _terrainBlocked(x, z) {
+    const h = this.terrain.getHeight(x, z);
+    return this.naval ? h > NAVAL_MAX_HEIGHT : h < 0.65;
   }
 
   /**
@@ -211,7 +229,7 @@ export class Pathfinder {
 
   /** Caminhável no ponto do mundo (x, z): nem água nem bloqueio dinâmico. */
   isWalkableWorld(x, z) {
-    if (this.isWater(x, z)) return false;
+    if (this._terrainBlocked(x, z)) return false;
     const { c, r } = this.toGrid(x, z);
     return this.isWalkable(c, r);
   }
@@ -253,16 +271,17 @@ export class Pathfinder {
   }
 
   /**
-   * Snaps a coordinate in water to the nearest walkable land tile
+   * Snaps a coordinate in water to the nearest walkable land tile (F4-07a: navegável, no modo naval)
    * @param {number} x
    * @param {number} z
+   * @param {number} [maxRadius]  raio máximo da busca, em células
    * @returns {{ x: number, z: number }}
    */
-  findNearestWalkable(x, z) {
+  findNearestWalkable(x, z, maxRadius = 16) {
     const { c, r } = this.toGrid(x, z);
     if (this.isWalkable(c, r)) return { x, z };
 
-    for (let radius = 1; radius <= 16; radius++) {
+    for (let radius = 1; radius <= maxRadius; radius++) {
       let bestPt = null;
       let minDSq = Infinity;
       for (let dr = -radius; dr <= radius; dr++) {
@@ -283,6 +302,30 @@ export class Pathfinder {
       if (bestPt) return bestPt;
     }
     return { x, z };
+  }
+
+  /**
+   * F4-07b: existe água navegável (camada ESTÁTICA, ignora bloqueios dinâmicos) a até `margin` do ponto (x, z)?
+   * Usado para decidir se um navio alcança um alvo em terra (margem). Só faz sentido no modo naval.
+   */
+  nearNavigable(x, z, margin) {
+    const { c, r } = this.toGrid(x, z);
+    const reach = Math.ceil(margin / this.cellSize) + 1;
+    const lim = margin + this.cellSize * 0.5;
+    const limSq = lim * lim;
+    for (let dr = -reach; dr <= reach; dr++) {
+      const nr = r + dr;
+      if (nr < 0 || nr >= this.rows) continue;
+      for (let dc = -reach; dc <= reach; dc++) {
+        const nc = c + dc;
+        if (nc < 0 || nc >= this.cols || this.staticGrid[nr * this.cols + nc] !== 1) continue;
+        const w = this.toWorld(nc, nr);
+        const ddx = w.x - x;
+        const ddz = w.z - z;
+        if (ddx * ddx + ddz * ddz <= limSq) return true;
+      }
+    }
+    return false;
   }
 
   /**
@@ -308,7 +351,7 @@ export class Pathfinder {
       const z = z0 + (z1 - z0) * t;
 
       // 1. Direct height check
-      if (this.isWater(x, z)) return false;
+      if (this._terrainBlocked(x, z)) return false;
 
       // 2. Grid cell check (camada estática + dinâmica)
       const { c, r } = this.toGrid(x, z);
@@ -445,7 +488,7 @@ export class Pathfinder {
     let bestNode = startIndex; // Nó mais próximo ao destino encontrado (se não há caminho)
     let bestHeuristic = h(start.c, start.r);
     let iterations = 0;
-    const maxIterations = 3200;
+    const maxIterations = this.naval ? this.numCells : 3200; // F4-07a: contornar continentes inteiros exige mais nós que a marcha terrestre
 
     while (this._heap.size > 0 && iterations < maxIterations) {
       iterations++;

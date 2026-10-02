@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64">
+  <defs>
+    <linearGradient id="shipHull" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#b45309"/>
+      <stop offset="100%" stop-color="#78350f"/>
+    </linearGradient>
+  </defs>
+  <path d="M6 40 H58 L50 54 H16 Z" fill="url(#shipHull)" stroke="#2a1305" stroke-width="2.5" stroke-linejoin="round"/>
+  <rect x="31" y="8" width="3" height="32" fill="#4a2c12" stroke="#2a1305" stroke-width="1"/>
+  <path d="M34 11 L52 36 H34 Z" fill="#f1ead8" stroke="#6b5b3a" stroke-width="1.5" stroke-linejoin="round"/>
+  <path d="M31 14 L16 36 H31 Z" fill="#e2d9bd" stroke="#6b5b3a" stroke-width="1.5" stroke-linejoin="round"/>
+  <path d="M4 58 Q12 54 20 58 T36 58 T52 58 T62 58" fill="none" stroke="#38bdf8" stroke-width="2.5" stroke-linecap="round" opacity="0.8"/>
+</svg>

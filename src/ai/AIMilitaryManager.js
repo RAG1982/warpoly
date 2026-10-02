@@ -503,7 +503,7 @@ export class AIMilitaryManager {
     if (tower) return tower;
     const hq = per.nearestBuilding(base.x, base.y, k => k.role === 'hq');
     if (hq) return hq;
-    const any = per.nearestBuilding(base.x, base.y);
+    const any = per.nearestBuilding(base.x, base.y, k => k.role !== 'platform'); // F4-07a: plataforma no mar é inalcançável por terra
     if (any) return any;
     let best = null;
     let bd = Infinity;

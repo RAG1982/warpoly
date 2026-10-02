@@ -2,13 +2,13 @@
  * victory.js — F3-09: regras puras de derrota por modo de vitória (sem three.js/DOM).
  *
  * - `conquest` (Destruir tudo, padrão): derrotado quando não resta nenhuma construção viva do
- *   jogador (em obra contam; muralhas `role:'wall'` não contam). Unidades sem construção não salvam.
+ *   jogador (em obra contam; muralhas `role:'wall'` e plataformas `role:'platform'` não contam). Unidades sem construção não salvam.
  * - `regicide`: derrotado quando não resta Centro (`role:'hq'`) vivo.
  */
 import { normalizeVictoryMode } from './MatchConfig.js';
 
 /** Papéis que não contam para a regra "Destruir tudo". Papel desconhecido conta normalmente. */
-const NON_COUNTING_ROLES = new Set(['wall']);
+const NON_COUNTING_ROLES = new Set(['wall', 'platform']); // F4-07a: a plataforma no mar não conta (exércitos terrestres não a alcançam)
 
 /**
  * @param {'conquest'|'regicide'} mode

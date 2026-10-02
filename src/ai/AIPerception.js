@@ -26,6 +26,7 @@ export function unitClassOf(type) {
   if (d.suicide) return 'suicide';
   if (d.maxMana > 0) return 'caster';
   if (d.layer === 'air') return 'air';
+  if (d.layer === 'naval') return d.isCombat === false ? 'worker' : 'ranged'; // F4-07: a IA ainda não modela navios (F5): tratados como atiradores/trabalhadores
   if (d.isRanged) return 'ranged';
   if (type === FACTIONS.human.units.cavalry || type === FACTIONS.orc.units.cavalry) return 'cavalry';
   if (d.modelOf && (d.modelOf === FACTIONS.human.units.cavalry || d.modelOf === FACTIONS.orc.units.cavalry)) return 'cavalry';

@@ -14,7 +14,7 @@ import { STARTING_RESOURCES } from '../../src/data/index.js';
 describe('Player: economia', () => {
   it('começa com os recursos iniciais de src/data', () => {
     const p = new Player({ id: 0 });
-    expect(p.resources).toEqual({ ...STARTING_RESOURCES });
+    expect(p.resources).toEqual({ ...STARTING_RESOURCES, oil: 0 });
     // cópia: mexer no jogador não altera a tabela congelada
     p.resources.gold -= 1;
     expect(STARTING_RESOURCES.gold).toBe(p.resources.gold + 1);
@@ -33,10 +33,10 @@ describe('Player: economia', () => {
   it('deduct debita e add credita (tipo único ou custo inteiro)', () => {
     const p = new Player({ id: 0, resources: { wood: 100, gold: 50, stone: 20 } });
     p.deduct({ wood: 30, gold: 10, time: 5 });
-    expect(p.resources).toEqual({ wood: 70, gold: 40, stone: 20 });
+    expect(p.resources).toEqual({ wood: 70, gold: 40, stone: 20, oil: 0 });
     p.add('stone', 5);
     p.add({ wood: 30, gold: 10, time: 5 }); // reembolso
-    expect(p.resources).toEqual({ wood: 100, gold: 50, stone: 25 });
+    expect(p.resources).toEqual({ wood: 100, gold: 50, stone: 25, oil: 0 });
     p.add('mana', 99); // tipo desconhecido é ignorado
     expect(p.resources.mana).toBeUndefined();
     p.addResource('gold', 1); // alias legado

@@ -11,8 +11,8 @@ import { EVT } from './events.js';
 import { REPAIR_INTERVAL, MAX_WORKERS_PER_BUILDING } from './repair.js';
 import { createStatusSlots, createMods, tickStatuses, clearStatuses, removeStatus, STATUS_DEFS } from './statuses.js';
 import { isDetectedBy } from './detection.js';
-import { canTarget, defaultCanHitAir } from './targeting.js';
-import { FLAMESHIELD_DAMAGE } from '../data/combat.js';
+import { canTarget, defaultCanHitAir, defaultCanHitNaval } from './targeting.js';
+import { FLAMESHIELD_DAMAGE, WATER_LEVEL, NAVAL_MAX_HEIGHT, OIL_LOAD_TIME, SHORE_REACH } from '../data/combat.js';
 import { getAbility } from '../data/abilities.js';
 import { resolveAbility, canCast, needsEntityTarget, targetProblem, applyAbility, emitCastStart, findAutocastTarget, getChannel, applyChannelWave } from './abilities.js';
 
@@ -155,6 +155,9 @@ export class Unit {
     this.flyHeight = this.layer === 'air' ? (typeof def.flyHeight === 'number' ? def.flyHeight : 4.5) : 0;
     this.canHitAir = defaultCanHitAir(def);
     this.canHitGround = def.canHitGround !== false;
+    /** F4-07: navios (`layer:'naval'`) — `canHitNaval` (atinge navios), petroleiro (`isTanker`, coleta petróleo e ergue plataforma). */
+    this.canHitNaval = defaultCanHitNaval(def);
+    this.isTanker = !!def.isTanker;
     /** F4-02: velocidade estimada (u/s) medida pelo `GameManager` a cada tick — mira preditiva do cerco. */
     this.velX = 0;
     this.velZ = 0;
@@ -194,7 +197,9 @@ export class Unit {
 
     // Worker inventory (F3-04: `max` passa a ser por recurso — ver `src/data/economy.js` CARRY;
     // fixado quando a unidade começa a coletar, em vez de um valor único fixo).
-    this.carrying = { type: null, amount: 0, max: CARRY.wood };
+    this.carrying = { type: null, amount: 0, max: def.isTanker ? CARRY.oil : CARRY.wood };
+    /** F4-07a: segundos já gastos carregando petróleo junto à plataforma (petroleiro). */
+    this._loadT = 0;
     // F3-04: timer de "dentro da mina/pedreira" (estado `insideMine`) — ver `updateInsideMine`.
     this._mineTimer = 0;
     this.actionTimer = 0;
@@ -215,7 +220,7 @@ export class Unit {
 
     // Corpo de simulação (F2-08c): posição/rotação Y como números; a malha 3D é da `UnitView`.
     const h = this.terrain.getHeight(x, z);
-    this.mesh = new Body(x, h + this.flyHeight, z);
+    this.mesh = new Body(x, this.layer === 'naval' ? WATER_LEVEL : h + this.flyHeight, z);
     this.mesh.scale.set(1.62, 1.62, 1.62); // Scaled +20% for superior visibility and detail appreciation
     this.mesh.userData.entity = this;
 
@@ -304,6 +309,23 @@ export class Unit {
 
   isWorker() {
     return getUnitDef(this.type).isWorker;
+  }
+
+  /** F4-07a: pathfinder da camada desta unidade — terrestre, naval ou `null` (aéreo voa em linha reta). */
+  _pf(gm) {
+    if (!gm || this.layer === 'air') return null;
+    return this.layer === 'naval' ? gm.navalPathfinder : gm.pathfinder;
+  }
+
+  /** F4-07a: o ponto (x, z) é intransponível para esta unidade (água para terrestres; terra/raso para navios)? */
+  _blockedAt(x, z) {
+    const h = this.terrain.getHeight(x, z);
+    return this.layer === 'naval' ? h > NAVAL_MAX_HEIGHT : h < 0.65;
+  }
+
+  /** F4-07a: folga extra de contato (navio encostando em construção costeira/plataforma: o casco para na célula livre mais próxima). */
+  _contactSlack() {
+    return this.layer === 'naval' ? 1.2 : 0;
   }
 
   /** Pede uma animação à view (a reprodução em si roda em `UnitView.update`). `restart` reinicia mesmo se já ativa. */
@@ -448,10 +470,11 @@ export class Unit {
     this._mvLastX = NaN;
 
     const gm = gameManager || this.gameManager;
-    if (gm && gm.pathfinder && this.layer !== 'air') { // F4-06: aéreo voa em linha reta (sem pathfinder, sem ajuste de água)
-      // Snap destination if clicked in water
-      if (gm.pathfinder.isWater(x, z)) {
-        const snapped = gm.pathfinder.findNearestWalkable(x, z);
+    const pf = this._pf(gm);
+    if (pf) { // F4-06: aéreo voa em linha reta (sem pathfinder, sem ajuste de água); F4-07a: navio usa o pathfinder naval
+      // Snap destination if clicked in water (navio: se clicado em terra/raso)
+      if (pf._terrainBlocked(x, z)) {
+        const snapped = pf.findNearestWalkable(x, z);
         x = snapped.x;
         z = snapped.z;
       }
@@ -470,7 +493,7 @@ export class Unit {
     this.pathDestination = { x, z };
     this.hasTargetPos = false;
     this.pathPending = true;
-    gm.pathfinder.requestPath(this, x, z, (path) => {
+    this._pf(gm).requestPath(this, x, z, (path) => {
       this.pathPending = false;
       // Descarta callback obsoleto (ordem já mudou enquanto o pedido esperava na fila).
       if (!MOVEY_STATES.has(this.state) || !this.pathDestination || this.pathDestination.x !== x || this.pathDestination.z !== z) return;
@@ -523,7 +546,16 @@ export class Unit {
 
   orderGather(resource) {
     if (this.isDead || this.isDying || this.state === 'dying') return;
-    if (!this.isWorker()) return;
+    if (!this.isWorker() && !this.isTanker) return;
+    // F4-07a: petroleiro só coleta petróleo (de poço com plataforma própria concluída); trabalhadores nunca o coletam.
+    if (this.isTanker !== (resource.type === 'oil')) return;
+    if (this.isTanker) {
+      const gm = this.gameManager;
+      if (!gm || !gm.platformReady(resource, this.ownerId)) {
+        if (gm && gm.events) gm.events.emit(EVT.NOTIFY, { ownerId: this.ownerId, text: '⚠️ Sem plataforma neste poço' });
+        return;
+      }
+    }
     this._clearOrderModes();
     this.gatherTarget = resource;
     this.targetEntity = resource;
@@ -532,7 +564,8 @@ export class Unit {
     this.attackTarget = null;
 
     // Ferramenta ativa (a `UnitView` mostra o machado/picareta/martelo do modelo)
-    this.tool = resource.type === 'tree' ? 'axe' : 'pickaxe';
+    this.tool = resource.type === 'oil' ? null : (resource.type === 'tree' ? 'axe' : 'pickaxe');
+    this._loadT = 0;
 
     const resType = resource.type === 'tree' ? 'wood' : resource.type;
     // If worker is carrying a different resource type, drop off at base first before harvesting new type
@@ -559,7 +592,8 @@ export class Unit {
 
   orderBuild(building) {
     if (this.isDead || this.isDying || this.state === 'dying') return;
-    if (!this.isWorker()) return;
+    // F4-07a: a plataforma é erguida pelo petroleiro; as demais construções, pelos trabalhadores.
+    if (building && building.role === 'platform' ? !this.isTanker : !this.isWorker()) return;
     if (!this._acceptWorkSlot(building)) return;
     this._clearOrderModes();
     this.state = 'building';
@@ -592,6 +626,7 @@ export class Unit {
   orderAttack(target, preserveObjective = false) {
     if (this.isDead || this.isDying || this.state === 'dying') return;
     if (target && !canTarget(this, target)) return; // F4-06: melee/cerco não atingem aéreos; batedores não atacam
+    if (target && !this._shoreOk(target)) return; // F4-07b: navios só atingem terra junto à margem
     this._clearOrderModes();
     this.state = 'attacking';
     this.attackTarget = target;
@@ -871,6 +906,22 @@ export class Unit {
       return (dist - move) < 0.15;
     }
 
+    // F4-07a: navio — só se move onde há profundidade suficiente (desliza ao longo da costa como os terrestres na água).
+    if (this.layer === 'naval') {
+      if (this.terrain.getHeight(nextX, nextZ) > NAVAL_MAX_HEIGHT) {
+        const hX = this.terrain.getHeight(nextX, curZ);
+        const hZ = this.terrain.getHeight(curX, nextZ);
+        if (hX <= NAVAL_MAX_HEIGHT) this.mesh.position.x = nextX;
+        else if (hZ <= NAVAL_MAX_HEIGHT) this.mesh.position.z = nextZ;
+        return false;
+      }
+      this.mesh.position.x = nextX;
+      this.mesh.position.z = nextZ;
+      this.mesh.position.y = WATER_LEVEL;
+      this.mesh.rotation.y = Math.atan2(dirX, dirZ);
+      return (dist - move) < 0.15;
+    }
+
     // WATER IMPASSABILITY: Units cannot enter or cross water!
     const nextH = this.terrain.getHeight(nextX, nextZ);
     if (nextH < 0.65) {
@@ -904,8 +955,9 @@ export class Unit {
     let subTargetZ = destZ;
 
     const gm = gameManager || this.gameManager;
-    if (gm && gm.pathfinder && this.layer !== 'air') {
-      const los = gm.pathfinder.hasLineOfSight(curX, curZ, destX, destZ);
+    const pf = this._pf(gm);
+    if (pf) {
+      const los = pf.hasLineOfSight(curX, curZ, destX, destZ);
       if (!los) {
         // Direct line blocked by water! Route through waypoints / fords
         const distFromLastDest = this.pathDestination
@@ -915,7 +967,7 @@ export class Unit {
         if ((!this.waypoints || this.waypoints.length === 0 || distFromLastDest > 2.5) && !this._chaseRequestPending) {
           this.pathDestination = { x: destX, z: destZ };
           this._chaseRequestPending = true;
-          gm.pathfinder.requestPath(this, destX, destZ, (path) => {
+          pf.requestPath(this, destX, destZ, (path) => {
             this._chaseRequestPending = false;
             this.waypoints = path;
             this.waypointIndex = 0;
@@ -973,8 +1025,15 @@ export class Unit {
     if (this.canRemove) return;
     this.gameManager = gameManager;
 
-    // Safety: ensure unit never stays submerged in water
-    if (this.layer !== 'air' && this.terrain.getHeight(this.mesh.position.x, this.mesh.position.z) < 0.65) {
+    // Safety: ensure unit never stays submerged in water (navio: nunca em terra/raso — F4-07a)
+    if (this.layer === 'naval') {
+      if (this.terrain.getHeight(this.mesh.position.x, this.mesh.position.z) > NAVAL_MAX_HEIGHT && gameManager && gameManager.navalPathfinder) {
+        const safe = gameManager.navalPathfinder.findNearestWalkable(this.mesh.position.x, this.mesh.position.z, 24);
+        this.mesh.position.x = safe.x;
+        this.mesh.position.z = safe.z;
+        this.mesh.position.y = WATER_LEVEL;
+      }
+    } else if (this.layer !== 'air' && this.terrain.getHeight(this.mesh.position.x, this.mesh.position.z) < 0.65) {
       if (gameManager && gameManager.pathfinder) {
         const safe = gameManager.pathfinder.findNearestWalkable(this.mesh.position.x, this.mesh.position.z);
         this.mesh.position.x = safe.x;
@@ -1488,7 +1547,7 @@ export class Unit {
       this.stop();
       return;
     }
-    if (this._stuckT > 1.5 && gm && gm.pathfinder && this.pathDestination && !this.pathPending) {
+    if (this._stuckT > 1.5 && this._pf(gm) && this.pathDestination && !this.pathPending) {
       // Preso longe do destino: pede um caminho novo a partir daqui (algumas vezes), depois desiste se estiver perto.
       this._stuckT = 0;
       this._repaths++;
@@ -1543,7 +1602,7 @@ export class Unit {
     nb.length = 0;
     for (let i = 0; i < buf.length; i++) {
       const u = buf[i];
-      if (u === this || u.isDead || u.isDying || u.layer === 'air' || this.layer === 'air') continue; // sem checar `mesh.visible` (névoa é visual; a sim não pode depender dela)
+      if (u === this || u.isDead || u.isDying || u.layer === 'air' || this.layer === 'air' || u.layer !== this.layer) continue; // sem checar `mesh.visible` (névoa é visual; a sim não pode depender dela); F4-07: camadas distintas não interagem
       const p = u.mesh.position;
       nb.push({ x: p.x, z: p.z, radius: u.collisionRadius || 0.6, stationary: u.state === 'idle' || u.state === 'holding' });
     }
@@ -1551,12 +1610,67 @@ export class Unit {
     const dir = steerDirection((tx - px) / dist, (tz - pz) / dist, px, pz, r, nb, isLastLeg && dist < 3 ? 0.5 : 1);
     const move = Math.min(step, dist);
     // O desvio nunca leva à água: se o passo desviado cair na água, usa o passo normal até o waypoint.
-    if (this.terrain.getHeight(px + dir.x * move, pz + dir.z * move) < 0.65) return false;
+    if (this._blockedAt(px + dir.x * move, pz + dir.z * move)) return false;
     this.stepTowards(px + dir.x * 10, pz + dir.z * 10, move);
     return true;
   }
 
+  /**
+   * F4-07a: petroleiro junto à plataforma — encosta, carrega `CARRY.oil` em `OIL_LOAD_TIME` s (sem fila nem slot) e
+   * volta à Refinaria (`returning`); poço esgotado ou plataforma destruída → próximo poço com plataforma própria.
+   */
+  updateTankerGathering(delta, gm) {
+    const dep = this.gatherTarget;
+    if (!dep || dep.isDead || dep.resourcesRemaining <= 0 || !gm.platformReady(dep, this.ownerId)) {
+      if (this.carrying.amount > 0) {
+        this.state = 'returning';
+        return;
+      }
+      const next = gm.findNearestResource(this.mesh.position, 'oil', this.ownerId);
+      if (next) {
+        this.gatherTarget = next;
+        this.targetEntity = next;
+        this._loadT = 0;
+      } else {
+        this.stop();
+      }
+      return;
+    }
+
+    const tp = dep.mesh.position;
+    const dist = Math.hypot(this.mesh.position.x - tp.x, this.mesh.position.z - tp.z);
+    const contactDist = (dep.platform.collisionRadius || dep.collisionRadius) + this.collisionRadius + 0.25 + this._contactSlack();
+    if (dist > contactDist) {
+      this._loadT = 0;
+      this.moveTowards(tp.x, tp.z, delta);
+      return;
+    }
+
+    this.mesh.rotation.y = Math.atan2(tp.x - this.mesh.position.x, tp.z - this.mesh.position.z);
+    this.hasFiredThisAttack = false;
+    if (this.hurtTimer <= 0) this._setAnim('idle');
+    this._loadT += delta;
+    if (this._loadT < OIL_LOAD_TIME) return;
+    this._loadT = 0;
+
+    const harvested = dep.mine(CARRY.oil * gatherMultiplier(this.ownerId, 'oil', gm));
+    this.carrying.type = 'oil';
+    this.carrying.max = CARRY.oil;
+    this.carrying.amount = harvested;
+    if (dep.consumeDepletedFlag() && gm.events) {
+      gm.events.emit(EVT.RESOURCE_DEPLETED, { resourceId: dep.id, pos: posOf(dep.mesh.position), resourceType: 'oil' });
+    }
+    if (harvested > 0) {
+      this.state = 'returning';
+      this.updateCarryingVisuals(true);
+    }
+  }
+
   updateGathering(delta, gameManager, buildings) {
+    if (this.isTanker) {
+      this.updateTankerGathering(delta, gameManager || this.gameManager);
+      return;
+    }
     if (!this.gatherTarget || this.gatherTarget.isDead || (this.gatherTarget.resourcesRemaining <= 0 && this.gatherTarget.woodRemaining <= 0)) {
       // Find another nearby resource of same type if possible
       const nextResource = gameManager.findNearestResource(this.mesh.position, this.gatherTarget ? this.gatherTarget.type : 'tree');
@@ -1749,6 +1863,7 @@ export class Unit {
     // Find nearest dropoff building owned by this unit's player
     const dropoff = gameManager.findNearestDropoff(this.mesh.position, this.carrying.type, buildings || gameManager.buildings, this.ownerId);
     if (!dropoff) {
+      if (this.isTanker && gameManager.events) gameManager.events.emit(EVT.NOTIFY, { ownerId: this.ownerId, text: '⚠️ Sem Refinaria para entregar o petróleo' });
       this.stop();
       return;
     }
@@ -1758,7 +1873,7 @@ export class Unit {
 
     // Contact / collision perimeter of dropoff building
     const dropoffRadius = dropoff.collisionRadius || (dropoff.type === 'castle' ? 5.5 : 3.2);
-    const contactDist = dropoffRadius + this.collisionRadius + 0.25;
+    const contactDist = dropoffRadius + this.collisionRadius + 0.25 + this._contactSlack();
 
     // Delivery triggers upon colliding / contacting the dropoff building!
     if (dist <= contactDist) {
@@ -1794,7 +1909,7 @@ export class Unit {
     const targetPos = this.buildTarget.mesh.position;
     const dist = Math.hypot(this.mesh.position.x - targetPos.x, this.mesh.position.z - targetPos.z);
     const targetRadius = this.buildTarget.collisionRadius || 3.0;
-    const contactDist = targetRadius + this.collisionRadius + 0.25;
+    const contactDist = targetRadius + this.collisionRadius + 0.25 + this._contactSlack();
 
     if (dist > contactDist) {
       this.moveTowards(targetPos.x, targetPos.z, delta);
@@ -1956,6 +2071,12 @@ export class Unit {
         this._giveUpAttack();
         return;
       }
+      // F4-07b: um terrestre não alcança um navio pela costa — desiste em vez de ficar parado na margem.
+      if (this.attackTarget.layer === 'naval' && this.layer === 'ground') {
+        this.objectiveTarget = null;
+        this._giveUpAttack();
+        return;
+      }
       this.hasFiredThisAttack = false;
       this.moveTowards(targetPos.x, targetPos.z, delta);
       return;
@@ -2089,6 +2210,13 @@ export class Unit {
    */
   _canEngage(e) {
     if (!canTarget(this, e)) return false; // F4-06: imune (Olho Vigia), camada aérea/terrestre (`src/sim/targeting.js`)
+    if (!this._shoreOk(e)) return false; // F4-07b: navio só mira terra junto à margem
+    // F4-07b: terrestre (que não voa) só auto-adquire navio ao alcance (não persegue o que não alcança pela costa).
+    if (e.layer === 'naval' && this.layer === 'ground') {
+      const p = this.mesh.position;
+      const q = e.mesh.position;
+      if (Math.hypot(p.x - q.x, p.z - q.z) - (e.collisionRadius || 1) > this.attackRange) return false;
+    }
     if (this.minAttackRange <= 0) return true;
     if (this.minAttackRange > 0) {
       const p = this.mesh.position;
@@ -2097,6 +2225,19 @@ export class Unit {
       if (edge < this.minAttackRange) return false;
     }
     return true;
+  }
+
+  /**
+   * F4-07b: navio atacando alvo em TERRA (unidade ou construção): só se o alvo estiver a até `SHORE_REACH` da água navegável
+   * (margem). Alvo naval/aéreo e atacantes não-navais passam direto (a camada já foi checada por `canTarget`).
+   */
+  _shoreOk(e) {
+    if (this.layer !== 'naval' || e.layer === 'naval' || e.layer === 'air') return true;
+    const gm = this.gameManager;
+    const npf = gm && gm.navalPathfinder;
+    if (!npf) return true;
+    const p = e.mesh.position;
+    return npf.nearNavigable(p.x, p.z, SHORE_REACH + (e.collisionRadius || 0));
   }
 
   /**

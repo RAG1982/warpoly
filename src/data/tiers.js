@@ -7,9 +7,8 @@
  * Módulo puro (sem three.js), fonte única destes números (F0-06). `TIER_NAMES` fica local
  * aqui por ora (F6-09/NEW-3 migra nomes para `src/data/names.js` quando existir i18n).
  *
- * NEW-24: o custo do nível 3 declara `oil: 200` no schema (petróleo), mas nenhum Player tem
- * esse recurso ainda — `Building.startTierUpgrade` só debita gold/wood/stone. O campo fica
- * pronto para a F4-07 ligar o recurso de verdade.
+ * F4-07a: o custo do nível 3 inclui `oil: 200` e agora É cobrado (`Player.deduct`/`canAfford` conhecem o
+ * 4º recurso; resolve a pendência NEW-24 da F3-06).
  */
 
 export const TIER_NAMES = {
@@ -31,8 +30,7 @@ export const HQ_TIER_ARMOR = 20;
 export const HQ_TIER_GOLD_MULT = { 1: 1.0, 2: 1.10, 3: 1.20 };
 
 /**
- * Custo/tempo do upgrade para o nível indicado (2 ou 3). `oil` é declarado e ignorado
- * até a F4-07 (ver NEW-24 acima).
+ * Custo/tempo do upgrade para o nível indicado (2 ou 3). F4-07a: `oil` é cobrado.
  */
 export const HQ_UPGRADE_COST = {
   2: { gold: 1000, wood: 400, stone: 300, time: 60 },

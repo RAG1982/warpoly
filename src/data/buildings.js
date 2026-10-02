@@ -5,8 +5,11 @@
  * - name          Nome PT-BR exibido no painel de construção do trabalhador (D2: provisório até a F3-00).
  * - entityName    Rótulo atual do card de seleção (legado; unificar com `name` na F3-00/F6-09).
  * - faction       'human' | 'orc' | 'neutral'.
- * - role          'hq' | 'house' | 'farm' | 'lumber' | 'barracks' | 'stable' | 'workshop' | 'aerie' | 'arcane' | 'temple' | 'forge' | 'tower' | 'wall' | 'camp'.
- * - hp, cost {gold, wood, stone}, collisionRadius, popGranted.
+ * - role          'hq' | 'house' | 'farm' | 'lumber' | 'barracks' | 'stable' | 'workshop' | 'aerie' | 'arcane' | 'temple' | 'forge' | 'tower' | 'wall' | 'camp'
+ *                 | F4-07: 'shipyard' | 'refinery' | 'foundry' | 'platform'.
+ * - coastal       F4-07a: construção costeira (Estaleiro/Refinaria/Fundição): centro em terra, com água navegável
+ *                 encostada (`GameManager.canPlaceBuilding`). `platform: true` = plataforma de petróleo (sobre o poço, no mar).
+ * - hp, cost {gold, wood, stone, oil?}, collisionRadius, popGranted.
  * - armor         F3-03: armadura da construção (corrige B5 — antes não existia). HQ/torres
  *                  20, muralhas 10 (quando existirem), demais 15 (design §6).
  * - visionRadius  Raio revelado na névoa de guerra.
@@ -279,6 +282,74 @@ export const BUILDINGS = {
     description: 'Torre defensiva com arqueiros'
   },
 
+  // --- F4-07 (naval/petróleo; Centro nível 2, decisão D1) ---
+  shipyard: {
+    type: 'shipyard',
+    name: 'Estaleiro',
+    entityName: 'Estaleiro',
+    faction: 'human',
+    role: 'shipyard',
+    coastal: true,
+    hp: 900,
+    armor: 15,
+    cost: { gold: 200, wood: 150, stone: 0 },
+    collisionRadius: 3.6,
+    popGranted: 0,
+    visionRadius: 24,
+    healthBarHeight: 6.4,
+    tower: null,
+    passiveIncome: null,
+    requires: ['barracks', { hq: 2 }],
+    trains: ['tanker'],
+    dropoff: [],
+    icon: '/icoEstaleiro.svg',
+    description: 'Constrói navios na costa; treina petroleiros (requer Quartel e Centro nível 2)'
+  },
+  refinery: {
+    type: 'refinery',
+    name: 'Refinaria',
+    entityName: 'Refinaria',
+    faction: 'human',
+    role: 'refinery',
+    coastal: true,
+    hp: 700,
+    armor: 15,
+    cost: { gold: 100, wood: 150, stone: 50 },
+    collisionRadius: 3.4,
+    popGranted: 0,
+    visionRadius: 20,
+    healthBarHeight: 7.0,
+    tower: null,
+    passiveIncome: null,
+    requires: ['shipyard', { hq: 2 }],
+    trains: [],
+    dropoff: ['oil'],
+    icon: '/icoPetroleo.svg',
+    description: 'Ponto de entrega de petróleo, na costa (requer Estaleiro e Centro nível 2)'
+  },
+  oil_platform: {
+    type: 'oil_platform',
+    name: 'Plataforma de Petróleo',
+    entityName: 'Plataforma de Petróleo',
+    faction: 'neutral',
+    role: 'platform',
+    platform: true,
+    hp: 500,
+    armor: 10,
+    cost: { gold: 180, wood: 60, stone: 0 },
+    collisionRadius: 2.6,
+    popGranted: 0,
+    visionRadius: 16,
+    healthBarHeight: 5.2,
+    tower: null,
+    passiveIncome: null,
+    requires: [{ hq: 2 }],
+    trains: [],
+    dropoff: [],
+    icon: '/icoPetroleo.svg',
+    description: 'Erguida pelo petroleiro sobre um poço de petróleo no mar (requer Centro nível 2)'
+  },
+
   wall_human: {
     type: 'wall_human',
     name: 'Muralha de Pedra',
@@ -547,6 +618,52 @@ export const BUILDINGS = {
     dropoff: [],
     icon: '/icoTorreOrc.svg',
     description: 'Torre defensiva com arremesso de machados'
+  },
+
+  // --- F4-07 (naval/petróleo; Centro nível 2, decisão D1) ---
+  ship_dock: {
+    type: 'ship_dock',
+    name: 'Doca do Clã',
+    entityName: 'Doca do Clã',
+    faction: 'orc',
+    role: 'shipyard',
+    coastal: true,
+    hp: 900,
+    armor: 15,
+    cost: { gold: 200, wood: 150, stone: 0 },
+    collisionRadius: 3.6,
+    popGranted: 0,
+    visionRadius: 24,
+    healthBarHeight: 6.0,
+    tower: null,
+    passiveIncome: null,
+    requires: ['orc_barracks', { hq: 2 }],
+    trains: ['tanker'],
+    dropoff: [],
+    icon: '/icoEstaleiro.svg',
+    description: 'Constrói navios na costa; treina petroleiros (requer Quartel da Horda e Centro nível 2)'
+  },
+  ash_cauldron: {
+    type: 'ash_cauldron',
+    name: 'Caldeirão de Óleo',
+    entityName: 'Caldeirão de Óleo',
+    faction: 'orc',
+    role: 'refinery',
+    coastal: true,
+    hp: 700,
+    armor: 15,
+    cost: { gold: 100, wood: 150, stone: 50 },
+    collisionRadius: 3.4,
+    popGranted: 0,
+    visionRadius: 20,
+    healthBarHeight: 6.6,
+    tower: null,
+    passiveIncome: null,
+    requires: ['ship_dock', { hq: 2 }],
+    trains: [],
+    dropoff: ['oil'],
+    icon: '/icoPetroleo.svg',
+    description: 'Ponto de entrega de petróleo, na costa (requer Doca do Clã e Centro nível 2)'
   },
 
   wall_orc: {

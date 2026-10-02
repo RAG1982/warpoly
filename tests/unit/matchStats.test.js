@@ -32,8 +32,8 @@ describe('MatchStats (F3-09)', () => {
     const p = me(stats, 0);
     expect(p.unitsTrained).toBe(1);
     expect(p.buildingsBuilt).toBe(1);
-    expect(p.resources).toEqual({ gold: 10, wood: 5, stone: 0 });
-    expect(p.spent).toEqual({ gold: 30, wood: 20, stone: 0 });
+    expect(p.resources).toEqual({ gold: 10, wood: 5, stone: 0, oil: 0 });
+    expect(p.spent).toEqual({ gold: 30, wood: 20, stone: 0, oil: 0 });
   });
 
   it('kills: com killer hostil conta; sem killer, aliado e neutro não contam', () => {
@@ -97,6 +97,6 @@ describe('MatchStats (F3-09)', () => {
     p.deduct({ gold: 10, wood: 3, time: 40 });
     events.flush();
     expect(got).toHaveLength(1);
-    expect(got[0].cost).toEqual({ gold: 10, wood: 3, stone: 0 });
+    expect(got[0].cost).toEqual({ gold: 10, wood: 3, stone: 0, oil: 0 });
   });
 });

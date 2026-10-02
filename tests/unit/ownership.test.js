@@ -77,15 +77,17 @@ describe('Building.queueUnit debita do dono correto', () => {
     expect(gm.getPlayer(0).resources).toEqual({
       wood: 500 - (knight.wood || 0),
       gold: 500 - (knight.gold || 0),
-      stone: 500 - (knight.stone || 0)
+      stone: 500 - (knight.stone || 0),
+      oil: 0
     });
     expect(gm.getPlayer(1).resources).toEqual({
       wood: 500 - (grunt.wood || 0),
       gold: 500 - (grunt.gold || 0),
-      stone: 500 - (grunt.stone || 0)
+      stone: 500 - (grunt.stone || 0),
+      oil: 0
     });
     // terceiro jogador intocado
-    expect(gm.getPlayer(2).resources).toEqual({ wood: 500, gold: 500, stone: 500 });
+    expect(gm.getPlayer(2).resources).toEqual({ wood: 500, gold: 500, stone: 500, oil: 0 });
   });
 
   it('sem recursos do dono não enfileira (mesmo que outro jogador seja rico)', () => {
@@ -119,10 +121,10 @@ describe('Building.queueUnit debita do dono correto', () => {
     gm.getPlayer(2).maxPopulation = 20;
     const b = makeBuilding(gm, 'barracks', 2);
     expect(b.queueUnit('archer', gm)).toBe(true);
-    expect(gm.getPlayer(2).resources).not.toEqual({ wood: 500, gold: 500, stone: 500 });
+    expect(gm.getPlayer(2).resources).not.toEqual({ wood: 500, gold: 500, stone: 500, oil: 0 });
     expect(b.cancelQueuedUnit(0, gm)).toBe(true);
-    expect(gm.getPlayer(2).resources).toEqual({ wood: 500, gold: 500, stone: 500 });
-    expect(gm.getPlayer(0).resources).toEqual({ wood: 500, gold: 500, stone: 500 });
+    expect(gm.getPlayer(2).resources).toEqual({ wood: 500, gold: 500, stone: 500, oil: 0 });
+    expect(gm.getPlayer(0).resources).toEqual({ wood: 500, gold: 500, stone: 500, oil: 0 });
   });
 
   it('startResearch/cancelResearch cobram e reembolsam o dono; pesquisas são por jogador', () => {
@@ -140,7 +142,7 @@ describe('Building.queueUnit debita do dono correto', () => {
     expect(humanForge.startResearch(upg, gm)).toBe(true);
 
     expect(orcForge.cancelResearch(gm)).toBe(true);
-    expect(gm.getPlayer(1).resources).toEqual({ wood: 500, gold: 500, stone: 500 });
+    expect(gm.getPlayer(1).resources).toEqual({ wood: 500, gold: 500, stone: 500, oil: 0 });
 
     // já pesquisado pelo jogador 1 → bloqueado só para ele
     gm.getPlayer(1).setResearchLevel(upg, 2); // nível máximo (F3-07)

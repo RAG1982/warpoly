@@ -4,7 +4,7 @@
  * `stateChecksum(gm)`: hash FNV-1a de 32 bits sobre o estado de jogo relevante à simulação, em
  * ordem de `id` (arrays já mantidos em ordem de criação — ver GameManager): unidades
  * (`id, type, ownerId, x, z` arredondados a 1e-3, `hp`, `state`, e — F4-03 — `mana` e `statuses`), construções (`id, type,
- * ownerId, hp, buildProgress, tamanho da fila`), recursos de cada jogador e `currentTick`.
+ * ownerId, hp, buildProgress, tamanho da fila`), recursos de cada jogador (F4-07a: + petróleo, só se > 0) e `currentTick`.
  *
  * Não inclui nada puramente visual (rotação de malha, partículas, som, animação): duas
  * execuções com a mesma seed e o mesmo log de comandos devem produzir o mesmo checksum a cada
@@ -71,6 +71,7 @@ export function stateChecksum(gm) {
   for (let i = 0; i < players.length; i++) {
     const pl = players[i];
     h = fnv1aStep(h, `p:${pl.id}:${pl.resources.wood}:${pl.resources.gold}:${pl.resources.stone}|`);
+    if (pl.resources.oil) h = fnv1aStep(h, `o:${pl.resources.oil}|`); // F4-07a: só quando há petróleo (mapas sem poços mantêm o checksum)
   }
 
   return h >>> 0;

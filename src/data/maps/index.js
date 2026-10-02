@@ -7,11 +7,13 @@
  */
 import continental1v1 from './continental-1v1.json';
 import ilhas4p from './ilhas-4p.json';
+import estreito1v1 from './estreito-1v1.json'; // F4-07a: mapa com mar, canal e poços de petróleo
 import tutorial from './tutorial.json';
 
 const MAPS = Object.freeze({
   'continental-1v1': continental1v1,
   'ilhas-4p': ilhas4p,
+  'estreito-1v1': estreito1v1,
   tutorial // F6-09: mapa do tutorial (`hidden`: não aparece na lista da Escaramuça)
 });
 

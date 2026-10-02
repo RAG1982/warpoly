@@ -8,7 +8,7 @@ import { createAIDirector } from './aiRegistry.js';
 import { Pathfinder } from './Pathfinder.js';
 
 import {
-  STARTING_RESOURCES, FACTIONS, WALL_STEP, WALL_MAX_POINTS, getBuildingDef, getUnitDef, isDropoffFor, RESEARCH, getMaxResearchLevel, promotedType
+  STARTING_RESOURCES, FACTIONS, WALL_STEP, WALL_MAX_POINTS, getBuildingDef, getUnitDef, isDropoffFor, RESEARCH, getMaxResearchLevel, promotedType, getHqUpgradeCost
 } from '../data/index.js';
 import { Player } from './Player.js';
 import { PlayerRegistry } from './PlayerRegistry.js';
@@ -34,6 +34,7 @@ import { EVT } from './events.js';
 import { MatchStats } from './MatchStats.js';
 import { isPlayerDefeated } from './victory.js';
 import { missingRequirements, formatRequirementList } from './requirements.js';
+import { NAVAL_MAX_HEIGHT, WATER_LEVEL } from '../data/combat.js';
 
 const EMPTY_LIST = Object.freeze([]);
 
@@ -144,6 +145,8 @@ export class GameManager {
     // Terrain Navigation & Water Obstacle Pathfinder
     this.pathfinder = new Pathfinder(this.terrain);
     this.terrain.pathfinder = this.pathfinder;
+    // F4-07a: grade de navegação dos navios (água com profundidade ≥ NAVAL_MIN_DEPTH); mesma API, fila/cache próprios.
+    this.navalPathfinder = new Pathfinder(this.terrain, undefined, 1.5, 'naval');
 
     // Grade espacial (F1-06): unitGrid = unidades (dinâmica, sincronizada 1x/tick em update());
     // blockerGrid = construções/depósitos/árvores vivas (inserida/removida em registerEntity/unregisterEntity).
@@ -221,6 +224,11 @@ export class GameManager {
       this.unitGrid.insert(entity, pos.x, pos.z, entity.collisionRadius || 0);
     } else if (entity instanceof Building || entity instanceof ResourceDeposit || entity instanceof Tree) {
       this.blockerGrid.insert(entity, pos.x, pos.z, entity.collisionRadius || 0);
+      // F4-07a: poços, plataformas e construções costeiras também bloqueiam a grade naval (o resto está em terra).
+      if (this.navalPathfinder && (entity instanceof ResourceDeposit ? entity.type === 'oil' : (entity instanceof Building && (entity.coastal || entity.role === 'platform')))) {
+        this.navalPathfinder.blockCircle(pos.x, pos.z, entity.collisionRadius || 0, +1);
+        entity._navalBlocked = true;
+      }
       if (this.pathfinder && (entity instanceof Building || entity instanceof Tree)) {
         this.pathfinder.blockCircle(pos.x, pos.z, entity.collisionRadius || 0, +1);
         entity._pathBlocked = true;
@@ -238,6 +246,10 @@ export class GameManager {
       this.unitGrid.remove(entity);
     } else if (entity instanceof Building || entity instanceof ResourceDeposit || entity instanceof Tree) {
       this.blockerGrid.remove(entity);
+      if (this.navalPathfinder && entity._navalBlocked) {
+        this.navalPathfinder.blockCircle(entity.mesh.position.x, entity.mesh.position.z, entity.collisionRadius || 0, -1);
+        entity._navalBlocked = false;
+      }
       if (this.pathfinder && entity._pathBlocked) {
         this.pathfinder.blockCircle(entity.mesh.position.x, entity.mesh.position.z, entity.collisionRadius || 0, -1);
         entity._pathBlocked = false;
@@ -536,7 +548,7 @@ export class GameManager {
     const usedSlots = new Set(this.players.map(p => p.startSlot));
     for (const r of mapDef.resources) {
       if (r.slot !== undefined && !usedSlots.has(r.slot)) continue;
-      this.resourceDeposits.push(this.registerEntity(new ResourceDeposit(this.terrain, r.type, r.x, r.z)));
+      this.resourceDeposits.push(this.registerEntity(new ResourceDeposit(this.terrain, r.type, r.x, r.z, typeof r.amount === 'number' ? r.amount : undefined)));
     }
   }
 
@@ -714,16 +726,26 @@ export class GameManager {
   canPlaceBuilding(type, x, z, ignoreBuilding = null, ownerId = this._localPlayerId) {
     const stats = Building.getBuildingStats(type);
     const radius = stats.collisionRadius || 3.0;
+    const bdef = getBuildingDef(type);
+
+    // F4-07a: plataforma de petróleo — só sobre um poço livre (no mar), sem as demais regras de terra.
+    if (bdef.platform) return !!this.findFreeOilDeposit(x, z);
 
     // 1. Terrain Height check at center and 4 footprint perimeter samples
     const h = this.terrain.getHeight(x, z);
     if (h < 1.8) return false;
 
-    const sampleOffset = radius * 0.75;
-    if (this.terrain.getHeight(x + sampleOffset, z + sampleOffset) < 1.8) return false;
-    if (this.terrain.getHeight(x - sampleOffset, z + sampleOffset) < 1.8) return false;
-    if (this.terrain.getHeight(x + sampleOffset, z - sampleOffset) < 1.8) return false;
-    if (this.terrain.getHeight(x - sampleOffset, z - sampleOffset) < 1.8) return false;
+    if (bdef.coastal) {
+      // F4-07a: Estaleiro/Refinaria/Fundição — o centro é terra seca e há água NAVEGÁVEL encostada na construção (o casco
+      // precisa alcançar o cais a `radius + 1,3`); sem as amostras de pegada, que exigiriam terra firme até o mar.
+      if (!this.hasNavigableWaterNear(x, z, radius + 1.3)) return false;
+    } else {
+      const sampleOffset = radius * 0.75;
+      if (this.terrain.getHeight(x + sampleOffset, z + sampleOffset) < 1.8) return false;
+      if (this.terrain.getHeight(x - sampleOffset, z + sampleOffset) < 1.8) return false;
+      if (this.terrain.getHeight(x + sampleOffset, z - sampleOffset) < 1.8) return false;
+      if (this.terrain.getHeight(x - sampleOffset, z - sampleOffset) < 1.8) return false;
+    }
 
     // 2. Minimum distance to other buildings (F1-06: blockerGrid.queryRadius já soma o raio
     //    de cada construção encontrada; passamos radius + minBuildingGap como `r`).
@@ -786,6 +808,82 @@ export class GameManager {
     return true;
   }
 
+  /**
+   * F4-07a: há água navegável (profundidade ≥ NAVAL_MIN_DEPTH) em algum ponto do anel de raio `dist` ao redor de (x, z)?
+   * 24 amostras; usado pelas construções costeiras e para achar o cais (`getDockPoint`).
+   */
+  hasNavigableWaterNear(x, z, dist) {
+    for (let k = 0; k < 24; k++) {
+      const a = (k / 24) * Math.PI * 2;
+      if (this.terrain.getHeight(x + Math.sin(a) * dist, z + Math.cos(a) * dist) <= NAVAL_MAX_HEIGHT) return true;
+    }
+    return false;
+  }
+
+  /**
+   * F4-07a: ponto de saída (célula navegável livre) de um Estaleiro/Doca — varre anéis crescentes ao redor da construção
+   * começando pela frente do modelo (+Z) e alternando os lados (determinístico). Cacheado em `b.dockPoint`;
+   * `null` se não há saída para o mar (o treino é recusado: "Sem saída para o mar").
+   */
+  getDockPoint(b) {
+    if (b.dockPoint) return b.dockPoint;
+    const npf = this.navalPathfinder;
+    if (!npf) return null;
+    const p = b.mesh.position;
+    const r = b.collisionRadius || 3.6;
+    for (let ring = 0; ring < 4; ring++) {
+      const d = r + 1.6 + ring * 1.5;
+      for (let k = 0; k < 24; k++) {
+        const step = Math.ceil(k / 2) * (Math.PI * 2 / 24) * (k % 2 === 0 ? 1 : -1);
+        const x = p.x + Math.sin(step) * d;
+        const z = p.z + Math.cos(step) * d;
+        if (npf.isWalkableWorld(x, z)) {
+          b.dockPoint = { x, z };
+          return b.dockPoint;
+        }
+      }
+    }
+    return null;
+  }
+
+  /** F4-07a: poço de petróleo livre (sem plataforma, com petróleo) a até `radius` de (x, z), o mais próximo; ou null. */
+  findFreeOilDeposit(x, z, radius = 2.0) {
+    let best = null;
+    let bestD = radius;
+    const list = this.resourceDeposits;
+    for (let i = 0; i < list.length; i++) {
+      const d = list[i];
+      if (d.type !== 'oil' || d.resourcesRemaining <= 0 || (d.platform && !d.platform.isDead)) continue;
+      const dist = Math.hypot(d.mesh.position.x - x, d.mesh.position.z - z);
+      if (dist <= bestD) { bestD = dist; best = d; }
+    }
+    return best;
+  }
+
+  /** F4-07a: o poço tem plataforma CONCLUÍDA e viva do jogador `ownerId` (e ainda tem petróleo)? */
+  platformReady(deposit, ownerId) {
+    const p = deposit && deposit.platform;
+    return !!p && !p.isDead && p.isConstructed && p.ownerId === ownerId;
+  }
+
+  /** F4-07a: a partida tem poços de petróleo (mesmo esgotados)? Sem eles o petróleo é dispensado nos custos (ver `hqUpgradeCost`). */
+  get hasOilWells() {
+    const list = this.resourceDeposits;
+    for (let i = 0; i < list.length; i++) if (list[i].type === 'oil') return true;
+    return false;
+  }
+
+  /**
+   * F4-07a: custo de evoluir o Centro ao nível `tier`. O nível 3 cobra 200 de petróleo (`HQ_UPGRADE_COST`), mas em mapas SEM poços
+   * o petróleo é dispensado (senão o nível 3 seria inalcançável).
+   */
+  hqUpgradeCost(tier) {
+    const cost = getHqUpgradeCost(tier);
+    if (!cost || !cost.oil || this.hasOilWells) return cost;
+    const { oil: _oil, ...rest } = cost; // eslint-disable-line no-unused-vars
+    return rest;
+  }
+
   /** Recalcula população e teto de TODOS os jogadores (poucos jogadores × entidades: barato). */
   recalculatePopCap() {
     const players = this.players;
@@ -816,7 +914,14 @@ export class GameManager {
    */
   spawnUnit(type, x, z, owner = 'player', rallyPoint = null) {
     const ownerId = this.resolveOwnerId(owner);
-    if (this.pathfinder && this.pathfinder.isWater(x, z)) {
+    if (getUnitDef(type).layer === 'naval') {
+      // F4-07a: navio nasce na água navegável (não na costa/terra).
+      if (this.navalPathfinder && !this.navalPathfinder.isWalkableWorld(x, z)) {
+        const snapped = this.navalPathfinder.findNearestWalkable(x, z, 24);
+        x = snapped.x;
+        z = snapped.z;
+      }
+    } else if (this.pathfinder && this.pathfinder.isWater(x, z)) {
       const snapped = this.pathfinder.findNearestWalkable(x, z);
       x = snapped.x;
       z = snapped.z;
@@ -831,7 +936,8 @@ export class GameManager {
       player.recalculatePop(this);
       // Ponto de reunião: só para jogadores humanos (a IA sempre ignorou o rally no spawn;
       // mantido para a partida 1×1 continuar idêntica).
-      if (rallyPoint && !player.isAI) {
+      // F4-07a: navio só segue o ponto de reunião se ele estiver na água navegável (o padrão fica em terra).
+      if (rallyPoint && !player.isAI && (unit.layer !== 'naval' || (this.navalPathfinder && this.navalPathfinder.isWalkableWorld(rallyPoint.x, rallyPoint.z)))) {
         unit.moveTo(rallyPoint.x, rallyPoint.z, this);
       }
     }
@@ -996,14 +1102,36 @@ export class GameManager {
       if (owner.isLocal) this.events.emit(EVT.NOTIFY, { ownerId, text: '⚠️ Recursos insuficientes!' });
       return null;
     }
+
+    // F4-07a: plataforma — erguida SOBRE um poço livre (a posição vira a do poço) pelo petroleiro (o construtor).
+    const isPlatform = stats.role === 'platform';
+    let deposit = null;
+    if (isPlatform) {
+      deposit = this.findFreeOilDeposit(x, z);
+      if (!deposit) {
+        if (owner.isLocal) this.events.emit(EVT.NOTIFY, { ownerId, text: '⚠️ Sem poço de petróleo livre aqui' });
+        return null;
+      }
+      if (!this.getUnitsOf(ownerId).some(u => !u.isDead && u.isTanker)) {
+        if (owner.isLocal) this.events.emit(EVT.NOTIFY, { ownerId, text: '⚠️ Requer um Petroleiro' });
+        return null;
+      }
+      x = deposit.mesh.position.x;
+      z = deposit.mesh.position.z;
+    }
     owner.deduct(stats.cost);
 
     const b = this._createPlacedBuilding(type, x, z, ownerId);
+    if (deposit) {
+      b.deposit = deposit;
+      deposit.platform = b;
+    }
+    const canBuild = isPlatform ? (u => u.isTanker) : (u => u.type === 'villager' || u.type === 'peon');
 
     // Task workers (villagers or peons) to construct it — só os do próprio dono.
     const builders = (unitIds || [])
       .map(id => this.entitiesById.get(id))
-      .filter(u => u && !u.isDead && u.ownerId === ownerId && (u.type === 'villager' || u.type === 'peon'));
+      .filter(u => u && !u.isDead && u.ownerId === ownerId && canBuild(u));
 
     if (builders.length > 0) {
       builders.forEach(v => v.orderBuild(b));
@@ -1011,7 +1139,7 @@ export class GameManager {
       let nearestV = null;
       let minDist = Infinity;
       this.getUnitsOf(ownerId).forEach(u => {
-        if (!u.isDead && (u.type === 'villager' || u.type === 'peon')) {
+        if (!u.isDead && canBuild(u)) {
           const d = u.mesh.position.distanceTo(b.mesh.position);
           if (d < minDist) {
             minDist = d;
@@ -1138,9 +1266,13 @@ export class GameManager {
   }
 
   /** Recurso mais próximo (árvore com madeira ou jazida do `type`), via `blockerGrid.nearest`. */
-  findNearestResource(pos, type) {
+  findNearestResource(pos, type, ownerId = null) {
     if (type === 'tree') {
       return this.blockerGrid.nearest(pos.x, pos.z, Infinity, e => e instanceof Tree && !e.isDead && e.woodRemaining > 0);
+    }
+    // F4-07a: petróleo — só poços com plataforma própria concluída (`ownerId`).
+    if (type === 'oil') {
+      return this.blockerGrid.nearest(pos.x, pos.z, Infinity, e => e instanceof ResourceDeposit && e.type === 'oil' && e.resourcesRemaining > 0 && (ownerId === null || this.platformReady(e, ownerId)));
     }
     return this.blockerGrid.nearest(pos.x, pos.z, Infinity, e => e instanceof ResourceDeposit && e.type === type && e.resourcesRemaining > 0);
   }
@@ -1234,6 +1366,25 @@ export class GameManager {
         this.issue({ type: CMD.ATTACK, playerId: this._localPlayerId, unitIds, targetId: e.id });
         return;
       }
+      // F4-07a: poço de petróleo — petroleiros coletam (plataforma própria pronta), erguem a plataforma (poço livre) ou ajudam a obra.
+      if (e instanceof ResourceDeposit && e.type === 'oil') {
+        const tankerIds = this.selectedUnits.filter(u => u.isTanker).map(u => u.id);
+        const local = this._localPlayerId;
+        if (tankerIds.length > 0 && e.resourcesRemaining > 0) {
+          if (this.platformReady(e, local)) {
+            this.issue({ type: CMD.GATHER, playerId: local, unitIds: tankerIds, targetId: e.id, ...q });
+            return;
+          }
+          if (!e.platform || e.platform.isDead) {
+            this.issue({ type: CMD.PLACE_BUILDING, playerId: local, buildingType: 'oil_platform', x: e.mesh.position.x, z: e.mesh.position.z, unitIds: tankerIds });
+            return;
+          }
+          if (e.platform.ownerId === local && !e.platform.isConstructed) {
+            this.issue({ type: CMD.BUILD, playerId: local, unitIds: tankerIds, buildingId: e.platform.id, ...q });
+            return;
+          }
+        }
+      }
       // Right-clicked a resource: Gather! (Villagers and Peons)
       if (e instanceof Tree || e instanceof ResourceDeposit) {
         const isDepleted = e.isDead || (e.woodRemaining !== undefined && e.woodRemaining <= 0) || (e.resourcesRemaining !== undefined && e.resourcesRemaining <= 0);
@@ -1253,7 +1404,7 @@ export class GameManager {
       }
       // Right-clicked an incomplete building: Build!
       if (e instanceof Building && !e.isConstructed && e.ownerId === this._localPlayerId) {
-        const workerIds = this.selectedUnits.filter(u => u.type === 'villager' || u.type === 'peon').map(u => u.id);
+        const workerIds = this.selectedUnits.filter(u => e.role === 'platform' ? u.isTanker : (u.type === 'villager' || u.type === 'peon')).map(u => u.id); // F4-07a: a plataforma é do petroleiro
         this.issue({ type: CMD.BUILD, playerId: this._localPlayerId, unitIds: workerIds, buildingId: e.id, ...q });
         return;
       }
@@ -1429,6 +1580,7 @@ export class GameManager {
     // Orçamento de A* por passo de simulação (F1-07): resolve pedidos pendentes de requestPath.
     // F2-03: orçamento por nós expandidos (não por relógio) — mesmo limite em todas as máquinas.
     if (this.pathfinder) this.pathfinder.processQueue(4000);
+    if (this.navalPathfinder) this.navalPathfinder.processQueue(4000); // F4-07a: fila dos navios (orçamento próprio)
 
     // Update Trees (árvore cortada — isDead/woodRemaining <= 0 — sai do blockerGrid; remove()
     // é no-op se já não estiver na grade, então repetir o teste em árvores já cortadas é barato)
@@ -1474,6 +1626,7 @@ export class GameManager {
     for (let i = this.buildings.length - 1; i >= 0; i--) {
       if (this.buildings[i].isDead) {
         const deadB = this.buildings.splice(i, 1)[0];
+        if (deadB.deposit && deadB.deposit.platform === deadB) deadB.deposit.platform = null; // F4-07a: o poço volta a ficar livre
         if (this.selectedBuilding === deadB) this.selectedBuilding = null; // QA NEW-28: não deixa o card da obra cancelada/destruída preso
         if (deadB.dispose) deadB.dispose();
         this.unregisterEntity(deadB);
@@ -1618,7 +1771,7 @@ export class GameManager {
       nz = dz / dist;
     }
     const push = minDist - dist;
-    this._pushDry(uPos, nx * push, nz * push); // F3-02: nunca empurra para a água
+    this._pushFor(unit, uPos, nx * push, nz * push); // F3-02: nunca empurra para a água (F4-07a: navio, nunca para a terra)
 
     // Direct delivery upon colliding with dropoff building!
     const isDropoff = isDropoffFor(b.type, unit.carrying ? unit.carrying.type : null) &&
@@ -1652,6 +1805,27 @@ export class GameManager {
    * F3-02: desloca `p` por (dx, dz) sem entrar na água (altura < 0,65): tenta o vetor inteiro, depois só X,
    * depois só Z; se nenhum for seco, não move. Evita que o empurrão da colisão jogue unidades no rio.
    */
+  _pushFor(unit, p, dx, dz) {
+    if (unit.layer === 'naval') this._pushWet(p, dx, dz);
+    else this._pushDry(p, dx, dz);
+  }
+
+  /** F4-07a: como `_pushDry`, mas para navios — só desloca para pontos com profundidade navegável (nunca para terra/raso). */
+  _pushWet(p, dx, dz) {
+    const t = this.terrain;
+    if (t.getHeight(p.x + dx, p.z + dz) <= NAVAL_MAX_HEIGHT) {
+      p.x += dx;
+      p.z += dz;
+    } else if (dx !== 0 && t.getHeight(p.x + dx, p.z) <= NAVAL_MAX_HEIGHT) {
+      p.x += dx;
+    } else if (dz !== 0 && t.getHeight(p.x, p.z + dz) <= NAVAL_MAX_HEIGHT) {
+      p.z += dz;
+    } else {
+      return;
+    }
+    p.y = WATER_LEVEL;
+  }
+
   _pushDry(p, dx, dz) {
     const t = this.terrain;
     if (t.getHeight(p.x + dx, p.z + dz) >= 0.65) {
@@ -1689,7 +1863,7 @@ export class GameManager {
         const u2 = buf[k];
         if (u2 === u1 || u2.id <= u1.id || u2.isDead) continue;
         const air1 = u1.layer === 'air';
-        if (air1 !== (u2.layer === 'air')) continue; // F4-06: camadas distintas não colidem
+        if (u1.layer !== u2.layer) continue; // F4-06/F4-07: camadas distintas (solo/ar/mar) não colidem
 
         const p2 = u2.mesh.position;
         const r2 = u2.collisionRadius || 0.6;
@@ -1732,8 +1906,8 @@ export class GameManager {
           p2.x += nx * push; p2.z += nz * push;
           continue;
         }
-        this._pushDry(p1, -nx * overlap * w1, -nz * overlap * w1);
-        this._pushDry(p2, nx * overlap * (1 - w1), nz * overlap * (1 - w1));
+        this._pushFor(u1, p1, -nx * overlap * w1, -nz * overlap * w1);
+        this._pushFor(u2, p2, nx * overlap * (1 - w1), nz * overlap * (1 - w1));
       }
     }
   }

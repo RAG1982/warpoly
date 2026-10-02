@@ -1,7 +1,7 @@
 import { CMD } from '../sim/commands.js';
 import { repairCostFor, REPAIR_HP_FRACTION } from '../sim/repair.js';
 import { missingRequirements, missingUpgradeRequirements } from '../sim/requirements.js';
-import { getHqUpgradeCost, getBuildingDef, getUnitDef, RESEARCH, WALL_STEP } from '../data/index.js';
+import { getBuildingDef, getUnitDef, RESEARCH, WALL_STEP } from '../data/index.js';
 
 /**
  * AIEconomyManager (Gerenciador de Economia e Construção da IA)
@@ -167,7 +167,7 @@ export class AIEconomyManager {
     if (this.getLivingWorkerCount() < Math.min(need, 8 + Math.max(0, this.director.profile.workerBonus))) return;
     if (!this.director.getConstructedBarracks() || !hasForge) return;
 
-    const cost = getHqUpgradeCost(hq.tier + 1);
+    const cost = this.gm.hqUpgradeCost(hq.tier + 1); // F4-07a: petróleo do nível 3 (dispensado em mapas sem poços; a IA ainda não explora petróleo — F5/NEW-32)
     if (!cost || !this.director.canAfford(cost)) return;
 
     // F2-02: comando UPGRADE_HQ — o débito/validação final é do executor.

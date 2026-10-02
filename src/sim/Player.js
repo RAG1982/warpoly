@@ -10,7 +10,7 @@
 import { STARTING_RESOURCES } from '../data/index.js';
 import { EVT } from './events.js';
 
-export const RESOURCE_TYPES = Object.freeze(['wood', 'gold', 'stone']);
+export const RESOURCE_TYPES = Object.freeze(['wood', 'gold', 'stone', 'oil']); // F4-07a: petróleo (4º recurso; inicial 0 — D1)
 
 export class Player {
   /**
@@ -24,7 +24,7 @@ export class Player {
    * @param {boolean} [opts.isNeutralHostile]  F3-10: bandoleiros/acampamentos (id 99, sem HUD/IA)
    * @param {boolean} [opts.isLocal]         jogador controlado por este cliente (HUD, seleção, névoa)
    * @param {number} [opts.startSlot]        posição inicial no mapa (MatchConfig)
-   * @param {{wood:number,gold:number,stone:number}} [opts.resources]
+   * @param {{wood:number,gold:number,stone:number,oil?:number}} [opts.resources]
    */
   constructor({
     id,
@@ -52,7 +52,7 @@ export class Player {
     /** Posição {x, z} do HQ inicial, resolvida pelo GameManager a partir do slot. */
     this.startPos = null;
 
-    this.resources = { wood: 0, gold: 0, stone: 0, ...resources };
+    this.resources = { wood: 0, gold: 0, stone: 0, oil: 0, ...resources };
     this.population = 0;
     this.maxPopulation = 0;
 
@@ -76,7 +76,7 @@ export class Player {
     if (level >= 1) this.researchedUpgrades.add(id);
   }
 
-  /** @param {{wood?:number,gold?:number,stone?:number}} cost */
+  /** @param {{wood?:number,gold?:number,stone?:number,oil?:number}} cost */
   canAfford(cost) {
     if (!cost) return true;
     for (const r of RESOURCE_TYPES) {
@@ -94,7 +94,7 @@ export class Player {
     if (this.events) {
       this.events.emit(EVT.RESOURCES_SPENT, {
         ownerId: this.id,
-        cost: { gold: cost.gold || 0, wood: cost.wood || 0, stone: cost.stone || 0 }
+        cost: { gold: cost.gold || 0, wood: cost.wood || 0, stone: cost.stone || 0, oil: cost.oil || 0 }
       });
     }
   }

@@ -35,7 +35,9 @@ export {
   ABILITIES, getAbility, abilityName, isDebugUrl
 };
 
-export const RESOURCE_TYPES = ['gold', 'wood', 'stone'];
+export const RESOURCE_TYPES = ['gold', 'wood', 'stone', 'oil']; // F4-07a: 4º recurso (petróleo)
+/** Recursos que o Centro aceita em conjunto (sem petróleo: só a Refinaria o recebe). */
+const BASIC_RESOURCES = ['gold', 'wood', 'stone'];
 
 // ---------------------------------------------------------------------------
 // Helpers de consulta
@@ -67,7 +69,7 @@ function compactCost(cost) {
 }
 
 /**
- * Custo {gold?, wood?, stone?} de uma unidade ou construção (sem o tempo).
+ * Custo {gold?, wood?, stone?, oil?} de uma unidade ou construção (sem o tempo).
  * Unidades não treináveis retornam null; construções desconhecidas usam DEFAULT_BUILDING.
  */
 export function getCost(type) {
@@ -103,7 +105,7 @@ export function isRangedType(type) {
 export function isDropoffFor(buildingType, resourceType) {
   const accepted = getBuildingDef(buildingType).dropoff;
   if (!accepted || accepted.length === 0) return false;
-  if (!resourceType) return RESOURCE_TYPES.every(r => accepted.includes(r));
+  if (!resourceType) return BASIC_RESOURCES.every(r => accepted.includes(r));
   return accepted.includes(resourceType);
 }
 
@@ -153,7 +155,7 @@ export function getBuildingStats(type) {
 // Tabelas derivadas (formato legado)
 // ---------------------------------------------------------------------------
 
-/** Unidades treináveis: { type, name, icon, cost: {gold?, wood?, stone?, time}, description } */
+/** Unidades treináveis: { type, name, icon, cost: {gold?, wood?, stone?, oil?, time}, description } */
 export const UNIT_TRAIN_CONFIG = Object.fromEntries(
   Object.values(UNITS)
     .filter(u => u.cost)
@@ -169,15 +171,16 @@ export const UNIT_TRAIN_CONFIG = Object.fromEntries(
     }])
 );
 
-/** Lista de construção por tipo de trabalhador: { villager: [...], peon: [...] } */
-export const WORKER_BUILD_LIST = Object.fromEntries(
-  Object.values(FACTIONS).map(f => [f.worker, [...f.buildList]])
-);
+/** Lista de construção por tipo de trabalhador: { villager: [...], peon: [...], tanker: ['oil_platform'] } */
+export const WORKER_BUILD_LIST = {
+  ...Object.fromEntries(Object.values(FACTIONS).map(f => [f.worker, [...f.buildList]])),
+  tanker: [...new Set(Object.values(FACTIONS).flatMap(f => f.tankerBuildList || []))] // F4-07a: o Petroleiro ergue a plataforma
+};
 
 /** Construções que um trabalhador pode erguer: { type, name, icon, cost, description } */
 export const BUILDING_BUILD_CONFIG = Object.fromEntries(
   Object.values(FACTIONS)
-    .flatMap(f => f.buildList)
+    .flatMap(f => [...f.buildList, ...(f.tankerBuildList || [])])
     .map(t => {
       const b = BUILDINGS[t];
       return [t, { type: t, name: b.name, icon: b.icon, cost: compactCost(b.cost), description: b.description }];

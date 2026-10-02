@@ -42,6 +42,8 @@
  *   sem colisão com terreno/construções/terrestres), Y = terreno + `flyHeight` (padrão 4,5; o Olho Vigia usa 0 porque o
  *   modelo já flutua). Alvo aéreo só é atingível por atacantes com `canHitAir` (padrão: unidade à distância não-cerco);
  *   `canHitGround:false` impede atacar o solo (batedores aéreos não atacam: ambos false). Ver `src/sim/targeting.js`.
+ * - layer 'naval' / isTanker / carryCapacity / canHitNaval   F4-07: navios (`layer:'naval'`: só na água navegável, pathfinder naval; `canHitNaval` = pode atingir navios,
+ *   padrão: atirador/cerco; melee nunca). `isTanker`+`carryCapacity`: petroleiro (coleta petróleo e ergue plataforma; não é `isWorker`).
  * - isSiege         F4-04: unidade de cerco (imune à Transmutação). `isHero` idem (heróis na F4-08).
  */
 
@@ -520,6 +522,27 @@ export const UNITS = {
     description: 'Vítima de Transmutação',
     isWorker: false, isRanged: false, isCombat: false, projectile: null,
     corpseless: true
+  },
+
+  // --- F4-07: naval (Estaleiro/Doca; Centro nível 2). `layer:'naval'`: só navega em água com profundidade ≥ NAVAL_MIN_DEPTH. ---
+  // Petroleiro: mesmo tipo para as duas facções (modelo único; cor de time nas velas/faixa). Não ataca.
+  tanker: {
+    type: 'tanker',
+    name: 'Petroleiro',
+    entityName: 'Petroleiro',
+    faction: 'neutral',
+    requires: [{ hq: 2 }],
+    hp: 180, speed: 5.0, damage: { basic: 0, piercing: 0, type: 'normal' }, attackRange: 0, attackCooldown: 1.0, armor: 0,
+    collisionRadius: 1.2,
+    visionRadius: 16,
+    ...MELEE_SCAN,
+    healthBarHeight: 3.4,
+    cost: { gold: 100, wood: 60, stone: 0 },
+    trainTime: 12,
+    icon: '/icoNavio.svg',
+    description: 'Naval. Coleta petróleo das plataformas e ergue plataformas sobre poços no mar',
+    isWorker: false, isRanged: false, isCombat: false, projectile: null,
+    layer: 'naval', isTanker: true, carryCapacity: 100, canHitAir: false, canHitGround: false, canHitNaval: false, corpseless: true
   },
 
   // --- Neutro ---

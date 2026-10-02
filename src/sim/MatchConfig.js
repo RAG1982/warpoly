@@ -7,6 +7,7 @@
  * `src/data/maps/<mapId>.json` — F2-05). Sem three.js nem DOM: testável em Node.
  */
 import { getMap, DEFAULT_MAP_ID } from '../data/maps/index.js';
+import { getHeightForMap } from './terrainGenerators.js';
 
 export { DEFAULT_MAP_ID };
 
@@ -214,6 +215,23 @@ export function validateNeutrals(mapDef) {
 }
 
 /**
+ * F4-07a: valida `mapDef.resources` — `oil` (poço de petróleo) só em ÁGUA (`altura < waterLevel`), dentro de `playable`, com `amount`
+ * > 0 opcional; `gold`/`stone` não são checados aqui (cobertos por `maps.test.js`). Lança Error com a primeira inconsistência.
+ */
+export function validateOilWells(mapDef) {
+  const half = (mapDef.playable ?? mapDef.size) / 2;
+  (mapDef.resources || []).forEach((r, i) => {
+    if (r.type !== 'oil') return;
+    const tag = `MatchConfig: resources[${i}] (oil) do mapa "${mapDef.id}"`;
+    if (typeof r.x !== 'number' || typeof r.z !== 'number' || Math.abs(r.x) >= half || Math.abs(r.z) >= half) throw new Error(`${tag}: fora da área jogável`);
+    if (r.amount !== undefined && !(r.amount > 0)) throw new Error(`${tag}: amount inválido`);
+    const h = getHeightForMap(mapDef, r.x, r.z);
+    if (!(h < mapDef.waterLevel)) throw new Error(`${tag}: o poço precisa ficar em água (altura ${h.toFixed(2)} ≥ nível da água)`);
+  });
+  return mapDef;
+}
+
+/**
  * Valida a config; lança Error com a primeira inconsistência encontrada.
  * F2-05: também valida contra o mapa (`cfg.mapId`) — jogadores demais ou `startSlot` fora do
  * array `startSlots` do mapa.
@@ -228,6 +246,7 @@ export function validateMatchConfig(cfg) {
     throw new Error(`MatchConfig: mapa "${cfg.mapId}" aceita no máximo ${mapDef.maxPlayers} jogadores`);
   }
   validateNeutrals(mapDef);
+  validateOilWells(mapDef);
   const ids = new Set();
   const slots = new Set();
   let locals = 0;

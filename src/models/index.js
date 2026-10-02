@@ -43,6 +43,14 @@ export { createAviary } from './buildings/AviaryModel.js';
 export { createSerpentNest } from './buildings/SerpentNestModel.js';
 export { createSapper } from './units/SapperModel.js';
 export { createArsonist } from './units/ArsonistModel.js';
+// F4-07: naval/petróleo (procedurais provisórios)
+export { createTanker } from './units/TankerModel.js';
+export { createShipyard } from './buildings/ShipyardModel.js';
+export { createShipDock } from './buildings/ShipDockModel.js';
+export { createRefinery } from './buildings/RefineryModel.js';
+export { createCauldron } from './buildings/CauldronModel.js';
+export { createPlatform } from './buildings/PlatformModel.js';
+export { createOilWell } from './environment/OilWellModel.js';
 export { getPeonFaceTextures, getPeonTunicHarnessTextures, getPeonPantsBootsTextures, getPeonToolTextures } from './units/peonTextures.js';
 export { getGruntFaceTextures, getGruntArmorTextures, getGruntAxeTextures } from './units/gruntTextures.js';
 export { getAxethrowerFaceTextures, getAxethrowerHarnessTextures, getAxethrowerAxeTextures } from './units/axethrowerTextures.js';

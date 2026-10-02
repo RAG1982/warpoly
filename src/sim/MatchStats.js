@@ -17,7 +17,7 @@ export const SERIES_MAX_POINTS = 720;
 /** Fórmula de pontuação (WC2 simplificada). Função pura sobre um objeto de estatísticas. */
 export function computeScore(s) {
   const r = s.resources;
-  return s.unitsKilled * 10 + s.buildingsDestroyed * 20 + (r.gold + r.wood + r.stone) / 10;
+  return s.unitsKilled * 10 + s.buildingsDestroyed * 20 + (r.gold + r.wood + r.stone + (r.oil || 0)) / 10;
 }
 
 function newStats() {
@@ -28,8 +28,8 @@ function newStats() {
     buildingsBuilt: 0,
     buildingsLost: 0,
     buildingsDestroyed: 0,
-    resources: { gold: 0, wood: 0, stone: 0 },
-    spent: { gold: 0, wood: 0, stone: 0 },
+    resources: { gold: 0, wood: 0, stone: 0, oil: 0 },
+    spent: { gold: 0, wood: 0, stone: 0, oil: 0 },
     commands: 0
   };
 }
@@ -77,6 +77,7 @@ export class MatchStats {
       s.spent.gold += e.cost.gold || 0;
       s.spent.wood += e.cost.wood || 0;
       s.spent.stone += e.cost.stone || 0;
+      s.spent.oil += e.cost.oil || 0;
     });
     this.reset();
   }

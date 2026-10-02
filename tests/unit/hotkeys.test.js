@@ -48,7 +48,8 @@ describe('hotkeys (F6-03)', () => {
     expect(getTrainHotkey(0)).toBe('Q');
     expect(getTrainHotkey(1)).toBe('W');
     expect(getTrainHotkey(2)).toBe('E');
-    expect(getTrainHotkey(3)).toBe('');
+    expect(getTrainHotkey(3)).toBe('Z'); // F4-07: o Estaleiro treina até 5 navios
+    expect(getTrainHotkey(5)).toBe('');
 
     expect(getResearchHotkey(0)).toBe('R');
     expect(getResearchHotkey(3)).toBe('D');

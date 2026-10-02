@@ -380,7 +380,7 @@ Sonnet 5.5 escreve a spec em `docs/specs/<ID>.md`; agente **Sonnet** executa; o 
 - `DONE(520dcc7)` · UI · Onda 1 (maquete) / Onda 2 (integração com F2-04) · Novo Jogo, Campanha, Multiplayer, Opções, Inspetor, Créditos; fundo 3D animado da cena; substitui parâmetros de URL.
 
 ### F6-02 · Tela de configuração de partida (Skirmish)
-- `TODO` · UI · Dep: F2-04 · Escolha de facção (Aliança/Horda com prévia 3D), mapa (miniatura), 1–7 oponentes IA, times, cores, dificuldade, recursos iniciais, condição de vitória, seed.
+- `DOING(sonnet, 2026-10-02)` · UI · Dep: F2-04 · Escolha de facção (Aliança/Horda com prévia 3D), mapa (miniatura), 1–7 oponentes IA, times, cores, dificuldade, recursos iniciais, condição de vitória, seed.
 
 ### F6-03 · HUD responsiva estilo WC2 (corrige B11)
 - `DONE(PR#3)` · UI · Dep: F0-06 · Layout que funciona de 1024×768 a 4K (escala de UI); painel de seleção com retrato; seleção múltipla em grade com barras de vida; card de comandos 3×3 com atalhos visíveis; tooltips com custo, requisitos e descrição.
@@ -389,7 +389,7 @@ Sonnet 5.5 escreve a spec em `docs/specs/<ID>.md`; agente **Sonnet** executa; o 
 - `TODO` · UI · Dep: F2-05, F1-05 · Renderizado a partir do mapa/terreno real, trapézio do frustum da câmera, pings de ataque, ordens por clique direito, cores de jogador.
 
 ### F6-05 · Alertas e feedback
-- `TODO` · UI+AUDIO · Dep: F2-07 · "Estamos sob ataque", "Mina esgotada", "Pesquisa concluída", "Construção concluída", "Não há comida suficiente"; ping no minimapa; Espaço vai ao alerta.
+- `DOING(sonnet, 2026-10-02)` · UI+AUDIO · Dep: F2-07 · "Estamos sob ataque", "Mina esgotada", "Pesquisa concluída", "Construção concluída", "Não há comida suficiente"; ping no minimapa; Espaço vai ao alerta.
 
 ### F6-06 · Cursores contextuais e destaque
 - `TODO` · UI+PERF · Dep: F2-02 · Cursor de atacar/coletar/construir/inválido/alvo de magia; contorno (outline) na entidade sob o mouse.
@@ -398,7 +398,7 @@ Sonnet 5.5 escreve a spec em `docs/specs/<ID>.md`; agente **Sonnet** executa; o 
 - `TODO` · UI · Dep: F3-09 · Pontuação estilo WC2 (unidades, construções, recursos, ranking), gráficos de evolução, botões Jogar de novo / Menu.
 
 ### F6-08 · Opções completas
-- `TODO` · UI · Dep: F1-04, F1-01 · Gráficos (presets + avançado: sombras, texturas, DPR, pós-proc., FPS alvo), áudio por canal, remapeamento de teclas, velocidade de rolagem, escala de UI, modo daltônico para cores de time. Persistência em localStorage.
+- `DOING(sonnet, 2026-10-02)` · UI · Dep: F1-04, F1-01 · Gráficos (presets + avançado: sombras, texturas, DPR, pós-proc., FPS alvo), áudio por canal, remapeamento de teclas, velocidade de rolagem, escala de UI, modo daltônico para cores de time. Persistência em localStorage.
 
 ### F6-09 · Internacionalização + tutorial (corrige B12)
 - `TODO` · UI · Dep: F6-03 · `src/i18n/{pt-BR,en}.json`, nenhum texto hardcoded; tutorial jogável (missão 0) ensinando coleta, construção, treino, combate.

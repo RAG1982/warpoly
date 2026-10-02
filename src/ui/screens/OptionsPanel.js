@@ -9,6 +9,7 @@ import { options as defaultOptions, TAB_OPTIONS } from '../optionsStore.js';
 import { applyAudio, applyColorblind, applyKeybinds } from '../optionsApply.js';
 import { applyUiScale } from '../uiScale.js';
 import { QualitySettings, detectDefaultPreset } from '../../core/QualitySettings.js';
+import { CURSOR_TEXT } from '../cursors.js';
 import {
   DEFAULT_BINDINGS, BINDING_LABELS, getBindings, findConflict, isReservedCode, codeLabel
 } from '../../core/Hotkeys.js';
@@ -201,6 +202,7 @@ export class OptionsPanel {
       <section class="op-group"><h3>Avançado</h3>
         ${this._row('Qualidade de textura', this._seg('texture', TEXTURES, q.textureQuality), 'Aplica ao recarregar a página.')}
         ${this._row('Sombras', this._toggle('shadows', q.shadows, q.shadows ? 'Ligadas' : 'Desligadas'))}
+        ${this._row(CURSOR_TEXT.options.hoverOutline.label, this._toggle('hoverOutline', q.hoverOutline, q.hoverOutline ? CURSOR_TEXT.options.on : CURSOR_TEXT.options.off), CURSOR_TEXT.options.hoverOutline.hint)}
         ${this._row('Resolução dinâmica', this._toggle('dynamicResolution', q.dynamicResolution, q.dynamicResolution ? 'Ligada' : 'Desligada'), 'Reduz a resolução quando o FPS cai.')}
         ${this._row('FPS alvo', this._seg('fps', FPS_CHOICES, fpsId), 'Limita os quadros por segundo.')}
         ${this._row('Escala de resolução máx.', this._slider('maxPixelRatio', { min: 0.5, max: 2, step: 0.05, value: dpr, fmt: (v) => `${Number(v).toFixed(2)}×` }), 'Limitada pela densidade de pixels da tela.')}
@@ -265,6 +267,7 @@ export class OptionsPanel {
       <section class="op-group"><h3>Partida</h3>
         ${this._row('Velocidade padrão', this._seg('speed', SPEEDS, String(s.get('defaultSpeed'))), 'Vale para novas partidas e já altera a atual.')}
         ${this._row('Textos de dano', this._toggle('floatingText', s.get('floatingText'), s.get('floatingText') ? 'Mostrar' : 'Ocultar'), 'Números flutuantes sobre unidades e construções.')}
+        ${this._row(CURSOR_TEXT.options.contextCursors.label, this._toggle('contextCursors', s.get('contextCursors'), s.get('contextCursors') ? CURSOR_TEXT.options.on : CURSOR_TEXT.options.off), CURSOR_TEXT.options.contextCursors.hint)}
       </section>
       ${document.getElementById('help-modal') ? `<section class="op-group"><h3>Ajuda</h3>
         <div><button type="button" class="op-mini" data-op="guide">Abrir o Guia do Jogo</button></div>
@@ -329,7 +332,7 @@ export class OptionsPanel {
     }
     if (t.matches('input[type="checkbox"][data-opt]')) {
       const name = t.dataset.opt;
-      if (name === 'shadows' || name === 'dynamicResolution') {
+      if (name === 'shadows' || name === 'dynamicResolution' || name === 'hoverOutline') {
         const { requiresReload } = QualitySettings.setOverride(name, t.checked);
         if (requiresReload) this._notify('Aplica ao recarregar a página.');
         this._renderBody();

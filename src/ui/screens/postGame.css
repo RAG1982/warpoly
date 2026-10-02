@@ -1,0 +1,55 @@
+/* src/ui/screens/postGame.css — F6-07 · tela pós-jogo (relatório dentro de #game-over-modal) */
+#game-over-modal .modal-card.pg-card {
+  width: min(1000px, 96vw);
+  max-width: none;
+  max-height: 94vh;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: 18px 22px 16px;
+  box-sizing: border-box;
+}
+#game-over-modal .pg-card .modal-title { font-size: 24px; margin-bottom: 4px; }
+#game-over-modal .pg-card #game-over-msg { margin-bottom: 8px !important; font-size: 13px; line-height: 1.45; }
+
+.pg-report { text-align: left; margin-bottom: 12px; }
+.pg-h {
+  margin: 8px 0 6px;
+  font-family: 'Cinzel', serif; font-size: 12px; font-weight: 700;
+  letter-spacing: 0.2em; text-transform: uppercase; color: #e6c45e;
+}
+.pg-sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+
+.pg-table-wrap { overflow-x: auto; border: 1px solid rgba(212, 175, 55, 0.35); border-radius: 8px; background: rgba(8, 12, 18, 0.55); }
+.pg-table { width: 100%; border-collapse: collapse; font-size: 12px; color: #f1e7c8; font-variant-numeric: tabular-nums; }
+.pg-table th, .pg-table td { padding: 4px 7px; text-align: center; white-space: nowrap; }
+.pg-table thead th { font-size: 10.5px; font-weight: 700; letter-spacing: 0.04em; color: #e6c45e; border-bottom: 1px solid rgba(212, 175, 55, 0.25); }
+.pg-table thead tr:first-child th[colspan] { border-bottom: 1px solid rgba(212, 175, 55, 0.2); }
+.pg-table .pg-left { text-align: left; }
+.pg-table tbody tr { border-top: 1px solid rgba(255, 255, 255, 0.06); }
+.pg-table tbody tr.is-local { background: rgba(230, 196, 94, 0.10); }
+.pg-table tbody tr.is-winner .pg-name { color: #ffe39a; }
+.pg-table tfoot th, .pg-table tfoot td { border-top: 1px solid rgba(212, 175, 55, 0.35); color: #cdbf93; font-weight: 700; }
+.pg-rank { font-family: 'Cinzel', serif; font-weight: 700; color: #ffd75e; }
+.pg-score { font-weight: 800; color: #ffe39a; }
+.pg-player { text-align: left; display: flex; align-items: center; gap: 7px; font-weight: 400; min-width: 190px; }
+.pg-name { font-weight: 800; }
+.pg-sub { font-size: 10.5px; color: #b9ab88; }
+.pg-swatch { display: inline-block; flex: none; width: 11px; height: 11px; border-radius: 3px; border: 1px solid rgba(0, 0, 0, 0.6); }
+
+.pg-tabs { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 6px; }
+.pg-tab {
+  font: 700 11.5px 'Nunito', sans-serif; color: #e8dcb4; cursor: pointer;
+  padding: 4px 11px; border-radius: 999px; border: 1px solid rgba(212, 175, 55, 0.4); background: rgba(8, 12, 18, 0.6);
+}
+.pg-tab:hover { border-color: #ffe39a; }
+.pg-tab:focus-visible { outline: 2px solid #ffe39a; outline-offset: 2px; }
+.pg-tab.is-active { background: linear-gradient(180deg, #ffe39a, #c8952f); color: #20160a; border-color: #ffe39a; }
+.pg-chart-box {
+  position: relative; height: clamp(120px, 24vh, 230px); border: 1px solid rgba(212, 175, 55, 0.35);
+  border-radius: 8px; background: rgba(8, 12, 18, 0.55); overflow: hidden;
+}
+.pg-chart { display: block; }
+.pg-legend { display: flex; flex-wrap: wrap; gap: 6px 14px; margin-top: 6px; font-size: 12px; color: #e8dcb4; align-items: center; }
+.pg-leg { display: inline-flex; align-items: center; gap: 6px; }
+.pg-axis { margin-left: auto; font-size: 11px; color: #a89a78; }
+.pg-empty { font-size: 12px; color: #b9ab88; margin: 4px 0 8px; }

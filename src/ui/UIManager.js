@@ -13,10 +13,16 @@ import { buildCostHtml } from './Tooltip.js';
 import { CMD } from '../sim/commands.js';
 import { resolveAbility, canCast, selectionAbilityUnits } from '../sim/abilities.js';
 import { abilityName } from '../data/abilities.js';
-import { victoryMessage, defeatMessage } from '../sim/victory.js';
+import { buildPostGameModel } from './postGame.js';
+import { PostGameScreen } from './screens/PostGameScreen.js';
 import { worldToMinimap, minimapToWorld } from './minimapCoords.js';
 import { NEUTRAL_HOSTILE_ID } from '../sim/EntityIds.js';
 import { renderTerrainImage } from './terrainMinimapImage.js';
+import { Vector3 } from 'three';
+import {
+  MINIMAP_TEXT, frustumGroundQuad, playerColor, pointerToCanvas, pickMinimapTarget,
+  OrderFlashes, orderKindFor, drawOrderFlashes, drawCameraQuad
+} from './minimapView.js';
 
 // Quem treina o quê — derivado de src/data/buildings.js (campo `trains`)
 export { BUILDING_TRAINABLE_UNITS };
@@ -88,6 +94,8 @@ export class UIManager {
     this._disposeUiScale = initUiScale();
 
     this.notificationBox = document.getElementById('notification-box');
+    this.postGame = new PostGameScreen(document.getElementById('game-over-modal'));
+    this._postGameShown = false;
 
     this.lastSelectionKey = null;
 
@@ -140,32 +148,43 @@ export class UIManager {
   initMinimapEvents() {
     if (!this.minimapCanvas) return;
     const canvas = this.minimapCanvas;
+    canvas.title = MINIMAP_TEXT.label;
+    this.minimapOrders = new OrderFlashes();
 
-    const handleMinimapClick = (e) => {
-      if (e.button !== 0) return; // F3-01: o direito move as unidades (abaixo)
-      const rect = canvas.getBoundingClientRect();
-      const clickX = e.clientX - rect.left;
-      const clickY = e.clientY - rect.top;
-
-      // F2-05: tamanho do mapa vem de mapDef (era 140 fixo).
-      const mapSize = this.gm.terrain.mapDef.size;
-      const { x: worldX, z: worldZ } = minimapToWorld(clickX, clickY, mapSize, canvas.width, canvas.height);
-
-      this.sm.cameraTarget.set(worldX, this.gm.terrain.getHeight(worldX, worldZ), worldZ);
+    /** Ponto do mundo sob o ponteiro (respeita a escala CSS do canvas). */
+    const worldAt = (e) => {
+      const p = pointerToCanvas(e.clientX, e.clientY, canvas.getBoundingClientRect(), canvas.width, canvas.height);
+      return minimapToWorld(p.x, p.y, this.gm.terrain.mapDef.size, canvas.width, canvas.height);
+    };
+    const moveCamera = (e) => {
+      const { x, z } = worldAt(e);
+      this.sm.cameraTarget.set(x, this.gm.terrain.getHeight(x, z), z);
     };
 
-    canvas.addEventListener('mousedown', handleMinimapClick, this._listenOpts);
+    // Clique esquerdo move a câmera; segurar e arrastar acompanha o ponteiro (F6-04).
+    let dragging = false;
+    canvas.addEventListener('mousedown', (e) => {
+      if (e.button !== 0) return; // o direito envia ordens (abaixo)
+      dragging = true;
+      moveCamera(e);
+    }, this._listenOpts);
+    window.addEventListener('mousemove', (e) => { if (dragging) moveCamera(e); }, this._listenOpts);
+    window.addEventListener('mouseup', (e) => { if (e.button === 0) dragging = false; }, this._listenOpts);
 
-    // F3-01: clique direito no minimapa com unidades selecionadas = MOVE para o ponto.
+    // Clique direito: mesma ordem contextual do clique direito no mundo (atacar, coletar, construir,
+    // reparar, mover; sem unidades e com construção própria selecionada = ponto de reunião). Shift enfileira.
     canvas.addEventListener('contextmenu', (e) => {
       e.preventDefault();
-      const units = this.gm.selectedUnits.filter(u => !u.isDead && !u.isDying);
-      if (units.length === 0) return;
-      const rect = canvas.getBoundingClientRect();
-      const mapSize = this.gm.terrain.mapDef.size;
-      const { x, z } = minimapToWorld(e.clientX - rect.left, e.clientY - rect.top, mapSize, canvas.width, canvas.height);
-      this.gm.issue({ type: CMD.MOVE, playerId: this.gm.localPlayerId, unitIds: units.map(u => u.id), x, z, ...(e.shiftKey ? { queued: true } : {}) });
-      this.sound.playOrder();
+      const { x, z } = worldAt(e);
+      const gm = this.gm;
+      const noUnits = gm.selectedUnits.every(u => u.isDead || u.isDying);
+      const rallying = noUnits && !!gm.selectedBuilding && gm.selectedBuilding.ownerId === gm.localPlayerId;
+      if (noUnits && !rallying) return;
+      const mapSize = gm.terrain.mapDef.size;
+      const target = rallying ? null : pickMinimapTarget(gm, x, z, Math.max(3, 5 * mapSize / canvas.width));
+      const at = target && target.mesh ? target.mesh.position : { x, z };
+      gm.issueOrder(target, { x: at.x, y: gm.terrain.getHeight(at.x, at.z), z: at.z }, { queued: e.shiftKey });
+      this.minimapOrders.add(at.x, at.z, rallying ? 'rally' : orderKindFor(gm, target));
     }, this._listenOpts);
   }
 
@@ -226,28 +245,15 @@ export class UIManager {
     // 3. Minimap (throttled to ~12.5 FPS to preserve CPU cycles during large battles)
     this.minimapTimer = (this.minimapTimer || 0) + delta;
     if (this.minimapTimer >= 0.08) {
+      if (this.minimapOrders) this.minimapOrders.update(this.minimapTimer);
       this.minimapTimer = 0;
       this.drawMinimap();
     }
 
-    // 4. Win/Loss Screen
-    if (this.gm.isGameOver) {
-      const modal = document.getElementById('game-over-modal');
-      const title = document.getElementById('game-over-title');
-      const msg = document.getElementById('game-over-msg');
-      if (modal && modal.style.display !== 'flex') {
-        modal.style.display = 'flex';
-        msg.style.whiteSpace = 'pre-line';
-        if (this.gm.gameWon) {
-          title.innerText = '🏆 VITÓRIA GLORIOSA 🏆';
-          title.style.color = '#ffd700';
-          msg.innerText = this._gameOverText(true);
-        } else {
-          title.innerText = '💀 DERROTA 💀';
-          title.style.color = '#ef4444';
-          msg.innerText = this._gameOverText(false);
-        }
-      }
+    // 4. Tela pós-jogo (F6-07): pontuação, ranking e gráficos
+    if (this.gm.isGameOver && !this._postGameShown) {
+      this._postGameShown = true;
+      this.postGame.show(this._postGameModel());
     }
   }
 
@@ -549,19 +555,12 @@ export class UIManager {
     }, this._listenOpts);
   }
 
-  /** F3-09: texto do modal de fim de jogo — mensagem do modo + 3 linhas de resumo (PT-BR). */
-  _gameOverText(won) {
+  /** F6-07: modelo da tela pós-jogo a partir do snapshot congelado (`gm.result`) ou do atual. */
+  _postGameModel() {
     const gm = this.gm;
-    const r = gm.result || gm.matchStats.snapshot();
-    const me = r.players.find(p => p.id === gm.localPlayerId) || {};
-    const mm = Math.floor(r.elapsed / 60);
-    const ss = String(Math.floor(r.elapsed % 60)).padStart(2, '0');
-    return [
-      won ? victoryMessage(r.mode) : defeatMessage(r.mode),
-      `Tempo de partida: ${mm}:${ss}`,
-      `Unidades: ${me.unitsKilled || 0} mortas / ${me.unitsLost || 0} perdidas`,
-      `Construções: ${me.buildingsDestroyed || 0} destruídas / ${me.buildingsLost || 0} perdidas`
-    ].join('\n');
+    const colors = {};
+    for (const p of gm.playerRegistry.players) colors[p.id] = p.color;
+    return buildPostGameModel(gm.result || gm.matchStats.snapshot(), { localId: gm.localPlayerId, victory: !!gm.gameWon, colors });
   }
 
   updateSelectionCard() {
@@ -1203,14 +1202,22 @@ export class UIManager {
       ctx.fillRect(m.x - 2, m.y - 2, 4, 4);
     });
 
+    // Cores por jogador (F6-04): cada dono usa a cor escolhida na partida.
+    const registry = this.gm.playerRegistry;
+    const colorOf = (id) => playerColor(registry, id, NEUTRAL_HOSTILE_ID);
+
     // Draw Buildings (inimigas: só as já vistas — visíveis agora ou lembradas pela névoa)
     const fog = this.gm.fogOfWar;
+    const localId = this.gm.localPlayerId;
     this.gm.buildings.forEach(b => {
       if (!b.isDead) {
-        if (b.faction === 'player' || !fog || fog.isBuildingKnown(b)) {
+        if (!this.gm.isHostile(localId, b.ownerId) || !fog || fog.isBuildingKnown(b)) {
           const m = toMap(b.mesh.position.x, b.mesh.position.z);
-          ctx.fillStyle = b.faction === 'player' ? '#2563eb' : (b.ownerId === NEUTRAL_HOSTILE_ID ? '#f97316' : '#dc2626');
+          ctx.fillStyle = colorOf(b.ownerId);
           ctx.fillRect(m.x - 3, m.y - 3, 6, 6);
+          ctx.strokeStyle = 'rgba(0,0,0,0.55)';
+          ctx.lineWidth = 1;
+          ctx.strokeRect(m.x - 3, m.y - 3, 6, 6);
         }
       }
     });
@@ -1219,30 +1226,23 @@ export class UIManager {
       ctx.fillStyle = '#dc2626';
       fog.forEachGhostBuilding((b, rec) => {
         const m = toMap(rec.x, rec.z);
+        ctx.fillStyle = colorOf(b.ownerId);
         ctx.fillRect(m.x - 3, m.y - 3, 6, 6);
       });
     }
 
-    // Draw Player Units (cyan dots)
-    this.gm.units.forEach(u => {
-      if (!u.isDead) {
-        const m = toMap(u.mesh.position.x, u.mesh.position.z);
-        ctx.fillStyle = '#38bdf8';
-        ctx.fillRect(m.x - 1.5, m.y - 1.5, 3, 3);
-      }
-    });
-
-    // Draw Enemy Units (red dots, só com visão atual)
-    this.gm.enemies.forEach(e => {
-      if (!e.isDead) {
-        if (!fog || fog.isVisible(e.mesh.position.x, e.mesh.position.z)) {
-          const m = toMap(e.mesh.position.x, e.mesh.position.z);
-          // F3-10: neutros hostis (bandoleiros) em laranja, só quando visíveis.
-          ctx.fillStyle = e.ownerId === NEUTRAL_HOSTILE_ID ? '#f97316' : '#ef4444';
-          ctx.fillRect(m.x - 1.5, m.y - 1.5, 3, 3);
-        }
-      }
-    });
+    // Unidades: próprias e aliadas sempre; hostis só com visão atual.
+    const all = this.gm.allUnits;
+    for (let i = 0; i < all.length; i++) {
+      const u = all[i];
+      if (u.isDead || u.isDying) continue;
+      const px = u.mesh.position.x;
+      const pz = u.mesh.position.z;
+      if (this.gm.isHostile(localId, u.ownerId) && fog && !fog.isVisible(px, pz)) continue;
+      const m = toMap(px, pz);
+      ctx.fillStyle = colorOf(u.ownerId);
+      ctx.fillRect(m.x - 1.5, m.y - 1.5, 3, 3);
+    }
 
     // Névoa no minimapa: preto = não explorado, escurecido = memória, limpo = visível
     if (fog && this.gm.fogView) {
@@ -1252,11 +1252,9 @@ export class UIManager {
     // F6-05: pings de alerta (ataque, mina esgotada) sobre a névoa
     if (this.alerts) drawMinimapPings(ctx, this.alerts.activePings(), toMap);
 
-    // Camera Viewport Box on top of Fog
-    const camPos = toMap(this.sm.cameraTarget.x, this.sm.cameraTarget.z);
-    ctx.strokeStyle = '#ffd700';
-    ctx.lineWidth = 1.5;
-    ctx.strokeRect(camPos.x - 8, camPos.y - 6, 16, 12);
+    // F6-04: flashes das ordens dadas pelo minimapa e trapézio do frustum da câmera (sobre a névoa)
+    if (this.minimapOrders) drawOrderFlashes(ctx, this.minimapOrders.items, toMap);
+    drawCameraQuad(ctx, frustumGroundQuad(this.sm.camera, Vector3, mapDef.size, { groundY: this.sm.cameraTarget.y }), toMap);
   }
 
   /**
@@ -1273,6 +1271,7 @@ export class UIManager {
       const el = document.getElementById(id);
       if (el) el.style.display = 'none';
     };
+    if (this.postGame) { this.postGame.dispose(); this.postGame = null; }
     hide('game-over-modal');
     hide('help-modal');
     if (this.notificationBox) {
@@ -1285,6 +1284,7 @@ export class UIManager {
     if (pauseToggle) pauseToggle.checked = false;
     document.querySelectorAll('.time-pill').forEach(p => p.classList.toggle('active', p.id === 'btn-time-day'));
     if (this.minimapCtx) this.minimapCtx.clearRect(0, 0, this.minimapCanvas.width, this.minimapCanvas.height);
+    if (this.minimapOrders) this.minimapOrders.clear();
 
     this.currentBuilding = null;
     this.gm = null;

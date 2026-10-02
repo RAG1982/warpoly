@@ -26,6 +26,7 @@ const TEXTURE_KEY = 'warpoly.textureQuality';
  * @property {number} shadowUpdateInterval  1 = todo frame; N = a cada N frames (ou quando o frustum da luz muda)
  * @property {number} maxShadowDistance     raio máximo (u) coberto pela shadow camera
  * @property {boolean} pointLightShadows    PointLights dos modelos projetam sombra (6 passadas cada)
+ * @property {boolean} hoverOutline         F6-06: contorno (colchetes) da entidade sob o mouse; ajustável nas Opções
  * @property {'aces'|'agx'|'neutral'|'none'} toneMapping
  * @property {'low'|'med'|'high'|'ultra'} textureQuality
  * @property {boolean} dynamicResolution
@@ -46,6 +47,7 @@ export const QUALITY_PRESETS = {
     shadowUpdateInterval: 3,
     maxShadowDistance: 40,
     pointLightShadows: false,
+    hoverOutline: false,
     toneMapping: 'aces',
     textureQuality: 'low',
     dynamicResolution: true,
@@ -63,6 +65,7 @@ export const QUALITY_PRESETS = {
     shadowUpdateInterval: 2,
     maxShadowDistance: 60,
     pointLightShadows: false,
+    hoverOutline: true,
     toneMapping: 'aces',
     textureQuality: 'med',
     dynamicResolution: true,
@@ -80,6 +83,7 @@ export const QUALITY_PRESETS = {
     shadowUpdateInterval: 1,
     maxShadowDistance: 80,
     pointLightShadows: false,
+    hoverOutline: true,
     toneMapping: 'aces',
     textureQuality: 'high',
     dynamicResolution: true,
@@ -97,6 +101,7 @@ export const QUALITY_PRESETS = {
     shadowUpdateInterval: 1,
     maxShadowDistance: 110,
     pointLightShadows: false,
+    hoverOutline: true,
     toneMapping: 'aces',
     textureQuality: 'ultra',
     dynamicResolution: false,
@@ -178,7 +183,7 @@ const TEXTURE_LEVELS = ['low', 'med', 'high', 'ultra'];
 
 /**
  * F6-08: ajustes avançados sobre o preset (persistidos em `warpoly.qualityOverrides`, JSON).
- * Chaves: shadows (bool), dynamicResolution (bool), targetFps (15..240), maxPixelRatio (0,5..2),
+ * Chaves: shadows (bool), dynamicResolution (bool), hoverOutline (bool), targetFps (15..240), maxPixelRatio (0,5..2),
  * textureQuality (low|med|high|ultra) e fpsCap (0 = sem limite; senão 15..240 quadros/s).
  * Valores inválidos são descartados.
  */
@@ -188,6 +193,7 @@ export function sanitizeOverrides(raw) {
   const num = (v, lo, hi) => (typeof v === 'number' && Number.isFinite(v) ? Math.min(hi, Math.max(lo, v)) : undefined);
   if (typeof raw.shadows === 'boolean') out.shadows = raw.shadows;
   if (typeof raw.dynamicResolution === 'boolean') out.dynamicResolution = raw.dynamicResolution;
+  if (typeof raw.hoverOutline === 'boolean') out.hoverOutline = raw.hoverOutline;
   const fps = num(raw.targetFps, 15, 240);
   if (fps !== undefined) out.targetFps = fps;
   const dpr = num(raw.maxPixelRatio, 0.5, 2);

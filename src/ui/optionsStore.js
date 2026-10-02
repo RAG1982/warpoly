@@ -26,6 +26,8 @@ export const OPTION_DEFS = Object.freeze({
   colorblind: { key: 'warpoly.colorblind', def: 'off', parse: (r) => (['off', 'protan', 'deutan', 'tritan'].includes(r) ? r : undefined) },
   defaultSpeed: { key: 'warpoly.defaultSpeed', def: 1, parse: (r) => { const n = num(r); return [1, 2, 3].includes(n) ? n : undefined; } },
   floatingText: { key: 'warpoly.floatingText', def: true, parse: (r) => (r === '0' ? false : r === '1' ? true : undefined), format: (v) => (v ? '1' : '0') },
+  /** F6-06: cursores contextuais (atacar/coletar/construir/reparar/magia). O contorno sob o mouse é um ajuste de QualitySettings. */
+  contextCursors: { key: 'warpoly.contextCursors', def: true, parse: (r) => (r === '0' ? false : r === '1' ? true : undefined), format: (v) => (v ? '1' : '0') },
   /** Remapeamento: `{ ação: KeyboardEvent.code }` (só o que difere do padrão). JSON. */
   keybinds: {
     key: 'warpoly.keybinds',
@@ -48,14 +50,15 @@ export const TAB_OPTIONS = Object.freeze({
   audio: ['volumeMaster', 'volumeSfx', 'volumeMusic'],
   controls: ['panSpeed', 'edgePan', 'keybinds'],
   interface: ['uiScale', 'colorblind'],
-  game: ['defaultSpeed', 'floatingText']
+  game: ['defaultSpeed', 'floatingText', 'contextCursors']
 });
 
 /** Espelho em memória (padrões até `createOptionsStore().loadRuntime()` rodar). */
 export const runtime = {
   panSpeed: OPTION_DEFS.panSpeed.def,
   edgePan: OPTION_DEFS.edgePan.def,
-  floatingText: OPTION_DEFS.floatingText.def
+  floatingText: OPTION_DEFS.floatingText.def,
+  contextCursors: OPTION_DEFS.contextCursors.def
 };
 
 function safeStorage() {

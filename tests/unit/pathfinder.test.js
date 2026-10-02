@@ -174,7 +174,7 @@ describe('Pathfinder', () => {
       const heap = new MinHeap(1000);
       const priorities = [];
       for (let i = 0; i < 1000; i++) {
-        const p = Math.random() * 100000;
+        const p = Math.fround(Math.random() * 100000); // o heap guarda Float32: sem fround, prioridades quase iguais invertem
         priorities.push(p);
         heap.push(i, p);
       }

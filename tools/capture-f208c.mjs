@@ -34,7 +34,7 @@ try {
   await assertHardwareGpu(page);
 
   // ---------------- jogo ----------------
-  await page.goto(`http://127.0.0.1:${PORT}/?skipPreload&texq=low&play&debug`, { waitUntil: 'load', timeout: 90000 });
+  await page.goto(`http://127.0.0.1:${PORT}/?skipPreload&texq=low&play&debug&seed=7`, { waitUntil: 'load', timeout: 90000 });
   await page.waitForFunction(() => window.game && window.game.gameManager && window.game.gameManager.buildings.length > 0, null, { timeout: 90000 });
   await page.waitForTimeout(1500);
 
@@ -56,7 +56,8 @@ try {
     forge.hp = forge.maxHp * 0.3;
     const smith = gm.createBuilding('orc_forge', b.x + 14, b.z - 4, true, 1);
     const mill = gm.createBuilding('orc_lumber_mill', b.x + 14, b.z - 16, true, 1);
-    const w1 = gm.createBuilding('wall', a.x - 14, a.z - 8, true, 0);
+    const w1 = gm.createBuilding('wall_human', a.x - 14, a.z - 8, true, 0);
+    [wip, forge, smith, mill, w1].forEach(b => gm.buildings.push(b));
     const live = u.filter(Boolean);
     live[2].takeDamage(30, null);
     const sel = live.filter(x => x.ownerId === 0).slice(0, 5);
@@ -65,6 +66,11 @@ try {
     return { a, b, ids: { wip: wip.id, forge: forge.id, smith: smith.id, mill: mill.id, w1: w1.id }, n: live.length };
   });
   console.log('setup', JSON.stringify(setup));
+  stats.entities = await page.evaluate(() => {
+    const gm = window.game.gameManager;
+    const f = e => `${e.type}@${e.mesh.position.x.toFixed(1)},${e.mesh.position.z.toFixed(1)}#${e.ownerId}`;
+    return { buildings: gm.buildings.map(f), units: gm.allUnits.map(f), trees: gm.trees.length, deposits: gm.resourceDeposits.length };
+  });
   await page.waitForTimeout(2500);
 
   const shot = async (name, tx, tz, zoom = 1.0) => {

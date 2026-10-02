@@ -74,6 +74,7 @@ export class BuildingView {
     /** Raiz da malha (picking/raycast): `userData.entity` aponta para a entidade de simulação. */
     this.root = new THREE.Group();
     this.root.position.set(p.x, p.y, p.z);
+    this.root.rotation.y = building.mesh.rotation.y;
     this.root.add(this.fullMesh);
     this.root.add(this.scaffoldMesh);
     this.root.userData.entity = building;
@@ -417,6 +418,7 @@ export class BuildingView {
     this.root.visible = shown;
     const bp = e.mesh.position;
     this.root.position.set(bp.x, bp.y, bp.z);
+    this.root.rotation.y = e.mesh.rotation.y;
 
     // Construção em andamento / concluída.
     const csKey = e.isConstructed ? -1 : e.buildProgress;

@@ -23,7 +23,6 @@ export class EntityViews {
     /** @type {Map<object, {root: object, update: Function, dispose: Function}>} */
     this.views = new Map();
     this._frame = 0;
-    this._seen = new Map();
     this._deposits = { ref: null, len: -1, views: [] };
     this._trees = { ref: null, len: -1, views: [] };
     this._critters = { ref: null, len: -1, views: [] };
@@ -69,7 +68,8 @@ export class EntityViews {
       slot.ref = list;
       slot.len = list.length;
       const old = slot.views;
-      slot.views = [];
+      const next = slot.spare || [];
+      next.length = 0;
       for (let i = 0; i < list.length; i++) {
         const e = list[i];
         if (e.isDisposed) continue;
@@ -78,17 +78,18 @@ export class EntityViews {
           v = make(e);
           this.views.set(e, v);
         }
-        this._seen.set(e, frame);
-        slot.views.push(v);
+        v._evFrame = frame; // marca "visto neste quadro" (sem alocar/consultar Map)
+        next.push(v);
       }
       for (let i = 0; i < old.length; i++) {
         const v = old[i];
-        if (this._seen.get(v.entity) !== frame) {
+        if (v._evFrame !== frame) {
           v.dispose();
           this.views.delete(v.entity);
-          this._seen.delete(v.entity);
         }
       }
+      slot.views = next;
+      slot.spare = old;
     }
     for (let i = 0; i < slot.views.length; i++) slot.views[i].update(this._frameDelta, this);
   }
@@ -127,6 +128,5 @@ export class EntityViews {
     for (const wb of Object.values(this._wallBatches)) wb.dispose();
     this._wallBatches = {};
     this.views.clear();
-    this._seen.clear();
   }
 }

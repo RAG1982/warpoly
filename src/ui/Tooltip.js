@@ -8,13 +8,14 @@
  * balão continua em CSS (`:hover`, já existente).
  */
 
+import { t, resourceName } from '../i18n/index.js';
+
 const RESOURCE_ICON = { gold: '/icoouro.png', wood: '/icomadeira.png', stone: '/icopedra.png' };
-const RESOURCE_LABEL = { gold: 'Ouro', wood: 'Madeira', stone: 'Pedra' };
 
 /** HTML de um item de custo; fica em vermelho (`.cost-insufficient`) quando falta o recurso. */
 function costItemHtml(type, amount, available) {
   const insufficient = available !== undefined && available < amount;
-  return `<span class="bld-cost-item${insufficient ? ' cost-insufficient' : ''}">${amount} <img src="${RESOURCE_ICON[type]}" class="bld-cost-icon" alt="${RESOURCE_LABEL[type]}" /></span>`;
+  return `<span class="bld-cost-item${insufficient ? ' cost-insufficient' : ''}">${amount} <img src="${RESOURCE_ICON[type]}" class="bld-cost-icon" alt="${resourceName(type)}" /></span>`;
 }
 
 /**
@@ -27,7 +28,7 @@ export function buildCostHtml(cost, resources) {
   if (cost.gold) parts.push(costItemHtml('gold', cost.gold, resources?.gold));
   if (cost.wood) parts.push(costItemHtml('wood', cost.wood, resources?.wood));
   if (cost.stone) parts.push(costItemHtml('stone', cost.stone, resources?.stone));
-  return parts.length > 0 ? parts.join(', ') : 'Sem custo';
+  return parts.length > 0 ? parts.join(', ') : t('hud.noCost');
 }
 
 /**

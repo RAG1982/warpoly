@@ -10,6 +10,8 @@
  * existente é atualizada (Espaço vai ao ponto mais novo) mas não nasce banner nem ping novo.
  */
 
+import { t } from '../i18n/index.js';
+
 export const PING_LIFE = 4;          // s que o ping do minimapa permanece
 export const RING_SIZE = 8;          // alertas posicionais lembrados para o Espaço
 export const CYCLE_WINDOW = 5;       // s: toques seguidos de Espaço percorrem os anteriores
@@ -17,11 +19,11 @@ const HISTORY_MAX = 24;
 
 /** Tipos de alerta. `severity`: danger | warn | good. `cooldown` em s (0 = nunca suprime); `radius` em unidades de mundo. */
 export const ALERT_KINDS = Object.freeze({
-  attack: { text: 'Estamos sob ataque!', severity: 'danger', cooldown: 10, radius: 20, ping: true },
-  depleted: { text: 'Mina esgotada', severity: 'warn', cooldown: 2, radius: 10, ping: true },
-  research: { text: 'Pesquisa concluída', severity: 'good', cooldown: 0, radius: 0, ping: false },
-  built: { text: 'Construção concluída', severity: 'good', cooldown: 1.5, radius: 8, ping: false },
-  food: { text: 'Não há comida suficiente', severity: 'warn', cooldown: 4, radius: Infinity, ping: false }
+  attack: { textKey: 'alert.attack', severity: 'danger', cooldown: 10, radius: 20, ping: true },
+  depleted: { textKey: 'alert.depleted', severity: 'warn', cooldown: 2, radius: 10, ping: true },
+  research: { textKey: 'alert.research', severity: 'good', cooldown: 0, radius: 0, ping: false },
+  built: { textKey: 'alert.built', severity: 'good', cooldown: 1.5, radius: 8, ping: false },
+  food: { textKey: 'alert.food', severity: 'warn', cooldown: 4, radius: Infinity, ping: false }
 });
 
 const dist = (a, b) => Math.hypot(a.x - b.x, a.z - b.z);
@@ -66,7 +68,7 @@ export class AlertCenter {
       return { shown: false, alert: dupe };
     }
 
-    const alert = { kind, text: text || def.text, severity: def.severity, pos: p, shownAt: now, time: now };
+    const alert = { kind, text: text || t(def.textKey), severity: def.severity, pos: p, shownAt: now, time: now };
     this.history.unshift(alert);
     if (this.history.length > HISTORY_MAX) this.history.length = HISTORY_MAX;
     if (p && def.ping) this.pings.push({ x: p.x, z: p.z, kind, t0: now });

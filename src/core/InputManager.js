@@ -1,3 +1,4 @@
+import { t, resourceName } from '../i18n/index.js';
 import * as THREE from 'three';
 import { ModelFactory } from '../entities/ModelFactory.js';
 import { Building } from '../entities/Building.js';
@@ -261,7 +262,7 @@ export class InputManager {
       gm.soundManager.playOrder();
     } else {
       this.setTargetMode({ kind: order });
-      gm.events.emit(EVT.NOTIFY, { ownerId: playerId, text: order === 'attackMove' ? 'Atacar-movendo: clique no destino.' : 'Patrulhar: clique no destino.' });
+      gm.events.emit(EVT.NOTIFY, { ownerId: playerId, text: order === 'attackMove' ? t('input.attackMove') : t('input.patrol') });
     }
   }
 
@@ -272,7 +273,7 @@ export class InputManager {
       .filter(u => (u.type === 'villager' || u.type === 'peon') && u.state === 'idle' && !u.isDead && !u.isDying)
       .sort((a, b) => a.id - b.id);
     if (idle.length === 0) {
-      gm.events.emit(EVT.NOTIFY, { ownerId: gm.localPlayerId, text: 'Nenhum trabalhador ocioso.' });
+      gm.events.emit(EVT.NOTIFY, { ownerId: gm.localPlayerId, text: t('input.noIdle') });
       return null;
     }
     this._idleCursor = idle.findIndex(u => u.id > this._idleCursor);
@@ -354,7 +355,7 @@ export class InputManager {
     const workers = this.gm.selectedUnits.filter(u => !u.isDead && (u.type === 'villager' || u.type === 'peon'));
     if (workers.length === 0) return;
     this.setTargetMode({ kind: 'repair' });
-    this.gm.events.emit(EVT.NOTIFY, { ownerId: this.gm.localPlayerId, text: 'Clique numa construção sua para reparar (custa recursos).' });
+    this.gm.events.emit(EVT.NOTIFY, { ownerId: this.gm.localPlayerId, text: t('input.repairHint') });
   }
 
   /** F4-03: liga/desliga o modo-alvo e ajusta o cursor (mira). */
@@ -424,7 +425,7 @@ export class InputManager {
     const local = gm.localPlayerId;
     if (!pickCaster(gm, units, ab)) {
       const why = canCast(gm, units[0], ab);
-      gm.events.emit(EVT.NOTIFY, { ownerId: local, text: why.ok ? '⚠️ Habilidade em recarga' : why.reason });
+      gm.events.emit(EVT.NOTIFY, { ownerId: local, text: why.ok ? `⚠️ ${t('sim.cooldown')}` : why.reason });
       return;
     }
     if (ab.target === 'none' || ab.target === 'self') {
@@ -432,7 +433,7 @@ export class InputManager {
       return;
     }
     this.setTargetMode({ kind: 'cast', abilityId });
-    gm.events.emit(EVT.NOTIFY, { ownerId: local, text: ab.target === 'ground' ? 'Clique no chão para lançar.' : 'Clique num alvo para lançar.' });
+    gm.events.emit(EVT.NOTIFY, { ownerId: local, text: ab.target === 'ground' ? t('input.castGround') : t('input.castTarget') });
   }
 
   /** F4-03: clique esquerdo em modo-alvo de habilidade. Alvo inválido: avisa e mantém o modo. */
@@ -504,7 +505,7 @@ export class InputManager {
     const local = this.gm.localPlayerId;
     if (!(e instanceof Building) || e.ownerId !== local) return true;
     if (!e.isConstructed || e.hp >= e.maxHp) {
-      this.gm.events.emit(EVT.NOTIFY, { ownerId: local, text: 'Esta construção não precisa de reparo.' });
+      this.gm.events.emit(EVT.NOTIFY, { ownerId: local, text: t('input.noRepairNeeded') });
       return true;
     }
     const unitIds = this.gm.selectedUnits.filter(u => u.type === 'villager' || u.type === 'peon').map(u => u.id);
@@ -874,10 +875,10 @@ export class InputManager {
     }
     const unit = getCost(type);
     const parts = [];
-    if (unit.wood) parts.push(`${unit.wood * validCount} madeira`);
-    if (unit.stone) parts.push(`${unit.stone * validCount} pedra`);
-    if (unit.gold) parts.push(`${unit.gold * validCount} ouro`);
-    this._wallLabel.textContent = `${validCount} ${validCount === 1 ? 'segmento' : 'segmentos'} — ${parts.join(', ')}`;
+    if (unit.wood) parts.push(`${unit.wood * validCount} ${resourceName('wood').toLowerCase()}`);
+    if (unit.stone) parts.push(`${unit.stone * validCount} ${resourceName('stone').toLowerCase()}`);
+    if (unit.gold) parts.push(`${unit.gold * validCount} ${resourceName('gold').toLowerCase()}`);
+    this._wallLabel.textContent = `${t('input.wallSegments', { count: validCount })} — ${parts.join(', ')}`;
     this._wallLabel.style.display = 'block';
     this._wallLabel.style.left = `${this.currentMousePos.x + 16}px`;
     this._wallLabel.style.top = `${this.currentMousePos.y + 16}px`;
@@ -890,7 +891,7 @@ export class InputManager {
     this.updateWallPreview(); // garante o traço no ponto final do mouseup
     const points = this._wallPreview.filter(p => p.valid).map(p => ({ x: p.x, z: p.z }));
     if (points.length === 0) {
-      this.uiManager?.showNotification('⚠️ Muralha: sem pontos válidos');
+      this.uiManager?.showNotification(`⚠️ ${t('sim.wallNoPoints')}`);
       this.wallAnchor = null;
       this._wallLastKey = null;
       this.updateWallPreview();
@@ -900,7 +901,7 @@ export class InputManager {
     const total = {};
     for (const k of Object.keys(unit)) total[k] = unit[k] * points.length;
     if (!this.gm.canAfford(total)) {
-      this.uiManager?.showNotification('⚠️ Recursos insuficientes!');
+      this.uiManager?.showNotification(`⚠️ ${t('sim.noResources')}`);
       this.wallAnchor = null;
       this._wallLastKey = null;
       this.updateWallPreview();
@@ -966,7 +967,7 @@ export class InputManager {
     if (!this.placingBuildingType) return;
     const stats = this.getCost(this.placingBuildingType);
     if (!this.gm.canAfford(stats.cost)) {
-      this.uiManager?.showNotification('⚠️ Recursos insuficientes!');
+      this.uiManager?.showNotification(`⚠️ ${t('sim.noResources')}`);
       return;
     }
 
@@ -975,7 +976,7 @@ export class InputManager {
 
     // Strict clearance check: dry terrain, distance to other buildings, trees, deposits, and fords
     if (!this.gm.canPlaceBuilding(this.placingBuildingType, gx, gz)) {
-      this.uiManager?.showNotification('❌ Local obstruído! Mantenha distância de árvores e outras construções.');
+      this.uiManager?.showNotification(`❌ ${t('input.blocked')}`);
       return;
     }
 

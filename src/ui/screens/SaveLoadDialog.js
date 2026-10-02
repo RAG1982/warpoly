@@ -4,9 +4,9 @@
 import './mainMenu.css';
 import './gameScreens.css';
 import { SAVE_SLOTS, AUTOSAVE_SLOT } from '../../core/SaveStore.js';
+import { t, getLanguage, getLocale, factionName } from '../../i18n/index.js';
 
-const SLOT_LABEL = { slot1: 'Slot 1', slot2: 'Slot 2', slot3: 'Slot 3', [AUTOSAVE_SLOT]: 'Autosave' };
-const FACTION_LABEL = { human: 'Aliança', orc: 'Horda' };
+const SLOT_KEY = { slot1: 'save.slot1', slot2: 'save.slot2', slot3: 'save.slot3', [AUTOSAVE_SLOT]: 'save.autosave' };
 
 function fmtTime(seconds) {
   const m = Math.floor(seconds / 60);
@@ -15,11 +15,11 @@ function fmtTime(seconds) {
 }
 
 function describe(meta) {
-  if (!meta) return 'Vazio';
+  if (!meta) return t('save.empty');
   const s = meta.summary || {};
-  const when = meta.savedAt ? new Date(meta.savedAt).toLocaleString('pt-BR') : '';
-  const faction = FACTION_LABEL[s.faction] || '';
-  return `${fmtTime(s.seconds || 0)} de jogo${faction ? ` · ${faction}` : ''}${s.units !== undefined ? ` · ${s.units} unid.` : ''}${when ? ` · ${when}` : ''}`;
+  const when = meta.savedAt ? new Date(meta.savedAt).toLocaleString(getLocale()) : '';
+  const faction = s.faction ? factionName(s.faction) : '';
+  return `${t('save.playTime', { time: fmtTime(s.seconds || 0) })}${faction ? ` · ${faction}` : ''}${s.units !== undefined ? ` · ${t('save.units', { n: s.units })}` : ''}${when ? ` · ${when}` : ''}`;
 }
 
 export class SaveLoadDialog {
@@ -54,11 +54,11 @@ export class SaveLoadDialog {
     root.style.zIndex = '9100';
     root.innerHTML = `
       <div class="gs-card gs-card--wide">
-        <p class="gs-kicker">Partida</p>
+        <p class="gs-kicker">${t('pause.kicker')}</p>
         <h2 id="save-dialog-title" class="gs-title"></h2>
         <p class="gs-sub" data-save-msg></p>
         <div class="gs-actions gs-slots" data-save-slots></div>
-        <div class="gs-actions"><button type="button" class="mm-btn mm-btn--ghost" data-save-close>Voltar</button></div>
+        <div class="gs-actions"><button type="button" class="mm-btn mm-btn--ghost" data-save-close>${t('common.back')}</button></div>
       </div>`;
     root.addEventListener('click', (e) => {
       if (e.target.closest('[data-save-close]')) { this.close(); return; }
@@ -67,12 +67,14 @@ export class SaveLoadDialog {
     });
     this.parent.appendChild(root);
     this.root = root;
+    this._builtLang = getLanguage();
   }
 
   async open(mode) {
+    if (this.root && this._builtLang !== getLanguage()) { this.root.remove(); this.root = null; } // F6-09
     if (!this.root) this._build();
     this.mode = mode;
-    this.root.querySelector('#save-dialog-title').textContent = mode === 'save' ? 'Salvar partida' : 'Carregar partida';
+    this.root.querySelector('#save-dialog-title').textContent = mode === 'save' ? t('pause.save') : t('pause.load');
     this.root.hidden = false;
     window.addEventListener('keydown', this._onKeyDown, true);
     await this.refresh();
@@ -81,12 +83,12 @@ export class SaveLoadDialog {
 
   async refresh(message = '') {
     const msgEl = this.root.querySelector('[data-save-msg]');
-    msgEl.textContent = message || (this.mode === 'save' ? 'Escolha um slot (sobrescreve o conteúdo atual).' : 'Escolha o save a carregar.');
+    msgEl.textContent = message || (this.mode === 'save' ? t('save.pickSlot') : t('save.pickLoad'));
     let metas = [];
     try {
       metas = await this.store.list();
     } catch (err) {
-      msgEl.textContent = 'Não foi possível acessar o armazenamento de saves neste navegador.';
+      msgEl.textContent = t('save.storageError');
       console.warn('[WarPoly] SaveStore:', err);
     }
     const bySlot = new Map(metas.map(m => [m.slot, m]));
@@ -95,7 +97,7 @@ export class SaveLoadDialog {
       const meta = bySlot.get(slot);
       const disabled = this.mode === 'load' && !meta;
       return `<button type="button" class="mm-btn" data-slot="${slot}"${disabled ? ' disabled' : ''}>
-        <span class="mm-btn__label">${SLOT_LABEL[slot]}</span><span class="mm-btn__hint">${describe(meta)}</span>
+        <span class="mm-btn__label">${t(SLOT_KEY[slot])}</span><span class="mm-btn__hint">${describe(meta)}</span>
       </button>`;
     }).join('');
   }
@@ -104,13 +106,13 @@ export class SaveLoadDialog {
     try {
       if (this.mode === 'save') {
         await this.onSave?.(slot);
-        await this.refresh('Partida salva.');
+        await this.refresh(t('save.saved'));
       } else {
         await this.onLoad?.(slot);
       }
     } catch (err) {
       console.error('[WarPoly] save/load:', err);
-      this.root.querySelector('[data-save-msg]').textContent = `Erro: ${err.message || err}`;
+      this.root.querySelector('[data-save-msg]').textContent = t('save.error', { msg: err.message || err });
     }
   }
 

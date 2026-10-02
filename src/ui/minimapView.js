@@ -4,11 +4,6 @@
  * ordem dada por clique direito e flashes de ordem. O desenho em si fica em `UIManager.drawMinimap`.
  */
 
-/** Textos de UI (PT-BR) — mantidos aqui para a internacionalização (F6-09). */
-export const MINIMAP_TEXT = {
-  label: 'Minimapa: clique esquerdo move a câmera; clique direito envia a ordem às unidades selecionadas'
-};
-
 /** Cor dos neutros hostis (bandoleiros/acampamentos) e fallback de jogador sem cor. */
 export const NEUTRAL_COLOR = '#f97316';
 export const FALLBACK_COLOR = '#9ca3af';

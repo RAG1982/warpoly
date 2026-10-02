@@ -4,32 +4,29 @@
  * A tela (DOM + canvas) vive em `screens/PostGameScreen.js`. Lê o snapshot de `MatchStats`
  * (`gm.result` / `matchStats.snapshot()`); nunca altera a simulação.
  */
-import { victoryMessage, defeatMessage } from '../sim/victory.js';
+import { t } from '../i18n/index.js';
 
-/** Textos de UI (PT-BR) — constantes para a internacionalização (F6-09). */
+/** Textos de UI (localizados via i18n, F6-09): getters para refletir a troca de idioma em tempo real. */
+const COLS = ['rank', 'player', 'score', 'units', 'unitsTrained', 'unitsKilled', 'unitsLost', 'buildings', 'buildingsBuilt', 'buildingsDestroyed', 'buildingsLost', 'resources', 'gold', 'wood', 'stone', 'apm'];
+const group = (prefix, keys) => Object.defineProperties({}, Object.fromEntries(keys.map(k => [k, { enumerable: true, get: () => t(`${prefix}.${k}`) }])));
 export const POSTGAME_TEXT = {
-  victoryTitle: '🏆 VITÓRIA GLORIOSA 🏆',
-  defeatTitle: '💀 DERROTA 💀',
-  timeLabel: 'Tempo de partida',
-  scoreTitle: 'Pontuação',
-  chartsTitle: 'Evolução da partida',
-  noSeries: 'Partida curta demais para gerar gráficos (a coleta é feita a cada 10 s).',
-  playAgain: 'Jogar novamente',
-  mainMenu: 'Menu principal',
-  you: 'Você',
-  ai: 'IA',
-  winnerMark: 'Vencedor',
-  tableCaption: 'Pontuação final por jogador',
-  chartAxisTime: 'tempo (mm:ss)',
-  factions: { human: 'Reino Humano', orc: 'Clãs Orcs' },
-  columns: {
-    rank: '#', player: 'Jogador', score: 'Pontos',
-    units: 'Unidades', unitsTrained: 'Treinadas', unitsKilled: 'Mortas', unitsLost: 'Perdidas',
-    buildings: 'Construções', buildingsBuilt: 'Feitas', buildingsDestroyed: 'Destruídas', buildingsLost: 'Perdidas',
-    resources: 'Recursos coletados', gold: 'Ouro', wood: 'Madeira', stone: 'Pedra', apm: 'APM'
-  },
-  totalRow: 'Total',
-  metrics: { units: 'Unidades', buildings: 'Construções', kills: 'Abates', resources: 'Recursos coletados' }
+  get victoryTitle() { return t('hud.victoryTitle'); },
+  get defeatTitle() { return t('hud.defeatTitle'); },
+  get timeLabel() { return t('pg.timeLabel'); },
+  get scoreTitle() { return t('pg.scoreTitle'); },
+  get chartsTitle() { return t('pg.chartsTitle'); },
+  get noSeries() { return t('pg.noSeries'); },
+  get playAgain() { return t('pg.playAgain'); },
+  get mainMenu() { return t('pg.mainMenu'); },
+  get you() { return t('pg.you'); },
+  get ai() { return t('pg.ai'); },
+  get winnerMark() { return t('pg.winnerMark'); },
+  get tableCaption() { return t('pg.tableCaption'); },
+  get chartAxisTime() { return t('pg.chartAxisTime'); },
+  factions: group('pg.faction', ['human', 'orc']),
+  columns: group('pg.col', COLS),
+  get totalRow() { return t('pg.totalRow'); },
+  metrics: group('pg.metric', ['units', 'buildings', 'kills', 'resources'])
 };
 
 /** Métricas dos gráficos, na ordem das abas. */
@@ -107,7 +104,7 @@ export function buildPostGameModel(snapshot, { localId, victory, colors = {} }) 
   return {
     outcome: victory ? 'victory' : 'defeat',
     title: victory ? POSTGAME_TEXT.victoryTitle : POSTGAME_TEXT.defeatTitle,
-    message: victory ? victoryMessage(mode) : defeatMessage(mode),
+    message: t(`result.${victory ? 'victory' : 'defeat'}.${mode === 'regicide' ? 'regicide' : 'conquest'}`),
     mode,
     elapsed: snap.elapsed || 0,
     elapsedText: formatTime(snap.elapsed || 0),

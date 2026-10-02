@@ -57,6 +57,7 @@ Cada mapa é um JSON em `src/data/maps/<id>.json`, registrado em `index.js` (`ge
     decorativos (no máximo 40 por mapa; `x`/`z` dentro de `playable`).
   Convenção: acampamentos em terra firme, ≥ 25 de qualquer `startSlot`; em mapas 1×1 os pares
   são espelhados (ponto → oposto).
+- **`hidden`** (F6-09): `true` = não aparece em `listMaps()` (lista da Escaramuça); `getMap(id)` e `listMaps({ includeHidden: true })` ainda o devolvem. Usado por `tutorial`.
 - **`decorationDensity`**: reservado (decorações não-jogáveis); não usado ainda.
 
 ## Mapas
@@ -67,6 +68,8 @@ Cada mapa é um JSON em `src/data/maps/<id>.json`, registrado em `index.js` (`ge
   para o teste/uso de FFA de 3 jogadores que já existia antes da F2-05 (`?ffa=1` no mapa padrão).
 - **`ilhas-4p`** ("Ilhas Gêmeas"): novo mapa FFA (4 slots, 2 ilhas ligadas por 2 pontes de terra,
   128×128). Jogue com `?map=ilhas-4p&ffa=1`.
+
+- **`tutorial`** ("Campo de Treino", F6-09, `hidden`): 104×104, uma ilha só (`islands`), 2 slots (jogador SW, rival passivo NE), 1 acampamento de bandidos (2 guardas) como alvo; ver `src/ui/tutorial.js`. Não é validado por `maps.test.js` (usa `listMaps()`); `tests/unit/tutorial.test.js` repete as checagens de terra seca.
 
 ## Adicionando um mapa
 

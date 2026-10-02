@@ -17,6 +17,7 @@ import { HazardView } from '../render/HazardView.js';
 import { ProjectileViews } from '../render/ProjectileViews.js';
 import { EntityViews } from '../render/EntityViews.js';
 import { createUiEvents } from '../ui/UiEvents.js';
+import { TutorialController } from '../ui/TutorialController.js';
 import { options } from '../ui/optionsStore.js';
 
 /**
@@ -103,6 +104,15 @@ export class MatchSession {
       this.gameManager.hazardView = new HazardView(scene, this.gameManager); // F4-04b
       this.projectileViews = new ProjectileViews(this.gameManager, scene); // F2-08: malhas dos projéteis
       this._disposeUiEvents = createUiEvents(this.gameManager, this.uiManager);
+      // F6-09: tutorial jogável (missão 0) — painel de objetivo e setas só nesta partida.
+      this.tutorialController = matchConfig.tutorial
+        ? new TutorialController({
+          gm: this.gameManager,
+          sceneManager,
+          uiManager: this.uiManager,
+          onExit: () => document.dispatchEvent(new CustomEvent('warpoly:tutorial-exit'))
+        })
+        : null;
     }
   }
 
@@ -167,6 +177,7 @@ export class MatchSession {
       this.projectileViews?.update(1);
     }
     this.uiManager.update(delta);
+    this.tutorialController?.update(delta);
   }
 
   /**
@@ -208,6 +219,8 @@ export class MatchSession {
     this.projectileViews?.dispose();
     this.projectileViews = null;
     this._disposeUiEvents?.();
+    this.tutorialController?.dispose();
+    this.tutorialController = null;
 
     // 1. Entrada e HUD primeiro: nada mais reage a eventos desta partida.
     this.inputManager.dispose();

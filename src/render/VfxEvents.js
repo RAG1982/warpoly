@@ -7,6 +7,7 @@
  * `isLocal`) que antes vivia na simulação agora é decidida aqui, a partir do payload
  * (`pos`/`ownerId`).
  */
+import { t, resourceName } from '../i18n/index.js';
 import { EVT } from '../sim/events.js';
 import { resolveAbility } from '../sim/abilities.js';
 
@@ -76,7 +77,7 @@ export function createVfxEvents(gm, particleSystem) {
   on(EVT.RESOURCE_GATHERED, ({ type, amount, pos, ownerId, passive }) => {
     if (!passive && !isLocalOrExplored(ownerId, pos)) return;
     const color = RESOURCE_COLOR[type] || '#ffd700';
-    const text = passive ? `+${amount} Gold` : `+${amount} ${String(type).toUpperCase()}`;
+    const text = `+${amount} ${resourceName(type).toUpperCase()}`;
     particleSystem.spawnFloatingText(text, toVec(pos), color);
   });
 
@@ -90,10 +91,10 @@ export function createVfxEvents(gm, particleSystem) {
 
   // --- Construção ---
   on(EVT.BUILDING_COMPLETED, ({ pos }) => {
-    particleSystem.spawnFloatingText('Constructed!', toVec(pos), '#ffd700');
+    particleSystem.spawnFloatingText(t('vfx.built'), toVec(pos), '#ffd700');
   });
   on(EVT.RESEARCH_DONE, ({ pos }) => {
-    if (pos) particleSystem.spawnFloatingText('Melhoria Forjada!', toVec(pos), '#ffd700');
+    if (pos) particleSystem.spawnFloatingText(t('vfx.upgradeForged'), toVec(pos), '#ffd700');
   });
 
   // --- VFX ambiente das construções (chaminé, faíscas de forja, serragem, boneco de treino…):

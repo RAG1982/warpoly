@@ -7,10 +7,12 @@
  */
 import continental1v1 from './continental-1v1.json';
 import ilhas4p from './ilhas-4p.json';
+import tutorial from './tutorial.json';
 
 const MAPS = Object.freeze({
   'continental-1v1': continental1v1,
-  'ilhas-4p': ilhas4p
+  'ilhas-4p': ilhas4p,
+  tutorial // F6-09: mapa do tutorial (`hidden`: não aparece na lista da Escaramuça)
 });
 
 export const DEFAULT_MAP_ID = 'continental-1v1';
@@ -20,7 +22,7 @@ export function getMap(id) {
   return MAPS[id];
 }
 
-/** @returns {object[]} todas as definições de mapa registradas (ordem estável). */
-export function listMaps() {
-  return Object.values(MAPS);
+/** @returns {object[]} mapas selecionáveis na Escaramuça (ordem estável; `hidden: true` — ex.: o do tutorial — fica de fora). */
+export function listMaps({ includeHidden = false } = {}) {
+  return Object.values(MAPS).filter((m) => includeHidden || !m.hidden);
 }

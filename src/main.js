@@ -16,6 +16,7 @@ import { captureSave, applySaveCommands, fastForward, finishFastForward } from '
 import { SIM_DT } from './sim/constants.js';
 import { bootOptions, applyAudio } from './ui/optionsApply.js';
 import { OptionsPanel } from './ui/screens/OptionsPanel.js';
+import { t, applyI18n, onLanguageChange, getLanguage } from './i18n/index.js';
 
 // F6-08: opções salvas (teclas, escala de UI, daltonismo, pan…) antes de qualquer tela.
 bootOptions();
@@ -188,15 +189,15 @@ class GameApp {
   /** Salva a partida atual no slot (`slot1..3` ou `autosave`). */
   async saveToSlot(slot) {
     const gm = this.gameManager;
-    if (!gm) throw new Error('Nenhuma partida em andamento.');
-    const label = slot === AUTOSAVE_SLOT ? 'Autosave' : `Slot ${slot.replace('slot', '')}`;
+    if (!gm) throw new Error(t('main.noMatch'));
+    const label = slot === AUTOSAVE_SLOT ? t('save.autosave') : `${t('save.slotWord')} ${slot.replace('slot', '')}`;
     await this.saves.put(slot, captureSave(gm, { name: label, view: this._captureView() }));
   }
 
   /** Carrega um slot: recria a partida pela config do save e a reproduz até o tick salvo. */
   async loadFromSlot(slot) {
     const save = await this.saves.get(slot);
-    if (!save) throw new Error('Slot vazio.');
+    if (!save) throw new Error(t('main.emptySlot'));
     this.saveDialog.close();
     if (this.fsm.is(S.MAIN_MENU)) this.fsm.transition(S.MATCH_SETUP);
     if (!this.fsm.can(S.LOADING)) return;
@@ -220,9 +221,9 @@ class GameApp {
     while (left > 0) {
       left = fastForward(gm, save, 400);
       const pct = Math.round(((save.tick - left) / Math.max(1, save.tick)) * 100);
-      this._updateLoadingUI({ percent: pct, current: 1, total: 1, name: 'partida', estSeconds: 1 });
-      if (status) status.textContent = 'Restaurando a partida salva...';
-      if (est) est.textContent = `Reproduzindo ${Math.floor(save.tick * SIM_DT / 60)} min de jogo (${pct}%)`;
+      this._updateLoadingUI({ percent: pct, current: 1, total: 1, name: 'match', estSeconds: 1 });
+      if (status) status.textContent = t('loading.restoring');
+      if (est) est.textContent = t('loading.replaying', { min: Math.floor(save.tick * SIM_DT / 60), pct });
       await nextFrame();
       if (token !== this._loadToken || !this.fsm.is(S.LOADING)) { gm.events.presentationMuted = false; return false; }
     }
@@ -337,7 +338,7 @@ class GameApp {
     if (!(this.skipPreload && firstServices && !save)) this._hideLoadingScreen(true);
     this.fsm.transition(S.IN_GAME);
     if (this._saveMismatch) {
-      this.session.uiManager.showNotification('⚠️ Este save foi feito numa versão diferente do jogo e pode não ser idêntico.', 7000);
+      this.session.uiManager.showNotification(`⚠️ ${t('main.saveMismatch')}`, 7000);
     }
   }
 
@@ -401,6 +402,7 @@ class GameApp {
     document.getElementById('btn-pause-menu')?.addEventListener('click', () => this.pause());
     document.getElementById('btn-play-again')?.addEventListener('click', () => this.playAgain());
     document.getElementById('btn-go-main-menu')?.addEventListener('click', () => this.goToMainMenu());
+    document.addEventListener('warpoly:tutorial-exit', () => this.goToMainMenu()); // F6-09
   }
 
   _animate() {
@@ -438,8 +440,8 @@ class GameApp {
       this._updateLoadingUI({ percent: 100, current: 1, total: 1, name: 'batalha', estSeconds: 0 });
       const status = document.getElementById('loading-status');
       const est = document.getElementById('loading-est');
-      if (status) status.textContent = 'Preparando o campo de batalha...';
-      if (est) est.textContent = 'Posicionando exércitos e recursos';
+      if (status) status.textContent = t('loading.battlefield');
+      if (est) est.textContent = t('loading.positioning');
     }
   }
 
@@ -466,16 +468,16 @@ class GameApp {
     if (percentEl) percentEl.textContent = `${info.percent}%`;
     if (statusEl) {
       statusEl.textContent = info.name === 'Pronto!'
-        ? 'Reino preparado com sucesso!'
-        : `Preparando ${info.name}... (${info.current}/${info.total})`;
+        ? t('loading.ready')
+        : t('loading.preparing', { current: info.current, total: info.total });
     }
     if (estEl) {
       if (info.percent >= 100) {
-        estEl.textContent = 'Iniciando o reino de WarPoly...';
+        estEl.textContent = t('loading.starting');
       } else if (info.estSeconds > 0) {
-        estEl.textContent = `Tempo estimado restante: ~${info.estSeconds}s`;
+        estEl.textContent = t('loading.eta', { s: info.estSeconds });
       } else {
-        estEl.textContent = 'Carregando detalhes finais...';
+        estEl.textContent = t('loading.finalizing');
       }
     }
   }
@@ -483,6 +485,10 @@ class GameApp {
 
 // Start Game when DOM is ready
 window.addEventListener('DOMContentLoaded', () => {
+  // F6-09: textos estáticos do index.html (data-i18n*) no idioma salvo/detectado; troca em tempo real.
+  document.documentElement.lang = getLanguage() === 'en' ? 'en' : 'pt-BR';
+  applyI18n();
+  onLanguageChange(() => applyI18n());
   const app = new GameApp();
   // Máquina de estados acessível mesmo antes da 1ª partida (window.game só aparece no InGame).
   window.warpoly = app;

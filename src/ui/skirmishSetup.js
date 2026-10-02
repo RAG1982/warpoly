@@ -17,6 +17,7 @@ import {
 } from '../sim/MatchConfig.js';
 import { STARTING_RESOURCES } from '../data/factions.js';
 import { fnv1a, mulberry32 } from '../sim/rng.js';
+import { t } from '../i18n/index.js';
 
 export const STORAGE_KEY = 'warpoly.skirmish';
 export const MAX_TEAMS = 8;
@@ -32,10 +33,10 @@ const scale = (k) => ({
 
 /** Recursos iniciais por jogador (`standard` = `STARTING_RESOURCES`). */
 export const RESOURCE_PRESETS = Object.freeze({
-  low: Object.freeze({ id: 'low', label: 'Poucos', amounts: Object.freeze(scale(0.5)) }),
-  standard: Object.freeze({ id: 'standard', label: 'Padrão', amounts: Object.freeze(scale(1)) }),
-  high: Object.freeze({ id: 'high', label: 'Muitos', amounts: Object.freeze(scale(2)) }),
-  rich: Object.freeze({ id: 'rich', label: 'Fartos', amounts: Object.freeze(scale(4)) })
+  low: Object.freeze({ id: 'low', labelKey: 'skirmish.res.low', amounts: Object.freeze(scale(0.5)) }),
+  standard: Object.freeze({ id: 'standard', labelKey: 'skirmish.res.standard', amounts: Object.freeze(scale(1)) }),
+  high: Object.freeze({ id: 'high', labelKey: 'skirmish.res.high', amounts: Object.freeze(scale(2)) }),
+  rich: Object.freeze({ id: 'rich', labelKey: 'skirmish.res.rich', amounts: Object.freeze(scale(4)) })
 });
 export const DEFAULT_RESOURCES = 'standard';
 
@@ -193,15 +194,15 @@ export function assignSlots(setup) {
   return { local: setup.localSlot, ai: setup.ai.map((_, i) => rest[i]) };
 }
 
-/** Erros PT-BR que impedem iniciar (lista vazia = ok). */
+/** Erros (localizados) que impedem iniciar (lista vazia = ok). */
 export function validateSetup(setup) {
   const errors = [];
   const mapDef = getMap(setup.mapId);
-  if (!mapDef) return ['Mapa inválido.'];
-  if (setup.ai.length < 1) errors.push('Adicione pelo menos um oponente.');
-  if (setup.ai.length > maxAIs(mapDef)) errors.push(`Este mapa comporta no máximo ${maxAIs(mapDef)} oponente(s).`);
+  if (!mapDef) return [t('skirmish.err.map')];
+  if (setup.ai.length < 1) errors.push(t('skirmish.err.noOpponent'));
+  if (setup.ai.length > maxAIs(mapDef)) errors.push(t('skirmish.err.tooMany', { count: maxAIs(mapDef) }));
   const teams = new Set([setup.localTeam, ...setup.ai.map((a) => a.team)]);
-  if (teams.size < 2) errors.push('É preciso haver pelo menos dois times diferentes.');
+  if (teams.size < 2) errors.push(t('skirmish.err.teams'));
   return errors;
 }
 
@@ -220,7 +221,7 @@ export function buildMatchConfig(setupIn, { seed = null, headless = false } = {}
 
   const players = [{
     id: 0,
-    name: 'Você',
+    name: t('player.you'),
     factionId: setup.localFaction,
     team: setup.localTeam,
     color: PLAYER_COLORS[setup.localColor],
@@ -231,7 +232,7 @@ export function buildMatchConfig(setupIn, { seed = null, headless = false } = {}
   setup.ai.forEach((a, i) => {
     players.push({
       id: i + 1,
-      name: `IA ${i + 1}`,
+      name: t('player.ai', { n: i + 1 }),
       factionId: a.faction === 'random' ? FACTION_IDS[rng.int(FACTION_IDS.length)] : a.faction,
       team: a.team,
       color: PLAYER_COLORS[a.color],

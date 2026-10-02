@@ -9,48 +9,43 @@ import { options as defaultOptions, TAB_OPTIONS } from '../optionsStore.js';
 import { applyAudio, applyColorblind, applyKeybinds } from '../optionsApply.js';
 import { applyUiScale } from '../uiScale.js';
 import { QualitySettings, detectDefaultPreset } from '../../core/QualitySettings.js';
-import { CURSOR_TEXT } from '../cursors.js';
 import {
-  DEFAULT_BINDINGS, BINDING_LABELS, getBindings, findConflict, isReservedCode, codeLabel
+  DEFAULT_BINDINGS, getBindings, findConflict, isReservedCode, codeLabel as rawCodeLabel
 } from '../../core/Hotkeys.js';
+import { t, LANGUAGES, getLanguage, setLanguage, has } from '../../i18n/index.js';
+
+/** Nome da tecla localizado (`key.<code>` quando existe; senão o rótulo padrão do Hotkeys). */
+const codeLabel = (code) => (has(`key.${code}`) ? t(`key.${code}`) : rawCodeLabel(code));
+const bindLabel = (action) => t(`bind.${action}`);
 
 export const OPEN_OPTIONS_EVENT = 'warpoly:open-options';
 
-const TABS = [
-  { id: 'graphics', label: 'Gráficos' },
-  { id: 'audio', label: 'Áudio' },
-  { id: 'controls', label: 'Controles' },
-  { id: 'interface', label: 'Interface' },
-  { id: 'game', label: 'Jogo' }
-];
+// `key` = chave i18n do rótulo; `label` = rótulo literal (números, nomes próprios de idioma).
+const TABS = ['graphics', 'audio', 'controls', 'interface', 'game'].map((id) => ({ id, key: `opt.tab.${id}` }));
 
-const PRESETS = [
-  { id: 'low', label: 'Baixo' }, { id: 'med', label: 'Médio' },
-  { id: 'high', label: 'Alto' }, { id: 'ultra', label: 'Ultra' }
-];
-const TEXTURES = [
-  { id: 'low', label: 'Baixa' }, { id: 'med', label: 'Média' },
-  { id: 'high', label: 'Alta' }, { id: 'ultra', label: 'Ultra' }
-];
+const PRESETS = ['low', 'med', 'high', 'ultra'].map((id) => ({ id, key: `opt.preset.${id}` }));
+const TEXTURES = ['low', 'med', 'high', 'ultra'].map((id) => ({ id, key: `opt.texture.${id}` }));
 const FPS_CHOICES = [
-  { id: 'auto', label: 'Automático' }, { id: '30', label: '30' }, { id: '60', label: '60' },
-  { id: '120', label: '120' }, { id: '0', label: 'Sem limite' }
+  { id: 'auto', key: 'opt.fps.auto' }, { id: '30', label: '30' }, { id: '60', label: '60' },
+  { id: '120', label: '120' }, { id: '0', key: 'opt.fps.unlimited' }
 ];
 const COLORBLIND = [
-  { id: 'off', label: 'Desligado' }, { id: 'protan', label: 'Protanopia' },
-  { id: 'deutan', label: 'Deuteranopia' }, { id: 'tritan', label: 'Tritanopia' }
+  { id: 'off', key: 'opt.colorblind.off' }, { id: 'protan', key: 'opt.colorblind.protan' },
+  { id: 'deutan', key: 'opt.colorblind.deutan' }, { id: 'tritan', key: 'opt.colorblind.tritan' }
 ];
 const SPEEDS = [{ id: '1', label: '1×' }, { id: '2', label: '2×' }, { id: '3', label: '3×' }];
-const LIGHTING = [{ id: 'day', label: 'Dia' }, { id: 'sunset', label: 'Pôr do sol' }, { id: 'night', label: 'Noite' }];
+const LIGHTING = ['day', 'sunset', 'night'].map((id) => ({ id, key: `opt.lighting.${id}` }));
+const LANG_CHOICES = LANGUAGES.map((l) => ({ id: l.id, label: l.label }));
 
+/** [rótulo da tecla (chave i18n ou literal), chave da descrição]. */
 const FIXED_KEYS = [
-  ['W A S D / setas', 'Mover a câmera'],
-  ['Mouse na borda', 'Mover a câmera (se ativado)'],
-  ['1 – 9', 'Selecionar grupo de controle'],
-  ['Ctrl + 1 – 9', 'Definir grupo de controle'],
-  ['Shift + 1 – 9', 'Adicionar ao grupo'],
-  ['Letras do card', 'Construir, treinar e pesquisar (mostradas nos botões)'],
-  ['Esc', 'Cancelar / menu de pausa']
+  ['opt.fixed.camera.k', 'opt.fixed.camera'],
+  ['opt.fixed.edge.k', 'opt.fixed.edge'],
+  ['1 – 9', 'opt.fixed.group'],
+  ['Ctrl + 1 – 9', 'opt.fixed.groupSet'],
+  ['Shift + 1 – 9', 'opt.fixed.groupAdd'],
+  ['opt.fixed.card.k', 'opt.fixed.card'],
+  ['Esc', 'opt.fixed.esc']
 ];
 
 const esc = (s) => String(s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
@@ -117,16 +112,16 @@ export class OptionsPanel {
     root.innerHTML = `
       <div class="gs-card op-card">
         <header class="op-head">
-          <div><p class="gs-kicker">Configurações</p><h2 id="op-title" class="gs-title">Opções</h2></div>
-          <button type="button" class="mm-close" data-op="close" aria-label="Fechar opções">✕</button>
+          <div><p class="gs-kicker">${t('opt.kicker')}</p><h2 id="op-title" class="gs-title">${t('opt.title')}</h2></div>
+          <button type="button" class="mm-close" data-op="close" aria-label="${t('opt.close')}">✕</button>
         </header>
-        <div class="op-tabs" role="tablist" aria-label="Seções de opções">
-          ${TABS.map((t) => `<button type="button" class="op-tab" role="tab" id="op-tab-${t.id}" aria-controls="op-body" data-tab="${t.id}">${t.label}</button>`).join('')}
+        <div class="op-tabs" role="tablist" aria-label="${t('opt.sections')}">
+          ${TABS.map((tb) => `<button type="button" class="op-tab" role="tab" id="op-tab-${tb.id}" aria-controls="op-body" data-tab="${tb.id}">${t(tb.key)}</button>`).join('')}
         </div>
         <div class="op-body" id="op-body" role="tabpanel" tabindex="-1"></div>
         <footer class="op-foot">
-          <button type="button" class="mm-btn mm-btn--ghost" data-op="reset">Restaurar padrão</button>
-          <button type="button" class="mm-btn mm-btn--primary" data-op="close"><span class="mm-btn__label">Fechar</span></button>
+          <button type="button" class="mm-btn mm-btn--ghost" data-op="reset">${t('opt.reset')}</button>
+          <button type="button" class="mm-btn mm-btn--primary" data-op="close"><span class="mm-btn__label">${t('opt.closeBtn')}</span></button>
         </footer>
       </div>`;
     root.addEventListener('click', (e) => this._onClick(e));
@@ -134,13 +129,25 @@ export class OptionsPanel {
     root.addEventListener('change', (e) => this._onInput(e));
     root.querySelector('.op-tabs').addEventListener('keydown', (e) => {
       if (e.key !== 'ArrowRight' && e.key !== 'ArrowLeft') return;
-      const i = TABS.findIndex((t) => t.id === this.tab);
+      const i = TABS.findIndex((tb) => tb.id === this.tab);
       const n = TABS[(i + (e.key === 'ArrowRight' ? 1 : TABS.length - 1)) % TABS.length];
       e.preventDefault();
       this._setTab(n.id, true);
     });
     this.parent.appendChild(root);
     this.root = root;
+  }
+
+  /** Idioma trocado: refaz o cromo do diálogo (abas, botões) e a aba atual no novo idioma. */
+  _rebuild() {
+    const wasOpen = this.isOpen;
+    this.root?.remove();
+    this.root = null;
+    this._build();
+    this.root.hidden = !wasOpen;
+    this.message = {};
+    this._renderBody();
+    this._focusSeg('lang', getLanguage());
   }
 
   _setTab(id, focus = false) {
@@ -167,7 +174,7 @@ export class OptionsPanel {
 
   _seg(name, choices, current) {
     return `<div class="op-seg" role="radiogroup" data-seg="${name}">${choices.map((c) => `
-      <label class="op-seg__item"><input type="radio" name="op-${name}" value="${c.id}" ${String(current) === c.id ? 'checked' : ''}/><span>${esc(c.label)}</span></label>`).join('')}</div>`;
+      <label class="op-seg__item"><input type="radio" name="op-${name}" value="${c.id}" ${String(current) === c.id ? 'checked' : ''}/><span>${esc(c.key ? t(c.key) : c.label)}</span></label>`).join('')}</div>`;
   }
 
   _toggle(name, on, label) {
@@ -196,19 +203,19 @@ export class OptionsPanel {
     const lighting = ctx.sceneManager?.timeOfDay || 'day';
     return `
       ${this._notice('graphics')}
-      <section class="op-group"><h3>Qualidade geral</h3>
-        ${this._row('Predefinição', this._seg('preset', PRESETS, QualitySettings.name), 'Escolher uma predefinição descarta os ajustes avançados.')}
+      <section class="op-group"><h3>${t('opt.g.quality')}</h3>
+        ${this._row(t('opt.g.preset'), this._seg('preset', PRESETS, QualitySettings.name), t('opt.g.presetHint'))}
       </section>
-      <section class="op-group"><h3>Avançado</h3>
-        ${this._row('Qualidade de textura', this._seg('texture', TEXTURES, q.textureQuality), 'Aplica ao recarregar a página.')}
-        ${this._row('Sombras', this._toggle('shadows', q.shadows, q.shadows ? 'Ligadas' : 'Desligadas'))}
-        ${this._row(CURSOR_TEXT.options.hoverOutline.label, this._toggle('hoverOutline', q.hoverOutline, q.hoverOutline ? CURSOR_TEXT.options.on : CURSOR_TEXT.options.off), CURSOR_TEXT.options.hoverOutline.hint)}
-        ${this._row('Resolução dinâmica', this._toggle('dynamicResolution', q.dynamicResolution, q.dynamicResolution ? 'Ligada' : 'Desligada'), 'Reduz a resolução quando o FPS cai.')}
-        ${this._row('FPS alvo', this._seg('fps', FPS_CHOICES, fpsId), 'Limita os quadros por segundo.')}
-        ${this._row('Escala de resolução máx.', this._slider('maxPixelRatio', { min: 0.5, max: 2, step: 0.05, value: dpr, fmt: (v) => `${Number(v).toFixed(2)}×` }), 'Limitada pela densidade de pixels da tela.')}
+      <section class="op-group"><h3>${t('opt.g.advanced')}</h3>
+        ${this._row(t('opt.g.texture'), this._seg('texture', TEXTURES, q.textureQuality), t('opt.reloadHint'))}
+        ${this._row(t('opt.g.shadows'), this._toggle('shadows', q.shadows, q.shadows ? t('opt.on.f.pl') : t('opt.off.f.pl')))}
+        ${this._row(t('opt.g.hoverOutline'), this._toggle('hoverOutline', q.hoverOutline, q.hoverOutline ? t('opt.on.pl') : t('opt.off.pl')), t('opt.g.hoverOutlineHint'))}
+        ${this._row(t('opt.g.dynRes'), this._toggle('dynamicResolution', q.dynamicResolution, q.dynamicResolution ? t('opt.on.f') : t('opt.off.f')), t('opt.g.dynResHint'))}
+        ${this._row(t('opt.g.fps'), this._seg('fps', FPS_CHOICES, fpsId), t('opt.g.fpsHint'))}
+        ${this._row(t('opt.g.scale'), this._slider('maxPixelRatio', { min: 0.5, max: 2, step: 0.05, value: dpr, fmt: (v) => `${Number(v).toFixed(2)}×` }), t('opt.g.scaleHint'))}
       </section>
-      ${ctx.gameManager ? `<section class="op-group"><h3>Partida atual</h3>
-        ${this._row('Iluminação', this._seg('lighting', LIGHTING, lighting))}
+      ${ctx.gameManager ? `<section class="op-group"><h3>${t('opt.g.currentMatch')}</h3>
+        ${this._row(t('opt.g.lighting'), this._seg('lighting', LIGHTING, lighting))}
       </section>` : ''}`;
   }
 
@@ -216,10 +223,10 @@ export class OptionsPanel {
     const s = this.store;
     const fmt = (v) => pct(Number(v));
     return `
-      <section class="op-group"><h3>Volume</h3>
-        ${this._row('Geral', this._slider('volumeMaster', { min: 0, max: 1, step: 0.05, value: s.get('volumeMaster'), fmt }), 'Multiplica efeitos e música.')}
-        ${this._row('Efeitos sonoros', this._slider('volumeSfx', { min: 0, max: 1, step: 0.05, value: s.get('volumeSfx'), fmt }))}
-        ${this._row('Música', this._slider('volumeMusic', { min: 0, max: 1, step: 0.05, value: s.get('volumeMusic'), fmt }))}
+      <section class="op-group"><h3>${t('opt.a.volume')}</h3>
+        ${this._row(t('opt.a.master'), this._slider('volumeMaster', { min: 0, max: 1, step: 0.05, value: s.get('volumeMaster'), fmt }), t('opt.a.masterHint'))}
+        ${this._row(t('opt.a.sfx'), this._slider('volumeSfx', { min: 0, max: 1, step: 0.05, value: s.get('volumeSfx'), fmt }))}
+        ${this._row(t('opt.a.music'), this._slider('volumeMusic', { min: 0, max: 1, step: 0.05, value: s.get('volumeMusic'), fmt }))}
       </section>`;
   }
 
@@ -230,47 +237,48 @@ export class OptionsPanel {
       const waiting = this.rebinding === a;
       const modified = b[a] !== DEFAULT_BINDINGS[a];
       return `<tr>
-        <th scope="row">${esc(BINDING_LABELS[a])}</th>
-        <td><kbd class="${waiting ? 'is-waiting' : ''}">${waiting ? 'Pressione uma tecla…' : esc(codeLabel(b[a]) || '—')}</kbd></td>
+        <th scope="row">${esc(bindLabel(a))}</th>
+        <td><kbd class="${waiting ? 'is-waiting' : ''}">${waiting ? t('opt.c.pressKey') : esc(codeLabel(b[a]) || '—')}</kbd></td>
         <td class="op-keys__act">
-          <button type="button" class="op-mini" data-rebind="${a}" aria-label="Alterar tecla de ${esc(BINDING_LABELS[a])}">${waiting ? 'Cancelar' : 'Alterar'}</button>
-          ${modified ? `<button type="button" class="op-mini" data-unbind="${a}" aria-label="Restaurar tecla de ${esc(BINDING_LABELS[a])}">Padrão</button>` : ''}
+          <button type="button" class="op-mini" data-rebind="${a}" aria-label="${esc(t('opt.c.changeKeyOf', { action: bindLabel(a) }))}">${waiting ? t('opt.c.cancel') : t('opt.c.change')}</button>
+          ${modified ? `<button type="button" class="op-mini" data-unbind="${a}" aria-label="${esc(t('opt.c.restoreKeyOf', { action: bindLabel(a) }))}">${t('opt.c.default')}</button>` : ''}
         </td></tr>`;
     }).join('');
     return `
       ${this._notice('controls')}
-      <section class="op-group"><h3>Câmera</h3>
-        ${this._row('Velocidade de rolagem', this._slider('panSpeed', { min: 0.5, max: 2, step: 0.1, value: s.get('panSpeed'), fmt: (v) => `${Number(v).toFixed(1)}×` }))}
-        ${this._row('Rolagem pela borda', this._toggle('edgePan', s.get('edgePan'), s.get('edgePan') ? 'Ligada' : 'Desligada'), 'Move a câmera com o mouse na borda da janela.')}
+      <section class="op-group"><h3>${t('opt.c.camera')}</h3>
+        ${this._row(t('opt.c.panSpeed'), this._slider('panSpeed', { min: 0.5, max: 2, step: 0.1, value: s.get('panSpeed'), fmt: (v) => `${Number(v).toFixed(1)}×` }))}
+        ${this._row(t('opt.c.edgePan'), this._toggle('edgePan', s.get('edgePan'), s.get('edgePan') ? t('opt.on.f') : t('opt.off.f')), t('opt.c.edgePanHint'))}
       </section>
-      <section class="op-group"><h3>Atalhos remapeáveis</h3>
+      <section class="op-group"><h3>${t('opt.c.rebindable')}</h3>
         <table class="op-keys"><tbody>${rows}</tbody></table>
-        <p class="op-hint">Clique em Alterar e pressione a nova tecla. Esc cancela.</p>
+        <p class="op-hint">${t('opt.c.rebindHint')}</p>
       </section>
-      <section class="op-group"><h3>Atalhos fixos</h3>
-        <table class="op-keys op-keys--fixed"><tbody>${FIXED_KEYS.map(([k, d]) => `<tr><th scope="row"><kbd>${esc(k)}</kbd></th><td colspan="2">${esc(d)}</td></tr>`).join('')}</tbody></table>
+      <section class="op-group"><h3>${t('opt.c.fixed')}</h3>
+        <table class="op-keys op-keys--fixed"><tbody>${FIXED_KEYS.map(([k, d]) => `<tr><th scope="row"><kbd>${esc(has(k) ? t(k) : k)}</kbd></th><td colspan="2">${esc(t(d))}</td></tr>`).join('')}</tbody></table>
       </section>`;
   }
 
   _tab_interface() {
     const s = this.store;
     return `
-      <section class="op-group"><h3>Interface</h3>
-        ${this._row('Escala da interface', this._slider('uiScale', { min: 0.75, max: 1.5, step: 0.05, value: s.get('uiScale'), fmt: (v) => pct(Number(v)) }), 'Multiplica o ajuste automático da janela.')}
-        ${this._row('Modo daltônico', this._seg('colorblind', COLORBLIND, s.get('colorblind')), 'Cores de time em paletas alternativas (aplicação completa em breve).')}
+      <section class="op-group"><h3>${t('opt.i.interface')}</h3>
+        ${this._row(t('opt.i.language'), this._seg('lang', LANG_CHOICES, getLanguage()), t('opt.i.languageHint'))}
+        ${this._row(t('opt.i.scale'), this._slider('uiScale', { min: 0.75, max: 1.5, step: 0.05, value: s.get('uiScale'), fmt: (v) => pct(Number(v)) }), t('opt.i.scaleHint'))}
+        ${this._row(t('opt.i.colorblind'), this._seg('colorblind', COLORBLIND, s.get('colorblind')), t('opt.i.colorblindHint'))}
       </section>`;
   }
 
   _tab_game() {
     const s = this.store;
     return `
-      <section class="op-group"><h3>Partida</h3>
-        ${this._row('Velocidade padrão', this._seg('speed', SPEEDS, String(s.get('defaultSpeed'))), 'Vale para novas partidas e já altera a atual.')}
-        ${this._row('Textos de dano', this._toggle('floatingText', s.get('floatingText'), s.get('floatingText') ? 'Mostrar' : 'Ocultar'), 'Números flutuantes sobre unidades e construções.')}
-        ${this._row(CURSOR_TEXT.options.contextCursors.label, this._toggle('contextCursors', s.get('contextCursors'), s.get('contextCursors') ? CURSOR_TEXT.options.on : CURSOR_TEXT.options.off), CURSOR_TEXT.options.contextCursors.hint)}
+      <section class="op-group"><h3>${t('opt.m.match')}</h3>
+        ${this._row(t('opt.m.speed'), this._seg('speed', SPEEDS, String(s.get('defaultSpeed'))), t('opt.m.speedHint'))}
+        ${this._row(t('opt.m.floatingText'), this._toggle('floatingText', s.get('floatingText'), s.get('floatingText') ? t('opt.m.show') : t('opt.m.hide')), t('opt.m.floatingTextHint'))}
+        ${this._row(t('opt.m.contextCursors'), this._toggle('contextCursors', s.get('contextCursors'), s.get('contextCursors') ? t('opt.on.pl') : t('opt.off.pl')), t('opt.m.contextCursorsHint'))}
       </section>
-      ${document.getElementById('help-modal') ? `<section class="op-group"><h3>Ajuda</h3>
-        <div><button type="button" class="op-mini" data-op="guide">Abrir o Guia do Jogo</button></div>
+      ${document.getElementById('help-modal') ? `<section class="op-group"><h3>${t('opt.m.help')}</h3>
+        <div><button type="button" class="op-mini" data-op="guide">${t('opt.m.openGuide')}</button></div>
       </section>` : ''}`;
   }
 
@@ -282,10 +290,10 @@ export class OptionsPanel {
   }
 
   _onClick(e) {
-    const t = e.target;
-    const tab = t.closest('[data-tab]');
+    const el = e.target;
+    const tab = el.closest('[data-tab]');
     if (tab) return this._setTab(tab.dataset.tab);
-    const op = t.closest('[data-op]');
+    const op = el.closest('[data-op]');
     if (op) {
       if (op.dataset.op === 'close') this.close();
       else if (op.dataset.op === 'reset') this._resetTab();
@@ -296,14 +304,14 @@ export class OptionsPanel {
       }
       return;
     }
-    const rb = t.closest('[data-rebind]');
+    const rb = el.closest('[data-rebind]');
     if (rb) {
       const a = rb.dataset.rebind;
       this.rebinding = this.rebinding === a ? null : a;
       this.message.controls = '';
       return this._renderBody();
     }
-    const ub = t.closest('[data-unbind]');
+    const ub = el.closest('[data-unbind]');
     if (ub) {
       const a = ub.dataset.unbind;
       this._saveBinding(a, DEFAULT_BINDINGS[a]);
@@ -312,12 +320,12 @@ export class OptionsPanel {
   }
 
   _onInput(e) {
-    const t = e.target;
-    if (e.type === 'input' && t.type !== 'range') return; // interruptores e segmentados: só no `change`
+    const el = e.target;
+    if (e.type === 'input' && el.type !== 'range') return; // interruptores e segmentados: só no `change`
     const ctx = this.getContext() || {};
-    if (t.matches('input[type="range"][data-opt]')) {
-      const name = t.dataset.opt;
-      const v = Number(t.value);
+    if (el.matches('input[type="range"][data-opt]')) {
+      const name = el.dataset.opt;
+      const v = Number(el.value);
       const out = this.root.querySelector(`[data-out="${name}"]`);
       if (name === 'maxPixelRatio') {
         QualitySettings.setOverride('maxPixelRatio', v);
@@ -330,33 +338,33 @@ export class OptionsPanel {
       else if (name === 'uiScale') applyUiScale();
       return;
     }
-    if (t.matches('input[type="checkbox"][data-opt]')) {
-      const name = t.dataset.opt;
+    if (el.matches('input[type="checkbox"][data-opt]')) {
+      const name = el.dataset.opt;
       if (name === 'shadows' || name === 'dynamicResolution' || name === 'hoverOutline') {
-        const { requiresReload } = QualitySettings.setOverride(name, t.checked);
-        if (requiresReload) this._notify('Aplica ao recarregar a página.');
+        const { requiresReload } = QualitySettings.setOverride(name, el.checked);
+        if (requiresReload) this._notify(t('opt.reloadHint'));
         this._renderBody();
       } else {
-        this.store.set(name, t.checked);
+        this.store.set(name, el.checked);
         this._renderBody();
       }
       return;
     }
-    if (t.matches('input[type="radio"]') && t.checked) {
-      const seg = t.closest('[data-seg]')?.dataset.seg;
-      this._onSeg(seg, t.value, ctx);
+    if (el.matches('input[type="radio"]') && el.checked) {
+      const seg = el.closest('[data-seg]')?.dataset.seg;
+      this._onSeg(seg, el.value, ctx);
     }
   }
 
   _onSeg(seg, value, ctx) {
     if (seg === 'preset') {
       const { requiresReload } = QualitySettings.set(value);
-      this._notify(requiresReload ? 'Aplica ao recarregar a página.' : '');
+      this._notify(requiresReload ? t('opt.reloadHint') : '');
       this._renderBody();
       this._focusSeg(seg, value);
     } else if (seg === 'texture') {
       const { requiresReload } = QualitySettings.setOverride('textureQuality', value);
-      this._notify(requiresReload ? 'Aplica ao recarregar a página.' : '');
+      this._notify(requiresReload ? t('opt.reloadHint') : '');
       this._renderBody();
       this._focusSeg(seg, value);
     } else if (seg === 'fps') {
@@ -365,6 +373,9 @@ export class OptionsPanel {
       else { QualitySettings.setOverride('fpsCap', Number(value)); QualitySettings.setOverride('targetFps', Number(value)); }
     } else if (seg === 'lighting') {
       ctx.sceneManager?.setTimeOfDay?.(value);
+    } else if (seg === 'lang') {
+      setLanguage(value);
+      this._rebuild();
     } else if (seg === 'colorblind') {
       this.store.set('colorblind', value);
       applyColorblind(this.store);
@@ -382,7 +393,7 @@ export class OptionsPanel {
     const ctx = this.getContext() || {};
     if (this.tab === 'graphics') {
       QualitySettings.set(detectDefaultPreset());
-      this._notify('Gráficos restaurados. Texturas aplicam ao recarregar a página.');
+      this._notify(t('opt.g.restored'));
     } else {
       this.store.resetTab(this.tab);
       if (this.tab === 'audio') applyAudio(ctx.sound, this.store);
@@ -413,9 +424,9 @@ export class OptionsPanel {
       if (['Shift', 'Control', 'Alt', 'Meta'].includes(e.key)) return;
       const a = this.rebinding;
       const code = e.code;
-      if (isReservedCode(code)) { this._notify(`A tecla ${codeLabel(code)} é reservada e não pode ser usada.`); return this._renderBody(); }
+      if (isReservedCode(code)) { this._notify(t('opt.c.reserved', { key: codeLabel(code) })); return this._renderBody(); }
       const clash = findConflict(code, a);
-      if (clash) { this._notify(`${codeLabel(code)} já é usada por "${BINDING_LABELS[clash]}". Escolha outra.`); return this._renderBody(); }
+      if (clash) { this._notify(t('opt.c.clash', { key: codeLabel(code), action: bindLabel(clash) })); return this._renderBody(); }
       this.message.controls = '';
       return this._saveBinding(a, code);
     }

@@ -5,16 +5,6 @@
  * O DOM fica em `CursorController`.
  */
 
-/** Textos de UI (PT-BR) — constantes para a internacionalização (F6-09). */
-export const CURSOR_TEXT = {
-  options: {
-    contextCursors: { label: 'Cursores contextuais', hint: 'Cursor muda para atacar, coletar, construir, reparar e lançar magias.' },
-    hoverOutline: { label: 'Contorno sob o mouse', hint: 'Colchetes coloridos ao redor da unidade ou construção sob o cursor.' },
-    on: 'Ligados',
-    off: 'Desligados'
-  }
-};
-
 /** @typedef {'default'|'attack'|'gather'|'build'|'repair'|'spell'|'invalid'} CursorKind */
 export const CURSOR_KINDS = Object.freeze(['default', 'attack', 'gather', 'build', 'repair', 'spell', 'invalid']);
 

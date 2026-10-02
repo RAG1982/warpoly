@@ -1,0 +1,308 @@
+{
+  "checks": [
+    {
+      "name": "detecção do navegador (locale pt-BR) → pt-BR",
+      "ok": true,
+      "extra": ""
+    },
+    {
+      "name": "menu em pt-BR tem \"Novo Jogo\" e \"Tutorial\"",
+      "ok": true,
+      "extra": ""
+    },
+    {
+      "name": "trocar idioma em Opções reflete na hora (aba \"Interface\")",
+      "ok": true,
+      "extra": ""
+    },
+    {
+      "name": "opções/graphics sem PT em en",
+      "ok": true,
+      "extra": ""
+    },
+    {
+      "name": "opções/audio sem PT em en",
+      "ok": true,
+      "extra": ""
+    },
+    {
+      "name": "opções/controls sem PT em en",
+      "ok": true,
+      "extra": ""
+    },
+    {
+      "name": "opções/interface sem PT em en",
+      "ok": true,
+      "extra": ""
+    },
+    {
+      "name": "opções/game sem PT em en",
+      "ok": true,
+      "extra": ""
+    },
+    {
+      "name": "idioma salvo em localStorage",
+      "ok": true,
+      "extra": ""
+    },
+    {
+      "name": "menu refeito em en",
+      "ok": true,
+      "extra": ""
+    },
+    {
+      "name": "menu + Escaramuça sem PT em en",
+      "ok": true,
+      "extra": ""
+    },
+    {
+      "name": "botão do rodapé alterna o idioma",
+      "ok": true,
+      "extra": ""
+    },
+    {
+      "name": "tutorial iniciou no passo \"select\" com painel visível",
+      "ok": true,
+      "extra": ""
+    },
+    {
+      "name": "seta de mundo no trabalhador (select)",
+      "ok": true,
+      "extra": ""
+    },
+    {
+      "name": "select → wood",
+      "ok": true,
+      "extra": ""
+    },
+    {
+      "name": "seta de mundo na árvore (wood)",
+      "ok": true,
+      "extra": ""
+    },
+    {
+      "name": "wood concluído",
+      "ok": true,
+      "extra": ""
+    },
+    {
+      "name": "seta de mundo na mina (gold)",
+      "ok": true,
+      "extra": ""
+    },
+    {
+      "name": "gold concluído",
+      "ok": true,
+      "extra": ""
+    },
+    {
+      "name": "painel do tutorial trocou para en na hora",
+      "ok": true,
+      "extra": ""
+    },
+    {
+      "name": "destaque da HUD no botão de construir (house)",
+      "ok": true,
+      "extra": "{\"marker\":\"none\",\"markerText\":\"▼\",\"ring\":\"block\"}"
+    },
+    {
+      "name": "HUD (selecionado: trabalhador) sem PT em en",
+      "ok": true,
+      "extra": ""
+    },
+    {
+      "name": "cottage posicionado",
+      "ok": true,
+      "extra": ""
+    },
+    {
+      "name": "house concluído",
+      "ok": true,
+      "extra": ""
+    },
+    {
+      "name": "destaque da HUD no botão de construir (farm)",
+      "ok": true,
+      "extra": "{\"marker\":\"none\",\"markerText\":\"▼\",\"ring\":\"block\"}"
+    },
+    {
+      "name": "farm posicionado",
+      "ok": true,
+      "extra": ""
+    },
+    {
+      "name": "farm concluído",
+      "ok": true,
+      "extra": ""
+    },
+    {
+      "name": "destaque da HUD no botão de construir (barracks)",
+      "ok": true,
+      "extra": "{\"marker\":\"none\",\"markerText\":\"▼\",\"ring\":\"block\"}"
+    },
+    {
+      "name": "barracks posicionado",
+      "ok": true,
+      "extra": ""
+    },
+    {
+      "name": "barracks concluído",
+      "ok": true,
+      "extra": ""
+    },
+    {
+      "name": "destaque da HUD no botão de treino (train)",
+      "ok": true,
+      "extra": "{\"marker\":\"none\",\"markerText\":\"▼\",\"ring\":\"block\"}"
+    },
+    {
+      "name": "HUD (selecionado: quartel) sem PT em en",
+      "ok": true,
+      "extra": ""
+    },
+    {
+      "name": "train concluído",
+      "ok": true,
+      "extra": ""
+    },
+    {
+      "name": "seta de mundo no acampamento (attack)",
+      "ok": true,
+      "extra": ""
+    },
+    {
+      "name": "HUD (selecionado: soldados) sem PT em en",
+      "ok": true,
+      "extra": ""
+    },
+    {
+      "name": "tutorial concluído",
+      "ok": true,
+      "extra": ""
+    },
+    {
+      "name": "tela de conclusão com \"Keep playing\"",
+      "ok": true,
+      "extra": ""
+    },
+    {
+      "name": "tutorial ≤ 8 min de jogo",
+      "ok": true,
+      "extra": "157 s"
+    },
+    {
+      "name": "mensagem da simulação traduzida (en)",
+      "ok": true,
+      "extra": ""
+    },
+    {
+      "name": "texto de fim de jogo em en",
+      "ok": true,
+      "extra": "All enemy buildings have been destroyed! / Match time: 2:38 / Units: 0 killed / 0 lost / Buildings: 0 destroyed / 0 lost"
+    },
+    {
+      "name": "pausa sem PT em en",
+      "ok": true,
+      "extra": ""
+    },
+    {
+      "name": "diálogo de saves sem PT em en",
+      "ok": true,
+      "extra": ""
+    },
+    {
+      "name": "volta ao menu principal depois do tutorial",
+      "ok": true,
+      "extra": ""
+    },
+    {
+      "name": "0 erros de console",
+      "ok": true,
+      "extra": ""
+    }
+  ],
+  "steps": [
+    {
+      "id": "select",
+      "lang": "pt-BR",
+      "marker": {
+        "marker": "block",
+        "markerText": "▼",
+        "ring": "none"
+      },
+      "panel": "TutorialPasso 1/8 Selecione um trabalhador Clique num dos camponeses (ou arraste uma caixa ao redor deles). Use W A S D "
+    },
+    {
+      "id": "wood",
+      "lang": "pt-BR",
+      "marker": {
+        "marker": "block",
+        "markerText": "▼",
+        "ring": "none"
+      },
+      "panel": "TutorialPasso 2/8 Colete madeira Com o trabalhador selecionado, clique com o botão direito numa árvore. Ele corta, leva "
+    },
+    {
+      "id": "gold",
+      "lang": "pt-BR",
+      "marker": {
+        "marker": "block",
+        "markerText": "▼",
+        "ring": "none"
+      },
+      "panel": "TutorialPasso 3/8 Colete ouro Selecione um trabalhador e clique com o botão direito na Mina de Ouro. O ouro paga tropas "
+    },
+    {
+      "id": "house",
+      "lang": "en",
+      "marker": {
+        "marker": "none",
+        "markerText": "▼",
+        "ring": "block"
+      },
+      "panel": "TutorialStep 4/8 Build a house Select a worker, pick the Cottage in the build panel (or press C) and click the ground to"
+    },
+    {
+      "id": "farm",
+      "lang": "en",
+      "marker": {
+        "marker": "none",
+        "markerText": "▼",
+        "ring": "block"
+      },
+      "panel": "TutorialStep 5/8 Build a farm The Barracks requires a Farm. Select a worker, pick the Farm (key F) and place it near you"
+    },
+    {
+      "id": "barracks",
+      "lang": "en",
+      "marker": {
+        "marker": "none",
+        "markerText": "▼",
+        "ring": "block"
+      },
+      "panel": "TutorialStep 6/8 Build barracks With the farm ready, pick the Barracks (key B) and place it. This is where you train sol"
+    },
+    {
+      "id": "train",
+      "lang": "en",
+      "marker": {
+        "marker": "none",
+        "markerText": "▼",
+        "ring": "block"
+      },
+      "panel": "TutorialStep 7/8 Train 2 soldiers Click the Barracks and use the training buttons (keys Q, W). Each unit joins the queue"
+    },
+    {
+      "id": "attack",
+      "lang": "en",
+      "marker": {
+        "marker": "block",
+        "markerText": "➤",
+        "ring": "none"
+      },
+      "panel": "TutorialStep 8/8 Attack the Bandit Camp Select your soldiers (drag a box or click them) and right-click the camp to atta"
+    }
+  ],
+  "errors": [],
+  "tutorialSimSeconds": 157.4
+}

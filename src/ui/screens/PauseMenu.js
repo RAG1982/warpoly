@@ -4,15 +4,17 @@
 // enquanto ele está aberto, mas a câmera (WASD/setas) e o render continuam.
 import './mainMenu.css';
 import './gameScreens.css';
+import { t, getLanguage } from '../../i18n/index.js';
 
+// `label`/`hint` = chaves i18n (`hint` literal quando começa com '<').
 const ACTIONS = [
-  { id: 'resume', label: 'Continuar', hint: '<kbd>Esc</kbd>', primary: true },
-  { id: 'save', label: 'Salvar partida', hint: 'Slots 1–3' },
-  { id: 'load', label: 'Carregar partida' },
-  { id: 'options', label: 'Opções' },
-  { id: 'restart', label: 'Reiniciar', hint: 'Mesma partida' },
-  { id: 'main-menu', label: 'Menu Principal' },
-  { id: 'quit', label: 'Sair' }
+  { id: 'resume', label: 'pause.resume', hint: '<kbd>Esc</kbd>', primary: true },
+  { id: 'save', label: 'pause.save', hint: 'pause.saveHint' },
+  { id: 'load', label: 'pause.load' },
+  { id: 'options', label: 'pause.options' },
+  { id: 'restart', label: 'pause.restart', hint: 'pause.restartHint' },
+  { id: 'main-menu', label: 'pause.mainMenu' },
+  { id: 'quit', label: 'pause.quit' }
 ];
 
 export class PauseMenu {
@@ -41,13 +43,13 @@ export class PauseMenu {
     root.setAttribute('aria-labelledby', 'pause-title');
     root.innerHTML = `
       <div class="gs-card">
-        <p class="gs-kicker">Partida</p>
-        <h2 id="pause-title" class="gs-title">Pausa</h2>
-        <p class="gs-sub">A simulação está parada. A câmera continua livre.</p>
-        <nav class="gs-actions" aria-label="Menu de pausa">
+        <p class="gs-kicker">${t('pause.kicker')}</p>
+        <h2 id="pause-title" class="gs-title">${t('pause.title')}</h2>
+        <p class="gs-sub">${t('pause.sub')}</p>
+        <nav class="gs-actions" aria-label="${t('pause.nav')}">
           ${ACTIONS.map((a) => `
             <button type="button" class="mm-btn${a.primary ? ' mm-btn--primary' : ''}" data-pause-action="${a.id}">
-              <span class="mm-btn__label">${a.label}</span>${a.hint ? `<span class="mm-btn__hint">${a.hint}</span>` : ''}
+              <span class="mm-btn__label">${t(a.label)}</span>${a.hint ? `<span class="mm-btn__hint">${a.hint.startsWith('<') ? a.hint : t(a.hint)}</span>` : ''}
             </button>`).join('')}
         </nav>
       </div>`;
@@ -65,6 +67,7 @@ export class PauseMenu {
     });
     this.parent.appendChild(root);
     this.root = root;
+    this._builtLang = getLanguage();
   }
 
   _run(action) {
@@ -89,6 +92,7 @@ export class PauseMenu {
   }
 
   show() {
+    if (this.root && this._builtLang !== getLanguage()) { this.root.remove(); this.root = null; } // F6-09
     if (!this.root) this._build();
     if (this.isOpen) return;
     this.root.hidden = false;

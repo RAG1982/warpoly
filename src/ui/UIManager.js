@@ -1,18 +1,24 @@
 import { UNIT_TRAIN_CONFIG, BUILDING_BUILD_CONFIG, WORKER_BUILD_LIST } from '../entities/Building.js';
 import {
-  UPGRADE_CONFIG, RESEARCH, researchIdsFor, getMaxResearchLevel, describeLevel,
-  BUILDING_TRAINABLE_UNITS, getUnitDef, getBuildingDef, getHqUpgradeCost, getTierName, getResourceName
+  UPGRADE_CONFIG, RESEARCH, researchIdsFor, getMaxResearchLevel,
+  BUILDING_TRAINABLE_UNITS, getUnitDef, getBuildingDef, getHqUpgradeCost
 } from '../data/index.js';
 import {
-  missingRequirements, missingUnitRequirements, missingUpgradeRequirements, formatRequirementList
+  missingRequirements, missingUnitRequirements, missingUpgradeRequirements
 } from '../sim/requirements.js';
+import {
+  t, applyI18n, onLanguageChange, researchName, describeLevelText, tierName as tierNameT, resourceName,
+  abilityName as abilityNameT, abilityDesc, buildingDesc
+} from '../i18n/index.js';
+import {
+  unitLabel, buildingLabel, requirementsLine, resourceNodeName, formatClock, localizeSimText
+} from './uiText.js';
 import { initUiScale } from './uiScale.js';
 import { drawMinimapPings } from './minimapPings.js';
 import { getBuildHotkey, getTrainHotkey, getResearchHotkey } from './hotkeys.js';
 import { buildCostHtml } from './Tooltip.js';
 import { CMD } from '../sim/commands.js';
 import { resolveAbility, canCast, selectionAbilityUnits } from '../sim/abilities.js';
-import { abilityName } from '../data/abilities.js';
 import { buildPostGameModel } from './postGame.js';
 import { PostGameScreen } from './screens/PostGameScreen.js';
 import { worldToMinimap, minimapToWorld } from './minimapCoords.js';
@@ -20,7 +26,7 @@ import { NEUTRAL_HOSTILE_ID } from '../sim/EntityIds.js';
 import { renderTerrainImage } from './terrainMinimapImage.js';
 import { Vector3 } from 'three';
 import {
-  MINIMAP_TEXT, frustumGroundQuad, playerColor, pointerToCanvas, pickMinimapTarget,
+  frustumGroundQuad, playerColor, pointerToCanvas, pickMinimapTarget,
   OrderFlashes, orderKindFor, drawOrderFlashes, drawCameraQuad
 } from './minimapView.js';
 
@@ -105,6 +111,15 @@ export class UIManager {
     this._listenOpts = { signal: this._abort.signal };
     this._notificationTimer = null;
 
+    // F6-09: trocar o idioma refaz os textos estáticos e força o redesenho do card de seleção.
+    this._offLang = onLanguageChange(() => {
+      applyI18n();
+      this.lastSelectionKey = null;
+      this.lastPortraitKey = null;
+      this.currentBuilding = null;
+      this._lastPop = null;
+    });
+
     this.initControls();
     this.initMinimapEvents();
     this.initActionsEventDelegation();
@@ -148,7 +163,7 @@ export class UIManager {
   initMinimapEvents() {
     if (!this.minimapCanvas) return;
     const canvas = this.minimapCanvas;
-    canvas.title = MINIMAP_TEXT.label;
+    canvas.title = t('minimap.label');
     this.minimapOrders = new OrderFlashes();
 
     /** Ponto do mundo sob o ponteiro (respeita a escala CSS do canvas). */
@@ -191,7 +206,7 @@ export class UIManager {
   /** `severity` (F6-05): 'danger' | 'warn' | 'good' colore a borda do banner. */
   showNotification(msg, duration = 4000, severity = null) {
     if (!this.notificationBox) return;
-    this.notificationBox.innerText = msg;
+    this.notificationBox.innerText = localizeSimText(msg);
     this.notificationBox.dataset.severity = severity || '';
     this.notificationBox.style.opacity = '1';
     this.notificationBox.style.transform = 'translateX(-50%) translateY(0)';
@@ -302,16 +317,16 @@ export class UIManager {
         const cfg = UNIT_TRAIN_CONFIG[trainType];
         if (b.queue.length >= 6) {
           this.sound.playChop();
-          this.showNotification('Fila de treinamento cheia! (Máximo 6)');
+          this.showNotification(t('hud.queueFull'));
           return;
         }
         if (this.gm.population >= this.gm.maxPopulation) {
-          this.alerts ? this.alerts.raise('food') : this.showNotification('Não há comida suficiente!');
+          this.alerts ? this.alerts.raise('food') : this.showNotification(t('alert.food'));
           return;
         }
         if (cfg && !this.gm.canAfford(cfg.cost)) {
           this.sound.playChop();
-          this.showNotification(`Recursos insuficientes para treinar ${cfg ? cfg.name : trainType}!`);
+          this.showNotification(t('hud.cantAffordTrain', { name: unitLabel(trainType) }));
           return;
         }
         this.gm.issue({ type: CMD.TRAIN, playerId: this.gm.localPlayerId, buildingId: b.id, unitType: trainType });
@@ -345,15 +360,14 @@ export class UIManager {
    * desabilitado, auto-cast) é atualizado por `updateAbilityButtons` sem recriar o DOM.
    */
   renderAbilityButtons(abilityIds) {
-    const faction = this.gm.playerFaction === 'orc' ? 'orc' : 'human';
     return abilityIds.map(id => {
       const ab = resolveAbility(this.gm, id);
       if (!ab) return '';
-      const name = abilityName(ab, faction);
+      const name = abilityNameT(ab.id, ab);
       const icon = typeof ab.icon === 'string' && ab.icon.startsWith('/')
         ? `<img src="${ab.icon}" class="bld-train-btn-icon" alt="${name}" />`
         : `<span class="action-stop-icon">${ab.icon}</span>`;
-      const cost = (ab.manaCost || 0) + (ab.manaPerHp > 0 ? ` +${ab.manaPerHp}/PV` : '');
+      const cost = (ab.manaCost || 0) + (ab.manaPerHp > 0 ? ` +${ab.manaPerHp}${t('hud.perHp')}` : '');
       return `
         <button class="bld-train-btn ability-btn" data-ability="${id}" title="${name}${ab.hotkey ? ` (${ab.hotkey})` : ''}">
           ${ab.hotkey ? `<span class="bld-hotkey-badge">${ab.hotkey}</span>` : ''}
@@ -364,10 +378,10 @@ export class UIManager {
             <div class="bld-hint-col">
               <div class="bld-hint-header">
                 <span class="bld-hint-title">${name}${ab.hotkey ? ` <span class="bld-hint-hotkey">(${ab.hotkey})</span>` : ''}</span>
-                <span class="bld-hint-desc">${ab.description || ''}</span>
+                <span class="bld-hint-desc">${abilityDesc(ab.id, ab)}</span>
               </div>
               <div class="bld-hint-footer">
-                Mana: ${cost} &bull; Alcance: ${ab.range || 0} &bull; Recarga: ${ab.cooldown || 0}s${ab.autocast ? ' &bull; Botão direito: auto-cast' : ''}
+                ${t('hud.abilityFooter', { mana: cost, range: ab.range || 0, cd: ab.cooldown || 0 })}${ab.autocast ? ` &bull; ${t('hud.autocastHint')}` : ''}
                 <span class="ability-req" data-req="${id}"></span>
               </div>
             </div>
@@ -382,7 +396,6 @@ export class UIManager {
     if (!this.selectionActions) return;
     const units = selectionAbilityUnits(this.gm.selectedUnits);
     if (units.length === 0) return;
-    const faction = this.gm.playerFaction === 'orc' ? 'orc' : 'human';
     const buttons = this.selectionActions.querySelectorAll('button[data-ability]');
     for (let i = 0; i < buttons.length; i++) {
       const btn = buttons[i];
@@ -396,7 +409,8 @@ export class UIManager {
         const u = units[k];
         if (!u.abilities.includes(id)) continue;
         const r = canCast(this.gm, u, ab);
-        if (r.ok) ready = true; else if (!reason) reason = r.reason;
+        if (r.ok) ready = true;
+        else if (!reason) reason = r.code === 'requires' ? requirementsLine(r.missing, r.factionId) : localizeSimText(r.reason.replace('⚠️ ', ''));
         const cd = u.cooldowns[id] || 0;
         if (cd < minCd) minCd = cd;
       }
@@ -410,8 +424,8 @@ export class UIManager {
       const cd = btn.querySelector('.ability-cd');
       if (cd) cd.style.height = `${pct}%`;
       const req = btn.querySelector('.ability-req');
-      if (req) req.innerHTML = !ready && reason.includes('Requer') ? `<br>${reason.replace('⚠️ ', '')}` : (!ready && reason ? `<br>${reason.replace('⚠️ ', '')}` : '');
-      btn.title = `${abilityName(ab, faction)}${ab.hotkey ? ` (${ab.hotkey})` : ''}`;
+      if (req) req.innerHTML = !ready && reason ? `<br>${reason}` : '';
+      btn.title = `${abilityNameT(ab.id, ab)}${ab.hotkey ? ` (${ab.hotkey})` : ''}`;
     }
   }
 
@@ -425,7 +439,7 @@ export class UIManager {
         if (!b.isConstructed && b.ownerId === this.gm.localPlayerId) {
           this.gm.issue({ type: CMD.CANCEL_CONSTRUCTION, playerId: this.gm.localPlayerId, buildingId: b.id });
           this.sound.playSelect();
-          this.showNotification('Obra cancelada. 75% dos recursos reembolsados.');
+          this.showNotification(t('hud.buildCancelled'));
         }
         return;
       }
@@ -438,14 +452,14 @@ export class UIManager {
           // Upgrade em andamento: clique cancela e reembolsa 100%.
           this.gm.issue({ type: CMD.CANCEL_UPGRADE_HQ, playerId: this.gm.localPlayerId, buildingId: b.id });
           this.sound.playSelect();
-          this.showNotification('Upgrade cancelado. Recursos reembolsados.');
+          this.showNotification(t('hud.upgradeCancelled'));
           return;
         }
         if (b.tier >= 3) return;
         const cost = getHqUpgradeCost(b.tier + 1);
         if (cost && !this.gm.canAfford(cost)) {
           this.sound.playChop();
-          this.showNotification('⚠️ Recursos insuficientes!');
+          this.showNotification(`⚠️ ${t('sim.noResources')}`);
           return;
         }
         this.gm.issue({ type: CMD.UPGRADE_HQ, playerId: this.gm.localPlayerId, buildingId: b.id });
@@ -461,23 +475,23 @@ export class UIManager {
         if (upgradeId) {
           const cfg = UPGRADE_CONFIG[upgradeId];
           const factionType = this.gm.playerFaction === 'orc' ? 'orc' : 'human';
-          const upgName = cfg ? cfg.name[factionType] : upgradeId;
+          const upgName = researchName(upgradeId, factionType, cfg);
 
           if (this.gm.isUpgradeResearched(upgradeId, 'player')) {
             this.sound.playChop();
-            this.showNotification(`Pesquisa "${upgName}" já está no nível máximo!`);
+            this.showNotification(t('hud.researchMaxed', { name: upgName }));
             return;
           }
 
           if (b.currentResearch) {
             this.sound.playChop();
-            this.showNotification('Esta construção já está ocupada com uma pesquisa!');
+            this.showNotification(t('hud.buildingBusy'));
             return;
           }
 
           if (this.gm.isUpgradeResearching(upgradeId, 'player')) {
             this.sound.playChop();
-            this.showNotification('Esta pesquisa já está em andamento em outra construção!');
+            this.showNotification(t('hud.researchElsewhere'));
             return;
           }
 
@@ -485,7 +499,7 @@ export class UIManager {
           const nextCost = RESEARCH[upgradeId].levels[nextLv - 1].cost;
           if (!this.gm.canAfford(nextCost)) {
             this.sound.playChop();
-            this.showNotification(`Recursos insuficientes para pesquisar ${upgName}!`);
+            this.showNotification(t('hud.cantAffordResearch', { name: upgName }));
             return;
           }
 
@@ -493,7 +507,7 @@ export class UIManager {
           // seguem client-side para feedback imediato; a validação final é do executor.
           this.gm.issue({ type: CMD.RESEARCH, playerId: this.gm.localPlayerId, buildingId: b.id, upgradeId });
           this.sound.playHammer();
-          this.showNotification(`Iniciando pesquisa: ${upgName}...`);
+          this.showNotification(t('hud.researchStarted', { name: upgName }));
           this.renderBuildingTrainButtons(b);
           this.updateBuildingQueue(b);
         }
@@ -509,16 +523,16 @@ export class UIManager {
           const cfg = UNIT_TRAIN_CONFIG[trainType];
           if (b.queue.length >= 6) {
             this.sound.playChop();
-            this.showNotification('Fila de treinamento cheia! (Máximo 6)');
+            this.showNotification(t('hud.queueFull'));
             return;
           }
           if (this.gm.population >= this.gm.maxPopulation) {
-            this.alerts ? this.alerts.raise('food') : this.showNotification('Não há comida suficiente!');
+            this.alerts ? this.alerts.raise('food') : this.showNotification(t('alert.food'));
             return;
           }
           if (cfg && !this.gm.canAfford(cfg.cost)) {
             this.sound.playChop();
-            this.showNotification(`Recursos insuficientes para treinar ${cfg ? cfg.name : trainType}!`);
+            this.showNotification(t('hud.cantAffordTrain', { name: unitLabel(trainType) }));
             return;
           }
           // F2-02: comando TRAIN — validação autoritativa (custo/fila/pop) no CommandExecutor.
@@ -537,7 +551,7 @@ export class UIManager {
           if (b.currentResearch) {
             this.gm.issue({ type: CMD.CANCEL_RESEARCH, playerId: this.gm.localPlayerId, buildingId: b.id });
             this.sound.playSelect();
-            this.showNotification('Pesquisa cancelada. Recursos reembolsados.');
+            this.showNotification(t('hud.researchCancelled'));
             this.renderBuildingTrainButtons(b);
             this.updateBuildingQueue(b);
           }
@@ -548,7 +562,7 @@ export class UIManager {
         if (!isNaN(slotIdx)) {
           this.gm.issue({ type: CMD.CANCEL_TRAIN, playerId: this.gm.localPlayerId, buildingId: b.id, slot: slotIdx });
           this.sound.playSelect();
-          this.showNotification('Treinamento cancelado. Recursos reembolsados.');
+          this.showNotification(t('hud.trainCancelled'));
           this.updateBuildingQueue(b);
         }
       }
@@ -576,7 +590,7 @@ export class UIManager {
       const count = this.gm.selectedUnits.length;
       const isWorker = u.type === 'villager' || u.type === 'peon';
 
-      this.selectionTitle.innerText = count > 1 ? `${count}x ${u.name}s` : u.name;
+      this.selectionTitle.innerText = count > 1 ? t('hud.multiSelect', { count, name: unitLabel(u.type) }) : unitLabel(u.type);
       this.updateSelectionPortraits(this.gm.selectedUnits);
 
       // Health
@@ -586,15 +600,15 @@ export class UIManager {
 
       // Stats
       this.selectionStats.innerHTML = `
-        <span>⚔️ Ataque: ${u.damage.basic}+${u.damage.piercing}</span>
-        <span>🛡️ Defesa: ${u.armor || 0}</span>
-        <span>🏃 Vel: ${u.speed}</span>
-        ${u.minAttackRange > 0 ? `<span>🎯 Alcance: ${u.minAttackRange}–${u.attackRange}</span>` : ''}
-        ${u.layer === 'air' ? `<span>🪽 Aéreo</span>` : ''}
-        ${u.suicide ? `<span>💣 Suicida</span>` : ''}
-        ${u.splashRadius > 0 ? `<span>💥 Área: ${u.splashRadius}</span>` : ''}
-        ${u.maxMana > 0 ? `<span>💧 Mana: ${Math.floor(u.mana)} / ${u.maxMana}</span>` : ''}
-        ${isWorker ? `<span>🎒 Carga: ${u.carrying.amount}/${u.carrying.max} ${getResourceName(u.carrying.type) || ''}</span>` : ''}
+        <span>⚔️ ${t('hud.stat.attack')}: ${u.damage.basic}+${u.damage.piercing}</span>
+        <span>🛡️ ${t('hud.stat.defense')}: ${u.armor || 0}</span>
+        <span>🏃 ${t('hud.stat.speed')}: ${u.speed}</span>
+        ${u.minAttackRange > 0 ? `<span>🎯 ${t('hud.stat.range')}: ${u.minAttackRange}–${u.attackRange}</span>` : ''}
+        ${u.layer === 'air' ? `<span>🪽 ${t('hud.stat.air')}</span>` : ''}
+        ${u.suicide ? `<span>💣 ${t('hud.stat.suicide')}</span>` : ''}
+        ${u.splashRadius > 0 ? `<span>💥 ${t('hud.stat.area')}: ${u.splashRadius}</span>` : ''}
+        ${u.maxMana > 0 ? `<span>💧 ${t('hud.stat.mana')}: ${Math.floor(u.mana)} / ${u.maxMana}</span>` : ''}
+        ${isWorker ? `<span>🎒 ${t('hud.stat.carry')}: ${u.carrying.amount}/${u.carrying.max} ${resourceName(u.carrying.type)}</span>` : ''}
       `;
 
       // F4-03: o card de habilidades muda a chave (recria o DOM só quando o conjunto muda)
@@ -619,15 +633,15 @@ export class UIManager {
 
       // Header Title
       if (this.bldSelectionTitle) {
-        let title = b.name.toUpperCase();
-        if (!b.isConstructed) title += ' (EM CONSTRUÇÃO)';
-        else if (b.faction === 'enemy') title += ' (INIMIGO)';
+        let title = buildingLabel(b.type).toUpperCase();
+        if (!b.isConstructed) title += ` (${t('hud.underConstruction')})`;
+        else if (b.faction === 'enemy') title += ` (${t('hud.enemy')})`;
         this.bldSelectionTitle.innerText = title;
       }
 
       // Health Text & Fill Bar
       if (this.bldSelectionHp) {
-        this.bldSelectionHp.innerText = `Vida: ${Math.round(b.hp)} / ${b.maxHp}`;
+        this.bldSelectionHp.innerText = t('hud.life', { hp: Math.round(b.hp), max: b.maxHp });
       }
       if (this.bldSelectionHpFill) {
         const pct = Math.max(0, Math.min(100, (b.hp / b.maxHp) * 100));
@@ -637,13 +651,13 @@ export class UIManager {
       // Extra Info
       if (this.bldExtraInfo) {
         if (!b.isConstructed) {
-          this.bldExtraInfo.innerText = `🔨 Construindo: ${Math.round(b.buildProgress)}%`;
+          this.bldExtraInfo.innerText = `🔨 ${t('hud.building', { pct: Math.round(b.buildProgress) })}`;
         } else if (b.popGranted) {
-          this.bldExtraInfo.innerText = `👥 +${b.popGranted} População`;
+          this.bldExtraInfo.innerText = `👥 ${t('hud.popGranted', { n: b.popGranted })}`;
         } else if (b.towerDamage) {
-          this.bldExtraInfo.innerText = `🏹 Dano: ${b.towerDamage.basic}+${b.towerDamage.piercing} | Alcance: ${b.attackRange} | 🛡️ ${b.armor || 0}`;
+          this.bldExtraInfo.innerText = `🏹 ${t('hud.towerInfo', { dmg: `${b.towerDamage.basic}+${b.towerDamage.piercing}`, range: b.attackRange })} | 🛡️ ${b.armor || 0}`;
         } else {
-          this.bldExtraInfo.innerText = b.armor ? `🛡️ Def: ${b.armor}` : '';
+          this.bldExtraInfo.innerText = b.armor ? `🛡️ ${t('hud.defShort', { n: b.armor })}` : '';
         }
       }
 
@@ -686,18 +700,18 @@ export class UIManager {
       const isTree = r.type === 'tree';
       const isDepletedTree = isTree && (r.isDead || r.woodRemaining <= 0);
 
-      this.selectionTitle.innerText = isDepletedTree ? 'Tronco Cortado' : (isTree ? 'Árvore Antiga' : r.name);
+      this.selectionTitle.innerText = isDepletedTree ? t('hud.stump') : (isTree ? t('hud.oldTree') : resourceNodeName(r.type));
 
       const remaining = isTree ? r.woodRemaining : r.resourcesRemaining;
       const max = isTree ? r.maxWood : r.maxResources;
       const pct = max > 0 ? (remaining / max) * 100 : 0;
       this.selectionHpBar.style.width = `${pct}%`;
       this.selectionHp.innerText = isDepletedTree
-        ? '0 / 120 Madeira (Esgotada)'
-        : `${remaining} / ${max} Disponível`;
+        ? t('hud.woodDepleted')
+        : t('hud.available', { remaining, max });
       this.selectionStats.innerHTML = isDepletedTree
-        ? '<span>Tronco com cogumelos &bull; Madeira esgotada</span>'
-        : `<span>Designe Aldeões para colher recursos</span>`;
+        ? `<span>${t('hud.stumpHint')}</span>`
+        : `<span>${t('hud.assignWorkers')}</span>`;
 
       if (this.lastSelectionKey !== 'resource') {
         this.lastSelectionKey = 'resource';
@@ -745,8 +759,8 @@ export class UIManager {
       const icon = getUnitDef(unit.type).icon;
       const pct = Math.max(0, unit.hp / unit.maxHp) * 100;
       return `
-        <button type="button" class="selection-portrait" data-portrait-id="${unit.id}" title="${unit.name}">
-          <img src="${icon}" class="selection-portrait-icon" alt="${unit.name}" />
+        <button type="button" class="selection-portrait" data-portrait-id="${unit.id}" title="${unitLabel(unit.type)}">
+          <img src="${icon}" class="selection-portrait-icon" alt="${unitLabel(unit.type)}" />
           <div class="selection-portrait-hp-bg"><div class="selection-portrait-hp-fill" style="width: ${pct}%"></div></div>
         </button>
       `;
@@ -759,8 +773,8 @@ export class UIManager {
     const researchRole = researchRoleOf(building);
     const isForge = building.faction === 'player' && building.isConstructed && !!researchRole;
     if (isForge) {
-      if (this.bldTrainLabel) this.bldTrainLabel.innerText = researchRole === 'forge' ? 'MELHORIAS DA FORJA:' : researchRole === 'arcane' ? 'MAGIAS:' : researchRole === 'temple' ? 'CLASSE E MAGIAS SAGRADAS:' : 'PESQUISAS DA SERRARIA:';
-      if (this.bldQueueLabel) this.bldQueueLabel.innerText = 'PROGRESSO DA PESQUISA:';
+      if (this.bldTrainLabel) this.bldTrainLabel.innerText = t(`hud.section.research.${researchRole}`);
+      if (this.bldQueueLabel) this.bldQueueLabel.innerText = t('hud.section.researchProgress');
       if (this.bldTrainSection) this.bldTrainSection.style.display = 'flex';
       if (this.bldQueueSection) this.bldQueueSection.style.display = 'flex';
 
@@ -773,11 +787,11 @@ export class UIManager {
         const isResearched = this.gm.isUpgradeResearched(upgId, 'player');
         const isResearchingThis = building.currentResearch && building.currentResearch.id === upgId;
         const isResearchingAny = this.gm.isUpgradeResearching(upgId, 'player');
-        const upgName = cfg.name[factionType] || upgId;
+        const upgName = researchName(upgId, factionType, cfg);
         const curLv = this.gm.getResearchLevel(upgId, 'player');
         const maxLv = getMaxResearchLevel(upgId);
         const nextLv = Math.min(curLv + 1, maxLv);
-        const upgDesc = describeLevel(upgId, nextLv);
+        const upgDesc = describeLevelText(RESEARCH[upgId] && RESEARCH[upgId].levels[nextLv - 1]);
         const lvLabel = maxLv > 1 ? ` ${curLv}/${maxLv}` : '';
         const hotkey = getResearchHotkey(i);
 
@@ -815,8 +829,8 @@ export class UIManager {
       return;
     }
 
-    if (this.bldTrainLabel) this.bldTrainLabel.innerText = 'TREINAR UNIDADE:';
-    if (this.bldQueueLabel) this.bldQueueLabel.innerText = 'FILA DE TREINAMENTO:';
+    if (this.bldTrainLabel) this.bldTrainLabel.innerText = t('hud.section.train');
+    if (this.bldQueueLabel) this.bldQueueLabel.innerText = t('hud.section.queue');
 
     const trainable = (building.faction === 'player' && building.isConstructed)
       ? BUILDING_TRAINABLE_UNITS[building.type]
@@ -838,11 +852,11 @@ export class UIManager {
       if (!cfg) return '';
       const hotkey = getTrainHotkey(i);
       return `
-        <button class="bld-train-btn" data-train="${unitType}" title="${cfg.name}${hotkey ? ` (${hotkey})` : ''}">
+        <button class="bld-train-btn" data-train="${unitType}" title="${unitLabel(unitType)}${hotkey ? ` (${hotkey})` : ''}">
           ${hotkey ? `<span class="bld-hotkey-badge">${hotkey}</span>` : ''}
-          <img src="${cfg.icon}" class="bld-train-btn-icon" alt="${cfg.name}" />
+          <img src="${cfg.icon}" class="bld-train-btn-icon" alt="${unitLabel(unitType)}" />
           <div class="bld-hint-bubble">
-            <span class="bld-hint-title">${cfg.name}${hotkey ? ` <span class="bld-hint-hotkey">(${hotkey})</span>` : ''}</span> - Custo: <span class="bld-cost-items" data-cost-unit="${unitType}"></span>
+            <span class="bld-hint-title">${unitLabel(unitType)}${hotkey ? ` <span class="bld-hint-hotkey">(${hotkey})</span>` : ''}</span> - ${t('hud.cost')}: <span class="bld-cost-items" data-cost-unit="${unitType}"></span>
           </div>
         </button>
       `;
@@ -866,14 +880,14 @@ export class UIManager {
 
         const isResearched = this.gm.isUpgradeResearched(upgId, 'player');
         if (isResearched) {
-          if (costContainer) costContainer.innerHTML = '<span class="bld-cost-researched">✓ Nível máximo</span>';
+          if (costContainer) costContainer.innerHTML = `<span class="bld-cost-researched">✓ ${t('hud.maxLevel')}</span>`;
           return;
         }
 
         const isResearchingThis = building.currentResearch && building.currentResearch.id === upgId;
         const isResearchingAny = this.gm.isUpgradeResearching(upgId, 'player');
         if (isResearchingThis || isResearchingAny) {
-          if (costContainer) costContainer.innerHTML = '<span class="bld-cost-researching">🔨 Pesquisando...</span>';
+          if (costContainer) costContainer.innerHTML = `<span class="bld-cost-researching">🔨 ${t('hud.researching')}</span>`;
           return;
         }
 
@@ -883,7 +897,7 @@ export class UIManager {
           if (missing.length > 0) {
             btn.disabled = true;
             btn.classList.add('bld-requirement-missing');
-            btn.title = `Requer: ${formatRequirementList(missing, factionId)}`;
+            btn.title = requirementsLine(missing, factionId);
           } else {
             btn.disabled = false;
             btn.classList.remove('bld-requirement-missing');
@@ -913,7 +927,7 @@ export class UIManager {
         if (missing.length > 0) {
           btn.disabled = true;
           btn.classList.add('bld-requirement-missing');
-          btn.title = `Requer: ${formatRequirementList(missing, this.gm.playerFaction === 'orc' ? 'orc' : 'human')}`;
+          btn.title = requirementsLine(missing, this.gm.playerFaction === 'orc' ? 'orc' : 'human');
         } else {
           btn.disabled = false;
           btn.classList.remove('bld-requirement-missing');
@@ -932,14 +946,14 @@ export class UIManager {
         const r = b.currentResearch;
         const cfg = r.cfg || UPGRADE_CONFIG[r.id];
         const factionType = this.gm.playerFaction === 'orc' ? 'orc' : 'human';
-        const name = cfg ? cfg.name[factionType] : r.id;
+        const name = researchName(r.id, factionType, cfg);
         const iconSrc = cfg ? cfg.icon : '/icoEspada.png';
 
         const slot0 = this.bldQueueSlots[0];
         if (slot0) {
           slot0.className = 'bld-queue-slot filled active forge-slot';
           slot0.innerHTML = `<img src="${iconSrc}" class="bld-slot-icon" alt="${name}" />`;
-          slot0.title = `${name}${r.level && getMaxResearchLevel(r.id) > 1 ? ` ${r.level}/${getMaxResearchLevel(r.id)}` : ''} (Pesquisando...) - Clique para cancelar`;
+          slot0.title = `${name}${r.level && getMaxResearchLevel(r.id) > 1 ? ` ${r.level}/${getMaxResearchLevel(r.id)}` : ''} (${t('hud.researching')}) - ${t('hud.clickCancel')}`;
         }
 
         for (let i = 1; i < 6; i++) {
@@ -947,7 +961,7 @@ export class UIManager {
           if (!slotEl) continue;
           slotEl.className = 'bld-queue-slot empty';
           slotEl.innerHTML = '';
-          slotEl.title = 'Slot vazio';
+          slotEl.title = t('hud.emptySlot');
         }
 
         const pct = Math.min(100, Math.max(0, (r.progress / r.totalTime) * 100));
@@ -959,7 +973,7 @@ export class UIManager {
           if (!slotEl) continue;
           slotEl.className = 'bld-queue-slot empty';
           slotEl.innerHTML = '';
-          slotEl.title = 'Slot vazio';
+          slotEl.title = t('hud.emptySlot');
         }
         if (this.bldQueueProgressBar) this.bldQueueProgressBar.style.width = '0%';
         if (this.bldQueueProgressTrack) this.bldQueueProgressTrack.style.opacity = '0.35';
@@ -975,14 +989,14 @@ export class UIManager {
         const item = b.queue[i];
         const cfg = UNIT_TRAIN_CONFIG[item.type];
         const iconSrc = cfg ? cfg.icon : '/icoEspada.png';
-        const name = cfg ? cfg.name : item.type;
+        const name = unitLabel(item.type);
         slotEl.className = 'bld-queue-slot filled' + (i === 0 ? ' active' : '');
         slotEl.innerHTML = `<img src="${iconSrc}" class="bld-slot-icon" alt="${name}" />`;
-        slotEl.title = `${name} (${i === 0 ? 'Treinando' : 'Na fila'}) - Clique para cancelar`;
+        slotEl.title = `${name} (${i === 0 ? t('hud.training') : t('hud.queued')}) - ${t('hud.clickCancel')}`;
       } else {
         slotEl.className = 'bld-queue-slot empty';
         slotEl.innerHTML = '';
-        slotEl.title = 'Slot vazio';
+        slotEl.title = t('hud.emptySlot');
       }
     }
 
@@ -1012,8 +1026,8 @@ export class UIManager {
     this.bldHqTierSection.style.display = 'flex';
 
     const factionType = this.gm.playerFaction === 'orc' ? 'orc' : 'human';
-    const tierName = getTierName(factionType, b.tier);
-    if (this.bldHqTierLabel) this.bldHqTierLabel.innerText = `NÍVEL ${b.tier} — ${tierName.toUpperCase()}`;
+    const curTierName = tierNameT(factionType, b.tier);
+    if (this.bldHqTierLabel) this.bldHqTierLabel.innerText = t('hud.tierLabel', { n: b.tier, name: curTierName.toUpperCase() });
 
     const btn = this.bldHqUpgradeBtn;
     if (!btn) return;
@@ -1022,8 +1036,8 @@ export class UIManager {
       // Upgrade em andamento: botão vira "cancelar", barra mostra o progresso.
       btn.disabled = false;
       btn.classList.remove('bld-requirement-missing');
-      if (this.bldHqUpgradeBtnLabel) this.bldHqUpgradeBtnLabel.innerText = 'Cancelar';
-      btn.title = 'Cancelar upgrade (reembolsa 100%)';
+      if (this.bldHqUpgradeBtnLabel) this.bldHqUpgradeBtnLabel.innerText = t('hud.cancel');
+      btn.title = t('hud.cancelUpgrade');
       const pct = Math.min(100, Math.max(0, (b.tierUpgrade.progress / b.tierUpgrade.totalTime) * 100));
       if (this.bldHqUpgradeProgressBar) this.bldHqUpgradeProgressBar.style.width = `${pct}%`;
       if (this.bldHqUpgradeProgressTrack) this.bldHqUpgradeProgressTrack.style.opacity = '1';
@@ -1036,26 +1050,26 @@ export class UIManager {
     if (b.tier >= 3) {
       btn.disabled = true;
       btn.classList.remove('bld-requirement-missing');
-      if (this.bldHqUpgradeBtnLabel) this.bldHqUpgradeBtnLabel.innerText = 'Nível máximo';
-      btn.title = 'Nível máximo atingido';
+      if (this.bldHqUpgradeBtnLabel) this.bldHqUpgradeBtnLabel.innerText = t('hud.maxLevel');
+      btn.title = t('hud.maxLevelReached');
       return;
     }
 
     const nextTier = b.tier + 1;
-    const nextName = getTierName(factionType, nextTier);
+    const nextName = tierNameT(factionType, nextTier);
     const cost = getHqUpgradeCost(nextTier);
     const canAfford = !cost || this.gm.canAfford(cost);
-    if (this.bldHqUpgradeBtnLabel) this.bldHqUpgradeBtnLabel.innerText = `Evoluir para ${nextName}`;
+    if (this.bldHqUpgradeBtnLabel) this.bldHqUpgradeBtnLabel.innerText = t('hud.upgradeTo', { name: nextName });
 
     if (!canAfford) {
       btn.disabled = true;
       btn.classList.add('bld-requirement-missing');
       const costTxt = cost ? buildCostHtml(cost, this.gm.resources).replace(/<[^>]+>/g, ' ').trim() : '';
-      btn.title = `Recursos insuficientes! Custo: ${costTxt}`;
+      btn.title = t('hud.cantAffordCost', { cost: costTxt });
     } else {
       btn.disabled = false;
       btn.classList.remove('bld-requirement-missing');
-      btn.title = `Evoluir para ${nextName} (${cost.gold} ouro, ${cost.wood} madeira, ${cost.stone} pedra, ${cost.time}s)`;
+      btn.title = t('hud.upgradeToCost', { name: nextName, gold: cost.gold, wood: cost.wood, stone: cost.stone, time: cost.time });
     }
   }
 
@@ -1069,17 +1083,17 @@ export class UIManager {
         if (!cfg) return '';
         const hotkey = getBuildHotkey(bType);
         return `
-          <button class="bld-train-btn action-build-btn" data-build="${bType}" title="${cfg.name}${hotkey ? ` (${hotkey})` : ''}">
+          <button class="bld-train-btn action-build-btn" data-build="${bType}" title="${buildingLabel(bType)}${hotkey ? ` (${hotkey})` : ''}">
             ${hotkey ? `<span class="bld-hotkey-badge">${hotkey}</span>` : ''}
-            <img src="${cfg.icon}" class="bld-train-btn-icon" alt="${cfg.name}" />
+            <img src="${cfg.icon}" class="bld-train-btn-icon" alt="${buildingLabel(bType)}" />
             <div class="bld-hint-bubble">
               <div class="bld-hint-col">
                 <div class="bld-hint-header">
-                  <span class="bld-hint-title">${cfg.name}${hotkey ? ` <span class="bld-hint-hotkey">(${hotkey})</span>` : ''}</span>
-                  ${cfg.description ? `<span class="bld-hint-desc">${cfg.description}</span>` : ''}
+                  <span class="bld-hint-title">${buildingLabel(bType)}${hotkey ? ` <span class="bld-hint-hotkey">(${hotkey})</span>` : ''}</span>
+                  ${cfg.description ? `<span class="bld-hint-desc">${buildingDesc(bType, cfg)}</span>` : ''}
                 </div>
                 <div class="bld-hint-footer">
-                  Custo: <span class="bld-cost-items" data-cost-build="${bType}"></span>
+                  ${t('hud.cost')}: <span class="bld-cost-items" data-cost-build="${bType}"></span>
                 </div>
               </div>
             </div>
@@ -1088,27 +1102,27 @@ export class UIManager {
       }).join('');
 
       const stopButtonHtml = `
-        <button class="bld-train-btn action-stop-btn" data-action="stop" title="Parar Unidade (S)">
+        <button class="bld-train-btn action-stop-btn" data-action="stop" title="${t('hud.stopUnit')} (S)">
           <span class="action-stop-icon">🛑</span>
           <div class="bld-hint-bubble">
-            <span class="bld-hint-title">Parar</span> - Interromper ordens
+            <span class="bld-hint-title">${t('hud.stop')}</span> - ${t('hud.stopOrders')}
           </div>
         </button>
       `;
 
       const repairButtonHtml = `
-        <button class="bld-train-btn action-stop-btn" data-action="repair" title="Reparar (R)">
+        <button class="bld-train-btn action-stop-btn" data-action="repair" title="${t('hud.repair')} (R)">
           <span class="bld-hotkey-badge">R</span>
           <span class="action-stop-icon">🔧</span>
           <div class="bld-hint-bubble">
-            <span class="bld-hint-title">Reparar <span class="bld-hint-hotkey">(R)</span></span> - Reparar construção (custa recursos)
+            <span class="bld-hint-title">${t('hud.repair')} <span class="bld-hint-hotkey">(R)</span></span> - ${t('hud.repairDesc')}
           </div>
         </button>
       `;
 
       this.selectionActions.innerHTML = `
         <div class="worker-actions-container">
-          <span class="bld-section-label">CONSTRUIR:</span>
+          <span class="bld-section-label">${t('hud.section.build')}</span>
           <div class="worker-actions-group">
             ${buildButtonsHtml}
             ${repairButtonHtml}
@@ -1121,12 +1135,12 @@ export class UIManager {
       const abilityIds = key.includes('|') ? key.split('|')[1].split(',').filter(Boolean) : [];
       this.selectionActions.innerHTML = `
         <div class="worker-actions-container">
-          <span class="bld-section-label">AÇÕES:</span>
+          <span class="bld-section-label">${t('hud.section.actions')}</span>
           <div class="worker-actions-group">
-            <button class="bld-train-btn action-stop-btn" data-action="stop" title="Parar Unidades (S)">
+            <button class="bld-train-btn action-stop-btn" data-action="stop" title="${t('hud.stopUnits')} (S)">
               <span class="action-stop-icon">🛑</span>
               <div class="bld-hint-bubble">
-                <span class="bld-hint-title">Parar</span> - Interromper combate / movimento
+                <span class="bld-hint-title">${t('hud.stop')}</span> - ${t('hud.stopCombat')}
               </div>
             </button>
             ${this.renderAbilityButtons(abilityIds)}
@@ -1157,13 +1171,13 @@ export class UIManager {
       const missing = missingRequirements(ownerId, bType, this.gm);
       if (missing.length > 0) {
         btn.disabled = true;
-        btn.title = `Requer: ${formatRequirementList(missing, this.gm.playerFaction === 'orc' ? 'orc' : 'human')}`;
+        btn.title = requirementsLine(missing, this.gm.playerFaction === 'orc' ? 'orc' : 'human');
         btn.classList.add('bld-requirement-missing');
       } else {
         btn.disabled = false;
         btn.classList.remove('bld-requirement-missing');
         const hotkey = getBuildHotkey(bType);
-        btn.title = `${cfg.name}${hotkey ? ` (${hotkey})` : ''}`;
+        btn.title = `${buildingLabel(bType)}${hotkey ? ` (${hotkey})` : ''}`;
       }
     });
   }
@@ -1263,6 +1277,7 @@ export class UIManager {
    */
   dispose() {
     this._abort.abort();
+    if (this._offLang) this._offLang();
     if (this._disposeUiScale) this._disposeUiScale();
     clearTimeout(this._notificationTimer);
     this._notificationTimer = null;

@@ -22,38 +22,26 @@ import {
   validateSetup, buildMatchConfig, RESOURCE_PRESETS, MAX_TEAMS, otherFaction
 } from '../skirmishSetup.js';
 
+import { t, onLanguageChange, getLanguage, setLanguage, mapName, factionName } from '../../i18n/index.js';
+import { createTutorialConfig } from '../tutorial.js';
+
 const BYPASS_PARAMS = ['play', 'skipMenu', 'bench', 'skipPreload'];
 const MAP_THUMB_SIZE = { w: 96, h: 64 };
 
+// Textos das facções ficam em `faction.<id>.*` (src/i18n); aqui só ids e ícones.
 const FACTIONS = [
-  {
-    id: 'human',
-    name: 'Reino Humano',
-    icon: '/icoEscudo.svg',
-    motto: 'Pedra, aço e disciplina',
-    desc: 'Muralhas firmes, cavaleiros pesados e arqueiros treinados. Economia estável e defesa difícil de romper.',
-    tags: ['Defensivo', 'Arqueiros', 'Fortificações'],
-  },
-  {
-    id: 'orc',
-    name: 'Clãs Orcs',
-    icon: '/icoQuartelOrc.svg',
-    motto: 'Fúria, tambores e ferro bruto',
-    desc: 'Guerreiros robustos e ataques em massa. Pressão constante desde os primeiros minutos da partida.',
-    tags: ['Agressivo', 'Tropas robustas', 'Investidas'],
-  },
+  { id: 'human', icon: '/icoEscudo.svg' },
+  { id: 'orc', icon: '/icoQuartelOrc.svg' }
 ];
+const factionText = (id) => ({
+  name: t(`faction.${id}.name`),
+  motto: t(`faction.${id}.motto`),
+  desc: t(`faction.${id}.desc`),
+  tags: [1, 2, 3].map((n) => t(`faction.${id}.tag${n}`))
+});
 
-const VICTORY_MODES = [
-  { id: 'conquest', label: 'Destruir tudo' },
-  { id: 'regicide', label: 'Regicídio (Centro)' }
-];
-const DIFFICULTIES = [
-  { id: 'easy', label: 'Fácil' },
-  { id: 'normal', label: 'Normal' },
-  { id: 'hard', label: 'Difícil' },
-  { id: 'brutal', label: 'Brutal' },
-];
+const VICTORY_MODES = ['conquest', 'regicide'];
+const DIFFICULTIES = ['easy', 'normal', 'hard', 'brutal'];
 
 /** true quando a URL atual deve abrir o menu em vez de iniciar o jogo direto. */
 export function shouldShowMainMenu(search = window.location.search) {
@@ -108,6 +96,7 @@ export class MainMenu {
     this.preview = null; // FactionPreview (prévia 3D), criada ao abrir o painel
 
     this._onKeyDown = this._onKeyDown.bind(this);
+    this._offLang = onLanguageChange(() => this._relocalize());
   }
 
   mount() {
@@ -133,7 +122,39 @@ export class MainMenu {
     return this;
   }
 
+  /** F6-09: idioma trocado — refaz o menu inteiro (mesmo painel aberto). */
+  _relocalize() {
+    if (!this.root) return;
+    const panel = this.activePanel;
+    const leaving = this.root.classList.contains('mm-leaving');
+    if (leaving) return;
+    this._disposePreview();
+    this._stopParticles();
+    document.removeEventListener('keydown', this._onKeyDown);
+    this.root.remove();
+    this.root = null;
+    this.activePanel = null;
+    this._mapThumbCache = new Map();
+    this.mount();
+    this.root.classList.add('mm-ready');
+    if (panel === 'skirmish') this.openPanel('skirmish', this.root.querySelector('[data-action="new-game"]'));
+  }
+
+  /** F6-09: tutorial = partida guiada pequena (mapa `tutorial`, rival passivo). */
+  startTutorial() {
+    const config = createTutorialConfig();
+    this.root.classList.add('mm-leaving');
+    const reduce = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
+    const choice = { config, faction: 'human', difficulty: 'easy', mapId: config.mapId, victoryMode: config.victoryMode, tutorial: true };
+    this._startTimer = setTimeout(() => {
+      this._startTimer = null;
+      this._disposePreview();
+      this.onStart?.(choice);
+    }, reduce ? 0 : 380);
+  }
+
   destroy() {
+    this._offLang?.();
     this._disposePreview();
     clearTimeout(this._startTimer);
     this._startTimer = null;
@@ -146,7 +167,7 @@ export class MainMenu {
 
   // ---------------------------------------------------------------- template
   _template() {
-    const factionCards = FACTIONS.map((f) => `
+    const factionCards = FACTIONS.map((fc) => ({ ...fc, ...factionText(fc.id) })).map((f) => `
       <label class="mm-faction mm-faction--${f.id}">
         <input type="radio" name="mm-faction" value="${f.id}" />
         <span class="mm-faction__card">
@@ -155,22 +176,22 @@ export class MainMenu {
             <span class="mm-faction__name">${esc(f.name)}</span>
             <span class="mm-faction__motto">${esc(f.motto)}</span>
             <span class="mm-faction__desc">${esc(f.desc)}</span>
-            <span class="mm-faction__tags">${f.tags.map((t) => `<span>${esc(t)}</span>`).join('')}</span>
+            <span class="mm-faction__tags">${f.tags.map((tag) => `<span>${esc(tag)}</span>`).join('')}</span>
           </span>
           <span class="mm-faction__check" aria-hidden="true"></span>
         </span>
       </label>`).join('');
 
     const resources = Object.values(RESOURCE_PRESETS).map((r) => `
-      <label class="mm-seg" title="${r.amounts.wood} madeira · ${r.amounts.gold} ouro · ${r.amounts.stone} pedra">
+      <label class="mm-seg" title="${t('skirmish.res.title', { wood: r.amounts.wood, gold: r.amounts.gold, stone: r.amounts.stone })}">
         <input type="radio" name="mm-resources" value="${r.id}" />
-        <span>${esc(r.label)}</span>
+        <span>${esc(t(r.labelKey))}</span>
       </label>`).join('');
 
     const victories = VICTORY_MODES.map((v) => `
       <label class="mm-seg">
-        <input type="radio" name="mm-victory" value="${v.id}" />
-        <span>${esc(v.label)}</span>
+        <input type="radio" name="mm-victory" value="${v}" />
+        <span>${esc(t(`skirmish.victory.${v}`))}</span>
       </label>`).join('');
 
     // F2-05: lista real de mapas (miniatura gerada pelo mesmo renderizador do minimapa).
@@ -180,8 +201,8 @@ export class MainMenu {
         <span class="mm-map">
           <span class="mm-map__thumb" aria-hidden="true" data-map-thumb="${esc(m.id)}"></span>
           <span class="mm-map__info">
-            <span class="mm-map__name">${esc(m.name)}</span>
-            <span class="mm-map__meta">até ${m.maxPlayers} jogadores · ${m.size}×${m.size}</span>
+            <span class="mm-map__name">${esc(mapName(m.id, m.name))}</span>
+            <span class="mm-map__meta">${esc(t('skirmish.mapMeta', { n: m.maxPlayers, size: m.size }))}</span>
           </span>
         </span>
       </label>`).join('');
@@ -200,52 +221,55 @@ export class MainMenu {
           <header class="mm-brand">
             <span class="mm-brand__ornament" aria-hidden="true"></span>
             <h1 id="mm-title" class="mm-brand__title">WarPoly</h1>
-            <p class="mm-brand__tag">Estratégia em tempo real</p>
+            <p class="mm-brand__tag">${t('menu.tagline')}</p>
           </header>
 
-          <nav class="mm-nav" aria-label="Menu principal">
+          <nav class="mm-nav" aria-label="${t('menu.nav')}">
             <button type="button" class="mm-btn mm-btn--primary" data-action="new-game" aria-haspopup="dialog" aria-controls="mm-skirmish">
-              <span class="mm-btn__label">Novo Jogo</span><span class="mm-btn__hint">Escaramuça</span>
+              <span class="mm-btn__label">${t('menu.newGame')}</span><span class="mm-btn__hint">${t('menu.skirmish')}</span>
+            </button>
+            <button type="button" class="mm-btn" data-action="tutorial">
+              <span class="mm-btn__label">${t('menu.tutorial')}</span><span class="mm-btn__hint">${t('menu.tutorialHint')}</span>
             </button>
             <button type="button" class="mm-btn" data-action="load-game">
-              <span class="mm-btn__label">Carregar Jogo</span><span class="mm-btn__hint">Saves</span>
+              <span class="mm-btn__label">${t('menu.loadGame')}</span><span class="mm-btn__hint">${t('menu.saves')}</span>
             </button>
             <button type="button" class="mm-btn" disabled aria-describedby="mm-soon-note">
-              <span class="mm-btn__label">Campanha</span><span class="mm-badge">Em breve</span>
+              <span class="mm-btn__label">${t('menu.campaign')}</span><span class="mm-badge">${t('menu.soon')}</span>
             </button>
             <button type="button" class="mm-btn" disabled aria-describedby="mm-soon-note">
-              <span class="mm-btn__label">Multiplayer</span><span class="mm-badge">Em breve</span>
+              <span class="mm-btn__label">${t('menu.multiplayer')}</span><span class="mm-badge">${t('menu.soon')}</span>
             </button>
             <button type="button" class="mm-btn" data-action="options" aria-haspopup="dialog">
-              <span class="mm-btn__label">Opções</span>
+              <span class="mm-btn__label">${t('menu.options')}</span>
             </button>
             <a class="mm-btn" href="/inspector.html">
-              <span class="mm-btn__label">Inspetor 3D</span><span class="mm-btn__hint">Ferramenta</span>
+              <span class="mm-btn__label">${t('menu.inspector')}</span><span class="mm-btn__hint">${t('menu.tool')}</span>
             </a>
             <button type="button" class="mm-btn" data-action="credits" aria-haspopup="dialog" aria-controls="mm-credits">
-              <span class="mm-btn__label">Créditos</span>
+              <span class="mm-btn__label">${t('menu.credits')}</span>
             </button>
           </nav>
-          <p id="mm-soon-note" class="mm-sr">Disponível em uma atualização futura.</p>
+          <p id="mm-soon-note" class="mm-sr">${t('menu.soonNote')}</p>
         </section>
 
         <!-- Sub-painel: Escaramuça -->
         <section id="mm-skirmish" class="mm-panel mm-panel--skirmish" role="dialog" aria-modal="false" aria-labelledby="mm-sk-title" hidden>
           <header class="mm-panel__head">
             <div>
-              <p class="mm-panel__kicker">Novo Jogo</p>
-              <h2 id="mm-sk-title" class="mm-panel__title">Escaramuça</h2>
+              <p class="mm-panel__kicker">${t('menu.newGame')}</p>
+              <h2 id="mm-sk-title" class="mm-panel__title">${t('menu.skirmish')}</h2>
             </div>
-            <button type="button" class="mm-close" data-action="close" aria-label="Voltar ao menu">✕</button>
+            <button type="button" class="mm-close" data-action="close" aria-label="${t('menu.backToMenu')}">✕</button>
           </header>
 
           <div class="mm-panel__scroll">
             <div class="mm-sk-top">
               <fieldset class="mm-field">
-                <legend class="mm-field__label">Sua facção</legend>
+                <legend class="mm-field__label">${t('skirmish.yourFaction')}</legend>
                 <div class="mm-factions mm-factions--stack">${factionCards}</div>
               </fieldset>
-              <div class="mm-sk-preview" aria-label="Prévia 3D da facção">
+              <div class="mm-sk-preview" aria-label="${t('skirmish.preview')}">
                 <canvas class="mm-sk-preview__canvas" id="mm-preview-canvas"></canvas>
                 <img class="mm-sk-preview__fallback" id="mm-preview-fallback" alt="" hidden />
                 <span class="mm-sk-preview__caption" id="mm-preview-caption"></span>
@@ -253,66 +277,67 @@ export class MainMenu {
             </div>
 
             <fieldset class="mm-field">
-              <legend class="mm-field__label" id="mm-map-label">Mapa</legend>
+              <legend class="mm-field__label" id="mm-map-label">${t('skirmish.map')}</legend>
               <div class="mm-maps mm-maps--grid" role="group" aria-labelledby="mm-map-label">${mapCards}</div>
             </fieldset>
 
             <fieldset class="mm-field">
-              <legend class="mm-field__label">Jogadores <span class="mm-field__count" id="mm-sk-count"></span></legend>
+              <legend class="mm-field__label">${t('skirmish.players')} <span class="mm-field__count" id="mm-sk-count"></span></legend>
               <div class="mm-players" id="mm-sk-players"></div>
               <div class="mm-sk-add">
-                <button type="button" class="mm-btn mm-btn--ghost" data-action="add-ai" id="mm-sk-add-ai">+ Adicionar oponente</button>
+                <button type="button" class="mm-btn mm-btn--ghost" data-action="add-ai" id="mm-sk-add-ai">${t('skirmish.addOpponent')}</button>
               </div>
             </fieldset>
 
             <div class="mm-row">
               <fieldset class="mm-field mm-field--grow">
-                <legend class="mm-field__label">Recursos iniciais</legend>
+                <legend class="mm-field__label">${t('skirmish.startRes')}</legend>
                 <div class="mm-segmented">${resources}</div>
               </fieldset>
               <fieldset class="mm-field mm-field--grow">
-                <legend class="mm-field__label">Condição de vitória</legend>
+                <legend class="mm-field__label">${t('skirmish.victory')}</legend>
                 <div class="mm-segmented" style="grid-template-columns: repeat(2, 1fr)">${victories}</div>
               </fieldset>
             </div>
 
             <div class="mm-field">
-              <label class="mm-field__label" for="mm-seed">Semente do mapa</label>
+              <label class="mm-field__label" for="mm-seed">${t('skirmish.seed')}</label>
               <div class="mm-seed">
-                <input type="text" id="mm-seed" class="mm-input" maxlength="24" placeholder="Aleatória" autocomplete="off" spellcheck="false" />
-                <button type="button" class="mm-btn mm-btn--ghost" data-action="roll-seed">Sortear</button>
+                <input type="text" id="mm-seed" class="mm-input" maxlength="24" placeholder="${t('skirmish.random')}" autocomplete="off" spellcheck="false" />
+                <button type="button" class="mm-btn mm-btn--ghost" data-action="roll-seed">${t('skirmish.roll')}</button>
               </div>
-              <p class="mm-hint">Número ou palavra. A mesma semente no mesmo mapa gera a mesma partida.</p>
+              <p class="mm-hint">${t('skirmish.seedHint')}</p>
             </div>
             <p class="mm-sk-error" id="mm-sk-error" role="alert" hidden></p>
           </div>
 
           <footer class="mm-panel__foot">
-            <button type="button" class="mm-btn mm-btn--ghost" data-action="close">Voltar</button>
+            <button type="button" class="mm-btn mm-btn--ghost" data-action="close">${t('common.back')}</button>
             <button type="button" class="mm-btn mm-btn--primary mm-btn--start" data-action="start">
-              <span class="mm-btn__label">Iniciar</span>
+              <span class="mm-btn__label">${t('skirmish.start')}</span>
             </button>
           </footer>
         </section>
       </div>
 
       <footer class="mm-footer">
-        <span>Versão de desenvolvimento · maquete</span>
-        <span class="mm-footer__keys"><kbd>Tab</kbd> navegar <kbd>Enter</kbd> confirmar <kbd>Esc</kbd> voltar</span>
+        <span>${t('menu.version')}</span>
+        <button type="button" class="mm-footer__lang" data-action="lang" aria-label="${t('menu.language')}">${getLanguage() === 'en' ? 'PT-BR' : 'EN'}</button>
+        <span class="mm-footer__keys">${t('menu.keys')}</span>
       </footer>
 
       <!-- Modal: Créditos -->
       <div class="mm-modal" id="mm-credits" role="dialog" aria-modal="true" aria-labelledby="mm-cr-title" hidden>
         <div class="mm-modal__card">
-          <h2 id="mm-cr-title" class="mm-panel__title">Créditos</h2>
+          <h2 id="mm-cr-title" class="mm-panel__title">${t('menu.credits')}</h2>
           <div class="mm-credits">
-            <p><span>Direção e design</span>Rafael</p>
-            <p><span>Programação e arte procedural</span>Equipe WarPoly</p>
-            <p><span>Motor 3D</span>three.js</p>
-            <p><span>Ferramentas</span>Vite · Blender</p>
-            <p class="mm-credits__note">Inspirado nos clássicos de estratégia em tempo real dos anos 90. Todos os nomes, facções e personagens são originais.</p>
+            <p><span>${t('credits.direction')}</span>Rafael</p>
+            <p><span>${t('credits.programming')}</span>${t('credits.team')}</p>
+            <p><span>${t('credits.engine')}</span>three.js</p>
+            <p><span>${t('credits.tools')}</span>Vite · Blender</p>
+            <p class="mm-credits__note">${t('credits.note')}</p>
           </div>
-          <button type="button" class="mm-btn mm-btn--primary mm-modal__ok" data-action="close-modal">Fechar</button>
+          <button type="button" class="mm-btn mm-btn--primary mm-modal__ok" data-action="close-modal">${t('common.close')}</button>
         </div>
       </div>
     `;
@@ -331,6 +356,8 @@ export class MainMenu {
       else if (action === 'credits') this.openCredits(el);
       else if (action === 'close') this.closePanel();
       else if (action === 'close-modal') this.closeCredits();
+      else if (action === 'lang') setLanguage(getLanguage() === 'en' ? 'pt-BR' : 'en');
+      else if (action === 'tutorial') this.startTutorial();
       else if (action === 'start') this.start();
       else if (action === 'add-ai') this._apply(addAI(this.setup), { focus: '[data-sk="remove"]:last-of-type' });
       else if (action === 'roll-seed') {
@@ -472,7 +499,7 @@ export class MainMenu {
     saveSetup(this.setup);
     this.root.classList.add('mm-leaving');
     const btn = this.root.querySelector('.mm-btn--start');
-    if (btn) { btn.disabled = true; btn.querySelector('.mm-btn__label').textContent = 'Preparando…'; }
+    if (btn) { btn.disabled = true; btn.querySelector('.mm-btn__label').textContent = t('skirmish.preparing'); }
     const reduce = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
     const choice = { config, faction: this.setup.localFaction, difficulty: this.setup.ai[0].difficulty, mapId: this.setup.mapId, victoryMode: this.setup.victoryMode };
     if (this.onStart) {
@@ -512,7 +539,7 @@ export class MainMenu {
     this._renderErrors(validateSetup(s));
     const f = FACTIONS.find((x) => x.id === s.localFaction);
     const cap = root.querySelector('#mm-preview-caption');
-    if (cap && f) cap.textContent = f.name;
+    if (cap && f) cap.textContent = factionName(f.id);
     const fb = root.querySelector('#mm-preview-fallback');
     if (fb && f) fb.src = f.icon;
     this.preview?.setFaction(s.localFaction);
@@ -522,32 +549,32 @@ export class MainMenu {
   _renderPlayers() {
     const s = this.setup;
     const mapDef = getMap(s.mapId);
-    const factionOpt = (sel) => [['human', 'Reino Humano'], ['orc', 'Clãs Orcs'], ['random', 'Aleatória']]
+    const factionOpt = (sel) => [['human', factionName('human')], ['orc', factionName('orc')], ['random', t('skirmish.random')]]
       .map(([v, l]) => `<option value="${v}" ${v === sel ? 'selected' : ''}>${l}</option>`).join('');
-    const diffOpt = (sel) => DIFFICULTIES.map((d) => `<option value="${d.id}" ${d.id === sel ? 'selected' : ''}>${d.label}</option>`).join('');
-    const teamOpt = (sel) => Array.from({ length: MAX_TEAMS }, (_, t) => `<option value="${t}" ${t === sel ? 'selected' : ''}>Time ${t + 1}</option>`).join('');
+    const diffOpt = (sel) => DIFFICULTIES.map((d) => `<option value="${d}" ${d === sel ? 'selected' : ''}>${t(`skirmish.diff.${d}`)}</option>`).join('');
+    const teamOpt = (sel) => Array.from({ length: MAX_TEAMS }, (_, n) => `<option value="${n}" ${n === sel ? 'selected' : ''}>${t('skirmish.team', { n: n + 1 })}</option>`).join('');
     const colors = (who, cur) => PLAYER_COLORS.map((c, i) => `
       <button type="button" class="mm-swatch${i === cur ? ' is-on' : ''}" style="--sw:${c}" data-sk="color" data-who="${who}" data-color="${i}"
-        aria-label="Cor ${i + 1}${i === cur ? ' (atual)' : ''}" aria-pressed="${i === cur}"></button>`).join('');
-    const slotOpt = mapDef.startSlots.map((_, i) => `<option value="${i}" ${i === s.localSlot ? 'selected' : ''}>Posição ${i + 1}</option>`).join('');
+        aria-label="${t('skirmish.color', { n: i + 1 })}${i === cur ? ` (${t('skirmish.current')})` : ''}" aria-pressed="${i === cur}"></button>`).join('');
+    const slotOpt = mapDef.startSlots.map((_, i) => `<option value="${i}" ${i === s.localSlot ? 'selected' : ''}>${t('skirmish.position', { n: i + 1 })}</option>`).join('');
 
     const rows = [`
       <div class="mm-player mm-player--you">
-        <span class="mm-player__name">Você <em>${s.localFaction === 'orc' ? 'Clãs Orcs' : 'Reino Humano'}</em></span>
-        <label class="mm-player__cell"><span class="mm-sr">Posição inicial</span><select class="mm-select" data-sk="slot" data-who="-1">${slotOpt}</select></label>
-        <label class="mm-player__cell"><span class="mm-sr">Time</span><select class="mm-select" data-sk="team" data-who="-1">${teamOpt(s.localTeam)}</select></label>
-        <span class="mm-player__colors" role="group" aria-label="Cor do jogador">${colors(-1, s.localColor)}</span>
+        <span class="mm-player__name">${t('player.you')} <em>${factionName(s.localFaction)}</em></span>
+        <label class="mm-player__cell"><span class="mm-sr">${t('skirmish.startPos')}</span><select class="mm-select" data-sk="slot" data-who="-1">${slotOpt}</select></label>
+        <label class="mm-player__cell"><span class="mm-sr">${t('skirmish.teamLabel')}</span><select class="mm-select" data-sk="team" data-who="-1">${teamOpt(s.localTeam)}</select></label>
+        <span class="mm-player__colors" role="group" aria-label="${t('skirmish.playerColor')}">${colors(-1, s.localColor)}</span>
         <span class="mm-player__end"></span>
       </div>`];
     s.ai.forEach((a, i) => {
       rows.push(`
       <div class="mm-player">
-        <span class="mm-player__name">IA ${i + 1}</span>
-        <label class="mm-player__cell"><span class="mm-sr">Facção da IA ${i + 1}</span><select class="mm-select" data-sk="ai-faction" data-who="${i}">${factionOpt(a.faction)}</select></label>
-        <label class="mm-player__cell"><span class="mm-sr">Dificuldade da IA ${i + 1}</span><select class="mm-select mm-select--diff-${a.difficulty}" data-sk="ai-diff" data-who="${i}">${diffOpt(a.difficulty)}</select></label>
-        <label class="mm-player__cell"><span class="mm-sr">Time da IA ${i + 1}</span><select class="mm-select" data-sk="team" data-who="${i}">${teamOpt(a.team)}</select></label>
-        <span class="mm-player__colors" role="group" aria-label="Cor da IA ${i + 1}">${colors(i, a.color)}</span>
-        <span class="mm-player__end">${s.ai.length > 1 ? `<button type="button" class="mm-close mm-close--sm" data-sk="remove" data-who="${i}" aria-label="Remover IA ${i + 1}">✕</button>` : ''}</span>
+        <span class="mm-player__name">${t('player.ai', { n: i + 1 })}</span>
+        <label class="mm-player__cell"><span class="mm-sr">${t('skirmish.aiFaction', { n: i + 1 })}</span><select class="mm-select" data-sk="ai-faction" data-who="${i}">${factionOpt(a.faction)}</select></label>
+        <label class="mm-player__cell"><span class="mm-sr">${t('skirmish.aiDifficulty', { n: i + 1 })}</span><select class="mm-select mm-select--diff-${a.difficulty}" data-sk="ai-diff" data-who="${i}">${diffOpt(a.difficulty)}</select></label>
+        <label class="mm-player__cell"><span class="mm-sr">${t('skirmish.aiTeam', { n: i + 1 })}</span><select class="mm-select" data-sk="team" data-who="${i}">${teamOpt(a.team)}</select></label>
+        <span class="mm-player__colors" role="group" aria-label="${t('skirmish.aiColor', { n: i + 1 })}">${colors(i, a.color)}</span>
+        <span class="mm-player__end">${s.ai.length > 1 ? `<button type="button" class="mm-close mm-close--sm" data-sk="remove" data-who="${i}" aria-label="${t('skirmish.removeAi', { n: i + 1 })}">✕</button>` : ''}</span>
       </div>`);
     });
     const box = this.root.querySelector('#mm-sk-players');
@@ -560,10 +587,10 @@ export class MainMenu {
       match?.focus({ preventScroll: true });
     }
     const max = maxAIs(mapDef);
-    this.root.querySelector('#mm-sk-count').textContent = `${s.ai.length}/${max} oponente${max > 1 ? 's' : ''}`;
+    this.root.querySelector('#mm-sk-count').textContent = t('skirmish.opponents', { current: s.ai.length, max, count: max });
     const add = this.root.querySelector('#mm-sk-add-ai');
     add.disabled = s.ai.length >= max;
-    add.title = add.disabled ? `Este mapa comporta no máximo ${max} oponente${max > 1 ? 's' : ''}.` : '';
+    add.title = add.disabled ? t('skirmish.err.tooMany', { count: max }) : '';
   }
 
   _renderErrors(errors) {
@@ -595,7 +622,7 @@ export class MainMenu {
         fb.hidden = false;
       }
     } catch (err) {
-      console.warn('[MainMenu] prévia 3D indisponível:', err);
+      console.warn('[MainMenu] 3D preview unavailable:', err);
       if (canvas) canvas.hidden = true;
       if (fb) fb.hidden = false;
     } finally {

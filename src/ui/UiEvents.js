@@ -5,7 +5,8 @@
  */
 import { EVT } from '../sim/events.js';
 import { UPGRADE_CONFIG } from '../core/UpgradeConfig.js';
-import { getTierName, getBuildingDef } from '../data/index.js';
+import { t, researchName, tierName } from '../i18n/index.js';
+import { buildingLabel, playerDisplayName } from './uiText.js';
 import { AlertCenter } from './alerts.js';
 
 const ALERT_ICON = { attack: '⚔️', depleted: '⛏️', research: '🔥', built: '🏗️', food: '🌾' };
@@ -46,9 +47,9 @@ export function createUiEvents(gm, uiManager) {
     const player = gm.getPlayer(ownerId);
     const cfg = UPGRADE_CONFIG[upgradeId];
     const factionType = player && player.factionId === 'orc' ? 'orc' : 'human';
-    const upgName = cfg?.name?.[factionType] || upgradeId;
+    const upgName = researchName(upgradeId, factionType, cfg);
     const lvText = cfg && cfg.maxLevel > 1 && level ? ` ${level}/${cfg.maxLevel}` : '';
-    alerts.raise('research', { pos: pos2d(pos), text: `Pesquisa concluída: ${upgName}${lvText}` });
+    alerts.raise('research', { pos: pos2d(pos), text: t('alert.researchDone', { name: `${upgName}${lvText}` }) });
   });
 
   // F3-06: Centro evoluiu de nível — aviso PT-BR (só para o jogador local, dono do Centro).
@@ -56,25 +57,24 @@ export function createUiEvents(gm, uiManager) {
     if (!isLocal(ownerId)) return;
     const player = gm.getPlayer(ownerId);
     const factionType = player && player.factionId === 'orc' ? 'orc' : 'human';
-    uiManager.showNotification(`🏰 ${getTierName(factionType, tier)} concluído!`);
+    uiManager.showNotification(`🏰 ${t('alert.tierDone', { name: tierName(factionType, tier) })}`);
   });
 
   // Jogador derrotado: mostrado para qualquer jogador (era assim antes — sem filtro de dono).
   on(EVT.PLAYER_DEFEATED, ({ name }) => {
-    uiManager.showNotification(`☠️ ${name} foi derrotado!`);
+    uiManager.showNotification(`☠️ ${t('alert.defeated', { name: playerDisplayName(name) })}`);
   });
 
   // F3-04: mina/pedreira esgotada — sem `ownerId` no payload (jazida é neutra), mostrado a
   // qualquer jogador local como as demais notificações genéricas.
   on(EVT.RESOURCE_DEPLETED, ({ resourceType, pos }) => {
-    const label = resourceType === 'stone' ? 'Pedreira' : 'Mina de ouro';
-    alerts.raise('depleted', { pos: pos2d(pos), text: `${label} esgotada` });
+    alerts.raise('depleted', { pos: pos2d(pos), text: t('alert.depletedNode', { name: t(`res.node.${resourceType === 'stone' ? 'stone' : 'gold'}`) }) });
   });
 
   // F6-05: construção concluída (só do jogador local).
   on(EVT.BUILDING_COMPLETED, ({ ownerId, buildingType, pos }) => {
     if (!isLocal(ownerId)) return;
-    alerts.raise('built', { pos: pos2d(pos), text: `Construção concluída: ${getBuildingDef(buildingType).name}` });
+    alerts.raise('built', { pos: pos2d(pos), text: t('alert.builtDone', { name: buildingLabel(buildingType) }) });
   });
 
   // F6-05: "Estamos sob ataque" — dano a unidade/construção do jogador local, ou o aviso da IA

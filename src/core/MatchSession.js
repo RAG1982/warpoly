@@ -1,10 +1,12 @@
-import { Terrain } from '../world/Terrain.js';
+import { Terrain } from '../sim/Terrain.js';
+import { TerrainView } from '../render/TerrainView.js';
+import { FogView } from '../render/FogView.js';
 import { getMap } from '../data/maps/index.js';
 import { Water } from '../world/Water.js';
 import { Decorations } from '../world/Decorations.js';
 import { ParticleSystem } from '../entities/ParticleSystem.js';
 import { ModelFactory } from '../entities/ModelFactory.js';
-import { GameManager } from './GameManager.js';
+import { GameManager } from '../sim/GameManager.js';
 import { InputManager } from './InputManager.js';
 import { UIManager } from '../ui/UIManager.js';
 import { collectSharedResources, disposeObjectTree } from '../render/sceneDisposal.js';
@@ -50,31 +52,41 @@ export class MatchSession {
     this._resetView();
 
     // Mundo (F2-05: mapa orientado a dados — ver src/data/maps/README.md)
-    this.terrain = new Terrain(scene, getMap(matchConfig.mapId));
+    this.terrain = new Terrain(getMap(matchConfig.mapId));
+    this.terrainView = new TerrainView(scene, this.terrain); // F2-08c: malha do terreno (picking via `terrainView.mesh`)
     this.water = new Water(scene, this.terrain);
     this.decorations = new Decorations(scene, this.terrain);
     this.particleSystem = new ParticleSystem(scene);
 
     // Simulação (jogadores e bases a partir da MatchConfig, F2-01)
-    this.gameManager = new GameManager(scene, this.terrain, sound, this.particleSystem, matchConfig);
+    this.gameManager = new GameManager(this.terrain, sound, this.particleSystem, matchConfig);
 
     // Entrada e HUD
-    this.inputManager = new InputManager(sceneManager, this.gameManager, this.terrain);
+    this.inputManager = new InputManager(sceneManager, this.gameManager, this.terrain, this.terrainView);
     this.uiManager = new UIManager(this.gameManager, sceneManager, this.inputManager, sound);
     this.gameManager.uiManager = this.uiManager;
     this.gameManager.sceneManager = sceneManager;
     this.inputManager.uiManager = this.uiManager;
 
-    // F2-08b: malhas das entidades de simulação puras (árvores, minas, critters) — antes do warm-up de shaders.
+    // F2-08b/c: malhas das entidades de simulação puras (árvores, minas, critters, construções, unidades) e a parte
+    // visual da névoa — antes do warm-up de shaders. Fora do headless.
+    this.fogView = null;
+    this.entityViews = null;
     if (!this.gameManager.headless) {
-      this.entityViews = new EntityViews(this.gameManager, scene);
-      this.gameManager.entityViews = this.entityViews;
+      const gm = this.gameManager;
+      // Névoa (textura/shader, minimapa, fantasmas): criada com só terreno/água/decoração na cena (`markGroundMeshes`).
+      this.fogView = new FogView(gm.fogOfWar, scene);
+      gm.fogView = this.fogView; // lido pela HUD (minimapa)
+      this.entityViews = new EntityViews(gm, scene);
+      gm.entityViews = this.entityViews; // picking (InputManager)
+      this.fogView.viewOf = e => this.entityViews.viewOf(e);
       this.entityViews.update();
     }
 
-    this.gameManager.focusCameraOnLocalBase();
+    this.focusCameraOnLocalBase();
+    this.gameManager.onMatchStarted = () => this.focusCameraOnLocalBase(); // `GameManager.startMatch`
     // Compila os shaders da cena viva antes de a névoa esconder objetos
-    this.gameManager.warmLiveScene();
+    this._warmLiveScene();
 
     // F2-07: ouvintes de apresentação (áudio/VFX/UI) do barramento de eventos da simulação —
     // nunca em modo headless (`MatchConfig.headless`: sem DOM/WebGL/Web Audio em Node).
@@ -84,9 +96,35 @@ export class MatchSession {
     if (!this.gameManager.headless) {
       this._disposeAudioEvents = createAudioEvents(this.gameManager, sound);
       this._disposeVfxEvents = createVfxEvents(this.gameManager, this.particleSystem);
-      this.gameManager.hazardView = new HazardView(this.gameManager.scene, this.gameManager); // F4-04b
+      this.gameManager.hazardView = new HazardView(scene, this.gameManager); // F4-04b
       this.projectileViews = new ProjectileViews(this.gameManager, scene); // F2-08: malhas dos projéteis
       this._disposeUiEvents = createUiEvents(this.gameManager, this.uiManager);
+    }
+  }
+
+  /** Câmera na base do jogador local. */
+  focusCameraOnLocalBase() {
+    const p = this.gameManager.localPlayer;
+    if (this.sceneManager && p && p.startPos) {
+      this.sceneManager.cameraTarget.set(p.startPos.x, 2.5, p.startPos.z);
+    }
+  }
+
+  /** Compila os shaders de tudo o que está na cena (inclusive malhas ocultas), antes da primeira renderização. */
+  _warmLiveScene() {
+    const sm = this.sceneManager;
+    if (!sm || !sm.renderer) return;
+    const scene = sm.scene;
+    const unhideList = [];
+    scene.traverse(obj => {
+      if (obj.isMesh && !obj.visible) {
+        obj.visible = true;
+        unhideList.push(obj);
+      }
+    });
+    sm.renderer.compile(scene, sm.camera);
+    for (let i = 0; i < unhideList.length; i++) {
+      unhideList[i].visible = false;
     }
   }
 
@@ -114,20 +152,36 @@ export class MatchSession {
     this.sceneManager.updateCamera(delta);
     this.water.update(elapsed);
     if (simulate) {
-      const alpha = this.gameManager.advance(delta);
-      this.gameManager.renderUpdate(delta, alpha);
-      this.entityViews?.update(delta, alpha);
-      this.gameManager.events.flush(); // VFX ambiente emitido pelas views (fumaça, faíscas…)
+      const gm = this.gameManager;
+      const alpha = gm.advance(delta);
+      this._presentFrame(delta, alpha);
       this.projectileViews?.update(alpha);
       this.particleSystem.update(delta);
     } else {
       // Pausado: mantém a pose de simulação (sem avançar), billboards seguem a câmera.
-      this.gameManager.renderUpdate(0, 1);
-      this.entityViews?.update(0, 1);
-      this.gameManager.events.flush();
+      this._presentFrame(0, 1);
       this.projectileViews?.update(1);
     }
     this.uiManager.update(delta);
+  }
+
+  /**
+   * F2-08c: parte visual do quadro (nunca escreve na simulação): perigos, névoa (textura/fantasmas/esconder malhas
+   * inimigas), views das entidades (interpolação, LOD de animação, barras, VFX ambiente) e despacho dos eventos
+   * emitidos pelas views (fumaça, faíscas…) para áudio/partículas.
+   */
+  _presentFrame(delta, alpha) {
+    const gm = this.gameManager;
+    if (!gm.isPaused && !gm.isGameOver) {
+      if (gm.hazardView) gm.hazardView.update(delta); // F4-04b
+      if (this.fogView) {
+        const fl = gm._fogLists;
+        this.fogView.update(fl.playerUnits, fl.playerBuildings, gm.enemies, fl.enemyBuildings);
+      }
+    }
+    this.entityViews?.update(delta, alpha);
+    gm.renderUpdate(delta, alpha); // despacha `events.flush()` (se não pausado)
+    gm.events.flush();
   }
 
   /** Estatísticas para o teste de vazamento. */
@@ -149,8 +203,6 @@ export class MatchSession {
     if (this.gameManager.hazardView) { this.gameManager.hazardView.dispose(); this.gameManager.hazardView = null; }
     this.projectileViews?.dispose();
     this.projectileViews = null;
-    this.entityViews?.dispose();
-    this.entityViews = null;
     this._disposeUiEvents?.();
 
     // 1. Entrada e HUD primeiro: nada mais reage a eventos desta partida.
@@ -171,11 +223,17 @@ export class MatchSession {
       materials: disposed.materials.size
     };
 
-    // 4. Simulação: IAs, entidades, névoa, árvores instanciadas.
+    // 4. Views das entidades (árvores instanciadas, lotes de muralha) e da névoa; depois a simulação (IAs, entidades).
+    this.entityViews?.dispose();
+    this.entityViews = null;
+    this.fogView?.dispose();
+    this.fogView = null;
+    this.gameManager.fogView = null;
+    this.gameManager.entityViews = null;
     this.gameManager.dispose();
 
     // 5. Solta as referências (o GC leva o resto).
-    this.terrain = this.water = this.decorations = this.particleSystem = null;
+    this.terrain = this.terrainView = this.water = this.decorations = this.particleSystem = null;
     this.gameManager = this.inputManager = this.uiManager = null;
     this._baseline = null;
   }

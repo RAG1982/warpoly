@@ -49,10 +49,10 @@ describe('MatchConfig.victoryMode (F3-09)', () => {
 
 function makeGm(victoryMode, seed = 7) {
   const scene = new THREE.Scene();
-  const terrain = new Terrain(scene);
+  const terrain = new Terrain();
   const cfg = createMatchConfig({ seed, headless: true, victoryMode });
   cfg.players.forEach(p => { p.isAI = true; }); // IA × IA (o jogador local também joga sozinho)
-  return new GameManager(scene, terrain, null, null, cfg);
+  return new GameManager(terrain, null, null, cfg);
 }
 const run = (gm, n) => { for (let i = 0; i < n; i++) gm.simStep(SIM_DT); };
 const isHq = x => getBuildingDef(x.type).role === 'hq';

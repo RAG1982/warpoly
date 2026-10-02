@@ -10,6 +10,7 @@ import { createBuildingView } from './createBuildingView.js';
 import { WallBatch } from './WallView.js';
 import { BuildingView } from './BuildingView.js';
 import { UnitView } from './UnitView.js';
+import { TreeManager } from '../world/TreeManager.js';
 import * as THREE from 'three';
 
 export class EntityViews {
@@ -20,6 +21,8 @@ export class EntityViews {
   constructor(gm, scene) {
     this.gm = gm;
     this.scene = scene;
+    /** Instanced Trees System (poucos draw calls para todas as árvores); recriado quando o mapa é recriado. */
+    this.treeManager = new TreeManager(scene);
     /** @type {Map<object, {root: object, update: Function, dispose: Function}>} */
     this.views = new Map();
     this._frame = 0;
@@ -116,7 +119,12 @@ export class EntityViews {
       this.lodTarget = null;
     }
     this._sync(this._deposits, gm.resourceDeposits, e => new ResourceDepositView(e, this.scene), frame, true);
-    this._sync(this._trees, gm.trees, e => new TreeView(e, this.scene, gm.treeManager), frame, true);
+    if (this._trees.ref && this._trees.ref !== gm.trees) {
+      // Mapa recriado (`GameManager.resetMap` troca as listas): novas árvores → novo conjunto de instâncias.
+      this.treeManager.dispose();
+      this.treeManager = new TreeManager(this.scene);
+    }
+    this._sync(this._trees, gm.trees, e => new TreeView(e, this.scene, this.treeManager), frame, true);
     this._sync(this._critters, gm.critters, e => new CritterView(e, this.scene), frame, false);
     this._sync(this._buildings, gm.buildings, e => createBuildingView(e, this.scene, f => this.getWallBatch(f)), frame, false);
     this._sync(this._units, gm.allUnits, e => new UnitView(e, this.scene), frame, false);
@@ -127,6 +135,7 @@ export class EntityViews {
     for (const v of this.views.values()) if (v instanceof BuildingView || v instanceof UnitView) v.dispose();
     for (const wb of Object.values(this._wallBatches)) wb.dispose();
     this._wallBatches = {};
+    this.treeManager.dispose();
     this.views.clear();
   }
 }

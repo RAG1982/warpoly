@@ -19,9 +19,9 @@ describe('sem ouro passivo (F3-04)', () => {
 
   it('Fazenda pronta por 60s simulados: ouro do jogador não muda (sem trabalhador coletando)', () => {
     const scene = new THREE.Scene();
-    const terrain = new Terrain(scene);
+    const terrain = new Terrain();
     const cfg = createMatchConfig({ seed: 5, headless: true });
-    const gm = new GameManager(scene, terrain, null, null, cfg);
+    const gm = new GameManager(terrain, null, null, cfg);
 
     const owner = gm.getPlayer(0);
     const pos = owner.startPos;

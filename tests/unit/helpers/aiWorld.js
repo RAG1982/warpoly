@@ -15,7 +15,7 @@ export function makeGm({ seed = 1, ffa = false, difficulties = [], allAI = true,
     if (difficulties[i]) p.difficulty = difficulties[i];
   });
   const scene = new THREE.Scene();
-  return new GameManager(scene, new Terrain(scene, getMap(cfg.mapId)), null, null, cfg);
+  return new GameManager(new Terrain(getMap(cfg.mapId)), null, null, cfg);
 }
 
 export function run(gm, ticks) {

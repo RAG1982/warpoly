@@ -11,7 +11,7 @@ for (const mode of ['conquest', 'regicide']) {
     const scene = new THREE.Scene();
     const cfg = createMatchConfig({ seed, headless: true, victoryMode: mode });
     cfg.players.forEach((p) => { p.isAI = true; });
-    const gm = new GameManager(scene, new Terrain(scene), null, null, cfg);
+    const gm = new GameManager(new Terrain(), null, null, cfg);
     let t = 0;
     while (!gm.isGameOver && t < MAX_TICKS) { gm.simStep(SIM_DT); t++; }
     const r = gm.result || gm.matchStats.snapshot();

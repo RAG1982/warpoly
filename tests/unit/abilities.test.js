@@ -17,9 +17,9 @@ import { Unit } from '../../src/entities/Unit.js';
  */
 function makeGm(seed = 7) {
   const scene = new THREE.Scene();
-  const terrain = new Terrain(scene);
+  const terrain = new Terrain();
   const cfg = createMatchConfig({ seed, headless: true });
-  const gm = new GameManager(scene, terrain, null, null, cfg);
+  const gm = new GameManager(terrain, null, null, cfg);
   gm.debugAbilities = true;
   return gm;
 }

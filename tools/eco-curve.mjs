@@ -26,9 +26,9 @@ const SIM_SECONDS = 180; // 3 min simulados — várias viagens completas por tr
 
 function measure(workerCount) {
   const scene = new THREE.Scene();
-  const terrain = new Terrain(scene);
+  const terrain = new Terrain();
   const cfg = createMatchConfig({ seed: 1, headless: true });
-  const gm = new GameManager(scene, terrain, null, null, cfg);
+  const gm = new GameManager(terrain, null, null, cfg);
 
   const deposit = gm.resourceDeposits.find(d => d.type === 'gold');
   const { x, z } = deposit.mesh.position;

@@ -16,7 +16,7 @@ const MIX = ['footman', 'footman', 'footman', 'archer', 'footman', 'knight', 'ba
 
 function makeGm(seed = 9) {
   const scene = new THREE.Scene();
-  const gm = new GameManager(scene, new Terrain(scene), null, null, createMatchConfig({ seed, headless: true }));
+  const gm = new GameManager(new Terrain(), null, null, createMatchConfig({ seed, headless: true }));
   gm.aiDirectors.forEach(d => d.dispose?.());
   gm.aiDirectors = [];
   gm.aiDirector = null;

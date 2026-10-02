@@ -1,5 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import * as THREE from 'three';
+import { EntityViews } from '../../src/render/EntityViews.js';
+import { ModelFactory } from '../../src/entities/ModelFactory.js';
 import { GameManager } from '../../src/core/GameManager.js';
 import { Terrain } from '../../src/world/Terrain.js';
 import { createMatchConfig } from '../../src/sim/MatchConfig.js';
@@ -17,8 +19,8 @@ import { stateChecksum } from '../../src/sim/checksum.js';
 /** spells.test.js — F4-04: magias do Mago/Necromante, canalização, invisibilidade, polimorfia, cadáveres. */
 function makeGm(seed = 11) {
   const scene = new THREE.Scene();
-  const terrain = new Terrain(scene);
-  const gm = new GameManager(scene, terrain, null, null, createMatchConfig({ seed, headless: true }));
+  const terrain = new Terrain();
+  const gm = new GameManager(terrain, null, null, createMatchConfig({ seed, headless: true }));
   return gm;
 }
 const hqOf = (gm, id) => gm.buildings.find(b => b.ownerId === id && (b.type === 'castle' || b.type === 'great_hall'));
@@ -143,15 +145,23 @@ describe('magias do Mago', () => {
     const e = foe(gm, 5, 0, 'knight');
     const id = e.id;
     const siege = foe(gm, 5, 3, 'catapult');
-    const scene0 = gm.scene.children.length;
+    // F2-08c: a malha é da view; a troca de modelo da Transmutação não pode deixar malhas órfãs na cena.
+    ModelFactory.headless = true;
+    const viewScene = new THREE.Scene();
+    const views = new EntityViews(gm, viewScene);
+    views.update(0, 1);
+    const scene0 = viewScene.children.length;
     cast(gm, m, 'polymorph', { targetId: e.id });
     run(gm, 3);
+    views.update(0, 1);
     expect(e.type).toBe('sheep');
     expect(e.id).toBe(id);
     expect(e.ownerId).toBe(1);
     expect(e.hp).toBeLessThanOrEqual(20);
     expect(e.abilities.length).toBe(0);
-    expect(gm.scene.children.length).toBe(scene0);
+    expect(viewScene.children.length).toBe(scene0);
+    views.dispose();
+    ModelFactory.headless = false;
     const msgs = notifies(gm);
     m.mana = 255;
     m.cooldowns = {};

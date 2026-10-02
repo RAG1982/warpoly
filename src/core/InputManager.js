@@ -12,10 +12,12 @@ import { resolveAbility, needsEntityTarget, targetProblem, canCast, pickCaster, 
 const EDGE_PX = 8;
 
 export class InputManager {
-  constructor(sceneManager, gameManager, terrain) {
+  constructor(sceneManager, gameManager, terrain, terrainView = null) {
     this.sm = sceneManager;
     this.gm = gameManager;
     this.terrain = terrain;
+    /** F2-08c: malha do terreno (picking do ponto sob o mouse); a `Terrain` de simulação não tem malha. */
+    this.terrainView = terrainView;
 
     // Raycaster & Mouse
     this.raycaster = new THREE.Raycaster();
@@ -686,7 +688,7 @@ export class InputManager {
     this.raycaster.setFromCamera(this.mouse, this.sm.camera);
 
     // Test terrain intersection. Sem terreno sob o mouse (céu): nenhuma entidade sob o cursor.
-    const hits = this.raycaster.intersectObject(this.terrain.mesh);
+    const hits = this.raycaster.intersectObject(this.terrainView.mesh);
     if (hits.length === 0) {
       this.hoveredEntity = null;
       return;

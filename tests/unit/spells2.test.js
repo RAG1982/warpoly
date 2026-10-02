@@ -2,6 +2,7 @@ import { describe, it, expect } from 'vitest';
 import * as THREE from 'three';
 import { GameManager } from '../../src/core/GameManager.js';
 import { EntityViews } from '../../src/render/EntityViews.js';
+import { ModelFactory } from '../../src/entities/ModelFactory.js';
 import { Terrain } from '../../src/world/Terrain.js';
 import { createMatchConfig } from '../../src/sim/MatchConfig.js';
 import { CMD } from '../../src/sim/commands.js';
@@ -19,8 +20,8 @@ import { stateChecksum } from '../../src/sim/checksum.js';
 /** spells2.test.js — F4-04b: Templo/Altar, Templário/Ogro Feiticeiro, magias restantes, runas, redemoinho. */
 function makeGm(seed = 11) {
   const scene = new THREE.Scene();
-  const terrain = new Terrain(scene);
-  return new GameManager(scene, terrain, null, null, createMatchConfig({ seed, headless: true }));
+  const terrain = new Terrain();
+  return new GameManager(terrain, null, null, createMatchConfig({ seed, headless: true }));
 }
 const isHq = b => b.type === 'castle' || b.type === 'great_hall';
 const hqOf = (gm, id) => gm.buildings.find(b => b.ownerId === id && isHq(b));
@@ -493,13 +494,16 @@ describe('determinismo e sem vazamento', () => {
     const eyeU = gm.allUnits.find(u => u.type === 'watching_eye');
     expect(eyeU).toBeTruthy();
     // F2-08c: a malha é da view (EntityViews); some junto com a unidade.
-    const views = new EntityViews(gm, gm.scene);
+    ModelFactory.headless = true;
+    const viewScene = new THREE.Scene();
+    const views = new EntityViews(gm, viewScene);
     views.update(0, 1);
-    expect(views.rootOf(eyeU)?.parent).toBe(gm.scene);
+    expect(views.rootOf(eyeU)?.parent).toBe(viewScene);
     run(gm, 66);
     views.update(0, 1);
     expect(views.rootOf(eyeU)).toBeUndefined();
     views.dispose();
+    ModelFactory.headless = false;
     expect(gm.allUnits.filter(u => u.type === 'watching_eye').length).toBe(0);
   });
 

@@ -42,7 +42,7 @@ export function runMatch(seed, swap, minutes = MINUTES, mapId = MAP) {
     cfg.players[0].startSlot = cfg.players[1].startSlot;
     cfg.players[1].startSlot = a;
   }
-  const gm = new GameManager(scene, new Terrain(scene), null, null, cfg);
+  const gm = new GameManager(new Terrain(), null, null, cfg);
 
   const research = { human: {}, orc: {} };
   const tiers = { human: {}, orc: {} };

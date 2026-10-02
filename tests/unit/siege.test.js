@@ -17,9 +17,9 @@ import { Projectile, ballisticPeak, ballisticFlightTime } from '../../src/sim/pr
  */
 function makeGm(seed = 5) {
   const scene = new THREE.Scene();
-  const terrain = new Terrain(scene);
+  const terrain = new Terrain();
   const cfg = createMatchConfig({ seed, headless: true });
-  return new GameManager(scene, terrain, null, null, cfg);
+  return new GameManager(terrain, null, null, cfg);
 }
 
 const isHq = b => b.type === 'castle' || b.type === 'great_hall';

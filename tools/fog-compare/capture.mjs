@@ -129,7 +129,7 @@ try {
   await shot('fantasma-revisto', 'área revista: o fantasma some');
 
   results.destroyed = await page.evaluate(() => window.__fog.destroyed);
-  results.groundMeshes = await page.evaluate(() => window.game.gameManager.fogOfWar.groundMeshes || null);
+  results.groundMeshes = await page.evaluate(() => window.game.gameManager.fogView.groundMeshes || null);
 } finally {
   fs.writeFileSync(resolve(OUT, `${prefix}-results.json`), JSON.stringify(results, null, 2));
   await browser.close();

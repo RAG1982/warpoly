@@ -1314,8 +1314,8 @@ export class UIManager {
     });
 
     // Névoa no minimapa: preto = não explorado, escurecido = memória, limpo = visível
-    if (fog) {
-      fog.drawMinimapFog(ctx, w, h);
+    if (fog && this.gm.fogView) {
+      this.gm.fogView.drawMinimapFog(ctx, w, h);
     }
 
     // Camera Viewport Box on top of Fog

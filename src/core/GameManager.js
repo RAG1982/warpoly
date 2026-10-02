@@ -14,7 +14,8 @@ import {
 import { Tree } from '../sim/Tree.js';
 import { ResourceDeposit } from '../sim/ResourceDeposit.js';
 import { ModelFactory } from '../entities/ModelFactory.js';
-import { FogOfWar } from './FogOfWar.js';
+import { FogOfWar } from '../sim/FogOfWar.js';
+import { FogView } from '../render/FogView.js';
 import { AIDirector } from '../ai/AIDirector.js';
 import { TreeManager } from '../world/TreeManager.js';
 import { Pathfinder } from './Pathfinder.js';
@@ -156,7 +157,12 @@ export class GameManager {
     // Fog of War (F2-05: tamanho do mundo a partir do mapa — mesma margem de 20 u que o
     // mapa continental (140+20=160) sempre teve em relação à área jogável).
     const fogWorldSize = this.terrain.mapDef.size + 20;
-    this.fogOfWar = new FogOfWar(this.scene, fogWorldSize, fogWorldSize);
+    this.fogOfWar = new FogOfWar(fogWorldSize, fogWorldSize);
+    // F2-08b: parte visual da névoa (textura/shader, minimapa, fantasmas) — só com malhas (fora do headless).
+    // Criada aqui (antes das entidades do mapa) para `markGroundMeshes` ver só terreno/água, como sempre.
+    this.fogView = this.headless ? null : new FogView(this.fogOfWar, this.scene);
+    /** Listas usadas pela `FogView` a cada quadro (recalculadas em `simStep`, junto com `fogOfWar.update`). */
+    this._fogLists = { playerUnits: [], playerBuildings: [], enemyUnits: [], enemyBuildings: [] };
 
     // Um AIDirector por jogador de IA. `aiDirector` = o primeiro (compatibilidade: bench, UI).
     /** @type {AIDirector[]} */
@@ -1664,13 +1670,12 @@ export class GameManager {
     // Update Fog of War (reveals explored territory & culls unexplored enemies)
     if (this.fogOfWar) {
       const localId = this._localPlayerId;
-      this.fogOfWar.update(
-        dt,
-        this.allUnits.filter(u => u.ownerId === localId || this.isAlly(localId, u.ownerId)),
-        this.buildings.filter(b => b.ownerId === localId || this.isAlly(localId, b.ownerId)),
-        this.enemies,
-        this.buildings.filter(b => this.isHostile(localId, b.ownerId))
-      );
+      const fl = this._fogLists;
+      fl.playerUnits = this.allUnits.filter(u => u.ownerId === localId || this.isAlly(localId, u.ownerId));
+      fl.playerBuildings = this.buildings.filter(b => b.ownerId === localId || this.isAlly(localId, b.ownerId));
+      fl.enemyUnits = this.enemies;
+      fl.enemyBuildings = this.buildings.filter(b => this.isHostile(localId, b.ownerId));
+      this.fogOfWar.update(dt, fl.playerUnits, fl.playerBuildings, fl.enemyUnits, fl.enemyBuildings);
     }
 
     // Clean dead units from selection
@@ -1712,6 +1717,12 @@ export class GameManager {
     // `prev → pos` ficam em `src/render/ProjectileViews.js` (chamado pela MatchSession).
 
     if (this.hazardView) this.hazardView.update(frameDelta); // F4-04b
+
+    // Névoa (F2-08b): textura/fantasmas/visibilidade das malhas inimigas lidas do estado de `fogOfWar`.
+    if (this.fogView) {
+      const fl = this._fogLists;
+      this.fogView.update(fl.playerUnits, fl.playerBuildings, this.enemies, fl.enemyBuildings);
+    }
 
     // Construções: billboards, chamas, fumaça e VFX customizado das subclasses.
     this.buildings.forEach(b => {
@@ -1975,6 +1986,8 @@ export class GameManager {
     }
 
     // Névoa por shader (F1-05): sem plano sobreposto (shroudMesh) para remover.
+    this.fogView?.dispose();
+    this.fogView = null;
     this.fogOfWar?.dispose();
 
     this.allUnits = [];

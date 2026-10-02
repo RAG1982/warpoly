@@ -201,7 +201,7 @@ const OLD_BUILDING_TRAINABLE_UNITS = {
   great_hall: ['peon']
 };
 
-// src/core/FogOfWar.js @9f6cb7d (+ fallbacks 20 unidade / 22 construção)
+// src/core/FogOfWar.js (hoje src/sim/FogOfWar.js) @9f6cb7d (+ fallbacks 20 unidade / 22 construção)
 const OLD_visionRadii = {
   villager: 14, knight: 16, archer: 18,
   peon: 14, grunt: 16, axethrower: 18, ogre: 16,

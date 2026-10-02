@@ -107,7 +107,7 @@ def bbox_game(root):
 
 def finish_building(root, name, glb, atlas_name, static_parts, banners, weights, team_default, args,
                     spawn=(0, 0, 4.6), rally=(0, 0, 6.6), extra_nodes=None, extra_anim=None, game_dist=78, quality=80,
-                    banner_name='Anim_Banners'):
+                    banner_name='Anim_Banners', extra_views=None):
     """Pipeline comum das construções: UV atlas 1024² -> bake -> materiais -> junta `Static_Mesh` -> sockets ->
     export -> renders. `static_parts` = malhas estáticas; `banners` = malha(s) em TeamColor (nome Anim_Banners);
     `extra_anim` = malhas animáveis extras (já nomeadas Anim_*) que ficam separadas do Static_Mesh."""
@@ -139,6 +139,8 @@ def finish_building(root, name, glb, atlas_name, static_parts, banners, weights,
         rig.render('back', (-0.8, 0.8, -1.0), 30)
         rig.render('side', (1.0, 0.25, 0.0), 30)
         rig.render('game', (45, 44, 45), 30, dist=game_dist)
+        for (sfx, dvec) in (extra_views or []):
+            rig.render(sfx, dvec, 30)
         human = team_default.lower().startswith('#3')
         C.set_team_color('#d23a2c' if human else '#3a66d6')
         rig.render('34_vermelho' if human else '34_azul', (1.0, 0.95, 1.0), 30)

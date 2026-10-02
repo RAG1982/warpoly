@@ -74,7 +74,22 @@ export const GLB_MODELS = {
   tree_autumn: { url: `${BASE}models/tree_autumn.glb`, root: 'TreeAutumn', type: null },
   // F7-00b lote 2 (grupo 3): blocos de muralha instanciados (`WallBatch`)
   wall_human: { url: `${BASE}models/wall_human.glb`, root: 'WallHuman', type: null },
-  wall_orc: { url: `${BASE}models/wall_orc.glb`, root: 'WallOrc', type: null }
+  wall_orc: { url: `${BASE}models/wall_orc.glb`, root: 'WallOrc', type: null },
+  // ART-naval-buildings: construções navais humanas (Blender)
+  shipyard: { url: `${BASE}models/shipyard.glb`, root: 'Shipyard', type: null },
+  oil_platform: { url: `${BASE}models/oil_platform.glb`, root: 'OilPlatform', type: null },
+  ship_dock: { url: `${BASE}models/ship_dock.glb`, root: 'ShipDock', type: null },
+  orc_oil_platform: { url: `${BASE}models/orc_oil_platform.glb`, root: 'OrcOilPlatform', type: null },
+  // ART-naval-ships: navios humanos (Blender)
+  frigate: { url: `${BASE}models/frigate.glb`, root: 'Frigate', type: 'frigate' },
+  barge: { url: `${BASE}models/barge.glb`, root: 'Barge', type: 'barge' },
+  dreadnought: { url: `${BASE}models/dreadnought.glb`, root: 'Dreadnought', type: 'dreadnought' },
+  tanker: { url: `${BASE}models/tanker.glb`, root: 'Tanker', type: 'tanker' },
+  // ART-naval-ships: navios orcs (Blender)
+  orc_frigate: { url: `${BASE}models/orc_frigate.glb`, root: 'OrcFrigate', type: 'frigate' },
+  orc_barge: { url: `${BASE}models/orc_barge.glb`, root: 'OrcBarge', type: 'barge' },
+  orc_dreadnought: { url: `${BASE}models/orc_dreadnought.glb`, root: 'OrcDreadnought', type: 'dreadnought' },
+  orc_tanker: { url: `${BASE}models/orc_tanker.glb`, root: 'OrcTanker', type: 'tanker' },
 };
 
 export const glbEnabled = (() => {

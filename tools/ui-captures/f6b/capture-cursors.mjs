@@ -37,12 +37,6 @@ const state = (page) => page.evaluate(async () => {
   const kind = css === '' ? 'default' : (Object.entries(CURSOR_STYLES).find(([, v]) => v === css) || ['crosshair'])[0];
   return { kind, css: css.slice(0, 30), outline: im.hoverOutline.visible, overUi: im._overUi, mouse: im.currentMousePos, sel: window.game.gameManager.selectedUnits.length, hovered: im.hoveredEntity ? (im.hoveredEntity.type || im.hoveredEntity.constructor.name) : null };
 });
-const calls = (page) => page.evaluate(async () => {
-  const r = window.game.sceneManager.renderer;
-  await new Promise((res) => requestAnimationFrame(() => requestAnimationFrame(res)));
-  return r.info.render.calls;
-});
-
 const vite = await startVite();
 try {
   for (const s of SIZES.filter((z) => !process.env.ONLY || z.name === process.env.ONLY)) {

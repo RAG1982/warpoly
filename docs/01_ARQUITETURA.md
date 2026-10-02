@@ -88,6 +88,8 @@ src/
   ui/screens/                 MainMenu (F6-01), PauseMenu + gameScreens.css (F2-04), OptionsPanel (F6-08)
   ui/alerts.js                AlertCenter: alertas da HUD (anti-spam, histórico p/ Espaço, pings do minimapa) — F6-05
   ui/minimapPings.js          Desenho dos pings de alerta no minimapa — F6-05
+  ui/postGame.js              Modelo puro da tela pós-jogo: ranking, tabela, séries e geometria dos gráficos — F6-07
+  ui/screens/PostGameScreen.js Relatório pós-jogo (tabela + gráficos canvas) dentro de #game-over-modal — F6-07
   ui/cursors.js               Cursores contextuais (lógica pura + SVG embutido + CursorController) — F6-06
   ui/HoverOutline.js          Colchetes de canto na entidade sob o mouse (1 draw call) — F6-06
   ui/minimapView.js           Minimapa (F6-04): trapézio do frustum, cores de jogador, alvo/flash das ordens por clique direito

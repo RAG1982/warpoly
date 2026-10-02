@@ -1,6 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import * as THREE from 'three';
 import { GameManager } from '../../src/core/GameManager.js';
+import { EntityViews } from '../../src/render/EntityViews.js';
 import { Terrain } from '../../src/world/Terrain.js';
 import { createMatchConfig } from '../../src/sim/MatchConfig.js';
 import { CMD } from '../../src/sim/commands.js';
@@ -491,9 +492,14 @@ describe('determinismo e sem vazamento', () => {
     run(gm, 2);
     const eyeU = gm.allUnits.find(u => u.type === 'watching_eye');
     expect(eyeU).toBeTruthy();
-    expect(gm.scene.children.includes(eyeU.mesh)).toBe(true);
+    // F2-08c: a malha é da view (EntityViews); some junto com a unidade.
+    const views = new EntityViews(gm, gm.scene);
+    views.update(0, 1);
+    expect(views.rootOf(eyeU)?.parent).toBe(gm.scene);
     run(gm, 66);
-    expect(gm.scene.children.includes(eyeU.mesh)).toBe(false);
+    views.update(0, 1);
+    expect(views.rootOf(eyeU)).toBeUndefined();
+    views.dispose();
     expect(gm.allUnits.filter(u => u.type === 'watching_eye').length).toBe(0);
   });
 

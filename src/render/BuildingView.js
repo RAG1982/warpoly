@@ -400,11 +400,12 @@ export class BuildingView {
    * Um quadro (F1-09): sincroniza malha/barra/chamas com a simulação, billboard da barra de vida, chamas e fumaça de
    * dano, fumaça de chaminé e VFX customizado das subclasses (forjas, chiqueiro, serraria, bandeiras).
    * @param {number} frameDelta  segundos reais desde o último quadro
-   * @param {object} [gameManager]
-   * @param {import('three').Camera} [camera]
+   * @param {import('./EntityViews.js').EntityViews} [ctx]  `gm` e `camera` do quadro
    */
-  update(frameDelta, gameManager, camera) {
+  update(frameDelta, ctx) {
     const e = this.entity;
+    const gameManager = ctx && ctx.gm;
+    const camera = ctx && ctx.camera;
     if (e.isDead) {
       this.hpGroup.visible = false;
       if (this.flamesGroup) this.flamesGroup.visible = false;

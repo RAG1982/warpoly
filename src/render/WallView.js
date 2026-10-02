@@ -133,8 +133,8 @@ export class WallView extends BuildingView {
     this._batch.set(this._batchIdx, p.x, p.y, p.z, factor);
   }
 
-  update(frameDelta, gameManager, camera) {
-    super.update(frameDelta, gameManager, camera);
+  update(frameDelta, ctx) {
+    super.update(frameDelta, ctx);
     this._syncBatch(false); // reflete a névoa de guerra
   }
 

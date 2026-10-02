@@ -289,7 +289,7 @@ export class InputManager {
   }
 
   _screenPos(u) {
-    const p = u.mesh.position.clone().project(this.sm.camera);
+    const p = new THREE.Vector3().copy(this.gm.entityViews?.rootOf(u)?.position ?? u.mesh.position).project(this.sm.camera);
     return { id: u.id, u, x: ((p.x + 1) * window.innerWidth) / 2, y: ((-p.y + 1) * window.innerHeight) / 2 };
   }
 
@@ -707,7 +707,7 @@ export class InputManager {
     allMeshes.length = 0;
     for (let i = 0; i < this._pickUnitBuf.length; i++) {
       const u = this._pickUnitBuf[i];
-      const m = u.mesh;
+      const m = this.gm.entityViews?.rootOf(u); // malha na view (F2-08c)
       if (!m?.parent) continue;
       if (this.gm.isHostile(localId, u.ownerId) && !m.visible) continue;
       allMeshes.push(m);

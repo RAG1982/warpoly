@@ -1,7 +1,9 @@
 import { describe, it, expect } from 'vitest';
 import * as THREE from 'three';
 import { GameManager } from '../../src/core/GameManager.js';
-import { Unit } from '../../src/entities/Unit.js';
+import { Unit } from '../../src/sim/Unit.js';
+import { UnitView } from '../../src/render/UnitView.js';
+import { ModelFactory } from '../../src/entities/ModelFactory.js';
 import { SIM_DT, MAX_STEPS, lerpAngle, animationLodStep } from '../../src/sim/constants.js';
 
 /**
@@ -95,29 +97,22 @@ describe('F1-09: interpolação de transform', () => {
     expect(outDeg).toBeCloseTo(0, 3);
   });
 
-  it('Unit.renderUpdate interpola mesh.position/rotation.y entre _prevPos/_simPos', () => {
-    const fakeUnit = {
-      canRemove: false,
-      isDying: false,
-      state: 'idle',
-      hurtTimer: 0,
-      scene: null,
-      hpGroup: null,
-      animator: null,
-      mesh: {
-        position: new THREE.Vector3(0, 0, 0),
-        rotation: { y: THREE.MathUtils.degToRad(350) },
-        visible: true
-      },
-      _prevPos: new THREE.Vector3(0, 0, 0),
-      _simPos: new THREE.Vector3(10, 0, 0),
-      _prevRotY: THREE.MathUtils.degToRad(350),
-      _simRotY: THREE.MathUtils.degToRad(10)
-    };
+  it('UnitView.update interpola a pose visual entre _prevPos/_simPos sem tocar o corpo de simulação', () => {
+    ModelFactory.headless = true; // malhas vazias (sem texturas em canvas)
+    const unit = new Unit({ getHeight: () => 0 }, 'knight', 0, 0, 0, null);
+    const view = new UnitView(unit, new THREE.Scene());
+    unit._prevPos.set(0, 0, 0);
+    unit._simPos.set(10, 0, 0);
+    unit._prevRotY = THREE.MathUtils.degToRad(350);
+    unit._simRotY = THREE.MathUtils.degToRad(10);
+    unit.mesh.position.set(10, 0, 0);
+    unit.mesh.rotation.y = unit._simRotY;
 
-    Unit.prototype.renderUpdate.call(fakeUnit, 0.016, 0.25, 1);
+    view.update(0.016, { alpha: 0.25, camera: null, lodFrustum: null, lodTarget: null, frameIndex: 0 });
 
-    expect(fakeUnit.mesh.position.x).toBeCloseTo(2.5, 6);
+    expect(view.root.position.x).toBeCloseTo(2.5, 6);
+    expect(unit.mesh.position.x).toBe(10); // a simulação nunca lê a pose interpolada
+    ModelFactory.headless = false;
   });
 });
 

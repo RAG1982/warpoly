@@ -68,13 +68,18 @@ import {
   OrcWatchtower,
   OrcLumberMill,
   OrcForge
-} from '../entities/buildings/orc/index.js';
-import { HumanForge } from '../entities/buildings/HumanForge.js';
+} from '../render/buildings/orc/index.js';
+import { HumanForge } from '../render/buildings/HumanForge.js';
+import { Building } from '../sim/Building.js';
 import { ParticleSystem } from '../entities/ParticleSystem.js';
 import { prepareStaticTemplate, isStaticMergeEnabled } from '../render/staticTemplates.js';
 import { mergeUnitTemplate } from '../render/mergeUnitTemplate.js';
 import { skinUnitTemplate, isSkinEnabled } from '../render/skinUnitTemplate.js';
 import { ModelFactory } from '../entities/ModelFactory.js';
+
+// F2-08c: construção de simulação (pura) + a view correspondente, sem cena (o inspetor adiciona `view.mesh`).
+const flatTerrain = { getHeight: () => 0 };
+const bldView = (ViewClass, type) => new ViewClass(new Building(flatTerrain, type, 0, 0, true, 'player'), null);
 
 // Modelos do pipeline Blender (F7-00): sempre carregados no inspetor para comparação
 const glbPlaceholder = () => new THREE.Group();
@@ -524,8 +529,8 @@ const MODEL_CATALOG = [
     faction: 'orc',
     type: 'building',
     icon: '🌋',
-    sourceFile: 'src/entities/buildings/orc/GreatHall.js',
-    create: () => new GreatHall(null, { getHeight: () => 0 }, 0, 0, true, 'player'),
+    sourceFile: 'src/render/buildings/orc/GreatHall.js',
+    create: () => bldView(GreatHall, 'great_hall'),
     description: 'A colossal fortaleza central da Horda Orc. Construída com pesadas toras de ferro, estacas defensivas pontiagudas, crânio de fera ancestral sobre o portal de entrada, quatro torreões de canto com braseiros de fogo ardente e estandartes de guerra vermelhos.',
     notes: 'VFX: Estandartes de guerra da Horda com ondulação dinâmica ao vento e braseiro de entrada com PointLight animada e cintilação de calor.'
   },
@@ -536,8 +541,8 @@ const MODEL_CATALOG = [
     faction: 'orc',
     type: 'building',
     icon: '🛡️',
-    sourceFile: 'src/entities/buildings/orc/OrcBarracks.js',
-    create: () => new OrcBarracks(null, { getHeight: () => 0 }, 0, 0, true, 'player'),
+    sourceFile: 'src/render/buildings/orc/OrcBarracks.js',
+    create: () => bldView(OrcBarracks, 'orc_barracks'),
     description: 'Fortificação militar agressiva com toras entrecruzadas monumentais no cume do telhado, toldo de lona carmesim, pátio de treinamento com boneco de palha e estantes com machados de guerra afiados.',
     notes: 'VFX: Simulação física de pêndulo harmônico amortecido no boneco de treino suspenso (Anim_TrainingDummy) com reação a pancadas.'
   },
@@ -548,8 +553,8 @@ const MODEL_CATALOG = [
     faction: 'orc',
     type: 'building',
     icon: '🐖',
-    sourceFile: 'src/entities/buildings/orc/PigFarm.js',
-    create: () => new PigFarm(null, { getHeight: () => 0 }, 0, 0, true, 'player'),
+    sourceFile: 'src/render/buildings/orc/PigFarm.js',
+    create: () => bldView(PigFarm, 'pig_farm'),
     description: 'A emblemática fazenda dos Orcs em Warcraft 2. Cercado de toras rústicas com amarração de corda, chão de lama úmida com palha, cocho de comida, abrigo de palha e três javalis/porcos com rotinas autônomas fuçando e comendo no cercado.',
     notes: 'VFX: 3 javalis com IA comportamental autônoma (vagam pelo cercado, comem no cocho, farejam o chão e balançam os rabos em espiral).'
   },
@@ -560,8 +565,8 @@ const MODEL_CATALOG = [
     faction: 'orc',
     type: 'building',
     icon: '🛖',
-    sourceFile: 'src/entities/buildings/orc/OrcHouse.js',
-    create: () => new OrcHouse(null, { getHeight: () => 0 }, 0, 0, true, 'player'),
+    sourceFile: 'src/render/buildings/orc/OrcHouse.js',
+    create: () => bldView(OrcHouse, 'orc_house'),
     description: 'Toca e habitação dos Peons Orcs construída com esteios de madeira robustos, telhado cônico assimétrico de peles curtidas costuradas com faixas de couro, presas de bestas nas bordas, pórtico baixo com crânio tribal e respiradouro de fumaça.',
     notes: 'VFX: Fumaça suave saindo pelo respiradouro do teto e luz de fogueira interna (PointLight) escapando pelo vão da porta.'
   },
@@ -572,8 +577,8 @@ const MODEL_CATALOG = [
     faction: 'orc',
     type: 'building',
     icon: '🏹',
-    sourceFile: 'src/entities/buildings/orc/OrcWatchtower.js',
-    create: () => new OrcWatchtower(null, { getHeight: () => 0 }, 0, 0, true, 'player'),
+    sourceFile: 'src/render/buildings/orc/OrcWatchtower.js',
+    create: () => bldView(OrcWatchtower, 'orc_watchtower'),
     description: 'Atalaia defensiva de múltiplos andares com toras reforçadas por escoras diagonais, estacas de proteção na base, plataforma elevada de combate com paliçada dentada e braseiro ardente no topo.',
     notes: 'VFX: Braseiro de ferro suspenso no cume ardendo com chamas 3D animadas, fagulhas e PointLight dinâmica de fogo.'
   },
@@ -584,8 +589,8 @@ const MODEL_CATALOG = [
     faction: 'orc',
     type: 'building',
     icon: '🪚',
-    sourceFile: 'src/entities/buildings/orc/OrcLumberMill.js',
-    create: () => new OrcLumberMill(null, { getHeight: () => 0 }, 0, 0, true, 'player'),
+    sourceFile: 'src/render/buildings/orc/OrcLumberMill.js',
+    create: () => bldView(OrcLumberMill, 'orc_lumber_mill'),
     description: 'Oficina florestal pesada com plataforma de madeira elevada, mecanismo de serra circular giratória gigante de ferro serrilhado com marcas de resina, tora mestre sendo fatiada, montes de serragem e pilhas de toras.',
     notes: 'VFX: Serra circular dentada (Anim_SawBlade) que gira continuamente em torno do seu eixo com aceleração dinâmica ao processar toras.'
   },
@@ -596,8 +601,8 @@ const MODEL_CATALOG = [
     faction: 'orc',
     type: 'building',
     icon: '🔥',
-    sourceFile: 'src/entities/buildings/orc/OrcForge.js',
-    create: () => new OrcForge(null, { getHeight: () => 0 }, 0, 0, true, 'player'),
+    sourceFile: 'src/render/buildings/orc/OrcForge.js',
+    create: () => bldView(OrcForge, 'orc_forge'),
     description: 'Centro de aprimoramentos bélicos e fundição da Horda. Erguida sobre blocos maciços de basalto vulcânico negro, possui fornalha abobadada com boca em arco e grades de ferro, chaminé monumental reforçada com anéis forjados, telhado parcial de chapas rebitadas, toco com bigorna de ferro fundido e tina de têmpera.',
     notes: 'VFX: Fogo intenso na fornalha com malha de chamas animadas, PointLight de calor termodinâmico, chaminé alta expelindo fumaça preta e faíscas incandescentes na bigorna.'
   },
@@ -1048,8 +1053,8 @@ const MODEL_CATALOG = [
     faction: 'human',
     type: 'building',
     icon: '🔨',
-    sourceFile: 'src/entities/buildings/HumanForge.js',
-    create: () => new HumanForge(null, { getHeight: () => 0 }, 0, 0, true, 'player'),
+    sourceFile: 'src/render/buildings/HumanForge.js',
+    create: () => bldView(HumanForge, 'forge'),
     description: 'Centro de armaria e aprimoramento bélico dos humanos baseado fielmente em forjaHumanos.png. Fornalha de pedra rústica entalhada com arco de alvenaria e braseiro ardente, chaminé alta com anel expansivo expelindo fumaça, estação de bigorna sobre tora robusta com fogo ativo de forja, grande marreta encostada, cepo e ferramentas de ferreiro espalhadas.',
     notes: 'VFX: Brasas e chamas ardendo na fornalha e sobre a bigorna com PointLights quentes dinâmicas, fumaça subindo pela chaminé e bigorna, e fagulhas ao forjar melhorias.'
   },

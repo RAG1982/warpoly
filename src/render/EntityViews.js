@@ -1,7 +1,7 @@
 /**
  * EntityViews.js — F2-08b: cria/atualiza/remove as views (malhas) das entidades de simulação que já são só
- * dados (`Tree`, `ResourceDeposit`, `Critter`, `Building`/`Wall`), a partir das listas da `gm`. Chamado a cada quadro
- * pela `MatchSession` (nunca em modo headless). Só lê a simulação (F2-08c: construções; unidades na etapa seguinte).
+ * dados (`Tree`, `ResourceDeposit`, `Critter`, `Building`/`Wall`, `Unit`), a partir das listas da `gm`. Chamado a cada quadro
+ * pela `MatchSession` (nunca em modo headless). Só lê a simulação.
  */
 import { TreeView } from './TreeView.js';
 import { ResourceDepositView } from './ResourceDepositView.js';
@@ -9,6 +9,8 @@ import { CritterView } from './CritterView.js';
 import { createBuildingView } from './createBuildingView.js';
 import { WallBatch } from './WallView.js';
 import { BuildingView } from './BuildingView.js';
+import { UnitView } from './UnitView.js';
+import * as THREE from 'three';
 
 export class EntityViews {
   /**
@@ -26,10 +28,18 @@ export class EntityViews {
     this._trees = { ref: null, len: -1, views: [] };
     this._critters = { ref: null, len: -1, views: [] };
     this._buildings = { ref: null, len: -1, views: [] };
+    this._units = { ref: null, len: -1, views: [] };
+    // Contexto do quadro lido pelas views (`update(frameDelta, ctx)`): LOD de animação por frustum/distância.
+    this.camera = null;
+    this.alpha = 1;
+    this.frameIndex = 0;
+    this.lodFrustum = null;
+    this.lodTarget = null;
+    this._frustum = new THREE.Frustum();
+    this._projScreen = new THREE.Matrix4();
     /** F3-08: um InstancedMesh por facção ('human' | 'orc') com todos os segmentos de muralha. */
     this._wallBatches = {};
     this._frameDelta = 0;
-    this._alpha = 1;
   }
 
   /** `WallBatch` compartilhado da facção (criado sob demanda). */
@@ -80,8 +90,7 @@ export class EntityViews {
         }
       }
     }
-    const camera = this.gm.sceneManager?.camera;
-    for (let i = 0; i < slot.views.length; i++) slot.views[i].update(this._frameDelta, this.gm, camera, this._alpha);
+    for (let i = 0; i < slot.views.length; i++) slot.views[i].update(this._frameDelta, this);
   }
 
   /**
@@ -92,16 +101,29 @@ export class EntityViews {
     const gm = this.gm;
     const frame = ++this._frame;
     this._frameDelta = frameDelta;
-    this._alpha = alpha;
+    this.alpha = alpha;
+    this.frameIndex++;
+    const sm = gm.sceneManager;
+    const camera = sm && sm.camera;
+    this.camera = camera || null;
+    if (camera) {
+      this._projScreen.multiplyMatrices(camera.projectionMatrix, camera.matrixWorldInverse);
+      this.lodFrustum = this._frustum.setFromProjectionMatrix(this._projScreen);
+      this.lodTarget = sm.cameraTarget;
+    } else {
+      this.lodFrustum = null;
+      this.lodTarget = null;
+    }
     this._sync(this._deposits, gm.resourceDeposits, e => new ResourceDepositView(e, this.scene), frame, true);
     this._sync(this._trees, gm.trees, e => new TreeView(e, this.scene, gm.treeManager), frame, true);
     this._sync(this._critters, gm.critters, e => new CritterView(e, this.scene), frame, false);
     this._sync(this._buildings, gm.buildings, e => createBuildingView(e, this.scene, f => this.getWallBatch(f)), frame, false);
+    this._sync(this._units, gm.allUnits, e => new UnitView(e, this.scene), frame, false);
   }
 
   /** As malhas ficam na cena: o descarte da `MatchSession` as libera junto com o resto da partida. */
   dispose() {
-    for (const v of this.views.values()) if (v instanceof BuildingView) v.dispose();
+    for (const v of this.views.values()) if (v instanceof BuildingView || v instanceof UnitView) v.dispose();
     for (const wb of Object.values(this._wallBatches)) wb.dispose();
     this._wallBatches = {};
     this.views.clear();

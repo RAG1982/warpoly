@@ -25,7 +25,7 @@ import {
   validateMatchConfig,
   difficultyOf
 } from '../sim/MatchConfig.js';
-import { SIM_DT, MAX_STEPS, animationLodStep } from '../sim/constants.js';
+import { SIM_DT, MAX_STEPS } from '../sim/constants.js';
 import { CMD, makeCommand } from '../sim/commands.js';
 import { CommandQueue, COMMAND_DELAY_TICKS } from '../sim/CommandQueue.js';
 import { CommandExecutor } from '../sim/CommandExecutor.js';
@@ -40,11 +40,7 @@ import { isPlayerDefeated } from '../sim/victory.js';
 import { missingRequirements, formatRequirementList } from '../sim/requirements.js';
 
 const EMPTY_LIST = Object.freeze([]);
-
-// F1-09: buffers de módulo reutilizados pelo LOD de animação em renderUpdate (sem alocação/frame).
-const _lodFrustum = new THREE.Frustum();
-const _lodProjScreenMatrix = new THREE.Matrix4();
-const _lodSphere = new THREE.Sphere(new THREE.Vector3(), 3);
+const _screenPos = new THREE.Vector3();
 
 export class GameManager {
   /**
@@ -854,7 +850,7 @@ export class GameManager {
       x = snapped.x;
       z = snapped.z;
     }
-    const unit = new Unit(this.scene, this.terrain, type, x, z, ownerId, this);
+    const unit = new Unit(this.terrain, type, x, z, ownerId, this);
     this._addUnit(unit);
 
     const player = this.getPlayer(ownerId);
@@ -940,7 +936,6 @@ export class GameManager {
     // F4-04b: a classe avançada ganha mana e habilidades (Templário / Ogro Feiticeiro); quem já tinha mana mantém.
     if (to.maxMana > 0 && !(from.maxMana > 0) && unit.setupMana) {
       unit.setupMana(to);
-      unit.updateHealthBar();
     }
   }
 
@@ -1239,7 +1234,8 @@ export class GameManager {
 
     this.getUnitsOf(this._localPlayerId).forEach(u => {
       if (u.isDead || u.ownerId !== this._localPlayerId) return;
-      const screenPos = u.mesh.position.clone().project(camera);
+      const vp = this.entityViews ? this.entityViews.rootOf(u)?.position : null; // pose visual (interpolada)
+      const screenPos = _screenPos.copy(vp || u.mesh.position).project(camera);
       const sx = ((screenPos.x + 1) * window.innerWidth) / 2;
       const sy = ((-screenPos.y + 1) * window.innerHeight) / 2;
 
@@ -1411,10 +1407,6 @@ export class GameManager {
   advance(frameDelta) {
     if (this.isPaused || this.isGameOver) return this._lastAlpha;
 
-    // Desfaz a interpolação visual do frame anterior: a simulação sempre parte da última pose
-    // simulada real (`_simPos`/`_simRotY`), nunca da pose interpolada exibida na tela.
-    this._restoreSimPose();
-
     this._acc += frameDelta * this.gameSpeed;
     let steps = 0;
     // Épsilon evita perder/ganhar um passo por erro de arredondamento de ponto flutuante
@@ -1440,17 +1432,6 @@ export class GameManager {
   _isOwnerDefeated(ownerId) {
     const p = this.playerRegistry.getPlayer(ownerId);
     return !!p && p.defeated;
-  }
-
-  /** Pose visual (interpolada) → pose de simulação, antes de rodar `simStep` neste frame. */
-  _restoreSimPose() {
-    const all = this.allUnits;
-    for (let i = 0; i < all.length; i++) {
-      const u = all[i];
-      if (!u._simPos) continue;
-      u.mesh.position.copy(u._simPos);
-      u.mesh.rotation.y = u._simRotY;
-    }
   }
 
   /** Pose atual (antes de rodar um passo de simulação) → `_prevPos`/`_prevRotY`. */
@@ -1673,58 +1654,7 @@ export class GameManager {
 
     // Construções (F2-08c): billboards, chamas, fumaça e VFX customizado vivem nas `BuildingView`s (`EntityViews`).
 
-    // LOD de animação por unidade (F1-09 item 4): frustum + distância à câmera-alvo.
-    this._frameIndex++;
-    const sm = this.sceneManager;
-    const camera = sm && sm.camera;
-    let frustum = null;
-    let camTarget = null;
-    if (camera && sm) {
-      _lodProjScreenMatrix.multiplyMatrices(camera.projectionMatrix, camera.matrixWorldInverse);
-      frustum = _lodFrustum.setFromProjectionMatrix(_lodProjScreenMatrix);
-      camTarget = sm.cameraTarget;
-    }
-
-    const all = this.allUnits;
-    for (let i = 0; i < all.length; i++) {
-      const u = all[i];
-      if (u.canRemove) continue;
-
-      let animDelta = frameDelta;
-      let lodStep = 1;
-
-      if (frustum) {
-        const mesh = u.mesh;
-        const visible = mesh.visible !== false;
-        _lodSphere.center.copy(mesh.position);
-        const inView = visible && frustum.intersectsSphere(_lodSphere);
-
-        if (!visible || !inView) {
-          // Fora de tela/névoa: não anima; acumula o delta perdido (até 0,5s) para não
-          // "saltar" a animação quando a unidade reaparecer.
-          u._animAcc = Math.min(0.5, (u._animAcc || 0) + frameDelta);
-          animDelta = 0;
-          lodStep = 0;
-        } else if (u._animAcc) {
-          // Reapareceu: entrega de uma vez o delta acumulado enquanto estava oculta.
-          animDelta = frameDelta + u._animAcc;
-          u._animAcc = 0;
-          lodStep = 1;
-        } else {
-          const dist = camTarget.distanceTo(mesh.position);
-          lodStep = animationLodStep(dist, this._frameIndex, u.id);
-          if (lodStep && dist > 60) {
-            // Anima só a cada k frames (k=2 até 100, k=4 acima) — entrega de uma vez o delta
-            // de k frames para não parecer mais lento que o normal.
-            animDelta = frameDelta * (dist <= 100 ? 2 : 4);
-          } else if (!lodStep) {
-            animDelta = 0;
-          }
-        }
-      }
-
-      u.renderUpdate(animDelta, alpha, lodStep);
-    }
+    // Unidades (F2-08c): interpolação, LOD de animação, barras e animação vivem nas `UnitView`s (`EntityViews`).
 
     // F2-07: VFX ambiente (fumaça de chaminé, faíscas…) emitido durante o quadro renderizado
     // (fora do tick fixo) — despacha já aqui em vez de esperar o próximo `simStep` (até 50 ms).

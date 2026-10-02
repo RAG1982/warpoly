@@ -102,11 +102,10 @@ export function applySaveCommands(gm, save) {
 export function fastForward(gm, save, maxSteps = Infinity) {
   gm.events.presentationMuted = true;
   let n = 0;
-  // Mesmo protocolo de `GameManager.advance`: o quadro renderizado entre dois lotes (`renderUpdate`)
-  // interpola de `_prevPos`/`_simPos` e reescreve `mesh.position` — essas poses precisam estar em dia.
+  // Mesmo protocolo de `GameManager.advance`: as views interpolam de `_prevPos`/`_simPos` — essas poses precisam
+  // estar em dia (F2-08c: a pose interpolada nunca é escrita no corpo de simulação, então não há o que restaurar).
   const poses = typeof gm._snapshotSimPose === 'function';
   while (gm.currentTick < save.tick && n < maxSteps) {
-    if (poses) gm._restoreSimPose();
     if (poses) gm._snapshotPrevPose();
     gm.simStep(SIM_DT);
     if (poses) gm._snapshotSimPose();

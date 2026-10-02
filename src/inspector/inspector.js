@@ -720,6 +720,32 @@ const MODEL_CATALOG = [
     notes: 'Sockets: Socket_UnitSpawn, Socket_Rally.'
   },
   {
+    id: 'shipyard_glb',
+    name: 'Estaleiro (Blender)',
+    category: 'buildings',
+    faction: 'human',
+    type: 'building',
+    icon: '⚓',
+    glb: 'shipyard',
+    sourceFile: 'tools/blender/build_shipyard.py',
+    create: createGlb('shipyard'),
+    description: 'Estaleiro humano gerado pelo pipeline Blender (public/models/shipyard.glb): doca de pedra e madeira aberta para o mar (+Z) com doca seca, casco de navio em construção sobre cavaletes (mastro com gávea, vergas, portinholas, cabine de ré), torre de pedra com telhado de telhas azul/vermelho, dois guindastes de madeira e aço com corda e gancho, caixotes, barris, fardos, bancada e rack de ferramentas, cordas enroladas.',
+    notes: '5 draw calls (Static_Mesh + Anim_Banners TeamColor 2 materiais + Anim_Crane + Anim_Crane_2), atlas 2048². Pegada ~7,5 x 7,5 (raio de colisão 3,6), altura ~8. Nós animáveis: Anim_Banners, Anim_Crane, Anim_Crane_2. Sockets: Socket_UnitSpawn (mar, +Z), Socket_Rally.'
+  },
+  {
+    id: 'oil_platform_glb',
+    name: 'Plataforma de Petróleo (Blender)',
+    category: 'buildings',
+    faction: 'human',
+    type: 'building',
+    icon: '🛢️',
+    glb: 'oil_platform',
+    sourceFile: 'tools/blender/build_oil_platform.py',
+    create: createGlb('oil_platform'),
+    description: 'Plataforma de petróleo humana gerada pelo pipeline Blender (public/models/oil_platform.glb): convés de tábuas sobre quatro pilares de madeira com cintas de aço e blocos de pedra (y = 0 no nível da água; pilares descem até y = -1), torre de perfuração em treliça de aço e madeira com roda dentada, três tanques enferrujados com tubulações e válvulas, casinha de controle com chaminé e fumaça preta, guindaste, barris e bancada.',
+    notes: '6 draw calls (Static_Mesh + Anim_Banners TeamColor 2 materiais + Anim_Drill + Anim_Crane + Anim_Smoke), atlas 2048². Pegada ~5 x 5, altura ~7,5. Nós animáveis: Anim_Banners, Anim_Smoke, Anim_Crane, Anim_Drill. Sockets: Socket_UnitSpawn, Socket_Rally.'
+  },
+  {
     id: 'ash_sanctum_glb',
     name: 'Santuário das Cinzas (Blender)',
     category: 'buildings',

@@ -74,7 +74,10 @@ export const GLB_MODELS = {
   tree_autumn: { url: `${BASE}models/tree_autumn.glb`, root: 'TreeAutumn', type: null },
   // F7-00b lote 2 (grupo 3): blocos de muralha instanciados (`WallBatch`)
   wall_human: { url: `${BASE}models/wall_human.glb`, root: 'WallHuman', type: null },
-  wall_orc: { url: `${BASE}models/wall_orc.glb`, root: 'WallOrc', type: null }
+  wall_orc: { url: `${BASE}models/wall_orc.glb`, root: 'WallOrc', type: null },
+  // ART-naval-buildings: construções navais humanas (Blender)
+  shipyard: { url: `${BASE}models/shipyard.glb`, root: 'Shipyard', type: null },
+  oil_platform: { url: `${BASE}models/oil_platform.glb`, root: 'OilPlatform', type: null },
 };
 
 export const glbEnabled = (() => {

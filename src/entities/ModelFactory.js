@@ -346,7 +346,18 @@ export class ModelFactory {
     return clone;
   }
 
-  static createBuildingByType(type) {
+  /**
+   * F4-07a: tipos neutros (mesmo `type` para as duas facções) com .glb por facção; `factionId` do dono escolhe a chave.
+   * Sem .glb carregado (ou ?glb=0), cai no modelo procedural único.
+   */
+  static FACTION_GLB = { oil_platform: { orc: 'orc_oil_platform' }, tanker: { orc: 'orc_tanker' } };
+
+  static _factionGlb(type, factionId) {
+    const alt = this.FACTION_GLB[type] && this.FACTION_GLB[type][factionId];
+    return (alt && glbEnabled && this.createGlbModel(alt)) || null;
+  }
+
+  static createBuildingByType(type, factionId = 'human') {
     switch (type) {
       case 'castle': return this.createCastle();
       case 'great_hall': return this.createGreatHall();
@@ -370,7 +381,7 @@ export class ModelFactory {
       case 'ship_dock': return this._glbOr('ship_dock', () => this.getOrCreateModel('ship_dock', createShipDock));
       case 'refinery': return this._glbOr('refinery', () => this.getOrCreateModel('refinery', createRefinery));
       case 'ash_cauldron': return this._glbOr('ash_cauldron', () => this.getOrCreateModel('ash_cauldron', createCauldron));
-      case 'oil_platform': return this._glbOr('oil_platform', () => this.getOrCreateModel('oil_platform', createPlatform));
+      case 'oil_platform': return this._factionGlb('oil_platform', factionId) || this._glbOr('oil_platform', () => this.getOrCreateModel('oil_platform', createPlatform));
       case 'workshop': return this.createWorkshop();
       case 'orc_workshop': return this.createOrcWorkshop();
       case 'wall_human': return createWallSegment('human');
@@ -577,7 +588,7 @@ export class ModelFactory {
     return this._glbOr('oil_well', () => this.getOrCreateModel('oil_well', createOilWell));
   }
 
-  static createUnit(type) {
+  static createUnit(type, factionId = 'human') {
     switch (type) {
       case 'villager': return this.createVillager();
       case 'knight': return this.createKnight();
@@ -604,7 +615,7 @@ export class ModelFactory {
       case 'gryphon_rider': return this._glbOr('gryphon_rider', () => this.getOrCreateModel('gryphon_rider', createGryphonRider, 'gryphon_rider'));
       case 'war_serpent': return this._glbOr('war_serpent', () => this.getOrCreateModel('war_serpent', createWarSerpent, 'war_serpent'));
       // F4-07: naval (procedurais provisórios; .glb via `_glbOr` com a mesma chave)
-      case 'tanker': return this._glbOr('tanker', () => this.getOrCreateModel('tanker', createTanker));
+      case 'tanker': return this._factionGlb('tanker', factionId) || this._glbOr('tanker', () => this.getOrCreateModel('tanker', createTanker));
       case 'sapper': return this.createSapper();
       case 'arsonist': return this.createArsonist();
       default: return this.createVillager();

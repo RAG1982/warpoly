@@ -90,9 +90,9 @@ export class UnitView {
     const u = this.entity;
     const base = u.visualBase;
     const def = getUnitDef(base);
-    const root = ModelFactory.createUnit(ModelFactory.visualType(base, def));
     const gm = u.gameManager;
     const owner = gm && gm.getPlayer ? gm.getPlayer(u.ownerId) : null;
+    const root = ModelFactory.createUnit(ModelFactory.visualType(base, def), owner && owner.factionId);
     if (owner && owner.color) ModelFactory.setTeamColor(root, owner.color); // F7-02: no-op para modelos procedurais
     const p = u.mesh.position;
     root.position.set(p.x, p.y, p.z);

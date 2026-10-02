@@ -66,7 +66,9 @@ export class BuildingView {
     const type = building.type;
     const p = building.mesh.position;
 
-    this.fullMesh = this.createBuildingMesh(type);
+    const _gm0 = building.gameManager;
+    const _owner0 = _gm0 && _gm0.getPlayer ? _gm0.getPlayer(building.ownerId) : null;
+    this.fullMesh = this.createBuildingMesh(type, _owner0 && _owner0.factionId);
     this.fullMesh.userData.entity = building;
     this.scaffoldMesh = this.createScaffoldMesh();
     this.scaffoldMesh.userData.entity = building;
@@ -126,7 +128,7 @@ export class BuildingView {
   updateCustomVFX(delta, gameManager) {}
   cleanupCustomVFX() {}
 
-  createBuildingMesh(type) {
+  createBuildingMesh(type, factionId = 'human') {
     switch (type) {
       case 'castle': return ModelFactory.createCastle();
       case 'great_hall': return ModelFactory.createGreatHall();
@@ -149,7 +151,7 @@ export class BuildingView {
       case 'ship_dock':
       case 'refinery':
       case 'ash_cauldron':
-      case 'oil_platform': return ModelFactory.createBuildingByType(type);
+      case 'oil_platform': return ModelFactory.createBuildingByType(type, factionId);
       case 'workshop': return ModelFactory.createWorkshop();
       case 'orc_workshop': return ModelFactory.createOrcWorkshop();
       case 'barracks': return ModelFactory.createBarracks();

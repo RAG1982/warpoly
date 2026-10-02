@@ -345,7 +345,7 @@ Sonnet 5.5 escreve a spec em `docs/specs/<ID>.md`; agente **Sonnet** executa; o 
 - `DONE(2026-10-01)` · GAME+ART · Dep: F3-06 · Batedor aéreo (máquina voadora/zepelim) e atacante aéreo (grifo/dragão); camada de voo ignora terreno; só atingível por distância/torres.
 
 ### F4-07 · Naval + Petróleo
-- `DOING(sonnet, 2026-10-02)` (specs F4-07a/F4-07b; arte humana naval em paralelo a partir de docs/refs/naval/; arte orc aguarda referências do dono) · GAME+ART+CONTENT · Dep: F2-05, F3-06 · **Petróleo só é liberado após o Centro da Cidade T2 (decisão D1).** Estaleiro, Fundição, Refinaria, Plataforma em poço de petróleo; petroleiro, destróier, transporte, encouraçado, submarino/tartaruga; navegação em água (grade separada), desembarque.
+- `DOING(sonnet, 2026-10-02)` · **F4-07a `DONE` (2026-10-02, branch task/F4-07: petróleo `oil`, grade/pathfinder naval, Estaleiro/Doca, Petroleiro, Plataforma, Refinaria/Caldeirão, extração, mapa `estreito-1v1`, GLBs por facção); F4-07b `TODO`** (specs F4-07a/F4-07b; arte humana naval em paralelo a partir de docs/refs/naval/; arte orc aguarda referências do dono) · GAME+ART+CONTENT · Dep: F2-05, F3-06 · **Petróleo só é liberado após o Centro da Cidade T2 (decisão D1).** Estaleiro, Fundição, Refinaria, Plataforma em poço de petróleo; petroleiro, destróier, transporte, encouraçado, submarino/tartaruga; navegação em água (grade separada), desembarque.
 
 ### F4-08 · Heróis de campanha
 - `TODO` · GAME · Dep: F8-04 · Unidades únicas com stats maiores usadas em missões.

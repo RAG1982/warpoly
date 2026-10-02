@@ -5,6 +5,7 @@
 import { BuildingView } from './BuildingView.js';
 import { WallView } from './WallView.js';
 import { GreatHall, OrcBarracks, PigFarm, OrcHouse, OrcWatchtower, OrcLumberMill, OrcForge } from './buildings/orc/index.js';
+import { NavalBuildingView } from './buildings/NavalBuildingView.js';
 import { HumanForge } from './buildings/HumanForge.js';
 
 const VIEW_BY_TYPE = {
@@ -15,7 +16,10 @@ const VIEW_BY_TYPE = {
   orc_watchtower: OrcWatchtower,
   orc_lumber_mill: OrcLumberMill,
   orc_forge: OrcForge,
-  forge: HumanForge
+  forge: HumanForge,
+  shipyard: NavalBuildingView, // F4-07a
+  ship_dock: NavalBuildingView,
+  oil_platform: NavalBuildingView
 };
 
 /**

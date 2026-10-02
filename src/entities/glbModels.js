@@ -83,6 +83,11 @@ export const GLB_MODELS = {
   barge: { url: `${BASE}models/barge.glb`, root: 'Barge', type: 'barge' },
   dreadnought: { url: `${BASE}models/dreadnought.glb`, root: 'Dreadnought', type: 'dreadnought' },
   tanker: { url: `${BASE}models/tanker.glb`, root: 'Tanker', type: 'tanker' },
+  // ART-naval-ships: navios orcs (Blender)
+  orc_frigate: { url: `${BASE}models/orc_frigate.glb`, root: 'OrcFrigate', type: 'frigate' },
+  orc_barge: { url: `${BASE}models/orc_barge.glb`, root: 'OrcBarge', type: 'barge' },
+  orc_dreadnought: { url: `${BASE}models/orc_dreadnought.glb`, root: 'OrcDreadnought', type: 'dreadnought' },
+  orc_tanker: { url: `${BASE}models/orc_tanker.glb`, root: 'OrcTanker', type: 'tanker' },
 };
 
 export const glbEnabled = (() => {

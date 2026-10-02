@@ -772,6 +772,58 @@ const MODEL_CATALOG = [
     notes: 'Nós: Hull, Hose, Flag, Anim_Smoke. Compartilhado pelas duas facções até haver a versão orc.'
   },
   {
+    id: 'orc_frigate_glb',
+    name: 'Fragata Orc (Blender)',
+    category: 'units',
+    faction: 'orc',
+    type: 'frigate',
+    icon: '🚢',
+    glb: 'orc_frigate',
+    sourceFile: 'tools/blender/build_orc_frigate.py',
+    create: createGlb('orc_frigate'),
+    description: 'Fragata orc (public/models/orc_frigate.glb): casco de madeira com placas de ferro enferrujado e espinhos, proa em cabeça de javali de ferro com presas, torres de canos triplos/duplos, torre central com cesto de espinhos, chaminé, vela rasgada e estandarte de caveira. ~17 mil tris, 10 draw calls.',
+    notes: 'Mesmos nós da fragata humana: Hull, Turret1/Cannon1, Turret2/Cannon2, Sail, Flag, Anim_Smoke.'
+  },
+  {
+    id: 'orc_barge_glb',
+    name: 'Barcaça Orc (Blender)',
+    category: 'units',
+    faction: 'orc',
+    type: 'barge',
+    icon: '⛵',
+    glb: 'orc_barge',
+    sourceFile: 'tools/blender/build_orc_barge.py',
+    create: createGlb('orc_barge'),
+    description: 'Barcaça orc (public/models/orc_barge.glb): casco de tábuas escuras com remendos de couro e pano rasgado, rampa de proa com espinhos e correntes, postes, torre de vigia, caixotes, barris e canhão. ~13 mil tris, 7 draw calls.',
+    notes: 'Mesmos nós da barcaça humana: Hull, Crane/Hook, Ramp, Flag.'
+  },
+  {
+    id: 'orc_dreadnought_glb',
+    name: 'Couraçado Orc (Blender)',
+    category: 'units',
+    faction: 'orc',
+    type: 'dreadnought',
+    icon: '⚓',
+    glb: 'orc_dreadnought',
+    sourceFile: 'tools/blender/build_orc_dreadnought.py',
+    create: createGlb('orc_dreadnought'),
+    description: 'Couraçado orc (public/models/orc_dreadnought.glb): fortaleza flutuante de madeira e ferro com espinhos e presas, pagode central de 4 andares, torretas de canos grossos, canhões laterais, esporão serrilhado e bandeiras de guerra. ~27 mil tris, 12 draw calls, atlas 1024².',
+    notes: 'Nós: Hull, Turret1/Cannon1, Turret2/Cannon2, Cannon3, Sail1..3 (bandeiras), Flag.'
+  },
+  {
+    id: 'orc_tanker_glb',
+    name: 'Petroleiro Orc (Blender)',
+    category: 'units',
+    faction: 'orc',
+    type: 'tanker',
+    icon: '🛢️',
+    glb: 'orc_tanker',
+    sourceFile: 'tools/blender/build_orc_tanker.py',
+    create: createGlb('orc_tanker'),
+    description: 'Petroleiro orc (public/models/orc_tanker.glb): casco de ferro enferrujado e madeira, três tanques de cobre com canos e válvulas, caldeiras, chaminé com faixa de time, guindaste com balde. ~19 mil tris, 5 draw calls.',
+    notes: 'Nós: Hull, Hose, Flag, Anim_Smoke.'
+  },
+  {
     id: 'shipyard_glb',
     name: 'Estaleiro (Blender)',
     category: 'buildings',

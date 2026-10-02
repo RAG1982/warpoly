@@ -63,7 +63,11 @@ export const GLB_MODELS = {
   orc_house: { url: `${BASE}models/orc_house.glb`, root: 'OrcHouse', type: null },
   pig_farm: { url: `${BASE}models/pig_farm.glb`, root: 'PigFarm', type: null },
   orc_lumber_mill: { url: `${BASE}models/orc_lumber_mill.glb`, root: 'OrcLumberMill', type: null },
-  orc_watchtower: { url: `${BASE}models/orc_watchtower.glb`, root: 'OrcWatchtower', type: null }
+  orc_watchtower: { url: `${BASE}models/orc_watchtower.glb`, root: 'OrcWatchtower', type: null },
+  // F7-00b lote 2 (grupo 2): jazidas neutras e acampamento bandido
+  gold_mine: { url: `${BASE}models/gold_mine.glb`, root: 'GoldMine', type: null },
+  stone_quarry: { url: `${BASE}models/stone_quarry.glb`, root: 'StoneQuarry', type: null },
+  bandit_camp: { url: `${BASE}models/bandit_camp.glb`, root: 'BanditCamp', type: null }
 };
 
 export const glbEnabled = (() => {

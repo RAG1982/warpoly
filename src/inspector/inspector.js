@@ -1040,6 +1040,42 @@ const MODEL_CATALOG = [
     description: 'Torre orc gerada pelo pipeline Blender (public/models/orc_watchtower.glb): quatro troncos inclinados com travessas e escoras, paredes de tábuas e toras, plataforma de arqueiros com parapeito de espinhos e braseiro central.',
     notes: '2 draw calls, ~6,3 mil triângulos, atlas 1024², ~326 KB. Pegada ~4,5 (raio 2), altura ~10; chama animada em (0; 8,4; 0) pelo OrcWatchtower.js.'
   },
+  {
+    id: 'gold_mine_glb',
+    name: 'Mina de Ouro (Blender)',
+    category: 'buildings',
+    type: 'building',
+    icon: '🪙',
+    glb: 'gold_mine',
+    sourceFile: 'tools/blender/build_gold_mine.py',
+    create: createGlb('gold_mine'),
+    description: 'Mina de ouro neutra gerada pelo pipeline Blender (public/models/gold_mine.glb): morro de rocha escura em ferradura com picos facetados, veios e cristais de ouro, portal de vigas de carvalho com dossel e túnel negro, trilhos com vagoneta transbordando de pepitas, lanterna acesa, caixotes, barril, picaretas e pá.',
+    notes: '1 draw call (sem cor de time), ~5,4 mil triângulos, atlas 1024², ~353 KB. Pegada ~7 (raio de colisão 3,4), altura ~4,6. Usada pelo ResourceDepositView.'
+  },
+  {
+    id: 'stone_quarry_glb',
+    name: 'Pedreira (Blender)',
+    category: 'buildings',
+    type: 'building',
+    icon: '🪨',
+    glb: 'stone_quarry',
+    sourceFile: 'tools/blender/build_stone_quarry.py',
+    create: createGlb('stone_quarry'),
+    description: 'Pedreira neutra gerada pelo pipeline Blender (public/models/stone_quarry.glb): paredão de calcário em três patamares com estratos e faces recém-cortadas, penhasco escuro, derrick de madeira com talha e bloco em linga, cabrestante, pilha de blocos aparelhados, bloco rachado com cunhas, carrinho de mão, escada e ferramentas.',
+    notes: '1 draw call (sem cor de time), ~2,7 mil triângulos, atlas 1024², ~232 KB. Pegada ~6,4 (raio de colisão 3,0), altura ~4,7.'
+  },
+  {
+    id: 'bandit_camp_glb',
+    name: 'Acampamento Bandido (Blender)',
+    category: 'buildings',
+    type: 'building',
+    icon: '⛺',
+    glb: 'bandit_camp',
+    sourceFile: 'tools/blender/build_bandit_camp.py',
+    create: createGlb('bandit_camp'),
+    description: 'Acampamento hostil neutro gerado pelo pipeline Blender (public/models/bandit_camp.glb): paliçada circular de toras pontiagudas inclinadas, portão flanqueado por totens de crânios com chifres, tenda de guerra carmesim, abrigo de peles, fogueira com espeto e caldeirão, baú de saque aberto, rack de armas e faixas esfarrapadas.',
+    notes: '2 draw calls (Static_Mesh + Anim_Banners TeamColor), ~6,2 mil triângulos, atlas 1024², ~354 KB. Pegada ~8,6 (raio 4,2), altura ~6,8.'
+  },
   // F7-00b lote 1 (fim)
   {
     id: 'forge',

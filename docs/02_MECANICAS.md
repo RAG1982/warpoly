@@ -135,15 +135,42 @@ Lógica pura em `src/core/Hotkeys.js` (`resolveKey`) e `src/core/ControlGroups.j
 
 **Ainda não existem**: seleção de inimigos para inspeção, rebind de teclas (F6-08).
 
-## IA (AIDirector)
+## IA (AIDirector) — F5-01..F5-05
 
-Tick de 1s. Utilidades:
-- `U_def`: intrusos a < 26 da base → todas as tropas ociosas atacam o intruso mais próximo.
-- `U_housing/U_eco`: constrói casas perto do limite de pop; mantém 8–12 trabalhadores; emergência se < 3.
-- Muralha (F3-08): nas dificuldades normal/difícil/brutal, com ≥ 8 trabalhadores, Quartel, ≥ 1 torre e sobra de madeira/pedra, a IA constrói **uma** linha de 6 segmentos a ~16 unidades do Centro, perpendicular à direção do Centro inimigo. Suas tropas derrubam a muralha inimiga que fechar o caminho (comportamento da unidade, ver "Muralhas").
-- `U_mil`: quando tropas prontas ≥ limiar (4 → 5 → 6 → 3 …) envia onda contra torre mais próxima > HQ > qualquer construção.
-- Custos: a IA usa os **mesmos custos reais** de `src/data/` (bug B3 corrigido na F0-06; antes o arremessador custava 60 madeira/35 ouro para a IA contra 20/40 real, e o quartel/serraria/torre/chiqueiro orc e o "cerco" humano também estavam com valores próprios).
-- A IA é **onisciente** (lê `gm.units` diretamente), sem níveis de dificuldade, sem micro, sem scout, sem pesquisar melhorias de forma estratégica.
+Um `AIDirector` por jogador de IA (`gm.aiDirectors`); todas as decisões saem como comandos por `director.issue` (que respeita o orçamento de APM e chama `gm.issue`). Intervalo de decisão = atraso de reação da dificuldade (Normal 1,0 s). Funciona em FFA/times (cada IA vê como hostil o que `gm.isHostile` diz).
+
+**Dificuldades** (`src/ai/AIProfile.js`; `MatchConfig.difficulty` e, por jogador, `players[i].difficulty`; `?difficulty=`):
+
+| | Fácil | Normal | Difícil | Brutal |
+|---|---|---|---|---|
+| APM máx. (comandos/min; o uso real é ~25) | 20 | 60 | 120 | 240 |
+| Reação (s entre decisões) | 2,5 | 1,0 | 0,75 | 0,5 |
+| Micro (0–3) | 0 | 1 | 2 | 3 |
+| Onda base · atraso da 1ª onda | 3 · 7 min | 6 · 2,5 min | 6 · 1,5 min | 7 · 0 |
+| Avaliação de força (razão mín. · inimigo suposto) | cega | 1,0 · 0,8 | 1,2 · 0,9 | 1,2 · visão total |
+| Limite de combatentes | 10 | — | — | — |
+| Bônus de coleta | — | — | — | +25 % |
+| Visão | névoa | névoa | névoa | mapa inteiro |
+| Trabalhadores (vs. estratégia) | −2 | 0 | +2 | +4 |
+| Pesquisa na Forja (ouro mínimo em caixa) | 400 | 400 | 120 | 60 |
+| Conjuradores · muralha · scout | não · não · não | não · sim · sim | sim · sim · sim | sim · sim · sim |
+| Estratégias sorteáveis | boom, turtle | rush, boom, turtle | rush, boom, turtle (+air) | idem |
+
+O orçamento de APM é um balde de fichas (capacidade = APM/6, reposição APM/60 por segundo): comandos além dele são adiados para a decisão seguinte. A economia roda a no máximo 1 decisão por segundo e só realoca trabalhadores já ocupados a cada 6 s (reagir mais rápido não deve significar mexer mais nos peões — isso derrubava a produção de quem decidia a 0,75 s).
+
+**Percepção (F5-02)**: a IA só conhece o que suas unidades/construções veem (`visionRadius`). Mantém memória de construções inimigas (fantasma até a posição ser revista sem elas) e de unidades (45 s). Alvos de ataque, direção da muralha e composição inimiga vêm só dessa memória. Sem alvo conhecido o exército marcha em attack-move ao slot de início mais plausível; um explorador (unidade ociosa reservada) visita os slots e as células inexploradas até a base inimiga ser conhecida. Só o Brutal "trapaceia" (vê tudo).
+
+**Estratégias (F5-04, `AIStrategy.js`)**: sorteadas pelo RNG da IA (determinístico por seed + jogador, ponderado pela dificuldade): *rush* (2 quartéis, 1ª onda cedo, pouca economia), *boom* (mais trabalhadores, evolui o Centro cedo, cavalaria, tech), *turtle* (4 torres, onda tardia, cerco cedo) e *air* (**desligada** — `AI_FEATURES.air = false` até a F4-06). A mistura do exército é ajustada pela composição conhecida do inimigo (mais atiradores contra corpo a corpo, montarias/infantaria contra atiradores, +1 cerco contra torres/muralhas/Centro nível ≥ 2) e por facção.
+
+**Micro (F5-05, `AIMicroManager.js`)**: nível 1: recua feridos (< 30 % PV, longe da base); nível 2: foca fogo (conjurador/suicida > atirador/cerco > corpo a corpo > trabalhador, menor PV efetivo), kiting de atiradores só contra alvos mais lentos (as infantarias e montarias são mais rápidas que os atiradores: fugir delas só perderia dano), escolta que acode o cerco ameaçado, reação total à invasão (as tropas da onda voltam se a defesa de casa é menor que os invasores), 2ª serraria junto de um bosque denso, quartéis extras com ouro parado, assédio a trabalhadores com 2 montarias (só com ≥ 3 montarias, depois de 4 min, volta se houver ≥ 3 soldados inimigos ou PV < 40 %), Torre Arcana + pesquisas + Mago/Necromante com magias por política (Bola de Fogo/Nevasca/Nuvem em aglomerados, Lentidão/Transmutação nos mais fortes, Toque da Morte em feridos, Pressa/Armadura Profana/Escudo de Chamas em infantaria em combate, Erguer Mortos com cadáveres); nível 3: flanco (montarias dão a volta por um waypoint lateral e só então atacam o alvo).
+
+**Economia/militar (base F3/F4)**
+- `U_def`: intrusos a < 26 da base → tropas ociosas atacam o intruso (1 comando em lote).
+- `U_housing/U_eco`: constrói casas perto do limite de pop; trabalhadores conforme a estratégia (+ bônus da dificuldade); emergência se < 3 (o ouro fica reservado para recriar peões).
+- Muralha (F3-08): dificuldades Normal+, com ≥ 8 trabalhadores, Quartel, ≥ 1 torre e sobra de madeira/pedra, **uma** linha de 6 segmentos a ~16 unidades do Centro, perpendicular à direção do Centro inimigo conhecido.
+- Ondas: o limiar cresce por onda e cai com o tempo (anti-impasse: depois de 15 min, −1 a cada 5 min, mín. 2); a onda nunca leva o exército todo (guarda de casa: 1 unidade no Normal, 20 % ≥ 2 no Difícil+, atiradores ficam); antes de sair a IA compara o valor do seu exército com o do inimigo conhecido/suposto (defensor com +25 %); unidades da onda sem progresso por ~16 s desviam por um waypoint lateral e voltam ao ataque (anti-travamento); sem alvo conhecido o exército varre os slots e depois as células inexploradas (e recomeça a varredura quando tudo foi visto).
+- Custos: a IA usa os **mesmos custos reais** de `src/data/`.
+- Calibragem: `tools/ai-ladder.mjs` (Difícil × Normal e Normal × Fácil, ≥ 10 seeds, lados alternados).
 
 ## Condições de vitória (F3-09)
 

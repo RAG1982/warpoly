@@ -56,7 +56,11 @@ src/
     SpatialGrid.js            Grade espacial (spatial hash) uniforme: insert/update/remove/clear, queryRadius,
                                queryRect, nearest (F1-06; testado em tests/unit/spatialGrid.test.js)
   ai/
-    AIDirector.js             Utility AI (tick 1s): U_eco, U_housing, U_def, U_mil — um por jogador de IA (playerId)
+    AIDirector.js             Utility AI — um por jogador de IA (playerId); `issue()` = única saída de comandos (orçamento de APM, F5-03)
+    AIProfile.js              F5-03: dificuldades easy/normal/hard/brutal (APM, reação, micro, bônus, visão)
+    AIPerception.js           F5-02: conhecimento sob a névoa (memória de construções/unidades, grade explorada, scout)
+    AIStrategy.js             F5-04: rush/boom/turtle/air (flag desligada) + contra-unidades (`adaptMix`)
+    AIMicroManager.js         F5-05: recuar feridos, focar fogo, kiting, escolta de cerco, assédio, flanco, magias
     AIEconomyManager.js       Trabalhadores, construção, rebalanceamento de coleta
     AIMilitaryManager.js      Recrutamento, defesa, ondas de ataque (limiar 3–6 tropas)
   entities/
@@ -196,10 +200,10 @@ animate() [rAF da aplicação, delta máx 0.1s; sem sessão (menu/loading) não 
 
 ### Jogadores
 - `MatchConfig` (`src/sim/MatchConfig.js`): `{ mapId, seed, difficulty, players: [{ id, name, factionId, team, color, isAI, isLocal, startSlot }] }`.
-  `main.js` monta a config a partir do menu (`createMatchConfig`) ou da URL (`matchConfigFromSearch`, agora também lê `?map=`) e a `MatchSession` a passa ao `GameManager`. `difficulty` (`easy|normal|hard|brutal`) é guardada na config (a IA ainda não a lê); `withNewSeed(cfg)` gera a config de "Jogar novamente". Padrão: 1×1, jogador local = `?faction` ou humano (id 0, time 0), IA = a outra facção (id 1, time 1). `?ffa=1` acrescenta a IA 2 (facção do jogador local, time 2, slot 2). `validateMatchConfig` (F2-05) valida contra o mapa: `players.length <= mapDef.maxPlayers` e todo `startSlot` existe em `mapDef.startSlots`.
+  `main.js` monta a config a partir do menu (`createMatchConfig`) ou da URL (`matchConfigFromSearch`, agora também lê `?map=`) e a `MatchSession` a passa ao `GameManager`. `difficulty` (`easy|normal|hard|brutal`) é lida pela IA (F5-03; `players[i].difficulty` sobrepõe por jogador, `difficultyOf(cfg, id)`); `withNewSeed(cfg)` gera a config de "Jogar novamente". Padrão: 1×1, jogador local = `?faction` ou humano (id 0, time 0), IA = a outra facção (id 1, time 1). `?ffa=1` acrescenta a IA 2 (facção do jogador local, time 2, slot 2). `validateMatchConfig` (F2-05) valida contra o mapa: `players.length <= mapDef.maxPlayers` e todo `startSlot` existe em `mapDef.startSlots`.
 - `Player` (`src/sim/Player.js`): `resources {wood, gold, stone}`, `population`, `maxPopulation`, `researchLevels: Map<id, nível>` (F3-07; `researchedUpgrades: Set` derivado, nível ≥ 1), `defeated`, `startPos`; métodos `canAfford`, `deduct`, `add` (tipo ou custo inteiro), `recalculatePop(gm)`.
 - `PlayerRegistry`: `getPlayer(id)`, `localPlayer`, `isHostile(a, b)` (times diferentes; matriz pré-calculada, usada nas varreduras O(n²)), `isAlly(a, b)`, `aliveTeams()`. O dono neutro (−1) não é hostil nem aliado de ninguém.
-- `GameManager` expõe `players`, `getPlayer`, `localPlayer`, `localPlayerId`, `isHostile`, `isAlly`, `aiDirectors[]` (um `AIDirector(gm, playerId, baseCenter)` por IA; `aiDirector` = o primeiro).
+- `GameManager` expõe `players`, `getPlayer`, `localPlayer`, `localPlayerId`, `isHostile`, `isAlly`, `aiDirectors[]` (um `AIDirector(gm, playerId, baseCenter, difficulty)` por IA; `aiDirector` = o primeiro).
 - A IA não tem cópia própria de recursos/população: `AIDirector.resources/population/maxPopulation` são getters do `Player`.
 - Toda cobrança/crédito passa pelo dono: `Building.queueUnit/cancelQueuedUnit/startResearch/cancelResearch`, renda passiva, `Unit.depositResources`, construção concluída e `spawnUnit` usam `gm.getPlayer(ownerId)`. Pesquisas são por jogador (`Player.researchLevels`). F3-07: `RESEARCH` (`src/data/upgrades.js`) = `{building:'forge'|'lumber', faction?, levels:[{cost,time,bonus?,effect?,requires}], appliesTo?, name}`; `gm.completeUpgrade` aplica o bônus do nível às unidades vivas (`applyResearchLevelToUnit`), `applyUpgradeToUnit` aplica os níveis acumulados às treinadas depois, `effect.promote` troca o `type` (`promoteUnit`) e `gm.resolveTrainType` faz o Quartel treinar a classe avançada. Requisitos aceitam `{research:'id', level?}`.
 
@@ -342,7 +346,7 @@ e IA não chamam mais `Unit`/`Building` diretamente — emitem comandos via `gm.
   cancelar treino, pesquisar, cancelar pesquisa, parar) fazem o mesmo — os checks de custo/fila
   que sobraram no lado do cliente são só feedback imediato de UI; a validação autoritativa
   (custo, fila, autoria) acontece no executor, no tick de execução.
-- **IA**: `AIEconomyManager`/`AIMilitaryManager` emitem com o próprio `playerId` (mesmos tipos
+- **IA** (F5-01): `AIEconomyManager`/`AIMilitaryManager`/`AIMicroManager`/`AIPerception` emitem por `director.issue` (orçamento de APM; repassa a `gm.issue`) com o próprio `playerId` (mesmos tipos
   de comando do jogador humano — inclusive `PLACE_BUILDING`, que agora cobra o custo no
   executor em vez de `deduct`/refund locais no `AIEconomyManager`).
 - **Estados novos em `Unit`** (ainda sem tecla — F3-01 adiciona os atalhos): `stop` (já
@@ -472,7 +476,7 @@ Camadas e regra de dependência (verificada por `tests/unit/layers.test.js`):
   `splash.js` (dano em área) foi para `src/sim/` (`entities/splash.js` só reexporta). `src/sim/abilities.js` e `src/ai/*` não usam mais
   `three` (a IA usa `{x,y}`/`{x,y,z}` simples). Os ouvintes de eventos de apresentação (`audio/AudioEvents`, `render/VfxEvents`,
   `ui/UiEvents`, `render/HazardView`) já seguiam o padrão "view lê a sim".
-- **Partida headless em Node puro**: `node tools/headless-match.js --seed 1 [--map id] [--difficulty d] [--victory modo] [--ffa]
+- **Partida headless em Node puro**: `node tools/headless-match.js --seed 1 [--map id] [--difficulty d] [--difficulties d0,d1,d2] [--victory modo] [--ffa]
   [--max-minutes N] [--json]` — todos os jogadores IA, passos fixos de 20 Hz até alguém vencer (código de saída 0; 2 = estourou o
   limite; 1 = erro), imprime resumo e checksum final. Seed 1 (1×1): termina aos 7,3 min simulados em ~11 s (≈800 ticks/s). Funciona
   porque `MatchConfig.headless` faz `ModelFactory` devolver `Group` vazio (F2-03) e o hook `tools/lib/jsonImportLoader.mjs` resolve os

@@ -350,6 +350,9 @@ describe('IA constrói uma linha curta de muralha (F3-08)', () => {
     const eco = director.economyManager;
     const p = gm.getPlayer(director.playerId);
     p.resources.wood = 2000; p.resources.stone = 2000; p.resources.gold = 2000;
+    // F5-02: a direção da muralha vem do Centro inimigo CONHECIDO — dá visão total à IA para o teste.
+    director.perception.cheat = true;
+    director.perception.update();
     eco.considerWallLine();
     for (let i = 0; i < 3; i++) gm.simStep(SIM_DT);
     const mine = gm.buildings.filter(b => b.ownerId === director.playerId && b.role === 'wall');

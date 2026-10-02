@@ -6,6 +6,9 @@ import { CMD } from '../sim/commands.js';
 import { ControlGroups } from './ControlGroups.js';
 import { resolveKey, limitByDistance, SELECTION_LIMIT } from './Hotkeys.js';
 import { runtime as optionsRuntime } from '../ui/optionsStore.js';
+import { QualitySettings } from './QualitySettings.js';
+import { classifyHover, cursorKindFor, cursorCss, CursorController } from '../ui/cursors.js';
+import { HoverOutline } from '../ui/HoverOutline.js';
 import { EVT } from '../sim/events.js';
 import { resolveAbility, needsEntityTarget, targetProblem, canCast, pickCaster, selectionAbilityUnits } from '../sim/abilities.js';
 
@@ -25,6 +28,11 @@ export class InputManager {
     this.mouse = new THREE.Vector2();
     this.groundIntersection = new THREE.Vector3();
     this.hoveredEntity = null;
+    this._overUi = false;
+    this._ghostValid = true;
+    // F6-06: cursores contextuais e contorno da entidade sob o mouse.
+    this.cursorController = new CursorController(this.sm && this.sm.renderer ? this.sm.renderer.domElement : null);
+    this.hoverOutline = this.sm && this.sm.scene ? new HoverOutline(this.sm.scene) : null;
 
     // Keyboard state
     this.keys = {};
@@ -352,8 +360,39 @@ export class InputManager {
   /** F4-03: liga/desliga o modo-alvo e ajusta o cursor (mira). */
   setTargetMode(mode) {
     this.targetMode = mode;
-    const dom = this.sm && this.sm.renderer ? this.sm.renderer.domElement : null;
-    if (dom) dom.style.cursor = mode ? 'crosshair' : '';
+    this._updateCursor(); // F6-06: o cursor (mira ou contextual) é decidido em `_updateCursor`
+  }
+
+  /** F6-06: escolhe o cursor (e o contorno sob o mouse) a partir do estado atual. */
+  _updateCursor() {
+    if (!this.cursorController) return;
+    const gm = this.gm;
+    const e = this.hoveredEntity;
+    const hover = this._overUi ? 'none' : classifyHover(e, { localId: gm.localPlayerId, isHostile: (a, b) => gm.isHostile(a, b) });
+    const tm = this.targetMode;
+    let castValid = true;
+    if (tm && tm.kind === 'cast') {
+      const ab = resolveAbility(gm, tm.abilityId);
+      const units = ab ? selectionAbilityUnits(gm.selectedUnits).filter(u => u.abilities.includes(ab.id)) : [];
+      if (ab && units.length > 0 && needsEntityTarget(ab)) castValid = hover !== 'none' && !targetProblem(units[0], ab, e);
+    }
+    const kind = cursorKindFor({
+      enabled: optionsRuntime.contextCursors,
+      targetMode: tm,
+      castValid,
+      placing: !!this.placingBuildingType,
+      placeValid: this._ghostValid,
+      selectedUnits: gm.selectedUnits,
+      hover
+    });
+    this.cursorController.apply(cursorCss(kind, { enabled: optionsRuntime.contextCursors, inTargetMode: !!tm }));
+
+    const ho = this.hoverOutline;
+    if (ho) {
+      const show = QualitySettings.current.hoverOutline && !this.suspended && !this._overUi && !this.placingBuildingType && !this.isDraggingBox && hover !== 'none';
+      if (show) ho.show(gm.entityViews?.rootOf(e) ?? e.mesh, hover);
+      else ho.hide();
+    }
   }
 
   /** F4-03: atalho de teclado de uma habilidade do card atual (letra de `ABILITIES[id].hotkey`). */
@@ -541,7 +580,8 @@ export class InputManager {
     this._hasMouse = true;
     this.currentMousePos = { x: e.clientX, y: e.clientY };
 
-    if (e.target && e.target.closest && e.target.closest('#ui-layer')) {
+    this._overUi = !!(e.target && e.target.closest && e.target.closest('#ui-layer'));
+    if (this._overUi) {
       return;
     }
 
@@ -586,6 +626,7 @@ export class InputManager {
         this.ghostMesh.position.set(gx, h, gz);
 
         const isValid = this.gm.canPlaceBuilding(this.placingBuildingType, gx, gz);
+        this._ghostValid = isValid;
         const targetMat = isValid ? ModelFactory.ghostValidMat : ModelFactory.ghostInvalidMat;
         ModelFactory.setGhostMaterial(this.ghostMesh, targetMat);
       }
@@ -881,6 +922,7 @@ export class InputManager {
   startPlacement(buildingType) {
     this.cancelPlacement();
     this.placingBuildingType = buildingType;
+    this._ghostValid = true;
 
     if (this.isWallType(buildingType)) {
       this.wallAnchor = null;
@@ -903,6 +945,7 @@ export class InputManager {
       this.lastGhostGz = gz;
 
       const isValid = this.gm.canPlaceBuilding(buildingType, gx, gz);
+      this._ghostValid = isValid;
       const targetMat = isValid ? ModelFactory.ghostValidMat : ModelFactory.ghostInvalidMat;
       ModelFactory.setGhostMaterial(this.ghostMesh, targetMat);
     } else {
@@ -999,6 +1042,8 @@ export class InputManager {
       this.sm.panCamera(moveRight, moveForward);
     }
 
+    this._updateCursor();
+
     // Update click decal animation
     if (this.decalLife > 0) {
       this.decalLife -= delta;
@@ -1026,6 +1071,8 @@ export class InputManager {
     }
     this.keys = {};
     this.hoveredEntity = null;
+    if (this.hoverOutline) { this.hoverOutline.dispose(); this.hoverOutline = null; }
+    if (this.cursorController) { this.cursorController.dispose(); this.cursorController = null; }
     this.onPauseRequest = null;
     this.uiManager = null;
   }

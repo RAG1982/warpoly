@@ -1,21 +1,17 @@
 import * as THREE from 'three';
-import { Building } from '../../Building.js';
+import { BuildingView } from '../../BuildingView.js';
 import { EVT } from '../../../sim/events.js';
 
 /**
  * OrcHouse — Toca e Habitação dos Peons Orcs (Orc Burrow)
  *
  * Arquitetura (Engine & Gameplay):
- * - Extende a classe base Building.
+ * - Extende `BuildingView` (a entidade de simulação é `Building`, em src/sim).
  * - Concede +5 de população máxima com custo reduzido de madeira.
  * - VFX: Fumaça suave e esgalhada saindo pelo respiradouro do teto cônico de peles.
  * - VFX: Brilho de fogueira interna (PointLight) escapando pelo vão da porta.
  */
-export class OrcHouse extends Building {
-  constructor(scene, terrain, x, z, isConstructed = true, faction = 'enemy') {
-    super(scene, terrain, 'orc_house', x, z, isConstructed, faction);
-  }
-
+export class OrcHouse extends BuildingView {
   initCustomVFX() {
     this.smokeTimer = Math.random() * 0.5;
     this.flickerTimer = 0;

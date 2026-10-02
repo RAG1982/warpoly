@@ -1,20 +1,16 @@
 import * as THREE from 'three';
-import { Building } from '../../Building.js';
+import { BuildingView } from '../../BuildingView.js';
 
 /**
  * PigFarm — Fazenda e Criatório de Javalis/Porcos da Horda Orc
  *
  * Arquitetura (Engine & Gameplay):
- * - Extende a classe base Building.
+ * - Extende `BuildingView` (a entidade de simulação é `Building`, em src/sim).
  * - Gerencia 3 instâncias autônomas de Porcos Chunky Low-Poly (PigEntity).
  * - Os porcos vagam aleatoriamente dentro dos limites geométricos da cerca de lama,
  *   farejam o chão, comem no cocho e balançam os rabos em espiral.
  */
-export class PigFarm extends Building {
-  constructor(scene, terrain, x, z, isConstructed = true, faction = 'enemy') {
-    super(scene, terrain, 'pig_farm', x, z, isConstructed, faction);
-  }
-
+export class PigFarm extends BuildingView {
   initCustomVFX() {
     this.pigs = [];
     this.penBounds = {

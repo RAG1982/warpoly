@@ -6,7 +6,7 @@ import { createMatchConfig } from '../../src/sim/MatchConfig.js';
 import { SIM_DT } from '../../src/sim/constants.js';
 import { CMD } from '../../src/sim/commands.js';
 import { WALL_STEP, WALL_MAX_POINTS, getBuildingDef } from '../../src/data/index.js';
-import { Wall } from '../../src/entities/Wall.js';
+import { Wall } from '../../src/sim/Wall.js';
 
 /** Partida headless 1×1 (jogador 0 humano, IA orc no jogador 1). */
 function makeGm(seed = 7) {

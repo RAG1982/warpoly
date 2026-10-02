@@ -1,16 +1,7 @@
 import * as THREE from 'three';
 import { Unit } from '../entities/Unit.js';
-import { Building } from '../entities/Building.js';
-import { Wall, WallBatch } from '../entities/Wall.js';
-import {
-  GreatHall,
-  OrcBarracks,
-  PigFarm,
-  OrcHouse,
-  OrcWatchtower,
-  OrcLumberMill,
-  OrcForge
-} from '../entities/buildings/orc/index.js';
+import { Building } from '../sim/Building.js';
+import { Wall } from '../sim/Wall.js';
 import { Tree } from '../sim/Tree.js';
 import { ResourceDeposit } from '../sim/ResourceDeposit.js';
 import { ModelFactory } from '../entities/ModelFactory.js';
@@ -19,7 +10,6 @@ import { FogView } from '../render/FogView.js';
 import { AIDirector } from '../ai/AIDirector.js';
 import { TreeManager } from '../world/TreeManager.js';
 import { Pathfinder } from './Pathfinder.js';
-import { HumanForge } from '../entities/buildings/HumanForge.js';
 
 import {
   STARTING_RESOURCES, FACTIONS, WALL_STEP, WALL_MAX_POINTS, getBuildingDef, getUnitDef, isDropoffFor, RESEARCH, getMaxResearchLevel, promotedType
@@ -162,6 +152,7 @@ export class GameManager {
     // F2-08b: parte visual da névoa (textura/shader, minimapa, fantasmas) — só com malhas (fora do headless).
     // Criada aqui (antes das entidades do mapa) para `markGroundMeshes` ver só terreno/água, como sempre.
     this.fogView = this.headless ? null : new FogView(this.fogOfWar, this.scene);
+    if (this.fogView) this.fogView.viewOf = e => (this.entityViews ? this.entityViews.viewOf(e) : null);
     /** Listas usadas pela `FogView` a cada quadro (recalculadas em `simStep`, junto com `fogOfWar.update`). */
     this._fogLists = { playerUnits: [], playerBuildings: [], enemyUnits: [], enemyBuildings: [] };
 
@@ -442,16 +433,10 @@ export class GameManager {
   }
 
   resetMap() {
-    this.allUnits.forEach(u => this.scene.remove(u.mesh));
-    this.buildings.forEach(b => {
-      this.scene.remove(b.mesh);
-      if (b.rallyGroup) this.scene.remove(b.rallyGroup);
-    });
+    // F2-08c: as malhas de unidades/construções são das views (`EntityViews` as remove no próximo quadro).
+    this.allUnits.forEach(u => u.dispose?.());
+    this.buildings.forEach(b => b.dispose?.());
     this.trees.forEach(t => t.dispose());
-        if (this._wallBatches) {
-      Object.values(this._wallBatches).forEach(wb => wb.dispose());
-      this._wallBatches = null;
-    }
     this.critters.forEach(c => c.dispose());
 
     if (this.treeManager) {
@@ -1010,42 +995,10 @@ export class GameManager {
    */
   createBuilding(type, x, z, isConstructed = true, owner = 'player') {
     const ownerId = this.resolveOwnerId(owner);
-    let b;
-    switch (type) {
-      case 'great_hall':
-        b = new GreatHall(this.scene, this.terrain, x, z, isConstructed, ownerId);
-        break;
-      case 'orc_barracks':
-        b = new OrcBarracks(this.scene, this.terrain, x, z, isConstructed, ownerId);
-        break;
-      case 'pig_farm':
-        b = new PigFarm(this.scene, this.terrain, x, z, isConstructed, ownerId);
-        break;
-      case 'orc_house':
-        b = new OrcHouse(this.scene, this.terrain, x, z, isConstructed, ownerId);
-        break;
-      case 'orc_watchtower':
-        b = new OrcWatchtower(this.scene, this.terrain, x, z, isConstructed, ownerId);
-        break;
-      case 'orc_lumber_mill':
-        b = new OrcLumberMill(this.scene, this.terrain, x, z, isConstructed, ownerId);
-        break;
-      case 'orc_forge':
-        b = new OrcForge(this.scene, this.terrain, x, z, isConstructed, ownerId);
-        break;
-      case 'forge':
-        b = new HumanForge(this.scene, this.terrain, x, z, isConstructed, ownerId);
-        break;
-      case 'wall_human':
-      case 'wall_orc':
-        b = new Wall(this.scene, this.terrain, type, x, z, isConstructed, ownerId);
-        b.gameManager = this;
-        if (!this.headless) b.attachToBatch(this.getWallBatch(type === 'wall_orc' ? 'orc' : 'human'));
-        break;
-      default:
-        b = new Building(this.scene, this.terrain, type, x, z, isConstructed, ownerId);
-        break;
-    }
+    // F2-08c: a entidade é pura; a malha (e as subclasses visuais por tipo) é criada pela `EntityViews`.
+    const b = getBuildingDef(type).role === 'wall'
+      ? new Wall(this.terrain, type, x, z, isConstructed, ownerId)
+      : new Building(this.terrain, type, x, z, isConstructed, ownerId);
     b.gameManager = this;
     this.registerEntity(b, ownerId);
     return b;
@@ -1133,13 +1086,6 @@ export class GameManager {
       }
     });
     return b;
-  }
-
-  /** F3-08: InstancedMesh compartilhado dos segmentos de muralha da facção ('human' | 'orc'). */
-  getWallBatch(faction) {
-    if (!this._wallBatches) this._wallBatches = {};
-    if (!this._wallBatches[faction]) this._wallBatches[faction] = new WallBatch(this.scene, faction);
-    return this._wallBatches[faction];
   }
 
   /**
@@ -1725,10 +1671,7 @@ export class GameManager {
       this.fogView.update(fl.playerUnits, fl.playerBuildings, this.enemies, fl.enemyBuildings);
     }
 
-    // Construções: billboards, chamas, fumaça e VFX customizado das subclasses.
-    this.buildings.forEach(b => {
-      b.renderUpdate(frameDelta, this);
-    });
+    // Construções (F2-08c): billboards, chamas, fumaça e VFX customizado vivem nas `BuildingView`s (`EntityViews`).
 
     // LOD de animação por unidade (F1-09 item 4): frustum + distância à câmera-alvo.
     this._frameIndex++;
@@ -1976,15 +1919,11 @@ export class GameManager {
     this.matchStats.dispose();
 
     this.allUnits.forEach(u => u.dispose?.());
-    this.buildings.forEach(b => (b.dispose ? b.dispose() : this.scene.remove(b.mesh)));
+    this.buildings.forEach(b => b.dispose?.());
     this.trees.forEach(t => t.dispose());
-        this.critters.forEach(c => c.dispose());
+    this.critters.forEach(c => c.dispose());
     this.critters = [];
     this.treeManager?.dispose();
-    if (this._wallBatches) {
-      Object.values(this._wallBatches).forEach(wb => wb.dispose());
-      this._wallBatches = null;
-    }
 
     // Névoa por shader (F1-05): sem plano sobreposto (shroudMesh) para remover.
     this.fogView?.dispose();

@@ -1,20 +1,16 @@
 import * as THREE from 'three';
-import { Building } from '../../Building.js';
+import { BuildingView } from '../../BuildingView.js';
 import { EVT } from '../../../sim/events.js';
 
 /**
  * OrcBarracks — Quartel de Recrutamento e Treinamento Militar dos Orcs
  *
  * Arquitetura (Engine & Gameplay):
- * - Extende a classe base Building.
+ * - Extende `BuildingView` (a entidade de simulação é `Building`, em src/sim).
  * - Simula física pendular amortecida no boneco de treinamento suspenso (Anim_TrainingDummy).
  * - Ao treinar Grunts ou Axethrowers, aplica um impulso cinético no boneco simulando pancada de combate.
  */
-export class OrcBarracks extends Building {
-  constructor(scene, terrain, x, z, isConstructed = true, faction = 'enemy') {
-    super(scene, terrain, 'orc_barracks', x, z, isConstructed, faction);
-  }
-
+export class OrcBarracks extends BuildingView {
   initCustomVFX() {
     this.ambientTime = Math.random() * 10;
     this.dummyAngle = 0;

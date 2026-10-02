@@ -1,21 +1,17 @@
 import * as THREE from 'three';
-import { Building } from '../../Building.js';
+import { BuildingView } from '../../BuildingView.js';
 import { EVT } from '../../../sim/events.js';
 
 /**
  * OrcWatchtower — Torre de Vigia, Sentinela e Baluarte Defensivo da Horda
  *
  * Arquitetura (Engine & Gameplay):
- * - Extende a classe base Building.
+ * - Extende `BuildingView` (a entidade de simulação é `Building`, em src/sim).
  * - Concede raio de visão amplo (28m) através da Névoa de Guerra.
  * - Auto-ataque: dispara machados de arremesso rotativos contra inimigos no raio de 18m.
  * - VFX: Braseiro de ferro suspenso no cume ardendo com PointLight dinâmica e partículas de fogo.
  */
-export class OrcWatchtower extends Building {
-  constructor(scene, terrain, x, z, isConstructed = true, faction = 'enemy') {
-    super(scene, terrain, 'orc_watchtower', x, z, isConstructed, faction);
-  }
-
+export class OrcWatchtower extends BuildingView {
   initCustomVFX() {
     this.fireTimer = 0;
     this.flickerTimer = Math.random() * 10;

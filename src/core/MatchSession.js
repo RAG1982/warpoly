@@ -116,13 +116,15 @@ export class MatchSession {
     if (simulate) {
       const alpha = this.gameManager.advance(delta);
       this.gameManager.renderUpdate(delta, alpha);
-      this.entityViews?.update();
+      this.entityViews?.update(delta, alpha);
+      this.gameManager.events.flush(); // VFX ambiente emitido pelas views (fumaça, faíscas…)
       this.projectileViews?.update(alpha);
       this.particleSystem.update(delta);
     } else {
       // Pausado: mantém a pose de simulação (sem avançar), billboards seguem a câmera.
       this.gameManager.renderUpdate(0, 1);
-      this.entityViews?.update();
+      this.entityViews?.update(0, 1);
+      this.gameManager.events.flush();
       this.projectileViews?.update(1);
     }
     this.uiManager.update(delta);

@@ -38,6 +38,10 @@ export class FogView {
     this.fog = fog;
     this.scene = scene;
     this.gridSize = fog.gridSize;
+    /** F2-08c: `entidade → view` (definido pelo `GameManager`; as malhas vivem em `EntityViews`). */
+    this.viewOf = null;
+    /** Raízes 3D dos fantasmas (a view da construção destruída já foi descartada quando a lembrança expira). */
+    this._ghostRoots = new Map();
 
     /** Construções destruídas fora da visão, ainda lembradas */
     this.ghostGroup = new THREE.Group();
@@ -152,24 +156,29 @@ export class FogView {
    * idempotente e barato — `userData.noFog`).
    */
   _excludeSelectionRingsFromFog(playerUnits, enemyUnits, playerBuildings, enemyBuildings) {
-    if (playerUnits[0]?.selectionRing) excludeFromFog(playerUnits[0].selectionRing);
-    if (enemyUnits[0]?.selectionRing) excludeFromFog(enemyUnits[0].selectionRing);
-    if (playerBuildings[0]?.selectionRing) excludeFromFog(playerBuildings[0].selectionRing);
-    if (enemyBuildings[0]?.selectionRing) excludeFromFog(enemyBuildings[0].selectionRing);
+    const viewOf = this.viewOf;
+    if (!viewOf) return;
+    const ring = e => (e ? viewOf(e)?.selectionRing : null);
+    for (const ringMesh of [ring(playerUnits[0]), ring(enemyUnits[0]), ring(playerBuildings[0]), ring(enemyBuildings[0])]) {
+      if (ringMesh) excludeFromFog(ringMesh);
+    }
   }
 
   /** Mantém o modelo da construção destruída na cena, como lembrança (não entra em listas de seleção). */
   _addGhost(b) {
-    const mesh = b.mesh;
+    const view = this.viewOf ? this.viewOf(b) : null;
+    const mesh = view && view.root;
     if (!mesh) return;
-    if (!mesh.parent) this.ghostGroup.add(mesh);
+    if (!mesh.parent || mesh.parent !== this.ghostGroup) this.ghostGroup.add(mesh); // `add` já tira da cena
     mesh.visible = true;
-    if (b.hpGroup) b.hpGroup.visible = false;
-    if (b.selectionRing) b.selectionRing.visible = false;
+    if (view.hpGroup) view.hpGroup.visible = false;
+    if (view.selectionRing) view.selectionRing.visible = false;
+    this._ghostRoots.set(b, mesh);
   }
 
   _removeGhost(b) {
-    const mesh = b.mesh;
+    const mesh = this._ghostRoots.get(b);
+    this._ghostRoots.delete(b);
     if (mesh && mesh.parent === this.ghostGroup) this.ghostGroup.remove(mesh);
   }
 
@@ -180,19 +189,22 @@ export class FogView {
   cullHiddenEnemies(enemyUnits, enemyBuildings) {
     const fog = this.fog;
     const on = fog.enabled;
+    const viewOf = this.viewOf;
+    if (!viewOf) return;
     for (let i = 0; i < enemyUnits.length; i++) {
       const u = enemyUnits[i];
       if (!u || !u.mesh) continue;
-      const visible = !on || fog.grid.isVisible(u.mesh.position.x, u.mesh.position.z);
-      u.mesh.visible = visible;
-      if (!visible && u.hpGroup) u.hpGroup.visible = false;
+      const view = viewOf(u);
+      if (!view) continue;
+      // F2-08c: a névoa só esconde a view (o `Body.visible` da simulação é de outra natureza: mina, explosão).
+      view.fogHidden = !(!on || fog.grid.isVisible(u.mesh.position.x, u.mesh.position.z));
     }
     for (let i = 0; i < enemyBuildings.length; i++) {
       const b = enemyBuildings[i];
       if (!b || !b.mesh || b.isDead) continue;
-      const known = !on || fog.buildingMemory.isKnown(b);
-      b.mesh.visible = known;
-      if (b.hpGroup && on && !fog.isBuildingVisibleNow(b)) b.hpGroup.visible = false;
+      const view = viewOf(b);
+      if (!view) continue;
+      view.fogHidden = !(!on || fog.buildingMemory.isKnown(b));
     }
   }
 

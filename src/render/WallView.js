@@ -1,5 +1,5 @@
 import * as THREE from 'three';
-import { Building } from './Building.js';
+import { BuildingView } from './BuildingView.js';
 import { getWallGeometry, getWallMaterial } from '../models/buildings/WallModel.js';
 
 /** F3-08: máximo de instâncias por facção no InstancedMesh de segmentos (excedente não é desenhado). */
@@ -80,13 +80,15 @@ pickGeo.translate(0, 1.2, 0);
 const pickMat = new THREE.MeshBasicMaterial({ visible: false });
 
 /**
- * F3-08 — segmento de muralha. Reaproveita o esqueleto de `Building` (obra por estágios via
- * `updateConstructionState`, PV/armadura, bloqueio do pathfinder pelo `GameManager`), mas o
- * corpo visual vive num InstancedMesh por facção (`WallBatch`) em vez de um Mesh por segmento.
+ * F3-08 / F2-08c — view de um segmento de muralha (`src/sim/Wall.js`). Reaproveita `BuildingView` (andaime/obra por
+ * estágios, barra de vida), mas o corpo visual vive num InstancedMesh por facção (`WallBatch`) em vez de um Mesh por
+ * segmento; aqui só há um hit-proxy invisível para picking.
  */
-export class Wall extends Building {
-  constructor(scene, terrain, type, x, z, isConstructed = true, owner = 0) {
-    super(scene, terrain, type, x, z, isConstructed, owner);
+export class WallView extends BuildingView {
+  /** @param {import('../sim/Wall.js').Wall} wall  @param {WallBatch|null} [batch] */
+  constructor(wall, scene, batch = null) {
+    super(wall, scene);
+    if (batch) this.attachToBatch(batch);
   }
 
   createBuildingMesh() {
@@ -104,7 +106,6 @@ export class Wall extends Building {
     return g;
   }
 
-  /** Chamado por `GameManager.createBuilding` (depois de `gameManager` estar injetado). */
   attachToBatch(batch) {
     this._batch = batch;
     this._batchIdx = batch.add();
@@ -119,21 +120,22 @@ export class Wall extends Building {
 
   _syncBatch(force = false) {
     if (!this._batch || this._batchIdx < 0) return;
-    const shown = !this.isDead && this.mesh.visible !== false;
+    const e = this.entity;
+    const shown = !e.isDead && this._shown();
     if (!force && shown === this._batchShown) return;
     this._batchShown = shown;
     if (!shown) {
       this._batch.hide(this._batchIdx);
       return;
     }
-    const p = this.mesh.position;
-    const factor = this.isConstructed ? 1 : Math.max(0.1, this.buildProgress / 100);
+    const p = e.mesh.position;
+    const factor = e.isConstructed ? 1 : Math.max(0.1, e.buildProgress / 100);
     this._batch.set(this._batchIdx, p.x, p.y, p.z, factor);
   }
 
-  renderUpdate(frameDelta, gameManager) {
-    super.renderUpdate(frameDelta, gameManager);
-    this._syncBatch(false); // reflete a névoa de guerra (mesh.visible)
+  update(frameDelta, gameManager, camera) {
+    super.update(frameDelta, gameManager, camera);
+    this._syncBatch(false); // reflete a névoa de guerra
   }
 
   _releaseBatch() {
@@ -142,11 +144,6 @@ export class Wall extends Building {
       this._batch = null;
       this._batchIdx = -1;
     }
-  }
-
-  die() {
-    this._releaseBatch();
-    super.die();
   }
 
   dispose() {

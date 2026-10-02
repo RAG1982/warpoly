@@ -86,6 +86,8 @@ src/
   ui/terrainMinimapImage.js   Imagem do terreno (água/areia/grama/rocha) pré-renderizada 1×/partida para o minimapa e as miniaturas do menu (F2-05)
   ui/UiEvents.js              Ouvinte: eventos → UIManager.showNotification (F2-07)
   ui/screens/                 MainMenu (F6-01), PauseMenu + gameScreens.css (F2-04), OptionsPanel (F6-08)
+  ui/alerts.js                AlertCenter: alertas da HUD (anti-spam, histórico p/ Espaço, pings do minimapa) — F6-05
+  ui/minimapPings.js          Desenho dos pings de alerta no minimapa — F6-05
   ui/skirmishSetup.js         Lógica pura da tela de Escaramuça: estado do formulário → MatchConfig validada (F6-02)
   ui/FactionPreview.js        Prévia 3D (three.js leve, .glb do QG+unidade) da facção no painel de Escaramuça (F6-02)
   ui/optionsStore.js          Persistência pura das opções (localStorage injetável; espelho `runtime`) — F6-08

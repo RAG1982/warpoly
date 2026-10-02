@@ -125,7 +125,7 @@ Lógica pura em `src/core/Hotkeys.js` (`resolveKey`) e `src/core/ControlGroups.j
 | Atacar-movendo / Patrulhar | `A` / `P`, depois clique esquerdo (ATTACK_MOVE sobre o chão; ATTACK se clicar num inimigo; PATROL); Esc ou clique direito cancela |
 | Atalhos do card | Letras exibidas nos botões (construir C/L/F/B/K/V/O/G/J/T/M, treinar Q/W/E, pesquisa R/A/S/D, reparar R, habilidades Z/X/C/V/B/N) acionam o botão visível |
 | Trabalhador ocioso | `.` (próximo, em ciclo; centraliza) |
-| Último alerta | `Espaço` (último dano sofrido; senão o HQ) |
+| Último alerta | `Espaço` (F6-05: alerta mais novo do `AlertCenter`; toques seguidos em ≤ 5 s percorrem os 8 anteriores; sem alertas, o último dano sofrido / HQ) — remapeável |
 | Ir ao HQ | `Backspace` (antes era `H`) |
 | Câmera | WASD/setas, scroll zoom, Q/E rotaciona, botão do meio arrasta, mouse a ≤ 8 px da borda (Opções > Controles: liga/desliga e velocidade) |
 | Minimapa | Clique esquerdo move a câmera; clique direito com unidades selecionadas = MOVE (`Shift` enfileira) |
@@ -201,6 +201,10 @@ Regras por tipo de entidade:
 - **Minimapa**: mesmos 3 estados; inimigos só aparecem com visão atual; fantasmas de construção desenhados como construções.
 
 Nova partida (F2-04, sem recarregar a página) começa com a névoa zerada (`FogOfWar.dispose()` + `reset()`).
+
+## Alertas e feedback (F6-05)
+
+`ui/UiEvents.js` alimenta o `AlertCenter` (`ui/alerts.js`, anexado em `uiManager.alerts`) com os eventos da simulação do jogador **local**: **"Estamos sob ataque!"** (`UNIT_DAMAGED`/`BUILDING_DAMAGED` com `amount > 0` e `UNDER_ATTACK` da IA; recarga 10 s e supressão se o novo ataque estiver a ≤ 20 u do anterior; som de alarme), **"Mina/Pedreira esgotada"** (`RESOURCE_DEPLETED`), **"Pesquisa concluída: X"**, **"Construção concluída: X"** (recarga 1,5 s/8 u para muralhas) e **"Não há comida suficiente"** (cliques de treino com população cheia; recarga 4 s; som `playError`). O banner (`#notification-box`) ganha cor por severidade (`data-severity`: danger/warn/good). Alertas de ataque e mina esgotada geram **ping no minimapa** (anel pulsante por 4 s, `ui/minimapPings.js`). Todos os alertas com posição entram no anel de 8 usado pela tecla Espaço. Limitação: o payload de dano não traz o atacante, então dano de fogo amigo/perigos de chão também dispara "sob ataque". Testes: `tests/unit/alerts.test.js`.
 
 ## Escaramuça — configuração de partida (F6-02)
 

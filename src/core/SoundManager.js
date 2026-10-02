@@ -330,6 +330,22 @@ export class SoundManager {
     gain.gain.exponentialRampToValueAtTime(0.001, now + 0.65);
   }
 
+  /** F6-05: bipe curto e grave de recusa (sem comida, ação indisponível). */
+  playError() {
+    const gain = this.createSfxGain(0.25);
+    if (!gain) return;
+    const now = this.ctx.currentTime;
+    const osc = this.ctx.createOscillator();
+    osc.type = 'square';
+    osc.frequency.setValueAtTime(190, now);
+    osc.frequency.setValueAtTime(140, now + 0.09);
+    gain.gain.setValueAtTime(0.2 * this.sfxVolume, now);
+    gain.gain.exponentialRampToValueAtTime(0.001, now + 0.22);
+    osc.connect(gain);
+    osc.start(now);
+    osc.stop(now + 0.24);
+  }
+
   playAlarm() {
     const gain = this.createSfxGain(0.4);
     if (!gain) return;

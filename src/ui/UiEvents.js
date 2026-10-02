@@ -5,7 +5,10 @@
  */
 import { EVT } from '../sim/events.js';
 import { UPGRADE_CONFIG } from '../core/UpgradeConfig.js';
-import { getTierName } from '../data/index.js';
+import { getTierName, getBuildingDef } from '../data/index.js';
+import { AlertCenter } from './alerts.js';
+
+const ALERT_ICON = { attack: '⚔️', depleted: '⛏️', research: '🔥', built: '🏗️', food: '🌾' };
 
 /**
  * @param {import('../core/GameManager.js').GameManager} gm
@@ -16,6 +19,20 @@ export function createUiEvents(gm, uiManager) {
   const offs = [];
   const on = (type, fn) => offs.push(gm.events.on(type, fn, true)); // true = apresentação (F2-06)
   const isLocal = ownerId => ownerId === gm.localPlayerId;
+  const pos2d = (pos) => (pos ? { x: pos.x, z: pos.z } : null);
+
+  // F6-05: central de alertas (anti-spam, histórico p/ Espaço, pings do minimapa). Anexada à HUD
+  // (`uiManager.alerts`) para o InputManager (Espaço) e o UIManager (minimapa, comida) usarem.
+  const alerts = new AlertCenter({
+    onShow: (a) => {
+      uiManager.showNotification(`${ALERT_ICON[a.kind] || ''} ${a.text}`.trim(), 4000, a.severity);
+      if (!a.sound) return;
+      // Concluídos soam pelo AudioEvents; aqui só o que não tem evento de áudio próprio.
+      if (a.kind === 'attack') uiManager.sound?.playAlarm?.();
+      else if (a.kind === 'food') uiManager.sound?.playError?.();
+    }
+  });
+  uiManager.alerts = alerts;
 
   // Notificações genéricas (recursos insuficientes ao colocar construção, esquadrão de ataque
   // da IA…) — sempre restritas ao jogador local, como antes.
@@ -24,14 +41,14 @@ export function createUiEvents(gm, uiManager) {
   });
 
   // Melhoria forjada: mesma mensagem/condição de `GameManager.completeUpgrade` antes da F2-07.
-  on(EVT.RESEARCH_DONE, ({ ownerId, upgradeId, level }) => {
+  on(EVT.RESEARCH_DONE, ({ ownerId, upgradeId, level, pos }) => {
     if (!isLocal(ownerId)) return;
     const player = gm.getPlayer(ownerId);
     const cfg = UPGRADE_CONFIG[upgradeId];
     const factionType = player && player.factionId === 'orc' ? 'orc' : 'human';
     const upgName = cfg?.name?.[factionType] || upgradeId;
     const lvText = cfg && cfg.maxLevel > 1 && level ? ` ${level}/${cfg.maxLevel}` : '';
-    uiManager.showNotification(`🔥 Pesquisa concluída: ${upgName}${lvText}!`);
+    alerts.raise('research', { pos: pos2d(pos), text: `Pesquisa concluída: ${upgName}${lvText}` });
   });
 
   // F3-06: Centro evoluiu de nível — aviso PT-BR (só para o jogador local, dono do Centro).
@@ -49,13 +66,33 @@ export function createUiEvents(gm, uiManager) {
 
   // F3-04: mina/pedreira esgotada — sem `ownerId` no payload (jazida é neutra), mostrado a
   // qualquer jogador local como as demais notificações genéricas.
-  on(EVT.RESOURCE_DEPLETED, ({ resourceType }) => {
+  on(EVT.RESOURCE_DEPLETED, ({ resourceType, pos }) => {
     const label = resourceType === 'stone' ? 'Pedreira' : 'Mina de ouro';
-    uiManager.showNotification(`⛏️ ${label} esgotada`);
+    alerts.raise('depleted', { pos: pos2d(pos), text: `${label} esgotada` });
+  });
+
+  // F6-05: construção concluída (só do jogador local).
+  on(EVT.BUILDING_COMPLETED, ({ ownerId, buildingType, pos }) => {
+    if (!isLocal(ownerId)) return;
+    alerts.raise('built', { pos: pos2d(pos), text: `Construção concluída: ${getBuildingDef(buildingType).name}` });
+  });
+
+  // F6-05: "Estamos sob ataque" — dano a unidade/construção do jogador local, ou o aviso da IA
+  // (`UNDER_ATTACK`, cujo alarme já toca no AudioEvents). Anti-spam e Espaço no AlertCenter.
+  on(EVT.UNIT_DAMAGED, ({ ownerId, pos, amount }) => {
+    if (isLocal(ownerId) && amount > 0) alerts.raise('attack', { pos: pos2d(pos) });
+  });
+  on(EVT.BUILDING_DAMAGED, ({ ownerId, pos, amount }) => {
+    if (isLocal(ownerId) && amount > 0) alerts.raise('attack', { pos: pos2d(pos) });
+  });
+  on(EVT.UNDER_ATTACK, ({ ownerId, pos }) => {
+    if (isLocal(ownerId)) alerts.raise('attack', { pos: pos2d(pos), sound: false });
   });
 
   return function dispose() {
     offs.forEach(off => off());
     offs.length = 0;
+    alerts.clear();
+    if (uiManager.alerts === alerts) uiManager.alerts = null;
   };
 }

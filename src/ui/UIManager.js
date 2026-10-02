@@ -7,6 +7,7 @@ import {
   missingRequirements, missingUnitRequirements, missingUpgradeRequirements, formatRequirementList
 } from '../sim/requirements.js';
 import { initUiScale } from './uiScale.js';
+import { drawMinimapPings } from './minimapPings.js';
 import { getBuildHotkey, getTrainHotkey, getResearchHotkey } from './hotkeys.js';
 import { buildCostHtml } from './Tooltip.js';
 import { CMD } from '../sim/commands.js';
@@ -168,9 +169,11 @@ export class UIManager {
     }, this._listenOpts);
   }
 
-  showNotification(msg, duration = 4000) {
+  /** `severity` (F6-05): 'danger' | 'warn' | 'good' colore a borda do banner. */
+  showNotification(msg, duration = 4000, severity = null) {
     if (!this.notificationBox) return;
     this.notificationBox.innerText = msg;
+    this.notificationBox.dataset.severity = severity || '';
     this.notificationBox.style.opacity = '1';
     this.notificationBox.style.transform = 'translateX(-50%) translateY(0)';
 
@@ -297,9 +300,7 @@ export class UIManager {
           return;
         }
         if (this.gm.population >= this.gm.maxPopulation) {
-          this.sound.playChop();
-          const farmName = this.gm.playerFaction === 'orc' ? 'Chiqueiros' : 'Casas';
-          this.showNotification(`Limite de população atingido! Construa mais ${farmName}.`);
+          this.alerts ? this.alerts.raise('food') : this.showNotification('Não há comida suficiente!');
           return;
         }
         if (cfg && !this.gm.canAfford(cfg.cost)) {
@@ -506,9 +507,7 @@ export class UIManager {
             return;
           }
           if (this.gm.population >= this.gm.maxPopulation) {
-            this.sound.playChop();
-            const houseName = this.gm.playerFaction === 'orc' ? 'Tocas Orc' : 'Casas';
-            this.showNotification(`Limite de população atingido! Construa mais ${houseName}.`);
+            this.alerts ? this.alerts.raise('food') : this.showNotification('Não há comida suficiente!');
             return;
           }
           if (cfg && !this.gm.canAfford(cfg.cost)) {
@@ -1249,6 +1248,9 @@ export class UIManager {
     if (fog && this.gm.fogView) {
       this.gm.fogView.drawMinimapFog(ctx, w, h);
     }
+
+    // F6-05: pings de alerta (ataque, mina esgotada) sobre a névoa
+    if (this.alerts) drawMinimapPings(ctx, this.alerts.activePings(), toMap);
 
     // Camera Viewport Box on top of Fog
     const camPos = toMap(this.sm.cameraTarget.x, this.sm.cameraTarget.z);

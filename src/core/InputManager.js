@@ -275,7 +275,9 @@ export class InputManager {
   }
 
   centerOnLastAlert() {
-    const p = this.lastAlertPos;
+    // F6-05: histórico do AlertCenter (Espaço novo → antigo); sem ele, o último dano sofrido.
+    const a = this.uiManager?.alerts?.jump();
+    const p = a ? a.pos : this.lastAlertPos;
     if (p) this.sm.cameraTarget.set(p.x, this.terrain.getHeight(p.x, p.z), p.z);
     else this.centerOnHq();
   }

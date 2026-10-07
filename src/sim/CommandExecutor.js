@@ -11,6 +11,7 @@ import { isDetectedBy } from './detection.js';
 import { canTarget } from './targeting.js';
 import { EVT } from './events.js';
 import { planFormation, groupSpeed } from './formation.js';
+import { orderLoad, orderUnload } from './transport.js';
 import { resolveAbility, needsEntityTarget, targetProblem, canCast, pickCaster } from './abilities.js';
 
 /** `console.warn` (sem gate de build — ver `_COMUM.md`: mais simples, sem custo em produção). */
@@ -339,8 +340,54 @@ export const CommandExecutor = {
         break;
       }
 
+      case CMD.LOAD: {
+        const target = gm.entitiesById.get(cmd.targetId);
+        if (!target || target.isDead || target.ownerId !== cmd.playerId) break;
+        const units = resolveOwnedUnits(gm, cmd);
+        if (target.transportCapacity > 0) {
+          // terrestres → embarcam (ordem em ordem de id: as vagas vão para os primeiros)
+          for (let i = 0; i < units.length; i++) orderLoad(gm, units[i], target);
+        } else if (target.layer === 'ground') {
+          // a barcaça vai buscar o terrestre: aproxima-se da água mais próxima e ele embarca
+          for (let i = 0; i < units.length; i++) {
+            const boat = units[i];
+            if (!(boat.transportCapacity > 0) || boat.cargo.length >= boat.transportCapacity) continue;
+            const spot = findBoardingSpotFor(gm, target);
+            if (spot) boat.moveTo(spot.x, spot.z, gm);
+            orderLoad(gm, target, boat);
+            break;
+          }
+        }
+        break;
+      }
+
+      case CMD.UNLOAD: {
+        const boat = gm.entitiesById.get(cmd.unitId);
+        if (!boat || boat.isDead || boat.ownerId !== cmd.playerId || !(boat.transportCapacity > 0)) break;
+        boat.orderQueue = null;
+        orderUnload(gm, boat, cmd.x, cmd.z);
+        break;
+      }
+
       default:
         break;
     }
   }
 };
+
+/** Água navegável junto ao terrestre `unit` (onde a barcaça deve parar para recolhê-lo) ou `null`. */
+function findBoardingSpotFor(gm, unit) {
+  const npf = gm.navalPathfinder;
+  if (!npf) return null;
+  const p = unit.mesh.position;
+  for (let r = 0; r <= 30; r += 1.5) {
+    const steps = r === 0 ? 1 : 16;
+    for (let i = 0; i < steps; i++) {
+      const a = (i / steps) * Math.PI * 2;
+      const x = p.x + Math.cos(a) * r;
+      const z = p.z + Math.sin(a) * r;
+      if (npf.isWalkableWorld(x, z)) return { x, z };
+    }
+  }
+  return null;
+}

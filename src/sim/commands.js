@@ -34,7 +34,11 @@ export const CMD = Object.freeze({
   /** F4-03: lança uma habilidade (`abilityId`; alvo `targetId` ou `x`/`z` conforme `ABILITIES[id].target`). */
   CAST: 'cast',
   /** F4-03: liga/desliga o auto-cast de uma habilidade nas unidades. */
-  SET_AUTOCAST: 'setAutocast'
+  SET_AUTOCAST: 'setAutocast',
+  /** F4-07b: terrestres `unitIds` embarcam na barcaça `targetId` (ou a barcaça em `unitIds` vai buscar o terrestre `targetId`). */
+  LOAD: 'load',
+  /** F4-07b: a barcaça `unitId` navega à margem mais próxima de (`x`, `z`) (padrão: onde está) e desembarca a carga. */
+  UNLOAD: 'unload'
 });
 
 const ALL_TYPES = new Set(Object.values(CMD));
@@ -65,7 +69,9 @@ const REQUIRED_FIELDS = {
   [CMD.HOLD]: ['unitIds'],
   [CMD.PATROL]: ['unitIds', 'x', 'z'],
   [CMD.CAST]: ['unitIds', 'abilityId'],
-  [CMD.SET_AUTOCAST]: ['unitIds', 'abilityId', 'enabled']
+  [CMD.SET_AUTOCAST]: ['unitIds', 'abilityId', 'enabled'],
+  [CMD.LOAD]: ['unitIds', 'targetId'],
+  [CMD.UNLOAD]: ['unitId']
 };
 
 /**
@@ -94,6 +100,12 @@ export function validateCommand(fields) {
       const p = pts[i];
       if (!p || typeof p.x !== 'number' || typeof p.z !== 'number') return { ok: false, reason: `ponto ${i} inválido em 'points'` };
     }
+  }
+  if (fields.type === CMD.LOAD && !Array.isArray(fields.unitIds)) return { ok: false, reason: "'unitIds' precisa ser um array" };
+  if (fields.type === CMD.UNLOAD) {
+    if (typeof fields.unitId !== 'number') return { ok: false, reason: "'unitId' numérico obrigatório" };
+    if ((fields.x !== undefined) !== (fields.z !== undefined)) return { ok: false, reason: "'x' e 'z' devem vir juntos" };
+    if (fields.x !== undefined && (typeof fields.x !== 'number' || typeof fields.z !== 'number')) return { ok: false, reason: "'x'/'z' devem ser numéricos" };
   }
   return { ok: true };
 }

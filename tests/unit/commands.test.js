@@ -72,4 +72,18 @@ describe('commands.js (F2-02)', () => {
     expect(validateCommand({ ...auto, enabled: undefined }).ok).toBe(false);
     expect(() => makeCommand({ ...auto, tick: 1 })).not.toThrow();
   });
+  it('LOAD e UNLOAD (F4-07b): validam campos obrigatórios e x/z juntos', () => {
+    const load = { type: CMD.LOAD, playerId: 0, unitIds: [1, 2], targetId: 9 };
+    expect(validateCommand(load)).toEqual({ ok: true });
+    expect(validateCommand({ ...load, targetId: undefined }).ok).toBe(false);
+    expect(validateCommand({ ...load, unitIds: undefined }).ok).toBe(false);
+    expect(validateCommand({ ...load, unitIds: 'x' }).ok).toBe(false);
+    const unload = { type: CMD.UNLOAD, playerId: 0, unitId: 9 };
+    expect(validateCommand(unload)).toEqual({ ok: true });
+    expect(validateCommand({ ...unload, x: 3, z: -4 })).toEqual({ ok: true });
+    expect(validateCommand({ ...unload, x: 3 }).ok).toBe(false); // x sem z
+    expect(validateCommand({ ...unload, x: 'a', z: 1 }).ok).toBe(false);
+    expect(validateCommand({ type: CMD.UNLOAD, playerId: 0 }).ok).toBe(false);
+    expect(JSON.parse(JSON.stringify(makeCommand({ ...unload, x: 3, z: -4, tick: 2 })))).toEqual({ ...unload, x: 3, z: -4, tick: 2 });
+  });
 });

@@ -1640,7 +1640,7 @@ export class GameManager {
     const unitCount = allUnits.length;
     for (let i = 0; i < unitCount; i++) {
       const u = allUnits[i];
-      if (!u.isDead) {
+      if (!u.isDead && u.transportedBy === null) { // F4-07b: passageiro fora da grade
         const p = u.mesh.position;
         // F4-02: velocidade (u/s) entre ticks — mira preditiva do cerco (não entra no checksum).
         if (u._lastSyncX !== undefined && dt > 0) {
@@ -1791,7 +1791,7 @@ export class GameManager {
     const all = this.allUnits;
     for (let i = 0; i < all.length; i++) {
       const unit = all[i];
-      if (unit.isDead || unit.layer === 'air') continue; // F4-06: aéreo sobrevoa construções/árvores
+      if (unit.isDead || unit.layer === 'air' || unit.transportedBy !== null) continue; // F4-06: aéreo sobrevoa construções/árvores; F4-07b: passageiro
       const pos = unit.mesh.position;
       const radius = (unit.collisionRadius || 0.6) + 6;
       this.blockerGrid.queryRadius(pos.x, pos.z, radius, null, buf);
@@ -1854,7 +1854,7 @@ export class GameManager {
 
     for (let i = 0; i < all.length; i++) {
       const u1 = all[i];
-      if (u1.isDead) continue;
+      if (u1.isDead || u1.transportedBy !== null) continue; // F4-07b: passageiros não colidem
       const p1 = u1.mesh.position;
       const r1 = u1.collisionRadius || 0.6;
 

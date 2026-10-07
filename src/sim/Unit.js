@@ -9,11 +9,12 @@ import { CMD } from './commands.js';
 import { steerDirection, SEP_MARGIN } from './steering.js';
 import { EVT } from './events.js';
 import { REPAIR_INTERVAL, MAX_WORKERS_PER_BUILDING } from './repair.js';
-import { createStatusSlots, createMods, tickStatuses, clearStatuses, removeStatus, STATUS_DEFS } from './statuses.js';
+import { createStatusSlots, createMods, tickStatuses, clearStatuses, removeStatus, addStatus, STATUS_DEFS } from './statuses.js';
 import { isDetectedBy } from './detection.js';
 import { canTarget, defaultCanHitAir, defaultCanHitNaval } from './targeting.js';
-import { FLAMESHIELD_DAMAGE, WATER_LEVEL, NAVAL_MAX_HEIGHT, OIL_LOAD_TIME, SHORE_REACH } from '../data/combat.js';
+import { FLAMESHIELD_DAMAGE, WATER_LEVEL, NAVAL_MAX_HEIGHT, OIL_LOAD_TIME, SHORE_REACH, SUBMERGE_DELAY } from '../data/combat.js';
 import { getAbility } from '../data/abilities.js';
+import { followBoat, detachFromBoat, killCargo, updateBoarding, updateUnloading } from './transport.js';
 import { resolveAbility, canCast, needsEntityTarget, targetProblem, applyAbility, emitCastStart, findAutocastTarget, getChannel, applyChannelWave } from './abilities.js';
 
 /** F4-04: callback de expiração de status (módulo: sem closure por unidade). */
@@ -76,6 +77,7 @@ function pickNearestInBuf(buf, x, z) {
 
 // F1-08: pontos de módulo reutilizados para calcular a origem/impacto do projétil (Projectile copia o valor recebido)
 const _projectileOrigin = { x: 0, y: 0, z: 0 };
+const SUBMERGED_FOREVER = 1e9;
 const _impactPoint = { x: 0, y: 0, z: 0 }; // F4-02: ponto previsto do cerco
 
 /** Origem do projétil: 1,68 u acima da posição `p` (reaproveita um objeto de módulo). */
@@ -134,6 +136,7 @@ export class Unit {
     /** F4-04: invocada (Erguer Mortos): não consome suprimento; ao expirar morre sem cadáver nem baixa. */
     this.summoned = false;
     this._expired = false;
+    this._noCorpse = false; // F4-07b: passageiro morto com a barcaça
     this._cast = null;
     this._effDamage = { basic: 0, piercing: 0, type: 'normal' };
 
@@ -158,6 +161,17 @@ export class Unit {
     /** F4-07: navios (`layer:'naval'`) — `canHitNaval` (atinge navios), petroleiro (`isTanker`, coleta petróleo e ergue plataforma). */
     this.canHitNaval = defaultCanHitNaval(def);
     this.isTanker = !!def.isTanker;
+    /** F4-07b: transporte — barcaça (`transportCapacity` > 0) guarda `cargo` (unidades embarcadas); o passageiro guarda `transportedBy` (id do barco). */
+    this.transportCapacity = def.transportCapacity || 0;
+    this.cargo = this.transportCapacity > 0 ? [] : null;
+    this.transportedBy = null;
+    this._boardTarget = null;
+    this._boardRetry = 0;
+    this._unloadOrder = null;
+    /** F4-07b: submersível — invisível permanente; emerge ao atacar/sofrer dano e volta após `SUBMERGE_DELAY` s. */
+    this.submersible = !!def.submersible;
+    this._surfaceT = 0;
+    if (this.submersible) addStatus(this, 'invisible', SUBMERGED_FOREVER);
     /** F4-02: velocidade estimada (u/s) medida pelo `GameManager` a cada tick — mira preditiva do cerco. */
     this.velX = 0;
     this.velZ = 0;
@@ -386,6 +400,8 @@ export class Unit {
    */
   _clearOrderModes() {
     this._cast = null;
+    this._boardTarget = null; // F4-07b: qualquer ordem nova cancela embarque/desembarque pendentes
+    this._unloadOrder = null;
     this._exitMine();
     this._isHolding = false;
     this._amDest = null;
@@ -451,7 +467,7 @@ export class Unit {
    * unidades — a unidade nunca anda mais rápido que ela. 0 = sem limite (ordem individual).
    */
   moveTo(x, z, gameManager = this.gameManager, groupSpeed = 0, groupSize = 0) {
-    if (this.isDead || this.isDying || this.state === 'dying') return;
+    if (this.isDead || this.isDying || this.state === 'dying') return; if (this.transportedBy !== null) return; // F4-07b: passageiro não recebe ordens
     this._clearOrderModes();
 
     this.state = 'moving';
@@ -545,7 +561,7 @@ export class Unit {
   }
 
   orderGather(resource) {
-    if (this.isDead || this.isDying || this.state === 'dying') return;
+    if (this.isDead || this.isDying || this.state === 'dying') return; if (this.transportedBy !== null) return; // F4-07b
     if (!this.isWorker() && !this.isTanker) return;
     // F4-07a: petroleiro só coleta petróleo (de poço com plataforma própria concluída); trabalhadores nunca o coletam.
     if (this.isTanker !== (resource.type === 'oil')) return;
@@ -591,7 +607,7 @@ export class Unit {
   }
 
   orderBuild(building) {
-    if (this.isDead || this.isDying || this.state === 'dying') return;
+    if (this.isDead || this.isDying || this.state === 'dying') return; if (this.transportedBy !== null) return; // F4-07b
     // F4-07a: a plataforma é erguida pelo petroleiro; as demais construções, pelos trabalhadores.
     if (building && building.role === 'platform' ? !this.isTanker : !this.isWorker()) return;
     if (!this._acceptWorkSlot(building)) return;
@@ -608,7 +624,7 @@ export class Unit {
 
   /** F3-05: ordem de reparo de uma construção (só trabalhadores; mesma regra de 4 por obra). */
   orderRepair(building) {
-    if (this.isDead || this.isDying || this.state === 'dying') return;
+    if (this.isDead || this.isDying || this.state === 'dying') return; if (this.transportedBy !== null) return; // F4-07b
     if (!this.isWorker()) return;
     if (!building || building.isDead || !building.isConstructed || building.hp >= building.maxHp) return;
     if (!this._acceptWorkSlot(building)) return;
@@ -624,7 +640,7 @@ export class Unit {
   }
 
   orderAttack(target, preserveObjective = false) {
-    if (this.isDead || this.isDying || this.state === 'dying') return;
+    if (this.isDead || this.isDying || this.state === 'dying') return; if (this.transportedBy !== null) return; // F4-07b: passageiro não recebe ordens
     if (target && !canTarget(this, target)) return; // F4-06: melee/cerco não atingem aéreos; batedores não atacam
     if (target && !this._shoreOk(target)) return; // F4-07b: navios só atingem terra junto à margem
     this._clearOrderModes();
@@ -670,7 +686,7 @@ export class Unit {
    * mas só alvos dentro do próprio `attackRange` (nunca perseguem — ver `updateAttacking`).
    */
   hold() {
-    if (this.isDead || this.isDying || this.state === 'dying') return;
+    if (this.isDead || this.isDying || this.state === 'dying') return; if (this.transportedBy !== null) return; // F4-07b: passageiro não recebe ordens
     this._cast = null;
     this._exitMine();
     this.state = 'holding';
@@ -700,7 +716,7 @@ export class Unit {
    * (`_giveUpAttack`).
    */
   orderAttackMove(x, z, gameManager = this.gameManager, groupSpeed = this._groupSpeed || 0, groupSize = this._groupSize || 0) {
-    if (this.isDead || this.isDying || this.state === 'dying') return;
+    if (this.isDead || this.isDying || this.state === 'dying') return; if (this.transportedBy !== null) return; // F4-07b: passageiro não recebe ordens
     this.moveTo(x, z, gameManager, groupSpeed, groupSize); // já chama _clearOrderModes()
     this.state = 'attackMoving';
     this._amDest = { x, z };
@@ -711,7 +727,7 @@ export class Unit {
    * attack-move em cada trecho (ver `updatePatrolling`).
    */
   orderPatrol(x, z, gameManager = this.gameManager) {
-    if (this.isDead || this.isDying || this.state === 'dying') return;
+    if (this.isDead || this.isDying || this.state === 'dying') return; if (this.transportedBy !== null) return; // F4-07b: passageiro não recebe ordens
     this._clearOrderModes();
     this._patrolA = { x: this.mesh.position.x, z: this.mesh.position.z };
     this._patrolB = { x, z };
@@ -829,6 +845,10 @@ export class Unit {
     this.isDying = true;
     this.isDead = true;
     this._cast = null;
+    // F4-07b: barcaça afundando leva a carga junto; passageiro morto (invocação expirada…) sai da carga.
+    const dgm = this.gameManager;
+    if (dgm && this.cargo && this.cargo.length > 0) killCargo(dgm, this);
+    if (dgm && this.transportedBy !== null) detachFromBoat(dgm, this);
     this.canRemove = false;
     this.state = 'dying';
     this.deathTimer = 0;
@@ -846,7 +866,7 @@ export class Unit {
       });
     }
     // F4-04: registra o cadáver (só dados) para Erguer Mortos — sem cadáver: invocações expiradas, cerco, suicidas, ovelhas.
-    if (!this._expired && !getUnitDef(this.type).corpseless && this.gameManager && this.gameManager.corpses) {
+    if (!this._expired && !this._noCorpse && !getUnitDef(this.type).corpseless && this.gameManager && this.gameManager.corpses) {
       this.gameManager.corpses.add(this.mesh.position.x, this.mesh.position.z, this.ownerId, this.type, this.gameManager.gameTime);
     }
 
@@ -1025,6 +1045,14 @@ export class Unit {
     if (this.canRemove) return;
     this.gameManager = gameManager;
 
+    // F4-07b: passageiro de barcaça só acompanha o barco (sem IA/ordens/colisão).
+    if (this.transportedBy !== null) {
+      const boat = gameManager.entitiesById.get(this.transportedBy);
+      if (boat && !boat.isDead) followBoat(this, boat);
+      else { detachFromBoat(gameManager, this); this.mesh.visible = true; gameManager._insertIntoGrid(this); }
+      return;
+    }
+
     // Safety: ensure unit never stays submerged in water (navio: nunca em terra/raso — F4-07a)
     if (this.layer === 'naval') {
       if (this.terrain.getHeight(this.mesh.position.x, this.mesh.position.z) > NAVAL_MAX_HEIGHT && gameManager && gameManager.navalPathfinder) {
@@ -1063,6 +1091,15 @@ export class Unit {
     this.attackTimer += delta;
     this.actionTimer += delta;
     if (this.layer === 'air') this._updateFlightHeight(delta);
+    // F4-07b: submersível volta a mergulhar após `SUBMERGE_DELAY` s sem atacar/sofrer dano; embarque e desembarque pendentes.
+    if (this.submersible && !this.mods.invisible) {
+      this._surfaceT += delta;
+      if (this._surfaceT >= SUBMERGE_DELAY) addStatus(this, 'invisible', SUBMERGED_FOREVER);
+    }
+    if (gameManager) {
+      if (this._boardTarget) updateBoarding(gameManager, this, delta);
+      if (this._unloadOrder) updateUnloading(gameManager, this);
+    }
 
     this._updateAbilityTimers(delta, gameManager);
     if (this.isDead) return;
@@ -1165,12 +1202,14 @@ export class Unit {
   }
 
   _notifyInvisibleEnded() {
+    if (this.submersible) return; // F4-07b: o submersível emerge/mergulha sem aviso
     const gm = this.gameManager;
     if (gm && gm.events) gm.events.emit(EVT.NOTIFY, { ownerId: this.ownerId, text: 'Invisibilidade terminou' });
   }
 
   /** F4-04: invisibilidade acaba (ao atacar, lançar ou sofrer dano). */
   breakInvisibility() {
+    this._surfaceT = 0; // F4-07b: reinicia a contagem do mergulho
     if (removeStatus(this, 'invisible')) this._notifyInvisibleEnded();
   }
 
@@ -1244,7 +1283,7 @@ export class Unit {
 
   /** Ordem `cast` (já validada por `CommandExecutor`): anda até o alcance, lança e volta a `idle`. */
   orderCast(order) {
-    if (this.isDead || this.isDying || this.state === 'dying') return;
+    if (this.isDead || this.isDying || this.state === 'dying') return; if (this.transportedBy !== null) return; // F4-07b
     const gm = this.gameManager;
     const ab = resolveAbility(gm, order.abilityId);
     if (!ab || !this.abilities.includes(ab.id)) return;

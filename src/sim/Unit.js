@@ -12,7 +12,7 @@ import { REPAIR_INTERVAL, MAX_WORKERS_PER_BUILDING } from './repair.js';
 import { createStatusSlots, createMods, tickStatuses, clearStatuses, removeStatus, addStatus, STATUS_DEFS } from './statuses.js';
 import { isDetectedBy } from './detection.js';
 import { canTarget, defaultCanHitAir, defaultCanHitNaval } from './targeting.js';
-import { FLAMESHIELD_DAMAGE, WATER_LEVEL, NAVAL_MAX_HEIGHT, OIL_LOAD_TIME, SHORE_REACH, SUBMERGE_DELAY } from '../data/combat.js';
+import { FLAMESHIELD_DAMAGE, WATER_LEVEL, NAVAL_MAX_HEIGHT, OIL_LOAD_TIME, SHORE_REACH, SUBMERGE_DELAY, NAVAL_MESH_SCALE } from '../data/combat.js';
 import { getAbility } from '../data/abilities.js';
 import { followBoat, detachFromBoat, killCargo, updateBoarding, updateUnloading } from './transport.js';
 import { resolveAbility, canCast, needsEntityTarget, targetProblem, applyAbility, emitCastStart, findAutocastTarget, getChannel, applyChannelWave } from './abilities.js';
@@ -237,7 +237,8 @@ export class Unit {
     // Corpo de simulação (F2-08c): posição/rotação Y como números; a malha 3D é da `UnitView`.
     const h = this.terrain.getHeight(x, z);
     this.mesh = new Body(x, this.layer === 'naval' ? WATER_LEVEL : h + this.flyHeight, z);
-    this.mesh.scale.set(1.62, 1.62, 1.62); // Scaled +20% for superior visibility and detail appreciation
+    const meshScale = this.layer === 'naval' ? NAVAL_MESH_SCALE : 1.62; // F4-07b: navios em escala própria
+    this.mesh.scale.set(meshScale, meshScale, meshScale); // Scaled +20% for superior visibility and detail appreciation
     this.mesh.userData.entity = this;
 
     // F1-09: tick fixo — pose de simulação (posição/rotação Y) do início e do fim do último

@@ -13,7 +13,8 @@ const hullMat = (orc) => (orc ? NM.ironOrc : NM.hullWood);
 const trimMat = (orc) => (orc ? NM.rust : NM.hullDark);
 const sailMat = (orc) => (orc ? NM.rope : NM.sail);
 
-function bareHull(hull, orc, len, wid, h = 0.55) {
+function bareHull(hull, orc, len, wid, h = 0.9) {
+  hull.position.y = h * 0.5 - 0.1; // casco emerso: a quilha fica na linha d'água
   part(hull, B(wid, h, len), hullMat(orc), 0, 0.0, 0);
   part(hull, new THREE.ConeGeometry(wid * 0.72, len * 0.28, 4), hullMat(orc), 0, 0.0, len / 2 + len * 0.1, Math.PI / 2, Math.PI / 4, 0).scale.set(1, 1, 0.55); // proa
   part(hull, B(wid * 0.92, 0.07, len * 0.98), NM.deckWood, 0, h / 2, 0); // convés
@@ -60,7 +61,7 @@ export function createBarge(orc = false) {
   const hull = new THREE.Group();
   hull.name = 'Hull';
   root.add(hull);
-  bareHull(hull, orc, 5.4, 3.0, 0.7);
+  bareHull(hull, orc, 5.4, 3.0, 1.1);
   part(hull, B(2.5, 0.5, 3.2), NM.plank, 0, 0.55, -0.3); // carga
   part(hull, B(2.6, 0.08, 0.2), trimMat(orc), 0, 0.85, 1.4); // amurada de proa
   const crane = new THREE.Group();
@@ -85,7 +86,7 @@ export function createDreadnought(orc = false) {
   const hull = new THREE.Group();
   hull.name = 'Hull';
   root.add(hull);
-  bareHull(hull, orc, 8.4, 3.4, 0.9);
+  bareHull(hull, orc, 8.4, 3.4, 1.3);
   part(hull, B(2.6, 0.7, 5.8), NM.iron, 0, 0.8, 0); // casamata blindada
   for (let i = 0; i < 3; i++) {
     part(hull, C(0.06, 0.08, 5.0, 5), trimMat(orc), 0, 3.0, 2.6 - i * 1.8);

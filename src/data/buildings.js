@@ -300,10 +300,10 @@ export const BUILDINGS = {
     tower: null,
     passiveIncome: null,
     requires: ['barracks', { hq: 2 }],
-    trains: ['tanker'],
+    trains: ['tanker', 'frigate', 'barge', 'dreadnought', 'submersible'],
     dropoff: [],
     icon: '/icoEstaleiro.svg',
-    description: 'Constrói navios na costa; treina petroleiros (requer Quartel e Centro nível 2)'
+    description: 'Constrói navios na costa: petroleiros, fragatas, barcaças, couraçados e submersíveis (requer Quartel e Centro nível 2)'
   },
   refinery: {
     type: 'refinery',
@@ -326,6 +326,28 @@ export const BUILDINGS = {
     dropoff: ['oil'],
     icon: '/icoPetroleo.svg',
     description: 'Ponto de entrega de petróleo, na costa (requer Estaleiro e Centro nível 2)'
+  },
+  foundry: {
+    type: 'foundry',
+    name: 'Fundição',
+    entityName: 'Fundição',
+    faction: 'human',
+    role: 'foundry',
+    coastal: true,
+    hp: 800,
+    armor: 15,
+    cost: { gold: 180, wood: 100, stone: 60 },
+    collisionRadius: 3.4,
+    popGranted: 0,
+    visionRadius: 20,
+    healthBarHeight: 6.6,
+    tower: null,
+    passiveIncome: null,
+    requires: ['shipyard', { hq: 2 }],
+    trains: [],
+    dropoff: [],
+    icon: '/icoForja.svg',
+    description: 'Pesquisa canhões e cascos navais; libera Couraçado e Submersível (requer Estaleiro e Centro nível 2)'
   },
   oil_platform: {
     type: 'oil_platform',
@@ -638,10 +660,32 @@ export const BUILDINGS = {
     tower: null,
     passiveIncome: null,
     requires: ['orc_barracks', { hq: 2 }],
-    trains: ['tanker'],
+    trains: ['tanker', 'war_galley', 'barge', 'iron_leviathan', 'colossal_turtle'],
     dropoff: [],
     icon: '/icoEstaleiro.svg',
-    description: 'Constrói navios na costa; treina petroleiros (requer Quartel da Horda e Centro nível 2)'
+    description: 'Constrói navios na costa: petroleiros, galés, barcaças, leviatãs e tartarugas (requer Quartel da Horda e Centro nível 2)'
+  },
+  naval_forge: {
+    type: 'naval_forge',
+    name: 'Fornalha Naval',
+    entityName: 'Fornalha Naval',
+    faction: 'orc',
+    role: 'foundry',
+    coastal: true,
+    hp: 800,
+    armor: 15,
+    cost: { gold: 180, wood: 100, stone: 60 },
+    collisionRadius: 3.4,
+    popGranted: 0,
+    visionRadius: 20,
+    healthBarHeight: 6.4,
+    tower: null,
+    passiveIncome: null,
+    requires: ['ship_dock', { hq: 2 }],
+    trains: [],
+    dropoff: [],
+    icon: '/icoForjaOrc.svg',
+    description: 'Pesquisa canhões e cascos navais; libera Couraçado e Submersível (requer Doca do Clã e Centro nível 2)'
   },
   ash_cauldron: {
     type: 'ash_cauldron',

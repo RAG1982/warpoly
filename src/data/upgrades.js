@@ -1,7 +1,7 @@
 /**
  * upgrades.js — Pesquisas em níveis (F3-07; substitui as 4 pesquisas de nível único da F0-06).
  *
- * `RESEARCH[id]` = { building: 'forge'|'lumber'|'arcane'|'temple' (role da construção que pesquisa), faction?
+ * `RESEARCH[id]` = { building: 'forge'|'lumber'|'arcane'|'temple'|'foundry' (role da construção que pesquisa), faction?
  * ('human'|'orc' — ausente = ambas), levels: [{cost, time, bonus?, effect?, requires}], appliesTo?
  * (tipos de unidade afetados), name: {human, orc} }.
  *
@@ -45,6 +45,27 @@ export const RESEARCH = {
     appliesTo: ['ballista', 'catapult'],
     icon: '/icoEspada.png',
     name: { human: 'Munição Explosiva', orc: 'Pedras Incendiárias' }
+  },
+  // F4-07b: Fundição / Fornalha Naval (`role: 'foundry'`); custam petróleo. Nível 2 exige Centro nível 3.
+  naval_cannons: {
+    building: 'foundry',
+    levels: [
+      { cost: { gold: 250, wood: 150, oil: 100 }, time: 40, bonus: { piercing: 8 }, requires: [] },
+      { cost: { gold: 500, wood: 300, oil: 200 }, time: 60, bonus: { piercing: 8 }, requires: [{ hq: 3 }] }
+    ],
+    appliesTo: ['frigate', 'war_galley', 'dreadnought', 'iron_leviathan', 'submersible', 'colossal_turtle'],
+    icon: '/icoEspada.png',
+    name: { human: 'Canhões Reforçados', orc: 'Bocas de Fogo' }
+  },
+  naval_hulls: {
+    building: 'foundry',
+    levels: [
+      { cost: { gold: 200, wood: 200, oil: 80 }, time: 40, bonus: { armor: 3 }, requires: [] },
+      { cost: { gold: 400, wood: 400, oil: 160 }, time: 60, bonus: { armor: 3 }, requires: [{ hq: 3 }] }
+    ],
+    appliesTo: ['frigate', 'war_galley', 'dreadnought', 'iron_leviathan', 'submersible', 'colossal_turtle', 'barge', 'tanker'],
+    icon: '/icoEscudo.png',
+    name: { human: 'Cascos Blindados', orc: 'Cascos de Ferro' }
   },
   ranged_ammo: {
     building: 'lumber',

@@ -27,7 +27,8 @@ export const FACTIONS = {
     aerie: 'aviary', // F4-06
     shipyard: 'shipyard', // F4-07
     refinery: 'refinery',
-    buildList: ['cottage', 'lumber_camp', 'farm', 'barracks', 'forge', 'stable', 'workshop', 'arcane_tower', 'temple', 'aviary', 'shipyard', 'refinery', 'watchtower', 'wall_human'],
+    foundry: 'foundry', // F4-07b
+    buildList: ['cottage', 'lumber_camp', 'farm', 'barracks', 'forge', 'stable', 'workshop', 'arcane_tower', 'temple', 'aviary', 'shipyard', 'refinery', 'foundry', 'watchtower', 'wall_human'],
     /** F4-07a: construções do Petroleiro (`WORKER_BUILD_LIST.tanker`). */
     tankerBuildList: ['oil_platform'],
     units: {
@@ -40,7 +41,11 @@ export const FACTIONS = {
       caster: 'mage', // F4-04
       flyer: 'gryphon_rider', // F4-06
       scoutAir: 'glider',
-      tanker: 'tanker' // F4-07
+      tanker: 'tanker', // F4-07
+      warship: 'frigate', // F4-07b
+      transport: 'barge',
+      capital: 'dreadnought',
+      submarine: 'submersible'
     },
     startingBase: {
       buildings: { hq: 'castle', lumber: 'lumber_camp', house: 'cottage' },
@@ -65,7 +70,8 @@ export const FACTIONS = {
     aerie: 'serpent_nest', // F4-06
     shipyard: 'ship_dock', // F4-07
     refinery: 'ash_cauldron',
-    buildList: ['orc_house', 'pig_farm', 'orc_lumber_mill', 'orc_barracks', 'orc_forge', 'ogre_den', 'orc_workshop', 'ash_sanctum', 'storm_altar', 'serpent_nest', 'ship_dock', 'ash_cauldron', 'orc_watchtower', 'wall_orc'],
+    foundry: 'naval_forge', // F4-07b
+    buildList: ['orc_house', 'pig_farm', 'orc_lumber_mill', 'orc_barracks', 'orc_forge', 'ogre_den', 'orc_workshop', 'ash_sanctum', 'storm_altar', 'serpent_nest', 'ship_dock', 'ash_cauldron', 'naval_forge', 'orc_watchtower', 'wall_orc'],
     tankerBuildList: ['oil_platform'],
     units: {
       worker: 'peon',
@@ -77,7 +83,11 @@ export const FACTIONS = {
       caster: 'necromancer', // F4-04
       flyer: 'war_serpent', // F4-06
       scoutAir: 'war_balloon',
-      tanker: 'tanker' // F4-07
+      tanker: 'tanker', // F4-07
+      warship: 'war_galley', // F4-07b
+      transport: 'barge',
+      capital: 'iron_leviathan',
+      submarine: 'colossal_turtle'
     },
     startingBase: {
       buildings: { hq: 'great_hall', lumber: 'orc_lumber_mill', house: 'pig_farm' },

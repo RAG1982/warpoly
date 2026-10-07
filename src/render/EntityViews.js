@@ -37,6 +37,8 @@ export class EntityViews {
     this.frameIndex = 0;
     this.lodFrustum = null;
     this.lodTarget = null;
+    /** F4-07b: sistema de partículas (esteira dos navios); `null` em testes/inspetor. */
+    this.particles = null;
     this._frustum = new THREE.Frustum();
     this._projScreen = new THREE.Matrix4();
     /** F3-08: um InstancedMesh por facção ('human' | 'orc') com todos os segmentos de muralha. */

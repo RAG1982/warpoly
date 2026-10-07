@@ -11,6 +11,8 @@ import { getUnitDef } from '../data/index.js';
 import { isDetectedBy } from '../sim/detection.js';
 import { SIM_DT, lerpAngle, animationLodStep } from '../sim/constants.js';
 
+const _wakePos = new THREE.Vector3();
+
 // Shared Selection Ring Geometry & Materials
 const unitRingGeo = new THREE.RingGeometry(0.85, 1.05, 24);
 unitRingGeo.rotateX(-Math.PI / 2);
@@ -349,6 +351,22 @@ export class UnitView {
     if (u.animResetSeq !== this._resetSeq) {
       this._resetSeq = u.animResetSeq;
       animator.reset();
+    }
+
+    // F4-07b: navios — rampa da barcaça (visual) e esteira de espuma enquanto navega.
+    if (u.layer === 'naval') {
+      animator.rampOpen = u.rampT > 0 ? 1 : 0;
+      if (ctx.particles && u.anim === 'walk' && !u.isDying && this._shown() && frameDelta > 0) {
+        this._wakeT = (this._wakeT || 0) - frameDelta;
+        if (this._wakeT <= 0) {
+          this._wakeT = 0.16;
+          const dx = Math.sin(root.rotation.y);
+          const dz = Math.cos(root.rotation.y);
+          const back = (u.collisionRadius || 1.5) * 1.1;
+          _wakePos.set(root.position.x - dx * back, root.position.y + 0.1, root.position.z - dz * back);
+          ctx.particles.spawnWake(_wakePos, dx, dz);
+        }
+      }
     }
 
     if (u.isDying) {

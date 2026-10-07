@@ -18,6 +18,7 @@ import { drawMinimapPings } from './minimapPings.js';
 import { getBuildHotkey, getTrainHotkey, getResearchHotkey } from './hotkeys.js';
 import { buildCostHtml } from './Tooltip.js';
 import { CMD } from '../sim/commands.js';
+import { isDetectedBy } from '../sim/detection.js';
 import { resolveAbility, canCast, selectionAbilityUnits } from '../sim/abilities.js';
 import { buildPostGameModel } from './postGame.js';
 import { PostGameScreen } from './screens/PostGameScreen.js';
@@ -36,7 +37,7 @@ export { BUILDING_TRAINABLE_UNITS };
 /** F3-07: role de pesquisa ('forge' | 'lumber') da construção, ou null se ela não pesquisa. */
 function researchRoleOf(b) {
   const role = getBuildingDef(b.type).role;
-  return role === 'forge' || role === 'lumber' || role === 'arcane' || role === 'temple' ? role : null;
+  return role === 'forge' || role === 'lumber' || role === 'arcane' || role === 'temple' || role === 'foundry' ? role : null; // F4-07b: foundry
 }
 
 export class UIManager {
@@ -312,6 +313,16 @@ export class UIManager {
       const abilityId = btn.getAttribute('data-ability');
       if (abilityId) {
         this.im.beginAbility(abilityId);
+        this.sound.playSelect();
+        return;
+      }
+      if (action === 'unload') { // F4-07b
+        const boats = this.gm.selectedUnits.filter(u => u.transportCapacity > 0 && u.cargo && u.cargo.length > 0);
+        if (boats.length === 0) {
+          this.showNotification(t('hud.noCargo'));
+          return;
+        }
+        for (const b of boats) this.gm.issue({ type: CMD.UNLOAD, playerId: this.gm.localPlayerId, unitId: b.id });
         this.sound.playSelect();
         return;
       }
@@ -619,7 +630,9 @@ export class UIManager {
         <span>⚔️ ${t('hud.stat.attack')}: ${u.damage.basic}+${u.damage.piercing}</span>
         <span>🛡️ ${t('hud.stat.defense')}: ${u.armor || 0}</span>
         <span>🏃 ${t('hud.stat.speed')}: ${u.speed}</span>
-        ${u.minAttackRange > 0 ? `<span>🎯 ${t('hud.stat.range')}: ${u.minAttackRange}–${u.attackRange}</span>` : ''}
+        ${u.minAttackRange > 0 ? `<span>🎯 ${t('hud.stat.range')}: ${u.minAttackRange}–${u.attackRange}</span>` : (u.layer === 'naval' && u.attackRange > 0 ? `<span>🎯 ${t('hud.stat.range')}: ${u.attackRange}</span>` : '')}
+        ${u.transportCapacity > 0 ? `<span data-cargo-count>📦 ${t('hud.stat.cargo')}: ${u.cargo.length}/${u.transportCapacity}</span>` : ''}
+        ${u.submersible ? `<span>🫥 ${t('hud.stat.submerged')}</span>` : ''}
         ${u.layer === 'air' ? `<span>🪽 ${t('hud.stat.air')}</span>` : ''}
         ${u.layer === 'naval' ? `<span>⚓ ${t('hud.stat.naval')}</span>` : ''}
         ${u.suicide ? `<span>💣 ${t('hud.stat.suicide')}</span>` : ''}
@@ -630,9 +643,11 @@ export class UIManager {
 
       // F4-03: o card de habilidades muda a chave (recria o DOM só quando o conjunto muda)
       const abUnits = isWorker || isTanker ? [] : selectionAbilityUnits(this.gm.selectedUnits);
+      const isTransport = u.transportCapacity > 0; // F4-07b: barcaça
       const key = isWorker
         ? `${u.type}_actions`
         : isTanker ? 'tanker_actions'
+        : isTransport ? 'transport_actions'
         : (abUnits.length > 0 ? `military_actions|${abUnits[0].abilities.join(',')}|${abUnits[0].type}` : 'military_actions');
       if (this.lastSelectionKey !== key) {
         this.lastSelectionKey = key;
@@ -1149,6 +1164,27 @@ export class UIManager {
         </div>
       `;
       this.updateWorkerBuildCosts(workerType);
+    } else if (key === 'transport_actions') {
+      // F4-07b: barcaça — Parar e Desembarcar (todos na margem mais próxima; clique direito em terra desembarca no ponto).
+      this.selectionActions.innerHTML = `
+        <div class="worker-actions-container">
+          <span class="bld-section-label">${t('hud.section.actions')}</span>
+          <div class="worker-actions-group">
+            <button class="bld-train-btn action-stop-btn" data-action="stop" title="${t('hud.stopUnits')} (S)">
+              <span class="action-stop-icon">🛑</span>
+              <div class="bld-hint-bubble">
+                <span class="bld-hint-title">${t('hud.stop')}</span> - ${t('hud.stopOrders')}
+              </div>
+            </button>
+            <button class="bld-train-btn action-stop-btn" data-action="unload" title="${t('hud.unload')}">
+              <span class="action-stop-icon">⚓</span>
+              <div class="bld-hint-bubble">
+                <span class="bld-hint-title">${t('hud.unload')}</span> - ${t('hud.unloadDesc')}
+              </div>
+            </button>
+          </div>
+        </div>
+      `;
     } else if (key.startsWith('military_actions')) {
       const abilityIds = key.includes('|') ? key.split('|')[1].split(',').filter(Boolean) : [];
       this.selectionActions.innerHTML = `
@@ -1273,7 +1309,8 @@ export class UIManager {
     const all = this.gm.allUnits;
     for (let i = 0; i < all.length; i++) {
       const u = all[i];
-      if (u.isDead || u.isDying) continue;
+      if (u.isDead || u.isDying || u.transportedBy !== null) continue;
+      if (u.mods.invisible && !isDetectedBy(this.gm, u, localId)) continue; // F4-07b: submersível não detectado não aparece no minimapa
       const px = u.mesh.position.x;
       const pz = u.mesh.position.z;
       if (this.gm.isHostile(localId, u.ownerId) && fog && !fog.isVisible(px, pz)) continue;

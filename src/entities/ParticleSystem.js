@@ -149,6 +149,7 @@ export class ParticleSystem {
     this.goldMat = new THREE.MeshBasicMaterial({ color: 0xffd700 });
     this.stoneMat = new THREE.MeshBasicMaterial({ color: 0xa0a5a8 });
     this.sparkMat = new THREE.MeshBasicMaterial({ color: 0xffea79 });
+    this.foamMat = new THREE.MeshBasicMaterial({ color: 0xeaf6ff }); // F4-07b: espuma da esteira dos navios
     this.smokeMat = new THREE.MeshBasicMaterial({ color: 0xe0e6ed, transparent: true, opacity: 0.65 });
 
     // F1-08: pools (substituem criação de Mesh/Vector3/Material por spawn)
@@ -264,6 +265,22 @@ export class ParticleSystem {
         (Math.random() - 0.5) * 0.5, 0.6, (Math.random() - 0.5) * 0.5,
         (Math.random() - 0.5) * 2.5, 2.2 + Math.random() * 2.0, (Math.random() - 0.5) * 2.5,
         8.5, 0.4 + Math.random() * 0.2, 0.6
+      );
+    }
+  }
+
+  /**
+   * F4-07b: esteira de espuma de um navio — 2 flocos (um por borda de popa) que se espalham rente à água e somem.
+   * `pos` = popa; `dirX/dirZ` = sentido da proa (unitário). Usa o pool de lascas (sem alocação).
+   */
+  spawnWake(pos, dirX, dirZ) {
+    for (let i = 0; i < 2; i++) {
+      const side = i === 0 ? 1 : -1;
+      this._spawnChip(
+        pos, this.foamMat,
+        0, 0.05, 0,
+        -dirX * 0.6 + -dirZ * side * 0.9, 0.15, -dirZ * 0.6 + dirX * side * 0.9,
+        0.5, 0.55 + Math.random() * 0.2, 0.75
       );
     }
   }

@@ -108,6 +108,11 @@ export class UnitAnimator {
     if (NAVAL_TYPES.has(this.unitType)) {
       this.meshParts.hull = model.getObjectByName('Hull');
       this.meshParts.flag = model.getObjectByName('Flag');
+      this.meshParts.crane = model.getObjectByName('Crane'); // F4-07b: barcaça (guindaste, gancho, rampa de proa)
+      this.meshParts.hook = model.getObjectByName('Hook');
+      this.meshParts.ramp = model.getObjectByName('Ramp');
+      this.rampOpen = 0;
+      this._rampAmt = 0;
       let sails = 0;
       let cannons = 0;
       let turrets = 0;
@@ -342,6 +347,13 @@ export class UnitAnimator {
       parts.hull.rotation.x = Math.sin(TAU * phase * 2) * 0.03 * k + (anim === 'walk' ? -0.03 : 0);
     }
     if (parts.flag) parts.flag.rotation.y = Math.sin(TAU * phase * 3) * 0.25;
+    // F4-07b: barcaça — guindaste oscila, gancho balança; a rampa de proa abre ao embarcar/desembarcar (`rampOpen`, escrito pela UnitView).
+    if (parts.crane) parts.crane.rotation.y += Math.sin(TAU * phase) * 0.18;
+    if (parts.hook) parts.hook.position.y += Math.sin(TAU * phase * 2 + 1) * 0.06;
+    if (parts.ramp) {
+      this._rampAmt += ((this.rampOpen || 0) - this._rampAmt) * 0.1;
+      parts.ramp.rotation.x += this._rampAmt * 0.9;
+    }
     for (const key of Object.keys(parts)) {
       const node = parts[key];
       if (!node) continue;

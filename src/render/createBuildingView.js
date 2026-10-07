@@ -19,6 +19,8 @@ const VIEW_BY_TYPE = {
   forge: HumanForge,
   shipyard: NavalBuildingView, // F4-07a
   ship_dock: NavalBuildingView,
+  foundry: NavalBuildingView, // F4-07b
+  naval_forge: NavalBuildingView,
   oil_platform: NavalBuildingView
 };
 

@@ -87,6 +87,7 @@ export function loadUnit(gm, boat, unit) {
   unit._boardTarget = null;
   unit.transportedBy = boat.id;
   boat.cargo.push(unit);
+  boat.rampT = 1.4;
   unit.mesh.visible = false;
   if (unit.setSelected) unit.setSelected(false);
   if (gm.selectedUnits) {
@@ -141,6 +142,7 @@ export function unloadAll(gm, boat, land) {
     gm._insertIntoGrid(u);
   }
   boat.cargo.length = 0;
+  boat.rampT = 1.6;
   return n;
 }
 

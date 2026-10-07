@@ -328,7 +328,7 @@ export class InputManager {
     const minY = Math.min(rect.y1, rect.y2), maxY = Math.max(rect.y1, rect.y2);
     const inside = [];
     for (const u of gm.getUnitsOf(gm.localPlayerId)) {
-      if (u.isDead || u.isDying || u.ownerId !== gm.localPlayerId) continue;
+      if (u.isDead || u.isDying || u.ownerId !== gm.localPlayerId || u.transportedBy !== null) continue; // F4-07b: passageiro não se seleciona
       const s = this._screenPos(u);
       if (s.x >= minX && s.x <= maxX && s.y >= minY && s.y <= maxY) inside.push(s);
     }
@@ -342,7 +342,7 @@ export class InputManager {
     const gm = this.gm;
     const found = [];
     for (const u of gm.getUnitsOf(gm.localPlayerId)) {
-      if (u.isDead || u.isDying || u.type !== unit.type) continue;
+      if (u.isDead || u.isDying || u.type !== unit.type || u.transportedBy !== null) continue;
       const s = this._screenPos(u);
       if (s.x >= 0 && s.x <= window.innerWidth && s.y >= 0 && s.y <= window.innerHeight) found.push(s);
     }

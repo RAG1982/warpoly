@@ -42,6 +42,12 @@ import {
   createSerpentNest,
   createArsonist,
   createTanker,
+  createFrigate,
+  createBarge,
+  createDreadnought,
+  createSubmersible,
+  createFoundry,
+  createNavalForge,
   createShipyard,
   createShipDock,
   createRefinery,
@@ -350,11 +356,20 @@ export class ModelFactory {
    * F4-07a: tipos neutros (mesmo `type` para as duas facções) com .glb por facção; `factionId` do dono escolhe a chave.
    * Sem .glb carregado (ou ?glb=0), cai no modelo procedural único.
    */
-  static FACTION_GLB = { oil_platform: { orc: 'orc_oil_platform' }, tanker: { orc: 'orc_tanker' } };
+  static FACTION_GLB = {
+    oil_platform: { orc: 'orc_oil_platform' }, tanker: { orc: 'orc_tanker' },
+    frigate: { orc: 'orc_frigate' }, barge: { orc: 'orc_barge' }, dreadnought: { orc: 'orc_dreadnought' } // F4-07b
+  };
 
   static _factionGlb(type, factionId) {
     const alt = this.FACTION_GLB[type] && this.FACTION_GLB[type][factionId];
     return (alt && glbEnabled && this.createGlbModel(alt)) || null;
+  }
+
+  /** F4-07b: navio com .glb por facção (`FACTION_GLB`) e fallback procedural (variante orc). */
+  static _shipModel(type, factionId, fn) {
+    const orc = factionId === 'orc';
+    return this._factionGlb(type, factionId) || this._glbOr(type, () => this.getOrCreateModel(orc ? `${type}_orc` : type, () => fn(orc)));
   }
 
   static createBuildingByType(type, factionId = 'human') {
@@ -382,6 +397,8 @@ export class ModelFactory {
       case 'refinery': return this._glbOr('refinery', () => this.getOrCreateModel('refinery', createRefinery));
       case 'ash_cauldron': return this._glbOr('ash_cauldron', () => this.getOrCreateModel('ash_cauldron', createCauldron));
       case 'oil_platform': return this._factionGlb('oil_platform', factionId) || this._glbOr('oil_platform', () => this.getOrCreateModel('oil_platform', createPlatform));
+      case 'foundry': return this._glbOr('foundry', () => this.getOrCreateModel('foundry', createFoundry)); // F4-07b (sem .glb ainda)
+      case 'naval_forge': return this._glbOr('naval_forge', () => this.getOrCreateModel('naval_forge', createNavalForge));
       case 'workshop': return this.createWorkshop();
       case 'orc_workshop': return this.createOrcWorkshop();
       case 'wall_human': return createWallSegment('human');
@@ -616,6 +633,11 @@ export class ModelFactory {
       case 'war_serpent': return this._glbOr('war_serpent', () => this.getOrCreateModel('war_serpent', createWarSerpent, 'war_serpent'));
       // F4-07: naval (procedurais provisórios; .glb via `_glbOr` com a mesma chave)
       case 'tanker': return this._factionGlb('tanker', factionId) || this._glbOr('tanker', () => this.getOrCreateModel('tanker', createTanker));
+      // F4-07b: navios de guerra (.glb por facção; procedural com `?glb=0`). O orc usa os tipos `war_galley/iron_leviathan/colossal_turtle` (`modelOf`).
+      case 'frigate': return this._shipModel('frigate', factionId, createFrigate);
+      case 'barge': return this._shipModel('barge', factionId, createBarge);
+      case 'dreadnought': return this._shipModel('dreadnought', factionId, createDreadnought);
+      case 'submersible': return this.getOrCreateModel(factionId === 'orc' ? 'submersible_orc' : 'submersible', () => createSubmersible(factionId === 'orc')); // sem .glb
       case 'sapper': return this.createSapper();
       case 'arsonist': return this.createArsonist();
       default: return this.createVillager();

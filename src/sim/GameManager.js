@@ -1361,6 +1361,14 @@ export class GameManager {
         this.issue({ type: CMD.ATTACK, playerId: this._localPlayerId, unitIds, targetId: e.id });
         return;
       }
+      // F4-07b: clique direito numa barcaça aliada com terrestres selecionados = embarcar (LOAD).
+      if (e instanceof Unit && e.transportCapacity > 0 && e.ownerId === this._localPlayerId) {
+        const ground = this.selectedUnits.filter(u => u.layer === 'ground' && u.transportedBy === null).map(u => u.id);
+        if (ground.length > 0) {
+          this.issue({ type: CMD.LOAD, playerId: this._localPlayerId, unitIds: ground, targetId: e.id });
+          return;
+        }
+      }
       // F3-10: critter só é atacado por ordem explícita (nunca por auto-aquisição).
       if (e instanceof Critter && !e.isDead) {
         this.issue({ type: CMD.ATTACK, playerId: this._localPlayerId, unitIds, targetId: e.id });
@@ -1415,6 +1423,17 @@ export class GameManager {
           this.issue({ type: CMD.REPAIR, playerId: this._localPlayerId, unitIds: workerIds, buildingId: e.id });
           return;
         }
+      }
+    }
+
+    // F4-07b: barcaças com carga + clique direito em terra firme junto à água = desembarcar nessa margem (UNLOAD).
+    if (groundPoint && this.terrain.getHeight(groundPoint.x, groundPoint.z) >= 0.65) {
+      const barges = this.selectedUnits.filter(u => u.transportCapacity > 0 && u.cargo && u.cargo.length > 0);
+      if (barges.length > 0 && barges.length === this.selectedUnits.length && this.navalPathfinder && this.navalPathfinder.nearNavigable(groundPoint.x, groundPoint.z, 12)) {
+        for (let i = 0; i < barges.length; i++) {
+          this.issue({ type: CMD.UNLOAD, playerId: this._localPlayerId, unitId: barges[i].id, x: groundPoint.x, z: groundPoint.z });
+        }
+        return;
       }
     }
 

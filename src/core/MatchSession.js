@@ -83,6 +83,7 @@ export class MatchSession {
       this.fogView = new FogView(gm.fogOfWar, scene);
       gm.fogView = this.fogView; // lido pela HUD (minimapa)
       this.entityViews = new EntityViews(gm, scene);
+      this.entityViews.particles = this.particleSystem; // F4-07b: esteira dos navios
       gm.entityViews = this.entityViews; // picking (InputManager)
       this.fogView.viewOf = e => this.entityViews.viewOf(e);
       this.entityViews.update();

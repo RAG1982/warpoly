@@ -151,6 +151,8 @@ export class BuildingView {
       case 'ship_dock':
       case 'refinery':
       case 'ash_cauldron':
+      case 'foundry': // F4-07b
+      case 'naval_forge':
       case 'oil_platform': return ModelFactory.createBuildingByType(type, factionId);
       case 'workshop': return ModelFactory.createWorkshop();
       case 'orc_workshop': return ModelFactory.createOrcWorkshop();

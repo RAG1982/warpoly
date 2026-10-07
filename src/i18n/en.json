@@ -716,5 +716,14 @@
   "research.naval_cannons.orc": "Fire Maws",
   "research.naval_hulls.human": "Armored Hulls",
   "research.naval_hulls.orc": "Iron Hulls",
-  "hud.section.research.foundry": "NAVAL RESEARCH:"
+  "hud.section.research.foundry": "NAVAL RESEARCH:",
+  "sim.bargeFull": "Barge is full",
+  "sim.bargeFar": "Barge is too far from the shore",
+  "sim.noLanding": "No shore to land on",
+  "sim.noShoreReach": "Could not reach the shore",
+  "hud.stat.cargo": "Cargo",
+  "hud.stat.submerged": "Submerged",
+  "hud.unload": "Unload",
+  "hud.unloadDesc": "Unloads every unit on the nearest shore (right-click land to unload there)",
+  "hud.noCargo": "The barge is empty"
 }

@@ -716,5 +716,14 @@
   "research.naval_cannons.orc": "Bocas de Fogo",
   "research.naval_hulls.human": "Cascos Blindados",
   "research.naval_hulls.orc": "Cascos de Ferro",
-  "hud.section.research.foundry": "PESQUISAS NAVAIS:"
+  "hud.section.research.foundry": "PESQUISAS NAVAIS:",
+  "sim.bargeFull": "Barcaça cheia",
+  "sim.bargeFar": "Barcaça longe da margem",
+  "sim.noLanding": "Sem margem para desembarcar",
+  "sim.noShoreReach": "Não foi possível chegar à margem",
+  "hud.stat.cargo": "Carga",
+  "hud.stat.submerged": "Submerso",
+  "hud.unload": "Desembarcar",
+  "hud.unloadDesc": "Descarrega todas as unidades na margem mais próxima (clique direito em terra desembarca no ponto)",
+  "hud.noCargo": "A barcaça está vazia"
 }

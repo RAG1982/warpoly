@@ -168,6 +168,8 @@ export class Unit {
     this._boardTarget = null;
     this._boardRetry = 0;
     this._unloadOrder = null;
+    /** F4-07b: apresentação — segundos restantes com a rampa da barcaça aberta (embarque/desembarque); não entra no checksum. */
+    this.rampT = 0;
     /** F4-07b: submersível — invisível permanente; emerge ao atacar/sofrer dano e volta após `SUBMERGE_DELAY` s. */
     this.submersible = !!def.submersible;
     this._surfaceT = 0;
@@ -1092,6 +1094,7 @@ export class Unit {
     this.actionTimer += delta;
     if (this.layer === 'air') this._updateFlightHeight(delta);
     // F4-07b: submersível volta a mergulhar após `SUBMERGE_DELAY` s sem atacar/sofrer dano; embarque e desembarque pendentes.
+    if (this.rampT > 0) this.rampT -= delta;
     if (this.submersible && !this.mods.invisible) {
       this._surfaceT += delta;
       if (this._surfaceT >= SUBMERGE_DELAY) addStatus(this, 'invisible', SUBMERGED_FOREVER);

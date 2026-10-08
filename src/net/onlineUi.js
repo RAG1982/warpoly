@@ -61,6 +61,10 @@ export function attachOnlineUi({ online, gm, sceneManager, uiManager, inputManag
         chat.system('Você perdeu a conexão: a IA assumiu o seu lugar. Ressincronizando…');
         onResync?.();
         break;
+      case 'resyncFailed':
+        chat.system('Falha ao ressincronizar; tentando de novo…');
+        onResync?.(); // recria a partida local (a tentativa anterior a deixou suja)
+        break;
       case 'resynced':
         chat.system('Ressincronizado. Voltando ao controle em instantes.');
         break;

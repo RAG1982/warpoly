@@ -4,6 +4,9 @@
  * 8791) e o Vite (5191), abre DUAS partidas (contextos separados) em `/?online=1`, cria/entra numa
  * sala pela UI, inicia, comanda unidades dos dois lados, compara os checksums por turno e, no
  * fim, adultera o ouro de um lado para ver o aviso de desync nos dois.
+ * F9-04: antes do desync verifica chat e ping de mapa (fora do checksum), pausa votada (sim congela nos
+ * dois, retoma), e queda + retorno (B recarrega a página: A passa B à IA após o timeout de 3 s, B volta
+ * por snapshot e as sims reconvergem).
  *
  * NÃO rode direto: `bash tools/safe-run.sh --timeout 300 -- node tools/online-check.mjs`
  * (GPU real obrigatória; ver CLAUDE.md). Variável: ONLINE_ROUNDS (padrão 2 jogadores).
@@ -16,7 +19,7 @@ import { assertHardwareGpu } from './lib/assertGpu.mjs';
 const VITE_PORT = 5191;
 const SIG_PORT = 8791;
 const BASE = `http://127.0.0.1:${VITE_PORT}`;
-const qs = (name) => `online=1&skipPreload&texq=low&stun=0&autoconnect=1&signal=ws://127.0.0.1:${SIG_PORT}&nome=${name}`;
+const qs = (name) => `online=1&skipPreload&texq=low&stun=0&autoconnect=1&droptimeout=3000&signal=ws://127.0.0.1:${SIG_PORT}&nome=${name}`;
 
 const ARGS = [
   '--use-angle=vulkan', '--enable-features=Vulkan', '--enable-gpu', '--enable-unsafe-swiftshader', '--ignore-gpu-blocklist',
@@ -119,6 +122,51 @@ try {
   if (a.turn < 60 || b.turn < 60) throw new Error('poucos turnos executados');
   if (common.length < 5) throw new Error('poucos checksums comuns');
   if (bad.length > 0 || a.desync || b.desync) throw new Error(`desync inesperado: ${JSON.stringify(bad.slice(0, 3))}`);
+
+  // --- F9-04: chat e ping (fora do checksum) ---
+  await A.evaluate(() => window.game.session.online.session.sendChat('olá do Alice'));
+  await waitFor(B, () => (document.getElementById('online-chat')?.textContent || '').includes('olá do Alice'), 'chat em B');
+  await A.evaluate(() => window.game.session.online.session.sendMapPing(12, -7, { kind: 'attack', team: false }));
+  await waitFor(B, () => (window.game.session.uiManager.allyPings?.items.length || 0) > 0, 'ping de mapa em B');
+  log('chat e ping de mapa chegaram em B');
+
+  // --- F9-04: pausa votada ---
+  await A.evaluate(() => window.game.session.online.session.proposePause());
+  await waitFor(B, () => !!window.game.session.online.session.room.vote, 'votação em B');
+  await B.evaluate(() => window.game.session.online.session.vote(true));
+  await waitFor(A, () => window.game.session.online.session.status().pause.paused, 'pausa em A');
+  await waitFor(B, () => window.game.session.online.session.status().pause.paused, 'pausa em B');
+  await sleep(500);
+  const p0 = await Promise.all([A, B].map((p) => p.evaluate(() => window.game.gameManager.currentTick)));
+  await sleep(2000);
+  const p1 = await Promise.all([A, B].map((p) => p.evaluate(() => window.game.gameManager.currentTick)));
+  if (p0[0] !== p1[0] || p0[1] !== p1[1] || p0[0] !== p0[1]) throw new Error(`sim não congelou igual: ${p0} -> ${p1}`);
+  log('pausa votada: ticks congelados em', p0[0]);
+  await A.evaluate(() => window.game.session.online.session.proposePause()); // pausado => proposta de retomar
+  await waitFor(B, () => window.game.session.online.session.room.vote?.kind === 'resume', 'votação de retomada em B');
+  await B.evaluate(() => window.game.session.online.session.vote(true));
+  for (const p of [A, B]) await waitFor(p, () => !window.game.session.online.session.status().pause.paused && window.game.gameManager.currentTick > 0, 'retomada', 30000);
+  await sleep(1500);
+  const p2 = await Promise.all([A, B].map((p) => p.evaluate(() => window.game.gameManager.currentTick)));
+  if (p2[0] <= p0[0] || p2[1] <= p0[1]) throw new Error(`sim não retomou: ${p0} -> ${p2}`);
+  log('retomada ok; ticks', p2);
+
+  // --- F9-04: queda de B (recarrega a página) => A passa B à IA; B volta por snapshot ---
+  await B.goto(`${BASE}/?${qs('Bruno')}&rejoin=1`);
+  await waitFor(A, () => window.game.gameManager.getPlayer(1).isAI === true, 'A passa B à IA', 60000);
+  log('A: jogador B virou IA');
+  await waitFor(B, () => !!window.game?.session?.online && window.game.gameManager?.currentTick > 20, 'B recarregou e ressincronizou', 120000);
+  await waitFor(B, () => window.game.gameManager.getPlayer(1).isAI === false && !window.game.session.online.session.status().removed, 'B humano de novo', 120000);
+  await waitFor(A, () => window.game.gameManager.getPlayer(1).isAI === false, 'A devolve B ao humano', 60000);
+  await sleep(4000);
+  const a2 = await grab(A);
+  const b2 = await grab(B);
+  const mb2 = new Map(b2.sums);
+  const common2 = a2.sums.filter(([t]) => mb2.has(t));
+  const bad2 = common2.filter(([t, h]) => mb2.get(t) !== h);
+  log(`após o retorno: turnos A=${a2.turn} B=${b2.turn}; checksums comuns=${common2.length}; divergentes=${bad2.length}`);
+  if (common2.length < 3) throw new Error('poucos checksums comuns após o retorno');
+  if (bad2.length > 0 || a2.desync || b2.desync) throw new Error(`desync após retorno: ${JSON.stringify(bad2.slice(0, 3))}`);
 
   // desync forçado: +1 de ouro só em B
   await B.evaluate(() => { window.game.gameManager.players[1].resources.gold += 1; });

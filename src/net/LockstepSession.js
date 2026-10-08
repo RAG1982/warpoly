@@ -631,7 +631,8 @@ export class LockstepSession {
   // --- F9-04: removido (viramos IA) e retorno por snapshot ---
 
   _onRemoved(at) {
-    if (this.removed) return;
+    // Já removido, ou já ressincronizado (o snapshot trouxe a linha do tempo com a nossa queda): avisos atrasados não valem.
+    if (this.removed || (!this._snapReq && this.room.events.get(this.localId).some((e) => !e.active))) return;
     this.removed = { at };
     this._pending.length = 0;
     this._pendingRoom.length = 0;
@@ -690,6 +691,7 @@ export class LockstepSession {
     const fail = (reason) => {
       this.onViolation({ from, reason: `snapshot inválido: ${reason}` });
       this._snapReq = { at: this.now(), tries: this._snapReq ? this._snapReq.tries : 1 }; // tenta de novo no próximo ciclo
+      this.onRoomEvent({ type: 'resyncFailed', reason, turn: this.turn }); // a sim local ficou suja: a aplicação a recria
     };
     if (!snap || !Number.isInteger(snap.turn) || !Number.isInteger(snap.simTick) || !snap.room || !snap.data || typeof this.sim.restoreSnapshot !== 'function') return fail('formato');
     let res;

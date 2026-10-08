@@ -47,7 +47,7 @@ function makeGroup(n, net, { seed = 91, session = {}, difficulty = 'easy' } = {}
       onRoomEvent: (e) => {
         peer.events.room.push(e);
         // como a aplicação faz: ao ser removido, recria a partida local (nova GameManager) para receber o snapshot
-        if (e.type === 'removed' && peer.rebuildOnRemoved) {
+        if ((e.type === 'removed' || e.type === 'resyncFailed') && peer.rebuildOnRemoved) {
           proxy.target = null;
           peer.newGame();
           proxy.target = peer.adapter;
@@ -300,6 +300,42 @@ describe('robustez do lockstep (F9-04)', () => {
     expect(a.gm.commands.log.some((c) => c.playerId === 2 && c.tick > tk)).toBe(true);
     expect(a.events.desync).toBeNull();
     expect(b.events.desync).toBeNull();
+  }, 120000);
+
+  it('aviso `bye` pula o timeout: a IA assume sem esperar dropTimeoutMs', () => {
+    const net = createMemoryNetwork({ latencyMs: 30, jitterMs: 10, seed: 15 });
+    const peers = makeGroup(3, net, { session: { dropTimeoutMs: 600000 } });
+    run(peers, net, 25);
+    peers[2].session.bye();
+    net.setDown(2, true);
+    const alive = peers.slice(0, 2);
+    run(peers, net, 90, { who: alive, maxIter: 2000 }); // 600 s de timeout nunca chegaria
+    for (const p of alive) expect(p.gm.getPlayer(2).isAI).toBe(true);
+    const t = Math.min(...alive.map((p) => p.session.turn));
+    run(alive, net, t + 10);
+    expect(allEqual(sums(alive))).toBe(true);
+  }, 60000);
+
+  it('snapshot adulterado é recusado pelo checksum (e não vira estado)', () => {
+    const net = createMemoryNetwork({ latencyMs: 30, jitterMs: 20, seed: 16 });
+    const peers = makeGroup(3, net);
+    const [a, b, x] = peers;
+    x.rebuildOnRemoved = true;
+    run(peers, net, 30);
+    net.setDown(2, true);
+    run(peers, net, 100, { who: [a, b] });
+    // adultera o checksum dentro do JSON do snapshot (campo "checksum" do dado capturado)
+    net.tamper = (from, to, msg) => (msg.k === 'snap' ? { ...msg, d: msg.d.replace(/"checksum":(\d+)/, (m0, n) => `"checksum":${Number(n) + 1}`) } : msg);
+    net.setDown(2, false);
+    run(peers, net, a.session.turn + 40, { who: [a, b] });
+    expect(x.events.violations.some((v) => /checksum/.test(v.reason))).toBe(true);
+    expect(x.session.status().removed).not.toBeNull();
+    expect(x.session.turn).toBeLessThan(a.session.turn);
+    // sem adulteração, o mesmo par se recupera
+    net.tamper = null;
+    run(peers, net, a.session.turn + 150);
+    expect(x.session.status().removed).toBeNull();
+    expect(x.gm.getPlayer(2).isAI).toBe(false);
   }, 120000);
 
   it('4 jogadores, 1 cai por timeout: os 3 restantes seguem iguais e o ponto de troca é o mesmo', () => {

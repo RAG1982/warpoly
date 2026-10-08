@@ -508,7 +508,7 @@ Sonnet 5.5 escreve a spec em `docs/specs/<ID>.md`; agente **Sonnet** executa; o 
 - `TODO` · QA · Dep: F0-04 · Falha se draw calls/FPS/load piorarem > 10% vs baseline.
 
 ### F10-05 · Empacotamento e deploy
-- `TODO` · QA · Dep: F1-01 · PWA offline, code-splitting por facção/modelos, compressão (brotli), deploy estático (GitHub Pages/Cloudflare Pages), página de lançamento.
+- `DOING(agente-f10-05, 2026-10-08)` · QA · Dep: F1-01 · PWA offline, code-splitting por facção/modelos, compressão (brotli), deploy estático (GitHub Pages/Cloudflare Pages), página de lançamento.
 
 ---
 

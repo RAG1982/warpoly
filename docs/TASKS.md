@@ -435,7 +435,7 @@ Sonnet 5.5 escreve a spec em `docs/specs/<ID>.md`; agente **Sonnet** executa; o 
 - `TODO` · ART+PERF · Dep: F1-04 · Ciclo dia/noite opcional, SSAO leve, bloom para fogo/magias, color grading por tileset, outline de seleção; tudo desligável nos presets.
 
 ### F7-04 · Terreno e tilesets
-- `TODO` · ART+CONTENT · Dep: F2-05 · Splat map (grama, terra, areia, pedra, neve, lama), penhascos/elevação, estradas, 4 tilesets estilo WC2 (Floresta, Inverno, Terras Devastadas, Pântano), costa com espuma.
+- `DOING(agente-f7-04, 2026-10-08)` · ART+CONTENT · Dep: F2-05 · Splat map (grama, terra, areia, pedra, neve, lama), penhascos/elevação, estradas, 4 tilesets estilo WC2 (Floresta, Inverno, Terras Devastadas, Pântano), costa com espuma.
 
 ### F7-05 · VFX
 - `TODO` · ART+PERF · Dep: F1-08 · Partículas GPU em pool (instanced), destruição de construções com escombros, corpos que decaem, sangue/faíscas, pegadas de construção por estágio, magias.

@@ -476,7 +476,7 @@ Sonnet 5.5 escreve a spec em `docs/specs/<ID>.md`; agente **Sonnet** executa; o 
 ## F9 — Multiplayer
 
 ### F9-01 · Arquitetura e prova de conceito
-- `TODO` · NET · Dep: F2-02, F2-03 · Documento `docs/09_MULTIPLAYER.md`; PoC lockstep 1v1 em 2 abas via BroadcastChannel.
+- `DOING(agente-rede, 2026-10-08)` · NET · Dep: F2-02, F2-03 · Documento `docs/09_MULTIPLAYER.md`; PoC lockstep 1v1 em 2 abas via BroadcastChannel.
 
 ### F9-02 · Servidor de sinalização + lobby
 - `TODO` · NET · Dep: F9-01 · `server/` (Node + ws ou Cloudflare Worker), salas por código/link, lista de salas públicas.

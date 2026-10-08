@@ -52,11 +52,11 @@ function run(a, b, net, turns, { onTurn } = {}) {
     net.advance(25);
     if (a.session.turn < turns) {
       scriptedCommands(a, 0, a.session.turn);
-      a.session.update();
+      a.session.update(turns - a.session.turn);
     }
     if (b.session.turn < turns) {
       scriptedCommands(b, 1, b.session.turn);
-      b.session.update();
+      b.session.update(turns - b.session.turn);
     }
     if (onTurn) onTurn();
   }

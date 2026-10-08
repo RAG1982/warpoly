@@ -111,11 +111,32 @@ class GameApp {
 
   /** Boot: menu principal, ou direto para a partida se a URL pedir (?play, ?skipPreload, ?bench…). */
   start() {
+    if (this.params.get('online') === '1') {
+      this._startOnline();
+      return;
+    }
     if (shouldShowMainMenu()) {
       this.fsm.transition(S.MAIN_MENU);
     } else {
       this.fsm.transition(S.LOADING, { config: matchConfigFromSearch(window.location.search) });
     }
+  }
+
+  /**
+   * F9-03: `?online=1` — sala online no lugar do menu (módulo carregado só aqui; single-player intacto).
+   * Ao iniciar, a MatchConfig e a sessão lockstep seguem para o carregamento normal da partida.
+   */
+  async _startOnline() {
+    this._hideLoadingScreen(false);
+    document.documentElement.classList.remove('wp-menu');
+    const { openOnlineLobby } = await import('./net/OnlineLobby.js');
+    openOnlineLobby({
+      params: this.params,
+      onStart: (online) => {
+        this.online = online;
+        this.fsm.transition(S.LOADING, { config: online.config, online });
+      }
+    });
   }
 
   // ------------------------------------------------------------------ ações
@@ -129,6 +150,7 @@ class GameApp {
 
   /** Reiniciar (menu de pausa): mesma MatchConfig, mesma seed. */
   restartMatch() {
+    if (this.session?.online) return; // F9-03: partida online não reinicia (seria uma partida local)
     if (this.fsm.is(S.PAUSED) || this.fsm.is(S.POST_GAME)) {
       this.fsm.transition(S.LOADING, { config: this.matchConfig });
     }
@@ -136,6 +158,7 @@ class GameApp {
 
   /** Jogar novamente (fim de jogo): mesma MatchConfig, seed nova. */
   playAgain() {
+    if (this.session?.online) return this.goToMainMenu();
     if (this.fsm.is(S.POST_GAME)) {
       this.fsm.transition(S.LOADING, { config: withNewSeed(this.matchConfig) });
     }
@@ -279,7 +302,7 @@ class GameApp {
     this.fsm.transition(S.LOADING, { config });
   }
 
-  _enterLoading({ config, save = null }) {
+  _enterLoading({ config, save = null, online = null }) {
     const token = ++this._loadToken;
     this.pauseMenu.hide();
     this._disposeSession();
@@ -288,13 +311,13 @@ class GameApp {
       this.menu = null;
     }
     this.matchConfig = config;
-    this._loadMatch(config, token, save).catch((err) => {
+    this._loadMatch(config, token, save, online).catch((err) => {
       console.error('[WarPoly] falha ao carregar a partida:', err);
       if (token === this._loadToken && this.fsm.is(S.LOADING)) this.fsm.transition(S.MAIN_MENU);
     });
   }
 
-  async _loadMatch(config, token, save = null) {
+  async _loadMatch(config, token, save = null, online = null) {
     const firstServices = !this.sceneManager;
     this._ensureServices();
 
@@ -324,7 +347,7 @@ class GameApp {
     this.assetsReady = true;
     if (token !== this._loadToken || !this.fsm.is(S.LOADING)) return;
 
-    this.session = new MatchSession({ sceneManager: this.sceneManager, sound: this.sound, matchConfig: config });
+    this.session = new MatchSession({ sceneManager: this.sceneManager, sound: this.sound, matchConfig: config, online });
     this.matchCount++;
     this._saveMismatch = false;
     if (save) {
@@ -423,7 +446,8 @@ class GameApp {
     const session = this.session;
     if (!session) return; // menu/loading: nada para desenhar
 
-    const simulate = this.fsm.is(S.IN_GAME);
+    // F9-03: em rede não há pausa local (a sim é compartilhada; pausa votada = F9-04) — o menu de pausa abre por cima.
+    const simulate = this.fsm.is(S.IN_GAME) || (!!session.online && this.fsm.is(S.PAUSED));
     session.update(delta, elapsedTime, simulate);
     if (simulate) this._autosaveTick(session);
     this.sceneManager.render();

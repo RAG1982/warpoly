@@ -10,9 +10,10 @@ export class Tree {
   /**
    * @param {object} terrain  só `getHeight(x, z)`
    * @param {object|null} [rng]  F2-03: RNG de simulação (`gm.rngMap`) usado para `rotY`/escala,
-   *   para o mapa ficar idêntico entre execuções da mesma seed. Sem `rng`, cai em `Math.random`.
+   *   para o mapa ficar idêntico entre execuções da mesma seed. Obrigatório (F9-03): sem `rng` lança erro — `Math.random` na sim quebraria o lockstep.
    */
   constructor(terrain, x, z, type = 'oak', rng = null) {
+    if (!rng) throw new Error('Tree: rng de simulação obrigatório (F9-03)');
     this.terrain = terrain;
     this.type = 'tree';
     this.treeType = type;
@@ -24,8 +25,8 @@ export class Tree {
     this.shakeTimer = 0;
 
     const h = this.terrain.getHeight(x, z);
-    const rotY = (rng ? rng.next() : Math.random()) * Math.PI * 2;
-    const s = 0.85 + (rng ? rng.next() : Math.random()) * 0.35;
+    const rotY = rng.next() * Math.PI * 2;
+    const s = 0.85 + rng.next() * 0.35;
     this.scale = s;
     this.collisionRadius = 0.75 * s;
     this.baseRotY = rotY;

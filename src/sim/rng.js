@@ -60,7 +60,12 @@ export function mulberry32(seed) {
     return mulberry32((fnv1a(String(label)) ^ Math.imul(a >>> 0, 0x2545f491)) >>> 0);
   }
 
-  return { next, int, range, pick, fork };
+  /** F9-03: estado interno (32 bits) — entra no checksum de rede para acusar divergência do RNG cedo. */
+  function state() {
+    return a >>> 0;
+  }
+
+  return { next, int, range, pick, fork, state };
 }
 
 /** Fábrica nomeada usada pelo GameManager (`createRng(seed)` = `mulberry32(seed)`). */

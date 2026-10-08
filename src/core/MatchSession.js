@@ -1,3 +1,5 @@
+import { createGameSimAdapter } from '../net/GameSimAdapter.js';
+import { OnlineHud } from '../net/OnlineHud.js';
 import { Terrain } from '../sim/Terrain.js';
 import { TerrainView } from '../render/TerrainView.js';
 import { FogView } from '../render/FogView.js';
@@ -41,8 +43,9 @@ export class MatchSession {
    * @param {import('./SceneManager.js').SceneManager} deps.sceneManager
    * @param {import('./SoundManager.js').SoundManager} deps.sound
    * @param {object} deps.matchConfig  ver src/sim/MatchConfig.js
+   * @param {object|null} [deps.online]  F9-03: partida online `{session, proxy, names, dispose}` (OnlineLobby); null = single-player
    */
-  constructor({ sceneManager, sound, matchConfig }) {
+  constructor({ sceneManager, sound, matchConfig, online = null }) {
     this.sceneManager = sceneManager;
     this.sound = sound;
     this.matchConfig = matchConfig;
@@ -64,6 +67,22 @@ export class MatchSession {
     // Simulação (jogadores e bases a partir da MatchConfig, F2-01)
     this.gameManager = new GameManager(this.terrain, sound, this.particleSystem, matchConfig);
     if (!this.gameManager.headless) this.gameManager.gameSpeed = options.get('defaultSpeed'); // F6-08
+
+    // F9-03: partida online — a sessão lockstep passa a dirigir a sim; comandos da UI vão para ela (ver GameManager.issue).
+    this.online = online;
+    this.onlineHud = null;
+    if (online) {
+      const gm = this.gameManager;
+      online.proxy.target = createGameSimAdapter(gm, { render: !gm.headless });
+      gm.netIssue = (fields) => {
+        try {
+          online.session.queueCommand(fields);
+        } catch (err) {
+          console.warn('[WarPoly online] comando recusado:', err.message);
+        }
+      };
+      this.onlineHud = new OnlineHud(online.session, online.names);
+    }
 
     // Entrada e HUD
     this.inputManager = new InputManager(sceneManager, this.gameManager, this.terrain, this.terrainView);
@@ -168,7 +187,15 @@ export class MatchSession {
     this.water.update(elapsed);
     if (simulate) {
       const gm = this.gameManager;
-      const alpha = gm.advance(delta);
+      let alpha;
+      if (this.online) {
+        // F9-03: quem decide quantos passos rodam é a sessão (turnos de 100 ms em tempo real).
+        alpha = this.online.session.pump(delta * 1000).alpha;
+        gm._lastAlpha = alpha;
+        this.onlineHud?.update(delta);
+      } else {
+        alpha = gm.advance(delta);
+      }
       this._presentFrame(delta, alpha);
       this.projectileViews?.update(alpha);
       this.particleSystem.update(delta);
@@ -222,6 +249,13 @@ export class MatchSession {
     this._disposeUiEvents?.();
     this.tutorialController?.dispose();
     this.tutorialController = null;
+
+    // F9-03: encerra a sessão online (HUD, transporte, sala).
+    this.onlineHud?.dispose();
+    this.onlineHud = null;
+    this.gameManager.netIssue = null;
+    this.online?.dispose?.();
+    this.online = null;
 
     // 1. Entrada e HUD primeiro: nada mais reage a eventos desta partida.
     this.inputManager.dispose();

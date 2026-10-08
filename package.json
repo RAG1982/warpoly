@@ -8,13 +8,15 @@
     "preview": "vite preview",
     "bench": "bash tools/safe-run.sh --timeout 600 -- node tools/bench/run-bench.mjs",
     "lint": "eslint .",
+    "signaling": "node server/index.js",
     "test": "vitest run",
     "smoke": "bash tools/safe-run.sh --mem 6G --timeout 240 -- node tools/smoke.mjs",
     "soak": "bash tools/safe-run.sh --timeout 3600 -- node tools/soak.mjs",
     "format:check": "prettier --check"
   },
   "dependencies": {
-    "three": "^0.186.0"
+    "three": "^0.186.0",
+    "ws": "^8.22.0"
   },
   "devDependencies": {
     "@eslint/js": "^9.39.5",

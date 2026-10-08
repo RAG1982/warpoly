@@ -25,7 +25,7 @@ export default [
   },
   {
     // Configs, ferramentas e testes rodam em Node.
-    files: ['*.config.js', 'tools/**/*.{js,mjs}', 'tests/**/*.{js,mjs}'],
+    files: ['*.config.js', 'server/**/*.js', 'tools/**/*.{js,mjs}', 'tests/**/*.{js,mjs}'],
     languageOptions: {
       globals: {
         ...globals.node

@@ -480,7 +480,8 @@ Sonnet 5.5 escreve a spec em `docs/specs/<ID>.md`; agente **Sonnet** executa; o 
   - Resultado: `docs/09_MULTIPLAYER.md` (turnos, atraso, checksum/desync, WebRTC, lobby, reconexão, IA, replays, auditoria de determinismo) + `src/net/` (LockstepSession, Transport, BroadcastTransport, MemoryTransport, GameSimAdapter), `net-poc.html`, `tests/unit/lockstep.test.js`. Nenhuma mudança em `src/sim/`.
 
 ### F9-02 · Servidor de sinalização + lobby
-- `TODO` · NET · Dep: F9-01 · `server/` (Node + ws ou Cloudflare Worker), salas por código/link, lista de salas públicas.
+- `REVIEW` · NET · Dep: F9-01 · `server/` (Node + ws ou Cloudflare Worker), salas por código/link, lista de salas públicas.
+  - Resultado: `server/` (`signaling.js`, `protocol.js`, `index.js`, `README.md`; `npm run signaling`), `src/net/SignalingClient.js` (reconexão com backoff), `src/net/WebRTCTransport.js` (malha DataChannel, menor id inicia), painel `lobby.html` + `src/net/lobby.js` (não altera o jogo). Testes: `signaling.test.js` (clientes `ws`, porta efêmera), `webrtcTransport.test.js` (RTC falso). Dependência nova: `ws`. Cloudflare Worker/DO só documentado.
 
 ### F9-03 · Lockstep WebRTC
 - `TODO` · NET · Dep: F9-02 · Turnos de comando, atraso de input adaptativo à latência, checksum por turno, detecção e relatório de desync, até 8 jogadores.

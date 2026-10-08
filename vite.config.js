@@ -89,7 +89,8 @@ export default defineConfig({
       input: {
         main: resolve(__dirname, 'index.html'),
         inspector: resolve(__dirname, 'inspector.html'),
-        netPoc: resolve(__dirname, 'net-poc.html')
+        netPoc: resolve(__dirname, 'net-poc.html'),
+        lobby: resolve(__dirname, 'lobby.html')
       },
       output: {
         codeSplitting: {

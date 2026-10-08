@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>WarPoly — Sala multijogador</title>
+  <style>
+    body { font: 14px/1.4 system-ui, sans-serif; background: #14161a; color: #e6e6e6; margin: 0; padding: 16px; max-width: 760px; }
+    h1 { font-size: 18px; margin: 0 0 8px; } h2 { font-size: 15px; margin: 16px 0 6px; }
+    button, input, select { font: inherit; padding: 6px 10px; margin: 0 6px 6px 0; }
+    button { cursor: pointer; }
+    pre { background: #0c0d10; padding: 10px; border-radius: 6px; overflow: auto; max-height: 200px; }
+    table { border-collapse: collapse; } td, th { padding: 2px 12px 2px 0; text-align: left; }
+    .muted { color: #8a8f98; } .bad { color: #ff6b6b; }
+  </style>
+</head>
+<body>
+  <h1>Multijogador — sala</h1>
+  <p class="muted">Painel isolado (F9-02): não altera o fluxo do jogo. Requer o servidor de sinalização (<code>npm run signaling</code>).</p>
+  <section id="connect">
+    <input id="server" size="26" value="ws://localhost:8787" aria-label="Servidor" />
+    <input id="name" size="14" placeholder="Seu nome" maxlength="24" />
+    <button id="btnConnect">Conectar</button>
+    <span id="conn" class="muted">desconectado</span>
+  </section>
+  <section id="menu" hidden>
+    <h2>Criar sala</h2>
+    <label><input type="checkbox" id="pub" /> pública</label>
+    <button id="btnCreate">Criar sala</button>
+    <h2>Entrar por código</h2>
+    <input id="code" size="8" placeholder="CÓDIGO" maxlength="8" />
+    <button id="btnJoin">Entrar</button>
+    <h2>Salas públicas <button id="btnList">Atualizar</button></h2>
+    <table id="rooms"></table>
+  </section>
+  <section id="room" hidden>
+    <h2>Sala <b id="rcode"></b> <button id="btnCopy">Copiar link</button> <button id="btnLeave">Sair</button></h2>
+    <div>
+      Mapa <select id="map"></select>
+      Minha facção <select id="faction"><option value="human">Aliança</option><option value="orc">Horda</option></select>
+      <label><input type="checkbox" id="ready" /> Pronto</label>
+      <button id="btnStart" hidden>Iniciar partida</button>
+    </div>
+    <table id="players"></table>
+    <h2>Chat</h2>
+    <pre id="chat"></pre>
+    <input id="msg" size="40" maxlength="200" placeholder="Mensagem" /><button id="btnSend">Enviar</button>
+  </section>
+  <p id="status" class="bad"></p>
+  <script type="module" src="/src/net/lobby.js"></script>
+</body>
+</html>

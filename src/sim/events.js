@@ -68,7 +68,23 @@ export const EVT = Object.freeze({
 
   PLAYER_DEFEATED: 'player_defeated',
   MATCH_WON: 'match_won',
-  MATCH_LOST: 'match_lost'
+  MATCH_LOST: 'match_lost',
+
+  /** F8-04: objetivo de missão mudou de estado / visibilidade — só apresentação (a HUD também lê `gm.mission.snapshot()`). */
+  MISSION_OBJECTIVE: 'mission_objective',
+  /** F8-04: fala/diálogo da missão (ação `dialog`). */
+  MISSION_DIALOG: 'mission_dialog',
+  /** F8-04: aviso curto na HUD (ação `message`). */
+  MISSION_MESSAGE: 'mission_message',
+  /** F8-04: mover a câmera (ação `camera`) — a câmera é render, fora do checksum. */
+  MISSION_CAMERA: 'mission_camera',
+  /** F8-04: cutscene de câmera por keyframes (ação `cutscene`). */
+  MISSION_CUTSCENE: 'mission_cutscene',
+  /** F8-04: música/som da missão (ações `music`/`sound`). */
+  MISSION_MUSIC: 'mission_music',
+  MISSION_SOUND: 'mission_sound',
+  /** F8-04: a missão terminou (`outcome` 'victory'|'defeat'). */
+  MISSION_ENDED: 'mission_ended'
 });
 
 /**
@@ -117,6 +133,14 @@ export const EVT = Object.freeze({
  * EVT.MANA_CHANGED    {unitId:number, ownerId:number, mana:number}  (F4-03; só ao gastar)
  * EVT.HAZARD_SPAWNED {hazardId:number, kind:'rune'|'whirlwind', ownerId:number, pos:Pos}  (F4-04b)
  * EVT.HAZARD_REMOVED {hazardId:number, kind:string, ownerId:number, pos:Pos, triggered:boolean}  (F4-04b)
+ *
+ * EVT.MISSION_OBJECTIVE {id:string, status:'inactive'|'active'|'completed'|'failed', priority:string, visible:boolean}  (F8-04)
+ * EVT.MISSION_DIALOG    {speaker?:LText, portrait?:string, text:LText, duration?:number}  (LText = string | {'pt-BR','en'})
+ * EVT.MISSION_MESSAGE   {text:LText}
+ * EVT.MISSION_CAMERA    {x:number, z:number, zoom?:number}
+ * EVT.MISSION_CUTSCENE  {id:string, duration:number, skippable:boolean, steps:Array<{at:number,x?:number,z?:number,zoom?:number,dialog?:object}>}
+ * EVT.MISSION_MUSIC     {id:'on'|'off'} · EVT.MISSION_SOUND {id:string}
+ * EVT.MISSION_ENDED     {outcome:'victory'|'defeat', text?:LText}
  *
  * EVT.PLAYER_DEFEATED {ownerId:number, name:string}
  * EVT.MATCH_WON       {ownerId:number}

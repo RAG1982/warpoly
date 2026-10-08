@@ -1,0 +1,191 @@
+{
+  "format": "warpolymission",
+  "version": 1,
+  "id": "mission-demo",
+  "title": { "pt-BR": "Marcha de Demonstração", "en": "Demonstration March" },
+  "subtitle": { "pt-BR": "Missão de exemplo do sistema de missões", "en": "Mission-system showcase" },
+  "briefing": {
+    "speaker": { "pt-BR": "Capitã Lyra", "en": "Captain Lyra" },
+    "portrait": "🧙",
+    "text": {
+      "pt-BR": "Os bandoleiros do Campo de Treino ameaçam as nossas estradas. Erga um quartel, derrube o acampamento deles, resgate os aldeões cativos e escolte o nosso emissário até o ponto de trégua com os Clãs. Aguente as investidas e fique de olho: dizem que há ruínas esquecidas a leste.",
+      "en": "The bandits of the Training Grounds threaten our roads. Raise a barracks, tear down their camp, free the captive villagers and escort our envoy to the truce post with the Clans. Hold off their raids, and keep your eyes open: they say forgotten ruins lie to the east."
+    },
+    "hints": [
+      { "pt-BR": "Objetivos ocultos dão bônus: explore o mapa.", "en": "Hidden objectives grant bonuses: explore the map." },
+      { "pt-BR": "Esc pula as cutscenes.", "en": "Esc skips cutscenes." }
+    ]
+  },
+  "mapId": "tutorial",
+  "seed": 1996,
+  "players": [
+    { "id": 0, "name": { "pt-BR": "Você", "en": "You" }, "factionId": "human", "team": 0, "color": "#2563eb", "isLocal": true, "startSlot": 0 },
+    { "id": 1, "name": { "pt-BR": "Emissários do Clã", "en": "Clan Envoys" }, "factionId": "orc", "team": 1, "color": "#dc2626", "isAI": false, "startSlot": 1 }
+  ],
+  "startingResources": { "wood": 330, "gold": 260, "stone": 120 },
+  "vars": { "waves": 0, "rescued": false, "truce": false },
+
+  "setup": [
+    { "type": "tag", "select": { "buildingType": "bandit_camp" }, "tag": "camp" },
+    { "type": "tag", "select": { "unitType": "bandit", "owner": "bandits" }, "tag": "camp-guards" },
+    { "type": "spawn", "owner": "neutral", "unitType": "villager", "count": 3, "x": -32, "z": -10, "tag": "captives" },
+    { "type": "spawn", "owner": "player", "unitType": "villager", "count": 1, "x": -20, "z": 8, "tag": "envoy" }
+  ],
+
+  "objectives": [
+    {
+      "id": "build-barracks", "type": "build", "priority": "primary", "buildingType": "barracks", "count": 1,
+      "title": { "pt-BR": "Construir um Quartel", "en": "Build a Barracks" },
+      "description": { "pt-BR": "Prepare a sua tropa.", "en": "Prepare your troops." }
+    },
+    {
+      "id": "destroy-camp", "type": "destroy", "priority": "primary", "select": { "tag": "camp" },
+      "title": { "pt-BR": "Destruir o Acampamento de Bandidos", "en": "Destroy the Bandit Camp" }
+    },
+    {
+      "id": "rescue-captives", "type": "rescue", "priority": "primary", "tag": "captives", "count": 3,
+      "title": { "pt-BR": "Resgatar os aldeões cativos", "en": "Rescue the captive villagers" }
+    },
+    {
+      "id": "escort-envoy", "type": "escort", "priority": "primary", "tag": "envoy", "area": { "x": 14, "z": -18, "r": 6 },
+      "title": { "pt-BR": "Escoltar o emissário até o ponto de trégua", "en": "Escort the envoy to the truce post" },
+      "description": { "pt-BR": "Ele não pode morrer.", "en": "He must not die." }
+    },
+    {
+      "id": "hold-the-line", "type": "survive", "priority": "secondary", "seconds": 120, "active": false,
+      "title": { "pt-BR": "Resistir às investidas por 2 minutos", "en": "Withstand the raids for 2 minutes" }
+    },
+    {
+      "id": "gold-stock", "type": "collect", "priority": "secondary", "resource": "gold", "amount": 300,
+      "title": { "pt-BR": "Coletar 300 de ouro", "en": "Gather 300 gold" }
+    },
+    {
+      "id": "stockpile", "type": "collect", "priority": "secondary", "resource": "wood", "amount": 600, "mode": "stock", "active": false,
+      "title": { "pt-BR": "Manter 600 de madeira em estoque", "en": "Keep 600 wood in stock" }
+    },
+    {
+      "id": "scout-ruins", "type": "flag", "priority": "hidden",
+      "condition": { "type": "area", "owner": "player", "area": { "x": 34, "z": 26, "r": 7 } },
+      "title": { "pt-BR": "Descobrir as ruínas esquecidas", "en": "Discover the forgotten ruins" }
+    }
+  ],
+
+  "triggers": [
+    {
+      "id": "intro", "when": { "type": "time", "at": 0 },
+      "actions": [
+        { "type": "music", "id": "on" },
+        {
+          "type": "cutscene", "id": "intro-pan", "duration": 9, "skippable": true,
+          "steps": [
+            { "at": 0, "x": 4, "z": -8, "zoom": 1.1, "dialog": { "speaker": { "pt-BR": "Capitã Lyra", "en": "Captain Lyra" }, "portrait": "🧙", "text": { "pt-BR": "Aquele é o acampamento dos bandoleiros.", "en": "That is the bandits' camp." }, "duration": 4 } },
+            { "at": 4.5, "x": -22, "z": 16, "zoom": 1, "dialog": { "speaker": { "pt-BR": "Capitã Lyra", "en": "Captain Lyra" }, "portrait": "🧙", "text": { "pt-BR": "E esta é a nossa base. Construa o quartel e vamos a eles!", "en": "And this is our base. Build the barracks and let us go get them!" }, "duration": 4 } }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "barracks-done", "when": { "type": "objective", "id": "build-barracks", "status": "completed" },
+      "actions": [
+        { "type": "sound", "id": "build" },
+        { "type": "dialog", "speaker": { "pt-BR": "Capitã Lyra", "en": "Captain Lyra" }, "portrait": "🧙", "text": { "pt-BR": "Quartel pronto! Os bandoleiros devem atacar em breve: aguentem firmes.", "en": "Barracks ready! The bandits will raid soon: hold firm." } },
+        { "type": "setObjective", "id": "hold-the-line", "status": "active" },
+        { "type": "setObjective", "id": "stockpile", "status": "active" },
+        { "type": "reveal", "x": 4, "z": -8, "radius": 18 },
+        { "type": "enableTrigger", "id": "raid-wave" }
+      ]
+    },
+    {
+      "id": "raid-wave", "enabled": false, "once": false, "cooldown": 1,
+      "when": { "type": "every", "seconds": 40, "start": 40 },
+      "actions": [
+        { "type": "incVar", "name": "waves", "by": 1 },
+        { "type": "spawn", "owner": "bandits", "units": [{ "type": "bandit", "count": 3 }], "x": 38, "z": -2, "order": { "kind": "attackMove", "x": -22, "z": 12 } },
+        { "type": "message", "text": { "pt-BR": "Bandoleiros se aproximam pelo leste!", "en": "Bandits approach from the east!" } },
+        { "type": "sound", "id": "alarm" }
+      ]
+    },
+    {
+      "id": "first-raid-warning", "when": { "type": "var", "name": "waves", "op": ">=", "value": 1 },
+      "actions": [
+        { "type": "camera", "x": 30, "z": -2, "zoom": 1.2 },
+        { "type": "dialog", "speaker": { "pt-BR": "Vigia", "en": "Lookout" }, "portrait": "👁️", "text": { "pt-BR": "Capitã, vejo poeira no horizonte leste!", "en": "Captain, I see dust on the eastern horizon!" }, "duration": 5 }
+      ]
+    },
+    {
+      "id": "raids-over", "when": { "type": "var", "name": "waves", "op": ">=", "value": 2 },
+      "actions": [
+        { "type": "disableTrigger", "id": "raid-wave" },
+        { "type": "message", "text": { "pt-BR": "As investidas cessaram.", "en": "The raids have ceased." } }
+      ]
+    },
+    {
+      "id": "guards-down", "when": { "type": "dead", "select": { "tag": "camp-guards" } },
+      "actions": [
+        { "type": "message", "text": { "pt-BR": "Os guardas do acampamento caíram!", "en": "The camp guards have fallen!" } }
+      ]
+    },
+    {
+      "id": "camp-down", "when": { "type": "dead", "select": { "buildingType": "bandit_camp", "killedBy": "player" } },
+      "actions": [
+        { "type": "giveResources", "owner": "player", "gold": 100, "stone": 50 },
+        { "type": "dialog", "speaker": { "pt-BR": "Capitã Lyra", "en": "Captain Lyra" }, "portrait": "🧙", "text": { "pt-BR": "O acampamento caiu! Peguei um pouco de espólio para a tropa.", "en": "The camp has fallen! Take some spoils for the troops." } },
+        {
+          "type": "addObjective",
+          "objective": { "id": "rout-bandits", "type": "eliminate", "priority": "secondary", "owners": ["bandits"], "include": "units", "title": { "pt-BR": "Eliminar todos os bandoleiros", "en": "Eliminate every bandit" } }
+        }
+      ]
+    },
+    {
+      "id": "rescue", "when": { "type": "area", "owner": "player", "area": { "x": -32, "z": -10, "r": 9 } },
+      "actions": [
+        { "type": "transfer", "select": { "tag": "captives" }, "to": "player" },
+        { "type": "setVar", "name": "rescued", "value": true },
+        { "type": "takeResources", "owner": "player", "wood": 30 },
+        { "type": "order", "select": { "tag": "captives" }, "kind": "move", "x": -22, "z": 12 },
+        { "type": "dialog", "speaker": { "pt-BR": "Aldeão", "en": "Villager" }, "portrait": "👷", "text": { "pt-BR": "Obrigado por nos libertar! Em troca, ajudamos na colheita.", "en": "Thank you for freeing us! We will gladly help with the harvest." } }
+      ]
+    },
+    {
+      "id": "after-rescue", "when": { "type": "trigger", "id": "rescue" },
+      "actions": [
+        { "type": "revealObjective", "id": "scout-ruins" },
+        { "type": "message", "text": { "pt-BR": "Um aldeão fala de ruínas a leste...", "en": "A villager speaks of ruins to the east..." } }
+      ]
+    },
+    {
+      "id": "truce", "when": { "type": "objective", "id": "escort-envoy", "status": "completed" },
+      "actions": [
+        { "type": "setTeam", "player": 1, "team": 0 },
+        { "type": "setVar", "name": "truce", "value": true },
+        { "type": "dialog", "speaker": { "pt-BR": "Emissário", "en": "Envoy" }, "portrait": "📜", "text": { "pt-BR": "A trégua com os Clãs está selada.", "en": "The truce with the Clans is sealed." } }
+      ]
+    },
+    {
+      "id": "envoy-lost", "when": { "all": [{ "type": "dead", "select": { "tag": "envoy" } }, { "not": { "type": "objective", "id": "escort-envoy", "status": "completed" } }] },
+      "actions": [
+        { "type": "defeat", "text": { "pt-BR": "O emissário foi morto. A trégua falhou.", "en": "The envoy was slain. The truce failed." } }
+      ]
+    },
+    {
+      "id": "army-grows", "when": { "type": "count", "select": { "unitType": "knight", "owner": "player" }, "op": ">=", "value": 3 },
+      "actions": [
+        { "type": "message", "text": { "pt-BR": "Seu exército já tem 3 cavaleiros.", "en": "Your army now has 3 knights." } }
+      ]
+    },
+    {
+      "id": "rich", "when": { "all": [{ "type": "resource", "owner": "player", "resource": "gold", "op": ">=", "value": 500 }, { "not": { "type": "var", "name": "truce", "value": false } }] },
+      "actions": [
+        { "type": "message", "text": { "pt-BR": "Cofres cheios após a trégua: gaste com sabedoria.", "en": "Full coffers after the truce: spend wisely." } }
+      ]
+    },
+    {
+      "id": "ruins-found", "when": { "type": "objective", "id": "scout-ruins", "status": "completed" },
+      "actions": [
+        { "type": "giveResources", "owner": "player", "gold": 150 },
+        { "type": "sound", "id": "victory" },
+        { "type": "message", "text": { "pt-BR": "Ruínas encontradas: +150 de ouro!", "en": "Ruins found: +150 gold!" } }
+      ]
+    }
+  ]
+}

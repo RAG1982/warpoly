@@ -32,6 +32,7 @@ const PARTS = ['core', 'units', 'orders', 'hazards', 'buildings', 'players', 'tr
 function combine(parts) {
   let h = 0x811c9dc5;
   for (let i = 0; i < PARTS.length; i++) h = fnv1aStep(h, `${PARTS[i]}=${parts[PARTS[i]]}|`);
+  if (parts.mission !== undefined) h = fnv1aStep(h, `mission=${parts.mission}|`); // F8-04: só em partidas de missão (os demais hashes não mudam)
   return h >>> 0;
 }
 
@@ -145,6 +146,9 @@ export function stateChecksumDetail(gm, wantUnits = false) {
   for (let i = 0; i < dirs.length; i++) rs.push(dirs[i].rng);
   for (let i = 0; i < rs.length; i++) h = fnv1aStep(h, `r${i}:${rs[i] && rs[i].state ? rs[i].state() : '-'}|`);
   parts.rng = h >>> 0;
+
+  // F8-04: estado da missão (variáveis, objetivos, gatilhos, tags, contadores, desfecho).
+  if (gm.mission) parts.mission = fnv1aStep(0x811c9dc5, gm.mission.hashString());
 
   return { total: combine(parts), parts, units: unitList };
 }

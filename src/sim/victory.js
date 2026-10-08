@@ -5,7 +5,12 @@
  *   jogador (em obra contam; muralhas `role:'wall'` e plataformas `role:'platform'` não contam). Unidades sem construção não salvam.
  * - `regicide`: derrotado quando não resta Centro (`role:'hq'`) vivo.
  */
-import { normalizeVictoryMode } from './MatchConfig.js';
+import { normalizeVictoryMode, MISSION_VICTORY_MODE } from './MatchConfig.js';
+
+/** F8-04: modo de missão — a derrota por regra não se aplica; o `MissionRuntime` (src/sim/missions) decide vitória/derrota. */
+export function isMissionMode(mode) {
+  return mode === MISSION_VICTORY_MODE;
+}
 
 /** Papéis que não contam para a regra "Destruir tudo". Papel desconhecido conta normalmente. */
 const NON_COUNTING_ROLES = new Set(['wall', 'platform']); // F4-07a: a plataforma no mar não conta (exércitos terrestres não a alcançam)
@@ -17,6 +22,7 @@ const NON_COUNTING_ROLES = new Set(['wall', 'platform']); // F4-07a: a plataform
  */
 export function isPlayerDefeated(mode, ownedBuildings) {
   const m = normalizeVictoryMode(mode);
+  if (m === MISSION_VICTORY_MODE) return false; // F8-04
   for (let i = 0; i < ownedBuildings.length; i++) {
     const b = ownedBuildings[i];
     if (b.isDead) continue;

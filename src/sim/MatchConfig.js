@@ -8,6 +8,7 @@
  */
 import { getMap, DEFAULT_MAP_ID } from '../data/maps/index.js';
 import { getHeightForMap } from './terrainGenerators.js';
+import { resolveMissionDef } from '../data/missions/index.js';
 
 export { DEFAULT_MAP_ID };
 
@@ -77,8 +78,11 @@ export function difficultyOf(cfg, playerId) {
 export const VICTORY_MODES = Object.freeze(['conquest', 'regicide']);
 export const DEFAULT_VICTORY_MODE = 'conquest';
 
+/** F8-04: modo de vitória de missões (`MatchConfig.missionId`/`mission`): o `MissionRuntime` decide vitória e derrota. Não aparece na Escaramuça. */
+export const MISSION_VICTORY_MODE = 'mission';
+
 export function normalizeVictoryMode(m) {
-  return VICTORY_MODES.includes(m) ? m : DEFAULT_VICTORY_MODE;
+  return VICTORY_MODES.includes(m) || m === MISSION_VICTORY_MODE ? m : DEFAULT_VICTORY_MODE;
 }
 
 export function randomSeed() {
@@ -237,8 +241,16 @@ export function validateOilWells(mapDef) {
  * array `startSlots` do mapa.
  */
 export function validateMatchConfig(cfg) {
-  if (!cfg || !Array.isArray(cfg.players) || cfg.players.length < 2) {
-    throw new Error('MatchConfig: pelo menos 2 jogadores');
+  // F8-04: partida de missão — a missão (registro `missionId` ou `mission` inline) é validada e pode ter 1 só time.
+  const isMission = !!(cfg && (cfg.missionId || cfg.mission));
+  if (isMission) {
+    resolveMissionDef(cfg);
+    if (cfg.victoryMode !== MISSION_VICTORY_MODE) throw new Error('MatchConfig: missão exige victoryMode "mission"');
+  } else if (cfg && cfg.victoryMode === MISSION_VICTORY_MODE) {
+    throw new Error('MatchConfig: victoryMode "mission" exige missionId');
+  }
+  if (!cfg || !Array.isArray(cfg.players) || cfg.players.length < (isMission ? 1 : 2)) {
+    throw new Error(`MatchConfig: pelo menos ${isMission ? 1 : 2} jogador${isMission ? '' : 'es'}`);
   }
   const mapDef = getMap(cfg.mapId);
   if (!mapDef) throw new Error(`MatchConfig: mapa desconhecido "${cfg.mapId}"`);
@@ -276,6 +288,6 @@ export function validateMatchConfig(cfg) {
     }
   }
   const teams = new Set(cfg.players.map((p) => p.team));
-  if (teams.size < 2) throw new Error('MatchConfig: pelo menos 2 times');
+  if (teams.size < 2 && !isMission) throw new Error('MatchConfig: pelo menos 2 times');
   return cfg;
 }

@@ -33,6 +33,8 @@ import { EventBus } from './EventBus.js';
 import { EVT } from './events.js';
 import { MatchStats } from './MatchStats.js';
 import { isPlayerDefeated } from './victory.js';
+import { MissionRuntime } from './missions/MissionRuntime.js';
+import { resolveMissionDef } from '../data/missions/index.js';
 import { missingRequirements, formatRequirementList } from './requirements.js';
 import { NAVAL_MAX_HEIGHT, WATER_LEVEL } from '../data/combat.js';
 
@@ -132,6 +134,8 @@ export class GameManager {
     // F2-03: checksum de estado (src/sim/checksum.js) a cada 20 ticks — últimos 100 (teste de
     // determinismo/replay). Não inclui nada visual.
     this.checksums = [];
+    /** F8-04: execução da missão (`src/sim/missions`), ou null em partidas comuns. Criada em `initMapEntities`. */
+    this.mission = null;
 
     // Fog of War (F2-05: tamanho do mundo a partir do mapa — mesma margem de 20 u que o
     // mapa continental (140+20=160) sempre teve em relação à área jogável).
@@ -548,6 +552,41 @@ export class GameManager {
     this.spawnWoodlands();
 
     this.recalculatePopCap();
+
+    // 4. F8-04: missão (marcas, unidades e objetivos iniciais) — depois de tudo que o mapa cria.
+    this._initMission();
+  }
+
+  /** F8-04: (re)cria o `MissionRuntime` conforme `matchConfig.missionId`/`mission`. */
+  _initMission() {
+    if (this.mission) { this.mission.dispose(); this.mission = null; }
+    const def = resolveMissionDef(this.matchConfig);
+    if (def) this.mission = new MissionRuntime(this, def);
+  }
+
+  /**
+   * F8-04: passa uma unidade para outro dono (resgate/captura em missões). Mantém listas por dono, caches de
+   * hostilidade e população; `modelSeq++` faz a view recolorir o modelo.
+   */
+  transferUnit(unit, newOwnerId) {
+    const oldOwner = unit.ownerId;
+    if (oldOwner === newOwnerId) return false;
+    const from = this._unitsByOwner.get(oldOwner);
+    if (from) {
+      const i = from.indexOf(unit);
+      if (i !== -1) from.splice(i, 1);
+    }
+    let to = this._unitsByOwner.get(newOwnerId);
+    if (!to) { to = []; this._unitsByOwner.set(newOwnerId, to); }
+    to.push(unit);
+    unit.ownerId = newOwnerId;
+    unit.modelSeq++;
+    this._markUnitListsDirty();
+    const a = this.getPlayer(oldOwner);
+    if (a) a.recalculatePop(this);
+    const b = this.getPlayer(newOwnerId);
+    if (b) b.recalculatePop(this);
+    return true;
   }
 
   /** HQ + serraria + casa e 5 unidades iniciais da facção do jogador, espelhados para o slot. */
@@ -1518,6 +1557,7 @@ export class GameManager {
    * Ao terminar, congela `this.result` (snapshot de `matchStats`). Retorna true se acabou.
    */
   _updateVictoryConditions() {
+    if (this.mission) return this._updateMissionConditions(); // F8-04
     const players = this.players;
     for (let i = 0; i < players.length; i++) {
       const p = players[i];
@@ -1545,6 +1585,26 @@ export class GameManager {
       return true;
     }
     return false;
+  }
+
+  /**
+   * F8-04: fim de jogo por missão. O `MissionRuntime` avança um tick e decide o desfecho; a derrota por regra
+   * (`conquest`/`regicide`) não se aplica. Vitória → `gameWon`; derrota → jogador local marcado como derrotado.
+   */
+  _updateMissionConditions() {
+    const m = this.mission;
+    m.step();
+    if (!m.outcome) return false;
+    const local = this.localPlayer;
+    this.isGameOver = true;
+    this.gameWon = m.outcome === 'victory';
+    if (this.gameWon) this.events.emit(EVT.MATCH_WON, { ownerId: local.id });
+    else {
+      local.defeated = true;
+      this.events.emit(EVT.MATCH_LOST, { ownerId: local.id });
+    }
+    this._freezeResult();
+    return true;
   }
 
   /**
@@ -1986,6 +2046,7 @@ export class GameManager {
     this.aiDirectors = [];
     this.aiDirector = null;
     this.matchStats.dispose();
+    this.mission?.dispose();
 
     this.allUnits.forEach(u => u.dispose?.());
     this.buildings.forEach(b => b.dispose?.());

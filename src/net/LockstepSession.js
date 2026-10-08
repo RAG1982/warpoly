@@ -22,16 +22,34 @@
  *    e unidades divergentes (`desync` + `desyncDump()`);
  *  - `status()` para a HUD (RTT, atraso, quem estamos aguardando, tempo parado).
  *
+ * F9-04 (robustez, ver docs/09_MULTIPLAYER.md §12):
+ *  - reenvio/ack: cada pacote carrega `ack` (próximo turno do remetente); pacotes de todos ficam num
+ *    histórico (`HIST_KEEP` turnos) e qualquer par responde a `need{turn,to,pids}` (NACK em stall) e
+ *    reenvia os próprios pacotes a quem não avança (`_resendOwn`);
+ *  - `RoomState` (src/net/RoomState.js): pausa votada, saída voluntária, queda por timeout e retorno —
+ *    operações de sala viajam DENTRO dos pacotes (`room:[...]`), logo valem no mesmo turno em todos;
+ *  - queda por timeout: cada sobrevivente vota `dropvote{pid,next}` (próximo turno que executaria); com
+ *    todos os votos, a queda vale no turno `max(next)` e a sim troca o jogador para IA (`sim.takeover`);
+ *  - retorno: o jogador removido pede `snapreq`; o menor id ativo envia um snapshot (SaveGame-like,
+ *    em pedaços) validado por checksum; depois a operação `rejoin` devolve o controle (`sim.release`);
+ *  - chat e pings de mapa (`chat`, `mpin`) trafegam fora da sim e nunca entram no checksum.
+ *
  * Independente de three.js/DOM: o relógio entra por `now()` (padrão `performance.now`). A sim entra
  * por um adaptador `{ enqueue(cmd, tick), step(), checksum(), detail?(), beginTurn?(), endTurn?() }`.
  */
 import { validateCommand } from '../sim/commands.js';
+import { RoomState, cleanRoomOps } from './RoomState.js';
 
 const KEEP_SUMS = 128;
 const KEEP_DETAIL = 6;
 const KEEP_LOG = 100;
 const MAX_AHEAD = 64; // pacote de turno > turn + MAX_AHEAD = lixo/hostil
 const MAX_UNITS_IN_REPORT = 1500;
+const HIST_KEEP = 1200; // turnos de pacotes guardados para reenvio/recuperação (2 min)
+const NEED_SPAN = 32; // turnos por pedido de reenvio
+const SNAP_CHUNK = 12000; // caracteres por pedaço de snapshot (< limite de mensagem do DataChannel)
+const SNAP_MAX_CHUNKS = 400;
+const CHAT_MAX = 200;
 
 export class LockstepSession {
   /**
@@ -54,10 +72,20 @@ export class LockstepSession {
    * @param {(info: object) => void} [o.onDesyncDetail]  relatório enriquecido (chegou o detalhe de outro par)
    * @param {(info: object) => void} [o.onViolation]  pacote inválido/forjado de um par
    * @param {(info: {from: number, to: number}) => void} [o.onDelayChange]
+   * @param {number} [o.dropTimeoutMs=10000]  stall de um jogador por este tempo => voto de queda (vira IA)
+   * @param {number} [o.nackEveryMs=300]  intervalo entre pedidos de reenvio durante um stall
+   * @param {number} [o.resendEveryMs=500]
+   * @param {boolean} [o.autoRejoin=true]  jogador removido pede snapshot sozinho
+   * @param {object} [o.room]  opções do RoomState (voteTurns, countdownTurns, cooldownTurns, rejoinLead)
+   * @param {(info: object) => void} [o.onRoomEvent]  pausa/votação/queda/retorno (só apresentação)
+   * @param {(m: {from: number, text: string, team: boolean, local?: boolean}) => void} [o.onChat]
+   * @param {(m: {from: number, x: number, z: number, kind: string, team: boolean, local?: boolean}) => void} [o.onMapPing]
+   * @param {(pid: number) => boolean} [o.isAlly]  aliado do par local? (filtra chat/ping `team`)
    */
   constructor({
     transport, localId, playerIds, sim, turnTicks = 2, delayTurns = 2, adaptive = false, minDelay = 2, maxDelay = 6, lowerAfter = 30,
-    pingEveryMs = 500, checkEvery = 1, now = () => performance.now(), turnMs, onDesync, onDesyncDetail, onViolation, onDelayChange
+    pingEveryMs = 500, checkEvery = 1, now = () => performance.now(), turnMs, onDesync, onDesyncDetail, onViolation, onDelayChange,
+    dropTimeoutMs = 10000, nackEveryMs = 300, resendEveryMs = 500, autoRejoin = true, room, onRoomEvent, onChat, onMapPing, isAlly
   }) {
     this.transport = transport;
     this.localId = localId;
@@ -79,6 +107,36 @@ export class LockstepSession {
     this.onDesyncDetail = onDesyncDetail || (() => {});
     this.onViolation = onViolation || (() => {});
     this.onDelayChange = onDelayChange || (() => {});
+    this.dropTimeoutMs = dropTimeoutMs;
+    this.nackEveryMs = nackEveryMs;
+    this.resendEveryMs = resendEveryMs;
+    this.autoRejoin = autoRejoin;
+    this.onRoomEvent = onRoomEvent || (() => {});
+    this.onChat = onChat || (() => {});
+    this.onMapPing = onMapPing || (() => {});
+    this.isAlly = isAlly || (() => true);
+    this.room = new RoomState(this.playerIds, room);
+    /** Tick da sim (= ticks já simulados); congela em pausa. Em jogo normal vale `turn * turnTicks`. */
+    this.simTick = 0;
+    /** `{at}` se os outros pares nos removeram (viramos IA); null caso contrário. */
+    this.removed = null;
+    this._pendingRoom = [];
+    this._hist = new Map();
+    this._peerAck = new Map();
+    this._ackSeen = new Map();
+    this._lastNack = -Infinity;
+    this._lastResend = -Infinity;
+    this._missSince = new Map();
+    this._dropVotes = new Map();
+    this._myDrop = new Map();
+    this._dropFreeze = null;
+    this._notifiedRemoved = new Map();
+    this._snapReq = null;
+    this._snapIn = null;
+    this._snapOutAt = new Map();
+    this._catchup = false;
+    this._maxSeen = 0;
+    this._chatSeen = new Map();
 
     /** Próximo turno a executar (turnos 0..turn-1 já executados). */
     this.turn = 0;
@@ -114,7 +172,43 @@ export class LockstepSession {
     delete cmd.seqNo;
     const v = validateCommand(cmd);
     if (!v.ok) throw new Error(`queueCommand: ${v.reason}`);
+    if (this.removed || !this.room.activeAt(this.localId, this.turn + this.delayTurns)) return; // fora da partida (IA no controle)
     this._pending.push(cmd);
+  }
+
+  // --- F9-04: pausa votada, saída, chat e pings (API para a UI) ---
+
+  /** Propõe pausar (ou retomar, se já pausado). A votação vale no turno em que o pacote executa. */
+  proposePause() {
+    this._pendingRoom.push({ op: 'propose', kind: this.room.paused ? 'resume' : 'pause' });
+  }
+
+  /** Vota na proposta em andamento. */
+  vote(yes) {
+    this._pendingRoom.push({ op: 'vote', yes: !!yes });
+  }
+
+  /** Sai da partida: depois do turno em que o pacote executa, o jogador vira IA em todos os pares. */
+  leave() {
+    this._pendingRoom.push({ op: 'leave' });
+  }
+
+  /** Chat in-game (fora da sim). `team` = só aliados. Devolve o texto enviado (ou null). */
+  sendChat(text, { team = false } = {}) {
+    const t = String(text ?? '').replace(/[\u0000-\u001f\u007f]/g, ' ').trim().slice(0, CHAT_MAX);
+    if (!t) return null;
+    this.transport.send({ k: 'chat', from: this.localId, text: t, team: !!team });
+    this.onChat({ from: this.localId, text: t, team: !!team, local: true });
+    return t;
+  }
+
+  /** Ping no mapa (fora da sim, não afeta o checksum). `team` = só aliados veem. */
+  sendMapPing(x, z, { kind = 'attention', team = true } = {}) {
+    if (!Number.isFinite(x) || !Number.isFinite(z)) return false;
+    const msg = { k: 'mpin', from: this.localId, x: Math.round(x * 100) / 100, z: Math.round(z * 100) / 100, kind: String(kind).slice(0, 12), team: !!team };
+    this.transport.send(msg);
+    this.onMapPing({ ...msg, local: true });
+    return true;
   }
 
   /** Envia os pacotes vazios dos primeiros `delayTurns` turnos (ninguém pode ter emitido nada antes). */
@@ -131,20 +225,28 @@ export class LockstepSession {
   update(maxTurns = Infinity) {
     if (!this.started) this.start();
     this._pingTick();
+    this._maintenance();
     let ran = 0;
-    while (ran < maxTurns && !this.desync) {
+    while (ran < maxTurns && !this.desync && !this.removed && !this._snapIn) {
       const t = this.turn;
+      this._cancelStaleDropVotes(t);
+      if (this._dropFreeze !== null && t >= this._dropFreeze) break; // votamos a queda de alguém: esperar o acordo
       while (this._sentUpTo < t + this.delayTurns) this._sendTurn(this._sentUpTo + 1);
       const box = this._inbox.get(t);
-      const missing = this.playerIds.filter((p) => !box || !box.has(p));
+      const missing = this._required(t).filter((p) => !box || !box.has(p));
       if (missing.length > 0) {
         this.stalls++;
         this._waiting = missing;
-        if (this._stallSince === null) this._stallSince = this.now();
+        const nowT = this.now();
+        if (this._stallSince === null) this._stallSince = nowT;
+        for (const p of missing) if (!this._missSince.has(p)) this._missSince.set(p, nowT);
+        for (const p of [...this._missSince.keys()]) if (!missing.includes(p)) this._missSince.delete(p);
+        this._onStall(t, missing, nowT);
         break;
       }
       this._waiting = [];
       this._stallSince = null;
+      this._missSince.clear();
       this._execute(t, box);
       ran++;
     }
@@ -197,7 +299,15 @@ export class LockstepSession {
       waiting: [...this._waiting],
       stalledMs: this._stallSince === null ? 0 : Math.max(0, this.now() - this._stallSince),
       stalls: this.stalls,
-      desync: this.desync
+      desync: this.desync,
+      simTick: this.simTick,
+      active: this.room.activePlayers(this.turn),
+      dropped: this.playerIds.filter((p) => !this.room.activeAt(p, this.turn)),
+      dropping: [...this._myDrop.keys()],
+      removed: this.removed,
+      resyncing: !!this._snapIn || (!!this._snapReq && !!this.removed),
+      catchingUp: this._catchup,
+      pause: this.room.info(this.turn)
     };
   }
 
@@ -221,19 +331,133 @@ export class LockstepSession {
   // --- interno ---
 
   _sendTurn(turn) {
-    const cmds = turn < this._initialDelay ? [] : this._pending.splice(0);
-    this._storeCmds(turn, this.localId, cmds);
     this._sentUpTo = turn;
-    this.transport.send({ k: 'turn', from: this.localId, turn, cmds, sums: this._unsentSums.splice(0) });
+    // Fora da partida (removido, ou ainda observando até o `rejoin` valer): não enviamos pacote de turno.
+    if (this.removed || !this.room.activeAt(this.localId, turn)) return;
+    const cmds = turn < this._initialDelay ? [] : this._pending.splice(0);
+    const room = turn < this._initialDelay ? [] : this._pendingRoom.splice(0);
+    this._storeCmds(turn, this.localId, cmds, room);
+    this.transport.send({ k: 'turn', from: this.localId, turn, cmds, room, sums: this._unsentSums.splice(0), ack: this.turn });
   }
 
-  _storeCmds(turn, pid, cmds) {
+  _storeCmds(turn, pid, cmds, room = []) {
     let box = this._inbox.get(turn);
     if (!box) {
       box = new Map();
       this._inbox.set(turn, box);
     }
-    if (!box.has(pid)) box.set(pid, cmds);
+    if (!box.has(pid)) box.set(pid, { cmds, room });
+  }
+
+  /** Jogadores cujo pacote é obrigatório no turno `t`. */
+  _required(t) {
+    return this.room.activePlayers(t);
+  }
+
+  /** Pacote (já guardado ou executado) de `pid` no turno `turn`, no formato do fio; null se não temos. */
+  _packetFor(pid, turn) {
+    const e = this._inbox.get(turn)?.get(pid) || this._hist.get(turn)?.get(pid);
+    return e ? { k: 'turn', from: pid, turn, cmds: e.cmds, room: e.room, ack: this.turn, relay: pid !== this.localId } : null;
+  }
+
+  // --- F9-04: manutenção periódica (reenvio, ack, votos de queda, pedido de snapshot) ---
+
+  _maintenance() {
+    const t = this.now();
+    if (t - this._lastResend >= this.resendEveryMs) {
+      this._lastResend = t;
+      this._resendOwn(t);
+      for (const [pid, v] of this._myDrop) this.transport.send({ k: 'dropvote', from: this.localId, pid, next: v });
+      if (this._snapReq && this.removed && t - this._snapReq.at >= 2000) this._sendSnapReq();
+    }
+  }
+
+  /** Reenvia nossos pacotes a quem não avança (ack parado): cobre perdas em reconexão. */
+  _resendOwn(t) {
+    for (const p of this.room.activePlayers(this.turn)) {
+      if (p === this.localId) continue;
+      const ack = this._peerAck.get(p);
+      if (ack === undefined) continue;
+      const seen = this._ackSeen.get(p);
+      if (!seen || seen.ack !== ack) {
+        this._ackSeen.set(p, { ack, at: t });
+        continue;
+      }
+      if (t - seen.at < this.resendEveryMs || ack >= this._sentUpTo) continue;
+      for (let k = ack; k <= Math.min(this._sentUpTo, ack + NEED_SPAN); k++) {
+        const pk = this._packetFor(this.localId, k);
+        if (pk) this.transport.send(pk);
+      }
+    }
+  }
+
+  _onStall(t, missing, nowT) {
+    if (nowT - this._lastNack >= this.nackEveryMs) {
+      this._lastNack = nowT;
+      this.transport.send({ k: 'need', from: this.localId, turn: t, to: t + (this._catchup ? NEED_SPAN : 8), pids: missing });
+    }
+    for (const p of missing) {
+      if (p !== this.localId && nowT - this._missSince.get(p) >= this.dropTimeoutMs) this._castDropVote(p);
+    }
+    // Recuperação após snapshot que não anda (histórico dos outros já expirou): pede outro.
+    if (this._catchup && this._stallSince !== null && nowT - this._stallSince > 8000 && !this._snapReq) {
+      this.removed = { at: this.turn };
+      this._requestSnapshot();
+    }
+  }
+
+  _castDropVote(pid) {
+    if (this._myDrop.has(pid) || !this.room.finalState(pid)) return;
+    this._myDrop.set(pid, this.turn);
+    this._dropFreeze = Math.min(this._dropFreeze ?? Infinity, this.turn);
+    this._recordDropVote(pid, this.localId, this.turn);
+    this.transport.send({ k: 'dropvote', from: this.localId, pid, next: this.turn });
+  }
+
+  _recordDropVote(pid, from, next) {
+    if (!this.room.finalState(pid)) {
+      const at = this.room.droppedAt(pid);
+      if (at !== null) this.transport.send({ k: 'dropdone', from: this.localId, pid, at });
+      return;
+    }
+    let m = this._dropVotes.get(pid);
+    if (!m) {
+      m = new Map();
+      this._dropVotes.set(pid, m);
+    }
+    if (!m.has(from)) m.set(from, next);
+    const need = this.room.activePlayers(this.turn).filter((p) => p !== pid);
+    if (need.length > 0 && need.every((p) => m.has(p))) {
+      const at = Math.max(...need.map((p) => m.get(p)));
+      this._applyDrop(pid, at);
+    }
+  }
+
+  /** O pacote que faltava chegou (atrasado ou por relé) e ninguém mais votou: desistimos da queda. */
+  _cancelStaleDropVotes(t) {
+    for (const pid of [...this._myDrop.keys()]) {
+      if (!this._inbox.get(t)?.has(pid)) continue;
+      const m = this._dropVotes.get(pid);
+      if (m && m.size > 1) continue;
+      this._myDrop.delete(pid);
+      m?.delete(this.localId);
+      this._dropFreeze = this._myDrop.size > 0 ? Math.min(...this._myDrop.values()) : null;
+      this.transport.send({ k: 'dropcancel', from: this.localId, pid });
+    }
+  }
+
+  _applyDrop(pid, at) {
+    if (!this.room.addDrop(pid, at)) return;
+    this._dropVotes.delete(pid);
+    this._myDrop.delete(pid);
+    this._dropFreeze = this._myDrop.size > 0 ? Math.min(...this._myDrop.values()) : null;
+    this._missSince.clear();
+    this._flushNotices();
+    this.transport.send({ k: 'dropdone', from: this.localId, pid, at });
+  }
+
+  _flushNotices() {
+    for (const n of this.room.takeNotices()) this.onRoomEvent({ ...n, turn: this.turn });
   }
 
   _pingTick() {
@@ -285,6 +509,17 @@ export class LockstepSession {
 
   _onMessage(m) {
     if (!m || typeof m !== 'object' || !Number.isInteger(m.from) || !this.playerIds.includes(m.from) || m.from === this.localId) return;
+    // Quem foi removido e reaparece (reconexão): avisa, para ele pedir o snapshot (no máx. 1 aviso/s por jogador).
+    if (!this.removed && m.k !== 'dropped' && m.k !== 'dropdone' && !m.relay) {
+      const dAt = this.room.droppedAt(m.from);
+      if (dAt !== null) {
+        const nowT = this.now();
+        if (nowT - (this._notifiedRemoved.get(m.from) ?? -Infinity) > 1000) {
+          this._notifiedRemoved.set(m.from, nowT);
+          this.transport.send({ k: 'dropped', from: this.localId, pid: m.from, at: dAt });
+        }
+      }
+    }
     switch (m.k) {
       case 'ping':
         if (typeof m.t === 'number') this.transport.send({ k: 'pong', from: this.localId, to: m.from, id: m.id, t: m.t });
@@ -298,8 +533,180 @@ export class LockstepSession {
       case 'turn':
         this._onTurn(m);
         return;
+      case 'need':
+        this._onNeed(m);
+        return;
+      case 'dropvote':
+        if (Number.isInteger(m.pid) && Number.isInteger(m.next) && this.playerIds.includes(m.pid) && m.pid !== m.from) this._recordDropVote(m.pid, m.from, m.next);
+        return;
+      case 'dropcancel':
+        if (Number.isInteger(m.pid) && this.room.finalState(m.pid)) this._dropVotes.get(m.pid)?.delete(m.from);
+        return;
+      case 'dropdone':
+        if (Number.isInteger(m.pid) && Number.isInteger(m.at) && this.playerIds.includes(m.pid) && m.at >= this.turn && m.pid !== this.localId) this._applyDrop(m.pid, m.at);
+        return;
+      case 'dropped':
+        if (m.pid === this.localId && Number.isInteger(m.at)) this._onRemoved(m.at);
+        return;
+      case 'snapreq':
+        this._onSnapReq(m);
+        return;
+      case 'snap':
+        this._onSnapChunk(m);
+        return;
+      case 'snapok':
+        this._onSnapOk(m);
+        return;
+      case 'chat':
+        this._onChatMsg(m);
+        return;
+      case 'mpin':
+        this._onPingMsg(m);
+        return;
       default:
     }
+  }
+
+  /** Pedido de reenvio de pacotes (NACK): respondemos com o que temos do histórico. */
+  _onNeed(m) {
+    if (!Number.isInteger(m.turn) || !Number.isInteger(m.to) || !Array.isArray(m.pids)) return;
+    const to = Math.min(m.to, m.turn + NEED_SPAN);
+    for (let t = Math.max(0, m.turn); t <= to; t++) {
+      for (const pid of m.pids) {
+        if (!Number.isInteger(pid) || !this.playerIds.includes(pid) || pid === m.from) continue;
+        const pk = this._packetFor(pid, t);
+        if (pk) this.transport.send(pk);
+      }
+    }
+  }
+
+  _onChatMsg(m) {
+    if (typeof m.text !== 'string') return;
+    const now = this.now();
+    const rec = this._chatSeen.get(m.from) || { at: now, n: 0 };
+    if (now - rec.at > 1000) {
+      rec.at = now;
+      rec.n = 0;
+    }
+    if (++rec.n > 5) return; // limite por remetente: 5 mensagens/s
+    this._chatSeen.set(m.from, rec);
+    const team = !!m.team;
+    if (team && !this.isAlly(m.from)) return;
+    this.onChat({ from: m.from, text: m.text.replace(/[\u0000-\u001f\u007f]/g, ' ').slice(0, CHAT_MAX), team });
+  }
+
+  _onPingMsg(m) {
+    if (!Number.isFinite(m.x) || !Number.isFinite(m.z) || typeof m.kind !== 'string') return;
+    const team = !!m.team;
+    if (team && !this.isAlly(m.from)) return;
+    this.onMapPing({ from: m.from, x: m.x, z: m.z, kind: m.kind.slice(0, 12), team });
+  }
+
+  // --- F9-04: removido (viramos IA) e retorno por snapshot ---
+
+  _onRemoved(at) {
+    if (this.removed) return;
+    this.removed = { at };
+    this._pending.length = 0;
+    this._pendingRoom.length = 0;
+    this.onRoomEvent({ type: 'removed', at, turn: this.turn });
+    if (this.autoRejoin) this._requestSnapshot();
+  }
+
+  /** Pede o estado atual a um par saudável (repetido a cada 2 s até chegar). */
+  _requestSnapshot() {
+    if (this._snapIn) return;
+    this._snapReq = { at: -Infinity, tries: this._snapReq ? this._snapReq.tries : 0 };
+    this._sendSnapReq();
+  }
+
+  _sendSnapReq() {
+    this._snapReq.at = this.now();
+    this._snapReq.tries++;
+    this.transport.send({ k: 'snapreq', from: this.localId });
+  }
+
+  /** Servidor de snapshot = menor id ativo (excluindo o pedinte). Monta e envia em pedaços. */
+  _onSnapReq(m) {
+    if (this.room.droppedAt(m.from) === null) return; // só quem foi removido precisa de snapshot
+    const server = this.room.activePlayers(this.turn).filter((p) => p !== m.from)[0];
+    if (server !== this.localId || typeof this.sim.captureSnapshot !== 'function') return;
+    const now = this.now();
+    if (now - (this._snapOutAt.get(m.from) ?? -Infinity) < 1500) return;
+    this._snapOutAt.set(m.from, now);
+    const payload = JSON.stringify({ turn: this.turn, simTick: this.simTick, room: this.room.export(), data: this.sim.captureSnapshot() });
+    const n = Math.ceil(payload.length / SNAP_CHUNK);
+    const id = `${this.localId}:${this.turn}:${Math.floor(now)}`;
+    for (let i = 0; i < n; i++) this.transport.send({ k: 'snap', from: this.localId, to: m.from, id, i, n, d: payload.slice(i * SNAP_CHUNK, (i + 1) * SNAP_CHUNK) });
+  }
+
+  _onSnapChunk(m) {
+    if (m.to !== this.localId || !this.removed || typeof m.d !== 'string' || typeof m.id !== 'string') return;
+    if (this.sim.ready && !this.sim.ready()) return; // a partida local ainda está sendo recriada: o servidor reenvia
+    if (!Number.isInteger(m.i) || !Number.isInteger(m.n) || m.n < 1 || m.n > SNAP_MAX_CHUNKS || m.i < 0 || m.i >= m.n) return;
+    if (!this._snapIn || this._snapIn.id !== m.id) this._snapIn = { id: m.id, n: m.n, parts: new Map(), from: m.from };
+    this._snapIn.parts.set(m.i, m.d);
+    if (this._snapIn.parts.size < this._snapIn.n) return;
+    const { id, n, parts, from } = this._snapIn;
+    let text = '';
+    for (let i = 0; i < n; i++) text += parts.get(i);
+    this._snapIn = null;
+    let snap = null;
+    try {
+      snap = JSON.parse(text);
+    } catch {
+      snap = null;
+    }
+    this._applySnapshot(snap, id, from);
+  }
+
+  _applySnapshot(snap, id, from) {
+    const fail = (reason) => {
+      this.onViolation({ from, reason: `snapshot inválido: ${reason}` });
+      this._snapReq = { at: this.now(), tries: this._snapReq ? this._snapReq.tries : 1 }; // tenta de novo no próximo ciclo
+    };
+    if (!snap || !Number.isInteger(snap.turn) || !Number.isInteger(snap.simTick) || !snap.room || !snap.data || typeof this.sim.restoreSnapshot !== 'function') return fail('formato');
+    let res;
+    try {
+      res = this.sim.restoreSnapshot(snap.data);
+    } catch (err) {
+      return fail(err.message);
+    }
+    if (!res || !res.ok) return fail('checksum não bate');
+    this.room.import(snap.room);
+    this.turn = snap.turn;
+    this.simTick = snap.simTick;
+    this._sentUpTo = snap.turn - 1;
+    this._inbox.clear();
+    this._hist.clear();
+    this._localSums.clear();
+    this._localDetail.clear();
+    this._remoteSums.clear();
+    this._remoteDetail.clear();
+    this._unsentSums = [];
+    this._pending.length = 0;
+    this._pendingRoom.length = 0;
+    this._dropVotes.clear();
+    this._myDrop.clear();
+    this._dropFreeze = null;
+    this._missSince.clear();
+    this._stallSince = null;
+    this._waiting = [];
+    this._acc = 0;
+    this.desync = null;
+    this.removed = null;
+    this._snapReq = null;
+    this._catchup = true;
+    this.transport.send({ k: 'snapok', from: this.localId, turn: snap.turn });
+    this.onRoomEvent({ type: 'resynced', turn: snap.turn, id });
+  }
+
+  /** O pedinte carregou o snapshot: pedimos (via pacote, para valer em todos) que ele volte a ser humano. */
+  _onSnapOk(m) {
+    if (!Number.isInteger(m.turn)) return;
+    const server = this.room.activePlayers(this.turn).filter((p) => p !== m.from)[0];
+    if (server !== this.localId || this.room.finalState(m.from)) return;
+    if (!this._pendingRoom.some((o) => o.op === 'rejoin' && o.pid === m.from)) this._pendingRoom.push({ op: 'rejoin', pid: m.from });
   }
 
   _onTurn(m) {
@@ -307,11 +714,19 @@ export class LockstepSession {
       this.onViolation({ from: m.from, reason: 'pacote malformado' });
       return;
     }
+    if (m.turn > this._maxSeen) this._maxSeen = m.turn;
+    if (!m.relay && Number.isInteger(m.ack) && m.ack > (this._peerAck.get(m.from) ?? -1)) this._peerAck.set(m.from, m.ack);
     if (m.turn > this.turn + MAX_AHEAD) {
-      this.onViolation({ from: m.from, turn: m.turn, reason: 'turno muito à frente' });
+      // Remetente legítimo muito à frente de nós (estamos atrasados/reconectando): ignora sem alarde; o NACK recupera.
+      if (!(Number.isInteger(m.ack) && m.turn <= m.ack + 16)) this.onViolation({ from: m.from, turn: m.turn, reason: 'turno muito à frente' });
       return;
     }
-    if (m.turn >= this.turn) {
+    const roomOps = cleanRoomOps(m.room);
+    if (roomOps === null) {
+      this.onViolation({ from: m.from, turn: m.turn, reason: 'operação de sala inválida' });
+      return;
+    }
+    if (m.turn >= this.turn && !this.removed) {
       for (const c of m.cmds) {
         const v = validateCommand(c);
         if (!v.ok || c.playerId !== m.from) {
@@ -319,7 +734,7 @@ export class LockstepSession {
           return;
         }
       }
-      this._storeCmds(m.turn, m.from, m.cmds); // duplicata do mesmo turno é ignorada (vale o primeiro)
+      this._storeCmds(m.turn, m.from, m.cmds, roomOps); // duplicata do mesmo turno é ignorada (vale o primeiro)
     }
     if (Array.isArray(m.sums)) {
       for (const s of m.sums) if (s && Number.isInteger(s.turn)) this._recordRemoteSum(m.from, s.turn, s.hash);
@@ -327,6 +742,7 @@ export class LockstepSession {
   }
 
   _recordRemoteSum(pid, turn, hash) {
+    if (!this.room.activeAt(pid, turn) || this.removed) return; // quem está fora (IA no lugar) não participa do checksum
     let row = this._remoteSums.get(turn);
     if (!row) {
       row = new Map();
@@ -358,11 +774,21 @@ export class LockstepSession {
   }
 
   _execute(turn, box) {
-    const tick = turn * this.turnTicks;
+    const tick = this.simTick;
     this.sim.beginTurn?.();
+    // 1) eventos agendados para este turno: queda => IA assume; retorno => humano reassume (mesmo tick em todos)
+    for (const a of this.room.actionsAt(turn)) {
+      if (a.active) this.sim.release?.(a.pid);
+      else this.sim.takeover?.(a.pid);
+      this.onRoomEvent({ type: a.active ? 'release' : 'takeover', pid: a.pid, turn, tick });
+    }
+    const req = this._required(turn);
+    // 2) operações de sala (pausa, saída, retorno) na ordem de playerId
+    for (const pid of req) this.room.applyOps(turn, pid, box.get(pid).room || []);
+    // 3) comandos
     const logged = [];
-    for (const pid of this.playerIds) {
-      for (const c of box.get(pid)) {
+    for (const pid of req) {
+      for (const c of box.get(pid).cmds) {
         this.sim.enqueue({ ...c, playerId: pid }, tick);
         logged.push({ ...c, playerId: pid });
       }
@@ -371,10 +797,21 @@ export class LockstepSession {
       this._cmdLog.push({ turn, cmds: logged });
       if (this._cmdLog.length > KEEP_LOG) this._cmdLog.shift();
     }
-    for (let i = 0; i < this.turnTicks; i++) this.sim.step();
+    // 4) votação/pausa: turno congelado = nenhum passo de sim (todos decidem igual: estado vem dos pacotes)
+    const frozen = this.room.settle(turn);
+    if (!frozen) {
+      for (let i = 0; i < this.turnTicks; i++) {
+        this.sim.step();
+        this.simTick++;
+      }
+    }
     this.sim.endTurn?.();
+    this._hist.set(turn, box);
+    this._hist.delete(turn - HIST_KEEP);
     this._inbox.delete(turn);
     this.turn = turn + 1;
+    if (this._catchup && this.turn >= this._maxSeen - this.delayTurns - 2) this._catchup = false;
+    this._flushNotices();
     if (turn % this.checkEvery === 0) {
       let hash;
       if (this.sim.detail) {

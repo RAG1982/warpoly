@@ -284,6 +284,36 @@ export class GameManager {
   }
 
   /**
+   * F9-04: jogador humano que saiu/caiu vira IA (`difficultyOf` = dificuldade configurada). Chamado pela
+   * sessão lockstep NO MESMO tick em todos os pares (antes do passo do turno), então é determinístico.
+   * O diretor é anexado ao fim de `aiDirectors` (ordem de atualização estável).
+   */
+  convertPlayerToAI(playerId) {
+    const player = this.getPlayer(playerId);
+    if (!player || player.isAI || player.defeated) return false;
+    player.isAI = true;
+    const pos = player.startPos || { x: 0, z: 0 };
+    const director = createAIDirector(this, player.id, { x: pos.x, y: pos.z }, difficultyOf(this.matchConfig, player.id));
+    this.aiDirectors.push(director);
+    if (!this.aiDirector) this.aiDirector = director;
+    return true;
+  }
+
+  /** F9-04: inverso de `convertPlayerToAI` (jogador que volta à partida reassume o controle). */
+  convertPlayerToHuman(playerId) {
+    const player = this.getPlayer(playerId);
+    if (!player || !player.isAI) return false;
+    player.isAI = false;
+    const i = this.aiDirectors.findIndex((d) => d.playerId === playerId);
+    if (i >= 0) {
+      const [d] = this.aiDirectors.splice(i, 1);
+      d.dispose?.();
+      if (this.aiDirector === d) this.aiDirector = this.aiDirectors[0] || null;
+    }
+    return true;
+  }
+
+  /**
    * F2-02: API pública para emitir um comando (única forma de alterar o estado do jogo,
    * fora do efeito interno documentado em `spawnUnit`/`src/debug/bench.js`). `fields` é o
    * mesmo objeto que `makeCommand` espera (`type`, `playerId`, + campos do tipo — ver

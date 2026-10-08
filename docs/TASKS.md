@@ -488,7 +488,7 @@ Sonnet 5.5 escreve a spec em `docs/specs/<ID>.md`; agente **Sonnet** executa; o 
   - Resultado: `?online=1` abre a sala dentro do jogo (`src/net/OnlineLobby.js`: sinalização → malha WebRTC → handshake de versão/hash da config → partida); `LockstepSession` ganhou RTT/jitter por par (ping/pong), atraso adaptativo por par ([2,6] turnos; sobe na hora, desce 1 a cada 30 turnos de folga), `pump()` em tempo real, `status()` e relatório de desync (maioria com ≥ 3 jogadores, categoria e unidades divergentes, `desyncDump()`); `gm.issue` desvia para a sessão em modo online (`gm.netIssue`, `_inStep`); `OnlineHud` (RTT, atraso, "aguardando X", aviso + download do relatório); `src/net/onlineMatch.js` (MatchConfig determinística a partir do `start`, mapa gerado se faltar vaga); `stateChecksumDetail` com ordens/árvores/jazidas/flechas/RNG (+`rng.state()`); `Math.random` removido de `Tree`/`Building` (lançam erro sem rng) + `noMathRandom.test.js`. Testes: `lockstepNet.test.js` (2/4/8 sims, 300 turnos, enlaces/jitter/perda distintos por par, adaptativo sobe/desce, par lento, desync). Navegador: `tools/online-check.mjs` (via safe-run). Fora de escopo (F9-04): reconexão, pausa votada, jogador que sai vira IA, reenvio/ack.
 
 ### F9-04 · Robustez
-- `TODO` · NET · Dep: F9-03 · Reconexão, pausa votada, jogador que sai vira IA, chat, pings no mapa entre aliados.
+- `DOING` · NET · Dep: F9-03 · Reconexão, pausa votada, jogador que sai vira IA, chat, pings no mapa entre aliados.
 
 ### F9-05 · Replays
 - `TODO` · NET+UI · Dep: F2-02, F2-03 · Gravar log de comandos + seed; player de replay com velocidade e troca de visão por jogador.

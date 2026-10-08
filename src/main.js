@@ -302,6 +302,17 @@ class GameApp {
     this.fsm.transition(S.LOADING, { config });
   }
 
+  /**
+   * F9-04: a sessão lockstep nos removeu (caímos e a IA assumiu). Recria a partida local do zero (mantendo
+   * sessão e transporte) para receber o snapshot de um par saudável e voltar ao jogo.
+   */
+  _resyncOnlineMatch(online) {
+    if (this.session?.online !== online) return;
+    online.keepAlive = true;
+    if (this.fsm.is(S.IN_GAME)) this.fsm.transition(S.PAUSED);
+    if (this.fsm.is(S.PAUSED)) this.fsm.transition(S.LOADING, { config: online.config, online });
+  }
+
   _enterLoading({ config, save = null, online = null }) {
     const token = ++this._loadToken;
     this.pauseMenu.hide();
@@ -348,6 +359,7 @@ class GameApp {
     if (token !== this._loadToken || !this.fsm.is(S.LOADING)) return;
 
     this.session = new MatchSession({ sceneManager: this.sceneManager, sound: this.sound, matchConfig: config, online });
+    if (online) this.session.onOnlineResync = () => setTimeout(() => this._resyncOnlineMatch(online), 0);
     this.matchCount++;
     this._saveMismatch = false;
     if (save) {

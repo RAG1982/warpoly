@@ -51,6 +51,16 @@ const SNAP_CHUNK = 12000; // caracteres por pedaço de snapshot (< limite de men
 const SNAP_MAX_CHUNKS = 400;
 const CHAT_MAX = 200;
 
+/** Troca caracteres de controle por espaço (chat vem de pares não confiáveis). */
+function cleanText(text) {
+  let out = '';
+  for (const ch of String(text ?? '')) {
+    const c = ch.codePointAt(0);
+    out += c < 32 || c === 127 ? ' ' : ch;
+  }
+  return out;
+}
+
 export class LockstepSession {
   /**
    * @param {object} o
@@ -137,6 +147,7 @@ export class LockstepSession {
     this._catchup = false;
     this._maxSeen = 0;
     this._chatSeen = new Map();
+    this._bye = new Set();
 
     /** Próximo turno a executar (turnos 0..turn-1 já executados). */
     this.turn = 0;
@@ -178,6 +189,17 @@ export class LockstepSession {
 
   // --- F9-04: pausa votada, saída, chat e pings (API para a UI) ---
 
+  /** Aviso imediato de que vamos embora (aba fechada/saída): os outros pulam o timeout e passam o jogador à IA. */
+  bye() {
+    this.transport.send({ k: 'bye', from: this.localId });
+  }
+
+  /** Página recarregada no meio da partida: a sim local está zerada; pede o snapshot a um par saudável. */
+  beginResync() {
+    this.removed = { at: 0 };
+    this._requestSnapshot();
+  }
+
   /** Propõe pausar (ou retomar, se já pausado). A votação vale no turno em que o pacote executa. */
   proposePause() {
     this._pendingRoom.push({ op: 'propose', kind: this.room.paused ? 'resume' : 'pause' });
@@ -195,7 +217,7 @@ export class LockstepSession {
 
   /** Chat in-game (fora da sim). `team` = só aliados. Devolve o texto enviado (ou null). */
   sendChat(text, { team = false } = {}) {
-    const t = String(text ?? '').replace(/[\u0000-\u001f\u007f]/g, ' ').trim().slice(0, CHAT_MAX);
+    const t = cleanText(text).trim().slice(0, CHAT_MAX);
     if (!t) return null;
     this.transport.send({ k: 'chat', from: this.localId, text: t, team: !!team });
     this.onChat({ from: this.localId, text: t, team: !!team, local: true });
@@ -397,7 +419,7 @@ export class LockstepSession {
       this.transport.send({ k: 'need', from: this.localId, turn: t, to: t + (this._catchup ? NEED_SPAN : 8), pids: missing });
     }
     for (const p of missing) {
-      if (p !== this.localId && nowT - this._missSince.get(p) >= this.dropTimeoutMs) this._castDropVote(p);
+      if (p !== this.localId && nowT - this._missSince.get(p) >= (this._bye.has(p) ? 0 : this.dropTimeoutMs)) this._castDropVote(p);
     }
     // Recuperação após snapshot que não anda (histórico dos outros já expirou): pede outro.
     if (this._catchup && this._stallSince !== null && nowT - this._stallSince > 8000 && !this._snapReq) {
@@ -450,6 +472,7 @@ export class LockstepSession {
     if (!this.room.addDrop(pid, at)) return;
     this._dropVotes.delete(pid);
     this._myDrop.delete(pid);
+    this._bye.delete(pid);
     this._dropFreeze = this._myDrop.size > 0 ? Math.min(...this._myDrop.values()) : null;
     this._missSince.clear();
     this._flushNotices();
@@ -548,6 +571,9 @@ export class LockstepSession {
       case 'dropped':
         if (m.pid === this.localId && Number.isInteger(m.at)) this._onRemoved(m.at);
         return;
+      case 'bye':
+        this._bye.add(m.from);
+        return;
       case 'snapreq':
         this._onSnapReq(m);
         return;
@@ -592,7 +618,7 @@ export class LockstepSession {
     this._chatSeen.set(m.from, rec);
     const team = !!m.team;
     if (team && !this.isAlly(m.from)) return;
-    this.onChat({ from: m.from, text: m.text.replace(/[\u0000-\u001f\u007f]/g, ' ').slice(0, CHAT_MAX), team });
+    this.onChat({ from: m.from, text: cleanText(m.text).slice(0, CHAT_MAX), team });
   }
 
   _onPingMsg(m) {

@@ -11,7 +11,7 @@
  * nos dois sentidos; `setLink(a, b, null)` volta ao padrão da rede). `lossRate` simula perda em
  * canal CONFIÁVEL (DataChannel ordered:true retransmite): a mensagem "perdida" chega `resendMs`
  * (padrão 3×latência + 200 ms) mais tarde, o que também a reordena em relação às seguintes.
- * F9-04: `net.setDown(id, true)` derruba um par (mensagens perdidas nos dois sentidos) até `setDown(id, false)`.
+ * F9-04: `setLink(a, b, { down: true })` corta só o enlace do par (partição parcial); `net.setDown(id, true)` derruba um par (mensagens perdidas nos dois sentidos) até `setDown(id, false)`.
  * Os parâmetros podem ser mudados durante o teste (atraso adaptativo sobe e desce).
  * `net.tamper` (opcional) permite alterar uma mensagem em trânsito (testes de par malicioso).
  */
@@ -74,6 +74,7 @@ export function createMemoryNetwork({ latencyMs = 0, jitterMs = 0, seed = 1, los
         let copy = JSON.parse(JSON.stringify(msg));
         if (net.tamper) copy = net.tamper(from, id, copy) || copy;
         const l = links.get(linkKey(from, id)) || {};
+        if (l.down) continue; // F9-04: enlace cortado entre este par (os demais seguem)
         const lat = l.latencyMs ?? latencyMs;
         const jit = l.jitterMs ?? jitterMs;
         const loss = l.lossRate ?? lossRate;

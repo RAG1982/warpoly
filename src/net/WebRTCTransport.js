@@ -50,6 +50,16 @@ export class WebRTCTransport extends Transport {
     for (const p of sig.room?.players ?? []) if (p.id !== this.localId) this.addPeer(p.id);
   }
 
+  /**
+   * F9-04: depois de reconectar ao servidor de sinalização (id de conexão novo), descarta a malha antiga e
+   * reconstrói com a sala atual do `sig`. Os ouvintes de `attach` continuam valendo (mesmo `sig`).
+   */
+  reattach(sig) {
+    for (const id of [...this.peers.keys()]) this.removePeer(id);
+    this.localId = sig.id;
+    for (const p of sig.room?.players ?? []) if (p.id !== this.localId) this.addPeer(p.id);
+  }
+
   /** Cria a conexão com `id` (idempotente). O menor id inicia a offer. */
   addPeer(id) {
     if (id === this.localId) return null;

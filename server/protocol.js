@@ -56,6 +56,7 @@ const SPEC = {
       verOk(m)
   ],
   join: [['code', 'name', 'ver'], (m) => isStr(m.code, 8, 4) && /^[A-Z0-9]+$/.test(m.code) && isName(m.name) && verOk(m)],
+  rejoin: [['code', 'token'], (m) => isStr(m.code, 8, 4) && /^[A-Z0-9]+$/.test(m.code) && isStr(m.token, 64, 8) && /^[a-f0-9]+$/.test(m.token)],
   signal: [['to', 'data'], (m) => isId(m.to) && validSignal(m.data)],
   chat: [['text'], (m) => isStr(m.text, MAX_CHAT, 1) && m.text.trim().length > 0],
   ready: [['ready'], (m) => isBool(m.ready)],

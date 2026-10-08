@@ -174,6 +174,22 @@ describe('robustez do lockstep (F9-04)', () => {
     expect(new Set(peers.map((p) => p.gm.currentTick)).size).toBe(1);
   }, 120000);
 
+  it('partição parcial (enlace 0-1 cortado por 30+ turnos): o par 2 retransmite e ninguém vira IA', () => {
+    const net = createMemoryNetwork({ latencyMs: 30, jitterMs: 20, seed: 14 });
+    const peers = makeGroup(3, net, { session: { dropTimeoutMs: 60000 } });
+    run(peers, net, 20);
+    net.setLink(0, 1, { down: true });
+    run(peers, net, 80);
+    net.setLink(0, 1, null);
+    run(peers, net, 120);
+    expect(allEqual(sums(peers))).toBe(true);
+    for (const p of peers) {
+      expect(p.events.desync).toBeNull();
+      expect(p.events.violations).toEqual([]);
+      expect(p.gm.players.every((pl) => !pl.isAI)).toBe(true);
+    }
+  }, 120000);
+
   it('queda longa vira IA e o retorno por snapshot reconverge (perda de 20+ turnos)', () => {
     const net = createMemoryNetwork({ latencyMs: 30, jitterMs: 20, seed: 6 });
     const peers = makeGroup(3, net);

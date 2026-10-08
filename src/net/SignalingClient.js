@@ -2,7 +2,7 @@
  * SignalingClient.js — F9-02: cliente WebSocket do servidor de sinalização/lobby (`server/`).
  *
  * Eventos (via `on(tipo, fn)`): todo `t` do servidor (`hello`, `joined`, `room`, `rooms`,
- * `peer-joined`, `peer-left`, `signal`, `chat`, `start`, `kicked`, `error`, `pong`) mais os locais
+ * `rejoined`, `peer-joined`, `peer-left`, `signal`, `chat`, `start`, `kicked`, `error`, `pong`) mais os locais
  * `open`, `close` e `reconnecting`. Reconexão simples: backoff exponencial 0,5 s → 8 s, até
  * `maxRetries`. O servidor não guarda sessão: após reconectar o id muda (novo `hello`) e a
  * camada de cima decide se reentra na sala (`rejoin()` usa o último código). `ping` periódico
@@ -33,6 +33,8 @@ export class SignalingClient {
     this.room = null;
     this.name = null;
     this._lastCode = null;
+    /** F9-04: token da vaga (devolvido em `joined`/`rejoined`) para voltar à partida em andamento. */
+    this.token = null;
     this._pingTimer = null;
     this._retryTimer = null;
   }
@@ -70,10 +72,11 @@ export class SignalingClient {
       }
       if (!m || typeof m.t !== 'string') return;
       if (m.t === 'hello') this.id = m.id;
-      if (m.t === 'joined') {
+      if (m.t === 'joined' || m.t === 'rejoined') {
         this.id = m.you;
         this.room = m.room;
         this._lastCode = m.room.code;
+        if (typeof m.token === 'string') this.token = m.token;
       } else if (m.t === 'room') {
         this.room = m;
       }
@@ -113,6 +116,10 @@ export class SignalingClient {
   /** Reentra na última sala após reconexão. */
   rejoin() {
     return this._lastCode && this.name ? this.join(this._lastCode, this.name) : false;
+  }
+  /** F9-04: volta à partida em andamento na mesma vaga (após queda/recarga), com o token da sala. */
+  rejoinGame(code = this._lastCode, token = this.token) {
+    return code && token ? this.send({ t: 'rejoin', code: String(code).toUpperCase(), token }) : false;
   }
   list() {
     return this.send({ t: 'list' });

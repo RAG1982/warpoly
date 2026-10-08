@@ -183,6 +183,11 @@ export class UIManager {
     let dragging = false;
     canvas.addEventListener('mousedown', (e) => {
       if (e.button !== 0) return; // o direito envia ordens (abaixo)
+      if (e.altKey && this.onMapPingRequest) { // F9-04: Alt+clique = ping para os aliados (partida online)
+        const { x, z } = worldAt(e);
+        this.onMapPingRequest({ x, z }, e.shiftKey ? 'attack' : 'attention');
+        return;
+      }
       dragging = true;
       moveCamera(e);
     }, this._listenOpts);
@@ -1326,6 +1331,7 @@ export class UIManager {
 
     // F6-05: pings de alerta (ataque, mina esgotada) sobre a névoa
     if (this.alerts) drawMinimapPings(ctx, this.alerts.activePings(), toMap);
+    if (this.allyPings) drawMinimapPings(ctx, this.allyPings.active(performance.now()), toMap); // F9-04: pings de aliados
 
     // F6-04: flashes das ordens dadas pelo minimapa e trapézio do frustum da câmera (sobre a névoa)
     if (this.minimapOrders) drawOrderFlashes(ctx, this.minimapOrders.items, toMap);

@@ -11,7 +11,8 @@ export default defineConfig({
     rollupOptions: {
       input: {
         main: resolve(__dirname, 'index.html'),
-        inspector: resolve(__dirname, 'inspector.html')
+        inspector: resolve(__dirname, 'inspector.html'),
+        netPoc: resolve(__dirname, 'net-poc.html')
       },
       output: {
         manualChunks(id) {

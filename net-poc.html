@@ -1,0 +1,39 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>WarPoly — PoC lockstep</title>
+  <style>
+    body { font: 14px/1.4 system-ui, sans-serif; background: #14161a; color: #e6e6e6; margin: 0; padding: 16px; max-width: 760px; }
+    h1 { font-size: 18px; margin: 0 0 8px; }
+    button { font: inherit; padding: 6px 12px; margin: 0 6px 6px 0; cursor: pointer; }
+    pre { background: #0c0d10; padding: 10px; border-radius: 6px; overflow: auto; max-height: 260px; }
+    .ok { color: #6fd36f; } .bad { color: #ff6b6b; }
+    table { border-collapse: collapse; } td { padding: 2px 10px 2px 0; }
+  </style>
+</head>
+<body>
+  <h1>PoC lockstep 1v1 (BroadcastChannel)</h1>
+  <p>Abra esta página em <b>duas abas</b>. Numa clique em <i>Criar (jogador 0)</i>, na outra em <i>Entrar (jogador 1)</i>.
+     Cada aba roda a própria simulação; só os comandos trafegam. Os checksums devem coincidir.</p>
+  <div id="setup">
+    <button id="host">Criar (jogador 0)</button>
+    <button id="join">Entrar (jogador 1)</button>
+  </div>
+  <div id="game" hidden>
+    <button id="move">Mover minhas unidades</button>
+    <button id="train">Treinar unidade</button>
+    <button id="tamper">Forçar desync (+1 ouro só aqui)</button>
+    <table>
+      <tr><td>Jogador</td><td id="pid"></td></tr>
+      <tr><td>Turno / tick</td><td id="turn"></td></tr>
+      <tr><td>Stalls</td><td id="stalls"></td></tr>
+      <tr><td>Checksum local</td><td id="sum"></td></tr>
+      <tr><td>Estado</td><td id="status"></td></tr>
+    </table>
+  </div>
+  <pre id="log"></pre>
+  <script type="module" src="/src/net/poc.js"></script>
+</body>
+</html>

@@ -12,6 +12,7 @@ RTS 3D low-poly para navegador (three.js + Vite), inspirado em **Warcraft II**. 
 | [06_ROADMAP_AAA](06_ROADMAP_AAA.md) | Visão, fases F0–F10, caminho crítico, decisões de arquitetura |
 | [07_DECISOES](07_DECISOES.md) | Decisões do dono: recursos, nomes próprios, alvos de hardware |
 | [08_GAME_DESIGN](08_GAME_DESIGN.md) | Design de jogo F3-00 (facções, economia, níveis, unidades, magias) — proposta v1 |
+| [09_MULTIPLAYER](09_MULTIPLAYER.md) | Multiplayer lockstep (F9-01): turnos, checksum/desync, WebRTC, lobby, reconexão, replays, PoC |
 | [SESSION_HANDOFF](SESSION_HANDOFF.md) | **Comece aqui numa sessão nova**: estado, regras, fluxo de agentes, próximos passos |
 | [HANDOFF_CLOUD](HANDOFF_CLOUD.md) | Roteiro para executar tarefas no Claude Code online (nuvem) |
 | [specs/](specs/README.md) | Especificações por tarefa com status (índice em `specs/README.md`) |

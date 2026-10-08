@@ -30,6 +30,13 @@ describe('mapas (src/data/maps/*.json)', () => {
     }
   });
 
+  it('NEW-46: continental-1v1 tem bosques alcançáveis (centro + raio dentro da área jogável; árvores na costa eram inalcançáveis e esgotavam a madeira)', () => {
+    const m = getMap('continental-1v1');
+    const half = m.playable / 2;
+    for (const f of m.forests) expect(Math.max(Math.abs(f.x), Math.abs(f.z)) + f.radius).toBeLessThanOrEqual(half - 1);
+    expect(m.forests.reduce((n, f) => n + f.count, 0)).toBeGreaterThanOrEqual(8 * m.maxPlayers);
+  });
+
   it('F4-07a: estreito-1v1 está registrado e tem 2 poços de petróleo; ilhas-4p ganhou 1 por margem', () => {
     expect(listMaps().map((m) => m.id)).toContain('estreito-1v1');
     const oil = (id) => getMap(id).resources.filter((r) => r.type === 'oil');

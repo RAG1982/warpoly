@@ -129,9 +129,11 @@ try {
   log('desync em A:', JSON.stringify({ turn: ra.turn, divergent: ra.divergent, partsDiff: ra.partsDiff }), '|', ra.hud);
   if (!ra.hud.includes('DESSINCRONIA')) throw new Error('HUD sem aviso de desync');
 
-  if (errors.length) log('erros de página:\n' + errors.slice(0, 8).join('\n'));
-  log(errors.length ? 'FALHA (erros de página)' : 'OK');
-  process.exitCode = errors.length ? 1 : 0;
+  // o `console.error` do dump de desync é ESPERADO (desync forçado acima)
+  const real = errors.filter((e) => !e.includes('[WarPoly online] DESYNC'));
+  if (real.length) log('erros de página:\n' + real.slice(0, 8).join('\n'));
+  log(real.length ? 'FALHA (erros de página)' : 'OK');
+  process.exitCode = real.length ? 1 : 0;
 } catch (err) {
   console.error('[online-check] FALHA:', err);
   process.exitCode = 1;

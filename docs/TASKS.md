@@ -491,7 +491,7 @@ Sonnet 5.5 escreve a spec em `docs/specs/<ID>.md`; agente **Sonnet** executa; o 
 - `TODO` · NET · Dep: F9-03 · Reconexão, pausa votada, jogador que sai vira IA, chat, pings no mapa entre aliados.
 
 ### F9-05 · Replays
-- `TODO` · NET+UI · Dep: F2-02, F2-03 · Gravar log de comandos + seed; player de replay com velocidade e troca de visão por jogador.
+- `DOING(agente-f9-05, 2026-10-08)` · NET+UI · Dep: F2-02, F2-03 · Gravar log de comandos + seed; player de replay com velocidade e troca de visão por jogador.
 
 ---
 

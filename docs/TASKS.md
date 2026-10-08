@@ -498,7 +498,8 @@ Sonnet 5.5 escreve a spec em `docs/specs/<ID>.md`; agente **Sonnet** executa; o 
 - `TODO` · QA · Dep: F0-05, F2-08 · Testes de combate, economia, pathfinding, comandos, determinismo.
 
 ### F10-02 · Soak test IA×IA headless
-- `TODO` · QA · Dep: F2-08 · 100 partidas por noite, detecção de travamentos, partidas que não terminam, exceções.
+- `REVIEW` · QA · Dep: F2-08 · 100 partidas por noite, detecção de travamentos, partidas que não terminam, exceções.
+  - Resultado: `npm run soak -- --count 100` (`tools/soak.mjs` + `tools/lib/soakDetector.mjs`, teste `tests/unit/soakDetector.test.js`; relatório em `tools/soak-report/`). Soak de 20 partidas (seeds 1–20, 3 mapas, 2 facções, 4 dificuldades): 19/20 terminam (95%), ticks médios até o fim 16905, 0 exceções/NaN/vazamentos, determinismo OK em 2 seeds re-rodadas; 2 achados (NEW-42, NEW-43). Reproduzir: `node tools/soak.mjs --count 1 --recheck 0 --seed-start S --maps M --faction F --difficulty D`.
 
 ### F10-03 · Regressão visual
 - `TODO` · QA · Dep: F0-05 · Capturas Playwright de todos os modelos do inspetor e da HUD em 3 resoluções; diff em PR.
@@ -558,6 +559,8 @@ _(agentes adicionam aqui: `NEW-<n> · título · lane · motivo`)_
 - ✅ NEW-38 · `DONE` (12 magias OK; bench combate100 54,5 FPS) Verificar manualmente as 6 magias do Mago/Necromante no jogo, capturas em tools/ui-captures/spells/, bench combate100; ícones de magia são emojis provisórios · QA/UI
 - ✅ NEW-39 · `DONE` (Mago, Necromante, Torre Arcana fortes; pendências no UnitAnimator: esqueleto sem ramo `fight` (sugestão: mapear para applyKnightFight), Weapon do Mago/Necromante fixo na raiz) Arte Blender: Mago Arcano, Necromante, Esqueleto, Torre Arcana, Santuário das Cinzas, Sapadores/Incendiários (hoje procedurais) · ART
 - NEW-41 · `DOING(parcial)` pathfinder MinHeap corrigido (teste usava doubles; heap guarda Float32 → `Math.fround`); fogOfWar ainda intermitente (visto 3× em ~8 execuções antes; 0 em 4 depois), causa não achada. Teste intermitente `tests/unit/fogOfWar.test.js` ("dispose() … uniform de textura trocado") e `pathfinder.test.js` (MinHeap): passam isolados, falham às vezes na suíte completa sob carga; suspeita de estado global `fogUniforms` compartilhado (F2-08b) · QA
+- NEW-42 · `TODO` Soak F10-02: partida que não termina em 72000 ticks (1 h simulada): seed 10, `continental-1v1`, facção slot 0 orc, dificuldade easy (`--seed-start 10 --maps continental-1v1 --faction orc --difficulty easy`). Provável impasse de IA easy (sem ataque decisivo) · IA/QA
+- NEW-43 · `TODO` Soak F10-02: janela >2 min sem nenhum movimento/recurso/HP alterado (tick ~49820–52220) em seed 15, `ilhas-4p` (4 jogadores), human, brutal (`--seed-start 15 --maps ilhas-4p --faction human --difficulty brutal`); a partida termina só em 66157 ticks — IA parada/aguardando? · IA/QA
 - NEW-1 · Avaliar uso real de `GLTFBuildingLoader` em `GreatHall.js` e remover ou adotar no pipeline Blender (F7-00) · ART · ficou fora do escopo da F0-03
 
 ## Notas de integração

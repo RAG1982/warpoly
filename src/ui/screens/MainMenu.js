@@ -243,7 +243,7 @@ export class MainMenu {
             <button type="button" class="mm-btn" data-action="options" aria-haspopup="dialog">
               <span class="mm-btn__label">${t('menu.options')}</span>
             </button>
-            <a class="mm-btn" href="/inspector.html">
+            <a class="mm-btn" href="./inspector.html">
               <span class="mm-btn__label">${t('menu.inspector')}</span><span class="mm-btn__hint">${t('menu.tool')}</span>
             </a>
             <button type="button" class="mm-btn" data-action="credits" aria-haspopup="dialog" aria-controls="mm-credits">

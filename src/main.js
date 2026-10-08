@@ -17,8 +17,10 @@ import { SIM_DT } from './sim/constants.js';
 import { bootOptions, applyAudio } from './ui/optionsApply.js';
 import { OptionsPanel } from './ui/screens/OptionsPanel.js';
 import { t, applyI18n, onLanguageChange, getLanguage } from './i18n/index.js';
+import { registerServiceWorker } from './pwa.js';
 
 // F6-08: opções salvas (teclas, escala de UI, daltonismo, pan…) antes de qualquer tela.
+registerServiceWorker();
 bootOptions();
 
 const S = GameState;

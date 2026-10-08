@@ -9,6 +9,7 @@ import {
   createTreeMaterial
 } from '../models/environment/treeTextures.js';
 import { glbEnabled, glbTemplates } from '../entities/glbModels.js';
+import { getMapTileset, getTileset } from '../data/tilesets.js';
 
 let cachedTreeGeometries = null;
 
@@ -155,9 +156,47 @@ function getOrCreateTreeGeometries() {
   return cachedTreeGeometries;
 }
 
+/**
+ * F7-04: variante de árvore por tileset. Clona o material (o original pode ser o atlas .glb compartilhado) e injeta no
+ * shader: tinta (`color`), dessaturação (`desat`: árvores mortas/secas) e neve nas faces voltadas para cima (`snow`).
+ */
+function createTintedMaterial(src, cfg) {
+  const mat = src.clone();
+  const snow = cfg.snow != null ? new THREE.Color(cfg.snow) : new THREE.Color(1, 1, 1);
+  const uniforms = {
+    uTreeTint: { value: new THREE.Color(cfg.color) },
+    uTreeDesat: { value: cfg.desat },
+    uTreeSnow: { value: snow },
+    uTreeSnowAmt: { value: cfg.snowAmount || 0 }
+  };
+  const baseCompile = THREE.Material.prototype.onBeforeCompile; // com o patch da névoa de guerra
+  mat.onBeforeCompile = function treeTintOnBeforeCompile(shader, renderer) {
+    Object.assign(shader.uniforms, uniforms);
+    shader.fragmentShader = shader.fragmentShader
+      .replace('#include <common>', `#include <common>
+uniform vec3 uTreeTint; uniform float uTreeDesat; uniform vec3 uTreeSnow; uniform float uTreeSnowAmt;`)
+      .replace('#include <normal_fragment_maps>', `#include <normal_fragment_maps>
+{
+  float wpL = dot( diffuseColor.rgb, vec3( 0.3, 0.59, 0.11 ) );
+  vec3 wpC = mix( diffuseColor.rgb, vec3( wpL ), uTreeDesat ) * uTreeTint;
+  float wpUp = ( vec4( normal, 0.0 ) * viewMatrix ).y;
+  float wpSnow = uTreeSnowAmt * smoothstep( 0.25, 0.75, wpUp );
+  diffuseColor.rgb = mix( wpC, uTreeSnow, wpSnow );
+}`);
+    baseCompile.call(this, shader, renderer);
+  };
+  mat.customProgramCacheKey = function () {
+    return 'wp-treetint' + THREE.Material.prototype.customProgramCacheKey.call(this);
+  };
+  mat.needsUpdate = true;
+  return mat;
+}
+
 export class TreeManager {
-  constructor(scene) {
+  /** @param {{tileset?: string}} [options]  F7-04: variante (tinta/neve) por tileset; padrão: sem alteração */
+  constructor(scene, options = {}) {
     this.scene = scene;
+    this._tintedMats = [];
     this.trees = [];
 
     // Capacity per tree type
@@ -212,6 +251,22 @@ export class TreeManager {
     });
 
     this.zeroMatrix = new THREE.Matrix4().makeScale(0, 0, 0);
+    if (options.tileset) this.applyTileset(getTileset(options.tileset));
+  }
+
+  /** F7-04: aplica a variante de árvore do tileset (`def.trees.tint`); `null` = material original. */
+  applyTileset(def) {
+    const cfg = def && def.trees && def.trees.tint;
+    if (!cfg) return;
+    const map = new Map();
+    for (const im of this.instancedMeshes) {
+      if (!map.has(im.material)) {
+        const t = createTintedMaterial(im.material, cfg);
+        map.set(im.material, t);
+        this._tintedMats.push(t);
+      }
+      im.material = map.get(im.material);
+    }
   }
 
   /** Material procedural criado sob demanda (as texturas de 2048² só são geradas se o .glb faltar). */
@@ -293,6 +348,8 @@ export class TreeManager {
       this.scene.remove(im);
       if (im.geometry) im.geometry.dispose();
     });
+    this._tintedMats.forEach(m => m.dispose());
+    this._tintedMats = [];
     this.trees = [];
     this.oakCount = 0;
     this.pineCount = 0;

@@ -1,6 +1,7 @@
 import * as THREE from 'three';
 import { mergeGeometries } from 'three/examples/jsm/utils/BufferGeometryUtils.js';
 import { getGraniteBoulderTextures, getRiverPebbleTextures } from '../models/environment/rockTextures.js';
+import { getMapTileset, getTileset } from '../data/tilesets.js';
 import {
   getFlowerTextures,
   getFlowerCenterTextures,
@@ -28,7 +29,8 @@ function createPBRMat(tex, opts = {}) {
 }
 
 export class Decorations {
-  constructor(scene, terrain) {
+  /** @param {{tileset?: string}} [options]  F7-04: variantes de decoração do tileset (padrão: `mapDef.tileset`) */
+  constructor(scene, terrain, options = {}) {
     this.scene = scene;
     this.terrain = terrain;
     this.group = new THREE.Group();
@@ -42,7 +44,29 @@ export class Decorations {
     this.createInstancedWaterLilies();
     this.createInstancedFlowerPatches();
 
+    this.applyTileset(options.tileset ? getTileset(options.tileset) : getMapTileset(terrain && terrain.mapDef));
     this.scene.add(this.group);
+  }
+
+  /**
+   * F7-04: variante por tileset — tinge os materiais (próprios desta instância) e esconde o que não existe no clima
+   * (flores/mirtilos na neve e no deserto, nenúfares sem água parada…). O tileset legado não muda nada.
+   */
+  applyTileset(def) {
+    this.tileset = def;
+    if (def.legacy) return;
+    const d = def.decor;
+    const tint = {
+      InstancedGrassTufts: d.grass, InstancedPebbles: d.pebbles, InstancedBoulders: d.boulders, InstancedBushes: d.bushes
+    };
+    const show = {
+      InstancedBerries: d.flowers, InstancedFlowerLeaves: d.flowers, InstancedFlowerPetals: d.flowers,
+      InstancedStumps: d.mushrooms, InstancedMushrooms: d.mushrooms, InstancedLilyPads: d.lilies, InstancedLotus: d.lilies
+    };
+    for (const child of this.group.children) {
+      if (tint[child.name] !== undefined) child.material.color.setHex(tint[child.name]);
+      if (show[child.name] !== undefined) child.visible = show[child.name];
+    }
   }
 
   // --- 1. INSTANCED GRASS TUFTS (1 Draw Call for 60 Grass Tufts) ---
@@ -285,7 +309,9 @@ export class Decorations {
 
     instancedFoliage.instanceMatrix.needsUpdate = true;
     instancedBerries.instanceMatrix.needsUpdate = true;
+    instancedFoliage.name = 'InstancedBushes';
     this.group.add(instancedFoliage);
+    instancedBerries.name = 'InstancedBerries';
     this.group.add(instancedBerries);
   }
 
@@ -353,7 +379,9 @@ export class Decorations {
 
     instancedStumps.instanceMatrix.needsUpdate = true;
     instancedMushrooms.instanceMatrix.needsUpdate = true;
+    instancedStumps.name = 'InstancedStumps';
     this.group.add(instancedStumps);
+    instancedMushrooms.name = 'InstancedMushrooms';
     this.group.add(instancedMushrooms);
   }
 
@@ -413,7 +441,9 @@ export class Decorations {
 
     instancedPads.instanceMatrix.needsUpdate = true;
     instancedLotus.instanceMatrix.needsUpdate = true;
+    instancedPads.name = 'InstancedLilyPads';
     this.group.add(instancedPads);
+    instancedLotus.name = 'InstancedLotus';
     this.group.add(instancedLotus);
   }
 
@@ -497,7 +527,9 @@ export class Decorations {
 
     instancedLeaves.instanceMatrix.needsUpdate = true;
     instancedPetals.instanceMatrix.needsUpdate = true;
+    instancedLeaves.name = 'InstancedFlowerLeaves';
     this.group.add(instancedLeaves);
+    instancedPetals.name = 'InstancedFlowerPetals';
     this.group.add(instancedPetals);
   }
 }

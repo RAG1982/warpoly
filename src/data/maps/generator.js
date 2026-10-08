@@ -24,7 +24,7 @@ import { Pathfinder } from '../../sim/Pathfinder.js';
 import { NAVAL_MAX_HEIGHT } from '../combat.js';
 
 export const GEN_LIMITS = Object.freeze({ minPlayers: 2, maxPlayers: 8, minSize: 96, maxSize: 192 });
-export const GEN_THEMES = Object.freeze(['verdejante', 'ilhas']);
+export const GEN_THEMES = Object.freeze(['verdejante', 'ilhas', 'inverno', 'devastadas', 'pantano']);
 export const GEN_SYMMETRIES = Object.freeze(['rotational', 'mirror']);
 
 /** Perfis geométricos: `rb` raio da ilha da base, `edge` folga entre a borda jogável e o centro da base, `sep` distância mínima entre bases vizinhas. */

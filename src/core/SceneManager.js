@@ -111,6 +111,30 @@ export class SceneManager {
     this.scene.add(this.fillLight);
   }
 
+  /**
+   * F7-04: céu/névoa/ambiente do tileset (`src/data/tilesets.js`). O tileset legado (verdejante) mantém os valores
+   * originais da cena; os demais tingem céu, névoa de distância e luz hemisférica (só no modo 'day').
+   */
+  applyTileset(def) {
+    if (!this._baseAtmo) {
+      this._baseAtmo = {
+        sky: this.skyColor, fogNear: this.scene.fog.near, fogFar: this.scene.fog.far,
+        hemiSky: this.hemiLight.color.getHex(), hemiGround: this.hemiLight.groundColor.getHex(), hemiI: this.hemiLight.intensity
+      };
+    }
+    this.tileset = def && !def.legacy ? def : null;
+    const a = this.tileset ? this.tileset.atmosphere : this._baseAtmo;
+    this.skyColor = a.sky;
+    this.scene.background.set(a.sky);
+    this.scene.fog.color.set(a.sky);
+    this.scene.fog.near = a.fogNear;
+    this.scene.fog.far = a.fogFar;
+    this.hemiLight.color.set(a.hemiSky);
+    this.hemiLight.groundColor.set(a.hemiGround);
+    if (!this.tileset) this.hemiLight.intensity = this._baseAtmo.hemiI;
+    if (this.timeOfDay && this.timeOfDay !== 'day') this.setTimeOfDay(this.timeOfDay);
+  }
+
   setTimeOfDay(mode) {
     this.timeOfDay = mode;
     if (mode === 'day') {
@@ -125,6 +149,14 @@ export class SceneManager {
       this.hemiLight.intensity = 1.05;
       this.fillLight.color.set(0x9fc3e7);
       this.fillLight.intensity = 0.55;
+      if (this.tileset) { // F7-04: ambiente do tileset por cima do 'day' padrão
+        const a = this.tileset.atmosphere;
+        this.skyColor = a.sky;
+        this.scene.background.set(a.sky);
+        this.scene.fog.color.set(a.sky);
+        this.hemiLight.color.set(a.hemiSky);
+        this.hemiLight.groundColor.set(a.hemiGround);
+      }
     } else if (mode === 'sunset') {
       this.skyColor = 0xdf8458;
       this.scene.background.set(this.skyColor);

@@ -22,7 +22,7 @@ export class EntityViews {
     this.gm = gm;
     this.scene = scene;
     /** Instanced Trees System (poucos draw calls para todas as árvores); recriado quando o mapa é recriado. */
-    this.treeManager = new TreeManager(scene);
+    this.treeManager = new TreeManager(scene, { tileset: gm.terrain?.mapDef?.tileset }); // F7-04: variante de árvore do tileset
     /** @type {Map<object, {root: object, update: Function, dispose: Function}>} */
     this.views = new Map();
     this._frame = 0;
@@ -124,7 +124,7 @@ export class EntityViews {
     if (this._trees.ref && this._trees.ref !== gm.trees) {
       // Mapa recriado (`GameManager.resetMap` troca as listas): novas árvores → novo conjunto de instâncias.
       this.treeManager.dispose();
-      this.treeManager = new TreeManager(this.scene);
+      this.treeManager = new TreeManager(this.scene, { tileset: gm.terrain?.mapDef?.tileset });
     }
     this._sync(this._trees, gm.trees, e => new TreeView(e, this.scene, this.treeManager), frame, true);
     this._sync(this._critters, gm.critters, e => new CritterView(e, this.scene), frame, false);

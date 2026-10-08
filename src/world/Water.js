@@ -5,6 +5,8 @@ import {
 } from '../models/environment/waterTextures.js';
 import { enableShadows } from '../models/materials.js';
 import { markFogGround } from '../render/fogOfWarShader.js';
+import { getMapTileset, getTileset } from '../data/tilesets.js';
+import { getTextureQuality } from '../models/textureQuality.js';
 
 /**
  * Next-Gen Stylized Water & Shoreline System for WarPoly
@@ -18,10 +20,13 @@ import { markFogGround } from '../render/fogOfWarShader.js';
  * 4. Enhanced Cattails & Lotus Lilies: Textured velvet brown cattails, floating lotus pads & water lilies.
  */
 export class Water {
-  constructor(scene, terrain) {
+  /** @param {{tileset?: string}} [options]  F7-04: cor da água, espuma e plantas vêm do tileset (padrão: `mapDef.tileset`) */
+  constructor(scene, terrain, options = {}) {
     this.scene = scene;
     this.terrain = terrain;
     this.waterLevel = 0.5;
+    this.tileset = options.tileset ? getTileset(options.tileset) : getMapTileset(terrain && terrain.mapDef);
+    this.cfg = this.tileset.water;
 
     // Collections for animations
     this.reedClumps = [];
@@ -30,7 +35,8 @@ export class Water {
     // Multi-tiered Water System
     this.createDeepWaterBase();
     this.createWaterMesh();
-    this.createReeds();
+    this.createShoreFoam();
+    if (this.cfg.plants) this.createReeds();
   }
 
   /**
@@ -44,7 +50,7 @@ export class Water {
     geo.rotateX(-Math.PI / 2);
 
     const mat = new THREE.MeshStandardMaterial({
-      color: 0x09233f, // Deep abyssal sapphire / navy blue
+      color: this.cfg.deep, // Deep abyssal sapphire / navy blue (tileset)
       roughness: 0.92,
       metalness: 0.08,
       flatShading: true
@@ -72,7 +78,7 @@ export class Water {
     const surfaceTextures = getWaterSurfaceTextures();
 
     this.surfaceMat = new THREE.MeshStandardMaterial({
-      color: 0x3cb0d8, // Vibrant tranquil cyan / turquoise tint
+      color: this.cfg.color, // tint do tileset (padrão: ciano/turquesa)
       map: surfaceTextures.map,
       roughnessMap: surfaceTextures.roughnessMap,
       bumpMap: surfaceTextures.bumpMap,
@@ -80,7 +86,7 @@ export class Water {
       roughness: 0.16,
       metalness: 0.20,
       transparent: true,
-      opacity: 0.86,
+      opacity: this.cfg.opacity,
       flatShading: true
     });
 
@@ -92,6 +98,85 @@ export class Water {
   }
 
 
+
+  /**
+   * 3. F7-04 · Espuma de costa: UM plano (1 draw call) logo acima da água, com a altura relativa ao nível d'água
+   * amostrada do terreno numa DataTexture 256² (R = (h − nível + 1)/3). O shader desenha uma frente de onda que avança e
+   * recua + uma onda secundária mais fraca, quebradas por ruído. `?texq=low`: faixa estática simples (só pulsa a opacidade).
+   */
+  createShoreFoam() {
+    const terrain = this.terrain;
+    const size = terrain.width;
+    const G = 256;
+    const data = new Uint8Array(G * G * 4);
+    for (let j = 0; j < G; j++) {
+      const z = size / 2 - (j + 0.5) * (size / G); // linha 0 = v 0 = z positivo (rotateX(-90°) do plano)
+      for (let i = 0; i < G; i++) {
+        const x = -size / 2 + (i + 0.5) * (size / G);
+        const hh = terrain.getHeight(x, z) - this.waterLevel;
+        const o = (j * G + i) * 4;
+        data[o] = Math.max(0, Math.min(255, Math.round(((hh + 1) / 3) * 255)));
+        data[o + 3] = 255;
+      }
+    }
+    const tex = new THREE.DataTexture(data, G, G, THREE.RGBAFormat);
+    tex.magFilter = THREE.LinearFilter;
+    tex.minFilter = THREE.LinearFilter;
+    tex.wrapS = tex.wrapT = THREE.ClampToEdgeWrapping;
+    tex.needsUpdate = true;
+
+    const low = getTextureQuality() === 'low';
+    const mat = new THREE.MeshBasicMaterial({
+      map: tex, transparent: true, depthWrite: false, color: 0xffffff,
+      polygonOffset: true, polygonOffsetFactor: -2, polygonOffsetUnits: -2
+    });
+    const uniforms = {
+      uTime: { value: 0 },
+      uSize: { value: size },
+      uLow: { value: low ? 1 : 0 },
+      uFoam: { value: new THREE.Color(this.cfg.foam) },
+      uStrength: { value: this.cfg.foamStrength }
+    };
+    const baseCompile = THREE.Material.prototype.onBeforeCompile; // inclui o patch da névoa de guerra
+    mat.onBeforeCompile = function foamOnBeforeCompile(shader, renderer) {
+      Object.assign(shader.uniforms, uniforms);
+      shader.fragmentShader = shader.fragmentShader
+        .replace('#include <common>', `#include <common>
+uniform float uTime; uniform float uSize; uniform float uLow; uniform vec3 uFoam; uniform float uStrength;`)
+        .replace('#include <map_fragment>', `
+float hh = texture2D( map, vMapUv ).r * 3.0 - 1.0;
+vec2 wp = vMapUv * uSize;
+float a;
+if ( uLow > 0.5 ) {
+  a = smoothstep( 0.22, 0.0, abs( hh + 0.12 ) ) * 0.8;
+} else {
+  float swell = 0.5 + 0.5 * sin( uTime * 0.9 + wp.x * 0.11 + wp.y * 0.07 );
+  float edge = -0.32 + swell * 0.38;
+  float nz = 0.55 + 0.45 * sin( wp.x * 1.7 + uTime * 0.6 ) * sin( wp.y * 1.9 - uTime * 0.5 );
+  float front = smoothstep( 0.2, 0.0, abs( hh - edge ) );
+  float trail = smoothstep( 0.26, 0.0, abs( hh - ( edge - 0.38 ) ) ) * 0.45;
+  float rim = smoothstep( 0.1, 0.0, abs( hh + 0.02 ) ) * 0.5;
+  a = ( front + trail ) * nz + rim;
+}
+a *= step( -0.95, hh ) * uStrength;
+diffuseColor = vec4( uFoam, clamp( a, 0.0, 1.0 ) );`);
+      baseCompile.call(this, shader, renderer);
+    };
+    mat.customProgramCacheKey = function () {
+      return 'wp-foam' + THREE.Material.prototype.customProgramCacheKey.call(this);
+    };
+    markFogGround(mat);
+
+    const geo = new THREE.PlaneGeometry(size, size, 1, 1);
+    geo.rotateX(-Math.PI / 2);
+    this.foamMesh = new THREE.Mesh(geo, mat);
+    this.foamMesh.position.y = this.waterLevel + 0.16;
+    this.foamMesh.renderOrder = 1;
+    this.foamMesh.name = 'ShoreFoam';
+    this.foamUniforms = uniforms;
+    this.foamLow = low;
+    this.scene.add(this.foamMesh);
+  }
 
   /**
    * 4. Enhanced Cattails, Lotus Pads & Water Lilies
@@ -349,6 +434,12 @@ export class Water {
 
       pos.needsUpdate = true;
       this.mesh.geometry.computeVertexNormals();
+    }
+
+    // 1b. Espuma de costa (F7-04)
+    if (this.foamUniforms) {
+      this.foamUniforms.uTime.value = time;
+      if (this.foamLow) this.foamMesh.material.opacity = 0.75 + 0.25 * Math.sin(time * 1.1);
     }
 
     // 2. Shifting Stylized Caustic Texture Offset (Drifting underwater light web)

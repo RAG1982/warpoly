@@ -77,3 +77,12 @@ Cada mapa é um JSON em `src/data/maps/<id>.json`, registrado em `index.js` (`ge
 2. Registre em `index.js` (import estático + entrada em `MAPS`).
 3. Rode `npm test` (valida em `tests/unit/maps.test.js`: campos obrigatórios, slots dentro da área
    jogável e em terra seca, recursos em terra, `maxPlayers >= startSlots.length`).
+
+## Mapas gerados (F8-02)
+
+`generateMap({ seed, players: 2..8, size: 96..192, naval, theme, forestDensity, symmetry })` (`generator.js`) devolve um mapa neste
+mesmo formato (+ `generated: true`, `generator` com as opções efetivas), determinístico pela seed (PRNG, nunca `Math.random`) e
+simétrico (rotacional de N dobras; `symmetry: 'mirror'` para N par). `size` é elevado a `minMapSize(players, naval)` se pequeno demais.
+O gerador verifica o mapa antes de devolver (terra seca, conectividade terrestre por flood fill no `Pathfinder`; no naval, poços e
+costa de cada base ligados pelo mar). Uso: `node tools/gen-map.mjs --seed 7 --players 4 --size 128 [--naval] --out mapa.json`, ou em
+código `registerGeneratedMap(opts)` (`index.js`) para o mapa ficar disponível em `getMap`/`listMaps` e em `MatchConfig`.

@@ -1,0 +1,88 @@
+/* src/ui/screens/replay.css — F9-05 · barra do player de replay e lista de replays */
+.rp-bar {
+  position: fixed;
+  left: 50%;
+  bottom: 10px;
+  transform: translateX(-50%);
+  z-index: 8500;
+  width: min(760px, calc(100vw - 24px));
+  padding: 8px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  background: var(--mm-panel);
+  border: 1px solid var(--mm-border);
+  border-radius: 8px;
+  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.55);
+  color: var(--mm-text);
+  font-family: 'Nunito', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  font-size: 13px;
+}
+.rp-row { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.rp-tag {
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  font-size: 11px;
+  color: var(--mm-gold-2);
+}
+.rp-speeds { display: flex; gap: 3px; }
+.rp-btn {
+  min-width: 34px;
+  min-height: 32px;
+  padding: 0 8px;
+  border: 1px solid var(--mm-border);
+  border-radius: 5px;
+  background: rgba(255, 255, 255, 0.06);
+  color: var(--mm-text);
+  font: inherit;
+  cursor: pointer;
+}
+.rp-btn:hover { background: rgba(255, 214, 110, 0.18); }
+.rp-btn:focus-visible, .rp-view select:focus-visible, .rp-seek:focus-visible { outline: none; box-shadow: var(--mm-focus); }
+.rp-btn[aria-pressed='true'] { background: var(--mm-bevel); color: #2a1c05; font-weight: 800; }
+.rp-btn--exit { margin-left: auto; }
+.rp-view { display: flex; align-items: center; gap: 6px; color: var(--mm-muted); }
+.rp-view select {
+  min-height: 32px;
+  background: #0f1824;
+  color: var(--mm-text);
+  border: 1px solid var(--mm-border);
+  border-radius: 5px;
+  font: inherit;
+  max-width: 190px;
+}
+.rp-time { min-width: 108px; font-variant-numeric: tabular-nums; }
+.rp-seek { flex: 1 1 240px; accent-color: var(--mm-gold-2); min-height: 24px; }
+.rp-msg { margin: 0; color: var(--mm-muted); }
+.rp-warn {
+  margin: 0;
+  padding: 6px 8px;
+  border-radius: 5px;
+  background: rgba(220, 38, 38, 0.25);
+  border: 1px solid rgba(248, 113, 113, 0.7);
+  color: #fecaca;
+  font-weight: 700;
+}
+.rp-bar [hidden] { display: none; }
+
+/* Lista de replays */
+.rp-list { display: flex; flex-direction: column; gap: 8px; max-height: 52vh; overflow-y: auto; }
+.rp-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 10px;
+  border: 1px solid var(--mm-border);
+  border-radius: 6px;
+  background: rgba(255, 255, 255, 0.04);
+}
+.rp-item__main { flex: 1; min-width: 0; text-align: left; }
+.rp-item__title { font-weight: 800; }
+.rp-item__meta { font-size: 12px; color: var(--mm-muted); overflow-wrap: anywhere; }
+.rp-item__actions { display: flex; gap: 4px; flex-wrap: wrap; justify-content: flex-end; }
+.rp-empty { color: var(--mm-muted); text-align: center; padding: 14px 0; }
+@media (max-width: 560px) {
+  .rp-item { flex-direction: column; align-items: stretch; }
+  .rp-item__actions { justify-content: flex-start; }
+}

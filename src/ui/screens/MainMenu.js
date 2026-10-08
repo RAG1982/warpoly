@@ -70,8 +70,9 @@ export class MainMenu {
    * @param {(open: boolean) => void} [opts.onSetupChange]
    * @param {() => void} [opts.onLoadGame]  F2-06
    */
-  constructor(parent = document.body, { onStart = null, onSetupChange = null, onLoadGame = null, onOptions = null } = {}) {
+  constructor(parent = document.body, { onStart = null, onSetupChange = null, onLoadGame = null, onOptions = null, onReplays = null } = {}) {
     this.parent = parent;
+    this.onReplays = onReplays; // F9-05: abre a lista de replays
     this.onOptions = onOptions; // F6-08
     this.onLoadGame = onLoadGame; // F2-06: abre o diálogo de slots de save
     this.onStart = onStart;
@@ -234,6 +235,9 @@ export class MainMenu {
             <button type="button" class="mm-btn" data-action="load-game">
               <span class="mm-btn__label">${t('menu.loadGame')}</span><span class="mm-btn__hint">${t('menu.saves')}</span>
             </button>
+            <button type="button" class="mm-btn" data-action="replays">
+              <span class="mm-btn__label">${t('menu.replays')}</span><span class="mm-btn__hint">${t('menu.replaysHint')}</span>
+            </button>
             <button type="button" class="mm-btn" disabled aria-describedby="mm-soon-note">
               <span class="mm-btn__label">${t('menu.campaign')}</span><span class="mm-badge">${t('menu.soon')}</span>
             </button>
@@ -352,6 +356,7 @@ export class MainMenu {
       const action = el.dataset.action;
       if (action === 'new-game') this.openPanel('skirmish', el);
       else if (action === 'load-game') this.onLoadGame?.();
+      else if (action === 'replays') this.onReplays?.();
       else if (action === 'options') this.onOptions?.(); // F6-08: OptionsPanel (diálogo único)
       else if (action === 'credits') this.openCredits(el);
       else if (action === 'close') this.closePanel();

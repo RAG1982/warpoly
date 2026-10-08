@@ -14,6 +14,10 @@ import { SaveLoadDialog } from './ui/screens/SaveLoadDialog.js';
 import { SaveStore, AUTOSAVE_SLOT } from './core/SaveStore.js';
 import { captureSave, applySaveCommands, fastForward, finishFastForward } from './sim/SaveGame.js';
 import { SIM_DT } from './sim/constants.js';
+import { ReplayService } from './core/ReplayService.js'; // F9-05
+import { ReplayController } from './core/ReplayController.js';
+import { ReplayDialog } from './ui/screens/ReplayDialog.js';
+import { ensureReplayMap, replaySeek, finishReplaySeek, attachReplay } from './replay/Replay.js';
 import { bootOptions, applyAudio } from './ui/optionsApply.js';
 import { OptionsPanel } from './ui/screens/OptionsPanel.js';
 import { t, applyI18n, onLanguageChange, getLanguage } from './i18n/index.js';
@@ -67,6 +71,10 @@ class GameApp {
       onSave: (slot) => this.saveToSlot(slot),
       onLoad: (slot) => this.loadFromSlot(slot)
     });
+    // F9-05: replays — gravação automática de toda partida + lista/importação/exportação no menu principal.
+    this.replays = new ReplayService();
+    this.replayCtl = null;
+    this.replayDialog = new ReplayDialog({ service: this.replays, onPlay: (replay) => this.playReplay(replay) });
     this._autosaveMinutes = this._readAutosaveMinutes();
     this._nextAutosaveTick = Infinity;
     // F6-08: tela de Opções única (menu principal e pausa/engrenagem). Aplica áudio ao vivo.
@@ -229,8 +237,53 @@ class GameApp {
     this.fsm.transition(S.LOADING, { config: save.config, save });
   }
 
+  // ------------------------------------------------------------------ replays (F9-05)
+  /**
+   * Reproduz um replay (do menu principal ou da lista). `tick`/`view` = onde começar e de qual jogador mostrar a visão
+   * (usados ao saltar para trás: a partida é recriada e avança até o tick).
+   */
+  playReplay(replay, { tick = 0, view = null } = {}) {
+    try {
+      ensureReplayMap(replay);
+    } catch (err) {
+      this.replayDialog.showError(err);
+      return;
+    }
+    this.replayDialog.close();
+    if (this.fsm.is(S.MAIN_MENU)) this.fsm.transition(S.MATCH_SETUP);
+    if (this.fsm.is(S.IN_GAME)) this.fsm.transition(S.PAUSED); // recarregar a partir do replay em andamento
+    if (!this.fsm.can(S.LOADING)) return;
+    this.fsm.transition(S.LOADING, { config: { ...replay.config, headless: false }, replayPlay: { replay, tick, view } });
+  }
+
+  /** Sai do replay para o menu principal (a partir de IN_GAME passa por PAUSED, como o resto do fluxo). */
+  exitReplay() {
+    if (this.fsm.is(S.IN_GAME)) this.fsm.transition(S.PAUSED);
+    this.goToMainMenu();
+  }
+
+  /** Avança a sim do replay até `tick` por quadros, com progresso na tela de loading. */
+  async _seekReplayLoading(gm, replayPlay, token) {
+    const status = document.getElementById('loading-status');
+    const est = document.getElementById('loading-est');
+    const target = Math.min(replayPlay.tick, replayPlay.replay.ticks);
+    let left = target - gm.currentTick;
+    while (left > 0) {
+      left = replaySeek(gm, target, 400);
+      const pct = Math.round(((target - left) / Math.max(1, target)) * 100);
+      this._updateLoadingUI({ percent: pct, current: 1, total: 1, name: 'match', estSeconds: 1 });
+      if (status) status.textContent = t('loading.restoring');
+      if (est) est.textContent = t('loading.replaying', { min: Math.floor(target * SIM_DT / 60), pct });
+      await nextFrame();
+      if (token !== this._loadToken || !this.fsm.is(S.LOADING)) { gm.events.presentationMuted = false; return false; }
+    }
+    finishReplaySeek(gm);
+    return true;
+  }
+
   _autosaveTick(session) {
     const gm = session.gameManager;
+    if (this.replayCtl) return;
     if (this._autosaveMinutes <= 0 || gm.isGameOver || gm.currentTick < this._nextAutosaveTick) return;
     this._nextAutosaveTick = gm.currentTick + Math.round((this._autosaveMinutes * 60) / SIM_DT);
     this.saveToSlot(AUTOSAVE_SLOT).catch((err) => console.warn('[WarPoly] autosave falhou:', err));
@@ -281,6 +334,7 @@ class GameApp {
       onOptions: () => this.optionsPanel.open(),
       onStart: (choice) => this._onMenuStart(choice),
       onLoadGame: () => this.saveDialog.open('load'),
+      onReplays: () => this.replayDialog.open(),
       onSetupChange: (open) => {
         if (open && this.fsm.is(S.MAIN_MENU)) this.fsm.transition(S.MATCH_SETUP);
         else if (!open && this.fsm.is(S.MATCH_SETUP)) this.fsm.transition(S.MAIN_MENU);
@@ -302,7 +356,7 @@ class GameApp {
     this.fsm.transition(S.LOADING, { config });
   }
 
-  _enterLoading({ config, save = null, online = null }) {
+  _enterLoading({ config, save = null, online = null, replayPlay = null }) {
     const token = ++this._loadToken;
     this.pauseMenu.hide();
     this._disposeSession();
@@ -311,18 +365,19 @@ class GameApp {
       this.menu = null;
     }
     this.matchConfig = config;
-    this._loadMatch(config, token, save, online).catch((err) => {
+    this._loadMatch(config, token, save, online, replayPlay).catch((err) => {
       console.error('[WarPoly] falha ao carregar a partida:', err);
       if (token === this._loadToken && this.fsm.is(S.LOADING)) this.fsm.transition(S.MAIN_MENU);
     });
   }
 
-  async _loadMatch(config, token, save = null, online = null) {
+  async _loadMatch(config, token, save = null, online = null, replayPlay = null) {
     const firstServices = !this.sceneManager;
+    const restoring = save || replayPlay; // F2-06/F9-05: partida que avança até um tick antes de jogar
     this._ensureServices();
 
     const needsPreload = !this.assetsReady && !this.skipPreload;
-    if (this.skipPreload && firstServices && !save) {
+    if (this.skipPreload && firstServices && !restoring) {
       // Comportamento histórico do ?skipPreload: sem tela de loading, partida na hora.
       this._hideLoadingScreen(false);
     } else {
@@ -355,12 +410,29 @@ class GameApp {
       const ok = await this._restoreSave(save, token);
       if (!ok) return;
     }
+    if (replayPlay) {
+      // F9-05: modo replay — comandos humanos do arquivo, sem gravação, sem entrada de comandos.
+      const gm = this.session.gameManager;
+      attachReplay(gm, replayPlay.replay);
+      if (this.skipPreload && firstServices) this._showLoadingScreen(false);
+      const ok = await this._seekReplayLoading(gm, replayPlay, token);
+      if (!ok) return;
+      this.replayCtl = new ReplayController({
+        session: this.session,
+        replay: replayPlay.replay,
+        view: replayPlay.view,
+        onExit: () => this.exitReplay(),
+        onReload: (o) => this.playReplay(replayPlay.replay, o)
+      });
+    } else {
+      this.replays.begin(this.session.gameManager, { online: !!online }); // F9-05: gravação automática
+    }
     this._nextAutosaveTick = this._autosaveMinutes > 0
       ? this.session.gameManager.currentTick + Math.round((this._autosaveMinutes * 60) / SIM_DT)
       : Infinity;
     this.timer.update(); // o tempo de carga não vira um delta gigante
 
-    if (!(this.skipPreload && firstServices && !save)) this._hideLoadingScreen(true);
+    if (!(this.skipPreload && firstServices && !restoring)) this._hideLoadingScreen(true);
     this.fsm.transition(S.IN_GAME);
     if (this._saveMismatch) {
       this.session.uiManager.showNotification(`⚠️ ${t('main.saveMismatch')}`, 7000);
@@ -370,7 +442,7 @@ class GameApp {
   _enterInGame(from) {
     const im = this.session.inputManager;
     im.suspended = false;
-    im.onPauseRequest = () => this.pause();
+    im.onPauseRequest = this.replayCtl ? () => this.replayCtl.togglePause() : () => this.pause();
     if (from !== S.LOADING) return;
 
     // 1ª partida da página: ganchos de depuração e atalhos de URL, como antes da F2-04.
@@ -418,6 +490,9 @@ class GameApp {
 
   _disposeSession() {
     if (!this.session) return;
+    this.replays.finish().catch((err) => console.warn('[WarPoly] replay: falha ao gravar:', err)); // F9-05 (snapshot síncrono)
+    this.replayCtl?.dispose();
+    this.replayCtl = null;
     this.session.dispose();
     this.session = null;
   }
@@ -447,12 +522,20 @@ class GameApp {
     if (!session) return; // menu/loading: nada para desenhar
 
     // F9-03: em rede não há pausa local (a sim é compartilhada; pausa votada = F9-04) — o menu de pausa abre por cima.
-    const simulate = this.fsm.is(S.IN_GAME) || (!!session.online && this.fsm.is(S.PAUSED));
+    const ctl = this.replayCtl; // F9-05
+    ctl?.update();
+    const simulate = (this.fsm.is(S.IN_GAME) || (!!session.online && this.fsm.is(S.PAUSED))) && (!ctl || ctl.simulate);
     session.update(delta, elapsedTime, simulate);
-    if (simulate) this._autosaveTick(session);
+    if (simulate && !ctl) {
+      this._autosaveTick(session);
+      this.replays.poll();
+    }
     this.sceneManager.render();
 
-    if (simulate && session.gameManager.isGameOver) this.fsm.transition(S.POST_GAME);
+    if (simulate && !ctl && session.gameManager.isGameOver) {
+      this.replays.finish().catch((err) => console.warn('[WarPoly] replay: falha ao gravar:', err)); // F9-05
+      this.fsm.transition(S.POST_GAME);
+    }
   }
 
   // ------------------------------------------------------------------ tela de loading

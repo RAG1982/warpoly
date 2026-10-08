@@ -146,27 +146,34 @@ export function serializeReplay(replay) {
   return JSON.stringify(replay);
 }
 
-/** Valida e devolve o replay; lança `Error` (PT-BR) se o JSON/versão/estrutura for inválido. */
+/** Erro de replay com `code` (`json|format|version|invalid`) para a UI traduzir. */
+function fail(code, msg) {
+  const e = new Error(msg);
+  e.code = code;
+  return e;
+}
+
+/** Valida e devolve o replay; lança `Error` (PT-BR, com `code`) se o JSON/versão/estrutura for inválido. */
 export function parseReplay(json) {
   let r;
   try {
     r = typeof json === 'string' ? JSON.parse(json) : json;
   } catch {
-    throw new Error('Replay corrompido (JSON inválido).');
+    throw fail('json', 'Replay corrompido (JSON inválido).');
   }
-  if (!r || typeof r !== 'object' || r.format !== REPLAY_FORMAT) throw new Error('Arquivo não é um replay do WarPoly.');
-  if (r.version !== REPLAY_VERSION) throw new Error(`Versão de replay incompatível (${r.version}; esperada ${REPLAY_VERSION}).`);
-  if (!Number.isInteger(r.ticks) || r.ticks < 0) throw new Error('Replay inválido: duração.');
-  if (!r.config || typeof r.config !== 'object' || !Array.isArray(r.config.players) || r.config.players.length < 2) throw new Error('Replay inválido: configuração da partida.');
-  if (!Array.isArray(r.cmds)) throw new Error('Replay inválido: comandos.');
+  if (!r || typeof r !== 'object' || r.format !== REPLAY_FORMAT) throw fail('format', 'Arquivo não é um replay do WarPoly.');
+  if (r.version !== REPLAY_VERSION) throw fail('version', `Versão de replay incompatível (${r.version}; esperada ${REPLAY_VERSION}).`);
+  if (!Number.isInteger(r.ticks) || r.ticks < 0) throw fail('invalid', 'Replay inválido: duração.');
+  if (!r.config || typeof r.config !== 'object' || !Array.isArray(r.config.players) || r.config.players.length < 2) throw fail('invalid', 'Replay inválido: configuração da partida.');
+  if (!Array.isArray(r.cmds)) throw fail('invalid', 'Replay inválido: comandos.');
   for (const c of r.cmds) {
     const check = validateCommand(c);
-    if (!check.ok || !Number.isInteger(c.tick) || c.tick < 0) throw new Error(`Replay inválido: ${check.reason || 'tick do comando'}.`);
+    if (!check.ok || !Number.isInteger(c.tick) || c.tick < 0) throw fail('invalid', `Replay inválido: ${check.reason || 'tick do comando'}.`);
   }
-  if (!Array.isArray(r.checks)) throw new Error('Replay inválido: checksums.');
-  for (const c of r.checks) if (!Array.isArray(c) || !Number.isInteger(c[0]) || !Number.isInteger(c[1])) throw new Error('Replay inválido: checksums.');
-  if (!r.final || !Number.isInteger(r.final.tick) || !Number.isInteger(r.final.hash)) throw new Error('Replay inválido: checksum final.');
-  if (!r.summary || typeof r.summary !== 'object') throw new Error('Replay inválido: resumo.');
+  if (!Array.isArray(r.checks)) throw fail('invalid', 'Replay inválido: checksums.');
+  for (const c of r.checks) if (!Array.isArray(c) || !Number.isInteger(c[0]) || !Number.isInteger(c[1])) throw fail('invalid', 'Replay inválido: checksums.');
+  if (!r.final || !Number.isInteger(r.final.tick) || !Number.isInteger(r.final.hash)) throw fail('invalid', 'Replay inválido: checksum final.');
+  if (!r.summary || typeof r.summary !== 'object') throw fail('invalid', 'Replay inválido: resumo.');
   return r;
 }
 
@@ -174,9 +181,9 @@ export function parseReplay(json) {
 export function ensureReplayMap(replay) {
   const id = replay.config.mapId;
   if (!getMap(id)) {
-    if (!replay.mapGen) throw new Error(`Mapa desconhecido "${id}".`);
+    if (!replay.mapGen) throw fail('map', `Mapa desconhecido "${id}".`);
     const def = registerGeneratedMap(replay.mapGen);
-    if (def.id !== id) throw new Error(`Mapa gerado não confere ("${def.id}" ≠ "${id}").`);
+    if (def.id !== id) throw fail('map', `Mapa gerado não confere ("${def.id}" ≠ "${id}").`);
   }
   return getMap(id);
 }

@@ -463,7 +463,7 @@ Sonnet 5.5 escreve a spec em `docs/specs/<ID>.md`; agente **Sonnet** executa; o 
 - `TODO` · CONTENT+UI · Dep: F2-05, F7-04 · Pintar terreno/água/florestas, posicionar minas/jogadores/neutros, exportar/importar JSON.
 
 ### F8-04 · Sistema de missões e gatilhos
-- `TODO` · CONTENT+CORE · Dep: F2-02, F2-07 · Objetivos (destruir, sobreviver X min, escoltar, resgatar, construir N), gatilhos (área, tempo, morte), diálogos/briefings, cutscenes simples de câmera.
+- `DOING(agente-f8-04, 2026-10-08)` · CONTENT+CORE · Dep: F2-02, F2-07 · Objetivos (destruir, sobreviver X min, escoltar, resgatar, construir N), gatilhos (área, tempo, morte), diálogos/briefings, cutscenes simples de câmera.
 
 ### F8-05 · Campanha da Aliança (8+ missões)
 - `TODO` · CONTENT · Dep: F8-04 · História original inspirada na temática do WC2.

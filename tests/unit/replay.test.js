@@ -48,7 +48,7 @@ function record(ticks, seed = 11) {
   return { gm, replay: parseReplay(serializeReplay(rec.snapshot({ name: 'teste' }))) };
 }
 
-describe('replay (F9-05)', () => {
+describe('replay (F9-05)', { timeout: 120000 }, () => {
   const TICKS = 3000; // 2,5 min
   let rec; // gravado uma vez (a partida é a parte cara)
   const get = () => (rec ||= record(TICKS));

@@ -16,6 +16,11 @@ describe('mapas (src/data/maps/*.json)', () => {
     expect(ids).toContain('ilhas-4p');
   });
 
+  it('NEW-43: ilhas-4p tem madeira suficiente (>= 8 árvores planejadas por jogador; antes só 12 nasciam e a economia travava)', () => {
+    const planned = getMap('ilhas-4p').forests.reduce((n, f) => n + f.count, 0);
+    expect(planned).toBeGreaterThanOrEqual(8 * getMap('ilhas-4p').maxPlayers);
+  });
+
   it('F4-07a: estreito-1v1 está registrado e tem 2 poços de petróleo; ilhas-4p ganhou 1 por margem', () => {
     expect(listMaps().map((m) => m.id)).toContain('estreito-1v1');
     const oil = (id) => getMap(id).resources.filter((r) => r.type === 'oil');

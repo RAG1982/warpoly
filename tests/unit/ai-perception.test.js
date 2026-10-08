@@ -67,5 +67,16 @@ describe('F5-02: percepção sob a névoa', () => {
     expect(d0.perception.exploredCount).toBeGreaterThan(0);
     gm.dispose();
   });
-});
 
+  it('NEW-42: markExploredAt descarta uma célula inalcançável da varredura de marcha', () => {
+    const gm = makeGm({ difficulties: ['normal', 'normal'] });
+    const per = gm.aiDirectors[0].perception;
+    const c = per.nearestUnexploredCell(0, 0);
+    expect(per.isExplored(c.x, c.z)).toBe(false);
+    per.markExploredAt(c.x, c.z);
+    expect(per.isExplored(c.x, c.z)).toBe(true);
+    const n = per.nearestUnexploredCell(0, 0);
+    expect(n.x !== c.x || n.z !== c.z).toBe(true);
+    gm.dispose();
+  });
+});

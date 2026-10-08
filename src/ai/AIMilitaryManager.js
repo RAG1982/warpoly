@@ -452,6 +452,11 @@ export class AIMilitaryManager {
     if (!target) {
       const m = dir.perception.marchTarget();
       if (!m) return;
+      // NEW-42: a mesma marcha repetida 3× sem a célula virar "explorada" = destino que o exército não alcança
+      // (ilha, penhasco, canto do mapa): descarta o ponto para a varredura seguir adiante em vez de ficar em laço.
+      const lm = this._lastMarch;
+      if (lm && Math.hypot(lm.x - m.x, lm.z - m.z) < 1) lm.n++; else this._lastMarch = { x: m.x, z: m.z, n: 1 };
+      if (this._lastMarch.n >= 3) { dir.perception.markExploredAt(m.x, m.z); this._lastMarch = null; return; }
       const ids = units.map(u => u.id);
       if (dir.issue({ type: CMD.ATTACK_MOVE, playerId: dir.playerId, unitIds: ids, x: m.x, z: m.z })) {
         for (let i = 0; i < ids.length; i++) this.waveIds.add(ids[i]);

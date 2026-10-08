@@ -210,6 +210,9 @@ export class Unit {
     this._repaths = 0;
     this._mvLastX = NaN;
     this._mvLastZ = NaN;
+    this._mtX = NaN; // NEW-42: travamento de `moveTowards` (caminho velho que a unidade não consegue seguir)
+    this._mtZ = NaN;
+    this._mtStuck = 0;
 
     // Worker inventory (F3-04: `max` passa a ser por recurso — ver `src/data/economy.js` CARRY;
     // fixado quando a unidade começa a coletar, em vez de um valor único fixo).
@@ -986,6 +989,17 @@ export class Unit {
         const distFromLastDest = this.pathDestination
           ? Math.hypot(destX - this.pathDestination.x, destZ - this.pathDestination.z)
           : Infinity;
+
+        // NEW-42: sem progresso por 1,5 s com um caminho velho (unidade empurrada para a margem da água, atravessada
+        // a um waypoint que o relevo não deixa alcançar) — descarta o caminho para pedir um novo desta posição.
+        if (Math.hypot(curX - this._mtX, curZ - this._mtZ) < this.speed * delta * 0.3) this._mtStuck += delta;
+        else this._mtStuck = 0;
+        this._mtX = curX;
+        this._mtZ = curZ;
+        if (this._mtStuck > 1.5 && this.waypoints && !this._chaseRequestPending) {
+          this.waypoints = null;
+          this._mtStuck = 0;
+        }
 
         if ((!this.waypoints || this.waypoints.length === 0 || distFromLastDest > 2.5) && !this._chaseRequestPending) {
           this.pathDestination = { x: destX, z: destZ };

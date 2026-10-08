@@ -124,6 +124,12 @@ export class AIPerception {
     return this.cheat || this.explored[this._cellOf(x, z)] === 1;
   }
 
+  /** NEW-42: dá a célula de (x, z) como explorada (marcha que não consegue chegar perto o bastante para vê-la). */
+  markExploredAt(x, z) {
+    const i = this._cellOf(x, z);
+    if (!this.explored[i]) { this.explored[i] = 1; this.exploredCount++; }
+  }
+
   _markExplored() {
     const n = EXPLORE_N;
     const size = (this.mapHalf * 2) / n;

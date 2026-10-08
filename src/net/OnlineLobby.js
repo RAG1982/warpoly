@@ -8,7 +8,10 @@
  *
  * Parâmetros: `?signal=ws://host:8787` (padrão: mesmo host, porta 8787), `?sala=CODIGO` (entra direto),
  * `?nome=…`, `?stun=0` (sem STUN, útil em rede local/testes), `?delay=N` (atraso inicial),
- * `?adaptive=0` (desliga o atraso adaptativo).
+ * `?adaptive=0` (desliga o atraso adaptativo), `?droptimeout=ms` (F9-04; padrão 10000), `?rejoin=1` (volta à partida após recarregar).
+ * F9-04: sobrevive a quedas — se o WebSocket de sinalização cai durante a partida ele reconecta e volta
+ * à vaga com `rejoin` (malha WebRTC refeita); se a PÁGINA é recarregada (`?online=1&rejoin=1`, dados em
+ * sessionStorage) a partida local é recriada e o estado vem por snapshot de um par saudável.
  * Também expõe `window.lobby` (room, start, transporte, localId, config) como o `lobby.html`.
  */
 import { SignalingClient } from './SignalingClient.js';
@@ -20,6 +23,7 @@ import { listMaps, DEFAULT_MAP_ID } from '../data/maps/index.js';
 
 export const PROTOCOL_VERSION = 1;
 const OPEN_TIMEOUT_MS = 25000;
+const STORE_KEY = 'warpoly.online';
 const HELLO_TIMEOUT_MS = 10000;
 
 const ERR = {
@@ -108,6 +112,7 @@ export function openOnlineLobby({ params, onStart }) {
   window.lobby = state;
   let closed = false;
   let starting = false;
+  let running = false; // partida em andamento (a sessão lockstep existe)
 
   function render() {
     const r = state.room;
@@ -138,6 +143,14 @@ export function openOnlineLobby({ params, onStart }) {
     sig.on('open', () => {
       setStatus('Conectado ao servidor.', false);
       render();
+      if (running) {
+        sig.rejoinGame(); // F9-04: queda do WebSocket no meio da partida: volta à mesma vaga
+        return;
+      }
+      if (rejoinData) {
+        sig.rejoinGame(rejoinData.code, rejoinData.token);
+        return;
+      }
       const code = q('sala');
       if (code && !state.room) sig.join(code, name);
     });
@@ -151,6 +164,16 @@ export function openOnlineLobby({ params, onStart }) {
       state.room = m.room;
       render();
     });
+    sig.on('rejoined', (m) => {
+      state.room = m.room;
+      if (running) {
+        state.localId = sig.id;
+        state.transport?.reattach(sig); // malha WebRTC refeita com o id novo
+        return;
+      }
+      rejoinData = null;
+      beginMatch(m.start, { rejoin: true, slot: m.slot }).catch((err) => failStart(err));
+    });
     sig.on('room', (m) => {
       state.room = m;
       render();
@@ -160,7 +183,19 @@ export function openOnlineLobby({ params, onStart }) {
       setStatus('Você foi removido da sala.');
       render();
     });
-    sig.on('error', (m) => setStatus(ERR[m.code] || `Erro: ${m.code}`));
+    sig.on('error', (m) => {
+      if (rejoinData && m.code === 'no-such-room') {
+        rejoinData = null;
+        try {
+          sessionStorage.removeItem(STORE_KEY);
+        } catch {
+          /* sem storage */
+        }
+        setStatus('A partida anterior não existe mais.');
+        return;
+      }
+      setStatus(ERR[m.code] || `Erro: ${m.code}`);
+    });
     sig.on('start', (m) => beginMatch(m).catch((err) => failStart(err)));
     sig.connect();
   }
@@ -173,19 +208,27 @@ export function openOnlineLobby({ params, onStart }) {
     state.transport = null;
   }
 
-  async function beginMatch(m) {
+  async function beginMatch(m, { rejoin = false, slot = null } = {}) {
     starting = true;
-    setStatus('Partida iniciando — conectando aos jogadores…', false);
-    const built = buildOnlineMatchConfig({ players: m.players, seed: m.seed, config: m.config, localNetId: sig.id });
+    setStatus(rejoin ? 'Voltando à partida — conectando aos jogadores…' : 'Partida iniciando — conectando aos jogadores…', false);
+    const mySlot = slot ?? sig.id; // id de rede da vaga na mensagem `start`
+    try {
+      sessionStorage.setItem(STORE_KEY, JSON.stringify({ signal: inServer.value.trim(), code: sig.room?.code ?? sig._lastCode, token: sig.token, name: inName.value.trim(), at: Date.now() }));
+    } catch {
+      /* sem storage: só perde o rejoin após recarregar */
+    }
+    const built = buildOnlineMatchConfig({ players: m.players, seed: m.seed, config: m.config, localNetId: mySlot });
     const { config, playerIds, toPlayerId, localPlayerId } = built;
     const rtcConfig = q('stun') === '0' ? { iceServers: [] } : undefined;
     const transport = new WebRTCTransport({ localId: sig.id, sendSignal: () => {}, ...(rtcConfig ? { rtcConfig } : {}) });
     transport.attach(sig);
     Object.assign(state, { start: m, transport, localId: sig.id, config, built });
+    running = true;
 
     // A sessão existe já (recebe e guarda pacotes durante o carregamento); a sim é ligada depois.
     const proxy = { target: null };
-    for (const fn of ['enqueue', 'step', 'checksum', 'detail', 'beginTurn', 'endTurn']) proxy[fn] = (...a) => proxy.target[fn]?.(...a);
+    for (const fn of ['enqueue', 'step', 'checksum', 'detail', 'beginTurn', 'endTurn', 'takeover', 'release', 'captureSnapshot', 'restoreSnapshot']) proxy[fn] = (...a) => proxy.target[fn]?.(...a);
+    proxy.ready = () => !!proxy.target; // F9-04: a sessão só aplica snapshot quando a partida local existe
     const hash = configHash(config);
     // Os ids de rede (sig.id) e de jogo (0..n-1) diferem; a sessão usa os de jogo (campo `from` das mensagens).
     const session = new LockstepSession({
@@ -196,16 +239,19 @@ export function openOnlineLobby({ params, onStart }) {
       turnTicks: 2,
       delayTurns: Number(q('delay', 3)),
       adaptive: q('adaptive') !== '0',
-      checkEvery: 10
+      checkEvery: 10,
+      dropTimeoutMs: Number(q('droptimeout', 10000)) // F9-04: stall deste tamanho => o jogador vira IA
     });
 
     const helloFrom = new Map();
     transport.onMessage((msg) => {
       if (msg && msg.k === 'hello' && Number.isInteger(msg.from) && msg.from < 0) helloFrom.set(-1 - msg.from, msg);
     });
-    const others = m.players.filter((p) => p.id !== sig.id).map((p) => p.id);
+    const others = (rejoin ? (sig.room?.players ?? []) : m.players).filter((p) => p.id !== sig.id).map((p) => p.id);
     const t0 = performance.now();
-    while (!transport.allOpen(others)) {
+    // Rejoin: basta um canal aberto (outros jogadores podem ter caído); partida nova exige todos.
+    const opened = () => (rejoin ? others.some((id) => transport.allOpen([id])) : transport.allOpen(others));
+    while (!opened()) {
       if (performance.now() - t0 > OPEN_TIMEOUT_MS) throw new Error('tempo esgotado abrindo a conexão com os jogadores (NAT? configure TURN)');
       await new Promise((r) => setTimeout(r, 100));
     }
@@ -214,7 +260,7 @@ export function openOnlineLobby({ params, onStart }) {
     const sendHello = () => transport.send({ k: 'hello', from: -1 - localPlayerId, v: PROTOCOL_VERSION, cfg: hash });
     sendHello();
     const t1 = performance.now();
-    const need = playerIds.filter((i) => i !== localPlayerId);
+    const need = rejoin ? [] : playerIds.filter((i) => i !== localPlayerId); // quem volta não repete o handshake (a partida já corre)
     for (let tick = 0; need.some((i) => !helloFrom.has(i)); tick++) {
       if (performance.now() - t1 > HELLO_TIMEOUT_MS) throw new Error('algum jogador não respondeu ao handshake');
       if (tick % 5 === 4) sendHello(); // reenvia: o outro lado pode ter registrado o ouvinte depois
@@ -224,16 +270,26 @@ export function openOnlineLobby({ params, onStart }) {
       if (h.v !== PROTOCOL_VERSION || h.cfg !== hash) throw new Error(`jogador ${i + 1} está com versão/configuração diferente`);
     }
     const names = config.players.map((p) => p.name);
+    if (rejoin) session.beginResync(); // sim local zerada: o estado vem por snapshot
     close();
     const dispose = () => {
-      session.dispose();
-      transport.close();
+      running = false;
       try {
-        sig.leave();
-        sig.close();
+        sessionStorage.removeItem(STORE_KEY);
       } catch {
-        /* já fechado */
+        /* sem storage */
       }
+      session.bye(); // aviso imediato: os outros passam este jogador à IA sem esperar o timeout
+      setTimeout(() => {
+        session.dispose();
+        transport.close();
+        try {
+          sig.leave();
+          sig.close();
+        } catch {
+          /* já fechado */
+        }
+      }, 250);
     };
     onStart({ config, session, proxy, transport, names, localPlayerId, toPlayerId, dispose });
   }
@@ -257,6 +313,18 @@ export function openOnlineLobby({ params, onStart }) {
   chkReady.onchange = () => sig.setReady(chkReady.checked);
   btnStart.onclick = () => sig.start();
 
+  // F9-04: página recarregada no meio da partida: volta à vaga (token em sessionStorage).
+  let rejoinData = null;
+  if (q('rejoin') === '1') {
+    try {
+      const d = JSON.parse(sessionStorage.getItem(STORE_KEY) || 'null');
+      if (d && d.code && d.token && Date.now() - d.at < 10 * 60_000) rejoinData = d;
+    } catch {
+      rejoinData = null;
+    }
+    if (rejoinData && rejoinData.signal) inServer.value = rejoinData.signal;
+    if (rejoinData && rejoinData.name) inName.value = rejoinData.name;
+  }
   if (q('autoconnect') !== '0') connect();
   return { close };
 }

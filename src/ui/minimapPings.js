@@ -10,7 +10,7 @@ export function drawMinimapPings(ctx, pings, toMap) {
   ctx.save();
   for (const p of pings) {
     const m = toMap(p.x, p.z);
-    const color = COLORS[p.kind] || '#ffd700';
+    const color = p.color || COLORS[p.kind] || '#ffd700'; // F9-04: ping de aliado traz a cor do jogador
     const fade = 1 - p.age;
     // dois anéis defasados (pulso)
     for (let k = 0; k < 2; k++) {

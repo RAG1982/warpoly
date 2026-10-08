@@ -194,4 +194,43 @@ describe('servidor de sinalização', () => {
     t = 5000;
     expect(await a.closed).toBe(4000);
   });
+
+  it('F9-04: quem cai no meio da partida volta com rejoin{code,token}; token errado e saída voluntária não voltam', async () => {
+    const a = await mk();
+    const b = await mk();
+    a.send({ t: 'create', name: 'Ana' });
+    const ja = await a.next('joined');
+    expect(ja.token).toMatch(/^[a-f0-9]{16,}$/);
+    b.send({ t: 'join', code: ja.room.code, name: 'Bia' });
+    const jb = await b.next('joined');
+    await a.next('peer-joined');
+    b.send({ t: 'ready', ready: true });
+    await a.next('room');
+    a.send({ t: 'start' });
+    const st = await b.next('start');
+    const oldId = b.id;
+    b.ws.terminate(); // queda de rede
+    await a.next('peer-left');
+    const b2 = await mk();
+    b2.send({ t: 'rejoin', code: ja.room.code, token: 'ab'.repeat(12) });
+    expect((await b2.next('error')).code).toBe('no-such-room');
+    b2.send({ t: 'rejoin', code: ja.room.code, token: jb.token });
+    const rj = await b2.next('rejoined');
+    expect(rj.oldId).toBe(oldId);
+    expect(rj.slot).toBe(oldId); // a vaga mantém o id da mensagem `start`
+    expect(rj.start.seed).toBe(st.seed);
+    expect(rj.start.players).toHaveLength(2);
+    const pj = await a.next('peer-joined');
+    expect(pj).toMatchObject({ id: b2.id, rejoin: true, oldId });
+    // o token só vale uma vez
+    const b3 = await mk();
+    b3.send({ t: 'rejoin', code: ja.room.code, token: jb.token });
+    expect((await b3.next('error')).code).toBe('no-such-room');
+    // quem sai de propósito não volta
+    b2.send({ t: 'leave' });
+    await a.next('peer-left');
+    const b4 = await mk();
+    b4.send({ t: 'rejoin', code: ja.room.code, token: rj.token });
+    expect((await b4.next('error')).code).toBe('no-such-room');
+  });
 });

@@ -43,6 +43,8 @@ export class InputManager {
     // cliques e atalhos são ignorados. `onPauseRequest` é chamado no Esc sem nada a cancelar.
     this.suspended = false;
     this.onPauseRequest = null;
+    /** F9-04: ping de mapa para aliados (`(pos, kind) => void`), ligado só em partida online. */
+    this.onMapPingRequest = null;
 
     /**
      * Modo-alvo (F3-05 Reparar, generalizado na F4-03): `{kind:'repair'}` (o próximo clique numa construção
@@ -537,6 +539,13 @@ export class InputManager {
 
     this.updateMouseCoords(e);
     this.raycastScene();
+
+    // F9-04: Alt+clique no terreno = ping para os aliados (só em partida online; Shift+Alt = ataque).
+    if (e.button === 0 && e.altKey && this.onMapPingRequest && this.groundIntersection) {
+      e.preventDefault();
+      this.onMapPingRequest({ x: this.groundIntersection.x, z: this.groundIntersection.z }, e.shiftKey ? 'attack' : 'attention');
+      return;
+    }
 
     if (e.button === 1) {
       // F3-01: botão do meio arrasta a câmera

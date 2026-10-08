@@ -7,7 +7,7 @@
  * inatividade (sem mensagem/pong) => expulsão, máx. de salas e de conexões por IP.
  */
 import { WebSocketServer } from 'ws';
-import { randomInt } from 'node:crypto';
+import { randomInt, randomBytes } from 'node:crypto';
 import { parseClientMessage, MAX_MESSAGE_BYTES, MAX_PLAYERS, PROTOCOL_VERSION } from './protocol.js';
 
 const CODE_CHARS = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
@@ -22,6 +22,7 @@ export function createSignalingServer({
   rateBurst = 30,
   ratePerSec = 15,
   strikesToKick = 5,
+  awayMs = 10 * 60_000,
   now = () => Date.now()
 } = {}) {
   const wss = new WebSocketServer({ port, host, maxPayload: MAX_MESSAGE_BYTES });
@@ -71,6 +72,10 @@ export function createSignalingServer({
     if (!r) return;
     c.room = null;
     r.members.delete(c.id);
+    // F9-04: quem cai no meio de uma partida pode voltar com `rejoin{code,token}` (mesma vaga, nova conexão).
+    if (r.started && c.token && reason !== 'left' && reason !== 'kicked' && r.members.size > 0) {
+      r.away.set(c.token, { name: c.name, faction: c.faction, color: c.color, team: c.team, oldId: c.id, slot: c.slot ?? c.id, at: now() });
+    }
     if (r.members.size === 0) {
       rooms.delete(r.code);
       return;
@@ -83,12 +88,14 @@ export function createSignalingServer({
   function enter(c, r, name) {
     c.room = r;
     c.name = name;
+    c.token = randomBytes(12).toString('hex');
+    c.slot = c.id; // id de rede com que a vaga entrou (os ids da mensagem `start` são esses)
     c.ready = false;
     c.faction = 'human';
     c.color = 0;
     c.team = 0;
     r.members.set(c.id, c);
-    send(c, { t: 'joined', you: c.id, room: snapshot(r), v: PROTOCOL_VERSION });
+    send(c, { t: 'joined', you: c.id, room: snapshot(r), v: PROTOCOL_VERSION, token: c.token });
     broadcast(r, { t: 'peer-joined', id: c.id, name }, c);
     pushRoom(r);
   }
@@ -106,7 +113,7 @@ export function createSignalingServer({
         if (rooms.size >= maxRooms) return err(c, 'server-full');
         const code = newCode();
         if (!code) return err(c, 'server-full');
-        const room = { code, host: c.id, public: m.public === true, maxPlayers: m.maxPlayers ?? MAX_PLAYERS, started: false, config: m.config ?? {}, members: new Map() };
+        const room = { code, host: c.id, public: m.public === true, maxPlayers: m.maxPlayers ?? MAX_PLAYERS, started: false, config: m.config ?? {}, members: new Map(), away: new Map(), startMsg: null };
         rooms.set(code, room);
         return enter(c, room, m.name);
       }
@@ -118,8 +125,30 @@ export function createSignalingServer({
         if (room.members.size >= room.maxPlayers) return err(c, 'room-full');
         return enter(c, room, m.name);
       }
+      case 'rejoin': {
+        if (r) return err(c, 'already-in-room');
+        const room = rooms.get(m.code);
+        if (!room || !room.started) return err(c, 'no-such-room');
+        const gone = room.away.get(m.token);
+        if (!gone || now() - gone.at > awayMs) return err(c, 'no-such-room');
+        room.away.delete(m.token);
+        if (room.members.size >= room.maxPlayers) return err(c, 'room-full');
+        c.room = room;
+        c.name = gone.name;
+        c.token = m.token;
+        c.slot = gone.slot;
+        c.ready = true;
+        c.faction = gone.faction;
+        c.color = gone.color;
+        c.team = gone.team;
+        room.members.set(c.id, c);
+        send(c, { t: 'rejoined', you: c.id, oldId: gone.oldId, slot: gone.slot, room: snapshot(room), start: room.startMsg, v: PROTOCOL_VERSION, token: c.token });
+        broadcast(room, { t: 'peer-joined', id: c.id, name: c.name, rejoin: true, oldId: gone.oldId, slot: gone.slot }, c);
+        pushRoom(room);
+        return;
+      }
       case 'leave':
-        return leaveRoom(c);
+        return leaveRoom(c, 'left');
       default:
     }
     if (!r) return err(c, 'not-in-room');
@@ -160,6 +189,7 @@ export function createSignalingServer({
         r.started = true;
         const players = [...r.members.values()].map((p) => ({ id: p.id, name: p.name, faction: p.faction, color: p.color, team: p.team }));
         const seed = randomInt(1, 2 ** 31 - 1);
+        r.startMsg = { config: r.config, players, seed };
         return broadcast(r, { t: 'start', config: r.config, players, seed, startAt: now() + 3000 });
       }
       default:

@@ -1,5 +1,6 @@
 import { createGameSimAdapter } from '../net/GameSimAdapter.js';
 import { OnlineHud } from '../net/OnlineHud.js';
+import { attachOnlineUi } from '../net/onlineUi.js';
 import { Terrain } from '../sim/Terrain.js';
 import { TerrainView } from '../render/TerrainView.js';
 import { FogView } from '../render/FogView.js';
@@ -71,7 +72,11 @@ export class MatchSession {
     // F9-03: partida online — a sessão lockstep passa a dirigir a sim; comandos da UI vão para ela (ver GameManager.issue).
     this.online = online;
     this.onlineHud = null;
+    this.onlineUi = null;
+    /** F9-04: chamado quando a sessão online nos removeu (viramos IA) — `main.js` recria a partida local para o snapshot. */
+    this.onOnlineResync = null;
     if (online) {
+      online.keepAlive = false;
       const gm = this.gameManager;
       online.proxy.target = createGameSimAdapter(gm, { render: !gm.headless });
       gm.netIssue = (fields) => {
@@ -91,6 +96,10 @@ export class MatchSession {
     this.gameManager.uiManager = this.uiManager;
     this.gameManager.sceneManager = sceneManager;
     this.inputManager.uiManager = this.uiManager;
+    if (online) {
+      // F9-04: chat, pings de aliados e avisos de pausa/queda (só apresentação).
+      this.onlineUi = attachOnlineUi({ online, gm: this.gameManager, sceneManager, uiManager: this.uiManager, inputManager: this.inputManager, onResync: () => this.onOnlineResync?.() });
+    }
 
     // F2-08b/c: malhas das entidades de simulação puras (árvores, minas, critters, construções, unidades) e a parte
     // visual da névoa — antes do warm-up de shaders. Fora do headless.
@@ -193,6 +202,7 @@ export class MatchSession {
         alpha = this.online.session.pump(delta * 1000).alpha;
         gm._lastAlpha = alpha;
         this.onlineHud?.update(delta);
+        this.onlineUi?.update();
       } else {
         alpha = gm.advance(delta);
       }
@@ -253,8 +263,15 @@ export class MatchSession {
     // F9-03: encerra a sessão online (HUD, transporte, sala).
     this.onlineHud?.dispose();
     this.onlineHud = null;
+    this.onlineUi?.dispose();
+    this.onlineUi = null;
     this.gameManager.netIssue = null;
-    this.online?.dispose?.();
+    if (this.online?.keepAlive) {
+      // F9-04: recriação para ressincronizar — a sessão lockstep e o transporte continuam vivos; só a sim local morre.
+      if (this.online.proxy) this.online.proxy.target = null;
+    } else {
+      this.online?.dispose?.();
+    }
     this.online = null;
 
     // 1. Entrada e HUD primeiro: nada mais reage a eventos desta partida.

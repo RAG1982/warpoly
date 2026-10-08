@@ -68,6 +68,9 @@ export class GameManager {
     /** @type {PlayerRegistry} */
     this.playerRegistry = new PlayerRegistry();
     this._localPlayerId = 0;
+    /** F9-03: partida online — `netIssue(fields)` desvia comandos da UI para a sessão lockstep; `_inStep` marca passos da sim. */
+    this.netIssue = null;
+    this._inStep = false;
 
     // F2-03: RNG de simulação — determinístico, derivado da seed da partida. Tudo que altera
     // estado de jogo usa `this.rng` (ou um fork dele); RNG visual (Math.random) continua livre.
@@ -287,6 +290,12 @@ export class GameManager {
    * `src/sim/commands.js`); `tick` é preenchido aqui.
    */
   issue(fields) {
+    // F9-03: em partida online, comandos da UI (fora de `simStep`) vão para a sessão lockstep e só
+    // entram na `CommandQueue` quando o turno executa. Comandos da própria sim (IA) passam direto.
+    if (this.netIssue && !this._inStep) {
+      this.netIssue(fields);
+      return null;
+    }
     const cmd = makeCommand({ ...fields, tick: this.currentTick + COMMAND_DELAY_TICKS });
     this.matchStats.countCommand(fields.playerId);
     return this.commands.enqueue(cmd);

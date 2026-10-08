@@ -557,8 +557,8 @@ export class Building {
           spawnX = dock.x;
           spawnZ = dock.z;
         } else {
-          const rng = gameManager && gameManager.rng ? gameManager.rng : null;
-          spawnX = this.mesh.position.x + ((rng ? rng.next() : Math.random()) - 0.5) * 1.5;
+          if (!gameManager || !gameManager.rng) throw new Error('Building: gameManager.rng obrigatório para treinar unidades (F9-03)');
+          spawnX = this.mesh.position.x + (gameManager.rng.next() - 0.5) * 1.5;
           spawnZ = this.mesh.position.z + spawnDist;
         }
         const spawned = gameManager.spawnUnit(current.type, spawnX, spawnZ, this.ownerId, this.rallyPoint);

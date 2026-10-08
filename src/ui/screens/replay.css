@@ -2,7 +2,7 @@
 .rp-bar {
   position: fixed;
   left: 50%;
-  bottom: 10px;
+  top: 68px; /* abaixo da barra de recursos da HUD */
   transform: translateX(-50%);
   z-index: 8500;
   width: min(760px, calc(100vw - 24px));

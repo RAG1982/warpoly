@@ -491,7 +491,8 @@ Sonnet 5.5 escreve a spec em `docs/specs/<ID>.md`; agente **Sonnet** executa; o 
 - `TODO` · NET · Dep: F9-03 · Reconexão, pausa votada, jogador que sai vira IA, chat, pings no mapa entre aliados.
 
 ### F9-05 · Replays
-- `DOING(agente-f9-05, 2026-10-08)` · NET+UI · Dep: F2-02, F2-03 · Gravar log de comandos + seed; player de replay com velocidade e troca de visão por jogador.
+- `REVIEW` · NET+UI · Dep: F2-02, F2-03 · Gravar log de comandos + seed; player de replay com velocidade e troca de visão por jogador.
+  - Resultado: `src/replay/Replay.js` (formato `.warpolyreplay` versionado: config+seed+comandos humanos+checksums a cada 10 s; `parseReplay` rejeita versão errada; `attachReplay`/`replaySeek`/`verifyReplayProgress`), `ReplayStore` (IndexedDB, 30 máx.), gravação automática em toda partida (`ReplayService`, sem custo e sem tocar na sim), player (`ReplayController`+`ReplayBar`: 0,25×–8×, pausa, salto, visão por jogador/total, aviso de divergência), lista/importar/exportar/apagar no menu (i18n PT/en). Testes: `replay.test.js` (11) — gravar IA+humano, reproduzir = mesmo checksum final e intermediários, salto = simulação direta, divergência detectada; `tools/replay-check.mjs` no navegador. Sem snapshots de sim (salto p/ trás recria a partida). Ver `docs/09_MULTIPLAYER.md` §12.
 
 ---
 

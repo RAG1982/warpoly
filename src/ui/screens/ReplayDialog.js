@@ -54,7 +54,7 @@ export class ReplayDialog {
     root.setAttribute('role', 'dialog');
     root.setAttribute('aria-modal', 'true');
     root.setAttribute('aria-labelledby', 'replay-dialog-title');
-    root.style.zIndex = '9100';
+    root.style.zIndex = '100200'; // acima do menu principal (z-index 100000)
     root.innerHTML = `
       <div class="gs-card gs-card--wide" style="width:min(680px,100%)">
         <p class="gs-kicker">${t('menu.tagline')}</p>

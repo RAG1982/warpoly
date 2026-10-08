@@ -149,6 +149,7 @@ class GameApp {
 
   // ------------------------------------------------------------------ ações
   pause() {
+    if (this.replayCtl) return this.replayCtl.togglePause(); // F9-05: no replay o botão da HUD só pausa/retoma o replay
     if (this.fsm.is(S.IN_GAME)) this.fsm.transition(S.PAUSED);
   }
 

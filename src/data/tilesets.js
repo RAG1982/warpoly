@@ -84,9 +84,19 @@ export function getTileset(id) {
   return TILESETS[resolveTilesetId(id)];
 }
 
-/** Tileset de um mapa (`mapDef.tileset`). */
+/** Depuração: `?tileset=inverno` na URL força o tileset de qualquer mapa (só render; no Node não existe `location`). */
+function urlOverride() {
+  try {
+    const v = globalThis.location && new URLSearchParams(globalThis.location.search).get('tileset');
+    return v && (TILESETS[v] || TILESET_ALIASES[v]) ? v : null;
+  } catch (e) {
+    return null;
+  }
+}
+
+/** Tileset de um mapa (`mapDef.tileset`; `?tileset=` na URL tem prioridade, para depurar). */
 export function getMapTileset(mapDef) {
-  return getTileset(mapDef && mapDef.tileset);
+  return getTileset(urlOverride() || (mapDef && mapDef.tileset));
 }
 
 // ---------------------------------------------------------------------------------------------

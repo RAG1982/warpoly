@@ -287,10 +287,16 @@ export class UIManager {
     }
 
     // 4. Tela pós-jogo (F6-07): pontuação, ranking e gráficos
-    if (this.gm.isGameOver && !this._postGameShown) {
-      this._postGameShown = true;
-      this.postGame.show(this._postGameModel());
+    // F8-04: em missões a tela de fim é a do MissionController (que chama `showPostGame` pelo botão Estatísticas).
+    if (this.gm.isGameOver && !this._postGameShown && !this.gm.mission) {
+      this.showPostGame();
     }
+  }
+
+  /** Mostra a tela pós-jogo (pontuação e gráficos). */
+  showPostGame() {
+    this._postGameShown = true;
+    this.postGame.show(this._postGameModel());
   }
 
   initActionsEventDelegation() {

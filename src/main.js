@@ -169,7 +169,9 @@ class GameApp {
   playAgain() {
     if (this.session?.online) return this.goToMainMenu();
     if (this.fsm.is(S.POST_GAME)) {
-      this.fsm.transition(S.LOADING, { config: withNewSeed(this.matchConfig) });
+      // F8-04: missão = mesma config (a seed faz parte da missão).
+      const isMission = !!(this.matchConfig.missionId || this.matchConfig.mission);
+      this.fsm.transition(S.LOADING, { config: isMission ? this.matchConfig : withNewSeed(this.matchConfig) });
     }
   }
 
@@ -516,6 +518,8 @@ class GameApp {
     document.getElementById('btn-play-again')?.addEventListener('click', () => this.playAgain());
     document.getElementById('btn-go-main-menu')?.addEventListener('click', () => this.goToMainMenu());
     document.addEventListener('warpoly:tutorial-exit', () => this.goToMainMenu()); // F6-09
+    document.addEventListener('warpoly:mission-retry', () => this.restartMatch()); // F8-04: tela de fim de missão
+    document.addEventListener('warpoly:mission-menu', () => this.goToMainMenu());
   }
 
   _animate() {

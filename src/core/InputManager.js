@@ -42,6 +42,8 @@ export class InputManager {
     // F2-04: com `suspended` (menu de pausa aberto) só a câmera responde (WASD/setas);
     // cliques e atalhos são ignorados. `onPauseRequest` é chamado no Esc sem nada a cancelar.
     this.suspended = false;
+    /** F8-04: com `true` (cutscene) o pan por teclado/borda é ignorado. */
+    this.cameraLocked = false;
     this.onPauseRequest = null;
     /** F9-04: ping de mapa para aliados (`(pos, kind) => void`), ligado só em partida online. */
     this.onMapPingRequest = null;
@@ -1053,6 +1055,10 @@ export class InputManager {
     let moveRight = 0;
 
     const k = (code) => this.keys[code] && !this._consumed[code];
+    if (this.cameraLocked) { // F8-04: cutscene de missão — a câmera é dirigida pelo MissionController
+      this._updateCursor();
+      return;
+    }
     if (k('KeyW') || this.keys['ArrowUp']) moveForward += panSpeed;
     if (k('KeyS') || this.keys['ArrowDown']) moveForward -= panSpeed;
     if (k('KeyA') || this.keys['ArrowLeft']) moveRight -= panSpeed;

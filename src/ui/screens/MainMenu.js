@@ -24,6 +24,8 @@ import {
 
 import { t, onLanguageChange, getLanguage, setLanguage, mapName, factionName } from '../../i18n/index.js';
 import { createTutorialConfig } from '../tutorial.js';
+import { MissionBriefing } from './MissionBriefing.js'; // F8-04
+import { createMissionConfig } from '../../data/missions/index.js';
 
 const BYPASS_PARAMS = ['play', 'skipMenu', 'bench', 'skipPreload'];
 const MAP_THUMB_SIZE = { w: 96, h: 64 };
@@ -154,7 +156,28 @@ export class MainMenu {
     }, reduce ? 0 : 380);
   }
 
+  /** F8-04: "Missões" > briefing > Iniciar: partida de missão (config com `missionId`, vitória por `MissionRuntime`). */
+  openMissions() {
+    if (!this.briefing) this.briefing = new MissionBriefing({ onStart: (id) => this.startMission(id), onClose: () => this.root?.querySelector('[data-action="missions"]')?.focus({ preventScroll: true }) });
+    this.briefing.open();
+  }
+
+  startMission(missionId) {
+    const config = createMissionConfig(missionId, { lang: getLanguage() === 'en' ? 'en' : 'pt-BR' });
+    this.briefing?.close();
+    this.root.classList.add('mm-leaving');
+    const reduce = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
+    const choice = { config, faction: config.players[0].factionId, difficulty: config.difficulty, mapId: config.mapId, victoryMode: config.victoryMode, mission: true };
+    this._startTimer = setTimeout(() => {
+      this._startTimer = null;
+      this._disposePreview();
+      this.onStart?.(choice);
+    }, reduce ? 0 : 380);
+  }
+
   destroy() {
+    this.briefing?.close();
+    this.briefing = null;
     this._offLang?.();
     this._disposePreview();
     clearTimeout(this._startTimer);
@@ -231,6 +254,9 @@ export class MainMenu {
             </button>
             <button type="button" class="mm-btn" data-action="tutorial">
               <span class="mm-btn__label">${t('menu.tutorial')}</span><span class="mm-btn__hint">${t('menu.tutorialHint')}</span>
+            </button>
+            <button type="button" class="mm-btn" data-action="missions">
+              <span class="mm-btn__label">${t('menu.missions')}</span><span class="mm-btn__hint">${t('menu.missionsHint')}</span>
             </button>
             <button type="button" class="mm-btn" data-action="load-game">
               <span class="mm-btn__label">${t('menu.loadGame')}</span><span class="mm-btn__hint">${t('menu.saves')}</span>
@@ -363,6 +389,7 @@ export class MainMenu {
       else if (action === 'close-modal') this.closeCredits();
       else if (action === 'lang') setLanguage(getLanguage() === 'en' ? 'pt-BR' : 'en');
       else if (action === 'tutorial') this.startTutorial();
+      else if (action === 'missions') this.openMissions();
       else if (action === 'start') this.start();
       else if (action === 'add-ai') this._apply(addAI(this.setup), { focus: '[data-sk="remove"]:last-of-type' });
       else if (action === 'roll-seed') {

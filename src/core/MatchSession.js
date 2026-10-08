@@ -21,6 +21,7 @@ import { ProjectileViews } from '../render/ProjectileViews.js';
 import { EntityViews } from '../render/EntityViews.js';
 import { createUiEvents } from '../ui/UiEvents.js';
 import { TutorialController } from '../ui/TutorialController.js';
+import { MissionController } from '../ui/MissionController.js';
 import { options } from '../ui/optionsStore.js';
 
 /**
@@ -142,6 +143,10 @@ export class MatchSession {
           onExit: () => document.dispatchEvent(new CustomEvent('warpoly:tutorial-exit'))
         })
         : null;
+      // F8-04: missão — painel de objetivos, diálogos, cutscenes e tela de fim (só apresentação).
+      this.missionController = this.gameManager.mission
+        ? new MissionController({ gm: this.gameManager, sceneManager, inputManager: this.inputManager, uiManager: this.uiManager, sound })
+        : null;
     }
   }
 
@@ -216,6 +221,7 @@ export class MatchSession {
     }
     this.uiManager.update(delta);
     this.tutorialController?.update(delta);
+    this.missionController?.update(delta, simulate); // F8-04
   }
 
   /**
@@ -259,6 +265,8 @@ export class MatchSession {
     this._disposeUiEvents?.();
     this.tutorialController?.dispose();
     this.tutorialController = null;
+    this.missionController?.dispose(); // F8-04
+    this.missionController = null;
 
     // F9-03: encerra a sessão online (HUD, transporte, sala).
     this.onlineHud?.dispose();

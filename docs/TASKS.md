@@ -509,7 +509,8 @@ Sonnet 5.5 escreve a spec em `docs/specs/<ID>.md`; agente **Sonnet** executa; o 
 - `TODO` · QA · Dep: F0-04 · Falha se draw calls/FPS/load piorarem > 10% vs baseline.
 
 ### F10-05 · Empacotamento e deploy
-- `TODO` · QA · Dep: F1-01 · PWA offline, code-splitting por facção/modelos, compressão (brotli), deploy estático (GitHub Pages/Cloudflare Pages), página de lançamento.
+- `REVIEW` · QA · Dep: F1-01 · PWA offline, code-splitting por facção/modelos, compressão (brotli), deploy estático (GitHub Pages/Cloudflare Pages), página de lançamento.
+  - Resultado: chunks `three-vendor`(708 kB)/`vendor`/`models-human`(566 kB)/`models-orc`(46 kB)/`main`; antes three estava dentro de `game-models` (1.299 kB). `.br`/`.gz` no build, SW versionado + manifest (só em produção), `base` configurável (`BASE=`), ícones corrigidos p/ subpasta, workflow Pages e `docs/10_DEPLOY.md`. Validar: `tools/preview-check.mjs`. Não feito: GLB/facção 100% sob demanda (exige mexer no preload, lane PERF); landing = menu principal já existente.
 
 ---
 

@@ -42,15 +42,17 @@ function hashKey(s) {
 
 export class AudioEngine {
   /**
-   * @param {{ctx:BaseAudioContext, level?:string, seed?:number, timers?:{setInterval:Function, clearInterval:Function}|null}} o
+   * @param {{ctx:BaseAudioContext, level?:string, seed?:number, volumes?:object, musicOn?:boolean, timers?:{setInterval:Function, clearInterval:Function}|null}} o
+   *   `volumes`/`musicOn`: estado inicial do mixer (o `SoundManager` guarda as preferências antes do 1º gesto);
    *   `timers: null` desliga o temporizador interno (testes chamam `tick()` à mão).
    */
-  constructor({ ctx, level = 'med', seed = 0x51f7, timers = globalThis } = {}) {
+  constructor({ ctx, level = 'med', seed = 0x51f7, volumes = null, musicOn = true, timers = globalThis } = {}) {
     this.ctx = ctx;
     this.rng = createAudioRng(seed);
     this.level = level;
     this.caps = capsFor(level);
     this.volumes = { master: 1, music: 0.25, sfx: 0.5, voice: 0.8 };
+    if (volumes) for (const k of ['master', 'music', 'sfx', 'voice']) if (volumes[k] !== undefined) this.volumes[k] = clampVolume(volumes[k], this.volumes[k]);
     this.listener = { x: 0, z: 0, zoom: 1, rightX: 1, rightZ: 0 };
 
     // --- mixer: barramentos -> mestre -> limitador -> saída
@@ -84,7 +86,7 @@ export class AudioEngine {
     this.ambience = new AmbiencePlayer({ ctx, out: this.ambienceBus, noise: this.noise, rng: this.rng });
     this.director = new MusicDirector();
     this.match = null; // { faction, tilesetId }
-    this.musicOn = true; // preferência do jogador (música ligada)
+    this.musicOn = !!musicOn; // preferência do jogador (música ligada)
     this.musicHold = false; // silêncio temporário (cutscene/missão)
     this.sceneProbe = null; // () => ({ timeOfDay, dayNight }) para a ambiência noturna
     this._speech = null;
@@ -92,6 +94,7 @@ export class AudioEngine {
     this._ambienceAt = -Infinity;
     this._lastUpdate = 0;
 
+    this._applyMusic(); // música do menu já no primeiro gesto (respeita volume/preferência/nível)
     this._timers = timers;
     this._timer = timers && timers.setInterval ? timers.setInterval(() => this.tick(), TICK_MS) : null;
   }

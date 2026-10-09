@@ -43,7 +43,13 @@ export class SoundManager {
       const Ctor = this.env.AudioContext || (typeof window !== 'undefined' && (window.AudioContext || window.webkitAudioContext));
       if (!Ctor) throw new Error('Web Audio indisponível');
       this.ctx = new Ctor();
-      this.engine = new AudioEngine({ ctx: this.ctx, level: this.level, timers: this.env.timers === undefined ? globalThis : this.env.timers });
+      this.engine = new AudioEngine({
+        ctx: this.ctx,
+        level: this.level,
+        volumes: { ...this.volumes, master: this.enabled ? this.volumes.master : 0 },
+        musicOn: this.musicEnabled,
+        timers: this.env.timers === undefined ? globalThis : this.env.timers
+      });
       this.initialized = true;
       this._pushState(true);
       if (this._match) this.engine.beginMatch(this._match);
@@ -68,8 +74,7 @@ export class SoundManager {
   setLevel(level) {
     if (level === this.level) return;
     this.level = level;
-    if (this.engine) this.engine.setLevel(level);
-    else if (level !== 'off' && this._match && this.initialized === false) { /* o motor nasce no próximo gesto */ }
+    if (this.engine) this.engine.setLevel(level); // sem motor ainda: ele nasce no próximo gesto já com este nível
   }
 
   dispose() {

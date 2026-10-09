@@ -213,8 +213,8 @@ function makeTrack(segs) {
   };
 }
 
-/** f0(t): declinação + acentos nas tônicas + contorno da pausa/pontuação final. */
-function makeF0(plan, voice) {
+/** f0(t): declinação + acentos nas tônicas + contorno da pausa/pontuação final (exportada para os testes). */
+export function f0Contour(plan, voice) {
   const f0 = voice.f0 || 120;
   const range = voice.range ?? 0.22;
   const total = Math.max(0.3, plan.total);
@@ -285,7 +285,7 @@ export function renderUtterance(ph, voice = {}, opts = {}) {
   const out = new Float32Array(N);
 
   const at = makeTrack(plan.segs);
-  const f0Fn = makeF0(plan, voice);
+  const f0Fn = f0Contour(plan, voice);
   const fs = voice.fs || 1;
   const oq = Math.min(0.9, Math.max(0.35, voice.oq ?? 0.6));
   const tp = 0.4 * (oq / 0.6);

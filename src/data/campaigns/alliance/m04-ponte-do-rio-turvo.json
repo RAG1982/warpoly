@@ -59,9 +59,9 @@
             { "at": 5, "x": -22, "z": -6, "zoom": 1, "dialog": { "speaker": { "pt-BR": "Marechal Dorian", "en": "Marshal Dorian" }, "portrait": "🛡️", "text": { "pt-BR": "E lá, o Forte Atalaia. Levem os carregadores até lá.", "en": "And there, Fort Atalaia. Take the porters there." }, "duration": 4.5 } }
           ] }
       ] },
-    { "id": "ambush", "when": { "type": "area", "owner": "player", "area": { "x": -12, "z": -4, "r": 10 }, "tag": "convoy" },
+    { "id": "ambush", "when": { "type": "area", "owner": "player", "area": { "x": -6, "z": 6, "r": 10 }, "tag": "convoy" },
       "actions": [
-        { "type": "spawn", "owner": "enemy", "units": [{ "type": "grunt", "count": 4 }, { "type": "axethrower", "count": 2 }], "x": -18, "z": -2, "tag": "ambush", "order": { "kind": "attackMove", "x": -8, "z": -4 } },
+        { "type": "spawn", "owner": "enemy", "units": [{ "type": "grunt", "count": 4 }, { "type": "axethrower", "count": 2 }], "x": -18, "z": -2, "tag": "ambush", "order": { "kind": "attackMove", "x": -4, "z": 4 } },
         { "type": "setObjective", "id": "ambush-clear", "status": "active" },
         { "type": "sound", "id": "alarm" },
         { "type": "dialog", "speaker": { "pt-BR": "Carregador", "en": "Porter" }, "portrait": "📦", "text": { "pt-BR": "Emboscada! Eles saíram do mato!", "en": "Ambush! They came out of the brush!" } }

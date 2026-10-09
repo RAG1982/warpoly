@@ -42,7 +42,7 @@
       "title": { "pt-BR": "Manter 400 de pedra em estoque", "en": "Keep 400 stone in stock" } },
     { "id": "stable", "type": "build", "priority": "secondary", "buildingType": "stable", "count": 1,
       "title": { "pt-BR": "Construir um Estábulo", "en": "Build a Stable" } },
-    { "id": "camp-hunter", "type": "destroy", "priority": "hidden", "select": { "tag": "camps" },
+    { "id": "camp-hunter", "type": "destroy", "priority": "hidden", "select": { "tag": "camps" }, "count": 1,
       "title": { "pt-BR": "Limpar um acampamento de bandoleiros", "en": "Clear a bandit camp" } }
   ],
 

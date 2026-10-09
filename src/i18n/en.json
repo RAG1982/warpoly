@@ -788,5 +788,16 @@
   "mission.back": "Back",
   "mission.objDone": "Objective complete: {title}",
   "mission.objFailed": "Objective failed: {title}",
-  "mission.objNew": "New objective: {title}"
+  "mission.objNew": "New objective: {title}",
+  "menu.campaignHint": "Alliance",
+  "campaign.none": "No campaign available.",
+  "campaign.play": "Start mission",
+  "campaign.newAttempt": "New attempt",
+  "campaign.attempt": "Attempt {n}",
+  "campaign.provisional": "PROVISIONAL",
+  "campaign.provisionalHint": "The campaign premise is still awaiting approval.",
+  "campaign.status.locked": "Locked: complete the previous mission",
+  "campaign.status.available": "Available",
+  "campaign.status.completed": "Completed",
+  "campaign.carry": "Part of your resources from the previous mission carries over to this one."
 }

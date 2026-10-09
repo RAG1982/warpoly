@@ -119,3 +119,8 @@
   .ms-panel { width: min(240px, 48vw); font-size: 12px; }
 }
 @media (prefers-reduced-motion: reduce) { .ms-dialog { transition: none; } }
+/* F8-05 campanha */
+.ms-badge-prov { justify-self: start; font-size: 0.75em; letter-spacing: 0.08em; padding: 2px 8px; border-radius: 999px; border: 1px solid #e0a030; color: #e0a030; }
+.ms-brief-item[data-status="locked"] { opacity: 0.55; }
+.ms-brief-item[data-status="completed"] { color: #9fd89f; }
+.ms-brief-actions button[disabled] { opacity: 0.45; cursor: not-allowed; }

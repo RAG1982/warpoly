@@ -788,5 +788,16 @@
   "mission.back": "Voltar",
   "mission.objDone": "Objetivo cumprido: {title}",
   "mission.objFailed": "Objetivo fracassado: {title}",
-  "mission.objNew": "Novo objetivo: {title}"
+  "mission.objNew": "Novo objetivo: {title}",
+  "menu.campaignHint": "Aliança",
+  "campaign.none": "Nenhuma campanha disponível.",
+  "campaign.play": "Iniciar missão",
+  "campaign.newAttempt": "Nova tentativa",
+  "campaign.attempt": "Tentativa {n}",
+  "campaign.provisional": "PROVISÓRIA",
+  "campaign.provisionalHint": "A premissa da campanha ainda aguarda aprovação.",
+  "campaign.status.locked": "Bloqueada: conclua a missão anterior",
+  "campaign.status.available": "Disponível",
+  "campaign.status.completed": "Concluída",
+  "campaign.carry": "Parte dos seus recursos da missão anterior é levada para esta."
 }

@@ -9,8 +9,8 @@
     "speaker": { "pt-BR": "Capitã Lyra Ventosa", "en": "Captain Lyra Ventosa" },
     "portrait": "🏹",
     "text": {
-      "pt-BR": "Os clãs do Cinzal cruzaram o mar com barcaças e tomaram as Ilhas Gêmeas, de onde atacam o nosso porto. São dois acampamentos principais, um ao norte e outro ao sul da ponte da ilha leste. A guarnição aliada de Brumar nos ajuda, mas só se mantiver o porto de pé. Derrube os dois salões e não deixe Brumar cair.",
-      "en": "The Cinzal clans crossed the sea in barges and took the Twin Isles, from where they strike our harbor. There are two main camps, one north and one south of the east island bridge. The allied garrison of Brumar helps us, but only if its harbor stays up. Tear down both halls and do not let Brumar fall."
+      "pt-BR": "Os clãs do Cinzal cruzaram o mar com barcaças e tomaram as Ilhas Gêmeas, de onde atacam o nosso porto. São dois acampamentos principais, um ao norte e outro ao sul da ilha leste. A guarnição aliada de Brumar nos ajuda, mas só se mantiver o porto de pé. Derrube os dois salões e não deixe Brumar cair.",
+      "en": "The Cinzal clans crossed the sea in barges and took the Twin Isles, from where they strike our harbor. There are two main camps, one north and one south on the east island. The allied garrison of Brumar helps us, but only if its harbor stays up. Tear down both halls and do not let Brumar fall."
     },
     "hints": [
       { "pt-BR": "As duas ilhas se ligam por pontes de terra: elas são pontos de estrangulamento.", "en": "The two islands link through land bridges: they are chokepoints." },
@@ -47,8 +47,8 @@
     { "id": "towers", "type": "build", "priority": "secondary", "buildingType": "watchtower", "count": 3,
       "title": { "pt-BR": "Erguer 3 torres de vigia", "en": "Raise 3 watchtowers" } },
     { "id": "centre-bridge", "type": "flag", "priority": "hidden",
-      "condition": { "type": "area", "owner": "player", "area": { "x": 0, "z": 0, "r": 8 } },
-      "title": { "pt-BR": "Cruzar a ponte central", "en": "Cross the central bridge" } }
+      "condition": { "type": "area", "owner": "player", "area": { "x": 0, "z": -15, "r": 6 } },
+      "title": { "pt-BR": "Cruzar a ponte norte", "en": "Cross the north bridge" } }
   ],
 
   "triggers": [

@@ -517,8 +517,10 @@ Sonnet 5.5 escreve a spec em `docs/specs/<ID>.md`; agente **Sonnet** executa; o 
   - Soak completo 100 partidas (seeds 1–100, 4 lotes de 25; consolidado por `node tools/lib/soakConsolidate.mjs` em `tools/soak-report/soak-report.md`): 96/100 terminam (96%), ticks médios 16007, máx 60618, 0 exceções/NaN/vazamentos, determinismo ok (12 re-checadas); achados NEW-46..48.
 
 ### F10-03 · Regressão visual
-- `REVIEW` · QA · Dep: F0-05 · Capturas Playwright de todos os modelos do inspetor e da HUD em 3 resoluções; diff em PR.
+- `DONE` · QA · Dep: F0-05 · Capturas Playwright de todos os modelos do inspetor e da HUD em 3 resoluções; diff em PR.
   - Resultado: `npm run visual` (`tools/visual-regress.mjs`): 130 alvos (127 modelos do inspetor + 3 telas HUD) × 3 resoluções = 390 PNGs; 0 falhas na rodada de conferência; ~5 min por rodada completa (GPU real RX 7600 XT). Baseline em `tests/visual/baseline/` (~110 MB). Comparador/PNG sem dependência nova (`tools/lib/`), teste unitário em `tests/unit/visualCompare.test.js`. Determinismo: `Math.random` semeado e prévia 3D congelada; partida curta com limiar de 1 %. Documentado em `docs/README.md`.
+  - Revisão (task/F10-03-review): baseline antiga estava defasada (painel "Cor de time" do inspetor entrou no master depois; 1ª comparação falhou nos 127 modelos, diff legítimo) → baseline regravada no master atual e comparação refeita: 390/390 ok, 0 falhas (~302 s, GPU RX 7600 XT, Chromium 153). Decisão sobre o git: a baseline tem 109 MB; testes mostraram que PNG lossless reotimizado NÃO reduz (Chromium já comprime bem) e quantização para 256 cores estoura a tolerância (delta até 141 > 24); reduzir bits baixos de cor (erro ≤ 8) só chega a ~47 MB, acima do teto de ~25 MB. Portanto os PNGs saem do git (`git rm --cached` + `.gitignore`; histórico NÃO reescrito, os 109 MB antigos continuam no histórico) e ficam só `tests/visual/baseline/manifest.json` (Chromium, GPU, aviso de dependência de GPU real) e a instrução: `npm run visual -- --update`. Sem baseline o script aborta com mensagem clara (exit 2); WebGL de software já aborta via `assertHardwareGpu`. vitest 1190/1190 verde, lint 0 erros.
+
 
 ### F10-04 · Orçamento de desempenho em CI
 - `TODO` · QA · Dep: F0-04 · Falha se draw calls/FPS/load piorarem > 10% vs baseline.

@@ -692,7 +692,7 @@ const MODEL_CATALOG = [
     glb: 'stable',
     sourceFile: 'tools/blender/build_stable.py',
     create: createGlb('stable'),
-    description: 'Estábulo humano gerado pelo pipeline Blender (public/models/stable.glb): celeiro de empena frontal com estrutura de madeira aparente e reboco sobre pé de pedra, baias com meias-portas e cavalos espiando, portão central aberto, sótão de feno com talha, telhado azul com cumeeira dourada e cúpula com cata-vento, pátio com cocho, cerca, fardos, rack de sela, lanternas e mastros com bandeirolas.',
+    description: 'Estábulo humano gerado pelo pipeline Blender (public/models/stable.glb): celeiro de empena frontal com estrutura de madeira aparente e reboco sobre pé de pedra, baias fundas com divisórias e meias-portas, dois cavalos de peito para cima espiando por cima delas (castanho e ruço, com pescoço arqueado, crina, blaze, ombros e peito), portão central aberto, sótão de feno com talha, telhado azul com cumeeira dourada e cúpula com cata-vento, pátio com cocho, cerca, fardos, rack de sela, lanternas e mastros com bandeirolas.',
     notes: '2 draw calls (Static_Mesh + Anim_Banners em cor de time), ~5 mil triângulos, atlas 1024². Pegada ~7,3 x 7,3 (raio de colisão 3,6), altura ~6. Sockets: Socket_UnitSpawn, Socket_Rally.'
   },
   {
@@ -939,7 +939,7 @@ const MODEL_CATALOG = [
     glb: 'templar',
     sourceFile: 'tools/blender/build_templar.py',
     create: createGlb('templar'),
-    description: 'Cavaleiro consagrado gerado a partir do Cavaleiro (public/models/templar.glb): armadura branca com frisos de ouro vivo, cavalo branco, tabardo e gualdrapa em cor de time com emblema de sol, elmo com crista alta de plumas brancas e disco solar na testa.',
+    description: 'Cavaleiro consagrado gerado a partir do Cavaleiro (public/models/templar.glb): armadura branca com frisos de ouro vivo, cavalo branco, tabardo e gualdrapa em cor de time com emblema de sol (também no escudo e no peitoral do cavalo, voltados para +Z), elmo com crista alta de plumas brancas e disco solar na testa.',
     notes: 'Mesma rig do Cavaleiro (Horse, HorseLeg*, Torso, Head, ArmL/ArmR, Sword, ShieldGroup). ~9 mil triângulos, 14 draw calls, atlas 512². Animações do UnitAnimator como `cavalier`.'
   },
   {
@@ -952,7 +952,7 @@ const MODEL_CATALOG = [
     glb: 'ogre_mage',
     sourceFile: 'tools/blender/build_ogre_mage.py',
     create: createGlb('ogre_mage'),
-    description: 'Ogro xamã gerado a partir do Ogro (public/models/ogre_mage.glb): pele cinza-azulada com tinta ritual de raio luminosa, olhos elétricos, cabelo branco, cristal na testa, penacho de ossos e penas, colar de presas e cajado de xamã com cristal de raio no lugar da clava.',
+    description: 'Ogro xamã gerado a partir do Ogro (public/models/ogre_mage.glb): pele cinza-azulada com tinta ritual de raio luminosa, olhos elétricos, cabelo branco, cristal na testa, penacho de ossos e penas, colar de presas com cristal de tempestade no centro do peito e cajado de xamã com cristal de raio no lugar da clava.',
     notes: 'Mesma rig aninhada do Ogro (Weapon em ArmR). ~7 mil triângulos, 11 draw calls, atlas 512². Rosto só na face frontal (+Z).'
   },
   // F7-00b lote 1 (início)

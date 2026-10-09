@@ -11,7 +11,7 @@ Saída (public/models/stable.glb), coordenadas do jogo, origem no centro da base
   ├─ Socket_UnitSpawn  saída das unidades (frente do portão central)
   └─ Socket_Rally      ponto de reunião padrão
 Pegada ~7.3 x 7.3 (raio de colisão 3.6), altura ~5.9.
-Celeiro de empena frontal: baias com meias-portas e cavalos espiando, portão central aberto, sótão de
+Celeiro de empena frontal: baias com meias-portas e cavalos (cabeça, pescoço, peito e cernelha) espiando, portão central aberto, sótão de
 feno com talha, telhado azul com cumeeira dourada e cúpula com cata-vento; pátio com cocho, cerca,
 fardos, rack de sela, lanternas e mastros com bandeirolas em cor de time.
 """
@@ -24,8 +24,9 @@ import bpy  # noqa: E402
 from mathutils import Vector, Matrix  # noqa: E402
 import common as C  # noqa: E402
 from common import (MeshBuilder, M, prim_box, prim_rings, ring_h, prim_cyl, prim_cone,  # noqa: E402
-                    prim_sphere, prim_extrude, bezier)
-from bld_common import beam, tube, log, horse_head, bbox_game  # noqa: E402
+                    prim_sphere, prim_extrude, bezier, limb_rings)
+from bld_common import beam, tube, log, xf, bbox_game  # noqa: E402
+import build_cavalier as CAV  # noqa: E402  (pescoço, cabeça e peito do cavalo anatômico do Cavaleiro)
 
 TEAM_DEFAULT = '#3a66d6'
 Y0 = 0.30          # topo do embasamento
@@ -78,11 +79,15 @@ PALETTE = {
     'leather': dict(base='#7a4a26', var='#5c3419', var_scale=6.0, fine=0.12, top=0.2, edge='#b07a48',
                     edge_amt=0.5, edge_r=0.02, ao=(0.25, 0.6)),
     'water': dict(base='#5d94c9', var='#3f78b0', var_scale=3.0, top=0.35),
-    'coat': dict(base='#94562f', var='#6b3a1e', var_scale=7.0, var_amt=0.65, fine=0.05, top=0.3, ao=(0.3, 0.55)),
+    'coat': dict(base='#b3652f', var='#8a4a22', var_scale=7.0, var_amt=0.65, fine=0.05, top=0.3, ao=(0.3, 0.55)),
     'mane': dict(base='#1f140d', var='#3a2516', var_scale=10.0, var_amt=0.8, fine=0.1, top=0.35),
     'muzzle': dict(base='#3a2a22', var='#2a1d17', var_scale=10.0, fine=0.05, top=0.3),
     'blaze': dict(base='#efe8da', var='#d8cfbd', var_scale=9.0, fine=0.03, top=0.3),
     'iris': dict(base='#4a2c14', var='#2c190b', var_scale=25.0),
+    'pupil': dict(base='#0b0806', var='#0b0806'),
+    'nostril': dict(base='#120c09', var='#120c09'),
+    'coat_gray': dict(base='#bdbab3', var='#8f8c87', var_scale=6.0, var_amt=0.85, fine=0.05, top=0.3, ao=(0.3, 0.55)),
+    'mane_gray': dict(base='#3c3a3d', var='#59565a', var_scale=10.0, var_amt=0.8, fine=0.1, top=0.35),
     'team': dict(base='#bab2a6', var='#a0988c', var_scale=2.0, fine=0.08, top=0.2, edge='#dcd6cc',
                  edge_amt=0.3, edge_r=0.03, ao=(0.8, 0.6), team=True),
 }
@@ -120,7 +125,13 @@ def build_barn(mats, root):
     mb.add(prim_box(2 * BX - 0.1, H, 0.3, base=True), 'plaster', M((0, FT, BZ0 + 0.15)), bevel=0.02)
     for sx in (-1, 1):
         mb.add(prim_box(0.3, H, depth - 0.1, base=True), 'plaster', M((sx * (BX - 0.15), FT, cz)), bevel=0.02)
-    mb.add(prim_box(2 * BX - 0.6, H, 0.1, base=True), 'dark', M((0, FT, BZ1 - 0.45)))
+    # interior escuro: atrás do portão central o fundo fica logo atrás da fachada; as duas baias laterais têm 0,55 a mais de
+    # profundidade (cabem o peito e os ombros dos cavalos) com divisórias de madeira
+    mb.add(prim_box(2.5, H, 0.1, base=True), 'dark', M((0, FT, BZ1 - 0.45)))
+    for sx in (-1, 1):
+        mb.add(prim_box(1.45, H, 0.1, base=True), 'dark', M((sx * 1.88, FT, 0.2)))
+        for dx in (1.25, 2.55):
+            mb.add(prim_box(0.08, H, 0.65, base=True), 'wood_beam', M((sx * dx, FT, 0.5)), bevel=0.01)
     # frente: pilares com viga de madeira, padieira, meias-portas
     for x, w in ((-2.85, 0.65), (-1.0, 0.5), (1.0, 0.5), (2.85, 0.65)):
         mb.add(prim_box(w, H, 0.5, base=True), 'plaster', M((x, FT, BZ1 - 0.2)), bevel=0.02)
@@ -296,11 +307,60 @@ def build_props(mats, root):
         log(mb, (sx * 3.35, Y0, 3.25), (sx * 3.35, 5.0, 3.25), 0.06, 'wood', n=6)
         mb.add(prim_sphere(0.09, 0.09, 0.09, 6, 3), 'gold', M((sx * 3.35, 5.0, 3.25)), smooth=60)
         mb.add(prim_cone(0.07, 0.3, 5), 'gold', M((sx * 3.35, 5.06, 3.25)))
-    # cavalos espiando nas baias laterais
-    for sx in (-1, 1):
-        T = M((sx * 1.95, FT + 0.95, BZ1 - 0.2), (0, sx * -16, 0))
-        horse_head(mb, T, 1.15)
     return mb.build(mats, parent=root)
+
+
+def stall_horse(mb, T, s):
+    """Cavalo da baia de peito para cima, com a anatomia do cavalo do Cavaleiro (`build_cavalier.py`): pescoço arqueado com
+    crina, cabeça com blaze, olhos nas laterais, orelhas, focinho e narinas, mais o peito e os ombros. `T` leva o espaço do
+    cavalo do Cavaleiro (base do pescoço em (0; 1,30; 0,50)) para a baia; `s` é a escala. Antes eram só uma cabeça e um
+    pescoço fino sobre a meia-porta, como uma cabeça solta."""
+    Ti = T.inverted()
+    R = lambda r: [(a * s, b * s) for (a, b) in r]  # noqa: E731
+    npts = bezier(*CAV.NECK_BEZ, 4)
+    tube(mb, xf(T, npts), R(CAV.NECK_R), 'coat', n=10, smooth=70)
+
+    def blaze(c, n):
+        lc, ln = Ti @ Vector(c), Ti.to_3x3() @ Vector(n)
+        return 'blaze' if (abs(lc.x) < 0.02 * s and ln.y > 0.35 and lc.y > 1.66 and lc.z > 0.98) else None
+    mb.add(prim_rings(limb_rings(xf(T, CAV.HEAD), R(CAV.HEAD_R), 12, up=(0, 1, 0))), 'coat', smooth=65, mat_fn=blaze)
+    mb.add(prim_rings(limb_rings(xf(T, [(0, 1.64, 1.322), (0, 1.573, 1.402)]), R([(0.072, 0.09), (0.074, 0.08)]), 12,
+                                 up=(0, 1, 0))), 'muzzle', smooth=60)
+    for sx in (-1, 1):
+        mb.add(prim_sphere(0.012 * s, 0.016 * s, 0.012 * s, 5, 3), 'nostril', T @ M((sx * 0.032, 1.578, 1.398), (-40, 0, 0)))
+        mb.add(prim_sphere(0.028 * s, 0.034 * s, 0.03 * s, 6, 4), 'iris', T @ M((sx * 0.106, 1.895, 1.05)), smooth=80)
+        mb.add(prim_sphere(0.013 * s, 0.018 * s, 0.016 * s, 5, 3), 'pupil', T @ M((sx * 0.128, 1.895, 1.055)), smooth=80)
+        mb.add(prim_box(0.03 * s, 0.05 * s, 0.11 * s, taper=(0.8, 0.8)), 'coat', T @ M((sx * 0.09, 1.945, 1.03), (-30, 0, sx * -15)))
+        mb.add(prim_cone(0.038 * s, 0.16 * s, 5), 'coat', T @ M((sx * 0.065, 2.03, 0.93), (16, 0, sx * -9), (0.7, 1, 1.2)), smooth=40)
+        mb.add(prim_cone(0.022 * s, 0.10 * s, 5), 'muzzle', T @ M((sx * 0.065, 2.04, 0.945), (16, 0, sx * -9), (0.6, 1, 0.9)))
+    for k in range(9):   # crina ao longo do pescoço e topete
+        p, d, n, r = CAV.neck_frame(0.04 + 0.11 * k)
+        pos = p + n * (r * 0.92) + Vector((0.05, 0, -0.02))
+        ang = math.degrees(math.atan2(d.z, d.y)) + 12
+        mb.add(prim_box(0.05 * s, 0.19 * s, 0.13 * s, taper=(0.5, 0.6)), 'mane', T @ M(tuple(pos), (ang, 0, -24 + 6 * (k % 2))),
+               smooth=30)
+    mb.add(prim_box(0.06 * s, 0.15 * s, 0.08 * s, taper=(0.5, 0.5)), 'mane', T @ M((0, 2.05, 1.0), (40, 0, 0)))
+    # peito e ombros (a frente do tronco do Cavaleiro: estações z = 0,00 a 0,78)
+    chest = [(0, y, z) for (z, y, _, _) in CAV.BODY[3:]]
+    mb.add(prim_rings(limb_rings(xf(T, chest), R([(w, h) for (_, _, w, h) in CAV.BODY[3:]]), 12, up=(0, 1, 0))), 'coat', smooth=70)
+    for sx in (-1, 1):
+        mb.add(prim_sphere(0.10 * s, 0.19 * s, 0.17 * s, 6, 4), 'coat', T @ M((sx * 0.23, 1.12, 0.42)), smooth=70)
+
+
+def build_horses(mats, root):
+    """Os dois cavalos das baias laterais (castanho à esquerda, ruço à direita), um objeto por cavalo (cada um com a sua
+    pelagem; o `coat`/`mane` do ruço é remapeado)."""
+    parts = []
+    for sx, name in ((-1, 'HorseL'), (1, 'HorseR')):
+        m = dict(mats)
+        if sx > 0:
+            m['coat'], m['mane'] = mats['coat_gray'], mats['mane_gray']
+        mb = MeshBuilder(name)
+        # base do pescoço (cav 0; 1,30; 0,50) logo acima do topo da meia-porta, virado levemente para o portão central
+        T = M((sx * 1.95, FT + 1.2, 0.5), (0, sx * -14, 0)) @ Matrix.Diagonal((0.95, 0.95, 0.95, 1.0)) @ Matrix.Translation((0, -1.30, -0.50))
+        stall_horse(mb, T, 0.95)
+        parts.append(mb.build(m, parent=root))
+    return parts
 
 
 def build_banners(mats, root):
@@ -328,15 +388,16 @@ def main():
     roof = build_roof(mats, root)
     props = build_props(mats, root)
     banners = build_banners(mats, root)
-    bake_set = [base, barn, roof, props, banners]
+    horses = build_horses(mats, root)
+    bake_set = [base, barn, roof, props, banners] + horses
     bpy.context.view_layer.update()
-    C.uv_atlas(bake_set, weights={'Base': 0.6, 'Barn': 1.0, 'Roof': 0.9, 'Props': 1.0, 'Anim_Banners': 1.0},
+    C.uv_atlas(bake_set, weights={'Base': 0.6, 'Barn': 1.0, 'Roof': 0.9, 'Props': 1.0, 'Anim_Banners': 1.0, 'HorseL': 1.0, 'HorseR': 1.0},
                margin=0.004, angle=50.0)
     img = C.bake_atlas(bake_set, 'stable_atlas', int(os.environ.get('ATLAS', 1024)),
                        samples=int(os.environ.get('BAKE_SAMPLES', 32)), margin=6)
     C.finalize_materials(bake_set, img, team_default=TEAM_DEFAULT,
                          out_png=os.path.join(C.BUILD_DIR, 'stable_atlas.png'))
-    static = C.join_objects([base, barn, roof, props], 'Static_Mesh')
+    static = C.join_objects([base, barn, roof, props] + horses, 'Static_Mesh')
     static.parent = root
     C.make_empty('Socket_UnitSpawn', (0, 0, 4.6), parent=root)
     C.make_empty('Socket_Rally', (0, 0, 6.6), parent=root)

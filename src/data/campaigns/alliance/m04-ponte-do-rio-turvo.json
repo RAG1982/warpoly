@@ -1,0 +1,88 @@
+{
+  "format": "warpolymission",
+  "version": 1,
+  "id": "alliance-04-ponte-do-rio-turvo",
+  "hidden": true,
+  "title": { "pt-BR": "A Ponte do Rio Turvo", "en": "The Murky River Bridge" },
+  "subtitle": { "pt-BR": "Aliança, missão 4", "en": "Alliance, mission 4" },
+  "briefing": {
+    "speaker": { "pt-BR": "Marechal Dorian Vasques", "en": "Marshal Dorian Vasques" },
+    "portrait": "🛡️",
+    "text": {
+      "pt-BR": "O Cinzal tomou o vau central do Rio Turvo e isolou o forte de Atalaia, do outro lado. A guarnição está sem suprimentos. Um comboio de carregadores sai da nossa base com escolta curta. Rompa o bloqueio no vau, abra caminho e entregue os suprimentos ao forte antes que a fome faça o trabalho do inimigo.",
+      "en": "The Cinzal seized the central ford of the Murky River and cut off Fort Atalaia on the far bank. The garrison is out of supplies. A porter convoy leaves our base with a short escort. Break the blockade at the ford, open the way and deliver the supplies to the fort before hunger does the enemy's work."
+    },
+    "hints": [
+      { "pt-BR": "O rio só se atravessa pelos três vaus; o do centro está bloqueado.", "en": "The river can only be crossed at its three fords; the central one is blocked." },
+      { "pt-BR": "Se menos de 3 carregadores sobreviverem, a missão falha.", "en": "If fewer than 3 porters survive, the mission fails." }
+    ]
+  },
+  "mapId": "continental-1v1",
+  "seed": 8104,
+  "players": [
+    { "id": 0, "name": { "pt-BR": "Exército de Aurelan", "en": "Army of Aurelan" }, "factionId": "human", "team": 0, "color": "#2563eb", "isLocal": true, "startSlot": 0 },
+    { "id": 1, "name": { "pt-BR": "Horda do Cinzal", "en": "Cinzal Horde" }, "factionId": "orc", "team": 1, "color": "#dc2626", "isAI": false, "startSlot": 1 }
+  ],
+  "startingResources": { "wood": 400, "gold": 500, "stone": 200 },
+  "vars": { "reinforced": false },
+
+  "setup": [
+    { "type": "spawn", "owner": "player", "unitType": "villager", "count": 4, "x": 24, "z": -22, "tag": "convoy" },
+    { "type": "spawn", "owner": "player", "units": [{ "type": "knight", "count": 3 }, { "type": "archer", "count": 4 }], "x": 20, "z": -18 },
+    { "type": "spawn", "owner": "enemy", "units": [{ "type": "grunt", "count": 5 }, { "type": "axethrower", "count": 3 }], "x": -3, "z": 3, "tag": "blockade", "guard": true }
+  ],
+
+  "objectives": [
+    { "id": "break-blockade", "type": "destroy", "priority": "primary", "select": { "tag": "blockade" }, "count": 8,
+      "title": { "pt-BR": "Romper o bloqueio no vau central", "en": "Break the blockade at the central ford" } },
+    { "id": "deliver", "type": "escort", "priority": "primary", "tag": "convoy", "count": 3,
+      "area": { "x": -22, "z": -6, "r": 9 },
+      "title": { "pt-BR": "Entregar os suprimentos no Forte Atalaia", "en": "Deliver the supplies to Fort Atalaia" },
+      "description": { "pt-BR": "Ao menos 3 dos 4 carregadores precisam chegar.", "en": "At least 3 of the 4 porters must arrive." } },
+    { "id": "ambush-clear", "type": "destroy", "priority": "secondary", "select": { "tag": "ambush" }, "count": 6, "active": false,
+      "title": { "pt-BR": "Repelir a emboscada na outra margem", "en": "Repel the ambush on the far bank" } },
+    { "id": "all-porters", "type": "flag", "priority": "secondary",
+      "condition": { "all": [{ "type": "objective", "id": "deliver", "status": "completed" }, { "type": "count", "select": { "tag": "convoy" }, "op": ">=", "value": 4 }] },
+      "title": { "pt-BR": "Não perder nenhum carregador", "en": "Lose no porter" } },
+    { "id": "ford-cache", "type": "flag", "priority": "hidden",
+      "condition": { "type": "area", "owner": "player", "area": { "x": 16, "z": 16, "r": 6 } },
+      "title": { "pt-BR": "Encontrar o depósito no vau do norte", "en": "Find the depot at the northern ford" } }
+  ],
+
+  "triggers": [
+    { "id": "intro", "when": { "type": "time", "at": 0 },
+      "actions": [
+        { "type": "music", "id": "on" },
+        { "type": "cutscene", "id": "ford", "duration": 10, "skippable": true,
+          "steps": [
+            { "at": 0, "x": 0, "z": 0, "zoom": 1.15, "dialog": { "speaker": { "pt-BR": "Marechal Dorian", "en": "Marshal Dorian" }, "portrait": "🛡️", "text": { "pt-BR": "Aquele é o vau. Oito guerreiros, bem entrincheirados.", "en": "That is the ford. Eight warriors, well dug in." }, "duration": 4.5 } },
+            { "at": 5, "x": -22, "z": -6, "zoom": 1, "dialog": { "speaker": { "pt-BR": "Marechal Dorian", "en": "Marshal Dorian" }, "portrait": "🛡️", "text": { "pt-BR": "E lá, o Forte Atalaia. Levem os carregadores até lá.", "en": "And there, Fort Atalaia. Take the porters there." }, "duration": 4.5 } }
+          ] }
+      ] },
+    { "id": "ambush", "when": { "type": "area", "owner": "player", "area": { "x": -12, "z": -4, "r": 10 }, "tag": "convoy" },
+      "actions": [
+        { "type": "spawn", "owner": "enemy", "units": [{ "type": "grunt", "count": 4 }, { "type": "axethrower", "count": 2 }], "x": -18, "z": -2, "tag": "ambush", "order": { "kind": "attackMove", "x": -8, "z": -4 } },
+        { "type": "setObjective", "id": "ambush-clear", "status": "active" },
+        { "type": "sound", "id": "alarm" },
+        { "type": "dialog", "speaker": { "pt-BR": "Carregador", "en": "Porter" }, "portrait": "📦", "text": { "pt-BR": "Emboscada! Eles saíram do mato!", "en": "Ambush! They came out of the brush!" } }
+      ] },
+    { "id": "cache", "when": { "type": "objective", "id": "ford-cache", "status": "completed" },
+      "actions": [
+        { "type": "giveResources", "owner": "player", "gold": 200, "wood": 100 },
+        { "type": "message", "text": { "pt-BR": "Depósito encontrado: +200 de ouro, +100 de madeira.", "en": "Depot found: +200 gold, +100 wood." } }
+      ] },
+    { "id": "blockade-cheer", "when": { "type": "objective", "id": "break-blockade", "status": "completed" },
+      "actions": [
+        { "type": "message", "text": { "pt-BR": "O vau está livre! Avancem com o comboio.", "en": "The ford is clear! Advance with the convoy." } },
+        { "type": "reveal", "x": -22, "z": -6, "radius": 18 }
+      ] },
+    { "id": "convoy-lost", "when": { "all": [{ "type": "count", "select": { "tag": "convoy" }, "op": "<", "value": 3 }, { "not": { "type": "objective", "id": "deliver", "status": "completed" } }] },
+      "actions": [
+        { "type": "defeat", "text": { "pt-BR": "O comboio foi destruído. O forte caiu de fome.", "en": "The convoy was destroyed. The fort starved." } }
+      ] },
+    { "id": "arrived", "when": { "type": "objective", "id": "deliver", "status": "completed" },
+      "actions": [
+        { "type": "dialog", "speaker": { "pt-BR": "Comandante da guarnição", "en": "Garrison commander" }, "portrait": "🏰", "text": { "pt-BR": "Pão e lenha! Marechal, o Cinzal prepara uma forja de guerra nas Florestas Altas. Precisam de ferro.", "en": "Bread and firewood! Marshal, the Cinzal are readying a war forge in the High Woods. They need iron." }, "duration": 6 }
+      ] }
+  ]
+}

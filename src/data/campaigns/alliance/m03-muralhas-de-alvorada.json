@@ -1,0 +1,86 @@
+{
+  "format": "warpolymission",
+  "version": 1,
+  "id": "alliance-03-muralhas-de-alvorada",
+  "hidden": true,
+  "title": { "pt-BR": "Muralhas de Alvorada", "en": "The Walls of Alvorada" },
+  "subtitle": { "pt-BR": "Aliança, missão 3", "en": "Alliance, mission 3" },
+  "briefing": {
+    "speaker": { "pt-BR": "Rainha Sevelin", "en": "Queen Sevelin" },
+    "portrait": "👑",
+    "text": {
+      "pt-BR": "O Cinzal desceu das montanhas e marcha sobre o Estreito de Alvorada, o único caminho até a capital. Não temos tropas para atacar; precisamos segurar a linha até que o Marechal Dorian traga as legiões do sul. Resistam por cinco minutos. Torres de vigia farão o trabalho que os homens não puderem.",
+      "en": "The Cinzal came down from the mountains and march on the Alvorada Strait, the only road to the capital. We have no troops to attack; we must hold the line until Marshal Dorian brings the legions from the south. Hold out for five minutes. Watchtowers will do the work men cannot."
+    },
+    "hints": [
+      { "pt-BR": "As ondas vêm do leste e crescem a cada investida.", "en": "The waves come from the east and grow with each assault." },
+      { "pt-BR": "Torres de vigia (secundário) rendem um reforço de tropas.", "en": "Watchtowers (secondary) earn a troop reinforcement." }
+    ]
+  },
+  "mapId": "estreito-1v1",
+  "seed": 8103,
+  "players": [
+    { "id": 0, "name": { "pt-BR": "Guarnição de Alvorada", "en": "Alvorada Garrison" }, "factionId": "human", "team": 0, "color": "#2563eb", "isLocal": true, "startSlot": 0 },
+    { "id": 1, "name": { "pt-BR": "Horda do Cinzal", "en": "Cinzal Horde" }, "factionId": "orc", "team": 1, "color": "#dc2626", "isAI": false, "startSlot": 1 }
+  ],
+  "startingResources": { "wood": 500, "gold": 400, "stone": 200 },
+  "vars": { "waves": 0, "reinforced": false },
+
+  "setup": [
+    { "type": "spawn", "owner": "player", "units": [{ "type": "knight", "count": 2 }, { "type": "archer", "count": 4 }], "x": -26, "z": -12 }
+  ],
+
+  "objectives": [
+    { "id": "hold-line", "type": "survive", "priority": "primary", "seconds": 300,
+      "title": { "pt-BR": "Resistir por 5 minutos", "en": "Hold out for 5 minutes" } },
+    { "id": "two-towers", "type": "build", "priority": "secondary", "buildingType": "watchtower", "count": 2,
+      "title": { "pt-BR": "Erguer 2 torres de vigia", "en": "Raise 2 watchtowers" } },
+    { "id": "kill-twenty", "type": "destroy", "priority": "secondary", "select": { "unitType": "grunt", "killedBy": "player" }, "count": 12,
+      "title": { "pt-BR": "Abater 12 guerreiros do Cinzal", "en": "Slay 12 Cinzal warriors" } },
+    { "id": "no-losses", "type": "flag", "priority": "hidden",
+      "condition": { "all": [{ "type": "objective", "id": "hold-line", "status": "completed" }, { "type": "var", "name": "waves", "op": ">=", "value": 6 }] },
+      "title": { "pt-BR": "Aguentar todas as ondas", "en": "Withstand every wave" } }
+  ],
+
+  "triggers": [
+    { "id": "intro", "when": { "type": "time", "at": 0 },
+      "actions": [
+        { "type": "music", "id": "on" },
+        { "type": "cutscene", "id": "strait", "duration": 9, "skippable": true,
+          "steps": [
+            { "at": 0, "x": 24, "z": 10, "zoom": 1.1, "dialog": { "speaker": { "pt-BR": "Vigia", "en": "Lookout" }, "portrait": "👁️", "text": { "pt-BR": "Estandartes cinzentos no leste, Majestade. Muitos.", "en": "Grey banners to the east, Majesty. Many." }, "duration": 4.5 } },
+            { "at": 4.5, "x": -26, "z": -12, "zoom": 1, "dialog": { "speaker": { "pt-BR": "Rainha Sevelin", "en": "Queen Sevelin" }, "portrait": "👑", "text": { "pt-BR": "Que Alvorada faça jus ao nome. Segurem até o amanhecer.", "en": "Let Alvorada live up to its name. Hold until dawn." }, "duration": 4 } }
+          ] }
+      ] },
+    { "id": "wave", "once": false, "cooldown": 1, "when": { "type": "every", "seconds": 45, "start": 40 },
+      "actions": [
+        { "type": "incVar", "name": "waves", "by": 1 },
+        { "type": "spawn", "owner": "enemy", "units": [{ "type": "grunt", "count": 3 }, { "type": "axethrower", "count": 1 }], "x": 24, "z": 10, "order": { "kind": "attackMove", "x": -24, "z": -12 } },
+        { "type": "sound", "id": "alarm" }
+      ] },
+    { "id": "wave-2", "when": { "type": "var", "name": "waves", "op": ">=", "value": 3 },
+      "actions": [
+        { "type": "spawn", "owner": "enemy", "units": [{ "type": "ogre", "count": 1 }, { "type": "grunt", "count": 2 }], "x": 24, "z": 10, "order": { "kind": "attackMove", "x": -24, "z": -12 } },
+        { "type": "message", "text": { "pt-BR": "Um ogro marcha com a próxima onda!", "en": "An ogre marches with the next wave!" } }
+      ] },
+    { "id": "wave-3", "when": { "type": "var", "name": "waves", "op": ">=", "value": 5 },
+      "actions": [
+        { "type": "spawn", "owner": "enemy", "units": [{ "type": "ogre", "count": 2 }, { "type": "axethrower", "count": 3 }, { "type": "grunt", "count": 3 }], "x": 24, "z": 10, "order": { "kind": "attackMove", "x": -24, "z": -12 } },
+        { "type": "dialog", "speaker": { "pt-BR": "Vigia", "en": "Lookout" }, "portrait": "👁️", "text": { "pt-BR": "É a grande investida! Todos às muralhas!", "en": "It is the great assault! Everyone to the walls!" } }
+      ] },
+    { "id": "towers-bonus", "when": { "type": "objective", "id": "two-towers", "status": "completed" },
+      "actions": [
+        { "type": "spawn", "owner": "player", "units": [{ "type": "archer", "count": 4 }], "x": -26, "z": -12 },
+        { "type": "message", "text": { "pt-BR": "Torres prontas: 4 arqueiros reforçam a linha.", "en": "Towers ready: 4 archers reinforce the line." } }
+      ] },
+    { "id": "halfway", "when": { "type": "time", "at": 150 },
+      "actions": [
+        { "type": "dialog", "speaker": { "pt-BR": "Rainha Sevelin", "en": "Queen Sevelin" }, "portrait": "👑", "text": { "pt-BR": "Metade do caminho. O Marechal já cruzou o Rio Claro!", "en": "Halfway. The Marshal has already crossed the Clear River!" } },
+        { "type": "giveResources", "owner": "player", "gold": 200, "wood": 150 }
+      ] },
+    { "id": "relieved", "when": { "type": "objective", "id": "hold-line", "status": "completed" },
+      "actions": [
+        { "type": "dialog", "speaker": { "pt-BR": "Marechal Dorian", "en": "Marshal Dorian" }, "portrait": "🛡️", "text": { "pt-BR": "As legiões chegaram. O estreito é nosso. Agora vamos recuperar a Ponte do Rio Turvo.", "en": "The legions have arrived. The strait is ours. Now we retake the Murky River Bridge." }, "duration": 6 }
+      ] }
+  ]
+}

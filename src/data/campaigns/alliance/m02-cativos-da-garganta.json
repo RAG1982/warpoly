@@ -1,0 +1,91 @@
+{
+  "format": "warpolymission",
+  "version": 1,
+  "id": "alliance-02-cativos-da-garganta",
+  "hidden": true,
+  "title": { "pt-BR": "Os Cativos da Garganta", "en": "The Captives of the Gorge" },
+  "subtitle": { "pt-BR": "Aliança, missão 2", "en": "Alliance, mission 2" },
+  "briefing": {
+    "speaker": { "pt-BR": "Capitã Lyra Ventosa", "en": "Captain Lyra Ventosa" },
+    "portrait": "🏹",
+    "text": {
+      "pt-BR": "Os homens do Cinzal levaram quatro famílias de camponeses para a Garganta de Pedralva e os prendem num acampamento de bandoleiros que lhes vendeu passagem. Corte a guarda, liberte os aldeões e traga todos de volta para casa vivos. Cada rosto que perdermos é um ponto a mais para o inimigo.",
+      "en": "The Cinzal men took four peasant families into Pedralva Gorge and hold them in a bandit camp that sold them passage. Cut the guard down, free the villagers and bring every one of them home alive. Each face we lose is a point scored by the enemy."
+    },
+    "hints": [
+      { "pt-BR": "Os cativos só se juntam a você quando uma tropa chega perto deles.", "en": "The captives join you only when a troop gets close to them." },
+      { "pt-BR": "Depois do resgate, uma patrulha do Cinzal sai atrás de vocês.", "en": "After the rescue, a Cinzal patrol comes after you." }
+    ]
+  },
+  "mapId": "desfiladeiro-1v1",
+  "seed": 8102,
+  "players": [
+    { "id": 0, "name": { "pt-BR": "Reino de Aurelan", "en": "Kingdom of Aurelan" }, "factionId": "human", "team": 0, "color": "#2563eb", "isLocal": true, "startSlot": 0 },
+    { "id": 1, "name": { "pt-BR": "Arautos do Cinzal", "en": "Heralds of the Cinzal" }, "factionId": "orc", "team": 1, "color": "#dc2626", "isAI": false, "startSlot": 1 }
+  ],
+  "startingResources": { "wood": 400, "gold": 350, "stone": 150 },
+  "vars": { "freed": false },
+
+  "setup": [
+    { "type": "tag", "select": { "buildingType": "bandit_camp" }, "tag": "camp" },
+    { "type": "spawn", "owner": "neutral", "unitType": "villager", "count": 4, "x": -26, "z": 26, "tag": "captives" },
+    { "type": "spawn", "owner": "player", "units": [{ "type": "knight", "count": 2 }, { "type": "archer", "count": 3 }], "x": 22, "z": 22, "tag": "strike" }
+  ],
+
+  "objectives": [
+    { "id": "free-captives", "type": "rescue", "priority": "primary", "tag": "captives", "count": 4,
+      "title": { "pt-BR": "Libertar os 4 aldeões cativos", "en": "Free the 4 captive villagers" },
+      "description": { "pt-BR": "Chegue perto deles com uma tropa.", "en": "Get a troop close to them." } },
+    { "id": "bring-home", "type": "escort", "priority": "primary", "tag": "captives", "count": 4, "active": false,
+      "area": { "x": 26, "z": 26, "r": 9 },
+      "title": { "pt-BR": "Levar todos os aldeões de volta à base", "en": "Bring every villager back to base" },
+      "description": { "pt-BR": "Nenhum pode morrer.", "en": "None may die." } },
+    { "id": "break-patrol", "type": "destroy", "priority": "secondary", "select": { "tag": "patrol" }, "count": 6, "active": false,
+      "title": { "pt-BR": "Derrotar a patrulha do Cinzal", "en": "Defeat the Cinzal patrol" } },
+    { "id": "burn-camp", "type": "destroy", "priority": "secondary", "select": { "tag": "camp" },
+      "title": { "pt-BR": "Derrubar o acampamento dos bandoleiros", "en": "Tear down the bandit camp" } },
+    { "id": "full-purse", "type": "flag", "priority": "hidden",
+      "condition": { "type": "resource", "owner": "player", "resource": "gold", "op": ">=", "value": 700 },
+      "title": { "pt-BR": "Encher o cofre (700 de ouro)", "en": "Fill the purse (700 gold)" } }
+  ],
+
+  "triggers": [
+    { "id": "intro", "when": { "type": "time", "at": 0 },
+      "actions": [
+        { "type": "music", "id": "on" },
+        { "type": "cutscene", "id": "gorge", "duration": 9, "skippable": true,
+          "steps": [
+            { "at": 0, "x": -26, "z": 26, "zoom": 1.1, "dialog": { "speaker": { "pt-BR": "Capitã Lyra", "en": "Captain Lyra" }, "portrait": "🏹", "text": { "pt-BR": "Quatro famílias, atadas como gado. Eu mesma cuido de quem as guarda.", "en": "Four families, tied like cattle. I will deal with their guards myself." }, "duration": 4.5 } },
+            { "at": 4.5, "x": 22, "z": 22, "zoom": 1, "dialog": { "speaker": { "pt-BR": "Capitã Lyra", "en": "Captain Lyra" }, "portrait": "🏹", "text": { "pt-BR": "Cavaleiros e arqueiros, comigo. Avançar pela garganta!", "en": "Knights and archers, with me. Advance through the gorge!" }, "duration": 4 } }
+          ] }
+      ] },
+    { "id": "free", "when": { "type": "area", "owner": "player", "area": { "x": -26, "z": 26, "r": 10 } },
+      "actions": [
+        { "type": "transfer", "select": { "tag": "captives" }, "to": "player" },
+        { "type": "setVar", "name": "freed", "value": true },
+        { "type": "order", "select": { "tag": "captives" }, "kind": "move", "x": -18, "z": 18 },
+        { "type": "dialog", "speaker": { "pt-BR": "Aldeã", "en": "Villager" }, "portrait": "👷", "text": { "pt-BR": "Que os céus os abençoem! Levem-nos para casa, depressa!", "en": "Heaven bless you! Take us home, quickly!" } }
+      ] },
+    { "id": "freed-follow", "when": { "type": "trigger", "id": "free" },
+      "actions": [
+        { "type": "setObjective", "id": "bring-home", "status": "active" },
+        { "type": "spawn", "owner": "enemy", "units": [{ "type": "grunt", "count": 4 }, { "type": "axethrower", "count": 2 }], "x": -6, "z": -6, "tag": "patrol", "order": { "kind": "attackMove", "x": -18, "z": 18 } },
+        { "type": "setObjective", "id": "break-patrol", "status": "active" },
+        { "type": "sound", "id": "alarm" },
+        { "type": "message", "text": { "pt-BR": "Uma patrulha do Cinzal vem do centro da garganta!", "en": "A Cinzal patrol is coming from the middle of the gorge!" } }
+      ] },
+    { "id": "camp-spoils", "when": { "type": "dead", "select": { "buildingType": "bandit_camp", "killedBy": "player" } },
+      "actions": [
+        { "type": "giveResources", "owner": "player", "gold": 150, "wood": 80 },
+        { "type": "message", "text": { "pt-BR": "Espólio dos bandoleiros: +150 de ouro, +80 de madeira.", "en": "Bandit spoils: +150 gold, +80 wood." } }
+      ] },
+    { "id": "captive-lost", "when": { "all": [{ "type": "trigger", "id": "free" }, { "type": "dead", "select": { "tag": "captives" } }] },
+      "actions": [
+        { "type": "message", "text": { "pt-BR": "Um aldeão tombou. Proteja os demais!", "en": "A villager has fallen. Protect the rest!" } }
+      ] },
+    { "id": "done", "when": { "type": "objective", "id": "bring-home", "status": "completed" },
+      "actions": [
+        { "type": "dialog", "speaker": { "pt-BR": "Capitã Lyra", "en": "Captain Lyra" }, "portrait": "🏹", "text": { "pt-BR": "Todos em casa. Eles contaram que o chefe-de-brasa, Skarn, reúne os clãs ao norte.", "en": "All of them home. They say the ember-chief, Skarn, is gathering the clans to the north." }, "duration": 6 }
+      ] }
+  ]
+}

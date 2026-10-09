@@ -822,3 +822,9 @@ body, html {
   opacity: 1;
   transform: translateY(0);
 }
+
+/* F7-02: seletor de cor de time */
+.team-swatches { display: flex; flex-wrap: wrap; gap: 6px; margin: 6px 0; }
+.team-swatch { width: 28px; height: 28px; border-radius: 6px; border: 2px solid transparent; cursor: pointer; }
+.team-swatch.active { border-color: #fff; box-shadow: 0 0 0 2px #d4af37; }
+.team-free-row { display: flex; align-items: center; gap: 8px; font-size: 12px; opacity: .9; }

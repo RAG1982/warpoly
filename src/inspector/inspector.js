@@ -76,6 +76,7 @@ import { prepareStaticTemplate, isStaticMergeEnabled } from '../render/staticTem
 import { mergeUnitTemplate } from '../render/mergeUnitTemplate.js';
 import { skinUnitTemplate, isSkinEnabled } from '../render/skinUnitTemplate.js';
 import { ModelFactory } from '../entities/ModelFactory.js';
+import { setTeamColor, hasTeamMask, TEAM_PALETTE } from '../render/teamColor.js';
 
 // F2-08c: construção de simulação (pura) + a view correspondente, sem cena (o inspetor adiciona `view.mesh`).
 const flatTerrain = { getHeight: () => 0 };
@@ -1655,6 +1656,9 @@ class ModelInspectorApp {
     this.villagerTool = 'axe';
     this.villagerCargo = 'none';
 
+    // F7-02: cor de time da prévia (paleta de 8 + cor livre)
+    this.teamColor = TEAM_PALETTE[0];
+
     // Clock
     this.timer = new THREE.Timer();
 
@@ -1672,6 +1676,7 @@ class ModelInspectorApp {
     if (initialLight && LIGHT_PRESETS[initialLight]) {
       this.applyLightingPreset(initialLight);
     }
+    this.setupTeamColorUI();
     this.selectModel(initialModel);
     ModelFactory.loadGlbModels().then(() => {
       if (this.currentModelItem && this.currentModelItem.glb) {
@@ -2007,8 +2012,49 @@ class ModelInspectorApp {
       this.applyWireframeOverlay(true);
     }
 
+    this.applyTeamColor();
+
     // Update Model Stats & Details Card
     this.updateModelStatsUI(item, model, box, size);
+  }
+
+  /** F7-02: aplica a cor de time atual ao modelo mostrado (no-op sem máscara `TeamColor`) e atualiza a UI. */
+  applyTeamColor() {
+    const model = this.currentModelObject;
+    const has = !!model && hasTeamMask(model);
+    if (has) setTeamColor(model, this.teamColor);
+    const sec = document.getElementById('team-color-section');
+    if (sec) sec.dataset.mask = has ? '1' : '0';
+    const note = document.getElementById('team-color-note');
+    if (note) note.textContent = has ? '' : 'Este modelo não tem área de cor de time.';
+    const hex = new THREE.Color(this.teamColor).getHexString();
+    document.querySelectorAll('.team-swatch').forEach(b => {
+      b.classList.toggle('active', b.dataset.color.replace('#', '').toLowerCase() === hex);
+    });
+    const free = document.getElementById('team-color-free');
+    if (free) free.value = '#' + hex;
+  }
+
+  setTeamColorValue(color) {
+    this.teamColor = color;
+    this.applyTeamColor();
+  }
+
+  setupTeamColorUI() {
+    const wrap = document.getElementById('team-color-swatches');
+    if (!wrap) return;
+    wrap.innerHTML = '';
+    TEAM_PALETTE.forEach((c, i) => {
+      const b = document.createElement('button');
+      b.className = 'team-swatch';
+      b.dataset.color = c;
+      b.title = 'Cor de time ' + (i + 1);
+      b.style.background = c;
+      b.addEventListener('click', () => this.setTeamColorValue(c));
+      wrap.appendChild(b);
+    });
+    const free = document.getElementById('team-color-free');
+    if (free) free.addEventListener('input', () => this.setTeamColorValue(free.value));
   }
 
   frameCameraOn(box) {

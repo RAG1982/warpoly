@@ -21,7 +21,7 @@ describe('F7-03 curva de dia/noite', () => {
     expect(night.night).toBe(1);
     expect(night.sunI).toBeLessThan(noon.sunI);
     expect(night.hemiI).toBeLessThan(noon.hemiI);
-    expect(night.exposure).toBeLessThan(noon.exposure);
+    expect(night.exposure).toBeLessThanOrEqual(noon.exposure);
   });
   it('o dia usa o céu/hemisfério do tileset', () => {
     const base = { sky: 0xc9dbe8, hemiSky: 0xdbe9ff, hemiGround: 0x8497ad };

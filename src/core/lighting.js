@@ -99,8 +99,8 @@ export const DEFAULT_DAY_BASE = Object.freeze({ sky: 0x85c8ec, hemiSky: 0xcde6ff
  */
 function keyframes(base) {
   const night = {
-    sky: 0x121b2d, sunColor: 0x89aee6, sunI: 0.7, sunPos: [-30, 60, -30],
-    hemiSky: 0x283b5e, hemiGround: 0x111e15, hemiI: 0.45, fillColor: 0x19273c, fillI: 0.2, exposure: 0.92, night: 1
+    sky: 0x16213a, sunColor: 0x9bbcf0, sunI: 1.15, sunPos: [-30, 60, -30],
+    hemiSky: 0x4a6396, hemiGround: 0x1b2c22, hemiI: 0.85, fillColor: 0x2b3f63, fillI: 0.4, exposure: 1.0, night: 1
   };
   const dawn = {
     sky: 0xd99a74, sunColor: 0xffb067, sunI: 2.2, sunPos: [60, 38, -50],

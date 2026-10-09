@@ -54,7 +54,7 @@ export const TILESETS = Object.freeze({
     surface: { roughness: 0.93, cliff: 0x5a4a40, strata: 0.16 },
     water: { color: 0x5f8f86, opacity: 0.9, deep: 0x13262a, foam: 0xe9e4d2, foamStrength: 0.6, plants: false },
     // F7-03: color grading do pós-processamento (tint RGB, saturação, contraste, brilho, vinheta); neutro = sem efeito
-    grade: { tint: [1.09, 0.98, 0.86], sat: 1.06, contrast: 1.1, brightness: 0.98, vignette: 0.18 },
+    grade: { tint: [1.09, 0.98, 0.86], sat: 1.02, contrast: 1.06, brightness: 0.98, vignette: 0.18 },
     atmosphere: { sky: 0xb69b7e, fogNear: 70, fogFar: 250, hemiSky: 0xf0cfa5, hemiGround: 0x6a4a35 },
     decor: { grass: 0xa8885a, flowers: false, pebbles: 0x8a7a68, boulders: 0x7a6a5e, mushrooms: false, lilies: false, bushes: 0x8a6e48 },
     trees: { tint: { color: 0xc9a27a, desat: 0.75, snow: null, snowAmount: 0 } }

@@ -511,7 +511,7 @@ Sonnet 5.5 escreve a spec em `docs/specs/<ID>.md`; agente **Sonnet** executa; o 
   - Soak completo 100 partidas (seeds 1–100, 4 lotes de 25; consolidado por `node tools/lib/soakConsolidate.mjs` em `tools/soak-report/soak-report.md`): 96/100 terminam (96%), ticks médios 16007, máx 60618, 0 exceções/NaN/vazamentos, determinismo ok (12 re-checadas); achados NEW-46..48.
 
 ### F10-03 · Regressão visual
-- `TODO` · QA · Dep: F0-05 · Capturas Playwright de todos os modelos do inspetor e da HUD em 3 resoluções; diff em PR.
+- `DOING(agente-qa, 2026-10-08)` · QA · Dep: F0-05 · Capturas Playwright de todos os modelos do inspetor e da HUD em 3 resoluções; diff em PR.
 
 ### F10-04 · Orçamento de desempenho em CI
 - `TODO` · QA · Dep: F0-04 · Falha se draw calls/FPS/load piorarem > 10% vs baseline.

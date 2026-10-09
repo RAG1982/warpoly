@@ -7,5 +7,6 @@
     "1920x1080",
     "390x844"
   ],
-  "targets": 130
+  "targets": 130,
+  "notes": "PNGs da baseline NAO ficam no git (gitignore); dependem de GPU real + Chromium acima. Regerar com npm run visual -- --update."
 }

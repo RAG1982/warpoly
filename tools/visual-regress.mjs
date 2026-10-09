@@ -190,6 +190,10 @@ async function main() {
   const resolutions = RESOLUTIONS.filter((r) => !opts.res || opts.res.includes(r.name));
   console.log(`[visual] ${catalogIds.length} modelos no catálogo, ${targets.length} alvos × ${resolutions.length} resolução(ões) (${opts.update ? 'ATUALIZAR baseline' : 'comparar'})`);
 
+  if (!opts.update && !existsSync(join(BASE_DIR, RESOLUTIONS[0].name))) {
+    console.error('[visual] baseline ausente: os PNGs ficam fora do git (~109 MB). Gere-a no estado validado do master com:\n  bash tools/safe-run.sh --timeout 1800 -- node tools/visual-regress.mjs --update');
+    process.exit(2);
+  }
   BASE = `http://127.0.0.1:${PORT}`;
   const vite = await createServer({ root: ROOT, server: { port: PORT, strictPort: true, host: '127.0.0.1' }, logLevel: 'warn', clearScreen: false });
   await vite.listen();
@@ -278,7 +282,8 @@ async function main() {
       chromium: browserVersion,
       gpu: renderer,
       resolutions: [...new Set([...(prev.resolutions ?? []), ...resolutions.map((r) => r.name)])],
-      targets: catalogIds.length + HUD_TARGETS.length
+      targets: catalogIds.length + HUD_TARGETS.length,
+      notes: 'PNGs da baseline NAO ficam no git (gitignore); dependem de GPU real + Chromium acima. Regerar com npm run visual -- --update.'
     };
     writeFileDeep(manifestPath, JSON.stringify(manifest, null, 2) + '\n');
     console.log(`\n[visual] baseline gravada em ${secs} s · ${failedCount} falha(s) de captura`);

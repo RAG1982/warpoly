@@ -4,3 +4,6 @@ node_modules
 dist/
 .claude/worktrees/
 tools/visual-report/
+
+# F10-03: baseline visual fora do git (~109 MB de PNG); gerar com npm run visual -- --update
+tests/visual/baseline/*/

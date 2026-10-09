@@ -454,7 +454,7 @@ Sonnet 5.5 escreve a spec em `docs/specs/<ID>.md`; agente **Sonnet** executa; o 
 - `TODO` · ART · Dep: F3-00 · Todas as construções/unidades novas da árvore tecnológica, cada uma com entrada no inspetor e orçamento (≤ 20 draw calls pós-merge, texturas ≤ 512).
 
 ### F7-08 · Áudio de produção
-- `TODO` · AUDIO · Dep: F2-07 · Áudio posicional (atenuação pela câmera), falas de confirmação por unidade (síntese de voz estilizada ou samples originais), música adaptativa (paz/combate) por facção, mixer com limitador, ambiência por tileset.
+- `DOING(agente-audio, 2026-10-09)` · AUDIO · Dep: F2-07 · Áudio posicional (atenuação pela câmera), falas de confirmação por unidade (síntese de voz estilizada ou samples originais), música adaptativa (paz/combate) por facção, mixer com limitador, ambiência por tileset.
 
 ---
 

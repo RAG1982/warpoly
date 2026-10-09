@@ -2,6 +2,8 @@ import * as THREE from 'three';
 import { installFogOfWarShader } from './render/fogOfWarShader.js';
 import { SceneManager } from './core/SceneManager.js';
 import { SoundManager } from './core/SoundManager.js';
+import { detectAudioLevel } from './audio/audioEnv.js'; // F7-08
+import { getTextureQuality } from './models/textureQuality.js';
 import { AssetPreloader } from './core/AssetPreloader.js';
 import { QualitySettings } from './core/QualitySettings.js';
 import { MatchSession } from './core/MatchSession.js';
@@ -500,16 +502,20 @@ class GameApp {
   // ------------------------------------------------------------------ serviços
   _ensureServices() {
     if (this.sceneManager) return;
-    this.sound = new SoundManager();
+    // F7-08: nível de áudio por preset/`?audio=`; testes/automação (navigator.webdriver) ficam mudos por padrão.
+    this.sound = new SoundManager({ level: detectAudioLevel(QualitySettings.current, getTextureQuality()) });
     applyAudio(this.sound);
     this.sceneManager = new SceneManager(this.container);
 
     // Libera o áudio na primeira interação (política de autoplay)
+    // (pointerdown também conta como gesto: o motor já existe quando o clique de seleção acontece, e a 1ª fala sai)
     const unlockAudio = () => {
       this.sound.resume();
+      window.removeEventListener('pointerdown', unlockAudio);
       window.removeEventListener('click', unlockAudio);
       window.removeEventListener('keydown', unlockAudio);
     };
+    window.addEventListener('pointerdown', unlockAudio);
     window.addEventListener('click', unlockAudio);
     window.addEventListener('keydown', unlockAudio);
 

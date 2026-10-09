@@ -1,449 +1,207 @@
-// SoundManager.js - Procedural Web Audio synthesizer for cozy RTS sound effects & ambient music
+// SoundManager.js — fachada de áudio do jogo (F7-08: antes um sintetizador único; agora delega ao motor em src/audio/).
+//
+// Mantém a API que a HUD, o InputManager e o MissionController já usam (`resume`, `playSelect`, `playOrder`, `startMusic`,
+// `setSfxVolume`…) e acrescenta: volume por canal (música/efeitos/falas + geral), nível de áudio por preset (`?audio=`),
+// som posicional (`playChop(pos)`…), falas de unidade, música adaptativa e ambiência por partida.
+//
+// Regras: o AudioContext só nasce depois de um gesto do usuário (`init` via `resume`, chamados pelos ouvintes de
+// click/keydown do main.js); nível 'off' (testes/automação, `?audio=0`) não cria nada; nada aqui toca a simulação.
+import { AudioEngine } from '../audio/AudioEngine.js';
+import { clampVolume } from '../audio/audioConfig.js';
+
 export class SoundManager {
-  constructor() {
+  /**
+   * @param {{level?:string, env?:{AudioContext?:Function, log?:Function, timers?:object|null}}} [opts]
+   *   `level`: 'off'|'low'|'med'|'high' (ver `detectAudioLevel`); `env` injeta AudioContext/log/timers (testes).
+   */
+  constructor({ level = 'med', env = {} } = {}) {
+    this.env = env;
+    this.level = level;
     this.ctx = null;
-    this.enabled = true;
-    this.musicEnabled = true;
-    this.sfxVolume = 0.5;
-    this.musicVolume = 0.25;
-    this.ambientTimer = null;
-    this.isMusicPlaying = false;
+    this.engine = null;
+    this.enabled = true; // mudo geral (toggleSound)
+    this.musicEnabled = true; // preferência de música (toggleMusic)
+    this.initialized = false;
+    /** @type {{master:number, music:number, sfx:number, voice:number}} */
+    this.volumes = { master: 1, music: 0.25, sfx: 0.5, voice: 0.8 };
+    this._musicHold = false;
+    this._match = null;
+    this._listener = null;
+    this._sceneProbe = null;
+  }
+
+  // Compatibilidade com o código antigo (leitura)
+  get sfxVolume() { return this.volumes.sfx; }
+  get musicVolume() { return this.volumes.music; }
+  get isMusicPlaying() { return !!(this.engine && this.engine.music.playing); }
+
+  // ------------------------------------------------------------------ ciclo de vida
+  /** Cria o AudioContext e o motor. Só chamar a partir de um gesto do usuário (ver `resume`). */
+  init() {
+    if (this.initialized || this.level === 'off') return;
+    try {
+      const Ctor = this.env.AudioContext || (typeof window !== 'undefined' && (window.AudioContext || window.webkitAudioContext));
+      if (!Ctor) throw new Error('Web Audio indisponível');
+      this.ctx = new Ctor();
+      this.engine = new AudioEngine({ ctx: this.ctx, level: this.level, timers: this.env.timers === undefined ? globalThis : this.env.timers });
+      this.initialized = true;
+      this._pushState(true);
+      if (this._match) this.engine.beginMatch(this._match);
+      const log = this.env.log || ((...a) => console.info(...a));
+      log(`[WarPoly áudio] AudioContext iniciado: estado=${this.ctx.state}, nível=${this.level}, ${this.ctx.sampleRate} Hz`);
+    } catch (e) {
+      console.warn('[WarPoly áudio] Web Audio indisponível ou bloqueado', e);
+      this.engine = null;
+      this.ctx = null;
+    }
+  }
+
+  /** Gesto do usuário: cria o motor na primeira vez e retoma um contexto suspenso (autoplay/aba em segundo plano). */
+  resume() {
+    if (this.ctx && this.ctx.state === 'suspended') {
+      try { this.ctx.resume().catch(() => {}); } catch { /* ok */ }
+    }
+    if (!this.initialized) this.init();
+  }
+
+  /** Muda o nível (preset/`?audio=`). 'off' cala; sair de 'off' só vale após um gesto (cria o motor em `resume`). */
+  setLevel(level) {
+    if (level === this.level) return;
+    this.level = level;
+    if (this.engine) this.engine.setLevel(level);
+    else if (level !== 'off' && this._match && this.initialized === false) { /* o motor nasce no próximo gesto */ }
+  }
+
+  dispose() {
+    if (this.engine) this.engine.dispose();
+    this.engine = null;
+    this.ctx = null;
     this.initialized = false;
   }
 
-  init() {
-    if (this.initialized) return;
-    try {
-      const AudioContext = window.AudioContext || window.webkitAudioContext;
-      this.ctx = new AudioContext();
-      this.initialized = true;
-      if (this.musicEnabled) {
-        this.startMusic();
-      }
-    } catch (e) {
-      console.warn("Web Audio not supported or blocked", e);
-    }
+  _pushState(immediate = false) {
+    const e = this.engine;
+    if (!e) return;
+    e.setVolumes({ ...this.volumes, master: this.enabled ? this.volumes.master : 0 }, immediate);
+    e.setMusicOn(this.musicEnabled);
+    e.setMusicHold(this._musicHold);
+    if (this._listener) e.setListener(this._listener);
+    if (this._sceneProbe) e.sceneProbe = this._sceneProbe;
   }
 
-  resume() {
-    if (this.ctx && this.ctx.state === 'suspended') {
-      this.ctx.resume();
-    }
-    if (!this.initialized) {
-      this.init();
-    }
+  // ------------------------------------------------------------------ volumes e liga/desliga
+  /** @param {{master?:number, music?:number, sfx?:number, voice?:number}} v  valores 0..1 por canal */
+  setVolumes(v) {
+    for (const k of ['master', 'music', 'sfx', 'voice']) if (v[k] !== undefined) this.volumes[k] = clampVolume(v[k], this.volumes[k]);
+    this._pushState();
   }
+
+  setMasterVolume(v) { this.setVolumes({ master: v }); }
+  setSfxVolume(v) { this.setVolumes({ sfx: v }); }
+  setMusicVolume(v) { this.setVolumes({ music: v }); }
+  setVoiceVolume(v) { this.setVolumes({ voice: v }); }
 
   toggleSound() {
     this.enabled = !this.enabled;
-    if (!this.enabled && this.ctx) {
-      this.stopMusic();
-    } else if (this.enabled && this.musicEnabled) {
-      this.startMusic();
-    }
+    this._pushState();
     return this.enabled;
   }
 
   toggleMusic() {
     this.musicEnabled = !this.musicEnabled;
-    if (this.musicEnabled && this.enabled) {
-      this.startMusic();
-    } else {
-      this.stopMusic();
-    }
+    this._pushState();
     return this.musicEnabled;
   }
 
-  setSfxVolume(val) {
-    this.sfxVolume = Math.max(0, Math.min(1, val));
-    if (this.sfxVolume === 0) {
-      this.enabled = false;
-    } else {
-      this.enabled = true;
-    }
+  // ------------------------------------------------------------------ efeitos
+  /** Toca um efeito pelo nome da receita (`audio/sfxRecipes.js`). `opts`: pos, priority, gain, variant. */
+  playSfx(name, opts) {
+    const e = this.engine;
+    if (!e || !this.enabled) return false;
+    if (this.ctx.state === 'suspended') this.resume();
+    return e.playSfx(name, opts);
   }
 
-  setMusicVolume(val) {
-    this.musicVolume = Math.max(0, Math.min(1, val));
-    if (this.musicVolume === 0) {
-      this.stopMusic();
-    } else if (!this.isMusicPlaying && this.musicEnabled && this.enabled) {
-      this.startMusic();
-    }
-  }
-
-  // Helper to create gain node with master SFX scaling
-  createSfxGain(peak = 0.3) {
-    if (!this.ctx || !this.enabled) return null;
-    this.resume();
-    const gain = this.ctx.createGain();
-    gain.gain.value = peak * this.sfxVolume;
-    gain.connect(this.ctx.destination);
-    return gain;
-  }
-
-  // --- PROCEDURAL SFX ---
-
-  playChop() {
-    const gain = this.createSfxGain(0.4);
-    if (!gain) return;
-    const now = this.ctx.currentTime;
-    
-    // Low wood thud
-    const osc = this.ctx.createOscillator();
-    osc.type = 'triangle';
-    const baseFreq = 110 + Math.random() * 30;
-    osc.frequency.setValueAtTime(baseFreq, now);
-    osc.frequency.exponentialRampToValueAtTime(40, now + 0.08);
-
-    // Filtered noise for axe blade bite
-    const bufferSize = this.ctx.sampleRate * 0.05;
-    const buffer = this.ctx.createBuffer(1, bufferSize, this.ctx.sampleRate);
-    const data = buffer.getChannelData(0);
-    for (let i = 0; i < bufferSize; i++) {
-      data[i] = (Math.random() * 2 - 1) * Math.exp(-i / (bufferSize * 0.25));
-    }
-    const noise = this.ctx.createBufferSource();
-    noise.buffer = buffer;
-    const filter = this.ctx.createBiquadFilter();
-    filter.type = 'bandpass';
-    filter.frequency.value = 1400;
-
-    noise.connect(filter);
-    filter.connect(gain);
-    osc.connect(gain);
-
-    gain.gain.setValueAtTime(0.4 * this.sfxVolume, now);
-    gain.gain.exponentialRampToValueAtTime(0.001, now + 0.12);
-
-    osc.start(now);
-    noise.start(now);
-    osc.stop(now + 0.12);
-  }
-
-  playMineGold() {
-    const gain = this.createSfxGain(0.35);
-    if (!gain) return;
-    const now = this.ctx.currentTime;
-
-    // High crystalline resonant ping
-    const osc = this.ctx.createOscillator();
-    osc.type = 'sine';
-    const notes = [1200, 1440, 1680, 1920];
-    const freq = notes[Math.floor(Math.random() * notes.length)];
-    osc.frequency.setValueAtTime(freq, now);
-
-    const osc2 = this.ctx.createOscillator();
-    osc2.type = 'triangle';
-    osc2.frequency.setValueAtTime(freq * 1.5, now);
-
-    osc.connect(gain);
-    osc2.connect(gain);
-
-    gain.gain.setValueAtTime(0.3 * this.sfxVolume, now);
-    gain.gain.exponentialRampToValueAtTime(0.001, now + 0.25);
-
-    osc.start(now);
-    osc2.start(now);
-    osc.stop(now + 0.25);
-    osc2.stop(now + 0.25);
-  }
-
-  playMineStone() {
-    const gain = this.createSfxGain(0.35);
-    if (!gain) return;
-    const now = this.ctx.currentTime;
-
-    const osc = this.ctx.createOscillator();
-    osc.type = 'sawtooth';
-    osc.frequency.setValueAtTime(180, now);
-    osc.frequency.exponentialRampToValueAtTime(60, now + 0.1);
-
-    const filter = this.ctx.createBiquadFilter();
-    filter.type = 'lowpass';
-    filter.frequency.value = 800;
-
-    osc.connect(filter);
-    filter.connect(gain);
-
-    gain.gain.setValueAtTime(0.35 * this.sfxVolume, now);
-    gain.gain.exponentialRampToValueAtTime(0.001, now + 0.14);
-
-    osc.start(now);
-    osc.stop(now + 0.14);
-  }
-
-  playHammer() {
-    const gain = this.createSfxGain(0.3);
-    if (!gain) return;
-    const now = this.ctx.currentTime;
-
-    const osc = this.ctx.createOscillator();
-    osc.type = 'sine';
-    osc.frequency.setValueAtTime(750 + Math.random() * 80, now);
-    osc.frequency.exponentialRampToValueAtTime(250, now + 0.08);
-
-    osc.connect(gain);
-    gain.gain.setValueAtTime(0.3 * this.sfxVolume, now);
-    gain.gain.exponentialRampToValueAtTime(0.001, now + 0.09);
-
-    osc.start(now);
-    osc.stop(now + 0.09);
-  }
-
-  playSword() {
-    const gain = this.createSfxGain(0.35);
-    if (!gain) return;
-    const now = this.ctx.currentTime;
-
-    // Metal clash / slice
-    const osc = this.ctx.createOscillator();
-    osc.type = 'triangle';
-    osc.frequency.setValueAtTime(950, now);
-    osc.frequency.exponentialRampToValueAtTime(450, now + 0.12);
-
-    const osc2 = this.ctx.createOscillator();
-    osc2.type = 'sawtooth';
-    osc2.frequency.setValueAtTime(600, now);
-    osc2.frequency.exponentialRampToValueAtTime(180, now + 0.15);
-
-    osc.connect(gain);
-    osc2.connect(gain);
-
-    gain.gain.setValueAtTime(0.35 * this.sfxVolume, now);
-    gain.gain.exponentialRampToValueAtTime(0.001, now + 0.18);
-
-    osc.start(now);
-    osc2.start(now);
-    osc.stop(now + 0.18);
-    osc2.stop(now + 0.18);
-  }
-
-  playBow() {
-    const gain = this.createSfxGain(0.3);
-    if (!gain) return;
-    const now = this.ctx.currentTime;
-
-    // String snap
-    const osc = this.ctx.createOscillator();
-    osc.type = 'triangle';
-    osc.frequency.setValueAtTime(480, now);
-    osc.frequency.exponentialRampToValueAtTime(120, now + 0.1);
-
-    osc.connect(gain);
-    gain.gain.setValueAtTime(0.3 * this.sfxVolume, now);
-    gain.gain.exponentialRampToValueAtTime(0.001, now + 0.12);
-
-    osc.start(now);
-    osc.stop(now + 0.12);
-  }
-
-  playArrowHit() {
-    const gain = this.createSfxGain(0.3);
-    if (!gain) return;
-    const now = this.ctx.currentTime;
-
-    const osc = this.ctx.createOscillator();
-    osc.type = 'sine';
-    osc.frequency.setValueAtTime(320, now);
-    osc.frequency.exponentialRampToValueAtTime(90, now + 0.07);
-
-    osc.connect(gain);
-    gain.gain.setValueAtTime(0.3 * this.sfxVolume, now);
-    gain.gain.exponentialRampToValueAtTime(0.001, now + 0.08);
-
-    osc.start(now);
-    osc.stop(now + 0.08);
-  }
-
-  playSelect() {
-    const gain = this.createSfxGain(0.25);
-    if (!gain) return;
-    const now = this.ctx.currentTime;
-
-    const osc = this.ctx.createOscillator();
-    osc.type = 'sine';
-    osc.frequency.setValueAtTime(523.25, now); // C5
-    osc.frequency.setValueAtTime(659.25, now + 0.05); // E5
-
-    osc.connect(gain);
-    gain.gain.setValueAtTime(0.2 * this.sfxVolume, now);
-    gain.gain.exponentialRampToValueAtTime(0.001, now + 0.14);
-
-    osc.start(now);
-    osc.stop(now + 0.14);
-  }
-
-  playOrder() {
-    const gain = this.createSfxGain(0.25);
-    if (!gain) return;
-    const now = this.ctx.currentTime;
-
-    const osc = this.ctx.createOscillator();
-    osc.type = 'triangle';
-    osc.frequency.setValueAtTime(440, now); // A4
-    osc.frequency.setValueAtTime(554.37, now + 0.04); // C#5
-    osc.frequency.setValueAtTime(659.25, now + 0.08); // E5
-
-    osc.connect(gain);
-    gain.gain.setValueAtTime(0.22 * this.sfxVolume, now);
-    gain.gain.exponentialRampToValueAtTime(0.001, now + 0.18);
-
-    osc.start(now);
-    osc.stop(now + 0.18);
-  }
-
-  playBuildPlace() {
-    const gain = this.createSfxGain(0.4);
-    if (!gain) return;
-    const now = this.ctx.currentTime;
-
-    const osc = this.ctx.createOscillator();
-    osc.type = 'triangle';
-    osc.frequency.setValueAtTime(140, now);
-    osc.frequency.exponentialRampToValueAtTime(45, now + 0.15);
-
-    osc.connect(gain);
-    gain.gain.setValueAtTime(0.4 * this.sfxVolume, now);
-    gain.gain.exponentialRampToValueAtTime(0.001, now + 0.2);
-
-    osc.start(now);
-    osc.stop(now + 0.2);
-  }
-
-  playBuildComplete() {
-    const gain = this.createSfxGain(0.35);
-    if (!gain) return;
-    const now = this.ctx.currentTime;
-
-    const chord = [392.00, 493.88, 587.33, 783.99]; // G chord
-    chord.forEach((freq, idx) => {
-      const osc = this.ctx.createOscillator();
-      osc.type = 'sine';
-      osc.frequency.value = freq;
-      osc.connect(gain);
-      osc.start(now + idx * 0.06);
-      osc.stop(now + 0.6);
-    });
-
-    gain.gain.setValueAtTime(0.3 * this.sfxVolume, now);
-    gain.gain.exponentialRampToValueAtTime(0.001, now + 0.65);
-  }
-
+  // API antiga (sons de trabalho/combate aceitam a posição no mundo para atenuar pela distância)
+  playChop(pos) { return this.playSfx('chop', { pos }); }
+  playMineGold(pos) { return this.playSfx('mineGold', { pos }); }
+  playMineStone(pos) { return this.playSfx('mineStone', { pos }); }
+  playHammer(pos) { return this.playSfx('hammer', { pos }); }
+  playSword(pos) { return this.playSfx('sword', { pos }); }
+  playBow(pos) { return this.playSfx('bow', { pos }); }
+  playArrowHit(pos) { return this.playSfx('arrowHit', { pos }); }
+  playBuildPlace(pos) { return this.playSfx('buildPlace', { pos }); }
+  // Interface (sem posição)
+  playSelect() { return this.playSfx('select'); }
+  playOrder() { return this.playSfx('order'); }
+  playBuildComplete() { return this.playSfx('buildComplete'); }
   /** F6-05: bipe curto e grave de recusa (sem comida, ação indisponível). */
-  playError() {
-    const gain = this.createSfxGain(0.25);
-    if (!gain) return;
-    const now = this.ctx.currentTime;
-    const osc = this.ctx.createOscillator();
-    osc.type = 'square';
-    osc.frequency.setValueAtTime(190, now);
-    osc.frequency.setValueAtTime(140, now + 0.09);
-    gain.gain.setValueAtTime(0.2 * this.sfxVolume, now);
-    gain.gain.exponentialRampToValueAtTime(0.001, now + 0.22);
-    osc.connect(gain);
-    osc.start(now);
-    osc.stop(now + 0.24);
+  playError() { return this.playSfx('error'); }
+  playAlarm() { return this.playSfx('alarm'); }
+  playVictory() { return this.playSfx('victory'); }
+
+  // ------------------------------------------------------------------ falas, posição e partida
+  /** Tempo do áudio em segundos (relógio do AudioContext; antes do motor existir, 0). */
+  now() {
+    return this.engine ? this.engine.now() : 0;
   }
 
-  playAlarm() {
-    const gain = this.createSfxGain(0.4);
-    if (!gain) return;
-    const now = this.ctx.currentTime;
-
-    // War horn / trumpet
-    const osc = this.ctx.createOscillator();
-    osc.type = 'sawtooth';
-    osc.frequency.setValueAtTime(220, now);
-    osc.frequency.linearRampToValueAtTime(246.94, now + 0.2);
-
-    const filter = this.ctx.createBiquadFilter();
-    filter.type = 'lowpass';
-    filter.frequency.value = 650;
-
-    osc.connect(filter);
-    filter.connect(gain);
-
-    gain.gain.setValueAtTime(0.35 * this.sfxVolume, now);
-    gain.gain.exponentialRampToValueAtTime(0.001, now + 0.45);
-
-    osc.start(now);
-    osc.stop(now + 0.45);
+  /** Há como falar agora? (motor ligado, nível com falas e canal de falas audível) */
+  canSpeak() {
+    const e = this.engine;
+    return !!(e && this.enabled && e.caps.speech && this.volumes.voice > 0 && this.volumes.master > 0);
   }
 
-  playVictory() {
-    const gain = this.createSfxGain(0.45);
-    if (!gain) return;
-    const now = this.ctx.currentTime;
-
-    // Victory fanfare notes: C4 -> E4 -> G4 -> C5
-    const fanfare = [261.63, 329.63, 392.00, 523.25];
-    fanfare.forEach((f, i) => {
-      const osc = this.ctx.createOscillator();
-      osc.type = 'triangle';
-      osc.frequency.value = f;
-      osc.connect(gain);
-      const startT = now + i * 0.15;
-      osc.start(startT);
-      osc.stop(startT + 0.4);
-    });
-
-    gain.gain.setValueAtTime(0.4 * this.sfxVolume, now);
-    gain.gain.exponentialRampToValueAtTime(0.001, now + 1.2);
+  /** Toca uma fala já escolhida (`createSpeechDirector().pick`). Devolve a duração (0 = não falou). */
+  speak(line) {
+    if (!this.canSpeak()) return 0;
+    if (this.ctx.state === 'suspended') this.resume();
+    return this.engine.speak(line);
   }
 
-  // --- COZY BACKGROUND AMBIENT LUTE & HARP CHORD ARPEGGIATOR ---
+  setListener(l) {
+    this._listener = l;
+    if (this.engine) this.engine.setListener(l);
+  }
 
+  /** `() => ({ timeOfDay, dayNight })` para os insetos da ambiência à noite. */
+  setSceneProbe(fn) {
+    this._sceneProbe = fn;
+    if (this.engine) this.engine.sceneProbe = fn;
+  }
+
+  /** Começa a partida: música da facção (paz/combate) e ambiência do tileset. Vale mesmo antes do 1º gesto. */
+  beginMatch(match) {
+    this._match = match;
+    if (this.engine) this.engine.beginMatch(match);
+  }
+
+  endMatch() {
+    this._match = null;
+    this._sceneProbe = null;
+    if (this.engine) { this.engine.sceneProbe = null; this.engine.endMatch(); }
+  }
+
+  /** Peso de combate (música adaptativa). */
+  noteCombat(weight) {
+    if (this.engine) this.engine.noteCombat(weight);
+  }
+
+  // ------------------------------------------------------------------ música
+  /** Retoma a música (depois de `stopMusic`). A preferência do jogador continua em `musicEnabled`/volume. */
   startMusic() {
-    if (this.isMusicPlaying || !this.enabled || !this.musicEnabled) return;
-    this.isMusicPlaying = true;
-    
-    // Play warm gentle medieval chord progression every 4-5 seconds
-    const chords = [
-      [261.63, 329.63, 392.00, 523.25], // C major
-      [220.00, 261.63, 329.63, 440.00], // A minor
-      [174.61, 220.00, 261.63, 349.23], // F major
-      [196.00, 246.94, 293.66, 392.00], // G major
-      [164.81, 196.00, 246.94, 329.63]  // E minor
-    ];
-
-    let chordIdx = 0;
-
-    const playNextBar = () => {
-      if (!this.isMusicPlaying || !this.musicEnabled || !this.enabled || !this.ctx) return;
-      const currentChord = chords[chordIdx % chords.length];
-      chordIdx++;
-
-      const now = this.ctx.currentTime;
-      // Arpeggiate notes with harp-like decay
-      currentChord.forEach((freq, i) => {
-        const noteGain = this.ctx.createGain();
-        noteGain.gain.setValueAtTime(0.0001, now + i * 0.28);
-        noteGain.gain.exponentialRampToValueAtTime(0.07 * this.musicVolume, now + i * 0.28 + 0.05);
-        noteGain.gain.exponentialRampToValueAtTime(0.0001, now + i * 0.28 + 1.8);
-        noteGain.connect(this.ctx.destination);
-
-        const osc = this.ctx.createOscillator();
-        osc.type = 'sine';
-        osc.frequency.value = freq;
-        osc.connect(noteGain);
-
-        osc.start(now + i * 0.28);
-        osc.stop(now + i * 0.28 + 2.0);
-      });
-
-      // Schedule next bar
-      this.ambientTimer = setTimeout(playNextBar, 3800 + Math.random() * 800);
-    };
-
-    playNextBar();
+    this._musicHold = false;
+    if (this.engine) this.engine.setMusicHold(false);
   }
 
+  /** Silencia a música (missão/cutscene) sem mexer nas preferências. */
   stopMusic() {
-    this.isMusicPlaying = false;
-    if (this.ambientTimer) {
-      clearTimeout(this.ambientTimer);
-      this.ambientTimer = null;
-    }
+    this._musicHold = true;
+    if (this.engine) this.engine.setMusicHold(true);
+  }
+
+  /** Estado do áudio para depuração (`game.sound.stats()`). */
+  stats() {
+    return this.engine ? this.engine.stats() : { level: this.level, state: 'sem gesto (AudioContext não criado)', volumes: { ...this.volumes } };
   }
 }

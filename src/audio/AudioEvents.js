@@ -1,80 +1,142 @@
 /**
- * AudioEvents.js — F2-07: ouvinte de apresentação que traduz eventos de `gm.events`
- * (`src/sim/events.js`) em chamadas ao `SoundManager`. Criado pela `MatchSession`; nunca em modo
- * headless (`MatchConfig.headless`), já que não há `SoundManager`/Web Audio em Node.
+ * AudioEvents.js — F2-07/F7-08: ouvinte de apresentação que traduz eventos de `gm.events` (`src/sim/events.js`) em som.
+ * Espelha `render/VfxEvents.js`: a decisão "o que toca" é PURA e testada (`audioMapping.js`); aqui só se coleta o contexto
+ * (dono local, visibilidade na névoa, posição da câmera, tipo de habilidade, unidades selecionadas) e se executa.
+ * Criado pela `MatchSession`; nunca em modo headless (`MatchConfig.headless`): não há Web Audio em Node.
  *
- * Preserva exatamente os gatilhos e condições de antes da F2-07 (comentados por evento);
- * a única mudança é onde a decisão é tomada — no ouvinte, a partir do payload (`ownerId`),
- * em vez de na simulação.
+ *  - Efeitos: posicionais (atenuação pela distância ao alvo da câmera + panorama) e com limite de vozes por prioridade;
+ *    sons de unidades alheias só se a posição está visível na névoa.
+ *  - Falas: ao selecionar e ao dar ordem, fala a unidade "líder" da seleção (herói > conjurador > equipagem > soldado >
+ *    trabalhador), PT-BR, sintetizadas por formantes. A seleção em grupo e as ordens por tecla/menu não passam por evento: o
+ *    InputManager chama `gm.soundManager.playSelect()/playOrder()`, então este módulo põe ali um adaptador (`inputSound`)
+ *    que fala (ou, sem voz, toca o clique de antes) e o devolve no `dispose`.
+ *  - Música adaptativa: dano/morte/explosão alimentam a intensidade de combate (`combatWeight`).
+ *  - Partida: avisa o `SoundManager` (facção do jogador local e tileset do mapa → música e ambiência).
  */
 import { EVT } from '../sim/events.js';
+import { resolveAbility } from '../sim/abilities.js';
+import { soundsForEvent, combatWeight, SFX_EVENTS, COMBAT_EVENTS } from './audioMapping.js';
+import { listenerRanges } from './attenuation.js';
+import { createSpeechDirector, speakerFor, leaderOf } from './speech/speechLines.js';
+import { createAudioRng } from './audioConfig.js';
 
 /**
  * @param {import('../core/GameManager.js').GameManager} gm
- * @param {*} soundManager
- * @returns {() => void} `dispose` — remove todos os ouvintes registrados.
+ * @param {*} sound  `SoundManager` (ou falso nos testes)
+ * @param {{tilesetId?:string|null}} [opts]  tileset do mapa (ambiência)
+ * @returns {() => void} `dispose` — remove todos os ouvintes e devolve o gancho de som do InputManager.
  */
-export function createAudioEvents(gm, soundManager) {
+export function createAudioEvents(gm, sound, { tilesetId = null } = {}) {
   const offs = [];
   const on = (type, fn) => offs.push(gm.events.on(type, fn, true)); // true = apresentação (F2-06)
-  const isLocal = ownerId => ownerId === gm.localPlayerId;
+  const isLocal = (ownerId) => ownerId === gm.localPlayerId;
 
-  // F2-08d: sons de seleção/ordem do jogador local (antes chamados direto por `GameManager.selectSingle/issueOrder`).
-  on(EVT.SELECTED, () => soundManager.playSelect());
-  on(EVT.ORDER_ISSUED, () => soundManager.playOrder());
+  // --- ouvinte = alvo da câmera (lido na hora do evento; objeto reutilizado, sem alocação por evento)
+  const L = { x: 0, z: 0, zoom: 1, rightX: 1, rightZ: 0 };
+  const syncListener = () => {
+    const sm = gm.sceneManager;
+    if (!sm || !sm.cameraTarget) return;
+    L.x = sm.cameraTarget.x;
+    L.z = sm.cameraTarget.z;
+    L.zoom = typeof sm.zoomLevel === 'number' ? sm.zoomLevel : 1;
+    const e = sm.camera && sm.camera.matrixWorld && sm.camera.matrixWorld.elements;
+    if (e) { L.rightX = e[0]; L.rightZ = e[2]; } // eixo "direita" da câmera projetado no chão
+    sound.setListener(L);
+  };
+  const visibleAt = (pos) => {
+    const f = gm.fogOfWar;
+    return !pos || !f || f.isVisible(pos.x, pos.z);
+  };
 
-  // Coleta de recursos: som só quando é o próprio jogador local que entrega (era `isLocal`).
-  on(EVT.RESOURCE_GATHERED, ({ ownerId }) => {
-    if (isLocal(ownerId)) soundManager.playOrder();
+  // --- efeitos sonoros
+  const play = (type, p) => {
+    const pos = p.pos || p.from || null;
+    const own = isLocal(p.ownerId);
+    const info = { own, visible: own || visibleAt(pos) };
+    if (type === EVT.ABILITY_CAST) {
+      const ab = resolveAbility(gm, p.abilityId);
+      info.vfxKind = ab && ab.vfx ? ab.vfx.kind : 'burst';
+    }
+    const list = soundsForEvent(type, p, info);
+    if (list.length === 0) return;
+    syncListener();
+    for (let i = 0; i < list.length; i++) sound.playSfx(list[i].sfx, list[i]);
+  };
+  for (const type of SFX_EVENTS) on(type, (p) => play(type, p));
+
+  // --- intensidade de combate (música adaptativa)
+  for (const type of COMBAT_EVENTS) {
+    on(type, (p) => {
+      const own = isLocal(p.ownerId);
+      let near = false;
+      if (!own && p.pos && visibleAt(p.pos)) {
+        syncListener();
+        const dx = p.pos.x - L.x;
+        const dz = p.pos.z - L.z;
+        near = Math.sqrt(dx * dx + dz * dz) < listenerRanges(L.zoom).max;
+      }
+      const w = combatWeight(type, p, { own, near });
+      if (w > 0) sound.noteCombat(w);
+    });
+  }
+
+  // --- falas de confirmação (seleção e ordem)
+  const speech = createSpeechDirector({ rng: createAudioRng(0x5eed ^ (gm.localPlayerId | 0)) });
+  const factionOf = (u) => {
+    const pl = gm.getPlayer ? gm.getPlayer(u.ownerId) : null;
+    return pl && pl.factionId ? pl.factionId : 'human';
+  };
+  /** true = tratou o som (falou ou foi limitada pela política); false = sem voz possível (toca o clique). */
+  const speakUnits = (kind, units) => {
+    if (!sound.canSpeak()) return false;
+    const lead = leaderOf(units, factionOf);
+    if (!lead) return false;
+    const now = sound.now();
+    const line = speech.pick(kind, lead.speaker, now);
+    if (!line) return true;
+    const dur = sound.speak(line);
+    if (dur > 0) speech.started(now, dur);
+    return true;
+  };
+  const selectedUnits = () => (gm.selectedUnits && gm.selectedUnits.length ? gm.selectedUnits : null);
+
+  on(EVT.SELECTED, ({ entityId }) => {
+    const e = gm.entitiesById.get(entityId);
+    if (e && e.type && speakerFor(e.type, factionOf(e)) && speakUnits('select', [e])) return;
+    sound.playSelect(); // construção, recurso ou unidade sem voz: o clique de sempre
+  });
+  on(EVT.ORDER_ISSUED, () => {
+    const sel = selectedUnits();
+    if (sel && speakUnits('order', sel)) return;
+    sound.playOrder();
   });
 
-  // Corte de madeira / mineração / martelo: sempre tocava, sem checar dono.
-  on(EVT.WORKER_CHOP, () => soundManager.playChop());
-  on(EVT.WORKER_MINE, ({ resource }) => {
-    if (resource === 'gold') soundManager.playMineGold();
-    else soundManager.playMineStone();
-  });
-  on(EVT.WORKER_HAMMER, () => soundManager.playHammer());
+  // InputManager (seleção em grupo, S/H/A/P, magias) chama `gm.soundManager.playSelect()/playOrder()` direto.
+  const inputSound = {
+    playSelect() {
+      const sel = selectedUnits();
+      if (!(sel && speakUnits('select', sel))) sound.playSelect();
+    },
+    playOrder() {
+      const sel = selectedUnits();
+      if (!(sel && speakUnits('order', sel))) sound.playOrder();
+    }
+  };
+  const previousHook = gm.soundManager;
+  gm.soundManager = inputSound;
 
-  // Projéteis e golpes corpo-a-corpo: sempre tocava.
-  on(EVT.PROJECTILE_FIRED, ({ kind }) => {
-    if (kind === 'axe') soundManager.playSword();
-    else soundManager.playBow();
+  // --- partida: música da facção do jogador local + ambiência do tileset
+  const lp = gm.localPlayer;
+  sound.beginMatch({ faction: lp && lp.factionId ? lp.factionId : 'human', tilesetId });
+  sound.setSceneProbe(() => {
+    const sm = gm.sceneManager;
+    return sm ? { timeOfDay: sm.timeOfDay, dayNight: sm.dayNight } : {};
   });
-  // F4-02: impacto do cerco (bolt/boulder) soa como pedra/ferro em vez do estalo de flecha.
-  on(EVT.PROJECTILE_HIT, ({ kind }) => {
-    if (kind === 'bolt' || kind === 'boulder') soundManager.playMineStone();
-    else soundManager.playArrowHit();
-  });
-  on(EVT.MELEE_HIT, () => soundManager.playSword());
-  // F4-05: explosão de sapador = impacto pesado (reaproveita o som do cerco)
-  on(EVT.EXPLOSION, () => soundManager.playMineStone());
-
-  // F4-03: som genérico de habilidade (reusa o som de construção concluída; sem assets novos).
-  // Só para o jogador local ou alvo explorado — a condição de névoa fica no ouvinte de VFX.
-  on(EVT.ABILITY_CAST, ({ ownerId }) => {
-    if (isLocal(ownerId)) soundManager.playBuildComplete();
-  });
-
-  // Construção: colocação só se local; treino e conclusão sempre tocavam.
-  on(EVT.BUILDING_PLACED, ({ ownerId }) => {
-    if (isLocal(ownerId)) soundManager.playBuildPlace();
-  });
-  on(EVT.UNIT_TRAINED, () => soundManager.playOrder());
-  on(EVT.BUILDING_COMPLETED, () => soundManager.playBuildComplete());
-  on(EVT.RESEARCH_DONE, () => soundManager.playBuildComplete());
-
-  // Alarme de ataque da IA: só quando o alvo é o jogador local.
-  on(EVT.UNDER_ATTACK, ({ ownerId }) => {
-    if (isLocal(ownerId)) soundManager.playAlarm();
-  });
-
-  // Vitória: só chega a acontecer quando o time do jogador local venceu (ver
-  // `GameManager._updateVictoryConditions`) — sempre tocava.
-  on(EVT.MATCH_WON, () => soundManager.playVictory());
 
   return function dispose() {
-    offs.forEach(off => off());
+    offs.forEach((off) => off());
     offs.length = 0;
+    if (gm.soundManager === inputSound) gm.soundManager = previousHook;
+    sound.endMatch();
   };
 }

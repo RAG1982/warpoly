@@ -227,6 +227,7 @@ export class OptionsPanel {
         ${this._row(t('opt.a.master'), this._slider('volumeMaster', { min: 0, max: 1, step: 0.05, value: s.get('volumeMaster'), fmt }), t('opt.a.masterHint'))}
         ${this._row(t('opt.a.sfx'), this._slider('volumeSfx', { min: 0, max: 1, step: 0.05, value: s.get('volumeSfx'), fmt }))}
         ${this._row(t('opt.a.music'), this._slider('volumeMusic', { min: 0, max: 1, step: 0.05, value: s.get('volumeMusic'), fmt }))}
+        ${this._row(t('opt.a.voice'), this._slider('volumeVoice', { min: 0, max: 1, step: 0.05, value: s.get('volumeVoice'), fmt }), t('opt.a.voiceHint'))}
       </section>`;
   }
 

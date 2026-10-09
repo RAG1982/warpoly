@@ -15,6 +15,7 @@ import { InputManager } from './InputManager.js';
 import { UIManager } from '../ui/UIManager.js';
 import { collectSharedResources, disposeObjectTree } from '../render/sceneDisposal.js';
 import { createAudioEvents } from '../audio/AudioEvents.js';
+import { detectAudioLevel } from '../audio/audioEnv.js';
 import { createVfxEvents } from '../render/VfxEvents.js';
 import { VfxSystem } from '../render/vfx/VfxSystem.js';
 import { selectVfxLevel } from '../render/vfx/vfxConfig.js';
@@ -135,7 +136,9 @@ export class MatchSession {
     this._disposeVfxEvents = null;
     this._disposeUiEvents = null;
     if (!this.gameManager.headless) {
-      this._disposeAudioEvents = createAudioEvents(this.gameManager, sound);
+      // F7-08: nível de áudio do preset atual (`?audio=` força; automação fica muda) e tileset do mapa (ambiência)
+      sound.setLevel?.(detectAudioLevel(QualitySettings.current, getTextureQuality()));
+      this._disposeAudioEvents = createAudioEvents(this.gameManager, sound, { tilesetId: this.terrainView.tileset && this.terrainView.tileset.id });
       // F7-05: partículas GPU em pool (nível por preset; `?vfx=off|low|med|high` força; `?texq=low` reduz).
       let vfxParam = null;
       try { vfxParam = new URLSearchParams(window.location.search).get('vfx'); } catch { /* sem window */ }

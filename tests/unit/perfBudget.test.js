@@ -357,32 +357,35 @@ describe('scripts injetados na página (determinismo)', () => {
     expect(seq(7)).not.toEqual(a);
   });
 
-  it('freezeInitScript: a simulação para exatamente no tick pedido, qualquer que seja o ritmo de quadros', () => {
-    const { win } = inPage(freezeInitScript(20));
+  it('freezeInitScript: a simulação não anda até go(); depois executa exatamente N passos, qualquer que seja o ritmo de quadros', () => {
+    const { win } = inPage(freezeInitScript(6));
     const gm = {
       currentTick: 0,
-      executados: 0,
       simStep() {
         this.currentTick++; // como GameManager.simStep: o contador sobe no começo do passo
-        this.executados++;
       }
     };
     win.game = { gameManager: gm }; // main.js atribui window.game depois de criar a sessão
+    for (let i = 0; i < 100; i++) gm.simStep(0.05); // antes do cenário ser montado: o jogo não envelhece
+    expect(gm.currentTick).toBe(0);
+    expect(win.__perfFreeze).toMatchObject({ ticks: 6, applied: true, active: false, steps: 0 });
+
+    win.__perfFreeze.go(); // o medidor chama quando o ?bench= terminou de montar o cenário
     for (let i = 0; i < 500; i++) gm.simStep(0.05);
-    expect(gm.currentTick).toBe(20);
-    expect(gm.executados).toBe(20);
-    expect(win.__perfFreeze).toEqual({ ticks: 20, applied: true });
+    expect(gm.currentTick).toBe(6);
+    expect(win.__perfFreeze).toMatchObject({ applied: true, active: true, steps: 6 });
     expect(win.game.gameManager).toBe(gm); // o getter devolve o mesmo objeto
   });
 
-  it('freezeInitScript: tick 0 não executa nenhum passo; sem gameManager registra applied:false com o erro', () => {
+  it('freezeInitScript: 0 passos nunca avança; sem gameManager registra applied:false com o erro', () => {
     const zero = inPage(freezeInitScript(0));
     const gm = { currentTick: 0, simStep() { this.currentTick++; } };
     zero.win.game = { gameManager: gm };
+    zero.win.__perfFreeze.go();
     gm.simStep(0.05);
     expect(gm.currentTick).toBe(0);
 
-    const broken = inPage(freezeInitScript(20));
+    const broken = inPage(freezeInitScript(6));
     broken.win.game = { gameManager: null };
     expect(broken.win.__perfFreeze.applied).toBe(false);
     expect(broken.win.__perfFreeze.error).toMatch(/TypeError/);

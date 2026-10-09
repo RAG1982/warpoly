@@ -49,7 +49,7 @@ Guarda contra regressões de desempenho. O orçamento **falha** (exit ≠ 0) qua
 
 | Métrica | Como é medida | CI (`perf.yml`, sem GPU) | `npm run perf` (com GPU) |
 |---|---|---|---|
-| **Draw calls** (`?bench=inicial` e `combate100`) | simulação congelada no tick 20, `Math.random` semeado, `quality=high&texq=low&skipPreload`; mediana de N; igual com ou sem GPU | confere | confere |
+| **Draw calls** (`?bench=inicial` e `combate100`) | cenário montado, simulação avança 6 passos e congela, `Math.random` semeado, `quality=high&texq=low&skipPreload`; mediana de N; igual com ou sem GPU | confere | confere |
 | **Bundle JS** | bytes de `assets/main-*.js` (bundle principal) e do JS de boot (entrada + `modulepreload`) do build de produção | confere | confere |
 | **FPS** (`inicial`, `combate100`) | cenário ao vivo, 2 s de aquecimento + 10 s, melhor de N | `fps: null` + motivo → "pulado" | confere |
 | **Tempo de load** | navegação até o jogo pronto **com** preload de texturas (`texq=low`, sem `skipPreload`), menor de N | `ms: null` + motivo → "pulado" | confere |
@@ -72,7 +72,7 @@ node tools/perf-budget.mjs --compare tools/perf-results/<arquivo>.json   # só c
 ### Protocolo de medição
 
 - **Build de produção** (`vite build` num diretório temporário, ou `--dist` para reaproveitar o `dist/` da CI) servido por `vite preview`; Chromium headless 1280×720, um contexto novo por execução, service worker bloqueado.
-- **Draw calls determinísticos.** Três fontes de variação foram eliminadas: (1) `Math.random` com semente fixa (props/árvores mudavam a contagem em até 8 % entre cargas); (2) preset de qualidade fixo (`quality=high`; senão a detecção de GPU escolhe `low` no SwiftShader e `high` na GPU real); (3) simulação congelada no tick 20 (sem congelar, a quantidade de combate dentro da janela depende do FPS e o `combate100` da CI seria outro cenário). O congelamento é feito pelo próprio script (`window.game` + `gameManager.simStep`), sem alterar código do jogo; se não congelar exatamente no tick 20 a execução falha.
+- **Draw calls determinísticos.** Três fontes de variação foram eliminadas: (1) `Math.random` com semente fixa (props/árvores mudavam a contagem em até 8 % entre cargas); (2) preset de qualidade fixo (`quality=high`; senão a detecção de GPU escolhe `low` no SwiftShader e `high` na GPU real); (3) simulação congelada: o `?bench=` monta o cenário, a simulação avança exatamente 6 passos (0,3 s de jogo) e para; só então 3 quadros são amostrados (`renderer.info.render.calls`). Sem congelar, a quantidade de combate dentro da janela de medição depende do FPS (o delta por quadro é limitado a 0,1 s, então no SwiftShader a luta anda ~10× mais devagar) e o `combate100` da CI seria outro cenário. O congelamento é feito pelo próprio script (`window.game` + `gameManager.simStep`, ativado só depois que o bench montou o cenário), sem alterar código do jogo; se a simulação não parar exatamente no passo 6 a execução falha em vez de medir algo diferente.
 - **FPS e load** ficam ao vivo (a simulação roda) e usam o *melhor* de N (maior FPS, menor load): ruído de CPU só piora a medida, nunca melhora.
 - **Bundle**: `mainJsBytes` = chunk de entrada do `index.html`; `initialJsBytes` = entrada + chunks pré-carregados (o que o jogo baixa para abrir); também grava o gzip (informativo) e os bytes de cada chunk, para a mensagem de falha apontar quem cresceu.
 - Cobertura: o preset `texq=low` desliga o pós-processamento (bloom/GTAO); regressões só desse caminho não aparecem aqui.

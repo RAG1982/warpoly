@@ -96,14 +96,20 @@ export function randomInitScript(seed) {
 }
 
 /**
- * Congela a simulação em `ticks` passos. `window.game` é atribuído uma vez, depois que a sessão existe; o setter troca
- * `gameManager.simStep` por um passo que não faz nada a partir do tick pedido. Assim o estado visual (e os draw calls)
- * não depende do FPS da máquina. Deixa `window.__perfFreeze = {ticks, applied, error?}` para o medidor conferir.
+ * Congela a simulação: o estado visual (e os draw calls) passa a depender só do cenário, não do FPS da máquina.
+ *
+ * `window.game` é atribuído uma vez, depois que a sessão existe; o setter troca `gameManager.simStep` por um passo
+ * que NÃO FAZ NADA até o medidor chamar `window.__perfFreeze.go()` (o que ele só faz depois que o `?bench=` montou o
+ * cenário) e, depois disso, executa exatamente `ticks` passos reais. Assim o cenário envelhece sempre os mesmos
+ * `ticks` desde a montagem, em qualquer máquina e em qualquer ritmo de quadros (GPU a 170 FPS ou SwiftShader a 1 FPS).
+ * O medidor lê `window.__perfFreeze = {ticks, applied, active, steps, error?}` para conferir.
  */
 export function freezeInitScript(ticks) {
   const n = Math.max(0, Math.floor(Number(ticks)));
   return `(() => {
   let game;
+  const state = { ticks: ${n}, applied: false, active: false, steps: 0, error: null, go() { state.active = true; } };
+  window.__perfFreeze = state;
   Object.defineProperty(window, 'game', {
     configurable: true,
     get() { return game; },
@@ -112,10 +118,14 @@ export function freezeInitScript(ticks) {
       try {
         const gm = v && v.gameManager;
         const step = gm.simStep.bind(gm);
-        gm.simStep = (dt) => { if (gm.currentTick < ${n}) step(dt); };
-        window.__perfFreeze = { ticks: ${n}, applied: true };
+        gm.simStep = (dt) => {
+          if (!state.active || state.steps >= state.ticks) return;
+          state.steps++;
+          step(dt);
+        };
+        state.applied = true;
       } catch (e) {
-        window.__perfFreeze = { ticks: ${n}, applied: false, error: String(e) };
+        state.error = String(e);
       }
     }
   });

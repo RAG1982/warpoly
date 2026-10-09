@@ -2,6 +2,8 @@
 
 Arquivo bruto: `tools/bench/results/baseline-2026-09-28.json` (commit base `9f6cb7d`).
 
+> **Atualização (F10-04).** Esta é a baseline histórica de 2026-09-28 (dev server, antes das otimizações da F1). O orçamento vigente, medido sobre o build de produção e conferido a cada mudança, está em `tests/perf/baseline.json` (`npm run perf`; ver `docs/10_DEPLOY.md`).
+
 ## Condições
 
 | Item | Valor |

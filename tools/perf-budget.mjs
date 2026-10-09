@@ -8,15 +8,15 @@
  *   node tools/perf-budget.mjs --ci       runner SEM GPU (CI): draw calls + tamanho do bundle; FPS e load = null com motivo
  *   node tools/perf-budget.mjs --compare atual.json   só compara um relatório já medido (sem navegador)
  *
- * Opções: --baseline <arq>  --out <arq>  --dist <pasta do build>  --runs <n>  --threshold <0.10|10%>
+ * Opções: --calls-only (só draw calls + bundle, com o navegador normal)  --baseline <arq>  --out <arq>  --dist <pasta do build>  --runs <n>  --threshold <0.10|10%>
  *         --timeout <ms por página>  --port <n>
  *
  * Códigos de saída: 0 ok · 1 regressão (ou métrica sem medição) · 2 erro de uso/ambiente (sem GPU, sem baseline…).
  *
  * Protocolo (ver docs/10_DEPLOY.md): build de produção servido por `vite preview`, Chromium headless 1280×720,
  * `?bench=<cenário>` (src/debug/bench.js) com `quality=high&texq=low`, uma página por vez:
- *   - draw calls: `Math.random` semeado e simulação congelada no tick 20 (independe de FPS e de GPU → igual em
- *     CI/SwiftShader); mediana de N execuções;
+ *   - draw calls: `Math.random` semeado e simulação que envelhece 6 passos desde a montagem do cenário e congela
+ *     (independe de FPS e de GPU → igual em CI/SwiftShader); mediana de N execuções;
  *   - FPS: cenário ao vivo (2 s de aquecimento + 10 s), melhor de N (só com GPU real);
  *   - load: `?bench=inicial` COM o preload de texturas (sem `skipPreload`), menor de N (só com GPU real);
  *   - bundle: bytes do chunk `main` e do JS de boot lidos de dist/.
@@ -56,9 +56,11 @@ const PROTOCOL = {
   viewport: [1280, 720],
   /** Parâmetros fixos de URL: preset de qualidade fixo (senão a detecção de GPU muda o preset entre máquinas). */
   query: 'quality=high&texq=low',
-  freezeTicks: 20,
-  callsWarmupS: 1,
-  callsDurationS: 2,
+  /** Passos de simulação que o cenário envelhece antes de congelar (a névoa precisa de 2 passos para revelar a área). */
+  freezeTicks: 6,
+  /** Quadros descartados e quadros amostrados depois que o cenário congelou. */
+  settleFrames: 2,
+  sampleFrames: 3,
   fpsWarmupS: 2,
   fpsDurationS: 10,
   loadDurationS: 1
@@ -71,6 +73,7 @@ const PROTOCOL = {
 function parseArgs(argv) {
   const o = {
     ci: false,
+    callsOnly: false,
     update: false,
     compare: null,
     baseline: DEFAULT_BASELINE,
@@ -98,6 +101,7 @@ function parseArgs(argv) {
     };
     switch (flag) {
       case '--ci': o.ci = true; break;
+      case '--calls-only': o.callsOnly = true; break;
       case '--update': o.update = true; break;
       case '--help': case '-h': o.help = true; break;
       case '--compare': o.compare = resolve(val()); break;
@@ -114,6 +118,7 @@ function parseArgs(argv) {
   if (o.runs !== null && !(Number.isInteger(o.runs) && o.runs >= 1 && o.runs <= 15)) usageError('--runs deve ser um inteiro entre 1 e 15');
   if (!(o.timeout >= 1000)) usageError('--timeout em ms (>= 1000)');
   if (o.ci && o.update) usageError('--update exige GPU real: não combine com --ci (nunca use SwiftShader como baseline)');
+  if (o.callsOnly && o.update) usageError('--update precisa de todas as métricas: não combine com --calls-only');
   return o;
 }
 
@@ -239,48 +244,106 @@ const SOFTWARE_ARGS = ['--use-angle=swiftshader', '--enable-unsafe-swiftshader',
 
 const RANDOM_SEED = 0x5eed1004;
 
-/**
- * Uma execução do bench numa página nova (contexto isolado, sem service worker).
- * @returns {Promise<{bench: object, tick: number|null, errors: string[], wallS: number}>}
- */
-async function benchRun(browser, baseUrl, { scenario, skipPreload, warmupS, durationS, freezeTicks = null, timeout }) {
+/** Contexto isolado (sem service worker) + página com os scripts de determinismo e a coleta de erros de console. */
+async function openPage(browser, { freezeTicks = null } = {}) {
   const context = await browser.newContext({
     viewport: { width: PROTOCOL.viewport[0], height: PROTOCOL.viewport[1] },
     deviceScaleFactor: 1,
     serviceWorkers: 'block'
   });
   const errors = [];
+  // Falha rápido se a aba ou o navegador morrerem (ex.: OOM no teto do safe-run), em vez de esperar o timeout.
   let abort;
   const aborted = new Promise((_, reject) => (abort = reject));
   aborted.catch(() => {});
   const onDisconnect = () => abort(new Error('o navegador desconectou (morto por OOM?)'));
   browser.on('disconnected', onDisconnect);
-  try {
-    const page = await context.newPage();
-    page.on('crash', () => abort(new Error('a aba travou (memória?)')));
-    page.on('pageerror', (e) => errors.push(`pageerror: ${e.message}`));
-    page.on('console', (m) => m.type() === 'error' && errors.push(`console.error: ${m.text()}`));
-    await page.addInitScript(randomInitScript(RANDOM_SEED));
-    if (freezeTicks !== null) await page.addInitScript(freezeInitScript(freezeTicks));
-    const url = `${baseUrl}/?bench=${scenario}&${PROTOCOL.query}${skipPreload ? '&skipPreload' : ''}&benchWarmup=${warmupS}&benchDuration=${durationS}`;
-    const t0 = Date.now();
-    const run = async () => {
-      await page.goto(url, { waitUntil: 'domcontentloaded', timeout });
-      await page.waitForFunction(() => window.__bench, null, { timeout, polling: 250 });
-      const bench = await page.evaluate(() => window.__bench);
-      const tick = await page.evaluate(() => window.game?.gameManager?.currentTick ?? null);
-      const freeze = await page.evaluate(() => window.__perfFreeze ?? null);
-      return { bench, tick, freeze };
-    };
-    const { bench, tick, freeze } = await Promise.race([run(), aborted]);
-    if (!bench.ok) throw new Error(`bench ${scenario} falhou: ${bench.error}`);
-    if (freezeTicks !== null && (!freeze?.applied || tick !== freezeTicks)) {
-      throw new Error(`a simulação não congelou no tick ${freezeTicks} (tick=${tick}, freeze=${JSON.stringify(freeze)}): o ganho de determinismo se perdeu`);
+  const page = await context.newPage();
+  page.on('crash', () => abort(new Error('a aba travou (memória?)')));
+  page.on('pageerror', (e) => errors.push(`pageerror: ${e.message}`));
+  page.on('console', (m) => m.type() === 'error' && errors.push(`console.error: ${m.text()}`));
+  await page.addInitScript(randomInitScript(RANDOM_SEED));
+  if (freezeTicks !== null) await page.addInitScript(freezeInitScript(freezeTicks));
+  return {
+    page,
+    errors,
+    /** Corre contra a queda do navegador/aba. */
+    race: (promise) => Promise.race([promise, aborted]),
+    async close() {
+      browser.off('disconnected', onDisconnect);
+      await context.close().catch(() => {});
     }
-    return { bench, tick, errors, wallS: round1((Date.now() - t0) / 1000) };
+  };
+}
+
+/** Roda no navegador: descarta `settle` quadros e amostra `samples` quadros (lê o contador do renderer depois de cada render). */
+async function sampleFrames({ settle, samples }) {
+  const game = window.game;
+  const info = game.sceneManager.renderer.info;
+  const nextFrame = () => new Promise((resolve) => requestAnimationFrame(() => resolve()));
+  for (let i = 0; i < settle; i++) await nextFrame();
+  const calls = [];
+  for (let i = 0; i < samples; i++) {
+    await nextFrame(); // o rAF do medidor roda depois do rAF do jogo no mesmo quadro: info.render é deste quadro
+    calls.push(info.render.calls);
+  }
+  let objects = 0;
+  game.sceneManager.scene.traverse(() => objects++);
+  return { calls, objects, geometries: info.memory.geometries, tick: game.gameManager.currentTick };
+}
+
+/**
+ * Draw calls DETERMINÍSTICOS de um cenário `?bench=`: o cenário é montado, a simulação roda exatamente `freezeTicks`
+ * passos e congela; só então os quadros são amostrados. Não depende do FPS nem da GPU (igual no SwiftShader da CI).
+ * @returns {Promise<{drawCalls: number, frames: number[], objects: number, geometries: number, errors: string[], wallS: number}>}
+ */
+async function callsRun(browser, baseUrl, { scenario, freezeTicks, timeout }) {
+  const t0 = Date.now();
+  const ctx = await openPage(browser, { freezeTicks });
+  try {
+    // Aquecimento do bench gigante: o laço de medição do próprio bench nunca termina aqui; só interessa o cenário montado.
+    const url = `${baseUrl}/?bench=${scenario}&${PROTOCOL.query}&skipPreload&benchWarmup=3600&benchDuration=1`;
+    const run = async () => {
+      await ctx.page.goto(url, { waitUntil: 'domcontentloaded', timeout });
+      // startBench cria o overlay e monta o cenário na mesma chamada síncrona: com o overlay no DOM, o cenário está pronto.
+      await ctx.page.waitForSelector('#bench-overlay', { state: 'attached', timeout });
+      const applied = await ctx.page.evaluate(() => {
+        window.__perfFreeze.go();
+        return window.__perfFreeze.applied;
+      });
+      if (!applied) throw new Error(`não consegui congelar a simulação: ${await ctx.page.evaluate(() => window.__perfFreeze.error)}`);
+      await ctx.page.waitForFunction((k) => (window.game?.gameManager?.currentTick ?? 0) >= k, freezeTicks, { timeout, polling: 100 });
+      return ctx.page.evaluate(sampleFrames, { settle: PROTOCOL.settleFrames, samples: PROTOCOL.sampleFrames });
+    };
+    const r = await ctx.race(run());
+    if (r.tick !== freezeTicks) {
+      throw new Error(`a simulação não parou no tick ${freezeTicks} (tick=${r.tick}): o cenário não está congelado e os draw calls deixariam de ser determinísticos`);
+    }
+    return { drawCalls: Math.round(median(r.calls)), frames: r.calls, objects: r.objects, geometries: r.geometries, errors: ctx.errors, wallS: round1((Date.now() - t0) / 1000) };
   } finally {
-    browser.off('disconnected', onDisconnect);
-    await context.close().catch(() => {});
+    await ctx.close();
+  }
+}
+
+/**
+ * Uma execução AO VIVO do bench (a simulação roda): devolve o `window.__bench` completo (FPS, load…).
+ * @returns {Promise<{bench: object, errors: string[], wallS: number}>}
+ */
+async function liveRun(browser, baseUrl, { scenario, skipPreload, warmupS, durationS, timeout }) {
+  const t0 = Date.now();
+  const ctx = await openPage(browser);
+  try {
+    const url = `${baseUrl}/?bench=${scenario}&${PROTOCOL.query}${skipPreload ? '&skipPreload' : ''}&benchWarmup=${warmupS}&benchDuration=${durationS}`;
+    const run = async () => {
+      await ctx.page.goto(url, { waitUntil: 'domcontentloaded', timeout });
+      await ctx.page.waitForFunction(() => window.__bench, null, { timeout, polling: 250 });
+      return ctx.page.evaluate(() => window.__bench);
+    };
+    const bench = await ctx.race(run());
+    if (!bench.ok) throw new Error(`bench ${scenario} falhou: ${bench.error}`);
+    return { bench, errors: ctx.errors, wallS: round1((Date.now() - t0) / 1000) };
+  } finally {
+    await ctx.close();
   }
 }
 
@@ -290,6 +353,13 @@ async function benchRun(browser, baseUrl, { scenario, skipPreload, warmupS, dura
 
 async function measure(opts, baseUrl, browser, gpuInfo) {
   const runs = opts.runs ?? (opts.ci ? 2 : 3);
+  // FPS e load só existem com GPU real; --ci e --calls-only também os dispensam (sempre com o motivo registrado).
+  const skipTiming = opts.ci || opts.callsOnly || !gpuInfo.hardware;
+  const timingSkipReason = opts.ci
+    ? `modo --ci: WebGL por software (${gpuInfo.renderer}); FPS e load só são medidos com GPU real e comparados na mesma máquina (npm run perf)`
+    : opts.callsOnly
+      ? 'modo --calls-only: FPS e load não medidos'
+      : `sem GPU real: ${gpuInfo.reason}`;
   const scenarios = {};
   const pageErrors = new Set();
   const note = (r) => r.errors.forEach((e) => pageErrors.add(e));
@@ -298,29 +368,20 @@ async function measure(opts, baseUrl, browser, gpuInfo) {
     // 1) draw calls: simulação congelada (determinístico).
     const calls = [];
     for (let i = 0; i < runs; i++) {
-      const r = await benchRun(browser, baseUrl, {
-        scenario: name,
-        skipPreload: true,
-        warmupS: PROTOCOL.callsWarmupS,
-        durationS: PROTOCOL.callsDurationS,
-        freezeTicks: PROTOCOL.freezeTicks,
-        timeout: opts.timeout
-      });
+      const r = await callsRun(browser, baseUrl, { scenario: name, freezeTicks: PROTOCOL.freezeTicks, timeout: opts.timeout });
       note(r);
-      calls.push(r.bench.render.callsAvg);
-      log(`${name} · draw calls #${i + 1}/${runs}: ${r.bench.render.callsAvg} (máx ${r.bench.render.callsMax}; ${r.bench.entities.sceneObjects} objetos, ${r.bench.memory.geometries} geometrias; ${r.bench.frames} quadros, ${r.wallS} s)`);
+      calls.push(r.drawCalls);
+      log(`${name} · draw calls #${i + 1}/${runs}: ${r.drawCalls} (quadros: ${r.frames.join(', ')}; ${r.objects} objetos, ${r.geometries} geometrias; ${r.wallS} s)`);
     }
     const entry = { drawCalls: Math.round(median(calls)), fps: null, samples: { drawCalls: calls } };
 
     // 2) FPS: ao vivo, só com GPU real.
-    if (opts.ci || !gpuInfo.hardware) {
-      entry.fpsReason = opts.ci
-        ? `modo --ci: WebGL por software (${gpuInfo.renderer}); FPS só é medido com GPU real (npm run perf)`
-        : `sem GPU real: ${gpuInfo.reason}`;
+    if (skipTiming) {
+      entry.fpsReason = timingSkipReason;
     } else {
       const fps = [];
       for (let i = 0; i < runs; i++) {
-        const r = await benchRun(browser, baseUrl, {
+        const r = await liveRun(browser, baseUrl, {
           scenario: name,
           skipPreload: true,
           warmupS: PROTOCOL.fpsWarmupS,
@@ -339,12 +400,12 @@ async function measure(opts, baseUrl, browser, gpuInfo) {
 
   // 3) load: com o preload de texturas (sem skipPreload), só com GPU real.
   let load;
-  if (opts.ci || !gpuInfo.hardware) {
-    load = { ms: null, reason: opts.ci ? 'modo --ci: tempo de load não é comparável entre máquinas (runner sem GPU)' : `sem GPU real: ${gpuInfo.reason}` };
+  if (skipTiming) {
+    load = { ms: null, reason: timingSkipReason };
   } else {
     const ms = [];
     for (let i = 0; i < runs; i++) {
-      const r = await benchRun(browser, baseUrl, {
+      const r = await liveRun(browser, baseUrl, {
         scenario: 'inicial',
         skipPreload: false,
         warmupS: 0,
@@ -367,7 +428,7 @@ function buildManifest({ opts, browserVersion, gpuInfo, runs }) {
   } catch { /* sem playwright instalado */ }
   const cpus = os.cpus();
   return {
-    mode: opts.ci ? 'ci' : 'gpu',
+    mode: opts.ci ? 'ci' : opts.callsOnly ? 'calls-only' : 'gpu',
     chromium: browserVersion,
     playwright,
     gpu: { renderer: gpuInfo.renderer, hardware: gpuInfo.hardware },
@@ -380,7 +441,7 @@ function buildManifest({ opts, browserVersion, gpuInfo, runs }) {
     viewport: PROTOCOL.viewport,
     runs,
     protocol:
-      `build de produção + vite preview; ?bench=<cenário>&${PROTOCOL.query}; draw calls com sim congelada no tick ${PROTOCOL.freezeTicks} (mediana); ` +
+      `build de produção + vite preview; ?bench=<cenário>&${PROTOCOL.query}; draw calls com a sim congelada ${PROTOCOL.freezeTicks} passos após montar o cenário (mediana); ` +
       `FPS ao vivo ${PROTOCOL.fpsWarmupS}+${PROTOCOL.fpsDurationS} s (melhor); load sem skipPreload (menor)`
   };
 }

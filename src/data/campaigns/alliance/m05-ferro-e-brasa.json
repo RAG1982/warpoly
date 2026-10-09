@@ -1,0 +1,80 @@
+{
+  "format": "warpolymission",
+  "version": 1,
+  "id": "alliance-05-ferro-e-brasa",
+  "hidden": true,
+  "title": { "pt-BR": "Ferro e Brasa", "en": "Iron and Ember" },
+  "subtitle": { "pt-BR": "Aliança, missão 5", "en": "Alliance, mission 5" },
+  "briefing": {
+    "speaker": { "pt-BR": "Mestre Orsolo", "en": "Master Orsolo" },
+    "portrait": "🔮",
+    "text": {
+      "pt-BR": "Nas Florestas Altas o Cinzal ergue uma forja de guerra que arma a horda inteira. Não há tropa pronta para uma marcha longa: vamos construir uma base própria, forjar armas melhores e só então queimar o que eles ergueram. Use a madeira, o ouro e a pedra com sabedoria. O inimigo também cresce, e rápido.",
+      "en": "In the High Woods the Cinzal raise a war forge that arms the whole horde. No troops are ready for a long march: we will build a base of our own, forge better arms and only then burn what they built. Spend wood, gold and stone wisely. The enemy grows too, and fast."
+    },
+    "hints": [
+      { "pt-BR": "A IA inimiga vai atacar por conta própria; mantenha defesas.", "en": "The enemy AI will attack on its own; keep defenses up." },
+      { "pt-BR": "Aos 8 minutos chegam reforços do reino.", "en": "At 8 minutes reinforcements arrive from the realm." }
+    ]
+  },
+  "mapId": "bosques-2v2",
+  "seed": 8105,
+  "players": [
+    { "id": 0, "name": { "pt-BR": "Expedição de Aurelan", "en": "Aurelan Expedition" }, "factionId": "human", "team": 0, "color": "#2563eb", "isLocal": true, "startSlot": 0 },
+    { "id": 1, "name": { "pt-BR": "Clã da Forja Negra", "en": "Black Forge Clan" }, "factionId": "orc", "team": 1, "color": "#dc2626", "isAI": true, "startSlot": 2, "difficulty": "easy" }
+  ],
+  "startingResources": { "wood": 300, "gold": 250, "stone": 100 },
+  "vars": { "armed": false },
+
+  "setup": [
+    { "type": "tag", "select": { "buildingType": "great_hall", "owner": "enemy" }, "tag": "enemy-hall" },
+    { "type": "tag", "select": { "buildingType": "bandit_camp" }, "tag": "camps" }
+  ],
+
+  "objectives": [
+    { "id": "forge", "type": "build", "priority": "primary", "buildingType": "forge", "count": 1,
+      "title": { "pt-BR": "Construir uma Ferraria", "en": "Build a Forge" } },
+    { "id": "economy", "type": "collect", "priority": "primary", "resource": "gold", "amount": 1500,
+      "title": { "pt-BR": "Coletar 1500 de ouro", "en": "Gather 1500 gold" } },
+    { "id": "burn-forge", "type": "destroy", "priority": "primary", "select": { "tag": "enemy-hall" }, "active": false,
+      "title": { "pt-BR": "Destruir o Grande Salão da Forja Negra", "en": "Destroy the Black Forge Great Hall" } },
+    { "id": "stone-stock", "type": "collect", "priority": "secondary", "resource": "stone", "amount": 400, "mode": "stock",
+      "title": { "pt-BR": "Manter 400 de pedra em estoque", "en": "Keep 400 stone in stock" } },
+    { "id": "stable", "type": "build", "priority": "secondary", "buildingType": "stable", "count": 1,
+      "title": { "pt-BR": "Construir um Estábulo", "en": "Build a Stable" } },
+    { "id": "camp-hunter", "type": "destroy", "priority": "hidden", "select": { "tag": "camps" }, "count": 1,
+      "title": { "pt-BR": "Limpar um acampamento de bandoleiros", "en": "Clear a bandit camp" } }
+  ],
+
+  "triggers": [
+    { "id": "intro", "when": { "type": "time", "at": 0 },
+      "actions": [
+        { "type": "music", "id": "on" },
+        { "type": "cutscene", "id": "woods", "duration": 9, "skippable": true,
+          "steps": [
+            { "at": 0, "x": 38, "z": 38, "zoom": 1.1, "dialog": { "speaker": { "pt-BR": "Mestre Orsolo", "en": "Master Orsolo" }, "portrait": "🔮", "text": { "pt-BR": "Madeira de sobra e uma jazida de ouro por perto. Aqui nasce o nosso exército.", "en": "Timber aplenty and a gold seam nearby. Our army is born here." }, "duration": 4.5 } },
+            { "at": 4.5, "x": -38, "z": -38, "zoom": 1, "dialog": { "speaker": { "pt-BR": "Mestre Orsolo", "en": "Master Orsolo" }, "portrait": "🔮", "text": { "pt-BR": "E ali, a fumaça da forja deles. Em tempo, ela será cinza.", "en": "And there, the smoke of their forge. In time, it will be ash." }, "duration": 4 } }
+          ] }
+      ] },
+    { "id": "forge-up", "when": { "type": "objective", "id": "forge", "status": "completed" },
+      "actions": [
+        { "type": "setVar", "name": "armed", "value": true },
+        { "type": "message", "text": { "pt-BR": "Ferraria pronta: pesquise melhorias para suas armas e armaduras.", "en": "Forge ready: research upgrades for your weapons and armor." } }
+      ] },
+    { "id": "economy-ready", "when": { "type": "objective", "id": "economy", "status": "completed" },
+      "actions": [
+        { "type": "setObjective", "id": "burn-forge", "status": "active" },
+        { "type": "reveal", "x": -38, "z": -38, "radius": 22 },
+        { "type": "dialog", "speaker": { "pt-BR": "Mestre Orsolo", "en": "Master Orsolo" }, "portrait": "🔮", "text": { "pt-BR": "Os cofres estão cheios. Hora de queimar a forja deles: marchem para o sudoeste.", "en": "The coffers are full. Time to burn their forge: march to the southwest." } }
+      ] },
+    { "id": "reinforcements", "when": { "type": "time", "at": 480 },
+      "actions": [
+        { "type": "spawn", "owner": "player", "units": [{ "type": "knight", "count": 4 }, { "type": "ballista", "count": 2 }], "x": 30, "z": 30 },
+        { "type": "dialog", "speaker": { "pt-BR": "Capitã Lyra", "en": "Captain Lyra" }, "portrait": "🏹", "text": { "pt-BR": "Reforços do reino, Mestre! Quatro cavaleiros e duas balistas.", "en": "Reinforcements from the realm, Master! Four knights and two ballistae." } }
+      ] },
+    { "id": "enemy-hall-down", "when": { "type": "objective", "id": "burn-forge", "status": "completed" },
+      "actions": [
+        { "type": "dialog", "speaker": { "pt-BR": "Mestre Orsolo", "en": "Master Orsolo" }, "portrait": "🔮", "text": { "pt-BR": "A forja é cinza. Sobrou um mapa: o Cinzal vai atacar por mar e ilha. Sigam!", "en": "The forge is ash. A map survived: the Cinzal will strike by sea and island. Onward!" }, "duration": 6 }
+      ] }
+  ]
+}

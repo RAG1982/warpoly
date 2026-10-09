@@ -26,6 +26,8 @@ import { t, onLanguageChange, getLanguage, setLanguage, mapName, factionName } f
 import { createTutorialConfig } from '../tutorial.js';
 import { MissionBriefing } from './MissionBriefing.js'; // F8-04
 import { createMissionConfig } from '../../data/missions/index.js';
+import { CampaignScreen } from './CampaignScreen.js'; // F8-05
+import { createCampaignMissionConfig, setActiveRun } from '../../campaign/index.js';
 
 const BYPASS_PARAMS = ['play', 'skipMenu', 'bench', 'skipPreload'];
 const MAP_THUMB_SIZE = { w: 96, h: 64 };
@@ -162,9 +164,25 @@ export class MainMenu {
     this.briefing.open();
   }
 
-  startMission(missionId) {
-    const config = createMissionConfig(missionId, { lang: getLanguage() === 'en' ? 'en' : 'pt-BR' });
+  /** F8-05: "Campanha" > escolha de missão > Iniciar (config com carry-over; a vitória é gravada pelo main.js). */
+  openCampaign() {
+    if (!this.campaignScreen) {
+      const unlockAll = new URLSearchParams(location.search).get('campaign') === 'unlock';
+      this.campaignScreen = new CampaignScreen({
+        unlockAll,
+        onStart: (campaignId, missionId) => this.startMission(missionId, campaignId, unlockAll),
+        onClose: () => this.root?.querySelector('[data-action="campaign"]')?.focus({ preventScroll: true })
+      });
+    }
+    this.campaignScreen.open();
+  }
+
+  startMission(missionId, campaignId = null, unlockAll = false) {
+    const lang = getLanguage() === 'en' ? 'en' : 'pt-BR';
+    const config = campaignId ? createCampaignMissionConfig(campaignId, missionId, { lang, unlockAll }) : createMissionConfig(missionId, { lang });
+    setActiveRun(campaignId ? { campaignId, missionId } : null);
     this.briefing?.close();
+    this.campaignScreen?.close();
     this.root.classList.add('mm-leaving');
     const reduce = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
     const choice = { config, faction: config.players[0].factionId, difficulty: config.difficulty, mapId: config.mapId, victoryMode: config.victoryMode, mission: true };
@@ -178,6 +196,8 @@ export class MainMenu {
   destroy() {
     this.briefing?.close();
     this.briefing = null;
+    this.campaignScreen?.close();
+    this.campaignScreen = null;
     this._offLang?.();
     this._disposePreview();
     clearTimeout(this._startTimer);
@@ -264,8 +284,8 @@ export class MainMenu {
             <button type="button" class="mm-btn" data-action="replays">
               <span class="mm-btn__label">${t('menu.replays')}</span><span class="mm-btn__hint">${t('menu.replaysHint')}</span>
             </button>
-            <button type="button" class="mm-btn" disabled aria-describedby="mm-soon-note">
-              <span class="mm-btn__label">${t('menu.campaign')}</span><span class="mm-badge">${t('menu.soon')}</span>
+            <button type="button" class="mm-btn" data-action="campaign">
+              <span class="mm-btn__label">${t('menu.campaign')}</span><span class="mm-btn__hint">${t('menu.campaignHint')}</span>
             </button>
             <button type="button" class="mm-btn" disabled aria-describedby="mm-soon-note">
               <span class="mm-btn__label">${t('menu.multiplayer')}</span><span class="mm-badge">${t('menu.soon')}</span>
@@ -390,6 +410,7 @@ export class MainMenu {
       else if (action === 'lang') setLanguage(getLanguage() === 'en' ? 'pt-BR' : 'en');
       else if (action === 'tutorial') this.startTutorial();
       else if (action === 'missions') this.openMissions();
+      else if (action === 'campaign') this.openCampaign();
       else if (action === 'start') this.start();
       else if (action === 'add-ai') this._apply(addAI(this.setup), { focus: '[data-sk="remove"]:last-of-type' });
       else if (action === 'roll-seed') {

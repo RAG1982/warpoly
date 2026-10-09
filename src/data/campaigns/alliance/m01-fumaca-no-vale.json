@@ -1,0 +1,86 @@
+{
+  "format": "warpolymission",
+  "version": 1,
+  "id": "alliance-01-fumaca-no-vale",
+  "hidden": true,
+  "title": { "pt-BR": "Fumaça no Vale", "en": "Smoke over the Valley" },
+  "subtitle": { "pt-BR": "Aliança, missão 1", "en": "Alliance, mission 1" },
+  "briefing": {
+    "speaker": { "pt-BR": "Marechal Dorian Vasques", "en": "Marshal Dorian Vasques" },
+    "portrait": "🛡️",
+    "text": {
+      "pt-BR": "Fumaça ao longo do Rio Claro: os arautos do Cinzal cruzaram as Montanhas do Véu e queimam as nossas fazendas. Ainda não é uma guerra, é um teste. Erga um quartel, reúna a milícia e esmague a vanguarda deles antes que a notícia chegue ao grosso da horda.",
+      "en": "Smoke along the Clear River: the heralds of the Cinzal have crossed the Veil Mountains and are burning our farms. This is not yet a war, it is a probe. Raise a barracks, gather the militia and crush their vanguard before word reaches the main horde."
+    },
+    "hints": [
+      { "pt-BR": "Trabalhadores constroem; o quartel treina soldados.", "en": "Workers build; the barracks trains soldiers." },
+      { "pt-BR": "Há um acampamento de bandoleiros a sudeste: espólio para quem o derrubar.", "en": "A bandit camp lies to the southeast: spoils for whoever tears it down." }
+    ]
+  },
+  "mapId": "campos-1v1",
+  "seed": 8101,
+  "players": [
+    { "id": 0, "name": { "pt-BR": "Reino de Aurelan", "en": "Kingdom of Aurelan" }, "factionId": "human", "team": 0, "color": "#2563eb", "isLocal": true, "startSlot": 0 },
+    { "id": 1, "name": { "pt-BR": "Arautos do Cinzal", "en": "Heralds of the Cinzal" }, "factionId": "orc", "team": 1, "color": "#dc2626", "isAI": false, "startSlot": 1 }
+  ],
+  "startingResources": { "wood": 350, "gold": 300, "stone": 120 },
+  "vars": { "barracks": false },
+
+  "setup": [
+    { "type": "tag", "select": { "buildingType": "bandit_camp" }, "tag": "camp" },
+    { "type": "spawn", "owner": "enemy", "unitType": "grunt", "count": 5, "x": -6, "z": -4, "tag": "vanguard", "guard": true }
+  ],
+
+  "objectives": [
+    { "id": "build-barracks", "type": "build", "priority": "primary", "buildingType": "barracks", "count": 1,
+      "title": { "pt-BR": "Construir um Quartel", "en": "Build a Barracks" } },
+    { "id": "crush-vanguard", "type": "destroy", "priority": "primary", "select": { "tag": "vanguard" }, "count": 5, "active": false,
+      "title": { "pt-BR": "Destruir a vanguarda do Cinzal", "en": "Destroy the Cinzal vanguard" },
+      "description": { "pt-BR": "Eles acampam no centro do vale.", "en": "They are camped in the middle of the valley." } },
+    { "id": "gold-500", "type": "collect", "priority": "secondary", "resource": "gold", "amount": 500,
+      "title": { "pt-BR": "Coletar 500 de ouro", "en": "Gather 500 gold" } },
+    { "id": "clear-camp", "type": "destroy", "priority": "secondary", "select": { "tag": "camp" },
+      "title": { "pt-BR": "Derrubar o acampamento de bandoleiros", "en": "Tear down the bandit camp" } },
+    { "id": "old-shrine", "type": "flag", "priority": "hidden",
+      "condition": { "type": "area", "owner": "player", "area": { "x": 14, "z": 14, "r": 8 } },
+      "title": { "pt-BR": "Encontrar o santuário abandonado", "en": "Find the abandoned shrine" } }
+  ],
+
+  "triggers": [
+    { "id": "intro", "when": { "type": "time", "at": 0 },
+      "actions": [
+        { "type": "music", "id": "on" },
+        { "type": "cutscene", "id": "intro", "duration": 10, "skippable": true,
+          "steps": [
+            { "at": 0, "x": -6, "z": -4, "zoom": 1.1, "dialog": { "speaker": { "pt-BR": "Marechal Dorian", "en": "Marshal Dorian" }, "portrait": "🛡️", "text": { "pt-BR": "Ali estão eles: cinco guerreiros do Cinzal, no meio do nosso vale.", "en": "There they are: five Cinzal warriors, in the middle of our valley." }, "duration": 4.5 } },
+            { "at": 5, "x": 30, "z": 30, "zoom": 1, "dialog": { "speaker": { "pt-BR": "Marechal Dorian", "en": "Marshal Dorian" }, "portrait": "🛡️", "text": { "pt-BR": "Esta é a nossa base. Erga o quartel e treine soldados.", "en": "This is our base. Raise the barracks and train soldiers." }, "duration": 4.5 } }
+          ] }
+      ] },
+    { "id": "barracks-up", "when": { "type": "objective", "id": "build-barracks", "status": "completed" },
+      "actions": [
+        { "type": "setVar", "name": "barracks", "value": true },
+        { "type": "setObjective", "id": "crush-vanguard", "status": "active" },
+        { "type": "reveal", "x": -6, "z": -4, "radius": 16 },
+        { "type": "dialog", "speaker": { "pt-BR": "Marechal Dorian", "en": "Marshal Dorian" }, "portrait": "🛡️", "text": { "pt-BR": "Quartel de pé! Treine soldados e marche contra a vanguarda, ao centro do vale.", "en": "Barracks standing! Train soldiers and march on the vanguard in the heart of the valley." } }
+      ] },
+    { "id": "vanguard-half", "when": { "type": "dead", "select": { "tag": "vanguard" }, "count": 3 },
+      "actions": [
+        { "type": "message", "text": { "pt-BR": "A vanguarda está se desfazendo!", "en": "The vanguard is breaking!" } }
+      ] },
+    { "id": "camp-spoils", "when": { "type": "dead", "select": { "buildingType": "bandit_camp", "killedBy": "player" } },
+      "actions": [
+        { "type": "giveResources", "owner": "player", "gold": 120, "wood": 60 },
+        { "type": "message", "text": { "pt-BR": "Espólio do acampamento: +120 de ouro, +60 de madeira.", "en": "Camp spoils: +120 gold, +60 wood." } }
+      ] },
+    { "id": "shrine", "when": { "type": "objective", "id": "old-shrine", "status": "completed" },
+      "actions": [
+        { "type": "giveResources", "owner": "player", "gold": 150 },
+        { "type": "sound", "id": "victory" },
+        { "type": "message", "text": { "pt-BR": "Santuário abandonado: +150 de ouro!", "en": "Abandoned shrine: +150 gold!" } }
+      ] },
+    { "id": "ending", "when": { "type": "objective", "id": "crush-vanguard", "status": "completed" },
+      "actions": [
+        { "type": "dialog", "speaker": { "pt-BR": "Marechal Dorian", "en": "Marshal Dorian" }, "portrait": "🛡️", "text": { "pt-BR": "Vitória! Mas a bandeira deles traz o símbolo de Skarn, o chefe-de-brasa. Isto é só o começo.", "en": "Victory! But their banner bears the sign of Skarn, the ember-chief. This is only the beginning." }, "duration": 6 }
+      ] }
+  ]
+}

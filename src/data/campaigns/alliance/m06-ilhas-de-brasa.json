@@ -1,0 +1,84 @@
+{
+  "format": "warpolymission",
+  "version": 1,
+  "id": "alliance-06-ilhas-de-brasa",
+  "hidden": true,
+  "title": { "pt-BR": "Ilhas de Brasa", "en": "Isles of Ember" },
+  "subtitle": { "pt-BR": "Aliança, missão 6", "en": "Alliance, mission 6" },
+  "briefing": {
+    "speaker": { "pt-BR": "Capitã Lyra Ventosa", "en": "Captain Lyra Ventosa" },
+    "portrait": "🏹",
+    "text": {
+      "pt-BR": "Os clãs do Cinzal cruzaram o mar com barcaças e tomaram as Ilhas Gêmeas, de onde atacam o nosso porto. São dois acampamentos principais, um ao norte e outro ao sul da ilha leste. A guarnição aliada de Brumar nos ajuda, mas só se mantiver o porto de pé. Derrube os dois salões e não deixe Brumar cair.",
+      "en": "The Cinzal clans crossed the sea in barges and took the Twin Isles, from where they strike our harbor. There are two main camps, one north and one south on the east island. The allied garrison of Brumar helps us, but only if its harbor stays up. Tear down both halls and do not let Brumar fall."
+    },
+    "hints": [
+      { "pt-BR": "As duas ilhas se ligam por pontes de terra: elas são pontos de estrangulamento.", "en": "The two islands link through land bridges: they are chokepoints." },
+      { "pt-BR": "Brumar é uma guarnição aliada controlada pela IA.", "en": "Brumar is an AI-controlled allied garrison." }
+    ]
+  },
+  "mapId": "ilhas-4p",
+  "seed": 8106,
+  "players": [
+    { "id": 0, "name": { "pt-BR": "Frota de Aurelan", "en": "Aurelan Fleet" }, "factionId": "human", "team": 0, "color": "#2563eb", "isLocal": true, "startSlot": 0 },
+    { "id": 1, "name": { "pt-BR": "Guarnição de Brumar", "en": "Brumar Garrison" }, "factionId": "human", "team": 0, "color": "#16a34a", "isAI": true, "startSlot": 1, "difficulty": "easy" },
+    { "id": 2, "name": { "pt-BR": "Clã das Marés Negras", "en": "Black Tide Clan" }, "factionId": "orc", "team": 1, "color": "#dc2626", "isAI": true, "startSlot": 2, "difficulty": "normal" },
+    { "id": 3, "name": { "pt-BR": "Clã do Sal Cinzento", "en": "Grey Salt Clan" }, "factionId": "orc", "team": 1, "color": "#ea580c", "isAI": true, "startSlot": 3, "difficulty": "easy" }
+  ],
+  "startingResources": { "wood": 400, "gold": 400, "stone": 150 },
+  "vars": { "brumar_warned": false },
+
+  "setup": [
+    { "type": "tag", "select": { "buildingType": "great_hall", "owner": 2 }, "tag": "hall-mares" },
+    { "type": "tag", "select": { "buildingType": "great_hall", "owner": 3 }, "tag": "hall-sal" },
+    { "type": "tag", "select": { "buildingType": "castle", "owner": 1 }, "tag": "brumar-keep" }
+  ],
+
+  "objectives": [
+    { "id": "raze-mares", "type": "destroy", "priority": "primary", "select": { "tag": "hall-mares" },
+      "title": { "pt-BR": "Destruir o salão do Clã das Marés Negras", "en": "Destroy the Black Tide Clan hall" } },
+    { "id": "raze-sal", "type": "destroy", "priority": "primary", "select": { "tag": "hall-sal" },
+      "title": { "pt-BR": "Destruir o salão do Clã do Sal Cinzento", "en": "Destroy the Grey Salt Clan hall" } },
+    { "id": "keep-brumar", "type": "flag", "priority": "primary",
+      "failWhen": { "type": "dead", "select": { "tag": "brumar-keep" } },
+      "condition": { "all": [{ "type": "dead", "select": { "tag": "hall-mares" } }, { "type": "dead", "select": { "tag": "hall-sal" } }] },
+      "title": { "pt-BR": "Manter o forte de Brumar de pé", "en": "Keep Brumar keep standing" },
+      "description": { "pt-BR": "Se o forte cair, a missão falha.", "en": "If the keep falls, the mission fails." } },
+    { "id": "towers", "type": "build", "priority": "secondary", "buildingType": "watchtower", "count": 3,
+      "title": { "pt-BR": "Erguer 3 torres de vigia", "en": "Raise 3 watchtowers" } },
+    { "id": "centre-bridge", "type": "flag", "priority": "hidden",
+      "condition": { "type": "area", "owner": "player", "area": { "x": 0, "z": -15, "r": 6 } },
+      "title": { "pt-BR": "Cruzar a ponte norte", "en": "Cross the north bridge" } }
+  ],
+
+  "triggers": [
+    { "id": "intro", "when": { "type": "time", "at": 0 },
+      "actions": [
+        { "type": "music", "id": "on" },
+        { "type": "cutscene", "id": "isles", "duration": 10, "skippable": true,
+          "steps": [
+            { "at": 0, "x": 30, "z": -25, "zoom": 1.1, "dialog": { "speaker": { "pt-BR": "Capitã Lyra", "en": "Captain Lyra" }, "portrait": "🏹", "text": { "pt-BR": "O salão das Marés Negras, ao norte da ilha leste.", "en": "The Black Tide hall, north of the east island." }, "duration": 4 } },
+            { "at": 4.5, "x": 30, "z": 25, "zoom": 1.1, "dialog": { "speaker": { "pt-BR": "Capitã Lyra", "en": "Captain Lyra" }, "portrait": "🏹", "text": { "pt-BR": "E o do Sal Cinzento, ao sul. Um de cada vez, ou os dois ao mesmo tempo, se tivermos coragem.", "en": "And the Grey Salt hall, to the south. One at a time, or both at once if we dare." }, "duration": 5 } }
+          ] }
+      ] },
+    { "id": "ally-help", "when": { "type": "dead", "select": { "tag": "hall-sal" } },
+      "actions": [
+        { "type": "giveResources", "owner": "player", "gold": 200 },
+        { "type": "message", "text": { "pt-BR": "O Sal Cinzento caiu: Brumar envia 200 de ouro como agradecimento.", "en": "Grey Salt has fallen: Brumar sends 200 gold in thanks." } }
+      ] },
+    { "id": "brumar-hit", "when": { "type": "area", "owner": "enemy", "area": { "x": -22, "z": 0, "r": 14 } },
+      "actions": [
+        { "type": "setVar", "name": "brumar_warned", "value": true },
+        { "type": "dialog", "speaker": { "pt-BR": "Capitão de Brumar", "en": "Brumar captain" }, "portrait": "⚓", "text": { "pt-BR": "Estamos sob ataque! Mandem socorro ao forte!", "en": "We are under attack! Send help to the keep!" } }
+      ] },
+    { "id": "relief", "when": { "type": "time", "at": 300 },
+      "actions": [
+        { "type": "spawn", "owner": "player", "units": [{ "type": "knight", "count": 3 }, { "type": "archer", "count": 3 }], "x": -26, "z": -22 },
+        { "type": "message", "text": { "pt-BR": "Chegam barcaças com reforços!", "en": "Barges with reinforcements arrive!" } }
+      ] },
+    { "id": "closing", "when": { "type": "dead", "select": { "tag": "hall-mares" } },
+      "actions": [
+        { "type": "dialog", "speaker": { "pt-BR": "Capitã Lyra", "en": "Captain Lyra" }, "portrait": "🏹", "text": { "pt-BR": "As ilhas são nossas. Mas um aliado nos olha de longe, e algo me diz que o Presa-Negra não é amigo.", "en": "The isles are ours. But an ally watches us from afar, and something tells me the Blackfang is no friend." }, "duration": 6 }
+      ] }
+  ]
+}

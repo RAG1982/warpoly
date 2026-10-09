@@ -1,0 +1,101 @@
+{
+  "format": "warpolymission",
+  "version": 1,
+  "id": "alliance-08-queda-do-cinzal",
+  "hidden": true,
+  "title": { "pt-BR": "A Queda do Cinzal", "en": "The Fall of the Cinzal" },
+  "subtitle": { "pt-BR": "Aliança, missão 8", "en": "Alliance, mission 8" },
+  "briefing": {
+    "speaker": { "pt-BR": "Marechal Dorian Vasques", "en": "Marshal Dorian Vasques" },
+    "portrait": "🛡️",
+    "text": {
+      "pt-BR": "Esta é a última marcha. No Planalto do Cinzal, Skarn reuniu os dois clãs que lhe restam e mantém a bandeira da horda erguida. Ao norte, a Guarda Real avança conosco. Derrubem os dois salões de guerra e matem o próprio Skarn. Se o chefe-de-brasa cair, a horda se desfaz. Se escaparmos, a guerra dura outra geração.",
+      "en": "This is the final march. On the Cinzal Plateau, Skarn has gathered the two clans left to him and keeps the horde's banner raised. To the north, the Royal Guard advances with us. Tear down both war halls and slay Skarn himself. If the ember-chief falls, the horde breaks apart. If he escapes, the war lasts another generation."
+    },
+    "hints": [
+      { "pt-BR": "A Guarda Real é uma aliada controlada pela IA.", "en": "The Royal Guard is an AI-controlled ally." },
+      { "pt-BR": "Há dois magos cativos num acampamento ao norte: resgatá-los dá apoio mágico.", "en": "Two mages are held captive in a camp to the north: rescuing them grants magic support." }
+    ]
+  },
+  "mapId": "planalto-ffa-4p",
+  "seed": 8108,
+  "players": [
+    { "id": 0, "name": { "pt-BR": "Exército de Aurelan", "en": "Army of Aurelan" }, "factionId": "human", "team": 0, "color": "#2563eb", "isLocal": true, "startSlot": 0 },
+    { "id": 1, "name": { "pt-BR": "Guarda Real", "en": "Royal Guard" }, "factionId": "human", "team": 0, "color": "#16a34a", "isAI": true, "startSlot": 3, "difficulty": "normal" },
+    { "id": 2, "name": { "pt-BR": "Horda do Cinzal", "en": "Cinzal Horde" }, "factionId": "orc", "team": 1, "color": "#dc2626", "isAI": true, "startSlot": 2, "difficulty": "normal" },
+    { "id": 3, "name": { "pt-BR": "Clã das Lanças Quebradas", "en": "Broken Spear Clan" }, "factionId": "orc", "team": 1, "color": "#ea580c", "isAI": true, "startSlot": 1, "difficulty": "easy" }
+  ],
+  "startingResources": { "wood": 600, "gold": 600, "stone": 300 },
+  "vars": { "skarn_slain": false, "waves": 0 },
+
+  "setup": [
+    { "type": "tag", "select": { "buildingType": "great_hall", "owner": 2 }, "tag": "hall-cinzal" },
+    { "type": "tag", "select": { "buildingType": "great_hall", "owner": 3 }, "tag": "hall-lancas" },
+    { "type": "spawn", "owner": 2, "unitType": "ogre", "count": 1, "x": -40, "z": -40, "tag": "skarn", "guard": true },
+    { "type": "spawn", "owner": "neutral", "unitType": "mage", "count": 2, "x": 4, "z": 56, "tag": "captive-mages" }
+  ],
+
+  "objectives": [
+    { "id": "raze-lancas", "type": "destroy", "priority": "primary", "select": { "tag": "hall-lancas" },
+      "title": { "pt-BR": "Destruir o salão das Lanças Quebradas", "en": "Destroy the Broken Spear hall" } },
+    { "id": "raze-cinzal", "type": "destroy", "priority": "primary", "select": { "tag": "hall-cinzal" },
+      "title": { "pt-BR": "Destruir o salão de guerra do Cinzal", "en": "Destroy the Cinzal war hall" } },
+    { "id": "slay-skarn", "type": "destroy", "priority": "primary", "select": { "tag": "skarn" },
+      "title": { "pt-BR": "Matar Skarn, o chefe-de-brasa", "en": "Slay Skarn, the ember-chief" } },
+    { "id": "free-mages", "type": "rescue", "priority": "secondary", "tag": "captive-mages", "count": 2,
+      "title": { "pt-BR": "Resgatar os 2 magos cativos", "en": "Rescue the 2 captive mages" } },
+    { "id": "strong-army", "type": "flag", "priority": "secondary",
+      "condition": { "type": "count", "select": { "owner": "player", "unitType": "knight" }, "value": 6 },
+      "title": { "pt-BR": "Manter 6 cavaleiros vivos", "en": "Keep 6 knights alive" } },
+    { "id": "gold-hoard", "type": "collect", "priority": "hidden", "resource": "gold", "amount": 2000, "mode": "stock",
+      "title": { "pt-BR": "Acumular 2000 de ouro", "en": "Hoard 2000 gold" } }
+  ],
+
+  "triggers": [
+    { "id": "intro", "when": { "type": "time", "at": 0 },
+      "actions": [
+        { "type": "music", "id": "on" },
+        { "type": "cutscene", "id": "plateau", "duration": 14, "skippable": true,
+          "steps": [
+            { "at": 0, "x": -40, "z": -40, "zoom": 1.2, "dialog": { "speaker": { "pt-BR": "Marechal Dorian", "en": "Marshal Dorian" }, "portrait": "🛡️", "text": { "pt-BR": "Ali, entre as fogueiras: Skarn. O ogro com a coroa de ferro.", "en": "There, between the fires: Skarn. The ogre with the iron crown." }, "duration": 5 } },
+            { "at": 5, "x": -43, "z": 43, "zoom": 1.1, "dialog": { "speaker": { "pt-BR": "Marechal Dorian", "en": "Marshal Dorian" }, "portrait": "🛡️", "text": { "pt-BR": "Aquele é o clã das Lanças Quebradas, o elo mais fraco.", "en": "That is the Broken Spear clan, the weakest link." }, "duration": 4 } },
+            { "at": 9.5, "x": 43, "z": 43, "zoom": 1, "dialog": { "speaker": { "pt-BR": "Marechal Dorian", "en": "Marshal Dorian" }, "portrait": "🛡️", "text": { "pt-BR": "E aqui estamos nós. Por Aurelan!", "en": "And here we stand. For Aurelan!" }, "duration": 4 } }
+          ] }
+      ] },
+    { "id": "mages-freed", "when": { "type": "area", "owner": "player", "area": { "x": 4, "z": 56, "r": 9 } },
+      "actions": [
+        { "type": "transfer", "select": { "tag": "captive-mages" }, "to": "player" },
+        { "type": "dialog", "speaker": { "pt-BR": "Mestre Orsolo", "en": "Master Orsolo" }, "portrait": "🔮", "text": { "pt-BR": "Obrigado, soldado. Estes dois magos conhecem os pontos fracos de Skarn.", "en": "Thank you, soldier. These two mages know Skarn's weak points." } }
+      ] },
+    { "id": "mage-boost", "when": { "type": "objective", "id": "free-mages", "status": "completed" },
+      "actions": [
+        { "type": "giveResources", "owner": "player", "gold": 200, "stone": 100 },
+        { "type": "reveal", "x": -40, "z": -40, "radius": 20 }
+      ] },
+    { "id": "horde-wave", "once": false, "cooldown": 1, "when": { "type": "every", "seconds": 150, "start": 210 },
+      "actions": [
+        { "type": "incVar", "name": "waves", "by": 1 },
+        { "type": "spawn", "owner": 2, "units": [{ "type": "ogre", "count": 2 }, { "type": "grunt", "count": 4 }, { "type": "axethrower", "count": 2 }], "x": -30, "z": -30, "order": { "kind": "attackMove", "x": 38, "z": 38 } },
+        { "type": "message", "text": { "pt-BR": "Skarn lança outra onda de guerreiros!", "en": "Skarn throws another wave of warriors!" } }
+      ] },
+    { "id": "royal-guard", "when": { "type": "time", "at": 420 },
+      "actions": [
+        { "type": "spawn", "owner": "player", "units": [{ "type": "knight", "count": 4 }, { "type": "ballista", "count": 2 }, { "type": "archer", "count": 4 }], "x": 36, "z": 36 },
+        { "type": "dialog", "speaker": { "pt-BR": "Capitã Lyra", "en": "Captain Lyra" }, "portrait": "🏹", "text": { "pt-BR": "A Guarda Real chega! Façam deste planalto o túmulo do Cinzal!", "en": "The Royal Guard arrives! Make this plateau the tomb of the Cinzal!" } }
+      ] },
+    { "id": "skarn-falls", "when": { "type": "dead", "select": { "tag": "skarn" } },
+      "actions": [
+        { "type": "setVar", "name": "skarn_slain", "value": true },
+        { "type": "sound", "id": "victory" },
+        { "type": "cutscene", "id": "skarn-dead", "duration": 8, "skippable": true,
+          "steps": [
+            { "at": 0, "x": -40, "z": -40, "zoom": 1.2, "dialog": { "speaker": { "pt-BR": "Marechal Dorian", "en": "Marshal Dorian" }, "portrait": "🛡️", "text": { "pt-BR": "Skarn caiu! A coroa de ferro rolou na cinza.", "en": "Skarn has fallen! The iron crown rolled into the ash." }, "duration": 4 } },
+            { "at": 4, "x": 0, "z": 0, "zoom": 1, "dialog": { "speaker": { "pt-BR": "Rainha Sevelin", "en": "Queen Sevelin" }, "portrait": "👑", "text": { "pt-BR": "Que o Reino lembre: a paz vale mais que a vitória.", "en": "Let the Realm remember: peace is worth more than victory." }, "duration": 4 } }
+          ] }
+      ] },
+    { "id": "final", "when": { "type": "objective", "id": "raze-cinzal", "status": "completed" },
+      "actions": [
+        { "type": "message", "text": { "pt-BR": "O salão de guerra do Cinzal virou cinzas!", "en": "The Cinzal war hall is ash!" } }
+      ] }
+  ]
+}

@@ -22,6 +22,8 @@ import { bootOptions, applyAudio } from './ui/optionsApply.js';
 import { OptionsPanel } from './ui/screens/OptionsPanel.js';
 import { t, applyI18n, onLanguageChange, getLanguage } from './i18n/index.js';
 import { registerServiceWorker } from './pwa.js';
+import { getActiveRun, onMissionEnded } from './campaign/index.js'; // F8-05
+import { EVT } from './sim/events.js';
 
 // F6-08: opções salvas (teclas, escala de UI, daltonismo, pan…) antes de qualquer tela.
 registerServiceWorker();
@@ -421,6 +423,7 @@ class GameApp {
     if (online) this.session.onOnlineResync = () => setTimeout(() => this._resyncOnlineMatch(online), 0);
     this.matchCount++;
     this._saveMismatch = false;
+    this._hookCampaign(this.session.gameManager, config); // F8-05
     if (save) {
       if (this.skipPreload && firstServices) this._showLoadingScreen(false);
       const ok = await this._restoreSave(save, token);
@@ -453,6 +456,16 @@ class GameApp {
     if (this._saveMismatch) {
       this.session.uiManager.showNotification(`⚠️ ${t('main.saveMismatch')}`, 7000);
     }
+  }
+
+  /** F8-05: grava a vitória da missão de campanha em curso (progresso por tentativa + saldo final para o carry-over). */
+  _hookCampaign(gm, config) {
+    const missionId = config.missionId;
+    if (!missionId || !getActiveRun() || getActiveRun().missionId !== missionId) return;
+    gm.events.on(EVT.MISSION_ENDED, (p) => {
+      const me = gm.getPlayer(gm.localPlayerId);
+      onMissionEnded({ missionId, outcome: p.outcome, seconds: gm.mission ? gm.mission.elapsed : 0, resources: me ? me.resources : null });
+    }, true);
   }
 
   _enterInGame(from) {

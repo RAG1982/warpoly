@@ -800,5 +800,16 @@
   "ability.hero_arcane_bolt.name": "Raio Arcano",
   "ability.hero_arcane_bolt.desc": "Dispara energia arcana: 60 de dano mágico em área (raio 3) ao redor do alvo.",
   "ability.hero_mend.name": "Restauro",
-  "ability.hero_mend.desc": "Cura um aliado (8 PV por segundo, 3 de mana por PV) enquanto ele estiver ferido e houver mana. Auto-cast: abaixo de 60% de PV."
+  "ability.hero_mend.desc": "Cura um aliado (8 PV por segundo, 3 de mana por PV) enquanto ele estiver ferido e houver mana. Auto-cast: abaixo de 60% de PV.",
+  "menu.campaignHint": "Aliança",
+  "campaign.none": "Nenhuma campanha disponível.",
+  "campaign.play": "Iniciar missão",
+  "campaign.newAttempt": "Nova tentativa",
+  "campaign.attempt": "Tentativa {n}",
+  "campaign.provisional": "PROVISÓRIA",
+  "campaign.provisionalHint": "A premissa da campanha ainda aguarda aprovação.",
+  "campaign.status.locked": "Bloqueada: conclua a missão anterior",
+  "campaign.status.available": "Disponível",
+  "campaign.status.completed": "Concluída",
+  "campaign.carry": "Parte dos seus recursos da missão anterior é levada para esta."
 }

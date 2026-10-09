@@ -1,0 +1,83 @@
+{
+  "format": "warpolymission",
+  "version": 1,
+  "id": "alliance-07-traicao-presa-negra",
+  "hidden": true,
+  "title": { "pt-BR": "A Traição do Presa-Negra", "en": "The Blackfang Betrayal" },
+  "subtitle": { "pt-BR": "Aliança, missão 7", "en": "Alliance, mission 7" },
+  "briefing": {
+    "speaker": { "pt-BR": "Rainha Sevelin", "en": "Queen Sevelin" },
+    "portrait": "👑",
+    "text": {
+      "pt-BR": "O Clã Presa-Negra rompeu com Skarn e oferece uma trégua: o vale deles em troca de proteção contra o Cinzal. A trégua é valiosa e perigosa. Fortifique seu lado do vale, aprenda o que puder deles e não baixe a guarda. Quem aceita a mão de um chefe orc deve vigiar a outra.",
+      "en": "The Blackfang Clan broke with Skarn and offers a truce: their valley in exchange for protection against the Cinzal. The truce is valuable and dangerous. Fortify your side of the valley, learn what you can from them and never lower your guard. Whoever accepts an orc chief's hand must watch the other."
+    },
+    "hints": [
+      { "pt-BR": "O Presa-Negra começa aliado, com IA própria.", "en": "The Blackfang start allied, with their own AI." },
+      { "pt-BR": "Visitar o forte deles revela sinais da traição, e rende uma vantagem.", "en": "Visiting their fort reveals signs of the betrayal, and earns an advantage." }
+    ]
+  },
+  "mapId": "vales-2v2",
+  "seed": 8107,
+  "players": [
+    { "id": 0, "name": { "pt-BR": "Reino de Aurelan", "en": "Kingdom of Aurelan" }, "factionId": "human", "team": 0, "color": "#2563eb", "isLocal": true, "startSlot": 0 },
+    { "id": 1, "name": { "pt-BR": "Clã Presa-Negra", "en": "Blackfang Clan" }, "factionId": "orc", "team": 0, "color": "#9333ea", "isAI": true, "startSlot": 1, "difficulty": "normal" }
+  ],
+  "startingResources": { "wood": 450, "gold": 450, "stone": 200 },
+  "vars": { "betrayed": false, "suspicion": false },
+
+  "setup": [
+    { "type": "tag", "select": { "buildingType": "great_hall", "owner": 1 }, "tag": "presa-hall" }
+  ],
+
+  "objectives": [
+    { "id": "fortify", "type": "build", "priority": "primary", "buildingType": "watchtower", "count": 2,
+      "title": { "pt-BR": "Fortificar o vale com 2 torres de vigia", "en": "Fortify the valley with 2 watchtowers" } },
+    { "id": "survive-betrayal", "type": "survive", "priority": "primary", "seconds": 120, "active": false,
+      "title": { "pt-BR": "Sobreviver ao ataque traiçoeiro", "en": "Survive the treacherous attack" } },
+    { "id": "raze-presa", "type": "destroy", "priority": "primary", "select": { "tag": "presa-hall" }, "active": false,
+      "title": { "pt-BR": "Destruir o salão do Presa-Negra", "en": "Destroy the Blackfang hall" } },
+    { "id": "barracks-two", "type": "build", "priority": "secondary", "buildingType": "barracks", "count": 2,
+      "title": { "pt-BR": "Erguer 2 quartéis", "en": "Raise 2 barracks" } },
+    { "id": "sign-of-betrayal", "type": "flag", "priority": "hidden",
+      "condition": { "type": "area", "owner": "player", "area": { "x": -30, "z": 30, "r": 12 } },
+      "title": { "pt-BR": "Descobrir os sinais da traição", "en": "Discover the signs of betrayal" } }
+  ],
+
+  "triggers": [
+    { "id": "intro", "when": { "type": "time", "at": 0 },
+      "actions": [
+        { "type": "music", "id": "on" },
+        { "type": "cutscene", "id": "truce", "duration": 10, "skippable": true,
+          "steps": [
+            { "at": 0, "x": -32, "z": 32, "zoom": 1.1, "dialog": { "speaker": { "pt-BR": "Chefe Brakka Presa-Negra", "en": "Chief Brakka Blackfang" }, "portrait": "🐗", "text": { "pt-BR": "Humana, o Cinzal também queimou o meu povo. Por ora, lutamos lado a lado.", "en": "Human, the Cinzal burned my people too. For now we fight side by side." }, "duration": 5 } },
+            { "at": 5, "x": 32, "z": 32, "zoom": 1, "dialog": { "speaker": { "pt-BR": "Rainha Sevelin", "en": "Queen Sevelin" }, "portrait": "👑", "text": { "pt-BR": "Aceitei a trégua, mas guardem as torres. A paz entre nós é de vidro.", "en": "I accepted the truce, but guard the towers. The peace between us is made of glass." }, "duration": 4.5 } }
+          ] }
+      ] },
+    { "id": "signs", "when": { "type": "objective", "id": "sign-of-betrayal", "status": "completed" },
+      "actions": [
+        { "type": "setVar", "name": "suspicion", "value": true },
+        { "type": "spawn", "owner": "player", "units": [{ "type": "knight", "count": 3 }, { "type": "ballista", "count": 1 }], "x": 28, "z": 28 },
+        { "type": "dialog", "speaker": { "pt-BR": "Capitã Lyra", "en": "Captain Lyra" }, "portrait": "🏹", "text": { "pt-BR": "Armas empilhadas e tropas em formação. Eles vão nos trair. Chamei reforços: três cavaleiros e uma balista.", "en": "Stacked arms and troops forming up. They will betray us. I called for reinforcements: three knights and a ballista." } }
+      ] },
+    { "id": "betray-by-time", "when": { "type": "time", "at": 330 },
+      "actions": [
+        { "type": "enableTrigger", "id": "betray-now" }
+      ] },
+    { "id": "betray-now", "enabled": false, "when": { "type": "var", "name": "betrayed", "value": false },
+      "actions": [
+        { "type": "setVar", "name": "betrayed", "value": true },
+        { "type": "setTeam", "player": 1, "team": 1 },
+        { "type": "setObjective", "id": "survive-betrayal", "status": "active" },
+        { "type": "setObjective", "id": "raze-presa", "status": "active" },
+        { "type": "reveal", "x": -32, "z": 32, "radius": 24 },
+        { "type": "sound", "id": "alarm" },
+        { "type": "dialog", "speaker": { "pt-BR": "Chefe Brakka", "en": "Chief Brakka" }, "portrait": "🐗", "text": { "pt-BR": "A trégua acabou, humana! O Cinzal paga bem pelo seu vale!", "en": "The truce is over, human! The Cinzal pay well for your valley!" } },
+        { "type": "spawn", "owner": 1, "units": [{ "type": "grunt", "count": 4 }, { "type": "axethrower", "count": 3 }], "x": -26, "z": 26, "order": { "kind": "attackMove", "x": 26, "z": 26 } }
+      ] },
+    { "id": "presa-dies", "when": { "type": "objective", "id": "raze-presa", "status": "completed" },
+      "actions": [
+        { "type": "dialog", "speaker": { "pt-BR": "Rainha Sevelin", "en": "Queen Sevelin" }, "portrait": "👑", "text": { "pt-BR": "O traidor caiu. Agora nada nos separa do próprio Skarn.", "en": "The traitor is down. Now nothing stands between us and Skarn himself." }, "duration": 6 }
+      ] }
+  ]
+}

@@ -800,5 +800,16 @@
   "ability.hero_arcane_bolt.name": "Arcane Bolt",
   "ability.hero_arcane_bolt.desc": "Fires arcane energy: 60 magic damage in an area (radius 3) around the target.",
   "ability.hero_mend.name": "Restore",
-  "ability.hero_mend.desc": "Heals an ally (8 HP per second, 3 mana per HP) while it is wounded and mana remains. Auto-cast: below 60% HP."
+  "ability.hero_mend.desc": "Heals an ally (8 HP per second, 3 mana per HP) while it is wounded and mana remains. Auto-cast: below 60% HP.",
+  "menu.campaignHint": "Alliance",
+  "campaign.none": "No campaign available.",
+  "campaign.play": "Start mission",
+  "campaign.newAttempt": "New attempt",
+  "campaign.attempt": "Attempt {n}",
+  "campaign.provisional": "PROVISIONAL",
+  "campaign.provisionalHint": "The campaign premise is still awaiting approval.",
+  "campaign.status.locked": "Locked: complete the previous mission",
+  "campaign.status.available": "Available",
+  "campaign.status.completed": "Completed",
+  "campaign.carry": "Part of your resources from the previous mission carries over to this one."
 }

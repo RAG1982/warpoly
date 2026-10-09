@@ -16,6 +16,10 @@ import { UIManager } from '../ui/UIManager.js';
 import { collectSharedResources, disposeObjectTree } from '../render/sceneDisposal.js';
 import { createAudioEvents } from '../audio/AudioEvents.js';
 import { createVfxEvents } from '../render/VfxEvents.js';
+import { VfxSystem } from '../render/vfx/VfxSystem.js';
+import { selectVfxLevel } from '../render/vfx/vfxConfig.js';
+import { getTextureQuality } from '../models/textureQuality.js';
+import { QualitySettings } from './QualitySettings.js';
 import { HazardView } from '../render/HazardView.js';
 import { ProjectileViews } from '../render/ProjectileViews.js';
 import { EntityViews } from '../render/EntityViews.js';
@@ -66,6 +70,7 @@ export class MatchSession {
     this.water = new Water(scene, this.terrain);
     this.decorations = new Decorations(scene, this.terrain);
     this.particleSystem = new ParticleSystem(scene);
+    this.vfx = null; // F7-05 (só fora do headless)
 
     // Simulação (jogadores e bases a partir da MatchConfig, F2-01)
     this.gameManager = new GameManager(this.terrain, sound, this.particleSystem, matchConfig);
@@ -131,7 +136,12 @@ export class MatchSession {
     this._disposeUiEvents = null;
     if (!this.gameManager.headless) {
       this._disposeAudioEvents = createAudioEvents(this.gameManager, sound);
-      this._disposeVfxEvents = createVfxEvents(this.gameManager, this.particleSystem);
+      // F7-05: partículas GPU em pool (nível por preset; `?vfx=off|low|med|high` força; `?texq=low` reduz).
+      let vfxParam = null;
+      try { vfxParam = new URLSearchParams(window.location.search).get('vfx'); } catch { /* sem window */ }
+      const vfxLevel = selectVfxLevel(QualitySettings.current, getTextureQuality(), vfxParam);
+      this.vfx = new VfxSystem(scene, vfxLevel, this.gameManager);
+      this._disposeVfxEvents = createVfxEvents(this.gameManager, this.particleSystem, this.vfx);
       this.gameManager.hazardView = new HazardView(scene, this.gameManager); // F4-04b
       this.projectileViews = new ProjectileViews(this.gameManager, scene); // F2-08: malhas dos projéteis
       this._disposeUiEvents = createUiEvents(this.gameManager, this.uiManager);
@@ -215,6 +225,7 @@ export class MatchSession {
       this._presentFrame(delta, alpha);
       this.projectileViews?.update(alpha);
       this.particleSystem.update(delta);
+      this.vfx?.update(delta);
     } else {
       // Pausado: mantém a pose de simulação (sem avançar), billboards seguem a câmera.
       this._presentFrame(0, 1);
@@ -290,6 +301,8 @@ export class MatchSession {
 
     // 2. Partículas e textos flutuantes (texturas de canvas próprias).
     this.particleSystem.dispose();
+    this.vfx?.dispose();
+    this.vfx = null;
 
     // 3. Tudo o que a partida pôs na cena: remove e descarta o que não é compartilhado.
     const shared = collectSharedResources(ModelFactory);

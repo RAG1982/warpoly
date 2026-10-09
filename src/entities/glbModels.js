@@ -73,6 +73,8 @@ export const GLB_MODELS = {
   tree_oak: { url: `${BASE}models/tree_oak.glb`, root: 'TreeOak', type: null },
   tree_pine: { url: `${BASE}models/tree_pine.glb`, root: 'TreePine', type: null },
   tree_autumn: { url: `${BASE}models/tree_autumn.glb`, root: 'TreeAutumn', type: null },
+  // F7-00b (agente B): bétula (4º tipo de árvore instanciada; `species: 'birch'` nos mapas)
+  tree_birch: { url: `${BASE}models/tree_birch.glb`, root: 'TreeBirch', type: null },
   // F7-00b lote 2 (grupo 3): blocos de muralha instanciados (`WallBatch`)
   wall_human: { url: `${BASE}models/wall_human.glb`, root: 'WallHuman', type: null },
   wall_orc: { url: `${BASE}models/wall_orc.glb`, root: 'WallOrc', type: null },

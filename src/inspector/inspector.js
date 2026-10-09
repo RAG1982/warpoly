@@ -1276,6 +1276,18 @@ const MODEL_CATALOG = [
     notes: '1 draw call, ~570 triângulos, atlas 512², ~64 KB.'
   },
   {
+    id: 'tree_birch_glb',
+    name: 'Bétula (Blender)',
+    category: 'environment',
+    type: 'nature',
+    icon: '🌿',
+    glb: 'tree_birch',
+    sourceFile: 'tools/blender/build_birch.py',
+    create: createGlb('tree_birch'),
+    description: 'Bétula do mapa gerada pelo pipeline Blender (public/models/tree_birch.glb): tronco esguio de curva suave com base alargada, casca branco-giz com lenticelas escuras horizontais (padrão procedural assado no atlas), dez galhos finos e dez copas facetadas verde-limão em três andares. `species: "birch"` nos mapas; instanciada pelo TreeManager sob demanda (só existe o InstancedMesh se o mapa tiver bétulas).',
+    notes: '1 draw call, ~820 triângulos, atlas 512², ~80 KB, altura ~6,8. Substitui a bétula procedural (2 malhas e texturas de 2048² geradas no carregamento). `?glbtrees=0`/`?glb=0` fazem as bétulas do mapa caírem no carvalho.'
+  },
+  {
     id: 'wall_human_glb',
     name: 'Muralha de Pedra (Blender)',
     category: 'buildings',

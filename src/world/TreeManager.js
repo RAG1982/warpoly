@@ -208,6 +208,14 @@ export class TreeManager {
     this.pineCount = 0;
     this.autumnCount = 0;
 
+    // F7-00b: 4º tipo, a bétula (`tree_birch.glb`), criada sob demanda: nenhum mapa-base a usa por padrão, então sem árvore
+    // `birch` registrada não existe InstancedMesh (nem chamada de desenho, nem vértices extras). Sem o .glb (`?glb=0`,
+    // `?glbtrees=0` ou falha de carga) a bétula cai no carvalho.
+    this.maxBirches = 120;
+    this.birchCount = 0;
+    this._birchMesh = null;
+    this._birchChecked = false;
+
     // Cada tipo usa o .glb do Blender (1 InstancedMesh: tronco e copa na mesma malha/atlas) quando disponível;
     // senão, o par procedural tronco + copa (2 InstancedMesh por tipo).
     const glbOak = getGlbTreeSource('tree_oak');
@@ -258,15 +266,46 @@ export class TreeManager {
   applyTileset(def) {
     const cfg = def && def.trees && def.trees.tint;
     if (!cfg) return;
-    const map = new Map();
-    for (const im of this.instancedMeshes) {
-      if (!map.has(im.material)) {
-        const t = createTintedMaterial(im.material, cfg);
-        map.set(im.material, t);
-        this._tintedMats.push(t);
-      }
-      im.material = map.get(im.material);
+    this._tintCfg = cfg;
+    this._tintBySource = new Map();
+    for (const im of this.instancedMeshes) this._tintMesh(im);
+  }
+
+  /** Troca o material do InstancedMesh pela variante do tileset (um clone por material de origem; só se há tinta). */
+  _tintMesh(im) {
+    if (!this._tintCfg) return;
+    if (!this._tintBySource.has(im.material)) {
+      const t = createTintedMaterial(im.material, this._tintCfg);
+      this._tintBySource.set(im.material, t);
+      this._tintedMats.push(t);
     }
+    im.material = this._tintBySource.get(im.material);
+  }
+
+  /** InstancedMesh da bétula, criado na primeira árvore `birch`; `null` se o .glb não está disponível (usa o carvalho). */
+  _ensureBirchMesh() {
+    if (this._birchMesh || this._birchChecked) return this._birchMesh;
+    this._birchChecked = true;
+    const src = getGlbTreeSource('tree_birch');
+    if (!src) return null;
+    const m = new THREE.InstancedMesh(src.geo, src.mat, this.maxBirches);
+    m.castShadow = true;
+    m.receiveShadow = true;
+    m.userData.isTreeInstanced = true;
+    m.userData.treeEntities = [];
+    this._tintMesh(m);
+    this.scene.add(m);
+    this.instancedMeshes.push(m);
+    this._birchMesh = m;
+    return m;
+  }
+
+  /** Quantas árvores do tipo já foram registradas (a capacidade de cada InstancedMesh é de 120). */
+  countOf(type) {
+    if (type === 'pine') return this.pineCount;
+    if (type === 'autumn') return this.autumnCount;
+    if (type === 'birch' && this._ensureBirchMesh()) return this.birchCount;
+    return this.oakCount;
   }
 
   /** Material procedural criado sob demanda (as texturas de 2048² só são geradas se o .glb faltar). */
@@ -278,6 +317,7 @@ export class TreeManager {
   registerTree(tree, x, y, z, rotY, scale, type) {
     let trunkMesh, foliageMesh, idx;
 
+    const birchMesh = type === 'birch' ? this._ensureBirchMesh() : null;
     if (type === 'pine') {
       trunkMesh = this.pineTrunkMesh;
       foliageMesh = this.pineNeedlesMesh;
@@ -286,6 +326,10 @@ export class TreeManager {
       trunkMesh = this.autumnTrunkMesh;
       foliageMesh = this.autumnFoliageMesh;
       idx = this.autumnCount++;
+    } else if (birchMesh) {
+      trunkMesh = birchMesh;
+      foliageMesh = birchMesh;
+      idx = this.birchCount++;
     } else {
       trunkMesh = this.oakTrunkMesh;
       foliageMesh = this.oakFoliageMesh;
@@ -354,5 +398,8 @@ export class TreeManager {
     this.oakCount = 0;
     this.pineCount = 0;
     this.autumnCount = 0;
+    this.birchCount = 0;
+    this._birchMesh = null;
+    this._birchChecked = false;
   }
 }

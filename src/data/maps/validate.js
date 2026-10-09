@@ -19,7 +19,7 @@ import { getMap } from './index.js';
 import { decodeHeights, paintedNodes } from './painted.js';
 
 export const DRY = 1.8; // limiar de "terra seca" (GameManager.canPlaceBuilding)
-export const FOREST_SPECIES = Object.freeze(['oak', 'pine', 'autumn']);
+export const FOREST_SPECIES = Object.freeze(['oak', 'pine', 'autumn', 'birch']); // F7-00b: bétula (`tree_birch.glb`)
 export const RESOURCE_TYPES = Object.freeze(['gold', 'stone', 'oil']);
 export const MAP_ID_RE = /^[a-z0-9][a-z0-9-]{1,47}$/;
 export const SIZE_LIMITS = Object.freeze({ min: 64, max: 256 });

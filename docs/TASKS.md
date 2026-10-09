@@ -526,7 +526,7 @@ Sonnet 5.5 escreve a spec em `docs/specs/<ID>.md`; agente **Sonnet** executa; o 
 
 
 ### F10-04 · Orçamento de desempenho em CI
-- `TODO` · QA · Dep: F0-04 · Falha se draw calls/FPS/load piorarem > 10% vs baseline.
+- `DOING(agente-qa, 2026-10-09)` · QA · Dep: F0-04 · Falha se draw calls/FPS/load piorarem > 10% vs baseline.
 
 ### F10-05 · Empacotamento e deploy
 - `REVIEW` · QA · Dep: F1-01 · PWA offline, code-splitting por facção/modelos, compressão (brotli), deploy estático (GitHub Pages/Cloudflare Pages), página de lançamento.

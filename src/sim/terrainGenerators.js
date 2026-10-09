@@ -18,6 +18,7 @@
  * `loadHeightmap(url)` (suporte futuro ao editor F8-03) precisa de `Image`/canvas: vive em
  * `src/render/loadHeightmap.js` (F2-08c), reexportado por `src/world/terrainGenerators.js`.
  */
+import { paintedHeight } from '../data/maps/painted.js';
 
 /** Ondulações suaves comuns às plataformas de terra dos dois geradores. */
 function rollingBumps(x, z) {
@@ -124,7 +125,8 @@ export function islandsHeight(mapDef, x, z) {
 /** Geradores registrados por `mapDef.terrain.generator`. */
 export const TERRAIN_GENERATORS = Object.freeze({
   continental: continentalHeight,
-  islands: islandsHeight
+  islands: islandsHeight,
+  painted: paintedHeight // F8-03: grade pintada pelo editor (src/data/maps/painted.js)
 });
 
 /** Altura do terreno de `mapDef` em (x, z), delegando ao gerador registrado. */

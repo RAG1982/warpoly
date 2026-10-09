@@ -1,0 +1,137 @@
+{
+ "opts": {
+  "count": 8,
+  "seedStart": 1,
+  "maps": [
+   "desfiladeiro-1v1"
+  ],
+  "maxTicks": 72000,
+  "recheck": 3,
+  "faction": null,
+  "difficulty": null,
+  "stallTicks": 2400,
+  "out": "tools/soak-report/maps/desfiladeiro-1v1"
+ },
+ "wallMs": 85516,
+ "results": [
+  {
+   "seed": 1,
+   "map": "desfiladeiro-1v1",
+   "faction": "human",
+   "difficulty": "easy",
+   "finished": true,
+   "ticks": 12327,
+   "checksum": 1772356526,
+   "peakEntities": 71,
+   "wallMs": 10057,
+   "issues": []
+  },
+  {
+   "seed": 2,
+   "map": "desfiladeiro-1v1",
+   "faction": "orc",
+   "difficulty": "easy",
+   "finished": true,
+   "ticks": 15773,
+   "checksum": 193062291,
+   "peakEntities": 70,
+   "wallMs": 11531,
+   "issues": []
+  },
+  {
+   "seed": 3,
+   "map": "desfiladeiro-1v1",
+   "faction": "human",
+   "difficulty": "normal",
+   "finished": true,
+   "ticks": 7316,
+   "checksum": 32888161,
+   "peakEntities": 64,
+   "wallMs": 4720,
+   "issues": []
+  },
+  {
+   "seed": 4,
+   "map": "desfiladeiro-1v1",
+   "faction": "orc",
+   "difficulty": "normal",
+   "finished": true,
+   "ticks": 8302,
+   "checksum": 3049000508,
+   "peakEntities": 61,
+   "wallMs": 5021,
+   "issues": []
+  },
+  {
+   "seed": 5,
+   "map": "desfiladeiro-1v1",
+   "faction": "human",
+   "difficulty": "hard",
+   "finished": true,
+   "ticks": 6961,
+   "checksum": 1998051542,
+   "peakEntities": 61,
+   "wallMs": 4778,
+   "issues": []
+  },
+  {
+   "seed": 6,
+   "map": "desfiladeiro-1v1",
+   "faction": "orc",
+   "difficulty": "hard",
+   "finished": true,
+   "ticks": 12985,
+   "checksum": 3608965066,
+   "peakEntities": 83,
+   "wallMs": 12177,
+   "issues": []
+  },
+  {
+   "seed": 7,
+   "map": "desfiladeiro-1v1",
+   "faction": "human",
+   "difficulty": "brutal",
+   "finished": true,
+   "ticks": 6800,
+   "checksum": 656368884,
+   "peakEntities": 68,
+   "wallMs": 5476,
+   "issues": []
+  },
+  {
+   "seed": 8,
+   "map": "desfiladeiro-1v1",
+   "faction": "orc",
+   "difficulty": "brutal",
+   "finished": true,
+   "ticks": 10699,
+   "checksum": 3382495178,
+   "peakEntities": 106,
+   "wallMs": 12419,
+   "issues": []
+  }
+ ],
+ "rechecks": [
+  {
+   "seed": 1,
+   "map": "desfiladeiro-1v1",
+   "faction": "human",
+   "difficulty": "easy",
+   "diff": null
+  },
+  {
+   "seed": 3,
+   "map": "desfiladeiro-1v1",
+   "faction": "human",
+   "difficulty": "normal",
+   "diff": null
+  },
+  {
+   "seed": 5,
+   "map": "desfiladeiro-1v1",
+   "faction": "human",
+   "difficulty": "hard",
+   "diff": null
+  }
+ ]
+}

@@ -1,0 +1,137 @@
+{
+ "opts": {
+  "count": 8,
+  "seedStart": 1,
+  "maps": [
+   "arquipelago-naval-4p"
+  ],
+  "maxTicks": 72000,
+  "recheck": 3,
+  "faction": null,
+  "difficulty": null,
+  "stallTicks": 2400,
+  "out": "tools/soak-report/maps/arquipelago-naval-4p"
+ },
+ "wallMs": 241202,
+ "results": [
+  {
+   "seed": 1,
+   "map": "arquipelago-naval-4p",
+   "faction": "human",
+   "difficulty": "easy",
+   "finished": true,
+   "ticks": 36756,
+   "checksum": 2998105765,
+   "peakEntities": 103,
+   "wallMs": 31267,
+   "issues": []
+  },
+  {
+   "seed": 2,
+   "map": "arquipelago-naval-4p",
+   "faction": "orc",
+   "difficulty": "easy",
+   "finished": true,
+   "ticks": 13883,
+   "checksum": 2904013249,
+   "peakEntities": 105,
+   "wallMs": 15595,
+   "issues": []
+  },
+  {
+   "seed": 3,
+   "map": "arquipelago-naval-4p",
+   "faction": "human",
+   "difficulty": "normal",
+   "finished": true,
+   "ticks": 8537,
+   "checksum": 1995458935,
+   "peakEntities": 90,
+   "wallMs": 9769,
+   "issues": []
+  },
+  {
+   "seed": 4,
+   "map": "arquipelago-naval-4p",
+   "faction": "orc",
+   "difficulty": "normal",
+   "finished": true,
+   "ticks": 5607,
+   "checksum": 23546368,
+   "peakEntities": 95,
+   "wallMs": 6191,
+   "issues": []
+  },
+  {
+   "seed": 5,
+   "map": "arquipelago-naval-4p",
+   "faction": "human",
+   "difficulty": "hard",
+   "finished": true,
+   "ticks": 5852,
+   "checksum": 730774719,
+   "peakEntities": 103,
+   "wallMs": 7873,
+   "issues": []
+  },
+  {
+   "seed": 6,
+   "map": "arquipelago-naval-4p",
+   "faction": "orc",
+   "difficulty": "hard",
+   "finished": true,
+   "ticks": 32631,
+   "checksum": 1970644805,
+   "peakEntities": 118,
+   "wallMs": 42129,
+   "issues": []
+  },
+  {
+   "seed": 7,
+   "map": "arquipelago-naval-4p",
+   "faction": "human",
+   "difficulty": "brutal",
+   "finished": true,
+   "ticks": 57179,
+   "checksum": 4064611625,
+   "peakEntities": 121,
+   "wallMs": 54365,
+   "issues": []
+  },
+  {
+   "seed": 8,
+   "map": "arquipelago-naval-4p",
+   "faction": "orc",
+   "difficulty": "brutal",
+   "finished": true,
+   "ticks": 21177,
+   "checksum": 1895107602,
+   "peakEntities": 120,
+   "wallMs": 25989,
+   "issues": []
+  }
+ ],
+ "rechecks": [
+  {
+   "seed": 1,
+   "map": "arquipelago-naval-4p",
+   "faction": "human",
+   "difficulty": "easy",
+   "diff": null
+  },
+  {
+   "seed": 3,
+   "map": "arquipelago-naval-4p",
+   "faction": "human",
+   "difficulty": "normal",
+   "diff": null
+  },
+  {
+   "seed": 5,
+   "map": "arquipelago-naval-4p",
+   "faction": "human",
+   "difficulty": "hard",
+   "diff": null
+  }
+ ]
+}

@@ -506,7 +506,8 @@ Sonnet 5.5 escreve a spec em `docs/specs/<ID>.md`; agente **Sonnet** executa; o 
 ## F10 — Qualidade e lançamento
 
 ### F10-01 · Testes da simulação
-- `TODO` · QA · Dep: F0-05, F2-08 · Testes de combate, economia, pathfinding, comandos, determinismo.
+- `REVIEW` · QA · Dep: F0-05, F2-08 · Testes de combate, economia, pathfinding, comandos, determinismo.
+  - Resultado: inventário de `src/sim`/`src/ai` sem teste direto: statuses, targeting, splash (falloff), Player (economia), ResourceDeposit, Building.queueUnit/cancel, checksum (sensibilidade), validação de comandos inválidos/ordem de execução, Pathfinder (ótimo/orçamento/determinismo). Novos (66 testes): `simStatusTargeting`, `simEconomy`, `simCombat`, `simCommandsChecksum`, `simPathfinder`. Sem mudança de produção; nenhum bug novo achado. Sem cobertura direta ainda: `abilities`, `hazards`, `corpses`, `transport`, `AIMilitaryManager/AIMicroManager` (cobertos só indiretamente por spells/ships/ai-*).
 
 ### F10-02 · Soak test IA×IA headless
 - `REVIEW` · QA · Dep: F2-08 · 100 partidas por noite, detecção de travamentos, partidas que não terminam, exceções.

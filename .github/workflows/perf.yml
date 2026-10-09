@@ -1,0 +1,52 @@
+name: Perf budget
+
+# F10-04 · Orçamento de desempenho em CI.
+# O runner não tem GPU: aqui só se confere o que é independente de hardware, contra tests/perf/baseline.json
+#   - draw calls dos cenários ?bench=inicial e ?bench=combate100 (WebGL por software só para contar chamadas);
+#   - tamanho do bundle JS (chunk `main` e JS de boot) do build de produção.
+# FPS e tempo de load NÃO são conferidos aqui (dependem da máquina): rode `npm run perf` numa máquina com GPU.
+# Falha se alguma métrica piorar mais de 10 % em relação à baseline. Ver docs/10_DEPLOY.md.
+
+on:
+  push:
+    branches: [master]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: perf-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  perf:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm run lint
+      - run: npx vitest run
+      - run: npm run build
+      - name: Cache do Chromium (Playwright)
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-${{ runner.os }}-${{ hashFiles('package-lock.json') }}
+      - run: npx playwright install --with-deps chromium
+      # --ci: sem GPU. Mede draw calls (sim congelada, independe do hardware) e o tamanho do bundle de dist/;
+      # FPS e load saem como null com o motivo registrado. Escreve o resumo no job (GITHUB_STEP_SUMMARY).
+      - name: Orçamento de desempenho (draw calls + bundle)
+        run: node tools/perf-budget.mjs --ci --dist dist --out perf-current.json
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: perf-current
+          path: perf-current.json
+          if-no-files-found: ignore

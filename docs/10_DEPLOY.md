@@ -41,6 +41,50 @@ BASE=/warpoly/ bash tools/safe-run.sh --mem 6G --timeout 240 -- node tools/previ
 
 Sobe `vite preview`, abre `?skipPreload`, falha com qualquer erro de console/HTTP ≥ 400 e confirma o service worker ativo (e encerra servidor e navegador).
 
+## Orçamento de desempenho (F10-04)
+
+Guarda contra regressões de desempenho. O orçamento **falha** (exit ≠ 0) quando **draw calls, FPS, tempo de load ou o tamanho do bundle JS** pioram **mais de 10 %** em relação a `tests/perf/baseline.json` (só números + manifesto de hardware/Chromium, poucos KB, versionada). O limiar é estrito: exatamente 10 % ainda passa. Código: `tools/perf-budget.mjs` (medição/CLI) e `tools/lib/perfBudget.mjs` (comparador puro, testado em `tests/unit/perfBudget.test.js`).
+
+### Quem confere o quê
+
+| Métrica | Como é medida | CI (`perf.yml`, sem GPU) | `npm run perf` (com GPU) |
+|---|---|---|---|
+| **Draw calls** (`?bench=inicial` e `combate100`) | simulação congelada no tick 20, `Math.random` semeado, `quality=high&texq=low&skipPreload`; mediana de N; igual com ou sem GPU | confere | confere |
+| **Bundle JS** | bytes de `assets/main-*.js` (bundle principal) e do JS de boot (entrada + `modulepreload`) do build de produção | confere | confere |
+| **FPS** (`inicial`, `combate100`) | cenário ao vivo, 2 s de aquecimento + 10 s, melhor de N | `fps: null` + motivo → "pulado" | confere |
+| **Tempo de load** | navegação até o jogo pronto **com** preload de texturas (`texq=low`, sem `skipPreload`), menor de N | `ms: null` + motivo → "pulado" | confere |
+
+**FPS e load são checados localmente, não na CI.** O runner do GitHub não tem GPU (WebGL por software) e é outra máquina; FPS e load só são comparáveis com uma baseline medida na mesma máquina. Antes de mergear mudanças de render/sim/modelos, rode `npm run perf` numa máquina com GPU. Em runner sem GPU o relatório grava `fps: null` com o motivo (`fpsReason`) e o comparador mostra a linha como "pulado" com o motivo — nunca falha por causa disso, nunca esconde o motivo e **nunca usa SwiftShader como baseline** (`--update` recusa qualquer renderer de software).
+
+### Uso
+
+```bash
+npm run perf                                   # GPU real: build de produção + preview + Chromium; compara com a baseline; exit 1 em regressão
+npm run perf -- --runs 5                       # mais amostras (padrão 3)
+npm run perf -- --threshold 5%                 # limiar mais apertado (padrão 10%)
+npm run perf -- --update                       # regrava tests/perf/baseline.json (só do master, na máquina de referência)
+node tools/perf-budget.mjs --ci --dist dist    # runner SEM GPU (é o que a CI roda): draw calls + bundle
+node tools/perf-budget.mjs --compare tools/perf-results/<arquivo>.json   # só compara um resultado já medido (sem navegador)
+```
+
+`npm run perf` passa pelo `tools/safe-run.sh` (trava global, teto de RAM, timeout de 900 s) e leva alguns minutos. Cada execução grava o relatório completo (com as amostras de cada rodada) em `tools/perf-results/` (fora do git). Saída: tabela `métrica · baseline · atual · variação · limite · status` e o veredito; a CI também escreve o resumo em markdown no job (`GITHUB_STEP_SUMMARY`). Códigos de saída: **0** ok · **1** regressão (ou métrica sem medição) · **2** erro de uso/ambiente (sem GPU, sem baseline, build ausente…).
+
+### Protocolo de medição
+
+- **Build de produção** (`vite build` num diretório temporário, ou `--dist` para reaproveitar o `dist/` da CI) servido por `vite preview`; Chromium headless 1280×720, um contexto novo por execução, service worker bloqueado.
+- **Draw calls determinísticos.** Três fontes de variação foram eliminadas: (1) `Math.random` com semente fixa (props/árvores mudavam a contagem em até 8 % entre cargas); (2) preset de qualidade fixo (`quality=high`; senão a detecção de GPU escolhe `low` no SwiftShader e `high` na GPU real); (3) simulação congelada no tick 20 (sem congelar, a quantidade de combate dentro da janela depende do FPS e o `combate100` da CI seria outro cenário). O congelamento é feito pelo próprio script (`window.game` + `gameManager.simStep`), sem alterar código do jogo; se não congelar exatamente no tick 20 a execução falha.
+- **FPS e load** ficam ao vivo (a simulação roda) e usam o *melhor* de N (maior FPS, menor load): ruído de CPU só piora a medida, nunca melhora.
+- **Bundle**: `mainJsBytes` = chunk de entrada do `index.html`; `initialJsBytes` = entrada + chunks pré-carregados (o que o jogo baixa para abrir); também grava o gzip (informativo) e os bytes de cada chunk, para a mensagem de falha apontar quem cresceu.
+- Cobertura: o preset `texq=low` desliga o pós-processamento (bloom/GTAO); regressões só desse caminho não aparecem aqui.
+
+### Baseline
+
+@@BASELINE@@
+
+### CI
+
+`.github/workflows/perf.yml` (push em `master`, PRs e manual): `npm ci` → `npm run lint` → `npx vitest run` → `npm run build` → `playwright install chromium` → `node tools/perf-budget.mjs --ci --dist dist`. O Chromium usa SwiftShader só para contar chamadas; não mede FPS nem load. O job reprova a PR se um cenário tiver mais de 10 % de draw calls que a baseline ou se o `main` (ou o JS de boot) crescer mais de 10 % em bytes.
+
 ## Página de lançamento
 
 `index.html` já abre o menu principal do jogo (F6-01); não foi criada landing separada.

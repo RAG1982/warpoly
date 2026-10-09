@@ -38,7 +38,10 @@ import {
   classifyRenderer,
   compareBudgets,
   formatReport,
+  freezeInitScript,
   median,
+  normalizeRenderer,
+  randomInitScript,
   readBundleStats,
   reportProblems,
   toBaseline
@@ -225,46 +228,7 @@ const GPU_ARGS = [
 // Só no modo --ci (runner sem GPU): WebGL por software, apenas para CONTAR draw calls.
 const SOFTWARE_ARGS = ['--use-angle=swiftshader', '--enable-unsafe-swiftshader', '--ignore-gpu-blocklist', '--autoplay-policy=no-user-gesture-required', ...MEMORY_ARGS];
 
-/**
- * Determinismo do cenário: props (flores, grama, pedras) e árvores são espalhadas com `Math.random`, e o layout muda a
- * contagem de objetos (e de draw calls, até ~8 % entre cargas). Troca `Math.random` por um PRNG com semente fixa
- * antes de qualquer script da página (mesma técnica da regressão visual, tools/visual-regress.mjs).
- */
 const RANDOM_SEED = 0x5eed1004;
-const randomInitScript = `(() => {
-  let s = ${RANDOM_SEED} >>> 0;
-  Math.random = () => {
-    s = (s + 0x6d2b79f5) >>> 0;
-    let t = s;
-    t = Math.imul(t ^ (t >>> 15), t | 1);
-    t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
-    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
-  };
-})();`;
-
-/**
- * Antes de qualquer lógica do jogo: congela a simulação em `ticks` passos (sem tocar em src/).
- * `window.game` é atribuído uma vez, depois que a sessão existe; o setter troca `gameManager.simStep` por um
- * passo que não faz nada a partir do tick pedido. Assim o estado visual (e os draw calls) não depende do FPS.
- */
-const freezeInitScript = (ticks) => `(() => {
-  let game;
-  Object.defineProperty(window, 'game', {
-    configurable: true,
-    get() { return game; },
-    set(v) {
-      game = v;
-      try {
-        const gm = v && v.gameManager;
-        const step = gm.simStep.bind(gm);
-        gm.simStep = (dt) => { if (gm.currentTick < ${ticks}) step(dt); };
-        window.__perfFreeze = { ticks: ${ticks}, applied: true };
-      } catch (e) {
-        window.__perfFreeze = { ticks: ${ticks}, applied: false, error: String(e) };
-      }
-    }
-  });
-})();`;
 
 /**
  * Uma execução do bench numa página nova (contexto isolado, sem service worker).
@@ -287,7 +251,7 @@ async function benchRun(browser, baseUrl, { scenario, skipPreload, warmupS, dura
     page.on('crash', () => abort(new Error('a aba travou (memória?)')));
     page.on('pageerror', (e) => errors.push(`pageerror: ${e.message}`));
     page.on('console', (m) => m.type() === 'error' && errors.push(`console.error: ${m.text()}`));
-    await page.addInitScript(randomInitScript);
+    await page.addInitScript(randomInitScript(RANDOM_SEED));
     if (freezeTicks !== null) await page.addInitScript(freezeInitScript(freezeTicks));
     const url = `${baseUrl}/?bench=${scenario}&${PROTOCOL.query}${skipPreload ? '&skipPreload' : ''}&benchWarmup=${warmupS}&benchDuration=${durationS}`;
     const t0 = Date.now();
@@ -514,17 +478,14 @@ async function main() {
   try {
     // 3. GPU: o modo normal exige hardware; --ci aceita software, mas registra e nunca mede FPS.
     const probe = await (await browser.newContext()).newPage();
-    let renderer;
-    if (opts.ci) {
-      renderer = await readWebGLRenderer(probe);
-    } else {
+    if (!opts.ci) {
       try {
         await assertHardwareGpu(probe);
       } catch (err) {
         fail(`${err.message}\n  Sem GPU real não há FPS nem baseline: em runner sem GPU use \`node tools/perf-budget.mjs --ci\` (só draw calls + bundle).`);
       }
-      renderer = await readWebGLRenderer(probe);
     }
+    const renderer = normalizeRenderer(await readWebGLRenderer(probe));
     await probe.context().close();
     const gpuInfo = { renderer, ...classifyRenderer(renderer) };
     log(`Chromium ${browser.version()} · WebGL: ${renderer} (${gpuInfo.hardware ? 'GPU real' : 'software'})`);

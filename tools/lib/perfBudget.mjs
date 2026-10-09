@@ -34,6 +34,11 @@ const EPS = 1e-9;
 // GPU
 // ---------------------------------------------------------------------------
 
+/** Renderer sem caracteres fora do ASCII imprimível (o Chromium devolve "Radeon™" como "Radeonâ¢"): texto estável no manifesto. */
+export function normalizeRenderer(renderer) {
+  return String(renderer ?? '').replace(/[^\x20-\x7e]/g, '').replace(/\s+/g, ' ').trim();
+}
+
 /**
  * Classifica a string UNMASKED_RENDERER_WEBGL. Só `hardware: true` conta como GPU real
  * (SwiftShader/llvmpipe/software e "sem WebGL" nunca servem para FPS nem para baseline).
@@ -66,6 +71,55 @@ export function best(values, mode) {
   const xs = values.filter(Number.isFinite);
   if (!xs.length) return null;
   return mode === 'max' ? Math.max(...xs) : Math.min(...xs);
+}
+
+// ---------------------------------------------------------------------------
+// Scripts injetados na página antes do jogo (page.addInitScript) — sem tocar em src/
+// ---------------------------------------------------------------------------
+
+/**
+ * Determinismo do cenário: props (flores, grama, pedras) e árvores são espalhadas com `Math.random`, e o layout muda a
+ * contagem de objetos (e de draw calls, até ~8 % entre cargas). Troca `Math.random` por um PRNG (mulberry32) com semente
+ * fixa antes de qualquer script da página; mesma técnica da regressão visual (tools/visual-regress.mjs).
+ */
+export function randomInitScript(seed) {
+  return `(() => {
+  let s = ${Number(seed) >>> 0} >>> 0;
+  Math.random = () => {
+    s = (s + 0x6d2b79f5) >>> 0;
+    let t = s;
+    t = Math.imul(t ^ (t >>> 15), t | 1);
+    t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+})();`;
+}
+
+/**
+ * Congela a simulação em `ticks` passos. `window.game` é atribuído uma vez, depois que a sessão existe; o setter troca
+ * `gameManager.simStep` por um passo que não faz nada a partir do tick pedido. Assim o estado visual (e os draw calls)
+ * não depende do FPS da máquina. Deixa `window.__perfFreeze = {ticks, applied, error?}` para o medidor conferir.
+ */
+export function freezeInitScript(ticks) {
+  const n = Math.max(0, Math.floor(Number(ticks)));
+  return `(() => {
+  let game;
+  Object.defineProperty(window, 'game', {
+    configurable: true,
+    get() { return game; },
+    set(v) {
+      game = v;
+      try {
+        const gm = v && v.gameManager;
+        const step = gm.simStep.bind(gm);
+        gm.simStep = (dt) => { if (gm.currentTick < ${n}) step(dt); };
+        window.__perfFreeze = { ticks: ${n}, applied: true };
+      } catch (e) {
+        window.__perfFreeze = { ticks: ${n}, applied: false, error: String(e) };
+      }
+    }
+  });
+})();`;
 }
 
 // ---------------------------------------------------------------------------

@@ -4,6 +4,7 @@ import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
 import { spawnSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
+import vm from 'node:vm';
 import {
   DEFAULT_THRESHOLD,
   SCHEMA_VERSION,
@@ -13,9 +14,12 @@ import {
   classifyRenderer,
   compareBudgets,
   formatReport,
+  freezeInitScript,
   manifestDiff,
   median,
+  normalizeRenderer,
   parseIndexHtml,
+  randomInitScript,
   readBundleStats,
   reportProblems,
   toBaseline
@@ -287,6 +291,12 @@ describe('GPU, estatística e utilitários', () => {
     expect(classifyRenderer('').reason).toMatch(/sem informação/);
   });
 
+  it('normalizeRenderer tira caracteres fora do ASCII e espaços repetidos', () => {
+    expect(normalizeRenderer('ANGLE (AMD, Vulkan (AMD Radeonâ¢ RX 7600 XT))')).toBe('ANGLE (AMD, Vulkan (AMD Radeon RX 7600 XT))');
+    expect(normalizeRenderer('ANGLE (AMD, Vulkan (AMD Radeon\u2122  RX 7600 XT))')).toBe('ANGLE (AMD, Vulkan (AMD Radeon RX 7600 XT))');
+    expect(normalizeRenderer(null)).toBe('');
+  });
+
   it('median e best ignoram valores inválidos', () => {
     expect(median([3, 1, 2])).toBe(2);
     expect(median([4, 1, 3, 2])).toBe(2.5);
@@ -308,6 +318,58 @@ describe('GPU, estatística e utilitários', () => {
   it('chunkDeltas ordena os maiores crescimentos primeiro e ignora o que não mudou', () => {
     const d = chunkDeltas({ a: 10, b: 20, c: 5 }, { a: 10, b: 50, d: 7 });
     expect(d.map((x) => [x.name, x.delta])).toEqual([['b', 30], ['d', 7], ['c', -5]]);
+  });
+});
+
+describe('scripts injetados na página (determinismo)', () => {
+  /** Executa o script num contexto isolado com um `window` falso, como o addInitScript faria na página. */
+  const inPage = (script, win = {}) => {
+    const ctx = vm.createContext({ window: win });
+    vm.runInContext(script, ctx);
+    return { ctx, win };
+  };
+
+  it('randomInitScript: mesma semente = mesma sequência, valores em [0,1), semente diferente muda', () => {
+    const seq = (seed) => {
+      const { ctx } = inPage(randomInitScript(seed));
+      return vm.runInContext('Array.from({ length: 50 }, () => Math.random())', ctx);
+    };
+    const a = seq(0x5eed1004);
+    expect(seq(0x5eed1004)).toEqual(a);
+    expect(a.every((v) => v >= 0 && v < 1)).toBe(true);
+    expect(new Set(a).size).toBe(50);
+    expect(seq(7)).not.toEqual(a);
+  });
+
+  it('freezeInitScript: a simulação para exatamente no tick pedido, qualquer que seja o ritmo de quadros', () => {
+    const { win } = inPage(freezeInitScript(20));
+    const gm = {
+      currentTick: 0,
+      executados: 0,
+      simStep() {
+        this.currentTick++; // como GameManager.simStep: o contador sobe no começo do passo
+        this.executados++;
+      }
+    };
+    win.game = { gameManager: gm }; // main.js atribui window.game depois de criar a sessão
+    for (let i = 0; i < 500; i++) gm.simStep(0.05);
+    expect(gm.currentTick).toBe(20);
+    expect(gm.executados).toBe(20);
+    expect(win.__perfFreeze).toEqual({ ticks: 20, applied: true });
+    expect(win.game.gameManager).toBe(gm); // o getter devolve o mesmo objeto
+  });
+
+  it('freezeInitScript: tick 0 não executa nenhum passo; sem gameManager registra applied:false com o erro', () => {
+    const zero = inPage(freezeInitScript(0));
+    const gm = { currentTick: 0, simStep() { this.currentTick++; } };
+    zero.win.game = { gameManager: gm };
+    gm.simStep(0.05);
+    expect(gm.currentTick).toBe(0);
+
+    const broken = inPage(freezeInitScript(20));
+    broken.win.game = { gameManager: null };
+    expect(broken.win.__perfFreeze.applied).toBe(false);
+    expect(broken.win.__perfFreeze.error).toMatch(/TypeError/);
   });
 });
 
@@ -419,7 +481,7 @@ describe('tests/perf/baseline.json (versionada)', () => {
   });
 });
 
-describe('CLI: --compare (sem navegador)', () => {
+describe('CLI: --compare (sem navegador)', { timeout: 30000 }, () => {
   /** Roda `node tools/perf-budget.mjs --compare ...` com arquivos temporários. */
   function run(baseline, current) {
     const dir = mkdtempSync(join(tmpdir(), 'warpoly-perf-cli-'));

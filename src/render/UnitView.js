@@ -396,7 +396,7 @@ export class UnitView {
       // simulada) — evita o "degrau" de 20 Hz na animação de ataque.
       const t = Math.min(1, (u.attackTimer + alpha * SIM_DT) / u.effAttackCooldown);
       animator.advanceBlend(animDelta);
-      animator.setTime(t);
+      animator.setTime(t, true);
     } else {
       animator.update(animDelta * lodStep);
     }

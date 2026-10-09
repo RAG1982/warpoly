@@ -306,14 +306,14 @@ export class UnitAnimator {
     return ANIMATION_DURATIONS[this.currentAnim] || 1.0;
   }
 
-  setTime(time) {
+  setTime(time, blend = false) {
     const dur = this.getDuration();
     if (this.loop) {
       this.time = ((time % dur) + dur) % dur;
     } else {
       this.time = Math.max(0, Math.min(dur, time));
     }
-    this.applyPose(this.time);
+    this.applyPose(this.time, blend);
   }
 
   step(dt) {
@@ -338,7 +338,7 @@ export class UnitAnimator {
       }
     }
 
-    this.applyPose(this.time);
+    this.applyPose(this.time, true);
   }
 
   reset() {
@@ -350,10 +350,10 @@ export class UnitAnimator {
   /**
    * Applies the calculated pose transforms to the 3D meshes for the current time
    */
-  applyPose(time) {
+  applyPose(time, blend = false) {
     if (!this.model) return;
     this._applyPoseRaw(time);
-    this._applyBlend();
+    if (blend) this._applyBlend();
   }
 
   _applyPoseRaw(time) {

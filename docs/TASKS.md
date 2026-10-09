@@ -421,7 +421,7 @@ Sonnet 5.5 escreve a spec em `docs/specs/<ID>.md`; agente **Sonnet** executa; o 
 - **Aceite**: load < 5 s; cena inicial < 400 draw calls.
 
 ### F7-09 · Ícones, retratos e artes 2D renderizados no Blender
-- **Status**: `TODO(liberada pelo dono em 2026-10-09)` · Lane ART+UI · Onda 2 · Dep: F7-00
+- **Status**: `DOING(sonnet, 2026-10-09)` (liberada pelo dono em 2026-10-09) · Lane ART+UI · Onda 2 · Dep: F7-00
 - **Fazer**: script que renderiza (Eevee) ícones de comando, retratos animáveis de unidades para o painel de seleção, arte do menu principal e da tela de loading a partir dos mesmos `.glb`; sprites em `public/ui/`.
 - **Aceite**: HUD usa os novos ícones; consistência visual com o jogo 3D.
 

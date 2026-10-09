@@ -19,3 +19,14 @@ RTS 3D low-poly para navegador (three.js + Vite), inspirado em **Warcraft II**. 
 | [TASKS](TASKS.md) | **Lista de tarefas controlada**: protocolo, lanes/agentes, ondas paralelas, status |
 
 Backups: `~/warpoly_backups/warpoly_full_2026-09-28.tar.gz` e branch `backup/pre-aaa-2026-09-28`.
+
+## Regressão visual (F10-03)
+
+`npm run visual` captura todos os modelos do catálogo do inspetor (`MODEL_CATALOG`, 127 alvos) e três telas da HUD (menu principal, escaramuça, partida curta) em 1280×720, 1920×1080 e 390×844. Compara com a baseline commitada em `tests/visual/baseline/` e gera `tools/visual-report/index.html` com diffs por imagem (pasta ignorada pelo git).
+
+- Regravar a baseline (só depois de validar o master): `bash tools/safe-run.sh --timeout 1800 -- node tools/visual-regress.mjs --update`.
+- Filtros para lotes: `--res 1280x720`, `--only <regex>` (ex.: `--only 'inspector/knight$'`). Rodada sem filtro reinicia o relatório.
+- Limiar: um pixel conta como diferente se o maior delta entre canais passar de 24; a imagem falha se mais de 0,2 % dos pixels forem diferentes (`--pixel-tol`, `--max-ratio`). A partida curta usa 1 % (água, fogo e unidades animam em tempo real).
+- Determinismo: `Math.random` vira PRNG com semente fixa em cada página; a prévia 3D do menu tem o laço de animação congelado no screenshot.
+- Exige GPU real (aborta em SwiftShader/llvmpipe via `tools/lib/assertGpu.mjs`). Codec PNG e comparador em `tools/lib/` (sem dependência nova); testes em `tests/unit/visualCompare.test.js`.
+- `tests/visual/baseline/manifest.json` registra Chromium e GPU da baseline; o script avisa se a GPU mudar.

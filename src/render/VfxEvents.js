@@ -10,15 +10,18 @@
 import { t, resourceName } from '../i18n/index.js';
 import { EVT } from '../sim/events.js';
 import { resolveAbility } from '../sim/abilities.js';
+import { getBuildingDef, getUnitDef } from '../data/index.js';
+import { effectsForEvent } from './vfx/vfxMapping.js';
 
 const RESOURCE_COLOR = { gold: '#ffd700', wood: '#68d391', stone: '#cbd5e1' };
 
 /**
  * @param {import('../core/GameManager.js').GameManager} gm
  * @param {*} particleSystem
+ * @param {import('./vfx/VfxSystem.js').VfxSystem|null} [vfx] F7-05: partículas GPU (sangue, escombros, magia…); null = só o ParticleSystem antigo
  * @returns {() => void} `dispose` — remove todos os ouvintes registrados.
  */
-export function createVfxEvents(gm, particleSystem) {
+export function createVfxEvents(gm, particleSystem, vfx = null) {
   const offs = [];
   const on = (type, fn) => offs.push(gm.events.on(type, fn, true)); // true = apresentação (F2-06)
   const toVec = pos => ({ x: pos.x, y: pos.y, z: pos.z });
@@ -124,6 +127,44 @@ export function createVfxEvents(gm, particleSystem) {
         break;
     }
   });
+
+  // --- F7-05: partículas GPU. O mapeamento evento -> efeito é puro (`vfx/vfxMapping.js`); aqui só se coleta o contexto
+  // (flags da unidade, raio da construção, definição da habilidade, visibilidade) e se executa os descritores. ---
+  if (vfx && vfx.enabled) {
+    const seen = (ownerId, pos) => ownerId === gm.localPlayerId || !gm.fogOfWar || gm.fogOfWar.isVisible(pos.x, pos.z);
+    const unitFlags = (type) => {
+      const d = type ? getUnitDef(type) : null;
+      return d ? { undead: !!d.undead, siege: !!d.isSiege, corpseless: !!d.corpseless } : {};
+    };
+    const run = (type, p, info) => {
+      const list = effectsForEvent(type, p, info);
+      for (let i = 0; i < list.length; i++) vfx.play(list[i]);
+    };
+    on(EVT.UNIT_DAMAGED, (p) => {
+      if (!seen(p.ownerId, p.pos)) return;
+      const u = gm.entitiesById.get(p.unitId);
+      run(EVT.UNIT_DAMAGED, p, { unit: unitFlags(u && u.type) });
+    });
+    on(EVT.BUILDING_DAMAGED, (p) => { if (seen(p.ownerId, p.pos)) run(EVT.BUILDING_DAMAGED, p, {}); });
+    on(EVT.UNIT_DIED, (p) => {
+      if (!seen(p.ownerId, p.pos)) return;
+      const owner = gm.getPlayer(p.ownerId);
+      run(EVT.UNIT_DIED, p, { unit: unitFlags(p.unitType), teamColor: owner && owner.color });
+    });
+    for (const type of [EVT.BUILDING_DESTROYED, EVT.BUILDING_PLACED, EVT.BUILDING_COMPLETED]) {
+      on(type, (p) => {
+        if (!seen(p.ownerId, p.pos)) return;
+        const def = getBuildingDef(p.buildingType);
+        run(type, p, { radius: (def && def.collisionRadius) || 2 });
+      });
+    }
+    on(EVT.EXPLOSION, (p) => { if (seen(p.ownerId, p.pos)) run(EVT.EXPLOSION, p, {}); });
+    on(EVT.ABILITY_EFFECT, (p) => {
+      const ab = resolveAbility(gm, p.abilityId);
+      if (!ab || !ab.vfx || !isLocalOrExplored(p.ownerId, p.pos)) return;
+      run(EVT.ABILITY_EFFECT, p, { vfx: ab.vfx });
+    });
+  }
 
   return function dispose() {
     offs.forEach(off => off());

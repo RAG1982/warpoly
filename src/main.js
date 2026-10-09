@@ -113,6 +113,7 @@ class GameApp {
   get water() { return this.session?.water ?? null; }
   get decorations() { return this.session?.decorations ?? null; }
   get particleSystem() { return this.session?.particleSystem ?? null; }
+  get vfx() { return this.session?.vfx ?? null; } // F7-05: partículas GPU (debug/capturas)
   /** F1-04: presets de qualidade (window.game.quality) */
   get quality() { return this.sceneManager?.quality ?? QualitySettings; }
   get state() { return this.fsm.state; }

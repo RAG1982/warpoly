@@ -32,6 +32,7 @@ const TEXTURE_KEY = 'warpoly.textureQuality';
  * @property {boolean} ssao             F7-03: oclusão de ambiente de tela (GTAO)
  * @property {boolean} colorGrading     F7-03: color grading por tileset
  * @property {boolean} selectionOutline F7-03: contorno de seleção por máscara
+ * @property {'off'|'low'|'med'|'high'} vfx   F7-05: nível das partículas GPU (tetos/densidade em render/vfx/vfxConfig.js)
  * @property {'aces'|'agx'|'neutral'|'none'} toneMapping
  * @property {'low'|'med'|'high'|'ultra'} textureQuality
  * @property {boolean} dynamicResolution
@@ -57,6 +58,7 @@ export const QUALITY_PRESETS = {
     ssao: false,
     colorGrading: false,
     selectionOutline: false,
+    vfx: 'low',
     toneMapping: 'aces',
     textureQuality: 'low',
     dynamicResolution: true,
@@ -79,6 +81,7 @@ export const QUALITY_PRESETS = {
     ssao: false,
     colorGrading: true,
     selectionOutline: true,
+    vfx: 'med',
     toneMapping: 'aces',
     textureQuality: 'med',
     dynamicResolution: true,
@@ -101,6 +104,7 @@ export const QUALITY_PRESETS = {
     ssao: true,
     colorGrading: true,
     selectionOutline: true,
+    vfx: 'high',
     toneMapping: 'aces',
     textureQuality: 'high',
     dynamicResolution: true,
@@ -123,6 +127,7 @@ export const QUALITY_PRESETS = {
     ssao: true,
     colorGrading: true,
     selectionOutline: true,
+    vfx: 'high',
     toneMapping: 'aces',
     textureQuality: 'ultra',
     dynamicResolution: false,

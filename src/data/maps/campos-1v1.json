@@ -1,0 +1,239 @@
+{
+  "id": "campos-1v1",
+  "name": "Campos Dourados",
+  "size": 160,
+  "playable": 152,
+  "tileset": "verdejante",
+  "waterLevel": 0.5,
+  "maxPlayers": 2,
+  "generated": true,
+  "generator": {
+    "seed": 1,
+    "players": 2,
+    "size": 160,
+    "naval": false,
+    "theme": "verdejante",
+    "forestDensity": 2,
+    "symmetry": "rotational"
+  },
+  "terrain": {
+    "generator": "islands",
+    "params": {
+      "baseHeight": 2.6,
+      "coast": {
+        "falloff": 10
+      },
+      "islands": [
+        {
+          "x": 38.18,
+          "z": 38.18,
+          "rx": 26,
+          "rz": 26
+        },
+        {
+          "x": -38.18,
+          "z": -38.18,
+          "rx": 26,
+          "rz": 26
+        },
+        {
+          "x": 0,
+          "z": 0,
+          "rx": 13.67,
+          "rz": 13.67
+        },
+        {
+          "x": -36.27,
+          "z": 36.27,
+          "rx": 15,
+          "rz": 15
+        },
+        {
+          "x": 36.27,
+          "z": -36.27,
+          "rx": 15,
+          "rz": 15
+        }
+      ],
+      "bridges": [
+        {
+          "x1": 0,
+          "z1": 0,
+          "x2": 38.18,
+          "z2": 38.18,
+          "width": 12.77
+        },
+        {
+          "x1": 0,
+          "z1": 0,
+          "x2": -38.18,
+          "z2": -38.18,
+          "width": 12.77
+        },
+        {
+          "x1": 0,
+          "z1": 0,
+          "x2": -36.27,
+          "z2": 36.27,
+          "width": 10
+        },
+        {
+          "x1": 0,
+          "z1": 0,
+          "x2": 36.27,
+          "z2": -36.27,
+          "width": 10
+        }
+      ]
+    }
+  },
+  "fords": [],
+  "startSlots": [
+    {
+      "x": 38.18,
+      "z": 38.18,
+      "mirror": [
+        1,
+        -1
+      ]
+    },
+    {
+      "x": -38.18,
+      "z": -38.18,
+      "mirror": [
+        -1,
+        1
+      ]
+    }
+  ],
+  "resources": [
+    {
+      "type": "gold",
+      "x": 30.76,
+      "z": 51.27
+    },
+    {
+      "type": "stone",
+      "x": 52.68,
+      "z": 29.34
+    },
+    {
+      "type": "gold",
+      "x": -30.76,
+      "z": -51.27
+    },
+    {
+      "type": "stone",
+      "x": -52.68,
+      "z": -29.34
+    },
+    {
+      "type": "gold",
+      "x": 0,
+      "z": 0
+    }
+  ],
+  "forests": [
+    {
+      "x": 13.12,
+      "z": 10.87,
+      "count": 5,
+      "radius": 5.55,
+      "species": "pine"
+    },
+    {
+      "x": -13.12,
+      "z": -10.87,
+      "count": 5,
+      "radius": 5.55,
+      "species": "pine"
+    },
+    {
+      "x": 2.29,
+      "z": 9.31,
+      "count": 6,
+      "radius": 4.92,
+      "species": "pine"
+    },
+    {
+      "x": -2.29,
+      "z": -9.31,
+      "count": 6,
+      "radius": 4.92,
+      "species": "pine"
+    },
+    {
+      "x": 20.29,
+      "z": 16.95,
+      "count": 7,
+      "radius": 5.92,
+      "species": "autumn"
+    },
+    {
+      "x": -20.29,
+      "z": -16.95,
+      "count": 7,
+      "radius": 5.92,
+      "species": "autumn"
+    },
+    {
+      "x": 10.33,
+      "z": 2.1,
+      "count": 7,
+      "radius": 5.83,
+      "species": "autumn"
+    },
+    {
+      "x": -10.33,
+      "z": -2.1,
+      "count": 7,
+      "radius": 5.83,
+      "species": "autumn"
+    }
+  ],
+  "neutrals": [
+    {
+      "kind": "camp",
+      "x": -36.27,
+      "z": 36.27,
+      "guards": 3,
+      "reward": {
+        "gold": 300
+      },
+      "deposit": {
+        "type": "gold",
+        "amount": 3000
+      }
+    },
+    {
+      "kind": "camp",
+      "x": 36.27,
+      "z": -36.27,
+      "guards": 3,
+      "reward": {
+        "gold": 300
+      },
+      "deposit": {
+        "type": "gold",
+        "amount": 3000
+      }
+    },
+    {
+      "kind": "critters",
+      "species": "pig",
+      "x": 25.3,
+      "z": 39.21,
+      "count": 4,
+      "radius": 5
+    },
+    {
+      "kind": "critters",
+      "species": "pig",
+      "x": -25.3,
+      "z": -39.21,
+      "count": 4,
+      "radius": 5
+    }
+  ],
+  "decorationDensity": 1
+}

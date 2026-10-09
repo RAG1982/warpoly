@@ -1,0 +1,481 @@
+{
+  "id": "planalto-ffa-4p",
+  "name": "Planalto",
+  "size": 176,
+  "playable": 168,
+  "tileset": "verdejante",
+  "waterLevel": 0.5,
+  "maxPlayers": 4,
+  "generated": true,
+  "generator": {
+    "seed": 3,
+    "players": 4,
+    "size": 176,
+    "naval": false,
+    "theme": "verdejante",
+    "forestDensity": 1,
+    "symmetry": "rotational"
+  },
+  "terrain": {
+    "generator": "islands",
+    "params": {
+      "baseHeight": 2.6,
+      "coast": {
+        "falloff": 10
+      },
+      "islands": [
+        {
+          "x": 43.84,
+          "z": 43.84,
+          "rx": 26,
+          "rz": 26
+        },
+        {
+          "x": -43.84,
+          "z": 43.84,
+          "rx": 26,
+          "rz": 26
+        },
+        {
+          "x": -43.84,
+          "z": -43.84,
+          "rx": 26,
+          "rz": 26
+        },
+        {
+          "x": 43.84,
+          "z": -43.84,
+          "rx": 26,
+          "rz": 26
+        },
+        {
+          "x": 0,
+          "z": 0,
+          "rx": 19.35,
+          "rz": 19.35
+        },
+        {
+          "x": 0,
+          "z": 58.9,
+          "rx": 15,
+          "rz": 15
+        },
+        {
+          "x": -58.9,
+          "z": 0,
+          "rx": 15,
+          "rz": 15
+        },
+        {
+          "x": 0,
+          "z": -58.9,
+          "rx": 15,
+          "rz": 15
+        },
+        {
+          "x": 58.9,
+          "z": 0,
+          "rx": 15,
+          "rz": 15
+        }
+      ],
+      "bridges": [
+        {
+          "x1": 0,
+          "z1": 0,
+          "x2": 43.84,
+          "z2": 43.84,
+          "width": 12.21
+        },
+        {
+          "x1": 0,
+          "z1": 0,
+          "x2": -43.84,
+          "z2": 43.84,
+          "width": 12.21
+        },
+        {
+          "x1": 0,
+          "z1": 0,
+          "x2": -43.84,
+          "z2": -43.84,
+          "width": 12.21
+        },
+        {
+          "x1": 0,
+          "z1": 0,
+          "x2": 43.84,
+          "z2": -43.84,
+          "width": 12.21
+        },
+        {
+          "x1": 0,
+          "z1": 0,
+          "x2": 0,
+          "z2": 58.9,
+          "width": 10
+        },
+        {
+          "x1": 0,
+          "z1": 0,
+          "x2": -58.9,
+          "z2": 0,
+          "width": 10
+        },
+        {
+          "x1": 0,
+          "z1": 0,
+          "x2": 0,
+          "z2": -58.9,
+          "width": 10
+        },
+        {
+          "x1": 0,
+          "z1": 0,
+          "x2": 58.9,
+          "z2": 0,
+          "width": 10
+        }
+      ]
+    }
+  },
+  "fords": [],
+  "startSlots": [
+    {
+      "x": 43.84,
+      "z": 43.84,
+      "mirror": [
+        1,
+        -1
+      ]
+    },
+    {
+      "x": -43.84,
+      "z": 43.84,
+      "mirror": [
+        -1,
+        -1
+      ]
+    },
+    {
+      "x": -43.84,
+      "z": -43.84,
+      "mirror": [
+        -1,
+        1
+      ]
+    },
+    {
+      "x": 43.84,
+      "z": -43.84,
+      "mirror": [
+        1,
+        1
+      ]
+    }
+  ],
+  "resources": [
+    {
+      "type": "gold",
+      "x": 36.42,
+      "z": 56.92
+    },
+    {
+      "type": "stone",
+      "x": 58.34,
+      "z": 35
+    },
+    {
+      "type": "gold",
+      "x": -56.92,
+      "z": 36.42
+    },
+    {
+      "type": "stone",
+      "x": -35,
+      "z": 58.34
+    },
+    {
+      "type": "gold",
+      "x": -36.42,
+      "z": -56.92
+    },
+    {
+      "type": "stone",
+      "x": -58.34,
+      "z": -35
+    },
+    {
+      "type": "gold",
+      "x": 56.92,
+      "z": -36.42
+    },
+    {
+      "type": "stone",
+      "x": 35,
+      "z": -58.34
+    },
+    {
+      "type": "gold",
+      "x": 0,
+      "z": 0
+    }
+  ],
+  "forests": [
+    {
+      "x": 1.77,
+      "z": 30.97,
+      "count": 5,
+      "radius": 5.41,
+      "species": "autumn"
+    },
+    {
+      "x": -30.97,
+      "z": 1.77,
+      "count": 5,
+      "radius": 5.41,
+      "species": "autumn"
+    },
+    {
+      "x": -1.77,
+      "z": -30.97,
+      "count": 5,
+      "radius": 5.41,
+      "species": "autumn"
+    },
+    {
+      "x": 30.97,
+      "z": -1.77,
+      "count": 5,
+      "radius": 5.41,
+      "species": "autumn"
+    },
+    {
+      "x": 20.84,
+      "z": 1.35,
+      "count": 5,
+      "radius": 4.52,
+      "species": "pine"
+    },
+    {
+      "x": -1.35,
+      "z": 20.84,
+      "count": 5,
+      "radius": 4.52,
+      "species": "pine"
+    },
+    {
+      "x": -20.84,
+      "z": -1.35,
+      "count": 5,
+      "radius": 4.52,
+      "species": "pine"
+    },
+    {
+      "x": 1.35,
+      "z": -20.84,
+      "count": 5,
+      "radius": 4.52,
+      "species": "pine"
+    },
+    {
+      "x": 9.93,
+      "z": 6.03,
+      "count": 5,
+      "radius": 5.86,
+      "species": "autumn"
+    },
+    {
+      "x": -6.03,
+      "z": 9.93,
+      "count": 5,
+      "radius": 5.86,
+      "species": "autumn"
+    },
+    {
+      "x": -9.93,
+      "z": -6.03,
+      "count": 5,
+      "radius": 5.86,
+      "species": "autumn"
+    },
+    {
+      "x": 6.03,
+      "z": -9.93,
+      "count": 5,
+      "radius": 5.86,
+      "species": "autumn"
+    },
+    {
+      "x": 23.08,
+      "z": 23.02,
+      "count": 7,
+      "radius": 5.94,
+      "species": "autumn"
+    },
+    {
+      "x": -23.02,
+      "z": 23.08,
+      "count": 7,
+      "radius": 5.94,
+      "species": "autumn"
+    },
+    {
+      "x": -23.08,
+      "z": -23.02,
+      "count": 7,
+      "radius": 5.94,
+      "species": "autumn"
+    },
+    {
+      "x": 23.02,
+      "z": -23.08,
+      "count": 7,
+      "radius": 5.94,
+      "species": "autumn"
+    },
+    {
+      "x": 16.69,
+      "z": 16.42,
+      "count": 7,
+      "radius": 4.87,
+      "species": "pine"
+    },
+    {
+      "x": -16.42,
+      "z": 16.69,
+      "count": 7,
+      "radius": 4.87,
+      "species": "pine"
+    },
+    {
+      "x": -16.69,
+      "z": -16.42,
+      "count": 7,
+      "radius": 4.87,
+      "species": "pine"
+    },
+    {
+      "x": 16.42,
+      "z": -16.69,
+      "count": 7,
+      "radius": 4.87,
+      "species": "pine"
+    },
+    {
+      "x": 46.46,
+      "z": 0.47,
+      "count": 5,
+      "radius": 5.02,
+      "species": "autumn"
+    },
+    {
+      "x": -0.47,
+      "z": 46.46,
+      "count": 5,
+      "radius": 5.02,
+      "species": "autumn"
+    },
+    {
+      "x": -46.46,
+      "z": -0.47,
+      "count": 5,
+      "radius": 5.02,
+      "species": "autumn"
+    },
+    {
+      "x": 0.47,
+      "z": -46.46,
+      "count": 5,
+      "radius": 5.02,
+      "species": "autumn"
+    }
+  ],
+  "neutrals": [
+    {
+      "kind": "camp",
+      "x": 0,
+      "z": 58.9,
+      "guards": 5,
+      "reward": {
+        "gold": 300
+      },
+      "deposit": {
+        "type": "gold",
+        "amount": 3000
+      }
+    },
+    {
+      "kind": "camp",
+      "x": -58.9,
+      "z": 0,
+      "guards": 5,
+      "reward": {
+        "gold": 300
+      },
+      "deposit": {
+        "type": "gold",
+        "amount": 3000
+      }
+    },
+    {
+      "kind": "camp",
+      "x": 0,
+      "z": -58.9,
+      "guards": 5,
+      "reward": {
+        "gold": 300
+      },
+      "deposit": {
+        "type": "gold",
+        "amount": 3000
+      }
+    },
+    {
+      "kind": "camp",
+      "x": 58.9,
+      "z": 0,
+      "guards": 5,
+      "reward": {
+        "gold": 300
+      },
+      "deposit": {
+        "type": "gold",
+        "amount": 3000
+      }
+    },
+    {
+      "kind": "critters",
+      "species": "pig",
+      "x": 24.87,
+      "z": 43.59,
+      "count": 4,
+      "radius": 5
+    },
+    {
+      "kind": "critters",
+      "species": "pig",
+      "x": -43.59,
+      "z": 24.87,
+      "count": 4,
+      "radius": 5
+    },
+    {
+      "kind": "critters",
+      "species": "pig",
+      "x": -24.87,
+      "z": -43.59,
+      "count": 4,
+      "radius": 5
+    },
+    {
+      "kind": "critters",
+      "species": "pig",
+      "x": 43.59,
+      "z": -24.87,
+      "count": 4,
+      "radius": 5
+    }
+  ],
+  "decorationDensity": 1
+}

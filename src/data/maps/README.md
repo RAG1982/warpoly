@@ -77,6 +77,14 @@ Cada mapa é um JSON em `src/data/maps/<id>.json`, registrado em `index.js` (`ge
 - **`ilhas-4p`** ("Ilhas Gêmeas"): novo mapa FFA (4 slots, 2 ilhas ligadas por 2 pontes de terra,
   128×128). Jogue com `?map=ilhas-4p&ffa=1`.
 
+- **Pacote skirmish (F8-01)**, gerados com `tools/gen-map.mjs` e salvos como JSON estático (ids e nomes em PT-BR; nomes traduzidos em `src/i18n/*.json`, chave `map.<id>.name`). Testes em `tests/unit/mapsSkirmish.test.js`:
+  - **`campos-1v1`** ("Campos Dourados"): 1×1, 160. `--seed 1 --players 2 --size 160 --forest 2`.
+  - **`desfiladeiro-1v1`** ("Desfiladeiro"): 1×1, 144. `--seed 2 --players 2 --size 144`.
+  - **`vales-2v2`** ("Vales Verdes"): 4 slots para 2v2, 144. `--seed 4 --players 4 --size 144`.
+  - **`bosques-2v2`** ("Bosques Antigos"): 4 slots para 2v2, 160. `--seed 5 --players 4 --size 160`.
+  - **`planalto-ffa-4p`** ("Planalto"): FFA de 4, 176. `--seed 3 --players 4 --size 176`.
+  - **`arquipelago-naval-4p`** ("Arquipélago"): naval, 4 slots, 192 (poços de petróleo e costa para Estaleiro). `--seed 3 --players 4 --size 192 --naval --forest 2`.
+  - Não há mapa 1×1 de 96: com a regra de bosques a ≥ 27 dos pátios, o gerador não acha lugar para árvores suficientes nessa área (a seed 1 de 96 tinha 0 árvores). Ver também a nota de bosques no gerador abaixo.
 - **`tutorial`** ("Campo de Treino", F6-09, `hidden`): 104×104, uma ilha só (`islands`), 2 slots (jogador SW, rival passivo NE), 1 acampamento de bandidos (2 guardas) como alvo; ver `src/ui/tutorial.js`. Não é validado por `maps.test.js` (usa `listMaps()`); `tests/unit/tutorial.test.js` repete as checagens de terra seca.
 
 ## Adicionando um mapa
@@ -94,3 +102,5 @@ simétrico (rotacional de N dobras; `symmetry: 'mirror'` para N par). `size` é 
 O gerador verifica o mapa antes de devolver (terra seca, conectividade terrestre por flood fill no `Pathfinder`; no naval, poços e
 costa de cada base ligados pelo mar). Uso: `node tools/gen-map.mjs --seed 7 --players 4 --size 128 [--naval] --out mapa.json`, ou em
 código `registerGeneratedMap(opts)` (`index.js`) para o mapa ficar disponível em `getMap`/`listMaps` e em `MatchConfig`.
+Bosques (F8-01): o gerador só põe clusters com centro a ≥ 27 de qualquer base e com `max(|x|,|z|) + raio ≤ playable/2 − 1`
+(antes 17 e raio 6 colado na borda, o que deixava árvores inalcançáveis e colava bosques nos pátios).

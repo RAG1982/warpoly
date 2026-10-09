@@ -455,7 +455,8 @@ Sonnet 5.5 escreve a spec em `docs/specs/<ID>.md`; agente **Sonnet** executa; o 
 ## F8 — Conteúdo
 
 ### F8-01 · Pacote de mapas skirmish
-- `TODO` · CONTENT · Dep: F2-05 · 6 mapas: 2×1v1, 2×2v2, 1×FFA 4, 1×ilhas (naval, após F4-07); tamanhos 96–192.
+- `REVIEW` · CONTENT · Dep: F2-05 · 6 mapas: 2×1v1, 2×2v2, 1×FFA 4, 1×ilhas (naval, após F4-07); tamanhos 96–192.
+  - Resultado: `campos-1v1` (1×1, 160), `desfiladeiro-1v1` (1×1, 144), `vales-2v2` (4 slots, 144), `bosques-2v2` (4 slots, 160), `planalto-ffa-4p` (FFA 4, 176), `arquipelago-naval-4p` (naval 4, 192, poços de petróleo) — JSON em `src/data/maps/`, registrados em `index.js`, testes `tests/unit/mapsSkirmish.test.js`, i18n `map.<id>.name`. Soak `--count 8` por mapa: 8/8 terminaram em todos. Sem 1×1 de 96: com bosques a ≥27 dos pátios não há área para madeira suficiente (seed 1 de 96: 0 árvores). Ajuste em `generator.js` (F8-02): bosques minSlot 17→27 e margem da borda 6→7 (regra NEW-45/46); teste de densidade de `mapGenerator.test.js` passou a usar size 160 e `>=`. Soak que reprovou antes e foi corrigido: campos @128 seed 3 (22 árvores, 4/8 terminaram); naval seeds 6 e 7 (1 partida de 8 sem fim na seed 2 orc/easy) — trocado para seed 3.
 
 ### F8-02 · Gerador procedural de mapas
 - `DONE` · CONTENT · Dep: F2-05 · Seed → mapa simétrico balanceado para 2–8 jogadores. `src/data/maps/generator.js` (`generateMap`, determinístico, simetria rotacional/espelhada, minas/florestas/acampamentos/expansões, `naval:true` com poços e costa para Estaleiro, verificação por flood fill no Pathfinder), `registerGeneratedMap` em `maps/index.js`, CLI `tools/gen-map.mjs`, testes `tests/unit/mapGenerator.test.js`.

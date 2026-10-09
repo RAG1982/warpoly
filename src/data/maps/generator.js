@@ -226,7 +226,7 @@ export function generateMap(options = {}) {
       let ok = true;
       for (let a = 0; a < imgs.length && ok; a++) {
         const p = imgs[a];
-        if (Math.max(Math.abs(p.x), Math.abs(p.z)) > half - 6) ok = false;
+        if (Math.max(Math.abs(p.x), Math.abs(p.z)) > half - 7) ok = false;
         else if (depth(p) < minDepth) ok = false;
         else if (taken.some((q) => Math.hypot(p.x - q.x, p.z - q.z) < q.d)) ok = false;
         else if (minSlot && slots.some((s) => Math.hypot(p.x - s.x, p.z - s.z) < minSlot)) ok = false;
@@ -245,7 +245,8 @@ export function generateMap(options = {}) {
     const radius = r2(rngScatter.range(4.5, 6));
     const count = 5 + rngScatter.int(3);
     const sp = species[rngScatter.int(3)];
-    const imgs = scatter(R * 0.15, R + rb * 0.9, 3, 300, 17);
+    // F8-01: bosque a ≥ 27 dos pátios (regra NEW-45) e raio 6 dentro da área jogável (NEW-46): minSlot 27, margem de 7
+    const imgs = scatter(R * 0.15, R + rb * 0.9, 3, 300, 27);
     if (!imgs) continue;
     imgs.forEach((p) => {
       forests.push({ x: r2(p.x), z: r2(p.z), count, radius, species: sp });

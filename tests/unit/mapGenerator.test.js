@@ -157,11 +157,12 @@ describe('gerador procedural de mapas (F8-02)', () => {
   });
 
   it('densidade de florestas e tema são respeitados', () => {
-    const base = generateMap({ seed: 3, players: 4, size: 128, forestDensity: 1 });
-    expect(generateMap({ seed: 3, players: 4, size: 128, forestDensity: 0 }).forests).toHaveLength(0);
-    expect(generateMap({ seed: 3, players: 4, size: 128, forestDensity: 2 }).forests.length).toBeGreaterThan(base.forests.length);
+    const base = generateMap({ seed: 3, players: 4, size: 160, forestDensity: 1 });
+    expect(generateMap({ seed: 3, players: 4, size: 160, forestDensity: 0 }).forests).toHaveLength(0);
+    // F8-01: a regra de 27 un. dos pátios limita a quantidade em mapas pequenos; densidade maior nunca tira árvores
+    expect(generateMap({ seed: 3, players: 4, size: 160, forestDensity: 2 }).forests.length).toBeGreaterThanOrEqual(base.forests.length);
     expect(base.tileset).toBe('verdejante');
-    expect(generateMap({ seed: 3, players: 4, size: 128, naval: true }).tileset).toBe('ilhas');
+    expect(generateMap({ seed: 3, players: 4, size: 160, naval: true }).tileset).toBe('ilhas');
   });
 
   it('registro opcional: mapas gerados entram em getMap/listMaps sem afetar os estáticos', () => {

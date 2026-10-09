@@ -1,0 +1,225 @@
+{
+  "id": "desfiladeiro-1v1",
+  "name": "Desfiladeiro",
+  "size": 144,
+  "playable": 136,
+  "tileset": "verdejante",
+  "waterLevel": 0.5,
+  "maxPlayers": 2,
+  "generated": true,
+  "generator": {
+    "seed": 2,
+    "players": 2,
+    "size": 144,
+    "naval": false,
+    "theme": "verdejante",
+    "forestDensity": 1,
+    "symmetry": "rotational"
+  },
+  "terrain": {
+    "generator": "islands",
+    "params": {
+      "baseHeight": 2.6,
+      "coast": {
+        "falloff": 10
+      },
+      "islands": [
+        {
+          "x": 32.53,
+          "z": 32.53,
+          "rx": 28,
+          "rz": 28
+        },
+        {
+          "x": -32.53,
+          "z": -32.53,
+          "rx": 28,
+          "rz": 28
+        },
+        {
+          "x": 0,
+          "z": 0,
+          "rx": 15.53,
+          "rz": 15.53
+        },
+        {
+          "x": -30.9,
+          "z": 30.9,
+          "rx": 15,
+          "rz": 15
+        },
+        {
+          "x": 30.9,
+          "z": -30.9,
+          "rx": 15,
+          "rz": 15
+        }
+      ],
+      "bridges": [
+        {
+          "x1": 0,
+          "z1": 0,
+          "x2": 32.53,
+          "z2": 32.53,
+          "width": 12.11
+        },
+        {
+          "x1": 0,
+          "z1": 0,
+          "x2": -32.53,
+          "z2": -32.53,
+          "width": 12.11
+        },
+        {
+          "x1": 0,
+          "z1": 0,
+          "x2": -30.9,
+          "z2": 30.9,
+          "width": 10
+        },
+        {
+          "x1": 0,
+          "z1": 0,
+          "x2": 30.9,
+          "z2": -30.9,
+          "width": 10
+        }
+      ]
+    }
+  },
+  "fords": [],
+  "startSlots": [
+    {
+      "x": 32.53,
+      "z": 32.53,
+      "mirror": [
+        1,
+        -1
+      ]
+    },
+    {
+      "x": -32.53,
+      "z": -32.53,
+      "mirror": [
+        -1,
+        1
+      ]
+    }
+  ],
+  "resources": [
+    {
+      "type": "gold",
+      "x": 25.1,
+      "z": 45.61
+    },
+    {
+      "type": "stone",
+      "x": 47.02,
+      "z": 23.69
+    },
+    {
+      "type": "gold",
+      "x": -25.1,
+      "z": -45.61
+    },
+    {
+      "type": "stone",
+      "x": -47.02,
+      "z": -23.69
+    },
+    {
+      "type": "gold",
+      "x": 0,
+      "z": 0
+    }
+  ],
+  "forests": [
+    {
+      "x": 2.21,
+      "z": 11.52,
+      "count": 5,
+      "radius": 5.97,
+      "species": "pine"
+    },
+    {
+      "x": -2.21,
+      "z": -11.52,
+      "count": 5,
+      "radius": 5.97,
+      "species": "pine"
+    },
+    {
+      "x": 12.39,
+      "z": -1.1,
+      "count": 7,
+      "radius": 5.73,
+      "species": "oak"
+    },
+    {
+      "x": -12.39,
+      "z": 1.1,
+      "count": 7,
+      "radius": 5.73,
+      "species": "oak"
+    },
+    {
+      "x": 12.49,
+      "z": 8.51,
+      "count": 5,
+      "radius": 4.77,
+      "species": "autumn"
+    },
+    {
+      "x": -12.49,
+      "z": -8.51,
+      "count": 5,
+      "radius": 4.77,
+      "species": "autumn"
+    }
+  ],
+  "neutrals": [
+    {
+      "kind": "camp",
+      "x": -30.9,
+      "z": 30.9,
+      "guards": 4,
+      "reward": {
+        "gold": 300
+      },
+      "deposit": {
+        "type": "gold",
+        "amount": 3000
+      }
+    },
+    {
+      "kind": "camp",
+      "x": 30.9,
+      "z": -30.9,
+      "guards": 4,
+      "reward": {
+        "gold": 300
+      },
+      "deposit": {
+        "type": "gold",
+        "amount": 3000
+      }
+    },
+    {
+      "kind": "critters",
+      "species": "pig",
+      "x": 13.16,
+      "z": 25.36,
+      "count": 4,
+      "radius": 5
+    },
+    {
+      "kind": "critters",
+      "species": "pig",
+      "x": -13.16,
+      "z": -25.36,
+      "count": 4,
+      "radius": 5
+    }
+  ],
+  "decorationDensity": 1
+}

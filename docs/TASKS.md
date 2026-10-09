@@ -442,7 +442,7 @@ Sonnet 5.5 escreve a spec em `docs/specs/<ID>.md`; agente **Sonnet** executa; o 
 - **Resultado**: `src/data/tilesets.js` (4 tilesets + `splatWeights`), textura por splat em `src/models/environment/tilesetTextures.js` (≤ 2048² lógicos, `?texq=` escala), cliffs com estratos nas cores de vértice (`TerrainView`), `roads`/`splatMasks` opcionais no JSON do mapa, água/espuma/decoração/árvores/céu-névoa por tileset (`Water`, `Decorations`, `TreeManager`, `SceneManager.applyTileset`), espuma = 1 draw call (shader + DataTexture 256²; versão estática em `texq=low`). `verdejante` idêntico ao anterior (caminho legado). Prévia: `/terrain-preview.html` (seletor + comparar 4 + mapa); `?tileset=` força o tileset no jogo. Capturas em `tools/ui-captures/terrain/`. Bench `inicial`: 159,7 fps / 655 calls (antes 146,9 / 700; sem regressão). Limitação: árvores mortas/nevadas são tinta+neve por shader sobre os mesmos modelos (sem malhas novas — dependem de ART/Blender).
 
 ### F7-05 · VFX
-- `TODO` · ART+PERF · Dep: F1-08 · Partículas GPU em pool (instanced), destruição de construções com escombros, corpos que decaem, sangue/faíscas, pegadas de construção por estágio, magias.
+- `DOING(sonnet, 2026-10-08)` · ART+PERF · Dep: F1-08 · Partículas GPU em pool (instanced), destruição de construções com escombros, corpos que decaem, sangue/faíscas, pegadas de construção por estágio, magias.
 
 ### F7-06 · Animação de produção
 - `TODO` · ART · Dep: F2-07 · Blend entre estados, variações de ataque, animação de morte por tipo de dano, animação de carregar recurso, idle variados.

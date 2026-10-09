@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { readdirSync, readFileSync, statSync } from 'node:fs';
-import { join, relative } from 'node:path';
+import { join, relative, resolve, dirname } from 'node:path';
 
 /**
  * F2-08 — fronteira sim/render: as camadas puras (`src/sim`, `src/ai`, `src/data`) não podem importar
@@ -58,7 +58,9 @@ describe('camadas puras (F2-08)', () => {
       const code = stripComments(readFileSync(f, 'utf8'));
       for (const m of code.matchAll(/(?:from|import)\s*\(?\s*['"](\.\.?\/[^'"]+)['"]/g)) {
         const target = m[1];
-        if (!target.startsWith('./') && !target.startsWith('../data/')) bad.push(`${relative(ROOT, f)} → ${target}`);
+        // F8-04: subpastas de src/sim (ex.: sim/missions) — resolve o caminho e exige destino dentro de src/sim ou src/data.
+        const dest = resolve(dirname(f), target);
+        if (!dest.startsWith(join(ROOT, 'sim') + '/') && !dest.startsWith(join(ROOT, 'data') + '/')) bad.push(`${relative(ROOT, f)} → ${target}`);
       }
       if (/\b(soundManager|uiManager|particleSystem|sceneManager)\b/.test(code)) bad.push(`${relative(ROOT, f)}: referencia soundManager/uiManager/particleSystem/sceneManager`);
     }

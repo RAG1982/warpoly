@@ -447,7 +447,8 @@ Sonnet 5.5 escreve a spec em `docs/specs/<ID>.md`; agente **Sonnet** executa; o 
 - **Resultado**: `src/render/vfx/` (3 draw calls: solid/smoke/glow com bloom por `userData.bloom`; corpos em 1 InstancedMesh), mapeamento evento→efeito puro, níveis `off|low|med|high` por preset/`?texq=low`/`?vfx=`, `tests/unit/vfx.test.js`, capturas em `tools/ui-captures/vfx/`, botão no inspetor. Bench (3 execuções, GPU real, vs master): combate100 31,4 → 30,6 fps (−2,5%); inicial dentro do ruído (~95–100 fps). Doc em `01_ARQUITETURA.md` (F7-05). Limitações: o cadáver é um volume achatado genérico (sem malha por unidade); VFX fora da visão de névoa não são gerados.
 
 ### F7-06 · Animação de produção
-- `TODO` · ART · Dep: F2-07 · Blend entre estados, variações de ataque, animação de morte por tipo de dano, animação de carregar recurso, idle variados.
+- `REVIEW` · ART · Dep: F2-07 · Blend entre estados, variações de ataque, animação de morte por tipo de dano, animação de carregar recurso, idle variados.
+- **Resultado**: `src/animation/animMath.js` (funções puras: variante estável por id, blend, estilo de morte, idle com rng) + `UnitAnimator` (cross-fade 0,14 s sem alocação por quadro, ataque v0/v1 por id, morte `cut|projectile|crush|magic` via `Unit.lastHitTag` — dica de render escrita em `takeDamage`, fora do checksum, `sim/hitTag.js` —, carga: tronco curvado/braços contidos/mochila balança (ouro/madeira já nas costas), idle olhar/alongar a cada 3,5–8 s). Testes `tests/unit/animMath.test.js`; capturas `tools/ui-captures/anim/` (`tools/capture-anim.mjs`). Bench combate100 52,2 vs 52,9 fps (−1,3%), inicial no ruído. Limitação: petróleo (petroleiro naval) sem animação de carga; magias de habilidade contam como projétil/magia pelo atacante.
 
 ### F7-07 · Modelos novos (para F3/F4)
 - `TODO` · ART · Dep: F3-00 · Todas as construções/unidades novas da árvore tecnológica, cada uma com entrada no inspetor e orçamento (≤ 20 draw calls pós-merge, texturas ≤ 512).

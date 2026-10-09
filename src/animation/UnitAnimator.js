@@ -1,4 +1,9 @@
 import * as THREE from 'three';
+import {
+  BLEND_DURATION, blendWeight, attackProgress, idleInterval, pickIdleVariant, idleEnvelope,
+  CARRY_ARM_DAMP, CARRY_LEAN, deathPhase
+} from './animMath.js';
+import { createRenderRng } from '../render/vfx/vfxConfig.js';
 
 /**
  * Durations (in seconds) for each unit animation
@@ -39,6 +44,19 @@ export class UnitAnimator {
     // Flash / Damage tint state
     this.isHurtFlashing = false;
     this.originalColors = new Map();
+
+    // F7-06: cross-fade entre estados (buffers pré-alocados no bind), variante de ataque, idle variado, carga, estilo de morte
+    this._blendObjs = [];
+    this._blendFrom = null;
+    this._blendT = BLEND_DURATION;
+    this.attackVariant = 0;
+    this._rng = null;
+    this._idleSeed = 0x51ed;
+    this._idleVar = 0;
+    this._idleTimer = -1;
+    this.carrying = false;
+    this.deathStyle = 'cut';
+    this.deathSide = 1;
 
     if (model) {
       this.bindModel(model, unitType);
@@ -131,6 +149,12 @@ export class UnitAnimator {
       }
     });
 
+    // F7-06: lista fixa de partes + buffer de pose antiga (9 floats/parte) — o blend não aloca por quadro
+    this._blendObjs.length = 0;
+    for (const obj of Object.values(this.meshParts)) if (obj && obj.isObject3D) this._blendObjs.push(obj);
+    this._blendFrom = new Float32Array(this._blendObjs.length * 9);
+    this._blendT = BLEND_DURATION;
+
     // Store base transforms for all limbs (model position and heading belong to world/game)
     for (const [key, obj] of Object.entries(this.meshParts)) {
       if (obj) {
@@ -188,11 +212,77 @@ export class UnitAnimator {
     if (!ANIMATION_DURATIONS[name]) return;
     if (this.currentAnim === name && !forceRestart) return;
 
+    // F7-06: guarda a pose atual para o cross-fade (não mistura para hurt/die, que precisam de reação imediata)
+    if (this.isPlaying && name !== 'hurt' && name !== 'die' && this.currentAnim !== 'die') {
+      this._captureBlend();
+      this._blendT = 0;
+    } else {
+      this._blendT = BLEND_DURATION;
+    }
     this.currentAnim = name;
     this.time = 0;
+    this._idleVar = 0;
     this.loop = (name !== 'die');
     this.resetTransforms();
     this.applyPose(0);
+  }
+
+  /** F7-06: copia posição/rotação/escala atuais das partes para o buffer do cross-fade. */
+  _captureBlend() {
+    const objs = this._blendObjs;
+    const f = this._blendFrom;
+    if (!f) return;
+    for (let i = 0, o = 0; i < objs.length; i++, o += 9) {
+      const ob = objs[i];
+      f[o] = ob.position.x; f[o + 1] = ob.position.y; f[o + 2] = ob.position.z;
+      f[o + 3] = ob.rotation.x; f[o + 4] = ob.rotation.y; f[o + 5] = ob.rotation.z;
+      f[o + 6] = ob.scale.x; f[o + 7] = ob.scale.y; f[o + 8] = ob.scale.z;
+    }
+  }
+
+  /** F7-06: mistura a pose recém-calculada com a capturada (peso por smoothstep). */
+  _applyBlend() {
+    if (this._blendT >= BLEND_DURATION || !this.isPlaying) return;
+    const w = blendWeight(this._blendT);
+    const objs = this._blendObjs;
+    const f = this._blendFrom;
+    const k = 1 - w;
+    for (let i = 0, o = 0; i < objs.length; i++, o += 9) {
+      const ob = objs[i];
+      ob.position.set(f[o] * k + ob.position.x * w, f[o + 1] * k + ob.position.y * w, f[o + 2] * k + ob.position.z * w);
+      ob.rotation.set(f[o + 3] * k + ob.rotation.x * w, f[o + 4] * k + ob.rotation.y * w, f[o + 5] * k + ob.rotation.z * w);
+      ob.scale.set(f[o + 6] * k + ob.scale.x * w, f[o + 7] * k + ob.scale.y * w, f[o + 8] * k + ob.scale.z * w);
+    }
+  }
+
+  /** F7-06: avança o relógio do cross-fade (o UnitView chama antes de `setTime` no ataque contínuo). */
+  advanceBlend(dt) {
+    if (this._blendT < BLEND_DURATION) this._blendT += dt;
+  }
+
+  /** F7-06: semente do rng de render (idle variado) e variante estável do ataque (0|1). */
+  setSeed(seed) {
+    this._idleSeed = seed | 0;
+    this._rng = null;
+    this._idleTimer = -1;
+  }
+  setAttackVariant(v) { this.attackVariant = v ? 1 : 0; }
+  setCarrying(on) { this.carrying = !!on; }
+  setDeathStyle(style, side = 1) { this.deathStyle = style; this.deathSide = side < 0 ? -1 : 1; }
+
+  _tickIdle(dt, wrapped) {
+    if (!this._rng) {
+      this._rng = createRenderRng(this._idleSeed);
+      this._idleTimer = idleInterval(this._rng);
+    }
+    this._idleTimer -= dt;
+    if (!wrapped) return;
+    if (this._idleVar !== 0) {
+      this._idleVar = 0;
+      this._idleTimer = idleInterval(this._rng);
+    } else if (this._idleTimer <= 0) {
+      this._idleVar = pickIdleVariant(this._rng, 0);
+    }
   }
 
   play() {
@@ -216,14 +306,14 @@ export class UnitAnimator {
     return ANIMATION_DURATIONS[this.currentAnim] || 1.0;
   }
 
-  setTime(time) {
+  setTime(time, blend = false) {
     const dur = this.getDuration();
     if (this.loop) {
       this.time = ((time % dur) + dur) % dur;
     } else {
       this.time = Math.max(0, Math.min(dur, time));
     }
-    this.applyPose(this.time);
+    this.applyPose(this.time, blend);
   }
 
   step(dt) {
@@ -234,6 +324,8 @@ export class UnitAnimator {
     if (!this.isPlaying || !this.model) return;
     const dur = this.getDuration();
     const nextTime = this.time + dt * this.playbackSpeed;
+    this.advanceBlend(dt);
+    if (this.currentAnim === 'idle') this._tickIdle(dt, nextTime >= dur);
 
     if (this.loop) {
       this.time = nextTime % dur;
@@ -246,7 +338,7 @@ export class UnitAnimator {
       }
     }
 
-    this.applyPose(this.time);
+    this.applyPose(this.time, true);
   }
 
   reset() {
@@ -258,8 +350,13 @@ export class UnitAnimator {
   /**
    * Applies the calculated pose transforms to the 3D meshes for the current time
    */
-  applyPose(time) {
+  applyPose(time, blend = false) {
     if (!this.model) return;
+    this._applyPoseRaw(time);
+    if (blend) this._applyBlend();
+  }
+
+  _applyPoseRaw(time) {
     this.resetTransforms();
 
     const parts = this.meshParts;
@@ -302,6 +399,17 @@ export class UnitAnimator {
       case 'cast':
         this.applyCast(time, progress, parts);
         break;
+    }
+
+    // F7-06: carregando recurso (mochila nas costas) — tronco curvado, braços contidos, mochila balançando
+    if (this.carrying && (uType === 'villager' || uType === 'peon') && (this.currentAnim === 'walk' || this.currentAnim === 'idle')) {
+      if (parts.torso) parts.torso.rotation.x += CARRY_LEAN;
+      if (parts.head) parts.head.rotation.x += 0.08;
+      if (this.currentAnim === 'walk') {
+        if (parts.armL) parts.armL.rotation.x *= CARRY_ARM_DAMP;
+        if (parts.armR) parts.armR.rotation.x *= CARRY_ARM_DAMP;
+        if (parts.pack) parts.pack.rotation.x += Math.sin(time * ((Math.PI * 4) / 0.8)) * 0.05;
+      }
     }
 
     // Cajado do Mago/Necromante: `Weapon` é filho de ArmR (empunhado); contra-gira o braço para o cajado
@@ -406,6 +514,21 @@ export class UnitAnimator {
     if (parts.armR) {
       parts.armR.rotation.z = -Math.sin(time * 2.5) * 0.04 + 0.02;
       parts.armR.rotation.x = breath * 0.03;
+    }
+
+    // F7-06: variantes de idle (olhar em volta / alongar), um ciclo por vez, com envelope 0→1→0
+    if (this._idleVar !== 0) {
+      const p = time / ANIMATION_DURATIONS.idle;
+      const env = idleEnvelope(p);
+      if (this._idleVar === 1) {
+        if (parts.head) parts.head.rotation.y += Math.sin(p * Math.PI * 2) * 0.75 * env;
+        if (parts.torso) parts.torso.rotation.y += Math.sin(p * Math.PI * 2) * 0.18 * env;
+      } else {
+        if (parts.torso) parts.torso.rotation.x -= 0.1 * env;
+        if (parts.head) parts.head.rotation.x -= 0.3 * env;
+        if (parts.armL) parts.armL.rotation.z -= 0.55 * env;
+        if (parts.armR) parts.armR.rotation.z += 0.55 * env;
+      }
     }
 
     // Unit-specific idle nuances
@@ -534,7 +657,8 @@ export class UnitAnimator {
   }
 
   // --- 3. FIGHT / ATTACK ANIMATION ---
-  applyFight(time, progress, parts, uType) {
+  applyFight(time, rawProgress, parts, uType) {
+    const progress = attackProgress(rawProgress, this.attackVariant);
     // F4-05: sapadores — corrida acelerada com o pavio piscando
     if (uType === 'sapper' || uType === 'arsonist') {
       this.applySapperRun(time, parts);
@@ -560,6 +684,13 @@ export class UnitAnimator {
       this.applyAxethrowerFight(progress, parts);
     } else if (uType === 'ogre') {
       this.applyOgreFight(progress, parts);
+    }
+    // F7-06: variante 1 do golpe corpo a corpo — diagonal (torção do tronco + braço inclinado)
+    if (this.attackVariant === 1 && uType !== 'archer' && uType !== 'axethrower') {
+      const e = Math.sin(Math.PI * rawProgress);
+      if (parts.torso) { parts.torso.rotation.y -= 0.2 * e; parts.torso.rotation.z += 0.1 * e; }
+      if (parts.head) parts.head.rotation.y += 0.12 * e;
+      if (parts.armR) parts.armR.rotation.z += 0.3 * e;
     }
   }
 
@@ -1273,6 +1404,10 @@ export class UnitAnimator {
 
   // --- 6. FALL / DIE ANIMATION ---
   applyDie(time, progress, parts, uType) {
+    if (this.deathStyle !== 'cut') {
+      this.applyDieStyled(progress, parts);
+      return;
+    }
     // 0.0 -> 0.25: Knees buckle, arms go limp, head drops forward
     // 0.25 -> 0.80: Tumble and collapse to the floor (model rotates onto back)
     // 0.80 -> 1.05: Ground impact bounce & limp settle
@@ -1340,6 +1475,43 @@ export class UnitAnimator {
       if (parts.armL) parts.armL.rotation.z = -0.85;
       if (parts.armR) parts.armR.rotation.z = 0.85;
       if (parts.head) parts.head.rotation.z = 0.3;
+    }
+  }
+
+  /**
+   * F7-06: morte por tipo de dano. projectile = recua e tomba de frente; crush = joelhos cedem, achata e cai de lado;
+   * magic = arqueia com braços erguidos e gira para o lado. Só rotações/escala (sem mexer na posição de mundo).
+   */
+  applyDieStyled(progress, parts) {
+    const ph = deathPhase(progress);
+    const m = this.model;
+    const side = this.deathSide;
+    const style = this.deathStyle;
+    const settled = ph.fall + ph.settle > 0 ? 1 : 0;
+    if (style === 'projectile') {
+      if (parts.torso) parts.torso.rotation.x = -0.3 * ph.crouch * (1 - ph.fall);
+      if (parts.head) parts.head.rotation.x = -0.35 * ph.crouch * (1 - ph.fall);
+      if (parts.armL) { parts.armL.rotation.z = -0.3 * ph.crouch - 0.6 * ph.fall; parts.armL.rotation.x = -0.4 * ph.crouch * (1 - ph.fall); }
+      if (parts.armR) { parts.armR.rotation.z = 0.3 * ph.crouch + 0.6 * ph.fall; parts.armR.rotation.x = -0.4 * ph.crouch * (1 - ph.fall); }
+      if (parts.legL) parts.legL.rotation.x = 0.4 * ph.crouch;
+      if (m) { m.rotation.x = ph.fall * (Math.PI / 2) - ph.bounce * settled; m.rotation.z = side * 0.1 * ph.fall; }
+    } else if (style === 'crush') {
+      const sq = 0.5 * ph.crouch + 0.5 * ph.fall;
+      if (parts.torso) { parts.torso.scale.y = 1 - 0.4 * sq; parts.torso.rotation.x = 0.5 * ph.crouch; }
+      if (parts.head) parts.head.rotation.x = 0.55 * ph.crouch;
+      if (parts.legL) parts.legL.rotation.x = 0.9 * ph.crouch;
+      if (parts.legR) parts.legR.rotation.x = 0.9 * ph.crouch;
+      if (parts.armL) parts.armL.rotation.z = -0.2 - 0.7 * ph.fall;
+      if (parts.armR) parts.armR.rotation.z = 0.2 + 0.7 * ph.fall;
+      if (m) { m.rotation.z = side * (ph.fall * 1.45 + ph.bounce * settled); m.rotation.x = -0.15 * ph.fall; }
+    } else { // magic
+      if (parts.torso) parts.torso.rotation.x = -0.5 * ph.crouch * (1 - 0.4 * ph.fall);
+      if (parts.head) parts.head.rotation.x = -0.5 * ph.crouch;
+      if (parts.armL) parts.armL.rotation.z = -1.3 * ph.crouch * (1 - ph.fall * 0.85);
+      if (parts.armR) parts.armR.rotation.z = 1.3 * ph.crouch * (1 - ph.fall * 0.85);
+      if (parts.legL) parts.legL.rotation.z = -0.3 * ph.crouch;
+      if (parts.legR) parts.legR.rotation.z = 0.3 * ph.crouch;
+      if (m) { m.rotation.z = side * ph.fall * (Math.PI / 2); m.rotation.x = -0.45 * ph.fall + ph.bounce * settled; }
     }
   }
 

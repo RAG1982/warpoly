@@ -926,8 +926,8 @@ const MODEL_CATALOG = [
     glb: 'watching_eye',
     sourceFile: 'tools/blender/build_watching_eye.py',
     create: createGlb('watching_eye'),
-    description: 'Olho voador invocado, gerado pelo pipeline Blender (public/models/watching_eye.glb): globo violeta com veias flutuando a ~2,4 u do chão, íris dourada com pupila em fenda e anel de ouro na frente (+Z), pálpebras pesadas, espinhos de osso, cinco tentáculos com ventosas e barbatana em cor de time.',
-    notes: 'Sem rig humanoide: nós Body, Tentacle0..4 e Fin. ~1,5 mil triângulos, 7 draw calls, atlas 512², ~100 KB.'
+    description: 'Olho voador invocado, gerado pelo pipeline Blender (public/models/watching_eye.glb): globo violeta com veias flutuando a ~2,4 u do chão, íris dourada com pupila em fenda e anel de ouro na frente (+Z), pálpebras pesadas, espinhos de osso, seis tentáculos articulados com ventosas pendurados em volta da metade de baixo do globo e barbatana em cor de time.',
+    notes: 'Sem rig humanoide: Torso (nó no centro do globo; o UnitAnimator respira/balança o conjunto) > Body, Fin e Anim_Tentacle0..5 (pivôs articulados, cada um com a malha TentacleN em coordenadas locais; o UnitAnimator ondula rotation.x/z, mais ao se mover). ~1,7 mil triângulos, 8 draw calls, atlas 512², ~112 KB.'
   },
   {
     id: 'templar_glb',

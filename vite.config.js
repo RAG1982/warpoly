@@ -83,6 +83,11 @@ function packagingPlugin() {
 export default defineConfig({
   base: process.env.BASE || './',
   plugins: [publicBasePlugin(), packagingPlugin()],
+  // worktrees de agentes (.claude/worktrees) e capturas/baselines não são código-fonte: sem isso o
+  // inotify esgota (ENOSPC) com dezenas de worktrees no repositório
+  server: {
+    watch: { ignored: ['**/.claude/**', '**/tools/ui-captures/**', '**/tools/soak-report/**', '**/tests/visual/**'] },
+  },
   build: {
     chunkSizeWarningLimit: 1600,
     rollupOptions: {

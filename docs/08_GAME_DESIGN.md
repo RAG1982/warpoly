@@ -144,6 +144,17 @@ Regras na escaramuça:
 - Opção da partida "Sem heróis" (clássico WC2) no setup de escaramuça.
 - Campanha usa os mesmos heróis com níveis fixos por missão.
 
+### 5.3b Heróis de campanha únicos (F4-08, implementado)
+Definidos em `src/data/units.js` (`unique:true`, `isHero:true`, `cost:null`; consultas em `src/data/heroes.js`). Entram **só** pela ação `spawn` de missão. Regras: 1 por tipo por partida/campanha; se morre, está fora (spawn posterior é recusado); imunes à Transmutação; modelo da unidade base em escala `scaleMul` + cor do time; barra de vida 3D ×1,6 e retrato dourado/★ na HUD. Sem sistema de níveis/XP/reviver (escopo da escaramuça, D6, ainda não feito).
+
+| Herói | Facção | Base (modelo) | PV | Dano (básico+perf.) | Armad. | Vel. | Alc. | Escala | Mana | Habilidades |
+|---|---|---|---|---|---|---|---|---|---|---|
+| Capitão Brann | humano | Espadachim (200 PV, 20+7, arm. 4) | 520 | 34+12 normal | 6 | 5,0 | 2,2 | ×1,2 | 120 | Grito de Guerra |
+| Drogath Punho-de-Brasa | orc | Talhador (198 PV, 22+6, arm. 4) | 540 | 38+10 normal | 6 | 4,9 | 2,2 | ×1,2 | 120 | Grito de Guerra |
+| Mestre Arcano Oren | humano | Mago (60 PV, 0+20 mágico) | 260 | 0+34 mágico | 2 | 4,6 | 10 | ×1,15 | 255 (+1,5/s) | Raio Arcano, Restauro |
+
+Habilidades (`hero_*` em `abilities.js`, sem pré-requisito de pesquisa): **Grito de Guerra** (próprio; status `bloodlust` 15 s: dano +50 %, vel. de ataque +50 %, mov. +25 %; 50 mana, recarga 5 s); **Raio Arcano** (inimigo, alcance 14; 60 mágico em área r=3; 40 mana, recarga 3 s); **Restauro** (aliado, alcance 9; 8 PV/s, 3 mana/PV, auto-cast <60 %). Aura passiva não implementada (exigiria sistema novo).
+
 ### 5.4 Neutros
 Bandoleiros (modelos prontos: Bandido + Acampamento) guardam minas extras; critters decorativos (ovelhas, porcos, focas).
 **Implementado (F3-10):** acampamentos de bandidos (4 guardas com leash de 22, jazida de ouro própria, recompensa de 300 de ouro ao destruir o acampamento) e critters (ovelha/porco) definidos por `neutrals` nos mapas; jogador neutro hostil (id 99) fora de vitória/HUD/IA. Focas e ataque da IA a acampamentos (NEW-25) ficam para depois.

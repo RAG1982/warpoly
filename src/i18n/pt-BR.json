@@ -788,5 +788,17 @@
   "mission.back": "Voltar",
   "mission.objDone": "Objetivo cumprido: {title}",
   "mission.objFailed": "Objetivo fracassado: {title}",
-  "mission.objNew": "Novo objetivo: {title}"
+  "mission.objNew": "Novo objetivo: {title}",
+  "unit.hero_brann.name": "Capitão Brann",
+  "unit.hero_brann.desc": "Herói único: comandante de infantaria. Grito de Guerra enfurece a si mesmo",
+  "unit.hero_drogath.name": "Drogath Punho-de-Brasa",
+  "unit.hero_drogath.desc": "Herói único: chefe de guerra dos Clãs. Grito de Guerra enfurece a si mesmo",
+  "unit.hero_oren.name": "Mestre Arcano Oren",
+  "unit.hero_oren.desc": "Herói único: mago de alcance. Raio Arcano fere em área e Restauro cura aliados",
+  "ability.hero_war_cry.name": "Grito de Guerra",
+  "ability.hero_war_cry.desc": "O herói se enfurece por 15 s: dano +50%, velocidade de ataque +50% e movimento +25%.",
+  "ability.hero_arcane_bolt.name": "Raio Arcano",
+  "ability.hero_arcane_bolt.desc": "Dispara energia arcana: 60 de dano mágico em área (raio 3) ao redor do alvo.",
+  "ability.hero_mend.name": "Restauro",
+  "ability.hero_mend.desc": "Cura um aliado (8 PV por segundo, 3 de mana por PV) enquanto ele estiver ferido e houver mana. Auto-cast: abaixo de 60% de PV."
 }

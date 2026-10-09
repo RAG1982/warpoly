@@ -348,7 +348,7 @@ Sonnet 5.5 escreve a spec em `docs/specs/<ID>.md`; agente **Sonnet** executa; o 
 - `DONE(2026-10-07)` · F4-07a (2026-10-02: petróleo, grade/pathfinder naval, Estaleiro/Doca, Petroleiro, Plataforma, Refinaria/Caldeirão, extração, mapa `estreito-1v1`) + **F4-07b (2026-10-07, branch task/F4-07: Fragata/Galé, Barcaça com `LOAD`/`UNLOAD`, Couraçado/Leviatã, Submersível/Tartaruga, Fundição/Fornalha Naval + pesquisas `naval_cannons`/`naval_hulls`, HUD, i18n PT-BR/en, IA não trava; GLBs por facção com procedurais de fallback; testes `ships.test.js`/`commands.test.js`; capturas em `tools/ui-captures/naval/`)** · GAME+ART+CONTENT · Dep: F2-05, F3-06 · **Petróleo só é liberado após o Centro da Cidade T2 (decisão D1).** Pendências: Submersível/Fundição sem .glb (procedurais); IA naval/anfíbia fica para a F5; cano de canhão usa o projétil `bolt`/`boulder` (sem sprite de bala própria).
 
 ### F4-08 · Heróis de campanha
-- `TODO` · GAME · Dep: F8-04 · Unidades únicas com stats maiores usadas em missões.
+- `DONE(2026-10-08)` (branch task/F4-08) · GAME · Dep: F8-04 · 3 heróis únicos (Brann, Drogath, Oren) em `units.js` (`unique`/`isHero`) + `src/data/heroes.js`; `spawnUnit` recusa o 2º (`gm.uniqueSpawned`); 3 habilidades `hero_*`; HUD (barra ×1,6, retrato dourado, ★); números em 08_GAME_DESIGN §5.3b; `tests/unit/heroes.test.js`. Pendências: níveis/XP/reviver (D6), aura, ícones/arte próprios.
 
 ---
 

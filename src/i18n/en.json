@@ -788,5 +788,17 @@
   "mission.back": "Back",
   "mission.objDone": "Objective complete: {title}",
   "mission.objFailed": "Objective failed: {title}",
-  "mission.objNew": "New objective: {title}"
+  "mission.objNew": "New objective: {title}",
+  "unit.hero_brann.name": "Captain Brann",
+  "unit.hero_brann.desc": "Unique hero: infantry commander. War Cry enrages himself",
+  "unit.hero_drogath.name": "Drogath Emberfist",
+  "unit.hero_drogath.desc": "Unique hero: clan warlord. War Cry enrages himself",
+  "unit.hero_oren.name": "Arcane Master Oren",
+  "unit.hero_oren.desc": "Unique hero: ranged mage. Arcane Bolt hurts an area and Restore heals allies",
+  "ability.hero_war_cry.name": "War Cry",
+  "ability.hero_war_cry.desc": "The hero rages for 15 s: damage +50%, attack speed +50% and movement +25%.",
+  "ability.hero_arcane_bolt.name": "Arcane Bolt",
+  "ability.hero_arcane_bolt.desc": "Fires arcane energy: 60 magic damage in an area (radius 3) around the target.",
+  "ability.hero_mend.name": "Restore",
+  "ability.hero_mend.desc": "Heals an ally (8 HP per second, 3 mana per HP) while it is wounded and mana remains. Auto-cast: below 60% HP."
 }

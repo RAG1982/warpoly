@@ -12,6 +12,7 @@
     "test": "vitest run",
     "smoke": "bash tools/safe-run.sh --mem 6G --timeout 240 -- node tools/smoke.mjs",
     "soak": "bash tools/safe-run.sh --timeout 3600 -- node tools/soak.mjs",
+    "visual": "bash tools/safe-run.sh --timeout 1800 -- node tools/visual-regress.mjs",
     "format:check": "prettier --check"
   },
   "dependencies": {

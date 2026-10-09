@@ -1,0 +1,11 @@
+{
+  "updatedAt": "2026-10-09T01:40:06.198Z",
+  "chromium": "153.0.8010.12",
+  "gpu": "ANGLE (AMD, Vulkan 1.4.318 (AMD Radeonâ¢ RX 7600 XT (RADV NAVI33) (0x00007480)), radv)",
+  "resolutions": [
+    "1280x720",
+    "1920x1080",
+    "390x844"
+  ],
+  "targets": 130
+}

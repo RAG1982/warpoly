@@ -21,6 +21,8 @@ export const TILESETS = Object.freeze({
     legacy: true,
     palette: { grass: [0x78d458, 0x66873c], dirt: 0x855533, sand: 0xe4ce95, rock: 0x8a8f6a, snow: 0xf2f6fa, mud: 0x5a4a30, road: 0xa98757 },
     water: { color: 0x3cb0d8, opacity: 0.86, deep: 0x09233f, foam: 0xffffff, foamStrength: 0.7, plants: true },
+    // F7-03: color grading do pós-processamento (tint RGB, saturação, contraste, brilho, vinheta); neutro = sem efeito
+    grade: { tint: [1, 1, 1], sat: 1.04, contrast: 1.02, brightness: 1, vignette: 0.10 },
     atmosphere: { sky: 0x85c8ec, fogNear: 95, fogFar: 320, hemiSky: 0xcde6ff, hemiGround: 0x567848 },
     decor: { grass: 0xffffff, flowers: true, pebbles: 0xffffff, boulders: 0xffffff, mushrooms: true, lilies: true, bushes: 0xffffff },
     trees: { tint: null }
@@ -35,6 +37,8 @@ export const TILESETS = Object.freeze({
     rules: { base: 'grass', patch: 'dirt', high: 'rock', shore: 'sand', patchAmount: 0.30, shoreTop: 1.5, highStart: 4.2, rockSlope: [0.55, 1.05], crack: 0 },
     surface: { roughness: 0.62, cliff: 0x6a7684, strata: 0.10 },
     water: { color: 0x7fb7d6, opacity: 0.94, deep: 0x1c3a52, foam: 0xf4fbff, foamStrength: 0.85, plants: false },
+    // F7-03: color grading do pós-processamento (tint RGB, saturação, contraste, brilho, vinheta); neutro = sem efeito
+    grade: { tint: [0.95, 1.0, 1.07], sat: 0.9, contrast: 1.04, brightness: 1.02, vignette: 0.14 },
     atmosphere: { sky: 0xc9dbe8, fogNear: 80, fogFar: 270, hemiSky: 0xdbe9ff, hemiGround: 0x8497ad },
     decor: { grass: 0xdfe9f2, flowers: false, pebbles: 0xaab6c4, boulders: 0xb9c6d4, mushrooms: false, lilies: false, bushes: 0xcfdcea },
     trees: { tint: { color: 0xffffff, desat: 0.35, snow: 0xf4f8ff, snowAmount: 0.85 } }
@@ -49,6 +53,8 @@ export const TILESETS = Object.freeze({
     rules: { base: 'grass', patch: 'dirt', high: 'rock', shore: 'sand', patchAmount: 0.42, shoreTop: 1.4, highStart: 3.8, rockSlope: [0.5, 0.95], crack: 0.55 },
     surface: { roughness: 0.93, cliff: 0x5a4a40, strata: 0.16 },
     water: { color: 0x5f8f86, opacity: 0.9, deep: 0x13262a, foam: 0xe9e4d2, foamStrength: 0.6, plants: false },
+    // F7-03: color grading do pós-processamento (tint RGB, saturação, contraste, brilho, vinheta); neutro = sem efeito
+    grade: { tint: [1.09, 0.98, 0.86], sat: 1.02, contrast: 1.06, brightness: 0.98, vignette: 0.18 },
     atmosphere: { sky: 0xb69b7e, fogNear: 70, fogFar: 250, hemiSky: 0xf0cfa5, hemiGround: 0x6a4a35 },
     decor: { grass: 0xa8885a, flowers: false, pebbles: 0x8a7a68, boulders: 0x7a6a5e, mushrooms: false, lilies: false, bushes: 0x8a6e48 },
     trees: { tint: { color: 0xc9a27a, desat: 0.75, snow: null, snowAmount: 0 } }
@@ -63,6 +69,8 @@ export const TILESETS = Object.freeze({
     rules: { base: 'grass', patch: 'mud', high: 'dirt', shore: 'mud', patchAmount: 0.50, shoreTop: 1.6, highStart: 4.4, rockSlope: [0.6, 1.1], crack: 0 },
     surface: { roughness: 0.55, cliff: 0x4d4a3a, strata: 0.08 },
     water: { color: 0x58703a, opacity: 0.95, deep: 0x142014, foam: 0xc9d6a0, foamStrength: 0.55, plants: true },
+    // F7-03: color grading do pós-processamento (tint RGB, saturação, contraste, brilho, vinheta); neutro = sem efeito
+    grade: { tint: [0.93, 1.04, 0.88], sat: 0.88, contrast: 1.03, brightness: 0.96, vignette: 0.2 },
     atmosphere: { sky: 0x9bb08f, fogNear: 55, fogFar: 210, hemiSky: 0xcbe0b5, hemiGround: 0x3d4a2a },
     decor: { grass: 0x7d8f4a, flowers: false, pebbles: 0x6d6a56, boulders: 0x66705a, mushrooms: true, lilies: true, bushes: 0x6f7d3e },
     trees: { tint: { color: 0x8a7d62, desat: 0.65, snow: null, snowAmount: 0 } }

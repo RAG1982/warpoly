@@ -604,6 +604,19 @@ visuais/sonoros nunca são "re-disparados" porque o `EventBus` tem `muted` (aind
 - **Determinismo**: nada de `Math.random`/`Date.now`; spawns em espiral fixa; ações mexem na sim direto (nunca `gm.issue`, que iria para o log de comandos de saves/replays). Mortes e coleta chegam por ouvintes (não-apresentação) do `EventBus`, acumulados e consumidos no início do `step()` seguinte (o bus só despacha no fim do passo). Objetivos de varredura rodam a cada 5 ticks; `survive`/`flag`/`destroy`/gatilhos a cada tick. `stateChecksumDetail` ganha a parte `mission` **só** quando há missão (partidas comuns mantêm os mesmos hashes). Save/replay guardam a config (com `missionId` ou a missão inline) — nenhum formato novo.
 - Apresentação (fora do checksum): eventos `EVT.MISSION_*` → `src/ui/MissionController.js` (painel, diálogos com retrato emoji, cutscene por keyframes com letterbox/`InputManager.cameraLocked`/Esc pula, tela de fim; a pós-jogo padrão vira o botão "Estatísticas"), `src/ui/screens/MissionBriefing.js` (menu "Missões"), lógica pura em `src/ui/missionPresentation.js`. Capturas: `tools/ui-captures/mission/capture-mission.mjs` (via safe-run).
 
+## Iluminação e pós-processamento (F7-03)
+
+Tudo é só render (nada em `src/sim/`) e desligável. Funções puras em `src/core/lighting.js` (testadas): `selectEffects(preset, texq, fx)`, `sampleDayNight(fase, base)`, `parseFxParam`, `parseDayNightParam`, `gradeOf`. Montagem em `src/render/PostFX.js` (EffectComposer do three/examples) e `SceneManager` (`applyPostFx`, `setDayNight`).
+- **Efeitos por preset** (`QualitySettings`: `bloom`, `ssao`, `colorGrading`, `selectionOutline`; ajustáveis em `overrides`): low = nenhum; med = bloom + grading + contorno; high/ultra = todos (+ GTAO). `?texq=low` (textura low) desliga tudo mesmo em preset alto: sem composer, o render é direto (custo zero). `?fx=0|all|bloom,-ssao,outline,grading` força por URL.
+- **Cadeia**: RenderPass (HDR HalfFloat, MSAA se o preset tiver antialias) → GTAO → UnrealBloom (limiar 1,15) → contorno de seleção → grading → OutputPass (tone mapping/sRGB do renderer). Resolução dinâmica e resize são acompanhados por `PostFX._syncSize`.
+- **Bloom "seletivo"** por limiar HDR: `render/postfx/bloomTag.js` eleva uma vez (e restaura ao desligar) emissivos fortes sem mapa e materiais aditivos; superfícies iluminadas ficam abaixo do limiar. Quem criar VFX pode marcar `material.userData.bloom = true` (força) ou `noBloom` (exclui).
+- **Contorno de seleção**: `UnitView`/`BuildingView` chamam `syncOutline` na transição de seleção (camada 12 nas malhas, sem anel/barras); `PostFX` desenha só essas malhas em máscara de meia resolução e pinta a borda externa (1 passe fullscreen; sem seleção nem renderiza a máscara).
+- **Color grading por tileset**: campo `grade` em `src/data/tilesets.js` (tint RGB, sat, contrast, brightness, vignette; `gradeOf` limita faixas).
+- **Dia/noite**: `?daynight=1|<período s>` e `?tod=<0..1>` (0 meia-noite, 0,5 meio-dia); padrão desligado (a cena não é tocada). Curva com chaves noite/alvorada/dia/ocaso, dia derivado do tileset; atualização ~10 Hz, sombra recalculada só quando a direção do sol muda. `sceneManager.setDayNight({enabled, period, phase})` em runtime.
+- Diferença conhecida: com composer a mistura de transparências ocorre em espaço linear (a névoa de guerra fica azul-escura em vez de preta).
+- AO: GTAO só em high/ultra (custa um passe extra de normais da cena inteira, ~8% de fps medido); AO por vértice não cobriria unidades/prédios dinâmicos.
+- Capturas/medições: `tools/ui-captures/lighting/capture.mjs [fx|tileset|ciclo|perf]` (via safe-run).
+
 ## Pipeline de assets
 
 - Cada `*Textures.js` tem funções `getXTextures()` memoizadas que pintam canvases (map, roughness, metalness, bump) — **498 chamadas `createCanvas(2048…)`**, 41 de 1024, 17 de 512.

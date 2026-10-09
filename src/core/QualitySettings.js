@@ -1,5 +1,6 @@
 import * as THREE from 'three';
 import { shadowOptions } from '../models/materials.js';
+import { FX_KEYS } from './lighting.js';
 
 /**
  * Presets de qualidade do renderer (F1-04).
@@ -27,6 +28,10 @@ const TEXTURE_KEY = 'warpoly.textureQuality';
  * @property {number} maxShadowDistance     raio máximo (u) coberto pela shadow camera
  * @property {boolean} pointLightShadows    PointLights dos modelos projetam sombra (6 passadas cada)
  * @property {boolean} hoverOutline         F6-06: contorno (colchetes) da entidade sob o mouse; ajustável nas Opções
+ * @property {boolean} bloom            F7-03: bloom por limiar HDR (fogo/magias)
+ * @property {boolean} ssao             F7-03: oclusão de ambiente de tela (GTAO)
+ * @property {boolean} colorGrading     F7-03: color grading por tileset
+ * @property {boolean} selectionOutline F7-03: contorno de seleção por máscara
  * @property {'aces'|'agx'|'neutral'|'none'} toneMapping
  * @property {'low'|'med'|'high'|'ultra'} textureQuality
  * @property {boolean} dynamicResolution
@@ -48,6 +53,10 @@ export const QUALITY_PRESETS = {
     maxShadowDistance: 40,
     pointLightShadows: false,
     hoverOutline: false,
+    bloom: false,
+    ssao: false,
+    colorGrading: false,
+    selectionOutline: false,
     toneMapping: 'aces',
     textureQuality: 'low',
     dynamicResolution: true,
@@ -66,6 +75,10 @@ export const QUALITY_PRESETS = {
     maxShadowDistance: 60,
     pointLightShadows: false,
     hoverOutline: true,
+    bloom: true,
+    ssao: false,
+    colorGrading: true,
+    selectionOutline: true,
     toneMapping: 'aces',
     textureQuality: 'med',
     dynamicResolution: true,
@@ -84,6 +97,10 @@ export const QUALITY_PRESETS = {
     maxShadowDistance: 80,
     pointLightShadows: false,
     hoverOutline: true,
+    bloom: true,
+    ssao: true,
+    colorGrading: true,
+    selectionOutline: true,
     toneMapping: 'aces',
     textureQuality: 'high',
     dynamicResolution: true,
@@ -102,6 +119,10 @@ export const QUALITY_PRESETS = {
     maxShadowDistance: 110,
     pointLightShadows: false,
     hoverOutline: true,
+    bloom: true,
+    ssao: true,
+    colorGrading: true,
+    selectionOutline: true,
     toneMapping: 'aces',
     textureQuality: 'ultra',
     dynamicResolution: false,
@@ -194,6 +215,7 @@ export function sanitizeOverrides(raw) {
   if (typeof raw.shadows === 'boolean') out.shadows = raw.shadows;
   if (typeof raw.dynamicResolution === 'boolean') out.dynamicResolution = raw.dynamicResolution;
   if (typeof raw.hoverOutline === 'boolean') out.hoverOutline = raw.hoverOutline;
+  for (const k of FX_KEYS) if (typeof raw[k] === 'boolean') out[k] = raw[k]; // F7-03: efeitos de pós-processamento
   const fps = num(raw.targetFps, 15, 240);
   if (fps !== undefined) out.targetFps = fps;
   const dpr = num(raw.maxPixelRatio, 0.5, 2);
@@ -308,6 +330,7 @@ export const QualitySettings = {
         });
       }
     }
+    if (sm && typeof sm.applyPostFx === 'function') sm.applyPostFx();
     return p;
   },
 

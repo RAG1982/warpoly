@@ -95,7 +95,7 @@
 .ms-end-actions .ms-primary, .ms-brief-actions .ms-primary { background: var(--gold-primary, #d4af37); color: #1a1408; font-weight: 700; }
 
 /* Briefing (menu principal > Missões) */
-.ms-brief-overlay { position: fixed; inset: 0; display: grid; place-items: center; background: rgba(0, 0, 0, 0.7); z-index: 1100; }
+.ms-brief-overlay { position: fixed; inset: 0; display: grid; place-items: center; background: rgba(0, 0, 0, 0.7); z-index: 100100; }
 .ms-brief {
   width: min(860px, 94vw); max-height: 92vh; display: grid; grid-template-columns: minmax(170px, 230px) 1fr; overflow: hidden;
   background: rgba(18, 16, 13, 0.98); border: 2px solid rgba(212, 175, 55, 0.7); border-radius: 14px; color: #f5e4b2;

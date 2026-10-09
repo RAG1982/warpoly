@@ -463,7 +463,8 @@ Sonnet 5.5 escreve a spec em `docs/specs/<ID>.md`; agente **Sonnet** executa; o 
 - `TODO` · CONTENT+UI · Dep: F2-05, F7-04 · Pintar terreno/água/florestas, posicionar minas/jogadores/neutros, exportar/importar JSON.
 
 ### F8-04 · Sistema de missões e gatilhos
-- `DOING(agente-f8-04, 2026-10-08)` · CONTENT+CORE · Dep: F2-02, F2-07 · Objetivos (destruir, sobreviver X min, escoltar, resgatar, construir N), gatilhos (área, tempo, morte), diálogos/briefings, cutscenes simples de câmera.
+- `REVIEW` · CONTENT+CORE · Dep: F2-02, F2-07 · Objetivos (destruir, sobreviver X min, escoltar, resgatar, construir N), gatilhos (área, tempo, morte), diálogos/briefings, cutscenes simples de câmera.
+  - **Resultado**: `src/sim/missions/` (MissionRuntime, TriggerEngine, 8 tipos de objetivo, 9 condições + all/any/not, 23 ações, schema validado e versionado) integrado a `victory.js`/`GameManager` como `victoryMode:'mission'`; determinístico, no checksum (parte `mission` só em missões), save/replay sem formato novo. Formato e exemplos em `src/data/missions/README.md`; missão `mission-demo` (mapa `tutorial`) cobre todos os tipos. UI: briefing no menu "Missões", painel de objetivos, diálogos com retrato emoji, cutscene por keyframes (Esc pula), tela de fim (`MissionController`/`MissionBriefing`, i18n pt-BR/en). Testes: `tests/unit/mission*.test.js` (+ `layers.test.js` agora resolve imports de subpastas de `src/sim`); captura/checagem de UI em `tools/ui-captures/mission/`. Fora do escopo: campanhas (F8-05/06), transferência de construções, música própria.
 
 ### F8-05 · Campanha da Aliança (8+ missões)
 - `TODO` · CONTENT · Dep: F8-04 · História original inspirada na temática do WC2.
@@ -578,3 +579,4 @@ _(agentes adicionam aqui: `NEW-<n> · título · lane · motivo`)_
 
 ## Notas de integração
 _(quando uma tarefa precisar tocar arquivo de outra lane, registrar aqui: `<ID>: arquivo — o que mudou`)_
+- F8-04: `src/core/InputManager.js` — campo `cameraLocked` (trava o pan por teclado/borda na cutscene); `src/core/MatchSession.js`/`src/main.js`/`src/ui/UIManager.js`/`src/ui/screens/MainMenu.js` — ganchos do `MissionController`, eventos `warpoly:mission-retry/menu`, `showPostGame()` e botão "Missões"; `src/sim/MatchConfig.js`, `checksum.js`, `events.js`, `victory.js`, `GameManager.js` — modo `mission`, parte `mission` do checksum, eventos `MISSION_*`, `transferUnit`; `tests/unit/layers.test.js` — resolve caminhos relativos de subpastas de `src/sim`.

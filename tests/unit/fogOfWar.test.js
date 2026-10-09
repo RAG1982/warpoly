@@ -22,5 +22,5 @@ describe('FogOfWar — dispose', () => {
     expect(fogUniforms.fowMap.value).not.toBe(texA);
     expect(fogUniforms.fowMap.value).toBe(fowB.fogTexture);
     fowB.dispose();
-  });
+  }, 30000); // F8-04: o teste é síncrono mas estourava os 5 s padrão quando o pool do vitest está saturado
 });

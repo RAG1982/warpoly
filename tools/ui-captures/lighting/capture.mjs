@@ -84,13 +84,14 @@ async function shot(page, name) {
   await page.screenshot({ path: `${OUT}/${name}.png` });
 }
 
+const ONLY = process.argv[2] || '';
 async function main() {
   server = await createServer({ root: ROOT, server: { port: PORT, strictPort: true, host: '127.0.0.1' }, logLevel: 'warn', clearScreen: false });
   await server.listen();
   const BASE = `http://127.0.0.1:${PORT}/?skipPreload&texq=med&quality=high`;
 
   // 1. Sem efeitos × completo (cena com seleção e chamas)
-  for (const [name, q] of [['01-base-fx0', '&fx=0'], ['02-completo', ''], ['03-sem-ssao', '&fx=-ssao'], ['04-so-ssao', '&fx=ssao'], ['05-so-bloom', '&fx=bloom'], ['06-so-outline', '&fx=outline']]) {
+  if (!ONLY || ONLY === 'fx') for (const [name, q] of [['01-base-fx0', '&fx=0'], ['02-completo', ''], ['03-sem-ssao', '&fx=-ssao'], ['04-so-ssao', '&fx=ssao'], ['05-so-bloom', '&fx=bloom'], ['06-so-outline', '&fx=outline']]) {
     await withPage(BASE + q, async (page) => {
       await setupScene(page);
       await shot(page, name);
@@ -98,8 +99,19 @@ async function main() {
     });
   }
 
+  // 1b. Contorno de unidade escondida atrás do prédio (não deve aparecer por trás) e névoa (preto, não azul)
+  if (!ONLY || ONLY === 'oculto') await withPage(BASE + '&fx=outline', async (page) => {
+    await setupScene(page, { select: true, burn: false });
+    await page.evaluate(() => {
+      const gm = window.game.gameManager, hq = window.__hq, u = gm.getUnitsOf(gm.localPlayer.id)[0];
+      u.mesh.position.set(hq.mesh.position.x + 0.5, u.mesh.position.y, hq.mesh.position.z - 3.5);
+    });
+    await page.waitForTimeout(800);
+    await shot(page, '07-outline-atras-do-predio');
+  });
+
   // 2. Tilesets com grade (completo × sem grade)
-  for (const id of ['verdejante', 'inverno', 'devastadas', 'pantano']) {
+  if (!ONLY || ONLY === 'tileset') for (const id of ['verdejante', 'inverno', 'devastadas', 'pantano']) {
     await withPage(`${BASE}&tileset=${id}`, async (page) => {
       await setupScene(page, { select: false, burn: false });
       await shot(page, `10-tileset-${id}`);
@@ -111,7 +123,7 @@ async function main() {
   }
 
   // 3. Ciclo dia/noite (fase fixa por ?tod, ciclo longo para não andar durante a captura)
-  for (const [tag, tod] of [['meia-noite', 0], ['alvorada', 0.25], ['meio-dia', 0.5], ['por-do-sol', 0.75]]) {
+  if (!ONLY || ONLY === 'ciclo') for (const [tag, tod] of [['meia-noite', 0], ['alvorada', 0.25], ['meio-dia', 0.5], ['por-do-sol', 0.75]]) {
     await withPage(`${BASE}&daynight=7200&tod=${tod}`, async (page) => {
       await setupScene(page, { select: true, burn: true });
       await shot(page, `20-ciclo-${tag}`);
@@ -119,7 +131,7 @@ async function main() {
   }
 
   // 4. Desempenho em texq=low (cena inicial): sem efeitos × padrão (deve ser idêntico) e high/texq=low
-  for (const [label, q] of [['low fx=0', '&texq=low&fx=0'], ['low padrao', '&texq=low']]) {
+  if (!ONLY || ONLY === 'perf') for (const [label, q] of [['low fx=0', '&texq=low&fx=0'], ['low padrao', '&texq=low']]) {
     await withPage(`http://127.0.0.1:${PORT}/?skipPreload${q}`, async (page) => { await measure(page, label, 6); });
   }
   console.log(errors.length ? `ERROS:\n${errors.join('\n')}` : 'sem erros de console');

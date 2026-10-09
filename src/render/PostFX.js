@@ -17,6 +17,7 @@ import { ShaderPass } from 'three/examples/jsm/postprocessing/ShaderPass.js';
 import { OutputPass } from 'three/examples/jsm/postprocessing/OutputPass.js';
 import { anyEffect, bloomStrengthFor, NEUTRAL_GRADE } from '../core/lighting.js';
 import { OUTLINE_LAYER, outlineCount } from './postfx/outlineLayer.js';
+import { setFogLinearOutput } from './fogOfWarShader.js';
 import { BloomTagger } from './postfx/bloomTag.js';
 
 const BLOOM_BASE = { strength: 0.55, radius: 0.55, threshold: 1.15 };
@@ -90,6 +91,7 @@ export class PostFX {
     this._key = '';
     this._maskRT = null;
     this._maskMat = null;
+    this._occMat = null;
     this._passes = {};
     this._bg = new THREE.Color();
   }
@@ -105,6 +107,7 @@ export class PostFX {
     this._disposeComposer();
     this.effects = next;
     this.tagger.setActive(next.bloom);
+    setFogLinearOutput(anyEffect(next));
     if (!anyEffect(next)) return;
 
     const r = this.renderer;
@@ -136,7 +139,10 @@ export class PostFX {
     if (next.selectionOutline) {
       this._maskRT = new THREE.WebGLRenderTarget(Math.max(1, w >> 1), Math.max(1, h >> 1), { type: THREE.UnsignedByteType });
       this._maskRT.texture.minFilter = this._maskRT.texture.magFilter = THREE.LinearFilter;
-      this._maskMat = new THREE.MeshBasicMaterial({ color: 0xffffff, fog: false, toneMapped: false });
+      // Selecionados: brancos, só onde passam no teste de profundidade dos oclusores (contorno não aparece por trás de prédios).
+      this._maskMat = new THREE.MeshBasicMaterial({ color: 0xffffff, fog: false, toneMapped: false, depthFunc: THREE.LessEqualDepth, depthWrite: false });
+      // Oclusores: a cena toda em preto, só para preencher a profundidade.
+      this._occMat = new THREE.MeshBasicMaterial({ color: 0x000000, fog: false, toneMapped: false });
       const p = new ShaderPass(OutlineShader);
       p.uniforms.tMask.value = this._maskRT.texture;
       p.uniforms.texel.value.set(1 / this._maskRT.width, 1 / this._maskRT.height);
@@ -205,14 +211,20 @@ export class PostFX {
     const prevNeeds = r.shadowMap.needsUpdate;
     scene.background = null;
     scene.fog = null;
-    scene.overrideMaterial = this._maskMat;
-    cam.layers.set(OUTLINE_LAYER);
     r.shadowMap.autoUpdate = false;
     r.shadowMap.needsUpdate = false;
     r.setRenderTarget(this._maskRT);
     r.setClearColor(0x000000, 1);
     r.clear();
+    // 1) oclusores (camada 0, preto, escrevem profundidade); 2) selecionados (camada 12, branco, LessEqual) sem limpar.
+    scene.overrideMaterial = this._occMat;
+    cam.layers.set(0);
     r.render(scene, cam);
+    scene.overrideMaterial = this._maskMat;
+    cam.layers.set(OUTLINE_LAYER);
+    r.autoClear = false;
+    r.render(scene, cam);
+    r.autoClear = true;
     r.setRenderTarget(prevTarget);
     r.shadowMap.autoUpdate = prevShadow;
     r.shadowMap.needsUpdate = prevNeeds;
@@ -239,10 +251,12 @@ export class PostFX {
     }
     if (this._maskRT) { this._maskRT.dispose(); this._maskRT = null; }
     if (this._maskMat) { this._maskMat.dispose(); this._maskMat = null; }
+    if (this._occMat) { this._occMat.dispose(); this._occMat = null; }
   }
 
   dispose() {
     this.tagger.setActive(false);
     this._disposeComposer();
+    setFogLinearOutput(false);
   }
 }

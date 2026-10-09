@@ -286,17 +286,22 @@ function collectSpecs(baseline, current) {
     baseReason: baseline.load?.reason,
     curReason: current.load?.reason
   });
+  // FPS só vale se os DOIS lados foram medidos com GPU real: um número de FPS com o manifesto dizendo "software" é
+  // ignorado (defesa extra; o medidor já grava `fps: null` nesses casos).
+  const noGpu = (r) => (r.manifest?.gpu?.hardware === false ? `FPS ignorado: ${r.manifest.gpu.renderer ?? 'WebGL por software'} não é GPU real` : null);
   for (const name of names) {
     const b = baseline.scenarios?.[name];
     const c = current.scenarios?.[name];
+    const baseSoft = noGpu(baseline);
+    const curSoft = noGpu(current);
     specs.push({
       id: `fps.${name}`,
       group: 'fps',
       label: `FPS · ${name}`,
-      base: b?.fps,
-      cur: c?.fps,
-      baseReason: b?.fpsReason,
-      curReason: c?.fpsReason
+      base: baseSoft ? null : b?.fps,
+      cur: curSoft ? null : c?.fps,
+      baseReason: b?.fpsReason ?? baseSoft,
+      curReason: c?.fpsReason ?? curSoft
     });
   }
   for (const [key, label] of BUNDLE_METRICS) {
@@ -436,6 +441,12 @@ function tableCells(result) {
   return [head, ...body];
 }
 
+/** "abc1234 sobre master d769cd7, 2026-10-09". */
+function describeRun(report) {
+  const base = report.base ? ` sobre master ${report.base}` : '';
+  return `${report.commit ?? '?'}${base}, ${String(report.createdAt ?? '?').slice(0, 10)}`;
+}
+
 function describeManifest(m) {
   if (!m) return 'sem manifesto';
   const gpu = m.gpu?.renderer ? `${m.gpu.hardware ? 'GPU' : 'sem GPU real'}: ${m.gpu.renderer}` : 'GPU: ?';
@@ -457,10 +468,16 @@ export function formatReport(result, ctx = {}) {
   if (md) lines.push(`### Orçamento de desempenho (limiar ${limit})`, '');
   else lines.push(`Orçamento de desempenho (F10-04) — limiar de piora: ${limit}`);
   if (ctx.baseline) {
-    lines.push(`${md ? '- ' : 'baseline: '}${ctx.baselinePath ?? 'baseline'} (${ctx.baseline.commit ?? '?'}, ${String(ctx.baseline.createdAt ?? '?').slice(0, 10)}) — ${describeManifest(ctx.baseline.manifest)}`);
+    lines.push(`${md ? '- ' : 'baseline: '}${ctx.baselinePath ?? 'baseline'} (${describeRun(ctx.baseline)}) — ${describeManifest(ctx.baseline.manifest)}`);
   }
   if (ctx.current) {
-    lines.push(`${md ? '- ' : 'atual:    '}${ctx.current.commit ?? '?'}, ${String(ctx.current.createdAt ?? '?').slice(0, 10)} — ${describeManifest(ctx.current.manifest)}`);
+    const sameMachine =
+      ctx.baseline &&
+      ctx.baseline.manifest?.mode === ctx.current.manifest?.mode &&
+      manifestDiff(ctx.baseline.manifest, ctx.current.manifest).length === 0;
+    lines.push(
+      `${md ? '- ' : 'atual:    '}${describeRun(ctx.current)} — ${sameMachine ? 'mesmo modo, hardware e Chromium da baseline' : describeManifest(ctx.current.manifest)}`
+    );
   }
   lines.push('');
 

@@ -175,6 +175,22 @@ describe('compareBudgets · FPS e load ausentes (sem GPU real)', () => {
     expect(r.ok).toBe(true);
   });
 
+  it('FPS numérico com manifesto de GPU de software (de qualquer lado) é ignorado: só vale com GPU real nos dois', () => {
+    const softCurrent = variant((c) => {
+      c.manifest.gpu = { renderer: SWIFTSHADER, hardware: false };
+      c.scenarios.inicial.fps = 5; // 97 % abaixo: se fosse comparado, reprovaria
+    });
+    const r = compareBudgets(makeReport(), softCurrent);
+    expect(row(r, 'fps.inicial').status).toBe('skipped');
+    expect(row(r, 'fps.inicial').note).toMatch(/não é GPU real/);
+    expect(r.ok).toBe(true);
+
+    const softBaseline = variant((b) => (b.manifest.gpu = { renderer: SWIFTSHADER, hardware: false }));
+    const r2 = compareBudgets(softBaseline, makeReport());
+    expect(row(r2, 'fps.combate100').status).toBe('skipped');
+    expect(r2.ok).toBe(true);
+  });
+
   it('valor ausente SEM motivo é falha de medição (não passa em silêncio)', () => {
     const cur = variant((c) => {
       delete c.scenarios.inicial.fps; // esqueceram de medir/anotar o motivo
@@ -517,5 +533,23 @@ describe('CLI: --compare (sem navegador)', { timeout: 30000 }, () => {
     const r = run(makeReport(), '{ isto não é json');
     expect(r.status).toBe(2);
     expect(r.stderr).toMatch(/não é JSON válido|inválid/i);
+  });
+});
+
+describe('integração: npm run perf e o job de CI', () => {
+  it('package.json: `npm run perf` roda o orçamento dentro do safe-run', () => {
+    const pkg = JSON.parse(readFileSync(join(ROOT, 'package.json'), 'utf8'));
+    expect(pkg.scripts.perf).toMatch(/tools\/safe-run\.sh .*node tools\/perf-budget\.mjs/);
+  });
+
+  it('perf.yml: lint, testes, build e o orçamento sem GPU (--ci) sobre o dist/ do build; FPS só local', () => {
+    const yml = readFileSync(join(ROOT, '.github/workflows/perf.yml'), 'utf8');
+    for (const step of ['npm ci', 'npm run lint', 'npx vitest run', 'npm run build', 'playwright install']) {
+      expect(yml).toContain(step);
+    }
+    expect(yml).toMatch(/node tools\/perf-budget\.mjs --ci --dist dist/);
+    expect(yml).not.toMatch(/safe-run/); // runner efêmero, sem systemd --user
+    expect(yml).not.toMatch(/--update/); // a CI nunca regrava a baseline
+    expect(yml).toMatch(/npm run perf/); // o comentário aponta o FPS local
   });
 });

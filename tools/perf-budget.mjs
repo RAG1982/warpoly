@@ -15,8 +15,8 @@
  *
  * Protocolo (ver docs/10_DEPLOY.md): build de produção servido por `vite preview`, Chromium headless 1280×720,
  * `?bench=<cenário>` (src/debug/bench.js) com `quality=high&texq=low`, uma página por vez:
- *   - draw calls: simulação congelada no tick FREEZE_TICKS (independe de FPS e de GPU → igual em CI/SwiftShader);
- *     mediana de N execuções;
+ *   - draw calls: `Math.random` semeado e simulação congelada no tick 20 (independe de FPS e de GPU → igual em
+ *     CI/SwiftShader); mediana de N execuções;
  *   - FPS: cenário ao vivo (2 s de aquecimento + 10 s), melhor de N (só com GPU real);
  *   - load: `?bench=inicial` COM o preload de texturas (sem `skipPreload`), menor de N (só com GPU real);
  *   - bundle: bytes do chunk `main` e do JS de boot lidos de dist/.
@@ -161,12 +161,21 @@ function fail(msg, code = 2) {
   throw new ExitError(msg, code);
 }
 
-function gitCommit() {
+/** Saída de `git <args>` no repositório, ou null (sem git, sem a ref, clone raso…). */
+function git(args) {
   try {
-    return execFileSync('git', ['rev-parse', '--short', 'HEAD'], { cwd: ROOT, encoding: 'utf8', stdio: ['ignore', 'pipe', 'ignore'] }).trim();
+    return execFileSync('git', args, { cwd: ROOT, encoding: 'utf8', stdio: ['ignore', 'pipe', 'ignore'] }).trim() || null;
   } catch {
     return null;
   }
+}
+
+/** `commit` = HEAD; `base` = ponto de partida no master (útil quando a medição sai de uma branch de tarefa). */
+function gitInfo() {
+  const commit = git(['rev-parse', '--short', 'HEAD']);
+  const mergeBase = git(['merge-base', 'HEAD', 'master']);
+  const base = mergeBase ? git(['rev-parse', '--short', mergeBase]) : null;
+  return { commit, base: base && base !== commit ? base : null };
 }
 
 function freePort() {
@@ -421,7 +430,8 @@ for (const sig of ['SIGINT', 'SIGTERM']) {
 async function main() {
   const opts = parseArgs(process.argv.slice(2));
   if (opts.help) {
-    console.log(readFileSync(fileURLToPath(import.meta.url), 'utf8').split('*/')[0].replace(/^#!.*\n/, ''));
+    const header = readFileSync(fileURLToPath(import.meta.url), 'utf8').split('*/')[0];
+    console.log(header.replace(/^#!.*\n/, '').replace(/^\/\*\*\n/, '').replace(/^ \* ?/gm, '').trimEnd());
     return 0;
   }
 
@@ -487,6 +497,9 @@ async function main() {
     }
     const renderer = normalizeRenderer(await readWebGLRenderer(probe));
     await probe.context().close();
+    if (/^desconhecido/i.test(renderer)) {
+      fail(`WebGL indisponível no Chromium (${renderer || 'sem informação'}): sem ele o jogo não monta. Em runner sem GPU use --ci (SwiftShader); confira os flags --use-angle/--enable-unsafe-swiftshader.`);
+    }
     const gpuInfo = { renderer, ...classifyRenderer(renderer) };
     log(`Chromium ${browser.version()} · WebGL: ${renderer} (${gpuInfo.hardware ? 'GPU real' : 'software'})`);
     if (opts.ci && gpuInfo.hardware) log('aviso: --ci com GPU real: FPS e load continuam sem medição neste modo');
@@ -496,7 +509,7 @@ async function main() {
     const current = {
       version: SCHEMA_VERSION,
       createdAt: new Date().toISOString(),
-      commit: gitCommit(),
+      ...gitInfo(),
       manifest: buildManifest({ opts, browserVersion: browser.version(), gpuInfo, runs: m.runs }),
       scenarios: m.scenarios,
       load: m.load,

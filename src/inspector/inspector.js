@@ -1676,6 +1676,8 @@ class ModelInspectorApp {
     if (initialLight && LIGHT_PRESETS[initialLight]) {
       this.applyLightingPreset(initialLight);
     }
+    const teamQ = urlParams.get('team'); // ?team=3 (índice da paleta) ou ?team=ff8800
+    if (teamQ) this.teamColor = /^\d$/.test(teamQ) ? TEAM_PALETTE[+teamQ] || this.teamColor : '#' + teamQ.replace('#', '');
     this.setupTeamColorUI();
     this.selectModel(initialModel);
     ModelFactory.loadGlbModels().then(() => {

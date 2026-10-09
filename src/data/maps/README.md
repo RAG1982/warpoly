@@ -58,6 +58,14 @@ Cada mapa é um JSON em `src/data/maps/<id>.json`, registrado em `index.js` (`ge
   Convenção: acampamentos em terra firme, ≥ 25 de qualquer `startSlot`; em mapas 1×1 os pares
   são espelhados (ponto → oposto).
 - **`hidden`** (F6-09): `true` = não aparece em `listMaps()` (lista da Escaramuça); `getMap(id)` e `listMaps({ includeHidden: true })` ainda o devolvem. Usado por `tutorial`.
+- **`tileset`** (F7-04): `verdejante` (Floresta, padrão; `ilhas` é alias legado), `inverno`, `devastadas` (Terras Devastadas) ou `pantano`
+  (definições em `src/data/tilesets.js`: paleta/splat, água, espuma, névoa/céu, decoração e árvores). Só render — não afeta sim nem
+  pathfinding. `?tileset=<id>` na URL força o tileset de qualquer mapa (depuração); a página `terrain-preview.html` mostra os 4 e compara.
+  `verdejante` mantém exatamente o visual anterior; os demais pintam o terreno por splat map (grama/terra/areia/pedra/neve/lama por
+  altura, declive e ruído). Mapas gerados: `generateMap({ theme })` aceita os mesmos ids e grava em `tileset`.
+- **`roads`** (F7-04, opcional): estradas/trilhas pintadas na textura — `[{ "points": [[x, z], ...], "width": 2.2 }, ...]` (mundo; `width` opcional).
+- **`splatMasks`** (F7-04, opcional): manchas forçadas no splat — `[{ "layer": "dirt"|"sand"|"rock"|"snow"|"mud"|"grass"|"road", "x", "z", "r", "strength"? }]`
+  (uma mancha `dirt` r=6 já é criada sob cada `startSlot`). Ignorado pelo tileset `verdejante`.
 - **`decorationDensity`**: reservado (decorações não-jogáveis); não usado ainda.
 
 ## Mapas

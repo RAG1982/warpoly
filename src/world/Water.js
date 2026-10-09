@@ -135,7 +135,7 @@ export class Water {
       uSize: { value: size },
       uLow: { value: low ? 1 : 0 },
       uFoam: { value: new THREE.Color(this.cfg.foam) },
-      uStrength: { value: this.cfg.foamStrength }
+      uStrength: { value: this.cfg.foamStrength * 1.6 }
     };
     const baseCompile = THREE.Material.prototype.onBeforeCompile; // inclui o patch da névoa de guerra
     mat.onBeforeCompile = function foamOnBeforeCompile(shader, renderer) {
@@ -148,14 +148,14 @@ float hh = texture2D( map, vMapUv ).r * 3.0 - 1.0;
 vec2 wp = vMapUv * uSize;
 float a;
 if ( uLow > 0.5 ) {
-  a = smoothstep( 0.22, 0.0, abs( hh + 0.12 ) ) * 0.8;
+  a = ( 1.0 - smoothstep( 0.08, 0.3, abs( hh + 0.12 ) ) ) * 0.9;
 } else {
   float swell = 0.5 + 0.5 * sin( uTime * 0.9 + wp.x * 0.11 + wp.y * 0.07 );
   float edge = -0.32 + swell * 0.38;
-  float nz = 0.55 + 0.45 * sin( wp.x * 1.7 + uTime * 0.6 ) * sin( wp.y * 1.9 - uTime * 0.5 );
-  float front = smoothstep( 0.2, 0.0, abs( hh - edge ) );
-  float trail = smoothstep( 0.26, 0.0, abs( hh - ( edge - 0.38 ) ) ) * 0.45;
-  float rim = smoothstep( 0.1, 0.0, abs( hh + 0.02 ) ) * 0.5;
+  float nz = 0.7 + 0.3 * sin( wp.x * 1.7 + uTime * 0.6 ) * sin( wp.y * 1.9 - uTime * 0.5 );
+  float front = 1.0 - smoothstep( 0.10, 0.34, abs( hh - edge ) );
+  float trail = ( 1.0 - smoothstep( 0.08, 0.30, abs( hh - ( edge - 0.38 ) ) ) ) * 0.5;
+  float rim = ( 1.0 - smoothstep( 0.04, 0.14, abs( hh + 0.02 ) ) ) * 0.6;
   a = ( front + trail ) * nz + rim;
 }
 a *= step( -0.95, hh ) * uStrength;

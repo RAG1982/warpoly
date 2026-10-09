@@ -57,6 +57,18 @@ async function main() {
       await page.waitForTimeout(1200);
       await page.screenshot({ path: `${OUT}/preview-${id}.png` });
     }
+    // Costa com espuma (close-up)
+    for (const id of ['verdejante', 'pantano']) {
+      await page.evaluate((t) => {
+        const p = window.terrainPreview;
+        p.setTileset(t);
+        p.controls.target.set(50, 0.5, 0);
+        p.camera.position.set(64, 9, 14);
+        p.controls.update();
+      }, id);
+      await page.waitForTimeout(1500);
+      await page.screenshot({ path: `${OUT}/foam-${id}.png` });
+    }
     await page.evaluate(() => { window.terrainPreview.setMap('ilhas-4p'); window.terrainPreview.setCompare(true); });
     await page.waitForTimeout(2500);
     await page.screenshot({ path: `${OUT}/preview-compare-ilhas.png` });

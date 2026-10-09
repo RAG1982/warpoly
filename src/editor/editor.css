@@ -63,5 +63,6 @@ dialog .row { display: flex; gap: 8px; justify-content: flex-end; margin-top: 12
 @media (max-width: 1100px) {
   main { grid-template-columns: 1fr; overflow-y: auto; }
   #tools, #side { overflow: visible; }
+  #stage { min-height: 440px; }
   #stage-wrap { min-height: 360px; }
 }

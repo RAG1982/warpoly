@@ -1425,3 +1425,9 @@ input:checked + .slider.round:before {
 .ability-req { color: #fca5a5; }
 .ability-btn .bld-hint-bubble { left: 0; transform: translateY(4px); white-space: normal; width: 250px; }
 .ability-btn:hover .bld-hint-bubble { transform: translateY(0); }
+
+/* F4-08: herois de campanha - retrato com realce dourado */
+.selection-portrait.hero {
+  border-color: #fbbf24;
+  box-shadow: 0 0 8px rgba(251, 191, 36, 0.75), inset 0 0 6px rgba(251, 191, 36, 0.35);
+}

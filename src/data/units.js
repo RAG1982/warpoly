@@ -45,7 +45,10 @@
  * - layer 'naval' / isTanker / carryCapacity / canHitNaval   F4-07: navios (`layer:'naval'`: só na água navegável, pathfinder naval; `canHitNaval` = pode atingir navios,
  *   padrão: atirador/cerco; melee nunca). `isTanker`+`carryCapacity`: petroleiro (coleta petróleo e ergue plataforma; não é `isWorker`).
  * - transportCapacity / submersible   F4-07b: barcaça (nº de terrestres embarcáveis); submersível (invisível permanente: reemerge ao atacar, volta após SUBMERGE_DELAY).
- * - isSiege         F4-04: unidade de cerco (imune à Transmutação). `isHero` idem (heróis na F4-08).
+ * - isSiege         F4-04: unidade de cerco (imune à Transmutação).
+ * - isHero / unique / scaleMul   F4-08: herói de campanha. `unique` = 1 por partida (`gm.spawnUnit` recusa o 2º, mesmo após a
+ *   morte do 1º); `isHero` = imune à Transmutação, barra de vida maior, destaque no HUD; `scaleMul` multiplica a escala do modelo.
+ *   Ver `src/data/heroes.js`.
  */
 
 // Raios de varredura compartilhados (antes hardcoded em Unit.js: 11/14, 13/15, 16, 14).
@@ -507,6 +510,69 @@ export const UNITS = {
     undead: true, corpseless: true
   },
   // Resultado da Transmutação: a unidade vira ovelha (modelo do critter da F3-10 em escala de unidade).
+  // --- F4-08: heróis de campanha (ÚNICOS: 1 por partida; morte = fora da partida, sem recriação). Não treináveis
+  // (`cost: null`); entram só pela ação `spawn` das missões. Usam o modelo de uma unidade existente (`modelOf`),
+  // em escala `scaleMul` e com a cor do time. Stats ≈ 2,3–2,6× o PV da base (números em docs/08_GAME_DESIGN.md §5.3b).
+  hero_brann: {
+    type: 'hero_brann',
+    modelOf: 'knight',
+    unique: true, isHero: true, scaleMul: 1.2,
+    name: 'Capitão Brann',
+    entityName: 'Capitão Brann',
+    faction: 'human',
+    hp: 520, speed: 5.0, damage: { basic: 34, piercing: 12, type: 'normal' }, attackRange: 2.2, attackCooldown: 1.0, armor: 6,
+    collisionRadius: 0.95,
+    visionRadius: 18,
+    ...MELEE_SCAN,
+    healthBarHeight: 4.6,
+    cost: null,
+    trainTime: null,
+    icon: '/icoEspada.png', // provisório
+    description: 'Herói único: comandante de infantaria. Grito de Guerra enfurece a si mesmo',
+    isWorker: false, isRanged: false, isCombat: true, projectile: null,
+    maxMana: 120, startMana: 120, manaRegen: 1,
+    abilities: ['hero_war_cry']
+  },
+  hero_drogath: {
+    type: 'hero_drogath',
+    modelOf: 'grunt',
+    unique: true, isHero: true, scaleMul: 1.2,
+    name: 'Drogath Punho-de-Brasa',
+    entityName: 'Drogath Punho-de-Brasa',
+    faction: 'orc',
+    hp: 540, speed: 4.9, damage: { basic: 38, piercing: 10, type: 'normal' }, attackRange: 2.2, attackCooldown: 1.05, armor: 6,
+    collisionRadius: 0.98,
+    visionRadius: 18,
+    ...MELEE_SCAN,
+    healthBarHeight: 4.6,
+    cost: null,
+    trainTime: null,
+    icon: '/icoEspada.png', // provisório
+    description: 'Herói único: chefe de guerra dos Clãs. Grito de Guerra enfurece a si mesmo',
+    isWorker: false, isRanged: false, isCombat: true, projectile: null,
+    maxMana: 120, startMana: 120, manaRegen: 1,
+    abilities: ['hero_war_cry']
+  },
+  hero_oren: {
+    type: 'hero_oren',
+    modelOf: 'mage',
+    unique: true, isHero: true, scaleMul: 1.15,
+    name: 'Mestre Arcano Oren',
+    entityName: 'Mestre Arcano Oren',
+    faction: 'human',
+    hp: 260, speed: 4.6, damage: { basic: 0, piercing: 34, type: 'magic' }, attackRange: 10, attackCooldown: 1.6, armor: 2,
+    collisionRadius: 0.78,
+    visionRadius: 20,
+    ...RANGED_SCAN,
+    healthBarHeight: 3.9,
+    cost: null,
+    trainTime: null,
+    icon: '/icoEscudo.png', // provisório
+    description: 'Herói único: mago de alcance. Raio Arcano fere em área e Restauro cura aliados',
+    isWorker: false, isRanged: true, isCombat: true, projectile: 'bolt',
+    maxMana: 255, startMana: 255, manaRegen: 1.5,
+    abilities: ['hero_arcane_bolt', 'hero_mend']
+  },
   sheep: {
     type: 'sheep',
     name: 'Ovelha',

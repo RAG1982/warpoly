@@ -90,6 +90,8 @@ export class GameManager {
     // Entity collections
     /** Lista única de unidades de todos os jogadores, em ordem de spawn. */
     this.allUnits = [];
+    /** F4-08: tipos de unidade `unique` (heróis) já criados nesta partida — nunca recriados, nem após a morte. */
+    this.uniqueSpawned = new Set();
     /** @type {Map<number, Array>} ownerId → unidades desse dono (mantido em add/remove) */
     this._unitsByOwner = new Map();
     /** @type {Map<number, {list: Array, dirty: boolean}>} ownerId → unidades hostis a ele (cache) */
@@ -992,6 +994,11 @@ export class GameManager {
    */
   spawnUnit(type, x, z, owner = 'player', rallyPoint = null) {
     const ownerId = this.resolveOwnerId(owner);
+    // F4-08: unidade única (herói) — 1 por partida; o 2º pedido é recusado (retorna null) mesmo se o 1º morreu.
+    if (getUnitDef(type).unique) {
+      if (this.uniqueSpawned.has(type)) return null;
+      this.uniqueSpawned.add(type);
+    }
     if (getUnitDef(type).layer === 'naval') {
       // F4-07a: navio nasce na água navegável (não na costa/terra).
       if (this.navalPathfinder && !this.navalPathfinder.isWalkableWorld(x, z)) {

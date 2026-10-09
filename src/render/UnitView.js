@@ -8,6 +8,7 @@ import * as THREE from 'three';
 import { ModelFactory } from '../entities/ModelFactory.js';
 import { UnitAnimator } from '../animation/UnitAnimator.js';
 import { getUnitDef } from '../data/index.js';
+import { HERO_BAR_SCALE } from '../data/heroes.js';
 import { syncOutline, resetOutline } from './postfx/outlineLayer.js';
 import { isDetectedBy } from '../sim/detection.js';
 import { SIM_DT, lerpAngle, animationLodStep } from '../sim/constants.js';
@@ -148,6 +149,7 @@ export class UnitView {
     this.hpFillMesh.renderOrder = 1101;
     this.hpGroup.add(this.hpFillMesh);
 
+    if (getUnitDef(u.type).isHero) this.hpGroup.scale.setScalar(HERO_BAR_SCALE); // F4-08: barra maior para heróis
     this.hpGroup.visible = false;
     this.hpSprite = this.hpGroup; // backward compatibility alias
     if (this.scene) this.scene.add(this.hpGroup);

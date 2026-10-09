@@ -628,7 +628,8 @@ export class UIManager {
       const isWorker = u.type === 'villager' || u.type === 'peon';
       const isTanker = !!u.isTanker; // F4-07a: petroleiro (constrói a plataforma; coleta petróleo)
 
-      this.selectionTitle.innerText = count > 1 ? t('hud.multiSelect', { count, name: unitLabel(u.type) }) : unitLabel(u.type);
+      const heroMark = getUnitDef(u.type).isHero ? '★ ' : ''; // F4-08
+      this.selectionTitle.innerText = heroMark + (count > 1 ? t('hud.multiSelect', { count, name: unitLabel(u.type) }) : unitLabel(u.type));
       this.updateSelectionPortraits(this.gm.selectedUnits);
 
       // Health
@@ -803,7 +804,7 @@ export class UIManager {
       const icon = getUnitDef(unit.type).icon;
       const pct = Math.max(0, unit.hp / unit.maxHp) * 100;
       return `
-        <button type="button" class="selection-portrait" data-portrait-id="${unit.id}" title="${unitLabel(unit.type)}">
+        <button type="button" class="selection-portrait${getUnitDef(unit.type).isHero ? ' hero' : ''}" data-portrait-id="${unit.id}" title="${unitLabel(unit.type)}">
           <img src="${icon}" class="selection-portrait-icon" alt="${unitLabel(unit.type)}" />
           <div class="selection-portrait-hp-bg"><div class="selection-portrait-hp-fill" style="width: ${pct}%"></div></div>
         </button>

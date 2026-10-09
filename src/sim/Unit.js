@@ -240,7 +240,7 @@ export class Unit {
     // Corpo de simulação (F2-08c): posição/rotação Y como números; a malha 3D é da `UnitView`.
     const h = this.terrain.getHeight(x, z);
     this.mesh = new Body(x, this.layer === 'naval' ? WATER_LEVEL : h + this.flyHeight, z);
-    const meshScale = this.layer === 'naval' ? NAVAL_MESH_SCALE : 1.62; // F4-07b: navios em escala própria
+    const meshScale = (this.layer === 'naval' ? NAVAL_MESH_SCALE : 1.62) * (def.scaleMul || 1); // F4-07b: navios em escala própria
     this.mesh.scale.set(meshScale, meshScale, meshScale); // Scaled +20% for superior visibility and detail appreciation
     this.mesh.userData.entity = this;
 

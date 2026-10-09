@@ -40,6 +40,7 @@ const HANDLERS = {
       for (let k = 0; k < entry.count; k++) {
         const { dx, dz } = ringOffset(i++, a.spread ?? 1.8);
         const unit = gm.spawnUnit(entry.type, a.x + dx, a.z + dz, owner);
+        if (!unit) continue; // F4-08: herói único já criado nesta partida
         if (a.guard) unit.homePos = { x: unit.mesh.position.x, z: unit.mesh.position.z };
         if (a.tag) addTag(rt, a.tag, unit.id);
         applyOrder(gm, unit, a.order);

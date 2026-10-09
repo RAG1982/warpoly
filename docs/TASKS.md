@@ -467,7 +467,7 @@ Sonnet 5.5 escreve a spec em `docs/specs/<ID>.md`; agente **Sonnet** executa; o 
 - `DONE` · CONTENT · Dep: F2-05 · Seed → mapa simétrico balanceado para 2–8 jogadores. `src/data/maps/generator.js` (`generateMap`, determinístico, simetria rotacional/espelhada, minas/florestas/acampamentos/expansões, `naval:true` com poços e costa para Estaleiro, verificação por flood fill no Pathfinder), `registerGeneratedMap` em `maps/index.js`, CLI `tools/gen-map.mjs`, testes `tests/unit/mapGenerator.test.js`.
 
 ### F8-03 · Editor de mapas no navegador
-- `TODO` · CONTENT+UI · Dep: F2-05, F7-04 · Pintar terreno/água/florestas, posicionar minas/jogadores/neutros, exportar/importar JSON.
+- `DOING(sonnet, 2026-10-09)` · CONTENT+UI · Dep: F2-05, F7-04 · Pintar terreno/água/florestas, posicionar minas/jogadores/neutros, exportar/importar JSON.
 
 ### F8-04 · Sistema de missões e gatilhos
 - `REVIEW` · CONTENT+CORE · Dep: F2-02, F2-07 · Objetivos (destruir, sobreviver X min, escoltar, resgatar, construir N), gatilhos (área, tempo, morte), diálogos/briefings, cutscenes simples de câmera.

@@ -62,6 +62,7 @@ Guarda contra regressões de desempenho. O orçamento **falha** (exit ≠ 0) qua
 npm run perf                                   # GPU real: build de produção + preview + Chromium; compara com a baseline; exit 1 em regressão
 npm run perf -- --runs 5                       # mais amostras (padrão 3)
 npm run perf -- --threshold 5%                 # limiar mais apertado (padrão 10%)
+npm run perf -- --calls-only                   # só draw calls + bundle (~40 s), sem FPS/load; bom para iterar em modelos/render
 npm run perf -- --update                       # regrava tests/perf/baseline.json (só do master, na máquina de referência)
 node tools/perf-budget.mjs --ci --dist dist    # runner SEM GPU (é o que a CI roda): draw calls + bundle
 node tools/perf-budget.mjs --compare tools/perf-results/<arquivo>.json   # só compara um resultado já medido (sem navegador)

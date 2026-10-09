@@ -356,7 +356,7 @@ async function measure(opts, baseUrl, browser, gpuInfo) {
   // FPS e load só existem com GPU real; --ci e --calls-only também os dispensam (sempre com o motivo registrado).
   const skipTiming = opts.ci || opts.callsOnly || !gpuInfo.hardware;
   const timingSkipReason = opts.ci
-    ? `modo --ci: WebGL por software (${gpuInfo.renderer}); FPS e load só são medidos com GPU real e comparados na mesma máquina (npm run perf)`
+    ? 'modo --ci: runner sem GPU real (WebGL por software); FPS e load só são medidos com GPU real e comparados na mesma máquina (npm run perf)'
     : opts.callsOnly
       ? 'modo --calls-only: FPS e load não medidos'
       : `sem GPU real: ${gpuInfo.reason}`;

@@ -8,6 +8,7 @@ import * as THREE from 'three';
 import { ModelFactory } from '../entities/ModelFactory.js';
 import { UnitAnimator } from '../animation/UnitAnimator.js';
 import { getUnitDef } from '../data/index.js';
+import { syncOutline, resetOutline } from './postfx/outlineLayer.js';
 import { isDetectedBy } from '../sim/detection.js';
 import { SIM_DT, lerpAngle, animationLodStep } from '../sim/constants.js';
 
@@ -115,6 +116,7 @@ export class UnitView {
   /** F4-04: troca o modelo 3D (Transmutação): mantém o anel de seleção e a visibilidade. */
   _swapModel() {
     const old = this.root;
+    resetOutline(this);
     const ring = this.selectionRing;
     const visible = old.visible;
     this._buildModel();
@@ -303,6 +305,7 @@ export class UnitView {
 
     // Anel de seleção e barras (billboard voltado para a câmera).
     this.selectionRing.visible = !!u.isSelected && !gone;
+    syncOutline(this, root, this.selectionRing.visible && root.visible); // F7-03: contorno de seleção (máscara)
     if (gone || !root.visible) {
       this.hpGroup.visible = false;
     } else {
@@ -395,6 +398,7 @@ export class UnitView {
   dispose() {
     if (this._disposed) return;
     this._disposed = true;
+    resetOutline(this);
     if (this.scene) {
       this.scene.remove(this.root);
       this.scene.remove(this.hpGroup);

@@ -1,5 +1,10 @@
 import * as THREE from 'three';
 import { QualitySettings } from './QualitySettings.js';
+import { PostFX } from '../render/PostFX.js';
+import { getTextureQuality } from '../models/textureQuality.js';
+import {
+  selectEffects, parseFxParam, parseDayNightParam, sampleDayNight, advancePhase, gradeOf, DEFAULT_DAY_BASE
+} from './lighting.js';
 
 // Temporários da shadow camera dinâmica (evita alocação por frame)
 const _ndc = [[-1, -1], [1, -1], [1, 1], [-1, 1], [0, 0]];
@@ -15,6 +20,9 @@ const _up = new THREE.Vector3(0, 1, 0);
 const SHAKE_DURATION = 0.15;
 const SHAKE_AMPLITUDE = 0.3;
 const SHAKE_MAX_DIST = 50;
+const _urlParams = (() => {
+  try { return new URLSearchParams(globalThis.location ? globalThis.location.search : ''); } catch (e) { return new URLSearchParams(''); }
+})();
 const SHAKE_ENABLED = (() => {
   try { return new URLSearchParams(globalThis.location ? globalThis.location.search : '').get('shake') !== '0'; } catch (e) { return true; }
 })();
@@ -65,14 +73,101 @@ export class SceneManager {
     // Lights
     this.setupLights();
 
+    // F7-03: pós-processamento (composer só existe se algum efeito estiver ligado pelo preset) e ciclo dia/noite opcional
+    this.postfx = new PostFX(this.renderer, this.scene, this.camera);
+    this.dayNight = { ...parseDayNightParam(_urlParams.get('daynight'), _urlParams.get('tod')), _snap: null, _acc: 0, _sunDirAt: 0 };
+
     // Presets de qualidade (DPR, sombras, tone mapping, resolução dinâmica)
     QualitySettings.apply(this.renderer, this);
+    if (this.dayNight.enabled) this.setDayNight({ enabled: true });
 
     // Time of day preset
     this.timeOfDay = 'day'; // 'day', 'sunset', 'night'
 
     // Resize event
     window.addEventListener('resize', () => this.onResize());
+  }
+
+  /** F7-03: (re)monta o pós-processamento conforme o preset atual (`?texq=low` desliga; `?fx=` força). */
+  applyPostFx() {
+    if (!this.postfx) return;
+    const fx = selectEffects(QualitySettings.current, getTextureQuality(), parseFxParam(_urlParams.get('fx')));
+    this.postfx.configure(fx);
+    this.postfx.setGrade(gradeOf(this.tileset));
+  }
+
+  /**
+   * F7-03: ciclo dia/noite (só visual, relógio de render; desligado por padrão). `cfg`: { enabled, period (s), phase (0..1) }.
+   * Ao desligar restaura a iluminação anterior.
+   */
+  setDayNight(cfg = {}) {
+    const d = this.dayNight;
+    const wasOn = d.enabled;
+    if (typeof cfg.period === 'number' && cfg.period >= 20) d.period = cfg.period;
+    if (typeof cfg.phase === 'number') d.phase = cfg.phase - Math.floor(cfg.phase);
+    if (typeof cfg.enabled === 'boolean') d.enabled = cfg.enabled;
+    if (d.enabled && !d._snap) {
+      d._snap = {
+        sky: this.skyColor, sunColor: this.sunLight.color.getHex(), sunI: this.sunLight.intensity, sunPos: this.sunLight.position.clone(),
+        hemiSky: this.hemiLight.color.getHex(), hemiGround: this.hemiLight.groundColor.getHex(), hemiI: this.hemiLight.intensity,
+        fillColor: this.fillLight.color.getHex(), fillI: this.fillLight.intensity, exposure: this.renderer.toneMappingExposure
+      };
+      d._exposure0 = this.renderer.toneMappingExposure;
+    }
+    if (d.enabled) { d._acc = 1; this._applyDayNight(true); }
+    else if (wasOn && d._snap) this._restoreDayNight();
+  }
+
+  _dayBase() {
+    const a = this.tileset ? this.tileset.atmosphere : null;
+    return a ? { sky: a.sky, hemiSky: a.hemiSky, hemiGround: a.hemiGround } : DEFAULT_DAY_BASE;
+  }
+
+  _applyDayNight(force) {
+    const d = this.dayNight;
+    const st = sampleDayNight(d.phase, this._dayBase());
+    this.skyColor = st.sky;
+    this.scene.background.set(st.sky);
+    this.scene.fog.color.set(st.sky);
+    this.sunLight.color.set(st.sunColor);
+    this.sunLight.intensity = st.sunI;
+    this.hemiLight.color.set(st.hemiSky);
+    this.hemiLight.groundColor.set(st.hemiGround);
+    this.hemiLight.intensity = st.hemiI;
+    this.fillLight.color.set(st.fillColor);
+    this.fillLight.intensity = st.fillI;
+    this.renderer.toneMappingExposure = d._exposure0 * st.exposure;
+    if (this.postfx) this.postfx.setNight(st.night);
+    // direção do sol: a sombra só é recalculada em degraus (evita redesenhar o shadow map todo frame)
+    const nx = st.sunPos[0] - this.sunAnchor.x, ny = st.sunPos[1] - this.sunAnchor.y, nz = st.sunPos[2] - this.sunAnchor.z;
+    const len = Math.hypot(nx, ny, nz) || 1;
+    const dot = (nx * this.sunDirection.x + ny * this.sunDirection.y + nz * this.sunDirection.z) / len;
+    if (force || dot < 0.9995) {
+      this.sunLight.position.set(st.sunPos[0], st.sunPos[1], st.sunPos[2]);
+      this.sunDirection.set(nx / len, ny / len, nz / len);
+      this.invalidateShadowFrustum();
+    }
+  }
+
+  _restoreDayNight() {
+    const d = this.dayNight;
+    const sn = d._snap;
+    this.skyColor = sn.sky;
+    this.scene.background.set(sn.sky);
+    this.scene.fog.color.set(sn.sky);
+    this.sunLight.color.set(sn.sunColor);
+    this.sunLight.intensity = sn.sunI;
+    this.sunLight.position.copy(sn.sunPos);
+    this.hemiLight.color.set(sn.hemiSky);
+    this.hemiLight.groundColor.set(sn.hemiGround);
+    this.hemiLight.intensity = sn.hemiI;
+    this.fillLight.color.set(sn.fillColor);
+    this.fillLight.intensity = sn.fillI;
+    this.renderer.toneMappingExposure = sn.exposure;
+    this.sunDirection.copy(this.sunLight.position).sub(this.sunAnchor).normalize();
+    if (this.postfx) this.postfx.setNight(0);
+    this.invalidateShadowFrustum();
+    d._snap = null;
   }
 
   setupLights() {
@@ -133,6 +228,8 @@ export class SceneManager {
     this.hemiLight.groundColor.set(a.hemiGround);
     if (!this.tileset) this.hemiLight.intensity = this._baseAtmo.hemiI;
     if (this.timeOfDay && this.timeOfDay !== 'day') this.setTimeOfDay(this.timeOfDay);
+    if (this.postfx) this.postfx.setGrade(gradeOf(this.tileset)); // F7-03
+    if (this.dayNight && this.dayNight.enabled) this._applyDayNight(true);
   }
 
   setTimeOfDay(mode) {
@@ -340,6 +437,7 @@ export class SceneManager {
   render() {
     // Resolução dinâmica (desligável pelo preset)
     const now = performance.now();
+    this._lastDt = this._lastRenderTime ? Math.min(0.25, (now - this._lastRenderTime) / 1000) : 0;
     if (this._lastRenderTime) QualitySettings.tick((now - this._lastRenderTime) / 1000);
     this._lastRenderTime = now;
 
@@ -354,6 +452,16 @@ export class SceneManager {
     }
     this._shadowFrustumChanged = false;
 
-    this.renderer.render(this.scene, this.camera);
+    // F7-03: ciclo dia/noite (≈10 Hz; só visual)
+    const dn = this.dayNight;
+    if (dn.enabled) {
+      const dt = this._lastDt || 0;
+      dn.phase = advancePhase(dn.phase, dt, dn.period);
+      dn._acc += dt;
+      if (dn._acc >= 0.1) { dn._acc = 0; this._applyDayNight(false); }
+    }
+
+    if (this.postfx && this.postfx.active) this.postfx.render(this._lastDt || 0.016);
+    else this.renderer.render(this.scene, this.camera);
   }
 }

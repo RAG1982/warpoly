@@ -7,6 +7,7 @@
 import * as THREE from 'three';
 import { ModelFactory } from '../entities/ModelFactory.js';
 import { getBuildingDef } from '../data/index.js';
+import { syncOutline, resetOutline } from './postfx/outlineLayer.js';
 import { EVT } from '../sim/events.js';
 
 /** Vector3 → objeto plano `{x,y,z}` (payload de evento: nunca referências a objetos three.js). */
@@ -440,6 +441,7 @@ export class BuildingView {
 
     // Anel de seleção e bandeira do ponto de reunião.
     this.selectionRing.visible = e.isSelected;
+    syncOutline(this, this.mesh, e.isSelected); // F7-03: contorno de seleção (máscara)
     this.rallyGroup.visible = e.rallyShown;
     if (e.rallyShown) this.rallyGroup.position.set(e.rallyPoint.x, e.rallyPoint.y, e.rallyPoint.z);
 
@@ -508,6 +510,7 @@ export class BuildingView {
   dispose() {
     if (this._disposed) return;
     this._disposed = true;
+    resetOutline(this);
     this.hpGroup.visible = false;
     if (this.flamesGroup) this.flamesGroup.visible = false;
     this.cleanupCustomVFX();

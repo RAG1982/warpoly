@@ -1,0 +1,413 @@
+{
+  "id": "arquipelago-naval-4p",
+  "name": "Arquipélago",
+  "size": 192,
+  "playable": 184,
+  "tileset": "ilhas",
+  "waterLevel": 0.5,
+  "maxPlayers": 4,
+  "generated": true,
+  "generator": {
+    "seed": 3,
+    "players": 4,
+    "size": 192,
+    "naval": true,
+    "theme": "ilhas",
+    "forestDensity": 2,
+    "symmetry": "rotational"
+  },
+  "terrain": {
+    "generator": "islands",
+    "params": {
+      "baseHeight": 2.6,
+      "coast": {
+        "falloff": 6
+      },
+      "islands": [
+        {
+          "x": 45.96,
+          "z": 45.96,
+          "rx": 17,
+          "rz": 17
+        },
+        {
+          "x": -45.96,
+          "z": 45.96,
+          "rx": 17,
+          "rz": 17
+        },
+        {
+          "x": -45.96,
+          "z": -45.96,
+          "rx": 17,
+          "rz": 17
+        },
+        {
+          "x": 45.96,
+          "z": -45.96,
+          "rx": 17,
+          "rz": 17
+        },
+        {
+          "x": 0,
+          "z": 0,
+          "rx": 8.33,
+          "rz": 8.33
+        },
+        {
+          "x": 17.09,
+          "z": 17.09,
+          "rx": 13,
+          "rz": 13
+        },
+        {
+          "x": -17.09,
+          "z": 17.09,
+          "rx": 13,
+          "rz": 13
+        },
+        {
+          "x": -17.09,
+          "z": -17.09,
+          "rx": 13,
+          "rz": 13
+        },
+        {
+          "x": 17.09,
+          "z": -17.09,
+          "rx": 13,
+          "rz": 13
+        }
+      ],
+      "bridges": [
+        {
+          "x1": 0,
+          "z1": 0,
+          "x2": 45.96,
+          "z2": 45.96,
+          "width": 8
+        },
+        {
+          "x1": 0,
+          "z1": 0,
+          "x2": -45.96,
+          "z2": 45.96,
+          "width": 8
+        },
+        {
+          "x1": 0,
+          "z1": 0,
+          "x2": -45.96,
+          "z2": -45.96,
+          "width": 8
+        },
+        {
+          "x1": 0,
+          "z1": 0,
+          "x2": 45.96,
+          "z2": -45.96,
+          "width": 8
+        }
+      ]
+    }
+  },
+  "fords": [],
+  "startSlots": [
+    {
+      "x": 45.96,
+      "z": 45.96,
+      "mirror": [
+        1,
+        -1
+      ]
+    },
+    {
+      "x": -45.96,
+      "z": 45.96,
+      "mirror": [
+        -1,
+        -1
+      ]
+    },
+    {
+      "x": -45.96,
+      "z": -45.96,
+      "mirror": [
+        -1,
+        1
+      ]
+    },
+    {
+      "x": 45.96,
+      "z": -45.96,
+      "mirror": [
+        1,
+        1
+      ]
+    }
+  ],
+  "resources": [
+    {
+      "type": "gold",
+      "x": 40.31,
+      "z": 54.45
+    },
+    {
+      "type": "stone",
+      "x": 54.8,
+      "z": 39.95
+    },
+    {
+      "type": "gold",
+      "x": -54.45,
+      "z": 40.31
+    },
+    {
+      "type": "stone",
+      "x": -39.95,
+      "z": 54.8
+    },
+    {
+      "type": "gold",
+      "x": -40.31,
+      "z": -54.45
+    },
+    {
+      "type": "stone",
+      "x": -54.8,
+      "z": -39.95
+    },
+    {
+      "type": "gold",
+      "x": 54.45,
+      "z": -40.31
+    },
+    {
+      "type": "stone",
+      "x": 39.95,
+      "z": -54.8
+    },
+    {
+      "type": "gold",
+      "x": 0,
+      "z": 0
+    },
+    {
+      "type": "oil",
+      "x": 61.52,
+      "z": 61.52,
+      "amount": 5000
+    },
+    {
+      "type": "oil",
+      "x": -61.52,
+      "z": 61.52,
+      "amount": 5000
+    },
+    {
+      "type": "oil",
+      "x": -61.52,
+      "z": -61.52,
+      "amount": 5000
+    },
+    {
+      "type": "oil",
+      "x": 61.52,
+      "z": -61.52,
+      "amount": 5000
+    },
+    {
+      "type": "oil",
+      "x": 0,
+      "z": 31.33,
+      "amount": 5000
+    },
+    {
+      "type": "oil",
+      "x": -31.33,
+      "z": 0,
+      "amount": 5000
+    },
+    {
+      "type": "oil",
+      "x": 0,
+      "z": -31.33,
+      "amount": 5000
+    },
+    {
+      "type": "oil",
+      "x": 31.33,
+      "z": 0,
+      "amount": 5000
+    },
+    {
+      "type": "oil",
+      "x": 0,
+      "z": 47.33,
+      "amount": 5000
+    },
+    {
+      "type": "oil",
+      "x": -47.33,
+      "z": 0,
+      "amount": 5000
+    },
+    {
+      "type": "oil",
+      "x": 0,
+      "z": -47.33,
+      "amount": 5000
+    },
+    {
+      "type": "oil",
+      "x": 47.33,
+      "z": 0,
+      "amount": 5000
+    }
+  ],
+  "forests": [
+    {
+      "x": 7.43,
+      "z": 7.77,
+      "count": 7,
+      "radius": 5.74,
+      "species": "pine"
+    },
+    {
+      "x": -7.77,
+      "z": 7.43,
+      "count": 7,
+      "radius": 5.74,
+      "species": "pine"
+    },
+    {
+      "x": -7.43,
+      "z": -7.77,
+      "count": 7,
+      "radius": 5.74,
+      "species": "pine"
+    },
+    {
+      "x": 7.77,
+      "z": -7.43,
+      "count": 7,
+      "radius": 5.74,
+      "species": "pine"
+    },
+    {
+      "x": 25.84,
+      "z": 26.98,
+      "count": 7,
+      "radius": 5.76,
+      "species": "autumn"
+    },
+    {
+      "x": -26.98,
+      "z": 25.84,
+      "count": 7,
+      "radius": 5.76,
+      "species": "autumn"
+    },
+    {
+      "x": -25.84,
+      "z": -26.98,
+      "count": 7,
+      "radius": 5.76,
+      "species": "autumn"
+    },
+    {
+      "x": 26.98,
+      "z": -25.84,
+      "count": 7,
+      "radius": 5.76,
+      "species": "autumn"
+    }
+  ],
+  "neutrals": [
+    {
+      "kind": "camp",
+      "x": 17.09,
+      "z": 17.09,
+      "guards": 5,
+      "reward": {
+        "gold": 300
+      },
+      "deposit": {
+        "type": "gold",
+        "amount": 3000
+      }
+    },
+    {
+      "kind": "camp",
+      "x": -17.09,
+      "z": 17.09,
+      "guards": 5,
+      "reward": {
+        "gold": 300
+      },
+      "deposit": {
+        "type": "gold",
+        "amount": 3000
+      }
+    },
+    {
+      "kind": "camp",
+      "x": -17.09,
+      "z": -17.09,
+      "guards": 5,
+      "reward": {
+        "gold": 300
+      },
+      "deposit": {
+        "type": "gold",
+        "amount": 3000
+      }
+    },
+    {
+      "kind": "camp",
+      "x": 17.09,
+      "z": -17.09,
+      "guards": 5,
+      "reward": {
+        "gold": 300
+      },
+      "deposit": {
+        "type": "gold",
+        "amount": 3000
+      }
+    },
+    {
+      "kind": "critters",
+      "species": "pig",
+      "x": 48.57,
+      "z": 56.45,
+      "count": 4,
+      "radius": 5
+    },
+    {
+      "kind": "critters",
+      "species": "pig",
+      "x": -56.45,
+      "z": 48.57,
+      "count": 4,
+      "radius": 5
+    },
+    {
+      "kind": "critters",
+      "species": "pig",
+      "x": -48.57,
+      "z": -56.45,
+      "count": 4,
+      "radius": 5
+    },
+    {
+      "kind": "critters",
+      "species": "pig",
+      "x": 56.45,
+      "z": -48.57,
+      "count": 4,
+      "radius": 5
+    }
+  ],
+  "decorationDensity": 1
+}

@@ -1,0 +1,453 @@
+{
+  "id": "vales-2v2",
+  "name": "Vales Verdes",
+  "size": 144,
+  "playable": 136,
+  "tileset": "verdejante",
+  "waterLevel": 0.5,
+  "maxPlayers": 4,
+  "generated": true,
+  "generator": {
+    "seed": 4,
+    "players": 4,
+    "size": 144,
+    "naval": false,
+    "theme": "verdejante",
+    "forestDensity": 1,
+    "symmetry": "rotational"
+  },
+  "terrain": {
+    "generator": "islands",
+    "params": {
+      "baseHeight": 2.6,
+      "coast": {
+        "falloff": 10
+      },
+      "islands": [
+        {
+          "x": 32.53,
+          "z": 32.53,
+          "rx": 27,
+          "rz": 27
+        },
+        {
+          "x": -32.53,
+          "z": 32.53,
+          "rx": 27,
+          "rz": 27
+        },
+        {
+          "x": -32.53,
+          "z": -32.53,
+          "rx": 27,
+          "rz": 27
+        },
+        {
+          "x": 32.53,
+          "z": -32.53,
+          "rx": 27,
+          "rz": 27
+        },
+        {
+          "x": 0,
+          "z": 0,
+          "rx": 12.45,
+          "rz": 12.45
+        },
+        {
+          "x": 0,
+          "z": 43.7,
+          "rx": 15,
+          "rz": 15
+        },
+        {
+          "x": -43.7,
+          "z": 0,
+          "rx": 15,
+          "rz": 15
+        },
+        {
+          "x": 0,
+          "z": -43.7,
+          "rx": 15,
+          "rz": 15
+        },
+        {
+          "x": 43.7,
+          "z": 0,
+          "rx": 15,
+          "rz": 15
+        }
+      ],
+      "bridges": [
+        {
+          "x1": 0,
+          "z1": 0,
+          "x2": 32.53,
+          "z2": 32.53,
+          "width": 13.46
+        },
+        {
+          "x1": 0,
+          "z1": 0,
+          "x2": -32.53,
+          "z2": 32.53,
+          "width": 13.46
+        },
+        {
+          "x1": 0,
+          "z1": 0,
+          "x2": -32.53,
+          "z2": -32.53,
+          "width": 13.46
+        },
+        {
+          "x1": 0,
+          "z1": 0,
+          "x2": 32.53,
+          "z2": -32.53,
+          "width": 13.46
+        },
+        {
+          "x1": 0,
+          "z1": 0,
+          "x2": 0,
+          "z2": 43.7,
+          "width": 10
+        },
+        {
+          "x1": 0,
+          "z1": 0,
+          "x2": -43.7,
+          "z2": 0,
+          "width": 10
+        },
+        {
+          "x1": 0,
+          "z1": 0,
+          "x2": 0,
+          "z2": -43.7,
+          "width": 10
+        },
+        {
+          "x1": 0,
+          "z1": 0,
+          "x2": 43.7,
+          "z2": 0,
+          "width": 10
+        },
+        {
+          "x1": 32.53,
+          "z1": 32.53,
+          "x2": -32.53,
+          "z2": 32.53,
+          "width": 9
+        },
+        {
+          "x1": -32.53,
+          "z1": 32.53,
+          "x2": -32.53,
+          "z2": -32.53,
+          "width": 9
+        },
+        {
+          "x1": -32.53,
+          "z1": -32.53,
+          "x2": 32.53,
+          "z2": -32.53,
+          "width": 9
+        },
+        {
+          "x1": 32.53,
+          "z1": -32.53,
+          "x2": 32.53,
+          "z2": 32.53,
+          "width": 9
+        }
+      ]
+    }
+  },
+  "fords": [],
+  "startSlots": [
+    {
+      "x": 32.53,
+      "z": 32.53,
+      "mirror": [
+        1,
+        -1
+      ]
+    },
+    {
+      "x": -32.53,
+      "z": 32.53,
+      "mirror": [
+        -1,
+        -1
+      ]
+    },
+    {
+      "x": -32.53,
+      "z": -32.53,
+      "mirror": [
+        -1,
+        1
+      ]
+    },
+    {
+      "x": 32.53,
+      "z": -32.53,
+      "mirror": [
+        1,
+        1
+      ]
+    }
+  ],
+  "resources": [
+    {
+      "type": "gold",
+      "x": 25.1,
+      "z": 45.61
+    },
+    {
+      "type": "stone",
+      "x": 47.02,
+      "z": 23.69
+    },
+    {
+      "type": "gold",
+      "x": -45.61,
+      "z": 25.1
+    },
+    {
+      "type": "stone",
+      "x": -23.69,
+      "z": 47.02
+    },
+    {
+      "type": "gold",
+      "x": -25.1,
+      "z": -45.61
+    },
+    {
+      "type": "stone",
+      "x": -47.02,
+      "z": -23.69
+    },
+    {
+      "type": "gold",
+      "x": 45.61,
+      "z": -25.1
+    },
+    {
+      "type": "stone",
+      "x": 23.69,
+      "z": -47.02
+    },
+    {
+      "type": "gold",
+      "x": 0,
+      "z": 0
+    }
+  ],
+  "forests": [
+    {
+      "x": 5.48,
+      "z": 8.79,
+      "count": 6,
+      "radius": 4.58,
+      "species": "autumn"
+    },
+    {
+      "x": -8.79,
+      "z": 5.48,
+      "count": 6,
+      "radius": 4.58,
+      "species": "autumn"
+    },
+    {
+      "x": -5.48,
+      "z": -8.79,
+      "count": 6,
+      "radius": 4.58,
+      "species": "autumn"
+    },
+    {
+      "x": 8.79,
+      "z": -5.48,
+      "count": 6,
+      "radius": 4.58,
+      "species": "autumn"
+    },
+    {
+      "x": 1.7,
+      "z": 19.97,
+      "count": 7,
+      "radius": 4.99,
+      "species": "pine"
+    },
+    {
+      "x": -19.97,
+      "z": 1.7,
+      "count": 7,
+      "radius": 4.99,
+      "species": "pine"
+    },
+    {
+      "x": -1.7,
+      "z": -19.97,
+      "count": 7,
+      "radius": 4.99,
+      "species": "pine"
+    },
+    {
+      "x": 19.97,
+      "z": -1.7,
+      "count": 7,
+      "radius": 4.99,
+      "species": "pine"
+    },
+    {
+      "x": 28.49,
+      "z": 1.77,
+      "count": 5,
+      "radius": 5.02,
+      "species": "oak"
+    },
+    {
+      "x": -1.77,
+      "z": 28.49,
+      "count": 5,
+      "radius": 5.02,
+      "species": "oak"
+    },
+    {
+      "x": -28.49,
+      "z": -1.77,
+      "count": 5,
+      "radius": 5.02,
+      "species": "oak"
+    },
+    {
+      "x": 1.77,
+      "z": -28.49,
+      "count": 5,
+      "radius": 5.02,
+      "species": "oak"
+    },
+    {
+      "x": 14.18,
+      "z": 12.5,
+      "count": 7,
+      "radius": 4.86,
+      "species": "oak"
+    },
+    {
+      "x": -12.5,
+      "z": 14.18,
+      "count": 7,
+      "radius": 4.86,
+      "species": "oak"
+    },
+    {
+      "x": -14.18,
+      "z": -12.5,
+      "count": 7,
+      "radius": 4.86,
+      "species": "oak"
+    },
+    {
+      "x": 12.5,
+      "z": -14.18,
+      "count": 7,
+      "radius": 4.86,
+      "species": "oak"
+    }
+  ],
+  "neutrals": [
+    {
+      "kind": "camp",
+      "x": 0,
+      "z": 43.7,
+      "guards": 3,
+      "reward": {
+        "gold": 300
+      },
+      "deposit": {
+        "type": "gold",
+        "amount": 3000
+      }
+    },
+    {
+      "kind": "camp",
+      "x": -43.7,
+      "z": 0,
+      "guards": 3,
+      "reward": {
+        "gold": 300
+      },
+      "deposit": {
+        "type": "gold",
+        "amount": 3000
+      }
+    },
+    {
+      "kind": "camp",
+      "x": 0,
+      "z": -43.7,
+      "guards": 3,
+      "reward": {
+        "gold": 300
+      },
+      "deposit": {
+        "type": "gold",
+        "amount": 3000
+      }
+    },
+    {
+      "kind": "camp",
+      "x": 43.7,
+      "z": 0,
+      "guards": 3,
+      "reward": {
+        "gold": 300
+      },
+      "deposit": {
+        "type": "gold",
+        "amount": 3000
+      }
+    },
+    {
+      "kind": "critters",
+      "species": "pig",
+      "x": 31.21,
+      "z": 11.8,
+      "count": 4,
+      "radius": 5
+    },
+    {
+      "kind": "critters",
+      "species": "pig",
+      "x": -11.8,
+      "z": 31.21,
+      "count": 4,
+      "radius": 5
+    },
+    {
+      "kind": "critters",
+      "species": "pig",
+      "x": -31.21,
+      "z": -11.8,
+      "count": 4,
+      "radius": 5
+    },
+    {
+      "kind": "critters",
+      "species": "pig",
+      "x": 11.8,
+      "z": -31.21,
+      "count": 4,
+      "radius": 5
+    }
+  ],
+  "decorationDensity": 1
+}

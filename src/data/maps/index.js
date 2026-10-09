@@ -9,12 +9,24 @@ import continental1v1 from './continental-1v1.json';
 import ilhas4p from './ilhas-4p.json';
 import estreito1v1 from './estreito-1v1.json'; // F4-07a: mapa com mar, canal e poços de petróleo
 import tutorial from './tutorial.json';
+import campos1v1 from './campos-1v1.json'; // F8-01: pacote de skirmish (1v1, 2v2, FFA, naval)
+import desfiladeiro1v1 from './desfiladeiro-1v1.json';
+import vales2v2 from './vales-2v2.json';
+import bosques2v2 from './bosques-2v2.json';
+import planaltoFfa4p from './planalto-ffa-4p.json';
+import arquipelagoNaval4p from './arquipelago-naval-4p.json';
 import { generateMap } from './generator.js';
 
 const MAPS = Object.freeze({
   'continental-1v1': continental1v1,
   'ilhas-4p': ilhas4p,
   'estreito-1v1': estreito1v1,
+  'campos-1v1': campos1v1,
+  'desfiladeiro-1v1': desfiladeiro1v1,
+  'vales-2v2': vales2v2,
+  'bosques-2v2': bosques2v2,
+  'planalto-ffa-4p': planaltoFfa4p,
+  'arquipelago-naval-4p': arquipelagoNaval4p,
   tutorial // F6-09: mapa do tutorial (`hidden`: não aparece na lista da Escaramuça)
 });
 

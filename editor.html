@@ -1,0 +1,82 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>WarPoly — Editor de mapas</title>
+  <link rel="stylesheet" href="./src/editor/editor.css" />
+</head>
+<body>
+  <header id="bar">
+    <a class="btn" id="btn-back" href="./" data-i18n="editor.back"></a>
+    <h1 data-i18n="editor.title"></h1>
+    <div class="group">
+      <button id="btn-new" data-i18n="editor.new"></button>
+      <select id="sel-game-map" aria-label="Mapa do jogo"></select>
+      <button id="btn-import" data-i18n="editor.import"></button>
+      <input id="file-import" type="file" accept="application/json,.json" hidden />
+      <button id="btn-export" class="primary" data-i18n="editor.export"></button>
+      <button id="btn-save" data-i18n="editor.save"></button>
+      <button id="btn-saved" data-i18n="editor.saved"></button>
+    </div>
+    <div class="group">
+      <button id="btn-undo" data-i18n="editor.undo" data-i18n-title="editor.undoHint"></button>
+      <button id="btn-redo" data-i18n="editor.redo" data-i18n-title="editor.redoHint"></button>
+      <select id="sel-lang" aria-label="Idioma"></select>
+    </div>
+  </header>
+
+  <main>
+    <aside id="tools" aria-label="Ferramentas"></aside>
+
+    <section id="stage">
+      <div id="stage-wrap"><canvas id="view2d"></canvas></div>
+      <div id="status"></div>
+      <div id="message" role="status"></div>
+    </section>
+
+    <aside id="side">
+      <div class="panel">
+        <div class="panel-head">
+          <h2 data-i18n="editor.section.preview"></h2>
+          <div class="seg">
+            <button id="pv-light" class="on" data-i18n="editor.preview.light"></button>
+            <button id="pv-game" data-i18n="editor.preview.game"></button>
+            <button id="pv-refresh" data-i18n="editor.preview.refresh" hidden></button>
+          </div>
+        </div>
+        <canvas id="view3d"></canvas>
+        <small data-i18n="editor.preview.hint"></small>
+      </div>
+      <div class="panel" id="issues-panel">
+        <h2 data-i18n="editor.section.issues"></h2>
+        <div id="issues-summary"></div>
+        <ul id="issues"></ul>
+      </div>
+    </aside>
+  </main>
+
+  <dialog id="dlg-new">
+    <form method="dialog">
+      <h2 data-i18n="editor.newTitle"></h2>
+      <label><span data-i18n="editor.map.name"></span><input id="new-name" type="text" maxlength="40" /></label>
+      <label><span data-i18n="editor.map.size"></span><select id="new-size"></select></label>
+      <label><span data-i18n="editor.newFill"></span><select id="new-fill"></select></label>
+      <div class="row">
+        <button value="cancel" data-i18n="editor.cancel"></button>
+        <button id="new-ok" value="ok" class="primary" data-i18n="editor.create"></button>
+      </div>
+    </form>
+  </dialog>
+
+  <dialog id="dlg-saved">
+    <form method="dialog">
+      <h2 data-i18n="editor.saved"></h2>
+      <ul id="saved-list"></ul>
+      <div class="row"><button value="close" data-i18n="editor.close"></button></div>
+    </form>
+  </dialog>
+
+  <script type="module" src="./src/editor/editor.js"></script>
+</body>
+</html>

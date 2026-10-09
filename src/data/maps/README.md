@@ -29,7 +29,8 @@ Cada mapa é um JSON em `src/data/maps/<id>.json`, registrado em `index.js` (`ge
   - `"islands"`: soma de discos/elipses de terra (`params.islands`: `{x,z,rx,rz}`) e pontes
     retangulares (`params.bridges`: `{x1,z1,x2,z2,width}`), com suavização costeira
     (`params.coast.falloff`) na distância até a forma de terra mais próxima.
-  - Suporte futuro (editor F8-03): `"terrain": { "heightmap": "maps/x.png", "scale": 6 }` —
+  - `"painted"` (F8-03): grade de alturas em décimos (Int8, base64) escrita pelo editor — `params.cell` (2), `params.nodes` (= size/cell + 1), `params.data`; interpolação bilinear (`painted.js`). Único gerador que guarda pincéis de altura/água/vau sem perda.
+  - Suporte futuro (heightmap em PNG, sem uso): `"terrain": { "heightmap": "maps/x.png", "scale": 6 }` —
     `loadHeightmap(url)` faz só o carregamento (canvas → `Float32Array`, amostragem bilinear);
     nenhum mapa atual usa isso.
 - **`fords`**: vaus/pontes de terra sobre rios — usados pelo gerador `continental` (altura),
@@ -104,3 +105,13 @@ costa de cada base ligados pelo mar). Uso: `node tools/gen-map.mjs --seed 7 --pl
 código `registerGeneratedMap(opts)` (`index.js`) para o mapa ficar disponível em `getMap`/`listMaps` e em `MatchConfig`.
 Bosques (F8-01): o gerador só põe clusters com centro a ≥ 27 de qualquer base e com `max(|x|,|z|) + raio ≤ playable/2 − 1`
 (antes 17 e raio 6 colado na borda, o que deixava árvores inalcançáveis e colava bosques nos pátios).
+
+## Editor de mapas (F8-03)
+
+`/editor.html` (`src/editor/`): pinta terreno (elevar/rebaixar/nivelar/suavizar/terra/água/vau), posiciona bases (`startSlots`), minas de ouro/pedreiras/poços,
+bosques e neutros (acampamento/animais), com desfazer/refazer, prévia 3D (leve ou com o terreno/tileset do jogo), importar JSON (inclusive mapas do jogo, que
+viram `<id>-editado`), exportar download (`<id>.json`) e salvar no `localStorage` (`warpoly.editor.maps.v1`, rascunho em `warpoly.editor.draft.v1`).
+A exportação roda `validateMapDef` (`validate.js`: as checagens de `maps.test.js` + `validateNeutrals`/`validateOilWells` do `MatchConfig` + avisos de jogabilidade e
+conectividade) e só baixa sem erros. Um mapa exportado **não** entra sozinho no registro: copie o JSON para `src/data/maps/` e registre em `index.js`
+(ou use `registerMap(json)` em código). Modelo puro/testável em `src/editor/mapModel.js`; testes `tests/unit/mapEditor.test.js`; capturas
+`node tools/capture-editor.mjs` (via safe-run) em `tools/ui-captures/editor/`.

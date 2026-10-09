@@ -16,6 +16,7 @@ import { FLAMESHIELD_DAMAGE, WATER_LEVEL, NAVAL_MAX_HEIGHT, OIL_LOAD_TIME, SHORE
 import { getAbility } from '../data/abilities.js';
 import { followBoat, detachFromBoat, killCargo, updateBoarding, updateUnloading } from './transport.js';
 import { resolveAbility, canCast, needsEntityTarget, targetProblem, applyAbility, emitCastStart, findAutocastTarget, getChannel, applyChannelWave } from './abilities.js';
+import { hitTagFor } from './hitTag.js';
 
 /** F4-04: callback de expiração de status (módulo: sem closure por unidade). */
 function onStatusExpire(unit, id) {
@@ -226,6 +227,7 @@ export class Unit {
     this.walkTimer = 0;
     this.isDead = false;
     this.lastAttackerOwnerId = null; // F3-09
+    this.lastHitTag = 'cut'; // F7-06: dica de render (animação de morte); fora do checksum
     /** F3-10: origem do guarda neutro ({x, z}) — `null` para unidades normais. */
     this.homePos = null;
     this._returningHome = false;
@@ -783,6 +785,7 @@ export class Unit {
     if (this.mods.invisible) this.breakInvisibility(); // F4-04: dano revela
     // F3-09: atribuição de kills (lida em die()).
     if (attacker && typeof attacker.ownerId === 'number') this.lastAttackerOwnerId = attacker.ownerId;
+    this.lastHitTag = hitTagFor(attacker); // F7-06
 
     const effectiveDamage = amount;
     this.hp -= effectiveDamage;

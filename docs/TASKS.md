@@ -447,7 +447,7 @@ Sonnet 5.5 escreve a spec em `docs/specs/<ID>.md`; agente **Sonnet** executa; o 
 - **Resultado**: `src/render/vfx/` (3 draw calls: solid/smoke/glow com bloom por `userData.bloom`; corpos em 1 InstancedMesh), mapeamento evento→efeito puro, níveis `off|low|med|high` por preset/`?texq=low`/`?vfx=`, `tests/unit/vfx.test.js`, capturas em `tools/ui-captures/vfx/`, botão no inspetor. Bench (3 execuções, GPU real, vs master): combate100 31,4 → 30,6 fps (−2,5%); inicial dentro do ruído (~95–100 fps). Doc em `01_ARQUITETURA.md` (F7-05). Limitações: o cadáver é um volume achatado genérico (sem malha por unidade); VFX fora da visão de névoa não são gerados.
 
 ### F7-06 · Animação de produção
-- `TODO` · ART · Dep: F2-07 · Blend entre estados, variações de ataque, animação de morte por tipo de dano, animação de carregar recurso, idle variados.
+- `DOING` · ART · Dep: F2-07 · Blend entre estados, variações de ataque, animação de morte por tipo de dano, animação de carregar recurso, idle variados.
 
 ### F7-07 · Modelos novos (para F3/F4)
 - `TODO` · ART · Dep: F3-00 · Todas as construções/unidades novas da árvore tecnológica, cada uma com entrada no inspetor e orçamento (≤ 20 draw calls pós-merge, texturas ≤ 512).

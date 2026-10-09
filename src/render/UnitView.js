@@ -7,6 +7,7 @@
 import * as THREE from 'three';
 import { ModelFactory } from '../entities/ModelFactory.js';
 import { UnitAnimator } from '../animation/UnitAnimator.js';
+import { stableVariant, deathStyleFor } from '../animation/animMath.js';
 import { getUnitDef } from '../data/index.js';
 import { HERO_BAR_SCALE } from '../data/heroes.js';
 import { syncOutline, resetOutline } from './postfx/outlineLayer.js';
@@ -105,6 +106,8 @@ export class UnitView {
     root.userData.entity = u;
     this.root = root;
     this.animator = new UnitAnimator(root, def.modelOf || base);
+    this.animator.setSeed(u.id | 0); // F7-06: rng de render do idle variado + variante estável do ataque
+    this.animator.setAttackVariant(stableVariant(u.id | 0, 2, 1));
     this._ghost = false;
     this._tool = null; // ferramenta aplicada (null = padrão do modelo)
     this._carryKey = '#'; // carga aplicada ('#' = padrão do modelo)
@@ -340,6 +343,7 @@ export class UnitView {
     if (carryKey !== this._carryKey) {
       this._carryKey = carryKey;
       this._applyCarry(u.carryVisible, u.carrying.type);
+      this.animator.setCarrying(u.carryVisible);
     }
     if (u.poseResetSeq !== this._poseSeq) {
       this._poseSeq = u.poseResetSeq;
@@ -375,6 +379,7 @@ export class UnitView {
     }
 
     if (u.isDying) {
+      animator.setDeathStyle(deathStyleFor(u.lastHitTag), stableVariant(u.id | 0, 2, 7) ? 1 : -1);
       // Afundamento visual pós-colapso (y), com o delta real do quadro (LOD) — não o tick fixo.
       if (u.deathTimer >= 1.0) {
         this._deathSinkOffset += animDelta * 0.35;
@@ -390,6 +395,7 @@ export class UnitView {
       // Progresso contínuo do ataque (attackTimer do último tick + fração do próximo ainda não
       // simulada) — evita o "degrau" de 20 Hz na animação de ataque.
       const t = Math.min(1, (u.attackTimer + alpha * SIM_DT) / u.effAttackCooldown);
+      animator.advanceBlend(animDelta);
       animator.setTime(t);
     } else {
       animator.update(animDelta * lodStep);

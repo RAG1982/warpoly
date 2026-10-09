@@ -1,4 +1,5 @@
 import * as THREE from 'three';
+import { VfxSystem } from '../render/vfx/VfxSystem.js';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 
 // Import all game models
@@ -2204,6 +2205,10 @@ class ModelInspectorApp {
       });
     });
 
+    // F7-05: efeito de teste (partículas GPU) no pedestal — cada clique dispara o próximo da lista.
+    const vfxBtn = document.getElementById('btn-test-vfx');
+    if (vfxBtn) vfxBtn.addEventListener('click', () => this.testVfx());
+
     // 3. Viewport Floating Toolbar
     // Reset Camera
     document.getElementById('btn-reset-cam').addEventListener('click', () => {
@@ -2495,11 +2500,26 @@ class ModelInspectorApp {
     this.renderer.setSize(width, height);
   }
 
+  /** F7-05: dispara um efeito de teste do VFX (`kind` opcional; senão cicla). */
+  testVfx(kind) {
+    if (!this.vfx) this.vfx = new VfxSystem(this.scene, 'high');
+    const list = [
+      { fx: 'building_collapse', radius: 3 }, { fx: 'blood', amount: 40 }, { fx: 'unit_death' },
+      { fx: 'explosion', radius: 2.5 }, { fx: 'magic', kind: 'burst', color: '#fb923c', radius: 2.5 },
+      { fx: 'magic', kind: 'ring', color: '#38bdf8', radius: 3 }, { fx: 'magic', kind: 'aura', color: '#4ade80', radius: 2, duration: 1 }
+    ];
+    this._vfxIdx = ((this._vfxIdx ?? -1) + 1) % list.length;
+    const d = kind ? { fx: kind, radius: 2.5, amount: 30, kind: 'burst', color: '#fb923c' } : list[this._vfxIdx];
+    this.vfx.play({ ...d, pos: { x: 0, y: 0.1, z: 0 } });
+    return d.fx;
+  }
+
   animate() {
     requestAnimationFrame(this.animate);
 
     this.timer.update();
     const dt = this.timer.getDelta();
+    if (this.vfx) this.vfx.update(dt);
 
     // Turntable Auto-rotation
     if (this.autoRotate && this.currentModelObject) {

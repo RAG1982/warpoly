@@ -39,8 +39,10 @@ export function playFx(L, rng, d) {
   }
 }
 
+/** Escala visual por tipo (a cena é grande: partículas precisam de tamanho para aparecer na câmera de jogo). */
+const SIZE_SCALE = { solid: 1.5, smoke: 1.5, glow: 2.2 };
 function put(layer, L, t, life, size, g, p, ox, oy, oz, vx, vy, vz, col) {
-  layer.ring.spawn(L.time + t, life, size, g, p.x + ox, p.y + oy, p.z + oz, vx, vy, vz, col[0], col[1], col[2], p.y);
+  layer.ring.spawn(L.time + t, life, size * SIZE_SCALE[layer.kind], g, p.x + ox, p.y + oy, p.z + oz, vx, vy, vz, col[0], col[1], col[2], p.y);
 }
 
 function blood(L, rng, d) {
@@ -104,7 +106,7 @@ function collapse(L, rng, d) {
   for (let i = 0; i < nd; i++) {
     const a = rng() * 6.283, s = rng.range(1.5, 4.8) * (0.6 + r * 0.12);
     const wood = rng() < 0.55;
-    put(L.solid, L, rng.range(0, 0.12), rng.range(7, 11), rng.range(0.22, 0.55), 11, d.pos,
+    put(L.solid, L, rng.range(0, 0.12), rng.range(7, 11), rng.range(0.3, 0.7), 11, d.pos,
       Math.cos(a) * r * 0.4, rng.range(0.5, 2), Math.sin(a) * r * 0.4, Math.cos(a) * s, rng.range(3, 7.5), Math.sin(a) * s,
       wood ? (rng() < 0.5 ? COL.wood : COL.woodDark) : (rng() < 0.5 ? COL.stone : COL.stoneDark));
   }

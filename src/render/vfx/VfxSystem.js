@@ -8,7 +8,7 @@ import { CorpseDecals } from './CorpseDecals.js';
 import { playFx } from './vfxEmitters.js';
 import { VFX_CAPS, createRenderRng } from './vfxConfig.js';
 import { constructionStage, constructionStageEffect } from './vfxMapping.js';
-import { getBuildingDef } from '../../data/buildings.js';
+import { getBuildingDef } from '../../data/index.js';
 
 export class VfxSystem {
   /**

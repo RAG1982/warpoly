@@ -228,6 +228,8 @@ export class Unit {
     this.lastAttackerOwnerId = null; // F3-09
     /** F3-10: origem do guarda neutro ({x, z}) — `null` para unidades normais. */
     this.homePos = null;
+    /** F5-06: raio do leash (guarnição de missão); null = GUARD_LEASH. */
+    this.guardRadius = null;
     this._returningHome = false;
     this.isDying = false;
     this.canRemove = false;
@@ -1433,7 +1435,7 @@ export class Unit {
     const h = this.homePos;
     const d = Math.hypot(p.x - h.x, p.z - h.z);
     if (!this._returningHome) {
-      if (d > GUARD_LEASH) {
+      if (d > (this.guardRadius ?? GUARD_LEASH)) {
         this._returningHome = true;
         this.moveTo(h.x, h.z, this.gameManager);
       }

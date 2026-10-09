@@ -19,7 +19,7 @@ export const CONDITION_TYPES = Object.freeze(['time', 'every', 'area', 'dead', '
 export const ACTION_TYPES = Object.freeze([
   'spawn', 'giveResources', 'takeResources', 'setObjective', 'addObjective', 'revealObjective', 'reveal', 'setTeam',
   'transfer', 'dialog', 'message', 'victory', 'defeat', 'music', 'sound', 'camera', 'cutscene', 'setVar', 'incVar',
-  'enableTrigger', 'disableTrigger', 'tag', 'order'
+  'enableTrigger', 'disableTrigger', 'tag', 'order', 'guard'
 ]);
 export const OPS = Object.freeze(['==', '!=', '>', '>=', '<', '<=']);
 export const RESOURCES = Object.freeze(['gold', 'wood', 'stone', 'oil']);
@@ -260,7 +260,7 @@ function checkAction(c, path, a, setup = false) {
         if (!isObj(a.order) || !ORDER_KINDS.includes(a.order.kind)) c.err(`${p}.order.kind`, `kind deve ser ${ORDER_KINDS.join('|')}`);
         else if (a.order.kind !== 'stop') checkXZ(c, `${p}.order`, a.order);
       }
-      if (a.guard !== undefined && typeof a.guard !== 'boolean') c.err(`${p}.guard`, 'deve ser booleano');
+      if (a.guard !== undefined && !(typeof a.guard === 'boolean' || (isObj(a.guard) && typeof a.guard.r === 'number' && a.guard.r > 0))) c.err(`${p}.guard`, 'deve ser booleano ou {r>0}');
       break;
     }
     case 'giveResources':
@@ -348,6 +348,16 @@ function checkAction(c, path, a, setup = false) {
       checkSelect(c, `${p}.select`, a.select);
       if (!ORDER_KINDS.includes(a.kind)) c.err(`${p}.kind`, `kind deve ser ${ORDER_KINDS.join('|')}`);
       else if (a.kind !== 'stop') checkXZ(c, p, a);
+      if (a.release !== undefined && typeof a.release !== 'boolean') c.err(`${p}.release`, 'deve ser booleano');
+      break;
+    case 'guard':
+      checkSelect(c, `${p}.select`, a.select);
+      if (a.release !== undefined && typeof a.release !== 'boolean') c.err(`${p}.release`, 'deve ser booleano');
+      if (a.area !== undefined) {
+        if (!isObj(a.area) || typeof a.area.r !== 'number' || a.area.r <= 0) c.err(`${p}.area`, 'área circular {x,z,r} obrigatória');
+        else checkXZ(c, `${p}.area`, a.area);
+      }
+      if (a.radius !== undefined) checkNum(c, `${p}.radius`, a.radius, { min: 1 });
       break;
   }
   void setup;

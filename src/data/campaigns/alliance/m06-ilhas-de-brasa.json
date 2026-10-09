@@ -31,7 +31,8 @@
   "setup": [
     { "type": "tag", "select": { "buildingType": "great_hall", "owner": 2 }, "tag": "hall-mares" },
     { "type": "tag", "select": { "buildingType": "great_hall", "owner": 3 }, "tag": "hall-sal" },
-    { "type": "tag", "select": { "buildingType": "castle", "owner": 1 }, "tag": "brumar-keep" }
+    { "type": "tag", "select": { "buildingType": "castle", "owner": 1 }, "tag": "brumar-keep" },
+    { "type": "spawn", "owner": 3, "units": [{ "type": "grunt", "count": 3 }, { "type": "axethrower", "count": 1 }], "x": 30, "z": 17, "tag": "garrison-sal", "guard": { "r": 9 } }
   ],
 
   "objectives": [
@@ -70,6 +71,16 @@
       "actions": [
         { "type": "setVar", "name": "brumar_warned", "value": true },
         { "type": "dialog", "speaker": { "pt-BR": "Capitão de Brumar", "en": "Brumar captain" }, "portrait": "⚓", "text": { "pt-BR": "Estamos sob ataque! Mandem socorro ao forte!", "en": "We are under attack! Send help to the keep!" } }
+      ] },
+    { "id": "tide-raid", "when": { "type": "time", "at": 240 },
+      "actions": [
+        { "type": "spawn", "owner": 2, "units": [{ "type": "grunt", "count": 3 }, { "type": "axethrower", "count": 2 }], "x": 24, "z": -20, "order": { "kind": "attackMove", "x": -26, "z": 20 } },
+        { "type": "sound", "id": "alarm" }
+      ] },
+    { "id": "salt-counter", "when": { "type": "dead", "select": { "tag": "hall-mares" } },
+      "actions": [
+        { "type": "order", "select": { "tag": "garrison-sal" }, "kind": "attackMove", "x": -26, "z": -20, "release": true },
+        { "type": "message", "text": { "pt-BR": "O Sal Cinzento larga a guarnição e contra-ataca!", "en": "Grey Salt releases its garrison and counterattacks!" } }
       ] },
     { "id": "relief", "when": { "type": "time", "at": 300 },
       "actions": [

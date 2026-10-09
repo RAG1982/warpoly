@@ -27,7 +27,8 @@
   "vars": { "waves": 0, "reinforced": false },
 
   "setup": [
-    { "type": "spawn", "owner": "player", "units": [{ "type": "knight", "count": 2 }, { "type": "archer", "count": 4 }], "x": -26, "z": -12 }
+    { "type": "spawn", "owner": "player", "units": [{ "type": "knight", "count": 2 }, { "type": "archer", "count": 4 }], "x": -26, "z": -12 },
+    { "type": "spawn", "owner": "enemy", "units": [{ "type": "grunt", "count": 2 }, { "type": "axethrower", "count": 1 }], "x": 18, "z": 6, "tag": "picket", "guard": { "r": 8 } }
   ],
 
   "objectives": [
@@ -67,6 +68,10 @@
       "actions": [
         { "type": "spawn", "owner": "enemy", "units": [{ "type": "ogre", "count": 2 }, { "type": "axethrower", "count": 3 }, { "type": "grunt", "count": 3 }], "x": 24, "z": 10, "order": { "kind": "attackMove", "x": -24, "z": -12 } },
         { "type": "dialog", "speaker": { "pt-BR": "Vigia", "en": "Lookout" }, "portrait": "👁️", "text": { "pt-BR": "É a grande investida! Todos às muralhas!", "en": "It is the great assault! Everyone to the walls!" } }
+      ] },
+    { "id": "picket-release", "when": { "type": "var", "name": "waves", "op": ">=", "value": 5 },
+      "actions": [
+        { "type": "order", "select": { "tag": "picket" }, "kind": "attackMove", "x": -24, "z": -12, "release": true }
       ] },
     { "id": "towers-bonus", "when": { "type": "objective", "id": "two-towers", "status": "completed" },
       "actions": [

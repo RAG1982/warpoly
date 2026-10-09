@@ -28,6 +28,15 @@ function addTag(rt, tag, id) {
   if (!list.includes(id)) list.push(id);
 }
 
+/** F5-06: guarnição — a unidade não sai de `r` metros do ponto (leash do `Unit._updateGuardLeash`); `null` solta. */
+function setGuard(unit, area) {
+  if (!isAlive(unit)) return;
+  if (!area) { unit.homePos = null; unit.guardRadius = null; unit._returningHome = false; return; }
+  unit.homePos = { x: area.x, z: area.z };
+  unit.guardRadius = area.r ?? null;
+  unit._returningHome = false;
+}
+
 const clone = (v) => JSON.parse(JSON.stringify(v));
 
 const HANDLERS = {
@@ -41,7 +50,7 @@ const HANDLERS = {
         const { dx, dz } = ringOffset(i++, a.spread ?? 1.8);
         const unit = gm.spawnUnit(entry.type, a.x + dx, a.z + dz, owner);
         if (!unit) continue; // F4-08: herói único já criado nesta partida
-        if (a.guard) unit.homePos = { x: unit.mesh.position.x, z: unit.mesh.position.z };
+        if (a.guard) setGuard(unit, { x: unit.mesh.position.x, z: unit.mesh.position.z, r: a.guard === true ? null : a.guard.r });
         if (a.tag) addTag(rt, a.tag, unit.id);
         applyOrder(gm, unit, a.order);
       }
@@ -160,7 +169,20 @@ const HANDLERS = {
 
   order(rt, a) {
     const found = selectEntities(rt, { kind: 'unit', ...a.select });
-    for (let i = 0; i < found.length; i++) applyOrder(rt.gm, found[i], { kind: a.kind, x: a.x, z: a.z });
+    for (let i = 0; i < found.length; i++) {
+      if (a.release) setGuard(found[i], null); // F5-06: ataque programado solta a guarnição antes da ordem
+      applyOrder(rt.gm, found[i], { kind: a.kind, x: a.x, z: a.z });
+    }
+  },
+
+  /** F5-06: `guard {select, area?{x,z,r}}` prende as unidades à área (padrão: posição atual, raio padrão); `release:true` solta. */
+  guard(rt, a) {
+    const found = selectEntities(rt, { kind: 'unit', ...a.select });
+    for (let i = 0; i < found.length; i++) {
+      const u = found[i];
+      if (a.release) setGuard(u, null);
+      else setGuard(u, a.area ? { x: a.area.x, z: a.area.z, r: a.area.r } : { x: u.mesh.position.x, z: u.mesh.position.z, r: a.radius ?? null });
+    }
   }
 };
 

@@ -432,7 +432,8 @@ Sonnet 5.5 escreve a spec em `docs/specs/<ID>.md`; agente **Sonnet** executa; o 
 - `TODO` · ART · Dep: F2-01 · Máscara de team color nas texturas (canal/área de estandartes, capas, escudos) + uniform por jogador; prévia no inspetor com seletor de cor.
 
 ### F7-03 · Iluminação e pós-processamento
-- `DOING(agente-arte, 2026-10-08)` · ART+PERF · Dep: F1-04 · Ciclo dia/noite opcional, SSAO leve, bloom para fogo/magias, color grading por tileset, outline de seleção; tudo desligável nos presets.
+- `REVIEW` · ART+PERF · Dep: F1-04 · Ciclo dia/noite opcional, SSAO leve, bloom para fogo/magias, color grading por tileset, outline de seleção; tudo desligável nos presets.
+- **Resultado**: `src/core/lighting.js` (puro, testado: curva dia/noite, `selectEffects`, parsers de `?fx=`/`?daynight=`/`?tod=`, `gradeOf`), `src/render/PostFX.js` (EffectComposer: GTAO, UnrealBloom por limiar HDR + `postfx/bloomTag.js`, contorno de seleção por máscara de meia resolução, grading, OutputPass), campos `bloom/ssao/colorGrading/selectionOutline` nos presets (low nenhum; med sem SSAO; high/ultra todos; `?texq=low` desliga tudo = sem composer), `grade` por tileset em `src/data/tilesets.js`, dia/noite opcional (desligado por padrão). Detalhes em `docs/01_ARQUITETURA.md` (F7-03); capturas em `tools/ui-captures/lighting/`. GTAO só em high/ultra (~8% fps; AO por vértice não cobre entidades dinâmicas). Limitação: com composer a névoa de guerra (transparência) fica azul-escura em vez de preta.
 
 ### F7-04 · Terreno e tilesets
 - `REVIEW` · ART+CONTENT · Dep: F2-05 · Splat map (grama, terra, areia, pedra, neve, lama), penhascos/elevação, estradas, 4 tilesets estilo WC2 (Floresta, Inverno, Terras Devastadas, Pântano), costa com espuma.

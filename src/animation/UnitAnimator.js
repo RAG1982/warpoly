@@ -149,9 +149,10 @@ export class UnitAnimator {
       }
     });
 
-    // F7-06: lista fixa de partes + buffer de pose antiga (9 floats/parte) — o blend não aloca por quadro
+    // F7-06: lista fixa de partes + buffer de pose antiga (9 floats/parte) — o blend não aloca por quadro.
+    // Sem repetidos: várias chaves podem apontar para o mesmo nó (Arremessador: `weapon`/`weaponR`/`drawnAxe`) e ele seria misturado N vezes (peso w^N).
     this._blendObjs.length = 0;
-    for (const obj of Object.values(this.meshParts)) if (obj && obj.isObject3D) this._blendObjs.push(obj);
+    for (const obj of Object.values(this.meshParts)) if (obj && obj.isObject3D && !this._blendObjs.includes(obj)) this._blendObjs.push(obj);
     this._blendFrom = new Float32Array(this._blendObjs.length * 9);
     this._blendT = BLEND_DURATION;
 

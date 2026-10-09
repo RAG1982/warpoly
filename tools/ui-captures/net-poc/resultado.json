@@ -1,0 +1,146 @@
+{
+  "quando": "2026-10-09T16:58:35.826Z",
+  "navegador": "153.0.8010.12",
+  "abas": "duas abas do mesmo contexto (BroadcastChannel)",
+  "comandosEnviados": 24,
+  "antes": [
+    {
+      "ouro": [
+        200,
+        200
+      ],
+      "unidades": [
+        5,
+        5
+      ],
+      "tick": 28,
+      "turno": 14
+    },
+    {
+      "ouro": [
+        200,
+        200
+      ],
+      "unidades": [
+        5,
+        5
+      ],
+      "tick": 34,
+      "turno": 17
+    }
+  ],
+  "depois": [
+    {
+      "ouro": [
+        0,
+        0
+      ],
+      "unidades": [
+        9,
+        4
+      ],
+      "filas": [],
+      "tick": 1014,
+      "turno": 507
+    },
+    {
+      "ouro": [
+        0,
+        0
+      ],
+      "unidades": [
+        9,
+        4
+      ],
+      "filas": [],
+      "tick": 1008,
+      "turno": 504
+    }
+  ],
+  "turnosComparados": 498,
+  "divergentes": 0,
+  "primeiroTurno": 0,
+  "ultimoTurno": 497,
+  "stalls": [
+    88,
+    88
+  ],
+  "desync": [
+    {
+      "detectadoNoTurno": 516,
+      "hashLocal": 1890524237,
+      "hashRemoto": 3460552379,
+      "congeladoNoTurno": 519,
+      "log": [
+        "13:58:33 DESYNC no turno 516: local 1890524237 x jogador 1 3460552379"
+      ]
+    },
+    {
+      "detectadoNoTurno": 516,
+      "hashLocal": 3460552379,
+      "hashRemoto": 1890524237,
+      "congeladoNoTurno": 517,
+      "log": [
+        "13:58:33 DESYNC no turno 516: local 3460552379 x jogador 0 1890524237",
+        "13:58:33 estado local adulterado (+1 ouro) — o próximo checksum deve divergir"
+      ]
+    }
+  ],
+  "criterios": [
+    {
+      "ok": true,
+      "label": "criar sala na aba 0 e entrar pela aba 1",
+      "extra": "jogadores 0 e 1"
+    },
+    {
+      "ok": true,
+      "label": "as duas abas executaram dezenas de turnos",
+      "extra": "turno aba0=501, aba1=504"
+    },
+    {
+      "ok": true,
+      "label": "checksums iguais em todos os turnos comuns",
+      "extra": "498 turnos comparados, 0 divergentes (turnos 0..497)"
+    },
+    {
+      "ok": true,
+      "label": "as duas abas mostram \"em sincronia\"",
+      "extra": "em sincronia / em sincronia"
+    },
+    {
+      "ok": true,
+      "label": "estado das duas simulações idêntico (ouro, unidades e filas)",
+      "extra": "ouro [0,0] unidades [9,4] filas []"
+    },
+    {
+      "ok": true,
+      "label": "treinar teve efeito na simulação (ouro gasto/fila/unidade nova)",
+      "extra": "ouro [200,200] -> [0,0]"
+    },
+    {
+      "ok": true,
+      "label": "captura: mesmo checksum no turno 497 nas duas abas",
+      "extra": "2901690144 = 2901690144"
+    },
+    {
+      "ok": true,
+      "label": "forçar desync: as DUAS abas mostram \"DESYNC — sim congelada\"",
+      "extra": "turno 516 / turno 516"
+    },
+    {
+      "ok": true,
+      "label": "simulação congelada nas duas abas após o desync",
+      "extra": "turnos 519/517 -> 519/517"
+    },
+    {
+      "ok": true,
+      "label": "os dois relatórios apontam hashes diferentes (local x remoto) cruzados entre as abas",
+      "extra": "[[1890524237,3460552379],[3460552379,1890524237]]"
+    },
+    {
+      "ok": true,
+      "label": "sem erros de página/console (exceto o log de desync esperado)",
+      "extra": ""
+    }
+  ]
+}

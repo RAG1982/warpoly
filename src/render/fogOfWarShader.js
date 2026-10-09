@@ -50,6 +50,23 @@ export const fogUniforms = {
   fowShroud: { value: new THREE.Vector3(0.012, 0.016, 0.024) }
 };
 
+const SHROUD_OUT = [0.012, 0.016, 0.024];
+const MEMORY_BRIGHTNESS_OUT = 0.42;
+const srgbToLinear = (v) => (v <= 0.04045 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4));
+
+/**
+ * F7-03: o patch roda DEPOIS do tone mapping/sRGB do material (`fog_fragment` é o último include do three). Com o
+ * EffectComposer o material entrega cor linear HDR e o `OutputPass` converte depois, então a mortalha e o brilho da
+ * memória (valores em espaço de saída) saíam azul-escuros/claros demais. `linear = true` entrega os mesmos valores
+ * já convertidos para linear, de modo que o resultado final bate com o caminho sem composer.
+ */
+export function setFogLinearOutput(linear) {
+  const s = fogUniforms.fowShroud.value;
+  if (linear) s.set(srgbToLinear(SHROUD_OUT[0]), srgbToLinear(SHROUD_OUT[1]), srgbToLinear(SHROUD_OUT[2]));
+  else s.set(SHROUD_OUT[0], SHROUD_OUT[1], SHROUD_OUT[2]);
+  fogUniforms.fowStyle.value.x = linear ? srgbToLinear(MEMORY_BRIGHTNESS_OUT) : MEMORY_BRIGHTNESS_OUT;
+}
+
 /**
  * Devolve `fowMap` à textura neutra 1×1 (não escurece nada). Chamado por `FogOfWar.dispose()`
  * para que a textura da partida anterior (já descartada) não continue referenciada pelo uniform

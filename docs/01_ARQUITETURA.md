@@ -615,7 +615,7 @@ Tudo é só render (nada em `src/sim/`) e desligável. Funções puras em `src/c
 - **Dia/noite**: `?daynight=1|<período s>` e `?tod=<0..1>` (0 meia-noite, 0,5 meio-dia); padrão desligado (a cena não é tocada). Curva com chaves noite/alvorada/dia/ocaso, dia derivado do tileset; atualização ~10 Hz, sombra recalculada só quando a direção do sol muda. `sceneManager.setDayNight({enabled, period, phase})` em runtime.
 - Diferença conhecida: com composer a mistura de transparências ocorre em espaço linear (a névoa de guerra fica azul-escura em vez de preta).
 - AO: GTAO só em high/ultra (custa um passe extra de normais da cena inteira, ~8% de fps medido); AO por vértice não cobriria unidades/prédios dinâmicos.
-- Capturas/medições: `tools/ui-captures/lighting/capture.mjs [fx|tileset|ciclo|perf]` (via safe-run).
+- Capturas/medições: `tools/ui-captures/lighting/capture.mjs [fx|oculto|tileset|ciclo|perf]` (via safe-run).
 
 ## Pipeline de assets
 

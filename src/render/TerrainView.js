@@ -4,16 +4,21 @@
  */
 import * as THREE from 'three';
 import { getTerrainTextures, getTerrainTexturesFromHeight } from '../models/environment/terrainTextures.js';
+import { getTilesetTerrainTexture, withRoads } from '../models/environment/tilesetTextures.js';
+import { getTileset, getMapTileset } from '../data/tilesets.js';
 
 export class TerrainView {
   /**
    * @param {import('three').Scene} scene
    * @param {import('../sim/Terrain.js').Terrain} terrain
+   * @param {{tileset?: string}} [options]  F7-04: `tileset` força um tileset (prévia); padrão = `mapDef.tileset`
    */
-  constructor(scene, terrain) {
+  constructor(scene, terrain, options = {}) {
     this.scene = scene;
     this.terrain = terrain;
     const mapDef = terrain.mapDef;
+    /** F7-04: tileset ativo (`src/data/tilesets.js`). */
+    this.tileset = options.tileset ? getTileset(options.tileset) : getMapTileset(mapDef);
     // Compatibilidade com getTerrainTextures (pinta rio/vaus/bases do mapa continental); `landmarks` é derivado
     // de `mapDef.fords`/`startSlots` — mapas sem esses dados simplesmente não têm vau/base marcados na textura.
     const [ford0, ford1, ford2] = mapDef.fords || [];
@@ -30,6 +35,14 @@ export class TerrainView {
 
   dispose() {
     if (this.mesh && this.mesh.parent) this.mesh.parent.remove(this.mesh);
+  }
+
+  /** F7-04 (prévia): troca o tileset reconstruindo a malha. */
+  setTileset(id) {
+    this.dispose();
+    if (this.mesh) { this.mesh.geometry.dispose(); this.mesh.material.dispose(); }
+    this.tileset = getTileset(id);
+    this.createTerrainMesh();
   }
 
   createTerrainMesh() {
@@ -76,7 +89,20 @@ export class TerrainView {
 
       const triColor = new THREE.Color(1.0, 1.0, 1.0);
 
-      if (cy < 0.2) {
+      if (!this.tileset.legacy) {
+        // F7-04: a cor vem do splat da textura; aqui só sombreamento de relevo (estratos nos penhascos, base escurecida).
+        const wl = terrain.mapDef.waterLevel ?? 0.5;
+        const surf = this.tileset.surface;
+        let tone = 0.97 + (rand - 0.5) * 0.06;
+        if (cy > wl + 0.1 && ny < 0.72) {
+          const k = Math.min(1, (0.72 - ny) / 0.3); // 0 = encosta suave, 1 = parede
+          const strata = 0.5 + 0.5 * Math.sin(cy * 5.5 + rand * 0.6);
+          tone *= 1 - k * (0.12 + surf.strata * strata);
+        } else if (ny >= 0.72 && ny < 0.86) {
+          tone *= 1.04; // quina superior do platô levemente mais clara
+        }
+        triColor.setRGB(tone, tone, tone);
+      } else if (cy < 0.2) {
         // Submerged riverbed / sand
         triColor.setRGB(0.90, 0.88, 0.78);
       } else if (cy < 1.4) {
@@ -110,7 +136,19 @@ export class TerrainView {
 
     // Master Procedural PBR Terrain Material
     let terrainTex;
-    if (terrain.mapDef.terrain?.generator === 'continental') {
+    const roads = terrain.mapDef.roads;
+    if (!this.tileset.legacy) {
+      terrainTex = getTilesetTerrainTexture({
+        def: this.tileset,
+        id: terrain.mapDef.id,
+        size: terrain.width,
+        getHeight: (x, z) => terrain.getHeight(x, z),
+        waterLevel: terrain.mapDef.waterLevel ?? 0.5,
+        startSlots: terrain.mapDef.startSlots || [],
+        roads,
+        masks: terrain.mapDef.splatMasks || []
+      });
+    } else if (terrain.mapDef.terrain?.generator === 'continental') {
       terrainTex = getTerrainTextures(this.landmarks, terrain.width);
     } else {
       terrainTex = getTerrainTexturesFromHeight({
@@ -121,6 +159,8 @@ export class TerrainView {
         startSlots: terrain.mapDef.startSlots || []
       });
     }
+    // Estradas num mapa 'verdejante' (legado): copia a textura cacheada e pinta por cima (nenhum mapa atual tem `roads`).
+    if (this.tileset.legacy && roads && roads.length) terrainTex = withRoads(terrainTex, roads, terrain.width, this.tileset.palette.road);
 
     const mat = new THREE.MeshStandardMaterial({
       map: terrainTex.map,
@@ -129,9 +169,10 @@ export class TerrainView {
       bumpScale: 0.04,
       vertexColors: true,
       flatShading: true,
-      roughness: 0.82,
+      roughness: this.tileset.legacy ? 0.82 : this.tileset.surface.roughness,
       metalness: 0.04
     });
+    this.material = mat;
 
     this.mesh = new THREE.Mesh(nonIndexedGeo, mat);
     this.mesh.receiveShadow = true;

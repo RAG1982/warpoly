@@ -62,6 +62,7 @@ export class MatchSession {
     // Mundo (F2-05: mapa orientado a dados — ver src/data/maps/README.md)
     this.terrain = new Terrain(getMap(matchConfig.mapId));
     this.terrainView = new TerrainView(scene, this.terrain); // F2-08c: malha do terreno (picking via `terrainView.mesh`)
+    sceneManager.applyTileset?.(this.terrainView.tileset); // F7-04: céu/névoa/ambiente do tileset do mapa
     this.water = new Water(scene, this.terrain);
     this.decorations = new Decorations(scene, this.terrain);
     this.particleSystem = new ParticleSystem(scene);
@@ -254,6 +255,7 @@ export class MatchSession {
     if (this.disposed) return;
     this.disposed = true;
     const scene = this.sceneManager.scene;
+    this.sceneManager.applyTileset?.(null); // F7-04: céu/névoa voltam ao padrão
 
     // 0. Ouvintes do barramento de eventos (F2-07) — antes de tudo, para não reagir a eventos
     // emitidos durante o próprio dispose (ex.: Building.dispose não emite, mas por segurança).

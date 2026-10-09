@@ -90,7 +90,8 @@ export default defineConfig({
         main: resolve(__dirname, 'index.html'),
         inspector: resolve(__dirname, 'inspector.html'),
         netPoc: resolve(__dirname, 'net-poc.html'),
-        lobby: resolve(__dirname, 'lobby.html')
+        lobby: resolve(__dirname, 'lobby.html'),
+        terrainPreview: resolve(__dirname, 'terrain-preview.html')
       },
       output: {
         codeSplitting: {

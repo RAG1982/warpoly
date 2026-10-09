@@ -103,20 +103,21 @@ try {
 
   // ---------------------------------------------------------------- Balão de Guerra em voo (orcs)
   if (WHAT === 'all' || WHAT === 'balloon') {
-    MAP = 'campos-1v1'; FACTION = 'orc';
+    MAP = 'continental-1v1'; FACTION = 'orc';
     const { page, errors } = await gameReady();
     const info = await page.evaluate(() => {
       const gm = window.game.gameManager;
       const id = gm.localPlayerId;
       const hq = gm.buildings.find(b => b.ownerId === id && b.role === 'hq');
       const hp = hq.mesh.position;
-      const mk = (t, dx, dz) => gm.spawnUnit(t, hp.x + dx, hp.z + dz, id);
-      // balões voando em linha sobre o terreno; grunts andando embaixo para dar escala
-      const bs = [mk('war_balloon', 12, 14), mk('war_balloon', 18, 6)];
-      const gs = [mk('grunt', 14, 16), mk('grunt', 16, 17), mk('grunt', 20, 8)];
-      bs[0].orderMove({ x: hp.x - 12, y: 0, z: hp.z + 4 });
-      bs[1].orderMove({ x: hp.x - 8, y: 0, z: hp.z - 10 });
-      gs.forEach(g => g.orderMove({ x: g.mesh.position.x - 10, y: 0, z: g.mesh.position.z - 3 }));
+      // voo em direção à câmera do jogo (+x, +z): a frente do balão (crânio) fica visível; longe da base inimiga
+      const S = { x: hp.x - 4, z: hp.z - 38 }, T = { x: hp.x + 30, z: hp.z - 4 };
+      const mk = (t, x, z) => gm.spawnUnit(t, x, z, id);
+      const bs = [mk('war_balloon', S.x, S.z), mk('war_balloon', S.x + 9, S.z - 5)];
+      const gs = [mk('grunt', S.x + 3, S.z + 3), mk('grunt', S.x + 5, S.z + 1), mk('grunt', S.x + 7, S.z + 4)];
+      bs[0].moveTo(T.x, T.z, gm);
+      bs[1].moveTo(T.x + 9, T.z - 5, gm);
+      gs.forEach(g => g.moveTo(T.x + 4 * Math.sin(g.mesh.position.x), T.z + 3, gm));
       window.__cap = { bs, gs, hp: { x: hp.x, z: hp.z } };
       return { hp: { x: hp.x, z: hp.z }, fly: bs.map(b => b.flyHeight), pos: bs.map(b => [b.mesh.position.x, b.mesh.position.y, b.mesh.position.z]) };
     });
@@ -129,16 +130,17 @@ try {
       await page.waitForTimeout(wait);
       // reaponta o alvo de novo (o balão andou) e captura
       await page.evaluate(() => { const sm = window.game.sceneManager; const u = window.__cap.bs[0].mesh.position; sm.cameraTarget.set(u.x, u.y + 2.0, u.z); });
-      await page.waitForTimeout(150);
+      await page.waitForTimeout(250);
       await grab(page, name);
+      return page.evaluate(() => { const u = window.__cap.bs[0]; return { x: +u.mesh.position.x.toFixed(1), y: +u.mesh.position.y.toFixed(2), z: +u.mesh.position.z.toFixed(1), moving: u.isMoving !== undefined ? u.isMoving : null }; });
     };
-    await follow(1.0, Math.PI / 4, 'balao-voo-padrao-1', 1800);
-    await follow(0.5, Math.PI / 4, 'balao-voo-perto-1', 1200);
-    await follow(0.35, Math.PI / 4, 'balao-voo-perto-2', 900);
-    await follow(0.5, Math.PI / 2, 'balao-voo-frente', 900);
-    await follow(0.5, Math.PI * 1.25, 'balao-voo-fundos', 900);
-    const anim = await page.evaluate(() => { const u = window.__cap.bs[0]; return { state: u.state || u.animState || null, y: u.mesh.position.y, anim: u.view?.animator?.currentAnim || null }; });
-    console.log('balao em voo', JSON.stringify(anim), errors.length ? `ERROS: ${errors.join(' | ')}` : 'sem erros');
+    console.log('t0', JSON.stringify(await follow(1.0, Math.PI / 4, 'balao-voo-padrao-1', 1500)));
+    console.log('t1', JSON.stringify(await follow(0.6, Math.PI / 4, 'balao-voo-perto-1', 900)));
+    console.log('t2', JSON.stringify(await follow(0.38, Math.PI / 4, 'balao-voo-perto-2', 900)));
+    console.log('t3', JSON.stringify(await follow(0.5, Math.PI / 2, 'balao-voo-frente', 900)));
+    console.log('t4', JSON.stringify(await follow(0.5, Math.PI * 1.25, 'balao-voo-fundos', 900)));
+    console.log('t5', JSON.stringify(await follow(0.38, Math.PI * 0.8, 'balao-voo-lado', 900)));
+    console.log('balao em voo', errors.length ? `ERROS: ${errors.join(' | ')}` : 'sem erros');
     await close();
   }
 

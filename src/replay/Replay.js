@@ -11,6 +11,9 @@
  * - `version` = versão do FORMATO (rejeitada se diferente); `simVersion` = versão das REGRAS da sim
  *   (`REPLAY_SIM_VERSION`; suba quando uma mudança alterar o resultado de partidas já gravadas).
  *   Diferença de `simVersion` não bloqueia: os checksums gravados dizem se a reprodução diverge.
+ * - `takes` (opcional, F9-05b, partidas online) = trocas humano↔IA `{tick,pid,ai}` (queda/saída => IA assume;
+ *   volta => humano). Na reprodução são aplicadas antes do passo do `tick`, como no `GameSimAdapter`. Nas partidas
+ *   online `cmds` vem do `humanLog` do adaptador (só o que os humanos enviaram; a IA que assume regenera o resto).
  * - `cmds` = comandos humanos executados (`commands.log`) + agendados (`pending`), na ordem de execução, sem `seqNo`.
  *   Reenfileirá-los nessa ordem reproduz a ordem `(playerId, seqNo)` original.
  * - `checks` = checksum do estado a cada `checkEvery` ticks (múltiplos de 20, vindos de `gm.checksums`).
@@ -51,6 +54,17 @@ export function replayCommands(gm) {
   return out;
 }
 
+/**
+ * F9-05b: comandos de partida online = o que o adaptador enfileirou (`humanLog`, só os humanos). Os comandos que a IA
+ * emite depois de assumir um jogador que caiu NÃO entram (estariam duplicados: a IA os regenera na reprodução).
+ */
+function adapterCommands(adapter) {
+  return adapter.humanLog.map((c) => {
+    const { seqNo: _seq, ...rest } = c; // eslint-disable-line no-unused-vars
+    return rest;
+  });
+}
+
 /** Grava checksums periódicos lendo `gm.checksums` (alimentado pela própria sim a cada 20 ticks). */
 export class ReplayRecorder {
   /**
@@ -59,9 +73,11 @@ export class ReplayRecorder {
    * @param {number} [o.checkEvery]
    * @param {string} [o.id]
    * @param {boolean} [o.online]
+   * @param {{humanLog:object[], takeLog:object[]}|null} [o.adapter]  `GameSimAdapter` da partida online (F9-05b)
    */
-  constructor(gm, { checkEvery = CHECK_EVERY, id = null, online = false } = {}) {
+  constructor(gm, { checkEvery = CHECK_EVERY, id = null, online = false, adapter = null } = {}) {
     this.gm = gm;
+    this.adapter = adapter;
     this.checkEvery = checkEvery;
     this.online = online;
     this.createdAt = Date.now();
@@ -96,7 +112,7 @@ export class ReplayRecorder {
   /** Monta o objeto de replay do estado atual (chame ao fim da partida, ao sair ou periodicamente). */
   snapshot({ name = '', now = Date.now() } = {}) {
     this.poll();
-    return captureReplay(this.gm, { id: this.id, name, createdAt: this.createdAt, savedAt: now, checks: this.checks, online: this.online });
+    return captureReplay(this.gm, { id: this.id, name, createdAt: this.createdAt, savedAt: now, checks: this.checks, online: this.online, adapter: this.adapter });
   }
 }
 
@@ -119,7 +135,7 @@ function summarize(gm, { online }) {
  * Captura o replay da partida em `gm`. `checks` (opcional) = checksums já coletados pelo `ReplayRecorder`;
  * sem ele, usa o que `gm.checksums` ainda guarda.
  */
-export function captureReplay(gm, { id = null, name = '', createdAt = Date.now(), savedAt = Date.now(), checks = null, online = false, checkEvery = CHECK_EVERY } = {}) {
+export function captureReplay(gm, { id = null, name = '', createdAt = Date.now(), savedAt = Date.now(), checks = null, online = false, checkEvery = CHECK_EVERY, adapter = null } = {}) {
   const cfg = JSON.parse(JSON.stringify(gm.matchConfig));
   const mapDef = getMap(cfg.mapId);
   const list = checks || (gm.checksums || []).filter((c) => c.tick > 0 && c.tick % checkEvery === 0).map((c) => [c.tick, c.hash]);
@@ -135,7 +151,8 @@ export function captureReplay(gm, { id = null, name = '', createdAt = Date.now()
     mapGen: mapDef && mapDef.generated ? JSON.parse(JSON.stringify(mapDef.generator)) : null,
     localPlayerId: gm.localPlayerId,
     ticks: gm.currentTick,
-    cmds: replayCommands(gm),
+    cmds: adapter ? adapterCommands(adapter) : replayCommands(gm),
+    takes: adapter ? adapter.takeLog.map((e) => ({ tick: e.tick, pid: e.pid, ai: !!e.ai })) : [],
     checks: list.map((c) => [c[0], c[1]]),
     final: { tick: gm.currentTick, hash: stateChecksum(gm) },
     summary: summarize(gm, { online })
@@ -169,6 +186,10 @@ export function parseReplay(json) {
   for (const c of r.cmds) {
     const check = validateCommand(c);
     if (!check.ok || !Number.isInteger(c.tick) || c.tick < 0) throw fail('invalid', `Replay inválido: ${check.reason || 'tick do comando'}.`);
+  }
+  if (r.takes !== undefined) {
+    if (!Array.isArray(r.takes)) throw fail('invalid', 'Replay inválido: trocas humano/IA.');
+    for (const t of r.takes) if (!t || !Number.isInteger(t.tick) || t.tick < 0 || !Number.isInteger(t.pid) || typeof t.ai !== 'boolean') throw fail('invalid', 'Replay inválido: trocas humano/IA.');
   }
   if (!Array.isArray(r.checks)) throw fail('invalid', 'Replay inválido: checksums.');
   for (const c of r.checks) if (!Array.isArray(c) || !Number.isInteger(c[0]) || !Number.isInteger(c[1])) throw fail('invalid', 'Replay inválido: checksums.');
@@ -221,7 +242,15 @@ export function attachReplay(gm, replay) {
   // direto — por isso o passo marca `_inStep`, como o `GameSimAdapter` faz em partidas online.
   gm.netIssue = () => null;
   const step = gm.simStep.bind(gm);
+  // F9-05b: quedas/saídas do jogo online — o jogador vira IA (ou volta a humano) no tick gravado, antes do passo.
+  const takes = Array.isArray(replay.takes) ? replay.takes : [];
+  let ti = 0;
   gm.simStep = (dt) => {
+    while (ti < takes.length && takes[ti].tick <= gm.currentTick) {
+      const e = takes[ti++];
+      if (e.ai) gm.convertPlayerToAI(e.pid);
+      else gm.convertPlayerToHuman(e.pid);
+    }
     gm._inStep = true;
     try {
       step(dt);

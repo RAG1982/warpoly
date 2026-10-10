@@ -449,7 +449,7 @@ class GameApp {
         onReload: (o) => this.playReplay(replayPlay.replay, o)
       });
     } else {
-      this.replays.begin(this.session.gameManager, { online: !!online }); // F9-05: gravação automática
+      this.replays.begin(this.session.gameManager, { online: !!online, adapter: online?.proxy?.target || null }); // F9-05: gravação automática
     }
     this._nextAutosaveTick = this._autosaveMinutes > 0
       ? this.session.gameManager.currentTick + Math.round((this._autosaveMinutes * 60) / SIM_DT)

@@ -57,6 +57,8 @@ export class UnitAnimator {
     this.carrying = false;
     this.deathStyle = 'cut';
     this.deathSide = 1;
+    // F7-00b: tentáculos articulados do Olho Vigia (`Anim_Tentacle*`), na ordem do modelo
+    this._tentacles = [];
 
     if (model) {
       this.bindModel(model, unitType);
@@ -139,6 +141,18 @@ export class UnitAnimator {
         if (n.startsWith('Sail')) this.meshParts[`sail${sails++}`] = node;
         else if (n.startsWith('Cannon')) this.meshParts[`cannon${cannons++}`] = node;
         else if (n.startsWith('Turret')) this.meshParts[`turret${turrets++}`] = node;
+      });
+    }
+    // F7-00b: Olho Vigia — tentáculos articulados (`Anim_Tentacle0..N`: pivô no ponto de fixação, malha em coordenadas locais).
+    // Entram em `meshParts` (reset de transformações e cross-fade os tratam como as demais partes) e em `_tentacles`
+    // (iteração por quadro sem montar chaves).
+    this._tentacles.length = 0;
+    if (this.unitType === 'watching_eye') {
+      model.traverse(node => {
+        if ((node.name || '').startsWith('Anim_Tentacle')) {
+          this.meshParts[`tentacle${this._tentacles.length}`] = node;
+          this._tentacles.push(node);
+        }
       });
     }
 
@@ -402,6 +416,9 @@ export class UnitAnimator {
         break;
     }
 
+    // F7-00b: tentáculos do Olho Vigia ondulam em todos os estados (pose reposta por quadro; ciclos inteiros por loop)
+    if (this._tentacles.length) this.applyTentacles(time);
+
     // F7-06: carregando recurso (mochila nas costas) — tronco curvado, braços contidos, mochila balançando
     if (this.carrying && (uType === 'villager' || uType === 'peon') && (this.currentAnim === 'walk' || this.currentAnim === 'idle')) {
       if (parts.torso) parts.torso.rotation.x += CARRY_LEAN;
@@ -418,6 +435,25 @@ export class UnitAnimator {
     if ((uType === 'mage' || uType === 'necromancer') && parts.weapon && parts.armR && parts.weapon.parent === parts.armR) {
       parts.weapon.rotation.x -= parts.armR.rotation.x;
       parts.weapon.rotation.z -= parts.armR.rotation.z;
+    }
+  }
+
+  /**
+   * F7-00b: tentáculos do Olho Vigia. Cada `Anim_Tentacle<i>` pende na vertical a partir do pivô; gira de leve em x (avante/trás)
+   * e z (lados), defasado por índice, num ciclo inteiro por loop (sem emenda). Em movimento/ataque/magia a amplitude cresce e os
+   * tentáculos arrastam para trás (rotação x positiva leva a ponta para -Z).
+   */
+  applyTentacles(time) {
+    const TAU = Math.PI * 2;
+    const phase = (time / this.getDuration()) % 1;
+    const fast = this.currentAnim === 'walk' || this.currentAnim === 'fight' || this.currentAnim === 'cast';
+    const amp = fast ? 1.0 : 0.7;
+    const trail = fast ? 0.14 : 0;
+    for (let i = 0; i < this._tentacles.length; i++) {
+      const o = this._tentacles[i];
+      const off = i * 0.9;
+      o.rotation.x = trail + Math.sin(TAU * phase + off) * 0.16 * amp;
+      o.rotation.z = Math.cos(TAU * phase + off * 1.3) * 0.12 * amp;
     }
   }
 

@@ -10,7 +10,6 @@ const HERE = path.dirname(fileURLToPath(import.meta.url));
 const OUT = path.join(HERE, 'renders');
 const BASE = process.env.BASE_URL || 'http://localhost:5197';
 const shots = [
-  ['insp_knight_old', 'model=knight&light=day'],
   ['insp_knight_new', 'model=knight_glb&light=day'],
   ['insp_knight_new_side', 'model=knight_glb&light=day&cam=side'],
   ['insp_knight_new_walk', 'model=knight_glb&light=day&anim=walk&time=0.2'],

@@ -22,7 +22,7 @@ Backups: `~/warpoly_backups/warpoly_full_2026-09-28.tar.gz` e branch `backup/pre
 
 ## Regressão visual (F10-03)
 
-`npm run visual` captura todos os modelos do catálogo do inspetor (`MODEL_CATALOG`, 127 alvos) e três telas da HUD (menu principal, escaramuça, partida curta) em 1280×720, 1920×1080 e 390×844. Compara com a baseline local em `tests/visual/baseline/` (os ~109 MB de PNG NÃO ficam no git — só o `manifest.json`; gere com `npm run visual -- --update` na primeira vez; sem baseline o script aborta com instrução) e gera `tools/visual-report/index.html` com diffs por imagem (pasta ignorada pelo git).
+`npm run visual` captura todos os modelos do catálogo do inspetor (`MODEL_CATALOG`, 107 alvos após a limpeza da F7-00b; a baseline antiga tem 127) e três telas da HUD (menu principal, escaramuça, partida curta) em 1280×720, 1920×1080 e 390×844. Compara com a baseline local em `tests/visual/baseline/` (os ~109 MB de PNG NÃO ficam no git — só o `manifest.json`; gere com `npm run visual -- --update` na primeira vez; sem baseline o script aborta com instrução) e gera `tools/visual-report/index.html` com diffs por imagem (pasta ignorada pelo git).
 
 - Regravar a baseline (só depois de validar o master): `bash tools/safe-run.sh --timeout 1800 -- node tools/visual-regress.mjs --update`.
 - Filtros para lotes: `--res 1280x720`, `--only <regex>` (ex.: `--only 'inspector/knight$'`). Rodada sem filtro reinicia o relatório.

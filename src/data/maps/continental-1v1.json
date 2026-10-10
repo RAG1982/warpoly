@@ -49,8 +49,8 @@
     { "x": 28, "z": 26, "count": 6, "radius": 6.0, "species": "oak" },
     { "x": 26, "z": 2, "count": 5, "radius": 5.5, "species": "pine" },
     { "x": -26, "z": -2, "count": 5, "radius": 5.5, "species": "pine" },
-    { "x": 2, "z": -26, "count": 5, "radius": 5.5, "species": "oak" },
-    { "x": -2, "z": 26, "count": 5, "radius": 5.5, "species": "autumn" },
+    { "x": 2, "z": -26, "count": 5, "radius": 5.5, "species": "birch" },
+    { "x": -2, "z": 26, "count": 5, "radius": 5.5, "species": "birch" },
     { "x": -40, "z": -34, "count": 6, "radius": 6.0, "species": "oak" },
     { "x": -46, "z": -28, "count": 6, "radius": 6.0, "species": "pine" },
     { "x": 40, "z": 34, "count": 6, "radius": 6.0, "species": "oak" }

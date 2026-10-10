@@ -4,15 +4,6 @@ import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 
 // Import all game models
 import {
-  createKnight,
-  createArcher,
-  createVillager,
-  createBandit,
-  createPeon,
-  createGrunt,
-  createAxethrower,
-  createOgre,
-  createCavalier,
   createStable,
   createOgreDen,
   createBallista,
@@ -35,21 +26,7 @@ import {
   createArsonist,
   createWorkshop,
   createOrcWorkshop,
-  createCastle,
-  createLumberCamp,
-  createGoldMine,
-  createStoneQuarry,
-  createCottage,
-  createBarracks,
-  createWatchtower,
-  createFarm,
   createBanditCamp,
-  createGreatHall,
-  createOrcBarracks,
-  createPigFarm,
-  createOrcLumberMill,
-  createOrcWatchtower,
-  createTree,
   createFlowerPatch,
   createPebbles,
   createGrassTuft,
@@ -93,17 +70,6 @@ const createGlb = key => () => ModelFactory.createGlbModel(key) || glbPlaceholde
 const MODEL_CATALOG = [
   // --- UNIDADES ---
   {
-    id: 'knight',
-    name: 'Cavaleiro (Knight)',
-    category: 'units',
-    type: 'knight',
-    icon: '🛡️',
-    sourceFile: 'src/models/units/KnightModel.js',
-    create: createKnight,
-    description: 'Infantaria de choque com armadura de placas completa, penacho carmesim icônico, espada de aço forjado e escudo pontiagudo com brasão real dourado.',
-    notes: 'Articulação modular completa (cabeça, torso, braços, pernas, ombreiras, escudo e espada). Escudo e espada vinculados aos braços com rotações independentes.'
-  },
-  {
     id: 'knight_glb',
     name: 'Espadachim (Blender)',
     category: 'units',
@@ -114,19 +80,7 @@ const MODEL_CATALOG = [
     sourceFile: 'tools/blender/build_knight.py',
     create: createGlb('knight'),
     description: 'Versão gerada pelo pipeline Blender headless (public/models/knight.glb) a partir da referência soldado.png: armadura de placas de aço com frisos dourados, elmo aberto, capa e mangas azuis em cor de time, espada longa. 7 partes rígidas (Torso, Head, ArmL, ArmR, LegL, LegR, Sword), atlas 512².',
-    notes: 'Rig plana idêntica à do KnightModel.js procedural (o UnitAnimator anima Sword/braços com rotações independentes). Sem escudo (a referência não tem). 10 draw calls, ~4,2 mil triângulos, 213 KB. Rosto só na face frontal (+Z).'
-  },
-  {
-    id: 'cavalier',
-    name: 'Cavaleiro Montado (Cavalier)',
-    category: 'units',
-    faction: 'human',
-    type: 'cavalier',
-    icon: '🐎',
-    sourceFile: 'src/models/units/CavalierModel.js',
-    create: createCavalier,
-    description: 'Cavalaria pesada humana (F4-01): cavalo low-poly em caixas (tronco, pescoço, cabeça, crina, cauda, sela e manta azul) com o tronco do Espadachim montado na sela. Modelo procedural provisório; o modelo final do Blender vem na F7.',
-    notes: 'Pernas do cavalo (HorseLegFL/FR/BL/BR) balançam em diagonais alternadas na animação de andar; braços, espada e escudo usam as mesmas poses do Espadachim.'
+    notes: 'Rig plana (a do antigo KnightModel.js, removido na F7-00b; o UnitAnimator anima Sword/braços com rotações independentes). Sem escudo (a referência não tem). 10 draw calls, ~4,2 mil triângulos, 213 KB. Rosto só na face frontal (+Z).'
   },
   {
     id: 'ballista',
@@ -353,17 +307,6 @@ const MODEL_CATALOG = [
     notes: 'Rig plana: Body, SiegeArm (pivô (0, 2.25, −0.1); gira em X: + arma, − lança; repouso com a ponta 14° acima, já na geometria), WheelL/WheelR (giram em X ao andar). 6 draw calls, ~6,5 mil triângulos, atlas 512².'
   },
   {
-    id: 'archer',
-    name: 'Arqueiro (Archer)',
-    category: 'units',
-    type: 'archer',
-    icon: '🏹',
-    sourceFile: 'src/models/units/ArcherModel.js',
-    create: createArcher,
-    description: 'Atirador de elite ágil trajando túnica verde floresta, capuz cônico emplumado, aljava dorsal com flechas e arco recurvo de madeira nobre.',
-    notes: 'Arco e corda modelados com CatmullRomCurve3. A aljava e flechas no dorso acompanham a inclinação lateral do torso durante a puxada da corda.'
-  },
-  {
     id: 'archer_glb',
     name: 'Arqueiro (Blender)',
     category: 'units',
@@ -374,18 +317,7 @@ const MODEL_CATALOG = [
     sourceFile: 'tools/blender/build_archer.py',
     create: createGlb('archer'),
     description: 'Versão gerada pelo pipeline Blender headless (public/models/archer.glb): capuz e manto em cor de time (verde-oliva), gibão de couro sobre túnica, braçadeiras, aljava cheia de flechas com penas, arco composto com empunhadura de couro e corda de dois segmentos, adaga e bolsas.',
-    notes: 'Rig plana igual à do ArcherModel.js (Torso, Head, ArmL, ArmR, LegL, LegR; Bow em ArmL com BowStringTop/BowStringBottom, BowTipTop/BowTipBottom e DrawnArrow). O ModelFactory recria updateBowString a partir desses nós. Também é o modelo do Ranger.'
-  },
-  {
-    id: 'villager',
-    name: 'Aldeão (Villager)',
-    category: 'units',
-    type: 'villager',
-    icon: '🌾',
-    sourceFile: 'src/models/units/VillagerModel.js',
-    create: createVillager,
-    description: 'A espinha dorsal da economia do reino em estilo estilizado AAA (inspirado em Warcraft 2 / Overwatch). Trabalhador multifuncional com túnica de lã ocre, avental de couro de artesão com fivelas de latão e costuras reforçadas, calças remendadas, ferramentas intercambiáveis (machado de lenhador com fio polido, picareta de mineração e marreta de construtor) e mochila de carga modular (feixe de toras com anéis de crescimento ou saco de juta com pepitas de ouro reluzentes).',
-    notes: 'Texturas procedurais hand-painted em 2048x2048 com mapas de albedo, roughness, metalness e bump gerados via Canvas. Rigging completo compatível com todas as animações de coleta, marcha e ataque tanto no inspector quanto no jogo.'
+    notes: 'Rig plana (a do antigo ArcherModel.js, removido na F7-00b; Torso, Head, ArmL, ArmR, LegL, LegR; Bow em ArmL com BowStringTop/BowStringBottom, BowTipTop/BowTipBottom e DrawnArrow). O ModelFactory recria updateBowString a partir desses nós. Também é o modelo do Ranger.'
   },
   {
     id: 'villager_glb',
@@ -397,18 +329,7 @@ const MODEL_CATALOG = [
     sourceFile: 'tools/blender/build_villager.py',
     create: createGlb('villager'),
     description: 'Versão gerada pelo pipeline Blender headless (public/models/villager.glb): barrete de feltro e avental em cor de time, túnica de lã com mangas arregaçadas, luvas e botas de couro, cinto com ferramentas, machado/picareta/marreta separados e mochila com feixe de lenha ou saco de ouro.',
-    notes: 'Rig plana idêntica à do VillagerModel.js (Torso, Head, ArmL, ArmR, LegL, LegR, ToolGroup > Axe/Pickaxe/Hammer, Pack > WoodBundle/GoldSack). Atlas 512², rosto só em +Z.'
-  },
-  {
-    id: 'bandit',
-    name: 'Bandido (Bandit Raider)',
-    category: 'units',
-    type: 'bandit',
-    icon: '🪓',
-    sourceFile: 'src/models/units/BanditModel.js',
-    create: createBandit,
-    description: 'Saqueador bárbaro temível com pintura de guerra carmesim, olhos furiosos luminescentes, elmo spangenhelm com chifres curvados de osso ancestral, brigandina tachada com fivela de crânio, ombreira de ferro espinhosa e clava com runas de sangue.',
-    notes: 'Texturas PBR procedurais pintadas à mão (Warcraft 2 / Overwatch / Valorant). Rigging completo de membros, elmo, chifres e arma com suporte a todas as animações (Idle, Walk, Attack Slam, Death).'
+    notes: 'Rig plana (a do antigo VillagerModel.js, removido na F7-00b; Torso, Head, ArmL, ArmR, LegL, LegR, ToolGroup > Axe/Pickaxe/Hammer, Pack > WoodBundle/GoldSack). Atlas 512², rosto só em +Z.'
   },
   {
     id: 'bandit_glb',
@@ -420,19 +341,7 @@ const MODEL_CATALOG = [
     sourceFile: 'tools/blender/build_bandit.py',
     create: createGlb('bandit'),
     description: 'Versão gerada pelo pipeline Blender headless (public/models/bandit.glb): saqueador magro e mal-encarado com capuz e bandana, colete de couro remendado, cinto com facas e bolsa, luvas sem dedos, botas gastas e porrete cravejado de pregos. 7 partes rígidas (Torso, Head, ArmL, ArmR, LegL, LegR, Weapon), atlas 512².',
-    notes: 'Rig plana idêntica à do BanditModel.js (Weapon é irmã dos braços). Neutro: o TeamColor guarda só o trapo/bandana (vermelho-sujo). Rosto só na face frontal (+Z).'
-  },
-  {
-    id: 'peon',
-    name: 'Peon (Aldeão Orc)',
-    category: 'units',
-    faction: 'orc',
-    type: 'peon',
-    icon: '🪓',
-    sourceFile: 'src/models/units/PeonModel.js',
-    create: createPeon,
-    description: 'Trabalhador incansável da Horda dos Orcs com postura curvada característica, pele verde-oliva, presas inferiores proeminentes, túnica de juta rústica com arreios de couro tachados, e ferramentas intercambiáveis (machado de corte, picareta de ferro e marreta de construtor).',
-    notes: 'Inspirado no Peon clássico de Warcraft 2. Rigging modular completo com mochila de toras e saco de minério de ouro.'
+    notes: 'Rig plana (a do antigo BanditModel.js, removido na F7-00b; Weapon é irmã dos braços). Neutro: o TeamColor guarda só o trapo/bandana (vermelho-sujo). Rosto só na face frontal (+Z).'
   },
   {
     id: 'peon_glb',
@@ -445,19 +354,7 @@ const MODEL_CATALOG = [
     sourceFile: 'tools/blender/build_peon.py',
     create: createGlb('peon'),
     description: 'Versão gerada pelo pipeline Blender headless (public/models/peon.glb): trabalhador orc curvado de pele verde-oliva, presas pequenas, olhos âmbar, avental de couro, cinto de ferramentas, faixa/bandoleira em cor de time e ferramentas rudimentares (machado, picareta, marreta) com mochila de lenha/ouro.',
-    notes: 'Rig aninhada idêntica à do PeonModel.js (Torso > Head, ArmL, ArmR > ToolGroup > Axe/Pickaxe/Hammer; Pack no Torso; LegL/LegR na raiz). Atlas 512².'
-  },
-  {
-    id: 'grunt',
-    name: 'Grunt (Guerreiro Orc)',
-    category: 'units',
-    faction: 'orc',
-    type: 'grunt',
-    icon: '⚔️',
-    sourceFile: 'src/models/units/GruntModel.js',
-    create: createGrunt,
-    description: 'A temível espinha dorsal da infantaria da Horda. Porte colossal com musculatura maciça, pintura de guerra carmesim, elmo spangenhelm com chifres recurvados de osso ancestral, ombreiras com espinhos de ferro forjado e machado de batalha de lâmina dupla gigantesco.',
-    notes: 'Contraparte orc do Cavaleiro Humano. Animações de golpe circular violento (cleave) com torque total do tronco.'
+    notes: 'Rig aninhada (a do antigo PeonModel.js, removido na F7-00b; Torso > Head, ArmL, ArmR > ToolGroup > Axe/Pickaxe/Hammer; Pack no Torso; LegL/LegR na raiz). Atlas 512².'
   },
   {
     id: 'grunt_glb',
@@ -473,18 +370,6 @@ const MODEL_CATALOG = [
     notes: 'Compatível com o UnitAnimator atual (mesmos nós e pivôs nas articulações). 8 draw calls, ~4,4 mil triângulos, 1 textura. Esqueleto e AnimationMixer ficam para a F7-00b.'
   },
   {
-    id: 'axethrower',
-    name: 'Arremessador Troll (Axethrower)',
-    category: 'units',
-    faction: 'orc',
-    type: 'axethrower',
-    icon: '🎯',
-    sourceFile: 'src/models/units/AxethrowerModel.js',
-    create: createAxethrower,
-    description: 'Atirador de elite ágil da Horda dos Orcs com silhueta acrobática e predadora. Pele verde-azulada (teal) vibrante, crista de cabelo moicano chamejante em laranja e carmesim, presas curvas de marfim, colar tribal de contas e machadinhas de arremesso afiadas.',
-    notes: 'Inspirado no Troll Axethrower icônico de Warcraft 2. Animação de recuo de mira, arremesso balístico e recarga.'
-  },
-  {
     id: 'axethrower_glb',
     name: 'Lanceiro-Machado Troll (Blender)',
     category: 'units',
@@ -495,19 +380,7 @@ const MODEL_CATALOG = [
     sourceFile: 'tools/blender/build_axethrower.py',
     create: createGlb('axethrower'),
     description: 'Versão gerada pelo pipeline Blender headless (public/models/axethrower.glb): troll alto e musculoso de pele verde-acinzentada com pintura de guerra, moicano laranja, presas, colar de contas, bandoleira e cinturão de machados de arremesso, ombreira de pele, tanga em cor de time e dois machados de arremesso nas mãos.',
-    notes: 'Rig aninhada igual à do AxethrowerModel.js (Torso > Head/ArmL/ArmR > WeaponL/WeaponR; LegL/LegR na raiz; Mohawk em Head). Também é o modelo do Berserker.'
-  },
-  {
-    id: 'ogre',
-    name: 'Ogro da Horda (Ogre Brute)',
-    category: 'units',
-    faction: 'orc',
-    type: 'ogre',
-    icon: '👹',
-    sourceFile: 'src/models/units/OgreModel.js',
-    create: createOgre,
-    description: 'Campeão titânico da Horda com força descomunal. Pele ocre-amarelada enrijecida, chifre frontal de marfim, barriga proeminente com arreio de couro tachado e clava maciça feita de tronco de árvore cravada de espinhos de ferro.',
-    notes: 'Unidade gigante de elite (escala 1.5x) com golpe devastador de impacto sísmico no solo.'
+    notes: 'Rig aninhada (a do antigo AxethrowerModel.js, removido na F7-00b; Torso > Head/ArmL/ArmR > WeaponL/WeaponR; LegL/LegR na raiz; Mohawk em Head). Também é o modelo do Berserker.'
   },
   {
     id: 'ogre_glb',
@@ -520,7 +393,7 @@ const MODEL_CATALOG = [
     sourceFile: 'tools/blender/build_ogre.py',
     create: createGlb('ogre'),
     description: 'Versão gerada pelo pipeline Blender headless (public/models/ogre.glb): brutamontes colossal com barrigão, ombros largos, cabeça pequena de mandíbula proeminente e chifre, pele acinzentada com cicatrizes, ombreiras de ferro, correntes e clava gigante cravejada de espigões. 7 partes rígidas (Torso, Head, ArmL, ArmR, Weapon, LegL, LegR), atlas 512².',
-    notes: 'Rig aninhada idêntica à do OgreModel.js (Head/ArmL/ArmR em Torso, Weapon em ArmR). Faixas, tanga, capa e trapo da clava em cor de time. Rosto só na face frontal (+Z).'
+    notes: 'Rig aninhada (a do antigo OgreModel.js, removido na F7-00b; Head/ArmL/ArmR em Torso, Weapon em ArmR). Faixas, tanga, capa e trapo da clava em cor de time. Rosto só na face frontal (+Z).'
   },
 
   // --- CONSTRUÇÕES ---
@@ -692,7 +565,7 @@ const MODEL_CATALOG = [
     glb: 'stable',
     sourceFile: 'tools/blender/build_stable.py',
     create: createGlb('stable'),
-    description: 'Estábulo humano gerado pelo pipeline Blender (public/models/stable.glb): celeiro de empena frontal com estrutura de madeira aparente e reboco sobre pé de pedra, baias com meias-portas e cavalos espiando, portão central aberto, sótão de feno com talha, telhado azul com cumeeira dourada e cúpula com cata-vento, pátio com cocho, cerca, fardos, rack de sela, lanternas e mastros com bandeirolas.',
+    description: 'Estábulo humano gerado pelo pipeline Blender (public/models/stable.glb): celeiro de empena frontal com estrutura de madeira aparente e reboco sobre pé de pedra, baias fundas com divisórias e meias-portas, dois cavalos inteiros (tronco, garupa e cauda atrás da porta) espiando por cima delas (castanho e ruço, com pescoço arqueado, crina, blaze, ombros e peito), portão central aberto, sótão de feno com talha, telhado azul com cumeeira dourada e cúpula com cata-vento, pátio com cocho, cerca, fardos, rack de sela, lanternas e mastros com bandeirolas.',
     notes: '2 draw calls (Static_Mesh + Anim_Banners em cor de time), ~5 mil triângulos, atlas 1024². Pegada ~7,3 x 7,3 (raio de colisão 3,6), altura ~6. Sockets: Socket_UnitSpawn, Socket_Rally.'
   },
   {
@@ -926,8 +799,8 @@ const MODEL_CATALOG = [
     glb: 'watching_eye',
     sourceFile: 'tools/blender/build_watching_eye.py',
     create: createGlb('watching_eye'),
-    description: 'Olho voador invocado, gerado pelo pipeline Blender (public/models/watching_eye.glb): globo violeta com veias flutuando a ~2,4 u do chão, íris dourada com pupila em fenda e anel de ouro na frente (+Z), pálpebras pesadas, espinhos de osso, cinco tentáculos com ventosas e barbatana em cor de time.',
-    notes: 'Sem rig humanoide: nós Body, Tentacle0..4 e Fin. ~1,5 mil triângulos, 7 draw calls, atlas 512², ~100 KB.'
+    description: 'Olho voador invocado, gerado pelo pipeline Blender (public/models/watching_eye.glb): globo violeta com veias flutuando a ~2,4 u do chão, íris dourada com pupila em fenda e anel de ouro na frente (+Z), pálpebras pesadas, espinhos de osso, seis tentáculos articulados com ventosas pendurados em volta da metade de baixo do globo e barbatana em cor de time.',
+    notes: 'Sem rig humanoide: Torso (nó no centro do globo; o UnitAnimator respira/balança o conjunto) > Body, Fin e Anim_Tentacle0..5 (pivôs articulados, cada um com a malha TentacleN em coordenadas locais; o UnitAnimator ondula rotation.x/z, mais ao se mover). ~1,7 mil triângulos, 8 draw calls, atlas 512², ~112 KB.'
   },
   {
     id: 'templar_glb',
@@ -939,7 +812,7 @@ const MODEL_CATALOG = [
     glb: 'templar',
     sourceFile: 'tools/blender/build_templar.py',
     create: createGlb('templar'),
-    description: 'Cavaleiro consagrado gerado a partir do Cavaleiro (public/models/templar.glb): armadura branca com frisos de ouro vivo, cavalo branco, tabardo e gualdrapa em cor de time com emblema de sol, elmo com crista alta de plumas brancas e disco solar na testa.',
+    description: 'Cavaleiro consagrado gerado a partir do Cavaleiro (public/models/templar.glb): armadura branca com frisos de ouro vivo, cavalo branco, tabardo e gualdrapa em cor de time com emblema de sol (também no escudo e no peitoral do cavalo, voltados para +Z), elmo com crista alta de plumas brancas e disco solar na testa.',
     notes: 'Mesma rig do Cavaleiro (Horse, HorseLeg*, Torso, Head, ArmL/ArmR, Sword, ShieldGroup). ~9 mil triângulos, 14 draw calls, atlas 512². Animações do UnitAnimator como `cavalier`.'
   },
   {
@@ -952,7 +825,7 @@ const MODEL_CATALOG = [
     glb: 'ogre_mage',
     sourceFile: 'tools/blender/build_ogre_mage.py',
     create: createGlb('ogre_mage'),
-    description: 'Ogro xamã gerado a partir do Ogro (public/models/ogre_mage.glb): pele cinza-azulada com tinta ritual de raio luminosa, olhos elétricos, cabelo branco, cristal na testa, penacho de ossos e penas, colar de presas e cajado de xamã com cristal de raio no lugar da clava.',
+    description: 'Ogro xamã gerado a partir do Ogro (public/models/ogre_mage.glb): pele cinza-azulada com tinta ritual de raio luminosa, olhos elétricos, cabelo branco, cristal na testa, penacho de ossos e penas, colar de presas com cristal de tempestade no centro do peito e cajado de xamã com cristal de raio no lugar da clava.',
     notes: 'Mesma rig aninhada do Ogro (Weapon em ArmR). ~7 mil triângulos, 11 draw calls, atlas 512². Rosto só na face frontal (+Z).'
   },
   // F7-00b lote 1 (início)
@@ -1249,7 +1122,7 @@ const MODEL_CATALOG = [
     sourceFile: 'tools/blender/build_trees.py',
     create: createGlb('tree_oak'),
     description: 'Carvalho do mapa gerado pelo pipeline Blender (public/models/tree_oak.glb): tronco com raízes e galhos e sete copas facetadas com luz e sombra pintadas. Usado em InstancedMesh pelo TreeManager.',
-    notes: '1 draw call (uma malha, atlas 512²), ~570 triângulos, ~56 KB. Substitui as 2 malhas procedurais (tronco e copa, ~480 triângulos) e as texturas de 2048² geradas no carregamento. `?glbtrees=0` volta ao procedural.'
+    notes: '1 draw call (uma malha, atlas 512²), ~570 triângulos, ~56 KB. Substituiu as 2 malhas procedurais (tronco e copa, ~480 triângulos) e as texturas de 2048² geradas no carregamento (removidas na F7-00b). `?glbtrees=0`/`?glb=0` usam a árvore reserva de uma cor do TreeManager.'
   },
   {
     id: 'tree_pine_glb',
@@ -1274,6 +1147,18 @@ const MODEL_CATALOG = [
     create: createGlb('tree_autumn'),
     description: 'Carvalho de outono (mesma malha do carvalho, copas alaranjadas) gerado pelo pipeline Blender (public/models/tree_autumn.glb).',
     notes: '1 draw call, ~570 triângulos, atlas 512², ~64 KB.'
+  },
+  {
+    id: 'tree_birch_glb',
+    name: 'Bétula (Blender)',
+    category: 'environment',
+    type: 'nature',
+    icon: '🌿',
+    glb: 'tree_birch',
+    sourceFile: 'tools/blender/build_birch.py',
+    create: createGlb('tree_birch'),
+    description: 'Bétula do mapa gerada pelo pipeline Blender (public/models/tree_birch.glb): tronco esguio de curva suave com base alargada, casca branco-giz com lenticelas escuras horizontais (padrão procedural assado no atlas), dez galhos finos e dez copas facetadas verde-limão em três andares. `species: "birch"` nos mapas; instanciada pelo TreeManager sob demanda (só existe o InstancedMesh se o mapa tiver bétulas).',
+    notes: '1 draw call, ~820 triângulos, atlas 512², ~80 KB, altura ~6,8. Substituiu a bétula procedural (2 malhas e texturas de 2048² geradas no carregamento; removida na F7-00b). `?glbtrees=0`/`?glb=0` usam a árvore reserva de uma cor do TreeManager.'
   },
   {
     id: 'wall_human_glb',
@@ -1315,17 +1200,6 @@ const MODEL_CATALOG = [
     notes: 'VFX: Brasas e chamas ardendo na fornalha e sobre a bigorna com PointLights quentes dinâmicas, fumaça subindo pela chaminé e bigorna, e fagulhas ao forjar melhorias.'
   },
   {
-    id: 'castle',
-    name: 'Castelo Real (Castle Keep)',
-    category: 'buildings',
-    type: 'building',
-    icon: '🏰',
-    sourceFile: 'src/models/buildings/CastleModel.js',
-    create: createCastle,
-    description: 'A colossal fortaleza central do reino. Possui muralhas de cantaria pesada, 4 torres de vigia com telhados cônicos azuis, torreão principal com coroa ameada e portal reforçado.',
-    notes: 'Construção modular com múltiplos níveis de platô. Geometrias com flat-shading criam facetas nítidas com sombras suaves, transmitindo solidez medieval.'
-  },
-  {
     id: 'castle_glb',
     name: 'Castelo (Blender)',
     category: 'buildings',
@@ -1336,83 +1210,6 @@ const MODEL_CATALOG = [
     create: createGlb('castle'),
     description: 'Versão gerada pelo pipeline Blender headless (public/models/castle.glb): torres com telhados cônicos azuis, muralhas com ameias, portão em arco, torre de menagem, salão, madeira e estandartes em cor de time.',
     notes: '2 draw calls (Static_Mesh + Anim_Banners), ~8,7 mil triângulos, atlas 1024² com bake de cor e AO. Mesma pegada (raio 5,5) e altura (~9,5) do castelo procedural. Sockets: Socket_UnitSpawn, Socket_Rally.'
-  },
-  {
-    id: 'lumber_camp',
-    name: 'Serraria (Lumber Camp)',
-    category: 'buildings',
-    type: 'building',
-    icon: '🪵',
-    sourceFile: 'src/models/buildings/LumberCampModel.js',
-    create: createLumberCamp,
-    description: 'Serraria medieval estilizada AAA com plataforma de madeira elevada, abrigo de vigas e telhas de cedro, esteira mecânica com serra circular gigante cortando tora mestre, pilhas de toras com casca e anéis de corte, tábuas plainadas em cura, toco de corte com machado fincado e lanterna reluzente.',
-    notes: 'Texturas PBR procedurais pintadas à mão em 2048x2048 (casca de carvalho, anéis de cerne/alburno, madeira de pinho chanfrada com pregos forjados, lâmina de aço polida e pilhas de serragem dourada). Escala otimizada para o grid de jogo com radius 3.2.'
-  },
-  {
-    id: 'gold_mine',
-    name: 'Mina de Ouro (Gold Mine)',
-    category: 'buildings',
-    type: 'building',
-    icon: '🪙',
-    sourceFile: 'src/models/buildings/GoldMineModel.js',
-    create: createGoldMine,
-    description: 'Complexo subterrâneo de mineração com escarpas de granito escuro, veios e agulhas de ouro reluzentes (metalness 0.94), portal fortificado de carvalho, trilhos de trem com dormentes, vagonete transbordando de pepitas, lanterna de ferro com luz âmbar e caixotes de minério.',
-    notes: 'Texturas procedurais PBR 2048x2048 com veios dourados embutidos nas fendas da rocha, lanterna suspensa com PointLight atmosférico suave e vagonete com rodas de ferro fundido sobre trilhos de aço.'
-  },
-  {
-    id: 'stone_quarry',
-    name: 'Pedreira (Stone Quarry)',
-    category: 'buildings',
-    type: 'building',
-    icon: '🪨',
-    sourceFile: 'src/models/buildings/StoneQuarryModel.js',
-    create: createStoneQuarry,
-    description: 'Escavação ativa em múltiplos patamares rochosos de calcário e granito, derrick crane de madeira maciça com carga suspensa em linga, paletes de blocos aparelhados, escadas de acesso e ferramentas de cantaria.',
-    notes: 'Texturas PBR procedurais em 2048x2048 (estratos sedimentares com marcas de cinzel, blocos ashlar com marcas de guilda de cantaria, vigas de carvalho com roldanas de ferro forjado e cordas trançadas).'
-  },
-  {
-    id: 'cottage',
-    name: 'Casa Colonial (Cottage)',
-    category: 'buildings',
-    type: 'building',
-    icon: '🏠',
-    sourceFile: 'src/models/buildings/CottageModel.js',
-    create: createCottage,
-    description: 'Residência medieval com reboco amarelo rústico, vigas e escoras de madeira escura no estilo enxaimel e telhado azul pontiagudo.',
-    notes: 'Detalhe de chaminé de tijolos de pedra e porta arqueada de carvalho maciço com maçaneta forjada.'
-  },
-  {
-    id: 'barracks',
-    name: 'Quartel Militar (Barracks)',
-    category: 'buildings',
-    type: 'building',
-    icon: '⚔️',
-    sourceFile: 'src/models/buildings/BarracksModel.js',
-    create: createBarracks,
-    description: 'Guarnição militar fortificada de padrão AAA estilizado (inspirada em Warcraft 2, Valorant e Overwatch). Estrutura multisseção com salão principal em alvenaria e enxaimel, ala de armaria, plataforma de defesa superior com ameias e escadas, portas de ferro com brasão de espadas cruzadas, boneco de treino de palha com estopa e alvo, suportes com alabardas de aço e escudo do leão real, braseiros de ferro com brasas incandescentes e estandartes esvoaçantes.',
-    notes: 'Dotado de texturas PBR procedurais em canvas 2048x2048 (albedo, rugosidade, metalicidade e bump). Proporções balanceadas para o grid do jogo (8.8x7.6).'
-  },
-  {
-    id: 'watchtower',
-    name: 'Torre de Vigia (Watchtower)',
-    category: 'buildings',
-    type: 'building',
-    icon: '🗼',
-    sourceFile: 'src/models/buildings/WatchtowerModel.js',
-    create: createWatchtower,
-    description: 'Posto de defesa e vigia medieval fortificado (estilo AAA estilizado / Warcraft 2). Apresenta fundação de cantaria com contrafortes a 45°, frestas de tiro chanfradas, superestrutura de vigamento em carvalho com mãos-francesas em balanço, cesto de observação com parapeito ameado e escudos heráldicos reais, telhado cônico de telhas azuis sobrepostas com friso dourado e pináculo, braseiro de ferro forjado com brasas incandescentes e galhardete ondulante no topo.',
-    notes: 'Proporções arquitetônicas ideais para visão RTS isométrica (pegada 4x4, altura ~9.8). Plataforma dos arqueiros alinhada na altura y=6.8 para disparo perfeito de flechas. Texturas PBR procedurais em alta resolução (pedra com musgo e intempéries, vigamento com placas de reforço, telhas escamadas reais e brasas emissivas).'
-  },
-  {
-    id: 'farm',
-    name: 'Fazenda de Trigo (Farm)',
-    category: 'buildings',
-    type: 'building',
-    icon: '🌾',
-    sourceFile: 'src/models/buildings/FarmModel.js',
-    create: createFarm,
-    description: 'Fazenda medieval estilizada AAA completa: canteiro arado com espigas de trigo dourado, celeiro rústico com telhado de palha escalonada, puxadinho de ferramentas com lenha e roda, poço de pedra com manivela e balde, cerca de cedro com portão, fardos de feno e sacos de grãos.',
-    notes: 'Texturas PBR procedurais pintadas à mão em 2048x2048 (albedo, rugosidade, metalicidade, relevo) com iluminação estilizada inspirada em Warcraft 2, Overwatch e Valorant.'
   },
   {
     id: 'bandit_camp',
@@ -1427,50 +1224,6 @@ const MODEL_CATALOG = [
   },
 
   // --- AMBIENTE & ITENS ---
-  {
-    id: 'oak_tree',
-    name: 'Carvalho Frondoso (Oak Tree)',
-    category: 'environment',
-    type: 'nature',
-    icon: '🌳',
-    sourceFile: 'src/models/environment/TreeModel.js',
-    create: () => createTree('oak'),
-    description: 'Carvalho nobre AAA estilizado com tronco gotejado de musgo, 5 raízes tabulares ancoradas ao solo, bifurcações de galhos orgânicos, copas volumosas em dodecaedros facetados e cipós pendentes.',
-    notes: 'Texturas PBR procedurais pintadas à mão (2048x2048): casca com fissuras profundas, anéis de crescimento em nós de galhos podados, musgo esmeralda e folhagem com luz de contorno dourada.'
-  },
-  {
-    id: 'pine_tree',
-    name: 'Pinheiro Alpino (Pine Tree)',
-    category: 'environment',
-    type: 'nature',
-    icon: '🌲',
-    sourceFile: 'src/models/environment/TreeModel.js',
-    create: () => createTree('pine'),
-    description: 'Conífera alpina imponente com tronco afunilado e casca escamosa avermelhada, 5 saias cônicas sobrepostas com bainhas serrilhadas facetadas e pinhas 3D suspensas.',
-    notes: 'Texturas PBR com placas escamosas de pinheiro, gotas de resina âmbar translúcidas e feixes de agulhas com pontas orvalhadas/iluminadas pelo sol.'
-  },
-  {
-    id: 'autumn_tree',
-    name: 'Carvalho de Outono (Autumn Oak)',
-    category: 'environment',
-    type: 'nature',
-    icon: '🍁',
-    sourceFile: 'src/models/environment/TreeModel.js',
-    create: () => createTree('autumn'),
-    description: 'Variante outonal deslumbrante do carvalho ancestral com folhagem vibrante em tons de âmbar, cobre, rubi e ouro, cipós dourados e montinhos de folhas caídas ao pé das raízes.',
-    notes: 'Iluminação estilizada de folhagem inspirada na arte conceitual de Warcraft 2, Valorant e Overwatch com oclusão ambiente nas fendas.'
-  },
-  {
-    id: 'birch_tree',
-    name: 'Bétula Prateada (Birch Tree)',
-    category: 'environment',
-    type: 'nature',
-    icon: '🌿',
-    sourceFile: 'src/models/environment/TreeModel.js',
-    create: () => createTree('birch'),
-    description: 'Bétula esguia e graciosa com curva suave no tronco, casca branco-giz com lenticelas escuras horizontais, manchas de líquen e copas esparsas em verde-lima/dourado.',
-    notes: 'Elegância botânica nórdica estilizada com ramificações finas, tiras de casca descascando e pingentes de folhas que dançam ao vento.'
-  },
   {
     id: 'flower_patch',
     name: 'Canteiro de Flores (Flower Patch)',

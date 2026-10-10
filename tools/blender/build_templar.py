@@ -4,7 +4,9 @@ build_templar.py — Templário (tipo interno `templar`, classe avançada da cav
 Reaproveita `build_cavalier.py` (cavalo + cavaleiro do Espadachim) com a MESMA rig e os MESMOS nomes de nós
 (Horse, HorseLegFL/FR/BL/BR, Torso, Head, ArmL, ArmR, Sword, ShieldGroup), mudando só tinta e adornos:
 armadura branca com frisos de ouro vivo, cavalo branco, tabardo de time com emblema de luz (sol de 8 raios),
-elmo com crista alta de plumas brancas e disco solar na testa (frente, +Z).
+elmo com crista alta de plumas brancas e disco solar na testa (frente, +Z). O emblema do tabardo fica atrás do pescoço do cavalo
+na câmera RTS (de frente e de cima), então o sol também aparece onde se vê: no escudo (cruz + 4 raios diagonais = sol de 8 raios com
+núcleo luminoso) e no peitoral do cavalo (medalhão com 8 raios), ambos voltados para +Z.
 
 Uso:
   blender -b --factory-startup --python tools/blender/build_templar.py -- [--no-render]
@@ -80,7 +82,29 @@ def torso_extras(mb):
         mb.add(prim_cyl(0.03, 0.03, 0.015, 8, base=False), 'light', M((sx * 0.43, 0.32, 0.06), (0, 0, 90)))
 
 
-EXTRAS = {'Head': head_extras, 'Torso': torso_extras}
+def horse_extras(mb):
+    # sol de 8 raios no peitoral do cavalo (frente, +Z), em volta do medalhão do arreio (0; 1,06; 0,80): é o emblema que a
+    # câmera RTS vê de frente, já que o do tabardo fica atrás do pescoço do cavalo
+    S = M((0, 1.06, 0.80))
+    for k in range(8):
+        a = k * 45
+        ln = 0.17 if k % 2 == 0 else 0.115
+        r = 0.07 + ln / 2
+        mb.add(prim_box(0.04, ln, 0.02, taper=(0.4, 1.0)), 'gold',
+               S @ M((math.sin(math.radians(a)) * r, math.cos(math.radians(a)) * r, 0.006), (0, 0, -a)))
+    mb.add(prim_cyl(0.045, 0.045, 0.03, 8, base=False), 'light', S @ M((0, 0, 0.012), (90, 0, 0)))
+
+
+def shield_extras(mb):
+    # escudo (escala 0,62 no Cavaleiro): a cruz dourada ganha 4 raios diagonais e o umbo um núcleo luminoso = sol de 8 raios
+    k = 0.62
+    z = 0.058
+    for a in (45, 135):
+        mb.add(prim_box(0.05 * k, 0.56 * k, 0.03), 'gold', M((0, 0.14 * k, z), (0, 0, a)))
+    mb.add(prim_sphere(0.078 * k, 0.078 * k, 0.05, 8, 4), 'light', M((0, 0.14 * k, 0.118)), smooth=60)
+
+
+EXTRAS = {'Head': head_extras, 'Torso': torso_extras, 'Horse': horse_extras, 'ShieldGroup': shield_extras}
 _orig_build = MeshBuilder.build
 
 

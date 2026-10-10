@@ -675,12 +675,12 @@ input:checked + .slider.round:before {
   line-height: 1;
 }
 
+/* F7-09: sprites renderizados (128/256 px) ocupam ~78 % do botão; o tamanho acompanha --ui-scale pelo botão */
 .bld-train-btn-icon {
-  width: 32px;
-  height: 32px;
+  width: 78%;
+  height: 78%;
   object-fit: contain;
-  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.8));
-  image-rendering: -webkit-optimize-contrast;
+  filter: drop-shadow(0 2px 3px rgba(0, 0, 0, 0.75));
   pointer-events: none;
 }
 
@@ -945,8 +945,8 @@ input:checked + .slider.round:before {
 }
 
 .bld-slot-icon {
-  width: 26px;
-  height: 26px;
+  width: 88%;
+  height: 88%;
   object-fit: contain;
   filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.9));
   pointer-events: none;
@@ -1038,10 +1038,20 @@ input:checked + .slider.round:before {
 
 .card-body {
   display: flex;
+  flex-direction: row;
+  align-items: flex-start;
+  gap: calc(14px * var(--ui-scale));
+  width: 100%;
+}
+
+/* F7-09: coluna principal do card (grade de retratos, atributos e botões); o retrato animável fica à esquerda */
+.card-main {
+  display: flex;
   flex-direction: column;
   align-items: flex-start;
   gap: 8px;
-  width: 100%;
+  flex: 1 1 auto;
+  min-width: 0;
 }
 
 /* F6-03: grade de retratos da seleção múltipla (até 24; clique seleciona só aquela unidade). */
@@ -1061,6 +1071,7 @@ input:checked + .slider.round:before {
   background: rgba(14, 23, 36, 0.85);
   border: 1.5px solid var(--gold-primary);
   border-radius: 6px;
+  overflow: hidden;
   cursor: pointer;
   padding: 0;
   display: flex;
@@ -1074,11 +1085,17 @@ input:checked + .slider.round:before {
   transform: translateY(-1px);
 }
 
+/* F7-09: retrato 128² preenche o quadrado; ícone (sem retrato) fica contido e menor */
 .selection-portrait-icon {
-  width: 70%;
-  height: 70%;
-  object-fit: contain;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
   pointer-events: none;
+}
+.selection-portrait-icon.is-icon {
+  width: 80%;
+  height: 80%;
+  object-fit: contain;
 }
 
 .selection-portrait-hp-bg {
@@ -1100,7 +1117,8 @@ input:checked + .slider.round:before {
 
 #selection-stats {
   display: flex;
-  gap: 16px;
+  flex-wrap: wrap;
+  gap: 6px 16px;
   font-size: 12.5px;
   color: #cbd5e1;
   font-weight: 600;
@@ -1431,3 +1449,91 @@ input:checked + .slider.round:before {
   border-color: #fbbf24;
   box-shadow: 0 0 8px rgba(251, 191, 36, 0.75), inset 0 0 6px rgba(251, 191, 36, 0.35);
 }
+
+/* ===== F7-09: sprites 2D renderizados no Blender (public/ui/) ===== */
+/* Fallback quando o sprite e o ícone antigo falham: o <img> vira <span class="ui-sprite-emoji">emoji</span> (uiSprites.js). */
+.ui-sprite-emoji {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: calc(24px * var(--ui-scale));
+  line-height: 1;
+  pointer-events: none;
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.8));
+}
+.bld-train-btn-icon.ui-sprite-emoji,
+.bld-slot-icon.ui-sprite-emoji { width: auto; height: auto; }
+.bld-slot-icon.ui-sprite-emoji { font-size: calc(18px * var(--ui-scale)); }
+
+/* Retrato animável da unidade selecionada: duas imagens empilhadas (idle e ataque), cross-fade de 0,14 s */
+.selection-portrait-box {
+  position: relative;
+  flex: 0 0 auto;
+  width: calc(88px * var(--ui-scale));
+  height: calc(88px * var(--ui-scale));
+  border: 2px solid var(--gold-primary);
+  border-radius: 10px;
+  overflow: hidden;
+  background: #0b1018;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.6), inset 0 0 10px rgba(0, 0, 0, 0.5);
+}
+.selection-portrait-box img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  pointer-events: none;
+  transition: opacity 0.14s ease;
+}
+.selection-portrait-box .msp-attack { opacity: 0; }
+.selection-portrait-box.is-attacking .msp-attack { opacity: 1; }
+.selection-portrait-box.is-attacking { border-color: #fb923c; box-shadow: 0 0 10px rgba(251, 146, 60, 0.55), inset 0 0 10px rgba(0, 0, 0, 0.5); }
+.selection-portrait-box.no-portrait img { object-fit: contain; padding: 10%; }
+.selection-portrait-box.no-portrait .msp-attack { display: none; }
+.selection-portrait-box.hero { border-color: #fbbf24; box-shadow: 0 0 10px rgba(251, 191, 36, 0.75), inset 0 0 8px rgba(251, 191, 36, 0.35); }
+
+/* Ícone da construção no cabeçalho do card de construção */
+.bld-card-header { align-items: center; gap: calc(10px * var(--ui-scale)); }
+.bld-header-icon { flex: 0 0 auto; width: calc(52px * var(--ui-scale)); height: calc(52px * var(--ui-scale)); display: flex; align-items: center; justify-content: center; }
+.bld-header-icon img, .bld-header-icon .ui-sprite-emoji { width: 100%; height: 100%; object-fit: contain; filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.8)); }
+.bld-header-left { flex: 1 1 auto; }
+
+/* Ícone pequeno dentro dos botões de texto (evoluir Centro / cancelar obra) */
+.bld-btn-icon, .bld-btn-icon-slot img { width: calc(26px * var(--ui-scale)); height: calc(26px * var(--ui-scale)); object-fit: contain; margin-right: 6px; vertical-align: middle; filter: drop-shadow(0 1px 3px rgba(0, 0, 0, 0.8)); }
+.bld-btn-icon-slot { display: inline-flex; align-items: center; }
+.bld-btn-icon-slot .ui-sprite-emoji { font-size: calc(18px * var(--ui-scale)); margin-right: 6px; }
+.bld-hq-upgrade-btn { display: inline-flex; align-items: center; justify-content: center; }
+
+/* Tela de loading com a arte renderizada (aparece só quando a imagem carrega: classe .has-art) */
+.loading-art-img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; opacity: 0; transition: opacity 0.5s ease; pointer-events: none; }
+#loading-screen.has-art .loading-art-img { opacity: 1; }
+#loading-screen.has-art { align-items: flex-end; padding-bottom: 7vh; background: #0d0b09; }
+#loading-screen.has-art::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, rgba(6, 5, 8, 0) 40%, rgba(6, 5, 8, 0.72) 100%);
+  pointer-events: none;
+}
+#loading-screen.has-art .loading-container { position: relative; background: rgba(18, 15, 12, 0.82); backdrop-filter: blur(6px); padding: 24px 36px; }
+.loading-crest { position: relative; width: 64px; height: 64px; display: flex; align-items: center; justify-content: center; }
+.loading-crest-img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: contain; opacity: 0; transition: opacity 0.3s ease; }
+.loading-crest.has-img .loading-crest-img { opacity: 1; }
+.loading-crest.has-img .loading-crest-emoji { opacity: 0; }
+
+/* Ícones de atributo (linha de status do card, informação da construção, selo de pesquisa): sprites 128 px exibidos a ~18 px */
+.stat-ico {
+  width: 18px;
+  height: 18px;
+  object-fit: contain;
+  flex: 0 0 auto;
+  vertical-align: middle;
+  filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.8));
+  pointer-events: none;
+}
+.stat-ico.ui-sprite-emoji { width: auto; height: auto; font-size: 14px; filter: none; }
+#bld-extra-info { display: flex; align-items: center; justify-content: flex-end; gap: 4px; }
+.bld-upgrade-badge-researching .stat-ico { width: 12px; height: 12px; filter: none; }
+.bld-upgrade-badge-researching .stat-ico.ui-sprite-emoji { font-size: 9px; width: auto; height: auto; }
+.bld-cost-researching .stat-ico { width: 14px; height: 14px; margin-right: 2px; }

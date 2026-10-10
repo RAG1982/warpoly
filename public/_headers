@@ -4,3 +4,9 @@
   Cache-Control: public, max-age=604800
 /sw.js
   Cache-Control: no-cache
+/ui/icons/*
+  Cache-Control: public, max-age=604800
+/ui/portraits/*
+  Cache-Control: public, max-age=604800
+/ui/art/*
+  Cache-Control: public, max-age=604800

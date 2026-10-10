@@ -11,7 +11,7 @@
 | Render | three.js `^0.186.0` (WebGLRenderer, PCFSoftShadowMap, ACES tone mapping) |
 | Build | Vite `^8.3.0` — duas entradas: `index.html` (jogo) e `inspector.html` (inspetor 3D) |
 | Áudio | Web Audio API 100% sintetizado (sem arquivos de som) |
-| Assets | **Zero arquivos 3D/texturas externos**: todos os modelos são construídos em código (primitivas three.js) e todas as texturas são pintadas proceduralmente em `<canvas>` |
+| Assets | Unidades, construções, árvores e muralhas migradas são **`.glb` gerados no Blender** (`public/models/`, scripts em `tools/blender/`; F7-00/F7-00b); o que ainda é procedural (cerco, conjuradores, aéreos, navais, Acampamento Bandido, estábulos/oficinas, decoração, terreno, água) é construído em código (primitivas three.js) com texturas pintadas em `<canvas>` |
 | Testes / lint | Nenhum |
 | Dev server | `npx vite --port 5173` (config em `.claude/launch.json`, nome `warpoly-dev`) |
 
@@ -23,7 +23,7 @@ Debug: `window.game` expõe o `GameApp` (ex.: `game.gameManager`, `game.sceneMan
 ```
 index.html / style.css        HUD completo em HTML/CSS (loading, top bar, settings, bottom bar, modais)
 inspector.html                Inspetor 3D de modelos e animações
-public/                       Ícones da HUD (png/svg)
+public/                       Ícones antigos da HUD (png/svg), `models/` (.glb), `ui/` (sprites 2D renderizados no Blender: ícones, retratos, artes — F7-09)
 specs/orc_buildings/          Specs de arte das construções orc (direção de arte)
 src/
   main.js                     GameApp: máquina de estados, serviços da aplicação, preload único, loop rAF (F2-04)
@@ -73,9 +73,9 @@ src/
   sim/EventBus.js, sim/events.js   Barramento de eventos da simulação (F2-07: ver seção "Eventos")
   audio/AudioEvents.js       Ouvinte: eventos → SoundManager (F2-07)
   models/
-    units/*Model.js + *Textures.js       8 unidades (4 humanas incl. bandido, 4 orcs)
-    buildings/*Model.js + *Textures.js   17 construções
-    environment/*                        árvores, rochas, flora, água, terreno, flecha
+    units/*Model.js                      só os procedurais que restam (F7-00b limpeza): cerco, conjuradores, esqueleto, sapadores, aéreos, navais, critters, Olho Vigia (+ `axethrowerTextures.js`: textura do machado de arremesso)
+    buildings/*Model.js + *Textures.js   só o que resta: Acampamento Bandido, Estábulo, Covil, Oficinas, torres arcanas/templos, navais, muralha (fallback) — os demais são `.glb`
+    environment/*                        rochas, flora, água, terreno, flecha (as 4 árvores são `.glb`; o fallback é uma árvore reserva de uma cor em `TreeManager`)
     materials.js, index.js
   world/
     Terrain.js                Orientado a dados (F2-05): tamanho/altura/vaus vêm de mapDef (src/data/maps)
@@ -98,6 +98,7 @@ src/
   ui/optionsStore.js          Persistência pura das opções (localStorage injetável; espelho `runtime`) — F6-08
   ui/optionsApply.js          Aplica opções salvas ao áudio/teclas/escala/daltonismo — F6-08
   ui/uiText.js                Textos de UI derivados de dados (nomes/requisitos/mensagens da sim já localizados) — F6-09
+  ui/uiSprites.js             Sprites 2D da HUD (F7-09): manifesto de `public/ui/`, ids/URLs de ícones e retratos, estado idle/ataque, `<img>` com fallback sprite→ícone antigo→emoji
   ui/tutorial.js              Lógica pura do tutorial (passos por eventos do EventBus, `createTutorialConfig`) — F6-09
   ui/TutorialController.js    Painel de objetivo + seta/destaque do tutorial (DOM; só em partidas com `matchConfig.tutorial`) — F6-09
   i18n/index.js, pt-BR.json, en.json   `t(key, params)`, idioma (localStorage `warpoly.lang`, detecção do navegador), `applyI18n` (data-i18n*) — F6-09
@@ -590,7 +591,7 @@ visuais/sonoros nunca são "re-disparados" porque o `EventBus` tem `muted` (aind
   unitAnimator.js` é um reexport de 1 linha para compatibilidade.
 - **Cerco (F4-02):** `UNITS.ballista`/`catapult` ganham `minAttackRange` e `splashRadius` (documentados no cabeçalho de `units.js`) e `projectile: 'bolt'|'boulder'`. `Unit` marca `isBallistic`; no disparo (`updateAttacking`, progresso 0,6) cria um `Projectile` balístico (`src/sim/projectiles.js` desde a F2-08; vive em `gm.arrows`) que voa até a posição **prevista** (`velX/velZ`, medidos por `GameManager` ao sincronizar o `unitGrid` a cada tick) e, no impacto, chama `applySplashDamage` (`src/sim/splash.js`: unidades + construções hostis, queda linear 100→50 %, 1 `computeDamage` por entidade em ordem de `id`). Alcance mínimo: `Unit._canEngage` filtra as buscas de alvo e o passo 2b de `updateAttacking` recua/troca de alvo. Oficinas (`role:'workshop'`, `WorkshopModel.js`/`OrcWorkshopModel.js`); `BallistaModel.js`/`CatapultModel.js` expõem `SiegeArm`/`WheelL`/`WheelR` (em `ANIMATED_NODE_NAMES`; animação `fight` do `UnitAnimator` via `parts.siegeArm`). Requisito novo `{role:'workshop'}` em `src/sim/requirements.js`. Eventos `PROJECTILE_FIRED/HIT` com `kind` `bolt`/`boulder`.
 - **Sapadores (F4-05):** `UNITS.sapper`/`arsonist` (campo `suicide`, `splashRadius: 2.2`; treinados nas Oficinas). `Unit.suicide` desativa a auto-aquisição de unidades (`findNearestHostileUnit`/`CombatUnit` devolvem `null`, salvo em `hold`) e faz `findNearestHostile` preferir a construção/muralha hostil mais próxima (`_nearestStructure`); no passo 4 de `updateAttacking`, em vez de golpear, chama `_detonate`: emite `EVT.EXPLOSION {pos, radius, ownerId}`, `applySplashDamage(..., edge 0,4, surface true)` centrado no alvo (distância medida até a superfície, por isso a explosão pega os segmentos de muralha vizinhos), zera `lastAttackerOwnerId` (a morte do sapador não dá kill a ninguém, mas conta em `unitsLost`) e morre sem cadáver (`deathDuration = 0`, malha oculta). `applySplashDamage` ganhou os parâmetros opcionais `edge` (padrão 0,5: cerco) e `surface` (padrão `false`). VFX: `ParticleSystem.spawnExplosion` (clarão + anel em pool de 6, fagulhas no `chipPool`, fumaça) e `SceneManager.shake` (0,15 s; `?shake=0` desliga) via `VfxEvents`; som via `AudioEvents`. Modelos procedurais `SapperModel.js`/`ArsonistModel.js` (nó `Fuse` em `ANIMATED_NODE_NAMES`; `UnitAnimator.applySapperRun`). IA: `FACTIONS.*.units.suicide`; `AIMilitaryManager` mantém até 3 na Oficina quando o inimigo tem ≥ 4 muralhas ou Centro nível ≥ 2.
-- **Cavalaria (F4-01):** construções com `role:'stable'` (`stable`, `ogre_den`; classe base `Building`, modelos procedurais `StableModel.js`/`OgreDenModel.js`). O `cavalier` usa `CavalierModel.js` (cavalo em caixas + tronco do Espadachim): `UnitAnimator` trata `cavalier` como `knight` nas poses e, se `userData.horseLegs` existir (nós `HorseLegFL/FR/BL/BR`, religados por `ModelFactory.rebindUserData`), balança as pernas do cavalo em diagonais no `walk`. Os nomes `HorseLeg*` estão em `ANIMATED_NODE_NAMES` (pivôs do skinning rígido).
+- **Cavalaria (F4-01):** construções com `role:'stable'` (`stable`, `ogre_den`; classe base `Building`, modelos procedurais `StableModel.js`/`OgreDenModel.js`). O `cavalier` usa `cavalier.glb` (cavalo anatômico + tronco do Espadachim; o `CavalierModel.js` procedural foi removido na F7-00b): `UnitAnimator` trata `cavalier` como `knight` nas poses e, se `userData.horseLegs` existir (nós `HorseLegFL/FR/BL/BR`, religados por `ModelFactory.rebindUserData`), balança as pernas do cavalo em diagonais no `walk`. Os nomes `HorseLeg*` estão em `ANIMATED_NODE_NAMES` (pivôs do skinning rígido).
 
 ### Vitória e estatísticas (F3-09)
 - `src/sim/victory.js`: `isPlayerDefeated(mode, ownedBuildings)` (função pura) e textos PT-BR; `GameManager._updateVictoryConditions` aplica a regra por jogador a cada passo e, ao terminar a partida, congela `gm.result` (`matchStats.snapshot()`, depois de despachar os eventos pendentes).
@@ -617,9 +618,19 @@ Tudo é só render (nada em `src/sim/`) e desligável. Funções puras em `src/c
 - AO: GTAO só em high/ultra (custa um passe extra de normais da cena inteira, ~8% de fps medido); AO por vértice não cobriria unidades/prédios dinâmicos.
 - Capturas/medições: `tools/ui-captures/lighting/capture.mjs [fx|oculto|tileset|ciclo|perf]` (via safe-run).
 
+## Sprites 2D da HUD (F7-09)
+
+Ícones, retratos e artes de tela são **renderizados no Blender (Eevee) a partir dos mesmos `.glb`** de `public/models/` e ficam em `public/ui/` (2,65 MiB; teto 15 MiB). Nada é gerado em tempo de execução e **nenhum JSON/imagem entra no bundle JS**.
+- **Arquivos**: `icons/<128|256>/<tipo>_<id>.webp` (RGBA, fundo transparente; `unit_`, `building_`, `command_`, `research_`, `ability_`, `stat_`; variantes de facção com sufixo `_orc`), `portraits/<tipo>_<idle|attack>.webp` (128², um quadro por estado), `art/menu.webp` e `art/loading.webp` (1920×1080) e `manifest.json` (ids existentes, `aliases`, tamanhos e bytes; gerado pelos scripts de render).
+- **Consumo**: `src/ui/uiSprites.js` (lógica pura + DOM mínimo; testada em `tests/unit/uiSprites.test.js`). `main.js` chama `installSpriteFallback()` e `loadUiManifest()` (fetch assíncrono, nunca rejeita). `UIManager` resolve o ícone por id (`unitIconId`/`buildingIconId`/`researchIconId`/`abilityIconId`/`commandIconId`/`statIconId`; aliases do manifesto: a pesquisa de uma magia reaproveita o ícone da magia, a classe avançada o da unidade) e escolhe 128 ou 256 pelo tamanho em pixels de dispositivo (css × `--ui-scale` × DPR). Se o manifesto chegar depois do primeiro card, `onUiManifestReady` invalida os cards e eles se redesenham.
+- **Fallback encadeado** (`spriteImgHtml`): sprite → ícone antigo (`icon` de `src/data/*.js`, png/svg) → emoji provisório (`data-fb-emoji`). `installSpriteFallback` (ouvinte `error` em captura no `document`; também trata `<img>` estáticas que falharam antes de o JS rodar) troca a imagem quebrada pelo ícone antigo e, se esse também falhar, por `<span class="ui-sprite-emoji">`. Tipos sem `.glb` (Ovelha, Submersível, Tartaruga Colossal, Refinaria, Fundição, Forja Naval, Caldeirão) seguem com o ícone antigo.
+- **Retrato animável** (card de UMA unidade): `#selection-portrait-box` com duas imagens empilhadas (`msp-idle`, `msp-attack`); `portraitState(unit)` = `attack` enquanto `Unit.anim` é `fight` ou `cast` (histerese de 0,45 s, pois a sim alterna fight/hurt/idle), com cross-fade de 0,14 s por classe CSS `is-attacking`; herói ganha anel dourado. Na seleção múltipla a grade de 40 px usa o retrato idle. Construção selecionada mostra o ícone 256 no cabeçalho; "Evoluir o Centro" usa `command_upgrade_hq[_orc]`. A fila de treino/pesquisa só reescreve o ícone do slot quando o tipo muda, e a linha de atributos/`#bld-extra-info` só quando o HTML muda (antes recriavam os elementos a cada quadro). Os atributos do card (⚔️🛡️🏃🎯📦💧🪽⚓💣💥🫥🔨👥🏹) viraram sprites `stat_*` de 18 px, com o emoji como último fallback.
+- **Arte de tela**: o menu coloca `<img class="mm-art">` por cima do cenário SVG/CSS (só some o SVG depois do `load`; no erro a imagem é removida e o cenário antigo continua); a tela de loading usa `<img class="loading-art-img">` e o brasão `command_attack` no lugar do emoji ⚔️ (classes `has-art`/`has-img` no `onload`).
+- **Como gerar**: `tools/blender/README.md` (seção "Arte 2D") e `docs/03_ASSETS_E_INSPETOR.md`. As poses de idle/ataque dos retratos vêm do **`UnitAnimator` real** (`node tools/dump-portrait-poses.mjs` → `tools/blender/portrait_poses.json`), sem reescrever fórmulas de animação em Python. Verificação em navegador: `tools/capture-art2d.mjs` (via safe-run) → `tools/ui-captures/art-2d/`.
+
 ## Pipeline de assets
 
-- Cada `*Textures.js` tem funções `getXTextures()` memoizadas que pintam canvases (map, roughness, metalness, bump) — **498 chamadas `createCanvas(2048…)`**, 41 de 1024, 17 de 512.
+- Cada `*Textures.js` que sobrou (flora, rochas, terreno, água, tilesets, Acampamento Bandido, machado de arremesso) tem funções `getXTextures()` memoizadas que pintam canvases (map, roughness, metalness, bump). **F7-00b (limpeza):** os `*Textures.js` e `*Model.js` procedurais dos itens 100% migrados para o Blender foram removidos (23 arquivos de texturas + 26 modelos, 49 arquivos; ~490 KB a menos de JS no bundle, `models-human` 703 → 261 KB); `ModelFactory._placeholder` entrega um bloco simples quando um desses `.glb` não carrega (ou com `?glb=0`).
 - `*Model.js` monta um `THREE.Group` com dezenas/centenas de `Mesh` primitivos nomeados (`Torso`, `ArmL`, `Sword`…).
 - `ModelFactory.createX()` cria um template uma vez e devolve `clone(true)` (geometria/material compartilhados), depois `rebindUserData` reconecta os nós usados pelo `UnitAnimator`.
 - Construções orcs possuem specs de arte em `specs/orc_buildings/`.

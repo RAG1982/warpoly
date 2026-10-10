@@ -2,6 +2,7 @@ import { describe, it, expect } from 'vitest';
 import { listMaps, getMap, DEFAULT_MAP_ID } from '../../src/data/maps/index.js';
 import { getHeightForMap } from '../../src/world/terrainGenerators.js';
 import { NAVAL_MAX_HEIGHT } from '../../src/data/combat.js';
+import { FOREST_SPECIES } from '../../src/data/maps/validate.js';
 
 const DRY = 1.8; // mesmo limiar de "terra seca" usado por GameManager.canPlaceBuilding
 
@@ -109,7 +110,7 @@ describe('mapas (src/data/maps/*.json)', () => {
         for (const f of mapDef.forests) {
           expect(f.count).toBeGreaterThan(0);
           expect(f.radius).toBeGreaterThan(0);
-          expect(['oak', 'pine', 'autumn']).toContain(f.species);
+          expect(FOREST_SPECIES).toContain(f.species);
           let foundDry = false;
           for (let i = 0; i < 16 && !foundDry; i++) {
             const ang = (i / 16) * Math.PI * 2;

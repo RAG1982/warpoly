@@ -74,6 +74,21 @@ html.wp-menu #selection-box { display: none !important; }
   pointer-events: none;
 }
 
+/* F7-09: arte renderizada no Blender (public/ui/art/menu.webp) por cima do cenário em SVG/CSS. Só entra depois de
+   carregar (.mm-has-art); se a imagem falhar, ela é removida e o cenário antigo continua. */
+.mm-art {
+  object-fit: cover;
+  object-position: 62% 58%;
+  opacity: 0;
+  transition: opacity 0.9s ease;
+  transform-origin: 62% 58%;
+  animation: mm-art-drift 52s ease-in-out infinite alternate;
+}
+.mm-has-art .mm-art { opacity: 1; }
+.mm-has-art .mm-sky, .mm-has-art .mm-glow, .mm-has-art .mm-scene { display: none; }
+@keyframes mm-art-drift { from { transform: scale(1.02) translateX(-6px); } to { transform: scale(1.07) translateX(8px); } }
+@media (prefers-reduced-motion: reduce) { .mm-art { animation: none; } }
+
 @keyframes mm-drift { from { transform: translateX(-14px); } to { transform: translateX(14px); } }
 @keyframes mm-wave { from { transform: skewY(-4deg) scaleX(0.94); } to { transform: skewY(5deg) scaleX(1.04); } }
 @keyframes mm-flicker { 0% { opacity: 0.75; } 50% { opacity: 1; } 100% { opacity: 0.85; } }

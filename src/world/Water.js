@@ -1,4 +1,5 @@
 import * as THREE from 'three';
+import { mergeGeometries } from 'three/examples/jsm/utils/BufferGeometryUtils.js';
 import {
   getWaterSurfaceTextures,
   getCattailLotusTextures
@@ -7,6 +8,30 @@ import { enableShadows } from '../models/materials.js';
 import { markFogGround } from '../render/fogOfWarShader.js';
 import { getMapTileset, getTileset } from '../data/tilesets.js';
 import { getTextureQuality } from '../models/textureQuality.js';
+
+/**
+ * F7-00b (aceite de desempenho): funde todos os `Mesh` sob `root` (qualquer profundidade; `root` na identidade e sem pai) em UM
+ * `Mesh` por material, em coordenadas de `root`. As plantas aquáticas eram ~625 malhas soltas (hastes, cabeças, lâminas, folhas,
+ * pétalas...) = ~500 dos ~680 draw calls da cena inicial (passe principal + sombras); agora são ~8 malhas por moita.
+ */
+export function mergeByMaterial(root, name) {
+  root.updateMatrixWorld(true);
+  const byMaterial = new Map();
+  root.traverse((o) => {
+    if (!o.isMesh) return;
+    const g = o.geometry.clone().applyMatrix4(o.matrixWorld);
+    if (!byMaterial.has(o.material)) byMaterial.set(o.material, []);
+    byMaterial.get(o.material).push(g);
+  });
+  const out = new THREE.Group();
+  out.name = name;
+  for (const [material, geos] of byMaterial) {
+    const merged = mergeGeometries(geos, false);
+    geos.forEach((g) => g.dispose());
+    out.add(new THREE.Mesh(merged, material));
+  }
+  return out;
+}
 
 /**
  * Next-Gen Stylized Water & Shoreline System for WarPoly
@@ -252,6 +277,8 @@ diffuseColor = vec4( uFoam, clamp( a, 0.0, 1.0 ) );`);
     reedLocations.forEach((loc, clumpIdx) => {
       const clump = new THREE.Group();
       clump.name = `ReedClump_${clumpIdx}`;
+      const stalks = new THREE.Group(); // F7-00b: hastes/folhas (estático)
+      const floaters = new THREE.Group(); // F7-00b: vitórias-régias e flores (sobem e descem juntas)
 
       // A. Cattail Stalks in Clump
       const stalkCount = 6 + Math.floor(Math.random() * 4);
@@ -316,7 +343,7 @@ diffuseColor = vec4( uFoam, clamp( a, 0.0, 1.0 ) );`);
         stalk.rotation.z = (Math.random() - 0.5) * 0.16;
         stalk.rotation.x = (Math.random() - 0.5) * 0.16;
 
-        clump.add(stalk);
+        stalks.add(stalk);
       }
 
       // B. Floating Lotus Leaves / Lily Pads around clump
@@ -335,10 +362,7 @@ diffuseColor = vec4( uFoam, clamp( a, 0.0, 1.0 ) );`);
         pad.position.set(pox, pY, poz);
         pad.rotation.y = Math.random() * Math.PI * 2;
         pad.rotation.z = (Math.random() - 0.5) * 0.04;
-        pad.userData = { baseY: pY, offset: Math.random() * 6 };
-
-        clump.add(pad);
-        this.lotusEntities.push(pad);
+        floaters.add(pad);
       }
 
       // C. Blooming Lotus Flowers / Water Lilies
@@ -394,11 +418,14 @@ diffuseColor = vec4( uFoam, clamp( a, 0.0, 1.0 ) );`);
         const fY = this.waterLevel + 0.02;
         flower.position.set(fox, fY, foz);
         flower.rotation.y = Math.random() * Math.PI * 2;
-        flower.userData = { baseY: fY, offset: Math.random() * 6 };
-
-        clump.add(flower);
-        this.lotusEntities.push(flower);
+        floaters.add(flower);
       }
+
+      // F7-00b: uma malha por material em vez de dezenas; o balanço da moita (clump) e a oscilação das folhas ficam
+      const floatMerged = mergeByMaterial(floaters, 'ReedFloaters');
+      floatMerged.userData = { baseY: 0, offset: Math.random() * 6 };
+      clump.add(mergeByMaterial(stalks, 'ReedStalks'), floatMerged);
+      this.lotusEntities.push(floatMerged);
 
       clump.position.set(loc.x, 0, loc.z);
       enableShadows(clump);

@@ -96,7 +96,7 @@ try {
     const clip = { x: 340, y: 60, width: 640, height: 600 };
     const models = ['villager', 'peon', 'knight', 'grunt', 'archer', 'axethrower'];
     const select = async (id) => {
-      await page.evaluate((mid) => { window.inspectorApp.selectModel(mid); }, id);
+      await page.evaluate((mid) => { window.inspectorApp.selectModel(mid + '_glb'); }, id); // F7-00b: só existem as versões .glb
       await page.waitForTimeout(900);
     };
     const shotOf = (id) => async (name) => { await page.waitForTimeout(150); await page.screenshot({ path: `${OUT}/${id}-${name}.png`, clip }); };

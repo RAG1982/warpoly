@@ -24,10 +24,15 @@ import { t, applyI18n, onLanguageChange, getLanguage } from './i18n/index.js';
 import { registerServiceWorker } from './pwa.js';
 import { getActiveRun, onMissionEnded } from './campaign/index.js'; // F8-05
 import { EVT } from './sim/events.js';
+import { loadUiManifest, installSpriteFallback } from './ui/uiSprites.js'; // F7-09: ícones/retratos renderizados (public/ui)
 
 // F6-08: opções salvas (teclas, escala de UI, daltonismo, pan…) antes de qualquer tela.
 registerServiceWorker();
 bootOptions();
+// F7-09: manifesto dos sprites da HUD (fetch assíncrono, nunca bloqueia nem rejeita; sem ele a HUD usa os ícones antigos)
+// e fallback de <img> quebrada (sprite -> ícone antigo -> emoji).
+installSpriteFallback();
+loadUiManifest();
 
 const S = GameState;
 

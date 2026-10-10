@@ -338,29 +338,47 @@ describe('m04 Ponte do Rio Turvo: Forte Atalaia (NEW-52)', () => {
     expect(camp).toEqual({ kind: 'camp', x: -40, z: -20, guards: 4, reward: { gold: 300 }, deposit: { type: 'gold', amount: 3000 } });
   });
 
-  /** Roteiro do comboio pelo vau CENTRAL: bloqueio e emboscada abatidos pela escolta (dano direto); o resto é caminhada de verdade. */
+  /**
+   * Roteiro do comboio pelo vau CENTRAL: bloqueio e emboscada abatidos pela escolta (dano direto); o resto é caminhada de verdade.
+   * A escolta vai à frente até `across` (margem oeste do vau, dentro da área do gatilho da emboscada) e só então solta o comboio
+   * — o ponto de passagem fixa o caminho, qualquer que seja o desempate do A* entre os vaus, e evita o engarrafamento de 14 unidades
+   * no corredor entre a mina (8,-6) e o rio.
+   */
   function walkCentral() {
     const gm = boot(M04);
     runTicks(gm, 5);
     const convoy = tagged(gm, 'convoy');
+    const escort = escortOf(gm);
     const fort = tagged(gm, 'fort')[0].mesh.position;
     const goal = { x: fort.x + 7, z: fort.z };
+    const across = { x: -10, z: 4 };
+    const near = (arr, p, r) => alive(arr).filter((u) => Math.hypot(u.mesh.position.x - p.x, u.mesh.position.z - p.z) < r);
     slayTag(gm, 'blockade');
-    order(gm, convoy, goal.x, goal.z);
-    order(gm, escortOf(gm), goal.x, goal.z, CMD.ATTACK_MOVE);
+    order(gm, escort, across.x, across.z, CMD.ATTACK_MOVE);
     const start = convoy.map((u) => ({ x: u.mesh.position.x, z: u.mesh.position.z }));
+    let phase = 'escort';
     let sawAmbush = false;
+    let crossed = false;
     while (!gm.isGameOver && gm.currentTick < 150 * T) {
       runTicks(gm, 1);
       if (alive(tagged(gm, 'ambush')).length > 0) { sawAmbush = true; slayTag(gm, 'ambush'); }
-      if (gm.currentTick % 100 === 0) nudge(gm, convoy, goal, fort);
+      if (phase === 'escort' && near(escort, across, 8).length >= 8) {
+        phase = 'convoy';
+        order(gm, convoy, across.x, across.z);
+      } else if (phase === 'convoy' && near(convoy, across, 7).length >= 3) {
+        phase = 'fort';
+        crossed = true;
+        order(gm, convoy, goal.x, goal.z);
+        order(gm, escort, goal.x, goal.z, CMD.ATTACK_MOVE);
+      } else if (phase !== 'escort' && gm.currentTick % 100 === 0) nudge(gm, convoy, phase === 'convoy' ? across : goal, phase === 'convoy' ? across : fort);
     }
-    return { gm, convoy, fort, start, sawAmbush };
+    return { gm, convoy, fort, start, sawAmbush, crossed };
   }
 
   it('o comboio chega ANDANDO ao forte pelo vau central (bloqueio e emboscada abatidos)', () => {
-    const { gm, convoy, fort, start, sawAmbush } = walkCentral();
-    expect(sawAmbush).toBe(true); // o caminho mais curto até o forte passa pelo vau central e dispara a emboscada
+    const { gm, convoy, fort, start, sawAmbush, crossed } = walkCentral();
+    expect(crossed).toBe(true); // atravessou o vau central (bloqueio já abatido)
+    expect(sawAmbush).toBe(true); // ... e disparou a emboscada da outra margem
     expectWon(gm);
     expect(statusOf(gm, 'deliver')).toBe('completed');
     expect(alive(convoy).length).toBeGreaterThanOrEqual(3);

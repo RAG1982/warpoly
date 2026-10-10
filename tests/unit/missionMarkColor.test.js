@@ -20,7 +20,7 @@ vi.hoisted(() => {
 });
 
 /**
- * NEW-52 — `markColor` (`#rrggbb`) nas ações `spawn`/`spawnBuilding`: cor própria do anel de seleção (ex.: carregadores do m04).
+ * NEW-53 — `markColor` (`#rrggbb`) nas ações `spawn`/`spawnBuilding`: cor própria do anel de seleção (ex.: carregadores do m04).
  * É só apresentação: grava `unit.markColor`/`building.markColor`, nunca entra no checksum, e o anel padrão (dourado do
  * jogador, vermelho dos demais) continua igual para quem não tem a marca.
  */

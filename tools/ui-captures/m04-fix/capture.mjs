@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /**
- * NEW-52 — capturas NO JOGO da missão m04 "A Ponte do Rio Turvo" corrigida: Forte Atalaia (castelo humano criado pela ação
+ * NEW-53 — capturas NO JOGO da missão m04 "A Ponte do Rio Turvo" corrigida: Forte Atalaia (castelo humano criado pela ação
  * `spawnBuilding`) depois do acampamento neutro, e anel de seleção ciano dos 4 carregadores (`spawn.markColor`).
  * Segue o caminho real do jogador: menu > Campanha > m04 > Iniciar (`?campaign=unlock` libera a missão 4) > cutscene > partida.
  * GPU real obrigatória (assertHardwareGpu). Rode SOMENTE via safe-run:
@@ -11,6 +11,7 @@ import { chromium } from 'playwright';
 import { createServer } from 'vite';
 import path from 'node:path';
 import fs from 'node:fs';
+import { execFileSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 import { assertHardwareGpu } from '../../lib/assertGpu.mjs';
 
@@ -23,6 +24,7 @@ const ARGS = [
 ];
 const M04 = 'alliance-04-ponte-do-rio-turvo';
 const M02 = 'alliance-02-cativos-da-garganta';
+const written = [];
 const checks = [];
 const check = (name, ok, extra = '') => { checks.push({ name, ok: !!ok }); console.log(`${ok ? 'OK   ' : 'FALHA'} ${name} ${extra}`); };
 
@@ -52,7 +54,7 @@ async function startFromCampaign(page, missionId, shotBriefing) {
   await page.waitForSelector('.ms-brief-item', { timeout: 10000 });
   await page.click(`[data-cp="pick"][data-id="${missionId}"]`);
   await page.waitForTimeout(400);
-  if (shotBriefing) await page.screenshot({ path: path.join(OUT, shotBriefing) });
+  if (shotBriefing) await shot(page, shotBriefing);
   await page.click('[data-cp="start"]');
   await page.waitForFunction(() => window.game && window.game.gameManager && window.game.gameManager.mission, null, { timeout: 90000 });
   await page.waitForTimeout(800);
@@ -66,6 +68,12 @@ async function grab(page, name) {
     return sm.renderer.domElement.toDataURL('image/png').split(',')[1];
   });
   fs.writeFileSync(path.join(OUT, name), Buffer.from(b64, 'base64'));
+  written.push(path.join(OUT, name));
+}
+/** Foto da página inteira (com HUD, letterbox e diálogos). */
+async function shot(page, name) {
+  await page.screenshot({ path: path.join(OUT, name) });
+  written.push(path.join(OUT, name));
 }
 /** Câmera: alvo, zoom (menor = mais perto) e giro (π/4 = padrão). */
 async function cam(page, x, y, z, zoom, yaw = Math.PI / 4, wait = 1400) {
@@ -103,7 +111,7 @@ try {
     const saw = async (needle, file) => {
       await page.waitForFunction((t) => { const d = document.getElementById('mission-dialog'); return d && !d.hidden && d.innerText.includes(t); }, needle, { timeout: 30000 });
       await page.waitForTimeout(1300);
-      await page.screenshot({ path: path.join(OUT, file) });
+      await shot(page, file);
     };
     await saw('Aquele é o vau', '02-cutscene-1-vau.png');
     await saw('acampamento de saqueadores', '03-cutscene-2-acampamento.png');
@@ -143,8 +151,6 @@ try {
     await grab(page, '06-jogo-forte-e-acampamento.png');
     await cam(page, info.fort.x + 2, 2.5, info.fort.z, 0.6, Math.PI / 2 + 0.35); // forte de perto, frente (+X) voltada para a câmera
     await grab(page, '07-jogo-forte-perto.png');
-    await cam(page, info.fort.x + 2, 2.5, info.fort.z, 0.9, Math.PI / 4);
-    await grab(page, '08-jogo-forte-padrao.png');
 
     // 3. carregadores + soldados selecionados juntos na base: anel ciano dos carregadores x dourado dos demais
     await select(page, [...info.convoy, ...info.soldiers, ...info.villagers]);
@@ -154,12 +160,12 @@ try {
       hex.slice(0, 4).every((h) => h === '#22d3ee') && hex.slice(4).every((h) => h === '#deb841'));
     await cam(page, 22, 1.2, -20, 0.5);
     await grab(page, '09-jogo-carregadores-aneis.png');
-    await page.screenshot({ path: path.join(OUT, '10-jogo-carregadores-hud.png') });
+    await shot(page, '10-jogo-carregadores-hud.png');
 
     // 4. o forte selecionado (anel dourado padrão — sem markColor) com a HUD
     await select(page, [info.fort.id], true);
     await cam(page, info.fort.x + 2, 2.5, info.fort.z, 0.9, Math.PI / 4);
-    await page.screenshot({ path: path.join(OUT, '11-jogo-forte-selecionado-hud.png') });
+    await shot(page, '11-jogo-forte-selecionado-hud.png');
 
     // 5. chegada: carregadores diante do forte (selecionados) — entrega concluída pelo objetivo
     await page.evaluate(({ ids, fx, fz }) => {
@@ -180,7 +186,7 @@ try {
     const st = await page.evaluate(() => Object.fromEntries([...window.game.gameManager.mission.objectives.values()].map((o) => [o.id, o.status])));
     console.log('objetivos', JSON.stringify(st));
     check('chegada ao forte conclui o objetivo "deliver"', st.deliver === 'completed');
-    await page.screenshot({ path: path.join(OUT, '13-jogo-entrega-hud.png') });
+    await shot(page, '13-jogo-entrega-hud.png');
 
     check('sem erros de console (m04)', errors.length === 0, errors.slice(0, 3).join(' / '));
     await close();
@@ -218,6 +224,19 @@ try {
 } finally {
   await close();
   await vite.close().catch(() => {});
+}
+// reduz o peso no repositório (256 cores com dithering; precisa do Pillow no Python do sistema; NO_SHRINK=1 desliga)
+if (!process.env.NO_SHRINK && written.length) {
+  try {
+    execFileSync('python3', ['-I', '-c', `
+import sys
+from PIL import Image
+for f in sys.argv[1:]:
+    im = Image.open(f).convert('RGB')
+    q = im.quantize(colors=256, method=Image.Quantize.MEDIANCUT, dither=Image.Dither.FLOYDSTEINBERG)
+    q.save(f, optimize=True)
+`, ...written], { stdio: 'inherit' });
+  } catch (e) { console.log('shrink ignorado:', e.message); }
 }
 const failed = checks.filter((c) => !c.ok);
 console.log(`\n${checks.length - failed.length}/${checks.length} verificações OK`);

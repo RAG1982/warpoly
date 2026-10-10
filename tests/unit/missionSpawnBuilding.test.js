@@ -5,7 +5,7 @@ import { stateChecksum } from '../../src/sim/checksum.js';
 import { baseMission, makeMissionGm, runTicks, statusOf } from './helpers/missionWorld.js';
 
 /**
- * NEW-52 — ação de missão `spawnBuilding {owner, buildingType, x, z, tag?, facing?, markColor?}`: construção já CONCLUÍDA
+ * NEW-53 — ação de missão `spawnBuilding {owner, buildingType, x, z, tag?, facing?, markColor?}`: construção já CONCLUÍDA
  * do dono (forte aliado, torre inimiga…), registrada como as construções iniciais das bases. O campo `type` já é o
  * discriminador da ação, por isso o tipo da construção se chama `buildingType` (como `unitType` no `spawn`).
  */

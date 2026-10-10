@@ -249,12 +249,12 @@ describe('campanha da Aliança: simulação headless até a vitória (F8-05)', (
 });
 
 /**
- * NEW-52 — m04 "A Ponte do Rio Turvo": o objetivo de entrega agora tem um forte de verdade (castelo do jogador criado pela
+ * NEW-53 — m04 "A Ponte do Rio Turvo": o objetivo de entrega agora tem um forte de verdade (castelo do jogador criado pela
  * ação `spawnBuilding`), do outro lado do rio e DEPOIS do acampamento neutro hostil (-40,-20) em relação à base. Os testes
  * conferem a posição (terra firme, fora do rio, fora do alcance dos bandoleiros) e que o comboio CHEGA ANDANDO (sem teletransporte)
  * pelos dois caminhos — vau central (bloqueio + emboscada) e vau noroeste (acampamento no caminho) —, de forma determinística.
  */
-describe('m04 Ponte do Rio Turvo: Forte Atalaia (NEW-52)', () => {
+describe('m04 Ponte do Rio Turvo: Forte Atalaia (NEW-53)', () => {
   const M04 = 'alliance-04-ponte-do-rio-turvo';
   const BASE = { x: 24, z: -22 }; // onde o comboio nasce (base do jogador)
   const alive = (arr) => arr.filter((u) => !u.isDead && !u.isDying);

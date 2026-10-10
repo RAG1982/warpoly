@@ -751,8 +751,42 @@ export class UIManager {
     return buildPostGameModel(gm.result || gm.matchStats.snapshot(), { localId: gm.localPlayerId, victory: !!gm.gameWon, colors });
   }
 
+  /** NEW-26: card somente-leitura de unidade/construção não-local (sem botões de ação nem retrato de comando). */
+  _renderInspectCard(e) {
+    this.currentBuilding = null;
+    if (this.buildingView) this.buildingView.style.display = 'none';
+    if (this.standardView) this.standardView.style.display = 'flex';
+    this.selectionCard.style.display = 'flex';
+    const isUnit = !('isConstructed' in e);
+    const owner = this.gm.getPlayer(e.ownerId);
+    const side = owner && owner.isNeutralHostile ? t('hud.neutral') : t('hud.enemy');
+    const name = isUnit ? unitLabel(e.type) : buildingLabel(e.type);
+    this.selectionTitle.innerText = `${name} (${side})`;
+    this.selectionHpBar.style.width = `${Math.max(0, e.hp / e.maxHp) * 100}%`;
+    this.selectionHp.innerText = `${Math.round(e.hp)} / ${e.maxHp} HP`;
+    const dmg = isUnit ? e.damage : e.towerDamage;
+    this._setStats(`
+      ${dmg ? `<span>${this._stat('attack', '⚔️')} ${t('hud.stat.attack')}: ${dmg.basic}+${dmg.piercing}</span>` : ''}
+      <span>${this._stat('armor', '🛡️')} ${t('hud.stat.defense')}: ${e.armor || 0}</span>
+      <span>${escHtml(t('hud.owner', { name: owner ? owner.name : '?' }))}</span>
+    `);
+    if (this.lastSelectionKey !== 'inspect') {
+      this.lastSelectionKey = 'inspect';
+      this.selectionActions.innerHTML = '';
+    }
+    this.updateSelectionPortraits([]);
+    this.updateMainPortrait([]);
+  }
+
   updateSelectionCard() {
     if (!this.selectionCard) return;
+
+    // NEW-26: inspeção somente-leitura (neutro/inimigo); some se morrer ou sair da visão.
+    if (this.gm.inspected && !this.gm.isInspectable(this.gm.inspected)) this.gm.clearInspection();
+    if (this.gm.inspected && this.gm.selectedUnits.length === 0 && !this.gm.selectedBuilding) {
+      this._renderInspectCard(this.gm.inspected);
+      return;
+    }
 
     if (this.gm.selectedUnits.length > 0) {
       this.currentBuilding = null;

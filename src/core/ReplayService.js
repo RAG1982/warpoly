@@ -20,10 +20,10 @@ export class ReplayService {
   }
 
   /** Começa a gravar a partida `gm` (single ou online). Ignora tutorial (não é reproduzível fora do contexto). */
-  begin(gm, { online = false } = {}) {
+  begin(gm, { online = false, adapter = null } = {}) {
     this.recorder = null;
     if (!gm || gm.matchConfig?.tutorial) return;
-    this.recorder = new ReplayRecorder(gm, { online });
+    this.recorder = new ReplayRecorder(gm, { online, adapter });
     this._lastPutTick = -1;
     this._nextPersist = gm.currentTick + PERSIST_EVERY;
   }

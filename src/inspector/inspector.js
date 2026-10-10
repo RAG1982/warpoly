@@ -979,8 +979,8 @@ const MODEL_CATALOG = [
     glb: 'war_balloon',
     sourceFile: 'tools/blender/build_war_balloon.py',
     create: createGlb('war_balloon'),
-    description: 'Batedor aéreo orc gerado pelo pipeline Blender (public/models/war_balloon.glb): envelope em gomos de couro com faixa equatorial em cor de time, rede de cordas e espinhos de osso, braseiro aceso na boca, cesta de vime com crânio, orc vigia e hélice de popa de ossos.',
-    notes: 'Nós Torso, Head (vigia), Rotor (gira em z). ~4,5 mil triângulos, 4 draw calls, atlas 512², ~211 KB (cesta de vime 1,9 × 1,9 com piso aberto, envelope menor, hélice em z −1,3).'
+    description: 'Batedor aéreo orc gerado pelo pipeline Blender (public/models/war_balloon.glb): envelope de gomos abaulados (couro claro e ferrugem, remendos) com costuras de tiras de couro rebitadas, faixa de guerra serrilhada em cor de time com o crânio de presas, coroa de ferro com espinhos de osso, braseiro aceso na boca, cesta de vime com escada de corda, bombas e leme em cor de time, vigia com luneta e um segundo tripulante, hélice de popa de ossos.',
+    notes: 'Nós Torso (envelope + cordas + braseiro), Basket (cesta, tripulação, bombas, leme; filho do Torso), Head (vigia) e Rotor (gira em z). ~7,5 mil triângulos, 6 draw calls (4 malhas: Atlas + TeamColor), atlas 512², ~286 KB. Rosto/crânio só na frente (+Z). Base em y ~ 0 (a simulação aplica flyHeight 4,5).'
   },
   {
     id: 'gryphon_rider_glb',
@@ -1236,8 +1236,8 @@ const MODEL_CATALOG = [
     glb: 'bandit_camp',
     sourceFile: 'tools/blender/build_bandit_camp.py',
     create: createGlb('bandit_camp'),
-    description: 'Acampamento hostil neutro gerado pelo pipeline Blender (public/models/bandit_camp.glb): paliçada circular de toras pontiagudas inclinadas, portão flanqueado por totens de crânios com chifres, tenda de guerra carmesim, abrigo de peles, fogueira com espeto e caldeirão, baú de saque aberto, rack de armas e faixas esfarrapadas.',
-    notes: '2 draw calls (Static_Mesh + Anim_Banners TeamColor), ~6,2 mil triângulos, atlas 1024², ~354 KB. Pegada ~8,6 (raio 4,2), altura ~6,8.'
+    description: 'Acampamento hostil neutro gerado pelo pipeline Blender (public/models/bandit_camp.glb): muro contínuo de toras pontiagudas (alto nos fundos, caído e aberto para a câmera do jogo), portão com dois mourões-totem de crânios, verga com dentes de osso e crânio de ogro com presas e batentes abertos, torre de vigia sobre pernas com teto carmesim, tenda de guerra de cumeeira com remendos, abrigo de peles, fogueira com caldeirão, baú de saque, rack de armas, barris e dois mastros de estandarte.',
+    notes: '2 draw calls (Static_Mesh + Anim_Banners TeamColor; o jogo pinta as faixas com a cor dos neutros), ~12,4 mil triângulos, atlas 1024², ~530 KB. Pegada ~8,4 (raio de colisão 4,2), altura ~6,6 (torre). Sockets: Socket_UnitSpawn, Socket_Rally. Frente (portão) em +Z.'
   },
   {
     id: 'tree_oak_glb',
@@ -1285,8 +1285,8 @@ const MODEL_CATALOG = [
     glb: 'wall_human',
     sourceFile: 'tools/blender/build_walls.py',
     create: createGlb('wall_human'),
-    description: 'Bloco de muralha humana gerado pelo pipeline Blender (public/models/wall_human.glb): pé escuro, corpo de alvenaria com seteiras, cornija e quatro ameias. O WallBatch instancia a geometria e o material deste .glb.',
-    notes: '1 draw call, ~356 triângulos, atlas 512², ~34 KB. Bloco de 2,2 × 2,4 × 2,2.'
+    description: 'Bloco de muralha humana gerado pelo pipeline Blender (public/models/wall_human.glb): pé escuro enterrado, corpo de alvenaria com seteiras emolduradas, cordão e mísulas, cornija e ameias nos cantos. A pegada é o passo WALL_STEP (2,4): o bloco vizinho encosta rente, sem vão, e as ameias de cantos vizinhos viram uma ameia de 1,2 com vão de 1,2. O WallBatch instancia a geometria e o material deste .glb.',
+    notes: '1 draw call, ~616 triângulos, atlas 512², ~49 KB. Bloco de 2,4 × 2,4 (rente à célula) × 2,5 de altura, com 0,55 enterrado (relevo em desnível não mostra frestas). Fileira de 5 blocos: tools/ui-captures/art-a/muralha-humana-*.png.'
   },
   {
     id: 'wall_orc_glb',
@@ -1298,8 +1298,8 @@ const MODEL_CATALOG = [
     glb: 'wall_orc',
     sourceFile: 'tools/blender/build_walls.py',
     create: createGlb('wall_orc'),
-    description: 'Bloco de paliçada orc gerado pelo pipeline Blender (public/models/wall_orc.glb): base de pedra bruta, anel de toras pontiagudas, duas cintas de ferro e espinhos de canto.',
-    notes: '1 draw call, ~468 triângulos, atlas 512², ~41 KB. Bloco de 2,2 × 2,5 × 2,2.'
+    description: 'Bloco de paliçada orc gerado pelo pipeline Blender (public/models/wall_orc.glb): pé de pedra bruta enterrado, grade 3×3 de toras octogonais encostadas (0,8 de passo, pontas de ferro nos cantos), miolo escuro nos vãos e duas cintas de ferro rentes. A pegada é o passo WALL_STEP (2,4): a fileira mantém o ritmo de toras sem emenda visível.',
+    notes: '1 draw call, ~368 triângulos, atlas 512², ~35 KB. Bloco de 2,4 × 2,4 × 2,6 de altura, com 0,55 enterrado. Fileira de 5 blocos: tools/ui-captures/art-a/muralha-orc-*.png.'
   },
   // F7-00b lote 1 (fim)
   {

@@ -94,7 +94,7 @@ Sonnet 5.5 escreve a spec em `docs/specs/<ID>.md`; agente **Sonnet** executa; o 
 | **Total** | **88** | **6** | **1** | **8** | **73** |
 
 - **Backlog NEW** (atualizado 2026-10-10, após merges da nuvem): 31 DONE · 4 REVIEW (NEW-13, 19, 49, 52: verificação visual local) · 1 DOING (NEW-41: causa do fogOfWar ainda aberta) · 2 TODO (NEW-44 IA sem madeira/naval; NEW-51 seed 82) · 1 ADIADA (NEW-20) · 14 ABERTO na auditoria AUD-1 (`docs/AUDITORIA_BACKLOG.md`): NEW-1, 6, 7, 9, 14 (parcial), 15, 24, 25, 26, 27, 29, 30, 34, 35.
-- **Em andamento fora do TASKS**: nenhum (a correção do m04, NEW-53, está concluída em `task/fix-m04`).
+- **Em andamento**: nenhum agente. NEW-53 (correção de m04) concluído e mesclado no `master`.
 - **Pendências de decisão do dono**: F7-02 (máscara de cor), F8-03 (gerador `painted` em `src/sim`), F8-05 (premissa da campanha Aliança), F9-03 (checksum a cada 10 turnos em jogo vs spec por turno).
 - **Quem faz o quê**: tarefas da nuvem e locais, com o briefing de cada uma, estão em `docs/HANDOFF_CLOUD.md`.
 

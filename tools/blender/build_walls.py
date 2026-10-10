@@ -19,6 +19,7 @@ Regras de encaixe (por que a fileira não tem emenda feia):
     padrão continua sem salto de um bloco para o outro; as duas ameias de cantos vizinhos formam uma ameia de 1,2 com
     vão de 1,2 (merlão e vão iguais);
   * o pé desce 0,55 abaixo do solo, então relevo em desnível não mostra frestas por baixo do bloco.
+Orc: grade 3×3 de toras octogonais (0,8 de passo, pontas de ferro nos cantos), faixa de tinta de guerra na tora do meio de cada face e cintas de ferro rentes.
 Com `--no-render` só exporta; sem ele também gera `wall_<tipo>_row*` (5 blocos no passo do jogo, em linha e na diagonal).
 """
 import os
@@ -61,6 +62,7 @@ PALETTE.update({
                   edge_r=0.012, ao=(0.3, 0.5)),
     'spike': dict(base='#4b4d58', var='#33343d', var_scale=3.0, fine=0.08, top=0.35, edge='#9a9aa8', edge_amt=0.3,
                   edge_r=0.02, ao=(0.25, 0.4)),
+    'war_paint': dict(base='#a82a20', var='#7c1a12', var_scale=6.0, fine=0.12, top=0.25, ao=(0.25, 0.35)),
     'wmoss': dict(base='#5f7a4a', var='#47603a', var_scale=3.0, var_amt=0.9, fine=0.14, top=0.3, ao=(0.4, 0.5)),
 })
 
@@ -110,6 +112,10 @@ def orc(mb):
                 stake(mb, x, z, 0.35, ORC_H[j][i], r, 0.6, 'spike')
             else:
                 stake(mb, x, z, 0.35, ORC_H[j][i], r, 0.5, 'stake_tip')
+    # faixa de tinta de guerra na tora do meio de cada face (ritmo de 2,4 na fileira); anel um pouco maior que o octógono
+    for (i, j) in ((1, 0), (1, 2), (0, 1), (2, 1)):
+        x, z = (-0.8, 0.0, 0.8)[i], (-0.8, 0.0, 0.8)[j]
+        mb.add(prim_cyl(r + 0.012, r + 0.012, 0.2, 8, base=True, cap0=False, cap1=False), 'war_paint', M((x, 0.35 + 0.62, z)), smooth=0)
     # cintas de ferro rentes ao bloco nas quatro faces (duas alturas)
     for y in (0.8, 1.4):
         for ry in (0, 90, 180, 270):

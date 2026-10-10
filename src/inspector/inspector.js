@@ -1298,8 +1298,8 @@ const MODEL_CATALOG = [
     glb: 'wall_orc',
     sourceFile: 'tools/blender/build_walls.py',
     create: createGlb('wall_orc'),
-    description: 'Bloco de paliçada orc gerado pelo pipeline Blender (public/models/wall_orc.glb): pé de pedra bruta enterrado, grade 3×3 de toras octogonais encostadas (0,8 de passo, pontas de ferro nos cantos), miolo escuro nos vãos e duas cintas de ferro rentes. A pegada é o passo WALL_STEP (2,4): a fileira mantém o ritmo de toras sem emenda visível.',
-    notes: '1 draw call, ~368 triângulos, atlas 512², ~35 KB. Bloco de 2,4 × 2,4 × 2,6 de altura, com 0,55 enterrado. Fileira de 5 blocos: tools/ui-captures/art-a/muralha-orc-*.png.'
+    description: 'Bloco de paliçada orc gerado pelo pipeline Blender (public/models/wall_orc.glb): pé de pedra bruta enterrado, grade 3×3 de toras octogonais encostadas (0,8 de passo, pontas de ferro nos cantos, faixa de tinta de guerra na tora do meio de cada face), miolo escuro nos vãos e duas cintas de ferro rentes. A pegada é o passo WALL_STEP (2,4): a fileira mantém o ritmo de toras sem emenda visível.',
+    notes: '1 draw call, ~432 triângulos, atlas 512², ~39 KB. Bloco de 2,4 × 2,4 × 2,6 de altura, com 0,55 enterrado. Fileira de 5 blocos: tools/ui-captures/art-a/muralha-orc-*.png.'
   },
   // F7-00b lote 1 (fim)
   {

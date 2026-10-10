@@ -71,7 +71,7 @@ def wall_h(theta):
     return 2.3 - 0.55 * math.cos(math.radians(theta - 50.0))
 
 
-BROKEN = (40.0, 98.0)       # trecho "caído" (toras curtas e inclinadas, com vãos) voltado para a câmera do jogo
+BROKEN = (28.0, 92.0)       # trecho "caído" (toras curtas e inclinadas, com vãos) voltado para a câmera do jogo
 
 
 def build_base(mats, root):

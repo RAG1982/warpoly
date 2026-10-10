@@ -5,7 +5,7 @@ import { TreeManager } from '../../src/world/TreeManager.js';
 import { FOREST_SPECIES } from '../../src/data/maps/validate.js';
 import { getMap } from '../../src/data/maps/index.js';
 
-/** Modelo .glb falso (uma malha de 1 caixa por chave) para o TreeManager não gerar texturas procedurais (canvas). */
+/** Modelo .glb falso (uma malha de 1 caixa por chave): o TreeManager extrai a primeira malha, como do .glb real. */
 function fakeTree(name, color) {
   const root = new THREE.Group();
   root.name = name;

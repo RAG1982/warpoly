@@ -118,10 +118,10 @@ try {
         await page.waitForTimeout(wait);
       };
       if (faction === 'human') {
-        // bosque de bétulas do mapa-base (continental-1v1: (28, 26) e (-28, -26)), com a névoa desligada
-        await look(28, 26, 0.55);
+        // bosque de bétulas do mapa-base (continental-1v1: (2, -26) e (-2, 26), 5 árvores cada), com a névoa desligada
+        await look(2, -26, 0.55);
         await page.screenshot({ path: path.join(OUT, '12-jogo-betulas.png') });
-        await look(28, 26, 0.28);
+        await look(2, -26, 0.28);
         await page.screenshot({ path: path.join(OUT, '13-jogo-betulas-perto.png') });
         const st = await page.evaluate(() => { const s = window.__cap.st.mesh.position; return { x: s.x, z: s.z }; });
         await look(st.x, st.z + 3, 0.34);

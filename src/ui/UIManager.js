@@ -32,7 +32,7 @@ import { renderTerrainImage } from './terrainMinimapImage.js';
 import { Vector3 } from 'three';
 import {
   frustumGroundQuad, playerColor, pointerToCanvas, pickMinimapTarget,
-  OrderFlashes, orderKindFor, drawOrderFlashes, drawCameraQuad
+  OrderFlashes, orderKindFor, drawOrderFlashes, drawCameraQuad, wallMinimapShapes
 } from './minimapView.js';
 
 // Quem treina o quê — derivado de src/data/buildings.js (campo `trains`)
@@ -1451,9 +1451,14 @@ export class UIManager {
     // Draw Buildings (inimigas: só as já vistas — visíveis agora ou lembradas pela névoa)
     const fog = this.gm.fogOfWar;
     const localId = this.gm.localPlayerId;
+    const wallsToDraw = [];
     this.gm.buildings.forEach(b => {
       if (!b.isDead) {
         if (!this.gm.isHostile(localId, b.ownerId) || !fog || fog.isBuildingKnown(b)) {
+          if (b.role === 'wall') { // NEW-24: muralha vira linha/ponto fino, não quadrado de 6 px
+            wallsToDraw.push({ x: b.mesh.position.x, z: b.mesh.position.z, ownerId: b.ownerId });
+            return;
+          }
           const m = toMap(b.mesh.position.x, b.mesh.position.z);
           ctx.fillStyle = colorOf(b.ownerId);
           ctx.fillRect(m.x - 3, m.y - 3, 6, 6);
@@ -1463,6 +1468,21 @@ export class UIManager {
         }
       }
     });
+    if (wallsToDraw.length) {
+      const shapes = wallMinimapShapes(wallsToDraw, toMap);
+      ctx.lineWidth = 2;
+      for (const l of shapes.lines) {
+        ctx.strokeStyle = colorOf(l.ownerId);
+        ctx.beginPath();
+        ctx.moveTo(l.x1, l.y1);
+        ctx.lineTo(l.x2, l.y2);
+        ctx.stroke();
+      }
+      for (const p of shapes.points) {
+        ctx.fillStyle = colorOf(p.ownerId);
+        ctx.fillRect(p.x - 1, p.y - 1, 2, 2);
+      }
+    }
     // Fantasmas: construções inimigas destruídas fora da visão continuam na memória até a área ser revista
     if (fog) {
       ctx.fillStyle = '#dc2626';

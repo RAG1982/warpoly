@@ -6,19 +6,10 @@
  */
 import { SignalingClient } from './SignalingClient.js';
 import { WebRTCTransport } from './WebRTCTransport.js';
+import { bindStatus } from './lobbyStatus.js';
 import { listMaps, DEFAULT_MAP_ID } from '../data/maps/index.js';
 
 const $ = (id) => document.getElementById(id);
-const ERR = {
-  'no-such-room': 'Sala não encontrada.',
-  'room-full': 'Sala cheia.',
-  'already-started': 'A partida já começou.',
-  'not-host': 'Só o anfitrião pode fazer isso.',
-  'need-players': 'São necessários pelo menos 2 jogadores.',
-  'not-all-ready': 'Nem todos estão prontos.',
-  'rate-limited': 'Muitas mensagens; devagar.',
-  'server-full': 'Servidor cheio.'
-};
 
 let sig = null;
 const state = { room: null };
@@ -116,7 +107,7 @@ function connect() {
     status('Você foi removido da sala.');
     show();
   });
-  sig.on('error', (m) => status(ERR[m.code] || `Erro: ${m.code}`));
+  bindStatus(sig, status);
   sig.on('start', (m) => {
     const transport = new WebRTCTransport({ localId: sig.id, sendSignal: () => {} });
     transport.attach(sig);

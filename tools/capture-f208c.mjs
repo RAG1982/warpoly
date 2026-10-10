@@ -153,7 +153,7 @@ try {
   await page.goto(`http://127.0.0.1:${PORT}/inspector.html`, { waitUntil: 'load', timeout: 90000 });
   await page.waitForFunction(() => window.inspectorApp, null, { timeout: 90000 });
   await page.waitForTimeout(2500);
-  const ids = ['knight', 'villager', 'grunt', 'archer', 'great_hall', 'orc_forge', 'pig_farm', 'orc_house', 'orc_watchtower', 'orc_lumber_mill', 'orc_barracks', 'forge'];
+  const ids = ['knight_glb', 'villager_glb', 'grunt_glb', 'archer_glb', 'great_hall', 'orc_forge', 'pig_farm', 'orc_house', 'orc_watchtower', 'orc_lumber_mill', 'orc_barracks', 'forge'];
   for (const id of ids) {
     const ok = await page.evaluate(async id => {
       try { await window.inspectorApp.selectModel(id); return true; } catch (e) { return String(e); }

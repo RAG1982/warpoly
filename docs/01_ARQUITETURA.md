@@ -11,7 +11,7 @@
 | Render | three.js `^0.186.0` (WebGLRenderer, PCFSoftShadowMap, ACES tone mapping) |
 | Build | Vite `^8.3.0` — duas entradas: `index.html` (jogo) e `inspector.html` (inspetor 3D) |
 | Áudio | Web Audio API 100% sintetizado (sem arquivos de som) |
-| Assets | **Zero arquivos 3D/texturas externos**: todos os modelos são construídos em código (primitivas three.js) e todas as texturas são pintadas proceduralmente em `<canvas>` |
+| Assets | Unidades, construções, árvores e muralhas migradas são **`.glb` gerados no Blender** (`public/models/`, scripts em `tools/blender/`; F7-00/F7-00b); o que ainda é procedural (cerco, conjuradores, aéreos, navais, Acampamento Bandido, estábulos/oficinas, decoração, terreno, água) é construído em código (primitivas three.js) com texturas pintadas em `<canvas>` |
 | Testes / lint | Nenhum |
 | Dev server | `npx vite --port 5173` (config em `.claude/launch.json`, nome `warpoly-dev`) |
 
@@ -73,9 +73,9 @@ src/
   sim/EventBus.js, sim/events.js   Barramento de eventos da simulação (F2-07: ver seção "Eventos")
   audio/AudioEvents.js       Ouvinte: eventos → SoundManager (F2-07)
   models/
-    units/*Model.js + *Textures.js       8 unidades (4 humanas incl. bandido, 4 orcs)
-    buildings/*Model.js + *Textures.js   17 construções
-    environment/*                        árvores, rochas, flora, água, terreno, flecha
+    units/*Model.js                      só os procedurais que restam (F7-00b limpeza): cerco, conjuradores, esqueleto, sapadores, aéreos, navais, critters, Olho Vigia (+ `axethrowerTextures.js`: textura do machado de arremesso)
+    buildings/*Model.js + *Textures.js   só o que resta: Acampamento Bandido, Estábulo, Covil, Oficinas, torres arcanas/templos, navais, muralha (fallback) — os demais são `.glb`
+    environment/*                        rochas, flora, água, terreno, flecha (as 4 árvores são `.glb`; o fallback é uma árvore reserva de uma cor em `TreeManager`)
     materials.js, index.js
   world/
     Terrain.js                Orientado a dados (F2-05): tamanho/altura/vaus vêm de mapDef (src/data/maps)
@@ -590,7 +590,7 @@ visuais/sonoros nunca são "re-disparados" porque o `EventBus` tem `muted` (aind
   unitAnimator.js` é um reexport de 1 linha para compatibilidade.
 - **Cerco (F4-02):** `UNITS.ballista`/`catapult` ganham `minAttackRange` e `splashRadius` (documentados no cabeçalho de `units.js`) e `projectile: 'bolt'|'boulder'`. `Unit` marca `isBallistic`; no disparo (`updateAttacking`, progresso 0,6) cria um `Projectile` balístico (`src/sim/projectiles.js` desde a F2-08; vive em `gm.arrows`) que voa até a posição **prevista** (`velX/velZ`, medidos por `GameManager` ao sincronizar o `unitGrid` a cada tick) e, no impacto, chama `applySplashDamage` (`src/sim/splash.js`: unidades + construções hostis, queda linear 100→50 %, 1 `computeDamage` por entidade em ordem de `id`). Alcance mínimo: `Unit._canEngage` filtra as buscas de alvo e o passo 2b de `updateAttacking` recua/troca de alvo. Oficinas (`role:'workshop'`, `WorkshopModel.js`/`OrcWorkshopModel.js`); `BallistaModel.js`/`CatapultModel.js` expõem `SiegeArm`/`WheelL`/`WheelR` (em `ANIMATED_NODE_NAMES`; animação `fight` do `UnitAnimator` via `parts.siegeArm`). Requisito novo `{role:'workshop'}` em `src/sim/requirements.js`. Eventos `PROJECTILE_FIRED/HIT` com `kind` `bolt`/`boulder`.
 - **Sapadores (F4-05):** `UNITS.sapper`/`arsonist` (campo `suicide`, `splashRadius: 2.2`; treinados nas Oficinas). `Unit.suicide` desativa a auto-aquisição de unidades (`findNearestHostileUnit`/`CombatUnit` devolvem `null`, salvo em `hold`) e faz `findNearestHostile` preferir a construção/muralha hostil mais próxima (`_nearestStructure`); no passo 4 de `updateAttacking`, em vez de golpear, chama `_detonate`: emite `EVT.EXPLOSION {pos, radius, ownerId}`, `applySplashDamage(..., edge 0,4, surface true)` centrado no alvo (distância medida até a superfície, por isso a explosão pega os segmentos de muralha vizinhos), zera `lastAttackerOwnerId` (a morte do sapador não dá kill a ninguém, mas conta em `unitsLost`) e morre sem cadáver (`deathDuration = 0`, malha oculta). `applySplashDamage` ganhou os parâmetros opcionais `edge` (padrão 0,5: cerco) e `surface` (padrão `false`). VFX: `ParticleSystem.spawnExplosion` (clarão + anel em pool de 6, fagulhas no `chipPool`, fumaça) e `SceneManager.shake` (0,15 s; `?shake=0` desliga) via `VfxEvents`; som via `AudioEvents`. Modelos procedurais `SapperModel.js`/`ArsonistModel.js` (nó `Fuse` em `ANIMATED_NODE_NAMES`; `UnitAnimator.applySapperRun`). IA: `FACTIONS.*.units.suicide`; `AIMilitaryManager` mantém até 3 na Oficina quando o inimigo tem ≥ 4 muralhas ou Centro nível ≥ 2.
-- **Cavalaria (F4-01):** construções com `role:'stable'` (`stable`, `ogre_den`; classe base `Building`, modelos procedurais `StableModel.js`/`OgreDenModel.js`). O `cavalier` usa `CavalierModel.js` (cavalo em caixas + tronco do Espadachim): `UnitAnimator` trata `cavalier` como `knight` nas poses e, se `userData.horseLegs` existir (nós `HorseLegFL/FR/BL/BR`, religados por `ModelFactory.rebindUserData`), balança as pernas do cavalo em diagonais no `walk`. Os nomes `HorseLeg*` estão em `ANIMATED_NODE_NAMES` (pivôs do skinning rígido).
+- **Cavalaria (F4-01):** construções com `role:'stable'` (`stable`, `ogre_den`; classe base `Building`, modelos procedurais `StableModel.js`/`OgreDenModel.js`). O `cavalier` usa `cavalier.glb` (cavalo anatômico + tronco do Espadachim; o `CavalierModel.js` procedural foi removido na F7-00b): `UnitAnimator` trata `cavalier` como `knight` nas poses e, se `userData.horseLegs` existir (nós `HorseLegFL/FR/BL/BR`, religados por `ModelFactory.rebindUserData`), balança as pernas do cavalo em diagonais no `walk`. Os nomes `HorseLeg*` estão em `ANIMATED_NODE_NAMES` (pivôs do skinning rígido).
 
 ### Vitória e estatísticas (F3-09)
 - `src/sim/victory.js`: `isPlayerDefeated(mode, ownedBuildings)` (função pura) e textos PT-BR; `GameManager._updateVictoryConditions` aplica a regra por jogador a cada passo e, ao terminar a partida, congela `gm.result` (`matchStats.snapshot()`, depois de despachar os eventos pendentes).
@@ -619,7 +619,7 @@ Tudo é só render (nada em `src/sim/`) e desligável. Funções puras em `src/c
 
 ## Pipeline de assets
 
-- Cada `*Textures.js` tem funções `getXTextures()` memoizadas que pintam canvases (map, roughness, metalness, bump) — **498 chamadas `createCanvas(2048…)`**, 41 de 1024, 17 de 512.
+- Cada `*Textures.js` que sobrou (flora, rochas, terreno, água, tilesets, Acampamento Bandido, machado de arremesso) tem funções `getXTextures()` memoizadas que pintam canvases (map, roughness, metalness, bump). **F7-00b (limpeza):** os `*Textures.js` e `*Model.js` procedurais dos itens 100% migrados para o Blender foram removidos (23 arquivos de texturas + 26 modelos, 49 arquivos; ~490 KB a menos de JS no bundle, `models-human` 703 → 261 KB); `ModelFactory._placeholder` entrega um bloco simples quando um desses `.glb` não carrega (ou com `?glb=0`).
 - `*Model.js` monta um `THREE.Group` com dezenas/centenas de `Mesh` primitivos nomeados (`Torso`, `ArmL`, `Sword`…).
 - `ModelFactory.createX()` cria um template uma vez e devolve `clone(true)` (geometria/material compartilhados), depois `rebindUserData` reconecta os nós usados pelo `UnitAnimator`.
 - Construções orcs possuem specs de arte em `specs/orc_buildings/`.

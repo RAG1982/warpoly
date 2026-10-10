@@ -12,7 +12,6 @@ const OUT = path.join(HERE, 'renders');
 const BASE = process.env.BASE_URL || 'http://localhost:5218';
 const shots = [];
 for (const m of ['ogre', 'bandit']) {
-  shots.push([`insp_${m}_old`, `model=${m}&light=day`]);
   shots.push([`insp_${m}_idle`, `model=${m}_glb&light=day`]);
   shots.push([`insp_${m}_side`, `model=${m}_glb&light=day&cam=side`]);
   shots.push([`insp_${m}_walk`, `model=${m}_glb&light=day&anim=walk&time=0.2`]);

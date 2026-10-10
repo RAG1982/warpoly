@@ -12,7 +12,6 @@ const BASE = process.env.BASE_URL || 'http://localhost:5217';
 const which = process.argv[2] || 'all';
 const A = 'light=day';
 const archer = [
-  ['insp_archer_old', `model=archer&${A}`],
   ['insp_archer_new', `model=archer_glb&${A}`],
   ['insp_archer_new_walk', `model=archer_glb&${A}&anim=walk&time=0.2`],
   ['insp_archer_new_raise', `model=archer_glb&${A}&anim=fight&time=0.25`],
@@ -22,7 +21,6 @@ const archer = [
   ['insp_archer_new_die', `model=archer_glb&${A}&anim=die&time=1.4`]
 ];
 const axe = [
-  ['insp_axe_old', `model=axethrower&${A}`],
   ['insp_axe_new', `model=axethrower_glb&${A}`],
   ['insp_axe_new_walk', `model=axethrower_glb&${A}&anim=walk&time=0.2`],
   ['insp_axe_new_windup', `model=axethrower_glb&${A}&anim=fight&time=0.35`],

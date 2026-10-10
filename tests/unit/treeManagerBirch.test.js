@@ -84,16 +84,32 @@ describe('TreeManager — bétula (F7-00b)', () => {
     tm.dispose();
   });
 
-  it('sem o .glb da bétula (falha de carga, ?glb=0) ela cai no carvalho e nenhuma malha extra é criada', () => {
+  it('sem o .glb da bétula (falha de carga) ela usa a árvore reserva, num InstancedMesh próprio (sem texturas de canvas)', () => {
     glbTemplates.delete('tree_birch');
     const scene = new THREE.Scene();
     const tm = new TreeManager(scene);
     const tree = {};
     tm.registerTree(tree, 0, 0, 0, 0, 1, 'birch');
-    expect(tm.oakCount).toBe(1);
-    expect(tm.birchCount).toBe(0);
-    expect(scene.children.filter(isInstanced)).toHaveLength(3);
-    expect(tm.countOf('birch')).toBe(1); // sem malha própria, a contagem é a do carvalho
+    expect(tm.birchCount).toBe(1);
+    expect(tm.oakCount).toBe(0);
+    expect(scene.children.filter(isInstanced)).toHaveLength(4);
+    expect(tree.trunkMesh.material.map).toBeNull();
+    expect(tree.trunkMesh.material.color.getHex()).toBe(0xb6d95a);
+    tm.dispose();
+  });
+
+  it('sem nenhum .glb (rede/`?glb=0`) os quatro tipos viram árvores reservas de uma cor, sem DOM nem texturas', () => {
+    glbTemplates.clear();
+    const scene = new THREE.Scene();
+    const tm = new TreeManager(scene);
+    const types = ['oak', 'pine', 'autumn', 'birch'];
+    const trees = types.map((t, i) => { const tr = {}; tm.registerTree(tr, i, 0, 0, 0, 1, t); return tr; });
+    expect(new Set(trees.map((t) => t.trunkMesh)).size).toBe(4);
+    trees.forEach((t) => {
+      expect(t.trunkMesh.geometry.attributes.position.count).toBeGreaterThan(40);
+      expect(t.trunkMesh.material.map).toBeNull();
+    });
+    expect([tm.oakCount, tm.pineCount, tm.autumnCount, tm.birchCount]).toEqual([1, 1, 1, 1]);
     tm.dispose();
   });
 

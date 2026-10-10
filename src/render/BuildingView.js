@@ -466,8 +466,9 @@ export class BuildingView {
 
     this.updateDamageFlames();
 
-    // Animate damage flames and smoke if active
-    if (this.flamesGroup && this.flamesGroup.visible) {
+    // Animate damage flames and smoke if active — só se a construção está visível: chamas de construções inimigas
+    // na memória da névoa (`fogHidden`) não animam nem emitem fumaça (NEW-13).
+    if (shown && this.flamesGroup && this.flamesGroup.visible) {
       this.flameTime = (this.flameTime || 0) + frameDelta;
       const t = this.flameTime;
       for (let i = 0; i < this.flameTongues.length; i++) {
@@ -501,7 +502,7 @@ export class BuildingView {
     }
 
     // Cottage & Great Hall chimney smoke
-    if (e.isConstructed && (e.type === 'cottage' || e.type === 'great_hall') && gmEvents) {
+    if (shown && e.isConstructed && (e.type === 'cottage' || e.type === 'great_hall') && gmEvents) {
       this.smokeTimer += frameDelta;
       if (this.smokeTimer >= 0.8) {
         this.smokeTimer = 0;

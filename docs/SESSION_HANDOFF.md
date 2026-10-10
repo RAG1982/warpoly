@@ -1,6 +1,6 @@
 # SESSION HANDOFF — como continuar o WarPoly numa sessão nova
 
-> Escrito em 2026-09-29 ao encerrar a sessão de coordenação. Leia este arquivo inteiro antes de agir.
+> Escrito em 2026-09-29; **atualizado em 2026-10-10** (seções 2.3, 4, 5, 7 e 8). Leia este arquivo inteiro antes de agir.
 > **Prompt para colar na sessão nova (local, Claude Code com Opus):**
 > `Leia docs/SESSION_HANDOFF.md e continue a coordenação do projeto WarPoly a partir da seção "Próximos passos".`
 
@@ -23,7 +23,7 @@
      ```
      Projeto WarPoly, em /home/rafael/warpoly. Você está numa git worktree isolada. Primeiro rode `git merge master` (confira que contém <ID-anterior> com `git log --oneline | grep <ID>`). Depois leia `CLAUDE.md`, `docs/specs/_COMUM.md` e `docs/specs/<ARQUIVO>.md` e execute a spec <ID> literalmente. Escreva em PT-BR. Faça commits intermediários ("<ID> wip: ...") a cada etapa concluída. Atenção: `npm run smoke` e `npm run bench` já chamam tools/safe-run.sh por dentro — rode-os direto, sem envolver em outro safe-run. Entregue commit final e relatório curto.
      ```
-3. **Modelagem no Blender: Sonnet 5.5, nunca Haiku** (dono revogou a regra "só Opus" em 2026-09-30). Adiada até todo o código estar pronto (F7-00b, F7-00d Lacaio — spec pronta, F7-09 e demais ART em `ADIADA`).
+3. **Modelagem no Blender: Sonnet 5.5, nunca Haiku.** Liberada pelo dono em 2026-10-09 (antes adiada até o código estar pronto). Nota: `model: "haiku"` no `Agent` aponta para o **Haiku 4.5**; o Haiku 5.5 só aparece via `/model` na sessão local.
 4. **Máximo 3 agentes em paralelo.** Evite dois agentes editando os mesmos arquivos (principalmente `GameManager.js`, `Unit.js`, `Building.js`, `UIManager.js`, `InputManager.js`).
 5. **Recursos da máquina** (a máquina já travou por OOM): todo navegador/Playwright/Blender/bench roda via `tools/safe-run.sh` (trava global, 12 GB, sem swap). `tools/safe-run.sh` é **reentrante** (variável `WARPOLY_HEAVY_LOCK_HELD`). Scripts de navegador abortam sem GPU real (`tools/lib/assertGpu.mjs`). Nunca use `ALLOW_SOFTWARE_GL=1` em agentes.
 
@@ -46,38 +46,34 @@
 - Agentes às vezes não batem a meta numérica: aceite o ganho real, registre `NEW-<n>` com o motivo e siga.
 
 ## 4. Trabalho na nuvem (Claude Code web)
-- Roteiro: `docs/HANDOFF_CLOUD.md`. Prompt na nuvem: `Leia docs/HANDOFF_CLOUD.md e execute a próxima tarefa pendente da fila da nuvem, seguindo as regras do handoff.`
-- Nuvem **não tem GPU**: só `npm test`/lint/build; verificação visual fica "pendente local".
-- Nuvem cria branch `cloud/<ID>` + PR; **o coordenador local faz o merge** (`git fetch origin && git merge --no-ff origin/cloud/<ID>`), verifica, fecha o PR se o GitHub não fechar sozinho, e atualiza `HANDOFF_CLOUD.md` (fila) e `TASKS.md`.
-- Fila atual da nuvem (ainda **não iniciada**): **F3-01** controles RTS + NEW-16 (`docs/specs/F3-01-controles-rts.md`) → **F6-08** menu de opções (`docs/specs/F6-08-opcoes.md`). Mantenha a tabela "O que está rodando localmente" do handoff da nuvem atualizada para evitar conflitos.
+- Roteiro e **fila atualizada**: `docs/HANDOFF_CLOUD.md` (seção 3: 11 tarefas com briefing; seção 4: o que fica no local e por quê). Prompt na nuvem: `Leia docs/HANDOFF_CLOUD.md e execute a próxima tarefa pendente da fila da nuvem, seguindo as regras do handoff.`
+- **Pré-requisito**: `git push origin master` (ação do dono). O `origin/master` está em `a801c47`, defasado.
+- Nuvem **não tem GPU nem Blender**: só `npm test`, lint e build; a verificação visual/benchmark fica "pendente local".
+- Nuvem cria branch `cloud/<ID>` + PR; **o coordenador local faz o merge** (`git fetch origin && git merge --no-ff origin/cloud/<ID>`), verifica e registra no TASKS.
 
-## 5. Estado atual (2026-09-30, tudo no GitHub)
-Quadro: F0 7/7 · F1 9/10 · F2 6/8 · F3 4/11 (design, economia, combate, níveis do Centro) · F6 2/9 · F7 1/11 · demais 0.
-Testes: **298** passando; lint 0 erros (~25 avisos antigos); build ok; smoke ok.
-
-Entregas principais já no master:
-- Desempenho: texturas por qualidade (`?texq=`), presets gráficos (`?quality=`), sombras seletivas, mesclagem estática (`?merge=0`), unidades SkinnedMesh rígido (`?skin=0`), pools/sem vazamentos, grade espacial, pathfinder com heap/obstáculos dinâmicos/orçamento por nós, **tick fixo 20 Hz** com interpolação e LOD de animação. Cena inicial ~120 FPS; combate100 ~37–43 FPS (meta 50 → NEW-15); massa300 ~19 FPS (limitado por draw calls das unidades).
-- Núcleo: jogadores/IDs/`MatchConfig` (`?ffa=1`), máquina de estados + partidas sem reload + pausa, **comandos** (`gm.issue`, stop/hold/attack-move/patrol, shift-queue), **determinismo** (RNG com seed, checksum, modo headless — partida IA×IA de 10 min em ~1 s), **event bus** (simulação não chama som/VFX/UI), **mapas por dados** (`continental-1v1`, `ilhas-4p`, `?map=`).
-- UX/arte: menu principal + escaramuça com lista de mapas, névoa de guerra por shader (3 estados + fantasmas), HUD responsiva com card 3×3/tooltips/seleção múltipla, modelos Blender Grunt e Castelo **ligados por padrão** (`?glb=0` desliga).
-
-Parâmetros de URL úteis: `?play&faction=orc`, `?skipPreload`, `?texq=low`, `?quality=`, `?merge=0`, `?skin=0`, `?glb=0`, `?ffa=1`, `?map=ilhas-4p`, `?bench=inicial|combate100|massa300`.
+## 5. Estado atual (2026-10-10)
+- Quadro (`docs/TASKS.md`): 88 tarefas de fase — **73 DONE**, 8 REVIEW, 6 TODO, 1 DOING (F5-03, pausado). Backlog NEW: 22 DONE, 5 TODO, 1 DOING (NEW-41), 1 ADIADA (NEW-20), ~24 sem status (auditoria AUD-1 na fila da nuvem).
+- Testes: **1259** passando; lint 0 erros (68 avisos antigos); build ok; smoke ok (última rodada: F7-09).
+- Entregas grandes desde 2026-09-30: F4 (cavalaria, cerco, mana/magias, sapadores, aéreo, naval com petróleo, heróis), F5 (IA por jogador, percepção sob a névoa, dificuldades), F7 (VFX, iluminação/pós-processamento, tilesets, animação de produção, team color, ícones e arte 2D, modelos Blender de navios/construções navais/acampamento/balão/muralhas/bétula), F8 (gerador de mapas, 6 mapas skirmish, missões e gatilhos, editor de mapas, campanha Aliança provisória), F9 (lockstep online com WebRTC, sinalização e lobby, reconexão e pausa votada, replays), F10 (testes da simulação, soak IA×IA com 100 partidas, regressão visual, empacotamento PWA e deploy).
 
 ## 6. Decisões do dono (resumo — detalhes em `docs/07_DECISOES.md`)
-D1 pedra permanece; petróleo só com Centro nível 2 · D2 nomes próprios (nada Blizzard) · D3 hardware fraco sem perder qualidade · D4 facções **Coroa de Aldária** / **Clãs de Gorthak** · D5 Casa/Toca mantidas, **sem ouro passivo** nas fazendas · D6 heróis na campanha **e** escaramuça (1 por jogador, Centro nível 2, opção "Sem heróis") · D7 nomes de `08_GAME_DESIGN.md` aprovados.
+D1 pedra permanece; petróleo só com Centro nível 2 · D2 nomes próprios (nada Blizzard) · D3 hardware fraco sem perder qualidade · D4 facções **Coroa de Aldária** / **Clãs de Gorthak** · D5 Casa/Toca mantidas, **sem ouro passivo** nas fazendas · D6 heróis com reviver/XP pendentes.
+Decisões pendentes (2026-10-10): F7-02 máscara de cor; F8-03 gerador `painted` em `src/sim`; F8-05 premissa da campanha Aliança; F9-03 checksum por turno ou a cada 10. Ver `docs/TASKS.md` e a seção 4 de `docs/HANDOFF_CLOUD.md`.
 
-## 7. Próximos passos (atualizado 2026-09-30)
-Índice de specs com status: **`docs/specs/README.md`**. Coordenação e specs agora por **Sonnet 5.5** (decisão do dono).
-1. **Em andamento** (worktrees): F3-08 muralhas (5203) e F3-09 vitória/estatísticas (porta 5205; F3-05 usa 5204). Ao terminar: `git merge --no-ff`, `npm test && npm run lint && vite build && npm run smoke`, conflitos em `TASKS.md`/`UIManager.js` resolvem-se à mão (viram rotina).
-2. **Specs prontas, não disparadas** (ordem): F3-05 reparo (após F3-08) → F3-10 neutros (após F3-09) → F3-11 balanceamento (após todas; IA ainda sem dificuldade — F5).
-3. Nuvem (fila em `docs/HANDOFF_CLOUD.md`): F3-01 controles → F6-08 opções → NEW-19 ruínas.
-4. **Specs a escrever**: F4 (cavalaria F4-01, cerco F4-02 + NEW-23, mana F4-03, magias F4-04, sapadores F4-05, aéreo F4-06, naval/petróleo F4-07, heróis D6), F5 IA, F6 restante, F8, F9, F10.
-5. Pequenas para **haiku**: NEW-6 (ORM de texturas — grande, precisa de spec). NEW-3/22/21 já feitos.
-6. **Blender**: modelagem agora com **Sonnet 5.5** (decisão do dono), ainda adiada até o código estar pronto: F7-00b, F7-00d Lacaio (spec pronta), F7-09 etc. NEW-20 adiada pelo dono.
+Parâmetros de URL úteis: `?play&faction=orc`, `?skipPreload`, `?texq=low`, `?quality=`, `?merge=0`, `?skin=0`, `?glb=0`, `?ffa=1`, `?map=ilhas-4p`, `?bench=inicial|combate100|massa300`, `?online=1` (lockstep), `?vfx=`, `?fx=`, `?daynight=`, `?team=`, `?campaign=unlock`.
 
-Estado ao escrever: master com F3-03..F3-07, NEW-10/17/18/21/22/3 mesclados; **312 testes**.
+## 7. Próximos passos (atualizado 2026-10-10)
+1. **Dono**: decidir o push de `master` para o GitHub (repositório público) — pré-requisito da nuvem.
+2. **Em andamento**: NEW-53 (correção de m04 "A Ponte do Rio Turvo": forte Atalaia humano e anel ciano dos carregadores). Ao concluir: merge, `npm test`, lint, build e captura em `tools/ui-captures/m04-fix/`.
+3. **Local, retomar**: NEW-44 (IA sem madeira/naval, alterações não commitadas), F7-08 (áudio, branch `task/F7-08`), F10-04 (CI de desempenho, branch `task/F10-04`), F10-03 (regravar baseline visual).
+4. **Local, Blender**: F7-01 e F7-07 (precisa de referências de arte para Refinaria, Fundição, Submersível, Tartaruga, Forja Naval e Caldeirão), revisão final da F7-00b.
+5. **Nuvem**: fila de `docs/HANDOFF_CLOUD.md` seção 3 (1. NEW-50 → 11. AUD-1).
+6. **Decisões do dono**: seção 6 acima.
 
-## 8. Estado operacional ao encerrar
-- Nenhum agente rodando; dev server local parado (subir com `npx vite --port 5173` em background se precisar mostrar algo ao dono).
-- PRs #1–#3 da nuvem já mesclados; branches `origin/cloud/{BUGS-01,F1-07,F6-03}` podem ser apagadas.
-- Muitas worktrees antigas em `.claude/worktrees/` (ignoradas pelo git); podem ser limpas com `git worktree prune` após remover as pastas das tarefas já mescladas.
+## 8. Estado operacional ao encerrar (2026-10-10)
+- Agentes: 1 em andamento (NEW-53). Dev server parado (subir com `npx vite --port 5173` em background se precisar mostrar algo).
+- Git: `master` local com as últimas mesclagens; `origin/master` defasado (ver seção 4).
+- Worktrees de agentes em `.claude/worktrees/` (ignoradas pelo git, ~90): limpar com `git worktree prune` depois de remover as pastas das tarefas já mescladas. Não apagar as que têm alterações não commitadas (NEW-44, F7-08, F10-04).
+- Dev watcher: `vite.config.js` ignora `.claude/**`, `tools/ui-captures/**`, `tools/soak-report/**` e `tests/visual/**` (sem isso o inotify esgota com muitos worktrees).
+- Limite de uso (HTTP 429) derruba agentes no meio: verifique a worktree, salve WIP com commit e **retome com `SendMessage`** para o id do agente (mantém o contexto).
 - Memória do assistente: `~/.claude/projects/-home-rafael-warpoly/memory/` (objetivos, usuário, política de modelos).

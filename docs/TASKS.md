@@ -47,8 +47,8 @@
 
 ---
 
-## Fluxo de execução atual (2026-09-28)
-Sonnet 5.5 escreve a spec em `docs/specs/<ID>.md`; agente **Sonnet** executa; o coordenador revisa relatório + testes e faz o merge. Tarefas de arte no Blender (F7-*) **adiadas até o código estar pronto**.
+## Fluxo de execução (histórico, 2026-09-28)
+Sonnet 5.5 escreve a spec em `docs/specs/<ID>.md`; agente **Sonnet** executa; o coordenador revisa relatório + testes e faz o merge. Tarefas de arte no Blender (F7-*) **liberadas pelo dono em 2026-10-09**.
 
 | Spec pronta | Tarefa | Executor |
 |---|---|---|
@@ -63,7 +63,7 @@ Sonnet 5.5 escreve a spec em `docs/specs/<ID>.md`; agente **Sonnet** executa; o 
 | `docs/specs/F2-05-mapas-dados.md` | F2-05 + B16 — **DONE** | sonnet (local) |
 | `docs/specs/F3-01-controles-rts.md` | F3-01 + NEW-16 — **nuvem** | sonnet (claude.ai/code) |
 | `docs/specs/F6-08-opcoes.md` | F6-08 — **nuvem**, após F3-01 | sonnet (claude.ai/code) |
-| `docs/specs/F7-00d-lacaio-blender.md` | F7-00d Lacaio no Blender — **ADIADA** (modelagem por Sonnet 5.5 no fim) | sonnet 5.5 (futuro) |
+| `docs/specs/F7-00d-lacaio-blender.md` | F7-00d Lacaio no Blender — **liberada em 2026-10-09** (pendente; modelagem por Sonnet 5.5) | sonnet 5.5 |
 | `docs/specs/F3-04-economia.md` | F3-04 economia WC2 — **DONE (5b8a72e)**; toca GameManager/Unit/Building/ai → não vai para a nuvem | sonnet (local) |
 | `docs/specs/F3-03-combate.md` | F3-03 — spec pronta; **local, depois da F3-04** | sonnet (local) |
 | `docs/specs/F3-07-pesquisas-niveis.md` | F3-07 — **DONE** | sonnet (local) |
@@ -76,21 +76,27 @@ Sonnet 5.5 escreve a spec em `docs/specs/<ID>.md`; agente **Sonnet** executa; o 
 | `docs/specs/F1-03b-unidades-skinned.md` | F1-03b SkinnedMesh rígido — **DONE (38c013b)** | sonnet |
 | `docs/specs/F1-06-grade-espacial.md` | F1-06 — **DONE parcial** | sonnet |
 
-## Quadro resumo
+## Quadro resumo (atualizado 2026-10-10)
 
-| Fase | Total | TODO | DOING | DONE |
-|---|---|---|---|---|
-| F0 Fundação | 7 | 0 | 0 | 7 |
-| F1 Desempenho | 10 | 1 | 0 | 9 |
-| F2 Núcleo | 8 | 0 | 0 | 8 |
-| F3 Jogabilidade WC2 base | 12 | 0 | 0 | 12 |
-| F4 Jogabilidade WC2 expansão | 8 | 1 | 1 | 6 |
-| F5 IA | 6 | 1 | 1 | 4 |
-| F6 HUD/UX | 9 | 0 | 0 | 9 |
-| F7 Arte/Áudio | 11 | 10 | 0 | 1 |
-| F8 Conteúdo | 6 | 6 | 0 | 0 |
-| F9 Multiplayer | 5 | 5 | 0 | 0 |
-| F10 Qualidade/Release | 5 | 5 | 0 | 0 |
+| Fase | Total | TODO | DOING | REVIEW | DONE |
+|---|---|---|---|---|---|
+| F0 Fundação | 7 | 0 | 0 | 0 | 7 |
+| F1 Desempenho | 10 | 1 | 0 | 0 | 9 |
+| F2 Núcleo | 8 | 0 | 0 | 0 | 8 |
+| F3 Jogabilidade base | 12 | 0 | 0 | 0 | 12 |
+| F4 Expansão | 9 | 0 | 0 | 0 | 9 |
+| F5 IA | 6 | 0 | 1 | 0 | 5 |
+| F6 HUD/UX | 9 | 0 | 0 | 0 | 9 |
+| F7 Arte/Áudio | 11 | 3 | 0 | 3 | 5 |
+| F8 Conteúdo | 6 | 1 | 0 | 2 | 3 |
+| F9 Multiplayer | 5 | 0 | 0 | 2 | 3 |
+| F10 Qualidade/Release | 5 | 1 | 0 | 1 | 3 |
+| **Total** | **88** | **6** | **1** | **8** | **73** |
+
+- **Backlog NEW**: 22 DONE · 5 TODO (NEW-44, 49, 50, 51, 52) · 1 DOING (NEW-41) · 1 ADIADA (NEW-20) · ~24 sem status registrado (NEW-1…NEW-35, auditoria pendente).
+- **Em andamento fora do TASKS**: correção de m04 (ver NEW-53).
+- **Pendências de decisão do dono**: F7-02 (máscara de cor), F8-03 (gerador `painted` em `src/sim`), F8-05 (premissa da campanha Aliança), F9-03 (checksum a cada 10 turnos em jogo vs spec por turno).
+- **Quem faz o quê**: tarefas da nuvem e locais, com o briefing de cada uma, estão em `docs/HANDOFF_CLOUD.md`.
 
 ---
 
@@ -455,6 +461,8 @@ Sonnet 5.5 escreve a spec em `docs/specs/<ID>.md`; agente **Sonnet** executa; o 
 - `DONE(2026-10-09, task/close-b)` · ART · Dep: F2-07 · Blend entre estados, variações de ataque, animação de morte por tipo de dano, animação de carregar recurso, idle variados.
 - **Resultado**: `src/animation/animMath.js` (funções puras: variante estável por id, blend, estilo de morte, idle com rng) + `UnitAnimator` (cross-fade 0,14 s sem alocação por quadro, ataque v0/v1 por id, morte `cut|projectile|crush|magic` via `Unit.lastHitTag` — dica de render escrita em `takeDamage`, fora do checksum, `sim/hitTag.js` —, carga: tronco curvado/braços contidos/mochila balança (ouro/madeira já nas costas), idle olhar/alongar a cada 3,5–8 s). Testes `tests/unit/animMath.test.js`; capturas `tools/ui-captures/anim/` (`tools/capture-anim.mjs`). Bench combate100 52,2 vs 52,9 fps (−1,3%), inicial no ruído. Limitação: petróleo (petroleiro naval) sem animação de carga; magias de habilidade contam como projétil/magia pelo atacante.
 - **Revisão/fechamento (2026-10-09, task/close-b)**: **Resultado:** capturas de `tools/ui-captures/anim/` abertas com Read, mais checagens numéricas no mesmo script (`tools/capture-anim.mjs`; saídas `crossfade.json`, `carga.json`, `jogo-dados.json`). (1) Ataque v0/v1: poses distintas nos 6 modelos (no Arqueiro a diferença é só o ponto do saque do arco, pois a variante 1 remapeia o progresso). (2) Morte cut/projectile/crush/magic: 4 poses finais distintas nos 6 modelos (inspetor) e no jogo real: 4 vítimas × 4 atacantes (Espadachim→cut, Arqueiro→projectile, Catapulta→crush, Mago→magic; `Unit.lastHitTag` e `animator.deathStyle` conferem) com a sequência `jogo-morte-1..4-t*.png` (t = 0,35/0,70/1,05/1,40 s). (3) Carregar recurso (Aldeão e Peão): braço 0,45× e tronco +0,16 rad em relação ao andar sem carga (`andar-sem-carga*.png` × `carga-*.png`) e mochila de ouro/madeira vista de costas (`*-costas.png`). (4) Idle: **as capturas antigas `idle-olhar`/`idle-alongar` eram idênticas** (bug do script: `_idleVar` era zerado pelo `setAnimation` chamado depois; e `olhar` usava t = 1,0, onde o seno da cabeça vale 0) — script corrigido e recapturado com a referência sem variante (`idle-base-t0.5/t1.0`): cabeça virada e braços abertos visíveis nos 6 modelos; no jogo real 10 unidades paradas trocaram de variante de idle (0→1/2 e de volta) em 17 s (2–4 mudanças cada) e as duas variantes de ataque por id aparecem (7 × 3). (5) Cross-fade sem pop: sequência `knight|grunt-crossfade-0..4` (golpe a 0,5 s → idle: quadro 1 ≈ pose antiga, meio, fim e o corte seco para comparar) + sonda numérica em 36 transições (6 modelos × idle/walk/fight, quadros de 1/60 s): nas 13 em que um corte seco seria visível (≥ 0,2 rad, até 2,2 rad num quadro) o 1º quadro fica em ≤ 4,2 % do salto e o pico por quadro em ≤ 26 %; a pose exibida é exatamente (1−w)·antiga + w·crua com w = smoothstep(t/0,14 s) (erro ≤ 1,1e-7) e converge à pose crua. **Bug achado e corrigido**: `UnitAnimator.bindModel` repetia em `_blendObjs` os nós referenciados por várias chaves de `meshParts` (Arremessador: `weapon`/`weaponR`/`drawnAxe` = o mesmo nó), então o machado era misturado 3× (peso w³; erro de até 0,98 rad contra a fórmula; sem salto, mas defasado do braço); agora sem repetidos + `tests/unit/unitAnimatorBlend.test.js` (falha sem a correção). Observação fora do critério (não é do blend): o golpe do Arremessador tem 2 saltos de 2,3 rad no machado de mão (`WeaponR`) em p = 0,60 e 0,78 → NEW-49. Gates do fechamento (árvore = master `ad72ff8` + estas mudanças): `npm run smoke` OK (jogo em 5,8 s e inspetor em 3,8 s, GPU RX 7600 XT), `npx vitest run` 103 arquivos / 1226 testes verdes (2 novos), `npx eslint src tests tools` 0 erros (68 avisos antigos), `npm run build` ok.
+
+### F7-07 · Modelos novos (para F3/F4)
 - `TODO` · ART · Dep: F3-00 · Todas as construções/unidades novas da árvore tecnológica, cada uma com entrada no inspetor e orçamento (≤ 20 draw calls pós-merge, texturas ≤ 512).
 
 ### F7-08 · Áudio de produção
@@ -550,6 +558,7 @@ Sonnet 5.5 escreve a spec em `docs/specs/<ID>.md`; agente **Sonnet** executa; o 
 ## Backlog descoberto
 _(agentes adicionam aqui: `NEW-<n> · título · lane · motivo`)_
 
+- NEW-53 · `DOING(agente-m04, 2026-10-10)` Dono (teste da campanha, m04 "A Ponte do Rio Turvo"): (1) o "Forte Atalaia" não existia (objetivo de entrega era só uma área vazia em (-22,-6)) e o dono quer um forte HUMANO depois do forte dos orcs, onde se entregam os suprimentos; (2) os 4 carregadores têm o mesmo anel dourado das demais unidades do jogador, sem identificação. Correção em andamento: ação de missão `spawnBuilding` (forte `castle` humano depois do acampamento neutro), `markColor` por spawn (anel de render, fora do checksum) e carregadores em ciano. Ao concluir: marcar DONE com resultado e captura em `tools/ui-captures/m04-fix/`.
 - NEW-2 · IA reembolsa custo errado em `AIEconomyManager.placeBuilding` (usa `director.costs[tipoDaConstrução]`, mas `costs` é indexado por papel → devolve custo da fazenda) · AI · achado na F0-06
 - NEW-3 · Card de seleção ainda mostra nomes antigos em inglês (`entityName`: "Villager"…); unificar com nomes PT-BR/glossário · UI · depende de F3-00/F6-09
 - NEW-4 · `Pathfinder.hasLineOfSight` devolve false para pontos idênticos (0/0 = NaN em `t`) · PERF · achado na F0-05 (`src/core/Pathfinder.js:157-175`)

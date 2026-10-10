@@ -51,6 +51,8 @@ os `.glb` em `public/models/` são artefatos reproduzíveis.
 | `siege_common.py` | — | helpers do cerco e das oficinas (rodas, correntes, engrenagens, proxy `Xf`) |
 | `bld_common.py` | — | helpers das construções (viga/tubo/tora entre pontos, cabeça de cavalo, crânio de ogro, bbox) |
 | `common.py` | — | helpers (primitivas bmesh, materiais de pintura, UV atlas, bake, export, render) |
+| `render_icons.py` `render_portraits.py` `render_art2d.py` | `public/ui/` | **arte 2D (F7-09)**: ícones 128/256, retratos idle/ataque 128² e artes de menu/loading, renderizados em Eevee a partir dos mesmos `.glb`; ver a seção "Arte 2D" abaixo |
+| `ui_common.py` `ui_glyphs.py` `ui_specs.py` `ui_scene.py` `ui_sheet.py` | — | suporte da arte 2D (cena Eevee, glifos 3D procedurais, tabelas de ícones/retratos, cena de pôr do sol, folhas de contato) |
 
 ## Como rodar
 
@@ -73,6 +75,27 @@ timeout 900 npx vite --port 5180 --strictPort &
 /home/rafael/warpoly/tools/safe-run.sh --timeout 600 -- node tools/blender/capture_inspector.mjs
 python3 tools/blender/compose_compare.py     # gera renders/compare_*.png (antigo × novo)
 ```
+
+## Arte 2D (F7-09): ícones, retratos e artes de menu/loading
+
+Renderiza em Eevee, a partir dos **mesmos `.glb`** de `public/models/`, os sprites da HUD (`public/ui/`, ~2,65 MiB) e o manifesto `public/ui/manifest.json`. Os modelos 3D não são tocados.
+
+```bash
+node tools/dump-portrait-poses.mjs          # poses idle/fight/cast do UnitAnimator REAL -> tools/blender/portrait_poses.json
+B=/home/rafael/Downloads/blender-5.2.1-linux-x64/blender
+tools/safe-run.sh --timeout 1200 -- $B -b --factory-startup --python tools/blender/render_icons.py     # 140 ícones x (128, 256)
+tools/safe-run.sh --timeout 1200 -- $B -b --factory-startup --python tools/blender/render_portraits.py # 36 retratos x (idle, ataque)
+tools/safe-run.sh --timeout 1200 -- $B -b --factory-startup --python tools/blender/render_art2d.py     # menu.webp e loading.webp
+python3 tools/blender/ui_sheet.py icons /tmp/icones.png --prefix unit_     # folha de contato (Pillow, Python do sistema)
+bash tools/safe-run.sh --mem 6G --timeout 420 -- node tools/capture-art2d.mjs   # HUD no jogo + menu + loading + fallback
+```
+
+Opções (`-- <opções>` depois do script): `--only id1,id2` (só esses ícones/retratos ou `menu|loading`), `--out <pasta>` (prova fora de `public/ui/`; o manifesto vai junto), `--quality N`, `--samples N`; só a arte: `--scale 0.5` (960×540) e `--guides` (escurece a faixa do menu de botões para conferir a composição). Cada script atualiza só a sua seção do manifesto e recalcula os bytes.
+
+- **Ícones**: unidades/construções = o `.glb` na pose idle do jogo, câmera por projeção dos vértices (busto nos humanoides via `crop`), luz de 3 pontos, fundo transparente, contorno escuro pós-processado em numpy e redução por média de bloco (render de 512²). Comandos/pesquisas/magias = glifos 3D procedurais (`ui_glyphs.py`) ou partes/efeitos sobre o próprio `.glb` (Olho Vigia, esqueleto, mago fantasma). Selos: patente (classes), estrela (heróis), seta verde (evoluir o Centro).
+- **Retratos**: bust em degradê da facção; o quadro de ataque usa a pose real do golpe/lançamento (instante em `ui_specs.PORTRAITS`), mesma câmera do idle (acompanha a cabeça), zoom de 6 %, inclinação de 3° e fundo quente.
+- **Artes**: céu em nós de shader (degradê, sol, nuvens em faixas), terreno low-poly por função (estrada, colinas), montanhas, árvores/castelo/Grande Salão/exércitos em poses reais (`Library.instance`), brasas emissivas; passe de profundidade em EXR para a neblina atmosférica; `grade()` aplica bloom, contraste, vignette e grão.
+- **Orçamento**: ícones ~5 KB (128) / ~13 KB (256), retratos ~4 KB, artes ~120 KB; total de `public/ui/` ≤ 15 MiB (testado).
 
 ## Etapas do pipeline
 

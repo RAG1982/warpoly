@@ -128,7 +128,7 @@ export class ModelFactory {
 
   // Pipeline Blender (F7-00): .glb só com ?glb=1 (lógica em glbModels.js)
   static glbEnabled = glbEnabled;
-  static loadGlbModels() { return loadGlbTemplates(); }
+  static loadGlbModels(factions = null) { return loadGlbTemplates(factions); }
   static setTeamColor(obj, color) { return setTeamColor(obj, color); }
 
   /** Clone de um .glb já carregado (ou null), com nomes preservados e userData religado. */

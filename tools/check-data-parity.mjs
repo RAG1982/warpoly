@@ -8,18 +8,23 @@
  *
  * Única diferença permitida: custos da IA (bug B3) — a IA agora usa os custos reais.
  *
- * Uso: node tools/check-data-parity.mjs   (precisa de node_modules com three)
+ * Uso: node --import ./tools/lib/register-json-loader.mjs tools/check-data-parity.mjs
+ *      (precisa de node_modules com three; o loader permite importar .json/.css em Node puro).
+ *
+ * NEW-31: portado para a estrutura atual (`src/sim`, `src/data`, mocks de `blockerGrid`) e roda
+ * sem exceção. É um retrato histórico da F0-06: divergências de balanceamento posteriores
+ * (F3-03 dano básico/perfurante, nomes PT-BR, F3-07 pesquisas em níveis…) aparecem como
+ * "não esperadas" e fazem o script sair com 1 — não indicam regressão atual.
  * Sai com código 1 se houver qualquer divergência não esperada.
  */
-import { Unit } from '../src/entities/Unit.js';
-import { Building, UNIT_TRAIN_CONFIG, BUILDING_BUILD_CONFIG, WORKER_BUILD_LIST } from '../src/entities/Building.js';
+import { Unit } from '../src/sim/Unit.js';
+import { Building } from '../src/sim/Building.js';
 import { InputManager } from '../src/core/InputManager.js';
-import { GameManager } from '../src/core/GameManager.js';
-import { BUILDING_TRAINABLE_UNITS } from '../src/ui/UIManager.js';
+import { GameManager } from '../src/sim/GameManager.js';
 import { AIDirector } from '../src/ai/AIDirector.js';
 import { Player } from '../src/sim/Player.js';
-import { UPGRADE_CONFIG, FORGE_UPGRADES } from '../src/core/UpgradeConfig.js';
 import {
+  UNIT_TRAIN_CONFIG, BUILDING_BUILD_CONFIG, WORKER_BUILD_LIST, BUILDING_TRAINABLE_UNITS,
   getUnitDef, getBuildingDef, getCost, VISION_RADII, DEFAULT_UNIT, DEFAULT_BUILDING,
   STARTING_RESOURCES, WORKER_STATS
 } from '../src/data/index.js';
@@ -248,14 +253,6 @@ function OLD_aiDirector(faction) {
 }
 
 // src/core/UpgradeConfig.js @9f6cb7d (números)
-const OLD_UPGRADES = {
-  infantry_attack: { statType: 'attack', bonus: 5, cost: { gold: 100, wood: 50, time: 14 }, appliesTo: ['knight', 'grunt', 'ogre'] },
-  infantry_defense: { statType: 'defense', bonus: 3, cost: { gold: 80, stone: 70, time: 14 }, appliesTo: ['knight', 'grunt', 'ogre'] },
-  ranged_attack: { statType: 'attack', bonus: 4, cost: { gold: 90, wood: 60, time: 14 }, appliesTo: ['archer', 'axethrower'] },
-  ranged_defense: { statType: 'defense', bonus: 2, cost: { gold: 70, wood: 50, time: 14 }, appliesTo: ['archer', 'axethrower'] }
-};
-const OLD_FORGE_UPGRADES = ['infantry_attack', 'infantry_defense', 'ranged_attack', 'ranged_defense'];
-
 // ===========================================================================
 // Comparação
 // ===========================================================================
@@ -295,7 +292,7 @@ for (const t of UNIT_TYPES) {
   const n = Unit.prototype.getUnitStats.call({}, t);
   // o construtor aplica `armor || 0` e `collisionRadius || 0.6`
   check(`Unit.getUnitStats(${t})`, { ...o, armor: o.armor || 0 }, { ...n, armor: n.armor || 0 });
-  check(`Unit.getHealthBarHeight(${t})`, OLD_getHealthBarHeight(t), Unit.prototype.getHealthBarHeight.call(fakeUnit(t)));
+  check(`Unit.getHealthBarHeight(${t})`, OLD_getHealthBarHeight(t), getUnitDef(t).healthBarHeight);
   check(`Unit.isCombatUnit(${t})`, OLD_isCombatUnit(t), Unit.prototype.isCombatUnit.call(fakeUnit(t)));
   check(`Unit.isWorker(${t})`, OLD_isWorker(t), Unit.prototype.isWorker.call(fakeUnit(t)));
   const d = getUnitDef(t);
@@ -322,7 +319,7 @@ for (const t of BUILDING_TYPES) {
     collisionRadius: s.collisionRadius || 3.0, attackCooldown: cd
   });
   check(`Building.getBuildingStats(${t})`, asCtor(o, OLD_buildingAttackCooldown), asCtor(n, n.attackCooldown));
-  check(`Building.getBuildingHeight(${t})`, OLD_getBuildingHeight(t), Building.prototype.getBuildingHeight.call({ type: t }));
+  check(`Building.getBuildingHeight(${t})`, OLD_getBuildingHeight(t), getBuildingDef(t).healthBarHeight);
   const d = getBuildingDef(t);
   check(`Building.isTower(${t})`, OLD_isTower(t), !!d.tower);
   if (OLD_isTower(t)) {
@@ -338,12 +335,11 @@ for (const t of BUILDING_TYPES) {
     check(`InputManager.getCost(${t})`, OLD_InputManager_getCost(t), InputManager.prototype.getCost.call({}, t));
   }
   for (const r of RESOURCES) {
-    check(`GameManager.dropoff(${t}, ${r})`, OLD_isDropoff(t, r), GameManager.prototype.findNearestDropoff.call(
-      { buildings: [] },
-      { distanceTo: () => 1 }, r,
-      [{ type: t, isConstructed: true, ownerId: 0, isDead: false, mesh: { position: {} } }],
-      0
-    ) !== null);
+    // findNearestDropoff usa `blockerGrid.nearest(x, z, raio, filtro)`: mock devolve o 1º que passa no filtro.
+    const dropoffBuilding = Object.assign(Object.create(Building.prototype), { type: t, isConstructed: true, ownerId: 0, isDead: false });
+    const mockGm = { blockerGrid: { nearest: (x, z, radius, pred) => [dropoffBuilding].find(pred) || null } };
+    check(`GameManager.dropoff(${t}, ${r})`, OLD_isDropoff(t, r),
+      GameManager.prototype.findNearestDropoff.call(mockGm, { x: 0, z: 0 }, r, [], 0) !== null);
   }
   for (const u of UNIT_TYPES) {
     // F2-01: queueUnit cobra do Player dono (gm.getPlayer(ownerId)), não mais do GameManager.
@@ -363,12 +359,7 @@ check('BUILDING_TRAINABLE_UNITS', OLD_BUILDING_TRAINABLE_UNITS, BUILDING_TRAINAB
 check('GameManager.resources iniciais', OLD_STARTING_RESOURCES, STARTING_RESOURCES);
 
 // --- Pesquisas ---
-check('FORGE_UPGRADES', OLD_FORGE_UPGRADES, FORGE_UPGRADES);
-for (const [id, o] of Object.entries(OLD_UPGRADES)) {
-  const n = UPGRADE_CONFIG[id];
-  const applies = UNIT_TYPES.filter(t => n.appliesTo(t));
-  check(`UPGRADE_CONFIG.${id}`, o, { statType: n.statType, bonus: n.bonus, cost: n.cost, appliesTo: applies });
-}
+// (NEW-31) Removido: as 4 pesquisas de nível único viraram `RESEARCH` em níveis (F3-07), sem equivalente antigo comparável.
 
 // --- IA (B3: custos são a única diferença esperada) ---
 for (const faction of ['orc', 'human']) {

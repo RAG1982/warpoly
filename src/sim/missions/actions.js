@@ -39,17 +39,21 @@ function setGuard(unit, area) {
 
 const clone = (v) => JSON.parse(JSON.stringify(v));
 
+/** Folga entre a construção e as árvores vivas que `GameManager.canPlaceBuilding` exige do jogador (`minTreeGap`). */
+const TREE_CLEARANCE = 3.5;
+
 /**
- * Árvores sob a pegada de uma construção criada por script (`spawnBuilding`) somem sem animação nem toco — o equivalente
- * do que o jogador faria derrubando-as antes de construir; as vivas que encostam no modelo atravessariam as paredes.
- * Determinístico: varre `gm.trees` em ordem; o efeito na grade espacial/caminhos acontece no passo seguinte (`simStep`).
+ * Uma construção criada por script (`spawnBuilding`) não passa por `canPlaceBuilding`: as árvores vivas dentro da MESMA
+ * folga que o jogador precisaria (`collisionRadius` + 3,5) somem sem animação nem toco — assim o ponto escolhido fica tão
+ * livre quanto um ponto onde o jogador poderia construir, e nenhuma árvore atravessa o modelo.
+ * Determinístico: varre `gm.trees` em ordem; a saída da grade espacial/caminhos acontece no passo seguinte (`simStep`).
  */
-function clearTreesUnder(gm, b) {
+function clearTreesAround(gm, b) {
   const p = b.mesh.position;
-  const reach = (b.collisionRadius || 3.0) + 0.5;
+  const gap = (b.collisionRadius || 3.0) + TREE_CLEARANCE;
   for (const t of gm.trees) {
     if (t.isDisposed) continue;
-    if (Math.hypot(t.mesh.position.x - p.x, t.mesh.position.z - p.z) >= reach + (t.collisionRadius || 0.75)) continue;
+    if (Math.hypot(t.mesh.position.x - p.x, t.mesh.position.z - p.z) > gap + (t.collisionRadius || 0.75)) continue;
     t.die();
     t.fallProgress = 1;
     t.dispose();
@@ -83,7 +87,7 @@ const HANDLERS = {
     if (a.facing) b.mesh.rotation.y = (a.facing * Math.PI) / 180;
     if (a.markColor) b.markColor = a.markColor; // só apresentação (cor do anel de seleção): fora do checksum
     gm.buildings.push(b);
-    clearTreesUnder(gm, b);
+    clearTreesAround(gm, b);
     if (a.tag) addTag(rt, a.tag, b.id);
     gm.recalculatePopCap(); // casas/castelos concedem população
   },

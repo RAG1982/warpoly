@@ -9,7 +9,10 @@ vi.mock('../../src/models/environment/waterTextures.js', () => ({
   })
 }));
 
-const { Water, mergeByMaterial } = await import('../../src/world/Water.js');
+const { Water, mergeByMaterial, pickReedLocations } = await import('../../src/world/Water.js');
+const { Terrain } = await import('../../src/sim/Terrain.js');
+const { getMap } = await import('../../src/data/maps/index.js');
+const { WATER_LEVEL } = await import('../../src/data/combat.js');
 
 const triCount = (geo) => (geo.index ? geo.index.count : geo.attributes.position.count) / 3;
 
@@ -53,7 +56,7 @@ describe('Water — plantas aquáticas mescladas (F7-00b, aceite de desempenho)'
 
   it('o Water de tileset com plantas cria as 7 moitas com poucas malhas (eram ~625) e ainda as anima', () => {
     const scene = new THREE.Scene();
-    const terrain = { width: 140, getHeight: () => 2.5, mapDef: { tileset: 'verdejante' } };
+    const terrain = { width: 140, getHeight: () => 0.3, mapDef: { tileset: 'verdejante' } }; // lago raso em todo o mapa
     const water = new Water(scene, terrain, { tileset: 'verdejante' });
     const group = scene.getObjectByName('WaterVegetationGroup');
     expect(group).toBeTruthy();
@@ -77,6 +80,32 @@ describe('Water — plantas aquáticas mescladas (F7-00b, aceite de desempenho)'
       expect(e.position.y).not.toBe(y0[i]);
     });
     water.reedClumps.forEach((c, i) => expect(c.rotation.z).not.toBe(rot0[i])); // o balanço da moita segue
+  });
+
+  it('NEW-52: terreno todo seco => nenhuma moita', () => {
+    const scene = new THREE.Scene();
+    new Water(scene, { width: 140, getHeight: () => 2.5, mapDef: { tileset: 'verdejante' } }, { tileset: 'verdejante' });
+    expect(scene.getObjectByName('WaterVegetationGroup').children).toHaveLength(0);
+  });
+
+  it('NEW-52: continental-1v1 — juncos só em água rasa (e as posições fixas antigas eram terra seca)', () => {
+    const terrain = new Terrain(getMap('continental-1v1'));
+    const locs = pickReedLocations(terrain, WATER_LEVEL);
+    expect(locs.length).toBeGreaterThan(0);
+    expect(locs.length).toBeLessThanOrEqual(7);
+    for (const { x, z } of locs) {
+      const h = terrain.getHeight(x, z);
+      expect(h, `(${x},${z})`).toBeLessThan(WATER_LEVEL);
+      expect(h).toBeGreaterThan(WATER_LEVEL - 0.7);
+      for (const [dx, dz] of [[0.9, 0], [-0.9, 0], [0, 0.9], [0, -0.9]]) {
+        expect(terrain.getHeight(x + dx, z + dz), `(${x},${z})+(${dx},${dz})`).toBeLessThan(WATER_LEVEL);
+      }
+    }
+    // determinístico
+    expect(pickReedLocations(terrain, WATER_LEVEL)).toEqual(locs);
+    // as posições fixas do mapa antigo ficavam em terra seca neste mapa (o bug)
+    const old = [[10, 12], [12, 15], [-10, -12], [-12, -15], [-15, 18], [15, -18], [-20, 12]];
+    expect(old.some(([x, z]) => terrain.getHeight(x, z) > WATER_LEVEL)).toBe(true);
   });
 
   it('tileset sem plantas (inverno) não cria a vegetação', () => {

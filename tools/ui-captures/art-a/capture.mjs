@@ -158,19 +158,23 @@ try {
         const STEP = 2.4;
         const line = (x0, z0, dx, dz, n) => Array.from({ length: n }, (_, i) => ({ x: x0 + dx * i * STEP, z: z0 + dz * i * STEP }));
         const free = pts => pts.every(q => gm.canPlaceBuilding(wt, q.x, q.z, null, p.id));
+        const placed = [];   // fileiras já escolhidas: as demais ficam a ≥ 9 de distância, para cada fileira aparecer limpa
         const find = (dx, dz, n, from) => {
-          for (let r = 0; r < 40; r += 2) for (let a = 0; a < 360; a += 20) {
+          for (let r = 0; r < 60; r += 2) for (let a = 0; a < 360; a += 20) {
             const x0 = hp.x + from.x + Math.cos(a * Math.PI / 180) * r, z0 = hp.z + from.z + Math.sin(a * Math.PI / 180) * r;
             const pts = line(x0, z0, dx, dz, n);
-            if (free(pts)) return pts;
+            if (!free(pts)) continue;
+            if (placed.some(o => o.some(q => pts.some(w => Math.hypot(q.x - w.x, q.z - w.z) < 9)))) continue;
+            placed.push(pts);
+            return pts;
           }
           return null;
         };
         const s2 = Math.SQRT1_2;
         const rows = {
-          x: find(1, 0, 5, { x: 8, z: 12 }),
-          z: find(0, 1, 5, { x: 22, z: 12 }),
-          diag: find(s2, s2, 5, { x: 8, z: 26 })
+          x: find(1, 0, 5, { x: 6, z: 14 }),
+          z: find(0, 1, 5, { x: -22, z: -6 }),
+          diag: find(s2, s2, 5, { x: 20, z: -26 })
         };
         const made = {};
         for (const [k, pts] of Object.entries(rows)) {

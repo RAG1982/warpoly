@@ -400,6 +400,21 @@ def build_loot(mats, root):
     return mb.build(mats, parent=root)
 
 
+def build_poles(mats, root, banners):
+    """Dois mastros altos de estandarte com crânio no topo (fundos do pátio), visíveis por cima do muro."""
+    mb = MeshBuilder('Poles')
+    for (ang, rr, hh, ry) in ((160.0, 3.0, 4.7, 200), (95.0, 3.05, 4.3, 120)):
+        x, z = polar(rr, ang)
+        log(mb, (x, Y0 - 0.05, z), (x, Y0 + hh, z), 0.1, 'wood_dark', n=6)
+        mb.add(prim_cone(0.12, 0.45, 5), 'iron', M((x, Y0 + hh, z)))
+        mb.add(prim_box(0.95, 0.07, 0.07), 'bone', M((x, Y0 + hh - 0.2, z), (0, ry, 0)))
+        skull(mb, M((x, Y0 + hh - 0.62, z + 0.12), (0, ry, 0)), 0.3, 'bone')
+        for yy in (0.8, 1.9):
+            mb.add(prim_cyl(0.13, 0.13, 0.06, 6), 'rope', M((x, Y0 + yy, z)), smooth=0)
+        O.tattered_banner(banners, x + 0.02, Y0 + hh - 0.24, z + 0.1, ry, 0.75, 1.5)
+    return mb.build(mats, parent=root)
+
+
 def build_banners(mats, root, mb):
     # faixas esfarrapadas penduradas na verga do portão e nas toras do muro (laterais e fundo)
     gx, gz = polar(R, POST_A)
@@ -419,16 +434,18 @@ def main():
     root = C.make_empty('BanditCamp')
     bmb = MeshBuilder('Anim_Banners')
     parts = [build_base(mats, root), build_palisade(mats, root), build_gate(mats, root), build_tower(mats, root, bmb),
-             build_tent(mats, root, bmb), build_shelter(mats, root), build_fire(mats, root), build_loot(mats, root)]
+             build_tent(mats, root, bmb), build_shelter(mats, root), build_fire(mats, root), build_loot(mats, root),
+             build_poles(mats, root, bmb)]
     banners = build_banners(mats, root, bmb)
     # Smart UV com 70° (finish_building usa 50°): cada tora (prisma hexagonal, diedro 60°) vira UMA ilha em vez de seis,
     # o que reduz as ilhas de ~600 para ~150 e devolve área útil do atlas aos adereços
     _uv = C.uv_atlas
     C.uv_atlas = lambda objs, weights=None, margin=0.006, angle=60.0: _uv(objs, weights, margin, 70.0)
     finish_building(root, 'bandit_camp', 'bandit_camp.glb', 'bandit_camp_atlas', parts, banners,
-                    {'Base': 0.45, 'Palisade': 0.85, 'Gate': 1.3, 'Tower': 1.0, 'Tent': 1.25, 'Shelter': 0.9, 'Fire': 1.0,
-                     'Loot': 1.25, 'Anim_Banners': 0.8},
-                    TEAM_DEFAULT, args, spawn=(0, 0, 5.4), rally=(0, 0, 7.0), game_dist=80)
+                    {'Base': 0.4, 'Palisade': 0.62, 'Gate': 1.3, 'Tower': 1.1, 'Tent': 1.3, 'Shelter': 1.0, 'Fire': 1.1,
+                     'Loot': 1.35, 'Poles': 1.0, 'Anim_Banners': 0.8},
+                    TEAM_DEFAULT, args, spawn=(0, 0, 5.4), rally=(0, 0, 7.0), game_dist=80,
+                    extra_views=[('top', (0.0, 1.0, 0.22)), ('inside', (0.55, 0.8, 1.0)), ('inside_back', (-0.45, 0.8, -1.0))])
 
 
 if __name__ == '__main__':

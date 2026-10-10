@@ -1144,11 +1144,22 @@ input:checked + .slider.round:before {
   width: 100%;
 }
 
-/* F6-03: mesma grade 3×3 dos botões de construção/treino/pesquisa. */
+/* Botões de construção do trabalhador: grade larga que quebra sozinha em poucas linhas
+   (antes 3 por linha → cinco ou mais linhas). O card se alarga quando mostra esta grade. */
 .worker-actions-group {
+  flex: 1;
+  min-width: 0;
   display: grid;
-  grid-template-columns: repeat(3, calc(56px * var(--ui-scale)));
+  grid-template-columns: repeat(auto-fill, calc(56px * var(--ui-scale)));
   gap: calc(8px * var(--ui-scale));
+}
+
+#selection-card:has(.worker-actions-group) {
+  max-width: min(100%, calc(1000px * var(--ui-scale)));
+}
+
+.worker-actions-container .bld-section-label {
+  flex: none;
 }
 
 .action-stop-btn {

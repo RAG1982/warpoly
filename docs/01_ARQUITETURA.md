@@ -23,7 +23,7 @@ Debug: `window.game` expõe o `GameApp` (ex.: `game.gameManager`, `game.sceneMan
 ```
 index.html / style.css        HUD completo em HTML/CSS (loading, top bar, settings, bottom bar, modais)
 inspector.html                Inspetor 3D de modelos e animações
-public/                       Ícones da HUD (png/svg)
+public/                       Ícones antigos da HUD (png/svg), `models/` (.glb), `ui/` (sprites 2D renderizados no Blender: ícones, retratos, artes — F7-09)
 specs/orc_buildings/          Specs de arte das construções orc (direção de arte)
 src/
   main.js                     GameApp: máquina de estados, serviços da aplicação, preload único, loop rAF (F2-04)
@@ -98,6 +98,7 @@ src/
   ui/optionsStore.js          Persistência pura das opções (localStorage injetável; espelho `runtime`) — F6-08
   ui/optionsApply.js          Aplica opções salvas ao áudio/teclas/escala/daltonismo — F6-08
   ui/uiText.js                Textos de UI derivados de dados (nomes/requisitos/mensagens da sim já localizados) — F6-09
+  ui/uiSprites.js             Sprites 2D da HUD (F7-09): manifesto de `public/ui/`, ids/URLs de ícones e retratos, estado idle/ataque, `<img>` com fallback sprite→ícone antigo→emoji
   ui/tutorial.js              Lógica pura do tutorial (passos por eventos do EventBus, `createTutorialConfig`) — F6-09
   ui/TutorialController.js    Painel de objetivo + seta/destaque do tutorial (DOM; só em partidas com `matchConfig.tutorial`) — F6-09
   i18n/index.js, pt-BR.json, en.json   `t(key, params)`, idioma (localStorage `warpoly.lang`, detecção do navegador), `applyI18n` (data-i18n*) — F6-09
@@ -616,6 +617,16 @@ Tudo é só render (nada em `src/sim/`) e desligável. Funções puras em `src/c
 - Névoa de guerra com composer: o patch do shader roda após tone mapping/sRGB (`fog_fragment` é o último include), então com composer `setFogLinearOutput` (chamado por `PostFX.configure`) converte mortalha e brilho da memória para linear; o `OutputPass` devolve o mesmo resultado do caminho sem composer.
 - AO: GTAO só em high/ultra (custa um passe extra de normais da cena inteira, ~8% de fps medido); AO por vértice não cobriria unidades/prédios dinâmicos.
 - Capturas/medições: `tools/ui-captures/lighting/capture.mjs [fx|oculto|tileset|ciclo|perf]` (via safe-run).
+
+## Sprites 2D da HUD (F7-09)
+
+Ícones, retratos e artes de tela são **renderizados no Blender (Eevee) a partir dos mesmos `.glb`** de `public/models/` e ficam em `public/ui/` (2,65 MiB; teto 15 MiB). Nada é gerado em tempo de execução e **nenhum JSON/imagem entra no bundle JS**.
+- **Arquivos**: `icons/<128|256>/<tipo>_<id>.webp` (RGBA, fundo transparente; `unit_`, `building_`, `command_`, `research_`, `ability_`, `stat_`; variantes de facção com sufixo `_orc`), `portraits/<tipo>_<idle|attack>.webp` (128², um quadro por estado), `art/menu.webp` e `art/loading.webp` (1920×1080) e `manifest.json` (ids existentes, `aliases`, tamanhos e bytes; gerado pelos scripts de render).
+- **Consumo**: `src/ui/uiSprites.js` (lógica pura + DOM mínimo; testada em `tests/unit/uiSprites.test.js`). `main.js` chama `installSpriteFallback()` e `loadUiManifest()` (fetch assíncrono, nunca rejeita). `UIManager` resolve o ícone por id (`unitIconId`/`buildingIconId`/`researchIconId`/`abilityIconId`/`commandIconId`/`statIconId`; aliases do manifesto: a pesquisa de uma magia reaproveita o ícone da magia, a classe avançada o da unidade) e escolhe 128 ou 256 pelo tamanho em pixels de dispositivo (css × `--ui-scale` × DPR). Se o manifesto chegar depois do primeiro card, `onUiManifestReady` invalida os cards e eles se redesenham.
+- **Fallback encadeado** (`spriteImgHtml`): sprite → ícone antigo (`icon` de `src/data/*.js`, png/svg) → emoji provisório (`data-fb-emoji`). `installSpriteFallback` (ouvinte `error` em captura no `document`; também trata `<img>` estáticas que falharam antes de o JS rodar) troca a imagem quebrada pelo ícone antigo e, se esse também falhar, por `<span class="ui-sprite-emoji">`. Tipos sem `.glb` (Ovelha, Submersível, Tartaruga Colossal, Refinaria, Fundição, Forja Naval, Caldeirão) seguem com o ícone antigo.
+- **Retrato animável** (card de UMA unidade): `#selection-portrait-box` com duas imagens empilhadas (`msp-idle`, `msp-attack`); `portraitState(unit)` = `attack` enquanto `Unit.anim` é `fight` ou `cast` (histerese de 0,45 s, pois a sim alterna fight/hurt/idle), com cross-fade de 0,14 s por classe CSS `is-attacking`; herói ganha anel dourado. Na seleção múltipla a grade de 40 px usa o retrato idle. Construção selecionada mostra o ícone 256 no cabeçalho; "Evoluir o Centro" usa `command_upgrade_hq[_orc]`. A fila de treino/pesquisa só reescreve o ícone do slot quando o tipo muda, e a linha de atributos/`#bld-extra-info` só quando o HTML muda (antes recriavam os elementos a cada quadro). Os atributos do card (⚔️🛡️🏃🎯📦💧🪽⚓💣💥🫥🔨👥🏹) viraram sprites `stat_*` de 18 px, com o emoji como último fallback.
+- **Arte de tela**: o menu coloca `<img class="mm-art">` por cima do cenário SVG/CSS (só some o SVG depois do `load`; no erro a imagem é removida e o cenário antigo continua); a tela de loading usa `<img class="loading-art-img">` e o brasão `command_attack` no lugar do emoji ⚔️ (classes `has-art`/`has-img` no `onload`).
+- **Como gerar**: `tools/blender/README.md` (seção "Arte 2D") e `docs/03_ASSETS_E_INSPETOR.md`. As poses de idle/ataque dos retratos vêm do **`UnitAnimator` real** (`node tools/dump-portrait-poses.mjs` → `tools/blender/portrait_poses.json`), sem reescrever fórmulas de animação em Python. Verificação em navegador: `tools/capture-art2d.mjs` (via safe-run) → `tools/ui-captures/art-2d/`.
 
 ## Pipeline de assets
 

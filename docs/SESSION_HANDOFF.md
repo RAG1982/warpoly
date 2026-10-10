@@ -53,7 +53,8 @@
 
 ## 5. Estado atual (2026-10-10)
 - Quadro (`docs/TASKS.md`): 88 tarefas de fase — **73 DONE**, 8 REVIEW, 6 TODO, 1 DOING (F5-03, pausado). Backlog NEW: 22 DONE, 5 TODO, 1 DOING (NEW-41), 1 ADIADA (NEW-20), ~24 sem status (auditoria AUD-1 na fila da nuvem).
-- Testes: **1259** passando; lint 0 erros (68 avisos antigos); build ok; smoke ok (última rodada: F7-09).
+- Testes: **1311** passando; lint 0 erros (51 avisos antigos); build ok. Smoke: última rodada completa em F7-09; as mesclas da nuvem (2026-10-10) rodaram só `npm test`, lint e build.
+- Nuvem: 11 tarefas da fila de `docs/HANDOFF_CLOUD.md` executadas e mescladas em 2026-10-10 (NEW-4/13/19/31/41/49/50/52, F9-05b, F10-05b, AUD-1). Verificação visual pendente (local) em NEW-13, NEW-19, NEW-49, NEW-52, F9-05 e F10-05.
 - Entregas grandes desde 2026-09-30: F4 (cavalaria, cerco, mana/magias, sapadores, aéreo, naval com petróleo, heróis), F5 (IA por jogador, percepção sob a névoa, dificuldades), F7 (VFX, iluminação/pós-processamento, tilesets, animação de produção, team color, ícones e arte 2D, modelos Blender de navios/construções navais/acampamento/balão/muralhas/bétula), F8 (gerador de mapas, 6 mapas skirmish, missões e gatilhos, editor de mapas, campanha Aliança provisória), F9 (lockstep online com WebRTC, sinalização e lobby, reconexão e pausa votada, replays), F10 (testes da simulação, soak IA×IA com 100 partidas, regressão visual, empacotamento PWA e deploy).
 
 ## 6. Decisões do dono (resumo — detalhes em `docs/07_DECISOES.md`)
@@ -67,11 +68,11 @@ Parâmetros de URL úteis: `?play&faction=orc`, `?skipPreload`, `?texq=low`, `?q
 2. **Em andamento**: NEW-53 (correção de m04 "A Ponte do Rio Turvo": forte Atalaia humano e anel ciano dos carregadores). Ao concluir: merge, `npm test`, lint, build e captura em `tools/ui-captures/m04-fix/`.
 3. **Local, retomar**: NEW-44 (IA sem madeira/naval, alterações não commitadas), F7-08 (áudio, branch `task/F7-08`), F10-04 (CI de desempenho, branch `task/F10-04`), F10-03 (regravar baseline visual).
 4. **Local, Blender**: F7-01 e F7-07 (precisa de referências de arte para Refinaria, Fundição, Submersível, Tartaruga, Forja Naval e Caldeirão), revisão final da F7-00b.
-5. **Nuvem**: fila de `docs/HANDOFF_CLOUD.md` seção 3 (1. NEW-50 → 11. AUD-1).
+5. **Nuvem**: fila de `docs/HANDOFF_CLOUD.md` seção 3 concluída. Próxima rodada: definir novas tarefas (ex.: os itens ABERTO da auditoria `docs/AUDITORIA_BACKLOG.md`) e lançar em `cloud/<ID>`.
 6. **Decisões do dono**: seção 6 acima.
 
 ## 8. Estado operacional ao encerrar (2026-10-10)
-- Agentes: 1 em andamento (NEW-53). Dev server parado (subir com `npx vite --port 5173` em background se precisar mostrar algo).
+- Agentes: nenhum em andamento. Dev server parado (subir com `npx vite --port 5173` em background se precisar mostrar algo).
 - Git: `master` local com as últimas mesclagens; `origin/master` defasado (ver seção 4).
 - Worktrees de agentes em `.claude/worktrees/` (ignoradas pelo git, ~90): limpar com `git worktree prune` depois de remover as pastas das tarefas já mescladas. Não apagar as que têm alterações não commitadas (NEW-44, F7-08, F10-04).
 - Dev watcher: `vite.config.js` ignora `.claude/**`, `tools/ui-captures/**`, `tools/soak-report/**` e `tests/visual/**` (sem isso o inotify esgota com muitos worktrees).

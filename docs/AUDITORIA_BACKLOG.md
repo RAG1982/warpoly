@@ -36,3 +36,16 @@ Legenda: **FEITO** (com evidência), **ABERTO** (com `arquivo:linha`), **OBSOLET
 - **EM PR/branch**: NEW-4 (testes, #9), NEW-13 (chamas, #14), NEW-19 (branch), NEW-31 (#8).
 - **ABERTO**: NEW-1 (decisão), 6, 7, 9, 15, 24, 25, 26, 27, 29, 30, 34, 35.
 - **OBSOLETO**: nenhum identificado.
+
+## Atualização pós-merge (2026-10-10)
+Os PRs da nuvem listados acima foram mesclados no `master` (merge local, testes 1311 verdes):
+- **NEW-4** (PR #9): testes de ponto idêntico no `Pathfinder` — FEITO.
+- **NEW-13** (PR #14): chamas de construção sob a névoa — FEITO em código e teste; verificação visual pendente (local) → REVIEW.
+- **NEW-19** (`cloud/NEW-19`): ruínas/clareira — mesclado; verificação visual pendente (local) → REVIEW.
+- **NEW-31** (PR #8): `check-data-parity` roda sem exceção — FEITO.
+- **NEW-41** (PR #10): timeouts de 30 s — mitigação; causa do fogOfWar aberta → DOING(parcial).
+- **NEW-49** (PR #13): golpe do Arremessador — FEITO em código e teste; captura pendente → REVIEW.
+- **NEW-50** (PR #7): aviso do lobby — FEITO.
+- **NEW-52** (PR #12): juncos em água rasa — FEITO em código e teste; captura pendente → REVIEW.
+- **F9-05b** (PR #11) e **F10-05b** (PR #15): replay online e chunks por facção — mesclados; verificação no navegador pendente (local).
+- **NEW-16**: confirmado no master (`.pop-secondary` só nowrap) — FEITO. O PR #6 (F3-01 da nuvem, de 2026-09-29) é superado pela F3-01 local já mesclada e não foi mesclado.

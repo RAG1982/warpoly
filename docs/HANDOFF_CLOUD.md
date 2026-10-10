@@ -33,6 +33,8 @@ Cada tarefa desta fila traz o briefing completo (objetivo, arquivos, aceite). Qu
 - Idioma: PT-BR em código de UI, docs e relatório.
 
 ## 3. Fila da nuvem (execute em ordem; pegue a primeira sem branch/PR `cloud/<ID>`)
+
+> **Estado em 2026-10-10:** as 11 tarefas da fila foram executadas na nuvem e mescladas no `master` local (PRs #5 e #7–#16; NEW-19 entrou pela branch `cloud/NEW-19`). Verificação visual/navegador pendente (local) em NEW-13, NEW-19, NEW-49, NEW-52, F9-05 e F10-05. A fila abaixo fica como registro; para a próxima rodada, use a seção 4 e o TASKS.
 Para saber o que já foi feito: `git ls-remote --heads origin 'cloud/*'` e o histórico do `master`.
 
 | # | ID | Tarefa | Arquivos | Aceite |
@@ -88,5 +90,7 @@ Motivo: precisam de GPU, Blender, navegador ou de decisão do dono.
 Branch, commits, o que foi feito, números e testes, desvios da spec, e **Verificação pendente (local)** com passos.
 
 ## 6. Estado da nuvem (preenchido pelo coordenador ao mesclar)
-- PRs mesclados: nenhum desde 2026-09-30 (BUGS-01, F1-07 e F6-03 estão no histórico).
-- Branches remotas `cloud/*` antigas podem ser apagadas.
+- Mesclados em 2026-10-10: `cloud/AUD-1` (PR #16), `cloud/F10-05b` (#15), `cloud/NEW-13` (#14), `cloud/NEW-49` (#13), `cloud/NEW-52` (#12), `cloud/F9-05b` (#11), `cloud/NEW-41` (#10), `cloud/NEW-4` (#9), `cloud/NEW-31` (#8), `cloud/NEW-50` (#7), `cloud/NEW-19` (#5), `cloud/ui-worker-build-grid` (sem PR).
+- **Superado, não mesclado:** `cloud/F3-01` (PR #6, de 2026-09-29). A F3-01 foi feita localmente (`ee2fe9d`) e o NEW-16 já está no master.
+- Branches remotas `cloud/*` mescladas podem ser apagadas depois que o push do `master` confirmar os PRs como mesclados.
+- Antigos (já mesclados antes): `cloud/BUGS-01`, `cloud/F1-07`, `cloud/F6-03`.

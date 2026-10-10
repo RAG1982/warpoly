@@ -271,6 +271,8 @@ export class Unit {
     this.tool = null;
     /** Trabalhador carregando (mochila/lenha/ouro visíveis); o tipo vem de `carrying.type`. */
     this.carryVisible = false;
+    /** Cor `#rrggbb` do anel de seleção (ação de missão `spawn.markColor`); `null` = anel padrão do lado. Só render: fora do checksum. */
+    this.markColor = null;
 
     if (def.maxMana > 0 || (def.abilities && def.abilities.length > 0)) this.setupMana(def);
   }

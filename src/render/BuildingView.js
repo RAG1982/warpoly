@@ -8,6 +8,7 @@ import * as THREE from 'three';
 import { ModelFactory } from '../entities/ModelFactory.js';
 import { getBuildingDef } from '../data/index.js';
 import { syncOutline, resetOutline } from './postfx/outlineLayer.js';
+import { markRingMaterial } from './markRing.js';
 import { EVT } from '../sim/events.js';
 
 /** Vector3 → objeto plano `{x,y,z}` (payload de evento: nunca referências a objetos three.js). */
@@ -198,7 +199,8 @@ export class BuildingView {
       ? bldRingGeoBarracks
       : bldRingGeoDefault;
 
-    this.selectionRing = new THREE.Mesh(ringGeo, bldRingMat);
+    this._markColor = this.entity.markColor || null; // ação de missão `spawnBuilding.markColor`: anel com cor própria
+    this.selectionRing = new THREE.Mesh(ringGeo, this._markColor ? markRingMaterial(this._markColor) : bldRingMat);
     this.selectionRing.name = 'SelectionRing';
     this.selectionRing.position.y = 0.08;
     this.selectionRing.visible = false;
@@ -440,6 +442,10 @@ export class BuildingView {
     }
 
     // Anel de seleção e bandeira do ponto de reunião.
+    if ((e.markColor || null) !== this._markColor) {
+      this._markColor = e.markColor || null;
+      this.selectionRing.material = this._markColor ? markRingMaterial(this._markColor) : bldRingMat;
+    }
     this.selectionRing.visible = e.isSelected;
     syncOutline(this, this.mesh, e.isSelected); // F7-03: contorno de seleção (máscara)
     this.rallyGroup.visible = e.rallyShown;

@@ -30,6 +30,8 @@ import { CampaignScreen } from './CampaignScreen.js'; // F8-05
 import { createCampaignMissionConfig, setActiveRun } from '../../campaign/index.js';
 
 const BYPASS_PARAMS = ['play', 'skipMenu', 'bench', 'skipPreload'];
+// F7-09: arte do fundo renderizada no Blender (tools/blender/render_art2d.py). Se não carregar, o cenário em SVG/CSS continua.
+const MENU_ART_URL = `${(import.meta.env && import.meta.env.BASE_URL) || '/'}ui/art/menu.webp`;
 const MAP_THUMB_SIZE = { w: 96, h: 64 };
 
 // Textos das facções ficam em `faction.<id>.*` (src/i18n); aqui só ids e ícones.
@@ -114,6 +116,7 @@ export class MainMenu {
     document.documentElement.classList.add('wp-menu');
 
     this._bind();
+    this._bindArt();
     this._syncSkirmish();
     this._startParticles();
     this._renderMapThumbnails();
@@ -256,6 +259,7 @@ export class MainMenu {
         <div class="mm-sky"></div>
         <div class="mm-glow"></div>
         ${BACKDROP_SVG}
+        <img class="mm-art" src="${MENU_ART_URL}" alt="" width="1920" height="1080" decoding="async" draggable="false" />
         <canvas class="mm-particles"></canvas>
         <div class="mm-vignette"></div>
       </div>
@@ -391,6 +395,16 @@ export class MainMenu {
         </div>
       </div>
     `;
+  }
+
+  /** F7-09: a arte só substitui o cenário em SVG/CSS depois de carregar; se falhar, a imagem some e o cenário antigo fica. */
+  _bindArt() {
+    const img = this.root.querySelector('.mm-art');
+    if (!img) return;
+    const ok = () => this.root?.classList.add('mm-has-art');
+    if (img.complete && img.naturalWidth > 0) ok();
+    img.addEventListener('load', ok, { once: true });
+    img.addEventListener('error', () => img.remove(), { once: true });
   }
 
   // ------------------------------------------------------------------ events

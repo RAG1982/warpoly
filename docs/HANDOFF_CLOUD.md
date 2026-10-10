@@ -56,6 +56,28 @@ Após a fila acima:
 - **NEW-2** (IA reembolsa custo errado em `AIEconomyManager.placeBuilding`): depois do NEW-44 (mesmo arquivo, `src/ai/**`).
 - **NEW-20** (teste intermitente, spec `docs/specs/NEW-20-teste-intermitente.md`): adiado pelo dono; só se ele reativar.
 
+## 3b. Fila da nuvem — rodada 2 (atualizada 2026-10-10)
+Mesmas regras da seção 2. Cada item tem briefing próprio; pegue o primeiro sem branch/PR `cloud/<ID>`.
+Antes de iniciar um item que toca `src/sim/` ou `src/ai/`: confirme que o `master` no GitHub está atualizado.
+
+| # | ID | Briefing (resumo) | Arquivos | Aceite na nuvem |
+|---|---|---|---|---|
+| 1 | NEW-41 | Descobrir a causa da intermitência de `tests/unit/fogOfWar.test.js` ("dispose … uniform de textura trocado"): suspeita de estado global `fogUniforms` compartilhado. Corrigir a causa, não só o timeout. | `src/render/fogOfWar*`, teste | 10 execuções isoladas e 3 da suíte completa sem falha |
+| 2 | NEW-7 | `TreeManager` cria `InstancedMesh` de 120 instâncias por tipo (vagas com escala 0) e esfera de culling do mapa inteiro. Dimensionar pela contagem real e/ou dividir em chunks. | `src/world/TreeManager.js` + teste | teste de contagem e culling; sem mudança visual (captura local) |
+| 3 | NEW-29 | Trocar `name:` de `src/data/buildings.js` ("Castelo Real", "Forja Real", "Grande Salão Orc"…) pelos nomes de nível de `src/data/tiers.js` (Paço Real, Salão do Clã, Ferraria Real…), com i18n pt-BR/en. | `src/data/buildings.js`, `src/i18n/*.json`, teste | teste de consistência nome ↔ tiers; sem chave ausente |
+| 4 | NEW-35 | Ataque no chão do cerco (clique direito no chão): novo comando `ATTACK_GROUND` em `src/sim/commands.js` e `CommandExecutor`, input em `InputManager`. Determinístico. | `src/sim/commands.js`, `CommandExecutor.js`, `InputManager.js`, testes | `commands.test.js` cobre validação; `determinism.test.js` verde |
+| 5 | NEW-26 | Card de inspeção para unidade/construção neutra (bandido): `GameManager.selectSingle` só aceita o jogador local hoje. Permitir inspeção (sem comandos) de neutros. | `src/sim/GameManager.js` (mínimo), `src/ui/UIManager.js` | teste de seleção de neutro; sem comando emitido |
+| 6 | NEW-24 | Muralha: portão visual entre segmentos e segmentos no minimapa (`UIManager.drawMinimap`). | `src/render/**`, `src/ui/UIManager.js` | teste de posição do portão; captura pendente (local) |
+| 7 | F9-03 *(só após decisão do dono)* | Se o dono confirmar checksum por turno: `checkEvery = 1` em jogo e teste. Senão, nada. | `src/net/LockstepSession.js` | `lockstepNet.test.js` verde |
+
+Dependem de outra decisão ou de tarefa anterior (não lançar ainda):
+- **NEW-44** (IA sem madeira/naval) e **NEW-25**, **NEW-34** (IA): mexem em `src/ai/**`. Só depois de o dono confirmar que o WIP local não será usado. Validação: soak Node com ≤ 10 partidas por configuração, A/B. Depois, **NEW-51** (seed 82).
+- **F8-06** (campanha Horda): só após aprovar a premissa da campanha Aliança (F8-05).
+- **F8-03** (`painted` fora de `src/sim`): só após decisão do dono.
+- **NEW-1** (`GLTFBuildingLoader`, usado só por `GreatHall.js`): recomendado remover; só após confirmar.
+- **F7-08** (áudio) e **F10-04** (CI de desempenho): têm branches locais com trabalho parcial (`task/F7-08`, `task/F10-04`). Só entram na nuvem depois de o dono autorizar o push dessas branches.
+- **F1-10** (LOD e culling), **NEW-6** (ORM e texturas), **NEW-14** (CPU da animação): precisam de spec antes (Sonnet escreve em `docs/specs/`).
+
 ## 4. Tarefas que ficam no local (não vão para a nuvem)
 Motivo: precisam de GPU, Blender, navegador ou de decisão do dono.
 

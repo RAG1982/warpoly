@@ -1524,7 +1524,15 @@ export class GameManager {
 
     // Right-clicked ground: Move (o executor calcula a formação e evita água)
     if (groundPoint) {
-      this.issue({ type: CMD.MOVE, playerId: this._localPlayerId, unitIds, x: groundPoint.x, z: groundPoint.z, ...q });
+      // NEW-35: cerco selecionado dispara no ponto (ATTACK_GROUND); as demais unidades continuam em MOVE.
+      const siegeIds = [];
+      const otherIds = [];
+      for (let i = 0; i < this.selectedUnits.length; i++) {
+        const u = this.selectedUnits[i];
+        (u.isBallistic ? siegeIds : otherIds).push(u.id);
+      }
+      if (siegeIds.length > 0) this.issue({ type: CMD.ATTACK_GROUND, playerId: this._localPlayerId, unitIds: siegeIds, x: groundPoint.x, z: groundPoint.z });
+      if (otherIds.length > 0) this.issue({ type: CMD.MOVE, playerId: this._localPlayerId, unitIds: otherIds, x: groundPoint.x, z: groundPoint.z, ...q });
     }
   }
 

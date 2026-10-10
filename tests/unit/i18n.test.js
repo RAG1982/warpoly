@@ -136,7 +136,7 @@ describe('i18n — mensagens da simulação (PT literal) traduzidas na exibiçã
     for (const [k, v] of Object.entries(ptBR)) if (k.startsWith('sim.') && !v.includes('{')) expect(translateSimText(v), k).toBe(v);
   });
   it('"Requer: …", recompensa do acampamento e onda da IA são reconhecidos', () => {
-    expect(localizeSimText('⚠️ Requer: Fazenda de Trigo')).toBe('⚠️ Requer: Fazenda de Trigo');
+    expect(localizeSimText('⚠️ Requer: Fazenda')).toBe('⚠️ Requer: Fazenda');
     expect(localizeSimText('Acampamento de bandidos destruído! +300 de ouro')).toBe('Acampamento de bandidos destruído! +300 ouro');
     expect(localizeSimText('⚔️ A Horda Orc reuniu um esquadrão de guerra (7 tropas) e avança contra sua base!')).toContain('Clãs Orcs');
     expect(requirementText({ hq: 2 }, 'human')).toBe('Centro nível 2 (Fortaleza)');

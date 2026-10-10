@@ -125,13 +125,13 @@ def build_barn(mats, root):
     mb.add(prim_box(2 * BX - 0.1, H, 0.3, base=True), 'plaster', M((0, FT, BZ0 + 0.15)), bevel=0.02)
     for sx in (-1, 1):
         mb.add(prim_box(0.3, H, depth - 0.1, base=True), 'plaster', M((sx * (BX - 0.15), FT, cz)), bevel=0.02)
-    # interior escuro: atrás do portão central o fundo fica logo atrás da fachada; as duas baias laterais têm 0,55 a mais de
-    # profundidade (cabem o peito e os ombros dos cavalos) com divisórias de madeira
+    # interior escuro: atrás do portão central o fundo fica logo atrás da fachada; as duas baias laterais são fundas (2,5 de
+    # comprimento: cabem o corpo inteiro do cavalo, do peito à cauda) com divisórias de madeira
     mb.add(prim_box(2.5, H, 0.1, base=True), 'dark', M((0, FT, BZ1 - 0.45)))
     for sx in (-1, 1):
-        mb.add(prim_box(1.45, H, 0.1, base=True), 'dark', M((sx * 1.88, FT, 0.2)))
+        mb.add(prim_box(1.45, H, 0.1, base=True), 'dark', M((sx * 1.88, FT, -1.8)))
         for dx in (1.25, 2.55):
-            mb.add(prim_box(0.08, H, 0.65, base=True), 'wood_beam', M((sx * dx, FT, 0.5)), bevel=0.01)
+            mb.add(prim_box(0.08, H, 2.7, base=True), 'wood_beam', M((sx * dx, FT, -0.5)), bevel=0.01)
     # frente: pilares com viga de madeira, padieira, meias-portas
     for x, w in ((-2.85, 0.65), (-1.0, 0.5), (1.0, 0.5), (2.85, 0.65)):
         mb.add(prim_box(w, H, 0.5, base=True), 'plaster', M((x, FT, BZ1 - 0.2)), bevel=0.02)
@@ -311,10 +311,10 @@ def build_props(mats, root):
 
 
 def stall_horse(mb, T, s):
-    """Cavalo da baia de peito para cima, com a anatomia do cavalo do Cavaleiro (`build_cavalier.py`): pescoço arqueado com
-    crina, cabeça com blaze, olhos nas laterais, orelhas, focinho e narinas, mais o peito e os ombros. `T` leva o espaço do
+    """Cavalo da baia com a anatomia do cavalo do Cavaleiro (`build_cavalier.py`): pescoço arqueado com crina, cabeça com blaze,
+    olhos nas laterais, orelhas, focinho e narinas, tronco inteiro (peito, ombros, dorso e garupa) e cauda. `T` leva o espaço do
     cavalo do Cavaleiro (base do pescoço em (0; 1,30; 0,50)) para a baia; `s` é a escala. Antes eram só uma cabeça e um
-    pescoço fino sobre a meia-porta, como uma cabeça solta."""
+    pescoço fino sobre a meia-porta, como uma cabeça solta. As pernas ficam de fora (a meia-porta as esconde sempre)."""
     Ti = T.inverted()
     R = lambda r: [(a * s, b * s) for (a, b) in r]  # noqa: E731
     npts = bezier(*CAV.NECK_BEZ, 4)
@@ -340,11 +340,19 @@ def stall_horse(mb, T, s):
         mb.add(prim_box(0.05 * s, 0.19 * s, 0.13 * s, taper=(0.5, 0.6)), 'mane', T @ M(tuple(pos), (ang, 0, -24 + 6 * (k % 2))),
                smooth=30)
     mb.add(prim_box(0.06 * s, 0.15 * s, 0.08 * s, taper=(0.5, 0.5)), 'mane', T @ M((0, 2.05, 1.0), (40, 0, 0)))
-    # peito e ombros (a frente do tronco do Cavaleiro: estações z = 0,00 a 0,78)
-    chest = [(0, y, z) for (z, y, _, _) in CAV.BODY[3:]]
-    mb.add(prim_rings(limb_rings(xf(T, chest), R([(w, h) for (_, _, w, h) in CAV.BODY[3:]]), 12, up=(0, 1, 0))), 'coat', smooth=70)
-    for sx in (-1, 1):
+    # tronco inteiro do cavalo (as 7 estações do corpo do Cavaleiro, do peito à garupa): atrás da meia-porta só o dorso e a
+    # garupa aparecem de cima, mas o corpo não é mais só uma cabeça com um pescoço fino. Sem pernas: a porta as esconde sempre
+    body = [(0, y, z) for (z, y, _, _) in CAV.BODY]
+    mb.add(prim_rings(limb_rings(xf(T, body), R([(w, h) for (_, _, w, h) in CAV.BODY]), 12, up=(0, 1, 0))), 'coat', smooth=70)
+    for sx in (-1, 1):   # massa muscular do ombro e da garupa
         mb.add(prim_sphere(0.10 * s, 0.19 * s, 0.17 * s, 6, 4), 'coat', T @ M((sx * 0.23, 1.12, 0.42)), smooth=70)
+        mb.add(prim_sphere(0.11 * s, 0.18 * s, 0.22 * s, 6, 4), 'coat', T @ M((sx * 0.21, 1.22, -0.58)), smooth=70)
+    # cauda e duas mechas laterais
+    tail = bezier((0, 1.40, -0.86), (0, 1.36, -1.32), (0, 0.80, -1.22), 5)
+    tube(mb, xf(T, tail), R([(0.05, 0.05), (0.085, 0.08), (0.11, 0.09), (0.10, 0.08), (0.07, 0.05), (0.03, 0.03)]), 'mane', n=8, smooth=60)
+    for sx in (-1, 1):
+        lock = bezier((sx * 0.03, 1.38, -0.88), (sx * 0.10, 1.25, -1.26), (sx * 0.12, 0.92, -1.12), 4)
+        tube(mb, xf(T, lock), R([(0.035, 0.035), (0.06, 0.05), (0.06, 0.05), (0.04, 0.03), (0.015, 0.015)]), 'mane', n=6, smooth=60)
 
 
 def build_horses(mats, root):

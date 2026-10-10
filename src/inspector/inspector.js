@@ -565,7 +565,7 @@ const MODEL_CATALOG = [
     glb: 'stable',
     sourceFile: 'tools/blender/build_stable.py',
     create: createGlb('stable'),
-    description: 'Estábulo humano gerado pelo pipeline Blender (public/models/stable.glb): celeiro de empena frontal com estrutura de madeira aparente e reboco sobre pé de pedra, baias fundas com divisórias e meias-portas, dois cavalos de peito para cima espiando por cima delas (castanho e ruço, com pescoço arqueado, crina, blaze, ombros e peito), portão central aberto, sótão de feno com talha, telhado azul com cumeeira dourada e cúpula com cata-vento, pátio com cocho, cerca, fardos, rack de sela, lanternas e mastros com bandeirolas.',
+    description: 'Estábulo humano gerado pelo pipeline Blender (public/models/stable.glb): celeiro de empena frontal com estrutura de madeira aparente e reboco sobre pé de pedra, baias fundas com divisórias e meias-portas, dois cavalos inteiros (tronco, garupa e cauda atrás da porta) espiando por cima delas (castanho e ruço, com pescoço arqueado, crina, blaze, ombros e peito), portão central aberto, sótão de feno com talha, telhado azul com cumeeira dourada e cúpula com cata-vento, pátio com cocho, cerca, fardos, rack de sela, lanternas e mastros com bandeirolas.',
     notes: '2 draw calls (Static_Mesh + Anim_Banners em cor de time), ~5 mil triângulos, atlas 1024². Pegada ~7,3 x 7,3 (raio de colisão 3,6), altura ~6. Sockets: Socket_UnitSpawn, Socket_Rally.'
   },
   {

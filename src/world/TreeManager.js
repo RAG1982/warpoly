@@ -3,8 +3,10 @@ import { mergeGeometries } from 'three/examples/jsm/utils/BufferGeometryUtils.js
 import { glbEnabled, glbTemplates } from '../entities/glbModels.js';
 import { getTileset } from '../data/tilesets.js';
 
-/** Instâncias por tipo de árvore (cada tipo é um InstancedMesh de capacidade fixa). */
-const CAPACITY = 120;
+/** NEW-7: lado (unidades de mundo) do chunk espacial; cada tipo × chunk é um InstancedMesh com `boundingSphere` própria. */
+const CHUNK_SIZE = 32;
+/** Capacidade inicial de um chunk; dobra quando enche (a capacidade acompanha a contagem real, `mesh.count` = nº real). */
+const CHUNK_INITIAL_CAPACITY = 8;
 
 /** Cor da árvore reserva por tipo (sem textura): usada só quando o .glb não carregou. */
 const PLACEHOLDER_COLORS = { tree_oak: 0x3f7d3a, tree_pine: 0x2f6a44, tree_autumn: 0xd9791c, tree_birch: 0xb6d95a };
@@ -102,27 +104,49 @@ export class TreeManager {
     // F7-00b: 4º tipo, a bétula (`tree_birch.glb`), criada sob demanda: nenhum mapa-base a usa por padrão, então sem árvore
     // `birch` registrada não existe InstancedMesh (nem chamada de desenho, nem vértices extras).
     this.birchCount = 0;
-    this._birchMesh = null;
 
-    // Cada tipo é 1 InstancedMesh com o .glb do Blender (tronco e copa na mesma malha e no mesmo atlas de 512²).
-    this.oakMesh = this._createMesh('tree_oak');
-    this.pineMesh = this._createMesh('tree_pine');
-    this.autumnMesh = this._createMesh('tree_autumn');
-    this.instancedMeshes = [this.oakMesh, this.pineMesh, this.autumnMesh];
+    // NEW-7: cada tipo vira N InstancedMesh (um por chunk de ~32 u, criado na 1ª árvore do chunk), todos com a mesma geometria
+    // e material do .glb do Blender (tronco e copa na mesma malha e no mesmo atlas de 512²). Frustum culling por chunk.
+    this.instancedMeshes = [];
+    this._sources = new Map(); // key do .glb → {geo, mat} (compartilhado entre os chunks do tipo)
+    this._chunks = new Map(); // `${key}|${cx}|${cz}` → InstancedMesh
 
     this.zeroMatrix = new THREE.Matrix4().makeScale(0, 0, 0);
     if (options.tileset) this.applyTileset(getTileset(options.tileset));
   }
 
-  _createMesh(key) {
-    const src = getTreeSource(key);
-    const im = new THREE.InstancedMesh(src.geo, src.mat, CAPACITY);
+  /** InstancedMesh do chunk (tipo × célula de 32 u), criado sob demanda já com a tinta do tileset, se houver. */
+  _getChunkMesh(key, x, z) {
+    const id = `${key}|${Math.floor(x / CHUNK_SIZE)}|${Math.floor(z / CHUNK_SIZE)}`;
+    let im = this._chunks.get(id);
+    if (im) return im;
+    let src = this._sources.get(key);
+    if (!src) this._sources.set(key, src = getTreeSource(key));
+    im = new THREE.InstancedMesh(src.geo, src.mat, CHUNK_INITIAL_CAPACITY);
+    im.count = 0;
     im.castShadow = true;
     im.receiveShadow = true;
     im.userData.isTreeInstanced = true;
     im.userData.treeEntities = [];
+    this._tintMesh(im);
     this.scene.add(im);
+    this.instancedMeshes.push(im);
+    this._chunks.set(id, im);
     return im;
+  }
+
+  /** Garante vaga para mais uma instância (dobra a capacidade do buffer quando enche) e devolve o índice dela. */
+  _allocInstance(im) {
+    const idx = im.count;
+    if (idx >= im.instanceMatrix.count) {
+      const old = im.instanceMatrix;
+      const next = new THREE.InstancedBufferAttribute(new Float32Array(old.count * 2 * 16), 16);
+      next.array.set(old.array);
+      next.setUsage(old.usage);
+      im.instanceMatrix = next;
+    }
+    im.count = idx + 1;
+    return idx;
   }
 
   /** F7-04: aplica a variante de árvore do tileset (`def.trees.tint`); `null` = material original. */
@@ -145,17 +169,7 @@ export class TreeManager {
     im.material = this._tintBySource.get(im.material);
   }
 
-  /** InstancedMesh da bétula, criado na primeira árvore `birch` (já com a tinta do tileset, se houver). */
-  _ensureBirchMesh() {
-    if (this._birchMesh) return this._birchMesh;
-    const m = this._createMesh('tree_birch');
-    this._tintMesh(m);
-    this.instancedMeshes.push(m);
-    this._birchMesh = m;
-    return m;
-  }
-
-  /** Quantas árvores do tipo já foram registradas (a capacidade de cada InstancedMesh é de 120). */
+  /** Quantas árvores do tipo já foram registradas. */
   countOf(type) {
     if (type === 'pine') return this.pineCount;
     if (type === 'autumn') return this.autumnCount;
@@ -164,20 +178,22 @@ export class TreeManager {
   }
 
   registerTree(tree, x, y, z, rotY, scale, type) {
-    let mesh, idx;
+    let key;
     if (type === 'pine') {
-      mesh = this.pineMesh;
-      idx = this.pineCount++;
+      key = 'tree_pine';
+      this.pineCount++;
     } else if (type === 'autumn') {
-      mesh = this.autumnMesh;
-      idx = this.autumnCount++;
+      key = 'tree_autumn';
+      this.autumnCount++;
     } else if (type === 'birch') {
-      mesh = this._ensureBirchMesh();
-      idx = this.birchCount++;
+      key = 'tree_birch';
+      this.birchCount++;
     } else {
-      mesh = this.oakMesh;
-      idx = this.oakCount++;
+      key = 'tree_oak';
+      this.oakCount++;
     }
+    const mesh = this._getChunkMesh(key, x, z);
+    const idx = this._allocInstance(mesh); // índice local ao chunk
 
     tree.instanceType = type;
     tree.instanceIndex = idx;
@@ -193,6 +209,7 @@ export class TreeManager {
     mesh.setMatrixAt(idx, matrix);
     mesh.userData.treeEntities[idx] = tree;
     mesh.instanceMatrix.needsUpdate = true;
+    mesh.boundingSphere = null; // recalculada (só deste chunk) no próximo culling
 
     this.trees.push(tree);
   }
@@ -222,8 +239,11 @@ export class TreeManager {
   dispose() {
     this.instancedMeshes.forEach(im => {
       this.scene.remove(im);
-      if (im.geometry) im.geometry.dispose();
     });
+    this._sources.forEach(src => { if (src.geo) src.geo.dispose(); });
+    this._sources.clear();
+    this._chunks.clear();
+    this.instancedMeshes = [];
     this._tintedMats.forEach(m => m.dispose());
     this._tintedMats = [];
     this.trees = [];
@@ -231,6 +251,5 @@ export class TreeManager {
     this.pineCount = 0;
     this.autumnCount = 0;
     this.birchCount = 0;
-    this._birchMesh = null;
   }
 }

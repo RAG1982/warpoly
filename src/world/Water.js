@@ -33,6 +33,39 @@ export function mergeByMaterial(root, name) {
   return out;
 }
 
+/** Água rasa própria para juncos/vitórias-régias: abaixo do nível d'água, mas longe do abismo. */
+const REED_MIN_DEPTH = 0.05;
+const REED_MAX_DEPTH = 0.6;
+const REED_CLEARANCE = 0.9; // pontos em volta da moita também precisam estar na água (rasa ou funda, nunca terra)
+const REED_SPACING = 7;
+
+/**
+ * NEW-52: escolhe até `max` posições de moitas em água rasa do terreno (determinístico: varre uma grade
+ * em ordem fixa, pula `REED_SPACING` entre moitas). Terreno sem água rasa => lista vazia.
+ * @returns {Array<{x:number, z:number}>}
+ */
+export function pickReedLocations(terrain, waterLevel = 0.5, max = 7) {
+  const size = (terrain && (terrain.mapDef?.size || terrain.width)) || 140;
+  const half = size / 2 - 4;
+  const shallow = (x, z) => {
+    const h = terrain.getHeight(x, z);
+    return h <= waterLevel - REED_MIN_DEPTH && h >= waterLevel - REED_MAX_DEPTH;
+  };
+  const wet = (x, z) => terrain.getHeight(x, z) <= waterLevel - REED_MIN_DEPTH;
+  const ring = [[1, 0], [-1, 0], [0, 1], [0, -1]];
+  const found = [];
+  // Varredura em ordem fixa (determinística); o espaçamento mínimo espalha as moitas pelo mapa.
+  for (let x = -half; x <= half && found.length < max; x += 1) {
+    for (let z = -half; z <= half && found.length < max; z += 1) {
+      if (!shallow(x, z)) continue;
+      if (!ring.every(([dx, dz]) => wet(x + dx * REED_CLEARANCE, z + dz * REED_CLEARANCE))) continue;
+      if (found.some((f) => Math.hypot(f.x - x, f.z - z) < REED_SPACING)) continue;
+      found.push({ x, z });
+    }
+  }
+  return found;
+}
+
 /**
  * Next-Gen Stylized Water & Shoreline System for WarPoly
  * Inspired by Warcraft 2 hand-painted art style, Valorant, and Overwatch.
@@ -210,16 +243,8 @@ diffuseColor = vec4( uFoam, clamp( a, 0.0, 1.0 ) );`);
     const reedGroup = new THREE.Group();
     reedGroup.name = 'WaterVegetationGroup';
 
-    // Shallow calm water reed clump locations along river and coastlines
-    const reedLocations = [
-      { x: 10, z: 12 },
-      { x: 12, z: 15 },
-      { x: -10, z: -12 },
-      { x: -12, z: -15 },
-      { x: -15, z: 18 },
-      { x: 15, z: -18 },
-      { x: -20, z: 12 }
-    ];
+    // NEW-52: moitas só em água rasa DESTE mapa (antes: 7 posições fixas do mapa antigo, que caíam em terra seca).
+    const reedLocations = pickReedLocations(this.terrain, this.waterLevel);
 
     const cattailTex = getCattailLotusTextures();
 

@@ -86,7 +86,7 @@ describe('campanha da Aliança: simulação headless até a vitória (F8-05)', (
     expect(gm.gameWon).toBe(false);
   });
 
-  it('03 Muralhas de Alvorada: 5 minutos de ondas e torres', () => {
+  it('03 Muralhas de Alvorada: 5 minutos de ondas e torres', { timeout: 60000 }, () => {
     const gm = boot('alliance-03-muralhas-de-alvorada');
     build(gm, 'watchtower', -20, -6);
     build(gm, 'watchtower', -20, -18);

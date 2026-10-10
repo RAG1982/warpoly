@@ -1210,14 +1210,24 @@ export class UnitAnimator {
       }
       if (parts.armL) {
         parts.armL.rotation.x = 0.75 - ease * 1.25; // counter-whip back
+        parts.armL.rotation.z = -0.25 * (1 - ease); // NEW-49: continua o -0.25 do windup em vez de saltar para 0
       }
       if (parts.weaponR) {
         parts.weaponR.rotation.x = mirrorX(-1.28 + ease * 2.8, weaponRRest);
       }
     } else if (p < 0.78) {
-      // Release follow-through & draw next axe
-      if (parts.armR) parts.armR.rotation.x = mirrorX(1.4);
-      if (parts.torso) parts.torso.rotation.y = -0.4;
+      // Release follow-through & draw next axe — mantém a pose final do arremesso (0.60) para não haver salto (NEW-49)
+      if (parts.armR) {
+        parts.armR.rotation.x = mirrorX(1.4);
+        parts.armR.rotation.z = -0.1;
+      }
+      if (parts.armL) parts.armL.rotation.x = -0.5;
+      if (parts.weaponR) parts.weaponR.rotation.x = mirrorX(1.52, weaponRRest);
+      if (parts.head) parts.head.rotation.y = 0.1;
+      if (parts.torso) {
+        parts.torso.rotation.y = -0.4;
+        parts.torso.rotation.x = 0.27;
+      }
     } else {
       // Reset to agile ready crouch (0.78 -> 1.0)
       const t = (p - 0.78) / 0.22;
@@ -1231,6 +1241,7 @@ export class UnitAnimator {
       }
       if (parts.armR) {
         parts.armR.rotation.x = mirrorX(1.4 * (1 - ease));
+        parts.armR.rotation.z = -0.1 * (1 - ease);
       }
       if (parts.armL) {
         parts.armL.rotation.x = -0.5 * (1 - ease);

@@ -7,6 +7,7 @@ Pré-requisito: `npm install`. Para o smoke, também é preciso ter o Chromium d
 | `npm run lint` | ESLint 9 (`eslint.config.js`, recommended + globals de browser). Sai com código 0 se não houver erros; os avisos (`no-unused-vars`) não falham. |
 | `npm test` | Vitest (`vitest.config.js`): roda `tests/unit/**/*.test.js` em Node. |
 | `npm run smoke` | Roda `tools/smoke.mjs` **dentro de `tools/safe-run.sh --mem 6G --timeout 240`**. O smoke sobe o Vite na porta 5176, abre `/?skipPreload` e depois `/inspector.html` no Chromium headless (uma página por vez) e espera `window.game` / `window.inspectorApp`. Falha em qualquer `pageerror` ou `console.error`. |
+| `npm run perf` | Orçamento de desempenho (F10-04): `tools/perf-budget.mjs` dentro do safe-run. Mede draw calls, FPS, tempo de load e tamanho do bundle JS e falha (exit 1) se algo piorar mais de 10 % vs `tests/perf/baseline.json`. **Exige GPU real**; `npm run perf -- --update` regrava a baseline. Na CI (`.github/workflows/perf.yml`, sem GPU) roda `--ci`: só draw calls + bundle. Detalhes em `docs/10_DEPLOY.md`. |
 | `npm run format:check -- <arquivos>` | Prettier `--check` **só nos arquivos passados**. O código antigo ainda não foi formatado, então rode só nos arquivos que você tocou. |
 
 ## Smoke: segurança de memória

@@ -16,6 +16,7 @@ RTS 3D low-poly para navegador (three.js + Vite), inspirado em **Warcraft II**. 
 | [SESSION_HANDOFF](SESSION_HANDOFF.md) | **Comece aqui numa sessão nova**: estado, regras, fluxo de agentes, próximos passos |
 | [HANDOFF_CLOUD](HANDOFF_CLOUD.md) | Roteiro para executar tarefas no Claude Code online (nuvem) |
 | [ESTADO_NUVEM](ESTADO_NUVEM.md) | Estado para a nuvem: pronto, com falha, não iniciado; branches com trabalho parcial |
+| [CHANGELOG_NUVEM](CHANGELOG_NUVEM.md) | O que foi feito na nuvem (PRs mesclados e pendentes) e planos |
 | [specs/](specs/README.md) | Especificações por tarefa com status (índice em `specs/README.md`) |
 | [TASKS](TASKS.md) | **Lista de tarefas controlada**: protocolo, lanes/agentes, ondas paralelas, status |
 

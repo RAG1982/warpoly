@@ -24,7 +24,8 @@ Cada spec tem na 3ª linha `> **Status: ...**`. Regras comuns a todas: [`_COMUM.
 | [F3-01-controles-rts.md](F3-01-controles-rts.md) | nuvem (item 4) | sonnet | Controles RTS + NEW-16 |
 | [F6-08-opcoes.md](F6-08-opcoes.md) | nuvem (item 5) | sonnet | Depois da F3-01 |
 | [NEW-19-ruinas.md](NEW-19-ruinas.md) | nuvem (item 6) | sonnet | Ruínas/clareiras, só render |
-| [MUNDO-HISTORIA-CAMPANHA.md](MUNDO-HISTORIA-CAMPANHA.md) | nuvem (só doc; passos 1–10 após decisões do dono) | sonnet | Novo mundo (Ondara), tela de história, 2 campanhas × 12 missões, liberação acelerada, final e migração. Irmã: `MUNDO-TERRENO-MAPAS.md`; fonte: [MUNDO-BRIEFING-DONO.md](MUNDO-BRIEFING-DONO.md) |
+| [MUNDO-HISTORIA-CAMPANHA.md](MUNDO-HISTORIA-CAMPANHA.md) | nuvem (só doc; passos 1–10 após decisões do dono) | sonnet | Novo mundo (Ondara), tela de história, 2 campanhas × 12 missões (principal; a atual vira "Clássica (beta)"), liberação (tutorial m1–6), final e migração. **Revisada em 2026-10-11 com as decisões do dono.** Irmã: `MUNDO-TERRENO-MAPAS.md`; fonte: [MUNDO-BRIEFING-DONO.md](MUNDO-BRIEFING-DONO.md) |
+| [MUNDO-HEROIS.md](MUNDO-HEROIS.md) | nuvem (dados/habilidades/i18n; modelos 3D e retratos finais locais) | sonnet | 6 heróis (Capitão, Mago e Comandante por facção): histórias, habilidades, aparência para o modelador, mapeamento com Brann/Oren/Drogath. Irmã de `MUNDO-HISTORIA-CAMPANHA.md` |
 | [F8-06-campanha-horda.md](F8-06-campanha-horda.md) | nuvem (passos 0–9; arte e equilíbrio locais) | sonnet | Campanha da Horda, 8 missões (briefing de 2026-10-11; aguarda as perguntas do §10) |
 
 ## ⏸ ADIADA

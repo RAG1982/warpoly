@@ -1,6 +1,6 @@
 # F1-10 · LOD e culling
 
-> **Status: 📝 SPEC (nuvem escreve; execução = parte código na nuvem, parte medição local)**
+> **Status: itens 1-4 implementados; falta medição local** (bench A/B com `?lod=0`, massa300 ≥ 45 FPS)
 
 Leia antes: `CLAUDE.md`, `docs/HANDOFF_CLOUD.md` (seção 2), `docs/specs/_COMUM.md`, `docs/specs/F1-09-tick-fixo-lod-animacao.md` (LOD de **animação** já feito — não repetir), `tools/bench/BASELINE.md`, NEW-7 em `docs/TASKS.md`.
 
@@ -42,3 +42,10 @@ Pressupõe o chunking do NEW-7 (um `InstancedMesh` por tipo × chunk de 32 u). P
 
 ## Relatório (≤ 25 linhas)
 Branch, commits, o que mudou por item, testes, o que depende de medição local e os números esperados vs obtidos (só local).
+
+## Implementação dos itens 3-4 (branch `cloud/F1-10b`)
+- **Árvores**: `TreeManager.applyLod(cameraTarget)` (1×/quadro, ligado em `MatchSession.update` via `entityViews.treeManager`). Por chunk: `lodLevelForDistance` com o nível guardado em `userData.lodLevel`; longe → `userData.lodImpostor` (InstancedMesh criado sob demanda, geometria cone 6 lados + cilindro 4 lados, cores nos vértices, dimensionada pela caixa do modelo real; `castShadow=false`). O impostor **compartilha** `instanceMatrix`/`instanceColor`/`count` do chunk (ressincronizado em `_allocInstance` quando o buffer cresce), logo `hideTree`/`shakeTree` valem nos dois. Impostores ficam em `TreeManager.lodMeshes` (fora de `instancedMeshes`).
+- **Construções/unidades**: `applyEntityLod` (`src/render/lod.js`) percorre a raiz uma vez (cache em `view._lodCache`, zerado em `_swapModel`) e, ao mudar de nível, oculta peças `userData.lodDetail` (guarda `lodWasVisible` e restaura) e, nas unidades, desliga/religa `castShadow`. Estado em `UnitView._lodLevel`/`BuildingView._lodLevel` (render, fora do checksum). Limiares: `LOD_DISTANCES.unit/building`, com histerese.
+- **Como marcar uma peça como detalhe**: `obj.userData.lodDetail = true` em qualquer nó sob a raiz do modelo (bandeiras, plumas, chamas). Hoje marcado em código: a bandeira do ponto de reunião (`BuildingView.rallyGroup`, fora da raiz, tratada explicitamente em `update`). Nenhum modelo .glb/procedural tem `lodDetail` ainda.
+- `?lod=0` desliga tudo (árvores, unidades, construções).
+- Testes: `tests/unit/treeLod.test.js`, `tests/unit/entityLod.test.js`.

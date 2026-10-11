@@ -16,7 +16,8 @@
       { "pt-BR": "O rio só se atravessa pelos três vaus; o do centro está bloqueado.", "en": "The river can only be crossed at its three fords; the central one is blocked." },
       { "pt-BR": "Quem atravessa pelo vau noroeste passa perto do acampamento de saqueadores: limpe-o com a escolta antes de levar os carregadores.", "en": "Crossing at the north-west ford takes you past the raiders' camp: clear it with the escort before bringing the porters." },
       { "pt-BR": "Os carregadores têm o anel de seleção ciano; mantenha-os atrás da escolta.", "en": "The porters have a cyan selection ring; keep them behind the escort." },
-      { "pt-BR": "Se menos de 3 carregadores sobreviverem, a missão falha.", "en": "If fewer than 3 porters survive, the mission fails." }
+      { "pt-BR": "Se menos de 3 carregadores sobreviverem, a missão falha.", "en": "If fewer than 3 porters survive, the mission fails." },
+      { "pt-BR": "Dica: a Rainha elevou o Paço a Fortaleza. O Estábulo Real (novo) treina Cavaleiros: rápidos e fortes contra Arqueiros, mas frágeis diante de Ogros. Quando o vau cair, o forte envia dois deles ao seu encontro.", "en": "Tip: the Queen raised your Palace to a Fortress. The new Royal Stable trains Horsemen: fast and strong against Archers, but fragile before Ogres. Once the ford falls, the fort sends two of them to meet you." }
     ]
   },
   "mapId": "continental-1v1",
@@ -30,6 +31,7 @@
 
   "setup": [
     { "type": "spawnBuilding", "owner": "player", "buildingType": "castle", "x": -47, "z": 4, "facing": 90, "tag": "fort" },
+    { "type": "setTier", "owner": "player", "tier": 2 },
     { "type": "spawn", "owner": "player", "unitType": "villager", "count": 4, "x": 24, "z": -22, "tag": "convoy", "markColor": "#22d3ee" },
     { "type": "spawn", "owner": "player", "units": [{ "type": "knight", "count": 3 }, { "type": "archer", "count": 4 }], "x": 20, "z": -18 },
     { "type": "spawn", "owner": "enemy", "units": [{ "type": "grunt", "count": 5 }, { "type": "axethrower", "count": 3 }], "x": -3, "z": 3, "tag": "blockade", "guard": true }
@@ -42,8 +44,11 @@
       "area": { "x": -47, "z": 4, "r": 12 },
       "title": { "pt-BR": "Entregar os suprimentos no Forte Atalaia", "en": "Deliver the supplies to Fort Atalaia" },
       "description": { "pt-BR": "Ao menos 3 dos 4 carregadores precisam chegar.", "en": "At least 3 of the 4 porters must arrive." } },
-    { "id": "ambush-clear", "type": "destroy", "priority": "secondary", "select": { "tag": "ambush" }, "count": 6, "active": false,
+    { "id": "ambush-clear", "type": "destroy", "priority": "secondary", "select": { "tag": "ambush" }, "count": 7, "active": false,
       "title": { "pt-BR": "Repelir a emboscada na outra margem", "en": "Repel the ambush on the far bank" } },
+    { "id": "cavalry-corps", "type": "flag", "priority": "secondary",
+      "condition": { "type": "count", "select": { "owner": "player", "unitType": "cavalier" }, "value": 4 },
+      "title": { "pt-BR": "Reunir 4 Cavaleiros (treine no Estábulo Real)", "en": "Muster 4 Horsemen (train them at the Royal Stable)" } },
     { "id": "all-porters", "type": "flag", "priority": "secondary",
       "condition": { "all": [{ "type": "objective", "id": "deliver", "status": "completed" }, { "type": "count", "select": { "tag": "convoy" }, "op": ">=", "value": 4 }] },
       "title": { "pt-BR": "Não perder nenhum carregador", "en": "Lose no porter" } },
@@ -65,7 +70,7 @@
       ] },
     { "id": "ambush", "when": { "type": "area", "owner": "player", "area": { "x": -6, "z": 6, "r": 10 }, "tag": "convoy" },
       "actions": [
-        { "type": "spawn", "owner": "enemy", "units": [{ "type": "grunt", "count": 4 }, { "type": "axethrower", "count": 2 }], "x": -18, "z": -2, "tag": "ambush", "order": { "kind": "attackMove", "x": -4, "z": 4 } },
+        { "type": "spawn", "owner": "enemy", "units": [{ "type": "grunt", "count": 4 }, { "type": "axethrower", "count": 2 }, { "type": "ogre", "count": 1 }], "x": -18, "z": -2, "tag": "ambush", "order": { "kind": "attackMove", "x": -4, "z": 4 } },
         { "type": "setObjective", "id": "ambush-clear", "status": "active" },
         { "type": "sound", "id": "alarm" },
         { "type": "dialog", "speaker": { "pt-BR": "Carregador", "en": "Porter" }, "portrait": "📦", "text": { "pt-BR": "Emboscada! Eles saíram do mato!", "en": "Ambush! They came out of the brush!" } }
@@ -78,7 +83,14 @@
     { "id": "blockade-cheer", "when": { "type": "objective", "id": "break-blockade", "status": "completed" },
       "actions": [
         { "type": "message", "text": { "pt-BR": "O vau está livre! Avancem com o comboio.", "en": "The ford is clear! Advance with the convoy." } },
-        { "type": "reveal", "x": -38, "z": -12, "radius": 22 }
+        { "type": "reveal", "x": -38, "z": -12, "radius": 22 },
+        { "type": "spawn", "owner": "player", "unitType": "cavalier", "count": 2, "x": -38, "z": 10 },
+        { "type": "dialog", "speaker": { "pt-BR": "Sentinela do Forte Atalaia", "en": "Fort Atalaia Sentinel" }, "portrait": "🐎", "text": { "pt-BR": "Vimos o vau livre! Dois Cavaleiros saem para abrir caminho. Dica: eles correm mais que a infantaria, mas cuidado com os Ogros.", "en": "We saw the ford clear! Two Horsemen ride out to open the way. Tip: they outrun the infantry, but beware the Ogres." } }
+      ] },
+    { "id": "cavalry-ready", "when": { "type": "objective", "id": "cavalry-corps", "status": "completed" },
+      "actions": [
+        { "type": "giveResources", "owner": "player", "gold": 150, "wood": 50 },
+        { "type": "message", "text": { "pt-BR": "Corpo de cavalaria formado: +150 de ouro e +50 de madeira.", "en": "Cavalry corps formed: +150 gold and +50 wood." } }
       ] },
     { "id": "convoy-lost", "when": { "all": [{ "type": "count", "select": { "tag": "convoy" }, "op": "<", "value": 3 }, { "not": { "type": "objective", "id": "deliver", "status": "completed" } }] },
       "actions": [

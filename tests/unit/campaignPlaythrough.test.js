@@ -111,7 +111,7 @@ describe('campanha da Aliança: simulação headless até a vitória (F8-05)', (
     expect(statusOf(gm, 'break-blockade')).toBe('completed');
     for (const c of tagged(gm, 'convoy')) teleport(gm, c, -6, 6);
     settle(gm);
-    expect(tagged(gm, 'ambush').length).toBe(6);
+    expect(tagged(gm, 'ambush').length).toBe(7);
     expect(statusOf(gm, 'ambush-clear')).toBe('active');
     slayTag(gm, 'ambush');
     const fort = tagged(gm, 'fort')[0];
@@ -164,6 +164,9 @@ describe('campanha da Aliança: simulação headless até a vitória (F8-05)', (
     teleport(gm, hero(gm), 0, -15);
     settle(gm);
     expect(statusOf(gm, 'centre-bridge')).toBe('completed');
+    build(gm, 'shipyard', -30, -40); // objetivo primário (F8-05b)
+    settle(gm);
+    expect(statusOf(gm, 'build-shipyard')).toBe('completed');
     slayTag(gm, 'hall-sal');
     settle(gm);
     expect(gm.isGameOver).toBe(false);

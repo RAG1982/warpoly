@@ -17,7 +17,7 @@ export const PRIORITIES = Object.freeze(['primary', 'secondary', 'hidden']);
 export const OBJECTIVE_STATUSES = Object.freeze(['inactive', 'active', 'completed', 'failed']);
 export const CONDITION_TYPES = Object.freeze(['time', 'every', 'area', 'dead', 'count', 'var', 'objective', 'resource', 'trigger', 'research']);
 export const ACTION_TYPES = Object.freeze([
-  'spawn', 'spawnBuilding', 'giveResources', 'takeResources', 'setObjective', 'addObjective', 'revealObjective', 'reveal', 'setTeam',
+  'spawn', 'spawnBuilding', 'setTier', 'giveResources', 'takeResources', 'setObjective', 'addObjective', 'revealObjective', 'reveal', 'setTeam',
   'transfer', 'dialog', 'message', 'victory', 'defeat', 'music', 'sound', 'camera', 'cutscene', 'setVar', 'incVar',
   'enableTrigger', 'disableTrigger', 'tag', 'order', 'guard'
 ]);
@@ -293,6 +293,10 @@ function checkAction(c, path, a, setup = false) {
       checkNum(c, `${p}.facing`, a.facing, { min: -360, max: 360, optional: true });
       break;
     }
+    case 'setTier': // F8-05b: eleva o Centro do dono ao nível `tier`
+      checkOwner(c, `${p}.owner`, a.owner, { optional: true });
+      checkNum(c, `${p}.tier`, a.tier, { min: 2, max: 3, int: true });
+      break;
     case 'giveResources':
     case 'takeResources': {
       checkOwner(c, `${p}.owner`, a.owner, { optional: true });

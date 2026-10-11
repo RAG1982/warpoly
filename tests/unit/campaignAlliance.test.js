@@ -5,6 +5,8 @@ import { getMap } from '../../src/data/maps/index.js';
 import { validateMission } from '../../src/sim/missions/schema.js';
 import { validateMatchConfig } from '../../src/sim/MatchConfig.js';
 import { getHeightForMap } from '../../src/world/terrainGenerators.js';
+import { UNITS } from '../../src/data/units.js';
+import { NAVAL_MIN_DEPTH } from '../../src/data/combat.js';
 import {
   validateCampaign, isUnlocked, missionStatus, nextMission, isCampaignComplete, startingResourcesFor,
   CampaignProgress, memoryStorage, PROGRESS_KEY, createCampaignMissionConfig, setActiveRun, onMissionEnded
@@ -63,24 +65,32 @@ describe('campanha da Aliança: dados (F8-05)', () => {
     for (const id of ids) walk(getMission(id), id, id);
   });
 
-  it('spawns, áreas e ordens ficam em terra firme dentro da área jogável do mapa', () => {
+  it('spawns, áreas e ordens ficam em terra firme dentro da área jogável do mapa (navios: na água navegável)', () => {
+    const isNaval = (a) => {
+      const list = a.units ?? (a.unitType ? [{ type: a.unitType }] : null);
+      return a.type === 'spawn' && !!list && list.length > 0 && list.every((u) => UNITS[u.type] && UNITS[u.type].layer === 'naval');
+    };
     for (const id of ids) {
       const m = getMission(id);
       const map = getMap(m.mapId);
       const half = (map.playable ?? map.size) / 2;
-      const pts = [];
+      const land = [];
+      const sea = []; // F8-05b: spawn só de navios
+      const anywhere = []; // F8-05b: `reveal` (névoa) pode mirar o mar
       const walk = (v, key) => {
         if (Array.isArray(v)) return v.forEach((x) => walk(x, key));
         if (!v || typeof v !== 'object') return;
-        if (key !== 'steps' && typeof v.x === 'number' && typeof v.z === 'number') pts.push([v.x, v.z]);
+        if (key !== 'steps' && typeof v.x === 'number' && typeof v.z === 'number') (isNaval(v) ? sea : v.type === 'reveal' ? anywhere : land).push([v.x, v.z]);
         for (const [k, x] of Object.entries(v)) walk(x, k);
       };
       walk(m.setup, 'setup');
       walk(m.objectives, 'objectives');
       walk(m.triggers.filter((t) => !t.actions.some((a) => a.type === 'cutscene')), 'triggers');
-      expect(pts.length).toBeGreaterThan(0);
-      const bad = pts.filter(([x, z]) => Math.abs(x) >= half || Math.abs(z) >= half || getHeightForMap(map, x, z) < 1.8);
-      expect(bad, `${id}: pontos fora da terra firme`).toEqual([]);
+      expect(land.length).toBeGreaterThan(0);
+      const out = ([x, z]) => Math.abs(x) >= half || Math.abs(z) >= half;
+      expect(land.filter(([x, z]) => out([x, z]) || getHeightForMap(map, x, z) < 1.8), `${id}: pontos fora da terra firme`).toEqual([]);
+      expect(sea.filter(([x, z]) => out([x, z]) || getHeightForMap(map, x, z) > map.waterLevel - NAVAL_MIN_DEPTH), `${id}: navios fora da água navegável`).toEqual([]);
+      expect(anywhere.filter(out), `${id}: reveal fora da área jogável`).toEqual([]);
     }
   });
 

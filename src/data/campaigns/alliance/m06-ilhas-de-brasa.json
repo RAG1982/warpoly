@@ -14,7 +14,10 @@
     },
     "hints": [
       { "pt-BR": "As duas ilhas se ligam por pontes de terra: elas são pontos de estrangulamento.", "en": "The two islands link through land bridges: they are chokepoints." },
-      { "pt-BR": "Brumar é uma guarnição aliada controlada pela IA.", "en": "Brumar is an AI-controlled allied garrison." }
+      { "pt-BR": "Brumar é uma guarnição aliada controlada pela IA.", "en": "Brumar is an AI-controlled allied garrison." },
+      { "pt-BR": "Dica: o Estaleiro (novo, exigido) precisa de água funda encostada na costa e treina Petroleiro, Fragata, Barcaça, Couraçado e Submersível. Navios custam petróleo: Brumar envia um primeiro lote quando o Estaleiro ficar pronto.", "en": "Tip: the new, required Shipyard needs deep water against the shore and trains the Tanker, Frigate, Barge, Dreadnought and Submersible. Ships cost oil: Brumar sends a first batch once the Shipyard is done." },
+      { "pt-BR": "Dica: o Petroleiro ergue Plataformas sobre os poços do mar. O mar do norte e o do sul não se ligam: um Estaleiro na costa norte alcança o poço nordeste (guardado pela frota inimiga); um na costa sul, o poço de Brumar. A Refinaria aumenta a coleta e a Fundição melhora canhões e cascos.", "en": "Tip: the Tanker raises Platforms over the sea wells. The sea to the north and the sea to the south do not connect: a Shipyard on the north coast reaches the northeast well (guarded by the enemy fleet); one on the south coast reaches the Brumar well. The Refinery boosts the haul and the Foundry upgrades cannons and hulls." },
+      { "pt-BR": "Dica: a Barcaça leva até 6 tropas (ordem de embarcar; depois, desembarcar na margem). Um desembarque na Praia Norte pega o inimigo pelas costas.", "en": "Tip: the Barge carries up to 6 troops (board order; then unload on a shore). A landing on the North Beach catches the enemy from behind." }
     ]
   },
   "mapId": "ilhas-4p",
@@ -29,6 +32,8 @@
   "vars": { "brumar_warned": false },
 
   "setup": [
+    { "type": "setTier", "owner": "player", "tier": 3 },
+    { "type": "spawn", "owner": 2, "unitType": "war_galley", "count": 3, "x": 22, "z": -53, "tag": "tide-fleet" },
     { "type": "tag", "select": { "buildingType": "great_hall", "owner": 2 }, "tag": "hall-mares" },
     { "type": "tag", "select": { "buildingType": "great_hall", "owner": 3 }, "tag": "hall-sal" },
     { "type": "tag", "select": { "buildingType": "castle", "owner": 1 }, "tag": "brumar-keep" },
@@ -45,8 +50,20 @@
       "condition": { "all": [{ "type": "dead", "select": { "tag": "hall-mares" } }, { "type": "dead", "select": { "tag": "hall-sal" } }] },
       "title": { "pt-BR": "Manter o forte de Brumar de pé", "en": "Keep Brumar keep standing" },
       "description": { "pt-BR": "Se o forte cair, a missão falha.", "en": "If the keep falls, the mission fails." } },
+    { "id": "build-shipyard", "type": "build", "priority": "primary", "buildingType": "shipyard", "count": 1,
+      "title": { "pt-BR": "Erguer um Estaleiro na costa", "en": "Raise a Shipyard on the coast" },
+      "description": { "pt-BR": "Sem navios você não alcança os poços nem a frota inimiga.", "en": "Without ships you cannot reach the wells or the enemy fleet." } },
+    { "id": "oil-platform", "type": "build", "priority": "secondary", "buildingType": "oil_platform", "count": 1,
+      "title": { "pt-BR": "Erguer uma Plataforma de petróleo (Petroleiro)", "en": "Raise an Oil Platform (Tanker)" } },
+    { "id": "sink-fleet", "type": "destroy", "priority": "secondary", "select": { "tag": "tide-fleet" }, "count": 3,
+      "title": { "pt-BR": "Afundar as 3 Galés de Guerra das Marés Negras", "en": "Sink the 3 War Galleys of the Black Tide" } },
     { "id": "towers", "type": "build", "priority": "secondary", "buildingType": "watchtower", "count": 3,
       "title": { "pt-BR": "Erguer 3 torres de vigia", "en": "Raise 3 watchtowers" } },
+    { "id": "beachhead", "type": "flag", "priority": "hidden",
+      "condition": { "type": "area", "owner": "player", "area": { "x": 24, "z": -38, "r": 6 }, "unitType": "knight", "count": 3 },
+      "title": { "pt-BR": "Desembarcar 3 Espadachins na Praia Norte", "en": "Land 3 Swordsmen on the North Beach" } },
+    { "id": "sink-leviathan", "type": "destroy", "priority": "hidden", "select": { "tag": "tide-boss" },
+      "title": { "pt-BR": "Afundar o Leviatã de Ferro", "en": "Sink the Iron Leviathan" } },
     { "id": "centre-bridge", "type": "flag", "priority": "hidden",
       "condition": { "type": "area", "owner": "player", "area": { "x": 0, "z": -15, "r": 6 } },
       "title": { "pt-BR": "Cruzar a ponte norte", "en": "Cross the north bridge" } }
@@ -61,6 +78,39 @@
             { "at": 0, "x": 30, "z": -25, "zoom": 1.1, "dialog": { "speaker": { "pt-BR": "Capitã Lyra", "en": "Captain Lyra" }, "portrait": "🏹", "text": { "pt-BR": "O salão das Marés Negras, ao norte da ilha leste.", "en": "The Black Tide hall, north of the east island." }, "duration": 4 } },
             { "at": 4.5, "x": 30, "z": 25, "zoom": 1.1, "dialog": { "speaker": { "pt-BR": "Capitã Lyra", "en": "Captain Lyra" }, "portrait": "🏹", "text": { "pt-BR": "E o do Sal Cinzento, ao sul. Um de cada vez, ou os dois ao mesmo tempo, se tivermos coragem.", "en": "And the Grey Salt hall, to the south. One at a time, or both at once if we dare." }, "duration": 5 } }
           ] }
+      ] },
+    { "id": "shipyard-up", "when": { "type": "objective", "id": "build-shipyard", "status": "completed" },
+      "actions": [
+        { "type": "giveResources", "owner": "player", "gold": 150, "wood": 100, "oil": 150 },
+        { "type": "dialog", "speaker": { "pt-BR": "Capitã Lyra", "en": "Captain Lyra" }, "portrait": "⚓", "text": { "pt-BR": "Estaleiro de pé! Brumar enviou ouro, madeira e 150 de petróleo. Treine um Petroleiro para erguer a Plataforma e Fragatas para a frota.", "en": "Shipyard up! Brumar sent gold, wood and 150 oil. Train a Tanker to raise the Platform and Frigates for the fleet." } }
+      ] },
+    { "id": "platform-up", "when": { "type": "objective", "id": "oil-platform", "status": "completed" },
+      "actions": [
+        { "type": "spawn", "owner": "player", "units": [{ "type": "dreadnought", "count": 1 }, { "type": "submersible", "count": 1 }], "x": -36, "z": -54 },
+        { "type": "giveResources", "owner": "player", "oil": 100 },
+        { "type": "dialog", "speaker": { "pt-BR": "Capitã Lyra", "en": "Captain Lyra" }, "portrait": "⚓", "text": { "pt-BR": "O petróleo jorra! A frota real envia um Couraçado e um Submersível. Dica: o Couraçado bombardeia de longe (não acerta o que está colado a ele); o Submersível é invisível até atacar e só fere navios.", "en": "The oil flows! The royal fleet sends a Dreadnought and a Submersible. Tip: the Dreadnought shells from afar (it cannot hit what is right next to it); the Submersible is invisible until it strikes and only hurts ships." } }
+      ] },
+    { "id": "fleet-sunk", "when": { "type": "objective", "id": "sink-fleet", "status": "completed" },
+      "actions": [
+        { "type": "giveResources", "owner": "player", "gold": 300 },
+        { "type": "reveal", "x": 30, "z": -48, "radius": 22 },
+        { "type": "message", "text": { "pt-BR": "Frota das Marés Negras ao fundo do mar: +300 de ouro e o poço nordeste está livre.", "en": "Black Tide fleet sent to the seabed: +300 gold and the northeast well is free." } }
+      ] },
+    { "id": "beachhead-done", "when": { "type": "objective", "id": "beachhead", "status": "completed" },
+      "actions": [
+        { "type": "giveResources", "owner": "player", "gold": 250 },
+        { "type": "dialog", "speaker": { "pt-BR": "Capitão Brann", "en": "Captain Brann" }, "portrait": "🛡️", "text": { "pt-BR": "Cabeça-de-praia firme! Os do Cinzal nunca esperaram vir ninguém pelo mar. +250 de ouro.", "en": "Beachhead secured! The Cinzal never expected anyone from the sea. +250 gold." }, "duration": 6 }
+      ] },
+    { "id": "tide-boss", "when": { "type": "time", "at": 480 },
+      "actions": [
+        { "type": "spawn", "owner": 2, "unitType": "iron_leviathan", "count": 1, "x": 48, "z": -54, "tag": "tide-boss" },
+        { "type": "sound", "id": "alarm" },
+        { "type": "message", "text": { "pt-BR": "O Leviatã de Ferro sai do porto das Marés Negras!", "en": "The Iron Leviathan sails out of the Black Tide harbor!" } }
+      ] },
+    { "id": "leviathan-sunk", "when": { "type": "objective", "id": "sink-leviathan", "status": "completed" },
+      "actions": [
+        { "type": "giveResources", "owner": "player", "gold": 200, "oil": 100 },
+        { "type": "message", "text": { "pt-BR": "O Leviatã afundou! +200 de ouro e +100 de petróleo.", "en": "The Leviathan is down! +200 gold and +100 oil." } }
       ] },
     { "id": "ally-help", "when": { "type": "dead", "select": { "tag": "hall-sal" } },
       "actions": [
@@ -84,8 +134,9 @@
       ] },
     { "id": "relief", "when": { "type": "time", "at": 300 },
       "actions": [
-        { "type": "spawn", "owner": "player", "units": [{ "type": "knight", "count": 3 }, { "type": "archer", "count": 3 }], "x": -26, "z": -22 },
-        { "type": "message", "text": { "pt-BR": "Chegam barcaças com reforços!", "en": "Barges with reinforcements arrive!" } }
+        { "type": "spawn", "owner": "player", "units": [{ "type": "hero_brann", "count": 1 }, { "type": "knight", "count": 3 }, { "type": "archer", "count": 3 }], "x": -26, "z": -22 },
+        { "type": "spawn", "owner": "player", "units": [{ "type": "barge", "count": 1 }, { "type": "frigate", "count": 2 }], "x": -26, "z": -54 },
+        { "type": "message", "text": { "pt-BR": "Chegam o Capitão Brann, tropas e a frota de socorro (1 Barcaça, 2 Fragatas)! Embarque os Espadachins na Barcaça para o desembarque.", "en": "Captain Brann, troops and the relief fleet (1 Barge, 2 Frigates) arrive! Board the Swordsmen on the Barge for the landing." } }
       ] },
     { "id": "closing", "when": { "type": "dead", "select": { "tag": "hall-mares" } },
       "actions": [

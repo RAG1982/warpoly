@@ -8,6 +8,7 @@
  * F8-05b: cada entrada pode ter `unlocks: { units:[], buildings:[], research:[], heroes:[] }` = o que a missão LIBERA (progressão
  * da campanha). O conjunto DISPONÍVEL na missão N é a união cumulativa dos `unlocks` das missões 1..N (`availableTech`); a partida
  * da campanha leva isso em `MatchConfig.techRestriction` (`techRestrictionFor`). Missões isoladas (menu "Missões") não são restritas.
+ * `epilogue?` (tela final da campanha): { title:{pt-BR,en}, paragraphs:[{pt-BR,en} x 3..5], faction:'human'|'orc', credits?:{pt-BR,en} }.
  * Os ids de `missions` são ids de missões F8-04 (já registradas). A ordem do array é a ordem de exibição; `requires`
  * só pode citar missões ANTERIORES (sem ciclos). Sem `requires` = disponível desde o início.
  */
@@ -26,6 +27,18 @@ export class CampaignError extends Error {}
 const isObj = (v) => v !== null && typeof v === 'object' && !Array.isArray(v);
 const okText = (t) => (typeof t === 'string' && t.length > 0) || (isObj(t) && typeof t['pt-BR'] === 'string' && t['pt-BR'].length > 0);
 
+const okBi = (t) => isObj(t) && ['pt-BR', 'en'].every((l) => typeof t[l] === 'string' && t[l].trim().length > 0);
+
+/** Valida o epílogo opcional (puro). Acrescenta erros via `err`. */
+function validateEpilogue(e, err) {
+  if (!isObj(e)) return err('epilogue', 'deve ser objeto');
+  if (!okBi(e.title)) err('epilogue.title', 'precisa de pt-BR e en');
+  if (!['human', 'orc'].includes(e.faction)) err('epilogue.faction', 'deve ser human|orc');
+  if (!Array.isArray(e.paragraphs) || e.paragraphs.length < 3 || e.paragraphs.length > 5) err('epilogue.paragraphs', 'lista de 3 a 5 parágrafos');
+  else e.paragraphs.forEach((p, i) => { if (!okBi(p)) err(`epilogue.paragraphs[${i}]`, 'precisa de pt-BR e en'); });
+  if (e.credits !== undefined && !okBi(e.credits)) err('epilogue.credits', 'precisa de pt-BR e en');
+}
+
 /**
  * @param {object} def  índice da campanha
  * @param {{ hasMission?: (id:string)=>boolean }} [opts]  confere se cada missão existe
@@ -41,6 +54,7 @@ export function validateCampaign(def, opts = {}) {
   if (!['human', 'orc'].includes(def.factionId)) err('factionId', 'deve ser human|orc');
   if (!okText(def.title)) err('title', 'texto obrigatório (pt-BR)');
   if (!okText(def.premise)) err('premise', 'texto obrigatório (pt-BR)');
+  if (def.epilogue !== undefined) validateEpilogue(def.epilogue, err);
   if (def.provisional !== undefined && typeof def.provisional !== 'boolean') err('provisional', 'deve ser booleano');
   if (!Array.isArray(def.missions) || def.missions.length === 0) {
     err('missions', 'lista obrigatória e não vazia');
@@ -249,4 +263,40 @@ export function techRestrictionFor(def, missionRef, { players = [0] } = {}) {
   cfg.mission = idx + 1;
   cfg.unlocks = missionUnlocks(def, idx);
   return cfg;
+}
+
+/**
+ * Plano da tela de fim de missão de campanha (puro). Decide quais botões fazem sentido.
+ * Vitória: a missão atual conta como concluída (o progresso já foi gravado, mas não dependemos disso). A "próxima" é a
+ * primeira missão DEPOIS da atual, na ordem da campanha, que esteja desbloqueada com esse progresso.
+ * @returns {{ inCampaign:boolean, outcome:string, nextMissionId:string|null, hasNext:boolean, isLastMission:boolean,
+ *   campaignComplete:boolean, carryOver:boolean, epilogue:object|null, factionId:string|null }}
+ *   `epilogue`/`factionId` só vêm preenchidos quando a campanha foi concluída (tela final especial).
+ */
+export function campaignEndPlan(def, missionId, outcome, completed, opts = {}) {
+  const idx = def ? def.missions.findIndex((m) => m.id === missionId) : -1;
+  if (idx < 0) return { inCampaign: false, outcome, nextMissionId: null, hasNext: false, isLastMission: false, campaignComplete: false, carryOver: false, epilogue: null, factionId: null };
+  const won = outcome === 'victory';
+  const keys = completed instanceof Set || completed instanceof Map ? [...completed.keys()] : Object.keys(completed || {});
+  const done = Object.fromEntries(keys.map((k) => [k, true]));
+  if (won) done[missionId] = true;
+  let nextMissionId = null;
+  if (won) {
+    for (let i = idx + 1; i < def.missions.length; i++) {
+      if (isUnlocked(def, def.missions[i].id, done, opts)) { nextMissionId = def.missions[i].id; break; }
+    }
+  }
+  const nextEntry = nextMissionId ? entryOf(def, nextMissionId) : null;
+  const campaignComplete = won && isCampaignComplete(def, done);
+  return {
+    inCampaign: true,
+    outcome,
+    nextMissionId,
+    hasNext: !!nextMissionId,
+    isLastMission: idx === def.missions.length - 1,
+    campaignComplete,
+    carryOver: !!(nextEntry && nextEntry.carryOver && nextEntry.carryOver.resources),
+    epilogue: campaignComplete && def.epilogue ? def.epilogue : null,
+    factionId: campaignComplete ? (def.epilogue?.faction || def.factionId || null) : null
+  };
 }

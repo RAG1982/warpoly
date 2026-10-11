@@ -1,11 +1,11 @@
 # Estado do projeto para a nuvem — pronto, com falha, não iniciado
 
-> Atualizado em 2026-10-10. Documento para sessões do Claude Code na nuvem (`cloud/<ID>`). Complementa `docs/TASKS.md` (fonte de status) e `docs/HANDOFF_CLOUD.md` (fila e regras).
+> Atualizado em 2026-10-11 (após a integração #35 e a rodada de melhorias pedidas após jogar a campanha). Documento para sessões do Claude Code na nuvem (`cloud/<ID>`). Complementa `docs/TASKS.md` (fonte de status) e `docs/HANDOFF_CLOUD.md` (fila e regras).
 > Regra: **nada deste documento é verdade sem conferir no código** — ao começar, rode `npm test` e confirme.
 
 ## 0. Como começar
-1. `git fetch origin && git checkout -b cloud/<ID> origin/master` (o `master` do GitHub já inclui os merges de PRs da nuvem até a PR #25 "integração").
-2. Branches com trabalho parcial (seção 3) **não** estão no `master`. Para retomar uma delas: `git checkout -b cloud/<ID> origin/task/<nome>` e depois `git merge origin/master` (estão cerca de 60 commits atrás; sem conflito pelo teste de merge).
+1. `git fetch origin && git checkout -b cloud/<ID> origin/master` (o `master` do GitHub inclui os PRs da nuvem até a PR #42 "integração 3"; só a F8-05b está pendente — ver seção 3).
+2. Branches pendentes (seção 3) **não** estão no `master`. Para continuar uma delas: `git checkout -b cloud/<ID> origin/cloud/<nome>` e depois `git merge origin/master`. As branches locais antigas `task/F7-08`, `task/F10-04` e `task/NEW-44` já foram retomadas e mescladas (PRs #29, #28, #30).
 3. Verificação na nuvem: `npm ci`, `npm test`, `npm run lint`, `npx vite build --outDir /tmp/build-check`. Sem GPU, sem Blender, sem `safe-run.sh`.
 
 ## 1. PRONTO — no `master`
@@ -32,42 +32,33 @@
 | F9-05 | Replays, inclusive online (`takeLog`, PR #11): falta verificar replay online no navegador. Local. |
 | F10-05 | PWA, deploy, chunks por facção (PR #15): falta verificar carga por facção no navegador. Local. |
 
-### 1.3 Backlog NEW já resolvido (DONE) e mesclado pela nuvem
-- NEW-4 (testes de `hasLineOfSight`), NEW-31 (`check-data-parity` roda), NEW-41 (causa: singleton `fogUniforms` compartilhado entre testes; isolado em `99edfbb`), NEW-50 (lobby limpa aviso), NEW-29 (nomes D7 em `buildings.js`), NEW-2, NEW-3, NEW-5, NEW-8, NEW-10, NEW-11, NEW-12, NEW-16, NEW-17, NEW-18, NEW-21, NEW-22, NEW-23, NEW-28, NEW-32, NEW-33, NEW-36 a NEW-40, NEW-42, NEW-43, NEW-45 a NEW-48, NEW-53 (correção de m04: forte humano, `markColor`, `spawnBuilding`).
-- Verificação visual ou de medição pendente (local), status REVIEW: **NEW-7** (chunks do `TreeManager`, `7f6a565`; medir draw calls), **NEW-13** (chamas sob névoa), **NEW-19** (ruínas/clareira, `src/render/RuinsManager.js`), **NEW-24** (portão e minimapa da muralha, `WallGate`), **NEW-26** (inspeção de neutros, `582dcbe`), **NEW-35** (`CMD.ATTACK_GROUND`, clique direito no chão no navegador), **NEW-49** (golpe do Arremessador), **NEW-52** (juncos só em água rasa).
+### 1.3 Backlog NEW resolvido e mesclado
+- Rodada 1 da nuvem (PRs #5, #7–#16): NEW-4, NEW-31, NEW-50, NEW-11, NEW-13, NEW-49, NEW-52, AUD-1, F9-05b, F10-05b.
+- Rodada 2 (PRs #17–#24, integração #25): NEW-41 (teste isolado), NEW-7 (chunks do `TreeManager`), NEW-29 (nomes D7), NEW-35 (`CMD.ATTACK_GROUND`), NEW-26 (inspeção de neutros), NEW-24 (portão e minimapa da muralha), correção de idioma nos testes (#23), F1-10 itens 1–2.
+- Rodada 3 (integração #35): NEW-1 (remove `GLTFBuildingLoader`), decisões do dono (#27), F10-04 (CI de desempenho), F7-08 (áudio de produção), NEW-44 (IA com madeira alcançável), NEW-25 e NEW-34 (acampamentos neutros e escolta de cerco), F1-10 itens 3–4 (impostor de árvores, LOD de unidades e construções), specs NEW-6 e NEW-14.
+- Já DONE antes: NEW-2, 3, 5, 8, 10, 12, 16, 17, 18, 21, 22, 23, 28, 32, 33, 36–40, 42, 43, 45–48, 53.
+- Verificação visual ou de medição pendente (local, status REVIEW): NEW-7, 13, 19, 24, 25, 26, 34, 35, 44, 49, 52; F1-10; F7-08; F10-04.
 
 ## 2. FALHA — o que hoje não está verde ou não está correto
-- **Suíte de testes:** no `master` após o merge da PR #25: **1339 testes passam** (120 arquivos), lint 0 erros (51 avisos), build ok. Intermitência conhecida: `tests/unit/signaling.test.js` ("pronto / iniciar: só anfitrião…") falhou uma vez sob carga durante a validação do NEW-44 — passa isolado.
-- **NEW-41:** resolvido na forma de isolamento do singleton `fogUniforms` no teste (`99edfbb`). Verificação: 3 execuções isoladas verdes; suíte completa verde. Se a intermitência voltar, reabrir.
-- **Campanha Aliança:** premissa provisória. Início de missão pelo navegador não verificado até o fim.
-- **Backlog aberto (auditoria `docs/AUDITORIA_BACKLOG.md`):**
-  - NEW-1: **decidido remover (2026-10-11)**; PR `cloud/NEW-1-remove-loader` (import sem uso em `GreatHall.js` e arquivo `src/core/GLTFBuildingLoader.js` removidos).
-  - NEW-6: sem ORM de texturas nem Worker/OffscreenCanvas (`grep` em `src/` vazio). Precisa de spec.
-  - NEW-9: IA destrói HQ cedo (testes da F2-01). Depende de F5-03 e de balanceamento.
-  - NEW-14: `Unit.update` domina a CPU (~4,5 ms com 310 unidades). LOD de animação existe (`src/sim/constants.js:31`), falta medir.
-  - NEW-15: 50 FPS em `combate100` não atingido (medição com GPU).
-  - NEW-27: draw calls dos neutros vs master (medição com GPU).
-  - NEW-30: repetir o lote de balanceamento (F3-11) quando F4/F5 estiverem em uso (ferramentas `tools/balance-sim.mjs`).
-  - NEW-34: escolta de cerco pela IA e alvo dentro do alcance mínimo (`src/ai/AIMilitaryManager.js:368-372`).
-  - NEW-44 e NEW-51: ver seção 3.
+- **Suíte:** `master` após o PR #42: **136 arquivos / 1667 testes, 0 falhas**; lint 0 erros (50 avisos antigos); build ok. Intermitência conhecida: `tests/unit/signaling.test.js` falhou uma vez sob carga (passa isolado); no ambiente de nuvem exige `npm ci` (pacote `ws`).
+- **CI de desempenho (`perf.yml`)** compara com baseline de draw calls antiga: **pode falhar até regravar** com GPU: `bash tools/safe-run.sh --timeout 900 -- npm run perf -- --update`.
+- **NEW-41:** a causa real da intermitência do `fogOfWar.test.js` **não foi reproduzida** (10 execuções isoladas e 4 suítes completas sem falha); o teste foi endurecido. Se voltar, capturar a mensagem exata.
+- **Soak sem cobertura da escolta de cerco:** a operação de cerco da NEW-34 disparou 0 vezes nas 30 partidas de soak; está coberta só por testes unitários.
+- **Backlog ainda aberto:** NEW-6 (spec pronta, execução pendente), NEW-9 (IA destrói HQ cedo; depende de F5-03), NEW-14 (spec pronta), NEW-15/27/30 (medições com GPU/soak), NEW-51 (seed 82: terminou em 9106 ticks com a IA nova em `--count 1`; confirmar com amostra grande).
 
-## 3. TRABALHO PARCIAL — branches no GitHub (não mesclados)
-| Branch | O que está implementado | O que falha / falta | Estado de teste |
-|---|---|---|---|
-| `task/NEW-44` (2 commits) | `src/ai/AIWood.js` (leitura de madeira alcançável por terra), serraria avançada e reserva de madeira em `AIEconomyManager.js`, `AIDirector.js` e `AIMilitaryManager.js`; `tests/unit/ai-wood.test.js` (13 testes). | **1 teste falha**: "a reserva segura o treino que consumiria a madeira da serraria; sem reserva treina" (`expected +0 to be 1`). **Sem soak A/B** (seeds 1–20 em continental-1v1, estreito-1v1, ilhas-4p) e sem validação de que não piora a taxa de término (96–100% hoje). | 12/13 do arquivo; suíte completa com 1 falha de teste (+ 1 intermitente de sinalização). |
-| `task/F7-08` (5 commits) | Motor de áudio: `src/audio/AudioEngine.js`, `VoicePool.js` (vozes com prioridade), `attenuation.js` (posicional), `musicDirector.js` + `music/` (trilha adaptativa paz/combate), `ambience.js`, `sfxRecipes.js`, `speech/` (falas por síntese de formantes, sem samples de terceiros), `audioMapping.js`, `audioConfig.js`, `SoundManager.js` reescrito; integração parcial em `main.js`, `QualitySettings.js`, `MatchSession.js`, `optionsApply/optionsStore/OptionsPanel` e i18n. `tools/audio-check.mjs` (verificação no navegador). | Integração não concluída de ponta a ponta. **`tools/audio-check.mjs` nunca rodou.** AudioContext só após gesto do usuário: não verificado no navegador. | Suíte completa da branch: **1327 passam** (104 arquivos). |
-| `task/F10-04` (7 commits) | `tools/perf-budget.mjs` + `tools/lib/perfBudget.mjs` (comparador: draw calls e load sempre; FPS só com GPU real; limiar 10%), `tests/unit/perfBudget.test.js` (41 testes), `.github/workflows/perf.yml`, `npm run perf`, docs em `docs/10_DEPLOY.md`, `tests/perf/baseline.json`. | `baseline.json` foi medida no commit `475f874` (base `d769cd7`): **está desatualizada**, precisa regravar no master atual. Job de CI nunca rodou. Verificação com GPU (FPS) pendente — **local**. | 41/41 do arquivo. |
+## 3. PENDENTE DE MERGE
+- **Mesclados em 2026-10-11 (integração #42, `4e60ba1`):** #36 próxima missão, #37 orcs no tamanho humano, #38 áudio, #39 tela final da campanha, #40 mapas/florestas. Suíte após o merge: **136 arquivos / 1667 testes, 0 falhas**; lint 0 erros; build ok. Verificação visual/auditiva/GPU segue pendente (local) — ver o corpo de cada PR.
+- **Em andamento:** `cloud/F8-05b` (campanha com todas as categorias de unidade e liberação progressiva; parte do #40, já no `master`).
 
-Para retomar: `git fetch origin && git checkout -b cloud/<ID> origin/task/<nome> && git merge origin/master`.
-
-## 4. NÃO INICIADO
-- **Sem código:** NEW-25 (IA ataca acampamentos neutros; depende de `src/ai`, faria conflito com NEW-44 — começar depois), NEW-34 (escolta de cerco pela IA; mesma restrição).
-- **Depende de NEW-44:** NEW-51 (seed 82, `continental-1v1`, humano, brutal: não termina em 72000 ticks; mesma classe de NEW-46 — madeira esgotada).
-- **F1-10 (LOD e culling):** parcial no master (núcleo `src/render/lod.js` e decorações, `ccf49ec`). Spec em `docs/specs/F1-10-lod-culling.md`. Falta a meta de ≥ 45 FPS em `massa300` (medição local).
-- **Precisa de spec antes (Sonnet escreve em `docs/specs/`):** NEW-6 (ORM e texturas), NEW-14 (CPU da animação).
-- **Blender (local):** F7-01 (fidelidade dos orcs Peão, Grunt, Lançador, Ogro), F7-07 (modelos novos: faltam referências de Refinaria, Fundição, Submersível, Tartaruga, Forja Naval, Caldeirão).
-- **Conteúdo:** F8-06 (campanha Horda, 8+ missões) — só depois de aprovar a premissa da Aliança (F8-05).
-- **Adiado pelo dono:** F5-03 (níveis de dificuldade, DOING parcial: meta Difícil×Normal ≥ 60% não atingida); NEW-20 (teste intermitente, spec em `docs/specs/NEW-20-teste-intermitente.md`).
+## 4. NÃO INICIADO / PLANOS
+- **F8-05b** (em andamento): ver seção 3. Depois: **F8-06** (campanha da Horda, 8+ missões): premissa da Aliança aprovada; falta o briefing (mesmo esquema de `unlocks`, `epilogue` e arte de vitória `victory_orc.webp`).
+- **NEW-6** (ORM e texturas, spec no master): passos 1, 2, 4, 5 vão para a nuvem; **o passo 2 exige decisão do dono** (reduzir ORM e bump à metade do lado em `high` para ficar < 300 MB; alternativa HRM).
+- **NEW-14** (CPU de animação, spec no master): passos 0–2, 5–6 na nuvem; **3 e 4 só depois do NEW-53** (`UnitView.js` em edição local); 7–8 opcionais.
+- **F1-10c:** depende do bench local de massa300 (meta ≥ 45 FPS).
+- **Mapas:** `estreito-1v1` e `ilhas-4p` precisam de terra nova para a meta de madeira (muda rotas navais; decisão do dono); os JSON ampliados não são reproduzíveis por `tools/gen-map.mjs`.
+- **Orcs no tamanho humano:** revisar visualmente os fatores do grunt (0,73) e do lançador (0,72), medidos pela caixa que inclui moicano e cabeça grande.
+- **Blender (local):** F7-01, F7-07, F7-00b remanescentes, F7-09 (sprites sem `.glb`) e arte de vitória `victory_human.webp`/`victory_orc.webp` (1920×1080, WebP ≤ 500 kB, faixa inferior escura).
+- **Adiado pelo dono:** F5-03 (níveis de dificuldade), NEW-20.
 
 ## 5. Decisões do dono (2026-10-11) — todas tomadas
 1. F7-02: **fica como está** (material `TeamColor`).
@@ -76,14 +67,16 @@ Para retomar: `git fetch origin && git checkout -b cloud/<ID> origin/task/<nome>
 4. F9-03: **mantém `checkEvery = 10`** em jogo.
 5. NEW-1: **remover** `GLTFBuildingLoader` (PR `cloud/NEW-1-remove-loader`).
 6. PR #6 (`cloud/F3-01`): **fechado sem mesclar**.
-7. Autorizado o uso das branches `task/F7-08` e `task/F10-04` na nuvem. **Ainda não autorizado:** `src/ai/**` (NEW-44, NEW-25, NEW-34, NEW-51).
+7. Autorizado o uso das branches `task/F7-08` e `task/F10-04` e de `src/ai/**` (NEW-44, NEW-25, NEW-34 feitos; NEW-51 a confirmar).
+8. Pedidos após jogar a campanha (2026-10-11): próxima missão na tela final, tela final especial com imagem e epílogo, F8-05b (todas as unidades, liberação progressiva), mapas maiores e florestas, áudio melhor (só da cena visível, com zoom), orcs no tamanho humano — ver seção 3.
 
 ## 6. Verificações que só o dono pode fazer (GPU / navegador / Blender)
 - Replay online e carga por facção (F9-05, F10-05).
 - Capturas: NEW-13, NEW-19, NEW-49, NEW-52.
 - Benchmarks: F1-10, NEW-14, NEW-15, NEW-27, regravar `tests/perf/baseline.json` (F10-04).
 - Baseline visual: `npm run visual -- --update` após mudanças no inspetor (107 alvos).
-- Áudio no navegador (F7-08): `tools/audio-check.mjs`.
+- Áudio no navegador (F7-08 e PR #38): `tools/audio-check.mjs`; ouvir som fora de vista, zoom, efeitos e música.
+- Jogar as 8 missões da campanha (mapas novos #40, F8-05b, tela final #36/#39) e comparar o tamanho dos orcs (#37).
 
 ## 7. Onde estão as coisas (mapa rápido)
 - Simulação: `src/sim/` (missões em `src/sim/missions/`, comandos, transporte, checksum, RNG). Não usar `Math.random` nem `Date.now` aqui (`tests/unit/noMathRandom.test.js` vigia `src/sim` e `src/ai`).

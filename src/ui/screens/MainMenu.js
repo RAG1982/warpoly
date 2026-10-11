@@ -27,7 +27,7 @@ import { createTutorialConfig } from '../tutorial.js';
 import { MissionBriefing } from './MissionBriefing.js'; // F8-04
 import { createMissionConfig } from '../../data/missions/index.js';
 import { CampaignScreen } from './CampaignScreen.js'; // F8-05
-import { createCampaignMissionConfig, setActiveRun } from '../../campaign/index.js';
+import { prepareCampaignMission, setActiveRun } from '../../campaign/index.js';
 
 const BYPASS_PARAMS = ['play', 'skipMenu', 'bench', 'skipPreload'];
 // F7-09: arte do fundo renderizada no Blender (tools/blender/render_art2d.py). Se não carregar, o cenário em SVG/CSS continua.
@@ -182,8 +182,8 @@ export class MainMenu {
 
   startMission(missionId, campaignId = null, unlockAll = false) {
     const lang = getLanguage() === 'en' ? 'en' : 'pt-BR';
-    const config = campaignId ? createCampaignMissionConfig(campaignId, missionId, { lang, unlockAll, techAll: unlockAll }) : createMissionConfig(missionId, { lang });
-    setActiveRun(campaignId ? { campaignId, missionId } : null);
+    const config = campaignId ? prepareCampaignMission(campaignId, missionId, { lang, unlockAll }) : createMissionConfig(missionId, { lang });
+    if (!campaignId) setActiveRun(null);
     this.briefing?.close();
     this.campaignScreen?.close();
     this.root.classList.add('mm-leaving');

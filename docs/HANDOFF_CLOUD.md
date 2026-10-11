@@ -80,6 +80,18 @@ Dependem de outra decisão ou de tarefa anterior (não lançar ainda):
 - **F7-08** (áudio) e **F10-04** (CI de desempenho): branches `task/F7-08` e `task/F10-04` no GitHub, **uso autorizado em 2026-10-11** (retomar com `git checkout -b cloud/<ID> origin/task/<nome> && git merge origin/master`).
 - **F1-10** (LOD e culling), **NEW-6** (ORM e texturas), **NEW-14** (CPU da animação): precisam de spec antes (Sonnet escreve em `docs/specs/`).
 
+## 3c. Fila da nuvem — rodada 3 (2026-10-11)
+Estado e PRs pendentes em [ESTADO_NUVEM](ESTADO_NUVEM.md) §3–4. Pegue o primeiro item sem branch/PR.
+| # | ID | Briefing | Depende de |
+|---|---|---|---|
+| 1 | F8-05b | Campanha da Aliança usando todas as categorias de unidade, com liberação progressiva (`unlocks`). **Em andamento** (`cloud/F8-05b`). | (#40 já mesclado) |
+| 2 | F8-06 | Campanha da Horda (8+ missões). Escrever o briefing primeiro (mesmo esquema de `unlocks`, `epilogue`, arte `victory_orc.webp`). | F8-05b |
+| 3 | NEW-6 | Passos 1, 2, 4, 5 da spec `docs/specs/NEW-6-orm-texturas.md`. O passo 2 exige aprovar a redução de resolução em `high`. | decisão do dono |
+| 4 | NEW-14 | Passos 0–2, 5–6 da spec `docs/specs/NEW-14-cpu-animacao.md` (3–4 após o NEW-53). | — |
+| 5 | NEW-51 | Confirmar a seed 82 (`continental-1v1`, humano, brutal) com amostra grande (`--count 30`, `--recheck 3`). | (#40 já mesclado) |
+
+Não vão para a nuvem: bench de FPS (F1-10c, NEW-15, NEW-27), regravar a baseline de desempenho, áudio no navegador, arte Blender e toda verificação visual.
+
 ## 4. Tarefas que ficam no local (não vão para a nuvem)
 Motivo: precisam de GPU, Blender, navegador ou de decisão do dono.
 

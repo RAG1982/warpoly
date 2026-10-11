@@ -10,6 +10,21 @@
     "pt-BR": "O Reino de Aurelan vive em paz há três gerações. Então os Clãs do Cinzal, expulsos de suas terras áridas além das Montanhas do Véu, se unem sob o chefe-de-brasa Skarn e descem sobre os vales. Sob o comando do Marechal Dorian Vasques, da Capitã Lyra Ventosa e da Rainha Sevelin, o reino precisa deter a vanguarda, libertar os cativos, resistir no Estreito de Alvorada, reabrir o Rio Turvo, armar-se, retomar as ilhas, sobreviver à traição de um falso aliado e, por fim, marchar sobre o próprio Planalto do Cinzal.",
     "en": "The Kingdom of Aurelan has known peace for three generations. Then the Cinzal Clans, driven from their barren lands beyond the Veil Mountains, unite under the ember-chief Skarn and pour into the valleys. Led by Marshal Dorian Vasques, Captain Lyra Ventosa and Queen Sevelin, the realm must stop the vanguard, free the captives, hold the Alvorada Strait, reopen the Murky River, arm itself, retake the isles, survive the treachery of a false ally and finally march on the Cinzal Plateau itself."
   },
+  "epilogue": {
+    "faction": "human",
+    "title": { "pt-BR": "A Aurora sobre Aurelan", "en": "Dawn over Aurelan" },
+    "paragraphs": [
+      { "pt-BR": "Quando Skarn tombou no Planalto do Cinzal, o estandarte da horda caiu com ele. Os salões de guerra viraram cinzas e os clãs, sem chefe e sem rumo, baixaram as armas.",
+        "en": "When Skarn fell on the Cinzal Plateau, the horde's banner fell with him. The war halls turned to ash, and the clans, leaderless and lost, laid down their arms." },
+      { "pt-BR": "Mestre Orsolo conduziu os magos libertados de volta ao reino. Dizem que, naquela noite, as torres de Aurelan se acenderam uma a uma, e os sinos soaram de vale em vale.",
+        "en": "Master Orsolo led the freed mages back to the realm. They say that night the towers of Aurelan lit up one by one, and bells rang from valley to valley." },
+      { "pt-BR": "A Capitã Lyra Ventosa trouxe a Guarda Real para casa. O Marechal Dorian Vasques guardou a espada pela primeira vez em muitos anos. A Rainha Sevelin estendeu a mão aos clãs vencidos, inclusive ao Clã Presa-Negra e a Brumar, e prometeu reconstruir o que a guerra levou.",
+        "en": "Captain Lyra Ventosa brought the Royal Guard home. Marshal Dorian Vasques sheathed his sword for the first time in many years. Queen Sevelin offered her hand to the defeated clans, even the Blackfang Clan, and to Brumar, and vowed to rebuild what the war had taken." },
+      { "pt-BR": "A ameaça acabou, e o Reino de Aurelan amanheceu livre. A paz agora tem o preço da coragem de quem a defendeu, e nunca será esquecida.",
+        "en": "The threat is over, and the Kingdom of Aurelan woke up free. Peace now bears the price of the courage of those who defended it, and it shall never be forgotten." }
+    ],
+    "credits": { "pt-BR": "Fim da Marcha da Aliança", "en": "End of the Alliance March" }
+  },
   "heroes": [],
   "missions": [
     { "id": "alliance-01-fumaca-no-vale",

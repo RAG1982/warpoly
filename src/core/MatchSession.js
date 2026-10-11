@@ -233,6 +233,7 @@ export class MatchSession {
         alpha = gm.advance(delta);
       }
       this._presentFrame(delta, alpha);
+      this.sound?.setMatchTime?.(gm.gameTime); // música de paz ganha urgência com os minutos (só apresentação)
       this.projectileViews?.update(alpha);
       this.particleSystem.update(delta);
       this.vfx?.update(delta);

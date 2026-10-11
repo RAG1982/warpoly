@@ -685,7 +685,7 @@ describe('F7-08 motor de áudio (contexto falso): mixer, limitador, posicional e
 
   it('música: paz por facção ao começar a partida; combate recente troca com crossfade; volta à paz depois', () => {
     mk();
-    expect(eng.music.currentId).toBe('human_peace'); // menu
+    expect(eng.music.currentId).toBe('title'); // menu: tema de abertura
     eng.beginMatch({ faction: 'orc', tilesetId: 'inverno' });
     expect(eng.music.currentId).toBe('orc_peace');
     // agenda notas (instrumentos criam osciladores)

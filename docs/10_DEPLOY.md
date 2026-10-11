@@ -68,6 +68,18 @@ node tools/perf-budget.mjs --ci --dist dist    # runner SEM GPU (é o que a CI r
 node tools/perf-budget.mjs --compare tools/perf-results/<arquivo>.json   # só compara um resultado já medido (sem navegador)
 ```
 
+### Regravar a baseline (passo LOCAL, com GPU real)
+
+A `tests/perf/baseline.json` versionada foi medida no commit `475f874` (base `d769cd7`) e **está desatualizada**: precisa ser regravada no master atual, numa máquina com GPU real (nunca em runner sem GPU nem com SwiftShader; `--update` recusa isso). Passo a passo:
+
+```bash
+git switch master && git pull
+bash tools/safe-run.sh --timeout 900 -- npm run perf -- --update   # mede (GPU real) e regrava tests/perf/baseline.json
+git diff tests/perf/baseline.json                                    # revise e commite (ex.: "F10-04: baseline regravada no master <commit>")
+```
+
+O `npm run perf` já passa pelo `safe-run`; o `bash tools/safe-run.sh` externo é reentrante (`WARPOLY_HEAVY_LOCK_HELD`), não trava nem mede duas vezes. Enquanto não for regravada, o comparador de draw calls contra a baseline antiga pode acusar variação falsa: confira o relatório antes de tratar como regressão. A CI (`perf.yml`) confere só draw calls e bundle; FPS e load ficam de fora dela.
+
 `npm run perf` passa pelo `tools/safe-run.sh` (trava global, teto de RAM, timeout de 900 s) e leva alguns minutos. Cada execução grava o relatório completo (com as amostras de cada rodada) em `tools/perf-results/` (fora do git). Saída: tabela `métrica · baseline · atual · variação · limite · status` e o veredito; a CI também escreve o resumo em markdown no job (`GITHUB_STEP_SUMMARY`). Códigos de saída: **0** ok · **1** regressão (ou métrica sem medição) · **2** erro de uso/ambiente (sem GPU, sem baseline, build ausente…).
 
 ### Protocolo de medição

@@ -8,6 +8,7 @@
 // click/keydown do main.js); nível 'off' (testes/automação, `?audio=0`) não cria nada; nada aqui toca a simulação.
 import { AudioEngine } from '../audio/AudioEngine.js';
 import { clampVolume } from '../audio/audioConfig.js';
+import { loadSelection } from '../audio/music/catalog.js';
 
 export class SoundManager {
   /**
@@ -52,6 +53,7 @@ export class SoundManager {
         timers: this.env.timers === undefined ? globalThis : this.env.timers
       });
       this.initialized = true;
+      this.engine.setMusicSelection(this._storedMusicSelection());
       this._pushState(true);
       if (this._match) this.engine.beginMatch(this._match);
       const log = this.env.log || ((...a) => console.info(...a));
@@ -60,6 +62,16 @@ export class SoundManager {
       console.warn('[WarPoly áudio] Web Audio indisponível ou bloqueado', e);
       this.engine = null;
       this.ctx = null;
+    }
+  }
+
+  /** Seleção de faixas gravada pelo inspetor (`localStorage['warpoly.music.selection']`) ou `null` (padrões do catálogo). */
+  _storedMusicSelection() {
+    try {
+      const st = this.env.storage !== undefined ? this.env.storage : (typeof localStorage !== 'undefined' ? localStorage : null);
+      return loadSelection(st);
+    } catch {
+      return null;
     }
   }
 
@@ -199,6 +211,11 @@ export class SoundManager {
     this._match = null;
     this._sceneProbe = null;
     if (this.engine) { this.engine.sceneProbe = null; this.engine.paused = false; this.engine.endMatch(); }
+  }
+
+  /** Tempo de partida em segundos (`gameTime`): a música de paz ganha urgência com os minutos. Só apresentação. */
+  setMatchTime(seconds) {
+    if (this.engine) this.engine.setMatchTime(seconds);
   }
 
   /** Peso de combate (música adaptativa). */

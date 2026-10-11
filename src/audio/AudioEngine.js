@@ -24,6 +24,8 @@ import { createNoiseBuffers } from './noise.js';
 import { MusicPlayer } from './music/MusicPlayer.js';
 import { AmbiencePlayer } from './AmbiencePlayer.js';
 import { MusicDirector, trackIdFor, pickVariant } from './musicDirector.js';
+import { enabledVariants, normalizeSelection } from './music/catalog.js';
+import { intensityFromGameTime } from './music/intensity.js';
 import { ambienceMix, nightFactor } from './ambience.js';
 import { renderUtterance, SPEECH_SR } from './speech/speechSynth.js';
 
@@ -91,6 +93,7 @@ export class AudioEngine {
     this.musicSeed = seed >>> 0; // semente das variações de música (determinística, fora da sim)
     this._musicSerial = 0; // quantas faixas já começaram (entra no sorteio da variação)
     this._lastVariant = {}; // família -> última variação tocada (nunca repete em seguida)
+    this.musicSelection = null; // seleção de faixas do jogador (Map do catálogo) ou null = padrões `inGame` do catálogo
     this.musicOn = !!musicOn; // preferência do jogador (música ligada)
     this.musicHold = false; // silêncio temporário (cutscene/missão)
     this.sceneProbe = null; // () => ({ timeOfDay, dayNight }) para a ambiência noturna
@@ -355,15 +358,34 @@ export class AudioEngine {
     this._startMusic(id, false);
   }
 
-  /** Começa a família `id` numa variação escolhida de forma determinística (semente + família + contador). */
+  /** Seleção de faixas (ver `catalog.js`): `null` = padrões do catálogo. Vale a partir da próxima troca de faixa. */
+  setMusicSelection(raw) {
+    this.musicSelection = normalizeSelection(raw);
+  }
+
+  /** Tempo de partida (s): evolução da música de paz (camadas, registro e andamento; ver `intensity.js`). Só apresentação. */
+  setMatchTime(seconds) {
+    this.music.setIntensity(intensityFromGameTime(seconds));
+  }
+
+  /**
+   * Começa a família `id` numa variação escolhida de forma determinística (semente + família + contador) entre as
+   * HABILITADAS no catálogo/seleção (com reserva nas atuais se nenhuma estiver habilitada).
+   */
   _startMusic(id, force) {
-    const variant = pickVariant(this.musicSeed, id, this._musicSerial++, this._lastVariant[id] ?? -1);
+    const pool = enabledVariants(id, this.musicSelection);
+    if (!pool.length) return;
+    const prev = this._lastVariant[id] ?? -1;
+    const k = pickVariant(this.musicSeed, id, this._musicSerial++, pool.indexOf(prev), pool.length);
+    const variant = pool[k];
     if (this.music.play(id, { fade: this.music.playing ? 2.5 : 1.2, variant, force })) this._lastVariant[id] = this.music.currentVariant;
   }
 
   /** Rodízio: depois de algumas voltas da mesma variação, troca por outra da mesma família (variedade em partidas longas). */
   _rotateMusic() {
-    if (this.music.playing && this.music.loopsPlayed() >= ROTATE_AFTER_LOOPS) this._startMusic(this.music.currentId, true);
+    if (!this.music.playing || this.music.loopsPlayed() < ROTATE_AFTER_LOOPS) return;
+    if (enabledVariants(this.music.currentId, this.musicSelection).length < 2) return; // só uma habilitada: segue em laço
+    this._startMusic(this.music.currentId, true);
   }
 
   _applyAmbience(force = false) {

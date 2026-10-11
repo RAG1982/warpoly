@@ -14,7 +14,9 @@
     },
     "hints": [
       { "pt-BR": "A IA inimiga vai atacar por conta própria; mantenha defesas.", "en": "The enemy AI will attack on its own; keep defenses up." },
-      { "pt-BR": "Aos 8 minutos chegam reforços do reino.", "en": "At 8 minutes reinforcements arrive from the realm." }
+      { "pt-BR": "Aos 8 minutos chegam reforços do reino, e com eles o herói Capitão Brann (único: se cair, não volta nesta missão).", "en": "At 8 minutes reinforcements arrive from the realm, and with them the hero Captain Brann (unique: if he falls, he does not return in this mission)." },
+      { "pt-BR": "Dica: a Oficina de Engenharia (nova) produz Balistas e Sapadores de Pólvora. Balistas arrasam construções de longe, mas não acertam o que está colado nelas; Sapadores correm até uma construção e explodem.", "en": "Tip: the new Engineering Workshop makes Ballistae and Powder Sappers. Ballistae wreck buildings from afar but cannot hit what is right next to them; Sappers run up to a building and blow up." },
+      { "pt-BR": "Dica: a Ferraria agora pesquisa Munição Explosiva (dano do cerco). Os inimigos guardam o salão com torres e uma Catapulta: derrube-as com cerco, não com espadas.", "en": "Tip: the Smithy now researches Explosive Ammunition (siege damage). The enemy guards its hall with towers and a Catapult: take them down with siege, not swords." }
     ]
   },
   "mapId": "bosques-2v2",
@@ -27,8 +29,12 @@
   "vars": { "armed": false },
 
   "setup": [
+    { "type": "setTier", "owner": "player", "tier": 2 },
     { "type": "tag", "select": { "buildingType": "great_hall", "owner": "enemy" }, "tag": "enemy-hall" },
-    { "type": "tag", "select": { "buildingType": "bandit_camp" }, "tag": "camps" }
+    { "type": "tag", "select": { "buildingType": "bandit_camp" }, "tag": "camps" },
+    { "type": "spawnBuilding", "owner": "enemy", "buildingType": "orc_watchtower", "x": -26, "z": -31, "tag": "gate-towers" },
+    { "type": "spawnBuilding", "owner": "enemy", "buildingType": "orc_watchtower", "x": -31, "z": -26, "tag": "gate-towers" },
+    { "type": "spawn", "owner": "enemy", "unitType": "catapult", "count": 1, "x": -31, "z": -31, "tag": "siege-guard", "guard": true }
   ],
 
   "objectives": [
@@ -42,6 +48,13 @@
       "title": { "pt-BR": "Manter 400 de pedra em estoque", "en": "Keep 400 stone in stock" } },
     { "id": "stable", "type": "build", "priority": "secondary", "buildingType": "stable", "count": 1,
       "title": { "pt-BR": "Construir um Estábulo", "en": "Build a Stable" } },
+    { "id": "workshop-built", "type": "build", "priority": "secondary", "buildingType": "workshop", "count": 1,
+      "title": { "pt-BR": "Erguer uma Oficina de Engenharia", "en": "Raise an Engineering Workshop" } },
+    { "id": "gate-towers", "type": "destroy", "priority": "secondary", "select": { "tag": "gate-towers" },
+      "title": { "pt-BR": "Derrubar as duas torres de guarda da Forja Negra", "en": "Tear down the two guard towers of the Black Forge" },
+      "description": { "pt-BR": "Fortes demais para espadas: use Balistas ou Sapadores.", "en": "Too tough for swords: use Ballistae or Sappers." } },
+    { "id": "sapper-blast", "type": "destroy", "priority": "hidden", "select": { "unitType": "sapper" }, "count": 1,
+      "title": { "pt-BR": "Detonar um Sapador de Pólvora", "en": "Detonate a Powder Sapper" } },
     { "id": "camp-hunter", "type": "destroy", "priority": "hidden", "select": { "tag": "camps" }, "count": 1,
       "title": { "pt-BR": "Limpar um acampamento de bandoleiros", "en": "Clear a bandit camp" } }
   ],
@@ -69,8 +82,29 @@
       ] },
     { "id": "reinforcements", "when": { "type": "time", "at": 480 },
       "actions": [
-        { "type": "spawn", "owner": "player", "units": [{ "type": "knight", "count": 4 }, { "type": "ballista", "count": 2 }], "x": 30, "z": 30 },
-        { "type": "dialog", "speaker": { "pt-BR": "Capitã Lyra", "en": "Captain Lyra" }, "portrait": "🏹", "text": { "pt-BR": "Reforços do reino, Mestre! Quatro cavaleiros e duas balistas.", "en": "Reinforcements from the realm, Master! Four knights and two ballistae." } }
+        { "type": "spawn", "owner": "player", "units": [{ "type": "hero_brann", "count": 1 }, { "type": "knight", "count": 4 }, { "type": "ballista", "count": 2 }], "x": 30, "z": 30 },
+        { "type": "dialog", "speaker": { "pt-BR": "Capitã Lyra", "en": "Captain Lyra" }, "portrait": "🏹", "text": { "pt-BR": "Reforços do reino, Mestre! O Capitão Brann, quatro espadachins e duas balistas. Dica: o Grito de Guerra de Brann enfurece o capitão em combate.", "en": "Reinforcements from the realm, Master! Captain Brann, four swordsmen and two ballistae. Tip: Brann's War Cry enrages the captain in battle." } }
+      ] },
+    { "id": "sappers-sent", "when": { "type": "objective", "id": "workshop-built", "status": "completed" },
+      "actions": [
+        { "type": "spawn", "owner": "player", "unitType": "sapper", "count": 2, "x": 32, "z": 32 },
+        { "type": "dialog", "speaker": { "pt-BR": "Mestre Orsolo", "en": "Master Orsolo" }, "portrait": "🔮", "text": { "pt-BR": "A oficina rendeu! Dois Sapadores de Pólvora para você. Dica: mande-os atacar uma torre; eles explodem ao chegar, então não os use contra tropas.", "en": "The workshop paid off! Two Powder Sappers for you. Tip: order them to attack a tower; they blow up on arrival, so do not use them against troops." } }
+      ] },
+    { "id": "towers-down", "when": { "type": "objective", "id": "gate-towers", "status": "completed" },
+      "actions": [
+        { "type": "giveResources", "owner": "player", "gold": 250 },
+        { "type": "message", "text": { "pt-BR": "Torres derrubadas: o caminho até o salão está aberto. +250 de ouro.", "en": "Towers down: the way to the hall is open. +250 gold." } }
+      ] },
+    { "id": "sapper-boom", "when": { "type": "objective", "id": "sapper-blast", "status": "completed" },
+      "actions": [
+        { "type": "giveResources", "owner": "player", "gold": 150 },
+        { "type": "message", "text": { "pt-BR": "Que estrondo! +150 de ouro pela pólvora bem gasta.", "en": "What a blast! +150 gold for well-spent powder." } }
+      ] },
+    { "id": "forge-raid", "when": { "type": "time", "at": 360 },
+      "actions": [
+        { "type": "spawn", "owner": "enemy", "units": [{ "type": "grunt", "count": 3 }, { "type": "arsonist", "count": 2 }], "x": -30, "z": -30, "order": { "kind": "attackMove", "x": 30, "z": 30 } },
+        { "type": "sound", "id": "alarm" },
+        { "type": "message", "text": { "pt-BR": "Os Incendiários da Forja Negra vêm queimar sua base! Abata-os antes que cheguem às construções.", "en": "The Black Forge Arsonists come to burn your base! Cut them down before they reach your buildings." } }
       ] },
     { "id": "enemy-hall-down", "when": { "type": "objective", "id": "burn-forge", "status": "completed" },
       "actions": [

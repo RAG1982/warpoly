@@ -5,10 +5,18 @@
  * Formato do índice (`src/data/campaigns/<id>/campaign.json`, versão 1):
  *   { format:"warpolycampaign", version:1, id, factionId, provisional?, title, subtitle?, premise, heroes?:[],
  *     missions:[{ id, requires?:[missionId…], carryOver?:{ from?, resources:{gold,wood,stone: fração 0..1}, max?, heroes?:[] } }] }
+ * F8-05b: cada entrada pode ter `unlocks: { units:[], buildings:[], research:[], heroes:[] }` = o que a missão LIBERA (progressão
+ * da campanha). O conjunto DISPONÍVEL na missão N é a união cumulativa dos `unlocks` das missões 1..N (`availableTech`); a partida
+ * da campanha leva isso em `MatchConfig.techRestriction` (`techRestrictionFor`). Missões isoladas (menu "Missões") não são restritas.
  * `epilogue?` (tela final da campanha): { title:{pt-BR,en}, paragraphs:[{pt-BR,en} x 3..5], faction:'human'|'orc', credits?:{pt-BR,en} }.
  * Os ids de `missions` são ids de missões F8-04 (já registradas). A ordem do array é a ordem de exibição; `requires`
  * só pode citar missões ANTERIORES (sem ciclos). Sem `requires` = disponível desde o início.
  */
+import { UNITS } from '../data/units.js';
+import { BUILDINGS } from '../data/buildings.js';
+import { RESEARCH } from '../data/upgrades.js';
+import { TECH_KINDS, techItemProblem, parseResearchToken, researchToken } from '../sim/techRestriction.js';
+
 export const CAMPAIGN_FORMAT = 'warpolycampaign';
 export const CAMPAIGN_VERSION = 1;
 const ID_RE = /^[a-z0-9_-]{1,48}$/;
@@ -53,6 +61,7 @@ export function validateCampaign(def, opts = {}) {
     return { ok: false, errors };
   }
   const seen = new Set();
+  const unlocked = new Set();
   def.missions.forEach((m, i) => {
     const p = `missions[${i}]`;
     if (!isObj(m) || typeof m.id !== 'string') return err(p, 'precisa de id');
@@ -78,9 +87,46 @@ export function validateCampaign(def, opts = {}) {
         if (c.heroes !== undefined && !Array.isArray(c.heroes)) err(`${p}.carryOver.heroes`, 'deve ser lista (reservado: F4-08)');
       }
     }
+    if (m.unlocks !== undefined) validateUnlocks(m.unlocks, `${p}.unlocks`, def, errors, unlocked);
     seen.add(m.id);
   });
   return { ok: errors.length === 0, errors };
+}
+
+/** Facção do item compatível com a campanha (a da campanha ou neutra: petroleiro, barcaça, plataforma)? */
+function factionOk(itemFaction, campaignFaction) {
+  return !itemFaction || itemFaction === 'neutral' || itemFaction === campaignFaction;
+}
+
+/** Valida o bloco `unlocks` de uma missão: tipos existentes em `src/data`, da facção da campanha, sem repetição entre missões. */
+function validateUnlocks(u, p, def, errors, unlocked) {
+  const err = (path, m) => errors.push(`${path}: ${m}`);
+  if (!isObj(u)) return err(p, 'deve ser objeto');
+  for (const k of Object.keys(u)) if (!TECH_KINDS.includes(k)) err(`${p}.${k}`, `campo desconhecido (use ${TECH_KINDS.join('|')})`);
+  for (const kind of TECH_KINDS) {
+    const list = u[kind];
+    if (list === undefined) continue;
+    if (!Array.isArray(list)) { err(`${p}.${kind}`, 'deve ser lista'); continue; }
+    for (const id of list) {
+      const prob = techItemProblem(kind, id);
+      if (prob) { err(`${p}.${kind}`, prob); continue; }
+      let fac;
+      if (kind === 'units' || kind === 'heroes') fac = UNITS[id].faction;
+      else if (kind === 'buildings') fac = BUILDINGS[id].faction;
+      else fac = RESEARCH[parseResearchToken(id).id].faction;
+      if (!factionOk(fac, def.factionId)) err(`${p}.${kind}`, `"${id}" é da facção ${fac}, a campanha é ${def.factionId}`);
+      if (kind === 'heroes' && UNITS[id].faction !== def.factionId) err(`${p}.${kind}`, `herói "${id}" não é da campanha`);
+      const key = `${kind}:${id}`;
+      if (unlocked.has(key)) err(`${p}.${kind}`, `"${id}" já foi liberado antes`);
+      else if (kind === 'research') {
+        const r = parseResearchToken(id);
+        if (r.level > 1 && !unlocked.has(`research:${researchToken(r.id, r.level - 1)}`) && !(u.research || []).includes(researchToken(r.id, r.level - 1))) {
+          err(`${p}.research`, `"${id}" precisa do nível anterior liberado antes ou junto`);
+        }
+      }
+      unlocked.add(key);
+    }
+  }
 }
 
 export function assertCampaign(def, opts) {
@@ -146,6 +192,77 @@ export function startingResourcesFor(missionDef, entry, completed) {
     base[k] += Math.min(cap, Math.floor(frac * Math.max(0, prev.resources[k] || 0)));
   }
   return base;
+}
+
+// ------------------------------------------------------------------ liberação progressiva (F8-05b)
+
+/** Posição (0-based) da missão: aceita o índice ou o id; `-1` se não existir. */
+function indexOfMission(def, ref) {
+  if (typeof ref === 'number') return ref < def.missions.length ? ref : def.missions.length - 1;
+  return def.missions.findIndex((m) => m.id === ref);
+}
+
+/** Algum `unlocks` na campanha? (sem nenhum, a campanha não restringe a árvore tecnológica) */
+export const hasTechProgression = (def) => def.missions.some((m) => isObj(m.unlocks));
+
+/**
+ * O que a campanha LIBERA na missão `missionRef` (índice 0-based ou id), só ela (as novidades): `{units, buildings, research, heroes}` (listas).
+ */
+export function missionUnlocks(def, missionRef) {
+  const i = indexOfMission(def, missionRef);
+  const u = (i >= 0 && def.missions[i].unlocks) || {};
+  return Object.fromEntries(TECH_KINDS.map((k) => [k, [...(u[k] || [])]]));
+}
+
+/**
+ * Conjunto DISPONÍVEL na missão `missionRef` (índice 0-based — 0 = missão 1 — ou id da missão): a união CUMULATIVA dos `unlocks`
+ * das missões 1..N. Função pura; sem `unlocks` devolve conjuntos vazios (use `hasTechProgression` para saber se há restrição).
+ * `research` usa fichas `"id"` (nível 1) e `"id@2"` (nível 2).
+ * @returns {{units:Set<string>, buildings:Set<string>, research:Set<string>, heroes:Set<string>}}
+ */
+export function availableTech(def, missionRef) {
+  const out = { units: new Set(), buildings: new Set(), research: new Set(), heroes: new Set() };
+  const idx = indexOfMission(def, missionRef);
+  for (let i = 0; i <= idx; i++) {
+    const u = def.missions[i].unlocks;
+    if (!u) continue;
+    for (const kind of TECH_KINDS) for (const id of u[kind] || []) out[kind].add(id);
+  }
+  return out;
+}
+
+/** Número (1-based) da missão que libera o item, ou `null` se a campanha nunca o libera. */
+export function unlockMissionOf(def, kind, id) {
+  for (let i = 0; i < def.missions.length; i++) {
+    const u = def.missions[i].unlocks;
+    if (u && (u[kind] || []).includes(id)) return i + 1;
+  }
+  return null;
+}
+
+/**
+ * `MatchConfig.techRestriction` da missão `missionRef` para o(s) jogador(es) `players` (padrão: [0], o jogador local das missões
+ * da campanha): disponível = `availableTech`, mais `later` (itens que só chegam em missão posterior → dica "Disponível na missão N"),
+ * `mission` e `unlocks` (novidades da missão, para o anúncio). `null` quando a campanha não tem progressão.
+ */
+export function techRestrictionFor(def, missionRef, { players = [0] } = {}) {
+  if (!hasTechProgression(def)) return null;
+  const idx = indexOfMission(def, missionRef);
+  if (idx < 0) return null;
+  const avail = availableTech(def, idx);
+  const cfg = { players: [...players] };
+  for (const kind of TECH_KINDS) cfg[kind] = [...avail[kind]];
+  const later = {};
+  for (const kind of TECH_KINDS) {
+    later[kind] = {};
+    for (let i = idx + 1; i < def.missions.length; i++) {
+      for (const id of (def.missions[i].unlocks && def.missions[i].unlocks[kind]) || []) later[kind][id] = i + 1;
+    }
+  }
+  cfg.later = later;
+  cfg.mission = idx + 1;
+  cfg.unlocks = missionUnlocks(def, idx);
+  return cfg;
 }
 
 /**

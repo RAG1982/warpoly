@@ -1,6 +1,6 @@
 /**
  * conditions.js — F8-04: avaliação das condições dos gatilhos (`time`, `every`, `area`, `dead`, `count`, `var`,
- * `objective`, `resource`, `trigger`) e dos combinadores `all` / `any` / `not`. Sem efeitos colaterais.
+ * `objective`, `resource`, `trigger`, `research`) e dos combinadores `all` / `any` / `not`. Sem efeitos colaterais.
  */
 import { SIM_DT } from '../constants.js';
 import { compare, inArea, isAlive, ownerMatches, resolveOwnerId, selectEntities } from './selectors.js';
@@ -64,6 +64,10 @@ export function evalCondition(rt, cond) {
     case 'trigger': {
       const t = rt.triggers.get(cond.id);
       return !!t && t.fired > 0;
+    }
+    case 'research': { // F8-05b
+      const p = gm.getPlayer(resolveOwnerId(gm, cond.owner ?? 'player'));
+      return !!p && p.getResearchLevel(cond.id) >= (cond.level ?? 1);
     }
     default:
       return false;

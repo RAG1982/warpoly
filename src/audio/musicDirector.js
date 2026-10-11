@@ -7,6 +7,8 @@
  * a música não ficar trocando a cada golpe isolado. O tempo é injetado (`now`, segundos).
  */
 
+import { VARIANTS_PER_FAMILY } from './music/musicScores.js';
+
 export const MUSIC_STATES = Object.freeze(['peace', 'combat']);
 export const MUSIC_FACTIONS = Object.freeze(['human', 'orc']);
 
@@ -23,6 +25,31 @@ export function trackIdFor(faction, state) {
   const f = MUSIC_FACTIONS.includes(faction) ? faction : 'human';
   const s = state === 'combat' ? 'combat' : 'peace';
   return `${f}_${s}`;
+}
+
+/** Hash FNV-1a de 32 bits de uma string (puro). */
+function hashStr(str) {
+  let h = 0x811c9dc5;
+  for (let i = 0; i < str.length; i++) {
+    h ^= str.charCodeAt(i);
+    h = Math.imul(h, 0x01000193);
+  }
+  return h >>> 0;
+}
+
+/**
+ * Variação (0..count-1) da faixa de uma família para o `serial`-ésimo início. DETERMINÍSTICA (semente da sessão de áudio +
+ * família + contador de trocas) e FORA da simulação: não usa o RNG da sim, Math.random nem relógio. Nunca repete a variação
+ * anterior `prev` (quando há mais de uma), então a música muda a cada troca/volta.
+ */
+export function pickVariant(seed, family, serial, prev = -1, count = VARIANTS_PER_FAMILY) {
+  if (!(count > 1)) return 0;
+  let h = hashStr(`${seed >>> 0}|${family}|${serial | 0}`);
+  h = Math.imul(h ^ (h >>> 15), 0x2c1b3c6d);
+  h = (h ^ (h >>> 12)) >>> 0;
+  let v = h % count;
+  if (v === prev) v = (v + 1 + ((h >>> 9) % (count - 1))) % count;
+  return v;
 }
 
 export class MusicDirector {

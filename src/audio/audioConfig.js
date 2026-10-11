@@ -78,3 +78,25 @@ export function clampVolume(v, fallback = 0) {
 
 /** RNG de RENDER do áudio (mulberry32; semente fixa => som reproduzível), independente do RNG da simulação. */
 export const createAudioRng = createRenderRng;
+
+/**
+ * Escuta pela CENA VISÍVEL e pelo zoom (feedback do dono, 2026-10-11): só soa o que está dentro do frustum da câmera
+ * (mais uma margem) e, quanto mais afastada a câmera (`SceneManager.zoomLevel` 0,5 perto … 1,8 longe), mais baixo e
+ * mais curto é o alcance. Sons de interface/alertas globais (sem posição) não passam por aqui.
+ *  - margin        fração da TELA além da borda que ainda conta como "na cena" (0,08 = 8 %; o NDC mede 2, então 2 × margin)
+ *  - nearZoom/farZoom  extremos do zoom do jogo; fora deles o valor satura
+ *  - nearDb/farDb  volume geral dos efeitos posicionais em cada extremo (dB; interpolado linearmente no zoom)
+ *  - refNear/refFar    raio (unidades de mundo) de ganho cheio, em volta do alvo da câmera, no zoom perto/longe
+ *  - maxNear/maxFar    raio onde o som some (mesmos extremos)
+ */
+export const AUDIO_SCENE = Object.freeze({
+  margin: 0.08,
+  nearZoom: 0.5,
+  farZoom: 1.8,
+  nearDb: 2,
+  farDb: -6,
+  refNear: 34,
+  refFar: 16,
+  maxNear: 120,
+  maxFar: 64
+});

@@ -25,10 +25,10 @@
 |---|---|
 | F7-00b | Migração de modelos para Blender. Arte A e B concluídas; restam remanescentes procedurais (flora, rochas, terreno, água, machado) e revisão final. Local (Blender). |
 | F7-09 | Ícones, retratos e artes 2D (`public/ui`, 3,4 MB). Faltam sprites de modelos sem `.glb` (Ovelha, Submersível, Tartaruga, Refinaria, Fundição, Forja Naval, Caldeirão). |
-| F7-02 | Cores de time: **decisão do dono** (a spec pede máscara em canal/área e uniform; implementado: material `TeamColor`). |
-| F8-03 | Editor de mapas: **decisão do dono** (gerador `painted` registrado em `src/sim/terrainGenerators.js`, contra a regra de não tocar `src/sim`). |
-| F8-05 | Campanha Aliança (8 missões, premissa **provisória**): **decisão do dono** (aprovar premissa); verificar início de missão no jogo e carry-over. |
-| F9-03 | Lockstep WebRTC: **decisão do dono** (checksum a cada 10 turnos em jogo vs "por turno" da spec). |
+| F7-02 | Cores de time: **decidido (2026-10-11): fica como está** (material `TeamColor`); sem máscara/uniform. Falta só a revisão visual local. |
+| F8-03 | Editor de mapas: **decidido (2026-10-11): `painted` fica em `src/sim/terrainGenerators.js`** (exceção à regra, aceita). |
+| F8-05 | Campanha Aliança (8 missões): **premissa "A Marcha da Aliança" APROVADA (2026-10-11)**. Falta verificar início de missão no jogo e carry-over (local). Destrava a F8-06. |
+| F9-03 | Lockstep WebRTC: **decidido (2026-10-11): `checkEvery = 10` em jogo** (1 s, como em `docs/09_MULTIPLAYER.md` §3); 1 só nos testes. Sem mudança de código. |
 | F9-05 | Replays, inclusive online (`takeLog`, PR #11): falta verificar replay online no navegador. Local. |
 | F10-05 | PWA, deploy, chunks por facção (PR #15): falta verificar carga por facção no navegador. Local. |
 
@@ -41,7 +41,7 @@
 - **NEW-41:** resolvido na forma de isolamento do singleton `fogUniforms` no teste (`99edfbb`). Verificação: 3 execuções isoladas verdes; suíte completa verde. Se a intermitência voltar, reabrir.
 - **Campanha Aliança:** premissa provisória. Início de missão pelo navegador não verificado até o fim.
 - **Backlog aberto (auditoria `docs/AUDITORIA_BACKLOG.md`):**
-  - NEW-1: `GLTFBuildingLoader` só usado por `src/render/buildings/orc/GreatHall.js:3`. Decisão: remover ou adotar.
+  - NEW-1: **decidido remover (2026-10-11)**; PR `cloud/NEW-1-remove-loader` (import sem uso em `GreatHall.js` e arquivo `src/core/GLTFBuildingLoader.js` removidos).
   - NEW-6: sem ORM de texturas nem Worker/OffscreenCanvas (`grep` em `src/` vazio). Precisa de spec.
   - NEW-9: IA destrói HQ cedo (testes da F2-01). Depende de F5-03 e de balanceamento.
   - NEW-14: `Unit.update` domina a CPU (~4,5 ms com 310 unidades). LOD de animação existe (`src/sim/constants.js:31`), falta medir.
@@ -69,13 +69,14 @@ Para retomar: `git fetch origin && git checkout -b cloud/<ID> origin/task/<nome>
 - **Conteúdo:** F8-06 (campanha Horda, 8+ missões) — só depois de aprovar a premissa da Aliança (F8-05).
 - **Adiado pelo dono:** F5-03 (níveis de dificuldade, DOING parcial: meta Difícil×Normal ≥ 60% não atingida); NEW-20 (teste intermitente, spec em `docs/specs/NEW-20-teste-intermitente.md`).
 
-## 5. Decisões pendentes do dono (bloqueiam; não são de implementação)
-1. F7-02: máscara de cor por canal/uniform, ou aceitar tinta por material?
-2. F8-03: gerador `painted` fica em `src/sim`, ou move para `src/data`?
-3. F8-05: aprova a premissa "A Marcha da Aliança" (provisória)?
-4. F9-03: checksum a cada turno (custo baixo) ou a cada 10 (atual)?
-5. NEW-1: remover `GLTFBuildingLoader` (recomendado) ou adotar em `GreatHall.js`?
-6. PR #6 (`cloud/F3-01`, 29/09): fechar como superado (a F3-01 já está no master).
+## 5. Decisões do dono (2026-10-11) — todas tomadas
+1. F7-02: **fica como está** (material `TeamColor`).
+2. F8-03: **fica como está** (`painted` em `src/sim`).
+3. F8-05: **premissa "A Marcha da Aliança" aprovada** (F8-06, campanha da Horda, liberada para briefing).
+4. F9-03: **mantém `checkEvery = 10`** em jogo.
+5. NEW-1: **remover** `GLTFBuildingLoader` (PR `cloud/NEW-1-remove-loader`).
+6. PR #6 (`cloud/F3-01`): **fechado sem mesclar**.
+7. Autorizado o uso das branches `task/F7-08` e `task/F10-04` na nuvem. **Ainda não autorizado:** `src/ai/**` (NEW-44, NEW-25, NEW-34, NEW-51).
 
 ## 6. Verificações que só o dono pode fazer (GPU / navegador / Blender)
 - Replay online e carga por facção (F9-05, F10-05).

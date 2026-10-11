@@ -70,14 +70,14 @@ Antes de iniciar um item que toca `src/sim/` ou `src/ai/`: confirme que o `maste
 | 4 | NEW-35 | Ataque no chão do cerco (clique direito no chão): novo comando `ATTACK_GROUND` em `src/sim/commands.js` e `CommandExecutor`, input em `InputManager`. Determinístico. | `src/sim/commands.js`, `CommandExecutor.js`, `InputManager.js`, testes | `commands.test.js` cobre validação; `determinism.test.js` verde |
 | 5 | NEW-26 | Card de inspeção para unidade/construção neutra (bandido): `GameManager.selectSingle` só aceita o jogador local hoje. Permitir inspeção (sem comandos) de neutros. | `src/sim/GameManager.js` (mínimo), `src/ui/UIManager.js` | teste de seleção de neutro; sem comando emitido |
 | 6 | NEW-24 | Muralha: portão visual entre segmentos e segmentos no minimapa (`UIManager.drawMinimap`). | `src/render/**`, `src/ui/UIManager.js` | teste de posição do portão; captura pendente (local) |
-| 7 | F9-03 *(só após decisão do dono)* | Se o dono confirmar checksum por turno: `checkEvery = 1` em jogo e teste. Senão, nada. | `src/net/LockstepSession.js` | `lockstepNet.test.js` verde |
+| 7 | F9-03 *(decidido 2026-10-11: manter `checkEvery = 10`; nada a fazer)* | Sem mudança de código. | `src/net/LockstepSession.js` | `lockstepNet.test.js` verde |
 
 Dependem de outra decisão ou de tarefa anterior (não lançar ainda):
 - **NEW-44** (IA sem madeira/naval) e **NEW-25**, **NEW-34** (IA): mexem em `src/ai/**`. Só depois de o dono confirmar que o WIP local não será usado. Validação: soak Node com ≤ 10 partidas por configuração, A/B. Depois, **NEW-51** (seed 82).
-- **F8-06** (campanha Horda): só após aprovar a premissa da campanha Aliança (F8-05).
-- **F8-03** (`painted` fora de `src/sim`): só após decisão do dono.
-- **NEW-1** (`GLTFBuildingLoader`, usado só por `GreatHall.js`): recomendado remover; só após confirmar.
-- **F7-08** (áudio) e **F10-04** (CI de desempenho): têm branches locais com trabalho parcial (`task/F7-08`, `task/F10-04`). Só entram na nuvem depois de o dono autorizar o push dessas branches.
+- **F8-06** (campanha Horda): premissa da Aliança (F8-05) **aprovada em 2026-10-11**; o briefing da F8-06 ainda precisa ser escrito.
+- **F8-03** (`painted`): decidido em 2026-10-11 — fica em `src/sim`; nada a fazer.
+- **NEW-1** (`GLTFBuildingLoader`): decidido remover em 2026-10-11 (PR `cloud/NEW-1-remove-loader`).
+- **F7-08** (áudio) e **F10-04** (CI de desempenho): branches `task/F7-08` e `task/F10-04` no GitHub, **uso autorizado em 2026-10-11** (retomar com `git checkout -b cloud/<ID> origin/task/<nome> && git merge origin/master`).
 - **F1-10** (LOD e culling), **NEW-6** (ORM e texturas), **NEW-14** (CPU da animação): precisam de spec antes (Sonnet escreve em `docs/specs/`).
 
 ## 4. Tarefas que ficam no local (não vão para a nuvem)

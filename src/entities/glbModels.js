@@ -3,6 +3,8 @@ import * as THREE from 'three';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 import { MeshoptDecoder } from 'three/examples/jsm/libs/meshopt_decoder.module.js';
 import { enableShadows } from '../models/materials.js';
+import { UNITS } from '../data/units.js';
+import { BUILDINGS } from '../data/buildings.js';
 
 /**
  * Modelos .glb gerados pelo pipeline Blender (tools/blender/, tarefa F7-00).
@@ -73,6 +75,8 @@ export const GLB_MODELS = {
   tree_oak: { url: `${BASE}models/tree_oak.glb`, root: 'TreeOak', type: null },
   tree_pine: { url: `${BASE}models/tree_pine.glb`, root: 'TreePine', type: null },
   tree_autumn: { url: `${BASE}models/tree_autumn.glb`, root: 'TreeAutumn', type: null },
+  // F7-00b (agente B): bétula (4º tipo de árvore instanciada; `species: 'birch'` nos mapas)
+  tree_birch: { url: `${BASE}models/tree_birch.glb`, root: 'TreeBirch', type: null },
   // F7-00b lote 2 (grupo 3): blocos de muralha instanciados (`WallBatch`)
   wall_human: { url: `${BASE}models/wall_human.glb`, root: 'WallHuman', type: null },
   wall_orc: { url: `${BASE}models/wall_orc.glb`, root: 'WallOrc', type: null },
@@ -105,29 +109,48 @@ export const glbEnabled = (() => {
 })();
 
 export const glbTemplates = new Map();
-let loadPromise = null;
 
 /**
- * Carrega (uma vez) todos os .glb de GLB_MODELS. Falhas individuais só geram
- * aviso: o modelo procedural continua sendo o fallback.
+ * F10-05b: facção dona de cada .glb ('human' | 'orc' | 'neutral'), derivada de `faction` em src/data (unidade ou
+ * construção com a mesma chave); chaves fora das tabelas (árvores, jazidas...) são 'neutral' = sempre carregadas.
  */
-export function loadGlbTemplates() {
-  if (loadPromise) return loadPromise;
-  const loader = new GLTFLoader();
-  loader.setMeshoptDecoder(MeshoptDecoder);
-  const jobs = Object.entries(GLB_MODELS).map(([key, def]) =>
-    loader.loadAsync(def.url).then(gltf => {
-      const root = gltf.scene.getObjectByName(def.root) || gltf.scene;
-      if (root.parent) root.parent.remove(root);
-      root.position.set(0, 0, 0);
-      enableShadows(root);
-      glbTemplates.set(key, root);
-    }).catch(err => {
-      console.warn(`[glbModels] .glb indisponível (${def.url}), usando modelo procedural`, err);
-    })
-  );
-  loadPromise = Promise.all(jobs).then(() => glbTemplates);
-  return loadPromise;
+const FACTION_OVERRIDES = { orc_oil_platform: 'orc', orc_frigate: 'orc', orc_barge: 'orc', orc_dreadnought: 'orc', orc_tanker: 'orc' };
+export function glbFaction(key) {
+  if (FACTION_OVERRIDES[key]) return FACTION_OVERRIDES[key];
+  const f = (UNITS[key] && UNITS[key].faction) || (BUILDINGS[key] && BUILDINGS[key].faction) || 'neutral';
+  return f === 'human' || f === 'orc' ? f : 'neutral';
+}
+
+const jobs = new Map(); // chave do GLB_MODELS → Promise (cada .glb é baixado uma única vez)
+let loader = null;
+
+function loadOne(key) {
+  if (jobs.has(key)) return jobs.get(key);
+  const def = GLB_MODELS[key];
+  loader ||= new GLTFLoader().setMeshoptDecoder(MeshoptDecoder);
+  const job = loader.loadAsync(def.url).then(gltf => {
+    const root = gltf.scene.getObjectByName(def.root) || gltf.scene;
+    if (root.parent) root.parent.remove(root);
+    root.position.set(0, 0, 0);
+    enableShadows(root);
+    glbTemplates.set(key, root);
+  }).catch(err => {
+    console.warn(`[glbModels] .glb indisponível (${def.url}), usando modelo procedural`, err);
+  });
+  jobs.set(key, job);
+  return job;
+}
+
+/**
+ * Carrega os .glb de GLB_MODELS (cada um uma única vez, mesmo em chamadas repetidas). Sem argumento carrega TODOS
+ * (inspetor, pré-carga completa). Com `factions` (ex.: `['human']`) carrega só essas facções + os neutros; chamadas
+ * posteriores completam o que faltar. Falhas individuais só geram aviso: o modelo procedural continua sendo o fallback.
+ * @param {string[]|null} [factions]
+ */
+export function loadGlbTemplates(factions = null) {
+  const wanted = factions && new Set([...factions, 'neutral']);
+  const pending = Object.keys(GLB_MODELS).filter(key => !wanted || wanted.has(glbFaction(key))).map(loadOne);
+  return Promise.all(pending).then(() => glbTemplates);
 }
 
 /**
@@ -135,8 +158,8 @@ export function loadGlbTemplates() {
  * Chamada na preload (quando habilitada) e em caminhos com ?skipPreload.
  * Falhas são registradas (console.warn) mas não impedem continuação com modelos procedurais.
  */
-export function ensureGlbLoaded() {
-  return loadGlbTemplates();
+export function ensureGlbLoaded(factions = null) {
+  return loadGlbTemplates(factions);
 }
 
 // Cor de time (F7-02): implementação em render/teamColor.js (máscara = materiais `TeamColor`, cache por cor).

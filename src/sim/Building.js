@@ -112,6 +112,8 @@ export class Building {
     this.mesh.userData.entity = this;
 
     this.isSelected = false;
+    /** Cor `#rrggbb` do anel de seleção (ação de missão `spawnBuilding.markColor`); `null` = anel padrão. Só render: fora do checksum. */
+    this.markColor = null;
     /** Já sofreu dano de combate (obra em andamento só mostra chamas de dano depois disso). */
     this.wasDamaged = false;
     this.isDead = false;

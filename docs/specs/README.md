@@ -1,4 +1,4 @@
-# Índice das especificações (status em 2026-09-30)
+# Índice das especificações (status em 2026-10-10)
 
 Cada spec tem na 3ª linha `> **Status: ...**`. Regras comuns a todas: [`_COMUM.md`](_COMUM.md). Fluxo e regras de modelos: [`../SESSION_HANDOFF.md`](../SESSION_HANDOFF.md).
 
@@ -28,7 +28,7 @@ Cada spec tem na 3ª linha `> **Status: ...**`. Regras comuns a todas: [`_COMUM.
 ## ⏸ ADIADA
 | Spec | Motivo |
 |---|---|
-| [F7-00d-lacaio-blender.md](F7-00d-lacaio-blender.md) | Modelagem 3D por **Sonnet 5.5**, e só depois do código pronto |
+| [F7-00d-lacaio-blender.md](F7-00d-lacaio-blender.md) | Arte liberada pelo dono em 2026-10-09 (pode ser lançada; modelagem por **Sonnet 5.5**) |
 | [NEW-20-teste-intermitente.md](NEW-20-teste-intermitente.md) | Adiada pelo dono (executor sem permissão para `npx vitest`) |
 
 ## ✅ PRONTAS (mescladas no master)

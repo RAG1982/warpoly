@@ -17,18 +17,29 @@ export function constructionStage(progress, complete = false) {
 /** Tempos do cadáver visual: cai (espera), permanece e decai (afunda e encolhe). */
 export const CORPSE = Object.freeze({ delay: 0.9, linger: 9, decay: 5 });
 
+function setDecay(r, visible, scale, sink, done) {
+  r.visible = visible;
+  r.scale = scale;
+  r.sink = sink;
+  r.done = done;
+  return r;
+}
+
 /**
  * Estado do cadáver visual na idade `age` (s desde a morte). `age < delay` = ainda não aparece.
+ * `out` (opcional) é preenchido e devolvido em vez de criar um objeto novo: `CorpseDecals.update` chama isto por
+ * cadáver a cada quadro e passa um objeto fixo (sem alocação por quadro).
  * @returns {{visible:boolean, scale:number, sink:number, done:boolean}}
  */
-export function corpseDecay(age, c = CORPSE) {
-  if (!(age >= c.delay)) return { visible: false, scale: 0, sink: 0, done: false };
+export function corpseDecay(age, c = CORPSE, out = null) {
+  const r = out || { visible: false, scale: 0, sink: 0, done: false };
+  if (!(age >= c.delay)) return setDecay(r, false, 0, 0, false);
   const a = age - c.delay;
-  if (a <= c.linger) return { visible: true, scale: 1, sink: 0, done: false };
+  if (a <= c.linger) return setDecay(r, true, 1, 0, false);
   const k = Math.min(1, (a - c.linger) / c.decay);
-  if (k >= 1) return { visible: false, scale: 0, sink: 1, done: true };
+  if (k >= 1) return setDecay(r, false, 0, 1, true);
   const e = k * k * (3 - 2 * k);
-  return { visible: true, scale: 1 - 0.55 * e, sink: e * 0.22, done: false };
+  return setDecay(r, true, 1 - 0.55 * e, e * 0.22, false);
 }
 
 const at = (pos) => ({ x: pos.x, y: pos.y || 0, z: pos.z });

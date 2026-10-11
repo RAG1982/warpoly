@@ -17,6 +17,7 @@ import { collectSharedResources, disposeObjectTree } from '../render/sceneDispos
 import { createAudioEvents } from '../audio/AudioEvents.js';
 import { detectAudioLevel } from '../audio/audioEnv.js';
 import { createVfxEvents } from '../render/VfxEvents.js';
+import { RuinsManager } from '../render/RuinsManager.js';
 import { VfxSystem } from '../render/vfx/VfxSystem.js';
 import { selectVfxLevel } from '../render/vfx/vfxConfig.js';
 import { getTextureQuality } from '../models/textureQuality.js';
@@ -135,6 +136,7 @@ export class MatchSession {
     this._disposeAudioEvents = null;
     this._disposeVfxEvents = null;
     this._disposeUiEvents = null;
+    this.ruins = null;
     if (!this.gameManager.headless) {
       // F7-08: nível de áudio do preset atual (`?audio=` força; automação fica muda) e tileset do mapa (ambiência)
       sound.setLevel?.(detectAudioLevel(QualitySettings.current, getTextureQuality()));
@@ -148,6 +150,9 @@ export class MatchSession {
       this.gameManager.hazardView = new HazardView(scene, this.gameManager); // F4-04b
       this.projectileViews = new ProjectileViews(this.gameManager, scene); // F2-08: malhas dos projéteis
       this._disposeUiEvents = createUiEvents(this.gameManager, this.uiManager);
+      // NEW-19: ruínas visuais (só apresentação)
+      this.ruins = new RuinsManager(this.gameManager, scene, QualitySettings);
+      this.ruins.attach();
       // F6-09: tutorial jogável (missão 0) — painel de objetivo e setas só nesta partida.
       this.tutorialController = matchConfig.tutorial
         ? new TutorialController({
@@ -213,6 +218,7 @@ export class MatchSession {
     this.inputManager.update(delta);
     this.sceneManager.updateCamera(delta);
     this.water.update(elapsed);
+    this.decorations?.applyLod(this.sceneManager.zoomLevel); // F1-10: decorações pequenas somem no zoom máximo
     if (simulate) {
       const gm = this.gameManager;
       let alpha;
@@ -229,6 +235,7 @@ export class MatchSession {
       this.projectileViews?.update(alpha);
       this.particleSystem.update(delta);
       this.vfx?.update(delta);
+      this.ruins?.update(delta);
     } else {
       // Pausado: mantém a pose de simulação (sem avançar), billboards seguem a câmera.
       this._presentFrame(0, 1);
@@ -279,6 +286,7 @@ export class MatchSession {
     this.projectileViews?.dispose();
     this.projectileViews = null;
     this._disposeUiEvents?.();
+    this.ruins?.dispose();
     this.tutorialController?.dispose();
     this.tutorialController = null;
     this.missionController?.dispose(); // F8-04

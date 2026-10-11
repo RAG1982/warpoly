@@ -13,17 +13,12 @@ const BASE = process.env.BASE_URL || 'http://localhost:5180';
 
 const shots = [
   // [arquivo, query do inspetor]
-  ['insp_grunt_old', 'model=grunt&light=day'],
   ['insp_grunt_new', 'model=grunt_glb&light=day'],
-  ['insp_grunt_old_side', 'model=grunt&light=day&cam=side'],
   ['insp_grunt_new_side', 'model=grunt_glb&light=day&cam=side'],
-  ['insp_grunt_old_fight', 'model=grunt&light=day&anim=fight&time=0.3'],
   ['insp_grunt_new_fight', 'model=grunt_glb&light=day&anim=fight&time=0.3'],
-  ['insp_grunt_old_strike', 'model=grunt&light=day&anim=fight&time=0.55'],
   ['insp_grunt_new_strike', 'model=grunt_glb&light=day&anim=fight&time=0.55'],
   ['insp_grunt_new_walk', 'model=grunt_glb&light=day&anim=walk&time=0.2'],
   ['insp_grunt_new_die', 'model=grunt_glb&light=day&anim=die&time=1.4'],
-  ['insp_castle_old', 'model=castle&light=day'],
   ['insp_castle_new', 'model=castle_glb&light=day'],
 ];
 

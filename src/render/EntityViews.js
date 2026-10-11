@@ -8,6 +8,9 @@ import { ResourceDepositView } from './ResourceDepositView.js';
 import { CritterView } from './CritterView.js';
 import { createBuildingView } from './createBuildingView.js';
 import { WallBatch } from './WallView.js';
+import { WallGates } from './WallGate.js';
+import { playerColor } from '../ui/minimapView.js';
+import { NEUTRAL_HOSTILE_ID } from '../sim/EntityIds.js';
 import { BuildingView } from './BuildingView.js';
 import { UnitView } from './UnitView.js';
 import { TreeManager } from '../world/TreeManager.js';
@@ -45,6 +48,8 @@ export class EntityViews {
     /** F3-08: um InstancedMesh por facção ('human' | 'orc') com todos os segmentos de muralha. */
     this._wallBatches = {};
     this._frameDelta = 0;
+    /** NEW-24: portões visuais nas lacunas das muralhas. */
+    this.wallGates = new WallGates(scene);
   }
 
   /** `WallBatch` compartilhado da facção (criado sob demanda). */
@@ -131,6 +136,7 @@ export class EntityViews {
     this._sync(this._critters, gm.critters, e => new CritterView(e, this.scene), frame, false);
     this._sync(this._buildings, gm.buildings, e => createBuildingView(e, this.scene, f => this.getWallBatch(f)), frame, false);
     this._sync(this._units, gm.allUnits, e => new UnitView(e, this.scene), frame, false);
+    this.wallGates.update(gm, id => playerColor(gm.playerRegistry, id, NEUTRAL_HOSTILE_ID));
   }
 
   /** As malhas ficam na cena: o descarte da `MatchSession` as libera junto com o resto da partida. */
@@ -138,6 +144,7 @@ export class EntityViews {
     for (const v of this.views.values()) if (v instanceof BuildingView || v instanceof UnitView) v.dispose();
     for (const wb of Object.values(this._wallBatches)) wb.dispose();
     this._wallBatches = {};
+    this.wallGates.dispose();
     this.treeManager.dispose();
     this.views.clear();
   }

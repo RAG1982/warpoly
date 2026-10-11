@@ -143,3 +143,27 @@ describe('MinHeap', () => {
     expect(h.size).toBe(0);
   });
 });
+
+describe('hasLineOfSight com pontos idênticos (NEW-4)', () => {
+  it('ponto caminhável: true, sem NaN em `t` (0/0)', () => {
+    const pf = mk();
+    expect(pf.hasLineOfSight(5, 5, 5, 5)).toBe(true);
+  });
+
+  it('ponto bloqueado: false', () => {
+    const pf = mk();
+    pf.blockCircle(5, 5, 1.5, 1);
+    expect(pf.hasLineOfSight(5, 5, 5, 5)).toBe(false);
+  });
+
+  it('pontos quase idênticos (< 1e-6) dão o mesmo resultado que o ponto', () => {
+    const pf = mk();
+    expect(pf.hasLineOfSight(5, 5, 5 + 1e-9, 5)).toBe(true);
+  });
+
+  it('findPath com origem = destino devolve um caminho definido', () => {
+    const pf = mk();
+    const path = pf.findPath(3, 3, 3, 3);
+    expect(path).toEqual([{ x: 3, z: 3 }]);
+  });
+});

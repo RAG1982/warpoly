@@ -1,0 +1,40 @@
+[
+ {
+  "modelo": "villager",
+  "sem": {
+   "armR": 0.55,
+   "armL": -0.55,
+   "torso": 0.05,
+   "pack": 0,
+   "packVisible": true
+  },
+  "com": {
+   "armR": 0.24750000000000003,
+   "armL": -0.24750000000000003,
+   "torso": 0.21000000000000002,
+   "pack": 5.053215498074303e-17,
+   "packVisible": true
+  },
+  "razaoBraco": 0.45,
+  "inclinacaoTronco": 0.16000000000000003
+ },
+ {
+  "modelo": "peon",
+  "sem": {
+   "armR": 0.55,
+   "armL": -0.55,
+   "torso": 0.05,
+   "pack": 0,
+   "packVisible": true
+  },
+  "com": {
+   "armR": 0.24750000000000003,
+   "armL": -0.24750000000000003,
+   "torso": 0.21000000000000002,
+   "pack": 5.053215498074303e-17,
+   "packVisible": true
+  },
+  "razaoBraco": 0.45,
+  "inclinacaoTronco": 0.16000000000000003
+ }
+]

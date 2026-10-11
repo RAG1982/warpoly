@@ -366,4 +366,47 @@ describe('IA e cerco (F4-02)', () => {
     }
     expect(catapults).toBeGreaterThanOrEqual(1);
   }, 120000);
+
+  it('ATTACK_GROUND (NEW-35): só o cerco dispara no ponto (dano em área); demais ignoram; clique direito mistura MOVE', () => {
+    const gm = makeGm();
+    const { x, z } = arena(gm);
+    const siege = gm.spawnUnit('ballista', x, z + 12, 0);
+    const knight = gm.spawnUnit('knight', x + 5, z + 12, 0);
+    const enemy = gm.spawnUnit('grunt', x, z, 1);
+    place(enemy, x, z);
+    enemy.state = 'idle';
+    const hp0 = enemy.hp;
+    gm.issue({ type: CMD.ATTACK_GROUND, playerId: 0, unitIds: [siege.id, knight.id], x, z });
+    gm.simStep(SIM_DT);
+    expect(siege.state).toBe('attackingGround');
+    expect(knight.state).not.toBe('attackingGround');
+    run(gm, 8);
+    expect(enemy.hp).toBeLessThan(hp0);
+    expect(siege.attackTarget).toBe(null);
+
+    // unidade de outro dono é ignorada
+    const foe = gm.spawnUnit('catapult', x + 30, z + 30, 1);
+    gm.issue({ type: CMD.ATTACK_GROUND, playerId: 0, unitIds: [foe.id], x, z });
+    gm.simStep(SIM_DT);
+    expect(foe.state).not.toBe('attackingGround');
+
+    // clique direito no chão: cerco -> ATTACK_GROUND, demais -> MOVE
+    const siege2 = gm.spawnUnit('ballista', x + 40, z + 40, 0);
+    gm.selectedUnits = [siege2, knight];
+    const issued = [];
+    const orig = gm.issue.bind(gm);
+    gm.issue = c => { issued.push(c.type); return orig(c); };
+    gm.issueOrder(null, { x: x + 2, y: 0, z: z + 2 });
+    expect(issued.sort()).toEqual([CMD.ATTACK_GROUND, CMD.MOVE].sort());
+  });
+
+  it('ATTACK_GROUND: ponto dentro do alcance mínimo faz o cerco recuar antes de disparar', () => {
+    const gm = makeGm();
+    const { x, z } = arena(gm);
+    const siege = gm.spawnUnit('ballista', x, z + 2, 0);
+    place(siege, x, z + 2);
+    gm.issue({ type: CMD.ATTACK_GROUND, playerId: 0, unitIds: [siege.id], x, z });
+    run(gm, 2);
+    expect(Math.hypot(siege.mesh.position.x - x, siege.mesh.position.z - z)).toBeGreaterThanOrEqual(UNITS.ballista.minAttackRange);
+  });
 });

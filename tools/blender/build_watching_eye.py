@@ -5,11 +5,14 @@ Uso:
   blender -b --factory-startup --python tools/blender/build_watching_eye.py -- [--no-render]
 
 Saída (public/models/watching_eye.glb), coordenadas do jogo, origem no chão, frente = +Z:
-  WatchingEye (raiz)       globo flutuando a 2,4 u do chão (igual ao procedural), sem rig humanoide
-  ├─ Body                  globo ocular violeta com veias, pálpebra/sobrancelha, espinhos de osso e íris dourada
-  │                        com pupila em fenda NA FRENTE (+Z); nada de "rosto" nas outras faces
-  ├─ TentacleN (5)         tentáculos atrás/abaixo do globo (nós separados, prontos para animar)
-  └─ Fin                   barbatana de cor de time no topo do globo (TeamColor)
+  WatchingEye (raiz)
+  └─ Torso                  nó vazio no centro do globo (0; 2,4; 0): o `UnitAnimator` balança/respira o conjunto por aqui
+     ├─ Body                globo ocular violeta com veias, pálpebra/sobrancelha, espinhos de osso e íris dourada
+     │                      com pupila em fenda NA FRENTE (+Z); nada de "rosto" nas outras faces
+     ├─ Fin                 barbatana de cor de time no topo do globo (TeamColor)
+     └─ Anim_Tentacle0..5   pivôs (nós vazios) na raiz de cada tentáculo, em volta da metade de baixo/trás do globo;
+        └─ TentacleN        a malha do tentáculo, em coordenadas locais do pivô: girar o pivô articula o tentáculo
+                            (o `UnitAnimator` ondula `rotation.x/z` de cada `Anim_Tentacle*`, defasado por índice)
 """
 import os
 import sys
@@ -19,8 +22,8 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import bpy  # noqa: E402
 import common as C  # noqa: E402
 from common import (MeshBuilder, M, prim_box, prim_rings, prim_cone, prim_sphere,  # noqa: E402
-                    prim_extrude, bezier)
-from bld_common import tube, bbox_game  # noqa: E402
+                    prim_extrude, limb_rings)
+from bld_common import bbox_game  # noqa: E402
 
 TEAM_DEFAULT = '#7c3aed'
 EY = 2.4          # altura do centro do globo
@@ -46,9 +49,9 @@ PALETTE = {
 }
 
 
-def build_body(mats, root):
+def build_body(mats, parent):
     mb = MeshBuilder('Body')
-    P = M((0, EY, 0))
+    P = M()  # a malha fica em coordenadas locais do `Torso` (centro do globo)
     # globo ocular: esclera lilás com veias, calota de carne roxa atrás (nuca)
     mb.add(prim_sphere(R, R * 0.98, R, 14, 8), 'sclera', P, smooth=80)
     # córnea/íris dourada saliente voltada para +Z, com anel de ouro, pupila em fenda e brilho
@@ -80,32 +83,52 @@ def build_body(mats, root):
         a = math.radians(k * 60)
         mb.add(prim_sphere(0.028, 0.028, 0.028, 5, 3), 'gold',
                P @ M((0.43 * math.cos(a), 0.43 * math.sin(a), R - 0.22)), smooth=60)
-    return mb.build(mats, parent=root)
+    return mb.build(mats, parent=parent)
 
 
-def build_tentacle(mats, root, idx, x, ang_z):
+# Seis tentáculos pendurados em volta da metade de baixo/trás do globo (o centro da frente fica livre para a íris e a
+# sobrancelha). (ângulo em graus a partir de +Z em torno de Y, comprimento relativo, enrolamento da ponta)
+TENTACLES = [(72, 0.95, 1), (112, 1.1, -1), (152, 1.25, 1), (208, 1.2, -1), (248, 1.05, 1), (288, 0.9, -1)]
+
+
+def cubic(p0, p1, p2, p3, steps):
+    out = []
+    for i in range(steps + 1):
+        t = i / steps
+        u = 1 - t
+        out.append(tuple(u ** 3 * p0[j] + 3 * u * u * t * p1[j] + 3 * u * t * t * p2[j] + t ** 3 * p3[j] for j in range(3)))
+    return out
+
+
+def build_tentacle(mats, torso, idx, ang, ln, curl):
+    """Pivô `Anim_Tentacle<idx>` (nó vazio no ponto de fixação, sob o globo) + malha `Tentacle<idx>` em coordenadas locais
+    do pivô: curva em S que desce, abre para fora e enrola a ponta. Coordenadas relativas ao centro do globo."""
+    a = math.radians(ang)
+    sx, sz = math.sin(a), math.cos(a)
+    p0 = (0.40 * sx, -0.40, 0.40 * sz)
+    p1 = (0.62 * sx, -0.40 - 0.50 * ln, 0.62 * sz - 0.05)
+    p2 = (0.92 * sx - 0.12 * curl * sz, -0.40 - 1.05 * ln, 0.92 * sz + 0.12 * curl * sx - 0.12)
+    p3 = (0.62 * sx - 0.30 * curl * sz, -0.40 - 1.32 * ln, 0.62 * sz + 0.30 * curl * sx - 0.22)
+    pts = [tuple(c - o for c, o in zip(q, p0)) for q in cubic(p0, p1, p2, p3, 7)]  # relativos ao pivô
+    pivot = C.make_empty(f'Anim_Tentacle{idx}', p0, parent=torso)
     mb = MeshBuilder(f'Tentacle{idx}')
-    sx = 1 if x >= 0 else -1
-    p0 = (x * 0.55, EY - 0.18, -0.30)
-    p1 = (x * 1.3, EY - 0.45, -0.70)
-    p2 = (x * 1.0 + sx * 0.1 * (idx % 2), EY - 1.25, -0.95 - 0.1 * (idx % 3))
-    pts = bezier(p0, p1, p2, 7)
-    radii = [0.16, 0.15, 0.13, 0.11, 0.09, 0.066, 0.042, 0.014]
-    tube(mb, pts, radii, 'flesh', n=7, smooth=75)
-    # ventosas rosadas na face interna
+    radii = [0.15, 0.14, 0.125, 0.105, 0.085, 0.063, 0.04, 0.014]
+    # up = +Z: o tentáculo pende na vertical e, com up = +Y, o anel torceria quando a curva troca de lado
+    mb.add(prim_rings(limb_rings(pts, radii, 7, up=(0, 0, 1))), 'flesh', smooth=75)
+    # ventosas rosadas na face externa (visíveis de fora)
     for t in (2, 4, 5):
         px, py, pz = pts[t]
-        mb.add(prim_sphere(0.034, 0.034, 0.03, 5, 3), 'sucker', M((px - sx * radii[t] * 0.2, py, pz + radii[t] * 0.85)),
-               smooth=60)
-    return mb.build(mats, parent=root)
+        r = radii[t] * 0.9
+        mb.add(prim_sphere(0.034, 0.034, 0.03, 5, 3), 'sucker', M((px + sx * r, py, pz + sz * r)), smooth=60)
+    return mb.build(mats, parent=pivot)
 
 
-def build_fin(mats, root):
+def build_fin(mats, parent):
     mb = MeshBuilder('Fin')
     pts = [(-0.30, 0.0), (0.30, 0.0), (0.2, 0.42), (0.0, 0.62), (-0.2, 0.42)]
     verts, faces = prim_extrude(pts, 0.04, axis='x')
-    mb.add((verts, faces), 'team', M((0, EY + R - 0.08, -0.12), (-24, 0, 0)), smooth=30)
-    return mb.build(mats, parent=root)
+    mb.add((verts, faces), 'team', M((0, R - 0.08, -0.12), (-24, 0, 0)), smooth=30)
+    return mb.build(mats, parent=parent)
 
 
 def main():
@@ -113,9 +136,10 @@ def main():
     C.reset_scene()
     mats = C.make_paint_set(PALETTE)
     root = C.make_empty('WatchingEye')
-    body = build_body(mats, root)
-    tents = [build_tentacle(mats, root, i, x, 0) for i, x in enumerate((-0.55, -0.28, 0.0, 0.28, 0.55))]
-    fin = build_fin(mats, root)
+    torso = C.make_empty('Torso', (0, EY, 0), parent=root)
+    body = build_body(mats, torso)
+    tents = [build_tentacle(mats, torso, i, *t) for i, t in enumerate(TENTACLES)]
+    fin = build_fin(mats, torso)
     parts = [body] + tents + [fin]
     bpy.context.view_layer.update()
     C.uv_atlas(parts, weights={'Body': 2.0, 'Fin': 0.6}, margin=0.006)
@@ -137,6 +161,15 @@ def main():
         C.set_team_color('#2f63e0')
         rig.render('34_azul', (1.0, 0.45, 1.0), 30)
         C.set_team_color(TEAM_DEFAULT)
+        # pose articulada (revisão dos pivôs, fora do repositório): cada Anim_Tentacle gira em x e z como no UnitAnimator
+        scratch = os.environ.get('EYE_DEBUG_DIR')
+        if scratch:
+            C.RENDERS = scratch
+            os.makedirs(scratch, exist_ok=True)
+            for i, o in enumerate(c for c in torso.children if c.name.startswith('Anim_Tentacle')):
+                C.set_rot_game(o, (26 * math.sin(i * 0.9), 0, 23 * math.cos(i * 1.3)))
+            rig.render('pose_34', (1.0, 0.45, 1.0), 30)
+            rig.render('pose_back', (-0.6, 0.3, -1.0), 30)
 
 
 if __name__ == '__main__':

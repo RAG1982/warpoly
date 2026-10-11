@@ -17,6 +17,10 @@ import { initUiScale } from './uiScale.js';
 import { drawMinimapPings } from './minimapPings.js';
 import { getBuildHotkey, getTrainHotkey, getResearchHotkey } from './hotkeys.js';
 import { buildCostHtml } from './Tooltip.js';
+import {
+  spriteImgHtml, unitIconId, buildingIconId, researchIconId, commandIconId, statIconId, portraitUrl, portraitState, iconUrl,
+  onUiManifestReady, preloadSprites
+} from './uiSprites.js';
 import { CMD } from '../sim/commands.js';
 import { isDetectedBy } from '../sim/detection.js';
 import { resolveAbility, canCast, selectionAbilityUnits } from '../sim/abilities.js';
@@ -28,11 +32,13 @@ import { renderTerrainImage } from './terrainMinimapImage.js';
 import { Vector3 } from 'three';
 import {
   frustumGroundQuad, playerColor, pointerToCanvas, pickMinimapTarget,
-  OrderFlashes, orderKindFor, drawOrderFlashes, drawCameraQuad
+  OrderFlashes, orderKindFor, drawOrderFlashes, drawCameraQuad, wallMinimapShapes
 } from './minimapView.js';
 
 // Quem treina o quê — derivado de src/data/buildings.js (campo `trains`)
 export { BUILDING_TRAINABLE_UNITS };
+
+const escHtml = (s) => String(s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 
 /** F3-07: role de pesquisa ('forge' | 'lumber') da construção, ou null se ela não pesquisa. */
 function researchRoleOf(b) {
@@ -96,6 +102,19 @@ export class UIManager {
     this.selectionPortraits = document.getElementById('selection-portraits');
     this.lastPortraitKey = null;
 
+    // F7-09: retrato animável (idle/ataque) da unidade selecionada e ícone no cabeçalho do card de construção
+    this.mainPortraitBox = document.getElementById('selection-portrait-box');
+    this.mainPortraitIdle = document.getElementById('selection-portrait-idle');
+    this.mainPortraitAttack = document.getElementById('selection-portrait-attack');
+    this._mainPortraitKey = null;
+    this._attackUntil = 0;
+    this._statsHtml = null;
+    this._extraInfoHtml = null;
+    this.bldHeaderIcon = document.getElementById('bld-header-icon');
+    this._bldHeaderIconKey = null;
+    this.bldHqUpgradeIcon = document.getElementById('bld-hq-upgrade-btn-icon');
+    this._hqIconKey = null;
+
     this.minimapCanvas = document.getElementById('minimap-canvas');
     this.minimapCtx = this.minimapCanvas ? this.minimapCanvas.getContext('2d') : null;
 
@@ -122,6 +141,9 @@ export class UIManager {
       this.currentBuilding = null;
       this._lastPop = null;
     });
+    // F7-09: o manifesto de sprites (public/ui/manifest.json) chega de forma assíncrona; se vier depois do 1º card,
+    // refaz os botões/retratos já desenhados com os ícones antigos.
+    this._offSprites = onUiManifestReady(() => this._invalidateSpriteViews());
 
     this.initControls();
     this.initMinimapEvents();
@@ -129,6 +151,122 @@ export class UIManager {
     this.initAbilityContextMenu();
     this.initBuildingEvents();
     this.initPortraitEvents();
+  }
+
+  // ------------------------------------------------------------------ F7-09: sprites (ícones e retratos)
+  /** 'orc' | 'human' do jogador local. */
+  _faction() {
+    return this.gm && this.gm.playerFaction === 'orc' ? 'orc' : 'human';
+  }
+
+  /** Contexto de resolução (escolha de 128/256): escala da HUD e devicePixelRatio. */
+  _spriteCtx() {
+    const v = parseFloat(document.documentElement.style.getPropertyValue('--ui-scale'));
+    return { uiScale: Number.isFinite(v) && v > 0 ? v : 1, dpr: window.devicePixelRatio || 1 };
+  }
+
+  /** `<img>` de ícone (sprite -> ícone antigo -> emoji). `id` = id do manifesto (ou null para só usar o fallback). */
+  _icon(id, { cssPx = 44, cls = 'bld-train-btn-icon', alt = '', fallbackSrc = '', fallbackEmoji = '' } = {}) {
+    return spriteImgHtml({ id, cssPx, cls, alt, fallbackSrc, fallbackEmoji, ...this._spriteCtx() });
+  }
+
+  _unitIcon(type, opts = {}) {
+    return this._icon(unitIconId(type, this._faction()), { fallbackSrc: getUnitDef(type).icon, fallbackEmoji: '⚔️', ...opts });
+  }
+
+  /** Ícone pequeno de atributo (linha de status do card): sprite `stat_<nome>` -> emoji. */
+  _stat(name, emoji) {
+    return this._icon(statIconId(name) ? `stat_${name}` : null, { cssPx: 18, cls: 'stat-ico', alt: '', fallbackEmoji: emoji });
+  }
+
+  /** A linha de atributos era reescrita a cada quadro; agora só quando o HTML muda (evita recriar as <img>). */
+  _setStats(html) {
+    if (!this.selectionStats || html === this._statsHtml) return;
+    this._statsHtml = html;
+    this.selectionStats.innerHTML = html;
+  }
+
+  _setExtraInfo(html) {
+    if (!this.bldExtraInfo || html === this._extraInfoHtml) return;
+    this._extraInfoHtml = html;
+    this.bldExtraInfo.innerHTML = html;
+  }
+
+  _buildingIcon(type, opts = {}) {
+    return this._icon(buildingIconId(type, this._faction()), { fallbackSrc: getBuildingDef(type).icon, fallbackEmoji: '🏠', ...opts });
+  }
+
+  /** Força o redesenho dos cards/retratos (manifesto de sprites chegou ou o idioma mudou). */
+  _invalidateSpriteViews() {
+    this.lastSelectionKey = null;
+    this.lastPortraitKey = null;
+    this.currentBuilding = null;
+    this._mainPortraitKey = null;
+    this._bldHeaderIconKey = null;
+    this._hqIconKey = null;
+    this._statsHtml = null;
+    this._extraInfoHtml = null;
+  }
+
+  /**
+   * Retrato animável da unidade selecionada (só com UMA unidade): duas imagens empilhadas (idle e ataque) e um
+   * cross-fade por classe CSS quando `Unit.anim` é `fight`/`cast`. Sem retrato para o tipo, mostra o ícone (contido).
+   */
+  updateMainPortrait(units) {
+    const box = this.mainPortraitBox;
+    if (!box) return;
+    if (units.length !== 1) {
+      if (box.style.display !== 'none') box.style.display = 'none';
+      this._mainPortraitKey = null;
+      return;
+    }
+    const u = units[0];
+    const def = getUnitDef(u.type);
+    const key = `${u.id}|${u.type}`;
+    if (this._mainPortraitKey !== key) {
+      this._mainPortraitKey = key;
+      this._attackUntil = 0;
+      const faction = this._faction();
+      const idle = portraitUrl(u.type, 'idle', faction);
+      const attack = portraitUrl(u.type, 'attack', faction);
+      let idleSrc = idle;
+      let attackSrc = attack;
+      let noPortrait = false;
+      if (!idle) { // sem retrato: o ícone 128 no lugar (ou o ícone antigo)
+        noPortrait = true;
+        const iid = unitIconId(u.type, faction);
+        idleSrc = iid ? iconUrl(iid, 128) : def.icon;
+        attackSrc = '';
+      } else {
+        preloadSprites([idle, attack]);
+      }
+      const set = (img, src) => {
+        if (!img) return;
+        if (src) { img.setAttribute('src', src); img.style.visibility = ''; } else { img.removeAttribute('src'); img.style.visibility = 'hidden'; }
+        img.alt = '';
+      };
+      set(this.mainPortraitIdle, idleSrc);
+      set(this.mainPortraitAttack, attackSrc);
+      box.classList.toggle('no-portrait', noPortrait);
+      box.classList.toggle('hero', !!def.isHero);
+      box.title = unitLabel(u.type);
+      box.style.display = '';
+    }
+    // histerese de 0,45 s: o `anim` da sim alterna fight/hurt/idle entre golpes; sem isso o retrato piscaria a cada troca
+    const now = performance.now();
+    if (portraitState(u) === 'attack') this._attackUntil = now + 450;
+    box.classList.toggle('is-attacking', now < this._attackUntil);
+  }
+
+  /** Ícone da construção selecionada no cabeçalho do card (256 px; troca só quando o tipo muda). */
+  updateBuildingHeaderIcon(b) {
+    const el = this.bldHeaderIcon;
+    if (!el) return;
+    const key = `${b.type}|${this._faction()}`;
+    if (this._bldHeaderIconKey === key) return;
+    this._bldHeaderIconKey = key;
+    el.innerHTML = this._buildingIcon(b.type, { cssPx: 52, cls: '', alt: buildingLabel(b.type) });
+    el.style.display = '';
   }
 
   /** F6-03: clique num retrato da grade de seleção múltipla seleciona só aquela unidade. */
@@ -401,9 +539,8 @@ export class UIManager {
       const ab = resolveAbility(this.gm, id);
       if (!ab) return '';
       const name = abilityNameT(ab.id, ab);
-      const icon = typeof ab.icon === 'string' && ab.icon.startsWith('/')
-        ? `<img src="${ab.icon}" class="bld-train-btn-icon" alt="${name}" />`
-        : `<span class="action-stop-icon">${ab.icon}</span>`;
+      const legacy = typeof ab.icon === 'string' && ab.icon.startsWith('/') ? ab.icon : '';
+      const icon = this._icon(`ability_${ab.id}`, { alt: name, fallbackSrc: legacy, fallbackEmoji: legacy ? '✨' : (ab.icon || '✨') });
       const cost = (ab.manaCost || 0) + (ab.manaPerHp > 0 ? ` +${ab.manaPerHp}${t('hud.perHp')}` : '');
       return `
         <button class="bld-train-btn ability-btn" data-ability="${id}" title="${name}${ab.hotkey ? ` (${ab.hotkey})` : ''}">
@@ -614,8 +751,42 @@ export class UIManager {
     return buildPostGameModel(gm.result || gm.matchStats.snapshot(), { localId: gm.localPlayerId, victory: !!gm.gameWon, colors });
   }
 
+  /** NEW-26: card somente-leitura de unidade/construção não-local (sem botões de ação nem retrato de comando). */
+  _renderInspectCard(e) {
+    this.currentBuilding = null;
+    if (this.buildingView) this.buildingView.style.display = 'none';
+    if (this.standardView) this.standardView.style.display = 'flex';
+    this.selectionCard.style.display = 'flex';
+    const isUnit = !('isConstructed' in e);
+    const owner = this.gm.getPlayer(e.ownerId);
+    const side = owner && owner.isNeutralHostile ? t('hud.neutral') : t('hud.enemy');
+    const name = isUnit ? unitLabel(e.type) : buildingLabel(e.type);
+    this.selectionTitle.innerText = `${name} (${side})`;
+    this.selectionHpBar.style.width = `${Math.max(0, e.hp / e.maxHp) * 100}%`;
+    this.selectionHp.innerText = `${Math.round(e.hp)} / ${e.maxHp} HP`;
+    const dmg = isUnit ? e.damage : e.towerDamage;
+    this._setStats(`
+      ${dmg ? `<span>${this._stat('attack', '⚔️')} ${t('hud.stat.attack')}: ${dmg.basic}+${dmg.piercing}</span>` : ''}
+      <span>${this._stat('armor', '🛡️')} ${t('hud.stat.defense')}: ${e.armor || 0}</span>
+      <span>${escHtml(t('hud.owner', { name: owner ? owner.name : '?' }))}</span>
+    `);
+    if (this.lastSelectionKey !== 'inspect') {
+      this.lastSelectionKey = 'inspect';
+      this.selectionActions.innerHTML = '';
+    }
+    this.updateSelectionPortraits([]);
+    this.updateMainPortrait([]);
+  }
+
   updateSelectionCard() {
     if (!this.selectionCard) return;
+
+    // NEW-26: inspeção somente-leitura (neutro/inimigo); some se morrer ou sair da visão.
+    if (this.gm.inspected && !this.gm.isInspectable(this.gm.inspected)) this.gm.clearInspection();
+    if (this.gm.inspected && this.gm.selectedUnits.length === 0 && !this.gm.selectedBuilding) {
+      this._renderInspectCard(this.gm.inspected);
+      return;
+    }
 
     if (this.gm.selectedUnits.length > 0) {
       this.currentBuilding = null;
@@ -631,6 +802,7 @@ export class UIManager {
       const heroMark = getUnitDef(u.type).isHero ? '★ ' : ''; // F4-08
       this.selectionTitle.innerText = heroMark + (count > 1 ? t('hud.multiSelect', { count, name: unitLabel(u.type) }) : unitLabel(u.type));
       this.updateSelectionPortraits(this.gm.selectedUnits);
+      this.updateMainPortrait(this.gm.selectedUnits); // F7-09: retrato animável (idle/ataque) quando há UMA unidade
 
       // Health
       const pct = Math.max(0, u.hp / u.maxHp) * 100;
@@ -638,20 +810,21 @@ export class UIManager {
       this.selectionHp.innerText = `${Math.round(u.hp)} / ${u.maxHp} HP`;
 
       // Stats
-      this.selectionStats.innerHTML = `
-        <span>⚔️ ${t('hud.stat.attack')}: ${u.damage.basic}+${u.damage.piercing}</span>
-        <span>🛡️ ${t('hud.stat.defense')}: ${u.armor || 0}</span>
-        <span>🏃 ${t('hud.stat.speed')}: ${u.speed}</span>
-        ${u.minAttackRange > 0 ? `<span>🎯 ${t('hud.stat.range')}: ${u.minAttackRange}–${u.attackRange}</span>` : (u.layer === 'naval' && u.attackRange > 0 ? `<span>🎯 ${t('hud.stat.range')}: ${u.attackRange}</span>` : '')}
-        ${u.transportCapacity > 0 ? `<span data-cargo-count>📦 ${t('hud.stat.cargo')}: ${u.cargo.length}/${u.transportCapacity}</span>` : ''}
-        ${u.submersible ? `<span>🫥 ${t('hud.stat.submerged')}</span>` : ''}
-        ${u.layer === 'air' ? `<span>🪽 ${t('hud.stat.air')}</span>` : ''}
-        ${u.layer === 'naval' ? `<span>⚓ ${t('hud.stat.naval')}</span>` : ''}
-        ${u.suicide ? `<span>💣 ${t('hud.stat.suicide')}</span>` : ''}
-        ${u.splashRadius > 0 ? `<span>💥 ${t('hud.stat.area')}: ${u.splashRadius}</span>` : ''}
-        ${u.maxMana > 0 ? `<span>💧 ${t('hud.stat.mana')}: ${Math.floor(u.mana)} / ${u.maxMana}</span>` : ''}
-        ${isWorker || isTanker ? `<span>🎒 ${t('hud.stat.carry')}: ${u.carrying.amount}/${u.carrying.max} ${resourceName(isTanker ? 'oil' : u.carrying.type)}</span>` : ''}
-      `;
+      // F7-09: ícones de atributo em sprite (fallback emoji); o HTML só é reescrito quando muda
+      this._setStats(`
+        <span>${this._stat('attack', '⚔️')} ${t('hud.stat.attack')}: ${u.damage.basic}+${u.damage.piercing}</span>
+        <span>${this._stat('armor', '🛡️')} ${t('hud.stat.defense')}: ${u.armor || 0}</span>
+        <span>${this._stat('speed', '🏃')} ${t('hud.stat.speed')}: ${u.speed}</span>
+        ${u.minAttackRange > 0 ? `<span>${this._stat('range', '🎯')} ${t('hud.stat.range')}: ${u.minAttackRange}–${u.attackRange}</span>` : (u.layer === 'naval' && u.attackRange > 0 ? `<span>${this._stat('range', '🎯')} ${t('hud.stat.range')}: ${u.attackRange}</span>` : '')}
+        ${u.transportCapacity > 0 ? `<span data-cargo-count>${this._stat('cargo', '📦')} ${t('hud.stat.cargo')}: ${u.cargo.length}/${u.transportCapacity}</span>` : ''}
+        ${u.submersible ? `<span>${this._stat('submerged', '🫥')} ${t('hud.stat.submerged')}</span>` : ''}
+        ${u.layer === 'air' ? `<span>${this._stat('air', '🪽')} ${t('hud.stat.air')}</span>` : ''}
+        ${u.layer === 'naval' ? `<span>${this._stat('naval', '⚓')} ${t('hud.stat.naval')}</span>` : ''}
+        ${u.suicide ? `<span>${this._stat('suicide', '💣')} ${t('hud.stat.suicide')}</span>` : ''}
+        ${u.splashRadius > 0 ? `<span>${this._stat('area', '💥')} ${t('hud.stat.area')}: ${u.splashRadius}</span>` : ''}
+        ${u.maxMana > 0 ? `<span>${this._stat('mana', '💧')} ${t('hud.stat.mana')}: ${Math.floor(u.mana)} / ${u.maxMana}</span>` : ''}
+        ${isWorker || isTanker ? `<span>${this._stat('cargo', '🎒')} ${t('hud.stat.carry')}: ${u.carrying.amount}/${u.carrying.max} ${resourceName(isTanker ? 'oil' : u.carrying.type)}</span>` : ''}
+      `);
 
       // F4-03: o card de habilidades muda a chave (recria o DOM só quando o conjunto muda)
       const abUnits = isWorker || isTanker ? [] : selectionAbilityUnits(this.gm.selectedUnits);
@@ -675,6 +848,7 @@ export class UIManager {
       if (this.buildingView) this.buildingView.style.display = 'flex';
       this.selectionCard.style.display = 'flex';
       this.updateSelectionPortraits([]);
+      this.updateBuildingHeaderIcon(b); // F7-09
 
       // Header Title
       if (this.bldSelectionTitle) {
@@ -695,15 +869,17 @@ export class UIManager {
 
       // Extra Info
       if (this.bldExtraInfo) {
+        let info = '';
         if (!b.isConstructed) {
-          this.bldExtraInfo.innerText = `🔨 ${t('hud.building', { pct: Math.round(b.buildProgress) })}`;
+          info = `${this._stat('build', '🔨')} ${escHtml(t('hud.building', { pct: Math.round(b.buildProgress) }))}`;
         } else if (b.popGranted) {
-          this.bldExtraInfo.innerText = `👥 ${t('hud.popGranted', { n: b.popGranted })}`;
+          info = `${this._stat('pop', '👥')} ${escHtml(t('hud.popGranted', { n: b.popGranted }))}`;
         } else if (b.towerDamage) {
-          this.bldExtraInfo.innerText = `🏹 ${t('hud.towerInfo', { dmg: `${b.towerDamage.basic}+${b.towerDamage.piercing}`, range: b.attackRange })} | 🛡️ ${b.armor || 0}`;
-        } else {
-          this.bldExtraInfo.innerText = b.armor ? `🛡️ ${t('hud.defShort', { n: b.armor })}` : '';
+          info = `${this._stat('tower', '🏹')} ${escHtml(t('hud.towerInfo', { dmg: `${b.towerDamage.basic}+${b.towerDamage.piercing}`, range: b.attackRange }))} | ${this._stat('armor', '🛡️')} ${b.armor || 0}`;
+        } else if (b.armor) {
+          info = `${this._stat('armor', '🛡️')} ${escHtml(t('hud.defShort', { n: b.armor }))}`;
         }
+        this._setExtraInfo(info);
       }
 
       // Render buttons when building changes or forge research state changes
@@ -754,20 +930,22 @@ export class UIManager {
       this.selectionHp.innerText = isDepletedTree
         ? t('hud.woodDepleted')
         : t('hud.available', { remaining, max });
-      this.selectionStats.innerHTML = isDepletedTree
+      this._setStats(isDepletedTree
         ? `<span>${t('hud.stumpHint')}</span>`
-        : `<span>${t('hud.assignWorkers')}</span>`;
+        : `<span>${t('hud.assignWorkers')}</span>`);
 
       if (this.lastSelectionKey !== 'resource') {
         this.lastSelectionKey = 'resource';
         this.selectionActions.innerHTML = '';
       }
       this.updateSelectionPortraits([]);
+      this.updateMainPortrait([]);
     } else {
       this.currentBuilding = null;
       this.selectionCard.style.display = 'none';
       this.lastSelectionKey = 'none';
       this.updateSelectionPortraits([]);
+      this.updateMainPortrait([]);
     }
   }
 
@@ -801,11 +979,14 @@ export class UIManager {
     this.lastPortraitKey = key;
     this.selectionPortraits.style.display = 'grid';
     this.selectionPortraits.innerHTML = shown.map(unit => {
-      const icon = getUnitDef(unit.type).icon;
       const pct = Math.max(0, unit.hp / unit.maxHp) * 100;
+      const pUrl = portraitUrl(unit.type, 'idle', this._faction());
+      const img = pUrl
+        ? `<img src="${pUrl}" class="selection-portrait-icon" alt="${unitLabel(unit.type)}" draggable="false" data-ui-sprite="portrait" data-fb-src="${getUnitDef(unit.type).icon}" data-fb-emoji="⚔️">`
+        : this._unitIcon(unit.type, { cls: 'selection-portrait-icon is-icon', alt: unitLabel(unit.type), cssPx: 32 });
       return `
         <button type="button" class="selection-portrait${getUnitDef(unit.type).isHero ? ' hero' : ''}" data-portrait-id="${unit.id}" title="${unitLabel(unit.type)}">
-          <img src="${icon}" class="selection-portrait-icon" alt="${unitLabel(unit.type)}" />
+          ${img}
           <div class="selection-portrait-hp-bg"><div class="selection-portrait-hp-fill" style="width: ${pct}%"></div></div>
         </button>
       `;
@@ -847,13 +1028,13 @@ export class UIManager {
           badge = '<span class="bld-upgrade-badge-check">✓</span>';
         } else if (isResearchingThis || isResearchingAny) {
           btnClass += ' researching';
-          badge = '<span class="bld-upgrade-badge-researching">🔨</span>';
+          badge = `<span class="bld-upgrade-badge-researching">${this._stat('build', '🔨')}</span>`;
         }
 
         return `
           <button class="${btnClass}" data-upgrade="${upgId}" title="${upgName}${lvLabel}${hotkey ? ` (${hotkey})` : ''}" ${isResearched ? 'disabled' : ''}>
             ${hotkey ? `<span class="bld-hotkey-badge">${hotkey}</span>` : ''}
-            <img src="${cfg.icon}" class="bld-train-btn-icon" alt="${upgName}" />
+            ${this._icon(researchIconId(upgId, factionType), { alt: upgName, fallbackSrc: cfg.icon, fallbackEmoji: '📜' })}
             ${badge}
             <div class="bld-hint-bubble">
               <div class="bld-hint-col">
@@ -899,7 +1080,7 @@ export class UIManager {
       return `
         <button class="bld-train-btn" data-train="${unitType}" title="${unitLabel(unitType)}${hotkey ? ` (${hotkey})` : ''}">
           ${hotkey ? `<span class="bld-hotkey-badge">${hotkey}</span>` : ''}
-          <img src="${cfg.icon}" class="bld-train-btn-icon" alt="${unitLabel(unitType)}" />
+          ${this._unitIcon(unitType, { alt: unitLabel(unitType) })}
           <div class="bld-hint-bubble">
             <span class="bld-hint-title">${unitLabel(unitType)}${hotkey ? ` <span class="bld-hint-hotkey">(${hotkey})</span>` : ''}</span> - ${t('hud.cost')}: <span class="bld-cost-items" data-cost-unit="${unitType}"></span>
           </div>
@@ -932,7 +1113,7 @@ export class UIManager {
         const isResearchingThis = building.currentResearch && building.currentResearch.id === upgId;
         const isResearchingAny = this.gm.isUpgradeResearching(upgId, 'player');
         if (isResearchingThis || isResearchingAny) {
-          if (costContainer) costContainer.innerHTML = `<span class="bld-cost-researching">🔨 ${t('hud.researching')}</span>`;
+          if (costContainer) costContainer.innerHTML = `<span class="bld-cost-researching">${this._stat('build', '🔨')} ${t('hud.researching')}</span>`;
           return;
         }
 
@@ -983,6 +1164,13 @@ export class UIManager {
     });
   }
 
+  /** Reescreve o ícone de um slot da fila só quando a chave muda (antes o <img> era recriado a cada quadro). */
+  _setSlotHtml(slotEl, key, html) {
+    if (slotEl._iconKey === key) return;
+    slotEl._iconKey = key;
+    slotEl.innerHTML = html();
+  }
+
   updateBuildingQueue(b) {
     if (!this.bldQueueSlots || this.bldQueueSlots.length === 0) return;
 
@@ -992,12 +1180,12 @@ export class UIManager {
         const cfg = r.cfg || UPGRADE_CONFIG[r.id];
         const factionType = this.gm.playerFaction === 'orc' ? 'orc' : 'human';
         const name = researchName(r.id, factionType, cfg);
-        const iconSrc = cfg ? cfg.icon : '/icoEspada.png';
-
         const slot0 = this.bldQueueSlots[0];
         if (slot0) {
           slot0.className = 'bld-queue-slot filled active forge-slot';
-          slot0.innerHTML = `<img src="${iconSrc}" class="bld-slot-icon" alt="${name}" />`;
+          this._setSlotHtml(slot0, `r|${r.id}`, () => this._icon(researchIconId(r.id, factionType), {
+            cssPx: 30, cls: 'bld-slot-icon', alt: name, fallbackSrc: cfg ? cfg.icon : '/icoEspada.png', fallbackEmoji: '📜'
+          }));
           slot0.title = `${name}${r.level && getMaxResearchLevel(r.id) > 1 ? ` ${r.level}/${getMaxResearchLevel(r.id)}` : ''} (${t('hud.researching')}) - ${t('hud.clickCancel')}`;
         }
 
@@ -1005,7 +1193,7 @@ export class UIManager {
           const slotEl = this.bldQueueSlots[i];
           if (!slotEl) continue;
           slotEl.className = 'bld-queue-slot empty';
-          slotEl.innerHTML = '';
+          this._setSlotHtml(slotEl, '', () => '');
           slotEl.title = t('hud.emptySlot');
         }
 
@@ -1017,7 +1205,7 @@ export class UIManager {
           const slotEl = this.bldQueueSlots[i];
           if (!slotEl) continue;
           slotEl.className = 'bld-queue-slot empty';
-          slotEl.innerHTML = '';
+          this._setSlotHtml(slotEl, '', () => '');
           slotEl.title = t('hud.emptySlot');
         }
         if (this.bldQueueProgressBar) this.bldQueueProgressBar.style.width = '0%';
@@ -1032,15 +1220,13 @@ export class UIManager {
 
       if (i < b.queue.length) {
         const item = b.queue[i];
-        const cfg = UNIT_TRAIN_CONFIG[item.type];
-        const iconSrc = cfg ? cfg.icon : '/icoEspada.png';
         const name = unitLabel(item.type);
         slotEl.className = 'bld-queue-slot filled' + (i === 0 ? ' active' : '');
-        slotEl.innerHTML = `<img src="${iconSrc}" class="bld-slot-icon" alt="${name}" />`;
+        this._setSlotHtml(slotEl, `u|${item.type}`, () => this._unitIcon(item.type, { cssPx: 30, cls: 'bld-slot-icon', alt: name }));
         slotEl.title = `${name} (${i === 0 ? t('hud.training') : t('hud.queued')}) - ${t('hud.clickCancel')}`;
       } else {
         slotEl.className = 'bld-queue-slot empty';
-        slotEl.innerHTML = '';
+        this._setSlotHtml(slotEl, '', () => '');
         slotEl.title = t('hud.emptySlot');
       }
     }
@@ -1076,6 +1262,10 @@ export class UIManager {
 
     const btn = this.bldHqUpgradeBtn;
     if (!btn) return;
+    if (this.bldHqUpgradeIcon && this._hqIconKey !== factionType) { // F7-09
+      this._hqIconKey = factionType;
+      this.bldHqUpgradeIcon.innerHTML = this._icon(commandIconId('upgrade_hq', factionType), { cssPx: 26, cls: 'bld-btn-icon', alt: '', fallbackEmoji: '⬆️' });
+    }
 
     if (b.tierUpgrade) {
       // Upgrade em andamento: botão vira "cancelar", barra mostra o progresso.
@@ -1130,7 +1320,7 @@ export class UIManager {
         return `
           <button class="bld-train-btn action-build-btn" data-build="${bType}" title="${buildingLabel(bType)}${hotkey ? ` (${hotkey})` : ''}">
             ${hotkey ? `<span class="bld-hotkey-badge">${hotkey}</span>` : ''}
-            <img src="${cfg.icon}" class="bld-train-btn-icon" alt="${buildingLabel(bType)}" />
+            ${this._buildingIcon(bType, { alt: buildingLabel(bType) })}
             <div class="bld-hint-bubble">
               <div class="bld-hint-col">
                 <div class="bld-hint-header">
@@ -1148,7 +1338,7 @@ export class UIManager {
 
       const stopButtonHtml = `
         <button class="bld-train-btn action-stop-btn" data-action="stop" title="${t('hud.stopUnit')} (S)">
-          <span class="action-stop-icon">🛑</span>
+          ${this._icon(commandIconId('stop'), { alt: t('hud.stop'), fallbackEmoji: '🛑' })}
           <div class="bld-hint-bubble">
             <span class="bld-hint-title">${t('hud.stop')}</span> - ${t('hud.stopOrders')}
           </div>
@@ -1158,7 +1348,7 @@ export class UIManager {
       const repairButtonHtml = workerType === 'tanker' ? '' : `
         <button class="bld-train-btn action-stop-btn" data-action="repair" title="${t('hud.repair')} (R)">
           <span class="bld-hotkey-badge">R</span>
-          <span class="action-stop-icon">🔧</span>
+          ${this._icon(commandIconId('repair'), { alt: t('hud.repair'), fallbackEmoji: '🔧' })}
           <div class="bld-hint-bubble">
             <span class="bld-hint-title">${t('hud.repair')} <span class="bld-hint-hotkey">(R)</span></span> - ${t('hud.repairDesc')}
           </div>
@@ -1183,13 +1373,13 @@ export class UIManager {
           <span class="bld-section-label">${t('hud.section.actions')}</span>
           <div class="worker-actions-group">
             <button class="bld-train-btn action-stop-btn" data-action="stop" title="${t('hud.stopUnits')} (S)">
-              <span class="action-stop-icon">🛑</span>
+              ${this._icon(commandIconId('stop'), { alt: t('hud.stop'), fallbackEmoji: '🛑' })}
               <div class="bld-hint-bubble">
                 <span class="bld-hint-title">${t('hud.stop')}</span> - ${t('hud.stopOrders')}
               </div>
             </button>
             <button class="bld-train-btn action-stop-btn" data-action="unload" title="${t('hud.unload')}">
-              <span class="action-stop-icon">⚓</span>
+              ${this._icon(commandIconId('unload'), { alt: t('hud.unload'), fallbackEmoji: '⚓' })}
               <div class="bld-hint-bubble">
                 <span class="bld-hint-title">${t('hud.unload')}</span> - ${t('hud.unloadDesc')}
               </div>
@@ -1204,7 +1394,7 @@ export class UIManager {
           <span class="bld-section-label">${t('hud.section.actions')}</span>
           <div class="worker-actions-group">
             <button class="bld-train-btn action-stop-btn" data-action="stop" title="${t('hud.stopUnits')} (S)">
-              <span class="action-stop-icon">🛑</span>
+              ${this._icon(commandIconId('stop'), { alt: t('hud.stop'), fallbackEmoji: '🛑' })}
               <div class="bld-hint-bubble">
                 <span class="bld-hint-title">${t('hud.stop')}</span> - ${t('hud.stopCombat')}
               </div>
@@ -1295,9 +1485,14 @@ export class UIManager {
     // Draw Buildings (inimigas: só as já vistas — visíveis agora ou lembradas pela névoa)
     const fog = this.gm.fogOfWar;
     const localId = this.gm.localPlayerId;
+    const wallsToDraw = [];
     this.gm.buildings.forEach(b => {
       if (!b.isDead) {
         if (!this.gm.isHostile(localId, b.ownerId) || !fog || fog.isBuildingKnown(b)) {
+          if (b.role === 'wall') { // NEW-24: muralha vira linha/ponto fino, não quadrado de 6 px
+            wallsToDraw.push({ x: b.mesh.position.x, z: b.mesh.position.z, ownerId: b.ownerId });
+            return;
+          }
           const m = toMap(b.mesh.position.x, b.mesh.position.z);
           ctx.fillStyle = colorOf(b.ownerId);
           ctx.fillRect(m.x - 3, m.y - 3, 6, 6);
@@ -1307,6 +1502,21 @@ export class UIManager {
         }
       }
     });
+    if (wallsToDraw.length) {
+      const shapes = wallMinimapShapes(wallsToDraw, toMap);
+      ctx.lineWidth = 2;
+      for (const l of shapes.lines) {
+        ctx.strokeStyle = colorOf(l.ownerId);
+        ctx.beginPath();
+        ctx.moveTo(l.x1, l.y1);
+        ctx.lineTo(l.x2, l.y2);
+        ctx.stroke();
+      }
+      for (const p of shapes.points) {
+        ctx.fillStyle = colorOf(p.ownerId);
+        ctx.fillRect(p.x - 1, p.y - 1, 2, 2);
+      }
+    }
     // Fantasmas: construções inimigas destruídas fora da visão continuam na memória até a área ser revista
     if (fog) {
       ctx.fillStyle = '#dc2626';
@@ -1352,6 +1562,7 @@ export class UIManager {
   dispose() {
     this._abort.abort();
     if (this._offLang) this._offLang();
+    if (this._offSprites) this._offSprites();
     if (this._disposeUiScale) this._disposeUiScale();
     clearTimeout(this._notificationTimer);
     this._notificationTimer = null;

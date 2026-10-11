@@ -1,0 +1,137 @@
+{
+ "opts": {
+  "count": 8,
+  "seedStart": 1,
+  "maps": [
+   "vales-2v2"
+  ],
+  "maxTicks": 72000,
+  "recheck": 3,
+  "faction": null,
+  "difficulty": null,
+  "stallTicks": 2400,
+  "out": "tools/soak-report/maps/vales-2v2"
+ },
+ "wallMs": 258907,
+ "results": [
+  {
+   "seed": 1,
+   "map": "vales-2v2",
+   "faction": "human",
+   "difficulty": "easy",
+   "finished": true,
+   "ticks": 10323,
+   "checksum": 3116689966,
+   "peakEntities": 107,
+   "wallMs": 16102,
+   "issues": []
+  },
+  {
+   "seed": 2,
+   "map": "vales-2v2",
+   "faction": "orc",
+   "difficulty": "easy",
+   "finished": true,
+   "ticks": 11826,
+   "checksum": 3347639365,
+   "peakEntities": 92,
+   "wallMs": 16572,
+   "issues": []
+  },
+  {
+   "seed": 3,
+   "map": "vales-2v2",
+   "faction": "human",
+   "difficulty": "normal",
+   "finished": true,
+   "ticks": 7791,
+   "checksum": 2347779472,
+   "peakEntities": 92,
+   "wallMs": 11464,
+   "issues": []
+  },
+  {
+   "seed": 4,
+   "map": "vales-2v2",
+   "faction": "orc",
+   "difficulty": "normal",
+   "finished": true,
+   "ticks": 10571,
+   "checksum": 3118895306,
+   "peakEntities": 94,
+   "wallMs": 12535,
+   "issues": []
+  },
+  {
+   "seed": 5,
+   "map": "vales-2v2",
+   "faction": "human",
+   "difficulty": "hard",
+   "finished": true,
+   "ticks": 21394,
+   "checksum": 322755247,
+   "peakEntities": 212,
+   "wallMs": 50282,
+   "issues": []
+  },
+  {
+   "seed": 6,
+   "map": "vales-2v2",
+   "faction": "orc",
+   "difficulty": "hard",
+   "finished": true,
+   "ticks": 10106,
+   "checksum": 2658557219,
+   "peakEntities": 116,
+   "wallMs": 15707,
+   "issues": []
+  },
+  {
+   "seed": 7,
+   "map": "vales-2v2",
+   "faction": "human",
+   "difficulty": "brutal",
+   "finished": true,
+   "ticks": 16361,
+   "checksum": 1492837658,
+   "peakEntities": 182,
+   "wallMs": 41367,
+   "issues": []
+  },
+  {
+   "seed": 8,
+   "map": "vales-2v2",
+   "faction": "orc",
+   "difficulty": "brutal",
+   "finished": true,
+   "ticks": 9027,
+   "checksum": 2174711020,
+   "peakEntities": 153,
+   "wallMs": 18354,
+   "issues": []
+  }
+ ],
+ "rechecks": [
+  {
+   "seed": 1,
+   "map": "vales-2v2",
+   "faction": "human",
+   "difficulty": "easy",
+   "diff": null
+  },
+  {
+   "seed": 3,
+   "map": "vales-2v2",
+   "faction": "human",
+   "difficulty": "normal",
+   "diff": null
+  },
+  {
+   "seed": 5,
+   "map": "vales-2v2",
+   "faction": "human",
+   "difficulty": "hard",
+   "diff": null
+  }
+ ]
+}

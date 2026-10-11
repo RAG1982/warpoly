@@ -112,6 +112,15 @@ describe('F7-05 decaimento de corpo', () => {
       prev = s;
     }
   });
+
+  it('com objeto de saída: reaproveita o mesmo objeto (sem alocação por quadro) e dá os mesmos valores', () => {
+    const out = { visible: true, scale: 9, sink: 9, done: true }; // lixo de uma chamada anterior: tudo deve ser sobrescrito
+    for (let t = 0; t < CORPSE.delay + CORPSE.linger + CORPSE.decay + 1; t += 0.37) {
+      const r = corpseDecay(t, CORPSE, out);
+      expect(r).toBe(out);
+      expect(out).toEqual(corpseDecay(t));
+    }
+  });
 });
 
 describe('F7-05 mapeamento evento -> efeito', () => {

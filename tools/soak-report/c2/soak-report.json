@@ -1,0 +1,343 @@
+{
+ "opts": {
+  "count": 25,
+  "seedStart": 26,
+  "maps": [
+   "continental-1v1",
+   "estreito-1v1",
+   "ilhas-4p"
+  ],
+  "maxTicks": 72000,
+  "recheck": 3,
+  "faction": null,
+  "difficulty": null,
+  "stallTicks": 2400,
+  "out": "tools/soak-report/c2"
+ },
+ "wallMs": 406696,
+ "results": [
+  {
+   "seed": 26,
+   "map": "continental-1v1",
+   "faction": "human",
+   "difficulty": "easy",
+   "finished": true,
+   "ticks": 36858,
+   "checksum": 1821629955,
+   "peakEntities": 97,
+   "wallMs": 28551,
+   "issues": []
+  },
+  {
+   "seed": 27,
+   "map": "estreito-1v1",
+   "faction": "human",
+   "difficulty": "easy",
+   "finished": true,
+   "ticks": 32673,
+   "checksum": 1842712487,
+   "peakEntities": 61,
+   "wallMs": 18465,
+   "issues": []
+  },
+  {
+   "seed": 28,
+   "map": "ilhas-4p",
+   "faction": "human",
+   "difficulty": "normal",
+   "finished": true,
+   "ticks": 4684,
+   "checksum": 3851789256,
+   "peakEntities": 66,
+   "wallMs": 3736,
+   "issues": []
+  },
+  {
+   "seed": 29,
+   "map": "continental-1v1",
+   "faction": "orc",
+   "difficulty": "normal",
+   "finished": true,
+   "ticks": 24160,
+   "checksum": 2138409669,
+   "peakEntities": 95,
+   "wallMs": 25231,
+   "issues": []
+  },
+  {
+   "seed": 30,
+   "map": "estreito-1v1",
+   "faction": "orc",
+   "difficulty": "hard",
+   "finished": true,
+   "ticks": 12051,
+   "checksum": 2564846100,
+   "peakEntities": 91,
+   "wallMs": 8854,
+   "issues": []
+  },
+  {
+   "seed": 31,
+   "map": "ilhas-4p",
+   "faction": "orc",
+   "difficulty": "hard",
+   "finished": true,
+   "ticks": 10709,
+   "checksum": 520358040,
+   "peakEntities": 87,
+   "wallMs": 10667,
+   "issues": []
+  },
+  {
+   "seed": 32,
+   "map": "continental-1v1",
+   "faction": "human",
+   "difficulty": "brutal",
+   "finished": true,
+   "ticks": 9981,
+   "checksum": 4207980475,
+   "peakEntities": 130,
+   "wallMs": 15599,
+   "issues": []
+  },
+  {
+   "seed": 33,
+   "map": "estreito-1v1",
+   "faction": "human",
+   "difficulty": "brutal",
+   "finished": true,
+   "ticks": 10179,
+   "checksum": 53104383,
+   "peakEntities": 58,
+   "wallMs": 6121,
+   "issues": []
+  },
+  {
+   "seed": 34,
+   "map": "ilhas-4p",
+   "faction": "human",
+   "difficulty": "easy",
+   "finished": true,
+   "ticks": 22056,
+   "checksum": 1066390122,
+   "peakEntities": 84,
+   "wallMs": 12913,
+   "issues": []
+  },
+  {
+   "seed": 35,
+   "map": "continental-1v1",
+   "faction": "orc",
+   "difficulty": "easy",
+   "finished": true,
+   "ticks": 12186,
+   "checksum": 651017377,
+   "peakEntities": 95,
+   "wallMs": 13482,
+   "issues": []
+  },
+  {
+   "seed": 36,
+   "map": "estreito-1v1",
+   "faction": "orc",
+   "difficulty": "normal",
+   "finished": true,
+   "ticks": 29660,
+   "checksum": 2176542703,
+   "peakEntities": 49,
+   "wallMs": 16957,
+   "issues": []
+  },
+  {
+   "seed": 37,
+   "map": "ilhas-4p",
+   "faction": "orc",
+   "difficulty": "normal",
+   "finished": true,
+   "ticks": 5786,
+   "checksum": 3647227174,
+   "peakEntities": 75,
+   "wallMs": 4820,
+   "issues": []
+  },
+  {
+   "seed": 38,
+   "map": "continental-1v1",
+   "faction": "human",
+   "difficulty": "hard",
+   "finished": true,
+   "ticks": 16141,
+   "checksum": 1029307371,
+   "peakEntities": 114,
+   "wallMs": 21256,
+   "issues": []
+  },
+  {
+   "seed": 39,
+   "map": "estreito-1v1",
+   "faction": "human",
+   "difficulty": "hard",
+   "finished": true,
+   "ticks": 32579,
+   "checksum": 1328954647,
+   "peakEntities": 74,
+   "wallMs": 23414,
+   "issues": []
+  },
+  {
+   "seed": 40,
+   "map": "ilhas-4p",
+   "faction": "human",
+   "difficulty": "brutal",
+   "finished": true,
+   "ticks": 6946,
+   "checksum": 58949638,
+   "peakEntities": 79,
+   "wallMs": 6080,
+   "issues": []
+  },
+  {
+   "seed": 41,
+   "map": "continental-1v1",
+   "faction": "orc",
+   "difficulty": "brutal",
+   "finished": true,
+   "ticks": 7783,
+   "checksum": 1518663104,
+   "peakEntities": 117,
+   "wallMs": 9887,
+   "issues": []
+  },
+  {
+   "seed": 42,
+   "map": "estreito-1v1",
+   "faction": "orc",
+   "difficulty": "easy",
+   "finished": true,
+   "ticks": 32867,
+   "checksum": 525712628,
+   "peakEntities": 58,
+   "wallMs": 17900,
+   "issues": []
+  },
+  {
+   "seed": 43,
+   "map": "ilhas-4p",
+   "faction": "orc",
+   "difficulty": "easy",
+   "finished": true,
+   "ticks": 9530,
+   "checksum": 1529077374,
+   "peakEntities": 83,
+   "wallMs": 8536,
+   "issues": []
+  },
+  {
+   "seed": 44,
+   "map": "continental-1v1",
+   "faction": "human",
+   "difficulty": "normal",
+   "finished": true,
+   "ticks": 6080,
+   "checksum": 3360948583,
+   "peakEntities": 81,
+   "wallMs": 5819,
+   "issues": []
+  },
+  {
+   "seed": 45,
+   "map": "estreito-1v1",
+   "faction": "human",
+   "difficulty": "normal",
+   "finished": true,
+   "ticks": 9534,
+   "checksum": 3700694233,
+   "peakEntities": 50,
+   "wallMs": 5381,
+   "issues": []
+  },
+  {
+   "seed": 46,
+   "map": "ilhas-4p",
+   "faction": "human",
+   "difficulty": "hard",
+   "finished": true,
+   "ticks": 8870,
+   "checksum": 3721179997,
+   "peakEntities": 97,
+   "wallMs": 7327,
+   "issues": []
+  },
+  {
+   "seed": 47,
+   "map": "continental-1v1",
+   "faction": "orc",
+   "difficulty": "hard",
+   "finished": true,
+   "ticks": 23964,
+   "checksum": 1949185484,
+   "peakEntities": 112,
+   "wallMs": 32030,
+   "issues": []
+  },
+  {
+   "seed": 48,
+   "map": "estreito-1v1",
+   "faction": "orc",
+   "difficulty": "brutal",
+   "finished": true,
+   "ticks": 22161,
+   "checksum": 3741944779,
+   "peakEntities": 110,
+   "wallMs": 24783,
+   "issues": []
+  },
+  {
+   "seed": 49,
+   "map": "ilhas-4p",
+   "faction": "orc",
+   "difficulty": "brutal",
+   "finished": true,
+   "ticks": 4956,
+   "checksum": 1814861175,
+   "peakEntities": 99,
+   "wallMs": 4592,
+   "issues": []
+  },
+  {
+   "seed": 50,
+   "map": "continental-1v1",
+   "faction": "human",
+   "difficulty": "easy",
+   "finished": true,
+   "ticks": 14801,
+   "checksum": 1269906878,
+   "peakEntities": 91,
+   "wallMs": 15459,
+   "issues": []
+  }
+ ],
+ "rechecks": [
+  {
+   "seed": 26,
+   "map": "continental-1v1",
+   "faction": "human",
+   "difficulty": "easy",
+   "diff": null
+  },
+  {
+   "seed": 34,
+   "map": "ilhas-4p",
+   "faction": "human",
+   "difficulty": "easy",
+   "diff": null
+  },
+  {
+   "seed": 42,
+   "map": "estreito-1v1",
+   "faction": "orc",
+   "difficulty": "easy",
+   "diff": null
+  }
+ ]
+}

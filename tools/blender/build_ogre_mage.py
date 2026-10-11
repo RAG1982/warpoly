@@ -3,8 +3,9 @@ build_ogre_mage.py — Ogro Feiticeiro (tipo interno `ogre_mage`, classe avança
 
 Reaproveita `build_ogre.py` com a MESMA rig aninhada e os MESMOS nomes de nós (Torso > Head, ArmL, ArmR > Weapon;
 LegL, LegR): pele cinza-azulada com tinta ritual de raio (as cicatrizes viram marcas luminosas), olhos azuis
-elétricos, cabelo branco, colar de presas com cristal de tempestade, cristal na testa, penacho de ossos e penas,
-bolsa de runas e, no lugar da clava, um cajado de xamã (`Weapon`) com cristal de raio e garras de ferro.
+elétricos, cabelo branco, colar de presas com cristal de tempestade no centro do peito (longe da barba e dos ombros),
+cristal na testa, penacho de ossos e penas, bolsa de runas e, no lugar da clava, um cajado de xamã (`Weapon`) com cristal
+de raio e garras de ferro.
 
 Uso:
   blender -b --factory-startup --python tools/blender/build_ogre_mage.py -- [--no-render]
@@ -44,20 +45,30 @@ def bolt_poly(w, h):
             (0.04 * w, 0.06 * h)]
 
 
+def necklace(mb):
+    """Colar de tempestade (NEW-40 fechamento, agente B): o cordão antigo nascia sob a mandíbula e sumia atrás do queixo/gola
+    de pele, e se somava ao colar de presas do Ogro base. Agora o do Ogro base é desligado (`O.NECKLACE = False`) e este é o
+    único: cordão de couro em V que desce da gola de pele por dentro das tintas de raio das peitorais, passa bem abaixo da
+    mandíbula e sustenta, no centro do peito (+Z), um cristal de tempestade grande preso por tampa de ferro, com seis presas
+    de osso penduradas dos dois lados."""
+    pts = [(-0.30, 0.99, 0.12), (-0.38, 0.88, 0.38), (-0.38, 0.76, 0.62), (-0.28, 0.67, 0.77), (-0.14, 0.62, 0.84),
+           (0.0, 0.60, 0.86), (0.14, 0.62, 0.84), (0.28, 0.67, 0.77), (0.38, 0.76, 0.62), (0.38, 0.88, 0.38),
+           (0.30, 0.99, 0.12)]
+    mb.add(prim_rings(limb_rings(pts, [0.03] * len(pts), 5), cap0=True, cap1=True), 'leather', smooth=40)
+    for k in (2, 3, 4, 6, 7, 8):
+        px, py, pz = pts[k]
+        mb.add(prim_cone(0.05, 0.2 if k in (3, 7) else 0.17, 4), 'bone', M((px, py - 0.02, pz + 0.01), (172, 0, 0)), smooth=40)
+    mb.add(prim_cyl(0.058, 0.048, 0.06, 6, base=False), 'iron', M((0, 0.585, 0.86)), smooth=30)
+    mb.add(prim_sphere(0.095, 0.20, 0.095, 6, 4), 'crystal', M((0, 0.40, 0.87)), smooth=0)
+    mb.add(prim_sphere(0.045, 0.11, 0.045, 5, 3), 'core', M((0, 0.40, 0.87)), smooth=0)
+
+
 def torso_extras(mb):
     # tinta ritual de raio na barriga e no peito (luminosa), só na frente
     mb.add(prim_extrude(bolt_poly(0.30, 0.62), 0.07, axis='z'), 'scar', M((0.0, -0.30, 0.86), (-6, 0, 0)))
     for sx in (-1, 1):
         mb.add(prim_extrude(bolt_poly(0.16, 0.34), 0.05, axis='z'), 'scar', M((sx * 0.50, 0.60, 0.69), (0, sx * 18, 0)))
-    # colar: cordão com presas e cristal de tempestade
-    pts = bezier((-0.30, 0.98, 0.20), (0.0, 0.52, 0.92), (0.30, 0.98, 0.20), 8)
-    mb.add(prim_rings(limb_rings(pts, [0.028] * 9, 5, up=(0, 1, 0)), cap0=True, cap1=True), 'leather', smooth=40)
-    for k, t in enumerate((1, 2, 3, 5, 6, 7)):
-        px, py, pz = pts[t]
-        mb.add(prim_cone(0.045, 0.17, 5, base=True), 'bone', M((px, py - 0.02, pz + 0.02), (170, 0, 0)), smooth=40)
-    px, py, pz = pts[4]
-    mb.add(prim_sphere(0.075, 0.13, 0.075, 5, 3), 'crystal', M((px, py - 0.10, pz + 0.03)), smooth=0)
-    mb.add(prim_cyl(0.05, 0.05, 0.03, 6), 'rust', M((px, py + 0.02, pz + 0.02), (80, 0, 0)))
+    necklace(mb)
     # bolsa de runas presa ao cinto
     mb.add(prim_box(0.22, 0.26, 0.12, taper=(0.9, 0.8)), 'leather', M((0.62, -0.62, 0.34), (0, 20, 0)), bevel=0.02)
     mb.add(prim_box(0.14, 0.1, 0.03), 'scar', M((0.66, -0.58, 0.41), (0, 20, 0)))
@@ -114,6 +125,7 @@ def build_staff(mats, arm_r):
 
 
 EXTRAS = {'Head': head_extras, 'Torso': torso_extras}
+O.NECKLACE = False  # só o colar de tempestade deste modelo (ver `necklace`)
 _orig_build = MeshBuilder.build
 
 

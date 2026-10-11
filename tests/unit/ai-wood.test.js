@@ -55,8 +55,8 @@ describe('NEW-44: regiões terrestres e alcançabilidade', () => {
     o = refresh(d);
     expect(o.none).toBe(true);
     expect(o.count).toBe(0);
-    // além do limite (±55 no mapa continental): inalcançável
-    plantTree(gm, 57, 0);
+    // além do limite (metade de `playable` no mapa continental): inalcançável
+    plantTree(gm, gm.terrain.mapDef.playable / 2 + 3, 0);
     o = refresh(d);
     expect(o.none).toBe(true);
     // dentro do limite: alcançável
@@ -113,7 +113,7 @@ describe('NEW-44: trabalhadores', () => {
   it('peão preso numa árvore inalcançável é reatribuído a uma árvore que chega', () => {
     const gm = makeGm({ seed: 3, difficulties: ['normal', 'normal'] });
     const d = gm.aiDirectors[0];
-    const bad = plantTree(gm, 57, 0);
+    const bad = plantTree(gm, gm.terrain.mapDef.playable / 2 + 3, 0);
     const worker = gm.getUnitsOf(0).find(u => u.type === d.workerType);
     worker.state = 'gathering';
     worker.gatherTarget = bad;

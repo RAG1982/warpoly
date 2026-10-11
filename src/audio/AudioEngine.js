@@ -307,6 +307,20 @@ export class AudioEngine {
     this._applyAmbience(true);
   }
 
+  /** Pausa da partida: a ambiência cala (a música segue); ao retomar, a ambiência volta. Só apresentação. */
+  setPaused(paused) {
+    paused = !!paused;
+    if (paused === !!this.paused) return;
+    this.paused = paused;
+    this._applyAmbience(true);
+  }
+
+  /** Fim de jogo (vitória/derrota): a intensidade de combate zera e a música volta à de paz. */
+  calm() {
+    this.director.reset(this.now());
+    this._applyMusic();
+  }
+
   /** Fim da partida (descarte da sessão): ambiência para, música volta à do menu. */
   endMatch() {
     this.match = null;
@@ -337,7 +351,7 @@ export class AudioEngine {
     const now = this.now();
     if (!force && now - this._ambienceAt < 2) return;
     this._ambienceAt = now;
-    if (!this.ready || !this.caps.ambience || !this.match || this.volumes.sfx <= 0) {
+    if (!this.ready || !this.caps.ambience || !this.match || this.paused || this.volumes.sfx <= 0) {
       this.ambience.stop(1.5);
       return;
     }

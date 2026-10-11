@@ -6,6 +6,8 @@ import './mainMenu.css';
 import './gameScreens.css';
 import './optionsPanel.css';
 import { options as defaultOptions, TAB_OPTIONS } from '../optionsStore.js';
+import { detectAudioLevel } from '../../audio/audioEnv.js';
+import { getTextureQuality } from '../../models/textureQuality.js';
 import { applyAudio, applyColorblind, applyKeybinds } from '../optionsApply.js';
 import { applyUiScale } from '../uiScale.js';
 import { QualitySettings, detectDefaultPreset } from '../../core/QualitySettings.js';
@@ -357,14 +359,21 @@ export class OptionsPanel {
     }
   }
 
+  /** F7-08: o nível de áudio acompanha preset/textura (`?audio=` e automação continuam mandando). */
+  _applyAudioLevel(ctx) {
+    ctx?.sound?.setLevel?.(detectAudioLevel(QualitySettings.current, getTextureQuality()));
+  }
+
   _onSeg(seg, value, ctx) {
     if (seg === 'preset') {
       const { requiresReload } = QualitySettings.set(value);
+      this._applyAudioLevel(ctx); // F7-08: vozes/ambiência do novo preset valem já
       this._notify(requiresReload ? t('opt.reloadHint') : '');
       this._renderBody();
       this._focusSeg(seg, value);
     } else if (seg === 'texture') {
       const { requiresReload } = QualitySettings.setOverride('textureQuality', value);
+      this._applyAudioLevel(ctx);
       this._notify(requiresReload ? t('opt.reloadHint') : '');
       this._renderBody();
       this._focusSeg(seg, value);

@@ -105,7 +105,7 @@ class GameApp {
         [S.MAIN_MENU]: { enter: () => this._enterMainMenu() },
         [S.LOADING]: { enter: (ctx) => this._enterLoading(ctx.payload) },
         [S.IN_GAME]: { enter: (ctx) => this._enterInGame(ctx.from) },
-        [S.PAUSED]: { enter: () => this._enterPaused(), exit: () => this.pauseMenu.hide() },
+        [S.PAUSED]: { enter: () => this._enterPaused(), exit: () => { this.pauseMenu.hide(); this.sound?.setPaused(false); } },
         [S.POST_GAME]: { enter: () => this._enterPostGame() }
       }
     });
@@ -495,12 +495,14 @@ class GameApp {
 
   _enterPaused() {
     this.session.inputManager.suspended = true;
+    this.sound?.setPaused(true); // F7-08: ambiência cala na pausa
     this.pauseMenu.show();
   }
 
   _enterPostGame() {
     // A simulação já parou (isGameOver); o modal de fim de jogo é mostrado pelo UIManager.
     this.session.inputManager.onPauseRequest = null;
+    this.sound?.calmMusic(); // F7-08: música volta à de paz depois da vitória/derrota
     requestAnimationFrame(() => document.getElementById('btn-play-again')?.focus({ preventScroll: true }));
   }
 

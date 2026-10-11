@@ -25,6 +25,7 @@ export class SoundManager {
     /** @type {{master:number, music:number, sfx:number, voice:number}} */
     this.volumes = { master: 1, music: 0.25, sfx: 0.5, voice: 0.8 };
     this._musicHold = false;
+    this._paused = false;
     this._match = null;
     this._listener = null;
     this._sceneProbe = null;
@@ -90,6 +91,7 @@ export class SoundManager {
     e.setVolumes({ ...this.volumes, master: this.enabled ? this.volumes.master : 0 }, immediate);
     e.setMusicOn(this.musicEnabled);
     e.setMusicHold(this._musicHold);
+    e.setPaused(this._paused);
     if (this._listener) e.setListener(this._listener);
     if (this._sceneProbe) e.sceneProbe = this._sceneProbe;
   }
@@ -181,10 +183,22 @@ export class SoundManager {
     if (this.engine) this.engine.beginMatch(match);
   }
 
+  /** Pausa/retomada da partida (menu de pausa): a ambiência cala; música e cliques da interface seguem. */
+  setPaused(paused) {
+    this._paused = !!paused;
+    if (this.engine) this.engine.setPaused(this._paused);
+  }
+
+  /** Fim de jogo: a música adaptativa volta à de paz. */
+  calmMusic() {
+    if (this.engine) this.engine.calm();
+  }
+
   endMatch() {
+    this._paused = false;
     this._match = null;
     this._sceneProbe = null;
-    if (this.engine) { this.engine.sceneProbe = null; this.engine.endMatch(); }
+    if (this.engine) { this.engine.sceneProbe = null; this.engine.paused = false; this.engine.endMatch(); }
   }
 
   /** Peso de combate (música adaptativa). */

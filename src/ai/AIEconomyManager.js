@@ -2,6 +2,14 @@ import { CMD } from '../sim/commands.js';
 import { repairCostFor, REPAIR_HP_FRACTION } from '../sim/repair.js';
 import { missingRequirements, missingUpgradeRequirements } from '../sim/requirements.js';
 import { getBuildingDef, getUnitDef, RESEARCH, WALL_STEP } from '../data/index.js';
+import { findLumberSite, pointReachable } from './AIWood.js';
+
+/** NEW-44: serrarias avançadas por escassez (além da inicial), tentativas por partida e tempos de espera (s). */
+const CAMP_LUMBER_CAP = 3;
+const CAMP_MAX_TRIES = 6;
+const CAMP_HOLD_MAX = 150;
+const CAMP_COOLDOWN = 240;
+const CAMP_NO_SITE_COOLDOWN = 45;
 
 /**
  * AIEconomyManager (Gerenciador de Economia e Construção da IA)
@@ -31,6 +39,19 @@ export class AIEconomyManager {
     /** F3-08: no máx. 1 linha de muralha por partida (`_wallAttempts` limita tentativas sem espaço). */
     this._wallLineDone = false;
     this._wallAttempts = 0;
+    /** NEW-44: serraria avançada por escassez — reserva de madeira ativa, desde quando, tentativas e espera. */
+    this._campHold = false;
+    this._campHoldSince = 0;
+    this._campTries = 0;
+    this._campCooldownUntil = 0;
+  }
+
+  /**
+   * NEW-44: madeira que os gastos não essenciais (treino, obras opcionais) devem deixar intacta enquanto a serraria
+   * avançada — o remédio para árvores longe das entregas — ainda não foi erguida.
+   */
+  get woodReserve() {
+    return this._campHold ? this.director.costs.lumber.wood : 0;
   }
 
   /**
@@ -104,6 +125,9 @@ export class AIEconomyManager {
     const buildings = this.gm.buildings;
     const pid = this.director.playerId;
     const player = this.director.player;
+    // NEW-44: sem árvores alcançáveis a madeira não volta — pesquisa que custa madeira tira unidades do exército; só vale
+    // gastar ouro puro (e sem a folga mínima de caixa da dificuldade: o ouro parado não tem outro destino).
+    const woodless = this.director.woodOutlook().none;
     let rangedCount = 0;
     const units = this.director.getOwnUnits();
     for (let i = 0; i < units.length; i++) {
@@ -134,8 +158,9 @@ export class AIEconomyManager {
         if (id === 'ranged_class' && rangedCount < 4) continue;
         if (missingUpgradeRequirements(pid, id, this.gm, lv + 1).length > 0) continue;
         const cost = research.levels[lv].cost;
+        if (woodless && cost.wood > 0) continue;
         if (!this.director.canAfford(cost)) continue;
-        if (id !== 'ranged_class' && player.resources.gold <= this.director.profile.research) continue;
+        if (id !== 'ranged_class' && !woodless && player.resources.gold <= this.director.profile.research) continue;
         this.director.issue({ type: CMD.RESEARCH, playerId: pid, buildingId: b.id, upgradeId: id });
         break;
       }
@@ -161,6 +186,7 @@ export class AIEconomyManager {
       }
     }
     if (!hq || hq.tier >= 3 || hq.tierUpgrade) return;
+    if (this.director.woodOutlook().none) return; // NEW-44: o upgrade custa 400+ de madeira que não volta — vale mais em tropas
     // F5-04: a estratégia define quando evoluir (rush só depois de 8 min); `hqUpgradeAt` trabalhadores vivos.
     if (this.director.simTime <= 480 && this.director.strategy.hqUpgradeAt >= 99) return;
     const need = this.director.simTime > 480 ? Math.min(8, this.director.strategy.hqUpgradeAt) : this.director.strategy.hqUpgradeAt;
@@ -414,11 +440,18 @@ export class AIEconomyManager {
       return;
     }
 
+    // 3a. NEW-44: as árvores perto das entregas acabaram (a mais próxima está longe) — serraria avançada junto do melhor
+    // bosque alcançável, para todas as dificuldades; segura os demais gastos até juntar o custo (`woodReserve`).
+    if (workerCount >= 5 && hasBarracks && this.manageForwardLumber(lumberCount)) return;
+
+    // NEW-44: sem nenhuma árvore alcançável a madeira não volta — o estoque vale mais em tropas que em obras opcionais.
+    const woodless = this.director.woodOutlook().none;
+
     // 3b. F5-04: 2º quartel (rush) com ≥ 5 trabalhadores.
     // Difícil+ também reinveste ouro parado em quartéis extras (produção em paralelo).
     const surplusBarracks = this.director.profile.micro >= 2 && workerCount >= 7 && this.director.resources.gold >= 300
       ? (this.director.profile.micro >= 3 ? 2 : 1) : 0;
-    if (hasBarracks && barracksCount < this.director.strategy.barracks + surplusBarracks && workerCount >= 5 &&
+    if (!woodless && hasBarracks && barracksCount < this.director.strategy.barracks + surplusBarracks && workerCount >= 5 &&
         this.director.canAfford(this.director.costs.barracks) &&
         missingRequirements(this.director.playerId, this.director.barracksType, this.gm).length === 0) {
       this.placeBuilding(this.director.barracksType);
@@ -433,6 +466,8 @@ export class AIEconomyManager {
       this.placeBuilding(chosenType);
       return;
     }
+
+    if (woodless) return; // NEW-44: o resto (forja, estábulo, oficina, torres, muralhas…) é opcional e custa madeira
 
     // 5. WAR FORGE: forja de pesquisas — necessária para o Centro evoluir (F3-06,
     // `considerHqUpgrade`); antes só a IA orc construía, agora as duas facções (requer ≥5 workers).
@@ -468,12 +503,8 @@ export class AIEconomyManager {
       return;
     }
 
-    // 5e. F5-03: Difícil+ constrói uma 2ª serraria junto de um aglomerado denso de árvores longe das serrarias
-    // existentes (as árvores perto do Centro acabam e o trajeto de coleta cresce).
-    if (this.director.profile.micro >= 2 && hasLumber && workerCount >= 6 && lumberCount < (this.director.profile.micro >= 3 ? 3 : 2) &&
-        this.director.canAfford(this.director.costs.lumber) && this.placeForwardLumber()) {
-      return;
-    }
+    // (5e. F5-03 — 2ª serraria de Difícil+ junto de um aglomerado denso — passou para o passo 3a: a busca antiga de local nunca
+    // achava ponto livre [`canPlaceBuilding` exige ~7,5 u de folga das árvores] e a serraria avançada ficava só no papel.)
 
     // 6. WATCHTOWERS: Perimeter defense against player incursions (requires at least 5 workers)
     if (workerCount >= 5 && towerCount < this.director.strategy.towers && this.director.canAfford(this.director.costs.tower)) {
@@ -707,6 +738,13 @@ export class AIEconomyManager {
       targetGold = GOLD_WORKERS_PER_MINE_CAP;
     }
 
+    // NEW-44: sem árvore alcançável não há o que cortar — a meta de madeira vira 0 (o ouro absorve o que a mina comporta;
+    // o resto fica ocioso em vez de caminhar para árvores que não chegam).
+    if (this.director.woodOutlook().none && targetWood > 0) {
+      targetGold = Math.min(GOLD_WORKERS_PER_MINE_CAP, targetGold + targetWood);
+      targetWood = 0;
+    }
+
     return { wood: targetWood, gold: targetGold, stone: targetStone };
   }
 
@@ -755,7 +793,10 @@ export class AIEconomyManager {
           }
 
           if (assignedType === 'tree' || assignedType === 'wood') {
-            woodWorkers.push(e);
+            // NEW-44: cortando (ou indo cortar) uma árvore que não se alcança por terra — fica parado "coletando" sem render;
+            // conta como ocioso para ser reatribuído a uma árvore alcançável (ou ao ouro, se não há mais nenhuma).
+            if (e.state === 'gathering' && e.gatherTarget && !e.gatherTarget.isDead && !this.isTreeReachable(e.gatherTarget)) idleWorkers.push(e);
+            else woodWorkers.push(e);
           } else if (assignedType === 'gold') {
             goldWorkers.push(e);
           } else if (assignedType === 'stone') {
@@ -771,6 +812,7 @@ export class AIEconomyManager {
 
     // Calculate optimal workforce target distribution
     const targets = this.evaluateWorkforceTargets(livingWorkers, availableGatherers);
+    const noTrees = this.director.woodOutlook().none;
 
     const cur = {
       gold: goldWorkers.length,
@@ -808,7 +850,8 @@ export class AIEconomyManager {
 
       if (maxDeficit <= 0) {
         // Fallback: pick the resource with the lowest current count between gold and wood
-        bestType = (cur.gold <= cur.wood) ? 'gold' : 'wood';
+        // (NEW-44: sem árvore alcançável, só o ouro)
+        bestType = (cur.gold <= cur.wood || noTrees) ? 'gold' : 'wood';
       }
 
       cur[bestType]++;
@@ -867,6 +910,14 @@ export class AIEconomyManager {
     if (transferred) this._lastTransfer = now;
   }
 
+  /** NEW-44: a árvore está encostada na região terrestre da base (outra ilha/além da borda jogável = inalcançável)? */
+  isTreeReachable(tree) {
+    const pf = this.gm.pathfinder;
+    if (!pf) return true;
+    const p = tree.mesh.position;
+    return pointReachable(pf, this.director.woodOutlook().region, p.x, p.z);
+  }
+
   /**
    * Finds closest living tree with remaining wood to a given position
    * @param {{x:number,y:number,z:number}} pos 
@@ -879,7 +930,7 @@ export class AIEconomyManager {
 
     for (let i = 0; i < len; i++) {
       const t = trees[i];
-      if (!t.isDead && t.woodRemaining > 0) {
+      if (!t.isDead && t.woodRemaining > 0 && this.isTreeReachable(t)) {
         const dx = t.mesh.position.x - pos.x;
         const dz = t.mesh.position.z - pos.z;
         const dSq = dx * dx + dz * dz;
@@ -919,60 +970,73 @@ export class AIEconomyManager {
   }
 
   /**
+   * NEW-44: serraria avançada por escassez. Árvores longe das entregas (`outlook.far`) = trajetos longos de coleta; o remédio
+   * é uma serraria junto das árvores ainda alcançáveis (`findLumberSite`). Enquanto a obra não é paga, `woodReserve` segura o
+   * treino (a madeira que chega é logo gasta em tropas e nunca junta os 80 da serraria). Devolve `true` quando consumiu o turno
+   * de construção (reservando ou erguendo); `false` libera o fluxo normal de `manageBuildingPlacement`.
+   * @param {number} lumberCount  serrarias próprias (concluídas ou em obra)
+   */
+  manageForwardLumber(lumberCount) {
+    const dir = this.director;
+    const o = dir.woodOutlook();
+    const now = dir.simTime;
+    if (!o.far || now < this._campCooldownUntil || this._campTries >= CAMP_MAX_TRIES || lumberCount >= CAMP_LUMBER_CAP) {
+      this._campHold = false;
+      return false;
+    }
+    if (!this._campHold) {
+      // A busca de local varre a grade inteira: sem local viável, tenta de novo só depois de um tempo.
+      if (!this.findLumberSiteNow()) {
+        this._campCooldownUntil = now + CAMP_NO_SITE_COOLDOWN;
+        return false;
+      }
+      this._campHold = true;
+      this._campHoldSince = now;
+    }
+    if (now - this._campHoldSince > CAMP_HOLD_MAX) {
+      // Não juntou a madeira a tempo (combate, população bloqueada…): libera a reserva e tenta de novo mais tarde.
+      this._campHold = false;
+      this._campCooldownUntil = now + CAMP_COOLDOWN;
+      return false;
+    }
+    if (!dir.canAfford(dir.costs.lumber)) return true; // segura os demais gastos: a reserva vale até juntar o custo
+    this._campHold = false;
+    this._campTries++;
+    const site = this.findLumberSiteNow(); // refaz na hora de erguer: árvores cortadas e obras mudam o mapa
+    if (!site || !this.placeLumberAt(site)) this._campCooldownUntil = now + CAMP_NO_SITE_COOLDOWN;
+    return true;
+  }
+
+  /** NEW-44: melhor local para a serraria avançada agora (ver `findLumberSite`), ou null. */
+  findLumberSiteNow() {
+    const dir = this.director;
+    const gm = this.gm;
+    const o = dir.woodOutlook();
+    const pf = gm.pathfinder;
+    return findLumberSite(dir, o, (x, z) => gm.canPlaceBuilding(dir.lumberType, x, z) && (!pf || pointReachable(pf, o.region, x, z)));
+  }
+
+  /** NEW-44: PLACE_BUILDING da serraria em `site` ({x, z}) pelo trabalhador mais próximo (ocioso primeiro). */
+  placeLumberAt(site) {
+    const dir = this.director;
+    let w = null;
+    let wd = Infinity;
+    const units = dir.getOwnUnits();
+    for (let i = 0; i < units.length; i++) {
+      const u = units[i];
+      if (u.isDead || u.type !== dir.workerType) continue;
+      const d = Math.hypot(u.mesh.position.x - site.x, u.mesh.position.z - site.z) + (u.state === 'idle' ? 0 : 50);
+      if (d < wd) { wd = d; w = u; }
+    }
+    return !!dir.issue({ type: CMD.PLACE_BUILDING, playerId: dir.playerId, buildingType: dir.lumberType, x: site.x, z: site.z, unitIds: w ? [w.id] : [] });
+  }
+
+  /**
    * Finds an unobstructed, valid placement spot around the base and orders a worker to
    * construct it. F2-02: emite PLACE_BUILDING em vez de `createBuilding`+push — a construção
    * (e a dedução do custo) só acontece de fato no `CommandExecutor`, no tick de execução.
    * @param {string} type
    */
-  /**
-   * Procura o aglomerado de árvores mais denso (≥ 4 árvores num raio de 7) entre 14 e 55 unidades de distância
-   * de qualquer ponto de entrega (Centro/serrarias) e emite PLACE_BUILDING da serraria ao lado dele.
-   * Poucas tentativas por partida (`_forwardTries`). @returns {boolean} comando emitido
-   */
-  placeForwardLumber() {
-    if ((this._forwardTries || 0) >= 5) return false;
-    this._forwardTries = (this._forwardTries || 0) + 1;
-    const dir = this.director;
-    const base = dir.baseCenter;
-    const drops = [{ x: base.x, z: base.y }];
-    for (const b of this.gm.buildings) {
-      if (b.ownerId === dir.playerId && !b.isDead && b.type === dir.lumberType) drops.push({ x: b.mesh.position.x, z: b.mesh.position.z });
-    }
-    const trees = [];
-    for (const t of this.gm.trees) if (!t.isDead && t.woodRemaining > 0) trees.push(t.mesh.position);
-    let best = null;
-    let bestScore = -Infinity;
-    for (let i = 0; i < trees.length; i++) {
-      const p = trees[i];
-      let dmin = Infinity;
-      for (let k = 0; k < drops.length; k++) dmin = Math.min(dmin, Math.hypot(p.x - drops[k].x, p.z - drops[k].z));
-      if (dmin < 14 || Math.hypot(p.x - base.x, p.z - base.y) > 55) continue;
-      let n = 0; let cx = 0; let cz = 0;
-      for (let j = 0; j < trees.length; j++) {
-        if (Math.hypot(trees[j].x - p.x, trees[j].z - p.z) <= 7) { n++; cx += trees[j].x; cz += trees[j].z; }
-      }
-      if (n < 4) continue;
-      const score = n * 6 - Math.hypot(p.x - base.x, p.z - base.y) - i * 1e-6;
-      if (score > bestScore) { bestScore = score; best = { x: cx / n, z: cz / n }; }
-    }
-    if (!best) return false;
-    for (let a = 0; a < 12; a++) {
-      const ang = a * (Math.PI / 6);
-      const r = 4 + (a % 2) * 2;
-      const x = best.x + Math.cos(ang) * r;
-      const z = best.z + Math.sin(ang) * r;
-      if (!this.gm.canPlaceBuilding(dir.lumberType, x, z)) continue;
-      let w = null; let wd = Infinity;
-      for (const u of dir.getOwnUnits()) {
-        if (u.isDead || u.type !== dir.workerType) continue;
-        const d = Math.hypot(u.mesh.position.x - x, u.mesh.position.z - z) + (u.state === 'idle' ? 0 : 50);
-        if (d < wd) { wd = d; w = u; }
-      }
-      return !!dir.issue({ type: CMD.PLACE_BUILDING, playerId: dir.playerId, buildingType: dir.lumberType, x, z, unitIds: w ? [w.id] : [] });
-    }
-    return false;
-  }
-
   placeBuilding(type) {
     let chosenX = null;
     let chosenZ = null;

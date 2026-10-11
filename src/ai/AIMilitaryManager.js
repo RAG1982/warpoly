@@ -7,6 +7,8 @@ import { adaptMix } from './AIStrategy.js';
 
 /** F4-06: atacante terrestre genérico (não atinge aéreos) — escolha de alvo da expedição. */
 const LAND_ATTACKER = { canHitAir: false, canHitGround: true };
+/** NEW-44: tamanho da onda quando o exército não pode mais ser reposto (ataca com o que tem, mín. 3 combatentes). */
+const WOODLESS_WAVE = 3;
 
 /**
  * AIMilitaryManager (Gerenciador Militar e Ofensivo da IA)
@@ -20,6 +22,14 @@ const LAND_ATTACKER = { canHitAir: false, canHitGround: true };
  * - Reutilização de buffers internos pré-alocados para evitar instanciações
  *   de novos arrays a cada ciclo de 1.0 segundo.
  */
+
+/** NEW-44: combatentes vivos (todos os não trabalhadores) de uma lista de unidades próprias. */
+function combatTotal(units) {
+  let n = 0;
+  for (let i = 0; i < units.length; i++) if (!units[i].isDead && !getUnitDef(units[i].type).isWorker) n++;
+  return n;
+}
+
 /** Valor de um tipo de unidade = custo total (ouro + madeira + pedra). */
 function unitValue(type) {
   const c = getUnitDef(type).cost;
@@ -70,7 +80,20 @@ export class AIMilitaryManager {
     let n = d.profile.attackBase + st.firstWave - 4 + st.waveStep * Math.min(this.strikeWaveNumber - 1, 6);
     const t = d.simTime || 0;
     if (t > 900) n -= Math.floor((t - 900) / 300) + 1;
+    // NEW-44: sem como repor tropas, esperar uma onda maior é inútil — ataca com o que tem.
+    if (this.reinforcementsBlocked()) n = Math.min(n, WOODLESS_WAVE);
     return Math.max(2, Math.round(n));
+  }
+
+  /**
+   * NEW-44: o exército não cresce mais? Nenhuma árvore alcançável (a madeira não volta) e o estoque não paga o combatente
+   * de menor custo em madeira. Todo combatente custa madeira (só conjuradores não, e exigem Centro nível 3).
+   */
+  reinforcementsBlocked() {
+    const d = this.director;
+    if ((d.simTime || 0) < 60 || !d.woodOutlook().none) return false;
+    const c = d.costs;
+    return d.resources.wood < Math.min((c.melee && c.melee.wood) || 0, (c.ranged && c.ranged.wood) || 0);
   }
 
   /**
@@ -334,10 +357,18 @@ export class AIMilitaryManager {
     const comp = dir.perception.composition(this._comp);
     const mix = adaptMix(dir.strategy, dir.faction, comp);
 
+    // NEW-44: madeira acabando/acabada — atiradores custam 20 de madeira, infantaria 50: o mesmo estoque rende 2,5× mais tropas.
+    const outlook = dir.woodOutlook();
+    if (outlook.none || outlook.low) mix.ranged = Math.min(0.85, mix.ranged + 0.3);
+    // NEW-44: a serraria avançada (remédio para árvores longe das entregas) tem a madeira reservada; só a defesa em andamento e
+    // um exército mínimo passam à frente dela.
+    const reserve = dir.utilities.def > 0 || combatTotal(enemies) < 4 ? 0 : dir.woodReserve;
+    const can = cost => dir.canAfford(cost) && (cost.wood || 0) + reserve <= dir.resources.wood;
+
     let recruitType = null;
     let trainAt = barracks;
-    const canMelee = dir.canAfford(dir.costs.melee);
-    const canRanged = dir.canAfford(dir.costs.ranged);
+    const canMelee = can(dir.costs.melee);
+    const canRanged = can(dir.costs.ranged);
 
     // Defense priority: If base has ZERO combat units, train whatever combat unit is affordable!
     if (meleeCount === 0 && rangedCount === 0) {
@@ -357,7 +388,7 @@ export class AIMilitaryManager {
     // F4-01: cavalaria no Estábulo/Covil, 1 para cada `cavalryRatio` combatentes de linha.
     const stable = dir.getConstructedStable();
     if (stable && mix.cavalryRatio > 0 && (!stable.queue || stable.queue.length < 2) &&
-        dir.canAfford(dir.costs.cavalry) &&
+        can(dir.costs.cavalry) &&
         missingUnitRequirements(dir.playerId, dir.cavalryType, this.gm).length === 0 &&
         line >= mix.cavalryRatio * (cavalryCount + 1)) {
       recruitType = dir.cavalryType;
@@ -370,7 +401,7 @@ export class AIMilitaryManager {
     if (workshop && recruitType !== dir.cavalryType && (!workshop.queue || workshop.queue.length < 1)) {
       const siegeCap = Math.min(3, 1 + Math.floor(line / 6)) + mix.siegeBonus;
       if (siegeCount < siegeCap && line >= Math.min(dir.strategy.siegeAt, 8) &&
-          dir.canAfford(dir.costs.siege) &&
+          can(dir.costs.siege) &&
           missingUnitRequirements(dir.playerId, dir.siegeType, this.gm).length === 0) {
         recruitType = dir.siegeType;
         trainAt = workshop;
@@ -381,7 +412,7 @@ export class AIMilitaryManager {
     if (workshop && recruitType !== dir.cavalryType && recruitType !== dir.siegeType &&
         (!workshop.queue || workshop.queue.length < 1) && dir.suicideType) {
       if (suicideCount < 3 && line >= 3 && this._enemyFortified() &&
-          dir.canAfford(dir.costs.suicide) &&
+          can(dir.costs.suicide) &&
           missingUnitRequirements(dir.playerId, dir.suicideType, this.gm).length === 0) {
         recruitType = dir.suicideType;
         trainAt = workshop;
@@ -389,11 +420,11 @@ export class AIMilitaryManager {
     }
 
     // F5-05: conjuradores (Mago/Necromante) no edifício arcano — só dificuldades com `casters`, estratégias de tech.
-    if (dir.profile.casters && dir.strategy.tech && line >= 6) {
+    if (dir.profile.casters && (dir.strategy.tech || outlook.none) && line >= 6) { // NEW-44: sem madeira, o ouro vai para conjuradores (não custam madeira)
       const arcane = dir.getConstructedArcane();
       const casterCap = dir.profile.micro >= 3 ? 3 : 2;
       if (arcane && (!arcane.queue || arcane.queue.length < 1) && casterCount < casterCap &&
-          recruitType !== dir.siegeType && dir.canAfford(dir.costs.caster) &&
+          recruitType !== dir.siegeType && can(dir.costs.caster) &&
           missingUnitRequirements(dir.playerId, dir.casterType, this.gm).length === 0) {
         recruitType = dir.casterType;
         trainAt = arcane;
@@ -428,7 +459,9 @@ export class AIMilitaryManager {
     const dir = this.director;
     // Guarda de casa: a onda nunca leva todo o exército (Normal 1 unidade; Difícil+ 20 %, mín. 2).
     const micro = dir.profile.micro;
-    const guardFor = n => (micro >= 2 ? Math.max(2, Math.floor(n * 0.2)) : micro >= 1 ? 1 : 0);
+    // NEW-44: sem reposição possível a guarda de casa é só 1 (esperar mais tropas não adianta).
+    const blocked = this.reinforcementsBlocked();
+    const guardFor = n => (blocked ? (micro >= 1 ? 1 : 0) : micro >= 2 ? Math.max(2, Math.floor(n * 0.2)) : micro >= 1 ? 1 : 0);
     const total = this.collectSquad();
     if (total < this.attackThreshold + guardFor(total)) return;
 

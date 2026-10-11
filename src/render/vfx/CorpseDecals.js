@@ -13,6 +13,7 @@ const _p = new THREE.Vector3();
 const _s = new THREE.Vector3();
 const _e = new THREE.Euler();
 const _col = new THREE.Color();
+const _st = { visible: false, scale: 0, sink: 0, done: false }; // saída reutilizada de `corpseDecay` (sem alocação por quadro)
 const BLOOD = new THREE.Color('#4a1014');
 
 export class CorpseDecals {
@@ -65,7 +66,7 @@ export class CorpseDecals {
     let i = 0;
     while (i < this.count) {
       this.age[i] += delta;
-      const st = corpseDecay(this.age[i], CORPSE);
+      const st = corpseDecay(this.age[i], CORPSE, _st);
       if (st.done) { // swap-remove com o último
         const l = --this.count;
         if (i !== l) {

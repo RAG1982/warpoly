@@ -3,26 +3,9 @@ import { clone as skeletonClone } from 'three/examples/jsm/utils/SkeletonUtils.j
 import {
   materials,
   enableShadows,
-  createCastle,
-  createLumberCamp,
-  createGoldMine,
-  createStoneQuarry,
-  createCottage,
-  createBarracks,
-  createWatchtower,
-  createFarm,
   createBanditCamp,
-  createGreatHall,
-  createOrcBarracks,
-  createPigFarm,
-  createOrcLumberMill,
-  createOrcWatchtower,
-  createOrcHouse,
-  createOrcForge,
-  createHumanForge,
   createStable,
   createOgreDen,
-  createCavalier,
   createBallista,
   createCatapult,
   createSapper,
@@ -56,16 +39,7 @@ import {
   createOilWell,
   createWorkshop,
   createOrcWorkshop,
-  createTree,
-  createKnight,
-  createArcher,
-  createVillager,
-  createBandit,
   createCritter,
-  createPeon,
-  createGrunt,
-  createAxethrower,
-  createOgre,
   createArrow,
   createFlowerPatch,
   createPebbles,
@@ -128,13 +102,33 @@ function unifySkeletons(root) {
   });
 }
 
+/** Tamanho (x, y, z) do bloco reserva por tipo de item (ver `ModelFactory._placeholder`). */
+const PLACEHOLDER_SIZE_BY_KIND = { building: [4.5, 3, 4.5], unit: [0.8, 1.8, 0.8], tree: [1.6, 5, 1.6] };
+const PLACEHOLDER_SIZES = {
+  castle: [6.5, 4.5, 6.5], great_hall: [6.5, 4.5, 6.5], cavalier: [0.9, 2, 2.2], ogre: [1.2, 2.6, 1.2],
+  gold_mine: [5, 3, 5], stone_quarry: [5, 3, 5]
+};
+const placeholderGeometries = new Map();
+function placeholderGeometry(size) {
+  const k = size.join('x');
+  if (!placeholderGeometries.has(k)) placeholderGeometries.set(k, new THREE.BoxGeometry(size[0], size[1], size[2]));
+  return placeholderGeometries.get(k);
+}
+const placeholderMaterials = {};
+function placeholderMaterial(kind) {
+  if (!placeholderMaterials[kind]) {
+    placeholderMaterials[kind] = new THREE.MeshStandardMaterial({ color: kind === 'tree' ? 0x3f7d3a : kind === 'unit' ? 0x9a8f80 : 0xb8a88a, roughness: 0.9 });
+  }
+  return placeholderMaterials[kind];
+}
+
 export class ModelFactory {
   // Shared materials
   static materials = materials;
 
   // Pipeline Blender (F7-00): .glb só com ?glb=1 (lógica em glbModels.js)
   static glbEnabled = glbEnabled;
-  static loadGlbModels() { return loadGlbTemplates(); }
+  static loadGlbModels(factions = null) { return loadGlbTemplates(factions); }
   static setTeamColor(obj, color) { return setTeamColor(obj, color); }
 
   /** Clone de um .glb já carregado (ou null), com nomes preservados e userData religado. */
@@ -160,6 +154,25 @@ export class ModelFactory {
 
   static _glbOr(key, fallback) {
     return (glbEnabled && this.createGlbModel(key)) || fallback();
+  }
+
+  /**
+   * F7-00b: os modelos procedurais (e as texturas de canvas) dos itens migrados para o Blender foram removidos. Se o .glb
+   * não carregou (rede) ou `?glb=0`, entra este bloco simples, sem texturas, para o jogo continuar jogável: unidades levam um
+   * nó `Torso` (o `UnitAnimator` o acha pelo nome). Em modo headless (testes), grupo vazio como o `getOrCreateModel`.
+   * @param {string} key chave do .glb (`GLB_MODELS`)
+   * @param {'building'|'unit'|'tree'} [kind]
+   */
+  static _placeholder(key, kind = 'building') {
+    const group = new THREE.Group();
+    group.name = `Placeholder_${key}`;
+    if (this.headless) return group;
+    const size = PLACEHOLDER_SIZES[key] || PLACEHOLDER_SIZE_BY_KIND[kind];
+    const mesh = new THREE.Mesh(placeholderGeometry(size), placeholderMaterial(kind));
+    mesh.name = kind === 'unit' ? 'Torso' : 'Static_Mesh';
+    mesh.position.y = size[1] / 2;
+    group.add(mesh);
+    return enableShadows(group);
   }
 
   /**
@@ -415,35 +428,35 @@ export class ModelFactory {
 
   // --- Human Buildings ---
   static createCastle() {
-    return this._glbOr('castle', () => this.getOrCreateModel('castle', createCastle));
+    return this._glbOr('castle', () => this._placeholder('castle'));
   }
 
   static createLumberCamp() {
-    return this._glbOr('lumber_camp', () => this.getOrCreateModel('lumber_camp', createLumberCamp));
+    return this._glbOr('lumber_camp', () => this._placeholder('lumber_camp'));
   }
 
   static createGoldMine() {
-    return this._glbOr('gold_mine', () => this.getOrCreateModel('gold_mine', createGoldMine));
+    return this._glbOr('gold_mine', () => this._placeholder('gold_mine'));
   }
 
   static createStoneQuarry() {
-    return this._glbOr('stone_quarry', () => this.getOrCreateModel('stone_quarry', createStoneQuarry));
+    return this._glbOr('stone_quarry', () => this._placeholder('stone_quarry'));
   }
 
   static createCottage() {
-    return this._glbOr('cottage', () => this.getOrCreateModel('cottage', createCottage));
+    return this._glbOr('cottage', () => this._placeholder('cottage'));
   }
 
   static createBarracks() {
-    return this._glbOr('barracks', () => this.getOrCreateModel('barracks', createBarracks));
+    return this._glbOr('barracks', () => this._placeholder('barracks'));
   }
 
   static createWatchtower() {
-    return this._glbOr('watchtower', () => this.getOrCreateModel('watchtower', createWatchtower));
+    return this._glbOr('watchtower', () => this._placeholder('watchtower'));
   }
 
   static createFarm() {
-    return this._glbOr('farm', () => this.getOrCreateModel('farm', createFarm));
+    return this._glbOr('farm', () => this._placeholder('farm'));
   }
 
   static createBanditCamp() {
@@ -467,41 +480,41 @@ export class ModelFactory {
   }
 
   static createHumanForge() {
-    return this._glbOr('forge', () => this.getOrCreateModel('forge', createHumanForge));
+    return this._glbOr('forge', () => this._placeholder('forge'));
   }
 
   // --- Orc Buildings ---
   static createGreatHall() {
-    return this._glbOr('great_hall', () => this.getOrCreateModel('great_hall', createGreatHall));
+    return this._glbOr('great_hall', () => this._placeholder('great_hall'));
   }
 
   static createOrcBarracks() {
-    return this._glbOr('orc_barracks', () => this.getOrCreateModel('orc_barracks', createOrcBarracks));
+    return this._glbOr('orc_barracks', () => this._placeholder('orc_barracks'));
   }
 
   static createPigFarm() {
-    return this._glbOr('pig_farm', () => this.getOrCreateModel('pig_farm', createPigFarm));
+    return this._glbOr('pig_farm', () => this._placeholder('pig_farm'));
   }
 
   static createOrcLumberMill() {
-    return this._glbOr('orc_lumber_mill', () => this.getOrCreateModel('orc_lumber_mill', createOrcLumberMill));
+    return this._glbOr('orc_lumber_mill', () => this._placeholder('orc_lumber_mill'));
   }
 
   static createOrcWatchtower() {
-    return this._glbOr('orc_watchtower', () => this.getOrCreateModel('orc_watchtower', createOrcWatchtower));
+    return this._glbOr('orc_watchtower', () => this._placeholder('orc_watchtower'));
   }
 
   static createOrcHouse() {
-    return this._glbOr('orc_house', () => this.getOrCreateModel('orc_house', createOrcHouse));
+    return this._glbOr('orc_house', () => this._placeholder('orc_house'));
   }
 
   static createOrcForge() {
-    return this._glbOr('orc_forge', () => this.getOrCreateModel('orc_forge', createOrcForge));
+    return this._glbOr('orc_forge', () => this._placeholder('orc_forge'));
   }
 
   // --- Environment & Props ---
   static createTree(type = 'oak') {
-    return this._glbOr('tree_' + type, () => this.getOrCreateModel('tree_' + type, () => createTree(type)));
+    return this._glbOr('tree_' + type, () => this._placeholder('tree_' + type, 'tree'));
   }
 
   static createArrow() {
@@ -538,12 +551,12 @@ export class ModelFactory {
 
   // --- Human Units ---
   static createKnight() {
-    return this._glbOr('knight', () => this.getOrCreateModel('knight', createKnight, 'knight'));
+    return this._glbOr('knight', () => this._placeholder('knight', 'unit'));
   }
 
-  /** F4-01/NEW-33: cavaleiro montado (.glb do Blender; fallback procedural: cavalo de caixas + tronco do Espadachim). */
+  /** F4-01/NEW-33: cavaleiro montado (.glb do Blender; sem ele, o bloco reserva de `_placeholder`). */
   static createCavalier() {
-    return this._glbOr('cavalier', () => this.getOrCreateModel('cavalier', createCavalier, 'cavalier'));
+    return this._glbOr('cavalier', () => this._placeholder('cavalier', 'unit'));
   }
 
   /** F4-02: balista (cerco humano, procedural). */
@@ -557,11 +570,11 @@ export class ModelFactory {
   }
 
   static createArcher() {
-    return this._glbOr('archer', () => this.getOrCreateModel('archer', createArcher, 'archer'));
+    return this._glbOr('archer', () => this._placeholder('archer', 'unit'));
   }
 
   static createVillager() {
-    return this._glbOr('villager', () => this.getOrCreateModel('villager', createVillager, 'villager'));
+    return this._glbOr('villager', () => this._placeholder('villager', 'unit'));
   }
 
   /** F3-10: critter decorativo (`sheep` | `pig`). */
@@ -570,24 +583,24 @@ export class ModelFactory {
   }
 
   static createBandit() {
-    return this._glbOr('bandit', () => this.getOrCreateModel('bandit', createBandit, 'bandit'));
+    return this._glbOr('bandit', () => this._placeholder('bandit', 'unit'));
   }
 
   // --- Orc Units ---
   static createPeon() {
-    return this._glbOr('peon', () => this.getOrCreateModel('peon', createPeon, 'peon'));
+    return this._glbOr('peon', () => this._placeholder('peon', 'unit'));
   }
 
   static createGrunt() {
-    return this._glbOr('grunt', () => this.getOrCreateModel('grunt', createGrunt, 'grunt'));
+    return this._glbOr('grunt', () => this._placeholder('grunt', 'unit'));
   }
 
   static createAxethrower() {
-    return this._glbOr('axethrower', () => this.getOrCreateModel('axethrower', createAxethrower, 'axethrower'));
+    return this._glbOr('axethrower', () => this._placeholder('axethrower', 'unit'));
   }
 
   static createOgre() {
-    return this._glbOr('ogre', () => this.getOrCreateModel('ogre', createOgre, 'ogre'));
+    return this._glbOr('ogre', () => this._placeholder('ogre', 'unit'));
   }
 
   /** F4-05: Sapadores de Pólvora (humano; .glb do Blender, fallback procedural). */

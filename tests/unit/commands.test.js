@@ -10,6 +10,14 @@ describe('commands.js (F2-02)', () => {
     expect(() => makeCommand({ type: CMD.STOP, unitIds: [1] })).toThrow(); // falta playerId
   });
 
+  it('ATTACK_GROUND (NEW-35) exige unitIds, x e z numéricos', () => {
+    expect(() => makeCommand({ type: CMD.ATTACK_GROUND, playerId: 0, unitIds: [1] })).toThrow();
+    expect(() => makeCommand({ type: CMD.ATTACK_GROUND, playerId: 0, x: 1, z: 2 })).toThrow();
+    expect(validateCommand({ type: CMD.ATTACK_GROUND, playerId: 0, unitIds: [1], x: '1', z: 2 }).ok).toBe(false);
+    const cmd = makeCommand({ type: CMD.ATTACK_GROUND, playerId: 0, unitIds: [1, 2], x: 5, z: -3 });
+    expect(deserialize(serialize(cmd))).toEqual({ type: 'attackGround', playerId: 0, unitIds: [1, 2], x: 5, z: -3 });
+  });
+
   it('makeCommand aceita quando todos os campos obrigatórios estão presentes', () => {
     const cmd = makeCommand({ type: CMD.MOVE, playerId: 0, unitIds: [1, 2], x: 5, z: -3, tick: 10 });
     expect(cmd).toEqual({ type: CMD.MOVE, playerId: 0, unitIds: [1, 2], x: 5, z: -3, tick: 10 });

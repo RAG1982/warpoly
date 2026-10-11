@@ -1,8 +1,20 @@
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, afterEach, vi } from 'vitest';
 import * as THREE from 'three';
 import { FogOfWar } from '../../src/sim/FogOfWar.js';
 import { FogView } from '../../src/render/FogView.js';
-import { fogUniforms } from '../../src/render/fogOfWarShader.js';
+import { fogUniforms, resetFogTexture } from '../../src/render/fogOfWarShader.js';
+
+// NEW-41: `FogView` importa o `ModelFactory`, que na importação dispara o download de ~50 .glb (falha em Node, com um
+// `console.warn` de pilha enorme por arquivo, assíncrono, durante o teste). `?glb=0` desliga essa carga automática.
+vi.hoisted(() => {
+  globalThis.window = { location: { search: '?glb=0' } };
+});
+
+// O uniform da névoa é um singleton do módulo: cada teste devolve o estado ao neutro, para não depender da ordem.
+afterEach(() => {
+  resetFogTexture();
+  fogUniforms.fowParams.value.z = 0;
+});
 
 describe('FogOfWar — dispose', () => {
   it('dispose() seguido de nova instância não compartilha estado (uniform de textura trocado)', () => {

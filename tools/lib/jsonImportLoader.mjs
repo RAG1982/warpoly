@@ -6,6 +6,10 @@
  * nenhum arquivo de `src/` (fora da lane desta spec).
  */
 export async function load(url, context, next) {
+  // NEW-31: imports de CSS (efeito colateral da UI, ex. `UIManager` → telas) viram módulo vazio.
+  if (url.endsWith('.css')) {
+    return { format: 'module', source: '', shortCircuit: true };
+  }
   if (url.endsWith('.json') && (!context.importAttributes || !context.importAttributes.type)) {
     return next(url, { ...context, importAttributes: { ...(context.importAttributes || {}), type: 'json' } });
   }

@@ -8,6 +8,7 @@ import * as THREE from 'three';
 import { ModelFactory } from '../entities/ModelFactory.js';
 import { getBuildingDef } from '../data/index.js';
 import { syncOutline, resetOutline } from './postfx/outlineLayer.js';
+import { markRingMaterial } from './markRing.js';
 import { EVT } from '../sim/events.js';
 
 /** Vector3 → objeto plano `{x,y,z}` (payload de evento: nunca referências a objetos three.js). */
@@ -198,7 +199,8 @@ export class BuildingView {
       ? bldRingGeoBarracks
       : bldRingGeoDefault;
 
-    this.selectionRing = new THREE.Mesh(ringGeo, bldRingMat);
+    this._markColor = this.entity.markColor || null; // ação de missão `spawnBuilding.markColor`: anel com cor própria
+    this.selectionRing = new THREE.Mesh(ringGeo, this._markColor ? markRingMaterial(this._markColor) : bldRingMat);
     this.selectionRing.name = 'SelectionRing';
     this.selectionRing.position.y = 0.08;
     this.selectionRing.visible = false;
@@ -440,6 +442,10 @@ export class BuildingView {
     }
 
     // Anel de seleção e bandeira do ponto de reunião.
+    if ((e.markColor || null) !== this._markColor) {
+      this._markColor = e.markColor || null;
+      this.selectionRing.material = this._markColor ? markRingMaterial(this._markColor) : bldRingMat;
+    }
     this.selectionRing.visible = e.isSelected;
     syncOutline(this, this.mesh, e.isSelected); // F7-03: contorno de seleção (máscara)
     this.rallyGroup.visible = e.rallyShown;
@@ -460,8 +466,9 @@ export class BuildingView {
 
     this.updateDamageFlames();
 
-    // Animate damage flames and smoke if active
-    if (this.flamesGroup && this.flamesGroup.visible) {
+    // Animate damage flames and smoke if active — só se a construção está visível: chamas de construções inimigas
+    // na memória da névoa (`fogHidden`) não animam nem emitem fumaça (NEW-13).
+    if (shown && this.flamesGroup && this.flamesGroup.visible) {
       this.flameTime = (this.flameTime || 0) + frameDelta;
       const t = this.flameTime;
       for (let i = 0; i < this.flameTongues.length; i++) {
@@ -495,7 +502,7 @@ export class BuildingView {
     }
 
     // Cottage & Great Hall chimney smoke
-    if (e.isConstructed && (e.type === 'cottage' || e.type === 'great_hall') && gmEvents) {
+    if (shown && e.isConstructed && (e.type === 'cottage' || e.type === 'great_hall') && gmEvents) {
       this.smokeTimer += frameDelta;
       if (this.smokeTimer >= 0.8) {
         this.smokeTimer = 0;

@@ -11,6 +11,7 @@ import { stableVariant, deathStyleFor } from '../animation/animMath.js';
 import { getUnitDef } from '../data/index.js';
 import { HERO_BAR_SCALE } from '../data/heroes.js';
 import { syncOutline, resetOutline } from './postfx/outlineLayer.js';
+import { markRingMaterial } from './markRing.js';
 import { isDetectedBy } from '../sim/detection.js';
 import { SIM_DT, lerpAngle, animationLodStep } from '../sim/constants.js';
 
@@ -75,7 +76,11 @@ export class UnitView {
     this._buildModel();
     this._modelSeq = unit.modelSeq;
 
-    this.selectionRing = new THREE.Mesh(unitRingGeo, unit.faction === 'player' ? playerRingMat : enemyRingMat);
+    // Anel do lado (dourado = do jogador, vermelho = demais), decidido na criação; `markColor` (ação de missão `spawn`) o substitui
+    // pela cor própria da unidade (ex.: carregadores do comboio) sem alterar o padrão das demais.
+    this._baseRingMat = unit.faction === 'player' ? playerRingMat : enemyRingMat;
+    this._markColor = unit.markColor || null;
+    this.selectionRing = new THREE.Mesh(unitRingGeo, this._markColor ? markRingMaterial(this._markColor) : this._baseRingMat);
     this.selectionRing.name = 'SelectionRing';
     this.selectionRing.position.y = 0.05 - (unit.flyHeight || 0) / 1.62; // F4-06: aéreo — anel no chão, sob a unidade
     this.selectionRing.visible = false;
@@ -309,6 +314,10 @@ export class UnitView {
     const gone = u.isDead || u.isDying || u.state === 'dying';
 
     // Anel de seleção e barras (billboard voltado para a câmera).
+    if ((u.markColor || null) !== this._markColor) { // cor própria atribuída/removida depois da criação (sem alocar: materiais em cache)
+      this._markColor = u.markColor || null;
+      this.selectionRing.material = this._markColor ? markRingMaterial(this._markColor) : this._baseRingMat;
+    }
     this.selectionRing.visible = !!u.isSelected && !gone;
     syncOutline(this, root, this.selectionRing.visible && root.visible); // F7-03: contorno de seleção (máscara)
     if (gone || !root.visible) {

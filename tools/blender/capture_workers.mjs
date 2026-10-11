@@ -14,7 +14,6 @@ const which = process.argv[2] || 'all';
 // [arquivo, modelo, anim, tempo, ferramenta, carga]
 function shotsFor(id, procId) {
   return [
-    [`insp_${id}_old`, procId, 'idle', null, 'axe', 'none'],
     [`insp_${id}_new`, `${procId}_glb`, 'idle', null, 'axe', 'none'],
     [`insp_${id}_new_walk`, `${procId}_glb`, 'walk', 0.2, 'axe', 'none'],
     [`insp_${id}_new_walk_wood`, `${procId}_glb`, 'walk', 0.45, 'axe', 'wood'],
@@ -24,7 +23,6 @@ function shotsFor(id, procId) {
     [`insp_${id}_new_fight`, `${procId}_glb`, 'fight', 0.3, 'axe', 'none'],
     [`insp_${id}_new_hurt`, `${procId}_glb`, 'hurt', 0.12, 'axe', 'none'],
     [`insp_${id}_new_die`, `${procId}_glb`, 'die', 1.4, 'axe', 'none'],
-    [`insp_${id}_old_axe`, procId, 'gather', 0.55, 'axe', 'none']
   ];
 }
 

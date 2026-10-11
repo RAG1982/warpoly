@@ -15,8 +15,10 @@
 <body>
   <!-- Royal Loading Screen with Progress Bar -->
   <div id="loading-screen">
+    <!-- F7-09: arte renderizada no Blender (public/ui/art/loading.webp); se não carregar, o fundo escuro antigo continua -->
+    <img class="loading-art-img" src="/ui/art/loading.webp" alt="" width="1920" height="1080" draggable="false" decoding="async" loading="lazy" onload="this.parentNode.classList.add('has-art')" onerror="this.remove()" />
     <div class="loading-container">
-      <div class="loading-crest">⚔️</div>
+      <div class="loading-crest"><span class="loading-crest-emoji" aria-hidden="true">⚔️</span><img class="loading-crest-img" src="/ui/icons/256/command_attack.webp" alt="" width="64" height="64" draggable="false" onload="this.parentNode.classList.add('has-img')" onerror="this.remove()" /></div>
       <h1 class="loading-title">WARPOLY</h1>
       <p class="loading-subtitle" data-i18n="loading.subtitle">Construindo o Reino...</p>
 
@@ -105,14 +107,21 @@
             </div>
           </div>
           <div class="card-body">
-            <div id="selection-portraits" style="display: none;">
-              <!-- F6-03: grade de retratos da seleção múltipla (gm.selectedUnits.length > 1) -->
+            <!-- F7-09: retrato do estado (idle/ataque) da unidade selecionada; duas imagens empilhadas, a troca é um cross-fade -->
+            <div id="selection-portrait-box" class="selection-portrait-box" style="display: none;">
+              <img id="selection-portrait-idle" class="msp-idle" alt="" draggable="false" />
+              <img id="selection-portrait-attack" class="msp-attack" alt="" draggable="false" />
             </div>
-            <div id="selection-stats">
-              <!-- Dynamic stats inserted here -->
-            </div>
-            <div id="selection-actions">
-              <!-- Dynamic command & production buttons -->
+            <div class="card-main">
+              <div id="selection-portraits" style="display: none;">
+                <!-- F6-03: grade de retratos da seleção múltipla (gm.selectedUnits.length > 1) -->
+              </div>
+              <div id="selection-stats">
+                <!-- Dynamic stats inserted here -->
+              </div>
+              <div id="selection-actions">
+                <!-- Dynamic command & production buttons -->
+              </div>
             </div>
           </div>
         </div>
@@ -120,6 +129,7 @@
         <!-- Building Selection View (Matches dialogoBarracs.png) -->
         <div id="building-selection-view" style="display: none;">
           <div class="bld-card-header">
+            <div id="bld-header-icon" class="bld-header-icon" style="display: none;"></div>
             <div class="bld-header-left">
               <span id="bld-selection-title"></span>
               <div class="bld-hp-row">
@@ -136,6 +146,7 @@
           <div id="bld-hq-tier-section" class="bld-section-row" style="display: none;">
             <span class="bld-section-label" id="bld-hq-tier-label"></span>
             <button id="bld-hq-upgrade-btn" class="bld-train-btn bld-hq-upgrade-btn" data-action="upgrade-hq">
+              <span id="bld-hq-upgrade-btn-icon" class="bld-btn-icon-slot"></span>
               <span id="bld-hq-upgrade-btn-label"></span>
             </button>
             <div class="bld-queue-progress-track" id="bld-hq-upgrade-progress-track">
@@ -146,6 +157,7 @@
           <!-- F3-05: Cancelar obra (só visível em construção em obra) -->
           <div id="bld-cancel-section" class="bld-section-row" style="display: none;">
             <button id="bld-cancel-construction-btn" class="bld-train-btn bld-hq-upgrade-btn" data-action="cancel-construction" data-i18n-title="hud.cancelBuild" title="Cancelar obra (reembolsa 75%)">
+              <img class="bld-btn-icon" src="/ui/icons/128/command_cancel.webp" alt="" draggable="false" data-ui-sprite="command_cancel" data-fb-emoji="✖️" />
               <span data-i18n="hud.cancelBuild">Cancelar obra (reembolsa 75%)</span>
             </button>
           </div>

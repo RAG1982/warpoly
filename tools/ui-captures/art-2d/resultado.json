@@ -1,0 +1,473 @@
+{
+  "errors": [],
+  "badUi": [],
+  "scenes": {
+    "01-hud-trabalhador": {
+      "sprites": 22,
+      "spriteOk": 22,
+      "legacy": 2,
+      "broken": 0,
+      "emojiFallbacks": 0,
+      "statIcons": 4,
+      "portraitBox": {
+        "cls": "selection-portrait-box",
+        "srcs": [
+          "/ui/portraits/villager_idle.webp",
+          "/ui/portraits/villager_attack.webp"
+        ],
+        "ok": true
+      },
+      "firstSrcs": [
+        "/ui/icons/128/stat_attack.webp",
+        "/ui/icons/128/stat_armor.webp",
+        "/ui/icons/128/stat_speed.webp",
+        "/ui/icons/128/stat_cargo.webp"
+      ]
+    },
+    "02-hud-castelo-fila": {
+      "sprites": 28,
+      "spriteOk": 28,
+      "legacy": 2,
+      "broken": 0,
+      "emojiFallbacks": 0,
+      "statIcons": 5,
+      "portraitBox": {
+        "cls": "selection-portrait-box",
+        "srcs": [
+          "/ui/portraits/villager_idle.webp",
+          "/ui/portraits/villager_attack.webp"
+        ],
+        "ok": true
+      },
+      "firstSrcs": [
+        "/ui/icons/128/stat_attack.webp",
+        "/ui/icons/128/stat_armor.webp",
+        "/ui/icons/128/stat_speed.webp",
+        "/ui/icons/128/stat_cargo.webp"
+      ]
+    },
+    "03-hud-quartel-fila": {
+      "sprites": 29,
+      "spriteOk": 29,
+      "legacy": 2,
+      "broken": 0,
+      "emojiFallbacks": 0,
+      "statIcons": 5,
+      "portraitBox": {
+        "cls": "selection-portrait-box",
+        "srcs": [
+          "/ui/portraits/villager_idle.webp",
+          "/ui/portraits/villager_attack.webp"
+        ],
+        "ok": true
+      },
+      "firstSrcs": [
+        "/ui/icons/128/stat_attack.webp",
+        "/ui/icons/128/stat_armor.webp",
+        "/ui/icons/128/stat_speed.webp",
+        "/ui/icons/128/stat_cargo.webp"
+      ]
+    },
+    "04-hud-forja-pesquisa": {
+      "sprites": 31,
+      "spriteOk": 31,
+      "legacy": 2,
+      "broken": 0,
+      "emojiFallbacks": 0,
+      "statIcons": 7,
+      "portraitBox": {
+        "cls": "selection-portrait-box",
+        "srcs": [
+          "/ui/portraits/villager_idle.webp",
+          "/ui/portraits/villager_attack.webp"
+        ],
+        "ok": true
+      },
+      "firstSrcs": [
+        "/ui/icons/128/stat_attack.webp",
+        "/ui/icons/128/stat_armor.webp",
+        "/ui/icons/128/stat_speed.webp",
+        "/ui/icons/128/stat_cargo.webp"
+      ]
+    },
+    "05-hud-torre-arcana": {
+      "sprites": 31,
+      "spriteOk": 31,
+      "legacy": 2,
+      "broken": 0,
+      "emojiFallbacks": 0,
+      "statIcons": 5,
+      "portraitBox": {
+        "cls": "selection-portrait-box",
+        "srcs": [
+          "/ui/portraits/villager_idle.webp",
+          "/ui/portraits/villager_attack.webp"
+        ],
+        "ok": true
+      },
+      "firstSrcs": [
+        "/ui/icons/128/stat_attack.webp",
+        "/ui/icons/128/stat_armor.webp",
+        "/ui/icons/128/stat_speed.webp",
+        "/ui/icons/128/stat_cargo.webp"
+      ]
+    },
+    "06-hud-estabulo": {
+      "sprites": 26,
+      "spriteOk": 26,
+      "legacy": 2,
+      "broken": 0,
+      "emojiFallbacks": 0,
+      "statIcons": 5,
+      "portraitBox": {
+        "cls": "selection-portrait-box",
+        "srcs": [
+          "/ui/portraits/villager_idle.webp",
+          "/ui/portraits/villager_attack.webp"
+        ],
+        "ok": true
+      },
+      "firstSrcs": [
+        "/ui/icons/128/stat_attack.webp",
+        "/ui/icons/128/stat_armor.webp",
+        "/ui/icons/128/stat_speed.webp",
+        "/ui/icons/128/stat_cargo.webp"
+      ]
+    },
+    "07-hud-oficina": {
+      "sprites": 28,
+      "spriteOk": 28,
+      "legacy": 2,
+      "broken": 0,
+      "emojiFallbacks": 0,
+      "statIcons": 5,
+      "portraitBox": {
+        "cls": "selection-portrait-box",
+        "srcs": [
+          "/ui/portraits/villager_idle.webp",
+          "/ui/portraits/villager_attack.webp"
+        ],
+        "ok": true
+      },
+      "firstSrcs": [
+        "/ui/icons/128/stat_attack.webp",
+        "/ui/icons/128/stat_armor.webp",
+        "/ui/icons/128/stat_speed.webp",
+        "/ui/icons/128/stat_cargo.webp"
+      ]
+    },
+    "08-hud-templo": {
+      "sprites": 29,
+      "spriteOk": 29,
+      "legacy": 2,
+      "broken": 0,
+      "emojiFallbacks": 0,
+      "statIcons": 5,
+      "portraitBox": {
+        "cls": "selection-portrait-box",
+        "srcs": [
+          "/ui/portraits/villager_idle.webp",
+          "/ui/portraits/villager_attack.webp"
+        ],
+        "ok": true
+      },
+      "firstSrcs": [
+        "/ui/icons/128/stat_attack.webp",
+        "/ui/icons/128/stat_armor.webp",
+        "/ui/icons/128/stat_speed.webp",
+        "/ui/icons/128/stat_cargo.webp"
+      ]
+    },
+    "09-hud-cavaleiro-retrato-idle": {
+      "sprites": 12,
+      "spriteOk": 12,
+      "legacy": 0,
+      "broken": 0,
+      "emojiFallbacks": 0,
+      "statIcons": 4,
+      "portraitBox": {
+        "cls": "selection-portrait-box",
+        "srcs": [
+          "/ui/portraits/knight_idle.webp",
+          "/ui/portraits/knight_attack.webp"
+        ],
+        "ok": true
+      },
+      "firstSrcs": [
+        "/ui/icons/128/stat_attack.webp",
+        "/ui/icons/128/stat_armor.webp",
+        "/ui/icons/128/stat_speed.webp",
+        "/ui/icons/128/command_stop.webp"
+      ]
+    },
+    "10-hud-cavaleiro-retrato-ataque": {
+      "sprites": 12,
+      "spriteOk": 12,
+      "legacy": 0,
+      "broken": 0,
+      "emojiFallbacks": 0,
+      "statIcons": 4,
+      "portraitBox": {
+        "cls": "selection-portrait-box is-attacking",
+        "srcs": [
+          "/ui/portraits/knight_idle.webp",
+          "/ui/portraits/knight_attack.webp"
+        ],
+        "ok": true
+      },
+      "firstSrcs": [
+        "/ui/icons/128/stat_attack.webp",
+        "/ui/icons/128/stat_armor.webp",
+        "/ui/icons/128/stat_speed.webp",
+        "/ui/icons/128/command_stop.webp"
+      ]
+    },
+    "11-hud-mago-magias": {
+      "sprites": 19,
+      "spriteOk": 19,
+      "legacy": 0,
+      "broken": 0,
+      "emojiFallbacks": 0,
+      "statIcons": 5,
+      "portraitBox": {
+        "cls": "selection-portrait-box",
+        "srcs": [
+          "/ui/portraits/mage_idle.webp",
+          "/ui/portraits/mage_attack.webp"
+        ],
+        "ok": true
+      },
+      "firstSrcs": [
+        "/ui/icons/128/stat_attack.webp",
+        "/ui/icons/128/stat_armor.webp",
+        "/ui/icons/128/stat_speed.webp",
+        "/ui/icons/128/stat_mana.webp"
+      ]
+    },
+    "12-hud-heroi": {
+      "sprites": 14,
+      "spriteOk": 14,
+      "legacy": 0,
+      "broken": 0,
+      "emojiFallbacks": 0,
+      "statIcons": 5,
+      "portraitBox": {
+        "cls": "selection-portrait-box hero",
+        "srcs": [
+          "/ui/portraits/hero_brann_idle.webp",
+          "/ui/portraits/hero_brann_attack.webp"
+        ],
+        "ok": true
+      },
+      "firstSrcs": [
+        "/ui/icons/128/stat_attack.webp",
+        "/ui/icons/128/stat_armor.webp",
+        "/ui/icons/128/stat_speed.webp",
+        "/ui/icons/128/stat_mana.webp"
+      ]
+    },
+    "13-hud-selecao-multipla": {
+      "sprites": 23,
+      "spriteOk": 23,
+      "legacy": 0,
+      "broken": 0,
+      "emojiFallbacks": 0,
+      "statIcons": 4,
+      "portraitBox": null,
+      "firstSrcs": [
+        "/ui/portraits/knight_idle.webp",
+        "/ui/portraits/archer_idle.webp",
+        "/ui/portraits/mage_idle.webp",
+        "/ui/portraits/cavalier_idle.webp"
+      ]
+    },
+    "14-hud-orc-lacaio": {
+      "sprites": 22,
+      "spriteOk": 22,
+      "legacy": 2,
+      "broken": 0,
+      "emojiFallbacks": 0,
+      "statIcons": 4,
+      "portraitBox": {
+        "cls": "selection-portrait-box",
+        "srcs": [
+          "/ui/portraits/peon_idle.webp",
+          "/ui/portraits/peon_attack.webp"
+        ],
+        "ok": true
+      },
+      "firstSrcs": [
+        "/ui/icons/128/stat_attack.webp",
+        "/ui/icons/128/stat_armor.webp",
+        "/ui/icons/128/stat_speed.webp",
+        "/ui/icons/128/stat_cargo.webp"
+      ]
+    },
+    "15-hud-orc-salao": {
+      "sprites": 26,
+      "spriteOk": 26,
+      "legacy": 2,
+      "broken": 0,
+      "emojiFallbacks": 0,
+      "statIcons": 5,
+      "portraitBox": {
+        "cls": "selection-portrait-box",
+        "srcs": [
+          "/ui/portraits/peon_idle.webp",
+          "/ui/portraits/peon_attack.webp"
+        ],
+        "ok": true
+      },
+      "firstSrcs": [
+        "/ui/icons/128/stat_attack.webp",
+        "/ui/icons/128/stat_armor.webp",
+        "/ui/icons/128/stat_speed.webp",
+        "/ui/icons/128/stat_cargo.webp"
+      ]
+    },
+    "16-hud-orc-forja": {
+      "sprites": 31,
+      "spriteOk": 31,
+      "legacy": 2,
+      "broken": 0,
+      "emojiFallbacks": 0,
+      "statIcons": 7,
+      "portraitBox": {
+        "cls": "selection-portrait-box",
+        "srcs": [
+          "/ui/portraits/peon_idle.webp",
+          "/ui/portraits/peon_attack.webp"
+        ],
+        "ok": true
+      },
+      "firstSrcs": [
+        "/ui/icons/128/stat_attack.webp",
+        "/ui/icons/128/stat_armor.webp",
+        "/ui/icons/128/stat_speed.webp",
+        "/ui/icons/128/stat_cargo.webp"
+      ]
+    },
+    "17-hud-orc-quartel": {
+      "sprites": 28,
+      "spriteOk": 28,
+      "legacy": 2,
+      "broken": 0,
+      "emojiFallbacks": 0,
+      "statIcons": 5,
+      "portraitBox": {
+        "cls": "selection-portrait-box",
+        "srcs": [
+          "/ui/portraits/peon_idle.webp",
+          "/ui/portraits/peon_attack.webp"
+        ],
+        "ok": true
+      },
+      "firstSrcs": [
+        "/ui/icons/128/stat_attack.webp",
+        "/ui/icons/128/stat_armor.webp",
+        "/ui/icons/128/stat_speed.webp",
+        "/ui/icons/128/stat_cargo.webp"
+      ]
+    },
+    "18-hud-orc-necromante": {
+      "sprites": 18,
+      "spriteOk": 18,
+      "legacy": 0,
+      "broken": 0,
+      "emojiFallbacks": 0,
+      "statIcons": 5,
+      "portraitBox": {
+        "cls": "selection-portrait-box",
+        "srcs": [
+          "/ui/portraits/necromancer_idle.webp",
+          "/ui/portraits/necromancer_attack.webp"
+        ],
+        "ok": true
+      },
+      "firstSrcs": [
+        "/ui/icons/128/stat_attack.webp",
+        "/ui/icons/128/stat_armor.webp",
+        "/ui/icons/128/stat_speed.webp",
+        "/ui/icons/128/stat_mana.webp"
+      ]
+    },
+    "19-hud-orc-talhador-retrato": {
+      "sprites": 11,
+      "spriteOk": 11,
+      "legacy": 0,
+      "broken": 0,
+      "emojiFallbacks": 0,
+      "statIcons": 4,
+      "portraitBox": {
+        "cls": "selection-portrait-box",
+        "srcs": [
+          "/ui/portraits/grunt_idle.webp",
+          "/ui/portraits/grunt_attack.webp"
+        ],
+        "ok": true
+      },
+      "firstSrcs": [
+        "/ui/icons/128/stat_attack.webp",
+        "/ui/icons/128/stat_armor.webp",
+        "/ui/icons/128/stat_speed.webp",
+        "/ui/icons/128/command_stop.webp"
+      ]
+    }
+  },
+  "fallback": {
+    "castle": {
+      "sprites": 3,
+      "spriteOk": 3,
+      "legacy": 3,
+      "broken": 0,
+      "emojiFallbacks": 3,
+      "statIcons": 0,
+      "portraitBox": null,
+      "firstSrcs": [
+        "/icoCasa.svg",
+        "/icopopulacao.png",
+        "/icopopulacao.png"
+      ]
+    },
+    "villager": {
+      "sprites": 18,
+      "spriteOk": 18,
+      "legacy": 18,
+      "broken": 0,
+      "emojiFallbacks": 9,
+      "statIcons": 0,
+      "portraitBox": {
+        "cls": "selection-portrait-box no-portrait",
+        "srcs": [
+          "/icopopulacao.png"
+        ],
+        "ok": true
+      },
+      "firstSrcs": [
+        "/icoCasa.svg",
+        "/icoSerraria.svg",
+        "/icoFazenda.svg",
+        "/icoQuartel.svg"
+      ]
+    },
+    "buttons": 17
+  },
+  "fightAnim": "hurt",
+  "fightPortraitClass": "selection-portrait-box is-attacking",
+  "menuFetchesLoadingArt": false,
+  "menuArt": {
+    "w": 1920,
+    "h": 1080,
+    "hasArt": true
+  },
+  "loadingArt": {
+    "shown": true,
+    "hasArt": true,
+    "artSize": [
+      1920,
+      1080
+    ],
+    "crestImg": true
+  },
+  "problems": []
+}

@@ -1,0 +1,137 @@
+{
+ "opts": {
+  "count": 8,
+  "seedStart": 1,
+  "maps": [
+   "campos-1v1"
+  ],
+  "maxTicks": 72000,
+  "recheck": 3,
+  "faction": null,
+  "difficulty": null,
+  "stallTicks": 2400,
+  "out": "tools/soak-report/maps/campos-1v1"
+ },
+ "wallMs": 149416,
+ "results": [
+  {
+   "seed": 1,
+   "map": "campos-1v1",
+   "faction": "human",
+   "difficulty": "easy",
+   "finished": true,
+   "ticks": 12475,
+   "checksum": 3993096667,
+   "peakEntities": 71,
+   "wallMs": 10049,
+   "issues": []
+  },
+  {
+   "seed": 2,
+   "map": "campos-1v1",
+   "faction": "orc",
+   "difficulty": "easy",
+   "finished": true,
+   "ticks": 39778,
+   "checksum": 2327544437,
+   "peakEntities": 67,
+   "wallMs": 21011,
+   "issues": []
+  },
+  {
+   "seed": 3,
+   "map": "campos-1v1",
+   "faction": "human",
+   "difficulty": "normal",
+   "finished": true,
+   "ticks": 6310,
+   "checksum": 2093599303,
+   "peakEntities": 54,
+   "wallMs": 3373,
+   "issues": []
+  },
+  {
+   "seed": 4,
+   "map": "campos-1v1",
+   "faction": "orc",
+   "difficulty": "normal",
+   "finished": true,
+   "ticks": 8393,
+   "checksum": 3509954172,
+   "peakEntities": 53,
+   "wallMs": 5186,
+   "issues": []
+  },
+  {
+   "seed": 5,
+   "map": "campos-1v1",
+   "faction": "human",
+   "difficulty": "hard",
+   "finished": true,
+   "ticks": 16729,
+   "checksum": 1558481261,
+   "peakEntities": 76,
+   "wallMs": 15603,
+   "issues": []
+  },
+  {
+   "seed": 6,
+   "map": "campos-1v1",
+   "faction": "orc",
+   "difficulty": "hard",
+   "finished": true,
+   "ticks": 25140,
+   "checksum": 3749851233,
+   "peakEntities": 75,
+   "wallMs": 22024,
+   "issues": []
+  },
+  {
+   "seed": 7,
+   "map": "campos-1v1",
+   "faction": "human",
+   "difficulty": "brutal",
+   "finished": true,
+   "ticks": 8652,
+   "checksum": 3099166601,
+   "peakEntities": 74,
+   "wallMs": 7331,
+   "issues": []
+  },
+  {
+   "seed": 8,
+   "map": "campos-1v1",
+   "faction": "orc",
+   "difficulty": "brutal",
+   "finished": true,
+   "ticks": 26541,
+   "checksum": 3160697452,
+   "peakEntities": 117,
+   "wallMs": 35202,
+   "issues": []
+  }
+ ],
+ "rechecks": [
+  {
+   "seed": 1,
+   "map": "campos-1v1",
+   "faction": "human",
+   "difficulty": "easy",
+   "diff": null
+  },
+  {
+   "seed": 3,
+   "map": "campos-1v1",
+   "faction": "human",
+   "difficulty": "normal",
+   "diff": null
+  },
+  {
+   "seed": 5,
+   "map": "campos-1v1",
+   "faction": "human",
+   "difficulty": "hard",
+   "diff": null
+  }
+ ]
+}

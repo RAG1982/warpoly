@@ -1,0 +1,137 @@
+{
+ "opts": {
+  "count": 8,
+  "seedStart": 1,
+  "maps": [
+   "planalto-ffa-4p"
+  ],
+  "maxTicks": 72000,
+  "recheck": 3,
+  "faction": null,
+  "difficulty": null,
+  "stallTicks": 2400,
+  "out": "tools/soak-report/maps/planalto-ffa-4p"
+ },
+ "wallMs": 318551,
+ "results": [
+  {
+   "seed": 1,
+   "map": "planalto-ffa-4p",
+   "faction": "human",
+   "difficulty": "easy",
+   "finished": true,
+   "ticks": 36857,
+   "checksum": 1394809028,
+   "peakEntities": 125,
+   "wallMs": 37558,
+   "issues": []
+  },
+  {
+   "seed": 2,
+   "map": "planalto-ffa-4p",
+   "faction": "orc",
+   "difficulty": "easy",
+   "finished": true,
+   "ticks": 16754,
+   "checksum": 1882898331,
+   "peakEntities": 126,
+   "wallMs": 25135,
+   "issues": []
+  },
+  {
+   "seed": 3,
+   "map": "planalto-ffa-4p",
+   "faction": "human",
+   "difficulty": "normal",
+   "finished": true,
+   "ticks": 5000,
+   "checksum": 2654084311,
+   "peakEntities": 117,
+   "wallMs": 7746,
+   "issues": []
+  },
+  {
+   "seed": 4,
+   "map": "planalto-ffa-4p",
+   "faction": "orc",
+   "difficulty": "normal",
+   "finished": true,
+   "ticks": 5492,
+   "checksum": 3831250874,
+   "peakEntities": 116,
+   "wallMs": 8044,
+   "issues": []
+  },
+  {
+   "seed": 5,
+   "map": "planalto-ffa-4p",
+   "faction": "human",
+   "difficulty": "hard",
+   "finished": true,
+   "ticks": 12700,
+   "checksum": 488669076,
+   "peakEntities": 127,
+   "wallMs": 23083,
+   "issues": []
+  },
+  {
+   "seed": 6,
+   "map": "planalto-ffa-4p",
+   "faction": "orc",
+   "difficulty": "hard",
+   "finished": true,
+   "ticks": 12532,
+   "checksum": 79843951,
+   "peakEntities": 115,
+   "wallMs": 22993,
+   "issues": []
+  },
+  {
+   "seed": 7,
+   "map": "planalto-ffa-4p",
+   "faction": "human",
+   "difficulty": "brutal",
+   "finished": true,
+   "ticks": 11538,
+   "checksum": 1640688870,
+   "peakEntities": 209,
+   "wallMs": 30324,
+   "issues": []
+  },
+  {
+   "seed": 8,
+   "map": "planalto-ffa-4p",
+   "faction": "orc",
+   "difficulty": "brutal",
+   "finished": true,
+   "ticks": 26453,
+   "checksum": 4153459579,
+   "peakEntities": 249,
+   "wallMs": 96159,
+   "issues": []
+  }
+ ],
+ "rechecks": [
+  {
+   "seed": 1,
+   "map": "planalto-ffa-4p",
+   "faction": "human",
+   "difficulty": "easy",
+   "diff": null
+  },
+  {
+   "seed": 3,
+   "map": "planalto-ffa-4p",
+   "faction": "human",
+   "difficulty": "normal",
+   "diff": null
+  },
+  {
+   "seed": 5,
+   "map": "planalto-ffa-4p",
+   "faction": "human",
+   "difficulty": "hard",
+   "diff": null
+  }
+ ]
+}

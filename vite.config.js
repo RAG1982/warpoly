@@ -83,6 +83,11 @@ function packagingPlugin() {
 export default defineConfig({
   base: process.env.BASE || './',
   plugins: [publicBasePlugin(), packagingPlugin()],
+  // worktrees de agentes (.claude/worktrees) e capturas/baselines não são código-fonte: sem isso o
+  // inotify esgota (ENOSPC) com dezenas de worktrees no repositório
+  server: {
+    watch: { ignored: ['**/.claude/**', '**/tools/ui-captures/**', '**/tools/soak-report/**', '**/tests/visual/**'] },
+  },
   build: {
     chunkSizeWarningLimit: 1600,
     rollupOptions: {
@@ -99,7 +104,11 @@ export default defineConfig({
           groups: [
             { name: 'three-vendor', test: /node_modules[\\/]three[\\/]/, priority: 30 },
             { name: 'vendor', test: /node_modules[\\/]/, priority: 20 },
-            { name: 'models-orc', test: /src[\\/]models[\\/].*Orc[^\\/]*$/, priority: 10 },
+            // F10-05b: modelos procedurais por facção (cada chunk só muda quando os modelos da facção mudam).
+            // Orc = arquivos `Orc*` e os de unidades/construções da Horda (ver `faction: 'orc'` em src/data).
+            { name: 'models-orc', test: /src[\\/]models[\\/](?:units|buildings)[\\/](?:Orc\w*|AshSanctum\w*|Cauldron\w*|NavalForge\w*|OgreDen\w*|SerpentNest\w*|ShipDock\w*|StormAltar\w*|Arsonist\w*|Necromancer\w*|Skeleton\w*|WarSerpent\w*|WatchingEye\w*|Balloon\w*|Catapult\w*|axethrower\w*)\.js$/, priority: 12 },
+            // Neutro/compartilhado: bandidos, muralha, plataforma, critters, navios/petroleiro, materiais, ambiente.
+            { name: 'models-shared', test: /src[\\/]models[\\/](?:environment[\\/]|naval[\\/]|materials|textureQuality|index|buildings[\\/](?:BanditCamp\w*|banditCamp\w*|Wall\w*|Platform\w*)|units[\\/](?:Critter\w*|ShipModels|TankerModel))/, priority: 11 },
             { name: 'models-human', test: /src[\\/]models[\\/]/, priority: 5 }
           ]
         }

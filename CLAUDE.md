@@ -17,7 +17,7 @@ RTS 3D low-poly no navegador (three.js + Vite, JS ES modules), inspirado em **Wa
 ## Modelos e fluxo de trabalho (decisão do dono, 2026-09-28; revista 2026-09-30)
 - **Sonnet 5.5 planeja e escreve especificações** (`docs/specs/<ID>.md`, regras comuns em `docs/specs/_COMUM.md`) e coordena. Opus não é mais necessário.
 - **Execução de código por agentes `sonnet`** (ou `haiku` para tarefas mecânicas triviais), que leem `CLAUDE.md` + a spec e executam.
-- **Modelagem 3D/Blender: Sonnet 5.5** (decisão do dono 2026-09-30, revoga a regra "somente Opus"); nunca Haiku. Adiada até o código estar pronto (F7-00b, F7-00d, F7-09 e demais ART em espera).
+- **Modelagem 3D/Blender: Sonnet 5.5** (decisão do dono 2026-09-30, revoga a regra "somente Opus"); nunca Haiku. Liberada pelo dono em 2026-10-09 (F7-00b, F7-00d Lacaio, F7-09 e demais ART). Haiku 5.5 não entra em modelagem.
 
 ## Regras de recursos da máquina (OBRIGATÓRIO — a máquina travou por OOM em 2026-09-28)
 - Todo processo pesado (Playwright/Chromium, Blender, `npm run bench`, `npm run smoke`) roda **somente** via

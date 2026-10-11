@@ -20,7 +20,7 @@ traição do Clã Presa-Negra e marchar sobre o Planalto do Cinzal. Se a premiss
 | 1 | `alliance-01-fumaca-no-vale` | campos-1v1 | construir quartel, destruir vanguarda, santuário oculto, acampamento neutro |
 | 2 | `alliance-02-cativos-da-garganta` | desfiladeiro-1v1 | resgate de 4 cativos + escolta de volta à base sob patrulha |
 | 3 | `alliance-03-muralhas-de-alvorada` | estreito-1v1 | sobreviver 5 min a ondas crescentes, torres (reforço) |
-| 4 | `alliance-04-ponte-do-rio-turvo` | continental-1v1 | romper bloqueio no vau, comboio de 4 carregadores (≥ 3 vivos), emboscada |
+| 4 | `alliance-04-ponte-do-rio-turvo` | continental-1v1 | romper bloqueio no vau, comboio de 4 carregadores (anel ciano, ≥ 3 vivos) até o Forte Atalaia — castelo humano em (-47, 4), depois do acampamento neutro (-40,-20) em relação à base, criado por `spawnBuilding` —, emboscada |
 | 5 | `alliance-05-ferro-e-brasa` | bosques-2v2 | economia (ferraria, 1500 de ouro), IA inimiga, reforços aos 8 min, queimar o salão |
 | 6 | `alliance-06-ilhas-de-brasa` | ilhas-4p | 2 IAs orcs, aliado de IA (Brumar) cujo forte não pode cair |
 | 7 | `alliance-07-traicao-presa-negra` | vales-2v2 | aliado orc vira inimigo aos 330 s (`setTeam`), sobreviver e destruí-lo |

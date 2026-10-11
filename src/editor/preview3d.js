@@ -148,7 +148,7 @@ export class Preview3D {
         const x = f.x + Math.cos(a) * rr;
         const z = f.z + Math.sin(a) * rr;
         if (heightAt(model, x, z) < 1.8) continue;
-        add(new THREE.ConeGeometry(1.1, 3.6, 7), f.species === 'autumn' ? 0xc27a2a : f.species === 'oak' ? 0x3f9a3f : 0x1f6a3a, x, z, 1.8);
+        add(new THREE.ConeGeometry(1.1, 3.6, 7), f.species === 'autumn' ? 0xc27a2a : f.species === 'oak' ? 0x3f9a3f : f.species === 'birch' ? 0xa6cf55 : 0x1f6a3a, x, z, 1.8);
       }
     });
     for (const n of model.neutrals) {

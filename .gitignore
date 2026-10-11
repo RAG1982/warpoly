@@ -10,3 +10,4 @@ tests/visual/baseline/*/
 
 # F10-04: resultados locais do npm run perf (a baseline versionada fica em tests/perf/baseline.json)
 tools/perf-results/
+.vitest/

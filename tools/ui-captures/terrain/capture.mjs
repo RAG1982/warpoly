@@ -13,7 +13,7 @@ import { dirname, resolve } from 'path';
 import { assertHardwareGpu } from '../../lib/assertGpu.mjs';
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '../../..');
-const OUT = resolve(ROOT, 'tools/ui-captures/terrain');
+const OUT = process.env.TERRAIN_OUT ? resolve(process.env.TERRAIN_OUT) : resolve(ROOT, 'tools/ui-captures/terrain'); // TERRAIN_OUT: pasta alternativa (conferência sem sujar o repositório)
 const PORT = 5197;
 const IDS = ['verdejante', 'inverno', 'devastadas', 'pantano'];
 

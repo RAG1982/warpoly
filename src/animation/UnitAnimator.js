@@ -57,6 +57,8 @@ export class UnitAnimator {
     this.carrying = false;
     this.deathStyle = 'cut';
     this.deathSide = 1;
+    // F7-00b: tentáculos articulados do Olho Vigia (`Anim_Tentacle*`), na ordem do modelo
+    this._tentacles = [];
 
     if (model) {
       this.bindModel(model, unitType);
@@ -141,6 +143,18 @@ export class UnitAnimator {
         else if (n.startsWith('Turret')) this.meshParts[`turret${turrets++}`] = node;
       });
     }
+    // F7-00b: Olho Vigia — tentáculos articulados (`Anim_Tentacle0..N`: pivô no ponto de fixação, malha em coordenadas locais).
+    // Entram em `meshParts` (reset de transformações e cross-fade os tratam como as demais partes) e em `_tentacles`
+    // (iteração por quadro sem montar chaves).
+    this._tentacles.length = 0;
+    if (this.unitType === 'watching_eye') {
+      model.traverse(node => {
+        if ((node.name || '').startsWith('Anim_Tentacle')) {
+          this.meshParts[`tentacle${this._tentacles.length}`] = node;
+          this._tentacles.push(node);
+        }
+      });
+    }
 
     // Store original materials on userData for zero-clone damage flash
     model.traverse(child => {
@@ -149,9 +163,10 @@ export class UnitAnimator {
       }
     });
 
-    // F7-06: lista fixa de partes + buffer de pose antiga (9 floats/parte) — o blend não aloca por quadro
+    // F7-06: lista fixa de partes + buffer de pose antiga (9 floats/parte) — o blend não aloca por quadro.
+    // Sem repetidos: várias chaves podem apontar para o mesmo nó (Arremessador: `weapon`/`weaponR`/`drawnAxe`) e ele seria misturado N vezes (peso w^N).
     this._blendObjs.length = 0;
-    for (const obj of Object.values(this.meshParts)) if (obj && obj.isObject3D) this._blendObjs.push(obj);
+    for (const obj of Object.values(this.meshParts)) if (obj && obj.isObject3D && !this._blendObjs.includes(obj)) this._blendObjs.push(obj);
     this._blendFrom = new Float32Array(this._blendObjs.length * 9);
     this._blendT = BLEND_DURATION;
 
@@ -401,6 +416,9 @@ export class UnitAnimator {
         break;
     }
 
+    // F7-00b: tentáculos do Olho Vigia ondulam em todos os estados (pose reposta por quadro; ciclos inteiros por loop)
+    if (this._tentacles.length) this.applyTentacles(time);
+
     // F7-06: carregando recurso (mochila nas costas) — tronco curvado, braços contidos, mochila balançando
     if (this.carrying && (uType === 'villager' || uType === 'peon') && (this.currentAnim === 'walk' || this.currentAnim === 'idle')) {
       if (parts.torso) parts.torso.rotation.x += CARRY_LEAN;
@@ -417,6 +435,25 @@ export class UnitAnimator {
     if ((uType === 'mage' || uType === 'necromancer') && parts.weapon && parts.armR && parts.weapon.parent === parts.armR) {
       parts.weapon.rotation.x -= parts.armR.rotation.x;
       parts.weapon.rotation.z -= parts.armR.rotation.z;
+    }
+  }
+
+  /**
+   * F7-00b: tentáculos do Olho Vigia. Cada `Anim_Tentacle<i>` pende na vertical a partir do pivô; gira de leve em x (avante/trás)
+   * e z (lados), defasado por índice, num ciclo inteiro por loop (sem emenda). Em movimento/ataque/magia a amplitude cresce e os
+   * tentáculos arrastam para trás (rotação x positiva leva a ponta para -Z).
+   */
+  applyTentacles(time) {
+    const TAU = Math.PI * 2;
+    const phase = (time / this.getDuration()) % 1;
+    const fast = this.currentAnim === 'walk' || this.currentAnim === 'fight' || this.currentAnim === 'cast';
+    const amp = fast ? 1.0 : 0.7;
+    const trail = fast ? 0.14 : 0;
+    for (let i = 0; i < this._tentacles.length; i++) {
+      const o = this._tentacles[i];
+      const off = i * 0.9;
+      o.rotation.x = trail + Math.sin(TAU * phase + off) * 0.16 * amp;
+      o.rotation.z = Math.cos(TAU * phase + off * 1.3) * 0.12 * amp;
     }
   }
 
@@ -1173,14 +1210,24 @@ export class UnitAnimator {
       }
       if (parts.armL) {
         parts.armL.rotation.x = 0.75 - ease * 1.25; // counter-whip back
+        parts.armL.rotation.z = -0.25 * (1 - ease); // NEW-49: continua o -0.25 do windup em vez de saltar para 0
       }
       if (parts.weaponR) {
         parts.weaponR.rotation.x = mirrorX(-1.28 + ease * 2.8, weaponRRest);
       }
     } else if (p < 0.78) {
-      // Release follow-through & draw next axe
-      if (parts.armR) parts.armR.rotation.x = mirrorX(1.4);
-      if (parts.torso) parts.torso.rotation.y = -0.4;
+      // Release follow-through & draw next axe — mantém a pose final do arremesso (0.60) para não haver salto (NEW-49)
+      if (parts.armR) {
+        parts.armR.rotation.x = mirrorX(1.4);
+        parts.armR.rotation.z = -0.1;
+      }
+      if (parts.armL) parts.armL.rotation.x = -0.5;
+      if (parts.weaponR) parts.weaponR.rotation.x = mirrorX(1.52, weaponRRest);
+      if (parts.head) parts.head.rotation.y = 0.1;
+      if (parts.torso) {
+        parts.torso.rotation.y = -0.4;
+        parts.torso.rotation.x = 0.27;
+      }
     } else {
       // Reset to agile ready crouch (0.78 -> 1.0)
       const t = (p - 0.78) / 0.22;
@@ -1194,6 +1241,7 @@ export class UnitAnimator {
       }
       if (parts.armR) {
         parts.armR.rotation.x = mirrorX(1.4 * (1 - ease));
+        parts.armR.rotation.z = -0.1 * (1 - ease);
       }
       if (parts.armL) {
         parts.armL.rotation.x = -0.5 * (1 - ease);

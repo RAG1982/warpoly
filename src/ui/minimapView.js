@@ -173,3 +173,27 @@ export function drawCameraQuad(ctx, quad, toMap) {
   ctx.stroke();
   ctx.restore();
 }
+
+/**
+ * NEW-24: pontos e linhas de muralha no minimapa. Só segmentos `isKnown` (visíveis/explorados pela névoa, mesma regra das
+ * construções). Segmentos consecutivos do mesmo dono a no máx. `maxLink` de distância ligam-se por uma linha.
+ * @param {{x:number,z:number,ownerId:number}[]} walls  posições de mundo, na ordem de criação
+ * @param {(x:number,z:number)=>{x:number,y:number}} toMap
+ * @param {(w:object)=>boolean} [isKnown]
+ */
+export function wallMinimapShapes(walls, toMap, isKnown = () => true, maxLink = 3) {
+  const points = [];
+  const lines = [];
+  let prev = null;
+  for (const w of walls) {
+    if (!isKnown(w)) { prev = null; continue; }
+    const m = toMap(w.x, w.z);
+    points.push({ x: m.x, y: m.y, ownerId: w.ownerId });
+    if (prev && prev.ownerId === w.ownerId && Math.hypot(w.x - prev.x, w.z - prev.z) <= maxLink) {
+      const p = toMap(prev.x, prev.z);
+      lines.push({ x1: p.x, y1: p.y, x2: m.x, y2: m.y, ownerId: w.ownerId });
+    }
+    prev = w;
+  }
+  return { points, lines };
+}

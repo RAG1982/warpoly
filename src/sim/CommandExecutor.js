@@ -189,6 +189,16 @@ export const CommandExecutor = {
         break;
       }
 
+      case CMD.ATTACK_GROUND: { // NEW-35: só cerco (isBallistic); as demais são ignoradas
+        const units = resolveOwnedUnits(gm, cmd);
+        for (let i = 0; i < units.length; i++) {
+          if (!units[i].isBallistic) continue;
+          units[i].orderQueue = null;
+          units[i].orderAttackGround(cmd.x, cmd.z, gm);
+        }
+        break;
+      }
+
       case CMD.PATROL: {
         const units = resolveOwnedUnits(gm, cmd);
         for (let i = 0; i < units.length; i++) {

@@ -216,6 +216,7 @@ export class MatchSession {
     this.sceneManager.updateCamera(delta);
     this.water.update(elapsed);
     this.decorations?.applyLod(this.sceneManager.zoomLevel); // F1-10: decorações pequenas somem no zoom máximo
+    this.entityViews?.treeManager?.applyLod(this.sceneManager.cameraTarget); // F1-10: árvores distantes → impostor
     if (simulate) {
       const gm = this.gameManager;
       let alpha;

@@ -39,6 +39,27 @@ function setGuard(unit, area) {
 
 const clone = (v) => JSON.parse(JSON.stringify(v));
 
+/** Folga entre a construção e as árvores vivas que `GameManager.canPlaceBuilding` exige do jogador (`minTreeGap`). */
+const TREE_CLEARANCE = 3.5;
+
+/**
+ * Uma construção criada por script (`spawnBuilding`) não passa por `canPlaceBuilding`: as árvores vivas dentro da MESMA
+ * folga que o jogador precisaria (`collisionRadius` + 3,5) somem sem animação nem toco — assim o ponto escolhido fica tão
+ * livre quanto um ponto onde o jogador poderia construir, e nenhuma árvore atravessa o modelo.
+ * Determinístico: varre `gm.trees` em ordem; a saída da grade espacial/caminhos acontece no passo seguinte (`simStep`).
+ */
+function clearTreesAround(gm, b) {
+  const p = b.mesh.position;
+  const gap = (b.collisionRadius || 3.0) + TREE_CLEARANCE;
+  for (const t of gm.trees) {
+    if (t.isDisposed) continue;
+    if (Math.hypot(t.mesh.position.x - p.x, t.mesh.position.z - p.z) > gap + (t.collisionRadius || 0.75)) continue;
+    t.die();
+    t.fallProgress = 1;
+    t.dispose();
+  }
+}
+
 const HANDLERS = {
   spawn(rt, a) {
     const gm = rt.gm;
@@ -50,11 +71,25 @@ const HANDLERS = {
         const { dx, dz } = ringOffset(i++, a.spread ?? 1.8);
         const unit = gm.spawnUnit(entry.type, a.x + dx, a.z + dz, owner);
         if (!unit) continue; // F4-08: herói único já criado nesta partida
+        if (a.markColor) unit.markColor = a.markColor; // só apresentação (cor do anel de seleção): fora do checksum
         if (a.guard) setGuard(unit, { x: unit.mesh.position.x, z: unit.mesh.position.z, r: a.guard === true ? null : a.guard.r });
         if (a.tag) addTag(rt, a.tag, unit.id);
         applyOrder(gm, unit, a.order);
       }
     }
+  },
+
+  /** Construção já CONCLUÍDA do dono em (x, z) — o mesmo registro das construções iniciais das bases (`_spawnStartingBase`). */
+  spawnBuilding(rt, a) {
+    const gm = rt.gm;
+    const owner = resolveOwnerId(gm, a.owner);
+    const b = gm.createBuilding(a.buildingType, a.x, a.z, true, owner);
+    if (a.facing) b.mesh.rotation.y = (a.facing * Math.PI) / 180;
+    if (a.markColor) b.markColor = a.markColor; // só apresentação (cor do anel de seleção): fora do checksum
+    gm.buildings.push(b);
+    clearTreesAround(gm, b);
+    if (a.tag) addTag(rt, a.tag, b.id);
+    gm.recalculatePopCap(); // casas/castelos concedem população
   },
 
   giveResources(rt, a) {

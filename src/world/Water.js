@@ -1,4 +1,5 @@
 import * as THREE from 'three';
+import { mergeGeometries } from 'three/examples/jsm/utils/BufferGeometryUtils.js';
 import {
   getWaterSurfaceTextures,
   getCattailLotusTextures
@@ -7,6 +8,63 @@ import { enableShadows } from '../models/materials.js';
 import { markFogGround } from '../render/fogOfWarShader.js';
 import { getMapTileset, getTileset } from '../data/tilesets.js';
 import { getTextureQuality } from '../models/textureQuality.js';
+
+/**
+ * F7-00b (aceite de desempenho): funde todos os `Mesh` sob `root` (qualquer profundidade; `root` na identidade e sem pai) em UM
+ * `Mesh` por material, em coordenadas de `root`. As plantas aquáticas eram ~625 malhas soltas (hastes, cabeças, lâminas, folhas,
+ * pétalas...) = ~500 dos ~680 draw calls da cena inicial (passe principal + sombras); agora são ~8 malhas por moita.
+ */
+export function mergeByMaterial(root, name) {
+  root.updateMatrixWorld(true);
+  const byMaterial = new Map();
+  root.traverse((o) => {
+    if (!o.isMesh) return;
+    const g = o.geometry.clone().applyMatrix4(o.matrixWorld);
+    if (!byMaterial.has(o.material)) byMaterial.set(o.material, []);
+    byMaterial.get(o.material).push(g);
+  });
+  const out = new THREE.Group();
+  out.name = name;
+  for (const [material, geos] of byMaterial) {
+    const merged = mergeGeometries(geos, false);
+    geos.forEach((g) => g.dispose());
+    out.add(new THREE.Mesh(merged, material));
+  }
+  return out;
+}
+
+/** Água rasa própria para juncos/vitórias-régias: abaixo do nível d'água, mas longe do abismo. */
+const REED_MIN_DEPTH = 0.05;
+const REED_MAX_DEPTH = 0.6;
+const REED_CLEARANCE = 0.9; // pontos em volta da moita também precisam estar na água (rasa ou funda, nunca terra)
+const REED_SPACING = 7;
+
+/**
+ * NEW-52: escolhe até `max` posições de moitas em água rasa do terreno (determinístico: varre uma grade
+ * em ordem fixa, pula `REED_SPACING` entre moitas). Terreno sem água rasa => lista vazia.
+ * @returns {Array<{x:number, z:number}>}
+ */
+export function pickReedLocations(terrain, waterLevel = 0.5, max = 7) {
+  const size = (terrain && (terrain.mapDef?.size || terrain.width)) || 140;
+  const half = size / 2 - 4;
+  const shallow = (x, z) => {
+    const h = terrain.getHeight(x, z);
+    return h <= waterLevel - REED_MIN_DEPTH && h >= waterLevel - REED_MAX_DEPTH;
+  };
+  const wet = (x, z) => terrain.getHeight(x, z) <= waterLevel - REED_MIN_DEPTH;
+  const ring = [[1, 0], [-1, 0], [0, 1], [0, -1]];
+  const found = [];
+  // Varredura em ordem fixa (determinística); o espaçamento mínimo espalha as moitas pelo mapa.
+  for (let x = -half; x <= half && found.length < max; x += 1) {
+    for (let z = -half; z <= half && found.length < max; z += 1) {
+      if (!shallow(x, z)) continue;
+      if (!ring.every(([dx, dz]) => wet(x + dx * REED_CLEARANCE, z + dz * REED_CLEARANCE))) continue;
+      if (found.some((f) => Math.hypot(f.x - x, f.z - z) < REED_SPACING)) continue;
+      found.push({ x, z });
+    }
+  }
+  return found;
+}
 
 /**
  * Next-Gen Stylized Water & Shoreline System for WarPoly
@@ -185,16 +243,8 @@ diffuseColor = vec4( uFoam, clamp( a, 0.0, 1.0 ) );`);
     const reedGroup = new THREE.Group();
     reedGroup.name = 'WaterVegetationGroup';
 
-    // Shallow calm water reed clump locations along river and coastlines
-    const reedLocations = [
-      { x: 10, z: 12 },
-      { x: 12, z: 15 },
-      { x: -10, z: -12 },
-      { x: -12, z: -15 },
-      { x: -15, z: 18 },
-      { x: 15, z: -18 },
-      { x: -20, z: 12 }
-    ];
+    // NEW-52: moitas só em água rasa DESTE mapa (antes: 7 posições fixas do mapa antigo, que caíam em terra seca).
+    const reedLocations = pickReedLocations(this.terrain, this.waterLevel);
 
     const cattailTex = getCattailLotusTextures();
 
@@ -252,6 +302,8 @@ diffuseColor = vec4( uFoam, clamp( a, 0.0, 1.0 ) );`);
     reedLocations.forEach((loc, clumpIdx) => {
       const clump = new THREE.Group();
       clump.name = `ReedClump_${clumpIdx}`;
+      const stalks = new THREE.Group(); // F7-00b: hastes/folhas (estático)
+      const floaters = new THREE.Group(); // F7-00b: vitórias-régias e flores (sobem e descem juntas)
 
       // A. Cattail Stalks in Clump
       const stalkCount = 6 + Math.floor(Math.random() * 4);
@@ -316,7 +368,7 @@ diffuseColor = vec4( uFoam, clamp( a, 0.0, 1.0 ) );`);
         stalk.rotation.z = (Math.random() - 0.5) * 0.16;
         stalk.rotation.x = (Math.random() - 0.5) * 0.16;
 
-        clump.add(stalk);
+        stalks.add(stalk);
       }
 
       // B. Floating Lotus Leaves / Lily Pads around clump
@@ -335,10 +387,7 @@ diffuseColor = vec4( uFoam, clamp( a, 0.0, 1.0 ) );`);
         pad.position.set(pox, pY, poz);
         pad.rotation.y = Math.random() * Math.PI * 2;
         pad.rotation.z = (Math.random() - 0.5) * 0.04;
-        pad.userData = { baseY: pY, offset: Math.random() * 6 };
-
-        clump.add(pad);
-        this.lotusEntities.push(pad);
+        floaters.add(pad);
       }
 
       // C. Blooming Lotus Flowers / Water Lilies
@@ -394,11 +443,14 @@ diffuseColor = vec4( uFoam, clamp( a, 0.0, 1.0 ) );`);
         const fY = this.waterLevel + 0.02;
         flower.position.set(fox, fY, foz);
         flower.rotation.y = Math.random() * Math.PI * 2;
-        flower.userData = { baseY: fY, offset: Math.random() * 6 };
-
-        clump.add(flower);
-        this.lotusEntities.push(flower);
+        floaters.add(flower);
       }
+
+      // F7-00b: uma malha por material em vez de dezenas; o balanço da moita (clump) e a oscilação das folhas ficam
+      const floatMerged = mergeByMaterial(floaters, 'ReedFloaters');
+      floatMerged.userData = { baseY: 0, offset: Math.random() * 6 };
+      clump.add(mergeByMaterial(stalks, 'ReedStalks'), floatMerged);
+      this.lotusEntities.push(floatMerged);
 
       clump.position.set(loc.x, 0, loc.z);
       enableShadows(clump);

@@ -9,11 +9,13 @@
     "speaker": { "pt-BR": "Marechal Dorian Vasques", "en": "Marshal Dorian Vasques" },
     "portrait": "🛡️",
     "text": {
-      "pt-BR": "O Cinzal tomou o vau central do Rio Turvo e isolou o forte de Atalaia, do outro lado. A guarnição está sem suprimentos. Um comboio de carregadores sai da nossa base com escolta curta. Rompa o bloqueio no vau, abra caminho e entregue os suprimentos ao forte antes que a fome faça o trabalho do inimigo.",
-      "en": "The Cinzal seized the central ford of the Murky River and cut off Fort Atalaia on the far bank. The garrison is out of supplies. A porter convoy leaves our base with a short escort. Break the blockade at the ford, open the way and deliver the supplies to the fort before hunger does the enemy's work."
+      "pt-BR": "O Cinzal tomou o vau central do Rio Turvo e isolou o Forte Atalaia, na margem oeste, além de um acampamento de saqueadores. A guarnição está sem suprimentos. Um comboio de carregadores (anel ciano) sai da nossa base com escolta curta. Rompa o bloqueio no vau, abra caminho e entregue os suprimentos ao forte antes que a fome faça o trabalho do inimigo.",
+      "en": "The Cinzal seized the central ford of the Murky River and cut off Fort Atalaia on the west bank, beyond a raiders' camp. The garrison is out of supplies. A porter convoy (cyan ring) leaves our base with a short escort. Break the blockade at the ford, open the way and deliver the supplies to the fort before hunger does the enemy's work."
     },
     "hints": [
       { "pt-BR": "O rio só se atravessa pelos três vaus; o do centro está bloqueado.", "en": "The river can only be crossed at its three fords; the central one is blocked." },
+      { "pt-BR": "Quem atravessa pelo vau noroeste passa perto do acampamento de saqueadores: limpe-o com a escolta antes de levar os carregadores.", "en": "Crossing at the north-west ford takes you past the raiders' camp: clear it with the escort before bringing the porters." },
+      { "pt-BR": "Os carregadores têm o anel de seleção ciano; mantenha-os atrás da escolta.", "en": "The porters have a cyan selection ring; keep them behind the escort." },
       { "pt-BR": "Se menos de 3 carregadores sobreviverem, a missão falha.", "en": "If fewer than 3 porters survive, the mission fails." }
     ]
   },
@@ -27,7 +29,8 @@
   "vars": { "reinforced": false },
 
   "setup": [
-    { "type": "spawn", "owner": "player", "unitType": "villager", "count": 4, "x": 24, "z": -22, "tag": "convoy" },
+    { "type": "spawnBuilding", "owner": "player", "buildingType": "castle", "x": -47, "z": 4, "facing": 90, "tag": "fort" },
+    { "type": "spawn", "owner": "player", "unitType": "villager", "count": 4, "x": 24, "z": -22, "tag": "convoy", "markColor": "#22d3ee" },
     { "type": "spawn", "owner": "player", "units": [{ "type": "knight", "count": 3 }, { "type": "archer", "count": 4 }], "x": 20, "z": -18 },
     { "type": "spawn", "owner": "enemy", "units": [{ "type": "grunt", "count": 5 }, { "type": "axethrower", "count": 3 }], "x": -3, "z": 3, "tag": "blockade", "guard": true }
   ],
@@ -36,7 +39,7 @@
     { "id": "break-blockade", "type": "destroy", "priority": "primary", "select": { "tag": "blockade" }, "count": 8,
       "title": { "pt-BR": "Romper o bloqueio no vau central", "en": "Break the blockade at the central ford" } },
     { "id": "deliver", "type": "escort", "priority": "primary", "tag": "convoy", "count": 3,
-      "area": { "x": -22, "z": -6, "r": 9 },
+      "area": { "x": -47, "z": 4, "r": 12 },
       "title": { "pt-BR": "Entregar os suprimentos no Forte Atalaia", "en": "Deliver the supplies to Fort Atalaia" },
       "description": { "pt-BR": "Ao menos 3 dos 4 carregadores precisam chegar.", "en": "At least 3 of the 4 porters must arrive." } },
     { "id": "ambush-clear", "type": "destroy", "priority": "secondary", "select": { "tag": "ambush" }, "count": 6, "active": false,
@@ -53,10 +56,11 @@
     { "id": "intro", "when": { "type": "time", "at": 0 },
       "actions": [
         { "type": "music", "id": "on" },
-        { "type": "cutscene", "id": "ford", "duration": 10, "skippable": true,
+        { "type": "cutscene", "id": "ford", "duration": 15, "skippable": true,
           "steps": [
             { "at": 0, "x": 0, "z": 0, "zoom": 1.15, "dialog": { "speaker": { "pt-BR": "Marechal Dorian", "en": "Marshal Dorian" }, "portrait": "🛡️", "text": { "pt-BR": "Aquele é o vau. Oito guerreiros, bem entrincheirados.", "en": "That is the ford. Eight warriors, well dug in." }, "duration": 4.5 } },
-            { "at": 5, "x": -22, "z": -6, "zoom": 1, "dialog": { "speaker": { "pt-BR": "Marechal Dorian", "en": "Marshal Dorian" }, "portrait": "🛡️", "text": { "pt-BR": "E lá, o Forte Atalaia. Levem os carregadores até lá.", "en": "And there, Fort Atalaia. Take the porters there." }, "duration": 4.5 } }
+            { "at": 5, "x": -40, "z": -14, "zoom": 1, "dialog": { "speaker": { "pt-BR": "Marechal Dorian", "en": "Marshal Dorian" }, "portrait": "🛡️", "text": { "pt-BR": "Mais adiante, um acampamento de saqueadores na margem. Não deixem os carregadores passarem perto dele sem escolta.", "en": "Further on, a raiders' camp on the bank. Do not let the porters go near it unescorted." }, "duration": 4.5 } },
+            { "at": 10, "x": -47, "z": 4, "zoom": 1, "dialog": { "speaker": { "pt-BR": "Marechal Dorian", "en": "Marshal Dorian" }, "portrait": "🛡️", "text": { "pt-BR": "E lá no fundo, o Forte Atalaia. Levem os carregadores até lá.", "en": "And there in the distance, Fort Atalaia. Take the porters there." }, "duration": 4.5 } }
           ] }
       ] },
     { "id": "ambush", "when": { "type": "area", "owner": "player", "area": { "x": -6, "z": 6, "r": 10 }, "tag": "convoy" },
@@ -74,7 +78,7 @@
     { "id": "blockade-cheer", "when": { "type": "objective", "id": "break-blockade", "status": "completed" },
       "actions": [
         { "type": "message", "text": { "pt-BR": "O vau está livre! Avancem com o comboio.", "en": "The ford is clear! Advance with the convoy." } },
-        { "type": "reveal", "x": -22, "z": -6, "radius": 18 }
+        { "type": "reveal", "x": -38, "z": -12, "radius": 22 }
       ] },
     { "id": "convoy-lost", "when": { "all": [{ "type": "count", "select": { "tag": "convoy" }, "op": "<", "value": 3 }, { "not": { "type": "objective", "id": "deliver", "status": "completed" } }] },
       "actions": [

@@ -1,0 +1,137 @@
+{
+ "opts": {
+  "count": 8,
+  "seedStart": 1,
+  "maps": [
+   "bosques-2v2"
+  ],
+  "maxTicks": 72000,
+  "recheck": 3,
+  "faction": null,
+  "difficulty": null,
+  "stallTicks": 2400,
+  "out": "tools/soak-report/maps/bosques-2v2"
+ },
+ "wallMs": 463476,
+ "results": [
+  {
+   "seed": 1,
+   "map": "bosques-2v2",
+   "faction": "human",
+   "difficulty": "easy",
+   "finished": true,
+   "ticks": 12536,
+   "checksum": 2809780420,
+   "peakEntities": 125,
+   "wallMs": 20051,
+   "issues": []
+  },
+  {
+   "seed": 2,
+   "map": "bosques-2v2",
+   "faction": "orc",
+   "difficulty": "easy",
+   "finished": true,
+   "ticks": 26534,
+   "checksum": 3557249681,
+   "peakEntities": 125,
+   "wallMs": 32932,
+   "issues": []
+  },
+  {
+   "seed": 3,
+   "map": "bosques-2v2",
+   "faction": "human",
+   "difficulty": "normal",
+   "finished": true,
+   "ticks": 16186,
+   "checksum": 282450390,
+   "peakEntities": 94,
+   "wallMs": 18878,
+   "issues": []
+  },
+  {
+   "seed": 4,
+   "map": "bosques-2v2",
+   "faction": "orc",
+   "difficulty": "normal",
+   "finished": true,
+   "ticks": 10599,
+   "checksum": 2848942686,
+   "peakEntities": 135,
+   "wallMs": 19990,
+   "issues": []
+  },
+  {
+   "seed": 5,
+   "map": "bosques-2v2",
+   "faction": "human",
+   "difficulty": "hard",
+   "finished": true,
+   "ticks": 27740,
+   "checksum": 2868614828,
+   "peakEntities": 229,
+   "wallMs": 86462,
+   "issues": []
+  },
+  {
+   "seed": 6,
+   "map": "bosques-2v2",
+   "faction": "orc",
+   "difficulty": "hard",
+   "finished": true,
+   "ticks": 31315,
+   "checksum": 3959283985,
+   "peakEntities": 139,
+   "wallMs": 54365,
+   "issues": []
+  },
+  {
+   "seed": 7,
+   "map": "bosques-2v2",
+   "faction": "human",
+   "difficulty": "brutal",
+   "finished": true,
+   "ticks": 21997,
+   "checksum": 2032501342,
+   "peakEntities": 304,
+   "wallMs": 82537,
+   "issues": []
+  },
+  {
+   "seed": 8,
+   "map": "bosques-2v2",
+   "faction": "orc",
+   "difficulty": "brutal",
+   "finished": true,
+   "ticks": 9416,
+   "checksum": 1644284487,
+   "peakEntities": 172,
+   "wallMs": 25007,
+   "issues": []
+  }
+ ],
+ "rechecks": [
+  {
+   "seed": 1,
+   "map": "bosques-2v2",
+   "faction": "human",
+   "difficulty": "easy",
+   "diff": null
+  },
+  {
+   "seed": 3,
+   "map": "bosques-2v2",
+   "faction": "human",
+   "difficulty": "normal",
+   "diff": null
+  },
+  {
+   "seed": 5,
+   "map": "bosques-2v2",
+   "faction": "human",
+   "difficulty": "hard",
+   "diff": null
+  }
+ ]
+}

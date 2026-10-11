@@ -17,7 +17,7 @@ export const PRIORITIES = Object.freeze(['primary', 'secondary', 'hidden']);
 export const OBJECTIVE_STATUSES = Object.freeze(['inactive', 'active', 'completed', 'failed']);
 export const CONDITION_TYPES = Object.freeze(['time', 'every', 'area', 'dead', 'count', 'var', 'objective', 'resource', 'trigger']);
 export const ACTION_TYPES = Object.freeze([
-  'spawn', 'giveResources', 'takeResources', 'setObjective', 'addObjective', 'revealObjective', 'reveal', 'setTeam',
+  'spawn', 'spawnBuilding', 'giveResources', 'takeResources', 'setObjective', 'addObjective', 'revealObjective', 'reveal', 'setTeam',
   'transfer', 'dialog', 'message', 'victory', 'defeat', 'music', 'sound', 'camera', 'cutscene', 'setVar', 'incVar',
   'enableTrigger', 'disableTrigger', 'tag', 'order', 'guard'
 ]);
@@ -29,6 +29,8 @@ export const ORDER_KINDS = Object.freeze(['move', 'attackMove', 'stop']);
 export const OWNER_KEYWORDS = Object.freeze(['player', 'enemy', 'ally', 'neutral', 'bandits']);
 export const LANGS = Object.freeze(['pt-BR', 'en']);
 const ID_RE = /^[a-z0-9][a-z0-9_-]{0,47}$/;
+/** Cor de marcação (anel de seleção) das unidades/construções de missão: `#rrggbb`. */
+const HEX_COLOR_RE = /^#[0-9a-fA-F]{6}$/;
 
 export class MissionError extends Error {
   constructor(errors, id = '?') {
@@ -91,6 +93,11 @@ function checkArea(c, path, a) {
   } else if ('x1' in a) {
     for (const k of ['x1', 'z1', 'x2', 'z2']) checkNum(c, `${path}.${k}`, a[k]);
   } else c.err(path, 'área deve ter "r" (círculo) ou "x1,z1,x2,z2" (retângulo)');
+}
+
+function checkMarkColor(c, path, v) {
+  if (v === undefined) return;
+  if (typeof v !== 'string' || !HEX_COLOR_RE.test(v)) c.err(path, 'cor inválida (use o formato hexadecimal "#rrggbb")');
 }
 
 function checkTagRef(c, path, tag) {
@@ -261,6 +268,23 @@ function checkAction(c, path, a, setup = false) {
         else if (a.order.kind !== 'stop') checkXZ(c, `${p}.order`, a.order);
       }
       if (a.guard !== undefined && !(typeof a.guard === 'boolean' || (isObj(a.guard) && typeof a.guard.r === 'number' && a.guard.r > 0))) c.err(`${p}.guard`, 'deve ser booleano ou {r>0}');
+      checkMarkColor(c, `${p}.markColor`, a.markColor);
+      break;
+    }
+    case 'spawnBuilding': {
+      // Construção já concluída (forte aliado, torre inimiga…). `type` já é o discriminador da ação: o tipo da construção é `buildingType`.
+      checkOwner(c, `${p}.owner`, a.owner);
+      checkXZ(c, p, a);
+      const bdef = isStr(a.buildingType) ? BUILDINGS[a.buildingType] : null;
+      if (!bdef) c.err(`${p}.buildingType`, isStr(a.buildingType) ? `construção desconhecida "${a.buildingType}"` : 'informe buildingType (tipo de src/data/buildings.js)');
+      else if (bdef.role === 'platform') c.err(`${p}.buildingType`, 'plataforma de petróleo só existe sobre um poço (não pode ser criada por spawnBuilding)');
+      else if (isNum(a.x) && isNum(a.z)) {
+        const r = bdef.collisionRadius || 0; // a pegada inteira precisa caber na área jogável
+        if (Math.abs(a.x) + r > c.half || Math.abs(a.z) + r > c.half) c.err(p, 'a pegada da construção sai da área jogável do mapa');
+      }
+      if (a.tag !== undefined) { if (!isStr(a.tag) || !ID_RE.test(a.tag)) c.err(`${p}.tag`, 'tag inválida'); else c.tagDefs.add(a.tag); }
+      checkMarkColor(c, `${p}.markColor`, a.markColor);
+      checkNum(c, `${p}.facing`, a.facing, { min: -360, max: 360, optional: true });
       break;
     }
     case 'giveResources':

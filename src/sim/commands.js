@@ -15,6 +15,8 @@ export const CMD = Object.freeze({
   MOVE: 'move',
   ATTACK: 'attack',
   ATTACK_MOVE: 'attackMove',
+  /** NEW-35: unidades de cerco disparam no ponto (`x`, `z`) do chão (dano em área, sem alvo entidade). */
+  ATTACK_GROUND: 'attackGround',
   GATHER: 'gather',
   BUILD: 'build',
   REPAIR: 'repair',
@@ -52,6 +54,7 @@ const REQUIRED_FIELDS = {
   [CMD.MOVE]: ['unitIds', 'x', 'z'],
   [CMD.ATTACK]: ['unitIds', 'targetId'],
   [CMD.ATTACK_MOVE]: ['unitIds', 'x', 'z'],
+  [CMD.ATTACK_GROUND]: ['unitIds', 'x', 'z'],
   [CMD.GATHER]: ['unitIds', 'targetId'],
   [CMD.BUILD]: ['unitIds', 'buildingId'],
   [CMD.REPAIR]: ['unitIds', 'buildingId'],
@@ -100,6 +103,9 @@ export function validateCommand(fields) {
       const p = pts[i];
       if (!p || typeof p.x !== 'number' || typeof p.z !== 'number') return { ok: false, reason: `ponto ${i} inválido em 'points'` };
     }
+  }
+  if (fields.type === CMD.ATTACK_GROUND && (typeof fields.x !== 'number' || typeof fields.z !== 'number' || !Array.isArray(fields.unitIds))) {
+    return { ok: false, reason: "'x'/'z' numéricos e 'unitIds' array obrigatórios" };
   }
   if (fields.type === CMD.LOAD && !Array.isArray(fields.unitIds)) return { ok: false, reason: "'unitIds' precisa ser um array" };
   if (fields.type === CMD.UNLOAD) {

@@ -37,8 +37,8 @@ export const BUILDINGS = {
   // --- Reino Humano ---
   castle: {
     type: 'castle',
-    name: 'Castelo Real',
-    entityName: 'Castelo Real',
+    name: 'Paço Real',
+    entityName: 'Paço Real',
     faction: 'human',
     role: 'hq',
     hp: 1600,
@@ -57,8 +57,8 @@ export const BUILDINGS = {
   },
   cottage: {
     type: 'cottage',
-    name: 'Casa Residencial',
-    entityName: 'Casa Residencial',
+    name: 'Casa',
+    entityName: 'Casa',
     faction: 'human',
     role: 'house',
     hp: 400,
@@ -77,8 +77,8 @@ export const BUILDINGS = {
   },
   lumber_camp: {
     type: 'lumber_camp',
-    name: 'Serraria Florestal',
-    entityName: 'Serraria Florestal',
+    name: 'Serraria',
+    entityName: 'Serraria',
     faction: 'human',
     role: 'lumber',
     hp: 550,
@@ -97,8 +97,8 @@ export const BUILDINGS = {
   },
   farm: {
     type: 'farm',
-    name: 'Fazenda de Trigo',
-    entityName: 'Fazenda de Trigo',
+    name: 'Fazenda',
+    entityName: 'Fazenda',
     faction: 'human',
     role: 'farm',
     hp: 350,
@@ -117,8 +117,8 @@ export const BUILDINGS = {
   },
   barracks: {
     type: 'barracks',
-    name: 'Quartel de Infantaria',
-    entityName: 'Quartel de Infantaria',
+    name: 'Quartel',
+    entityName: 'Quartel',
     faction: 'human',
     role: 'barracks',
     hp: 850,
@@ -138,8 +138,8 @@ export const BUILDINGS = {
   },
   forge: {
     type: 'forge',
-    name: 'Forja Real',
-    entityName: 'Forja Real',
+    name: 'Ferraria Real',
+    entityName: 'Ferraria Real',
     faction: 'human',
     role: 'forge',
     hp: 850,
@@ -351,8 +351,8 @@ export const BUILDINGS = {
   },
   oil_platform: {
     type: 'oil_platform',
-    name: 'Plataforma de Petróleo',
-    entityName: 'Plataforma de Petróleo',
+    name: 'Plataforma',
+    entityName: 'Plataforma',
     faction: 'neutral',
     role: 'platform',
     platform: true,
@@ -397,8 +397,8 @@ export const BUILDINGS = {
   // --- Clãs Orcs ---
   great_hall: {
     type: 'great_hall',
-    name: 'Grande Salão Orc',
-    entityName: 'Grande Salão Orc',
+    name: 'Salão do Clã',
+    entityName: 'Salão do Clã',
     faction: 'orc',
     role: 'hq',
     hp: 1600, // F3-06 NEW-24: alinhado a HQ_TIER_HP[1] (src/data/tiers.js) — antes 1750.
@@ -417,8 +417,8 @@ export const BUILDINGS = {
   },
   orc_house: {
     type: 'orc_house',
-    name: 'Toca Orc',
-    entityName: 'Toca Orc',
+    name: 'Toca',
+    entityName: 'Toca',
     faction: 'orc',
     role: 'house',
     hp: 450,
@@ -437,8 +437,8 @@ export const BUILDINGS = {
   },
   pig_farm: {
     type: 'pig_farm',
-    name: 'Chiqueiro de Porcos',
-    entityName: 'Chiqueiro de Porcos',
+    name: 'Chiqueiro',
+    entityName: 'Chiqueiro',
     faction: 'orc',
     role: 'farm',
     hp: 420,
@@ -457,8 +457,8 @@ export const BUILDINGS = {
   },
   orc_lumber_mill: {
     type: 'orc_lumber_mill',
-    name: 'Serraria Mecânica',
-    entityName: 'Serraria Mecânica',
+    name: 'Serraria do Clã',
+    entityName: 'Serraria do Clã',
     faction: 'orc',
     role: 'lumber',
     hp: 580,
@@ -477,8 +477,8 @@ export const BUILDINGS = {
   },
   orc_barracks: {
     type: 'orc_barracks',
-    name: 'Quartel da Horda',
-    entityName: 'Quartel da Horda',
+    name: 'Acampamento de Guerra',
+    entityName: 'Acampamento de Guerra',
     faction: 'orc',
     role: 'barracks',
     hp: 900,
@@ -498,8 +498,8 @@ export const BUILDINGS = {
   },
   orc_forge: {
     type: 'orc_forge',
-    name: 'Forja de Guerra Orc',
-    entityName: 'Forja de Guerra Orc',
+    name: 'Forja de Guerra',
+    entityName: 'Forja de Guerra',
     faction: 'orc',
     role: 'forge',
     hp: 850,
@@ -623,8 +623,8 @@ export const BUILDINGS = {
   },
   orc_watchtower: {
     type: 'orc_watchtower',
-    name: 'Torre de Vigia Orc',
-    entityName: 'Torre de Vigia Orc',
+    name: 'Torre de Vigia',
+    entityName: 'Torre de Vigia',
     faction: 'orc',
     role: 'tower',
     hp: 700,

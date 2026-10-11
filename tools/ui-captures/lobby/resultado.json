@@ -1,0 +1,155 @@
+{
+  "quando": "2026-10-09T17:10:29.178Z",
+  "navegador": "153.0.8010.12",
+  "flagsMdns": "padrão do Chromium (mDNS ligado)",
+  "servidor": "npm run signaling (porta 8787)",
+  "sala": "VBZYW",
+  "link": "http://127.0.0.1:5232/lobby.html?sala=VBZYW",
+  "start": {
+    "seed": 894666650,
+    "players": [
+      "Alice:human",
+      "Bruno:orc"
+    ],
+    "map": "ilhas-4p",
+    "localId": 1
+  },
+  "webrtc": {
+    "abriuEmMs": 15,
+    "a": [
+      {
+        "peer": 3,
+        "dc": {
+          "label": "lockstep",
+          "readyState": "open",
+          "ordered": true
+        },
+        "connectionState": "connected",
+        "iceConnectionState": "connected",
+        "iceGatheringState": "complete",
+        "signalingState": "stable",
+        "pair": {
+          "local": "host/udp",
+          "remote": "host/udp",
+          "rttMs": 1
+        }
+      }
+    ],
+    "b": [
+      {
+        "peer": 1,
+        "dc": {
+          "label": "lockstep",
+          "readyState": "open",
+          "ordered": true
+        },
+        "connectionState": "connected",
+        "iceConnectionState": "connected",
+        "iceGatheringState": "complete",
+        "signalingState": "stable",
+        "pair": {
+          "local": "host/udp",
+          "remote": "host/udp",
+          "rttMs": 1
+        }
+      }
+    ],
+    "mensagens": {
+      "deAliceParaBruno": 20,
+      "deBrunoParaAlice": 20,
+      "latenciaMs": {
+        "aliceParaBruno": [
+          1,
+          2
+        ],
+        "brunoParaAlice": [
+          1,
+          2
+        ]
+      }
+    }
+  },
+  "errosDePagina": [],
+  "criterios": [
+    {
+      "ok": true,
+      "label": "criar sala devolve um código de 5 caracteres",
+      "extra": "VBZYW"
+    },
+    {
+      "ok": true,
+      "label": "iniciar com 1 jogador é recusado (need-players)",
+      "extra": "São necessários pelo menos 2 jogadores."
+    },
+    {
+      "ok": true,
+      "label": "\"Copiar link\" coloca o link da sala na área de transferência",
+      "extra": "http://127.0.0.1:5232/lobby.html?sala=VBZYW"
+    },
+    {
+      "ok": true,
+      "label": "entrar pelo link (?sala=CÓDIGO) leva direto à sala",
+      "extra": "Carla na sala VBZYW; Alice vê 2 jogadores"
+    },
+    {
+      "ok": true,
+      "label": "lista pública mostra a sala (código, anfitrião, jogadores)",
+      "extra": "[\"VBZYW\",\"Alice\",\"1/8\",\"Entrar\"]"
+    },
+    {
+      "ok": true,
+      "label": "entrar pelo código: Alice (anfitrião) e Bruno na sala",
+      "extra": "[[\"Alice (anfitrião)\",\"Aliança\",\"não\"],[\"Bruno\",\"Aliança\",\"não\"]]"
+    },
+    {
+      "ok": true,
+      "label": "facção: Bruno escolhe Horda e Alice vê",
+      "extra": ""
+    },
+    {
+      "ok": true,
+      "label": "chat nos dois sentidos (botão Enviar e tecla Enter)",
+      "extra": ""
+    },
+    {
+      "ok": true,
+      "label": "mapa: só o anfitrião altera (seletor desabilitado para Bruno) e a troca chega a Bruno",
+      "extra": "continental-1v1 -> ilhas-4p"
+    },
+    {
+      "ok": true,
+      "label": "iniciar com Bruno NÃO pronto é recusado (\"Nem todos estão prontos.\")",
+      "extra": "nenhuma aba recebeu start"
+    },
+    {
+      "ok": true,
+      "label": "pronto: Bruno marca \"Pronto\" e Alice vê \"sim\"",
+      "extra": ""
+    },
+    {
+      "ok": true,
+      "label": "com todos prontos o iniciar funciona: as duas abas recebem o mesmo start (seed, jogadores, mapa)",
+      "extra": "{\"seed\":894666650,\"players\":[\"Alice:human\",\"Bruno:orc\"],\"map\":\"ilhas-4p\",\"localId\":1}"
+    },
+    {
+      "ok": true,
+      "label": "DataChannel \"lockstep\" aberto nas duas abas",
+      "extra": "abriu em ~15 ms após o start; ICE connected/connected; par {\"local\":\"host/udp\",\"remote\":\"host/udp\",\"rttMs\":1}"
+    },
+    {
+      "ok": true,
+      "label": "mensagens trocadas pelo DataChannel nos dois sentidos (20 + 20, íntegras e em ordem)",
+      "extra": "{\"deAliceParaBruno\":20,\"deBrunoParaAlice\":20,\"latenciaMs\":{\"aliceParaBruno\":[1,2],\"brunoParaAlice\":[1,2]}}"
+    },
+    {
+      "ok": true,
+      "label": "o canal continua aberto 3 s depois",
+      "extra": "[[\"open/connected\"],[\"open/connected\"]]"
+    },
+    {
+      "ok": true,
+      "label": "sem erros de página/console",
+      "extra": ""
+    }
+  ]
+}

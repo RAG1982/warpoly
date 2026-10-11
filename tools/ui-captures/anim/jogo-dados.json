@@ -1,0 +1,101 @@
+{
+ "mortes": [
+  {
+   "esperado": "cut",
+   "atacante": "knight",
+   "lastHitTag": "cut",
+   "estiloNoAnimador": "cut",
+   "anim": "die",
+   "morrendo": true
+  },
+  {
+   "esperado": "projectile",
+   "atacante": "archer",
+   "lastHitTag": "projectile",
+   "estiloNoAnimador": "projectile",
+   "anim": "die",
+   "morrendo": true
+  },
+  {
+   "esperado": "crush",
+   "atacante": "catapult",
+   "lastHitTag": "crush",
+   "estiloNoAnimador": "crush",
+   "anim": "die",
+   "morrendo": true
+  },
+  {
+   "esperado": "magic",
+   "atacante": "mage",
+   "lastHitTag": "magic",
+   "estiloNoAnimador": "magic",
+   "anim": "die",
+   "morrendo": true
+  }
+ ],
+ "idle": {
+  "unidades": 10,
+  "variantesVistas": [
+   [
+    0,
+    1
+   ],
+   [
+    0,
+    2
+   ],
+   [
+    0,
+    1,
+    2
+   ],
+   [
+    0,
+    1,
+    2
+   ],
+   [
+    0,
+    2
+   ],
+   [
+    0,
+    1,
+    2
+   ],
+   [
+    0,
+    1
+   ],
+   [
+    0,
+    1,
+    2
+   ],
+   [
+    0,
+    1,
+    2
+   ],
+   [
+    0,
+    1
+   ]
+  ],
+  "trocas": [
+   2,
+   2,
+   3,
+   4,
+   2,
+   4,
+   4,
+   3,
+   3,
+   2
+  ],
+  "todasTrocaram": true,
+  "ataqueV0": 7,
+  "ataqueV1": 3
+ }
+}

@@ -14,6 +14,7 @@ import { isDetectedBy } from './detection.js';
 import { canTarget, defaultCanHitAir, defaultCanHitNaval } from './targeting.js';
 import { FLAMESHIELD_DAMAGE, WATER_LEVEL, NAVAL_MAX_HEIGHT, OIL_LOAD_TIME, SHORE_REACH, SUBMERGE_DELAY, NAVAL_MESH_SCALE } from '../data/combat.js';
 import { getAbility } from '../data/abilities.js';
+import { visualScaleOf } from '../data/visualScale.js';
 import { followBoat, detachFromBoat, killCargo, updateBoarding, updateUnloading } from './transport.js';
 import { resolveAbility, canCast, needsEntityTarget, targetProblem, applyAbility, emitCastStart, findAutocastTarget, getChannel, applyChannelWave } from './abilities.js';
 import { hitTagFor } from './hitTag.js';
@@ -246,7 +247,7 @@ export class Unit {
     // Corpo de simulação (F2-08c): posição/rotação Y como números; a malha 3D é da `UnitView`.
     const h = this.terrain.getHeight(x, z);
     this.mesh = new Body(x, this.layer === 'naval' ? WATER_LEVEL : h + this.flyHeight, z);
-    const meshScale = (this.layer === 'naval' ? NAVAL_MESH_SCALE : 1.62) * (def.scaleMul || 1); // F4-07b: navios em escala própria
+    const meshScale = (this.layer === 'naval' ? NAVAL_MESH_SCALE : 1.62) * (def.scaleMul || 1) * visualScaleOf(type); // F4-07b: navios em escala própria; visualScale = só render (orcs ≈ humanos)
     this.mesh.scale.set(meshScale, meshScale, meshScale); // Scaled +20% for superior visibility and detail appreciation
     this.mesh.userData.entity = this;
 

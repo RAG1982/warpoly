@@ -12,6 +12,7 @@
  *  - Faixas de PAZ evoluem com o tempo de partida (`intensity`): ver `musicEngine.js` e `intensity.js`.
  */
 import { STEPS_PER_BAR, makeTrack, arp, pump, evolutionLayers } from './musicEngine.js';
+import { TITLE_TRACKS } from './tracksTitle.js';
 
 export { STEPS_PER_BEAT, STEPS_PER_BAR, METERS, MODES, MINOR_MODES, CHORD_TONES, makeTrack, trackLength, stepSeconds, loopSeconds, eventsForStep, parseLine, evolutionLayers } from './musicEngine.js';
 
@@ -121,7 +122,8 @@ export const TRACK_SETS = Object.freeze({
   human_peace: Object.freeze([...humanPeace]),
   human_combat: Object.freeze([...humanCombat]),
   orc_peace: Object.freeze([...orcPeace]),
-  orc_combat: Object.freeze([...orcCombat])
+  orc_combat: Object.freeze([...orcCombat]),
+  title: Object.freeze([...TITLE_TRACKS])
 });
 
 /** Variação 0 de cada família (`TRACKS.orc_combat`): compatível com quem só conhece "uma faixa por facção e estado". */

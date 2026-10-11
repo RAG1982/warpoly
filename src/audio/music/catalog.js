@@ -43,7 +43,10 @@ const INFO = {
   orc_peace_2: { title: 'Noite do Clã', description: 'Frígio grave: baixo sustentado, caixa abafada e trompas longas.', inGame: true },
   orc_combat_0: { title: 'Trovão de Guerra', description: 'Taiko pesado em galope, metais em trítono e cordas ameaçadoras (atual, em reavaliação).', inGame: false },
   orc_combat_1: { title: 'Galope do Clã', description: 'Guerra em frígio com baixo em colcheias e trompa de guerra (atual, em reavaliação).', inGame: false },
-  orc_combat_2: { title: 'Ruína e Cinza', description: 'A mais rápida: taiko em semicolcheias, metais dissonantes e rufar (atual, em reavaliação).', inGame: false }
+  orc_combat_2: { title: 'Ruína e Cinza', description: 'A mais rápida: taiko em semicolcheias, metais dissonantes e rufar (atual, em reavaliação).', inGame: false },
+  title_0: { title: 'Marcha da Tempestade', description: 'TEMA DE ABERTURA do jogo. Caixas e tambores marchando, metais graves da Horda, suspense quase silencioso, cordas trágicas dos humanos, explosões com tímpanos e final em acorde suspenso (laço suave no menu).', inGame: true },
+  title_1: { title: 'Réquiem das Muralhas', description: 'Abertura alternativa, mais lenta e trágica: lamento de violinos e violoncelos, resposta de trombones e coro, clímax e despedida em acorde suspenso.', candidate: true },
+  title_2: { title: 'Chamado dos Tambores', description: 'Abertura alternativa da Horda em 5/4: taiko irregular, trombones em frígio, canto do clã com flauta de osso e final de força total.', candidate: true }
 };
 
 /** Fanfarras curtas (sfx): `sfx` é o nome em `sfxRecipes.js`. */

@@ -363,6 +363,7 @@ class GameApp {
 
   // ------------------------------------------------------------------ estados
   _enterMainMenu() {
+    this._ensureSound(); // tema de abertura nos menus (depois do 1º gesto)
     this.pauseMenu.hide();
     this._disposeSession();
     this._hideLoadingScreen(false);
@@ -531,12 +532,14 @@ class GameApp {
   }
 
   // ------------------------------------------------------------------ serviços
-  _ensureServices() {
-    if (this.sceneManager) return;
-    // F7-08: nível de áudio por preset/`?audio=`; testes/automação (navigator.webdriver) ficam mudos por padrão.
+  /**
+   * Áudio: nasce já no menu principal (o tema de abertura toca nos menus depois do 1º gesto do usuário) e não depende do
+   * WebGL. Nível por preset/`?audio=` (testes/automação, `navigator.webdriver`, ficam mudos; `?audio=0` nunca cria o contexto).
+   */
+  _ensureSound() {
+    if (this.sound) return;
     this.sound = new SoundManager({ level: detectAudioLevel(QualitySettings.current, getTextureQuality()) });
     applyAudio(this.sound);
-    this.sceneManager = new SceneManager(this.container);
 
     // Libera o áudio na primeira interação (política de autoplay)
     // (pointerdown também conta como gesto: o motor já existe quando o clique de seleção acontece, e a 1ª fala sai)
@@ -549,6 +552,12 @@ class GameApp {
     window.addEventListener('pointerdown', unlockAudio);
     window.addEventListener('click', unlockAudio);
     window.addEventListener('keydown', unlockAudio);
+  }
+
+  _ensureServices() {
+    if (this.sceneManager) return;
+    this._ensureSound();
+    this.sceneManager = new SceneManager(this.container);
 
     this.timer = new THREE.Timer();
     requestAnimationFrame(this._animate);

@@ -31,7 +31,7 @@ import { renderUtterance, SPEECH_SR } from './speech/speechSynth.js';
 
 const TICK_MS = 150;
 const SPEECH_CACHE_MAX = 64;
-const MENU_FACTION = 'human'; // música do menu = a de paz dos humanos
+const TITLE_FAMILY = 'title'; // música do menu e das telas fora da partida: o tema de abertura (catalog.js, família `title`)
 const ROTATE_AFTER_LOOPS = 3; // depois de tantas voltas da mesma variação (≈ 50 s), troca por outra da família (crossfade)
 
 /** FNV-1a de 32 bits (semente por chave de fala: mesma fala = mesmas amostras). */
@@ -46,11 +46,11 @@ function hashKey(s) {
 
 export class AudioEngine {
   /**
-   * @param {{ctx:BaseAudioContext, level?:string, seed?:number, volumes?:object, musicOn?:boolean, timers?:{setInterval:Function, clearInterval:Function}|null}} o
+   * @param {{ctx:BaseAudioContext, level?:string, seed?:number, volumes?:object, musicOn?:boolean, timers?:{setInterval:Function, clearInterval:Function}|null, musicSelection?:*}} o
    *   `volumes`/`musicOn`: estado inicial do mixer (o `SoundManager` guarda as preferências antes do 1º gesto);
    *   `timers: null` desliga o temporizador interno (testes chamam `tick()` à mão).
    */
-  constructor({ ctx, level = 'med', seed = 0x51f7, volumes = null, musicOn = true, timers = globalThis } = {}) {
+  constructor({ ctx, level = 'med', seed = 0x51f7, volumes = null, musicOn = true, timers = globalThis, musicSelection = null } = {}) {
     this.ctx = ctx;
     this.rng = createAudioRng(seed);
     this.level = level;
@@ -93,7 +93,7 @@ export class AudioEngine {
     this.musicSeed = seed >>> 0; // semente das variações de música (determinística, fora da sim)
     this._musicSerial = 0; // quantas faixas já começaram (entra no sorteio da variação)
     this._lastVariant = {}; // família -> última variação tocada (nunca repete em seguida)
-    this.musicSelection = null; // seleção de faixas do jogador (Map do catálogo) ou null = padrões `inGame` do catálogo
+    this.musicSelection = normalizeSelection(musicSelection); // seleção de faixas do jogador (Map do catálogo) ou null = padrões `inGame`
     this.musicOn = !!musicOn; // preferência do jogador (música ligada)
     this.musicHold = false; // silêncio temporário (cutscene/missão)
     this.sceneProbe = null; // () => ({ timeOfDay, dayNight }) para a ambiência noturna
@@ -353,7 +353,7 @@ export class AudioEngine {
       if (this.music.playing) this.music.stop({ fade: 0.8 });
       return;
     }
-    const id = trackIdFor(this.match ? this.match.faction : MENU_FACTION, this.director.state);
+    const id = this.match ? trackIdFor(this.match.faction, this.director.state) : TITLE_FAMILY;
     if (this.music.currentId === id) return; // mesma família: segue na variação atual (o rodízio é à parte)
     this._startMusic(id, false);
   }

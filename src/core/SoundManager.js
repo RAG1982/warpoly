@@ -50,10 +50,10 @@ export class SoundManager {
         level: this.level,
         volumes: { ...this.volumes, master: this.enabled ? this.volumes.master : 0 },
         musicOn: this.musicEnabled,
+        musicSelection: this._storedMusicSelection(),
         timers: this.env.timers === undefined ? globalThis : this.env.timers
       });
       this.initialized = true;
-      this.engine.setMusicSelection(this._storedMusicSelection());
       this._pushState(true);
       if (this._match) this.engine.beginMatch(this._match);
       const log = this.env.log || ((...a) => console.info(...a));

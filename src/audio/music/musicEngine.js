@@ -120,6 +120,33 @@ export function dr(str) {
 export const L = (...parts) => parts.filter(Boolean).join(' ');
 /** Repete um trecho `n` vezes. */
 export const rep = (s, n) => Array.from({ length: n }, () => s).join(' ');
+/** Aplica a velocidade `v` (0..1) a todos os símbolos de um trecho que ainda não têm `@vel`. */
+export const vol = (str, v) => str.split(/\s+/).filter(Boolean).map((tok) => (tok.includes('@') ? tok : `${tok}@${v}`)).join(' ');
+/** Rampa de `n` valores de `a` a `b` (rufar crescente/decrescente de percussão). */
+export const ramp = (n, a, b) => Array.from({ length: n }, (_, i) => +(a + ((b - a) * i) / Math.max(1, n - 1)).toFixed(3));
+/** Rufar de notas afinadas (tímpano) de `spb` passos, velocidade de `a` a `b`, para `pattern` (grau `n` do acorde). */
+export const rollSteps = (spb, a, b, n = 0) => ramp(spb, a, b).map((vel, i) => ({ i, n, dur: 1, vel }));
+/** Lista de compassos de intervalos fechados: `span([0, 3], [8, 11])` -> [0,1,2,3,8,9,10,11]. */
+export const span = (...ranges) => ranges.flatMap(([a, b]) => Array.from({ length: b - a + 1 }, (_, k) => a + k));
+/**
+ * Posiciona trechos de linha em compassos de uma faixa de `totalBars` compassos, preenchendo os vazios com pausas:
+ * `place(40, 16, [4, 'frase…'], [16, 'outra…'])`. Dá erro se um trecho passar do fim ou invadir o seguinte.
+ */
+export function place(totalBars, spb, ...entries) {
+  const out = [];
+  let cursor = 0;
+  for (const [bar, str] of entries) {
+    const start = bar * spb;
+    if (start < cursor) throw new Error(`place: trecho do compasso ${bar} invade o anterior`);
+    if (start > cursor) out.push(`r:${start - cursor}`);
+    out.push(str);
+    cursor = start + parseLine(str).len;
+  }
+  const total = totalBars * spb;
+  if (cursor > total) throw new Error(`place: linha com ${cursor} passos passa do fim (${total})`);
+  if (cursor < total) out.push(`r:${total - cursor}`);
+  return out.join(' ');
+}
 /** Transpõe os graus de um trecho em `k` degraus da escala (sequência diatônica). */
 export function shift(str, k) {
   return str.split(/\s+/).filter(Boolean).map((tok) => {

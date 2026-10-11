@@ -25,6 +25,7 @@ Cada spec tem na 3ª linha `> **Status: ...**`. Regras comuns a todas: [`_COMUM.
 | [F6-08-opcoes.md](F6-08-opcoes.md) | nuvem (item 5) | sonnet | Depois da F3-01 |
 | [NEW-19-ruinas.md](NEW-19-ruinas.md) | nuvem (item 6) | sonnet | Ruínas/clareiras, só render |
 | [MUNDO-HISTORIA-CAMPANHA.md](MUNDO-HISTORIA-CAMPANHA.md) | nuvem (só doc; passos 1–10 após decisões do dono) | sonnet | Novo mundo (Ondara), tela de história, 2 campanhas × 12 missões, liberação acelerada, final e migração. Irmã: `MUNDO-TERRENO-MAPAS.md`; fonte: [MUNDO-BRIEFING-DONO.md](MUNDO-BRIEFING-DONO.md) |
+| [F8-06-campanha-horda.md](F8-06-campanha-horda.md) | nuvem (passos 0–9; arte e equilíbrio locais) | sonnet | Campanha da Horda, 8 missões (briefing de 2026-10-11; aguarda as perguntas do §10) |
 
 ## ⏸ ADIADA
 | Spec | Motivo |

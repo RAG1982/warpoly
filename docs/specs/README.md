@@ -24,6 +24,7 @@ Cada spec tem na 3ª linha `> **Status: ...**`. Regras comuns a todas: [`_COMUM.
 | [F3-01-controles-rts.md](F3-01-controles-rts.md) | nuvem (item 4) | sonnet | Controles RTS + NEW-16 |
 | [F6-08-opcoes.md](F6-08-opcoes.md) | nuvem (item 5) | sonnet | Depois da F3-01 |
 | [NEW-19-ruinas.md](NEW-19-ruinas.md) | nuvem (item 6) | sonnet | Ruínas/clareiras, só render |
+| [MUNDO-HISTORIA-CAMPANHA.md](MUNDO-HISTORIA-CAMPANHA.md) | nuvem (só doc; passos 1–10 após decisões do dono) | sonnet | Novo mundo (Ondara), tela de história, 2 campanhas × 12 missões, liberação acelerada, final e migração. Irmã: `MUNDO-TERRENO-MAPAS.md`; fonte: [MUNDO-BRIEFING-DONO.md](MUNDO-BRIEFING-DONO.md) |
 | [F8-06-campanha-horda.md](F8-06-campanha-horda.md) | nuvem (passos 0–9; arte e equilíbrio locais) | sonnet | Campanha da Horda, 8 missões (briefing de 2026-10-11; aguarda as perguntas do §10) |
 
 ## ⏸ ADIADA
@@ -57,6 +58,7 @@ Cada spec tem na 3ª linha `> **Status: ...**`. Regras comuns a todas: [`_COMUM.
 | [NEW-10-ataque-para-frente.md](NEW-10-ataque-para-frente.md) | 944b6ee |
 | [NEW-17-pintura-terreno.md](NEW-17-pintura-terreno.md) | 297a07e |
 | [NEW-18-card-vazio.md](NEW-18-card-vazio.md) | 640dff1 |
+| [MUNDO-TERRENO-MAPAS.md](MUNDO-TERRENO-MAPAS.md) | spec (nuvem, 2026-10-11) + protótipo `tools/proto/irregular-coast.mjs` |
 
 ## Sem spec ainda (candidatas, ver `../TASKS.md`)
 F3-05 reparo · F3-08 muralhas · F3-09 vitória/estatísticas · F3-10 neutros · F3-11 balanceamento · F4-* (cavalaria, cerco, magias, sapadores, aéreo, naval/petróleo, heróis) · F5-* IA · F6-02/F6-04..F6-07/F6-09 · F8-* conteúdo · F9-* multiplayer · F10-* release · pequenas: NEW-21 (rota em floresta fechada), NEW-22/NEW-3 (textos em inglês), NEW-6 (ORM), NEW-15 (FPS combate).

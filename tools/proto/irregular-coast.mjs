@@ -10,8 +10,8 @@ import { register } from 'node:module';
 import { mkdirSync, writeFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { encodePng } from '../lib/png.mjs';
-import { generateIrregularCoast, irregularityIndex, outerIrregularity, coastFractalDimension, landMaskFromHeight, BIOME_NAMES } from '../lib/irregularCoast.mjs';
-import { renderBiomePreview, renderParchmentPreview, renderMaskPreview } from '../lib/irregularCoastRender.mjs';
+import { generateIrregularCoast, lavaStats, irregularityIndex, outerIrregularity, coastFractalDimension, landMaskFromHeight, BIOME_NAMES } from '../lib/irregularCoast.mjs';
+import { renderBiomePreview, renderParchmentPreview, renderMaskPreview, lavaIslandView } from '../lib/irregularCoastRender.mjs';
 
 register('../lib/jsonImportLoader.mjs', import.meta.url);
 console.warn = () => {};
@@ -29,11 +29,14 @@ for (const seed of seeds) {
   const map = generateIrregularCoast({ seed });
   const ms = Math.round(performance.now() - t0);
   writeFileSync(resolve(out, `seed-${seed}.png`), encodePng(renderBiomePreview(map, px)));
+  const lview = lavaIslandView(map);
+  if (lview) writeFileSync(resolve(out, `vulcanica-lava-seed-${seed}.png`), encodePng(renderBiomePreview(map, 640, lview)));
   if (seed === seeds[0]) writeFileSync(resolve(out, `mapa-antigo-seed-${seed}.png`), encodePng(renderParchmentPreview(map, px)));
   const s = map.stats;
   metrics.generated[seed] = {
     ms, landFraction: +s.landFraction.toFixed(3), landComponents: s.landComponents, lakes: s.lakes,
     irregularityAll: +s.irregularity.all.toFixed(3), irregularityWeighted: +s.irregularity.weighted.toFixed(3), irregularityLargest: +s.irregularity.largest.toFixed(3), fractalDim: +s.fractalDim.toFixed(3),
+    lava: lavaStats(map),
     entities: s.perEntity.map((p) => `${p.id}[${p.biome}] ${Math.round(p.area)}u2 idx=${p.index.toFixed(2)}`)
   };
   console.log(`seed ${seed}: ${ms} ms, terra ${(s.landFraction * 100).toFixed(1)}%, componentes ${s.landComponents}, irregularidade ${s.irregularity.all.toFixed(2)} ponderada ${s.irregularity.weighted.toFixed(2)} (maior ${s.irregularity.largest.toFixed(2)}), D ${s.fractalDim.toFixed(3)}`);

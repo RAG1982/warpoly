@@ -35,14 +35,19 @@ function line(data, W, x0, y0, x1, y1, rgb, a = 1) {
 }
 function hash(i, j, s) { return valueNoise(i * 12.9898, j * 78.233, s) * 0.5 + valueNoise(i * 3.7 + 9, j * 5.1 - 4, s + 5) * 0.5; }
 
-/** Prévia colorida por bioma. `px` = lado da imagem (ex.: 768). */
-export function renderBiomePreview(map, px = 768) {
+/**
+ * Prévia colorida por bioma. `px` = lado da imagem (ex.: 768). `view` (opcional) = recorte em coordenadas normalizadas do mapa
+ * `{ u0, v0, u1, v1 }` (ex.: ilha vulcânica ampliada); sem ele, o mapa inteiro. Lava: laranja/vermelho com brilho (halo na terra
+ * ao redor), crosta escura em fluxo; passagens de rocha resfriada em cinza com marcadores (anel = base, losango = passagem).
+ */
+export function renderBiomePreview(map, px = 768, view = { u0: 0, v0: 0, u1: 1, v1: 1 }) {
   const { grid: G, sd, height, biome, size, cell } = map;
+  const lv = map.lava;
   const data = new Uint8Array(px * px * 4);
   const seed = map.options.seed | 0;
   for (let y = 0; y < px; y++) {
     for (let x = 0; x < px; x++) {
-      const u = (x + 0.5) / px, v = (y + 0.5) / px;
+      const u = view.u0 + ((x + 0.5) / px) * (view.u1 - view.u0), v = view.v0 + ((y + 0.5) / px) * (view.v1 - view.v0);
       const d = bilinear(sd, G, u, v);
       const gi = Math.min(G - 1, Math.floor(u * G)), gj = Math.min(G - 1, Math.floor(v * G));
       let r, g, b;
@@ -75,13 +80,69 @@ export function renderBiomePreview(map, px = 768) {
         // sombra d'água rasa: areia molhada junto à costa
         const wet = smooth(0.7, 0, d) * 0.28;
         r = mix(r, 150, wet); g = mix(g, 130, wet); b = mix(b, 90, wet);
+        if (lv) [r, g, b] = shadeLava(lv, G, u, v, seed, r, g, b, gj * G + gi);
       }
       const o = (y * px + x) * 4;
       data[o] = Math.min(255, r); data[o + 1] = Math.min(255, g); data[o + 2] = Math.min(255, b); data[o + 3] = 255;
     }
   }
   void size; void cell;
+  if (lv) drawLavaMarkers(data, px, map, view);
   return { width: px, height: px, data };
+}
+
+/** Aplica lava (núcleo incandescente + crosta), halo de brilho na terra e rocha das passagens a um pixel de terra. */
+function shadeLava(lv, G, u, v, seed, r, g, b, cellIdx) {
+  const soft = bilinear(lv.soft, G, u, v), glow = bilinear(lv.glow, G, u, v);
+  const flow = fbm(u * 95 + 4, v * 95 - 7, seed + 611, 3), crust = fbm(u * 210 - 3, v * 210 + 5, seed + 612, 2);
+  if (soft > 0.02) {
+    const a = smooth(0.18, 0.55, soft); // borda da lava (macia)
+    const core = clamp01((soft - 0.35) * 1.8) * (0.55 + 0.9 * flow);
+    let lr = mix(150, 255, core), lg = mix(28, 205, core * core), lb = mix(8, 70, core * core * core);
+    const dark = smooth(0.55, 0.8, crust) * 0.55 * (1 - core * 0.5); // placas de crosta escura
+    lr = mix(lr, 52, dark); lg = mix(lg, 22, dark); lb = mix(lb, 18, dark);
+    r = mix(r, lr, a); g = mix(g, lg, a); b = mix(b, lb, a);
+  }
+  const halo = smooth(0.03, 0.4, glow) * (1 - smooth(0.2, 0.55, soft)) * 0.5; // luz da lava sobre o basalto vizinho
+  r = mix(r, Math.min(255, r * 0.55 + 190), halo); g = mix(g, g * 0.5 + 70, halo); b = mix(b, b * 0.45 + 22, halo * 0.8);
+  if (lv.passage[cellIdx]) { // rocha resfriada: cinza-quente, mais clara nas bordas
+    const t = 0.82 + (flow - 0.5) * 0.4;
+    r = mix(r, 128 * t, 0.85); g = mix(g, 112 * t, 0.85); b = mix(b, 104 * t, 0.85);
+  }
+  return [r, g, b];
+}
+
+/** Marcadores sobre a prévia: anel branco = base (um por área), losango claro = passagem de rocha. */
+function drawLavaMarkers(data, px, map, view) {
+  const lv = map.lava, G = map.grid;
+  const toPx = (i, j) => [Math.round(((((i + 0.5) / G) - view.u0) / (view.u1 - view.u0)) * px), Math.round(((((j + 0.5) / G) - view.v0) / (view.v1 - view.v0)) * px)];
+  const scale = px / ((view.u1 - view.u0) * 768); // 1 na prévia 768 do mapa inteiro
+  const rr = Math.max(3, Math.round(6 * Math.sqrt(scale)));
+  for (const b of lv.bases) {
+    const [cx, cy] = toPx(b.i, b.j);
+    for (let a = 0; a < 90; a++) { const t = (a / 90) * Math.PI * 2; put(data, px, Math.round(cx + Math.cos(t) * rr), Math.round(cy + Math.sin(t) * rr), [255, 255, 255], 0.95); put(data, px, Math.round(cx + Math.cos(t) * (rr - 1)), Math.round(cy + Math.sin(t) * (rr - 1)), [40, 60, 120], 0.8); }
+    for (let k = -1; k <= 1; k++) { put(data, px, cx + k, cy, [255, 255, 255], 0.95); put(data, px, cx, cy + k, [255, 255, 255], 0.95); }
+  }
+  for (const st of lv.streams) for (const p of st.passages) {
+    const [cx, cy] = toPx(p.i, p.j), q = rr;
+    line(data, px, cx - q, cy, cx, cy - q, [240, 236, 200], 0.95); line(data, px, cx, cy - q, cx + q, cy, [240, 236, 200], 0.95);
+    line(data, px, cx + q, cy, cx, cy + q, [240, 236, 200], 0.95); line(data, px, cx, cy + q, cx - q, cy, [240, 236, 200], 0.95);
+  }
+}
+
+/** Recorte (normalizado) em torno da ilha vulcânica, com margem; `null` se o mapa não tem lava. */
+export function lavaIslandView(map, margin = 0.1) {
+  if (!map.lava) return null;
+  const G = map.grid;
+  let i0 = G, j0 = G, i1 = 0, j1 = 0;
+  for (let c = 0; c < map.owner.length; c++) {
+    if (map.owner[c] !== map.lava.entity || !map.land[c]) continue;
+    const i = c % G, j = (c - i) / G;
+    i0 = Math.min(i0, i); i1 = Math.max(i1, i); j0 = Math.min(j0, j); j1 = Math.max(j1, j);
+  }
+  const side = Math.max(i1 - i0, j1 - j0) / G + 2 * margin, cu = (i0 + i1 + 1) / 2 / G, cv = (j0 + j1 + 1) / 2 / G;
+  const u0 = Math.min(1 - side, Math.max(0, cu - side / 2)), v0 = Math.min(1 - side, Math.max(0, cv - side / 2));
+  return { u0, v0, u1: u0 + side, v1: v0 + side };
 }
 
 /** Prévia "mapa antigo": pergaminho, costa em tinta, linhas de eco, montanhas (chevrons) e rosa dos ventos. */

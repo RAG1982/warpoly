@@ -1,13 +1,13 @@
 # MUNDO-TERRENO-MAPAS — terreno, biomas, mapas de contorno natural e mapa do mundo
 
-> Spec da nuvem (2026-10-11). **Fonte:** `docs/specs/MUNDO-BRIEFING-DONO.md` (vale o texto do dono em caso de dúvida) e as 3 imagens de `docs/refs/mundo/`. Regras comuns: `docs/specs/_COMUM.md`. Companheira: `MUNDO-HISTORIA-CAMPANHA.md` (história e missões; esta spec só reserva os "encaixes" geográficos).
-> **Escopo da nuvem:** especificar + protótipo Node (`tools/proto/irregular-coast.mjs`, `tools/lib/irregularCoast*.mjs`, `tests/unit/irregularCoast.test.js`, prévias em `docs/refs/mundo/previews/`). Nada em `src/` foi alterado. Arte (Blender/navegador) fica no **local** (§6).
+> Spec da nuvem (2026-10-11; **revisão 2 de 2026-10-11** aplica as decisões do dono: orcs a leste/humanos a oeste, mapa-múndi só ilustrativo, bioma só visual, **lava como divisor de áreas** (§3.5, sem dano) e nomes aprovados (§3.6)). **Fonte:** `docs/specs/MUNDO-BRIEFING-DONO.md` (vale o texto do dono em caso de dúvida) e as 3 imagens de `docs/refs/mundo/`. Regras comuns: `docs/specs/_COMUM.md`. Companheira: `MUNDO-HISTORIA-CAMPANHA.md` (história e missões; esta spec só reserva os "encaixes" geográficos).
+> **Escopo da nuvem:** especificar + protótipo Node (`tools/proto/irregular-coast.mjs`, `tools/lib/irregularCoast*.mjs`, `tests/unit/irregularCoast.test.js`, prévias em `docs/refs/mundo/previews/`). Nada em `src/` foi alterado. Arte (Blender/navegador) fica no **local** (§6). Protótipo da lava: `tools/lib/irregularCoast.mjs` (`generateLava`), prévias `docs/refs/mundo/previews/vulcanica-lava-seed-*.png`.
 
 ## 0. Resumo executivo
 1. Os mapas atuais são uniões de **discos/elipses ligados por pontes retangulares** (gerador `islands`) ou um **quadrado com rio diagonal** (`continental`): o contorno é geometria de compasso, não costa. Medido: índice perímetro/disco **1,19** (`ilhas-4p`) e **1,07** (contorno externo do `continental-1v1`); dimensão fractal da costa ≈ **1,0** (curva lisa).
 2. Proposta: **gerador `coastal`** (§2) = campo escalar por entidade (continente/ilha) com raio angular de Fourier + fBm de domínio deformado + enseadas/penínsulas explícitas + folga entre entidades + limpeza de lagoas; **assado** em grade (`painted`) para ser determinístico em rede/replay. O protótipo já gera 2 continentes + 6 ilhas (vulcânica, rochosa, gelo, pântano, tropical, atol) + ilhotas em **~0,3 s**: índice **1,69–1,83** e D **1,11–1,14**.
-3. **Biomas** como camada visual (§3) por continente/ilha — deserto/pântano/estepe × exuberante/neve/savana + ilhas vulcânica/pedregosa/gelo —, **sem mudar balanceamento** (só arte, exceto lava, ver P-3).
-4. **Mapa do mundo** (§4): pergaminho procedural (SVG/canvas) com costas vindas do mesmo gerador + slot de arte final; rota animada do navio, rosa dos ventos, selo.
+3. **Biomas** como camada visual (§3) por continente/ilha — deserto/pântano/estepe × exuberante/neve/savana + ilhas vulcânica/pedregosa/gelo —, **sem mudar balanceamento**: bioma é só visual (DECIDIDO). A **lava** (§3.5) é a única classe nova de célula na sim: bloqueio puro como a água, **sem dano**.
+4. **Mapa-múndi** (§4): **só ilustrativo** (os dois continentes, Velmara a oeste e Cinzara a leste, e as ilhas Estilhaços entre eles; não jogável, sem rota navegável); pergaminho procedural com costas do mesmo gerador, rosa dos ventos, selo e marcadores opcionais de missão. As missões acontecem em mapas próprios.
 5. **Javalis** no lugar dos porcos (orcs), ovelhas (humanos) (§5); lista de arte local priorizada (§6); plano em 10 passos (§7).
 
 ## 1. Imagens de referência (descrição detalhada)
@@ -50,7 +50,7 @@ Todas estão em `docs/refs/mundo/`. Câmera de jogo em ambas: **isométrica alta
 | `ilhas-4p` | **1,19** | 1,18 | 0,99 |
 | `continental-1v1` | 2,02 (**inflado pelo rio**) | **1,07** | 1,06 |
 | `arquipelago-naval-4p` | 3,10 (centenas de ilhotas de poucas células; rasterização) | 2,62 | 1,01 |
-| **novo, seeds 1/2/3** | **1,69 / 1,76 / 1,83** (bruto 1,52–1,60; maior massa 1,78–1,90) | n/a | **1,11 / 1,14 / 1,12** |
+| **novo, seeds 1/2/3** | **1,69 / 1,75 / 1,83** (bruto 1,52–1,60; maior massa 1,78–1,90) | n/a | **1,11 / 1,14 / 1,13** |
 
 Leitura honesta: o índice bruto é enganado por rio e por ilhotas pixeladas; por isso o teste usa **três** métricas (índice ponderado, contorno externo dos mapas atuais, dimensão fractal por contagem de caixas), todas a favor do gerador novo.
 - **O que precisa mudar:** (a) costa por **campo ruidoso**, não por primitivas; (b) **formas-base diferentes por ilha** (alongada, atol, vulcão, serrilhada); (c) **enseadas, baías, penínsulas, lagoas/lagos**; (d) praia rasa e fundo mar com perfil de costa verdadeiro; (e) **rios** meandrados com vaus; (f) simetria só no que afeta jogo (§2.4); (g) tudo **assado** em dados (§2.5).
@@ -97,7 +97,7 @@ Parâmetros: `seed, size (192), grid (256), roughness (0,4–1,6), islands (≥5
 - **Editor (`src/editor/`)**: já importa/edita `painted`; falta (a) camada de **bioma** (pincel de bioma + sobrepõe `biomeGrid`), (b) botão "Regenerar costa (seed)" que chama o gerador, (c) exportar `biomeGrid`. `validateMapDef` ganha avisos: lagoa < N células, bioma sob base incompatível (lava), costa sem praia.
 
 ## 3. Novos tipos de terreno e bioma
-**Princípio:** bioma é **só visual** (paleta, textura, decoração, partículas). Velocidade, custo e balanceamento **não mudam**. Única exceção a decidir (P-3): **lava** como "água não navegável" (impede passagem). `src/data/tilesets.js` hoje tem `verdejante` (legado, **não tocar**), `inverno`, `devastadas`, `pantano`, todos **por mapa**; os continentes novos precisam de **vários biomas no mesmo mapa**.
+**Princípio:** bioma é **só visual** (paleta, textura, decoração, partículas). Velocidade, custo e balanceamento **não mudam**. Única exceção (DECIDIDO pelo dono em 2026-10-11): a **lava** (§3.5), que **bloqueia** como a água, **sem dano**. `src/data/tilesets.js` hoje tem `verdejante` (legado, **não tocar**), `inverno`, `devastadas`, `pantano`, todos **por mapa**; os continentes novos precisam de **vários biomas no mesmo mapa**.
 
 ### 3.1 Catálogo de biomas (cores dos splats; água/atmosfera por tileset do mapa)
 | bioma | paleta (hex) | textura (procedural × Blender) | vegetação/decoração | objetos novos (modelagem local) | efeitos | tileset |
@@ -125,16 +125,87 @@ Parâmetros: `seed, size (192), grid (256), roughness (0,4–1,6), islands (≥5
 
 ### 3.4 Impacto em jogabilidade
 - **Nenhum** em velocidade/custo/vida. Efeitos visuais ≤ orçamento de partículas atual; poeira/cinzas/vapor só `quality ≥ med`.
-- **Lava (P-3):** proposta = células de lava em altura `< 0,65` (comportam-se como água para `Terrain`), mas **fora de `fords`** e sem acesso naval (lago interno) ⇒ obstáculo permanente; o render pinta lava em vez de água (marcador `lavaCells` ou `biomeGrid=8`). Não afeta saves antigos.
+- **Lava:** DECIDIDO (2026-10-11): obstáculo puro, **sem dano**, igual à água; detalhes, grade, pathfinder, IA, visual, som, minimapa, determinismo e editor em **§3.5**. Não afeta saves antigos (mapas sem lava não mudam).
 - **Dunas** só visuais (normal map), **sem** relevo caminhável.
 
-## 4. Mapa do mundo (tela da campanha)
+### 3.5 Lava como divisor de áreas (DECIDIDO: bloqueio sem dano)
+**Decisão do dono (2026-10-11).** Em ilhas vulcânicas, **córregos/rios de lava** fazem o papel do rio dos outros mapas: **delimitam áreas**. A lava **não causa dano**: apenas **bloqueia a passagem, exatamente como a água** (terrestres não entram, como no rio/mar; navais também não entram, pois não é água; **aéreas atravessam**). **Passagens de rocha resfriada** fazem o papel dos vaus. Nada de dano/perigo entra na sim: sem `HazardPool`, sem tick de dano, sem efeito em balanceamento. Se um dia o dono quiser dano, é uma nova decisão (fora de escopo; não há opção parcialmente implementada).
+
+**Regras de jogo**
+| Quem | Lava | Passagem de rocha |
+|---|---|---|
+| Terrestre (inclusive construções, muros, tropas de cerco) | **bloqueada** (como água: `Terrain.isWalkable` falso) | caminhável como terra |
+| Naval | **bloqueada** (não é água navegável) | n/a (é terra) |
+| Aéreo (`layer: 'air'`) | **atravessa** (já ignora o pathfinder terrestre/naval) | atravessa |
+| Edificação / jazida / árvore | **proibida** sobre lava (como sobre água) | permitida só se `h >= 1,8` e fora do vau (raio livre de 3 u para não fechar a passagem) |
+| Mágicas/projéteis | passam (a lava não bloqueia linha de tiro nem visão); ataque à distância sobre o córrego funciona | idem |
+| Transmutação (ovelha), Redemoinho etc. | sem interação | sem interação |
+- **Largura:** 3–4 células do protótipo (grid 256 sobre 192 u = 0,75 u/célula, ou seja 2,25–3 u) servem para a prévia; **no mapa jogável (`painted`, `cell` 1) o córrego mede 4–6 u**, no mínimo **2 células inteiras do Pathfinder (3 u)**, senão unidades vazam na diagonal. O teste usa conectividade **8-conexa sem cortar quina** para garantir isso.
+- **Passagens:** 1–2 por córrego, **~6 células ao longo do fluxo (≥ 4,5 u)**, localizadas fora das pontas (t entre 0,2 e 0,8) e distantes ≥ 20 % entre si. Largura útil ≥ 6 u no jogo (regra de "passagem única": ≥ 6 u, §2.4) para uma construção não a fechar sozinha. Visual: laje de basalto cinza com borda quente; no minimapa a mesma cor de terra (não de lava).
+- **Número de áreas** = córregos + 1 (1 córrego = 2 áreas; 2 córregos paralelos = 3). Cada área tem **uma base/slot** (platô com folga ≥ 2,5 células do protótipo ≈ 14 u no jogo) e ≥ 60 células; fatias menores que 30 células entre lava e costa são absorvidas pela lava.
+- **Papel nas missões:** a Fornalha (palco 8) usa os divisores como **frentes**: defender/atacar uma passagem é a decisão tática (equivalente aos vaus do `continental-1v1`). Mapas 1×1 competitivos: córregos e passagens **simétricos** dentro de R_jogo (§2.4).
+
+**Representação na grade e no pathfinder (única mudança de sim; fica para a execução, nada em `src/` nesta spec)**
+- **Nova classe de célula `lava`**: bit no terreno, não no `height`. Duas portas de entrada, em ordem de preferência:
+  1. **Preferida:** `mapDef.lavaGrid` (mesmo formato do `biomeGrid`/`painted`: `{ cell, nodes, data base64 Uint8 }`, 1 = lava, 0 = não) lida por `Terrain.isLava(x, z)`. `Terrain.isWalkable` passa a `height >= 0,65 && !isLava`; `Terrain.isWater` devolve **falso** em lava (não é água: sem barco, sem Estaleiro, sem pesca/petróleo, sem render d'água).
+  2. **Compat/retrocompat:** o JSON assado também grava `height = 0,4` nas células de lava (entre `NAVAL_MAX_HEIGHT` 0,1 e 0,65), de modo que **qualquer código que só olhe a altura já trata a lava como bloqueio para terrestres e navais**; o bit `lavaGrid` serve para render, minimapa, validação e para `isWater`.
+- **`Pathfinder.buildGrid`**: `staticGrid = 0` em células de lava **nos dois modos** (terrestre `h >= 0,68` já falha; naval `h <= NAVAL_MAX_HEIGHT` já falha com 0,4; a checagem explícita de `isLava` documenta a regra e protege contra altura reescrita por editor). `_terrainBlocked`/`isWater` nas linhas de visada: lava bloqueia **movimento**, não **visão/tiro** (usar `isLava` só no movimento).
+- **`isBlocked`** e a validação de colocação de edifícios (`Placement`) e de árvores/jazidas usam a mesma classe. `unitCanEnter` de aéreos não consulta a grade: sem mudança.
+- **Dentro da lava não há unidade**: se uma unidade aparecer sobre lava (editor, spawn mal posicionado), `validateMapDef` falha em tempo de carga; em partida o `Pathfinder.findNearestWalkable` já a empurra para a margem (não há dano).
+- **Determinismo:** a lava é **assada** no JSON (`painted` + `lavaGrid`); a sim só lê bytes (sem ruído, sem `sin/cos` em tempo de execução). O fluxo animado é **só render** (shader, sem estado de sim). `lavaGrid` entra no hash do mapa/replay como dado do mapa, **não** no checksum de estado (não muda durante a partida).
+- **Teste de aceite da execução:** (a) terrestre e naval não atravessam lava (A* sem caminho entre áreas sem passagem); (b) com passagem, o caminho existe e é determinístico; (c) aéreo atravessa; (d) construção sobre lava rejeitada; (e) nenhum dano: `hp` inalterado após 120 s de unidade ao lado da lava.
+
+**IA e pathfinder**
+- A IA terrestre já raciocina por **região conexa do `Pathfinder`** (`AIWood`, expedições): lava só cria regiões desconectadas e, com passagem, um **gargalo**. Sem código novo de IA além de **(i) escolher a base-alvo/expedição por região e custo de caminho** (o `markExploredAt` do NEW-42 evita marchar em laço), **(ii) tratar a passagem como ponto de defesa** (torres/muralhas perto dela, `Placement` já evita o vau), **(iii) transporte aéreo/Grifos** para atravessar quando não há caminho.
+- Recursos (ouro/madeira) em área sem passagem para a base da IA = **proibido** (regra de equidade §2.4): toda base alcança suas jazidas e ≥ 8000 de madeira **sem** atravessar lava; a **passagem** só leva a terreno extra/inimigo. Teste: `measure-wood` por região.
+- `Pathfinder` terrestre/naval **não** ganha custo diferente: lava é só obstáculo (mesmo código de água).
+
+**Visual (render; sem tocar na sim)**
+- **Material de lava emissivo**: cor `ff5a1a` (núcleo `ffb347`, borda `8a1c0a`), textura de fluxo com **UV scroll** (2 camadas de ruído a velocidades opostas), **crosta escura** (placas de basalto `2b2528`) que se abrem; `emissiveIntensity` 1,2–1,8 com pulso lento. Sem sombra projetada; sem reflexo.
+- **Brilho vizinho:** cor de vértice laranja no terreno a ≤ 3 u da lava (cinza/basalto aquecido) e **luz pontual fraca** a cada ~14 u ao longo do córrego (≤ 6 luzes por ilha, só `quality ≥ med`; em `low`, só cor de vértice).
+- **Partículas** (orçamento F10-04, só perto da câmera): **brasas** subindo (≤ 40), **vapor** nas bordas e onde a lava toca o mar (≤ 30), **fumaça** fina; `quality ≥ med`. Nenhuma colide com a sim.
+- **Margem de rocha:** a passagem resfriada tem textura de basalto liso com rachaduras brilhantes; as bordas da lava no mar soltam vapor (e a costa cria "obsidiana" cinza).
+- **Atmosfera:** o bioma é visual: a ilha mantém `vulcanico` (água escura, céu quente); a lava não muda o `grade` global.
+
+**Som (F7-08, só apresentação):** laço baixo de **lava borbulhando** posicional (distância ≤ 25 u da câmera, 1 emissor por trecho de ~20 u, máx. 3 simultâneos), **chiado** de vapor onde toca a água; sem sons de dano.
+
+**Minimapa:** células de lava em **vermelho-laranja saturado `d9481c`** (`#ff6a2a` no pulso), passagens na cor de terra cinza do bioma, nunca vermelho; legenda i18n `minimap.lava`. No minimapa circular (ART-14) a lava mantém o contraste sobre o basalto `2b2528`. Fog of war aplica como no terreno (lava explorada fica visível).
+
+**Editor (`src/editor/`)**: novo pincel **"Lava"** (liga o bit `lavaGrid` e grava `height 0,4`), **"Passagem de rocha"** (apaga lava e grava `height ≥ 1,05` no raio, como o pincel de vau grava platô 2,35) e botão **"Gerar córregos (seed)"** (chama o gerador abaixo). Avisos de `validateMapDef`: lava sem passagem entre bases (aviso), lava sobre base/jazida/árvore (erro), passagem < 4,5 u (aviso), córrego que não toca a costa em ambas as pontas (aviso: a área não se separa), células de lava isoladas (< 6 células, aviso).
+
+**Geração (protótipo, `generateLava` em `tools/lib/irregularCoast.mjs`)**
+1. Na ilha **vulcânica** (maior que 200 células), escolhe-se `S = 1` ou `2` córregos (45 % dois), ângulo `θ`, deslocamento transversal (um córrego: ±0,15·R do centro; dois: ±0,28–0,36·R, paralelos com jitter ±0,1 rad).
+2. Para cada córrego, marcha-se do ponto base nos dois sentidos até a **primeira saída da terra** (+3 células para vazar no mar): isto fixa os extremos **costa a costa**.
+3. O caminho é a corda A→B com **deslocamento por fBm** (`0,22·R`, envelope `sin(πt)^0,5`) e **largura 3–4 células** com variação ±8 % por ruído; carimba-se um disco por passo (sempre só sobre terra da ilha).
+4. **Validação**: cada córrego é **um** componente 8-conexo; toca a costa em dois pontos separados por ≥ 0,9·R; terra restante = `S+1` áreas ≥ 60 células (fatias < 30 viram lava); então abrem-se **1–2 passagens por córrego** (disco de raio `largura/2 + 0,4` ao longo de ±0,5 célula do centro `t`; `t` em 0,38–0,62 para uma passagem, 0,20–0,36 e 0,64–0,80 para duas); com as passagens fechadas as áreas continuam `S+1`; abertas, são **uma massa**; cada passagem toca ≥ 2 áreas; uma **base por área** = célula de maior folga longe do cone do vulcão (≥ 2,5 células). Reprovou: novo sorteio (até 80 tentativas, deslocamento 100 % → 50 % → 0).
+5. **Superfície:** lava `h = 0,4`, bioma `LAVA`; passagem `h ≥ 1,05`, bioma rocha; ≤ 3 células de lava = cinza/basalto. A cratera deixa de ser "lava" (vira basalto) para não parecer córrego.
+Resultados (100 sementes): lava válida em **100 %**, quase sempre na 1ª tentativa; < 0,5 s por mapa completo.
+
+### 3.6 Matriz ilha → bioma → divisores → bases e recursos
+**Nomes aprovados (2026-10-11):** mundo **Ondara**; continentes **Velmara** (oeste, humanos/Aliança; exuberante, montanhas nevadas, savana) e **Cinzara** (leste, orcs/Horda; deserto, pântano, estepe); mar **Mar Fendido**; arquipélago **Os Estilhaços** (8 ilhas). Bioma é **só visual**; os **divisores** abaixo são o que muda a forma de jogar (rio e lava só nos mapas jogáveis, não no mapa-múndi). Os mapas jogáveis usam **tamanho de missão** (ilha em escala 2–3× o protótipo; a tabela diz o que cada um reserva).
+
+| Ilha / continente | Bioma (visual) | Divisores | Bases e recursos (mapa jogável) | Missão / observação |
+|---|---|---|---|---|
+| **Velmara** (oeste) | exuberante: grama, floresta densa, savana ao sul, cordilheira nevada ao norte | **rio** meandrado com 2–3 vaus (§2.2); **costa** irregular com enseadas (estaleiro); sem lava | Aliança: 1 base na baía + expansões; madeira ≥ 8000 por jogador, ouro/pedra no pé da cordilheira, ovelhas | palcos 1, 10–12 (campanha orc, lado de fora) |
+| **Cinzara** (leste) | deserto, pântano nas lagoas, estepe | **rio seco/uádi** com vaus nos mapas de campanha; **lagoas** de pântano (lago interno, sem poço); sem lava | Horda: base no planalto, ouro/pedra em afloramentos, javalis | palcos 1, 10–12 (campanha humana, lado de fora) |
+| **Pouso do Encontro** | tropical/temperada: praia larga, grama, farol | **costa** (enseadas); sem rio nem lava | 2 bases opostas, madeira e ouro médios, ovelhas e javalis, neutro | palco 2 |
+| **Pedra-Mãe** | pedregosa (granito, musgo) | **costa** e **penhasco** (declive, sem custo) ; sem rio/lava | colônia mineira da Aliança; **ouro abundante**, pouca madeira (madeira 8000 vem de ilhota anexa) | palco 3 |
+| **Baixio do Breu** | atol/recifes: areia + dezenas de ilhotas | **costa**/baixios (naval) | só mar: **poços de petróleo** em água navegável (≥ 6 u da costa), ruínas de naufrágio; bases em 2 ilhotas | palco 4 (frota) |
+| **Cerne Verde** | floresta densa | **rio** curto com 1 vau no meio; costa | **madeira abundante**, ninho de grifos, bosque sagrado; base da Aliança | palco 5 |
+| **A Geada** | gelo: neve, gelo, rocha azulada | **lago congelado** (bloqueio como água, só visual) e **costa**; sem lava | pouco ouro, Farol Boreal, 2 bases | palco 6 |
+| **Brejo Mudo** | pântano: juncos, lama, água rasa | **rio/canais** meandrados com vaus; **costa** | ferro de brejo, javalis, base da Horda; água rasa com vitórias-régias | palco 7 |
+| **Fornalha** | vulcânica: basalto, cinza, **lava** | **LAVA**: 1–2 córregos costa a costa dividindo a ilha em 2–3 áreas; **1–2 passagens de rocha por córrego**; costa | **uma base por área** (platô, folga ≥ 14 u), ouro e obsidiana na área maior, Monte Caldeira no centro; forja/santuário da Horda numa área, passagem como ponto de defesa | palco 8 (forja e rito) |
+| **Miragem** | deserto/oásis: dunas, ruínas | **costa**; sem rio/lava (os 3 poços são pontos de controle) | três poços (água), pouca coisa mais; cabeça de ponte | palco 9 |
+Notas: (1) o protótipo mapeia `ISLAND_TYPES` assim: volcanic = Fornalha, rocky = Pedra-Mãe, ice = A Geada, swamp = Brejo Mudo, tropical = Pouso do Encontro, atoll+ilhotas = Baixio do Breu; Cerne Verde (floresta densa) e Miragem (deserto) entram como tipos novos `forest` e `desert` na execução (hoje a 7ª/8ª ilha repetem rocha/tropical). (2) Só a Fornalha tem lava; os demais divisores são **rio** (vaus, §2.2) e **costa**.
+
+## 4. Mapa-múndi (ilustrativo; tela da campanha)
 - **Estilo:** pergaminho antigo da referência (§1.3): fundo manchado, vinheta queimada, **costa em tinta** com sombra interna, **linhas de eco** no mar, hachuras de montanha/floresta, **duas rosas dos ventos**, **selo de cera** da facção, **moldura** ornamental, rótulos em serifa curva (texto em PT-BR/i18n, `textPath`).
-- **Geografia:** os mesmos **dois continentes + 6 ilhas** do protótipo (assadas com **semente fixa**, p.ex. 1), escolhida **uma vez** e congelada em dado (`src/data/campaigns/world-map.json`: contornos como polilinhas simplificadas por marching squares + `entities` com bioma + posição dos pinos de missão em coordenadas normalizadas 0–1). **Atribuição provisória (confirmar P-1):** oeste = continente exuberante/nevado/savana (**Aliança**); leste = desértico/pântano/estepe (**Horda**); ilhas no meio = pontes de recurso/cabeça de ponte (vulcânica, rochosa, gelo, pântano, tropical, atol), conforme a história do dono.
-- **Formato (nuvem):** componente de UI em **SVG** (contornos, rota, selos, rosas — escala nítida em qualquer tela) sobre **textura de pergaminho desenhada em canvas procedural** (a mesma rotina do `renderParchmentPreview`: ruído de manchas, fibras, vinheta). Interativo: pinos clicáveis (missão concluída = selo; atual = pulsando; bloqueada = esmaecida), tooltip com título/descrição da missão (i18n), botão "Iniciar". Acessível: foco por teclado, `aria-label`.
+- **Natureza (DECIDIDO 2026-10-11): o mapa-múndi é só uma ILUSTRAÇÃO.** Mostra **Velmara** (oeste, humanos) e **Cinzara** (leste, orcs) e **Os Estilhaços** entre eles, no **Mar Fendido**; **não é jogável** e não tem rota navegável. As missões acontecem em **mapas próprios** (jogáveis, menores) e, se ficar interessante, cada missão pode ser **marcada** sobre a ilustração por um **marcador opcional** (pino/selo) sem ligação com a sim.
+- **Geografia:** os mesmos **dois continentes + as ilhas** do protótipo (assadas com **semente fixa**, p.ex. 1), escolhidas **uma vez** e congeladas em dado (`src/data/campaigns/world-map.json`: contornos como polilinhas simplificadas por marching squares + `entities` com bioma + **marcadores de missão opcionais** em coordenadas normalizadas 0–1). Atribuição **decidida**: oeste = Velmara (exuberante/nevado/savana, **Aliança**), leste = Cinzara (deserto/pântano/estepe, **Horda**); as 8 ilhas no meio recebem os nomes de §3.6 (sem rios nem lava na ilustração; a Fornalha ganha só um **ícone de fumaça**).
+- **Formato (nuvem):** componente de UI em **SVG** (contornos, selos, rosas, rótulos) sobre **textura de pergaminho desenhada em canvas procedural** (a mesma rotina do `renderParchmentPreview`: ruído de manchas, fibras, vinheta). Marcadores de missão **opcionais** e clicáveis (concluída = selo; atual = pulsando; bloqueada = esmaecida), tooltip com título/descrição (i18n), botão "Iniciar" que abre o **mapa jogável** da missão. Acessível: foco por teclado, `aria-label`.
 - **Slot de arte final (local):** se existir `public/art/world/mapa-mundi.webp` (+ `mapa-mundi-mask.png` com a costa para alinhamento), a tela usa a imagem no lugar do pergaminho procedural e mantém **pinos/rota/rosas** vindos do JSON; arte final é pintada sobre o contorno exportado (`tools/gen-world-map-art.mjs` exporta o contorno como PNG/SVG de guia).
-- **Encaixes de missão (12; ids por ordem, a história define títulos):** 1–2 = costa natal (oeste) e ilha tropical próxima (tutorial de coleta/construção); 3 = ilha rochosa (ouro/pedra, torres); 4 = ilha pantanosa (naval); 5 = ilha de gelo (frota, cerco); 6 = **ilha vulcânica** (primeira disputa de cabeça de ponte); 7 = atol/arquipélago central (poços de petróleo); 8 = desembarque na costa leste; 9–11 = interior do continente adversário (deserto/pântano/estepe); 12 = **fortaleza no continente adversário bloqueando o acesso às ilhas** (final do briefing). A campanha da Horda **espelha** a ordem (leste → oeste). Os pinos podem ser movidos no JSON sem tocar em código.
-- **Rota dos navios animada:** ao concluir uma missão (ou ao abrir a tela), um **ícone de navio** percorre um **spline de Catmull-Rom** do pino anterior ao próximo, com **rastro pontilhado em tinta** desenhado progressivamente (`stroke-dashoffset`), pequena **esteira** (2–3 arcos que somem), balanço leve; duração 2,5 s, pulável (clique/Esc); com `prefers-reduced-motion` aparece direto. Som de ondas/corda opcional (F7-08).
+- **Encaixes de missão (12; ids por ordem, a história define títulos; só marcadores):** palcos de `MUNDO-HISTORIA-CAMPANHA.md` §3.2: 1 = costa natal (oeste ou leste conforme a facção), 2 Pouso do Encontro, 3 Pedra-Mãe, 4 Baixio do Breu, 5 Cerne Verde, 6 A Geada, 7 Brejo Mudo, 8 Fornalha, 9 Miragem, 10–12 costa e interior do continente adversário. A campanha da Horda **espelha** a ordem (leste → oeste). Os marcadores podem ser movidos no JSON sem tocar em código; **a ilustração não depende deles**.
+- **Rota decorativa (opcional):** ao abrir a tela ou concluir uma missão, um ícone de navio pode percorrer um **spline de Catmull-Rom** entre dois marcadores, com rastro pontilhado em tinta (`stroke-dashoffset`), 2,5 s, pulável (clique/Esc); com `prefers-reduced-motion` aparece direto. **É só animação**: não há viagem, combate nem escolha de rota (nada de jogo no mapa-múndi).
 - **Selo:** selo de cera vermelho/azul por facção (SVG: círculo irregular com gotas, emblema gravado), usado como botão "Iniciar" e como carimbo nos pinos concluídos. **Rosa dos ventos:** SVG de estrela de 8 pontas + círculos duplos, rotação lenta (±2°) opcional.
 - **Integração:** nova tela `src/ui/worldMap.js` (+ CSS) chamada entre missões pelo fluxo de campanha existente; dados em `src/data/campaigns/world-map.json`; i18n `worldmap.*`. Não toca `sim`. (A **tela de história inicial** é da spec `MUNDO-HISTORIA-CAMPANHA.md`.)
 
@@ -164,7 +235,7 @@ Regras: Sonnet 5.5 em Blender (nunca Haiku), tudo via `tools/safe-run.sh`, GPU r
 | ART-08 | P1 | Água: turquesa/espuma e lagoa de pântano | ajustar `Water.js` (espuma de onda, gradiente raso→fundo, vitórias-régias/juncos já existem) | §1.2 costa; §1.1 lagoa |
 | ART-09 | P1 | Praia: conchas, estrela-do-mar, caniço, barco naufragado | props de costa | §1.2 |
 | ART-10 | P2 | Samambaia, tronco caído, tronco afogado, raiz de mangue | sub-bosque/pântano | §3.1 |
-| ART-11 | P2 | Efeitos: poeira, cinzas, vapor, nevasca, brilho de lava | partículas ≤ orçamento; `quality ≥ med` | §3.1 |
+| ART-11 | P2 | Efeitos: poeira, cinzas, vapor, nevasca, **lava (material emissivo com fluxo, brasas, vapor, luz, som, cor do minimapa; sem dano)** | partículas ≤ orçamento; `quality ≥ med` | §3.1 |
 | ART-12 | P2 | `pig_farm` → cercado de javalis (modelo/ícone) e ícones `biome.*` | | §5 |
 | ART-13 | P2 | Mapa do mundo: arte final de pergaminho + selo + rosas + moldura | `public/art/world/mapa-mundi.webp`; fonte serifada OFL local | §1.3, §4 |
 | ART-14 | P2 | **HUD de referência (tarefa visual separada):** minimapa **circular** com moldura de pedra/ferro espessa, barra de recursos Ouro/Madeira/Suprimento em placas de pedra-metal, painel de comandos retangular (retratos em cima, botões em baixo) em moldura de pedra | substitui o estilo atual; mexe em `style.css`/`UIManager` e minimapa (`drawMinimap` circular + máscara), i18n PT-BR; responsivo (F6-03) | §1.1/§1.2 HUD |
@@ -175,16 +246,17 @@ Regras: Sonnet 5.5 em Blender (nunca Haiku), tudo via `tools/safe-run.sh`, GPU r
 **Local (GPU/Blender/navegador):** todos os `ART-*`, ajuste fino de cores/transições à vista, capturas, bench (FPS/draw calls), soak visual, validação do mapa do mundo em telas reais, decisões de estilo do dono.
 
 ## 7. Plano de execução (passos/commits; uma branch `cloud/<ID>` por passo)
-Dependências: 1 → 2 → 3 → (4 ∥ 5) → 6 → 7 → 8 → 9 → 10. Tarefas de arte (§6) correm em paralelo no local; o jogo funciona sem elas (props `placeholder` já existem).
+Dependências: 1 → 2 → 3 → (4 ∥ 5) → 6 → 7 (+7b) → 8 → 9 → 10. Tarefas de arte (§6) correm em paralelo no local; o jogo funciona sem elas (props `placeholder` já existem).
 1. **`irregularCoast` promovido a módulo de dados** (`src/data/maps/coast/` puro, sem `Math.random`; mantém `tools/proto`): rios (§2.2), presets, `analyzeMap` + testes (determinismo, conectividade, lagoas, madeira ≥ 8000/jogador, rota naval, 1 s/mapa). *Aceite:* `npm test` verde; seeds 1–50 sem falha de verificação.
 2. **Assador `tools/gen-world-map.mjs`**: JSON `painted` (`cell` 1) + `startSlots`/`resources`/`forests`/`neutrals`/`fords`/`roads`, validação `validateMapDef` + `buildPathfinder`/`floodFill`. *Aceite:* mapa assado passa em `maps.test.js`/`mapsWood.test.js` (estendidos).
 3. **Extrair `placement.js`** do `generator.js` (funções puras reutilizáveis) sem alterar a saída (`mapGenerator.test.js` e checksums idênticos).
 4. **Tilesets/biomas (dados):** `exuberante`, `deserto`, `savana`, `vulcanico`, `pedregoso` em `tilesets.js`; `biomeGrid` (formato, `validate.js`, `README`); ainda sem render regional. *Aceite:* testes de paleta/regras (como F7-04), `verdejante` byte-idêntico.
 5. **Render regional (pode usar GPU local para ver):** `tilesetTextures.js` mistura por região, `TreeManager`/`Decorations` por região, água turquesa/espuma, lava emissiva. Verificação visual pendente (local).
 6. **Mapas novos por tipo** (`duelo-continental`, `dois-continentes`, `arquipelago-vivo`, `ilha-unica`), cada um com 3 sementes aprovadas; i18n; registro em `index.js`. *Aceite:* soak (`node tools/soak.mjs --count 8` por mapa, 8/8 terminam) e `measure-wood`.
-7. **Editor:** pincel de bioma, regenerar costa, exportar `biomeGrid`, avisos novos.
+7. **Editor:** pincel de bioma, regenerar costa, exportar `biomeGrid`, **pincéis de lava e passagem** (§3.5), avisos novos.
+7b. **Lava na sim** (pequena, dados + pathfinder): `lavaGrid`, `Terrain.isLava`, `Pathfinder.buildGrid`, placement, `validateMapDef`, testes de §3.5; só depois render emissivo/partículas/som/minimapa (local).
 8. **Fauna/javali:** `Critter.js` (`boar`, alias `pig`), validação, i18n, nome do prédio; modelo/ícone local (ART-04).
-9. **Mapa do mundo:** `world-map.json` + `src/ui/worldMap.js` (SVG/canvas, rota animada, selos) e ligação ao fluxo de campanha; slot de arte final.
+9. **Mapa-múndi ilustrativo:** `world-map.json` + `src/ui/worldMap.js` (SVG/canvas, marcadores opcionais, rota decorativa, selos) e ligação ao fluxo de campanha; slot de arte final.
 10. **Migração e docs:** mapas antigos **ficam**; campanha atual segue neles; as 12 missões novas (spec `MUNDO-HISTORIA-CAMPANHA.md`) usam mapas novos (um por missão ou compartilhados) com as coordenadas fixas escritas **depois** de assados (fixture `missionTerrainClasses.json` regenerada para os mapas novos). Atualizar `src/data/maps/README.md`, `docs/TASKS.md` (coordenador) e `docs/01_ARQUITETURA.md`.
 
 **Riscos e mitigação**
@@ -199,16 +271,22 @@ Dependências: 1 → 2 → 3 → (4 ∥ 5) → 6 → 7 → 8 → 9 → 10. Taref
 **Verificação**
 - Nuvem: `npm ci`, `npm test`, `npm run lint`, `npx vite build --outDir /tmp/build-check`, `node tools/measure-wood.mjs`, `node tools/soak.mjs --count ≤ 10` (Node puro, tempo curto), `node tools/proto/irregular-coast.mjs`.
 - Local (pendente): capturas dos biomas no jogo e no inspetor, minimapa, `npm run perf`, `npm run visual -- --update` (baseline), mapa do mundo em 3 resoluções.
-- Testes de conectividade novos: terra (cada base alcança suas jazidas e a madeira), mar (cada costa de base alcança cada poço e as costas inimigas), lagoas, lava sem ponte de acesso.
+- Testes de conectividade novos: terra (cada base alcança suas jazidas e a madeira), mar (cada costa de base alcança cada poço e as costas inimigas), lagoas, lava sem passagem entre bases (BFS terrestre fechado, aberto pela passagem).
 
-## 8. Perguntas em aberto ao dono
-1. **P-1 Atribuição:** Aliança = continente exuberante/nevado/savana (oeste) e Horda = deserto/pântano/estepe (leste)? As referências (humano exuberante × orc desértico) sugerem que sim; o briefing cita ainda "montanhas nevadas" para os humanos. Confirmar posições (oeste/leste) e se a Horda joga a campanha "de fora para dentro".
-2. **P-2 Escala:** o mapa do mundo é só **ilustração** (pinos) ou deve ser **também um mapa jogável** (continentes inteiros ~ 256 u)? A spec assume ilustração + mapas jogáveis menores por missão.
-3. **P-3 Lava/vulcão:** lava deve ser **obstáculo** (como água) ou só visual? (Proposta: obstáculo.)
-4. **P-4 Bioma e jogabilidade:** confirmar "só visual" (sem bônus/penalidade de velocidade por terreno).
-5. **P-5 Javali:** manter também a ovelha para os orcs em mapas neutros? A Transmutação continua virando ovelha (humano e orc) ou vira javali para orcs?
-6. **P-6 Simetria:** aceita assimetria controlada fora da zona de jogo nos mapas 1×1 competitivos (ranking futuro)?
-7. **P-7 Tamanhos:** mapas de campanha podem passar de 192 para até 256? (impacta pathfinder e soak)
-8. **P-8 HUD:** o redesenho do ART-14 (minimapa circular etc.) vale como tarefa do pacote "mundo" ou entra no F6?
-9. **P-9 Fonte/arte do mapa do mundo:** autorizar uma fonte serifada OFL (ex.: IM Fell/Cinzel) e arte final pintada localmente?
-10. **P-10 Ordem:** priorizar (a) mapas novos jogáveis, (b) render de biomas ou (c) mapa do mundo? A spec assume (a) → (b) → (c).
+## 8. Decisões do dono e perguntas ainda abertas
+**Decididas (2026-10-11):**
+- **P-1 Atribuição:** orcs no **leste** (Cinzara, desértico), humanos no **oeste** (Velmara, exuberante).
+- **P-2 Escala:** o mapa-múndi é **só ilustrativo** (dois continentes + ilhas); não é jogável; missões em mapas próprios, marcáveis na ilustração.
+- **P-3 Lava:** **divisor de áreas, sem dano, bloqueio como a água** (terrestres e navais não entram, aéreas atravessam), com passagens de rocha como vaus (§3.5).
+- **P-4 Bioma:** **só visual** (sem bônus/penalidade de velocidade).
+- **Nomes:** Ondara, Velmara, Cinzara, Mar Fendido; ilhas Pouso do Encontro, Pedra-Mãe, Baixio do Breu, Cerne Verde, A Geada, Brejo Mudo, Fornalha, Miragem.
+
+**Ainda abertas:**
+1. **P-5 Javali:** manter também a ovelha para os orcs em mapas neutros? A Transmutação continua virando ovelha (humano e orc) ou vira javali para orcs?
+2. **P-6 Simetria:** aceita assimetria controlada fora da zona de jogo nos mapas 1×1 competitivos (ranking futuro)? (Vale também para a posição dos córregos de lava fora de R_jogo.)
+3. **P-7 Tamanhos:** mapas de campanha podem passar de 192 para até 256? (impacta pathfinder e soak; a Fornalha em escala de missão precisa de ~96–128 u.)
+4. **P-8 HUD:** o redesenho do ART-14 (minimapa circular etc.) vale como tarefa do pacote "mundo" ou entra no F6?
+5. **P-9 Fonte/arte do mapa-múndi:** autorizar uma fonte serifada OFL (ex.: IM Fell/Cinzel) e arte final pintada localmente?
+6. **P-10 Ordem:** priorizar (a) mapas novos jogáveis, (b) render de biomas ou (c) mapa-múndi? A spec assume (a) → (b) → (c).
+7. **P-11 Marcadores de missão no mapa-múndi:** quer marcar as 12 missões já na primeira versão ou deixar para depois, quando o mapa ilustrativo estiver pronto?
+8. **P-12 Lava no mapa-múndi:** a Fornalha mostra só um ícone de fumaça (proposto) ou também um traço de lava na ilustração?

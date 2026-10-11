@@ -23,13 +23,14 @@ import { SFX, SFX_LIMITS } from './sfxRecipes.js';
 import { createNoiseBuffers } from './noise.js';
 import { MusicPlayer } from './music/MusicPlayer.js';
 import { AmbiencePlayer } from './AmbiencePlayer.js';
-import { MusicDirector, trackIdFor } from './musicDirector.js';
+import { MusicDirector, trackIdFor, pickVariant } from './musicDirector.js';
 import { ambienceMix, nightFactor } from './ambience.js';
 import { renderUtterance, SPEECH_SR } from './speech/speechSynth.js';
 
 const TICK_MS = 150;
 const SPEECH_CACHE_MAX = 64;
 const MENU_FACTION = 'human'; // música do menu = a de paz dos humanos
+const ROTATE_AFTER_LOOPS = 3; // depois de tantas voltas da mesma variação (≈ 50 s), troca por outra da família (crossfade)
 
 /** FNV-1a de 32 bits (semente por chave de fala: mesma fala = mesmas amostras). */
 function hashKey(s) {
@@ -87,6 +88,9 @@ export class AudioEngine {
     this.ambience = new AmbiencePlayer({ ctx, out: this.ambienceBus, noise: this.noise, rng: this.rng });
     this.director = new MusicDirector();
     this.match = null; // { faction, tilesetId }
+    this.musicSeed = seed >>> 0; // semente das variações de música (determinística, fora da sim)
+    this._musicSerial = 0; // quantas faixas já começaram (entra no sorteio da variação)
+    this._lastVariant = {}; // família -> última variação tocada (nunca repete em seguida)
     this.musicOn = !!musicOn; // preferência do jogador (música ligada)
     this.musicHold = false; // silêncio temporário (cutscene/missão)
     this.sceneProbe = null; // () => ({ timeOfDay, dayNight }) para a ambiência noturna
@@ -347,7 +351,19 @@ export class AudioEngine {
       return;
     }
     const id = trackIdFor(this.match ? this.match.faction : MENU_FACTION, this.director.state);
-    this.music.play(id, { fade: this.music.playing ? 2.5 : 1.2 });
+    if (this.music.currentId === id) return; // mesma família: segue na variação atual (o rodízio é à parte)
+    this._startMusic(id, false);
+  }
+
+  /** Começa a família `id` numa variação escolhida de forma determinística (semente + família + contador). */
+  _startMusic(id, force) {
+    const variant = pickVariant(this.musicSeed, id, this._musicSerial++, this._lastVariant[id] ?? -1);
+    if (this.music.play(id, { fade: this.music.playing ? 2.5 : 1.2, variant, force })) this._lastVariant[id] = this.music.currentVariant;
+  }
+
+  /** Rodízio: depois de algumas voltas da mesma variação, troca por outra da mesma família (variedade em partidas longas). */
+  _rotateMusic() {
+    if (this.music.playing && this.music.loopsPlayed() >= ROTATE_AFTER_LOOPS) this._startMusic(this.music.currentId, true);
   }
 
   _applyAmbience(force = false) {
@@ -371,6 +387,7 @@ export class AudioEngine {
       const before = this.director.state;
       if (this.match) this.director.update(now);
       if (this.director.state !== before || !this.music.playing) this._applyMusic();
+      else this._rotateMusic();
       this.music.tick();
     } else {
       this.music.tick(); // deixa a faixa que está saindo terminar o fade
@@ -392,7 +409,7 @@ export class AudioEngine {
       maxVoices: this.pool.max,
       counters: { ...this.counters },
       pool: { ...this.pool.stats, deniedByReason: { ...this.pool.stats.deniedByReason } },
-      music: { track: this.music.currentId, state: this.director.state, intensity: +this.director.level(now).toFixed(2), notes: this.music.stats.notes, switches: this.music.stats.switches, hold: this.musicHold },
+      music: { track: this.music.currentId, variant: this.music.currentVariant, state: this.director.state, intensity: +this.director.level(now).toFixed(2), notes: this.music.stats.notes, switches: this.music.stats.switches, hold: this.musicHold },
       ambience: this.ambience.active,
       speechCached: this._speechCache.size,
       limiterReductionDb: this.limiter.reduction

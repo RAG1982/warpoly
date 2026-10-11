@@ -11,7 +11,7 @@ import { detectAudioLevel } from '../../src/audio/audioEnv.js';
 import { soundsForEvent, combatWeight, SFX_EVENTS, COMBAT_EVENTS } from '../../src/audio/audioMapping.js';
 import { AMBIENCE_PROFILES, AMBIENCE_LAYERS, ambienceMix, nightFactor } from '../../src/audio/ambience.js';
 import { TILESET_IDS } from '../../src/data/tilesets.js';
-import { TRACKS, TRACK_IDS, eventsForStep, trackLength, stepSeconds } from '../../src/audio/music/musicScores.js';
+import { TRACKS, eventsForStep, trackLength } from '../../src/audio/music/musicScores.js';
 import { fillWhite, fillPink } from '../../src/audio/noise.js';
 import { SFX, SFX_LIMITS } from '../../src/audio/sfxRecipes.js';
 import { AudioEngine } from '../../src/audio/AudioEngine.js';
@@ -519,17 +519,6 @@ describe('F7-08 ambiência por tileset (puro)', () => {
 
 // ---------------------------------------------------------------------------------------------------------
 describe('F7-08 partituras procedurais', () => {
-  it('quatro faixas (duas por facção) com laço de 8 compassos', () => {
-    expect([...TRACK_IDS].sort()).toEqual(['human_combat', 'human_peace', 'orc_combat', 'orc_peace']);
-    for (const t of Object.values(TRACKS)) {
-      expect(trackLength(t)).toBe(t.stepsPerBar * t.bars);
-      expect(t.prog).toHaveLength(t.bars);
-      expect(stepSeconds(t)).toBeGreaterThan(0.05);
-    }
-    expect(TRACKS.human_combat.bpm).toBeGreaterThan(TRACKS.human_peace.bpm);
-    expect(TRACKS.orc_combat.bpm).toBeGreaterThan(TRACKS.orc_peace.bpm);
-  });
-
   it('as notas ficam em faixa audível e finitas; vel em (0,1]; durações positivas', () => {
     for (const t of Object.values(TRACKS)) {
       let n = 0;
@@ -545,33 +534,6 @@ describe('F7-08 partituras procedurais', () => {
       }
       expect(n, t.id).toBeGreaterThan(100);
     }
-  });
-
-  it('é determinística (mesma semente = mesmas notas) e dá a volta no laço', () => {
-    const t = TRACKS.human_peace;
-    const a = JSON.stringify(Array.from({ length: 80 }, (_, s) => eventsForStep(t, s, { seed: 5 })));
-    const b = JSON.stringify(Array.from({ length: 80 }, (_, s) => eventsForStep(t, s, { seed: 5 })));
-    expect(a).toBe(b);
-    // camadas fixas (sem melodia) se repetem a cada volta
-    const fixed = (s) => eventsForStep(t, s, { seed: 5 }).filter(e => e.inst !== 'flute');
-    for (let s = 0; s < trackLength(t); s++) expect(fixed(s)).toEqual(fixed(s + trackLength(t)));
-    // a melodia varia entre voltas
-    const mel = (loop) => JSON.stringify(Array.from({ length: trackLength(t) }, (_, s) => eventsForStep(t, s + loop * trackLength(t), { seed: 5 }).filter(e => e.inst === 'flute')));
-    expect(mel(0)).not.toBe(mel(1));
-  });
-
-  it('paz e combate soam diferente: combate tem percussão/metais; paz não tem caixa/tambor de guerra', () => {
-    const insts = (t) => {
-      const set = new Set();
-      for (let s = 0; s < trackLength(t); s++) for (const e of eventsForStep(t, s)) set.add(e.inst);
-      return set;
-    };
-    expect(insts(TRACKS.human_combat).has('snare')).toBe(true);
-    expect(insts(TRACKS.human_combat).has('brass')).toBe(true);
-    expect(insts(TRACKS.human_peace).has('snare')).toBe(false);
-    expect(insts(TRACKS.human_peace).has('pluck')).toBe(true);
-    expect(insts(TRACKS.orc_peace).has('drone')).toBe(true);
-    expect(insts(TRACKS.orc_combat).has('tom')).toBe(true);
   });
 
   it('modo leve (preset baixo) só mantém as camadas essenciais', () => {

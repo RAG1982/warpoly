@@ -4,14 +4,22 @@
  * agendando por uns instantes (as notas já soam sob o fade), para de agendar quando o ganho chega perto de zero e é
  * desconectada depois da cauda das notas.
  *
- * Uso: `play(id)` (crossfade), `stop()`, `tick()` chamado por um temporizador do motor a cada ~150 ms. O relógio é o do
- * AudioContext (`ctx.currentTime`), então nada depende de `Date.now`/`performance.now`.
+ * Uso: `play(família, { variant })` (crossfade), `stop()`, `tick()` chamado por um temporizador do motor a cada ~150 ms. O
+ * relógio é o do AudioContext (`ctx.currentTime`), então nada depende de `Date.now`/`performance.now`.
+ *
+ * ORÇAMENTO DE CPU (nada de bloquear o thread principal por mais de ~16 ms): a música é GERADA de forma incremental, só um
+ * passo (semicolcheia) por vez e só dentro da janela de antecipação de `LOOKAHEAD` s (≈ 8–9 passos); cada passo gera
+ * ≤ ~16 notas (verificado em tests/unit/musicScores.test.js) e cada nota cria uns 4–6 nós de áudio (sem decodificar nem
+ * pré-renderizar buffers). Cada `tick` agenda no máximo `MAX_NOTES_PER_TICK` notas e `MAX_PENDING_STEPS` passos: o que não
+ * coube fica para o tick seguinte (a antecipação de 1 s absorve), então um tick nunca passa de poucos milissegundos.
+ * A frase da melodia é memorizada por laço (cache pequeno), então o custo por passo é só ler tabelas.
  */
-import { TRACKS, eventsForStep, trackLength, stepSeconds } from './musicScores.js';
+import { trackFor, eventsForStep, trackLength, stepSeconds } from './musicScores.js';
 import { playInstrument } from './instruments.js';
 
 const LOOKAHEAD = 1.0; // s agendados à frente (tolera timers estrangulados em aba em segundo plano)
 const MAX_PENDING_STEPS = 24; // teto por tick (nunca trava se o relógio saltar)
+const MAX_NOTES_PER_TICK = 80; // teto de notas criadas por tick (≈ 5 passos densos): limita o trabalho no thread principal
 
 export class MusicPlayer {
   /**
@@ -26,7 +34,8 @@ export class MusicPlayer {
     this.seed = seed;
     /** @type {Array<object>} faixas vivas (a última é a atual) */
     this.runs = [];
-    this.currentId = null;
+    this.currentId = null; // família da faixa tocando (ex.: 'orc_combat')
+    this.currentVariant = 0; // variação (0..2) da família
     this.stats = { notes: 0, switches: 0 };
   }
 
@@ -34,10 +43,13 @@ export class MusicPlayer {
     return this.currentId !== null;
   }
 
-  /** Começa `id` (crossfade a partir da atual). Mesma faixa = não faz nada. */
-  play(id, { fade = 2.5 } = {}) {
-    const track = TRACKS[id];
-    if (!track || this.currentId === id) return false;
+  /**
+   * Começa a família `id` na `variant` (crossfade a partir da atual). Mesma família e mesma variação = não faz nada,
+   * salvo `force` (rodízio de variações dentro da mesma família).
+   */
+  play(id, { fade = 2.5, variant = 0, force = false } = {}) {
+    const track = trackFor(id, variant);
+    if (!track || (this.currentId === id && this.currentVariant === track.variant && !force)) return false;
     const now = this.ctx.currentTime;
     const prev = this.runs[this.runs.length - 1];
     if (prev) this._fadeOut(prev, now, fade);
@@ -47,8 +59,16 @@ export class MusicPlayer {
     gain.connect(this.out);
     this.runs.push({ id, track, gain, step: 0, next: now + 0.12, killAt: Infinity, stepSec: stepSeconds(track) });
     this.currentId = id;
+    this.currentVariant = track.variant;
     this.stats.switches++;
     return true;
+  }
+
+  /** Voltas completas já tocadas da faixa atual (0 se nada toca). */
+  loopsPlayed() {
+    const run = this.runs[this.runs.length - 1];
+    if (!run || run.killAt !== Infinity) return 0;
+    return Math.floor(run.step / trackLength(run.track));
   }
 
   /** Para a faixa atual com fade (a música cala; `play` retoma). */
@@ -78,8 +98,9 @@ export class MusicPlayer {
       if (run.stopScheduling !== undefined && now >= run.stopScheduling) continue;
       if (run.next < now - 0.1) run.next = now + 0.05; // ficou para trás (timer estrangulado): ressincroniza
       let n = 0;
-      while (run.next < now + LOOKAHEAD && n++ < MAX_PENDING_STEPS) {
-        this._scheduleStep(run);
+      let notes = 0;
+      while (run.next < now + LOOKAHEAD && n++ < MAX_PENDING_STEPS && notes < MAX_NOTES_PER_TICK) {
+        notes += this._scheduleStep(run);
         run.step++;
         run.next += run.stepSec;
       }
@@ -95,6 +116,7 @@ export class MusicPlayer {
       playInstrument(this.ctx, run.gain, this.noise, e.inst, e.midi, t, e.dur * run.stepSec, vel, this.rng);
       this.stats.notes++;
     }
+    return evs.length;
   }
 
   /** Volta de uma faixa = passos/volta (para depuração e testes). */

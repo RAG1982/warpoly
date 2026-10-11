@@ -1,8 +1,8 @@
 {
   "version": 1,
-  "createdAt": "2026-10-09T12:06:06.468Z",
-  "commit": "475f874",
-  "base": "d769cd7",
+  "createdAt": "2026-10-11T06:05:01.425Z",
+  "commit": "e16cdaf",
+  "base": null,
   "manifest": {
     "mode": "gpu",
     "chromium": "153.0.8010.12",
@@ -26,46 +26,47 @@
   },
   "scenarios": {
     "inicial": {
-      "drawCalls": 615,
-      "fps": 176.5
+      "drawCalls": 269,
+      "fps": 245
     },
     "combate100": {
-      "drawCalls": 2875,
-      "fps": 57
+      "drawCalls": 2180,
+      "fps": 70.6
     }
   },
   "load": {
-    "ms": 3094
+    "ms": 3231
   },
   "bundle": {
-    "mainJsBytes": 400484,
-    "mainJsGzipBytes": 117395,
-    "initialJsBytes": 2309248,
-    "initialJsGzipBytes": 618721,
+    "mainJsBytes": 512449,
+    "mainJsGzipBytes": 155052,
+    "initialJsBytes": 1950548,
+    "initialJsGzipBytes": 541262,
     "chunks": {
-      "Building": 17126,
-      "Decorations": 23059,
+      "Building": 17145,
+      "Decorations": 24186,
       "FactionPreview": 2803,
-      "GameManager": 146505,
+      "GameManager": 150270,
       "LockstepSession": 23143,
-      "OnlineLobby": 8087,
-      "Terrain": 416,
+      "OnlineLobby": 8088,
+      "Terrain": 417,
       "Transport": 266,
-      "TreeManager": 7851,
-      "UnitAnimator": 108575,
+      "TreeManager": 6780,
+      "UnitAnimator": 109531,
       "WebRTCTransport": 6109,
       "bench": 6373,
-      "editor": 31766,
-      "i18n": 95839,
-      "inspector": 96219,
-      "lobby": 3743,
-      "main": 400484,
-      "models-human": 703276,
-      "models-orc": 45619,
+      "editor": 31802,
+      "i18n": 96892,
+      "inspector": 86291,
+      "lobby": 3818,
+      "lod": 776,
+      "main": 512449,
+      "models-orc": 23944,
+      "models-shared": 254762,
       "modulepreload-polyfill": 670,
-      "netPoc": 2532,
-      "terrainPreview": 4037,
-      "three-vendor": 759828
+      "netPoc": 2533,
+      "terrainPreview": 3972,
+      "three-vendor": 752726
     }
   }
 }

@@ -35,7 +35,7 @@ import { MatchStats } from './MatchStats.js';
 import { isPlayerDefeated } from './victory.js';
 import { MissionRuntime } from './missions/MissionRuntime.js';
 import { resolveMissionDef } from '../data/missions/index.js';
-import { missingRequirements, formatRequirementList } from './requirements.js';
+import { missingRequirements, requirementsNotice } from './requirements.js';
 import { NAVAL_MAX_HEIGHT, WATER_LEVEL } from '../data/combat.js';
 
 const EMPTY_LIST = Object.freeze([]);
@@ -1178,10 +1178,7 @@ export class GameManager {
 
     const missing = missingRequirements(ownerId, type, this);
     if (missing.length > 0) {
-      if (owner.isLocal) {
-        const names = formatRequirementList(missing, owner.factionId);
-        this.events.emit(EVT.NOTIFY, { ownerId, text: `⚠️ Requer: ${names}` });
-      }
+      if (owner.isLocal) this.events.emit(EVT.NOTIFY, { ownerId, text: requirementsNotice(missing, owner.factionId) });
       return null;
     }
 
@@ -1286,10 +1283,7 @@ export class GameManager {
 
     const missing = missingRequirements(ownerId, type, this);
     if (missing.length > 0) {
-      if (owner.isLocal) {
-        const names = formatRequirementList(missing, owner.factionId);
-        this.events.emit(EVT.NOTIFY, { ownerId, text: `⚠️ Requer: ${names}` });
-      }
+      if (owner.isLocal) this.events.emit(EVT.NOTIFY, { ownerId, text: requirementsNotice(missing, owner.factionId) });
       return [];
     }
 

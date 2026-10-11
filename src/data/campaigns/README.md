@@ -36,7 +36,22 @@ Cada entrada de `missions`: `{ id, requires?: [missionId…] (anteriores), carry
 - **Desbloqueio**: missão disponível quando todas as `requires` estão concluídas na tentativa atual. `?campaign=unlock` na URL libera tudo (depuração).
 - **Carry-over de recursos**: `startingResources` da missão + `min(max, floor(fração × saldo final))` do resultado da missão `from` (padrão: 1ª de `requires`), por recurso.
   Nas missões 2 a 8: 25% do saldo, com teto de 300 por recurso.
+- **Liberação progressiva (F8-05b)**: ver a seção "Liberação progressiva" abaixo (`unlocks` por missão).
 - **Heróis**: reservados (`heroes`, `carryOver.heroes`) para a F4-08; nenhum herói existe ainda.
+
+## Liberação progressiva (F8-05b) — `unlocks`
+
+Cada entrada de `missions` pode ter `unlocks: { units:[], buildings:[], research:[], heroes:[] }` = o que **aquela missão LIBERA** (ids de `src/data`;
+o validador confere existência, facção, repetição entre missões e que o nível 2 de uma pesquisa — ficha `"id@2"` — venha depois/junto do nível 1).
+O conjunto **disponível** na missão N é a união cumulativa dos `unlocks` das missões 1..N: `availableTech(campanha, índice0 | idMissão) → {units, buildings, research, heroes}` (`Set`s;
+`research` usa `"id"` = nível 1 e `"id@2"` = nível 2; promoções valem pela unidade base: Patrulheiro/Templário dependem da pesquisa).
+
+- A partida de campanha leva `MatchConfig.techRestriction` (`techRestrictionFor`): `{ players:[jogador local], units, buildings, research, heroes, later, mission, unlocks }`.
+  **Só o jogador local** é restringido; IA inimiga/aliada não (a ordem de batalha da missão manda). Menu "Missões", escaramuça e rede: sem restrição. `?campaign=unlock` (depuração) libera missões **e** árvore.
+- A sim recusa (comando ignorado, sem debitar nada) `TRAIN`, `PLACE_BUILDING`/`PLACE_WALL` e `RESEARCH` fora do liberado: `requirements.js` acrescenta a exigência travada `{locked, kind, id, mission}` a `missingRequirements/missingUnitRequirements/missingUpgradeRequirements`
+  (nenhum ponto novo de checagem). A HUD desabilita o botão com a dica "Disponível na missão N" (`requirementsLine`). Evoluir o Centro de nível não é restringido (as missões concedem o nível com a ação `setTier`).
+- Entra no checksum (`parts.tech`) **só quando presente**; sem `techRestriction` o checksum é idêntico ao anterior (fixado em `tests/unit/techRestriction.test.js`).
+- Anúncio: o briefing da campanha mostra "Novo nesta missão" e, no início da missão (depois da abertura), toast + diálogo "Novo: Unidades: …" (`src/ui/techText.js`, i18n `campaign.unlock.*`).
 
 ## Progresso (`src/campaign/progress.js`)
 

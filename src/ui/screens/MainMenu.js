@@ -182,7 +182,7 @@ export class MainMenu {
 
   startMission(missionId, campaignId = null, unlockAll = false) {
     const lang = getLanguage() === 'en' ? 'en' : 'pt-BR';
-    const config = campaignId ? createCampaignMissionConfig(campaignId, missionId, { lang, unlockAll }) : createMissionConfig(missionId, { lang });
+    const config = campaignId ? createCampaignMissionConfig(campaignId, missionId, { lang, unlockAll, techAll: unlockAll }) : createMissionConfig(missionId, { lang });
     setActiveRun(campaignId ? { campaignId, missionId } : null);
     this.briefing?.close();
     this.campaignScreen?.close();

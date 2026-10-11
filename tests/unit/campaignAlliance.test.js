@@ -51,6 +51,7 @@ describe('campanha da Aliança: dados (F8-05)', () => {
   it('textos bilíngues em todo o JSON (todo objeto de texto com pt-BR tem en) e sem nomes proibidos', () => {
     const banned = /(thrall|orgrim|durotan|uther|arthas|jaina|lothar|khadgar|gul'?dan|blackhand|grom|medivh|turalyon|azeroth|stormwind|warcraft|blizzard)/i;
     const walk = (v, path, file) => {
+      if (path.endsWith('.unlocks')) return; // F8-05b: ids de src/data (ex.: spell_blizzard), não texto do jogo
       if (Array.isArray(v)) return v.forEach((x, i) => walk(x, `${path}[${i}]`, file));
       if (v && typeof v === 'object') {
         if ('pt-BR' in v) expect(typeof v.en, `${file} ${path} sem en`).toBe('string');

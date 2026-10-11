@@ -10,6 +10,7 @@ import './screens/mission.css';
 import { EVT } from '../sim/events.js';
 import { localize } from '../sim/missions/text.js';
 import { t, getLanguage, onLanguageChange } from '../i18n/index.js';
+import { unlockAnnouncement } from './techText.js';
 import { DialogQueue, buildObjectivesModel, buildMissionEndModel, cutscenePose, cutsceneDialogs } from './missionPresentation.js';
 
 const POLL_INTERVAL = 0.25;
@@ -64,6 +65,9 @@ export class MissionController {
     };
     window.addEventListener('keydown', this._onKey, true);
     this._renderPanel(true);
+    // F8-05b: anúncio "Novo: …" das liberações da missão (campanha) — só no início da partida, depois da cutscene de abertura.
+    const tech = gm.matchConfig && gm.matchConfig.techRestriction;
+    this._announce = tech && tech.unlocks && gm.currentTick < 40 ? tech.unlocks : null;
     // Se a partida terminou antes de a HUD existir (carregar save de missão concluída), mostra o fim direto.
     if (gm.mission.outcome) this._endIn = 0.01;
   }
@@ -223,6 +227,15 @@ export class MissionController {
     if (skipped) { this.dialogs.clear(); this._renderDialog(); }
   }
 
+  /** F8-05b: toast + diálogo "Novo: <liberações>" (idioma atual) — uma vez, quando a abertura termina. */
+  _showUnlocks() {
+    const text = unlockAnnouncement(this._announce, this.gm.playerFaction === 'orc' ? 'orc' : 'human');
+    this._announce = null;
+    if (!text) return;
+    this.ui?.showNotification(`🆕 ${text}`, 9000, 'good');
+    this._pushDialog({ portrait: '🆕', speaker: t('campaign.unlock.title'), text, duration: 9 });
+  }
+
   // ------------------------------------------------------------------ por quadro
   /** @param {number} delta  segundos reais @param {boolean} simulate  false no menu de pausa */
   update(delta, simulate = true) {
@@ -241,6 +254,7 @@ export class MissionController {
       }
     }
     if (!simulate) return;
+    if (this._announce && !this.cut && !this.dialogs.current && this.gm.currentTick > 40) this._showUnlocks();
     if (this.cut) {
       this.im.suspended = true; // reafirma (menu de pausa pode ter liberado)
       this._stepCutscene(delta);

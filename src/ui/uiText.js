@@ -23,6 +23,7 @@ export function entityLabel(e) {
 
 /** Texto localizado de um requisito faltante (`'barracks'`, `{hq:2}`, `{role}`, `{research}`). */
 export function requirementText(req, factionId = null) {
+  if (req && req.locked) return req.mission ? t('req.locked', { n: req.mission }) : t('req.lockedNever'); // F8-05b
   if (typeof req === 'string') return buildingLabel(req);
   if (req && typeof req.hq === 'number') {
     return factionId
@@ -38,6 +39,8 @@ export function requirementText(req, factionId = null) {
 
 /** "Requer: A, B" já localizado, a partir da lista de requisitos faltantes. */
 export function requirementsLine(missing, factionId = null) {
+  const lock = missing.find((r) => r && r.locked); // F8-05b: bloqueado pela campanha — "Disponível na missão N" (sem "Requer:")
+  if (lock) return requirementText(lock, factionId);
   return t('hud.requires', { list: missing.map((r) => requirementText(r, factionId)).join(', ') });
 }
 
@@ -102,6 +105,10 @@ export function localizeSimText(text) {
   if (fixed !== text) return fixed;
   let m = /^((?:⚠️|❌|\s)*)Requer: (.+)$/su.exec(text);
   if (m) return `${m[1]}${t('hud.requires', { list: m[2].split(', ').map(localizeRequirementName).join(', ') })}`;
+  m = /^((?:⚠️|\s)*)Disponível na missão (\d+)$/su.exec(text); // F8-05b
+  if (m) return `${m[1]}${t('req.locked', { n: m[2] })}`;
+  m = /^((?:⚠️|\s)*)Indisponível nesta campanha$/su.exec(text);
+  if (m) return `${m[1]}${t('req.lockedNever')}`;
   m = /^Acampamento de bandidos destruído!(?: (.*))?$/su.exec(text);
   if (m) return t('sim.banditsDestroyed') + (m[1] ? ` ${localizeRewards(m[1])}` : '');
   m = /^⚔️ A (Horda Orc|Aliança Humana) reuniu um esquadrão de guerra \((\d+) tropas\) e avança contra sua base!$/u.exec(text);

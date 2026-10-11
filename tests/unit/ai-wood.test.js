@@ -204,8 +204,11 @@ describe('NEW-44: serraria avançada e reserva de madeira', () => {
     })();
     const barracks = gm.createBuilding(d.barracksType, spot.x, spot.z, true, 0);
     gm.buildings.push(barracks);
+    // o treino também exige ≥ 3 peões (sem isso `isWorkerEmergency` congela o recrutamento militar)
+    for (let i = 0; i < 2; i++) place(gm, gm.spawnUnit(d.workerType, d.baseCenter.x - i, d.baseCenter.y + 5, 0), d.baseCenter.x - i, d.baseCenter.y + 5);
     for (let i = 0; i < 4; i++) place(gm, gm.spawnUnit(d.meleeType, d.baseCenter.x + i, d.baseCenter.y + 3, 0), d.baseCenter.x + i, d.baseCenter.y + 3);
     d.recalculatePop();
+    d.player.maxPopulation = 60; // sem o teto de população do cenário
     d.player.resources.gold = 500;
     d.player.resources.wood = d.costs.melee.wood + 20; // paga o treino, mas não o treino + a reserva (80)
     const spy = vi.spyOn(gm, 'issue');

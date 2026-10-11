@@ -1,8 +1,8 @@
 {
   "id": "continental-1v1",
   "name": "Vale do Rio",
-  "size": 140,
-  "playable": 110,
+  "size": 168,
+  "playable": 134,
   "tileset": "verdejante",
   "waterLevel": 0.5,
   "maxPlayers": 3,
@@ -10,58 +10,434 @@
     "generator": "continental",
     "params": {
       "baseHeight": 2.6,
-      "river": { "bendAmp": 5.5, "bendFreq": 0.08, "halfWidth": 6.0 },
-      "coast": { "start": 54, "falloff": 12 }
+      "river": {
+        "bendAmp": 5.5,
+        "bendFreq": 0.08,
+        "halfWidth": 6
+      },
+      "coast": {
+        "start": 66,
+        "falloff": 12
+      }
     }
   },
   "fords": [
-    { "x": -16, "z": -16, "r": 7.5 },
-    { "x": 0, "z": 0, "r": 8.5 },
-    { "x": 16, "z": 16, "r": 7.5 }
+    {
+      "x": -16,
+      "z": -16,
+      "r": 7.5
+    },
+    {
+      "x": 0,
+      "z": 0,
+      "r": 8.5
+    },
+    {
+      "x": 16,
+      "z": 16,
+      "r": 7.5
+    }
   ],
   "startSlots": [
-    { "x": 32, "z": -30, "mirror": [1, 1] },
-    { "x": -32, "z": 30, "mirror": [-1, -1] },
-    { "x": -14, "z": -46, "mirror": [-1, 1] }
+    {
+      "x": 32,
+      "z": -30,
+      "mirror": [
+        1,
+        1
+      ]
+    },
+    {
+      "x": -32,
+      "z": 30,
+      "mirror": [
+        -1,
+        -1
+      ]
+    },
+    {
+      "x": -14,
+      "z": -46,
+      "mirror": [
+        -1,
+        1
+      ]
+    }
   ],
   "resources": [
-    { "type": "gold", "x": 30, "z": -46 },
-    { "type": "stone", "x": 46, "z": -46 },
-    { "type": "gold", "x": 16, "z": -26 },
-    { "type": "gold", "x": -30, "z": 46 },
-    { "type": "stone", "x": -46, "z": 46 },
-    { "type": "gold", "x": -16, "z": 26 },
-    { "type": "gold", "x": 8, "z": -6 },
-    { "type": "stone", "x": -8, "z": 6 },
-    { "type": "gold", "x": -3.4, "z": -35.4, "slot": 2 },
-    { "type": "stone", "x": -14, "z": -31, "slot": 2 }
+    {
+      "type": "gold",
+      "x": 30,
+      "z": -46
+    },
+    {
+      "type": "stone",
+      "x": 46,
+      "z": -46
+    },
+    {
+      "type": "gold",
+      "x": 16,
+      "z": -26
+    },
+    {
+      "type": "gold",
+      "x": -30,
+      "z": 46
+    },
+    {
+      "type": "stone",
+      "x": -46,
+      "z": 46
+    },
+    {
+      "type": "gold",
+      "x": -16,
+      "z": 26
+    },
+    {
+      "type": "gold",
+      "x": 8,
+      "z": -6
+    },
+    {
+      "type": "stone",
+      "x": -8,
+      "z": 6
+    },
+    {
+      "type": "gold",
+      "x": -3.4,
+      "z": -35.4,
+      "slot": 2
+    },
+    {
+      "type": "stone",
+      "x": -14,
+      "z": -31,
+      "slot": 2
+    }
   ],
   "forests": [
-    { "x": 12, "z": -46, "count": 6, "radius": 6.0, "species": "pine" },
-    { "x": -12, "z": -46, "count": 6, "radius": 6.0, "species": "pine" },
-    { "x": 47, "z": 12, "count": 6, "radius": 6.0, "species": "autumn" },
-    { "x": 47, "z": -2, "count": 6, "radius": 6.0, "species": "autumn" },
-    { "x": -12, "z": 46, "count": 6, "radius": 6.0, "species": "pine" },
-    { "x": 12, "z": 46, "count": 6, "radius": 6.0, "species": "pine" },
-    { "x": -47, "z": -12, "count": 6, "radius": 6.0, "species": "autumn" },
-    { "x": -47, "z": 2, "count": 6, "radius": 6.0, "species": "autumn" },
-    { "x": -28, "z": -26, "count": 6, "radius": 6.0, "species": "oak" },
-    { "x": 28, "z": 26, "count": 6, "radius": 6.0, "species": "oak" },
-    { "x": 26, "z": 2, "count": 5, "radius": 5.5, "species": "pine" },
-    { "x": -26, "z": -2, "count": 5, "radius": 5.5, "species": "pine" },
-    { "x": 2, "z": -26, "count": 5, "radius": 5.5, "species": "birch" },
-    { "x": -2, "z": 26, "count": 5, "radius": 5.5, "species": "birch" },
-    { "x": -40, "z": -34, "count": 6, "radius": 6.0, "species": "oak" },
-    { "x": -46, "z": -28, "count": 6, "radius": 6.0, "species": "pine" },
-    { "x": 40, "z": 34, "count": 6, "radius": 6.0, "species": "oak" }
+    {
+      "x": 12,
+      "z": -46,
+      "count": 6,
+      "radius": 6,
+      "species": "pine"
+    },
+    {
+      "x": -12,
+      "z": -46,
+      "count": 6,
+      "radius": 6,
+      "species": "pine"
+    },
+    {
+      "x": 47,
+      "z": 12,
+      "count": 6,
+      "radius": 6,
+      "species": "autumn"
+    },
+    {
+      "x": 47,
+      "z": -2,
+      "count": 6,
+      "radius": 6,
+      "species": "autumn"
+    },
+    {
+      "x": -12,
+      "z": 46,
+      "count": 6,
+      "radius": 6,
+      "species": "pine"
+    },
+    {
+      "x": 12,
+      "z": 46,
+      "count": 6,
+      "radius": 6,
+      "species": "pine"
+    },
+    {
+      "x": -47,
+      "z": -12,
+      "count": 6,
+      "radius": 6,
+      "species": "autumn"
+    },
+    {
+      "x": -47,
+      "z": 2,
+      "count": 6,
+      "radius": 6,
+      "species": "autumn"
+    },
+    {
+      "x": -28,
+      "z": -26,
+      "count": 6,
+      "radius": 6,
+      "species": "oak"
+    },
+    {
+      "x": 28,
+      "z": 26,
+      "count": 6,
+      "radius": 6,
+      "species": "oak"
+    },
+    {
+      "x": 26,
+      "z": 2,
+      "count": 5,
+      "radius": 5.5,
+      "species": "pine"
+    },
+    {
+      "x": -26,
+      "z": -2,
+      "count": 5,
+      "radius": 5.5,
+      "species": "pine"
+    },
+    {
+      "x": 2,
+      "z": -26,
+      "count": 5,
+      "radius": 5.5,
+      "species": "birch"
+    },
+    {
+      "x": -2,
+      "z": 26,
+      "count": 5,
+      "radius": 5.5,
+      "species": "birch"
+    },
+    {
+      "x": -40,
+      "z": -34,
+      "count": 6,
+      "radius": 6,
+      "species": "oak"
+    },
+    {
+      "x": -46,
+      "z": -28,
+      "count": 6,
+      "radius": 6,
+      "species": "pine"
+    },
+    {
+      "x": 40,
+      "z": 34,
+      "count": 6,
+      "radius": 6,
+      "species": "oak"
+    },
+    {
+      "x": -57,
+      "z": 17,
+      "count": 14,
+      "radius": 8,
+      "species": "oak"
+    },
+    {
+      "x": 57,
+      "z": -17,
+      "count": 14,
+      "radius": 8,
+      "species": "oak"
+    },
+    {
+      "x": -57,
+      "z": 43,
+      "count": 17,
+      "radius": 8.5,
+      "species": "birch"
+    },
+    {
+      "x": 57,
+      "z": -43,
+      "count": 17,
+      "radius": 8.5,
+      "species": "birch"
+    },
+    {
+      "x": -19,
+      "z": 55,
+      "count": 16,
+      "radius": 9,
+      "species": "autumn"
+    },
+    {
+      "x": 19,
+      "z": -55,
+      "count": 16,
+      "radius": 9,
+      "species": "autumn"
+    },
+    {
+      "x": -41,
+      "z": -55,
+      "count": 15,
+      "radius": 7.5,
+      "species": "pine"
+    },
+    {
+      "x": 41,
+      "z": 55,
+      "count": 15,
+      "radius": 7.5,
+      "species": "pine"
+    },
+    {
+      "x": -41,
+      "z": 57,
+      "count": 14,
+      "radius": 8,
+      "species": "oak"
+    },
+    {
+      "x": 41,
+      "z": -57,
+      "count": 14,
+      "radius": 8,
+      "species": "oak"
+    },
+    {
+      "x": -3,
+      "z": -17,
+      "count": 17,
+      "radius": 8.5,
+      "species": "oak"
+    },
+    {
+      "x": 3,
+      "z": 17,
+      "count": 17,
+      "radius": 8.5,
+      "species": "oak"
+    },
+    {
+      "x": -53,
+      "z": 55,
+      "count": 16,
+      "radius": 9,
+      "species": "birch"
+    },
+    {
+      "x": 53,
+      "z": -55,
+      "count": 16,
+      "radius": 9,
+      "species": "birch"
+    },
+    {
+      "x": -51,
+      "z": -37,
+      "count": 15,
+      "radius": 7.5,
+      "species": "autumn"
+    },
+    {
+      "x": 51,
+      "z": 37,
+      "count": 15,
+      "radius": 7.5,
+      "species": "autumn"
+    },
+    {
+      "x": -57,
+      "z": -5,
+      "count": 14,
+      "radius": 8,
+      "species": "autumn"
+    },
+    {
+      "x": 57,
+      "z": 5,
+      "count": 14,
+      "radius": 8,
+      "species": "autumn"
+    },
+    {
+      "x": -57,
+      "z": -25,
+      "count": 17,
+      "radius": 8.5,
+      "species": "oak"
+    },
+    {
+      "x": 57,
+      "z": 25,
+      "count": 17,
+      "radius": 8.5,
+      "species": "oak"
+    }
   ],
   "neutrals": [
-    { "kind": "camp", "x": 40, "z": 20, "guards": 4, "reward": { "gold": 300 }, "deposit": { "type": "gold", "amount": 3000 } },
-    { "kind": "camp", "x": -40, "z": -20, "guards": 4, "reward": { "gold": 300 }, "deposit": { "type": "gold", "amount": 3000 } },
-    { "kind": "critters", "species": "sheep", "x": 36, "z": 6, "count": 5, "radius": 6 },
-    { "kind": "critters", "species": "sheep", "x": -36, "z": -6, "count": 5, "radius": 6 },
-    { "kind": "critters", "species": "pig", "x": 14, "z": -44, "count": 4, "radius": 5 },
-    { "kind": "critters", "species": "pig", "x": -14, "z": 44, "count": 4, "radius": 5 }
+    {
+      "kind": "camp",
+      "x": 40,
+      "z": 20,
+      "guards": 4,
+      "reward": {
+        "gold": 300
+      },
+      "deposit": {
+        "type": "gold",
+        "amount": 3000
+      }
+    },
+    {
+      "kind": "camp",
+      "x": -40,
+      "z": -20,
+      "guards": 4,
+      "reward": {
+        "gold": 300
+      },
+      "deposit": {
+        "type": "gold",
+        "amount": 3000
+      }
+    },
+    {
+      "kind": "critters",
+      "species": "sheep",
+      "x": 36,
+      "z": 6,
+      "count": 5,
+      "radius": 6
+    },
+    {
+      "kind": "critters",
+      "species": "sheep",
+      "x": -36,
+      "z": -6,
+      "count": 5,
+      "radius": 6
+    },
+    {
+      "kind": "critters",
+      "species": "pig",
+      "x": 14,
+      "z": -44,
+      "count": 4,
+      "radius": 5
+    },
+    {
+      "kind": "critters",
+      "species": "pig",
+      "x": -14,
+      "z": 44,
+      "count": 4,
+      "radius": 5
+    }
   ],
-  "decorationDensity": 1.0
+  "decorationDensity": 1
 }

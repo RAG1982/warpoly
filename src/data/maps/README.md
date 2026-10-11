@@ -79,14 +79,26 @@ Cada mapa é um JSON em `src/data/maps/<id>.json`, registrado em `index.js` (`ge
   128×128). Jogue com `?map=ilhas-4p&ffa=1`.
 
 - **Pacote skirmish (F8-01)**, gerados com `tools/gen-map.mjs` e salvos como JSON estático (ids e nomes em PT-BR; nomes traduzidos em `src/i18n/*.json`, chave `map.<id>.name`). Testes em `tests/unit/mapsSkirmish.test.js`:
-  - **`campos-1v1`** ("Campos Dourados"): 1×1, 160. `--seed 1 --players 2 --size 160 --forest 2`.
-  - **`desfiladeiro-1v1`** ("Desfiladeiro"): 1×1, 144. `--seed 2 --players 2 --size 144`.
-  - **`vales-2v2`** ("Vales Verdes"): 4 slots para 2v2, 144. `--seed 4 --players 4 --size 144`.
-  - **`bosques-2v2`** ("Bosques Antigos"): 4 slots para 2v2, 160. `--seed 5 --players 4 --size 160`.
-  - **`planalto-ffa-4p`** ("Planalto"): FFA de 4, 176. `--seed 3 --players 4 --size 176`.
-  - **`arquipelago-naval-4p`** ("Arquipélago"): naval, 4 slots, 192 (poços de petróleo e costa para Estaleiro). `--seed 3 --players 4 --size 192 --naval --forest 2`.
+  - **`campos-1v1`** ("Campos Dourados"): 1×1, 192 (era 160). Gerado com `--seed 1 --players 2 --size 160 --forest 2` e depois ampliado à mão/por script (ver "Ampliação e florestas densas").
+  - **`desfiladeiro-1v1`** ("Desfiladeiro"): 1×1, 176 (era 144). Base: `--seed 2 --players 2 --size 144`.
+  - **`vales-2v2`** ("Vales Verdes"): 4 slots para 2v2, 176 (era 144). Base: `--seed 4 --players 4 --size 144`.
+  - **`bosques-2v2`** ("Bosques Antigos"): 4 slots para 2v2, 192 (era 160). Base: `--seed 5 --players 4 --size 160`.
+  - **`planalto-ffa-4p`** ("Planalto"): FFA de 4, 208 (era 176). Base: `--seed 3 --players 4 --size 176`.
+  - **`arquipelago-naval-4p`** ("Arquipélago"): naval, 4 slots, 224 (era 192; poços de petróleo e costa para Estaleiro). Base: `--seed 3 --players 4 --size 192 --naval --forest 2`.
   - Não há mapa 1×1 de 96: com a regra de bosques a ≥ 27 dos pátios, o gerador não acha lugar para árvores suficientes nessa área (a seed 1 de 96 tinha 0 árvores). Ver também a nota de bosques no gerador abaixo.
 - **`tutorial`** ("Campo de Treino", F6-09, `hidden`): 104×104, uma ilha só (`islands`), 2 slots (jogador SW, rival passivo NE), 1 acampamento de bandidos (2 guardas) como alvo; ver `src/ui/tutorial.js`. Não é validado por `maps.test.js` (usa `listMaps()`); `tests/unit/tutorial.test.js` repete as checagens de terra seca.
+
+## Ampliação e florestas densas (feedback da campanha, 2026-10-11)
+
+Feedback do dono: mapas pequenos e madeira acabando cedo. Medição (`node tools/measure-wood.mjs`; critério de alcance = região conexa do `Pathfinder`, o mesmo de `src/ai/AIWood.js`) e correção:
+
+- **Meta de madeira (`WOOD_TARGET` em `tools/lib/woodStats.mjs`)**: cada jogador alcança por terra, a **≤ 60 u** do pátio, **≥ 8000 de madeira** (~67 árvores de 120). Base: nos soaks a IA corta ~2300–3100 por jogador em 15–20 min (NEW-51: 59 árvores / 3 jogadores esgotaram em 15 min); 8000 dá ~2,5× de folga. Conferido por `tests/unit/mapsWood.test.js` (seeds 1–3).
+- **Árvore = 120 de madeira** (`Tree.maxWood`, inalterado). As árvores só nascem a ≥ 26 u de qualquer pátio, ≥ 8,5 de jazidas, ≥ 9 de vaus e com espaçamento ≥ 4,4: mais madeira perto da base exige **mais terra** com bosques, não só mais `count`.
+- **Mapas de `islands`**: o tamanho cresce **acrescentando terra** (nunca mudando as ilhas existentes): "lobos" (elipses `r` 12–18 em `terrain.params.islands`) ligados à ilha-mãe por uma ponte de largura 12 (`bridges`), em simetria (rot. 180° nos 1v1; grupo completo nos 4 slots) e fora de acampamentos, jazidas e pontos de missão; `size`/`playable` sobem ~+20 %. O centro/origem e todas as coordenadas antigas ficam válidas (o mapa só ganha terra). Os bosques novos são **anexados ao fim de `forests`** (os antigos consomem o `rngMap` primeiro) em órbitas simétricas, `count` 14–17, `radius` 7,5–9 e `species` rotativa (oak/pine/autumn/birch).
+- **`continental-1v1`** (gerador `continental`): `coast.start` 54 → 66, `size` 140 → 168, `playable` 110 → 134. Dentro de |x|,|z| ≤ 54 a altura é idêntica à antiga (`terrainGenerators.test.js`); o rio só passa a existir até 68.
+- **Não crescem**: `estreito-1v1` (só densidade) e `ilhas-4p` (inalterado): a campanha (m03/m06) e `naval.test.js` fixam as rotas navais ao redor das ilhas; nova terra nas bordas fecha a circulação ou, com `playable` maior, a abre (muda a conectividade do mar). `tutorial` inalterado.
+- **Regra para novos ajustes**: `tests/fixtures/missionTerrainClasses.json` guarda a classe (terra/água) de **toda** coordenada x/z referenciada por missões da campanha e pelos `startSlots` no mapa original; `tests/fixtures/originalMapTerrain.json` guarda o terreno original (compara "nenhuma terra virou água" e a conectividade terrestre/naval). Se uma missão nova citar coordenadas, regenere a primeira fixture.
+- Os JSON dos mapas ampliados foram gerados por script a partir dos originais e deixam de ser reproduzíveis por `tools/gen-map.mjs`.
 
 ## Adicionando um mapa
 

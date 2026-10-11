@@ -32,7 +32,16 @@ function oldContinentalHeight(x, z) {
 
 describe('terrainGenerators', () => {
   it('continentalHeight(continental-1v1) reproduz o Terrain.getHeight anterior à F2-05 em 2000 pontos aleatórios', () => {
-    const mapDef = getMap('continental-1v1');
+    // O mapa foi ampliado (coast.start 54 -> 66): a réplica antiga vale com os parâmetros históricos, e o mapa atual
+    // continua idêntico a ela dentro da plataforma original (|x|,|z| <= 54), onde as missões da campanha jogam.
+    const current = getMap('continental-1v1');
+    expect(current.terrain.params.coast.start).toBeGreaterThanOrEqual(54);
+    const mapDef = { ...current, terrain: { ...current.terrain, params: { ...current.terrain.params, coast: { ...current.terrain.params.coast, start: 54 } } } };
+    for (let i = 0; i < 2000; i++) {
+      const x = (Math.random() - 0.5) * 108;
+      const z = (Math.random() - 0.5) * 108;
+      expect(Math.abs(continentalHeight(current, x, z) - oldContinentalHeight(x, z))).toBeLessThan(1e-9);
+    }
     let maxDiff = 0;
     for (let i = 0; i < 2000; i++) {
       const x = (Math.random() - 0.5) * 160;

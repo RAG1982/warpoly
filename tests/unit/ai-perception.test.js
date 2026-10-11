@@ -61,7 +61,7 @@ describe('F5-02: percepção sob a névoa', () => {
   it('o explorador (scout) é reservado e sai explorando; some quando a base inimiga é conhecida', () => {
     const gm = makeGm({ difficulties: ['normal', 'normal'] });
     const d0 = gm.aiDirectors[0];
-    run(gm, 20 * 40);
+    run(gm, 15 * 40); // o explorador acha a base inimiga por volta de 800 ticks (e então some): checa antes
     expect(d0.perception.scoutId).not.toBeNull();
     expect(d0.isReserved(d0.perception.scoutId)).toBe(true);
     expect(d0.perception.exploredCount).toBeGreaterThan(0);

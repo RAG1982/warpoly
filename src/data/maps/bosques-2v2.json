@@ -1,8 +1,8 @@
 {
   "id": "bosques-2v2",
   "name": "Bosques Antigos",
-  "size": 160,
-  "playable": 152,
+  "size": 192,
+  "playable": 184,
   "tileset": "verdejante",
   "waterLevel": 0.5,
   "maxPlayers": 4,
@@ -77,6 +77,30 @@
           "z": 0,
           "rx": 15,
           "rz": 15
+        },
+        {
+          "x": -68,
+          "z": -68,
+          "rx": 18,
+          "rz": 18
+        },
+        {
+          "x": 68,
+          "z": 68,
+          "rx": 18,
+          "rz": 18
+        },
+        {
+          "x": 68,
+          "z": -68,
+          "rx": 18,
+          "rz": 18
+        },
+        {
+          "x": -68,
+          "z": 68,
+          "rx": 18,
+          "rz": 18
         }
       ],
       "bridges": [
@@ -163,6 +187,34 @@
           "x2": 38.18,
           "z2": 38.18,
           "width": 9
+        },
+        {
+          "x1": -38.18,
+          "z1": -38.18,
+          "x2": -68,
+          "z2": -68,
+          "width": 12
+        },
+        {
+          "x1": 38.18,
+          "z1": 38.18,
+          "x2": 68,
+          "z2": 68,
+          "width": 12
+        },
+        {
+          "x1": 38.18,
+          "z1": -38.18,
+          "x2": 68,
+          "z2": -68,
+          "width": 12
+        },
+        {
+          "x1": -38.18,
+          "z1": 38.18,
+          "x2": -68,
+          "z2": 68,
+          "width": 12
         }
       ]
     }
@@ -388,6 +440,174 @@
       "z": -39,
       "count": 5,
       "radius": 5.73,
+      "species": "pine"
+    },
+    {
+      "x": -58,
+      "z": -58,
+      "count": 14,
+      "radius": 8,
+      "species": "oak"
+    },
+    {
+      "x": 58,
+      "z": 58,
+      "count": 14,
+      "radius": 8,
+      "species": "oak"
+    },
+    {
+      "x": 58,
+      "z": -58,
+      "count": 14,
+      "radius": 8,
+      "species": "oak"
+    },
+    {
+      "x": -58,
+      "z": 58,
+      "count": 14,
+      "radius": 8,
+      "species": "oak"
+    },
+    {
+      "x": -66,
+      "z": -50,
+      "count": 17,
+      "radius": 8.5,
+      "species": "birch"
+    },
+    {
+      "x": 66,
+      "z": 50,
+      "count": 17,
+      "radius": 8.5,
+      "species": "birch"
+    },
+    {
+      "x": 66,
+      "z": -50,
+      "count": 17,
+      "radius": 8.5,
+      "species": "birch"
+    },
+    {
+      "x": -66,
+      "z": 50,
+      "count": 17,
+      "radius": 8.5,
+      "species": "birch"
+    },
+    {
+      "x": -50,
+      "z": -66,
+      "count": 17,
+      "radius": 8.5,
+      "species": "birch"
+    },
+    {
+      "x": 50,
+      "z": 66,
+      "count": 17,
+      "radius": 8.5,
+      "species": "birch"
+    },
+    {
+      "x": 50,
+      "z": -66,
+      "count": 17,
+      "radius": 8.5,
+      "species": "birch"
+    },
+    {
+      "x": -50,
+      "z": 66,
+      "count": 17,
+      "radius": 8.5,
+      "species": "birch"
+    },
+    {
+      "x": -66,
+      "z": -66,
+      "count": 16,
+      "radius": 9,
+      "species": "autumn"
+    },
+    {
+      "x": 66,
+      "z": 66,
+      "count": 16,
+      "radius": 9,
+      "species": "autumn"
+    },
+    {
+      "x": 66,
+      "z": -66,
+      "count": 16,
+      "radius": 9,
+      "species": "autumn"
+    },
+    {
+      "x": -66,
+      "z": 66,
+      "count": 16,
+      "radius": 9,
+      "species": "autumn"
+    },
+    {
+      "x": -78,
+      "z": -58,
+      "count": 15,
+      "radius": 7.5,
+      "species": "pine"
+    },
+    {
+      "x": 78,
+      "z": 58,
+      "count": 15,
+      "radius": 7.5,
+      "species": "pine"
+    },
+    {
+      "x": 78,
+      "z": -58,
+      "count": 15,
+      "radius": 7.5,
+      "species": "pine"
+    },
+    {
+      "x": -78,
+      "z": 58,
+      "count": 15,
+      "radius": 7.5,
+      "species": "pine"
+    },
+    {
+      "x": -58,
+      "z": -78,
+      "count": 15,
+      "radius": 7.5,
+      "species": "pine"
+    },
+    {
+      "x": 58,
+      "z": 78,
+      "count": 15,
+      "radius": 7.5,
+      "species": "pine"
+    },
+    {
+      "x": 58,
+      "z": -78,
+      "count": 15,
+      "radius": 7.5,
+      "species": "pine"
+    },
+    {
+      "x": -58,
+      "z": 78,
+      "count": 15,
+      "radius": 7.5,
       "species": "pine"
     }
   ],

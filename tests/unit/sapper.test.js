@@ -53,7 +53,11 @@ const place = (u, x, z) => {
 /** Campo aberto longe das bases. */
 function arena(gm) {
   const hq = hqOf(gm, 0);
-  return { x: hq.mesh.position.x - 6, z: hq.mesh.position.z - 26 };
+  const x = hq.mesh.position.x - 6;
+  const z = hq.mesh.position.z - 26;
+  // A arena fica logo fora do pátio, onde as florestas densas do mapa podem nascer: limpa as árvores em volta para o teste ser só de combate.
+  for (const t of gm.trees) if (!t.isDead && Math.hypot(t.mesh.position.x - x, t.mesh.position.z - z) < 14) t.die();
+  return { x, z };
 }
 
 describe('dados dos sapadores (F4-05)', () => {

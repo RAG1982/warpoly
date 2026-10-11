@@ -8,12 +8,12 @@ import { getMap, listMaps } from '../../src/data/maps/index.js';
  * (O soak por mapa é feito à parte: `tools/soak.mjs --maps <id>`; ver docs/TASKS.md, F8-01.)
  */
 const SKIRMISH = [
-  { id: 'campos-1v1', players: 2, size: 160 },
-  { id: 'desfiladeiro-1v1', players: 2, size: 144 },
-  { id: 'vales-2v2', players: 4, size: 144 },
-  { id: 'bosques-2v2', players: 4, size: 160 },
-  { id: 'planalto-ffa-4p', players: 4, size: 176 },
-  { id: 'arquipelago-naval-4p', players: 4, size: 192, naval: true }
+  { id: 'campos-1v1', players: 2, size: 192 },
+  { id: 'desfiladeiro-1v1', players: 2, size: 176 },
+  { id: 'vales-2v2', players: 4, size: 176 },
+  { id: 'bosques-2v2', players: 4, size: 192 },
+  { id: 'planalto-ffa-4p', players: 4, size: 208 },
+  { id: 'arquipelago-naval-4p', players: 4, size: 224, naval: true }
 ];
 
 const dist = (a, b) => Math.hypot(a.x - b.x, a.z - b.z);

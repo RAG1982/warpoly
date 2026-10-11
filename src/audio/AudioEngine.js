@@ -5,8 +5,9 @@
  *  MIXER      música, efeitos e falas em barramentos separados -> mestre -> DynamicsCompressor (limitador) -> saída.
  *             Volume por canal (+ geral) com suavização; a ambiência entra no barramento de efeitos; a música abaixa
  *             (ducking) enquanto uma fala toca.
- *  POSICIONAL `playSfx(nome, { pos })`: ganho pela distância ao alvo da câmera + panorama estéreo (attenuation.js) e
- *             limite de vozes com prioridade (VoicePool). Fora de alcance nem cria nós.
+ *  POSICIONAL `playSfx(nome, { pos })`: só soa o que está na CENA VISÍVEL (frustum da câmera + margem); ganho pela distância
+ *             ao alvo da câmera e pelo zoom (longe = mais baixo e alcance menor) + panorama estéreo (attenuation.js) e
+ *             limite de vozes com prioridade (VoicePool). Fora da cena/alcance nem cria nós.
  *  FALAS      `speak(...)`: sintetiza a fala por formantes (speech/), guarda o AudioBuffer em cache (LRU) e toca numa
  *             única "vaga" (a nova fala corta a anterior).
  *  MÚSICA     `MusicPlayer` + `MusicDirector`: paz × combate por facção com crossfade (combate recente = `noteCombat`).
@@ -22,13 +23,14 @@ import { SFX, SFX_LIMITS } from './sfxRecipes.js';
 import { createNoiseBuffers } from './noise.js';
 import { MusicPlayer } from './music/MusicPlayer.js';
 import { AmbiencePlayer } from './AmbiencePlayer.js';
-import { MusicDirector, trackIdFor } from './musicDirector.js';
+import { MusicDirector, trackIdFor, pickVariant } from './musicDirector.js';
 import { ambienceMix, nightFactor } from './ambience.js';
 import { renderUtterance, SPEECH_SR } from './speech/speechSynth.js';
 
 const TICK_MS = 150;
 const SPEECH_CACHE_MAX = 64;
 const MENU_FACTION = 'human'; // música do menu = a de paz dos humanos
+const ROTATE_AFTER_LOOPS = 3; // depois de tantas voltas da mesma variação (≈ 50 s), troca por outra da família (crossfade)
 
 /** FNV-1a de 32 bits (semente por chave de fala: mesma fala = mesmas amostras). */
 function hashKey(s) {
@@ -53,7 +55,7 @@ export class AudioEngine {
     this.caps = capsFor(level);
     this.volumes = { master: 1, music: 0.25, sfx: 0.5, voice: 0.8 };
     if (volumes) for (const k of ['master', 'music', 'sfx', 'voice']) if (volumes[k] !== undefined) this.volumes[k] = clampVolume(volumes[k], this.volumes[k]);
-    this.listener = { x: 0, z: 0, zoom: 1, rightX: 1, rightZ: 0 };
+    this.listener = { x: 0, z: 0, zoom: 1, rightX: 1, rightZ: 0, viewProj: null, bounds: null };
 
     // --- mixer: barramentos -> mestre -> limitador -> saída
     this.master = ctx.createGain();
@@ -86,6 +88,9 @@ export class AudioEngine {
     this.ambience = new AmbiencePlayer({ ctx, out: this.ambienceBus, noise: this.noise, rng: this.rng });
     this.director = new MusicDirector();
     this.match = null; // { faction, tilesetId }
+    this.musicSeed = seed >>> 0; // semente das variações de música (determinística, fora da sim)
+    this._musicSerial = 0; // quantas faixas já começaram (entra no sorteio da variação)
+    this._lastVariant = {}; // família -> última variação tocada (nunca repete em seguida)
     this.musicOn = !!musicOn; // preferência do jogador (música ligada)
     this.musicHold = false; // silêncio temporário (cutscene/missão)
     this.sceneProbe = null; // () => ({ timeOfDay, dayNight }) para a ambiência noturna
@@ -131,6 +136,8 @@ export class AudioEngine {
     const L = this.listener;
     L.x = l.x; L.z = l.z; L.zoom = l.zoom;
     L.rightX = l.rightX ?? 1; L.rightZ = l.rightZ ?? 0;
+    L.viewProj = l.viewProj ?? null; // projeção × visão da câmera (recorte pela cena visível)
+    L.bounds = l.bounds ?? null;
   }
 
   /** Muda o nível (preset/`?audio=`): teto de vozes, ambiência e música leve; 'off' cala tudo. */
@@ -164,7 +171,7 @@ export class AudioEngine {
     let gain = opts.gain ?? 1;
     let pan = 0;
     if (opts.pos && this.caps.positional) {
-      const m = positionalMix(this.listener, opts.pos);
+      const m = positionalMix(this.listener, opts.pos, opts.margin);
       if (!m.audible) { this.counters.culled++; return false; }
       gain *= m.gain;
       pan = this.caps.pan ? m.pan : 0;
@@ -344,7 +351,19 @@ export class AudioEngine {
       return;
     }
     const id = trackIdFor(this.match ? this.match.faction : MENU_FACTION, this.director.state);
-    this.music.play(id, { fade: this.music.playing ? 2.5 : 1.2 });
+    if (this.music.currentId === id) return; // mesma família: segue na variação atual (o rodízio é à parte)
+    this._startMusic(id, false);
+  }
+
+  /** Começa a família `id` numa variação escolhida de forma determinística (semente + família + contador). */
+  _startMusic(id, force) {
+    const variant = pickVariant(this.musicSeed, id, this._musicSerial++, this._lastVariant[id] ?? -1);
+    if (this.music.play(id, { fade: this.music.playing ? 2.5 : 1.2, variant, force })) this._lastVariant[id] = this.music.currentVariant;
+  }
+
+  /** Rodízio: depois de algumas voltas da mesma variação, troca por outra da mesma família (variedade em partidas longas). */
+  _rotateMusic() {
+    if (this.music.playing && this.music.loopsPlayed() >= ROTATE_AFTER_LOOPS) this._startMusic(this.music.currentId, true);
   }
 
   _applyAmbience(force = false) {
@@ -368,6 +387,7 @@ export class AudioEngine {
       const before = this.director.state;
       if (this.match) this.director.update(now);
       if (this.director.state !== before || !this.music.playing) this._applyMusic();
+      else this._rotateMusic();
       this.music.tick();
     } else {
       this.music.tick(); // deixa a faixa que está saindo terminar o fade
@@ -389,7 +409,7 @@ export class AudioEngine {
       maxVoices: this.pool.max,
       counters: { ...this.counters },
       pool: { ...this.pool.stats, deniedByReason: { ...this.pool.stats.deniedByReason } },
-      music: { track: this.music.currentId, state: this.director.state, intensity: +this.director.level(now).toFixed(2), notes: this.music.stats.notes, switches: this.music.stats.switches, hold: this.musicHold },
+      music: { track: this.music.currentId, variant: this.music.currentVariant, state: this.director.state, intensity: +this.director.level(now).toFixed(2), notes: this.music.stats.notes, switches: this.music.stats.switches, hold: this.musicHold },
       ambience: this.ambience.active,
       speechCached: this._speechCache.size,
       limiterReductionDb: this.limiter.reduction

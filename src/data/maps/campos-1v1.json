@@ -1,8 +1,8 @@
 {
   "id": "campos-1v1",
   "name": "Campos Dourados",
-  "size": 160,
-  "playable": 152,
+  "size": 192,
+  "playable": 184,
   "tileset": "verdejante",
   "waterLevel": 0.5,
   "maxPlayers": 2,
@@ -53,6 +53,42 @@
           "z": -36.27,
           "rx": 15,
           "rz": 15
+        },
+        {
+          "x": 4,
+          "z": 67,
+          "rx": 18,
+          "rz": 18
+        },
+        {
+          "x": -4,
+          "z": -67,
+          "rx": 18,
+          "rz": 18
+        },
+        {
+          "x": 67,
+          "z": 4,
+          "rx": 18,
+          "rz": 18
+        },
+        {
+          "x": -67,
+          "z": -4,
+          "rx": 18,
+          "rz": 18
+        },
+        {
+          "x": -68,
+          "z": -68,
+          "rx": 18,
+          "rz": 18
+        },
+        {
+          "x": 68,
+          "z": 68,
+          "rx": 18,
+          "rz": 18
         }
       ],
       "bridges": [
@@ -83,6 +119,48 @@
           "x2": 36.27,
           "z2": -36.27,
           "width": 10
+        },
+        {
+          "x1": 38.18,
+          "z1": 38.18,
+          "x2": 4,
+          "z2": 67,
+          "width": 12
+        },
+        {
+          "x1": -38.18,
+          "z1": -38.18,
+          "x2": -4,
+          "z2": -67,
+          "width": 12
+        },
+        {
+          "x1": 38.18,
+          "z1": 38.18,
+          "x2": 67,
+          "z2": 4,
+          "width": 12
+        },
+        {
+          "x1": -38.18,
+          "z1": -38.18,
+          "x2": -67,
+          "z2": -4,
+          "width": 12
+        },
+        {
+          "x1": -38.18,
+          "z1": -38.18,
+          "x2": -68,
+          "z2": -68,
+          "width": 12
+        },
+        {
+          "x1": 38.18,
+          "z1": 38.18,
+          "x2": 68,
+          "z2": 68,
+          "width": 12
         }
       ]
     }
@@ -189,6 +267,160 @@
       "count": 7,
       "radius": 5.83,
       "species": "autumn"
+    },
+    {
+      "x": -58,
+      "z": -58,
+      "count": 14,
+      "radius": 8,
+      "species": "oak"
+    },
+    {
+      "x": 58,
+      "z": 58,
+      "count": 14,
+      "radius": 8,
+      "species": "oak"
+    },
+    {
+      "x": -58,
+      "z": -18,
+      "count": 17,
+      "radius": 8.5,
+      "species": "birch"
+    },
+    {
+      "x": 58,
+      "z": 18,
+      "count": 17,
+      "radius": 8.5,
+      "species": "birch"
+    },
+    {
+      "x": -18,
+      "z": -58,
+      "count": 16,
+      "radius": 9,
+      "species": "autumn"
+    },
+    {
+      "x": 18,
+      "z": 58,
+      "count": 16,
+      "radius": 9,
+      "species": "autumn"
+    },
+    {
+      "x": -66,
+      "z": -50,
+      "count": 15,
+      "radius": 7.5,
+      "species": "pine"
+    },
+    {
+      "x": 66,
+      "z": 50,
+      "count": 15,
+      "radius": 7.5,
+      "species": "pine"
+    },
+    {
+      "x": -50,
+      "z": -66,
+      "count": 14,
+      "radius": 8,
+      "species": "oak"
+    },
+    {
+      "x": 50,
+      "z": 66,
+      "count": 14,
+      "radius": 8,
+      "species": "oak"
+    },
+    {
+      "x": -50,
+      "z": -10,
+      "count": 17,
+      "radius": 8.5,
+      "species": "oak"
+    },
+    {
+      "x": 50,
+      "z": 10,
+      "count": 17,
+      "radius": 8.5,
+      "species": "oak"
+    },
+    {
+      "x": -10,
+      "z": -50,
+      "count": 16,
+      "radius": 9,
+      "species": "birch"
+    },
+    {
+      "x": 10,
+      "z": 50,
+      "count": 16,
+      "radius": 9,
+      "species": "birch"
+    },
+    {
+      "x": -70,
+      "z": -22,
+      "count": 15,
+      "radius": 7.5,
+      "species": "autumn"
+    },
+    {
+      "x": 70,
+      "z": 22,
+      "count": 15,
+      "radius": 7.5,
+      "species": "autumn"
+    },
+    {
+      "x": -22,
+      "z": -70,
+      "count": 14,
+      "radius": 8,
+      "species": "autumn"
+    },
+    {
+      "x": 22,
+      "z": 70,
+      "count": 14,
+      "radius": 8,
+      "species": "autumn"
+    },
+    {
+      "x": -66,
+      "z": -66,
+      "count": 17,
+      "radius": 8.5,
+      "species": "oak"
+    },
+    {
+      "x": 66,
+      "z": 66,
+      "count": 17,
+      "radius": 8.5,
+      "species": "oak"
+    },
+    {
+      "x": -66,
+      "z": -10,
+      "count": 16,
+      "radius": 9,
+      "species": "oak"
+    },
+    {
+      "x": 66,
+      "z": 10,
+      "count": 16,
+      "radius": 9,
+      "species": "oak"
     }
   ],
   "neutrals": [

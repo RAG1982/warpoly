@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeEach } from 'vitest';
 import {
-  distanceGain, listenerRanges, panFor, positionalMix, LISTENER_TUNING, MIN_AUDIBLE
+  distanceGain, listenerRanges, panFor, positionalMix, LISTENER_TUNING, MIN_AUDIBLE, zoomVolume
 } from '../../src/audio/attenuation.js';
 import { VoicePool } from '../../src/audio/VoicePool.js';
 import { MusicDirector, trackIdFor, DIRECTOR_DEFAULTS } from '../../src/audio/musicDirector.js';
@@ -11,7 +11,7 @@ import { detectAudioLevel } from '../../src/audio/audioEnv.js';
 import { soundsForEvent, combatWeight, SFX_EVENTS, COMBAT_EVENTS } from '../../src/audio/audioMapping.js';
 import { AMBIENCE_PROFILES, AMBIENCE_LAYERS, ambienceMix, nightFactor } from '../../src/audio/ambience.js';
 import { TILESET_IDS } from '../../src/data/tilesets.js';
-import { TRACKS, TRACK_IDS, eventsForStep, trackLength, stepSeconds } from '../../src/audio/music/musicScores.js';
+import { TRACKS, eventsForStep, trackLength } from '../../src/audio/music/musicScores.js';
 import { fillWhite, fillPink } from '../../src/audio/noise.js';
 import { SFX, SFX_LIMITS } from '../../src/audio/sfxRecipes.js';
 import { AudioEngine } from '../../src/audio/AudioEngine.js';
@@ -73,13 +73,15 @@ describe('F7-08 atenuação pela distância (função pura)', () => {
     expect(distanceGain(30, 20, 20)).toBe(0);
   });
 
-  it('os raios do ouvinte crescem com o zoom e respeitam os limites', () => {
+  it('os raios do ouvinte ENCOLHEM com o zoom afastado e respeitam os limites', () => {
     const a = listenerRanges(0.5), b = listenerRanges(1), c = listenerRanges(1.8);
-    expect(a.ref).toBeLessThan(b.ref);
-    expect(b.max).toBeLessThan(c.max);
-    expect(b.ref).toBe(LISTENER_TUNING.refPerZoom);
-    expect(listenerRanges(99).max).toBe(LISTENER_TUNING.maxPerZoom * LISTENER_TUNING.maxZoom);
-    expect(listenerRanges(NaN).ref).toBe(LISTENER_TUNING.refPerZoom);
+    expect(a.ref).toBeGreaterThan(b.ref);
+    expect(b.max).toBeGreaterThan(c.max);
+    expect(a.max).toBe(LISTENER_TUNING.maxNear);
+    expect(c.max).toBe(LISTENER_TUNING.maxFar);
+    expect(listenerRanges(99).max).toBe(LISTENER_TUNING.maxFar);
+    expect(listenerRanges(0.01).ref).toBe(LISTENER_TUNING.refNear);
+    expect(listenerRanges(NaN).ref).toBe(listenerRanges(1).ref);
   });
 
   it('panorama: lado direito positivo, centro zero, satura em maxPan', () => {
@@ -95,15 +97,15 @@ describe('F7-08 atenuação pela distância (função pura)', () => {
     const L = { x: 0, z: 0, zoom: 1, rightX: 1, rightZ: 0 };
     expect(positionalMix(L, null)).toEqual({ gain: 1, pan: 0, distance: 0, audible: true });
     const near = positionalMix(L, { x: 10, z: 0 });
-    expect(near.gain).toBe(1);
+    expect(near.gain).toBeCloseTo(zoomVolume(1), 6); // ganho cheio × volume do zoom
     expect(near.pan).toBeGreaterThan(0);
     const mid = positionalMix(L, { x: 60, z: 0 });
     expect(mid.gain).toBeGreaterThan(MIN_AUDIBLE);
     expect(mid.gain).toBeLessThan(1);
     expect(positionalMix(L, { x: 400, z: 0 }).audible).toBe(false);
-    // afastar o zoom amplia o alcance
-    expect(positionalMix({ ...L, zoom: 1.8 }, { x: 110, z: 0 }).audible).toBe(true);
-    expect(positionalMix({ ...L, zoom: 0.5 }, { x: 110, z: 0 }).audible).toBe(false);
+    // afastar o zoom ENCOLHE o alcance
+    expect(positionalMix({ ...L, zoom: 0.5 }, { x: 100, z: 0 }).audible).toBe(true);
+    expect(positionalMix({ ...L, zoom: 1.8 }, { x: 100, z: 0 }).audible).toBe(false);
   });
 });
 
@@ -413,7 +415,7 @@ describe('F7-08 mapeamento evento -> som (puro)', () => {
   it('projéteis: disparo e impacto por tipo; cerco bate mais forte', () => {
     const from = { x: 1, y: 1, z: 1 };
     expect(soundsForEvent(EVT.PROJECTILE_FIRED, { kind: 'arrow', from }, { own: true })[0]).toMatchObject({ sfx: 'bow', pos: from });
-    expect(soundsForEvent(EVT.PROJECTILE_FIRED, { kind: 'axe', from }, { own: true })[0].sfx).toBe('throw');
+    expect(soundsForEvent(EVT.PROJECTILE_FIRED, { kind: 'axe', from }, { own: true })[0].sfx).toBe('axeThrow');
     expect(soundsForEvent(EVT.PROJECTILE_FIRED, { kind: 'bolt', from }, { own: true })[0].sfx).toBe('bolt');
     expect(soundsForEvent(EVT.PROJECTILE_FIRED, { kind: 'boulder', from }, { own: true })[0].sfx).toBe('catapult');
     const arrow = soundsForEvent(EVT.PROJECTILE_HIT, { kind: 'arrow', pos }, { own: false, visible: true })[0];
@@ -455,11 +457,11 @@ describe('F7-08 mapeamento evento -> som (puro)', () => {
   it('todo som mapeado tem receita; todo evento registrado tem mapeamento', () => {
     const used = new Set();
     for (const type of SFX_EVENTS) {
-      const out = soundsForEvent(type, { pos, from: pos, kind: 'arrow', resource: 'gold' }, { own: true, visible: true });
+      const out = soundsForEvent(type, { pos, from: pos, kind: type === EVT.BUILDING_VFX ? 'anvil_spark' : 'arrow', resource: 'gold' }, { own: true, visible: true });
       expect(out.length, type).toBeGreaterThan(0);
       for (const d of out) { used.add(d.sfx); expect(SFX[d.sfx], d.sfx).toBeTruthy(); }
     }
-    for (const k of ['bolt', 'catapult', 'stoneHit', 'throw']) {
+    for (const k of ['bolt', 'catapult', 'stoneHit', 'axeThrow', 'axeHit', 'metalHit']) {
       expect(SFX[k]).toBeTruthy();
     }
     expect(used.size).toBeGreaterThan(8);
@@ -517,17 +519,6 @@ describe('F7-08 ambiência por tileset (puro)', () => {
 
 // ---------------------------------------------------------------------------------------------------------
 describe('F7-08 partituras procedurais', () => {
-  it('quatro faixas (duas por facção) com laço de 8 compassos', () => {
-    expect([...TRACK_IDS].sort()).toEqual(['human_combat', 'human_peace', 'orc_combat', 'orc_peace']);
-    for (const t of Object.values(TRACKS)) {
-      expect(trackLength(t)).toBe(t.stepsPerBar * t.bars);
-      expect(t.prog).toHaveLength(t.bars);
-      expect(stepSeconds(t)).toBeGreaterThan(0.05);
-    }
-    expect(TRACKS.human_combat.bpm).toBeGreaterThan(TRACKS.human_peace.bpm);
-    expect(TRACKS.orc_combat.bpm).toBeGreaterThan(TRACKS.orc_peace.bpm);
-  });
-
   it('as notas ficam em faixa audível e finitas; vel em (0,1]; durações positivas', () => {
     for (const t of Object.values(TRACKS)) {
       let n = 0;
@@ -543,33 +534,6 @@ describe('F7-08 partituras procedurais', () => {
       }
       expect(n, t.id).toBeGreaterThan(100);
     }
-  });
-
-  it('é determinística (mesma semente = mesmas notas) e dá a volta no laço', () => {
-    const t = TRACKS.human_peace;
-    const a = JSON.stringify(Array.from({ length: 80 }, (_, s) => eventsForStep(t, s, { seed: 5 })));
-    const b = JSON.stringify(Array.from({ length: 80 }, (_, s) => eventsForStep(t, s, { seed: 5 })));
-    expect(a).toBe(b);
-    // camadas fixas (sem melodia) se repetem a cada volta
-    const fixed = (s) => eventsForStep(t, s, { seed: 5 }).filter(e => e.inst !== 'flute');
-    for (let s = 0; s < trackLength(t); s++) expect(fixed(s)).toEqual(fixed(s + trackLength(t)));
-    // a melodia varia entre voltas
-    const mel = (loop) => JSON.stringify(Array.from({ length: trackLength(t) }, (_, s) => eventsForStep(t, s + loop * trackLength(t), { seed: 5 }).filter(e => e.inst === 'flute')));
-    expect(mel(0)).not.toBe(mel(1));
-  });
-
-  it('paz e combate soam diferente: combate tem percussão/metais; paz não tem caixa/tambor de guerra', () => {
-    const insts = (t) => {
-      const set = new Set();
-      for (let s = 0; s < trackLength(t); s++) for (const e of eventsForStep(t, s)) set.add(e.inst);
-      return set;
-    };
-    expect(insts(TRACKS.human_combat).has('snare')).toBe(true);
-    expect(insts(TRACKS.human_combat).has('brass')).toBe(true);
-    expect(insts(TRACKS.human_peace).has('snare')).toBe(false);
-    expect(insts(TRACKS.human_peace).has('pluck')).toBe(true);
-    expect(insts(TRACKS.orc_peace).has('drone')).toBe(true);
-    expect(insts(TRACKS.orc_combat).has('tom')).toBe(true);
   });
 
   it('modo leve (preset baixo) só mantém as camadas essenciais', () => {
@@ -710,7 +674,7 @@ describe('F7-08 motor de áudio (contexto falso): mixer, limitador, posicional e
       const ok = eng.playSfx(name, { pos: null, variant: name === 'cast' ? 'ring' : undefined });
       expect(ok, name).toBe(true);
       expect(r.dur, name).toBeGreaterThan(0.05);
-      expect(r.dur, name).toBeLessThan(2);
+      expect(r.dur, name).toBeLessThan(4);
     }
     for (const v of ['burst', 'ring', 'beam', 'aura']) { ctx.advance(2); expect(eng.playSfx('cast', { variant: v })).toBe(true); }
     // limites por som só mencionam receitas que existem

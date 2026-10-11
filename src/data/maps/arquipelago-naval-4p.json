@@ -1,8 +1,8 @@
 {
   "id": "arquipelago-naval-4p",
   "name": "Arquipélago",
-  "size": 192,
-  "playable": 184,
+  "size": 224,
+  "playable": 216,
   "tileset": "ilhas",
   "waterLevel": 0.5,
   "maxPlayers": 4,
@@ -77,6 +77,54 @@
           "z": -17.09,
           "rx": 13,
           "rz": 13
+        },
+        {
+          "x": -78,
+          "z": -30,
+          "rx": 18,
+          "rz": 18
+        },
+        {
+          "x": 78,
+          "z": 30,
+          "rx": 18,
+          "rz": 18
+        },
+        {
+          "x": 78,
+          "z": -30,
+          "rx": 18,
+          "rz": 18
+        },
+        {
+          "x": -78,
+          "z": 30,
+          "rx": 18,
+          "rz": 18
+        },
+        {
+          "x": -30,
+          "z": -78,
+          "rx": 18,
+          "rz": 18
+        },
+        {
+          "x": 30,
+          "z": 78,
+          "rx": 18,
+          "rz": 18
+        },
+        {
+          "x": 30,
+          "z": -78,
+          "rx": 18,
+          "rz": 18
+        },
+        {
+          "x": -30,
+          "z": 78,
+          "rx": 18,
+          "rz": 18
         }
       ],
       "bridges": [
@@ -107,6 +155,62 @@
           "x2": 45.96,
           "z2": -45.96,
           "width": 8
+        },
+        {
+          "x1": -45.96,
+          "z1": -45.96,
+          "x2": -78,
+          "z2": -30,
+          "width": 12
+        },
+        {
+          "x1": 45.96,
+          "z1": 45.96,
+          "x2": 78,
+          "z2": 30,
+          "width": 12
+        },
+        {
+          "x1": 45.96,
+          "z1": -45.96,
+          "x2": 78,
+          "z2": -30,
+          "width": 12
+        },
+        {
+          "x1": -45.96,
+          "z1": 45.96,
+          "x2": -78,
+          "z2": 30,
+          "width": 12
+        },
+        {
+          "x1": -45.96,
+          "z1": -45.96,
+          "x2": -30,
+          "z2": -78,
+          "width": 12
+        },
+        {
+          "x1": 45.96,
+          "z1": 45.96,
+          "x2": 30,
+          "z2": 78,
+          "width": 12
+        },
+        {
+          "x1": 45.96,
+          "z1": -45.96,
+          "x2": 30,
+          "z2": -78,
+          "width": 12
+        },
+        {
+          "x1": -45.96,
+          "z1": 45.96,
+          "x2": -30,
+          "z2": 78,
+          "width": 12
         }
       ]
     }
@@ -321,6 +425,342 @@
       "count": 7,
       "radius": 5.76,
       "species": "autumn"
+    },
+    {
+      "x": -66,
+      "z": -26,
+      "count": 14,
+      "radius": 8,
+      "species": "oak"
+    },
+    {
+      "x": 66,
+      "z": 26,
+      "count": 14,
+      "radius": 8,
+      "species": "oak"
+    },
+    {
+      "x": 66,
+      "z": -26,
+      "count": 14,
+      "radius": 8,
+      "species": "oak"
+    },
+    {
+      "x": -66,
+      "z": 26,
+      "count": 14,
+      "radius": 8,
+      "species": "oak"
+    },
+    {
+      "x": -26,
+      "z": -66,
+      "count": 14,
+      "radius": 8,
+      "species": "oak"
+    },
+    {
+      "x": 26,
+      "z": 66,
+      "count": 14,
+      "radius": 8,
+      "species": "oak"
+    },
+    {
+      "x": 26,
+      "z": -66,
+      "count": 14,
+      "radius": 8,
+      "species": "oak"
+    },
+    {
+      "x": -26,
+      "z": 66,
+      "count": 14,
+      "radius": 8,
+      "species": "oak"
+    },
+    {
+      "x": -76,
+      "z": -42,
+      "count": 17,
+      "radius": 8.5,
+      "species": "birch"
+    },
+    {
+      "x": 76,
+      "z": 42,
+      "count": 17,
+      "radius": 8.5,
+      "species": "birch"
+    },
+    {
+      "x": 76,
+      "z": -42,
+      "count": 17,
+      "radius": 8.5,
+      "species": "birch"
+    },
+    {
+      "x": -76,
+      "z": 42,
+      "count": 17,
+      "radius": 8.5,
+      "species": "birch"
+    },
+    {
+      "x": -42,
+      "z": -76,
+      "count": 17,
+      "radius": 8.5,
+      "species": "birch"
+    },
+    {
+      "x": 42,
+      "z": 76,
+      "count": 17,
+      "radius": 8.5,
+      "species": "birch"
+    },
+    {
+      "x": 42,
+      "z": -76,
+      "count": 17,
+      "radius": 8.5,
+      "species": "birch"
+    },
+    {
+      "x": -42,
+      "z": 76,
+      "count": 17,
+      "radius": 8.5,
+      "species": "birch"
+    },
+    {
+      "x": -78,
+      "z": -28,
+      "count": 16,
+      "radius": 9,
+      "species": "autumn"
+    },
+    {
+      "x": 78,
+      "z": 28,
+      "count": 16,
+      "radius": 9,
+      "species": "autumn"
+    },
+    {
+      "x": 78,
+      "z": -28,
+      "count": 16,
+      "radius": 9,
+      "species": "autumn"
+    },
+    {
+      "x": -78,
+      "z": 28,
+      "count": 16,
+      "radius": 9,
+      "species": "autumn"
+    },
+    {
+      "x": -28,
+      "z": -78,
+      "count": 16,
+      "radius": 9,
+      "species": "autumn"
+    },
+    {
+      "x": 28,
+      "z": 78,
+      "count": 16,
+      "radius": 9,
+      "species": "autumn"
+    },
+    {
+      "x": 28,
+      "z": -78,
+      "count": 16,
+      "radius": 9,
+      "species": "autumn"
+    },
+    {
+      "x": -28,
+      "z": 78,
+      "count": 16,
+      "radius": 9,
+      "species": "autumn"
+    },
+    {
+      "x": -86,
+      "z": -36,
+      "count": 15,
+      "radius": 7.5,
+      "species": "pine"
+    },
+    {
+      "x": 86,
+      "z": 36,
+      "count": 15,
+      "radius": 7.5,
+      "species": "pine"
+    },
+    {
+      "x": 86,
+      "z": -36,
+      "count": 15,
+      "radius": 7.5,
+      "species": "pine"
+    },
+    {
+      "x": -86,
+      "z": 36,
+      "count": 15,
+      "radius": 7.5,
+      "species": "pine"
+    },
+    {
+      "x": -36,
+      "z": -86,
+      "count": 15,
+      "radius": 7.5,
+      "species": "pine"
+    },
+    {
+      "x": 36,
+      "z": 86,
+      "count": 15,
+      "radius": 7.5,
+      "species": "pine"
+    },
+    {
+      "x": 36,
+      "z": -86,
+      "count": 15,
+      "radius": 7.5,
+      "species": "pine"
+    },
+    {
+      "x": -36,
+      "z": 86,
+      "count": 15,
+      "radius": 7.5,
+      "species": "pine"
+    },
+    {
+      "x": -78,
+      "z": -14,
+      "count": 14,
+      "radius": 8,
+      "species": "oak"
+    },
+    {
+      "x": 78,
+      "z": 14,
+      "count": 14,
+      "radius": 8,
+      "species": "oak"
+    },
+    {
+      "x": 78,
+      "z": -14,
+      "count": 14,
+      "radius": 8,
+      "species": "oak"
+    },
+    {
+      "x": -78,
+      "z": 14,
+      "count": 14,
+      "radius": 8,
+      "species": "oak"
+    },
+    {
+      "x": -14,
+      "z": -78,
+      "count": 14,
+      "radius": 8,
+      "species": "oak"
+    },
+    {
+      "x": 14,
+      "z": 78,
+      "count": 14,
+      "radius": 8,
+      "species": "oak"
+    },
+    {
+      "x": 14,
+      "z": -78,
+      "count": 14,
+      "radius": 8,
+      "species": "oak"
+    },
+    {
+      "x": -14,
+      "z": 78,
+      "count": 14,
+      "radius": 8,
+      "species": "oak"
+    },
+    {
+      "x": -88,
+      "z": -22,
+      "count": 17,
+      "radius": 8.5,
+      "species": "oak"
+    },
+    {
+      "x": 88,
+      "z": 22,
+      "count": 17,
+      "radius": 8.5,
+      "species": "oak"
+    },
+    {
+      "x": 88,
+      "z": -22,
+      "count": 17,
+      "radius": 8.5,
+      "species": "oak"
+    },
+    {
+      "x": -88,
+      "z": 22,
+      "count": 17,
+      "radius": 8.5,
+      "species": "oak"
+    },
+    {
+      "x": -22,
+      "z": -88,
+      "count": 17,
+      "radius": 8.5,
+      "species": "oak"
+    },
+    {
+      "x": 22,
+      "z": 88,
+      "count": 17,
+      "radius": 8.5,
+      "species": "oak"
+    },
+    {
+      "x": 22,
+      "z": -88,
+      "count": 17,
+      "radius": 8.5,
+      "species": "oak"
+    },
+    {
+      "x": -22,
+      "z": 88,
+      "count": 17,
+      "radius": 8.5,
+      "species": "oak"
     }
   ],
   "neutrals": [

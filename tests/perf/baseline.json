@@ -1,0 +1,71 @@
+{
+  "version": 1,
+  "createdAt": "2026-10-09T12:06:06.468Z",
+  "commit": "475f874",
+  "base": "d769cd7",
+  "manifest": {
+    "mode": "gpu",
+    "chromium": "153.0.8010.12",
+    "playwright": "1.63.0",
+    "gpu": {
+      "renderer": "ANGLE (AMD, Vulkan 1.4.318 (AMD Radeon RX 7600 XT (RADV NAVI33) (0x00007480)), radv)",
+      "hardware": true
+    },
+    "cpu": "Intel(R) Xeon(R) CPU E5-2680 v4 @ 2.40GHz",
+    "cores": 28,
+    "memGB": 31,
+    "os": "linux 6.17.0-40-generic x64",
+    "node": "v22.23.3",
+    "headless": true,
+    "viewport": [
+      1280,
+      720
+    ],
+    "runs": 3,
+    "protocol": "build de produção + vite preview; ?bench=<cenário>&quality=high&texq=low; draw calls com a sim congelada 6 passos após montar o cenário (mediana); FPS ao vivo 2+10 s (melhor); load sem skipPreload (menor)"
+  },
+  "scenarios": {
+    "inicial": {
+      "drawCalls": 615,
+      "fps": 176.5
+    },
+    "combate100": {
+      "drawCalls": 2875,
+      "fps": 57
+    }
+  },
+  "load": {
+    "ms": 3094
+  },
+  "bundle": {
+    "mainJsBytes": 400484,
+    "mainJsGzipBytes": 117395,
+    "initialJsBytes": 2309248,
+    "initialJsGzipBytes": 618721,
+    "chunks": {
+      "Building": 17126,
+      "Decorations": 23059,
+      "FactionPreview": 2803,
+      "GameManager": 146505,
+      "LockstepSession": 23143,
+      "OnlineLobby": 8087,
+      "Terrain": 416,
+      "Transport": 266,
+      "TreeManager": 7851,
+      "UnitAnimator": 108575,
+      "WebRTCTransport": 6109,
+      "bench": 6373,
+      "editor": 31766,
+      "i18n": 95839,
+      "inspector": 96219,
+      "lobby": 3743,
+      "main": 400484,
+      "models-human": 703276,
+      "models-orc": 45619,
+      "modulepreload-polyfill": 670,
+      "netPoc": 2532,
+      "terrainPreview": 4037,
+      "three-vendor": 759828
+    }
+  }
+}

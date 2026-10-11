@@ -14,7 +14,11 @@
     },
     "hints": [
       { "pt-BR": "O Presa-Negra começa aliado, com IA própria.", "en": "The Blackfang start allied, with their own AI." },
-      { "pt-BR": "Visitar o forte deles revela sinais da traição, e rende uma vantagem.", "en": "Visiting their fort reveals signs of the betrayal, and earns an advantage." }
+      { "pt-BR": "Visitar o forte deles revela sinais da traição, e rende uma vantagem.", "en": "Visiting their fort reveals signs of the betrayal, and earns an advantage." },
+      { "pt-BR": "Dica: a Torre Arcana treina Magos Arcanos (Bola de Fogo e Lentidão são pesquisas dela). O Templo da Luz pesquisa a Ordenação: ela promove Cavaleiros a Templários, que curam aliados e usam Exorcismo contra mortos-vivos.", "en": "Tip: the Arcane Tower trains Arcane Mages (Fireball and Slow are researched there). The Temple of Light researches Ordination: it promotes Horsemen to Templars, who heal allies and use Exorcism against the undead." },
+      { "pt-BR": "Dica: o Aviário de Grifos treina Cavaleiros Grifos (voam sobre tudo; só arqueiros, magos e aéreos os acertam). O Planador de Engenho, da Oficina, é um batedor aéreo: não ataca, mas enxerga longe e revela invisíveis.", "en": "Tip: the Gryphon Aviary trains Gryphon Riders (they fly over everything; only archers, mages and fliers can hit them). The Engine Glider, from the Workshop, is an aerial scout: it does not attack, but sees far and reveals the invisible." },
+      { "pt-BR": "Dica: o Presa-Negra traz Necromantes, que erguem Esqueletos dos mortos. Mate os conjuradores primeiro.", "en": "Tip: the Blackfang field Necromancers, who raise Skeletons from the dead. Kill the casters first." },
+      { "pt-BR": "Dica: a Rainha elevou seu Paço a Castelo de Aldária: a Torre Arcana, o Templo e o Aviário já estão ao seu alcance.", "en": "Tip: the Queen raised your Palace to the Castle of Aldaria: the Arcane Tower, the Temple and the Aviary are within your reach." }
     ]
   },
   "mapId": "vales-2v2",
@@ -27,6 +31,7 @@
   "vars": { "betrayed": false, "suspicion": false },
 
   "setup": [
+    { "type": "setTier", "owner": "player", "tier": 3 },
     { "type": "tag", "select": { "buildingType": "great_hall", "owner": 1 }, "tag": "presa-hall" }
   ],
 
@@ -39,6 +44,20 @@
       "title": { "pt-BR": "Destruir o salão do Presa-Negra", "en": "Destroy the Blackfang hall" } },
     { "id": "barracks-two", "type": "build", "priority": "secondary", "buildingType": "barracks", "count": 2,
       "title": { "pt-BR": "Erguer 2 quartéis", "en": "Raise 2 barracks" } },
+    { "id": "mage-pair", "type": "flag", "priority": "secondary",
+      "condition": { "type": "count", "select": { "owner": "player", "unitType": "mage" }, "value": 2 },
+      "title": { "pt-BR": "Treinar 2 Magos Arcanos na Torre Arcana", "en": "Train 2 Arcane Mages at the Arcane Tower" } },
+    { "id": "aviary-built", "type": "build", "priority": "secondary", "buildingType": "aviary", "count": 1,
+      "title": { "pt-BR": "Erguer um Aviário de Grifos", "en": "Raise a Gryphon Aviary" } },
+    { "id": "scout-fort", "type": "flag", "priority": "secondary",
+      "condition": { "type": "area", "owner": "player", "area": { "x": -30, "z": 30, "r": 12 }, "unitType": "glider" },
+      "title": { "pt-BR": "Sobrevoar o forte do Presa-Negra com um Planador de Engenho", "en": "Fly an Engine Glider over the Blackfang fort" } },
+    { "id": "ordination", "type": "flag", "priority": "hidden",
+      "condition": { "type": "research", "owner": "player", "id": "cavalry_class" },
+      "title": { "pt-BR": "Receber a Ordenação no Templo da Luz", "en": "Receive Ordination at the Temple of Light" } },
+    { "id": "forged-two", "type": "flag", "priority": "hidden",
+      "condition": { "type": "research", "owner": "player", "id": "melee_weapons", "level": 2 },
+      "title": { "pt-BR": "Forjar o segundo nível de Armas Forjadas", "en": "Forge the second tier of Forged Weapons" } },
     { "id": "sign-of-betrayal", "type": "flag", "priority": "hidden",
       "condition": { "type": "area", "owner": "player", "area": { "x": -30, "z": 30, "r": 12 } },
       "title": { "pt-BR": "Descobrir os sinais da traição", "en": "Discover the signs of betrayal" } }
@@ -57,8 +76,34 @@
     { "id": "signs", "when": { "type": "objective", "id": "sign-of-betrayal", "status": "completed" },
       "actions": [
         { "type": "setVar", "name": "suspicion", "value": true },
-        { "type": "spawn", "owner": "player", "units": [{ "type": "knight", "count": 3 }, { "type": "ballista", "count": 1 }], "x": 28, "z": 28 },
-        { "type": "dialog", "speaker": { "pt-BR": "Capitã Lyra", "en": "Captain Lyra" }, "portrait": "🏹", "text": { "pt-BR": "Armas empilhadas e tropas em formação. Eles vão nos trair. Chamei reforços: três cavaleiros e uma balista.", "en": "Stacked arms and troops forming up. They will betray us. I called for reinforcements: three knights and a ballista." } }
+        { "type": "spawn", "owner": "player", "units": [{ "type": "hero_oren", "count": 1 }, { "type": "knight", "count": 3 }, { "type": "ballista", "count": 1 }], "x": 28, "z": 28 },
+        { "type": "dialog", "speaker": { "pt-BR": "Capitã Lyra", "en": "Captain Lyra" }, "portrait": "🏹", "text": { "pt-BR": "Armas empilhadas e tropas em formação. Eles vão nos trair. Chamei reforços: o Mestre Arcano Oren, três espadachins e uma balista. Dica: Oren lança Seta Arcana em área e Restaurar cura aliados.", "en": "Stacked arms and troops forming up. They will betray us. I called for reinforcements: Arcane Master Oren, three swordsmen and a ballista. Tip: Oren casts Arcane Bolt over an area and Restore heals allies." } }
+      ] },
+    { "id": "scout-done", "when": { "type": "objective", "id": "scout-fort", "status": "completed" },
+      "actions": [
+        { "type": "reveal", "x": -32, "z": 32, "radius": 24 },
+        { "type": "giveResources", "owner": "player", "gold": 150 },
+        { "type": "message", "text": { "pt-BR": "O Planador viu o forte inteiro: +150 de ouro e a área foi revelada.", "en": "The Glider saw the whole fort: +150 gold and the area was revealed." } }
+      ] },
+    { "id": "mages-ready", "when": { "type": "objective", "id": "mage-pair", "status": "completed" },
+      "actions": [
+        { "type": "giveResources", "owner": "player", "gold": 200 },
+        { "type": "message", "text": { "pt-BR": "Dois Magos Arcanos treinados: +200 de ouro. Dica: pesquise Bola de Fogo e Lentidão na Torre Arcana.", "en": "Two Arcane Mages trained: +200 gold. Tip: research Fireball and Slow at the Arcane Tower." } }
+      ] },
+    { "id": "aviary-up", "when": { "type": "objective", "id": "aviary-built", "status": "completed" },
+      "actions": [
+        { "type": "spawn", "owner": "player", "unitType": "gryphon_rider", "count": 1, "x": 30, "z": 30 },
+        { "type": "message", "text": { "pt-BR": "Aviário pronto: um Cavaleiro Grifo se juntou a você. Ele voa por cima de rios e muros.", "en": "Aviary ready: a Gryphon Rider joined you. It flies over rivers and walls." } }
+      ] },
+    { "id": "ordained", "when": { "type": "objective", "id": "ordination", "status": "completed" },
+      "actions": [
+        { "type": "giveResources", "owner": "player", "gold": 300 },
+        { "type": "message", "text": { "pt-BR": "Ordenação concluída: seus Cavaleiros viram Templários. +300 de ouro. Dica: pesquise Cura e Exorcismo no Templo.", "en": "Ordination complete: your Horsemen become Templars. +300 gold. Tip: research Heal and Exorcism at the Temple." } }
+      ] },
+    { "id": "forged-two-done", "when": { "type": "objective", "id": "forged-two", "status": "completed" },
+      "actions": [
+        { "type": "giveResources", "owner": "player", "gold": 200 },
+        { "type": "message", "text": { "pt-BR": "Armas Forjadas no segundo nível: +200 de ouro.", "en": "Forged Weapons at the second tier: +200 gold." } }
       ] },
     { "id": "betray-by-time", "when": { "type": "time", "at": 330 },
       "actions": [
@@ -73,7 +118,8 @@
         { "type": "reveal", "x": -32, "z": 32, "radius": 24 },
         { "type": "sound", "id": "alarm" },
         { "type": "dialog", "speaker": { "pt-BR": "Chefe Brakka", "en": "Chief Brakka" }, "portrait": "🐗", "text": { "pt-BR": "A trégua acabou, humana! O Cinzal paga bem pelo seu vale!", "en": "The truce is over, human! The Cinzal pay well for your valley!" } },
-        { "type": "spawn", "owner": 1, "units": [{ "type": "grunt", "count": 4 }, { "type": "axethrower", "count": 3 }], "x": -26, "z": 26, "order": { "kind": "attackMove", "x": 26, "z": 26 } }
+        { "type": "spawn", "owner": 1, "units": [{ "type": "grunt", "count": 3 }, { "type": "axethrower", "count": 3 }, { "type": "ogre", "count": 1 }, { "type": "necromancer", "count": 2 }, { "type": "war_balloon", "count": 1 }], "x": -26, "z": 26, "order": { "kind": "attackMove", "x": 26, "z": 26 } },
+        { "type": "message", "text": { "pt-BR": "Dica: os Necromantes ressuscitam Esqueletos dos caídos; o Exorcismo (Templário) os destrói e o Mago Arcano os abate de longe.", "en": "Tip: the Necromancers raise Skeletons from the fallen; Exorcism (Templar) destroys them and the Arcane Mage cuts them down from afar." } }
       ] },
     { "id": "presa-dies", "when": { "type": "objective", "id": "raze-presa", "status": "completed" },
       "actions": [

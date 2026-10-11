@@ -14,7 +14,8 @@
     },
     "hints": [
       { "pt-BR": "Os cativos só se juntam a você quando uma tropa chega perto deles.", "en": "The captives join you only when a troop gets close to them." },
-      { "pt-BR": "Depois do resgate, uma patrulha do Cinzal sai atrás de vocês.", "en": "After the rescue, a Cinzal patrol comes after you." }
+      { "pt-BR": "Depois do resgate, uma patrulha do Cinzal sai atrás de vocês.", "en": "After the rescue, a Cinzal patrol comes after you." },
+      { "pt-BR": "Dica: a Ferraria Real (nova) pesquisa Armas Forjadas, e a Serraria pesquisa Flechas de Aço. Pesquisas valem para todas as tropas, para sempre.", "en": "Tip: the new Royal Smithy researches Forged Weapons, and the Sawmill researches Steel Arrows. Upgrades apply to every troop, for good." }
     ]
   },
   "mapId": "desfiladeiro-1v1",
@@ -44,6 +45,12 @@
       "title": { "pt-BR": "Derrotar a patrulha do Cinzal", "en": "Defeat the Cinzal patrol" } },
     { "id": "burn-camp", "type": "destroy", "priority": "secondary", "select": { "tag": "camp" },
       "title": { "pt-BR": "Derrubar o acampamento dos bandoleiros", "en": "Tear down the bandit camp" } },
+    { "id": "forged-arms", "type": "flag", "priority": "secondary",
+      "condition": { "type": "research", "owner": "player", "id": "melee_weapons" },
+      "title": { "pt-BR": "Pesquisar Armas Forjadas na Ferraria Real", "en": "Research Forged Weapons at the Royal Smithy" } },
+    { "id": "steel-arrows", "type": "flag", "priority": "hidden",
+      "condition": { "type": "research", "owner": "player", "id": "ranged_ammo" },
+      "title": { "pt-BR": "Pesquisar Flechas de Aço na Serraria", "en": "Research Steel Arrows at the Sawmill" } },
     { "id": "full-purse", "type": "flag", "priority": "hidden",
       "condition": { "type": "resource", "owner": "player", "resource": "gold", "op": ">=", "value": 700 },
       "title": { "pt-BR": "Encher o cofre (700 de ouro)", "en": "Fill the purse (700 gold)" } }
@@ -82,6 +89,16 @@
     { "id": "captive-lost", "when": { "all": [{ "type": "trigger", "id": "free" }, { "type": "dead", "select": { "tag": "captives" } }] },
       "actions": [
         { "type": "message", "text": { "pt-BR": "Um aldeão tombou. Proteja os demais!", "en": "A villager has fallen. Protect the rest!" } }
+      ] },
+    { "id": "arms-ready", "when": { "type": "objective", "id": "forged-arms", "status": "completed" },
+      "actions": [
+        { "type": "giveResources", "owner": "player", "gold": 150 },
+        { "type": "message", "text": { "pt-BR": "Armas Forjadas prontas: +150 de ouro do arsenal real.", "en": "Forged Weapons ready: +150 gold from the royal arsenal." } }
+      ] },
+    { "id": "arrows-ready", "when": { "type": "objective", "id": "steel-arrows", "status": "completed" },
+      "actions": [
+        { "type": "giveResources", "owner": "player", "gold": 100, "wood": 50 },
+        { "type": "message", "text": { "pt-BR": "Flechas de Aço prontas: +100 de ouro e +50 de madeira.", "en": "Steel Arrows ready: +100 gold and +50 wood." } }
       ] },
     { "id": "done", "when": { "type": "objective", "id": "bring-home", "status": "completed" },
       "actions": [

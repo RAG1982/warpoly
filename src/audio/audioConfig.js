@@ -12,22 +12,21 @@ export const AUDIO_LEVELS = Object.freeze(['off', 'low', 'med', 'high']);
 
 /**
  * Capacidades por nível.
- *  - maxVoices   efeitos simultâneos (música, ambiência e a fala atual não contam)
- *  - speech      falas de confirmação das unidades
+ *  - maxVoices   efeitos simultâneos (música e ambiência não contam)
  *  - music       'none' | 'lite' (só baixo, melodia e percussão) | 'full' (todas as camadas)
  *  - ambience    camadas de ambiência por tileset
  *  - positional  atenuação pela distância à câmera
  *  - pan         panorama estéreo por voz (um StereoPannerNode por efeito)
  */
 export const AUDIO_CAPS = Object.freeze({
-  off: Object.freeze({ maxVoices: 0, speech: false, music: 'none', ambience: false, positional: false, pan: false }),
-  low: Object.freeze({ maxVoices: 8, speech: true, music: 'lite', ambience: false, positional: true, pan: false }),
-  med: Object.freeze({ maxVoices: 14, speech: true, music: 'full', ambience: true, positional: true, pan: true }),
-  high: Object.freeze({ maxVoices: 24, speech: true, music: 'full', ambience: true, positional: true, pan: true })
+  off: Object.freeze({ maxVoices: 0, music: 'none', ambience: false, positional: false, pan: false }),
+  low: Object.freeze({ maxVoices: 8, music: 'lite', ambience: false, positional: true, pan: false }),
+  med: Object.freeze({ maxVoices: 14, music: 'full', ambience: true, positional: true, pan: true }),
+  high: Object.freeze({ maxVoices: 24, music: 'full', ambience: true, positional: true, pan: true })
 });
 
 /** Canais de volume que o jogador controla (mais o geral). */
-export const AUDIO_CHANNELS = Object.freeze(['music', 'sfx', 'voice']);
+export const AUDIO_CHANNELS = Object.freeze(['music', 'sfx']);
 
 /** `?audio=` → nível válido ou `null` (ausente/inválido = usa o preset). Aceita 0/1/off/on. */
 export function parseAudioParam(value) {

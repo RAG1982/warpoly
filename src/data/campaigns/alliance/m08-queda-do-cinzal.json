@@ -14,7 +14,10 @@
     },
     "hints": [
       { "pt-BR": "A Guarda Real é uma aliada controlada pela IA.", "en": "The Royal Guard is an AI-controlled ally." },
-      { "pt-BR": "Há dois magos cativos num acampamento ao norte: resgatá-los dá apoio mágico.", "en": "Two mages are held captive in a camp to the north: rescuing them grants magic support." }
+      { "pt-BR": "Há dois magos cativos num acampamento ao norte: resgatá-los dá apoio mágico.", "en": "Two mages are held captive in a camp to the north: rescuing them grants magic support." },
+      { "pt-BR": "Aos 7 minutos a Guarda Real traz dois heróis: o Capitão Brann (Grito de Guerra) e o Mestre Arcano Oren (Seta Arcana e Restaurar), além de dois Cavaleiros Grifos. Heróis são únicos: cuide deles.", "en": "At 7 minutes the Royal Guard brings two heroes: Captain Brann (War Cry) and Arcane Master Oren (Arcane Bolt and Restore), plus two Gryphon Riders. Heroes are unique: look after them." },
+      { "pt-BR": "Dica: os Lanças Quebradas guardam um Ninho das Serpes. Serpes de Guerra voam: Espadachins e Balistas não as alcançam; use Arqueiros, Magos, Grifos e suas magias (Bola de Fogo, Transmutação).", "en": "Tip: the Broken Spear guard a Serpent Nest. War Serpents fly: Swordsmen and Ballistae cannot reach them; use Archers, Mages, Gryphons and their spells (Fireball, Polymorph)." },
+      { "pt-BR": "Dica: tudo o que a campanha liberou está à sua disposição, inclusive o Patrulheiro (Treinamento de Patrulheiro, na Serraria) e as magias de Invisibilidade, Transmutação e Escudo de Chamas.", "en": "Tip: everything the campaign unlocked is at your disposal, including the Ranger (Ranger Training, at the Sawmill) and the Invisibility, Polymorph and Flame Shield spells." }
     ]
   },
   "mapId": "planalto-ffa-4p",
@@ -29,6 +32,9 @@
   "vars": { "skarn_slain": false, "waves": 0 },
 
   "setup": [
+    { "type": "setTier", "owner": "player", "tier": 3 },
+    { "type": "spawnBuilding", "owner": 3, "buildingType": "serpent_nest", "x": -30, "z": 34, "tag": "nest" },
+    { "type": "spawn", "owner": 3, "unitType": "war_serpent", "count": 2, "x": -30, "z": 34, "tag": "serpents", "guard": { "r": 12 } },
     { "type": "tag", "select": { "buildingType": "great_hall", "owner": 2 }, "tag": "hall-cinzal" },
     { "type": "tag", "select": { "buildingType": "great_hall", "owner": 3 }, "tag": "hall-lancas" },
     { "type": "spawn", "owner": 2, "unitType": "ogre", "count": 1, "x": -40, "z": -40, "tag": "skarn", "guard": true },
@@ -47,6 +53,12 @@
     { "id": "strong-army", "type": "flag", "priority": "secondary",
       "condition": { "type": "count", "select": { "owner": "player", "unitType": "knight" }, "value": 6 },
       "title": { "pt-BR": "Manter 6 cavaleiros vivos", "en": "Keep 6 knights alive" } },
+    { "id": "nest-fall", "type": "destroy", "priority": "secondary", "select": { "tag": "nest" },
+      "title": { "pt-BR": "Derrubar o Ninho das Serpes dos Lanças Quebradas", "en": "Tear down the Broken Spear Serpent Nest" },
+      "description": { "pt-BR": "As serpes voam: Grifos, Arqueiros e Magos as alcançam.", "en": "The serpents fly: Gryphons, Archers and Mages reach them." } },
+    { "id": "ranger-class", "type": "flag", "priority": "hidden",
+      "condition": { "type": "research", "owner": "player", "id": "ranged_class" },
+      "title": { "pt-BR": "Pesquisar o Treinamento de Patrulheiro", "en": "Research Ranger Training" } },
     { "id": "gold-hoard", "type": "collect", "priority": "hidden", "resource": "gold", "amount": 2000, "mode": "stock",
       "title": { "pt-BR": "Acumular 2000 de ouro", "en": "Hoard 2000 gold" } }
   ],
@@ -75,13 +87,23 @@
     { "id": "horde-wave", "once": false, "cooldown": 1, "when": { "type": "every", "seconds": 150, "start": 210 },
       "actions": [
         { "type": "incVar", "name": "waves", "by": 1 },
-        { "type": "spawn", "owner": 2, "units": [{ "type": "ogre", "count": 2 }, { "type": "grunt", "count": 4 }, { "type": "axethrower", "count": 2 }], "x": -30, "z": -30, "order": { "kind": "attackMove", "x": 38, "z": 38 } },
+        { "type": "spawn", "owner": 2, "units": [{ "type": "ogre", "count": 2 }, { "type": "grunt", "count": 4 }, { "type": "axethrower", "count": 2 }, { "type": "necromancer", "count": 1 }, { "type": "war_serpent", "count": 1 }], "x": -30, "z": -30, "order": { "kind": "attackMove", "x": 38, "z": 38 } },
         { "type": "message", "text": { "pt-BR": "Skarn lança outra onda de guerreiros!", "en": "Skarn throws another wave of warriors!" } }
       ] },
     { "id": "royal-guard", "when": { "type": "time", "at": 420 },
       "actions": [
-        { "type": "spawn", "owner": "player", "units": [{ "type": "knight", "count": 4 }, { "type": "ballista", "count": 2 }, { "type": "archer", "count": 4 }], "x": 36, "z": 36 },
-        { "type": "dialog", "speaker": { "pt-BR": "Capitã Lyra", "en": "Captain Lyra" }, "portrait": "🏹", "text": { "pt-BR": "A Guarda Real chega! Façam deste planalto o túmulo do Cinzal!", "en": "The Royal Guard arrives! Make this plateau the tomb of the Cinzal!" } }
+        { "type": "spawn", "owner": "player", "units": [{ "type": "hero_brann", "count": 1 }, { "type": "hero_oren", "count": 1 }, { "type": "gryphon_rider", "count": 2 }, { "type": "knight", "count": 4 }, { "type": "ballista", "count": 2 }, { "type": "archer", "count": 4 }], "x": 36, "z": 36 },
+        { "type": "dialog", "speaker": { "pt-BR": "Capitã Lyra", "en": "Captain Lyra" }, "portrait": "🏹", "text": { "pt-BR": "A Guarda Real chega, com Brann, Oren e dois Grifos! Façam deste planalto o túmulo do Cinzal!", "en": "The Royal Guard arrives, with Brann, Oren and two Gryphons! Make this plateau the tomb of the Cinzal!" } }
+      ] },
+    { "id": "nest-down", "when": { "type": "objective", "id": "nest-fall", "status": "completed" },
+      "actions": [
+        { "type": "giveResources", "owner": "player", "gold": 300 },
+        { "type": "message", "text": { "pt-BR": "O Ninho das Serpes ruiu: +300 de ouro. Sem ninho, não nascem mais serpes.", "en": "The Serpent Nest has fallen: +300 gold. With no nest, no more serpents hatch." } }
+      ] },
+    { "id": "rangers-ready", "when": { "type": "objective", "id": "ranger-class", "status": "completed" },
+      "actions": [
+        { "type": "giveResources", "owner": "player", "gold": 200 },
+        { "type": "message", "text": { "pt-BR": "Seus Arqueiros viram Patrulheiros: mais vida e pontaria. +200 de ouro.", "en": "Your Archers become Rangers: more health and aim. +200 gold." } }
       ] },
     { "id": "skarn-falls", "when": { "type": "dead", "select": { "tag": "skarn" } },
       "actions": [

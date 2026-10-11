@@ -20,8 +20,6 @@ export const OPTION_DEFS = Object.freeze({
   volumeMaster: { key: 'warpoly.volMaster', def: 1, parse: (r) => { const n = num(r); return Number.isFinite(n) ? clamp(n, 0, 1) : undefined; } },
   volumeSfx: { key: 'warpoly.volSfx', def: 0.5, parse: (r) => { const n = num(r); return Number.isFinite(n) ? clamp(n, 0, 1) : undefined; } },
   volumeMusic: { key: 'warpoly.volMusic', def: 0.25, parse: (r) => { const n = num(r); return Number.isFinite(n) ? clamp(n, 0, 1) : undefined; } },
-  /** F7-08: falas de confirmação das unidades (canal próprio do mixer). */
-  volumeVoice: { key: 'warpoly.volVoice', def: 0.8, parse: (r) => { const n = num(r); return Number.isFinite(n) ? clamp(n, 0, 1) : undefined; } },
   panSpeed: { key: 'warpoly.panSpeed', def: 1, parse: (r) => { const n = num(r); return Number.isFinite(n) ? clamp(n, 0.5, 2) : undefined; } },
   edgePan: { key: 'warpoly.edgePan', def: true, parse: (r) => (r === '0' ? false : r === '1' ? true : undefined), format: (v) => (v ? '1' : '0') },
   uiScale: { key: 'warpoly.uiScale', def: 1, parse: (r) => { const n = num(r); return Number.isFinite(n) ? clamp(n, 0.75, 1.5) : undefined; } },
@@ -49,7 +47,7 @@ export const OPTION_DEFS = Object.freeze({
 
 /** Opções por aba (usado por "Restaurar padrão" de cada aba). */
 export const TAB_OPTIONS = Object.freeze({
-  audio: ['volumeMaster', 'volumeSfx', 'volumeMusic', 'volumeVoice'],
+  audio: ['volumeMaster', 'volumeSfx', 'volumeMusic'],
   controls: ['panSpeed', 'edgePan', 'keybinds'],
   interface: ['uiScale', 'colorblind'],
   game: ['defaultSpeed', 'floatingText', 'contextCursors']

@@ -14,7 +14,8 @@
     },
     "hints": [
       { "pt-BR": "As ondas vêm do leste e crescem a cada investida.", "en": "The waves come from the east and grow with each assault." },
-      { "pt-BR": "Torres de vigia (secundário) rendem um reforço de tropas.", "en": "Watchtowers (secondary) earn a troop reinforcement." }
+      { "pt-BR": "Torres de vigia (secundário) rendem um reforço de tropas.", "en": "Watchtowers (secondary) earn a troop reinforcement." },
+      { "pt-BR": "Dica: a Muralha de Pedra (arraste o mouse para traçar a linha) trava o avanço inimigo e deixa seus Arqueiros atirarem em paz. Na onda final vêm Incendiários, que explodem contra muros e torres: abata-os de longe.", "en": "Tip: the Stone Wall (drag the mouse to draw the line) stalls the enemy advance and lets your Archers shoot in peace. The final wave brings Arsonists, who blow up against walls and towers: pick them off from afar." }
     ]
   },
   "mapId": "estreito-1v1",
@@ -38,6 +39,11 @@
       "title": { "pt-BR": "Erguer 2 torres de vigia", "en": "Raise 2 watchtowers" } },
     { "id": "kill-twenty", "type": "destroy", "priority": "secondary", "select": { "unitType": "grunt", "killedBy": "player" }, "count": 12,
       "title": { "pt-BR": "Abater 12 guerreiros do Cinzal", "en": "Slay 12 Cinzal warriors" } },
+    { "id": "wall-line", "type": "build", "priority": "secondary", "buildingType": "wall_human", "count": 6,
+      "title": { "pt-BR": "Erguer 6 trechos de Muralha de Pedra", "en": "Raise 6 sections of Stone Wall" } },
+    { "id": "iron-shields", "type": "flag", "priority": "hidden",
+      "condition": { "type": "research", "owner": "player", "id": "melee_armor" },
+      "title": { "pt-BR": "Pesquisar Escudos Reforçados", "en": "Research Reinforced Shields" } },
     { "id": "no-losses", "type": "flag", "priority": "hidden",
       "condition": { "all": [{ "type": "objective", "id": "hold-line", "status": "completed" }, { "type": "var", "name": "waves", "op": ">=", "value": 6 }] },
       "title": { "pt-BR": "Aguentar todas as ondas", "en": "Withstand every wave" } }
@@ -66,7 +72,7 @@
       ] },
     { "id": "wave-3", "when": { "type": "var", "name": "waves", "op": ">=", "value": 5 },
       "actions": [
-        { "type": "spawn", "owner": "enemy", "units": [{ "type": "ogre", "count": 2 }, { "type": "axethrower", "count": 3 }, { "type": "grunt", "count": 3 }], "x": 24, "z": 10, "order": { "kind": "attackMove", "x": -24, "z": -12 } },
+        { "type": "spawn", "owner": "enemy", "units": [{ "type": "ogre", "count": 2 }, { "type": "axethrower", "count": 3 }, { "type": "grunt", "count": 3 }, { "type": "arsonist", "count": 2 }], "x": 24, "z": 10, "order": { "kind": "attackMove", "x": -24, "z": -12 } },
         { "type": "dialog", "speaker": { "pt-BR": "Vigia", "en": "Lookout" }, "portrait": "👁️", "text": { "pt-BR": "É a grande investida! Todos às muralhas!", "en": "It is the great assault! Everyone to the walls!" } }
       ] },
     { "id": "picket-release", "when": { "type": "var", "name": "waves", "op": ">=", "value": 5 },
@@ -82,6 +88,16 @@
       "actions": [
         { "type": "dialog", "speaker": { "pt-BR": "Rainha Sevelin", "en": "Queen Sevelin" }, "portrait": "👑", "text": { "pt-BR": "Metade do caminho. O Marechal já cruzou o Rio Claro!", "en": "Halfway. The Marshal has already crossed the Clear River!" } },
         { "type": "giveResources", "owner": "player", "gold": 200, "wood": 150 }
+      ] },
+    { "id": "walls-bonus", "when": { "type": "objective", "id": "wall-line", "status": "completed" },
+      "actions": [
+        { "type": "giveResources", "owner": "player", "gold": 100, "stone": 100 },
+        { "type": "message", "text": { "pt-BR": "Muralha de pé: +100 de ouro e +100 de pedra dos engenheiros.", "en": "Wall standing: +100 gold and +100 stone from the engineers." } }
+      ] },
+    { "id": "shields-ready", "when": { "type": "objective", "id": "iron-shields", "status": "completed" },
+      "actions": [
+        { "type": "giveResources", "owner": "player", "gold": 150 },
+        { "type": "message", "text": { "pt-BR": "Escudos Reforçados: seus Espadachins resistem mais. +150 de ouro.", "en": "Reinforced Shields: your Swordsmen hold longer. +150 gold." } }
       ] },
     { "id": "relieved", "when": { "type": "objective", "id": "hold-line", "status": "completed" },
       "actions": [

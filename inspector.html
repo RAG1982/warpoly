@@ -23,6 +23,7 @@
       </div>
 
       <div class="header-actions">
+        <button id="btn-music" class="gold-btn secondary" title="Player de músicas: ouvir as faixas e escolher quais tocam no jogo">🎵 Músicas</button>
         <button id="btn-fullscreen" class="gold-btn secondary" title="Alternar Modo Tela Cheia">⤢ Tela Cheia</button>
         <a href="/" class="gold-btn" title="Retornar para a Partida RTS">🎮 Voltar ao Jogo</a>
       </div>
@@ -223,6 +224,9 @@
         </div>
       </aside>
     </main>
+
+    <!-- Painel de músicas (player + seleção das faixas do jogo): montado por src/inspector/musicPanel.js -->
+    <section id="music-panel" class="music-panel" aria-label="Músicas" hidden></section>
 
     <!-- Toast Notification -->
     <div id="toast-msg">Mensagem</div>

@@ -251,6 +251,48 @@ export const SFX = {
       c.burst(0.18, 0.5, 0).connect(g);
     }
   },
+  // Derrotas por facção (catálogo de música): o Reino cai em lá menor, com um trompete que desce e se apaga; a Horda
+  // desaba em graves, trítono descendente e um último golpe de tambor.
+  defeatHuman: {
+    dur: 3.2,
+    priority: 6,
+    play(c) {
+      const g = c.gain(0); decay(g, c.t, 0.34, 0.001, 3.1);
+      const lp = c.filter('lowpass', 1500);
+      lp.connect(g);
+      // mi–ré–dó–si (descendo) e acorde final de lá menor, com a nota do trompete (dente de serra) mais longa
+      [[659.25, 0, 0.5], [587.33, 0.45, 0.5], [523.25, 0.9, 0.5], [493.88, 1.35, 0.7]].forEach(([f, d, len]) => {
+        const o = c.osc('sawtooth', f);
+        o.connect(lp);
+        o.start(c.t + d); o.stop(c.t + d + len);
+      });
+      [220.0, 261.63, 329.63].forEach((f) => {
+        const o = c.osc('triangle', f);
+        o.connect(lp);
+        o.start(c.t + 1.95); o.stop(c.t + 3.1);
+      });
+    }
+  },
+  defeatOrc: {
+    dur: 3.2,
+    priority: 6,
+    play(c) {
+      const g = c.gain(0); decay(g, c.t, 0.42, 0.001, 3.1);
+      const lp = c.filter('lowpass', 700);
+      lp.connect(g);
+      // lá–mi bemol (trítono) descendo e um bordão grave que cai de altura
+      [[220.0, 0, 0.9], [155.56, 0.8, 1.6]].forEach(([f, d, len]) => {
+        const o = c.osc('sawtooth', f);
+        o.connect(lp);
+        o.start(c.t + d); o.stop(c.t + d + len);
+      });
+      const drone = c.osc('square', 55);
+      sweep(drone, c.t + 1.2, 55, 36, 1.8);
+      drone.connect(lp);
+      drone.start(c.t + 1.2); drone.stop(c.t + 3.1);
+      c.burst(0.25, 0.6, 1.3).connect(g);
+    }
+  },
   defeat: {
     dur: 1.6,
     priority: 6,

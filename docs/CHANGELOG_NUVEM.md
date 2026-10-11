@@ -5,6 +5,9 @@
 
 ## Mesclado
 
+### Áudio
+- **cloud/remover-falas** (decisão do dono, 2026-10-11): removidas as falas sintetizadas das unidades (diretório `src/audio/speech/`, canal `volumeVoice` e slider das Opções, chaves i18n `opt.a.voice*`). Ficam os cliques de seleção/ordem, os efeitos e o `VoicePool`; o histórico da F7-08 abaixo cita as falas como eram. Configuração salva com `warpoly.volVoice` é ignorada.
+
 ### Jogabilidade e controles
 - **F3-01** controles RTS (grupos de controle, S/H/A/P, Shift, atalhos do card, borda, minimapa) e NEW-16 (população "5 / 10"): feitos localmente (`ee2fe9d`); o PR #6 da nuvem foi fechado como superado.
 - **NEW-35** `CMD.ATTACK_GROUND` (#19): o cerco ataca o chão; recua se o ponto estiver dentro do alcance mínimo.
@@ -24,7 +27,7 @@
 - **F10-04** orçamento de desempenho em CI (#28): `npm run perf`; baseline precisa ser regravada.
 
 ### Áudio
-- **F7-08** motor de áudio de produção (#29): mixer + limitador, posicional, vozes com prioridade, música adaptativa, ambiência, falas por formantes; pausa e fim de jogo integrados.
+- **F7-08** motor de áudio de produção (#29): mixer + limitador, posicional, vozes com prioridade, música adaptativa, ambiência (as falas foram removidas depois, ver "Áudio" acima); pausa e fim de jogo integrados.
 
 ### Qualidade e infraestrutura
 - Testes de idioma (6 falhas antigas): `navigator.language = pt-BR` no vitest (#23). Suíte: 1527 testes.

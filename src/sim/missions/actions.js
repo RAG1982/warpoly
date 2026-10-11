@@ -6,7 +6,8 @@
  */
 import { EVT } from '../events.js';
 import { RESOURCE_TYPES } from '../Player.js';
-import { isAlive, resolveOwnerId, selectEntities } from './selectors.js';
+import { HQ_TIER_HP } from '../../data/tiers.js';
+import { isAlive, resolveOwnerId, roleOf, selectEntities } from './selectors.js';
 
 /** Posição `i` de uma espiral de Fermat (ângulo áureo) ao redor do ponto — espalha spawns sem aleatoriedade. */
 export function ringOffset(i, spread = 1.8) {
@@ -90,6 +91,24 @@ const HANDLERS = {
     clearTreesAround(gm, b);
     if (a.tag) addTag(rt, a.tag, b.id);
     gm.recalculatePopCap(); // casas/castelos concedem população
+  },
+
+  /**
+   * F8-05b: eleva o(s) Centro(s) CONCLUÍDO(s) do dono ao nível `tier` (2 ou 3) na hora — a campanha concede o nível que a nova
+   * tecnologia exige (estábulo/oficina/estaleiro pedem nível 2; magos, aviário e couraçado, nível 3). Não rebaixa; PV na mesma proporção.
+   */
+  setTier(rt, a) {
+    const gm = rt.gm;
+    const owner = resolveOwnerId(gm, a.owner ?? 'player');
+    for (const b of gm.buildings) {
+      if (b.ownerId !== owner || !isAlive(b) || b.isConstructed === false || roleOf(b.type) !== 'hq' || (b.tier || 1) >= a.tier) continue;
+      const pct = b.maxHp > 0 ? b.hp / b.maxHp : 1;
+      b.tier = a.tier;
+      b.tierUpgrade = null;
+      b.maxHp = HQ_TIER_HP[a.tier] || b.maxHp;
+      b.hp = Math.min(b.maxHp, Math.round(b.maxHp * pct));
+      gm.events.emit(EVT.HQ_TIER_CHANGED, { buildingId: b.id, ownerId: b.ownerId, pos: { x: b.mesh.position.x, y: b.mesh.position.y, z: b.mesh.position.z }, tier: a.tier });
+    }
   },
 
   giveResources(rt, a) {

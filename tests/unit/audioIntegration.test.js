@@ -62,20 +62,16 @@ describe('F7-08 integração: pausa e fim de jogo', () => {
 });
 
 describe('F7-08 integração: opções, presets e i18n', () => {
-  it('volumes mestre/música/efeitos/voz valem ao vivo no SoundManager e no motor', () => {
+  it('volumes mestre/música/efeitos valem ao vivo no SoundManager e no motor', () => {
     const { sm } = mkSm();
     sm.resume();
     const store = mkStore();
     store.set('volumeMaster', 0.4);
     store.set('volumeMusic', 0.3);
     store.set('volumeSfx', 0.6);
-    store.set('volumeVoice', 0.2);
     applyAudio(sm, store);
-    expect(sm.volumes).toEqual({ master: 0.4, music: 0.3, sfx: 0.6, voice: 0.2 });
-    expect(sm.engine.volumes).toMatchObject({ master: 0.4, music: 0.3, sfx: 0.6, voice: 0.2 });
-    store.set('volumeVoice', 0);
-    applyAudio(sm, store);
-    expect(sm.canSpeak()).toBe(false);
+    expect(sm.volumes).toEqual({ master: 0.4, music: 0.3, sfx: 0.6 });
+    expect(sm.engine.volumes).toMatchObject({ master: 0.4, music: 0.3, sfx: 0.6 });
   });
 
   it('cada preset define o nível de áudio e o orçamento de vozes cresce com ele; trocar ao vivo reduz o teto', () => {
@@ -94,7 +90,7 @@ describe('F7-08 integração: opções, presets e i18n', () => {
   });
 
   it('i18n: as chaves de áudio existem em pt-BR e en', () => {
-    for (const k of ['opt.a.master', 'opt.a.masterHint', 'opt.a.music', 'opt.a.sfx', 'opt.a.voice', 'opt.a.voiceHint']) {
+    for (const k of ['opt.a.master', 'opt.a.masterHint', 'opt.a.music', 'opt.a.sfx']) {
       expect(ptBR[k], k).toBeTruthy();
       expect(en[k], k).toBeTruthy();
     }

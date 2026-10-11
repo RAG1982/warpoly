@@ -133,3 +133,35 @@ export function startingResourcesFor(missionDef, entry, completed) {
   }
   return base;
 }
+
+/**
+ * Plano da tela de fim de missão de campanha (puro). Decide quais botões fazem sentido.
+ * Vitória: a missão atual conta como concluída (o progresso já foi gravado, mas não dependemos disso). A "próxima" é a
+ * primeira missão DEPOIS da atual, na ordem da campanha, que esteja desbloqueada com esse progresso.
+ * @returns {{ inCampaign:boolean, outcome:string, nextMissionId:string|null, hasNext:boolean, isLastMission:boolean,
+ *   campaignComplete:boolean, carryOver:boolean }}
+ */
+export function campaignEndPlan(def, missionId, outcome, completed, opts = {}) {
+  const idx = def ? def.missions.findIndex((m) => m.id === missionId) : -1;
+  if (idx < 0) return { inCampaign: false, outcome, nextMissionId: null, hasNext: false, isLastMission: false, campaignComplete: false, carryOver: false };
+  const won = outcome === 'victory';
+  const keys = completed instanceof Set || completed instanceof Map ? [...completed.keys()] : Object.keys(completed || {});
+  const done = Object.fromEntries(keys.map((k) => [k, true]));
+  if (won) done[missionId] = true;
+  let nextMissionId = null;
+  if (won) {
+    for (let i = idx + 1; i < def.missions.length; i++) {
+      if (isUnlocked(def, def.missions[i].id, done, opts)) { nextMissionId = def.missions[i].id; break; }
+    }
+  }
+  const nextEntry = nextMissionId ? entryOf(def, nextMissionId) : null;
+  return {
+    inCampaign: true,
+    outcome,
+    nextMissionId,
+    hasNext: !!nextMissionId,
+    isLastMission: idx === def.missions.length - 1,
+    campaignComplete: won && isCampaignComplete(def, done),
+    carryOver: !!(nextEntry && nextEntry.carryOver && nextEntry.carryOver.resources)
+  };
+}

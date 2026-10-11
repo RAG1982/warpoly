@@ -4,7 +4,7 @@
 import { getCampaign } from '../data/campaigns/index.js';
 import { getMission, createMissionConfig } from '../data/missions/index.js';
 import { CampaignProgress } from './progress.js';
-import { isUnlocked } from './campaign.js';
+import { isUnlocked, campaignEndPlan } from './campaign.js';
 
 export * from './campaign.js';
 export { CampaignProgress, memoryStorage, PROGRESS_KEY } from './progress.js';
@@ -31,6 +31,26 @@ export function createCampaignMissionConfig(campaignId, missionId, { progress = 
   const cfg = createMissionConfig(mission, { lang, inline });
   cfg.startingResources = progress.startingResources(def, mission);
   return cfg;
+}
+
+/**
+ * Fluxo único de "iniciar missão de campanha" (botão da CampaignScreen e "Próxima missão" da tela final):
+ * monta o MatchConfig (com carry-over) e marca a execução ativa, cuja vitória é gravada por `onMissionEnded`.
+ */
+export function prepareCampaignMission(campaignId, missionId, { lang = 'pt-BR', unlockAll = false, progress = getProgress() } = {}) {
+  const config = createCampaignMissionConfig(campaignId, missionId, { lang, unlockAll, progress });
+  setActiveRun({ campaignId, missionId, unlockAll });
+  return config;
+}
+
+/** Plano da tela final da missão em curso (ou `null` se não é missão de campanha). */
+export function getCampaignEndPlan(missionId, outcome, progress = getProgress()) {
+  const run = activeRun;
+  if (!run || run.missionId !== missionId) return null;
+  const def = getCampaign(run.campaignId);
+  if (!def) return null;
+  const plan = campaignEndPlan(def, missionId, outcome, progress.completed(run.campaignId), { unlockAll: !!run.unlockAll });
+  return plan.inCampaign ? { ...plan, campaignId: run.campaignId } : null;
 }
 
 // ------------------------------------------------------------------ execução ativa (campanha em curso)

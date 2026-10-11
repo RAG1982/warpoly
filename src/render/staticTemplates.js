@@ -7,11 +7,11 @@ import { mergeStaticTemplate } from './mergeStaticTemplate.js';
  * flecha, seixos) NÃO são mesclados: unidades são animadas por partes pelo UnitAnimator (F1-03) e
  * árvores/grama/seixos do mapa já usam InstancedMesh.
  *
- * Levantamento dos nós acessados por nome (entities/buildings/**, Building.js, GLTFBuildingLoader):
+ * Levantamento dos nós acessados por nome (entities/buildings/**, Building.js):
  * - GreatHall.initCustomVFX: todo nó cujo nome contém "Banner" (gira os estandartes);
  * - OrcBarracks: `Anim_TrainingDummy` (pêndulo); OrcLumberMill: `Anim_SawBlade` (serra gira);
  * - HumanForge: filhos Cone dos grupos `FurnaceFlames` e `AnvilFlames` (chamas pulsam);
- * - GLTFBuildingLoader: prefixo `Anim_` (preservado por padrão em todos os tipos);
+ * - nós animados do .glb: prefixo `Anim_` (preservado por padrão em todos os tipos);
  * - OrcForge, OrcWatchtower, OrcHouse, PigFarm: VFX criados em tempo de execução sobre o clone
  *   (luzes, chamas, porcos) — nada do template é acessado por nome;
  * - BanditCamp: `userData.flame` (grupo de chamas com onBeforeRender) e `userData.fireLight`.

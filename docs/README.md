@@ -31,3 +31,7 @@ Backups: `~/warpoly_backups/warpoly_full_2026-09-28.tar.gz` e branch `backup/pre
 - Determinismo: `Math.random` vira PRNG com semente fixa em cada página; a prévia 3D do menu tem o laço de animação congelado no screenshot.
 - Exige GPU real (aborta em SwiftShader/llvmpipe via `tools/lib/assertGpu.mjs`). Codec PNG e comparador em `tools/lib/` (sem dependência nova); testes em `tests/unit/visualCompare.test.js`.
 - `tests/visual/baseline/manifest.json` registra Chromium e GPU da baseline; o script avisa se a GPU mudar. A baseline só vale para essa combinação GPU+Chromium.
+
+## Orçamento de desempenho (F10-04)
+
+`npm run perf` (`tools/perf-budget.mjs`, dentro do safe-run) mede draw calls, FPS, tempo de load e tamanho do bundle JS e compara com `tests/perf/baseline.json` (poucos KB, só números + manifesto de hardware/Chromium); sai com código 1 se qualquer métrica piorar mais de 10 %. Exige GPU real; `npm run perf -- --update` regrava a baseline. A CI (`.github/workflows/perf.yml`, sem GPU) roda `--ci`: só draw calls (determinísticos: `Math.random` semeado, preset fixo, sim congelada) e bundle — FPS e load saem como `null` com o motivo e são checados localmente. Protocolo, uso e como regravar a baseline: [10_DEPLOY](10_DEPLOY.md#orçamento-de-desempenho-f10-04).

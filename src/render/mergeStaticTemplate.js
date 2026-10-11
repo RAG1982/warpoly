@@ -11,7 +11,7 @@ import { mergeGeometries } from 'three/examples/jsm/utils/BufferGeometryUtils.js
  *
  * Ficam intactos (com toda a subárvore):
  * - nós listados em `keep` (nome exato, RegExp ou predicado) e nós cujo nome começa com um dos
- *   `keepPrefixes` (padrão `Anim_`, convenção do GLTFBuildingLoader);
+ *   `keepPrefixes` (padrão `Anim_`, convenção de nós animados no .glb);
  * - nós referenciados por `userData` de qualquer nó (referências de animação);
  * - nós com `onBeforeRender`/`onAfterRender` próprios (animação por callback);
  * - luzes, sprites, linhas, pontos, InstancedMesh, SkinnedMesh (não entram na mescla);

@@ -6,12 +6,23 @@ import { options } from './optionsStore.js';
 import { setBindings } from '../core/Hotkeys.js';
 import { applyUiScale } from './uiScale.js';
 
-/** Volume geral multiplica efeitos e música (`SoundManager.setSfxVolume/setMusicVolume`). */
+/**
+ * Mixer (F7-08): volume por canal — música, efeitos e falas — mais o geral, que é o ganho do barramento mestre
+ * (efetivo = canal × geral, como antes). Persistência: `optionsStore` (try/catch no storage).
+ */
 export function applyAudio(sound, store = options) {
   if (!sound) return;
-  const master = store.get('volumeMaster');
-  sound.setSfxVolume(store.get('volumeSfx') * master);
-  sound.setMusicVolume(store.get('volumeMusic') * master);
+  const v = {
+    master: store.get('volumeMaster'),
+    music: store.get('volumeMusic'),
+    sfx: store.get('volumeSfx'),
+    voice: store.get('volumeVoice')
+  };
+  if (typeof sound.setVolumes === 'function') sound.setVolumes(v);
+  else {
+    sound.setSfxVolume(v.sfx * v.master);
+    sound.setMusicVolume(v.music * v.master);
+  }
 }
 
 export function applyKeybinds(store = options) {

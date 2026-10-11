@@ -4,6 +4,7 @@ import { AIPerception } from './AIPerception.js';
 import { AIMicroManager } from './AIMicroManager.js';
 import { getAIProfile } from './AIProfile.js';
 import { pickStrategy } from './AIStrategy.js';
+import { analyzeWood } from './AIWood.js';
 import { SIM_DT } from '../sim/constants.js';
 import { EVT } from '../sim/events.js';
 import { FACTIONS, getBuildingDef, getCost, getTrainCost } from '../data/index.js';
@@ -130,6 +131,28 @@ export class AIDirector {
 
     // Buffer reutilizado pela consulta de intrusos (F1-06: gm.unitGrid.queryRadius).
     this._intruderBuf = [];
+
+    // NEW-44: leitura da oferta de madeira (cache de 1 s de simulação; ver `woodOutlook`).
+    this._woodOutlook = null;
+    this._woodOutlookTick = -1e9;
+  }
+
+  /**
+   * NEW-44: oferta de madeira ao redor da base (`analyzeWood`, ver AIWood.js) — árvores ALCANÇÁVEIS, distância às entregas,
+   * `none`/`far`/`low`. Recalculada no máx. 1× por segundo de simulação (determinístico: usa `gm.currentTick`).
+   */
+  woodOutlook() {
+    const tick = this.gm.currentTick;
+    if (!this._woodOutlook || tick - this._woodOutlookTick >= 20) {
+      this._woodOutlook = analyzeWood(this);
+      this._woodOutlookTick = tick;
+    }
+    return this._woodOutlook;
+  }
+
+  /** NEW-44: madeira que gastos não essenciais (treino, obras opcionais) devem deixar para a serraria avançada. */
+  get woodReserve() {
+    return this.economyManager ? this.economyManager.woodReserve : 0;
   }
 
   // --- Comandos (F5-01/F5-03): única saída da IA para a simulação ---

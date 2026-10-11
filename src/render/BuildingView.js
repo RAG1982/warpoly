@@ -9,6 +9,7 @@ import { ModelFactory } from '../entities/ModelFactory.js';
 import { getBuildingDef } from '../data/index.js';
 import { syncOutline, resetOutline } from './postfx/outlineLayer.js';
 import { markRingMaterial } from './markRing.js';
+import { LOD_DISTANCES, lodLevelForDistance, lodEnabled, applyEntityLod } from './lod.js';
 import { EVT } from '../sim/events.js';
 
 /** Vector3 → objeto plano `{x,y,z}` (payload de evento: nunca referências a objetos three.js). */
@@ -100,6 +101,8 @@ export class BuildingView {
     this._hpPct = -1;
 
     this.createSelectionRing();
+    this._lodLevel = 0; // F1-10 item 4: 0 perto, 1 longe (só render)
+    this._lodCache = null;
     this.createRallyFlag();
     this.createHealthBar();
     this.updateConstructionState();
@@ -209,6 +212,7 @@ export class BuildingView {
 
   createRallyFlag() {
     this.rallyGroup = new THREE.Group();
+    this.rallyGroup.userData.lodDetail = true; // F1-10: some longe (tratado em `update`, pois fica fora de `root`)
     const pole = new THREE.Mesh(new THREE.CylinderGeometry(0.04, 0.04, 1.8, 4), ModelFactory.materials.woodDark);
     pole.position.y = 0.9;
     this.rallyGroup.add(pole);
@@ -441,6 +445,15 @@ export class BuildingView {
       this.updateConstructionState();
     }
 
+    // F1-10 item 4: longe do alvo da câmera, oculta as partes `userData.lodDetail` (só `visible`).
+    if (ctx && ctx.lodTarget) {
+      const lvl = lodEnabled() ? lodLevelForDistance(ctx.lodTarget.distanceTo(this.root.position), LOD_DISTANCES.building, this._lodLevel) : 0;
+      if (lvl !== this._lodLevel) {
+        this._lodLevel = lvl;
+        applyEntityLod(this, this.root, lvl, false);
+      }
+    }
+
     // Anel de seleção e bandeira do ponto de reunião.
     if ((e.markColor || null) !== this._markColor) {
       this._markColor = e.markColor || null;
@@ -448,7 +461,7 @@ export class BuildingView {
     }
     this.selectionRing.visible = e.isSelected;
     syncOutline(this, this.mesh, e.isSelected); // F7-03: contorno de seleção (máscara)
-    this.rallyGroup.visible = e.rallyShown;
+    this.rallyGroup.visible = e.rallyShown && this._lodLevel === 0;
     if (e.rallyShown) this.rallyGroup.position.set(e.rallyPoint.x, e.rallyPoint.y, e.rallyPoint.z);
 
     // Barra de vida: preenchimento + billboard voltado para a câmera.

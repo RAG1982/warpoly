@@ -15,6 +15,7 @@ import { InputManager } from './InputManager.js';
 import { UIManager } from '../ui/UIManager.js';
 import { collectSharedResources, disposeObjectTree } from '../render/sceneDisposal.js';
 import { createAudioEvents } from '../audio/AudioEvents.js';
+import { detectAudioLevel } from '../audio/audioEnv.js';
 import { createVfxEvents } from '../render/VfxEvents.js';
 import { RuinsManager } from '../render/RuinsManager.js';
 import { VfxSystem } from '../render/vfx/VfxSystem.js';
@@ -137,7 +138,9 @@ export class MatchSession {
     this._disposeUiEvents = null;
     this.ruins = null;
     if (!this.gameManager.headless) {
-      this._disposeAudioEvents = createAudioEvents(this.gameManager, sound);
+      // F7-08: nível de áudio do preset atual (`?audio=` força; automação fica muda) e tileset do mapa (ambiência)
+      sound.setLevel?.(detectAudioLevel(QualitySettings.current, getTextureQuality()));
+      this._disposeAudioEvents = createAudioEvents(this.gameManager, sound, { tilesetId: this.terrainView.tileset && this.terrainView.tileset.id });
       // F7-05: partículas GPU em pool (nível por preset; `?vfx=off|low|med|high` força; `?texq=low` reduz).
       let vfxParam = null;
       try { vfxParam = new URLSearchParams(window.location.search).get('vfx'); } catch { /* sem window */ }
@@ -216,6 +219,7 @@ export class MatchSession {
     this.sceneManager.updateCamera(delta);
     this.water.update(elapsed);
     this.decorations?.applyLod(this.sceneManager.zoomLevel); // F1-10: decorações pequenas somem no zoom máximo
+    this.entityViews?.treeManager?.applyLod(this.sceneManager.cameraTarget); // F1-10: árvores distantes → impostor
     if (simulate) {
       const gm = this.gameManager;
       let alpha;

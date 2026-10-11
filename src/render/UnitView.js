@@ -12,6 +12,7 @@ import { getUnitDef } from '../data/index.js';
 import { HERO_BAR_SCALE } from '../data/heroes.js';
 import { syncOutline, resetOutline } from './postfx/outlineLayer.js';
 import { markRingMaterial } from './markRing.js';
+import { LOD_DISTANCES, lodLevelForDistance, lodEnabled, applyEntityLod } from './lod.js';
 import { isDetectedBy } from '../sim/detection.js';
 import { SIM_DT, lerpAngle, animationLodStep } from '../sim/constants.js';
 
@@ -73,6 +74,8 @@ export class UnitView {
     this._hpPct = -1;
     this._manaPct = -1;
 
+    this._lodLevel = 0; // F1-10 item 4: 0 perto, 1 longe (só render)
+    this._lodCache = null;
     this._buildModel();
     this._modelSeq = unit.modelSeq;
 
@@ -125,6 +128,8 @@ export class UnitView {
   /** F4-04: troca o modelo 3D (Transmutação): mantém o anel de seleção e a visibilidade. */
   _swapModel() {
     const old = this.root;
+    this._lodCache = null;
+    this._lodLevel = 0;
     resetOutline(this);
     const ring = this.selectionRing;
     const visible = old.visible;
@@ -298,6 +303,15 @@ export class UnitView {
         } else if (!lodStep) {
           animDelta = 0;
         }
+      }
+    }
+
+    // F1-10 item 4: longe do alvo da câmera, sem sombra projetada e sem peças `lodDetail` (histerese; `?lod=0` desliga).
+    if (ctx.lodTarget) {
+      const lvl = lodEnabled() ? lodLevelForDistance(ctx.lodTarget.distanceTo(root.position), LOD_DISTANCES.unit, this._lodLevel) : 0;
+      if (lvl !== this._lodLevel) {
+        this._lodLevel = lvl;
+        applyEntityLod(this, root, lvl, true);
       }
     }
 

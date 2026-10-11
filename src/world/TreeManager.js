@@ -2,6 +2,7 @@ import * as THREE from 'three';
 import { mergeGeometries } from 'three/examples/jsm/utils/BufferGeometryUtils.js';
 import { glbEnabled, glbTemplates } from '../entities/glbModels.js';
 import { getTileset } from '../data/tilesets.js';
+import { LOD_DISTANCES, lodLevelForDistance, lodEnabled } from '../render/lod.js';
 
 /** NEW-7: lado (unidades de mundo) do chunk espacial; cada tipo × chunk é um InstancedMesh com `boundingSphere` própria. */
 const CHUNK_SIZE = 32;
@@ -90,6 +91,34 @@ uniform vec3 uTreeTint; uniform float uTreeDesat; uniform vec3 uTreeSnow; unifor
   return mat;
 }
 
+/**
+ * F1-10 item 3: geometria simplificada do impostor (copa em cone de 6 lados + tronco em cilindro de 4 lados, cores nos
+ * vértices), dimensionada pela caixa da geometria real do tipo. Gerada uma única vez por tipo.
+ */
+function buildImpostorGeometry(key, srcGeo) {
+  if (!srcGeo.boundingBox) srcGeo.computeBoundingBox();
+  const bb = srcGeo.boundingBox;
+  const h = Math.max(1, bb.max.y - Math.min(0, bb.min.y));
+  const r = Math.max(0.8, Math.max(bb.max.x - bb.min.x, bb.max.z - bb.min.z) * 0.5);
+  const trunk = new THREE.CylinderGeometry(r * 0.16, r * 0.22, h * 0.4, 4);
+  trunk.translate(0, h * 0.2, 0);
+  const crown = new THREE.ConeGeometry(r, h * 0.75, 6);
+  crown.translate(0, h * 0.25 + h * 0.375, 0);
+  const paint = (g, hex) => {
+    const c = new THREE.Color(hex);
+    const n = g.attributes.position.count;
+    const a = new Float32Array(n * 3);
+    for (let i = 0; i < n; i++) { a[i * 3] = c.r; a[i * 3 + 1] = c.g; a[i * 3 + 2] = c.b; }
+    g.setAttribute('color', new THREE.BufferAttribute(a, 3));
+  };
+  paint(trunk, 0x5a3d26);
+  paint(crown, PLACEHOLDER_COLORS[key] || PLACEHOLDER_COLORS.tree_oak);
+  const geo = mergeGeometries([trunk.toNonIndexed(), crown.toNonIndexed()]);
+  trunk.dispose();
+  crown.dispose();
+  return geo;
+}
+
 export class TreeManager {
   /** @param {{tileset?: string}} [options]  F7-04: variante (tinta/neve) por tileset; padrão: sem alteração */
   constructor(scene, options = {}) {
@@ -110,6 +139,10 @@ export class TreeManager {
     this.instancedMeshes = [];
     this._sources = new Map(); // key do .glb → {geo, mat} (compartilhado entre os chunks do tipo)
     this._chunks = new Map(); // `${key}|${cx}|${cz}` → InstancedMesh
+    // F1-10 item 3: impostores (criados sob demanda, compartilham instanceMatrix/instanceColor do chunk).
+    this.lodMeshes = [];
+    this._impostorGeo = new Map(); // key → geometria simplificada (uma por tipo)
+    this._impostorMat = null;
 
     this.zeroMatrix = new THREE.Matrix4().makeScale(0, 0, 0);
     if (options.tileset) this.applyTileset(getTileset(options.tileset));
@@ -128,9 +161,14 @@ export class TreeManager {
     im.receiveShadow = true;
     im.userData.isTreeInstanced = true;
     im.userData.treeEntities = [];
+    im.userData.lodLevel = 0;
+    im.userData.lodImpostor = null;
+    im.userData.chunkX = (Math.floor(x / CHUNK_SIZE) + 0.5) * CHUNK_SIZE; // centro do chunk (XZ) p/ o LOD
+    im.userData.chunkZ = (Math.floor(z / CHUNK_SIZE) + 0.5) * CHUNK_SIZE;
     this._tintMesh(im);
     this.scene.add(im);
     this.instancedMeshes.push(im);
+    im.userData.lodKey = key;
     this._chunks.set(id, im);
     return im;
   }
@@ -146,6 +184,8 @@ export class TreeManager {
       im.instanceMatrix = next;
     }
     im.count = idx + 1;
+    const imp = im.userData.lodImpostor;
+    if (imp) this._syncImpostor(im, imp);
     return idx;
   }
 
@@ -156,6 +196,63 @@ export class TreeManager {
     this._tintCfg = cfg;
     this._tintBySource = new Map();
     for (const im of this.instancedMeshes) this._tintMesh(im);
+    for (const imp of this.lodMeshes) this._tintMesh(imp);
+  }
+
+  /** Impostor do chunk usa os MESMOS buffers de matriz/cor e a mesma contagem do mesh normal. */
+  _syncImpostor(im, imp) {
+    imp.instanceMatrix = im.instanceMatrix;
+    imp.instanceColor = im.instanceColor;
+    imp.count = im.count;
+    imp.boundingSphere = null;
+  }
+
+  _getImpostor(im, key) {
+    let imp = im.userData.lodImpostor;
+    if (imp) return imp;
+    let geo = this._impostorGeo.get(key);
+    if (!geo) this._impostorGeo.set(key, geo = buildImpostorGeometry(key, this._sources.get(key).geo));
+    if (!this._impostorMat) this._impostorMat = new THREE.MeshStandardMaterial({ vertexColors: true, roughness: 0.9, flatShading: true });
+    imp = new THREE.InstancedMesh(geo, this._impostorMat, 1);
+    imp.castShadow = false;
+    imp.receiveShadow = false;
+    imp.userData.isTreeImpostor = true;
+    this._tintMesh(imp);
+    this._syncImpostor(im, imp);
+    imp.visible = false;
+    this.scene.add(imp);
+    this.lodMeshes.push(imp);
+    im.userData.lodImpostor = imp;
+    return imp;
+  }
+
+  /**
+   * F1-10 item 3: 1×/quadro. Chunks mais longe que `LOD_DISTANCES.tree` (com histerese) trocam o mesh normal pelo impostor
+   * simplificado; só `visible` muda (nenhuma matriz é regravada). `?lod=0` mantém tudo no nível 0.
+   * @param {{x:number,z:number}} cameraTarget  alvo da câmera (mundo)
+   */
+  applyLod(cameraTarget) {
+    if (!cameraTarget) return;
+    const enabled = lodEnabled();
+    const ims = this.instancedMeshes;
+    for (let i = 0; i < ims.length; i++) {
+      const im = ims[i];
+      const ud = im.userData;
+      const dx = ud.chunkX - cameraTarget.x;
+      const dz = ud.chunkZ - cameraTarget.z;
+      const level = enabled ? lodLevelForDistance(Math.sqrt(dx * dx + dz * dz), LOD_DISTANCES.tree, ud.lodLevel) : 0;
+      if (level === ud.lodLevel) continue;
+      ud.lodLevel = level;
+      if (level === 1) {
+        const imp = this._getImpostor(im, ud.lodKey);
+        this._syncImpostor(im, imp);
+        imp.visible = true;
+        im.visible = false;
+      } else {
+        im.visible = true;
+        if (ud.lodImpostor) ud.lodImpostor.visible = false;
+      }
+    }
   }
 
   /** Troca o material do InstancedMesh pela variante do tileset (um clone por material de origem; só se há tinta). */
@@ -240,6 +337,11 @@ export class TreeManager {
     this.instancedMeshes.forEach(im => {
       this.scene.remove(im);
     });
+    this.lodMeshes.forEach(im => this.scene.remove(im));
+    this.lodMeshes = [];
+    this._impostorGeo.forEach(g => g.dispose());
+    this._impostorGeo.clear();
+    if (this._impostorMat) { this._impostorMat.dispose(); this._impostorMat = null; }
     this._sources.forEach(src => { if (src.geo) src.geo.dispose(); });
     this._sources.clear();
     this._chunks.clear();

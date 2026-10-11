@@ -9,6 +9,15 @@ import { adaptMix } from './AIStrategy.js';
 const LAND_ATTACKER = { canHitAir: false, canHitGround: true };
 /** NEW-44: tamanho da onda quando o exército não pode mais ser reposto (ataca com o que tem, mín. 3 combatentes). */
 const WOODLESS_WAVE = 3;
+/** NEW-34: só vale encenar (ponto de encontro) se o alvo está além disto do centro da tropa. */
+const STAGE_MIN_DIST = 45;
+/** NEW-34: distância do exército ao alvo no ponto de encontro; o cerco fica `SIEGE_BEHIND` atrás da linha. */
+const STAGE_DIST = 26;
+const SIEGE_BEHIND = 8;
+/** NEW-34: tempo máximo (s) esperando o cerco no ponto de encontro e vida máxima (s) da operação. */
+const STAGE_TIMEOUT = 70;
+const OP_MAX_AGE = 300;
+const ESCORT_COOLDOWN = 4;
 
 /**
  * AIMilitaryManager (Gerenciador Militar e Ofensivo da IA)
@@ -71,6 +80,89 @@ export class AIMilitaryManager {
     this.readySquadCount = 0;
     // Buffer reutilizado pela consulta de intrusos (F1-06: gm.unitGrid.queryRadius).
     this._intruderBuf = [];
+    /** NEW-34: operação de cerco em curso (encenação + escolta), ou null. */
+    this._op = null;
+    this._escortBuf = [];
+  }
+
+  /**
+   * NEW-34: a onda com cerco sai junto, mas o exército espera o cerco (mais lento) num ponto de encontro a `STAGE_DIST` do alvo,
+   * com o cerco `SIEGE_BEHIND` atrás da linha; depois do ataque, inimigo colado no cerco (dentro de `minAttackRange`, onde ele
+   * não consegue atirar) é atacado por uma escolta corpo a corpo — sem escolta, o cerco recua por ordem de movimento.
+   * Só comandos (`director.issue`); sem RNG.
+   */
+  updateOperation() {
+    const op = this._op;
+    if (!op) return;
+    const dir = this.director;
+    const gm = this.gm;
+    const now = dir.simTime || 0;
+    const alive = ids => { const r = []; for (const id of ids) { const e = gm.getEntity(id); if (e && !e.isDead) r.push(e); } return r; };
+    const army = alive(op.army);
+    const siege = alive(op.siege);
+    if (army.length === 0 || siege.length === 0 || now - op.since > OP_MAX_AGE) { this._op = null; return; }
+
+    if (op.phase === 'stage') {
+      if (op.siegePending) {
+        if (dir.issue({ type: CMD.ATTACK_MOVE, playerId: dir.playerId, unitIds: siege.map(u => u.id), x: op.siegeStage.x, z: op.siegeStage.z })) op.siegePending = false;
+        return;
+      }
+      let siegeIn = true;
+      for (let i = 0; i < siege.length; i++) {
+        const p = siege[i].mesh.position;
+        if (siege[i].state !== 'idle' && Math.hypot(p.x - op.siegeStage.x, p.z - op.siegeStage.z) > 8) siegeIn = false;
+      }
+      if (!siegeIn && now - op.stagedAt < STAGE_TIMEOUT) return;
+      // lançamento: todos contra o alvo (o cerco já está atrás da linha e é mais lento)
+      const t = op.target;
+      const k = dir.perception.buildings.get(t.id) || dir.perception.units.get(t.id);
+      const seenNow = !!k && k.lastSeen === dir.perception.now;
+      const mk = unitIds => (seenNow ? { type: CMD.ATTACK, playerId: dir.playerId, unitIds, targetId: t.id } : { type: CMD.ATTACK_MOVE, playerId: dir.playerId, unitIds, x: t.x, z: t.z });
+      if (!dir.issue(mk(army.map(u => u.id)))) return;
+      dir.issue(mk(siege.map(u => u.id)));
+      op.phase = 'assault';
+      return;
+    }
+
+    // assalto: escolta contra inimigos dentro do alcance mínimo do cerco
+    for (let i = 0; i < siege.length; i++) {
+      const s = siege[i];
+      const minR = s.minAttackRange || 0;
+      if (minR <= 0) continue;
+      const cd = op.cool.get(s.id);
+      if (cd !== undefined && now - cd < ESCORT_COOLDOWN) continue;
+      const sp = s.mesh.position;
+      const near = gm.unitGrid.queryRadius(sp.x, sp.z, minR + 2, u => !u.isDead && !u.isDying && gm.isHostile(dir.playerId, u.ownerId), this._escortBuf);
+      let foe = null; let fd = Infinity;
+      for (let j = 0; j < near.length; j++) {
+        const q = near[j].mesh.position;
+        const d = Math.hypot(q.x - sp.x, q.z - sp.z) - (near[j].collisionRadius || 0.5) - (s.collisionRadius || 0.5);
+        if (d < minR && d < fd) { fd = d; foe = near[j]; }
+      }
+      if (!foe) continue;
+      // escolta: até 4 combatentes corpo a corpo da onda mais perto do inimigo
+      const cand = [];
+      for (let j = 0; j < army.length; j++) {
+        const a = army[j];
+        const def = getUnitDef(a.type);
+        if (def.isRanged || def.isSiege || def.isWorker || def.suicide || def.maxMana > 0 || a.targetEntity === foe) continue;
+        cand.push(a);
+      }
+      const fp = foe.mesh.position;
+      const dd = u => Math.hypot(u.mesh.position.x - fp.x, u.mesh.position.z - fp.z);
+      cand.sort((a, b) => dd(a) - dd(b) || a.id - b.id);
+      const ids = cand.slice(0, 4).map(u => u.id);
+      let ok;
+      if (ids.length > 0) {
+        ok = dir.issue({ type: CMD.ATTACK, playerId: dir.playerId, unitIds: ids, targetId: foe.id });
+      } else {
+        // sem escolta: recuar o cerco, afastando-se do inimigo além do alcance mínimo
+        const dx = sp.x - fp.x; const dz = sp.z - fp.z;
+        const len = Math.hypot(dx, dz) || 1;
+        ok = dir.issue({ type: CMD.MOVE, playerId: dir.playerId, unitIds: [s.id], x: sp.x + dx / len * (minR + 5), z: sp.z + dz / len * (minR + 5) });
+      }
+      if (ok) op.cool.set(s.id, now);
+    }
   }
 
   /** Tamanho da próxima onda (ver construtor). */
@@ -108,6 +200,7 @@ export class AIMilitaryManager {
     const stuck = [];
     for (const id of this.waveIds) {
       if (this._detourOf.has(id)) continue;
+      if (this._op && this._op.phase === 'stage' && this._op.ids.has(id)) continue; // NEW-34: aguardando o cerco no ponto de encontro
       const u = this.gm.getEntity(id);
       if (!u || u.isDead) { this._track.delete(id); continue; }
       if (u.state === 'idle' || u.state === 'casting') { this._track.delete(id); continue; }
@@ -212,9 +305,11 @@ export class AIMilitaryManager {
       if (!e || e.isDead) this.waveIds.delete(id);
     }
     this.readySquadCount = 0;
+    const op = this._op;
     for (let i = 0; i < units.length; i++) {
       const e = units[i];
       if (e.isDead || e.type === workerType || this.director.isReserved(e.id)) continue;
+      if (op && op.ids.has(e.id)) continue; // NEW-34: a operação de cerco cuida das suas unidades
       if (e.state !== 'idle' && e.state !== 'moving') continue;
       if (this.director.profile.micro >= 1 && e.hp < e.maxHp * 0.35) continue; // feridos ficam em casa
       if (this.waveIds.has(e.id) && e.state !== 'idle') continue;
@@ -294,6 +389,7 @@ export class AIMilitaryManager {
 
     // 2. Coordinate and dispatch military expedition squads if threshold reached
     this.attackThreshold = this.computeThreshold();
+    this.updateOperation();
     this.unstickWave();
     if (uMil >= 0.8 && this.expeditionAllowed()) {
       this.manageMilitaryExpedition();
@@ -508,6 +604,13 @@ export class AIMilitaryManager {
       });
     }
 
+    // NEW-34: cerco + tropa de apoio contra alvo distante => encena num ponto de encontro (cerco atrás da linha).
+    if (this._startOperation(units, target)) {
+      for (let i = 0; i < units.length; i++) this.waveIds.add(units[i].id);
+      this.strikeWaveNumber++;
+      this.attackThreshold = this.computeThreshold();
+      return;
+    }
     // F5-05: o micro pode separar um grupo de flanco (Brutal); o resto ataca direto.
     const mainUnits = dir.microManager.planWave(units, target);
     const unitIds = new Array(mainUnits.length);
@@ -526,6 +629,37 @@ export class AIMilitaryManager {
     // Update threshold for subsequent wave
     this.strikeWaveNumber++;
     this.attackThreshold = this.computeThreshold();
+  }
+
+  /** NEW-34: inicia a encenação (ponto de encontro) da onda com cerco. Devolve true se assumiu a onda. */
+  _startOperation(units, target) {
+    if (this._op) return false;
+    const dir = this.director;
+    const siege = [];
+    const army = [];
+    let cx = 0; let cz = 0;
+    for (let i = 0; i < units.length; i++) {
+      const u = units[i];
+      (getUnitDef(u.type).isSiege ? siege : army).push(u);
+      cx += u.mesh.position.x; cz += u.mesh.position.z;
+    }
+    if (siege.length === 0 || army.length < 2) return false;
+    cx /= units.length; cz /= units.length;
+    const dx = cx - target.x; const dz = cz - target.z;
+    const len = Math.hypot(dx, dz);
+    if (len < STAGE_MIN_DIST) return false;
+    const ux = dx / len; const uz = dz / len;
+    const stage = { x: target.x + ux * STAGE_DIST, z: target.z + uz * STAGE_DIST };
+    const siegeStage = { x: target.x + ux * (STAGE_DIST + SIEGE_BEHIND), z: target.z + uz * (STAGE_DIST + SIEGE_BEHIND) };
+    if (!dir.issue({ type: CMD.ATTACK_MOVE, playerId: dir.playerId, unitIds: army.map(u => u.id), x: stage.x, z: stage.z })) return false;
+    const siegePending = !dir.issue({ type: CMD.ATTACK_MOVE, playerId: dir.playerId, unitIds: siege.map(u => u.id), x: siegeStage.x, z: siegeStage.z });
+    const now = dir.simTime || 0;
+    this._op = {
+      phase: 'stage', since: now, stagedAt: now, siegePending,
+      ids: new Set(units.map(u => u.id)), army: army.map(u => u.id), siege: siege.map(u => u.id),
+      target: { id: target.id, x: target.x, z: target.z }, stage, siegeStage, cool: new Map()
+    };
+    return true;
   }
 
   /**
@@ -556,3 +690,4 @@ export class AIMilitaryManager {
     return bestLand || best;
   }
 }
+

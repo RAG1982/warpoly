@@ -18,6 +18,11 @@ const SIEGE_BEHIND = 8;
 const STAGE_TIMEOUT = 70;
 const OP_MAX_AGE = 300;
 const ESCORT_COOLDOWN = 4;
+/** NEW-25: ataque a acampamento neutro — mínimo de combatentes, distância máxima da base, tempo máximo (s), pausa entre tentativas (s). */
+const CAMP_MIN_ARMY = 8;
+const CAMP_MAX_DIST = 90;
+const CAMP_OP_MAX = 150;
+const CAMP_COOLDOWN = 240;
 
 /**
  * AIMilitaryManager (Gerenciador Militar e Ofensivo da IA)
@@ -83,6 +88,77 @@ export class AIMilitaryManager {
     /** NEW-34: operação de cerco em curso (encenação + escolta), ou null. */
     this._op = null;
     this._escortBuf = [];
+    /** NEW-25: ataque em curso a um acampamento neutro, ou null. */
+    this._campOp = null;
+    this._campNextAt = 0;
+  }
+
+  /** NEW-25: alguma unidade viva da onda ainda está em ação (não ociosa)? */
+  _waveActive() {
+    for (const id of this.waveIds) {
+      const e = this.gm.getEntity(id);
+      if (e && !e.isDead && e.state !== 'idle') return true;
+    }
+    return false;
+  }
+
+  /**
+   * NEW-25: acampamento neutro (bandidos) como alvo ocasional. Só Normal+ (micro >= 1), com >= 8 combatentes parados,
+   * sem inimigo à vista nem invasão, nenhuma onda em marcha e um acampamento já REVELADO à IA dentro de `CAMP_MAX_DIST` da base.
+   * Deixa defesa em casa (guarda da onda + todos os atiradores excedentes), recolhe quando as baixas passam de 60 % ou o tempo
+   * acaba, e espera `CAMP_COOLDOWN` entre tentativas. Retorna ao fluxo normal (as unidades voltam ao ponto de reunião).
+   */
+  manageNeutralCamp() {
+    const dir = this.director;
+    const gm = this.gm;
+    const now = dir.simTime || 0;
+    const op = this._campOp;
+    if (op) {
+      let alive = 0;
+      for (const id of op.ids) { const e = gm.getEntity(id); if (e && !e.isDead) alive++; else op.ids.delete(id); }
+      const camp = gm.getEntity(op.campId);
+      const done = !camp || camp.isDead;
+      const hurt = alive < op.start * 0.4;
+      const late = now - op.since > CAMP_OP_MAX;
+      const threatened = dir.utilities.def > 0 && dir.perception.visibleUnits.length > 0;
+      if (alive === 0 || done || hurt || late || threatened) {
+        if (alive > 0) {
+          const rally = dir.militaryRally();
+          if (!dir.issue({ type: CMD.MOVE, playerId: dir.playerId, unitIds: Array.from(op.ids), x: rally.x, z: rally.z })) return; // tenta de novo
+        }
+        this._campOp = null;
+        this._campNextAt = now + CAMP_COOLDOWN;
+      }
+      return;
+    }
+    if (dir.profile.micro < 1 || now < this._campNextAt || !this.expeditionAllowed()) return;
+    if (this._waveActive() || this._op || dir.utilities.def > 0 || dir.perception.visibleUnits.length > 0) return;
+    if (dir.getCombatUnitCount() < CAMP_MIN_ARMY) return;
+    // acampamento revelado mais próximo da base (desempate por id) e dentro do alcance de risco
+    const base = dir.baseCenter;
+    let best = null; let bd = Infinity;
+    for (const c of dir.perception.camps.values()) {
+      const e = gm.getEntity(c.id);
+      if (!e || e.isDead) continue;
+      const d = Math.hypot(c.x - base.x, c.z - base.y);
+      if (d <= CAMP_MAX_DIST && (d < bd || (d === bd && c.id < best.id))) { bd = d; best = c; }
+    }
+    if (!best) return;
+    const total = this.collectSquad();
+    if (total < CAMP_MIN_ARMY) return;
+    const all = new Array(total);
+    for (let i = 0; i < total; i++) { all[i] = this.readySquadBuffer[i]; this.readySquadBuffer[i] = null; }
+    this.readySquadCount = 0;
+    // defesa mínima em casa: atiradores primeiro, depois de maior id (como a guarda da onda); nunca menos de 3 ficam
+    const home = Math.max(3, Math.floor(total * 0.3));
+    const rank = u => (getUnitDef(u.type).isRanged ? 0 : 1) * 1e6 - u.id;
+    const stay = new Set(all.slice().sort((a, b) => rank(a) - rank(b)).slice(0, home).map(u => u.id));
+    const units = all.filter(u => !stay.has(u.id) && !getUnitDef(u.type).isSiege && !getUnitDef(u.type).suicide);
+    // risco: precisa de pelo menos 2 atacantes por guarda + 2
+    if (units.length < CAMP_MIN_ARMY - 2 || units.length < best.guards * 2 + 2) { this._campNextAt = now + 30; return; }
+    const ids = units.map(u => u.id);
+    if (!dir.issue({ type: CMD.ATTACK_MOVE, playerId: dir.playerId, unitIds: ids, x: best.x, z: best.z })) return;
+    this._campOp = { campId: best.id, ids: new Set(ids), start: ids.length, since: now };
   }
 
   /**
@@ -310,6 +386,7 @@ export class AIMilitaryManager {
       const e = units[i];
       if (e.isDead || e.type === workerType || this.director.isReserved(e.id)) continue;
       if (op && op.ids.has(e.id)) continue; // NEW-34: a operação de cerco cuida das suas unidades
+      if (this._campOp && this._campOp.ids.has(e.id)) continue; // NEW-25: idem para o ataque ao acampamento
       if (e.state !== 'idle' && e.state !== 'moving') continue;
       if (this.director.profile.micro >= 1 && e.hp < e.maxHp * 0.35) continue; // feridos ficam em casa
       if (this.waveIds.has(e.id) && e.state !== 'idle') continue;
@@ -390,6 +467,7 @@ export class AIMilitaryManager {
     // 2. Coordinate and dispatch military expedition squads if threshold reached
     this.attackThreshold = this.computeThreshold();
     this.updateOperation();
+    this.manageNeutralCamp();
     this.unstickWave();
     if (uMil >= 0.8 && this.expeditionAllowed()) {
       this.manageMilitaryExpedition();
@@ -690,4 +768,3 @@ export class AIMilitaryManager {
     return bestLand || best;
   }
 }
-

@@ -48,6 +48,8 @@ export class AIPerception {
     /** Unidades hostis visíveis neste instante (referências; reutilizado a cada tick). */
     this.visibleUnits = [];
     this.visibleBuildings = [];
+    /** NEW-25: acampamentos neutros (bandidos) revelados: id -> {id,x,z,guards,lastSeen}. Só o que a IA já viu (ou tudo, se `cheatVision`). */
+    this.camps = new Map();
 
     this._src = []; // [x, z, r, x, z, r, ...]
     this._srcCount = 0;
@@ -165,7 +167,8 @@ export class AIPerception {
     const bs = gm.buildings;
     for (let i = 0; i < bs.length; i++) {
       const b = bs[i];
-      if (b.isDead || b.ownerId === NEUTRAL_HOSTILE_ID || !gm.isHostile(myId, b.ownerId)) continue;
+      if (b.ownerId === NEUTRAL_HOSTILE_ID) { this._noteCamp(b, now); continue; }
+      if (b.isDead || !gm.isHostile(myId, b.ownerId)) continue;
       const p = b.mesh.position;
       const radius = b.collisionRadius || 2;
       if (!this.isVisible(p.x, p.z, radius * 0.7)) continue;
@@ -209,6 +212,18 @@ export class AIPerception {
       const ent = gm.getEntity(id);
       if (!ent || ent.isDead) this.units.delete(id);
     }
+  }
+
+  /** NEW-25: registra/atualiza (se visível) ou esquece (se destruído) um acampamento neutro. */
+  _noteCamp(b, now) {
+    if (b.type !== 'bandit_camp') return;
+    if (b.isDead) { this.camps.delete(b.id); return; }
+    const p = b.mesh.position;
+    if (!this.isVisible(p.x, p.z, (b.collisionRadius || 2) * 0.7)) return;
+    let guards = 0;
+    const g = this.gm.unitGrid.queryRadius(p.x, p.z, 12, u => !u.isDead && !u.isDying && u.ownerId === NEUTRAL_HOSTILE_ID, this._campBuf || (this._campBuf = []));
+    guards = g.length;
+    this.camps.set(b.id, { id: b.id, x: p.x, z: p.z, guards, lastSeen: now });
   }
 
   // --- Consultas ---

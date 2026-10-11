@@ -24,6 +24,7 @@ Cada spec tem na 3ª linha `> **Status: ...**`. Regras comuns a todas: [`_COMUM.
 | [F3-01-controles-rts.md](F3-01-controles-rts.md) | nuvem (item 4) | sonnet | Controles RTS + NEW-16 |
 | [F6-08-opcoes.md](F6-08-opcoes.md) | nuvem (item 5) | sonnet | Depois da F3-01 |
 | [NEW-19-ruinas.md](NEW-19-ruinas.md) | nuvem (item 6) | sonnet | Ruínas/clareiras, só render |
+| [F8-06-campanha-horda.md](F8-06-campanha-horda.md) | nuvem (passos 0–9; arte e equilíbrio locais) | sonnet | Campanha da Horda, 8 missões (briefing de 2026-10-11; aguarda as perguntas do §10) |
 
 ## ⏸ ADIADA
 | Spec | Motivo |

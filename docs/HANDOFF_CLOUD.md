@@ -11,6 +11,8 @@ O `origin/master` está defasado (`a801c47`). A nuvem parte do `master` do GitHu
 - Ação do dono: `git push origin master` (o repositório é **público**: antes de publicar, confirme que tudo que está no histórico pode ser público — inclui a baseline visual antiga de 109 MB, que continua no histórico).
 - Depois do push, cada tarefa abaixo parte de `master` atualizado.
 
+> **Leia também `docs/ESTADO_NUVEM.md`** (pronto / falha / não iniciado; branches `task/*` com trabalho parcial).
+
 ## 1. Contexto rápido
 WarPoly: RTS 3D low-poly no navegador (three.js 0.186 + Vite 8, JS ES modules), inspirado em Warcraft II. Leia nesta ordem: `CLAUDE.md` → `docs/README.md` → `docs/TASKS.md` (seção da tarefa) → `docs/specs/_COMUM.md` (se houver spec) → o briefing desta fila.
 Cada tarefa desta fila traz o briefing completo (objetivo, arquivos, aceite). Quando houver spec em `docs/specs/`, ela prevalece.

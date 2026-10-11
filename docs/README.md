@@ -15,6 +15,7 @@ RTS 3D low-poly para navegador (three.js + Vite), inspirado em **Warcraft II**. 
 | [09_MULTIPLAYER](09_MULTIPLAYER.md) | Multiplayer lockstep (F9-01): turnos, checksum/desync, WebRTC, lobby, reconexão, replays, PoC |
 | [SESSION_HANDOFF](SESSION_HANDOFF.md) | **Comece aqui numa sessão nova**: estado, regras, fluxo de agentes, próximos passos |
 | [HANDOFF_CLOUD](HANDOFF_CLOUD.md) | Roteiro para executar tarefas no Claude Code online (nuvem) |
+| [ESTADO_NUVEM](ESTADO_NUVEM.md) | Estado para a nuvem: pronto, com falha, não iniciado; branches com trabalho parcial |
 | [specs/](specs/README.md) | Especificações por tarefa com status (índice em `specs/README.md`) |
 | [TASKS](TASKS.md) | **Lista de tarefas controlada**: protocolo, lanes/agentes, ondas paralelas, status |
 

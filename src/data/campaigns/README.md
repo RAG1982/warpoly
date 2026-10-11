@@ -33,6 +33,14 @@ Todas têm objetivo primário, secundário e oculto, cutscene de abertura e diá
 `{ format:"warpolycampaign", version:1, id, factionId, provisional?, title, subtitle?, premise, heroes?:[], missions:[…] }`.
 Cada entrada de `missions`: `{ id, requires?: [missionId…] (anteriores), carryOver?: { from?, resources:{gold,wood,stone: fração 0..1}, max?, heroes?:[] } }`.
 
+- **Epílogo (tela final)**: `epilogue?: { faction:'human'|'orc', title:{pt-BR,en}, paragraphs:[{pt-BR,en} × 3–5], credits?:{pt-BR,en} }`
+  (validado por `validateCampaign`; pt-BR **e** en obrigatórios). Ao vencer a última missão, `campaignEndPlan` devolve `campaignComplete`, `epilogue`
+  e `factionId`, e o `MissionController` abre `src/ui/screens/CampaignVictory.js` (modelo puro em `src/ui/campaignVictoryModel.js`, SVG em
+  `campaignVictoryArt.js`) no lugar do cartão simples: ilustração da facção, "VITÓRIA", epílogo em sequência, estatísticas, fanfarra
+  (`victoryFanfareHuman|Orc` em `sfxRecipes.js`) e botões Menu / Rejogar a campanha (nova tentativa a partir da m01) / Estatísticas.
+  Sem `epilogue`, a tela usa o texto genérico `campaign.end.complete` com a facção da campanha.
+- **Slot de arte final**: se existir `public/ui/art/victory_human.webp` / `victory_orc.webp` (1920×1080, WebP ≤ 500 kB), a tela usa a imagem
+  no lugar do SVG procedural (detectado por `Image` onload/onerror; nenhuma mudança de código é necessária).
 - **Desbloqueio**: missão disponível quando todas as `requires` estão concluídas na tentativa atual. `?campaign=unlock` na URL libera tudo (depuração).
 - **Carry-over de recursos**: `startingResources` da missão + `min(max, floor(fração × saldo final))` do resultado da missão `from` (padrão: 1ª de `requires`), por recurso.
   Nas missões 2 a 8: 25% do saldo, com teto de 300 por recurso.

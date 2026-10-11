@@ -24,7 +24,8 @@ import { bootOptions, applyAudio } from './ui/optionsApply.js';
 import { OptionsPanel } from './ui/screens/OptionsPanel.js';
 import { t, applyI18n, onLanguageChange, getLanguage } from './i18n/index.js';
 import { registerServiceWorker } from './pwa.js';
-import { getActiveRun, onMissionEnded, prepareCampaignMission, getCampaignEndPlan } from './campaign/index.js'; // F8-05
+import { getActiveRun, onMissionEnded, prepareCampaignMission, getCampaignEndPlan, getProgress } from './campaign/index.js'; // F8-05
+import { getCampaign } from './data/campaigns/index.js';
 import { EVT } from './sim/events.js';
 import { loadUiManifest, installSpriteFallback } from './ui/uiSprites.js'; // F7-09: ícones/retratos renderizados (public/ui)
 
@@ -193,6 +194,18 @@ class GameApp {
     if (!plan || !plan.nextMissionId) return;
     const lang = getLanguage() === 'en' ? 'en' : 'pt-BR';
     const config = prepareCampaignMission(run.campaignId, plan.nextMissionId, { lang, unlockAll: !!run.unlockAll });
+    this.fsm.transition(S.LOADING, { config });
+  }
+
+  /** Tela final da campanha: "Rejogar a campanha" abre uma tentativa nova e reinicia da primeira missão. */
+  replayCampaign() {
+    if (!this.fsm.is(S.POST_GAME) || this.session?.online) return;
+    const run = getActiveRun();
+    const def = run && getCampaign(run.campaignId);
+    if (!def) return;
+    getProgress().newAttempt(run.campaignId);
+    const lang = getLanguage() === 'en' ? 'en' : 'pt-BR';
+    const config = prepareCampaignMission(run.campaignId, def.missions[0].id, { lang, unlockAll: !!run.unlockAll });
     this.fsm.transition(S.LOADING, { config });
   }
 
@@ -558,6 +571,7 @@ class GameApp {
     document.addEventListener('warpoly:tutorial-exit', () => this.goToMainMenu()); // F6-09
     document.addEventListener('warpoly:mission-retry', () => this.restartMatch()); // F8-04: tela de fim de missão
     document.addEventListener('warpoly:mission-next', () => this.nextCampaignMission());
+    document.addEventListener('warpoly:campaign-replay', () => this.replayCampaign());
     document.addEventListener('warpoly:mission-menu', () => this.goToMainMenu());
   }
 

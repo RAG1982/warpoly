@@ -10,7 +10,10 @@ import './screens/mission.css';
 import { EVT } from '../sim/events.js';
 import { localize } from '../sim/missions/text.js';
 import { t, getLanguage, onLanguageChange } from '../i18n/index.js';
-import { getCampaignEndPlan } from '../campaign/index.js';
+import { getCampaignEndPlan, getProgress } from '../campaign/index.js';
+import { getCampaign } from '../data/campaigns/index.js';
+import { isCampaignFinale } from './campaignVictoryModel.js';
+import { CampaignVictory } from './screens/CampaignVictory.js';
 import { DialogQueue, buildObjectivesModel, buildMissionEndModel, cutscenePose, cutsceneDialogs } from './missionPresentation.js';
 
 const POLL_INTERVAL = 0.25;
@@ -131,6 +134,8 @@ export class MissionController {
     if (this.endBox.hidden) return;
     const snap = this.gm.mission.snapshot();
     const plan = getCampaignEndPlan(snap.id, snap.outcome === 'victory' ? 'victory' : 'defeat');
+    if (this.victory?.isOpen) return; // a tela final da campanha tem o próprio redesenho de idioma
+    if (isCampaignFinale(plan)) { this.endBox.hidden = true; this._openCampaignVictory(plan); return; }
     const m = buildMissionEndModel(snap, this.gm.mission.elapsed, this.lang(), plan);
     const won = m.outcome === 'victory';
     const rows = m.rows.map((r) => `<li class="ms-obj is-${r.status}"><span class="ms-ico" aria-hidden="true">${STATUS_ICON[r.status] || '–'}</span>`
@@ -144,6 +149,21 @@ export class MissionController {
       + (m.campaignDoneKey ? `<p class="ms-end-text">${esc(t(m.campaignDoneKey))}</p>` : '')
       + `<div class="ms-end-actions">${m.actions.map((x) => `<button type="button"${x.primary ? ' class="ms-primary"' : ''} data-ms="${x.id}">${esc(t(x.labelKey))}</button>`).join('')}</div></div>`;
     this.endBox.querySelector('.ms-primary')?.focus({ preventScroll: true });
+  }
+
+  /** Fim da campanha: tela especial de vitória (arte da facção + epílogo) no lugar do cartão simples. */
+  _openCampaignVictory(plan) {
+    const def = getCampaign(plan.campaignId);
+    if (!def) { this.endBox.hidden = false; return; }
+    this.victory = new CampaignVictory({
+      def, plan, completed: getProgress().completed(plan.campaignId), sound: this.sound,
+      onAction: (id) => {
+        if (id === 'menu') document.dispatchEvent(new CustomEvent('warpoly:mission-menu'));
+        else if (id === 'replay') document.dispatchEvent(new CustomEvent('warpoly:campaign-replay'));
+        else if (id === 'stats') this.ui?.showPostGame?.();
+      }
+    });
+    this.victory.open();
   }
 
   // ------------------------------------------------------------------ eventos
@@ -259,6 +279,8 @@ export class MissionController {
   dispose() {
     if (this.disposed) return;
     this.disposed = true;
+    this.victory?.close();
+    this.victory = null;
     if (this.cut) { this.im.cameraLocked = false; this.im.suspended = false; }
     this._offs.forEach((off) => off());
     this._offs = [];

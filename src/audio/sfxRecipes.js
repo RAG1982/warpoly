@@ -331,6 +331,38 @@ export const SFX = {
       });
     }
   },
+  // Fanfarras da tela final da campanha (curtas, sintetizadas): metais da Aliança (maior, brilhante) e da Horda (grave, áspera).
+  victoryFanfareHuman: {
+    dur: 1.9,
+    priority: 6,
+    play(c) {
+      const g = c.gain(0); decay(g, c.t, 0.34, 0.001, 1.85);
+      const lp = c.filter('lowpass', 2600);
+      lp.connect(g);
+      // sol-dó-mi-sol (arpejo ascendente) e acorde final de dó maior
+      [[392.0, 0], [523.25, 0.17], [659.25, 0.34], [783.99, 0.51], [523.25, 0.78], [659.25, 0.78], [1046.5, 0.78]].forEach(([f, d]) => {
+        const o = c.osc('sawtooth', f);
+        o.connect(lp);
+        o.start(c.t + d); o.stop(c.t + d + (d < 0.7 ? 0.22 : 1.0));
+      });
+    }
+  },
+  victoryFanfareOrc: {
+    dur: 1.9,
+    priority: 6,
+    play(c) {
+      const g = c.gain(0); decay(g, c.t, 0.4, 0.001, 1.85);
+      const lp = c.filter('lowpass', 1400);
+      lp.connect(g);
+      // lá-menor grave: lá-dó-mi e quinta vazia final
+      [[110.0, 0], [130.81, 0.22], [164.81, 0.44], [220.0, 0.7], [329.63, 0.7]].forEach(([f, d]) => {
+        const o = c.osc('square', f);
+        o.connect(lp);
+        o.start(c.t + d); o.stop(c.t + d + (d < 0.6 ? 0.28 : 1.1));
+      });
+      c.burst(0.18, 0.5, 0).connect(g);
+    }
+  },
   defeat: {
     dur: 1.6,
     priority: 6,

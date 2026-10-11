@@ -13,6 +13,8 @@
  */
 import { STEPS_PER_BAR, makeTrack, arp, pump, evolutionLayers } from './musicEngine.js';
 import { TITLE_TRACKS } from './tracksTitle.js';
+import { HUMAN_PEACE_NEW, HUMAN_COMBAT_NEW } from './tracksHuman.js';
+import { ORC_PEACE_NEW, ORC_COMBAT_NEW } from './tracksOrc.js';
 
 export { STEPS_PER_BEAT, STEPS_PER_BAR, METERS, MODES, MINOR_MODES, CHORD_TONES, makeTrack, trackLength, stepSeconds, loopSeconds, eventsForStep, parseLine, evolutionLayers } from './musicEngine.js';
 
@@ -119,10 +121,10 @@ const orcCombat = [
 
 /** Famílias de faixa (facção × estado) e suas variações: as 3 clássicas primeiro, depois as candidatas novas. */
 export const TRACK_SETS = Object.freeze({
-  human_peace: Object.freeze([...humanPeace]),
-  human_combat: Object.freeze([...humanCombat]),
-  orc_peace: Object.freeze([...orcPeace]),
-  orc_combat: Object.freeze([...orcCombat]),
+  human_peace: Object.freeze([...humanPeace, ...HUMAN_PEACE_NEW]),
+  human_combat: Object.freeze([...humanCombat, ...HUMAN_COMBAT_NEW]),
+  orc_peace: Object.freeze([...orcPeace, ...ORC_PEACE_NEW]),
+  orc_combat: Object.freeze([...orcCombat, ...ORC_COMBAT_NEW]),
   title: Object.freeze([...TITLE_TRACKS])
 });
 

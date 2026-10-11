@@ -44,6 +44,28 @@ const INFO = {
   orc_combat_0: { title: 'Trovão de Guerra', description: 'Taiko pesado em galope, metais em trítono e cordas ameaçadoras (atual, em reavaliação).', inGame: false },
   orc_combat_1: { title: 'Galope do Clã', description: 'Guerra em frígio com baixo em colcheias e trompa de guerra (atual, em reavaliação).', inGame: false },
   orc_combat_2: { title: 'Ruína e Cinza', description: 'A mais rápida: taiko em semicolcheias, metais dissonantes e rufar (atual, em reavaliação).', inGame: false },
+  human_peace_3: { title: 'Corte de Cristal', candidate: true, description: 'Barroco em ré maior: cravo em arpejos, violinos em sequências elegantes e violoncelo firme. Aristocrático e sereno.' },
+  human_peace_4: { title: 'Fanfarra do Rei', candidate: true, description: 'Dó maior em ritmo pontuado: trompetes majestosos sobre cordas e baixo real, com trompa ao fundo. Ordem e dever.' },
+  human_peace_5: { title: 'Jardins do Castelo', candidate: true, description: 'Minueto em 3/4 (sol maior): cravo valsando, violino cantante e flauta. Calma da corte.' },
+  human_peace_6: { title: 'Cavaleiros ao Amanhecer', candidate: true, description: 'Marcha pastoral em 6/8 (fá maior): chamados de trompa, alaúde e caixa leve.' },
+  human_peace_7: { title: 'Juramento da Guarda', candidate: true, description: 'Solene, em mi bemol maior a 84 bpm: coral de órgão, melodia de violoncelo e trompa distante.' },
+  human_combat_3: { title: 'Marcha de Ataque Pesada', candidate: true, description: 'Ré menor, tímpanos e caixa, trombones pesados em ostinato e trompetes dobrando na segunda metade. Ataque em bloco.' },
+  human_combat_4: { title: 'Perseguição em 6/8', candidate: true, description: 'Lá menor em 6/8: violinos em galope de colcheias, trompete a toda e rufar nas viradas. Rápida e urgente.' },
+  human_combat_5: { title: 'Cerco Lento', candidate: true, description: 'Si menor a 72 bpm: ostinato grave de violoncelos, tímpanos fúnebres, sinos e lamento de trompete. Ameaça que cresce devagar.' },
+  human_combat_6: { title: 'Carga da Cavalaria', candidate: true, description: 'Sol mixolídio a 144 bpm: galope de tímpanos (longa-curta-curta), chamado repetido de trompetes e metais em quintas.' },
+  human_combat_7: { title: 'Defesa Desesperada', candidate: true, description: 'Mi menor harmônico: tremolo de cordas, sinos dobrando e gritos de trompete que sobem. Termina na dominante e volta ao início.' },
+  human_combat_8: { title: 'Confronto Sombrio', candidate: true, description: 'Sol menor harmônico a 80 bpm: coro grave, órgão, violoncelos e tímpanos lentos; violinos agudos entram na segunda metade.' },
+  orc_peace_3: { title: 'Fogueira dos Clãs', candidate: true, description: '5/4 em mi frígio: flauta de osso, taiko de batimento irregular, bordão e coro grave ao redor da fogueira.' },
+  orc_peace_4: { title: 'Marcha das Trompas', candidate: true, description: '7/8 (2+2+3) em lá frígio: chamados de trompa sobre taiko e baixo coxos. Marcha implacável.' },
+  orc_peace_5: { title: 'Canto da Planície', candidate: true, description: 'Ré menor a 84 bpm: coro grave amplo, violoncelo, flauta ecoando e batida lenta. Espaçosa.' },
+  orc_peace_6: { title: 'Forja do Clã', candidate: true, description: 'Lá frígio: riff de trombones em ritmo de martelo, sinos de bigorna e taiko. Trabalho pesado.' },
+  orc_peace_7: { title: 'Pedra e Fumaça', candidate: true, description: '6/8 lento em sol menor harmônico: balanço de flauta, trompa de guerra e gongo.' },
+  orc_combat_3: { title: 'Invasão Implacável', candidate: true, description: 'Mi frígio a 112 bpm: riff de trombones em tríades pesadas, taiko em marcha, trompa de guerra e coro na segunda metade.' },
+  orc_combat_4: { title: 'Perseguição Selvagem', candidate: true, description: '6/8 em ré frígio a 132 bpm: galope de colcheias nos trombones e taiko de dois tempos.' },
+  orc_combat_5: { title: 'Cerco da Horda', candidate: true, description: 'Dó frígio a 66 bpm: trombones longos que sobem, taiko fúnebre, gongos e coro grave. Lento e ameaçador.' },
+  orc_combat_6: { title: 'Carga dos Lobos', candidate: true, description: '7/8 (2+2+3) em si frígio a 150 bpm: galope de sete colcheias nos trombones, taiko sem trégua.' },
+  orc_combat_7: { title: 'Defesa do Clã', candidate: true, description: '5/4 em fá menor harmônico: riffs sincopados, sinos dobrando e coro; a dominante fecha cada volta.' },
+  orc_combat_8: { title: 'Coro da Escuridão', candidate: true, description: 'Dó sustenido menor a 90 bpm: coro grave num canto repetido, órgão, violoncelos e tímpanos lentos. Confronto sombrio.' },
   title_0: { title: 'Marcha da Tempestade', description: 'TEMA DE ABERTURA do jogo. Caixas e tambores marchando, metais graves da Horda, suspense quase silencioso, cordas trágicas dos humanos, explosões com tímpanos e final em acorde suspenso (laço suave no menu).', inGame: true },
   title_1: { title: 'Réquiem das Muralhas', description: 'Abertura alternativa, mais lenta e trágica: lamento de violinos e violoncelos, resposta de trombones e coro, clímax e despedida em acorde suspenso.', candidate: true },
   title_2: { title: 'Chamado dos Tambores', description: 'Abertura alternativa da Horda em 5/4: taiko irregular, trombones em frígio, canto do clã com flauta de osso e final de força total.', candidate: true }
@@ -52,7 +74,9 @@ const INFO = {
 /** Fanfarras curtas (sfx): `sfx` é o nome em `sfxRecipes.js`. */
 const SFX_INFO = [
   { id: 'victory_human', title: 'Fanfarra de Vitória (Reino)', category: 'victory', faction: 'human', sfx: 'victoryFanfareHuman', mode: 'major', description: 'Arpejo ascendente de metais e acorde final de dó maior (tela final da campanha).', inGame: true },
-  { id: 'victory_orc', title: 'Fanfarra de Vitória (Horda)', category: 'victory', faction: 'orc', sfx: 'victoryFanfareOrc', mode: 'minor', description: 'Metais graves em lá menor que terminam numa quinta vazia, com golpe de tambor.', inGame: true }
+  { id: 'victory_orc', title: 'Fanfarra de Vitória (Horda)', category: 'victory', faction: 'orc', sfx: 'victoryFanfareOrc', mode: 'minor', description: 'Metais graves em lá menor que terminam numa quinta vazia, com golpe de tambor.', inGame: true },
+  { id: 'defeat_human', title: 'Derrota (Reino)', category: 'defeat', faction: 'human', sfx: 'defeatHuman', mode: 'minor', seconds: 3, description: 'Trompete que desce (mi–ré–dó–si) e se apaga num acorde de lá menor.', inGame: true, candidate: false },
+  { id: 'defeat_orc', title: 'Derrota (Horda)', category: 'defeat', faction: 'orc', sfx: 'defeatOrc', mode: 'phrygian', seconds: 3, description: 'Metais graves em trítono descendente, bordão que desaba de altura e um último golpe de tambor.', inGame: true, candidate: false }
 ];
 
 // ------------------------------------------------------------------------------------------------ montagem

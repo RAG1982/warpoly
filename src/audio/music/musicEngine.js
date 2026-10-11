@@ -391,7 +391,7 @@ export function evolutionLayers(spb, faction) {
   if (faction === 'orc') {
     return [
       { kind: 'drum', inst: 'taiko', steps: grid((i) => (i === half ? 0.55 : i === spb - 2 ? 0.4 : 0)), lite: false, int: 0.15 },
-      { kind: 'hold', inst: 'choir', oct: 0, vel: 0.2, lite: false, int: 0.3, bars: [2, 3, 6, 7] },
+      { kind: 'pattern', inst: 'choir', oct: 0, vel: 0.22, lite: false, int: 0.3, bars: [2, 3, 6, 7], steps: [{ i: 0, n: 0, dur: spb - 2 }] },
       { kind: 'drum', inst: 'snare', steps: grid((i) => (i % 2 === 0 ? (beat(i) ? 0.3 : 0.16) : 0)), lite: false, int: 0.45 },
       { kind: 'pattern', inst: 'brass', oct: 1, vel: 0.3, lite: false, int: 0.6, stack: 'tritone', steps: [{ i: 0, n: 0, dur: 3 }, { i: half, n: 0, dur: 2 }] },
       { kind: 'drum', inst: 'taiko', steps: grid((i) => (i % 2 === 0 ? (beat(i) ? 0.9 : 0.6) : 0)), lite: false, int: 0.78 },

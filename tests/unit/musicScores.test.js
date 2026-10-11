@@ -16,7 +16,6 @@ import { createFakeAudioContext } from './helpers/fakeAudio.js';
 const TRACK_FAMILIES = ['human_combat', 'human_peace', 'orc_combat', 'orc_peace'];
 const TRACK_SETS = Object.fromEntries(TRACK_FAMILIES.map((f) => [f, ALL_SETS[f].slice(0, VARIANTS_PER_FAMILY)]));
 const allTracks = Object.values(TRACK_SETS).flat();
-const TRACKS_BY_ID = Object.fromEntries(allTracks.map((t) => [t.id, t]));
 const TRACK_IDS = allTracks.map((t) => t.id);
 const pcInScale = (track, midi) => track.scale.includes((((midi - track.key) % 12) + 12) % 12);
 const dump = (track, loops = 2, seed = 5) => JSON.stringify(Array.from({ length: trackLength(track) * loops }, (_, s) => eventsForStep(track, s, { seed })));

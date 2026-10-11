@@ -112,6 +112,8 @@ export class GameManager {
 
     // Selected entities
     this.selectedUnits = [];
+    /** NEW-26: entidade não-local (neutra/inimiga visível) em inspeção somente-leitura; nunca entra em `selectedUnits`/`selectedBuilding`. */
+    this.inspected = null;
     this.selectedBuilding = null;
     this.selectedResource = null;
 
@@ -1383,6 +1385,30 @@ export class GameManager {
       this.selectedBuilding = null;
     }
     this.selectedResource = null;
+    this.clearInspection();
+  }
+
+  /** NEW-26: a entidade (unidade/construção de dono não-local) pode ser inspecionada agora? Só se viva e sob visão atual. */
+  isInspectable(entity) {
+    if (!entity || !(entity instanceof Unit || entity instanceof Building)) return false;
+    if (entity.ownerId === this._localPlayerId || entity.isDead || entity.isDying || entity.state === 'dying') return false;
+    const p = entity.mesh && entity.mesh.position;
+    if (!p) return false;
+    return !this.fogOfWar || this.fogOfWar.isVisible(p.x, p.z);
+  }
+
+  /** NEW-26: inspeciona sem selecionar (não toca em `selectedUnits`, não emite comandos). */
+  inspect(entity) {
+    this.clearInspection();
+    if (!this.isInspectable(entity)) return false;
+    this.inspected = entity;
+    if (entity.setSelected) entity.setSelected(true);
+    return true;
+  }
+
+  clearInspection() {
+    if (this.inspected && this.inspected.setSelected) this.inspected.setSelected(false);
+    this.inspected = null;
   }
 
   selectSingle(entity) {
@@ -1397,11 +1423,8 @@ export class GameManager {
       entity.setSelected(true);
       this.selectedBuilding = entity;
       this.events.emit(EVT.SELECTED, { entityId: entity.id, ownerId: entity.ownerId });
-    } else if (entity instanceof Building && entity.ownerId === NEUTRAL_HOSTILE_ID) {
-      // F3-10: acampamento neutro — card apenas informativo (sem comandos).
-      entity.setSelected(true);
-      this.selectedBuilding = entity;
-      this.events.emit(EVT.SELECTED, { entityId: entity.id, ownerId: entity.ownerId });
+    } else if (entity instanceof Unit || entity instanceof Building) {
+      this.inspect(entity); // NEW-26: neutro/inimigo visível — card somente-leitura
     } else if (entity instanceof Tree || entity instanceof ResourceDeposit) {
       this.selectedResource = entity;
       this.events.emit(EVT.SELECTED, { entityId: entity.id, ownerId: entity.ownerId });
@@ -1524,7 +1547,15 @@ export class GameManager {
 
     // Right-clicked ground: Move (o executor calcula a formação e evita água)
     if (groundPoint) {
-      this.issue({ type: CMD.MOVE, playerId: this._localPlayerId, unitIds, x: groundPoint.x, z: groundPoint.z, ...q });
+      // NEW-35: cerco selecionado dispara no ponto (ATTACK_GROUND); as demais unidades continuam em MOVE.
+      const siegeIds = [];
+      const otherIds = [];
+      for (let i = 0; i < this.selectedUnits.length; i++) {
+        const u = this.selectedUnits[i];
+        (u.isBallistic ? siegeIds : otherIds).push(u.id);
+      }
+      if (siegeIds.length > 0) this.issue({ type: CMD.ATTACK_GROUND, playerId: this._localPlayerId, unitIds: siegeIds, x: groundPoint.x, z: groundPoint.z });
+      if (otherIds.length > 0) this.issue({ type: CMD.MOVE, playerId: this._localPlayerId, unitIds: otherIds, x: groundPoint.x, z: groundPoint.z, ...q });
     }
   }
 

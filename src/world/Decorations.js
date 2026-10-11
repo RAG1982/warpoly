@@ -2,6 +2,7 @@ import * as THREE from 'three';
 import { mergeGeometries } from 'three/examples/jsm/utils/BufferGeometryUtils.js';
 import { getGraniteBoulderTextures, getRiverPebbleTextures } from '../models/environment/rockTextures.js';
 import { getMapTileset, getTileset } from '../data/tilesets.js';
+import { zoomHidesDecorations, lodEnabled } from '../render/lod.js';
 import {
   getFlowerTextures,
   getFlowerCenterTextures,
@@ -27,6 +28,12 @@ function createPBRMat(tex, opts = {}) {
   };
   return new THREE.MeshStandardMaterial(matParams);
 }
+
+/** Instâncias pequenas escondidas pelo LOD de zoom (F1-10). */
+const SMALL_DECORATIONS = new Set([
+  'InstancedGrassTufts', 'InstancedPebbles', 'InstancedMushrooms', 'InstancedStumps', 'InstancedBerries',
+  'InstancedFlowerLeaves', 'InstancedFlowerPetals', 'InstancedLilyPads', 'InstancedLotus'
+]);
 
 export class Decorations {
   /** @param {{tileset?: string}} [options]  F7-04: variantes de decoração do tileset (padrão: `mapDef.tileset`) */
@@ -65,7 +72,25 @@ export class Decorations {
     };
     for (const child of this.group.children) {
       if (tint[child.name] !== undefined) child.material.color.setHex(tint[child.name]);
-      if (show[child.name] !== undefined) child.visible = show[child.name];
+      if (show[child.name] !== undefined) {
+        child.visible = show[child.name];
+        child.userData.baseVisible = show[child.name]; // F1-10: o LOD só esconde o que o tileset deixa visível
+      }
+    }
+    this._lodHidden = null;
+  }
+
+  /**
+   * F1-10: com o zoom bem afastado esconde as decorações pequenas (grama, seixos, cogumelos, flores, vitórias-régias);
+   * pedras grandes e arbustos ficam (referência de navegação). Só `visible` (nenhuma matriz recalculada); chamar 1×/quadro.
+   */
+  applyLod(zoomLevel) {
+    const hide = lodEnabled() && zoomHidesDecorations(zoomLevel);
+    if (hide === this._lodHidden) return;
+    this._lodHidden = hide;
+    for (const child of this.group.children) {
+      if (!SMALL_DECORATIONS.has(child.name)) continue;
+      child.visible = (child.userData.baseVisible ?? true) && !hide;
     }
   }
 

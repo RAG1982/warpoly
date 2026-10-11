@@ -35,7 +35,7 @@ describe('TreeManager — bétula (F7-00b)', () => {
   it('sem árvore `birch` registrada não existe InstancedMesh da bétula (nenhuma chamada de desenho extra)', () => {
     const scene = new THREE.Scene();
     const tm = new TreeManager(scene);
-    expect(scene.children.filter(isInstanced)).toHaveLength(3); // carvalho, pinheiro e outono (1 malha cada, do .glb)
+    expect(scene.children.filter(isInstanced)).toHaveLength(0); // NEW-7: malhas por chunk, criadas na 1ª árvore
     expect(tm.birchCount).toBe(0);
     tm.dispose();
   });
@@ -47,7 +47,7 @@ describe('TreeManager — bétula (F7-00b)', () => {
     tm.registerTree(tree, 3, 1.5, -4, 0, 1.2, 'birch');
     expect(tm.birchCount).toBe(1);
     expect(tm.oakCount).toBe(0);
-    expect(scene.children.filter(isInstanced)).toHaveLength(4);
+    expect(scene.children.filter(isInstanced)).toHaveLength(1);
     expect(tree.trunkMesh).toBe(tree.foliageMesh);
     expect(tree.trunkMesh.isInstancedMesh).toBe(true);
     expect(tree.trunkMesh.material).toBe(glbTemplates.get('tree_birch').children[0].material);
@@ -57,7 +57,7 @@ describe('TreeManager — bétula (F7-00b)', () => {
     expect([p.x, p.y, p.z]).toEqual([3, 1.5, -4]);
     // segunda bétula reaproveita a mesma malha
     const t2 = {};
-    tm.registerTree(t2, 0, 0, 0, 0, 1, 'birch');
+    tm.registerTree(t2, 4, 0, -5, 0, 1, 'birch'); // mesmo chunk (x,z em [0,32) × [-32,0))
     expect(t2.trunkMesh).toBe(tree.trunkMesh);
     expect(t2.instanceIndex).toBe(1);
     expect(tm.countOf('birch')).toBe(2);
@@ -92,7 +92,7 @@ describe('TreeManager — bétula (F7-00b)', () => {
     tm.registerTree(tree, 0, 0, 0, 0, 1, 'birch');
     expect(tm.birchCount).toBe(1);
     expect(tm.oakCount).toBe(0);
-    expect(scene.children.filter(isInstanced)).toHaveLength(4);
+    expect(scene.children.filter(isInstanced)).toHaveLength(1);
     expect(tree.trunkMesh.material.map).toBeNull();
     expect(tree.trunkMesh.material.color.getHex()).toBe(0xb6d95a);
     tm.dispose();

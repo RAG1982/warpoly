@@ -215,6 +215,7 @@ export class MatchSession {
     this.inputManager.update(delta);
     this.sceneManager.updateCamera(delta);
     this.water.update(elapsed);
+    this.decorations?.applyLod(this.sceneManager.zoomLevel); // F1-10: decorações pequenas somem no zoom máximo
     if (simulate) {
       const gm = this.gameManager;
       let alpha;

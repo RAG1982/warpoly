@@ -32,7 +32,7 @@ import { renderTerrainImage } from './terrainMinimapImage.js';
 import { Vector3 } from 'three';
 import {
   frustumGroundQuad, playerColor, pointerToCanvas, pickMinimapTarget,
-  OrderFlashes, orderKindFor, drawOrderFlashes, drawCameraQuad
+  OrderFlashes, orderKindFor, drawOrderFlashes, drawCameraQuad, wallMinimapShapes
 } from './minimapView.js';
 
 // Quem treina o quê — derivado de src/data/buildings.js (campo `trains`)
@@ -751,8 +751,42 @@ export class UIManager {
     return buildPostGameModel(gm.result || gm.matchStats.snapshot(), { localId: gm.localPlayerId, victory: !!gm.gameWon, colors });
   }
 
+  /** NEW-26: card somente-leitura de unidade/construção não-local (sem botões de ação nem retrato de comando). */
+  _renderInspectCard(e) {
+    this.currentBuilding = null;
+    if (this.buildingView) this.buildingView.style.display = 'none';
+    if (this.standardView) this.standardView.style.display = 'flex';
+    this.selectionCard.style.display = 'flex';
+    const isUnit = !('isConstructed' in e);
+    const owner = this.gm.getPlayer(e.ownerId);
+    const side = owner && owner.isNeutralHostile ? t('hud.neutral') : t('hud.enemy');
+    const name = isUnit ? unitLabel(e.type) : buildingLabel(e.type);
+    this.selectionTitle.innerText = `${name} (${side})`;
+    this.selectionHpBar.style.width = `${Math.max(0, e.hp / e.maxHp) * 100}%`;
+    this.selectionHp.innerText = `${Math.round(e.hp)} / ${e.maxHp} HP`;
+    const dmg = isUnit ? e.damage : e.towerDamage;
+    this._setStats(`
+      ${dmg ? `<span>${this._stat('attack', '⚔️')} ${t('hud.stat.attack')}: ${dmg.basic}+${dmg.piercing}</span>` : ''}
+      <span>${this._stat('armor', '🛡️')} ${t('hud.stat.defense')}: ${e.armor || 0}</span>
+      <span>${escHtml(t('hud.owner', { name: owner ? owner.name : '?' }))}</span>
+    `);
+    if (this.lastSelectionKey !== 'inspect') {
+      this.lastSelectionKey = 'inspect';
+      this.selectionActions.innerHTML = '';
+    }
+    this.updateSelectionPortraits([]);
+    this.updateMainPortrait([]);
+  }
+
   updateSelectionCard() {
     if (!this.selectionCard) return;
+
+    // NEW-26: inspeção somente-leitura (neutro/inimigo); some se morrer ou sair da visão.
+    if (this.gm.inspected && !this.gm.isInspectable(this.gm.inspected)) this.gm.clearInspection();
+    if (this.gm.inspected && this.gm.selectedUnits.length === 0 && !this.gm.selectedBuilding) {
+      this._renderInspectCard(this.gm.inspected);
+      return;
+    }
 
     if (this.gm.selectedUnits.length > 0) {
       this.currentBuilding = null;
@@ -1451,9 +1485,14 @@ export class UIManager {
     // Draw Buildings (inimigas: só as já vistas — visíveis agora ou lembradas pela névoa)
     const fog = this.gm.fogOfWar;
     const localId = this.gm.localPlayerId;
+    const wallsToDraw = [];
     this.gm.buildings.forEach(b => {
       if (!b.isDead) {
         if (!this.gm.isHostile(localId, b.ownerId) || !fog || fog.isBuildingKnown(b)) {
+          if (b.role === 'wall') { // NEW-24: muralha vira linha/ponto fino, não quadrado de 6 px
+            wallsToDraw.push({ x: b.mesh.position.x, z: b.mesh.position.z, ownerId: b.ownerId });
+            return;
+          }
           const m = toMap(b.mesh.position.x, b.mesh.position.z);
           ctx.fillStyle = colorOf(b.ownerId);
           ctx.fillRect(m.x - 3, m.y - 3, 6, 6);
@@ -1463,6 +1502,21 @@ export class UIManager {
         }
       }
     });
+    if (wallsToDraw.length) {
+      const shapes = wallMinimapShapes(wallsToDraw, toMap);
+      ctx.lineWidth = 2;
+      for (const l of shapes.lines) {
+        ctx.strokeStyle = colorOf(l.ownerId);
+        ctx.beginPath();
+        ctx.moveTo(l.x1, l.y1);
+        ctx.lineTo(l.x2, l.y2);
+        ctx.stroke();
+      }
+      for (const p of shapes.points) {
+        ctx.fillStyle = colorOf(p.ownerId);
+        ctx.fillRect(p.x - 1, p.y - 1, 2, 2);
+      }
+    }
     // Fantasmas: construções inimigas destruídas fora da visão continuam na memória até a área ser revista
     if (fog) {
       ctx.fillStyle = '#dc2626';

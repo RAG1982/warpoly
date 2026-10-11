@@ -23,7 +23,7 @@ Pilares:
 | **F4** | Jogabilidade WC2 — expansão | Cavalaria, cerco, conjuradores + mana/magias, sapadores, aéreo, naval + petróleo, neutros | F3 |
 | **F5** | IA | Refatorada para N jogadores e comandos; 4 dificuldades; build orders; micro; scout; FFA | F2, cresce junto com F3/F4 |
 | **F6** | HUD/UX | Menu principal, setup de partida (facção/mapa/dificuldade/cor), HUD responsiva estilo WC2, opções gráficas, atalhos configuráveis, pós-jogo, tutorial, i18n | F2-04 |
-| **F7** | Arte e áudio | Paridade de fidelidade orc, team color, pós-processamento, terreno com biomas (4 tilesets), VFX, animações com blend, áudio posicional e falas | F1 (pipeline de merge/texturas) |
+| **F7** | Arte e áudio | Paridade de fidelidade orc, team color, pós-processamento, terreno com biomas (4 tilesets), VFX, animações com blend, áudio posicional | F1 (pipeline de merge/texturas) |
 | **F8** | Conteúdo | 6+ mapas skirmish, gerador procedural, editor de mapas, 2 campanhas (8+ missões cada), sistema de scripts/gatilhos | F2-05, F3 |
 | **F9** | Multiplayer | Lobby + sinalização, lockstep WebRTC, checksum anti-desync, reconexão, chat, replays | F2 (C1–C3, P10) |
 | **F10** | Qualidade e lançamento | Testes, soak IA×IA, regressão visual, orçamento de perf em CI, PWA, deploy | contínuo |

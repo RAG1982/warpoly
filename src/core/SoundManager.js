@@ -1,8 +1,8 @@
 // SoundManager.js — fachada de áudio do jogo (F7-08: antes um sintetizador único; agora delega ao motor em src/audio/).
 //
 // Mantém a API que a HUD, o InputManager e o MissionController já usam (`resume`, `playSelect`, `playOrder`, `startMusic`,
-// `setSfxVolume`…) e acrescenta: volume por canal (música/efeitos/falas + geral), nível de áudio por preset (`?audio=`),
-// som posicional (`playChop(pos)`…), falas de unidade, música adaptativa e ambiência por partida.
+// `setSfxVolume`…) e acrescenta: volume por canal (música/efeitos + geral), nível de áudio por preset (`?audio=`),
+// som posicional (`playChop(pos)`…), música adaptativa e ambiência por partida.
 //
 // Regras: o AudioContext só nasce depois de um gesto do usuário (`init` via `resume`, chamados pelos ouvintes de
 // click/keydown do main.js); nível 'off' (testes/automação, `?audio=0`) não cria nada; nada aqui toca a simulação.
@@ -22,8 +22,8 @@ export class SoundManager {
     this.enabled = true; // mudo geral (toggleSound)
     this.musicEnabled = true; // preferência de música (toggleMusic)
     this.initialized = false;
-    /** @type {{master:number, music:number, sfx:number, voice:number}} */
-    this.volumes = { master: 1, music: 0.25, sfx: 0.5, voice: 0.8 };
+    /** @type {{master:number, music:number, sfx:number}} */
+    this.volumes = { master: 1, music: 0.25, sfx: 0.5 };
     this._musicHold = false;
     this._paused = false;
     this._match = null;
@@ -97,16 +97,15 @@ export class SoundManager {
   }
 
   // ------------------------------------------------------------------ volumes e liga/desliga
-  /** @param {{master?:number, music?:number, sfx?:number, voice?:number}} v  valores 0..1 por canal */
+  /** @param {{master?:number, music?:number, sfx?:number}} v  valores 0..1 por canal */
   setVolumes(v) {
-    for (const k of ['master', 'music', 'sfx', 'voice']) if (v[k] !== undefined) this.volumes[k] = clampVolume(v[k], this.volumes[k]);
+    for (const k of ['master', 'music', 'sfx']) if (v[k] !== undefined) this.volumes[k] = clampVolume(v[k], this.volumes[k]);
     this._pushState();
   }
 
   setMasterVolume(v) { this.setVolumes({ master: v }); }
   setSfxVolume(v) { this.setVolumes({ sfx: v }); }
   setMusicVolume(v) { this.setVolumes({ music: v }); }
-  setVoiceVolume(v) { this.setVolumes({ voice: v }); }
 
   toggleSound() {
     this.enabled = !this.enabled;
@@ -147,23 +146,10 @@ export class SoundManager {
   playAlarm() { return this.playSfx('alarm'); }
   playVictory() { return this.playSfx('victory'); }
 
-  // ------------------------------------------------------------------ falas, posição e partida
+  // ------------------------------------------------------------------ posição e partida
   /** Tempo do áudio em segundos (relógio do AudioContext; antes do motor existir, 0). */
   now() {
     return this.engine ? this.engine.now() : 0;
-  }
-
-  /** Há como falar agora? (motor ligado, nível com falas e canal de falas audível) */
-  canSpeak() {
-    const e = this.engine;
-    return !!(e && this.enabled && e.caps.speech && this.volumes.voice > 0 && this.volumes.master > 0);
-  }
-
-  /** Toca uma fala já escolhida (`createSpeechDirector().pick`). Devolve a duração (0 = não falou). */
-  speak(line) {
-    if (!this.canSpeak()) return 0;
-    if (this.ctx.state === 'suspended') this.resume();
-    return this.engine.speak(line);
   }
 
   setListener(l) {

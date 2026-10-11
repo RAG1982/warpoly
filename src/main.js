@@ -539,7 +539,7 @@ class GameApp {
     this.sceneManager = new SceneManager(this.container);
 
     // Libera o áudio na primeira interação (política de autoplay)
-    // (pointerdown também conta como gesto: o motor já existe quando o clique de seleção acontece, e a 1ª fala sai)
+    // (pointerdown também conta como gesto: o motor já existe quando o clique de seleção acontece)
     const unlockAudio = () => {
       this.sound.resume();
       window.removeEventListener('pointerdown', unlockAudio);

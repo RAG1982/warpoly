@@ -17,7 +17,6 @@ import { SFX, SFX_LIMITS } from '../../src/audio/sfxRecipes.js';
 import { AudioEngine } from '../../src/audio/AudioEngine.js';
 import { SoundManager } from '../../src/core/SoundManager.js';
 import { createAudioEvents } from '../../src/audio/AudioEvents.js';
-import { VOICE_PROFILES } from '../../src/audio/speech/speechLines.js';
 import { EventBus } from '../../src/sim/EventBus.js';
 import { EVT } from '../../src/sim/events.js';
 import { ABILITIES } from '../../src/data/index.js';
@@ -263,38 +262,35 @@ describe('F7-08 mixer: volume por canal persistido (storage falso)', () => {
   let st, store;
   beforeEach(() => { st = fakeStorage(); store = createOptionsStore(st); });
 
-  it('os três canais (música, efeitos, falas) e o geral têm padrão e fazem parte da aba de áudio', () => {
+  it('os canais (música, efeitos)  e o geral têm padrão e fazem parte da aba de áudio', () => {
     expect(store.get('volumeMaster')).toBe(1);
     expect(store.get('volumeMusic')).toBe(OPTION_DEFS.volumeMusic.def);
     expect(store.get('volumeSfx')).toBe(OPTION_DEFS.volumeSfx.def);
-    expect(store.get('volumeVoice')).toBe(0.8);
-    expect(TAB_OPTIONS.audio).toEqual(expect.arrayContaining(['volumeMaster', 'volumeMusic', 'volumeSfx', 'volumeVoice']));
+    expect(TAB_OPTIONS.audio).toEqual(['volumeMaster', 'volumeSfx', 'volumeMusic']);
+    expect(OPTION_DEFS.volumeVoice).toBeUndefined();
   });
 
   it('grava e relê cada canal pelas chaves do localStorage', () => {
     store.set('volumeMusic', 0.1);
     store.set('volumeSfx', 0.35);
-    store.set('volumeVoice', 0.65);
     store.set('volumeMaster', 0.9);
     expect(st._m.get('warpoly.volMusic')).toBe('0.1');
     expect(st._m.get('warpoly.volSfx')).toBe('0.35');
-    expect(st._m.get('warpoly.volVoice')).toBe('0.65');
     expect(st._m.get('warpoly.volMaster')).toBe('0.9');
     // outra instância sobre o mesmo storage (recarregar a página) lê os mesmos valores
     const again = createOptionsStore(st);
     expect(again.get('volumeMusic')).toBe(0.1);
     expect(again.get('volumeSfx')).toBe(0.35);
-    expect(again.get('volumeVoice')).toBe(0.65);
     expect(again.get('volumeMaster')).toBe(0.9);
   });
 
   it('valores fora da faixa são limitados e lixo vira o padrão', () => {
-    store.set('volumeVoice', 7);
+    store.set('volumeSfx', 7);
     store.set('volumeMusic', -1);
-    expect(store.get('volumeVoice')).toBe(1);
+    expect(store.get('volumeSfx')).toBe(1);
     expect(store.get('volumeMusic')).toBe(0);
-    const bad = createOptionsStore(fakeStorage({ 'warpoly.volVoice': 'alto', 'warpoly.volMusic': '', 'warpoly.volSfx': 'NaN' }));
-    expect(bad.get('volumeVoice')).toBe(OPTION_DEFS.volumeVoice.def);
+    const bad = createOptionsStore(fakeStorage({ 'warpoly.volMaster': 'alto', 'warpoly.volMusic': '', 'warpoly.volSfx': 'NaN' }));
+    expect(bad.get('volumeMaster')).toBe(OPTION_DEFS.volumeMaster.def);
     expect(bad.get('volumeMusic')).toBe(OPTION_DEFS.volumeMusic.def);
     expect(bad.get('volumeSfx')).toBe(OPTION_DEFS.volumeSfx.def);
   });
@@ -306,28 +302,37 @@ describe('F7-08 mixer: volume por canal persistido (storage falso)', () => {
       removeItem() { throw new Error('SecurityError'); }
     };
     const s = createOptionsStore(boom);
-    expect(() => s.get('volumeVoice')).not.toThrow();
-    expect(s.get('volumeVoice')).toBe(0.8);
-    expect(() => s.set('volumeVoice', 0.3)).not.toThrow();
+    expect(() => s.get('volumeSfx')).not.toThrow();
+    expect(s.get('volumeSfx')).toBe(OPTION_DEFS.volumeSfx.def);
+    expect(() => s.set('volumeSfx', 0.3)).not.toThrow();
     expect(s.set('volumeMusic', 0.4)).toBe(0.4); // devolve o valor efetivo mesmo sem persistir
     expect(() => s.resetTab('audio')).not.toThrow();
     expect(createOptionsStore(null).get('volumeSfx')).toBe(OPTION_DEFS.volumeSfx.def);
   });
 
   it('restaurar padrão da aba de áudio apaga as chaves dos canais', () => {
-    store.set('volumeVoice', 0.2);
+    store.set('volumeSfx', 0.2);
     store.set('volumeMusic', 0.9);
     store.resetTab('audio');
-    expect(st._m.has('warpoly.volVoice')).toBe(false);
+    expect(st._m.has('warpoly.volSfx')).toBe(false);
     expect(st._m.has('warpoly.volMusic')).toBe(false);
-    expect(store.get('volumeVoice')).toBe(0.8);
+    expect(store.get('volumeSfx')).toBe(OPTION_DEFS.volumeSfx.def);
   });
 
-  it('applyAudio empurra os quatro volumes para o gerenciador de som (e cai no modo antigo sem setVolumes)', () => {
-    store.set('volumeMusic', 0.2); store.set('volumeSfx', 0.4); store.set('volumeVoice', 0.6); store.set('volumeMaster', 0.5);
+  it('configuração antiga com volume de falas (warpoly.volVoice) é ignorada sem erro', () => {
+    const old = createOptionsStore(fakeStorage({ 'warpoly.volVoice': '0.3', 'warpoly.volMusic': '0.4' }));
+    expect(old.get('volumeMusic')).toBe(0.4);
+    expect(() => old.resetTab('audio')).not.toThrow();
+    const got = [];
+    applyAudio({ setVolumes: (v) => got.push(v) }, old);
+    expect(Object.keys(got[0]).sort()).toEqual(['master', 'music', 'sfx']);
+  });
+
+  it('applyAudio empurra os três volumes para o gerenciador de som (e cai no modo antigo sem setVolumes)', () => {
+    store.set('volumeMusic', 0.2); store.set('volumeSfx', 0.4); store.set('volumeMaster', 0.5);
     const got = [];
     applyAudio({ setVolumes: (v) => got.push(v) }, store);
-    expect(got).toEqual([{ master: 0.5, music: 0.2, sfx: 0.4, voice: 0.6 }]);
+    expect(got).toEqual([{ master: 0.5, music: 0.2, sfx: 0.4 }]);
     const old = [];
     applyAudio({ setSfxVolume: (v) => old.push(['sfx', v]), setMusicVolume: (v) => old.push(['music', v]) }, store);
     expect(old).toEqual([['sfx', 0.2], ['music', 0.1]]);
@@ -576,7 +581,6 @@ describe('F7-08 motor de áudio (contexto falso): mixer, limitador, posicional e
     expect(eng.limiter.threshold.value).toBeLessThan(0);
     expect(eng.limiter.attack.value).toBeLessThanOrEqual(0.005);
     expect(eng.buses.sfx.connections).toContain(eng.master);
-    expect(eng.buses.voice.connections).toContain(eng.master);
     expect(eng.buses.music.connections).toContain(eng.musicDuck);
     expect(eng.musicDuck.connections).toContain(eng.master);
     expect(eng.ambienceBus.connections).toContain(eng.buses.sfx); // ambiência soa no canal de efeitos
@@ -584,15 +588,14 @@ describe('F7-08 motor de áudio (contexto falso): mixer, limitador, posicional e
 
   it('volume por canal: cada barramento recebe o seu valor; geral multiplica no mestre', () => {
     mk();
-    eng.setVolumes({ master: 0.7, music: 0.3, sfx: 0.6, voice: 0.9 }, true);
+    eng.setVolumes({ master: 0.7, music: 0.3, sfx: 0.6 }, true);
     const last = (n) => n.gain.events.filter(e => e[0] === 'set').pop()[1];
     expect(last(eng.master)).toBe(0.7);
     expect(last(eng.buses.music)).toBe(0.3);
     expect(last(eng.buses.sfx)).toBe(0.6);
-    expect(last(eng.buses.voice)).toBe(0.9);
-    eng.setVolumes({ voice: 0.1 }); // suave (setTargetAtTime), os outros canais ficam
-    expect(eng.buses.voice.gain.events.at(-1)[0]).toBe('target');
-    expect(eng.volumes).toEqual({ master: 0.7, music: 0.3, sfx: 0.6, voice: 0.1 });
+    eng.setVolumes({ music: 0.1 }); // suave (setTargetAtTime), os outros canais ficam
+    expect(eng.buses.music.gain.events.at(-1)[0]).toBe('target');
+    expect(eng.volumes).toEqual({ master: 0.7, music: 0.1, sfx: 0.6 });
     eng.setVolumes({ sfx: 5, music: -2 });
     expect(eng.volumes.sfx).toBe(1);
     expect(eng.volumes.music).toBe(0);
@@ -653,7 +656,6 @@ describe('F7-08 motor de áudio (contexto falso): mixer, limitador, posicional e
     eng.setLevel('off');
     expect(eng.pool.max).toBe(0);
     expect(eng.playSfx('select')).toBe(false);
-    expect(eng.speak({ key: 'k', ph: "s'i~", voice: VOICE_PROFILES.h_soldier })).toBe(0);
     expect(eng.music.playing).toBe(false);
   });
 
@@ -679,44 +681,6 @@ describe('F7-08 motor de áudio (contexto falso): mixer, limitador, posicional e
     for (const v of ['burst', 'ring', 'beam', 'aura']) { ctx.advance(2); expect(eng.playSfx('cast', { variant: v })).toBe(true); }
     // limites por som só mencionam receitas que existem
     for (const k of Object.keys({ ...SFX_LIMITS.perKey, ...SFX_LIMITS.minGap })) expect(SFX[k], k).toBeTruthy();
-  });
-
-  it('fala: sintetiza uma vez, cacheia, corta a fala anterior e abaixa a música', () => {
-    mk();
-    const spyBuf = { n: 0 };
-    const orig = ctx.createBuffer.bind(ctx);
-    ctx.createBuffer = (...a) => { spyBuf.n++; return orig(...a); };
-    const line = { key: 'h.soldier.order.0', ph: "s'i~, se~J'oh!", voice: VOICE_PROFILES.h_soldier };
-    const d1 = eng.speak(line);
-    expect(d1).toBeGreaterThan(0.5);
-    expect(d1).toBeLessThan(2.5);
-    const created = spyBuf.n;
-    expect(ctx.counts.bufsrc).toBeGreaterThan(0);
-    expect(eng.musicDuck.gain.events.some(e => e[0] === 'target' && e[1] < 1)).toBe(true); // ducking
-    const first = eng._speech;
-    ctx.advance(0.2);
-    eng.speak({ key: 'h.soldier.order.1', ph: "pr'o~tU!", voice: VOICE_PROFILES.h_soldier });
-    expect(first.src.stopped).toBe(true); // cortou a anterior
-    expect(first.g.gain.events.some(e => e[0] === 'target' && e[1] === 0)).toBe(true);
-    ctx.advance(3);
-    const again = eng.speak(line);
-    expect(again).toBeCloseTo(d1, 6);
-    expect(spyBuf.n).toBe(created + 1); // só a 2ª fala foi sintetizada; a 1ª veio do cache
-    expect(eng.counters.speech).toBe(3);
-  });
-
-  it('o cache de falas é limitado (LRU)', () => {
-    mk();
-    for (let i = 0; i < 80; i++) eng.speak({ key: `k${i}`, ph: "s'a", voice: VOICE_PROFILES.h_worker });
-    expect(eng._speechCache.size).toBeLessThanOrEqual(64);
-    expect(eng._speechCache.has('k79')).toBe(true);
-    expect(eng._speechCache.has('k0')).toBe(false);
-  });
-
-  it('falas desligadas por canal (voz 0) ou nível não tocam', () => {
-    mk();
-    eng.setVolumes({ voice: 0 });
-    expect(eng.speak({ key: 'a', ph: "s'a", voice: VOICE_PROFILES.h_worker })).toBe(0);
   });
 
   it('música: paz por facção ao começar a partida; combate recente troca com crossfade; volta à paz depois', () => {
@@ -847,17 +811,14 @@ describe('F7-08 SoundManager: AudioContext só após gesto, nível por config, m
     sm.init();
     expect(Fake.made).toHaveLength(0);
     expect(sm.playSelect()).toBe(false);
-    expect(sm.canSpeak()).toBe(false);
     expect(sm.stats().level).toBe('off');
   });
 
   it('volumes definidos antes do gesto valem depois; canais independentes; mudo geral', () => {
     const { sm } = mkSm();
-    sm.setVolumes({ music: 0.3, sfx: 0.6, voice: 0.4, master: 0.8 });
+    sm.setVolumes({ music: 0.3, sfx: 0.6, master: 0.8 });
     sm.resume();
-    expect(sm.engine.volumes).toEqual({ master: 0.8, music: 0.3, sfx: 0.6, voice: 0.4 });
-    sm.setVoiceVolume(0);
-    expect(sm.canSpeak()).toBe(false);
+    expect(sm.engine.volumes).toEqual({ master: 0.8, music: 0.3, sfx: 0.6 });
     expect(sm.playSelect()).toBe(true); // efeitos seguem
     expect(sm.toggleSound()).toBe(false);
     expect(sm.playSelect()).toBe(false);
@@ -908,10 +869,9 @@ describe('F7-08 SoundManager: AudioContext só após gesto, nível por config, m
 
 // ---------------------------------------------------------------------------------------------------------
 describe('F7-08 AudioEvents: eventos da sim -> som (sim intocada)', () => {
-  function setup({ visible = () => true, faction = 'human', canSpeak = true } = {}) {
+  function setup({ visible = () => true, faction = 'human' } = {}) {
     const events = new EventBus();
     const calls = [];
-    let clock = 10;
     const gm = {
       events, localPlayerId: 0, localPlayer: { factionId: faction },
       entitiesById: new Map(),
@@ -929,9 +889,6 @@ describe('F7-08 AudioEvents: eventos da sim -> som (sim intocada)', () => {
       playSfx: (n, o) => { calls.push(['sfx', n, o]); return true; },
       playSelect: () => calls.push(['select']),
       playOrder: () => calls.push(['order']),
-      canSpeak: () => canSpeak,
-      now: () => clock,
-      speak: (l) => { calls.push(['speak', l.key, l.voiceId]); return 0.8; },
       noteCombat: (w) => calls.push(['combat', w]),
       beginMatch: (m) => calls.push(['begin', m]),
       endMatch: () => calls.push(['end']),
@@ -940,16 +897,13 @@ describe('F7-08 AudioEvents: eventos da sim -> som (sim intocada)', () => {
     const dispose = createAudioEvents(gm, sound, { tilesetId: 'inverno' });
     const emit = (type, p) => { events.emit(type, p); events.flush(); };
     const only = (kind) => calls.filter(c => c[0] === kind);
-    return { gm, sound, calls, dispose, emit, only, tick: (dt) => { clock += dt; } };
+    return { gm, sound, calls, dispose, emit, only };
   }
 
   it('avisa a partida (facção do jogador local e tileset) e devolve tudo no dispose', () => {
     const t = setup({ faction: 'orc' });
     expect(t.only('begin')[0][1]).toEqual({ faction: 'orc', tilesetId: 'inverno' });
-    expect(t.gm.soundManager).not.toBe('original'); // gancho do InputManager
-    expect(typeof t.gm.soundManager.playSelect).toBe('function');
     t.dispose();
-    expect(t.gm.soundManager).toBe('original');
     expect(t.only('end')).toHaveLength(1);
     t.emit(EVT.WORKER_CHOP, { pos: { x: 0, y: 0, z: 0 }, ownerId: 0 }); // ouvintes removidos
     expect(t.only('sfx')).toHaveLength(0);
@@ -970,6 +924,14 @@ describe('F7-08 AudioEvents: eventos da sim -> som (sim intocada)', () => {
     expect(name).toBe('chop');
     expect(opts.priority).toBeLessThan(t.only('sfx')[0][2].priority); // trabalho alheio tem prioridade menor
     expect(opts.pos).toBe(pos);
+  });
+
+  it('seleção e ordem tocam só o clique (sem fala)', () => {
+    const t = setup();
+    t.emit(EVT.SELECTED, { entityId: 7, ownerId: 0 });
+    t.emit(EVT.ORDER_ISSUED, { ownerId: 0 });
+    expect(t.only('select')).toHaveLength(1);
+    expect(t.only('order')).toHaveLength(1);
   });
 
   it('marcos locais (alarme, unidade treinada) não são posicionais', () => {
@@ -1003,61 +965,4 @@ describe('F7-08 AudioEvents: eventos da sim -> som (sim intocada)', () => {
     expect(t.only('combat').map(c => c[1])).toEqual([1, 0.5, 3]);
   });
 
-  it('clicar numa unidade com voz fala (sem o clique); numa construção toca o clique', () => {
-    const t = setup();
-    t.gm.entitiesById.set(7, { id: 7, type: 'knight', ownerId: 0 });
-    t.gm.entitiesById.set(8, { id: 8, type: 'castle', ownerId: 0, isConstructed: true });
-    t.emit(EVT.SELECTED, { entityId: 7, ownerId: 0 });
-    expect(t.only('speak')).toHaveLength(1);
-    expect(t.only('speak')[0][1]).toMatch(/^h\.soldier\.select\./);
-    expect(t.only('select')).toHaveLength(0);
-    t.tick(1);
-    t.emit(EVT.SELECTED, { entityId: 8, ownerId: 0 });
-    expect(t.only('select')).toHaveLength(1);
-    expect(t.only('speak')).toHaveLength(1);
-  });
-
-  it('ordem fala a unidade líder; ordens em rajada não viram metralhadora (sem fala nem clique)', () => {
-    const t = setup();
-    t.gm.selectedUnits = [{ id: 1, type: 'villager', ownerId: 0 }, { id: 2, type: 'hero_brann', ownerId: 0 }, { id: 3, type: 'knight', ownerId: 0 }];
-    t.emit(EVT.ORDER_ISSUED, { ownerId: 0 });
-    expect(t.only('speak')).toHaveLength(1);
-    expect(t.only('speak')[0][1]).toMatch(/^h\.hero\.order\./); // o herói fala por todos
-    t.tick(0.3);
-    t.emit(EVT.ORDER_ISSUED, { ownerId: 0 });
-    expect(t.only('speak')).toHaveLength(1);
-    expect(t.only('order')).toHaveLength(0);
-    t.tick(1.5);
-    t.emit(EVT.ORDER_ISSUED, { ownerId: 0 });
-    expect(t.only('speak')).toHaveLength(2);
-  });
-
-  it('seleção em grupo e ordens por tecla (gm.soundManager) também falam; sem voz toca o clique de antes', () => {
-    const t = setup({ faction: 'orc' });
-    t.gm.selectedUnits = [{ id: 5, type: 'grunt', ownerId: 0 }, { id: 6, type: 'peon', ownerId: 0 }];
-    t.gm.soundManager.playSelect();
-    expect(t.only('speak')[0][1]).toMatch(/^o\.soldier\.select\./);
-    t.tick(2);
-    t.gm.soundManager.playOrder();
-    expect(t.only('speak')[1][1]).toMatch(/^o\.soldier\.order\./);
-    t.gm.selectedUnits = [];
-    t.gm.soundManager.playSelect(); // nada selecionado: clique
-    expect(t.only('select')).toHaveLength(1);
-
-    const mute = setup({ canSpeak: false });
-    mute.gm.selectedUnits = [{ id: 5, type: 'knight', ownerId: 0 }];
-    mute.gm.soundManager.playSelect();
-    mute.gm.soundManager.playOrder();
-    expect(mute.only('speak')).toHaveLength(0);
-    expect(mute.only('select')).toHaveLength(1);
-    expect(mute.only('order')).toHaveLength(1);
-  });
-
-  it('a unidade neutra compartilhada (petroleiro) fala com a voz da facção do dono', () => {
-    const t = setup({ faction: 'orc' });
-    t.gm.entitiesById.set(9, { id: 9, type: 'tanker', ownerId: 0 });
-    t.emit(EVT.SELECTED, { entityId: 9, ownerId: 0 });
-    expect(t.only('speak')[0][1]).toMatch(/^o\.crew\.select\./);
-    expect(t.only('speak')[0][2]).toBe('o_crew');
-  });
 });

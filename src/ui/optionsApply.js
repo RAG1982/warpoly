@@ -7,7 +7,7 @@ import { setBindings } from '../core/Hotkeys.js';
 import { applyUiScale } from './uiScale.js';
 
 /**
- * Mixer (F7-08): volume por canal — música, efeitos e falas — mais o geral, que é o ganho do barramento mestre
+ * Mixer (F7-08): volume por canal — música e efeitos — mais o geral, que é o ganho do barramento mestre
  * (efetivo = canal × geral, como antes). Persistência: `optionsStore` (try/catch no storage).
  */
 export function applyAudio(sound, store = options) {
@@ -15,8 +15,7 @@ export function applyAudio(sound, store = options) {
   const v = {
     master: store.get('volumeMaster'),
     music: store.get('volumeMusic'),
-    sfx: store.get('volumeSfx'),
-    voice: store.get('volumeVoice')
+    sfx: store.get('volumeSfx')
   };
   if (typeof sound.setVolumes === 'function') sound.setVolumes(v);
   else {

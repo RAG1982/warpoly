@@ -7,7 +7,11 @@ import { validateMatchConfig } from '../../src/sim/MatchConfig.js';
 import { getHeightForMap } from '../../src/world/terrainGenerators.js';
 import { UNITS } from '../../src/data/units.js';
 import { NAVAL_MIN_DEPTH } from '../../src/data/combat.js';
+import { BUILDINGS } from '../../src/data/buildings.js';
+import { RESEARCH } from '../../src/data/upgrades.js';
+import { researchToken, parseResearchToken } from '../../src/sim/techRestriction.js';
 import {
+  availableTech, missionUnlocks, unlockMissionOf,
   validateCampaign, isUnlocked, missionStatus, nextMission, isCampaignComplete, startingResourcesFor,
   CampaignProgress, memoryStorage, PROGRESS_KEY, createCampaignMissionConfig, setActiveRun, onMissionEnded
 } from '../../src/campaign/index.js';
@@ -214,5 +218,277 @@ describe('campanha: i18n (F8-05)', () => {
       expect(ptBR[k], k).toBeTruthy();
       expect(en[k], k).toBeTruthy();
     }
+  });
+});
+
+/**
+ * F8-05b — conteúdo da liberação progressiva: a campanha libera TODAS as unidades/construções/pesquisas da Aliança, cada missão usa
+ * (exige ou recompensa) as suas novidades, nada é entregue ao jogador antes de ser liberado, os inimigos variam por tema e a união
+ * das unidades das 8 missões cobre todas as categorias (infantaria, cavalaria, cerco, conjurador, sapador, aérea, naval, herói).
+ */
+describe('campanha da Aliança: liberação progressiva e cobertura de unidades (F8-05b)', () => {
+  const missions = ids.map((id) => getMission(id));
+  const isNum = (n) => typeof n === 'number';
+  const textOf = (t) => (typeof t === 'string' ? { 'pt-BR': t, en: t } : t);
+
+  /** Todos os objetos de ação `spawn`/`spawnBuilding` (setup + gatilhos) de uma missão, com o dono. */
+  function actionsOf(m) {
+    const out = [];
+    const walk = (v) => {
+      if (Array.isArray(v)) return v.forEach(walk);
+      if (!v || typeof v !== 'object') return;
+      if (v.type === 'spawn' || v.type === 'spawnBuilding') out.push(v);
+      Object.values(v).forEach(walk);
+    };
+    walk(m.setup);
+    walk(m.triggers);
+    return out;
+  }
+  const spawnedUnits = (a) => (a.units ?? (a.unitType ? [{ type: a.unitType }] : [])).map((u) => u.type);
+  /** Dono do lado do jogador? Um aliado que a missão faz trair (`setTeam`) conta como inimigo. */
+  const isPlayerOwner = (m, owner) => {
+    if (owner === 'player' || owner === 0) return true;
+    if (owner === 'ally') return true;
+    if (!isNum(owner)) return false;
+    const betrays = JSON.stringify(m.triggers).includes(`"type":"setTeam","player":${owner}`);
+    const localTeam = m.players.find((p) => p.isLocal).team;
+    return !betrays && m.players.some((p) => p.id === owner && p.team === localTeam);
+  };
+  const isEnemyOwner = (m, owner) => !isPlayerOwner(m, owner) && owner !== 'neutral';
+
+  /** Seletores/condições que citam `unitType` / `buildingType` / pesquisa de um objetivo ou gatilho. */
+  function conditionRefs(m) {
+    const refs = { units: [], buildings: [], research: [] };
+    const walk = (v, ctx) => {
+      if (Array.isArray(v)) return v.forEach((x) => walk(x, ctx));
+      if (!v || typeof v !== 'object') return;
+      if (v.type === 'destroy' || v.type === 'dead') return; // mortes de inimigos/neutros: não são unidades do jogador
+      const mine = v.owner === undefined || v.owner === 'player' || v.owner === 0;
+      if (v.type === 'research' && typeof v.id === 'string') refs.research.push(v.level > 1 ? `${v.id}@${v.level}` : v.id);
+      if (mine && typeof v.unitType === 'string') refs.units.push(v.unitType);
+      if (mine && typeof v.buildingType === 'string') refs.buildings.push(v.buildingType);
+      for (const x of Object.values(v)) walk(x, ctx);
+    };
+    walk(m.objectives, null);
+    walk(m.triggers.map((t) => t.when), null);
+    return refs;
+  }
+
+  it('a campanha libera TODAS as unidades, construções e pesquisas da Aliança (e os dois heróis)', () => {
+    const all = availableTech(alliance, ids.length - 1);
+    const humanUnits = Object.values(UNITS).filter((u) => (u.faction === 'human' || u.faction === 'neutral') && u.cost && !u.isHero).map((u) => u.type);
+    for (const t of humanUnits) expect(all.units.has(t), `unidade ${t} nunca é liberada`).toBe(true);
+    for (const t of Object.values(BUILDINGS).filter((b) => (b.faction === 'human' || b.faction === 'neutral') && b.role !== 'hq' && b.role !== 'camp').map((b) => b.type)) {
+      expect(all.buildings.has(t), `construção ${t} nunca é liberada`).toBe(true);
+    }
+    for (const [id, r] of Object.entries(RESEARCH).filter(([, r]) => !r.faction || r.faction === 'human')) {
+      for (let lv = 1; lv <= r.levels.length; lv++) expect(all.research.has(researchToken(id, lv)), `pesquisa ${id} nível ${lv} nunca é liberada`).toBe(true);
+    }
+    expect([...all.heroes].sort()).toEqual(['hero_brann', 'hero_oren']);
+  });
+
+  it('a progressão cresce missão a missão e cada missão libera algo novo', () => {
+    let prev = 0;
+    ids.forEach((id, i) => {
+      const u = missionUnlocks(alliance, i);
+      const novos = u.units.length + u.buildings.length + u.research.length + u.heroes.length;
+      expect(novos, `${id} não libera nada`).toBeGreaterThan(0);
+      const t = availableTech(alliance, i);
+      const total = t.units.size + t.buildings.size + t.research.size + t.heroes.size;
+      expect(total).toBe(prev + novos);
+      prev = total;
+    });
+    // as âncoras do plano: infantaria → ferraria → torres → estábulo → oficina → estaleiro → magia/aviário → o resto
+    const when = (kind, id) => unlockMissionOf(alliance, kind, id);
+    expect(when('units', 'knight')).toBe(1);
+    expect(when('units', 'archer')).toBe(1);
+    expect(when('buildings', 'forge')).toBe(2);
+    expect(when('buildings', 'watchtower')).toBe(3);
+    expect(when('buildings', 'wall_human')).toBe(3);
+    expect(when('buildings', 'stable')).toBe(4);
+    expect(when('units', 'cavalier')).toBe(4);
+    expect(when('buildings', 'workshop')).toBe(5);
+    expect(when('units', 'ballista')).toBe(5);
+    expect(when('units', 'sapper')).toBe(5);
+    expect(when('buildings', 'shipyard')).toBe(6);
+    expect(when('buildings', 'oil_platform')).toBe(6);
+    expect(when('units', 'frigate')).toBe(6);
+    expect(when('units', 'barge')).toBe(6);
+    expect(when('units', 'tanker')).toBe(6);
+    expect(when('units', 'dreadnought')).toBe(6);
+    expect(when('buildings', 'arcane_tower')).toBe(7);
+    expect(when('buildings', 'temple')).toBe(7);
+    expect(when('buildings', 'aviary')).toBe(7);
+    expect(when('units', 'mage')).toBe(7);
+    expect(when('units', 'templar')).toBe(7);
+    expect(when('units', 'gryphon_rider')).toBe(7);
+    expect(when('research', 'melee_weapons@2')).toBe(7);
+    expect(when('units', 'ranger')).toBe(8);
+  });
+
+  it('cada item liberado é alcançável: os requisitos de construção/nível/pesquisa saem de itens liberados antes ou junto', () => {
+    // nível do Centro que a missão concede (ação `setTier` do setup); sem ela, nível 1
+    const tierOf = (m) => Math.max(1, ...m.setup.filter((a) => a.type === 'setTier').map((a) => a.tier));
+    const reqOk = (req, avail, tier) => {
+      if (typeof req === 'string') return avail.buildings.has(req) || req === 'castle';
+      if (typeof req.hq === 'number') return tier >= req.hq;
+      if (typeof req.role === 'string') return [...avail.buildings].some((b) => BUILDINGS[b].role === req.role);
+      if (typeof req.research === 'string') return avail.research.has(researchToken(req.research, req.level || 1));
+      return false;
+    };
+    ids.forEach((id, i) => {
+      const avail = availableTech(alliance, i);
+      const here = tierOf(getMission(id));
+      const novos = missionUnlocks(alliance, i);
+      for (const b of novos.buildings) for (const r of BUILDINGS[b].requires || []) expect(reqOk(r, avail, here), `${id}: ${b} exige ${JSON.stringify(r)}`).toBe(true);
+      for (const u of novos.units) {
+        const base = UNITS[u].modelOf;
+        const reqs = UNITS[u].requires || [];
+        for (const r of reqs) expect(reqOk(r, avail, here), `${id}: ${u} exige ${JSON.stringify(r)}`).toBe(true);
+        // a unidade precisa de uma construção liberada que a treine (ou da pesquisa que a promove)
+        const trainers = Object.values(BUILDINGS).filter((b) => avail.buildings.has(b.type) && (b.trains || []).some((t) => t === u || t === base));
+        const promoted = Object.values(RESEARCH).some((r) => r.levels[0].effect && r.levels[0].effect.promote && Object.values(r.levels[0].effect.promote).includes(u) && avail.research.has(Object.keys(RESEARCH).find((k) => RESEARCH[k] === r)));
+        const castleTrains = (BUILDINGS.castle.trains || []).includes(u);
+        expect(trainers.length > 0 || promoted || castleTrains, `${id}: ${u} sem construção liberada que a treine`).toBe(true);
+      }
+      for (const r of novos.research) {
+        const { id: rid, level } = parseResearchToken(r);
+        const def = RESEARCH[rid];
+        for (const q of def.levels[level - 1].requires || []) expect(reqOk(q, avail, here), `${id}: pesquisa ${r} exige ${JSON.stringify(q)}`).toBe(true);
+        expect([...avail.buildings].some((b) => BUILDINGS[b].role === def.building), `${id}: ${r} sem construção liberada que a pesquise (${def.building})`).toBe(true);
+      }
+    });
+  });
+
+  it('nada é entregue ao jogador antes de liberado: spawns, construções e pesquisas de objetivos usam só o disponível naquela missão', () => {
+    ids.forEach((id, i) => {
+      const m = missions[i];
+      const avail = availableTech(alliance, i);
+      for (const a of actionsOf(m)) {
+        if (a.type === 'spawnBuilding') {
+          if (isPlayerOwner(m, a.owner)) expect(BUILDINGS[a.buildingType].role === 'hq' || avail.buildings.has(a.buildingType), `${id}: spawnBuilding ${a.buildingType}`).toBe(true);
+          continue;
+        }
+        if (!isPlayerOwner(m, a.owner)) continue;
+        for (const u of spawnedUnits(a)) {
+          if (UNITS[u].isHero) expect(avail.heroes.has(u), `${id}: herói ${u} ainda não liberado`).toBe(true);
+          else if (UNITS[u].faction === 'neutral' && u !== 'tanker' && u !== 'barge') continue; // cativos/civis neutros
+          else expect(avail.units.has(u) || (UNITS[u].modelOf && avail.units.has(UNITS[u].modelOf)), `${id}: ${u} entregue antes de liberado`).toBe(true);
+        }
+      }
+      const refs = conditionRefs(m);
+      for (const u of refs.units) expect(avail.units.has(u) || avail.heroes.has(u) || (UNITS[u].modelOf && avail.units.has(UNITS[u].modelOf)), `${id}: objetivo cita ${u} antes de liberado`).toBe(true);
+      for (const b of refs.buildings) expect(avail.buildings.has(b), `${id}: objetivo cita ${b} antes de liberado`).toBe(true);
+      for (const r of refs.research) expect(avail.research.has(r), `${id}: objetivo cita a pesquisa ${r} antes de liberada`).toBe(true);
+    });
+  });
+
+  it('cada missão USA as novidades que libera (objetivo, recompensa, herói ou inimigo) e traz uma "Dica" bilíngue', () => {
+    ids.forEach((id, i) => {
+      const m = missions[i];
+      const u = missionUnlocks(alliance, i);
+      const blob = JSON.stringify({ o: m.objectives, t: m.triggers, s: m.setup });
+      const used = [...u.units, ...u.buildings, ...u.heroes].filter((x) => blob.includes(`"${x}"`));
+      const usedResearch = u.research.filter((r) => { const p = parseResearchToken(r); return blob.includes(`"id":"${p.id}"`) || blob.includes(`"id": "${p.id}"`); });
+      expect(used.length + usedResearch.length, `${id}: nenhuma novidade é usada na missão`).toBeGreaterThanOrEqual(i === 0 ? 2 : 1);
+      const hints = (m.briefing.hints || []).map(textOf);
+      expect(hints.some((h) => /^Dica:/.test(h['pt-BR']) && /^Tip:/.test(h.en)), `${id}: sem "Dica:" bilíngue`).toBe(true);
+    });
+  });
+
+  it('as novidades de cada missão têm nome em pt-BR e en (sem chave ausente)', () => {
+    ids.forEach((id, i) => {
+      const u = missionUnlocks(alliance, i);
+      for (const t of [...u.units, ...u.heroes]) for (const d of [ptBR, en]) expect(d[`unit.${t}.name`], `unit.${t}.name`).toBeTruthy();
+      for (const t of u.buildings) for (const d of [ptBR, en]) expect(d[`building.${t}.name`], `building.${t}.name`).toBeTruthy();
+      for (const r of u.research) for (const d of [ptBR, en]) expect(d[`research.${parseResearchToken(r).id}.human`], `research.${r}`).toBeTruthy();
+    });
+    for (const k of ['req.locked', 'req.lockedNever', 'campaign.unlock.title', 'campaign.unlock.announce', 'campaign.unlock.units', 'campaign.unlock.buildings', 'campaign.unlock.research', 'campaign.unlock.heroes', 'campaign.unlock.level']) {
+      expect(ptBR[k], k).toBeTruthy();
+      expect(en[k], k).toBeTruthy();
+    }
+  });
+
+  it('heróis únicos: cada um entra em 2 ou 3 missões, sempre depois de liberado, e nunca em duas ações da mesma missão', () => {
+    const where = { hero_brann: [], hero_oren: [] };
+    ids.forEach((id, i) => {
+      const seen = new Set();
+      for (const a of actionsOf(missions[i])) for (const u of spawnedUnits(a)) {
+        if (!UNITS[u].isHero) continue;
+        expect(seen.has(u), `${id}: ${u} aparece duas vezes`).toBe(false);
+        seen.add(u);
+        where[u].push(i + 1);
+        expect(availableTech(alliance, i).heroes.has(u)).toBe(true);
+      }
+    });
+    expect(where.hero_brann).toEqual([5, 6, 8]);
+    expect(where.hero_oren).toEqual([7, 8]);
+  });
+
+  it('inimigos variam com o tema da missão (necromantes, serpes, lanceiros, navios orcs, cerco, incendiários…)', () => {
+    const enemy = ids.map((id, i) => {
+      const set = new Set();
+      for (const a of actionsOf(missions[i])) if (a.type === 'spawn' && isEnemyOwner(missions[i], a.owner)) spawnedUnits(a).forEach((u) => set.add(u));
+      return set;
+    });
+    const has = (n, ...types) => types.forEach((t) => expect(enemy[n - 1].has(t), `m0${n} sem ${t}`).toBe(true));
+    has(1, 'grunt');
+    has(2, 'grunt', 'axethrower');
+    has(3, 'ogre', 'arsonist'); // muralhas: Incendiários na onda final
+    has(4, 'ogre');
+    has(5, 'catapult', 'arsonist'); // cerco e Incendiários
+    has(6, 'war_galley', 'iron_leviathan'); // navios orcs
+    has(7, 'necromancer', 'war_balloon', 'ogre');
+    has(8, 'necromancer', 'war_serpent', 'ogre');
+    // construções inimigas criadas pela missão: torres de guarda (m05) e o Ninho das Serpes (m08)
+    const nests = actionsOf(missions[7]).filter((a) => a.type === 'spawnBuilding').map((a) => a.buildingType);
+    expect(nests).toContain('serpent_nest');
+    const towers = actionsOf(missions[4]).filter((a) => a.type === 'spawnBuilding').map((a) => a.buildingType);
+    expect(towers.filter((t) => t === 'orc_watchtower').length).toBe(2);
+    // m01–m03 continuam leves: nenhum deles ganhou herói, cerco, naval ou aéreo inimigo
+    for (let n = 1; n <= 3; n++) for (const t of enemy[n - 1]) expect(['grunt', 'axethrower', 'ogre', 'arsonist']).toContain(t);
+  });
+
+  it('cobertura de unidades: as 8 missões (jogador + inimigo + objetivos) usam pelo menos uma unidade de CADA categoria', () => {
+    const CAT = {
+      infantaria: ['villager', 'knight', 'archer', 'ranger', 'peon', 'grunt', 'axethrower', 'berserker'],
+      cavalaria: ['cavalier', 'ogre'],
+      cerco: ['ballista', 'catapult'],
+      conjurador: ['mage', 'templar', 'necromancer', 'ogre_mage'],
+      sapador: ['sapper', 'arsonist'],
+      aerea: ['glider', 'gryphon_rider', 'war_balloon', 'war_serpent'],
+      naval: ['tanker', 'barge', 'frigate', 'dreadnought', 'submersible', 'war_galley', 'iron_leviathan', 'colossal_turtle'],
+      heroi: ['hero_brann', 'hero_oren', 'hero_drogath']
+    };
+    const catOf = (t) => Object.keys(CAT).find((c) => CAT[c].includes(t));
+    const player = new Set();
+    const foe = new Set();
+    const objective = new Set();
+    ids.forEach((id, i) => {
+      const m = missions[i];
+      for (const a of actionsOf(m)) {
+        if (a.type !== 'spawn') continue;
+        for (const u of spawnedUnits(a)) (isPlayerOwner(m, a.owner) ? player : isEnemyOwner(m, a.owner) ? foe : new Set()).add(u);
+      }
+      const refs = conditionRefs(m);
+      refs.units.forEach((u) => objective.add(u));
+      for (const o of m.objectives) {
+        const sel = o.select || {};
+        if (sel.unitType) objective.add(sel.unitType);
+      }
+      for (const p of m.players) (p.factionId === 'human' ? ['villager', 'knight', 'archer'] : ['peon', 'grunt', 'axethrower']).forEach((u) => (p.isLocal || p.team === m.players.find((q) => q.isLocal).team ? player : foe).add(u));
+    });
+    const used = new Set([...player, ...foe, ...objective]);
+    for (const c of Object.keys(CAT)) {
+      expect(CAT[c].some((u) => used.has(u)), `categoria ${c} não aparece em nenhuma missão`).toBe(true);
+    }
+    // o jogador usa uma unidade de cada categoria da Aliança, e o inimigo traz as suas (sem heróis)
+    for (const c of Object.keys(CAT)) expect(CAT[c].some((u) => player.has(u) || objective.has(u)), `jogador sem ${c}`).toBe(true);
+    for (const c of Object.keys(CAT).filter((x) => x !== 'heroi')) expect(CAT[c].some((u) => foe.has(u)), `inimigo sem ${c}`).toBe(true);
+    // e toda unidade usada pertence a uma categoria conhecida (sem tipo esquecido)
+    for (const u of used) if (!['bandit', 'sheep', 'skeleton'].includes(u)) expect(catOf(u), `${u} sem categoria`).toBeTruthy();
+    // todas as unidades da Aliança (treináveis ou heróis) aparecem em alguma missão, no jogador ou nos objetivos, ou são liberadas para treino
+    const all = availableTech(alliance, ids.length - 1);
+    for (const u of [...all.units, ...all.heroes]) expect(catOf(u), `${u} sem categoria`).toBeTruthy();
   });
 });

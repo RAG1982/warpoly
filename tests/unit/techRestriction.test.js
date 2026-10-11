@@ -18,6 +18,8 @@ import {
 import { requirementsLine, requirementText, localizeSimText } from '../../src/ui/uiText.js';
 import { unlockNames, unlockSummary, unlockAnnouncement } from '../../src/ui/techText.js';
 import { setLanguage } from '../../src/i18n/index.js';
+import { validateMission } from '../../src/sim/missions/schema.js';
+import { baseMission, makeMissionGm, runTicks, recordEvents, statusOf } from './helpers/missionWorld.js';
 
 /**
  * F8-05b — liberação progressiva da campanha: `availableTech` (pura, cumulativa), validação de `unlocks`, `techRestriction` da
@@ -345,5 +347,65 @@ describe('textos: "Novo: …" (briefing/anúncio) e "Disponível na missão N", 
   it('researchToken: nível 1 = id, nível 2 = id@2', () => {
     expect(researchToken('melee_weapons')).toBe('melee_weapons');
     expect(researchToken('melee_weapons', 2)).toBe('melee_weapons@2');
+  });
+});
+
+describe('missões: ação `setTier` e condição `research` (F8-05b)', () => {
+  const mission = (over = {}) => baseMission({
+    setup: [{ type: 'setTier', owner: 'player', tier: 3 }],
+    objectives: [
+      { id: 'o1', type: 'survive', priority: 'primary', seconds: 600, title: 'Sobreviver' },
+      { id: 'r1', type: 'flag', priority: 'secondary', condition: { type: 'research', owner: 'player', id: 'melee_weapons' }, title: 'Pesquisar' },
+      { id: 'r2', type: 'flag', priority: 'hidden', condition: { type: 'research', owner: 'player', id: 'melee_weapons', level: 2 }, title: 'Pesquisar 2' }
+    ],
+    ...over
+  });
+
+  it('setTier eleva o Centro concluído do dono (PV do nível) e só o dono pedido', () => {
+    const gm = makeMissionGm(mission());
+    runTicks(gm, 2);
+    const castle = gm.buildings.find((b) => b.ownerId === 0 && b.type === 'castle');
+    expect(castle.tier).toBe(3);
+    expect(castle.maxHp).toBe(2800);
+    expect(castle.hp).toBe(2800);
+    expect(gm.buildings.find((b) => b.ownerId === 1 && b.type === 'great_hall').tier).toBe(1);
+  });
+
+  it('setTier em gatilho emite HQ_TIER_CHANGED e nunca rebaixa; o schema recusa nível fora de 2..3', () => {
+    const def = mission({
+      setup: [],
+      triggers: [
+        { id: 'up', when: { type: 'time', at: 0 }, actions: [{ type: 'setTier', tier: 2 }] },
+        { id: 'again', when: { type: 'trigger', id: 'up' }, actions: [{ type: 'setTier', tier: 2 }] }
+      ]
+    });
+    const gm = makeMissionGm(def);
+    const events = recordEvents(gm, [EVT.HQ_TIER_CHANGED]);
+    runTicks(gm, 3);
+    expect(events.map((e) => e.tier)).toEqual([2]);
+    expect(validateMission(mission({ setup: [{ type: 'setTier', tier: 1 }] })).ok).toBe(false);
+    expect(validateMission(mission({ setup: [{ type: 'setTier', tier: 4 }] })).ok).toBe(false);
+    expect(validateMission(mission({ setup: [{ type: 'setTier', owner: 'xx', tier: 2 }] })).ok).toBe(false);
+    expect(validateMission(mission()).ok).toBe(true);
+  });
+
+  it('a condição research conclui o objetivo quando a pesquisa (e o nível) termina', () => {
+    const gm = makeMissionGm(mission());
+    runTicks(gm, 3);
+    expect(statusOf(gm, 'r1')).not.toBe('completed');
+    gm.getPlayer(0).setResearchLevel('melee_weapons', 1);
+    runTicks(gm, 3);
+    expect(statusOf(gm, 'r1')).toBe('completed');
+    expect(statusOf(gm, 'r2')).not.toBe('completed');
+    gm.getPlayer(0).setResearchLevel('melee_weapons', 2);
+    runTicks(gm, 3);
+    expect(statusOf(gm, 'r2')).toBe('completed');
+  });
+
+  it('o schema recusa pesquisa desconhecida ou nível inexistente na condição research', () => {
+    const ok = (cond) => validateMission(mission({ objectives: [{ id: 'o1', type: 'survive', seconds: 5, title: 'x' }, { id: 'f', type: 'flag', priority: 'secondary', condition: cond, title: 'f' }] })).ok;
+    expect(ok({ type: 'research', id: 'melee_wepons' })).toBe(false);
+    expect(ok({ type: 'research', id: 'woodcutting', level: 2 })).toBe(false);
+    expect(ok({ type: 'research', id: 'woodcutting' })).toBe(true);
   });
 });

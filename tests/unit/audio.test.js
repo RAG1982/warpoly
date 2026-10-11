@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeEach } from 'vitest';
 import {
-  distanceGain, listenerRanges, panFor, positionalMix, LISTENER_TUNING, MIN_AUDIBLE
+  distanceGain, listenerRanges, panFor, positionalMix, LISTENER_TUNING, MIN_AUDIBLE, zoomVolume
 } from '../../src/audio/attenuation.js';
 import { VoicePool } from '../../src/audio/VoicePool.js';
 import { MusicDirector, trackIdFor, DIRECTOR_DEFAULTS } from '../../src/audio/musicDirector.js';
@@ -73,13 +73,15 @@ describe('F7-08 atenuação pela distância (função pura)', () => {
     expect(distanceGain(30, 20, 20)).toBe(0);
   });
 
-  it('os raios do ouvinte crescem com o zoom e respeitam os limites', () => {
+  it('os raios do ouvinte ENCOLHEM com o zoom afastado e respeitam os limites', () => {
     const a = listenerRanges(0.5), b = listenerRanges(1), c = listenerRanges(1.8);
-    expect(a.ref).toBeLessThan(b.ref);
-    expect(b.max).toBeLessThan(c.max);
-    expect(b.ref).toBe(LISTENER_TUNING.refPerZoom);
-    expect(listenerRanges(99).max).toBe(LISTENER_TUNING.maxPerZoom * LISTENER_TUNING.maxZoom);
-    expect(listenerRanges(NaN).ref).toBe(LISTENER_TUNING.refPerZoom);
+    expect(a.ref).toBeGreaterThan(b.ref);
+    expect(b.max).toBeGreaterThan(c.max);
+    expect(a.max).toBe(LISTENER_TUNING.maxNear);
+    expect(c.max).toBe(LISTENER_TUNING.maxFar);
+    expect(listenerRanges(99).max).toBe(LISTENER_TUNING.maxFar);
+    expect(listenerRanges(0.01).ref).toBe(LISTENER_TUNING.refNear);
+    expect(listenerRanges(NaN).ref).toBe(listenerRanges(1).ref);
   });
 
   it('panorama: lado direito positivo, centro zero, satura em maxPan', () => {
@@ -95,15 +97,15 @@ describe('F7-08 atenuação pela distância (função pura)', () => {
     const L = { x: 0, z: 0, zoom: 1, rightX: 1, rightZ: 0 };
     expect(positionalMix(L, null)).toEqual({ gain: 1, pan: 0, distance: 0, audible: true });
     const near = positionalMix(L, { x: 10, z: 0 });
-    expect(near.gain).toBe(1);
+    expect(near.gain).toBeCloseTo(zoomVolume(1), 6); // ganho cheio × volume do zoom
     expect(near.pan).toBeGreaterThan(0);
     const mid = positionalMix(L, { x: 60, z: 0 });
     expect(mid.gain).toBeGreaterThan(MIN_AUDIBLE);
     expect(mid.gain).toBeLessThan(1);
     expect(positionalMix(L, { x: 400, z: 0 }).audible).toBe(false);
-    // afastar o zoom amplia o alcance
-    expect(positionalMix({ ...L, zoom: 1.8 }, { x: 110, z: 0 }).audible).toBe(true);
-    expect(positionalMix({ ...L, zoom: 0.5 }, { x: 110, z: 0 }).audible).toBe(false);
+    // afastar o zoom ENCOLHE o alcance
+    expect(positionalMix({ ...L, zoom: 0.5 }, { x: 100, z: 0 }).audible).toBe(true);
+    expect(positionalMix({ ...L, zoom: 1.8 }, { x: 100, z: 0 }).audible).toBe(false);
   });
 });
 

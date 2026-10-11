@@ -5,8 +5,9 @@
  *  MIXER      música, efeitos e falas em barramentos separados -> mestre -> DynamicsCompressor (limitador) -> saída.
  *             Volume por canal (+ geral) com suavização; a ambiência entra no barramento de efeitos; a música abaixa
  *             (ducking) enquanto uma fala toca.
- *  POSICIONAL `playSfx(nome, { pos })`: ganho pela distância ao alvo da câmera + panorama estéreo (attenuation.js) e
- *             limite de vozes com prioridade (VoicePool). Fora de alcance nem cria nós.
+ *  POSICIONAL `playSfx(nome, { pos })`: só soa o que está na CENA VISÍVEL (frustum da câmera + margem); ganho pela distância
+ *             ao alvo da câmera e pelo zoom (longe = mais baixo e alcance menor) + panorama estéreo (attenuation.js) e
+ *             limite de vozes com prioridade (VoicePool). Fora da cena/alcance nem cria nós.
  *  FALAS      `speak(...)`: sintetiza a fala por formantes (speech/), guarda o AudioBuffer em cache (LRU) e toca numa
  *             única "vaga" (a nova fala corta a anterior).
  *  MÚSICA     `MusicPlayer` + `MusicDirector`: paz × combate por facção com crossfade (combate recente = `noteCombat`).
@@ -53,7 +54,7 @@ export class AudioEngine {
     this.caps = capsFor(level);
     this.volumes = { master: 1, music: 0.25, sfx: 0.5, voice: 0.8 };
     if (volumes) for (const k of ['master', 'music', 'sfx', 'voice']) if (volumes[k] !== undefined) this.volumes[k] = clampVolume(volumes[k], this.volumes[k]);
-    this.listener = { x: 0, z: 0, zoom: 1, rightX: 1, rightZ: 0 };
+    this.listener = { x: 0, z: 0, zoom: 1, rightX: 1, rightZ: 0, viewProj: null, bounds: null };
 
     // --- mixer: barramentos -> mestre -> limitador -> saída
     this.master = ctx.createGain();
@@ -131,6 +132,8 @@ export class AudioEngine {
     const L = this.listener;
     L.x = l.x; L.z = l.z; L.zoom = l.zoom;
     L.rightX = l.rightX ?? 1; L.rightZ = l.rightZ ?? 0;
+    L.viewProj = l.viewProj ?? null; // projeção × visão da câmera (recorte pela cena visível)
+    L.bounds = l.bounds ?? null;
   }
 
   /** Muda o nível (preset/`?audio=`): teto de vozes, ambiência e música leve; 'off' cala tudo. */
@@ -164,7 +167,7 @@ export class AudioEngine {
     let gain = opts.gain ?? 1;
     let pan = 0;
     if (opts.pos && this.caps.positional) {
-      const m = positionalMix(this.listener, opts.pos);
+      const m = positionalMix(this.listener, opts.pos, opts.margin);
       if (!m.audible) { this.counters.culled++; return false; }
       gain *= m.gain;
       pan = this.caps.pan ? m.pan : 0;

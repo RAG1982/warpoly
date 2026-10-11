@@ -153,7 +153,7 @@ export class InputManager {
         this.setTargetMode(null);
       } else if (this.placingBuildingType) {
         this.cancelPlacement();
-      } else if (this.gm.selectedUnits.length > 0 || this.gm.selectedBuilding || this.gm.selectedResource) {
+      } else if (this.gm.selectedUnits.length > 0 || this.gm.selectedBuilding || this.gm.selectedResource || this.gm.inspected) {
         this.gm.clearSelection();
       } else if (this.onPauseRequest) {
         e.preventDefault();

@@ -179,6 +179,8 @@ export class Unit {
     this.velX = 0;
     this.velZ = 0;
     this._siegeRetreating = false;
+    /** NEW-35: ponto {x,z} do ataque no chão (estado 'attackingGround'). */
+    this.groundTarget = null;
     this.aggroRange = def.aggroRange;
     this.threatScanRange = def.threatScanRange;
     this.retargetRange = def.retargetRange;
@@ -671,8 +673,80 @@ export class Unit {
     }
   }
 
+  /**
+   * NEW-35: ataque no chão (só cerco `isBallistic`): aproxima-se até `attackRange`, recua se o ponto estiver
+   * a menos de `minAttackRange` e dispara repetidamente no ponto (dano em área, sem alvo entidade) até nova ordem.
+   * @returns {boolean} se a ordem foi aceita
+   */
+  orderAttackGround(x, z, gameManager = this.gameManager) {
+    if (this.isDead || this.isDying || this.state === 'dying') return false;
+    if (this.transportedBy !== null || !this.isBallistic) return false;
+    this._clearOrderModes();
+    this.state = 'attackingGround';
+    this.groundTarget = { x, z };
+    this.targetEntity = null;
+    this.gatherTarget = null;
+    this.buildTarget = null;
+    this.repairTarget = null;
+    this.attackTarget = null;
+    this.objectiveTarget = null;
+    this.hasTargetPos = false;
+    this.hasFiredThisAttack = false;
+    this.gameManager = gameManager || this.gameManager;
+    return true;
+  }
+
+  updateAttackGround(delta, gameManager, arrows, allUnits) {
+    const g = this.groundTarget;
+    if (!g) { this.stop(); return; }
+    const pos = this.mesh.position;
+    const dist = Math.hypot(g.x - pos.x, g.z - pos.z);
+    if (dist < this.minAttackRange) {
+      this.hasFiredThisAttack = false;
+      let ax = pos.x - g.x;
+      let az = pos.z - g.z;
+      const al = Math.hypot(ax, az);
+      if (al < 0.001) { ax = -Math.sin(this.mesh.rotation.y); az = -Math.cos(this.mesh.rotation.y); } else { ax /= al; az /= al; }
+      this.stepTowards(pos.x + ax * 2, pos.z + az * 2, this.speed * this.mods.speedMul * delta);
+      if (this.hurtTimer <= 0) this._setAnim('walk');
+      return;
+    }
+    if (dist > this.attackRange) {
+      this.hasFiredThisAttack = false;
+      this.moveTowards(g.x, g.z, delta);
+      return;
+    }
+    this.mesh.rotation.y = Math.atan2(g.x - pos.x, g.z - pos.z);
+    if (this.hurtTimer <= 0) this._setAnim('fight');
+    const progress = Math.min(1.0, this.attackTimer / this.effAttackCooldown);
+    const gm = gameManager || this.gameManager;
+    const gmEvents = gm && gm.events;
+    if (progress >= 0.60 && !this.hasFiredThisAttack) {
+      this.hasFiredThisAttack = true;
+      if (this.mods.invisible) this.breakInvisibility();
+      const kind = this.projectileType;
+      const startPos = projectileOriginAt(pos);
+      _impactPoint.x = g.x;
+      _impactPoint.y = pos.y;
+      _impactPoint.z = g.z;
+      if (gmEvents) gmEvents.emit(EVT.PROJECTILE_FIRED, { kind, from: posOf(startPos), ownerId: this.ownerId });
+      const owner = this;
+      const projectile = new Projectile({ kind, from: startPos, impact: _impactPoint, onHit: (hitPos) => {
+        if (gm && gm.unitGrid && gm.blockerGrid) applySplashDamage(gm, owner, owner.getEffDamage(), hitPos, owner.splashRadius, allUnits);
+        if (gmEvents) gmEvents.emit(EVT.PROJECTILE_HIT, { kind, pos: posOf(hitPos), ownerId: owner.ownerId, splashRadius: owner.splashRadius });
+      } });
+      arrows.push(projectile);
+      if (this.gameManager && this.gameManager.registerEntity) this.gameManager.registerEntity(projectile, this.ownerId);
+    }
+    if (this.attackTimer >= this.effAttackCooldown) {
+      this.attackTimer = 0;
+      this.hasFiredThisAttack = false;
+    }
+  }
+
   stop() {
     if (this.isDead || this.isDying || this.state === 'dying') return;
+    this.groundTarget = null;
     this._cast = null;
     this._exitMine();
     this.state = 'idle';
@@ -1159,6 +1233,9 @@ export class Unit {
         break;
       case 'attacking':
         this.updateAttacking(delta, gameManager, arrows, allUnits, buildings);
+        break;
+      case 'attackingGround':
+        this.updateAttackGround(delta, gameManager, arrows, allUnits);
         break;
       case 'holding':
         this.updateHolding(delta, allUnits, buildings);

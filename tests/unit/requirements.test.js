@@ -76,7 +76,7 @@ describe('evalRequirements com {hq:N} (F3-06, tipo fictício)', () => {
   });
 
   it('formatRequirement: texto amigável para string e {hq:N}', () => {
-    expect(formatRequirement('farm')).toBe('Fazenda de Trigo');
+    expect(formatRequirement('farm')).toBe('Fazenda');
     expect(formatRequirement({ hq: 2 })).toBe('Centro nível 2');
   });
 

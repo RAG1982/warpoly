@@ -4,7 +4,7 @@
 > Regra: **nada deste documento é verdade sem conferir no código** — ao começar, rode `npm test` e confirme.
 
 ## 0. Como começar
-1. `git fetch origin && git checkout -b cloud/<ID> origin/master` (o `master` do GitHub está em `475e5d5` ou posterior).
+1. `git fetch origin && git checkout -b cloud/<ID> origin/master` (o `master` do GitHub já inclui os merges de PRs da nuvem até a PR #25 "integração").
 2. Branches com trabalho parcial (seção 3) **não** estão no `master`. Para retomar uma delas: `git checkout -b cloud/<ID> origin/task/<nome>` e depois `git merge origin/master` (estão cerca de 60 commits atrás; sem conflito pelo teste de merge).
 3. Verificação na nuvem: `npm ci`, `npm test`, `npm run lint`, `npx vite build --outDir /tmp/build-check`. Sem GPU, sem Blender, sem `safe-run.sh`.
 
@@ -33,27 +33,22 @@
 | F10-05 | PWA, deploy, chunks por facção (PR #15): falta verificar carga por facção no navegador. Local. |
 
 ### 1.3 Backlog NEW já resolvido (DONE) e mesclado pela nuvem
-- NEW-4 (testes de `hasLineOfSight`), NEW-31 (`check-data-parity` roda), NEW-41 (timeouts de 30 s; **causa do fogOfWar ainda aberta**), NEW-50 (lobby limpa aviso), NEW-2, NEW-3, NEW-5, NEW-8, NEW-10, NEW-11, NEW-12, NEW-16, NEW-17, NEW-18, NEW-21, NEW-22, NEW-23, NEW-28, NEW-32, NEW-33, NEW-36 a NEW-40, NEW-42, NEW-43, NEW-45 a NEW-48, NEW-53 (correção de m04: forte humano, `markColor`, `spawnBuilding`).
-- Verificação visual pendente (local), status REVIEW: **NEW-13** (chamas sob névoa), **NEW-19** (ruínas/clareira, `src/render/RuinsManager.js`), **NEW-49** (golpe do Arremessador), **NEW-52** (juncos só em água rasa).
+- NEW-4 (testes de `hasLineOfSight`), NEW-31 (`check-data-parity` roda), NEW-41 (causa: singleton `fogUniforms` compartilhado entre testes; isolado em `99edfbb`), NEW-50 (lobby limpa aviso), NEW-29 (nomes D7 em `buildings.js`), NEW-2, NEW-3, NEW-5, NEW-8, NEW-10, NEW-11, NEW-12, NEW-16, NEW-17, NEW-18, NEW-21, NEW-22, NEW-23, NEW-28, NEW-32, NEW-33, NEW-36 a NEW-40, NEW-42, NEW-43, NEW-45 a NEW-48, NEW-53 (correção de m04: forte humano, `markColor`, `spawnBuilding`).
+- Verificação visual ou de medição pendente (local), status REVIEW: **NEW-7** (chunks do `TreeManager`, `7f6a565`; medir draw calls), **NEW-13** (chamas sob névoa), **NEW-19** (ruínas/clareira, `src/render/RuinsManager.js`), **NEW-24** (portão e minimapa da muralha, `WallGate`), **NEW-26** (inspeção de neutros, `582dcbe`), **NEW-35** (`CMD.ATTACK_GROUND`, clique direito no chão no navegador), **NEW-49** (golpe do Arremessador), **NEW-52** (juncos só em água rasa).
 
 ## 2. FALHA — o que hoje não está verde ou não está correto
-- **Suíte de testes:** no `master` 1311 testes passam. Intermitência conhecida: `tests/unit/signaling.test.js` ("pronto / iniciar: só anfitrião…") falhou uma vez sob carga durante a validação do NEW-44 — passa isolado. Relacionado a NEW-41.
-- **NEW-41** (aberto, DOING parcial): intermitência de `fogOfWar.test.js` ("dispose … uniform de textura trocado"). Suspeita: estado global `fogUniforms` compartilhado. **Causa não confirmada.**
+- **Suíte de testes:** no `master` após o merge da PR #25: **1339 testes passam** (120 arquivos), lint 0 erros (51 avisos), build ok. Intermitência conhecida: `tests/unit/signaling.test.js` ("pronto / iniciar: só anfitrião…") falhou uma vez sob carga durante a validação do NEW-44 — passa isolado.
+- **NEW-41:** resolvido na forma de isolamento do singleton `fogUniforms` no teste (`99edfbb`). Verificação: 3 execuções isoladas verdes; suíte completa verde. Se a intermitência voltar, reabrir.
 - **Campanha Aliança:** premissa provisória. Início de missão pelo navegador não verificado até o fim.
 - **Backlog aberto (auditoria `docs/AUDITORIA_BACKLOG.md`):**
   - NEW-1: `GLTFBuildingLoader` só usado por `src/render/buildings/orc/GreatHall.js:3`. Decisão: remover ou adotar.
   - NEW-6: sem ORM de texturas nem Worker/OffscreenCanvas (`grep` em `src/` vazio). Precisa de spec.
-  - NEW-7: `src/world/TreeManager.js:7` `CAPACITY = 120` fixo por tipo; `:119` um `InstancedMesh` de 120 por tipo.
   - NEW-9: IA destrói HQ cedo (testes da F2-01). Depende de F5-03 e de balanceamento.
-  - NEW-14: `Unit.update` domina a CPU (~4,5 ms com 310 unidades). LOD existe (`src/sim/constants.js:31`), falta medir.
+  - NEW-14: `Unit.update` domina a CPU (~4,5 ms com 310 unidades). LOD de animação existe (`src/sim/constants.js:31`), falta medir.
   - NEW-15: 50 FPS em `combate100` não atingido (medição com GPU).
-  - NEW-24: muralha sem portão; segmentos ausentes do minimapa (`UIManager.drawMinimap`).
-  - NEW-26: `src/sim/GameManager.js:1388` `selectSingle` só seleciona entidades do jogador local; neutros sem card.
   - NEW-27: draw calls dos neutros vs master (medição com GPU).
-  - NEW-29: `name:` em `src/data/buildings.js` ainda com nomes antigos (`'Castelo Real'`, `'Forja Real'`, `'Grande Salão Orc'`); nomes D7 existem em `src/data/tiers.js:15-16`.
   - NEW-30: repetir o lote de balanceamento (F3-11) quando F4/F5 estiverem em uso (ferramentas `tools/balance-sim.mjs`).
   - NEW-34: escolta de cerco pela IA e alvo dentro do alcance mínimo (`src/ai/AIMilitaryManager.js:368-372`).
-  - NEW-35: sem ataque no chão do cerco (`src/sim/commands.js` sem `ATTACK_GROUND`).
   - NEW-44 e NEW-51: ver seção 3.
 
 ## 3. TRABALHO PARCIAL — branches no GitHub (não mesclados)
@@ -68,7 +63,8 @@ Para retomar: `git fetch origin && git checkout -b cloud/<ID> origin/task/<nome>
 ## 4. NÃO INICIADO
 - **Sem código:** NEW-25 (IA ataca acampamentos neutros; depende de `src/ai`, faria conflito com NEW-44 — começar depois), NEW-34 (escolta de cerco pela IA; mesma restrição).
 - **Depende de NEW-44:** NEW-51 (seed 82, `continental-1v1`, humano, brutal: não termina em 72000 ticks; mesma classe de NEW-46 — madeira esgotada).
-- **Precisa de spec antes (Sonnet escreve em `docs/specs/`):** F1-10 (LOD e culling), NEW-6 (ORM e texturas), NEW-14 (CPU da animação).
+- **F1-10 (LOD e culling):** parcial no master (núcleo `src/render/lod.js` e decorações, `ccf49ec`). Spec em `docs/specs/F1-10-lod-culling.md`. Falta a meta de ≥ 45 FPS em `massa300` (medição local).
+- **Precisa de spec antes (Sonnet escreve em `docs/specs/`):** NEW-6 (ORM e texturas), NEW-14 (CPU da animação).
 - **Blender (local):** F7-01 (fidelidade dos orcs Peão, Grunt, Lançador, Ogro), F7-07 (modelos novos: faltam referências de Refinaria, Fundição, Submersível, Tartaruga, Forja Naval, Caldeirão).
 - **Conteúdo:** F8-06 (campanha Horda, 8+ missões) — só depois de aprovar a premissa da Aliança (F8-05).
 - **Adiado pelo dono:** F5-03 (níveis de dificuldade, DOING parcial: meta Difícil×Normal ≥ 60% não atingida); NEW-20 (teste intermitente, spec em `docs/specs/NEW-20-teste-intermitente.md`).

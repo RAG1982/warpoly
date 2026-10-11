@@ -4,7 +4,7 @@
 > Regra: **nada deste documento é verdade sem conferir no código** — ao começar, rode `npm test` e confirme.
 
 ## 0. Como começar
-1. `git fetch origin && git checkout -b cloud/<ID> origin/master` (o `master` do GitHub inclui os PRs da nuvem até a PR #35 "integração 2"; PRs #36–#40 e a F8-05b ainda NÃO estão mesclados — ver seção 3).
+1. `git fetch origin && git checkout -b cloud/<ID> origin/master` (o `master` do GitHub inclui os PRs da nuvem até a PR #42 "integração 3"; só a F8-05b está pendente — ver seção 3).
 2. Branches pendentes (seção 3) **não** estão no `master`. Para continuar uma delas: `git checkout -b cloud/<ID> origin/cloud/<nome>` e depois `git merge origin/master`. As branches locais antigas `task/F7-08`, `task/F10-04` e `task/NEW-44` já foram retomadas e mescladas (PRs #29, #28, #30).
 3. Verificação na nuvem: `npm ci`, `npm test`, `npm run lint`, `npx vite build --outDir /tmp/build-check`. Sem GPU, sem Blender, sem `safe-run.sh`.
 
@@ -40,24 +40,15 @@
 - Verificação visual ou de medição pendente (local, status REVIEW): NEW-7, 13, 19, 24, 25, 26, 34, 35, 44, 49, 52; F1-10; F7-08; F10-04.
 
 ## 2. FALHA — o que hoje não está verde ou não está correto
-- **Suíte:** `master` após o PR #35: **129 arquivos / 1527 testes, 0 falhas**; lint 0 erros (50 avisos antigos); build ok. Intermitência conhecida: `tests/unit/signaling.test.js` falhou uma vez sob carga (passa isolado); no ambiente de nuvem exige `npm ci` (pacote `ws`).
+- **Suíte:** `master` após o PR #42: **136 arquivos / 1667 testes, 0 falhas**; lint 0 erros (50 avisos antigos); build ok. Intermitência conhecida: `tests/unit/signaling.test.js` falhou uma vez sob carga (passa isolado); no ambiente de nuvem exige `npm ci` (pacote `ws`).
 - **CI de desempenho (`perf.yml`)** compara com baseline de draw calls antiga: **pode falhar até regravar** com GPU: `bash tools/safe-run.sh --timeout 900 -- npm run perf -- --update`.
 - **NEW-41:** a causa real da intermitência do `fogOfWar.test.js` **não foi reproduzida** (10 execuções isoladas e 4 suítes completas sem falha); o teste foi endurecido. Se voltar, capturar a mensagem exata.
 - **Soak sem cobertura da escolta de cerco:** a operação de cerco da NEW-34 disparou 0 vezes nas 30 partidas de soak; está coberta só por testes unitários.
 - **Backlog ainda aberto:** NEW-6 (spec pronta, execução pendente), NEW-9 (IA destrói HQ cedo; depende de F5-03), NEW-14 (spec pronta), NEW-15/27/30 (medições com GPU/soak), NEW-51 (seed 82: terminou em 9106 ticks com a IA nova em `--count 1`; confirmar com amostra grande).
 
-## 3. PENDENTE DE MERGE — PRs abertos (rodada pós-campanha, 2026-10-11)
-Pedidos do dono após jogar a campanha. Todos verdes na nuvem (`npm test`, lint, build); **nada foi visto num navegador**.
-| PR | Branch | O que entrega | Depende de |
-|---|---|---|---|
-| #36 | `cloud/campanha-proxima-missao` | Tela final de missão: Próxima missão / Repetir / Tentar novamente / Menu; `campaignEndPlan`, `prepareCampaignMission`. | — |
-| #37 | `cloud/orcs-tamanho-humano` | `VISUAL_SCALE` (`src/data/visualScale.js`): peão, guerreiro e lançador de machado com a altura do aldeão, cavaleiro e arqueiro (±0,05 %). Ogros e cerco intocados. | — |
-| #38 | `cloud/audio-melhorias` | Só soa o que está na cena (frustum + margem de 8 %), volume e alcance menores com zoom afastado, biblioteca de efeitos (`sfxLibrary.js`: metal, pedra, explosão, desabamento, afundamento, flecha, machado, picareta, martelo) e música militar (3 variações por faixa e facção). | — |
-| #39 | `cloud/campanha-final-vitoria` | Tela final da campanha: ilustração procedural por facção (slot `public/ui/art/victory_<facção>.webp`), epílogo "A Aurora sobre Aurelan", fanfarra, Rejogar. | #36 |
-| #40 | `cloud/mapas-florestas` | 6 mapas maiores (+15–25 %) e florestas densas (madeira alcançável ≥ 8000 por jogador); `tools/measure-wood.mjs`; prova de coordenadas das missões. `estreito-1v1` e `ilhas-4p` não crescem (rotas navais). | — |
-| (em andamento) | `cloud/F8-05b` | Campanha com TODAS as categorias de unidade e liberação progressiva (`unlocks` por missão, `availableTech`). | #40 |
-
-Ordem sugerida de merge: #36 → #39; #37, #38 e #40 independentes; F8-05b depois do #40.
+## 3. PENDENTE DE MERGE
+- **Mesclados em 2026-10-11 (integração #42, `4e60ba1`):** #36 próxima missão, #37 orcs no tamanho humano, #38 áudio, #39 tela final da campanha, #40 mapas/florestas. Suíte após o merge: **136 arquivos / 1667 testes, 0 falhas**; lint 0 erros; build ok. Verificação visual/auditiva/GPU segue pendente (local) — ver o corpo de cada PR.
+- **Em andamento:** `cloud/F8-05b` (campanha com todas as categorias de unidade e liberação progressiva; parte do #40, já no `master`).
 
 ## 4. NÃO INICIADO / PLANOS
 - **F8-05b** (em andamento): ver seção 3. Depois: **F8-06** (campanha da Horda, 8+ missões): premissa da Aliança aprovada; falta o briefing (mesmo esquema de `unlocks`, `epilogue` e arte de vitória `victory_orc.webp`).

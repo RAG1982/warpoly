@@ -1,7 +1,7 @@
 # Changelog das alterações feitas na nuvem (2026-09-29 → 2026-10-11)
 
-> Cada item tem o PR de origem. "Mesclado" = no `master`; "Pendente" = PR aberto (ver `ESTADO_NUVEM.md` §3). Nada aqui foi visto num navegador: a verificação visual, de áudio e de GPU está no corpo de cada PR ("Verificação pendente (local)").
-> Branches `cloud/<ID>` por tarefa; integrações em `cloud/integracao` (#25) e `cloud/integracao-2` (#35).
+> Cada item tem o PR de origem. "Mesclado" = no `master`; "Pendente" = ainda sem PR mesclado (ver `ESTADO_NUVEM.md` §3). Nada aqui foi visto num navegador: a verificação visual, de áudio e de GPU está no corpo de cada PR ("Verificação pendente (local)").
+> Branches `cloud/<ID>` por tarefa; integrações em `cloud/integracao` (#25), `cloud/integracao-2` (#35) e `cloud/integracao-3` (#42).
 
 ## Mesclado
 
@@ -34,13 +34,15 @@
 ### Documentos
 - Specs: F1-10, NEW-6 (ORM/texturas: 530 MB em `high`, plano de 5 passos), NEW-14 (CPU de animação: 9 passos). Decisões do dono de 2026-10-11 (#27). `ESTADO_NUVEM.md`, `AUDITORIA_BACKLOG.md`.
 
-## Pendente de merge (pedidos após jogar a campanha, 2026-10-11)
+## Mesclado em 2026-10-11 (integração #42): pedidos após jogar a campanha
 - **#36** botão "Próxima missão" / "Tentar novamente" na tela final de missão.
 - **#37** orcs (peão, guerreiro, lançador) na altura das unidades humanas (`VISUAL_SCALE`).
 - **#38** áudio: só o que está na cena visível, menos volume/alcance com zoom afastado; efeitos de metal, pedra, explosão, desabamento, afundamento, flecha, machado, picareta, martelo; música militar por facção.
 - **#39** tela final da campanha: arte de vitória por facção, epílogo "A Aurora sobre Aurelan", fanfarra, Rejogar (depende do #36).
 - **#40** mapas maiores e florestas densas (madeira alcançável ≥ 8000 por jogador); `tools/measure-wood.mjs`.
-- **F8-05b** (em andamento): campanha com todas as categorias de unidade e liberação progressiva de unidades, construções e pesquisas (depende do #40).
+
+## Pendente
+- **F8-05b** (em andamento, `cloud/F8-05b`): campanha com todas as categorias de unidade e liberação progressiva de unidades, construções e pesquisas.
 
 ## Planos
 Ver `ESTADO_NUVEM.md` §4: F8-05b → F8-06 (campanha da Horda), NEW-6 passos 1/2/4/5 (decisão sobre a resolução em `high`), NEW-14 passos 0–2/5–6 (3 e 4 após NEW-53), F1-10c (depende do bench), mapas `estreito-1v1`/`ilhas-4p`, arte Blender de vitória (`victory_human.webp`, `victory_orc.webp`), regravar `tests/perf/baseline.json`.

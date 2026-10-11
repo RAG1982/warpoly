@@ -2,6 +2,8 @@ import * as THREE from 'three';
 import { installFogOfWarShader } from './render/fogOfWarShader.js';
 import { SceneManager } from './core/SceneManager.js';
 import { SoundManager } from './core/SoundManager.js';
+import { detectAudioLevel } from './audio/audioEnv.js'; // F7-08
+import { getTextureQuality } from './models/textureQuality.js';
 import { AssetPreloader } from './core/AssetPreloader.js';
 import { QualitySettings } from './core/QualitySettings.js';
 import { MatchSession } from './core/MatchSession.js';
@@ -103,7 +105,7 @@ class GameApp {
         [S.MAIN_MENU]: { enter: () => this._enterMainMenu() },
         [S.LOADING]: { enter: (ctx) => this._enterLoading(ctx.payload) },
         [S.IN_GAME]: { enter: (ctx) => this._enterInGame(ctx.from) },
-        [S.PAUSED]: { enter: () => this._enterPaused(), exit: () => this.pauseMenu.hide() },
+        [S.PAUSED]: { enter: () => this._enterPaused(), exit: () => { this.pauseMenu.hide(); this.sound?.setPaused(false); } },
         [S.POST_GAME]: { enter: () => this._enterPostGame() }
       }
     });
@@ -493,28 +495,34 @@ class GameApp {
 
   _enterPaused() {
     this.session.inputManager.suspended = true;
+    this.sound?.setPaused(true); // F7-08: ambiência cala na pausa
     this.pauseMenu.show();
   }
 
   _enterPostGame() {
     // A simulação já parou (isGameOver); o modal de fim de jogo é mostrado pelo UIManager.
     this.session.inputManager.onPauseRequest = null;
+    this.sound?.calmMusic(); // F7-08: música volta à de paz depois da vitória/derrota
     requestAnimationFrame(() => document.getElementById('btn-play-again')?.focus({ preventScroll: true }));
   }
 
   // ------------------------------------------------------------------ serviços
   _ensureServices() {
     if (this.sceneManager) return;
-    this.sound = new SoundManager();
+    // F7-08: nível de áudio por preset/`?audio=`; testes/automação (navigator.webdriver) ficam mudos por padrão.
+    this.sound = new SoundManager({ level: detectAudioLevel(QualitySettings.current, getTextureQuality()) });
     applyAudio(this.sound);
     this.sceneManager = new SceneManager(this.container);
 
     // Libera o áudio na primeira interação (política de autoplay)
+    // (pointerdown também conta como gesto: o motor já existe quando o clique de seleção acontece, e a 1ª fala sai)
     const unlockAudio = () => {
       this.sound.resume();
+      window.removeEventListener('pointerdown', unlockAudio);
       window.removeEventListener('click', unlockAudio);
       window.removeEventListener('keydown', unlockAudio);
     };
+    window.addEventListener('pointerdown', unlockAudio);
     window.addEventListener('click', unlockAudio);
     window.addEventListener('keydown', unlockAudio);
 

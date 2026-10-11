@@ -4,7 +4,7 @@
  * catálogo deriva bpm, compasso, modo, instrumentos e duração delas, então não há números duplicados para sair de sincronia.
  *
  * Entrada: { id, title, category:'title'|'peace'|'combat'|'victory'|'defeat', faction:'human'|'orc'|'neutral', bpm, meter,
- *   mode, description, inGame, candidate, kind:'music'|'sfx', family, variant, bars, seconds, instruments, sfx? }
+ *   mode, key (tônica MIDI), description, inGame, candidate, kind:'music'|'sfx', family, variant, bars, seconds, instruments, sfx? }
  *  - `inGame`    a faixa entra no sorteio do jogo (padrão do repositório; o dono pode mudar no inspetor)
  *  - `candidate` faixa NOVA em avaliação (nasce `inGame: false`)
  *  - `kind:'sfx'` fanfarras curtas (vitória/derrota) que vivem em `sfxRecipes.js` (`sfx` = nome da receita)
@@ -91,7 +91,7 @@ function musicEntry(id, info) {
   const candidate = !!info.candidate;
   return Object.freeze({
     id, title: info.title, category, faction: t.faction, family: t.family, variant: t.variant, kind: 'music',
-    bpm: t.bpm, meter: t.meter, mode: t.mode, bars: t.bars,
+    bpm: t.bpm, meter: t.meter, mode: t.mode, key: t.key, bars: t.bars,
     seconds: Math.round((t.bars * t.stepsPerBar * 60) / (t.bpm * 4)),
     instruments: Object.freeze(insts), instrumentLabels: Object.freeze(insts.map((i) => INSTRUMENT_LABELS[i] || i)),
     description: info.description,
@@ -103,7 +103,7 @@ function musicEntry(id, info) {
 function sfxEntry(s) {
   return Object.freeze({
     id: s.id, title: s.title, category: s.category, faction: s.faction, family: s.id, variant: 0, kind: 'sfx', sfx: s.sfx,
-    bpm: s.bpm ?? null, meter: s.meter ?? null, mode: s.mode ?? null, bars: 0, seconds: s.seconds ?? 2,
+    bpm: s.bpm ?? null, meter: s.meter ?? null, mode: s.mode ?? null, key: s.key ?? null, bars: 0, seconds: s.seconds ?? 2,
     instruments: Object.freeze(['sintetizador']), instrumentLabels: Object.freeze(['metais sintetizados']),
     description: s.description, inGame: s.inGame !== false, candidate: !!s.candidate
   });

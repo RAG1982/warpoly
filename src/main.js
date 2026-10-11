@@ -24,7 +24,7 @@ import { bootOptions, applyAudio } from './ui/optionsApply.js';
 import { OptionsPanel } from './ui/screens/OptionsPanel.js';
 import { t, applyI18n, onLanguageChange, getLanguage } from './i18n/index.js';
 import { registerServiceWorker } from './pwa.js';
-import { getActiveRun, onMissionEnded } from './campaign/index.js'; // F8-05
+import { getActiveRun, onMissionEnded, prepareCampaignMission, getCampaignEndPlan } from './campaign/index.js'; // F8-05
 import { EVT } from './sim/events.js';
 import { loadUiManifest, installSpriteFallback } from './ui/uiSprites.js'; // F7-09: ícones/retratos renderizados (public/ui)
 
@@ -183,6 +183,17 @@ class GameApp {
       const isMission = !!(this.matchConfig.missionId || this.matchConfig.mission);
       this.fsm.transition(S.LOADING, { config: isMission ? this.matchConfig : withNewSeed(this.matchConfig) });
     }
+  }
+
+  /** Tela final da campanha: "Próxima missão" (progresso já gravado no MISSION_ENDED; mesmo fluxo da CampaignScreen). */
+  nextCampaignMission() {
+    if (!this.fsm.is(S.POST_GAME) || this.session?.online) return;
+    const run = getActiveRun();
+    const plan = run && getCampaignEndPlan(run.missionId, 'victory');
+    if (!plan || !plan.nextMissionId) return;
+    const lang = getLanguage() === 'en' ? 'en' : 'pt-BR';
+    const config = prepareCampaignMission(run.campaignId, plan.nextMissionId, { lang, unlockAll: !!run.unlockAll });
+    this.fsm.transition(S.LOADING, { config });
   }
 
   // ------------------------------------------------------------------ save / load (F2-06)
@@ -546,6 +557,7 @@ class GameApp {
     document.getElementById('btn-go-main-menu')?.addEventListener('click', () => this.goToMainMenu());
     document.addEventListener('warpoly:tutorial-exit', () => this.goToMainMenu()); // F6-09
     document.addEventListener('warpoly:mission-retry', () => this.restartMatch()); // F8-04: tela de fim de missão
+    document.addEventListener('warpoly:mission-next', () => this.nextCampaignMission());
     document.addEventListener('warpoly:mission-menu', () => this.goToMainMenu());
   }
 

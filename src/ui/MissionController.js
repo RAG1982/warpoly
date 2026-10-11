@@ -10,6 +10,7 @@ import './screens/mission.css';
 import { EVT } from '../sim/events.js';
 import { localize } from '../sim/missions/text.js';
 import { t, getLanguage, onLanguageChange } from '../i18n/index.js';
+import { getCampaignEndPlan } from '../campaign/index.js';
 import { DialogQueue, buildObjectivesModel, buildMissionEndModel, cutscenePose, cutsceneDialogs } from './missionPresentation.js';
 
 const POLL_INTERVAL = 0.25;
@@ -94,7 +95,8 @@ export class MissionController {
       const b = e.target.closest('[data-ms]');
       if (!b) return;
       const act = b.dataset.ms;
-      if (act === 'retry') document.dispatchEvent(new CustomEvent('warpoly:mission-retry'));
+      if (act === 'next') document.dispatchEvent(new CustomEvent('warpoly:mission-next'));
+      else if (act === 'retry') document.dispatchEvent(new CustomEvent('warpoly:mission-retry'));
       else if (act === 'menu') document.dispatchEvent(new CustomEvent('warpoly:mission-menu'));
       else if (act === 'stats') { this.endBox.hidden = true; this.ui?.showPostGame?.(); }
     });
@@ -128,7 +130,8 @@ export class MissionController {
   _renderEnd() {
     if (this.endBox.hidden) return;
     const snap = this.gm.mission.snapshot();
-    const m = buildMissionEndModel(snap, this.gm.mission.elapsed, this.lang());
+    const plan = getCampaignEndPlan(snap.id, snap.outcome === 'victory' ? 'victory' : 'defeat');
+    const m = buildMissionEndModel(snap, this.gm.mission.elapsed, this.lang(), plan);
     const won = m.outcome === 'victory';
     const rows = m.rows.map((r) => `<li class="ms-obj is-${r.status}"><span class="ms-ico" aria-hidden="true">${STATUS_ICON[r.status] || '–'}</span>`
       + `<span class="ms-txt"><span class="ms-title">${esc(r.title)}</span>${r.priority !== 'primary' ? `<span class="ms-prog">${esc(t(`mission.${r.priority}`))}</span>` : ''}</span></li>`).join('');
@@ -138,9 +141,9 @@ export class MissionController {
       + (m.text ? `<p class="ms-end-text">${esc(m.text)}</p>` : '')
       + `<p class="ms-end-stats">${esc(t('mission.time'))}: ${esc(m.time)} · ${esc(t('mission.objectivesDone', { done: m.completed, total: m.total }))}</p>`
       + `<ul class="ms-list">${rows}</ul>`
-      + `<div class="ms-end-actions"><button type="button" class="ms-primary" data-ms="retry">${esc(t(won ? 'mission.replay' : 'mission.retry'))}</button>`
-      + `<button type="button" data-ms="stats">${esc(t('mission.stats'))}</button><button type="button" data-ms="menu">${esc(t('mission.menu'))}</button></div></div>`;
-    this.endBox.querySelector('[data-ms="retry"]')?.focus({ preventScroll: true });
+      + (m.campaignDoneKey ? `<p class="ms-end-text">${esc(t(m.campaignDoneKey))}</p>` : '')
+      + `<div class="ms-end-actions">${m.actions.map((x) => `<button type="button"${x.primary ? ' class="ms-primary"' : ''} data-ms="${x.id}">${esc(t(x.labelKey))}</button>`).join('')}</div></div>`;
+    this.endBox.querySelector('.ms-primary')?.focus({ preventScroll: true });
   }
 
   // ------------------------------------------------------------------ eventos

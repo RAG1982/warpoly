@@ -114,7 +114,7 @@ export function buildObjectivesModel(snap, lang = 'pt-BR') {
  * Modelo da tela de fim de missão.
  * @returns {{outcome:'victory'|'defeat', title:string, text:string, time:string, rows:Array<{title:string,status:string,priority:string}>, completed:number, total:number}}
  */
-export function buildMissionEndModel(snap, elapsedSeconds, lang = 'pt-BR') {
+export function buildMissionEndModel(snap, elapsedSeconds, lang = 'pt-BR', plan = null) {
   const rows = snap.objectives.map((o) => ({ title: localize(o.title, lang), status: o.status, priority: o.priority === 'hidden' ? 'bonus' : o.priority }));
   const counted = rows.filter((r) => r.priority !== 'bonus');
   return {
@@ -124,6 +124,24 @@ export function buildMissionEndModel(snap, elapsedSeconds, lang = 'pt-BR') {
     time: formatClock(elapsedSeconds),
     rows,
     completed: counted.filter((r) => r.status === 'completed').length,
-    total: counted.length
+    total: counted.length,
+    ...missionEndActions(snap.outcome === 'victory' ? 'victory' : 'defeat', plan)
   };
+}
+
+/**
+ * Botões da tela de fim (puro). `plan` = `campaignEndPlan` (ou null fora da campanha).
+ * Vitória de campanha com próxima: [Próxima missão (primário), Repetir missão, Estatísticas, Menu principal];
+ * derrota de campanha: [Tentar novamente (primário), Estatísticas, Menu principal]. Ids: next|retry|stats|menu.
+ * `campaignDoneKey`: chave i18n da mensagem de campanha concluída (ou null).
+ */
+export function missionEndActions(outcome, plan = null) {
+  const won = outcome === 'victory';
+  const camp = !!(plan && plan.inCampaign);
+  const actions = [];
+  if (camp && won && plan.hasNext) actions.push({ id: 'next', labelKey: 'campaign.end.next', primary: true });
+  if (camp) actions.push({ id: 'retry', labelKey: won ? 'campaign.end.repeat' : 'campaign.end.tryAgain', primary: !(won && plan.hasNext) });
+  else actions.push({ id: 'retry', labelKey: won ? 'mission.replay' : 'mission.retry', primary: true });
+  actions.push({ id: 'stats', labelKey: 'mission.stats', primary: false }, { id: 'menu', labelKey: 'mission.menu', primary: false });
+  return { actions, campaignDoneKey: camp && won && plan.campaignComplete && !plan.hasNext ? 'campaign.end.complete' : null };
 }

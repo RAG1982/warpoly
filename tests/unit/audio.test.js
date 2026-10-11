@@ -415,7 +415,7 @@ describe('F7-08 mapeamento evento -> som (puro)', () => {
   it('projéteis: disparo e impacto por tipo; cerco bate mais forte', () => {
     const from = { x: 1, y: 1, z: 1 };
     expect(soundsForEvent(EVT.PROJECTILE_FIRED, { kind: 'arrow', from }, { own: true })[0]).toMatchObject({ sfx: 'bow', pos: from });
-    expect(soundsForEvent(EVT.PROJECTILE_FIRED, { kind: 'axe', from }, { own: true })[0].sfx).toBe('throw');
+    expect(soundsForEvent(EVT.PROJECTILE_FIRED, { kind: 'axe', from }, { own: true })[0].sfx).toBe('axeThrow');
     expect(soundsForEvent(EVT.PROJECTILE_FIRED, { kind: 'bolt', from }, { own: true })[0].sfx).toBe('bolt');
     expect(soundsForEvent(EVT.PROJECTILE_FIRED, { kind: 'boulder', from }, { own: true })[0].sfx).toBe('catapult');
     const arrow = soundsForEvent(EVT.PROJECTILE_HIT, { kind: 'arrow', pos }, { own: false, visible: true })[0];
@@ -457,11 +457,11 @@ describe('F7-08 mapeamento evento -> som (puro)', () => {
   it('todo som mapeado tem receita; todo evento registrado tem mapeamento', () => {
     const used = new Set();
     for (const type of SFX_EVENTS) {
-      const out = soundsForEvent(type, { pos, from: pos, kind: 'arrow', resource: 'gold' }, { own: true, visible: true });
+      const out = soundsForEvent(type, { pos, from: pos, kind: type === EVT.BUILDING_VFX ? 'anvil_spark' : 'arrow', resource: 'gold' }, { own: true, visible: true });
       expect(out.length, type).toBeGreaterThan(0);
       for (const d of out) { used.add(d.sfx); expect(SFX[d.sfx], d.sfx).toBeTruthy(); }
     }
-    for (const k of ['bolt', 'catapult', 'stoneHit', 'throw']) {
+    for (const k of ['bolt', 'catapult', 'stoneHit', 'axeThrow', 'axeHit', 'metalHit']) {
       expect(SFX[k]).toBeTruthy();
     }
     expect(used.size).toBeGreaterThan(8);
@@ -712,7 +712,7 @@ describe('F7-08 motor de áudio (contexto falso): mixer, limitador, posicional e
       const ok = eng.playSfx(name, { pos: null, variant: name === 'cast' ? 'ring' : undefined });
       expect(ok, name).toBe(true);
       expect(r.dur, name).toBeGreaterThan(0.05);
-      expect(r.dur, name).toBeLessThan(2);
+      expect(r.dur, name).toBeLessThan(4);
     }
     for (const v of ['burst', 'ring', 'beam', 'aura']) { ctx.advance(2); expect(eng.playSfx('cast', { variant: v })).toBe(true); }
     // limites por som só mencionam receitas que existem

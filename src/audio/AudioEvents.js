@@ -61,6 +61,7 @@ export function createAudioEvents(gm, sound, { tilesetId = null } = {}) {
     const pos = p.pos || p.from || null;
     const own = isLocal(p.ownerId);
     const info = { own, visible: own || visibleAt(pos) };
+    if (type === EVT.MELEE_HIT) info.faction = factionOf({ ownerId: p.ownerId }); // aço × ferro
     if (type === EVT.ABILITY_CAST) {
       const ab = resolveAbility(gm, p.abilityId);
       info.vfxKind = ab && ab.vfx ? ab.vfx.kind : 'burst';

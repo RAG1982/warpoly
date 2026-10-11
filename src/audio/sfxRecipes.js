@@ -1,7 +1,8 @@
 /**
  * sfxRecipes.js (F7-08) — receitas dos efeitos sonoros, 100% sintetizadas (osciladores, ruído e filtros; sem arquivos).
- * Os sons antigos do `SoundManager` foram portados com os MESMOS picos (o volume agora é o do barramento "Efeitos");
- * entraram `throw`, `bolt`, `catapult`, `stoneHit`, `explosion`, `death`, `collapse`, `cast`, `chime`, `gather`, `defeat`.
+ * Os sons de interface e magia foram portados do `SoundManager` antigo com os MESMOS picos (o volume agora é o do barramento
+ * "Efeitos"). Os efeitos de guerra e de trabalho (metal, pedra, explosão, desabamento, afundamento, flecha, machados,
+ * picareta, martelo, bigorna) moram em `sfxLibrary.js` e entram aqui por espalhamento (`...LIBRARY`).
  *
  * Uma receita é `{ dur, priority?, play(c, p) }`:
  *   dur       duração máxima em segundos (o `VoicePool` usa para saber quando a voz acaba)
@@ -11,6 +12,8 @@
  * `burst(dur, pico, atraso)` (rajada de ruído branco com decaimento). Fontes criadas por `c.osc`/`c.burst` são
  * registradas: o motor as para se a voz for roubada por outra de prioridade maior.
  */
+
+import { LIBRARY } from './sfxLibrary.js';
 
 const decay = (g, t, from, to, d) => {
   g.gain.setValueAtTime(from, t);
@@ -24,87 +27,13 @@ const sweep = (o, t, f0, f1, d) => {
 
 /** @type {Record<string, {dur:number, priority?:number, play:(c:object, p?:object)=>void}>} */
 export const SFX = {
-  // --- trabalho -----------------------------------------------------------------------------------------
-  chop: {
-    dur: 0.15,
-    play(c) {
-      const g = c.gain(0); decay(g, c.t, 0.4, 0.001, 0.12);
-      const o = c.osc('triangle', 0); sweep(o, c.t, 110 + c.rng() * 30, 40, 0.08);
-      const bp = c.filter('bandpass', 1400);
-      c.burst(0.05, 1).connect(bp); bp.connect(g); o.connect(g);
-      o.start(c.t); o.stop(c.t + 0.12);
-    }
-  },
-  mineGold: {
-    dur: 0.3,
-    play(c) {
-      const f = [1200, 1440, 1680, 1920][Math.floor(c.rng() * 4)];
-      const g = c.gain(0); decay(g, c.t, 0.3, 0.001, 0.25);
-      const o1 = c.osc('sine', f), o2 = c.osc('triangle', f * 1.5);
-      o1.connect(g); o2.connect(g);
-      o1.start(c.t); o2.start(c.t); o1.stop(c.t + 0.25); o2.stop(c.t + 0.25);
-    }
-  },
-  mineStone: {
-    dur: 0.18,
-    play(c) {
-      const g = c.gain(0); decay(g, c.t, 0.35, 0.001, 0.14);
-      const o = c.osc('sawtooth', 0); sweep(o, c.t, 180, 60, 0.1);
-      const lp = c.filter('lowpass', 800);
-      o.connect(lp); lp.connect(g);
-      o.start(c.t); o.stop(c.t + 0.14);
-    }
-  },
-  hammer: {
-    dur: 0.12,
-    play(c) {
-      const g = c.gain(0); decay(g, c.t, 0.3, 0.001, 0.09);
-      const o = c.osc('sine', 0); sweep(o, c.t, 750 + c.rng() * 80, 250, 0.08);
-      o.connect(g);
-      o.start(c.t); o.stop(c.t + 0.09);
-    }
-  },
+  ...LIBRARY, // metal, pedra, explosão, desabamento, afundamento, flecha, machado, picareta, martelo… (sfxLibrary.js)
 
   // --- combate ------------------------------------------------------------------------------------------
   sword: {
-    dur: 0.22,
-    play(c) {
-      const g = c.gain(0); decay(g, c.t, 0.35, 0.001, 0.18);
-      const o1 = c.osc('triangle', 0); sweep(o1, c.t, 950, 450, 0.12);
-      const o2 = c.osc('sawtooth', 0); sweep(o2, c.t, 600, 180, 0.15);
-      o1.connect(g); o2.connect(g);
-      o1.start(c.t); o2.start(c.t); o1.stop(c.t + 0.18); o2.stop(c.t + 0.18);
-    }
-  },
-  bow: {
-    dur: 0.16,
-    play(c) {
-      const g = c.gain(0); decay(g, c.t, 0.3, 0.001, 0.12);
-      const o = c.osc('triangle', 0); sweep(o, c.t, 480, 120, 0.1);
-      o.connect(g);
-      o.start(c.t); o.stop(c.t + 0.12);
-    }
-  },
-  arrowHit: {
-    dur: 0.12,
-    play(c) {
-      const g = c.gain(0); decay(g, c.t, 0.3, 0.001, 0.08);
-      const o = c.osc('sine', 0); sweep(o, c.t, 320, 90, 0.07);
-      o.connect(g);
-      o.start(c.t); o.stop(c.t + 0.08);
-    }
-  },
-  throw: {
-    dur: 0.2,
-    play(c) {
-      const g = c.gain(1);
-      const bp = c.filter('bandpass', 700, 1.2); sweep(bp, c.t, 700, 2200, 0.14);
-      c.burst(0.16, 0.35).connect(bp); bp.connect(g);
-      const o = c.osc('triangle', 0); sweep(o, c.t, 280, 180, 0.12);
-      const og = c.gain(0); decay(og, c.t, 0.12, 0.001, 0.12);
-      o.connect(og);
-      o.start(c.t); o.stop(c.t + 0.13);
-    }
+    dur: 0.5,
+    priority: 1.1,
+    play(c, p = {}) { LIBRARY.metalHit.play(c, { ...p, kind: 'blade' }); } // compat: `playSword` e a ação `sound: sword` das missões
   },
   bolt: {
     dur: 0.24,
@@ -131,31 +60,6 @@ export const SFX = {
       o.start(c.t); o.stop(c.t + 0.36);
     }
   },
-  stoneHit: {
-    dur: 0.26,
-    priority: 1.5,
-    play(c) {
-      const g = c.gain(0); decay(g, c.t, 0.38, 0.001, 0.2);
-      const o = c.osc('sawtooth', 0); sweep(o, c.t, 170, 50, 0.14);
-      const lp = c.filter('lowpass', 700);
-      o.connect(lp); lp.connect(g);
-      const bp = c.filter('bandpass', 900);
-      c.burst(0.1, 0.35).connect(bp); bp.connect(c.gain(1));
-      o.start(c.t); o.stop(c.t + 0.2);
-    }
-  },
-  explosion: {
-    dur: 0.9,
-    priority: 3,
-    play(c) {
-      const lp = c.filter('lowpass', 1800); sweep(lp, c.t, 1800, 160, 0.6);
-      c.burst(0.7, 0.8).connect(lp); lp.connect(c.gain(1));
-      const g = c.gain(0); decay(g, c.t, 0.7, 0.001, 0.7);
-      const o = c.osc('sine', 0); sweep(o, c.t, 95, 34, 0.6);
-      o.connect(g);
-      o.start(c.t); o.stop(c.t + 0.72);
-    }
-  },
   death: {
     dur: 0.32,
     priority: 1.2,
@@ -167,22 +71,6 @@ export const SFX = {
       const lp2 = c.filter('lowpass', 400);
       c.burst(0.1, 0.25).connect(lp2); lp2.connect(c.gain(1));
       o.start(c.t); o.stop(c.t + 0.26);
-    }
-  },
-  collapse: {
-    dur: 1.3,
-    priority: 2.8,
-    play(c) {
-      const lp = c.filter('lowpass', 380);
-      c.burst(1.1, 0.6).connect(lp); lp.connect(c.gain(1));
-      const g = c.gain(0); decay(g, c.t, 0.5, 0.001, 1.1);
-      const o = c.osc('sine', 0); sweep(o, c.t, 60, 30, 0.9);
-      o.connect(g);
-      o.start(c.t); o.stop(c.t + 1.12);
-      const hp = c.filter('bandpass', 1100);
-      const cg = c.gain(1);
-      hp.connect(cg);
-      for (const dt of [0.1, 0.35, 0.6]) c.burst(0.14, 0.3, dt).connect(hp); // pedras caindo
     }
   },
   cast: {
@@ -350,11 +238,13 @@ export const SFX = {
 /** Teto de vozes simultâneas por som e intervalo mínimo entre recomeços (anti-"metralhadora"; ver `VoicePool`). */
 export const SFX_LIMITS = Object.freeze({
   perKey: Object.freeze({
-    chop: 3, mineGold: 2, mineStone: 3, hammer: 3, sword: 5, bow: 5, arrowHit: 4, throw: 3, bolt: 3, catapult: 2,
-    stoneHit: 3, death: 4, explosion: 3, collapse: 2, cast: 3, chime: 2, gather: 2
+    chop: 3, treeFall: 2, mineGold: 2, mineStone: 3, hammer: 3, anvil: 2, sword: 5, metalHit: 6, bow: 5, arrowHit: 4,
+    axeThrow: 3, axeHit: 3, bolt: 3, catapult: 2, stoneHit: 3, death: 4, explosion: 3, collapse: 2, shipSink: 2, cast: 3,
+    chime: 2, gather: 2
   }),
   minGap: Object.freeze({
-    chop: 0.05, mineGold: 0.08, mineStone: 0.06, hammer: 0.05, sword: 0.035, bow: 0.035, arrowHit: 0.03, throw: 0.05,
-    bolt: 0.05, stoneHit: 0.05, death: 0.06, gather: 0.12, chime: 0.1
+    chop: 0.05, treeFall: 0.2, mineGold: 0.08, mineStone: 0.06, hammer: 0.05, anvil: 0.3, sword: 0.035, metalHit: 0.035,
+    bow: 0.035, arrowHit: 0.03, axeThrow: 0.05, axeHit: 0.04, bolt: 0.05, stoneHit: 0.05, death: 0.06, shipSink: 0.3,
+    gather: 0.12, chime: 0.1
   })
 });

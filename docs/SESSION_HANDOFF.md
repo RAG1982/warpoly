@@ -1,6 +1,6 @@
 # SESSION HANDOFF — como continuar o WarPoly numa sessão nova
 
-> Escrito em 2026-09-29; **atualizado em 2026-10-10** (seções 2.3, 4, 5, 7 e 8). Leia este arquivo inteiro antes de agir.
+> Escrito em 2026-09-29; atualizado em 2026-10-10. **Em 2026-10-12 a nuvem entregou tudo no `master` (PRs até #50): leia PRIMEIRO `docs/ESTADO_NUVEM.md` (estado atual) e `docs/CHANGELOG_NUVEM.md`; o que está abaixo pode estar desatualizado.** Leia este arquivo inteiro antes de agir.
 > **Prompt para colar na sessão nova (local, Claude Code com Opus):**
 > `Leia docs/SESSION_HANDOFF.md e continue a coordenação do projeto WarPoly a partir da seção "Próximos passos".`
 

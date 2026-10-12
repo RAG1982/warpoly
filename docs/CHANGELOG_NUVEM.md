@@ -1,7 +1,7 @@
-# Changelog das alterações feitas na nuvem (2026-09-29 → 2026-10-11)
+# Changelog das alterações feitas na nuvem (2026-09-29 → 2026-10-12)
 
 > Cada item tem o PR de origem. "Mesclado" = no `master`; "Pendente" = ainda sem PR mesclado (ver `ESTADO_NUVEM.md` §3). Nada aqui foi visto num navegador: a verificação visual, de áudio e de GPU está no corpo de cada PR ("Verificação pendente (local)").
-> Branches `cloud/<ID>` por tarefa; integrações em `cloud/integracao` (#25), `cloud/integracao-2` (#35) e `cloud/integracao-3` (#42).
+> Branches `cloud/<ID>` por tarefa; integrações em `cloud/integracao` (#25), `cloud/integracao-2` (#35), `cloud/integracao-3` (#42) e `cloud/integracao-4` (#46). **Tudo está mesclado; nada pendente.**
 
 ## Mesclado
 
@@ -44,8 +44,13 @@
 - **#39** tela final da campanha: arte de vitória por facção, epílogo "A Aurora sobre Aurelan", fanfarra, Rejogar (depende do #36).
 - **#40** mapas maiores e florestas densas (madeira alcançável ≥ 8000 por jogador); `tools/measure-wood.mjs`.
 
-## Pendente
-- **F8-05b** (em andamento, `cloud/F8-05b`): campanha com todas as categorias de unidade e liberação progressiva de unidades, construções e pesquisas.
+
+## Mesclado em 2026-10-11/12 (integração #46 e documentos #47–#50)
+- **F8-05b** (#44): campanha da Aliança com todas as categorias de unidade e liberação progressiva (`unlocks`, `availableTech`, `techRestrictionFor`; exigência travada em `requirements.js`; ação `setTier` e condição `research` nas missões; UI "Disponível na missão N" e anúncio "Novo: …"); m5 oficina/sapadores/herói Brann, m6 naval com petróleo, m7 magos/aéreas/herói Oren, m8 tudo.
+- **Falas removidas** (#45): `src/audio/speech/` apagado, slider "Falas" das Opções removido (configuração antiga ignorada).
+- **Música:** catálogo único (41 entradas), tema de abertura "Marcha da Tempestade" e 2 candidatas, 5 candidatas de paz e 6 de combate por facção, evolução por tempo de partida, player no inspetor com seleção (`localStorage`), `docs/MUSICA.md`. As 3 faixas de combate atuais ficam `inGame:false`.
+- **MIDI** (#47): `tools/export-midi.mjs` e `src/audio/music/midiExport.js`.
+- **Documentos do novo mundo** (#48–#50): briefing da Horda (F8-06, preservado), briefing do dono, specs de história/campanha (12 missões por facção, tutorial 1–6), 6 heróis (`MUNDO-HEROIS.md`), terreno/mapas com costas irregulares, biomas, lava sem dano e mapa-múndi ilustrativo; protótipo `tools/proto/irregular-coast.mjs` com prévias.
 
 ## Planos
-Ver `ESTADO_NUVEM.md` §4: F8-05b → F8-06 (campanha da Horda), NEW-6 passos 1/2/4/5 (decisão sobre a resolução em `high`), NEW-14 passos 0–2/5–6 (3 e 4 após NEW-53), F1-10c (depende do bench), mapas `estreito-1v1`/`ilhas-4p`, arte Blender de vitória (`victory_human.webp`, `victory_orc.webp`), regravar `tests/perf/baseline.json`.
+Ver `ESTADO_NUVEM.md` §4: novo mundo (gerador de mapas irregulares → biomas → dados dos 6 heróis → seletor de campanhas → tela de história → 12 missões por facção), NEW-6, NEW-14, F1-10c, arte Blender, regravar a baseline de desempenho. A F8-06 (Horda, 8 missões) vira a "Campanha Clássica (beta)" junto com a Aliança atual.

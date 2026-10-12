@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import {
-  TRACK_SETS, TRACKS, TRACKS_BY_ID, TRACK_FAMILIES, TRACK_IDS, VARIANTS_PER_FAMILY, MODES, STEPS_PER_BAR, STEPS_PER_BEAT,
+  TRACK_SETS as ALL_SETS, TRACKS, VARIANTS_PER_FAMILY, MODES, STEPS_PER_BAR, STEPS_PER_BEAT,
   eventsForStep, trackLength, stepSeconds, trackFor
 } from '../../src/audio/music/musicScores.js';
 import { pickVariant, trackIdFor } from '../../src/audio/musicDirector.js';
@@ -11,19 +11,24 @@ import { createFakeAudioContext } from './helpers/fakeAudio.js';
 
 // Música (commit 3): marcha animada, militar e urgente; tema por facção; ≥ 3 variações por faixa; geração incremental.
 
-const allTracks = Object.values(TRACKS_BY_ID);
+// Este arquivo testa as faixas CLÁSSICAS (as 3 primeiras variações de cada família de paz/combate). As candidatas novas e os
+// temas de abertura têm os testes em musicTracksNew.test.js e musicTitle.test.js.
+const TRACK_FAMILIES = ['human_combat', 'human_peace', 'orc_combat', 'orc_peace'];
+const TRACK_SETS = Object.fromEntries(TRACK_FAMILIES.map((f) => [f, ALL_SETS[f].slice(0, VARIANTS_PER_FAMILY)]));
+const allTracks = Object.values(TRACK_SETS).flat();
+const TRACK_IDS = allTracks.map((t) => t.id);
 const pcInScale = (track, midi) => track.scale.includes((((midi - track.key) % 12) + 12) % 12);
 const dump = (track, loops = 2, seed = 5) => JSON.stringify(Array.from({ length: trackLength(track) * loops }, (_, s) => eventsForStep(track, s, { seed })));
 
 describe('estrutura: 4 famílias × 3 variações, 4/4 de 16 passos, 8 compassos', () => {
   it('duas faixas por facção (paz e combate), cada uma com pelo menos 3 variações', () => {
-    expect([...TRACK_FAMILIES].sort()).toEqual(['human_combat', 'human_peace', 'orc_combat', 'orc_peace']);
+    expect(Object.keys(ALL_SETS).sort()).toEqual(['human_combat', 'human_peace', 'orc_combat', 'orc_peace', 'title']);
     expect(VARIANTS_PER_FAMILY).toBeGreaterThanOrEqual(3);
     for (const fam of TRACK_FAMILIES) expect(TRACK_SETS[fam].length, fam).toBeGreaterThanOrEqual(3);
     expect(new Set(TRACK_IDS).size).toBe(TRACK_IDS.length);
     expect(TRACK_IDS).toHaveLength(12);
-    expect(TRACKS.orc_combat).toBe(TRACK_SETS.orc_combat[0]);
-    expect(trackFor('orc_combat', 4)).toBe(TRACK_SETS.orc_combat[1]); // circular
+    expect(TRACKS.orc_combat).toBe(ALL_SETS.orc_combat[0]);
+    expect(trackFor('orc_combat', 3 * ALL_SETS.orc_combat.length + 1)).toBe(ALL_SETS.orc_combat[1]); // circular
     expect(trackFor('nao_existe')).toBeUndefined();
     for (const t of allTracks) {
       expect(t.stepsPerBar).toBe(STEPS_PER_BAR);
@@ -283,7 +288,8 @@ describe('escolha determinística da variação (fora da sim)', () => {
     const { ctx, eng } = mkEngine(7);
     eng.beginMatch({ faction: 'human', tilesetId: 'verdejante' });
     const first = eng.music.currentVariant;
-    const loopSec = trackLength(eng.music.runs[0].track) * stepSeconds(eng.music.runs[0].track);
+    const cur = eng.music.runs[eng.music.runs.length - 1].track; // (a primeira faixa, o tema de abertura do menu, ainda sai)
+    const loopSec = trackLength(cur) * stepSeconds(cur);
     let changed = -1;
     for (let t = 0; t < loopSec * 4.2; t += 0.15) {
       ctx.advance(0.15); eng.tick();

@@ -8,10 +8,7 @@
  *    prioridade; TUDO que tem posição é descartado se estiver fora da cena visível (frustum da câmera + margem; `isAudible`),
  *    e sons de unidades alheias só se a posição está visível na névoa. Sons globais (interface, alarme "sob ataque",
  *    marcos, vitória/derrota — descritores sem `pos`) não são filtrados.
- *  - Falas: ao selecionar e ao dar ordem, fala a unidade "líder" da seleção (herói > conjurador > equipagem > soldado >
- *    trabalhador), PT-BR, sintetizadas por formantes. A seleção em grupo e as ordens por tecla/menu não passam por evento: o
- *    InputManager chama `gm.soundManager.playSelect()/playOrder()`, então este módulo põe ali um adaptador (`inputSound`)
- *    que fala (ou, sem voz, toca o clique de antes) e o devolve no `dispose`.
+ *  - Seleção e ordem: tocam o clique (`playSelect`/`playOrder`) ao receber SELECTED/ORDER_ISSUED.
  *  - Música adaptativa: dano/morte/explosão alimentam a intensidade de combate (`combatWeight`).
  *  - Partida: avisa o `SoundManager` (facção do jogador local e tileset do mapa → música e ambiência).
  */
@@ -19,14 +16,12 @@ import { EVT } from '../sim/events.js';
 import { resolveAbility } from '../sim/abilities.js';
 import { soundsForEvent, combatWeight, SFX_EVENTS, COMBAT_EVENTS } from './audioMapping.js';
 import { listenerRanges, isAudible, mulMat4 } from './attenuation.js';
-import { createSpeechDirector, speakerFor, leaderOf } from './speech/speechLines.js';
-import { createAudioRng } from './audioConfig.js';
 
 /**
  * @param {import('../core/GameManager.js').GameManager} gm
  * @param {*} sound  `SoundManager` (ou falso nos testes)
  * @param {{tilesetId?:string|null}} [opts]  tileset do mapa (ambiência)
- * @returns {() => void} `dispose` — remove todos os ouvintes e devolve o gancho de som do InputManager.
+ * @returns {() => void} `dispose` — remove todos os ouvintes e 
  */
 export function createAudioEvents(gm, sound, { tilesetId = null } = {}) {
   const offs = [];
@@ -93,50 +88,14 @@ export function createAudioEvents(gm, sound, { tilesetId = null } = {}) {
     });
   }
 
-  // --- falas de confirmação (seleção e ordem)
-  const speech = createSpeechDirector({ rng: createAudioRng(0x5eed ^ (gm.localPlayerId | 0)) });
+  // --- cliques de seleção e de ordem
+  on(EVT.SELECTED, () => sound.playSelect());
+  on(EVT.ORDER_ISSUED, () => sound.playOrder());
+
   const factionOf = (u) => {
     const pl = gm.getPlayer ? gm.getPlayer(u.ownerId) : null;
     return pl && pl.factionId ? pl.factionId : 'human';
   };
-  /** true = tratou o som (falou ou foi limitada pela política); false = sem voz possível (toca o clique). */
-  const speakUnits = (kind, units) => {
-    if (!sound.canSpeak()) return false;
-    const lead = leaderOf(units, factionOf);
-    if (!lead) return false;
-    const now = sound.now();
-    const line = speech.pick(kind, lead.speaker, now);
-    if (!line) return true;
-    const dur = sound.speak(line);
-    if (dur > 0) speech.started(now, dur);
-    return true;
-  };
-  const selectedUnits = () => (gm.selectedUnits && gm.selectedUnits.length ? gm.selectedUnits : null);
-
-  on(EVT.SELECTED, ({ entityId }) => {
-    const e = gm.entitiesById.get(entityId);
-    if (e && e.type && speakerFor(e.type, factionOf(e)) && speakUnits('select', [e])) return;
-    sound.playSelect(); // construção, recurso ou unidade sem voz: o clique de sempre
-  });
-  on(EVT.ORDER_ISSUED, () => {
-    const sel = selectedUnits();
-    if (sel && speakUnits('order', sel)) return;
-    sound.playOrder();
-  });
-
-  // InputManager (seleção em grupo, S/H/A/P, magias) chama `gm.soundManager.playSelect()/playOrder()` direto.
-  const inputSound = {
-    playSelect() {
-      const sel = selectedUnits();
-      if (!(sel && speakUnits('select', sel))) sound.playSelect();
-    },
-    playOrder() {
-      const sel = selectedUnits();
-      if (!(sel && speakUnits('order', sel))) sound.playOrder();
-    }
-  };
-  const previousHook = gm.soundManager;
-  gm.soundManager = inputSound;
 
   // --- partida: música da facção do jogador local + ambiência do tileset
   const lp = gm.localPlayer;
@@ -149,7 +108,6 @@ export function createAudioEvents(gm, sound, { tilesetId = null } = {}) {
   return function dispose() {
     offs.forEach((off) => off());
     offs.length = 0;
-    if (gm.soundManager === inputSound) gm.soundManager = previousHook;
     sound.endMatch();
   };
 }

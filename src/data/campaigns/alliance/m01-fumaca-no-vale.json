@@ -14,7 +14,8 @@
     },
     "hints": [
       { "pt-BR": "Trabalhadores constroem; o quartel treina soldados.", "en": "Workers build; the barracks trains soldiers." },
-      { "pt-BR": "Há um acampamento de bandoleiros a sudeste: espólio para quem o derrubar.", "en": "A bandit camp lies to the southeast: spoils for whoever tears it down." }
+      { "pt-BR": "Há um acampamento de bandoleiros a sudeste: espólio para quem o derrubar.", "en": "A bandit camp lies to the southeast: spoils for whoever tears it down." },
+      { "pt-BR": "Dica: o Quartel exige uma Fazenda concluída. Nele você treina Espadachins (corpo a corpo) e Arqueiros (à distância); misture os dois.", "en": "Tip: the Barracks needs a finished Farm. There you train Swordsmen (melee) and Archers (ranged); mix the two." }
     ]
   },
   "mapId": "campos-1v1",
@@ -37,6 +38,9 @@
     { "id": "crush-vanguard", "type": "destroy", "priority": "primary", "select": { "tag": "vanguard" }, "count": 5, "active": false,
       "title": { "pt-BR": "Destruir a vanguarda do Cinzal", "en": "Destroy the Cinzal vanguard" },
       "description": { "pt-BR": "Eles acampam no centro do vale.", "en": "They are camped in the middle of the valley." } },
+    { "id": "archers-four", "type": "flag", "priority": "secondary",
+      "condition": { "type": "count", "select": { "owner": "player", "unitType": "archer" }, "value": 4 },
+      "title": { "pt-BR": "Reunir 4 Arqueiros (treine no Quartel)", "en": "Muster 4 Archers (train them at the Barracks)" } },
     { "id": "gold-500", "type": "collect", "priority": "secondary", "resource": "gold", "amount": 500,
       "title": { "pt-BR": "Coletar 500 de ouro", "en": "Gather 500 gold" } },
     { "id": "clear-camp", "type": "destroy", "priority": "secondary", "select": { "tag": "camp" },
@@ -71,6 +75,11 @@
       "actions": [
         { "type": "giveResources", "owner": "player", "gold": 120, "wood": 60 },
         { "type": "message", "text": { "pt-BR": "Espólio do acampamento: +120 de ouro, +60 de madeira.", "en": "Camp spoils: +120 gold, +60 wood." } }
+      ] },
+    { "id": "archers-ready", "when": { "type": "objective", "id": "archers-four", "status": "completed" },
+      "actions": [
+        { "type": "giveResources", "owner": "player", "gold": 100 },
+        { "type": "message", "text": { "pt-BR": "Arqueiros reunidos: +100 de ouro. Dica: Arqueiros atiram de longe; deixe os Espadachins na frente.", "en": "Archers mustered: +100 gold. Tip: Archers shoot from afar; keep the Swordsmen in front." } }
       ] },
     { "id": "shrine", "when": { "type": "objective", "id": "old-shrine", "status": "completed" },
       "actions": [

@@ -9,6 +9,7 @@
 import { getMap, DEFAULT_MAP_ID } from '../data/maps/index.js';
 import { getHeightForMap } from './terrainGenerators.js';
 import { resolveMissionDef } from '../data/missions/index.js';
+import { validateTechRestriction } from './techRestriction.js';
 
 export { DEFAULT_MAP_ID };
 
@@ -285,6 +286,14 @@ export function validateMatchConfig(cfg) {
       if (!r || typeof r[k] !== 'number' || !(r[k] >= 0) || !Number.isFinite(r[k])) {
         throw new Error(`MatchConfig: startingResources.${k} inválido`);
       }
+    }
+  }
+  // F8-05b: restrição de árvore tecnológica (campanha) — só jogadores existentes, itens que existem em src/data.
+  if (cfg.techRestriction !== undefined) {
+    const v = validateTechRestriction(cfg.techRestriction);
+    if (!v.ok) throw new Error(`MatchConfig: techRestriction inválida: ${v.errors.join('; ')}`);
+    for (const pid of cfg.techRestriction.players) {
+      if (!ids.has(pid)) throw new Error(`MatchConfig: techRestriction cita o jogador ${pid}, que não existe`);
     }
   }
   const teams = new Set(cfg.players.map((p) => p.team));

@@ -1,13 +1,14 @@
 // SoundManager.js — fachada de áudio do jogo (F7-08: antes um sintetizador único; agora delega ao motor em src/audio/).
 //
 // Mantém a API que a HUD, o InputManager e o MissionController já usam (`resume`, `playSelect`, `playOrder`, `startMusic`,
-// `setSfxVolume`…) e acrescenta: volume por canal (música/efeitos/falas + geral), nível de áudio por preset (`?audio=`),
-// som posicional (`playChop(pos)`…), falas de unidade, música adaptativa e ambiência por partida.
+// `setSfxVolume`…) e acrescenta: volume por canal (música/efeitos + geral), nível de áudio por preset (`?audio=`),
+// som posicional (`playChop(pos)`…), música adaptativa e ambiência por partida.
 //
 // Regras: o AudioContext só nasce depois de um gesto do usuário (`init` via `resume`, chamados pelos ouvintes de
 // click/keydown do main.js); nível 'off' (testes/automação, `?audio=0`) não cria nada; nada aqui toca a simulação.
 import { AudioEngine } from '../audio/AudioEngine.js';
 import { clampVolume } from '../audio/audioConfig.js';
+import { loadSelection } from '../audio/music/catalog.js';
 
 export class SoundManager {
   /**
@@ -22,8 +23,8 @@ export class SoundManager {
     this.enabled = true; // mudo geral (toggleSound)
     this.musicEnabled = true; // preferência de música (toggleMusic)
     this.initialized = false;
-    /** @type {{master:number, music:number, sfx:number, voice:number}} */
-    this.volumes = { master: 1, music: 0.25, sfx: 0.5, voice: 0.8 };
+    /** @type {{master:number, music:number, sfx:number}} */
+    this.volumes = { master: 1, music: 0.25, sfx: 0.5 };
     this._musicHold = false;
     this._paused = false;
     this._match = null;
@@ -49,6 +50,7 @@ export class SoundManager {
         level: this.level,
         volumes: { ...this.volumes, master: this.enabled ? this.volumes.master : 0 },
         musicOn: this.musicEnabled,
+        musicSelection: this._storedMusicSelection(),
         timers: this.env.timers === undefined ? globalThis : this.env.timers
       });
       this.initialized = true;
@@ -60,6 +62,16 @@ export class SoundManager {
       console.warn('[WarPoly áudio] Web Audio indisponível ou bloqueado', e);
       this.engine = null;
       this.ctx = null;
+    }
+  }
+
+  /** Seleção de faixas gravada pelo inspetor (`localStorage['warpoly.music.selection']`) ou `null` (padrões do catálogo). */
+  _storedMusicSelection() {
+    try {
+      const st = this.env.storage !== undefined ? this.env.storage : (typeof localStorage !== 'undefined' ? localStorage : null);
+      return loadSelection(st);
+    } catch {
+      return null;
     }
   }
 
@@ -97,16 +109,15 @@ export class SoundManager {
   }
 
   // ------------------------------------------------------------------ volumes e liga/desliga
-  /** @param {{master?:number, music?:number, sfx?:number, voice?:number}} v  valores 0..1 por canal */
+  /** @param {{master?:number, music?:number, sfx?:number}} v  valores 0..1 por canal */
   setVolumes(v) {
-    for (const k of ['master', 'music', 'sfx', 'voice']) if (v[k] !== undefined) this.volumes[k] = clampVolume(v[k], this.volumes[k]);
+    for (const k of ['master', 'music', 'sfx']) if (v[k] !== undefined) this.volumes[k] = clampVolume(v[k], this.volumes[k]);
     this._pushState();
   }
 
   setMasterVolume(v) { this.setVolumes({ master: v }); }
   setSfxVolume(v) { this.setVolumes({ sfx: v }); }
   setMusicVolume(v) { this.setVolumes({ music: v }); }
-  setVoiceVolume(v) { this.setVolumes({ voice: v }); }
 
   toggleSound() {
     this.enabled = !this.enabled;
@@ -147,23 +158,10 @@ export class SoundManager {
   playAlarm() { return this.playSfx('alarm'); }
   playVictory() { return this.playSfx('victory'); }
 
-  // ------------------------------------------------------------------ falas, posição e partida
+  // ------------------------------------------------------------------ posição e partida
   /** Tempo do áudio em segundos (relógio do AudioContext; antes do motor existir, 0). */
   now() {
     return this.engine ? this.engine.now() : 0;
-  }
-
-  /** Há como falar agora? (motor ligado, nível com falas e canal de falas audível) */
-  canSpeak() {
-    const e = this.engine;
-    return !!(e && this.enabled && e.caps.speech && this.volumes.voice > 0 && this.volumes.master > 0);
-  }
-
-  /** Toca uma fala já escolhida (`createSpeechDirector().pick`). Devolve a duração (0 = não falou). */
-  speak(line) {
-    if (!this.canSpeak()) return 0;
-    if (this.ctx.state === 'suspended') this.resume();
-    return this.engine.speak(line);
   }
 
   setListener(l) {
@@ -199,6 +197,11 @@ export class SoundManager {
     this._match = null;
     this._sceneProbe = null;
     if (this.engine) { this.engine.sceneProbe = null; this.engine.paused = false; this.engine.endMatch(); }
+  }
+
+  /** Tempo de partida em segundos (`gameTime`): a música de paz ganha urgência com os minutos. Só apresentação. */
+  setMatchTime(seconds) {
+    if (this.engine) this.engine.setMatchTime(seconds);
   }
 
   /** Peso de combate (música adaptativa). */

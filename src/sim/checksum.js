@@ -12,6 +12,8 @@
  * chamada, em qualquer máquina/motor JS (aritmética de inteiros de 32 bits é determinística).
  */
 
+import { techHashString } from './techRestriction.js';
+
 /** Hash FNV-1a de 32 bits, alimentado incrementalmente por `hashStr`. */
 function fnv1aStep(h, str) {
   for (let i = 0; i < str.length; i++) {
@@ -33,6 +35,7 @@ function combine(parts) {
   let h = 0x811c9dc5;
   for (let i = 0; i < PARTS.length; i++) h = fnv1aStep(h, `${PARTS[i]}=${parts[PARTS[i]]}|`);
   if (parts.mission !== undefined) h = fnv1aStep(h, `mission=${parts.mission}|`); // F8-04: só em partidas de missão (os demais hashes não mudam)
+  if (parts.tech !== undefined) h = fnv1aStep(h, `tech=${parts.tech}|`); // F8-05b: só com restrição de árvore tecnológica (sem ela o checksum é idêntico)
   return h >>> 0;
 }
 
@@ -149,6 +152,10 @@ export function stateChecksumDetail(gm, wantUnits = false) {
 
   // F8-04: estado da missão (variáveis, objetivos, gatilhos, tags, contadores, desfecho).
   if (gm.mission) parts.mission = fnv1aStep(0x811c9dc5, gm.mission.hashString());
+
+  // F8-05b: restrição de árvore tecnológica da config (campanha): divergência de config entra no relatório de desync.
+  const tech = gm.matchConfig && gm.matchConfig.techRestriction;
+  if (tech) parts.tech = fnv1aStep(0x811c9dc5, techHashString(tech));
 
   return { total: combine(parts), parts, units: unitList };
 }

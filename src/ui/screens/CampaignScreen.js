@@ -8,6 +8,8 @@ import { listCampaigns } from '../../data/campaigns/index.js';
 import { getMission } from '../../data/missions/index.js';
 import { localize } from '../../sim/missions/text.js';
 import { getProgress, nextMission } from '../../campaign/index.js';
+import { unlockNames } from '../techText.js';
+import { TECH_KINDS } from '../../sim/techRestriction.js';
 
 const esc = (s) => String(s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]);
 const fmtTime = (s) => `${Math.floor(s / 60)}:${String(Math.floor(s % 60)).padStart(2, '0')}`;
@@ -109,11 +111,16 @@ export class CampaignScreen {
       const sec = obj('secondary');
       const rec = completed[this.selected];
       const carry = entry.carryOver && entry.requires && entry.requires.length ? `<p class="ms-brief-sub">${esc(t('campaign.carry'))}</p>` : '';
+      // F8-05b: o que esta missão LIBERA (unidades, construções, pesquisas, heróis).
+      const names = unlockNames(entry.unlocks, def.factionId);
+      const unl = TECH_KINDS.filter((k) => names[k]).map((k) => `<li><strong>${esc(t(`campaign.unlock.${k}`))}:</strong> ${esc(names[k].join(', '))}</li>`).join('');
+      const unlBlock = unl ? `<div><h4 class="ms-h">${esc(t('campaign.unlock.title'))}</h4><ul class="ms-brief-hints">${unl}</ul></div>` : '';
       main = `<h3>${esc(localize(m.title, lang))}</h3>`
         + `<p class="ms-brief-sub">${esc(t(`campaign.status.${st}`))}${rec ? ` · ${esc(t('mission.time'))}: ${fmtTime(rec.seconds)}` : ''}</p>`
         + `<div class="ms-brief-talk"><div class="ms-portrait" aria-hidden="true">${esc(m.briefing.portrait || '📜')}</div><div class="ms-say">`
         + (m.briefing.speaker ? `<span class="ms-speaker">${esc(localize(m.briefing.speaker, lang))}</span>` : '')
         + `<p>${esc(localize(m.briefing.text, lang))}</p></div></div>`
+        + unlBlock
         + `<div><h4 class="ms-h">${esc(t('mission.primary'))}</h4><ul class="ms-brief-hints">${prim}</ul>`
         + (sec ? `<h4 class="ms-h">${esc(t('mission.secondary'))}</h4><ul class="ms-brief-hints">${sec}</ul>` : '') + '</div>'
         + carry

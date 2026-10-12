@@ -5,7 +5,7 @@
  * `src/data/missions/README.md`. `validateMission(def, opts)` devolve a lista COMPLETA de erros (PT-BR) em vez
  * de parar no primeiro; `assertMission` lança `MissionError` com todos eles.
  */
-import { UNITS, BUILDINGS } from '../../data/index.js';
+import { UNITS, BUILDINGS, RESEARCH } from '../../data/index.js';
 import { getMap } from '../../data/maps/index.js';
 
 export const MISSION_FORMAT = 'warpolymission';
@@ -15,9 +15,9 @@ export const MISSION_VERSION = 1;
 export const OBJECTIVE_TYPES = Object.freeze(['destroy', 'survive', 'escort', 'rescue', 'build', 'collect', 'eliminate', 'flag']);
 export const PRIORITIES = Object.freeze(['primary', 'secondary', 'hidden']);
 export const OBJECTIVE_STATUSES = Object.freeze(['inactive', 'active', 'completed', 'failed']);
-export const CONDITION_TYPES = Object.freeze(['time', 'every', 'area', 'dead', 'count', 'var', 'objective', 'resource', 'trigger']);
+export const CONDITION_TYPES = Object.freeze(['time', 'every', 'area', 'dead', 'count', 'var', 'objective', 'resource', 'trigger', 'research']);
 export const ACTION_TYPES = Object.freeze([
-  'spawn', 'spawnBuilding', 'giveResources', 'takeResources', 'setObjective', 'addObjective', 'revealObjective', 'reveal', 'setTeam',
+  'spawn', 'spawnBuilding', 'setTier', 'giveResources', 'takeResources', 'setObjective', 'addObjective', 'revealObjective', 'reveal', 'setTeam',
   'transfer', 'dialog', 'message', 'victory', 'defeat', 'music', 'sound', 'camera', 'cutscene', 'setVar', 'incVar',
   'enableTrigger', 'disableTrigger', 'tag', 'order', 'guard'
 ]);
@@ -181,6 +181,12 @@ function checkCondition(c, path, cond, ids) {
       if (!isStr(cond.id)) c.err(`${p}.id`, 'id obrigatório');
       else c.trigRefs.push([`${p}.id`, cond.id]);
       break;
+    case 'research': { // F8-05b: pesquisa concluída (`level` padrão 1)
+      checkOwner(c, `${p}.owner`, cond.owner, { optional: true });
+      if (!isStr(cond.id) || !RESEARCH[cond.id]) c.err(`${p}.id`, `pesquisa desconhecida "${cond.id}"`);
+      else checkNum(c, `${p}.level`, cond.level, { min: 1, max: RESEARCH[cond.id].levels.length, int: true, optional: true });
+      break;
+    }
   }
   void ids;
 }
@@ -287,6 +293,10 @@ function checkAction(c, path, a, setup = false) {
       checkNum(c, `${p}.facing`, a.facing, { min: -360, max: 360, optional: true });
       break;
     }
+    case 'setTier': // F8-05b: eleva o Centro do dono ao nível `tier`
+      checkOwner(c, `${p}.owner`, a.owner, { optional: true });
+      checkNum(c, `${p}.tier`, a.tier, { min: 2, max: 3, int: true });
+      break;
     case 'giveResources':
     case 'takeResources': {
       checkOwner(c, `${p}.owner`, a.owner, { optional: true });

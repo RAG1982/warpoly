@@ -1,5 +1,6 @@
 import * as THREE from 'three';
 import { VfxSystem } from '../render/vfx/VfxSystem.js';
+import { initMusicPanel } from './musicPanel.js';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 
 // Import all game models
@@ -2303,4 +2304,5 @@ class ModelInspectorApp {
 // Bootstrap application on DOM load
 window.addEventListener('DOMContentLoaded', () => {
   window.inspectorApp = new ModelInspectorApp();
+  window.inspectorApp.musicPanel = initMusicPanel(document); // painel "Músicas": player e seleção das faixas do jogo
 });

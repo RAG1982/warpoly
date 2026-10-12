@@ -11,6 +11,7 @@
  */
 import { getBuildingDef, getUnitDef, RESEARCH, researchName } from '../data/index.js';
 import { getTierName } from '../data/tiers.js';
+import { techLock } from './techRestriction.js';
 
 /** Construção `type` concluída de `playerId` existe em `buildings`? */
 function hasBuildingType(playerId, type, buildings) {
@@ -52,6 +53,7 @@ export function evalRequirements(requires, playerId, gm) {
 
 /** Texto amigável (PT-BR) de um requisito faltante — para tooltip da HUD. */
 export function formatRequirement(req, factionId = null) {
+  if (req && req.locked) return req.mission ? `Disponível na missão ${req.mission}` : 'Indisponível nesta campanha'; // F8-05b
   if (typeof req === 'string') return getBuildingDef(req).name;
   if (req && typeof req.hq === 'number') return factionId ? `Centro nível ${req.hq} (${getTierName(factionId, req.hq)})` : `Centro nível ${req.hq}`;
   if (req && typeof req.role === 'string') return req.role === 'workshop' ? 'Oficina' : req.role;
@@ -67,6 +69,16 @@ export function formatRequirementList(missing, factionId = null) {
 }
 
 /**
+ * Aviso ao jogador local quando a ordem foi recusada por requisito: "⚠️ Requer: A, B" ou, se o item está bloqueado pela
+ * campanha (F8-05b), "⚠️ Disponível na missão N" (a liberação vale mais que os prédios que faltam).
+ */
+export function requirementsNotice(missing, factionId = null) {
+  const locked = missing.filter(r => r && r.locked);
+  if (locked.length > 0) return `⚠️ ${formatRequirement(locked[0], factionId)}`;
+  return `⚠️ Requer: ${formatRequirementList(missing, factionId)}`;
+}
+
+/**
  * Requisitos de `buildingType` ainda não satisfeitos por `playerId` (assinatura mantida da
  * F3-04; agora `requires` também aceita `{hq:N}`).
  * @param {number} playerId
@@ -75,12 +87,16 @@ export function formatRequirementList(missing, factionId = null) {
  * @returns {Array<string|{hq:number}>}
  */
 export function missingRequirements(playerId, buildingType, gm) {
-  return evalRequirements(getBuildingDef(buildingType).requires, playerId, gm);
+  const missing = evalRequirements(getBuildingDef(buildingType).requires, playerId, gm);
+  const lock = techLock(gm, playerId, 'buildings', buildingType); // F8-05b: liberação progressiva da campanha
+  return lock ? [lock, ...missing] : missing;
 }
 
 /** F3-06: requisitos de treino de `unitType` (`UNITS[type].requires`) ainda não satisfeitos. */
 export function missingUnitRequirements(playerId, unitType, gm) {
-  return evalRequirements(getUnitDef(unitType).requires, playerId, gm);
+  const missing = evalRequirements(getUnitDef(unitType).requires, playerId, gm);
+  const lock = techLock(gm, playerId, 'units', unitType); // F8-05b
+  return lock ? [lock, ...missing] : missing;
 }
 
 /**
@@ -94,6 +110,9 @@ export function missingUpgradeRequirements(playerId, upgradeId, gm, level = null
     const player = gm && gm.getPlayer ? gm.getPlayer(playerId) : null;
     level = (player && player.researchLevels ? player.researchLevels.get(upgradeId) || 0 : 0) + 1;
   }
-  const lv = cfg.levels[Math.min(level, cfg.levels.length) - 1];
-  return evalRequirements(lv && lv.requires, playerId, gm);
+  const lvl = Math.min(level, cfg.levels.length);
+  const lv = cfg.levels[lvl - 1];
+  const missing = evalRequirements(lv && lv.requires, playerId, gm);
+  const lock = techLock(gm, playerId, 'research', upgradeId, lvl); // F8-05b
+  return lock ? [lock, ...missing] : missing;
 }

@@ -121,7 +121,7 @@ describe('AudioEvents: descarta o que está fora da cena; globais seguem', () =>
     };
     const sound = {
       setListener: () => {}, playSfx: (n, o) => { calls.push([n, o]); return true; }, playSelect() {}, playOrder() {},
-      canSpeak: () => false, now: () => 0, speak: () => 0, noteCombat() {}, beginMatch() {}, endMatch() {}, setSceneProbe() {}
+      noteCombat() {}, beginMatch() {}, endMatch() {}, setSceneProbe() {}
     };
     createAudioEvents(gm, sound, {});
     return { calls, emit: (t, p) => { events.emit(t, p); events.flush(); } };

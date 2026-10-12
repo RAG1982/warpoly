@@ -261,6 +261,126 @@ export function playInstrument(c, dest, noise, inst, midi, t, dur, vel, rng) {
       n.connect(hp); hp.connect(g);
       break;
     }
+    case 'harpsichord': {
+      // cravo: ataque seco e brilhante, duas "ordens" de cordas (uníssono e oitava) e queda rápida
+      const end = env(g, t, 0.003, vel * 0.3, 0.012, 0.5);
+      const lp = filt(c, 'lowpass', Math.min(9000, f * 9));
+      lp.frequency.setValueAtTime(Math.min(9000, f * 9), t);
+      lp.frequency.exponentialRampToValueAtTime(Math.max(500, f * 2.5), t + 0.35);
+      const o1 = osc(c, 'sawtooth', f, -3);
+      const o2 = osc(c, 'square', f * 2, 4);
+      const g2 = c.createGain();
+      g2.gain.value = 0.22;
+      o1.connect(lp); o2.connect(g2); g2.connect(lp); lp.connect(g);
+      o1.start(t); o2.start(t); o1.stop(end); o2.stop(end);
+      break;
+    }
+    case 'violin':
+    case 'cello': {
+      // cordas arqueadas solistas: ataque de arco, vibrato que entra depois (violino mais brilhante e agudo; violoncelo mais escuro)
+      const cello = inst === 'cello';
+      const end = env(g, t, cello ? 0.09 : 0.06, vel * (cello ? 0.3 : 0.24), dur, 0.14);
+      const lp = filt(c, 'lowpass', Math.min(cello ? 2200 : 5200, f * (cello ? 4 : 5)), 0.8);
+      const o1 = osc(c, 'sawtooth', f, -5);
+      const o2 = osc(c, 'sawtooth', f, 5);
+      const lfo = osc(c, 'sine', cello ? 4.6 : 5.6);
+      const lg = c.createGain();
+      lg.gain.setValueAtTime(0, t);
+      lg.gain.linearRampToValueAtTime(f * 0.007, t + Math.max(0.12, dur * 0.5));
+      lfo.connect(lg); lg.connect(o1.frequency); lg.connect(o2.frequency);
+      o1.connect(lp); o2.connect(lp); lp.connect(g);
+      o1.start(t); o2.start(t); lfo.start(t); o1.stop(end); o2.stop(end); lfo.stop(end);
+      break;
+    }
+    case 'trombone': {
+      // trombone/tuba: metal grave e cheio, ataque macio, brilho que abre devagar
+      const end = env(g, t, 0.07, vel * 0.3, dur, 0.2);
+      const lp = filt(c, 'lowpass', f * 1.5, 0.9);
+      lp.frequency.setValueAtTime(f * 1.5, t);
+      lp.frequency.exponentialRampToValueAtTime(Math.min(2600, f * 4.5), t + 0.18);
+      const o1 = osc(c, 'sawtooth', f, -4);
+      const o2 = osc(c, 'square', f, 5);
+      const g2 = c.createGain();
+      g2.gain.value = 0.4;
+      o1.connect(lp); o2.connect(g2); g2.connect(lp); lp.connect(g);
+      o1.start(t); o2.start(t); o1.stop(end); o2.stop(end);
+      break;
+    }
+    case 'choir': {
+      // coro grave (vozes masculinas em "ó/á"): dentes de serra suaves passando por duas formantes
+      const end = env(g, t, 0.4, vel * 0.26, dur, 0.6);
+      const body = filt(c, 'lowpass', Math.min(1400, f * 6));
+      const f1 = filt(c, 'bandpass', 520, 3);
+      const f2 = filt(c, 'bandpass', 980, 4);
+      const fg = c.createGain();
+      fg.gain.value = 1.4;
+      const o1 = osc(c, 'sawtooth', f, -8);
+      const o2 = osc(c, 'sawtooth', f, 8);
+      o1.connect(body); o2.connect(body); body.connect(g);
+      o1.connect(f1); o2.connect(f2); f1.connect(fg); f2.connect(fg); fg.connect(g);
+      o1.start(t); o2.start(t); o1.stop(end); o2.stop(end);
+      break;
+    }
+    case 'organ': {
+      // órgão sombrio: harmônicos de tubo somados (8', 4', 2 2/3', 2')
+      const end = env(g, t, 0.05, vel * 0.2, dur, 0.25);
+      const lp = filt(c, 'lowpass', Math.min(3200, f * 6));
+      lp.connect(g);
+      [[1, 1], [2, 0.5], [3, 0.3], [4, 0.2]].forEach(([m, a]) => {
+        const o = osc(c, 'sine', f * m);
+        const og = c.createGain();
+        og.gain.value = a;
+        o.connect(og); og.connect(lp);
+        o.start(t); o.stop(end);
+      });
+      break;
+    }
+    case 'timpani': {
+      // tímpano afinado: golpe grave com queda de altura curta e ressonância longa (a nota é dobrada para a faixa 38–52)
+      let m = midi;
+      while (m > 52) m -= 12;
+      while (m < 38) m += 12;
+      const tf = mtof(m);
+      g.gain.setValueAtTime(vel * 0.85, t);
+      g.gain.exponentialRampToValueAtTime(FLOOR, t + 1.1);
+      const o = osc(c, 'sine', tf * 1.18);
+      o.frequency.setValueAtTime(tf * 1.18, t);
+      o.frequency.exponentialRampToValueAtTime(tf, t + 0.09);
+      o.connect(g);
+      const n = noiseSrc(c, noise, t, 0.06, rng);
+      const lp = filt(c, 'lowpass', 500);
+      const ng = c.createGain();
+      ng.gain.value = 0.3;
+      n.connect(lp); lp.connect(ng); ng.connect(g);
+      o.start(t); o.stop(t + 1.12);
+      break;
+    }
+    case 'gong': {
+      // gongo/tantã: parciais inarmônicos com cauda longa
+      g.gain.setValueAtTime(vel * 0.4, t);
+      g.gain.exponentialRampToValueAtTime(FLOOR, t + 2.6);
+      [[1, 1], [1.47, 0.7], [2.09, 0.5], [2.56, 0.35]].forEach(([m, a]) => {
+        const o = osc(c, 'sine', f * m);
+        const og = c.createGain();
+        og.gain.value = a;
+        o.connect(og); og.connect(g);
+        o.start(t); o.stop(t + 2.62);
+      });
+      break;
+    }
+    case 'bell': {
+      // sino de bronze (dobre): parciais de sino, decaimento longo
+      g.gain.setValueAtTime(vel * 0.32, t);
+      g.gain.exponentialRampToValueAtTime(FLOOR, t + 2.2);
+      [[1, 1], [2.0, 0.6], [2.76, 0.45], [5.4, 0.2]].forEach(([m, a]) => {
+        const o = osc(c, 'sine', f * m);
+        const og = c.createGain();
+        og.gain.value = a;
+        o.connect(og); og.connect(g);
+        o.start(t); o.stop(t + 2.22);
+      });
+      break;
+    }
     default:
       break;
   }

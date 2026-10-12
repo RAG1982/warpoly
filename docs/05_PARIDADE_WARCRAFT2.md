@@ -102,7 +102,7 @@ Requer: sistema de mana, habilidades com alvo (unidade/área/auto), pesquisas qu
 | Attack, Move, Stop, Patrol, Stand Ground, Attack Ground | só ordem contextual | ❌ |
 | Construir: B + letra; reparar construções (peões) | construir via botão; **sem reparo** | 🟡 |
 | Minimapa com clique e ordens | só move câmera | 🟡 |
-| Falas de confirmação das unidades ("Zug zug", "Yes, my lord") | SFX procedurais | 🟡 |
+| Falas de confirmação das unidades | removidas por decisão do dono (2026-10-11); ficam só os cliques de seleção/ordem | ⚪ |
 | Mensagens "Seu território está sob ataque" | só alerta de onda da IA | 🟡 |
 | Velocidades de jogo, pausa, save/load | velocidade + pausa, **sem save** | 🟡 |
 

@@ -1,6 +1,6 @@
 # SESSION HANDOFF — como continuar o WarPoly numa sessão nova
 
-> Escrito em 2026-09-29; atualizado em 2026-10-10. **Em 2026-10-12 a nuvem entregou tudo no `master` (PRs até #50): leia PRIMEIRO `docs/ESTADO_NUVEM.md` (estado atual) e `docs/CHANGELOG_NUVEM.md`; o que está abaixo pode estar desatualizado.** Leia este arquivo inteiro antes de agir.
+> Escrito em 2026-09-29; atualizado em 2026-10-12. **Em 2026-10-12 a nuvem entregou tudo no `master` (PRs até #51): leia PRIMEIRO `docs/ESTADO_NUVEM.md` (estado atual) e `docs/CHANGELOG_NUVEM.md`; o que está abaixo pode estar desatualizado.** Leia este arquivo inteiro antes de agir.
 > **Prompt para colar na sessão nova (local, Claude Code com Opus):**
 > `Leia docs/SESSION_HANDOFF.md e continue a coordenação do projeto WarPoly a partir da seção "Próximos passos".`
 
@@ -51,29 +51,28 @@
 - Nuvem **não tem GPU nem Blender**: só `npm test`, lint e build; a verificação visual/benchmark fica "pendente local".
 - Nuvem cria branch `cloud/<ID>` + PR; **o coordenador local faz o merge** (`git fetch origin && git merge --no-ff origin/cloud/<ID>`), verifica e registra no TASKS.
 
-## 5. Estado atual (2026-10-10)
-- Quadro (`docs/TASKS.md`): 88 tarefas de fase — **73 DONE**, 8 REVIEW, 6 TODO, 1 DOING (F5-03, pausado). Backlog NEW: 22 DONE, 5 TODO, 1 DOING (NEW-41), 1 ADIADA (NEW-20), ~24 sem status (auditoria AUD-1 na fila da nuvem).
-- Testes: **1311** passando; lint 0 erros (51 avisos antigos); build ok. Smoke: última rodada completa em F7-09; as mesclas da nuvem (2026-10-10) rodaram só `npm test`, lint e build.
-- Nuvem: 11 tarefas da fila de `docs/HANDOFF_CLOUD.md` executadas e mescladas em 2026-10-10 (NEW-4/13/19/31/41/49/50/52, F9-05b, F10-05b, AUD-1). Verificação visual pendente (local) em NEW-13, NEW-19, NEW-49, NEW-52, F9-05 e F10-05.
-- Entregas grandes desde 2026-09-30: F4 (cavalaria, cerco, mana/magias, sapadores, aéreo, naval com petróleo, heróis), F5 (IA por jogador, percepção sob a névoa, dificuldades), F7 (VFX, iluminação/pós-processamento, tilesets, animação de produção, team color, ícones e arte 2D, modelos Blender de navios/construções navais/acampamento/balão/muralhas/bétula), F8 (gerador de mapas, 6 mapas skirmish, missões e gatilhos, editor de mapas, campanha Aliança provisória), F9 (lockstep online com WebRTC, sinalização e lobby, reconexão e pausa votada, replays), F10 (testes da simulação, soak IA×IA com 100 partidas, regressão visual, empacotamento PWA e deploy).
+## 5. Estado atual (2026-10-12)
+- Quadro (`docs/TASKS.md`, atualizado em 2026-10-12): 88 tarefas de fase — **72 DONE, 10 REVIEW, 4 TODO, 2 DOING** (F1-10 parcial; F5-03 adiada pelo dono). Backlog NEW: ver o quadro resumo do TASKS.
+- Testes no `master` (PR #51): **142 arquivos / 1807 testes, 0 falhas**; lint 0 erros (50 avisos antigos); build ok. Smoke/bench/visual/áudio: **nada da nuvem foi visto num navegador** — roteiro em `docs/ESTADO_NUVEM.md` §6.
+- Nuvem: rodadas 1–5 mescladas (PRs #5–#51): backlog NEW, F8-05b (campanha com liberação progressiva), música (41 faixas, player no inspetor, MIDI), remoção das falas, áudio da cena visível, orcs no tamanho humano, mapas maiores e florestas, F1-10 itens 1–4, F10-04, F7-08, NEW-44/25/34, e **specs do novo mundo** (história, heróis, terreno/mapas; protótipo de costas irregulares com lava). Única branch remota fora do `master`: `cloud/F3-01` (PR #6 fechado como superado).
+- **Trabalho feito localmente fora do GitHub não está refletido aqui**: se existir commit local não enviado (`git log origin/master..master` na máquina do dono), ele precisa ser empurrado/mesclado e o TASKS ajustado.
 
 ## 6. Decisões do dono (resumo — detalhes em `docs/07_DECISOES.md`)
 D1 pedra permanece; petróleo só com Centro nível 2 · D2 nomes próprios (nada Blizzard) · D3 hardware fraco sem perder qualidade · D4 facções **Coroa de Aldária** / **Clãs de Gorthak** · D5 Casa/Toca mantidas, **sem ouro passivo** nas fazendas · D6 heróis com reviver/XP pendentes.
-Decisões pendentes (2026-10-10): F7-02 máscara de cor; F8-03 gerador `painted` em `src/sim`; F8-05 premissa da campanha Aliança; F9-03 checksum por turno ou a cada 10. Ver `docs/TASKS.md` e a seção 4 de `docs/HANDOFF_CLOUD.md`.
+Decisões de 2026-10-11/12 (todas tomadas): F7-02 fica como está (`TeamColor`); F8-03 `painted` fica em `src/sim`; F8-05 premissa "A Marcha da Aliança" aprovada; F9-03 `checkEvery = 10` em jogo; NEW-1 remover o loader; PR #6 fechado; **novo mundo** (Ondara, 2 campanhas espelhadas de 12 missões, 6 heróis, costas irregulares, lava que só bloqueia) — ver `docs/ESTADO_NUVEM.md` §5 e `docs/specs/MUNDO-*.md`. Ainda aberta: NEW-6 passo 2 (ORM à metade do lado em `high`).
 
 Parâmetros de URL úteis: `?play&faction=orc`, `?skipPreload`, `?texq=low`, `?quality=`, `?merge=0`, `?skin=0`, `?glb=0`, `?ffa=1`, `?map=ilhas-4p`, `?bench=inicial|combate100|massa300`, `?online=1` (lockstep), `?vfx=`, `?fx=`, `?daynight=`, `?team=`, `?campaign=unlock`.
 
-## 7. Próximos passos (atualizado 2026-10-10)
-1. **Dono**: decidir o push de `master` para o GitHub (repositório público) — pré-requisito da nuvem.
-2. **Em andamento**: NEW-53 (correção de m04 "A Ponte do Rio Turvo": forte Atalaia humano e anel ciano dos carregadores). Ao concluir: merge, `npm test`, lint, build e captura em `tools/ui-captures/m04-fix/`.
-3. **Local, retomar**: NEW-44 (IA sem madeira/naval, alterações não commitadas), F7-08 (áudio, branch `task/F7-08`), F10-04 (CI de desempenho, branch `task/F10-04`), F10-03 (regravar baseline visual).
-4. **Local, Blender**: F7-01 e F7-07 (precisa de referências de arte para Refinaria, Fundição, Submersível, Tartaruga, Forja Naval e Caldeirão), revisão final da F7-00b.
-5. **Nuvem**: fila de `docs/HANDOFF_CLOUD.md` seção 3 concluída. Próxima rodada: definir novas tarefas (ex.: os itens ABERTO da auditoria `docs/AUDITORIA_BACKLOG.md`) e lançar em `cloud/<ID>`.
-6. **Decisões do dono**: seção 6 acima.
+## 7. Próximos passos (atualizado 2026-10-12)
+1. **Dono, local**: `git pull`, `npm ci`, `npm test` (esperado 142/1807), lint e build; depois **jogar e conferir** o que a nuvem entregou sem ver (`docs/ESTADO_NUVEM.md` §6): 8 missões da Aliança, tamanho dos orcs, mapas e florestas, áudio, replay online, carga por facção; regravar baselines (`npm run perf -- --update`, `npm run visual -- --update`) e rodar `tools/audio-check.mjs`.
+2. **Nuvem, próxima rodada** (ordem de `docs/ESTADO_NUVEM.md` §4.1): gerador de mapas irregulares + `lavaGrid` → biomas → dados dos 6 heróis → seletor de campanhas → tela de história → mapas por ilha → 12 missões × 2. Em paralelo: NEW-6 (passos 1, 4, 5; o 2 depende do dono), NEW-14 (passos 0–2, 5–6), NEW-51 (seed 82, amostra grande).
+3. **Local, Blender**: F7-01, F7-07, F7-00b remanescentes (flora, rochas, terreno, água, machado), F7-09 (sprites sem `.glb`), artes de vitória (`victory_human/orc.webp`), ART-01..16 de terreno e modelos/retratos dos 6 heróis.
+4. **Local, desempenho**: F1-10c (bench massa300 ≥ 45 FPS, com e sem `?lod=0`), NEW-15/27/30.
+5. **Decisões do dono**: seção 6 acima; perguntas abertas do novo mundo em `MUNDO-HISTORIA-CAMPANHA.md` §10 e `MUNDO-TERRENO-MAPAS.md` §8; escolha das faixas de música no inspetor (prioridade baixa).
 
-## 8. Estado operacional ao encerrar (2026-10-10)
+## 8. Estado operacional (2026-10-10; ainda válido, exceto o git)
 - Agentes: nenhum em andamento. Dev server parado (subir com `npx vite --port 5173` em background se precisar mostrar algo).
-- Git: `master` local com as últimas mesclagens; `origin/master` defasado (ver seção 4).
+- Git (2026-10-12): `origin/master` contém todo o trabalho da nuvem (PRs até #51). Confira se o `master` local tem algo a mais ou a menos antes de começar.
 - Worktrees de agentes em `.claude/worktrees/` (ignoradas pelo git, ~90): limpar com `git worktree prune` depois de remover as pastas das tarefas já mescladas. Não apagar as que têm alterações não commitadas (NEW-44, F7-08, F10-04).
 - Dev watcher: `vite.config.js` ignora `.claude/**`, `tools/ui-captures/**`, `tools/soak-report/**` e `tests/visual/**` (sem isso o inotify esgota com muitos worktrees).
 - Limite de uso (HTTP 429) derruba agentes no meio: verifique a worktree, salve WIP com commit e **retome com `SendMessage`** para o id do agente (mantém o contexto).

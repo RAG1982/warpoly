@@ -4,10 +4,10 @@
 > **Prompt a colar na sessão online:**
 > `Leia docs/HANDOFF_CLOUD.md e execute a próxima tarefa pendente da fila da nuvem, seguindo as regras do handoff.`
 >
-> Atualizado em 2026-10-10. Antes de qualquer sessão na nuvem: o `master` local precisa estar no GitHub (ver seção 0).
+> Atualizado em 2026-10-12. **A fila da seção 3 está concluída e mesclada; as rodadas seguintes e o plano atual estão em `docs/ESTADO_NUVEM.md` (§4) — comece por lá.** Antes de qualquer sessão na nuvem: o `master` local precisa estar no GitHub (ver seção 0).
 
 ## 0. Pré-requisito: o `master` no GitHub
-O `origin/master` está defasado (`a801c47`). A nuvem parte do `master` do GitHub, então **sem push, a nuvem trabalha sobre código velho**.
+(Em 2026-10-12 o `origin/master` já está atualizado até o PR #51; o texto abaixo é o registro original.) O `origin/master` estava defasado (`a801c47`). A nuvem parte do `master` do GitHub, então **sem push, a nuvem trabalha sobre código velho**.
 - Ação do dono: `git push origin master` (o repositório é **público**: antes de publicar, confirme que tudo que está no histórico pode ser público — inclui a baseline visual antiga de 109 MB, que continua no histórico).
 - Depois do push, cada tarefa abaixo parte de `master` atualizado.
 

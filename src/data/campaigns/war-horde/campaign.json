@@ -1,0 +1,320 @@
+{
+  "format": "warpolycampaign",
+  "version": 1,
+  "id": "war-horde",
+  "factionId": "orc",
+  "track": "main",
+  "order": 2,
+  "title": {
+    "pt-BR": "A Guerra do Mar Fendido (Horda)",
+    "en": "The Sundered Sea War (Horde)"
+  },
+  "subtitle": {
+    "pt-BR": "O Caminho das Brasas do Cinzal (12 missões)",
+    "en": "The Ember Road of the Cinzal (12 missions)"
+  },
+  "premise": {
+    "pt-BR": "A terra seca de Cinzara não perdoa. O chefe-de-brasa Skarn uniu os clãs para atravessar o Mar Fendido, tomar os Estilhaços e erguer a Cidadela de Ferro no continente verde.",
+    "en": "The dry land of Cinzara forgives no one. Ember-chief Skarn has united the clans to cross the Sundered Sea, take the Shards, and raise the Iron Citadel on the green continent."
+  },
+  "epilogue": {
+    "faction": "orc",
+    "title": {
+      "pt-BR": "A Brasa que Não se Apaga",
+      "en": "The Ember That Never Dies"
+    },
+    "paragraphs": [
+      {
+        "pt-BR": "Quando a última torre da Cidadela de Brasa-Alta ergueu o estandarte, o Mar Fendido deixou de ser uma muralha e virou estrada.",
+        "en": "When the last tower of Highember Citadel raised the banner, the Sundered Sea stopped being a wall and became a road."
+      },
+      {
+        "pt-BR": "Drogath acendeu o Fogo do Clã no meio da terra verde, honrando a memória da Anciã Ulma.",
+        "en": "Drogath lit the Clan Fire in the middle of the green land, honoring the memory of Elder Ulma."
+      },
+      {
+        "pt-BR": "Vozgul e Skarn vigiam o horizonte: o Cinzal nunca mais será fechado por ninguém.",
+        "en": "Vozgul and Skarn watch the horizon: the Cinzal will never be sealed off by anyone again."
+      }
+    ],
+    "credits": {
+      "pt-BR": "Fim do Caminho das Brasas",
+      "en": "End of the Ember Road"
+    }
+  },
+  "missions": [
+    {
+      "id": "war-horde-01-cinzas-vermelhas",
+      "unlocks": {
+        "units": [
+          "peon",
+          "grunt",
+          "axethrower"
+        ],
+        "buildings": [
+          "orc_house",
+          "orc_lumber_mill",
+          "pig_farm",
+          "orc_barracks"
+        ]
+      }
+    },
+    {
+      "id": "war-horde-02-velas-brancas",
+      "requires": [
+        "war-horde-01-cinzas-vermelhas"
+      ],
+      "carryOver": {
+        "resources": {
+          "gold": 0.25,
+          "wood": 0.25,
+          "stone": 0.25
+        },
+        "max": 300
+      },
+      "unlocks": {
+        "buildings": [
+          "orc_forge",
+          "orc_watchtower"
+        ],
+        "research": [
+          "melee_weapons",
+          "ranged_ammo",
+          "melee_armor"
+        ]
+      }
+    },
+    {
+      "id": "war-horde-03-a-pedra-que-brilha",
+      "requires": [
+        "war-horde-02-velas-brancas"
+      ],
+      "carryOver": {
+        "resources": {
+          "gold": 0.25,
+          "wood": 0.25,
+          "stone": 0.25
+        },
+        "max": 300
+      },
+      "unlocks": {
+        "units": [
+          "ogre",
+          "catapult",
+          "arsonist",
+          "berserker",
+          "war_balloon"
+        ],
+        "buildings": [
+          "ogre_den",
+          "orc_workshop",
+          "wall_orc"
+        ],
+        "research": [
+          "siege_damage",
+          "woodcutting",
+          "ranged_class",
+          "melee_weapons@2",
+          "melee_armor@2",
+          "ranged_ammo@2",
+          "berserker_range"
+        ],
+        "heroes": [
+          "hero_drogath"
+        ]
+      }
+    },
+    {
+      "id": "war-horde-04-mare-de-breu",
+      "requires": [
+        "war-horde-03-a-pedra-que-brilha"
+      ],
+      "carryOver": {
+        "resources": {
+          "gold": 0.25,
+          "wood": 0.25,
+          "stone": 0.25
+        },
+        "max": 300
+      },
+      "unlocks": {
+        "units": [
+          "tanker",
+          "barge",
+          "war_galley",
+          "iron_leviathan",
+          "colossal_turtle"
+        ],
+        "buildings": [
+          "ship_dock",
+          "naval_forge",
+          "ash_cauldron",
+          "oil_platform"
+        ],
+        "research": [
+          "naval_cannons",
+          "naval_hulls",
+          "naval_cannons@2",
+          "naval_hulls@2",
+          "siege_damage@2"
+        ]
+      }
+    },
+    {
+      "id": "war-horde-05-madeira-de-guerra",
+      "requires": [
+        "war-horde-04-mare-de-breu"
+      ],
+      "carryOver": {
+        "resources": {
+          "gold": 0.25,
+          "wood": 0.25,
+          "stone": 0.25
+        },
+        "max": 300
+      },
+      "unlocks": {
+        "units": [
+          "necromancer",
+          "war_serpent",
+          "ogre_mage"
+        ],
+        "buildings": [
+          "ash_sanctum",
+          "storm_altar",
+          "serpent_nest"
+        ],
+        "research": [
+          "cavalry_class",
+          "spell_death_touch",
+          "spell_raise_dead",
+          "spell_eye",
+          "spell_bloodlust"
+        ]
+      }
+    },
+    {
+      "id": "war-horde-06-fogo-no-gelo",
+      "requires": [
+        "war-horde-05-madeira-de-guerra"
+      ],
+      "carryOver": {
+        "resources": {
+          "gold": 0.25,
+          "wood": 0.25,
+          "stone": 0.25
+        },
+        "max": 300
+      },
+      "unlocks": {
+        "research": [
+          "berserker_regen",
+          "berserker_fury",
+          "spell_haste",
+          "spell_unholy_armor",
+          "spell_ash_cloud",
+          "spell_whirlwind",
+          "spell_runes"
+        ]
+      }
+    },
+    {
+      "id": "war-horde-07-casa-no-brejo",
+      "requires": [
+        "war-horde-06-fogo-no-gelo"
+      ],
+      "carryOver": {
+        "resources": {
+          "gold": 0.25,
+          "wood": 0.25,
+          "stone": 0.25
+        },
+        "max": 300
+      },
+      "unlocks": {}
+    },
+    {
+      "id": "war-horde-08-o-monte-caldeira",
+      "requires": [
+        "war-horde-07-casa-no-brejo"
+      ],
+      "carryOver": {
+        "resources": {
+          "gold": 0.25,
+          "wood": 0.25,
+          "stone": 0.25
+        },
+        "max": 300
+      },
+      "unlocks": {}
+    },
+    {
+      "id": "war-horde-09-o-ultimo-poco",
+      "requires": [
+        "war-horde-08-o-monte-caldeira"
+      ],
+      "carryOver": {
+        "resources": {
+          "gold": 0.25,
+          "wood": 0.25,
+          "stone": 0.25
+        },
+        "max": 300
+      },
+      "unlocks": {}
+    },
+    {
+      "id": "war-horde-10-cabo-aurora",
+      "requires": [
+        "war-horde-09-o-ultimo-poco"
+      ],
+      "carryOver": {
+        "resources": {
+          "gold": 0.25,
+          "wood": 0.25,
+          "stone": 0.25
+        },
+        "max": 300
+      },
+      "unlocks": {
+        "heroes": [
+          "hero_vozgul"
+        ]
+      }
+    },
+    {
+      "id": "war-horde-11-brasa-alta",
+      "requires": [
+        "war-horde-10-cabo-aurora"
+      ],
+      "carryOver": {
+        "resources": {
+          "gold": 0.25,
+          "wood": 0.25,
+          "stone": 0.25
+        },
+        "max": 300
+      },
+      "unlocks": {
+        "heroes": [
+          "hero_skarn"
+        ]
+      }
+    },
+    {
+      "id": "war-horde-12-cidadela-de-brasa-alta",
+      "requires": [
+        "war-horde-11-brasa-alta"
+      ],
+      "carryOver": {
+        "resources": {
+          "gold": 0.25,
+          "wood": 0.25,
+          "stone": 0.25
+        },
+        "max": 300
+      },
+      "unlocks": {}
+    }
+  ]
+}

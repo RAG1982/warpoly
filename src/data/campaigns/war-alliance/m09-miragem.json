@@ -1,0 +1,87 @@
+{
+  "format": "warpolymission",
+  "version": 1,
+  "id": "war-alliance-09-miragem",
+  "hidden": true,
+  "title": {
+    "pt-BR": "Miragem",
+    "en": "Mirage"
+  },
+  "subtitle": {
+    "pt-BR": "Aliança, missão 9",
+    "en": "Alliance, mission 9"
+  },
+  "briefing": {
+    "speaker": {
+      "pt-BR": "Capitão Brann",
+      "en": "Captain Brann"
+    },
+    "portrait": "⚔️",
+    "text": {
+      "pt-BR": "Os três poços de Miragem são a última parada antes da costa orc. Assegure a água e a cabeça de ponte.",
+      "en": "The three wells of Mirage are the final stop before the orc coast. Secure the water and the bridgehead."
+    },
+    "hints": [
+      {
+        "pt-BR": "Concentre-se nos objetivos primários para avançar.",
+        "en": "Focus on primary objectives to advance."
+      }
+    ]
+  },
+  "mapId": "ilhas-4p",
+  "seed": 9153,
+  "players": [
+    {
+      "id": 0,
+      "name": {
+        "pt-BR": "Aliança de Aurelan",
+        "en": "Aurelan Alliance"
+      },
+      "factionId": "human",
+      "team": 0,
+      "color": "#2563eb",
+      "isLocal": true,
+      "startSlot": 0
+    },
+    {
+      "id": 1,
+      "name": {
+        "pt-BR": "Clãs do Cinzal",
+        "en": "Cinzal Clans"
+      },
+      "factionId": "orc",
+      "team": 1,
+      "color": "#dc2626",
+      "isAI": true,
+      "startSlot": 1
+    }
+  ],
+  "startingResources": {
+    "wood": 400,
+    "gold": 400,
+    "stone": 150
+  },
+  "setup": [
+    {
+      "type": "tag",
+      "select": {
+        "buildingType": "great_hall"
+      },
+      "tag": "enemy_base"
+    }
+  ],
+  "objectives": [
+    {
+      "id": "primary-main",
+      "type": "destroy",
+      "priority": "primary",
+      "select": {
+        "tag": "enemy_base"
+      },
+      "title": {
+        "pt-BR": "Capturar os três poços e repelir a contra-ofensiva",
+        "en": "Capture all three wells and repel the counter-offensive"
+      }
+    }
+  ]
+}

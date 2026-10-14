@@ -104,6 +104,19 @@ export class CampaignProgress {
     return startingResourcesFor(missionDef, entryOf(def, missionDef.id), this.completed(def.id));
   }
 
+  /** Verifica se a história de abertura foi vista na tentativa atual da campanha. */
+  isStorySeen(cid) {
+    const att = this._camp(cid).attempts[this._camp(cid).current];
+    return !!att.storySeen;
+  }
+
+  /** Marca a história de abertura como vista na tentativa atual da campanha. */
+  markStorySeen(cid) {
+    const att = this._camp(cid).attempts[this._camp(cid).current];
+    att.storySeen = true;
+    this._save();
+  }
+
   /** Apaga todo o progresso (depuração/testes). */
   reset() {
     this.data = { version: VERSION, campaigns: {} };

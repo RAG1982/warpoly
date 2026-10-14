@@ -577,9 +577,10 @@ export class ModelFactory {
     return this._glbOr('villager', () => this._placeholder('villager', 'unit'));
   }
 
-  /** F3-10: critter decorativo (`sheep` | `pig`). */
+  /** F3-10 / MUNDO-TERRENO-MAPAS §5: critter decorativo (`sheep` | `boar` | `pig`). */
   static createCritter(species = 'sheep') {
-    return this.getOrCreateModel(`critter_${species}`, () => createCritter(species));
+    const norm = species === 'pig' ? 'boar' : (species || 'sheep');
+    return this.getOrCreateModel(`critter_${norm}`, () => createCritter(norm));
   }
 
   static createBandit() {
@@ -633,8 +634,9 @@ export class ModelFactory {
       case 'catapult': return this.createCatapult();
       case 'mage': return this._glbOr('mage', () => this.getOrCreateModel('mage', createMage, 'mage'));
       case 'necromancer': return this._glbOr('necromancer', () => this.getOrCreateModel('necromancer', createNecromancer, 'necromancer'));
-      case 'skeleton': return this._glbOr('skeleton', () => this.getOrCreateModel('skeleton', createSkeleton, 'skeleton'));
       case 'sheep': return this.createCritter('sheep');
+      case 'boar': return this.createCritter('boar');
+      case 'pig': return this.createCritter('boar');
       case 'watching_eye': return this._glbOr('watching_eye', () => this.getOrCreateModel('watching_eye', createWatchingEye));
       // NEW-40: classes avançadas com .glb próprio (sem .glb, caem no modelo da unidade base)
       case 'templar': return this._glbOr('templar', () => this.createCavalier());

@@ -527,11 +527,11 @@ export const UNITS = {
     healthBarHeight: 4.6,
     cost: null,
     trainTime: null,
-    icon: '/icoEspada.png', // provisório
+    icon: '/ui/heroes/hero_brann.svg',
     description: 'Herói único: comandante de infantaria. Grito de Guerra enfurece a si mesmo',
     isWorker: false, isRanged: false, isCombat: true, projectile: null,
-    maxMana: 120, startMana: 120, manaRegen: 1,
-    abilities: ['hero_war_cry']
+    maxMana: 150, startMana: 150, manaRegen: 1.2,
+    abilities: ['hero_war_cry', 'hero_cleave_strike', 'hero_defensive_stance']
   },
   hero_drogath: {
     type: 'hero_drogath',
@@ -547,11 +547,11 @@ export const UNITS = {
     healthBarHeight: 4.6,
     cost: null,
     trainTime: null,
-    icon: '/icoEspada.png', // provisório
+    icon: '/ui/heroes/hero_drogath.svg',
     description: 'Herói único: chefe de guerra dos Clãs. Grito de Guerra enfurece a si mesmo',
     isWorker: false, isRanged: false, isCombat: true, projectile: null,
-    maxMana: 120, startMana: 120, manaRegen: 1,
-    abilities: ['hero_war_cry']
+    maxMana: 150, startMana: 150, manaRegen: 1.2,
+    abilities: ['hero_war_cry', 'hero_ember_strike', 'hero_clan_fire']
   },
   hero_oren: {
     type: 'hero_oren',
@@ -567,11 +567,71 @@ export const UNITS = {
     healthBarHeight: 3.9,
     cost: null,
     trainTime: null,
-    icon: '/icoEscudo.png', // provisório
+    icon: '/ui/heroes/hero_oren.svg',
     description: 'Herói único: mago de alcance. Raio Arcano fere em área e Restauro cura aliados',
     isWorker: false, isRanged: true, isCombat: true, projectile: 'bolt',
     maxMana: 255, startMana: 255, manaRegen: 1.5,
-    abilities: ['hero_arcane_bolt', 'hero_mend']
+    abilities: ['hero_arcane_bolt', 'hero_mend', 'hero_blizzard']
+  },
+  hero_dorian: {
+    type: 'hero_dorian',
+    modelOf: 'cavalier',
+    unique: true, isHero: true, scaleMul: 1.3,
+    name: 'Marechal Dorian Vasques',
+    entityName: 'Marechal Dorian Vasques',
+    faction: 'human',
+    hp: 600, speed: 6.0, damage: { basic: 42, piercing: 10, type: 'normal' }, attackRange: 2.4, attackCooldown: 1.15, armor: 6,
+    collisionRadius: 1.1,
+    visionRadius: 20,
+    ...MELEE_SCAN,
+    healthBarHeight: 4.8,
+    cost: null,
+    trainTime: null,
+    icon: '/ui/heroes/hero_dorian.svg',
+    description: 'Herói único: comandante supremo da Guarda Real de Aurelan',
+    isWorker: false, isRanged: false, isCombat: true, projectile: null,
+    maxMana: 180, startMana: 180, manaRegen: 1.2,
+    abilities: ['hero_banner', 'hero_shield_line', 'hero_marshal_charge']
+  },
+  hero_vozgul: {
+    type: 'hero_vozgul',
+    modelOf: 'necromancer',
+    unique: true, isHero: true, scaleMul: 1.15,
+    name: 'Vozgul, a Profetisa',
+    entityName: 'Vozgul, a Profetisa',
+    faction: 'orc',
+    hp: 240, speed: 4.4, damage: { basic: 0, piercing: 30, type: 'magic' }, attackRange: 9.5, attackCooldown: 1.7, armor: 2,
+    collisionRadius: 0.78,
+    visionRadius: 20,
+    ...RANGED_SCAN,
+    healthBarHeight: 3.9,
+    cost: null,
+    trainTime: null,
+    icon: '/ui/heroes/hero_vozgul.svg',
+    description: 'Herói único: profetisa e necromante dos clãs da Horda',
+    isWorker: false, isRanged: true, isCombat: true, projectile: 'bolt',
+    maxMana: 255, startMana: 255, manaRegen: 1.4,
+    abilities: ['hero_soul_drain', 'hero_ancestors', 'hero_ash_veil']
+  },
+  hero_skarn: {
+    type: 'hero_skarn',
+    modelOf: 'ogre',
+    unique: true, isHero: true, scaleMul: 1.35,
+    name: 'Skarn, chefe-de-brasa',
+    entityName: 'Skarn, chefe-de-brasa',
+    faction: 'orc',
+    hp: 700, speed: 5.2, damage: { basic: 48, piercing: 12, type: 'normal' }, attackRange: 2.6, attackCooldown: 1.4, armor: 7,
+    collisionRadius: 1.25,
+    visionRadius: 20,
+    ...MELEE_SCAN,
+    healthBarHeight: 5.2,
+    cost: null,
+    trainTime: null,
+    icon: '/ui/heroes/hero_skarn.svg',
+    description: 'Herói único: chefe-de-brasa supremo dos clãs da Horda',
+    isWorker: false, isRanged: false, isCombat: true, projectile: null,
+    maxMana: 180, startMana: 180, manaRegen: 1.2,
+    abilities: ['hero_horde_roar', 'hero_blood_pact', 'hero_ground_slam']
   },
   sheep: {
     type: 'sheep',

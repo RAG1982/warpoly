@@ -11,18 +11,21 @@
  * Puro (sem DOM/RNG): roda em Node.
  */
 import { getHeightForMap, TERRAIN_GENERATORS } from '../../sim/terrainGenerators.js';
-import { validateNeutrals, validateOilWells } from '../../sim/MatchConfig.js';
+import { validateNeutrals, validateOilWells, layoutAt } from '../../sim/MatchConfig.js';
 import { NAVAL_MAX_HEIGHT } from '../combat.js';
 import { TILESETS, TILESET_ALIASES } from '../tilesets.js';
 import { buildPathfinder, floodFill, isReached } from './generator.js';
 import { getMap } from './index.js';
 import { decodeHeights, paintedNodes } from './painted.js';
+import { isLavaAt, decodeLavaGrid } from './lava.js';
+import { decodeBiomeGrid, MAX_BIOME_ID, BIOME, getBiomeAt } from './biome.js';
 
 export const DRY = 1.8; // limiar de "terra seca" (GameManager.canPlaceBuilding)
 export const FOREST_SPECIES = Object.freeze(['oak', 'pine', 'autumn', 'birch']); // F7-00b: bétula (`tree_birch.glb`)
 export const RESOURCE_TYPES = Object.freeze(['gold', 'stone', 'oil']);
 export const MAP_ID_RE = /^[a-z0-9][a-z0-9-]{1,47}$/;
 export const SIZE_LIMITS = Object.freeze({ min: 64, max: 256 });
+export const MIN_PLAYABLE_SIZE = 168; // Regra: todo mapa jogável de escaramuça tem no mínimo 168x168
 const CAMP_MIN_SLOT_DIST = 25;
 const FOREST_MIN_SLOT_DIST = 27;
 const GOLD_NEAR_SLOT = 50;
@@ -44,6 +47,7 @@ export function validateMapDef(mapDef, { connectivity = true, checkId = true } =
   else if (checkId && getMap(m.id)) err('idTaken', { id: m.id });
   if (typeof m.name !== 'string' || !m.name.trim()) err('nameEmpty');
   if (!isNum(m.size) || m.size < SIZE_LIMITS.min || m.size > SIZE_LIMITS.max) err('sizeRange', SIZE_LIMITS);
+  if (!m.hidden && isNum(m.size) && m.size < MIN_PLAYABLE_SIZE) warn('sizeBelowMinPlayable', { min: MIN_PLAYABLE_SIZE, actual: m.size });
   if (!isNum(m.playable) || m.playable <= 0 || m.playable > m.size) err('playableRange');
   if (!isNum(m.waterLevel)) err('waterLevel');
   if (m.tileset !== undefined && !TILESETS[m.tileset] && !TILESET_ALIASES[m.tileset]) err('tilesetUnknown', { tileset: String(m.tileset) });
@@ -60,7 +64,41 @@ export function validateMapDef(mapDef, { connectivity = true, checkId = true } =
     }
     if (!okData) err('terrainData');
   }
-  if (errors.some((e) => ['sizeRange', 'playableRange', 'generator', 'terrainData', 'idInvalid'].includes(e.code))) {
+  if (m.lavaGrid) {
+    const lg = m.lavaGrid;
+    let okLava = false;
+    try {
+      okLava = !!lg && lg.nodes === paintedNodes(m.size, lg.cell || 1) && decodeLavaGrid(lg.data).length === lg.nodes * lg.nodes;
+    } catch {
+      okLava = false;
+    }
+    if (!okLava) err('lavaData');
+  }
+  if (m.biomeGrid) {
+    const bg = m.biomeGrid;
+    let okBiome = false;
+    try {
+      const cell = bg.cell || 1;
+      const expectedNodes = paintedNodes(m.size, cell);
+      if (isNum(cell) && cell > 0 && bg.nodes === expectedNodes) {
+        const decoded = decodeBiomeGrid(bg);
+        if (decoded && decoded.length === expectedNodes * expectedNodes) {
+          okBiome = true;
+          for (let i = 0; i < decoded.length; i++) {
+            const v = decoded[i];
+            if (!Number.isInteger(v) || v < 0 || v > MAX_BIOME_ID) {
+              okBiome = false;
+              break;
+            }
+          }
+        }
+      }
+    } catch {
+      okBiome = false;
+    }
+    if (!okBiome) err('biomeData');
+  }
+  if (errors.some((e) => ['sizeRange', 'playableRange', 'generator', 'terrainData', 'lavaData', 'biomeData', 'idInvalid'].includes(e.code))) {
     return { ok: false, errors, warnings };
   }
 
@@ -75,12 +113,15 @@ export function validateMapDef(mapDef, { connectivity = true, checkId = true } =
   const inside = (p) => isNum(p?.x) && isNum(p?.z) && Math.abs(p.x) < half && Math.abs(p.z) < half;
   const h = (p) => getHeightForMap(m, p.x, p.z);
 
+  const isLava = (p) => isLavaAt(m, p.x, p.z) || (m.biomeGrid && getBiomeAt(m, p.x, p.z) === BIOME.LAVA);
+
   // --- jogadores ---
   if (slots.length < 2) err('slotsMin', { count: slots.length });
   if (!Number.isInteger(m.maxPlayers) || m.maxPlayers < 2 || m.maxPlayers > slots.length) err('maxPlayers', { maxPlayers: m.maxPlayers, slots: slots.length });
   slots.forEach((s, i) => {
     if (!inside(s)) err('slotOutside', { n: i + 1 });
     else if (h(s) < DRY) err('slotWet', { n: i + 1 });
+    else if (isLava(s)) err('slotLava', { n: i + 1 });
   });
 
   // --- recursos ---
@@ -90,6 +131,7 @@ export function validateMapDef(mapDef, { connectivity = true, checkId = true } =
     if (r.type === 'oil') {
       if (h(r) < m.waterLevel && h(r) > NAVAL_MAX_HEIGHT) err('oilShallow', { n: i + 1 });
     } else if (h(r) < DRY) err('resourceWet', { n: i + 1, type: r.type });
+    if (isLava(r)) err('resourceLava', { n: i + 1, type: r.type });
     if (r.amount !== undefined && !(r.amount > 0)) err('resourceAmount', { n: i + 1 });
   });
 
@@ -125,6 +167,7 @@ export function validateMapDef(mapDef, { connectivity = true, checkId = true } =
   neutrals.forEach((n, i) => {
     if (n && n.kind === 'camp' && inside(n)) {
       if (h(n) < DRY) err('campWet', { n: i + 1 });
+      else if (isLava(n)) err('campLava', { n: i + 1 });
       if (slots.some((s) => Math.hypot(n.x - s.x, n.z - s.z) < CAMP_MIN_SLOT_DIST)) warn('campNearSlot', { n: i + 1, d: CAMP_MIN_SLOT_DIST });
     }
   });
@@ -132,6 +175,23 @@ export function validateMapDef(mapDef, { connectivity = true, checkId = true } =
   // --- jogabilidade (avisos) ---
   slots.forEach((s, i) => {
     if (!resources.some((r) => r.type === 'gold' && Math.hypot(r.x - s.x, r.z - s.z) <= GOLD_NEAR_SLOT)) warn('slotNoGold', { n: i + 1, d: GOLD_NEAR_SLOT });
+    const layout = layoutAt(s);
+    const lumber = layout.buildings.find((b) => b.role === 'lumber');
+    if (lumber && forests.length > 0) {
+      const minD = Math.min(...forests.map((f) => Math.hypot(f.x - lumber.x, f.z - lumber.z)));
+      if (minD > 22) warn('lumberFarFromForest', { n: i + 1, d: Math.round(minD) });
+    }
+    const rawUnits = s.layout?.units || [];
+    if (rawUnits.some((u) => u.dz <= 0)) {
+      warn('unitBehindHq', { n: i + 1 });
+    }
+    for (const b of layout.buildings) {
+      for (const r of resources) {
+        if (r.type === 'oil') continue;
+        const d = Math.hypot(b.x - r.x, b.z - r.z);
+        if (d < 6.5) warn('buildingOverlapsResource', { n: i + 1, role: b.role, type: r.type, d: Math.round(d * 10) / 10 });
+      }
+    }
   });
   const trees = forests.reduce((n, f) => n + (f.count || 0), 0);
   if (slots.length >= 2 && trees < 8 * slots.length) warn('woodLow', { trees, need: 8 * slots.length });

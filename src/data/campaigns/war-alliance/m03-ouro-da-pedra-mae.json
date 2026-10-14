@@ -1,0 +1,87 @@
+{
+  "format": "warpolymission",
+  "version": 1,
+  "id": "war-alliance-03-ouro-da-pedra-mae",
+  "hidden": true,
+  "title": {
+    "pt-BR": "Ouro da Pedra-Mãe",
+    "en": "Gold of the Mother Stone"
+  },
+  "subtitle": {
+    "pt-BR": "Aliança, missão 3",
+    "en": "Alliance, mission 3"
+  },
+  "briefing": {
+    "speaker": {
+      "pt-BR": "Capitão Brann",
+      "en": "Captain Brann"
+    },
+    "portrait": "⚔️",
+    "text": {
+      "pt-BR": "Os orcs desembarcaram para tomar as minas de ouro. Segure a posição com muralhas e com a Guarda da Guarnição!",
+      "en": "The orcs have landed to seize the gold mines. Hold the line with walls and the Garrison Guard!"
+    },
+    "hints": [
+      {
+        "pt-BR": "Concentre-se nos objetivos primários para avançar.",
+        "en": "Focus on primary objectives to advance."
+      }
+    ]
+  },
+  "mapId": "continental-1v1",
+  "seed": 9051,
+  "players": [
+    {
+      "id": 0,
+      "name": {
+        "pt-BR": "Aliança de Aurelan",
+        "en": "Aurelan Alliance"
+      },
+      "factionId": "human",
+      "team": 0,
+      "color": "#2563eb",
+      "isLocal": true,
+      "startSlot": 0
+    },
+    {
+      "id": 1,
+      "name": {
+        "pt-BR": "Clãs do Cinzal",
+        "en": "Cinzal Clans"
+      },
+      "factionId": "orc",
+      "team": 1,
+      "color": "#dc2626",
+      "isAI": true,
+      "startSlot": 1
+    }
+  ],
+  "startingResources": {
+    "wood": 400,
+    "gold": 400,
+    "stone": 150
+  },
+  "setup": [
+    {
+      "type": "tag",
+      "select": {
+        "buildingType": "great_hall"
+      },
+      "tag": "enemy_base"
+    }
+  ],
+  "objectives": [
+    {
+      "id": "primary-main",
+      "type": "destroy",
+      "priority": "primary",
+      "select": {
+        "tag": "enemy_base"
+      },
+      "title": {
+        "pt-BR": "Defender as minas com Capitão Brann e muralhas",
+        "en": "Defend the mines with Captain Brann and walls"
+      }
+    }
+  ]
+}

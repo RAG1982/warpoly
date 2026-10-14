@@ -1,0 +1,30 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" width="128" height="128">
+  <defs>
+    <linearGradient id="bgDorian" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#1d4ed8"/>
+      <stop offset="50%" stop-color="#1e3a8a"/>
+      <stop offset="100%" stop-color="#020617"/>
+    </linearGradient>
+    <linearGradient id="goldMarshal" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#fef08a"/>
+      <stop offset="50%" stop-color="#eab308"/>
+      <stop offset="100%" stop-color="#a16207"/>
+    </linearGradient>
+    <filter id="shadow" x="-10%" y="-10%" width="120%" height="120%">
+      <feDropShadow dx="0" dy="2" stdDeviation="3" flood-color="#000" flood-opacity="0.6"/>
+    </filter>
+  </defs>
+  <!-- Background -->
+  <rect width="128" height="128" fill="#090d16" rx="16"/>
+  <!-- Grand Heraldic Shield -->
+  <path d="M 64 10 L 112 24 L 112 56 C 112 88 64 116 64 116 C 64 116 16 88 16 56 L 16 24 Z"
+        fill="url(#bgDorian)" stroke="url(#goldMarshal)" stroke-width="4" filter="url(#shadow)"/>
+  <!-- Inner Line -->
+  <path d="M 64 18 L 102 30 L 102 54 C 102 80 64 106 64 106 C 64 106 26 80 26 54 L 26 30 Z"
+        fill="none" stroke="#93c5fd" stroke-width="1.5" stroke-opacity="0.5"/>
+  <!-- Monogram D -->
+  <text x="64" y="68" font-family="'Cinzel', 'Trajan Pro', 'Georgia', serif" font-weight="bold" font-size="44" fill="#fef08a" text-anchor="middle" filter="url(#shadow)">D</text>
+  <!-- Hero Name -->
+  <rect x="26" y="80" width="76" height="18" rx="4" fill="#172554" fill-opacity="0.9" stroke="#eab308" stroke-width="1"/>
+  <text x="64" y="93" font-family="'Arial Black', sans-serif" font-weight="900" font-size="10" fill="#f8fafc" text-anchor="middle" letter-spacing="1.5">DORIAN</text>
+</svg>

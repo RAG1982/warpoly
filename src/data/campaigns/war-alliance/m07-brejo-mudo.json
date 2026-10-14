@@ -1,0 +1,87 @@
+{
+  "format": "warpolymission",
+  "version": 1,
+  "id": "war-alliance-07-brejo-mudo",
+  "hidden": true,
+  "title": {
+    "pt-BR": "O Brejo Mudo",
+    "en": "Silent Marsh"
+  },
+  "subtitle": {
+    "pt-BR": "Aliança, missão 7",
+    "en": "Alliance, mission 7"
+  },
+  "briefing": {
+    "speaker": {
+      "pt-BR": "Capitão Brann",
+      "en": "Captain Brann"
+    },
+    "portrait": "⚔️",
+    "text": {
+      "pt-BR": "A traição de Mervane foi revelada. Sobreviva à emboscada no brejo e recupere os suprimentos.",
+      "en": "Mervane's treachery has been exposed. Survive the swamp ambush and recover the supplies."
+    },
+    "hints": [
+      {
+        "pt-BR": "Concentre-se nos objetivos primários para avançar.",
+        "en": "Focus on primary objectives to advance."
+      }
+    ]
+  },
+  "mapId": "vales-2v2",
+  "seed": 9119,
+  "players": [
+    {
+      "id": 0,
+      "name": {
+        "pt-BR": "Aliança de Aurelan",
+        "en": "Aurelan Alliance"
+      },
+      "factionId": "human",
+      "team": 0,
+      "color": "#2563eb",
+      "isLocal": true,
+      "startSlot": 0
+    },
+    {
+      "id": 1,
+      "name": {
+        "pt-BR": "Clãs do Cinzal",
+        "en": "Cinzal Clans"
+      },
+      "factionId": "orc",
+      "team": 1,
+      "color": "#dc2626",
+      "isAI": true,
+      "startSlot": 1
+    }
+  ],
+  "startingResources": {
+    "wood": 400,
+    "gold": 400,
+    "stone": 150
+  },
+  "setup": [
+    {
+      "type": "tag",
+      "select": {
+        "buildingType": "great_hall"
+      },
+      "tag": "enemy_base"
+    }
+  ],
+  "objectives": [
+    {
+      "id": "primary-main",
+      "type": "destroy",
+      "priority": "primary",
+      "select": {
+        "tag": "enemy_base"
+      },
+      "title": {
+        "pt-BR": "Derrotar as forças traidoras no Brejo Mudo",
+        "en": "Defeat the traitor forces in Silent Marsh"
+      }
+    }
+  ]
+}

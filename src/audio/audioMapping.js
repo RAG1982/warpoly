@@ -33,7 +33,7 @@ const BIG_MARGIN = 0.25;
 export const SFX_EVENTS = Object.freeze([
   EVT.WORKER_CHOP, EVT.WORKER_MINE, EVT.WORKER_HAMMER, EVT.BUILDING_VFX,
   EVT.PROJECTILE_FIRED, EVT.PROJECTILE_HIT, EVT.MELEE_HIT, EVT.EXPLOSION,
-  EVT.UNIT_DIED, EVT.BUILDING_DESTROYED, EVT.ABILITY_CAST,
+  EVT.UNIT_DIED, EVT.BUILDING_DESTROYED, EVT.RESOURCE_DEPLETED, EVT.ABILITY_CAST,
   EVT.BUILDING_PLACED, EVT.BUILDING_COMPLETED, EVT.UNIT_TRAINED, EVT.RESEARCH_DONE, EVT.RESOURCE_GATHERED,
   EVT.UNDER_ATTACK, EVT.MATCH_WON, EVT.MATCH_LOST
 ]);
@@ -50,7 +50,6 @@ export const SILENT_EVENTS = Object.freeze({
   [EVT.BUILDING_DAMAGED]: 'só intensidade de combate; o som vem do golpe/projétil',
   [EVT.BUILDING_CANCELLED]: 'cancelar obra não tem som próprio (o clique de ordem já tocou)',
   [EVT.HQ_TIER_CHANGED]: 'o fim da obra/pesquisa já toca o marco (buildComplete)',
-  [EVT.RESOURCE_DEPLETED]: 'sem som próprio; a árvore caindo (WORKER_CHOP neutro) e a mina são cobertas',
   [EVT.RESOURCES_SPENT]: 'sem som próprio (a HUD mostra)',
   [EVT.NOTIFY]: 'aviso de texto da HUD',
   [EVT.CAMP_CLEARED]: 'o combate e o RESOURCE_GATHERED já soam',
@@ -121,6 +120,11 @@ export function soundsForEvent(type, p, info = {}) {
       return [d('death', p.pos, own ? 1.8 : 1.2)];
     case EVT.BUILDING_DESTROYED:
       return audible ? [dm('collapse', p.pos, 2.8, 1, BIG_MARGIN)] : NONE;
+    case EVT.RESOURCE_DEPLETED: {
+      const rt = p.resourceType || p.resource || 'gold';
+      if (!audible || rt === 'wood') return NONE;
+      return [dm('collapse', p.pos, 2.8, 1, BIG_MARGIN)];
+    }
     case EVT.ABILITY_CAST: {
       if (!audible) return NONE;
       const s = d('cast', p.pos, own ? 2.2 : 1.6);

@@ -14,9 +14,9 @@ const heroMission = (over = {}) => baseMission({
 const heroOf = (gm) => gm.entitiesById.get(gm.mission.tags.get('hero')[0]);
 
 describe('heróis (F4-08)', () => {
-  it('há 2 a 4 heróis, únicos, não treináveis, com nome PT-BR e modelo de uma unidade existente', () => {
+  it('há 2 a 6 heróis, únicos, não treináveis, com nome PT-BR e modelo de uma unidade existente', () => {
     expect(HERO_TYPES.length).toBeGreaterThanOrEqual(2);
-    expect(HERO_TYPES.length).toBeLessThanOrEqual(4);
+    expect(HERO_TYPES.length).toBeLessThanOrEqual(6);
     for (const type of HERO_TYPES) {
       const d = UNITS[type];
       expect(d.unique && d.isHero).toBe(true);
@@ -93,8 +93,8 @@ describe('heróis (F4-08)', () => {
     const gm = makeMissionGm(heroMission({ autoVictory: false }));
     const hero = heroOf(gm);
     expect(canPolymorph(hero)).toBe(false);
-    expect(hero.abilities).toEqual(['hero_war_cry']);
-    expect(hero.maxMana).toBe(120);
+    expect(hero.abilities).toEqual(['hero_war_cry', 'hero_cleave_strike', 'hero_defensive_stance']);
+    expect(hero.maxMana).toBe(150);
   });
 
   it('checksum determinístico (duas execuções idênticas)', () => {

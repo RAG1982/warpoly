@@ -1,0 +1,1191 @@
+{
+  "item": "NEW-19",
+  "data": {
+    "quality": {
+      "preset": "high",
+      "ruinsAttached": true
+    },
+    "site": {
+      "cx": 35.62346663143529,
+      "cz": -16.477038431953044,
+      "barracks": {
+        "id": 292,
+        "x": 31.73437933490928,
+        "z": -12.587951135427033,
+        "r": 3.5
+      },
+      "cottage": {
+        "id": 293,
+        "x": 39.51255392796131,
+        "z": -20.366125728479055,
+        "r": 2.8
+      }
+    },
+    "afterBuildings": [
+      {
+        "i": 0,
+        "state": "active",
+        "age": 1.57,
+        "x": 31.73,
+        "z": -12.59,
+        "visible": true,
+        "opacity": 1,
+        "debrisOpacity": 1,
+        "debrisVisible": true,
+        "debrisY": 2.473,
+        "baseY": 2.473,
+        "decalScale": 4.02,
+        "decalColor": 1,
+        "tris": 120
+      },
+      {
+        "i": 1,
+        "state": "active",
+        "age": 1.57,
+        "x": 39.51,
+        "z": -20.37,
+        "visible": true,
+        "opacity": 1,
+        "debrisOpacity": 1,
+        "debrisVisible": true,
+        "debrisY": 2.72,
+        "baseY": 2.72,
+        "decalScale": 3.22,
+        "decalColor": 1,
+        "tris": 120
+      }
+    ],
+    "passthrough": {
+      "blockers": [],
+      "arrived": true,
+      "seconds": 3.6
+    },
+    "fog": {
+      "e1": {
+        "type": "orc_lumber_mill",
+        "explored": false,
+        "groupVisible": false
+      },
+      "e2": {
+        "type": "pig_farm",
+        "explored": true,
+        "visibleNow": false,
+        "groupVisible": true,
+        "decalColor": 0.5
+      }
+    },
+    "mine": {
+      "x": 30,
+      "z": -46,
+      "remaining": 30,
+      "dist": 16.1,
+      "radius": 3.4
+    },
+    "mineEvent": [
+      {
+        "type": "gold",
+        "x": 30,
+        "z": -46
+      }
+    ],
+    "mineRuin": {
+      "i": 4,
+      "state": "active",
+      "age": 1.7,
+      "x": 30,
+      "z": -46,
+      "visible": true,
+      "opacity": 1,
+      "debrisOpacity": 1,
+      "debrisVisible": true,
+      "debrisY": 2.654,
+      "baseY": 2.654,
+      "decalScale": 3.4,
+      "decalColor": 1,
+      "tris": 96
+    },
+    "fade": {
+      "i": 0,
+      "state": "active",
+      "age": 47.43,
+      "x": 31.73,
+      "z": -12.59,
+      "visible": true,
+      "opacity": 0.513,
+      "debrisOpacity": 0.513,
+      "debrisVisible": true,
+      "debrisY": 2.181,
+      "baseY": 2.473,
+      "decalScale": 4.02,
+      "decalColor": 1,
+      "tris": 120
+    },
+    "samples": [
+      {
+        "i": 0,
+        "age": 38.22,
+        "state": "active",
+        "opacity": 1,
+        "visible": true,
+        "debrisY": 0
+      },
+      {
+        "i": 1,
+        "age": 38.22,
+        "state": "active",
+        "opacity": 1,
+        "visible": true,
+        "debrisY": 0
+      },
+      {
+        "i": 0,
+        "age": 38.47,
+        "state": "active",
+        "opacity": 1,
+        "visible": true,
+        "debrisY": 0
+      },
+      {
+        "i": 1,
+        "age": 38.47,
+        "state": "active",
+        "opacity": 1,
+        "visible": true,
+        "debrisY": 0
+      },
+      {
+        "i": 0,
+        "age": 38.72,
+        "state": "active",
+        "opacity": 1,
+        "visible": true,
+        "debrisY": 0
+      },
+      {
+        "i": 1,
+        "age": 38.72,
+        "state": "active",
+        "opacity": 1,
+        "visible": true,
+        "debrisY": 0
+      },
+      {
+        "i": 0,
+        "age": 38.97,
+        "state": "active",
+        "opacity": 1,
+        "visible": true,
+        "debrisY": 0
+      },
+      {
+        "i": 1,
+        "age": 38.97,
+        "state": "active",
+        "opacity": 1,
+        "visible": true,
+        "debrisY": 0
+      },
+      {
+        "i": 0,
+        "age": 39.22,
+        "state": "active",
+        "opacity": 1,
+        "visible": true,
+        "debrisY": 0
+      },
+      {
+        "i": 1,
+        "age": 39.22,
+        "state": "active",
+        "opacity": 1,
+        "visible": true,
+        "debrisY": 0
+      },
+      {
+        "i": 0,
+        "age": 39.47,
+        "state": "active",
+        "opacity": 1,
+        "visible": true,
+        "debrisY": 0
+      },
+      {
+        "i": 1,
+        "age": 39.47,
+        "state": "active",
+        "opacity": 1,
+        "visible": true,
+        "debrisY": 0
+      },
+      {
+        "i": 0,
+        "age": 39.72,
+        "state": "active",
+        "opacity": 1,
+        "visible": true,
+        "debrisY": 0
+      },
+      {
+        "i": 1,
+        "age": 39.72,
+        "state": "active",
+        "opacity": 1,
+        "visible": true,
+        "debrisY": 0
+      },
+      {
+        "i": 0,
+        "age": 39.97,
+        "state": "active",
+        "opacity": 1,
+        "visible": true,
+        "debrisY": 0
+      },
+      {
+        "i": 1,
+        "age": 39.97,
+        "state": "active",
+        "opacity": 1,
+        "visible": true,
+        "debrisY": 0
+      },
+      {
+        "i": 0,
+        "age": 40.22,
+        "state": "active",
+        "opacity": 1,
+        "visible": true,
+        "debrisY": 0
+      },
+      {
+        "i": 1,
+        "age": 40.22,
+        "state": "active",
+        "opacity": 1,
+        "visible": true,
+        "debrisY": 0
+      },
+      {
+        "i": 0,
+        "age": 40.47,
+        "state": "active",
+        "opacity": 1,
+        "visible": true,
+        "debrisY": 0
+      },
+      {
+        "i": 1,
+        "age": 40.47,
+        "state": "active",
+        "opacity": 1,
+        "visible": true,
+        "debrisY": 0
+      },
+      {
+        "i": 0,
+        "age": 40.72,
+        "state": "active",
+        "opacity": 1,
+        "visible": true,
+        "debrisY": 0
+      },
+      {
+        "i": 1,
+        "age": 40.72,
+        "state": "active",
+        "opacity": 1,
+        "visible": true,
+        "debrisY": 0
+      },
+      {
+        "i": 0,
+        "age": 40.97,
+        "state": "active",
+        "opacity": 1,
+        "visible": true,
+        "debrisY": 0
+      },
+      {
+        "i": 1,
+        "age": 40.97,
+        "state": "active",
+        "opacity": 1,
+        "visible": true,
+        "debrisY": 0
+      },
+      {
+        "i": 0,
+        "age": 41.22,
+        "state": "active",
+        "opacity": 1,
+        "visible": true,
+        "debrisY": 0
+      },
+      {
+        "i": 1,
+        "age": 41.22,
+        "state": "active",
+        "opacity": 1,
+        "visible": true,
+        "debrisY": 0
+      },
+      {
+        "i": 0,
+        "age": 41.47,
+        "state": "active",
+        "opacity": 1,
+        "visible": true,
+        "debrisY": 0
+      },
+      {
+        "i": 1,
+        "age": 41.47,
+        "state": "active",
+        "opacity": 1,
+        "visible": true,
+        "debrisY": 0
+      },
+      {
+        "i": 0,
+        "age": 41.72,
+        "state": "active",
+        "opacity": 1,
+        "visible": true,
+        "debrisY": 0
+      },
+      {
+        "i": 1,
+        "age": 41.72,
+        "state": "active",
+        "opacity": 1,
+        "visible": true,
+        "debrisY": 0
+      },
+      {
+        "i": 0,
+        "age": 41.97,
+        "state": "active",
+        "opacity": 1,
+        "visible": true,
+        "debrisY": 0
+      },
+      {
+        "i": 1,
+        "age": 41.97,
+        "state": "active",
+        "opacity": 1,
+        "visible": true,
+        "debrisY": 0
+      },
+      {
+        "i": 0,
+        "age": 42.22,
+        "state": "active",
+        "opacity": 1,
+        "visible": true,
+        "debrisY": 0
+      },
+      {
+        "i": 1,
+        "age": 42.22,
+        "state": "active",
+        "opacity": 1,
+        "visible": true,
+        "debrisY": 0
+      },
+      {
+        "i": 0,
+        "age": 42.47,
+        "state": "active",
+        "opacity": 1,
+        "visible": true,
+        "debrisY": 0
+      },
+      {
+        "i": 1,
+        "age": 42.47,
+        "state": "active",
+        "opacity": 1,
+        "visible": true,
+        "debrisY": 0
+      },
+      {
+        "i": 0,
+        "age": 42.72,
+        "state": "active",
+        "opacity": 1,
+        "visible": true,
+        "debrisY": 0
+      },
+      {
+        "i": 1,
+        "age": 42.72,
+        "state": "active",
+        "opacity": 1,
+        "visible": true,
+        "debrisY": 0
+      },
+      {
+        "i": 0,
+        "age": 42.97,
+        "state": "active",
+        "opacity": 1,
+        "visible": true,
+        "debrisY": 0
+      },
+      {
+        "i": 1,
+        "age": 42.97,
+        "state": "active",
+        "opacity": 1,
+        "visible": true,
+        "debrisY": 0
+      },
+      {
+        "i": 0,
+        "age": 43.22,
+        "state": "active",
+        "opacity": 1,
+        "visible": true,
+        "debrisY": 0
+      },
+      {
+        "i": 1,
+        "age": 43.22,
+        "state": "active",
+        "opacity": 1,
+        "visible": true,
+        "debrisY": 0
+      },
+      {
+        "i": 0,
+        "age": 43.47,
+        "state": "active",
+        "opacity": 1,
+        "visible": true,
+        "debrisY": 0
+      },
+      {
+        "i": 1,
+        "age": 43.47,
+        "state": "active",
+        "opacity": 1,
+        "visible": true,
+        "debrisY": 0
+      },
+      {
+        "i": 0,
+        "age": 43.72,
+        "state": "active",
+        "opacity": 1,
+        "visible": true,
+        "debrisY": 0
+      },
+      {
+        "i": 1,
+        "age": 43.72,
+        "state": "active",
+        "opacity": 1,
+        "visible": true,
+        "debrisY": 0
+      },
+      {
+        "i": 0,
+        "age": 43.97,
+        "state": "active",
+        "opacity": 1,
+        "visible": true,
+        "debrisY": 0
+      },
+      {
+        "i": 1,
+        "age": 43.97,
+        "state": "active",
+        "opacity": 1,
+        "visible": true,
+        "debrisY": 0
+      },
+      {
+        "i": 0,
+        "age": 44.22,
+        "state": "active",
+        "opacity": 1,
+        "visible": true,
+        "debrisY": 0
+      },
+      {
+        "i": 1,
+        "age": 44.22,
+        "state": "active",
+        "opacity": 1,
+        "visible": true,
+        "debrisY": 0
+      },
+      {
+        "i": 0,
+        "age": 44.47,
+        "state": "active",
+        "opacity": 1,
+        "visible": true,
+        "debrisY": 0
+      },
+      {
+        "i": 1,
+        "age": 44.47,
+        "state": "active",
+        "opacity": 1,
+        "visible": true,
+        "debrisY": 0
+      },
+      {
+        "i": 2,
+        "age": 38.25,
+        "state": "active",
+        "opacity": 1,
+        "visible": false,
+        "debrisY": 0
+      },
+      {
+        "i": 0,
+        "age": 44.72,
+        "state": "active",
+        "opacity": 1,
+        "visible": true,
+        "debrisY": 0
+      },
+      {
+        "i": 1,
+        "age": 44.72,
+        "state": "active",
+        "opacity": 1,
+        "visible": true,
+        "debrisY": 0
+      },
+      {
+        "i": 2,
+        "age": 38.5,
+        "state": "active",
+        "opacity": 1,
+        "visible": false,
+        "debrisY": 0
+      },
+      {
+        "i": 0,
+        "age": 44.97,
+        "state": "active",
+        "opacity": 1,
+        "visible": true,
+        "debrisY": 0
+      },
+      {
+        "i": 1,
+        "age": 44.97,
+        "state": "active",
+        "opacity": 1,
+        "visible": true,
+        "debrisY": 0
+      },
+      {
+        "i": 2,
+        "age": 38.75,
+        "state": "active",
+        "opacity": 1,
+        "visible": false,
+        "debrisY": 0
+      },
+      {
+        "i": 0,
+        "age": 45.22,
+        "state": "active",
+        "opacity": 0.957,
+        "visible": true,
+        "debrisY": -0.026
+      },
+      {
+        "i": 1,
+        "age": 45.22,
+        "state": "active",
+        "opacity": 0.957,
+        "visible": true,
+        "debrisY": -0.026
+      },
+      {
+        "i": 2,
+        "age": 39,
+        "state": "active",
+        "opacity": 1,
+        "visible": false,
+        "debrisY": 0
+      },
+      {
+        "i": 0,
+        "age": 45.47,
+        "state": "active",
+        "opacity": 0.907,
+        "visible": true,
+        "debrisY": -0.056
+      },
+      {
+        "i": 1,
+        "age": 45.47,
+        "state": "active",
+        "opacity": 0.907,
+        "visible": true,
+        "debrisY": -0.056
+      },
+      {
+        "i": 2,
+        "age": 39.25,
+        "state": "active",
+        "opacity": 1,
+        "visible": false,
+        "debrisY": 0
+      },
+      {
+        "i": 0,
+        "age": 45.72,
+        "state": "active",
+        "opacity": 0.857,
+        "visible": true,
+        "debrisY": -0.086
+      },
+      {
+        "i": 1,
+        "age": 45.72,
+        "state": "active",
+        "opacity": 0.857,
+        "visible": true,
+        "debrisY": -0.086
+      },
+      {
+        "i": 2,
+        "age": 39.5,
+        "state": "active",
+        "opacity": 1,
+        "visible": false,
+        "debrisY": 0
+      },
+      {
+        "i": 0,
+        "age": 45.97,
+        "state": "active",
+        "opacity": 0.807,
+        "visible": true,
+        "debrisY": -0.116
+      },
+      {
+        "i": 1,
+        "age": 45.97,
+        "state": "active",
+        "opacity": 0.807,
+        "visible": true,
+        "debrisY": -0.116
+      },
+      {
+        "i": 2,
+        "age": 39.75,
+        "state": "active",
+        "opacity": 1,
+        "visible": false,
+        "debrisY": 0
+      },
+      {
+        "i": 0,
+        "age": 46.22,
+        "state": "active",
+        "opacity": 0.757,
+        "visible": true,
+        "debrisY": -0.146
+      },
+      {
+        "i": 1,
+        "age": 46.22,
+        "state": "active",
+        "opacity": 0.757,
+        "visible": true,
+        "debrisY": -0.146
+      },
+      {
+        "i": 2,
+        "age": 40,
+        "state": "active",
+        "opacity": 1,
+        "visible": false,
+        "debrisY": 0
+      },
+      {
+        "i": 0,
+        "age": 46.47,
+        "state": "active",
+        "opacity": 0.707,
+        "visible": true,
+        "debrisY": -0.176
+      },
+      {
+        "i": 1,
+        "age": 46.47,
+        "state": "active",
+        "opacity": 0.707,
+        "visible": true,
+        "debrisY": -0.176
+      },
+      {
+        "i": 2,
+        "age": 40.25,
+        "state": "active",
+        "opacity": 1,
+        "visible": false,
+        "debrisY": 0
+      },
+      {
+        "i": 0,
+        "age": 46.72,
+        "state": "active",
+        "opacity": 0.657,
+        "visible": true,
+        "debrisY": -0.206
+      },
+      {
+        "i": 1,
+        "age": 46.72,
+        "state": "active",
+        "opacity": 0.657,
+        "visible": true,
+        "debrisY": -0.206
+      },
+      {
+        "i": 2,
+        "age": 40.5,
+        "state": "active",
+        "opacity": 1,
+        "visible": false,
+        "debrisY": 0
+      },
+      {
+        "i": 0,
+        "age": 46.97,
+        "state": "active",
+        "opacity": 0.607,
+        "visible": true,
+        "debrisY": -0.236
+      },
+      {
+        "i": 1,
+        "age": 46.97,
+        "state": "active",
+        "opacity": 0.607,
+        "visible": true,
+        "debrisY": -0.236
+      },
+      {
+        "i": 2,
+        "age": 40.75,
+        "state": "active",
+        "opacity": 1,
+        "visible": false,
+        "debrisY": 0
+      },
+      {
+        "i": 0,
+        "age": 47.22,
+        "state": "active",
+        "opacity": 0.557,
+        "visible": true,
+        "debrisY": -0.266
+      },
+      {
+        "i": 1,
+        "age": 47.22,
+        "state": "active",
+        "opacity": 0.557,
+        "visible": true,
+        "debrisY": -0.266
+      },
+      {
+        "i": 2,
+        "age": 41,
+        "state": "active",
+        "opacity": 1,
+        "visible": false,
+        "debrisY": 0
+      },
+      {
+        "i": 0,
+        "age": 47.47,
+        "state": "active",
+        "opacity": 0.507,
+        "visible": true,
+        "debrisY": -0.296
+      },
+      {
+        "i": 1,
+        "age": 47.47,
+        "state": "active",
+        "opacity": 0.507,
+        "visible": true,
+        "debrisY": -0.296
+      },
+      {
+        "i": 2,
+        "age": 41.25,
+        "state": "active",
+        "opacity": 1,
+        "visible": false,
+        "debrisY": 0
+      },
+      {
+        "i": 0,
+        "age": 47.72,
+        "state": "active",
+        "opacity": 0.457,
+        "visible": true,
+        "debrisY": -0.326
+      },
+      {
+        "i": 1,
+        "age": 47.72,
+        "state": "active",
+        "opacity": 0.457,
+        "visible": true,
+        "debrisY": -0.326
+      },
+      {
+        "i": 2,
+        "age": 41.5,
+        "state": "active",
+        "opacity": 1,
+        "visible": false,
+        "debrisY": 0
+      },
+      {
+        "i": 0,
+        "age": 47.97,
+        "state": "active",
+        "opacity": 0.407,
+        "visible": true,
+        "debrisY": -0.356
+      },
+      {
+        "i": 1,
+        "age": 47.97,
+        "state": "active",
+        "opacity": 0.407,
+        "visible": true,
+        "debrisY": -0.356
+      },
+      {
+        "i": 2,
+        "age": 41.75,
+        "state": "active",
+        "opacity": 1,
+        "visible": false,
+        "debrisY": 0
+      },
+      {
+        "i": 0,
+        "age": 48.22,
+        "state": "active",
+        "opacity": 0.357,
+        "visible": true,
+        "debrisY": -0.386
+      },
+      {
+        "i": 1,
+        "age": 48.22,
+        "state": "active",
+        "opacity": 0.357,
+        "visible": true,
+        "debrisY": -0.386
+      },
+      {
+        "i": 2,
+        "age": 42,
+        "state": "active",
+        "opacity": 1,
+        "visible": false,
+        "debrisY": 0
+      },
+      {
+        "i": 0,
+        "age": 48.47,
+        "state": "active",
+        "opacity": 0.307,
+        "visible": true,
+        "debrisY": -0.416
+      },
+      {
+        "i": 1,
+        "age": 48.47,
+        "state": "active",
+        "opacity": 0.307,
+        "visible": true,
+        "debrisY": -0.416
+      },
+      {
+        "i": 2,
+        "age": 42.25,
+        "state": "active",
+        "opacity": 1,
+        "visible": false,
+        "debrisY": 0
+      },
+      {
+        "i": 0,
+        "age": 48.72,
+        "state": "active",
+        "opacity": 0.257,
+        "visible": true,
+        "debrisY": -0.446
+      },
+      {
+        "i": 1,
+        "age": 48.72,
+        "state": "active",
+        "opacity": 0.257,
+        "visible": true,
+        "debrisY": -0.446
+      },
+      {
+        "i": 2,
+        "age": 42.5,
+        "state": "active",
+        "opacity": 1,
+        "visible": false,
+        "debrisY": 0
+      },
+      {
+        "i": 0,
+        "age": 48.97,
+        "state": "active",
+        "opacity": 0.207,
+        "visible": true,
+        "debrisY": -0.476
+      },
+      {
+        "i": 1,
+        "age": 48.97,
+        "state": "active",
+        "opacity": 0.207,
+        "visible": true,
+        "debrisY": -0.476
+      },
+      {
+        "i": 2,
+        "age": 42.75,
+        "state": "active",
+        "opacity": 1,
+        "visible": false,
+        "debrisY": 0
+      },
+      {
+        "i": 0,
+        "age": 49.22,
+        "state": "active",
+        "opacity": 0.157,
+        "visible": true,
+        "debrisY": -0.506
+      },
+      {
+        "i": 1,
+        "age": 49.22,
+        "state": "active",
+        "opacity": 0.157,
+        "visible": true,
+        "debrisY": -0.506
+      },
+      {
+        "i": 2,
+        "age": 43,
+        "state": "active",
+        "opacity": 1,
+        "visible": false,
+        "debrisY": 0
+      },
+      {
+        "i": 0,
+        "age": 49.47,
+        "state": "active",
+        "opacity": 0.107,
+        "visible": true,
+        "debrisY": -0.536
+      },
+      {
+        "i": 1,
+        "age": 49.47,
+        "state": "active",
+        "opacity": 0.107,
+        "visible": true,
+        "debrisY": -0.536
+      },
+      {
+        "i": 2,
+        "age": 43.25,
+        "state": "active",
+        "opacity": 1,
+        "visible": false,
+        "debrisY": 0
+      },
+      {
+        "i": 3,
+        "age": 38.25,
+        "state": "active",
+        "opacity": 1,
+        "visible": true,
+        "debrisY": 0
+      },
+      {
+        "i": 0,
+        "age": 49.72,
+        "state": "active",
+        "opacity": 0.057,
+        "visible": true,
+        "debrisY": -0.566
+      },
+      {
+        "i": 1,
+        "age": 49.72,
+        "state": "active",
+        "opacity": 0.057,
+        "visible": true,
+        "debrisY": -0.566
+      },
+      {
+        "i": 2,
+        "age": 43.5,
+        "state": "active",
+        "opacity": 1,
+        "visible": false,
+        "debrisY": 0
+      },
+      {
+        "i": 3,
+        "age": 38.5,
+        "state": "active",
+        "opacity": 1,
+        "visible": true,
+        "debrisY": 0
+      },
+      {
+        "i": 0,
+        "age": 49.97,
+        "state": "active",
+        "opacity": 0.007,
+        "visible": true,
+        "debrisY": -0.596
+      },
+      {
+        "i": 1,
+        "age": 49.97,
+        "state": "active",
+        "opacity": 0.007,
+        "visible": true,
+        "debrisY": -0.596
+      },
+      {
+        "i": 2,
+        "age": 43.75,
+        "state": "active",
+        "opacity": 1,
+        "visible": false,
+        "debrisY": 0
+      },
+      {
+        "i": 3,
+        "age": 38.75,
+        "state": "active",
+        "opacity": 1,
+        "visible": true,
+        "debrisY": 0
+      }
+    ],
+    "freed": {
+      "state": "free",
+      "groupVisible": false,
+      "age": 50
+    }
+  },
+  "consoleErrors": [],
+  "consoleErrorCount": 0,
+  "consoleWarningCount": 0,
+  "checks": [
+    {
+      "name": "achou espaço para Caserna + Casa perto do Centro",
+      "ok": true,
+      "extra": ""
+    },
+    {
+      "name": "2 ruínas surgiram (uma por construção destruída)",
+      "ok": true,
+      "extra": "ativas=2"
+    },
+    {
+      "name": "ruína no local da Caserna e da Casa",
+      "ok": true,
+      "extra": ""
+    },
+    {
+      "name": "raio do decal = collisionRadius × 1,15 (Caserna 3,5 → 4,03; Casa 2,8 → 3,22)",
+      "ok": true,
+      "extra": "Caserna=4.02 Casa=3.22"
+    },
+    {
+      "name": "entulho de 4–8 peças mescladas numa geometria por ruína (≥ 12 triângulos)",
+      "ok": true,
+      "extra": "tris=120,120"
+    },
+    {
+      "name": "ruína em área visível não é esmaecida (decal cor 1)",
+      "ok": true,
+      "extra": ""
+    },
+    {
+      "name": "a ruína não bloqueia: blockerGrid vazio no local e a unidade atravessa",
+      "ok": true,
+      "extra": "{\"blockers\":[],\"arrived\":true,\"seconds\":3.6}"
+    },
+    {
+      "name": "ruína em área nunca explorada fica oculta",
+      "ok": true,
+      "extra": "{\"type\":\"orc_lumber_mill\",\"explored\":false,\"groupVisible\":false}"
+    },
+    {
+      "name": "ruína em área explorada sem visão aparece esmaecida (cor 0,5)",
+      "ok": true,
+      "extra": "{\"type\":\"pig_farm\",\"explored\":true,\"visibleNow\":false,\"groupVisible\":true,\"decalColor\":0.5}"
+    },
+    {
+      "name": "RESOURCE_DEPLETED emitido uma vez para o ouro",
+      "ok": true,
+      "extra": "[{\"type\":\"gold\",\"x\":30,\"z\":-46}]"
+    },
+    {
+      "name": "ruína da mina no local, raio 3,4 (colapsada)",
+      "ok": true,
+      "extra": "{\"i\":4,\"state\":\"active\",\"age\":1.7,\"x\":30,\"z\":-46,\"visible\":true,\"opacity\":1,\"debrisOpacity\":1,\"debrisVisible\":true,\"debrisY\":2.654,\"baseY\":2.654,\"decalScale\":3.4,\"decalColor\":1,\"tris\":96}"
+    },
+    {
+      "name": "aos ~47,5 s a opacidade está em ~0,5 e o entulho afunda",
+      "ok": true,
+      "extra": "{\"i\":0,\"state\":\"active\",\"age\":47.43,\"x\":31.73,\"z\":-12.59,\"visible\":true,\"opacity\":0.513,\"debrisOpacity\":0.513,\"debrisVisible\":true,\"debrisY\":2.181,\"baseY\":2.473,\"decalScale\":4.02,\"decalColor\":1,\"tris\":120}"
+    },
+    {
+      "name": "opacidade segue ruinAlpha(idade) (45 s plena, linear até 0 aos 50 s)",
+      "ok": true,
+      "extra": "maior desvio=0.001 amostras=48"
+    },
+    {
+      "name": "depois dos 50 s a ruína é removida (slot livre, grupo oculto)",
+      "ok": true,
+      "extra": "{\"state\":\"free\",\"groupVisible\":false,\"age\":50} | última amostra: idade=49.97 estado=active"
+    },
+    {
+      "name": "sem erros de console",
+      "ok": true,
+      "extra": ""
+    }
+  ],
+  "pngs": [
+    "NEW-19-1-construcao.png",
+    "NEW-19-2-mina-e-desvanecimento.png"
+  ]
+}

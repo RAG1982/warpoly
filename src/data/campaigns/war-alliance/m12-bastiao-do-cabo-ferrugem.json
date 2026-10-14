@@ -1,0 +1,87 @@
+{
+  "format": "warpolymission",
+  "version": 1,
+  "id": "war-alliance-12-bastiao-do-cabo-ferrugem",
+  "hidden": true,
+  "title": {
+    "pt-BR": "O Bastião do Cabo Ferrugem",
+    "en": "The Bastion of Cape Rust"
+  },
+  "subtitle": {
+    "pt-BR": "Aliança, missão 12",
+    "en": "Alliance, mission 12"
+  },
+  "briefing": {
+    "speaker": {
+      "pt-BR": "Marechal Dorian Vasques",
+      "en": "Marshal Dorian Vasques"
+    },
+    "portrait": "👑",
+    "text": {
+      "pt-BR": "A batalha final: os três heróis juntos. Construa o Bastião supremo, feche o estreito naval e derrote Skarn!",
+      "en": "The final battle: all three heroes united. Build the supreme Bastion, close the naval strait, and defeat Skarn!"
+    },
+    "hints": [
+      {
+        "pt-BR": "Concentre-se nos objetivos primários para avançar.",
+        "en": "Focus on primary objectives to advance."
+      }
+    ]
+  },
+  "mapId": "planalto-ffa-4p",
+  "seed": 9204,
+  "players": [
+    {
+      "id": 0,
+      "name": {
+        "pt-BR": "Aliança de Aurelan",
+        "en": "Aurelan Alliance"
+      },
+      "factionId": "human",
+      "team": 0,
+      "color": "#2563eb",
+      "isLocal": true,
+      "startSlot": 0
+    },
+    {
+      "id": 1,
+      "name": {
+        "pt-BR": "Clãs do Cinzal",
+        "en": "Cinzal Clans"
+      },
+      "factionId": "orc",
+      "team": 1,
+      "color": "#dc2626",
+      "isAI": true,
+      "startSlot": 1
+    }
+  ],
+  "startingResources": {
+    "wood": 400,
+    "gold": 400,
+    "stone": 150
+  },
+  "setup": [
+    {
+      "type": "tag",
+      "select": {
+        "buildingType": "great_hall"
+      },
+      "tag": "enemy_base"
+    }
+  ],
+  "objectives": [
+    {
+      "id": "primary-main",
+      "type": "destroy",
+      "priority": "primary",
+      "select": {
+        "tag": "enemy_base"
+      },
+      "title": {
+        "pt-BR": "Erguer a fortaleza final e bloquear as rotas marítimas",
+        "en": "Raise the final fortress and blockade the sea routes"
+      }
+    }
+  ]
+}

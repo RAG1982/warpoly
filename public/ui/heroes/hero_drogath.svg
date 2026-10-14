@@ -1,0 +1,30 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" width="128" height="128">
+  <defs>
+    <linearGradient id="bgDrogath" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#991b1b"/>
+      <stop offset="60%" stop-color="#450a0a"/>
+      <stop offset="100%" stop-color="#18181b"/>
+    </linearGradient>
+    <linearGradient id="ironHorde" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#f87171"/>
+      <stop offset="50%" stop-color="#dc2626"/>
+      <stop offset="100%" stop-color="#78350f"/>
+    </linearGradient>
+    <filter id="shadow" x="-10%" y="-10%" width="120%" height="120%">
+      <feDropShadow dx="0" dy="2" stdDeviation="3" flood-color="#000" flood-opacity="0.6"/>
+    </filter>
+  </defs>
+  <!-- Background -->
+  <rect width="128" height="128" fill="#140707" rx="16"/>
+  <!-- Iron/Horde Angular Shield -->
+  <path d="M 64 12 L 112 28 L 100 78 L 64 116 L 28 78 L 16 28 Z"
+        fill="url(#bgDrogath)" stroke="url(#ironHorde)" stroke-width="4" filter="url(#shadow)"/>
+  <!-- Inner Border -->
+  <path d="M 64 22 L 100 36 L 90 72 L 64 104 L 38 72 L 28 36 Z"
+        fill="none" stroke="#fca5a5" stroke-width="1.5" stroke-opacity="0.4"/>
+  <!-- Monogram D -->
+  <text x="64" y="68" font-family="'Cinzel', 'Trajan Pro', 'Georgia', serif" font-weight="bold" font-size="44" fill="#fca5a5" text-anchor="middle" filter="url(#shadow)">D</text>
+  <!-- Hero Name -->
+  <rect x="24" y="80" width="80" height="18" rx="4" fill="#450a0a" fill-opacity="0.9" stroke="#dc2626" stroke-width="1"/>
+  <text x="64" y="93" font-family="'Arial Black', sans-serif" font-weight="900" font-size="10" fill="#fef2f2" text-anchor="middle" letter-spacing="1.5">DROGATH</text>
+</svg>

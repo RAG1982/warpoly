@@ -2,6 +2,8 @@
 
 Auditoria **somente documental** (nenhum item foi corrigido aqui). Base: `origin/master` em 2026-10-10 (`bece3a9` e seguintes), leitura do código e do histórico. Itens que já têm status no `docs/TASKS.md` (✅ `DONE`) não foram reauditados: NEW-3, 8, 10, 12, 17, 18, 21, 22, 23, 28, 32, 33 e o ⏸ NEW-20.
 
+> **Nota (2026-10-12):** fotografia de 2026-10-10. Desde então foram mesclados NEW-1 (removido), NEW-7, 24, 25, 26, 29, 34, 35 e 44 (todos em REVIEW, verificação local). Seguem abertos: NEW-6, 9, 14 (parcial), 15, 27, 30. Ver o quadro resumo de `docs/TASKS.md`.
+
 Legenda: **FEITO** (com evidência), **ABERTO** (com `arquivo:linha`), **OBSOLETO**, **EM PR** (corrigido numa branch/PR da nuvem ainda não mesclada).
 
 | ID | Estado | Evidência |

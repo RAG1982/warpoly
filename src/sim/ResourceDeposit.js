@@ -26,6 +26,8 @@ export class ResourceDeposit {
     this.name = type === 'gold' ? 'Gold Mine' : (type === 'oil' ? 'Oil Well' : 'Stone Quarry');
 
     this.collisionRadius = type === 'gold' ? 3.4 : (type === 'oil' ? 2.6 : 3.0);
+    this.isDead = false;
+    this.isDisposed = false;
 
     const h = this.terrain.getHeight(x, z);
     // Compat legado: `deposit.mesh.position` (corpo de simulação; a malha vive em `render/ResourceDepositView`).
@@ -72,6 +74,9 @@ export class ResourceDeposit {
     if (this.resourcesRemaining <= 0 && !this._depletedEmitted) {
       this._depletedEmitted = true;
       this._justDepleted = true;
+      if (this.type !== 'oil') {
+        this.isDead = true;
+      }
     }
     return harvested;
   }
@@ -83,5 +88,40 @@ export class ResourceDeposit {
       return true;
     }
     return false;
+  }
+
+  /** Finaliza a jazida/mina quando os recursos chegam ao fim. */
+  die(gm = null) {
+    if (this.isDead && this.isDisposed) return;
+    this.isDead = true;
+    this.resourcesRemaining = 0;
+    this.releaseAll(gm);
+    this.dispose();
+  }
+
+  dispose() {
+    if (this.isDisposed) return;
+    this.isDisposed = true;
+  }
+
+  /** Ejeta com segurança todos os trabalhadores que estavam dentro ou na fila da mina. */
+  releaseAll(gm = null) {
+    const all = [...this.inside, ...this.queue];
+    for (const u of all) {
+      this.release(u);
+      if (u.mesh) u.mesh.visible = true;
+      if (gm && typeof gm._insertIntoGrid === 'function') gm._insertIntoGrid(u);
+      if (u.state === 'insideMine' || u.state === 'waitingMine') {
+        const next = gm && typeof gm.findNearestResource === 'function' ? gm.findNearestResource(u.mesh.position, this.type) : null;
+        if (next) {
+          u.gatherTarget = next;
+          u.state = 'gathering';
+        } else {
+          u.stop();
+        }
+      }
+    }
+    this.inside.length = 0;
+    this.queue.length = 0;
   }
 }

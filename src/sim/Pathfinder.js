@@ -146,7 +146,9 @@ export class Pathfinder {
         // Dry land above water table (water level = 0.5; dry land threshold >= 0.68)
         // and strictly within the map's playable border (F2-05: this.bounds = mapDef.playable/2)
         // F4-07a: modo naval — água com profundidade suficiente (`h <= NAVAL_MAX_HEIGHT`).
-        if ((this.naval ? h <= NAVAL_MAX_HEIGHT : h >= 0.68) && maxCoord < this.bounds) {
+        // Lava (MUNDO-TERRENO-MAPAS §3.5): intransponível para terrestre e naval.
+        const isLava = this.terrain.isLava?.(x, z);
+        if (!isLava && (this.naval ? h <= NAVAL_MAX_HEIGHT : h >= 0.68) && maxCoord < this.bounds) {
           this.staticGrid[r * this.cols + c] = 1;
         } else {
           this.staticGrid[r * this.cols + c] = 0;
@@ -162,6 +164,7 @@ export class Pathfinder {
    * @returns {boolean}
    */
   isWater(x, z) {
+    if (this.terrain.isLava?.(x, z)) return false;
     const h = this.terrain.getHeight(x, z);
     return h < 0.65;
   }
@@ -169,8 +172,10 @@ export class Pathfinder {
   /**
    * F4-07a: o terreno em (x, z) é intransponível NESTE modo? Terrestre = água (< 0,65); naval = qualquer
    * ponto raso ou seco (altura > `NAVAL_MAX_HEIGHT`). Substitui `isWater` nos testes internos de linha de visada.
+   * Lava (MUNDO-TERRENO-MAPAS §3.5): intransponível para ambos os modos.
    */
   _terrainBlocked(x, z) {
+    if (this.terrain.isLava?.(x, z)) return true;
     const h = this.terrain.getHeight(x, z);
     return this.naval ? h > NAVAL_MAX_HEIGHT : h < 0.65;
   }

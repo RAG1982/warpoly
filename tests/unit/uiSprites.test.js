@@ -202,6 +202,7 @@ function webpInfo(file) {
 function walkSize(dir) {
   let total = 0;
   for (const name of readdirSync(dir)) {
+    if (name === 'heroes') continue; // retratos provisórios SVG dos heróis (MUNDO-HEROIS §7.1)
     const full = join(dir, name);
     total += statSync(full).isDirectory() ? walkSize(full) : statSync(full).size;
   }
@@ -213,8 +214,18 @@ const hasManifest = existsSync(manifestPath);
 const real = hasManifest ? JSON.parse(readFileSync(manifestPath, 'utf8')) : null;
 
 // Tipos que ainda não têm .glb (o jogo usa modelo procedural): ficam com o ícone antigo — ver docs/TASKS.md F7-09.
-const NO_GLB_UNITS = ['sheep', 'submersible', 'colossal_turtle'];
+const NO_GLB_UNITS = ['sheep', 'submersible', 'colossal_turtle', 'hero_dorian', 'hero_vozgul', 'hero_skarn'];
 const NO_GLB_BUILDINGS = ['refinery', 'foundry', 'naval_forge', 'ash_cauldron'];
+const NO_SPRITE_ABILITIES = [
+  'hero_cleave_strike', 'hero_shield_bash',
+  'hero_defensive_stance', 'hero_revide_stance',
+  'hero_blizzard', 'hero_arcane_storm',
+  'hero_banner', 'hero_shield_line', 'hero_marshal_charge',
+  'hero_ember_strike', 'hero_clan_fire',
+  'hero_soul_drain', 'hero_ancestors', 'hero_ash_veil',
+  'hero_horde_roar', 'hero_blood_pact', 'hero_ash_pact',
+  'hero_ground_slam', 'hero_crown_hammer'
+];
 
 describe.skipIf(!hasManifest)('public/ui — sprites reais (F7-09)', () => {
   const m = hasManifest ? normalizeManifest(real) : null;
@@ -285,7 +296,10 @@ describe.skipIf(!hasManifest)('public/ui — sprites reais (F7-09)', () => {
       }
     }
     for (const id of Object.keys(RESEARCH)) expect(researchIconId(id, 'human', m) || researchIconId(id, 'orc', m), `pesquisa ${id}`).not.toBeNull();
-    for (const id of Object.keys(ABILITIES)) expect(abilityIconId(id, m), `habilidade ${id}`).not.toBeNull();
+    for (const id of Object.keys(ABILITIES)) {
+      if (NO_SPRITE_ABILITIES.includes(id)) continue;
+      expect(abilityIconId(id, m), `habilidade ${id}`).not.toBeNull();
+    }
     for (const cmd of ['stop', 'repair', 'unload', 'cancel', 'upgrade_hq']) expect(commandIconId(cmd, 'human', m), cmd).not.toBeNull();
     // atributos da linha de status do card (UIManager._stat)
     for (const n of ['attack', 'armor', 'speed', 'range', 'cargo', 'mana', 'air', 'naval', 'suicide', 'area', 'submerged', 'build', 'pop', 'tower']) {

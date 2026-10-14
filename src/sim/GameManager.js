@@ -813,7 +813,8 @@ export class GameManager {
     // F4-07a: plataforma de petróleo — só sobre um poço livre (no mar), sem as demais regras de terra.
     if (bdef.platform) return !!this.findFreeOilDeposit(x, z);
 
-    // 1. Terrain Height check at center and 4 footprint perimeter samples
+    // 1. Terrain Height check and Lava check at center and 4 footprint perimeter samples
+    if (this.terrain.isLava?.(x, z)) return false;
     const h = this.terrain.getHeight(x, z);
     if (h < 1.8) return false;
 
@@ -823,10 +824,10 @@ export class GameManager {
       if (!this.hasNavigableWaterNear(x, z, radius + 1.3)) return false;
     } else {
       const sampleOffset = radius * 0.75;
-      if (this.terrain.getHeight(x + sampleOffset, z + sampleOffset) < 1.8) return false;
-      if (this.terrain.getHeight(x - sampleOffset, z + sampleOffset) < 1.8) return false;
-      if (this.terrain.getHeight(x + sampleOffset, z - sampleOffset) < 1.8) return false;
-      if (this.terrain.getHeight(x - sampleOffset, z - sampleOffset) < 1.8) return false;
+      if (this.terrain.isLava?.(x + sampleOffset, z + sampleOffset) || this.terrain.getHeight(x + sampleOffset, z + sampleOffset) < 1.8) return false;
+      if (this.terrain.isLava?.(x - sampleOffset, z + sampleOffset) || this.terrain.getHeight(x - sampleOffset, z + sampleOffset) < 1.8) return false;
+      if (this.terrain.isLava?.(x + sampleOffset, z - sampleOffset) || this.terrain.getHeight(x + sampleOffset, z - sampleOffset) < 1.8) return false;
+      if (this.terrain.isLava?.(x - sampleOffset, z - sampleOffset) || this.terrain.getHeight(x - sampleOffset, z - sampleOffset) < 1.8) return false;
     }
 
     // 2. Minimum distance to other buildings (F1-06: blockerGrid.queryRadius já soma o raio
@@ -1782,6 +1783,29 @@ export class GameManager {
         this.unregisterEntity(deadB);
         if (deadB.campId) this._onCampDestroyed(deadB);
         this.recalculatePopCap();
+      }
+    }
+
+    // Clean depleted/dead resource deposits (minas de ouro e pedreiras esgotadas desabam e somem como construções)
+    for (let i = this.resourceDeposits.length - 1; i >= 0; i--) {
+      const dep = this.resourceDeposits[i];
+      if (dep.type !== 'oil' && (dep.isDead || (dep.resourcesRemaining !== undefined && dep.resourcesRemaining <= 0))) {
+        this.resourceDeposits.splice(i, 1);
+        if (!dep._depletedEmitted) {
+          dep._depletedEmitted = true;
+          if (this.events) {
+            const p = dep.mesh?.position || dep.position || { x: 0, y: 0, z: 0 };
+            this.events.emit(EVT.RESOURCE_DEPLETED, {
+              resourceId: dep.id,
+              pos: { x: p.x, y: p.y, z: p.z },
+              resourceType: dep.type || 'gold'
+            });
+          }
+        }
+        if (dep.die) dep.die(this);
+        else dep.isDead = true;
+        if (this.selectedResource === dep) this.selectedResource = null;
+        this.unregisterEntity(dep);
       }
     }
 

@@ -1,5 +1,6 @@
 # Estado do projeto para a nuvem — pronto, com falha, não iniciado
 
+> **Atualização 2026-10-13 (integração local):** `task/mundo-2026-10-13` (novo mundo parcial, mina que desaba, docs da nuvem `7497c72` e revisão visual de NEW-13/NEW-19 da branch `task/revisao-visual-2026-10-11`) mesclada no `master` e enviada ao `origin`. Testes: 149 arquivos / 1897 testes, 0 falhas; lint 0 erros; build ok. Seções 3, 4.1 e 6 atualizadas.
 > Atualizado em 2026-10-12, **estado de entrega para continuar localmente**: todo o trabalho da nuvem está mesclado no `master` (PRs até #50). Complementa `docs/TASKS.md` (fonte de status; o coordenador local o atualiza) e `docs/HANDOFF_CLOUD.md` (fila e regras).
 > Regra: **nada deste documento é verdade sem conferir no código** — ao começar, rode `npm test` e confirme.
 
@@ -49,11 +50,13 @@
 - **Backlog ainda aberto:** NEW-6 (spec pronta, execução pendente), NEW-9 (IA destrói HQ cedo; depende de F5-03), NEW-14 (spec pronta), NEW-15/27/30 (medições com GPU/soak), NEW-51 (seed 82: terminou em 9106 ticks com a IA nova em `--count 1`; confirmar com amostra grande).
 
 ## 3. PENDENTE DE MERGE
-**Nada.** Todo o trabalho da nuvem está no `master`. Única branch remota que NÃO está nele: `cloud/F3-01` (PR #6, fechado como superado; pode ser apagada). Branches `cloud/*` já mescladas podem ser apagadas à vontade.
+**Nada da nuvem.** Todo o trabalho da nuvem está no `master`; o `origin/cloud/docs-estado-final` de 2026-10-12 foi mesclado em 2026-10-13. `cloud/F3-01` (PR #6) segue **superado, não mesclar** (a F3-01 foi feita localmente). Local (2026-10-13): `task/F7-08-verificacao` (WIP de áudio) foi enviado ao `origin` e **não mesclado**: conflita com o motor de música em `src/audio/AudioEngine.js` e `tools/audio-check.mjs`. Branches `cloud/*` já mescladas podem ser apagadas à vontade.
 
 ## 4. NÃO INICIADO / PLANOS
-### 4.1 Novo mundo (decisão do dono de 2026-10-11) — só especificado, NADA implementado
+### 4.1 Novo mundo (decisão do dono de 2026-10-11) — implementação parcial local (2026-10-13)
 Specs no `master`: `docs/specs/MUNDO-BRIEFING-DONO.md` (fonte), `MUNDO-HISTORIA-CAMPANHA.md`, `MUNDO-HEROIS.md`, `MUNDO-TERRENO-MAPAS.md`. Resumo: planeta **Ondara**, continentes **Velmara** (humanos, OESTE, exuberante) e **Cinzara** (orcs, LESTE, desértico), **Mar Fendido** com 8 ilhas "Estilhaços" de terrenos distintos; **duas campanhas espelhadas de 12 missões** (`war-alliance`, `war-horde`; tutorial progressivo nas m1–6, tudo liberado a partir da m6; final = fortaleza no continente adversário bloqueando as ilhas; gancho aberto); **6 heróis** (capitão, mago e comandante por facção: Brann, Oren, Dorian / Drogath, Vozgul, Skarn); tela de abertura da história (7 painéis); mapa-múndi **só ilustrativo**; mapas de costa **irregular** (não mais "esferas interligadas"); biomas só visuais (10); **lava** como divisor sem dano (bloqueia como a água); javalis no lugar dos porcos (só visual). A campanha atual da Aliança + briefing da Horda ficam como **"Campanha Clássica (beta)"**.
+**Feito localmente (2026-10-13, `task/mundo-2026-10-13`, commits `cc0c505` e `b73fd57`):** lava na simulação (`lavaGrid`, `Terrain.isLava`, pathfinder, validação), biomas e tilesets novos (dados), 6 heróis (dados, habilidades, i18n, retratos SVG provisórios), seletor de campanhas com trilha `beta`, registro de `war-alliance` e `war-horde` (12 missões cada), tela de história (7 painéis), mapa-múndi ilustrativo, javali e ovelha como fauna, mapas com no mínimo 168×168 (P-7) e unidades iniciais à frente do prédio (P-13). **Falta:** promover o gerador de costa a `src/data/maps/coast/`; render regional e da lava; mapas por ilha e por tipo; testes de cobertura e progressão das 24 missões; modelos 3D e retratos finais dos heróis; verificação visual de tudo isso no navegador (local). Estado por passo: `docs/TASKS.md`, seção "Novo mundo".
+
 **Ordem de execução sugerida** (cada passo é um commit; ver os passos nas specs): (1) gerador de mapas irregulares + `lavaGrid` + testes (nuvem); (2) tilesets/biomas (nuvem; arte local); (3) dados dos 6 heróis (`units.js`, `abilities.js`, extensão `status` com `radius`/`allies` em `src/sim/abilities.js`, i18n, retratos SVG provisórios); (4) seletor de campanhas e progresso por campanha; (5) tela de história; (6) mapas por ilha; (7) 12 missões × 2 em lotes; (8) testes de cobertura e progressão. Perguntas AINDA abertas (nenhuma muda o escopo): ver §10 de `MUNDO-HISTORIA-CAMPANHA.md` e §8 de `MUNDO-TERRENO-MAPAS.md`.
 ### 4.2 Outros
 - **NEW-6** (ORM e texturas, spec no master): passos 1, 2, 4, 5 na nuvem; **o passo 2 exige decisão do dono** (reduzir ORM e bump à metade do lado em `high` para ficar < 300 MB; alternativa HRM).
@@ -83,6 +86,7 @@ Nada do que veio da nuvem foi visto ou ouvido num navegador. Roteiro por PR no c
 - **Áudio:** `bash tools/safe-run.sh --timeout 300 -- node tools/audio-check.mjs` (nunca rodou); som só do que está em vista, zoom; efeitos novos; música no inspetor (`/inspector.html` > Músicas): marcar as faixas que ficam e guardar o JSON; tema de abertura no menu; sem falas.
 - **Desempenho:** `npm run bench` com e sem `?lod=0` (F1-10; meta massa300 ≥ 45 FPS); regravar a baseline: `bash tools/safe-run.sh --timeout 900 -- npm run perf -- --update` (o job `perf.yml` pode falhar até lá); baseline visual `npm run visual -- --update` (o cabeçalho do inspetor ganhou um botão).
 - Replay online e carga por facção (F9-05, F10-05); capturas NEW-13, 19, 49, 52.
+- Novo mundo (local, 2026-10-13): tela de história, seletor de campanhas (trilha `main` × `beta`), mapa-múndi, mina que desaba (NEW-54), lava e biomas no jogo. Nada disso foi visto num navegador.
 
 ## 7. Onde estão as coisas (mapa rápido)
 - Simulação: `src/sim/` (missões em `src/sim/missions/`, comandos, transporte, checksum, RNG). Não usar `Math.random` nem `Date.now` aqui (`tests/unit/noMathRandom.test.js` vigia `src/sim` e `src/ai`).

@@ -1,0 +1,87 @@
+{
+  "format": "warpolymission",
+  "version": 1,
+  "id": "war-horde-11-brasa-alta",
+  "hidden": true,
+  "title": {
+    "pt-BR": "Brasa-Alta",
+    "en": "Highember"
+  },
+  "subtitle": {
+    "pt-BR": "Horda, missão 11",
+    "en": "Horde, mission 11"
+  },
+  "briefing": {
+    "speaker": {
+      "pt-BR": "Skarn chefe-de-brasa",
+      "en": "Skarn Ember-Chief"
+    },
+    "portrait": "👑",
+    "text": {
+      "pt-BR": "Eu cheguei com a frota principal. Sob a coroa de ferro, esmague a resistência da Aliança na savana!",
+      "en": "I have arrived with the main fleet. Beneath the iron crown, crush the Alliance resistance on the savanna!"
+    },
+    "hints": [
+      {
+        "pt-BR": "Concentre-se nos objetivos primários para avançar.",
+        "en": "Focus on primary objectives to advance."
+      }
+    ]
+  },
+  "mapId": "vales-2v2",
+  "seed": 9187,
+  "players": [
+    {
+      "id": 0,
+      "name": {
+        "pt-BR": "Horda do Cinzal",
+        "en": "Cinzal Horde"
+      },
+      "factionId": "orc",
+      "team": 0,
+      "color": "#dc2626",
+      "isLocal": true,
+      "startSlot": 0
+    },
+    {
+      "id": 1,
+      "name": {
+        "pt-BR": "Tropas de Aurelan",
+        "en": "Aurelan Troops"
+      },
+      "factionId": "human",
+      "team": 1,
+      "color": "#2563eb",
+      "isAI": true,
+      "startSlot": 1
+    }
+  ],
+  "startingResources": {
+    "wood": 400,
+    "gold": 400,
+    "stone": 150
+  },
+  "setup": [
+    {
+      "type": "tag",
+      "select": {
+        "buildingType": "castle"
+      },
+      "tag": "enemy_base"
+    }
+  ],
+  "objectives": [
+    {
+      "id": "primary-main",
+      "type": "destroy",
+      "priority": "primary",
+      "select": {
+        "tag": "enemy_base"
+      },
+      "title": {
+        "pt-BR": "Comandar as forças com Skarn e tomar a savana",
+        "en": "Command forces with Skarn and seize the savanna"
+      }
+    }
+  ]
+}

@@ -54,16 +54,19 @@ Cada mapa é um JSON em `src/data/maps/<id>.json`, registrado em `index.js` (`ge
     "deposit": { "type": "gold"|"stone", "amount" } }` — 1 `bandit_camp` (PV 1400) + `guards`
     bandidos em círculo (raio 5, leash 22) + a jazida `deposit` a ~9 do acampamento. Destruir o
     acampamento credita `reward` a quem deu o último golpe (`EVT.CAMP_CLEARED`).
-  - `{ "kind": "critters", "species": "sheep"|"pig", "x", "z", "count", "radius" }` — critters
+  - `{ "kind": "critters", "species": "sheep"|"boar"|"pig", "x", "z", "count", "radius" }` — critters
     decorativos (no máximo 40 por mapa; `x`/`z` dentro de `playable`).
   Convenção: acampamentos em terra firme, ≥ 25 de qualquer `startSlot`; em mapas 1×1 os pares
   são espelhados (ponto → oposto).
 - **`hidden`** (F6-09): `true` = não aparece em `listMaps()` (lista da Escaramuça); `getMap(id)` e `listMaps({ includeHidden: true })` ainda o devolvem. Usado por `tutorial`.
-- **`tileset`** (F7-04): `verdejante` (Floresta, padrão; `ilhas` é alias legado), `inverno`, `devastadas` (Terras Devastadas) ou `pantano`
-  (definições em `src/data/tilesets.js`: paleta/splat, água, espuma, névoa/céu, decoração e árvores). Só render — não afeta sim nem
-  pathfinding. `?tileset=<id>` na URL força o tileset de qualquer mapa (depuração); a página `terrain-preview.html` mostra os 4 e compara.
+- **`tileset`** (F7-04 · MUNDO-TERRENO-MAPAS): `verdejante` (Floresta, padrão; `ilhas` é alias legado), `inverno`, `devastadas` (Terras Devastadas), `pantano`, e os novos biomas `exuberante`, `deserto`, `savana`, `vulcanico`, `pedregoso`
+  (definições em `src/data/tilesets.js`: paleta/splat, água, espuma, névoa/céu, iluminação/atmosfera, decoração e árvores). Só render — não afeta sim nem
+  pathfinding. `?tileset=<id>` na URL força o tileset de qualquer mapa (depuração); a página `terrain-preview.html` mostra a comparação visual.
   `verdejante` mantém exatamente o visual anterior; os demais pintam o terreno por splat map (grama/terra/areia/pedra/neve/lama por
   altura, declive e ruído). Mapas gerados: `generateMap({ theme })` aceita os mesmos ids e grava em `tileset`.
+- **`biomeGrid`** (MUNDO-TERRENO-MAPAS §3.3): grade de biomas por célula para regiões com múltiplos biomas no mesmo mapa —
+  `{ "cell": 1, "nodes": N, "data": "<base64 de Uint8[nodes*nodes]>" }` ou formato RLE `{ "cell": 1, "nodes": N, "encoding": "rle", "data": [[count, id], ...] }`.
+  Ids canônicos: 0 mar, 1 areia, 2 grama, 3 savana, 4 deserto, 5 estepe, 6 rocha, 7 vulcânico, 8 lava, 9 neve, 10 pântano, 11 gelo, 12 floresta.
 - **`roads`** (F7-04, opcional): estradas/trilhas pintadas na textura — `[{ "points": [[x, z], ...], "width": 2.2 }, ...]` (mundo; `width` opcional).
 - **`splatMasks`** (F7-04, opcional): manchas forçadas no splat — `[{ "layer": "dirt"|"sand"|"rock"|"snow"|"mud"|"grass"|"road", "x", "z", "r", "strength"? }]`
   (uma mancha `dirt` r=6 já é criada sob cada `startSlot`). Ignorado pelo tileset `verdejante`.
@@ -75,8 +78,10 @@ Cada mapa é um JSON em `src/data/maps/<id>.json`, registrado em `index.js` (`ge
   `Terrain.js`/`GameManager.js` sem mudar o resultado (checksum de determinismo idêntico ao
   master, seed 42). `maxPlayers: 3`: o slot 2 (−14, −46) não faz parte do 1×1 padrão — existe só
   para o teste/uso de FFA de 3 jogadores que já existia antes da F2-05 (`?ffa=1` no mapa padrão).
-- **`ilhas-4p`** ("Ilhas Gêmeas"): novo mapa FFA (4 slots, 2 ilhas ligadas por 2 pontes de terra,
-  128×128). Jogue com `?map=ilhas-4p&ffa=1`.
+- **`ilhas-4p`** ("Ilhas Gêmeas"): mapa FFA (4 slots, 2 ilhas ligadas por 2 pontes de terra,
+  ampliado para 168×168, playable 156). Jogue com `?map=ilhas-4p&ffa=1`.
+- **`estreito-1v1`** ("Estreito de Vaeloria"): mapa 1v1 naval (2 ilhas ligadas por ponte central, 2 poços de petróleo,
+  ampliado para 168×168, playable 160).
 
 - **Pacote skirmish (F8-01)**, gerados com `tools/gen-map.mjs` e salvos como JSON estático (ids e nomes em PT-BR; nomes traduzidos em `src/i18n/*.json`, chave `map.<id>.name`). Testes em `tests/unit/mapsSkirmish.test.js`:
   - **`campos-1v1`** ("Campos Dourados"): 1×1, 192 (era 160). Gerado com `--seed 1 --players 2 --size 160 --forest 2` e depois ampliado à mão/por script (ver "Ampliação e florestas densas").
@@ -88,6 +93,23 @@ Cada mapa é um JSON em `src/data/maps/<id>.json`, registrado em `index.js` (`ge
   - Não há mapa 1×1 de 96: com a regra de bosques a ≥ 27 dos pátios, o gerador não acha lugar para árvores suficientes nessa área (a seed 1 de 96 tinha 0 árvores). Ver também a nota de bosques no gerador abaixo.
 - **`tutorial`** ("Campo de Treino", F6-09, `hidden`): 104×104, uma ilha só (`islands`), 2 slots (jogador SW, rival passivo NE), 1 acampamento de bandidos (2 guardas) como alvo; ver `src/ui/tutorial.js`. Não é validado por `maps.test.js` (usa `listMaps()`); `tests/unit/tutorial.test.js` repete as checagens de terra seca.
 
+## Regras de Design de Mapas (Tamanho Mínimo, Unidades e Serrarias)
+
+1. **Tamanho Mínimo de 168×168 para Mapas Jogáveis**:
+   - Todo mapa jogável de escaramuça / multiplayer DEVE ter no mínimo **168×168** (`size >= 168`, área jogável `playable >= 156`).
+   - Mapas abaixo de 168×168 são pequenos demais para a escala tática do jogo, sufocando a expansão de bases, jazidas de ouro/pedra e áreas florestais.
+   - `estreito-1v1` (era 140) e `ilhas-4p` (era 128) foram ampliados para 168×168 através de novos lobos e áreas costeiras, preservando 100% dos pontos de terra históricos das missões e canais navais.
+   - O validador (`src/data/maps/validate.js`) emite o aviso `sizeBelowMinPlayable` caso um mapa público seja menor que 168×168.
+
+2. **Posicionamento das Unidades Iniciais à Frente da Construção Principal**:
+   - Quando o jogo se inicia, todas as unidades existentes da base inicial (trabalhadores, espadachins/grunts e arqueiros/lançadores) DEVEM nascer estritamente **à frente da construção principal** (`dz > 0` no referencial do slot, viradas para o centro do mapa/pátio).
+   - Unidades posicionadas atrás do edifício principal ficam escondidas sob a malha 3D e colisão do prédio, atrapalhando a visibilidade, seleção e movimentação inicial do jogador.
+
+3. **Posicionamento da Serraria Próxima a um Arvoredo e Livre de Obstruções**:
+   - A serraria inicial (`lumber_camp` / `orc_lumber_mill`) DEVE estar posicionada **próxima de um arvoredo** (`forests`, distância recomendada $\le 12$ unidades), permitindo que os aldeões/peões coletem madeira imediatamente sem percorrer longas distâncias desérticas.
+   - **Distância de Segurança contra Obstrução**: A serraria DEVE manter uma distância mínima de segurança ($\ge 9$ unidades) de qualquer mina de ouro, pedreira ou outra construção. Isso impede sobreposição de modelos e garante largura de passagem livre para que os trabalhadores e unidades transitem sem serem bloqueados por colisões de outros objetos.
+   - Todos os mapas existentes foram revisados para posicionar a serraria e os bosques de modo alinhado, respeitando a zona de segurança do pátio central ($\ge 26$ u do centro do HQ para que as árvores floresçam normalmente).
+
 ## Ampliação e florestas densas (feedback da campanha, 2026-10-11)
 
 Feedback do dono: mapas pequenos e madeira acabando cedo. Medição (`node tools/measure-wood.mjs`; critério de alcance = região conexa do `Pathfinder`, o mesmo de `src/ai/AIWood.js`) e correção:
@@ -96,7 +118,7 @@ Feedback do dono: mapas pequenos e madeira acabando cedo. Medição (`node tools
 - **Árvore = 120 de madeira** (`Tree.maxWood`, inalterado). As árvores só nascem a ≥ 26 u de qualquer pátio, ≥ 8,5 de jazidas, ≥ 9 de vaus e com espaçamento ≥ 4,4: mais madeira perto da base exige **mais terra** com bosques, não só mais `count`.
 - **Mapas de `islands`**: o tamanho cresce **acrescentando terra** (nunca mudando as ilhas existentes): "lobos" (elipses `r` 12–18 em `terrain.params.islands`) ligados à ilha-mãe por uma ponte de largura 12 (`bridges`), em simetria (rot. 180° nos 1v1; grupo completo nos 4 slots) e fora de acampamentos, jazidas e pontos de missão; `size`/`playable` sobem ~+20 %. O centro/origem e todas as coordenadas antigas ficam válidas (o mapa só ganha terra). Os bosques novos são **anexados ao fim de `forests`** (os antigos consomem o `rngMap` primeiro) em órbitas simétricas, `count` 14–17, `radius` 7,5–9 e `species` rotativa (oak/pine/autumn/birch).
 - **`continental-1v1`** (gerador `continental`): `coast.start` 54 → 66, `size` 140 → 168, `playable` 110 → 134. Dentro de |x|,|z| ≤ 54 a altura é idêntica à antiga (`terrainGenerators.test.js`); o rio só passa a existir até 68.
-- **Não crescem**: `estreito-1v1` (só densidade) e `ilhas-4p` (inalterado): a campanha (m03/m06) e `naval.test.js` fixam as rotas navais ao redor das ilhas; nova terra nas bordas fecha a circulação ou, com `playable` maior, a abre (muda a conectividade do mar). `tutorial` inalterado.
+- **Ampliação de `estreito-1v1` e `ilhas-4p`**: ambos ampliados de 140 e 128 para 168×168, cumprindo a regra de tamanho mínimo jogável, com rotas navais e canais preservados.
 - **Regra para novos ajustes**: `tests/fixtures/missionTerrainClasses.json` guarda a classe (terra/água) de **toda** coordenada x/z referenciada por missões da campanha e pelos `startSlots` no mapa original; `tests/fixtures/originalMapTerrain.json` guarda o terreno original (compara "nenhuma terra virou água" e a conectividade terrestre/naval). Se uma missão nova citar coordenadas, regenere a primeira fixture.
 - Os JSON dos mapas ampliados foram gerados por script a partir dos originais e deixam de ser reproduzíveis por `tools/gen-map.mjs`.
 

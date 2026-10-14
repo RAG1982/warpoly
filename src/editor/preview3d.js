@@ -156,7 +156,8 @@ export class Preview3D {
       else {
         for (let t = 0; t < Math.min(n.count, 8); t++) {
           const a = hash(n.x + t) * 6.28;
-          add(new THREE.SphereGeometry(0.7, 8, 6), 0xffffff, n.x + Math.cos(a) * n.radius * 0.6, n.z + Math.sin(a) * n.radius * 0.6, 0.7);
+          const col = (n.species === 'boar' || n.species === 'pig') ? 0x6b4c35 : 0xffffff;
+          add(new THREE.SphereGeometry(0.7, 8, 6), col, n.x + Math.cos(a) * n.radius * 0.6, n.z + Math.sin(a) * n.radius * 0.6, 0.7);
         }
       }
     }

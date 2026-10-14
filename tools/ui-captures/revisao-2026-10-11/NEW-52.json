@@ -1,0 +1,164 @@
+{
+  "item": "NEW-52",
+  "data": {
+    "reeds": {
+      "waterLevel": 0.5,
+      "tileset": "verdejante",
+      "size": 168,
+      "playable": 134,
+      "clumps": [
+        {
+          "x": -72,
+          "z": -72,
+          "center": 0.4,
+          "min": -0.36,
+          "max": 0.94,
+          "dry": 2,
+          "samples": 17
+        },
+        {
+          "x": -72,
+          "z": 72,
+          "center": 0.4,
+          "min": -0.36,
+          "max": 0.94,
+          "dry": 2,
+          "samples": 17
+        },
+        {
+          "x": 72,
+          "z": -72,
+          "center": 0.4,
+          "min": -0.36,
+          "max": 0.94,
+          "dry": 2,
+          "samples": 17
+        },
+        {
+          "x": 72,
+          "z": 72,
+          "center": 0.4,
+          "min": -0.36,
+          "max": 0.94,
+          "dry": 2,
+          "samples": 17
+        }
+      ],
+      "old": [
+        {
+          "x": 10,
+          "z": 12,
+          "center": 2.46,
+          "min": -1,
+          "max": 2.56,
+          "dry": 12,
+          "samples": 17
+        },
+        {
+          "x": 12,
+          "z": 15,
+          "center": 2.4,
+          "min": 2.34,
+          "max": 2.51,
+          "dry": 17,
+          "samples": 17
+        },
+        {
+          "x": -10,
+          "z": -12,
+          "center": 2.45,
+          "min": -1,
+          "max": 2.51,
+          "dry": 12,
+          "samples": 17
+        },
+        {
+          "x": -12,
+          "z": -15,
+          "center": 2.72,
+          "min": 2.58,
+          "max": 2.85,
+          "dry": 17,
+          "samples": 17
+        },
+        {
+          "x": -15,
+          "z": 18,
+          "center": 2.97,
+          "min": 2.88,
+          "max": 3.04,
+          "dry": 17,
+          "samples": 17
+        },
+        {
+          "x": 15,
+          "z": -18,
+          "center": 2.48,
+          "min": 2.43,
+          "max": 2.52,
+          "dry": 17,
+          "samples": 17
+        },
+        {
+          "x": -20,
+          "z": 12,
+          "center": 2.37,
+          "min": 2.28,
+          "max": 2.47,
+          "dry": 17,
+          "samples": 17
+        }
+      ],
+      "lotusEntities": 4,
+      "groupChildren": 4,
+      "inPlayable": 0
+    },
+    "drawCalls": {
+      "with": 107,
+      "without": 92,
+      "delta": 15
+    },
+    "cornerView": {
+      "screen": [
+        640,
+        747
+      ],
+      "inFrustum": false,
+      "explored": false
+    }
+  },
+  "consoleErrors": [],
+  "consoleErrorCount": 0,
+  "consoleWarningCount": 0,
+  "checks": [
+    {
+      "name": "há moitas (1..7) e uma por moita no grupo de vegetação",
+      "ok": true,
+      "extra": "moitas=4"
+    },
+    {
+      "name": "cada moita está em água rasa (centro 0,05–0,6 abaixo do nível d'água) e nenhum dos 16 pontos em volta fica em terra seca",
+      "ok": false,
+      "extra": "[[0.4,2],[0.4,2],[0.4,2],[0.4,2]]"
+    },
+    {
+      "name": "as 7 posições fixas antigas eram terra seca neste mapa (o defeito original)",
+      "ok": true,
+      "extra": "[2.46,2.4,2.45,2.72,2.97,2.48,2.37]"
+    },
+    {
+      "name": "observação: a moita do canto está no quadro da câmera do jogo mas fica na névoa (área não explorada)",
+      "ok": true,
+      "extra": "no quadro=false explorada=false dentro da área jogável=0/4"
+    },
+    {
+      "name": "sem erros de console",
+      "ok": true,
+      "extra": ""
+    }
+  ],
+  "pngs": [
+    "NEW-52-1-moitas.png",
+    "NEW-52-2-vista-do-jogador.png"
+  ]
+}

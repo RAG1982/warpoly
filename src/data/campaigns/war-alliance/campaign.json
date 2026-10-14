@@ -1,0 +1,320 @@
+{
+  "format": "warpolycampaign",
+  "version": 1,
+  "id": "war-alliance",
+  "factionId": "human",
+  "track": "main",
+  "order": 1,
+  "title": {
+    "pt-BR": "A Guerra do Mar Fendido (Aliança)",
+    "en": "The Sundered Sea War (Alliance)"
+  },
+  "subtitle": {
+    "pt-BR": "A Marcha da Aliança de Aurelan (12 missões)",
+    "en": "The March of the Aurelan Alliance (12 missions)"
+  },
+  "premise": {
+    "pt-BR": "O planeta Ondara despertou para a Guerra do Mar Fendido. Conduza os exércitos de Aurelan através dos Estilhaços, domine as ilhas estratégicas e estabeleça o Bastião supremo em Cinzara.",
+    "en": "The world of Ondara has awakened to the Sundered Sea War. Lead the armies of Aurelan through the Shards, claim strategic islands, and establish the supreme Bastion in Cinzara."
+  },
+  "epilogue": {
+    "faction": "human",
+    "title": {
+      "pt-BR": "O Farol do Outro Lado",
+      "en": "The Lighthouse on the Other Shore"
+    },
+    "paragraphs": [
+      {
+        "pt-BR": "Quando a última torre do Bastião do Cabo Ferrugem foi coroada, o Mar Fendido ficou, pela primeira vez, do lado de Aurelan.",
+        "en": "When the last tower of the Cape Rust Bastion was crowned, the Sundered Sea lay, for the first time, on Aurelan's side."
+      },
+      {
+        "pt-BR": "Mestre Oren redesenhou o mapa com os cadernos de Orsolo: onde havia vazio, agora havia uma fortaleza em terra alheia.",
+        "en": "Master Oren redrew the map from Orsolo's notebooks: where there had been emptiness, there now stood a fortress on foreign soil."
+      },
+      {
+        "pt-BR": "O Marechal Dorian e o Capitão Brann guardam o estreito; a vitória da Aliança está gravada nas pedras do mar.",
+        "en": "Marshal Dorian and Captain Brann guard the strait; the Alliance victory is engraved in the stones of the sea."
+      }
+    ],
+    "credits": {
+      "pt-BR": "Fim da Marcha da Aliança",
+      "en": "End of the Alliance March"
+    }
+  },
+  "missions": [
+    {
+      "id": "war-alliance-01-terra-a-vista",
+      "unlocks": {
+        "units": [
+          "villager",
+          "knight",
+          "archer"
+        ],
+        "buildings": [
+          "cottage",
+          "lumber_camp",
+          "farm",
+          "barracks"
+        ]
+      }
+    },
+    {
+      "id": "war-alliance-02-pouso-do-encontro",
+      "requires": [
+        "war-alliance-01-terra-a-vista"
+      ],
+      "carryOver": {
+        "resources": {
+          "gold": 0.25,
+          "wood": 0.25,
+          "stone": 0.25
+        },
+        "max": 300
+      },
+      "unlocks": {
+        "buildings": [
+          "forge",
+          "watchtower"
+        ],
+        "research": [
+          "melee_weapons",
+          "ranged_ammo",
+          "melee_armor"
+        ]
+      }
+    },
+    {
+      "id": "war-alliance-03-ouro-da-pedra-mae",
+      "requires": [
+        "war-alliance-02-pouso-do-encontro"
+      ],
+      "carryOver": {
+        "resources": {
+          "gold": 0.25,
+          "wood": 0.25,
+          "stone": 0.25
+        },
+        "max": 300
+      },
+      "unlocks": {
+        "units": [
+          "cavalier",
+          "ballista",
+          "sapper",
+          "ranger"
+        ],
+        "buildings": [
+          "stable",
+          "workshop",
+          "wall_human"
+        ],
+        "research": [
+          "siege_damage",
+          "woodcutting",
+          "ranged_class",
+          "melee_weapons@2",
+          "melee_armor@2",
+          "ranged_ammo@2",
+          "ranger_longbow"
+        ],
+        "heroes": [
+          "hero_brann"
+        ]
+      }
+    },
+    {
+      "id": "war-alliance-04-baixio-do-breu",
+      "requires": [
+        "war-alliance-03-ouro-da-pedra-mae"
+      ],
+      "carryOver": {
+        "resources": {
+          "gold": 0.25,
+          "wood": 0.25,
+          "stone": 0.25
+        },
+        "max": 300
+      },
+      "unlocks": {
+        "units": [
+          "glider",
+          "tanker",
+          "barge",
+          "frigate",
+          "dreadnought",
+          "submersible"
+        ],
+        "buildings": [
+          "shipyard",
+          "refinery",
+          "foundry",
+          "oil_platform"
+        ],
+        "research": [
+          "naval_cannons",
+          "naval_hulls",
+          "naval_cannons@2",
+          "naval_hulls@2",
+          "siege_damage@2"
+        ]
+      }
+    },
+    {
+      "id": "war-alliance-05-cerne-verde",
+      "requires": [
+        "war-alliance-04-baixio-do-breu"
+      ],
+      "carryOver": {
+        "resources": {
+          "gold": 0.25,
+          "wood": 0.25,
+          "stone": 0.25
+        },
+        "max": 300
+      },
+      "unlocks": {
+        "units": [
+          "mage",
+          "templar",
+          "gryphon_rider"
+        ],
+        "buildings": [
+          "arcane_tower",
+          "temple",
+          "aviary"
+        ],
+        "research": [
+          "cavalry_class",
+          "spell_fireball",
+          "spell_slow",
+          "spell_heal",
+          "spell_exorcism"
+        ]
+      }
+    },
+    {
+      "id": "war-alliance-06-a-geada",
+      "requires": [
+        "war-alliance-05-cerne-verde"
+      ],
+      "carryOver": {
+        "resources": {
+          "gold": 0.25,
+          "wood": 0.25,
+          "stone": 0.25
+        },
+        "max": 300
+      },
+      "unlocks": {
+        "research": [
+          "ranger_sight",
+          "ranger_marksman",
+          "spell_flameshield",
+          "spell_invisibility",
+          "spell_polymorph",
+          "spell_blizzard",
+          "spell_holy_vision"
+        ]
+      }
+    },
+    {
+      "id": "war-alliance-07-brejo-mudo",
+      "requires": [
+        "war-alliance-06-a-geada"
+      ],
+      "carryOver": {
+        "resources": {
+          "gold": 0.25,
+          "wood": 0.25,
+          "stone": 0.25
+        },
+        "max": 300
+      },
+      "unlocks": {}
+    },
+    {
+      "id": "war-alliance-08-a-fornalha",
+      "requires": [
+        "war-alliance-07-brejo-mudo"
+      ],
+      "carryOver": {
+        "resources": {
+          "gold": 0.25,
+          "wood": 0.25,
+          "stone": 0.25
+        },
+        "max": 300
+      },
+      "unlocks": {}
+    },
+    {
+      "id": "war-alliance-09-miragem",
+      "requires": [
+        "war-alliance-08-a-fornalha"
+      ],
+      "carryOver": {
+        "resources": {
+          "gold": 0.25,
+          "wood": 0.25,
+          "stone": 0.25
+        },
+        "max": 300
+      },
+      "unlocks": {}
+    },
+    {
+      "id": "war-alliance-10-desembarque-costa-ferrugem",
+      "requires": [
+        "war-alliance-09-miragem"
+      ],
+      "carryOver": {
+        "resources": {
+          "gold": 0.25,
+          "wood": 0.25,
+          "stone": 0.25
+        },
+        "max": 300
+      },
+      "unlocks": {
+        "heroes": [
+          "hero_oren"
+        ]
+      }
+    },
+    {
+      "id": "war-alliance-11-porto-albor",
+      "requires": [
+        "war-alliance-10-desembarque-costa-ferrugem"
+      ],
+      "carryOver": {
+        "resources": {
+          "gold": 0.25,
+          "wood": 0.25,
+          "stone": 0.25
+        },
+        "max": 300
+      },
+      "unlocks": {
+        "heroes": [
+          "hero_dorian"
+        ]
+      }
+    },
+    {
+      "id": "war-alliance-12-bastiao-do-cabo-ferrugem",
+      "requires": [
+        "war-alliance-11-porto-albor"
+      ],
+      "carryOver": {
+        "resources": {
+          "gold": 0.25,
+          "wood": 0.25,
+          "stone": 0.25
+        },
+        "max": 300
+      },
+      "unlocks": {}
+    }
+  ]
+}

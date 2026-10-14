@@ -437,8 +437,8 @@ export const BUILDINGS = {
   },
   pig_farm: {
     type: 'pig_farm',
-    name: 'Chiqueiro',
-    entityName: 'Chiqueiro',
+    name: 'Cercado de Javalis',
+    entityName: 'Cercado de Javalis',
     faction: 'orc',
     role: 'farm',
     hp: 420,

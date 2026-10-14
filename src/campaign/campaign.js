@@ -56,6 +56,9 @@ export function validateCampaign(def, opts = {}) {
   if (!okText(def.premise)) err('premise', 'texto obrigatório (pt-BR)');
   if (def.epilogue !== undefined) validateEpilogue(def.epilogue, err);
   if (def.provisional !== undefined && typeof def.provisional !== 'boolean') err('provisional', 'deve ser booleano');
+  if (def.track !== undefined && !['main', 'beta'].includes(def.track)) err('track', 'deve ser main|beta');
+  if (def.order !== undefined && typeof def.order !== 'number') err('order', 'deve ser numérico');
+  if (def.betaLabel !== undefined && !okText(def.betaLabel)) err('betaLabel', 'texto obrigatório');
   if (!Array.isArray(def.missions) || def.missions.length === 0) {
     err('missions', 'lista obrigatória e não vazia');
     return { ok: false, errors };

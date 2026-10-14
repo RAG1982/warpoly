@@ -1,5 +1,6 @@
 import { getMap, DEFAULT_MAP_ID } from '../data/maps/index.js';
 import { getHeightForMap } from './terrainGenerators.js';
+import { isLavaAt } from '../data/maps/lava.js';
 
 /**
  * Terreno orientado a dados (F2-05): tamanho, segmentos, altura, vaus e slots vêm de `mapDef`
@@ -27,17 +28,24 @@ export class Terrain {
     return getHeightForMap(this.mapDef, x, z);
   }
 
+  isLava(x, z) {
+    return isLavaAt(this.mapDef, x, z);
+  }
+
   getSurfaceType(x, z, h) {
+    if (this.isLava(x, z)) return 'lava';
     if (h < 0.2) return 'water';
     if (h < 1.4) return 'sand';
     return 'grass';
   }
 
   isWater(x, z) {
+    if (this.isLava(x, z)) return false;
     return this.getHeight(x, z) < 0.65;
   }
 
   isWalkable(x, z) {
+    if (this.isLava(x, z)) return false;
     return this.getHeight(x, z) >= 0.65;
   }
 }

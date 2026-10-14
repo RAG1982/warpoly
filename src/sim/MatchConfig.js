@@ -38,11 +38,11 @@ export const START_LAYOUT = Object.freeze({
     { role: 'house', dx: 12, dz: 0, rotY: -Math.PI / 4 }
   ],
   units: [
-    { role: 'worker', dx: -4, dz: 2 },
-    { role: 'worker', dx: 4, dz: -2 },
-    { role: 'melee', dx: -2, dz: 8 },
-    { role: 'melee', dx: 2, dz: 8 },
-    { role: 'ranged', dx: -8, dz: 10 }
+    { role: 'worker', dx: -3, dz: 6 },
+    { role: 'worker', dx: 3, dz: 6 },
+    { role: 'melee', dx: -2, dz: 9 },
+    { role: 'melee', dx: 2, dz: 9 },
+    { role: 'ranged', dx: -6, dz: 11 }
   ]
 });
 
@@ -54,11 +54,13 @@ export function slotMirror(pos) {
 /**
  * Posições absolutas de construções e unidades iniciais para um slot. `pos.mirror: [mx, mz]`
  * (F2-05, `startSlots` do mapa) tem prioridade; sem ele, o espelhamento é calculado por `slotMirror`.
+ * Suporta `pos.layout` para layouts específicos de slot/mapa.
  */
 export function layoutAt(pos, layout = START_LAYOUT) {
+  const activeLayout = pos?.layout || layout;
   const { mx, mz } = pos.mirror ? { mx: pos.mirror[0], mz: pos.mirror[1] } : slotMirror(pos);
   const place = (e) => ({ ...e, x: pos.x + e.dx * mx, z: pos.z + e.dz * mz });
-  return { buildings: layout.buildings.map(place), units: layout.units.map(place) };
+  return { buildings: activeLayout.buildings.map(place), units: activeLayout.units.map(place) };
 }
 
 /** Dificuldades da IA escolhidas no menu (F6-01). */
@@ -187,8 +189,8 @@ export function matchConfigFromSearch(search = '') {
   });
 }
 
-/** F3-10: espécies de critters e tipos de jazida aceitos em `neutrals`. */
-export const CRITTER_SPECIES = Object.freeze(['sheep', 'pig']);
+/** F3-10 / MUNDO-TERRENO-MAPAS §5: espécies de critters e tipos de jazida aceitos em `neutrals`. */
+export const CRITTER_SPECIES = Object.freeze(['sheep', 'boar', 'pig']);
 const DEPOSIT_TYPES = Object.freeze(['gold', 'stone']);
 
 /**

@@ -158,6 +158,11 @@ export function createVfxEvents(gm, particleSystem, vfx = null) {
         run(type, p, { radius: (def && def.collisionRadius) || 2 });
       });
     }
+    on(EVT.RESOURCE_DEPLETED, (p) => {
+      if (p.resourceType === 'wood') return;
+      if (!seen(null, p.pos)) return;
+      run(EVT.RESOURCE_DEPLETED, p, { radius: 3.4 });
+    });
     on(EVT.EXPLOSION, (p) => { if (seen(p.ownerId, p.pos)) run(EVT.EXPLOSION, p, {}); });
     on(EVT.ABILITY_EFFECT, (p) => {
       const ab = resolveAbility(gm, p.abilityId);

@@ -1,0 +1,190 @@
+{
+  "format": "warpolyworldmap",
+  "version": 1,
+  "id": "ondara",
+  "name": {
+    "pt-BR": "Ondara",
+    "en": "Ondara"
+  },
+  "bounds": {
+    "width": 1200,
+    "height": 800
+  },
+  "continents": [
+    {
+      "id": "velmara",
+      "name": {
+        "pt-BR": "Velmara",
+        "en": "Velmara"
+      },
+      "faction": "human",
+      "side": "west",
+      "description": {
+        "pt-BR": "Continente ocidental: montanhas nevadas, florestas e savanas.",
+        "en": "Western continent: snowy mountains, forests, and savannas."
+      },
+      "path": "M 0 0 L 290 0 C 295 80 270 140 285 200 C 300 260 330 310 320 370 C 310 430 260 480 275 540 C 290 600 320 660 300 720 C 285 765 260 790 250 800 L 0 800 Z",
+      "labelPos": { "x": 140, "y": 400 }
+    },
+    {
+      "id": "cinzara",
+      "name": {
+        "pt-BR": "Cinzara",
+        "en": "Cinzara"
+      },
+      "faction": "orc",
+      "side": "east",
+      "description": {
+        "pt-BR": "Continente oriental: dunas, pântanos e estepes áridas.",
+        "en": "Eastern continent: dunes, marshes, and arid steppes."
+      },
+      "path": "M 1200 0 L 910 0 C 905 90 930 150 915 210 C 900 270 860 320 870 380 C 880 440 935 490 920 550 C 905 610 870 670 890 730 C 905 770 930 790 940 800 L 1200 800 Z",
+      "labelPos": { "x": 1060, "y": 400 }
+    }
+  ],
+  "sea": {
+    "id": "sundered-sea",
+    "name": {
+      "pt-BR": "Mar Fendido",
+      "en": "Sundered Sea"
+    },
+    "labelPos": { "x": 600, "y": 110 }
+  },
+  "islands": [
+    {
+      "id": "pouso-do-encontro",
+      "name": {
+        "pt-BR": "Pouso do Encontro",
+        "en": "Encounter's Landing"
+      },
+      "stage": 2,
+      "biome": "tropical",
+      "x": 520,
+      "y": 400,
+      "radius": 26,
+      "path": "M 520 376 C 538 377 548 388 546 405 C 544 422 531 426 515 424 C 499 422 494 407 498 392 C 502 377 512 375 520 376 Z"
+    },
+    {
+      "id": "pedra-mae",
+      "name": {
+        "pt-BR": "Pedra-Mãe",
+        "en": "Mother-Stone"
+      },
+      "stage": 3,
+      "biome": "rocky",
+      "x": 470,
+      "y": 290,
+      "radius": 22,
+      "path": "M 470 270 C 484 271 492 280 490 295 C 488 310 478 312 464 310 C 450 308 448 296 452 284 C 456 272 462 269 470 270 Z"
+    },
+    {
+      "id": "baixio-do-breu",
+      "name": {
+        "pt-BR": "Baixio do Breu",
+        "en": "Pitch Shallows"
+      },
+      "stage": 4,
+      "biome": "atoll",
+      "x": 450,
+      "y": 520,
+      "radius": 24,
+      "path": "M 450 498 C 466 499 474 510 472 526 C 470 542 458 544 444 542 C 430 540 428 528 432 514 C 436 500 442 497 450 498 Z"
+    },
+    {
+      "id": "cerne-verde",
+      "name": {
+        "pt-BR": "Cerne Verde",
+        "en": "Green Heart"
+      },
+      "stage": 5,
+      "biome": "forest",
+      "x": 560,
+      "y": 250,
+      "radius": 25,
+      "path": "M 560 228 C 578 229 586 240 584 256 C 582 272 570 274 554 272 C 538 270 536 258 540 244 C 544 230 552 227 560 228 Z"
+    },
+    {
+      "id": "a-geada",
+      "name": {
+        "pt-BR": "A Geada",
+        "en": "The Frost"
+      },
+      "stage": 6,
+      "biome": "ice",
+      "x": 630,
+      "y": 180,
+      "radius": 24,
+      "path": "M 630 158 C 646 159 654 170 652 186 C 650 202 638 204 624 202 C 610 200 608 188 612 174 C 616 160 622 157 630 158 Z"
+    },
+    {
+      "id": "brejo-mudo",
+      "name": {
+        "pt-BR": "Brejo Mudo",
+        "en": "Silent Marsh"
+      },
+      "stage": 7,
+      "biome": "swamp",
+      "x": 570,
+      "y": 590,
+      "radius": 26,
+      "path": "M 570 566 C 588 567 598 578 596 595 C 594 612 581 616 565 614 C 549 612 544 597 548 582 C 552 567 562 565 570 566 Z"
+    },
+    {
+      "id": "a-fornalha",
+      "name": {
+        "pt-BR": "A Fornalha",
+        "en": "The Furnace"
+      },
+      "stage": 8,
+      "biome": "volcanic",
+      "x": 680,
+      "y": 270,
+      "radius": 27,
+      "icon": "smoke",
+      "path": "M 680 245 C 700 246 710 258 708 276 C 706 294 691 298 673 296 C 655 294 650 278 655 261 C 660 245 670 244 680 245 Z"
+    },
+    {
+      "id": "miragem",
+      "name": {
+        "pt-BR": "Miragem",
+        "en": "Mirage"
+      },
+      "stage": 9,
+      "biome": "desert",
+      "x": 700,
+      "y": 500,
+      "radius": 23,
+      "path": "M 700 478 C 716 479 724 490 722 506 C 720 522 708 524 694 522 C 680 520 678 508 682 494 C 686 480 692 477 700 478 Z"
+    }
+  ],
+  "campaignStages": {
+    "war-alliance": [
+      { "missionIndex": 0, "stage": 1, "name": { "pt-BR": "Terra à Vista", "en": "Land in Sight" }, "x": 260, "y": 360 },
+      { "missionIndex": 1, "stage": 2, "name": { "pt-BR": "Pouso do Encontro", "en": "Encounter's Landing" }, "x": 520, "y": 400 },
+      { "missionIndex": 2, "stage": 3, "name": { "pt-BR": "Ouro da Pedra-Mãe", "en": "Mother-Stone Gold" }, "x": 470, "y": 290 },
+      { "missionIndex": 3, "stage": 4, "name": { "pt-BR": "Baixio do Breu", "en": "Pitch Shallows" }, "x": 450, "y": 520 },
+      { "missionIndex": 4, "stage": 5, "name": { "pt-BR": "O Cerne Verde", "en": "The Green Heart" }, "x": 560, "y": 250 },
+      { "missionIndex": 5, "stage": 6, "name": { "pt-BR": "A Geada", "en": "The Frost" }, "x": 630, "y": 180 },
+      { "missionIndex": 6, "stage": 7, "name": { "pt-BR": "O Brejo Mudo", "en": "The Silent Marsh" }, "x": 570, "y": 590 },
+      { "missionIndex": 7, "stage": 8, "name": { "pt-BR": "A Fornalha", "en": "The Furnace" }, "x": 680, "y": 270 },
+      { "missionIndex": 8, "stage": 9, "name": { "pt-BR": "Miragem", "en": "Mirage" }, "x": 700, "y": 500 },
+      { "missionIndex": 9, "stage": 10, "name": { "pt-BR": "Desembarque Costa Ferrugem", "en": "Rust Coast Landing" }, "x": 860, "y": 380 },
+      { "missionIndex": 10, "stage": 11, "name": { "pt-BR": "Porto Albor", "en": "Port Albor" }, "x": 930, "y": 330 },
+      { "missionIndex": 11, "stage": 12, "name": { "pt-BR": "Bastião do Cabo Ferrugem", "en": "Cape Rust Bastion" }, "x": 990, "y": 290 }
+    ],
+    "war-horde": [
+      { "missionIndex": 0, "stage": 1, "name": { "pt-BR": "Cinzas Vermelhas", "en": "Red Ashes" }, "x": 940, "y": 440 },
+      { "missionIndex": 1, "stage": 2, "name": { "pt-BR": "Velas Brancas", "en": "White Sails" }, "x": 520, "y": 400 },
+      { "missionIndex": 2, "stage": 3, "name": { "pt-BR": "A Pedra que Brilha", "en": "The Shining Stone" }, "x": 470, "y": 290 },
+      { "missionIndex": 3, "stage": 4, "name": { "pt-BR": "Maré de Breu", "en": "Pitch Tide" }, "x": 450, "y": 520 },
+      { "missionIndex": 4, "stage": 5, "name": { "pt-BR": "Madeira de Guerra", "en": "War Timber" }, "x": 560, "y": 250 },
+      { "missionIndex": 5, "stage": 6, "name": { "pt-BR": "Fogo no Gelo", "en": "Fire in the Ice" }, "x": 630, "y": 180 },
+      { "missionIndex": 6, "stage": 7, "name": { "pt-BR": "Casa no Brejo", "en": "House in the Marsh" }, "x": 570, "y": 590 },
+      { "missionIndex": 7, "stage": 8, "name": { "pt-BR": "O Monte Caldeira", "en": "Mount Caldeira" }, "x": 680, "y": 270 },
+      { "missionIndex": 8, "stage": 9, "name": { "pt-BR": "O Último Poço", "en": "The Last Well" }, "x": 700, "y": 500 },
+      { "missionIndex": 9, "stage": 10, "name": { "pt-BR": "Cabo Aurora", "en": "Cape Aurora" }, "x": 340, "y": 420 },
+      { "missionIndex": 10, "stage": 11, "name": { "pt-BR": "Brasa Alta", "en": "High Embers" }, "x": 270, "y": 470 },
+      { "missionIndex": 11, "stage": 12, "name": { "pt-BR": "Cidadela de Brasa Alta", "en": "High Embers Citadel" }, "x": 210, "y": 510 }
+    ]
+  }
+}

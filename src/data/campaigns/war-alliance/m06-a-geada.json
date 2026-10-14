@@ -1,0 +1,87 @@
+{
+  "format": "warpolymission",
+  "version": 1,
+  "id": "war-alliance-06-a-geada",
+  "hidden": true,
+  "title": {
+    "pt-BR": "A Geada",
+    "en": "The Frost"
+  },
+  "subtitle": {
+    "pt-BR": "Aliança, missão 6",
+    "en": "Alliance, mission 6"
+  },
+  "briefing": {
+    "speaker": {
+      "pt-BR": "Capitão Brann",
+      "en": "Captain Brann"
+    },
+    "portrait": "⚔️",
+    "text": {
+      "pt-BR": "Prova de Fogo: todo o nosso arsenal militar está pronto. Conquiste o Farol Boreal e derrote a frente orc no gelo.",
+      "en": "Trial by Fire: our full military arsenal is ready. Take the Boreal Lighthouse and shatter the orc frost front."
+    },
+    "hints": [
+      {
+        "pt-BR": "Concentre-se nos objetivos primários para avançar.",
+        "en": "Focus on primary objectives to advance."
+      }
+    ]
+  },
+  "mapId": "arquipelago-naval-4p",
+  "seed": 9102,
+  "players": [
+    {
+      "id": 0,
+      "name": {
+        "pt-BR": "Aliança de Aurelan",
+        "en": "Aurelan Alliance"
+      },
+      "factionId": "human",
+      "team": 0,
+      "color": "#2563eb",
+      "isLocal": true,
+      "startSlot": 0
+    },
+    {
+      "id": 1,
+      "name": {
+        "pt-BR": "Clãs do Cinzal",
+        "en": "Cinzal Clans"
+      },
+      "factionId": "orc",
+      "team": 1,
+      "color": "#dc2626",
+      "isAI": true,
+      "startSlot": 1
+    }
+  ],
+  "startingResources": {
+    "wood": 400,
+    "gold": 400,
+    "stone": 150
+  },
+  "setup": [
+    {
+      "type": "tag",
+      "select": {
+        "buildingType": "great_hall"
+      },
+      "tag": "enemy_base"
+    }
+  ],
+  "objectives": [
+    {
+      "id": "primary-main",
+      "type": "destroy",
+      "priority": "primary",
+      "select": {
+        "tag": "enemy_base"
+      },
+      "title": {
+        "pt-BR": "Tomar o Farol Boreal com forças combinadas",
+        "en": "Capture the Boreal Lighthouse with combined forces"
+      }
+    }
+  ]
+}

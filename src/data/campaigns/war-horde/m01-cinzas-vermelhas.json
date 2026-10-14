@@ -1,0 +1,87 @@
+{
+  "format": "warpolymission",
+  "version": 1,
+  "id": "war-horde-01-cinzas-vermelhas",
+  "hidden": true,
+  "title": {
+    "pt-BR": "Cinzas Vermelhas",
+    "en": "Red Ashes"
+  },
+  "subtitle": {
+    "pt-BR": "Horda, missão 1",
+    "en": "Horde, mission 1"
+  },
+  "briefing": {
+    "speaker": {
+      "pt-BR": "Anciã Ulma",
+      "en": "Elder Ulma"
+    },
+    "portrait": "🔥",
+    "text": {
+      "pt-BR": "O Cinzal precisa de recursos e madeira. Monte o Acampamento de Guerra, treine guerreiros e expulse os saqueadores.",
+      "en": "The Cinzal needs timber and iron. Pitch the War Camp, train warriors, and drive out the raiders."
+    },
+    "hints": [
+      {
+        "pt-BR": "Concentre-se nos objetivos primários para avançar.",
+        "en": "Focus on primary objectives to advance."
+      }
+    ]
+  },
+  "mapId": "desfiladeiro-1v1",
+  "seed": 9017,
+  "players": [
+    {
+      "id": 0,
+      "name": {
+        "pt-BR": "Horda do Cinzal",
+        "en": "Cinzal Horde"
+      },
+      "factionId": "orc",
+      "team": 0,
+      "color": "#dc2626",
+      "isLocal": true,
+      "startSlot": 0
+    },
+    {
+      "id": 1,
+      "name": {
+        "pt-BR": "Tropas de Aurelan",
+        "en": "Aurelan Troops"
+      },
+      "factionId": "human",
+      "team": 1,
+      "color": "#2563eb",
+      "isAI": true,
+      "startSlot": 1
+    }
+  ],
+  "startingResources": {
+    "wood": 400,
+    "gold": 400,
+    "stone": 150
+  },
+  "setup": [
+    {
+      "type": "tag",
+      "select": {
+        "buildingType": "castle"
+      },
+      "tag": "enemy_base"
+    }
+  ],
+  "objectives": [
+    {
+      "id": "primary-main",
+      "type": "destroy",
+      "priority": "primary",
+      "select": {
+        "tag": "enemy_base"
+      },
+      "title": {
+        "pt-BR": "Erguer um Acampamento de Guerra e treinar guerreiros",
+        "en": "Raise a War Camp and train warriors"
+      }
+    }
+  ]
+}

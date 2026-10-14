@@ -124,3 +124,7 @@
 .ms-brief-item[data-status="locked"] { opacity: 0.55; }
 .ms-brief-item[data-status="completed"] { color: #9fd89f; }
 .ms-brief-actions button[disabled] { opacity: 0.45; cursor: not-allowed; }
+.ms-brief-camps { display: flex; gap: 4px; margin-bottom: 8px; border-bottom: 1px solid rgba(212, 175, 55, 0.3); padding-bottom: 6px; flex-wrap: wrap; }
+.ms-brief-camp-tab { font: inherit; font-size: 0.8em; cursor: pointer; padding: 4px 8px; border-radius: 6px; border: 1px solid transparent; background: transparent; color: inherit; }
+.ms-brief-camp-tab[aria-selected="true"] { border-color: rgba(212, 175, 55, 0.6); background: rgba(212, 175, 55, 0.2); font-weight: 700; color: #ffd700; }
+.ms-brief-camp-tab:hover { background: rgba(212, 175, 55, 0.15); }

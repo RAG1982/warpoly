@@ -1,6 +1,6 @@
 # SESSION HANDOFF — como continuar o WarPoly numa sessão nova
 
-> Escrito em 2026-09-29; atualizado em 2026-10-10. **Em 2026-10-12 a nuvem entregou tudo no `master` (PRs até #50): leia PRIMEIRO `docs/ESTADO_NUVEM.md` (estado atual) e `docs/CHANGELOG_NUVEM.md`; o que está abaixo pode estar desatualizado.** Leia este arquivo inteiro antes de agir.
+> Escrito em 2026-09-29; atualizado em 2026-10-13. **Em 2026-10-13 o trabalho local do novo mundo foi mesclado no `master` e enviado ao `origin`; a nuvem entregou até o PR #51 (2026-10-12). Leia PRIMEIRO `docs/ESTADO_NUVEM.md` (estado atual) e `docs/CHANGELOG_NUVEM.md`; o que está abaixo pode estar desatualizado.** Leia este arquivo inteiro antes de agir.
 > **Prompt para colar na sessão nova (local, Claude Code com Opus):**
 > `Leia docs/SESSION_HANDOFF.md e continue a coordenação do projeto WarPoly a partir da seção "Próximos passos".`
 
@@ -51,30 +51,31 @@
 - Nuvem **não tem GPU nem Blender**: só `npm test`, lint e build; a verificação visual/benchmark fica "pendente local".
 - Nuvem cria branch `cloud/<ID>` + PR; **o coordenador local faz o merge** (`git fetch origin && git merge --no-ff origin/cloud/<ID>`), verifica e registra no TASKS.
 
-## 5. Estado atual (2026-10-10)
-- Quadro (`docs/TASKS.md`): 88 tarefas de fase — **73 DONE**, 8 REVIEW, 6 TODO, 1 DOING (F5-03, pausado). Backlog NEW: 22 DONE, 5 TODO, 1 DOING (NEW-41), 1 ADIADA (NEW-20), ~24 sem status (auditoria AUD-1 na fila da nuvem).
-- Testes: **1311** passando; lint 0 erros (51 avisos antigos); build ok. Smoke: última rodada completa em F7-09; as mesclas da nuvem (2026-10-10) rodaram só `npm test`, lint e build.
-- Nuvem: 11 tarefas da fila de `docs/HANDOFF_CLOUD.md` executadas e mescladas em 2026-10-10 (NEW-4/13/19/31/41/49/50/52, F9-05b, F10-05b, AUD-1). Verificação visual pendente (local) em NEW-13, NEW-19, NEW-49, NEW-52, F9-05 e F10-05.
-- Entregas grandes desde 2026-09-30: F4 (cavalaria, cerco, mana/magias, sapadores, aéreo, naval com petróleo, heróis), F5 (IA por jogador, percepção sob a névoa, dificuldades), F7 (VFX, iluminação/pós-processamento, tilesets, animação de produção, team color, ícones e arte 2D, modelos Blender de navios/construções navais/acampamento/balão/muralhas/bétula), F8 (gerador de mapas, 6 mapas skirmish, missões e gatilhos, editor de mapas, campanha Aliança provisória), F9 (lockstep online com WebRTC, sinalização e lobby, reconexão e pausa votada, replays), F10 (testes da simulação, soak IA×IA com 100 partidas, regressão visual, empacotamento PWA e deploy).
+## 5. Estado atual (2026-10-13)
+- Testes no `master` após a integração local: **149 arquivos / 1897 testes, 0 falhas**; lint 0 erros (53 avisos; 2 deles em `tools/ui-captures/revisao-2026-10-11/`, sem efeito); build ok. Smoke, bench, visual e áudio não foram vistos num navegador nesta rodada: roteiro em `docs/ESTADO_NUVEM.md` §6.
+- Quadro e estados por tarefa: `docs/TASKS.md` (quadro atualizado em 2026-10-13; itens do novo mundo na seção "Novo mundo", com PARCIAL/DONE por passo).
+- Integrado em 2026-10-13: `task/mundo-2026-10-13` (arte e decisões de mapa `cc0c505`; código e dados do novo mundo `b73fd57`; docs da nuvem `7497c72`; esta rodada de docs) e `task/revisao-visual-2026-10-11` (NEW-13 e NEW-19, verificados em 2026-10-11).
+- Enviado ao `origin` **sem mesclar**: `task/F7-08-verificacao` (WIP de áudio; conflita com o motor de música). `cloud/F3-01` segue superado.
+- Nada local ficou só no computador: as alterações não commitadas dos worktrees foram commitadas nas branches delas (ver §8).
 
 ## 6. Decisões do dono (resumo — detalhes em `docs/07_DECISOES.md`)
 D1 pedra permanece; petróleo só com Centro nível 2 · D2 nomes próprios (nada Blizzard) · D3 hardware fraco sem perder qualidade · D4 facções **Coroa de Aldária** / **Clãs de Gorthak** · D5 Casa/Toca mantidas, **sem ouro passivo** nas fazendas · D6 heróis com reviver/XP pendentes.
-Decisões pendentes (2026-10-10): F7-02 máscara de cor; F8-03 gerador `painted` em `src/sim`; F8-05 premissa da campanha Aliança; F9-03 checksum por turno ou a cada 10. Ver `docs/TASKS.md` e a seção 4 de `docs/HANDOFF_CLOUD.md`.
+Decisões de 2026-10-11/12 (todas tomadas): F7-02 fica como está (`TeamColor`); F8-03 `painted` fica em `src/sim`; F8-05 premissa "A Marcha da Aliança" aprovada; F9-03 `checkEvery = 10` em jogo; NEW-1 remover o loader; PR #6 fechado; **novo mundo** (Ondara, 2 campanhas espelhadas de 12 missões, 6 heróis, costas irregulares, lava que só bloqueia) — ver `docs/ESTADO_NUVEM.md` §5 e `docs/specs/MUNDO-*.md`. Ainda aberta: NEW-6 passo 2 (ORM à metade do lado em `high`).
 
 Parâmetros de URL úteis: `?play&faction=orc`, `?skipPreload`, `?texq=low`, `?quality=`, `?merge=0`, `?skin=0`, `?glb=0`, `?ffa=1`, `?map=ilhas-4p`, `?bench=inicial|combate100|massa300`, `?online=1` (lockstep), `?vfx=`, `?fx=`, `?daynight=`, `?team=`, `?campaign=unlock`.
 
-## 7. Próximos passos (atualizado 2026-10-10)
-1. **Dono**: decidir o push de `master` para o GitHub (repositório público) — pré-requisito da nuvem.
-2. **Em andamento**: NEW-53 (correção de m04 "A Ponte do Rio Turvo": forte Atalaia humano e anel ciano dos carregadores). Ao concluir: merge, `npm test`, lint, build e captura em `tools/ui-captures/m04-fix/`.
-3. **Local, retomar**: NEW-44 (IA sem madeira/naval, alterações não commitadas), F7-08 (áudio, branch `task/F7-08`), F10-04 (CI de desempenho, branch `task/F10-04`), F10-03 (regravar baseline visual).
-4. **Local, Blender**: F7-01 e F7-07 (precisa de referências de arte para Refinaria, Fundição, Submersível, Tartaruga, Forja Naval e Caldeirão), revisão final da F7-00b.
-5. **Nuvem**: fila de `docs/HANDOFF_CLOUD.md` seção 3 concluída. Próxima rodada: definir novas tarefas (ex.: os itens ABERTO da auditoria `docs/AUDITORIA_BACKLOG.md`) e lançar em `cloud/<ID>`.
-6. **Decisões do dono**: seção 6 acima.
+## 7. Próximos passos (atualizado 2026-10-13)
+1. **Dono, local**: `git pull`, `npm ci`, `npm test` (esperado 149/1897), lint e build; depois **jogar e conferir**: tela de história, seletor de campanhas e trilha "Clássica (beta)", mapa-múndi, mina que desaba (NEW-54), as 8 missões da Aliança e o que a nuvem entregou sem ver (`docs/ESTADO_NUVEM.md` §6). Regravar baselines (`npm run perf -- --update`, `npm run visual -- --update`), rodar `tools/audio-check.mjs` e decidir sobre `task/F7-08-verificacao`.
+2. **Novo mundo, passos locais** (`docs/TASKS.md`, "Novo mundo"): promover o gerador de costa a `src/data/maps/coast/` (MUNDO-1); render regional por bioma e da lava (MUNDO-1, MUNDO-5); mapas por ilha e por tipo (MUNDO-7); testes de cobertura e progressão das 24 missões (MUNDO-6); modelos 3D e retratos finais dos 6 heróis (Blender).
+3. **Nuvem**: fila em `docs/HANDOFF_CLOUD.md` §3c. Os dados do novo mundo já estão feitos localmente; a nuvem pega só o que segue pendente (NEW-6 passos 1, 4, 5; NEW-14 passos 0–2 e 5–6; NEW-51). Ler `docs/ESTADO_NUVEM.md` antes.
+4. **Local, desempenho**: F1-10c (bench massa300 ≥ 45 FPS, com e sem `?lod=0`), NEW-15/27/30. NEW-35 e NEW-52 com verificação incompleta.
+5. **Blender (local)**: F7-01, F7-07, F7-00b remanescentes, F7-09, javali (ART-04), retratos e modelos dos 6 heróis, artes de vitória, ART-01..16 de terreno.
+6. **Decisões do dono**: seção 6; perguntas abertas do novo mundo em `MUNDO-HISTORIA-CAMPANHA.md` §10 e `MUNDO-TERRENO-MAPAS.md` §8; faixas de música no inspetor (prioridade baixa); se a F8-06 (Horda de 8 missões, "Clássica (beta)") ainda será feita, já que a Horda do novo mundo é `war-horde`.
 
-## 8. Estado operacional ao encerrar (2026-10-10)
+## 8. Estado operacional (2026-10-10; ainda válido, exceto o git)
 - Agentes: nenhum em andamento. Dev server parado (subir com `npx vite --port 5173` em background se precisar mostrar algo).
-- Git: `master` local com as últimas mesclagens; `origin/master` defasado (ver seção 4).
-- Worktrees de agentes em `.claude/worktrees/` (ignoradas pelo git, ~90): limpar com `git worktree prune` depois de remover as pastas das tarefas já mescladas. Não apagar as que têm alterações não commitadas (NEW-44, F7-08, F10-04).
+- Git (2026-10-13): `origin/master` contém o trabalho desta rodada (ver §5). Confira `git status` e `git log origin/master..master` antes de começar.
+- Worktrees de agentes em `.claude/worktrees/` (ignoradas pelo git, ~90): limpar com `git worktree prune` depois de remover as pastas das tarefas já mescladas. Antes de apagar uma, conferir `git -C <wt> status`. Em 2026-10-13 as alterações não commitadas de `agent-a1bf74ec9095ea73d` foram commitadas em `task/revisao-visual-2026-10-11` (mesclada) e as de `agent-a845b4e0a2ec7d5f7` em `task/F7-08-verificacao` (enviada, não mesclada). As capturas e scripts soltos de `agent-a810c4ef8a851f926` (NEW-17) foram commitados e enviados como `task/NEW-17-capturas`. Os worktrees `agent-a5e7948a43999d191`, `agent-ab6decfcb4ebfb5fc` e `agent-accf8e08d85e2392f` têm só `node_modules` (não versionado).
 - Dev watcher: `vite.config.js` ignora `.claude/**`, `tools/ui-captures/**`, `tools/soak-report/**` e `tests/visual/**` (sem isso o inotify esgota com muitos worktrees).
 - Limite de uso (HTTP 429) derruba agentes no meio: verifique a worktree, salve WIP com commit e **retome com `SendMessage`** para o id do agente (mantém o contexto).
 - Memória do assistente: `~/.claude/projects/-home-rafael-warpoly/memory/` (objetivos, usuário, política de modelos).

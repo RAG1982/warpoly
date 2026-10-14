@@ -1,0 +1,87 @@
+{
+  "format": "warpolymission",
+  "version": 1,
+  "id": "war-horde-08-o-monte-caldeira",
+  "hidden": true,
+  "title": {
+    "pt-BR": "O Monte Caldeira",
+    "en": "Mount Caldron"
+  },
+  "subtitle": {
+    "pt-BR": "Horda, missão 8",
+    "en": "Horde, mission 8"
+  },
+  "briefing": {
+    "speaker": {
+      "pt-BR": "Vozgul a Profetisa",
+      "en": "Vozgul the Prophetess"
+    },
+    "portrait": "💀",
+    "text": {
+      "pt-BR": "A Fornalha é sagrada. Defenda a forja central enquanto os ritos de cinza inflamam a montanha.",
+      "en": "The Furnace is sacred. Defend the central forge while the ash rites ignite the mountain."
+    },
+    "hints": [
+      {
+        "pt-BR": "Concentre-se nos objetivos primários para avançar.",
+        "en": "Focus on primary objectives to advance."
+      }
+    ]
+  },
+  "mapId": "continental-1v1",
+  "seed": 9136,
+  "players": [
+    {
+      "id": 0,
+      "name": {
+        "pt-BR": "Horda do Cinzal",
+        "en": "Cinzal Horde"
+      },
+      "factionId": "orc",
+      "team": 0,
+      "color": "#dc2626",
+      "isLocal": true,
+      "startSlot": 0
+    },
+    {
+      "id": 1,
+      "name": {
+        "pt-BR": "Tropas de Aurelan",
+        "en": "Aurelan Troops"
+      },
+      "factionId": "human",
+      "team": 1,
+      "color": "#2563eb",
+      "isAI": true,
+      "startSlot": 1
+    }
+  ],
+  "startingResources": {
+    "wood": 400,
+    "gold": 400,
+    "stone": 150
+  },
+  "setup": [
+    {
+      "type": "tag",
+      "select": {
+        "buildingType": "castle"
+      },
+      "tag": "enemy_base"
+    }
+  ],
+  "objectives": [
+    {
+      "id": "primary-main",
+      "type": "destroy",
+      "priority": "primary",
+      "select": {
+        "tag": "enemy_base"
+      },
+      "title": {
+        "pt-BR": "Segurar a forja vulcânica durante o rito",
+        "en": "Hold the volcanic forge during the rite"
+      }
+    }
+  ]
+}

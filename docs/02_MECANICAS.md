@@ -284,3 +284,12 @@ Persistência pura em `ui/optionsStore.js` (valores inválidos → padrão; espe
 - **Fundição / Fornalha Naval** (`role:'foundry'`, costeira, 800 PV, 180/100/60; requer Estaleiro/Doca + Centro 2): `naval_cannons` (+8 perfurante/nível, 2 níveis) e `naval_hulls` (+3 armadura/nível, 2 níveis; também barcaça e petroleiro), custam petróleo; nível 2 exige Centro 3.
 - **IA**: não treina navios (F5); só trata os inimigos navais pelas regras de `canTarget`; barcaça cheia não trava a sim (teste headless 3000 ticks com frotas).
 
+## Novo mundo (2026-10-13)
+
+- **Lava:** divisor de áreas. Bloqueia unidades terrestres e navais, aéreas atravessam, **não causa dano**. Não é água navegável: estaleiro e plataforma não podem ser colocados nela, e nenhum slot inicial ou jazida pode estar sobre ela (validação em `src/data/maps/validate.js`).
+- **Biomas:** só visuais (decisão P-4). Não mudam velocidade, custo nem bônus.
+- **Minas e pedreiras esgotadas desabam:** saem da simulação, os trabalhadores que estavam dentro ou na fila são soltos e procuram outra jazida. Fica uma ruína no local (só visual). Poços de petróleo não desabam.
+- **Fauna decorativa:** ovelha e javali por bioma (`src/data/critters.js`). O javali substitui o porco no deserto, na savana e no pântano.
+- **Heróis:** 6 heróis de campanha, 3 por facção (Aliança: Brann, Oren e Dorian; Horda: Drogath, Vozgul e Skarn). Cada um é único na partida (`unique`/`isHero`) e tem habilidades próprias. Dados em `src/data/units.js` e `src/data/abilities.js`.
+- **Mapas jogáveis:** no mínimo 168×168 (regra P-7). As unidades iniciais nascem à frente da construção principal (P-13). A serraria inicial fica perto de arvoredo (P-14), testado nos dois mapas ampliados (`ilhas-4p` e `estreito-1v1`).
+- Regras de design e decisões: `docs/specs/MUNDO-HISTORIA-CAMPANHA.md` e `docs/specs/MUNDO-TERRENO-MAPAS.md` §8.

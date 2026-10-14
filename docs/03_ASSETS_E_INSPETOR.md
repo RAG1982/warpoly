@@ -259,3 +259,11 @@ Tudo sai dos **mesmos `.glb`** (nenhum modelo 3D novo ou alterado) com Eevee, po
 - **Adicionar uma unidade/construção nova**: entrada em `ui_specs.UNITS`/`BUILDINGS`/`PORTRAITS` (e `ui_glyphs.py` se for magia/pesquisa nova) → `node tools/dump-portrait-poses.mjs` → os três scripts (cada um aceita `--only id1,id2` e `--out <pasta>` para provas fora de `public/ui/`) → `python3 tools/blender/ui_sheet.py icons <png>` para conferir → `npx vitest run tests/unit/uiSprites.test.js` (falha se uma unidade/construção/pesquisa/magia do jogo ficar sem sprite, exceto os tipos sem `.glb`).
 - **Estilo**: stylized como o jogo — mesma paleta dos modelos, cor de time original do `.glb` (azul humano, vermelho orc), luz quente de cima-esquerda + contraluz frio, contorno escuro para ler sobre o azulejo escuro da HUD; efeitos mágicos com emissão e halo radial que cabe no quadro.
 - **Pendências**: ícones/retratos de Ovelha, Submersível, Tartaruga Colossal, Refinaria, Fundição, Forja Naval e Caldeirão (sem `.glb`; usam o ícone antigo até F7-00b); o diálogo de missão segue com retrato emoji (personagens, não unidades).
+
+## Arte do novo mundo (2026-10-13)
+
+- `public/art/story/panel-1` a `panel-6` e `panel-7`, mais `panel-7-alliance` e `panel-7-horde` (variantes por facção): PNG com fallback JPG (o código tenta `.png` e depois `.jpg`). Os dois formatos estão no repositório; escolher um e remover o outro é uma limpeza pendente.
+- `public/art/world/mapa-mundi.{png,jpg}`: mapa-múndi **ilustrativo**. Não é jogável e não mede distância.
+- `public/ui/heroes/hero_*.svg`: 6 retratos SVG **provisórios** (um por herói). Os retratos finais e os modelos 3D são arte local (Blender).
+- `docs/refs/herois/*_tpose.png`: referências T-pose dos heróis para o modelador. `docs/refs/menu_original.webp`: menu anterior, como referência. `public/ui/art/menu.webp` foi atualizado.
+- Pendências de arte (local): ART-01 a ART-16 de terreno (`docs/specs/MUNDO-TERRENO-MAPAS.md` §6), javali (ART-04), modelos e retratos dos 6 heróis, artes de vitória `victory_human/orc.webp`.

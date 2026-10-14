@@ -90,3 +90,11 @@ só para a missão iniciada pela tela de campanha. Falhas de armazenamento nunca
 requisitos alcançáveis, nada entregue antes de liberado, uso das novidades, heróis, inimigos por tema e **cobertura de unidades por categoria**),
 `tests/unit/campaignPlaythrough.test.js` (uma simulação headless por missão até a vitória, com ações injetadas; derrotas; determinismo; F8-05b: o roteiro treina/pesquisa/ergue as novidades de cada missão, inclusive combate
 naval, desembarque pela Barcaça, Fireball, Ordenação → Templário e Grifos contra o Ninho) e `tests/unit/techRestriction.test.js` (mecanismo de liberação: `availableTech`, recusa de comandos, checksums).
+
+## Novo mundo (2026-10-13): trilhas e campanhas espelhadas
+
+- `campaign.json` tem `track`: `main` (campanha principal, com tela de história) ou `beta` (a campanha da Aliança atual, "Clássica (beta)"; a trilha `beta` não tem tela de história e usa `betaLabel` como rótulo). O seletor está em `src/ui/screens/CampaignScreen.js`.
+- `war-alliance/` (`factionId: 'human'`) e `war-horde/` (`factionId: 'orc'`): 12 missões cada (`m01`–`m12`), espelhadas. Foram geradas a partir de `tools/scaffold-campaigns.mjs`. As missões **ainda usam os mapas atuais** (por exemplo `campos-1v1`, `continental-1v1`, `ilhas-4p`); mapas próprios entram no MUNDO-7 (`docs/specs/MUNDO-TERRENO-MAPAS.md`).
+- `world-map.json` (`format: warpolyworldmap`): mapa-múndi **ilustrativo** (Velmara a oeste, Cinzara a leste, ilhas Estilhaços). Não é campanha nem é jogável. Renderizado por `src/ui/worldMap.js`.
+- A tela de abertura da história lê `src/data/story/world.json` (7 painéis, pt-BR e en; arte em `public/art/story/`).
+- Os testes de registro estão em `tests/unit/campaignSelector.test.js` e `tests/unit/campaignStory.test.js`. **Não há teste de jogabilidade nem de cobertura das 24 missões novas** (MUNDO-6).

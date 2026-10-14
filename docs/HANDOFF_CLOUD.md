@@ -81,6 +81,7 @@ Dependem de outra decisão ou de tarefa anterior (não lançar ainda):
 - **F1-10** (LOD e culling), **NEW-6** (ORM e texturas), **NEW-14** (CPU da animação): precisam de spec antes (Sonnet escreve em `docs/specs/`).
 
 ## 3c. Fila da nuvem — rodada 4 (2026-10-12; todo o trabalho anterior está mesclado)
+**Atualização 2026-10-13:** MUNDO-2, MUNDO-3 e MUNDO-4 estão feitos localmente (branch `task/mundo-2026-10-13`, mesclada no `master`), e também a parte de dados de MUNDO-5, MUNDO-6, MUNDO-8 e MUNDO-9. MUNDO-1 está parcial. **Não refazer esses itens na nuvem**; estado por passo em `docs/TASKS.md`, seção "Novo mundo". O que segue pendente e serve à nuvem (código e testes, sem navegador): promover o gerador de costa a `src/data/maps/coast/` (MUNDO-1, passo 1 da spec), mapas por ilha e por tipo (MUNDO-7, com soak em Node) e testes de cobertura e progressão das 24 missões (MUNDO-6).
 Estado completo em [ESTADO_NUVEM](ESTADO_NUVEM.md). Pegue o primeiro item sem branch/PR.
 | # | ID | Briefing | Depende de |
 |---|---|---|---|
@@ -107,9 +108,9 @@ Motivo: precisam de GPU, Blender, navegador ou de decisão do dono.
 **Retomar localmente (trabalho já iniciado, com commits ou alterações não commitadas no seu computador):**
 - **NEW-44** IA sem madeira e IA naval: alterações não commitadas em `src/ai/`. Validação por soak A/B.
 - **NEW-51** seed 82 (`continental-1v1`, humano, brutal): depende de NEW-44.
-- **F7-08** áudio: branch `task/F7-08` com 3 commits; falta integração em `main.js`, `QualitySettings`, `MatchSession`, opções e i18n, e verificação de `AudioContext` no navegador.
+- **F7-08** áudio: branch `task/F7-08-verificacao` (WIP enviado ao `origin` em 2026-10-13, **não mesclado**: conflita com o motor de música em `AudioEngine.js` e `tools/audio-check.mjs`). Falta executar `tools/audio-check.mjs` no navegador (local, via safe-run).
 - **F10-04** orçamento de desempenho em CI: branch `task/F10-04` com commits; falta `tests/perf/` e a rodada com GPU.
-- **NEW-53** correção de m04 (forte Atalaia humano e anel ciano dos carregadores): em andamento.
+- **NEW-53** correção de m04 (forte Atalaia humano e anel ciano dos carregadores): concluído (`task/fix-m04`, mesclado no `master`).
 
 **Verificação com GPU / navegador:**
 - **F10-03**: regravar a baseline visual (`npm run visual -- --update`) após as mudanças do inspetor (107 alvos hoje; a baseline antiga tem 127).

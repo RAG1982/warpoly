@@ -1,4 +1,4 @@
-# Changelog das alterações feitas na nuvem (2026-09-29 → 2026-10-12)
+# Changelog das alterações feitas na nuvem (2026-09-29 → 2026-10-13)
 
 > Cada item tem o PR de origem. "Mesclado" = no `master`; "Pendente" = ainda sem PR mesclado (ver `ESTADO_NUVEM.md` §3). Nada aqui foi visto num navegador: a verificação visual, de áudio e de GPU está no corpo de cada PR ("Verificação pendente (local)").
 > Branches `cloud/<ID>` por tarefa; integrações em `cloud/integracao` (#25), `cloud/integracao-2` (#35), `cloud/integracao-3` (#42) e `cloud/integracao-4` (#46). **Tudo está mesclado; nada pendente.**
@@ -51,6 +51,15 @@
 - **Música:** catálogo único (41 entradas), tema de abertura "Marcha da Tempestade" e 2 candidatas, 5 candidatas de paz e 6 de combate por facção, evolução por tempo de partida, player no inspetor com seleção (`localStorage`), `docs/MUSICA.md`. As 3 faixas de combate atuais ficam `inGame:false`.
 - **MIDI** (#47): `tools/export-midi.mjs` e `src/audio/music/midiExport.js`.
 - **Documentos do novo mundo** (#48–#50): briefing da Horda (F8-06, preservado), briefing do dono, specs de história/campanha (12 missões por facção, tutorial 1–6), 6 heróis (`MUNDO-HEROIS.md`), terreno/mapas com costas irregulares, biomas, lava sem dano e mapa-múndi ilustrativo; protótipo `tools/proto/irregular-coast.mjs` com prévias.
+
+## Integração local (2026-10-13; não é trabalho da nuvem)
+
+- **Docs da nuvem** `origin/cloud/docs-estado-final` (`7497c72`, de 2026-10-12) mesclados. Conflito em `docs/TASKS.md` resolvido pela versão da nuvem (a mais nova); o resto foi mantido.
+- **Novo mundo (parcial)**, branch `task/mundo-2026-10-13` (`cc0c505` arte e decisões de mapa; `b73fd57` código e dados; mesclada no `master`): lava na simulação (`lavaGrid`, `Terrain.isLava`), biomas e 5 tilesets novos, 6 heróis, seletor de campanhas (trilha `main` × `beta`), `war-alliance` e `war-horde` (12 missões cada, só dados), tela de história, mapa-múndi ilustrativo, javali e ovelha como fauna, mapas com no mínimo 168×168. Estado por passo em `docs/TASKS.md`, seção "Novo mundo".
+- **Mina que desaba** (NEW-54): mina ou pedreira esgotada sai da simulação, com som e VFX de desabamento.
+- **Revisão visual de 2026-10-11** (`task/revisao-visual-2026-10-11`, commit `5a5ebdd`, mesclada no `master`): NEW-13 (construção lembrada pela névoa não anima nem solta fumaça), NEW-19 (decal da ruína acompanha o relevo; ruína da mina fica fora da pegada), plano de água de 1400 u. Capturas e JSON em `tools/ui-captures/revisao-2026-10-11/`. NEW-35 e NEW-52 ficaram com verificação incompleta (ver `docs/TASKS.md`).
+- **Não mesclado:** `task/F7-08-verificacao` (`ecdd348`, WIP de áudio): enviado ao `origin`, conflita com o motor de música em `AudioEngine.js` e `tools/audio-check.mjs`.
+- **Superado, não mesclar:** `cloud/F3-01` (PR #6).
 
 ## Planos
 Ver `ESTADO_NUVEM.md` §4: novo mundo (gerador de mapas irregulares → biomas → dados dos 6 heróis → seletor de campanhas → tela de história → 12 missões por facção), NEW-6, NEW-14, F1-10c, arte Blender, regravar a baseline de desempenho. A F8-06 (Horda, 8 missões) vira a "Campanha Clássica (beta)" junto com a Aliança atual.

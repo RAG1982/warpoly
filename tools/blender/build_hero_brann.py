@@ -333,6 +333,8 @@ def avaliar_fonte(f):
     for o in f.objetos:
         log('objeto', o)
     log('ossos do rig:', f.n_ossos, ' ações:', f.n_acoes, ' modificadores da malha:', f.n_modificadores)
+    log('malha: %d vértices, %d polígonos (%d quadriláteros + %d triângulos) = %d triângulos; %d grupos de vértices (pesos de pele) nos ossos %s...' %
+        (len(f.co), len(f.ls), int((f.lt == 4).sum()), int((f.lt == 3).sum()), int((f.lt - 2).sum()), len(f.ossos), f.ossos[:3]))
     for m in f.materiais:
         log('material', json.dumps(m, ensure_ascii=False))
     log('imagem', json.dumps(f.imagem, ensure_ascii=False))

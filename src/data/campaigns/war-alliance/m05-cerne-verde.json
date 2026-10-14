@@ -1,0 +1,87 @@
+{
+  "format": "warpolymission",
+  "version": 1,
+  "id": "war-alliance-05-cerne-verde",
+  "hidden": true,
+  "title": {
+    "pt-BR": "O Cerne Verde",
+    "en": "The Green Core"
+  },
+  "subtitle": {
+    "pt-BR": "Aliança, missão 5",
+    "en": "Alliance, mission 5"
+  },
+  "briefing": {
+    "speaker": {
+      "pt-BR": "Mestre Arcano Oren",
+      "en": "Arcane Master Oren"
+    },
+    "portrait": "🔮",
+    "text": {
+      "pt-BR": "As florestas ancestrais guardam ninhos de grifos e energia arcana. Convoque os magos da Torre Arcana e proteja o bosque.",
+      "en": "The ancient forests harbor gryphon roosts and arcane power. Summon mages from the Arcane Tower and protect the grove."
+    },
+    "hints": [
+      {
+        "pt-BR": "Concentre-se nos objetivos primários para avançar.",
+        "en": "Focus on primary objectives to advance."
+      }
+    ]
+  },
+  "mapId": "bosques-2v2",
+  "seed": 9085,
+  "players": [
+    {
+      "id": 0,
+      "name": {
+        "pt-BR": "Aliança de Aurelan",
+        "en": "Aurelan Alliance"
+      },
+      "factionId": "human",
+      "team": 0,
+      "color": "#2563eb",
+      "isLocal": true,
+      "startSlot": 0
+    },
+    {
+      "id": 1,
+      "name": {
+        "pt-BR": "Clãs do Cinzal",
+        "en": "Cinzal Clans"
+      },
+      "factionId": "orc",
+      "team": 1,
+      "color": "#dc2626",
+      "isAI": true,
+      "startSlot": 1
+    }
+  ],
+  "startingResources": {
+    "wood": 400,
+    "gold": 400,
+    "stone": 150
+  },
+  "setup": [
+    {
+      "type": "tag",
+      "select": {
+        "buildingType": "great_hall"
+      },
+      "tag": "enemy_base"
+    }
+  ],
+  "objectives": [
+    {
+      "id": "primary-main",
+      "type": "destroy",
+      "priority": "primary",
+      "select": {
+        "tag": "enemy_base"
+      },
+      "title": {
+        "pt-BR": "Treinar Magos e Grifos e purificar o bosque",
+        "en": "Train Mages and Gryphons and cleanse the grove"
+      }
+    }
+  ]
+}

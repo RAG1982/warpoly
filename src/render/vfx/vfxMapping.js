@@ -72,6 +72,9 @@ export function effectsForEvent(type, p, info = {}) {
     }
     case EVT.BUILDING_DESTROYED:
       return [{ fx: 'building_collapse', pos: at(p.pos), radius: info.radius || 2, buildingType: p.buildingType }];
+    case EVT.RESOURCE_DEPLETED:
+      if (p.resourceType === 'wood') return [];
+      return [{ fx: 'building_collapse', pos: at(p.pos), radius: info.radius || 3.4, buildingType: 'mine' }];
     case EVT.BUILDING_PLACED:
       return [{ fx: 'construction', pos: at(p.pos), radius: info.radius || 2, stage: 0, placed: true }];
     case EVT.BUILDING_COMPLETED:

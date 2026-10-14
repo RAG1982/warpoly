@@ -1,0 +1,103 @@
+{
+  "format": "warpolystory",
+  "version": 1,
+  "id": "world",
+  "title": {
+    "pt-BR": "A Guerra do Mar Fendido",
+    "en": "The War of the Sundered Sea"
+  },
+  "panels": [
+    {
+      "id": "panel-1-one-world",
+      "art": "panel-1",
+      "seconds": 10,
+      "text": {
+        "pt-BR": "Antes de haver nomes, havia uma só terra, um só oceano e um só céu. Ondara era um mundo inteiro, e ninguém ainda o chamava de lar.",
+        "en": "Before there were names, there was one land, one ocean and one sky. Ondara was a whole world, and no one yet called it home."
+      }
+    },
+    {
+      "id": "panel-2-the-rift",
+      "art": "panel-2",
+      "seconds": 10,
+      "text": {
+        "pt-BR": "Então a terra se partiu. O mar entrou pela Fenda, e por milhões de anos dois continentes derivaram em silêncio, cada um sonhando o seu próprio mundo.",
+        "en": "Then the land split. The sea poured into the Rift, and for millions of years two continents drifted in silence, each dreaming its own world."
+      }
+    },
+    {
+      "id": "panel-3-velmara-cinzara",
+      "art": "panel-3",
+      "seconds": 10,
+      "text": {
+        "pt-BR": "Em Velmara, entre montanhas nevadas, florestas e savanas, ergueram-se os homens, com seus rebanhos e seus grifos. Em Cinzara, entre dunas, pântanos e estepes, os clãs aprenderam a viver do pouco: javalis, brasas e vento.",
+        "en": "In Velmara, among snowy mountains, forests and savannas, humankind rose, with flocks and gryphons. In Cinzara, among dunes, marshes and steppes, the clans learned to live on little: boar, embers and wind."
+      }
+    },
+    {
+      "id": "panel-4-age-of-sails",
+      "art": "panel-4",
+      "seconds": 10,
+      "text": {
+        "pt-BR": "Os povos cresceram, e a fome de terra, de ouro, de madeira e de breu os lançou ao mar. Aurelan traçou cartas; os clãs queimaram mastros de cinza. Cada um buscava o que faltava em casa.",
+        "en": "The peoples grew, and hunger for land, gold, timber and tar drove them to sea. Aurelan drew charts; the clans burned ash-wood masts. Each sought what home could not give."
+      }
+    },
+    {
+      "id": "panel-5-the-encounter",
+      "art": "panel-5",
+      "seconds": 10,
+      "text": {
+        "pt-BR": "No meio do Mar Fendido, duas velas se avistaram. Ninguém sabe quem baixou o estandarte primeiro, nem de que lado partiu a primeira flecha. Só se sabe que o mar deixou de ser vazio.",
+        "en": "In the middle of the Sundered Sea, two sails sighted each other. No one knows who lowered the banner first, or whose arrow flew first. We only know the sea was empty no more."
+      }
+    },
+    {
+      "id": "panel-6-the-shards",
+      "art": "panel-6",
+      "seconds": 10,
+      "text": {
+        "pt-BR": "Entre os dois mundos jaziam os Estilhaços: ilhas de pedra, brejo, fogo, gelo e areia, com ouro, madeira e petróleo à beira da água. Quem as dominasse teria uma ponte de guerra e a chave do oceano.",
+        "en": "Between the two worlds lay the Shards: islands of stone, marsh, fire, ice and sand, with gold, timber and oil at the water's edge. Whoever held them would hold a bridge of war and the key to the ocean."
+      }
+    },
+    {
+      "id": "panel-7-call-to-arms",
+      "art": "panel-7",
+      "seconds": 10,
+      "text": {
+        "pt-BR": "Aurelan não queria a guerra, mas não cederia o mar. Na Baía de Aurelan, a Rainha Sevelin ergue o estandarte: tomar os Estilhaços e fincar uma fortaleza em terra inimiga, de onde o mar será nosso.",
+        "en": "Aurelan did not want war, but would not yield the sea. At Aurelan Bay, Queen Sevelin raises the banner: take the Shards and plant a fortress on enemy soil, from where the sea shall be ours."
+      },
+      "factionVariants": {
+        "human": {
+          "art": "panel-7-alliance",
+          "text": {
+            "pt-BR": "Aurelan não queria a guerra, mas não cederia o mar. Na Baía de Aurelan, a Rainha Sevelin ergue o estandarte: tomar os Estilhaços e fincar uma fortaleza em terra inimiga, de onde o mar será nosso.",
+            "en": "Aurelan did not want war, but would not yield the sea. At Aurelan Bay, Queen Sevelin raises the banner: take the Shards and plant a fortress on enemy soil, from where the sea shall be ours."
+          }
+        },
+        "orc": {
+          "art": "panel-7-horde",
+          "text": {
+            "pt-BR": "Os clãs não pediram esta guerra, mas a terra seca não perdoa. Do Planalto do Cinzal, o chefe-de-brasa Skarn acende a pira: tomar os Estilhaços e fincar uma cidadela na terra verde, de onde ninguém mais nos fechará o mar.",
+            "en": "The clans did not ask for this war, but dry land forgives no one. From the Cinzal Plateau, ember-chief Skarn lights the pyre: take the Shards and plant a citadel in the green land, from where no one will ever shut us from the sea."
+          }
+        }
+      }
+    }
+  ],
+  "titleCard": {
+    "id": "panel-title",
+    "art": "title",
+    "seconds": 6,
+    "title": {
+      "pt-BR": "A Guerra do Mar Fendido",
+      "en": "The War of the Sundered Sea"
+    },
+    "text": {
+      "pt-BR": "A Guerra do Mar Fendido",
+      "en": "The War of the Sundered Sea"
+    }
+  }
+}

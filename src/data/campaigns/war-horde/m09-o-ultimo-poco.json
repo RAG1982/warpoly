@@ -1,0 +1,87 @@
+{
+  "format": "warpolymission",
+  "version": 1,
+  "id": "war-horde-09-o-ultimo-poco",
+  "hidden": true,
+  "title": {
+    "pt-BR": "O Último Poço",
+    "en": "The Last Well"
+  },
+  "subtitle": {
+    "pt-BR": "Horda, missão 9",
+    "en": "Horde, mission 9"
+  },
+  "briefing": {
+    "speaker": {
+      "pt-BR": "Drogath Punho-de-Brasa",
+      "en": "Drogath Emberfist"
+    },
+    "portrait": "🔥",
+    "text": {
+      "pt-BR": "Os poços de Miragem dão água à travessia. Assegure a última ilha antes de Velmara.",
+      "en": "The wells of Mirage provide water for the crossing. Secure the final isle before Velmara."
+    },
+    "hints": [
+      {
+        "pt-BR": "Concentre-se nos objetivos primários para avançar.",
+        "en": "Focus on primary objectives to advance."
+      }
+    ]
+  },
+  "mapId": "ilhas-4p",
+  "seed": 9153,
+  "players": [
+    {
+      "id": 0,
+      "name": {
+        "pt-BR": "Horda do Cinzal",
+        "en": "Cinzal Horde"
+      },
+      "factionId": "orc",
+      "team": 0,
+      "color": "#dc2626",
+      "isLocal": true,
+      "startSlot": 0
+    },
+    {
+      "id": 1,
+      "name": {
+        "pt-BR": "Tropas de Aurelan",
+        "en": "Aurelan Troops"
+      },
+      "factionId": "human",
+      "team": 1,
+      "color": "#2563eb",
+      "isAI": true,
+      "startSlot": 1
+    }
+  ],
+  "startingResources": {
+    "wood": 400,
+    "gold": 400,
+    "stone": 150
+  },
+  "setup": [
+    {
+      "type": "tag",
+      "select": {
+        "buildingType": "castle"
+      },
+      "tag": "enemy_base"
+    }
+  ],
+  "objectives": [
+    {
+      "id": "primary-main",
+      "type": "destroy",
+      "priority": "primary",
+      "select": {
+        "tag": "enemy_base"
+      },
+      "title": {
+        "pt-BR": "Garantir os poços de água e a cabeça de ponte",
+        "en": "Secure the water wells and the bridgehead"
+      }
+    }
+  ]
+}

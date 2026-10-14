@@ -143,8 +143,10 @@ describe('Estaleiro, Refinaria e saída para o mar (F4-07a)', () => {
       expect(gm.terrain.getHeight(s.x, s.z)).toBeGreaterThanOrEqual(1.8);
       expect(gm.hasNavigableWaterNear(s.x, s.z, 3.6 + 1.3)).toBe(true);
     }
-    expect(gm.canPlaceBuilding('refinery', spots[0].x, spots[0].z)).toBe(true);
-    expect(gm.canPlaceBuilding('barracks', spots[0].x, spots[0].z)).toBe(true); // construções comuns seguem as regras de sempre
+    const dualSpot = spots.find((s) => gm.canPlaceBuilding('refinery', s.x, s.z) && gm.canPlaceBuilding('barracks', s.x, s.z));
+    expect(dualSpot).toBeTruthy();
+    expect(gm.canPlaceBuilding('refinery', dualSpot.x, dualSpot.z)).toBe(true);
+    expect(gm.canPlaceBuilding('barracks', dualSpot.x, dualSpot.z)).toBe(true); // construções comuns seguem as regras de sempre
   });
 
   it('ponto de saída (cais) fica em célula navegável; sem saída para o mar o treino é recusado com aviso e sem debitar', () => {

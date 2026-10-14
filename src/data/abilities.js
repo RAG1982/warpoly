@@ -29,7 +29,8 @@
  *        crescente de id); com `radius` atinge todos os hostis na área (`applySplashDamage`, queda 100→50 %).
  *   {kind:'heal', amount}  ou  {kind:'heal', perManaHp}  cura o alvo aliado (ou o lançador) até `maxHp`;
  *        com `manaPerHp` (na habilidade) cobra mana × PV curados; `perManaHp` = PV curados por mana gasta.
- *   {kind:'status', id, duration}  aplica um status de `STATUS_DEFS` (alvo, ou o lançador se não há alvo).
+ *   {kind:'status', id, duration, radius?, allies?}  aplica um status de `STATUS_DEFS` (alvo, ou o lançador se não há alvo);
+ *        com `radius` e `allies:true` aplica a todos os aliados no raio a partir do centro, em ordem de id (A1).
  *   {kind:'dispel'}  remove statuses removíveis do alvo (ou do lançador).
  *   {kind:'summon', unitType, count=1, lifetime}  cria unidades temporárias (F4-04) em anel de raio 1,5 ao redor do
  *        ponto-alvo (ou do lançador); `unit.lifetime` decrementa em `simStep`; não consomem suprimento e somem sem cadáver.
@@ -434,6 +435,336 @@ export const ABILITIES = {
     requires: [],
     effects: [{ kind: 'heal', amount: 8 }],
     vfx: { kind: 'aura', color: '#4ade80', duration: 1 }
+  },
+  // Brann
+  hero_cleave_strike: {
+    id: 'hero_cleave_strike',
+    name: 'Golpe Transpassante',
+    icon: '⚔️',
+    description: 'Golpeia com o escudo causando 45 de dano em área (raio 2.5) e reduz a velocidade do alvo por 5 s.',
+    hotkey: 'X',
+    target: 'enemy',
+    range: 3,
+    castTime: 0.4,
+    manaCost: 30,
+    cooldown: 8,
+    autocast: false,
+    requires: [],
+    effects: [
+      { kind: 'damage', amount: 45, damageType: 'normal', radius: 2.5 },
+      { kind: 'status', id: 'slow', duration: 5 }
+    ],
+    vfx: { kind: 'burst', color: '#94a3b8', radius: 2.5 }
+  },
+  hero_shield_bash: {
+    id: 'hero_shield_bash',
+    name: 'Golpe de Escudo',
+    icon: '🛡️',
+    description: 'Golpeia com o escudo causando 45 de dano em área (raio 2.5) e reduz a velocidade do alvo por 5 s.',
+    hotkey: 'X',
+    target: 'enemy',
+    range: 3,
+    castTime: 0.4,
+    manaCost: 30,
+    cooldown: 8,
+    autocast: false,
+    requires: [],
+    effects: [
+      { kind: 'damage', amount: 45, damageType: 'normal', radius: 2.5 },
+      { kind: 'status', id: 'slow', duration: 5 }
+    ],
+    vfx: { kind: 'burst', color: '#94a3b8', radius: 2.5 }
+  },
+  hero_defensive_stance: {
+    id: 'hero_defensive_stance',
+    name: 'Postura Defensiva',
+    icon: '🛡️',
+    description: 'Adota postura defensiva por 20 s: atacantes corpo a corpo sofrem 8 de dano mágico por golpe.',
+    hotkey: 'C',
+    target: 'self',
+    range: 0,
+    castTime: 0.4,
+    manaCost: 45,
+    cooldown: 25,
+    autocast: false,
+    requires: [],
+    effects: [{ kind: 'status', id: 'flameshield', duration: 20 }],
+    vfx: { kind: 'aura', color: '#f97316', duration: 1.2 }
+  },
+  hero_revide_stance: {
+    id: 'hero_revide_stance',
+    name: 'Postura de Revide',
+    icon: '🛡️',
+    description: 'Adota postura defensiva por 20 s: atacantes corpo a corpo sofrem 8 de dano mágico por golpe.',
+    hotkey: 'C',
+    target: 'self',
+    range: 0,
+    castTime: 0.4,
+    manaCost: 45,
+    cooldown: 25,
+    autocast: false,
+    requires: [],
+    effects: [{ kind: 'status', id: 'flameshield', duration: 20 }],
+    vfx: { kind: 'aura', color: '#f97316', duration: 1.2 }
+  },
+
+  // Oren
+  hero_blizzard: {
+    id: 'hero_blizzard',
+    name: 'Tempestade Arcana',
+    icon: '🌧️',
+    description: 'Canaliza uma tempestade sobre o alvo (6 ondas de 16 de dano mágico em área raio 4). Custa 30 de mana por onda.',
+    hotkey: 'C',
+    target: 'ground',
+    range: 12,
+    castTime: 0.6,
+    manaCost: 30,
+    cooldown: 10,
+    autocast: false,
+    requires: [],
+    effects: [{ kind: 'channel', waves: 6, interval: 1, wave: { kind: 'damage', amount: 16, damageType: 'magic', radius: 4 } }],
+    vfx: { kind: 'ring', color: '#818cf8', radius: 4 }
+  },
+  hero_arcane_storm: {
+    id: 'hero_arcane_storm',
+    name: 'Tempestade Arcana',
+    icon: '🌧️',
+    description: 'Canaliza uma tempestade sobre o alvo (6 ondas de 16 de dano mágico em área raio 4). Custa 30 de mana por onda.',
+    hotkey: 'C',
+    target: 'ground',
+    range: 12,
+    castTime: 0.6,
+    manaCost: 30,
+    cooldown: 10,
+    autocast: false,
+    requires: [],
+    effects: [{ kind: 'channel', waves: 6, interval: 1, wave: { kind: 'damage', amount: 16, damageType: 'magic', radius: 4 } }],
+    vfx: { kind: 'ring', color: '#818cf8', radius: 4 }
+  },
+
+  // Dorian
+  hero_banner: {
+    id: 'hero_banner',
+    name: 'Estandarte de Aurelan',
+    icon: '🚩',
+    description: 'Ergue o estandarte inspirando o herói e aliados num raio de 9 por 12 s (movimento +50%, velocidade de ataque +50%).',
+    hotkey: 'Z',
+    target: 'self',
+    range: 0,
+    castTime: 0.5,
+    manaCost: 60,
+    cooldown: 30,
+    autocast: false,
+    requires: [],
+    effects: [{ kind: 'status', id: 'haste', duration: 12, radius: 9, allies: true }],
+    vfx: { kind: 'ring', color: '#38bdf8', radius: 9 }
+  },
+  hero_shield_line: {
+    id: 'hero_shield_line',
+    name: 'Escudos Cerrados',
+    icon: '🛡️',
+    description: 'Forma uma barreira protetora para o herói e aliados num raio de 7 por 15 s (atacantes corpo a corpo sofrem dano).',
+    hotkey: 'X',
+    target: 'self',
+    range: 0,
+    castTime: 0.5,
+    manaCost: 70,
+    cooldown: 35,
+    autocast: false,
+    requires: [],
+    effects: [{ kind: 'status', id: 'flameshield', duration: 15, radius: 7, allies: true }],
+    vfx: { kind: 'ring', color: '#f97316', radius: 7 }
+  },
+  hero_marshal_charge: {
+    id: 'hero_marshal_charge',
+    name: 'Carga do Marechal',
+    icon: '🏇',
+    description: 'Investe violentamente contra o inimigo causando 90 de dano em área (raio 3) e lentidão por 3 s no alvo.',
+    hotkey: 'C',
+    target: 'enemy',
+    range: 10,
+    castTime: 0.5,
+    manaCost: 50,
+    cooldown: 12,
+    autocast: false,
+    requires: [],
+    effects: [
+      { kind: 'damage', amount: 90, damageType: 'normal', radius: 3 },
+      { kind: 'status', id: 'slow', duration: 3 }
+    ],
+    vfx: { kind: 'burst', color: '#60a5fa', radius: 3 }
+  },
+
+  // Drogath
+  hero_ember_strike: {
+    id: 'hero_ember_strike',
+    name: 'Golpe de Brasa',
+    icon: '🔥',
+    description: 'Desfere um golpe ardente causando 50 de dano mágico em área (raio 2.5) ao redor do inimigo.',
+    hotkey: 'X',
+    target: 'enemy',
+    range: 3,
+    castTime: 0.4,
+    manaCost: 35,
+    cooldown: 8,
+    autocast: false,
+    requires: [],
+    effects: [{ kind: 'damage', amount: 50, damageType: 'magic', radius: 2.5 }],
+    vfx: { kind: 'burst', color: '#ea580c', radius: 2.5 }
+  },
+  hero_clan_fire: {
+    id: 'hero_clan_fire',
+    name: 'Fogo do Clã',
+    icon: '❤️‍🔥',
+    description: 'Invoca o fogo sagrado do clã restaurando 150 PV instantaneamente a si mesmo.',
+    hotkey: 'C',
+    target: 'self',
+    range: 0,
+    castTime: 0.4,
+    manaCost: 60,
+    cooldown: 30,
+    autocast: false,
+    requires: [],
+    effects: [{ kind: 'heal', amount: 150 }],
+    vfx: { kind: 'aura', color: '#ea580c', duration: 1.2 }
+  },
+
+  // Vozgul
+  hero_soul_drain: {
+    id: 'hero_soul_drain',
+    name: 'Dreno de Alma',
+    icon: '💀',
+    description: 'Drena a essência vital de um inimigo: causa 70 de dano mágico e cura a si mesmo em 50% do dano causado.',
+    hotkey: 'Z',
+    target: 'enemy',
+    range: 10,
+    castTime: 0.5,
+    manaCost: 45,
+    cooldown: 4,
+    autocast: false,
+    requires: [],
+    effects: [{ kind: 'damage', amount: 70, damageType: 'magic', lifesteal: 0.5 }],
+    vfx: { kind: 'beam', color: '#a855f7' }
+  },
+  hero_ancestors: {
+    id: 'hero_ancestors',
+    name: 'Chamado dos Ancestrais',
+    icon: '☠️',
+    description: 'Ergue até 4 esqueletos temporários dos cadáveres em raio 8 por 90 s.',
+    hotkey: 'X',
+    target: 'self',
+    range: 0,
+    castTime: 0.6,
+    manaCost: 60,
+    cooldown: 15,
+    autocast: false,
+    requires: [],
+    effects: [{ kind: 'raise_dead', unitType: 'skeleton', radius: 8, maxCorpses: 4, lifetime: 90 }],
+    vfx: { kind: 'ring', color: '#84cc16', radius: 8 }
+  },
+  hero_ash_veil: {
+    id: 'hero_ash_veil',
+    name: 'Véu de Cinzas',
+    icon: '🌫️',
+    description: 'Envolve uma unidade aliada num véu de cinzas concedendo invisibilidade por 20 s.',
+    hotkey: 'C',
+    target: 'ally',
+    range: 10,
+    castTime: 0.5,
+    manaCost: 70,
+    cooldown: 20,
+    autocast: false,
+    requires: [],
+    effects: [{ kind: 'status', id: 'invisible', duration: 20 }],
+    vfx: { kind: 'aura', color: '#64748b', duration: 1.2 }
+  },
+
+  // Skarn
+  hero_horde_roar: {
+    id: 'hero_horde_roar',
+    name: 'Rugido da Horda',
+    icon: '📯',
+    description: 'Brada furiosamente enfurecendo o herói e aliados num raio de 8 por 10 s (dano, ataque e movimento ampliados).',
+    hotkey: 'Z',
+    target: 'self',
+    range: 0,
+    castTime: 0.5,
+    manaCost: 70,
+    cooldown: 30,
+    autocast: false,
+    requires: [],
+    effects: [{ kind: 'status', id: 'bloodlust', duration: 10, radius: 8, allies: true }],
+    vfx: { kind: 'ring', color: '#ef4444', radius: 8 }
+  },
+  hero_blood_pact: {
+    id: 'hero_blood_pact',
+    name: 'Pacto de Sangue',
+    icon: '🩸',
+    description: 'Pacto sombrio: torna o herói invulnerável por 6 s, mas consome 50% da sua vida atual ao expirar.',
+    hotkey: 'X',
+    target: 'self',
+    range: 0,
+    castTime: 0.4,
+    manaCost: 40,
+    cooldown: 40,
+    autocast: false,
+    requires: [],
+    effects: [{ kind: 'status', id: 'unholy_armor', duration: 6 }],
+    vfx: { kind: 'aura', color: '#7f1d1d', duration: 1.2 }
+  },
+  hero_ash_pact: {
+    id: 'hero_ash_pact',
+    name: 'Pacto de Cinzas',
+    icon: '🩸',
+    description: 'Pacto sombrio: torna o herói invulnerável por 6 s, mas consome 50% da sua vida atual ao expirar.',
+    hotkey: 'X',
+    target: 'self',
+    range: 0,
+    castTime: 0.4,
+    manaCost: 40,
+    cooldown: 40,
+    autocast: false,
+    requires: [],
+    effects: [{ kind: 'status', id: 'unholy_armor', duration: 6 }],
+    vfx: { kind: 'aura', color: '#7f1d1d', duration: 1.2 }
+  },
+  hero_ground_slam: {
+    id: 'hero_ground_slam',
+    name: 'Impacto no Solo',
+    icon: '🔨',
+    description: 'Esmaga o chão com força causando 110 de dano em área (raio 4) e lentidão por 4 s no alvo.',
+    hotkey: 'C',
+    target: 'enemy',
+    range: 3,
+    castTime: 0.5,
+    manaCost: 55,
+    cooldown: 12,
+    autocast: false,
+    requires: [],
+    effects: [
+      { kind: 'damage', amount: 110, damageType: 'normal', radius: 4 },
+      { kind: 'status', id: 'slow', duration: 4 }
+    ],
+    vfx: { kind: 'burst', color: '#b45309', radius: 4 }
+  },
+  hero_crown_hammer: {
+    id: 'hero_crown_hammer',
+    name: 'Martelo da Coroa',
+    icon: '🔨',
+    description: 'Esmaga o chão com o martelo da coroa causando 110 de dano em área (raio 4) e lentidão por 4 s no alvo.',
+    hotkey: 'C',
+    target: 'enemy',
+    range: 3,
+    castTime: 0.5,
+    manaCost: 55,
+    cooldown: 12,
+    autocast: false,
+    requires: [],
+    effects: [
+      { kind: 'damage', amount: 110, damageType: 'normal', radius: 4 },
+      { kind: 'status', id: 'slow', duration: 4 }
+    ],
+    vfx: { kind: 'burst', color: '#b45309', radius: 4 }
   },
   runes: {
     id: 'runes',

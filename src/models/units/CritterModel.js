@@ -9,14 +9,16 @@ import { materials, enableShadows } from '../materials.js';
  */
 const SPECIES = {
   sheep: { body: [1.0, 0.8, 1.5], head: [0.5, 0.5, 0.55], bodyMat: 'critterWool', headMat: 'critterDark', legMat: 'critterDark', legH: 0.4 },
-  pig: { body: [0.9, 0.7, 1.3], head: [0.5, 0.5, 0.5], bodyMat: 'critterPink', headMat: 'critterPink', legMat: 'critterPinkDark', legH: 0.3 }
+  pig: { body: [0.95, 0.75, 1.35], head: [0.55, 0.5, 0.55], bodyMat: 'critterBoar', headMat: 'critterBoar', legMat: 'critterBoarDark', legH: 0.35 },
+  boar: { body: [0.95, 0.75, 1.35], head: [0.55, 0.5, 0.55], bodyMat: 'critterBoar', headMat: 'critterBoar', legMat: 'critterBoarDark', legH: 0.35 }
 };
 
-/** @param {'sheep'|'pig'} species @returns {THREE.Group} */
+/** @param {'sheep'|'boar'|'pig'} species @returns {THREE.Group} */
 export function createCritter(species = 'sheep') {
-  const s = SPECIES[species] || SPECIES.sheep;
+  const norm = species === 'pig' ? 'boar' : (species || 'sheep');
+  const s = SPECIES[norm] || SPECIES[species] || SPECIES.sheep;
   const g = new THREE.Group();
-  g.name = species === 'pig' ? 'Pig' : 'Sheep';
+  g.name = norm === 'boar' ? 'Boar' : 'Sheep';
 
   const body = new THREE.Mesh(new THREE.BoxGeometry(...s.body), materials[s.bodyMat]);
   body.name = 'Body';

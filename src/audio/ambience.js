@@ -12,7 +12,12 @@ export const AMBIENCE_PROFILES = Object.freeze({
   verdejante: Object.freeze({ wind: 0.35, water: 0.28, crickets: 0.25, snow: 0, rumble: 0 }),
   inverno: Object.freeze({ wind: 0.6, water: 0, crickets: 0, snow: 0.55, rumble: 0 }),
   devastadas: Object.freeze({ wind: 0.7, water: 0, crickets: 0, snow: 0, rumble: 0.35 }),
-  pantano: Object.freeze({ wind: 0.18, water: 0.45, crickets: 0.8, snow: 0, rumble: 0 })
+  pantano: Object.freeze({ wind: 0.18, water: 0.45, crickets: 0.8, snow: 0, rumble: 0 }),
+  exuberante: Object.freeze({ wind: 0.35, water: 0.3, crickets: 0.3, snow: 0, rumble: 0 }),
+  deserto: Object.freeze({ wind: 0.65, water: 0.05, crickets: 0.1, snow: 0, rumble: 0.1 }),
+  savana: Object.freeze({ wind: 0.5, water: 0.1, crickets: 0.35, snow: 0, rumble: 0 }),
+  vulcanico: Object.freeze({ wind: 0.6, water: 0.1, crickets: 0, snow: 0, rumble: 0.55 }),
+  pedregoso: Object.freeze({ wind: 0.55, water: 0.35, crickets: 0.15, snow: 0, rumble: 0.1 })
 });
 
 /**

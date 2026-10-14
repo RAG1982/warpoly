@@ -4,8 +4,11 @@ import { listMaps } from '../../src/data/maps/index.js';
 import { generateMap, GEN_THEMES } from '../../src/data/maps/generator.js';
 
 describe('F7-04 tilesets', () => {
-  it('tem os 4 tilesets com paleta, água, atmosfera e decoração completas', () => {
-    expect(TILESET_IDS).toEqual(['verdejante', 'inverno', 'devastadas', 'pantano']);
+  it('tem os tilesets com paleta, água, atmosfera e decoração completas', () => {
+    expect(TILESET_IDS).toEqual([
+      'verdejante', 'inverno', 'devastadas', 'pantano',
+      'exuberante', 'deserto', 'savana', 'vulcanico', 'pedregoso'
+    ]);
     for (const id of TILESET_IDS) {
       const t = TILESETS[id];
       for (const k of ['grass', 'dirt', 'sand', 'rock', 'snow', 'mud', 'road']) expect(t.palette[k]).toBeDefined();

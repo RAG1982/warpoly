@@ -67,13 +67,13 @@ function modal(c, d, f, parts, level, scale = 1) {
   }
 }
 
-// parciais de uma barra livre (aço: brilhante e longo; ferro orc: mais curto, "sujo", razões mais baixas)
-const STEEL = [[1, 1, 0.3], [2.76, 0.55, 0.17], [5.4, 0.32, 0.1], [8.93, 0.18, 0.06]];
-const IRON = [[1, 1, 0.2], [2.32, 0.6, 0.12], [4.17, 0.4, 0.08], [6.7, 0.22, 0.05]];
+// parciais de lâmina e metal de guerra (aço: firme e cortante; ferro: mais pesado e fosco)
+const STEEL = [[1, 1, 0.18], [2.15, 0.65, 0.13], [3.8, 0.38, 0.09], [6.2, 0.16, 0.05]];
+const IRON = [[1, 1, 0.14], [1.85, 0.7, 0.1], [3.1, 0.42, 0.07], [4.9, 0.2, 0.04]];
 
-const BLADE_BASES = [880, 1020, 1180, 1320];
-const SHIELD_BASES = [430, 500, 570, 640];
-const ARMOR_BASES = [330, 390, 450, 520];
+const BLADE_BASES = [420, 480, 550, 620];
+const SHIELD_BASES = [320, 380, 440, 500];
+const ARMOR_BASES = [260, 310, 360, 420];
 
 /** Tipos de golpe de metal: lâmina, escudo, armadura (sorteados quando `p.kind` falta). */
 export const METAL_KINDS = Object.freeze(['blade', 'shield', 'armor']);
@@ -84,20 +84,21 @@ function metalPlay(c, p = {}) {
   const kind = METAL_KINDS.includes(p.kind) ? p.kind : (() => { const r = c.rng(); return r < 0.5 ? 'blade' : r < 0.75 ? 'shield' : 'armor'; })();
   const jit = 1 + (c.rng() - 0.5) * 0.05;
   if (kind === 'shield') {
-    modal(c, 0, SHIELD_BASES[v] * jit, parts, 0.2, 0.8);
-    thump(c, 0, 210, 90, 0.1, 0.32, 'triangle'); // couro e madeira por baixo do metal
-    hiss(c, 0, 'bandpass', 1700 + v * 150, 1.2, 0.045, 0.32);
+    modal(c, 0, SHIELD_BASES[v] * jit, parts, 0.22, 0.7);
+    thump(c, 0, 190, 70, 0.11, 0.42, 'triangle'); // couro e madeira pesada por baixo do metal
+    hiss(c, 0, 'bandpass', 1400 + v * 120, 1.1, 0.05, 0.35);
   } else if (kind === 'armor') {
-    modal(c, 0, ARMOR_BASES[v] * jit, parts, 0.15, 0.55);
-    thump(c, 0, 170, 80, 0.08, 0.3, 'triangle');
-    hiss(c, 0, 'bandpass', 2600, 0.9, 0.05, 0.34);
-    hiss(c, 0.05 + v * 0.01, 'bandpass', 3400, 1.5, 0.03, 0.2); // elos e placas chacoalhando
-    hiss(c, 0.1 + v * 0.012, 'bandpass', 3000, 1.5, 0.025, 0.12);
+    modal(c, 0, ARMOR_BASES[v] * jit, parts, 0.18, 0.55);
+    thump(c, 0, 160, 65, 0.1, 0.36, 'triangle');
+    hiss(c, 0, 'bandpass', 2200, 1.0, 0.05, 0.32);
+    hiss(c, 0.04 + v * 0.01, 'bandpass', 2800, 1.4, 0.03, 0.2); // elos e placas chacoalhando
+    hiss(c, 0.08 + v * 0.012, 'bandpass', 2400, 1.5, 0.025, 0.12);
   } else {
-    modal(c, 0, BLADE_BASES[v] * jit, parts, 0.22, 1);
-    hiss(c, 0, 'highpass', 6000, 0.7, 0.014, 0.4); // o "tink" do fio
-    thump(c, 0, 260, 120, 0.05, 0.18, 'triangle');
-    if (v >= 2) modal(c, rr(c, 0.03, 0.07), BLADE_BASES[v] * 1.12 * jit, [[1, 0.5, 0.14], [2.76, 0.25, 0.08]], 0.18, 1); // lâminas raspam
+    modal(c, 0, BLADE_BASES[v] * jit, parts, 0.24, 0.85);
+    thump(c, 0, 220 + v * 15, 60, 0.09, 0.38, 'triangle'); // peso do golpe de espada / machado
+    hiss(c, 0, 'bandpass', 2400 + v * 200, 1.2, 0.045, 0.38); // corte e impacto cortante de lâmina
+    hiss(c, 0, 'lowpass', 1500, 0.9, 0.04, 0.26); // choque mecânico
+    if (v >= 2) modal(c, rr(c, 0.02, 0.05), BLADE_BASES[v] * 1.08 * jit, [[1, 0.45, 0.1], [2.15, 0.25, 0.06]], 0.16, 0.8); // lâminas raspando
   }
 }
 

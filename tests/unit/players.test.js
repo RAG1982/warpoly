@@ -197,11 +197,11 @@ describe('MatchConfig', () => {
       ['house', 44, -30]
     ]);
     expect(a.units.map((u) => [u.x, u.z])).toEqual([
-      [28, -28],
-      [36, -32],
-      [30, -22],
-      [34, -22],
-      [24, -20]
+      [29, -24],
+      [35, -24],
+      [30, -21],
+      [34, -21],
+      [26, -19]
     ]);
     const b = layoutAt(sw);
     expect(b.buildings.map((e) => [e.role, e.x, e.z])).toEqual([
@@ -210,11 +210,24 @@ describe('MatchConfig', () => {
       ['house', -44, 30]
     ]);
     expect(b.units.map((u) => [u.x, u.z])).toEqual([
-      [-28, 28],
-      [-36, 32],
-      [-30, 22],
-      [-34, 22],
-      [-24, 20]
+      [-29, 24],
+      [-35, 24],
+      [-30, 21],
+      [-34, 21],
+      [-26, 19]
     ]);
+
+    // pos.layout sobrepõe START_LAYOUT quando informado
+    const custom = layoutAt({
+      x: 0,
+      z: 0,
+      mirror: [1, 1],
+      layout: {
+        buildings: [{ role: 'hq', dx: 0, dz: 0 }, { role: 'lumber', dx: -10, dz: -16 }],
+        units: [{ role: 'worker', dx: 0, dz: 5 }]
+      }
+    });
+    expect(custom.buildings.find((x) => x.role === 'lumber')).toMatchObject({ x: -10, z: -16 });
+    expect(custom.units[0]).toMatchObject({ x: 0, z: 5 });
   });
 });

@@ -1,0 +1,87 @@
+{
+  "format": "warpolymission",
+  "version": 1,
+  "id": "war-horde-06-fogo-no-gelo",
+  "hidden": true,
+  "title": {
+    "pt-BR": "Fogo no Gelo",
+    "en": "Fire on Ice"
+  },
+  "subtitle": {
+    "pt-BR": "Horda, missão 6",
+    "en": "Horde, mission 6"
+  },
+  "briefing": {
+    "speaker": {
+      "pt-BR": "Drogath Punho-de-Brasa",
+      "en": "Drogath Emberfist"
+    },
+    "portrait": "🔥",
+    "text": {
+      "pt-BR": "Prova de Fogo: todo o poder militar dos clãs reunido. Quebre o Farol Boreal e derrote a frota humana.",
+      "en": "Trial by Fire: full clan might assembled. Shatter the Boreal Lighthouse and crush the human fleet."
+    },
+    "hints": [
+      {
+        "pt-BR": "Concentre-se nos objetivos primários para avançar.",
+        "en": "Focus on primary objectives to advance."
+      }
+    ]
+  },
+  "mapId": "arquipelago-naval-4p",
+  "seed": 9102,
+  "players": [
+    {
+      "id": 0,
+      "name": {
+        "pt-BR": "Horda do Cinzal",
+        "en": "Cinzal Horde"
+      },
+      "factionId": "orc",
+      "team": 0,
+      "color": "#dc2626",
+      "isLocal": true,
+      "startSlot": 0
+    },
+    {
+      "id": 1,
+      "name": {
+        "pt-BR": "Tropas de Aurelan",
+        "en": "Aurelan Troops"
+      },
+      "factionId": "human",
+      "team": 1,
+      "color": "#2563eb",
+      "isAI": true,
+      "startSlot": 1
+    }
+  ],
+  "startingResources": {
+    "wood": 400,
+    "gold": 400,
+    "stone": 150
+  },
+  "setup": [
+    {
+      "type": "tag",
+      "select": {
+        "buildingType": "castle"
+      },
+      "tag": "enemy_base"
+    }
+  ],
+  "objectives": [
+    {
+      "id": "primary-main",
+      "type": "destroy",
+      "priority": "primary",
+      "select": {
+        "tag": "enemy_base"
+      },
+      "title": {
+        "pt-BR": "Conquistar o Farol Boreal no gelo",
+        "en": "Conquer the Boreal Lighthouse on the ice"
+      }
+    }
+  ]
+}

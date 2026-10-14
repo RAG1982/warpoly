@@ -1,0 +1,87 @@
+{
+  "format": "warpolymission",
+  "version": 1,
+  "id": "war-alliance-01-terra-a-vista",
+  "hidden": true,
+  "title": {
+    "pt-BR": "Terra à Vista",
+    "en": "Land Ahoy"
+  },
+  "subtitle": {
+    "pt-BR": "Aliança, missão 1",
+    "en": "Alliance, mission 1"
+  },
+  "briefing": {
+    "speaker": {
+      "pt-BR": "Sgt. Tomás Rocha",
+      "en": "Sgt. Tomás Rocha"
+    },
+    "portrait": "🛡️",
+    "text": {
+      "pt-BR": "O Mar Fendido nos trouxe a este cabo. Erga um quartel, reúna uma força de patrulha e limpe os contrabandistas da costa.",
+      "en": "The Sundered Sea brought us to this cape. Raise a barracks, gather a patrol force, and clear the smugglers from the coast."
+    },
+    "hints": [
+      {
+        "pt-BR": "Concentre-se nos objetivos primários para avançar.",
+        "en": "Focus on primary objectives to advance."
+      }
+    ]
+  },
+  "mapId": "campos-1v1",
+  "seed": 9017,
+  "players": [
+    {
+      "id": 0,
+      "name": {
+        "pt-BR": "Aliança de Aurelan",
+        "en": "Aurelan Alliance"
+      },
+      "factionId": "human",
+      "team": 0,
+      "color": "#2563eb",
+      "isLocal": true,
+      "startSlot": 0
+    },
+    {
+      "id": 1,
+      "name": {
+        "pt-BR": "Clãs do Cinzal",
+        "en": "Cinzal Clans"
+      },
+      "factionId": "orc",
+      "team": 1,
+      "color": "#dc2626",
+      "isAI": true,
+      "startSlot": 1
+    }
+  ],
+  "startingResources": {
+    "wood": 400,
+    "gold": 400,
+    "stone": 150
+  },
+  "setup": [
+    {
+      "type": "tag",
+      "select": {
+        "buildingType": "great_hall"
+      },
+      "tag": "enemy_base"
+    }
+  ],
+  "objectives": [
+    {
+      "id": "primary-main",
+      "type": "destroy",
+      "priority": "primary",
+      "select": {
+        "tag": "enemy_base"
+      },
+      "title": {
+        "pt-BR": "Erguer um Quartel e treinar soldados",
+        "en": "Raise a Barracks and train soldiers"
+      }
+    }
+  ]
+}

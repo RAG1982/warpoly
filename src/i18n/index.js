@@ -121,8 +121,15 @@ export const factionName = (id) => t(`faction.${id}.name`, { fallback: id });
 export const tierName = (factionId, tier) => t(`tier.${factionId}.${tier}`, { tier, fallback: t('tier.generic', { tier }) });
 export const unitName = (type, def) => t(`unit.${type}.name`, { fallback: def?.entityName || def?.name || type });
 export const unitDesc = (type, def) => t(`unit.${type}.desc`, { fallback: def?.description || '' });
-export const buildingName = (type, def) => t(`building.${type}.name`, { fallback: def?.entityName || def?.name || type });
+export const buildingName = (type, def) => {
+  const faction = def?.faction;
+  if (faction && has(`building.${type}.name_${faction}`)) {
+    return t(`building.${type}.name_${faction}`);
+  }
+  return t(`building.${type}.name`, { fallback: def?.entityName || def?.name || type });
+};
 export const buildingDesc = (type, def) => t(`building.${type}.desc`, { fallback: def?.description || '' });
+export const critterName = (species) => t(`critter.${species}`, { fallback: species === 'boar' ? 'Javali' : (species === 'sheep' ? 'Ovelha' : species) });
 export const abilityName = (id, def) => t(`ability.${id}.name`, { fallback: def?.name || id });
 export const abilityDesc = (id, def) => t(`ability.${id}.desc`, { fallback: def?.description || '' });
 export const researchName = (id, faction, def) => t(`research.${id}.${faction === 'orc' ? 'orc' : 'human'}`, {

@@ -1,0 +1,87 @@
+{
+  "format": "warpolymission",
+  "version": 1,
+  "id": "war-alliance-02-pouso-do-encontro",
+  "hidden": true,
+  "title": {
+    "pt-BR": "O Pouso do Encontro",
+    "en": "Landing of the Meeting"
+  },
+  "subtitle": {
+    "pt-BR": "Aliança, missão 2",
+    "en": "Alliance, mission 2"
+  },
+  "briefing": {
+    "speaker": {
+      "pt-BR": "Elara Pinheiral",
+      "en": "Elara Pinheiral"
+    },
+    "portrait": "🏹",
+    "text": {
+      "pt-BR": "Velas desconhecidas aportaram perto da Torre da Fenda. Forje armas na Ferraria e resgate nossos batedores.",
+      "en": "Unknown sails anchored near the Rift Tower. Forge weapons at the Smithy and rescue our scouts."
+    },
+    "hints": [
+      {
+        "pt-BR": "Concentre-se nos objetivos primários para avançar.",
+        "en": "Focus on primary objectives to advance."
+      }
+    ]
+  },
+  "mapId": "desfiladeiro-1v1",
+  "seed": 9034,
+  "players": [
+    {
+      "id": 0,
+      "name": {
+        "pt-BR": "Aliança de Aurelan",
+        "en": "Aurelan Alliance"
+      },
+      "factionId": "human",
+      "team": 0,
+      "color": "#2563eb",
+      "isLocal": true,
+      "startSlot": 0
+    },
+    {
+      "id": 1,
+      "name": {
+        "pt-BR": "Clãs do Cinzal",
+        "en": "Cinzal Clans"
+      },
+      "factionId": "orc",
+      "team": 1,
+      "color": "#dc2626",
+      "isAI": true,
+      "startSlot": 1
+    }
+  ],
+  "startingResources": {
+    "wood": 400,
+    "gold": 400,
+    "stone": 150
+  },
+  "setup": [
+    {
+      "type": "tag",
+      "select": {
+        "buildingType": "great_hall"
+      },
+      "tag": "enemy_base"
+    }
+  ],
+  "objectives": [
+    {
+      "id": "primary-main",
+      "type": "destroy",
+      "priority": "primary",
+      "select": {
+        "tag": "enemy_base"
+      },
+      "title": {
+        "pt-BR": "Pesquisar Armas Forjadas e resgatar batedores",
+        "en": "Research Forged Weapons and rescue scouts"
+      }
+    }
+  ]
+}

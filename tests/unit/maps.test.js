@@ -3,6 +3,7 @@ import { listMaps, getMap, DEFAULT_MAP_ID } from '../../src/data/maps/index.js';
 import { getHeightForMap } from '../../src/world/terrainGenerators.js';
 import { NAVAL_MAX_HEIGHT } from '../../src/data/combat.js';
 import { FOREST_SPECIES } from '../../src/data/maps/validate.js';
+import { layoutAt } from '../../src/sim/MatchConfig.js';
 
 const DRY = 1.8; // mesmo limiar de "terra seca" usado por GameManager.canPlaceBuilding
 
@@ -43,9 +44,50 @@ describe('mapas (src/data/maps/*.json)', () => {
     const oil = (id) => getMap(id).resources.filter((r) => r.type === 'oil');
     expect(oil('estreito-1v1').length).toBe(2);
     expect(oil('ilhas-4p').length).toBe(2);
-    expect(getMap('estreito-1v1')).toMatchObject({ size: 140, maxPlayers: 2 });
+    expect(getMap('estreito-1v1')).toMatchObject({ size: 168, maxPlayers: 2 });
     expect(getMap('estreito-1v1').terrain.generator).toBe('islands');
   });
+
+  it('ilhas-4p: slot 0 e slot 1 ficam em ilhas diferentes (lados opostos no eixo X para 1v1)', () => {
+    const m = getMap('ilhas-4p');
+    expect(Math.sign(m.startSlots[0].x)).not.toBe(Math.sign(m.startSlots[1].x));
+  });
+
+  it('todos os mapas jogáveis (não-hidden) têm tamanho mínimo de 168x168', () => {
+    for (const m of listMaps()) {
+      expect(m.size, `${m.id} deve ter no mínimo 168x168`).toBeGreaterThanOrEqual(168);
+    }
+  });
+
+  it('todas as unidades iniciais configuradas nascem à frente da construção principal (dz > 0)', () => {
+    for (const m of listMaps()) {
+      m.startSlots.forEach((slot, i) => {
+        const units = slot.layout?.units || [];
+        for (const u of units) {
+          expect(u.dz, `${m.id} slot ${i} unidade ${u.role} dz=${u.dz}`).toBeGreaterThan(0);
+        }
+      });
+    }
+  });
+
+  it('ilhas-4p e estreito-1v1: a serraria tem passagem livre de minas (>= 9 u) e fica próxima a um arvoredo (<= 12 u)', () => {
+    for (const id of ['ilhas-4p', 'estreito-1v1']) {
+      const m = getMap(id);
+      m.startSlots.forEach((slot, i) => {
+        const layout = layoutAt(slot);
+        const lumber = layout.buildings.find((b) => b.role === 'lumber');
+        expect(lumber, `${id} slot ${i} deve ter serraria`).toBeDefined();
+        for (const r of m.resources) {
+          if (r.type === 'oil') continue;
+          const d = Math.hypot(lumber.x - r.x, lumber.z - r.z);
+          expect(d, `${id} slot ${i}: serraria a ${d.toFixed(1)} da mina ${r.type} (deve ser >= 9)`).toBeGreaterThanOrEqual(9);
+        }
+        const minForest = Math.min(...m.forests.map((f) => Math.hypot(lumber.x - f.x, lumber.z - f.z)));
+        expect(minForest, `${id} slot ${i}: serraria a ${minForest.toFixed(1)} do bosque (deve ser <= 12)`).toBeLessThanOrEqual(12);
+      });
+    }
+  });
+
 
   for (const mapDef of listMaps()) {
     describe(`${mapDef.id} ("${mapDef.name}")`, () => {

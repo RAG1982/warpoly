@@ -10,6 +10,8 @@ import { localize } from '../../sim/missions/text.js';
 import { getProgress, nextMission } from '../../campaign/index.js';
 import { unlockNames } from '../techText.js';
 import { TECH_KINDS } from '../../sim/techRestriction.js';
+import { CampaignStory } from './CampaignStory.js';
+import { CampaignStoryModel } from '../campaignStoryModel.js';
 
 const esc = (s) => String(s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]);
 const fmtTime = (s) => `${Math.floor(s / 60)}:${String(Math.floor(s % 60)).padStart(2, '0')}`;
@@ -41,6 +43,30 @@ export class CampaignScreen {
 
   _def() { return listCampaigns().find((c) => c.id === this.campaignId) || null; }
 
+  _shouldAutoShowStory() {
+    const def = this._def();
+    if (!def || def.track === 'beta') return false;
+    return CampaignStoryModel.isFirstTime(this.campaignId, this.progress);
+  }
+
+  _openStory(onDone = null) {
+    const def = this._def();
+    if (!def) return;
+    const story = new CampaignStory({
+      campaignId: this.campaignId,
+      faction: def.factionId || (this.campaignId.includes('horde') ? 'orc' : 'human'),
+      progress: this.progress,
+      onAction: () => {
+        if (onDone) onDone();
+        else this._render();
+      },
+      onClose: () => {
+        if (!onDone) this._render();
+      }
+    }, this.parent);
+    story.open();
+  }
+
   open() {
     if (this.root) return;
     const camps = listCampaigns();
@@ -54,8 +80,26 @@ export class CampaignScreen {
       if (!el || el.disabled) return;
       const act = el.dataset.cp;
       if (act === 'pick') { this.selected = el.dataset.id; this._render(); }
-      else if (act === 'start') this.onStart?.(this.campaignId, this.selected);
-      else if (act === 'new') { this.progress.newAttempt(this.campaignId); this._pickDefault(); this._render(); }
+      else if (act === 'pickCamp') { this.campaignId = el.dataset.id; this._pickDefault(); this._render(); }
+      else if (act === 'start') {
+        if (this._shouldAutoShowStory()) {
+          this._openStory(() => this.onStart?.(this.campaignId, this.selected));
+        } else {
+          this.onStart?.(this.campaignId, this.selected);
+        }
+      }
+      else if (act === 'new') {
+        this.progress.newAttempt(this.campaignId);
+        this._pickDefault();
+        if (this._shouldAutoShowStory()) {
+          this._openStory();
+        } else {
+          this._render();
+        }
+      }
+      else if (act === 'reviewStory') {
+        this._openStory();
+      }
       else if (act === 'back') this.close();
     });
     this.parent.appendChild(root);
@@ -63,6 +107,9 @@ export class CampaignScreen {
     document.addEventListener('keydown', this._onKey, true);
     this._offLang = onLanguageChange(() => this._render());
     this._render();
+    if (this._shouldAutoShowStory()) {
+      this._openStory();
+    }
   }
 
   close() {
@@ -115,6 +162,8 @@ export class CampaignScreen {
       const names = unlockNames(entry.unlocks, def.factionId);
       const unl = TECH_KINDS.filter((k) => names[k]).map((k) => `<li><strong>${esc(t(`campaign.unlock.${k}`))}:</strong> ${esc(names[k].join(', '))}</li>`).join('');
       const unlBlock = unl ? `<div><h4 class="ms-h">${esc(t('campaign.unlock.title'))}</h4><ul class="ms-brief-hints">${unl}</ul></div>` : '';
+      const showStory = def.track !== 'beta';
+      const storyBtn = showStory ? `<button type="button" data-cp="reviewStory">${esc(t('story.review'))}</button>` : '';
       main = `<h3>${esc(localize(m.title, lang))}</h3>`
         + `<p class="ms-brief-sub">${esc(t(`campaign.status.${st}`))}${rec ? ` · ${esc(t('mission.time'))}: ${fmtTime(rec.seconds)}` : ''}</p>`
         + `<div class="ms-brief-talk"><div class="ms-portrait" aria-hidden="true">${esc(m.briefing.portrait || '📜')}</div><div class="ms-say">`
@@ -125,12 +174,23 @@ export class CampaignScreen {
         + (sec ? `<h4 class="ms-h">${esc(t('mission.secondary'))}</h4><ul class="ms-brief-hints">${sec}</ul>` : '') + '</div>'
         + carry
         + `<div class="ms-brief-actions"><button type="button" class="ms-primary" data-cp="start"${st === 'locked' ? ' disabled' : ''}>${esc(t(st === 'completed' ? 'mission.replay' : 'campaign.play'))}</button>`
-        + `<button type="button" data-cp="new">${esc(t('campaign.newAttempt'))}</button><button type="button" data-cp="back">${esc(t('mission.back'))}</button></div>`;
+        + `<button type="button" data-cp="new">${esc(t('campaign.newAttempt'))}</button>${storyBtn}<button type="button" data-cp="back">${esc(t('mission.back'))}</button></div>`;
     }
     const prov = def.provisional ? `<span class="ms-badge-prov" title="${esc(t('campaign.provisionalHint'))}">${esc(t('campaign.provisional'))}</span>` : '';
     const attempt = t('campaign.attempt', { n: this.progress.attemptNumber(def.id) });
+    const camps = listCampaigns();
+    const campsTabs = camps.length > 1
+      ? `<div class="ms-brief-camps" role="tablist">`
+        + camps.map((c) => {
+          const sel = c.id === this.campaignId;
+          const lbl = c.betaLabel ? localize(c.betaLabel, lang) : localize(c.title, lang);
+          return `<button type="button" class="ms-brief-camp-tab" data-cp="pickCamp" data-id="${esc(c.id)}" aria-selected="${sel}" role="tab">${esc(lbl)}</button>`;
+        }).join('')
+        + `</div>`
+      : '';
+
     this.root.innerHTML = `<div class="ms-brief" role="dialog" aria-modal="true" aria-labelledby="cp-title">`
-      + `<div class="ms-brief-list"><h2 id="cp-title">${esc(localize(def.title, lang))}</h2>${prov}`
+      + `<div class="ms-brief-list">${campsTabs}<h2 id="cp-title">${esc(localize(def.title, lang))}</h2>${prov}`
       + `<p class="ms-brief-sub">${esc(attempt)}</p>${list}</div>`
       + `<div class="ms-brief-main"><p class="ms-brief-talk">${esc(localize(def.premise, lang))}</p>${main}</div></div>`;
     this.root.querySelector('[data-cp="start"]:not([disabled])')?.focus({ preventScroll: true });

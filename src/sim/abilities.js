@@ -158,7 +158,36 @@ export function applyAbility(gm, caster, ability, target, x, z) {
         break;
       }
       case 'status':
-        if (recipient.statuses) addStatus(recipient, fx.id, fx.duration, caster.id);
+        if (fx.radius > 0 && fx.allies) {
+          radius = fx.radius;
+          const targets = [];
+          if (gm && gm.unitGrid) {
+            const buf = [];
+            gm.unitGrid.queryRadius(px, pz, fx.radius, null, buf);
+            for (let j = 0; j < buf.length; j++) {
+              const u = buf[j];
+              if (!isAlive(u) || u.fullMesh || u.isConstructed !== undefined) continue;
+              if (!caster.isAlliedWith(u)) continue;
+              const dist = Math.hypot(u.mesh.position.x - px, u.mesh.position.z - pz);
+              if (dist <= fx.radius) targets.push(u);
+            }
+          } else {
+            const all = (gm && gm.allUnits) || (gm && gm.entitiesById ? Array.from(gm.entitiesById.values()) : []);
+            for (let j = 0; j < all.length; j++) {
+              const u = all[j];
+              if (!isAlive(u) || u.fullMesh || u.isConstructed !== undefined) continue;
+              if (!caster.isAlliedWith(u)) continue;
+              const dist = Math.hypot(u.mesh.position.x - px, u.mesh.position.z - pz);
+              if (dist <= fx.radius) targets.push(u);
+            }
+          }
+          targets.sort((a, b) => a.id - b.id);
+          for (let j = 0; j < targets.length; j++) {
+            if (targets[j].statuses) addStatus(targets[j], fx.id, fx.duration, caster.id);
+          }
+        } else {
+          if (recipient.statuses) addStatus(recipient, fx.id, fx.duration, caster.id);
+        }
         break;
       case 'dispel':
         if (recipient.statuses) dispelStatuses(recipient);

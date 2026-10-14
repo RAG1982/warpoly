@@ -1,8 +1,11 @@
 import { NEUTRAL_OWNER_ID } from './EntityIds.js';
 import { Body } from './Body.js';
+import { CRITTER_SPECIES, normalizeCritterSpecies } from '../data/critters.js';
+
+export { CRITTER_SPECIES };
 
 /**
- * F3-10: critter decorativo (ovelha/porco). Classe leve, SEM `Unit`: sem animador, sem barra de
+ * F3-10: critter decorativo (ovelha/javali). Classe leve, SEM `Unit`: sem animador, sem barra de
  * vida, sem entrada nas grades espaciais nem em `getUnitsOf`. Registra-se em `gm.entitiesById`
  * (para `CMD.ATTACK` por id) e em `gm.critters` (picking/atualização).
  *
@@ -21,7 +24,7 @@ const CARCASS_TIME = 3;
 export class Critter {
   /**
    * @param {object} gm   GameManager (usa `scene`, `terrain`, `pathfinder`, `fogOfWar`)
-   * @param {string} species  'sheep' | 'pig'
+   * @param {string} species  'sheep' | 'boar' | 'pig' (alias de boar)
    * @param {number} x
    * @param {number} z
    * @param {{next: () => number}} rng  RNG determinístico próprio deste critter
@@ -30,9 +33,10 @@ export class Critter {
   constructor(gm, species, x, z, rng, radius = 6) {
     this.gameManager = gm;
     this.terrain = gm.terrain;
-    this.species = species;
-    this.type = `critter_${species}`;
-    this.name = species === 'pig' ? 'Porco' : 'Ovelha';
+    const norm = normalizeCritterSpecies(species);
+    this.species = norm;
+    this.type = `critter_${norm}`;
+    this.name = norm === 'boar' ? 'Javali' : 'Ovelha';
     this.id = undefined;
     this.ownerId = NEUTRAL_OWNER_ID;
     this.rng = rng;

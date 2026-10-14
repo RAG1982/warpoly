@@ -1,8 +1,8 @@
 {
   "id": "estreito-1v1",
   "name": "Estreito de Vaeloria",
-  "size": 140,
-  "playable": 132,
+  "size": 168,
+  "playable": 160,
   "tileset": "ilhas",
   "waterLevel": 0.5,
   "maxPlayers": 2,
@@ -25,6 +25,18 @@
           "z": 0,
           "rx": 18,
           "rz": 46
+        },
+        {
+          "x": -46,
+          "z": 0,
+          "rx": 14,
+          "rz": 44
+        },
+        {
+          "x": 46,
+          "z": 0,
+          "rx": 14,
+          "rz": 44
         }
       ],
       "bridges": [
@@ -46,7 +58,21 @@
       "mirror": [
         -1,
         1
-      ]
+      ],
+      "layout": {
+        "buildings": [
+          { "role": "hq", "dx": 0, "dz": 0, "rotY": 0 },
+          { "role": "lumber", "dx": -10, "dz": -16, "rotY": 0.785 },
+          { "role": "house", "dx": 12, "dz": 0, "rotY": -0.785 }
+        ],
+        "units": [
+          { "role": "worker", "dx": -3, "dz": 4 },
+          { "role": "worker", "dx": 3, "dz": 4 },
+          { "role": "melee", "dx": -2, "dz": 6 },
+          { "role": "melee", "dx": 2, "dz": 6 },
+          { "role": "ranged", "dx": -4, "dz": 6 }
+        ]
+      }
     },
     {
       "x": 34,
@@ -54,7 +80,21 @@
       "mirror": [
         1,
         -1
-      ]
+      ],
+      "layout": {
+        "buildings": [
+          { "role": "hq", "dx": 0, "dz": 0, "rotY": 0 },
+          { "role": "lumber", "dx": -10, "dz": -16, "rotY": 0.785 },
+          { "role": "house", "dx": 12, "dz": 0, "rotY": -0.785 }
+        ],
+        "units": [
+          { "role": "worker", "dx": -3, "dz": 4 },
+          { "role": "worker", "dx": 3, "dz": 4 },
+          { "role": "melee", "dx": -2, "dz": 6 },
+          { "role": "melee", "dz": 6, "dx": 2 },
+          { "role": "ranged", "dx": -4, "dz": 6 }
+        ]
+      }
     }
   ],
   "resources": [
@@ -164,16 +204,16 @@
     },
     {
       "x": -24,
-      "z": -45,
-      "count": 6,
-      "radius": 5,
+      "z": -42,
+      "count": 8,
+      "radius": 5.5,
       "species": "autumn"
     },
     {
       "x": 24,
-      "z": 45,
-      "count": 6,
-      "radius": 5,
+      "z": 42,
+      "count": 8,
+      "radius": 5.5,
       "species": "autumn"
     },
     {

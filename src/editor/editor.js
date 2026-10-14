@@ -9,7 +9,7 @@ import { t, applyI18n, setLanguage, getLanguage, LANGUAGES, onLanguageChange } f
 import { listMaps } from '../data/maps/index.js';
 import { validateMapDef, SIZE_LIMITS, FOREST_SPECIES } from '../data/maps/validate.js';
 import { TILESETS, TILESET_IDS, resolveTilesetId } from '../data/tilesets.js';
-import { CRITTER_SPECIES } from '../sim/MatchConfig.js';
+import { CRITTER_SPECIES_LIST } from '../data/critters.js';
 import {
   createModel, applyTerrainBrush, placeItem, eraseAt, exportMap, exportJson, importMap, importForEditing, History, heightAt,
   TERRAIN_TOOLS, ITEM_TOOLS
@@ -115,7 +115,7 @@ function renderOptions() {
     box.append(selectOf('depositType', ['gold', 'stone'], (v) => t(`editor.res.${v}`), 'editor.opt.depositType'));
     box.append(numberOf('depositAmount', 500, 20000, 500, 'editor.opt.depositAmount'));
   } else if (tool === 'critters') {
-    box.append(selectOf('critterSpecies', CRITTER_SPECIES, (v) => t(`editor.species.${v}`), 'editor.opt.species'));
+    box.append(selectOf('critterSpecies', CRITTER_SPECIES_LIST, (v) => t(`editor.species.${v}`), 'editor.opt.species'));
     box.append(slider('critterCount', 1, 40, 1, 'editor.opt.count'));
   } else if (tool === 'start') {
     box.append(el('p', { class: 'hint', text: t('editor.hint.start') }));

@@ -1,0 +1,133 @@
+{
+  "item": "NEW-49",
+  "data": {
+    "inspector": {
+      "item": "axethrower_glb",
+      "glb": true,
+      "parts": {
+        "torso": "Torso",
+        "head": "Head",
+        "armL": "ArmL",
+        "armR": "ArmR",
+        "weapon": null,
+        "weaponR": "WeaponR",
+        "drawnAxe": null
+      },
+      "weaponIsSameNode": false
+    },
+    "sweep": {
+      "variant0": {
+        "worstRotationStep": {
+          "torso": {
+            "rad": 0.0121,
+            "at": 0.382
+          },
+          "head": {
+            "rad": 0.0064,
+            "at": 0.382
+          },
+          "armL": {
+            "rad": 0.0178,
+            "at": 0.382
+          },
+          "armR": {
+            "rad": 0.0464,
+            "at": 0.382
+          },
+          "weaponR": {
+            "rad": 0.0416,
+            "at": 0.782
+          }
+        },
+        "worstWindow055_082": {
+          "rad": 0.0416,
+          "at": 0.782,
+          "part": "weaponR"
+        },
+        "worstWeaponWorldStep": {
+          "units": 0.0398,
+          "at": 0.43
+        }
+      },
+      "variant1": {
+        "worstRotationStep": {
+          "torso": {
+            "rad": 0.0148,
+            "at": 0.56
+          },
+          "head": {
+            "rad": 0.0078,
+            "at": 0.56
+          },
+          "armL": {
+            "rad": 0.0218,
+            "at": 0.56
+          },
+          "armR": {
+            "rad": 0.0566,
+            "at": 0.56
+          },
+          "weaponR": {
+            "rad": 0.0585,
+            "at": 0.848
+          }
+        },
+        "worstWindow055_082": {
+          "rad": 0.0566,
+          "at": 0.56,
+          "part": "armR"
+        },
+        "worstWeaponWorldStep": {
+          "units": 0.0501,
+          "at": 0.59
+        }
+      }
+    },
+    "setup": null
+  },
+  "consoleErrors": [
+    "script(jogo): sem espaço"
+  ],
+  "consoleErrorCount": 1,
+  "consoleWarningCount": 0,
+  "checks": [
+    {
+      "name": "o inspetor carregou o .glb real do Arremessador com weaponR ligado",
+      "ok": true,
+      "extra": "{\"item\":\"axethrower_glb\",\"glb\":true,\"parts\":{\"torso\":\"Torso\",\"head\":\"Head\",\"armL\":\"ArmL\",\"armR\":\"ArmR\",\"weapon\":null,\"weaponR\":\"WeaponR\",\"drawnAxe\":null},\"weaponIsSameNode\":false}"
+    },
+    {
+      "name": "inspetor (variant0): nenhuma parte salta entre amostras de 0,002 (maior passo ≤ 0,12 rad; o defeito era 2,3 rad)",
+      "ok": true,
+      "extra": "maior passo=0.0464 rad"
+    },
+    {
+      "name": "inspetor (variant0): o machado de mão não salta no espaço (passo ≤ 0,25 u/amostra)",
+      "ok": true,
+      "extra": "0.0398 u em p=0.43"
+    },
+    {
+      "name": "inspetor (variant1): nenhuma parte salta entre amostras de 0,002 (maior passo ≤ 0,12 rad; o defeito era 2,3 rad)",
+      "ok": true,
+      "extra": "maior passo=0.0585 rad"
+    },
+    {
+      "name": "inspetor (variant1): o machado de mão não salta no espaço (passo ≤ 0,25 u/amostra)",
+      "ok": true,
+      "extra": "0.0501 u em p=0.59"
+    },
+    {
+      "name": "achou espaço aberto para o teste no jogo",
+      "ok": false,
+      "extra": ""
+    },
+    {
+      "name": "sem erros de console",
+      "ok": false,
+      "extra": "script(jogo): sem espaço"
+    }
+  ],
+  "pngs": [
+    "NEW-49-1-inspetor-tira.png"
+  ]
+}

@@ -1,0 +1,123 @@
+{
+  "item": "NEW-13",
+  "data": {
+    "target": {
+      "id": 17,
+      "type": "great_hall",
+      "owner": 1,
+      "x": -32,
+      "z": 30,
+      "hp": 480,
+      "maxHp": 1600
+    },
+    "visible": {
+      "frames": 91,
+      "t0": 1.3458999999985106,
+      "emits0": 4,
+      "t1": 2.8626999999992604,
+      "emits1": 11,
+      "flamesVisible": true,
+      "scaleRange": 0.6994,
+      "rotRange": 0.2398,
+      "fog": {
+        "enabled": true,
+        "visibleNow": true,
+        "known": true,
+        "fogHidden": false,
+        "fogMemory": null,
+        "rootVisible": true
+      }
+    },
+    "memory": {
+      "frames": 180,
+      "t0": 12.745499999996186,
+      "emits0": 50,
+      "t1": 15.745399999998371,
+      "emits1": 62,
+      "flamesVisible": true,
+      "scaleRange": 0.6999,
+      "rotRange": 0.24,
+      "fog": {
+        "enabled": true,
+        "visibleNow": false,
+        "known": true,
+        "fogHidden": false,
+        "fogMemory": null,
+        "rootVisible": true
+      }
+    },
+    "edge": {
+      "sky": [
+        60,
+        147,
+        214
+      ],
+      "skyFractionTop40": 0,
+      "meanTop40": [
+        8,
+        11,
+        15
+      ],
+      "fogEnabled": true,
+      "camera": {
+        "x": 12.064432431320185,
+        "y": 67.67999999999999,
+        "z": 12.0644324313202
+      }
+    }
+  },
+  "consoleErrors": [],
+  "consoleErrorCount": 0,
+  "consoleWarningCount": 0,
+  "checks": [
+    {
+      "name": "A: a construção está visível agora e as chamas existem",
+      "ok": true,
+      "extra": ""
+    },
+    {
+      "name": "A: visível, as chamas animam (flameTime avança ≥ 1 s)",
+      "ok": true,
+      "extra": "Δ=1.52 s"
+    },
+    {
+      "name": "A: visível, a língua de fogo oscila (escala)",
+      "ok": true,
+      "extra": "faixa=0.6994"
+    },
+    {
+      "name": "B: na memória da névoa (conhecida, não visível, view não escondida)",
+      "ok": true,
+      "extra": ""
+    },
+    {
+      "name": "B: na memória, as chamas não animam (flameTime parado)",
+      "ok": false,
+      "extra": "Δ=3.000 s"
+    },
+    {
+      "name": "B: na memória, a língua de fogo não oscila",
+      "ok": false,
+      "extra": "faixa escala=0.6999 rot=0.24"
+    },
+    {
+      "name": "B: na memória, nenhuma fumaça é emitida pela construção",
+      "ok": false,
+      "extra": "emissões=12"
+    },
+    {
+      "name": "borda: com a névoa, o fundo além do mapa não mostra o azul do céu",
+      "ok": true,
+      "extra": "fração de pixels cor-de-céu nos 40 % de cima = 0"
+    },
+    {
+      "name": "sem erros de console",
+      "ok": true,
+      "extra": ""
+    }
+  ],
+  "pngs": [
+    "NEW-13-1-chamas.png",
+    "NEW-13-2-borda.png"
+  ]
+}

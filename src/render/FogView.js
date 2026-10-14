@@ -205,6 +205,8 @@ export class FogView {
       const view = viewOf(b);
       if (!view) continue;
       view.fogHidden = !(!on || fog.buildingMemory.isKnown(b));
+      // NEW-13: já vista mas sem visão atual (memória): a view a desenha parada (sem chamas/fumaça/VFX ambiente).
+      view.fogMemory = on && !fog.buildingMemory.isVisibleNow(b);
     }
   }
 

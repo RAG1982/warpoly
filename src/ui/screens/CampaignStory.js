@@ -5,9 +5,11 @@
  */
 import './campaignStory.css';
 import defaultStoryData from '../../data/story/world.json';
-import { CampaignStoryModel, storyArtUrl } from '../campaignStoryModel.js';
+import { CampaignStoryModel, storyArtCandidates } from '../campaignStoryModel.js';
 import { t, getLanguage, onLanguageChange } from '../../i18n/index.js';
 import { localize } from '../../sim/missions/text.js';
+
+const BASE = (typeof import.meta !== 'undefined' && import.meta.env && import.meta.env.BASE_URL) || '/';
 
 const esc = (s) => String(s || '').replace(/[&<>"']/g, (c) => ({
   '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
@@ -281,12 +283,7 @@ export class CampaignStory {
 
   _tryLoadArt(artId) {
     if (!artId || typeof Image === 'undefined') return;
-    const clean = artId.startsWith('panel-') ? artId : `panel-${artId}`;
-    const candidates = [
-      `/art/story/${clean}.png`,
-      `/art/story/${clean}.jpg`,
-      storyArtUrl(artId)
-    ];
+    const candidates = storyArtCandidates(artId, BASE);
     const container = this.root?.querySelector('#story-art-container');
     if (!container) return;
 

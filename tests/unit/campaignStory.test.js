@@ -1,7 +1,13 @@
 import { describe, it, expect } from 'vitest';
+import { existsSync } from 'node:fs';
+import { join } from 'node:path';
 import worldStory from '../../src/data/story/world.json';
-import { validateStory, CampaignStoryModel, storyArtUrl } from '../../src/ui/campaignStoryModel.js';
+import { validateStory, CampaignStoryModel, storyArtUrl, storyArtCandidates } from '../../src/ui/campaignStoryModel.js';
 import { CampaignProgress, memoryStorage } from '../../src/campaign/progress.js';
+
+const PUBLIC_DIR = join(process.cwd(), 'public');
+/** Caminho em `public/` (sem extensão) de um id de arte, como `storyArtCandidates` o resolve. */
+const artStem = (id) => (id.includes('/') ? `art/${id}` : `art/story/${id.startsWith('panel-') ? id : `panel-${id}`}`);
 
 describe('História de Abertura da Campanha (MUNDO-HISTORIA-CAMPANHA §2)', () => {
   describe('Validação do JSON (world.json)', () => {
@@ -158,6 +164,37 @@ describe('História de Abertura da Campanha (MUNDO-HISTORIA-CAMPANHA §2)', () =
       expect(storyArtUrl('1')).toBe('/ui/art/story/panel-1.webp');
       expect(storyArtUrl('panel-2')).toBe('/ui/art/story/panel-2.webp');
       expect(storyArtUrl('title', '/assets/')).toBe('/assets/ui/art/story/panel-title.webp');
+    });
+
+    it('storyArtCandidates parte do BASE_URL (jogo numa subpasta, ex.: GitHub Pages /warpoly/)', () => {
+      expect(storyArtCandidates('2', '/warpoly/')).toEqual([
+        '/warpoly/art/story/panel-2.png',
+        '/warpoly/art/story/panel-2.jpg',
+        '/warpoly/ui/art/story/panel-2.webp'
+      ]);
+      expect(storyArtCandidates('panel-7-horde', './')[0]).toBe('./art/story/panel-7-horde.png');
+      expect(storyArtCandidates('world/mapa-mundi', '/warpoly/')).toEqual([
+        '/warpoly/art/world/mapa-mundi.png',
+        '/warpoly/art/world/mapa-mundi.jpg'
+      ]);
+      for (const url of storyArtCandidates('3', '/warpoly/')) expect(url.startsWith('/warpoly/')).toBe(true);
+    });
+
+    it('toda arte citada em world.json (painéis das duas facções e cartão de título) existe em public/', () => {
+      const ids = new Set();
+      for (const p of worldStory.panels) {
+        ids.add(p.art);
+        for (const v of Object.values(p.factionVariants || {})) ids.add(v.art);
+      }
+      ids.add(worldStory.titleCard.art);
+      for (const id of ids) {
+        const stem = join(PUBLIC_DIR, artStem(id));
+        expect(existsSync(`${stem}.png`) || existsSync(`${stem}.jpg`), `arte sem arquivo: ${id}`).toBe(true);
+      }
+    });
+
+    it('o cartão de título usa a ilustração do mapa-múndi (spec: o mapa completo se funde ao logotipo)', () => {
+      expect(worldStory.titleCard.art).toBe('world/mapa-mundi');
     });
   });
 

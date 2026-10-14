@@ -89,7 +89,7 @@
   ],
   "titleCard": {
     "id": "panel-title",
-    "art": "title",
+    "art": "world/mapa-mundi",
     "seconds": 6,
     "title": {
       "pt-BR": "A Guerra do Mar Fendido",

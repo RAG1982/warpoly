@@ -71,6 +71,29 @@ export function storyArtUrl(artId, base = '/') {
   return `${base}ui/art/story/${clean}.webp`;
 }
 
+/**
+ * Candidatos de arte de um painel, em ordem: PNG e JPG em `public/art/story/` (ou em `public/art/<caminho>`,
+ * quando o id tem `/`, como `world/mapa-mundi`) e, por último, o slot WebP final (`storyArtUrl`).
+ * Todos partem de `base` (`import.meta.env.BASE_URL`): sem isso, o jogo servido numa subpasta
+ * (GitHub Pages em `/warpoly/`) pede `/art/...` na raiz do host e a arte nunca aparece.
+ * @param {string} artId  '3', 'panel-3' ou 'world/mapa-mundi'
+ * @param {string} base
+ * @returns {string[]}
+ */
+export function storyArtCandidates(artId, base = '/') {
+  const id = String(artId);
+  if (id.includes('/')) {
+    const stem = `${base}art/${id}`;
+    return [`${stem}.png`, `${stem}.jpg`];
+  }
+  const clean = id.startsWith('panel-') ? id : `panel-${id}`;
+  return [
+    `${base}art/story/${clean}.png`,
+    `${base}art/story/${clean}.jpg`,
+    storyArtUrl(id, base)
+  ];
+}
+
 export class CampaignStoryModel {
   /**
    * @param {object} opts

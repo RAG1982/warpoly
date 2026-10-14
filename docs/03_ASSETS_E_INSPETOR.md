@@ -262,8 +262,8 @@ Tudo sai dos **mesmos `.glb`** (nenhum modelo 3D novo ou alterado) com Eevee, po
 
 ## Arte do novo mundo (2026-10-13)
 
-- `public/art/story/panel-1` a `panel-6` e `panel-7`, mais `panel-7-alliance` e `panel-7-horde` (variantes por facção): PNG com fallback JPG (o código tenta `.png` e depois `.jpg`). Os dois formatos estão no repositório; escolher um e remover o outro é uma limpeza pendente.
-- `public/art/world/mapa-mundi.{png,jpg}`: mapa-múndi **ilustrativo**. Não é jogável e não mede distância.
+- `public/art/story/panel-1` a `panel-6` e `panel-7`, mais `panel-7-alliance` e `panel-7-horde` (variantes por facção): PNG com fallback JPG (o código tenta `.png` e depois `.jpg`). Os caminhos partem de `BASE_URL` (o deploy de Pages roda em `/warpoly/`; caminho absoluto `/art/...` quebra ali). **`panel-7.png/jpg` é cópia byte a byte de `panel-7-alliance` e não é usada** (a facção sempre tem variante); pode sair. Os dois formatos estão no repositório; escolher um e remover o outro é uma limpeza pendente.
+- `public/art/world/mapa-mundi.{png,jpg}`: mapa-múndi **ilustrativo**. Não é jogável e não mede distância. Usado hoje como arte do cartão de título da história. Tem título e nomes em inglês gravados na imagem ("Ondara", "Har'Akir"), que contradizem os nomes aprovados (Velmara e Cinzara): precisa de versão sem texto.
 - `public/ui/heroes/hero_*.svg`: 6 retratos SVG **provisórios** (um por herói). Os retratos finais e os modelos 3D são arte local (Blender).
 - `docs/refs/herois/*_tpose.png`: referências T-pose dos heróis para o modelador. `docs/refs/menu_original.webp`: menu anterior, como referência. `public/ui/art/menu.webp` foi atualizado.
 - Pendências de arte (local): ART-01 a ART-16 de terreno (`docs/specs/MUNDO-TERRENO-MAPAS.md` §6), javali (ART-04), modelos e retratos dos 6 heróis, artes de vitória `victory_human/orc.webp`.

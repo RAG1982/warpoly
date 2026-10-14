@@ -1,0 +1,28 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" width="128" height="128">
+  <defs>
+    <linearGradient id="bgBrann" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#1e3a8a"/>
+      <stop offset="100%" stop-color="#0f172a"/>
+    </linearGradient>
+    <linearGradient id="goldBorder" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#fbbf24"/>
+      <stop offset="50%" stop-color="#d97706"/>
+      <stop offset="100%" stop-color="#b45309"/>
+    </linearGradient>
+    <filter id="shadow" x="-10%" y="-10%" width="120%" height="120%">
+      <feDropShadow dx="0" dy="2" stdDeviation="3" flood-color="#000" flood-opacity="0.6"/>
+    </filter>
+  </defs>
+  <!-- Background Shield -->
+  <rect width="128" height="128" fill="#090d16" rx="16"/>
+  <path d="M 64 12 C 96 12 114 20 114 48 C 114 84 64 114 64 114 C 64 114 14 84 14 48 C 14 20 32 12 64 12 Z"
+        fill="url(#bgBrann)" stroke="url(#goldBorder)" stroke-width="4" filter="url(#shadow)"/>
+  <!-- Inner Shield Inset -->
+  <path d="M 64 20 C 88 20 104 26 104 50 C 104 78 64 104 64 104 C 64 104 24 78 24 50 C 24 26 40 20 64 20 Z"
+        fill="none" stroke="#60a5fa" stroke-width="1.5" stroke-opacity="0.4"/>
+  <!-- Monogram B -->
+  <text x="64" y="68" font-family="'Cinzel', 'Trajan Pro', 'Georgia', serif" font-weight="bold" font-size="44" fill="#fbbf24" text-anchor="middle" filter="url(#shadow)">B</text>
+  <!-- Hero Name -->
+  <rect x="28" y="80" width="72" height="18" rx="4" fill="#1e293b" fill-opacity="0.9" stroke="#d97706" stroke-width="1"/>
+  <text x="64" y="93" font-family="'Arial Black', sans-serif" font-weight="900" font-size="10" fill="#f8fafc" text-anchor="middle" letter-spacing="1.5">BRANN</text>
+</svg>

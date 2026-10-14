@@ -279,6 +279,9 @@ Dependências: 1 → 2 → 3 → (4 ∥ 5) → 6 → 7 (+7b) → 8 → 9 → 10.
 - **P-2 Escala:** o mapa-múndi é **só ilustrativo** (dois continentes + ilhas); não é jogável; missões em mapas próprios, marcáveis na ilustração.
 - **P-3 Lava:** **divisor de áreas, sem dano, bloqueio como a água** (terrestres e navais não entram, aéreas atravessam), com passagens de rocha como vaus (§3.5).
 - **P-4 Bioma:** **só visual** (sem bônus/penalidade de velocidade).
+- **P-7 Tamanho mínimo de mapas jogáveis (2026-10-12):** Todo mapa jogável de escaramuça / multiplayer precisa ter no mínimo **168×168** (`size >= 168`). Mapas abaixo disso (`ilhas-4p` 128 e `estreito-1v1` 140) eram pequenos demais e foram ampliados para no mínimo 168×168.
+- **P-13 Posição de unidades iniciais (2026-10-12):** Unidades iniciais existentes devem nascer estritamente **à frente da construção principal** (`dz > 0`), nunca atrás ou escondidas sob a malha do prédio.
+- **P-14 Posição da serraria (2026-10-12):** A serraria inicial (`lumber_camp` / `orc_lumber_mill`) deve ficar sempre **próxima a um arvoredo** (`forests`, distância recomendada $\le 12$ u). Todos os mapas existentes foram revistos.
 - **Nomes:** Ondara, Velmara, Cinzara, Mar Fendido; ilhas Pouso do Encontro, Pedra-Mãe, Baixio do Breu, Cerne Verde, A Geada, Brejo Mudo, Fornalha, Miragem.
 
 **Ainda abertas:**

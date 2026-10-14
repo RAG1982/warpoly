@@ -151,7 +151,7 @@
   ]
  },
  "bytes": {
-  "total": 2775256,
+  "total": 2817480,
   "art": 238982,
   "icons": 2257926,
   "portraits": 278348
@@ -234,7 +234,7 @@
    "file": "art/menu.webp",
    "width": 1920,
    "height": 1080,
-   "bytes": 131762
+   "bytes": 173986
   },
   "loading": {
    "file": "art/loading.webp",

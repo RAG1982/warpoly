@@ -91,6 +91,8 @@ export class BuildingView {
 
     /** Visível pela névoa (escrito pela `FogView`; só inimigos são escondidos). */
     this.fogHidden = false;
+    /** NEW-13: construção inimiga só LEMBRADA (já vista, sem visão atual; escrito pela `FogView`): retrato parado, sem animação ambiente. */
+    this.fogMemory = false;
     this.flamesGroup = null;
     this.flameTongues = [];
     this.flameClusters = [];
@@ -433,6 +435,9 @@ export class BuildingView {
     }
     const gmEvents = gameManager && gameManager.events;
     const shown = this._shown();
+    // NEW-13: só com visão atual (`!fogMemory`) as chamas, a fumaça e o VFX ambiente animam; a construção lembrada pela névoa
+    // (`fogMemory`, já vista) e a escondida (`fogHidden`) ficam paradas.
+    const live = shown && !this.fogMemory;
     this.root.visible = shown;
     const bp = e.mesh.position;
     this.root.position.set(bp.x, bp.y, bp.z);
@@ -479,9 +484,9 @@ export class BuildingView {
 
     this.updateDamageFlames();
 
-    // Animate damage flames and smoke if active — só se a construção está visível: chamas de construções inimigas
-    // na memória da névoa (`fogHidden`) não animam nem emitem fumaça (NEW-13).
-    if (shown && this.flamesGroup && this.flamesGroup.visible) {
+    // Animate damage flames and smoke if active — só com visão atual: chamas de construções inimigas na memória da
+    // névoa (`fogMemory`) ou escondidas (`fogHidden`) não animam nem emitem fumaça (NEW-13).
+    if (live && this.flamesGroup && this.flamesGroup.visible) {
       this.flameTime = (this.flameTime || 0) + frameDelta;
       const t = this.flameTime;
       for (let i = 0; i < this.flameTongues.length; i++) {
@@ -509,13 +514,13 @@ export class BuildingView {
       }
     }
 
-    // Subclass custom procedural animation and VFX update
-    if (e.isConstructed) {
+    // Subclass custom procedural animation and VFX update (NEW-13: parado na memória da névoa)
+    if (live && e.isConstructed) {
       this.updateCustomVFX(frameDelta, gameManager);
     }
 
     // Cottage & Great Hall chimney smoke
-    if (shown && e.isConstructed && (e.type === 'cottage' || e.type === 'great_hall') && gmEvents) {
+    if (live && e.isConstructed && (e.type === 'cottage' || e.type === 'great_hall') && gmEvents) {
       this.smokeTimer += frameDelta;
       if (this.smokeTimer >= 0.8) {
         this.smokeTimer = 0;

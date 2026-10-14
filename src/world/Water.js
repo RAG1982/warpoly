@@ -101,10 +101,12 @@ export class Water {
    * 1. Deep Water Base Plane (Abyssal sapphire / ocean navy foundation)
    */
   createDeepWaterBase() {
-    // Estende bem além do mapa (±250 u) para que, com a câmera olhando para fora da área
+    // Estende bem além do mapa (±700 u) para que, com a câmera olhando para fora da área
     // jogável, a névoa de guerra escureça esse "oceano distante" em vez de mostrar o
-    // scene.background azul do céu na borda (NEW-13).
-    const geo = new THREE.PlaneGeometry(500, 500, 8, 8);
+    // scene.background azul do céu na borda (NEW-13). Os ±250 u da 1ª correção ainda deixavam triângulos de céu nos
+    // cantos de cima com a câmera no canto do mapa e o zoom máximo (0,5 % do quadro; revisão visual 2026-10-11):
+    // o alvo vai a ±55, a câmera fica a ~120 u dele e a borda de cima da tela alcança ~340 u no chão (FOV 32°, far 900).
+    const geo = new THREE.PlaneGeometry(1400, 1400, 8, 8);
     geo.rotateX(-Math.PI / 2);
 
     const mat = new THREE.MeshStandardMaterial({

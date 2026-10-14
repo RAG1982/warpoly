@@ -1,0 +1,19 @@
+{
+  "item": "NEW-35",
+  "data": {
+    "setup": null
+  },
+  "consoleErrors": [
+    "script: sem espaço"
+  ],
+  "consoleErrorCount": 1,
+  "consoleWarningCount": 0,
+  "checks": [
+    {
+      "name": "achou espaço aberto para o teste",
+      "ok": false,
+      "extra": ""
+    }
+  ],
+  "pngs": []
+}

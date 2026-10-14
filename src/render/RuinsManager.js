@@ -7,9 +7,11 @@ import * as THREE from 'three';
 import { mergeGeometries } from 'three/examples/jsm/utils/BufferGeometryUtils.js';
 import { EVT } from '../sim/events.js';
 import { getBuildingDef } from '../data/index.js';
-import { ruinAlpha, pickSlot, ruinRadius, RUIN_MAX } from './ruinsLogic.js';
+import { ruinAlpha, pickSlot, ruinRadius, RUIN_MAX, MINE_RUIN_RADIUS } from './ruinsLogic.js';
 
 const SINK = 0.6;
+/** Segmentos por lado do decal: ele acompanha o relevo (`_drape`). */
+const DECAL_SEGS = 12;
 
 function makeDecalTexture() {
   const c = document.createElement('canvas');
@@ -60,7 +62,7 @@ export class RuinsManager {
     scene.add(this.root);
 
     this.decalTex = makeDecalTexture();
-    this.decalGeo = new THREE.PlaneGeometry(2, 2).rotateX(-Math.PI / 2);
+    this.decalGeo = new THREE.PlaneGeometry(2, 2, DECAL_SEGS, DECAL_SEGS).rotateX(-Math.PI / 2); // molde; cada slot clona (o relevo é por ruína)
     this._tmpColor = new THREE.Color();
 
     this.slots = [];
@@ -69,7 +71,7 @@ export class RuinsManager {
         map: this.decalTex, transparent: true, depthWrite: false,
         polygonOffset: true, polygonOffsetFactor: -2, polygonOffsetUnits: -2
       });
-      const decal = new THREE.Mesh(this.decalGeo, decalMat);
+      const decal = new THREE.Mesh(this.decalGeo.clone(), decalMat);
       decal.renderOrder = 1;
       const debrisMat = new THREE.MeshStandardMaterial({ vertexColors: true, roughness: 0.95, transparent: true });
       const debris = new THREE.Mesh(undefined, debrisMat);
@@ -93,7 +95,7 @@ export class RuinsManager {
     if (EVT.RESOURCE_DEPLETED) {
       offs.push(this.gm.events.on(EVT.RESOURCE_DEPLETED, ({ pos, resourceType }) => {
         if (resourceType === 'wood') return; // árvores não deixam ruína
-        this.spawn(pos, ruinRadius(3.4 / 1.15), 'mine');
+        this.spawn(pos, MINE_RUIN_RADIUS, 'mine'); // a mina segue em pé: o decal tem de passar da pegada do modelo
       }));
     }
     this._offs = offs;
@@ -102,20 +104,24 @@ export class RuinsManager {
 
   get _low() { return this.quality?.current?.name === 'low'; }
 
-  _buildDebris(radius, kind, colors) {
+  _buildDebris(radius, kind, colors, pos, baseY) {
+    const terrain = this.gm.terrain;
     const n = this._low ? 3 : 4 + Math.floor(Math.random() * 5);
     const parts = [];
     for (let i = 0; i < n; i++) {
       const stone = kind === 'mine' ? i % 2 === 0 : i % 3 === 0;
-      const s = radius * (0.12 + Math.random() * 0.14);
+      const s = (kind === 'mine' ? 4.4 : radius) * (0.12 + Math.random() * 0.14); // mina: peças de tamanho de prédio médio, não do raio do anel
       const geo = stone
         ? new THREE.DodecahedronGeometry(s * 0.7, 0).scale(1, 0.55, 1)
         : new THREE.BoxGeometry(s * (1.6 + Math.random()), s * 0.28, s * 0.4);
       geo.rotateY(Math.random() * Math.PI);
       if (!stone) { geo.rotateZ((Math.random() - 0.5) * 0.5); }
       const a = Math.random() * Math.PI * 2;
-      const d = Math.random() * radius * 0.6;
-      geo.translate(Math.cos(a) * d, s * 0.2, Math.sin(a) * d);
+      // construção: o modelo sumiu, o entulho cai no miolo; mina: o modelo segue em pé, o entulho cai no anel fora da pegada (3,6–5,8 u)
+      const d = kind === 'mine' ? radius * (0.5 + Math.random() * 0.3) : Math.random() * radius * 0.6;
+      const gx = Math.cos(a) * d, gz = Math.sin(a) * d;
+      const gy = terrain && terrain.getHeight ? terrain.getHeight(pos.x + gx, pos.z + gz) - baseY : 0; // cada peça assenta no relevo
+      geo.translate(gx, s * 0.2 + gy, gz);
       const col = this._tmpColor.set(stone ? colors.stone : colors.wood);
       const arr = new Float32Array(geo.attributes.position.count * 3);
       for (let v = 0; v < arr.length; v += 3) { arr[v] = col.r; arr[v + 1] = col.g; arr[v + 2] = col.b; }
@@ -137,20 +143,36 @@ export class RuinsManager {
   spawn(pos, radius, kind = 'building', colors = { wood: 0x6b4a2b, stone: 0x77726a }) {
     const idx = pickSlot(this.slots);
     const s = this.slots[idx];
+    s.x = pos.x; s.z = pos.z;
+    s.baseY = this.gm.terrain?.getHeight?.(pos.x, pos.z) ?? 0;
     s.debris.geometry?.dispose();
-    s.debris.geometry = this._buildDebris(radius, kind, colors);
+    s.debris.geometry = this._buildDebris(radius, kind, colors, pos, s.baseY);
     s.decal.scale.set(radius, 1, radius);
     s.decal.material.opacity = 1;
     s.debris.material.opacity = 1;
-    s.x = pos.x; s.z = pos.z;
-    s.baseY = this.gm.terrain?.getHeight?.(pos.x, pos.z) ?? 0;
     s.group.position.set(pos.x, 0, pos.z);
-    s.decal.position.set(0, s.baseY + 0.03, 0);
+    s.decal.position.set(0, s.baseY, 0);
+    this._drape(s, radius);
     s.debris.position.set(0, s.baseY, 0);
     s.age = 0;
     s.state = 'active';
     s.group.visible = true;
     this._applyFog(s);
+  }
+
+  /**
+   * O decal acompanha o relevo em vez de ser um plano reto à altura do centro: minas ficam em morros (o terreno varia ±0,4 u em
+   * 5 u do centro) e o plano reto ficava enterrado em metade do anel (captura de 2026-10-11). `+0,03` sobre o terreno + polygonOffset.
+   */
+  _drape(s, radius) {
+    const terrain = this.gm.terrain;
+    const pos = s.decal.geometry.attributes.position;
+    const tpl = this.decalGeo.attributes.position;
+    for (let i = 0; i < pos.count; i++) {
+      const h = terrain && terrain.getHeight ? terrain.getHeight(s.x + tpl.getX(i) * radius, s.z + tpl.getZ(i) * radius) : s.baseY;
+      pos.setY(i, h - s.baseY + 0.03);
+    }
+    pos.needsUpdate = true;
   }
 
   _applyFog(s) {
@@ -190,7 +212,7 @@ export class RuinsManager {
     this._offs?.forEach(off => off && off());
     this.clear();
     this.scene.remove(this.root);
-    for (const s of this.slots) { s.debris.geometry?.dispose(); s.decal.material.dispose(); s.debris.material.dispose(); }
+    for (const s of this.slots) { s.debris.geometry?.dispose(); s.decal.geometry.dispose(); s.decal.material.dispose(); s.debris.material.dispose(); }
     this.decalGeo.dispose();
     this.decalTex.dispose();
   }

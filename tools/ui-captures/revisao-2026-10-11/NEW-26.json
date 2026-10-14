@@ -1,0 +1,249 @@
+{
+  "item": "NEW-26",
+  "data": {
+    "setup": {
+      "me": 0,
+      "foeId": 1,
+      "camp": {
+        "id": 25,
+        "x": 40,
+        "z": 20,
+        "hp": 1400
+      },
+      "guards": [
+        {
+          "id": 26,
+          "type": "bandit"
+        },
+        {
+          "id": 27,
+          "type": "bandit"
+        },
+        {
+          "id": 28,
+          "type": "bandit"
+        },
+        {
+          "id": 29,
+          "type": "bandit"
+        }
+      ],
+      "campsOnMap": 2
+    },
+    "clickGuard": {
+      "x": 755.1671729175979,
+      "y": 298.12979748685456,
+      "behind": false
+    },
+    "A": {
+      "inspected": {
+        "id": 26,
+        "type": "bandit",
+        "owner": 99,
+        "hp": 125,
+        "maxHp": 125
+      },
+      "ringVisible": true,
+      "selectedUnits": 0,
+      "selectedBuilding": null,
+      "selectedResource": null,
+      "cardDisplay": "flex",
+      "standardDisplay": "flex",
+      "buildingViewDisplay": "none",
+      "title": "Bandido (NEUTRO)",
+      "hp": "125 / 125 HP",
+      "stats": "Ataque: 12+4 Defesa: 1 Dono: Bandoleiros",
+      "actionButtons": 0,
+      "issued": []
+    },
+    "A2": {
+      "inspected": {
+        "id": 26,
+        "type": "bandit",
+        "owner": 99,
+        "hp": 125,
+        "maxHp": 125
+      },
+      "ringVisible": true,
+      "selectedUnits": 0,
+      "selectedBuilding": null,
+      "selectedResource": null,
+      "cardDisplay": "flex",
+      "standardDisplay": "flex",
+      "buildingViewDisplay": "none",
+      "title": "Bandido (NEUTRO)",
+      "hp": "125 / 125 HP",
+      "stats": "Ataque: 12+4 Defesa: 1 Dono: Bandoleiros",
+      "actionButtons": 0,
+      "issued": []
+    },
+    "Aesc": {
+      "inspected": null,
+      "ringVisible": null,
+      "selectedUnits": 0,
+      "selectedBuilding": null,
+      "selectedResource": null,
+      "cardDisplay": "none",
+      "standardDisplay": "flex",
+      "buildingViewDisplay": "none",
+      "title": "Bandido (NEUTRO)",
+      "hp": "125 / 125 HP",
+      "stats": "Ataque: 12+4 Defesa: 1 Dono: Bandoleiros",
+      "actionButtons": 0,
+      "issued": []
+    },
+    "clickCamp": {
+      "x": 639.9999999999999,
+      "y": 296.1510563364625,
+      "behind": false
+    },
+    "B": {
+      "inspected": {
+        "id": 25,
+        "type": "bandit_camp",
+        "owner": 99,
+        "hp": 1400,
+        "maxHp": 1400
+      },
+      "ringVisible": true,
+      "selectedUnits": 0,
+      "selectedBuilding": null,
+      "selectedResource": null,
+      "cardDisplay": "flex",
+      "standardDisplay": "flex",
+      "buildingViewDisplay": "none",
+      "title": "Acampamento de Bandidos (NEUTRO)",
+      "hp": "1400 / 1400 HP",
+      "stats": "Defesa: 15 Dono: Bandoleiros",
+      "actionButtons": 0,
+      "issued": []
+    },
+    "clickFoe": {
+      "x": 640,
+      "y": 319.7886397056259,
+      "behind": false
+    },
+    "C": {
+      "inspected": {
+        "id": 22,
+        "type": "grunt",
+        "owner": 1,
+        "hp": 198,
+        "maxHp": 198
+      },
+      "ringVisible": true,
+      "selectedUnits": 0,
+      "selectedBuilding": null,
+      "selectedResource": null,
+      "cardDisplay": "flex",
+      "standardDisplay": "flex",
+      "buildingViewDisplay": "none",
+      "title": "Talhador (INIMIGO)",
+      "hp": "198 / 198 HP",
+      "stats": "Ataque: 22+6 Defesa: 4 Dono: IA 1",
+      "actionButtons": 0,
+      "issued": []
+    },
+    "Cgone": {
+      "inspected": null,
+      "ringVisible": null,
+      "selectedUnits": 0,
+      "selectedBuilding": null,
+      "selectedResource": null,
+      "cardDisplay": "none",
+      "standardDisplay": "flex",
+      "buildingViewDisplay": "none",
+      "title": "Talhador (INIMIGO)",
+      "hp": "198 / 198 HP",
+      "stats": "Ataque: 22+6 Defesa: 4 Dono: IA 1",
+      "actionButtons": 0,
+      "issued": []
+    },
+    "D": {
+      "inspected": null,
+      "ringVisible": null,
+      "selectedUnits": 1,
+      "selectedBuilding": null,
+      "selectedResource": null,
+      "cardDisplay": "flex",
+      "standardDisplay": "flex",
+      "buildingViewDisplay": "none",
+      "title": "Espadachim",
+      "hp": "200 / 200 HP",
+      "stats": "Ataque: 20+7 Defesa: 4 Vel: 4.8",
+      "actionButtons": 1,
+      "issued": [
+        "attack"
+      ]
+    }
+  },
+  "consoleErrors": [],
+  "consoleErrorCount": 0,
+  "consoleWarningCount": 0,
+  "checks": [
+    {
+      "name": "há acampamento neutro com guardas no mapa",
+      "ok": true,
+      "extra": "[{\"id\":26,\"type\":\"bandit\"},{\"id\":27,\"type\":\"bandit\"},{\"id\":28,\"type\":\"bandit\"},{\"id\":29,\"type\":\"bandit\"}]"
+    },
+    {
+      "name": "A: clique no bandido neutro inspeciona (gm.inspected) sem selecionar",
+      "ok": true,
+      "extra": "{\"id\":26,\"type\":\"bandit\",\"owner\":99,\"hp\":125,\"maxHp\":125}"
+    },
+    {
+      "name": "A: card visível com nome + lado NEUTRO, PV e dono; anel de seleção ligado",
+      "ok": true,
+      "extra": "Bandido (NEUTRO) | 125 / 125 HP | Ataque: 12+4 Defesa: 1 Dono: Bandoleiros"
+    },
+    {
+      "name": "A: card sem botões de ação (somente leitura)",
+      "ok": true,
+      "extra": "botões=0"
+    },
+    {
+      "name": "A: teclas S/H/A/P/1/Q/B e clique direito no chão não emitem comando e mantêm a inspeção",
+      "ok": true,
+      "extra": "comandos=[]"
+    },
+    {
+      "name": "Esc limpa a inspeção e esconde o card",
+      "ok": true,
+      "extra": "{\"i\":null,\"card\":\"none\"}"
+    },
+    {
+      "name": "B: clique no acampamento neutro inspeciona a construção (sem selectedBuilding)",
+      "ok": true,
+      "extra": "{\"id\":25,\"type\":\"bandit_camp\",\"owner\":99,\"hp\":1400,\"maxHp\":1400}"
+    },
+    {
+      "name": "B: card com lado NEUTRO, sem botões e sem o painel de construção",
+      "ok": true,
+      "extra": "Acampamento de Bandidos (NEUTRO) | 1400 / 1400 HP | bldView=none"
+    },
+    {
+      "name": "C: unidade inimiga visível é inspecionada (card INIMIGO, sem botões)",
+      "ok": true,
+      "extra": "Talhador (INIMIGO) | 198 / 198 HP"
+    },
+    {
+      "name": "a inspeção some quando a unidade sai da visão",
+      "ok": true,
+      "extra": "{\"i\":null,\"card\":\"none\"}"
+    },
+    {
+      "name": "com unidade própria selecionada, o clique no neutro dá ATAQUE (não vira inspeção)",
+      "ok": true,
+      "extra": "{\"i\":null,\"issued\":[\"attack\"]}"
+    },
+    {
+      "name": "sem erros de console",
+      "ok": true,
+      "extra": ""
+    }
+  ],
+  "pngs": [
+    "NEW-26-1-cards.png",
+    "NEW-26-2-cena.png"
+  ]
+}

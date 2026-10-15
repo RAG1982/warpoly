@@ -68,16 +68,51 @@
       ],
       "layout": {
         "buildings": [
-          { "role": "hq", "dx": 0, "dz": 0, "rotY": 0 },
-          { "role": "lumber", "dx": -12, "dz": -4, "rotY": 0.785 },
-          { "role": "house", "dx": -10, "dz": 8, "rotY": -0.785 }
+          {
+            "role": "hq",
+            "dx": 0,
+            "dz": 0,
+            "rotY": 0
+          },
+          {
+            "role": "lumber",
+            "dx": -12,
+            "dz": -4,
+            "rotY": 0.785
+          },
+          {
+            "role": "house",
+            "dx": -10,
+            "dz": 8,
+            "rotY": -0.785
+          }
         ],
         "units": [
-          { "role": "worker", "dx": -3, "dz": 4 },
-          { "role": "worker", "dx": 3, "dz": 4 },
-          { "role": "melee", "dx": -2, "dz": 6 },
-          { "role": "melee", "dx": 2, "dz": 6 },
-          { "role": "ranged", "dx": -4, "dz": 6 }
+          {
+            "role": "worker",
+            "dx": -3,
+            "dz": 4
+          },
+          {
+            "role": "worker",
+            "dx": 3,
+            "dz": 4
+          },
+          {
+            "role": "melee",
+            "dx": -2,
+            "dz": 6
+          },
+          {
+            "role": "melee",
+            "dx": 2,
+            "dz": 6
+          },
+          {
+            "role": "ranged",
+            "dx": -4,
+            "dz": 6
+          }
         ]
       }
     },
@@ -90,16 +125,51 @@
       ],
       "layout": {
         "buildings": [
-          { "role": "hq", "dx": 0, "dz": 0, "rotY": 0 },
-          { "role": "lumber", "dx": -12, "dz": -4, "rotY": 0.785 },
-          { "role": "house", "dx": -10, "dz": 8, "rotY": -0.785 }
+          {
+            "role": "hq",
+            "dx": 0,
+            "dz": 0,
+            "rotY": 0
+          },
+          {
+            "role": "lumber",
+            "dx": -12,
+            "dz": -4,
+            "rotY": 0.785
+          },
+          {
+            "role": "house",
+            "dx": -10,
+            "dz": 8,
+            "rotY": -0.785
+          }
         ],
         "units": [
-          { "role": "worker", "dx": -3, "dz": 4 },
-          { "role": "worker", "dx": 3, "dz": 4 },
-          { "role": "melee", "dx": -2, "dz": 6 },
-          { "role": "melee", "dx": 2, "dz": 6 },
-          { "role": "ranged", "dx": -4, "dz": 6 }
+          {
+            "role": "worker",
+            "dx": -3,
+            "dz": 4
+          },
+          {
+            "role": "worker",
+            "dx": 3,
+            "dz": 4
+          },
+          {
+            "role": "melee",
+            "dx": -2,
+            "dz": 6
+          },
+          {
+            "role": "melee",
+            "dx": 2,
+            "dz": 6
+          },
+          {
+            "role": "ranged",
+            "dx": -4,
+            "dz": 6
+          }
         ]
       }
     },
@@ -112,16 +182,51 @@
       ],
       "layout": {
         "buildings": [
-          { "role": "hq", "dx": 0, "dz": 0, "rotY": 0 },
-          { "role": "lumber", "dx": -12, "dz": -4, "rotY": 0.785 },
-          { "role": "house", "dx": -10, "dz": 8, "rotY": -0.785 }
+          {
+            "role": "hq",
+            "dx": 0,
+            "dz": 0,
+            "rotY": 0
+          },
+          {
+            "role": "lumber",
+            "dx": -12,
+            "dz": -4,
+            "rotY": 0.785
+          },
+          {
+            "role": "house",
+            "dx": -10,
+            "dz": 8,
+            "rotY": -0.785
+          }
         ],
         "units": [
-          { "role": "worker", "dx": -3, "dz": 4 },
-          { "role": "worker", "dx": 3, "dz": 4 },
-          { "role": "melee", "dx": -2, "dz": 6 },
-          { "role": "melee", "dx": 2, "dz": 6 },
-          { "role": "ranged", "dx": -4, "dz": 6 }
+          {
+            "role": "worker",
+            "dx": -3,
+            "dz": 4
+          },
+          {
+            "role": "worker",
+            "dx": 3,
+            "dz": 4
+          },
+          {
+            "role": "melee",
+            "dx": -2,
+            "dz": 6
+          },
+          {
+            "role": "melee",
+            "dx": 2,
+            "dz": 6
+          },
+          {
+            "role": "ranged",
+            "dx": -4,
+            "dz": 6
+          }
         ]
       }
     },
@@ -134,16 +239,51 @@
       ],
       "layout": {
         "buildings": [
-          { "role": "hq", "dx": 0, "dz": 0, "rotY": 0 },
-          { "role": "lumber", "dx": -12, "dz": -4, "rotY": 0.785 },
-          { "role": "house", "dx": -10, "dz": 8, "rotY": -0.785 }
+          {
+            "role": "hq",
+            "dx": 0,
+            "dz": 0,
+            "rotY": 0
+          },
+          {
+            "role": "lumber",
+            "dx": -12,
+            "dz": -4,
+            "rotY": 0.785
+          },
+          {
+            "role": "house",
+            "dx": -10,
+            "dz": 8,
+            "rotY": -0.785
+          }
         ],
         "units": [
-          { "role": "worker", "dx": -3, "dz": 4 },
-          { "role": "worker", "dx": 3, "dz": 4 },
-          { "role": "melee", "dx": -2, "dz": 6 },
-          { "role": "melee", "dx": 2, "dz": 6 },
-          { "role": "ranged", "dx": -4, "dz": 6 }
+          {
+            "role": "worker",
+            "dx": -3,
+            "dz": 4
+          },
+          {
+            "role": "worker",
+            "dx": 3,
+            "dz": 4
+          },
+          {
+            "role": "melee",
+            "dx": -2,
+            "dz": 6
+          },
+          {
+            "role": "melee",
+            "dx": 2,
+            "dz": 6
+          },
+          {
+            "role": "ranged",
+            "dx": -4,
+            "dz": 6
+          }
         ]
       }
     }
@@ -228,34 +368,6 @@
       "species": "oak"
     },
     {
-      "x": -15,
-      "z": -32,
-      "count": 12,
-      "radius": 6,
-      "species": "pine"
-    },
-    {
-      "x": 15,
-      "z": 32,
-      "count": 12,
-      "radius": 6,
-      "species": "pine"
-    },
-    {
-      "x": -15,
-      "z": 32,
-      "count": 12,
-      "radius": 6,
-      "species": "autumn"
-    },
-    {
-      "x": 15,
-      "z": -32,
-      "count": 12,
-      "radius": 6,
-      "species": "autumn"
-    },
-    {
       "x": 0,
       "z": -16,
       "count": 5,
@@ -296,6 +408,34 @@
       "count": 14,
       "radius": 7,
       "species": "oak"
+    },
+    {
+      "x": -15,
+      "z": -32,
+      "count": 12,
+      "radius": 6,
+      "species": "pine"
+    },
+    {
+      "x": 15,
+      "z": 32,
+      "count": 12,
+      "radius": 6,
+      "species": "pine"
+    },
+    {
+      "x": -15,
+      "z": 32,
+      "count": 12,
+      "radius": 6,
+      "species": "autumn"
+    },
+    {
+      "x": 15,
+      "z": -32,
+      "count": 12,
+      "radius": 6,
+      "species": "autumn"
     }
   ],
   "neutrals": [

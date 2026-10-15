@@ -1,8 +1,8 @@
 {
   "id": "ilhas-4p",
   "name": "Ilhas Gêmeas",
-  "size": 128,
-  "playable": 116,
+  "size": 168,
+  "playable": 156,
   "tileset": "ilhas",
   "waterLevel": 0.5,
   "maxPlayers": 4,
@@ -10,59 +10,353 @@
     "generator": "islands",
     "params": {
       "baseHeight": 2.4,
-      "coast": { "falloff": 10 },
+      "coast": {
+        "falloff": 10
+      },
       "islands": [
-        { "x": -30, "z": 0, "rx": 28, "rz": 40 },
-        { "x": 30, "z": 0, "rx": 28, "rz": 40 }
+        {
+          "x": -30,
+          "z": 0,
+          "rx": 28,
+          "rz": 40
+        },
+        {
+          "x": 30,
+          "z": 0,
+          "rx": 28,
+          "rz": 40
+        },
+        {
+          "x": -48,
+          "z": 0,
+          "rx": 18,
+          "rz": 38
+        },
+        {
+          "x": 48,
+          "z": 0,
+          "rx": 18,
+          "rz": 38
+        }
       ],
       "bridges": [
-        { "x1": -4, "z1": -15, "x2": 4, "z2": -15, "width": 8 },
-        { "x1": -4, "z1": 15, "x2": 4, "z2": 15, "width": 8 }
+        {
+          "x1": -4,
+          "z1": -15,
+          "x2": 4,
+          "z2": -15,
+          "width": 8
+        },
+        {
+          "x1": -4,
+          "z1": 15,
+          "x2": 4,
+          "z2": 15,
+          "width": 8
+        }
       ]
     }
   },
   "fords": [],
   "startSlots": [
-    { "x": -30, "z": -25, "mirror": [-1, 1] },
-    { "x": -30, "z": 25, "mirror": [-1, -1] },
-    { "x": 30, "z": -25, "mirror": [1, 1] },
-    { "x": 30, "z": 25, "mirror": [1, -1] }
+    {
+      "x": -30,
+      "z": -25,
+      "mirror": [
+        -1,
+        1
+      ],
+      "layout": {
+        "buildings": [
+          { "role": "hq", "dx": 0, "dz": 0, "rotY": 0 },
+          { "role": "lumber", "dx": -12, "dz": -4, "rotY": 0.785 },
+          { "role": "house", "dx": -10, "dz": 8, "rotY": -0.785 }
+        ],
+        "units": [
+          { "role": "worker", "dx": -3, "dz": 4 },
+          { "role": "worker", "dx": 3, "dz": 4 },
+          { "role": "melee", "dx": -2, "dz": 6 },
+          { "role": "melee", "dx": 2, "dz": 6 },
+          { "role": "ranged", "dx": -4, "dz": 6 }
+        ]
+      }
+    },
+    {
+      "x": 30,
+      "z": 25,
+      "mirror": [
+        1,
+        -1
+      ],
+      "layout": {
+        "buildings": [
+          { "role": "hq", "dx": 0, "dz": 0, "rotY": 0 },
+          { "role": "lumber", "dx": -12, "dz": -4, "rotY": 0.785 },
+          { "role": "house", "dx": -10, "dz": 8, "rotY": -0.785 }
+        ],
+        "units": [
+          { "role": "worker", "dx": -3, "dz": 4 },
+          { "role": "worker", "dx": 3, "dz": 4 },
+          { "role": "melee", "dx": -2, "dz": 6 },
+          { "role": "melee", "dx": 2, "dz": 6 },
+          { "role": "ranged", "dx": -4, "dz": 6 }
+        ]
+      }
+    },
+    {
+      "x": -30,
+      "z": 25,
+      "mirror": [
+        -1,
+        -1
+      ],
+      "layout": {
+        "buildings": [
+          { "role": "hq", "dx": 0, "dz": 0, "rotY": 0 },
+          { "role": "lumber", "dx": -12, "dz": -4, "rotY": 0.785 },
+          { "role": "house", "dx": -10, "dz": 8, "rotY": -0.785 }
+        ],
+        "units": [
+          { "role": "worker", "dx": -3, "dz": 4 },
+          { "role": "worker", "dx": 3, "dz": 4 },
+          { "role": "melee", "dx": -2, "dz": 6 },
+          { "role": "melee", "dx": 2, "dz": 6 },
+          { "role": "ranged", "dx": -4, "dz": 6 }
+        ]
+      }
+    },
+    {
+      "x": 30,
+      "z": -25,
+      "mirror": [
+        1,
+        1
+      ],
+      "layout": {
+        "buildings": [
+          { "role": "hq", "dx": 0, "dz": 0, "rotY": 0 },
+          { "role": "lumber", "dx": -12, "dz": -4, "rotY": 0.785 },
+          { "role": "house", "dx": -10, "dz": 8, "rotY": -0.785 }
+        ],
+        "units": [
+          { "role": "worker", "dx": -3, "dz": 4 },
+          { "role": "worker", "dx": 3, "dz": 4 },
+          { "role": "melee", "dx": -2, "dz": 6 },
+          { "role": "melee", "dx": 2, "dz": 6 },
+          { "role": "ranged", "dx": -4, "dz": 6 }
+        ]
+      }
+    }
   ],
   "resources": [
-    { "type": "gold", "x": -45, "z": -25 },
-    { "type": "stone", "x": -30, "z": -38 },
-    { "type": "gold", "x": -45, "z": 25 },
-    { "type": "stone", "x": -30, "z": 38 },
-    { "type": "gold", "x": 45, "z": -25 },
-    { "type": "stone", "x": 30, "z": -38 },
-    { "type": "gold", "x": 45, "z": 25 },
-    { "type": "stone", "x": 30, "z": 38 },
-    { "type": "gold", "x": -10, "z": 0 },
-    { "type": "stone", "x": 10, "z": 0 },
-    { "type": "oil", "x": -30, "z": 50, "amount": 5000 },
-    { "type": "oil", "x": 30, "z": -50, "amount": 5000 }
+    {
+      "type": "gold",
+      "x": -45,
+      "z": -25
+    },
+    {
+      "type": "stone",
+      "x": -30,
+      "z": -38
+    },
+    {
+      "type": "gold",
+      "x": -45,
+      "z": 25
+    },
+    {
+      "type": "stone",
+      "x": -30,
+      "z": 38
+    },
+    {
+      "type": "gold",
+      "x": 45,
+      "z": -25
+    },
+    {
+      "type": "stone",
+      "x": 30,
+      "z": -38
+    },
+    {
+      "type": "gold",
+      "x": 45,
+      "z": 25
+    },
+    {
+      "type": "stone",
+      "x": 30,
+      "z": 38
+    },
+    {
+      "type": "gold",
+      "x": -10,
+      "z": 0
+    },
+    {
+      "type": "stone",
+      "x": 10,
+      "z": 0
+    },
+    {
+      "type": "oil",
+      "x": -30,
+      "z": 50,
+      "amount": 5000
+    },
+    {
+      "type": "oil",
+      "x": 30,
+      "z": -50,
+      "amount": 5000
+    }
   ],
   "forests": [
-    { "x": -45, "z": 0, "count": 6, "radius": 8.0, "species": "oak" },
-    { "x": 45, "z": 0, "count": 6, "radius": 8.0, "species": "oak" },
-    { "x": -15, "z": -32, "count": 4, "radius": 5.0, "species": "pine" },
-    { "x": 15, "z": 32, "count": 4, "radius": 5.0, "species": "pine" },
-    { "x": -15, "z": 32, "count": 4, "radius": 5.0, "species": "autumn" },
-    { "x": 15, "z": -32, "count": 4, "radius": 5.0, "species": "autumn" },
-    { "x": 0, "z": -16, "count": 5, "radius": 5.0, "species": "pine" },
-    { "x": 0, "z": 16, "count": 5, "radius": 5.0, "species": "pine" },
-    { "x": -54, "z": -12, "count": 5, "radius": 5.0, "species": "oak" },
-    { "x": -54, "z": 12, "count": 5, "radius": 5.0, "species": "oak" },
-    { "x": 54, "z": -12, "count": 5, "radius": 5.0, "species": "oak" },
-    { "x": 54, "z": 12, "count": 5, "radius": 5.0, "species": "oak" }
+    {
+      "x": -45,
+      "z": 0,
+      "count": 14,
+      "radius": 7.5,
+      "species": "oak"
+    },
+    {
+      "x": 45,
+      "z": 0,
+      "count": 14,
+      "radius": 7.5,
+      "species": "oak"
+    },
+    {
+      "x": -15,
+      "z": -32,
+      "count": 12,
+      "radius": 6,
+      "species": "pine"
+    },
+    {
+      "x": 15,
+      "z": 32,
+      "count": 12,
+      "radius": 6,
+      "species": "pine"
+    },
+    {
+      "x": -15,
+      "z": 32,
+      "count": 12,
+      "radius": 6,
+      "species": "autumn"
+    },
+    {
+      "x": 15,
+      "z": -32,
+      "count": 12,
+      "radius": 6,
+      "species": "autumn"
+    },
+    {
+      "x": 0,
+      "z": -16,
+      "count": 5,
+      "radius": 5,
+      "species": "pine"
+    },
+    {
+      "x": 0,
+      "z": 16,
+      "count": 5,
+      "radius": 5,
+      "species": "pine"
+    },
+    {
+      "x": -57,
+      "z": -25,
+      "count": 14,
+      "radius": 7,
+      "species": "oak"
+    },
+    {
+      "x": -57,
+      "z": 25,
+      "count": 14,
+      "radius": 7,
+      "species": "oak"
+    },
+    {
+      "x": 57,
+      "z": -25,
+      "count": 14,
+      "radius": 7,
+      "species": "oak"
+    },
+    {
+      "x": 57,
+      "z": 25,
+      "count": 14,
+      "radius": 7,
+      "species": "oak"
+    }
   ],
   "neutrals": [
-    { "kind": "camp", "x": -22, "z": 0, "guards": 4, "reward": { "gold": 300 }, "deposit": { "type": "gold", "amount": 3000 } },
-    { "kind": "camp", "x": 22, "z": 0, "guards": 4, "reward": { "gold": 300 }, "deposit": { "type": "gold", "amount": 3000 } },
-    { "kind": "critters", "species": "sheep", "x": -40, "z": -10, "count": 5, "radius": 6 },
-    { "kind": "critters", "species": "sheep", "x": 40, "z": 10, "count": 5, "radius": 6 },
-    { "kind": "critters", "species": "pig", "x": -18, "z": -30, "count": 4, "radius": 5 },
-    { "kind": "critters", "species": "pig", "x": 18, "z": 30, "count": 4, "radius": 5 }
+    {
+      "kind": "camp",
+      "x": -22,
+      "z": 0,
+      "guards": 4,
+      "reward": {
+        "gold": 300
+      },
+      "deposit": {
+        "type": "gold",
+        "amount": 3000
+      }
+    },
+    {
+      "kind": "camp",
+      "x": 22,
+      "z": 0,
+      "guards": 4,
+      "reward": {
+        "gold": 300
+      },
+      "deposit": {
+        "type": "gold",
+        "amount": 3000
+      }
+    },
+    {
+      "kind": "critters",
+      "species": "sheep",
+      "x": -40,
+      "z": -10,
+      "count": 5,
+      "radius": 6
+    },
+    {
+      "kind": "critters",
+      "species": "sheep",
+      "x": 40,
+      "z": 10,
+      "count": 5,
+      "radius": 6
+    },
+    {
+      "kind": "critters",
+      "species": "pig",
+      "x": -18,
+      "z": -30,
+      "count": 4,
+      "radius": 5
+    },
+    {
+      "kind": "critters",
+      "species": "pig",
+      "x": 18,
+      "z": 30,
+      "count": 4,
+      "radius": 5
+    }
   ],
-  "decorationDensity": 1.0
+  "decorationDensity": 1
 }

@@ -228,6 +228,22 @@ export class AIEconomyManager {
   }
 
   /**
+   * DIAG (sondagem F): a recuperação de trabalhadores ainda é possível? Centro concluído e vivo, ouro para um
+   * trabalhador e vaga de população. Falso = a "emergência" nunca termina (sem Centro ou sem ouro).
+   * @returns {boolean}
+   */
+  canRecoverWorkers() {
+    const dir = this.director;
+    const buildings = this.gm.buildings;
+    let hq = false;
+    for (let i = 0; i < buildings.length; i++) {
+      const b = buildings[i];
+      if (b.ownerId === dir.playerId && b.type === dir.hqType && b.isConstructed && !b.isDead) { hq = true; break; }
+    }
+    return hq && dir.canAfford(dir.costs.worker) && dir.population < dir.maxPopulation;
+  }
+
+  /**
    * Verifies if the military manager can safely recruit combat troops without starving peon production
    * @returns {boolean}
    */

@@ -362,8 +362,10 @@ export class AIDirector {
     if (this.utilities.def > 0.5) {
       // Prioritize homeland defense over foreign offensive
       this.utilities.mil = 0.2;
-    } else if (isEmergency) {
+    } else if (isEmergency && this.economyManager.canRecoverWorkers()) {
       // Keep troops to defend home base while economy recovers
+      // DIAG (sondagem F): so segura o exercito se a recuperacao dos trabalhadores ainda e possivel
+      // (Centro vivo + ouro para um trabalhador + vaga de populacao). Sem isso a emergencia e permanente.
       this.utilities.mil = 0.0;
     } else if (readyCombatTroops >= threshold) {
       this.utilities.mil = 1.0; // Ready for assault!

@@ -117,6 +117,7 @@ for (const d of gm.aiDirectors) {
     const t = fields.type;
     if (r === null) { l.dropped++; l.recent.push({ tick: gm.currentTick, ...brief(fields), dropped: true }); }
     else {
+      if ((t === CMD.ATTACK_MOVE || t === CMD.ATTACK) && (l.firstAttacks || (l.firstAttacks = [])).length < 8) l.firstAttacks.push({ tick: gm.currentTick, ...brief(fields) });
       l.counts[t] = (l.counts[t] || 0) + 1;
       l.winCounts[t] = (l.winCounts[t] || 0) + 1;
       l.lastTick[t] = gm.currentTick;
@@ -157,14 +158,14 @@ const hostileKill = (e) => {
 gm.events.on(EVT.UNIT_DIED, (e) => {
   if (e.expired || !hostileKill(e)) return;
   pvp.kills++; pvp.win.kills++;
-  if (pvp.firstKill === null) pvp.firstKill = { tick: gm.currentTick, killer: e.killerOwnerId, victim: e.ownerId };
+  if (pvp.firstKill === null) pvp.firstKill = { tick: gm.currentTick, killer: e.killerOwnerId, victim: e.ownerId, unit: e.unitType, xz: e.pos ? [r1(e.pos.x), r1(e.pos.z)] : null };
   const key = `${e.killerOwnerId}>${e.ownerId}`;
   pvp.byPair[key] = (pvp.byPair[key] || 0) + 1;
 });
 gm.events.on(EVT.BUILDING_DESTROYED, (e) => {
   if (!hostileKill(e)) return;
   pvp.bKills++; pvp.win.bKills++;
-  if (pvp.firstBld === null) pvp.firstBld = { tick: gm.currentTick, killer: e.killerOwnerId, victim: e.ownerId, type: e.buildingType };
+  if (pvp.firstBld === null) pvp.firstBld = { tick: gm.currentTick, killer: e.killerOwnerId, victim: e.ownerId, type: e.buildingType, xz: e.pos ? [r1(e.pos.x), r1(e.pos.z)] : null };
 });
 
 // --- amostragem ---
@@ -257,7 +258,8 @@ function snapshotPlayers(gm, tick) {
         cmdWindow: l.winCounts,
         cmdTotals: l.counts, executed: l.executed, rejected: l.rejected,
         lastCmdTick: l.lastTick,
-        lastCmds: l.recent.slice(-10)
+        lastCmds: l.recent.slice(-10),
+        firstAttacks: l.firstAttacks || []
       };
       l.winCounts = {};
     }

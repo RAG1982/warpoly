@@ -138,10 +138,10 @@ if (mode === 'game') {
   // rotações de teste nos pivôs (rotation.x > 0 leva o pé de uma perna para trás e baixa o focinho)
   const poses = [
     ['repouso', {}],
-    ['andar A', { legs: [-0.45, 0.45, 0.45, -0.45], head: 0.05, tail: 0.15, body: 0.02 }],
-    ['andar B', { legs: [0.45, -0.45, -0.45, 0.45], head: -0.05, tail: -0.15, body: -0.02 }],
-    ['correr', { legs: [-0.85, 0.7, 0.85, -0.7], head: -0.12, tail: 0.5, body: 0.08, lift: 0.03 }],
-    ['pastar', { legs: [-0.12, 0.1, 0, 0], head: 0.95, tail: 0.35, body: -0.03 }],
+    ['andar A', { legs: [-0.45, 0.45, 0.45, -0.45], head: 0.05, body: 0.02 }],
+    ['andar B', { legs: [0.45, -0.45, -0.45, 0.45], head: -0.05, body: -0.02 }],
+    ['correr', { legs: [-0.85, 0.7, 0.85, -0.7], head: -0.12, body: 0.08, lift: 0.03 }],
+    ['pastar', { legs: [-0.12, 0.1, 0, 0], head: 0.95, body: -0.03 }],
   ];
   const labels = [];
   poses.forEach(([label, p], i) => {
@@ -149,7 +149,7 @@ if (mode === 'game') {
     const rot = (n, x) => { const o = c.getObjectByName(n); if (o) o.rotation.x = x; };
     const [fl, fr, bl, br] = p.legs || [0, 0, 0, 0];
     rot('Leg_FL', fl); rot('Leg_FR', fr); rot('Leg_BL', bl); rot('Leg_BR', br);
-    rot('Head', p.head || 0); rot('Body', p.body || 0); rot('Tail', p.tail || 0);
+    rot('Head', p.head || 0); rot('Body', p.body || 0); // Tail/Snout/Tusk_* são âncoras sem geometria: girá-los não move nada
     if (p.lift) c.getObjectByName('Body').position.y += p.lift;
     c.position.set(0, 0, (i - 2) * 1.5); // visto de -x: +z fica à direita, o javali olha para a direita
     scene.add(c);

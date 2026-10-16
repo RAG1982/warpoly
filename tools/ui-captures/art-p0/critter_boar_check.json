@@ -449,5 +449,9 @@
   "textures": [
    "512x512"
   ]
+ },
+ "meta": {
+  "gpu": "ANGLE (AMD, Vulkan 1.4.318 (AMD Radeon RX 7600 XT (RADV NAVI33) (0x00007480)), radv)",
+  "chromium": "153.0.8010.12"
  }
 }

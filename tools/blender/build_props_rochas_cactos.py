@@ -121,7 +121,7 @@ def stretch(nb, fac, lo=0.3, hi=0.7):
 
 
 def granite_paint(name, seed=0.0, k=1.0, grain=14.0, crack_scale=0.9, crack_amt=0.30, strata_amt=1.0, top_amt=1.0,
-                  dark='#716b62', light='#a39b8c', edge_r=0.035, edge_amt=0.45, ao=(0.9, 0.72), dust_h=0.5,
+                  dark='#7a7368', light='#aea695', edge_r=0.035, edge_amt=0.45, ao=(0.9, 0.70), dust_h=0.5,
                   strata_scale=3.8, facet_amt=0.20, grain_amt=0.14, mica_amt=0.20):
     """Granito cinza-quente (#8a8378): manchas largas (escala `k` acompanha o tamanho da rocha), estratos sutis (faixas
     horizontais em coordenadas do mundo, o eixo Z do Blender = y do jogo), trincas sinuosas (curvas de nível de um ruído),
@@ -168,9 +168,9 @@ def granite_paint(name, seed=0.0, k=1.0, grain=14.0, crack_scale=0.9, crack_amt=
     # luz de topo pintada (topo claro e quente) e lados/fundos frios
     col = bright(nb, col, nb.math('ADD', 0.80, nb.math('MULTIPLY', nz, 0.26 * top_amt)))
     top = smoothstep(nb, nz, 0.45, 0.95)
-    col = lerp_to(nb, col, top, '#cdc4b1', 0.40 * top_amt)
+    col = lerp_to(nb, col, top, '#d4cab6', 0.40 * top_amt)
     side = smoothstep(nb, nz, 0.5, -0.15)
-    col = lerp_to(nb, col, side, '#575c68', 0.30)
+    col = lerp_to(nb, col, side, '#5f6270', 0.14)
 
     # poeira no pé da rocha (altura do mundo)
     dust = smoothstep(nb, gz, dust_h, 0.0)
@@ -181,7 +181,7 @@ def granite_paint(name, seed=0.0, k=1.0, grain=14.0, crack_scale=0.9, crack_amt=
     return end_paint(mat, nt, nb, col)
 
 
-def cactus_paint(name, seed=0.0, base='#74886a', dark='#566b4e', tip='#97a97a', edge='#b6c79c', spine='#eadfb2',
+def cactus_paint(name, seed=0.0, base='#7b8b71', dark='#5d6c55', tip='#9cac84', edge='#bccaa4', spine='#eadfb2',
                  flat_tone=0.12):
     """Cacto verde-acinzentado: nervuras (AO escurece os vales, desgaste de borda clareia as cristas), espinhos em pontos
     claros sobre as cristas, verde mais novo para o alto, poeira de areia no pé."""
@@ -680,7 +680,7 @@ def build_bones(mats, root):
                 zz = z + 0.05 * math.sin(phi * 1.3) * (1 if side == 'L' else -1)
                 pts.append((sx * x2, max(y2, 0.02), zz))
                 t = k / steps
-                radii.append((0.036 - 0.013 * t, 0.066 - 0.024 * t))
+                radii.append((0.044 - 0.016 * t, 0.078 - 0.028 * t))
             bone_tube(mb, pts, radii, 'bone', 4, up=(0, 0, 1))
     # costela caída no chão (lado direito)
     rp = [(0.58, 0.04, -0.12), (0.80, 0.035, 0.02), (0.94, 0.035, 0.24), (0.90, 0.03, 0.46), (0.76, 0.03, 0.62)]
@@ -695,7 +695,7 @@ def build_bones(mats, root):
         ang = math.degrees(math.atan(slope))
         s = 1.0 if z > -0.55 else 0.62 + 0.38 * max(0.0, (z + 0.95) / 0.4)
         T = M((0, y, z), (-ang, 0, 0))
-        mb.add(prim_cyl(0.062 * s, 0.066 * s, 0.15, 5, base=False), 'bone', T @ M((0, 0, 0), (90, 0, 0)), smooth=0)
+        mb.add(prim_cyl(0.070 * s, 0.074 * s, 0.15, 5, base=False), 'bone', T @ M((0, 0, 0), (90, 0, 0)), smooth=0)
         mb.add(prim_cone(0.045 * s, (0.15 if -0.6 < z < 0.8 else 0.07) * s, 4), 'bone', T @ M((0, 0.04, 0)), smooth=0)
         z += 0.118 / math.sqrt(1.0 + slope * slope)
     # crânio no chão (focinho para +z, levemente girado e com o nariz mais baixo) e mandíbula solta ao lado
@@ -835,15 +835,83 @@ def clip_below_ground():
         mat['clip_ground'] = True
 
 
-def preview_rig(mesh_objs, out_path, res=512, az=CAM_AZ, el=CAM_EL, fov=CAM_FOV, margin=0.07, samples=64, ground=False):
+def load_rgba(path):
+    """PNG -> array float32 (H, W, 4), valores crus (sRGB, alfa direto), origem embaixo."""
+    img = bpy.data.images.load(path, check_existing=False)
+    w, h = img.size
+    arr = np.empty(w * h * 4, dtype=np.float32)
+    img.pixels.foreach_get(arr)
+    bpy.data.images.remove(img)
+    return arr.reshape(h, w, 4)
+
+
+def save_rgba(arr, path):
+    h, w = arr.shape[:2]
+    oi = bpy.data.images.new('out_rgba', w, h, alpha=True)
+    oi.alpha_mode = 'STRAIGHT'
+    oi.pixels.foreach_set(np.ascontiguousarray(arr, dtype=np.float32).ravel())
+    oi.filepath_raw = path
+    oi.file_format = 'PNG'
+    oi.save()
+    bpy.data.images.remove(oi)
+
+
+def shadow_pass(mesh_objs, lights, world, out_path, strength=0.5):
+    """Sombra de contato suave sob o modelo, para a prévia transparente não parecer flutuar: segundo render com chão branco,
+    modelo invisível para a câmera (continua projetando sombra) e só a luz principal acesa; a sombra (1 - luminância/luz plena)
+    vira alfa preto composto POR BAIXO do render do modelo (já salvo em out_path)."""
+    obj_layer = load_rgba(out_path)
+    ground = add_shadow_ground(60.0)
+    gm = bpy.data.materials.new('ShadowGroundMat')
+    gm.use_nodes = True
+    bsdf = gm.node_tree.nodes['Principled BSDF']
+    bsdf.inputs['Base Color'].default_value = (1.0, 1.0, 1.0, 1.0)
+    bsdf.inputs['Roughness'].default_value = 1.0
+    try:
+        bsdf.inputs['Specular IOR Level'].default_value = 0.0
+    except KeyError:
+        pass
+    ground.data.materials.append(gm)
+    ground.is_shadow_catcher = False
+    for o in mesh_objs:
+        o.visible_camera = False
+    for k, lt in lights.items():
+        if k != 'key':
+            lt.hide_render = True
+    for n in world.node_tree.nodes:
+        if n.type == 'BACKGROUND':
+            n.inputs['Strength'].default_value = 0.0
+    tmp = os.path.join(C.BUILD_DIR, 'art_p0_shadow.png')
+    bpy.context.scene.render.filepath = tmp
+    bpy.ops.render.render(write_still=True)
+    sh = load_rgba(tmp)
+    lum = sh[..., 0] * 0.2126 + sh[..., 1] * 0.7152 + sh[..., 2] * 0.0722
+    lit = float(np.percentile(lum, 97))
+    dark = np.clip(1.0 - lum / max(lit, 1e-4), 0.0, 1.0)
+    dark = np.clip((dark - 0.04) / 0.96, 0.0, 1.0) * strength
+    ao, ro = obj_layer[..., 3], obj_layer[..., :3]
+    out_a = ao + (1.0 - ao) * dark
+    out_rgb = np.where(out_a[..., None] > 1e-5, ro * ao[..., None] / np.maximum(out_a[..., None], 1e-5), 0.0)
+    save_rgba(np.concatenate([np.clip(out_rgb, 0, 1), out_a[..., None]], axis=-1), out_path)
+    for o in mesh_objs:
+        o.visible_camera = True
+
+
+def preview_rig(mesh_objs, out_path, res=512, az=CAM_AZ, el=CAM_EL, fov=CAM_FOV, margin=0.07, samples=64, ground=False, shadow=False):
     """Luz de 3 pontos + mundo + câmera enquadrando `mesh_objs` e render PNG RGBA (fundo transparente) em out_path."""
     import ui_common as U
     for o in list(bpy.data.objects):
         if o.type in ('LIGHT', 'CAMERA'):
             bpy.data.objects.remove(o, do_unlink=True)
     configure_render(res, samples)
-    U.make_world()
-    U.make_lights()
+    world = U.make_world()
+    lights = {
+        # como no jogo (SceneManager): sol quente atrás-à-esquerda (sombras caem para a direita-frente) e preenchimento
+        # frio à direita-frente; o ambiente do mundo faz o papel da luz hemisférica
+        'key': U._sun('Key', 3.4, (1.0, 0.98, 0.93), (-52.0, 68.0, -22.0), 4.0),
+        'fill': U._sun('Fill', 1.2, (0.56, 0.70, 0.83), (40.0, 30.0, 45.0), 12.0),
+    }
+    lights['fill'].data.use_shadow = False
     cam = U.make_camera(fov)
     if ground:
         add_shadow_ground()
@@ -854,6 +922,8 @@ def preview_rig(mesh_objs, out_path, res=512, az=CAM_AZ, el=CAM_EL, fov=CAM_FOV,
     os.makedirs(os.path.dirname(out_path), exist_ok=True)
     bpy.context.scene.render.filepath = out_path
     bpy.ops.render.render(write_still=True)
+    if shadow:
+        shadow_pass(mesh_objs, lights, world, out_path)
     return out_path
 
 
@@ -866,7 +936,7 @@ def render_final_preview(key):
     U.polish_materials(rough=SPECS[key]['rough'], spec=0.2)
     meshes = [o for o in objs if o.type == 'MESH']
     out = os.path.join(PREVIEW_DIR, key + '.png')
-    preview_rig(meshes, out, samples=96)
+    preview_rig(meshes, out, samples=96, shadow='--no-shadow' not in C.script_args())
     log('preview', os.path.relpath(out, C.REPO), f'({os.path.getsize(out) // 1024} KB)')
     return out
 

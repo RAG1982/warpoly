@@ -1,0 +1,453 @@
+{
+ "poses": {
+  "mode": "poses",
+  "tree": [
+   {
+    "name": "CritterBoar",
+    "type": "Object3D",
+    "depth": 0,
+    "pos": [
+     0,
+     0,
+     0
+    ]
+   },
+   {
+    "name": "Body",
+    "type": "Mesh",
+    "depth": 1,
+    "pos": [
+     0,
+     0.36,
+     0
+    ]
+   },
+   {
+    "name": "Head",
+    "type": "Mesh",
+    "depth": 2,
+    "pos": [
+     0,
+     0.07,
+     0.25
+    ]
+   },
+   {
+    "name": "Snout",
+    "type": "Object3D",
+    "depth": 3,
+    "pos": [
+     0,
+     -0.065,
+     0.22
+    ]
+   },
+   {
+    "name": "Tusk_L",
+    "type": "Object3D",
+    "depth": 3,
+    "pos": [
+     -0.056,
+     -0.14,
+     0.238
+    ]
+   },
+   {
+    "name": "Tusk_R",
+    "type": "Object3D",
+    "depth": 3,
+    "pos": [
+     0.056,
+     -0.14,
+     0.238
+    ]
+   },
+   {
+    "name": "Leg_BL",
+    "type": "Mesh",
+    "depth": 2,
+    "pos": [
+     -0.108,
+     -0.02,
+     -0.34
+    ]
+   },
+   {
+    "name": "Leg_BR",
+    "type": "Mesh",
+    "depth": 2,
+    "pos": [
+     0.108,
+     -0.02,
+     -0.34
+    ]
+   },
+   {
+    "name": "Leg_FL",
+    "type": "Mesh",
+    "depth": 2,
+    "pos": [
+     -0.126,
+     -0.02,
+     0.19
+    ]
+   },
+   {
+    "name": "Leg_FR",
+    "type": "Mesh",
+    "depth": 2,
+    "pos": [
+     0.126,
+     -0.02,
+     0.19
+    ]
+   },
+   {
+    "name": "Tail",
+    "type": "Object3D",
+    "depth": 2,
+    "pos": [
+     0,
+     0.045,
+     -0.575
+    ]
+   }
+  ],
+  "bbox": {
+   "min": [
+    -0.183,
+    0,
+    -0.743
+   ],
+   "max": [
+    0.183,
+    0.6,
+    0.602
+   ],
+   "size": [
+    0.365,
+    0.6,
+    1.345
+   ]
+  },
+  "meshes": 6,
+  "tris": 1162,
+  "materials": 1,
+  "attributes": [
+   "position",
+   "normal",
+   "uv"
+  ],
+  "textures": [
+   "512x512"
+  ]
+ },
+ "game": {
+  "mode": "game",
+  "tree": [
+   {
+    "name": "CritterBoar",
+    "type": "Object3D",
+    "depth": 0,
+    "pos": [
+     0,
+     0,
+     0
+    ]
+   },
+   {
+    "name": "Body",
+    "type": "Mesh",
+    "depth": 1,
+    "pos": [
+     0,
+     0.36,
+     0
+    ]
+   },
+   {
+    "name": "Head",
+    "type": "Mesh",
+    "depth": 2,
+    "pos": [
+     0,
+     0.07,
+     0.25
+    ]
+   },
+   {
+    "name": "Snout",
+    "type": "Object3D",
+    "depth": 3,
+    "pos": [
+     0,
+     -0.065,
+     0.22
+    ]
+   },
+   {
+    "name": "Tusk_L",
+    "type": "Object3D",
+    "depth": 3,
+    "pos": [
+     -0.056,
+     -0.14,
+     0.238
+    ]
+   },
+   {
+    "name": "Tusk_R",
+    "type": "Object3D",
+    "depth": 3,
+    "pos": [
+     0.056,
+     -0.14,
+     0.238
+    ]
+   },
+   {
+    "name": "Leg_BL",
+    "type": "Mesh",
+    "depth": 2,
+    "pos": [
+     -0.108,
+     -0.02,
+     -0.34
+    ]
+   },
+   {
+    "name": "Leg_BR",
+    "type": "Mesh",
+    "depth": 2,
+    "pos": [
+     0.108,
+     -0.02,
+     -0.34
+    ]
+   },
+   {
+    "name": "Leg_FL",
+    "type": "Mesh",
+    "depth": 2,
+    "pos": [
+     -0.126,
+     -0.02,
+     0.19
+    ]
+   },
+   {
+    "name": "Leg_FR",
+    "type": "Mesh",
+    "depth": 2,
+    "pos": [
+     0.126,
+     -0.02,
+     0.19
+    ]
+   },
+   {
+    "name": "Tail",
+    "type": "Object3D",
+    "depth": 2,
+    "pos": [
+     0,
+     0.045,
+     -0.575
+    ]
+   }
+  ],
+  "bbox": {
+   "min": [
+    -0.183,
+    0,
+    -0.743
+   ],
+   "max": [
+    0.183,
+    0.6,
+    0.602
+   ],
+   "size": [
+    0.365,
+    0.6,
+    1.345
+   ]
+  },
+  "meshes": 6,
+  "tris": 1162,
+  "materials": 1,
+  "attributes": [
+   "position",
+   "normal",
+   "uv"
+  ],
+  "textures": [
+   "512x512"
+  ],
+  "sizes_in_game": {
+   "Espadachim (x1,62)": [
+    3.648,
+    3.361,
+    2.562
+   ],
+   "javali .glb (x1,4)": [
+    1.188,
+    0.84,
+    1.926
+   ],
+   "javali procedural (x1,4)": [
+    1.973,
+    1.627,
+    2.788
+   ],
+   "ovelha procedural (x1,4)": [
+    2.107,
+    1.75,
+    2.981
+   ]
+  }
+ },
+ "close": {
+  "mode": "close",
+  "tree": [
+   {
+    "name": "CritterBoar",
+    "type": "Object3D",
+    "depth": 0,
+    "pos": [
+     0,
+     0,
+     0
+    ]
+   },
+   {
+    "name": "Body",
+    "type": "Mesh",
+    "depth": 1,
+    "pos": [
+     0,
+     0.36,
+     0
+    ]
+   },
+   {
+    "name": "Head",
+    "type": "Mesh",
+    "depth": 2,
+    "pos": [
+     0,
+     0.07,
+     0.25
+    ]
+   },
+   {
+    "name": "Snout",
+    "type": "Object3D",
+    "depth": 3,
+    "pos": [
+     0,
+     -0.065,
+     0.22
+    ]
+   },
+   {
+    "name": "Tusk_L",
+    "type": "Object3D",
+    "depth": 3,
+    "pos": [
+     -0.056,
+     -0.14,
+     0.238
+    ]
+   },
+   {
+    "name": "Tusk_R",
+    "type": "Object3D",
+    "depth": 3,
+    "pos": [
+     0.056,
+     -0.14,
+     0.238
+    ]
+   },
+   {
+    "name": "Leg_BL",
+    "type": "Mesh",
+    "depth": 2,
+    "pos": [
+     -0.108,
+     -0.02,
+     -0.34
+    ]
+   },
+   {
+    "name": "Leg_BR",
+    "type": "Mesh",
+    "depth": 2,
+    "pos": [
+     0.108,
+     -0.02,
+     -0.34
+    ]
+   },
+   {
+    "name": "Leg_FL",
+    "type": "Mesh",
+    "depth": 2,
+    "pos": [
+     -0.126,
+     -0.02,
+     0.19
+    ]
+   },
+   {
+    "name": "Leg_FR",
+    "type": "Mesh",
+    "depth": 2,
+    "pos": [
+     0.126,
+     -0.02,
+     0.19
+    ]
+   },
+   {
+    "name": "Tail",
+    "type": "Object3D",
+    "depth": 2,
+    "pos": [
+     0,
+     0.045,
+     -0.575
+    ]
+   }
+  ],
+  "bbox": {
+   "min": [
+    -0.183,
+    0,
+    -0.743
+   ],
+   "max": [
+    0.183,
+    0.6,
+    0.602
+   ],
+   "size": [
+    0.365,
+    0.6,
+    1.345
+   ]
+  },
+  "meshes": 6,
+  "tris": 1162,
+  "materials": 1,
+  "attributes": [
+   "position",
+   "normal",
+   "uv"
+  ],
+  "textures": [
+   "512x512"
+  ]
+ }
+}

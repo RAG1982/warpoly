@@ -78,8 +78,12 @@ TORSO = [
     (0.27, 0.530, 0.212, 0.180),
     (0.33, 0.488, 0.266, 0.132),
 ]
-# manchas claras do flanco: (lado, z mínimo, z máximo) — lado -1 = esquerdo (-x)
-TAN_PATCHES = [(-1, -0.40, -0.26), (-1, 0.04, 0.20), (1, -0.20, -0.10), (1, 0.18, 0.30)]
+# manchas claras da pelagem: esferas de influência (x, y, z, raio) em coordenadas do jogo; as bordas ficam irregulares
+# (ruído) e atravessam as facetas. Poucas e assimétricas: flancos e bochechas.
+PATCH_BLOBS = [
+    (-0.19, 0.36, 0.11, 0.095), (-0.16, 0.37, -0.33, 0.075), (0.18, 0.37, -0.12, 0.09), (0.19, 0.33, 0.25, 0.07),
+    (0.14, 0.40, -0.42, 0.06), (-0.125, 0.385, 0.41, 0.065), (0.125, 0.385, 0.41, 0.065),
+]
 # anéis do crânio/focinho: (z, centro y, meia-largura, meia-altura)
 SKULL = [
     (0.18, 0.420, 0.120, 0.110),
@@ -103,11 +107,8 @@ PALETTE = {
     # pelagem principal: marrom quente com riscas de cerda mais claras e manchas claras maiores
     'fur': dict(fur=True, base='#493524', var='#322418', var_scale=7.0, var_amt=0.75,
                 grizzle='#8a7050', grizzle_amt=0.34, streak=(80.0, 14.0), streak_lo=0.50, streak_hi=0.64,
+                patch='#8c7252', patch_amt=0.88, blobs=PATCH_BLOBS, blob_rag=1.5,
                 grad=(0.16, 0.58, 0.18), top=0.28, edge='#b49a74', edge_amt=0.14, edge_r=0.02, ao=(0.22, 0.65)),
-    # manchas de tom areia nos flancos (faces escolhidas à mão, para serem poucas e legíveis)
-    'fur_tan': dict(fur=True, base='#7b6144', var='#614a33', var_scale=8.0, var_amt=0.8,
-                    grizzle='#a99070', grizzle_amt=0.4, streak=(80.0, 14.0), streak_lo=0.50, streak_hi=0.64,
-                    grad=(0.16, 0.58, 0.18), top=0.28, edge='#c4ad86', edge_amt=0.14, edge_r=0.02, ao=(0.22, 0.65)),
     # crina, pernas, focinho, orelhas: marrom quase preto
     'fur_dark': dict(fur=True, base='#3a2b1e', var='#22180f', var_scale=7.0, var_amt=0.9,
                      grizzle='#6e543b', grizzle_amt=0.5, streak=(70.0, 16.0), streak_lo=0.47, streak_hi=0.62,
@@ -163,17 +164,16 @@ def fur_paint(name, p):
         st = nb.ramp(st, [(p.get('streak_lo', 0.5), 0.0), (p.get('streak_hi', 0.7), 1.0)])
         col = nb.mix(nb.math('MULTIPLY', nb.bw(st), p.get('grizzle_amt', 0.4)), col, nb.rgb(p['grizzle']))
 
-    # manchas claras maiores (bordas nítidas)
-    if p.get('patch'):
-        off = p.get('patch_seed', 0.0)
-        pv = nb.comb(nb.math('ADD', px, off), nb.math('ADD', py, off * 0.7), nb.math('ADD', pz, off * 1.3))
-        pt = nb.noise(pv, scale=p.get('patch_scale', 2.6), detail=2.0, rough=0.5, distortion=0.35)
-        pt = nb.ramp(pt, [(p.get('patch_lo', 0.58), 0.0), (p.get('patch_hi', 0.62), 1.0)])
-        pm = nb.bw(pt)
-        if p.get('patch_side'):  # só em superfícies de lado: o dorso (normal para cima) fica escuro
-            _, _, nzp = nb.sep(geo.outputs['Normal'])
-            up = nb.math('MINIMUM', nb.math('MAXIMUM', nb.math('MULTIPLY', nzp, p['patch_side']), 0.0), 1.0)
-            pm = nb.math('MULTIPLY', pm, nb.math('SUBTRACT', 1.0, up))
+    # manchas claras: esferas de influência (centro em coordenadas do jogo -> mundo do Blender) com borda irregular
+    if p.get('blobs'):
+        bm = None
+        for (cx, cy, cz, r) in p['blobs']:
+            d = nb.vmath('DISTANCE', pos, (cx, -cz, cy))
+            m = nb.math('SUBTRACT', 1.0, nb.math('DIVIDE', d, r))
+            bm = m if bm is None else nb.math('MAXIMUM', bm, m)
+        rag = nb.noise(pos, scale=p.get('blob_noise', 17.0), detail=3.0, rough=0.6)
+        bm = nb.math('ADD', bm, nb.math('MULTIPLY', nb.math('SUBTRACT', rag, 0.5), p.get('blob_rag', 1.0)))
+        pm = nb.bw(nb.ramp(bm, [(0.06, 0.0), (0.22, 1.0)]))
         col = nb.mix(nb.math('MULTIPLY', pm, p.get('patch_amt', 0.9)), col, nb.rgb(p['patch']))
 
     if p.get('fine', 0.0):
@@ -301,14 +301,7 @@ def build_body(mats, split=False):
     P = Part('Body', BODY_O)
     rings = [ring_z(z, (top + base) / 2, w, (top - base) / 2) for (z, top, base, w) in TORSO]
     def torso_mat(c, n):
-        if n[1] < -0.45:
-            return 'belly'
-        if abs(c[0]) > 0.10 and 0.32 < c[1] < 0.44 and abs(n[1]) < 0.55:  # manchas claras assimétricas nos flancos
-            side = 1 if c[0] > 0 else -1
-            for (sd, z0, z1) in TAN_PATCHES:
-                if sd == side and z0 < c[2] < z1:
-                    return 'fur_tan'
-        return None
+        return 'belly' if n[1] < -0.45 else None
     P.add_abs(prim_rings(rings), 'fur', smooth=0, mat_fn=torso_mat)
     # volumes: peito e coxas (garupa)
     P.add(prim_sphere(0.150, 0.125, 0.105, 10, 4), 'fur', pos=(0.0, 0.375, 0.255), smooth=0)
@@ -331,11 +324,9 @@ def build_head(mats, split=False):
     S = Part('Snout', SNOUT_O) if split else P   # focinho: malha própria só com --split
     TK = ({-1: Part('Tusk_L', TUSK_O['Tusk_L']), 1: Part('Tusk_R', TUSK_O['Tusk_R'])} if split else {-1: P, 1: P})
     sk = [ring_z(z, cy, rx, ry) for (z, cy, rx, ry) in SKULL]
-    def skull_mat(c, n):  # focinho e queixo escuros; mancha clara na bochecha (lados, abaixo do olho)
+    def skull_mat(c, n):  # focinho e queixo escuros
         if c[2] > 0.5 or n[1] < -0.5:
             return 'fur_dark'
-        if abs(c[0]) > 0.085 and 0.34 < c[2] < 0.47 and c[1] < 0.425:
-            return 'fur_light'
         return None
     if split:  # crânio até o anel do olho; o focinho (a partir dele) vai para a malha Snout
         P.add_abs(prim_rings(sk[:4]), 'fur', smooth=0, mat_fn=skull_mat)

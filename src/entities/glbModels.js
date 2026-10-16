@@ -79,6 +79,20 @@ export const GLB_MODELS = {
   tree_autumn: { url: `${BASE}models/tree_autumn.glb`, root: 'TreeAutumn', type: null },
   // F7-00b (agente B): bétula (4º tipo de árvore instanciada; `species: 'birch'` nos mapas)
   tree_birch: { url: `${BASE}models/tree_birch.glb`, root: 'TreeBirch', type: null },
+  // ART-01/02/03/04 (MUNDO-TERRENO-MAPAS §6): props de bioma, árvores novas, vegetação seca e javali.
+  // `lazy: true`: fora do boot e do preload; carregam só com `loadGlbTemplates(…, { includeLazy: true })` (inspetor e, depois, mapas de bioma).
+  rock_granite_large: { url: `${BASE}models/rock_granite_large.glb`, root: 'RockGraniteLarge', type: null, lazy: true },
+  rock_granite_medium: { url: `${BASE}models/rock_granite_medium.glb`, root: 'RockGraniteMedium', type: null, lazy: true },
+  rock_granite_small: { url: `${BASE}models/rock_granite_small.glb`, root: 'RockGraniteSmall', type: null, lazy: true },
+  cactus_1: { url: `${BASE}models/cactus_1.glb`, root: 'Cactus1', type: null, lazy: true },
+  cactus_2: { url: `${BASE}models/cactus_2.glb`, root: 'Cactus2', type: null, lazy: true },
+  bones: { url: `${BASE}models/bones.glb`, root: 'Bones', type: null, lazy: true },
+  tree_broad: { url: `${BASE}models/tree_broad.glb`, root: 'TreeBroad', type: null, lazy: true },
+  tree_palm: { url: `${BASE}models/tree_palm.glb`, root: 'TreePalm', type: null, lazy: true },
+  tree_acacia: { url: `${BASE}models/tree_acacia.glb`, root: 'TreeAcacia', type: null, lazy: true },
+  grass_dry: { url: `${BASE}models/grass_dry.glb`, root: 'GrassDry', type: null, lazy: true },
+  tumbleweed: { url: `${BASE}models/tumbleweed.glb`, root: 'Tumbleweed', type: null, lazy: true },
+  critter_boar: { url: `${BASE}models/critter_boar.glb`, root: 'CritterBoar', type: null, lazy: true },
   // F7-00b lote 2 (grupo 3): blocos de muralha instanciados (`WallBatch`)
   wall_human: { url: `${BASE}models/wall_human.glb`, root: 'WallHuman', type: null },
   wall_orc: { url: `${BASE}models/wall_orc.glb`, root: 'WallOrc', type: null },
@@ -149,9 +163,12 @@ function loadOne(key) {
  * posteriores completam o que faltar. Falhas individuais só geram aviso: o modelo procedural continua sendo o fallback.
  * @param {string[]|null} [factions]
  */
-export function loadGlbTemplates(factions = null) {
+export function loadGlbTemplates(factions = null, { includeLazy = false } = {}) {
   const wanted = factions && new Set([...factions, 'neutral']);
-  const pending = Object.keys(GLB_MODELS).filter(key => !wanted || wanted.has(glbFaction(key))).map(loadOne);
+  const pending = Object.keys(GLB_MODELS)
+    .filter(key => includeLazy || !GLB_MODELS[key].lazy)
+    .filter(key => !wanted || wanted.has(glbFaction(key)))
+    .map(loadOne);
   return Promise.all(pending).then(() => glbTemplates);
 }
 
@@ -160,8 +177,8 @@ export function loadGlbTemplates(factions = null) {
  * Chamada na preload (quando habilitada) e em caminhos com ?skipPreload.
  * Falhas são registradas (console.warn) mas não impedem continuação com modelos procedurais.
  */
-export function ensureGlbLoaded(factions = null) {
-  return loadGlbTemplates(factions);
+export function ensureGlbLoaded(factions = null, options = {}) {
+  return loadGlbTemplates(factions, options);
 }
 
 // Cor de time (F7-02): implementação em render/teamColor.js (máscara = materiais `TeamColor`, cache por cor).

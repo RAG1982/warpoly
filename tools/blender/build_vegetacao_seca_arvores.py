@@ -45,8 +45,8 @@ TWO_PI = 2.0 * math.pi
 # ---------------------------------------------------------------------------
 # Paletas (materiais de pintura: só existem para o bake)
 # ---------------------------------------------------------------------------
-BARK_BROAD = dict(base='#6b4d36', var='#3f2a1c', var_scale=5.0, var_amt=0.9, fine=0.14, fine_scale=38.0, top=0.28,
-                  streaks=(7.0, 1.1, 0.35), edge='#97754f', edge_amt=0.3, edge_r=0.04, ao=(0.9, 0.85), coord='obj')
+BARK_BROAD = dict(base='#6b4d36', var='#3f2a1c', var_scale=7.0, var_amt=0.8, fine=0.14, fine_scale=38.0, top=0.22,
+                  streaks=(7.0, 0.5, 0.28), edge='#8a6a48', edge_amt=0.14, edge_r=0.04, ao=(0.9, 0.85), coord='obj')
 
 PALETTE_BROAD = {
     'bark': BARK_BROAD,
@@ -59,14 +59,15 @@ PALETTE_BROAD = {
 }
 
 PALETTE_ACACIA = {
-    'bark': dict(base='#6d5c49', var='#3d3126', var_scale=4.5, var_amt=0.9, fine=0.16, fine_scale=36.0, top=0.25,
-                 streaks=(6.0, 1.0, 0.4), edge='#9a8566', edge_amt=0.3, edge_r=0.035, ao=(0.8, 0.85), coord='obj'),
-    'leaf': dict(base='#7b9040', var='#5d732f', var_scale=1.8, var_amt=1.0, fine=0.14, top=0.55, edge='#b5c862',
-                 edge_amt=0.35, edge_r=0.05, ao=(1.4, 0.95)),
-    'leaf_light': dict(base='#98a84a', var='#7b9040', var_scale=2.2, var_amt=1.0, fine=0.12, top=0.6, edge='#d0dc82',
-                       edge_amt=0.4, edge_r=0.05, ao=(1.2, 0.85)),
-    'leaf_dark': dict(base='#566a2b', var='#41531f', var_scale=1.9, var_amt=1.0, fine=0.14, top=0.5, edge='#8aa04c',
-                      edge_amt=0.3, edge_r=0.05, ao=(1.6, 1.0)),
+    'bark': dict(base='#6d5c49', var='#3d3126', var_scale=8.0, var_amt=0.75, fine=0.16, fine_scale=36.0, top=0.12,
+                 streaks=(7.0, 0.4, 0.28), edge='#8a7a62', edge_amt=0.08, edge_r=0.035, ao=(0.8, 0.85), coord='obj'),
+    # copas achatadas recebem luz de topo o tempo todo: `top` mais baixo que o das árvores redondas para não estourar
+    'leaf': dict(base='#738a3a', var='#566c2c', var_scale=1.8, var_amt=1.0, fine=0.14, top=0.36, edge='#a6bb5a',
+                 edge_amt=0.35, edge_r=0.05, ao=(1.4, 0.85)),
+    'leaf_light': dict(base='#8ea044', var='#738a3a', var_scale=2.2, var_amt=1.0, fine=0.12, top=0.4, edge='#c5d377',
+                       edge_amt=0.4, edge_r=0.05, ao=(1.2, 0.8)),
+    'leaf_dark': dict(base='#4f6228', var='#3b4c1e', var_scale=1.9, var_amt=1.0, fine=0.14, top=0.3, edge='#7d9444',
+                      edge_amt=0.3, edge_r=0.05, ao=(1.6, 0.9)),
 }
 
 PALETTE_PALM = {
@@ -444,9 +445,9 @@ def build_acacia():
     root = C.make_empty('TreeAcacia')
 
     tr = MeshBuilder('Trunk')
-    path = [(0.0, -0.12, 0.0), (-0.25, 0.65, 0.08), (-0.42, 1.45, 0.2), (-0.15, 2.25, 0.3), (0.3, 2.95, 0.2)]
-    radii = [0.56, 0.4, 0.33, 0.29, 0.26]
-    lobes = [0.42, 0.2, 0.0, 0.0, 0.0]
+    path = [(0.0, -0.12, 0.0), (-0.1, 0.22, 0.04), (-0.25, 0.7, 0.08), (-0.42, 1.45, 0.2), (-0.15, 2.25, 0.3), (0.3, 2.95, 0.2)]
+    radii = [0.56, 0.45, 0.39, 0.33, 0.29, 0.26]
+    lobes = [0.3, 0.16, 0.05, 0.0, 0.0, 0.0]
     tr.add(prim_rings(trunk_rings(path, radii, n=10, lobes=lobes, k=3, phase=0.5), cap0=False), 'bark', smooth=55)
     fork = (0.3, 2.95, 0.2)
     for tgt, mid, r in (((1.95, 4.7, 0.8), (1.2, 3.6, 0.6), 0.24), ((-1.65, 4.65, -1.0), (-0.5, 3.7, -0.3), 0.23),
@@ -463,26 +464,26 @@ def build_acacia():
     def tilt():
         return (rg.uniform(-flat[0], flat[0]), rg.uniform(0.0, flat[1]), rg.uniform(-flat[2], flat[2]))
 
-    # três andares de massas achatadas (bem mais largas que altas): aba escura embaixo, miolo, e o dossel claro por cima;
-    # o centro do dossel é o ponto mais alto, a copa tem ~7 de largura e ~1,8 de espessura
-    for k in range(8):
-        a = math.radians(22 + 45 * k + rg.uniform(-9, 9))
-        r = 2.3 + rg.uniform(-0.2, 0.15)
-        s = 1.25 + rg.uniform(-0.15, 0.15)
-        lump(cr, r * math.cos(a), 4.55 + rg.uniform(-0.12, 0.12), r * math.sin(a), s, 0.44, s * 0.94,
-             'leaf_dark' if k % 3 else 'leaf', tilt(), 8, 4, rg, 0.08)
-    for k in range(6):
-        a = math.radians(15 + 60 * k + rg.uniform(-10, 10))
-        r = 1.45 + rg.uniform(-0.15, 0.15)
-        s = 1.45 + rg.uniform(-0.12, 0.12)
-        lump(cr, r * math.cos(a), 5.1 + rg.uniform(-0.12, 0.12), r * math.sin(a), s, 0.5, s * 0.95,
-             'leaf_light' if k % 3 == 0 else 'leaf', tilt(), 8, 4, rg, 0.08)
-    for k in range(4):
-        a = math.radians(40 + 90 * k + rg.uniform(-12, 12))
-        r = 0.8 + rg.uniform(-0.1, 0.1)
-        s = 1.3 + rg.uniform(-0.1, 0.1)
-        lump(cr, r * math.cos(a), 5.5 + rg.uniform(-0.08, 0.1), r * math.sin(a), s, 0.5, s * 0.95, 'leaf_light', tilt(), 8, 4, rg, 0.08)
-    lump(cr, 0.1, 5.8, 0.0, 1.3, 0.5, 1.25, 'leaf_light', tilt(), 8, 4, rg, 0.08)
+    # três andares de massas achatadas (mais largas que altas, mas com volume): aba escura na borda, miolo e dossel claro por
+    # cima; o centro do dossel é o ponto mais alto, a copa tem ~7 de largura e ~2 de espessura, de borda recortada
+    for k in range(9):
+        a = math.radians(20 + 40 * k + rg.uniform(-9, 9))
+        r = 2.35 + rg.uniform(-0.2, 0.15)
+        s = 1.15 + rg.uniform(-0.12, 0.12)
+        lump(cr, r * math.cos(a), 4.5 + rg.uniform(-0.15, 0.15), r * math.sin(a), s, 0.58, s * 0.95,
+             'leaf_dark' if k % 3 else 'leaf', tilt(), 8, 4, rg, 0.1)
+    for k in range(7):
+        a = math.radians(10 + 51.4 * k + rg.uniform(-9, 9))
+        r = 1.35 + rg.uniform(-0.15, 0.15)
+        s = 1.3 + rg.uniform(-0.12, 0.12)
+        lump(cr, r * math.cos(a), 5.0 + rg.uniform(-0.15, 0.15), r * math.sin(a), s, 0.6, s * 0.95,
+             'leaf_light' if k % 3 == 0 else 'leaf', tilt(), 8, 4, rg, 0.1)
+    for k in range(5):
+        a = math.radians(30 + 72 * k + rg.uniform(-12, 12))
+        r = 0.75 + rg.uniform(-0.1, 0.1)
+        s = 1.1 + rg.uniform(-0.1, 0.1)
+        lump(cr, r * math.cos(a), 5.45 + rg.uniform(-0.1, 0.12), r * math.sin(a), s, 0.55, s * 0.95, 'leaf_light', tilt(), 8, 4, rg, 0.1)
+    lump(cr, 0.1, 5.8, 0.0, 1.2, 0.55, 1.15, 'leaf_light', tilt(), 8, 4, rg, 0.1)
     crown = cr.build(mats, parent=root)
     finish(root, [trunk, crown], 'tree_acacia', {'Trunk': 2.0, 'Crown': 1.0}, 512, margin=0.014)
     return root
@@ -505,7 +506,7 @@ def blade(phi_deg, h, w0, psi0, psi1, r0, n=4, fold=0.4, drift=0.0):
         ph = phi + math.radians(drift) * u
         p = p + Vector((math.sin(psi) * math.cos(ph), math.cos(psi), math.sin(psi) * math.sin(ph))) * ds
         pts.append(tuple(p))
-    ws = [w0 * f for f in (1.0, 0.94, 0.8, 0.5, 0.3)][:n]
+    ws = [w0 * f for f in (0.42, 1.0, 0.82, 0.48, 0.3)][:n]   # estreita na base, mais larga no 1/3 e afilando até a ponta
     side = (math.sin(phi), 0.0, -math.cos(phi))
     return ribbon(pts, ws, ws, side, fold, mid=0.0, mats=('a', 'b'))
 
@@ -519,12 +520,12 @@ def build_grass_dry():
     root = C.make_empty('GrassDry')
     mb = MeshBuilder('Tuft')
     plan = []
-    for k in range(7):       # anel de fora: longas, arqueadas, a ponta quase horizontal
-        plan.append((k * 51.4 + rg.uniform(-9, 9), rg.uniform(1.4, 1.6), rg.uniform(0.062, 0.074), rg.uniform(10, 16),
-                     rg.uniform(60, 74), rg.uniform(0.08, 0.12), rg.uniform(-14, 14), 'straw_pale' if k % 3 == 1 else 'straw'))
-    for k in range(5):       # anel de dentro: mais curtas e eretas, entre as de fora
-        plan.append((k * 72.0 + 26.0 + rg.uniform(-9, 9), rg.uniform(1.05, 1.3), rg.uniform(0.056, 0.066), rg.uniform(7, 11),
-                     rg.uniform(34, 52), rg.uniform(0.05, 0.08), rg.uniform(-10, 10), 'straw_dark' if k % 2 == 0 else 'straw'))
+    for k in range(7):       # anel de fora: longas, abrem logo na base e arqueiam até a ponta quase caída
+        plan.append((k * 51.4 + rg.uniform(-8, 8), rg.uniform(1.05, 1.2), rg.uniform(0.072, 0.084), rg.uniform(24, 30),
+                     rg.uniform(62, 74), rg.uniform(0.11, 0.16), rg.uniform(-14, 14), 'straw_pale' if k % 3 == 1 else 'straw'))
+    for k in range(5):       # anel de dentro, entre as de fora: mais eretas e ainda abertas
+        plan.append((k * 72.0 + 26.0 + rg.uniform(-9, 9), rg.uniform(0.95, 1.1), rg.uniform(0.066, 0.076), rg.uniform(14, 20),
+                     rg.uniform(46, 58), rg.uniform(0.07, 0.1), rg.uniform(-10, 10), 'straw_dark' if k % 2 == 0 else 'straw'))
     for (phi, h, w0, p0, p1, r0, drift, mat) in plan:
         v, f, fm = blade(phi, h, w0, p0, p1, r0, drift=drift, fold=0.3)
         add_sheet(mb, v, f, mat, None)
@@ -579,20 +580,20 @@ def build_tumbleweed():
         return Vector((rg.uniform(-s, s), rg.uniform(-s, s), rg.uniform(-s, s)))
 
     # miolo escuro: preenche o interior (visto pelas frestas da casca) por 24 triângulos
-    for k in range(96):      # arcos de círculo máximo em 3 estações; 60 % formam a casca, o resto o miolo emaranhado
+    for k in range(74):      # arcos de círculo máximo em 4 estações; 60 % formam a casca, o resto o miolo emaranhado
         a = rand_dir()
         ax = a.cross(rand_dir())
         if ax.length < 0.2:
             continue
         ax.normalize()
-        ang = math.radians(rg.uniform(50, 105))
+        ang = math.radians(rg.uniform(60, 120))
         shell = rg.random() < 0.6
         pts = []
-        for i in range(3):
-            q = Matrix.Rotation(ang * i / 2.0, 3, ax) @ a
+        for i in range(4):
+            q = Matrix.Rotation(ang * i / 3.0, 3, ax) @ a
             rad = R * ((0.9 + 0.12 * rg.random()) if shell else (0.4 + 0.4 * rg.random()))
-            pts.append(tuple(cen + q * rad + jit(0.025)))
-        twig(mb, pts, [0.013, 0.012, 0.006], keys[k % 3])
+            pts.append(tuple(cen + q * rad + jit(0.02)))
+        twig(mb, pts, [0.012, 0.011, 0.009, 0.005], keys[k % 3])
     for k in range(22):      # galhos radiais: alguns furam a casca e arrepiam a silhueta
         d = rand_dir()
         r0, r1 = R * rg.uniform(0.15, 0.4), R * rg.uniform(0.95, 1.14)

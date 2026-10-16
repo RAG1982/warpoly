@@ -16,6 +16,8 @@ const BASE = (import.meta.env && import.meta.env.BASE_URL) || '/';
 export const GLB_MODELS = {
   grunt: { url: `${BASE}models/grunt.glb`, root: 'Grunt', type: 'grunt' },
   knight: { url: `${BASE}models/knight.glb`, root: 'Knight', type: 'knight' },
+  // Capitão Brann (hero_brann): modelo do Tripo finalizado (commit 4df356b; martelo = Sword, capa = Cape, sem escudo)
+  hero_brann: { url: `${BASE}models/hero_brann.glb`, root: 'Knight', type: 'knight' },
   archer: { url: `${BASE}models/archer.glb`, root: 'Archer', type: 'archer' },
   axethrower: { url: `${BASE}models/axethrower.glb`, root: 'Axethrower', type: 'axethrower' },
   villager: { url: `${BASE}models/villager.glb`, root: 'Villager', type: 'villager' },

@@ -1,0 +1,420 @@
+{
+  "generated": "2026-10-14T02:28:33.144Z",
+  "rows": [
+    {
+      "id": "C0",
+      "name": "hero_brann.glb (JSON do arquivo): 9 nós, sem escudo, Cape=TeamColor, Torso=Atlas",
+      "status": "PASS",
+      "detail": "nós=[ArmL,ArmR,Cape,Head,LegL,LegR,Sword,Torso,Knight] faltando=[] escudo=[] Cape=TeamColor Torso=Atlas"
+    },
+    {
+      "id": "C1",
+      "name": "spawn hero_brann perto do HQ; view existe após 2 quadros",
+      "status": "PASS",
+      "detail": "id=294 tipo=hero_brann raiz=Knight escala=[1.944,1.944,1.944] unitType=knight filhos da raiz=[ArmL,ArmR,Cape,Head,LegL,LegR,Sword,Torso,SelectionRing] GET /models/hero_brann.glb=200"
+    },
+    {
+      "id": "C2",
+      "name": "malha com Knight/Torso/Head/ArmL/ArmR/LegL/LegR/Sword/Cape",
+      "status": "PASS",
+      "detail": "achou 9/9; faltando=[]; raiz=Knight; nós no jogo=10; do hero_brann.glb ausentes no jogo=[]; só no jogo=[SelectionRing]; escudo no jogo=[]; Jaccard={\"hero_brann\":0.9,\"knight\":0.73,\"villager\":0.32} -> parecido com hero_brann"
+    },
+    {
+      "id": "C3",
+      "name": "Cape com material TeamColor; Torso com material Atlas",
+      "status": "PASS",
+      "detail": "Cape=[TeamColor]; Torso=[Atlas]"
+    },
+    {
+      "id": "C4",
+      "name": "rebind de userData e meshParts do animador (torso, head, armL, armR, legL, legR, sword)",
+      "status": "PASS",
+      "detail": "userData nulos=[]; meshParts nulos=[]; mesmo nó em userData e meshParts=7/7; userData.shieldGroup=null (esperado: sem escudo); unitType do animador=knight"
+    },
+    {
+      "id": "C5",
+      "name": "golpe (fight): Sword muda > 0,05 rad entre as fases",
+      "status": "PASS",
+      "detail": "dif. máx. Sword por par (0,2-0,5 | 0,5-0,8 | 0,2-0,8)=[0.7555999999999999,0.1668,0.9224]; Sword 0,2=[0.7612,-0.0479,-0.0878] 0,8=[-0.1612,-0.0479,-0.0878]; armR 0,2-0,8=1.3912"
+    },
+    {
+      "id": "C6",
+      "name": "caminhada: walk ao vivo por 1 s muda pernas ou tronco",
+      "status": "PASS",
+      "detail": "quadros=61 com walk=61 anims=[walk] estados=[moving] maior faixa=1.3 rad; LegL=[1.3,0,0] torso=[0.0477,0.16,0.08] deslocou=5.25 u; sintético: setTime 0/0,2/0,4: dif. máx. LegL=0.65 torso=0.08"
+    },
+    {
+      "id": "C7",
+      "name": "sem pageerror nem console.error (deprecações listadas à parte)",
+      "status": "PASS",
+      "detail": "erros=0 (deprecação=0); avisos=0 (deprecação=0)"
+    },
+    {
+      "id": "C8",
+      "name": "capturas: jogo com o Brann perto do HQ e close-up (API: sceneManager.cameraTarget e targetZoomLevel)",
+      "status": "PASS",
+      "detail": "(a) PNG=true Brann na tela=true px=(646,403) HQ na tela=true; (b) PNG=true zoomLevel=0.500 Brann na tela=true px=(640,360)"
+    },
+    {
+      "id": "C9",
+      "name": "Brann x knight a 3 u: altura da Head acima da raiz (altura relativa)",
+      "status": "PASS",
+      "detail": "distância=3 u; Brann: Head acima da raiz=3.236 u (escala 1.944, raiz Knight); knight: Head=2.628 u (escala 1.62, raiz Knight); razão Brann/knight=1.231; ambos na tela=true"
+    }
+  ],
+  "files": [
+    {
+      "name": "game-brann-no-jogo.png",
+      "kB": 755
+    },
+    {
+      "name": "game-brann-closeup.png",
+      "kB": 878
+    },
+    {
+      "name": "game-brann-vs-cavaleiro.png",
+      "kB": 801
+    }
+  ],
+  "data": {
+    "renderer": "ANGLE (AMD, Vulkan 1.4.318 (AMD Radeonâ¢ RX 7600 XT (RADV NAVI33) (0x00007480)), radv)",
+    "glbHttpStatus": 200,
+    "spawn": {
+      "id": 294,
+      "type": "hero_brann",
+      "visualBase": "hero_brann",
+      "owner": 0,
+      "me": 0,
+      "hq": {
+        "x": 32,
+        "z": -30
+      },
+      "spot": {
+        "x": 38,
+        "z": -19.607695154586736
+      },
+      "rootName": "Knight",
+      "rootScale": [
+        1.944,
+        1.944,
+        1.944
+      ],
+      "rootChildren": [
+        "ArmL",
+        "ArmR",
+        "Cape",
+        "Head",
+        "LegL",
+        "LegR",
+        "Sword",
+        "Torso",
+        "SelectionRing"
+      ],
+      "animUnitType": "knight",
+      "anim": "idle"
+    },
+    "inspect": {
+      "rootName": "Knight",
+      "allNodeNames": [
+        "Knight",
+        "ArmL",
+        "ArmR",
+        "Cape",
+        "Head",
+        "LegL",
+        "LegR",
+        "Sword",
+        "Torso",
+        "SelectionRing"
+      ],
+      "nodeFound": {
+        "Knight": {
+          "type": "Object3D",
+          "mats": [
+            "Atlas",
+            "TeamColor",
+            "(sem nome)"
+          ]
+        },
+        "Torso": {
+          "type": "Mesh",
+          "mats": [
+            "Atlas"
+          ]
+        },
+        "Head": {
+          "type": "Mesh",
+          "mats": [
+            "Atlas"
+          ]
+        },
+        "ArmL": {
+          "type": "Mesh",
+          "mats": [
+            "Atlas"
+          ]
+        },
+        "ArmR": {
+          "type": "Mesh",
+          "mats": [
+            "Atlas"
+          ]
+        },
+        "LegL": {
+          "type": "Mesh",
+          "mats": [
+            "Atlas"
+          ]
+        },
+        "LegR": {
+          "type": "Mesh",
+          "mats": [
+            "Atlas"
+          ]
+        },
+        "Sword": {
+          "type": "Mesh",
+          "mats": [
+            "Atlas"
+          ]
+        },
+        "Cape": {
+          "type": "Mesh",
+          "mats": [
+            "TeamColor"
+          ]
+        }
+      },
+      "userData": {
+        "torso": "Torso",
+        "head": "Head",
+        "armL": "ArmL",
+        "armR": "ArmR",
+        "legL": "LegL",
+        "legR": "LegR",
+        "sword": "Sword",
+        "shieldGroup": null
+      },
+      "meshParts": {
+        "torso": "Torso",
+        "head": "Head",
+        "armL": "ArmL",
+        "armR": "ArmR",
+        "legL": "LegL",
+        "legR": "LegR",
+        "sword": "Sword",
+        "shieldGroup": null
+      },
+      "sameObj": {
+        "torso": true,
+        "head": true,
+        "armL": true,
+        "armR": true,
+        "legL": true,
+        "legR": true,
+        "sword": true,
+        "shieldGroup": false
+      },
+      "unitType": "knight",
+      "anim": "idle",
+      "rootScale": [
+        1.944,
+        1.944,
+        1.944
+      ]
+    },
+    "fight": {
+      "anim": "fight",
+      "dur": 1,
+      "phases": {
+        "0.2": {
+          "sword": [
+            0.7612,
+            -0.0479,
+            -0.0878
+          ],
+          "armR": [
+            0.4408,
+            0.098,
+            0.0653
+          ],
+          "torso": [
+            0,
+            0.1469,
+            0
+          ]
+        },
+        "0.5": {
+          "sword": [
+            0.0056,
+            -0.0479,
+            -0.0878
+          ],
+          "armR": [
+            -0.6725,
+            -0.2663,
+            -0.2045
+          ],
+          "torso": [
+            0,
+            -0.3186,
+            0
+          ]
+        },
+        "0.8": {
+          "sword": [
+            -0.1612,
+            -0.0479,
+            -0.0878
+          ],
+          "armR": [
+            -0.9504,
+            -0.3306,
+            0
+          ],
+          "torso": [
+            0,
+            -0.4132,
+            0
+          ]
+        }
+      }
+    },
+    "walkSweep": {
+      "dur": 0.8,
+      "phases": {
+        "0": {
+          "legL": [
+            0,
+            0,
+            0
+          ],
+          "legR": [
+            0,
+            0,
+            0
+          ],
+          "torso": [
+            0.05,
+            0,
+            0.04
+          ]
+        },
+        "0.2": {
+          "legL": [
+            0.65,
+            0,
+            0
+          ],
+          "legR": [
+            -0.65,
+            0,
+            0
+          ],
+          "torso": [
+            0.05,
+            0.08,
+            0
+          ]
+        },
+        "0.4": {
+          "legL": [
+            0,
+            0,
+            0
+          ],
+          "legR": [
+            0,
+            0,
+            0
+          ],
+          "torso": [
+            0.05,
+            0,
+            -0.04
+          ]
+        }
+      }
+    },
+    "walk": {
+      "frames": 61,
+      "walkFrames": 61,
+      "animsSeen": [
+        "walk"
+      ],
+      "statesSeen": [
+        "moving"
+      ],
+      "ranges": {
+        "legL": [
+          1.3,
+          0,
+          0
+        ],
+        "legR": [
+          1.3,
+          0,
+          0
+        ],
+        "torso": [
+          0.0477,
+          0.16,
+          0.08
+        ]
+      },
+      "maxRange": 1.3,
+      "movedUnits": 5.25,
+      "target": {
+        "x": 50,
+        "z": -19.61
+      }
+    },
+    "knightCmp": {
+      "dist": 3,
+      "brann": {
+        "rootName": "Knight",
+        "rootScaleY": 1.944,
+        "headRel": 3.236,
+        "headWorldY": 6.056,
+        "rootWorldY": 2.819
+      },
+      "knight": {
+        "rootName": "Knight",
+        "rootScaleY": 1.62,
+        "headRel": 2.628,
+        "headWorldY": 5.269,
+        "rootWorldY": 2.641
+      },
+      "knightType": "knight",
+      "brannPos": [
+        49.75,
+        2.8194800973067182,
+        -19.607695154586736
+      ],
+      "knightPos": [
+        52.75,
+        2.6411048410963063,
+        -19.607695154586736
+      ]
+    },
+    "c9Screen": [
+      {
+        "px": 615,
+        "py": 297,
+        "inTela": true
+      },
+      {
+        "px": 666,
+        "py": 330,
+        "inTela": true
+      }
+    ],
+    "deprecations": {
+      "errors": [],
+      "warnings": []
+    },
+    "otherWarnings": []
+  },
+  "errors": [],
+  "warnings": []
+}

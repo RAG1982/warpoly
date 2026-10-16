@@ -428,7 +428,7 @@ function planWells(field, sites, spec, perBase = 2) {
   return out.flat();
 }
 
-/** Um grupo de critters (4 animais, raio 6) por base, a 20–28 u do pátio, em terra seca longe das jazidas e dos bosques. */
+/** Um grupo de critters (4 animais, raio 6) por base, a 18–30 u do pátio, em terra seca longe das jazidas e dos bosques. */
 function planCritters(field, plans, speciesOfBase) {
   const out = [];
   plans.forEach((p, b) => {
@@ -437,10 +437,10 @@ function planCritters(field, plans, speciesOfBase) {
     for (let a = 0; a < 24; a++) {
       const ang = (a / 24) * Math.PI * 2;
       let done = false;
-      for (const rho of [24, 21, 27]) {
+      for (const rho of [24, 21, 27, 30, 18]) {
         const q = { x: p.site.x + Math.cos(ang) * rho, z: p.site.z + Math.sin(ang) * rho };
-        if (!field.inside(q.x, q.z, 8) || !dryAt(field, q, 6)) continue;
-        if (keepAway.some((r) => hyp(q.x, q.z, r.x, r.z) < 11)) continue;
+        if (!field.inside(q.x, q.z, 8) || !dryAt(field, q, 4)) continue;
+        if (keepAway.some((r) => hyp(q.x, q.z, r.x, r.z) < 9)) continue;
         out.push({ kind: 'critters', species: speciesOfBase(b), x: +q.x.toFixed(1), z: +q.z.toFixed(1), count: 4, radius: 6 });
         done = true;
         break;
@@ -490,7 +490,6 @@ export function planLayout(map, baked, spec, opts) {
     const tw = spec.bases.findIndex((x) => x.twinOf === b);
     if (tw >= 0 && cands[0]) sites[tw] = rotateSite(field, cands[0]);
   }
-  const rot = (p) => ({ ...p, x: -p.x, z: -p.z });
   const plans = new Array(nb).fill(null);
   const world = { field, sites: sites.map((s) => s ?? { x: 1e6, z: 1e6, k: 0 }), fords, extraDeposits: [], extraBuildings: [], extraTrees: [] };
   for (let b = 0; b < nb; b++) {
@@ -530,7 +529,6 @@ export function planLayout(map, baked, spec, opts) {
       world.extraTrees.push(...plans[tw].trees);
     }
   }
-  void rot;
 
   const startSlots = [], resources = [], forests = [];
   const speciesOf = (x, z) => {
@@ -546,11 +544,10 @@ export function planLayout(map, baked, spec, opts) {
     const p = plans[b];
     if (!p) { bases.push(null); continue; }
     startSlots.push({ x: +p.site.x.toFixed(1), z: +p.site.z.toFixed(1), mirror: p.mirror, layout: slotLayout(p.site, p.mirror, p.lumber) });
-    for (const d of p.deposits) resources.push({ ...d, slot: undefined });
+    for (const d of p.deposits) resources.push({ ...d });
     for (const c of p.clusters) forests.push({ x: c.x, z: c.z, count: c.count, radius: c.radius, species: speciesOf(c.x, c.z) });
     bases.push({ index: b, x: p.site.x, z: p.site.z, mirror: p.mirror, entity: ownerAt(p.site.x, p.site.z), wood: p.wood, trees: p.trees.length, clusters: p.clusters.length, clear: p.site.clear, cap: p.site.cap, twin: !!p.twin });
   }
-  for (const r of resources) delete r.slot;
 
   let wells = [];
   if (spec.naval && plans.every(Boolean)) {

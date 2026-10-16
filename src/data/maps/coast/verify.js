@@ -14,6 +14,9 @@ import { estimateWood, BASE_CLEARANCE } from './layout.js';
 import { buildPathfinder, floodFill, isReached } from '../generator.js';
 import { NAVAL_MAX_HEIGHT } from '../../combat.js';
 
+/** A madeira estimada (pior de 5 sorteios independentes) precisa passar de `WOOD_TARGET × 1,05`: folga contra a variação do sorteio real da partida. */
+export const WOOD_VERIFY_MARGIN = 1.05;
+
 /** Faixa de terra aceita por padrão (proporção da grade): protótipo 25–50 %. */
 export const DEFAULT_LAND_RANGE = Object.freeze([0.25, 0.5]);
 
@@ -165,13 +168,14 @@ export function verifyCoastWorld(mapDef, opts = {}) {
   }
 
   // madeira alcançável por jogador, estimada com sorteios independentes do planejador (as sementes de `woodSeeds`)
-  const seeds = opts.woodSeeds ?? [1, 2, 3];
+  const seeds = opts.woodSeeds ?? [1, 2, 3, 4, 5];
+  const need = target * (opts.woodMargin ?? WOOD_VERIFY_MARGIN);
   const woods = slots.map(() => Infinity);
   for (const sd of seeds) {
     const est = estimateWood(mapDef, sd, (x, z) => land.terrain.getHeight(x, z), slots.map((_, i) => (x, z) => isReached(land, seenFrom[i], x, z)));
     est.forEach((w, i) => { woods[i] = Math.min(woods[i], w); });
   }
-  woods.forEach((w, i) => { checks.wood.push(w); if (w < target) fail('madeira', `base ${i} alcança ${w} de madeira (< ${target})`); });
+  woods.forEach((w, i) => { checks.wood.push(w); if (w < need) fail('madeira', `base ${i} alcança ${w} de madeira (< ${need})`); });
   if (slots.length >= 2) {
     const mx = Math.max(...woods), mn = Math.min(...woods);
     checks.woodRatio = mn / (mx || 1);

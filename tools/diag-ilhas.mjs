@@ -117,6 +117,7 @@ for (const d of gm.aiDirectors) {
     const t = fields.type;
     if (r === null) { l.dropped++; l.recent.push({ tick: gm.currentTick, ...brief(fields), dropped: true }); }
     else {
+      if ((t === CMD.ATTACK_MOVE || t === CMD.ATTACK) && (l.firstAttacks || (l.firstAttacks = [])).length < 8) l.firstAttacks.push({ tick: gm.currentTick, ...brief(fields) });
       l.counts[t] = (l.counts[t] || 0) + 1;
       l.winCounts[t] = (l.winCounts[t] || 0) + 1;
       l.lastTick[t] = gm.currentTick;
@@ -257,7 +258,8 @@ function snapshotPlayers(gm, tick) {
         cmdWindow: l.winCounts,
         cmdTotals: l.counts, executed: l.executed, rejected: l.rejected,
         lastCmdTick: l.lastTick,
-        lastCmds: l.recent.slice(-10)
+        lastCmds: l.recent.slice(-10),
+        firstAttacks: l.firstAttacks || []
       };
       l.winCounts = {};
     }

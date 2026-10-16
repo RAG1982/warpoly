@@ -17,6 +17,8 @@ Opções (depois do `--`):
   --dev-flat          geometria com materiais lisos (sem bake/export) + vistas de conferência (precisa de --dev-out)
   --dev-out <pasta>   onde gravar as vistas de conferência (fora do repositório)
   --views             depois do export, grava também vistas de conferência do .glb reimportado em --dev-out
+  --split             variante com malhas próprias para Snout, Tusk_L, Tusk_R e Tail (10 draw calls; insumo para a
+                      animação futura): grava tools/blender/build/critter_boar_split.glb (NÃO vai para public/)
 
 Hierarquia (aninhada; L = -x, R = +x, como ArmL/ArmR do projeto; frente = +Z; todas as rotações de repouso = 0):
   CritterBoar (raiz, origem no chão no centro da pegada)
@@ -295,7 +297,7 @@ def cone_dir(P, base, direction, r, h, mat, n=4, smooth=0, **kw):
 
 
 # ---------------------------------------------------------------------------
-def build_body(mats, root):
+def build_body(mats, split=False):
     P = Part('Body', BODY_O)
     rings = [ring_z(z, (top + base) / 2, w, (top - base) / 2) for (z, top, base, w) in TORSO]
     def torso_mat(c, n):
@@ -316,15 +318,18 @@ def build_body(mats, root):
     for i, (z, h, x) in enumerate(MANE):
         P.add(prim_cone(0.034, h, 4), 'mane', pos=(x, torso_top(z) - 0.014, z), rot=(-22, 10 * (1 if i % 2 else -1), 0),
               smooth=0)
-    # cauda fina com penacho (raiz = nó Tail)
+    # cauda fina com penacho (raiz = nó Tail; malha própria só com --split)
+    T = Part('Tail', TAIL_O) if split else P
     path = [tuple(TAIL_O), (0.0, 0.442, -0.625), (0.0, 0.435, -0.675), (0.0, 0.390, -0.703)]
-    P.tube(path, [0.021, 0.015, 0.012, 0.009], 'fur_dark', n=5, up=(0, 1, 0))
-    cone_dir(P, (0.0, 0.397, -0.700), (0.0, -0.75, -0.55), 0.030, 0.072, 'fur_light', n=5)
-    return P
+    T.tube(path, [0.021, 0.015, 0.012, 0.009], 'fur_dark', n=5, up=(0, 1, 0))
+    cone_dir(T, (0.0, 0.397, -0.700), (0.0, -0.75, -0.55), 0.030, 0.072, 'fur_light', n=5)
+    return P, ([(T, 'Body')] if split else [])
 
 
-def build_head(mats, body):
+def build_head(mats, split=False):
     P = Part('Head', HEAD_O)
+    S = Part('Snout', SNOUT_O) if split else P   # focinho: malha própria só com --split
+    TK = ({-1: Part('Tusk_L', TUSK_O['Tusk_L']), 1: Part('Tusk_R', TUSK_O['Tusk_R'])} if split else {-1: P, 1: P})
     sk = [ring_z(z, cy, rx, ry) for (z, cy, rx, ry) in SKULL]
     def skull_mat(c, n):  # focinho e queixo escuros; mancha clara na bochecha (lados, abaixo do olho)
         if c[2] > 0.5 or n[1] < -0.5:
@@ -332,17 +337,21 @@ def build_head(mats, body):
         if abs(c[0]) > 0.085 and 0.34 < c[2] < 0.47 and c[1] < 0.425:
             return 'fur_light'
         return None
-    P.add_abs(prim_rings(sk), 'fur', smooth=0, mat_fn=skull_mat)
+    if split:  # crânio até o anel do olho; o focinho (a partir dele) vai para a malha Snout
+        P.add_abs(prim_rings(sk[:4]), 'fur', smooth=0, mat_fn=skull_mat)
+        S.add_abs(prim_rings(sk[3:]), 'fur', smooth=0, mat_fn=skull_mat)
+    else:
+        P.add_abs(prim_rings(sk), 'fur', smooth=0, mat_fn=skull_mat)
     # focinho: disco do nariz com narinas (só na face frontal +Z) e mandíbula inferior curta por baixo
-    P.add(prim_sphere(0.062, 0.052, 0.024, 8, 4), 'snout', pos=(0.0, 0.342, 0.576), smooth=0)
+    S.add(prim_sphere(0.062, 0.052, 0.024, 8, 4), 'snout', pos=(0.0, 0.342, 0.576), smooth=0)
     for sx in (-1, 1):
-        P.add(prim_box(0.014, 0.016, 0.012), 'lip', pos=(sx * 0.024, 0.344, 0.596), smooth=0)
+        S.add(prim_box(0.014, 0.016, 0.012), 'lip', pos=(sx * 0.024, 0.344, 0.596), smooth=0)
     P.add(prim_box(0.066, 0.040, 0.17, taper=(0.66, 0.85)), 'fur_dark', pos=(0.0, 0.282, 0.475), smooth=0)
     for sx in (-1, 1):
         # presas curtas, curvas para cima, nascendo da mandíbula e passando por fora do focinho
         tp = [(sx * 0.056, 0.290, 0.488), (sx * 0.080, 0.314, 0.503), (sx * 0.095, 0.348, 0.508),
               (sx * 0.095, 0.384, 0.498), (sx * 0.089, 0.400, 0.486)]
-        P.tube(tp, [0.017, 0.015, 0.012, 0.007, 0.002], 'tusk', n=5)
+        TK[sx].tube(tp, [0.017, 0.015, 0.012, 0.007, 0.002], 'tusk', n=5)
         # olhos pequenos (âmbar) com sobrancelha pesada
         P.add(prim_sphere(0.014, 0.014, 0.011, 6, 4), 'eye', pos=(sx * 0.121, 0.443, 0.385), smooth=0)
         P.add(prim_box(0.038, 0.011, 0.034), 'fur_dark', pos=(sx * 0.106, 0.468, 0.394), rot=(0, 0, sx * -26), smooth=0)
@@ -355,7 +364,7 @@ def build_head(mats, body):
     # tufo na testa (continua a crina)
     for (z, h) in ((0.33, 0.060), (0.385, 0.052), (0.435, 0.042)):
         P.add(prim_cone(0.026, h, 4), 'mane', pos=(0.0, 0.530 - (z - 0.33) * 0.42, z), rot=(-30, 0, 0), smooth=0)
-    return P
+    return P, ([(S, 'Head'), (TK[-1], 'Head'), (TK[1], 'Head')] if split else [])
 
 
 def build_leg(mats, name, front):
@@ -474,27 +483,69 @@ def render_views(U, cam, objs, out_dir, names, bg_hex='#d9c28e', size=None):
     return done
 
 
+REQUIRED_NODES = ['CritterBoar', 'Body', 'Head', 'Snout', 'Tusk_L', 'Tusk_R', 'Leg_FL', 'Leg_FR', 'Leg_BL', 'Leg_BR', 'Tail']
+LIMITS = dict(draw_calls=6, tris=4000, atlas=512)
+
+
+def uv_report(meshes):
+    """Faixa de UV de cada malha (precisa ficar em 0..1: atlas único)."""
+    lo, hi = [9.0, 9.0], [-9.0, -9.0]
+    for o in meshes:
+        uvl = o.data.uv_layers.active
+        if not uvl:
+            continue
+        for d in uvl.data:
+            lo[0], lo[1] = min(lo[0], d.uv[0]), min(lo[1], d.uv[1])
+            hi[0], hi[1] = max(hi[0], d.uv[0]), max(hi[1], d.uv[1])
+    return tuple(round(v, 4) for v in lo), tuple(round(v, 4) for v in hi)
+
+
+def check_budget(rep, atlas_px, split):
+    """Orçamento da tarefa: <= 6 draw calls (10 na variante --split), <= 4000 tris, atlas <= 512, sem cor de vértice."""
+    problems = []
+    limit_draw = 10 if split else LIMITS['draw_calls']
+    if rep['draw_calls'] > limit_draw:
+        problems.append(f"draw calls {rep['draw_calls']} > {limit_draw}")
+    if rep['tris'] > LIMITS['tris']:
+        problems.append(f"tris {rep['tris']} > {LIMITS['tris']}")
+    if atlas_px > LIMITS['atlas']:
+        problems.append(f"atlas {atlas_px} > {LIMITS['atlas']}")
+    if any(a.startswith('COLOR') for a in rep['attributes']):
+        problems.append('cor de vértice presente')
+    names = {n[0] for n in rep['nodes']}
+    miss = [n for n in REQUIRED_NODES if n not in names]
+    if miss:
+        problems.append('nós ausentes: ' + ', '.join(miss))
+    return problems
+
+
 def main():
     args = C.script_args()
     dev = '--dev-flat' in args
+    split = '--split' in args
     dev_out = args[args.index('--dev-out') + 1] if '--dev-out' in args else None
     C.reset_scene()
     mats = dev_materials() if dev else make_materials()
 
     root = C.make_empty(ROOT_NAME)
-    body = build_body(mats, root)
-    head = build_head(mats, body)
+    body, ex_body = build_body(mats, split)
+    head, ex_head = build_head(mats, split)
     legs = [build_leg(mats, n, n.startswith('Leg_F')) for n in ('Leg_FL', 'Leg_FR', 'Leg_BL', 'Leg_BR')]
 
     body_obj = body.build(mats, root, (0, 0, 0))
     head_obj = head.build(mats, body_obj, BODY_O)
     leg_objs = [lg.build(mats, body_obj, BODY_O) for lg in legs]
-    # âncoras (nós vazios): geometria mesclada em Head/Body para caber em 6 draw calls
-    C.make_empty('Snout', tuple(SNOUT_O - HEAD_O), parent=head_obj)
-    for nm, o in TUSK_O.items():
-        C.make_empty(nm, tuple(o - HEAD_O), parent=head_obj)
-    C.make_empty('Tail', tuple(TAIL_O - BODY_O), parent=body_obj)
-    parts = [body_obj, head_obj] + leg_objs
+    extra_objs = []
+    if split:  # variante com malhas próprias para Snout, Tusk_L/R e Tail (10 draw calls)
+        owner = {'Body': (body_obj, BODY_O), 'Head': (head_obj, HEAD_O)}
+        for (part, parent_name) in ex_body + ex_head:
+            extra_objs.append(part.build(mats, owner[parent_name][0], owner[parent_name][1]))
+    else:  # âncoras (nós vazios): geometria mesclada em Head/Body para caber em 6 draw calls
+        C.make_empty('Snout', tuple(SNOUT_O - HEAD_O), parent=head_obj)
+        for nm, o in TUSK_O.items():
+            C.make_empty(nm, tuple(o - HEAD_O), parent=head_obj)
+        C.make_empty('Tail', tuple(TAIL_O - BODY_O), parent=body_obj)
+    parts = [body_obj, head_obj] + leg_objs + extra_objs
     bpy.context.view_layer.update()
 
     if dev:
@@ -507,17 +558,27 @@ def main():
         print('STATS', C.stats(root))
         return
 
-    C.uv_atlas(parts, weights={'Head': 1.5, 'Body': 1.0, 'Leg_FL': 0.9, 'Leg_FR': 0.9, 'Leg_BL': 0.9, 'Leg_BR': 0.9},
-               margin=0.006, angle=66.0)
-    img = C.bake_atlas(parts, f'{OUT_NAME}_atlas', 512, samples=int(os.environ.get('BAKE_SAMPLES', 48)), margin=4)
+    weights = {'Head': 1.5, 'Body': 1.0, 'Snout': 1.5, 'Tusk_L': 1.5, 'Tusk_R': 1.5, 'Tail': 1.0,
+               'Leg_FL': 0.9, 'Leg_FR': 0.9, 'Leg_BL': 0.9, 'Leg_BR': 0.9}
+    C.uv_atlas(parts, weights=weights, margin=0.006, angle=66.0)
+    print('UV', uv_report(parts))
+    atlas_px = 512
+    img = C.bake_atlas(parts, f'{OUT_NAME}_atlas', atlas_px, samples=int(os.environ.get('BAKE_SAMPLES', 48)), margin=4)
     C.finalize_materials(parts, img, team_default='#ffffff', roughness=0.82,
                          out_png=os.path.join(C.BUILD_DIR, f'{OUT_NAME}_atlas.png'))
-    out = os.path.join(C.OUT_MODELS, f'{OUT_NAME}.glb')
+    # a variante --split é só um insumo para a animação futura: vai para a pasta de intermediários, não para public/
+    out = os.path.join(C.BUILD_DIR, f'{OUT_NAME}_split.glb') if split else os.path.join(C.OUT_MODELS, f'{OUT_NAME}.glb')
     C.export_glb(root, out)
     st = C.stats(root, out)
-    print('STATS', OUT_NAME, st)
+    print('STATS', OUT_NAME + ('_split' if split else ''), st)
     rep = glb_report(out)
     print('GLB', json.dumps(rep, ensure_ascii=False))
+    problems = check_budget(rep, atlas_px, split)
+    print('ORCAMENTO', 'OK' if not problems else 'FALHOU: ' + '; '.join(problems))
+    if problems:
+        raise SystemExit(1)
+    if split:
+        return
 
     if '--no-render' in args and not dev_out:
         return
@@ -528,6 +589,9 @@ def main():
     meshes = [o for o in objs if o.type == 'MESH']
     pts = U.world_points(meshes)
     print('BBOX', game_bbox(pts))
+    for im in bpy.data.images:
+        if im.size[0] > 0:
+            print('IMAGEM', im.name, tuple(im.size))
     if dev_out and '--views' in args:
         render_views(U, cam, meshes, dev_out, ('f34', 'side', 'front', 'back', 'top', 'game', 'right34'))
     if '--no-render' in args:

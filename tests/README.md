@@ -28,3 +28,5 @@ Em 2026-09-28 um chrome-headless chegou a 10,8 GB e travou a máquina. Por isso:
 ## Escrevendo testes unitários
 - Arquivos em `tests/unit/<modulo>.test.js`, importando direto de `src/`.
 - Prefira testar lógica pura, sem three.js nem DOM. Para dependências do mundo, use objetos falsos: por exemplo, um terreno `{ getHeight(x, z) }`, como em `pathfinder.test.js`.
+- Render sem GPU: as views (`TerrainView`, `Water`, `Decorations`, `TreeManager`, `Lava`) montam em Node; as texturas de canvas entram como mapas vazios (`vi.mock`, como em `regionalWorld.test.js`). Mapas de fixture com `biomeGrid`/`lavaGrid` montados no teste: `tests/unit/helpers/regionalMap.js`.
+- Shaders injetados por `onBeforeCompile`: `tests/unit/helpers/glslCheck.js` monta o fragment shader como o `WebGLProgram` e roda o `glslangValidator` (se instalado; sem ele os testes de GLSL são pulados). Pega erro de sintaxe/tipo/variável não declarada; não substitui compilar no driver (limite de uniforms, extensões).

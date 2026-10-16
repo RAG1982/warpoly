@@ -54,6 +54,7 @@ const { stateChecksum } = await import('../src/sim/checksum.js');
 const { CommandExecutor } = await import('../src/sim/CommandExecutor.js');
 const { analyzeWood } = await import('../src/ai/AIWood.js');
 const { CMD } = await import('../src/sim/commands.js');
+const { getUnitDef } = await import('../src/data/index.js');
 
 let mapId = mapId0;
 if (mapFile) {
@@ -229,13 +230,23 @@ function snapshotPlayers(gm, tick) {
       const per = dir.perception;
       let target = null;
       try { const t = mm.selectExpeditionTarget(); if (t) target = { id: t.id, owner: t.ownerId, role: t.role || t.cls || null, type: t.type, xz: [r1(t.x), r1(t.z)] }; } catch { /* ignora */ }
-      let ready = 0;
-      for (const u of units) if (u.type !== workerType && !dir.isReserved(u.id) && (u.state === 'idle' || u.state === 'moving') && u.hp >= u.maxHp * 0.35) ready++;
+      const readyUnits = [];
+      for (const u of units) if (u.type !== workerType && !dir.isReserved(u.id) && (u.state === 'idle' || u.state === 'moving') && u.hp >= u.maxHp * 0.35) readyUnits.push(u);
+      const ready = readyUnits.length;
+      // avaliação de força (assessAttack é pura): o exército pronto passaria no teste de lançamento da onda?
+      let assess = null;
+      try {
+        const val = (type) => { const c = getUnitDef(type).cost; return c ? (c.gold || 0) + (c.wood || 0) + (c.stone || 0) : 0; };
+        let own = 0; for (const u of readyUnits) own += val(u.type);
+        let knownVal = 0; for (const k of per.units.values()) if (k.cls !== 'worker') knownVal += val(k.type);
+        const expected = dir.profile.assumeEnemy * 400 * Math.max(0, (dir.simTime || 0) / 60 - 1.5);
+        assess = { ok: mm.assessAttack(readyUnits), need: dir.profile.assess, own, knownUnits: knownVal, expected: r1(expected), simTime: r1(dir.simTime || 0) };
+      } catch { /* ignora */ }
       const l = logOf(p.id);
       rec.ai = {
         strategy: dir.strategy.id, goal: em.currentGoal,
         util: { eco: r1(dir.utilities.eco), housing: r1(dir.utilities.housing), def: r1(dir.utilities.def), mil: r1(dir.utilities.mil) },
-        wave: mm.strikeWaveNumber, threshold: mm.attackThreshold, waveIds: mm.waveIds.size, readyArmy: ready,
+        wave: mm.strikeWaveNumber, threshold: mm.attackThreshold, waveIds: mm.waveIds.size, readyArmy: ready, assess,
         op: mm._op ? mm._op.phase : null, campOp: mm._campOp ? true : false, lastMarch: mm._lastMarch || null,
         expeditionAllowed: mm.expeditionAllowed(), reinforcementsBlocked: mm.reinforcementsBlocked(),
         target,

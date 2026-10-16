@@ -27,7 +27,9 @@ describe('F7-04 tilesets', () => {
     expect(resolveTilesetId(undefined)).toBe(DEFAULT_TILESET);
     expect(resolveTilesetId('lava')).toBe(DEFAULT_TILESET);
     expect(resolveTilesetId('pantano')).toBe('pantano');
-    for (const m of listMaps({ includeHidden: true })) expect(getMapTileset(m).id).toBe('verdejante');
+    for (const m of listMaps({ includeHidden: true })) if (!m.biomeGrid) expect(getMapTileset(m).id).toBe('verdejante');
+    // MUNDO-7 (mapas com biomeGrid): o tileset do preset (exuberante)
+    expect(getMapTileset(listMaps({ includeHidden: true }).find((m) => m.id === 'duelo-continental-1')).id).toBe('exuberante');
   });
 
   it('generateMap aceita os temas novos e grava em tileset', () => {

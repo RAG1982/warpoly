@@ -293,7 +293,8 @@ describe('coast: lava (generateLava exportado) e análise (analyzeMap exportado)
     expect(s.landFraction).toBeCloseTo(m.stats.landFraction, 12);
     expect(s.landComponents).toBe(m.entities.length);
     expect(s.irregularity.weighted).toBeGreaterThan(1.45);
-    expect(s.fractalDim).toBeGreaterThan(1.08);
+    // dois-continentes com 2 ilhas e 1 ilhota (MUNDO-7, 2026-10-16): costa menos recortada que antes (1,08 → ~1,04); limiar ajustado ao preset novo
+    expect(s.fractalDim).toBeGreaterThan(1.03);
     expect(s.lava.areas).toBeGreaterThanOrEqual(2);
     expect(s.rivers.count).toBeGreaterThanOrEqual(2);
   });

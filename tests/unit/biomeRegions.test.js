@@ -96,9 +96,9 @@ describe('getRegionMap · quando existe e quando não', () => {
     expect(getRegionMap(undefined)).toBeNull();
   });
 
-  it('os mapas atuais do jogo (sem biomeGrid) não ganham regiões', async () => {
+  it('os mapas sem biomeGrid (os de antes do MUNDO-7) não ganham regiões', async () => {
     const { listMaps } = await import('../../src/data/maps/index.js');
-    for (const m of listMaps({ includeHidden: true })) expect(getRegionMap(m), m.id).toBeNull();
+    for (const m of listMaps({ includeHidden: true })) if (!m.biomeGrid) expect(getRegionMap(m), m.id).toBeNull();
   });
 
   it('?regions=0 e ?tileset=<id> (tileset forçado) desligam o render regional', () => {

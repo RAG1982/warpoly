@@ -73,7 +73,8 @@ Cada mapa é um JSON em `src/data/maps/<id>.json`, registrado em `index.js` (`ge
   (`src/data/biomeStyles.js`): grama→`exuberante`, savana→`savana`, deserto→`deserto`, estepe→`deserto` com palha, rocha→`pedregoso`,
   vulcânico e lava→`vulcanico`, neve→`inverno`, gelo→`inverno` azulado, pântano→`pantano`, floresta→`exuberante` escura; mar e areia herdam o
   estilo da terra vizinha. Mapa SEM `biomeGrid` = render idêntico ao de antes. `?regions=0` na URL desliga o render regional (comparação A/B);
-  `?tileset=<id>` (tileset forçado) também o ignora. O `biomeGrid` não entra na sim nem no checksum.
+  `?tileset=<id>` (tileset forçado) também o ignora. O `biomeGrid` não entra na sim nem no checksum. A textura do terreno de um mapa com `biomeGrid` (ou `lavaGrid`)
+  é alinhada ao mundo (`flipY = false`); nos mapas sem eles ela segue como sempre (ver o achado do espelhamento em z em `src/models/environment/tilesetTextures.js`).
 - **`lavaGrid`** (MUNDO-TERRENO-MAPAS §3.5): grade de células de lava — `{ "cell": 1, "nodes": N, "data": "<base64 de Uint8[nodes*nodes]>" }`, 1 = lava.
   Na sim a lava bloqueia como a água (terrestres e navais; aéreas atravessam), sem dano (`Terrain.isLava`). **Render (MUNDO-5, `src/world/Lava.js`):** um
   plano emissivo (1 draw call) a y = 0,8, acima da água (a lava assada tem altura 0,4), recortado pela grade; brilho 1,2–1,8 com pulso lento e duas camadas de

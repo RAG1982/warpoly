@@ -90,6 +90,12 @@ export function getTilesetTerrainTexture({ def, id, size, getHeight, waterLevel,
   paintRoads(ctx, roads, size, def.palette.road);
 
   const result = { map: toTexture(canvas, true, { wrapS: THREE.ClampToEdgeWrapping }), roughnessMap: null, bumpMap: null };
+  // ORIENTAÇÃO (MUNDO-5). O pintor grava a linha do canvas crescendo com z, mas a malha usa v = (z + metade) / lado e a `CanvasTexture`
+  // nasce com flipY = true (linha 0 do canvas = v 1): a imagem sai ESPELHADA em z em relação à geometria (nos mapas atuais o leito de
+  // areia do `continental` aparece na outra diagonal e as manchas de terra das bases, longe delas). Em mapas com `biomeGrid`/`lavaGrid`
+  // a textura precisa bater com o que o jogo desenha por coordenada (árvores, decoração, água e lava por região): flipY = false alinha.
+  // Mapas sem nenhum dos dois ficam como sempre (mesma imagem, mesma orientação).
+  if ((regions || lava) && result.map) result.map.flipY = false;
   cache.set(key, result);
   return result;
 }

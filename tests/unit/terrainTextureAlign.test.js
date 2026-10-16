@@ -28,21 +28,20 @@ const { TerrainView } = await import('../../src/render/TerrainView.js');
 afterEach(() => { vi.unstubAllGlobals(); captured.clear(); });
 
 /**
- * MUNDO-5 · orientação da textura do terreno. O pintor grava a linha do canvas crescendo com z; a malha usa v = (z + metade) / lado; a
- * `CanvasTexture` nasce com flipY = true (linha 0 do canvas = v 1), o que ESPELHA a imagem em z (achado: o leito de areia do `continental` e
- * as manchas de terra das bases aparecem fora do lugar nos mapas atuais). Mapas com `biomeGrid`/`lavaGrid` têm a textura alinhada (flipY =
- * false); os demais ficam como sempre.
+ * Orientação da textura do terreno (MUNDO-5 achou; corrigido em 2026-10-16 para todos os mapas). O pintor grava a linha do canvas
+ * crescendo com z; a malha usa v = (z + metade) / lado; a `CanvasTexture` nasce com flipY = true (linha 0 do canvas = v 1), o que
+ * ESPELHAVA a imagem em z. flipY = false alinha: vale para o caminho regional, o da lava e o legado.
  */
 describe('textura do terreno: orientação', () => {
   const map = makeRegionalMap({ id: 'align-fixture' });
   const terrain = new Terrain(map);
   const base = { def: TILESETS.exuberante, size: 96, getHeight: (x, z) => terrain.getHeight(x, z), waterLevel: 0.5, startSlots: map.startSlots };
 
-  it('mapa sem biomeGrid nem lavaGrid: flipY = true, como sempre (a mesma imagem, a mesma orientação histórica)', () => {
+  it('mapa sem biomeGrid nem lavaGrid: flipY = false (a imagem alinha com z; antes saía espelhada)', () => {
     vi.stubGlobal('document', {});
     const tex = getTilesetTerrainTexture({ ...base, id: 'align-legacy' });
     expect(tex.map).toBeTruthy();
-    expect(tex.map.flipY).toBe(true);
+    expect(tex.map.flipY).toBe(false);
   });
 
   it('com regiões (biomeGrid) ou com lava (lavaGrid): flipY = false', () => {
@@ -86,7 +85,7 @@ describe('textura do terreno: orientação', () => {
     const a = getTilesetTerrainTexture({ ...base, id: 'align-cache' });
     const b = getTilesetTerrainTexture({ ...base, id: 'align-cache', regions: getRegionMap(map) });
     expect(a).not.toBe(b);
-    expect(a.map.flipY).toBe(true);
+    expect(a.map.flipY).toBe(false);
     expect(b.map.flipY).toBe(false);
     expect(getTilesetTerrainTexture({ ...base, id: 'align-cache' })).toBe(a);
   });

@@ -166,6 +166,9 @@ export function getTerrainTexturesFromHeight({ id, size, getHeight, waterLevel, 
   // Converter para texturas Three.js
   const mapTex = toTexture(albedoCanvas, true, { wrapS: THREE.ClampToEdgeWrapping });
   const roughTex = toTexture(roughCanvas, false, { wrapS: THREE.ClampToEdgeWrapping });
+  // Linha do canvas = z (v cresce com z na malha): sem flipY a textura não sai espelhada em z (ver tilesetTextures.js).
+  if (mapTex) mapTex.flipY = false;
+  if (roughTex) roughTex.flipY = false;
 
   const result = {
     map: mapTex,
@@ -394,6 +397,9 @@ export function getTerrainTextures(landmarks = null, worldSize = 140) {
   // Convert canvases to Three.js textures
   const mapTex = toTexture(albedoCanvas, true, { wrapS: THREE.ClampToEdgeWrapping });
   const roughTex = toTexture(roughCanvas, false, { wrapS: THREE.ClampToEdgeWrapping });
+  // Linha do canvas = z (v cresce com z na malha): sem flipY a textura não sai espelhada em z (ver tilesetTextures.js).
+  if (mapTex) mapTex.flipY = false;
+  if (roughTex) roughTex.flipY = false;
 
   const result = {
     map: mapTex,

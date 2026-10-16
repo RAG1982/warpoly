@@ -6,7 +6,7 @@
  * o ruído é fBm de domínio deformado (domain warp); enseadas (gaussianas negativas) e penínsulas (positivas) são explícitas.
  * Puro e determinístico: a aleatoriedade vem do PRNG (`mulberry32`) recebido por parâmetro.
  */
-import { fbm } from './noise.js';
+import { fbm, smoothstep } from './noise.js';
 
 /** Tipos de ilha: ordem fixa (os 6 primeiros são distintos). `r` = raio-base em u; `stretch` = alongamento. */
 export const ISLAND_TYPES = Object.freeze([
@@ -47,11 +47,23 @@ export function makeFeatures(rng, count, type) {
   return out;
 }
 
+/**
+ * Máscara de cordilheira (0..1) do continente "exuberante": cristas de ruído "ridged" só no norte da entidade e longe da costa
+ * (`dd` = distância à água em u). Usada pela superfície (cume até ~6 u de altura) e pelos rios (as nascentes ficam nas montanhas).
+ */
+export function lushMountain(e, x, z, dd, seed) {
+  const zn = (z - e.cz) / (e.rz || 1);
+  const ridge = 1 - Math.abs(fbm(x * 0.035, z * 0.035, seed + 41, 4) * 2 - 1);
+  const north = smoothstep(0.05, -0.45, zn);
+  return smoothstep(0.62, 0.86, ridge) * smoothstep(7, 18, dd) * north;
+}
+
 /** Campo escalar de uma entidade: > 0 = terra, 0 = costa. */
 export function entityField(e, x, z, o) {
   const sx = e.flipX ? -1 : 1;
   const dx0 = (x - e.cx) * sx, dz0 = z - e.cz;
-  const c = Math.cos(e.rot), s = Math.sin(e.rot);
+  if (e._cs === undefined || e._csRot !== e.rot) { e._cs = [Math.cos(e.rot), Math.sin(e.rot)]; e._csRot = e.rot; } // cos/sin da rotação: uma vez por entidade (mesmos valores)
+  const c = e._cs[0], s = e._cs[1];
   const ex = (dx0 * c + dz0 * s) / e.rx, ez = (-dx0 * s + dz0 * c) / e.rz;
   const r = Math.hypot(ex, ez);
   const th = Math.atan2(ez, ex);
@@ -71,7 +83,8 @@ export function entityField(e, x, z, o) {
   let f = base + n * e.noise * (0.55 + 0.45 * rough) * 1.6;
   f += (fbm(x * 0.13 + 5.5, z * 0.13 - 2.2, e.seed + 9, 3, 0.55) - 0.5) * 0.2 * rough + (fbm(x * 0.26 - 3.1, z * 0.26 + 8.4, e.seed + 10, 2, 0.5) - 0.5) * 0.1 * rough; // detalhe fino: pontas e reentrâncias de ~4–8 u
   for (const b of e.features) {
-    const ca = Math.cos(b.theta), sa = Math.sin(b.theta);
+    if (b._ca === undefined) { b._ca = Math.cos(b.theta); b._sa = Math.sin(b.theta); }
+    const ca = b._ca, sa = b._sa;
     const along = ex * ca + ez * sa, perp = -ex * sa + ez * ca;
     const g = Math.exp(-0.5 * (((along - b.c0) / b.sa) ** 2 + (perp / b.sp) ** 2));
     f += b.type === 'bay' ? -b.amp * g : b.amp * g;
@@ -79,8 +92,9 @@ export function entityField(e, x, z, o) {
   return f;
 }
 
-export function continentEntity(id, biome, cx, cz, rng, o, seed) {
-  const rx = 0.135 * o.size * rng.range(0.94, 1.08) * o.continentScale, rz = 0.34 * o.size * rng.range(0.9, 1.04) * o.continentScale;
+/** `dims` = [rx, rz] em frações de `size` (padrão do protótipo: continentes altos, 0,135 × 0,34). */
+export function continentEntity(id, biome, cx, cz, rng, o, seed, dims = [0.135, 0.34]) {
+  const rx = dims[0] * o.size * rng.range(0.94, 1.08) * o.continentScale, rz = dims[1] * o.size * rng.range(0.9, 1.04) * o.continentScale;
   return {
     id, kind: 'continent', biome, cx, cz, rx, rz, rot: rng.range(-0.35, 0.35), seed, flipX: false,
     harmonics: makeHarmonics(rng, o.roughness), noise: 0.7, warp: 0.5, rough: 1,

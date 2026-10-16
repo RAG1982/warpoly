@@ -5,19 +5,25 @@
  * no vulcão, cordilheira no continente exuberante, leito dos rios, platô dos vaus, lava a 0,4) e bioma por célula.
  * Altera `map` no lugar: define `map.sd`, `map.height` e `map.biome`.
  */
-import { fbm, smoothstep } from './noise.js';
+import { fbm, smoothstep, clamp } from './noise.js';
 import { distanceTransform, boxBlur } from './grid.js';
-import { BIOME, LAVA_HEIGHT } from './constants.js';
+import { BIOME, LAVA_HEIGHT, FORD_HEIGHT, RIVER_BED_EDGE, RIVER_BED_CENTER } from './constants.js';
+import { lushMountain } from './entities.js';
+import { rotateIndex } from './rotate.js';
 
 export function finalizeSurface(map) {
   const { grid: G, cell, land, owner, entities, size } = map;
   const N = G * G, half = size / 2;
+  const rv = map.rivers;
+  // terra seca = terra menos a ÁGUA dos rios: o rio entra na distância assinada como água (margem de areia, praia rasa e leito fundo)
+  let dry = land;
+  if (rv) { dry = new Uint8Array(N); for (let c = 0; c < N; c++) dry[c] = land[c] && !rv.mask[c] ? 1 : 0; }
   const water = new Uint8Array(N);
-  for (let c = 0; c < N; c++) water[c] = land[c] ? 0 : 1;
-  const dLand = distanceTransform(land, G); // em água: distância à terra
+  for (let c = 0; c < N; c++) water[c] = dry[c] ? 0 : 1;
+  const dLand = distanceTransform(dry, G); // em água: distância à terra
   const dWater = distanceTransform(water, G); // em terra: distância à água
   const sdRaw = new Float32Array(N);
-  for (let c = 0; c < N; c++) sdRaw[c] = land[c] ? (dWater[c] - 0.5) * cell : -(dLand[c] - 0.5) * cell;
+  for (let c = 0; c < N; c++) sdRaw[c] = dry[c] ? (dWater[c] - 0.5) * cell : -(dLand[c] - 0.5) * cell;
   const sd = boxBlur(sdRaw, G, 2); // costa suave para a amostragem bilinear
   const height = new Float32Array(N);
   const biome = new Uint8Array(N);
@@ -44,9 +50,7 @@ export function finalizeSurface(map) {
       const nz2 = fbm(x * 0.11 + 40, z * 0.11 - 9, seed + 33, 3);
       const zn = (z - e.cz) / (e.rz || 1);
       if (e.biome === 'lush') {
-        const ridge = 1 - Math.abs(fbm(x * 0.035, z * 0.035, seed + 41, 4) * 2 - 1);
-        const north = smoothstep(0.05, -0.45, zn);
-        const mount = smoothstep(0.62, 0.86, ridge) * smoothstep(7, 18, dd) * north;
+        const mount = lushMountain(e, x, z, dd, seed);
         h += mount * 3.4;
         b = h > 4.0 ? BIOME.SNOW : h > 3.35 ? BIOME.ROCK : (zn > 0.12 && nz > 0.5) ? BIOME.SAVANNA : nz2 > 0.56 && dd > 4 ? BIOME.FOREST : BIOME.GRASS;
       } else if (e.biome === 'arid') {
@@ -79,8 +83,22 @@ export function finalizeSurface(map) {
         else if (lv.passage[c]) { h = Math.max(h, 1.05); b = BIOME.ROCK; } // passagem = rocha resfriada, caminhável
         else if (dLava[c] <= 3 && b !== BIOME.SAND) b = BIOME.VOLCANIC; // cinza/basalto ao redor do fluxo
       }
+      if (rv) {
+        if (rv.mask[c]) { h = RIVER_BED_EDGE + (RIVER_BED_CENTER - RIVER_BED_EDGE) * clamp(-d / 2.2, 0, 1); b = BIOME.SAND; } // leito: abaixo de 0,65 (bloqueia terrestres)
+        else if (rv.ford[c]) { h = Math.max(h, FORD_HEIGHT + Math.sin(x * 0.5) * 0.05); b = BIOME.SAND; } // vau: platô seco e caminhável
+      }
       height[c] = h;
       biome[c] = b;
+    }
+  }
+  if (map.options.symmetry === 'rotate') {
+    // simetria 'rotate': o ruído da superfície depende da posição absoluta; a média de cada célula com a girada (e o bioma da de menor
+    // índice) deixa altura, distância e bioma EXATAMENTE simétricos. Terra, rios e vaus já são simétricos por construção.
+    for (let c = 0; c < N; c++) {
+      const r = rotateIndex(c, G);
+      if (r <= c) continue;
+      const h = (height[c] + height[r]) / 2, d = (sd[c] + sd[r]) / 2;
+      height[c] = height[r] = h; sd[c] = sd[r] = d; biome[r] = biome[c];
     }
   }
   map.sd = sd; map.height = height; map.biome = biome;

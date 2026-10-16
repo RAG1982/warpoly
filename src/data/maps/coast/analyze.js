@@ -6,6 +6,7 @@
  */
 import { labelComponents, distanceTransform } from './grid.js';
 import { lavaStats } from './lavaStreams.js';
+import { riverStats } from './rivers.js';
 import { LAND_HEIGHT } from './constants.js';
 
 /**
@@ -155,6 +156,7 @@ export function analyzeMap(map) {
     irregularity: irregularityIndex(land, G),
     fractalDim: coastFractalDimension(land, G),
     lava: lavaStats(map),
+    rivers: riverStats(map),
     cell
   };
 }

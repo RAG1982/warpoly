@@ -46,8 +46,11 @@ export const DEFAULT_OPTIONS = Object.freeze({
   continents: 2, // 2 (oeste × leste, padrão) | 1 (uma massa central com duas costas) | 0 (só ilhas)
   continentScale: 1, // multiplica os raios dos continentes (mais terra para madeira em mapas grandes)
   continentBiome: 'lush', // bioma do continente único (`continents: 1`)
+  continentCenter: null, // [fx, fz] em frações de `size` do continente único (null = centro do mapa)
+  continentDims: null, // [rx, rz] em frações de `size` dos continentes (null = 0,135 × 0,34 com 2 continentes; 0,30 × 0,24 com 1)
   islandZone: null, // { x, z } em frações de `size` onde as ilhas procuram lugar (null = corredor central ou mapa todo)
   bigIslands: 0, // ilhas grandes (do tamanho de um continente pequeno), uma por quadrante (arquipélago de 4 jogadores)
+  bigIslandAt: null, // [[fx, fz], ...] centros das ilhas grandes em frações de `size` (null = os 4 quadrantes)
   bigIslandScale: 1, // multiplica o raio das ilhas grandes
   lava: true, // córregos de lava na ilha vulcânica (Fornalha): divisor de áreas com passagens de rocha (spec §3.5)
   lavaStreams: 0, // 0 = auto (1 ou 2 córregos, por semente); 1 | 2 força

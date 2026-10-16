@@ -157,3 +157,50 @@ export function bfsReach(walk, G, from, to) {
   }
   return false;
 }
+
+/** Heap binário mínimo (menor prioridade primeiro) para Dijkstra sobre grades; `push` repete itens (remoção preguiçosa). */
+export class CellHeap {
+  constructor(capacity = 1024) {
+    this.keys = new Float64Array(capacity);
+    this.items = new Int32Array(capacity);
+    this.size = 0;
+  }
+
+  push(item, key) {
+    if (this.size === this.keys.length) {
+      const keys = new Float64Array(this.size * 2), items = new Int32Array(this.size * 2);
+      keys.set(this.keys); items.set(this.items);
+      this.keys = keys; this.items = items;
+    }
+    let i = this.size++;
+    while (i > 0) {
+      const p = (i - 1) >> 1;
+      if (this.keys[p] <= key) break;
+      this.keys[i] = this.keys[p]; this.items[i] = this.items[p];
+      i = p;
+    }
+    this.keys[i] = key; this.items[i] = item;
+  }
+
+  /** Remove e devolve o item de menor chave (a chave fica em `this.lastKey`). */
+  pop() {
+    const top = this.items[0];
+    this.lastKey = this.keys[0];
+    this.size--;
+    if (this.size > 0) {
+      const key = this.keys[this.size], item = this.items[this.size];
+      let i = 0;
+      for (;;) {
+        const l = i * 2 + 1;
+        if (l >= this.size) break;
+        const r = l + 1;
+        const m = r < this.size && this.keys[r] < this.keys[l] ? r : l;
+        if (this.keys[m] >= key) break;
+        this.keys[i] = this.keys[m]; this.items[i] = this.items[m];
+        i = m;
+      }
+      this.keys[i] = key; this.items[i] = item;
+    }
+    return top;
+  }
+}

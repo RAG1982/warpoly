@@ -177,8 +177,8 @@ O jogo **não** roda o gerador (o campo usa `sin/cos/exp`): ele roda em ferramen
   `generateRivers` (§2.2: nascem no interior, descem por caminho de menor custo com meandro, canal de 3,4–5 u com leito de −0,6 a −1,4, **vau** de 2,35 a cada
   ~25 u, delta alargado e nascente afilada; o rio é uma camada sobre a terra e `walkableMask` dá a terra caminhável), `analyzeMap` e `verifyCoastMap`
   (componentes, lagoas, rota naval, altura × máscara, lava, rios e simetria).
-- **Presets** (`COAST_PRESETS`, tabela de §2.5): `dois-continentes` (224², 2 continentes + 6 ilhas, lava, 1 rio por continente), `duelo-continental` (224², 1
-  continente simétrico de 180°), `arquipelago-vivo` (256², 4 ilhas grandes, 4 jogadores), `ilha-unica` (224², uma ilha, 2 bases) e `mundo-campanha` (256²,
+- **Presets** (`COAST_PRESETS`, tabela de §2.5): `dois-continentes` (224², 2 continentes com canal de ~92 u entre eles, 2 ilhas e 1 ilhota, lava, 1 rio por continente), `duelo-continental` (224², 1
+  continente simétrico de 180°), `arquipelago-vivo` (256², 4 ilhas grandes nos cantos com canal de ~62 u, 2 ilhas, sem ilhotas, 4 jogadores), `ilha-unica` (224², uma ilha, 2 bases) e `mundo-campanha` (256²,
   continente alheio + cabeça de ponte). `grid = size` (1 célula = 1 u).
 - **Mundo assado:** `buildCoastWorld(preset, { seed, tries })` gera a costa, confere a geografia, assa o terreno (`bakeTerrain`: `painted` `cell` 1 + `lavaGrid` +
   `biomeGrid` RLE), posiciona bases, ouro/pedra, bosques (simula `spawnWoodlands`: madeira ≥ 8000 por jogador a ≤ 60 u), serraria a ≤ 12 u de um bosque, vaus,
@@ -187,4 +187,4 @@ O jogo **não** roda o gerador (o campo usa `sin/cos/exp`): ele roda em ferramen
 - **CLI:** `node tools/gen-world-map.mjs --seed 1 --preset dois-continentes [--out mapa.json]` (stdout sem `--out`).
 - **Testes:** `tests/unit/coast.test.js` (pureza, shim, determinismo, conectividade, lagoas, rota naval, simetria, ≤ 1 s por mapa), `coastRivers.test.js` (rios e
   vaus, travessia no Pathfinder) e `coastWorld.test.js` (presets, `validateMapDef` sem erros, madeira ≥ 8000 medida com o GameManager real, duelo simétrico,
-  conectividade e rota naval, CLI). Os mapas jogáveis aprovados (3 sementes por preset) ainda **não** entram em `index.js` (MUNDO-7).
+  conectividade e rota naval, CLI). Mapas jogáveis do MUNDO-7 registrados em `index.js` (2026-10-16): `duelo-continental-1..3` (sementes 1, 2, 3), `ilha-unica-1..3` (sementes 1, 2, 3), `dois-continentes-1..3` (sementes 1, 2, 5) e `arquipelago-vivo-1..3` (sementes 1, 3, 4). Ouro de 7.500 por mina nos doze (a mina padrão de 2.500 esgotava no meio da partida). Estado do soak e travamentos aceitos: ver `docs/TASKS.md` (MUNDO-7).

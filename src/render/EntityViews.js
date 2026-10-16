@@ -15,7 +15,16 @@ import { BuildingView } from './BuildingView.js';
 import { UnitView } from './UnitView.js';
 import { TreeManager } from '../world/TreeManager.js';
 import { getMapTileset } from '../data/tilesets.js';
+import { getRegionMap } from '../data/biomeRegions.js';
 import * as THREE from 'three';
+
+/** F7-04/MUNDO-5: tileset do mapa + regiões de bioma (`biomeGrid`; `null` sem ele) para o `TreeManager`. */
+function treeManagerOptions(gm) {
+  const mapDef = gm.terrain?.mapDef;
+  if (!mapDef) return { tileset: undefined, regions: null };
+  const def = getMapTileset(mapDef);
+  return { tileset: def.id, regions: getRegionMap(mapDef, def) };
+}
 
 export class EntityViews {
   /**
@@ -26,7 +35,7 @@ export class EntityViews {
     this.gm = gm;
     this.scene = scene;
     /** Instanced Trees System (poucos draw calls para todas as árvores); recriado quando o mapa é recriado. */
-    this.treeManager = new TreeManager(scene, { tileset: gm.terrain?.mapDef ? getMapTileset(gm.terrain.mapDef).id : undefined }); // F7-04: variante de árvore do tileset
+    this.treeManager = new TreeManager(scene, treeManagerOptions(gm)); // F7-04: variante de árvore do tileset; MUNDO-5: por região de bioma
     /** @type {Map<object, {root: object, update: Function, dispose: Function}>} */
     this.views = new Map();
     this._frame = 0;
@@ -130,7 +139,7 @@ export class EntityViews {
     if (this._trees.ref && this._trees.ref !== gm.trees) {
       // Mapa recriado (`GameManager.resetMap` troca as listas): novas árvores → novo conjunto de instâncias.
       this.treeManager.dispose();
-      this.treeManager = new TreeManager(this.scene, { tileset: gm.terrain?.mapDef ? getMapTileset(gm.terrain.mapDef).id : undefined });
+      this.treeManager = new TreeManager(this.scene, treeManagerOptions(gm));
     }
     this._sync(this._trees, gm.trees, e => new TreeView(e, this.scene, this.treeManager), frame, true);
     this._sync(this._critters, gm.critters, e => new CritterView(e, this.scene), frame, false);

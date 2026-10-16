@@ -2,6 +2,9 @@ import * as THREE from 'three';
 import { mergeGeometries } from 'three/examples/jsm/utils/BufferGeometryUtils.js';
 import { getGraniteBoulderTextures, getRiverPebbleTextures } from '../models/environment/rockTextures.js';
 import { getMapTileset, getTileset } from '../data/tilesets.js';
+import { getRegionMap } from '../data/biomeRegions.js';
+import { buildLavaInfo } from '../data/lavaRender.js';
+import { planDecorations } from '../data/decorPlan.js';
 import { zoomHidesDecorations, lodEnabled } from '../render/lod.js';
 import {
   getFlowerTextures,
@@ -35,8 +38,23 @@ const SMALL_DECORATIONS = new Set([
   'InstancedFlowerLeaves', 'InstancedFlowerPetals', 'InstancedLilyPads', 'InstancedLotus'
 ]);
 
+/** Categoria de decoração (`DECOR_RULES`) → malhas instanciadas que a compõem e chave de tinta em `style.decor` (as outras não tingem). */
+const REGIONAL_GROUPS = [
+  { category: 'grass', meshes: ['InstancedGrassTufts'], tint: 'grass' },
+  { category: 'pebbles', meshes: ['InstancedPebbles'], tint: 'pebbles' },
+  { category: 'boulders', meshes: ['InstancedBoulders'], tint: 'boulders' },
+  { category: 'bushes', meshes: ['InstancedBushes', 'InstancedBerries'], tint: 'bushes' },
+  { category: 'stumps', meshes: ['InstancedStumps', 'InstancedMushrooms'], tint: null },
+  { category: 'lilies', meshes: ['InstancedLilyPads', 'InstancedLotus'], tint: null },
+  { category: 'flowers', meshes: ['InstancedFlowerLeaves', 'InstancedFlowerPetals'], tint: null }
+];
+
 export class Decorations {
-  /** @param {{tileset?: string}} [options]  F7-04: variantes de decoração do tileset (padrão: `mapDef.tileset`) */
+  /**
+   * @param {{tileset?: string, regions?: boolean}} [options]  F7-04: variantes de decoração do tileset (padrão: `mapDef.tileset`).
+   *   MUNDO-5: com `mapDef.biomeGrid` as instâncias são reposicionadas por bioma (`data/decorPlan.js`) e tingidas por região
+   *   (`instanceColor`): as MESMAS 11 malhas e o mesmo nº de draw calls; `regions: false` desliga.
+   */
   constructor(scene, terrain, options = {}) {
     this.scene = scene;
     this.terrain = terrain;
@@ -51,8 +69,94 @@ export class Decorations {
     this.createInstancedWaterLilies();
     this.createInstancedFlowerPatches();
 
-    this.applyTileset(options.tileset ? getTileset(options.tileset) : getMapTileset(terrain && terrain.mapDef));
+    const tilesetDef = options.tileset ? getTileset(options.tileset) : getMapTileset(terrain && terrain.mapDef);
+    this.applyTileset(tilesetDef);
+    /** MUNDO-5: regiões de bioma, ou `null` = caminho antigo (posições e tintas do tileset, como sempre). */
+    this.regions = options.regions === false ? null : getRegionMap(terrain && terrain.mapDef, tilesetDef);
+    if (this.regions) this.applyRegions(this.regions);
+    else {
+      // Mapa só com `lavaGrid`: as posições antigas não conhecem a lava; o que cair nela (ou colado) sai.
+      const lava = buildLavaInfo(terrain && terrain.mapDef);
+      if (lava) this._hideOnLava(lava);
+    }
     this.scene.add(this.group);
+  }
+
+  /** MUNDO-5: zera (escala 0) as instâncias a menos de 1,2 u da lava. Só roda em mapa com `lavaGrid` e sem regiões (com regiões o plano já evita a lava). */
+  _hideOnLava(lava) {
+    const m = new THREE.Matrix4();
+    const p = new THREE.Vector3();
+    const zero = new THREE.Matrix4().makeScale(0, 0, 0);
+    for (const mesh of this.group.children) {
+      if (!mesh.isInstancedMesh) continue;
+      let changed = false;
+      for (let i = 0; i < mesh.count; i++) {
+        mesh.getMatrixAt(i, m);
+        p.setFromMatrixPosition(m);
+        if (lava.distAt(p.x, p.z) < 1.2) { mesh.setMatrixAt(i, zero); changed = true; }
+      }
+      if (changed) {
+        mesh.instanceMatrix.needsUpdate = true;
+        mesh.boundingSphere = null;
+        mesh.boundingBox = null;
+      }
+    }
+  }
+
+  /**
+   * MUNDO-5: reposiciona e tinge as decorações por região. Cada categoria sorteia posições nas células do bioma certo
+   * (`planDecorations`, determinístico por mapa) e respeita as flags do estilo da célula (flores/cogumelos/vitórias-régias);
+   * a tinta é do estilo da célula (instanceColor; o material fica branco). Nada vai para lava, mar fundo, bases ou jazidas.
+   */
+  applyRegions(regions) {
+    const terrain = this.terrain;
+    const mapDef = (terrain && terrain.mapDef) || {};
+    const plan = planDecorations({
+      regions,
+      getHeight: (x, z) => terrain.getHeight(x, z),
+      mapDef: { ...mapDef, size: mapDef.size || regions.size },
+      lava: buildLavaInfo(mapDef),
+      waterLevel: 0.5
+    });
+    this.plan = plan;
+    const byName = (n) => this.group.children.find((c) => c.name === n);
+    for (const g of REGIONAL_GROUPS) {
+      const items = plan[g.category] || [];
+      for (const name of g.meshes) {
+        const mesh = byName(name);
+        if (!mesh) continue;
+        if (g.tint && mesh.material.color) mesh.material.color.setHex(0xffffff); // a tinta passa a ser por instância
+        this._fillInstances(mesh, items, g.tint && name === g.meshes[0] ? g.tint : null);
+      }
+    }
+    this._lodHidden = null;
+  }
+
+  /** Regrava as instâncias de `mesh` com `items` (posição/giro/escala) e, se `tintKey`, a cor de `style.decor[tintKey]` por instância. */
+  _fillInstances(mesh, items, tintKey) {
+    const n = items.length;
+    if (n > mesh.instanceMatrix.count) mesh.instanceMatrix = new THREE.InstancedBufferAttribute(new Float32Array(n * 16), 16);
+    mesh.count = n;
+    const dummy = new THREE.Object3D();
+    const col = new THREE.Color();
+    for (let i = 0; i < n; i++) {
+      const it = items[i];
+      dummy.position.set(it.x, it.y, it.z);
+      dummy.rotation.set(0, it.rotY, 0);
+      dummy.scale.set(it.scale, it.scale, it.scale);
+      dummy.updateMatrix();
+      mesh.setMatrixAt(i, dummy.matrix);
+      if (tintKey) {
+        const hex = this.regions.styles[it.style].def.decor[tintKey];
+        mesh.setColorAt(i, col.setHex(hex === undefined ? 0xffffff : hex));
+      }
+    }
+    mesh.instanceMatrix.needsUpdate = true;
+    if (mesh.instanceColor) mesh.instanceColor.needsUpdate = true;
+    mesh.boundingSphere = null; // o culling usa a esfera das instâncias: recalcula
+    mesh.boundingBox = null;
+    mesh.visible = n > 0;
+    mesh.userData.baseVisible = n > 0; // F1-10: o LOD só esconde o que a região deixa visível
   }
 
   /**

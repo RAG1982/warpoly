@@ -8,6 +8,9 @@ import { enableShadows } from '../models/materials.js';
 import { markFogGround } from '../render/fogOfWarShader.js';
 import { getMapTileset, getTileset } from '../data/tilesets.js';
 import { getTextureQuality } from '../models/textureQuality.js';
+import { getRegionMap } from '../data/biomeRegions.js';
+import { buildLavaInfo } from '../data/lavaRender.js';
+import { Lava } from './Lava.js';
 
 /**
  * F7-00b (aceite de desempenho): funde todos os `Mesh` sob `root` (qualquer profundidade; `root` na identidade e sem pai) em UM
@@ -42,16 +45,20 @@ const REED_SPACING = 7;
 /**
  * NEW-52: escolhe até `max` posições de moitas em água rasa do terreno (determinístico: varre uma grade
  * em ordem fixa, pula `REED_SPACING` entre moitas). Terreno sem água rasa => lista vazia.
+ * MUNDO-5: `accept(x, z)` (opcional) filtra as posições (moitas só em água de região com plantas); sem ele, nada muda.
  * @returns {Array<{x:number, z:number}>}
  */
-export function pickReedLocations(terrain, waterLevel = 0.5, max = 7) {
+export function pickReedLocations(terrain, waterLevel = 0.5, max = 7, accept = null) {
   const size = (terrain && (terrain.mapDef?.size || terrain.width)) || 140;
   const half = size / 2 - 4;
+  // MUNDO-5: lava (altura assada 0,4, "rasa" para esta conta) não é água: nada de juncos no córrego. Mapa sem `lavaGrid`: sempre falso.
+  const lava = (x, z) => typeof terrain.isLava === 'function' && terrain.isLava(x, z);
   const shallow = (x, z) => {
+    if (lava(x, z)) return false;
     const h = terrain.getHeight(x, z);
     return h <= waterLevel - REED_MIN_DEPTH && h >= waterLevel - REED_MAX_DEPTH;
   };
-  const wet = (x, z) => terrain.getHeight(x, z) <= waterLevel - REED_MIN_DEPTH;
+  const wet = (x, z) => !lava(x, z) && terrain.getHeight(x, z) <= waterLevel - REED_MIN_DEPTH;
   const ring = [[1, 0], [-1, 0], [0, 1], [0, -1]];
   const found = [];
   // Varredura em ordem fixa (determinística); o espaçamento mínimo espalha as moitas pelo mapa.
@@ -59,6 +66,7 @@ export function pickReedLocations(terrain, waterLevel = 0.5, max = 7) {
     for (let z = -half; z <= half && found.length < max; z += 1) {
       if (!shallow(x, z)) continue;
       if (!ring.every(([dx, dz]) => wet(x + dx * REED_CLEARANCE, z + dz * REED_CLEARANCE))) continue;
+      if (accept && !accept(x, z)) continue;
       if (found.some((f) => Math.hypot(f.x - x, f.z - z) < REED_SPACING)) continue;
       found.push({ x, z });
     }
@@ -78,13 +86,22 @@ export function pickReedLocations(terrain, waterLevel = 0.5, max = 7) {
  * 4. Enhanced Cattails & Lotus Lilies: Textured velvet brown cattails, floating lotus pads & water lilies.
  */
 export class Water {
-  /** @param {{tileset?: string}} [options]  F7-04: cor da água, espuma e plantas vêm do tileset (padrão: `mapDef.tileset`) */
+  /**
+   * @param {{tileset?: string, regions?: boolean}} [options]  F7-04: cor da água, espuma e plantas vêm do tileset (padrão: `mapDef.tileset`).
+   *   MUNDO-5: com `mapDef.biomeGrid` a cor/opacidade da água, a cor/força da espuma e as moitas variam por região (o mar adota o
+   *   estilo da costa vizinha e volta ao tileset base longe dela); `regions: false` desliga. Com `mapDef.lavaGrid` desenha a lava
+   *   emissiva (`world/Lava.js`, 1 draw call) e tira a espuma das bordas dela.
+   */
   constructor(scene, terrain, options = {}) {
     this.scene = scene;
     this.terrain = terrain;
     this.waterLevel = 0.5;
     this.tileset = options.tileset ? getTileset(options.tileset) : getMapTileset(terrain && terrain.mapDef);
     this.cfg = this.tileset.water;
+    /** MUNDO-5: regiões de bioma, ou `null` = caminho antigo (água/espuma/plantas só do tileset do mapa). */
+    this.regions = options.regions === false ? null : getRegionMap(terrain && terrain.mapDef, this.tileset);
+    /** MUNDO-5: lava do mapa (informação pura), ou `null`. */
+    this.lavaInfo = buildLavaInfo(terrain && terrain.mapDef);
 
     // Collections for animations
     this.reedClumps = [];
@@ -94,7 +111,43 @@ export class Water {
     this.createDeepWaterBase();
     this.createWaterMesh();
     this.createShoreFoam();
-    if (this.cfg.plants) this.createReeds();
+    if (this._wantsReeds()) this.createReeds();
+    /** MUNDO-5: malha de lava emissiva (só em mapa com `lavaGrid`), animada por `update`. */
+    this.lava = this.lavaInfo ? new Lava(scene, this.lavaInfo) : null;
+  }
+
+  /** Há juncos/vitórias-régias neste mapa? Caminho antigo: flag do tileset; regional: se algum estilo tem plantas. */
+  _wantsReeds() {
+    if (!this.regions) return !!this.cfg.plants;
+    return this.regions.styles.some((st) => st.def.water && st.def.water.plants);
+  }
+
+  /**
+   * MUNDO-5: cores por vértice a partir das regiões — `styleValue(def)` devolve [r, g, b, a] do estilo (sRGB 0..255; a = alfa/escala);
+   * o resultado é a média ponderada pela influência regional na água (campo largo) no ponto de cada vértice, gravada como atributo
+   * `color` (RGBA, rgb em espaço linear) da malha.
+   * @param {import('three').BufferGeometry} geo  malha plana em XZ (mundo)
+   * @param {(def: object) => number[]} styleValue
+   */
+  _regionalColors(geo, styleValue) {
+    const regions = this.regions;
+    const pos = geo.attributes.position;
+    const K = regions.styleCount;
+    const W = new Float32Array(K);
+    const out = new Float32Array(pos.count * 4);
+    const tmp = new THREE.Color();
+    const vals = regions.styles.map((st) => styleValue(st.def));
+    for (let i = 0; i < pos.count; i++) {
+      regions.waterWeightsAt(pos.getX(i), pos.getZ(i), W);
+      let r = 0, g = 0, b = 0, a = 0;
+      for (let k = 0; k < K; k++) {
+        const v = vals[k];
+        r += W[k] * v[0]; g += W[k] * v[1]; b += W[k] * v[2]; a += W[k] * v[3];
+      }
+      tmp.setRGB(r / 255, g / 255, b / 255, THREE.SRGBColorSpace);
+      out[i * 4] = tmp.r; out[i * 4 + 1] = tmp.g; out[i * 4 + 2] = tmp.b; out[i * 4 + 3] = a;
+    }
+    geo.setAttribute('color', new THREE.BufferAttribute(out, 4));
   }
 
   /**
@@ -137,8 +190,18 @@ export class Water {
 
     const surfaceTextures = getWaterSurfaceTextures();
 
+    // MUNDO-5: cor e opacidade da água por região (RGBA por vértice: o plano tem ~2,3 u por vértice, então a mistura entre regiões
+    // sai como gradiente). O material fica branco/opaco e o vértice manda; sem regiões é exatamente o material de antes.
+    const regional = !!this.regions;
+    if (regional) {
+      this._regionalColors(geo, (def) => {
+        const w = def.water, c = [(w.color >> 16) & 255, (w.color >> 8) & 255, w.color & 255];
+        return [c[0], c[1], c[2], w.opacity];
+      });
+    }
+
     this.surfaceMat = new THREE.MeshStandardMaterial({
-      color: this.cfg.color, // tint do tileset (padrão: ciano/turquesa)
+      color: regional ? 0xffffff : this.cfg.color, // tint do tileset (padrão: ciano/turquesa)
       map: surfaceTextures.map,
       roughnessMap: surfaceTextures.roughnessMap,
       bumpMap: surfaceTextures.bumpMap,
@@ -146,7 +209,8 @@ export class Water {
       roughness: 0.16,
       metalness: 0.20,
       transparent: true,
-      opacity: this.cfg.opacity,
+      opacity: regional ? 1 : this.cfg.opacity,
+      vertexColors: regional,
       flatShading: true
     });
 
@@ -173,7 +237,8 @@ export class Water {
       const z = size / 2 - (j + 0.5) * (size / G); // linha 0 = v 0 = z positivo (rotateX(-90°) do plano)
       for (let i = 0; i < G; i++) {
         const x = -size / 2 + (i + 0.5) * (size / G);
-        const hh = terrain.getHeight(x, z) - this.waterLevel;
+        let hh = terrain.getHeight(x, z) - this.waterLevel;
+        if (this.lavaInfo && this.lavaInfo.isLavaAt(x, z)) hh = 2; // MUNDO-5: a lava (h 0,4 < água) conta como terra: sem espuma na borda dela
         const o = (j * G + i) * 4;
         data[o] = Math.max(0, Math.min(255, Math.round(((hh + 1) / 3) * 255)));
         data[o + 3] = 255;
@@ -190,11 +255,13 @@ export class Water {
       map: tex, transparent: true, depthWrite: false, color: 0xffffff,
       polygonOffset: true, polygonOffsetFactor: -2, polygonOffsetUnits: -2
     });
+    const regional = !!this.regions;
     const uniforms = {
       uTime: { value: 0 },
       uSize: { value: size },
       uLow: { value: low ? 1 : 0 },
-      uFoam: { value: new THREE.Color(this.cfg.foam) },
+      // MUNDO-5: regional = a cor da espuma vem do vértice (cor × `uFoam` branco); sem regiões, a cor do tileset como sempre
+      uFoam: { value: new THREE.Color(regional ? 0xffffff : this.cfg.foam) },
       uStrength: { value: this.cfg.foamStrength * 1.6 }
     };
     const baseCompile = THREE.Material.prototype.onBeforeCompile; // inclui o patch da névoa de guerra
@@ -227,8 +294,18 @@ diffuseColor = vec4( uFoam, clamp( a, 0.0, 1.0 ) );`);
     };
     markFogGround(mat);
 
-    const geo = new THREE.PlaneGeometry(size, size, 1, 1);
+    // Regional: malha subdividida (2 304 triângulos, ainda 1 draw call) com cor/força da espuma por vértice; sem regiões, o quad de sempre.
+    const foamSegs = regional ? 48 : 1;
+    const geo = new THREE.PlaneGeometry(size, size, foamSegs, foamSegs);
     geo.rotateX(-Math.PI / 2);
+    if (regional) {
+      const baseStrength = this.cfg.foamStrength || 1;
+      this._regionalColors(geo, (def) => {
+        const w = def.water, c = [(w.foam >> 16) & 255, (w.foam >> 8) & 255, w.foam & 255];
+        return [c[0], c[1], c[2], Math.max(0.25, Math.min(1.7, (w.foamStrength ?? baseStrength) / baseStrength))];
+      });
+      mat.vertexColors = true;
+    }
     this.foamMesh = new THREE.Mesh(geo, mat);
     this.foamMesh.position.y = this.waterLevel + 0.16;
     this.foamMesh.renderOrder = 1;
@@ -246,7 +323,15 @@ diffuseColor = vec4( uFoam, clamp( a, 0.0, 1.0 ) );`);
     reedGroup.name = 'WaterVegetationGroup';
 
     // NEW-52: moitas só em água rasa DESTE mapa (antes: 7 posições fixas do mapa antigo, que caíam em terra seca).
-    const reedLocations = pickReedLocations(this.terrain, this.waterLevel);
+    // MUNDO-5: mapa regional só põe moitas na água de regiões com plantas (pântano, oásis…); sem plantas no tileset base, no máximo 2
+    // moitas (≈ 8 malhas cada), para o orçamento de draw calls.
+    const regions = this.regions;
+    const reedLocations = regions
+      ? pickReedLocations(this.terrain, this.waterLevel, this.cfg.plants ? 7 : 2, (x, z) => {
+        const def = regions.styles[regions.waterStyleAt(x, z)].def;
+        return !!(def.water && def.water.plants);
+      })
+      : pickReedLocations(this.terrain, this.waterLevel);
 
     const cattailTex = getCattailLotusTextures();
 
@@ -489,6 +574,9 @@ diffuseColor = vec4( uFoam, clamp( a, 0.0, 1.0 ) );`);
       pos.needsUpdate = true;
       this.mesh.geometry.computeVertexNormals();
     }
+
+    // 1a. Lava emissiva (MUNDO-5): pulso do brilho e fluxo (só mapas com lavaGrid)
+    if (this.lava) this.lava.update(time);
 
     // 1b. Espuma de costa (F7-04)
     if (this.foamUniforms) {

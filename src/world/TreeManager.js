@@ -91,6 +91,59 @@ uniform vec3 uTreeTint; uniform float uTreeDesat; uniform vec3 uTreeSnow; unifor
   return mat;
 }
 
+/** Quantos estilos (classes de tinta) cabem no shader regional (índices 0..15; `RegionMap.styleCount` ≤ 13). */
+const REGIONAL_TINT_SLOTS = 16;
+
+/**
+ * MUNDO-5: variante REGIONAL da árvore: UM material para todas as regiões (zero malhas extras). O índice do estilo de cada instância
+ * viaja no `instanceColor.r` (índice / 255; as .glb das árvores não têm cor de vértice, então `vColor` = cor da instância); o shader
+ * lê o índice e escolhe, em vetores uniform, a tinta, a dessaturação e a neve da região (mesma conta de `createTintedMaterial`).
+ * O `#include <color_fragment>` sai (senão a classe multiplicaria o albedo).
+ * @param {import('three').Material} src
+ * @param {Array<{color:number, desat:number, snow:number|null, snowAmount:number}|null>} tints  tinta de cada índice de estilo (`null` = sem tinta)
+ */
+function createRegionalTintMaterial(src, tints) {
+  const mat = src.clone();
+  const tint = [], desat = [], snow = [], snowAmt = [];
+  for (let k = 0; k < REGIONAL_TINT_SLOTS; k++) {
+    const cfg = tints[k] || null;
+    tint.push(new THREE.Color(cfg ? cfg.color : 0xffffff));
+    desat.push(cfg ? cfg.desat : 0);
+    snow.push(cfg && cfg.snow != null ? new THREE.Color(cfg.snow) : new THREE.Color(1, 1, 1));
+    snowAmt.push(cfg ? cfg.snowAmount || 0 : 0);
+  }
+  const uniforms = {
+    uRegTint: { value: tint },
+    uRegDesat: { value: desat },
+    uRegSnow: { value: snow },
+    uRegSnowAmt: { value: snowAmt }
+  };
+  const baseCompile = THREE.Material.prototype.onBeforeCompile; // com o patch da névoa de guerra
+  mat.onBeforeCompile = function treeRegionalTintOnBeforeCompile(shader, renderer) {
+    Object.assign(shader.uniforms, uniforms);
+    const n = REGIONAL_TINT_SLOTS;
+    shader.fragmentShader = shader.fragmentShader
+      .replace('#include <common>', `#include <common>
+uniform vec3 uRegTint[${n}]; uniform float uRegDesat[${n}]; uniform vec3 uRegSnow[${n}]; uniform float uRegSnowAmt[${n}];`)
+      .replace('#include <color_fragment>', '')
+      .replace('#include <normal_fragment_maps>', `#include <normal_fragment_maps>
+{
+  int wpK = clamp( int( vColor.r * 255.0 + 0.5 ), 0, ${n - 1} );
+  float wpL = dot( diffuseColor.rgb, vec3( 0.3, 0.59, 0.11 ) );
+  vec3 wpC = mix( diffuseColor.rgb, vec3( wpL ), uRegDesat[ wpK ] ) * uRegTint[ wpK ];
+  float wpUp = ( vec4( normal, 0.0 ) * viewMatrix ).y;
+  float wpSnow = uRegSnowAmt[ wpK ] * smoothstep( 0.25, 0.75, wpUp );
+  diffuseColor.rgb = mix( wpC, uRegSnow[ wpK ], wpSnow );
+}`);
+    baseCompile.call(this, shader, renderer);
+  };
+  mat.customProgramCacheKey = function () {
+    return 'wp-treetint-reg' + THREE.Material.prototype.customProgramCacheKey.call(this);
+  };
+  mat.needsUpdate = true;
+  return mat;
+}
+
 /**
  * F1-10 item 3: geometria simplificada do impostor (copa em cone de 6 lados + tronco em cilindro de 4 lados, cores nos
  * vértices), dimensionada pela caixa da geometria real do tipo. Gerada uma única vez por tipo.
@@ -120,11 +173,21 @@ function buildImpostorGeometry(key, srcGeo) {
 }
 
 export class TreeManager {
-  /** @param {{tileset?: string}} [options]  F7-04: variante (tinta/neve) por tileset; padrão: sem alteração */
+  /**
+   * @param {{tileset?: string, regions?: import('../data/biomeRegions.js').RegionMap|null}} [options]  F7-04: variante (tinta/neve) por
+   *   tileset; padrão: sem alteração. MUNDO-5: `regions` (mapa com `biomeGrid`) escolhe a tinta pela célula de cada árvore (estilo da
+   *   região: `def.trees.tint`) SEM malhas extras: os mesmos InstancedMesh (tipo × chunk) com um material regional e o índice do estilo de
+   *   cada árvore em `instanceColor` (o shader escolhe a tinta em vetores uniform). Sem `regions`: o de sempre.
+   */
   constructor(scene, options = {}) {
     this.scene = scene;
     this._tintedMats = [];
     this.trees = [];
+    /** MUNDO-5: regiões de bioma (ou `null`). */
+    this._regions = options.regions || null;
+    this._regionalMats = new Map(); // material de origem → material regional (tinta por instância)
+    this._impostorTints = new Map(); // classe de tinta → material do impostor tingido (impostor = tinta da classe dominante do chunk)
+    this._classColor = new THREE.Color();
 
     this.oakCount = 0;
     this.pineCount = 0;
@@ -148,7 +211,7 @@ export class TreeManager {
     if (options.tileset) this.applyTileset(getTileset(options.tileset));
   }
 
-  /** InstancedMesh do chunk (tipo × célula de 32 u), criado sob demanda já com a tinta do tileset, se houver. */
+  /** InstancedMesh do chunk (tipo × célula de 32 u), criado sob demanda já com a tinta do tileset (ou o material regional), se houver. */
   _getChunkMesh(key, x, z) {
     const id = `${key}|${Math.floor(x / CHUNK_SIZE)}|${Math.floor(z / CHUNK_SIZE)}`;
     let im = this._chunks.get(id);
@@ -182,6 +245,12 @@ export class TreeManager {
       next.array.set(old.array);
       next.setUsage(old.usage);
       im.instanceMatrix = next;
+      if (im.instanceColor) { // MUNDO-5: a classe de tinta de cada instância cresce junto com as matrizes
+        const oc = im.instanceColor;
+        const nc = new THREE.InstancedBufferAttribute(new Float32Array(next.count * 3).fill(1), 3);
+        nc.array.set(oc.array);
+        im.instanceColor = nc;
+      }
     }
     im.count = idx + 1;
     const imp = im.userData.lodImpostor;
@@ -199,10 +268,13 @@ export class TreeManager {
     for (const imp of this.lodMeshes) this._tintMesh(imp);
   }
 
-  /** Impostor do chunk usa os MESMOS buffers de matriz/cor e a mesma contagem do mesh normal. */
+  /**
+   * Impostor do chunk usa os MESMOS buffers de matriz/cor e a mesma contagem do mesh normal. MUNDO-5: no modo regional o `instanceColor`
+   * do chunk carrega a classe de tinta (não é cor), então o impostor não o herda; ele tem uma tinta só (a classe dominante do chunk).
+   */
   _syncImpostor(im, imp) {
     imp.instanceMatrix = im.instanceMatrix;
-    imp.instanceColor = im.instanceColor;
+    if (!this._regions) imp.instanceColor = im.instanceColor;
     imp.count = im.count;
     imp.boundingSphere = null;
   }
@@ -217,6 +289,7 @@ export class TreeManager {
     imp.castShadow = false;
     imp.receiveShadow = false;
     imp.userData.isTreeImpostor = true;
+    imp.userData.treeStyle = this._dominantClass(im); // MUNDO-5: tinta da classe dominante do chunk (impostor = 1 tinta só)
     this._tintMesh(imp);
     this._syncImpostor(im, imp);
     imp.visible = false;
@@ -255,8 +328,52 @@ export class TreeManager {
     }
   }
 
+  /** MUNDO-5: estilo (classe de tinta) que mais aparece entre as árvores do chunk (empate: o de menor índice). */
+  _dominantClass(im) {
+    const counts = im.userData.classCount;
+    let best = 0, bn = -1;
+    if (counts) for (const [k, n] of counts) if (n > bn || (n === bn && k < best)) { best = k; bn = n; }
+    return best;
+  }
+
+  /** Tinta (`def.trees.tint`) de cada índice de estilo; `null` = sem tinta. */
+  _regionalTints() {
+    return this._regions.styles.map((st) => (st.def.trees && st.def.trees.tint) || null);
+  }
+
+  /**
+   * MUNDO-5: tinta regional. Chunk normal: UM material regional por material de origem (tinta por instância, zero malhas extras) e o
+   * `instanceColor` alocado desde já (o programa do shader depende dele). Impostor: material tingido pela classe dominante do chunk
+   * (`userData.treeStyle`), um por classe. `userData.baseMaterial` guarda o original (reaplicar não tinge duas vezes).
+   */
+  _tintMeshRegional(im) {
+    const src = im.userData.baseMaterial || (im.userData.baseMaterial = im.material);
+    if (im.userData.isTreeImpostor) {
+      const cls = im.userData.treeStyle || 0;
+      const cfg = this._regionalTints()[cls];
+      if (!cfg) return;
+      let tinted = this._impostorTints.get(cls);
+      if (!tinted) {
+        tinted = createTintedMaterial(src, cfg);
+        this._impostorTints.set(cls, tinted);
+        this._tintedMats.push(tinted);
+      }
+      im.material = tinted;
+      return;
+    }
+    let mat = this._regionalMats.get(src);
+    if (!mat) {
+      mat = createRegionalTintMaterial(src, this._regionalTints());
+      this._regionalMats.set(src, mat);
+      this._tintedMats.push(mat);
+    }
+    im.material = mat;
+    if (!im.instanceColor) im.setColorAt(0, this._classColor.setRGB(0, 1, 1)); // classe 0; cada `registerTree` regrava a da árvore
+  }
+
   /** Troca o material do InstancedMesh pela variante do tileset (um clone por material de origem; só se há tinta). */
   _tintMesh(im) {
+    if (this._regions) { this._tintMeshRegional(im); return; }
     if (!this._tintCfg) return;
     if (!this._tintBySource.has(im.material)) {
       const t = createTintedMaterial(im.material, this._tintCfg);
@@ -291,6 +408,13 @@ export class TreeManager {
     }
     const mesh = this._getChunkMesh(key, x, z);
     const idx = this._allocInstance(mesh); // índice local ao chunk
+    if (this._regions) { // MUNDO-5: estilo da região desta árvore (instanceColor.r = índice do estilo / 255)
+      const cls = this._regions.styleAt(x, z);
+      mesh.setColorAt(idx, this._classColor.setRGB(cls / 255, 1, 1));
+      mesh.instanceColor.needsUpdate = true;
+      const counts = mesh.userData.classCount || (mesh.userData.classCount = new Map());
+      counts.set(cls, (counts.get(cls) || 0) + 1);
+    }
 
     tree.instanceType = type;
     tree.instanceIndex = idx;
@@ -348,6 +472,8 @@ export class TreeManager {
     this.instancedMeshes = [];
     this._tintedMats.forEach(m => m.dispose());
     this._tintedMats = [];
+    this._regionalMats.clear();
+    this._impostorTints.clear();
     this.trees = [];
     this.oakCount = 0;
     this.pineCount = 0;

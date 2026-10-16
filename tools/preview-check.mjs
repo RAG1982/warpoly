@@ -7,7 +7,7 @@ import { assertHardwareGpu } from './lib/assertGpu.mjs';
 
 const BASE = process.argv[2] || '/';
 const PORT = 4179;
-const server = spawn('npx', ['vite', 'preview', '--port', String(PORT), '--strictPort'], { stdio: 'ignore', detached: true });
+const server = spawn('npx', ['vite', 'preview', '--port', String(PORT), '--strictPort', '--base', BASE], { stdio: 'ignore', detached: true });
 let browser;
 const errors = [];
 try {

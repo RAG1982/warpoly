@@ -10,7 +10,7 @@ import { labelComponents } from './grid.js';
 import { LAND_HEIGHT, LAVA_HEIGHT, FORD_HEIGHT, WOOD_TARGET } from './constants.js';
 import { walkableMask } from './rivers.js';
 import { rotateIndex } from './rotate.js';
-import { estimateWood, BASE_CLEARANCE } from './layout.js';
+import { estimateWood, BASE_CLEARANCE, WELLS_PER_BASE } from './layout.js';
 import { buildPathfinder, floodFill, isReached } from '../generator.js';
 import { NAVAL_MAX_HEIGHT } from '../../combat.js';
 
@@ -23,7 +23,7 @@ export const DEFAULT_LAND_RANGE = Object.freeze([0.25, 0.5]);
 /**
  * Verifica a geografia de um mapa gerado.
  * @param {object} map  saída de `generateCoast`/`generateIrregularCoast`
- * @param {{ landRange?: number[], minRivers?: number, requireLava?: boolean }} [opts]
+ * @param {{ landRange?: number[], minRivers?: number }} [opts]  `landRange` = [mín, máx] da proporção de terra; `minRivers` = rios mínimos por continente
  */
 export function verifyCoastMap(map, opts = {}) {
   const { grid: G, land, owner, entities, height, cell } = map;
@@ -90,7 +90,7 @@ export function verifyCoastMap(map, opts = {}) {
       const wc = labelComponents(walk, G, 1);
       const walkPerEntity = new Map();
       for (let c = 0; c < N; c++) if (walk[c] && owner[c] >= 0) { const set = walkPerEntity.get(owner[c]) ?? new Set(); set.add(wc.labels[c]); walkPerEntity.set(owner[c], set); }
-      for (const [idx, set] of walkPerEntity) if (set.size !== 1 && !lv?.mask) fail('rio-parte-terra', `${entities[idx]?.id} partido em ${set.size} regiões caminháveis`);
+      for (const [idx, set] of walkPerEntity) if (set.size !== 1 && entities[idx].kind === 'continent') fail('rio-parte-terra', `${entities[idx].id} partido em ${set.size} regiões caminháveis`);
       for (let c = 0; c < N; c++) if (rv.mask[c] && rv.ford[c]) { fail('rio-vau', 'célula de água que também é vau'); break; }
       // a água de cada rio toca o oceano (a foz)
       const rl = labelComponents(rv.mask, G, 1);
@@ -120,10 +120,22 @@ export function verifyCoastMap(map, opts = {}) {
 // ---------------------------------------------------------------------------------------------
 const hyp = (a, b) => Math.hypot(a.x - b.x, a.z - b.z);
 
+/** Ponto de oceano navegável: a primeira célula navegável olhando dos 4 cantos da área jogável para dentro (o gerador deixa mar fundo na borda). */
+function oceanPoint(sea, playable) {
+  const half = playable / 2;
+  for (let d = 2; d <= 24; d++) {
+    for (const [sx, sz] of [[-1, -1], [1, -1], [-1, 1], [1, 1]]) {
+      const p = { x: sx * (half - d), z: sz * (half - d) };
+      if (sea.isWalkableWorld(p.x, p.z)) return p;
+    }
+  }
+  return null;
+}
+
 /**
  * Verifica o mapa jogável assado (`mapDef`) contra o `Pathfinder` real e as regras de §2.4.
- * @param {object} mapDef  saída de `bakeToMapDef`/`buildCoastMapDef`
- * @param {{ naval?: boolean, woodTarget?: number, woodSeeds?: number[], field?: object }} [opts]
+ * @param {object} mapDef  saída de `bakeToMapDef` (via `buildCoastWorld`)
+ * @param {{ naval?: boolean, woodTarget?: number, woodSeeds?: number[], woodMargin?: number }} [opts]
  * @returns {{ ok: boolean, failures: string[], checks: object }}
  */
 export function verifyCoastWorld(mapDef, opts = {}) {
@@ -181,31 +193,32 @@ export function verifyCoastWorld(mapDef, opts = {}) {
     checks.woodRatio = mn / (mx || 1);
   }
 
-  // rota naval (mapas navais): poços em água ligada ao oceano, cada base com costa para o Estaleiro ligada a todos os poços e às outras bases
+  // rota naval (mapas navais): poços em água ligada ao OCEANO (nunca em lago nem em rio), cada base com costa para o Estaleiro ligada a
+  // todos os poços e às costas das outras bases
   const wells = resources.filter((r) => r.type === 'oil');
   if (opts.naval) {
-    if (wells.length < slots.length) fail('poços', `${wells.length} poços para ${slots.length} bases`);
+    if (wells.length < WELLS_PER_BASE * slots.length) fail('poços', `${wells.length} poços para ${slots.length} bases (esperado ${WELLS_PER_BASE} por base)`);
     const sea = buildPathfinder(mapDef, 'naval');
-    if (wells.length) {
-      const water = floodFill(sea, wells[0].x, wells[0].z);
-      for (const w of wells) if (!isReached(sea, water, w.x, w.z)) fail('poço-isolado', `poço (${w.x}, ${w.z}) fora do mar principal`);
+    const corner = oceanPoint(sea, mapDef.playable);
+    if (!corner) fail('sem-oceano', 'nenhuma célula navegável junto à borda do mapa');
+    else {
+      const ocean = floodFill(sea, corner.x, corner.z);
+      for (const w of wells) if (!isReached(sea, ocean, w.x, w.z)) fail('poço-isolado', `poço (${w.x}, ${w.z}) fora do mar principal`);
       const dock = slots.map((s) => {
         for (let rho = 8; rho <= 60; rho += 1) {
           for (let a = 0; a < 36; a++) {
             const x = s.x + Math.cos((a / 36) * Math.PI * 2) * rho, z = s.z + Math.sin((a / 36) * Math.PI * 2) * rho;
             if (land.terrain.getHeight(x, z) < 1.8 || !sea.nearNavigable(x, z, 5.3)) continue;
             for (let dx = -6; dx <= 6; dx += 1.5) for (let dz = -6; dz <= 6; dz += 1.5) {
-              if (Math.hypot(dx, dz) <= 5.3 && sea.isWalkableWorld(x + dx, z + dz) && isReached(sea, water, x + dx, z + dz)) return { x: x + dx, z: z + dz, rho };
+              if (Math.hypot(dx, dz) <= 5.3 && sea.isWalkableWorld(x + dx, z + dz) && isReached(sea, ocean, x + dx, z + dz)) return { x: x + dx, z: z + dz, rho };
             }
           }
         }
         return null;
       });
-      dock.forEach((d, i) => { if (!d) fail('sem-costa', `base ${i} sem costa para o Estaleiro ligada ao mar dos poços`); });
+      // a costa de cada base fica no mesmo mar dos poços e das costas das outras bases (todas ligadas ao oceano)
+      dock.forEach((d, i) => { if (!d) fail('sem-costa', `base ${i} sem costa para o Estaleiro ligada ao oceano`); });
       checks.naval = { wells: wells.length, docks: dock.map((d) => (d ? Math.round(d.rho) : null)) };
-      // cada costa de base alcança as costas inimigas (mesmo componente de água)
-      const docks = dock.filter(Boolean);
-      for (const d of docks) if (!isReached(sea, water, d.x, d.z)) fail('costas-separadas', 'costas de base em componentes de água diferentes');
     }
   } else {
     for (const r of resources) if (r.type === 'oil' && hAt(r) > NAVAL_MAX_HEIGHT) fail('poço-raso', `poço (${r.x}, ${r.z}) raso`);

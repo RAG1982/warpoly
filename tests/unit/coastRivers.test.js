@@ -140,7 +140,7 @@ describe('rios: geometria do canal, vaus, foz e delta (1 rio por continente)', (
       const wc = labelComponents(walk, G, 1);
       const perEntity = new Map();
       for (let c = 0; c < G * G; c++) if (walk[c] && m.owner[c] >= 0) { const st = perEntity.get(m.owner[c]) ?? new Set(); st.add(wc.labels[c]); perEntity.set(m.owner[c], st); }
-      for (const [idx, st] of perEntity) if (!m.lava || !m.lava.mask.some((v, c) => v && m.owner[c] === idx)) expect(st.size, m.entities[idx].id).toBe(1);
+      for (const [idx, st] of perEntity) if (m.entities[idx].kind === 'continent') expect(st.size, m.entities[idx].id).toBe(1);
       expect(m.stats.landComponents).toBe(m.entities.length); // o rio não quebra a máscara de terra
       expect(verifyCoastMap(m, { minRivers: 1 }).failures).toEqual([]);
     });

@@ -17,6 +17,7 @@
 import { fbm, smoothstep } from './noise.js';
 import { NB8, CellHeap, distanceTransform, labelComponents } from './grid.js';
 import { lushMountain } from './entities.js';
+import { rotateIndex } from './rotate.js';
 
 /** Terra caminhável considerando lava e rios: `land` sem lava e sem a ÁGUA dos rios (os vaus continuam terra). */
 export function walkableMask(map) {
@@ -55,7 +56,7 @@ export function generateRivers(map, root) {
   const N = G * G, half = size / 2;
   const rng = root.fork('rivers');
   const sym = o.symmetry === 'rotate';
-  const rot = (c) => (G - 1 - ((c - (c % G)) / G)) * G + (G - 1 - (c % G));
+  const rot = (c) => rotateIndex(c, G);
   const seed = o.seed | 0;
 
   const water = new Uint8Array(N);
@@ -198,7 +199,7 @@ export function generateRivers(map, root) {
       for (let j = Math.floor(p.j - r); j <= Math.ceil(p.j + r); j++) for (let i = Math.floor(p.i - r); i <= Math.ceil(p.i + r); i++) {
         if (i < 0 || j < 0 || i >= G || j >= G) continue;
         const c = j * G + i;
-        if (own[c] && Math.hypot(i - p.i, j - p.j) <= r) mask[c] = 1;
+        if (own[c] && (i - p.i) * (i - p.i) + (j - p.j) * (j - p.j) <= r * r) mask[c] = 1;
       }
     }
     // --- vaus: a cada ~`riverFordSpacing` u (nenhum na nascente nem no delta), cada um cobre a largura inteira do leito
@@ -216,7 +217,7 @@ export function generateRivers(map, root) {
       for (let j = Math.floor(p.j - rc); j <= Math.ceil(p.j + rc); j++) for (let i = Math.floor(p.i - rc); i <= Math.ceil(p.i + rc); i++) {
         if (i < 0 || j < 0 || i >= G || j >= G) continue;
         const c = j * G + i;
-        if (mask[c] && Math.hypot(i - p.i, j - p.j) <= rc) { mask[c] = 0; ford[c] = 1; }
+        if (mask[c] && (i - p.i) * (i - p.i) + (j - p.j) * (j - p.j) <= rc * rc) { mask[c] = 0; ford[c] = 1; }
       }
       fordList.push({ x: (p.i + 0.5) * cell - half, z: (p.j + 0.5) * cell - half, r: +rf.toFixed(2), i: p.i, j: p.j, s: +p.s.toFixed(2), stream: total.streams.length });
     }
@@ -227,10 +228,10 @@ export function generateRivers(map, root) {
     // --- estado novo = anterior + este rio (+ gêmeo girado 180° na simetria 'rotate'; máscaras giradas ficam exatas)
     const mask2 = new Uint8Array(total.mask), ford2 = new Uint8Array(total.ford);
     for (let c = 0; c < N; c++) { if (mask[c]) mask2[c] = 1; if (ford[c]) ford2[c] = 1; }
-    const fords = fordList.slice(), twins = [];
+    const fords = fordList.slice();
     if (sym) {
       for (let c = 0; c < N; c++) { if (mask[c]) mask2[rot(c)] = 1; if (ford[c]) ford2[rot(c)] = 1; }
-      for (const f of fordList) { const t = { ...f, x: -f.x, z: -f.z, i: G - 1 - f.i, j: G - 1 - f.j, stream: f.stream + 1 }; fords.push(t); twins.push(t); }
+      for (const f of fordList) fords.push({ ...f, x: -f.x, z: -f.z, i: G - 1 - f.i, j: G - 1 - f.j, stream: f.stream + 1 });
     }
     for (let c = 0; c < N; c++) if (ford2[c]) mask2[c] = 0;
     // --- validação: o continente continua UMA massa caminhável e a foz toca o oceano

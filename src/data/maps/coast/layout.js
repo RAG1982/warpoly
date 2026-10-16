@@ -47,7 +47,7 @@ const TREE_SPACING = 4.4;
 export const WOOD_MARGIN_STOP = 1.3; // o planejador planta bosques até a madeira simulada chegar a WOOD_TARGET × 1,3…
 export const WOOD_MARGIN_MIN = 1.15; // …e só aceita a base se chegar a WOOD_TARGET × 1,15 (o sorteio real varia com a semente da partida)
 
-const hyp = (ax, az, bx, bz) => Math.hypot(ax - bx, az - bz);
+const hyp = (ax, az, bx, bz) => { const dx = ax - bx, dz = az - bz; return Math.sqrt(dx * dx + dz * dz); }; // mais rápido que Math.hypot nos laços quentes
 
 /**
  * Campo de nós do terreno assado: altura, terra seca, folga (u) até o que não é terra seca e região conexa (4-vizinhos, terra
@@ -381,13 +381,14 @@ function slotLayout(site, mirror, lumber) {
 /** Poços de petróleo só em água com profundidade navegável (`NAVAL_MAX_HEIGHT` = 0,1 menos uma folga) e `amount` padrão dos mapas navais. */
 const WELL_MAX_HEIGHT = 0.05;
 export const WELL_AMOUNT = 5000;
+export const WELLS_PER_BASE = 2;
 
 /**
  * Poços de petróleo de um mapa naval: 2 por base, em água LIGADA AO OCEANO (nunca em lago nem em rio), a ≥ 7 u da costa, o mais perto
  * possível da base (≤ 75 u) e a ≥ 16 u uns dos outros. Para bases gêmeas (`twinOf`), os poços da gêmea são o giro de 180° dos da mãe.
  * @returns {{ type: 'oil', x: number, z: number, amount: number }[]}
  */
-function planWells(field, sites, spec, perBase = 2) {
+function planWells(field, sites, spec, perBase = WELLS_PER_BASE) {
   const { N, cell, H, xOf, inside } = field;
   const water = new Uint8Array(N * N);
   for (let k = 0; k < water.length; k++) water[k] = H[k] <= WELL_MAX_HEIGHT ? 1 : 0;
@@ -553,7 +554,7 @@ export function planLayout(map, baked, spec, opts) {
   let wells = [];
   if (spec.naval && plans.every(Boolean)) {
     wells = planWells(field, plans.map((p) => p.site), spec);
-    if (wells.length < nb * 2) failures.push(`poços: só ${wells.length} de ${nb * 2} (água ligada ao oceano a ≥ 7 u da costa)`);
+    if (wells.length < nb * WELLS_PER_BASE) failures.push(`poços: só ${wells.length} de ${nb * WELLS_PER_BASE} (água ligada ao oceano a ≥ 7 u da costa)`);
     resources.push(...wells);
   }
   const neutrals = plans.every(Boolean) ? planCritters(field, plans, (b) => (map.entities[ownerAt(plans[b].site.x, plans[b].site.z)]?.biome === 'lush' ? 'sheep' : 'boar')) : [];

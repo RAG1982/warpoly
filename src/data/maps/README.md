@@ -149,3 +149,29 @@ A exportação roda `validateMapDef` (`validate.js`: as checagens de `maps.test.
 conectividade) e só baixa sem erros. Um mapa exportado **não** entra sozinho no registro: copie o JSON para `src/data/maps/` e registre em `index.js`
 (ou use `registerMap(json)` em código). Modelo puro/testável em `src/editor/mapModel.js`; testes `tests/unit/mapEditor.test.js`; capturas
 `node tools/capture-editor.mjs` (via safe-run) em `tools/ui-captures/editor/`.
+
+## Gerador de costa irregular (MUNDO-1, `src/data/maps/coast/`)
+
+Módulo de dados **puro** (sem three.js, sem DOM, sem `Math.random`; toda a aleatoriedade vem de semente `mulberry32`) que gera continentes e ilhas de
+contorno natural (spec `docs/specs/MUNDO-TERRENO-MAPAS.md` §2–3). Promovido do protótipo `tools/lib/irregularCoast.mjs`, que virou um **shim**
+(`export * from '../../src/data/maps/coast/index.js'`) para `tools/proto/irregular-coast.mjs`, `tools/gen-world-map.mjs` e os testes antigos.
+O jogo **não** roda o gerador (o campo usa `sin/cos/exp`): ele roda em ferramenta/editor e o resultado é assado em JSON `painted`.
+
+- **Geração:** `generateCoast(options)` (geral) e `generateIrregularCoast(options)` (API do protótipo, exige `islands >= 5`). Mesma entrada ⇒ mesmo mapa;
+  com as opções padrão a saída é idêntica à do protótipo (conferido em 83 casos). Opções novas: `continents` (2 | 1 | 0), `continentDims`, `bigIslands`,
+  `rivers`, `symmetry: 'rotate'` (rotação de 180° **exata** de terra, altura, bioma, rios e bases) e `grid`/`size`.
+- **Partes exportadas:** `resolveLagoons` (lagoa com menos de `minLake` células vira terra; as grandes ficam como lagos), `generateLava` (córregos de §3.5),
+  `generateRivers` (§2.2: nascem no interior, descem por caminho de menor custo com meandro, canal de 3,4–5 u com leito de −0,6 a −1,4, **vau** de 2,35 a cada
+  ~25 u, delta alargado e nascente afilada; o rio é uma camada sobre a terra e `walkableMask` dá a terra caminhável), `analyzeMap` e `verifyCoastMap`
+  (componentes, lagoas, rota naval, altura × máscara, lava, rios e simetria).
+- **Presets** (`COAST_PRESETS`, tabela de §2.5): `dois-continentes` (224², 2 continentes + 6 ilhas, lava, 1 rio por continente), `duelo-continental` (224², 1
+  continente simétrico de 180°), `arquipelago-vivo` (256², 4 ilhas grandes, 4 jogadores), `ilha-unica` (224², uma ilha, 2 bases) e `mundo-campanha` (256²,
+  continente alheio + cabeça de ponte). `grid = size` (1 célula = 1 u).
+- **Mundo assado:** `buildCoastWorld(preset, { seed, tries })` gera a costa, confere a geografia, assa o terreno (`bakeTerrain`: `painted` `cell` 1 + `lavaGrid` +
+  `biomeGrid` RLE), posiciona bases, ouro/pedra, bosques (simula `spawnWoodlands`: madeira ≥ 8000 por jogador a ≤ 60 u), serraria a ≤ 12 u de um bosque, vaus,
+  poços de petróleo (naval) e critters (`planLayout`) e confere tudo com o `Pathfinder` real (`verifyCoastWorld`). Se algo falhar, **a semente é rejeitada** e
+  tenta `seed+1…` (o resultado diz a `seed` usada e as `attempts`). `mapDef.meta` guarda preset e sementes; o id é `mundo-<preset>-<semente pedida>`.
+- **CLI:** `node tools/gen-world-map.mjs --seed 1 --preset dois-continentes [--out mapa.json]` (stdout sem `--out`).
+- **Testes:** `tests/unit/coast.test.js` (pureza, shim, determinismo, conectividade, lagoas, rota naval, simetria, ≤ 1 s por mapa), `coastRivers.test.js` (rios e
+  vaus, travessia no Pathfinder) e `coastWorld.test.js` (presets, `validateMapDef` sem erros, madeira ≥ 8000 medida com o GameManager real, duelo simétrico,
+  conectividade e rota naval, CLI). Os mapas jogáveis aprovados (3 sementes por preset) ainda **não** entram em `index.js` (MUNDO-7).

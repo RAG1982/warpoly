@@ -42,6 +42,7 @@ export const BASE_CLEARANCE = 14; // raio livre de terra seca em volta do pátio
 export const COURTYARD_CLEAR = 26; // as árvores só nascem a ≥ 26 u de qualquer pátio
 export const FOREST_COUNT = 14;
 export const FOREST_RADIUS = 10;
+export const LUMBER_TO_FOREST = 11.5; // serraria a 11,5 u do centro do bosque inicial (regra P-14: <= 12 u, com folga para o arredondamento das coordenadas)
 const TREE_SPACING = 4.4;
 export const WOOD_MARGIN_STOP = 1.3; // o planejador planta bosques até a madeira simulada chegar a WOOD_TARGET × 1,3…
 export const WOOD_MARGIN_MIN = 1.15; // …e só aceita a base se chegar a WOOD_TARGET × 1,15 (o sorteio real varia com a semente da partida)
@@ -253,7 +254,7 @@ const dryAt = (field, p, minClear) => { const k = field.at(p.x, p.z); return fie
 const angDiff = (a, b) => Math.abs(Math.atan2(Math.sin(a - b), Math.cos(a - b)));
 
 /**
- * Planeja UMA base num ponto candidato: espelhamento do layout, bosque inicial + serraria a 12 u dele, ouro e pedra e os demais
+ * Planeja UMA base num ponto candidato: espelhamento do layout, bosque inicial + serraria a 11,5 u dele, ouro e pedra e os demais
  * bosques, até a madeira simulada passar da meta. Devolve `null` se o ponto não serve.
  * `world`: { field, sites[] (pátios de TODAS as bases; o desta é `site`), fords[], extraDeposits[], extraBuildings[], extraTrees[] }.
  */
@@ -279,14 +280,14 @@ function planBase(world, site, index, rngRoot, woodTarget) {
     const base = layoutPositions(site, mirror);
     if (![...base.buildings.filter((b) => b.role !== 'lumber'), ...base.units].every((p) => dryAt(field, p, 2))) continue;
 
-    // 2) bosque inicial a 28–36 u do HQ (de preferência voltado ao centro do mapa) e serraria a 12 u dele (regra P-14)
+    // 2) bosque inicial a 28–36 u do HQ (de preferência voltado ao centro do mapa) e serraria a 11,5 u dele (regra P-14)
     const starters = [];
     for (let a = 0; a < 24; a++) {
       const ang = outward + Math.PI + (a % 2 ? 1 : -1) * Math.ceil(a / 2) * ((Math.PI * 2) / 24);
       for (const d of [32, 30, 34, 36, 28]) {
         const q = { x: site.x + Math.cos(ang) * d, z: site.z + Math.sin(ang) * d };
         if (!field.inside(q.x, q.z, FOREST_RADIUS + 3) || !dryAt(field, q, 4) || field.region[field.at(q.x, q.z)] !== regionId) continue;
-        const L = { x: site.x + Math.cos(ang) * (d - 12), z: site.z + Math.sin(ang) * (d - 12) };
+        const L = { x: site.x + Math.cos(ang) * (d - LUMBER_TO_FOREST), z: site.z + Math.sin(ang) * (d - LUMBER_TO_FOREST) };
         if (!dryAt(field, L, 3)) continue;
         starters.push({ q, L, frac: boxFrac(q.x, q.z, 8), d, a });
       }

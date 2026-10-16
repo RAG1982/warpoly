@@ -296,6 +296,48 @@
       "count": 14,
       "radius": 7,
       "species": "oak"
+    },
+    {
+      "x": -59,
+      "z": 0,
+      "count": 24,
+      "radius": 9,
+      "species": "oak"
+    },
+    {
+      "x": 59,
+      "z": 0,
+      "count": 24,
+      "radius": 9,
+      "species": "oak"
+    },
+    {
+      "x": -59,
+      "z": 15,
+      "count": 12,
+      "radius": 6,
+      "species": "oak"
+    },
+    {
+      "x": -59,
+      "z": -15,
+      "count": 12,
+      "radius": 6,
+      "species": "oak"
+    },
+    {
+      "x": 59,
+      "z": 15,
+      "count": 12,
+      "radius": 6,
+      "species": "oak"
+    },
+    {
+      "x": 59,
+      "z": -15,
+      "count": 12,
+      "radius": 6,
+      "species": "oak"
     }
   ],
   "neutrals": [

@@ -4,6 +4,7 @@ import { CMD } from '../sim/commands.js';
 import { EVT } from '../sim/events.js';
 import { canTarget } from '../sim/targeting.js';
 import { adaptMix } from './AIStrategy.js';
+import { regionAt, pointReachable } from './AIWood.js';
 
 /** F4-06: atacante terrestre genérico (não atinge aéreos) — escolha de alvo da expedição. */
 const LAND_ATTACKER = { canHitAir: false, canHitGround: true };
@@ -23,6 +24,11 @@ const CAMP_MIN_ARMY = 8;
 const CAMP_MAX_DIST = 90;
 const CAMP_OP_MAX = 150;
 const CAMP_COOLDOWN = 240;
+/** NEW-55 (finalizador): camponeses ociosos mínimos e máximos por grupo de ataque sem madeira. */
+const FINISH_MIN_WORKERS = 3;
+const FINISH_MAX_WORKERS = 10;
+/** NEW-55: tempo máximo (s) de um grupo do finalizador; passado isso, o grupo volta à economia e escolhe alvo de novo. */
+const FINISH_MAX_AGE = 240;
 
 /**
  * AIMilitaryManager (Gerenciador Militar e Ofensivo da IA)
@@ -90,6 +96,8 @@ export class AIMilitaryManager {
     this._escortBuf = [];
     /** NEW-25: ataque em curso a um acampamento neutro, ou null. */
     this._campOp = null;
+    /** NEW-55: grupo do finalizador (camponeses ociosos atacando o último alvo sem madeira), ou null. */
+    this._fin = null;
     this._campNextAt = 0;
   }
 
@@ -262,6 +270,54 @@ export class AIMilitaryManager {
     if ((d.simTime || 0) < 60 || !d.woodOutlook().none) return false;
     const c = d.costs;
     return d.resources.wood < Math.min((c.melee && c.melee.wood) || 0, (c.ranged && c.ranged.wood) || 0);
+  }
+
+  /**
+   * NEW-55 (finalizador sem madeira): sem madeira para repor o exército e sem combatentes para uma onda, a IA ainda pode
+   * terminar a partida. Os camponeses ociosos (o ouro sobra, a madeira não) atacam o alvo que ela conhece e que alcançam
+   * por terra: torre antes de tudo, depois o Centro, depois qualquer construção. Enquanto o grupo ataca, a madeira que
+   * resta não vira construção (`director.finisherActive`): fica para o golpe final. Sai quando o alvo cai, o grupo morre,
+   * a defesa de casa precisa dos camponeses ou a madeira volta.
+   */
+  manageFinisher() {
+    const dir = this.director;
+    const gm = this.gm;
+    const fin = this._fin;
+    if (fin) {
+      for (const id of fin.ids) {
+        const e = gm.getEntity(id);
+        if (!e || e.isDead) fin.ids.delete(id);
+      }
+      const t = gm.getEntity(fin.targetId);
+      const age = (dir.simTime || 0) - fin.since;
+      if (fin.ids.size > 0 && t && !t.isDead && dir.utilities.def <= 0 && this.reinforcementsBlocked() && age < FINISH_MAX_AGE) return;
+      for (const id of fin.ids) dir.unreserve(id);
+      this._fin = null;
+      dir.finisherActive = false;
+      return;
+    }
+    if (dir.utilities.def > 0 || !this.reinforcementsBlocked()) return;
+    // Com combatentes para uma onda, a expedição normal cuida do ataque: o finalizador é só para o que sobra.
+    if (this.collectSquad() >= this.attackThreshold) return;
+    const target = this.selectExpeditionTarget();
+    if (!target || !('role' in target)) return; // só construções: unidades inimigas não entram aqui
+    const pf = gm.pathfinder;
+    const home = dir.baseCenter;
+    if (!pointReachable(pf, regionAt(pf, home.x, home.y), target.x, target.z)) return;
+    const unitIds = [];
+    const units = dir.getOwnUnits();
+    for (let i = 0; i < units.length && unitIds.length < FINISH_MAX_WORKERS; i++) {
+      const u = units[i];
+      if (!u.isDead && u.type === dir.workerType && u.state === 'idle' && !dir.isReserved(u.id)) unitIds.push(u.id);
+    }
+    if (unitIds.length < FINISH_MIN_WORKERS) return;
+    const order = target.lastSeen === dir.perception.now
+      ? { type: CMD.ATTACK, playerId: dir.playerId, unitIds, targetId: target.id }
+      : { type: CMD.ATTACK_MOVE, playerId: dir.playerId, unitIds, x: target.x, z: target.z };
+    if (!dir.issue(order)) return; // sem orçamento de APM: tenta no próximo tick
+    for (let i = 0; i < unitIds.length; i++) dir.reserve(unitIds[i]);
+    this._fin = { ids: new Set(unitIds), targetId: target.id, since: dir.simTime || 0 };
+    dir.finisherActive = true;
   }
 
   /**
@@ -472,6 +528,7 @@ export class AIMilitaryManager {
     if (uMil >= 0.8 && this.expeditionAllowed()) {
       this.manageMilitaryExpedition();
     }
+    this.manageFinisher();
   }
 
   /**

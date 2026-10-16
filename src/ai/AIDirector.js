@@ -51,6 +51,8 @@ export class AIDirector {
     this.commandsDropped = 0;
     /** Unidades reservadas (explorador, assédio) que o exército principal não deve mexer. */
     this._reserved = new Set();
+    /** NEW-55: finalizador sem madeira ativo (ver AIMilitaryManager.manageFinisher); guarda a madeira para o golpe final. */
+    this.finisherActive = false;
     this.simTime = 0;
     this._lastEco = -1e9;
 
@@ -362,8 +364,8 @@ export class AIDirector {
     if (this.utilities.def > 0.5) {
       // Prioritize homeland defense over foreign offensive
       this.utilities.mil = 0.2;
-    } else if (isEmergency) {
-      // Keep troops to defend home base while economy recovers
+    } else if (isEmergency && this.economyManager.canRecoverWorkers()) {
+      // Keep troops to defend home base while economy recovers (NEW-55: só se a recuperação ainda for possível)
       this.utilities.mil = 0.0;
     } else if (readyCombatTroops >= threshold) {
       this.utilities.mil = 1.0; // Ready for assault!

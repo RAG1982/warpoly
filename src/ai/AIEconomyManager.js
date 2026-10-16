@@ -105,7 +105,7 @@ export class AIEconomyManager {
       let worker = null;
       for (let j = 0; j < units.length; j++) {
         const u = units[j];
-        if (!u.isDead && u.type === this.director.workerType && u.state === 'idle' && !assigned.has(u.id)) {
+        if (!u.isDead && u.type === this.director.workerType && u.state === 'idle' && !assigned.has(u.id) && !this.director.isReserved(u.id)) {
           worker = u;
           break;
         }
@@ -228,6 +228,23 @@ export class AIEconomyManager {
   }
 
   /**
+   * NEW-55: a recuperação de trabalhadores ainda é possível? Centro construído e vivo, ouro para um trabalhador
+   * e vaga de população. Falso = a emergência não tem saída (sem Centro, sem ouro ou sem vaga): segurar o exército
+   * em casa só trava a partida (ilhas-4p, seeds 1 e 6 do soak). Centro em melhoria conta como possível.
+   * @returns {boolean}
+   */
+  canRecoverWorkers() {
+    const dir = this.director;
+    const buildings = this.gm.buildings;
+    let hq = false;
+    for (let i = 0; i < buildings.length; i++) {
+      const b = buildings[i];
+      if (b.ownerId === dir.playerId && b.type === dir.hqType && b.isConstructed && !b.isDead) { hq = true; break; }
+    }
+    return hq && dir.canAfford(dir.costs.worker) && dir.population < dir.maxPopulation;
+  }
+
+  /**
    * Verifies if the military manager can safely recruit combat troops without starving peon production
    * @returns {boolean}
    */
@@ -274,7 +291,7 @@ export class AIEconomyManager {
 
     for (let i = 0; i < lenE; i++) {
       const e = enemies[i];
-      if (!e.isDead && e.type === this.director.workerType) {
+      if (!e.isDead && e.type === this.director.workerType && !this.director.isReserved(e.id)) {
         if (e.state === 'building' && e.buildTarget === incomplete) {
           hasBuilder = true;
           break;
@@ -376,6 +393,8 @@ export class AIEconomyManager {
 
     // 0. F5-01 (anti-colapso): com a força de trabalho quase zerada, o ouro é reservado para recriar peões.
     if (workerCount < 3 && this.director.resources.gold < 150) return;
+    // NEW-55: finalizador ativo — a madeira não vira construção, fica para o golpe final.
+    if (this.director.finisherActive) return;
 
     // 1. POPULATION UNLOCK: Pig Farm or Orc House (Maximum priority when population is near/at cap)
     // F2-02: sem dedução aqui — o custo é cobrado no CommandExecutor (PLACE_BUILDING).
@@ -560,7 +579,7 @@ export class AIEconomyManager {
     if (points.length < 3) return;
 
     const workers = this.director.getOwnUnits()
-      .filter(w => !w.isDead && w.type === this.director.workerType)
+      .filter(w => !w.isDead && w.type === this.director.workerType && !this.director.isReserved(w.id))
       .sort((a, b) => {
         const da = Math.hypot(a.mesh.position.x - cx, a.mesh.position.z - cz) + (a.state === 'idle' ? 0 : 50);
         const db = Math.hypot(b.mesh.position.x - cx, b.mesh.position.z - cz) + (b.state === 'idle' ? 0 : 50);
@@ -771,7 +790,7 @@ export class AIEconomyManager {
     // Categorize workers by current role
     for (let i = 0; i < lenE; i++) {
       const e = enemies[i];
-      if (!e.isDead && e.type === workerType) {
+      if (!e.isDead && e.type === workerType && !this.director.isReserved(e.id)) {
         livingWorkers.push(e);
 
         if (e.state === 'building' || e.state === 'repairing') {
@@ -1024,7 +1043,7 @@ export class AIEconomyManager {
     const units = dir.getOwnUnits();
     for (let i = 0; i < units.length; i++) {
       const u = units[i];
-      if (u.isDead || u.type !== dir.workerType) continue;
+      if (u.isDead || u.type !== dir.workerType || dir.isReserved(u.id)) continue;
       const d = Math.hypot(u.mesh.position.x - site.x, u.mesh.position.z - site.z) + (u.state === 'idle' ? 0 : 50);
       if (d < wd) { wd = d; w = u; }
     }
@@ -1068,7 +1087,7 @@ export class AIEconomyManager {
 
     for (let i = 0; i < lenE; i++) {
       const w = enemies[i];
-      if (!w.isDead && w.type === this.director.workerType) {
+      if (!w.isDead && w.type === this.director.workerType && !this.director.isReserved(w.id)) {
         const dx = w.mesh.position.x - chosenX;
         const dz = w.mesh.position.z - chosenZ;
         const dSq = dx * dx + dz * dz;

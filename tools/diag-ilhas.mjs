@@ -157,14 +157,14 @@ const hostileKill = (e) => {
 gm.events.on(EVT.UNIT_DIED, (e) => {
   if (e.expired || !hostileKill(e)) return;
   pvp.kills++; pvp.win.kills++;
-  if (pvp.firstKill === null) pvp.firstKill = { tick: gm.currentTick, killer: e.killerOwnerId, victim: e.ownerId };
+  if (pvp.firstKill === null) pvp.firstKill = { tick: gm.currentTick, killer: e.killerOwnerId, victim: e.ownerId, unit: e.unitType, xz: e.pos ? [r1(e.pos.x), r1(e.pos.z)] : null };
   const key = `${e.killerOwnerId}>${e.ownerId}`;
   pvp.byPair[key] = (pvp.byPair[key] || 0) + 1;
 });
 gm.events.on(EVT.BUILDING_DESTROYED, (e) => {
   if (!hostileKill(e)) return;
   pvp.bKills++; pvp.win.bKills++;
-  if (pvp.firstBld === null) pvp.firstBld = { tick: gm.currentTick, killer: e.killerOwnerId, victim: e.ownerId, type: e.buildingType };
+  if (pvp.firstBld === null) pvp.firstBld = { tick: gm.currentTick, killer: e.killerOwnerId, victim: e.ownerId, type: e.buildingType, xz: e.pos ? [r1(e.pos.x), r1(e.pos.z)] : null };
 });
 
 // --- amostragem ---

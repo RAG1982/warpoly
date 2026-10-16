@@ -290,7 +290,7 @@ def hull_prim(pts):
 
 
 def facet_block(rng, half, chamfer=0.8, cut=(0.70, 0.90), chamfer_top=0.5, cut_top=(0.82, 0.95), jitter=0.10, taper=0.06,
-                ridge=0.14, chips=3, chip_cut=(0.86, 0.95)):
+                ridge=0.14, chips=3, chip_cut=(0.86, 0.95), fracs=0, frac_cut=(0.74, 0.90)):
     """Bloco de pedra facetado (monólito), centrado na origem: caixa de meias-medidas `half` cujas 6 faces são giradas
     (`jitter`) e inclinadas com a altura (`taper`, pode ser negativo: face em balanço), com telhado de duas águas no topo
     (`ridge`), chanfros nas arestas verticais (`chamfer`, a `cut` do suporte) e nas arestas/quinas do topo (`chamfer_top`,
@@ -325,6 +325,11 @@ def facet_block(rng, half, chamfer=0.8, cut=(0.70, 0.90), chamfer_top=0.5, cut_t
                 nrm = unit(sx, sy, sz)
                 h = abs(nrm.x) * hx + abs(nrm.y) * hy + abs(nrm.z) * hz
                 planes.append((nrm, h * U(*rng_cut)))
+    verts = polytope_verts(planes)
+    # fraturas oblíquas profundas nas laterais (quebram as faces verticais longas)
+    for _ in range(fracs):
+        nrm = unit(U(-1, 1), U(-0.25, 0.35), U(-1, 1))
+        planes.append((nrm, max(v.dot(nrm) for v in verts) * U(*frac_cut)))
     verts = polytope_verts(planes)
     # lascas planas extras em direções aleatórias (superfícies de fratura)
     for _ in range(chips):
@@ -425,10 +430,11 @@ def rock_blocks(seed, specs, bottom):
     """specs = [(cx, cz, topo, meia_x, meia_z, yaw, (tilt_x, tilt_z), tipo, extras)] -> blocos posicionados (tipo 'slab' =
     monólito de caixa chanfrada, 'boulder' = matacão facetado). A base de cada bloco fica em `bottom` (abaixo de y = 0,
     escalonada para não haver planos coplanares na união) e o topo em `topo`."""
-    rng = random.Random(seed)
     blocks = []
     for k, (cx, cz, top, hx, hz, yaw, tilt, kind, kw) in enumerate(specs):
-        bot = bottom - 0.03 * k
+        kw = dict(kw)
+        rng = random.Random(kw.pop('seed', seed * 1000 + k))     # um sorteio por bloco: mexer num não muda os outros
+        bot = kw.pop('bottom', bottom - 0.03 * k)
         hy = (top - bot) / 2.0
         cy = (top + bot) / 2.0
         make = facet_block if kind == 'slab' else boulder_block
@@ -438,21 +444,27 @@ def rock_blocks(seed, specs, bottom):
 
 
 def build_rock_large(mats, root):
-    """Maciço de ~3,7 m: três monólitos (laje alta à esquerda, pilar central, bloco largo à direita) apoiados num bloco de
-    trás e em dois matacões na frente, com cascalho no pé. Altura ~2,45."""
-    slab = dict(chamfer=0.85, cut=(0.68, 0.90), chamfer_top=0.55, cut_top=(0.80, 0.94), chips=6, jitter=0.14, ridge=0.12,
-                taper=0.10, chip_cut=(0.78, 0.94))
+    """Maciço de ~3,8 m: três monólitos (laje alta à esquerda, pilar central, bloco largo à direita) com capitéis
+    deslocados (beiral de pedra sobreposta), apoiados num bloco de trás e em dois matacões na frente, com cascalho no pé e
+    lascas de fratura em cada monólito. Altura ~2,5."""
+    slab = dict(chamfer=0.85, cut=(0.68, 0.90), chamfer_top=0.6, cut_top=(0.82, 0.95), chips=8, jitter=0.20, ridge=0.12,
+                taper=0.12, chip_cut=(0.88, 0.97), fracs=2, frac_cut=(0.76, 0.90))
     specs = [
-        (-0.55, -0.30, 2.30, 0.68, 0.80, 20, (0, 6), 'slab', slab),
-        (0.25, 0.15, 1.85, 0.66, 0.66, -12, (-5, -6), 'slab', slab),
-        (1.10, -0.35, 1.35, 0.64, 0.82, 10, (0, -5), 'slab', slab),
-        (0.20, -1.00, 1.70, 0.82, 0.52, -4, (0, 0), 'slab', slab),
-        (-1.05, 0.75, 1.05, 0.62, 0.52, 35, (3, 4), 'boulder', dict(k=13)),
-        (0.85, 0.95, 0.85, 0.50, 0.46, -30, (0, -3), 'boulder', dict(k=12)),
-        (-1.55, 0.05, 0.50, 0.26, 0.24, 30, (0, 0), 'boulder', dict(k=9)),
-        (1.65, 0.55, 0.42, 0.24, 0.22, -20, (0, 0), 'boulder', dict(k=9)),
-        (-0.25, 1.35, 0.36, 0.22, 0.20, 50, (0, 0), 'boulder', dict(k=8)),
-        (1.25, -1.10, 0.50, 0.26, 0.22, 10, (0, 0), 'boulder', dict(k=9)),
+        (-0.55, -0.30, 2.05, 0.68, 0.80, 20, (0, 8), 'slab', slab),
+        (0.25, 0.15, 1.75, 0.66, 0.66, -12, (-6, -7), 'slab', slab),
+        (1.10, -0.35, 1.30, 0.64, 0.82, 10, (0, -6), 'slab', slab),
+        (0.20, -1.00, 1.55, 0.82, 0.52, -4, (0, 0), 'slab', slab),
+        (-1.05, 0.75, 1.05, 0.62, 0.52, 35, (3, 4), 'boulder', dict(k=15)),
+        (0.85, 0.95, 0.85, 0.50, 0.46, -30, (0, -3), 'boulder', dict(k=14)),
+        # capitéis: pedras achatadas pousadas sobre a laje alta e sobre o bloco largo, deslocadas (beiral)
+        (-0.42, -0.38, 2.52, 0.60, 0.70, 35, (2, -6), 'boulder', dict(k=13, bottom=1.85, tight=(0.82, 0.98))),
+        (1.22, -0.28, 1.66, 0.50, 0.62, -20, (0, 4), 'boulder', dict(k=12, bottom=1.18, tight=(0.82, 0.98))),
+        # cascalho no pé
+        (-1.55, 0.05, 0.50, 0.26, 0.24, 30, (0, 0), 'boulder', dict(k=10)),
+        (1.65, 0.55, 0.42, 0.24, 0.22, -20, (0, 0), 'boulder', dict(k=10)),
+        (-0.25, 1.35, 0.36, 0.22, 0.20, 50, (0, 0), 'boulder', dict(k=9)),
+        (1.25, -1.10, 0.50, 0.26, 0.22, 10, (0, 0), 'boulder', dict(k=10)),
+        (0.45, 1.50, 0.30, 0.18, 0.16, 15, (0, 0), 'boulder', dict(k=8)),
     ]
     return [union_blocks('Rock', rock_blocks(101, specs, -0.34), -0.30, mats['granite'])]
 
@@ -550,9 +562,9 @@ def build_cactus_1(mats, root):
         tips.append(m @ Vector((reach, lift + elbow + rise + 0.13, 0.0)))
     # flores: topo do tronco (duas) e topo do braço direito
     ax, az = axis(3.0)
-    flower(mb, (ax + 0.02, 3.17, az), yaw=10.0, size=0.095)
-    flower(mb, (ax - 0.11, 3.08, az + 0.08), yaw=40.0, size=0.065)
-    flower(mb, tuple(tips[1]), yaw=20.0, size=0.075)
+    flower(mb, (ax + 0.02, 3.17, az), yaw=10.0, size=0.115)
+    flower(mb, (ax - 0.12, 3.07, az + 0.09), yaw=40.0, size=0.08)
+    flower(mb, tuple(tips[1]), yaw=20.0, size=0.09)
     return [mb.build(mats, parent=root)]
 
 
@@ -572,7 +584,7 @@ def build_cactus_2(mats, root):
     ax, az = axis(y0)
     m = M((ax, y0, az), (0, -20.0, 0))
     mb.add(ribbed_loft(pts, radii, ribs=8, valley=0.80, dome=0.13), 'cactus', m, smooth=0)
-    flower(mb, tuple(m @ Vector((reach, lift + elbow + rise + 0.12, 0.0))), yaw=30.0, size=0.07)
+    flower(mb, tuple(m @ Vector((reach, lift + elbow + rise + 0.12, 0.0))), yaw=30.0, size=0.085)
     return [mb.build(mats, parent=root)]
 
 
@@ -628,16 +640,16 @@ def build_skull(mb, T):
 
 
 def build_jaw(mb, T):
-    """Mandíbula solta: dois ramos em V com dentes, caída no chão ao lado do crânio. Frente = +z local."""
+    """Mandíbula solta: dois ramos robustos em V com dentes curtos, caída no chão ao lado do crânio. Frente = +z local."""
     for sx in (-1, 1):
-        jp = [(sx * 0.09, 0.05, -0.02), (sx * 0.085, 0.035, 0.14), (sx * 0.06, 0.03, 0.30), (sx * 0.02, 0.03, 0.43)]
-        jr = [(0.032, 0.02), (0.026, 0.017), (0.02, 0.016), (0.018, 0.015)]
+        jp = [(sx * 0.10, 0.06, -0.04), (sx * 0.095, 0.045, 0.12), (sx * 0.07, 0.04, 0.29), (sx * 0.025, 0.04, 0.44)]
+        jr = [(0.045, 0.028), (0.036, 0.024), (0.03, 0.022), (0.028, 0.02)]
         mb.add(prim_rings([[tuple(T @ Vector(q)) for q in ring] for ring in limb_rings(jp, jr, 5, up=(0, 1, 0))],
                           cap0=True, cap1=True), 'bone', smooth=0)
         for k in range(3):
-            mb.add(prim_box(0.02, 0.04, 0.026, taper=(0.7, 0.7)), 'bone',
-                   T @ M((sx * (0.075 - 0.02 * k), 0.065, 0.14 + 0.1 * k)), smooth=0)
-    mb.add(prim_box(0.10, 0.05, 0.05, taper=(0.8, 0.8)), 'bone', T @ M((0, 0.04, 0.44)), smooth=0)
+            mb.add(prim_box(0.022, 0.03, 0.03, taper=(0.75, 0.75)), 'bone',
+                   T @ M((sx * (0.085 - 0.022 * k), 0.082, 0.13 + 0.1 * k)), smooth=0)
+    mb.add(prim_box(0.12, 0.06, 0.06, taper=(0.8, 0.8)), 'bone', T @ M((0, 0.045, 0.45)), smooth=0)
 
 
 def build_bones(mats, root):
@@ -826,6 +838,9 @@ def clip_below_ground():
 def preview_rig(mesh_objs, out_path, res=512, az=CAM_AZ, el=CAM_EL, fov=CAM_FOV, margin=0.07, samples=64, ground=False):
     """Luz de 3 pontos + mundo + câmera enquadrando `mesh_objs` e render PNG RGBA (fundo transparente) em out_path."""
     import ui_common as U
+    for o in list(bpy.data.objects):
+        if o.type in ('LIGHT', 'CAMERA'):
+            bpy.data.objects.remove(o, do_unlink=True)
     configure_render(res, samples)
     U.make_world()
     U.make_lights()
@@ -864,8 +879,28 @@ def measure(root):
     return {'min': lo, 'max': hi, 'size': tuple(round(hi[i] - lo[i], 2) for i in range(3))}
 
 
+def compose_row(paths, out):
+    """Junta PNGs RGBA lado a lado (numpy) num só arquivo."""
+    arrs = []
+    for p in paths:
+        img = bpy.data.images.load(p, check_existing=False)
+        w, h = img.size
+        a = np.empty(w * h * 4, dtype=np.float32)
+        img.pixels.foreach_get(a)
+        arrs.append(a.reshape(h, w, 4))
+        bpy.data.images.remove(img)
+    row = np.concatenate(arrs, axis=1)
+    h, w = row.shape[:2]
+    oi = bpy.data.images.new('row', w, h, alpha=True)
+    oi.pixels.foreach_set(np.ascontiguousarray(row).ravel())
+    oi.filepath_raw = out
+    oi.file_format = 'PNG'
+    oi.save()
+    bpy.data.images.remove(oi)
+
+
 def draft(key, parts, root):
-    """Rascunho sem bake: pintura (Emission) e clay iluminado em DRAFT_DIR."""
+    """Rascunho sem bake: pintura (Emission) num ângulo e clay iluminado em três azimutes (um só PNG) em DRAFT_DIR."""
     os.makedirs(DRAFT_DIR, exist_ok=True)
     meshes = [o for o in parts if o.type == 'MESH']
     n_tris = 0
@@ -881,15 +916,14 @@ def draft(key, parts, root):
     for o in meshes:
         o.data.materials.clear()
         o.data.materials.append(clay)
-    # em clay os objetos ficam com um único material (índice 0)
-    for o in meshes:
         for p in o.data.polygons:
             p.material_index = 0
-    # remove luzes/câmera/chão do primeiro render para recriar o rig
-    for o in list(bpy.data.objects):
-        if o.type in ('LIGHT', 'CAMERA') or o.name == 'ShadowGround':
-            bpy.data.objects.remove(o, do_unlink=True)
-    preview_rig(meshes, os.path.join(DRAFT_DIR, key + '_clay.png'))
+    paths = []
+    for az in (35.0, 155.0, 275.0):
+        p = os.path.join(DRAFT_DIR, f'{key}_clay_{int(az)}.png')
+        preview_rig(meshes, p, az=az, res=420)
+        paths.append(p)
+    compose_row(paths, os.path.join(DRAFT_DIR, key + '_clay.png'))
 
 
 def build_one(key, args):

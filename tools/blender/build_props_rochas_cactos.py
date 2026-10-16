@@ -2,31 +2,42 @@
 build_props_rochas_cactos.py — props de terreno P0 (ART-01 e ART-03 de docs/specs/MUNDO-TERRENO-MAPAS.md §6) gerados
 100% por script: rochas de granito (grande, média e pequena), dois cactos e uma ossada.
 
-Uso (sempre via tools/safe-run.sh; um Blender por vez):
+Uso (sempre via tools/safe-run.sh; um Blender por vez; ~3 min para os seis modelos com prévias):
   bash tools/safe-run.sh --timeout 600 -- /home/rafael/Downloads/blender-5.2.1-linux-x64/blender -b --factory-startup \
       --python tools/blender/build_props_rochas_cactos.py -- [rock_granite_large|rock_granite_medium|rock_granite_small|
-                                                              cactus_1|cactus_2|bones|all] [--no-render] [--draft]
+                                                              cactus_1|cactus_2|bones|all] [--no-render] [--no-shadow] [--draft]
 
-Saída (public/models/), coordenadas do jogo (x direita, y cima, +z frente), 1 unidade = 1 m, origem na base:
-  rock_granite_large.glb   RockGraniteLarge   maciço de granito ~3,6 m (cinco blocos + cascalho), 1 draw call
-  rock_granite_medium.glb  RockGraniteMedium  rocha de ~1,5 m, 1 draw call
-  rock_granite_small.glb   RockGraniteSmall   rocha de ~0,6 m, 1 draw call
-  cactus_1.glb             Cactus1            cacto colunar de dois braços (~3,1 m), 1 draw call
-  cactus_2.glb             Cactus2            cacto colunar baixo de um braço (~1,6 m), 1 draw call
-  bones.glb                Bones              ossada de fera: crânio com chifres, costelas, coluna e ossos soltos, 1 draw call
-Cada raiz é um empty com UM nó `Static_Mesh` (material `Atlas`), o mesmo padrão das árvores: o jogo clona o nó ou extrai
-geometria+material para `InstancedMesh` (como o `TreeManager`). Sem cor de vértice (o jogo tinge por instância). Sem frente
-definida, exceto a ossada (crânio e focinho voltados para +Z).
+Saída (public/models/), coordenadas do jogo (x direita, y cima, +z frente), 1 unidade = 1 m, origem na base (y = 0 = chão):
+  rock_granite_large.glb   RockGraniteLarge   maciço de granito 3,9 x 3,4 m e 2,6 m de altura, 661 tris, 1 draw call
+  rock_granite_medium.glb  RockGraniteMedium  rocha de 1,6 x 1,5 m e 0,75 m de altura, 203 tris, 1 draw call
+  rock_granite_small.glb   RockGraniteSmall   rocha de 0,6 x 0,55 m e 0,32 m de altura, 83 tris, 1 draw call
+  cactus_1.glb             Cactus1            cacto colunar de dois braços, 2,1 m de largura e 3,3 m de altura, 1260 tris
+  cactus_2.glb             Cactus2            cacto colunar baixo de um braço, 1,2 m de largura e 1,8 m de altura, 712 tris
+  bones.glb                Bones              ossada de fera (crânio com chifres, costelas, coluna, ossos soltos), 2,4 x 2,9 m
+                                              e 1,1 m de altura, 1694 tris, crânio e focinho voltados para +Z
+Cada raiz é um empty com UM nó `Static_Mesh` (um único material `Atlas`, 1 draw call), o mesmo padrão das árvores: o jogo
+clona o nó ou extrai geometria+material para `InstancedMesh` (como o `TreeManager`). Sem cor de vértice (o jogo tinge por
+instância). Sem frente definida, exceto a ossada.
 
-Técnica: cada rocha é a união booleana de blocos convexos (casco de uma nuvem de pontos num elipsoide rugoso, com cortes
-planos para facetas marcadas e topo achatado); a base é cortada abaixo de y = 0 (enterrada, esconde frestas em declive) e
-fica aberta. Pintura procedural só para o bake (estratos, trincas, grão, topo claro/lados frios, poeira no pé, desgaste
-de borda e AO) num atlas único; flat shading em todas as rochas e na ossada/cactos (facetas e nervuras marcadas).
+Técnica das rochas: cada rocha é a união booleana (EXACT) de blocos convexos facetados, calculados como interseção de
+semi-espaços (planos giráveis, chanfros e lascas): "monólitos" (caixa chanfrada de faces inclinadas, para os maciços) e
+"matacões" (polítopo circunscrito a um elipsoide, para pedras e cascalho). O maciço leva capitéis deslocados (beiral) sobre
+os monólitos. A base é cortada abaixo de y = 0 (-0,30 / -0,18 / -0,08 m) e fica aberta: a rocha nasce enterrada e esconde
+frestas em declive. Cada bloco tem o seu próprio sorteio (`seed`), então mexer num não muda os outros.
+Cactos: laços de nervuras (cristas e vales) ao longo do tronco e dos braços (cotovelo em arco), cúpula no ápice, flores de
+seis pétalas. Ossada: arcos de costela de seção achatada (algumas quebradas), vértebras com processo espinhoso, crânio
+de chifres, mandíbula solta, ossos longos.
+Pintura procedural só para o bake (granito: manchas, estratos horizontais, trincas sinuosas, grão/mica, tom por faceta, topo
+claro e quente, lados mais frios, poeira no pé, desgaste de borda e AO; cacto: nervuras, espinhos em pontos claros, verde mais
+novo no alto; osso: manchas amareladas, trincas, poeira) num atlas único; flat shading em tudo (facetas e nervuras marcadas).
 
-`--draft` não assa nem exporta: renderiza a pintura (Emission) e um "clay" iluminado em `ART_P0_DRAFT_DIR` (padrão
-tools/blender/build/art_p0_draft/) para iterar na forma. `--no-render` pula as pré-visualizações em
-tools/ui-captures/art-p0/<nome>.png (512 px, fundo transparente, câmera fixa a 35° de azimute e 38° de elevação).
-Variáveis: BAKE_SAMPLES (32), ATLAS_PX (força o lado do atlas), ART_P0_DRAFT_DIR.
+`--draft` não assa nem exporta: renderiza a pintura (Emission) e um "clay" iluminado em três azimutes em `ART_P0_DRAFT_DIR`
+(padrão tools/blender/build/art_p0_draft/) para iterar na forma. `--no-render` pula as pré-visualizações em
+tools/ui-captures/art-p0/<nome>.png (512 px, fundo transparente, câmera fixa a 35° de azimute e 38° de elevação, luzes do
+SceneManager: sol quente atrás-à-esquerda e preenchimento frio à direita-frente; a parte enterrada fica escondida). A prévia é
+renderizada a partir do .glb exportado (importado de volta) e leva uma sombra de contato suave em segundo passe (`--no-shadow`
+desliga). Variáveis: BAKE_SAMPLES (32), ATLAS_PX (força o lado do atlas), ART_P0_DRAFT_DIR. As métricas de cada execução ficam
+em tools/blender/build/art_p0_stats.json (fora do git).
 """
 import os
 import sys
@@ -655,7 +666,7 @@ def build_jaw(mb, T):
 def build_bones(mats, root):
     """Ossada de fera: caixa torácica de costelas em arcos (algumas quebradas e caídas para fora), coluna de vértebras que
     desce até o crânio de chifres no chão, mandíbula solta, ossos longos e vértebras espalhados. Crânio e focinho para +z.
-    ~2,6 m de comprimento, ~0,95 m de altura, ~2,4 m de largura (com os chifres e ossos soltos)."""
+    ~2,9 m de comprimento, ~1,1 m de altura, ~2,4 m de largura (com os chifres e ossos soltos)."""
     mb = MeshBuilder('Bones')
     rng = random.Random(11)
     # costelas: pares de arcos de elipse (4 trechos, seção retangular achatada), maiores no meio da caixa torácica
@@ -1021,6 +1032,18 @@ def build_one(key, args):
     st = C.stats(root, out)
     st['atlas_px'] = atlas_px
     st['bbox'] = measure(root)
+    # confere o arquivo exportado: uma malha, um material, sem cor de vértice (o jogo tinge por instância), atlas <= 512²
+    j = C.glb_json(out)
+    st['attrs'] = sorted({k for m in j.get('meshes', []) for p in m['primitives'] for k in p['attributes']})
+    problems = []
+    if 'COLOR_0' in st['attrs']:
+        problems.append('tem COLOR_0')
+    if len(j.get('meshes', [])) != 1 or len(j.get('materials', [])) != 1:
+        problems.append('não tem exatamente uma malha e um material')
+    if atlas_px > 512:
+        problems.append(f'atlas {atlas_px}² passa de 512²')
+    if problems:
+        raise SystemExit(f'{key}: ' + '; '.join(problems))
     draws, tris = BUDGET[key]
     ok = st['draw_calls'] <= draws and st['tris'] <= tris
     log('STATS', key, st, 'OK' if ok else 'FORA DO ORCAMENTO')

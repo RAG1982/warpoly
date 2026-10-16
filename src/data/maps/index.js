@@ -22,12 +22,7 @@ import duelo3 from './duelo-continental-3.json';
 import ilhaUnica1 from './ilha-unica-1.json';
 import ilhaUnica2 from './ilha-unica-2.json';
 import ilhaUnica3 from './ilha-unica-3.json';
-import dois1 from './dois-continentes-1.json';
-import dois2 from './dois-continentes-2.json';
-import dois3 from './dois-continentes-3.json';
-import arq1 from './arquipelago-vivo-1.json';
-import arq2 from './arquipelago-vivo-2.json';
-import arq3 from './arquipelago-vivo-3.json';
+// Navais (dois-continentes, arquipelago-vivo): em `pendentes/` até existir IA rival que ataque por mar (NEW-44). Fora do registro = fora do jogo e do boot.
 import { generateMap } from './generator.js';
 
 const MAPS = Object.freeze({
@@ -46,12 +41,6 @@ const MAPS = Object.freeze({
   'ilha-unica-1': ilhaUnica1,
   'ilha-unica-2': ilhaUnica2,
   'ilha-unica-3': ilhaUnica3,
-  'dois-continentes-1': dois1,
-  'dois-continentes-2': dois2,
-  'dois-continentes-3': dois3,
-  'arquipelago-vivo-1': arq1,
-  'arquipelago-vivo-2': arq2,
-  'arquipelago-vivo-3': arq3,
   tutorial // F6-09: mapa do tutorial (`hidden`: não aparece na lista da Escaramuça)
 });
 

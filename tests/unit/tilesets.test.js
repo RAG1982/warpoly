@@ -29,7 +29,7 @@ describe('F7-04 tilesets', () => {
     expect(resolveTilesetId('pantano')).toBe('pantano');
     for (const m of listMaps({ includeHidden: true })) if (!m.biomeGrid) expect(getMapTileset(m).id).toBe('verdejante');
     // MUNDO-7 (mapas com biomeGrid): o tileset do preset (exuberante)
-    expect(getMapTileset(listMaps({ includeHidden: true }).find((m) => m.id === 'dois-continentes-1')).id).toBe('exuberante');
+    expect(getMapTileset(listMaps({ includeHidden: true }).find((m) => m.id === 'duelo-continental-1')).id).toBe('exuberante');
   });
 
   it('generateMap aceita os temas novos e grava em tileset', () => {

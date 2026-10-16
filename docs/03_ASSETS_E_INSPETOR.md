@@ -181,6 +181,9 @@ oak 16m/476t · pine 12m/208t · autumn 16m/476t · birch 29m/904t · flower_pat
 - Referências visuais do dono do projeto: `modelo.png`, `modeloorcs.png`, `hudmodelo.png`, `dialogoBarracs.png`, `forjaHumanos.png` (em `docs/reference/`; comentários no código citam só o nome do arquivo).
 
 
+## Capitão Brann (Tripo) — `hero_brann.glb`
+Herói humano `hero_brann` (MUNDO-2). Fonte: FBX do Tripo (`medieval+knight+3d+model`). `tools/blender/build_hero_brann.py` avalia, segmenta, gera o atlas e exporta `public/models/hero_brann.glb`: raiz `Knight` com 8 nós (`Torso`, `Head`, `ArmL`, `ArmR`, `LegL`, `LegR`, `Sword` = martelo, `Cape` = capa em `TeamColor`), sem escudo. 8 draw calls, 10.953 triângulos, atlas 512² WebP, 358 KB. Registro em `GLB_MODELS.hero_brann` (`type: 'knight'`, rig de cavaleiro) e `case 'hero_brann'` em `ModelFactory.createUnit`. Limites: pivôs de ombro e punho seguem o corpo do Tripo; capa estática; runas espelhadas; textura 512² perde detalhe. Relatório completo: `docs/reference/heroi-brann-tripo.md`. Inspetor: `?model=hero_brann_glb`.
+
 ## Espadachim (Blender) — `knight.glb`
 `tools/blender/build_villager.py` (Camponês, rig plana como o `VillagerModel.js`) e `build_peon.py` (Lacaio orc, rig aninhada como o `PeonModel.js`) geram `villager.glb` (~6,0 mil tris, 278 KB) e `peon.glb` (~5,6 mil tris, 267 KB), atlas 512², 14 draw calls no total (~10 visíveis; ferramentas/carga alternam `visible`). O glTF não guarda `visible`: `ModelFactory._workerGlbDefaults` deixa só o machado visível e Pack/WoodBundle/GoldSack ocultos. Ligados por padrão (`?glb=0` volta ao procedural); no inspetor: "Camponês (Blender)" e "Lacaio (Blender)". Capturas: `tools/blender/capture_workers.mjs` (GPU real).
 

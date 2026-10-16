@@ -121,7 +121,7 @@ const warnings = [];
   });
   const { page } = S;
   try {
-    data.setup = await page.evaluate(() => {
+    data.setup = await page.evaluate(async () => {
       const gm = window.game.gameManager;
       const me = gm.localPlayerId;
       const foeId = gm.players.find((p) => p.id !== me && p.id !== 99).id;
@@ -142,6 +142,8 @@ const warnings = [];
       for (let i = 0; i < 4; i++) axes.push(gm.spawnUnit('axethrower', spot.x - 3.5 - (i % 2) * 2.2 + (i > 1 ? 1.5 : 0), spot.z + 3.5 + (i % 2) * 2.2 - (i > 1 ? 1.5 : 0), me));
       gm.fogOfWar.revealArea(spot.x, spot.z, 24, 900);
       gm.issue({ type: 'attack', playerId: me, unitIds: axes.map((u) => u.id), targetId: dummy.id });
+      // a view (UnitView) só existe depois de um quadro de render: espera dois quadros antes de consultá-la
+      await new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r)));
       const views = axes.map((u) => gm.entityViews.viewOf(u));
       window.__axes = axes.map((u) => u.id);
       return {

@@ -11,14 +11,14 @@
       "maxHp": 1600
     },
     "visible": {
-      "frames": 90,
-      "t0": 1.614200000002981,
+      "frames": 91,
+      "t0": 1.6325999999996288,
       "emits0": 6,
-      "t1": 3.1141000000014967,
+      "t1": 3.149299999999812,
       "emits1": 11,
       "flamesVisible": true,
-      "scaleRange": 0.6984,
-      "rotRange": 0.2395,
+      "scaleRange": 0.6988,
+      "rotRange": 0.2396,
       "fog": {
         "enabled": true,
         "visibleNow": true,
@@ -29,10 +29,10 @@
       }
     },
     "memory": {
-      "frames": 180,
-      "t0": 11.99699999999993,
+      "frames": 181,
+      "t0": 11.998900000000381,
       "emits0": 45,
-      "t1": 11.99699999999993,
+      "t1": 11.998900000000381,
       "emits1": 45,
       "flamesVisible": true,
       "scaleRange": 0,
@@ -81,12 +81,12 @@
     {
       "name": "A: visível, as chamas animam (flameTime avança ≥ 1 s)",
       "ok": true,
-      "extra": "Δ=1.50 s"
+      "extra": "Δ=1.52 s"
     },
     {
       "name": "A: visível, a língua de fogo oscila (escala)",
       "ok": true,
-      "extra": "faixa=0.6984"
+      "extra": "faixa=0.6988"
     },
     {
       "name": "B: na memória da névoa (conhecida, não visível, view não escondida)",

@@ -9,13 +9,13 @@
       "cx": 35.62346663143529,
       "cz": -16.477038431953044,
       "barracks": {
-        "id": 293,
+        "id": 289,
         "x": 31.73437933490928,
         "z": -12.587951135427033,
         "r": 3.5
       },
       "cottage": {
-        "id": 294,
+        "id": 290,
         "x": 39.51255392796131,
         "z": -20.366125728479055,
         "r": 2.8
@@ -36,7 +36,7 @@
         "baseY": 2.473,
         "decalScale": 4.02,
         "decalColor": 1,
-        "tris": 120
+        "tris": 156
       },
       {
         "i": 1,
@@ -52,20 +52,20 @@
         "baseY": 2.72,
         "decalScale": 3.22,
         "decalColor": 1,
-        "tris": 156
+        "tris": 96
       }
     ],
     "visibleBuilding": {
       "R": 2.2,
       "n": 16,
-      "meanDiff": 244.4,
-      "maxDiff": 294.1,
+      "meanDiff": 214.7,
+      "maxDiff": 324.3,
       "pointsChanged": 16
     },
     "passthrough": {
       "blockers": [],
       "arrived": true,
-      "seconds": 3.8
+      "seconds": 4
     },
     "fog": {
       "e1": {
@@ -98,7 +98,7 @@
     "mineRuin": {
       "i": 4,
       "state": "active",
-      "age": 1.98,
+      "age": 1.7,
       "x": 30,
       "z": -46,
       "visible": true,
@@ -109,7 +109,7 @@
       "baseY": 2.654,
       "decalScale": 7.2,
       "decalColor": 1,
-      "tris": 96
+      "tris": 180
     },
     "mineDrape": {
       "vertices": 169,
@@ -119,30 +119,30 @@
     "visibleMine": {
       "R": 4.4,
       "n": 16,
-      "meanDiff": 124.5,
-      "maxDiff": 287,
-      "pointsChanged": 12
+      "meanDiff": 141.8,
+      "maxDiff": 390,
+      "pointsChanged": 13
     },
     "fade": {
       "i": 0,
       "state": "active",
-      "age": 47.49,
+      "age": 47.46,
       "x": 31.73,
       "z": -12.59,
       "visible": true,
-      "opacity": 0.502,
-      "debrisOpacity": 0.502,
+      "opacity": 0.507,
+      "debrisOpacity": 0.507,
       "debrisVisible": true,
-      "debrisY": 2.175,
+      "debrisY": 2.177,
       "baseY": 2.473,
       "decalScale": 4.02,
       "decalColor": 1,
-      "tris": 120
+      "tris": 156
     },
     "samples": [
       {
         "i": 0,
-        "age": 38.12,
+        "age": 38.25,
         "state": "active",
         "opacity": 1,
         "visible": true,
@@ -150,7 +150,7 @@
       },
       {
         "i": 1,
-        "age": 38.12,
+        "age": 38.25,
         "state": "active",
         "opacity": 1,
         "visible": true,
@@ -158,7 +158,7 @@
       },
       {
         "i": 0,
-        "age": 38.37,
+        "age": 38.5,
         "state": "active",
         "opacity": 1,
         "visible": true,
@@ -166,7 +166,7 @@
       },
       {
         "i": 1,
-        "age": 38.37,
+        "age": 38.5,
         "state": "active",
         "opacity": 1,
         "visible": true,
@@ -174,7 +174,7 @@
       },
       {
         "i": 0,
-        "age": 38.62,
+        "age": 38.75,
         "state": "active",
         "opacity": 1,
         "visible": true,
@@ -182,7 +182,7 @@
       },
       {
         "i": 1,
-        "age": 38.62,
+        "age": 38.75,
         "state": "active",
         "opacity": 1,
         "visible": true,
@@ -190,7 +190,7 @@
       },
       {
         "i": 0,
-        "age": 38.87,
+        "age": 39,
         "state": "active",
         "opacity": 1,
         "visible": true,
@@ -198,7 +198,7 @@
       },
       {
         "i": 1,
-        "age": 38.87,
+        "age": 39,
         "state": "active",
         "opacity": 1,
         "visible": true,
@@ -206,7 +206,7 @@
       },
       {
         "i": 0,
-        "age": 39.12,
+        "age": 39.25,
         "state": "active",
         "opacity": 1,
         "visible": true,
@@ -214,7 +214,7 @@
       },
       {
         "i": 1,
-        "age": 39.12,
+        "age": 39.25,
         "state": "active",
         "opacity": 1,
         "visible": true,
@@ -222,7 +222,7 @@
       },
       {
         "i": 0,
-        "age": 39.37,
+        "age": 39.5,
         "state": "active",
         "opacity": 1,
         "visible": true,
@@ -230,7 +230,7 @@
       },
       {
         "i": 1,
-        "age": 39.37,
+        "age": 39.5,
         "state": "active",
         "opacity": 1,
         "visible": true,
@@ -238,7 +238,7 @@
       },
       {
         "i": 0,
-        "age": 39.62,
+        "age": 39.75,
         "state": "active",
         "opacity": 1,
         "visible": true,
@@ -246,7 +246,7 @@
       },
       {
         "i": 1,
-        "age": 39.62,
+        "age": 39.75,
         "state": "active",
         "opacity": 1,
         "visible": true,
@@ -254,7 +254,7 @@
       },
       {
         "i": 0,
-        "age": 39.87,
+        "age": 40,
         "state": "active",
         "opacity": 1,
         "visible": true,
@@ -262,7 +262,7 @@
       },
       {
         "i": 1,
-        "age": 39.87,
+        "age": 40,
         "state": "active",
         "opacity": 1,
         "visible": true,
@@ -270,7 +270,7 @@
       },
       {
         "i": 0,
-        "age": 40.12,
+        "age": 40.25,
         "state": "active",
         "opacity": 1,
         "visible": true,
@@ -278,7 +278,7 @@
       },
       {
         "i": 1,
-        "age": 40.12,
+        "age": 40.25,
         "state": "active",
         "opacity": 1,
         "visible": true,
@@ -286,7 +286,7 @@
       },
       {
         "i": 0,
-        "age": 40.37,
+        "age": 40.5,
         "state": "active",
         "opacity": 1,
         "visible": true,
@@ -294,7 +294,7 @@
       },
       {
         "i": 1,
-        "age": 40.37,
+        "age": 40.5,
         "state": "active",
         "opacity": 1,
         "visible": true,
@@ -302,7 +302,7 @@
       },
       {
         "i": 0,
-        "age": 40.62,
+        "age": 40.75,
         "state": "active",
         "opacity": 1,
         "visible": true,
@@ -310,7 +310,7 @@
       },
       {
         "i": 1,
-        "age": 40.62,
+        "age": 40.75,
         "state": "active",
         "opacity": 1,
         "visible": true,
@@ -318,7 +318,7 @@
       },
       {
         "i": 0,
-        "age": 40.87,
+        "age": 41,
         "state": "active",
         "opacity": 1,
         "visible": true,
@@ -326,7 +326,7 @@
       },
       {
         "i": 1,
-        "age": 40.87,
+        "age": 41,
         "state": "active",
         "opacity": 1,
         "visible": true,
@@ -334,7 +334,7 @@
       },
       {
         "i": 0,
-        "age": 41.12,
+        "age": 41.25,
         "state": "active",
         "opacity": 1,
         "visible": true,
@@ -342,7 +342,7 @@
       },
       {
         "i": 1,
-        "age": 41.12,
+        "age": 41.25,
         "state": "active",
         "opacity": 1,
         "visible": true,
@@ -350,7 +350,7 @@
       },
       {
         "i": 0,
-        "age": 41.37,
+        "age": 41.5,
         "state": "active",
         "opacity": 1,
         "visible": true,
@@ -358,7 +358,7 @@
       },
       {
         "i": 1,
-        "age": 41.37,
+        "age": 41.5,
         "state": "active",
         "opacity": 1,
         "visible": true,
@@ -366,7 +366,7 @@
       },
       {
         "i": 0,
-        "age": 41.62,
+        "age": 41.75,
         "state": "active",
         "opacity": 1,
         "visible": true,
@@ -374,7 +374,7 @@
       },
       {
         "i": 1,
-        "age": 41.62,
+        "age": 41.75,
         "state": "active",
         "opacity": 1,
         "visible": true,
@@ -382,7 +382,7 @@
       },
       {
         "i": 0,
-        "age": 41.87,
+        "age": 42,
         "state": "active",
         "opacity": 1,
         "visible": true,
@@ -390,7 +390,7 @@
       },
       {
         "i": 1,
-        "age": 41.87,
+        "age": 42,
         "state": "active",
         "opacity": 1,
         "visible": true,
@@ -398,7 +398,7 @@
       },
       {
         "i": 0,
-        "age": 42.12,
+        "age": 42.25,
         "state": "active",
         "opacity": 1,
         "visible": true,
@@ -406,7 +406,7 @@
       },
       {
         "i": 1,
-        "age": 42.12,
+        "age": 42.25,
         "state": "active",
         "opacity": 1,
         "visible": true,
@@ -414,7 +414,7 @@
       },
       {
         "i": 0,
-        "age": 42.37,
+        "age": 42.5,
         "state": "active",
         "opacity": 1,
         "visible": true,
@@ -422,7 +422,7 @@
       },
       {
         "i": 1,
-        "age": 42.37,
+        "age": 42.5,
         "state": "active",
         "opacity": 1,
         "visible": true,
@@ -430,7 +430,7 @@
       },
       {
         "i": 0,
-        "age": 42.62,
+        "age": 42.75,
         "state": "active",
         "opacity": 1,
         "visible": true,
@@ -438,7 +438,7 @@
       },
       {
         "i": 1,
-        "age": 42.62,
+        "age": 42.75,
         "state": "active",
         "opacity": 1,
         "visible": true,
@@ -446,7 +446,7 @@
       },
       {
         "i": 0,
-        "age": 42.87,
+        "age": 43,
         "state": "active",
         "opacity": 1,
         "visible": true,
@@ -454,7 +454,7 @@
       },
       {
         "i": 1,
-        "age": 42.87,
+        "age": 43,
         "state": "active",
         "opacity": 1,
         "visible": true,
@@ -462,7 +462,7 @@
       },
       {
         "i": 0,
-        "age": 43.12,
+        "age": 43.25,
         "state": "active",
         "opacity": 1,
         "visible": true,
@@ -470,7 +470,7 @@
       },
       {
         "i": 1,
-        "age": 43.12,
+        "age": 43.25,
         "state": "active",
         "opacity": 1,
         "visible": true,
@@ -478,7 +478,7 @@
       },
       {
         "i": 0,
-        "age": 43.37,
+        "age": 43.5,
         "state": "active",
         "opacity": 1,
         "visible": true,
@@ -486,7 +486,7 @@
       },
       {
         "i": 1,
-        "age": 43.37,
+        "age": 43.5,
         "state": "active",
         "opacity": 1,
         "visible": true,
@@ -494,7 +494,7 @@
       },
       {
         "i": 0,
-        "age": 43.62,
+        "age": 43.75,
         "state": "active",
         "opacity": 1,
         "visible": true,
@@ -502,7 +502,7 @@
       },
       {
         "i": 1,
-        "age": 43.62,
+        "age": 43.75,
         "state": "active",
         "opacity": 1,
         "visible": true,
@@ -510,7 +510,7 @@
       },
       {
         "i": 0,
-        "age": 43.87,
+        "age": 44,
         "state": "active",
         "opacity": 1,
         "visible": true,
@@ -518,7 +518,7 @@
       },
       {
         "i": 1,
-        "age": 43.87,
+        "age": 44,
         "state": "active",
         "opacity": 1,
         "visible": true,
@@ -526,7 +526,7 @@
       },
       {
         "i": 0,
-        "age": 44.12,
+        "age": 44.25,
         "state": "active",
         "opacity": 1,
         "visible": true,
@@ -534,7 +534,7 @@
       },
       {
         "i": 1,
-        "age": 44.12,
+        "age": 44.25,
         "state": "active",
         "opacity": 1,
         "visible": true,
@@ -542,7 +542,7 @@
       },
       {
         "i": 0,
-        "age": 44.37,
+        "age": 44.5,
         "state": "active",
         "opacity": 1,
         "visible": true,
@@ -550,7 +550,7 @@
       },
       {
         "i": 1,
-        "age": 44.37,
+        "age": 44.5,
         "state": "active",
         "opacity": 1,
         "visible": true,
@@ -558,7 +558,7 @@
       },
       {
         "i": 0,
-        "age": 44.62,
+        "age": 44.75,
         "state": "active",
         "opacity": 1,
         "visible": true,
@@ -566,7 +566,7 @@
       },
       {
         "i": 1,
-        "age": 44.62,
+        "age": 44.75,
         "state": "active",
         "opacity": 1,
         "visible": true,
@@ -574,7 +574,7 @@
       },
       {
         "i": 2,
-        "age": 38.14,
+        "age": 38.08,
         "state": "active",
         "opacity": 1,
         "visible": false,
@@ -582,7 +582,7 @@
       },
       {
         "i": 0,
-        "age": 44.87,
+        "age": 45,
         "state": "active",
         "opacity": 1,
         "visible": true,
@@ -590,7 +590,7 @@
       },
       {
         "i": 1,
-        "age": 44.87,
+        "age": 45,
         "state": "active",
         "opacity": 1,
         "visible": true,
@@ -598,7 +598,7 @@
       },
       {
         "i": 2,
-        "age": 38.39,
+        "age": 38.33,
         "state": "active",
         "opacity": 1,
         "visible": false,
@@ -606,23 +606,23 @@
       },
       {
         "i": 0,
-        "age": 45.12,
+        "age": 45.25,
         "state": "active",
-        "opacity": 0.976,
+        "opacity": 0.95,
         "visible": true,
-        "debrisY": -0.015
+        "debrisY": -0.03
       },
       {
         "i": 1,
-        "age": 45.12,
+        "age": 45.25,
         "state": "active",
-        "opacity": 0.976,
+        "opacity": 0.95,
         "visible": true,
-        "debrisY": -0.015
+        "debrisY": -0.03
       },
       {
         "i": 2,
-        "age": 38.64,
+        "age": 38.58,
         "state": "active",
         "opacity": 1,
         "visible": false,
@@ -630,23 +630,23 @@
       },
       {
         "i": 0,
-        "age": 45.37,
+        "age": 45.5,
         "state": "active",
-        "opacity": 0.926,
+        "opacity": 0.9,
         "visible": true,
-        "debrisY": -0.045
+        "debrisY": -0.06
       },
       {
         "i": 1,
-        "age": 45.37,
+        "age": 45.5,
         "state": "active",
-        "opacity": 0.926,
+        "opacity": 0.9,
         "visible": true,
-        "debrisY": -0.045
+        "debrisY": -0.06
       },
       {
         "i": 2,
-        "age": 38.89,
+        "age": 38.83,
         "state": "active",
         "opacity": 1,
         "visible": false,
@@ -654,23 +654,23 @@
       },
       {
         "i": 0,
-        "age": 45.62,
+        "age": 45.75,
         "state": "active",
-        "opacity": 0.876,
+        "opacity": 0.85,
         "visible": true,
-        "debrisY": -0.075
+        "debrisY": -0.09
       },
       {
         "i": 1,
-        "age": 45.62,
+        "age": 45.75,
         "state": "active",
-        "opacity": 0.876,
+        "opacity": 0.85,
         "visible": true,
-        "debrisY": -0.075
+        "debrisY": -0.09
       },
       {
         "i": 2,
-        "age": 39.14,
+        "age": 39.08,
         "state": "active",
         "opacity": 1,
         "visible": false,
@@ -678,23 +678,23 @@
       },
       {
         "i": 0,
-        "age": 45.87,
+        "age": 46,
         "state": "active",
-        "opacity": 0.826,
+        "opacity": 0.8,
         "visible": true,
-        "debrisY": -0.105
+        "debrisY": -0.12
       },
       {
         "i": 1,
-        "age": 45.87,
+        "age": 46,
         "state": "active",
-        "opacity": 0.826,
+        "opacity": 0.8,
         "visible": true,
-        "debrisY": -0.105
+        "debrisY": -0.12
       },
       {
         "i": 2,
-        "age": 39.39,
+        "age": 39.33,
         "state": "active",
         "opacity": 1,
         "visible": false,
@@ -702,23 +702,23 @@
       },
       {
         "i": 0,
-        "age": 46.12,
+        "age": 46.25,
         "state": "active",
-        "opacity": 0.776,
+        "opacity": 0.75,
         "visible": true,
-        "debrisY": -0.135
+        "debrisY": -0.15
       },
       {
         "i": 1,
-        "age": 46.12,
+        "age": 46.25,
         "state": "active",
-        "opacity": 0.776,
+        "opacity": 0.75,
         "visible": true,
-        "debrisY": -0.135
+        "debrisY": -0.15
       },
       {
         "i": 2,
-        "age": 39.64,
+        "age": 39.58,
         "state": "active",
         "opacity": 1,
         "visible": false,
@@ -726,23 +726,23 @@
       },
       {
         "i": 0,
-        "age": 46.37,
+        "age": 46.5,
         "state": "active",
-        "opacity": 0.726,
+        "opacity": 0.7,
         "visible": true,
-        "debrisY": -0.165
+        "debrisY": -0.18
       },
       {
         "i": 1,
-        "age": 46.37,
+        "age": 46.5,
         "state": "active",
-        "opacity": 0.726,
+        "opacity": 0.7,
         "visible": true,
-        "debrisY": -0.165
+        "debrisY": -0.18
       },
       {
         "i": 2,
-        "age": 39.89,
+        "age": 39.83,
         "state": "active",
         "opacity": 1,
         "visible": false,
@@ -750,23 +750,23 @@
       },
       {
         "i": 0,
-        "age": 46.62,
+        "age": 46.75,
         "state": "active",
-        "opacity": 0.676,
+        "opacity": 0.65,
         "visible": true,
-        "debrisY": -0.195
+        "debrisY": -0.21
       },
       {
         "i": 1,
-        "age": 46.62,
+        "age": 46.75,
         "state": "active",
-        "opacity": 0.676,
+        "opacity": 0.65,
         "visible": true,
-        "debrisY": -0.195
+        "debrisY": -0.21
       },
       {
         "i": 2,
-        "age": 40.14,
+        "age": 40.08,
         "state": "active",
         "opacity": 1,
         "visible": false,
@@ -774,23 +774,23 @@
       },
       {
         "i": 0,
-        "age": 46.87,
+        "age": 47,
         "state": "active",
-        "opacity": 0.626,
+        "opacity": 0.6,
         "visible": true,
-        "debrisY": -0.225
+        "debrisY": -0.24
       },
       {
         "i": 1,
-        "age": 46.87,
+        "age": 47,
         "state": "active",
-        "opacity": 0.626,
+        "opacity": 0.6,
         "visible": true,
-        "debrisY": -0.225
+        "debrisY": -0.24
       },
       {
         "i": 2,
-        "age": 40.39,
+        "age": 40.33,
         "state": "active",
         "opacity": 1,
         "visible": false,
@@ -798,23 +798,23 @@
       },
       {
         "i": 0,
-        "age": 47.12,
+        "age": 47.25,
         "state": "active",
-        "opacity": 0.576,
+        "opacity": 0.55,
         "visible": true,
-        "debrisY": -0.255
+        "debrisY": -0.27
       },
       {
         "i": 1,
-        "age": 47.12,
+        "age": 47.25,
         "state": "active",
-        "opacity": 0.576,
+        "opacity": 0.55,
         "visible": true,
-        "debrisY": -0.255
+        "debrisY": -0.27
       },
       {
         "i": 2,
-        "age": 40.64,
+        "age": 40.58,
         "state": "active",
         "opacity": 1,
         "visible": false,
@@ -822,23 +822,23 @@
       },
       {
         "i": 0,
-        "age": 47.37,
+        "age": 47.5,
         "state": "active",
-        "opacity": 0.526,
+        "opacity": 0.5,
         "visible": true,
-        "debrisY": -0.285
+        "debrisY": -0.3
       },
       {
         "i": 1,
-        "age": 47.37,
+        "age": 47.5,
         "state": "active",
-        "opacity": 0.526,
+        "opacity": 0.5,
         "visible": true,
-        "debrisY": -0.285
+        "debrisY": -0.3
       },
       {
         "i": 2,
-        "age": 40.89,
+        "age": 40.83,
         "state": "active",
         "opacity": 1,
         "visible": false,
@@ -846,23 +846,23 @@
       },
       {
         "i": 0,
-        "age": 47.62,
+        "age": 47.75,
         "state": "active",
-        "opacity": 0.476,
+        "opacity": 0.45,
         "visible": true,
-        "debrisY": -0.315
+        "debrisY": -0.33
       },
       {
         "i": 1,
-        "age": 47.62,
+        "age": 47.75,
         "state": "active",
-        "opacity": 0.476,
+        "opacity": 0.45,
         "visible": true,
-        "debrisY": -0.315
+        "debrisY": -0.33
       },
       {
         "i": 2,
-        "age": 41.14,
+        "age": 41.08,
         "state": "active",
         "opacity": 1,
         "visible": false,
@@ -870,23 +870,23 @@
       },
       {
         "i": 0,
-        "age": 47.87,
+        "age": 48,
         "state": "active",
-        "opacity": 0.426,
+        "opacity": 0.4,
         "visible": true,
-        "debrisY": -0.345
+        "debrisY": -0.36
       },
       {
         "i": 1,
-        "age": 47.87,
+        "age": 48,
         "state": "active",
-        "opacity": 0.426,
+        "opacity": 0.4,
         "visible": true,
-        "debrisY": -0.345
+        "debrisY": -0.36
       },
       {
         "i": 2,
-        "age": 41.39,
+        "age": 41.33,
         "state": "active",
         "opacity": 1,
         "visible": false,
@@ -894,23 +894,23 @@
       },
       {
         "i": 0,
-        "age": 48.12,
+        "age": 48.25,
         "state": "active",
-        "opacity": 0.376,
+        "opacity": 0.35,
         "visible": true,
-        "debrisY": -0.375
+        "debrisY": -0.39
       },
       {
         "i": 1,
-        "age": 48.12,
+        "age": 48.25,
         "state": "active",
-        "opacity": 0.376,
+        "opacity": 0.35,
         "visible": true,
-        "debrisY": -0.375
+        "debrisY": -0.39
       },
       {
         "i": 2,
-        "age": 41.64,
+        "age": 41.58,
         "state": "active",
         "opacity": 1,
         "visible": false,
@@ -918,23 +918,23 @@
       },
       {
         "i": 0,
-        "age": 48.37,
+        "age": 48.5,
         "state": "active",
-        "opacity": 0.326,
+        "opacity": 0.3,
         "visible": true,
-        "debrisY": -0.405
+        "debrisY": -0.42
       },
       {
         "i": 1,
-        "age": 48.37,
+        "age": 48.5,
         "state": "active",
-        "opacity": 0.326,
+        "opacity": 0.3,
         "visible": true,
-        "debrisY": -0.405
+        "debrisY": -0.42
       },
       {
         "i": 2,
-        "age": 41.89,
+        "age": 41.83,
         "state": "active",
         "opacity": 1,
         "visible": false,
@@ -942,23 +942,23 @@
       },
       {
         "i": 0,
-        "age": 48.62,
+        "age": 48.75,
         "state": "active",
-        "opacity": 0.276,
+        "opacity": 0.25,
         "visible": true,
-        "debrisY": -0.435
+        "debrisY": -0.45
       },
       {
         "i": 1,
-        "age": 48.62,
+        "age": 48.75,
         "state": "active",
-        "opacity": 0.276,
+        "opacity": 0.25,
         "visible": true,
-        "debrisY": -0.435
+        "debrisY": -0.45
       },
       {
         "i": 2,
-        "age": 42.14,
+        "age": 42.08,
         "state": "active",
         "opacity": 1,
         "visible": false,
@@ -966,23 +966,23 @@
       },
       {
         "i": 0,
-        "age": 48.87,
+        "age": 49,
         "state": "active",
-        "opacity": 0.226,
+        "opacity": 0.2,
         "visible": true,
-        "debrisY": -0.464
+        "debrisY": -0.48
       },
       {
         "i": 1,
-        "age": 48.87,
+        "age": 49,
         "state": "active",
-        "opacity": 0.226,
+        "opacity": 0.2,
         "visible": true,
-        "debrisY": -0.464
+        "debrisY": -0.48
       },
       {
         "i": 2,
-        "age": 42.39,
+        "age": 42.33,
         "state": "active",
         "opacity": 1,
         "visible": false,
@@ -990,23 +990,23 @@
       },
       {
         "i": 0,
-        "age": 49.12,
+        "age": 49.25,
         "state": "active",
-        "opacity": 0.176,
+        "opacity": 0.15,
         "visible": true,
-        "debrisY": -0.494
+        "debrisY": -0.51
       },
       {
         "i": 1,
-        "age": 49.12,
+        "age": 49.25,
         "state": "active",
-        "opacity": 0.176,
+        "opacity": 0.15,
         "visible": true,
-        "debrisY": -0.494
+        "debrisY": -0.51
       },
       {
         "i": 2,
-        "age": 42.64,
+        "age": 42.58,
         "state": "active",
         "opacity": 1,
         "visible": false,
@@ -1014,23 +1014,23 @@
       },
       {
         "i": 0,
-        "age": 49.37,
+        "age": 49.5,
         "state": "active",
-        "opacity": 0.126,
+        "opacity": 0.1,
         "visible": true,
-        "debrisY": -0.525
+        "debrisY": -0.54
       },
       {
         "i": 1,
-        "age": 49.37,
+        "age": 49.5,
         "state": "active",
-        "opacity": 0.126,
+        "opacity": 0.1,
         "visible": true,
-        "debrisY": -0.525
+        "debrisY": -0.54
       },
       {
         "i": 2,
-        "age": 42.89,
+        "age": 42.83,
         "state": "active",
         "opacity": 1,
         "visible": false,
@@ -1038,55 +1038,23 @@
       },
       {
         "i": 0,
-        "age": 49.62,
+        "age": 49.75,
         "state": "active",
-        "opacity": 0.076,
+        "opacity": 0.05,
         "visible": true,
-        "debrisY": -0.555
+        "debrisY": -0.57
       },
       {
         "i": 1,
-        "age": 49.62,
+        "age": 49.75,
         "state": "active",
-        "opacity": 0.076,
+        "opacity": 0.05,
         "visible": true,
-        "debrisY": -0.555
+        "debrisY": -0.57
       },
       {
         "i": 2,
-        "age": 43.14,
-        "state": "active",
-        "opacity": 1,
-        "visible": false,
-        "debrisY": 0
-      },
-      {
-        "i": 3,
-        "age": 38.12,
-        "state": "active",
-        "opacity": 1,
-        "visible": true,
-        "debrisY": 0
-      },
-      {
-        "i": 0,
-        "age": 49.87,
-        "state": "active",
-        "opacity": 0.026,
-        "visible": true,
-        "debrisY": -0.585
-      },
-      {
-        "i": 1,
-        "age": 49.87,
-        "state": "active",
-        "opacity": 0.026,
-        "visible": true,
-        "debrisY": -0.585
-      },
-      {
-        "i": 2,
-        "age": 43.39,
+        "age": 43.08,
         "state": "active",
         "opacity": 1,
         "visible": false,
@@ -1094,7 +1062,39 @@
       },
       {
         "i": 3,
-        "age": 38.37,
+        "age": 38.07,
+        "state": "active",
+        "opacity": 1,
+        "visible": true,
+        "debrisY": 0
+      },
+      {
+        "i": 0,
+        "age": 50,
+        "state": "active",
+        "opacity": 0,
+        "visible": true,
+        "debrisY": -0.6
+      },
+      {
+        "i": 1,
+        "age": 50,
+        "state": "active",
+        "opacity": 0,
+        "visible": true,
+        "debrisY": -0.6
+      },
+      {
+        "i": 2,
+        "age": 43.33,
+        "state": "active",
+        "opacity": 1,
+        "visible": false,
+        "debrisY": 0
+      },
+      {
+        "i": 3,
+        "age": 38.32,
         "state": "active",
         "opacity": 1,
         "visible": true,
@@ -1104,7 +1104,7 @@
     "freed": {
       "state": "free",
       "groupVisible": false,
-      "age": 50
+      "age": 50.01
     }
   },
   "consoleErrors": [],
@@ -1119,7 +1119,7 @@
     {
       "name": "ruína da Caserna visível (diferença média de cor ≥ 30 no anel de 2,2 u, ligada × desligada)",
       "ok": true,
-      "extra": "{\"R\":2.2,\"n\":16,\"meanDiff\":244.4,\"maxDiff\":294.1,\"pointsChanged\":16}"
+      "extra": "{\"R\":2.2,\"n\":16,\"meanDiff\":214.7,\"maxDiff\":324.3,\"pointsChanged\":16}"
     },
     {
       "name": "2 ruínas surgiram (uma por construção destruída)",
@@ -1139,7 +1139,7 @@
     {
       "name": "entulho de 4–8 peças mescladas numa geometria por ruína (≥ 12 triângulos)",
       "ok": true,
-      "extra": "tris=120,156"
+      "extra": "tris=156,96"
     },
     {
       "name": "ruína em área visível não é esmaecida (decal cor 1)",
@@ -1149,7 +1149,7 @@
     {
       "name": "a ruína não bloqueia: blockerGrid vazio no local e a unidade atravessa",
       "ok": true,
-      "extra": "{\"blockers\":[],\"arrived\":true,\"seconds\":3.8}"
+      "extra": "{\"blockers\":[],\"arrived\":true,\"seconds\":4}"
     },
     {
       "name": "ruína em área nunca explorada fica oculta",
@@ -1169,7 +1169,7 @@
     {
       "name": "ruína da mina VISÍVEL fora da pegada do modelo (diferença média de cor ≥ 30 no anel de 4,4 u, ligada × desligada)",
       "ok": true,
-      "extra": "{\"R\":4.4,\"n\":16,\"meanDiff\":124.5,\"maxDiff\":287,\"pointsChanged\":12}"
+      "extra": "{\"R\":4.4,\"n\":16,\"meanDiff\":141.8,\"maxDiff\":390,\"pointsChanged\":13}"
     },
     {
       "name": "RESOURCE_DEPLETED emitido uma vez para o ouro",
@@ -1179,12 +1179,12 @@
     {
       "name": "ruína da mina no local, com raio de decal maior que a pegada do modelo (> 3,6)",
       "ok": true,
-      "extra": "{\"i\":4,\"state\":\"active\",\"age\":1.98,\"x\":30,\"z\":-46,\"visible\":true,\"opacity\":1,\"debrisOpacity\":1,\"debrisVisible\":true,\"debrisY\":2.654,\"baseY\":2.654,\"decalScale\":7.2,\"decalColor\":1,\"tris\":96}"
+      "extra": "{\"i\":4,\"state\":\"active\",\"age\":1.7,\"x\":30,\"z\":-46,\"visible\":true,\"opacity\":1,\"debrisOpacity\":1,\"debrisVisible\":true,\"debrisY\":2.654,\"baseY\":2.654,\"decalScale\":7.2,\"decalColor\":1,\"tris\":180}"
     },
     {
       "name": "aos ~47,5 s a opacidade está em ~0,5 e o entulho afunda",
       "ok": true,
-      "extra": "{\"i\":0,\"state\":\"active\",\"age\":47.49,\"x\":31.73,\"z\":-12.59,\"visible\":true,\"opacity\":0.502,\"debrisOpacity\":0.502,\"debrisVisible\":true,\"debrisY\":2.175,\"baseY\":2.473,\"decalScale\":4.02,\"decalColor\":1,\"tris\":120}"
+      "extra": "{\"i\":0,\"state\":\"active\",\"age\":47.46,\"x\":31.73,\"z\":-12.59,\"visible\":true,\"opacity\":0.507,\"debrisOpacity\":0.507,\"debrisVisible\":true,\"debrisY\":2.177,\"baseY\":2.473,\"decalScale\":4.02,\"decalColor\":1,\"tris\":156}"
     },
     {
       "name": "opacidade segue ruinAlpha(idade) (45 s plena, linear até 0 aos 50 s)",
@@ -1194,7 +1194,7 @@
     {
       "name": "depois dos 50 s a ruína é removida (slot livre, grupo oculto)",
       "ok": true,
-      "extra": "{\"state\":\"free\",\"groupVisible\":false,\"age\":50} | última amostra: idade=49.87 estado=active"
+      "extra": "{\"state\":\"free\",\"groupVisible\":false,\"age\":50.01} | última amostra: idade=50 estado=active"
     },
     {
       "name": "sem erros de console",

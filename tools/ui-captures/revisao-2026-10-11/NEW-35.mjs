@@ -57,8 +57,9 @@ try {
     const hq = gm.buildings.find((b) => b.ownerId === me && b.role === 'hq').mesh.position;
     const free = (x, z) => gm.canPlaceBuilding('orc_house', x, z, null, me);
     let found = null;
-    for (let r = 16; r <= 44 && !found; r += 3) {
-      for (let a = 0; a < 360 && !found; a += 20) {
+    // busca ampla (antes r ≤ 44 e 20°: só 1 de 180 candidatos passava nas 4 condições neste mapa, e o setup ficava sem espaço)
+    for (let r = 16; r <= 70 && !found; r += 3) {
+      for (let a = 0; a < 360 && !found; a += 10) {
         const G = { x: hq.x + Math.cos((a * Math.PI) / 180) * r, z: hq.z + Math.sin((a * Math.PI) / 180) * r };
         const Sp = { x: G.x - 17, z: G.z + 17 }; // à esquerda da tela (câmera padrão): o projétil vai da esquerda para a direita
         const D = { x: G.x - 0.6, z: G.z - 0.6 }; // boneco do outro lado do ponto (o raio do clique não o atravessa)
@@ -140,15 +141,15 @@ try {
   const imgImpact = await shotTmp(page, 'impacto.png');
   data.watchG = summarize(await page.evaluate(() => window.__watchP), 'attackingGround');
   console.log('ataque no chão (amostragem 15 s)', JSON.stringify({ ...data.watchG, shots: data.watchG.shots.length }));
-  data.result = await page.evaluate(() => {
+  data.result = await page.evaluate((dummyId) => {
     const gm = window.game.gameManager;
     const c = [...gm.entitiesById.values()].find((e) => e.type === 'catapult');
-    const d = [...gm.entitiesById.values()].find((e) => e.type === 'knight' && e.ownerId !== gm.localPlayerId);
+    const d = gm.entitiesById.get(dummyId); // o boneco do setup (e não o primeiro cavaleiro inimigo do mapa)
     return {
       hits: window.__hits.map((h) => ({ x: h.x, z: h.z })), dummyDamage: Math.round(d.maxHp - d.hp), dummyHpPct: +(d.hp / d.maxHp).toFixed(4),
       catPos: [+c.mesh.position.x.toFixed(2), +c.mesh.position.z.toFixed(2)], fired: window.__fired.length
     };
-  });
+  }, data.setup.dummyId);
   const G = data.setup.G;
   const hitD = data.result.hits.map((h) => Math.hypot(h.x - data.afterClick.issued[0].x, h.z - data.afterClick.issued[0].z));
   const catD = Math.hypot(data.result.catPos[0] - data.afterClick.issued[0].x, data.result.catPos[1] - data.afterClick.issued[0].z);

@@ -20,16 +20,17 @@ Opções (depois do `--`):
   --split             variante com malhas próprias para Snout, Tusk_L, Tusk_R e Tail (10 draw calls; insumo para a
                       animação futura): grava tools/blender/build/critter_boar_split.glb (NÃO vai para public/)
 
-Hierarquia (aninhada; L = -x, R = +x, como ArmL/ArmR do projeto; frente = +Z; todas as rotações de repouso = 0):
-  CritterBoar (raiz, origem no chão no centro da pegada)
-  └─ Body    pivô (0; 0,38; 0)           tronco, garupa, crina de cerdas, cauda (malha)
-     ├─ Head    pivô (0; 0,44; 0,26)      crânio, focinho, mandíbula, presas, orelhas, olhos (malha)
-     │  ├─ Snout    (0; 0,385; 0,47)      âncora (sem geometria): base do focinho
-     │  ├─ Tusk_L   (-0,05; 0,305; 0,49)  âncora (sem geometria): raiz da presa esquerda
-     │  └─ Tusk_R   (+0,05; 0,305; 0,49)  âncora (sem geometria): raiz da presa direita
-     ├─ Leg_FL / Leg_FR   pivôs nos ombros (∓0,125; 0,38; 0,19)   (malhas)
-     ├─ Leg_BL / Leg_BR   pivôs nos quadris (∓0,12; 0,38; -0,34)  (malhas)
-     └─ Tail    (0; 0,415; -0,575)        âncora (sem geometria): raiz da cauda
+Hierarquia (aninhada; L = -x, R = +x, como ArmL/ArmR do projeto; frente = +Z; todas as rotações de repouso = 0;
+posições absolutas em metros, com a origem no chão sob o centro da pegada):
+  CritterBoar (raiz)
+  └─ Body    pivô (0; 0,36; 0)             tronco, garupa, crina de cerdas, cauda (malha)
+     ├─ Head    pivô (0; 0,43; 0,25)        crânio, focinho, mandíbula, presas, orelhas, olhos (malha)
+     │  ├─ Snout    (0; 0,365; 0,47)        âncora (sem geometria): base do focinho
+     │  ├─ Tusk_L   (-0,056; 0,29; 0,488)   âncora (sem geometria): raiz da presa esquerda
+     │  └─ Tusk_R   (+0,056; 0,29; 0,488)   âncora (sem geometria): raiz da presa direita
+     ├─ Leg_FL / Leg_FR   pivôs nos ombros (∓0,126; 0,34; 0,19)    (malhas)
+     ├─ Leg_BL / Leg_BR   pivôs nos quadris (∓0,108; 0,34; -0,34)  (malhas)
+     └─ Tail    (0; 0,405; -0,575)          âncora (sem geometria): raiz da cauda
 Orçamento: 6 malhas (Body, Head, 4 pernas) = 6 draw calls (1 material `Atlas`), atlas 512². Snout/Tusk_*/Tail são
 nós vazios porque as respectivas geometrias foram mescladas em Head/Body para caber no orçamento de draw calls.
 """
@@ -315,7 +316,8 @@ def build_body(mats, split=False):
     T = Part('Tail', TAIL_O) if split else P
     path = [tuple(TAIL_O), (0.0, 0.442, -0.625), (0.0, 0.435, -0.675), (0.0, 0.390, -0.703)]
     T.tube(path, [0.021, 0.015, 0.012, 0.009], 'fur_dark', n=5, up=(0, 1, 0))
-    cone_dir(T, (0.0, 0.397, -0.700), (0.0, -0.75, -0.55), 0.030, 0.072, 'fur_light', n=5)
+    for dx in (0.0, 0.40, -0.40):  # penacho: três cerdas em leque
+        cone_dir(T, (dx * 0.03, 0.396, -0.700), (dx, -0.75, -0.50), 0.015, 0.056, 'fur_dark' if dx else 'fur_light', n=4)
     return P, ([(T, 'Body')] if split else [])
 
 

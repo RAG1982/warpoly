@@ -127,9 +127,9 @@ if (mode === 'game') {
   info.sizes_in_game = {};
   for (const [label, o, x] of row) {
     o.position.set(x, 0, 0);
-    o.rotation.y = 0.4;
     scene.add(o);
-    info.sizes_in_game[label] = sizeOf(o);
+    info.sizes_in_game[label] = sizeOf(o); // medido sem rotação (x = largura, y = altura, z = comprimento)
+    o.rotation.y = 0.4;
   }
   frame(new THREE.Vector3(0, 0.8, 0), num('dist', 16), [45, 44, 45], 32);
   camera.updateMatrixWorld(true);

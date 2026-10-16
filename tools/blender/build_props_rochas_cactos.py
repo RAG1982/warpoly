@@ -121,7 +121,7 @@ def stretch(nb, fac, lo=0.3, hi=0.7):
 
 
 def granite_paint(name, seed=0.0, k=1.0, grain=14.0, crack_scale=0.9, crack_amt=0.30, strata_amt=1.0, top_amt=1.0,
-                  dark='#7a7368', light='#aea695', edge_r=0.035, edge_amt=0.45, ao=(0.9, 0.70), dust_h=0.5,
+                  dark='#7a7368', light='#aea695', edge_r=0.035, edge_amt=0.45, ao=(0.9, 0.64), dust_h=0.5,
                   strata_scale=3.8, facet_amt=0.20, grain_amt=0.14, mica_amt=0.20):
     """Granito cinza-quente (#8a8378): manchas largas (escala `k` acompanha o tamanho da rocha), estratos sutis (faixas
     horizontais em coordenadas do mundo, o eixo Z do Blender = y do jogo), trincas sinuosas (curvas de nível de um ruído),
@@ -166,7 +166,7 @@ def granite_paint(name, seed=0.0, k=1.0, grain=14.0, crack_scale=0.9, crack_amt=
     col = bright(nb, col, nb.math('ADD', 1.0 - facet_amt / 2, nb.math('MULTIPLY', fn, facet_amt)))
 
     # luz de topo pintada (topo claro e quente) e lados/fundos frios
-    col = bright(nb, col, nb.math('ADD', 0.80, nb.math('MULTIPLY', nz, 0.26 * top_amt)))
+    col = bright(nb, col, nb.math('ADD', 0.87, nb.math('MULTIPLY', nz, 0.26 * top_amt)))
     top = smoothstep(nb, nz, 0.45, 0.95)
     col = lerp_to(nb, col, top, '#d4cab6', 0.40 * top_amt)
     side = smoothstep(nb, nz, 0.5, -0.15)
@@ -741,11 +741,11 @@ SPECS = {
                                margin=0.007, angle=66.0, rough=0.92),
     'rock_granite_medium': dict(root='RockGraniteMedium', atlas=512, build=build_rock_medium,
                                 mats=lambda: mats_granite(3.1, k=1.9, grain=24.0, crack_scale=1.8, strata_scale=7.0, edge_r=0.022,
-                                                          ao=(0.45, 0.72), dust_h=0.3),
+                                                          ao=(0.45, 0.66), dust_h=0.3),
                                 margin=0.007, angle=66.0, rough=0.92),
     'rock_granite_small': dict(root='RockGraniteSmall', atlas=256, build=build_rock_small,
                                mats=lambda: mats_granite(5.3, k=3.6, grain=52.0, crack_scale=3.6, strata_scale=14.0, edge_r=0.012,
-                                                         ao=(0.2, 0.7), dust_h=0.12, crack_amt=0.25),
+                                                         ao=(0.2, 0.64), dust_h=0.12, crack_amt=0.25),
                                margin=0.010, angle=66.0, rough=0.92),
     'cactus_1': dict(root='Cactus1', atlas=512, build=build_cactus_1, mats=lambda: mats_cactus(0.6),
                      margin=0.008, angle=66.0, rough=0.85),

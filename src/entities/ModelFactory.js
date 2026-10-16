@@ -623,6 +623,7 @@ export class ModelFactory {
     switch (type) {
       case 'villager': return this.createVillager();
       case 'knight': return this.createKnight();
+      case 'hero_brann': return this._glbOr('hero_brann', () => this.createKnight()); // Capitão Brann: .glb próprio (Tripo); sem .glb, cavaleiro procedural
       case 'archer': return this.createArcher();
       case 'bandit': return this.createBandit();
       case 'peon': return this.createPeon();

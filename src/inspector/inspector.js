@@ -84,6 +84,19 @@ const MODEL_CATALOG = [
     notes: 'Rig plana (a do antigo KnightModel.js, removido na F7-00b; o UnitAnimator anima Sword/braços com rotações independentes). Sem escudo (a referência não tem). 10 draw calls, ~4,2 mil triângulos, 213 KB. Rosto só na face frontal (+Z).'
   },
   {
+    id: 'hero_brann_glb',
+    name: 'Capitão Brann (herói, Tripo)',
+    category: 'units',
+    faction: 'human',
+    type: 'knight',
+    icon: '🔨',
+    glb: 'hero_brann',
+    sourceFile: 'tools/blender/build_hero_brann.py',
+    create: createGlb('hero_brann'),
+    description: 'Herói humano Capitão Brann: modelo do Tripo finalizado no Blender (public/models/hero_brann.glb). Nós Knight, Torso, Head, ArmL, ArmR, LegL, LegR, Sword (martelo) e Cape (capa, TeamColor). Sem escudo.',
+    notes: 'Rig de cavaleiro (type knight). Pivôs de ombro e punho seguem o corpo do Tripo. Capa estática (não anima). 8 draw calls, 10.953 triângulos, atlas 512².',
+  },
+  {
     id: 'ballista',
     name: 'Balista (Ballista)',
     category: 'units',

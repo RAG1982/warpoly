@@ -1,19 +1,303 @@
 {
   "item": "NEW-35",
   "data": {
-    "setup": null
+    "setup": {
+      "me": 0,
+      "foeId": 1,
+      "G": {
+        "x": 22.502172005582686,
+        "z": 49.837168312888785
+      },
+      "S": {
+        "x": 5.502172005582686,
+        "z": 66.83716831288879
+      },
+      "D": {
+        "x": 21.902172005582685,
+        "z": 49.237168312888784
+      },
+      "catId": 276,
+      "dummyId": 277,
+      "gy": 2.467163190353615,
+      "range": 20,
+      "minRange": 4,
+      "cooldown": 3.2,
+      "splash": 1.5,
+      "dummyHp": 100000,
+      "selected": [
+        "catapult"
+      ]
+    },
+    "afterClick": {
+      "issued": [
+        {
+          "type": "attackGround",
+          "n": 1,
+          "x": 22.44,
+          "z": 49.81
+        }
+      ],
+      "state": "attackingGround",
+      "groundTarget": {
+        "x": 22.437201721475436,
+        "z": 49.810189063596894
+      },
+      "targetEntity": null,
+      "pos": [
+        6.35,
+        65.66
+      ]
+    },
+    "watchG": {
+      "state": "attackingGround",
+      "seconds": 15,
+      "fightFrames": 812,
+      "phaseErrMean": 0.249,
+      "phaseErrMax": 0.5,
+      "framesWithErrOver0_1": 0.802,
+      "projectiles": 5,
+      "armReleases": 0,
+      "shots": [
+        {
+          "t": 1472,
+          "panim": 0.017,
+          "ptimer": 0,
+          "armRx": 0,
+          "st": "attackingGround"
+        },
+        {
+          "t": 3417,
+          "panim": 0.967,
+          "ptimer": 0.609,
+          "armRx": -0.022,
+          "st": "attackingGround"
+        },
+        {
+          "t": 6667,
+          "panim": 0.216,
+          "ptimer": 0.609,
+          "armRx": 0.2,
+          "st": "attackingGround"
+        },
+        {
+          "t": 9918,
+          "panim": 0.466,
+          "ptimer": 0.609,
+          "armRx": 0.493,
+          "st": "attackingGround"
+        },
+        {
+          "t": 13167,
+          "panim": 0.716,
+          "ptimer": 0.609,
+          "armRx": -0.84,
+          "st": "attackingGround"
+        }
+      ]
+    },
+    "result": {
+      "hits": [
+        {
+          "x": 22.44,
+          "z": 49.81
+        },
+        {
+          "x": 22.44,
+          "z": 49.81
+        },
+        {
+          "x": 22.44,
+          "z": 49.81
+        },
+        {
+          "x": 22.44,
+          "z": 49.81
+        },
+        {
+          "x": 22.44,
+          "z": 49.81
+        }
+      ],
+      "dummyDamage": 152,
+      "dummyHpPct": 0.9985,
+      "catPos": [
+        8.27,
+        63.77
+      ],
+      "fired": 5
+    },
+    "armGround": {
+      "st": "attackingGround",
+      "ptimer": 0.688,
+      "panim": 0.499,
+      "armRx": 0.5
+    },
+    "armControl": {
+      "st": "attacking",
+      "ptimer": 0.688,
+      "panim": 0.693,
+      "armRx": -0.904
+    },
+    "watchC": {
+      "state": "attacking",
+      "seconds": 11,
+      "fightFrames": 661,
+      "phaseErrMean": 0.005,
+      "phaseErrMax": 0.011,
+      "framesWithErrOver0_1": 0,
+      "projectiles": 4,
+      "armReleases": 0,
+      "shots": [
+        {
+          "t": 13,
+          "panim": 0.703,
+          "ptimer": 0.703,
+          "armRx": -0.877,
+          "st": "attacking"
+        },
+        {
+          "t": 2962,
+          "panim": 0.61,
+          "ptimer": 0.609,
+          "armRx": -0.968,
+          "st": "attacking"
+        },
+        {
+          "t": 6213,
+          "panim": 0.609,
+          "ptimer": 0.609,
+          "armRx": -0.967,
+          "st": "attacking"
+        },
+        {
+          "t": 9461,
+          "panim": 0.609,
+          "ptimer": 0.609,
+          "armRx": -0.967,
+          "st": "attacking"
+        }
+      ]
+    },
+    "armAtShot": {
+      "ground": -0.034,
+      "control": -0.945
+    },
+    "minRange": {
+      "d0": 2.12,
+      "d1": 4.07,
+      "state": "attackingGround",
+      "minRange": 4
+    },
+    "mixedSetup": {
+      "P": {
+        "x": -3.1696928493314123,
+        "z": 66.81641461275383,
+        "y": 2.5416723796902363
+      },
+      "catId": 276,
+      "gruntId": 292,
+      "selected": [
+        "catapult",
+        "grunt"
+      ]
+    },
+    "mixed": {
+      "issued": [
+        {
+          "type": "attackGround",
+          "n": 1,
+          "x": -3.21,
+          "z": 66.77
+        },
+        {
+          "type": "move",
+          "n": 1,
+          "x": -3.21,
+          "z": 66.77
+        }
+      ],
+      "catState": "attackingGround",
+      "gruntState": "moving",
+      "gruntHasTarget": true
+    }
   },
-  "consoleErrors": [
-    "script: sem espaço"
-  ],
-  "consoleErrorCount": 1,
+  "consoleErrors": [],
+  "consoleErrorCount": 0,
   "consoleWarningCount": 0,
   "checks": [
     {
       "name": "achou espaço aberto para o teste",
+      "ok": true,
+      "extra": ""
+    },
+    {
+      "name": "o ponto do chão está na tela, fora da HUD",
+      "ok": true,
+      "extra": "{\"x\":875.717489591817,\"y\":344.7534803193299,\"behind\":false}"
+    },
+    {
+      "name": "clique direito no chão emitiu exatamente 1 comando attackGround (sem move)",
+      "ok": true,
+      "extra": "[{\"type\":\"attackGround\",\"n\":1,\"x\":22.44,\"z\":49.81}]"
+    },
+    {
+      "name": "estado attackingGround com groundTarget no ponto clicado e sem alvo-entidade",
+      "ok": true,
+      "extra": "{\"x\":22.437201721475436,\"z\":49.810189063596894}"
+    },
+    {
+      "name": "a catapulta se aproximou até o alcance (≤ 20,5 e ≥ alcance mínimo 4) e disparou ≥ 3 vezes sem nova ordem",
+      "ok": true,
+      "extra": "dist=19.9 disparos=5"
+    },
+    {
+      "name": "os impactos caem no ponto clicado (erro ≤ 0,5 u)",
+      "ok": true,
+      "extra": "0.00,0.00,0.00,0.00,0.00"
+    },
+    {
+      "name": "o impacto em área causa dano ao boneco hostil colado ao ponto",
+      "ok": true,
+      "extra": "dano total=152 (99.850 % de PV restante)"
+    },
+    {
+      "name": "controle: com ataque a entidade a animação do braço acompanha o ciclo de ataque (erro médio ≤ 0,05)",
+      "ok": true,
+      "extra": "erro médio=0.005 máx=0.011"
+    },
+    {
+      "name": "ataque no chão: a animação do braço acompanha o ciclo de ataque (erro médio ≤ 0,05)",
       "ok": false,
+      "extra": "erro médio=0.249 máx=0.5 quadros com erro>0,1=0.802"
+    },
+    {
+      "name": "ataque no chão: 1 lançamento do braço por projétil",
+      "ok": false,
+      "extra": "lançamentos do braço=0 projéteis=5"
+    },
+    {
+      "name": "no instante do disparo o braço está na mesma pose do controle (|Δ rx médio| ≤ 0,35)",
+      "ok": false,
+      "extra": "rx médio no disparo: chão=-0.034 controle=-0.945"
+    },
+    {
+      "name": "ponto dentro do alcance mínimo: a catapulta recua até ≥ 4 e segue atacando o chão",
+      "ok": true,
+      "extra": "{\"d0\":2.12,\"d1\":4.07,\"state\":\"attackingGround\",\"minRange\":4}"
+    },
+    {
+      "name": "seleção mista: attackGround só para o cerco e move para o grunt",
+      "ok": true,
+      "extra": "{\"issued\":[{\"type\":\"attackGround\",\"n\":1,\"x\":-3.21,\"z\":66.77},{\"type\":\"move\",\"n\":1,\"x\":-3.21,\"z\":66.77}],\"catState\":\"attackingGround\",\"gruntState\":\"moving\",\"gruntHasTarget\":true}"
+    },
+    {
+      "name": "sem erros de console",
+      "ok": true,
       "extra": ""
     }
   ],
-  "pngs": []
+  "pngs": [
+    "NEW-35-1-clique-direito.png",
+    "NEW-35-2-braco-no-disparo.png"
+  ]
 }

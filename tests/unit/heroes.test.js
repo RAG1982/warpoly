@@ -1,4 +1,6 @@
 import { describe, it, expect } from 'vitest';
+import { existsSync } from 'node:fs';
+import { join } from 'node:path';
 import { UNITS, ABILITIES, getAbility } from '../../src/data/index.js';
 import { HEROES, HERO_TYPES, isHeroType, isUniqueType } from '../../src/data/heroes.js';
 import { stateChecksum } from '../../src/sim/checksum.js';
@@ -12,6 +14,17 @@ const heroMission = (over = {}) => baseMission({
   ...over
 });
 const heroOf = (gm) => gm.entitiesById.get(gm.mission.tags.get('hero')[0]);
+
+describe('Ícones de herói (subpasta do deploy)', () => {
+  it('ícone de herói é relativo (sem "/" inicial) e existe em public/', () => {
+    for (const type of HERO_TYPES) {
+      const icon = UNITS[type].icon;
+      expect(typeof icon, type).toBe('string');
+      expect(icon.startsWith('/'), `${type}: ${icon}`).toBe(false);
+      expect(existsSync(join(process.cwd(), 'public', icon)), `${type}: ${icon}`).toBe(true);
+    }
+  });
+});
 
 describe('heróis (F4-08)', () => {
   it('há 2 a 6 heróis, únicos, não treináveis, com nome PT-BR e modelo de uma unidade existente', () => {

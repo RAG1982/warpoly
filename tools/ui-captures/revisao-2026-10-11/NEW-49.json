@@ -83,12 +83,182 @@
         }
       }
     },
-    "setup": null
+    "setup": {
+      "spot": {
+        "x": -34.952019020337815,
+        "z": 13.258268198792464
+      },
+      "ids": [
+        287,
+        288,
+        289,
+        290
+      ],
+      "variants": [
+        1,
+        1,
+        0,
+        0
+      ],
+      "range": 13.5,
+      "cooldown": 1.35,
+      "weaponRFound": [
+        true,
+        true,
+        true,
+        true
+      ],
+      "sameNode": [
+        false,
+        false,
+        false,
+        false
+      ]
+    },
+    "gameFrame": {
+      "p": 0.759,
+      "weaponRx": -3.08,
+      "armRx": -1.4
+    },
+    "watch": {
+      "frames": 841,
+      "perUnit": {
+        "287": {
+          "variant": 1,
+          "fightFrames": 840,
+          "maxByPart": {
+            "torso": 0.0917,
+            "head": 0.0486,
+            "armL": 0.1349,
+            "armR": 0.3507,
+            "weaponR": 0.3525
+          },
+          "maxAtP": {
+            "torso": 0.574,
+            "head": 0.574,
+            "armL": 0.574,
+            "armR": 0.574,
+            "weaponR": 0.858
+          },
+          "jumps": [
+            {
+              "part": "armR",
+              "rad": 0.347,
+              "p": 0.574,
+              "dtMs": 15
+            },
+            {
+              "part": "armR",
+              "rad": 0.347,
+              "p": 0.574,
+              "dtMs": 15
+            },
+            {
+              "part": "armR",
+              "rad": 0.347,
+              "p": 0.574,
+              "dtMs": 16
+            }
+          ],
+          "states": {
+            "attacking/fight": 841
+          }
+        },
+        "288": {
+          "variant": 1,
+          "fightFrames": 840,
+          "maxByPart": {
+            "torso": 0.0917,
+            "head": 0.0486,
+            "armL": 0.1349,
+            "armR": 0.3507,
+            "weaponR": 0.3525
+          },
+          "maxAtP": {
+            "torso": 0.574,
+            "head": 0.574,
+            "armL": 0.574,
+            "armR": 0.574,
+            "weaponR": 0.858
+          },
+          "jumps": [
+            {
+              "part": "armR",
+              "rad": 0.347,
+              "p": 0.574,
+              "dtMs": 15
+            },
+            {
+              "part": "armR",
+              "rad": 0.347,
+              "p": 0.574,
+              "dtMs": 15
+            },
+            {
+              "part": "armR",
+              "rad": 0.347,
+              "p": 0.574,
+              "dtMs": 16
+            }
+          ],
+          "states": {
+            "attacking/fight": 841
+          }
+        },
+        "289": {
+          "variant": 0,
+          "fightFrames": 840,
+          "maxByPart": {
+            "torso": 0.0746,
+            "head": 0.0395,
+            "armL": 0.1097,
+            "armR": 0.2853,
+            "weaponR": 0.2481
+          },
+          "maxAtP": {
+            "torso": 0.401,
+            "head": 0.401,
+            "armL": 0.401,
+            "armR": 0.401,
+            "weaponR": 0.796
+          },
+          "jumps": [],
+          "states": {
+            "attacking/fight": 841
+          }
+        },
+        "290": {
+          "variant": 0,
+          "fightFrames": 840,
+          "maxByPart": {
+            "torso": 0.0746,
+            "head": 0.0395,
+            "armL": 0.1097,
+            "armR": 0.2853,
+            "weaponR": 0.2481
+          },
+          "maxAtP": {
+            "torso": 0.401,
+            "head": 0.401,
+            "armL": 0.401,
+            "armR": 0.401,
+            "weaponR": 0.796
+          },
+          "jumps": [],
+          "states": {
+            "attacking/fight": 841
+          }
+        }
+      }
+    },
+    "frameStats": {
+      "frames": 841,
+      "medianDtMs": 16.7,
+      "over50ms": 0
+    }
   },
-  "consoleErrors": [
-    "script(jogo): sem espaço"
-  ],
-  "consoleErrorCount": 1,
+  "consoleErrors": [],
+  "consoleErrorCount": 0,
   "consoleWarningCount": 0,
   "checks": [
     {
@@ -118,16 +288,37 @@
     },
     {
       "name": "achou espaço aberto para o teste no jogo",
-      "ok": false,
+      "ok": true,
       "extra": ""
     },
     {
-      "name": "sem erros de console",
+      "name": "o animador do jogo tem weaponR ligado nos 4 Arremessadores (variantes 0 e 1 presentes)",
+      "ok": true,
+      "extra": "variantes=1,1,0,0"
+    },
+    {
+      "name": "os 4 Arremessadores lutaram (≥ 150 quadros de `fight` fora do cross-fade cada)",
+      "ok": true,
+      "extra": "[840,840,840,840]"
+    },
+    {
+      "name": "nenhum salto de pose entre quadros em nenhuma parte (passo > 0,3 rad E velocidade acima do máximo legítimo; as duas variantes)",
       "ok": false,
-      "extra": "script(jogo): sem espaço"
+      "extra": "[[{\"part\":\"armR\",\"rad\":0.347,\"p\":0.574,\"dtMs\":15},{\"part\":\"armR\",\"rad\":0.347,\"p\":0.574,\"dtMs\":15},{\"part\":\"armR\",\"rad\":0.347,\"p\":0.574,\"dtMs\":16}],[{\"part\":\"armR\",\"rad\":0.347,\"p\":0.574,\"dtMs\":15},{\"part\":\"armR\",\"rad\":0.347,\"p\":0.574,\"dtMs\":15},{\"part\":\"armR\",\"rad\":0.347,\"p\":0.574,\"dtMs\":16}],[],[]]"
+    },
+    {
+      "name": "maior passo por quadro no jogo ≤ 0,6 rad (arremesso é a fase mais rápida; o defeito era 2,3 rad)",
+      "ok": true,
+      "extra": "maior passo=0.352 rad (quadros: mediana 16.7 ms, ≥ 50 ms: 0)"
+    },
+    {
+      "name": "sem erros de console",
+      "ok": true,
+      "extra": ""
     }
   ],
   "pngs": [
-    "NEW-49-1-inspetor-tira.png"
+    "NEW-49-1-inspetor-tira.png",
+    "NEW-49-2-jogo.png"
   ]
 }

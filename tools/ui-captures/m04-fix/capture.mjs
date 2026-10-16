@@ -52,6 +52,16 @@ async function startFromCampaign(page, missionId, shotBriefing) {
   await page.waitForTimeout(600);
   await page.click('[data-action="campaign"]');
   await page.waitForSelector('.ms-brief-item', { timeout: 10000 });
+  // a história da campanha padrão (war-alliance) abre sozinha na primeira vez e cobre o menu: pula-a pelo botão "Pular"
+  const skipStory = await page.waitForSelector('[data-story="skip"]', { timeout: 5000 }).catch(() => null);
+  if (skipStory) {
+    await skipStory.click();
+    await page.waitForSelector('.story-screen', { state: 'detached', timeout: 5000 }).catch(() => {});
+  }
+  // a missão m04 só existe na trilha 'alliance': abre essa aba antes de escolher a missão (a campanha padrão é a war-alliance)
+  await page.waitForSelector('[data-cp="pickCamp"][data-id="alliance"]', { timeout: 10000 });
+  await page.click('[data-cp="pickCamp"][data-id="alliance"]');
+  await page.waitForTimeout(400);
   await page.click(`[data-cp="pick"][data-id="${missionId}"]`);
   await page.waitForTimeout(400);
   if (shotBriefing) await shot(page, shotBriefing);

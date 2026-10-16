@@ -228,6 +228,23 @@ export class AIEconomyManager {
   }
 
   /**
+   * NEW-55: a recuperação de trabalhadores ainda é possível? Centro construído e vivo, ouro para um trabalhador
+   * e vaga de população. Falso = a emergência não tem saída (sem Centro, sem ouro ou sem vaga): segurar o exército
+   * em casa só trava a partida (ilhas-4p, seeds 1 e 6 do soak). Centro em melhoria conta como possível.
+   * @returns {boolean}
+   */
+  canRecoverWorkers() {
+    const dir = this.director;
+    const buildings = this.gm.buildings;
+    let hq = false;
+    for (let i = 0; i < buildings.length; i++) {
+      const b = buildings[i];
+      if (b.ownerId === dir.playerId && b.type === dir.hqType && b.isConstructed && !b.isDead) { hq = true; break; }
+    }
+    return hq && dir.canAfford(dir.costs.worker) && dir.population < dir.maxPopulation;
+  }
+
+  /**
    * Verifies if the military manager can safely recruit combat troops without starving peon production
    * @returns {boolean}
    */

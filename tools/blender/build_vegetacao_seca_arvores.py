@@ -5,23 +5,29 @@ Uso:
   blender -b --factory-startup --python tools/blender/build_vegetacao_seca_arvores.py -- [broad|palm|acacia|grass_dry|tumbleweed|all] [--no-render]
 
 Saídas (public/models/):
-  tree_broad.glb    raiz `TreeBroad`    variante alta de copa larga (tronco ~1,5 de diâmetro na base, copa ~6,8, ~8,6 de altura)
-  tree_palm.glb     raiz `TreePalm`     palmeira de tronco curvo, anéis de cicatriz pintados, fronde de folhas largas e recortadas
-  tree_acacia.glb   raiz `TreeAcacia`   acácia: tronco torto que se abre em três braços, copa achatada em guarda-chuva
-  grass_dry.glb     raiz `GrassDry`     tufo de capim seco (12 lâminas em cone, ~#c9a24a)
-  tumbleweed.glb    raiz `Tumbleweed`   arbusto rolante: esfera de galhos secos (centro de rotação em y = 0,42)
+  tree_broad.glb    raiz `TreeBroad`    variante alta de copa larga (tronco de ~1,5 de diâmetro na base, copa de ~6,6, ~8,5 de altura)
+  tree_palm.glb     raiz `TreePalm`     palmeira de tronco curvo com anéis de cicatriz pintados, 16 frondes largas e recortadas (+2 secas)
+  tree_acacia.glb   raiz `TreeAcacia`   acácia: tronco torto que se abre em cinco braços, copa achatada em guarda-chuva (~6,7 de largura)
+  grass_dry.glb     raiz `GrassDry`     tufo de capim seco: 12 lâminas em cone, ouro-palha #c9a24a, ~0,9 de altura
+  tumbleweed.glb    raiz `Tumbleweed`   arbusto rolante: esfera de ~0,85 de galhos secos (centro de rotação em y = 0,42)
 
 Árvores: o `TreeManager` (`getGlbTreeSource`) pega a PRIMEIRA malha do .glb e o material dela e desenha em `InstancedMesh`,
 tingindo por tipo/região no shader (o índice da região viaja no `instanceColor`). Por isso cada árvore é UMA malha
 (`Static_Mesh`), UM material (`Atlas`, atlas 512², 1 draw call) e SEM cor de vértice (a cor vive na textura). A hierarquia é
-a de `tree_oak.glb`: raiz > `Static_Mesh`, `Socket_UnitSpawn`, `Socket_Rally`. Props: `Static_Mesh` só, atlas 256².
+a de `tree_oak.glb`: raiz > `Static_Mesh`, `Socket_UnitSpawn`, `Socket_Rally`. Props: só `Static_Mesh`, atlas 256².
 
-Convenções: coordenadas do jogo (x direita, y cima, +z frente; 1 unidade = 1 m), origem no pé (y = 0 no chão; o pé afunda ~0,1
-para não aparecer fresta em terreno em desnível), faces facetadas (copas e fitas `smooth=0`, troncos `smooth` 40–60).
-Folhas e lâminas são superfícies abertas (material `doubleSided`, como nas outras árvores); `add_sheet` orienta as normais
-da frente delas (lado de cima nas fronde, lado de fora nas lâminas) para a luz de topo pintada e o AO saírem do lado certo.
+Convenções: coordenadas do jogo (x direita, y cima, +z frente; 1 unidade = 1 m), origem no pé (y = 0 no chão; o pé das árvores
+afunda 0,16–0,32 para não aparecer fresta em terreno em desnível), faces facetadas (copas e fitas `smooth=0`, troncos `smooth`
+50–60). Folhas e lâminas são superfícies abertas (material `doubleSided`, como nas outras árvores); `ribbon` já enrola as faces
+voltadas para a frente (lado de cima nas frondes, lado de fora nas lâminas) para a luz de topo pintada e o AO saírem do lado certo.
 
-Variáveis: `BAKE_SAMPLES` (32), `RENDER_RES` (512). Preview: tools/ui-captures/art-p0/<nome>.png (fundo transparente).
+Pós-produção de cada modelo: UV atlas (Smart UV + empacotamento) -> bake Cycles de emissão (cor + AO + desgaste de borda dos
+materiais de pintura) -> material final `Atlas` -> `Static_Mesh` único -> export meshopt + WebP. No fim o script lê de volta o
+.glb gravado (`glb_report`) e confere os orçamentos (árvores: 1 malha, 1 material, textura <= 512², <= 15 mil tris, sem
+COLOR_0; props: <= 4 draw calls e <= 2 mil tris) e renderiza o preview a partir do próprio .glb exportado.
+
+Variáveis: `BAKE_SAMPLES` (32), `RENDER_RES` (512). Preview: tools/ui-captures/art-p0/<nome>.png (fundo transparente); o relatório
+numérico vai para tools/blender/build/art-p0-report.json (pasta ignorada pelo git).
 """
 import os
 import sys
@@ -35,7 +41,7 @@ os.environ.setdefault('ATLAS', '512')
 import bpy  # noqa: E402
 from mathutils import Vector, Matrix  # noqa: E402
 import common as C  # noqa: E402
-from common import (MeshBuilder, M, prim_rings, prim_sphere, prim_cone, limb_rings)  # noqa: E402
+from common import (MeshBuilder, M, prim_rings, prim_sphere, limb_rings)  # noqa: E402
 
 TEAM_DEFAULT = '#808080'
 PREVIEW_DIR = os.path.join(C.REPO, 'tools', 'ui-captures', 'art-p0')
@@ -89,7 +95,6 @@ PALETTE_GRASS = {
                        grad=(0.0, 1.0, 0.45), ao=(0.5, 0.6)),
     'straw_dark': dict(base='#a98532', var='#8a6a28', var_scale=6.0, var_amt=0.9, fine=0.10, fine_scale=40.0, top=0.3,
                        grad=(0.0, 1.0, 0.5), ao=(0.5, 0.7)),
-    'thatch': dict(base='#7a6030', var='#54401f', var_scale=8.0, var_amt=1.0, fine=0.14, top=0.3, ao=(0.3, 0.8)),
 }
 
 PALETTE_TUMBLE = {
@@ -260,31 +265,16 @@ def jitter_rot(rg, tilt=14.0):
     return (rg.uniform(-tilt, tilt), rg.uniform(0.0, 360.0), rg.uniform(-tilt, tilt))
 
 
-def lerp3(a, b, t):
-    return tuple(a[i] + (b[i] - a[i]) * t for i in range(3))
-
-
-def catmull(pts, per=2):
-    """Pontos intermediários suaves (Catmull-Rom) entre estações; devolve a lista com `per` subdivisões por trecho."""
-    out = []
-    n = len(pts)
-    for i in range(n - 1):
-        p0, p1, p2, p3 = pts[max(i - 1, 0)], pts[i], pts[i + 1], pts[min(i + 2, n - 1)]
-        for s in range(per):
-            t = s / per
-            t2, t3 = t * t, t * t * t
-            out.append(tuple(0.5 * ((2 * p1[k]) + (-p0[k] + p2[k]) * t + (2 * p0[k] - 5 * p1[k] + 4 * p2[k] - p3[k]) * t2
-                                    + (-p0[k] + 3 * p1[k] - 3 * p2[k] + p3[k]) * t3) for k in range(3)))
-    out.append(tuple(pts[-1]))
-    return out
-
-
 # ---------------------------------------------------------------------------
 # Pós-produção comum: UV atlas -> bake -> material final -> Static_Mesh -> export
 # ---------------------------------------------------------------------------
 def finish(root, parts, name, weights, atlas, margin=0.012, angle=66.0, quality=80, sockets=True):
     bpy.context.view_layer.update()
     C.uv_atlas(parts, weights=weights, margin=margin, angle=angle)
+    # Margem de bake de 4 px, MENOR que o espaço entre ilhas do empacotamento (0,014 × 512 = ~7 px nas árvores). Testado: com 16 px
+    # (para a cor das ilhas cobrir o fundo preto do atlas e a mip não escurecer folhas de árvore pequena na tela) o Blender
+    # estende a margem de uma ilha por cima da borda das ilhas finas vizinhas e pinta verde no tronco (7 faces do tronco da árvore
+    # larga contra 0 com 4 px; conferido amostrando o atlas no centro UV de cada face). Não aumente sem aumentar o espaço entre ilhas.
     img = C.bake_atlas(parts, name + '_atlas', atlas, samples=int(os.environ.get('BAKE_SAMPLES', 32)), margin=4)
     C.finalize_materials(parts, img, team_default=TEAM_DEFAULT, out_png=os.path.join(C.BUILD_DIR, name + '_atlas.png'))
     static = C.join_objects(list(parts), 'Static_Mesh')
@@ -304,7 +294,8 @@ def finish(root, parts, name, weights, atlas, margin=0.012, angle=66.0, quality=
 # ---------------------------------------------------------------------------
 def build_broad():
     """Tronco grosso (~1,5 de diâmetro na base, com quatro contrafortes), bifurcação a ~3,5 m e cinco braços que sustentam
-    uma copa larga (~6,8) em quatro andares de massas facetadas: saia escura embaixo, miolo, andar superior e topo claro."""
+    uma copa larga (~6,6) em quatro andares de massas facetadas (saia escura embaixo, miolo, andar superior e topo claro) com
+    vértices levemente deslocados para tirar a cara de balão; ~8,5 de altura."""
     C.reset_scene()
     rg = random.Random(21)
     mats = C.make_paint_set(PALETTE_BROAD)
@@ -388,8 +379,9 @@ def frond(phi_deg, th0_deg, th1_deg, length, wmax, n=8, fold=0.4, zig=0.5, mid=0
 
 
 def build_palm():
-    """Tronco curvo (arqueia para o lado e volta a subir), anéis de cicatriz pintados, 'pescoço' verde, cacho de cocos e 11 frondes
-    vivas (3 jovens quase de pé, 5 maduras em arco, 3 baixas caindo) mais 2 secas penduradas."""
+    """Tronco curvo (inclina ~14° e volta a subir; a copa fica ~1,6 m ao lado do pé), anéis de cicatriz pintados, 'pescoço' verde,
+    cacho de cocos e 16 frondes vivas (3 jovens quase de pé, 7 maduras em arco, 6 baixas caindo) mais 2 secas penduradas;
+    ~7,6 de altura. As frondes são fitas largas com margem em dentes de serra e nervura central clara."""
     C.reset_scene()
     rg = random.Random(5)
     mats = C.make_paint_set(PALETTE_PALM)
@@ -437,8 +429,9 @@ def build_palm():
 # ART-02: acácia
 # ---------------------------------------------------------------------------
 def build_acacia():
-    """Tronco torto em S que se abre em cinco braços (três longos para os lados, um curto para cima e um para a frente) e copa
-    achatada em guarda-chuva: panelas largas de folhagem, a do centro mais alta, mais bossas claras por cima e saia escura."""
+    """Tronco torto em S que se abre em cinco braços (quatro para os lados, um curto para cima) e copa achatada em
+    guarda-chuva: 22 massas de folhagem bem mais largas que altas, em três andares (aba escura na borda, miolo, dossel claro);
+    ~6,7 de largura e ~6,3 de altura."""
     C.reset_scene()
     rg = random.Random(33)
     mats = C.make_paint_set(PALETTE_ACACIA)
@@ -512,8 +505,8 @@ def blade(phi_deg, h, w0, psi0, psi1, r0, n=4, fold=0.4, drift=0.0):
 
 
 def build_grass_dry():
-    """12 lâminas em cone: seis longas e arqueadas no anel de fora, quatro médias, duas curtas e retas no miolo; ouro-palha
-    (#c9a24a) com base escurecida, algumas pálidas e algumas mais escuras. ~1,1 de altura e ~1,0 de largura nas pontas."""
+    """12 lâminas em cone (fonte): sete longas e arqueadas no anel de fora, cinco mais eretas no anel de dentro; ouro-palha
+    (#c9a24a) com a base escurecida, algumas pálidas e algumas mais escuras. ~0,9 de altura e ~1,8 de largura nas pontas."""
     C.reset_scene()
     rg = random.Random(11)
     mats = C.make_paint_set(PALETTE_GRASS)
@@ -558,9 +551,9 @@ def twig(mb, pts, radii, mat, n=3):
 
 
 def build_tumbleweed():
-    """Esfera emaranhada de galhos secos de ~0,85 de diâmetro, encostada no chão (centro de rotação em y = 0,42): 34 arcos de
-    círculo máximo com raio variável, 16 galhos radiais (alguns furam a casca e dão silhueta irregular) e 22 folhinhas secas.
-    Tom palha-escuro, interior mais escuro pelo AO assado."""
+    """Esfera emaranhada de galhos secos de ~0,85 de diâmetro, encostada no chão (centro de rotação em y = 0,42): ~74 arcos de
+    círculo máximo (4 estações; 60 % na casca e o resto no miolo), 22 galhos radiais (alguns furam a casca e arrepiam a
+    silhueta) e 20 folhinhas secas coladas. Tom palha-escuro; o interior fica mais escuro pelo AO assado."""
     C.reset_scene()
     rg = random.Random(17)
     mats = C.make_paint_set(PALETTE_TUMBLE)

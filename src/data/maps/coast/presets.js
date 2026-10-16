@@ -13,16 +13,16 @@
 const freeze = (o) => Object.freeze(o);
 
 export const COAST_PRESETS = freeze({
-  /** 1×1 naval / campanha: 2 continentes (Velmara a oeste, Cinzara a leste) + 6 ilhas + ilhotas; uma base por continente. */
+  /** 1×1 naval / campanha: 2 continentes (Velmara a oeste, Cinzara a leste) + 2 ilhas + 1 ilhota; uma base por continente. Mar largo entre as terras (MUNDO-7, 2026-10-16: continentes afastados, canal de 16 u, menos ilhas). */
   'dois-continentes': freeze({
     id: 'dois-continentes',
     name: 'Guerra dos Dois Continentes',
     uso: '1×1 naval / campanha',
     tileset: 'exuberante',
     naval: true,
-    options: freeze({ size: 224, grid: 224, continents: 2, continentDims: [0.175, 0.37], continentSpacing: 0.28, islands: 6, islets: 5, lava: true, lavaWidth: [4, 6], rivers: 1 }),
+    options: freeze({ size: 224, grid: 224, continents: 2, continentDims: [0.175, 0.44], continentSpacing: 0.38, gap: 16, islands: 2, islets: 1, lava: true, lavaWidth: [4, 6], rivers: 1 }),
     layout: freeze({ bases: [{ entities: [0] }, { entities: [1] }] }),
-    verify: freeze({ landRange: [0.3, 0.5], minRivers: 1 })
+    verify: freeze({ landRange: [0.25, 0.5], minRivers: 1 })
   }),
   /** 1×1 / 2×2: um continente com duas costas, simetria exata de 180° (terra, altura, bioma, rios e bases), ilhas de recurso na costa. */
   'duelo-continental': freeze({
@@ -35,16 +35,16 @@ export const COAST_PRESETS = freeze({
     layout: freeze({ bases: [{ entities: [0], side: 'west' }, { twinOf: 0 }] }),
     verify: freeze({ landRange: [0.25, 0.5], minRivers: 1 })
   }),
-  /** FFA / naval de 4 jogadores: 4 ilhas grandes irregulares (uma por quadrante) + ilhas e ilhotas; no lugar de `ilhas-4p` (que fica). */
+  /** FFA / naval de 4 jogadores: 4 ilhas grandes irregulares nos cantos (uma por quadrante), 2 ilhas, sem ilhotas; mar largo entre as ilhas (MUNDO-7, 2026-10-16). No lugar de `ilhas-4p` (que fica). */
   'arquipelago-vivo': freeze({
     id: 'arquipelago-vivo',
     name: 'Arquipélago do Mar Fendido',
     uso: 'FFA / naval 4 jogadores',
     tileset: 'exuberante',
     naval: true,
-    options: freeze({ size: 256, grid: 256, continents: 0, bigIslands: 4, bigIslandScale: 1.1, islands: 4, islets: 4, lava: false, rivers: 0 }),
+    options: freeze({ size: 256, grid: 256, continents: 0, bigIslands: 4, bigIslandScale: 1.05, bigIslandAt: [[-0.3, -0.3], [0.3, -0.3], [-0.3, 0.3], [0.3, 0.3]], islands: 2, islets: 0, gap: 12, lava: false, rivers: 0 }),
     layout: freeze({ bases: [{ entities: [0] }, { entities: [1] }, { entities: [2] }, { entities: [3] }] }),
-    verify: freeze({ landRange: [0.3, 0.55], minRivers: 0 })
+    verify: freeze({ landRange: [0.2, 0.46], minRivers: 0 })
   }),
   /** Tutorial / missão: uma ilha irregular grande com duas bases (jogador a oeste, rival a leste). */
   'ilha-unica': freeze({

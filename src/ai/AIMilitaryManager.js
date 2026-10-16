@@ -356,7 +356,10 @@ export class AIMilitaryManager {
     const per = dir.perception;
     for (const k of per.units.values()) if (k.cls !== 'worker') known += unitValue(k.type);
     for (const b of per.buildings.values()) if (getBuildingDef(b.type).tower) known += 120;
-    const expected = dir.profile.assumeEnemy * 400 * Math.max(0, (dir.simTime || 0) / 60 - 1.5);
+    // DIAG (sondagem H): sem árvores alcançáveis ninguém repõe combatentes (todos custam madeira, exceto conjuradores) —
+    // o inimigo não cresce com o tempo, então a estimativa por tempo de partida deixa de valer (só o que a percepção vê).
+    const woodless = dir.woodOutlook().none;
+    const expected = woodless ? 0 : dir.profile.assumeEnemy * 400 * Math.max(0, (dir.simTime || 0) / 60 - 1.5);
     const enemy = Math.max(known, expected) * 1.25;
     if (enemy <= 0) return true;
     let own = 0;

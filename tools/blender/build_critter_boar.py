@@ -60,8 +60,8 @@ TUSK_O = {'Tusk_L': Vector((-0.056, 0.29, 0.488)), 'Tusk_R': Vector((0.056, 0.29
 TAIL_O = Vector((0.0, 0.405, -0.575))
 LEG_Y = 0.34   # altura dos pivôs das pernas; os cascos ficam em y = 0
 LEG_O = {
-    'Leg_FL': Vector((-0.135, LEG_Y, 0.19)), 'Leg_FR': Vector((0.135, LEG_Y, 0.19)),
-    'Leg_BL': Vector((-0.115, LEG_Y, -0.34)), 'Leg_BR': Vector((0.115, LEG_Y, -0.34)),
+    'Leg_FL': Vector((-0.126, LEG_Y, 0.19)), 'Leg_FR': Vector((0.126, LEG_Y, 0.19)),
+    'Leg_BL': Vector((-0.108, LEG_Y, -0.34)), 'Leg_BR': Vector((0.108, LEG_Y, -0.34)),
 }
 
 # anéis do tronco: (z, topo, base, meia-largura)  [garupa baixa e estreita -> costelas -> cernelha alta e larga -> peito]
@@ -76,6 +76,8 @@ TORSO = [
     (0.27, 0.530, 0.212, 0.180),
     (0.33, 0.488, 0.266, 0.132),
 ]
+# manchas claras do flanco: (lado, z mínimo, z máximo) — lado -1 = esquerdo (-x)
+TAN_PATCHES = [(-1, -0.40, -0.26), (-1, 0.04, 0.20), (1, -0.20, -0.10), (1, 0.18, 0.30)]
 # anéis do crânio/focinho: (z, centro y, meia-largura, meia-altura)
 SKULL = [
     (0.18, 0.420, 0.120, 0.110),
@@ -97,13 +99,15 @@ MANE = [
 # ---------------------------------------------------------------------------
 PALETTE = {
     # pelagem principal: marrom quente com riscas de cerda mais claras e manchas claras maiores
-    'fur': dict(fur=True, base='#4e3827', var='#34261a', var_scale=5.0, var_amt=0.9,
-                grizzle='#957a58', grizzle_amt=0.36, streak=(80.0, 14.0), streak_lo=0.50, streak_hi=0.64,
-                patch='#957b58', patch_scale=3.4, patch_amt=0.85, patch_lo=0.60, patch_hi=0.635, patch_seed=3.1,
-                patch_side=1.7, grad=(0.16, 0.58, 0.18), top=0.28, edge='#b49a74', edge_amt=0.14, edge_r=0.02,
-                ao=(0.22, 0.65)),
+    'fur': dict(fur=True, base='#493524', var='#322418', var_scale=7.0, var_amt=0.75,
+                grizzle='#8a7050', grizzle_amt=0.34, streak=(80.0, 14.0), streak_lo=0.50, streak_hi=0.64,
+                grad=(0.16, 0.58, 0.18), top=0.28, edge='#b49a74', edge_amt=0.14, edge_r=0.02, ao=(0.22, 0.65)),
+    # manchas de tom areia nos flancos (faces escolhidas à mão, para serem poucas e legíveis)
+    'fur_tan': dict(fur=True, base='#7b6144', var='#614a33', var_scale=8.0, var_amt=0.8,
+                    grizzle='#a99070', grizzle_amt=0.4, streak=(80.0, 14.0), streak_lo=0.50, streak_hi=0.64,
+                    grad=(0.16, 0.58, 0.18), top=0.28, edge='#c4ad86', edge_amt=0.14, edge_r=0.02, ao=(0.22, 0.65)),
     # crina, pernas, focinho, orelhas: marrom quase preto
-    'fur_dark': dict(fur=True, base='#33261b', var='#1f160f', var_scale=7.0, var_amt=0.9,
+    'fur_dark': dict(fur=True, base='#3a2b1e', var='#22180f', var_scale=7.0, var_amt=0.9,
                      grizzle='#6e543b', grizzle_amt=0.5, streak=(70.0, 16.0), streak_lo=0.47, streak_hi=0.62,
                      top=0.28, edge='#85694a', edge_amt=0.18, edge_r=0.02, ao=(0.2, 0.65)),
     # crina de cerdas: tom areia que escurece na raiz (gradiente pela altura do mundo) e clareia nas pontas
@@ -123,7 +127,7 @@ PALETTE = {
     'lip': dict(base='#1d1210', var='#120b0a'),
     'tusk': dict(base='#ecdfb8', var='#c3af80', var_scale=9.0, fine=0.05, top=0.35,
                  edge='#fffbe8', edge_amt=0.6, edge_r=0.008, ao=(0.08, 0.4)),
-    'hoof': dict(base='#2b2019', var='#16100c', var_scale=10.0, fine=0.08, top=0.3,
+    'hoof': dict(base='#33271f', var='#1b1410', var_scale=10.0, fine=0.08, top=0.3,
                  edge='#5c4a3a', edge_amt=0.5, edge_r=0.01, ao=(0.1, 0.5)),
     'eye': dict(base='#f2a82c', var='#c97d12', var_scale=30.0, emit_boost=1.15),
     'ear_in': dict(base='#85655a', var='#5f453d', var_scale=9.0, fine=0.08, top=0.3, ao=(0.06, 0.5)),
@@ -294,7 +298,16 @@ def cone_dir(P, base, direction, r, h, mat, n=4, smooth=0, **kw):
 def build_body(mats, root):
     P = Part('Body', BODY_O)
     rings = [ring_z(z, (top + base) / 2, w, (top - base) / 2) for (z, top, base, w) in TORSO]
-    P.add_abs(prim_rings(rings), 'fur', smooth=0, mat_fn=lambda c, n: 'belly' if n[1] < -0.45 else None)
+    def torso_mat(c, n):
+        if n[1] < -0.45:
+            return 'belly'
+        if abs(c[0]) > 0.10 and 0.32 < c[1] < 0.44 and abs(n[1]) < 0.55:  # manchas claras assimétricas nos flancos
+            side = 1 if c[0] > 0 else -1
+            for (sd, z0, z1) in TAN_PATCHES:
+                if sd == side and z0 < c[2] < z1:
+                    return 'fur_tan'
+        return None
+    P.add_abs(prim_rings(rings), 'fur', smooth=0, mat_fn=torso_mat)
     # volumes: peito e coxas (garupa)
     P.add(prim_sphere(0.150, 0.125, 0.105, 10, 4), 'fur', pos=(0.0, 0.375, 0.255), smooth=0)
     for sx in (-1, 1):
@@ -350,10 +363,10 @@ def build_leg(mats, name, front):
     P = Part(name, o)
     if front:
         rel = [(0, 0.03, 0.0), (0, -0.07, 0.008), (0, -0.17, -0.004), (0, -0.26, 0.012), (0, -0.295, 0.014)]
-        rad = [(0.064, 0.062), (0.053, 0.051), (0.046, 0.046), (0.032, 0.032), (0.035, 0.035)]
+        rad = [(0.058, 0.058), (0.052, 0.050), (0.046, 0.046), (0.032, 0.032), (0.035, 0.035)]
     else:  # perna de trás: coxa para trás, jarrete angulado, canela para a frente
         rel = [(0, 0.04, 0.0), (0, -0.06, -0.030), (0, -0.16, -0.062), (0, -0.25, -0.012), (0, -0.295, 0.004)]
-        rad = [(0.072, 0.070), (0.060, 0.058), (0.046, 0.046), (0.032, 0.032), (0.035, 0.035)]
+        rad = [(0.066, 0.066), (0.058, 0.056), (0.046, 0.046), (0.032, 0.032), (0.035, 0.035)]
     pts = [(o.x + p[0], o.y + p[1], o.z + p[2]) for p in rel]
     P.tube(pts, rad, 'fur_dark', n=6, mat_fn=lambda c, n: 'fur' if c[1] > o.y - 0.12 else None)
     hz = o.z + rel[-1][2] + 0.012

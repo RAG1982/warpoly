@@ -13,6 +13,7 @@
  *        [--map ilhas-4p] [--mapFile outro.json] [--max-ticks 72000] [--every 2400]
  *        [--dense DE:ATE:PASSO]   (amostras extras mais densas numa janela de ticks)
  *        [--stop-after N]         (para N ticks depois do 1º trecho constante longo; N=0 desliga)
+ *        [--teams 0,1,1,0]        (time de cada jogador; padrão do soak = k % 2)
  *
  * Rodar sempre por `bash tools/safe-run.sh --timeout 3600 -- node tools/diag-ilhas.mjs …` (trava global).
  */
@@ -41,6 +42,7 @@ const outPath = opt('--out', null);
 const dense = (opt('--dense', null) || '').split(':').map(Number);
 const stopAfter = Number(opt('--stop-after', 0));
 const label = opt('--label', '');
+const teamsOverride = opt('--teams', null); // ex.: 0,1,1,0 (time de cada jogador k; padrão do soak = k % 2)
 
 const { GameManager } = await import('../src/core/GameManager.js');
 await import('../src/ai/registerAI.js');
@@ -81,6 +83,10 @@ if (want > 2) {
   }
 }
 cfg.players.forEach((p) => { p.isAI = true; });
+if (teamsOverride) {
+  const tt = teamsOverride.split(',').map(Number);
+  cfg.players.forEach((p, k) => { p.team = tt[k]; });
+}
 
 const gm = new GameManager(new Terrain(mapDef), null, null, cfg);
 
@@ -134,6 +140,31 @@ CommandExecutor.execute = function (g, cmd) {
   }
   return r;
 };
+
+// combate jogador x jogador (exclui neutros): 1ª baixa/1ª construção destruída e contagem por janela de amostragem
+const { EVT } = await import('../src/sim/events.js');
+const pvp = { kills: 0, bKills: 0, firstKill: null, firstBld: null, firstContact: null, win: { kills: 0, bKills: 0 }, byPair: {} };
+const hostileKill = (e) => {
+  const k = e.killerOwnerId;
+  if (k === null || k === undefined || k === e.ownerId) return false;
+  const reg = gm.playerRegistry;
+  if (!reg.isHostile(k, e.ownerId)) return false;
+  const v = reg.getPlayer(e.ownerId);
+  const kp = reg.getPlayer(k);
+  return !(v && v.isNeutralHostile) && !(kp && kp.isNeutralHostile);
+};
+gm.events.on(EVT.UNIT_DIED, (e) => {
+  if (e.expired || !hostileKill(e)) return;
+  pvp.kills++; pvp.win.kills++;
+  if (pvp.firstKill === null) pvp.firstKill = { tick: gm.currentTick, killer: e.killerOwnerId, victim: e.ownerId };
+  const key = `${e.killerOwnerId}>${e.ownerId}`;
+  pvp.byPair[key] = (pvp.byPair[key] || 0) + 1;
+});
+gm.events.on(EVT.BUILDING_DESTROYED, (e) => {
+  if (!hostileKill(e)) return;
+  pvp.bKills++; pvp.win.bKills++;
+  if (pvp.firstBld === null) pvp.firstBld = { tick: gm.currentTick, killer: e.killerOwnerId, victim: e.ownerId, type: e.buildingType };
+});
 
 // --- amostragem ---
 function workerRole(u, workerType) {
@@ -310,7 +341,8 @@ while (!gm.isGameOver && tick < maxTicks) {
       }
       activity = { movers, hpChanged, resDelta };
     }
-    emit({ kind: 'sample', tick, min: r1(tick / 1200), world: worldSummary(gm), activity, constRunNow: lastSig !== null ? tick - runStart : 0, players });
+    emit({ kind: 'sample', tick, min: r1(tick / 1200), world: worldSummary(gm), activity, pvp: { win: { ...pvp.win }, total: { kills: pvp.kills, bKills: pvp.bKills }, firstKill: pvp.firstKill, firstBld: pvp.firstBld }, constRunNow: lastSig !== null ? tick - runStart : 0, players });
+    pvp.win.kills = 0; pvp.win.bKills = 0;
     prevSnap = null;
     if (stopAfter > 0 && firstLongRunAt !== null && tick >= firstLongRunAt + stopAfter) break;
   }
@@ -322,7 +354,7 @@ try { checksum = stateChecksum(gm); } catch { /* ignora */ }
 const finalPlayers = snapshotPlayers(gm, tick);
 emit({
   kind: 'final', label, seed, faction, difficulty, mapId, finished, ticks: tick, checksum, stalledAt: stall.stalledAt, firstStallDetectedAt: firstLongRunAt,
-  gameWon: gm.gameWon, wallS: r1((Date.now() - t0) / 1000), constRuns, world: worldSummary(gm), players: finalPlayers
+  gameWon: gm.gameWon, wallS: r1((Date.now() - t0) / 1000), constRuns, pvp: { total: { kills: pvp.kills, bKills: pvp.bKills }, firstKill: pvp.firstKill, firstBld: pvp.firstBld, byPair: pvp.byPair }, world: worldSummary(gm), players: finalPlayers
 });
 try { gm.dispose(); } catch { /* ignora */ }
 console.log(`[diag] ${label ? label + ' ' : ''}seed ${seed} ${mapId} ${faction} ${difficulty}: ${finished ? 'fim' : 'NÃO terminou'} ${tick} ticks checksum ${checksum} stall@${stall.stalledAt} (${r1((Date.now() - t0) / 1000)}s)`);

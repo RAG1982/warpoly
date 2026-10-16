@@ -74,7 +74,33 @@ export class Decorations {
     /** MUNDO-5: regiões de bioma, ou `null` = caminho antigo (posições e tintas do tileset, como sempre). */
     this.regions = options.regions === false ? null : getRegionMap(terrain && terrain.mapDef, tilesetDef);
     if (this.regions) this.applyRegions(this.regions);
+    else {
+      // Mapa só com `lavaGrid`: as posições antigas não conhecem a lava; o que cair nela (ou colado) sai.
+      const lava = buildLavaInfo(terrain && terrain.mapDef);
+      if (lava) this._hideOnLava(lava);
+    }
     this.scene.add(this.group);
+  }
+
+  /** MUNDO-5: zera (escala 0) as instâncias a menos de 1,2 u da lava. Só roda em mapa com `lavaGrid` e sem regiões (com regiões o plano já evita a lava). */
+  _hideOnLava(lava) {
+    const m = new THREE.Matrix4();
+    const p = new THREE.Vector3();
+    const zero = new THREE.Matrix4().makeScale(0, 0, 0);
+    for (const mesh of this.group.children) {
+      if (!mesh.isInstancedMesh) continue;
+      let changed = false;
+      for (let i = 0; i < mesh.count; i++) {
+        mesh.getMatrixAt(i, m);
+        p.setFromMatrixPosition(m);
+        if (lava.distAt(p.x, p.z) < 1.2) { mesh.setMatrixAt(i, zero); changed = true; }
+      }
+      if (changed) {
+        mesh.instanceMatrix.needsUpdate = true;
+        mesh.boundingSphere = null;
+        mesh.boundingBox = null;
+      }
+    }
   }
 
   /**

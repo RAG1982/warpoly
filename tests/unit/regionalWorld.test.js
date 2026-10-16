@@ -9,6 +9,11 @@ import { Terrain } from '../../src/sim/Terrain.js';
 import { getMap } from '../../src/data/maps/index.js';
 import { LAVA_STYLE } from '../../src/data/lavaRender.js';
 import { makeRegionalMap } from './helpers/regionalMap.js';
+import { readFileSync } from 'node:fs';
+import '../../src/render/fogOfWarShader.js'; // instala o patch da névoa (como no jogo) antes de compilar os shaders injetados
+import { glslangAvailable, buildFragmentGlsl, validateFragmentGlsl } from './helpers/glslCheck.js';
+import { encodeHeights, paintedNodes } from '../../src/data/maps/painted.js';
+import { encodeLavaGrid } from '../../src/data/maps/lava.js';
 
 // As texturas procedurais são pintadas em <canvas> (inexistente no Node): mapas vazios bastam.
 vi.mock('../../src/models/environment/waterTextures.js', () => ({
@@ -27,6 +32,7 @@ const { TerrainView } = await import('../../src/render/TerrainView.js');
 const { Water, pickReedLocations } = await import('../../src/world/Water.js');
 const { Decorations } = await import('../../src/world/Decorations.js');
 const { TreeManager } = await import('../../src/world/TreeManager.js');
+const { Lava } = await import('../../src/world/Lava.js');
 
 /**
  * MUNDO-5 · as quatro views com e sem `biomeGrid`. Sem ele: o resultado é o de antes (referências capturadas no commit 82541c6, antes
@@ -312,51 +318,66 @@ describe('TreeManager regional', () => {
 
   const map = makeRegionalMap({ id: 'world-trees' });
   const rm = getRegionMap(map);
-  /** Tinta (uniforms do shader) de um material tingido. */
-  function tintOf(mat) {
-    const shader = { uniforms: {}, vertexShader: '', fragmentShader: '#include <common>\n#include <normal_fragment_maps>' };
+  const idx = (key) => rm.styles.findIndex((s) => s.key === key);
+  /** Roda o `onBeforeCompile` do material regional num shader de mentira e devolve uniforms + fragment shader resultante. */
+  function compiled(mat) {
+    const shader = { uniforms: {}, vertexShader: '', fragmentShader: '#include <common>\n#include <color_fragment>\n#include <normal_fragment_maps>' };
     mat.onBeforeCompile(shader, {});
-    const u = shader.uniforms;
-    return { color: u.uTreeTint.value.getHex(), desat: u.uTreeDesat.value, snowAmt: u.uTreeSnowAmt.value };
+    return { u: shader.uniforms, frag: shader.fragmentShader };
   }
   const reg = (tm, x, z, type = 'oak') => { const tr = {}; tm.registerTree(tr, x, 2.6, z, 0, 1, type); return tr; };
+  /** Classe de tinta gravada no instanceColor.r da instância (índice / 255). */
+  const classOf = (tree) => Math.round(tree.trunkMesh.instanceColor.array[tree.instanceIndex * 3] * 255);
 
-  it('a tinta de cada árvore vem do estilo da região da célula dela (mesma região = mesmo material)', () => {
+  it('o índice do estilo de cada árvore (instanceColor.r × 255) é o da região da célula dela; UM material regional para todas as regiões', () => {
     const tm = new TreeManager(new THREE.Scene(), { tileset: 'exuberante', regions: rm });
     const grass = reg(tm, -10, -5), grass2 = reg(tm, -12, -6), desert = reg(tm, 30, -2), forest = reg(tm, -26, -20), snow = reg(tm, -36, -30), volc = reg(tm, 0, 38);
-    const m = (t) => t.trunkMesh.material;
-    expect(m(grass)).toBe(m(grass2));
-    // grama e floresta têm tintas indistinguíveis (2f6a2c × 285a26): compartilham o material (e o chunk), sem malha a mais na fronteira
-    expect(m(forest)).toBe(m(grass));
-    expect(new Set([m(grass), m(desert), m(forest), m(snow), m(volc)]).size).toBe(4);
-    expect(tintOf(m(grass))).toMatchObject({ color: TILESETS.exuberante.trees.tint.color });
-    expect(tintOf(m(desert))).toMatchObject({ color: TILESETS.deserto.trees.tint.color, desat: TILESETS.deserto.trees.tint.desat });
-    expect(rm.styles[rm.styleAt(-26, -20)].key).toBe('exuberante:floresta'); // a célula É de floresta; só a tinta é a mesma
-    expect(STYLE_VARIANTS['exuberante:floresta'].trees.tint.color).not.toBe(TILESETS.exuberante.trees.tint.color);
-    expect(tintOf(m(snow))).toMatchObject({ color: TILESETS.inverno.trees.tint.color, snowAmt: TILESETS.inverno.trees.tint.snowAmount });
-    expect(tintOf(m(volc))).toMatchObject({ color: TILESETS.vulcanico.trees.tint.color, desat: TILESETS.vulcanico.trees.tint.desat });
-    // o material original (glb/reserva) não é tocado: a árvore da região tem um clone
-    expect(m(grass).isMeshStandardMaterial).toBe(true);
+    expect(classOf(grass)).toBe(idx('exuberante'));
+    expect(classOf(grass2)).toBe(idx('exuberante'));
+    expect(rm.styles[rm.styleAt(-26, -20)].key).toBe('exuberante:floresta');
+    expect(classOf(forest)).toBe(idx('exuberante:floresta')); // a floresta tem a tinta própria (mais escura), sem custo: é por instância
+    expect(classOf(desert)).toBe(idx('deserto'));
+    expect(classOf(snow)).toBe(idx('inverno'));
+    expect(classOf(volc)).toBe(idx('vulcanico'));
+    // um material só (por tipo de árvore), compartilhado por todos os chunks e regiões
+    const mats = new Set([grass, grass2, desert, forest, snow, volc].map((t) => t.trunkMesh.material));
+    expect(mats.size).toBe(1);
+    const mat = [...mats][0];
+    expect(mat.isMeshStandardMaterial).toBe(true);
+    expect(tm.instancedMeshes.every((im) => im.material === mat)).toBe(true);
     tm.dispose();
   });
 
-  it('o chunk se divide por estilo; sem regiões, a chave do chunk é a de sempre (sem sufixo de estilo)', () => {
-    const plain = new TreeManager(new THREE.Scene(), { tileset: 'exuberante' });
-    reg(plain, -10, -5); reg(plain, 30, -2);
-    expect(Array.from(plain._chunks.keys()).every((k) => k.split('|').length === 3)).toBe(true);
-    const regional = new TreeManager(new THREE.Scene(), { tileset: 'exuberante', regions: rm });
-    reg(regional, -10, -5); reg(regional, 30, -2);
-    expect(Array.from(regional._chunks.keys()).every((k) => k.split('|').length === 4)).toBe(true);
-    plain.dispose(); regional.dispose();
+  it('os uniforms do material regional guardam a tinta, a dessaturação e a neve de cada classe (a do próprio estilo)', () => {
+    const tm = new TreeManager(new THREE.Scene(), { tileset: 'exuberante', regions: rm });
+    reg(tm, -10, -5);
+    const { u } = compiled(tm.instancedMeshes[0].material);
+    const want = (key) => TILESETS[key] ? TILESETS[key].trees.tint : STYLE_VARIANTS[key].trees.tint;
+    for (const key of ['exuberante', 'deserto', 'inverno', 'pedregoso', 'vulcanico']) {
+      const k = idx(key);
+      const t = want(key);
+      expect(u.uRegTint.value[k].getHex(), key).toBe(t.color);
+      expect(u.uRegDesat.value[k], key).toBeCloseTo(t.desat, 6);
+      expect(u.uRegSnowAmt.value[k], key).toBeCloseTo(t.snowAmount || 0, 6);
+    }
+    expect(u.uRegSnow.value[idx('inverno')].getHex()).toBe(TILESETS.inverno.trees.tint.snow);
+    expect(u.uRegTint.value).toHaveLength(16);
+    expect(u.uRegDesat.value).toHaveLength(16);
+    // variantes têm a tinta própria; os slots sem estilo ficam neutros
+    expect(u.uRegTint.value[idx('exuberante:floresta')].getHex()).toBe(STYLE_VARIANTS['exuberante:floresta'].trees.tint.color);
+    expect(u.uRegTint.value[idx('exuberante:floresta')].getHex()).not.toBe(u.uRegTint.value[idx('exuberante')].getHex());
+    expect(u.uRegTint.value[15].getHex()).toBe(0xffffff);
+    expect(u.uRegDesat.value[15]).toBe(0);
+    tm.dispose();
   });
 
-  it('orçamento: espalhando árvores pela terra do mapa, o regional cria poucas malhas a mais que o caminho antigo', () => {
+  it('ZERO malhas extras: as mesmas chaves de chunk, o mesmo nº de InstancedMesh e as mesmas instâncias que o caminho antigo', () => {
     const plain = new TreeManager(new THREE.Scene(), { tileset: 'exuberante' });
     const regional = new TreeManager(new THREE.Scene(), { tileset: 'exuberante', regions: rm });
     const terrain = new Terrain(map);
     let n = 0;
-    for (let x = -38; x <= 38; x += 3) {
-      for (let z = -32; z <= 4; z += 3) {
+    for (let x = -38; x <= 38; x += 2) {
+      for (let z = -32; z <= 4; z += 2) {
         if (terrain.getHeight(x, z) < 1.8) continue;
         const type = ['oak', 'pine', 'autumn', 'birch'][n++ % 4];
         reg(plain, x, z, type);
@@ -367,38 +388,156 @@ describe('TreeManager regional', () => {
       if (terrain.getHeight(x, z) < 1.8 || terrain.isLava(x, z)) continue;
       reg(plain, x, z); reg(regional, x, z);
     }
-    expect(n).toBeGreaterThan(100);
-    const a = plain.instancedMeshes.length, b = regional.instancedMeshes.length;
-    expect(b).toBeGreaterThanOrEqual(a);
-    expect(b - a).toBeLessThanOrEqual(Math.ceil(a * 0.5)); // as fronteiras cortam alguns chunks; nunca dobra
-    // mesma contagem de instâncias desenhadas
+    expect(n).toBeGreaterThan(300);
+    expect(Array.from(regional._chunks.keys()).sort()).toEqual(Array.from(plain._chunks.keys()).sort());
+    expect(regional.instancedMeshes.length).toBe(plain.instancedMeshes.length);
     const drawn = (t) => t.instancedMeshes.reduce((s, m) => s + m.count, 0);
     expect(drawn(regional)).toBe(drawn(plain));
+    // as árvores têm classes diferentes (a tinta varia dentro do mesmo chunk, sem dividir o chunk)
+    const classes = new Set();
+    for (const im of regional.instancedMeshes) for (let i = 0; i < im.count; i++) classes.add(Math.round(im.instanceColor.array[i * 3] * 255));
+    expect(classes.size).toBeGreaterThanOrEqual(3);
     plain.dispose(); regional.dispose();
   });
 
-  it('o impostor de LOD herda a tinta regional do chunk', () => {
+  it('o instanceColor cresce junto com as matrizes (passa da capacidade inicial) e preserva a classe das árvores já registradas', () => {
+    const tm = new TreeManager(new THREE.Scene(), { tileset: 'exuberante', regions: rm });
+    const trees = [];
+    for (let i = 0; i < 40; i++) trees.push(reg(tm, -30 + (i % 8) * 0.5, -6 - Math.floor(i / 8) * 0.5, 'oak')); // 40 árvores num chunk (capacidade inicial 8)
+    const desert = reg(tm, 30, -2); // outro chunk
+    const im = trees[0].trunkMesh;
+    expect(im.count).toBe(40);
+    expect(im.instanceMatrix.count).toBeGreaterThanOrEqual(40);
+    expect(im.instanceColor.count).toBeGreaterThanOrEqual(40);
+    for (const t of trees) expect(classOf(t)).toBe(rm.styleAt(-30, -6));
+    expect(classOf(desert)).toBe(idx('deserto'));
+    expect(im.instanceColor.count).toBe(im.instanceMatrix.count);
+    tm.dispose();
+  });
+
+  it('o shader regional: sem #include <color_fragment> (a classe não pode multiplicar o albedo), índice vindo de vColor.r e a mesma conta de tinta', () => {
+    const tm = new TreeManager(new THREE.Scene(), { tileset: 'exuberante', regions: rm });
+    reg(tm, -10, -5);
+    const { frag } = compiled(tm.instancedMeshes[0].material);
+    expect(frag).not.toContain('#include <color_fragment>');
+    expect(frag.match(/vColor\.r/g)).toHaveLength(1);
+    expect(frag).toContain('uniform vec3 uRegTint[16];');
+    expect(frag).toContain('clamp( int( vColor.r * 255.0 + 0.5 ), 0, 15 )');
+    expect(frag.indexOf('uniform vec3 uRegTint')).toBeLessThan(frag.indexOf('uRegTint[ wpK ]')); // declarado antes de usado
+    expect(frag.match(/#include <normal_fragment_maps>/g)).toHaveLength(1);
+    expect(frag.split('{').length).toBe(frag.split('}').length); // chaves balanceadas
+    expect(tm.instancedMeshes[0].material.customProgramCacheKey()).toContain('wp-treetint-reg');
+    // o instanceColor existe desde a criação do chunk (o programa do shader depende de USE_COLOR)
+    expect(tm.instancedMeshes[0].instanceColor).toBeTruthy();
+    tm.dispose();
+  });
+
+  it('as .glb das árvores NÃO têm cor de vértice (a classe de tinta viaja no instanceColor.r; cor de vértice a corromperia)', () => {
+    for (const name of ['tree_oak', 'tree_pine', 'tree_autumn', 'tree_birch']) {
+      const buf = readFileSync(new URL(`../../public/models/${name}.glb`, import.meta.url));
+      expect(buf.toString('utf8', 0, 4)).toBe('glTF');
+      const json = JSON.parse(buf.subarray(20, 20 + buf.readUInt32LE(12)).toString('utf8'));
+      for (const m of json.meshes) for (const p of m.primitives) expect(Object.keys(p.attributes), name).not.toContain('COLOR_0');
+    }
+    // e a árvore reserva (sem .glb) é um material liso sem vertexColors
+    const tm = new TreeManager(new THREE.Scene(), { tileset: 'exuberante', regions: rm });
+    reg(tm, -10, -5);
+    expect(tm.instancedMeshes[0].userData.baseMaterial.vertexColors).toBe(false);
+    expect(tm.instancedMeshes[0].geometry.attributes.color).toBeUndefined();
+    tm.dispose();
+  });
+
+  it('o impostor de LOD: sem instanceColor herdado, com a tinta da classe dominante do chunk (um material por classe)', () => {
     const tm = new TreeManager(new THREE.Scene(), { tileset: 'exuberante', regions: rm });
     const g = reg(tm, -10, -5), d = reg(tm, 30, -2);
     tm.applyLod({ x: 500, z: 500 }); // câmera longe: tudo vira impostor
     const ig = g.trunkMesh.userData.lodImpostor, id = d.trunkMesh.userData.lodImpostor;
     expect(ig && id).toBeTruthy();
     expect(ig.visible && id.visible).toBe(true);
+    expect(ig.instanceColor).toBeNull(); // a classe codificada NÃO escurece o impostor
+    expect(id.instanceColor).toBeNull();
+    expect(ig.instanceMatrix).toBe(g.trunkMesh.instanceMatrix); // mas as matrizes são as do chunk
     expect(ig.material).not.toBe(id.material);
-    expect(tintOf(ig.material).color).toBe(TILESETS.exuberante.trees.tint.color);
-    expect(tintOf(id.material).color).toBe(TILESETS.deserto.trees.tint.color);
+    const tintOf = (mat) => { const sh = { uniforms: {}, vertexShader: '', fragmentShader: '#include <common>\n#include <normal_fragment_maps>' }; mat.onBeforeCompile(sh, {}); return sh.uniforms.uTreeTint.value.getHex(); };
+    expect(tintOf(ig.material)).toBe(TILESETS.exuberante.trees.tint.color);
+    expect(tintOf(id.material)).toBe(TILESETS.deserto.trees.tint.color);
     tm.dispose();
   });
 
   it('dispose descarta os materiais regionais', () => {
     const tm = new TreeManager(new THREE.Scene(), { tileset: 'exuberante', regions: rm });
     reg(tm, -10, -5); reg(tm, 30, -2);
-    expect(tm._tintedMats.length).toBe(2); // grama (exuberante) e deserto
-    expect(tm._regionTints.size).toBeGreaterThan(0);
+    tm.applyLod({ x: 500, z: 500 });
+    expect(tm._regionalMats.size).toBe(1);
+    expect(tm._impostorTints.size).toBe(2); // impostor da grama e do deserto
+    expect(tm._tintedMats.length).toBe(3);
     tm.dispose();
     expect(tm._tintedMats).toEqual([]);
-    expect(tm._regionTints.size).toBe(0);
+    expect(tm._regionalMats.size).toBe(0);
+    expect(tm._impostorTints.size).toBe(0);
   });
+
+  it('sem regiões nada disso existe: chave de chunk, material e instanceColor são os de sempre', () => {
+    const plain = new TreeManager(new THREE.Scene(), { tileset: 'inverno' });
+    const t = reg(plain, -10, -5);
+    expect(Array.from(plain._chunks.keys()).every((k) => k.split('|').length === 3)).toBe(true);
+    expect(t.trunkMesh.instanceColor).toBeNull();
+    expect(plain._regionalMats.size).toBe(0);
+    expect(t.trunkMesh.material.customProgramCacheKey()).toContain('wp-treetint');
+    expect(t.trunkMesh.material.customProgramCacheKey()).not.toContain('reg');
+    plain.dispose();
+  });
+});
+
+describe.skipIf(!glslangAvailable())('GLSL injetado validado offline (glslangValidator)', () => {
+  let saved;
+  beforeEach(() => { saved = new Map(glbTemplates); glbTemplates.clear(); });
+  afterEach(() => { glbTemplates.clear(); for (const [k, v] of saved) glbTemplates.set(k, v); });
+
+  const rm = getRegionMap(makeRegionalMap({ id: 'world-glsl' }));
+  const check = (mat, opts) => validateFragmentGlsl(buildFragmentGlsl(mat, opts));
+  const STD = { defines: ['USE_MAP', 'USE_COLOR', 'USE_FOG', 'USE_SHADOWMAP'] };
+
+  it('controles: o harness aceita o shader padrão e a tinta legada (que roda em produção) e REJEITA GLSL quebrado', () => {
+    expect(check(new THREE.MeshStandardMaterial({ color: 0x336633 }), STD).ok).toBe(true);
+    const legacy = new TreeManager(new THREE.Scene(), { tileset: 'inverno' });
+    reg2(legacy);
+    const r = check(legacy.instancedMeshes[0].material, STD);
+    expect(r.ok, r.output).toBe(true);
+    legacy.dispose();
+    const broken = new THREE.MeshStandardMaterial();
+    broken.onBeforeCompile = (shader) => { shader.fragmentShader = shader.fragmentShader.replace('#include <normal_fragment_maps>', '#include <normal_fragment_maps>\n diffuseColor.rgb = naoDeclarada;'); };
+    expect(check(broken, STD).ok).toBe(false);
+  });
+
+  it('o material regional da árvore compila (GLSL ES 3.00) com instanceColor (USE_COLOR) e a névoa de guerra', () => {
+    const tm = new TreeManager(new THREE.Scene(), { tileset: 'exuberante', regions: rm });
+    reg2(tm);
+    const r = check(tm.instancedMeshes[0].material, STD);
+    expect(r.ok, r.output).toBe(true);
+    // sem USE_COLOR (instanceColor ausente) o `vColor` não existe: é por isso que o chunk aloca o instanceColor na criação
+    expect(check(tm.instancedMeshes[0].material, { defines: ['USE_MAP', 'USE_FOG'] }).ok).toBe(false);
+    tm.dispose();
+  });
+
+  it('a espuma regional (MeshBasicMaterial com cor/alfa por vértice) e a legada compilam', () => {
+    for (const regional of [false, true]) {
+      const water = new Water(new THREE.Scene(), new Terrain(makeRegionalMap({ id: `world-foam-glsl-${regional}`, withBiomes: regional, withLava: false })));
+      const mat = water.foamMesh.material;
+      expect(mat.vertexColors).toBe(regional);
+      const r = check(mat, { shader: 'basic', defines: ['USE_MAP', 'USE_FOG', ...(regional ? ['USE_COLOR_ALPHA', 'USE_COLOR'] : [])] });
+      expect(r.ok, r.output).toBe(true);
+    }
+  });
+
+  it('a lava (MeshStandardMaterial: map, emissiveMap, alphaMap + alphaTest) compila', () => {
+    const lava = Lava.create(new THREE.Scene(), makeRegionalMap({ id: 'world-lava-glsl', withBiomes: false }));
+    const r = check(lava.material, { defines: ['USE_MAP', 'USE_EMISSIVEMAP', 'USE_ALPHAMAP', 'USE_ALPHATEST', 'USE_FOG', 'OPAQUE'] });
+    expect(r.ok, r.output).toBe(true);
+    lava.dispose();
+  });
+
+  function reg2(tm) { tm.registerTree({}, -10, 2.6, -5, 0, 1, 'oak'); }
 });
 
 describe('Decorations regional', () => {
@@ -479,6 +618,34 @@ describe('Decorations regional', () => {
     expect(boulders.visible).toBe(true);
     d.applyLod(1.0);
     expect(grass.visible).toBe(true);
+  });
+
+  it('mapa só com lavaGrid (sem biomeGrid): a posição antiga que cai na lava sai; as demais ficam', () => {
+    const size = 120, nodes = paintedNodes(size, 1);
+    const h = new Int8Array(nodes * nodes).fill(26);
+    const lv = new Uint8Array(nodes * nodes);
+    for (let j = 0; j < nodes; j++) {
+      for (let i = 0; i < nodes; i++) {
+        if (Math.hypot(-60 + i - 51, -60 + j + 47) <= 3) { lv[j * nodes + i] = 1; h[j * nodes + i] = 4; } // lava onde a 1ª pedra antiga é posta: (51, -47)
+      }
+    }
+    const lavaMap = {
+      id: 'world-decor-lava-only', size, playable: 110, waterLevel: 0.5, tileset: 'exuberante',
+      terrain: { generator: 'painted', params: { cell: 1, nodes, data: encodeHeights(h) } },
+      lavaGrid: { cell: 1, nodes, data: encodeLavaGrid(lv) }
+    };
+    const d = new Decorations(new THREE.Scene(), new Terrain(lavaMap), { tileset: 'exuberante' });
+    expect(d.regions).toBeNull();
+    const boulders = d.group.children.find((c) => c.name === 'InstancedBoulders');
+    const m = new THREE.Matrix4();
+    boulders.getMatrixAt(0, m); // (51, -47): sobre a lava
+    expect(m.elements[0]).toBe(0);
+    boulders.getMatrixAt(1, m); // (29, -45): terra
+    expect(m.elements[0]).not.toBe(0);
+    // sem lavaGrid o mesmo mapa não esconde nada
+    const noLava = new Decorations(new THREE.Scene(), new Terrain({ ...lavaMap, id: 'world-decor-nolava', lavaGrid: undefined }), { tileset: 'exuberante' });
+    noLava.group.children.find((c) => c.name === 'InstancedBoulders').getMatrixAt(0, m);
+    expect(m.elements[0]).not.toBe(0);
   });
 
   it('regions:false / mapa sem biomeGrid: o caminho antigo (60 tufos, sem instanceColor)', () => {

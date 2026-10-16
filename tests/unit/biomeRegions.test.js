@@ -1,6 +1,6 @@
 import { describe, it, expect, afterEach } from 'vitest';
 import { TILESETS, TILESET_IDS } from '../../src/data/tilesets.js';
-import { BIOME, MAX_BIOME_ID, encodeBiomeGrid, paintedNodes } from '../../src/data/maps/biome.js';
+import { BIOME, MAX_BIOME_ID, encodeBiomeGrid, encodeRleBiomeGrid, paintedNodes } from '../../src/data/maps/biome.js';
 import {
   BIOME_TO_STYLE, STYLE_VARIANTS, getStyleDef, styleKeyOfBiome, biomeHasStyle, regionalBaseDef, DECOR_RULES, decorCountFor
 } from '../../src/data/biomeStyles.js';
@@ -8,7 +8,7 @@ import { getRegionMap, regionsEnabled, RegionMap } from '../../src/data/biomeReg
 import { planDecorations, DECOR_CATEGORIES } from '../../src/data/decorPlan.js';
 import { buildLavaInfo } from '../../src/data/lavaRender.js';
 import { Terrain } from '../../src/sim/Terrain.js';
-import { makeRegionalMap, FIXTURE_SIZE } from './helpers/regionalMap.js';
+import { makeRegionalMap } from './helpers/regionalMap.js';
 
 /**
  * MUNDO-5 · lógica pura do render regional (sem GPU): bioma da célula → estilo → pesos de mistura (splat/água), plano de decoração.
@@ -224,23 +224,44 @@ describe('célula → bioma → estilo → peso de splat', () => {
   });
 });
 
-describe('classes de tinta de árvore (TreeManager)', () => {
-  const rm = getRegionMap(makeRegionalMap({ id: 'fixture-treeclass' }));
-  const idx = (key) => rm.styles.findIndex((s) => s.key === key);
+describe('formatos do biomeGrid: célula de 2 u e RLE', () => {
+  /** Mapa 96 u: oeste GRAMA, leste DESERTO; mar numa faixa de 8 u ao sul. `cell` 2 → 49 nós. */
+  function halfHalf(cell, encode) {
+    const size = 96, nodes = paintedNodes(size, cell);
+    const bio = new Uint8Array(nodes * nodes);
+    for (let j = 0; j < nodes; j++) for (let i = 0; i < nodes; i++) {
+      const x = -48 + i * cell, z = -48 + j * cell;
+      bio[j * nodes + i] = z > 40 ? BIOME.SEA : x < 0 ? BIOME.GRASS : BIOME.DESERT;
+    }
+    return { id: `fixture-cell${cell}-${encode}`, size, tileset: 'exuberante', biomeGrid: { cell, nodes, ...encode(bio) } };
+  }
+  const base64 = (bio) => ({ data: encodeBiomeGrid(bio) });
+  const rle = (bio) => ({ encoding: 'rle', data: encodeRleBiomeGrid(bio) });
 
-  it('estilos com tintas indistinguíveis compartilham a classe (grama × floresta); os demais, a própria', () => {
-    expect(rm.treeClass[idx('exuberante:floresta')]).toBe(idx('exuberante'));
-    expect(rm.treeClass[idx('deserto:estepe')]).toBe(idx('deserto')); // a estepe herda a tinta de árvore do deserto
-    for (const key of ['deserto', 'inverno', 'pedregoso', 'vulcanico']) expect(rm.treeClass[idx(key)], key).toBe(idx(key));
-    expect(new Set(rm.treeClass).size).toBeLessThan(rm.styleCount);
-    expect(rm.treeClassAt(-26, -20)).toBe(idx('exuberante')); // célula de floresta → classe da grama
-    expect(rm.treeClassAt(-10, -5)).toBe(idx('exuberante'));
-    expect(rm.treeClassAt(30, -2)).toBe(idx('deserto'));
-    expect(rm.treeClassAt(-36, -30)).toBe(idx('inverno'));
-  });
+  for (const [label, enc] of [['base64', base64], ['RLE em pares', rle]]) {
+    it(`cell = 2 em ${label}: biomeAt, estilo, fronteira em x ≈ 0 e mar ao sul`, () => {
+      const rm = getRegionMap(halfHalf(2, enc));
+      expect(rm.cell).toBe(2);
+      expect(rm.nodes).toBe(49);
+      expect(rm.biomeAt(-20, 0)).toBe(BIOME.GRASS);
+      expect(rm.biomeAt(20, 0)).toBe(BIOME.DESERT);
+      expect(rm.biomeAt(0, 44)).toBe(BIOME.SEA);
+      expect(keyOf(rm, -20, 0)).toBe('exuberante');
+      expect(keyOf(rm, 20, 0)).toBe('deserto');
+      const w = (x) => wOf(rm, weights(rm, x, 0), 'deserto');
+      expect(w(-10)).toBeLessThan(0.02);
+      expect(w(10)).toBeGreaterThan(0.98);
+      expect(w(-1)).toBeGreaterThan(0.2);
+      expect(w(-1)).toBeLessThan(0.8);
+      expect(rm.isInterior(0, 0)).toBe(false);
+      expect(rm.isInterior(-30, 0)).toBe(true);
+    });
+  }
 
-  it('a classe aponta sempre para um estilo representante de si mesmo', () => {
-    for (let k = 0; k < rm.styleCount; k++) expect(rm.treeClass[rm.treeClass[k]]).toBe(rm.treeClass[k]);
+  it('o mesmo mapa em base64 e em RLE dá o mesmo RegionMap (assinatura e pesos)', () => {
+    const a = getRegionMap(halfHalf(2, base64)), b = getRegionMap(halfHalf(2, rle));
+    expect(a.signature).toBe(b.signature);
+    expect(Array.from(weights(a, -0.7, 3.3))).toEqual(Array.from(weights(b, -0.7, 3.3)));
   });
 });
 
@@ -269,7 +290,6 @@ describe('influência regional na água (campo largo)', () => {
     expect(prev).toBeGreaterThan(0.95); // 27 u adiante: de volta ao base
     expect(maxJump).toBeLessThan(0.45); // nenhum degrau de uma casa para a outra
   });
-
 });
 
 describe('plano de decoração por bioma (planDecorations)', () => {

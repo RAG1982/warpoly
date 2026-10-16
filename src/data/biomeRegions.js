@@ -6,10 +6,13 @@
  * (índice 0: água, céu, grade de cor, e o que herda: mar longe da costa); o `biomeGrid` escolhe a paleta/splat, as árvores, as
  * decorações e a cor da água por região. Mapa SEM `biomeGrid` ⇒ `getRegionMap` devolve `null` e todo o render segue o caminho antigo.
  *
- * Mistura (§3.3: "smoothstep + ruído na fronteira"): o indicador de cada estilo (1 nas células que votam nele) é suavizado por um
- * borrão de caixa; os pesos são normalizados entre os estilos que votam (mar e areia não votam: adotam o estilo da terra vizinha) e
- * o que fica sem voto por perto cai no estilo base (rampa de cobertura). O ruído de fronteira é aplicado por quem pinta (desloca a
- * posição consultada); `weightsAt` só afia a transição com um `smoothstep` por estilo.
+ * Mistura da TERRA (§3.3: "smoothstep + ruído na fronteira"): o indicador de cada estilo (1 nas células que votam nele) é suavizado
+ * por um borrão de caixa; os pesos são normalizados entre os estilos que votam (mar e areia não votam: adotam o estilo da terra
+ * vizinha, até 6 células) e o que fica sem voto por perto cai no estilo base (rampa de cobertura). O ruído de fronteira é aplicado
+ * por quem pinta (desloca a posição consultada); `weightsAt` só afia a transição com um `smoothstep` por estilo.
+ *
+ * Influência na ÁGUA (`waterWeightsAt`): por estilo, `1 − smoothstep(3 u, 14 u, distância à costa dele)`; o que sobra é o estilo base
+ * (o mar aberto). Um lago no meio da terra herda o estilo dela.
  *
  * Não entra na sim nem no checksum (o `biomeGrid` é dado do mapa, só leitura).
  */
@@ -189,17 +192,6 @@ function waterFields(bio, n, K, styleOfBiome, cell, { near, far, fill }) {
   return A;
 }
 
-/** Duas tintas de árvore indistinguíveis (RGB a < 20 de distância, mesma dessaturação ±0,05, mesma neve) compartilham material. */
-function sameTreeTint(a, b) {
-  const ta = a.trees && a.trees.tint, tb = b.trees && b.trees.tint;
-  if (!ta || !tb) return !ta && !tb;
-  const ca = [(ta.color >> 16) & 255, (ta.color >> 8) & 255, ta.color & 255];
-  const cb = [(tb.color >> 16) & 255, (tb.color >> 8) & 255, tb.color & 255];
-  return Math.hypot(ca[0] - cb[0], ca[1] - cb[1], ca[2] - cb[2]) < 20
-    && Math.abs((ta.desat || 0) - (tb.desat || 0)) < 0.05
-    && (ta.snow || 0) === (tb.snow || 0) && Math.abs((ta.snowAmount || 0) - (tb.snowAmount || 0)) < 0.05;
-}
-
 export class RegionMap {
   /**
    * @param {object} mapDef  mapa com `biomeGrid` válido
@@ -242,17 +234,6 @@ export class RegionMap {
     }
     this.styleCount = this.styles.length;
     this.signature = fnv1a(grid, `${baseDef.id}|${this.size}|${this.cell}`);
-    /**
-     * Classe de tinta de árvore de cada estilo: estilos com tintas indistinguíveis (grama × floresta) compartilham a classe do primeiro,
-     * então o `TreeManager` não divide chunks nem cria materiais à toa nas fronteiras entre eles.
-     */
-    this.treeClass = [];
-    for (let k = 0; k < this.styleCount; k++) {
-      let cls = k;
-      for (let j = 0; j < k; j++) if (this.treeClass[j] === j && sameTreeTint(this.styles[j].def, this.styles[k].def)) { cls = j; break; }
-      this.treeClass.push(cls);
-    }
-
     const K = this.styleCount;
     this._tight = weightFields(bio, this.nodes, K, this.styleOfBiome, TIGHT);
     this._wide = null; // sob demanda (só a água usa)
@@ -312,19 +293,9 @@ export class RegionMap {
     return this.dominant[this.cellIndexAt(x, z)];
   }
 
-  /** Classe de tinta de árvore (índice do estilo representante) na célula de (x, z): o que o `TreeManager` usa para dividir chunks/materiais. */
-  treeClassAt(x, z) {
-    return this.treeClass[this.dominant[this.cellIndexAt(x, z)]];
-  }
-
   /** Definição (tileset/variante) do estilo dominante em (x, z). */
   styleDefAt(x, z) {
     return this.styles[this.dominant[this.cellIndexAt(x, z)]].def;
-  }
-
-  /** O estilo `index` é o base (o do tileset do mapa)? */
-  isBase(index) {
-    return index === 0;
   }
 
   /**
@@ -413,11 +384,6 @@ export class RegionMap {
     const inv = 1 / sum;
     for (let k = 0; k < K; k++) out[k] *= inv;
     return best;
-  }
-
-  /** Resumo legível (depuração/testes): estilos, área de terra de cada um. */
-  describe() {
-    return this.styles.map((s) => ({ key: s.key, area: s.area }));
   }
 }
 

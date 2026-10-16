@@ -60,7 +60,6 @@ export class Lava {
       emissiveIntensity: lavaPulse(0),
       alphaMap: this.maskTexture,
       alphaTest: 0.5,
-      alphaToCoverage: true, // com MSAA o contorno do recorte fica suave (sem MSAA é o mesmo que alphaTest)
       roughness: 1,
       metalness: 0
     });

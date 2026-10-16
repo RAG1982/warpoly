@@ -174,7 +174,7 @@ describe('splat do terreno · caminho regional', () => {
     expect(meanDist(regional)).toBeLessThan(meanDist(legacy)); // mais perto da areia clara
   });
 
-  it('o terreno do mapa de fixture: mar longe da costa = estilo base; dentro de cada região a cor é a do estilo dela', () => {
+  it('o terreno do mapa de fixture: mar longe da costa = estilo base (como no caminho antigo); o miolo do deserto já não é o do base', () => {
     const map = makeRegionalMap({ id: 'splat-fixture' });
     const terrain = new Terrain(map);
     const rm = getRegionMap(map);
@@ -190,7 +190,7 @@ describe('splat do terreno · caminho regional', () => {
     const get = (data, x, z) => { const o = (px(z) * N + px(x)) * 4; return [data[o], data[o + 1], data[o + 2]]; };
     // mar aberto (canto sudoeste): estilo base = idêntico ao caminho antigo
     expect(get(reg, -44, 44)).toEqual(get(base, -44, 44));
-    // miolo do deserto: igual ao pintado com o tileset deserto... e diferente do base
+    // miolo do deserto: a região manda, então a cor difere da pintada só com o tileset base
     expect(get(reg, 30, -2)).not.toEqual(get(base, 30, -2));
   });
 
@@ -235,6 +235,6 @@ describe('splat do terreno · caminho regional', () => {
       return data;
     };
     expect(fnv(run(lava))).not.toBe(fnv(run(null)));
-    expect(fnv(run(null))).toBe(fnv(run(undefined === 1 ? null : null))); // sem lava é estável
+    expect(fnv(run(null))).toBe(fnv(run(null))); // sem lava é estável (determinístico)
   });
 });

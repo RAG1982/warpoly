@@ -67,6 +67,18 @@ Cada mapa é um JSON em `src/data/maps/<id>.json`, registrado em `index.js` (`ge
 - **`biomeGrid`** (MUNDO-TERRENO-MAPAS §3.3): grade de biomas por célula para regiões com múltiplos biomas no mesmo mapa —
   `{ "cell": 1, "nodes": N, "data": "<base64 de Uint8[nodes*nodes]>" }` ou formato RLE `{ "cell": 1, "nodes": N, "encoding": "rle", "data": [[count, id], ...] }`.
   Ids canônicos: 0 mar, 1 areia, 2 grama, 3 savana, 4 deserto, 5 estepe, 6 rocha, 7 vulcânico, 8 lava, 9 neve, 10 pântano, 11 gelo, 12 floresta.
+  **Render regional (MUNDO-5, só visual):** `tileset` segue sendo o estilo BASE do mapa (água, céu, grade de cor, e o que o `biomeGrid` herda:
+  mar longe da costa); o `biomeGrid` escolhe por região a paleta e as regras do splat do terreno (mistura com fronteira irregular), a tinta das
+  árvores, a decoração (onde fica cada categoria e a tinta) e a cor/opacidade da água, a cor/força da espuma e as moitas. Bioma → estilo
+  (`src/data/biomeStyles.js`): grama→`exuberante`, savana→`savana`, deserto→`deserto`, estepe→`deserto` com palha, rocha→`pedregoso`,
+  vulcânico e lava→`vulcanico`, neve→`inverno`, gelo→`inverno` azulado, pântano→`pantano`, floresta→`exuberante` escura; mar e areia herdam o
+  estilo da terra vizinha. Mapa SEM `biomeGrid` = render idêntico ao de antes. `?regions=0` na URL desliga o render regional (comparação A/B);
+  `?tileset=<id>` (tileset forçado) também o ignora. O `biomeGrid` não entra na sim nem no checksum.
+- **`lavaGrid`** (MUNDO-TERRENO-MAPAS §3.5): grade de células de lava — `{ "cell": 1, "nodes": N, "data": "<base64 de Uint8[nodes*nodes]>" }`, 1 = lava.
+  Na sim a lava bloqueia como a água (terrestres e navais; aéreas atravessam), sem dano (`Terrain.isLava`). **Render (MUNDO-5, `src/world/Lava.js`):** um
+  plano emissivo (1 draw call) a y = 0,8, acima da água (a lava assada tem altura 0,4), recortado pela grade; brilho 1,2–1,8 com pulso lento e duas camadas de
+  fluxo em sentidos opostos; o terreno vizinho ganha borda incandescente (textura e cor de vértice) e a espuma/os juncos/as decorações evitam a lava.
+  Vale com ou sem `biomeGrid`; `?lava=0` não desenha a lava emissiva.
 - **`roads`** (F7-04, opcional): estradas/trilhas pintadas na textura — `[{ "points": [[x, z], ...], "width": 2.2 }, ...]` (mundo; `width` opcional).
 - **`splatMasks`** (F7-04, opcional): manchas forçadas no splat — `[{ "layer": "dirt"|"sand"|"rock"|"snow"|"mud"|"grass"|"road", "x", "z", "r", "strength"? }]`
   (uma mancha `dirt` r=6 já é criada sob cada `startSlot`). Ignorado pelo tileset `verdejante`.

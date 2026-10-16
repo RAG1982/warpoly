@@ -41,9 +41,10 @@ class Stage {
     sun.position.set(-45, 75, -35);
     this.scene.add(sun);
     const terrain = new Terrain({ ...mapDef, tileset: tilesetId });
-    this.terrainView = new TerrainView(this.scene, terrain, { tileset: tilesetId });
-    this.water = new Water(this.scene, terrain, { tileset: tilesetId });
-    this.decorations = new Decorations(this.scene, terrain, { tileset: tilesetId });
+    // MUNDO-5: a prévia compara tilesets puros sobre o mesmo mapa: `regions: false` ignora o `biomeGrid` do mapa.
+    this.terrainView = new TerrainView(this.scene, terrain, { tileset: tilesetId, regions: false });
+    this.water = new Water(this.scene, terrain, { tileset: tilesetId, regions: false });
+    this.decorations = new Decorations(this.scene, terrain, { tileset: tilesetId, regions: false });
     this.trees = new TreeManager(this.scene, { tileset: tilesetId });
     this.populateForests(terrain, mapDef);
   }

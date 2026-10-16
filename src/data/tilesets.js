@@ -400,6 +400,11 @@ export function getMapTileset(mapDef) {
   return getTileset(urlOverride() || (mapDef && mapDef.tileset));
 }
 
+/** `?tileset=<id>` força o tileset de TODO o mapa (depuração): o render regional por `biomeGrid` (MUNDO-5) fica desligado. */
+export function tilesetOverrideActive() {
+  return urlOverride() !== null;
+}
+
 // ---------------------------------------------------------------------------------------------
 // Splat (puro): pesos por classe a partir de altura, declive e ruído. Usado pela pintura da textura e testado em Node.
 // ---------------------------------------------------------------------------------------------

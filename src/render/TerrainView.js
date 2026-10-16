@@ -6,12 +6,16 @@ import * as THREE from 'three';
 import { getTerrainTextures, getTerrainTexturesFromHeight } from '../models/environment/terrainTextures.js';
 import { getTilesetTerrainTexture, withRoads } from '../models/environment/tilesetTextures.js';
 import { getTileset, getMapTileset } from '../data/tilesets.js';
+import { getRegionMap } from '../data/biomeRegions.js';
+import { buildLavaInfo, LAVA_STYLE } from '../data/lavaRender.js';
 
 export class TerrainView {
   /**
    * @param {import('three').Scene} scene
    * @param {import('../sim/Terrain.js').Terrain} terrain
-   * @param {{tileset?: string}} [options]  F7-04: `tileset` força um tileset (prévia); padrão = `mapDef.tileset`
+   * @param {{tileset?: string, regions?: boolean}} [options]  F7-04: `tileset` força um tileset (prévia); padrão = `mapDef.tileset`.
+   *   MUNDO-5: com `mapDef.biomeGrid` o terreno é regional (splat por bioma); `regions: false` desliga (a prévia de tilesets compara
+   *   o tileset puro). A lava (`mapDef.lavaGrid`) esquenta o terreno vizinho em qualquer caso.
    */
   constructor(scene, terrain, options = {}) {
     this.scene = scene;
@@ -19,6 +23,11 @@ export class TerrainView {
     const mapDef = terrain.mapDef;
     /** F7-04: tileset ativo (`src/data/tilesets.js`). */
     this.tileset = options.tileset ? getTileset(options.tileset) : getMapTileset(mapDef);
+    /** MUNDO-5: regiões de bioma (`biomeGrid`), ou `null` = caminho antigo, idêntico ao de antes. */
+    this._regionsOn = options.regions !== false;
+    this.regions = this._regionsOn ? getRegionMap(mapDef, this.tileset) : null;
+    /** MUNDO-5: lava (`lavaGrid`) para o brilho no terreno vizinho, ou `null`. */
+    this.lava = buildLavaInfo(mapDef);
     // Compatibilidade com getTerrainTextures (pinta rio/vaus/bases do mapa continental); `landmarks` é derivado
     // de `mapDef.fords`/`startSlots` — mapas sem esses dados simplesmente não têm vau/base marcados na textura.
     const [ford0, ford1, ford2] = mapDef.fords || [];
@@ -42,11 +51,16 @@ export class TerrainView {
     this.dispose();
     if (this.mesh) { this.mesh.geometry.dispose(); this.mesh.material.dispose(); }
     this.tileset = getTileset(id);
+    this.regions = this._regionsOn ? getRegionMap(this.terrain.mapDef, this.tileset) : null; // o estilo base mudou
     this.createTerrainMesh();
   }
 
   createTerrainMesh() {
     const terrain = this.terrain;
+    const regions = this.regions;
+    const lava = this.lava;
+    // Regional (MUNDO-5): sempre o splat (o tileset legado pinta por outro caminho e não sabe de regiões).
+    const useSplat = !this.tileset.legacy || !!regions;
     const geo = new THREE.PlaneGeometry(terrain.width, terrain.depth, terrain.segments, terrain.segments);
     geo.rotateX(-Math.PI / 2);
 
@@ -89,10 +103,10 @@ export class TerrainView {
 
       const triColor = new THREE.Color(1.0, 1.0, 1.0);
 
-      if (!this.tileset.legacy) {
+      if (useSplat) {
         // F7-04: a cor vem do splat da textura; aqui só sombreamento de relevo (estratos nos penhascos, base escurecida).
         const wl = terrain.mapDef.waterLevel ?? 0.5;
-        const surf = this.tileset.surface;
+        const surf = regions ? regions.styleDefAt(cx, cz).surface : this.tileset.surface; // MUNDO-5: estratos da região
         let tone = 0.97 + (rand - 0.5) * 0.06;
         if (cy > wl + 0.1 && ny < 0.72) {
           const k = Math.min(1, (0.72 - ny) / 0.3); // 0 = encosta suave, 1 = parede
@@ -127,6 +141,12 @@ export class TerrainView {
         }
       }
 
+      // MUNDO-5: terreno vizinho da lava aquece (cor de vértice laranja a ≤ 3 u; o brilho de verdade é a malha emissiva de `world/Lava.js`)
+      if (lava) {
+        const heat = lava.heatAt(cx, cz, LAVA_STYLE.glowRadius);
+        if (heat > 0.001) triColor.setRGB(triColor.r * (1 + 0.85 * heat), triColor.g * (1 + 0.12 * heat), triColor.b * (1 - 0.35 * heat));
+      }
+
       for (let v = 0; v < 3; v++) {
         colors.push(triColor.r, triColor.g, triColor.b);
       }
@@ -137,7 +157,7 @@ export class TerrainView {
     // Master Procedural PBR Terrain Material
     let terrainTex;
     const roads = terrain.mapDef.roads;
-    if (!this.tileset.legacy) {
+    if (useSplat) {
       terrainTex = getTilesetTerrainTexture({
         def: this.tileset,
         id: terrain.mapDef.id,
@@ -146,7 +166,9 @@ export class TerrainView {
         waterLevel: terrain.mapDef.waterLevel ?? 0.5,
         startSlots: terrain.mapDef.startSlots || [],
         roads,
-        masks: terrain.mapDef.splatMasks || []
+        masks: terrain.mapDef.splatMasks || [],
+        regions,
+        lava
       });
     } else if (terrain.mapDef.terrain?.generator === 'continental') {
       terrainTex = getTerrainTextures(this.landmarks, terrain.width);
@@ -160,7 +182,7 @@ export class TerrainView {
       });
     }
     // Estradas num mapa 'verdejante' (legado): copia a textura cacheada e pinta por cima (nenhum mapa atual tem `roads`).
-    if (this.tileset.legacy && roads && roads.length) terrainTex = withRoads(terrainTex, roads, terrain.width, this.tileset.palette.road);
+    if (!useSplat && roads && roads.length) terrainTex = withRoads(terrainTex, roads, terrain.width, this.tileset.palette.road);
 
     const mat = new THREE.MeshStandardMaterial({
       map: terrainTex.map,
@@ -169,7 +191,7 @@ export class TerrainView {
       bumpScale: 0.04,
       vertexColors: true,
       flatShading: true,
-      roughness: this.tileset.legacy ? 0.82 : this.tileset.surface.roughness,
+      roughness: regions ? regions.roughness : (this.tileset.legacy ? 0.82 : this.tileset.surface.roughness),
       metalness: 0.04
     });
     this.material = mat;

@@ -120,11 +120,20 @@ function buildImpostorGeometry(key, srcGeo) {
 }
 
 export class TreeManager {
-  /** @param {{tileset?: string}} [options]  F7-04: variante (tinta/neve) por tileset; padrão: sem alteração */
+  /**
+   * @param {{tileset?: string, regions?: import('../data/biomeRegions.js').RegionMap|null}} [options]  F7-04: variante (tinta/neve) por
+   *   tileset; padrão: sem alteração. MUNDO-5: `regions` (mapa com `biomeGrid`) escolhe a variante pela célula de cada árvore: a tinta
+   *   vem do estilo da região (`def.trees.tint`); cada (tipo × chunk × classe de tinta) é um InstancedMesh, então só os chunks que
+   *   cruzam uma fronteira entre estilos com tintas DIFERENTES ganham uma malha a mais (grama × floresta compartilham a tinta).
+   *   Sem `regions` o caminho é o de sempre.
+   */
   constructor(scene, options = {}) {
     this.scene = scene;
     this._tintedMats = [];
     this.trees = [];
+    /** MUNDO-5: regiões de bioma (ou `null`). */
+    this._regions = options.regions || null;
+    this._regionTints = new Map(); // material de origem → Map(índice do estilo → material tingido)
 
     this.oakCount = 0;
     this.pineCount = 0;
@@ -148,9 +157,13 @@ export class TreeManager {
     if (options.tileset) this.applyTileset(getTileset(options.tileset));
   }
 
-  /** InstancedMesh do chunk (tipo × célula de 32 u), criado sob demanda já com a tinta do tileset, se houver. */
-  _getChunkMesh(key, x, z) {
-    const id = `${key}|${Math.floor(x / CHUNK_SIZE)}|${Math.floor(z / CHUNK_SIZE)}`;
+  /**
+   * InstancedMesh do chunk (tipo × célula de 32 u), criado sob demanda já com a tinta do tileset, se houver.
+   * MUNDO-5: com regiões o chunk também se divide pela classe de tinta (`style` = `RegionMap.treeClassAt`); sem regiões `style` é ignorado.
+   */
+  _getChunkMesh(key, x, z, style = 0) {
+    const regional = !!this._regions;
+    const id = `${key}|${Math.floor(x / CHUNK_SIZE)}|${Math.floor(z / CHUNK_SIZE)}${regional ? `|s${style}` : ''}`;
     let im = this._chunks.get(id);
     if (im) return im;
     let src = this._sources.get(key);
@@ -165,6 +178,7 @@ export class TreeManager {
     im.userData.lodImpostor = null;
     im.userData.chunkX = (Math.floor(x / CHUNK_SIZE) + 0.5) * CHUNK_SIZE; // centro do chunk (XZ) p/ o LOD
     im.userData.chunkZ = (Math.floor(z / CHUNK_SIZE) + 0.5) * CHUNK_SIZE;
+    im.userData.treeStyle = regional ? style : 0;
     this._tintMesh(im);
     this.scene.add(im);
     this.instancedMeshes.push(im);
@@ -217,6 +231,7 @@ export class TreeManager {
     imp.castShadow = false;
     imp.receiveShadow = false;
     imp.userData.isTreeImpostor = true;
+    imp.userData.treeStyle = im.userData.treeStyle || 0; // MUNDO-5: o impostor usa a mesma tinta regional do chunk
     this._tintMesh(imp);
     this._syncImpostor(im, imp);
     imp.visible = false;
@@ -255,8 +270,30 @@ export class TreeManager {
     }
   }
 
+  /**
+   * MUNDO-5: tinta da região. `userData.treeStyle` = estilo do chunk; o material de origem fica em `userData.baseMaterial`
+   * (reaplicar não tinge duas vezes) e há um clone por (material de origem × estilo). Estilo sem `trees.tint` = material original.
+   */
+  _tintMeshRegional(im) {
+    const def = this._regions.styles[im.userData.treeStyle || 0].def;
+    const cfg = def.trees && def.trees.tint;
+    if (!cfg) return;
+    const src = im.userData.baseMaterial || (im.userData.baseMaterial = im.material);
+    let per = this._regionTints.get(src);
+    if (!per) this._regionTints.set(src, per = new Map());
+    const style = im.userData.treeStyle || 0;
+    let tinted = per.get(style);
+    if (!tinted) {
+      tinted = createTintedMaterial(src, cfg);
+      per.set(style, tinted);
+      this._tintedMats.push(tinted);
+    }
+    im.material = tinted;
+  }
+
   /** Troca o material do InstancedMesh pela variante do tileset (um clone por material de origem; só se há tinta). */
   _tintMesh(im) {
+    if (this._regions) { this._tintMeshRegional(im); return; }
     if (!this._tintCfg) return;
     if (!this._tintBySource.has(im.material)) {
       const t = createTintedMaterial(im.material, this._tintCfg);
@@ -289,7 +326,7 @@ export class TreeManager {
       key = 'tree_oak';
       this.oakCount++;
     }
-    const mesh = this._getChunkMesh(key, x, z);
+    const mesh = this._getChunkMesh(key, x, z, this._regions ? this._regions.treeClassAt(x, z) : 0);
     const idx = this._allocInstance(mesh); // índice local ao chunk
 
     tree.instanceType = type;
@@ -348,6 +385,7 @@ export class TreeManager {
     this.instancedMeshes = [];
     this._tintedMats.forEach(m => m.dispose());
     this._tintedMats = [];
+    this._regionTints.clear();
     this.trees = [];
     this.oakCount = 0;
     this.pineCount = 0;

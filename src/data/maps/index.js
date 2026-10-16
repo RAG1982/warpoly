@@ -15,6 +15,13 @@ import vales2v2 from './vales-2v2.json';
 import bosques2v2 from './bosques-2v2.json';
 import planaltoFfa4p from './planalto-ffa-4p.json';
 import arquipelagoNaval4p from './arquipelago-naval-4p.json';
+// MUNDO-7 (2026-10-16): mapas por tipo gerados pelo gerador de costa (`tools/gen-world-map.mjs`), sementes aprovadas
+import duelo1 from './duelo-continental-1.json';
+import duelo2 from './duelo-continental-2.json';
+import duelo3 from './duelo-continental-3.json';
+import ilhaUnica1 from './ilha-unica-1.json';
+import ilhaUnica2 from './ilha-unica-2.json';
+import ilhaUnica3 from './ilha-unica-3.json';
 import { generateMap } from './generator.js';
 
 const MAPS = Object.freeze({
@@ -27,6 +34,12 @@ const MAPS = Object.freeze({
   'bosques-2v2': bosques2v2,
   'planalto-ffa-4p': planaltoFfa4p,
   'arquipelago-naval-4p': arquipelagoNaval4p,
+  'duelo-continental-1': duelo1,
+  'duelo-continental-2': duelo2,
+  'duelo-continental-3': duelo3,
+  'ilha-unica-1': ilhaUnica1,
+  'ilha-unica-2': ilhaUnica2,
+  'ilha-unica-3': ilhaUnica3,
   tutorial // F6-09: mapa do tutorial (`hidden`: não aparece na lista da Escaramuça)
 });
 

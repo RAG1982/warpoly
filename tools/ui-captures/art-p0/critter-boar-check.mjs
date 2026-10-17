@@ -47,7 +47,8 @@ function verify(info) {
   if (info.attributes.some(a => a.startsWith('color'))) problems.push('cor de vértice');
   const [w, h, l] = info.bbox.size;
   if (Math.abs(info.bbox.min[1]) > 0.005) problems.push(`patas fora do chão (y mín = ${info.bbox.min[1]})`);
-  if (h < 0.55 || h > 0.65 || l < 1.1 || l > 1.4 || w > 0.5) problems.push(`tamanho fora do esperado (${w} × ${h} × ${l})`);
+  // escala ×1,4 do nativo (ESCALA_JOGO no script): nativo 0,37 × 0,60 × 1,33 → 0,51 × 0,84 × 1,87
+  if (h < 0.8 || h > 0.9 || l < 1.75 || l > 2.0 || w > 0.55) problems.push(`tamanho fora do esperado (${w} × ${h} × ${l})`);
   return problems;
 }
 

@@ -8,6 +8,8 @@ desta entrega; ver docs/reference/art-p0-javali.md). Saídas:
   public/icoJavali.png                       ícone 128x128, fundo transparente, contorno escuro (mesma linguagem dos
                                              ícones renderizados de public/ui/icons)
 
+Escala: a hierarquia sai ×ESCALA_JOGO (1,4) do tamanho nativo, na geometria (vértices e pivôs), com a raiz em escala 1.
+
 Uso (sempre via safe-run, um Blender por vez):
   bash tools/safe-run.sh --timeout 600 -- /home/rafael/Downloads/blender-5.2.1-linux-x64/blender -b \
       --factory-startup --python tools/blender/build_critter_boar.py -- [opções]
@@ -21,7 +23,7 @@ Opções (depois do `--`):
                       animação futura): grava tools/blender/build/critter_boar_split.glb (NÃO vai para public/)
 
 Hierarquia (aninhada; L = -x, R = +x, como ArmL/ArmR do projeto; frente = +Z; todas as rotações de repouso = 0;
-posições absolutas em metros, com a origem no chão sob o centro da pegada):
+posições absolutas em metros no tamanho nativo (antes de ESCALA_JOGO), com a origem no chão sob o centro da pegada):
   CritterBoar (raiz)
   └─ Body    pivô (0; 0,36; 0)             tronco, garupa, crina de cerdas, cauda (malha)
      ├─ Head    pivô (0; 0,43; 0,25)        crânio, focinho, mandíbula, presas, orelhas, olhos (malha)
@@ -52,6 +54,9 @@ OUT_NAME = 'critter_boar'
 ROOT_NAME = 'CritterBoar'
 PREVIEW_PATH = os.path.join(C.REPO, 'tools', 'ui-captures', 'art-p0', 'critter_boar.png')
 ICON_PATH = os.path.join(C.REPO, 'public', 'icoJavali.png')
+# Escala de jogo: o modelo sai ×1,4 do tamanho nativo. CritterView.js aplica mais ×1,4 no jogo (≈2,61 m de
+# comprimento, como o procedural). Ver docs/reference/art-p0-javali.md.
+ESCALA_JOGO = 1.4
 
 # ---------------------------------------------------------------------------
 # Medidas (m, coordenadas do jogo: x direita, y cima, +z frente; L = -x)
@@ -512,6 +517,27 @@ def check_budget(rep, atlas_px, split):
     return problems
 
 
+def _descendentes(raiz):
+    """Todos os objetos abaixo de `raiz` (filhos, netos...)."""
+    pilha, out = list(raiz.children), []
+    while pilha:
+        o = pilha.pop()
+        out.append(o)
+        pilha.extend(o.children)
+    return out
+
+
+def escalar_hierarquia(raiz, k):
+    """Escala a hierarquia inteira em `k` em torno da origem da raiz: pivôs (location) e vértices de cada malha.
+    A escala vai na geometria, não no nó raiz: CritterView.js define a escala do nó e a sobrescreveria."""
+    feitas = set()
+    for o in [raiz] + _descendentes(raiz):
+        o.location = o.location * k
+        if o.type == 'MESH' and o.data.name not in feitas:
+            o.data.transform(Matrix.Scale(k, 4))
+            feitas.add(o.data.name)
+
+
 def main():
     args = C.script_args()
     dev = '--dev-flat' in args
@@ -539,6 +565,8 @@ def main():
             C.make_empty(nm, tuple(o - HEAD_O), parent=head_obj)
         C.make_empty('Tail', tuple(TAIL_O - BODY_O), parent=body_obj)
     parts = [body_obj, head_obj] + leg_objs + extra_objs
+    bpy.context.view_layer.update()
+    escalar_hierarquia(root, ESCALA_JOGO)  # tamanho de jogo antes de UV, bake e export
     bpy.context.view_layer.update()
 
     if dev:

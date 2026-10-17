@@ -244,7 +244,7 @@ Legenda de dependências: só IDs; "—" = pode começar já. **Dif.** = dificul
 | M1-06 | `ilhas-4p`: florestas + portão de emergência da IA (opções 1+3) | Difícil | G | S | M0-01 | NEW-55 | DONE parcial (23/24; NEW-58 seed 16 aceita) |
 | M1-07 | P-14: serraria perto de bosque (opção A) | Fácil | P | S | M0-01 | NEW-56 | DONE (2026-10-17) |
 | M1-08 | Soak grande, NEW-51 e agressividade inicial da IA (NEW-9) | Média | M | S | M1-06 | NEW-51, NEW-9 | DONE (2026-10-17; 97/100; NEW-58b e NEW-59 registradas) |
-| M1-09 | Gate M1: regravar baselines, suíte completa, fechar `REVIEW` | Fácil | P | S | M1-01…08 | — | TODO |
+| M1-09 | Gate M1: regravar baselines, suíte completa, fechar `REVIEW` | Fácil | P | S | M1-01…08 | — | DONE (2026-10-17) |
 | M1-10 | **G1 — sua passada nº 1** (≈ 1 h) | — | — | V | M1-09 | — | TODO |
 | M1-11 | Renomear facções em UI e campanhas (D2 b): Aliança→Liga de Aurelan, Horda→Clãs do Cinzal | Média | M | S | M0-02 | D2 | DONE (2026-10-17) |
 

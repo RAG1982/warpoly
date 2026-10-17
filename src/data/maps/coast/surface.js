@@ -28,6 +28,7 @@ export function finalizeSurface(map) {
   const height = new Float32Array(N);
   const biome = new Uint8Array(N);
   const seed = map.options.seed | 0;
+  const swampPatches = map.options.aridSwamp !== false; // M2-05: `aridSwamp: false` = deserto sem manchas de pântano (Miragem)
   const mountainK = map.options.mountain ?? 1; // M2-03: escala da cordilheira do continente exuberante (1 = como sempre; < 1 = colinas, sem neve nas bases)
   const lv = map.lava;
   const dLava = lv ? distanceTransform(lv.mask, G) : null;
@@ -59,7 +60,7 @@ export function finalizeSurface(map) {
         h += dune * 0.25 * smoothstep(2, 8, dd);
         const rockN = fbm(x * 0.07 - 31, z * 0.07 + 12, seed + 55, 3);
         if (rockN > 0.66 && dd > 6) { b = BIOME.ROCK; h += (rockN - 0.66) * 6; }
-        else if (nz2 > 0.64 && dd < 16) b = BIOME.SWAMP;
+        else if (nz2 > 0.64 && dd < 16 && swampPatches) b = BIOME.SWAMP;
         else if (nz > 0.55) b = BIOME.STEPPE;
         else b = BIOME.DESERT;
       } else if (e.biome === 'volcanic') {

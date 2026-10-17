@@ -15,7 +15,7 @@ import { defaultAnchors } from '../../src/data/maps/anchors.js';
 import { getHeightForMap } from '../../src/sim/terrainGenerators.js';
 import { buildPathfinder, floodFill, isReached } from '../../src/data/maps/generator.js';
 import { layoutAt } from '../../src/sim/MatchConfig.js';
-import { getBiomeAt, BIOME } from '../../src/data/maps/biome.js';
+import { getBiomeAt, BIOME, decodeBiomeGrid, encodeRleBiomeGrid } from '../../src/data/maps/biome.js';
 
 const hyp = (a, b) => Math.hypot(a.x - b.x, a.z - b.z);
 const r1 = (v) => Math.round(v * 10) / 10;
@@ -50,9 +50,9 @@ export const CAMPAIGN_PRESETS = freeze({
   /** Palco 7 (M2-05): continente pantanoso com canais (rio com vaus), base do jogador a oeste e do aliado que trai a leste; o Salão inimigo vem por âncora. */
   'camp-07-brejo-mudo': freeze({
     id: 'camp-07-brejo-mudo', name: 'Brejo Mudo', uso: 'campanha, palco 7 (Liga e Clãs)', tileset: 'pantano', naval: false,
-    options: freeze({ size: 176, grid: 176, continents: 1, continentBiome: 'swamp', continentDims: [0.44, 0.36], islands: 0, islets: 0, bays: 3, peninsulas: 3, roughness: 1.0, lava: false, rivers: 1 }),
+    options: freeze({ size: 176, grid: 176, continents: 1, continentBiome: 'swamp', continentDims: [0.44, 0.36], islands: 0, islets: 0, bays: 3, peninsulas: 3, roughness: 1.0, lava: false, rivers: 2 }),
     layout: freeze({ bases: [{ entities: [0], side: 'west' }, { entities: [0], side: 'east' }], minSeparation: 66 }),
-    verify: freeze({ landRange: [0.25, 0.8], minRivers: 1 })
+    verify: freeze({ landRange: [0.25, 0.8], minRivers: 2 })
   }),
   /** Palco 8 (M2-05): ilha vulcânica pequena (jogável ≤ 128 u) cortada por UM rio de lava norte-sul com passagens de rocha; Liga a oeste, Clãs (forja e santuário) a leste. */
   'camp-08-fornalha': freeze({
@@ -64,7 +64,7 @@ export const CAMPAIGN_PRESETS = freeze({
   /** Palco 9 (M2-05): ilha deserta com dunas e três poços no meio; cabeça de ponte a oeste e base inimiga a leste. */
   'camp-09-miragem': freeze({
     id: 'camp-09-miragem', name: 'Miragem', uso: 'campanha, palco 9 (Liga e Clãs)', tileset: 'deserto', naval: false,
-    options: freeze({ size: 176, grid: 176, continents: 1, continentBiome: 'arid', continentDims: [0.44, 0.36], islands: 0, islets: 0, bays: 3, peninsulas: 3, roughness: 1.0, lava: false, rivers: 0 }),
+    options: freeze({ size: 176, grid: 176, continents: 1, continentBiome: 'arid', aridSwamp: false, continentDims: [0.44, 0.35], islands: 0, islets: 0, bays: 4, peninsulas: 2, roughness: 1.1, lava: false, rivers: 0 }),
     layout: freeze({ bases: [{ entities: [0], side: 'west' }, { entities: [0], side: 'east' }], minSeparation: 66 }),
     verify: freeze({ landRange: [0.25, 0.8], minRivers: 0 })
   })
@@ -167,9 +167,11 @@ export function makeCtx(m) {
   for (const f of m.forests) ctx.avoid.push({ x: f.x, z: f.z, r: f.radius * 0.75 });
   for (const s of m.startSlots) {
     for (const b of layoutAt(s).buildings) ctx.avoid.push({ x: b.x, z: b.z, r: 8 });
-    ctx.avoid.push({ x: s.x, z: s.z, r: 22 });
+    ctx.avoid.push({ x: s.x, z: s.z, r: 22, slot: true });
   }
   ctx.free = (x, z, extra = 0) => ctx.avoid.every((a) => Math.hypot(x - a.x, z - a.z) >= a.r + extra);
+  /** Como `free`, mas com folga de `slotR` (em vez de 22 + extra) em volta dos pátios: para o que cabe colado à base (Santuário, cativeiro). */
+  ctx.freeNear = (x, z, extra = 0, slotR = 14) => ctx.avoid.every((a) => Math.hypot(x - a.x, z - a.z) >= (a.slot ? slotR : a.r + extra));
   ctx.take = (p, r) => { ctx.avoid.push({ x: p.x, z: p.z, r }); return p; };
   return ctx;
 }
@@ -331,7 +333,207 @@ function postPedra(ctx, extra) {
   extra.landingZone = extra.beach1; // praia da primeira onda (o `landingZone` padrão é só uma sugestão)
 }
 
-const POST = freeze({ 'camp-01-baia-de-aurelan': postBaia, 'camp-02-pouso-do-encontro': postPouso, 'camp-03-pedra-mae': postPedra, 'camp-07-brejo-mudo': () => {}, 'camp-08-fornalha': () => {}, 'camp-09-miragem': () => {} });
+// ---------------------------------------------------------------------------------------------------------------------------
+// Palcos 7–9 (lote M2-05)
+// ---------------------------------------------------------------------------------------------------------------------------
+
+/** Praia (terra seca com água a ≤ 4 u e ponto de água navegável do oceano a 8–18 u) entre `dMin` e `dMax` u do pátio `s`, a ~`target` u. */
+function pickBeach(ctx, s, name, { dMin = 30, dMax = 62, target = 44, avoid = [] } = {}) {
+  const b = need(ctx.scan({
+    step: 1,
+    test: (x, z) => ctx.isShore(x, z) && ctx.reach(x, z) && ctx.free(x, z, 4) && hyp({ x, z }, s) >= dMin && hyp({ x, z }, s) <= dMax
+      && avoid.every((a) => hyp({ x, z }, a.p) >= a.r) && ctx.waterNear(x, z, 8, 18),
+    score: (x, z) => Math.abs(hyp({ x, z }, s) - target)
+  }), name);
+  ctx.take(b, 10);
+  return b;
+}
+
+/** Palco 7: Salão de Brakka com dois Cercados de Javalis, depósito de ferro do traidor, praias do desembarque da frota, expansões. */
+function postBrejo(ctx, extra) {
+  const { s0, s1 } = ctx;
+  // Salão do inimigo (Brakka em A07): platô livre longe das duas bases (as missões constroem o Salão e os cercados aqui)
+  const hall = need(ctx.scan({
+    test: (x, z) => ctx.dryClear(x, z, 15) && ctx.reach(x, z) && ctx.free(x, z, 10) && hyp({ x, z }, s0) >= 56 && hyp({ x, z }, s1) >= 56,
+    score: (x, z) => Math.abs(hyp({ x, z }, s0) - 72) + Math.abs(hyp({ x, z }, s1) - 72)
+  }), 'o Salão de Brakka');
+  ctx.take(hall, 22);
+  extra.brakkaHall = pt(hall);
+  for (let k = 0; k < 2; k++) {
+    const ang = Math.atan2(hall.z - (s0.z + s1.z) / 2, hall.x - (s0.x + s1.x) / 2) + (k ? 1 : -1) * 1.1;
+    const aim = { x: hall.x + Math.cos(ang) * 17, z: hall.z + Math.sin(ang) * 17 };
+    const pen = need(ctx.scan({ test: (x, z) => ctx.dryClear(x, z, 5) && ctx.reach(x, z) && ctx.free(x, z, 3) && hyp({ x, z }, hall) >= 13, score: (x, z) => hyp({ x, z }, aim) }), `o Cercado de Javalis ${k + 1}`);
+    ctx.take(pen, 9);
+    extra[`boarPen${k + 1}`] = pt(pen);
+  }
+  addGold(ctx, hall, 'brakkaGold', extra, { dMin: 20, dMax: 40, target: 28 });
+  // depósito de ferro de contrabando do aliado que trai (atrás da base dele, longe da do jogador)
+  const iron = need(ctx.scan({
+    test: (x, z) => ctx.dryClear(x, z, 5) && ctx.reach(x, z) && ctx.free(x, z, 4) && hyp({ x, z }, s1) >= 22 && hyp({ x, z }, s1) <= 36 && hyp({ x, z }, hall) >= 24,
+    score: (x, z) => -hyp({ x, z }, s0)
+  }), 'o depósito de ferro');
+  ctx.take(iron, 10);
+  extra.ironDepot = pt(iron);
+  extra.allyStart = pt(s1); // o aliado que trai aos 5:30 (Mervane/Hurgan) parte do slot 1
+  // praias do desembarque da frota de Aurelan (H07), uma em cada lado
+  const b1 = pickBeach(ctx, s0, 'a praia 1', { avoid: [{ p: hall, r: 24 }] });
+  const b2 = pickBeach(ctx, s1, 'a praia 2', { avoid: [{ p: hall, r: 24 }, { p: b1, r: 40 }] });
+  [b1, b2].forEach((b, i) => {
+    extra[`beach${i + 1}`] = pt(b);
+    extra[`seaLanding${i + 1}`] = { ...ctx.waterNear(b.x, b.z, 8, 18), water: true };
+  });
+  extra.landingZone = extra.beach1;
+  addGold(ctx, s0, 'expansion1', extra, { plain: true });
+  addGold(ctx, s1, 'expansion2', extra, { plain: true });
+}
+
+/** Palco 8: passagens de lava, Monte Caldeira, Forja Naval (na costa) e Santuário das Cinzas do lado dos Clãs, prisioneiros, chegada de Lyra. */
+function postFornalha(ctx, extra, world) {
+  const { m, s0, s1 } = ctx;
+  const half = ctx.half;
+  const lava = world.map.lava;
+  if (!lava) throw new Error('campanha: a ilha não ganhou rio de lava');
+  // passagens de rocha (os vaus da lava): o centro de cada uma, ordenadas de norte (z menor) a sul
+  const pass = [];
+  for (const st of lava.streams) for (const p of st.passages) pass.push({ x: p.i + 0.5 - m.size / 2, z: p.j + 0.5 - m.size / 2 });
+  pass.sort((a, b) => a.z - b.z);
+  if (!pass.length) throw new Error('campanha: sem passagem de rocha');
+  pass.forEach((p, i) => { extra[`lavaPass${i + 1}`] = pt(p); });
+  // Monte Caldeira: o ponto mais alto, terra seca e alcançável, perto do centro da ilha
+  const ent = world.map.entities[0];
+  const peak = need(ctx.scan({
+    step: 1,
+    test: (x, z) => ctx.reach(x, z) && hyp({ x, z }, { x: ent.cx, z: ent.cz }) <= 18 && ctx.hAt(x, z) >= 1.9 && ctx.free(x, z, 0),
+    score: (x, z) => -ctx.hAt(x, z)
+  }), 'o Monte Caldeira');
+  ctx.take(peak, 6);
+  extra.calderaPeak = pt(peak);
+  // Forja Naval: na costa do lado dos Clãs, com água navegável do oceano a 8–18 u (o Estaleiro e os Leviatãs de Ferro)
+  const forge = need(ctx.scan({
+    step: 1,
+    test: (x, z) => ctx.isShore(x, z) && ctx.reach(x, z) && ctx.free(x, z, 4) && hyp({ x, z }, s1) >= 18 && hyp({ x, z }, s1) <= 44 && ctx.waterNear(x, z, 8, 18),
+    score: (x, z) => Math.abs(hyp({ x, z }, s1) - 28)
+  }), 'a Forja Naval');
+  ctx.take(forge, 11);
+  extra.forge = pt(forge);
+  extra.forgeWater = { ...ctx.waterNear(forge.x, forge.z, 8, 18), water: true };
+  // Santuário das Cinzas (Vozgul): terra firme entre a base dos Clãs e a passagem de lava, longe da costa
+  const toward = pass.reduce((a, p) => (hyp(p, s1) < hyp(a, s1) ? p : a));
+  const sanctum = need(ctx.scan({
+    test: (x, z) => ctx.dryClear(x, z, 7) && !ctx.isShore(x, z) && ctx.reach(x, z) && ctx.freeNear(x, z, 4, 15) && hyp({ x, z }, s1) >= 15 && hyp({ x, z }, s1) <= 30 && hyp({ x, z }, forge) >= 16,
+    score: (x, z) => Math.abs(hyp({ x, z }, s1) - 21) + 0.3 * hyp({ x, z }, toward)
+  }), 'o Santuário das Cinzas');
+  ctx.take(sanctum, 13);
+  extra.sanctum = pt(sanctum);
+  // prisioneiros (os magos de Orsolo): seis pontos num círculo de 4,5 u, no território dos Clãs mas fora do Santuário
+  const cc = need(ctx.scan({
+    test: (x, z) => ctx.dryClear(x, z, 7.5) && ctx.reach(x, z) && ctx.freeNear(x, z, 3, 14) && hyp({ x, z }, s1) >= 18 && hyp({ x, z }, s1) <= 56 && hyp({ x, z }, sanctum) >= 14 && hyp({ x, z }, forge) >= 12,
+    score: (x, z) => Math.abs(hyp({ x, z }, s1) - 32)
+  }), 'o cativeiro dos magos');
+  ctx.take(cc, 14);
+  extra.captiveCamp = pt(cc);
+  for (let k = 0; k < 6; k++) {
+    const a = (k / 6) * Math.PI * 2 + 0.4;
+    extra[`captive${k + 1}`] = pt({ x: cc.x + Math.cos(a) * 4.5, z: cc.z + Math.sin(a) * 4.5 });
+  }
+  // chegada do esquadrão de grifos da Capitã Lyra: ponto de mar aberto na borda oeste, na altura da base da Liga
+  const lyra = need(ctx.scan({
+    step: 2,
+    test: (x, z) => ctx.oceanOk(x, z) && x <= -half + 14,
+    score: (x, z) => Math.abs(z - s0.z) + Math.abs(x + half - 8)
+  }), 'a chegada de Lyra');
+  extra.lyraArrival = { ...pt(lyra), water: true };
+  // uma mina de ouro de expansão por lado (com 2 minas o ouro acabava no soak dos outros palcos); sem filtro de bioma (a ilha é toda basalto)
+  addGold(ctx, s0, 'expansion1', extra, { dMin: 18, dMax: 40, target: 26 });
+  addGold(ctx, s1, 'expansion2', extra, { dMin: 18, dMax: 40, target: 26 });
+}
+
+/** Pinta um tapete de `id` (raio `r`) em torno de (x, z) no `biomeGrid` do mapa (só visual); só sobre os biomos de `only` (se dado), nunca no mar nem na lava. */
+function paintBiome(m, x, z, r, id, only = null) {
+  const bg = m.biomeGrid;
+  const grid = decodeBiomeGrid(bg);
+  const { nodes } = bg, cell = bg.cell || 1, half = m.size / 2;
+  const i0 = Math.round((x + half) / cell), j0 = Math.round((z + half) / cell), rr = Math.ceil(r / cell);
+  for (let j = j0 - rr; j <= j0 + rr; j++) {
+    for (let i = i0 - rr; i <= i0 + rr; i++) {
+      if (i < 0 || j < 0 || i >= nodes || j >= nodes) continue;
+      if (Math.hypot((i - i0) * cell, (j - j0) * cell) > r) continue;
+      const k = j * nodes + i;
+      if (grid[k] === BIOME.SEA || grid[k] === BIOME.LAVA) continue;
+      if (only && !only.includes(grid[k])) continue;
+      grid[k] = id;
+    }
+  }
+  m.biomeGrid = { ...bg, data: encodeRleBiomeGrid(grid) }; // objeto novo: o cache de `gridOfBiome` é por objeto
+}
+
+/** Palco 9: três poços no meio do deserto, ruínas, cabeça de ponte de cada lado, forte de cada lado, Ninho e Aviário. */
+function postMiragem(ctx, extra) {
+  const { m, s0, s1 } = ctx;
+  const L = hyp(s0, s1) || 1;
+  const ux = (s1.x - s0.x) / L, uz = (s1.z - s0.z) / L; // do slot 0 ao 1
+  const nx = -uz, nz = ux; // perpendicular
+  // 3 poços em zigue-zague no eixo entre as bases: perto do lado 0, no centro e perto do lado 1; cada um no melhor chão plano livre
+  const wells = [];
+  [[0.30, 0], [0.50, 1], [0.70, -1]].forEach(([t, side], k) => {
+    const aim = { x: s0.x + ux * L * t + nx * side * 20, z: s0.z + uz * L * t + nz * side * 20 };
+    const w = need(ctx.scan({
+      test: (x, z) => ctx.dryClear(x, z, 7) && ctx.plain(x, z) && ctx.reach(x, z) && ctx.free(x, z, 8) && wells.every((o) => hyp({ x, z }, o) >= 24)
+        && hyp({ x, z }, s0) >= 30 && hyp({ x, z }, s1) >= 30,
+      score: (x, z) => hyp({ x, z }, aim)
+    }), `o poço ${k + 1}`);
+    ctx.take(w, 12);
+    wells.push(w);
+  });
+  wells.sort((a, b) => hyp(a, s0) - hyp(b, s0)); // poço 1 = o mais perto do lado 0
+  wells.forEach((w, i) => { extra[`waterWell${i + 1}`] = pt(w); });
+  // ruínas: 4 conjuntos, a ~22 u dos poços, espalhados
+  const ruins = [];
+  for (let k = 0; k < 4; k++) {
+    const w = wells[k % 3];
+    const ang = (k / 4) * Math.PI * 2 + 0.9;
+    const aim = { x: w.x + Math.cos(ang) * 22, z: w.z + Math.sin(ang) * 22 };
+    const r = need(ctx.scan({ test: (x, z) => ctx.dryClear(x, z, 5) && ctx.reach(x, z) && ctx.free(x, z, 3) && ruins.every((o) => hyp({ x, z }, o) >= 20), score: (x, z) => hyp({ x, z }, aim) }), `as ruínas ${k + 1}`);
+    ctx.take(r, 8);
+    ruins.push(r);
+    extra[`ruins${k + 1}`] = pt(r);
+  }
+  // forte de cada lado: entre a base e o poço mais próximo (chão firme de 10 u de folga)
+  [[s0, wells[0], 'fortSite1'], [s1, wells[2], 'fortSite2']].forEach(([s, w, name]) => {
+    const aim = { x: w.x + (s.x - w.x) * 0.38, z: w.z + (s.z - w.z) * 0.38 };
+    const f = need(ctx.scan({ test: (x, z) => ctx.dryClear(x, z, 10) && ctx.reach(x, z) && ctx.free(x, z, 4) && hyp({ x, z }, w) >= 12, score: (x, z) => hyp({ x, z }, aim) }), `o ${name}`);
+    ctx.take(f, 14);
+    extra[name] = pt(f);
+  });
+  // cabeça de ponte de cada lado (praia + água de onde chegam as barcaças e os reforços navais)
+  const b1 = pickBeach(ctx, s0, 'a cabeça de ponte 1', { dMin: 14, dMax: 44, target: 28 });
+  const b2 = pickBeach(ctx, s1, 'a cabeça de ponte 2', { dMin: 14, dMax: 44, target: 28 });
+  [b1, b2].forEach((b, i) => {
+    extra[`bridgehead${i + 1}`] = pt(b);
+    extra[`bridgehead${i + 1}Sea`] = { ...ctx.waterNear(b.x, b.z, 8, 18), water: true };
+  });
+  extra.landingZone = extra.bridgehead1;
+  // Ninho das Serpes (Clãs, lado do slot 1) e Aviário (Liga, lado do slot 0): atrás de cada base
+  const behind = (s, other, name) => {
+    const p = need(ctx.scan({
+      test: (x, z) => ctx.dryClear(x, z, 6) && !ctx.isShore(x, z) && ctx.reach(x, z) && ctx.freeNear(x, z, 3, 14) && hyp({ x, z }, s) >= 16 && hyp({ x, z }, s) <= 38,
+      score: (x, z) => -hyp({ x, z }, other)
+    }), `o ${name}`);
+    ctx.take(p, 10);
+    extra[name] = pt(p);
+  };
+  behind(s1, s0, 'nestSite');
+  behind(s0, s1, 'aviarySite');
+  addGold(ctx, s0, 'expansion1', extra, { plain: true });
+  addGold(ctx, s1, 'expansion2', extra, { plain: true });
+  // oásis dos poços (visual): borda de estepe de 6,5 u e tapete de grama de 4 u
+  for (const w of wells) {
+    paintBiome(m, w.x, w.z, 6.5, BIOME.STEPPE, [BIOME.DESERT, BIOME.STEPPE]);
+    paintBiome(m, w.x, w.z, 4, BIOME.GRASS, [BIOME.DESERT, BIOME.STEPPE, BIOME.GRASS]);
+  }
+}
+
+const POST = freeze({ 'camp-01-baia-de-aurelan': postBaia, 'camp-02-pouso-do-encontro': postPouso, 'camp-03-pedra-mae': postPedra, 'camp-07-brejo-mudo': postBrejo, 'camp-08-fornalha': postFornalha, 'camp-09-miragem': postMiragem });
 
 // ---------------------------------------------------------------------------------------------------------------------------
 // Montagem
@@ -366,7 +568,7 @@ function finish(id, world, seedUsed) {
   for (const r of m.resources) if (r.type === 'gold') r.amount = GOLD_AMOUNT;
   const ctx = makeCtx(m);
   const extra = {};
-  POST[id](ctx, extra);
+  POST[id](ctx, extra, world);
   // âncoras: padrão (recalculadas com as jazidas/acampamentos novos) + as da ficha; as escritas à mão prevalecem
   const base = { ...m.anchors };
   delete m.anchors;
@@ -379,7 +581,7 @@ function finish(id, world, seedUsed) {
     out[k] = v;
   }
   out.meta = { ...m.meta, campaign: id, seedUsed };
-  const verification = verifyCoastWorld(out, { naval: false });
+  const verification = verifyCoastWorld(out, { naval: false, woodTarget: CAMPAIGN_PRESETS[id].woodTarget });
   if (!verification.ok) throw new Error('mundo: ' + verification.failures.slice(0, 2).join(' | '));
   // âncoras de terra alcançáveis a partir do slot 0 por terra; de água, no oceano
   const c2 = makeCtx(out);

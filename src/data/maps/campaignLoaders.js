@@ -10,5 +10,8 @@
 export const CAMPAIGN_MAP_LOADERS = Object.freeze({
   'camp-01-baia-de-aurelan': () => import('./camp-01-baia-de-aurelan.json'),
   'camp-02-pouso-do-encontro': () => import('./camp-02-pouso-do-encontro.json'),
-  'camp-03-pedra-mae': () => import('./camp-03-pedra-mae.json')
+  'camp-03-pedra-mae': () => import('./camp-03-pedra-mae.json'),
+  'camp-07-brejo-mudo': () => import('./camp-07-brejo-mudo.json'),
+  'camp-08-fornalha': () => import('./camp-08-fornalha.json'),
+  'camp-09-miragem': () => import('./camp-09-miragem.json')
 });

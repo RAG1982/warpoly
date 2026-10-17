@@ -183,10 +183,18 @@ export class Water {
    * 2. Translucent Animated Surface Mesh with Caustic Ripples & Low-Poly Wave Facets
    */
   createWaterMesh() {
-    const size = 150;
-    const segments = 64;
+    // M1-01: os 150 u fixos cobriam só o miolo dos mapas de 224 u (borda reta turquesa × azul-escuro à vista); agora a lâmina
+    // acompanha o mapa (mesma densidade de vértices e a mesma escala da textura de ondas dos mapas de ≤ 150 u).
+    // Só nos mapas com `biomeGrid` (224 u): os mapas antigos ficam byte a byte como antes (golden de regionalWorld.test.js).
+    const def = this.terrain && this.terrain.mapDef;
+    const size = def && def.biomeGrid ? Math.max(150, (def.size || 0) + 8) : 150;
+    const segments = Math.round((64 * size) / 150);
     const geo = new THREE.PlaneGeometry(size, size, segments, segments);
     geo.rotateX(-Math.PI / 2);
+    if (size > 150) {
+      const uv = geo.attributes.uv;
+      for (let i = 0; i < uv.count; i++) uv.setXY(i, ((uv.getX(i) - 0.5) * size) / 150 + 0.5, ((uv.getY(i) - 0.5) * size) / 150 + 0.5);
+    }
 
     this.initialPositions = geo.attributes.position.array.slice();
 

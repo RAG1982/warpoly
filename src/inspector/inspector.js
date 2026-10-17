@@ -231,6 +231,19 @@ const MODEL_CATALOG = [
     notes: 'Rig plana (Torso, Head, ArmL/ArmR, LegL/LegR, Weapon > Crystal); o Crystal pulsa na animação cast. ~6,8 mil triângulos, 9 draw calls, atlas 512².'
   },
   {
+    id: 'hero_oren_glb',
+    name: 'Mestre Arcano Oren (herói, Tripo)',
+    category: 'units',
+    faction: 'human',
+    type: 'mage',
+    icon: '🔮',
+    glb: 'hero_oren',
+    sourceFile: 'tools/blender/build_hero_oren.py',
+    create: createGlb('hero_oren'),
+    description: 'Herói humano Mestre Arcano Oren: modelo do Tripo finalizado no Blender (public/models/hero_oren.glb). Robe azul-petróleo com capuz, cinto com bolsas e rolos de mapas; cajado de madeira com cristal ciano. Nós Mage, Torso, Head, ArmL, ArmR, LegL, LegR, Weapon (cajado, filho de ArmR) e Crystal (filho de Weapon).',
+    notes: 'Rig de mago (type mage): o animador contra-gira o Weapon para o cajado ficar em pé e o Crystal pulsa no cast. Braços reposados pelo rig (o FBX estava em T-pose); a saia longa fica no Torso e só as botas viram LegL/LegR. O pano do robe usa TeamColor. 12 draw calls, ~21 mil triângulos, atlas 512².'
+  },
+  {
     id: 'necromancer_glb',
     name: 'Necromante das Cinzas (Blender)',
     category: 'units',

@@ -1,0 +1,63 @@
+{
+  "format": "warpolymission",
+  "version": 1,
+  "id": "mission-anchors-demo",
+  "hidden": true,
+  "title": { "pt-BR": "Desembarque Nomeado", "en": "Named Landing" },
+  "subtitle": { "pt-BR": "Exemplo de âncoras (M2-01): nenhuma coordenada escrita à mão", "en": "Anchors showcase (M2-01): no hand-written coordinates" },
+  "briefing": {
+    "speaker": { "pt-BR": "Capitã Lyra", "en": "Captain Lyra" },
+    "portrait": "🧙",
+    "text": {
+      "pt-BR": "A Liga de Aurelan precisa de um ponto de apoio. Resgate os aldeões presos perto da mina de ouro, derrube a torre dos Clãs do Cinzal e leve o nosso emissário até a praia de desembarque.",
+      "en": "The Aurelan League needs a foothold. Rescue the villagers held near the gold mine, bring down the Cinzal Clans' tower, and lead our envoy to the landing beach."
+    }
+  },
+  "mapId": "duelo-continental-1",
+  "seed": 2026,
+  "players": [
+    { "id": 0, "name": { "pt-BR": "Você", "en": "You" }, "factionId": "human", "team": 0, "color": "#2563eb", "isLocal": true, "startSlot": 0 },
+    { "id": 1, "name": { "pt-BR": "Clãs do Cinzal", "en": "Cinzal Clans" }, "factionId": "orc", "team": 1, "color": "#dc2626", "isAI": false, "startSlot": 1 }
+  ],
+  "startingResources": { "wood": 330, "gold": 260, "stone": 120 },
+  "vars": { "arrived": false },
+
+  "setup": [
+    { "type": "spawn", "owner": "neutral", "unitType": "villager", "count": 3, "anchor": "goldMine1", "dx": 6, "dz": 4, "tag": "captives" },
+    { "type": "spawn", "owner": "player", "unitType": "villager", "count": 1, "anchor": "playerStart", "dx": 5, "dz": 7, "tag": "envoy" },
+    { "type": "spawnBuilding", "owner": "enemy", "buildingType": "watchtower", "anchor": "enemyStart", "dx": -12, "dz": -8, "tag": "tower" }
+  ],
+
+  "objectives": [
+    {
+      "id": "rescue-captives", "type": "rescue", "priority": "primary", "tag": "captives", "count": 3,
+      "title": { "pt-BR": "Resgatar os aldeões perto da mina de ouro", "en": "Rescue the villagers near the gold mine" }
+    },
+    {
+      "id": "destroy-tower", "type": "destroy", "priority": "primary", "select": { "tag": "tower" },
+      "title": { "pt-BR": "Destruir a torre dos Clãs do Cinzal", "en": "Destroy the Cinzal Clans' tower" }
+    },
+    {
+      "id": "escort-envoy", "type": "escort", "priority": "primary", "tag": "envoy", "area": { "anchor": "landingZone", "r": 8 },
+      "title": { "pt-BR": "Levar o emissário à praia de desembarque", "en": "Bring the envoy to the landing beach" }
+    }
+  ],
+
+  "triggers": [
+    {
+      "id": "intro", "when": { "type": "time", "at": 0 },
+      "actions": [
+        { "type": "camera", "anchor": "playerStart", "zoom": 1 },
+        { "type": "reveal", "anchor": "landingZone", "radius": 24 },
+        { "type": "dialog", "speaker": { "pt-BR": "Capitã Lyra", "en": "Captain Lyra" }, "portrait": "🧙", "text": { "pt-BR": "A praia fica a oeste. Cuidado com a torre!", "en": "The beach lies to the west. Mind the tower!" }, "duration": 6 }
+      ]
+    },
+    {
+      "id": "arrived", "when": { "type": "area", "owner": "player", "tag": "envoy", "area": { "anchor": "landingZone", "r": 8 } },
+      "actions": [
+        { "type": "setVar", "name": "arrived", "value": true },
+        { "type": "message", "text": { "pt-BR": "O emissário chegou à praia.", "en": "The envoy reached the beach." } }
+      ]
+    }
+  ]
+}

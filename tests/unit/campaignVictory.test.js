@@ -23,7 +23,7 @@ describe('epilogue no schema', () => {
     const d = base(); delete d.epilogue;
     expect(validateCampaign(d).ok).toBe(true);
   });
-  it('a campanha da Aliança traz epílogo bilíngue de 3 a 5 parágrafos, facção human, 120-180 palavras', () => {
+  it('a campanha do Reino traz epílogo bilíngue de 3 a 5 parágrafos, facção human, 120-180 palavras', () => {
     const e = alliance.epilogue;
     expect(e.faction).toBe('human');
     expect(e.paragraphs.length).toBeGreaterThanOrEqual(3);
@@ -67,7 +67,7 @@ describe('campaignEndPlan na última missão', () => {
 
 describe('modelo da tela de vitória', () => {
   const plan = campaignEndPlan(alliance, lastId, 'victory', allDone);
-  it('Aliança: facção, título do epílogo, parágrafos, botões e estatísticas', () => {
+  it('Reino: facção, título do epílogo, parágrafos, botões e estatísticas', () => {
     const m = buildCampaignVictoryModel({ def: alliance, plan, completed: allDone, lang: 'pt-BR' });
     expect(m.faction).toBe('human');
     expect(m.generic).toBe(false);

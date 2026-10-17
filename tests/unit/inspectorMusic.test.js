@@ -15,7 +15,7 @@ const defaults = new Set(enabledIds());
 describe('modelo da lista (puro)', () => {
   it('7 grupos na ordem pedida; cada faixa do catálogo aparece uma única vez', () => {
     const m = buildMusicModel(defaults);
-    expect(m.groups.map((g) => g.label)).toEqual(['Abertura', 'Reino / paz', 'Reino / combate', 'Horda / paz', 'Horda / combate', 'Vitória / Derrota', 'Candidatas novas']);
+    expect(m.groups.map((g) => g.label)).toEqual(['Abertura', 'Reino / paz', 'Reino / combate', 'Clãs / paz', 'Clãs / combate', 'Vitória / Derrota', 'Candidatas novas']);
     expect(MUSIC_GROUPS).toHaveLength(7);
     const ids = m.groups.flatMap((g) => g.sections.flatMap((s) => s.items.map((i) => i.id)));
     expect(ids.sort()).toEqual(MUSIC_CATALOG.map((e) => e.id).sort());
@@ -31,7 +31,7 @@ describe('modelo da lista (puro)', () => {
     for (const f of ['human_peace', 'human_combat', 'orc_peace', 'orc_combat']) expect(g(f).total, f).toBe(3);
     expect(g('endings').total).toBe(4);
     const cand = g('candidates');
-    expect(cand.sections.map((s) => s.label)).toEqual(['Abertura', 'Reino / paz', 'Reino / combate', 'Horda / paz', 'Horda / combate']);
+    expect(cand.sections.map((s) => s.label)).toEqual(['Abertura', 'Reino / paz', 'Reino / combate', 'Clãs / paz', 'Clãs / combate']);
     expect(cand.total).toBe(2 + 5 + 6 + 5 + 6);
     expect(cand.sections.every((s) => s.items.every((i) => i.candidate && !i.checked))).toBe(true);
     // "No jogo" refletindo os padrões
@@ -54,7 +54,7 @@ describe('modelo da lista (puro)', () => {
     expect(d.subtitle).toBe('Abertura · Neutra');
     expect(d.details.join(' ')).toMatch(/Compasso: 4\/4/);
     expect(d.details.join(' ')).toMatch(/Instrumentos: .*(trombones|tímpanos)/);
-    expect(describeTrack(getTrack('orc_peace_4')).subtitle).toBe('Paz · Horda · candidata nova');
+    expect(describeTrack(getTrack('orc_peace_4')).subtitle).toBe('Paz · Clãs · candidata nova');
     expect(describeTrack(getTrack('victory_human')).details[0]).toMatch(/Efeito sintetizado/);
     expect(metaLine(getTrack('defeat_orc'))).toMatch(/^fanfarra curta/);
     expect(describeTrack(undefined)).toBeNull();

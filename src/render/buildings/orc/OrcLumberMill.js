@@ -3,7 +3,7 @@ import { BuildingView } from '../../BuildingView.js';
 import { EVT } from '../../../sim/events.js';
 
 /**
- * OrcLumberMill — Serraria e Centro Madeireiro Industrial da Horda Orc
+ * OrcLumberMill — Serraria e Centro Madeireiro Industrial dos Clãs Orcs
  *
  * Arquitetura (Engine & Gameplay):
  * - Extende `BuildingView` (a entidade de simulação é `Building`, em src/sim).

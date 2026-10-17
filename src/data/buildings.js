@@ -473,7 +473,7 @@ export const BUILDINGS = {
     trains: [],
     dropoff: LUMBER_DROPOFF,
     icon: '/icoSerrariaOrc.svg',
-    description: 'Ponto de entrega de madeira da Horda'
+    description: 'Ponto de entrega de madeira dos Clãs'
   },
   orc_barracks: {
     type: 'orc_barracks',
@@ -514,7 +514,7 @@ export const BUILDINGS = {
     trains: [],
     dropoff: [],
     icon: '/icoForjaOrc.svg',
-    description: 'Forja melhorias de combate para a Horda'
+    description: 'Forja melhorias de combate para os Clãs'
   },
   ogre_den: {
     type: 'ogre_den',
@@ -535,7 +535,7 @@ export const BUILDINGS = {
     trains: ['ogre'],
     dropoff: [],
     icon: '/icoQuartelOrc.svg',
-    description: 'Treina ogros, a cavalaria da Horda (requer Centro nível 2)'
+    description: 'Treina ogros, a cavalaria dos Clãs (requer Centro nível 2)'
   },
   orc_workshop: {
     type: 'orc_workshop',
@@ -577,7 +577,7 @@ export const BUILDINGS = {
     trains: ['war_serpent'],
     dropoff: [],
     icon: '/icoQuartel.svg',
-    description: 'Treina Serpes de Guerra, a força aérea da Horda (requer Quartel e Centro nível 3)'
+    description: 'Treina Serpes de Guerra, a força aérea dos Clãs (requer Quartel e Centro nível 3)'
   },
   ash_sanctum: {
     type: 'ash_sanctum',
@@ -663,7 +663,7 @@ export const BUILDINGS = {
     trains: ['tanker', 'war_galley', 'barge', 'iron_leviathan', 'colossal_turtle'],
     dropoff: [],
     icon: '/icoEstaleiro.svg',
-    description: 'Constrói navios na costa: petroleiros, galés, barcaças, leviatãs e tartarugas (requer Quartel da Horda e Centro nível 2)'
+    description: 'Constrói navios na costa: petroleiros, galés, barcaças, leviatãs e tartarugas (requer Quartel dos Clãs e Centro nível 2)'
   },
   naval_forge: {
     type: 'naval_forge',

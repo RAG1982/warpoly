@@ -4,7 +4,7 @@
  * Une `src/data/` (ids, defs) a `src/i18n` (nomes/descrições traduzidos) para a HUD e os menus não
  * repetirem a mesma lógica. Sem DOM; roda em Node (testável).
  */
-import { t, unitName, buildingName, researchName, tierName, translateSimText, resourceName, factionName } from '../i18n/index.js';
+import { t, unitName, buildingName, researchName, tierName, translateSimText, resourceName } from '../i18n/index.js';
 import { getUnitDef, getBuildingDef, BUILDINGS, RESEARCH, TIER_NAMES } from '../data/index.js';
 
 /** 'orc' | 'human' da facção do jogador local. */
@@ -111,8 +111,8 @@ export function localizeSimText(text) {
   if (m) return `${m[1]}${t('req.lockedNever')}`;
   m = /^Acampamento de bandidos destruído!(?: (.*))?$/su.exec(text);
   if (m) return t('sim.banditsDestroyed') + (m[1] ? ` ${localizeRewards(m[1])}` : '');
-  m = /^⚔️ A (Horda Orc|Aliança Humana) reuniu um esquadrão de guerra \((\d+) tropas\) e avança contra sua base!$/u.exec(text);
-  if (m) return `⚔️ ${t('sim.aiWave', { faction: factionName(m[1] === 'Horda Orc' ? 'orc' : 'human'), count: m[2] })}`;
+  m = /^⚔️ (?:(Os Clãs Orcs) reuniram|O Reino Humano reuniu) um esquadrão de guerra \((\d+) tropas\) e avança(?:m)? contra sua base!$/u.exec(text);
+  if (m) return `⚔️ ${t(m[1] ? 'sim.aiWaveOrc' : 'sim.aiWaveHuman', { count: m[2] })}`;
   return text;
 }
 

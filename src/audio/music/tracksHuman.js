@@ -1,5 +1,5 @@
 /**
- * tracksHuman.js — NOVAS variações do Reino (Liga de Aurelan), todas candidatas (ver `catalog.js`): 5 de paz e 6 de combate.
+ * tracksHuman.js — NOVAS variações do Reino Humano, todas candidatas (ver `catalog.js`): 5 de paz e 6 de combate.
  * Estética: nobre, barroca, ordem e dever real — trompetes majestosos, violinos e violoncelos, CRAVO aristocrático, 4/4
  * firme (e alguns 3/4 e 6/8 cavalheirescos). As melodias são ESCRITAS (graus da escala, motivos que se repetem e resolvem
  * na tônica), sem notas aleatórias. As de paz evoluem com o tempo de partida (`evolutionLayers`).

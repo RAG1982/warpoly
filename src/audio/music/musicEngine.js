@@ -51,7 +51,7 @@ export const CHORD_TONES = Object.freeze({
   aug: [0, 4, 8, 12, 16, 20],
   sus4: [0, 5, 7, 12, 17, 19],
   sus2: [0, 2, 7, 12, 14, 19],
-  pow: [0, 7, 12, 19, 24, 31] // quinta vazia (sem terça): o som de metais da Horda
+  pow: [0, 7, 12, 19, 24, 31] // quinta vazia (sem terça): o som de metais dos Clãs
 });
 
 /** Sufixo de grau (`'4M'`) -> qualidade do acorde. Sem sufixo, a qualidade sai da própria escala. */

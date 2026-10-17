@@ -3,7 +3,7 @@ import { missingRequirements, evalRequirements, formatRequirement } from '../../
 
 /**
  * requirements.test.js — F3-04: `missingRequirements` (módulo puro) e a validação em
- * `GameManager.placeBuilding` (Quartel exige Fazenda concluída / Quartel da Horda exige
+ * `GameManager.placeBuilding` (Quartel exige Fazenda concluída / Quartel dos Clãs exige
  * Chiqueiro concluído — `BUILDINGS[type].requires`, `src/data/buildings.js`).
  */
 describe('missingRequirements (puro)', () => {

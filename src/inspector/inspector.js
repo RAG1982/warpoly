@@ -414,19 +414,19 @@ const MODEL_CATALOG = [
   // --- CONSTRUÇÕES ---
   {
     id: 'great_hall',
-    name: 'Grande Salão da Horda (Great Hall)',
+    name: 'Grande Salão dos Clãs (Great Hall)',
     category: 'buildings',
     faction: 'orc',
     type: 'building',
     icon: '🌋',
     sourceFile: 'src/render/buildings/orc/GreatHall.js',
     create: () => bldView(GreatHall, 'great_hall'),
-    description: 'A colossal fortaleza central da Horda Orc. Construída com pesadas toras de ferro, estacas defensivas pontiagudas, crânio de fera ancestral sobre o portal de entrada, quatro torreões de canto com braseiros de fogo ardente e estandartes de guerra vermelhos.',
-    notes: 'VFX: Estandartes de guerra da Horda com ondulação dinâmica ao vento e braseiro de entrada com PointLight animada e cintilação de calor.'
+    description: 'A colossal fortaleza central dos Clãs Orcs. Construída com pesadas toras de ferro, estacas defensivas pontiagudas, crânio de fera ancestral sobre o portal de entrada, quatro torreões de canto com braseiros de fogo ardente e estandartes de guerra vermelhos.',
+    notes: 'VFX: Estandartes de guerra dos Clãs com ondulação dinâmica ao vento e braseiro de entrada com PointLight animada e cintilação de calor.'
   },
   {
     id: 'orc_barracks',
-    name: 'Quartel da Horda (Orc Barracks)',
+    name: 'Quartel dos Clãs (Orc Barracks)',
     category: 'buildings',
     faction: 'orc',
     type: 'building',
@@ -474,7 +474,7 @@ const MODEL_CATALOG = [
   },
   {
     id: 'orc_lumber_mill',
-    name: 'Serraria da Horda (Orc Lumber Mill)',
+    name: 'Serraria dos Clãs (Orc Lumber Mill)',
     category: 'buildings',
     faction: 'orc',
     type: 'building',
@@ -486,14 +486,14 @@ const MODEL_CATALOG = [
   },
   {
     id: 'orc_forge',
-    name: 'Forja de Guerra da Horda (Orc War Forge)',
+    name: 'Forja de Guerra dos Clãs (Orc War Forge)',
     category: 'buildings',
     faction: 'orc',
     type: 'building',
     icon: '🔥',
     sourceFile: 'src/render/buildings/orc/OrcForge.js',
     create: () => bldView(OrcForge, 'orc_forge'),
-    description: 'Centro de aprimoramentos bélicos e fundição da Horda. Erguida sobre blocos maciços de basalto vulcânico negro, possui fornalha abobadada com boca em arco e grades de ferro, chaminé monumental reforçada com anéis forjados, telhado parcial de chapas rebitadas, toco com bigorna de ferro fundido e tina de têmpera.',
+    description: 'Centro de aprimoramentos bélicos e fundição dos Clãs. Erguida sobre blocos maciços de basalto vulcânico negro, possui fornalha abobadada com boca em arco e grades de ferro, chaminé monumental reforçada com anéis forjados, telhado parcial de chapas rebitadas, toco com bigorna de ferro fundido e tina de têmpera.',
     notes: 'VFX: Fogo intenso na fornalha com malha de chamas animadas, PointLight de calor termodinâmico, chaminé alta expelindo fumaça preta e faíscas incandescentes na bigorna.'
   },
   {
@@ -1015,7 +1015,7 @@ const MODEL_CATALOG = [
   },
   {
     id: 'orc_barracks_glb',
-    name: 'Quartel da Horda (Blender)',
+    name: 'Quartel dos Clãs (Blender)',
     category: 'buildings',
     faction: 'orc',
     type: 'building',
@@ -2305,7 +2305,7 @@ class ModelInspectorApp {
     actionsEl.innerHTML = '';
 
     if (item.id === 'orc_lumber_mill') {
-      descEl.innerHTML = '🪚 <strong>Serraria Industrial da Horda:</strong> A serra circular dentada gira continuamente em torno do seu eixo. Entregas de toras aceleram a lâmina e projetam cavacos de madeira.';
+      descEl.innerHTML = '🪚 <strong>Serraria Industrial dos Clãs:</strong> A serra circular dentada gira continuamente em torno do seu eixo. Entregas de toras aceleram a lâmina e projetam cavacos de madeira.';
       const btn = document.createElement('button');
       btn.className = 'gold-btn action-btn';
       btn.innerHTML = '🪵 Processar Madeira (Acelerar Serra)';
@@ -2329,7 +2329,7 @@ class ModelInspectorApp {
       });
       actionsEl.appendChild(btn);
     } else if (item.id === 'pig_farm') {
-      descEl.innerHTML = `🐖 <strong>Criatório de Javalis da Horda:</strong> 3 javalis/porcos com IA comportamental autônoma vagam pelo cercado, farejam a terra, comem no cocho e balançam o rabo.`;
+      descEl.innerHTML = `🐖 <strong>Criatório de Javalis dos Clãs:</strong> 3 javalis/porcos com IA comportamental autônoma vagam pelo cercado, farejam a terra, comem no cocho e balançam o rabo.`;
       const btn = document.createElement('button');
       btn.className = 'gold-btn action-btn';
       btn.innerHTML = '🌾 Chamar Javalis ao Cocho';
@@ -2359,7 +2359,7 @@ class ModelInspectorApp {
       });
       actionsEl.appendChild(btn);
     } else if (item.id === 'great_hall') {
-      descEl.innerHTML = '🌋 <strong>Grande Salão da Horda:</strong> Estandartes carmesim com ondulação dinâmica de vento via equações senoidais, braseiro de entrada com PointLight animada e chaminé ativa.';
+      descEl.innerHTML = '🌋 <strong>Grande Salão dos Clãs:</strong> Estandartes carmesim com ondulação dinâmica de vento via equações senoidais, braseiro de entrada com PointLight animada e chaminé ativa.';
       const btn = document.createElement('button');
       btn.className = 'gold-btn action-btn';
       btn.innerHTML = '💨 Baforada de Fumaça na Chaminé';

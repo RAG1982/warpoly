@@ -2,11 +2,11 @@
  * tracksTitle.js — TEMAS DE ABERTURA (tela inicial/menus). Família `title` (neutra): a variação 0 é o tema do jogo; 1 e 2 são
  * candidatas para o dono escolher. Tudo original e sintetizado.
  *
- *  0 "Marcha da Tempestade" (≈ 100 s, ré menor harmônico, 4/4 a 96 bpm): abre com caixas e tambores marchando, a Horda
+ *  0 "Marcha da Tempestade" (≈ 100 s, ré menor harmônico, 4/4 a 96 bpm): abre com caixas e tambores marchando, os Clãs
  *    entra com metais graves, silêncio de suspense, cordas trágicas dos humanos, explosão tutti com tímpanos, diálogo entre
  *    metais e cordas, clímax e final em acorde suspenso (ré sus4) que desemboca limpo na marcha do início (laço do menu).
  *  1 "Réquiem das Muralhas" (≈ 91 s, lá menor, 4/4 a 84 bpm): lamento de violinos e violoncelos, resposta de metais e coro.
- *  2 "Chamado dos Tambores" (≈ 92 s, mi frígio, 5/4 a 104 bpm): marcha irregular da Horda em 5/4.
+ *  2 "Chamado dos Tambores" (≈ 92 s, mi frígio, 5/4 a 104 bpm): marcha irregular dos Clãs em 5/4.
  */
 import { makeTrack, place, span, vol, ramp, rollSteps, shift } from './musicEngine.js';
 
@@ -19,14 +19,14 @@ const T = (v) => ({ family: 'title', faction: 'neutral', state: 'title', variant
 const MARCH = 'g.ooX.oxg.ooX.xX';
 const DEG0 = [
   0, 0, 0, 0, // 0–3   abertura: percussão militar
-  0, 0, 3, 0, 5, 4, 0, 0, // 4–11  Horda: metais graves
+  0, 0, 3, 0, 5, 4, 0, 0, // 4–11  Clãs: metais graves
   0, 6, 4, 4, // 12–15 suspense
   0, 5, 3, 4, 0, '2M', 5, 4, // 16–23 cordas trágicas
   0, 0, 5, 4, // 24–27 explosão
   0, 3, 5, 4, 0, 3, 6, 4, // 28–35 diálogo e subida
   0, 5, 4, '0s' // 36–39 clímax e acorde suspenso
 ];
-// Tema dos metais da Horda (oito compassos): fanfarra sobre o acorde de ré menor, quedas em escala, tensão Sib–Dó# (2ª aumentada).
+// Tema dos metais dos Clãs (oito compassos): fanfarra sobre o acorde de ré menor, quedas em escala, tensão Sib–Dó# (2ª aumentada).
 const A_THEME = [
   '0:6 0:2 2:4 4:4', '4:6 2:2 1:4 0:4', '3:6 3:2 5:4 7:4', '4:6 6:2 7:4 4:4',
   '5:6 5:2 7:4 9:4', '8:6 7:2 6:4 4:4', '7:6 4:2 2:4 0:4', '0:12 r:4'
@@ -59,7 +59,7 @@ const title0 = makeTrack({
     { kind: 'pattern', inst: 'timpani', oct: 0, vel: 0.5, lite: false, bars: [39], steps: rollSteps(spb16, 0.7, 0.15) },
     { kind: 'drum', inst: 'cymbal', steps: 'X...............', lite: false, bars: [24, 28, 36] },
     { kind: 'pattern', inst: 'gong', oct: 1, vel: 0.9, lite: false, bars: [0, 24, 36, 39], steps: [{ i: 0, n: 0, dur: 1 }] },
-    // --- Horda: trombones e trompas na fanfarra grave
+    // --- Clãs: trombones e trompas na fanfarra grave
     { kind: 'pattern', inst: 'warhorn', oct: 1, vel: 0.3, lite: false, bars: [2, 3], steps: [{ i: 0, n: 0, dur: 14 }] },
     { kind: 'hold', inst: 'trombone', oct: 0, vel: 0.22, lite: false, bars: span([4, 11], [39, 39]) },
     { kind: 'line', inst: 'trombone', oct: 1, vel: 0.42, lite: true, line: place(40, spb16, [4, A_THEME], [24, dn(EXPLOSION)], [28, dn(CALL1)], [32, dn(CALL2)], [34, dn(TOGETHER)], [36, dn(FINAL)]) },

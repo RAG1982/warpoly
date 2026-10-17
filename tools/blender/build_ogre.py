@@ -1,5 +1,5 @@
 """
-build_ogre.py — Ogro da Horda (tipo interno `ogre`) gerado 100% por script.
+build_ogre.py — Ogro dos Clãs (tipo interno `ogre`) gerado 100% por script.
 
 Uso:
   blender -b --factory-startup --python tools/blender/build_ogre.py -- [--no-render]

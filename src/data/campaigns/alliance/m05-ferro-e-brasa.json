@@ -9,8 +9,8 @@
     "speaker": { "pt-BR": "Mestre Orsolo", "en": "Master Orsolo" },
     "portrait": "🔮",
     "text": {
-      "pt-BR": "Nas Florestas Altas o Cinzal ergue uma forja de guerra que arma a horda inteira. Não há tropa pronta para uma marcha longa: vamos construir uma base própria, forjar armas melhores e só então queimar o que eles ergueram. Use a madeira, o ouro e a pedra com sabedoria. O inimigo também cresce, e rápido.",
-      "en": "In the High Woods the Cinzal raise a war forge that arms the whole horde. No troops are ready for a long march: we will build a base of our own, forge better arms and only then burn what they built. Spend wood, gold and stone wisely. The enemy grows too, and fast."
+      "pt-BR": "Nas Florestas Altas o Cinzal ergue uma forja de guerra que arma todos os clãs. Não há tropa pronta para uma marcha longa: vamos construir uma base própria, forjar armas melhores e só então queimar o que eles ergueram. Use a madeira, o ouro e a pedra com sabedoria. O inimigo também cresce, e rápido.",
+      "en": "In the High Woods the Cinzal raise a war forge that arms all the clans. No troops are ready for a long march: we will build a base of our own, forge better arms and only then burn what they built. Spend wood, gold and stone wisely. The enemy grows too, and fast."
     },
     "hints": [
       { "pt-BR": "A IA inimiga vai atacar por conta própria; mantenha defesas.", "en": "The enemy AI will attack on its own; keep defenses up." },

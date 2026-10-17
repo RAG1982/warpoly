@@ -7,7 +7,7 @@ function posOf(v) {
 }
 
 /**
- * HumanForge — Forja Real, Armaria e Fundição da Aliança Humana
+ * HumanForge — Forja Real, Armaria e Fundição do Reino Humano
  *
  * Arquitetura (Engine & Gameplay):
  * - Extende `BuildingView` (a entidade de simulação é `Building`, em src/sim).

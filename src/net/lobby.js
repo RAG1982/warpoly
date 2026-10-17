@@ -54,7 +54,7 @@ function render() {
     kick.textContent = 'Expulsar';
     kick.onclick = () => sig.kick(p.id);
     const showKick = isHost && p.id !== sig.id;
-    t.append(row([p.name + (p.id === r.host ? ' (anfitrião)' : ''), p.faction === 'orc' ? 'Horda' : 'Aliança', p.ready ? 'sim' : 'não', showKick ? kick : '']));
+    t.append(row([p.name + (p.id === r.host ? ' (anfitrião)' : ''), p.faction === 'orc' ? 'Clãs Orcs' : 'Reino Humano', p.ready ? 'sim' : 'não', showKick ? kick : '']));
   }
 }
 

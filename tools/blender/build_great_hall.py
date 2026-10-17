@@ -1,5 +1,5 @@
 """
-build_great_hall.py — Grande Salão Orc (tipo interno `great_hall`, QG da Horda) gerado 100% por script.
+build_great_hall.py — Grande Salão Orc (tipo interno `great_hall`, QG dos Clãs) gerado 100% por script.
 
 Uso:
   blender -b --factory-startup --python tools/blender/build_great_hall.py -- [--no-render]

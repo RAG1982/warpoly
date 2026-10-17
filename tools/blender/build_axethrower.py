@@ -36,7 +36,7 @@ ARM_PIVOT = (0.48, 0.38, 0.0)       # relativo ao Torso
 LEG_PIVOT = (0.24, 0.85, 0.0)
 WEAPON_POS = (0.0, -0.84, 0.18)     # relativo ao braço
 WEAPON_REST_X = -45.0
-TEAM_DEFAULT = '#c9382a'            # vermelho da Horda (multiplica a área cinza)
+TEAM_DEFAULT = '#c9382a'            # vermelho dos Clãs (multiplica a área cinza)
 
 _SKIN = dict(base='#5d8f80', var='#456f66', var_scale=4.0, var_amt=0.6, fine=0.06,
              grad=(0.0, 2.7, 0.30), top=0.22, edge='#a5d2c0', edge_amt=0.35, edge_r=0.03, ao=(0.28, 0.65))

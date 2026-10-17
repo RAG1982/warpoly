@@ -1,5 +1,5 @@
 /**
- * tracksOrc.js — NOVAS variações da Horda, todas candidatas (ver `catalog.js`): 5 de paz e 6 de combate.
+ * tracksOrc.js — NOVAS variações dos Clãs, todas candidatas (ver `catalog.js`): 5 de paz e 6 de combate.
  * Estética: primal e agressiva — tambores pesados de guerra (taiko), metais graves (trompas/trombones) como trombetas de
  * invasão, madeiras escuras (flauta de osso), cantos corais graves, e RÍTMICA IRREGULAR (5/4, 7/8, 6/8). Marcha implacável.
  * As melodias são ESCRITAS (graus da escala, riffs e ostinatos que se repetem e resolvem), sem notas aleatórias. As de paz
@@ -152,7 +152,7 @@ const oc4 = makeTrack({
   ]
 });
 
-// 5 · Cerco da Horda — dó frígio a 66 bpm: trombones longos que sobem, taiko fúnebre, gongos e coro grave. Lento e ameaçador.
+// 5 · Cerco dos Clãs — dó frígio a 66 bpm: trombones longos que sobem, taiko fúnebre, gongos e coro grave. Lento e ameaçador.
 const oc5 = makeTrack({
   ...OC(5), bpm: 66, mode: 'phrygian', key: 36, seed: 349,
   deg: [0, 0, 1, 0, 0, 6, 1, 0, 0, 5, 1, 0, 3, 6, 1, 0],

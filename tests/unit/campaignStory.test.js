@@ -60,7 +60,7 @@ describe('História de Abertura da Campanha (MUNDO-HISTORIA-CAMPANHA §2)', () =
   });
 
   describe('Modelo puro CampaignStoryModel', () => {
-    it('carrega painéis e resolve variantes por facção (Aliança x Horda)', () => {
+    it('carrega painéis e resolve variantes por facção (Reino x Clãs)', () => {
       const storage = memoryStorage();
       const modelHuman = new CampaignStoryModel({
         storyData: worldStory,
@@ -79,13 +79,13 @@ describe('História de Abertura da Campanha (MUNDO-HISTORIA-CAMPANHA §2)', () =
       expect(modelHuman.totalCount).toBe(8); // 7 narrativos + 1 título
       expect(modelHuman.narrativeCount).toBe(7);
 
-      // Painel 7 da Aliança cita Sevelin e Baía de Aurelan
+      // Painel 7 do Reino cita Sevelin e Baía de Aurelan
       const p7Human = modelHuman.panels[6];
       expect(p7Human.art).toBe('panel-7-alliance');
       expect(p7Human.text['pt-BR']).toContain('Sevelin');
       expect(p7Human.text.en).toContain('Aurelan');
 
-      // Painel 7 da Horda cita Skarn e Planalto do Cinzal
+      // Painel 7 dos Clãs cita Skarn e Planalto do Cinzal
       const p7Orc = modelOrc.panels[6];
       expect(p7Orc.art).toBe('panel-7-horde');
       expect(p7Orc.text['pt-BR']).toContain('Skarn');
@@ -151,11 +151,11 @@ describe('História de Abertura da Campanha (MUNDO-HISTORIA-CAMPANHA §2)', () =
 
       CampaignStoryModel.markSeen('war-alliance', progress);
 
-      // Aliança agora vista, Horda ainda primeira vez
+      // Reino já visto, Clãs ainda na primeira vez
       expect(CampaignStoryModel.isFirstTime('war-alliance', progress)).toBe(false);
       expect(CampaignStoryModel.isFirstTime('war-horde', progress)).toBe(true);
 
-      // Nova tentativa na Aliança reativa a visualização de primeira vez
+      // Nova tentativa no Reino reativa a visualização de primeira vez
       progress.newAttempt('war-alliance');
       expect(CampaignStoryModel.isFirstTime('war-alliance', progress)).toBe(true);
     });
@@ -260,7 +260,7 @@ describe('História de Abertura da Campanha (MUNDO-HISTORIA-CAMPANHA §2)', () =
         progress
       }, null);
 
-      // Aliança principal na primeira tentativa deve exibir história
+      // campanha principal do Reino na primeira tentativa deve exibir história
       screen.campaignId = 'war-alliance';
       expect(screen._shouldAutoShowStory()).toBe(true);
 

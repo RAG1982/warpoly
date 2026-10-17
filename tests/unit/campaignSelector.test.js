@@ -30,14 +30,14 @@ describe('Seletor e Múltiplas Campanhas (MUNDO-HISTORIA-CAMPANHA §7)', () => {
     const storage = memoryStorage();
     const progress = new CampaignProgress(storage);
 
-    // Registra vitória na m01 da Aliança principal
+    // Registra vitória na m01 da campanha principal do Reino
     progress.recordVictory('war-alliance', 'war-alliance-01-terra-a-vista', { seconds: 120 });
     expect(progress.completed('war-alliance')['war-alliance-01-terra-a-vista']).toBeDefined();
 
-    // Horda principal não deve ter missões completadas
+    // campanha dos Clãs principal não deve ter missões completadas
     expect(Object.keys(progress.completed('war-horde')).length).toBe(0);
 
-    // Registra vitória na Horda
+    // Registra vitória nos Clãs
     progress.recordVictory('war-horde', 'war-horde-01-cinzas-vermelhas', { seconds: 95 });
     expect(progress.completed('war-horde')['war-horde-01-cinzas-vermelhas']).toBeDefined();
 

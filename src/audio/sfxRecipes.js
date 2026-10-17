@@ -219,7 +219,7 @@ export const SFX = {
       });
     }
   },
-  // Fanfarras da tela final da campanha (curtas, sintetizadas): metais da Aliança (maior, brilhante) e da Horda (grave, áspera).
+  // Fanfarras da tela final da campanha (curtas, sintetizadas): metais do Reino (maior, brilhante) e dos Clãs (grave, áspera).
   victoryFanfareHuman: {
     dur: 1.9,
     priority: 6,
@@ -251,8 +251,8 @@ export const SFX = {
       c.burst(0.18, 0.5, 0).connect(g);
     }
   },
-  // Derrotas por facção (catálogo de música): o Reino cai em lá menor, com um trompete que desce e se apaga; a Horda
-  // desaba em graves, trítono descendente e um último golpe de tambor.
+  // Derrotas por facção (catálogo de música): o Reino cai em lá menor, com um trompete que desce e se apaga; os Clãs
+  // desabam em graves, trítono descendente e um último golpe de tambor.
   defeatHuman: {
     dur: 3.2,
     priority: 6,

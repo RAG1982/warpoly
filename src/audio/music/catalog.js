@@ -62,13 +62,13 @@ const INFO = {
   orc_peace_7: { title: 'Pedra e Fumaça', candidate: true, description: '6/8 lento em sol menor harmônico: balanço de flauta, trompa de guerra e gongo.' },
   orc_combat_3: { title: 'Invasão Implacável', candidate: true, description: 'Mi frígio a 112 bpm: riff de trombones em tríades pesadas, taiko em marcha, trompa de guerra e coro na segunda metade.' },
   orc_combat_4: { title: 'Perseguição Selvagem', candidate: true, description: '6/8 em ré frígio a 132 bpm: galope de colcheias nos trombones e taiko de dois tempos.' },
-  orc_combat_5: { title: 'Cerco da Horda', candidate: true, description: 'Dó frígio a 66 bpm: trombones longos que sobem, taiko fúnebre, gongos e coro grave. Lento e ameaçador.' },
+  orc_combat_5: { title: 'Cerco dos Clãs', candidate: true, description: 'Dó frígio a 66 bpm: trombones longos que sobem, taiko fúnebre, gongos e coro grave. Lento e ameaçador.' },
   orc_combat_6: { title: 'Carga dos Lobos', candidate: true, description: '7/8 (2+2+3) em si frígio a 150 bpm: galope de sete colcheias nos trombones, taiko sem trégua.' },
   orc_combat_7: { title: 'Defesa do Clã', candidate: true, description: '5/4 em fá menor harmônico: riffs sincopados, sinos dobrando e coro; a dominante fecha cada volta.' },
   orc_combat_8: { title: 'Coro da Escuridão', candidate: true, description: 'Dó sustenido menor a 90 bpm: coro grave num canto repetido, órgão, violoncelos e tímpanos lentos. Confronto sombrio.' },
-  title_0: { title: 'Marcha da Tempestade', description: 'TEMA DE ABERTURA do jogo. Caixas e tambores marchando, metais graves da Horda, suspense quase silencioso, cordas trágicas dos humanos, explosões com tímpanos e final em acorde suspenso (laço suave no menu).', inGame: true },
+  title_0: { title: 'Marcha da Tempestade', description: 'TEMA DE ABERTURA do jogo. Caixas e tambores marchando, metais graves dos Clãs, suspense quase silencioso, cordas trágicas dos humanos, explosões com tímpanos e final em acorde suspenso (laço suave no menu).', inGame: true },
   title_1: { title: 'Réquiem das Muralhas', description: 'Abertura alternativa, mais lenta e trágica: lamento de violinos e violoncelos, resposta de trombones e coro, clímax e despedida em acorde suspenso.', candidate: true },
-  title_2: { title: 'Chamado dos Tambores', description: 'Abertura alternativa da Horda em 5/4: taiko irregular, trombones em frígio, canto do clã com flauta de osso e final de força total.', candidate: true }
+  title_2: { title: 'Chamado dos Tambores', description: 'Abertura alternativa dos Clãs em 5/4: taiko irregular, trombones em frígio, canto do clã com flauta de osso e final de força total.', candidate: true }
 };
 
 /** Fanfarras curtas (sfx): `sfx` é o nome em `sfxRecipes.js`. */

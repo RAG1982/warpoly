@@ -95,7 +95,7 @@ const installSceneProbe = async () => {
   }
 };
 
-/** 8 × 8 (Aliança × Horda) perto do Centro do jogador local; com `focus`, a câmera vai para lá. Devolve o centro da batalha. */
+/** 8 × 8 (Reino × Clãs) perto do Centro do jogador local; com `focus`, a câmera vai para lá. Devolve o centro da batalha. */
 const spawnBattle = (focus) => {
   const gm = window.game.gameManager;
   const hq = gm.buildings.find((b) => b.ownerId === 0);

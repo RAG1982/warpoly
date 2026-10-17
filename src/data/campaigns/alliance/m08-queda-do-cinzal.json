@@ -9,8 +9,8 @@
     "speaker": { "pt-BR": "Marechal Dorian Vasques", "en": "Marshal Dorian Vasques" },
     "portrait": "🛡️",
     "text": {
-      "pt-BR": "Esta é a última marcha. No Planalto do Cinzal, Skarn reuniu os dois clãs que lhe restam e mantém a bandeira da horda erguida. Ao norte, a Guarda Real avança conosco. Derrubem os dois salões de guerra e matem o próprio Skarn. Se o chefe-de-brasa cair, a horda se desfaz. Se escaparmos, a guerra dura outra geração.",
-      "en": "This is the final march. On the Cinzal Plateau, Skarn has gathered the two clans left to him and keeps the horde's banner raised. To the north, the Royal Guard advances with us. Tear down both war halls and slay Skarn himself. If the ember-chief falls, the horde breaks apart. If he escapes, the war lasts another generation."
+      "pt-BR": "Esta é a última marcha. No Planalto do Cinzal, Skarn reuniu os dois clãs que lhe restam e mantém a bandeira dos clãs erguida. Ao norte, a Guarda Real avança conosco. Derrubem os dois salões de guerra e matem o próprio Skarn. Se o chefe-de-brasa cair, a união dos clãs se desfaz. Se escaparmos, a guerra dura outra geração.",
+      "en": "This is the final march. On the Cinzal Plateau, Skarn has gathered the two clans left to him and keeps the clans' banner raised. To the north, the Royal Guard advances with us. Tear down both war halls and slay Skarn himself. If the ember-chief falls, the clan union breaks apart. If he escapes, the war lasts another generation."
     },
     "hints": [
       { "pt-BR": "A Guarda Real é uma aliada controlada pela IA.", "en": "The Royal Guard is an AI-controlled ally." },

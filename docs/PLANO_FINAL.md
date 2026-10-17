@@ -95,7 +95,10 @@ Esforço do agente: **P** ≤ 2 h · **M** meio dia · **G** 1–2 dias · **GG*
 | D6 | **HUD nova: sim**, o dono fornecerá imagens de referência | M5-06 confirmada; a maquete HTML nasce das imagens |
 | D7 | **Cortar heróis com XP** (e em escaramuça) | M5-12 **DROPPED** |
 | D8 | **Cancelar a Horda clássica (F8-06)** | F8-06 **DROPPED**; a Clássica fica com as 8 missões da Aliança |
-| D2, D5, D9 | **Aguardando resposta** (detalhes enviados na conversa) | D2 bloqueia M3-02; D5 e D9 não bloqueiam até M2-08/M6-03 |
+| D2 | **(b) Público, nomes limpos** | nova tarefa **M1-11** (renomear facções em UI e campanhas **antes** de M3-02); M6-02 vira só auditoria final + créditos |
+| D4 (formato) | Dono gera os heróis em **FBX/Blender** e informará o diretório | M2-20…24 esperam o diretório |
+| D5 | Mapa-múndi **limpo**: mesmo desenho, sem nenhum texto (instruções na conversa); ilustração apenas, não gera mapa jogável | M2-08 espera a imagem; fallback = cartela sobre a atual |
+| D9 | **(b) Cloudflare Worker + Durable Object** | M6-03 vira portar `server/` para Worker; o dono cria a conta Cloudflare e roda `wrangler login` |
 
 ### 4.1 Decisões suas (9) — texto original das opções
 
@@ -243,6 +246,7 @@ Legenda de dependências: só IDs; "—" = pode começar já. **Dif.** = dificul
 | M1-08 | Soak grande, NEW-51 e agressividade inicial da IA (NEW-9) | Média | M | S | M1-06 | NEW-51, NEW-9 | TODO |
 | M1-09 | Gate M1: regravar baselines, suíte completa, fechar `REVIEW` | Fácil | P | S | M1-01…08 | — | TODO |
 | M1-10 | **G1 — sua passada nº 1** (≈ 1 h) | — | — | V | M1-09 | — | TODO |
+| M1-11 | Renomear facções em UI e campanhas (D2 b): Aliança→Liga de Aurelan, Horda→Clãs do Cinzal | Média | M | S | M0-02 | D2 | TODO |
 
 ### M2 — Mundo jogável
 | ID | Tarefa | Dif. | Esf. | Exec. | Dep. | Origem | Status |
@@ -320,8 +324,8 @@ Legenda de dependências: só IDs; "—" = pode começar já. **Dif.** = dificul
 | ID | Tarefa | Dif. | Esf. | Exec. | Dep. | Origem | Status |
 |---|---|---|---|---|---|---|---|
 | M6-01 | Determinismo entre navegadores (trigonometria da sim) | Difícil | G | S | — | F9-03 risco | TODO |
-| M6-02 | Auditoria de nomes/IP, créditos e licenças | Média | M | S+V | D2 | D2 | TODO |
-| M6-03 | Hospedar o sinalizador e documentar TURN | Média | M | S+V | D9, M6-01 | F9-02 | TODO |
+| M6-02 | Auditoria final de nomes/IP, créditos e licenças | Média | M | S+V | M1-11 | D2 | TODO |
+| M6-03 | Portar o sinalizador para Cloudflare Worker + Durable Object | Difícil | G | S+V | M6-01 | F9-02 | TODO |
 | M6-04 | Compatibilidade (Firefox/Safari) e hardware mínimo (D3) | Média | M | S+V | M5-03 | D3 | TODO |
 | M6-05 | Empacotamento: versão, notas, PWA, página de entrada | Média | M | S | M6-04 | F10-05 | TODO |
 | M6-06 | Soak e regressão finais, release candidate | Média | M | S | M6-05 | F10-02/03/04 | TODO |

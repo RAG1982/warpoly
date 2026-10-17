@@ -140,6 +140,14 @@ Modelo: `sonnet` (Sonnet 5.5). `haiku` apenas nas fichas marcadas **H**. Modelag
 ### M1-10 · G1 — sua passada nº 1 (≈ 1 h)
 Lista (eu preparo no dia): tela de história e seletor de campanhas · uma partida em `duelo-continental-1` e outra em `ilha-unica-1` (biomas, lava, javali) · ouvir menu, partida, combate (som posicional, música) · ver o Brann no jogo e no inspetor (`?model=hero_brann_glb`) · jogar 5 min da missão clássica 1 · anotar o que incomoda.
 
+### M1-11 · Renomear facções em UI e campanhas (D2 = b)
+**Dif.** Média · **Esf.** M · **Exec.** S · **Roda:** Node · **Dep.:** M0-02 (deve terminar **antes** de M3-02)
+**Objetivo:** nenhum texto visível ao jogador usa os termos "Horda" e "Aliança" (par que evoca a marca Warcraft). Nomes novos (escolha do coordenador, veto do dono): **Aliança → "Liga de Aurelan"** (a liga de reinos de Velmara da lore; humano: "Reino de Aurelan" quando for o povo), **Horda → "Clãs do Cinzal"** (a força unificada por Skarn: "a União dos Clãs").
+**Contexto:** ocorrências em `src/i18n/pt-BR.json` e `en.json` (ex.: `building.ogre_den.desc`, `unit.hero_vozgul.desc`, `ability.hero_horde_roar.name` "Rugido da Horda", `menu.campaignHint` "Aliança"), regex em `src/ui/uiText.js:114` (mensagem da onda da IA), ~71 ocorrências em `src/data/campaigns/**/*.json` (clássica e novo mundo), `src/data/story/world.json`, `src/data/campaigns/README.md`, comentário em `src/ui/campaignVictoryArt.js`, comentário de crédito em `src/world/Water.js:79` ("Inspired by Warcraft 2": reescrever sem a marca), tests que conferem esses textos. Títulos aprovados mudam: "A Guerra do Mar Fendido: a Marcha da Aliança" → "…: a Marcha de Aurelan"; "o Caminho das Brasas" fica.
+**Fazer:** substituir nos textos pt-BR **e** en (en: "Horde"/"Alliance" → "Cinzal Clans"/"Aurelan League"), mantendo ids internos (`war-alliance`, `war-horde`, `orc`, `human`, `grunt`, `peon`); ids de i18n como `ability.hero_horde_roar` ficam (só o valor muda; renomear a habilidade "Rugido da Horda" → "Rugido dos Clãs"); ajustar frases em que o plural/gênero muda; atualizar testes; varrer de novo com `grep -rniE "horda|aliança|horde|alliance"` em `src` e listar o que sobrar e por quê (ex.: ids).
+**Pronto quando:** varredura só encontra ids internos e comentários explicativos; `npm test` verde; build ok; relatório com antes/depois da contagem.
+**Não fazer:** renomear ids, arquivos de campanha ou chaves de i18n.
+
 ---
 
 # M2 — Mundo jogável
@@ -435,16 +443,17 @@ HUD (se aprovada) · escuta de música e ambiência · seletor de dificuldade ·
 **Pronto quando:** testes verdes; `headless-match --seed 1` estável em 2 execuções; documentação em `docs/09_MULTIPLAYER.md` §4 atualizada; (a validação **entre navegadores** reais é a M6-04).
 
 ### M6-02 · Auditoria de nomes/IP, créditos e licenças
-**Dif.** Média · **Esf.** M · **Exec.** S + V · **Dep.:** D2
-**Fazer:** varrer UI, i18n, campanhas, ids visíveis, nomes de arquivo públicos, textos de documentação e README por termos suspeitos (lista em `docs/05_PARIDADE_WARCRAFT2.md` + "Horda/Aliança/Orc/Grunt/Peon/Goblin/Gryphon…" conforme D2); aplicar a opção escolhida em D2 (b: renomear em UI e campanhas — "Horda"→"Clãs do Cinzal", "Aliança"→"Reino de Aurelan"/"A Coroa", mantendo ids internos; a: aviso "projeto de fã"); tela **Créditos** completa (three.js, Vite, ws, fontes OFL, ferramentas de IA/arte, música sintetizada); `LICENSE`/`NOTICE` do projeto e das dependências; conferir licenças de fontes e de assets gerados (Tripo, imagens do dono).
+**Dif.** Média · **Esf.** M · **Exec.** S + V · **Dep.:** M1-11
+**Fazer (D2 = b; a renomeação principal já foi feita na M1-11, aqui é a auditoria final):** varrer UI, i18n, campanhas, ids visíveis, nomes de arquivo públicos, textos de documentação e README por termos suspeitos (lista em `docs/05_PARIDADE_WARCRAFT2.md` + "Horda/Aliança/Orc/Grunt/Peon/Goblin/Gryphon…" conforme D2); aplicar a opção escolhida em D2 (b: renomear em UI e campanhas — "Horda"→"Clãs do Cinzal", "Aliança"→"Reino de Aurelan"/"A Coroa", mantendo ids internos; a: aviso "projeto de fã"); tela **Créditos** completa (three.js, Vite, ws, fontes OFL, ferramentas de IA/arte, música sintetizada); `LICENSE`/`NOTICE` do projeto e das dependências; conferir licenças de fontes e de assets gerados (Tripo, imagens do dono).
 **Pronto quando:** relatório da varredura (antes/depois); Créditos acessível no menu; licenças listadas; `npm test` verde (atualizar testes de texto).
 **Aviso:** não é parecer jurídico.
 
-### M6-03 · Hospedar o sinalizador multiplayer e documentar TURN
-**Dif.** Média · **Esf.** M · **Exec.** S + V · **Dep.:** D9, M6-01
-**Contexto:** `server/` (Node + `ws`; `npm run signaling`), `src/net/SignalingClient.js`, `src/net/lobby.js`, `docs/09_MULTIPLAYER.md`, `docs/10_DEPLOY.md`.
-**Fazer (D9-a):** `Dockerfile` e instruções (Fly.io/Render/VPS) com variáveis (`PORT`, origens permitidas, limite de salas, *rate limit*); URL do sinalizador configurável por `BASE`/env no cliente com padrão de produção; HTTPS/WSS; STUN público configurado e lista opcional de TURN por env; mensagem clara quando a conexão P2P falha ("rede não permite conexão direta"); smoke remoto (`tools/online-check.mjs` apontando para o servidor hospedado). **Você:** criar a conta/serviço e fornecer a URL.
-**Pronto quando:** duas máquinas em redes diferentes criam e entram numa sala pelo link e jogam 5 min sem desync; docs atualizados.
+### M6-03 · Hospedar o sinalizador multiplayer na Cloudflare (D9 = b)
+**Dif.** Difícil · **Esf.** G · **Exec.** S + V · **Dep.:** M6-01
+**Contexto:** hoje o sinalizador é Node + `ws` (`server/index.js`, `server/signaling.js`, `server/protocol.js`; `npm run signaling`), protocolo documentado em `server/README.md` (cliente→servidor `create/join/leave/list/ready/setup/config/kick/start/rejoin…`, servidor→cliente `hello/joined/room/rooms/peer-joined/peer-left/signal/chat/start…`; limites de mensagem, token bucket, 8 jogadores/sala, códigos de 5 caracteres). Cliente: `src/net/SignalingClient.js`, `src/net/lobby.js`, `src/net/OnlineLobby.js`. O README prevê "Cloudflare Worker + Durable Object (um DO por sala, WebSocket Hibernation API)" mas **nada foi escrito**.
+**Fazer:** (1) extrair a lógica de sala de `signaling.js` para um módulo sem dependência de `ws` (`server/core/`), mantendo o servidor Node funcionando e os testes (`tests/unit/signaling.test.js`) verdes; (2) `server/worker/` com um Worker (roteia `GET /ws` e `GET /rooms`) e uma classe Durable Object **por sala** usando a WebSocket Hibernation API, reimplementando o mesmo protocolo e os mesmos limites; um DO "diretório" (ou KV) para a lista de salas públicas; (3) `wrangler.toml` e instruções (`docs/10_DEPLOY.md`): `wrangler dev` local, `wrangler deploy`, domínio `*.workers.dev`; (4) cliente: URL do sinalizador configurável (env/`BASE`), padrão de produção; (5) mensagem clara quando o P2P falha ("sua rede não permite conexão direta") e config de STUN público; TURN só documentado; (6) testes do Worker com `wrangler dev`/`miniflare` ou com a lógica extraída; (7) `tools/online-check.mjs` apontando para o servidor hospedado.
+**Você:** criar a conta Cloudflare (plano gratuito), rodar `npx wrangler login` na sua máquina e informar o nome da conta/subdomínio; o agente não cria contas nem manipula credenciais.
+**Pronto quando:** duas máquinas em redes diferentes criam e entram numa sala pelo link e jogam 5 min sem desync; o servidor Node local continua funcionando; testes verdes; docs atualizados.
 
 ### M6-04 · Compatibilidade (Firefox/Safari) e hardware mínimo
 **Dif.** Média · **Esf.** M · **Exec.** S + V · **Dep.:** M5-03

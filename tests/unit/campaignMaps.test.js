@@ -212,6 +212,7 @@ describe('M2-04 · Baixio do Breu (recifes, petróleo, naufrágios)', () => {
     const total = countCells(m, () => true);
     expect(reef / total, 'baixios').toBeGreaterThan(0.08); // "quase só água rasa e funda"
     expect(open / total, 'água funda').toBeGreaterThan(0.4);
+    expect(m.resources.filter((r) => r.type === 'gold')).toHaveLength(4); // 1 padrão + 1 de expansão por lado: com 1 só o soak travava
   });
 
   it('espaço para Estaleiro/Doca: costa de cada lado com água funda ligada ao oceano; poços e naufrágios afastados entre si; frotas no mar principal', () => {

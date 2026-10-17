@@ -368,6 +368,9 @@ function postBaixio(ctx, extra) {
     ctx.take(p, 14);
     return p;
   };
+  // uma mina de expansão por lado: com 1 mina por base o ouro acaba e a partida IA×IA trava (soak, semente 5 hard)
+  addGold(ctx, s0, 'expansion1', extra, { dMin: 20, dMax: 40, target: 28 });
+  addGold(ctx, s1, 'expansion2', extra, { dMin: 20, dMax: 40, target: 28 });
   const y1 = yardFor(s0, s1, 'Estaleiro da Liga'), y2 = yardFor(s1, s0, 'Doca do Clã');
   extra.shipyard1 = pt(y1); extra.shipyard1Water = ptw(wetSpot(y1.x, y1.z));
   extra.shipyard2 = pt(y2); extra.shipyard2Water = ptw(wetSpot(y2.x, y2.z));

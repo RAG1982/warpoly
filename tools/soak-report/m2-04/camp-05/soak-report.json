@@ -1,0 +1,130 @@
+{
+ "opts": {
+  "count": 8,
+  "seedStart": 1,
+  "maps": [
+   "camp-05-cerne-verde"
+  ],
+  "maxTicks": 72000,
+  "recheck": 2,
+  "faction": null,
+  "difficulty": null,
+  "stallTicks": 2400,
+  "out": "tools/soak-report/m2-04/camp-05"
+ },
+ "wallMs": 135154,
+ "results": [
+  {
+   "seed": 1,
+   "map": "camp-05-cerne-verde",
+   "faction": "human",
+   "difficulty": "easy",
+   "finished": true,
+   "ticks": 13931,
+   "checksum": 3495391678,
+   "peakEntities": 61,
+   "wallMs": 10701,
+   "issues": []
+  },
+  {
+   "seed": 2,
+   "map": "camp-05-cerne-verde",
+   "faction": "orc",
+   "difficulty": "easy",
+   "finished": true,
+   "ticks": 21871,
+   "checksum": 2364184614,
+   "peakEntities": 60,
+   "wallMs": 12937,
+   "issues": []
+  },
+  {
+   "seed": 3,
+   "map": "camp-05-cerne-verde",
+   "faction": "human",
+   "difficulty": "normal",
+   "finished": true,
+   "ticks": 13903,
+   "checksum": 675612601,
+   "peakEntities": 98,
+   "wallMs": 12572,
+   "issues": []
+  },
+  {
+   "seed": 4,
+   "map": "camp-05-cerne-verde",
+   "faction": "orc",
+   "difficulty": "normal",
+   "finished": true,
+   "ticks": 18369,
+   "checksum": 1768464333,
+   "peakEntities": 101,
+   "wallMs": 15570,
+   "issues": []
+  },
+  {
+   "seed": 5,
+   "map": "camp-05-cerne-verde",
+   "faction": "human",
+   "difficulty": "hard",
+   "finished": true,
+   "ticks": 29354,
+   "checksum": 2418093711,
+   "peakEntities": 109,
+   "wallMs": 26559,
+   "issues": []
+  },
+  {
+   "seed": 6,
+   "map": "camp-05-cerne-verde",
+   "faction": "orc",
+   "difficulty": "hard",
+   "finished": true,
+   "ticks": 11383,
+   "checksum": 3811642649,
+   "peakEntities": 80,
+   "wallMs": 7261,
+   "issues": []
+  },
+  {
+   "seed": 7,
+   "map": "camp-05-cerne-verde",
+   "faction": "human",
+   "difficulty": "brutal",
+   "finished": true,
+   "ticks": 11667,
+   "checksum": 2202830608,
+   "peakEntities": 81,
+   "wallMs": 9080,
+   "issues": []
+  },
+  {
+   "seed": 8,
+   "map": "camp-05-cerne-verde",
+   "faction": "orc",
+   "difficulty": "brutal",
+   "finished": true,
+   "ticks": 10510,
+   "checksum": 1996683235,
+   "peakEntities": 68,
+   "wallMs": 6983,
+   "issues": []
+  }
+ ],
+ "rechecks": [
+  {
+   "seed": 1,
+   "map": "camp-05-cerne-verde",
+   "faction": "human",
+   "difficulty": "easy",
+   "diff": null
+  },
+  {
+   "seed": 5,
+   "map": "camp-05-cerne-verde",
+   "faction": "human",
+   "difficulty": "hard",
+   "diff": null
+  }
+ ]
+}

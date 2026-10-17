@@ -146,7 +146,7 @@ Um `AIDirector` por jogador de IA (`gm.aiDirectors`); todas as decisões saem co
 | APM máx. (comandos/min; o uso real é ~25) | 20 | 60 | 120 | 240 |
 | Reação (s entre decisões) | 2,5 | 1,0 | 0,75 | 0,5 |
 | Micro (0–3) | 0 | 1 | 2 | 3 |
-| Onda base · atraso da 1ª onda | 3 · 7 min | 6 · 2,5 min | 6 · 1,5 min | 7 · 0 |
+| Onda base · atraso da 1ª onda | 3 · 7 min | 6 · 6,5 min | 6 · 1,5 min | 7 · 0 |
 | Avaliação de força (razão mín. · inimigo suposto) | cega | 1,0 · 0,8 | 1,2 · 0,9 | 1,2 · visão total |
 | Limite de combatentes | 10 | — | — | — |
 | Bônus de coleta | — | — | — | +25 % |
@@ -155,6 +155,8 @@ Um `AIDirector` por jogador de IA (`gm.aiDirectors`); todas as decisões saem co
 | Pesquisa na Forja (ouro mínimo em caixa) | 400 | 400 | 120 | 60 |
 | Conjuradores · muralha · scout | não · não · não | não · sim · sim | sim · sim · sim | sim · sim · sim |
 | Estratégias sorteáveis | boom, turtle | rush, boom, turtle | rush, boom, turtle (+air) | idem |
+
+Atraso da 1ª onda (`startDelay`) = segundos de partida antes da 1ª expedição; na estratégia *rush* vale `startDelay × rushDelayScale` (0,4 em Fácil/Difícil/Brutal; 1 no Normal, para o rush do Normal não abrir antes dos 6,5 min). M1-08/NEW-9: contra um jogador parado, o Centro só cai depois de 6,8 min no Normal (mín. em 24 partidas; antes: 2,5 min) e 7,6 min no Fácil (medido com `node tools/idle-hq-check.mjs`; Difícil/Brutal podem derrubar antes, de propósito).
 
 O orçamento de APM é um balde de fichas (capacidade = APM/6, reposição APM/60 por segundo): comandos além dele são adiados para a decisão seguinte. A economia roda a no máximo 1 decisão por segundo e só realoca trabalhadores já ocupados a cada 6 s (reagir mais rápido não deve significar mexer mais nos peões — isso derrubava a produção de quem decidia a 0,75 s).
 

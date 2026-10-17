@@ -1,0 +1,173 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<title>Conferência do critter_boar.glb (ART-04)</title>
+<style>
+  html, body { margin: 0; background: #1b1b22; overflow: hidden; font: 600 14px system-ui, sans-serif; }
+  canvas { display: block; }
+  .tag { position: absolute; transform: translate(-50%, 0); color: #fff; text-shadow: 0 1px 3px #000, 0 0 6px #000; white-space: nowrap; }
+</style>
+<script type="importmap">
+{ "imports": {
+  "three": "/three/build/three.module.js",
+  "three/addons/": "/three/examples/jsm/",
+  "three/examples/jsm/": "/three/examples/jsm/"
+} }
+</script>
+</head>
+<body>
+<script type="module">
+// Conferência do critter_boar.glb no three.js real, com a mesma luz, exposição e câmera do jogo (core/SceneManager.js):
+//   ?mode=game   javali .glb (escala 1.4 do CritterView) ao lado do procedural, da ovelha e de um humano de referência
+//   ?mode=poses  poses de teste dos pivôs (repouso, andar A/B, correr, pastar)
+//   ?mode=close  close-up (az/el/dist opcionais)
+// Fora do jogo e do inspetor de propósito: o registro em glbModels.js/inspector.js é feito na integração.
+import * as THREE from 'three';
+import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
+import { MeshoptDecoder } from 'three/addons/libs/meshopt_decoder.module.js';
+import { createCritter } from '/src/models/units/CritterModel.js';
+
+const params = new URLSearchParams(location.search);
+const mode = params.get('mode') || 'game';
+const num = (k, d) => (params.has(k) ? parseFloat(params.get(k)) : d);
+const W = innerWidth;
+const H = innerHeight;
+
+const renderer = new THREE.WebGLRenderer({ antialias: true, preserveDrawingBuffer: true });
+renderer.setSize(W, H);
+renderer.setPixelRatio(devicePixelRatio);
+renderer.shadowMap.enabled = true;
+renderer.shadowMap.type = THREE.PCFShadowMap;
+renderer.toneMapping = THREE.ACESFilmicToneMapping;
+renderer.toneMappingExposure = 1.38;
+document.body.appendChild(renderer.domElement);
+
+const scene = new THREE.Scene();
+scene.background = new THREE.Color(0x85c8ec);
+scene.add(new THREE.HemisphereLight(0xe8f4ff, 0x627d54, 1.2));
+const sun = new THREE.DirectionalLight(0xfffaee, 2.6);
+sun.position.set(-52, 68, -22);
+sun.castShadow = true;
+sun.shadow.mapSize.set(2048, 2048);
+sun.shadow.camera.near = 10;
+sun.shadow.camera.far = 220;
+const SD = mode === 'game' ? 14 : 6;
+Object.assign(sun.shadow.camera, { left: -SD, right: SD, top: SD, bottom: -SD });
+sun.shadow.bias = -0.0003;
+sun.shadow.normalBias = 0.02;
+scene.add(sun);
+
+const ground = new THREE.Mesh(new THREE.PlaneGeometry(400, 400), new THREE.MeshStandardMaterial({ color: parseInt(params.get('ground') || 'd7bd82', 16), roughness: 1 }));
+ground.rotation.x = -Math.PI / 2;
+ground.receiveShadow = true;
+scene.add(ground);
+
+const loader = new GLTFLoader().setMeshoptDecoder(MeshoptDecoder);
+const shadows = o => { o.traverse(c => { if (c.isMesh) { c.castShadow = true; c.receiveShadow = true; } }); return o; };
+const detach = o => { if (o.parent) o.parent.remove(o); return o; };
+const sizeOf = o => new THREE.Box3().setFromObject(o).getSize(new THREE.Vector3()).toArray().map(v => +v.toFixed(3));
+
+const gltf = await loader.loadAsync('/models/critter_boar.glb');
+const boar = shadows(detach(gltf.scene.getObjectByName('CritterBoar')));
+
+// relatório: hierarquia, caixa, malhas, triângulos, materiais, texturas, atributos
+const info = { mode, tree: [] };
+boar.updateMatrixWorld(true);
+boar.traverse(o => {
+  let depth = 0;
+  for (let p = o; p !== boar; p = p.parent) depth++;
+  info.tree.push({ name: o.name, type: o.type, depth, pos: o.position.toArray().map(v => +v.toFixed(3)) });
+});
+const box = new THREE.Box3().setFromObject(boar);
+info.bbox = { min: box.min.toArray().map(v => +v.toFixed(3)), max: box.max.toArray().map(v => +v.toFixed(3)), size: sizeOf(boar) };
+const mats = new Set();
+const attrs = new Set();
+const textures = new Set();
+let meshes = 0;
+let tris = 0;
+boar.traverse(o => {
+  if (!o.isMesh) return;
+  meshes++;
+  const g = o.geometry;
+  tris += (g.index ? g.index.count : g.attributes.position.count) / 3;
+  mats.add(o.material.uuid);
+  Object.keys(g.attributes).forEach(a => attrs.add(a));
+  if (o.material.map) textures.add(`${o.material.map.image.width}x${o.material.map.image.height}`);
+});
+Object.assign(info, { meshes, tris: Math.round(tris), materials: mats.size, attributes: [...attrs], textures: [...textures] });
+
+let camera;
+const frame = (target, dist, dir, fov) => {
+  camera = new THREE.PerspectiveCamera(fov, W / H, 0.05, 900);
+  camera.position.copy(target).addScaledVector(new THREE.Vector3(...dir).normalize(), dist);
+  camera.lookAt(target);
+};
+const tag = (text, worldPos) => {
+  const v = worldPos.clone().project(camera);
+  const el = document.createElement('div');
+  el.className = 'tag';
+  el.textContent = text;
+  el.style.left = `${(v.x * 0.5 + 0.5) * W}px`;
+  el.style.top = `${(-v.y * 0.5 + 0.5) * H}px`;
+  document.body.appendChild(el);
+};
+
+if (mode === 'game') {
+  const S = 1.4; // CritterView: root.scale.setScalar(1.4)
+  const knightGltf = await loader.loadAsync('/models/knight.glb');
+  const knight = shadows(detach(knightGltf.scene.getObjectByName('Knight')));
+  knight.scale.setScalar(1.62); // unidades: x1.62 em jogo
+  const proc = shadows(createCritter('boar'));
+  const sheep = shadows(createCritter('sheep'));
+  boar.scale.setScalar(S);
+  proc.scale.setScalar(S);
+  sheep.scale.setScalar(S);
+  const row = [['Espadachim (x1,62)', knight, -5.0], ['javali .glb (x1,4)', boar, -1.5], ['javali procedural (x1,4)', proc, 1.6], ['ovelha procedural (x1,4)', sheep, 4.6]];
+  info.sizes_in_game = {};
+  for (const [label, o, x] of row) {
+    o.position.set(x, 0, 0);
+    scene.add(o);
+    info.sizes_in_game[label] = sizeOf(o); // medido sem rotação (x = largura, y = altura, z = comprimento)
+    o.rotation.y = 0.4;
+  }
+  frame(new THREE.Vector3(0, 0.8, 0), num('dist', 16), [45, 44, 45], 32);
+  camera.updateMatrixWorld(true);
+  for (const [label, , x] of row) tag(label, new THREE.Vector3(x, -0.15, 0));
+} else if (mode === 'poses') {
+  // rotações de teste nos pivôs (rotation.x > 0 leva o pé de uma perna para trás e baixa o focinho)
+  const poses = [
+    ['repouso', {}],
+    ['andar A', { legs: [-0.45, 0.45, 0.45, -0.45], head: 0.05, body: 0.02 }],
+    ['andar B', { legs: [0.45, -0.45, -0.45, 0.45], head: -0.05, body: -0.02 }],
+    ['correr', { legs: [-0.85, 0.7, 0.85, -0.7], head: -0.12, body: 0.08, lift: 0.03 }],
+    ['pastar', { legs: [-0.12, 0.1, 0, 0], head: 0.95, body: -0.03 }],
+  ];
+  const labels = [];
+  poses.forEach(([label, p], i) => {
+    const c = boar.clone(true);
+    const rot = (n, x) => { const o = c.getObjectByName(n); if (o) o.rotation.x = x; };
+    const [fl, fr, bl, br] = p.legs || [0, 0, 0, 0];
+    rot('Leg_FL', fl); rot('Leg_FR', fr); rot('Leg_BL', bl); rot('Leg_BR', br);
+    rot('Head', p.head || 0); rot('Body', p.body || 0); // Tail/Snout/Tusk_* são âncoras sem geometria: girá-los não move nada
+    if (p.lift) c.getObjectByName('Body').position.y += p.lift;
+    c.position.set(0, 0, (i - 2) * 1.5); // visto de -x: +z fica à direita, o javali olha para a direita
+    scene.add(c);
+    labels.push([label, c.position.clone()]);
+  });
+  frame(new THREE.Vector3(0, 0.34, 0), num('dist', 4.9), [-1, 0.3, 0], 30);
+  camera.updateMatrixWorld(true);
+  for (const [label, pos] of labels) tag(label, pos.clone().setY(-0.1));
+} else {
+  scene.add(boar);
+  const a = num('az', -35) * Math.PI / 180;
+  const e = num('el', 20) * Math.PI / 180;
+  frame(new THREE.Vector3(0, 0.33, 0), num('dist', 2.6), [Math.sin(a) * Math.cos(e), Math.sin(e), Math.cos(a) * Math.cos(e)], 30);
+}
+
+renderer.render(scene, camera);
+window.__info = info;
+window.__done = true;
+</script>
+</body>
+</html>

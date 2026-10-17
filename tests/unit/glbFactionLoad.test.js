@@ -60,15 +60,22 @@ describe('loadGlbTemplates por facção (F10-05b)', () => {
       expect(keys.some((k) => fresh.glbFaction(k) === 'orc')).toBe(false);
       expect(keys.some((k) => fresh.glbFaction(k) === 'human')).toBe(true);
       expect(keys.some((k) => fresh.glbFaction(k) === 'neutral')).toBe(true);
+      expect(keys.some((k) => fresh.GLB_MODELS[k].lazy)).toBe(false); // props e javali (lazy) fora da carga padrão
       const afterHuman = requested.length;
 
       await fresh.loadGlbTemplates(['orc']);
+      // carga padrão (boot/preload) = só os não-lazy; os lazy entram com includeLazy (inspetor)
+      const eager = Object.keys(fresh.GLB_MODELS).filter((k) => !fresh.GLB_MODELS[k].lazy).length;
       const all = Object.keys(fresh.GLB_MODELS).length;
-      expect(fresh.glbTemplates.size).toBe(all);
-      expect(requested.length).toBe(all); // cada arquivo uma vez
+      expect(fresh.glbTemplates.size).toBe(eager);
+      expect(requested.length).toBe(eager); // cada arquivo uma vez
       expect(requested.length).toBeGreaterThan(afterHuman);
 
-      await fresh.loadGlbTemplates(); // tudo já carregado: nenhum download novo
+      await fresh.loadGlbTemplates(); // tudo não-lazy já carregado: nenhum download novo
+      expect(requested.length).toBe(eager);
+
+      await fresh.loadGlbTemplates(null, { includeLazy: true }); // inspetor: completa os lazy, sem repetir downloads
+      expect(fresh.glbTemplates.size).toBe(all);
       expect(requested.length).toBe(all);
     } finally {
       delete globalThis.window;

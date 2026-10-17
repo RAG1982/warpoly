@@ -14,7 +14,7 @@ import { runTicks, teleport, statusOf, EVT } from './helpers/missionWorld.js';
 import { place } from './helpers/navalWorld.js';
 
 /**
- * F8-05 — uma simulação headless por missão da campanha da Aliança, do tick 0 até a VITÓRIA, com comandos/ações
+ * F8-05 — uma simulação headless por missão da campanha do Reino, do tick 0 até a VITÓRIA, com comandos/ações
  * injetados (teletransporte, dano, construção direta): determinística e sem exceção. A IA de script faz o papel do jogador.
  */
 const T = 20; // ticks por segundo de simulação
@@ -39,7 +39,7 @@ function expectWon(gm) {
   expect(gm.mission.snapshot().outcome).toBe('victory');
 }
 
-describe('campanha da Aliança: simulação headless até a vitória (F8-05)', () => {
+describe('campanha do Reino: simulação headless até a vitória (F8-05)', () => {
   it('01 Fumaça no Vale: quartel, vanguarda destruída, santuário oculto e acampamento', () => {
     const gm = boot('alliance-01-fumaca-no-vale');
     runTicks(gm, 5);
@@ -470,7 +470,7 @@ describe('m04 Ponte do Rio Turvo: Forte Atalaia (NEW-53)', () => {
  * não foi liberado é recusado (comando ignorado, sem debitar). Tudo em Node puro: treino, pesquisa e combate rodam de verdade na sim;
  * só a "distância" é encurtada (teletransporte) onde o mapa seria só caminhada.
  */
-describe('campanha da Aliança: liberação progressiva e uso das novidades (F8-05b)', () => {
+describe('campanha do Reino: liberação progressiva e uso das novidades (F8-05b)', () => {
   const give = (gm, r) => { const res = gm.getPlayer(0).resources; for (const [k, v] of Object.entries(r)) res[k] = Math.max(res[k] || 0, v); };
   const issue = (gm, c) => gm.issue({ playerId: 0, ...c });
   const mine = (gm, type) => gm.getUnitsOf(0).filter((u) => u.type === type && !u.isDead);
@@ -877,7 +877,7 @@ describe('campanha da Aliança: liberação progressiva e uso das novidades (F8-
     const gm = boot('alliance-08-queda-do-cinzal');
     runTicks(gm, 5);
     expect(castle0(gm).tier).toBe(3);
-    // a Guarda Real (IA aliada) ficaria sozinha vencendo a missão enquanto o roteiro contém a Horda: desliga só a IA dela
+    // a Guarda Real (IA aliada) ficaria sozinha vencendo a missão enquanto o roteiro contém os Clãs: desliga só a IA dela
     for (const d of gm.aiDirectors.filter((x) => x.playerId === 1)) d.dispose?.();
     gm.aiDirectors = gm.aiDirectors.filter((x) => x.playerId !== 1);
     const nest = tagged(gm, 'nest')[0];
@@ -917,7 +917,7 @@ describe('campanha da Aliança: liberação progressiva e uso das novidades (F8-
     expect(mine(gm, 'hero_oren').length).toBe(1);
     const gryphons = mine(gm, 'gryphon_rider');
     expect(gryphons.length).toBe(2);
-    // as ondas da Horda trouxeram um Necromante e uma Serpe (aéreo) além da infantaria
+    // as ondas dos Clãs trouxeram um Necromante e uma Serpe (aéreo) além da infantaria
     expect(gm.mission.vars.waves).toBeGreaterThanOrEqual(1);
     expect(seen.has('necromancer')).toBe(true);
     expect(seen.has('war_serpent')).toBe(true);

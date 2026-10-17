@@ -4,7 +4,7 @@
   "id": "alliance-03-muralhas-de-alvorada",
   "hidden": true,
   "title": { "pt-BR": "Muralhas de Alvorada", "en": "The Walls of Alvorada" },
-  "subtitle": { "pt-BR": "Aliança, missão 3", "en": "Alliance, mission 3" },
+  "subtitle": { "pt-BR": "Liga de Aurelan, missão 3", "en": "Aurelan League, mission 3" },
   "briefing": {
     "speaker": { "pt-BR": "Rainha Sevelin", "en": "Queen Sevelin" },
     "portrait": "👑",
@@ -22,7 +22,7 @@
   "seed": 8103,
   "players": [
     { "id": 0, "name": { "pt-BR": "Guarnição de Alvorada", "en": "Alvorada Garrison" }, "factionId": "human", "team": 0, "color": "#2563eb", "isLocal": true, "startSlot": 0 },
-    { "id": 1, "name": { "pt-BR": "Horda do Cinzal", "en": "Cinzal Horde" }, "factionId": "orc", "team": 1, "color": "#dc2626", "isAI": false, "startSlot": 1 }
+    { "id": 1, "name": { "pt-BR": "Clãs do Cinzal", "en": "Cinzal Clans" }, "factionId": "orc", "team": 1, "color": "#dc2626", "isAI": false, "startSlot": 1 }
   ],
   "startingResources": { "wood": 500, "gold": 400, "stone": 200 },
   "vars": { "waves": 0, "reinforced": false },

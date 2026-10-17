@@ -8,8 +8,8 @@
     "en": "Landing on Rust Coast"
   },
   "subtitle": {
-    "pt-BR": "Aliança, missão 10",
-    "en": "Alliance, mission 10"
+    "pt-BR": "Liga de Aurelan, missão 10",
+    "en": "Aurelan League, mission 10"
   },
   "briefing": {
     "speaker": {
@@ -34,8 +34,8 @@
     {
       "id": 0,
       "name": {
-        "pt-BR": "Aliança de Aurelan",
-        "en": "Aurelan Alliance"
+        "pt-BR": "Liga de Aurelan",
+        "en": "Aurelan League"
       },
       "factionId": "human",
       "team": 0,

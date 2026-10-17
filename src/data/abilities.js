@@ -682,7 +682,7 @@ export const ABILITIES = {
   // Skarn
   hero_horde_roar: {
     id: 'hero_horde_roar',
-    name: 'Rugido da Horda',
+    name: 'Rugido dos Clãs',
     icon: '📯',
     description: 'Brada furiosamente enfurecendo o herói e aliados num raio de 8 por 10 s (dano, ataque e movimento ampliados).',
     hotkey: 'Z',

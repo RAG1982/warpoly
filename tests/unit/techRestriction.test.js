@@ -49,7 +49,7 @@ describe('availableTech: união cumulativa dos unlocks (função pura)', () => {
     expect(availableTech(c, 'nao-existe').units.size).toBe(0);
   });
 
-  it('cada conjunto contém o anterior (cumulatividade) na campanha da Aliança', () => {
+  it('cada conjunto contém o anterior (cumulatividade) na campanha do Reino', () => {
     const n = alliance.missions.length;
     let prev = availableTech(alliance, 0);
     expect(prev.units.size).toBeGreaterThan(0);
@@ -77,7 +77,7 @@ describe('availableTech: união cumulativa dos unlocks (função pura)', () => {
 describe('validateCampaign: bloco unlocks (tipos existentes em src/data, sem typo)', () => {
   const errs = (...u) => validateCampaign(camp(...u)).errors.join('|');
 
-  it('a campanha da Aliança é válida e todo item de unlocks existe em src/data', () => {
+  it('a campanha do Reino é válida e todo item de unlocks existe em src/data', () => {
     expect(validateCampaign(alliance).ok).toBe(true);
   });
   it('rejeita typo, tipo na categoria errada, item não treinável, de outra facção e repetido', () => {

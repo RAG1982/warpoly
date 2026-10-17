@@ -1,5 +1,5 @@
 """
-build_orc_barracks.py — Quartel da Horda (tipo interno `orc_barracks`) gerado 100% por script.
+build_orc_barracks.py — Quartel dos Clãs (tipo interno `orc_barracks`) gerado 100% por script.
 
 Uso:
   blender -b --factory-startup --python tools/blender/build_orc_barracks.py -- [--no-render]

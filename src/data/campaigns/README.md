@@ -4,7 +4,7 @@ Uma campanha é um índice `campaign.json` + as missões F8-04 (`mNN-*.json`, fo
 `index.js` importa tudo, valida (`validateCampaign`, `src/campaign/campaign.js`) e registra as missões no registro de missões
 (com `"hidden": true`: não aparecem no menu "Missões"). Nova missão de campanha = JSON + `import` em `index.js` + entrada em `missions[]`.
 
-## Premissa da campanha da Aliança — **PROVISÓRIA (aguarda aprovação do dono)**
+## Premissa da campanha clássica (Liga de Aurelan) — **PROVISÓRIA (aguarda aprovação do dono)**
 
 História 100% original (nomes, lugares e personagens inventados; sem lore da Blizzard). O Reino de Aurelan vive em paz há três
 gerações quando os Clãs do Cinzal, expulsos de suas terras áridas além das Montanhas do Véu, se unem sob o chefe-de-brasa Skarn
@@ -93,7 +93,7 @@ naval, desembarque pela Barcaça, Fireball, Ordenação → Templário e Grifos 
 
 ## Novo mundo (2026-10-13): trilhas e campanhas espelhadas
 
-- `campaign.json` tem `track`: `main` (campanha principal, com tela de história) ou `beta` (a campanha da Aliança atual, "Clássica (beta)"; a trilha `beta` não tem tela de história e usa `betaLabel` como rótulo). O seletor está em `src/ui/screens/CampaignScreen.js`.
+- `campaign.json` tem `track`: `main` (campanha principal, com tela de história) ou `beta` (a campanha clássica da Liga de Aurelan atual, "Clássica (beta)"; a trilha `beta` não tem tela de história e usa `betaLabel` como rótulo). O seletor está em `src/ui/screens/CampaignScreen.js`.
 - `war-alliance/` (`factionId: 'human'`) e `war-horde/` (`factionId: 'orc'`): 12 missões cada (`m01`–`m12`), espelhadas. Foram geradas a partir de `tools/scaffold-campaigns.mjs`. As missões **ainda usam os mapas atuais** (por exemplo `campos-1v1`, `continental-1v1`, `ilhas-4p`); mapas próprios entram no MUNDO-7 (`docs/specs/MUNDO-TERRENO-MAPAS.md`).
 - `world-map.json` (`format: warpolyworldmap`): mapa-múndi **ilustrativo** (Velmara a oeste, Cinzara a leste, ilhas Estilhaços). Não é campanha nem é jogável. Renderizado por `src/ui/worldMap.js`.
 - A tela de abertura da história lê `src/data/story/world.json` (7 painéis, pt-BR e en; arte em `public/art/story/`).

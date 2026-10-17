@@ -8,8 +8,8 @@
     "en": "Timber of War"
   },
   "subtitle": {
-    "pt-BR": "Horda, missão 5",
-    "en": "Horde, mission 5"
+    "pt-BR": "Clãs do Cinzal, missão 5",
+    "en": "Cinzal Clans, mission 5"
   },
   "briefing": {
     "speaker": {
@@ -34,8 +34,8 @@
     {
       "id": 0,
       "name": {
-        "pt-BR": "Horda do Cinzal",
-        "en": "Cinzal Horde"
+        "pt-BR": "Clãs do Cinzal",
+        "en": "Cinzal Clans"
       },
       "factionId": "orc",
       "team": 0,

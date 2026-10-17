@@ -152,7 +152,7 @@ export function playInstrument(c, dest, noise, inst, midi, t, dur, vel, rng) {
       break;
     }
     case 'warhorn': {
-      // trompa de guerra da Horda: grave, rouca, entra levemente abaixo do tom e sobe
+      // trompa de guerra dos Clãs: grave, rouca, entra levemente abaixo do tom e sobe
       const end = env(g, t, 0.22, vel * 0.3, dur, 0.5);
       const lp = filt(c, 'lowpass', f * 2.2, 1.4);
       lp.frequency.setValueAtTime(f * 1.2, t);
@@ -212,7 +212,7 @@ export function playInstrument(c, dest, noise, inst, midi, t, dur, vel, rng) {
       break;
     }
     case 'taiko': {
-      // tambor grande da Horda: golpe grave com cabeça de ruído
+      // tambor grande dos Clãs: golpe grave com cabeça de ruído
       g.gain.setValueAtTime(vel * 0.8, t);
       g.gain.exponentialRampToValueAtTime(FLOOR, t + 0.55);
       const o = osc(c, 'sine', 110);

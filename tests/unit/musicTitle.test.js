@@ -74,7 +74,7 @@ describe('abertura: caráter e dramaturgia ("Marcha da Tempestade")', () => {
     }
   });
 
-  it('contraste: metais graves da Horda (trombones/trompas) e cordas trágicas (violinos/violoncelos)', () => {
+  it('contraste: metais graves dos Clãs (trombones/trompas) e cordas trágicas (violinos/violoncelos)', () => {
     const insts = (a, b) => new Set(Array.from({ length: b - a + 1 }, (_, k) => barEvents(main, a + k)).flat().map((e) => e.inst));
     const horde = insts(4, 11);
     expect(horde.has('trombone') && horde.has('horn')).toBe(true);

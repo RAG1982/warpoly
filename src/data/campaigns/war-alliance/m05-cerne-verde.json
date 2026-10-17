@@ -8,8 +8,8 @@
     "en": "The Green Core"
   },
   "subtitle": {
-    "pt-BR": "Aliança, missão 5",
-    "en": "Alliance, mission 5"
+    "pt-BR": "Liga de Aurelan, missão 5",
+    "en": "Aurelan League, mission 5"
   },
   "briefing": {
     "speaker": {
@@ -34,8 +34,8 @@
     {
       "id": 0,
       "name": {
-        "pt-BR": "Aliança de Aurelan",
-        "en": "Aurelan Alliance"
+        "pt-BR": "Liga de Aurelan",
+        "en": "Aurelan League"
       },
       "factionId": "human",
       "team": 0,

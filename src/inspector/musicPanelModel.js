@@ -12,7 +12,7 @@ export const MODE_LABELS = Object.freeze({
 const NOTE_NAMES = ['Dó', 'Dó#', 'Ré', 'Mi♭', 'Mi', 'Fá', 'Fá#', 'Sol', 'Lá♭', 'Lá', 'Si♭', 'Si']; // grafias usuais (Mi♭, Lá♭, Si♭; Dó#, Fá#)
 
 export const FAMILY_LABELS = Object.freeze({
-  title: 'Abertura', human_peace: 'Reino / paz', human_combat: 'Reino / combate', orc_peace: 'Horda / paz', orc_combat: 'Horda / combate'
+  title: 'Abertura', human_peace: 'Reino / paz', human_combat: 'Reino / combate', orc_peace: 'Clãs / paz', orc_combat: 'Clãs / combate'
 });
 
 /** Grupos da lista, na ordem de exibição. `pick` decide quais entradas do catálogo entram (candidatas só em "Candidatas novas"). */
@@ -20,8 +20,8 @@ export const MUSIC_GROUPS = Object.freeze([
   { id: 'title', label: 'Abertura', pick: (e) => e.category === 'title' && !e.candidate },
   { id: 'human_peace', label: 'Reino / paz', pick: (e) => e.family === 'human_peace' && !e.candidate },
   { id: 'human_combat', label: 'Reino / combate', pick: (e) => e.family === 'human_combat' && !e.candidate },
-  { id: 'orc_peace', label: 'Horda / paz', pick: (e) => e.family === 'orc_peace' && !e.candidate },
-  { id: 'orc_combat', label: 'Horda / combate', pick: (e) => e.family === 'orc_combat' && !e.candidate },
+  { id: 'orc_peace', label: 'Clãs / paz', pick: (e) => e.family === 'orc_peace' && !e.candidate },
+  { id: 'orc_combat', label: 'Clãs / combate', pick: (e) => e.family === 'orc_combat' && !e.candidate },
   { id: 'endings', label: 'Vitória / Derrota', pick: (e) => (e.category === 'victory' || e.category === 'defeat') && !e.candidate },
   { id: 'candidates', label: 'Candidatas novas', pick: (e) => e.candidate, sectionBy: (e) => FAMILY_LABELS[e.family] || e.family }
 ]);
@@ -46,7 +46,7 @@ export function metaLine(e) {
 /** Descrição completa para o cartão do player. */
 export function describeTrack(e) {
   if (!e) return null;
-  const faction = e.faction === 'human' ? 'Reino (Aliança)' : e.faction === 'orc' ? 'Horda' : 'Neutra';
+  const faction = e.faction === 'human' ? 'Reino Humano' : e.faction === 'orc' ? 'Clãs' : 'Neutra';
   const cat = { title: 'Abertura', peace: 'Paz', combat: 'Combate', victory: 'Vitória', defeat: 'Derrota' }[e.category] || e.category;
   return {
     id: e.id,

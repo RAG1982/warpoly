@@ -279,7 +279,7 @@ describe('Habilidades dos 6 heróis', () => {
     expect(skels.length).toBeGreaterThanOrEqual(1);
   });
 
-  it('Skarn chefe-de-brasa: conjura Rugido da Horda, Pacto de Sangue e Impacto no Solo', () => {
+  it('Skarn chefe-de-brasa: conjura Rugido dos Clãs, Pacto de Sangue e Impacto no Solo', () => {
     const gm = makeGm();
     const skarn = spawnHero(gm, 'hero_skarn', 0, 0, 1);
     const ally = spawnEnemy(gm, 3, 0, 1); // aliado do Skarn (owner 1)
@@ -288,7 +288,7 @@ describe('Habilidades dos 6 heróis', () => {
     expect(skarn.abilities).toEqual(['hero_horde_roar', 'hero_blood_pact', 'hero_ground_slam']);
     expect(skarn.maxMana).toBe(180);
 
-    // Rugido da Horda
+    // Rugido dos Clãs
     cast(gm, skarn, 'hero_horde_roar');
     run(gm, 0.8);
     expect(hasStatus(skarn, 'bloodlust')).toBe(true);

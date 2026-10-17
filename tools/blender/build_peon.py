@@ -1,5 +1,5 @@
 """
-build_peon.py — Lacaio orc (trabalhador da Horda, tipo interno `peon`) gerado 100% por script.
+build_peon.py — Lacaio orc (trabalhador dos Clãs, tipo interno `peon`) gerado 100% por script.
 
 Uso:
   blender -b --factory-startup --python tools/blender/build_peon.py -- [--no-render]
@@ -35,7 +35,7 @@ ARM_PIVOT = (0.56, 0.38, 0.0)
 TOOL_PIVOT = (0.0, -0.92, 0.18)
 PACK_PIVOT = (0.0, 0.05, -0.42)
 LEG_PIVOT = (0.25, 0.85, -0.05)
-TEAM_DEFAULT = '#d23a2c'  # vermelho da Horda (multiplica a área cinza)
+TEAM_DEFAULT = '#d23a2c'  # vermelho dos Clãs (multiplica a área cinza)
 
 PALETTE = {
     'skin': dict(base='#77843f', var='#52622c', var_scale=3.2, var_amt=0.95, fine=0.12,

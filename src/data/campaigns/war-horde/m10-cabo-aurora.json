@@ -8,8 +8,8 @@
     "en": "Landing at Cape Aurora"
   },
   "subtitle": {
-    "pt-BR": "Horda, missão 10",
-    "en": "Horde, mission 10"
+    "pt-BR": "Clãs do Cinzal, missão 10",
+    "en": "Cinzal Clans, mission 10"
   },
   "briefing": {
     "speaker": {
@@ -18,8 +18,8 @@
     },
     "portrait": "💀",
     "text": {
-      "pt-BR": "A Horda pisou nas terras de Velmara. Acalme as marés e estabeleça o Marco de Brasa-Alta.",
-      "en": "The Horde has set foot on Velmara's shores. Calm the tides and raise the Highember Outpost."
+      "pt-BR": "Os Clãs do Cinzal pisaram nas terras de Velmara. Acalme as marés e estabeleça o Marco de Brasa-Alta.",
+      "en": "The Cinzal Clans have set foot on Velmara's shores. Calm the tides and raise the Highember Outpost."
     },
     "hints": [
       {
@@ -34,8 +34,8 @@
     {
       "id": 0,
       "name": {
-        "pt-BR": "Horda do Cinzal",
-        "en": "Cinzal Horde"
+        "pt-BR": "Clãs do Cinzal",
+        "en": "Cinzal Clans"
       },
       "factionId": "orc",
       "team": 0,

@@ -138,7 +138,8 @@ describe('i18n — mensagens da simulação (PT literal) traduzidas na exibiçã
   it('"Requer: …", recompensa do acampamento e onda da IA são reconhecidos', () => {
     expect(localizeSimText('⚠️ Requer: Fazenda')).toBe('⚠️ Requer: Fazenda');
     expect(localizeSimText('Acampamento de bandidos destruído! +300 de ouro')).toBe('Acampamento de bandidos destruído! +300 ouro');
-    expect(localizeSimText('⚔️ A Horda Orc reuniu um esquadrão de guerra (7 tropas) e avança contra sua base!')).toContain('Clãs Orcs');
+    expect(localizeSimText('⚔️ Os Clãs Orcs reuniram um esquadrão de guerra (7 tropas) e avançam contra sua base!')).toContain('Clãs Orcs');
+    expect(localizeSimText('⚔️ O Reino Humano reuniu um esquadrão de guerra (3 tropas) e avança contra sua base!')).toContain('Reino Humano');
     expect(requirementText({ hq: 2 }, 'human')).toBe('Centro nível 2 (Fortaleza)');
     expect(playerDisplayName('IA 3')).toBe('IA 3');
     expect(playerDisplayName('Você')).toBe('Você');
@@ -165,8 +166,8 @@ const ALLOW = [
   { file: 'src/ui/uiText.js', text: 'Centro nível', why: 'regex de mensagens PT da simulação' },
   { file: 'src/ui/uiText.js', text: 'Requer:', why: 'regex de mensagens PT da simulação' },
   { file: 'src/ui/uiText.js', text: 'Acampamento de bandidos', why: 'regex de mensagens PT da simulação' },
-  { file: 'src/ui/uiText.js', text: 'Horda Orc', why: 'regex de mensagens PT da simulação' },
-  { file: 'src/ui/uiText.js', text: 'Aliança Humana', why: 'regex de mensagens PT da simulação' },
+  { file: 'src/ui/uiText.js', text: 'Clãs Orcs', why: 'regex de mensagens PT da simulação' },
+  { file: 'src/ui/uiText.js', text: 'Reino Humano', why: 'regex de mensagens PT da simulação' },
   { file: 'src/ui/uiText.js', text: 'reuniu um esquadrão', why: 'regex de mensagens PT da simulação' },
   { file: 'src/ui/uiText.js', text: 'de (ouro|madeira|pedra)', why: 'regex de mensagens PT da simulação' },
   { file: 'src/ui/uiText.js', text: 'Você', why: 'nome padrão do jogador na simulação (MatchConfig)' },

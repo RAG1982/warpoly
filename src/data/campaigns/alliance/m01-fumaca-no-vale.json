@@ -4,13 +4,13 @@
   "id": "alliance-01-fumaca-no-vale",
   "hidden": true,
   "title": { "pt-BR": "Fumaça no Vale", "en": "Smoke over the Valley" },
-  "subtitle": { "pt-BR": "Aliança, missão 1", "en": "Alliance, mission 1" },
+  "subtitle": { "pt-BR": "Liga de Aurelan, missão 1", "en": "Aurelan League, mission 1" },
   "briefing": {
     "speaker": { "pt-BR": "Marechal Dorian Vasques", "en": "Marshal Dorian Vasques" },
     "portrait": "🛡️",
     "text": {
-      "pt-BR": "Fumaça ao longo do Rio Claro: os arautos do Cinzal cruzaram as Montanhas do Véu e queimam as nossas fazendas. Ainda não é uma guerra, é um teste. Erga um quartel, reúna a milícia e esmague a vanguarda deles antes que a notícia chegue ao grosso da horda.",
-      "en": "Smoke along the Clear River: the heralds of the Cinzal have crossed the Veil Mountains and are burning our farms. This is not yet a war, it is a probe. Raise a barracks, gather the militia and crush their vanguard before word reaches the main horde."
+      "pt-BR": "Fumaça ao longo do Rio Claro: os arautos do Cinzal cruzaram as Montanhas do Véu e queimam as nossas fazendas. Ainda não é uma guerra, é um teste. Erga um quartel, reúna a milícia e esmague a vanguarda deles antes que a notícia chegue ao grosso dos clãs.",
+      "en": "Smoke along the Clear River: the heralds of the Cinzal have crossed the Veil Mountains and are burning our farms. This is not yet a war, it is a probe. Raise a barracks, gather the militia and crush their vanguard before word reaches the main body of the clans."
     },
     "hints": [
       { "pt-BR": "Trabalhadores constroem; o quartel treina soldados.", "en": "Workers build; the barracks trains soldiers." },

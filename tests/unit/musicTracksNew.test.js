@@ -94,7 +94,7 @@ describe('cada faixa: escala/modo, compasso, andamento e duração', () => {
     }
   });
 
-  it('demais instrumentos: escala, tons do acorde do compasso (ex.: dominante maior) ou cromatismo ameaçador da Horda', () => {
+  it('demais instrumentos: escala, tons do acorde do compasso (ex.: dominante maior) ou cromatismo ameaçador dos Clãs', () => {
     for (const e of music) {
       const t = TRACKS_BY_ID[e.id];
       const pcs = scorePcs(t);

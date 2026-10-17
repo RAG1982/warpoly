@@ -8,8 +8,8 @@
     "en": "Highember"
   },
   "subtitle": {
-    "pt-BR": "Horda, missão 11",
-    "en": "Horde, mission 11"
+    "pt-BR": "Clãs do Cinzal, missão 11",
+    "en": "Cinzal Clans, mission 11"
   },
   "briefing": {
     "speaker": {
@@ -18,8 +18,8 @@
     },
     "portrait": "👑",
     "text": {
-      "pt-BR": "Eu cheguei com a frota principal. Sob a coroa de ferro, esmague a resistência da Aliança na savana!",
-      "en": "I have arrived with the main fleet. Beneath the iron crown, crush the Alliance resistance on the savanna!"
+      "pt-BR": "Eu cheguei com a frota principal. Sob a coroa de ferro, esmague a resistência da Liga de Aurelan na savana!",
+      "en": "I have arrived with the main fleet. Beneath the iron crown, crush the Aurelan League resistance on the savanna!"
     },
     "hints": [
       {
@@ -34,8 +34,8 @@
     {
       "id": 0,
       "name": {
-        "pt-BR": "Horda do Cinzal",
-        "en": "Cinzal Horde"
+        "pt-BR": "Clãs do Cinzal",
+        "en": "Cinzal Clans"
       },
       "factionId": "orc",
       "team": 0,

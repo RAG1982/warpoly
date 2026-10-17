@@ -9,7 +9,7 @@ import { baseMission, makeMissionGm, runTicks, teleport } from './helpers/missio
 
 /**
  * F5-06 — IA de campanha por DADOS (ações de missão): guarnição fixa (leash por área), onda no tempo, ataque
- * programado por morte de objetivo, determinismo e as missões 03/06 da Aliança com script.
+ * programado por morte de objetivo, determinismo e as missões 03/06 do Reino com script.
  */
 const base = (setup, triggers = []) => baseMission({
   autoVictory: false,

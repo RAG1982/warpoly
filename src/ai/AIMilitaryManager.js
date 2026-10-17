@@ -675,10 +675,12 @@ export class AIMilitaryManager {
     // evento — a IA não chama `soundManager`/`uiManager` direto.
     if (this.gm.events) {
       this.gm.events.emit(EVT.UNDER_ATTACK, { ownerId: target.ownerId, pos: { x: target.x, y: 0, z: target.z } });
-      const factionName = dir.faction === 'orc' ? 'Horda Orc' : 'Aliança Humana';
+      const waveText = dir.faction === 'orc'
+        ? `⚔️ Os Clãs Orcs reuniram um esquadrão de guerra (${count} tropas) e avançam contra sua base!`
+        : `⚔️ O Reino Humano reuniu um esquadrão de guerra (${count} tropas) e avança contra sua base!`;
       this.gm.events.emit(EVT.NOTIFY, {
         ownerId: target.ownerId,
-        text: `⚔️ A ${factionName} reuniu um esquadrão de guerra (${count} tropas) e avança contra sua base!`
+        text: waveText
       });
     }
 

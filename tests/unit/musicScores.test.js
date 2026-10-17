@@ -66,7 +66,7 @@ describe('estrutura: 4 famílias × 3 variações, 4/4 de 16 passos, 8 compassos
 });
 
 describe('escala e modo esperados', () => {
-  it('Reino em maior/dórico; Horda em frígio', () => {
+  it('Reino em maior/dórico; Clãs em frígio', () => {
     for (const t of TRACK_SETS.human_peace.concat(TRACK_SETS.human_combat)) expect(['major', 'dorian', 'mixolydian'], t.id).toContain(t.mode);
     for (const t of TRACK_SETS.orc_peace.concat(TRACK_SETS.orc_combat)) expect(t.mode, t.id).toBe('phrygian');
     expect(MODES.phrygian).toContain(1); // 2ª menor
@@ -91,7 +91,7 @@ describe('escala e modo esperados', () => {
     }
   });
 
-  it('demais instrumentos também ficam na escala, exceto o trítono/cromatismo ameaçador da Horda', () => {
+  it('demais instrumentos também ficam na escala, exceto o trítono/cromatismo ameaçador dos Clãs', () => {
     for (const t of allTracks) {
       for (let s = 0; s < trackLength(t); s++) {
         for (const e of eventsForStep(t, s)) {
@@ -103,7 +103,7 @@ describe('escala e modo esperados', () => {
     }
   });
 
-  it('timbre militar: metais em quintas/oitavas no Reino, em trítono na Horda', () => {
+  it('timbre militar: metais em quintas/oitavas no Reino, em trítono nos Clãs', () => {
     const intervals = (t, inst) => {
       const set = new Set();
       for (let s = 0; s < trackLength(t); s++) {
@@ -144,7 +144,7 @@ describe('caráter: marcha militar, síncopes, rufar e percussão por facção',
     for (const t of TRACK_SETS.orc_combat) {
       const i = insts(t);
       for (const need of ['taiko', 'kick', 'brass', 'warhorn', 'bass']) expect(i.has(need), `${t.id} ${need}`).toBe(true);
-      expect(countInst(t, 'taiko')).toBeGreaterThan(countInst(t, 'snare')); // a Horda é tambor
+      expect(countInst(t, 'taiko')).toBeGreaterThan(countInst(t, 'snare')); // os Clãs são tambor
     }
   });
 

@@ -4,7 +4,7 @@
   "id": "alliance-04-ponte-do-rio-turvo",
   "hidden": true,
   "title": { "pt-BR": "A Ponte do Rio Turvo", "en": "The Murky River Bridge" },
-  "subtitle": { "pt-BR": "Aliança, missão 4", "en": "Alliance, mission 4" },
+  "subtitle": { "pt-BR": "Liga de Aurelan, missão 4", "en": "Aurelan League, mission 4" },
   "briefing": {
     "speaker": { "pt-BR": "Marechal Dorian Vasques", "en": "Marshal Dorian Vasques" },
     "portrait": "🛡️",
@@ -24,7 +24,7 @@
   "seed": 8104,
   "players": [
     { "id": 0, "name": { "pt-BR": "Exército de Aurelan", "en": "Army of Aurelan" }, "factionId": "human", "team": 0, "color": "#2563eb", "isLocal": true, "startSlot": 0 },
-    { "id": 1, "name": { "pt-BR": "Horda do Cinzal", "en": "Cinzal Horde" }, "factionId": "orc", "team": 1, "color": "#dc2626", "isAI": false, "startSlot": 1 }
+    { "id": 1, "name": { "pt-BR": "Clãs do Cinzal", "en": "Cinzal Clans" }, "factionId": "orc", "team": 1, "color": "#dc2626", "isAI": false, "startSlot": 1 }
   ],
   "startingResources": { "wood": 400, "gold": 500, "stone": 200 },
   "vars": { "reinforced": false },

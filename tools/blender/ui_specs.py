@@ -6,7 +6,7 @@ Ids (= nome do arquivo, sem extensão, em public/ui/icons/<tamanho>/):
   building_<tipo>    tipo = chave de src/data/buildings.js
   command_<ação>     ações do card (parar, reparar, desembarcar, construir…)
   stat_<nome>        atributos da linha de status do card (ataque, defesa, velocidade, alcance, carga, mana…)
-  research_<id>      chave de src/data/upgrades.js (RESEARCH); `_orc` quando a arte da facção Horda difere
+  research_<id>      chave de src/data/upgrades.js (RESEARCH); `_orc` quando a arte da facção Clãs difere
   ability_<id>       chave de src/data/abilities.js
 Aliases (ALIASES) deixam uma pesquisa/classe usar o ícone de outra entrada sem renderizar duas vezes.
 
@@ -109,7 +109,7 @@ RESEARCH_GLYPH = {
     'berserker_range': 'axe_speed', 'berserker_regen': 'heart', 'berserker_fury': 'rage',
 }
 RESEARCH_ICONS = {f'{k}': dict(glyph=v) for k, v in RESEARCH_GLYPH.items()}
-# o casco/canhão da Horda usa a mesma forma com a paleta escura
+# o casco/canhão dos Clãs usa a mesma forma com a paleta escura
 RESEARCH_ICONS['naval_cannons_orc'] = dict(glyph='cannon', dark=True)
 RESEARCH_ICONS['naval_hulls_orc'] = dict(glyph='hull', dark=True)
 

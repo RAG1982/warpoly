@@ -230,8 +230,8 @@ const HORDE_MISSIONS = [
     portrait: '🔥',
     mapId: 'estreito-1v1',
     text: {
-      'pt-BR': 'Construa a Doca Naval e as Plataformas de Petróleo. As Galés de Guerra da Horda dominarão o Baixio!',
-      en: 'Construct the Naval Dock and Oil Platforms. The Horde\'s War Galleys will rule the Shallows!'
+      'pt-BR': 'Construa a Doca Naval e as Plataformas de Petróleo. As Galés de Guerra dos Clãs do Cinzal dominarão o Baixio!',
+      en: 'Construct the Naval Dock and Oil Platforms. The Cinzal Clans\' War Galleys will rule the Shallows!'
     },
     primary: { 'pt-BR': 'Construir a Doca e Plataformas e afundar a patrulha', en: 'Build the Dock and Platforms and sink the patrol' },
     unlocks: { units: ['tanker', 'barge', 'war_galley', 'iron_leviathan', 'colossal_turtle'], buildings: ['ship_dock', 'naval_forge', 'ash_cauldron', 'oil_platform'], research: ['naval_cannons', 'naval_hulls', 'naval_cannons@2', 'naval_hulls@2', 'siege_damage@2'] }
@@ -314,8 +314,8 @@ const HORDE_MISSIONS = [
     portrait: '💀',
     mapId: 'estreito-1v1',
     text: {
-      'pt-BR': 'A Horda pisou nas terras de Velmara. Acalme as marés e estabeleça o Marco de Brasa-Alta.',
-      en: 'The Horde has set foot on Velmara\'s shores. Calm the tides and raise the Highember Outpost.'
+      'pt-BR': 'Os Clãs do Cinzal pisaram nas terras de Velmara. Acalme as marés e estabeleça o Marco de Brasa-Alta.',
+      en: 'The Cinzal Clans have set foot on Velmara\'s shores. Calm the tides and raise the Highember Outpost.'
     },
     primary: { 'pt-BR': 'Estabelecer a colônia com Vozgul', en: 'Establish the colony outpost with Vozgul' },
     unlocks: { heroes: ['hero_vozgul'] }
@@ -328,8 +328,8 @@ const HORDE_MISSIONS = [
     portrait: '👑',
     mapId: 'vales-2v2',
     text: {
-      'pt-BR': 'Eu cheguei com a frota principal. Sob a coroa de ferro, esmague a resistência da Aliança na savana!',
-      en: 'I have arrived with the main fleet. Beneath the iron crown, crush the Alliance resistance on the savanna!'
+      'pt-BR': 'Eu cheguei com a frota principal. Sob a coroa de ferro, esmague a resistência da Liga de Aurelan na savana!',
+      en: 'I have arrived with the main fleet. Beneath the iron crown, crush the Aurelan League resistance on the savanna!'
     },
     primary: { 'pt-BR': 'Comandar as forças com Skarn e tomar a savana', en: 'Command forces with Skarn and seize the savanna' },
     unlocks: { heroes: ['hero_skarn'] }
@@ -363,7 +363,7 @@ function generateCampaign(faction, missions, dir, campId, campTitle, campSub, ca
       id,
       hidden: true,
       title: m.title,
-      subtitle: { 'pt-BR': `${faction === 'human' ? 'Aliança' : 'Horda'}, missão ${m.num}`, en: `${faction === 'human' ? 'Alliance' : 'Horde'}, mission ${m.num}` },
+      subtitle: { 'pt-BR': `${faction === 'human' ? 'Liga de Aurelan' : 'Clãs do Cinzal'}, missão ${m.num}`, en: `${faction === 'human' ? 'Aurelan League' : 'Cinzal Clans'}, mission ${m.num}` },
       briefing: {
         speaker: m.speaker,
         portrait: m.portrait,
@@ -375,7 +375,7 @@ function generateCampaign(faction, missions, dir, campId, campTitle, campSub, ca
       mapId: m.mapId,
       seed: 9000 + m.num * 17,
       players: [
-        { id: 0, name: { 'pt-BR': faction === 'human' ? 'Aliança de Aurelan' : 'Horda do Cinzal', en: faction === 'human' ? 'Aurelan Alliance' : 'Cinzal Horde' }, factionId: faction, team: 0, color: faction === 'human' ? '#2563eb' : '#dc2626', isLocal: true, startSlot: 0 },
+        { id: 0, name: { 'pt-BR': faction === 'human' ? 'Liga de Aurelan' : 'Clãs do Cinzal', en: faction === 'human' ? 'Aurelan League' : 'Cinzal Clans' }, factionId: faction, team: 0, color: faction === 'human' ? '#2563eb' : '#dc2626', isLocal: true, startSlot: 0 },
         { id: 1, name: { 'pt-BR': faction === 'human' ? 'Clãs do Cinzal' : 'Tropas de Aurelan', en: faction === 'human' ? 'Cinzal Clans' : 'Aurelan Troops' }, factionId: faction === 'human' ? 'orc' : 'human', team: 1, color: faction === 'human' ? '#dc2626' : '#2563eb', isAI: true, startSlot: 1 }
       ],
       startingResources: { wood: 400, gold: 400, stone: 150 },
@@ -425,8 +425,8 @@ generateCampaign(
   ALLIANCE_MISSIONS,
   ALLIANCE_DIR,
   'war-alliance',
-  { 'pt-BR': 'A Guerra do Mar Fendido (Aliança)', en: 'The Sundered Sea War (Alliance)' },
-  { 'pt-BR': 'A Marcha da Aliança de Aurelan (12 missões)', en: 'The March of the Aurelan Alliance (12 missions)' },
+  { 'pt-BR': 'A Guerra do Mar Fendido (Liga de Aurelan)', en: 'The Sundered Sea War (Aurelan League)' },
+  { 'pt-BR': 'A Marcha de Aurelan (12 missões)', en: 'The March of Aurelan (12 missions)' },
   {
     'pt-BR': 'O planeta Ondara despertou para a Guerra do Mar Fendido. Conduza os exércitos de Aurelan através dos Estilhaços, domine as ilhas estratégicas e estabeleça o Bastião supremo em Cinzara.',
     en: 'The world of Ondara has awakened to the Sundered Sea War. Lead the armies of Aurelan through the Shards, claim strategic islands, and establish the supreme Bastion in Cinzara.'
@@ -444,11 +444,11 @@ generateCampaign(
         en: 'Master Oren redrew the map from Orsolo\'s notebooks: where there had been emptiness, there now stood a fortress on foreign soil.'
       },
       {
-        'pt-BR': 'O Marechal Dorian e o Capitão Brann guardam o estreito; a vitória da Aliança está gravada nas pedras do mar.',
-        en: 'Marshal Dorian and Captain Brann guard the strait; the Alliance victory is engraved in the stones of the sea.'
+        'pt-BR': 'O Marechal Dorian e o Capitão Brann guardam o estreito; a vitória da Liga de Aurelan está gravada nas pedras do mar.',
+        en: 'Marshal Dorian and Captain Brann guard the strait; the Aurelan League victory is engraved in the stones of the sea.'
       }
     ],
-    credits: { 'pt-BR': 'Fim da Marcha da Aliança', en: 'End of the Alliance March' }
+    credits: { 'pt-BR': 'Fim da Marcha de Aurelan', en: 'End of the March of Aurelan' }
   }
 );
 
@@ -457,7 +457,7 @@ generateCampaign(
   HORDE_MISSIONS,
   HORDE_DIR,
   'war-horde',
-  { 'pt-BR': 'A Guerra do Mar Fendido (Horda)', en: 'The Sundered Sea War (Horde)' },
+  { 'pt-BR': 'A Guerra do Mar Fendido (Clãs do Cinzal)', en: 'The Sundered Sea War (Cinzal Clans)' },
   { 'pt-BR': 'O Caminho das Brasas do Cinzal (12 missões)', en: 'The Ember Road of the Cinzal (12 missions)' },
   {
     'pt-BR': 'A terra seca de Cinzara não perdoa. O chefe-de-brasa Skarn uniu os clãs para atravessar o Mar Fendido, tomar os Estilhaços e erguer a Cidadela de Ferro no continente verde.',

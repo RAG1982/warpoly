@@ -8,8 +8,8 @@
     "en": "The Bastion of Cape Rust"
   },
   "subtitle": {
-    "pt-BR": "Aliança, missão 12",
-    "en": "Alliance, mission 12"
+    "pt-BR": "Liga de Aurelan, missão 12",
+    "en": "Aurelan League, mission 12"
   },
   "briefing": {
     "speaker": {
@@ -34,8 +34,8 @@
     {
       "id": 0,
       "name": {
-        "pt-BR": "Aliança de Aurelan",
-        "en": "Aurelan Alliance"
+        "pt-BR": "Liga de Aurelan",
+        "en": "Aurelan League"
       },
       "factionId": "human",
       "team": 0,

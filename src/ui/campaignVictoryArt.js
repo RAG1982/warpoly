@@ -2,7 +2,7 @@
  * campaignVictoryArt.js — ilustração de vitória PROCEDURAL (SVG inline, sem assets externos) por facção.
  * Funções puras que devolvem strings; as animações são classes CSS (campaignVictory.css), desligadas com
  * prefers-reduced-motion. A arte final (Blender) entra por `public/ui/art/victory_<faction>.webp` sem mudar código.
- * Paleta: a do menu (ouro #d4af37, azul #2f5fb3 da Aliança, vermelho #a3281c da Horda).
+ * Paleta: a do menu (ouro #d4af37, azul #2f5fb3 do Reino, vermelho #a3281c dos Clãs).
  */
 const PAL = {
   human: {

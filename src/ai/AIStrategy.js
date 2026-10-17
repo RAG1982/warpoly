@@ -39,7 +39,7 @@ export const STRATEGIES = Object.freeze({
   })
 });
 
-/** Ajustes por facção (Horda: mais corpo a corpo e cavalaria; Aliança: mais atiradores). */
+/** Ajustes por facção (Clãs: mais corpo a corpo e cavalaria; Reino: mais atiradores). */
 export const FACTION_TWEAKS = Object.freeze({
   human: Object.freeze({ mixDelta: +0.1, cavalryDelta: 0 }),
   orc: Object.freeze({ mixDelta: -0.1, cavalryDelta: -1 })

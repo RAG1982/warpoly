@@ -3,7 +3,7 @@ import { BuildingView } from '../../BuildingView.js';
 import { EVT } from '../../../sim/events.js';
 
 /**
- * OrcWatchtower — Torre de Vigia, Sentinela e Baluarte Defensivo da Horda
+ * OrcWatchtower — Torre de Vigia, Sentinela e Baluarte Defensivo dos Clãs
  *
  * Arquitetura (Engine & Gameplay):
  * - Extende `BuildingView` (a entidade de simulação é `Building`, em src/sim).

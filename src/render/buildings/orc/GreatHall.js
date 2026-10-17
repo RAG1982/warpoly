@@ -12,7 +12,7 @@ function posOf(v) {
  * Arquitetura (Engine & Gameplay):
  * - Extende `BuildingView` (a entidade de simulação é `Building`, em src/sim).
  * - Usa o modelo glTF (great_hall.glb, via glbModels) com fallback procedural.
- * - VFX: Estandartes de guerra da Horda com ondulação dinâmica de vento via código senoidal.
+ * - VFX: Estandartes de guerra dos Clãs com ondulação dinâmica de vento via código senoidal.
  * - VFX: Chaminé do conselho expelindo baforadas contínuas de fumaça.
  * - VFX: Braseiro da entrada com PointLight animada e cintilação de calor.
  */

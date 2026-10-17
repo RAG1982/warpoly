@@ -167,9 +167,9 @@ const OLD_BUILDING_BUILD_CONFIG = {
   watchtower: { type: 'watchtower', name: 'Torre de Vigia', icon: '/icoTorre.svg', cost: { wood: 80, stone: 40 }, description: 'Torre defensiva com arqueiros' },
   orc_house: { type: 'orc_house', name: 'Toca Orc', icon: '/icoToca.svg', cost: { wood: 50 }, description: 'Fornece +5 de capacidade populacional' },
   pig_farm: { type: 'pig_farm', name: 'Chiqueiro de Porcos', icon: '/icoPorco.svg', cost: { wood: 55 }, description: 'Alimento e +5 de capacidade populacional' },
-  orc_lumber_mill: { type: 'orc_lumber_mill', name: 'Serraria Mecânica', icon: '/icoSerrariaOrc.svg', cost: { wood: 85 }, description: 'Ponto de entrega de madeira da Horda' },
-  orc_barracks: { type: 'orc_barracks', name: 'Quartel da Horda', icon: '/icoQuartelOrc.svg', cost: { wood: 130, stone: 50 }, description: 'Treina grunts, lanceiros e guerreiros orcs' },
-  orc_forge: { type: 'orc_forge', name: 'Forja de Guerra Orc', icon: '/icoForjaOrc.svg', cost: { wood: 100, stone: 70, gold: 50 }, description: 'Forja melhorias de combate para a Horda' },
+  orc_lumber_mill: { type: 'orc_lumber_mill', name: 'Serraria Mecânica', icon: '/icoSerrariaOrc.svg', cost: { wood: 85 }, description: 'Ponto de entrega de madeira dos Clãs' },
+  orc_barracks: { type: 'orc_barracks', name: 'Quartel dos Clãs', icon: '/icoQuartelOrc.svg', cost: { wood: 130, stone: 50 }, description: 'Treina grunts, lanceiros e guerreiros orcs' },
+  orc_forge: { type: 'orc_forge', name: 'Forja de Guerra Orc', icon: '/icoForjaOrc.svg', cost: { wood: 100, stone: 70, gold: 50 }, description: 'Forja melhorias de combate para os Clãs' },
   orc_watchtower: { type: 'orc_watchtower', name: 'Torre de Vigia Orc', icon: '/icoTorreOrc.svg', cost: { wood: 85, stone: 40 }, description: 'Torre defensiva com arremesso de machados' }
 };
 

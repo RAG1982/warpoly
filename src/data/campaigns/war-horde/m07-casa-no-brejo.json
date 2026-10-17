@@ -8,8 +8,8 @@
     "en": "Home in the Marsh"
   },
   "subtitle": {
-    "pt-BR": "Horda, missão 7",
-    "en": "Horde, mission 7"
+    "pt-BR": "Clãs do Cinzal, missão 7",
+    "en": "Cinzal Clans, mission 7"
   },
   "briefing": {
     "speaker": {
@@ -34,8 +34,8 @@
     {
       "id": 0,
       "name": {
-        "pt-BR": "Horda do Cinzal",
-        "en": "Cinzal Horde"
+        "pt-BR": "Clãs do Cinzal",
+        "en": "Cinzal Clans"
       },
       "factionId": "orc",
       "team": 0,

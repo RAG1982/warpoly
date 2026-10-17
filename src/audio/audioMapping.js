@@ -10,7 +10,7 @@
  *   - `gain`      multiplicador de volume do descritor (antes da atenuação por distância)
  *
  *   - `margin`    (opcional) margem de tela extra para o recorte pela cena visível (explosão, desabamento e cerco são grandes)
- *   - `variant`   (opcional) estilo da receita (ex.: `iron` = golpe de metal da Horda; `size` em explosões)
+ *   - `variant`   (opcional) estilo da receita (ex.: `iron` = golpe de metal dos Clãs; `size` em explosões)
  *
  * `info`: `{ own: o evento é do jogador local, visible: a posição está visível na névoa, vfxKind?: tipo do VFX da habilidade,
  * faction?: facção do dono do evento }`.
@@ -107,7 +107,7 @@ export function soundsForEvent(type, p, info = {}) {
       return [hit];
     }
     case EVT.MELEE_HIT:
-      // metal contra metal: aço da Aliança × ferro da Horda (a receita sorteia lâmina/escudo/armadura e a variante no RNG de áudio)
+      // metal contra metal: aço do Reino × ferro dos Clãs (a receita sorteia lâmina/escudo/armadura e a variante no RNG de áudio)
       return audible ? [dm('metalHit', p.pos, own ? 1.6 : 1.1, 1, undefined, { variant: info.faction === 'orc' ? 'iron' : 'steel' })] : NONE;
     case EVT.EXPLOSION: {
       const size = typeof p.radius === 'number' && Number.isFinite(p.radius) ? Math.min(1, Math.max(0.2, (p.radius - 1) / 5)) : 0.7;

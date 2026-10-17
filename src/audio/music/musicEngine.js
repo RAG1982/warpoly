@@ -51,7 +51,7 @@ export const CHORD_TONES = Object.freeze({
   aug: [0, 4, 8, 12, 16, 20],
   sus4: [0, 5, 7, 12, 17, 19],
   sus2: [0, 2, 7, 12, 14, 19],
-  pow: [0, 7, 12, 19, 24, 31] // quinta vazia (sem terça): o som de metais da Horda
+  pow: [0, 7, 12, 19, 24, 31] // quinta vazia (sem terça): o som de metais dos Clãs
 });
 
 /** Sufixo de grau (`'4M'`) -> qualidade do acorde. Sem sufixo, a qualidade sai da própria escala. */
@@ -60,7 +60,7 @@ const QUALITY = Object.freeze({ M: 'maj', m: 'min', d: 'dim', a: 'aug', s: 'sus4
 /** Empilhamentos (semitons somados a cada nota de um `pattern` com `stack`). */
 const STACKS = Object.freeze({
   fifths: [0, 7, 12], // quintas e oitavas: o som de metais militares (na execução usa a quinta do acorde)
-  tritone: [0, 6, 12], // trítono: ameaça (Horda)
+  tritone: [0, 6, 12], // trítono: ameaça (Clãs do Cinzal)
   octaves: [0, 12]
 });
 

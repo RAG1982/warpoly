@@ -6,7 +6,7 @@
 
 ## Visão geral
 
-RTS no estilo Warcraft II: **Aliança Humana** vs **Horda Orc**, jogador contra uma ou mais IAs. Mapas orientados a dados (F2-05, `src/data/maps/<id>.json`, escolha em `?map=` ou no menu de escaramuça):
+RTS no estilo Warcraft II: **Reino Humano** vs **Clãs Orcs**, jogador contra uma ou mais IAs. Mapas orientados a dados (F2-05, `src/data/maps/<id>.json`, escolha em `?map=` ou no menu de escaramuça):
 
 - **`continental-1v1`** ("Vale do Rio", padrão, 1×1): 140×140 (área jogável ±55), continente com rio diagonal e 3 vaus (norte −16,−16 / centro 0,0 / sul 16,16). Base humana em (32,−30), orc em (−32,30). Slot extra (−14,−46) só usado em partidas FFA de teste (`?ffa=1`).
 - **`ilhas-4p`** ("Ilhas Gêmeas", novo): 128×128, FFA de 4 jogadores — 2 ilhas ligadas por 2 pontes de terra, 2 slots por ilha. Jogue com `?map=ilhas-4p&ffa=1`.
@@ -290,6 +290,6 @@ Persistência pura em `ui/optionsStore.js` (valores inválidos → padrão; espe
 - **Biomas:** só visuais (decisão P-4). Não mudam velocidade, custo nem bônus.
 - **Minas e pedreiras esgotadas desabam:** saem da simulação, os trabalhadores que estavam dentro ou na fila são soltos e procuram outra jazida. Fica uma ruína no local (só visual). Poços de petróleo não desabam.
 - **Fauna decorativa:** ovelha e javali por bioma (`src/data/critters.js`). O javali substitui o porco no deserto, na savana e no pântano.
-- **Heróis:** 6 heróis de campanha, 3 por facção (Aliança: Brann, Oren e Dorian; Horda: Drogath, Vozgul e Skarn). Cada um é único na partida (`unique`/`isHero`) e tem habilidades próprias. Dados em `src/data/units.js` e `src/data/abilities.js`.
+- **Heróis:** 6 heróis de campanha, 3 por facção (Liga de Aurelan: Brann, Oren e Dorian; Clãs do Cinzal: Drogath, Vozgul e Skarn). Cada um é único na partida (`unique`/`isHero`) e tem habilidades próprias. Dados em `src/data/units.js` e `src/data/abilities.js`.
 - **Mapas jogáveis:** no mínimo 168×168 (regra P-7). As unidades iniciais nascem à frente da construção principal (P-13). A serraria inicial fica perto de arvoredo (P-14), testado nos dois mapas ampliados (`ilhas-4p` e `estreito-1v1`).
 - Regras de design e decisões: `docs/specs/MUNDO-HISTORIA-CAMPANHA.md` e `docs/specs/MUNDO-TERRENO-MAPAS.md` §8.

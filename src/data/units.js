@@ -608,7 +608,7 @@ export const UNITS = {
     cost: null,
     trainTime: null,
     icon: 'ui/heroes/hero_vozgul.svg',
-    description: 'Herói único: profetisa e necromante dos clãs da Horda',
+    description: 'Herói único: profetisa e necromante dos clãs do Cinzal',
     isWorker: false, isRanged: true, isCombat: true, projectile: 'bolt',
     maxMana: 255, startMana: 255, manaRegen: 1.4,
     abilities: ['hero_soul_drain', 'hero_ancestors', 'hero_ash_veil']
@@ -628,7 +628,7 @@ export const UNITS = {
     cost: null,
     trainTime: null,
     icon: 'ui/heroes/hero_skarn.svg',
-    description: 'Herói único: chefe-de-brasa supremo dos clãs da Horda',
+    description: 'Herói único: chefe-de-brasa supremo dos clãs do Cinzal',
     isWorker: false, isRanged: false, isCombat: true, projectile: null,
     maxMana: 180, startMana: 180, manaRegen: 1.2,
     abilities: ['hero_horde_roar', 'hero_blood_pact', 'hero_ground_slam']

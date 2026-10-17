@@ -80,7 +80,7 @@ export function openOnlineLobby({ params, onStart }) {
   const selMap = el('select', { id: 'ol-map' });
   for (const m of listMaps()) selMap.append(el('option', { value: m.id, textContent: m.name || m.id }));
   selMap.value = DEFAULT_MAP_ID;
-  const selFaction = el('select', { id: 'ol-faction' }, el('option', { value: 'human', textContent: 'Aliança' }), el('option', { value: 'orc', textContent: 'Horda' }));
+  const selFaction = el('select', { id: 'ol-faction' }, el('option', { value: 'human', textContent: 'Reino Humano' }), el('option', { value: 'orc', textContent: 'Clãs Orcs' }));
   const chkReady = el('input', { id: 'ol-ready', type: 'checkbox' });
   const btnStart = el('button', { id: 'ol-start', textContent: 'Iniciar partida' });
   const btnLeave = el('button', { id: 'ol-leave', textContent: 'Sair da sala' });
@@ -131,7 +131,7 @@ export function openOnlineLobby({ params, onStart }) {
       selFaction.value = me.faction;
     }
     list.replaceChildren(
-      ...r.players.map((p) => el('li', { textContent: `${p.name}${p.id === r.host ? ' (anfitrião)' : ''}${p.id === sig.id ? ' (você)' : ''} · ${p.faction === 'orc' ? 'Horda' : 'Aliança'} · ${p.ready || p.id === r.host ? 'pronto' : 'aguardando'}` }))
+      ...r.players.map((p) => el('li', { textContent: `${p.name}${p.id === r.host ? ' (anfitrião)' : ''}${p.id === sig.id ? ' (você)' : ''} · ${p.faction === 'orc' ? 'Clãs Orcs' : 'Reino Humano'} · ${p.ready || p.id === r.host ? 'pronto' : 'aguardando'}` }))
     );
   }
 

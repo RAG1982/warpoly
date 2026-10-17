@@ -12,8 +12,8 @@
 
 | Facção | Capitão | Mago | Comandante |
 |---|---|---|---|
-| Aliança (humanos, Velmara, oeste) | **Capitão Brann** (`hero_brann`, existe) | **Mestre Arcano Oren** (`hero_oren`, existe) | **Marechal Dorian Vasques** (`hero_dorian`, **novo**) |
-| Horda (orcs, Cinzara, leste) | **Drogath Punho-de-Brasa** (`hero_drogath`, existe) | **Vozgul, a Profetisa** (`hero_vozgul`, **novo**) | **Skarn, chefe-de-brasa** (`hero_skarn`, **novo**) |
+| Liga de Aurelan (humanos, Velmara, oeste) | **Capitão Brann** (`hero_brann`, existe) | **Mestre Arcano Oren** (`hero_oren`, existe) | **Marechal Dorian Vasques** (`hero_dorian`, **novo**) |
+| Clãs do Cinzal (orcs, Cinzara, leste) | **Drogath Punho-de-Brasa** (`hero_drogath`, existe) | **Vozgul, a Profetisa** (`hero_vozgul`, **novo**) | **Skarn, chefe-de-brasa** (`hero_skarn`, **novo**) |
 
 - **Mapeamento (§1)**: mantêm-se os 3 ids existentes (Brann, Oren, Drogath); só **3 tipos novos** (Dorian, Vozgul, Skarn). Grok Quebra-Muros (do GDD e da versão anterior) deixa de ser herói: vira o NPC "mestre de cerco" (um `ogre_mage`/`catapult` nomeado em diálogo). Fica o GDD §5.3 (Vozgul e Grok como heróis orcs) corrigido para Vozgul e Skarn (§7).
 - **Entrada na campanha** (igual nas duas facções, ver §2): **Capitão na missão 3** (primeiro herói; ensina o Grito de Guerra e as habilidades de herói) → **Mago na missão 10** → **Comandante na missão 11** → **missão 12: os três juntos** (a "reunião"). Antes de entrar, cada herói é **citado** em briefings e diálogos e **aparece como NPC/chefe inimigo** na campanha oposta (§2).
@@ -55,7 +55,7 @@ Como hoje: morto = fora da partida (não volta na mesma missão), e a missão po
 
 **Regra**: tutorial progressivo nas missões 1–6; a partir da 7 tudo liberado, **sem "personagem novo por missão"**. Os heróis entram assim, nas duas campanhas (a lista `unlocks.heroes` de cada missão acompanha, ver `MUNDO-HISTORIA-CAMPANHA.md` §4):
 
-| Missão | Aliança libera | Horda libera | Justificativa |
+| Missão | Liga de Aurelan libera | Clãs do Cinzal libera | Justificativa |
 |---|---|---|---|
 | 3 | **Capitão Brann** | **Drogath** | primeiro combate sério + muralha/cerco; o jogador aprende o que é um herói (Grito de Guerra, mana, unicidade) com o mais simples (corpo a corpo) |
 | 10 | **Oren** (Mago) | **Vozgul** (Mago) | o mago é o herói que exige a árvore completa e a logística da colônia; entra no desembarque, depois de ser apresentado como mentor/ameaça (m5, m8) |
@@ -69,14 +69,14 @@ Cada herói é **inimigo (chefe ou capitão de patrulha)** na campanha oposta, n
 
 | Herói inimigo | Aparece como inimigo em | Papel |
 |---|---|---|
-| Brann | Horda **m3** (capitão da guarnição de Pedra-Mãe; chefe do assalto) e **m6** (comandante do forte de Brumar) | muro humano |
-| Oren | Horda **m5** (mago do Bosque) e **m8** (defende a Fornalha com o esquadrão de Lyra) | feiticeiro aliado |
-| Dorian | Horda **m9** (contra-ofensiva de Miragem, junto de Cavaleiros e Balistas, sem grifos) e **m12** (chefe final) | marechal |
-| Drogath | Aliança **m2** (capitão da patrulha do Chama-Baixa, cutscene) e **m6** (forte dos Lanças Quebradas, chefe) | capitão de guerra |
-| Vozgul | Aliança **m5** (Necromantes do Salão do Bosque, voz em diálogo) e **m8** (chefe do Santuário das Cinzas) | profetisa |
-| Skarn | Aliança **m1** (voz), **m9** (contra-ofensiva de Miragem, comandada por Grok no campo; Skarn em cutscene) e **m12** (chefe final) | chefe-de-brasa |
+| Brann | Clãs do Cinzal **m3** (capitão da guarnição de Pedra-Mãe; chefe do assalto) e **m6** (comandante do forte de Brumar) | muro humano |
+| Oren | Clãs do Cinzal **m5** (mago do Bosque) e **m8** (defende a Fornalha com o esquadrão de Lyra) | feiticeiro aliado |
+| Dorian | Clãs do Cinzal **m9** (contra-ofensiva de Miragem, junto de Cavaleiros e Balistas, sem grifos) e **m12** (chefe final) | marechal |
+| Drogath | Liga de Aurelan **m2** (capitão da patrulha do Chama-Baixa, cutscene) e **m6** (forte dos Lanças Quebradas, chefe) | capitão de guerra |
+| Vozgul | Liga de Aurelan **m5** (Necromantes do Salão do Bosque, voz em diálogo) e **m8** (chefe do Santuário das Cinzas) | profetisa |
+| Skarn | Liga de Aurelan **m1** (voz), **m9** (contra-ofensiva de Miragem, comandada por Grok no campo; Skarn em cutscene) e **m12** (chefe final) | chefe-de-brasa |
 
-(As datas de `MUNDO-HISTORIA-CAMPANHA.md` §3.6/§3.7 foram ajustadas para este espelho. Grok comanda a contra-ofensiva da Horda em m9 da Aliança como `ogre_mage` nomeado; Lyra comanda o esquadrão de grifos nas m8/m9/m11 da Horda como `gryphon_rider` nomeado.)
+(As datas de `MUNDO-HISTORIA-CAMPANHA.md` §3.6/§3.7 foram ajustadas para este espelho. Grok comanda a contra-ofensiva dos Clãs do Cinzal em m9 da Liga de Aurelan como `ogre_mage` nomeado; Lyra comanda o esquadrão de grifos nas m8/m9/m11 dos Clãs do Cinzal como `gryphon_rider` nomeado.)
 
 ---
 
@@ -84,7 +84,7 @@ Cada herói é **inimigo (chefe ou capitão de patrulha)** na campanha oposta, n
 
 **Papel**: tanque corpo a corpo, o "capitão da guarnição": segura a linha e inspira a infantaria. É o herói que o jogador conhece primeiro.
 **Personalidade/história**: soldado de carreira de Aurelan, 48 anos, voz seca e humor curto, conhece o nome de cada recruta. Foi capitão do forte de Pedra-Mãe antes de o governador **Mervane** chegar, e desconfia do ouro que sai da mina sem passar pelo registro. Fiel a quem manda, mas não às ordens que desperdiçam soldados. Frase: "Ninguém dorme antes da sentinela render."
-**Arco por missão (Aliança, jogável)**
+**Arco por missão (Liga de Aurelan, jogável)**
 | m | Brann |
 |---|---|
 | 1–2 | citado: a Rainha lhe escreve do forte; na cutscene da m2 abre o portão para os náufragos |
@@ -93,7 +93,7 @@ Cada herói é **inimigo (chefe ou capitão de patrulha)** na campanha oposta, n
 | 7 | **descobre o ferro de contrabando** de Mervane; a traição o pega com o braço no escudo, jura "nunca mais confiar numa carta selada" |
 | 8–9 | segura a linha enquanto Oren/Orsolo libertam os magos; na m9 comanda o Forte Atalaia |
 | 10–12 | lidera o desembarque; na m12, âncora do muro (derrota se ele cair, opcional) |
-**Na Horda (inimigo)**: m3 e m6 (ver §2.1).
+**Nos Clãs do Cinzal (inimigo)**: m3 e m6 (ver §2.1).
 **Aparência (ficha para o modelador)**: ver §3.1.
 **Atributos base** (existentes; **sem mudança**): PV 520 · dano 34+12 normal · armadura 6 · velocidade 5,0 · alcance 2,2 · recarga 1,0 s · visão 18 · `modelOf: knight` · `scaleMul 1.2`. **Mana: 150 (+1,2/s)** (de 120 +1,0).
 **Habilidades**
@@ -108,7 +108,7 @@ Cada herói é **inimigo (chefe ou capitão de patrulha)** na campanha oposta, n
 - **Silhueta**: o mais largo e baixo do trio humano; ombros em "T" por causa das ombreiras e do escudo grande; capacete com crista curta (sem cimeira exagerada). Postura firme, pés afastados, escudo no braço esquerdo (`ArmL`).
 - **Armadura/roupa**: couraça de placas escovadas (aço fosco) sobre gibão de lã azul-escuro; manto curto de guarnição preso num ombro; luvas de couro; botas de marcha. Marcas de uso (amassados, remendos), **sem ornamento dourado exceto a gola**.
 - **Armas**: espada longa reta de uma mão (**gume voltado para +Z**) e escudo redondo/de brasão (o brasão pode levar a cor do time).
-- **Cores**: azul-real da Aliança nos panos e no brasão (cor do time), aço neutro, couro marrom; dourado só na gola e na fivela.
+- **Cores**: azul-real da Liga de Aurelan nos panos e no brasão (cor do time), aço neutro, couro marrom; dourado só na gola e na fivela.
 - **Expressão**: rosto quadrado e curtido, barba curta grisalha, cicatriz na sobrancelha, olhar de quem conta cabeças. **Textura de rosto só na face frontal (+Z)**; laterais, topo e nuca lisos.
 - **Proporção**: ≈ **1,2×** o Espadachim (`scaleMul 1.2`) e um pouco mais largo; mesma altura de olhos que a cavalaria desmontada.
 - **Nós nomeados**: manter `Torso`, `ArmL`, `ArmR`, `Sword` (e `Shield` se existir no modelo do Espadachim) para o `UnitAnimator` e `ModelFactory.rebindUserData`.
@@ -119,7 +119,7 @@ Cada herói é **inimigo (chefe ou capitão de patrulha)** na campanha oposta, n
 
 **Papel**: mago de campo de alcance: dano em área, cura e controle de área. Frágil; exige proteção.
 **Personalidade/história**: 29 anos, cartógrafo arcano, discípulo do **Mestre Orsolo** (NPC que desenha o primeiro mapa do Mar Fendido). Curioso, falante, sofre de ansiedade antes de cada combate e some em "cálculos" quando está nervoso, mas é calmo quando alguém depende dele. Carrega os cadernos de Orsolo.
-**Arco por missão (Aliança)**
+**Arco por missão (Liga de Aurelan)**
 | m | Oren |
 |---|---|
 | 1–4 | citado nas cartas de Orsolo; aparece em cutscene na m2 (mede a Torre da Fenda) |
@@ -129,7 +129,7 @@ Cada herói é **inimigo (chefe ou capitão de patrulha)** na campanha oposta, n
 | 9 | na cutscene, redesenha a costa inimiga a partir dos cadernos |
 | **10** | **jogável**: desenha o terreno do desembarque (a missão revela área); passa de "aprendiz" a "Mestre" |
 | 11–12 | cura e Tempestade Arcana sustentam a colônia e o muro; na m12 fecha o estreito com a Tempestade |
-**Na Horda (inimigo)**: m5, m8 (ver §2.1). **Aparência**: §4.1.
+**Nos Clãs do Cinzal (inimigo)**: m5, m8 (ver §2.1). **Aparência**: §4.1.
 **Atributos base** (existentes; **sem mudança**): PV 260 · dano 0+34 mágico · armadura 2 · velocidade 4,6 · alcance 10 · recarga 1,6 s · visão 20 · `modelOf: mage` · `scaleMul 1.15` · mana 255 (+1,5/s).
 **Habilidades**
 | # | id | Nome | Tecla | Alvo | Alcance | Mana | Recarga | Efeito | Novo? |
@@ -154,7 +154,7 @@ Cada herói é **inimigo (chefe ou capitão de patrulha)** na campanha oposta, n
 
 **Papel**: Comandante: lidera em área (aura de pressa/escudos), campeão montado. Mais veloz e mais caro em mana.
 **Personalidade/história**: 56 anos, estrategista da Guarda Real, calmo, formal, nunca levanta a voz, mas todas as ordens saem em duas frases. É cunhado de **Mervane**: a traição do governador na m7 é uma ferida pessoal que o faz mais duro. Carrega o estandarte de Aurelan. Frase: "Um mapa não perdoa uma hesitação."
-**Arco por missão (Aliança)**
+**Arco por missão (Liga de Aurelan)**
 | m | Dorian |
 |---|---|
 | 1 | citado: a Rainha lhe confia a frota |
@@ -164,7 +164,7 @@ Cada herói é **inimigo (chefe ou capitão de patrulha)** na campanha oposta, n
 | 10 | em cutscene, despede-se do porto e "sobe a bordo da terceira onda" |
 | **11** | **jogável**: chega com a segunda onda por mar ao Porto Albor; assume o comando do cerco |
 | **12** | lidera a fortaleza; derruba Skarn (chefe) ou o obriga a recuar; **fica** no Bastião (gancho) |
-**Na Horda (inimigo)**: m9 e m12 (chefe final; ver §2.1). Pode **fugir ferido** no gancho.
+**Nos Clãs do Cinzal (inimigo)**: m9 e m12 (chefe final; ver §2.1). Pode **fugir ferido** no gancho.
 **Atributos base sugeridos**
 | PV | Dano | Armad. | Vel. | Alcance | Recarga | Visão | Mana | Base/escala |
 |---|---|---|---|---|---|---|---|---|
@@ -189,12 +189,12 @@ Cada herói é **inimigo (chefe ou capitão de patrulha)** na campanha oposta, n
 
 ---
 
-## 6. Heróis da Horda
+## 6. Heróis dos Clãs do Cinzal
 
 ### 6.1 Drogath Punho-de-Brasa (orc, `hero_drogath`) — Capitão
 **Papel**: capitão de guerra do Clã Chama-Baixa: combatente de linha de frente, resistente, com cura própria.
 **Personalidade/história**: 40 anos, líder de um clã pequeno que sobrevive de honra e de promessas. Silencioso, cumpre o que jura, acredita que "o fogo do clã não se apaga por ordem de chefe". Cuida do braseiro da **Anciã Ulma**. Frase: "O que o clã acende, o clã apaga."
-**Arco por missão (Horda)**
+**Arco por missão (Clãs do Cinzal)**
 | m | Drogath |
 |---|---|
 | 1–2 | citado e em cutscenes: comanda a praia, reconhece o mural da Fenda com Ulma; objetivo oculto de conduta (Honra do Clã) |
@@ -203,7 +203,7 @@ Cada herói é **inimigo (chefe ou capitão de patrulha)** na campanha oposta, n
 | 7 | **traição de Hurgan** (Lanças Quebradas): quebra o juramento e abre o brejo; Drogath o enfrenta |
 | 8–9 | segura a Fornalha enquanto Vozgul faz o rito; na m9 a Anciã Ulma **morre** de velhice no último poço (morte narrativa de NPC), e Drogath **herda o Fogo do Clã** |
 | 10–12 | leva o Fogo do Clã ao desembarque; na m12 acende o braseiro na Cidadela |
-**Na Aliança (inimigo)**: m2 (cutscene) e m6 (chefe do forte).
+**Na Liga de Aurelan (inimigo)**: m2 (cutscene) e m6 (chefe do forte).
 **Atributos base** (existentes; **sem mudança**): PV 540 · dano 38+10 normal · armadura 6 · velocidade 4,9 · alcance 2,2 · recarga 1,05 s · visão 18 · `modelOf: grunt` · `scaleMul 1.2`. **Mana: 150 (+1,2/s)** (de 120 +1,0).
 **Habilidades**
 | # | id | Nome | Tecla | Alvo | Alcance | Mana | Recarga | Efeito | Novo? |
@@ -224,7 +224,7 @@ Cada herói é **inimigo (chefe ou capitão de patrulha)** na campanha oposta, n
 ### 6.2 Vozgul, a Profetisa (orc, `hero_vozgul` — NOVO) — Mago
 **Papel**: mago de apoio e controle: dreno de vida, mortos-vivos temporários e furtividade. Alcance médio, frágil.
 **Personalidade/história**: idade incerta (ouvem dizer que lembra os avós dos avós). Voz baixa e lenta; pensa em "dívidas de memória": todo morto merece lembrança. Ensina que o Erguer Mortos é um **empréstimo com juros**, não uma arma. Guardiã do rito da forja de Fornalha. Discreta oposição a Skarn (usa necromancia sem rito).
-**Arco por missão (Horda)**
+**Arco por missão (Clãs do Cinzal)**
 | m | Vozgul |
 |---|---|
 | 1–4 | citada por Ulma como "quem guarda os nomes dos mortos" |
@@ -234,7 +234,7 @@ Cada herói é **inimigo (chefe ou capitão de patrulha)** na campanha oposta, n
 | 9 | recusa-se a erguer os mortos de Miragem sem rito; discute com Skarn (semente do gancho) |
 | **10** | **jogável**: abre o desembarque acalmando as marés; erguida como guardiã do Fogo do Clã herdado de Ulma |
 | 11–12 | na colônia, honra os mortos e usa o Chamado dos Ancestrais com disciplina; na m12 é a "voz" da Cidadela |
-**Na Aliança (inimigo)**: m5 (voz), m8 (chefe do Santuário).
+**Na Liga de Aurelan (inimigo)**: m5 (voz), m8 (chefe do Santuário).
 **Atributos base sugeridos**
 | PV | Dano | Armad. | Vel. | Alcance | Recarga | Visão | Mana | Base/escala |
 |---|---|---|---|---|---|---|---|---|
@@ -257,9 +257,9 @@ Cada herói é **inimigo (chefe ou capitão de patrulha)** na campanha oposta, n
 - **Nós nomeados**: manter os do Necromante (`Torso`, `ArmL`, `ArmR`, `Staff`).
 
 ### 6.3 Skarn, chefe-de-brasa (orc, `hero_skarn` — NOVO) — Comandante
-**Papel**: Comandante da Horda: tanque de chefia, grita ordens em área e pode se proteger (ao custo de vida). O maior herói do jogo.
-**Personalidade/história**: 52 anos, ogro de coroa de ferro que unificou os clãs numa Horda porque viu a fome matar a metade deles. Carismático e implacável, convicto de que "a Horda precisa do mar, e quem fecha o mar fecha a Horda". Não é o vilão simples: trata os clãs com dureza, mas lhes dá água. Sua coroa de ferro é feita das lâminas de três clãs rivais.
-**Arco por missão (Horda)**
+**Papel**: Comandante dos Clãs do Cinzal: tanque de chefia, grita ordens em área e pode se proteger (ao custo de vida). O maior herói do jogo.
+**Personalidade/história**: 52 anos, ogro de coroa de ferro que unificou os clãs numa união de clãs porque viu a fome matar a metade deles. Carismático e implacável, convicto de que "os Clãs do Cinzal precisam do mar, e quem fecha o mar fecha os Clãs do Cinzal". Não é o vilão simples: trata os clãs com dureza, mas lhes dá água. Sua coroa de ferro é feita das lâminas de três clãs rivais.
+**Arco por missão (Clãs do Cinzal)**
 | m | Skarn |
 |---|---|
 | 1 | voz (pira do Planalto do Cinzal) e carta |
@@ -269,7 +269,7 @@ Cada herói é **inimigo (chefe ou capitão de patrulha)** na campanha oposta, n
 | 10 | atravessa o Mar Fendido na terceira onda |
 | **11** | **jogável**: chega com a segunda onda por mar a Brasa-Alta; assume o comando da colônia |
 | **12** | lidera a Cidadela contra Dorian (que pode fugir ferido: gancho) |
-**Na Aliança (inimigo)**: m1 (voz), m9 (cutscene) e m12 (chefe final).
+**Na Liga de Aurelan (inimigo)**: m1 (voz), m9 (cutscene) e m12 (chefe final).
 **Atributos base sugeridos**
 | PV | Dano | Armad. | Vel. | Alcance | Recarga | Visão | Mana | Base/escala |
 |---|---|---|---|---|---|---|---|---|
@@ -278,7 +278,7 @@ Cada herói é **inimigo (chefe ou capitão de patrulha)** na campanha oposta, n
 **Habilidades**
 | # | id | Nome | Tecla | Alvo | Alcance | Mana | Recarga | Efeito | Novo? |
 |---|---|---|---|---|---|---|---|---|---|
-| 1 | `hero_horde_roar` | Rugido da Horda | Z | si (área) | 0 | 70 | 30 s | `status bloodlust` 10 s no herói **e nos aliados em `radius 8`** | entrada nova + **extensão A1** |
+| 1 | `hero_horde_roar` | Rugido dos Clãs | Z | si (área) | 0 | 70 | 30 s | `status bloodlust` 10 s no herói **e nos aliados em `radius 8`** | entrada nova + **extensão A1** |
 | 2 | `hero_ash_pact` | Pacto de Cinzas | X | si | 0 | 40 | 40 s | `status unholy_armor` 6 s no herói: invulnerável durante o efeito; ao fim perde 50% do PV atual | entrada nova; status existente |
 | 3 | `hero_crown_hammer` | Martelo da Coroa | C | inimigo | 3 | 55 | 12 s | `damage` 110 (`normal`, `radius 4`) + `status slow` 4 s no alvo | entrada nova; efeitos existentes |
 **Itens/evolução**: nenhum no MVP.
@@ -331,8 +331,8 @@ Z/X/C livres em cada herói (sem repetir dentro do mesmo herói): Brann Z/X/C = 
 
 ## 9. Perguntas ainda abertas
 1. **Comandante na m11 (recomendado) ou na m12?** Na m11 ele é o herói que dá peso à colônia; na m12 o jogador o recebe só para o final (mais "recompensa", menos uso).
-2. **Skarn jogável na Horda** (e Dorian jogável na Aliança) apesar de serem os chefes da campanha oposta: confirmado pela decisão 6 ("versões humana e orc"); só confirme se o chefe final (inimigo) deve ser **mais forte** que o herói jogável (hoje: o mesmo tipo, com mais guarda/ondas).
+2. **Skarn jogável nos Clãs do Cinzal** (e Dorian jogável na Liga de Aurelan) apesar de serem os chefes da campanha oposta: confirmado pela decisão 6 ("versões humana e orc"); só confirme se o chefe final (inimigo) deve ser **mais forte** que o herói jogável (hoje: o mesmo tipo, com mais guarda/ondas).
 3. **Itens/evolução de herói**: manter fora (MVP) ou adotar evolução por missão / XP?
-4. **Vozgul como "Profetisa"**: a profetisa da Horda tem papel que lembra um oráculo; aceitável, ou prefere "Guardiã da Memória"?
+4. **Vozgul como "Profetisa"**: a profetisa dos Clãs do Cinzal tem papel que lembra um oráculo; aceitável, ou prefere "Guardiã da Memória"?
 5. **Brann e Drogath compartilham `hero_war_cry`**: ok manter uma habilidade reaproveitada, ou criar variação por facção (efeito idêntico, nome/ícone diferentes)?
-6. **Morte narrativa de NPCs** (Orsolo na m8 da Aliança; Ulma na m9 da Horda): aceitável no tom, só em diálogo e sem violência explícita?
+6. **Morte narrativa de NPCs** (Orsolo na m8 da Liga de Aurelan; Ulma na m9 dos Clãs do Cinzal): aceitável no tom, só em diálogo e sem violência explícita?

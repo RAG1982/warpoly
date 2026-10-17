@@ -7,7 +7,7 @@ function posOf(v) {
 }
 
 /**
- * OrcForge — Forja de Guerra, Armaria e Fundição da Horda Orc
+ * OrcForge — Forja de Guerra, Armaria e Fundição dos Clãs Orcs
  *
  * Arquitetura (Engine & Gameplay):
  * - Extende `BuildingView` (a entidade de simulação é `Building`, em src/sim).

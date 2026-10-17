@@ -4,8 +4,8 @@
  * (tudo sintetizado, sem samples).
  *
  * ESTILO (feedback do dono): música ANIMADA, um pouco MILITAR e URGENTE, como a de Warcraft II.
- *  - Reino (Aliança): fanfarra heroica em modo maior/dórico — trompetes, metais em quintas/oitavas, pífaro, caixas e bumbo.
- *  - Horda: percussão pesada (taiko/tambores), trompa de guerra, metais em trítono, modo frígio (2ª menor + 5ª diminuta).
+ *  - Reino Humano: fanfarra heroica em modo maior/dórico — trompetes, metais em quintas/oitavas, pífaro, caixas e bumbo.
+ *  - Clãs: percussão pesada (taiko/tambores), trompa de guerra, metais em trítono, modo frígio (2ª menor + 5ª diminuta).
  *  - As 3 primeiras variações de cada família (paz/combate × facção) são as CLÁSSICAS deste arquivo; as demais (candidatas
  *    novas) vêm de `tracksHuman.js`, `tracksOrc.js` e `tracksTitle.js`. O catálogo (`catalog.js`) diz quais tocam no jogo.
  *  - A escolha da variação é determinística e fica FORA da simulação (`pickVariant` em musicDirector.js).
@@ -29,7 +29,7 @@ const H_SNARE = [
 ];
 const ROLL = D([0.4, 0.4, 0.45, 0.5, 0.55, 0.6, 0.65, 0.7, 0.75, 0.8, 0.85, 0.9, 0.95, 1, 1, 1]); // rufar crescente
 const H_TOM = D([0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0.6, 0.6, 0.7, 0.8]);
-// Horda, combate: taiko/tambores pesados em colcheias com síncopes e galope.
+// Clãs, combate: taiko/tambores pesados em colcheias com síncopes e galope.
 const O_TAIKO = [
   D([1, 0, 0.6, 0, 0.9, 0, 0.6, 0.5, 1, 0, 0.6, 0, 0.9, 0.5, 0.7, 0.8]),
   D([1, 0.5, 0, 0.7, 0.9, 0, 0.6, 0, 1, 0.5, 0, 0.7, 0.9, 0.6, 0.7, 0.9]),
@@ -81,7 +81,7 @@ const humanCombat = [
   ]
 }));
 
-// Horda, paz: brasa lenta nas montanhas — pulsação de taiko, bordão grave, trompa de guerra e flauta de osso (frígio).
+// Clãs, paz: brasa lenta nas montanhas — pulsação de taiko, bordão grave, trompa de guerra e flauta de osso (frígio).
 const orcPeace = [
   { bpm: 120, mode: 'phrygian', key: 38, deg: [0, 0, 1, 6, 0, 0, 5, 6], seed: 3 },
   { bpm: 122, mode: 'phrygian', key: 40, deg: [0, 1, 0, 6, 0, 1, 6, 5], seed: 19 },
@@ -99,7 +99,7 @@ const orcPeace = [
   ]
 }));
 
-// Horda, combate: guerra — taiko pesado em galope, metais em trítono, cordas ameaçadoras e trompa (frígio).
+// Clãs, combate: guerra — taiko pesado em galope, metais em trítono, cordas ameaçadoras e trompa (frígio).
 const orcCombat = [
   { bpm: 136, mode: 'phrygian', key: 38, deg: [0, 0, 1, 0, 0, 6, 1, 4], seed: 7, stabs: [0, 3, 6, 8, 11, 14] },
   { bpm: 138, mode: 'phrygian', key: 40, deg: [0, 1, 0, 6, 0, 1, 6, 5], seed: 13, stabs: [0, 2, 6, 8, 10, 14] },

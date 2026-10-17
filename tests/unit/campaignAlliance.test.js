@@ -21,7 +21,7 @@ import en from '../../src/i18n/en.json';
 const alliance = getCampaign('alliance');
 const ids = alliance.missions.map((m) => m.id);
 
-describe('campanha da Aliança: dados (F8-05)', () => {
+describe('campanha do Reino: dados (F8-05)', () => {
   it('está registrada, válida e tem 8 ou mais missões, todas escondidas do menu "Missões"', () => {
     expect(listCampaigns().map((c) => c.id)).toContain('alliance');
     expect(validateCampaign(alliance, { hasMission: (id) => !!getMission(id) })).toEqual({ ok: true, errors: [] });
@@ -222,11 +222,11 @@ describe('campanha: i18n (F8-05)', () => {
 });
 
 /**
- * F8-05b — conteúdo da liberação progressiva: a campanha libera TODAS as unidades/construções/pesquisas da Aliança, cada missão usa
+ * F8-05b — conteúdo da liberação progressiva: a campanha libera TODAS as unidades/construções/pesquisas do Reino, cada missão usa
  * (exige ou recompensa) as suas novidades, nada é entregue ao jogador antes de ser liberado, os inimigos variam por tema e a união
  * das unidades das 8 missões cobre todas as categorias (infantaria, cavalaria, cerco, conjurador, sapador, aérea, naval, herói).
  */
-describe('campanha da Aliança: liberação progressiva e cobertura de unidades (F8-05b)', () => {
+describe('campanha do Reino: liberação progressiva e cobertura de unidades (F8-05b)', () => {
   const missions = ids.map((id) => getMission(id));
   const isNum = (n) => typeof n === 'number';
   const textOf = (t) => (typeof t === 'string' ? { 'pt-BR': t, en: t } : t);
@@ -274,7 +274,7 @@ describe('campanha da Aliança: liberação progressiva e cobertura de unidades 
     return refs;
   }
 
-  it('a campanha libera TODAS as unidades, construções e pesquisas da Aliança (e os dois heróis)', () => {
+  it('a campanha libera TODAS as unidades, construções e pesquisas do Reino (e os dois heróis)', () => {
     const all = availableTech(alliance, ids.length - 1);
     const humanUnits = Object.values(UNITS).filter((u) => (u.faction === 'human' || u.faction === 'neutral') && u.cost && !u.isHero).map((u) => u.type);
     for (const t of humanUnits) expect(all.units.has(t), `unidade ${t} nunca é liberada`).toBe(true);
@@ -482,12 +482,12 @@ describe('campanha da Aliança: liberação progressiva e cobertura de unidades 
     for (const c of Object.keys(CAT)) {
       expect(CAT[c].some((u) => used.has(u)), `categoria ${c} não aparece em nenhuma missão`).toBe(true);
     }
-    // o jogador usa uma unidade de cada categoria da Aliança, e o inimigo traz as suas (sem heróis)
+    // o jogador usa uma unidade de cada categoria do Reino, e o inimigo traz as suas (sem heróis)
     for (const c of Object.keys(CAT)) expect(CAT[c].some((u) => player.has(u) || objective.has(u)), `jogador sem ${c}`).toBe(true);
     for (const c of Object.keys(CAT).filter((x) => x !== 'heroi')) expect(CAT[c].some((u) => foe.has(u)), `inimigo sem ${c}`).toBe(true);
     // e toda unidade usada pertence a uma categoria conhecida (sem tipo esquecido)
     for (const u of used) if (!['bandit', 'sheep', 'skeleton'].includes(u)) expect(catOf(u), `${u} sem categoria`).toBeTruthy();
-    // todas as unidades da Aliança (treináveis ou heróis) aparecem em alguma missão, no jogador ou nos objetivos, ou são liberadas para treino
+    // todas as unidades do Reino (treináveis ou heróis) aparecem em alguma missão, no jogador ou nos objetivos, ou são liberadas para treino
     const all = availableTech(alliance, ids.length - 1);
     for (const u of [...all.units, ...all.heroes]) expect(catOf(u), `${u} sem categoria`).toBeTruthy();
   });

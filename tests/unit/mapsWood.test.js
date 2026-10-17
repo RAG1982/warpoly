@@ -7,7 +7,7 @@ import missionClasses from '../fixtures/missionTerrainClasses.json';
 import originals from '../fixtures/originalMapTerrain.json';
 
 /**
- * Florestas mais densas e mapas maiores (feedback do dono após a campanha da Aliança).
+ * Florestas mais densas e mapas maiores (feedback do dono após a campanha do Reino).
  *
  * - Meta de madeira: cada jogador alcança por terra, a <= 60 u do pátio, pelo menos `WOOD_TARGET` (8000 = ~67 árvores de 120).
  *   Base do número: nos soaks a IA corta ~2300-3100 de madeira por jogador em 15-20 min (NEW-51: 59 árvores / 3 jogadores

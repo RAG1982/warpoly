@@ -2,7 +2,7 @@ import * as THREE from 'three';
 import { BuildingView } from '../../BuildingView.js';
 
 /**
- * PigFarm — Fazenda e Criatório de Javalis/Porcos da Horda Orc
+ * PigFarm — Fazenda e Criatório de Javalis/Porcos dos Clãs Orcs
  *
  * Arquitetura (Engine & Gameplay):
  * - Extende `BuildingView` (a entidade de simulação é `Building`, em src/sim).

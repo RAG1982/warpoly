@@ -2,8 +2,9 @@
  * AudioEngine.js (F7-08) — o motor de áudio de produção sobre um AudioContext (criado só depois de um gesto do usuário,
  * ver `SoundManager`). Responsabilidades:
  *
- *  MIXER      música e efeitos em barramentos separados -> mestre -> DynamicsCompressor (limitador) -> saída.
- *             Volume por canal (+ geral) com suavização; a ambiência entra no barramento de efeitos.
+ *  MIXER      música e efeitos em barramentos separados -> mestre -> DynamicsCompressor (limitador) -> saturador suave
+ *             (teto de 1,0, ver `SOFT_CLIP`) -> saída. Volume por canal (+ geral) com suavização; a ambiência entra
+ *             no barramento de efeitos.
  *  POSICIONAL `playSfx(nome, { pos })`: só soa o que está na CENA VISÍVEL (frustum da câmera + margem); ganho pela distância
  *             ao alvo da câmera e pelo zoom (longe = mais baixo e alcance menor) + panorama estéreo (attenuation.js) e
  *             limite de vozes com prioridade (VoicePool). Fora da cena/alcance nem cria nós.
@@ -13,7 +14,7 @@
  * Só apresentação: nada aqui lê ou escreve a simulação, nenhum Math.random (RNG de render próprio) nem Date.now.
  * O relógio é `ctx.currentTime`; um temporizador de ~150 ms agenda notas, avalia o diretor de música e atualiza a ambiência.
  */
-import { capsFor, createAudioRng, clampVolume } from './audioConfig.js';
+import { capsFor, createAudioRng, clampVolume, SOFT_CLIP, softClipCurve } from './audioConfig.js';
 import { positionalMix } from './attenuation.js';
 import { VoicePool } from './VoicePool.js';
 import { SFX, SFX_LIMITS } from './sfxRecipes.js';
@@ -44,7 +45,7 @@ export class AudioEngine {
     if (volumes) for (const k of ['master', 'music', 'sfx']) if (volumes[k] !== undefined) this.volumes[k] = clampVolume(volumes[k], this.volumes[k]);
     this.listener = { x: 0, z: 0, zoom: 1, rightX: 1, rightZ: 0, viewProj: null, bounds: null };
 
-    // --- mixer: barramentos -> mestre -> limitador -> saída
+    // --- mixer: barramentos -> mestre -> limitador -> saturador de segurança -> saída
     this.master = ctx.createGain();
     this.limiter = ctx.createDynamicsCompressor();
     this.limiter.threshold.value = -9;
@@ -53,7 +54,16 @@ export class AudioEngine {
     this.limiter.attack.value = 0.003;
     this.limiter.release.value = 0.15;
     this.master.connect(this.limiter);
-    this.limiter.connect(ctx.destination);
+    // O compressor sozinho deixa passar picos de vozes que começam juntas (25 efeitos no máximo = 1,8 de pico): o saturador suave
+    // (identidade até SOFT_CLIP.knee, nunca acima de 1,0) garante o teto. `safetyIn` leva a amplitude à faixa da curva.
+    this.safetyIn = ctx.createGain();
+    this.safetyIn.gain.value = 1 / SOFT_CLIP.range;
+    this.safety = ctx.createWaveShaper();
+    this.safety.curve = softClipCurve();
+    this.safety.oversample = 'none';
+    this.limiter.connect(this.safetyIn);
+    this.safetyIn.connect(this.safety);
+    this.safety.connect(ctx.destination);
     this.musicDuck = ctx.createGain();
     this.musicDuck.connect(this.master);
     this.buses = { music: ctx.createGain(), sfx: ctx.createGain() };

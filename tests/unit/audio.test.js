@@ -5,7 +5,8 @@ import {
 import { VoicePool } from '../../src/audio/VoicePool.js';
 import { MusicDirector, trackIdFor, DIRECTOR_DEFAULTS } from '../../src/audio/musicDirector.js';
 import {
-  AUDIO_LEVELS, AUDIO_CAPS, parseAudioParam, selectAudioLevel, isAutomation, clampVolume, createAudioRng
+  AUDIO_LEVELS, AUDIO_CAPS, parseAudioParam, selectAudioLevel, isAutomation, clampVolume, createAudioRng,
+  SOFT_CLIP, softClip, softClipCurve
 } from '../../src/audio/audioConfig.js';
 import { detectAudioLevel } from '../../src/audio/audioEnv.js';
 import { soundsForEvent, combatWeight, SFX_EVENTS, COMBAT_EVENTS } from '../../src/audio/audioMapping.js';
@@ -401,6 +402,57 @@ describe('F7-08 configuração: nível por preset, ?audio= e automação muda', 
 });
 
 // ---------------------------------------------------------------------------------------------------------
+describe('F7-08 saturador de segurança do limitador (função pura)', () => {
+  it('é identidade exata até o joelho e nunca passa do teto, nem para entradas enormes', () => {
+    expect(softClip(0)).toBe(0);
+    for (const x of [0.1, 0.5, 0.84, SOFT_CLIP.knee]) {
+      expect(softClip(x)).toBe(x);
+      expect(softClip(-x)).toBe(-x);
+    }
+    for (const x of [0.86, 1, 1.5, 2, 10, 1e9, Infinity]) {
+      expect(softClip(x)).toBeLessThanOrEqual(SOFT_CLIP.ceiling);
+      expect(softClip(-x)).toBeGreaterThanOrEqual(-SOFT_CLIP.ceiling);
+    }
+    expect(softClip(Infinity)).toBe(SOFT_CLIP.ceiling);
+    expect(softClip(NaN)).toBe(0);
+    expect(softClip(undefined)).toBe(0);
+    expect(softClip(1.8)).toBeGreaterThan(0.99); // a entrada de 1,8 (pico medido sem o saturador) fica rente ao teto
+  });
+
+  it('é monótono, ímpar e suave no joelho (sem degrau nem inversão)', () => {
+    let prev = -Infinity;
+    for (let i = -300; i <= 300; i++) {
+      const x = i / 100;
+      const y = softClip(x);
+      expect(y).toBeGreaterThanOrEqual(prev - 1e-12);
+      expect(softClip(-x)).toBeCloseTo(-y, 12);
+      prev = y;
+    }
+    const k = SOFT_CLIP.knee, h = 1e-6;
+    const slopeBelow = (softClip(k) - softClip(k - h)) / h;
+    const slopeAbove = (softClip(k + h) - softClip(k)) / h;
+    expect(slopeBelow).toBeCloseTo(1, 4);
+    expect(slopeAbove).toBeCloseTo(1, 3); // derivada contínua no joelho
+  });
+
+  it('a curva do WaveShaper cobre [-range, range], é simétrica, limitada a 1,0 e termina no teto', () => {
+    const c = softClipCurve();
+    expect(c).toBeInstanceOf(Float32Array);
+    expect(c.length).toBe(SOFT_CLIP.points);
+    const n = c.length;
+    for (let i = 0; i < n; i++) {
+      expect(Math.abs(c[i])).toBeLessThanOrEqual(1);
+      expect(c[i]).toBeCloseTo(-c[n - 1 - i], 6);
+    }
+    expect(c[n - 1]).toBeGreaterThan(0.9999);
+    expect(c[(n - 1) / 2]).toBe(0);
+    // amplitude real x = u * range: dentro do joelho a curva reproduz a entrada (interpolação linear do WaveShaper é exata)
+    const at = (x) => { const f = ((x / SOFT_CLIP.range) + 1) / 2 * (n - 1); const i = Math.floor(f); return c[i] + (c[Math.min(n - 1, i + 1)] - c[i]) * (f - i); };
+    for (const x of [-0.8, -0.3, 0.2, 0.7, 0.8]) expect(at(x)).toBeCloseTo(x, 5);
+  });
+});
+
+// ---------------------------------------------------------------------------------------------------------
 describe('F7-08 mapeamento evento -> som (puro)', () => {
   const pos = { x: 3, y: 0, z: 4 };
 
@@ -572,14 +624,24 @@ describe('F7-08 motor de áudio (contexto falso): mixer, limitador, posicional e
   let ctx, eng;
   const mk = (level = 'med') => { ctx = createFakeAudioContext(); eng = new AudioEngine({ ctx, level, timers: null }); return eng; };
 
-  it('o grafo termina em mestre -> limitador (compressor) -> saída, com os 3 canais nos barramentos certos', () => {
+  it('o grafo termina em mestre -> limitador (compressor) -> saturador de segurança -> saída, com os 3 canais nos barramentos certos', () => {
     mk();
     expect(eng.master.connections).toContain(eng.limiter);
-    expect(eng.limiter.connections).toContain(ctx.destination);
+    expect(eng.limiter.connections).toContain(eng.safetyIn);
+    expect(eng.safetyIn.connections).toContain(eng.safety);
+    expect(eng.safety.connections).toContain(ctx.destination);
+    expect(eng.limiter.connections).not.toContain(ctx.destination); // nada contorna o saturador
     expect(eng.limiter.kind).toBe('compressor');
     expect(eng.limiter.ratio.value).toBeGreaterThanOrEqual(12); // comportamento de limitador
     expect(eng.limiter.threshold.value).toBeLessThan(0);
     expect(eng.limiter.attack.value).toBeLessThanOrEqual(0.005);
+    // saturador: sem oversample (os filtros ultrapassariam o teto), ganho de entrada 1/range e curva limitada a 1,0
+    expect(eng.safety.kind).toBe('shaper');
+    expect(eng.safety.oversample).toBe('none');
+    expect(eng.safetyIn.gain.value).toBeCloseTo(1 / SOFT_CLIP.range, 9);
+    expect(eng.safety.curve).toBeInstanceOf(Float32Array);
+    expect(eng.safety.curve.length).toBe(SOFT_CLIP.points);
+    expect(Math.max(...eng.safety.curve.map(Math.abs))).toBeLessThanOrEqual(1);
     expect(eng.buses.sfx.connections).toContain(eng.master);
     expect(eng.buses.music.connections).toContain(eng.musicDuck);
     expect(eng.musicDuck.connections).toContain(eng.master);

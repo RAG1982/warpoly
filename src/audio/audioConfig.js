@@ -79,6 +79,32 @@ export function clampVolume(v, fallback = 0) {
 export const createAudioRng = createRenderRng;
 
 /**
+ * Rede de segurança do limitador (verificação da F7-08 no navegador, 2026-10-11). O `DynamicsCompressorNode` do mestre não segura
+ * vozes que começam no MESMO instante (o `AudioEvents` despacha todos os eventos de um tick de uma vez): em renderização offline,
+ * 25 efeitos + uma fala no mesmo instante chegavam a 1,2-1,3 de pico nos volumes padrão e a 1,5-1,8 no volume máximo (acima de
+ * 1,0 o conversor corta: estalo). Depois dele entra um saturador suave (`WaveShaperNode`) cuja curva nunca
+ * passa de `ceiling`: identidade exata até `knee` (nada muda nos níveis normais) e `tanh` suave acima. `range` = amplitude de
+ * entrada mapeada na curva (o ganho de entrada do saturador é 1/range; acima dela a saída fica no teto). Sem oversample de
+ * propósito: os filtros do oversample ultrapassam o teto em ~0,4 %.
+ */
+export const SOFT_CLIP = Object.freeze({ knee: 0.85, ceiling: 1, range: 2, points: 4097 });
+
+/** Saturação suave de uma amostra: |y| <= ceiling, y = x até o joelho, derivada contínua (tanh) acima. */
+export function softClip(x, knee = SOFT_CLIP.knee, ceiling = SOFT_CLIP.ceiling) {
+  if (!(typeof x === 'number') || Number.isNaN(x)) return 0; // ±Infinity satura no teto
+  const a = Math.abs(x);
+  const y = a <= knee ? a : knee + (ceiling - knee) * Math.tanh((a - knee) / (ceiling - knee));
+  return x < 0 ? -y : y;
+}
+
+/** Curva do `WaveShaperNode` (entrada normalizada [-1,1] = amplitude [-range, range]). */
+export function softClipCurve({ knee, ceiling, range, points } = SOFT_CLIP) {
+  const curve = new Float32Array(points);
+  for (let i = 0; i < points; i++) curve[i] = softClip(((i / (points - 1)) * 2 - 1) * range, knee, ceiling);
+  return curve;
+}
+
+/**
  * Escuta pela CENA VISÍVEL e pelo zoom (feedback do dono, 2026-10-11): só soa o que está dentro do frustum da câmera
  * (mais uma margem) e, quanto mais afastada a câmera (`SceneManager.zoomLevel` 0,5 perto … 1,8 longe), mais baixo e
  * mais curto é o alcance. Sons de interface/alertas globais (sem posição) não passam por aqui.

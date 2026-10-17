@@ -32,7 +32,7 @@ export function buildCoastWorld(presetOrId, { seed = 1, tries = 10, id = null, n
     if (!geo.ok) { attempts.push({ seed: s, stage: 'geografia', failures: geo.failures }); continue; }
     const playable = map.size - 12;
     const baked = bakeTerrain(map, { cell: 1 });
-    const plan = planLayout(map, baked, { ...preset.layout, naval: preset.naval }, { playable, seed: s });
+    const plan = planLayout(map, baked, { ...preset.layout, naval: preset.naval }, { playable, seed: s, woodTarget: preset.woodTarget });
     if (!plan.ok) { attempts.push({ seed: s, stage: 'layout', failures: plan.failures }); continue; }
     const mapDef = bakeToMapDef(map, {
       id: id ?? coastMapId(preset.id, seed), name: name ?? preset.name, tileset: tileset ?? preset.tileset, cell: 1, playable,

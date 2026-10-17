@@ -11,20 +11,26 @@ import ptBR from '../../src/i18n/pt-BR.json';
 import en from '../../src/i18n/en.json';
 
 /**
- * M2-03: mapas de campanha do lote 1 (palcos 1 Baía de Aurelan, 2 Pouso do Encontro, 3 Pedra-Mãe), gerados por
- * `tools/gen-campaign-maps.mjs` (receita em `tools/lib/campaignMaps.mjs`). Os palcos 2 e 3 servem às duas campanhas
- * (slot 0 = lado da Liga de Aurelan, slot 1 = lado dos Clãs do Cinzal).
+ * M2-03: mapas de campanha do lote 1 (palcos 1 Baía de Aurelan, 2 Pouso do Encontro, 3 Pedra-Mãe) e, da M2-04, os palcos
+ * 4 Baixio do Breu, 5 Cerne Verde e 6 A Geada, gerados por `tools/gen-campaign-maps.mjs` (receita em `tools/lib/campaignMaps.mjs`).
+ * Os palcos 2 a 6 servem às duas campanhas (slot 0 = lado da Liga de Aurelan, slot 1 = lado dos Clãs do Cinzal). A Geada tem 4 vagas
+ * (jogador, Lanças Quebradas, Sal Cinzento e o aliado Brumar).
  */
-const IDS = ['camp-01-baia-de-aurelan', 'camp-02-pouso-do-encontro', 'camp-03-pedra-mae'];
+const IDS = ['camp-01-baia-de-aurelan', 'camp-02-pouso-do-encontro', 'camp-03-pedra-mae', 'camp-04-baixio-do-breu', 'camp-05-cerne-verde', 'camp-06-a-geada'];
+const SLOTS = { 'camp-06-a-geada': 4 }; // as demais têm 2 vagas
 
 // M2-28: os mapas de campanha são carregados sob demanda (chunks); os testes os carregam antes de usar `getMap`.
 beforeAll(async () => { await loadAllCampaignMaps(); });
 const MIN_ANCHORS = {
   'camp-01-baia-de-aurelan': ['playerStart', 'enemyStart', 'goldMine1', 'goldMine2', 'neutralCamp1', 'landingZone', 'muralFenda', 'shipHorizon'],
   'camp-02-pouso-do-encontro': ['playerStart', 'enemyStart', 'goldMine1', 'landingZone', 'pier1', 'pier1Water', 'pier2', 'pier2Water', 'logFort', 'lighthouse', 'emissary1', 'emissary2', 'patrol1', 'patrol2', 'patrol3', 'expansion1', 'expansion2'],
-  'camp-03-pedra-mae': ['playerStart', 'enemyStart', 'colonyHall', 'colonyGold1', 'colonyGold2', 'bridgeheadGold', 'beach1', 'beach2', 'beach3', 'seaLanding1', 'seaLanding2', 'seaLanding3', 'fort1', 'fort2', 'fort3', 'bridgehead', 'bridgeheadSea', 'landingZone']
+  'camp-03-pedra-mae': ['playerStart', 'enemyStart', 'colonyHall', 'colonyGold1', 'colonyGold2', 'bridgeheadGold', 'beach1', 'beach2', 'beach3', 'seaLanding1', 'seaLanding2', 'seaLanding3', 'fort1', 'fort2', 'fort3', 'bridgehead', 'bridgeheadSea', 'landingZone'],
+  'camp-04-baixio-do-breu': ['playerStart', 'enemyStart', 'well1', 'well2', 'well3', 'well4', 'shipyard1', 'shipyard1Water', 'shipyard2', 'shipyard2Water', 'wreck1', 'wreck2', 'wreck3', 'fleetStart1', 'fleetStart2', 'fleetMid'],
+  'camp-05-cerne-verde': ['playerStart', 'enemyStart', 'goldMine1', 'sacredGrove', 'gryphonNest', 'clearing1', 'clearing2', 'clearing3', 'lumberHall1', 'lumberHall2', 'orenStart', 'ford1', 'landingZone'],
+  'camp-06-a-geada': ['playerStart', 'enemyStart', 'enemy1Start', 'enemy2Start', 'allyStart', 'lighthouse', 'enemy1Fort', 'allyFort', 'allyHeroStart', 'convoyStart', 'convoyEnd', 'expansion1', 'expansion2', 'expansion3', 'expansion4', 'lake1', 'lake2']
 };
-const WATER = new Set(['shipHorizon', 'pier1Water', 'pier2Water', 'seaLanding1', 'seaLanding2', 'seaLanding3', 'bridgeheadSea']);
+const WATER = new Set(['shipHorizon', 'pier1Water', 'pier2Water', 'seaLanding1', 'seaLanding2', 'seaLanding3', 'bridgeheadSea', 'well1', 'well2', 'well3', 'well4', 'shipyard1Water', 'shipyard2Water', 'wreck1', 'wreck2', 'wreck3', 'fleetStart1', 'fleetStart2', 'fleetMid']);
+const isLake = (name) => /^lake\d$/.test(name); // lago congelado (A Geada): água rasa interior, fora do oceano navegável
 const hyp = (a, b) => Math.hypot(a.x - b.x, a.z - b.z);
 
 function oceanSeen(m, sea) {
@@ -37,7 +43,7 @@ function oceanSeen(m, sea) {
 }
 
 describe('M2-03 · registro e formato', () => {
-  it('a receita conhece os três palcos e traz nome pt-BR e en', () => {
+  it('a receita conhece os seis palcos e traz nome pt-BR e en', () => {
     expect(CAMPAIGN_IDS).toEqual(IDS);
     for (const id of IDS) {
       expect(CAMPAIGN_NAMES[id].pt.length).toBeGreaterThan(3);
@@ -47,7 +53,7 @@ describe('M2-03 · registro e formato', () => {
   });
 
   for (const id of IDS) {
-    it(`${id}: registrado como hidden (fora da Escaramuça), painted com biomeGrid, tileset existente, tamanho 96–192, 2 vagas`, () => {
+    it(`${id}: registrado como hidden (fora da Escaramuça), painted com biomeGrid, tileset existente, tamanho 96–224, 2 vagas (4 na Geada)`, () => {
       const m = getMap(id);
       expect(m, id).toBeTruthy();
       expect(m.id).toBe(id);
@@ -59,9 +65,9 @@ describe('M2-03 · registro e formato', () => {
       expect(decodeBiomeGrid(m.biomeGrid).length).toBe(m.biomeGrid.nodes ** 2);
       expect(TILESETS[m.tileset], m.tileset).toBeDefined();
       expect(m.size).toBeGreaterThanOrEqual(96);
-      expect(m.size).toBeLessThanOrEqual(192);
-      expect(m.startSlots).toHaveLength(2);
-      expect(m.maxPlayers).toBe(2);
+      expect(m.size).toBeLessThanOrEqual(224);
+      expect(m.startSlots).toHaveLength(SLOTS[id] ?? 2);
+      expect(m.maxPlayers).toBe(SLOTS[id] ?? 2);
     });
 
     it(`${id}: validateMapDef sem erros e sem avisos (inclusive âncoras e conectividade)`, () => {
@@ -103,7 +109,10 @@ describe('M2-03 · âncoras da ficha de cada missão', () => {
       const seenLand = floodFill(land, m.startSlots[0].x, m.startSlots[0].z);
       const ocean = oceanSeen(m, sea);
       for (const [name, a] of Object.entries(m.anchors)) {
-        if (a.water) {
+        if (a.water && isLake(name)) {
+          expect(getHeightForMap(m, a.x, a.z), name).toBeLessThan(m.waterLevel);
+          expect(getHeightForMap(m, a.x, a.z), `${name}: gelo raso, nem navio nem tropa`).toBeGreaterThan(0.1);
+        } else if (a.water) {
           expect(WATER.has(name), `${id}.${name} é água inesperada`).toBe(true);
           expect(getHeightForMap(m, a.x, a.z), name).toBeLessThan(m.waterLevel);
           expect(isReached(sea, ocean, a.x, a.z), `${id}.${name} no oceano navegável`).toBe(true);
@@ -163,5 +172,136 @@ describe('M2-03 · âncoras da ficha de cada missão', () => {
     }
     expect(hyp(m.anchors.bridgehead, m.startSlots[1])).toBeLessThanOrEqual(40);
     expect(m.anchors.landingZone).toEqual(m.anchors.beach1);
+  });
+});
+
+// ---------------------------------------------------------------------------------------------------------------------------
+// M2-04: palcos 4 (Baixio do Breu), 5 (Cerne Verde) e 6 (A Geada)
+// ---------------------------------------------------------------------------------------------------------------------------
+/** Conta células (passo 2 u) da área jogável com `test(x, z)` verdadeiro. */
+function countCells(m, test, step = 2) {
+  let n = 0;
+  const half = m.playable / 2;
+  for (let z = -half; z <= half; z += step) for (let x = -half; x <= half; x += step) if (test(x, z)) n++;
+  return n;
+}
+
+function biomeAtLocal(m, x, z) {
+  const g = decodeBiomeGrid(m.biomeGrid);
+  const n = m.biomeGrid.nodes, cell = m.biomeGrid.cell, half = m.size / 2;
+  const i = Math.max(0, Math.min(n - 1, Math.round((x + half) / cell))), j = Math.max(0, Math.min(n - 1, Math.round((z + half) / cell)));
+  return g[j * n + i];
+}
+
+describe('M2-04 · Baixio do Breu (recifes, petróleo, naufrágios)', () => {
+  const id = 'camp-04-baixio-do-breu';
+  it('mapa naval: 4 poços em água do oceano, baixios (água rasa que não é navegável) em boa parte do mar e ilhotas espalhadas', () => {
+    const m = getMap(id);
+    expect(m.size).toBe(224);
+    const sea = buildPathfinder(m, 'naval');
+    const ocean = oceanSeen(m, sea);
+    const wells = m.resources.filter((r) => r.type === 'oil');
+    expect(wells).toHaveLength(4);
+    for (const w of wells) {
+      expect(isReached(sea, ocean, w.x, w.z), `poço ${w.x},${w.z}`).toBe(true);
+      expect(getHeightForMap(m, w.x, w.z)).toBeLessThan(0.1);
+    }
+    wells.forEach((w, i) => expect(m.anchors[`well${i + 1}`]).toEqual({ x: w.x, z: w.z, water: true })); // well1..4 = os poços, nesta ordem
+    const reef = countCells(m, (x, z) => { const h = getHeightForMap(m, x, z); return h > 0.15 && h < 0.45; });
+    const open = countCells(m, (x, z) => getHeightForMap(m, x, z) < 0.05);
+    const total = countCells(m, () => true);
+    expect(reef / total, 'baixios').toBeGreaterThan(0.08); // "quase só água rasa e funda"
+    expect(open / total, 'água funda').toBeGreaterThan(0.4);
+  });
+
+  it('espaço para Estaleiro/Doca: costa de cada lado com água funda ligada ao oceano; poços e naufrágios afastados entre si; frotas no mar principal', () => {
+    const m = getMap(id);
+    const sea = buildPathfinder(m, 'naval');
+    const ocean = oceanSeen(m, sea);
+    for (const k of ['shipyard1', 'shipyard2']) {
+      const a = m.anchors[k], w = m.anchors[`${k}Water`];
+      expect(hyp(a, w), k).toBeLessThanOrEqual(18);
+      expect(sea.nearNavigable(w.x, w.z, 1.5), k).toBe(true);
+      expect(isReached(sea, ocean, w.x, w.z), k).toBe(true);
+    }
+    expect(hyp(m.anchors.shipyard1, m.startSlots[0])).toBeLessThan(hyp(m.anchors.shipyard1, m.startSlots[1]));
+    expect(hyp(m.anchors.shipyard2, m.startSlots[1])).toBeLessThan(hyp(m.anchors.shipyard2, m.startSlots[0]));
+    const wrecks = [1, 2, 3].map((i) => m.anchors[`wreck${i}`]);
+    for (let i = 0; i < 3; i++) for (let j = i + 1; j < 3; j++) expect(hyp(wrecks[i], wrecks[j])).toBeGreaterThanOrEqual(24);
+    for (const w of wrecks) for (const r of m.resources.filter((q) => q.type === 'oil')) expect(hyp(w, r)).toBeGreaterThanOrEqual(24);
+    for (const k of ['fleetStart1', 'fleetStart2', 'fleetMid']) expect(isReached(sea, ocean, m.anchors[k].x, m.anchors[k].z), k).toBe(true);
+    expect(hyp(m.anchors.fleetStart1, m.startSlots[0])).toBeLessThan(hyp(m.anchors.fleetStart1, m.startSlots[1]));
+  });
+});
+
+describe('M2-04 · Cerne Verde (floresta densa, clareiras, bosque sagrado, ninho de grifos)', () => {
+  const id = 'camp-05-cerne-verde';
+  it('a terra é quase toda floresta (bioma e bosques), com um rio curto de um vau', () => {
+    const m = getMap(id);
+    const forestCells = countCells(m, (x, z) => getHeightForMap(m, x, z) > 1 && biomeAtLocal(m, x, z) === 12);
+    const landCells = countCells(m, (x, z) => getHeightForMap(m, x, z) > 1);
+    expect(forestCells / landCells).toBeGreaterThan(0.6);
+    expect(m.forests.length).toBeGreaterThanOrEqual(18);
+    expect(m.fords).toHaveLength(1);
+    expect(m.anchors.ford1).toEqual({ x: m.fords[0].x, z: m.fords[0].z });
+  });
+
+  it('bosque sagrado e ninho de grifos longe das bases; 3 clareiras sem bosque por perto; um Salão do Bosque por lado', () => {
+    const m = getMap(id);
+    for (const s of m.startSlots) {
+      expect(hyp(m.anchors.sacredGrove, s)).toBeGreaterThanOrEqual(38);
+      expect(hyp(m.anchors.gryphonNest, s)).toBeGreaterThanOrEqual(40);
+    }
+    expect(hyp(m.anchors.gryphonNest, m.anchors.sacredGrove)).toBeGreaterThanOrEqual(30);
+    for (const k of ['clearing1', 'clearing2', 'clearing3']) {
+      for (const f of m.forests) expect(hyp(m.anchors[k], f), `${k} x bosque (${f.x},${f.z})`).toBeGreaterThanOrEqual(8);
+    }
+    expect(hyp(m.anchors.lumberHall1, m.startSlots[0])).toBeLessThan(hyp(m.anchors.lumberHall1, m.startSlots[1]));
+    expect(hyp(m.anchors.lumberHall2, m.startSlots[1])).toBeLessThan(hyp(m.anchors.lumberHall2, m.startSlots[0]));
+    expect(hyp(m.anchors.orenStart, m.startSlots[0])).toBeLessThan(40);
+  });
+});
+
+describe('M2-04 · A Geada (gelo, lagos congelados, Farol Boreal, 4 vagas)', () => {
+  const id = 'camp-06-a-geada';
+  it('4 vagas ligadas por terra, tileset de inverno e a terra é neve, gelo ou rocha', () => {
+    const m = getMap(id);
+    expect(m.tileset).toBe('inverno');
+    expect(m.startSlots).toHaveLength(4);
+    const land = buildPathfinder(m, 'land');
+    const seen = floodFill(land, m.startSlots[0].x, m.startSlots[0].z);
+    for (const s of m.startSlots) expect(isReached(land, seen, s.x, s.z)).toBe(true);
+    const cold = countCells(m, (x, z) => getHeightForMap(m, x, z) > 1 && [6, 9, 11].includes(biomeAtLocal(m, x, z)));
+    const dry = countCells(m, (x, z) => getHeightForMap(m, x, z) > 1);
+    expect(cold / dry).toBeGreaterThan(0.9);
+  });
+
+  it('gelo NÃO navegável: lagos congelados e banquisa rasos (0,1 < altura < linha d\'água) com bioma gelo, e nenhum navio os alcança', () => {
+    const m = getMap(id);
+    const sea = buildPathfinder(m, 'naval');
+    const ocean = oceanSeen(m, sea);
+    const lakes = Object.keys(m.anchors).filter(isLake);
+    expect(lakes.length).toBeGreaterThanOrEqual(2);
+    for (const k of lakes) {
+      const a = m.anchors[k];
+      expect(biomeAtLocal(m, a.x, a.z), k).toBe(11);
+      expect(getHeightForMap(m, a.x, a.z), `${k}: gelo raso, nem navio nem tropa`).toBeGreaterThan(0.1);
+      expect(isReached(sea, ocean, a.x, a.z), `${k} não é navegável`).toBe(false);
+    }
+    const floe = countCells(m, (x, z) => { const h = getHeightForMap(m, x, z); return h > 0.15 && h < 0.45 && biomeAtLocal(m, x, z) === 11; });
+    expect(floe).toBeGreaterThan(200); // banquisa + lagos (células de 2 u)
+  });
+
+  it('Farol Boreal no meio (>= 34 u de toda base), forte inimigo e do aliado, comboio entre o aliado e o jogador e uma mina extra por base', () => {
+    const m = getMap(id);
+    for (const s of m.startSlots) expect(hyp(m.anchors.lighthouse, s)).toBeGreaterThanOrEqual(34);
+    expect(m.anchors.allyStart).toEqual({ x: m.startSlots[3].x, z: m.startSlots[3].z });
+    expect(m.anchors.enemy1Start).toEqual({ x: m.startSlots[1].x, z: m.startSlots[1].z });
+    expect(m.anchors.enemy2Start).toEqual({ x: m.startSlots[2].x, z: m.startSlots[2].z });
+    expect(hyp(m.anchors.enemy1Fort, m.startSlots[1])).toBeLessThan(35);
+    expect(hyp(m.anchors.allyFort, m.startSlots[3])).toBeLessThan(35);
+    expect(hyp(m.anchors.convoyStart, m.startSlots[3])).toBeLessThan(hyp(m.anchors.convoyStart, m.startSlots[0]));
+    expect(hyp(m.anchors.convoyEnd, m.startSlots[0])).toBeLessThan(hyp(m.anchors.convoyEnd, m.startSlots[3]));
+    expect(m.resources.filter((r) => r.type === 'gold')).toHaveLength(8); // 1 padrão + 1 de expansão por base
   });
 });

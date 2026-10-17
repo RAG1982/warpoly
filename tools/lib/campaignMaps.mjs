@@ -362,7 +362,7 @@ function postBaixio(ctx, extra) {
   const yardFor = (s, other, name) => {
     const p = need(ctx.scan({
       step: 1,
-      test: (x, z) => ctx.isShore(x, z) && ctx.reach(x, z) && hyp({ x, z }, s) >= 16 && hyp({ x, z }, s) <= 48 && ctx.free(x, z, 5) && wetSpot(x, z) && openSea(ctx, wetSpot(x, z).x, wetSpot(x, z).z, 12) >= 0.75,
+      test: (x, z) => ctx.isShore(x, z) && ctx.reach(x, z) && hyp({ x, z }, s) >= 14 && hyp({ x, z }, s) <= 54 && ctx.free(x, z, 5) && wetSpot(x, z) && openSea(ctx, wetSpot(x, z).x, wetSpot(x, z).z, 10) >= 0.55,
       score: (x, z) => Math.abs(hyp({ x, z }, s) - 30) - 0.1 * hyp({ x, z }, other)
     }), `o espaço do ${name}`);
     ctx.take(p, 14);
@@ -476,11 +476,11 @@ function postGeada(ctx, extra) {
     if (!(h > 0.15 && h < 0.45) || getBiomeAt(m, x, z) !== BIOME.ICE) return false;
     let land = 0;
     for (let a = 0; a < 8; a++) if (ctx.hAt(x + Math.cos((a / 8) * Math.PI * 2) * 15, z + Math.sin((a / 8) * Math.PI * 2) * 15) >= 1.8) land++;
-    return land >= 6;
+    return land >= 7;
   };
   for (let z = -ctx.half + 8; z <= ctx.half - 8; z += 3) for (let x = -ctx.half + 8; x <= ctx.half - 8; x += 3) if (isLake(x, z) && lakes.every((q) => hyp({ x, z }, q) >= 16)) lakes.push({ x, z });
   if (lakes.length < 2) throw new Error('campanha: poucos lagos congelados');
-  lakes.slice(0, 4).forEach((p, i) => { extra[`lake${i + 1}`] = ptw(p); });
+  lakes.slice(0, 3).forEach((p, i) => { extra[`lake${i + 1}`] = ptw(p); });
 }
 
 const POST = freeze({ 'camp-01-baia-de-aurelan': postBaia, 'camp-02-pouso-do-encontro': postPouso, 'camp-03-pedra-mae': postPedra, 'camp-04-baixio-do-breu': postBaixio, 'camp-05-cerne-verde': postCerne, 'camp-06-a-geada': postGeada });

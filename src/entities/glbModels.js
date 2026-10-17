@@ -173,6 +173,16 @@ export function loadGlbTemplates(factions = null, { includeLazy = false } = {}) 
 }
 
 /**
+ * M2-10: carrega só as chaves pedidas (uma vez cada), inclusive as `lazy` (ex.: `tree_palm` quando o mapa tem palmeiras). Chaves
+ * desconhecidas são ignoradas; falha individual só gera aviso (o TreeManager cai na árvore reserva). Com `?glb=0` não faz nada.
+ * @param {string[]} keys
+ */
+export function ensureGlbKeys(keys) {
+  if (!glbEnabled) return Promise.resolve(glbTemplates);
+  return Promise.all((keys || []).filter(k => GLB_MODELS[k]).map(loadOne)).then(() => glbTemplates);
+}
+
+/**
  * Garante que os .glb foram carregados, memoizando a promessa.
  * Chamada na preload (quando habilitada) e em caminhos com ?skipPreload.
  * Falhas são registradas (console.warn) mas não impedem continuação com modelos procedurais.

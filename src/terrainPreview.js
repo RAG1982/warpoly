@@ -11,6 +11,7 @@ import { Decorations } from './world/Decorations.js';
 import { TreeManager } from './world/TreeManager.js';
 import { listMaps, getMap, DEFAULT_MAP_ID } from './data/maps/index.js';
 import { TILESETS, TILESET_IDS, resolveTilesetId } from './data/tilesets.js';
+import { treeMixFor } from './data/treeSpecies.js';
 
 const params = new URLSearchParams(location.search);
 if (params.get('ui') === '0') document.body.classList.add('hide-ui');
@@ -58,7 +59,7 @@ class Stage {
         const x = f.x + Math.cos(a) * r, z = f.z + Math.sin(a) * r;
         const y = terrain.getHeight(x, z);
         if (y < 1.6) continue;
-        const type = rnd() < 0.65 ? (f.species || 'pine') : ['oak', 'pine', 'autumn'][Math.floor(rnd() * 3)];
+        const type = rnd() < 0.65 ? (f.species || 'pine') : treeMixFor(f.species)[Math.floor(rnd() * 3)];
         if (this.trees.countOf(type) >= 118) continue;
         this.trees.registerTree({}, x, y, z, rnd() * 6.28, 0.9 + rnd() * 0.4, type);
       }

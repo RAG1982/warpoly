@@ -19,6 +19,7 @@ import { distanceTransform, labelComponents } from './grid.js';
 import { PAINTED_SCALE } from '../painted.js';
 import { BASE_DRY_HEIGHT, TREE_MIN_HEIGHT, WOOD_TARGET, WOOD_RADIUS, TREE_WOOD } from './constants.js';
 import { bakedHeightFn } from './bake.js';
+import { speciesForBiome } from '../../treeSpecies.js';
 
 /** Layout inicial padrão (cópia de `START_LAYOUT`, `src/sim/MatchConfig.js`; um teste confere que continuam iguais). */
 export const DEFAULT_BASE_LAYOUT = Object.freeze({
@@ -533,13 +534,12 @@ export function planLayout(map, baked, spec, opts) {
   }
 
   const startSlots = [], resources = [], forests = [];
+  // M2-10: espécie pelo bioma da célula (palmeira na costa/deserto, acácia na savana, copa larga no exuberante; `speciesForBiome`).
+  // Um único sorteio de `rng` por bosque, como antes (a sequência dos demais sorteios do planejador não muda).
+  const COAST_NEAR = 14; // u: água a menos disso conta como costa
   const speciesOf = (x, z) => {
-    const b = field.biomeData[field.at(x, z)];
-    const pick = (arr) => arr[Math.floor(rng.next() * arr.length)];
-    if (b === 4 || b === 5 || b === 3) return pick(['autumn', 'oak', 'autumn']); // deserto, estepe, savana
-    if (b === 9 || b === 11 || b === 6) return pick(['pine', 'pine', 'autumn']); // neve, gelo, rocha
-    if (b === 10) return pick(['oak', 'autumn']); // pântano
-    return pick(['oak', 'pine', 'birch', 'oak']);
+    const k = field.at(x, z);
+    return speciesForBiome(field.biomeData[k], field.clear[k] < COAST_NEAR, rng.next());
   };
   const bases = [];
   for (let b = 0; b < nb; b++) {

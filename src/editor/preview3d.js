@@ -14,6 +14,9 @@ import { TILESETS, resolveTilesetId } from '../data/tilesets.js';
 import { heightAtNode, nodeToWorld, heightAt, exportMap } from './mapModel.js';
 import { heightColor, startColor } from './view2d.js';
 
+/** Cor do cone-árvore da prévia por espécie (M2-10: copa larga, palmeira e acácia). */
+const SPECIES_COLOR = { autumn: 0xc27a2a, oak: 0x3f9a3f, birch: 0xa6cf55, broad: 0x2c7a3a, palm: 0x4fb04a, acacia: 0xb4ad45, pine: 0x1f6a3a };
+
 const hash = (n) => {
   const s = Math.sin(n * 127.1) * 43758.5453;
   return s - Math.floor(s);
@@ -148,7 +151,7 @@ export class Preview3D {
         const x = f.x + Math.cos(a) * rr;
         const z = f.z + Math.sin(a) * rr;
         if (heightAt(model, x, z) < 1.8) continue;
-        add(new THREE.ConeGeometry(1.1, 3.6, 7), f.species === 'autumn' ? 0xc27a2a : f.species === 'oak' ? 0x3f9a3f : f.species === 'birch' ? 0xa6cf55 : 0x1f6a3a, x, z, 1.8);
+        add(new THREE.ConeGeometry(1.1, 3.6, 7), SPECIES_COLOR[f.species] ?? 0x1f6a3a, x, z, 1.8);
       }
     });
     for (const n of model.neutrals) {

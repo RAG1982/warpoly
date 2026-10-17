@@ -1,0 +1,81 @@
+{
+  "when": "2026-10-17T12:24:40.839Z",
+  "baseMap": {
+    "mapId": "continental-1v1",
+    "drawCalls": 263,
+    "lazyKeysLoaded": []
+  },
+  "biomeMap": {
+    "mapId": "duelo-continental-1",
+    "forests": 14,
+    "lazyKeysLoaded": [
+      "tree_broad",
+      "tree_palm",
+      "tree_acacia"
+    ]
+  },
+  "perSpecies": {
+    "broad": {
+      "chunks": 4,
+      "chunksNoFrustum": 4,
+      "trees": 32,
+      "material": "atlas",
+      "camera": [
+        47,
+        46,
+        66
+      ],
+      "drawCallsWith": 356,
+      "drawCallsWithout": 350,
+      "delta": 6
+    },
+    "palm": {
+      "chunks": 8,
+      "chunksNoFrustum": 8,
+      "trees": 32,
+      "material": "atlas",
+      "camera": [
+        40,
+        46,
+        21
+      ],
+      "drawCallsWith": 348,
+      "drawCallsWithout": 331,
+      "delta": 17
+    },
+    "acacia": {
+      "chunks": 6,
+      "chunksNoFrustum": 6,
+      "trees": 36,
+      "material": "atlas",
+      "camera": [
+        22,
+        46,
+        44
+      ],
+      "drawCallsWith": 355,
+      "drawCallsWithout": 343,
+      "delta": 12
+    },
+    "oak": {
+      "chunks": 9,
+      "chunksNoFrustum": 7,
+      "trees": 28,
+      "material": "atlas",
+      "camera": [
+        86,
+        46,
+        50
+      ],
+      "drawCallsWith": 325,
+      "drawCallsWithout": 308,
+      "delta": 17
+    }
+  },
+  "palmPick": {
+    "ok": true,
+    "crownHit": true,
+    "mirroredHit": false
+  },
+  "pageErrors": []
+}

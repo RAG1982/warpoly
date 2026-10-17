@@ -1,8 +1,8 @@
 # NEW-14 · CPU de animação e simulação por unidade (o que falta depois da F1-09)
 
-> **Status: SPEC (só documento).** Leia antes: `docs/specs/_COMUM.md`, `CLAUDE.md`, `docs/HANDOFF_CLOUD.md` (seção 2), `docs/specs/F1-09-tick-fixo-lod-animacao.md`.
+> **Status: SPEC (só documento).** Leia antes: `docs/specs/_COMUM.md`, `CLAUDE.md`, `docs/historico/HANDOFF_CLOUD.md` (seção 2), `docs/specs/F1-09-tick-fixo-lod-animacao.md`.
 > Branch do executor: `task/NEW-14` (local) ou `cloud/NEW-14-<passo>` (passos "nuvem"). Porta do vite: **5192**.
-> Conflito conhecido: `src/render/UnitView.js` está em edição local (NEW-53, `HANDOFF_CLOUD.md` §2). **Os passos que tocam o UnitView só começam depois que o NEW-53 for mesclado.**
+> Conflito conhecido: `src/render/UnitView.js` está em edição local (NEW-53, `docs/historico/HANDOFF_CLOUD.md` §2). **Os passos que tocam o UnitView só começam depois que o NEW-53 for mesclado.**
 
 ## 1. Objetivo medido
 
@@ -153,7 +153,7 @@ Cada passo passa `npm test` e `npm run lint`.
 6. Passo 8 só com aprovação explícita. C7 não fazer; C9 descartado.
 
 ## 6. Nuvem × local
-- **Nuvem** (sem GPU/navegador, `HANDOFF_CLOUD.md` §2): código e testes dos passos 0-6 (`npm ci && npm test && npm run lint && npx vite build --outDir /tmp/build-check`). Tudo de desempenho/visual vai no relatório como **"Verificação pendente (local)"** com os comandos de 4.2. Branches `cloud/NEW-14-<passo>`, PR para `master`, sem merge.
+- **Nuvem** (sem GPU/navegador, `docs/historico/HANDOFF_CLOUD.md` §2): código e testes dos passos 0-6 (`npm ci && npm test && npm run lint && npx vite build --outDir /tmp/build-check`). Tudo de desempenho/visual vai no relatório como **"Verificação pendente (local)"** com os comandos de 4.2. Branches `cloud/NEW-14-<passo>`, PR para `master`, sem merge.
 - **Local**: baselines "antes"/"depois" do bench, conferência visual (jogo e inspetor), passo 7, decisão do passo 8, atualização de `docs/TASKS.md` (status/resultado) e `docs/01_ARQUITETURA.md` (LOD de animação: faixas por animação, `?animlod=0`, métrica `viewsMs`).
 
 ## 7. Não fazer

@@ -113,4 +113,4 @@ Requer: sistema de mana, habilidades com alvo (unidade/área/auto), pesquisas qu
 - ✅ ~10% · 🟡 ~35% · ❌ ~55% dos recursos do WC2.
 - Blocos grandes faltantes: **tiers de HQ + árvore tecnológica**, **magias/mana**, **cerco**, **aéreo**, **naval + petróleo**, **muralhas/reparo**, **campanha**, **editor de mapas**, **multiplayer 8 jogadores**.
 
-A ordem de implementação está no [ROADMAP](06_ROADMAP_AAA.md) e cada item vira tarefa em [TASKS.md](TASKS.md) com prefixo `WC2-`.
+A ordem de implementação está no [ROADMAP](../06_ROADMAP_AAA.md) e cada item vira tarefa em [TASKS.md](../TASKS.md) com prefixo `WC2-`.

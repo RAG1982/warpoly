@@ -2,7 +2,7 @@
 
 > **Status: ✅ PRONTA — DONE (PR #1, nuvem)**
 
-Leia antes: `docs/specs/_COMUM.md` (na nuvem, veja também `docs/HANDOFF_CLOUD.md`), `CLAUDE.md`, seção "Backlog descoberto" de `docs/TASKS.md`.
+Leia antes: `docs/specs/_COMUM.md` (na nuvem, veja também `docs/historico/HANDOFF_CLOUD.md`), `CLAUDE.md`, seção "Backlog descoberto" de `docs/TASKS.md`.
 Um commit por item (mensagens indicadas). Mudanças mínimas, sem reformatar arquivos.
 
 ## NEW-2 · Reembolso errado da IA

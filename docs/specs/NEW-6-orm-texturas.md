@@ -2,7 +2,7 @@
 
 > **Status: SPEC (não iniciada)**. Escrita em 2026-10-11 por Sonnet 5.5 (sem código). Cada passo é um commit independente.
 
-Leia antes: `docs/specs/_COMUM.md`, `CLAUDE.md`, F1-01 e NEW-6 em `docs/TASKS.md`, `docs/HANDOFF_CLOUD.md` seção 2 (regras da nuvem), `src/models/textureQuality.js`.
+Leia antes: `docs/specs/_COMUM.md`, `CLAUDE.md`, F1-01 e NEW-6 em `docs/TASKS.md`, `docs/historico/HANDOFF_CLOUD.md` seção 2 (regras da nuvem), `src/models/textureQuality.js`.
 Worktree: nova a partir de `master`. Porta do vite (passos locais): **5196**.
 
 ## Objetivo medido ("pronto")

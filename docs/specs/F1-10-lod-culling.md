@@ -2,7 +2,7 @@
 
 > **Status: itens 1-4 implementados; falta medição local** (bench A/B com `?lod=0`, massa300 ≥ 45 FPS)
 
-Leia antes: `CLAUDE.md`, `docs/HANDOFF_CLOUD.md` (seção 2), `docs/specs/_COMUM.md`, `docs/specs/F1-09-tick-fixo-lod-animacao.md` (LOD de **animação** já feito — não repetir), `tools/bench/BASELINE.md`, NEW-7 em `docs/TASKS.md`.
+Leia antes: `CLAUDE.md`, `docs/historico/HANDOFF_CLOUD.md` (seção 2), `docs/specs/_COMUM.md`, `docs/specs/F1-09-tick-fixo-lod-animacao.md` (LOD de **animação** já feito — não repetir), `tools/bench/BASELINE.md`, NEW-7 em `docs/TASKS.md`.
 
 ## Objetivo ("pronto")
 `npm run bench -- --scenarios=massa300`: **≥ 45 FPS** (hoje ≈ 17 FPS após F1-03b; meta original da tarefa) sem mudança visível em zoom normal (`zoomLevel` 0,5–1,8, ver `SceneManager.minZoom/maxZoom`). Medido **só no local** (GPU real, `tools/safe-run.sh`). Na nuvem o aceite é: testes de lógica pura verdes + `vite build`.

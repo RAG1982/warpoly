@@ -2,7 +2,7 @@
 
 > **Status: ⏳ A FAZER — fila da nuvem (item 6)**
 
-> Leia antes: `CLAUDE.md`, `docs/specs/_COMUM.md` (na nuvem valem as regras de `docs/HANDOFF_CLOUD.md`: sem navegador/GPU). Executor: **sonnet**. Candidata à **nuvem** (só `src/render/**` + 1 linha de wiring). Porta do vite (local) 5197.
+> Leia antes: `CLAUDE.md`, `docs/specs/_COMUM.md` (na nuvem valem as regras de `docs/historico/HANDOFF_CLOUD.md`: sem navegador/GPU). Executor: **sonnet**. Candidata à **nuvem** (só `src/render/**` + 1 linha de wiring). Porta do vite (local) 5197.
 
 ## Por quê
 No WC2, construção destruída ou mina esgotada deixa uma **clareira** (mancha de terra queimada/escombros) no chão por um tempo. Hoje a construção só desaparece. A marca dá leitura do campo de batalha e "peso" à destruição.

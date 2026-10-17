@@ -2,7 +2,7 @@
 
 > **Status: ✅ PRONTA — DONE (PR #3, nuvem)**
 
-Leia antes: `docs/specs/_COMUM.md` (na nuvem, veja também `docs/HANDOFF_CLOUD.md`), `CLAUDE.md`, referências visuais `docs/reference/hudmodelo.png` e `docs/reference/dialogoBarracs.png`, `src/ui/screens/mainMenu.css` (identidade dourada já usada no menu).
+Leia antes: `docs/specs/_COMUM.md` (na nuvem, veja também `docs/historico/HANDOFF_CLOUD.md`), `CLAUDE.md`, referências visuais `docs/reference/hudmodelo.png` e `docs/reference/dialogoBarracs.png`, `src/ui/screens/mainMenu.css` (identidade dourada já usada no menu).
 
 ## Por quê
 - `style.css`: `#minimap-wrapper` (linha ~436) fixo em `left:20px`, `#selection-card` (~482) fixo em `left:186px; width:580px; max-width: calc(100vw - 440px)` → em 1024×768 o card é cortado e sobrepõe (B11). Não há nenhuma `@media`.

@@ -2,7 +2,7 @@
 
 > **Status: ✅ FEITA na branch task/F6-ui (2026-10-02) — inclui remapeamento de teclas (antes "em breve"), `QualitySettings.setOverride` e leitura de pan/borda no `InputManager`**
 
-Leia antes: `docs/specs/_COMUM.md` (na nuvem: `docs/HANDOFF_CLOUD.md`), `CLAUDE.md`, `docs/07_DECISOES.md` (D3 hardware), `src/core/QualitySettings.js` (API: `QualitySettings.current`, `set(preset)` → `{requiresReload}`, `QUALITY_PRESETS`), `src/models/textureQuality.js` (`localStorage['warpoly.textureQuality']`), `src/ui/uiScale.js` (`localStorage['warpoly.uiScale']`), `src/ui/screens/MainMenu.js` (painel placeholder `#mm-options` ~linha 234) e o painel de config in-game (`#settings-panel` em `index.html`).
+Leia antes: `docs/specs/_COMUM.md` (na nuvem: `docs/historico/HANDOFF_CLOUD.md`), `CLAUDE.md`, `docs/07_DECISOES.md` (D3 hardware), `src/core/QualitySettings.js` (API: `QualitySettings.current`, `set(preset)` → `{requiresReload}`, `QUALITY_PRESETS`), `src/models/textureQuality.js` (`localStorage['warpoly.textureQuality']`), `src/ui/uiScale.js` (`localStorage['warpoly.uiScale']`), `src/ui/screens/MainMenu.js` (painel placeholder `#mm-options` ~linha 234) e o painel de config in-game (`#settings-panel` em `index.html`).
 
 ## "Pronto"
 Um único componente de Opções, aberto pelo menu principal **e** pelo menu de pausa/engrenagem in-game, com abas, que persiste tudo em `localStorage` e aplica imediatamente o que não exige recarregar.

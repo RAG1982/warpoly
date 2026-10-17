@@ -8,23 +8,20 @@ RTS 3D low-poly para navegador (three.js + Vite), inspirado em **Warcraft II**. 
 | [02_MECANICAS](02_MECANICAS.md) | Regras atuais: recursos, unidades, construções, pesquisas, IA, controles |
 | [03_ASSETS_E_INSPETOR](03_ASSETS_E_INSPETOR.md) | Pipeline de modelos/texturas, inspetor, métricas por modelo |
 | [04_DIAGNOSTICO](04_DIAGNOSTICO.md) | Medições de desempenho, bugs (B1–B17), lacunas AAA |
-| [05_PARIDADE_WARCRAFT2](05_PARIDADE_WARCRAFT2.md) | Matriz de recursos do WC2: existe / parcial / falta |
+| [05_PARIDADE_WARCRAFT2](05_PARIDADE_WARCRAFT2.md) | Matriz de recursos do WC2 conferida com o código (2026-10-17): existe / parcial / falta |
 | [06_ROADMAP_AAA](06_ROADMAP_AAA.md) | Visão, fases F0–F10, caminho crítico, decisões de arquitetura |
 | [07_DECISOES](07_DECISOES.md) | Decisões do dono: recursos, nomes próprios, alvos de hardware |
 | [08_GAME_DESIGN](08_GAME_DESIGN.md) | Design de jogo F3-00 (facções, economia, níveis, unidades, magias) — proposta v1 |
 | [09_MULTIPLAYER](09_MULTIPLAYER.md) | Multiplayer lockstep (F9-01): turnos, checksum/desync, WebRTC, lobby, reconexão, replays, PoC |
-| [SESSION_HANDOFF](SESSION_HANDOFF.md) | **Comece aqui numa sessão nova**: estado, regras, fluxo de agentes, próximos passos |
-| [HANDOFF_CLOUD](HANDOFF_CLOUD.md) | Roteiro para executar tarefas no Claude Code online (nuvem) |
-| [ESTADO_NUVEM](ESTADO_NUVEM.md) | Estado para a nuvem: pronto, com falha, não iniciado; branches com trabalho parcial |
-| [CHANGELOG_NUVEM](CHANGELOG_NUVEM.md) | O que foi feito na nuvem (PRs mesclados e pendentes) e planos |
+| [PLANO_FINAL](PLANO_FINAL.md) | **Execução atual — comece aqui**: diagnóstico, decisões do dono, marcos M0–M6, quadro de tarefas e *gates* |
+| [PLANO_FINAL_TAREFAS](PLANO_FINAL_TAREFAS.md) | **Fichas das tarefas** (autossuficientes, prontas para entregar a um agente) |
+| [SESSION_HANDOFF](SESSION_HANDOFF.md) | Sessão nova: regras de trabalho, comandos, estado do git (curto) |
+| [historico/](historico/) | Arquivo morto: `TASKS` integral até 2026-10-17, `ESTADO_NUVEM`, `HANDOFF_CLOUD`, `CHANGELOG_NUVEM`, `AUDITORIA_BACKLOG`, handoff e paridade antigos |
 | [MUSICA](MUSICA.md) | Catálogo de 41 faixas, player no inspetor, evolução por tempo de partida, exportação MIDI |
-| [AUDITORIA_BACKLOG](AUDITORIA_BACKLOG.md) | Auditoria AUD-1 do backlog NEW-1…35 (estado de 2026-10-10 + atualização pós-merge) |
 | [BALANCEAMENTO](BALANCEAMENTO.md) | Resultados dos lotes de balanceamento |
 | [10_DEPLOY](10_DEPLOY.md) | Deploy estático, PWA, orçamento de desempenho |
-| [specs/](specs/README.md) | Especificações por tarefa com status (índice em `specs/README.md`) |
-| [PLANO_FINAL](PLANO_FINAL.md) | **Plano de execução até o 1.0**: diagnóstico, decisões do dono, marcos M0–M6, quadro de tarefas e *gates* |
-| [PLANO_FINAL_TAREFAS](PLANO_FINAL_TAREFAS.md) | Fichas autossuficientes das tarefas, prontas para entregar a um agente |
-| [TASKS](TASKS.md) | **Lista de tarefas controlada**: protocolo, lanes/agentes, ondas paralelas, status |
+| [specs/](specs/README.md) | Especificações por tarefa; o índice traz o status real de cada uma |
+| [TASKS](TASKS.md) | Índice das tarefas antigas (F0–F10, NEW, MUNDO) com status final e link para o histórico |
 
 Backups: `~/warpoly_backups/warpoly_full_2026-09-28.tar.gz` e branch `backup/pre-aaa-2026-09-28`.
 

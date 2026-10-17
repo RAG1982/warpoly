@@ -1,8 +1,8 @@
 # F3-01 · Controles RTS completos (+ NEW-16)
 
-> **Status: ⏳ A FAZER — fila da nuvem (item 4 de docs/HANDOFF_CLOUD.md)**
+> **Status: ⏳ A FAZER — fila da nuvem (item 4 de docs/historico/HANDOFF_CLOUD.md)**
 
-Leia antes: `docs/specs/_COMUM.md` (na nuvem: `docs/HANDOFF_CLOUD.md`), `CLAUDE.md`, seção "Comandos" de `docs/01_ARQUITETURA.md` (F2-02: `gm.issue(cmd)`, `CMD.*`, `queued`), `src/ui/hotkeys.js` (F6-03: letras já **exibidas** no card).
+Leia antes: `docs/specs/_COMUM.md` (na nuvem: `docs/historico/HANDOFF_CLOUD.md`), `CLAUDE.md`, seção "Comandos" de `docs/01_ARQUITETURA.md` (F2-02: `gm.issue(cmd)`, `CMD.*`, `queued`), `src/ui/hotkeys.js` (F6-03: letras já **exibidas** no card).
 
 ## "Pronto"
 Todas as ações abaixo funcionam no jogo, emitindo **comandos** (`gm.issue(makeCommand({...}))`) — nunca chamando métodos de entidade diretamente — e são cobertas por testes de lógica pura.

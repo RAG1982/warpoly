@@ -3,8 +3,8 @@
 RTS 3D low-poly no navegador (three.js + Vite, JS ES modules), inspirado em **Warcraft II** (Aliança Humana × Horda Orc). Objetivo: paridade de recursos com o WC2 e qualidade AAA no navegador.
 
 ## Antes de qualquer tarefa
-1. Leia `docs/README.md` e a tarefa correspondente em `docs/TASKS.md`.
-2. Siga o **Protocolo de execução** do TASKS.md: mude o status para `DOING`, trabalhe em `task/<ID>`, respeite a posse de arquivos da sua lane e atualize status/docs ao terminar.
+1. Leia `docs/README.md`, `docs/specs/_COMUM.md` e a ficha da tarefa em `docs/PLANO_FINAL_TAREFAS.md` (plano de execução: `docs/PLANO_FINAL.md`). `docs/TASKS.md` é só o índice das tarefas antigas (texto integral em `docs/historico/`).
+2. Siga as **Regras fixas** do Preâmbulo de `PLANO_FINAL_TAREFAS.md` e a §2 de `PLANO_FINAL.md`: uma branch `task/<ID>` por ficha, respeite a posse de arquivos da lane (tabela em `docs/TASKS.md`); o coordenador atualiza o quadro depois do merge, então não edite `PLANO_FINAL.md` nem `TASKS.md`.
 3. Não duplique números de balanceamento: depois da F0-06 eles vivem em `src/data/`.
 
 ## Comandos

@@ -1,7 +1,7 @@
 # MUNDO-HISTORIA-CAMPANHA · O novo mundo, a história e as campanhas (12 missões por facção)
 
 > **Status: SPEC revisada (decisões do dono de 2026-10-11 aplicadas; não iniciada)**. Escrita em 2026-10-11 por Sonnet 5.5. **Só documento: nenhum código, nenhum JSON de missão.** Fonte: [`MUNDO-BRIEFING-DONO.md`](MUNDO-BRIEFING-DONO.md) (em caso de dúvida, vale o briefing). Arquivos irmãos: `MUNDO-TERRENO-MAPAS.md` (mapas, terreno, ilhas como geografia jogável) e [`MUNDO-HEROIS.md`](MUNDO-HEROIS.md) (os 6 heróis: histórias, habilidades, aparência). Perguntas ainda abertas: §10.
-> Leia antes: `CLAUDE.md`, `docs/HANDOFF_CLOUD.md` (§2, regras da nuvem), `docs/specs/_COMUM.md`, `src/data/campaigns/README.md`, `docs/specs/F8-06-campanha-horda.md` (briefing da Horda; **preservado** como campanha "Clássica (beta)", §7), `src/data/missions/README.md`, `docs/specs/MUNDO-HEROIS.md`, `docs/05_PARIDADE_WARCRAFT2.md` (nada de nomes ou lore da Blizzard).
+> Leia antes: `CLAUDE.md`, `docs/historico/HANDOFF_CLOUD.md` (§2, regras da nuvem), `docs/specs/_COMUM.md`, `src/data/campaigns/README.md`, `docs/specs/F8-06-campanha-horda.md` (briefing da Horda; **preservado** como campanha "Clássica (beta)", §7), `src/data/missions/README.md`, `docs/specs/MUNDO-HEROIS.md`, `docs/05_PARIDADE_WARCRAFT2.md` (nada de nomes ou lore da Blizzard).
 > Executores: agentes **sonnet** na nuvem (sem navegador/GPU), em lotes (§8). Arte, música, modelos 3D e tudo que exige jogar ficam **pendentes (local)**.
 > Imagens de referência (em `docs/refs/mundo/`): `mapa-mundi-referencia.png` (pergaminho, contorno irregular, rosa dos ventos, selo de cera), `terreno-humano-exuberante.webp`, `terreno-orc-deserto.webp`.
 
@@ -427,7 +427,7 @@ Ordem **Capitão → Mago → Comandante** (justificativa em `MUNDO-HEROIS.md` �
 | L4 | `skeleton`, `watching_eye` não são treináveis. | `cost: null` | cobertos por pesquisa; na lista de exceções do teste de cobertura |
 | L5 | **Segundo Centro**: o jogador não pode construí-lo (`castle`/`great_hall` fora da `buildList`); o Marco da Colônia (m10) precisa nascer por `spawnBuilding`. | `src/data/factions.js` `buildList` | roteiro `spawnBuilding`; ver risco R3 (verificar `UPGRADE_HQ` e `setTier` com 2 Centros) |
 | L6 | **Sem condição "usar magia"** nos gatilhos. | `missions/README.md` | objetivos por contagem/pesquisa |
-| L7 | **IA naval** ainda não existe (NEW-44, local). | `HANDOFF_CLOUD.md` | frotas roteirizadas (§3.3) |
+| L7 | **IA naval** ainda não existe (NEW-44, local). | `docs/historico/HANDOFF_CLOUD.md` | frotas roteirizadas (§3.3) |
 | L8 | Heróis imunes à Transmutação, únicos por partida. | `heroes.js` | aceitar; chefes inimigos usam o mesmo tipo (1 por missão) |
 | L9 | Habilidades de herói: só `hero_war_cry`, `hero_arcane_bolt`, `hero_mend`. | `abilities.js` | **14 entradas novas** com efeitos existentes + **1 extensão** (status em área aliada), `MUNDO-HEROIS.md` §1.1/§8 |
 | L10 | Retratos/ícones dos 3 heróis novos (`icon: '/icoEspada.png'` provisório). | `units.js` | SVG provisório gerado na nuvem; arte final local (F7-09) |

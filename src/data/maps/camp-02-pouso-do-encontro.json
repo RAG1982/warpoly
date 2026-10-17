@@ -9050,28 +9050,28 @@
       "z": -58,
       "count": 14,
       "radius": 10,
-      "species": "oak"
+      "species": "pine"
     },
     {
       "x": -22,
       "z": -14,
       "count": 14,
       "radius": 10,
-      "species": "oak"
+      "species": "broad"
     },
     {
       "x": 6,
       "z": -42,
       "count": 14,
       "radius": 10,
-      "species": "pine"
+      "species": "broad"
     },
     {
       "x": 14,
       "z": -60,
       "count": 14,
       "radius": 10,
-      "species": "oak"
+      "species": "pine"
     },
     {
       "x": -34,
@@ -9085,7 +9085,7 @@
       "z": -2,
       "count": 14,
       "radius": 10,
-      "species": "oak"
+      "species": "broad"
     },
     {
       "x": 8.3,
@@ -9106,21 +9106,21 @@
       "z": -2,
       "count": 14,
       "radius": 10,
-      "species": "pine"
+      "species": "broad"
     },
     {
       "x": 24,
       "z": 18,
       "count": 14,
       "radius": 10,
-      "species": "oak"
+      "species": "acacia"
     },
     {
       "x": 46,
       "z": 16,
       "count": 14,
       "radius": 10,
-      "species": "oak"
+      "species": "acacia"
     },
     {
       "x": 4,
@@ -9134,14 +9134,14 @@
       "z": 24,
       "count": 14,
       "radius": 10,
-      "species": "oak"
+      "species": "pine"
     },
     {
       "x": 32,
       "z": 36,
       "count": 14,
       "radius": 10,
-      "species": "oak"
+      "species": "broad"
     }
   ],
   "fords": [

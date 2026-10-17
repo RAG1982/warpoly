@@ -11,7 +11,12 @@ const server = spawn('npx', ['vite', 'preview', '--port', String(PORT), '--stric
 let browser;
 const errors = [];
 try {
-  await new Promise((r) => setTimeout(r, 2500));
+  // M1-04: espera o servidor responder (antes era uma pausa fixa de 2,5 s, que falhava com ERR_CONNECTION_REFUSED sob carga)
+  for (let i = 0; i < 60; i++) {
+    const up = await fetch(`http://localhost:${PORT}${BASE}`).then(() => true, () => false);
+    if (up) break;
+    await new Promise((r) => setTimeout(r, 500));
+  }
   browser = await chromium.launch({
     headless: true,
     args: ['--use-angle=vulkan', '--enable-features=Vulkan', '--enable-gpu', '--ignore-gpu-blocklist', '--enable-unsafe-swiftshader']

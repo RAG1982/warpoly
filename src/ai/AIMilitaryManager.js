@@ -367,7 +367,7 @@ export class AIMilitaryManager {
   /** A expedição já pode sair (atraso inicial da dificuldade, menor no rush)? */
   expeditionAllowed() {
     const d = this.director;
-    const delay = d.profile.startDelay * (d.strategy.id === 'rush' ? 0.4 : 1);
+    const delay = d.profile.startDelay * (d.strategy.id === 'rush' ? (d.profile.rushDelayScale ?? 0.4) : 1);
     return (d.simTime || 0) >= delay;
   }
 

@@ -5,6 +5,7 @@
 import * as THREE from 'three';
 import { getTerrainTextures, getTerrainTexturesFromHeight } from '../models/environment/terrainTextures.js';
 import { getTilesetTerrainTexture, withRoads } from '../models/environment/tilesetTextures.js';
+import { installBiomeDetail } from '../models/environment/biomeDetailMaterial.js';
 import { getTileset, getMapTileset } from '../data/tilesets.js';
 import { getRegionMap } from '../data/biomeRegions.js';
 import { buildLavaInfo, LAVA_STYLE } from '../data/lavaRender.js';
@@ -194,6 +195,8 @@ export class TerrainView {
       roughness: regions ? regions.roughness : (this.tileset.legacy ? 0.82 : this.tileset.surface.roughness),
       metalness: 0.04
     });
+    // M2-19: detalhe procedural de rocha/vulcânico/pântano/gelo (textura ladrilhável + pesos por bioma, no shader do próprio terreno)
+    if (useSplat) installBiomeDetail(mat, { def: this.tileset, regions, size: terrain.width });
     this.material = mat;
 
     this.mesh = new THREE.Mesh(nonIndexedGeo, mat);

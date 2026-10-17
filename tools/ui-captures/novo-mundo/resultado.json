@@ -1,170 +1,15 @@
 {
-  "when": "2026-10-17T06:30:15.535Z",
+  "when": "2026-10-17T16:43:38.731Z",
   "viewport": {
     "width": 1920,
     "height": 1080
   },
-  "renderer": "ANGLE (AMD, Vulkan 1.4.318 (AMD Radeonâ¢ RX 7600 XT (RADV NAVI33) (0x00007480)), radv)",
+  "renderer": null,
   "phases": [
-    "menu",
     "mapas",
     "lava"
   ],
-  "menu": {
-    "storyOpenedOnFirstVisit": true,
-    "panels": [
-      {
-        "dotActive": 0,
-        "dots": 7,
-        "art": {
-          "src": "/art/story/panel-1.png",
-          "w": 1376,
-          "h": 768,
-          "complete": true
-        },
-        "fallbackVisible": false,
-        "caption": "Antes de haver nomes, havia uma só terra, um só oceano e um só céu. Ondara era um mundo inteiro, e ninguém ainda o chamava de lar.",
-        "title": null,
-        "step": 0
-      },
-      {
-        "dotActive": 1,
-        "dots": 7,
-        "art": {
-          "src": "/art/story/panel-2.png",
-          "w": 1376,
-          "h": 768,
-          "complete": true
-        },
-        "fallbackVisible": false,
-        "caption": "Então a terra se partiu. O mar entrou pela Fenda, e por milhões de anos dois continentes derivaram em silêncio, cada um sonhando o seu próprio mundo.",
-        "title": null,
-        "step": 1
-      },
-      {
-        "dotActive": 2,
-        "dots": 7,
-        "art": {
-          "src": "/art/story/panel-3.png",
-          "w": 1376,
-          "h": 768,
-          "complete": true
-        },
-        "fallbackVisible": false,
-        "caption": "Em Velmara, entre montanhas nevadas, florestas e savanas, ergueram-se os homens, com seus rebanhos e seus grifos. Em Cinzara, entre dunas, pântanos e estepes, os clãs aprenderam a viver do pouco: javalis, brasas e vento.",
-        "title": null,
-        "step": 2
-      },
-      {
-        "dotActive": 3,
-        "dots": 7,
-        "art": {
-          "src": "/art/story/panel-4.png",
-          "w": 1376,
-          "h": 768,
-          "complete": true
-        },
-        "fallbackVisible": false,
-        "caption": "Os povos cresceram, e a fome de terra, de ouro, de madeira e de breu os lançou ao mar. Aurelan traçou cartas; os clãs queimaram mastros de cinza. Cada um buscava o que faltava em casa.",
-        "title": null,
-        "step": 3
-      },
-      {
-        "dotActive": 4,
-        "dots": 7,
-        "art": {
-          "src": "/art/story/panel-5.png",
-          "w": 1376,
-          "h": 768,
-          "complete": true
-        },
-        "fallbackVisible": false,
-        "caption": "No meio do Mar Fendido, duas velas se avistaram. Ninguém sabe quem baixou o estandarte primeiro, nem de que lado partiu a primeira flecha. Só se sabe que o mar deixou de ser vazio.",
-        "title": null,
-        "step": 4
-      },
-      {
-        "dotActive": 5,
-        "dots": 7,
-        "art": {
-          "src": "/art/story/panel-6.png",
-          "w": 1376,
-          "h": 768,
-          "complete": true
-        },
-        "fallbackVisible": false,
-        "caption": "Entre os dois mundos jaziam os Estilhaços: ilhas de pedra, brejo, fogo, gelo e areia, com ouro, madeira e petróleo à beira da água. Quem as dominasse teria uma ponte de guerra e a chave do oceano.",
-        "title": null,
-        "step": 5
-      },
-      {
-        "dotActive": 6,
-        "dots": 7,
-        "art": {
-          "src": "/art/story/panel-7-alliance.png",
-          "w": 1376,
-          "h": 768,
-          "complete": true
-        },
-        "fallbackVisible": false,
-        "caption": "Aurelan não queria a guerra, mas não cederia o mar. Na Baía de Aurelan, a Rainha Sevelin ergue o estandarte: tomar os Estilhaços e fincar uma fortaleza em terra inimiga, de onde o mar será nosso.",
-        "title": null,
-        "step": 6
-      },
-      {
-        "dotActive": 6,
-        "dots": 7,
-        "art": {
-          "src": "/art/world/mapa-mundi.png",
-          "w": 1376,
-          "h": 768,
-          "complete": true
-        },
-        "fallbackVisible": false,
-        "caption": null,
-        "title": "A Guerra do Mar Fendido",
-        "step": 7
-      }
-    ],
-    "tabs": [
-      {
-        "text": "A Guerra do Mar Fendido (Aliança)",
-        "selected": "true"
-      },
-      {
-        "text": "A Guerra do Mar Fendido (Horda)",
-        "selected": "false"
-      },
-      {
-        "text": "Campanha Clássica (beta)",
-        "selected": "false"
-      }
-    ],
-    "tab1": {
-      "hasReviewStory": true,
-      "items": 12,
-      "provisional": false
-    },
-    "tab2": {
-      "hasReviewStory": false,
-      "items": 8,
-      "provisional": true
-    },
-    "esc": {
-      "reopened": true,
-      "after": {
-        "story": false,
-        "campaign": true,
-        "mainMenu": true,
-        "inGame": false
-      }
-    },
-    "worldMapInDom": false,
-    "escFirstVisit": {
-      "story": false,
-      "campaign": true
-    }
-  },
+  "menu": {},
   "maps": {
     "duelo-continental-1": {
       "errors": [],
@@ -192,19 +37,19 @@
         "fps": 60,
         "fpsP1": 59.5,
         "frames": 236,
-        "drawCalls": 278,
-        "triangles": 448139,
-        "geometries": 128,
-        "textures": 45
+        "drawCalls": 276,
+        "triangles": 456298,
+        "geometries": 126,
+        "textures": 47
       },
       "spots": {
         "counts": {
           "mar": 32320,
           "areia": 3011,
           "grama": 7722,
-          "rocha": 2112,
+          "rocha": 2978,
           "vulcânico": 556,
-          "neve": 1198,
+          "neve": 332,
           "pântano": 728,
           "gelo": 308,
           "floresta": 2670
@@ -229,10 +74,10 @@
           "6": {
             "biome": 6,
             "name": "rocha",
-            "count": 2112,
+            "count": 2978,
             "depth": 4,
-            "x": -35,
-            "z": 79
+            "x": 28,
+            "z": -16
           },
           "7": {
             "biome": 7,
@@ -245,10 +90,10 @@
           "9": {
             "biome": 9,
             "name": "neve",
-            "count": 1198,
-            "depth": 3,
-            "x": 27,
-            "z": -16
+            "count": 332,
+            "depth": 2,
+            "x": -81,
+            "z": 86
           },
           "10": {
             "biome": 10,
@@ -283,15 +128,15 @@
             "z": -1
           },
           {
-            "pair": "rocha/neve",
-            "contact": 920,
-            "x": -30,
-            "z": 10
+            "pair": "grama/rocha",
+            "contact": 1117,
+            "x": 5,
+            "z": 6
           },
           {
-            "pair": "grama/rocha",
-            "contact": 911,
-            "x": 5,
+            "pair": "rocha/floresta",
+            "contact": 655,
+            "x": -33,
             "z": 6
           }
         ],
@@ -403,25 +248,7 @@
           "underwater": 0
         },
         {
-          "name": "05cc95",
-          "n": 14,
-          "floatN": 0,
-          "maxFloat": 0,
-          "sunkN": 0,
-          "minSunk": 0,
-          "underwater": 0
-        },
-        {
-          "name": "4d54c0",
-          "n": 11,
-          "floatN": 0,
-          "maxFloat": 0,
-          "sunkN": 0,
-          "minSunk": 0,
-          "underwater": 0
-        },
-        {
-          "name": "956106",
+          "name": "919161",
           "n": 12,
           "floatN": 0,
           "maxFloat": 0,
@@ -430,7 +257,16 @@
           "underwater": 0
         },
         {
-          "name": "8fef1a",
+          "name": "ac70a2",
+          "n": 9,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "26ac8b",
           "n": 1,
           "floatN": 0,
           "maxFloat": 0,
@@ -439,7 +275,142 @@
           "underwater": 0
         },
         {
-          "name": "761ef8",
+          "name": "cf1a55",
+          "n": 4,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "383fd5",
+          "n": 1,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "552205",
+          "n": 2,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "a760e3",
+          "n": 6,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "b3c1c9",
+          "n": 1,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "8558e2",
+          "n": 6,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "3a3671",
+          "n": 2,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "5a66b2",
+          "n": 1,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "42630f",
+          "n": 1,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "b92b37",
+          "n": 1,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "ca306d",
+          "n": 5,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "aaaed2",
+          "n": 1,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "d91b83",
+          "n": 1,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "adbc87",
+          "n": 5,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "14524b",
+          "n": 11,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "133f5d",
           "n": 3,
           "floatN": 0,
           "maxFloat": 0,
@@ -448,8 +419,8 @@
           "underwater": 0
         },
         {
-          "name": "a0a075",
-          "n": 1,
+          "name": "653679",
+          "n": 13,
           "floatN": 0,
           "maxFloat": 0,
           "sunkN": 0,
@@ -457,169 +428,7 @@
           "underwater": 0
         },
         {
-          "name": "6e5ebc",
-          "n": 1,
-          "floatN": 0,
-          "maxFloat": 0,
-          "sunkN": 0,
-          "minSunk": 0,
-          "underwater": 0
-        },
-        {
-          "name": "ef34dd",
-          "n": 6,
-          "floatN": 0,
-          "maxFloat": 0,
-          "sunkN": 0,
-          "minSunk": 0,
-          "underwater": 0
-        },
-        {
-          "name": "64756f",
-          "n": 1,
-          "floatN": 0,
-          "maxFloat": 0,
-          "sunkN": 0,
-          "minSunk": 0,
-          "underwater": 0
-        },
-        {
-          "name": "de2876",
-          "n": 2,
-          "floatN": 0,
-          "maxFloat": 0,
-          "sunkN": 0,
-          "minSunk": 0,
-          "underwater": 0
-        },
-        {
-          "name": "8061f8",
-          "n": 2,
-          "floatN": 0,
-          "maxFloat": 0,
-          "sunkN": 0,
-          "minSunk": 0,
-          "underwater": 0
-        },
-        {
-          "name": "442f72",
-          "n": 5,
-          "floatN": 0,
-          "maxFloat": 0,
-          "sunkN": 0,
-          "minSunk": 0,
-          "underwater": 0
-        },
-        {
-          "name": "6551fc",
-          "n": 1,
-          "floatN": 0,
-          "maxFloat": 0,
-          "sunkN": 0,
-          "minSunk": 0,
-          "underwater": 0
-        },
-        {
-          "name": "788521",
-          "n": 2,
-          "floatN": 0,
-          "maxFloat": 0,
-          "sunkN": 0,
-          "minSunk": 0,
-          "underwater": 0
-        },
-        {
-          "name": "ca6f7f",
-          "n": 8,
-          "floatN": 0,
-          "maxFloat": 0,
-          "sunkN": 0,
-          "minSunk": 0,
-          "underwater": 0
-        },
-        {
-          "name": "73d7b6",
-          "n": 4,
-          "floatN": 0,
-          "maxFloat": 0,
-          "sunkN": 0,
-          "minSunk": 0,
-          "underwater": 0
-        },
-        {
-          "name": "aed9c8",
-          "n": 1,
-          "floatN": 0,
-          "maxFloat": 0,
-          "sunkN": 0,
-          "minSunk": 0,
-          "underwater": 0
-        },
-        {
-          "name": "e93250",
-          "n": 2,
-          "floatN": 0,
-          "maxFloat": 0,
-          "sunkN": 0,
-          "minSunk": 0,
-          "underwater": 0
-        },
-        {
-          "name": "bea663",
-          "n": 4,
-          "floatN": 0,
-          "maxFloat": 0,
-          "sunkN": 0,
-          "minSunk": 0,
-          "underwater": 0
-        },
-        {
-          "name": "ad87a4",
-          "n": 1,
-          "floatN": 0,
-          "maxFloat": 0,
-          "sunkN": 0,
-          "minSunk": 0,
-          "underwater": 0
-        },
-        {
-          "name": "a5aa51",
-          "n": 11,
-          "floatN": 0,
-          "maxFloat": 0,
-          "sunkN": 0,
-          "minSunk": 0,
-          "underwater": 0
-        },
-        {
-          "name": "4c396e",
-          "n": 5,
-          "floatN": 0,
-          "maxFloat": 0,
-          "sunkN": 0,
-          "minSunk": 0,
-          "underwater": 0
-        },
-        {
-          "name": "b652c7",
-          "n": 6,
-          "floatN": 0,
-          "maxFloat": 0,
-          "sunkN": 0,
-          "minSunk": 0,
-          "underwater": 0
-        },
-        {
-          "name": "5a3225",
-          "n": 1,
-          "floatN": 0,
-          "maxFloat": 0,
-          "sunkN": 0,
-          "minSunk": 0,
-          "underwater": 0
-        },
-        {
-          "name": "877913",
+          "name": "4dc7d1",
           "n": 12,
           "floatN": 0,
           "maxFloat": 0,
@@ -628,8 +437,8 @@
           "underwater": 0
         },
         {
-          "name": "46fa28",
-          "n": 4,
+          "name": "3fd7b2",
+          "n": 12,
           "floatN": 0,
           "maxFloat": 0,
           "sunkN": 0,
@@ -637,16 +446,7 @@
           "underwater": 0
         },
         {
-          "name": "29fe04",
-          "n": 2,
-          "floatN": 0,
-          "maxFloat": 0,
-          "sunkN": 0,
-          "minSunk": 0,
-          "underwater": 0
-        },
-        {
-          "name": "a21c6e",
+          "name": "34fd35",
           "n": 7,
           "floatN": 0,
           "maxFloat": 0,
@@ -655,16 +455,7 @@
           "underwater": 0
         },
         {
-          "name": "108af0",
-          "n": 3,
-          "floatN": 0,
-          "maxFloat": 0,
-          "sunkN": 0,
-          "minSunk": 0,
-          "underwater": 0
-        },
-        {
-          "name": "397b6a",
+          "name": "5d70b4",
           "n": 1,
           "floatN": 0,
           "maxFloat": 0,
@@ -673,16 +464,7 @@
           "underwater": 0
         },
         {
-          "name": "c0dbeb",
-          "n": 3,
-          "floatN": 0,
-          "maxFloat": 0,
-          "sunkN": 0,
-          "minSunk": 0,
-          "underwater": 0
-        },
-        {
-          "name": "644372",
+          "name": "cf1915",
           "n": 1,
           "floatN": 0,
           "maxFloat": 0,
@@ -691,16 +473,7 @@
           "underwater": 0
         },
         {
-          "name": "930a9b",
-          "n": 2,
-          "floatN": 0,
-          "maxFloat": 0,
-          "sunkN": 0,
-          "minSunk": 0,
-          "underwater": 0
-        },
-        {
-          "name": "4c2c51",
+          "name": "604133",
           "n": 1,
           "floatN": 0,
           "maxFloat": 0,
@@ -709,8 +482,8 @@
           "underwater": 0
         },
         {
-          "name": "987c60",
-          "n": 2,
+          "name": "21ca3a",
+          "n": 4,
           "floatN": 0,
           "maxFloat": 0,
           "sunkN": 0,
@@ -718,259 +491,7 @@
           "underwater": 0
         },
         {
-          "name": "454661",
-          "n": 1,
-          "floatN": 0,
-          "maxFloat": 0,
-          "sunkN": 0,
-          "minSunk": 0,
-          "underwater": 0
-        },
-        {
-          "name": "fb0a5d",
-          "n": 1,
-          "floatN": 0,
-          "maxFloat": 0,
-          "sunkN": 0,
-          "minSunk": 0,
-          "underwater": 0
-        },
-        {
-          "name": "c1718e",
-          "n": 5,
-          "floatN": 0,
-          "maxFloat": 0,
-          "sunkN": 0,
-          "minSunk": 0,
-          "underwater": 0
-        },
-        {
-          "name": "9096be",
-          "n": 1,
-          "floatN": 0,
-          "maxFloat": 0,
-          "sunkN": 0,
-          "minSunk": 0,
-          "underwater": 0
-        },
-        {
-          "name": "ba918e",
-          "n": 1,
-          "floatN": 0,
-          "maxFloat": 0,
-          "sunkN": 0,
-          "minSunk": 0,
-          "underwater": 0
-        },
-        {
-          "name": "e94d8d",
-          "n": 1,
-          "floatN": 0,
-          "maxFloat": 0,
-          "sunkN": 0,
-          "minSunk": 0,
-          "underwater": 0
-        },
-        {
-          "name": "b74067",
-          "n": 5,
-          "floatN": 0,
-          "maxFloat": 0,
-          "sunkN": 0,
-          "minSunk": 0,
-          "underwater": 0
-        },
-        {
-          "name": "b2ee02",
-          "n": 1,
-          "floatN": 0,
-          "maxFloat": 0,
-          "sunkN": 0,
-          "minSunk": 0,
-          "underwater": 0
-        },
-        {
-          "name": "cb0fbc",
-          "n": 1,
-          "floatN": 0,
-          "maxFloat": 0,
-          "sunkN": 0,
-          "minSunk": 0,
-          "underwater": 0
-        },
-        {
-          "name": "83d77f",
-          "n": 2,
-          "floatN": 0,
-          "maxFloat": 0,
-          "sunkN": 0,
-          "minSunk": 0,
-          "underwater": 0
-        },
-        {
-          "name": "495da7",
-          "n": 5,
-          "floatN": 0,
-          "maxFloat": 0,
-          "sunkN": 0,
-          "minSunk": 0,
-          "underwater": 0
-        },
-        {
-          "name": "48cd35",
-          "n": 1,
-          "floatN": 0,
-          "maxFloat": 0,
-          "sunkN": 0,
-          "minSunk": 0,
-          "underwater": 0
-        },
-        {
-          "name": "60e423",
-          "n": 2,
-          "floatN": 0,
-          "maxFloat": 0,
-          "sunkN": 0,
-          "minSunk": 0,
-          "underwater": 0
-        },
-        {
-          "name": "0c7f28",
-          "n": 6,
-          "floatN": 0,
-          "maxFloat": 0,
-          "sunkN": 0,
-          "minSunk": 0,
-          "underwater": 0
-        },
-        {
-          "name": "151042",
-          "n": 1,
-          "floatN": 0,
-          "maxFloat": 0,
-          "sunkN": 0,
-          "minSunk": 0,
-          "underwater": 0
-        },
-        {
-          "name": "6ed8e4",
-          "n": 1,
-          "floatN": 0,
-          "maxFloat": 0,
-          "sunkN": 0,
-          "minSunk": 0,
-          "underwater": 0
-        },
-        {
-          "name": "d821ac",
-          "n": 3,
-          "floatN": 0,
-          "maxFloat": 0,
-          "sunkN": 0,
-          "minSunk": 0,
-          "underwater": 0
-        },
-        {
-          "name": "cac895",
-          "n": 11,
-          "floatN": 0,
-          "maxFloat": 0,
-          "sunkN": 0,
-          "minSunk": 0,
-          "underwater": 0
-        },
-        {
-          "name": "acf499",
-          "n": 1,
-          "floatN": 0,
-          "maxFloat": 0,
-          "sunkN": 0,
-          "minSunk": 0,
-          "underwater": 0
-        },
-        {
-          "name": "730d03",
-          "n": 3,
-          "floatN": 0,
-          "maxFloat": 0,
-          "sunkN": 0,
-          "minSunk": 0,
-          "underwater": 0
-        },
-        {
-          "name": "c37335",
-          "n": 1,
-          "floatN": 0,
-          "maxFloat": 0,
-          "sunkN": 0,
-          "minSunk": 0,
-          "underwater": 0
-        },
-        {
-          "name": "948059",
-          "n": 1,
-          "floatN": 0,
-          "maxFloat": 0,
-          "sunkN": 0,
-          "minSunk": 0,
-          "underwater": 0
-        },
-        {
-          "name": "a1c1b4",
-          "n": 6,
-          "floatN": 0,
-          "maxFloat": 0,
-          "sunkN": 0,
-          "minSunk": 0,
-          "underwater": 0
-        },
-        {
-          "name": "1fdad2",
-          "n": 1,
-          "floatN": 0,
-          "maxFloat": 0,
-          "sunkN": 0,
-          "minSunk": 0,
-          "underwater": 0
-        },
-        {
-          "name": "349be5",
-          "n": 2,
-          "floatN": 0,
-          "maxFloat": 0,
-          "sunkN": 0,
-          "minSunk": 0,
-          "underwater": 0
-        },
-        {
-          "name": "0595cc",
-          "n": 1,
-          "floatN": 0,
-          "maxFloat": 0,
-          "sunkN": 0,
-          "minSunk": 0,
-          "underwater": 0
-        },
-        {
-          "name": "5443bc",
-          "n": 2,
-          "floatN": 0,
-          "maxFloat": 0,
-          "sunkN": 0,
-          "minSunk": 0,
-          "underwater": 0
-        },
-        {
-          "name": "35a031",
-          "n": 1,
-          "floatN": 0,
-          "maxFloat": 0,
-          "sunkN": 0,
-          "minSunk": 0,
-          "underwater": 0
-        },
-        {
-          "name": "de2dd8",
+          "name": "4483b2",
           "n": 8,
           "floatN": 0,
           "maxFloat": 0,
@@ -979,7 +500,7 @@
           "underwater": 0
         },
         {
-          "name": "480526",
+          "name": "32a491",
           "n": 4,
           "floatN": 0,
           "maxFloat": 0,
@@ -988,7 +509,61 @@
           "underwater": 0
         },
         {
-          "name": "dfdeed",
+          "name": "d660b3",
+          "n": 1,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "bbde31",
+          "n": 1,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "cafd4c",
+          "n": 1,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "fa9280",
+          "n": 5,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "fc7f9f",
+          "n": 2,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "e7bc18",
+          "n": 1,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "2c24c5",
           "n": 4,
           "floatN": 0,
           "maxFloat": 0,
@@ -997,8 +572,8 @@
           "underwater": 0
         },
         {
-          "name": "772a05",
-          "n": 11,
+          "name": "fc0470",
+          "n": 2,
           "floatN": 0,
           "maxFloat": 0,
           "sunkN": 0,
@@ -1006,7 +581,214 @@
           "underwater": 0
         },
         {
-          "name": "ae0dd2",
+          "name": "79e422",
+          "n": 1,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "4e7d64",
+          "n": 1,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "d9404c",
+          "n": 4,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "0fc917",
+          "n": 2,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "554943",
+          "n": 1,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "9f2ffd",
+          "n": 1,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "914259",
+          "n": 1,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "b20643",
+          "n": 1,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "4b1846",
+          "n": 9,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "6e7a01",
+          "n": 1,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "b62485",
+          "n": 1,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "987dee",
+          "n": 2,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "02707c",
+          "n": 6,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "57dc69",
+          "n": 1,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "c18955",
+          "n": 6,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "cc2755",
+          "n": 2,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "5561c7",
+          "n": 1,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "c0f378",
+          "n": 1,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "ba6bb6",
+          "n": 1,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "35e31b",
+          "n": 5,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "207570",
+          "n": 1,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "de0e81",
+          "n": 1,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "340353",
+          "n": 7,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "748c67",
           "n": 12,
           "floatN": 0,
           "maxFloat": 0,
@@ -1015,7 +797,7 @@
           "underwater": 0
         },
         {
-          "name": "e80d09",
+          "name": "c014b7",
           "n": 4,
           "floatN": 0,
           "maxFloat": 0,
@@ -1024,7 +806,70 @@
           "underwater": 0
         },
         {
-          "name": "2c0b32",
+          "name": "e4f6e9",
+          "n": 12,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "899488",
+          "n": 12,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "46c4ef",
+          "n": 1,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "17c1d9",
+          "n": 8,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "8ba6dc",
+          "n": 4,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "5170d4",
+          "n": 1,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "a3b112",
+          "n": 1,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "898570",
           "n": 2,
           "floatN": 0,
           "maxFloat": 0,
@@ -1033,7 +878,34 @@
           "underwater": 0
         },
         {
-          "name": "eb5d8b",
+          "name": "26274a",
+          "n": 1,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "f961b3",
+          "n": 5,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "74f6d3",
+          "n": 11,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "02d8b3",
           "n": 3,
           "floatN": 0,
           "maxFloat": 0,
@@ -1042,8 +914,8 @@
           "underwater": 0
         },
         {
-          "name": "1d8d84",
-          "n": 2,
+          "name": "dec3fc",
+          "n": 13,
           "floatN": 0,
           "maxFloat": 0,
           "sunkN": 0,
@@ -1051,7 +923,16 @@
           "underwater": 0
         },
         {
-          "name": "bd9853",
+          "name": "17b4ac",
+          "n": 4,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "31c1ea",
           "n": 1,
           "floatN": 0,
           "maxFloat": 0,
@@ -1060,17 +941,8 @@
           "underwater": 0
         },
         {
-          "name": "086f29",
-          "n": 2,
-          "floatN": 0,
-          "maxFloat": 0,
-          "sunkN": 0,
-          "minSunk": 0,
-          "underwater": 0
-        },
-        {
-          "name": "188adb",
-          "n": 1,
+          "name": "9a852a",
+          "n": 5,
           "floatN": 0,
           "maxFloat": 0,
           "sunkN": 0,
@@ -1079,14 +951,14 @@
         }
       ],
       "scene": {
-        "trees": 152,
+        "trees": 155,
         "deposits": 4,
         "critters": 8
       },
       "critters": {
         "ref": {
-          "x": -20.209997831598223,
-          "z": -28.61124568590433,
+          "x": -25.255567497919508,
+          "z": -30.404725371454678,
           "species": "sheep"
         },
         "total": 11
@@ -1094,27 +966,9 @@
       "critterY": [
         {
           "sp": "sheep",
-          "y": 2.6,
-          "h": 2.6,
-          "root": 2.6
-        },
-        {
-          "sp": "sheep",
-          "y": 2.64,
-          "h": 2.64,
-          "root": 2.64
-        },
-        {
-          "sp": "sheep",
-          "y": 3.02,
-          "h": 3.02,
-          "root": 3.02
-        },
-        {
-          "sp": "sheep",
-          "y": 2.6,
-          "h": 2.6,
-          "root": 2.6
+          "y": 3.31,
+          "h": 3.31,
+          "root": 3.31
         },
         {
           "sp": "sheep",
@@ -1124,39 +978,57 @@
         },
         {
           "sp": "sheep",
-          "y": 3.17,
-          "h": 3.17,
-          "root": 3.17
+          "y": 2.88,
+          "h": 2.88,
+          "root": 2.88
         },
         {
           "sp": "sheep",
-          "y": 2.45,
-          "h": 2.45,
-          "root": 2.45
+          "y": 2.6,
+          "h": 2.6,
+          "root": 2.6
         },
         {
           "sp": "sheep",
-          "y": 2.56,
-          "h": 2.56,
-          "root": 2.56
+          "y": 2.62,
+          "h": 2.62,
+          "root": 2.62
+        },
+        {
+          "sp": "sheep",
+          "y": 2.6,
+          "h": 2.6,
+          "root": 2.6
+        },
+        {
+          "sp": "sheep",
+          "y": 2.6,
+          "h": 2.6,
+          "root": 2.6
+        },
+        {
+          "sp": "sheep",
+          "y": 3.09,
+          "h": 3.09,
+          "root": 3.09
         },
         {
           "sp": "boar",
-          "y": 2.85,
-          "h": 2.85,
-          "root": 2.85
+          "y": 2.64,
+          "h": 2.64,
+          "root": 2.64
         },
         {
           "sp": "boar",
-          "y": 2.8,
-          "h": 2.8,
-          "root": 2.8
+          "y": 2.6,
+          "h": 2.6,
+          "root": 2.6
         },
         {
           "sp": "boar",
-          "y": 2.94,
-          "h": 2.94,
-          "root": 2.94
+          "y": 2.74,
+          "h": 2.74,
+          "root": 2.74
         }
       ],
       "mine": {
@@ -1173,8 +1045,8 @@
             {
               "x": -43.6,
               "z": -37,
-              "minRel": -0.21,
-              "maxRel": 0.66,
+              "minRel": -0.24,
+              "maxRel": 0.69,
               "opacity": 1,
               "alpha": "active"
             }
@@ -1185,19 +1057,19 @@
         "fps": 60,
         "fpsP1": 59.5,
         "frames": 206,
-        "drawCalls": 302,
-        "triangles": 443187,
-        "geometries": 352,
-        "textures": 55
+        "drawCalls": 296,
+        "triangles": 447054,
+        "geometries": 357,
+        "textures": 59
       },
       "perfWide": {
         "fps": 60,
         "fpsP1": 59.5,
         "frames": 206,
-        "drawCalls": 355,
-        "triangles": 373413,
-        "geometries": 354,
-        "textures": 55
+        "drawCalls": 345,
+        "triangles": 377588,
+        "geometries": 359,
+        "textures": 59
       },
       "consoleErrors": []
     },
@@ -1227,19 +1099,19 @@
         "fps": 60,
         "fpsP1": 59.5,
         "frames": 236,
-        "drawCalls": 261,
-        "triangles": 440666,
+        "drawCalls": 258,
+        "triangles": 442787,
         "geometries": 144,
-        "textures": 44
+        "textures": 46
       },
       "spots": {
         "counts": {
           "mar": 33215,
           "areia": 2499,
           "grama": 6455,
-          "rocha": 2051,
+          "rocha": 2523,
           "vulcânico": 564,
-          "neve": 2084,
+          "neve": 1612,
           "pântano": 552,
           "gelo": 330,
           "floresta": 2875
@@ -1264,10 +1136,10 @@
           "6": {
             "biome": 6,
             "name": "rocha",
-            "count": 2051,
-            "depth": 2,
-            "x": 23,
-            "z": 9
+            "count": 2523,
+            "depth": 5,
+            "x": 60,
+            "z": -21
           },
           "7": {
             "biome": 7,
@@ -1280,7 +1152,7 @@
           "9": {
             "biome": 9,
             "name": "neve",
-            "count": 2084,
+            "count": 1612,
             "depth": 7,
             "x": 11,
             "z": 20
@@ -1319,15 +1191,15 @@
           },
           {
             "pair": "grama/rocha",
-            "contact": 1088,
+            "contact": 1126,
             "x": 14,
             "z": 5
           },
           {
-            "pair": "rocha/neve",
-            "contact": 949,
-            "x": 6,
-            "z": 9
+            "pair": "rocha/floresta",
+            "contact": 661,
+            "x": 5,
+            "z": 5
           }
         ],
         "coast": {
@@ -1438,7 +1310,25 @@
           "underwater": 0
         },
         {
-          "name": "fdac04",
+          "name": "64a2d4",
+          "n": 12,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "203c1a",
+          "n": 22,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "97615b",
           "n": 4,
           "floatN": 0,
           "maxFloat": 0,
@@ -1447,8 +1337,8 @@
           "underwater": 0
         },
         {
-          "name": "974352",
-          "n": 4,
+          "name": "2df97b",
+          "n": 6,
           "floatN": 0,
           "maxFloat": 0,
           "sunkN": 0,
@@ -1456,8 +1346,8 @@
           "underwater": 0
         },
         {
-          "name": "079d81",
-          "n": 21,
+          "name": "2d5c0a",
+          "n": 6,
           "floatN": 0,
           "maxFloat": 0,
           "sunkN": 0,
@@ -1465,7 +1355,7 @@
           "underwater": 0
         },
         {
-          "name": "2831f2",
+          "name": "521676",
           "n": 2,
           "floatN": 0,
           "maxFloat": 0,
@@ -1474,178 +1364,7 @@
           "underwater": 0
         },
         {
-          "name": "15dd5e",
-          "n": 10,
-          "floatN": 0,
-          "maxFloat": 0,
-          "sunkN": 0,
-          "minSunk": 0,
-          "underwater": 0
-        },
-        {
-          "name": "65a89d",
-          "n": 11,
-          "floatN": 0,
-          "maxFloat": 0,
-          "sunkN": 0,
-          "minSunk": 0,
-          "underwater": 0
-        },
-        {
-          "name": "f3755f",
-          "n": 3,
-          "floatN": 0,
-          "maxFloat": 0,
-          "sunkN": 0,
-          "minSunk": 0,
-          "underwater": 0
-        },
-        {
-          "name": "55d11c",
-          "n": 1,
-          "floatN": 0,
-          "maxFloat": 0,
-          "sunkN": 0,
-          "minSunk": 0,
-          "underwater": 0
-        },
-        {
-          "name": "49597d",
-          "n": 9,
-          "floatN": 0,
-          "maxFloat": 0,
-          "sunkN": 0,
-          "minSunk": 0,
-          "underwater": 0
-        },
-        {
-          "name": "5845ae",
-          "n": 3,
-          "floatN": 0,
-          "maxFloat": 0,
-          "sunkN": 0,
-          "minSunk": 0,
-          "underwater": 0
-        },
-        {
-          "name": "21bf0c",
-          "n": 6,
-          "floatN": 0,
-          "maxFloat": 0,
-          "sunkN": 0,
-          "minSunk": 0,
-          "underwater": 0
-        },
-        {
-          "name": "312787",
-          "n": 4,
-          "floatN": 0,
-          "maxFloat": 0,
-          "sunkN": 0,
-          "minSunk": 0,
-          "underwater": 0
-        },
-        {
-          "name": "44ad36",
-          "n": 9,
-          "floatN": 0,
-          "maxFloat": 0,
-          "sunkN": 0,
-          "minSunk": 0,
-          "underwater": 0
-        },
-        {
-          "name": "5aee28",
-          "n": 2,
-          "floatN": 0,
-          "maxFloat": 0,
-          "sunkN": 0,
-          "minSunk": 0,
-          "underwater": 0
-        },
-        {
-          "name": "c23390",
-          "n": 1,
-          "floatN": 0,
-          "maxFloat": 0,
-          "sunkN": 0,
-          "minSunk": 0,
-          "underwater": 0
-        },
-        {
-          "name": "89c5b2",
-          "n": 1,
-          "floatN": 0,
-          "maxFloat": 0,
-          "sunkN": 0,
-          "minSunk": 0,
-          "underwater": 0
-        },
-        {
-          "name": "fd9675",
-          "n": 6,
-          "floatN": 0,
-          "maxFloat": 0,
-          "sunkN": 0,
-          "minSunk": 0,
-          "underwater": 0
-        },
-        {
-          "name": "aa3b27",
-          "n": 1,
-          "floatN": 0,
-          "maxFloat": 0,
-          "sunkN": 0,
-          "minSunk": 0,
-          "underwater": 0
-        },
-        {
-          "name": "245e9c",
-          "n": 3,
-          "floatN": 0,
-          "maxFloat": 0,
-          "sunkN": 0,
-          "minSunk": 0,
-          "underwater": 0
-        },
-        {
-          "name": "bfbe5d",
-          "n": 6,
-          "floatN": 0,
-          "maxFloat": 0,
-          "sunkN": 0,
-          "minSunk": 0,
-          "underwater": 0
-        },
-        {
-          "name": "34dcfd",
-          "n": 18,
-          "floatN": 0,
-          "maxFloat": 0,
-          "sunkN": 0,
-          "minSunk": 0,
-          "underwater": 0
-        },
-        {
-          "name": "29450e",
-          "n": 7,
-          "floatN": 0,
-          "maxFloat": 0,
-          "sunkN": 0,
-          "minSunk": 0,
-          "underwater": 0
-        },
-        {
-          "name": "44afff",
-          "n": 1,
-          "floatN": 0,
-          "maxFloat": 0,
-          "sunkN": 0,
-          "minSunk": 0,
-          "underwater": 0
-        },
-        {
-          "name": "74c911",
+          "name": "dff464",
           "n": 8,
           "floatN": 0,
           "maxFloat": 0,
@@ -1654,7 +1373,7 @@
           "underwater": 0
         },
         {
-          "name": "05dde2",
+          "name": "3a53b9",
           "n": 2,
           "floatN": 0,
           "maxFloat": 0,
@@ -1663,7 +1382,7 @@
           "underwater": 0
         },
         {
-          "name": "f298a2",
+          "name": "358be5",
           "n": 3,
           "floatN": 0,
           "maxFloat": 0,
@@ -1672,16 +1391,7 @@
           "underwater": 0
         },
         {
-          "name": "b95c8f",
-          "n": 1,
-          "floatN": 0,
-          "maxFloat": 0,
-          "sunkN": 0,
-          "minSunk": 0,
-          "underwater": 0
-        },
-        {
-          "name": "fb764d",
+          "name": "e611e8",
           "n": 2,
           "floatN": 0,
           "maxFloat": 0,
@@ -1690,7 +1400,7 @@
           "underwater": 0
         },
         {
-          "name": "d3cd8b",
+          "name": "bbbcf6",
           "n": 6,
           "floatN": 0,
           "maxFloat": 0,
@@ -1699,25 +1409,7 @@
           "underwater": 0
         },
         {
-          "name": "c9b359",
-          "n": 2,
-          "floatN": 0,
-          "maxFloat": 0,
-          "sunkN": 0,
-          "minSunk": 0,
-          "underwater": 0
-        },
-        {
-          "name": "bb89e3",
-          "n": 10,
-          "floatN": 0,
-          "maxFloat": 0,
-          "sunkN": 0,
-          "minSunk": 0,
-          "underwater": 0
-        },
-        {
-          "name": "e7d835",
+          "name": "82288c",
           "n": 3,
           "floatN": 0,
           "maxFloat": 0,
@@ -1726,8 +1418,8 @@
           "underwater": 0
         },
         {
-          "name": "296610",
-          "n": 2,
+          "name": "282246",
+          "n": 4,
           "floatN": 0,
           "maxFloat": 0,
           "sunkN": 0,
@@ -1735,8 +1427,8 @@
           "underwater": 0
         },
         {
-          "name": "149fdd",
-          "n": 10,
+          "name": "f3fc04",
+          "n": 4,
           "floatN": 0,
           "maxFloat": 0,
           "sunkN": 0,
@@ -1744,115 +1436,7 @@
           "underwater": 0
         },
         {
-          "name": "673a38",
-          "n": 1,
-          "floatN": 0,
-          "maxFloat": 0,
-          "sunkN": 0,
-          "minSunk": 0,
-          "underwater": 0
-        },
-        {
-          "name": "550c34",
-          "n": 1,
-          "floatN": 0,
-          "maxFloat": 0,
-          "sunkN": 0,
-          "minSunk": 0,
-          "underwater": 0
-        },
-        {
-          "name": "ed801d",
-          "n": 5,
-          "floatN": 0,
-          "maxFloat": 0,
-          "sunkN": 0,
-          "minSunk": 0,
-          "underwater": 0
-        },
-        {
-          "name": "6e36bf",
-          "n": 1,
-          "floatN": 0,
-          "maxFloat": 0,
-          "sunkN": 0,
-          "minSunk": 0,
-          "underwater": 0
-        },
-        {
-          "name": "b911b7",
-          "n": 3,
-          "floatN": 0,
-          "maxFloat": 0,
-          "sunkN": 0,
-          "minSunk": 0,
-          "underwater": 0
-        },
-        {
-          "name": "9aecc2",
-          "n": 1,
-          "floatN": 0,
-          "maxFloat": 0,
-          "sunkN": 0,
-          "minSunk": 0,
-          "underwater": 0
-        },
-        {
-          "name": "5a2f7d",
-          "n": 3,
-          "floatN": 0,
-          "maxFloat": 0,
-          "sunkN": 0,
-          "minSunk": 0,
-          "underwater": 0
-        },
-        {
-          "name": "5d6488",
-          "n": 1,
-          "floatN": 0,
-          "maxFloat": 0,
-          "sunkN": 0,
-          "minSunk": 0,
-          "underwater": 0
-        },
-        {
-          "name": "9805e0",
-          "n": 1,
-          "floatN": 0,
-          "maxFloat": 0,
-          "sunkN": 0,
-          "minSunk": 0,
-          "underwater": 0
-        },
-        {
-          "name": "3a8159",
-          "n": 6,
-          "floatN": 0,
-          "maxFloat": 0,
-          "sunkN": 0,
-          "minSunk": 0,
-          "underwater": 0
-        },
-        {
-          "name": "9c0537",
-          "n": 6,
-          "floatN": 0,
-          "maxFloat": 0,
-          "sunkN": 0,
-          "minSunk": 0,
-          "underwater": 0
-        },
-        {
-          "name": "02d81f",
-          "n": 1,
-          "floatN": 0,
-          "maxFloat": 0,
-          "sunkN": 0,
-          "minSunk": 0,
-          "underwater": 0
-        },
-        {
-          "name": "b2166d",
+          "name": "fed632",
           "n": 8,
           "floatN": 0,
           "maxFloat": 0,
@@ -1861,34 +1445,7 @@
           "underwater": 0
         },
         {
-          "name": "16c7de",
-          "n": 2,
-          "floatN": 0,
-          "maxFloat": 0,
-          "sunkN": 0,
-          "minSunk": 0,
-          "underwater": 0
-        },
-        {
-          "name": "06220f",
-          "n": 2,
-          "floatN": 0,
-          "maxFloat": 0,
-          "sunkN": 0,
-          "minSunk": 0,
-          "underwater": 0
-        },
-        {
-          "name": "28add8",
-          "n": 10,
-          "floatN": 0,
-          "maxFloat": 0,
-          "sunkN": 0,
-          "minSunk": 0,
-          "underwater": 0
-        },
-        {
-          "name": "b58d21",
+          "name": "3c2f6e",
           "n": 1,
           "floatN": 0,
           "maxFloat": 0,
@@ -1897,16 +1454,7 @@
           "underwater": 0
         },
         {
-          "name": "1bd419",
-          "n": 1,
-          "floatN": 0,
-          "maxFloat": 0,
-          "sunkN": 0,
-          "minSunk": 0,
-          "underwater": 0
-        },
-        {
-          "name": "bfdf51",
+          "name": "eaa33d",
           "n": 5,
           "floatN": 0,
           "maxFloat": 0,
@@ -1915,7 +1463,7 @@
           "underwater": 0
         },
         {
-          "name": "aa8753",
+          "name": "bcf323",
           "n": 1,
           "floatN": 0,
           "maxFloat": 0,
@@ -1924,8 +1472,8 @@
           "underwater": 0
         },
         {
-          "name": "39c322",
-          "n": 4,
+          "name": "ceb8cf",
+          "n": 14,
           "floatN": 0,
           "maxFloat": 0,
           "sunkN": 0,
@@ -1933,16 +1481,7 @@
           "underwater": 0
         },
         {
-          "name": "1e8146",
-          "n": 10,
-          "floatN": 0,
-          "maxFloat": 0,
-          "sunkN": 0,
-          "minSunk": 0,
-          "underwater": 0
-        },
-        {
-          "name": "bd823a",
+          "name": "a0c8e6",
           "n": 11,
           "floatN": 0,
           "maxFloat": 0,
@@ -1951,7 +1490,7 @@
           "underwater": 0
         },
         {
-          "name": "4715b2",
+          "name": "d1a738",
           "n": 9,
           "floatN": 0,
           "maxFloat": 0,
@@ -1960,61 +1499,7 @@
           "underwater": 0
         },
         {
-          "name": "59683d",
-          "n": 3,
-          "floatN": 0,
-          "maxFloat": 0,
-          "sunkN": 0,
-          "minSunk": 0,
-          "underwater": 0
-        },
-        {
-          "name": "580124",
-          "n": 9,
-          "floatN": 0,
-          "maxFloat": 0,
-          "sunkN": 0,
-          "minSunk": 0,
-          "underwater": 0
-        },
-        {
-          "name": "18f305",
-          "n": 2,
-          "floatN": 0,
-          "maxFloat": 0,
-          "sunkN": 0,
-          "minSunk": 0,
-          "underwater": 0
-        },
-        {
-          "name": "fef58b",
-          "n": 1,
-          "floatN": 0,
-          "maxFloat": 0,
-          "sunkN": 0,
-          "minSunk": 0,
-          "underwater": 0
-        },
-        {
-          "name": "630402",
-          "n": 1,
-          "floatN": 0,
-          "maxFloat": 0,
-          "sunkN": 0,
-          "minSunk": 0,
-          "underwater": 0
-        },
-        {
-          "name": "a09247",
-          "n": 3,
-          "floatN": 0,
-          "maxFloat": 0,
-          "sunkN": 0,
-          "minSunk": 0,
-          "underwater": 0
-        },
-        {
-          "name": "02f629",
+          "name": "e719c9",
           "n": 4,
           "floatN": 0,
           "maxFloat": 0,
@@ -2023,7 +1508,34 @@
           "underwater": 0
         },
         {
-          "name": "ce5b8b",
+          "name": "82fbfc",
+          "n": 2,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "dcd9a8",
+          "n": 5,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "ab571b",
+          "n": 3,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "8b2d46",
           "n": 7,
           "floatN": 0,
           "maxFloat": 0,
@@ -2032,7 +1544,34 @@
           "underwater": 0
         },
         {
-          "name": "3fcd34",
+          "name": "646a46",
+          "n": 2,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "67eb00",
+          "n": 10,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "8b24f1",
+          "n": 1,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "810b5c",
           "n": 6,
           "floatN": 0,
           "maxFloat": 0,
@@ -2041,8 +1580,269 @@
           "underwater": 0
         },
         {
-          "name": "a86cf5",
+          "name": "b0fd61",
+          "n": 4,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "229a47",
           "n": 2,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "8c7ee5",
+          "n": 4,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "7ab6ff",
+          "n": 1,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "b35f77",
+          "n": 4,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "133f4a",
+          "n": 4,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "2eb670",
+          "n": 3,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "df7f39",
+          "n": 4,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "a1db37",
+          "n": 4,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "77f790",
+          "n": 3,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "e87e63",
+          "n": 8,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "cc97a3",
+          "n": 9,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "db7985",
+          "n": 2,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "c528b9",
+          "n": 3,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "a8efe3",
+          "n": 10,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "9bb21f",
+          "n": 1,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "8b283d",
+          "n": 4,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "9b4e51",
+          "n": 1,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "f44eb3",
+          "n": 12,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "598599",
+          "n": 6,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "0e30f1",
+          "n": 6,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "8d1b04",
+          "n": 2,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "a1427b",
+          "n": 8,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "15d69d",
+          "n": 2,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "96e8f1",
+          "n": 1,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "24038a",
+          "n": 5,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "348c61",
+          "n": 1,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "257f01",
+          "n": 6,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "61da99",
+          "n": 5,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "aaae8e",
+          "n": 7,
           "floatN": 0,
           "maxFloat": 0,
           "sunkN": 0,
@@ -2051,14 +1851,14 @@
         }
       ],
       "scene": {
-        "trees": 190,
+        "trees": 184,
         "deposits": 4,
         "critters": 8
       },
       "critters": {
         "ref": {
-          "x": -36.02581258393793,
-          "z": 6.879590449973894,
+          "x": -35.10258957046983,
+          "z": -0.4172317521942392,
           "species": "sheep"
         },
         "total": 11
@@ -2072,9 +1872,21 @@
         },
         {
           "sp": "sheep",
-          "y": 2.6,
-          "h": 2.6,
-          "root": 2.6
+          "y": 2.7,
+          "h": 2.7,
+          "root": 2.7
+        },
+        {
+          "sp": "sheep",
+          "y": 2.7,
+          "h": 2.7,
+          "root": 2.7
+        },
+        {
+          "sp": "sheep",
+          "y": 2.7,
+          "h": 2.7,
+          "root": 2.7
         },
         {
           "sp": "sheep",
@@ -2084,70 +1896,58 @@
         },
         {
           "sp": "sheep",
+          "y": 2.66,
+          "h": 2.66,
+          "root": 2.66
+        },
+        {
+          "sp": "sheep",
+          "y": 2.24,
+          "h": 2.24,
+          "root": 2.24
+        },
+        {
+          "sp": "sheep",
           "y": 2.6,
           "h": 2.6,
           "root": 2.6
         },
         {
-          "sp": "sheep",
-          "y": 3.03,
-          "h": 3.03,
-          "root": 3.03
+          "sp": "boar",
+          "y": 2.6,
+          "h": 2.6,
+          "root": 2.6
         },
         {
-          "sp": "sheep",
+          "sp": "boar",
           "y": 2.61,
           "h": 2.61,
           "root": 2.61
         },
         {
-          "sp": "sheep",
-          "y": 2.55,
-          "h": 2.55,
-          "root": 2.55
-        },
-        {
-          "sp": "sheep",
-          "y": 2.45,
-          "h": 2.45,
-          "root": 2.45
-        },
-        {
           "sp": "boar",
-          "y": 2.7,
-          "h": 2.7,
-          "root": 2.7
-        },
-        {
-          "sp": "boar",
-          "y": 2.7,
-          "h": 2.7,
-          "root": 2.7
-        },
-        {
-          "sp": "boar",
-          "y": 2.7,
-          "h": 2.7,
-          "root": 2.7
+          "y": 2.6,
+          "h": 2.6,
+          "root": 2.6
         }
       ],
       "perfBase": {
         "fps": 60,
         "fpsP1": 59.5,
         "frames": 206,
-        "drawCalls": 269,
-        "triangles": 441544,
-        "geometries": 389,
-        "textures": 54
+        "drawCalls": 273,
+        "triangles": 436537,
+        "geometries": 381,
+        "textures": 55
       },
       "perfWide": {
         "fps": 60,
         "fpsP1": 59.5,
         "frames": 206,
-        "drawCalls": 304,
-        "triangles": 360724,
-        "geometries": 389,
-        "textures": 55
+        "drawCalls": 296,
+        "triangles": 365239,
+        "geometries": 381,
+        "textures": 56
       },
       "consoleErrors": []
     },
@@ -2177,19 +1977,19 @@
         "fps": 60,
         "fpsP1": 59.5,
         "frames": 236,
-        "drawCalls": 314,
-        "triangles": 457167,
-        "geometries": 192,
-        "textures": 44
+        "drawCalls": 305,
+        "triangles": 466490,
+        "geometries": 189,
+        "textures": 47
       },
       "spots": {
         "counts": {
           "mar": 32130,
           "areia": 2787,
           "grama": 6802,
-          "rocha": 2504,
+          "rocha": 4030,
           "vulcânico": 616,
-          "neve": 1928,
+          "neve": 402,
           "pântano": 708,
           "gelo": 334,
           "floresta": 2816
@@ -2214,10 +2014,10 @@
           "6": {
             "biome": 6,
             "name": "rocha",
-            "count": 2504,
+            "count": 4030,
             "depth": 6,
-            "x": -18,
-            "z": 81
+            "x": 50,
+            "z": 13
           },
           "7": {
             "biome": 7,
@@ -2230,10 +2030,10 @@
           "9": {
             "biome": 9,
             "name": "neve",
-            "count": 1928,
+            "count": 402,
             "depth": 4,
-            "x": 35,
-            "z": -20
+            "x": 82,
+            "z": -81
           },
           "10": {
             "biome": 10,
@@ -2268,16 +2068,16 @@
             "z": -1
           },
           {
-            "pair": "rocha/neve",
-            "contact": 1188,
-            "x": 13,
-            "z": 9
-          },
-          {
             "pair": "grama/rocha",
-            "contact": 1000,
+            "contact": 1178,
             "x": 64,
             "z": 4
+          },
+          {
+            "pair": "rocha/floresta",
+            "contact": 558,
+            "x": 35,
+            "z": 5
           }
         ],
         "coast": {
@@ -2388,16 +2188,7 @@
           "underwater": 0
         },
         {
-          "name": "0de9da",
-          "n": 7,
-          "floatN": 0,
-          "maxFloat": 0,
-          "sunkN": 0,
-          "minSunk": 0,
-          "underwater": 0
-        },
-        {
-          "name": "f966d0",
+          "name": "e8bbaf",
           "n": 3,
           "floatN": 0,
           "maxFloat": 0,
@@ -2406,7 +2197,61 @@
           "underwater": 0
         },
         {
-          "name": "0d9b46",
+          "name": "722e54",
+          "n": 10,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "3449af",
+          "n": 4,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "f5a628",
+          "n": 13,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "a5e876",
+          "n": 4,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "df3c40",
+          "n": 3,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "bc1d4c",
+          "n": 10,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "fdf776",
           "n": 12,
           "floatN": 0,
           "maxFloat": 0,
@@ -2415,7 +2260,61 @@
           "underwater": 0
         },
         {
-          "name": "a2817a",
+          "name": "ef60cf",
+          "n": 2,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "6ea144",
+          "n": 3,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "d89a60",
+          "n": 1,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "462564",
+          "n": 2,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "e9c406",
+          "n": 3,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "d3523e",
+          "n": 2,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "42ac4b",
           "n": 11,
           "floatN": 0,
           "maxFloat": 0,
@@ -2424,8 +2323,8 @@
           "underwater": 0
         },
         {
-          "name": "53b1e2",
-          "n": 1,
+          "name": "f1174f",
+          "n": 8,
           "floatN": 0,
           "maxFloat": 0,
           "sunkN": 0,
@@ -2433,7 +2332,7 @@
           "underwater": 0
         },
         {
-          "name": "aa681b",
+          "name": "ea339c",
           "n": 3,
           "floatN": 0,
           "maxFloat": 0,
@@ -2442,7 +2341,25 @@
           "underwater": 0
         },
         {
-          "name": "4f2015",
+          "name": "68ad68",
+          "n": 4,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "4d23f7",
+          "n": 8,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "ca944c",
           "n": 1,
           "floatN": 0,
           "maxFloat": 0,
@@ -2451,25 +2368,7 @@
           "underwater": 0
         },
         {
-          "name": "618d10",
-          "n": 3,
-          "floatN": 0,
-          "maxFloat": 0,
-          "sunkN": 0,
-          "minSunk": 0,
-          "underwater": 0
-        },
-        {
-          "name": "fba74c",
-          "n": 3,
-          "floatN": 0,
-          "maxFloat": 0,
-          "sunkN": 0,
-          "minSunk": 0,
-          "underwater": 0
-        },
-        {
-          "name": "4e56f7",
+          "name": "08c068",
           "n": 1,
           "floatN": 0,
           "maxFloat": 0,
@@ -2478,7 +2377,25 @@
           "underwater": 0
         },
         {
-          "name": "fca927",
+          "name": "46b2d0",
+          "n": 1,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "69b6db",
+          "n": 1,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "f8b955",
           "n": 11,
           "floatN": 0,
           "maxFloat": 0,
@@ -2487,43 +2404,7 @@
           "underwater": 0
         },
         {
-          "name": "33c86e",
-          "n": 3,
-          "floatN": 0,
-          "maxFloat": 0,
-          "sunkN": 0,
-          "minSunk": 0,
-          "underwater": 0
-        },
-        {
-          "name": "af444a",
-          "n": 3,
-          "floatN": 0,
-          "maxFloat": 0,
-          "sunkN": 0,
-          "minSunk": 0,
-          "underwater": 0
-        },
-        {
-          "name": "334bcc",
-          "n": 2,
-          "floatN": 0,
-          "maxFloat": 0,
-          "sunkN": 0,
-          "minSunk": 0,
-          "underwater": 0
-        },
-        {
-          "name": "f41289",
-          "n": 3,
-          "floatN": 0,
-          "maxFloat": 0,
-          "sunkN": 0,
-          "minSunk": 0,
-          "underwater": 0
-        },
-        {
-          "name": "62b1a6",
+          "name": "ae726c",
           "n": 1,
           "floatN": 0,
           "maxFloat": 0,
@@ -2532,34 +2413,7 @@
           "underwater": 0
         },
         {
-          "name": "5f3d6e",
-          "n": 10,
-          "floatN": 0,
-          "maxFloat": 0,
-          "sunkN": 0,
-          "minSunk": 0,
-          "underwater": 0
-        },
-        {
-          "name": "dce7af",
-          "n": 3,
-          "floatN": 0,
-          "maxFloat": 0,
-          "sunkN": 0,
-          "minSunk": 0,
-          "underwater": 0
-        },
-        {
-          "name": "41cd2f",
-          "n": 7,
-          "floatN": 0,
-          "maxFloat": 0,
-          "sunkN": 0,
-          "minSunk": 0,
-          "underwater": 0
-        },
-        {
-          "name": "3c64d8",
+          "name": "026ea9",
           "n": 2,
           "floatN": 0,
           "maxFloat": 0,
@@ -2568,7 +2422,7 @@
           "underwater": 0
         },
         {
-          "name": "6b7b33",
+          "name": "403374",
           "n": 2,
           "floatN": 0,
           "maxFloat": 0,
@@ -2577,7 +2431,7 @@
           "underwater": 0
         },
         {
-          "name": "9aed87",
+          "name": "eee4a9",
           "n": 1,
           "floatN": 0,
           "maxFloat": 0,
@@ -2586,142 +2440,7 @@
           "underwater": 0
         },
         {
-          "name": "0321c2",
-          "n": 1,
-          "floatN": 0,
-          "maxFloat": 0,
-          "sunkN": 0,
-          "minSunk": 0,
-          "underwater": 0
-        },
-        {
-          "name": "3b591b",
-          "n": 2,
-          "floatN": 0,
-          "maxFloat": 0,
-          "sunkN": 0,
-          "minSunk": 0,
-          "underwater": 0
-        },
-        {
-          "name": "947115",
-          "n": 7,
-          "floatN": 0,
-          "maxFloat": 0,
-          "sunkN": 0,
-          "minSunk": 0,
-          "underwater": 0
-        },
-        {
-          "name": "0d594d",
-          "n": 2,
-          "floatN": 0,
-          "maxFloat": 0,
-          "sunkN": 0,
-          "minSunk": 0,
-          "underwater": 0
-        },
-        {
-          "name": "ca8ccc",
-          "n": 10,
-          "floatN": 0,
-          "maxFloat": 0,
-          "sunkN": 0,
-          "minSunk": 0,
-          "underwater": 0
-        },
-        {
-          "name": "c96fda",
-          "n": 3,
-          "floatN": 0,
-          "maxFloat": 0,
-          "sunkN": 0,
-          "minSunk": 0,
-          "underwater": 0
-        },
-        {
-          "name": "aa51af",
-          "n": 2,
-          "floatN": 0,
-          "maxFloat": 0,
-          "sunkN": 0,
-          "minSunk": 0,
-          "underwater": 0
-        },
-        {
-          "name": "8e027d",
-          "n": 5,
-          "floatN": 0,
-          "maxFloat": 0,
-          "sunkN": 0,
-          "minSunk": 0,
-          "underwater": 0
-        },
-        {
-          "name": "5dc800",
-          "n": 2,
-          "floatN": 0,
-          "maxFloat": 0,
-          "sunkN": 0,
-          "minSunk": 0,
-          "underwater": 0
-        },
-        {
-          "name": "008d0d",
-          "n": 1,
-          "floatN": 0,
-          "maxFloat": 0,
-          "sunkN": 0,
-          "minSunk": 0,
-          "underwater": 0
-        },
-        {
-          "name": "c493f2",
-          "n": 7,
-          "floatN": 0,
-          "maxFloat": 0,
-          "sunkN": 0,
-          "minSunk": 0,
-          "underwater": 0
-        },
-        {
-          "name": "7b8ce0",
-          "n": 1,
-          "floatN": 0,
-          "maxFloat": 0,
-          "sunkN": 0,
-          "minSunk": 0,
-          "underwater": 0
-        },
-        {
-          "name": "cbd3a3",
-          "n": 1,
-          "floatN": 0,
-          "maxFloat": 0,
-          "sunkN": 0,
-          "minSunk": 0,
-          "underwater": 0
-        },
-        {
-          "name": "4009a0",
-          "n": 1,
-          "floatN": 0,
-          "maxFloat": 0,
-          "sunkN": 0,
-          "minSunk": 0,
-          "underwater": 0
-        },
-        {
-          "name": "768cc5",
-          "n": 10,
-          "floatN": 0,
-          "maxFloat": 0,
-          "sunkN": 0,
-          "minSunk": 0,
-          "underwater": 0
-        },
-        {
-          "name": "7629e3",
+          "name": "2f5261",
           "n": 6,
           "floatN": 0,
           "maxFloat": 0,
@@ -2730,25 +2449,7 @@
           "underwater": 0
         },
         {
-          "name": "1d2b52",
-          "n": 3,
-          "floatN": 0,
-          "maxFloat": 0,
-          "sunkN": 0,
-          "minSunk": 0,
-          "underwater": 0
-        },
-        {
-          "name": "19ebfe",
-          "n": 3,
-          "floatN": 0,
-          "maxFloat": 0,
-          "sunkN": 0,
-          "minSunk": 0,
-          "underwater": 0
-        },
-        {
-          "name": "41f1eb",
+          "name": "3c222a",
           "n": 1,
           "floatN": 0,
           "maxFloat": 0,
@@ -2757,7 +2458,7 @@
           "underwater": 0
         },
         {
-          "name": "cfb4f9",
+          "name": "32b365",
           "n": 1,
           "floatN": 0,
           "maxFloat": 0,
@@ -2766,16 +2467,7 @@
           "underwater": 0
         },
         {
-          "name": "e7654c",
-          "n": 1,
-          "floatN": 0,
-          "maxFloat": 0,
-          "sunkN": 0,
-          "minSunk": 0,
-          "underwater": 0
-        },
-        {
-          "name": "017f64",
+          "name": "29b879",
           "n": 3,
           "floatN": 0,
           "maxFloat": 0,
@@ -2784,7 +2476,43 @@
           "underwater": 0
         },
         {
-          "name": "6accdc",
+          "name": "947b80",
+          "n": 1,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "6372b9",
+          "n": 1,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "74b9cb",
+          "n": 6,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "0b4825",
+          "n": 1,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "fc9350",
           "n": 2,
           "floatN": 0,
           "maxFloat": 0,
@@ -2793,16 +2521,7 @@
           "underwater": 0
         },
         {
-          "name": "56f8f4",
-          "n": 5,
-          "floatN": 0,
-          "maxFloat": 0,
-          "sunkN": 0,
-          "minSunk": 0,
-          "underwater": 0
-        },
-        {
-          "name": "91edc6",
+          "name": "60bb42",
           "n": 2,
           "floatN": 0,
           "maxFloat": 0,
@@ -2811,133 +2530,7 @@
           "underwater": 0
         },
         {
-          "name": "2b9522",
-          "n": 1,
-          "floatN": 0,
-          "maxFloat": 0,
-          "sunkN": 0,
-          "minSunk": 0,
-          "underwater": 0
-        },
-        {
-          "name": "748876",
-          "n": 7,
-          "floatN": 0,
-          "maxFloat": 0,
-          "sunkN": 0,
-          "minSunk": 0,
-          "underwater": 0
-        },
-        {
-          "name": "6a5e7a",
-          "n": 1,
-          "floatN": 0,
-          "maxFloat": 0,
-          "sunkN": 0,
-          "minSunk": 0,
-          "underwater": 0
-        },
-        {
-          "name": "50c44b",
-          "n": 1,
-          "floatN": 0,
-          "maxFloat": 0,
-          "sunkN": 0,
-          "minSunk": 0,
-          "underwater": 0
-        },
-        {
-          "name": "1bcb76",
-          "n": 11,
-          "floatN": 0,
-          "maxFloat": 0,
-          "sunkN": 0,
-          "minSunk": 0,
-          "underwater": 0
-        },
-        {
-          "name": "5458ac",
-          "n": 1,
-          "floatN": 0,
-          "maxFloat": 0,
-          "sunkN": 0,
-          "minSunk": 0,
-          "underwater": 0
-        },
-        {
-          "name": "05264c",
-          "n": 3,
-          "floatN": 0,
-          "maxFloat": 0,
-          "sunkN": 0,
-          "minSunk": 0,
-          "underwater": 0
-        },
-        {
-          "name": "485d6d",
-          "n": 1,
-          "floatN": 0,
-          "maxFloat": 0,
-          "sunkN": 0,
-          "minSunk": 0,
-          "underwater": 0
-        },
-        {
-          "name": "545782",
-          "n": 1,
-          "floatN": 0,
-          "maxFloat": 0,
-          "sunkN": 0,
-          "minSunk": 0,
-          "underwater": 0
-        },
-        {
-          "name": "611d8e",
-          "n": 1,
-          "floatN": 0,
-          "maxFloat": 0,
-          "sunkN": 0,
-          "minSunk": 0,
-          "underwater": 0
-        },
-        {
-          "name": "c40eb9",
-          "n": 2,
-          "floatN": 0,
-          "maxFloat": 0,
-          "sunkN": 0,
-          "minSunk": 0,
-          "underwater": 0
-        },
-        {
-          "name": "e0fa64",
-          "n": 3,
-          "floatN": 0,
-          "maxFloat": 0,
-          "sunkN": 0,
-          "minSunk": 0,
-          "underwater": 0
-        },
-        {
-          "name": "2647cb",
-          "n": 10,
-          "floatN": 0,
-          "maxFloat": 0,
-          "sunkN": 0,
-          "minSunk": 0,
-          "underwater": 0
-        },
-        {
-          "name": "d90d85",
-          "n": 3,
-          "floatN": 0,
-          "maxFloat": 0,
-          "sunkN": 0,
-          "minSunk": 0,
-          "underwater": 0
-        },
-        {
-          "name": "89c474",
+          "name": "6130b1",
           "n": 12,
           "floatN": 0,
           "maxFloat": 0,
@@ -2946,8 +2539,8 @@
           "underwater": 0
         },
         {
-          "name": "117eda",
-          "n": 3,
+          "name": "4dceb8",
+          "n": 5,
           "floatN": 0,
           "maxFloat": 0,
           "sunkN": 0,
@@ -2955,43 +2548,7 @@
           "underwater": 0
         },
         {
-          "name": "d60ef9",
-          "n": 3,
-          "floatN": 0,
-          "maxFloat": 0,
-          "sunkN": 0,
-          "minSunk": 0,
-          "underwater": 0
-        },
-        {
-          "name": "86677d",
-          "n": 11,
-          "floatN": 0,
-          "maxFloat": 0,
-          "sunkN": 0,
-          "minSunk": 0,
-          "underwater": 0
-        },
-        {
-          "name": "bdd3ca",
-          "n": 3,
-          "floatN": 0,
-          "maxFloat": 0,
-          "sunkN": 0,
-          "minSunk": 0,
-          "underwater": 0
-        },
-        {
-          "name": "1e9868",
-          "n": 2,
-          "floatN": 0,
-          "maxFloat": 0,
-          "sunkN": 0,
-          "minSunk": 0,
-          "underwater": 0
-        },
-        {
-          "name": "9946bd",
+          "name": "c6eef6",
           "n": 1,
           "floatN": 0,
           "maxFloat": 0,
@@ -3000,7 +2557,16 @@
           "underwater": 0
         },
         {
-          "name": "777b56",
+          "name": "452e27",
+          "n": 1,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "d6622a",
           "n": 2,
           "floatN": 0,
           "maxFloat": 0,
@@ -3009,16 +2575,7 @@
           "underwater": 0
         },
         {
-          "name": "b933de",
-          "n": 7,
-          "floatN": 0,
-          "maxFloat": 0,
-          "sunkN": 0,
-          "minSunk": 0,
-          "underwater": 0
-        },
-        {
-          "name": "10bb99",
+          "name": "2ca593",
           "n": 2,
           "floatN": 0,
           "maxFloat": 0,
@@ -3027,7 +2584,133 @@
           "underwater": 0
         },
         {
-          "name": "e1c16c",
+          "name": "316f9c",
+          "n": 1,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "ff6f6a",
+          "n": 6,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "8e7858",
+          "n": 1,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "3a889f",
+          "n": 1,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "9692d8",
+          "n": 3,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "170040",
+          "n": 5,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "7dfb58",
+          "n": 13,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "b1aa82",
+          "n": 4,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "5feaf9",
+          "n": 1,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "7e0937",
+          "n": 1,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "30d79a",
+          "n": 1,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "10e07c",
+          "n": 1,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "95955b",
+          "n": 4,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "757064",
+          "n": 3,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "b7ae70",
           "n": 10,
           "floatN": 0,
           "maxFloat": 0,
@@ -3036,7 +2719,34 @@
           "underwater": 0
         },
         {
-          "name": "a4f1e5",
+          "name": "7e05ad",
+          "n": 12,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "586410",
+          "n": 2,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "fcd071",
+          "n": 3,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "b5f1bd",
           "n": 1,
           "floatN": 0,
           "maxFloat": 0,
@@ -3045,7 +2755,115 @@
           "underwater": 0
         },
         {
-          "name": "03fc30",
+          "name": "e39abb",
+          "n": 2,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "4e551d",
+          "n": 11,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "e05911",
+          "n": 3,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "9f25cb",
+          "n": 10,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "bbbc01",
+          "n": 3,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "0a44d6",
+          "n": 2,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "c4710a",
+          "n": 2,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "d55462",
+          "n": 12,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "b12039",
+          "n": 2,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "6afbbf",
+          "n": 3,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "0926d6",
+          "n": 8,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "33ef23",
+          "n": 11,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "bca356",
           "n": 1,
           "floatN": 0,
           "maxFloat": 0,
@@ -3054,7 +2872,7 @@
           "underwater": 0
         },
         {
-          "name": "918ba1",
+          "name": "6ebfee",
           "n": 1,
           "floatN": 0,
           "maxFloat": 0,
@@ -3063,7 +2881,25 @@
           "underwater": 0
         },
         {
-          "name": "1e1fc3",
+          "name": "f50a41",
+          "n": 1,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "712256",
+          "n": 1,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "156113",
           "n": 1,
           "floatN": 0,
           "maxFloat": 0,
@@ -3073,14 +2909,14 @@
         }
       ],
       "scene": {
-        "trees": 163,
+        "trees": 170,
         "deposits": 4,
         "critters": 8
       },
       "critters": {
         "ref": {
-          "x": -21.450706235340213,
-          "z": -8.469623142855918,
+          "x": -20.461853506401972,
+          "z": -13.303480154493498,
           "species": "sheep"
         },
         "total": 11
@@ -3088,33 +2924,9 @@
       "critterY": [
         {
           "sp": "sheep",
-          "y": 3.2,
-          "h": 3.2,
-          "root": 3.2
-        },
-        {
-          "sp": "sheep",
-          "y": 2.92,
-          "h": 2.92,
-          "root": 2.92
-        },
-        {
-          "sp": "sheep",
-          "y": 2.5,
-          "h": 2.5,
-          "root": 2.5
-        },
-        {
-          "sp": "sheep",
-          "y": 2.78,
-          "h": 2.78,
-          "root": 2.78
-        },
-        {
-          "sp": "sheep",
-          "y": 3.35,
-          "h": 3.35,
-          "root": 3.35
+          "y": 3.1,
+          "h": 3.1,
+          "root": 3.1
         },
         {
           "sp": "sheep",
@@ -3124,52 +2936,76 @@
         },
         {
           "sp": "sheep",
-          "y": 3.11,
-          "h": 3.11,
-          "root": 3.11
+          "y": 2.6,
+          "h": 2.6,
+          "root": 2.6
         },
         {
           "sp": "sheep",
-          "y": 3.21,
-          "h": 3.21,
-          "root": 3.21
+          "y": 3.23,
+          "h": 3.23,
+          "root": 3.23
         },
         {
-          "sp": "boar",
+          "sp": "sheep",
+          "y": 3.1,
+          "h": 3.1,
+          "root": 3.1
+        },
+        {
+          "sp": "sheep",
+          "y": 3.07,
+          "h": 3.07,
+          "root": 3.07
+        },
+        {
+          "sp": "sheep",
           "y": 3.08,
           "h": 3.08,
           "root": 3.08
         },
         {
-          "sp": "boar",
-          "y": 2.9,
-          "h": 2.9,
-          "root": 2.9
-        },
-        {
-          "sp": "boar",
+          "sp": "sheep",
           "y": 3.01,
           "h": 3.01,
           "root": 3.01
+        },
+        {
+          "sp": "boar",
+          "y": 3.39,
+          "h": 3.39,
+          "root": 3.39
+        },
+        {
+          "sp": "boar",
+          "y": 3.31,
+          "h": 3.31,
+          "root": 3.31
+        },
+        {
+          "sp": "boar",
+          "y": 3.5,
+          "h": 3.5,
+          "root": 3.5
         }
       ],
       "perfBase": {
         "fps": 60,
         "fpsP1": 59.5,
         "frames": 206,
-        "drawCalls": 334,
-        "triangles": 464493,
-        "geometries": 381,
-        "textures": 53
+        "drawCalls": 329,
+        "triangles": 479045,
+        "geometries": 386,
+        "textures": 56
       },
       "perfWide": {
         "fps": 60,
         "fpsP1": 59.5,
         "frames": 206,
-        "drawCalls": 365,
-        "triangles": 387111,
-        "geometries": 381,
-        "textures": 54
+        "drawCalls": 351,
+        "triangles": 397785,
+        "geometries": 388,
+        "textures": 56
       },
       "consoleErrors": []
     },
@@ -3185,7 +3021,6 @@
           "exuberante",
           "savana",
           "pedregoso",
-          "inverno",
           "exuberante:floresta"
         ],
         "hq": {
@@ -3197,10 +3032,10 @@
         "fps": 60,
         "fpsP1": 59.5,
         "frames": 236,
-        "drawCalls": 246,
-        "triangles": 454904,
-        "geometries": 132,
-        "textures": 41
+        "drawCalls": 253,
+        "triangles": 459505,
+        "geometries": 140,
+        "textures": 43
       },
       "spots": {
         "counts": {
@@ -3208,8 +3043,7 @@
           "areia": 2088,
           "grama": 7771,
           "savana": 3811,
-          "rocha": 479,
-          "neve": 532,
+          "rocha": 1011,
           "floresta": 3058
         },
         "centers": {
@@ -3240,18 +3074,10 @@
           "6": {
             "biome": 6,
             "name": "rocha",
-            "count": 479,
-            "depth": 2,
-            "x": -7,
-            "z": -8
-          },
-          "9": {
-            "biome": 9,
-            "name": "neve",
-            "count": 532,
-            "depth": 5,
-            "x": -13,
-            "z": -20
+            "count": 1011,
+            "depth": 6,
+            "x": -12,
+            "z": -18
           },
           "12": {
             "biome": 12,
@@ -3276,10 +3102,10 @@
             "z": 38
           },
           {
-            "pair": "rocha/neve",
-            "contact": 434,
-            "x": -6,
-            "z": -21
+            "pair": "grama/rocha",
+            "contact": 451,
+            "x": -7,
+            "z": -17
           }
         ],
         "coast": {
@@ -3390,7 +3216,16 @@
           "underwater": 0
         },
         {
-          "name": "54f660",
+          "name": "437107",
+          "n": 4,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "261a26",
           "n": 10,
           "floatN": 0,
           "maxFloat": 0,
@@ -3399,7 +3234,7 @@
           "underwater": 0
         },
         {
-          "name": "99ab2e",
+          "name": "ef3e92",
           "n": 5,
           "floatN": 0,
           "maxFloat": 0,
@@ -3408,16 +3243,7 @@
           "underwater": 0
         },
         {
-          "name": "e9ef85",
-          "n": 4,
-          "floatN": 0,
-          "maxFloat": 0,
-          "sunkN": 0,
-          "minSunk": 0,
-          "underwater": 0
-        },
-        {
-          "name": "52ba15",
+          "name": "96c370",
           "n": 5,
           "floatN": 0,
           "maxFloat": 0,
@@ -3426,7 +3252,16 @@
           "underwater": 0
         },
         {
-          "name": "f43a30",
+          "name": "6fc12f",
+          "n": 5,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "3159de",
           "n": 1,
           "floatN": 0,
           "maxFloat": 0,
@@ -3435,8 +3270,8 @@
           "underwater": 0
         },
         {
-          "name": "f73b8e",
-          "n": 1,
+          "name": "beeb6c",
+          "n": 2,
           "floatN": 0,
           "maxFloat": 0,
           "sunkN": 0,
@@ -3444,16 +3279,7 @@
           "underwater": 0
         },
         {
-          "name": "77de09",
-          "n": 1,
-          "floatN": 0,
-          "maxFloat": 0,
-          "sunkN": 0,
-          "minSunk": 0,
-          "underwater": 0
-        },
-        {
-          "name": "1fe30a",
+          "name": "2e08fe",
           "n": 7,
           "floatN": 0,
           "maxFloat": 0,
@@ -3462,115 +3288,7 @@
           "underwater": 0
         },
         {
-          "name": "12c1c0",
-          "n": 15,
-          "floatN": 0,
-          "maxFloat": 0,
-          "sunkN": 0,
-          "minSunk": 0,
-          "underwater": 0
-        },
-        {
-          "name": "051013",
-          "n": 2,
-          "floatN": 0,
-          "maxFloat": 0,
-          "sunkN": 0,
-          "minSunk": 0,
-          "underwater": 0
-        },
-        {
-          "name": "909bfd",
-          "n": 9,
-          "floatN": 0,
-          "maxFloat": 0,
-          "sunkN": 0,
-          "minSunk": 0,
-          "underwater": 0
-        },
-        {
-          "name": "fe8ea2",
-          "n": 2,
-          "floatN": 0,
-          "maxFloat": 0,
-          "sunkN": 0,
-          "minSunk": 0,
-          "underwater": 0
-        },
-        {
-          "name": "3ca876",
-          "n": 4,
-          "floatN": 0,
-          "maxFloat": 0,
-          "sunkN": 0,
-          "minSunk": 0,
-          "underwater": 0
-        },
-        {
-          "name": "a12f1b",
-          "n": 2,
-          "floatN": 0,
-          "maxFloat": 0,
-          "sunkN": 0,
-          "minSunk": 0,
-          "underwater": 0
-        },
-        {
-          "name": "0a7b72",
-          "n": 8,
-          "floatN": 0,
-          "maxFloat": 0,
-          "sunkN": 0,
-          "minSunk": 0,
-          "underwater": 0
-        },
-        {
-          "name": "69cfee",
-          "n": 2,
-          "floatN": 0,
-          "maxFloat": 0,
-          "sunkN": 0,
-          "minSunk": 0,
-          "underwater": 0
-        },
-        {
-          "name": "496420",
-          "n": 4,
-          "floatN": 0,
-          "maxFloat": 0,
-          "sunkN": 0,
-          "minSunk": 0,
-          "underwater": 0
-        },
-        {
-          "name": "9a187d",
-          "n": 8,
-          "floatN": 0,
-          "maxFloat": 0,
-          "sunkN": 0,
-          "minSunk": 0,
-          "underwater": 0
-        },
-        {
-          "name": "4f88f2",
-          "n": 3,
-          "floatN": 0,
-          "maxFloat": 0,
-          "sunkN": 0,
-          "minSunk": 0,
-          "underwater": 0
-        },
-        {
-          "name": "3d3641",
-          "n": 1,
-          "floatN": 0,
-          "maxFloat": 0,
-          "sunkN": 0,
-          "minSunk": 0,
-          "underwater": 0
-        },
-        {
-          "name": "dd7d75",
+          "name": "4be386",
           "n": 11,
           "floatN": 0,
           "maxFloat": 0,
@@ -3579,8 +3297,8 @@
           "underwater": 0
         },
         {
-          "name": "448afe",
-          "n": 8,
+          "name": "bcb9e5",
+          "n": 14,
           "floatN": 0,
           "maxFloat": 0,
           "sunkN": 0,
@@ -3588,43 +3306,7 @@
           "underwater": 0
         },
         {
-          "name": "719458",
-          "n": 3,
-          "floatN": 0,
-          "maxFloat": 0,
-          "sunkN": 0,
-          "minSunk": 0,
-          "underwater": 0
-        },
-        {
-          "name": "9c76ca",
-          "n": 3,
-          "floatN": 0,
-          "maxFloat": 0,
-          "sunkN": 0,
-          "minSunk": 0,
-          "underwater": 0
-        },
-        {
-          "name": "a761c7",
-          "n": 17,
-          "floatN": 0,
-          "maxFloat": 0,
-          "sunkN": 0,
-          "minSunk": 0,
-          "underwater": 0
-        },
-        {
-          "name": "517656",
-          "n": 3,
-          "floatN": 0,
-          "maxFloat": 0,
-          "sunkN": 0,
-          "minSunk": 0,
-          "underwater": 0
-        },
-        {
-          "name": "0281bd",
+          "name": "03da1b",
           "n": 4,
           "floatN": 0,
           "maxFloat": 0,
@@ -3633,79 +3315,7 @@
           "underwater": 0
         },
         {
-          "name": "ba090e",
-          "n": 7,
-          "floatN": 0,
-          "maxFloat": 0,
-          "sunkN": 0,
-          "minSunk": 0,
-          "underwater": 0
-        },
-        {
-          "name": "4d7bd5",
-          "n": 1,
-          "floatN": 0,
-          "maxFloat": 0,
-          "sunkN": 0,
-          "minSunk": 0,
-          "underwater": 0
-        },
-        {
-          "name": "874967",
-          "n": 3,
-          "floatN": 0,
-          "maxFloat": 0,
-          "sunkN": 0,
-          "minSunk": 0,
-          "underwater": 0
-        },
-        {
-          "name": "0e82b3",
-          "n": 10,
-          "floatN": 0,
-          "maxFloat": 0,
-          "sunkN": 0,
-          "minSunk": 0,
-          "underwater": 0
-        },
-        {
-          "name": "9c7a82",
-          "n": 1,
-          "floatN": 0,
-          "maxFloat": 0,
-          "sunkN": 0,
-          "minSunk": 0,
-          "underwater": 0
-        },
-        {
-          "name": "1f3d51",
-          "n": 1,
-          "floatN": 0,
-          "maxFloat": 0,
-          "sunkN": 0,
-          "minSunk": 0,
-          "underwater": 0
-        },
-        {
-          "name": "c34c0c",
-          "n": 2,
-          "floatN": 0,
-          "maxFloat": 0,
-          "sunkN": 0,
-          "minSunk": 0,
-          "underwater": 0
-        },
-        {
-          "name": "e4feab",
-          "n": 4,
-          "floatN": 0,
-          "maxFloat": 0,
-          "sunkN": 0,
-          "minSunk": 0,
-          "underwater": 0
-        },
-        {
-          "name": "f20529",
+          "name": "38c7fe",
           "n": 6,
           "floatN": 0,
           "maxFloat": 0,
@@ -3714,7 +3324,7 @@
           "underwater": 0
         },
         {
-          "name": "af3262",
+          "name": "005858",
           "n": 1,
           "floatN": 0,
           "maxFloat": 0,
@@ -3723,7 +3333,106 @@
           "underwater": 0
         },
         {
-          "name": "6bbae3",
+          "name": "6be413",
+          "n": 8,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "d5a46e",
+          "n": 1,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "7ae302",
+          "n": 2,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "70e445",
+          "n": 2,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "ebe991",
+          "n": 8,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "fd064b",
+          "n": 2,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "4f4b48",
+          "n": 6,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "06e4f2",
+          "n": 1,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "82786e",
+          "n": 14,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "dfab81",
+          "n": 9,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "b450c3",
+          "n": 6,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "87e855",
           "n": 3,
           "floatN": 0,
           "maxFloat": 0,
@@ -3732,34 +3441,7 @@
           "underwater": 0
         },
         {
-          "name": "22a51f",
-          "n": 17,
-          "floatN": 0,
-          "maxFloat": 0,
-          "sunkN": 0,
-          "minSunk": 0,
-          "underwater": 0
-        },
-        {
-          "name": "3e71cd",
-          "n": 7,
-          "floatN": 0,
-          "maxFloat": 0,
-          "sunkN": 0,
-          "minSunk": 0,
-          "underwater": 0
-        },
-        {
-          "name": "afc798",
-          "n": 10,
-          "floatN": 0,
-          "maxFloat": 0,
-          "sunkN": 0,
-          "minSunk": 0,
-          "underwater": 0
-        },
-        {
-          "name": "cfd404",
+          "name": "525e6c",
           "n": 1,
           "floatN": 0,
           "maxFloat": 0,
@@ -3768,7 +3450,43 @@
           "underwater": 0
         },
         {
-          "name": "beddd9",
+          "name": "774890",
+          "n": 5,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "a1ff9f",
+          "n": 3,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "eb75e6",
+          "n": 2,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "a51dfc",
+          "n": 8,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "e86570",
           "n": 1,
           "floatN": 0,
           "maxFloat": 0,
@@ -3777,8 +3495,8 @@
           "underwater": 0
         },
         {
-          "name": "99eeea",
-          "n": 4,
+          "name": "dca322",
+          "n": 1,
           "floatN": 0,
           "maxFloat": 0,
           "sunkN": 0,
@@ -3786,7 +3504,142 @@
           "underwater": 0
         },
         {
-          "name": "5933d4",
+          "name": "b40c5d",
+          "n": 3,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "072f4f",
+          "n": 2,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "060d65",
+          "n": 2,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "5b4a19",
+          "n": 2,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "374992",
+          "n": 3,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "6d7856",
+          "n": 2,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "02284d",
+          "n": 1,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "15bd03",
+          "n": 14,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "7b6b4b",
+          "n": 9,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "951576",
+          "n": 2,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "a9137d",
+          "n": 8,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "b597e9",
+          "n": 1,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "a1d362",
+          "n": 1,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "7c2388",
+          "n": 3,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "43c0cd",
+          "n": 2,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "c31dd2",
           "n": 2,
           "floatN": 0,
           "maxFloat": 0,
@@ -3796,14 +3649,14 @@
         }
       ],
       "scene": {
-        "trees": 179,
+        "trees": 173,
         "deposits": 4,
         "critters": 8
       },
       "critters": {
         "ref": {
-          "x": -14.97547789363012,
-          "z": -32.61828603989925,
+          "x": -20.446270715402854,
+          "z": -40.942502769135565,
           "species": "sheep"
         },
         "total": 11
@@ -3811,69 +3664,69 @@
       "critterY": [
         {
           "sp": "sheep",
-          "y": 3.72,
-          "h": 3.72,
-          "root": 3.72
+          "y": 2.7,
+          "h": 2.7,
+          "root": 2.7
         },
         {
           "sp": "sheep",
-          "y": 5.3,
-          "h": 5.3,
-          "root": 5.3
-        },
-        {
-          "sp": "sheep",
-          "y": 4.16,
-          "h": 4.16,
-          "root": 4.16
-        },
-        {
-          "sp": "sheep",
-          "y": 4.3,
-          "h": 4.3,
-          "root": 4.3
-        },
-        {
-          "sp": "sheep",
-          "y": 2.5,
-          "h": 2.5,
-          "root": 2.5
-        },
-        {
-          "sp": "sheep",
-          "y": 2.6,
-          "h": 2.6,
-          "root": 2.6
-        },
-        {
-          "sp": "sheep",
-          "y": 2.65,
-          "h": 2.65,
-          "root": 2.65
-        },
-        {
-          "sp": "sheep",
-          "y": 2.6,
-          "h": 2.6,
-          "root": 2.6
-        },
-        {
-          "sp": "boar",
-          "y": 3.15,
-          "h": 3.15,
-          "root": 3.15
-        },
-        {
-          "sp": "boar",
           "y": 3.64,
           "h": 3.64,
           "root": 3.64
         },
         {
+          "sp": "sheep",
+          "y": 4.65,
+          "h": 4.65,
+          "root": 4.65
+        },
+        {
+          "sp": "sheep",
+          "y": 4.98,
+          "h": 4.98,
+          "root": 4.98
+        },
+        {
+          "sp": "sheep",
+          "y": 2.51,
+          "h": 2.51,
+          "root": 2.51
+        },
+        {
+          "sp": "sheep",
+          "y": 2.6,
+          "h": 2.6,
+          "root": 2.6
+        },
+        {
+          "sp": "sheep",
+          "y": 2.6,
+          "h": 2.6,
+          "root": 2.6
+        },
+        {
+          "sp": "sheep",
+          "y": 2.6,
+          "h": 2.6,
+          "root": 2.6
+        },
+        {
           "sp": "boar",
-          "y": 2.74,
-          "h": 2.74,
-          "root": 2.74
+          "y": 3.44,
+          "h": 3.44,
+          "root": 3.44
+        },
+        {
+          "sp": "boar",
+          "y": 3.01,
+          "h": 3.01,
+          "root": 3.01
+        },
+        {
+          "sp": "boar",
+          "y": 3.55,
+          "h": 3.55,
+          "root": 3.55
         }
       ],
       "mine": {
@@ -3890,8 +3743,8 @@
             {
               "x": -37.4,
               "z": -48.8,
-              "minRel": -0.18,
-              "maxRel": 0.56,
+              "minRel": -0.35,
+              "maxRel": 0.78,
               "opacity": 1,
               "alpha": "active"
             }
@@ -3902,19 +3755,19 @@
         "fps": 60,
         "fpsP1": 59.5,
         "frames": 206,
-        "drawCalls": 242,
-        "triangles": 445285,
-        "geometries": 382,
-        "textures": 55
+        "drawCalls": 268,
+        "triangles": 450506,
+        "geometries": 374,
+        "textures": 58
       },
       "perfWide": {
         "fps": 60,
         "fpsP1": 59.5,
         "frames": 206,
-        "drawCalls": 291,
-        "triangles": 391998,
-        "geometries": 384,
-        "textures": 55
+        "drawCalls": 319,
+        "triangles": 388324,
+        "geometries": 376,
+        "textures": 58
       },
       "consoleErrors": []
     },
@@ -3942,10 +3795,10 @@
         "fps": 60,
         "fpsP1": 59.5,
         "frames": 236,
-        "drawCalls": 285,
-        "triangles": 463954,
-        "geometries": 150,
-        "textures": 44
+        "drawCalls": 292,
+        "triangles": 462146,
+        "geometries": 155,
+        "textures": 46
       },
       "spots": {
         "counts": {
@@ -3953,8 +3806,8 @@
           "areia": 1812,
           "grama": 6611,
           "savana": 2789,
-          "rocha": 490,
-          "neve": 1199,
+          "rocha": 529,
+          "neve": 1160,
           "floresta": 2968
         },
         "centers": {
@@ -3985,15 +3838,15 @@
           "6": {
             "biome": 6,
             "name": "rocha",
-            "count": 490,
-            "depth": 2,
-            "x": -53,
-            "z": -5
+            "count": 529,
+            "depth": 4,
+            "x": -63,
+            "z": -10
           },
           "9": {
             "biome": 9,
             "name": "neve",
-            "count": 1199,
+            "count": 1160,
             "depth": 9,
             "x": 34,
             "z": -26
@@ -4135,8 +3988,8 @@
           "underwater": 0
         },
         {
-          "name": "8e1e4a",
-          "n": 14,
+          "name": "d8156a",
+          "n": 11,
           "floatN": 0,
           "maxFloat": 0,
           "sunkN": 0,
@@ -4144,8 +3997,8 @@
           "underwater": 0
         },
         {
-          "name": "4b45b4",
-          "n": 2,
+          "name": "2ff153",
+          "n": 12,
           "floatN": 0,
           "maxFloat": 0,
           "sunkN": 0,
@@ -4153,8 +4006,8 @@
           "underwater": 0
         },
         {
-          "name": "4b4ed5",
-          "n": 10,
+          "name": "969559",
+          "n": 11,
           "floatN": 0,
           "maxFloat": 0,
           "sunkN": 0,
@@ -4162,8 +4015,8 @@
           "underwater": 0
         },
         {
-          "name": "d884b9",
-          "n": 5,
+          "name": "4b6278",
+          "n": 3,
           "floatN": 0,
           "maxFloat": 0,
           "sunkN": 0,
@@ -4171,8 +4024,8 @@
           "underwater": 0
         },
         {
-          "name": "b05e16",
-          "n": 10,
+          "name": "b3ef84",
+          "n": 3,
           "floatN": 0,
           "maxFloat": 0,
           "sunkN": 0,
@@ -4180,7 +4033,7 @@
           "underwater": 0
         },
         {
-          "name": "77388b",
+          "name": "7b2f04",
           "n": 9,
           "floatN": 0,
           "maxFloat": 0,
@@ -4189,8 +4042,8 @@
           "underwater": 0
         },
         {
-          "name": "dcc216",
-          "n": 2,
+          "name": "0cf8e5",
+          "n": 3,
           "floatN": 0,
           "maxFloat": 0,
           "sunkN": 0,
@@ -4198,8 +4051,8 @@
           "underwater": 0
         },
         {
-          "name": "54bed6",
-          "n": 2,
+          "name": "9d4718",
+          "n": 3,
           "floatN": 0,
           "maxFloat": 0,
           "sunkN": 0,
@@ -4207,16 +4060,7 @@
           "underwater": 0
         },
         {
-          "name": "6de7da",
-          "n": 2,
-          "floatN": 0,
-          "maxFloat": 0,
-          "sunkN": 0,
-          "minSunk": 0,
-          "underwater": 0
-        },
-        {
-          "name": "a4d77c",
+          "name": "5ffcff",
           "n": 4,
           "floatN": 0,
           "maxFloat": 0,
@@ -4225,43 +4069,7 @@
           "underwater": 0
         },
         {
-          "name": "18e4b8",
-          "n": 1,
-          "floatN": 0,
-          "maxFloat": 0,
-          "sunkN": 0,
-          "minSunk": 0,
-          "underwater": 0
-        },
-        {
-          "name": "298196",
-          "n": 14,
-          "floatN": 0,
-          "maxFloat": 0,
-          "sunkN": 0,
-          "minSunk": 0,
-          "underwater": 0
-        },
-        {
-          "name": "fd500c",
-          "n": 1,
-          "floatN": 0,
-          "maxFloat": 0,
-          "sunkN": 0,
-          "minSunk": 0,
-          "underwater": 0
-        },
-        {
-          "name": "a7a160",
-          "n": 11,
-          "floatN": 0,
-          "maxFloat": 0,
-          "sunkN": 0,
-          "minSunk": 0,
-          "underwater": 0
-        },
-        {
-          "name": "bdc44a",
+          "name": "e56518",
           "n": 2,
           "floatN": 0,
           "maxFloat": 0,
@@ -4270,88 +4078,7 @@
           "underwater": 0
         },
         {
-          "name": "0e74ed",
-          "n": 3,
-          "floatN": 0,
-          "maxFloat": 0,
-          "sunkN": 0,
-          "minSunk": 0,
-          "underwater": 0
-        },
-        {
-          "name": "7f862e",
-          "n": 2,
-          "floatN": 0,
-          "maxFloat": 0,
-          "sunkN": 0,
-          "minSunk": 0,
-          "underwater": 0
-        },
-        {
-          "name": "61d373",
-          "n": 1,
-          "floatN": 0,
-          "maxFloat": 0,
-          "sunkN": 0,
-          "minSunk": 0,
-          "underwater": 0
-        },
-        {
-          "name": "87c8a6",
-          "n": 1,
-          "floatN": 0,
-          "maxFloat": 0,
-          "sunkN": 0,
-          "minSunk": 0,
-          "underwater": 0
-        },
-        {
-          "name": "71c308",
-          "n": 5,
-          "floatN": 0,
-          "maxFloat": 0,
-          "sunkN": 0,
-          "minSunk": 0,
-          "underwater": 0
-        },
-        {
-          "name": "184723",
-          "n": 7,
-          "floatN": 0,
-          "maxFloat": 0,
-          "sunkN": 0,
-          "minSunk": 0,
-          "underwater": 0
-        },
-        {
-          "name": "c86bc7",
-          "n": 18,
-          "floatN": 0,
-          "maxFloat": 0,
-          "sunkN": 0,
-          "minSunk": 0,
-          "underwater": 0
-        },
-        {
-          "name": "b40d9d",
-          "n": 7,
-          "floatN": 0,
-          "maxFloat": 0,
-          "sunkN": 0,
-          "minSunk": 0,
-          "underwater": 0
-        },
-        {
-          "name": "35c80c",
-          "n": 3,
-          "floatN": 0,
-          "maxFloat": 0,
-          "sunkN": 0,
-          "minSunk": 0,
-          "underwater": 0
-        },
-        {
-          "name": "a63b19",
+          "name": "5ca059",
           "n": 6,
           "floatN": 0,
           "maxFloat": 0,
@@ -4360,8 +4087,8 @@
           "underwater": 0
         },
         {
-          "name": "872877",
-          "n": 2,
+          "name": "d83608",
+          "n": 15,
           "floatN": 0,
           "maxFloat": 0,
           "sunkN": 0,
@@ -4369,16 +4096,7 @@
           "underwater": 0
         },
         {
-          "name": "e9b494",
-          "n": 2,
-          "floatN": 0,
-          "maxFloat": 0,
-          "sunkN": 0,
-          "minSunk": 0,
-          "underwater": 0
-        },
-        {
-          "name": "cc6cab",
+          "name": "2683d5",
           "n": 3,
           "floatN": 0,
           "maxFloat": 0,
@@ -4387,7 +4105,34 @@
           "underwater": 0
         },
         {
-          "name": "b4f322",
+          "name": "8d4a0c",
+          "n": 3,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "b303c2",
+          "n": 2,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "93e825",
+          "n": 1,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "e142e0",
           "n": 4,
           "floatN": 0,
           "maxFloat": 0,
@@ -4396,7 +4141,34 @@
           "underwater": 0
         },
         {
-          "name": "d0c2f6",
+          "name": "209bdc",
+          "n": 2,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "128114",
+          "n": 3,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "49972c",
+          "n": 1,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "bc9146",
           "n": 8,
           "floatN": 0,
           "maxFloat": 0,
@@ -4405,8 +4177,8 @@
           "underwater": 0
         },
         {
-          "name": "c122e4",
-          "n": 1,
+          "name": "270769",
+          "n": 19,
           "floatN": 0,
           "maxFloat": 0,
           "sunkN": 0,
@@ -4414,124 +4186,7 @@
           "underwater": 0
         },
         {
-          "name": "f1036b",
-          "n": 2,
-          "floatN": 0,
-          "maxFloat": 0,
-          "sunkN": 0,
-          "minSunk": 0,
-          "underwater": 0
-        },
-        {
-          "name": "0cce0b",
-          "n": 5,
-          "floatN": 0,
-          "maxFloat": 0,
-          "sunkN": 0,
-          "minSunk": 0,
-          "underwater": 0
-        },
-        {
-          "name": "5702f9",
-          "n": 2,
-          "floatN": 0,
-          "maxFloat": 0,
-          "sunkN": 0,
-          "minSunk": 0,
-          "underwater": 0
-        },
-        {
-          "name": "a40e0f",
-          "n": 4,
-          "floatN": 0,
-          "maxFloat": 0,
-          "sunkN": 0,
-          "minSunk": 0,
-          "underwater": 0
-        },
-        {
-          "name": "66ccfe",
-          "n": 1,
-          "floatN": 0,
-          "maxFloat": 0,
-          "sunkN": 0,
-          "minSunk": 0,
-          "underwater": 0
-        },
-        {
-          "name": "bf4f2b",
-          "n": 8,
-          "floatN": 0,
-          "maxFloat": 0,
-          "sunkN": 0,
-          "minSunk": 0,
-          "underwater": 0
-        },
-        {
-          "name": "9b983f",
-          "n": 4,
-          "floatN": 0,
-          "maxFloat": 0,
-          "sunkN": 0,
-          "minSunk": 0,
-          "underwater": 0
-        },
-        {
-          "name": "a161d5",
-          "n": 1,
-          "floatN": 0,
-          "maxFloat": 0,
-          "sunkN": 0,
-          "minSunk": 0,
-          "underwater": 0
-        },
-        {
-          "name": "a3f2b0",
-          "n": 1,
-          "floatN": 0,
-          "maxFloat": 0,
-          "sunkN": 0,
-          "minSunk": 0,
-          "underwater": 0
-        },
-        {
-          "name": "46694e",
-          "n": 11,
-          "floatN": 0,
-          "maxFloat": 0,
-          "sunkN": 0,
-          "minSunk": 0,
-          "underwater": 0
-        },
-        {
-          "name": "808070",
-          "n": 1,
-          "floatN": 0,
-          "maxFloat": 0,
-          "sunkN": 0,
-          "minSunk": 0,
-          "underwater": 0
-        },
-        {
-          "name": "ceebeb",
-          "n": 1,
-          "floatN": 0,
-          "maxFloat": 0,
-          "sunkN": 0,
-          "minSunk": 0,
-          "underwater": 0
-        },
-        {
-          "name": "a8ff19",
-          "n": 18,
-          "floatN": 0,
-          "maxFloat": 0,
-          "sunkN": 0,
-          "minSunk": 0,
-          "underwater": 0
-        },
-        {
-          "name": "3d6fd0",
+          "name": "178d0c",
           "n": 3,
           "floatN": 0,
           "maxFloat": 0,
@@ -4540,16 +4195,7 @@
           "underwater": 0
         },
         {
-          "name": "002758",
-          "n": 3,
-          "floatN": 0,
-          "maxFloat": 0,
-          "sunkN": 0,
-          "minSunk": 0,
-          "underwater": 0
-        },
-        {
-          "name": "045799",
+          "name": "17f4b5",
           "n": 5,
           "floatN": 0,
           "maxFloat": 0,
@@ -4558,8 +4204,197 @@
           "underwater": 0
         },
         {
-          "name": "a0c80b",
+          "name": "f38950",
+          "n": 6,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "0a3c79",
+          "n": 1,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "e38740",
+          "n": 5,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "96e597",
+          "n": 1,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "c0d3f8",
           "n": 2,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "7214eb",
+          "n": 6,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "c98065",
+          "n": 5,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "78a2ce",
+          "n": 6,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "fe5df6",
+          "n": 1,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "6d4818",
+          "n": 5,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "810122",
+          "n": 2,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "28da92",
+          "n": 6,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "ee4332",
+          "n": 4,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "f7e10c",
+          "n": 2,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "df123a",
+          "n": 6,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "53c55e",
+          "n": 3,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "b8323d",
+          "n": 1,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "567d6e",
+          "n": 19,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "66b36e",
+          "n": 5,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "1d19c8",
+          "n": 1,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "3befc9",
+          "n": 6,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "9377d5",
+          "n": 1,
           "floatN": 0,
           "maxFloat": 0,
           "sunkN": 0,
@@ -4568,14 +4403,14 @@
         }
       ],
       "scene": {
-        "trees": 171,
+        "trees": 169,
         "deposits": 4,
         "critters": 8
       },
       "critters": {
         "ref": {
-          "x": -28.360253803424428,
-          "z": -6.005149905945015,
+          "x": -32.737234757054054,
+          "z": -5.962521936087525,
           "species": "sheep"
         },
         "total": 11
@@ -4583,48 +4418,60 @@
       "critterY": [
         {
           "sp": "sheep",
-          "y": 2.18,
-          "h": 2.18,
-          "root": 2.18
+          "y": 2.24,
+          "h": 2.24,
+          "root": 2.24
         },
         {
           "sp": "sheep",
-          "y": 2.69,
-          "h": 2.69,
-          "root": 2.69
+          "y": 2.62,
+          "h": 2.62,
+          "root": 2.62
         },
         {
           "sp": "sheep",
-          "y": 2.61,
-          "h": 2.61,
-          "root": 2.61
+          "y": 2.7,
+          "h": 2.7,
+          "root": 2.7
         },
         {
           "sp": "sheep",
-          "y": 2.5,
-          "h": 2.5,
-          "root": 2.5
+          "y": 2.6,
+          "h": 2.6,
+          "root": 2.6
         },
         {
           "sp": "sheep",
-          "y": 2.58,
-          "h": 2.58,
-          "root": 2.58
+          "y": 2.84,
+          "h": 2.84,
+          "root": 2.84
         },
         {
           "sp": "sheep",
-          "y": 2.58,
-          "h": 2.58,
-          "root": 2.58
+          "y": 4.5,
+          "h": 4.5,
+          "root": 4.5
         },
         {
           "sp": "sheep",
-          "y": 3.4,
-          "h": 3.4,
-          "root": 3.4
+          "y": 3.63,
+          "h": 3.63,
+          "root": 3.63
         },
         {
           "sp": "sheep",
+          "y": 2.56,
+          "h": 2.56,
+          "root": 2.56
+        },
+        {
+          "sp": "boar",
+          "y": 2.6,
+          "h": 2.6,
+          "root": 2.6
+        },
+        {
+          "sp": "boar",
           "y": 2.6,
           "h": 2.6,
           "root": 2.6
@@ -4634,37 +4481,25 @@
           "y": 2.7,
           "h": 2.7,
           "root": 2.7
-        },
-        {
-          "sp": "boar",
-          "y": 2.7,
-          "h": 2.7,
-          "root": 2.7
-        },
-        {
-          "sp": "boar",
-          "y": 2.6,
-          "h": 2.6,
-          "root": 2.6
         }
       ],
       "perfBase": {
-        "fps": 57.4,
+        "fps": 60,
         "fpsP1": 59.5,
-        "frames": 197,
-        "drawCalls": 282,
-        "triangles": 463326,
-        "geometries": 370,
-        "textures": 53
+        "frames": 206,
+        "drawCalls": 309,
+        "triangles": 460804,
+        "geometries": 365,
+        "textures": 55
       },
       "perfWide": {
-        "fps": 19.8,
-        "fpsP1": 2.9,
-        "frames": 72,
-        "drawCalls": 317,
-        "triangles": 379302,
-        "geometries": 372,
-        "textures": 54
+        "fps": 60,
+        "fpsP1": 59.5,
+        "frames": 206,
+        "drawCalls": 341,
+        "triangles": 377050,
+        "geometries": 367,
+        "textures": 55
       },
       "consoleErrors": []
     },
@@ -4680,7 +4515,6 @@
           "exuberante",
           "savana",
           "pedregoso",
-          "inverno",
           "exuberante:floresta"
         ],
         "hq": {
@@ -4691,11 +4525,11 @@
       "perfStart": {
         "fps": 60,
         "fpsP1": 59.5,
-        "frames": 237,
-        "drawCalls": 267,
-        "triangles": 456414,
-        "geometries": 140,
-        "textures": 44
+        "frames": 236,
+        "drawCalls": 273,
+        "triangles": 458067,
+        "geometries": 142,
+        "textures": 46
       },
       "spots": {
         "counts": {
@@ -4703,8 +4537,7 @@
           "areia": 2135,
           "grama": 7022,
           "savana": 4673,
-          "rocha": 405,
-          "neve": 650,
+          "rocha": 1055,
           "floresta": 2874
         },
         "centers": {
@@ -4735,18 +4568,10 @@
           "6": {
             "biome": 6,
             "name": "rocha",
-            "count": 405,
-            "depth": 2,
-            "x": 0,
-            "z": -7
-          },
-          "9": {
-            "biome": 9,
-            "name": "neve",
-            "count": 650,
-            "depth": 4,
-            "x": -35,
-            "z": -28
+            "count": 1055,
+            "depth": 5,
+            "x": -3,
+            "z": -10
           },
           "12": {
             "biome": 12,
@@ -4771,10 +4596,10 @@
             "z": 27
           },
           {
-            "pair": "rocha/neve",
-            "contact": 403,
-            "x": 59,
-            "z": -27
+            "pair": "grama/rocha",
+            "contact": 492,
+            "x": -44,
+            "z": -26
           }
         ],
         "coast": {
@@ -4885,7 +4710,25 @@
           "underwater": 0
         },
         {
-          "name": "796bce",
+          "name": "498fed",
+          "n": 4,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "586b1e",
+          "n": 12,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "50fcfd",
           "n": 9,
           "floatN": 0,
           "maxFloat": 0,
@@ -4894,16 +4737,7 @@
           "underwater": 0
         },
         {
-          "name": "eb84bc",
-          "n": 16,
-          "floatN": 0,
-          "maxFloat": 0,
-          "sunkN": 0,
-          "minSunk": 0,
-          "underwater": 0
-        },
-        {
-          "name": "c4b446",
+          "name": "81a8e1",
           "n": 2,
           "floatN": 0,
           "maxFloat": 0,
@@ -4912,16 +4746,7 @@
           "underwater": 0
         },
         {
-          "name": "8013dc",
-          "n": 13,
-          "floatN": 0,
-          "maxFloat": 0,
-          "sunkN": 0,
-          "minSunk": 0,
-          "underwater": 0
-        },
-        {
-          "name": "b6a75b",
+          "name": "75c22c",
           "n": 2,
           "floatN": 0,
           "maxFloat": 0,
@@ -4930,331 +4755,7 @@
           "underwater": 0
         },
         {
-          "name": "c9b5c5",
-          "n": 2,
-          "floatN": 0,
-          "maxFloat": 0,
-          "sunkN": 0,
-          "minSunk": 0,
-          "underwater": 0
-        },
-        {
-          "name": "209a4d",
-          "n": 9,
-          "floatN": 0,
-          "maxFloat": 0,
-          "sunkN": 0,
-          "minSunk": 0,
-          "underwater": 0
-        },
-        {
-          "name": "81ca58",
-          "n": 3,
-          "floatN": 0,
-          "maxFloat": 0,
-          "sunkN": 0,
-          "minSunk": 0,
-          "underwater": 0
-        },
-        {
-          "name": "5953b6",
-          "n": 3,
-          "floatN": 0,
-          "maxFloat": 0,
-          "sunkN": 0,
-          "minSunk": 0,
-          "underwater": 0
-        },
-        {
-          "name": "f1b73a",
-          "n": 2,
-          "floatN": 0,
-          "maxFloat": 0,
-          "sunkN": 0,
-          "minSunk": 0,
-          "underwater": 0
-        },
-        {
-          "name": "5af352",
-          "n": 1,
-          "floatN": 0,
-          "maxFloat": 0,
-          "sunkN": 0,
-          "minSunk": 0,
-          "underwater": 0
-        },
-        {
-          "name": "cd286d",
-          "n": 4,
-          "floatN": 0,
-          "maxFloat": 0,
-          "sunkN": 0,
-          "minSunk": 0,
-          "underwater": 0
-        },
-        {
-          "name": "c2dcf3",
-          "n": 2,
-          "floatN": 0,
-          "maxFloat": 0,
-          "sunkN": 0,
-          "minSunk": 0,
-          "underwater": 0
-        },
-        {
-          "name": "2d419d",
-          "n": 1,
-          "floatN": 0,
-          "maxFloat": 0,
-          "sunkN": 0,
-          "minSunk": 0,
-          "underwater": 0
-        },
-        {
-          "name": "7f7956",
-          "n": 9,
-          "floatN": 0,
-          "maxFloat": 0,
-          "sunkN": 0,
-          "minSunk": 0,
-          "underwater": 0
-        },
-        {
-          "name": "a8a0ff",
-          "n": 4,
-          "floatN": 0,
-          "maxFloat": 0,
-          "sunkN": 0,
-          "minSunk": 0,
-          "underwater": 0
-        },
-        {
-          "name": "d6e6ea",
-          "n": 11,
-          "floatN": 0,
-          "maxFloat": 0,
-          "sunkN": 0,
-          "minSunk": 0,
-          "underwater": 0
-        },
-        {
-          "name": "0f9eb6",
-          "n": 1,
-          "floatN": 0,
-          "maxFloat": 0,
-          "sunkN": 0,
-          "minSunk": 0,
-          "underwater": 0
-        },
-        {
-          "name": "c1ce94",
-          "n": 4,
-          "floatN": 0,
-          "maxFloat": 0,
-          "sunkN": 0,
-          "minSunk": 0,
-          "underwater": 0
-        },
-        {
-          "name": "9889c1",
-          "n": 1,
-          "floatN": 0,
-          "maxFloat": 0,
-          "sunkN": 0,
-          "minSunk": 0,
-          "underwater": 0
-        },
-        {
-          "name": "cde0fb",
-          "n": 2,
-          "floatN": 0,
-          "maxFloat": 0,
-          "sunkN": 0,
-          "minSunk": 0,
-          "underwater": 0
-        },
-        {
-          "name": "39b108",
-          "n": 7,
-          "floatN": 0,
-          "maxFloat": 0,
-          "sunkN": 0,
-          "minSunk": 0,
-          "underwater": 0
-        },
-        {
-          "name": "dd8a3e",
-          "n": 3,
-          "floatN": 0,
-          "maxFloat": 0,
-          "sunkN": 0,
-          "minSunk": 0,
-          "underwater": 0
-        },
-        {
-          "name": "9e257f",
-          "n": 2,
-          "floatN": 0,
-          "maxFloat": 0,
-          "sunkN": 0,
-          "minSunk": 0,
-          "underwater": 0
-        },
-        {
-          "name": "227641",
-          "n": 3,
-          "floatN": 0,
-          "maxFloat": 0,
-          "sunkN": 0,
-          "minSunk": 0,
-          "underwater": 0
-        },
-        {
-          "name": "6a701e",
-          "n": 13,
-          "floatN": 0,
-          "maxFloat": 0,
-          "sunkN": 0,
-          "minSunk": 0,
-          "underwater": 0
-        },
-        {
-          "name": "3260cb",
-          "n": 3,
-          "floatN": 0,
-          "maxFloat": 0,
-          "sunkN": 0,
-          "minSunk": 0,
-          "underwater": 0
-        },
-        {
-          "name": "0f85ed",
-          "n": 1,
-          "floatN": 0,
-          "maxFloat": 0,
-          "sunkN": 0,
-          "minSunk": 0,
-          "underwater": 0
-        },
-        {
-          "name": "837053",
-          "n": 3,
-          "floatN": 0,
-          "maxFloat": 0,
-          "sunkN": 0,
-          "minSunk": 0,
-          "underwater": 0
-        },
-        {
-          "name": "cf1a50",
-          "n": 2,
-          "floatN": 0,
-          "maxFloat": 0,
-          "sunkN": 0,
-          "minSunk": 0,
-          "underwater": 0
-        },
-        {
-          "name": "82a70d",
-          "n": 1,
-          "floatN": 0,
-          "maxFloat": 0,
-          "sunkN": 0,
-          "minSunk": 0,
-          "underwater": 0
-        },
-        {
-          "name": "692545",
-          "n": 4,
-          "floatN": 0,
-          "maxFloat": 0,
-          "sunkN": 0,
-          "minSunk": 0,
-          "underwater": 0
-        },
-        {
-          "name": "5ebf58",
-          "n": 1,
-          "floatN": 0,
-          "maxFloat": 0,
-          "sunkN": 0,
-          "minSunk": 0,
-          "underwater": 0
-        },
-        {
-          "name": "c7d84b",
-          "n": 1,
-          "floatN": 0,
-          "maxFloat": 0,
-          "sunkN": 0,
-          "minSunk": 0,
-          "underwater": 0
-        },
-        {
-          "name": "c07774",
-          "n": 1,
-          "floatN": 0,
-          "maxFloat": 0,
-          "sunkN": 0,
-          "minSunk": 0,
-          "underwater": 0
-        },
-        {
-          "name": "3a8f2a",
-          "n": 14,
-          "floatN": 0,
-          "maxFloat": 0,
-          "sunkN": 0,
-          "minSunk": 0,
-          "underwater": 0
-        },
-        {
-          "name": "b44ce7",
-          "n": 4,
-          "floatN": 0,
-          "maxFloat": 0,
-          "sunkN": 0,
-          "minSunk": 0,
-          "underwater": 0
-        },
-        {
-          "name": "864ebc",
-          "n": 1,
-          "floatN": 0,
-          "maxFloat": 0,
-          "sunkN": 0,
-          "minSunk": 0,
-          "underwater": 0
-        },
-        {
-          "name": "dd2c3b",
-          "n": 1,
-          "floatN": 0,
-          "maxFloat": 0,
-          "sunkN": 0,
-          "minSunk": 0,
-          "underwater": 0
-        },
-        {
-          "name": "1d6c90",
-          "n": 1,
-          "floatN": 0,
-          "maxFloat": 0,
-          "sunkN": 0,
-          "minSunk": 0,
-          "underwater": 0
-        },
-        {
-          "name": "ee7328",
-          "n": 3,
-          "floatN": 0,
-          "maxFloat": 0,
-          "sunkN": 0,
-          "minSunk": 0,
-          "underwater": 0
-        },
-        {
-          "name": "99077e",
+          "name": "db4aea",
           "n": 5,
           "floatN": 0,
           "maxFloat": 0,
@@ -5263,43 +4764,7 @@
           "underwater": 0
         },
         {
-          "name": "c51b47",
-          "n": 1,
-          "floatN": 0,
-          "maxFloat": 0,
-          "sunkN": 0,
-          "minSunk": 0,
-          "underwater": 0
-        },
-        {
-          "name": "e007c6",
-          "n": 3,
-          "floatN": 0,
-          "maxFloat": 0,
-          "sunkN": 0,
-          "minSunk": 0,
-          "underwater": 0
-        },
-        {
-          "name": "ce6b5f",
-          "n": 2,
-          "floatN": 0,
-          "maxFloat": 0,
-          "sunkN": 0,
-          "minSunk": 0,
-          "underwater": 0
-        },
-        {
-          "name": "0ee261",
-          "n": 1,
-          "floatN": 0,
-          "maxFloat": 0,
-          "sunkN": 0,
-          "minSunk": 0,
-          "underwater": 0
-        },
-        {
-          "name": "ff0fbc",
+          "name": "562f9d",
           "n": 14,
           "floatN": 0,
           "maxFloat": 0,
@@ -5308,8 +4773,8 @@
           "underwater": 0
         },
         {
-          "name": "de3c36",
-          "n": 4,
+          "name": "4ec58b",
+          "n": 3,
           "floatN": 0,
           "maxFloat": 0,
           "sunkN": 0,
@@ -5317,7 +4782,7 @@
           "underwater": 0
         },
         {
-          "name": "1cd850",
+          "name": "9360d1",
           "n": 1,
           "floatN": 0,
           "maxFloat": 0,
@@ -5326,7 +4791,7 @@
           "underwater": 0
         },
         {
-          "name": "2dde2c",
+          "name": "0628d4",
           "n": 1,
           "floatN": 0,
           "maxFloat": 0,
@@ -5335,7 +4800,25 @@
           "underwater": 0
         },
         {
-          "name": "e47741",
+          "name": "f90e5b",
+          "n": 6,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "ef67db",
+          "n": 5,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "f3c97f",
           "n": 1,
           "floatN": 0,
           "maxFloat": 0,
@@ -5344,16 +4827,7 @@
           "underwater": 0
         },
         {
-          "name": "be920d",
-          "n": 1,
-          "floatN": 0,
-          "maxFloat": 0,
-          "sunkN": 0,
-          "minSunk": 0,
-          "underwater": 0
-        },
-        {
-          "name": "c9ae78",
+          "name": "e69bcf",
           "n": 2,
           "floatN": 0,
           "maxFloat": 0,
@@ -5362,7 +4836,34 @@
           "underwater": 0
         },
         {
-          "name": "8ef4f3",
+          "name": "3920db",
+          "n": 3,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "7a0f1d",
+          "n": 4,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "74a5fe",
+          "n": 7,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "57e973",
           "n": 9,
           "floatN": 0,
           "maxFloat": 0,
@@ -5371,7 +4872,7 @@
           "underwater": 0
         },
         {
-          "name": "192c68",
+          "name": "830642",
           "n": 2,
           "floatN": 0,
           "maxFloat": 0,
@@ -5380,8 +4881,332 @@
           "underwater": 0
         },
         {
-          "name": "ca01e3",
+          "name": "6a88b2",
+          "n": 2,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "d9de22",
+          "n": 7,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "9c8ba7",
+          "n": 1,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "29bf52",
           "n": 4,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "a989be",
+          "n": 6,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "5b1327",
+          "n": 1,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "bf28a9",
+          "n": 8,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "b5071c",
+          "n": 11,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "99f4a5",
+          "n": 3,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "fb75c0",
+          "n": 3,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "98951e",
+          "n": 2,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "240b29",
+          "n": 5,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "20c763",
+          "n": 1,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "7e9a5c",
+          "n": 1,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "5a737f",
+          "n": 1,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "4b4a43",
+          "n": 2,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "4d6253",
+          "n": 3,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "2fe4d8",
+          "n": 1,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "2b2a6b",
+          "n": 12,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "2b0bc6",
+          "n": 2,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "486dac",
+          "n": 1,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "da0489",
+          "n": 1,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "38ec16",
+          "n": 1,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "b16638",
+          "n": 1,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "825777",
+          "n": 3,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "4eece7",
+          "n": 1,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "869bf8",
+          "n": 2,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "c66794",
+          "n": 1,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "7915a1",
+          "n": 1,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "d5931f",
+          "n": 2,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "8025bd",
+          "n": 3,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "58cf66",
+          "n": 12,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "0304ed",
+          "n": 1,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "a220a8",
+          "n": 1,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "f3408d",
+          "n": 1,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "806994",
+          "n": 3,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "7eb0b7",
+          "n": 1,
           "floatN": 0,
           "maxFloat": 0,
           "sunkN": 0,
@@ -5396,8 +5221,8 @@
       },
       "critters": {
         "ref": {
-          "x": -26.237234291412207,
-          "z": -31.13892767668635,
+          "x": -23.48429111166164,
+          "z": -32.35198342965792,
           "species": "sheep"
         },
         "total": 11
@@ -5405,9 +5230,39 @@
       "critterY": [
         {
           "sp": "sheep",
-          "y": 3.43,
-          "h": 3.43,
-          "root": 3.43
+          "y": 3.33,
+          "h": 3.33,
+          "root": 3.33
+        },
+        {
+          "sp": "sheep",
+          "y": 4.34,
+          "h": 4.34,
+          "root": 4.34
+        },
+        {
+          "sp": "sheep",
+          "y": 0.77,
+          "h": 0.77,
+          "root": 0.77
+        },
+        {
+          "sp": "sheep",
+          "y": 3.92,
+          "h": 3.92,
+          "root": 3.92
+        },
+        {
+          "sp": "sheep",
+          "y": 2.5,
+          "h": 2.5,
+          "root": 2.5
+        },
+        {
+          "sp": "sheep",
+          "y": 0.91,
+          "h": 0.91,
+          "root": 0.91
         },
         {
           "sp": "sheep",
@@ -5417,76 +5272,46 @@
         },
         {
           "sp": "sheep",
-          "y": 3.2,
-          "h": 3.2,
-          "root": 3.2
-        },
-        {
-          "sp": "sheep",
-          "y": 3.67,
-          "h": 3.67,
-          "root": 3.67
-        },
-        {
-          "sp": "sheep",
-          "y": 2.6,
-          "h": 2.6,
-          "root": 2.6
-        },
-        {
-          "sp": "sheep",
-          "y": 1.36,
-          "h": 1.36,
-          "root": 1.36
-        },
-        {
-          "sp": "sheep",
-          "y": 2.6,
-          "h": 2.6,
-          "root": 2.6
-        },
-        {
-          "sp": "sheep",
-          "y": 2.86,
-          "h": 2.86,
-          "root": 2.86
+          "y": 2.5,
+          "h": 2.5,
+          "root": 2.5
         },
         {
           "sp": "boar",
-          "y": 3.23,
-          "h": 3.23,
-          "root": 3.23
+          "y": 4.17,
+          "h": 4.17,
+          "root": 4.17
         },
         {
           "sp": "boar",
-          "y": 2.6,
-          "h": 2.6,
-          "root": 2.6
+          "y": 3.72,
+          "h": 3.72,
+          "root": 3.72
         },
         {
           "sp": "boar",
-          "y": 3.51,
-          "h": 3.51,
-          "root": 3.51
+          "y": 4.63,
+          "h": 4.63,
+          "root": 4.63
         }
       ],
       "perfBase": {
         "fps": 60,
         "fpsP1": 59.5,
         "frames": 206,
-        "drawCalls": 281,
-        "triangles": 457436,
-        "geometries": 391,
-        "textures": 54
+        "drawCalls": 276,
+        "triangles": 460868,
+        "geometries": 376,
+        "textures": 56
       },
       "perfWide": {
         "fps": 60,
         "fpsP1": 59.5,
-        "frames": 207,
-        "drawCalls": 350,
-        "triangles": 416760,
-        "geometries": 394,
-        "textures": 54
+        "frames": 206,
+        "drawCalls": 346,
+        "triangles": 413477,
+        "geometries": 378,
+        "textures": 56
       },
       "consoleErrors": []
     }
@@ -5506,7 +5331,7 @@
       "d": 1
     },
     "glow": {
-      "hotFraction": 0.04,
+      "hotFraction": 0.041,
       "maxLum": 231.8
     },
     "perf": {
@@ -5514,57 +5339,12 @@
       "fpsP1": 59.5,
       "frames": 206,
       "drawCalls": 160,
-      "triangles": 395127,
-      "geometries": 356,
-      "textures": 53
+      "triangles": 394540,
+      "geometries": 359,
+      "textures": 55
     }
   },
   "checks": [
-    {
-      "name": "história abre sozinha na 1a visita à campanha principal",
-      "ok": true,
-      "extra": ""
-    },
-    {
-      "name": "7 painéis narrativos visitados",
-      "ok": true,
-      "extra": "narrativos=7, total=8"
-    },
-    {
-      "name": "nenhum painel caiu no fallback de imagem",
-      "ok": true,
-      "extra": "1376x768 1376x768 1376x768 1376x768 1376x768 1376x768 1376x768 1376x768"
-    },
-    {
-      "name": "história terminou sozinha após o último painel (sem travar)",
-      "ok": true,
-      "extra": ""
-    },
-    {
-      "name": "seletor main x beta presente (2+ abas)",
-      "ok": true,
-      "extra": "[{\"text\":\"A Guerra do Mar Fendido (Aliança)\",\"selected\":\"true\"},{\"text\":\"A Guerra do Mar Fendido (Horda)\",\"selected\":\"false\"},{\"text\":\"Campanha Clássica (beta)\",\"selected\":\"false\"}]"
-    },
-    {
-      "name": "aba beta (Campanha Clássica) não mostra \"Rever história\"",
-      "ok": true,
-      "extra": "{\"hasReviewStory\":false,\"items\":8,\"provisional\":true}"
-    },
-    {
-      "name": "abas main (Aliança/Horda) mostram \"Rever história\"",
-      "ok": true,
-      "extra": "{\"hasReviewStory\":true,\"items\":12,\"provisional\":false}"
-    },
-    {
-      "name": "\"Rever história\" reabre e Esc volta à lista de campanha (sem iniciar partida)",
-      "ok": true,
-      "extra": "{\"story\":false,\"campaign\":true,\"mainMenu\":true,\"inGame\":false}"
-    },
-    {
-      "name": "1a visita: Esc na história pula a história e deixa a lista da campanha aberta",
-      "ok": true,
-      "extra": "{\"story\":false,\"campaign\":true}"
-    },
     {
       "name": "duelo-continental-1: partida carregou o mapa certo e o render é regional",
       "ok": true,
@@ -5593,7 +5373,7 @@
     {
       "name": "duelo-continental-1: mina esgotada some da simulação e deixa ruína",
       "ok": true,
-      "extra": "{\"antes\":4,\"depois\":{\"deposits\":3,\"depleted\":1,\"disposed\":true,\"ruins\":1,\"debris\":[{\"x\":-43.6,\"z\":-37,\"minRel\":-0.21,\"maxRel\":0.66,\"opacity\":1,\"alpha\":\"active\"}]}}"
+      "extra": "{\"antes\":4,\"depois\":{\"deposits\":3,\"depleted\":1,\"disposed\":true,\"ruins\":1,\"debris\":[{\"x\":-43.6,\"z\":-37,\"minRel\":-0.24,\"maxRel\":0.69,\"opacity\":1,\"alpha\":\"active\"}]}}"
     },
     {
       "name": "duelo-continental-1: 0 erros de console/página/rede",
@@ -5663,7 +5443,7 @@
     {
       "name": "ilha-unica-1: partida carregou o mapa certo e o render é regional",
       "ok": true,
-      "extra": "{\"styles\":[\"exuberante\",\"savana\",\"pedregoso\",\"inverno\",\"exuberante:floresta\"]}"
+      "extra": "{\"styles\":[\"exuberante\",\"savana\",\"pedregoso\",\"exuberante:floresta\"]}"
     },
     {
       "name": "ilha-unica-1: props (instâncias) a no máximo 0,9 u de altura do terreno",
@@ -5688,7 +5468,7 @@
     {
       "name": "ilha-unica-1: mina esgotada some da simulação e deixa ruína",
       "ok": true,
-      "extra": "{\"antes\":4,\"depois\":{\"deposits\":3,\"depleted\":1,\"disposed\":true,\"ruins\":1,\"debris\":[{\"x\":-37.4,\"z\":-48.8,\"minRel\":-0.18,\"maxRel\":0.56,\"opacity\":1,\"alpha\":\"active\"}]}}"
+      "extra": "{\"antes\":4,\"depois\":{\"deposits\":3,\"depleted\":1,\"disposed\":true,\"ruins\":1,\"debris\":[{\"x\":-37.4,\"z\":-48.8,\"minRel\":-0.35,\"maxRel\":0.78,\"opacity\":1,\"alpha\":\"active\"}]}}"
     },
     {
       "name": "ilha-unica-1: 0 erros de console/página/rede",
@@ -5728,7 +5508,7 @@
     {
       "name": "ilha-unica-3: partida carregou o mapa certo e o render é regional",
       "ok": true,
-      "extra": "{\"styles\":[\"exuberante\",\"savana\",\"pedregoso\",\"inverno\",\"exuberante:floresta\"]}"
+      "extra": "{\"styles\":[\"exuberante\",\"savana\",\"pedregoso\",\"exuberante:floresta\"]}"
     },
     {
       "name": "ilha-unica-3: props (instâncias) a no máximo 0,9 u de altura do terreno",
@@ -5763,7 +5543,7 @@
     {
       "name": "lava tem pixels laranja vivos no quadro (emissiva)",
       "ok": true,
-      "extra": "{\"hotFraction\":0.04,\"maxLum\":231.8}"
+      "extra": "{\"hotFraction\":0.041,\"maxLum\":231.8}"
     },
     {
       "name": "lava: 0 erros de console/página/rede",
@@ -5773,8 +5553,6 @@
   ],
   "consoleErrors": [],
   "files": [
-    "historia-painel-a-painel.jpg",
-    "campanha-menu-abas.jpg",
     "duelo-continental-1-1-visao.jpg",
     "duelo-continental-1-2-minimapa.jpg",
     "duelo-continental-1-3-biomas.jpg",

@@ -498,9 +498,172 @@ export class AIMicroManager {
         }
         case 'raise_dead':
           return { id: ab.id };
-        default:
+        default: {
+          // M2-11: habilidades de herói (`hero_*`), cada uma com a sua condição de uso
+          if (ab.id.startsWith('hero_')) {
+            const plan = this._planHeroCast(ab, c, foes, army, gm);
+            if (plan) return plan;
+          }
           break;
+        }
       }
+    }
+    return null;
+  }
+
+  /**
+   * M2-11: planejamento das habilidades de herói (as 18 de `src/data/units.js` `hero_*`, mais as 5 duplicatas
+   * de `abilities.js`). Determinístico (sem RNG; empates pela ordem de `foes`/`army`). `canCast` (mana, recarga,
+   * cadáveres) já foi checado por `_planCast`. Tabela herói → habilidade → condição: `docs/01_ARQUITETURA.md`.
+   * @returns {{id:string, targetId?:number, x?:number, z?:number}|null}
+   */
+  _planHeroCast(ab, c, foes, army, gm) {
+    const cp = c.mesh.position;
+    const range = ab.range || 0;
+    const distTo = e => Math.hypot(e.mesh.position.x - cp.x, e.mesh.position.z - cp.z);
+    const foesWithin = r => {
+      let n = 0;
+      for (let k = 0; k < foes.length; k++) if (distTo(foes[k]) <= r) n++;
+      return n;
+    };
+    const clusterAt = (e, r) => {
+      let n = 0;
+      for (let k = 0; k < foes.length; k++) {
+        const q = foes[k].mesh.position;
+        if (Math.hypot(q.x - e.mesh.position.x, q.z - e.mesh.position.z) <= r) n++;
+      }
+      return n;
+    };
+    /** aliados do exército (sem o herói) em combate a até `r` do herói, sem o status `st` */
+    const fightersWithout = (r, st) => {
+      let n = 0;
+      for (let k = 0; k < army.length; k++) {
+        const u = army[k];
+        if (u === c || u.state !== 'attacking' || hasStatus(u, st)) continue;
+        if (Math.hypot(u.mesh.position.x - cp.x, u.mesh.position.z - cp.z) <= r) n++;
+      }
+      return n;
+    };
+    const fighting = c.state === 'attacking' || foesWithin(8) > 0;
+
+    switch (ab.id) {
+      // buff pessoal ofensivo: só em combate (inimigo a ≤ 10) e sem o buff ativo
+      case 'hero_war_cry':
+        if (!hasStatus(c, 'bloodlust') && foesWithin(10) > 0 && (c.state === 'attacking' || foesWithin(6) > 0)) return { id: ab.id };
+        break;
+      // buff pessoal defensivo: ≥ 1 inimigo corpo a corpo colado no herói (≤ 5), sem o status
+      case 'hero_defensive_stance': case 'hero_revide_stance': {
+        if (hasStatus(c, 'flameshield')) break;
+        for (let k = 0; k < foes.length; k++) {
+          const cls = unitClassOf(foes[k].type);
+          if ((cls === 'melee' || cls === 'cavalry') && distTo(foes[k]) <= 5) return { id: ab.id };
+        }
+        break;
+      }
+      // dano em área com alvo inimigo: melhor aglomerado; vale com ≥ 2 inimigos no raio ou 1 alvo com PV ≥ 1,5× o dano
+      case 'hero_cleave_strike': case 'hero_shield_bash': case 'hero_ground_slam': case 'hero_crown_hammer':
+      case 'hero_ember_strike': case 'hero_marshal_charge': case 'hero_arcane_bolt': {
+        const fx = ab.effects.find(e => e.kind === 'damage');
+        const r = fx.radius || 2;
+        let best = null;
+        let bs = 0;
+        for (let k = 0; k < foes.length; k++) {
+          const e = foes[k];
+          if (distTo(e) > range + 1.5) continue;
+          const n = clusterAt(e, r);
+          const worth = n >= 2 || e.hp >= fx.amount * 1.5;
+          if (!worth) continue;
+          const s = n * 1000 + Math.min(e.hp, 999);
+          if (s > bs) { bs = s; best = e; }
+        }
+        if (best) return { id: ab.id, targetId: best.id };
+        break;
+      }
+      // cura própria (150 PV): falta ≥ 120 PV
+      case 'hero_clan_fire':
+        if (c.maxHp - c.hp >= 120) return { id: ab.id };
+        break;
+      // cura de aliado (repeat): o aliado mais ferido (< 60 % PV) dentro do alcance, herói incluído
+      case 'hero_mend': {
+        const below = ab.autocastBelow || 0.6;
+        const own = this.director.getOwnUnits();
+        let best = null;
+        let br = below;
+        for (let k = 0; k < own.length; k++) {
+          const u = own[k];
+          if (u.isDead || u.isDying || u.hp <= 0) continue;
+          if (Math.hypot(u.mesh.position.x - cp.x, u.mesh.position.z - cp.z) > range) continue;
+          const ratio = u.hp / u.maxHp;
+          if (ratio < br) { br = ratio; best = u; }
+        }
+        if (best) return { id: ab.id, targetId: best.id };
+        break;
+      }
+      // canalização (Tempestade Arcana): aglomerado de ≥ 3 inimigos a ≤ alcance e NENHUM inimigo adjacente ao herói (≤ 3)
+      case 'hero_blizzard': case 'hero_arcane_storm': {
+        if (foesWithin(3) > 0) break;
+        let best = null;
+        let bn = 0;
+        for (let k = 0; k < foes.length; k++) {
+          const e = foes[k];
+          if (distTo(e) > range) continue;
+          const n = clusterAt(e, 5);
+          if (n > bn) { bn = n; best = e; }
+        }
+        if (best && bn >= 3) return { id: ab.id, x: best.mesh.position.x, z: best.mesh.position.z };
+        break;
+      }
+      // buffs em área aliada (herói + aliados): ≥ 3 aliados em combate no raio, sem o status, e o herói em combate
+      case 'hero_banner':
+        if (fighting && fightersWithout(9, 'haste') >= 3) return { id: ab.id };
+        break;
+      case 'hero_shield_line':
+        if (fighting && fightersWithout(7, 'flameshield') >= 3) return { id: ab.id };
+        break;
+      case 'hero_horde_roar':
+        if (fighting && fightersWithout(8, 'bloodlust') >= 3) return { id: ab.id };
+        break;
+      // invulnerabilidade pessoal (custa metade da vida atual ao fim): só com < 50 % de PV, em combate e sem o status
+      case 'hero_blood_pact': case 'hero_ash_pact':
+        if (!hasStatus(c, 'unholy_armor') && c.hp < c.maxHp * 0.5 && foesWithin(8) > 0) return { id: ab.id };
+        break;
+      // dreno de vida: mata alvo com PV ≤ dano (70) ou, com o herói ≥ 15 % ferido, o inimigo de mais PV no alcance
+      case 'hero_soul_drain': {
+        const fx = ab.effects.find(e => e.kind === 'damage');
+        let kill = null;
+        let tank = null;
+        for (let k = 0; k < foes.length; k++) {
+          const e = foes[k];
+          if (distTo(e) > range + 2) continue;
+          if (e.hp <= fx.amount && (!kill || e.hp > kill.hp)) kill = e;
+          if (!tank || e.hp > tank.hp) tank = e;
+        }
+        if (kill) return { id: ab.id, targetId: kill.id };
+        if (tank && c.hp <= c.maxHp * 0.85) return { id: ab.id, targetId: tank.id };
+        break;
+      }
+      // erguer esqueletos (canCast já garante ≥ 1 cadáver): com ≥ 2 cadáveres no raio
+      case 'hero_ancestors': {
+        const rd = ab.effects.find(e => e.kind === 'raise_dead');
+        if (gm.corpses && gm.corpses.countNear(cp.x, cp.z, rd.radius) >= 2) return { id: ab.id };
+        break;
+      }
+      // invisibilidade em aliado: o aliado em combate mais ferido (< 40 % PV), ainda visível, no alcance
+      case 'hero_ash_veil': {
+        let best = null;
+        let br = 0.4;
+        for (let k = 0; k < army.length; k++) {
+          const u = army[k];
+          if (u === c || u.state !== 'attacking' || hasStatus(u, 'invisible')) continue;
+          if (Math.hypot(u.mesh.position.x - cp.x, u.mesh.position.z - cp.z) > range) continue;
+          const ratio = u.hp / u.maxHp;
+          if (ratio < br) { br = ratio; best = u; }
+        }
+        if (best) return { id: ab.id, targetId: best.id };
+        break;
+      }
+      default:
+        break;
     }
     return null;
   }

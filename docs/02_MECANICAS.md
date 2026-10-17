@@ -166,6 +166,30 @@ O orçamento de APM é um balde de fichas (capacidade = APM/6, reposição APM/6
 
 **Micro (F5-05, `AIMicroManager.js`)**: nível 1: recua feridos (< 30 % PV, longe da base); nível 2: foca fogo (conjurador/suicida > atirador/cerco > corpo a corpo > trabalhador, menor PV efetivo), kiting de atiradores só contra alvos mais lentos (as infantarias e montarias são mais rápidas que os atiradores: fugir delas só perderia dano), escolta que acode o cerco ameaçado, reação total à invasão (as tropas da onda voltam se a defesa de casa é menor que os invasores), 2ª serraria junto de um bosque denso, quartéis extras com ouro parado, assédio a trabalhadores com 2 montarias (só com ≥ 3 montarias, depois de 4 min, volta se houver ≥ 3 soldados inimigos ou PV < 40 %), Torre Arcana + pesquisas + Mago/Necromante com magias por política (Bola de Fogo/Nevasca/Nuvem em aglomerados, Lentidão/Transmutação nos mais fortes, Toque da Morte em feridos, Pressa/Armadura Profana/Escudo de Chamas em infantaria em combate, Erguer Mortos com cadáveres); nível 3: flanco (montarias dão a volta por um waypoint lateral e só então atacam o alvo).
 
+**Habilidades de herói na IA (M2-11, `AIMicroManager._planHeroCast`)**: nível de micro ≥ 2, só com inimigo visível a ≤ 20 do herói e fora de `casting`; determinístico (sem RNG; empate pela ordem de `foes`/`army`); `canCast` (mana, recarga, cadáveres) vale antes. A primeira habilidade da lista do herói cujo gatilho vale é lançada (1 por tique). Antes só a Cura (`hero_mend`) era coberta, pelo auto-cast do simulador (`Unit._autocastScan`, só ocioso/em marcha de ataque); o `_planCast` não tinha caso para nenhuma `hero_*`. Partidas padrão não têm heróis: checksum do `headless-match` inalterado.
+
+| Herói | Habilidade | Condição de uso da IA |
+|---|---|---|
+| Brann | Grito de Guerra (`hero_war_cry`) | sem Sede de Batalha e inimigo a ≤ 10 (herói atacando ou inimigo a ≤ 6) |
+| Brann | Golpe Transpassante (`hero_cleave_strike`; igual `hero_shield_bash`) | alvo a ≤ alcance+1,5 com ≥ 2 inimigos no raio 2,5 ou PV ≥ 1,5× dano (melhor aglomerado) |
+| Brann | Postura Defensiva (`hero_defensive_stance`; igual `hero_revide_stance`) | sem Escudo de Chamas e inimigo corpo a corpo/montado a ≤ 5 |
+| Drogath | Grito de Guerra | idem Brann |
+| Drogath | Golpe de Brasa (`hero_ember_strike`) | idem Golpe Transpassante (raio 2,5; mágico) |
+| Drogath | Fogo do Clã (`hero_clan_fire`) | faltam ≥ 120 PV ao herói |
+| Oren | Raio Arcano (`hero_arcane_bolt`) | alvo no alcance+1,5 com ≥ 2 inimigos no raio 3 ou PV ≥ 90 |
+| Oren | Restauro (`hero_mend`) | aliado (herói incluso) no alcance com < 60 % PV; escolhe o mais ferido |
+| Oren | Tempestade Arcana (`hero_blizzard`; igual `hero_arcane_storm`) | canaliza: ≥ 3 inimigos num raio 5 dentro do alcance e NENHUM inimigo a ≤ 3 do herói |
+| Dorian | Estandarte (`hero_banner`) | herói em combate e ≥ 3 aliados lutando a ≤ 9 sem Pressa |
+| Dorian | Escudos Cerrados (`hero_shield_line`) | herói em combate e ≥ 3 aliados lutando a ≤ 7 sem Escudo de Chamas |
+| Dorian | Carga do Marechal (`hero_marshal_charge`) | alvo a ≤ 11,5 com ≥ 2 inimigos no raio 3 ou PV ≥ 135 |
+| Vozgul | Dreno de Alma (`hero_soul_drain`) | alvo a ≤ 12 com PV ≤ 70 (abate) ou, com herói ≤ 85 % PV, o inimigo de mais PV |
+| Vozgul | Chamado dos Ancestrais (`hero_ancestors`) | ≥ 2 cadáveres no raio 8 |
+| Vozgul | Véu de Cinzas (`hero_ash_veil`) | aliado lutando no alcance, visível, com < 40 % PV (o mais ferido) |
+| Skarn | Rugido dos Clãs (`hero_horde_roar`) | herói em combate e ≥ 3 aliados lutando a ≤ 8 sem Sede de Batalha |
+| Skarn | Pacto de Sangue (`hero_blood_pact`; igual `hero_ash_pact`) | herói < 50 % PV, sem o status, inimigo a ≤ 8 |
+| Skarn | Impacto no Solo (`hero_ground_slam`; igual `hero_crown_hammer`) | alvo a ≤ 4,5 com ≥ 2 inimigos no raio 4 ou PV ≥ 165 |
+
+
 **Economia/militar (base F3/F4)**
 - `U_def`: intrusos a < 26 da base → tropas ociosas atacam o intruso (1 comando em lote).
 - `U_housing/U_eco`: constrói casas perto do limite de pop; trabalhadores conforme a estratégia (+ bônus da dificuldade); emergência se < 3 (o ouro fica reservado para recriar peões).

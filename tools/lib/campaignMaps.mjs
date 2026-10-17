@@ -157,6 +157,18 @@ const pt = (p) => ({ x: r1(p.x), z: r1(p.z) });
 // Pós-processamento por palco
 // ---------------------------------------------------------------------------------------------------------------------------
 
+/** Mina de ouro extra de `amount` GOLD_AMOUNT a `dMin`–`dMax` u do pátio `s` (expansão); registra em `m.resources` e devolve o ponto. */
+function addGold(ctx, s, name, extra, { dMin = 20, dMax = 36, target = 26, plain = false } = {}) {
+  const g = need(ctx.scan({
+    test: (x, z) => ctx.dryClear(x, z, 5) && (!plain || ctx.plain(x, z)) && ctx.reach(x, z) && ctx.free(x, z, 4) && hyp({ x, z }, s) >= dMin && hyp({ x, z }, s) <= dMax,
+    score: (x, z) => Math.abs(hyp({ x, z }, s) - target)
+  }), `a mina extra ${name}`);
+  ctx.take(g, 14);
+  ctx.m.resources.push({ type: 'gold', x: r1(g.x), z: r1(g.z), amount: GOLD_AMOUNT });
+  extra[name] = pt(g);
+  return g;
+}
+
 /** Palco 1: acampamento da Irmandade da Maré entre as bases; Mural da Fenda numa enseada afastada; vela no horizonte. */
 function postBaia(ctx, extra) {
   const { m, s0, s1 } = ctx;
@@ -228,6 +240,9 @@ function postPouso(ctx, extra) {
     ctx.take(p, 8);
     extra[`patrol${k + 1}`] = pt(p);
   }
+  // uma mina de expansão por lado: com só 2 minas o ouro acaba e a partida IA×IA trava (soak, semente 8 brutal)
+  addGold(ctx, s0, 'expansion1', extra, { plain: true });
+  addGold(ctx, s1, 'expansion2', extra, { plain: true });
   extra.landingZone = pt(pier1); // praia de desembarque desta ilha: a do Cais da Liga (o `landingZone` padrão é só uma sugestão)
 }
 
@@ -235,19 +250,9 @@ function postPouso(ctx, extra) {
 function postPedra(ctx, extra) {
   const { m, s0, s1 } = ctx;
   // minas extras: 2 junto ao Paço (a Liga defende; os Clãs as capturam) e 1 na cabeça de ponte
-  const placeGold = (s, n, names) => {
-    for (let k = 0; k < n; k++) {
-      const g = need(ctx.scan({
-        test: (x, z) => ctx.dryClear(x, z, 5) && ctx.reach(x, z) && ctx.free(x, z, 4) && hyp({ x, z }, s) >= 20 && hyp({ x, z }, s) <= 36,
-        score: (x, z) => Math.abs(hyp({ x, z }, s) - 26) + (k ? 0 : 0)
-      }), 'a mina extra');
-      ctx.take(g, 14);
-      m.resources.push({ type: 'gold', x: r1(g.x), z: r1(g.z), amount: GOLD_AMOUNT });
-      extra[names[k]] = pt(g);
-    }
-  };
-  placeGold(s0, 2, ['colonyGold1', 'colonyGold2']);
-  placeGold(s1, 1, ['bridgeheadGold']);
+  addGold(ctx, s0, 'colonyGold1', extra);
+  addGold(ctx, s0, 'colonyGold2', extra);
+  addGold(ctx, s1, 'bridgeheadGold', extra);
   // três praias onde as ondas (Barcaças) desembarcam, espalhadas em volta do Paço
   const cands = [];
   for (let z = -ctx.half + 6; z <= ctx.half - 6; z += 2) {

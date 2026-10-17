@@ -18,7 +18,7 @@ import en from '../../src/i18n/en.json';
 const IDS = ['camp-01-baia-de-aurelan', 'camp-02-pouso-do-encontro', 'camp-03-pedra-mae'];
 const MIN_ANCHORS = {
   'camp-01-baia-de-aurelan': ['playerStart', 'enemyStart', 'goldMine1', 'goldMine2', 'neutralCamp1', 'landingZone', 'muralFenda', 'shipHorizon'],
-  'camp-02-pouso-do-encontro': ['playerStart', 'enemyStart', 'goldMine1', 'landingZone', 'pier1', 'pier1Water', 'pier2', 'pier2Water', 'logFort', 'lighthouse', 'emissary1', 'emissary2', 'patrol1', 'patrol2', 'patrol3'],
+  'camp-02-pouso-do-encontro': ['playerStart', 'enemyStart', 'goldMine1', 'landingZone', 'pier1', 'pier1Water', 'pier2', 'pier2Water', 'logFort', 'lighthouse', 'emissary1', 'emissary2', 'patrol1', 'patrol2', 'patrol3', 'expansion1', 'expansion2'],
   'camp-03-pedra-mae': ['playerStart', 'enemyStart', 'colonyHall', 'colonyGold1', 'colonyGold2', 'bridgeheadGold', 'beach1', 'beach2', 'beach3', 'seaLanding1', 'seaLanding2', 'seaLanding3', 'fort1', 'fort2', 'fort3', 'bridgehead', 'bridgeheadSea', 'landingZone']
 };
 const WATER = new Set(['shipHorizon', 'pier1Water', 'pier2Water', 'seaLanding1', 'seaLanding2', 'seaLanding3', 'bridgeheadSea']);
@@ -136,6 +136,7 @@ describe('M2-03 · âncoras da ficha de cada missão', () => {
     for (const s of m.startSlots) expect(hyp(m.anchors.logFort, s)).toBeGreaterThanOrEqual(30);
     expect(hyp(m.anchors.lighthouse, m.anchors.logFort)).toBeGreaterThanOrEqual(25);
     expect(m.anchors.landingZone).toEqual(m.anchors.pier1);
+    expect(m.resources.filter((r) => r.type === 'gold')).toHaveLength(4); // 2 por lado: com só 2 minas o ouro acabava e o soak travava
   });
 
   it('Pedra-Mãe: ouro abundante junto ao Paço (>= 3 minas a <= 40 u), 3 praias de pouso afastadas com ponto no mar ligado por mar, 3 fortes e cabeça de ponte', () => {

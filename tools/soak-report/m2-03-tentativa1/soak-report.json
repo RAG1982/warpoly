@@ -1,0 +1,342 @@
+{
+ "opts": {
+  "count": 24,
+  "seedStart": 1,
+  "maps": [
+   "camp-01-baia-de-aurelan",
+   "camp-02-pouso-do-encontro",
+   "camp-03-pedra-mae"
+  ],
+  "maxTicks": 72000,
+  "recheck": 3,
+  "faction": null,
+  "difficulty": null,
+  "stallTicks": 2400,
+  "out": "tools/soak-report/m2-03"
+ },
+ "wallMs": 358083,
+ "results": [
+  {
+   "seed": 1,
+   "map": "camp-01-baia-de-aurelan",
+   "faction": "human",
+   "difficulty": "easy",
+   "finished": true,
+   "ticks": 16746,
+   "checksum": 2448336325,
+   "peakEntities": 63,
+   "wallMs": 11319,
+   "issues": []
+  },
+  {
+   "seed": 2,
+   "map": "camp-02-pouso-do-encontro",
+   "faction": "human",
+   "difficulty": "easy",
+   "finished": true,
+   "ticks": 30212,
+   "checksum": 4292075177,
+   "peakEntities": 66,
+   "wallMs": 35761,
+   "issues": []
+  },
+  {
+   "seed": 3,
+   "map": "camp-03-pedra-mae",
+   "faction": "human",
+   "difficulty": "normal",
+   "finished": true,
+   "ticks": 12254,
+   "checksum": 536010883,
+   "peakEntities": 97,
+   "wallMs": 12569,
+   "issues": []
+  },
+  {
+   "seed": 4,
+   "map": "camp-01-baia-de-aurelan",
+   "faction": "orc",
+   "difficulty": "normal",
+   "finished": true,
+   "ticks": 12038,
+   "checksum": 1020078495,
+   "peakEntities": 92,
+   "wallMs": 12037,
+   "issues": []
+  },
+  {
+   "seed": 5,
+   "map": "camp-02-pouso-do-encontro",
+   "faction": "orc",
+   "difficulty": "hard",
+   "finished": true,
+   "ticks": 19154,
+   "checksum": 446007965,
+   "peakEntities": 101,
+   "wallMs": 18048,
+   "issues": []
+  },
+  {
+   "seed": 6,
+   "map": "camp-03-pedra-mae",
+   "faction": "orc",
+   "difficulty": "hard",
+   "finished": true,
+   "ticks": 20087,
+   "checksum": 2146185028,
+   "peakEntities": 73,
+   "wallMs": 16583,
+   "issues": []
+  },
+  {
+   "seed": 7,
+   "map": "camp-01-baia-de-aurelan",
+   "faction": "human",
+   "difficulty": "brutal",
+   "finished": true,
+   "ticks": 10277,
+   "checksum": 298549164,
+   "peakEntities": 97,
+   "wallMs": 9943,
+   "issues": []
+  },
+  {
+   "seed": 8,
+   "map": "camp-02-pouso-do-encontro",
+   "faction": "human",
+   "difficulty": "brutal",
+   "finished": false,
+   "ticks": 72000,
+   "checksum": 2742391161,
+   "peakEntities": 100,
+   "wallMs": 49431,
+   "issues": [
+    {
+     "type": "stall",
+     "tick": 31860,
+     "detail": "sem progresso desde o tick 29460"
+    },
+    {
+     "type": "no-end",
+     "tick": 72000,
+     "detail": "não terminou em 72000 ticks"
+    }
+   ]
+  },
+  {
+   "seed": 9,
+   "map": "camp-03-pedra-mae",
+   "faction": "human",
+   "difficulty": "easy",
+   "finished": true,
+   "ticks": 15223,
+   "checksum": 2508162714,
+   "peakEntities": 62,
+   "wallMs": 9842,
+   "issues": []
+  },
+  {
+   "seed": 10,
+   "map": "camp-01-baia-de-aurelan",
+   "faction": "orc",
+   "difficulty": "easy",
+   "finished": true,
+   "ticks": 15777,
+   "checksum": 4239402557,
+   "peakEntities": 63,
+   "wallMs": 10411,
+   "issues": []
+  },
+  {
+   "seed": 11,
+   "map": "camp-02-pouso-do-encontro",
+   "faction": "orc",
+   "difficulty": "normal",
+   "finished": true,
+   "ticks": 13130,
+   "checksum": 1232126851,
+   "peakEntities": 97,
+   "wallMs": 13720,
+   "issues": []
+  },
+  {
+   "seed": 12,
+   "map": "camp-03-pedra-mae",
+   "faction": "orc",
+   "difficulty": "normal",
+   "finished": true,
+   "ticks": 12512,
+   "checksum": 2870146845,
+   "peakEntities": 93,
+   "wallMs": 11418,
+   "issues": []
+  },
+  {
+   "seed": 13,
+   "map": "camp-01-baia-de-aurelan",
+   "faction": "human",
+   "difficulty": "hard",
+   "finished": true,
+   "ticks": 7629,
+   "checksum": 3243088706,
+   "peakEntities": 65,
+   "wallMs": 4951,
+   "issues": []
+  },
+  {
+   "seed": 14,
+   "map": "camp-02-pouso-do-encontro",
+   "faction": "human",
+   "difficulty": "hard",
+   "finished": true,
+   "ticks": 8998,
+   "checksum": 3651318881,
+   "peakEntities": 68,
+   "wallMs": 6850,
+   "issues": []
+  },
+  {
+   "seed": 15,
+   "map": "camp-03-pedra-mae",
+   "faction": "human",
+   "difficulty": "brutal",
+   "finished": true,
+   "ticks": 12759,
+   "checksum": 2205091377,
+   "peakEntities": 77,
+   "wallMs": 9485,
+   "issues": []
+  },
+  {
+   "seed": 16,
+   "map": "camp-01-baia-de-aurelan",
+   "faction": "orc",
+   "difficulty": "brutal",
+   "finished": true,
+   "ticks": 14573,
+   "checksum": 1743118605,
+   "peakEntities": 91,
+   "wallMs": 12021,
+   "issues": []
+  },
+  {
+   "seed": 17,
+   "map": "camp-02-pouso-do-encontro",
+   "faction": "orc",
+   "difficulty": "easy",
+   "finished": true,
+   "ticks": 16831,
+   "checksum": 4056463564,
+   "peakEntities": 63,
+   "wallMs": 10603,
+   "issues": []
+  },
+  {
+   "seed": 18,
+   "map": "camp-03-pedra-mae",
+   "faction": "orc",
+   "difficulty": "easy",
+   "finished": true,
+   "ticks": 15882,
+   "checksum": 2843981522,
+   "peakEntities": 63,
+   "wallMs": 9445,
+   "issues": []
+  },
+  {
+   "seed": 19,
+   "map": "camp-01-baia-de-aurelan",
+   "faction": "human",
+   "difficulty": "normal",
+   "finished": true,
+   "ticks": 12021,
+   "checksum": 1582135371,
+   "peakEntities": 99,
+   "wallMs": 11192,
+   "issues": []
+  },
+  {
+   "seed": 20,
+   "map": "camp-02-pouso-do-encontro",
+   "faction": "human",
+   "difficulty": "normal",
+   "finished": true,
+   "ticks": 13558,
+   "checksum": 3631343716,
+   "peakEntities": 100,
+   "wallMs": 13082,
+   "issues": []
+  },
+  {
+   "seed": 21,
+   "map": "camp-03-pedra-mae",
+   "faction": "human",
+   "difficulty": "hard",
+   "finished": true,
+   "ticks": 19488,
+   "checksum": 4002530572,
+   "peakEntities": 83,
+   "wallMs": 17850,
+   "issues": []
+  },
+  {
+   "seed": 22,
+   "map": "camp-01-baia-de-aurelan",
+   "faction": "orc",
+   "difficulty": "hard",
+   "finished": true,
+   "ticks": 8376,
+   "checksum": 3127555322,
+   "peakEntities": 59,
+   "wallMs": 5143,
+   "issues": []
+  },
+  {
+   "seed": 23,
+   "map": "camp-02-pouso-do-encontro",
+   "faction": "orc",
+   "difficulty": "brutal",
+   "finished": true,
+   "ticks": 12959,
+   "checksum": 4080586665,
+   "peakEntities": 86,
+   "wallMs": 11038,
+   "issues": []
+  },
+  {
+   "seed": 24,
+   "map": "camp-03-pedra-mae",
+   "faction": "orc",
+   "difficulty": "brutal",
+   "finished": true,
+   "ticks": 7397,
+   "checksum": 4132801888,
+   "peakEntities": 78,
+   "wallMs": 5058,
+   "issues": []
+  }
+ ],
+ "rechecks": [
+  {
+   "seed": 1,
+   "map": "camp-01-baia-de-aurelan",
+   "faction": "human",
+   "difficulty": "easy",
+   "diff": null
+  },
+  {
+   "seed": 9,
+   "map": "camp-03-pedra-mae",
+   "faction": "human",
+   "difficulty": "easy",
+   "diff": null
+  },
+  {
+   "seed": 17,
+   "map": "camp-02-pouso-do-encontro",
+   "faction": "orc",
+   "difficulty": "easy",
+   "diff": null
+  }
+ ]
+}

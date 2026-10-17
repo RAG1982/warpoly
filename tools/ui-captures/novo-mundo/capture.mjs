@@ -528,7 +528,7 @@ try {
               const pos = s.debris.geometry.attributes.position; let lo = 1e9, hi = -1e9, worst = 0;
               for (let i = 0; i < pos.count; i++) {
                 const wx = s.x + pos.getX(i), wz = s.z + pos.getZ(i);
-                const rel = s.baseY + s.debris.position.y + pos.getY(i) - gm.terrain.getHeight(wx, wz);
+                const rel = s.debris.position.y + pos.getY(i) - gm.terrain.getHeight(wx, wz);
                 lo = Math.min(lo, rel); hi = Math.max(hi, rel); if (Math.abs(rel) > Math.abs(worst)) worst = rel;
               }
               out.push({ x: +s.x.toFixed(1), z: +s.z.toFixed(1), minRel: +lo.toFixed(2), maxRel: +hi.toFixed(2), opacity: +s.debris.material.opacity.toFixed(2), alpha: s.state });

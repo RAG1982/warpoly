@@ -185,8 +185,9 @@ export class Water {
   createWaterMesh() {
     // M1-01: os 150 u fixos cobriam só o miolo dos mapas de 224 u (borda reta turquesa × azul-escuro à vista); agora a lâmina
     // acompanha o mapa (mesma densidade de vértices e a mesma escala da textura de ondas dos mapas de ≤ 150 u).
-    const mapSize = (this.terrain && this.terrain.mapDef && this.terrain.mapDef.size) || 0;
-    const size = Math.max(150, mapSize + 8);
+    // Só nos mapas com `biomeGrid` (224 u): os mapas antigos ficam byte a byte como antes (golden de regionalWorld.test.js).
+    const def = this.terrain && this.terrain.mapDef;
+    const size = def && def.biomeGrid ? Math.max(150, (def.size || 0) + 8) : 150;
     const segments = Math.round((64 * size) / 150);
     const geo = new THREE.PlaneGeometry(size, size, segments, segments);
     geo.rotateX(-Math.PI / 2);

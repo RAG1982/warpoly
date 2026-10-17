@@ -1,14 +1,170 @@
 {
-  "when": "2026-10-17T06:18:12.676Z",
+  "when": "2026-10-17T06:30:15.535Z",
   "viewport": {
     "width": 1920,
     "height": 1080
   },
-  "renderer": null,
+  "renderer": "ANGLE (AMD, Vulkan 1.4.318 (AMD Radeonâ¢ RX 7600 XT (RADV NAVI33) (0x00007480)), radv)",
   "phases": [
-    "mapas"
+    "menu",
+    "mapas",
+    "lava"
   ],
-  "menu": {},
+  "menu": {
+    "storyOpenedOnFirstVisit": true,
+    "panels": [
+      {
+        "dotActive": 0,
+        "dots": 7,
+        "art": {
+          "src": "/art/story/panel-1.png",
+          "w": 1376,
+          "h": 768,
+          "complete": true
+        },
+        "fallbackVisible": false,
+        "caption": "Antes de haver nomes, havia uma só terra, um só oceano e um só céu. Ondara era um mundo inteiro, e ninguém ainda o chamava de lar.",
+        "title": null,
+        "step": 0
+      },
+      {
+        "dotActive": 1,
+        "dots": 7,
+        "art": {
+          "src": "/art/story/panel-2.png",
+          "w": 1376,
+          "h": 768,
+          "complete": true
+        },
+        "fallbackVisible": false,
+        "caption": "Então a terra se partiu. O mar entrou pela Fenda, e por milhões de anos dois continentes derivaram em silêncio, cada um sonhando o seu próprio mundo.",
+        "title": null,
+        "step": 1
+      },
+      {
+        "dotActive": 2,
+        "dots": 7,
+        "art": {
+          "src": "/art/story/panel-3.png",
+          "w": 1376,
+          "h": 768,
+          "complete": true
+        },
+        "fallbackVisible": false,
+        "caption": "Em Velmara, entre montanhas nevadas, florestas e savanas, ergueram-se os homens, com seus rebanhos e seus grifos. Em Cinzara, entre dunas, pântanos e estepes, os clãs aprenderam a viver do pouco: javalis, brasas e vento.",
+        "title": null,
+        "step": 2
+      },
+      {
+        "dotActive": 3,
+        "dots": 7,
+        "art": {
+          "src": "/art/story/panel-4.png",
+          "w": 1376,
+          "h": 768,
+          "complete": true
+        },
+        "fallbackVisible": false,
+        "caption": "Os povos cresceram, e a fome de terra, de ouro, de madeira e de breu os lançou ao mar. Aurelan traçou cartas; os clãs queimaram mastros de cinza. Cada um buscava o que faltava em casa.",
+        "title": null,
+        "step": 3
+      },
+      {
+        "dotActive": 4,
+        "dots": 7,
+        "art": {
+          "src": "/art/story/panel-5.png",
+          "w": 1376,
+          "h": 768,
+          "complete": true
+        },
+        "fallbackVisible": false,
+        "caption": "No meio do Mar Fendido, duas velas se avistaram. Ninguém sabe quem baixou o estandarte primeiro, nem de que lado partiu a primeira flecha. Só se sabe que o mar deixou de ser vazio.",
+        "title": null,
+        "step": 4
+      },
+      {
+        "dotActive": 5,
+        "dots": 7,
+        "art": {
+          "src": "/art/story/panel-6.png",
+          "w": 1376,
+          "h": 768,
+          "complete": true
+        },
+        "fallbackVisible": false,
+        "caption": "Entre os dois mundos jaziam os Estilhaços: ilhas de pedra, brejo, fogo, gelo e areia, com ouro, madeira e petróleo à beira da água. Quem as dominasse teria uma ponte de guerra e a chave do oceano.",
+        "title": null,
+        "step": 5
+      },
+      {
+        "dotActive": 6,
+        "dots": 7,
+        "art": {
+          "src": "/art/story/panel-7-alliance.png",
+          "w": 1376,
+          "h": 768,
+          "complete": true
+        },
+        "fallbackVisible": false,
+        "caption": "Aurelan não queria a guerra, mas não cederia o mar. Na Baía de Aurelan, a Rainha Sevelin ergue o estandarte: tomar os Estilhaços e fincar uma fortaleza em terra inimiga, de onde o mar será nosso.",
+        "title": null,
+        "step": 6
+      },
+      {
+        "dotActive": 6,
+        "dots": 7,
+        "art": {
+          "src": "/art/world/mapa-mundi.png",
+          "w": 1376,
+          "h": 768,
+          "complete": true
+        },
+        "fallbackVisible": false,
+        "caption": null,
+        "title": "A Guerra do Mar Fendido",
+        "step": 7
+      }
+    ],
+    "tabs": [
+      {
+        "text": "A Guerra do Mar Fendido (Aliança)",
+        "selected": "true"
+      },
+      {
+        "text": "A Guerra do Mar Fendido (Horda)",
+        "selected": "false"
+      },
+      {
+        "text": "Campanha Clássica (beta)",
+        "selected": "false"
+      }
+    ],
+    "tab1": {
+      "hasReviewStory": true,
+      "items": 12,
+      "provisional": false
+    },
+    "tab2": {
+      "hasReviewStory": false,
+      "items": 8,
+      "provisional": true
+    },
+    "esc": {
+      "reopened": true,
+      "after": {
+        "story": false,
+        "campaign": true,
+        "mainMenu": true,
+        "inGame": false
+      }
+    },
+    "worldMapInDom": false,
+    "escFirstVisit": {
+      "story": false,
+      "campaign": true
+    }
+  },
   "maps": {
     "duelo-continental-1": {
       "errors": [],
@@ -17,8 +173,16 @@
         "tileset": "exuberante",
         "size": 224,
         "hasBiomeGrid": true,
-        "regions": false,
-        "styles": null,
+        "regions": true,
+        "styles": [
+          "exuberante",
+          "pedregoso",
+          "vulcanico",
+          "inverno",
+          "pantano",
+          "inverno:gelo",
+          "exuberante:floresta"
+        ],
         "hq": {
           "x": -28,
           "z": -46
@@ -27,10 +191,10 @@
       "perfStart": {
         "fps": 60,
         "fpsP1": 59.5,
-        "frames": 237,
-        "drawCalls": 277,
-        "triangles": 450278,
-        "geometries": 125,
+        "frames": 236,
+        "drawCalls": 278,
+        "triangles": 448139,
+        "geometries": 128,
         "textures": 45
       },
       "spots": {
@@ -239,8 +403,8 @@
           "underwater": 0
         },
         {
-          "name": "df598d",
-          "n": 13,
+          "name": "05cc95",
+          "n": 14,
           "floatN": 0,
           "maxFloat": 0,
           "sunkN": 0,
@@ -248,7 +412,16 @@
           "underwater": 0
         },
         {
-          "name": "e0a532",
+          "name": "4d54c0",
+          "n": 11,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "956106",
           "n": 12,
           "floatN": 0,
           "maxFloat": 0,
@@ -257,25 +430,7 @@
           "underwater": 0
         },
         {
-          "name": "6c64c0",
-          "n": 6,
-          "floatN": 0,
-          "maxFloat": 0,
-          "sunkN": 0,
-          "minSunk": 0,
-          "underwater": 0
-        },
-        {
-          "name": "c57e11",
-          "n": 6,
-          "floatN": 0,
-          "maxFloat": 0,
-          "sunkN": 0,
-          "minSunk": 0,
-          "underwater": 0
-        },
-        {
-          "name": "a73bca",
+          "name": "8fef1a",
           "n": 1,
           "floatN": 0,
           "maxFloat": 0,
@@ -284,7 +439,97 @@
           "underwater": 0
         },
         {
-          "name": "d448e1",
+          "name": "761ef8",
+          "n": 3,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "a0a075",
+          "n": 1,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "6e5ebc",
+          "n": 1,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "ef34dd",
+          "n": 6,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "64756f",
+          "n": 1,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "de2876",
+          "n": 2,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "8061f8",
+          "n": 2,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "442f72",
+          "n": 5,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "6551fc",
+          "n": 1,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "788521",
+          "n": 2,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "ca6f7f",
           "n": 8,
           "floatN": 0,
           "maxFloat": 0,
@@ -293,7 +538,7 @@
           "underwater": 0
         },
         {
-          "name": "d5ab88",
+          "name": "73d7b6",
           "n": 4,
           "floatN": 0,
           "maxFloat": 0,
@@ -302,7 +547,7 @@
           "underwater": 0
         },
         {
-          "name": "b65c89",
+          "name": "aed9c8",
           "n": 1,
           "floatN": 0,
           "maxFloat": 0,
@@ -311,8 +556,8 @@
           "underwater": 0
         },
         {
-          "name": "81b5ad",
-          "n": 1,
+          "name": "e93250",
+          "n": 2,
           "floatN": 0,
           "maxFloat": 0,
           "sunkN": 0,
@@ -320,7 +565,7 @@
           "underwater": 0
         },
         {
-          "name": "da253e",
+          "name": "bea663",
           "n": 4,
           "floatN": 0,
           "maxFloat": 0,
@@ -329,7 +574,7 @@
           "underwater": 0
         },
         {
-          "name": "a9a3dc",
+          "name": "ad87a4",
           "n": 1,
           "floatN": 0,
           "maxFloat": 0,
@@ -338,43 +583,7 @@
           "underwater": 0
         },
         {
-          "name": "34ad21",
-          "n": 4,
-          "floatN": 0,
-          "maxFloat": 0,
-          "sunkN": 0,
-          "minSunk": 0,
-          "underwater": 0
-        },
-        {
-          "name": "a3cba3",
-          "n": 9,
-          "floatN": 0,
-          "maxFloat": 0,
-          "sunkN": 0,
-          "minSunk": 0,
-          "underwater": 0
-        },
-        {
-          "name": "4fc98f",
-          "n": 7,
-          "floatN": 0,
-          "maxFloat": 0,
-          "sunkN": 0,
-          "minSunk": 0,
-          "underwater": 0
-        },
-        {
-          "name": "eab5f8",
-          "n": 6,
-          "floatN": 0,
-          "maxFloat": 0,
-          "sunkN": 0,
-          "minSunk": 0,
-          "underwater": 0
-        },
-        {
-          "name": "476ef3",
+          "name": "a5aa51",
           "n": 11,
           "floatN": 0,
           "maxFloat": 0,
@@ -383,34 +592,7 @@
           "underwater": 0
         },
         {
-          "name": "d1c1a0",
-          "n": 1,
-          "floatN": 0,
-          "maxFloat": 0,
-          "sunkN": 0,
-          "minSunk": 0,
-          "underwater": 0
-        },
-        {
-          "name": "a8cd02",
-          "n": 9,
-          "floatN": 0,
-          "maxFloat": 0,
-          "sunkN": 0,
-          "minSunk": 0,
-          "underwater": 0
-        },
-        {
-          "name": "6d12b3",
-          "n": 1,
-          "floatN": 0,
-          "maxFloat": 0,
-          "sunkN": 0,
-          "minSunk": 0,
-          "underwater": 0
-        },
-        {
-          "name": "54ed55",
+          "name": "4c396e",
           "n": 5,
           "floatN": 0,
           "maxFloat": 0,
@@ -419,70 +601,7 @@
           "underwater": 0
         },
         {
-          "name": "b80e25",
-          "n": 1,
-          "floatN": 0,
-          "maxFloat": 0,
-          "sunkN": 0,
-          "minSunk": 0,
-          "underwater": 0
-        },
-        {
-          "name": "5c72ee",
-          "n": 5,
-          "floatN": 0,
-          "maxFloat": 0,
-          "sunkN": 0,
-          "minSunk": 0,
-          "underwater": 0
-        },
-        {
-          "name": "0d59c5",
-          "n": 2,
-          "floatN": 0,
-          "maxFloat": 0,
-          "sunkN": 0,
-          "minSunk": 0,
-          "underwater": 0
-        },
-        {
-          "name": "862c96",
-          "n": 5,
-          "floatN": 0,
-          "maxFloat": 0,
-          "sunkN": 0,
-          "minSunk": 0,
-          "underwater": 0
-        },
-        {
-          "name": "096134",
-          "n": 2,
-          "floatN": 0,
-          "maxFloat": 0,
-          "sunkN": 0,
-          "minSunk": 0,
-          "underwater": 0
-        },
-        {
-          "name": "415121",
-          "n": 3,
-          "floatN": 0,
-          "maxFloat": 0,
-          "sunkN": 0,
-          "minSunk": 0,
-          "underwater": 0
-        },
-        {
-          "name": "434c42",
-          "n": 2,
-          "floatN": 0,
-          "maxFloat": 0,
-          "sunkN": 0,
-          "minSunk": 0,
-          "underwater": 0
-        },
-        {
-          "name": "8256af",
+          "name": "b652c7",
           "n": 6,
           "floatN": 0,
           "maxFloat": 0,
@@ -491,7 +610,7 @@
           "underwater": 0
         },
         {
-          "name": "7ec275",
+          "name": "5a3225",
           "n": 1,
           "floatN": 0,
           "maxFloat": 0,
@@ -500,7 +619,43 @@
           "underwater": 0
         },
         {
-          "name": "d839e8",
+          "name": "877913",
+          "n": 12,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "46fa28",
+          "n": 4,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "29fe04",
+          "n": 2,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "a21c6e",
+          "n": 7,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "108af0",
           "n": 3,
           "floatN": 0,
           "maxFloat": 0,
@@ -509,7 +664,7 @@
           "underwater": 0
         },
         {
-          "name": "d93b65",
+          "name": "397b6a",
           "n": 1,
           "floatN": 0,
           "maxFloat": 0,
@@ -518,7 +673,25 @@
           "underwater": 0
         },
         {
-          "name": "77de53",
+          "name": "c0dbeb",
+          "n": 3,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "644372",
+          "n": 1,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "930a9b",
           "n": 2,
           "floatN": 0,
           "maxFloat": 0,
@@ -527,7 +700,7 @@
           "underwater": 0
         },
         {
-          "name": "f0a3f7",
+          "name": "4c2c51",
           "n": 1,
           "floatN": 0,
           "maxFloat": 0,
@@ -536,16 +709,7 @@
           "underwater": 0
         },
         {
-          "name": "5f5fb6",
-          "n": 4,
-          "floatN": 0,
-          "maxFloat": 0,
-          "sunkN": 0,
-          "minSunk": 0,
-          "underwater": 0
-        },
-        {
-          "name": "d8cee8",
+          "name": "987c60",
           "n": 2,
           "floatN": 0,
           "maxFloat": 0,
@@ -554,7 +718,7 @@
           "underwater": 0
         },
         {
-          "name": "d465a5",
+          "name": "454661",
           "n": 1,
           "floatN": 0,
           "maxFloat": 0,
@@ -563,7 +727,7 @@
           "underwater": 0
         },
         {
-          "name": "c03f04",
+          "name": "fb0a5d",
           "n": 1,
           "floatN": 0,
           "maxFloat": 0,
@@ -572,79 +736,7 @@
           "underwater": 0
         },
         {
-          "name": "9404b6",
-          "n": 4,
-          "floatN": 0,
-          "maxFloat": 0,
-          "sunkN": 0,
-          "minSunk": 0,
-          "underwater": 0
-        },
-        {
-          "name": "1c40f4",
-          "n": 2,
-          "floatN": 0,
-          "maxFloat": 0,
-          "sunkN": 0,
-          "minSunk": 0,
-          "underwater": 0
-        },
-        {
-          "name": "00970f",
-          "n": 1,
-          "floatN": 0,
-          "maxFloat": 0,
-          "sunkN": 0,
-          "minSunk": 0,
-          "underwater": 0
-        },
-        {
-          "name": "1983b7",
-          "n": 1,
-          "floatN": 0,
-          "maxFloat": 0,
-          "sunkN": 0,
-          "minSunk": 0,
-          "underwater": 0
-        },
-        {
-          "name": "be3c09",
-          "n": 1,
-          "floatN": 0,
-          "maxFloat": 0,
-          "sunkN": 0,
-          "minSunk": 0,
-          "underwater": 0
-        },
-        {
-          "name": "2fb1b3",
-          "n": 4,
-          "floatN": 0,
-          "maxFloat": 0,
-          "sunkN": 0,
-          "minSunk": 0,
-          "underwater": 0
-        },
-        {
-          "name": "e289c8",
-          "n": 1,
-          "floatN": 0,
-          "maxFloat": 0,
-          "sunkN": 0,
-          "minSunk": 0,
-          "underwater": 0
-        },
-        {
-          "name": "d92af3",
-          "n": 4,
-          "floatN": 0,
-          "maxFloat": 0,
-          "sunkN": 0,
-          "minSunk": 0,
-          "underwater": 0
-        },
-        {
-          "name": "f88a28",
+          "name": "c1718e",
           "n": 5,
           "floatN": 0,
           "maxFloat": 0,
@@ -653,7 +745,7 @@
           "underwater": 0
         },
         {
-          "name": "44bee6",
+          "name": "9096be",
           "n": 1,
           "floatN": 0,
           "maxFloat": 0,
@@ -662,7 +754,52 @@
           "underwater": 0
         },
         {
-          "name": "1a742b",
+          "name": "ba918e",
+          "n": 1,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "e94d8d",
+          "n": 1,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "b74067",
+          "n": 5,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "b2ee02",
+          "n": 1,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "cb0fbc",
+          "n": 1,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "83d77f",
           "n": 2,
           "floatN": 0,
           "maxFloat": 0,
@@ -671,7 +808,34 @@
           "underwater": 0
         },
         {
-          "name": "daae84",
+          "name": "495da7",
+          "n": 5,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "48cd35",
+          "n": 1,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "60e423",
+          "n": 2,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "0c7f28",
           "n": 6,
           "floatN": 0,
           "maxFloat": 0,
@@ -680,7 +844,133 @@
           "underwater": 0
         },
         {
-          "name": "aa2a2b",
+          "name": "151042",
+          "n": 1,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "6ed8e4",
+          "n": 1,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "d821ac",
+          "n": 3,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "cac895",
+          "n": 11,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "acf499",
+          "n": 1,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "730d03",
+          "n": 3,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "c37335",
+          "n": 1,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "948059",
+          "n": 1,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "a1c1b4",
+          "n": 6,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "1fdad2",
+          "n": 1,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "349be5",
+          "n": 2,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "0595cc",
+          "n": 1,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "5443bc",
+          "n": 2,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "35a031",
+          "n": 1,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "de2dd8",
           "n": 8,
           "floatN": 0,
           "maxFloat": 0,
@@ -689,7 +979,7 @@
           "underwater": 0
         },
         {
-          "name": "cdbabc",
+          "name": "480526",
           "n": 4,
           "floatN": 0,
           "maxFloat": 0,
@@ -698,8 +988,8 @@
           "underwater": 0
         },
         {
-          "name": "fecccf",
-          "n": 1,
+          "name": "dfdeed",
+          "n": 4,
           "floatN": 0,
           "maxFloat": 0,
           "sunkN": 0,
@@ -707,52 +997,7 @@
           "underwater": 0
         },
         {
-          "name": "93aa1b",
-          "n": 1,
-          "floatN": 0,
-          "maxFloat": 0,
-          "sunkN": 0,
-          "minSunk": 0,
-          "underwater": 0
-        },
-        {
-          "name": "2cea20",
-          "n": 6,
-          "floatN": 0,
-          "maxFloat": 0,
-          "sunkN": 0,
-          "minSunk": 0,
-          "underwater": 0
-        },
-        {
-          "name": "a8943a",
-          "n": 1,
-          "floatN": 0,
-          "maxFloat": 0,
-          "sunkN": 0,
-          "minSunk": 0,
-          "underwater": 0
-        },
-        {
-          "name": "65c2f0",
-          "n": 9,
-          "floatN": 0,
-          "maxFloat": 0,
-          "sunkN": 0,
-          "minSunk": 0,
-          "underwater": 0
-        },
-        {
-          "name": "64888c",
-          "n": 7,
-          "floatN": 0,
-          "maxFloat": 0,
-          "sunkN": 0,
-          "minSunk": 0,
-          "underwater": 0
-        },
-        {
-          "name": "c3d505",
+          "name": "772a05",
           "n": 11,
           "floatN": 0,
           "maxFloat": 0,
@@ -761,8 +1006,8 @@
           "underwater": 0
         },
         {
-          "name": "5b3a4e",
-          "n": 9,
+          "name": "ae0dd2",
+          "n": 12,
           "floatN": 0,
           "maxFloat": 0,
           "sunkN": 0,
@@ -770,8 +1015,8 @@
           "underwater": 0
         },
         {
-          "name": "6b5bcf",
-          "n": 5,
+          "name": "e80d09",
+          "n": 4,
           "floatN": 0,
           "maxFloat": 0,
           "sunkN": 0,
@@ -779,7 +1024,7 @@
           "underwater": 0
         },
         {
-          "name": "743ab9",
+          "name": "2c0b32",
           "n": 2,
           "floatN": 0,
           "maxFloat": 0,
@@ -788,25 +1033,7 @@
           "underwater": 0
         },
         {
-          "name": "94da2b",
-          "n": 6,
-          "floatN": 0,
-          "maxFloat": 0,
-          "sunkN": 0,
-          "minSunk": 0,
-          "underwater": 0
-        },
-        {
-          "name": "815a85",
-          "n": 1,
-          "floatN": 0,
-          "maxFloat": 0,
-          "sunkN": 0,
-          "minSunk": 0,
-          "underwater": 0
-        },
-        {
-          "name": "cd3f7e",
+          "name": "eb5d8b",
           "n": 3,
           "floatN": 0,
           "maxFloat": 0,
@@ -815,7 +1042,16 @@
           "underwater": 0
         },
         {
-          "name": "8e3ba3",
+          "name": "1d8d84",
+          "n": 2,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "bd9853",
           "n": 1,
           "floatN": 0,
           "maxFloat": 0,
@@ -824,7 +1060,988 @@
           "underwater": 0
         },
         {
-          "name": "e2ce95",
+          "name": "086f29",
+          "n": 2,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "188adb",
+          "n": 1,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        }
+      ],
+      "scene": {
+        "trees": 152,
+        "deposits": 4,
+        "critters": 8
+      },
+      "critters": {
+        "ref": {
+          "x": -20.209997831598223,
+          "z": -28.61124568590433,
+          "species": "sheep"
+        },
+        "total": 11
+      },
+      "critterY": [
+        {
+          "sp": "sheep",
+          "y": 2.6,
+          "h": 2.6,
+          "root": 2.6
+        },
+        {
+          "sp": "sheep",
+          "y": 2.64,
+          "h": 2.64,
+          "root": 2.64
+        },
+        {
+          "sp": "sheep",
+          "y": 3.02,
+          "h": 3.02,
+          "root": 3.02
+        },
+        {
+          "sp": "sheep",
+          "y": 2.6,
+          "h": 2.6,
+          "root": 2.6
+        },
+        {
+          "sp": "sheep",
+          "y": 2.61,
+          "h": 2.61,
+          "root": 2.61
+        },
+        {
+          "sp": "sheep",
+          "y": 3.17,
+          "h": 3.17,
+          "root": 3.17
+        },
+        {
+          "sp": "sheep",
+          "y": 2.45,
+          "h": 2.45,
+          "root": 2.45
+        },
+        {
+          "sp": "sheep",
+          "y": 2.56,
+          "h": 2.56,
+          "root": 2.56
+        },
+        {
+          "sp": "boar",
+          "y": 2.85,
+          "h": 2.85,
+          "root": 2.85
+        },
+        {
+          "sp": "boar",
+          "y": 2.8,
+          "h": 2.8,
+          "root": 2.8
+        },
+        {
+          "sp": "boar",
+          "y": 2.94,
+          "h": 2.94,
+          "root": 2.94
+        }
+      ],
+      "mine": {
+        "x": -43.6,
+        "z": -37,
+        "before": 4,
+        "ruins": 0,
+        "after": {
+          "deposits": 3,
+          "depleted": 1,
+          "disposed": true,
+          "ruins": 1,
+          "debris": [
+            {
+              "x": -43.6,
+              "z": -37,
+              "minRel": -0.21,
+              "maxRel": 0.66,
+              "opacity": 1,
+              "alpha": "active"
+            }
+          ]
+        }
+      },
+      "perfBase": {
+        "fps": 60,
+        "fpsP1": 59.5,
+        "frames": 206,
+        "drawCalls": 302,
+        "triangles": 443187,
+        "geometries": 352,
+        "textures": 55
+      },
+      "perfWide": {
+        "fps": 60,
+        "fpsP1": 59.5,
+        "frames": 206,
+        "drawCalls": 355,
+        "triangles": 373413,
+        "geometries": 354,
+        "textures": 55
+      },
+      "consoleErrors": []
+    },
+    "duelo-continental-2": {
+      "errors": [],
+      "start": {
+        "mapId": "duelo-continental-2",
+        "tileset": "exuberante",
+        "size": 224,
+        "hasBiomeGrid": true,
+        "regions": true,
+        "styles": [
+          "exuberante",
+          "pedregoso",
+          "vulcanico",
+          "inverno",
+          "pantano",
+          "inverno:gelo",
+          "exuberante:floresta"
+        ],
+        "hq": {
+          "x": -55,
+          "z": -10
+        }
+      },
+      "perfStart": {
+        "fps": 60,
+        "fpsP1": 59.5,
+        "frames": 236,
+        "drawCalls": 261,
+        "triangles": 440666,
+        "geometries": 144,
+        "textures": 44
+      },
+      "spots": {
+        "counts": {
+          "mar": 33215,
+          "areia": 2499,
+          "grama": 6455,
+          "rocha": 2051,
+          "vulcânico": 564,
+          "neve": 2084,
+          "pântano": 552,
+          "gelo": 330,
+          "floresta": 2875
+        },
+        "centers": {
+          "1": {
+            "biome": 1,
+            "name": "areia",
+            "count": 2499,
+            "depth": 4,
+            "x": -31,
+            "z": 54
+          },
+          "2": {
+            "biome": 2,
+            "name": "grama",
+            "count": 6455,
+            "depth": 5,
+            "x": 48,
+            "z": 0
+          },
+          "6": {
+            "biome": 6,
+            "name": "rocha",
+            "count": 2051,
+            "depth": 2,
+            "x": 23,
+            "z": 9
+          },
+          "7": {
+            "biome": 7,
+            "name": "vulcânico",
+            "count": 564,
+            "depth": 6,
+            "x": -15,
+            "z": 89
+          },
+          "9": {
+            "biome": 9,
+            "name": "neve",
+            "count": 2084,
+            "depth": 7,
+            "x": 11,
+            "z": 20
+          },
+          "10": {
+            "biome": 10,
+            "name": "pântano",
+            "count": 552,
+            "depth": 4,
+            "x": 85,
+            "z": -47
+          },
+          "11": {
+            "biome": 11,
+            "name": "gelo",
+            "count": 330,
+            "depth": 1,
+            "x": -65,
+            "z": 78
+          },
+          "12": {
+            "biome": 12,
+            "name": "floresta",
+            "count": 2875,
+            "depth": 3,
+            "x": 0,
+            "z": 8
+          }
+        },
+        "transitions": [
+          {
+            "pair": "grama/floresta",
+            "contact": 2938,
+            "x": -9,
+            "z": -1
+          },
+          {
+            "pair": "grama/rocha",
+            "contact": 1088,
+            "x": 14,
+            "z": 5
+          },
+          {
+            "pair": "rocha/neve",
+            "contact": 949,
+            "x": 6,
+            "z": 9
+          }
+        ],
+        "coast": {
+          "x": -11,
+          "z": 33
+        },
+        "size": 224,
+        "tileset": "exuberante"
+      },
+      "props": [
+        {
+          "name": "InstancedGrassTufts",
+          "n": 154,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "InstancedPebbles",
+          "n": 128,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "InstancedBoulders",
+          "n": 26,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "InstancedBushes",
+          "n": 15,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "InstancedBerries",
+          "n": 15,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "InstancedStumps",
+          "n": 10,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "InstancedMushrooms",
+          "n": 10,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "InstancedLilyPads",
+          "n": 7,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 7
+        },
+        {
+          "name": "InstancedLotus",
+          "n": 7,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 7
+        },
+        {
+          "name": "InstancedFlowerLeaves",
+          "n": 33,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "InstancedFlowerPetals",
+          "n": 33,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "fdac04",
+          "n": 4,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "974352",
+          "n": 4,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "079d81",
+          "n": 21,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "2831f2",
+          "n": 2,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "15dd5e",
+          "n": 10,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "65a89d",
+          "n": 11,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "f3755f",
+          "n": 3,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "55d11c",
+          "n": 1,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "49597d",
+          "n": 9,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "5845ae",
+          "n": 3,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "21bf0c",
+          "n": 6,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "312787",
+          "n": 4,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "44ad36",
+          "n": 9,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "5aee28",
+          "n": 2,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "c23390",
+          "n": 1,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "89c5b2",
+          "n": 1,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "fd9675",
+          "n": 6,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "aa3b27",
+          "n": 1,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "245e9c",
+          "n": 3,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "bfbe5d",
+          "n": 6,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "34dcfd",
+          "n": 18,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "29450e",
+          "n": 7,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "44afff",
+          "n": 1,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "74c911",
+          "n": 8,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "05dde2",
+          "n": 2,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "f298a2",
+          "n": 3,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "b95c8f",
+          "n": 1,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "fb764d",
+          "n": 2,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "d3cd8b",
+          "n": 6,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "c9b359",
+          "n": 2,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "bb89e3",
+          "n": 10,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "e7d835",
+          "n": 3,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "296610",
+          "n": 2,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "149fdd",
+          "n": 10,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "673a38",
+          "n": 1,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "550c34",
+          "n": 1,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "ed801d",
+          "n": 5,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "6e36bf",
+          "n": 1,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "b911b7",
+          "n": 3,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "9aecc2",
+          "n": 1,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "5a2f7d",
+          "n": 3,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "5d6488",
+          "n": 1,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "9805e0",
+          "n": 1,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "3a8159",
+          "n": 6,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "9c0537",
+          "n": 6,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "02d81f",
+          "n": 1,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "b2166d",
+          "n": 8,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "16c7de",
+          "n": 2,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "06220f",
+          "n": 2,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "28add8",
+          "n": 10,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "b58d21",
+          "n": 1,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "1bd419",
+          "n": 1,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "bfdf51",
+          "n": 5,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "aa8753",
+          "n": 1,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "39c322",
+          "n": 4,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "1e8146",
+          "n": 10,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "bd823a",
+          "n": 11,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "4715b2",
+          "n": 9,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "59683d",
+          "n": 3,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "580124",
+          "n": 9,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "18f305",
+          "n": 2,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "fef58b",
+          "n": 1,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "630402",
+          "n": 1,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "a09247",
+          "n": 3,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "02f629",
+          "n": 4,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "ce5b8b",
+          "n": 7,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "3fcd34",
+          "n": 6,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "a86cf5",
           "n": 2,
           "floatN": 0,
           "maxFloat": 0,
@@ -834,14 +2051,14 @@
         }
       ],
       "scene": {
-        "trees": 151,
+        "trees": 190,
         "deposits": 4,
         "critters": 8
       },
       "critters": {
         "ref": {
-          "x": -19.974490980062843,
-          "z": -28.308577614093764,
+          "x": -36.02581258393793,
+          "z": 6.879590449973894,
           "species": "sheep"
         },
         "total": 11
@@ -861,12 +2078,6 @@
         },
         {
           "sp": "sheep",
-          "y": 2.54,
-          "h": 2.54,
-          "root": 2.54
-        },
-        {
-          "sp": "sheep",
           "y": 2.6,
           "h": 2.6,
           "root": 2.6
@@ -879,80 +2090,3485 @@
         },
         {
           "sp": "sheep",
-          "y": 2.68,
-          "h": 2.68,
-          "root": 2.68
+          "y": 3.03,
+          "h": 3.03,
+          "root": 3.03
         },
         {
           "sp": "sheep",
-          "y": 2.95,
-          "h": 2.95,
-          "root": 2.95
+          "y": 2.61,
+          "h": 2.61,
+          "root": 2.61
         },
         {
           "sp": "sheep",
-          "y": 2.6,
-          "h": 2.6,
-          "root": 2.6
+          "y": 2.55,
+          "h": 2.55,
+          "root": 2.55
+        },
+        {
+          "sp": "sheep",
+          "y": 2.45,
+          "h": 2.45,
+          "root": 2.45
         },
         {
           "sp": "boar",
-          "y": 3.01,
-          "h": 3.01,
-          "root": 3.01
+          "y": 2.7,
+          "h": 2.7,
+          "root": 2.7
         },
         {
           "sp": "boar",
-          "y": 2.6,
-          "h": 2.6,
-          "root": 2.6
+          "y": 2.7,
+          "h": 2.7,
+          "root": 2.7
         },
         {
           "sp": "boar",
-          "y": 2.92,
-          "h": 2.92,
-          "root": 2.92
+          "y": 2.7,
+          "h": 2.7,
+          "root": 2.7
         }
       ],
-      "mine": {
-        "x": -43.6,
-        "z": -37,
-        "before": 4,
-        "ruins": 0,
-        "after": {
-          "deposits": 3,
-          "depleted": 1,
-          "disposed": true,
-          "ruins": 1
-        }
-      },
       "perfBase": {
         "fps": 60,
         "fpsP1": 59.5,
         "frames": 206,
-        "drawCalls": 298,
-        "triangles": 441649,
-        "geometries": 351,
+        "drawCalls": 269,
+        "triangles": 441544,
+        "geometries": 389,
         "textures": 54
       },
       "perfWide": {
         "fps": 60,
         "fpsP1": 59.5,
         "frames": 206,
-        "drawCalls": 347,
-        "triangles": 369244,
-        "geometries": 353,
+        "drawCalls": 304,
+        "triangles": 360724,
+        "geometries": 389,
+        "textures": 55
+      },
+      "consoleErrors": []
+    },
+    "duelo-continental-3": {
+      "errors": [],
+      "start": {
+        "mapId": "duelo-continental-3",
+        "tileset": "exuberante",
+        "size": 224,
+        "hasBiomeGrid": true,
+        "regions": true,
+        "styles": [
+          "exuberante",
+          "pedregoso",
+          "vulcanico",
+          "inverno",
+          "pantano",
+          "inverno:gelo",
+          "exuberante:floresta"
+        ],
+        "hq": {
+          "x": -40,
+          "z": -10
+        }
+      },
+      "perfStart": {
+        "fps": 60,
+        "fpsP1": 59.5,
+        "frames": 236,
+        "drawCalls": 314,
+        "triangles": 457167,
+        "geometries": 192,
+        "textures": 44
+      },
+      "spots": {
+        "counts": {
+          "mar": 32130,
+          "areia": 2787,
+          "grama": 6802,
+          "rocha": 2504,
+          "vulcânico": 616,
+          "neve": 1928,
+          "pântano": 708,
+          "gelo": 334,
+          "floresta": 2816
+        },
+        "centers": {
+          "1": {
+            "biome": 1,
+            "name": "areia",
+            "count": 2787,
+            "depth": 4,
+            "x": -9,
+            "z": 38
+          },
+          "2": {
+            "biome": 2,
+            "name": "grama",
+            "count": 6802,
+            "depth": 5,
+            "x": 65,
+            "z": 27
+          },
+          "6": {
+            "biome": 6,
+            "name": "rocha",
+            "count": 2504,
+            "depth": 6,
+            "x": -18,
+            "z": 81
+          },
+          "7": {
+            "biome": 7,
+            "name": "vulcânico",
+            "count": 616,
+            "depth": 6,
+            "x": 77,
+            "z": 85
+          },
+          "9": {
+            "biome": 9,
+            "name": "neve",
+            "count": 1928,
+            "depth": 4,
+            "x": 35,
+            "z": -20
+          },
+          "10": {
+            "biome": 10,
+            "name": "pântano",
+            "count": 708,
+            "depth": 6,
+            "x": 32,
+            "z": 87
+          },
+          "11": {
+            "biome": 11,
+            "name": "gelo",
+            "count": 334,
+            "depth": 1,
+            "x": -74,
+            "z": 80
+          },
+          "12": {
+            "biome": 12,
+            "name": "floresta",
+            "count": 2816,
+            "depth": 3,
+            "x": 34,
+            "z": -9
+          }
+        },
+        "transitions": [
+          {
+            "pair": "grama/floresta",
+            "contact": 2800,
+            "x": -14,
+            "z": -1
+          },
+          {
+            "pair": "rocha/neve",
+            "contact": 1188,
+            "x": 13,
+            "z": 9
+          },
+          {
+            "pair": "grama/rocha",
+            "contact": 1000,
+            "x": 64,
+            "z": 4
+          }
+        ],
+        "coast": {
+          "x": 27,
+          "z": 26
+        },
+        "size": 224,
+        "tileset": "exuberante"
+      },
+      "props": [
+        {
+          "name": "InstancedGrassTufts",
+          "n": 154,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "InstancedPebbles",
+          "n": 128,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "InstancedBoulders",
+          "n": 26,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "InstancedBushes",
+          "n": 15,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "InstancedBerries",
+          "n": 15,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "InstancedStumps",
+          "n": 10,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "InstancedMushrooms",
+          "n": 10,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "InstancedLilyPads",
+          "n": 2,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 2
+        },
+        {
+          "name": "InstancedLotus",
+          "n": 2,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 2
+        },
+        {
+          "name": "InstancedFlowerLeaves",
+          "n": 33,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "InstancedFlowerPetals",
+          "n": 33,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "0de9da",
+          "n": 7,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "f966d0",
+          "n": 3,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "0d9b46",
+          "n": 12,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "a2817a",
+          "n": 11,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "53b1e2",
+          "n": 1,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "aa681b",
+          "n": 3,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "4f2015",
+          "n": 1,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "618d10",
+          "n": 3,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "fba74c",
+          "n": 3,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "4e56f7",
+          "n": 1,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "fca927",
+          "n": 11,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "33c86e",
+          "n": 3,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "af444a",
+          "n": 3,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "334bcc",
+          "n": 2,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "f41289",
+          "n": 3,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "62b1a6",
+          "n": 1,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "5f3d6e",
+          "n": 10,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "dce7af",
+          "n": 3,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "41cd2f",
+          "n": 7,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "3c64d8",
+          "n": 2,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "6b7b33",
+          "n": 2,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "9aed87",
+          "n": 1,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "0321c2",
+          "n": 1,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "3b591b",
+          "n": 2,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "947115",
+          "n": 7,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "0d594d",
+          "n": 2,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "ca8ccc",
+          "n": 10,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "c96fda",
+          "n": 3,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "aa51af",
+          "n": 2,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "8e027d",
+          "n": 5,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "5dc800",
+          "n": 2,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "008d0d",
+          "n": 1,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "c493f2",
+          "n": 7,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "7b8ce0",
+          "n": 1,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "cbd3a3",
+          "n": 1,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "4009a0",
+          "n": 1,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "768cc5",
+          "n": 10,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "7629e3",
+          "n": 6,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "1d2b52",
+          "n": 3,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "19ebfe",
+          "n": 3,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "41f1eb",
+          "n": 1,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "cfb4f9",
+          "n": 1,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "e7654c",
+          "n": 1,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "017f64",
+          "n": 3,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "6accdc",
+          "n": 2,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "56f8f4",
+          "n": 5,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "91edc6",
+          "n": 2,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "2b9522",
+          "n": 1,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "748876",
+          "n": 7,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "6a5e7a",
+          "n": 1,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "50c44b",
+          "n": 1,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "1bcb76",
+          "n": 11,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "5458ac",
+          "n": 1,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "05264c",
+          "n": 3,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "485d6d",
+          "n": 1,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "545782",
+          "n": 1,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "611d8e",
+          "n": 1,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "c40eb9",
+          "n": 2,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "e0fa64",
+          "n": 3,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "2647cb",
+          "n": 10,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "d90d85",
+          "n": 3,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "89c474",
+          "n": 12,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "117eda",
+          "n": 3,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "d60ef9",
+          "n": 3,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "86677d",
+          "n": 11,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "bdd3ca",
+          "n": 3,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "1e9868",
+          "n": 2,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "9946bd",
+          "n": 1,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "777b56",
+          "n": 2,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "b933de",
+          "n": 7,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "10bb99",
+          "n": 2,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "e1c16c",
+          "n": 10,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "a4f1e5",
+          "n": 1,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "03fc30",
+          "n": 1,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "918ba1",
+          "n": 1,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "1e1fc3",
+          "n": 1,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        }
+      ],
+      "scene": {
+        "trees": 163,
+        "deposits": 4,
+        "critters": 8
+      },
+      "critters": {
+        "ref": {
+          "x": -21.450706235340213,
+          "z": -8.469623142855918,
+          "species": "sheep"
+        },
+        "total": 11
+      },
+      "critterY": [
+        {
+          "sp": "sheep",
+          "y": 3.2,
+          "h": 3.2,
+          "root": 3.2
+        },
+        {
+          "sp": "sheep",
+          "y": 2.92,
+          "h": 2.92,
+          "root": 2.92
+        },
+        {
+          "sp": "sheep",
+          "y": 2.5,
+          "h": 2.5,
+          "root": 2.5
+        },
+        {
+          "sp": "sheep",
+          "y": 2.78,
+          "h": 2.78,
+          "root": 2.78
+        },
+        {
+          "sp": "sheep",
+          "y": 3.35,
+          "h": 3.35,
+          "root": 3.35
+        },
+        {
+          "sp": "sheep",
+          "y": 3.14,
+          "h": 3.14,
+          "root": 3.14
+        },
+        {
+          "sp": "sheep",
+          "y": 3.11,
+          "h": 3.11,
+          "root": 3.11
+        },
+        {
+          "sp": "sheep",
+          "y": 3.21,
+          "h": 3.21,
+          "root": 3.21
+        },
+        {
+          "sp": "boar",
+          "y": 3.08,
+          "h": 3.08,
+          "root": 3.08
+        },
+        {
+          "sp": "boar",
+          "y": 2.9,
+          "h": 2.9,
+          "root": 2.9
+        },
+        {
+          "sp": "boar",
+          "y": 3.01,
+          "h": 3.01,
+          "root": 3.01
+        }
+      ],
+      "perfBase": {
+        "fps": 60,
+        "fpsP1": 59.5,
+        "frames": 206,
+        "drawCalls": 334,
+        "triangles": 464493,
+        "geometries": 381,
+        "textures": 53
+      },
+      "perfWide": {
+        "fps": 60,
+        "fpsP1": 59.5,
+        "frames": 206,
+        "drawCalls": 365,
+        "triangles": 387111,
+        "geometries": 381,
+        "textures": 54
+      },
+      "consoleErrors": []
+    },
+    "ilha-unica-1": {
+      "errors": [],
+      "start": {
+        "mapId": "ilha-unica-1",
+        "tileset": "exuberante",
+        "size": 224,
+        "hasBiomeGrid": true,
+        "regions": true,
+        "styles": [
+          "exuberante",
+          "savana",
+          "pedregoso",
+          "inverno",
+          "exuberante:floresta"
+        ],
+        "hq": {
+          "x": -40,
+          "z": -34
+        }
+      },
+      "perfStart": {
+        "fps": 60,
+        "fpsP1": 59.5,
+        "frames": 236,
+        "drawCalls": 246,
+        "triangles": 454904,
+        "geometries": 132,
+        "textures": 41
+      },
+      "spots": {
+        "counts": {
+          "mar": 32886,
+          "areia": 2088,
+          "grama": 7771,
+          "savana": 3811,
+          "rocha": 479,
+          "neve": 532,
+          "floresta": 3058
+        },
+        "centers": {
+          "1": {
+            "biome": 1,
+            "name": "areia",
+            "count": 2088,
+            "depth": 4,
+            "x": 26,
+            "z": 62
+          },
+          "2": {
+            "biome": 2,
+            "name": "grama",
+            "count": 7771,
+            "depth": 8,
+            "x": 52,
+            "z": 23
+          },
+          "3": {
+            "biome": 3,
+            "name": "savana",
+            "count": 3811,
+            "depth": 9,
+            "x": -16,
+            "z": 21
+          },
+          "6": {
+            "biome": 6,
+            "name": "rocha",
+            "count": 479,
+            "depth": 2,
+            "x": -7,
+            "z": -8
+          },
+          "9": {
+            "biome": 9,
+            "name": "neve",
+            "count": 532,
+            "depth": 5,
+            "x": -13,
+            "z": -20
+          },
+          "12": {
+            "biome": 12,
+            "name": "floresta",
+            "count": 3058,
+            "depth": 4,
+            "x": 17,
+            "z": 1
+          }
+        },
+        "transitions": [
+          {
+            "pair": "grama/floresta",
+            "contact": 3280,
+            "x": 63,
+            "z": 4
+          },
+          {
+            "pair": "grama/savana",
+            "contact": 1006,
+            "x": 46,
+            "z": 38
+          },
+          {
+            "pair": "rocha/neve",
+            "contact": 434,
+            "x": -6,
+            "z": -21
+          }
+        ],
+        "coast": {
+          "x": 18,
+          "z": -20
+        },
+        "size": 224,
+        "tileset": "exuberante"
+      },
+      "props": [
+        {
+          "name": "InstancedGrassTufts",
+          "n": 154,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "InstancedPebbles",
+          "n": 128,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "InstancedBoulders",
+          "n": 26,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "InstancedBushes",
+          "n": 15,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "InstancedBerries",
+          "n": 15,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "InstancedStumps",
+          "n": 10,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "InstancedMushrooms",
+          "n": 10,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "InstancedLilyPads",
+          "n": 2,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 2
+        },
+        {
+          "name": "InstancedLotus",
+          "n": 2,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 2
+        },
+        {
+          "name": "InstancedFlowerLeaves",
+          "n": 33,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "InstancedFlowerPetals",
+          "n": 33,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "54f660",
+          "n": 10,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "99ab2e",
+          "n": 5,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "e9ef85",
+          "n": 4,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "52ba15",
+          "n": 5,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "f43a30",
+          "n": 1,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "f73b8e",
+          "n": 1,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "77de09",
+          "n": 1,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "1fe30a",
+          "n": 7,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "12c1c0",
+          "n": 15,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "051013",
+          "n": 2,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "909bfd",
+          "n": 9,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "fe8ea2",
+          "n": 2,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "3ca876",
+          "n": 4,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "a12f1b",
+          "n": 2,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "0a7b72",
+          "n": 8,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "69cfee",
+          "n": 2,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "496420",
+          "n": 4,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "9a187d",
+          "n": 8,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "4f88f2",
+          "n": 3,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "3d3641",
+          "n": 1,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "dd7d75",
+          "n": 11,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "448afe",
+          "n": 8,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "719458",
+          "n": 3,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "9c76ca",
+          "n": 3,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "a761c7",
+          "n": 17,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "517656",
+          "n": 3,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "0281bd",
+          "n": 4,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "ba090e",
+          "n": 7,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "4d7bd5",
+          "n": 1,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "874967",
+          "n": 3,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "0e82b3",
+          "n": 10,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "9c7a82",
+          "n": 1,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "1f3d51",
+          "n": 1,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "c34c0c",
+          "n": 2,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "e4feab",
+          "n": 4,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "f20529",
+          "n": 6,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "af3262",
+          "n": 1,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "6bbae3",
+          "n": 3,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "22a51f",
+          "n": 17,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "3e71cd",
+          "n": 7,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "afc798",
+          "n": 10,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "cfd404",
+          "n": 1,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "beddd9",
+          "n": 1,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "99eeea",
+          "n": 4,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "5933d4",
+          "n": 2,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        }
+      ],
+      "scene": {
+        "trees": 179,
+        "deposits": 4,
+        "critters": 8
+      },
+      "critters": {
+        "ref": {
+          "x": -14.97547789363012,
+          "z": -32.61828603989925,
+          "species": "sheep"
+        },
+        "total": 11
+      },
+      "critterY": [
+        {
+          "sp": "sheep",
+          "y": 3.72,
+          "h": 3.72,
+          "root": 3.72
+        },
+        {
+          "sp": "sheep",
+          "y": 5.3,
+          "h": 5.3,
+          "root": 5.3
+        },
+        {
+          "sp": "sheep",
+          "y": 4.16,
+          "h": 4.16,
+          "root": 4.16
+        },
+        {
+          "sp": "sheep",
+          "y": 4.3,
+          "h": 4.3,
+          "root": 4.3
+        },
+        {
+          "sp": "sheep",
+          "y": 2.5,
+          "h": 2.5,
+          "root": 2.5
+        },
+        {
+          "sp": "sheep",
+          "y": 2.6,
+          "h": 2.6,
+          "root": 2.6
+        },
+        {
+          "sp": "sheep",
+          "y": 2.65,
+          "h": 2.65,
+          "root": 2.65
+        },
+        {
+          "sp": "sheep",
+          "y": 2.6,
+          "h": 2.6,
+          "root": 2.6
+        },
+        {
+          "sp": "boar",
+          "y": 3.15,
+          "h": 3.15,
+          "root": 3.15
+        },
+        {
+          "sp": "boar",
+          "y": 3.64,
+          "h": 3.64,
+          "root": 3.64
+        },
+        {
+          "sp": "boar",
+          "y": 2.74,
+          "h": 2.74,
+          "root": 2.74
+        }
+      ],
+      "mine": {
+        "x": -37.4,
+        "z": -48.8,
+        "before": 4,
+        "ruins": 0,
+        "after": {
+          "deposits": 3,
+          "depleted": 1,
+          "disposed": true,
+          "ruins": 1,
+          "debris": [
+            {
+              "x": -37.4,
+              "z": -48.8,
+              "minRel": -0.18,
+              "maxRel": 0.56,
+              "opacity": 1,
+              "alpha": "active"
+            }
+          ]
+        }
+      },
+      "perfBase": {
+        "fps": 60,
+        "fpsP1": 59.5,
+        "frames": 206,
+        "drawCalls": 242,
+        "triangles": 445285,
+        "geometries": 382,
+        "textures": 55
+      },
+      "perfWide": {
+        "fps": 60,
+        "fpsP1": 59.5,
+        "frames": 206,
+        "drawCalls": 291,
+        "triangles": 391998,
+        "geometries": 384,
+        "textures": 55
+      },
+      "consoleErrors": []
+    },
+    "ilha-unica-2": {
+      "errors": [],
+      "start": {
+        "mapId": "ilha-unica-2",
+        "tileset": "exuberante",
+        "size": 224,
+        "hasBiomeGrid": true,
+        "regions": true,
+        "styles": [
+          "exuberante",
+          "savana",
+          "pedregoso",
+          "inverno",
+          "exuberante:floresta"
+        ],
+        "hq": {
+          "x": -55,
+          "z": -4
+        }
+      },
+      "perfStart": {
+        "fps": 60,
+        "fpsP1": 59.5,
+        "frames": 236,
+        "drawCalls": 285,
+        "triangles": 463954,
+        "geometries": 150,
+        "textures": 44
+      },
+      "spots": {
+        "counts": {
+          "mar": 34756,
+          "areia": 1812,
+          "grama": 6611,
+          "savana": 2789,
+          "rocha": 490,
+          "neve": 1199,
+          "floresta": 2968
+        },
+        "centers": {
+          "1": {
+            "biome": 1,
+            "name": "areia",
+            "count": 1812,
+            "depth": 4,
+            "x": -17,
+            "z": -44
+          },
+          "2": {
+            "biome": 2,
+            "name": "grama",
+            "count": 6611,
+            "depth": 7,
+            "x": -59,
+            "z": 5
+          },
+          "3": {
+            "biome": 3,
+            "name": "savana",
+            "count": 2789,
+            "depth": 8,
+            "x": -36,
+            "z": 22
+          },
+          "6": {
+            "biome": 6,
+            "name": "rocha",
+            "count": 490,
+            "depth": 2,
+            "x": -53,
+            "z": -5
+          },
+          "9": {
+            "biome": 9,
+            "name": "neve",
+            "count": 1199,
+            "depth": 9,
+            "x": 34,
+            "z": -26
+          },
+          "12": {
+            "biome": 12,
+            "name": "floresta",
+            "count": 2968,
+            "depth": 4,
+            "x": 16,
+            "z": 4
+          }
+        },
+        "transitions": [
+          {
+            "pair": "grama/floresta",
+            "contact": 2987,
+            "x": 40,
+            "z": -1
+          },
+          {
+            "pair": "grama/savana",
+            "contact": 839,
+            "x": -52,
+            "z": 28
+          },
+          {
+            "pair": "savana/floresta",
+            "contact": 494,
+            "x": -77,
+            "z": 30
+          }
+        ],
+        "coast": {
+          "x": -20,
+          "z": -13
+        },
+        "size": 224,
+        "tileset": "exuberante"
+      },
+      "props": [
+        {
+          "name": "InstancedGrassTufts",
+          "n": 154,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "InstancedPebbles",
+          "n": 128,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "InstancedBoulders",
+          "n": 26,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "InstancedBushes",
+          "n": 15,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "InstancedBerries",
+          "n": 15,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "InstancedStumps",
+          "n": 10,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "InstancedMushrooms",
+          "n": 10,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "InstancedLilyPads",
+          "n": 2,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 2
+        },
+        {
+          "name": "InstancedLotus",
+          "n": 2,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 2
+        },
+        {
+          "name": "InstancedFlowerLeaves",
+          "n": 33,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "InstancedFlowerPetals",
+          "n": 33,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "8e1e4a",
+          "n": 14,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "4b45b4",
+          "n": 2,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "4b4ed5",
+          "n": 10,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "d884b9",
+          "n": 5,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "b05e16",
+          "n": 10,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "77388b",
+          "n": 9,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "dcc216",
+          "n": 2,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "54bed6",
+          "n": 2,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "6de7da",
+          "n": 2,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "a4d77c",
+          "n": 4,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "18e4b8",
+          "n": 1,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "298196",
+          "n": 14,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "fd500c",
+          "n": 1,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "a7a160",
+          "n": 11,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "bdc44a",
+          "n": 2,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "0e74ed",
+          "n": 3,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "7f862e",
+          "n": 2,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "61d373",
+          "n": 1,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "87c8a6",
+          "n": 1,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "71c308",
+          "n": 5,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "184723",
+          "n": 7,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "c86bc7",
+          "n": 18,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "b40d9d",
+          "n": 7,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "35c80c",
+          "n": 3,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "a63b19",
+          "n": 6,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "872877",
+          "n": 2,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "e9b494",
+          "n": 2,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "cc6cab",
+          "n": 3,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "b4f322",
+          "n": 4,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "d0c2f6",
+          "n": 8,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "c122e4",
+          "n": 1,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "f1036b",
+          "n": 2,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "0cce0b",
+          "n": 5,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "5702f9",
+          "n": 2,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "a40e0f",
+          "n": 4,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "66ccfe",
+          "n": 1,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "bf4f2b",
+          "n": 8,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "9b983f",
+          "n": 4,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "a161d5",
+          "n": 1,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "a3f2b0",
+          "n": 1,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "46694e",
+          "n": 11,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "808070",
+          "n": 1,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "ceebeb",
+          "n": 1,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "a8ff19",
+          "n": 18,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "3d6fd0",
+          "n": 3,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "002758",
+          "n": 3,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "045799",
+          "n": 5,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "a0c80b",
+          "n": 2,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        }
+      ],
+      "scene": {
+        "trees": 171,
+        "deposits": 4,
+        "critters": 8
+      },
+      "critters": {
+        "ref": {
+          "x": -28.360253803424428,
+          "z": -6.005149905945015,
+          "species": "sheep"
+        },
+        "total": 11
+      },
+      "critterY": [
+        {
+          "sp": "sheep",
+          "y": 2.18,
+          "h": 2.18,
+          "root": 2.18
+        },
+        {
+          "sp": "sheep",
+          "y": 2.69,
+          "h": 2.69,
+          "root": 2.69
+        },
+        {
+          "sp": "sheep",
+          "y": 2.61,
+          "h": 2.61,
+          "root": 2.61
+        },
+        {
+          "sp": "sheep",
+          "y": 2.5,
+          "h": 2.5,
+          "root": 2.5
+        },
+        {
+          "sp": "sheep",
+          "y": 2.58,
+          "h": 2.58,
+          "root": 2.58
+        },
+        {
+          "sp": "sheep",
+          "y": 2.58,
+          "h": 2.58,
+          "root": 2.58
+        },
+        {
+          "sp": "sheep",
+          "y": 3.4,
+          "h": 3.4,
+          "root": 3.4
+        },
+        {
+          "sp": "sheep",
+          "y": 2.6,
+          "h": 2.6,
+          "root": 2.6
+        },
+        {
+          "sp": "boar",
+          "y": 2.7,
+          "h": 2.7,
+          "root": 2.7
+        },
+        {
+          "sp": "boar",
+          "y": 2.7,
+          "h": 2.7,
+          "root": 2.7
+        },
+        {
+          "sp": "boar",
+          "y": 2.6,
+          "h": 2.6,
+          "root": 2.6
+        }
+      ],
+      "perfBase": {
+        "fps": 57.4,
+        "fpsP1": 59.5,
+        "frames": 197,
+        "drawCalls": 282,
+        "triangles": 463326,
+        "geometries": 370,
+        "textures": 53
+      },
+      "perfWide": {
+        "fps": 19.8,
+        "fpsP1": 2.9,
+        "frames": 72,
+        "drawCalls": 317,
+        "triangles": 379302,
+        "geometries": 372,
+        "textures": 54
+      },
+      "consoleErrors": []
+    },
+    "ilha-unica-3": {
+      "errors": [],
+      "start": {
+        "mapId": "ilha-unica-3",
+        "tileset": "exuberante",
+        "size": 224,
+        "hasBiomeGrid": true,
+        "regions": true,
+        "styles": [
+          "exuberante",
+          "savana",
+          "pedregoso",
+          "inverno",
+          "exuberante:floresta"
+        ],
+        "hq": {
+          "x": -49,
+          "z": -34
+        }
+      },
+      "perfStart": {
+        "fps": 60,
+        "fpsP1": 59.5,
+        "frames": 237,
+        "drawCalls": 267,
+        "triangles": 456414,
+        "geometries": 140,
+        "textures": 44
+      },
+      "spots": {
+        "counts": {
+          "mar": 32866,
+          "areia": 2135,
+          "grama": 7022,
+          "savana": 4673,
+          "rocha": 405,
+          "neve": 650,
+          "floresta": 2874
+        },
+        "centers": {
+          "1": {
+            "biome": 1,
+            "name": "areia",
+            "count": 2135,
+            "depth": 3,
+            "x": 26,
+            "z": -20
+          },
+          "2": {
+            "biome": 2,
+            "name": "grama",
+            "count": 7022,
+            "depth": 5,
+            "x": -15,
+            "z": 0
+          },
+          "3": {
+            "biome": 3,
+            "name": "savana",
+            "count": 4673,
+            "depth": 9,
+            "x": 0,
+            "z": 20
+          },
+          "6": {
+            "biome": 6,
+            "name": "rocha",
+            "count": 405,
+            "depth": 2,
+            "x": 0,
+            "z": -7
+          },
+          "9": {
+            "biome": 9,
+            "name": "neve",
+            "count": 650,
+            "depth": 4,
+            "x": -35,
+            "z": -28
+          },
+          "12": {
+            "biome": 12,
+            "name": "floresta",
+            "count": 2874,
+            "depth": 4,
+            "x": -29,
+            "z": 37
+          }
+        },
+        "transitions": [
+          {
+            "pair": "grama/floresta",
+            "contact": 3153,
+            "x": 1,
+            "z": -4
+          },
+          {
+            "pair": "grama/savana",
+            "contact": 829,
+            "x": -36,
+            "z": 27
+          },
+          {
+            "pair": "rocha/neve",
+            "contact": 403,
+            "x": 59,
+            "z": -27
+          }
+        ],
+        "coast": {
+          "x": -24,
+          "z": -5
+        },
+        "size": 224,
+        "tileset": "exuberante"
+      },
+      "props": [
+        {
+          "name": "InstancedGrassTufts",
+          "n": 154,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "InstancedPebbles",
+          "n": 128,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "InstancedBoulders",
+          "n": 26,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "InstancedBushes",
+          "n": 15,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "InstancedBerries",
+          "n": 15,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "InstancedStumps",
+          "n": 10,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "InstancedMushrooms",
+          "n": 10,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "InstancedLilyPads",
+          "n": 4,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 4
+        },
+        {
+          "name": "InstancedLotus",
+          "n": 4,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 4
+        },
+        {
+          "name": "InstancedFlowerLeaves",
+          "n": 33,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "InstancedFlowerPetals",
+          "n": 33,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "796bce",
+          "n": 9,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "eb84bc",
+          "n": 16,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "c4b446",
+          "n": 2,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "8013dc",
+          "n": 13,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "b6a75b",
+          "n": 2,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "c9b5c5",
+          "n": 2,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "209a4d",
+          "n": 9,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "81ca58",
+          "n": 3,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "5953b6",
+          "n": 3,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "f1b73a",
+          "n": 2,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "5af352",
+          "n": 1,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "cd286d",
+          "n": 4,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "c2dcf3",
+          "n": 2,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "2d419d",
+          "n": 1,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "7f7956",
+          "n": 9,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "a8a0ff",
+          "n": 4,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "d6e6ea",
+          "n": 11,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "0f9eb6",
+          "n": 1,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "c1ce94",
+          "n": 4,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "9889c1",
+          "n": 1,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "cde0fb",
+          "n": 2,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "39b108",
+          "n": 7,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "dd8a3e",
+          "n": 3,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "9e257f",
+          "n": 2,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "227641",
+          "n": 3,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "6a701e",
+          "n": 13,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "3260cb",
+          "n": 3,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "0f85ed",
+          "n": 1,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "837053",
+          "n": 3,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "cf1a50",
+          "n": 2,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "82a70d",
+          "n": 1,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "692545",
+          "n": 4,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "5ebf58",
+          "n": 1,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "c7d84b",
+          "n": 1,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "c07774",
+          "n": 1,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "3a8f2a",
+          "n": 14,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "b44ce7",
+          "n": 4,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "864ebc",
+          "n": 1,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "dd2c3b",
+          "n": 1,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "1d6c90",
+          "n": 1,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "ee7328",
+          "n": 3,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "99077e",
+          "n": 5,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "c51b47",
+          "n": 1,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "e007c6",
+          "n": 3,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "ce6b5f",
+          "n": 2,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "0ee261",
+          "n": 1,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "ff0fbc",
+          "n": 14,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "de3c36",
+          "n": 4,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "1cd850",
+          "n": 1,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "2dde2c",
+          "n": 1,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "e47741",
+          "n": 1,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "be920d",
+          "n": 1,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "c9ae78",
+          "n": 2,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "8ef4f3",
+          "n": 9,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "192c68",
+          "n": 2,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "ca01e3",
+          "n": 4,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        }
+      ],
+      "scene": {
+        "trees": 176,
+        "deposits": 4,
+        "critters": 8
+      },
+      "critters": {
+        "ref": {
+          "x": -26.237234291412207,
+          "z": -31.13892767668635,
+          "species": "sheep"
+        },
+        "total": 11
+      },
+      "critterY": [
+        {
+          "sp": "sheep",
+          "y": 3.43,
+          "h": 3.43,
+          "root": 3.43
+        },
+        {
+          "sp": "sheep",
+          "y": 2.6,
+          "h": 2.6,
+          "root": 2.6
+        },
+        {
+          "sp": "sheep",
+          "y": 3.2,
+          "h": 3.2,
+          "root": 3.2
+        },
+        {
+          "sp": "sheep",
+          "y": 3.67,
+          "h": 3.67,
+          "root": 3.67
+        },
+        {
+          "sp": "sheep",
+          "y": 2.6,
+          "h": 2.6,
+          "root": 2.6
+        },
+        {
+          "sp": "sheep",
+          "y": 1.36,
+          "h": 1.36,
+          "root": 1.36
+        },
+        {
+          "sp": "sheep",
+          "y": 2.6,
+          "h": 2.6,
+          "root": 2.6
+        },
+        {
+          "sp": "sheep",
+          "y": 2.86,
+          "h": 2.86,
+          "root": 2.86
+        },
+        {
+          "sp": "boar",
+          "y": 3.23,
+          "h": 3.23,
+          "root": 3.23
+        },
+        {
+          "sp": "boar",
+          "y": 2.6,
+          "h": 2.6,
+          "root": 2.6
+        },
+        {
+          "sp": "boar",
+          "y": 3.51,
+          "h": 3.51,
+          "root": 3.51
+        }
+      ],
+      "perfBase": {
+        "fps": 60,
+        "fpsP1": 59.5,
+        "frames": 206,
+        "drawCalls": 281,
+        "triangles": 457436,
+        "geometries": 391,
+        "textures": 54
+      },
+      "perfWide": {
+        "fps": 60,
+        "fpsP1": 59.5,
+        "frames": 207,
+        "drawCalls": 350,
+        "triangles": 416760,
+        "geometries": 394,
         "textures": 54
       },
       "consoleErrors": []
     }
   },
-  "lava": {},
+  "lava": {
+    "start": {
+      "mapId": "dois-continentes-1",
+      "lavaGrid": true,
+      "biomeGrid": true,
+      "lavaObj": false
+    },
+    "spot": {
+      "cells": 93,
+      "sc": 975.4846986557375,
+      "x": -5,
+      "z": -24,
+      "d": 1
+    },
+    "glow": {
+      "hotFraction": 0.04,
+      "maxLum": 231.8
+    },
+    "perf": {
+      "fps": 60,
+      "fpsP1": 59.5,
+      "frames": 206,
+      "drawCalls": 160,
+      "triangles": 395127,
+      "geometries": 356,
+      "textures": 53
+    }
+  },
   "checks": [
     {
+      "name": "história abre sozinha na 1a visita à campanha principal",
+      "ok": true,
+      "extra": ""
+    },
+    {
+      "name": "7 painéis narrativos visitados",
+      "ok": true,
+      "extra": "narrativos=7, total=8"
+    },
+    {
+      "name": "nenhum painel caiu no fallback de imagem",
+      "ok": true,
+      "extra": "1376x768 1376x768 1376x768 1376x768 1376x768 1376x768 1376x768 1376x768"
+    },
+    {
+      "name": "história terminou sozinha após o último painel (sem travar)",
+      "ok": true,
+      "extra": ""
+    },
+    {
+      "name": "seletor main x beta presente (2+ abas)",
+      "ok": true,
+      "extra": "[{\"text\":\"A Guerra do Mar Fendido (Aliança)\",\"selected\":\"true\"},{\"text\":\"A Guerra do Mar Fendido (Horda)\",\"selected\":\"false\"},{\"text\":\"Campanha Clássica (beta)\",\"selected\":\"false\"}]"
+    },
+    {
+      "name": "aba beta (Campanha Clássica) não mostra \"Rever história\"",
+      "ok": true,
+      "extra": "{\"hasReviewStory\":false,\"items\":8,\"provisional\":true}"
+    },
+    {
+      "name": "abas main (Aliança/Horda) mostram \"Rever história\"",
+      "ok": true,
+      "extra": "{\"hasReviewStory\":true,\"items\":12,\"provisional\":false}"
+    },
+    {
+      "name": "\"Rever história\" reabre e Esc volta à lista de campanha (sem iniciar partida)",
+      "ok": true,
+      "extra": "{\"story\":false,\"campaign\":true,\"mainMenu\":true,\"inGame\":false}"
+    },
+    {
+      "name": "1a visita: Esc na história pula a história e deixa a lista da campanha aberta",
+      "ok": true,
+      "extra": "{\"story\":false,\"campaign\":true}"
+    },
+    {
       "name": "duelo-continental-1: partida carregou o mapa certo e o render é regional",
-      "ok": false,
-      "extra": "{\"styles\":null}"
+      "ok": true,
+      "extra": "{\"styles\":[\"exuberante\",\"pedregoso\",\"vulcanico\",\"inverno\",\"pantano\",\"inverno:gelo\",\"exuberante:floresta\"]}"
     },
     {
       "name": "duelo-continental-1: props (instâncias) a no máximo 0,9 u de altura do terreno",
@@ -966,8 +5582,8 @@
     },
     {
       "name": "duelo-continental-1: nenhuma árvore/decoração debaixo d'água",
-      "ok": false,
-      "extra": "[[\"InstancedLilyPads\",8],[\"InstancedLotus\",8]]"
+      "ok": true,
+      "extra": "[]"
     },
     {
       "name": "duelo-continental-1: critters pousados no terreno (|y - altura| <= 0,8)",
@@ -977,22 +5593,221 @@
     {
       "name": "duelo-continental-1: mina esgotada some da simulação e deixa ruína",
       "ok": true,
-      "extra": "{\"antes\":4,\"depois\":{\"deposits\":3,\"depleted\":1,\"disposed\":true,\"ruins\":1}}"
+      "extra": "{\"antes\":4,\"depois\":{\"deposits\":3,\"depleted\":1,\"disposed\":true,\"ruins\":1,\"debris\":[{\"x\":-43.6,\"z\":-37,\"minRel\":-0.21,\"maxRel\":0.66,\"opacity\":1,\"alpha\":\"active\"}]}}"
     },
     {
       "name": "duelo-continental-1: 0 erros de console/página/rede",
+      "ok": true,
+      "extra": ""
+    },
+    {
+      "name": "duelo-continental-2: partida carregou o mapa certo e o render é regional",
+      "ok": true,
+      "extra": "{\"styles\":[\"exuberante\",\"pedregoso\",\"vulcanico\",\"inverno\",\"pantano\",\"inverno:gelo\",\"exuberante:floresta\"]}"
+    },
+    {
+      "name": "duelo-continental-2: props (instâncias) a no máximo 0,9 u de altura do terreno",
+      "ok": true,
+      "extra": "[]"
+    },
+    {
+      "name": "duelo-continental-2: props (instâncias) não afundados > 0,9 u",
+      "ok": true,
+      "extra": "[]"
+    },
+    {
+      "name": "duelo-continental-2: nenhuma árvore/decoração debaixo d'água",
+      "ok": true,
+      "extra": "[]"
+    },
+    {
+      "name": "duelo-continental-2: critters pousados no terreno (|y - altura| <= 0,8)",
+      "ok": true,
+      "extra": "[]"
+    },
+    {
+      "name": "duelo-continental-2: 0 erros de console/página/rede",
+      "ok": true,
+      "extra": ""
+    },
+    {
+      "name": "duelo-continental-3: partida carregou o mapa certo e o render é regional",
+      "ok": true,
+      "extra": "{\"styles\":[\"exuberante\",\"pedregoso\",\"vulcanico\",\"inverno\",\"pantano\",\"inverno:gelo\",\"exuberante:floresta\"]}"
+    },
+    {
+      "name": "duelo-continental-3: props (instâncias) a no máximo 0,9 u de altura do terreno",
+      "ok": true,
+      "extra": "[]"
+    },
+    {
+      "name": "duelo-continental-3: props (instâncias) não afundados > 0,9 u",
+      "ok": true,
+      "extra": "[]"
+    },
+    {
+      "name": "duelo-continental-3: nenhuma árvore/decoração debaixo d'água",
+      "ok": true,
+      "extra": "[]"
+    },
+    {
+      "name": "duelo-continental-3: critters pousados no terreno (|y - altura| <= 0,8)",
+      "ok": true,
+      "extra": "[]"
+    },
+    {
+      "name": "duelo-continental-3: 0 erros de console/página/rede",
+      "ok": true,
+      "extra": ""
+    },
+    {
+      "name": "ilha-unica-1: partida carregou o mapa certo e o render é regional",
+      "ok": true,
+      "extra": "{\"styles\":[\"exuberante\",\"savana\",\"pedregoso\",\"inverno\",\"exuberante:floresta\"]}"
+    },
+    {
+      "name": "ilha-unica-1: props (instâncias) a no máximo 0,9 u de altura do terreno",
+      "ok": true,
+      "extra": "[]"
+    },
+    {
+      "name": "ilha-unica-1: props (instâncias) não afundados > 0,9 u",
+      "ok": true,
+      "extra": "[]"
+    },
+    {
+      "name": "ilha-unica-1: nenhuma árvore/decoração debaixo d'água",
+      "ok": true,
+      "extra": "[]"
+    },
+    {
+      "name": "ilha-unica-1: critters pousados no terreno (|y - altura| <= 0,8)",
+      "ok": true,
+      "extra": "[]"
+    },
+    {
+      "name": "ilha-unica-1: mina esgotada some da simulação e deixa ruína",
+      "ok": true,
+      "extra": "{\"antes\":4,\"depois\":{\"deposits\":3,\"depleted\":1,\"disposed\":true,\"ruins\":1,\"debris\":[{\"x\":-37.4,\"z\":-48.8,\"minRel\":-0.18,\"maxRel\":0.56,\"opacity\":1,\"alpha\":\"active\"}]}}"
+    },
+    {
+      "name": "ilha-unica-1: 0 erros de console/página/rede",
+      "ok": true,
+      "extra": ""
+    },
+    {
+      "name": "ilha-unica-2: partida carregou o mapa certo e o render é regional",
+      "ok": true,
+      "extra": "{\"styles\":[\"exuberante\",\"savana\",\"pedregoso\",\"inverno\",\"exuberante:floresta\"]}"
+    },
+    {
+      "name": "ilha-unica-2: props (instâncias) a no máximo 0,9 u de altura do terreno",
+      "ok": true,
+      "extra": "[]"
+    },
+    {
+      "name": "ilha-unica-2: props (instâncias) não afundados > 0,9 u",
+      "ok": true,
+      "extra": "[]"
+    },
+    {
+      "name": "ilha-unica-2: nenhuma árvore/decoração debaixo d'água",
+      "ok": true,
+      "extra": "[]"
+    },
+    {
+      "name": "ilha-unica-2: critters pousados no terreno (|y - altura| <= 0,8)",
+      "ok": true,
+      "extra": "[]"
+    },
+    {
+      "name": "ilha-unica-2: 0 erros de console/página/rede",
+      "ok": true,
+      "extra": ""
+    },
+    {
+      "name": "ilha-unica-3: partida carregou o mapa certo e o render é regional",
+      "ok": true,
+      "extra": "{\"styles\":[\"exuberante\",\"savana\",\"pedregoso\",\"inverno\",\"exuberante:floresta\"]}"
+    },
+    {
+      "name": "ilha-unica-3: props (instâncias) a no máximo 0,9 u de altura do terreno",
+      "ok": true,
+      "extra": "[]"
+    },
+    {
+      "name": "ilha-unica-3: props (instâncias) não afundados > 0,9 u",
+      "ok": true,
+      "extra": "[]"
+    },
+    {
+      "name": "ilha-unica-3: nenhuma árvore/decoração debaixo d'água",
+      "ok": true,
+      "extra": "[]"
+    },
+    {
+      "name": "ilha-unica-3: critters pousados no terreno (|y - altura| <= 0,8)",
+      "ok": true,
+      "extra": "[]"
+    },
+    {
+      "name": "ilha-unica-3: 0 erros de console/página/rede",
+      "ok": true,
+      "extra": ""
+    },
+    {
+      "name": "mapa com lava carregou (id certo, lavaGrid)",
+      "ok": true,
+      "extra": "{\"mapId\":\"dois-continentes-1\",\"lavaGrid\":true,\"biomeGrid\":true,\"lavaObj\":false}"
+    },
+    {
+      "name": "lava tem pixels laranja vivos no quadro (emissiva)",
+      "ok": true,
+      "extra": "{\"hotFraction\":0.04,\"maxLum\":231.8}"
+    },
+    {
+      "name": "lava: 0 erros de console/página/rede",
       "ok": true,
       "extra": ""
     }
   ],
   "consoleErrors": [],
   "files": [
+    "historia-painel-a-painel.jpg",
+    "campanha-menu-abas.jpg",
     "duelo-continental-1-1-visao.jpg",
     "duelo-continental-1-2-minimapa.jpg",
     "duelo-continental-1-3-biomas.jpg",
     "duelo-continental-1-4-transicoes-e-costa.jpg",
     "duelo-continental-1-5-critters.jpg",
-    "duelo-continental-1-6-mina-desaba.jpg"
+    "duelo-continental-1-6-mina-desaba.jpg",
+    "duelo-continental-2-1-visao.jpg",
+    "duelo-continental-2-2-minimapa.jpg",
+    "duelo-continental-2-3-biomas.jpg",
+    "duelo-continental-2-4-transicoes-e-costa.jpg",
+    "duelo-continental-2-5-critters.jpg",
+    "duelo-continental-3-1-visao.jpg",
+    "duelo-continental-3-2-minimapa.jpg",
+    "duelo-continental-3-3-biomas.jpg",
+    "duelo-continental-3-4-transicoes-e-costa.jpg",
+    "duelo-continental-3-5-critters.jpg",
+    "ilha-unica-1-1-visao.jpg",
+    "ilha-unica-1-2-minimapa.jpg",
+    "ilha-unica-1-3-biomas.jpg",
+    "ilha-unica-1-4-transicoes-e-costa.jpg",
+    "ilha-unica-1-5-critters.jpg",
+    "ilha-unica-1-6-mina-desaba.jpg",
+    "ilha-unica-2-1-visao.jpg",
+    "ilha-unica-2-2-minimapa.jpg",
+    "ilha-unica-2-3-biomas.jpg",
+    "ilha-unica-2-4-transicoes-e-costa.jpg",
+    "ilha-unica-2-5-critters.jpg",
+    "ilha-unica-3-1-visao.jpg",
+    "ilha-unica-3-2-minimapa.jpg",
+    "ilha-unica-3-3-biomas.jpg",
+    "ilha-unica-3-4-transicoes-e-costa.jpg",
+    "ilha-unica-3-5-critters.jpg",
+    "lava-dois-continentes-1.jpg"
   ],
   "consoleErrorCount": 0
 }

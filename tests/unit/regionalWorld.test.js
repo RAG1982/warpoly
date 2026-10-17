@@ -80,6 +80,15 @@ describe('mapa sem biomeGrid = caminho antigo, idêntico ao de antes (referênci
     }
   });
 
+  it('M1-01: a lâmina de água de um mapa com biomeGrid cobre o mapa inteiro (antes: 150 u fixos num mapa de 224)', () => {
+    const def = getMap('duelo-continental-1');
+    const w = new Water(new THREE.Scene(), new Terrain(def), { tileset: def.tileset });
+    w.mesh.geometry.computeBoundingBox();
+    const bb = w.mesh.geometry.boundingBox;
+    expect(bb.max.x - bb.min.x).toBeGreaterThanOrEqual(def.size);
+    expect(bb.max.z - bb.min.z).toBeGreaterThanOrEqual(def.size);
+  });
+
   it('Water: mesmas malhas, cores, opacidade, espuma (quad de 4 vértices) e moitas; sem vertexColors nem lava', () => {
     const GOLDEN = {
       // M1-05/NEW-52: o rio de continental-1v1 é fundo dentro da área jogável; as moitas (antes 4, nos cantos fora de jogo) somem.

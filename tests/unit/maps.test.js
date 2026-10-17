@@ -89,11 +89,11 @@ describe('mapas (src/data/maps/*.json)', () => {
   });
 
   // P-14 (docs/specs/MUNDO-TERRENO-MAPAS.md §8): a serraria inicial fica sempre próxima a um arvoredo
-  // (distância recomendada <= 12 u). Mesma métrica do teste acima: distância ao centro do bosque (m.forests).
+  // (distância recomendada <= 12 u). M1-07 (opção A): mede pela BORDA do bosque (distância ao centro menos o raio do cluster, m.forests[].radius).
   describe('P-14: serraria inicial perto de um arvoredo (todos os mapas jogáveis)', () => {
     const MAX_LUMBER_TO_FOREST = 12;
     for (const m of listMaps()) {
-      it(`${m.id}: cada serraria inicial fica a <= ${MAX_LUMBER_TO_FOREST} u do arvoredo mais próximo`, () => {
+      it(`${m.id}: cada serraria inicial fica a <= ${MAX_LUMBER_TO_FOREST} u da borda do arvoredo mais próximo`, () => {
         const problems = [];
         m.startSlots.forEach((slot, i) => {
           const lumber = layoutAt(slot).buildings.find((b) => b.role === 'lumber');
@@ -104,7 +104,7 @@ describe('mapas (src/data/maps/*.json)', () => {
           let nearest = null;
           let minD = Infinity;
           for (const f of m.forests) {
-            const d = Math.hypot(lumber.x - f.x, lumber.z - f.z);
+            const d = Math.max(0, Math.hypot(lumber.x - f.x, lumber.z - f.z) - (f.radius ?? 0));
             if (d < minD) {
               minD = d;
               nearest = f;
@@ -114,7 +114,7 @@ describe('mapas (src/data/maps/*.json)', () => {
             problems.push(`slot ${i}: o mapa não tem arvoredo (forests vazio)`);
           } else if (minD > MAX_LUMBER_TO_FOREST) {
             problems.push(
-              `slot ${i}: serraria em (${lumber.x.toFixed(1)}, ${lumber.z.toFixed(1)}) a ${minD.toFixed(1)} u do arvoredo mais próximo em (${nearest.x}, ${nearest.z}) (deve ser <= ${MAX_LUMBER_TO_FOREST})`
+              `slot ${i}: serraria em (${lumber.x.toFixed(1)}, ${lumber.z.toFixed(1)}) a ${minD.toFixed(1)} u da borda do arvoredo mais próximo em (${nearest.x}, ${nearest.z}) (deve ser <= ${MAX_LUMBER_TO_FOREST})`
             );
           }
         });

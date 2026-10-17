@@ -3,7 +3,7 @@ import { createScaledCanvas as createCanvas, createBumpCanvas, toTexture as make
 
 /**
  * Procedural Hand-Painted Stylized PBR Texture Generator for the Bandit Camp
- * Inspired by Warcraft 2 hand-painted art style, Valorant, and Overwatch.
+ * Stylized hand-painted look with soft shading.
  * 
  * Generates 2048x2048 high-detail textures:
  * 1. getCrimsonWarCanvasTextures(): Weathered dark crimson canvas with tribal slash runes, animal fur trims, bone stitching.

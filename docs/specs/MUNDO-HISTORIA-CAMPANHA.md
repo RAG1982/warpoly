@@ -1,7 +1,7 @@
 # MUNDO-HISTORIA-CAMPANHA · O novo mundo, a história e as campanhas (12 missões por facção)
 
 > **Status: SPEC revisada (decisões do dono de 2026-10-11 aplicadas; não iniciada)**. Escrita em 2026-10-11 por Sonnet 5.5. **Só documento: nenhum código, nenhum JSON de missão.** Fonte: [`MUNDO-BRIEFING-DONO.md`](MUNDO-BRIEFING-DONO.md) (em caso de dúvida, vale o briefing). Arquivos irmãos: `MUNDO-TERRENO-MAPAS.md` (mapas, terreno, ilhas como geografia jogável) e [`MUNDO-HEROIS.md`](MUNDO-HEROIS.md) (os 6 heróis: histórias, habilidades, aparência). Perguntas ainda abertas: §10.
-> Leia antes: `CLAUDE.md`, `docs/historico/HANDOFF_CLOUD.md` (§2, regras da nuvem), `docs/specs/_COMUM.md`, `src/data/campaigns/README.md`, `docs/specs/F8-06-campanha-horda.md` (briefing da Horda; **preservado** como campanha "Clássica (beta)", §7), `src/data/missions/README.md`, `docs/specs/MUNDO-HEROIS.md`, `docs/05_PARIDADE_WARCRAFT2.md` (nada de nomes ou lore da Blizzard).
+> Leia antes: `CLAUDE.md`, `docs/historico/HANDOFF_CLOUD.md` (§2, regras da nuvem), `docs/specs/_COMUM.md`, `src/data/campaigns/README.md`, `docs/specs/F8-06-campanha-horda.md` (briefing dos Clãs do Cinzal; **preservado** como campanha "Clássica (beta)", §7), `src/data/missions/README.md`, `docs/specs/MUNDO-HEROIS.md`, `docs/05_PARIDADE_WARCRAFT2.md` (nada de nomes ou lore da Blizzard).
 > Executores: agentes **sonnet** na nuvem (sem navegador/GPU), em lotes (§8). Arte, música, modelos 3D e tudo que exige jogar ficam **pendentes (local)**.
 > Imagens de referência (em `docs/refs/mundo/`): `mapa-mundi-referencia.png` (pergaminho, contorno irregular, rosa dos ventos, selo de cera), `terreno-humano-exuberante.webp`, `terreno-orc-deserto.webp`.
 
@@ -11,13 +11,13 @@
 
 > **Revisão de 2026-10-11**: aplica as 7 decisões do dono (§0.1). O que mudou em relação à primeira versão: continentes confirmados, crônicas espelhadas confirmadas, mapa-múndi só ilustrativo, **3 heróis por facção em vez de 15 personagens novos** (ver [`MUNDO-HEROIS.md`](MUNDO-HEROIS.md)), liberação "tutorial nas missões 1–6, tudo liberado depois" e **duas entradas de campanha** (principal × "Clássica (beta)").
 
-- **Mundo**: o planeta **Ondara**. Dois continentes isolados por milhões de anos pela **Fenda** (hoje o **Mar Fendido**): **Velmara** (**oeste**; montanhas nevadas, florestas, savanas; exuberante; casa dos **humanos**, o Reino de Aurelan e a **Aliança**) e **Cinzara** (**leste**; desertos, pântanos, estepes; casa dos **orcs**, os Clãs do Cinzal e a **Horda**). Entre eles, **Os Estilhaços**: oito ilhas de terrenos diferentes (pedregosa, vulcânica, pantanosa, gelada, deserta, florestal, recifes de petróleo e o ponto de encontro).
+- **Mundo**: o planeta **Ondara**. Dois continentes isolados por milhões de anos pela **Fenda** (hoje o **Mar Fendido**): **Velmara** (**oeste**; montanhas nevadas, florestas, savanas; exuberante; casa dos **humanos**, o Reino de Aurelan e a **Liga de Aurelan**) e **Cinzara** (**leste**; desertos, pântanos, estepes; casa dos **orcs**, os Clãs do Cinzal e a **União dos Clãs**). Entre eles, **Os Estilhaços**: oito ilhas de terrenos diferentes (pedregosa, vulcânica, pantanosa, gelada, deserta, florestal, recifes de petróleo e o ponto de encontro).
 - **Estrutura**: **duas campanhas espelhadas** (principal: "A Guerra do Mar Fendido", facções `human` e `orc`, 12 missões cada) sobre **os mesmos 12 "palcos"** (oito ilhas compartilhadas, vistas de lados opostos; quatro palcos continentais diferentes por facção). Cada lado conta a guerra do seu ponto de vista e **vence na sua história**; o final de cada uma é uma **fortaleza no continente do adversário que bloqueia o acesso às ilhas**, com **gancho aberto** para uma campanha futura.
 - **Mapa-múndi**: só **ilustrativo** (dois continentes e ilhas entre eles). **Não é jogável** nem navegável; as missões acontecem em mapas próprios que, se ficar interessante, podem ser **marcados** no mapa-múndi (§7.2).
 - **Liberação**: tutorial **progressivo nas missões 1–6**; **a árvore completa (16 unidades, 16 construções, 27 fichas de pesquisa por facção) está liberada a partir da missão 6** ("Prova de Fogo"); 7–12 sem restrição. **Sem "personagem novo por missão"**.
-- **Heróis (6 no total)**: por facção, um **Capitão, um Mago e um Comandante**. Aliança: **Brann** (m3), **Oren** (m10), **Dorian** (m11). Horda: **Drogath** (m3), **Vozgul** (m10), **Skarn** (m11). Na m12 os três atuam juntos. Só 3 tipos novos em `units.js` (Dorian, Vozgul, Skarn) e 14 habilidades novas (efeitos existentes; uma extensão mínima de código). Detalhes, histórias e fichas de aparência em [`MUNDO-HEROIS.md`](MUNDO-HEROIS.md).
+- **Heróis (6 no total)**: por facção, um **Capitão, um Mago e um Comandante**. Liga de Aurelan: **Brann** (m3), **Oren** (m10), **Dorian** (m11). Clãs do Cinzal: **Drogath** (m3), **Vozgul** (m10), **Skarn** (m11). Na m12 os três atuam juntos. Só 3 tipos novos em `units.js` (Dorian, Vozgul, Skarn) e 14 habilidades novas (efeitos existentes; uma extensão mínima de código). Detalhes, histórias e fichas de aparência em [`MUNDO-HEROIS.md`](MUNDO-HEROIS.md).
 - **Final**: a m12 é construir e defender uma **fortaleza** (o Centro evoluído ao nível 3 + torres + muralhas) no continente do adversário e **bloquear as rotas para as ilhas**. O chefe cai; um **sinal no horizonte** abre a continuação (expulsão ou conquista).
-- **Migração (decisão 7)**: a campanha atual da Aliança (8 missões, `src/data/campaigns/alliance/`, id `alliance`) e o briefing da Horda (F8-06) **ficam intactos** numa entrada separada, rotulada **"Campanha Clássica (beta)"**; a campanha nova de 12 missões é a **principal**. O seletor de campanha tem duas entradas, o progresso é salvo **por campanha** e **nada da beta é apagado** (§7). Fauna: **javalis** no lugar de porcos (troca visual e de textos, §1.4).
+- **Migração (decisão 7)**: a campanha atual da Liga de Aurelan (8 missões, `src/data/campaigns/alliance/`, id `alliance`) e o briefing dos Clãs do Cinzal (F8-06) **ficam intactos** numa entrada separada, rotulada **"Campanha Clássica (beta)"**; a campanha nova de 12 missões é a **principal**. O seletor de campanha tem duas entradas, o progresso é salvo **por campanha** e **nada da beta é apagado** (§7). Fauna: **javalis** no lugar de porcos (troca visual e de textos, §1.4).
 - **Perguntas ainda abertas: §10** (nenhuma muda o escopo).
 
 ### 0.1 Decisões do dono (2026-10-11) e onde foram aplicadas
@@ -29,7 +29,7 @@
 | 4 | Bioma **só visual**; lava pode ser limite de passagem (como rios) | §1.6 (e `MUNDO-TERRENO-MAPAS.md`) |
 | 5 | Todos os nomes propostos **aprovados** (Ondara, Velmara, Cinzara, Mar Fendido, Estilhaços, ilhas, Mervane, Hurgan…) | §1, §10 |
 | 6 | **3 heróis por facção** (Capitão, Mago, Comandante), jogáveis conforme a história | §1.8, §3.4–§3.7, §4.5, §5, `MUNDO-HEROIS.md` |
-| 7 | Campanha atual da Aliança + F8-06 preservadas como **"Campanha Clássica (beta)"**; a nova é a principal | §7 |
+| 7 | Campanha atual da Liga de Aurelan + F8-06 preservadas como **"Campanha Clássica (beta)"**; a nova é a principal | §7 |
 
 ---
 
@@ -53,8 +53,8 @@ Convenção de datas: **AN** = "Anos da Navegação", contados desde a primeira 
 **Atribuição (decisão do dono, 2026-10-11)**: **orcs no LESTE (Cinzara, desértico)** e **humanos no OESTE (Velmara, exuberante)**. Os nomes `Aurelan`, `Cinzal`, `Brumar`, `Alvorada` e o rio `Turvo` já existem no jogo; os mantemos para reaproveitar texto e missões. O bioma é **só visual** (não muda regras de jogo); **lava** (Fornalha) pode ser **limite de passagem** em mapas, como os rios.
 
 ### 1.3 Os povos
-**Aliança de Aurelan (humanos)**. O Reino de Aurelan (capital na Baía de Aurelan, Rainha **Sevelin**) é o mais antigo dos reinos de Velmara e liderou a **Aliança**: uma liga de reino e cidades-porto (entre elas **Brumar**, o porto-fortaleza do sul). Cultura de mercadores, cartógrafos e cavaleiros; a Academia de Cartografia Arcana (Mestre **Orsolo**) desenha o primeiro mapa do mar. Tecnologia: pedra, ferro, madeira naval, grifos domesticados, magia de torres.
-**Horda do Cinzal (orcs)**. Os **Clãs do Cinzal** (Chama-Baixa, Lanças Quebradas, Presa-Negra, Forja Negra, Marés Negras, Sal Cinzento: nomes de F8-06) vivem em Cinzara e dividem poços e rebanhos. Cultura de **fogo, memória e clã**: cada clã guarda um braseiro (o **Fogo do Clã**). Tecnologia: ferro de forja, óleo, serpes, ritos de cinza. Quando a seca aperta, o chefe-de-brasa **Skarn** une os clãs numa **Horda**: o contrário da leitura simplista "orc = vilão": a Horda é um povo que **precisa** do mar.
+**Liga de Aurelan (humanos)**. O Reino de Aurelan (capital na Baía de Aurelan, Rainha **Sevelin**) é o mais antigo dos reinos de Velmara e liderou a **Liga de Aurelan**: uma liga de reino e cidades-porto (entre elas **Brumar**, o porto-fortaleza do sul). Cultura de mercadores, cartógrafos e cavaleiros; a Academia de Cartografia Arcana (Mestre **Orsolo**) desenha o primeiro mapa do mar. Tecnologia: pedra, ferro, madeira naval, grifos domesticados, magia de torres.
+**Clãs do Cinzal (orcs)**. Os **Clãs do Cinzal** (Chama-Baixa, Lanças Quebradas, Presa-Negra, Forja Negra, Marés Negras, Sal Cinzento: nomes de F8-06) vivem em Cinzara e dividem poços e rebanhos. Cultura de **fogo, memória e clã**: cada clã guarda um braseiro (o **Fogo do Clã**). Tecnologia: ferro de forja, óleo, serpes, ritos de cinza. Quando a seca aperta, o chefe-de-brasa **Skarn** une os clãs numa **Clãs do Cinzal**: o contrário da leitura simplista "orc = vilão": os Clãs do Cinzal são um povo que **precisa** do mar.
 O nome do povo orc antigo, "Gorthak" (do GDD), é **aposentado** (nomes aprovados pelo dono em 2026-10-11).
 
 ### 1.4 Fauna: ovelhas e javalis (impacto nos dados e na interface)
@@ -79,18 +79,18 @@ Cada continente tem uma fauna própria: **ovelhas** em Velmara (já existe), **j
 | Ilha | Terreno | Recursos/curiosidades | Começa com | Missão (palco) |
 |---|---|---|---|---|
 | **Pouso do Encontro** | temperada, praias, enseadas e um farol em ruínas (a "Torre da Fenda") | madeira e ouro médios, ovelhas e javalis | ninguém | 2 |
-| **Pedra-Mãe** | **pedregosa**: rochedos, penhascos, platôs, pouca madeira | **ouro abundante** | Aliança (colônia mineira do governador Mervane) | 3 |
+| **Pedra-Mãe** | **pedregosa**: rochedos, penhascos, platôs, pouca madeira | **ouro abundante** | Liga de Aurelan (colônia mineira do governador Mervane) | 3 |
 | **Baixio do Breu** | **recifes**: dezenas de ilhotas e baixios (quase só água rasa e funda) | **petróleo** (poços); ruínas de naufrágios | contestada | 4 |
-| **Cerne Verde** | **florestal** densa, clareiras, bosque sagrado | **madeira** abundante; ninho de grifos | Aliança (bosque) | 5 |
+| **Cerne Verde** | **florestal** densa, clareiras, bosque sagrado | **madeira** abundante; ninho de grifos | Liga de Aurelan (bosque) | 5 |
 | **A Geada** | **gelada**: neve, lagos congelados, geleiras (gelo não navegável), o **Farol Boreal** | pouco ouro; vista sobre o norte do mar | ninguém (disputada) | 6 |
-| **Brejo Mudo** | **pantanosa**: juncos, lama, vitórias-régias, água rasa; chão lento | ferro de brejo, javalis selvagens | Horda (clãs do Presa-Negra) | 7 |
-| **Fornalha** | **vulcânica**: basalto, fendas de lava, cinzas, fumarolas | ouro e obsidiana; o **Monte Caldeira**; **rios de lava** como limite de passagem (como rios de água) | Horda (forja e santuário) | 8 |
+| **Brejo Mudo** | **pantanosa**: juncos, lama, vitórias-régias, água rasa; chão lento | ferro de brejo, javalis selvagens | Clãs do Cinzal (clãs do Presa-Negra) | 7 |
+| **Fornalha** | **vulcânica**: basalto, fendas de lava, cinzas, fumarolas | ouro e obsidiana; o **Monte Caldeira**; **rios de lava** como limite de passagem (como rios de água) | Clãs do Cinzal (forja e santuário) | 8 |
 | **Miragem** | **deserta**: dunas, ruínas, **três poços** | água (poços), pouco mais | ninguém | 9 |
 
 Convenções para os mapas (a spec irmã usa estes nomes): ilhas de **contorno irregular** (enseadas, penínsulas, ilhotas satélites), nada de "lobos circulares ligados por pontes". Os quatro palcos continentais: **Baía de Aurelan** / **Praia das Cinzas Vermelhas** (missão 1, "casa"), e **Costa Ferrugem**/**Cabo Aurora** (missão 10), **Estepe do Vento**/**Savana de Âmbar** (missão 11), **Cabo Ferrugem**/**Cabo Aurora** (missão 12), conforme a campanha. O bioma de cada ilha é **só visual**; as fronteiras de passagem (rios, lava) são decididas na spec de mapas. O **mapa-múndi** onde as ilhas aparecem é **apenas ilustrativo** (não jogável); as missões ocorrem nos mapas próprios de cada palco.
 
 ### 1.7 O conflito, a colônia e o ataque final
-1. **Choque nas ilhas** (missões 2–9): cada ilha muda de mãos. Aliança ataca ou defende conforme a posição; cada lado tem **um traidor/rival** (Mervane na Aliança, Hurgan na Horda) e **um aliado leal** (Brumar / Presa-Negra).
+1. **Choque nas ilhas** (missões 2–9): cada ilha muda de mãos. Liga de Aurelan ataca ou defende conforme a posição; cada lado tem **um traidor/rival** (Mervane na Liga de Aurelan, Hurgan nos Clãs do Cinzal) e **um aliado leal** (Brumar / Presa-Negra).
 2. **Cabeça de ponte** (missão 9): quem toma **Miragem** (a última ilha antes da costa inimiga) fecha o circuito de bases e abre a travessia.
 3. **Colônia** (missões 10–11): desembarque numa costa hostil, um Marco da Colônia (Centro avançado: **Porto Albor**, humano; **Brasa-Alta**, orc), economia sob ataque e reforços por mar.
 4. **Fortaleza e bloqueio** (missão 12): o Centro da colônia vira **Castelo de Aldária** (humano) / **Cidadela de Ferro** (orc) com torres e muralhas, e a frota/torres **fecham o estreito** entre o continente alheio e as ilhas.
@@ -100,28 +100,28 @@ Convenções para os mapas (a spec irmã usa estes nomes): ilhas de **contorno i
 **Os 6 heróis jogáveis** (fichas completas em [`MUNDO-HEROIS.md`](MUNDO-HEROIS.md)):
 | Herói | Lado | Papel | Tipo no jogo | Entra (jogável) |
 |---|---|---|---|---|
-| **Capitão Brann** | Aliança | Capitão: tanque da guarnição | `hero_brann` (existe) | **m3** |
-| **Mestre Arcano Oren** | Aliança | Mago: cartógrafo arcano, aprendiz de Orsolo | `hero_oren` (existe) | **m10** (cameo na m5) |
-| **Marechal Dorian Vasques** | Aliança | Comandante: estrategista da Guarda Real | `hero_dorian` (**novo**) | **m11**; chefe final da Horda (m12) |
-| **Drogath Punho-de-Brasa** | Horda | Capitão: capitão de guerra do Clã Chama-Baixa | `hero_drogath` (existe) | **m3** |
-| **Vozgul, a Profetisa** | Horda | Mago: guardiã da memória dos mortos | `hero_vozgul` (**novo**) | **m10** (cameo na m5) |
-| **Skarn, chefe-de-brasa** | Horda | Comandante: unificador dos clãs, ogro de coroa de ferro | `hero_skarn` (**novo**) | **m11**; chefe final da Aliança (m12) |
+| **Capitão Brann** | Liga de Aurelan | Capitão: tanque da guarnição | `hero_brann` (existe) | **m3** |
+| **Mestre Arcano Oren** | Liga de Aurelan | Mago: cartógrafo arcano, aprendiz de Orsolo | `hero_oren` (existe) | **m10** (cameo na m5) |
+| **Marechal Dorian Vasques** | Liga de Aurelan | Comandante: estrategista da Guarda Real | `hero_dorian` (**novo**) | **m11**; chefe final dos Clãs do Cinzal (m12) |
+| **Drogath Punho-de-Brasa** | Clãs do Cinzal | Capitão: capitão de guerra do Clã Chama-Baixa | `hero_drogath` (existe) | **m3** |
+| **Vozgul, a Profetisa** | Clãs do Cinzal | Mago: guardiã da memória dos mortos | `hero_vozgul` (**novo**) | **m10** (cameo na m5) |
+| **Skarn, chefe-de-brasa** | Clãs do Cinzal | Comandante: unificador dos clãs, ogro de coroa de ferro | `hero_skarn` (**novo**) | **m11**; chefe final da Liga de Aurelan (m12) |
 
 **NPCs** (só diálogo/cutscene; em campo usam **unidades comuns** nomeadas, **sem entrada nova em `units.js`**):
 | Personagem | Lado | Papel | Aparece |
 |---|---|---|---|
-| **Rainha Sevelin** | Aliança | soberana de Aurelan; voz da campanha | 1–12 |
-| **Mestre Orsolo** | Aliança | cartógrafo arcano e mentor de Oren; **morre libertando os magos presos na m8** | 2, 5, 8 |
-| **Capitã Lyra Ventosa** | Aliança | comandante dos grifos (um `gryphon_rider` nomeado) | 8, 9, 11 |
-| **Sgt. Tomás Rocha** / **Elara Pinheiral** | Aliança | sargento (Espadachim nomeado) e batedora (Arqueira nomeada) | 1 / 2 |
-| **Dama Aurora** / caravela **Estrela-d'Alva** | Aliança | Cavaleiro nomeado aliado de IA / `frigate` nomeada | 6 / 4 |
-| **Governador Aldric Mervane** | Aliança (**vilão interno**, cunhado de Dorian) | governador de Pedra-Mãe, explora a mina, vende ferro à Horda e trai | 3 (cutscene), aliado→inimigo na m7 |
-| **Brumar** (porto) | Aliança | aliado leal de IA | 4, 6, 9 |
-| **Anciã Ulma** | Horda | guardiã do Fogo do Clã; **morre ao fim da m9** e Drogath herda o fogo | 1–9 |
-| **Grok Quebra-Muros** | Horda | mestre de cerco (`ogre_mage` nomeado; **deixa de ser herói**) | 9 (Aliança), 11 (Horda) |
-| **Rurga Faro-Fino** / **Brakka Presa-Negra** | Horda | batedora lanceira / chefe do Clã Presa-Negra (Ogro nomeado) | 2 / 3 |
-| **Orvanna Maré-Negra** / **Narga Asa-Rota** / **Zarruk Fornalha** | Horda | `war_galley`, `war_serpent` e `arsonist` nomeados | 4 / 5 / 6 |
-| **Hurgan Lança-Partida** | Horda (**rival interno**) | chefe do Clã das Lanças Quebradas | m1–m2 rival; aliado→inimigo na m7 da Horda |
+| **Rainha Sevelin** | Liga de Aurelan | soberana de Aurelan; voz da campanha | 1–12 |
+| **Mestre Orsolo** | Liga de Aurelan | cartógrafo arcano e mentor de Oren; **morre libertando os magos presos na m8** | 2, 5, 8 |
+| **Capitã Lyra Ventosa** | Liga de Aurelan | comandante dos grifos (um `gryphon_rider` nomeado) | 8, 9, 11 |
+| **Sgt. Tomás Rocha** / **Elara Pinheiral** | Liga de Aurelan | sargento (Espadachim nomeado) e batedora (Arqueira nomeada) | 1 / 2 |
+| **Dama Aurora** / caravela **Estrela-d'Alva** | Liga de Aurelan | Cavaleiro nomeado aliado de IA / `frigate` nomeada | 6 / 4 |
+| **Governador Aldric Mervane** | Liga de Aurelan (**vilão interno**, cunhado de Dorian) | governador de Pedra-Mãe, explora a mina, vende ferro aos Clãs do Cinzal e trai | 3 (cutscene), aliado→inimigo na m7 |
+| **Brumar** (porto) | Liga de Aurelan | aliado leal de IA | 4, 6, 9 |
+| **Anciã Ulma** | Clãs do Cinzal | guardiã do Fogo do Clã; **morre ao fim da m9** e Drogath herda o fogo | 1–9 |
+| **Grok Quebra-Muros** | Clãs do Cinzal | mestre de cerco (`ogre_mage` nomeado; **deixa de ser herói**) | 9 (Liga de Aurelan), 11 (Clãs do Cinzal) |
+| **Rurga Faro-Fino** / **Brakka Presa-Negra** | Clãs do Cinzal | batedora lanceira / chefe do Clã Presa-Negra (Ogro nomeado) | 2 / 3 |
+| **Orvanna Maré-Negra** / **Narga Asa-Rota** / **Zarruk Fornalha** | Clãs do Cinzal | `war_galley`, `war_serpent` e `arsonist` nomeados | 4 / 5 / 6 |
+| **Hurgan Lança-Partida** | Clãs do Cinzal (**rival interno**) | chefe do Clã das Lanças Quebradas | m1–m2 rival; aliado→inimigo na m7 dos Clãs do Cinzal |
 | **Irmandade da Maré** | neutro | contrabandistas e piratas que saqueiam as duas costas | jogador neutro (id 99) + `bandit_camp`, m1 |
 
 **Nomear unidades comuns**: o nome vive no diálogo/briefing (a `speaker` da fala) e, se o dono quiser, no `title` do objetivo; a unidade em campo é um `knight`, `gryphon_rider` etc. do jogador ou da IA. Nenhum NPC é "único" (podem morrer sem efeito de regra). Os `hero_*` são os únicos com barra ampliada e habilidades próprias.
@@ -149,13 +149,13 @@ Os painéis 1–6 são **comuns às duas campanhas**; o 7 tem **variante por fac
 | 4 | **A Era das Velas.** Cartas náuticas se desenham; veleiros brancos de um lado e barcaças de cinza do outro avançam por rotas pontilhadas. | "Os povos cresceram, e a fome de terra, de ouro, de madeira e de breu os lançou ao mar. Aurelan traçou cartas; os clãs queimaram mastros de cinza. Cada um buscava o que faltava em casa." | "The peoples grew, and hunger for land, gold, timber and tar drove them to sea. Aurelan drew charts; the clans burned ash-wood masts. Each sought what home could not give." | vento, cordame; música sobe |
 | 5 | **O Encontro.** As duas rotas se tocam no meio do mapa (Pouso do Encontro); duas velas se cruzam, uma flecha riscada em tinta vermelha. | "No meio do Mar Fendido, duas velas se avistaram. Ninguém sabe quem baixou o estandarte primeiro, nem de que lado partiu a primeira flecha. Só se sabe que o mar deixou de ser vazio." | "In the middle of the Sundered Sea, two sails sighted each other. No one knows who lowered the banner first, or whose arrow flew first. We only know the sea was empty no more." | **corneta** curta (sfx), silêncio, caixa de guerra |
 | 6 | **Os Estilhaços.** As oito ilhas aparecem uma a uma, com seu terreno em miniatura e um ícone de ouro, madeira ou gota de petróleo. | "Entre os dois mundos jaziam os Estilhaços: ilhas de pedra, brejo, fogo, gelo e areia, com ouro, madeira e petróleo à beira da água. Quem as dominasse teria uma ponte de guerra e a chave do oceano." | "Between the two worlds lay the Shards: islands of stone, marsh, fire, ice and sand, with gold, timber and oil at the water's edge. Whoever held them would hold a bridge of war and the key to the ocean." | batida que cresce |
-| 7a | **(Aliança)** O estandarte de Aurelan sobre a Baía; a Rainha Sevelin de costas, o mapa de Orsolo na mesa; um X marcado em Cinzara. | "Aurelan não queria a guerra, mas não cederia o mar. Na Baía de Aurelan, a Rainha Sevelin ergue o estandarte: tomar os Estilhaços e fincar uma fortaleza em terra inimiga, de onde o mar será nosso." | "Aurelan did not want war, but would not yield the sea. At Aurelan Bay, Queen Sevelin raises the banner: take the Shards and plant a fortress on enemy soil, from where the sea shall be ours." | fanfarra curta humana |
-| 7b | **(Horda)** A pira do Planalto do Cinzal, Skarn de coroa de ferro diante dos clãs, o mapa riscado a carvão; um X em Velmara. | "Os clãs não pediram esta guerra, mas a terra seca não perdoa. Do Planalto do Cinzal, o chefe-de-brasa Skarn acende a pira: tomar os Estilhaços e fincar uma cidadela na terra verde, de onde ninguém mais nos fechará o mar." | "The clans did not ask for this war, but dry land forgives no one. From the Cinzal Plateau, ember-chief Skarn lights the pyre: take the Shards and plant a citadel in the green land, from where no one will ever shut us from the sea." | tambores orcs |
+| 7a | **(Liga de Aurelan)** O estandarte de Aurelan sobre a Baía; a Rainha Sevelin de costas, o mapa de Orsolo na mesa; um X marcado em Cinzara. | "Aurelan não queria a guerra, mas não cederia o mar. Na Baía de Aurelan, a Rainha Sevelin ergue o estandarte: tomar os Estilhaços e fincar uma fortaleza em terra inimiga, de onde o mar será nosso." | "Aurelan did not want war, but would not yield the sea. At Aurelan Bay, Queen Sevelin raises the banner: take the Shards and plant a fortress on enemy soil, from where the sea shall be ours." | fanfarra curta humana |
+| 7b | **(Clãs do Cinzal)** A pira do Planalto do Cinzal, Skarn de coroa de ferro diante dos clãs, o mapa riscado a carvão; um X em Velmara. | "Os clãs não pediram esta guerra, mas a terra seca não perdoa. Do Planalto do Cinzal, o chefe-de-brasa Skarn acende a pira: tomar os Estilhaços e fincar uma cidadela na terra verde, de onde ninguém mais nos fechará o mar." | "The clans did not ask for this war, but dry land forgives no one. From the Cinzal Plateau, ember-chief Skarn lights the pyre: take the Shards and plant a citadel in the green land, from where no one will ever shut us from the sea." | tambores orcs |
 | T | **Título.** O mapa completo se funde ao logotipo; "A Guerra do Mar Fendido". | "A Guerra do Mar Fendido" | "The War of the Sundered Sea" | acorde final |
 
 Cada painel tem legenda sobre faixa translúcida (sempre legível, também sem som); texto máximo ~40 palavras por idioma.
 
-**Os heróis na abertura**: no painel 7a/7b as três silhuetas da facção aparecem ao fundo (Aliança: Brann, Oren, Dorian; Horda: Drogath, Vozgul, Skarn), sem fala, como promessa do que virá (ver [`MUNDO-HEROIS.md`](MUNDO-HEROIS.md)). O mapa dos painéis 1, 2, 4, 5 e 6 é a mesma ilustração do mapa-múndi ilustrativo (§7.2).
+**Os heróis na abertura**: no painel 7a/7b as três silhuetas da facção aparecem ao fundo (Liga de Aurelan: Brann, Oren, Dorian; Clãs do Cinzal: Drogath, Vozgul, Skarn), sem fala, como promessa do que virá (ver [`MUNDO-HEROIS.md`](MUNDO-HEROIS.md)). O mapa dos painéis 1, 2, 4, 5 e 6 é a mesma ilustração do mapa-múndi ilustrativo (§7.2).
 
 ### 2.2 Comportamento
 - **Início**: aparece quando o jogador inicia uma campanha **nova** (primeira vez, ou "Nova tentativa"/"Rejogar a campanha"), antes do briefing da missão 1. Ao continuar uma campanha em andamento, **não** reaparece.
@@ -178,12 +178,12 @@ Cada painel tem legenda sobre faixa translúcida (sempre legível, também sem s
 ## 3. Estrutura da campanha: duas campanhas espelhadas sobre palcos compartilhados
 
 ### 3.1 Decisão e justificativa
-**Duas campanhas independentes** (`alliance`: Aliança/humanos; `horde`: Horda/orcs), **12 missões cada**, jogando a mesma guerra de **lados opostos** sobre **12 palcos** numerados:
-- **Palcos 2–9: as oito ilhas, compartilhadas.** O mesmo mapa serve às duas campanhas (menos mapas a construir e a testar: 8 em vez de 16); o que muda é **quem ataca e quem defende**, as unidades inimigas, os objetivos e o texto. Isso também dá à Horda uma partida realmente diferente: onde a Aliança defende Pedra-Mãe, a Horda a **assalta**.
+**Duas campanhas independentes** (`alliance`: Liga de Aurelan/humanos; `horde`: Clãs do Cinzal/orcs), **12 missões cada**, jogando a mesma guerra de **lados opostos** sobre **12 palcos** numerados:
+- **Palcos 2–9: as oito ilhas, compartilhadas.** O mesmo mapa serve às duas campanhas (menos mapas a construir e a testar: 8 em vez de 16); o que muda é **quem ataca e quem defende**, as unidades inimigas, os objetivos e o texto. Isso também dá aos Clãs do Cinzal uma partida realmente diferente: onde a Liga de Aurelan defende Pedra-Mãe, os Clãs do Cinzal a **assalta**.
 - **Palcos 1, 10, 11, 12: continentais, diferentes por facção** (casa na m1; costa, interior e promontório inimigos nas m10–12). Total: **16 mapas**.
 - **Por que não uma estrutura única compartilhada** (um jogador, dois lados alternados): quebra a identidade da facção no tutorial de liberação (a árvore de cada lado é diferente) e dobra o texto por missão; o jogador quer jogar "o seu lado" do começo ao fim. **Por que não só espelhar o texto**: cada lado ocupa frentes diferentes (ver tabelas), então as missões ensinam o mesmo conteúdo com objetivos que dependem do lado.
 - **Cânone (decisão do dono, 2026-10-11)**: **Crônicas espelhadas**: cada campanha é o relato do seu povo e vence em seu relato. O epílogo de cada lado termina com um **sinal do outro** no horizonte, que mantém aberto o gancho (§6.3) sem desmentir a outra campanha. Cada campanha termina com o estabelecimento de uma fortaleza no continente do adversário que bloqueia o acesso às ilhas, e deixa um gancho aberto.
-- **Ordem de lançamento recomendada**: Aliança primeiro (já tem 8 missões, base reaproveitável), Horda em seguida (§8).
+- **Ordem de lançamento recomendada**: Liga de Aurelan primeiro (já tem 8 missões, base reaproveitável), Clãs do Cinzal em seguida (§8).
 
 ### 3.2 Os 12 palcos
 | Palco | Cenário (nome canônico) | Terreno | Função | Mapa existente provisório (até a spec irmã entregar o novo) |
@@ -197,9 +197,9 @@ Cada painel tem legenda sobre faixa translúcida (sempre legível, também sem s
 | 7 | **Brejo Mudo** | pantanosa | traição | `vales-2v2` |
 | 8 | **Fornalha** | vulcânica | forja e rito | `continental-1v1` |
 | 9 | **Miragem** | deserta | cabeça de ponte | `ilhas-4p` |
-| 10 | Costa Ferrugem (Aliança) / Cabo Aurora (Horda) | costa inimiga | desembarque | `continental-1v1` |
-| 11 | Estepe do Vento (Aliança) / Savana de Âmbar (Horda) | interior inimigo | colônia | `vales-2v2` |
-| 12 | Cabo Ferrugem (Aliança) / Cabo Aurora, ponta leste (Horda) | promontório | fortaleza e bloqueio | `planalto-ffa-4p` |
+| 10 | Costa Ferrugem (Liga de Aurelan) / Cabo Aurora (Clãs do Cinzal) | costa inimiga | desembarque | `continental-1v1` |
+| 11 | Estepe do Vento (Liga de Aurelan) / Savana de Âmbar (Clãs do Cinzal) | interior inimigo | colônia | `vales-2v2` |
+| 12 | Cabo Ferrugem (Liga de Aurelan) / Cabo Aurora, ponta leste (Clãs do Cinzal) | promontório | fortaleza e bloqueio | `planalto-ffa-4p` |
 
 Os mapas provisórios só servem para **escrever e testar** as missões na nuvem antes da spec de mapas; cada missão aponta `map: <id>` e coordenadas. **Risco**: coordenadas escritas contra um mapa provisório são refeitas quando o mapa novo chegar (§9). Mitigação: pedir à spec de mapas **pontos nomeados** (`anchors`: `playerStart`, `enemyStart`, `goldMine1`, `landingZone`, `well1`…) e resolver as coordenadas por nome no JSON da missão.
 
@@ -209,7 +209,7 @@ Os mapas provisórios só servem para **escrever e testar** as missões na nuvem
 - Elenco: a partir da missão N a missão pode criar (`spawn`) os **heróis já liberados** da facção (§4.5); NPCs nomeados são unidades comuns. Um herói morto fica fora da partida (regra de `heroes.js`), não da campanha.
 - Honra (objetivo oculto de conduta) vale nas duas campanhas (poupar um emissário, não perder uma barcaça etc.).
 
-### 3.4 Campanha da Aliança: `war-alliance` ("A Guerra do Mar Fendido: a Marcha da Aliança", `factionId: 'human'`)
+### 3.4 Campanha da Liga de Aurelan: `war-alliance` ("A Guerra do Mar Fendido: a Marcha de Aurelan", `factionId: 'human'`)
 Resumo: ids em `src/data/campaigns/war-alliance/mNN-*.json` (campanha **principal**; a campanha antiga `alliance` continua intacta como "Clássica (beta)", §7). Os ids de missão usam o prefixo `war-alliance-NN-`; abaixo, `alliance-NN-` é só abreviatura de leitura.
 
 | # | id (slug) | Nome | Palco | Heróis jogáveis | Ideia |
@@ -227,7 +227,7 @@ Resumo: ids em `src/data/campaigns/war-alliance/mNN-*.json` (campanha **principa
 | 11 | `…-11-porto-albor` | Porto Albor | Estepe do Vento | Brann + Oren + **Dorian** (Comandante) | colônia sob cerco; reforços |
 | 12 | `…-12-bastiao-do-cabo-ferrugem` | O Bastião do Cabo Ferrugem | Cabo Ferrugem | Brann + Oren + Dorian (reunião) | fortaleza + bloqueio + Skarn; gancho |
 
-### 3.5 Campanha da Horda: `war-horde` ("A Guerra do Mar Fendido: o Caminho das Brasas", `factionId: 'orc'`)
+### 3.5 Campanha dos Clãs do Cinzal: `war-horde` ("A Guerra do Mar Fendido: o Caminho das Brasas", `factionId: 'orc'`)
 | # | id (slug) | Nome | Palco | Heróis jogáveis | Ideia |
 |---|---|---|---|---|---|
 | 1 | `…-01-cinzas-vermelhas` | Cinzas Vermelhas | Praia das Cinzas Vermelhas | — | economia, Acampamento de Guerra, saqueadores; mural; velas brancas |
@@ -243,7 +243,7 @@ Resumo: ids em `src/data/campaigns/war-alliance/mNN-*.json` (campanha **principa
 | 11 | `…-11-brasa-alta` | Brasa-Alta | Savana de Âmbar | Drogath + Vozgul + **Skarn** (Comandante) | colônia sob cerco |
 | 12 | `…-12-cidadela-de-brasa-alta` | A Cidadela de Brasa-Alta | Cabo Aurora (ponta leste) | Drogath + Vozgul + Skarn (reunião) | cidadela + bloqueio + Dorian; gancho |
 
-### 3.6 Fichas da campanha da Aliança
+### 3.6 Fichas da campanha da Liga de Aurelan
 Formato: **P** primário · **S** secundário · **O** oculto · **IA** inimigos · **Al** aliados · **Per** personagens · **Min** duração · **Ensina**. As unidades usam ids de `src/data`.
 
 **A01 · `war-alliance-01-terra-a-vista` · Terra à Vista** (Baía de Aurelan; verde, costa turquesa, enseadas) · Min 10–12.
@@ -289,7 +289,7 @@ Formato: **P** primário · **S** secundário · **O** oculto · **IA** inimigos
 
 **A09 · `war-alliance-09-miragem` · Miragem (cabeça de ponte)** (deserta; três poços) · Min 20–25.
 - **P**: tomar os 3 poços (`area`) e fincar o **Forte Atalaia** (Torres + Muralha) por 8 min contra a grande contra-ofensiva de **Grok** (Catapultas, Ogros Feiticeiros, Serpes). **S**: destruir o Ninho das Serpes (`serpent_nest`). **O**: poços intactos.
-- **IA**: Horda (difícil). **Al**: reforços navais de Brumar. **Per**: Brann (jogável); **Grok** (`ogre_mage` nomeado, inimigo) comanda a contra-ofensiva; Skarn em cutscene.
+- **IA**: Clãs do Cinzal (difícil). **Al**: reforços navais de Brumar. **Per**: Brann (jogável); **Grok** (`ogre_mage` nomeado, inimigo) comanda a contra-ofensiva; Skarn em cutscene.
 - **Ensina**: defender em arco com muralha e torres; cerco adversário. Reaproveita `alliance-04` (forte Atalaia) e `alliance-03` (ondas).
 
 **A10 · `war-alliance-10-desembarque` · Desembarque na Costa Ferrugem** (costa inimiga: dunas e foz de brejo) · Min 15–20.
@@ -305,10 +305,10 @@ Formato: **P** primário · **S** secundário · **O** oculto · **IA** inimigos
 **A12 · `war-alliance-12-bastiao-do-cabo-ferrugem` · O Bastião do Cabo Ferrugem** (Cabo Ferrugem; falésias, estreito) · Min 22–25.
 - **P** (3 partes): (1) **construir o Bastião**: Centro no nível 3 (**Castelo de Aldária**), 4 Torres de Vigia, 8 trechos de Muralha e 2 Balistas na área; (2) **bloquear as rotas**: destruir as 3 Docas orcs (`ship_dock`) do litoral e manter 2 navios de guerra no estreito 90 s sem inimigos; (3) **sobreviver ao ataque final** de Skarn (chefe) até ele cair.
 - **S**: matar Skarn pessoalmente. **O**: nenhum trecho de muralha cai.
-- **IA**: Horda com todas as tropas, Skarn (boss), ondas. **Al**: a frota da Aliança. **Per**: os três heróis juntos (Brann, Oren, Dorian), mais Lyra (NPC) nos grifos; chefe inimigo **Skarn**.
+- **IA**: Clãs do Cinzal com todas as tropas, Skarn (boss), ondas. **Al**: a frota da Liga de Aurelan. **Per**: os três heróis juntos (Brann, Oren, Dorian), mais Lyra (NPC) nos grifos; chefe inimigo **Skarn**.
 - Cutscene final e gancho (§6).
 
-### 3.7 Fichas da campanha da Horda
+### 3.7 Fichas da campanha dos Clãs do Cinzal
 **H01 · `war-horde-01-cinzas-vermelhas` · Cinzas Vermelhas** (Praia das Cinzas Vermelhas; dunas, brejo no limite) · Min 10–12.
 - **P**: construir o **Acampamento de Guerra** (`orc_barracks`), treinar 3 Talhadores (`grunt`) e 4 Lanceiros-Machado (`axethrower`), destruir o acampamento dos Saqueadores (`bandit_camp`, Irmandade da Maré). **S**: 500 de ouro. **O**: o **Mural da Fenda** (vista dos clãs; +100).
 - **IA**: nenhuma (neutros). **Per**: **Drogath Punho-de-Brasa** é citado e aparece em cutscene (comanda a praia; ainda não jogável); a **Anciã Ulma** guarda o Fogo do Clã (diálogo).
@@ -351,12 +351,12 @@ Formato: **P** primário · **S** secundário · **O** oculto · **IA** inimigos
 - **IA**: guarnição de Aurelan. **Per**: **Vozgul** (`hero_vozgul`, **jogável a partir daqui**) e Drogath.
 
 **H11 · `war-horde-11-brasa-alta` · Brasa-Alta** (Savana de Âmbar; capim alto, rios) · Min 20–25.
-- **P**: evoluir o Marco ao **nível 2 (Bastião)**, 3000 de ouro e resistir a 3 incursões; **S**: erguer Covil e Ninho na colônia; **O**: converter um posto avançado da Aliança (`transfer`).
+- **P**: evoluir o Marco ao **nível 2 (Bastião)**, 3000 de ouro e resistir a 3 incursões; **S**: erguer Covil e Ninho na colônia; **O**: converter um posto avançado da Liga de Aurelan (`transfer`).
 - **IA**: Aurelan (difícil, Grifos). **Al**: reforços por mar. **Per**: **Skarn** (`hero_skarn`, **jogável a partir daqui**, chega com a 2ª onda), Drogath e Vozgul; **Grok** (NPC; Ogro Feiticeiro nomeado) comanda o cerco; inimiga: **Lyra** com grifos.
 
 **H12 · `war-horde-12-cidadela-de-brasa-alta` · A Cidadela de Brasa-Alta** (Cabo Aurora, ponta leste; farol, estreito) · Min 22–25.
 - **P**: (1) **Cidadela**: Centro no nível 3 (**Cidadela de Ferro**), 4 Torres, 8 Paliçadas e 2 Catapultas; (2) **bloquear as rotas**: destruir as 3 Docas humanas (incluindo Brumar) e manter 2 galés no estreito 90 s; (3) sobreviver ao ataque do **Marechal Dorian** (chefe) até ele cair ou fugir.
-- **S**: destruir o Farol do Cabo (o último ponto de sinal da Aliança). **O**: nenhuma Paliçada cai.
+- **S**: destruir o Farol do Cabo (o último ponto de sinal da Liga de Aurelan). **O**: nenhuma Paliçada cai.
 - **Per**: os três heróis juntos (Drogath, Vozgul, Skarn), mais Grok (NPC) nos cercos; chefe inimigo **Dorian**. Gancho (§6).
 
 > Os objetivos usam só tipos de condição que existem (`build`, `destroy`, `collect`, `rescue`, `escort`, `survive`, `flag`, `area`, `count`, `research`; não há "usar magia", G8 do F8-06). "Salvar uma Barcaça", "manter vivo" e "bloquear" são `count`/`dead`/`area` em gatilhos.
@@ -371,7 +371,7 @@ Formato: **P** primário · **S** secundário · **O** oculto · **IA** inimigos
 - **Ordem de tutorial**: m1 economia e infantaria básica → m2 melhorias (Forja, Torre) → m3 nível 2 (cavalaria, cerco, muralha) e **o primeiro herói (Capitão)** → m4 naval e petróleo (nível 3) → m5 magia e ar (básico) → m6 magias e promoções avançadas (†) = tudo. Nas missões 7–12 **nada é restringido** (`unlocks` sem unidades/construções/pesquisas; só os heróis das m10 e m11).
 - **Nível do Centro (`setTier`)**: m1–m2 nível 1, m3 nível 2, m4–m12 nível 3 (a campanha concede o nível que a tecnologia exige, como hoje). Nas missões 10–12 o Centro avançado (Marco da Colônia) nasce no nível 1 e **o jogador o evolui** (nível 2 na m11, nível 3 na m12); `setTier` não é aplicado a ele (§8, risco R3).
 
-### 4.2 Tabela da Aliança (`human`, `factionId: 'human'`)
+### 4.2 Tabela da Liga de Aurelan (`human`, `factionId: 'human'`)
 | # | `units` | `buildings` | `research` | `heroes` | Tier |
 |---|---|---|---|---|---|
 | 1 | `villager`, `knight`, `archer` | `cottage`, `lumber_camp`, `farm`, `barracks` | — | — | 1 |
@@ -387,7 +387,7 @@ Formato: **P** primário · **S** secundário · **O** oculto · **IA** inimigos
 
 Totais: 16 unidades (14 + Petroleiro e Barcaça neutros), 16 construções (15 + a Plataforma), 27 fichas de pesquisa.
 
-### 4.3 Tabela da Horda (`orc`, `factionId: 'orc'`)
+### 4.3 Tabela dos Clãs do Cinzal (`orc`, `factionId: 'orc'`)
 | # | `units` | `buildings` | `research` | `heroes` | Tier |
 |---|---|---|---|---|---|
 | 1 | `peon`, `grunt`, `axethrower` | `orc_house`, `orc_lumber_mill`, `pig_farm`, `orc_barracks` | — | — | 1 |
@@ -407,7 +407,7 @@ Totais: 16 unidades (14 + Petroleiro e Barcaça neutros), 16 construções (15 +
 Importando `src/data/{units,buildings,upgrades,factions}.js`, para **cada** facção e cada missão, sobre as **tabelas 4.2 e 4.3 desta revisão** (lidas do próprio documento): (a) todo id (unidade, construção, ficha de pesquisa, herói) existe e é da facção ou neutro (`tanker`, `barge`, `oil_platform`); (b) nenhum item se repete entre missões; (c) os `requires` de construções, unidades e fichas de pesquisa (`{hq:N}` contra o `Tier` da missão, tipo de construção, `{research}`, `{role}`) são satisfeitos por itens liberados **antes ou junto**; (d) cobertura: **16 unidades, 16 construções e 27 fichas por facção**. O resultado e a lista de checagens de habilidades/efeitos (§11) estão no fim do documento. Cadeias de referência: `barracks`/`orc_barracks` ← `farm`/`pig_farm` (m1); `stable`/`ogre_den`, `workshop`/`orc_workshop` ← quartel + Centro 2 (m3); `shipyard`/`ship_dock` ← quartel + Centro 2 (m4); `dreadnought`, `submersible`, `iron_leviathan`, `colossal_turtle` ← Centro 3 + Fundição/Fornalha (m4); `arcane_tower`/`ash_sanctum`, `aviary`/`serpent_nest` ← quartel + Centro 3; `temple` ← `stable` + Centro 3; `storm_altar` ← `ogre_den` + Centro 3 (m5); `cavalry_class` exige o Templo/Altar; as fichas † da m6 dependem de `arcane`/`temple`/`forge` já liberados.
 
 ### 4.5 Heróis por missão (substitui "um personagem novo por missão")
-| Missão | Aliança | Horda | Observação |
+| Missão | Liga de Aurelan | Clãs do Cinzal | Observação |
 |---|---|---|---|
 | 1–2 | — | — | heróis só citados/aparecendo em cutscene |
 | **3** | **Brann** (Capitão) | **Drogath** (Capitão) | o primeiro herói; ensina Grito de Guerra, mana e unicidade |
@@ -432,7 +432,7 @@ Ordem **Capitão → Mago → Comandante** (justificativa em `MUNDO-HEROIS.md` �
 | L9 | Habilidades de herói: só `hero_war_cry`, `hero_arcane_bolt`, `hero_mend`. | `abilities.js` | **14 entradas novas** com efeitos existentes + **1 extensão** (status em área aliada), `MUNDO-HEROIS.md` §1.1/§8 |
 | L10 | Retratos/ícones dos 3 heróis novos (`icon: '/icoEspada.png'` provisório). | `units.js` | SVG provisório gerado na nuvem; arte final local (F7-09) |
 | L11 | `README` de campanhas diz "nenhum herói existe ainda" (F4-08 já feita). | `src/data/campaigns/README.md` | corrigir no passo de docs |
-| L12 | O epílogo da Aliança (campanha beta) cita **Brumar entre os clãs vencidos** (Brumar é porto humano). | `alliance/campaign.json` | **não corrigir na beta** (preservada); a campanha nova tem epílogo próprio (§6.2) |
+| L12 | O epílogo da Liga de Aurelan (campanha beta) cita **Brumar entre os clãs vencidos** (Brumar é porto humano). | `alliance/campaign.json` | **não corrigir na beta** (preservada); a campanha nova tem epílogo próprio (§6.2) |
 
 ---
 
@@ -457,22 +457,22 @@ A versão anterior propunha 15 tipos novos (`champ_*`, `hero_*`). **Decisão do 
 ### 6.1 Missão 12 (`alliance-12-bastiao-do-cabo-ferrugem` / `horde-12-cidadela-de-brasa-alta`)
 Estrutura em **três atos** dentro da mesma partida (gatilhos por tempo e por objetivo):
 1. **Construir (0–8 min)**: o Marco (Centro avançado, já em nível 2 pela m11) é evoluído ao **nível 3** (**Castelo de Aldária** / **Cidadela de Ferro**); 4 Torres de Vigia, 8 trechos de Muralha e 2 Balistas/Catapultas na área marcada ("o Bastião"). Os guarda-costas do inimigo atacam em ondas leves.
-2. **Bloquear (8–16 min)**: o litoral entre o promontório e as ilhas tem 3 Docas inimigas (`ship_dock` na Aliança, **Estaleiro**/Docas humanas na Horda). Destruí-las e **manter 2 navios de guerra no estreito 90 s** sem inimigo na área → o mar fica **fechado**: ilustra a frase do briefing ("bloqueando o acesso às ilhas").
-3. **Defender e chefe (16–25 min)**: o **ataque final** do chefe inimigo (Skarn na Aliança; Marechal Dorian na Horda), com ondas e o herói; cai o chefe (ou, na Horda, foge ferido: ver gancho) e o objetivo fecha.
+2. **Bloquear (8–16 min)**: o litoral entre o promontório e as ilhas tem 3 Docas inimigas (`ship_dock` na Liga de Aurelan, **Estaleiro**/Docas humanas nos Clãs do Cinzal). Destruí-las e **manter 2 navios de guerra no estreito 90 s** sem inimigo na área → o mar fica **fechado**: ilustra a frase do briefing ("bloqueando o acesso às ilhas").
+3. **Defender e chefe (16–25 min)**: o **ataque final** do chefe inimigo (Skarn na Liga de Aurelan; Marechal Dorian nos Clãs do Cinzal), com ondas e o herói; cai o chefe (ou, nos Clãs do Cinzal, foge ferido: ver gancho) e o objetivo fecha.
 - **Chefe**: um herói do inimigo (`hero_skarn`/`hero_dorian`) cercado de guarda. Se o dono preferir um chefe mais forte que o herói jogável, pergunta §10-11.
 - **Derrota**: o Centro avançado cai ou o herói principal morre (padrão de campanha).
 
 ### 6.2 Tela final (reusa `CampaignVictory`)
 `epilogue` no `campaign.json` (validado por `validateCampaign`, 3–5 parágrafos, `faction: 'human'|'orc'`, `credits`), arte `public/ui/art/victory_human.webp` / `victory_orc.webp` (slot; o SVG procedural atual cobre a falta), fanfarra `victoryFanfareHuman`/`Orc`. A tela mostra "VITÓRIA", o epílogo em sequência, estatísticas e botões Menu / Rejogar / Estatísticas (sem mudança de código).
 
-**Epílogo da Aliança (rascunho; título "O Farol do Outro Lado" / "The Lighthouse on the Other Shore")**
-1. pt-BR: "Quando a última torre do Bastião do Cabo Ferrugem foi coroada, o Mar Fendido ficou, pela primeira vez, do lado de Aurelan. As rotas dos clãs para os Estilhaços calaram-se, e os estaleiros da Horda arderam em silêncio." · en: "When the last tower of the Cape Rust Bastion was crowned, the Sundered Sea lay, for the first time, on Aurelan's side. The clans' routes to the Shards fell silent, and the Horde's shipyards burned without a sound."
+**Epílogo da Liga de Aurelan (rascunho; título "O Farol do Outro Lado" / "The Lighthouse on the Other Shore")**
+1. pt-BR: "Quando a última torre do Bastião do Cabo Ferrugem foi coroada, o Mar Fendido ficou, pela primeira vez, do lado de Aurelan. As rotas dos clãs para os Estilhaços calaram-se, e os estaleiros dos Clãs do Cinzal arderam em silêncio." · en: "When the last tower of the Cape Rust Bastion was crowned, the Sundered Sea lay, for the first time, on Aurelan's side. The clans' routes to the Shards fell silent, and the Cinzal Clans' shipyards burned without a sound."
 2. pt-BR: "A Rainha Sevelin recebeu a notícia na Baía de Aurelan e não sorriu. O Mestre Oren redesenhou o mapa com os cadernos de Orsolo: onde havia vazio, agora havia uma fortaleza em terra alheia." · en: "Queen Sevelin heard the news at Aurelan Bay and did not smile. Master Oren redrew the map from Orsolo's notebooks: where there had been emptiness, there now stood a fortress on foreign soil."
 3. pt-BR: "O Marechal Dorian e a Capitã Lyra juraram guardar a ponta do mundo. Brann e Oren ensinaram aos recrutas o nome de cada ilha que custou sangue; a Dama Aurora e a Estrela-d'Alva guardam o estreito." · en: "Marshal Dorian and Captain Lyra swore to guard the tip of the world. Brann and Oren taught the recruits the name of every island that cost blood; Dame Aurora and the Estrela-d'Alva keep the strait."
 4. pt-BR: "Mas, nas noites de vento seco, da muralha se vê uma luz vermelha além das dunas: as fogueiras do Cinzal ainda ardem. Expulsá-los de vez, ou marchar sobre o que resta? Essa pergunta fica para o próximo inverno." · en: "But on nights of dry wind, a red light can be seen from the wall beyond the dunes: the Cinzal fires still burn. Drive them out for good, or march on what remains? That question waits for the next winter."
-Créditos: "Fim da Marcha da Aliança" / "End of the Alliance March".
+Créditos: "Fim da Marcha de Aurelan" / "End of the March of Aurelan".
 
-**Epílogo da Horda (rascunho; título "A Brasa que Não se Apaga" / "The Ember That Never Dies")**
+**Epílogo dos Clãs do Cinzal (rascunho; título "A Brasa que Não se Apaga" / "The Ember That Never Dies")**
 1. pt-BR: "Quando a última torre da Cidadela de Brasa-Alta ergueu o estandarte, o Mar Fendido deixou de ser uma muralha e virou estrada. As Docas de Aurelan queimaram, e os navios dos reinos voltaram para casa." · en: "When the last tower of Highember Citadel raised the banner, the Sundered Sea stopped being a wall and became a road. Aurelan's docks burned, and the kingdoms' ships turned for home."
 2. pt-BR: "Drogath acendeu o Fogo do Clã no meio da terra verde, e a lembrança da Anciã Ulma o abençoou. Pela primeira vez em três invernos, nenhum clã passou sede." · en: "Drogath lit the Clan Fire in the middle of the green land, and the memory of Elder Ulma blessed it. For the first time in three winters, no clan went thirsty."
 3. pt-BR: "Vozgul guardou a memória dos mortos da guerra; Grok reergueu as muralhas; Skarn jurou que o Cinzal nunca mais seria fechado por ninguém." · en: "Vozgul kept the memory of the war's dead; Grok rebuilt the walls; Skarn swore the Cinzal would never be shut in by anyone again."
@@ -483,21 +483,21 @@ Créditos: "Fim do Caminho das Brasas" / "End of the Ember Road".
 Nada é decidido: o jogo guarda só um sinal no fim de cada campanha.
 - **Expulsão** (campanha II "A Maré Vazante"): obrigar o outro lado a abandonar a costa, destruindo seus portos e retomando os Estilhaços que sobrarem; tom defensivo/de contra-ataque.
 - **Conquista** (campanha II "O Coração de Velmara"/"O Coração do Cinzal"): marchar sobre a **capital** do adversário (Baía de Aurelan / Planalto do Cinzal), ainda **inexplorada** (as regiões "Terras Altas do Véu" e "Coração do Cinzal" aparecem no mapa-múndi como pergaminho em branco).
-- Sementes já plantadas na campanha: um herói inimigo **escapa** (Dorian ferido, na Horda; Skarn em retirada, na Aliança, só em cutscene), a frota restante do outro lado, o selo de cera quebrado no mapa-múndi final. Estado persistido: apenas `completed.<missionId>` (sem ramificação), mais um campo opcional de "capítulo II disponível" quando existir.
+- Sementes já plantadas na campanha: um herói inimigo **escapa** (Dorian ferido, nos Clãs do Cinzal; Skarn em retirada, na Liga de Aurelan, só em cutscene), a frota restante do outro lado, o selo de cera quebrado no mapa-múndi final. Estado persistido: apenas `completed.<missionId>` (sem ramificação), mais um campo opcional de "capítulo II disponível" quando existir.
 
 ---
 
 ## 7. Migração: campanha principal × "Campanha Clássica (beta)"
 
-**Princípio (decisão 7 do dono):** **nada do que existe é apagado nem alterado.** A campanha atual da Aliança (8 missões, `src/data/campaigns/alliance/`, id `alliance`) e o briefing da Horda (`docs/specs/F8-06-campanha-horda.md`) passam a ser a **"Campanha Clássica (beta)"**. A nova campanha de 12 missões por facção é a **principal**.
+**Princípio (decisão 7 do dono):** **nada do que existe é apagado nem alterado.** A campanha atual da Liga de Aurelan (8 missões, `src/data/campaigns/alliance/`, id `alliance`) e o briefing dos Clãs do Cinzal (`docs/specs/F8-06-campanha-horda.md`) passam a ser a **"Campanha Clássica (beta)"**. A nova campanha de 12 missões por facção é a **principal**.
 
 ### 7.1 Duas "trilhas" de campanha
 | | **Principal** ("A Guerra do Mar Fendido") | **Clássica (beta)** |
 |---|---|---|
 | Ids de campanha | `war-alliance` (human), `war-horde` (orc) | `alliance` (human; **existente, intacta**) e, no futuro, `horde-beta` (orc; só se o F8-06 for implementado) |
-| Missões | 12 por facção (24 JSONs), `src/data/campaigns/war-alliance/` e `war-horde/` | 8 (Aliança), as de hoje; Horda: **ainda é só briefing** |
+| Missões | 12 por facção (24 JSONs), `src/data/campaigns/war-alliance/` e `war-horde/` | 8 (Liga de Aurelan), as de hoje; Clãs do Cinzal: **ainda é só briefing** |
 | Rótulo no seletor | "A Guerra do Mar Fendido" | "Campanha Clássica (beta)" |
-| História | tela de abertura (§2), mundo Ondara | a premissa antiga ("A Marcha da Aliança"), sem a tela de abertura |
+| História | tela de abertura (§2), mundo Ondara | a premissa antiga ("A Marcha de Aurelan"), sem a tela de abertura |
 | Heróis | 3 por facção (§4.5), conforme a história | os que as missões antigas já usam (`hero_brann`, `hero_oren`, `hero_drogath`) |
 | Liberação | `unlocks` da §4 | `unlocks` de hoje (F8-05b), **sem mudança** |
 | Progresso | `warpoly.campaign.v1` → `campaigns['war-alliance']` / `['war-horde']` | `campaigns['alliance']` (**o salvo atual continua válido**) |
@@ -505,8 +505,8 @@ Nada é decidido: o jogo guarda só um sinal no fim de cada campanha.
 **Metadados no `campaign.json`** (campos opcionais e aditivos; `validateCampaign` passa a aceitá-los): `track: 'main' | 'beta'`, `betaLabel?: { 'pt-BR', en }`, `order: number` (para ordenar o seletor). A beta ganha `track: 'beta'` e `betaLabel` (**única alteração no JSON da beta**, aditiva; não muda `missions`, `unlocks`, `epilogue`, `premise` nem os `mNN-*.json`). Se o dono preferir que **nenhum** arquivo da beta mude, o rótulo/trilha podem vir de uma tabela em `index.js` (`CAMPAIGN_TRACKS = { alliance: 'beta' }`): pergunta §10-2.
 
 ### 7.2 Seletor de campanha (`src/ui/screens/CampaignScreen.js`)
-Hoje a tela usa `listCampaigns()[0]` e o texto fixo `menu.campaignHint` ("Aliança"). Mudança:
-1. **Duas entradas** (cartões ou abas): **A Guerra do Mar Fendido** (principal; dentro dela, sub-escolha **Aliança | Horda**) e **Campanha Clássica (beta)** (hoje: só Aliança; selo "beta"; quando houver `horde-beta`, aparece também).
+Hoje a tela usa `listCampaigns()[0]` e o texto fixo `menu.campaignHint` ("Liga de Aurelan"). Mudança:
+1. **Duas entradas** (cartões ou abas): **A Guerra do Mar Fendido** (principal; dentro dela, sub-escolha **Liga de Aurelan | Clãs do Cinzal**) e **Campanha Clássica (beta)** (hoje: só Liga de Aurelan; selo "beta"; quando houver `horde-beta`, aparece também).
 2. **Progresso por campanha**: o objeto `progress.campaigns[<id>]` já é por campanha (`progress.js`); basta o seletor ler/gravar o `id` escolhido (não o `[0]`). **Nada é migrado**: os ids de missão da beta não mudam, então o progresso salvo continua valendo; a campanha principal começa do zero. A tentativa atual (`attempt`) e o carry-over seguem separados.
 3. `menu.campaignHint` vira genérico; novas chaves `campaign.track.main`, `campaign.track.beta`, `campaign.beta.badge` (pt-BR/en).
 4. **Tela de abertura (§2)**: só para a trilha principal (e só em campanha nova). A beta abre direto no briefing da m1, como hoje.
@@ -532,8 +532,8 @@ As missões novas copiam estrutura/triggers das antigas e as reescrevem; as orig
 | `m08-queda-do-cinzal` (`planalto-ffa-4p`) | **A08** (magos cativos, Ninho) e **A12** (chefe Skarn, ondas, cutscene final) | `rescue` de 6 magos; Ninho + Serpes; boss ogro; cena final | A12 passa à construção da fortaleza + bloqueio; epílogo novo |
 | — | **A09, A10**; **A11** (parte nova) | — | escritas do zero |
 
-### 7.5 O briefing F8-06 (Horda)
-- **Fica como está** (`docs/specs/F8-06-campanha-horda.md` não é editado). Continua sendo a fonte da **Campanha Clássica (beta) da Horda**, se o dono mandar implementá-la (id sugerido `horde-beta`, mesmas regras da §7.1). A tabela de índice (`docs/specs/README.md`) já a lista; o rótulo "(beta)" entra no cartão do seletor.
+### 7.5 O briefing F8-06 (Clãs do Cinzal)
+- **Fica como está** (`docs/specs/F8-06-campanha-horda.md` não é editado). Continua sendo a fonte da **Campanha Clássica (beta) dos Clãs do Cinzal**, se o dono mandar implementá-la (id sugerido `horde-beta`, mesmas regras da §7.1). A tabela de índice (`docs/specs/README.md`) já a lista; o rótulo "(beta)" entra no cartão do seletor.
 - **Aproveita-se para a campanha principal** (por referência, sem editar o arquivo): elenco e clãs (Chama-Baixa, Lanças Quebradas, Presa-Negra, Forja Negra, Marés Negras, Sal Cinzento), **Honra do Clã** (objetivo oculto de conduta), os testes e passos de execução (adaptados), as lacunas G1–G12 e o tom. **Não** se usa o arco (conquista dos vales + rebelião de Drogath contra Skarn): na principal Skarn é o **comandante jogável** e a rebelião fica como **gancho possível** da campanha II.
 - Os herdeiros do F8-06 que a principal **substitui**: 8 missões → 12; a tabela `unlocks` → §4.3; Grok e Vozgul como heróis → só Vozgul (Skarn entra como Comandante).
 
@@ -555,7 +555,7 @@ Todos os passos terminam com `npm test`, `npm run lint`, `npx vite build --outDi
 | **2** | **Heróis (dados)**: 3 tipos novos + ajuste de 3 em `units.js`, **14 habilidades** em `abilities.js`, **extensão A1** (`status` em área aliada) em `src/sim/abilities.js`, i18n, retratos SVG provisórios, testes (`heroes.test.js`, `abilities.test.js`, `determinism.test.js` verde), ajuste do `README` de campanhas (L11) e do GDD §5.3 | — | detalhes em `MUNDO-HEROIS.md` §7.1; independente de mapas |
 | **3** | **Tela de história**: `world.json`, `campaignStoryModel.js`, `CampaignStory.js`, `campaignStoryArt.js`, `worldMapShapes.js`, i18n, integração, testes | — | compartilhar formas com a spec de mapas |
 | **4** | **Seletor de campanha (duas trilhas) + registro**: `CampaignScreen`, `menu.campaignHint`, `campaign.json` (`track`/`betaLabel`/`order`), `index.js`, `validateCampaign`, testes (`campaignSelector`) | 2 | a beta **não muda**; progresso separado já existe |
-| **5** | **Lote A (m1–m3)** das duas campanhas principais: 6 JSON + `unlocks` + roteiros de teste | 2, 4; mapas provisórios | começa pela Aliança (copia de `m01`–`m03`); Capitão entra na m3 |
+| **5** | **Lote A (m1–m3)** das duas campanhas principais: 6 JSON + `unlocks` + roteiros de teste | 2, 4; mapas provisórios | começa pela Liga de Aurelan (copia de `m01`–`m03`); Capitão entra na m3 |
 | **6** | **Lote B (m4–m6)**: naval, magia/ar, Prova de Fogo (árvore completa) | 5 | frotas roteirizadas (L7) |
 | **7** | **Lote C (m7–m9)**: traição, forja, cabeça de ponte | 6 | `m04` congelada até a NEW-53 |
 | **8** | **Lote D (m10–m12)** + epílogos + `victory_*` (slot); Mago na m10, Comandante na m11 | 7; spec de mapas (palcos continentais) | requer R3 (segundo Centro) verificado |
@@ -564,7 +564,7 @@ Todos os passos terminam com `npm test`, `npm run lint`, `npx vite build --outDi
 
 **Dependências com a spec de mapas** (`MUNDO-TERRENO-MAPAS.md`): (a) os **16 mapas** (8 ilhas + 8 continentais) com os nomes e terrenos da §1.6; (b) **pontos nomeados** (`anchors`) para as missões; (c) `worldMapShapes.js` compartilhado (formas dos continentes e ilhas; o mapa-múndi é **ilustrativo**); (d) distribuição de **espécies de critters por bioma** (javalis × ovelhas); (e) o quanto de madeira o mapa precisa (a meta de madeira do F8-06 G11: mapas gerados novos podem reprovar em `tools/lib/woodStats.mjs`); (f) lava e rios como **limites de passagem** (decisão 4). Até lá, vale a tabela de mapas provisórios (§3.2).
 
-**Riscos técnicos**: R1 `techRestriction` entra no checksum só quando presente (ok); R2 IA por dados nos mapas novos (F5-06); **R3** Centro avançado: `setTier` e `UPGRADE_HQ` com dois Centros ou com o Centro criado por `spawnBuilding` (verificar `GameManager`/`commands` antes do lote D; se faltar, restringir à evolução do Marco como único Centro "ativo"); R4 **naval**: sem IA naval até a NEW-44; R5 **dois idiomas** em 24 missões (volume de texto: ~300 linhas por campanha); R6 desempenho do SVG procedural da história (usar `will-change` e poucas camadas); R7 **escopo**: 24 missões é grande: entregar a Aliança primeiro (§3.1); **R8** heróis inimigos (chefes) criados para a IA com o mesmo `unitType` do herói jogável: confirmar que `spawnUnit` aceita 1 por partida por tipo mesmo com dono diferente (a regra atual é por partida: cada missão tem só um); **R9** a extensão A1 (status em área) toca `src/sim/abilities.js`: precisa do `determinism.test.js` verde.
+**Riscos técnicos**: R1 `techRestriction` entra no checksum só quando presente (ok); R2 IA por dados nos mapas novos (F5-06); **R3** Centro avançado: `setTier` e `UPGRADE_HQ` com dois Centros ou com o Centro criado por `spawnBuilding` (verificar `GameManager`/`commands` antes do lote D; se faltar, restringir à evolução do Marco como único Centro "ativo"); R4 **naval**: sem IA naval até a NEW-44; R5 **dois idiomas** em 24 missões (volume de texto: ~300 linhas por campanha); R6 desempenho do SVG procedural da história (usar `will-change` e poucas camadas); R7 **escopo**: 24 missões é grande: entregar a Liga de Aurelan primeiro (§3.1); **R8** heróis inimigos (chefes) criados para a IA com o mesmo `unitType` do herói jogável: confirmar que `spawnUnit` aceita 1 por partida por tipo mesmo com dono diferente (a regra atual é por partida: cada missão tem só um); **R9** a extensão A1 (status em área) toca `src/sim/abilities.js`: precisa do `determinism.test.js` verde.
 
 **O que só se verifica jogando (pendente, local)**: duração de 10–25 min por missão e dificuldade (ondas, chefes); equilíbrio das IAs e dos heróis (PV/dano/mana/recarga); a entrada gradual do tutorial (m5 e m6 carregadas); legibilidade dos mapas (ilha irregular, terreno pantanoso/gelado/vulcânico); rotas navais e desembarques; chefes e **herói morto** na m12; ritmo, texto e música da tela de história; aparência dos javalis e dos 6 heróis; arte `victory_*`; leitura de diálogos; HUD com retratos de herói; se a campanha "pesa" em frames.
 
@@ -572,7 +572,7 @@ Todos os passos terminam com `npm test`, `npm run lint`, `npx vite build --outDi
 
 ## 9. Riscos de roteiro
 - **Crônicas espelhadas**: um jogador que faz as duas verá cada lado vencer; a ponte narrativa (o sinal do outro no fim) evita contradição explícita.
-- **Tom**: a Horda não é "o mal": fome e orgulho. Sem violência explícita: conflito é nas ações de jogo; cativos, mortes de NPCs (Orsolo, Ulma) e traições aparecem em diálogo (pergunta §10-5).
+- **Tom**: os Clãs do Cinzal não são "o mal": fome e orgulho. Sem violência explícita: conflito é nas ações de jogo; cativos, mortes de NPCs (Orsolo, Ulma) e traições aparecem em diálogo (pergunta §10-5).
 - **Heróis inimigos**: Brann, Oren, Dorian, Drogath, Vozgul e Skarn aparecem como chefes na campanha oposta (`MUNDO-HEROIS.md` §2.1): a mesma pessoa é "aliada" numa campanha e "inimiga" na outra, coerente com as crônicas espelhadas.
 
 ---
@@ -585,7 +585,7 @@ Todos os passos terminam com `npm test`, `npm run lint`, `npx vite build --outDi
 2. **Rótulo da beta**: "Campanha Clássica (beta)" no `campaign.json` da beta (alteração aditiva de 3 campos) ou numa tabela em `index.js` (nenhum arquivo da beta muda)?
 3. **Javalis**: troca **só visual e de textos** (recomendada; "Cercado de Javalis"/"Boar Pen"; ids internos ficam) ou também renomear os ids (`pig_farm`, espécie `pig`) e migrar mapas e salvamentos?
 4. **Itens/evolução de herói**: manter fora (MVP) ou adotar evolução por missão / XP? (`MUNDO-HEROIS.md` §9-3)
-5. **Tom**: Mervane (traidor humano), Hurgan (traidor orc), contrabando, cativos, a morte narrativa de Orsolo e de Ulma e a Horda como povo com fome: aceitável (implícito/diálogo, sem violência explícita)?
+5. **Tom**: Mervane (traidor humano), Hurgan (traidor orc), contrabando, cativos, a morte narrativa de Orsolo e de Ulma e os Clãs do Cinzal como povo com fome: aceitável (implícito/diálogo, sem violência explícita)?
 6. **Gancho**: preferem sugerir mais **expulsão**, mais **conquista**, ou manter perfeitamente neutro?
 7. **Colônia (segundo Centro)**: aceita o Marco da Colônia criado por script (`spawnBuilding`), ou quer uma **mecânica nova** (construir um segundo Centro; tarefa de código)?
 8. **Tela de história**: aprovada a duração de ~75 s, a faixa nova de música e **sem locução** no MVP? Arte final por painel (local) com que prioridade? `victory_human/orc.webp` entram junto?
@@ -597,4 +597,4 @@ Todos os passos terminam com `npm test`, `npm run lint`, `npx vite build --outDi
 ---
 
 ## 11. Verificação feita nesta spec
-Script descartável (em `/tmp`, fora do repositório; nada no repositório foi alterado além deste documento, de `MUNDO-HEROIS.md` e da linha no índice): importou `src/data/{units,buildings,upgrades,factions,abilities}.js` e `src/sim/statuses.js` e conferiu (a) que **todos** os ids citados nas tabelas de `unlocks` (§4.2/§4.3) existem e são da facção correta, sem repetição, com cobertura 16/16/27 por facção e requisitos alcançáveis; (b) que existem `hero_brann`, `hero_oren`, `hero_drogath` e **não** existem `hero_dorian|vozgul|skarn`; (c) que as 14 habilidades novas não colidem com ids existentes e que todos os ids reaproveitados existem (`hero_war_cry`, `hero_arcane_bolt`, `hero_mend`; tipos de efeito `damage`, `heal`, `status`, `channel`, `raise_dead` em `EFFECT_KINDS`; status `slow`, `flameshield`, `haste`, `bloodlust`, `invisible`, `unholy_armor` em `STATUS_DEFS`; `skeleton` em `UNITS`; `modelOf` `cavalier`, `necromancer`, `ogre`, `knight`, `grunt`, `mage` em `UNITS`); (d) que `pig_farm`, `Critter` (`'pig'`), `CRITTER_SPECIES` e `icoPorco.svg` existem onde a §1.4 diz; (e) que `buildList` não contém o Centro (L5). **Resultado**: Aliança e Horda com 16 unidades, 16 construções e 27 fichas; 0 problemas de existência, facção, repetição ou requisito alcançável; as 14 habilidades novas não colidem e todos os ids/efeitos/status/unidades reaproveitados existem. Únicos achados (esperados): `hero_dorian`, `hero_vozgul` e `hero_skarn` ainda não existem em `UNITS` (são os 3 tipos novos do passo 2). Nada precisa de navegador.
+Script descartável (em `/tmp`, fora do repositório; nada no repositório foi alterado além deste documento, de `MUNDO-HEROIS.md` e da linha no índice): importou `src/data/{units,buildings,upgrades,factions,abilities}.js` e `src/sim/statuses.js` e conferiu (a) que **todos** os ids citados nas tabelas de `unlocks` (§4.2/§4.3) existem e são da facção correta, sem repetição, com cobertura 16/16/27 por facção e requisitos alcançáveis; (b) que existem `hero_brann`, `hero_oren`, `hero_drogath` e **não** existem `hero_dorian|vozgul|skarn`; (c) que as 14 habilidades novas não colidem com ids existentes e que todos os ids reaproveitados existem (`hero_war_cry`, `hero_arcane_bolt`, `hero_mend`; tipos de efeito `damage`, `heal`, `status`, `channel`, `raise_dead` em `EFFECT_KINDS`; status `slow`, `flameshield`, `haste`, `bloodlust`, `invisible`, `unholy_armor` em `STATUS_DEFS`; `skeleton` em `UNITS`; `modelOf` `cavalier`, `necromancer`, `ogre`, `knight`, `grunt`, `mage` em `UNITS`); (d) que `pig_farm`, `Critter` (`'pig'`), `CRITTER_SPECIES` e `icoPorco.svg` existem onde a §1.4 diz; (e) que `buildList` não contém o Centro (L5). **Resultado**: Liga de Aurelan e Clãs do Cinzal com 16 unidades, 16 construções e 27 fichas; 0 problemas de existência, facção, repetição ou requisito alcançável; as 14 habilidades novas não colidem e todos os ids/efeitos/status/unidades reaproveitados existem. Únicos achados (esperados): `hero_dorian`, `hero_vozgul` e `hero_skarn` ainda não existem em `UNITS` (são os 3 tipos novos do passo 2). Nada precisa de navegador.

@@ -445,7 +445,7 @@ const MODEL_CATALOG = [
     icon: '🐖',
     sourceFile: 'src/render/buildings/orc/PigFarm.js',
     create: () => bldView(PigFarm, 'pig_farm'),
-    description: 'A emblemática fazenda dos Orcs em Warcraft 2. Cercado de toras rústicas com amarração de corda, chão de lama úmida com palha, cocho de comida, abrigo de palha e três javalis/porcos com rotinas autônomas fuçando e comendo no cercado.',
+    description: 'A emblemática fazenda dos Orcs. Cercado de toras rústicas com amarração de corda, chão de lama úmida com palha, cocho de comida, abrigo de palha e três javalis/porcos com rotinas autônomas fuçando e comendo no cercado.',
     notes: 'VFX: 3 javalis com IA comportamental autônoma (vagam pelo cercado, comem no cocho, farejam o chão e balançam os rabos em espiral).'
   },
   {

@@ -49,7 +49,7 @@
 | [F6-09.md](F6-09.md) | F6-09 | DONE (2026-10-02) | i18n pt-BR/en e tutorial |
 | [F7-00c-glb-padrao.md](F7-00c-glb-padrao.md) | F7-00c / NEW-12 | DONE (7d6f712) | |
 | [F7-00d-lacaio-blender.md](F7-00d-lacaio-blender.md) | F7-00d | DONE (`peon.glb` via `tools/blender/build_peon.py`; refinado na NEW-32) | a linha "ADIADA" da spec é antiga; arte liberada em 2026-10-09 |
-| [F8-06-campanha-horda.md](F8-06-campanha-horda.md) | F8-06 | TODO (briefing) | a Horda do novo mundo é `war-horde` (M4) |
+| [F8-06-campanha-horda.md](F8-06-campanha-horda.md) | F8-06 | TODO (briefing) | os Clãs do Cinzal do novo mundo é `war-horde` (M4) |
 | [MUNDO-BRIEFING-DONO.md](MUNDO-BRIEFING-DONO.md) | novo mundo | fonte | briefing original do dono |
 | [MUNDO-HISTORIA-CAMPANHA.md](MUNDO-HISTORIA-CAMPANHA.md) | MUNDO-3/4/6/9/10 | PARCIAL | história, seletor e dados das 24 missões feitos; falta polir (M3/M4) |
 | [MUNDO-HEROIS.md](MUNDO-HEROIS.md) | MUNDO-2 | PARCIAL | dados dos 6 heróis feitos; só o Brann tem modelo 3D |

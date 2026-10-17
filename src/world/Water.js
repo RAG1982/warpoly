@@ -78,7 +78,7 @@ export function pickReedLocations(terrain, waterLevel = 0.5, max = 7, accept = n
 
 /**
  * Next-Gen Stylized Water & Shoreline System for WarPoly
- * Inspired by Warcraft 2 hand-painted art style, Valorant, and Overwatch.
+ * Stylized hand-painted look with soft shading.
  *
  * Architecture:
  * 1. Deep Water Base Plane: Rich deep sapphire / ocean navy blue foundation.

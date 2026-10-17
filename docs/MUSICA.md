@@ -10,7 +10,7 @@ sem `Math.random`/`Date.now` nas partituras; o RNG de áudio é o de `createAudi
 | `src/audio/music/catalog.js` | **Fonte única**: `MUSIC_CATALOG`, `getTrack`, `isTrackEnabled(id, seleção?)`, `enabledVariants`, `enabledForGroup`, leitura/gravação da seleção. |
 | `src/audio/music/musicEngine.js` | Motor de partitura (puro): modos, acordes, compassos (`4/4 3/4 5/4 6/8 7/8…`), notação de linha, geração de notas por passo, intensidade. |
 | `src/audio/music/musicScores.js` | Registro das faixas: as 3 clássicas de cada família + `TRACK_SETS` (importa os arquivos abaixo). |
-| `tracksHuman.js` / `tracksOrc.js` / `tracksTitle.js` | Candidatas novas do Reino e da Horda, e os temas de abertura. |
+| `tracksHuman.js` / `tracksOrc.js` / `tracksTitle.js` | Candidatas novas do Reino e dos Clãs, e os temas de abertura. |
 | `trackKit.js` | Construtores compactos de camada (`P`, `H`, `DR`, `LN`, `each`, `peace`). |
 | `intensity.js` | `intensityFromGameTime(segundos)` → 0..1 (evolução pelo tempo de partida). |
 | `MusicPlayer.js`, `instruments.js` | Player incremental e instrumentos (cravo, violinos, violoncelos, trombones, coro, órgão, tímpanos, gongo, sino… além dos antigos). |
@@ -20,7 +20,7 @@ sem `Math.random`/`Date.now` nas partituras; o RNG de áudio é o de `createAudi
 
 1. `npx vite --port 5173` e abra **`/inspector.html`** → botão **🎵 Músicas** (ou `/inspector.html?panel=music`).
 2. Clique em ▶ numa faixa (o `AudioContext` só nasce nesse clique). A lista é agrupada: **Abertura**, **Reino/paz**,
-   **Reino/combate**, **Horda/paz**, **Horda/combate**, **Vitória/Derrota** e **Candidatas novas**.
+   **Reino/combate**, **Clãs/paz**, **Clãs/combate**, **Vitória/Derrota** e **Candidatas novas**.
 3. Marque **No jogo** nas que devem entrar. A escolha é salva na hora em `localStorage['warpoly.music.selection']`
    como `{"version":1,"enabled":["id", …]}` — o **jogo honra a mesma seleção na mesma máquina** (inclusive a abertura).
 4. Botões do cartão: **Ouvir transição paz → combate** (paz → crossfade para o combate da facção → paz), **Só ouvir os
@@ -47,7 +47,7 @@ A lista viva (com descrições e instrumentos) está no painel do inspetor; as t
 | `title_1` | Réquiem das Muralhas | 84 bpm · 4/4 · Lá menor · 1:31 | não (candidata) |
 | `title_2` | Chamado dos Tambores | 104 bpm · 5/4 · Mi frígio · 1:32 | não (candidata) |
 
-`title_0` abre com caixas e tambores marchando, entra a Horda (trombones/trompas), cai num suspense quase silencioso
+`title_0` abre com caixas e tambores marchando, entram os Clãs (trombones/trompas), cai num suspense quase silencioso
 (órgão e dobres de sino), as cordas trágicas dos humanos crescem, explode em tutti com tímpanos, dialoga metais × cordas e
 fecha num **acorde suspenso (sus4)** que desemboca limpo na marcha do começo (laço do menu).
 
@@ -78,7 +78,7 @@ fecha num **acorde suspenso (sus4)** que desemboca limpo na marcha do começo (l
 | `human_combat_7` | Defesa Desesperada | 120 bpm · 4/4 · Mi menor harmônico · 0:32 | não |
 | `human_combat_8` | Confronto Sombrio | 80 bpm · 4/4 · Sol menor harmônico · 0:48 | não |
 
-### Horda / paz — `orc_peace` (3 atuais + 5 candidatas)
+### Clãs / paz — `orc_peace` (3 atuais + 5 candidatas)
 
 | id | título | andamento · compasso · modo · volta | No jogo (padrão) |
 |---|---|---|---|
@@ -91,7 +91,7 @@ fecha num **acorde suspenso (sus4)** que desemboca limpo na marcha do começo (l
 | `orc_peace_6` | Forja do Clã | 96 bpm · 4/4 · Lá frígio · 0:40 | não |
 | `orc_peace_7` | Pedra e Fumaça | 80 bpm · 6/8 · Sol menor harmônico · 0:36 | não |
 
-### Horda / combate — `orc_combat` (3 atuais + 6 candidatas)
+### Clãs / combate — `orc_combat` (3 atuais + 6 candidatas)
 
 | id | título | andamento · compasso · modo · volta | No jogo (padrão) |
 |---|---|---|---|
@@ -100,7 +100,7 @@ fecha num **acorde suspenso (sus4)** que desemboca limpo na marcha do começo (l
 | `orc_combat_2` | Ruína e Cinza | 140 bpm · 4/4 · Lá frígio · 0:14 | não (atual) |
 | `orc_combat_3` | Invasão Implacável | 112 bpm · 4/4 · Mi frígio · 0:34 | não |
 | `orc_combat_4` | Perseguição Selvagem | 132 bpm · 6/8 · Ré frígio · 0:22 | não |
-| `orc_combat_5` | Cerco da Horda | 66 bpm · 4/4 · Dó frígio · 0:58 | não |
+| `orc_combat_5` | Cerco dos Clãs | 66 bpm · 4/4 · Dó frígio · 0:58 | não |
 | `orc_combat_6` | Carga dos Lobos | 150 bpm · 7/8 · Si frígio · 0:22 | não |
 | `orc_combat_7` | Defesa do Clã | 126 bpm · 5/4 · Fá menor harmônico · 0:38 | não |
 | `orc_combat_8` | Coro da Escuridão | 90 bpm · 4/4 · Dó# menor · 0:43 | não |
@@ -123,7 +123,7 @@ fecha num **acorde suspenso (sus4)** que desemboca limpo na marcha do começo (l
 `MusicPlayer.setIntensity` (quantizada em 1/16). Efeito, sem quebrar o laço (a posição é sempre `passo % tamanho do laço`):
 
 - **camadas** com `int: x` só soam a partir de `x` (caixa marchando, tímpanos, cordas em tremolo, metais em quintas/trítono,
-  bumbo, prato; na Horda taiko extra, coro e galope) — a densidade **só cresce** (testado);
+  bumbo, prato; nos Clãs taiko extra, coro e galope) — a densidade **só cresce** (testado);
 - **registro**: a melodia principal sobe uma oitava a partir de 0,75 (`lift`);
 - **andamento**: `tempoGain` (+2 … +6 %, padrão 4 %) em intensidade 1.
 

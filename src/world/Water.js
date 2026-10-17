@@ -50,7 +50,9 @@ const REED_SPACING = 7;
  */
 export function pickReedLocations(terrain, waterLevel = 0.5, max = 7, accept = null) {
   const size = (terrain && (terrain.mapDef?.size || terrain.width)) || 140;
-  const half = size / 2 - 4;
+  // M1-05/NEW-52: só dentro da área jogável (`mapDef.playable`); antes a varredura ia até a borda do mundo (juncos na névoa, fora de jogo).
+  const playable = terrain && terrain.mapDef && terrain.mapDef.playable;
+  const half = Math.min(size / 2 - 4, playable ? playable / 2 : Infinity);
   // MUNDO-5: lava (altura assada 0,4, "rasa" para esta conta) não é água: nada de juncos no córrego. Mapa sem `lavaGrid`: sempre falso.
   const lava = (x, z) => typeof terrain.isLava === 'function' && terrain.isLava(x, z);
   const shallow = (x, z) => {

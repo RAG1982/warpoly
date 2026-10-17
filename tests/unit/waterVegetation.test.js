@@ -88,24 +88,34 @@ describe('Water — plantas aquáticas mescladas (F7-00b, aceite de desempenho)'
     expect(scene.getObjectByName('WaterVegetationGroup').children).toHaveLength(0);
   });
 
-  it('NEW-52: continental-1v1 — juncos só em água rasa (e as posições fixas antigas eram terra seca)', () => {
+  it('NEW-52 (M1-05): continental-1v1 — juncos só em água rasa DENTRO da área jogável', () => {
     const terrain = new Terrain(getMap('continental-1v1'));
+    const halfPlayable = getMap('continental-1v1').playable / 2;
     const locs = pickReedLocations(terrain, WATER_LEVEL);
-    expect(locs.length).toBeGreaterThan(0);
     expect(locs.length).toBeLessThanOrEqual(7);
+    // O rio dentro da área jogável é fundo (< -0,7): a água rasa só existia nos cantos (±72 > ±67); agora não há moitas.
     for (const { x, z } of locs) {
+      expect(Math.abs(x), `x=${x}`).toBeLessThanOrEqual(halfPlayable);
+      expect(Math.abs(z), `z=${z}`).toBeLessThanOrEqual(halfPlayable);
       const h = terrain.getHeight(x, z);
       expect(h, `(${x},${z})`).toBeLessThan(WATER_LEVEL);
       expect(h).toBeGreaterThan(WATER_LEVEL - 0.7);
-      for (const [dx, dz] of [[0.9, 0], [-0.9, 0], [0, 0.9], [0, -0.9]]) {
-        expect(terrain.getHeight(x + dx, z + dz), `(${x},${z})+(${dx},${dz})`).toBeLessThan(WATER_LEVEL);
-      }
     }
     // determinístico
     expect(pickReedLocations(terrain, WATER_LEVEL)).toEqual(locs);
-    // as posições fixas do mapa antigo ficavam em terra seca neste mapa (o bug)
+    // as posições fixas do mapa antigo ficavam em terra seca neste mapa (o bug original)
     const old = [[10, 12], [12, 15], [-10, -12], [-12, -15], [-15, 18], [15, -18], [-20, 12]];
     expect(old.some(([x, z]) => terrain.getHeight(x, z) > WATER_LEVEL)).toBe(true);
+  });
+
+  it('M1-05: com `mapDef.playable`, água rasa fora da área jogável é ignorada; dentro dela, é aceita', () => {
+    // lago raso só nos cantos (|x| > 20 ou |z| > 20), terra no meio
+    const outsideOnly = { width: 100, getHeight: (x, z) => (Math.abs(x) > 20 || Math.abs(z) > 20 ? 0.3 : 2.5), mapDef: { size: 100, playable: 40 } };
+    expect(pickReedLocations(outsideOnly, WATER_LEVEL)).toEqual([]);
+    const everywhere = { width: 100, getHeight: () => 0.3, mapDef: { size: 100, playable: 40 } };
+    const locs = pickReedLocations(everywhere, WATER_LEVEL);
+    expect(locs.length).toBeGreaterThan(0);
+    for (const { x, z } of locs) { expect(Math.abs(x)).toBeLessThanOrEqual(20); expect(Math.abs(z)).toBeLessThanOrEqual(20); }
   });
 
   it('tileset sem plantas (inverno) não cria a vegetação', () => {

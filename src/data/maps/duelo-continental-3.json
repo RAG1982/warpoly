@@ -13597,6 +13597,108 @@
       "radius": 6
     }
   ],
+  "anchors": {
+    "playerStart": {
+      "x": -40,
+      "z": -10
+    },
+    "enemyStart": {
+      "x": 40,
+      "z": 10
+    },
+    "goldMine1": {
+      "x": -55.6,
+      "z": -19
+    },
+    "stoneQuarry1": {
+      "x": -55.6,
+      "z": -1
+    },
+    "goldMine2": {
+      "x": 55.6,
+      "z": 19
+    },
+    "stoneQuarry2": {
+      "x": 55.6,
+      "z": 1
+    },
+    "forest1": {
+      "x": -25.6,
+      "z": 14
+    },
+    "forest2": {
+      "x": -68,
+      "z": -2
+    },
+    "forest3": {
+      "x": -48,
+      "z": 18
+    },
+    "forest4": {
+      "x": -14,
+      "z": -24
+    },
+    "forest5": {
+      "x": -10,
+      "z": -4
+    },
+    "forest6": {
+      "x": -16,
+      "z": -44
+    },
+    "forest7": {
+      "x": 8,
+      "z": 4
+    },
+    "forest8": {
+      "x": -68,
+      "z": -22
+    },
+    "forest9": {
+      "x": 25.6,
+      "z": -14
+    },
+    "forest10": {
+      "x": 68,
+      "z": 2
+    },
+    "forest11": {
+      "x": 48,
+      "z": -18
+    },
+    "forest12": {
+      "x": 14,
+      "z": 24
+    },
+    "forest13": {
+      "x": 10,
+      "z": 4
+    },
+    "forest14": {
+      "x": 16,
+      "z": 44
+    },
+    "forest15": {
+      "x": -8,
+      "z": -4
+    },
+    "forest16": {
+      "x": 68,
+      "z": 22
+    },
+    "ford1": {
+      "x": 5.51,
+      "z": -28.81
+    },
+    "ford2": {
+      "x": -5.51,
+      "z": 28.81
+    },
+    "landingZone": {
+      "x": -60,
+      "z": -34
+    }
+  },
   "meta": {
     "generator": "coast",
     "preset": "duelo-continental",

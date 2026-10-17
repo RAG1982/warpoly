@@ -16,6 +16,7 @@ import { isAlive, ownerMatches, resolveOwnerId, roleOf, selectEntities } from '.
 import { evalObjective, EXACT_TYPES, POLL_TICKS } from './objectives.js';
 import { TriggerEngine } from './TriggerEngine.js';
 import { runAction } from './actions.js';
+import { resolveMissionAnchors } from './anchors.js';
 
 /** Verificação "tudo destruído?" do jogador local (derrota por aniquilação), a cada 20 ticks. */
 const WIPE_CHECK_TICKS = 20;
@@ -27,6 +28,8 @@ export class MissionRuntime {
    * @param {object} def  missão já validada (`assertMission`)
    */
   constructor(gm, def) {
+    // M2-01: âncoras viram coordenadas AQUI, antes de qualquer tick (a sim, o checksum e os saves só veem x/z). Sem âncoras: mesma `def`.
+    def = resolveMissionAnchors(def, gm.terrain?.mapDef ?? null);
     this.gm = gm;
     this.def = def;
     this.id = def.id;

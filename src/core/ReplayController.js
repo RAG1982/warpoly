@@ -35,6 +35,14 @@ export class ReplayController {
     this._warned = false;
     this._finalChecked = false;
     if (!this.gm._replay) attachReplay(this.gm, replay);
+    // M1-04: a reprodução nunca passa do último tick gravado. A 8x um quadro podia dar o passo extra (tick 1501 de 1500),
+    // `ended` só era visto depois, e a conferência do checksum final (`currentTick === final.tick`) era pulada em silêncio.
+    if (!this.gm._replayCapped) {
+      this.gm._replayCapped = true;
+      const inner = this.gm.simStep.bind(this.gm);
+      const cap = replay.final?.tick ?? replay.ticks;
+      this.gm.simStep = (dt) => { if (this.gm.currentTick < cap) inner(dt); };
+    }
     this.view = view === null ? this.gm.localPlayerId : view;
     if (this.view !== this.gm.localPlayerId) setReplayView(this.gm, this.view);
     // Sem o modal de fim de partida do jogador local (a barra mostra "fim do replay").

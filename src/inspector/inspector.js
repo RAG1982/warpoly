@@ -1269,7 +1269,7 @@ const MODEL_CATALOG = [
     sourceFile: 'tools/blender/build_vegetacao_seca_arvores.py',
     create: createGlb('tree_palm'),
     description: 'Palmeira com tronco curvo e fronde (ART-02). 1 116 triângulos, atlas 512², 5,9 × 7,7 m.',
-    notes: '1 draw call. A copa fica deslocada do pé: o impostor de LOD e o hit-proxy do TreeManager não a acompanham.',
+    notes: '1 draw call. A copa fica ~1,6 ao lado do pé: no jogo o impostor de LOD desloca a copa junto e o hit-proxy ganha um 2º cilindro na copa (M2-10); a colisão fica no pé.',
   },
   {
     id: 'tree_acacia_glb',

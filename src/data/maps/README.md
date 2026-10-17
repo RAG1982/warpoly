@@ -45,8 +45,8 @@ Cada mapa é um JSON em `src/data/maps/<id>.json`, registrado em `index.js` (`ge
   algum jogador da partida usar `startSlot === N` (jazidas extras de um slot de teste/FFA que não
   faz parte do 1×1 padrão do mapa — ver `continental-1v1.json`, slot 2).
 - **`forests`**: clusters de árvores (`GameManager.spawnWoodlands`, usando `rngMap` — determinístico
-  pela seed da partida). `species` (`oak`/`pine`/`autumn`/`birch`) é o tipo preferido (~65% das árvores do cluster); o resto
-  sorteia entre `oak`/`pine`/`autumn` (a bétula só aparece como espécie preferida; o sorteio e o consumo do `rngMap` não mudam).
+  pela seed da partida). `species` (`oak`/`pine`/`autumn`/`birch`/`broad`/`palm`/`acacia`; tabela em `src/data/treeSpecies.js`) é o tipo preferido (~65% das árvores do cluster); o resto
+  sorteia numa lista de companhia (`treeMixFor`): `oak`/`pine`/`autumn` para as espécies antigas; `broad`, `palm` e `acacia` têm lista própria com elas mesmas (a bétula só aparece como preferida). O sorteio e o consumo do `rngMap` não mudam (espécie é só visual). `broad|palm|acacia` são `.glb` lazy: o jogo os baixa só quando o mapa os usa (`lazyTreeKeysOfMap` em `_loadMatch`); a palmeira tem a copa ~1,6 u ao lado do pé (impostor de LOD e hit-proxy acompanham). `coast/layout.js` escolhe a espécie pelo bioma (`speciesForBiome`: palmeira na costa/deserto/areia, acácia na savana, copa larga no exuberante).
 - **`neutrals`** (F3-10): entidades neutras, criadas por `GameManager.spawnNeutrals()` com RNG
   determinístico (`rng.fork('neutrals')`). Só quando o mapa tem alguma entrada existe o jogador
   neutro hostil (`NEUTRAL_HOSTILE_ID = 99`, time 99). `validateNeutrals` (MatchConfig.js) valida:

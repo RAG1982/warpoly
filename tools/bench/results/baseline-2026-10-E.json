@@ -1,0 +1,152 @@
+{
+  "meta": {
+    "part": "E",
+    "createdAt": "2026-10-17T07:08:40.360Z",
+    "runs": 3,
+    "warmupS": 3,
+    "durationS": 10,
+    "headless": false,
+    "browser": "153.0.8010.12"
+  },
+  "results": [
+    {
+      "lod": true,
+      "setup": {
+        "camps": [
+          [
+            40,
+            20
+          ],
+          [
+            -40,
+            -20
+          ]
+        ],
+        "counts": {
+          "bandidos": 8,
+          "acampamentos": 2,
+          "critters": 18,
+          "jazidas": 2
+        },
+        "pixelRatio": 1,
+        "effects": {
+          "bloom": true,
+          "ssao": true,
+          "colorGrading": true,
+          "selectionOutline": true
+        }
+      },
+      "rows": [
+        {
+          "vista": "acampamento neutro 1 (40,20)",
+          "neutros": "visíveis",
+          "calls": 1121,
+          "callsMin": 1120,
+          "callsMax": 1122,
+          "tris": 1313595,
+          "fps": 123.3
+        },
+        {
+          "vista": "acampamento neutro 1 (40,20)",
+          "neutros": "só bandidos ocultos",
+          "calls": 902,
+          "callsMin": 901,
+          "callsMax": 903,
+          "tris": 1177063,
+          "fps": 131.2
+        },
+        {
+          "vista": "acampamento neutro 1 (40,20)",
+          "neutros": "só acampamentos ocultos",
+          "calls": 1113,
+          "callsMin": 1112,
+          "callsMax": 1115,
+          "tris": 1239378,
+          "fps": 120.5
+        },
+        {
+          "vista": "acampamento neutro 1 (40,20)",
+          "neutros": "só critters ocultos",
+          "calls": 975,
+          "callsMin": 975,
+          "callsMax": 976,
+          "tris": 1309981,
+          "fps": 127.5
+        },
+        {
+          "vista": "acampamento neutro 1 (40,20)",
+          "neutros": "só jazidas ocultos",
+          "calls": 1116,
+          "callsMin": 1114,
+          "callsMax": 1117,
+          "tris": 1281384,
+          "fps": 124.2
+        },
+        {
+          "vista": "acampamento neutro 1 (40,20)",
+          "neutros": "ocultos",
+          "calls": 733,
+          "callsMin": 733,
+          "callsMax": 734,
+          "tris": 1066923,
+          "fps": 137.9
+        },
+        {
+          "vista": "controle: base do jogador (32,-30)",
+          "neutros": "visíveis",
+          "calls": 907,
+          "callsMin": 906,
+          "callsMax": 908,
+          "tris": 1129999,
+          "fps": 131.8
+        },
+        {
+          "vista": "controle: base do jogador (32,-30)",
+          "neutros": "só bandidos ocultos",
+          "calls": 760,
+          "callsMin": 755,
+          "callsMax": 766,
+          "tris": 1024206,
+          "fps": 140.9
+        },
+        {
+          "vista": "controle: base do jogador (32,-30)",
+          "neutros": "só acampamentos ocultos",
+          "calls": 895,
+          "callsMin": 893,
+          "callsMax": 899,
+          "tris": 1055761,
+          "fps": 134.8
+        },
+        {
+          "vista": "controle: base do jogador (32,-30)",
+          "neutros": "só critters ocultos",
+          "calls": 768,
+          "callsMin": 768,
+          "callsMax": 769,
+          "tris": 1126707,
+          "fps": 142.4
+        },
+        {
+          "vista": "controle: base do jogador (32,-30)",
+          "neutros": "só jazidas ocultos",
+          "calls": 897,
+          "callsMin": 896,
+          "callsMax": 898,
+          "tris": 1108436,
+          "fps": 134.8
+        },
+        {
+          "vista": "controle: base do jogador (32,-30)",
+          "neutros": "ocultos",
+          "calls": 599,
+          "callsMin": 598,
+          "callsMax": 599,
+          "tris": 924974,
+          "fps": 155.5
+        }
+      ],
+      "errors": []
+    }
+  ]
+}

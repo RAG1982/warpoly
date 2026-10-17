@@ -1,0 +1,80 @@
+{
+  "meta": {
+    "part": "I",
+    "createdAt": "2026-10-17T07:46:26.365Z",
+    "runs": 3,
+    "warmupS": 3,
+    "durationS": 10,
+    "headless": false,
+    "browser": "153.0.8010.12"
+  },
+  "results": [
+    {
+      "lod": true,
+      "setup": {
+        "camps": [
+          [
+            40,
+            20
+          ],
+          [
+            -40,
+            -20
+          ]
+        ],
+        "counts": {
+          "bandidos": 8,
+          "acampamentos": 2,
+          "critters": 18,
+          "jazidas": 2
+        },
+        "pixelRatio": 1,
+        "effects": {
+          "bloom": true,
+          "ssao": true,
+          "colorGrading": true,
+          "selectionOutline": true
+        }
+      },
+      "rows": [
+        {
+          "vista": "acampamento neutro 1 (40,20)",
+          "neutros": "visíveis",
+          "calls": 509,
+          "callsMin": 508,
+          "callsMax": 511,
+          "tris": 665276,
+          "fps": 165.4
+        },
+        {
+          "vista": "acampamento neutro 1 (40,20)",
+          "neutros": "ocultos",
+          "calls": 364,
+          "callsMin": 363,
+          "callsMax": 364,
+          "tris": 582393,
+          "fps": 185
+        },
+        {
+          "vista": "controle: base do jogador (32,-30)",
+          "neutros": "visíveis",
+          "calls": 330,
+          "callsMin": 327,
+          "callsMax": 333,
+          "tris": 505686,
+          "fps": 190.9
+        },
+        {
+          "vista": "controle: base do jogador (32,-30)",
+          "neutros": "ocultos",
+          "calls": 242,
+          "callsMin": 242,
+          "callsMax": 243,
+          "tris": 446297,
+          "fps": 205.6
+        }
+      ],
+      "errors": []
+    }
+  ]
+}

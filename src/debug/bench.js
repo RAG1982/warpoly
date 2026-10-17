@@ -12,7 +12,7 @@
  * Parâmetros opcionais de URL: `benchWarmup=<s>`, `benchDuration=<s>`.
  */
 
-const BENCH_VERSION = 1;
+const BENCH_VERSION = 2; // v2 (M1-03): draw calls/triângulos somados sobre todas as passadas de render do quadro
 const SEED = 0x5eed1234;
 
 /** PRNG determinístico (usado só pelo bench para montar cenários). */
@@ -196,6 +196,19 @@ export function startBench(app) {
   const rng = mulberry32(SEED);
   const state = {};
 
+  // M1-03: com pós-processamento (EffectComposer) um quadro tem várias chamadas a `renderer.render`, e
+  // `renderer.info.render.calls` (autoReset) só guarda a ÚLTIMA (um quadro cheio de efeitos lia "1 draw call").
+  // Soma as passadas aqui; o laço de amostragem lê e zera a cada quadro.
+  const passAcc = { calls: 0, tris: 0, ms: 0 };
+  const origRender = renderer.render.bind(renderer);
+  renderer.render = (...a) => {
+    const r0 = performance.now();
+    origRender(...a);
+    passAcc.ms += performance.now() - r0; // tempo de CPU em renderer.render (inclui espera de fila da GPU)
+    passAcc.calls += renderer.info.render.calls;
+    passAcc.tris += renderer.info.render.triangles;
+  };
+
   // 1. IA pausada para resultado estável.
   if (gm.aiDirector) gm.aiDirector.update = () => {};
   if (gm.enemyAI && gm.enemyAI !== gm.aiDirector) gm.enemyAI.update = () => {};
@@ -237,6 +250,7 @@ export function startBench(app) {
   const frameTimes = [];
   const calls = [];
   const tris = [];
+  const renderMs = [];
   let firstFrameAt = null;
   let phaseStart = null;
   let last = null;
@@ -284,6 +298,7 @@ export function startBench(app) {
         callsMax: calls.length ? Math.max(...calls) : 0,
         trianglesAvg: Math.round(avg(tris)),
         trianglesMax: tris.length ? Math.max(...tris) : 0,
+        renderCpuMsAvg: round(avg(renderMs), 2), // M1-03
       },
       memory: {
         geometries: mem.geometries,
@@ -312,6 +327,19 @@ export function startBench(app) {
         userAgent: navigator.userAgent,
         hardwareConcurrency: navigator.hardwareConcurrency,
       },
+      // M1-03: o que estava ligado de fato na medição (preset, resolução dinâmica, efeitos de pós-processamento).
+      quality: (() => {
+        try {
+          const q = sm.quality?.current;
+          return {
+            preset: q?.name ?? null,
+            dynamicResolution: q?.dynamicResolution ?? null,
+            pixelRatioNow: renderer.getPixelRatio(),
+            effects: sm.postfx?.effects ? { ...sm.postfx.effects } : null,
+            lod: !/[?&]lod=0\b/.test(window.location.search),
+          };
+        } catch (err) { return { error: String(err) }; }
+      })(),
     };
 
     window.__bench = result;
@@ -345,6 +373,9 @@ export function startBench(app) {
       if (now - phaseStart >= warmupS * 1000) {
         phase = 'medindo';
         phaseStart = now;
+        passAcc.calls = 0;
+        passAcc.tris = 0;
+        passAcc.ms = 0;
         applyCamera();
         measuring = true;
       } else {
@@ -352,8 +383,12 @@ export function startBench(app) {
       }
     } else if (phase === 'medindo') {
       frameTimes.push(dt);
-      calls.push(renderer.info.render.calls);
-      tris.push(renderer.info.render.triangles);
+      calls.push(passAcc.calls);
+      tris.push(passAcc.tris);
+      renderMs.push(passAcc.ms);
+      passAcc.calls = 0;
+      passAcc.tris = 0;
+      passAcc.ms = 0;
       if ((frameTimes.length & 15) === 0) status(` ${((now - phaseStart) / 1000).toFixed(1)}s`);
       if (now - phaseStart >= durationS * 1000) {
         finish();

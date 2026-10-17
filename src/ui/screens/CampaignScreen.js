@@ -33,8 +33,10 @@ export class CampaignScreen {
     this.root = null;
     this.campaignId = null;
     this.selected = null;
+    this._story = null;
     this._onKey = (e) => {
-      if (e.code === 'Escape') { e.preventDefault(); e.stopPropagation(); this.close(); }
+      // M1-01: com a história aberta, o Esc é dela (pula só a história); antes o mesmo Esc fechava também a campanha.
+      if (e.code === 'Escape' && !this._story?.isOpen) { e.preventDefault(); e.stopPropagation(); this.close(); }
     };
     this._offLang = null;
   }
@@ -64,6 +66,7 @@ export class CampaignScreen {
         if (!onDone) this._render();
       }
     }, this.parent);
+    this._story = story;
     story.open();
   }
 

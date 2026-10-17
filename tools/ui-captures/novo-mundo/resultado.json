@@ -1,0 +1,226 @@
+{
+  "when": "2026-10-17T06:17:33.846Z",
+  "viewport": {
+    "width": 1920,
+    "height": 1080
+  },
+  "renderer": "ANGLE (AMD, Vulkan 1.4.318 (AMD Radeonâ¢ RX 7600 XT (RADV NAVI33) (0x00007480)), radv)",
+  "phases": [
+    "menu"
+  ],
+  "menu": {
+    "storyOpenedOnFirstVisit": true,
+    "panels": [
+      {
+        "dotActive": 0,
+        "dots": 7,
+        "art": {
+          "src": "/art/story/panel-1.png",
+          "w": 1376,
+          "h": 768,
+          "complete": true
+        },
+        "fallbackVisible": false,
+        "caption": "Antes de haver nomes, havia uma só terra, um só oceano e um só céu. Ondara era um mundo inteiro, e ninguém ainda o chamava de lar.",
+        "title": null,
+        "step": 0
+      },
+      {
+        "dotActive": 1,
+        "dots": 7,
+        "art": {
+          "src": "/art/story/panel-2.png",
+          "w": 1376,
+          "h": 768,
+          "complete": true
+        },
+        "fallbackVisible": false,
+        "caption": "Então a terra se partiu. O mar entrou pela Fenda, e por milhões de anos dois continentes derivaram em silêncio, cada um sonhando o seu próprio mundo.",
+        "title": null,
+        "step": 1
+      },
+      {
+        "dotActive": 2,
+        "dots": 7,
+        "art": {
+          "src": "/art/story/panel-3.png",
+          "w": 1376,
+          "h": 768,
+          "complete": true
+        },
+        "fallbackVisible": false,
+        "caption": "Em Velmara, entre montanhas nevadas, florestas e savanas, ergueram-se os homens, com seus rebanhos e seus grifos. Em Cinzara, entre dunas, pântanos e estepes, os clãs aprenderam a viver do pouco: javalis, brasas e vento.",
+        "title": null,
+        "step": 2
+      },
+      {
+        "dotActive": 3,
+        "dots": 7,
+        "art": {
+          "src": "/art/story/panel-4.png",
+          "w": 1376,
+          "h": 768,
+          "complete": true
+        },
+        "fallbackVisible": false,
+        "caption": "Os povos cresceram, e a fome de terra, de ouro, de madeira e de breu os lançou ao mar. Aurelan traçou cartas; os clãs queimaram mastros de cinza. Cada um buscava o que faltava em casa.",
+        "title": null,
+        "step": 3
+      },
+      {
+        "dotActive": 4,
+        "dots": 7,
+        "art": {
+          "src": "/art/story/panel-5.png",
+          "w": 1376,
+          "h": 768,
+          "complete": true
+        },
+        "fallbackVisible": false,
+        "caption": "No meio do Mar Fendido, duas velas se avistaram. Ninguém sabe quem baixou o estandarte primeiro, nem de que lado partiu a primeira flecha. Só se sabe que o mar deixou de ser vazio.",
+        "title": null,
+        "step": 4
+      },
+      {
+        "dotActive": 5,
+        "dots": 7,
+        "art": {
+          "src": "/art/story/panel-6.png",
+          "w": 1376,
+          "h": 768,
+          "complete": true
+        },
+        "fallbackVisible": false,
+        "caption": "Entre os dois mundos jaziam os Estilhaços: ilhas de pedra, brejo, fogo, gelo e areia, com ouro, madeira e petróleo à beira da água. Quem as dominasse teria uma ponte de guerra e a chave do oceano.",
+        "title": null,
+        "step": 5
+      },
+      {
+        "dotActive": 6,
+        "dots": 7,
+        "art": {
+          "src": "/art/story/panel-7-alliance.png",
+          "w": 1376,
+          "h": 768,
+          "complete": true
+        },
+        "fallbackVisible": false,
+        "caption": "Aurelan não queria a guerra, mas não cederia o mar. Na Baía de Aurelan, a Rainha Sevelin ergue o estandarte: tomar os Estilhaços e fincar uma fortaleza em terra inimiga, de onde o mar será nosso.",
+        "title": null,
+        "step": 6
+      },
+      {
+        "dotActive": 6,
+        "dots": 7,
+        "art": {
+          "src": "/art/world/mapa-mundi.png",
+          "w": 1376,
+          "h": 768,
+          "complete": true
+        },
+        "fallbackVisible": false,
+        "caption": null,
+        "title": "A Guerra do Mar Fendido",
+        "step": 7
+      }
+    ],
+    "tabs": [
+      {
+        "text": "A Guerra do Mar Fendido (Aliança)",
+        "selected": "true"
+      },
+      {
+        "text": "A Guerra do Mar Fendido (Horda)",
+        "selected": "false"
+      },
+      {
+        "text": "Campanha Clássica (beta)",
+        "selected": "false"
+      }
+    ],
+    "tab1": {
+      "hasReviewStory": true,
+      "items": 12,
+      "provisional": false
+    },
+    "tab2": {
+      "hasReviewStory": false,
+      "items": 8,
+      "provisional": true
+    },
+    "esc": {
+      "reopened": true,
+      "after": {
+        "story": false,
+        "campaign": true,
+        "mainMenu": true,
+        "inGame": false
+      }
+    },
+    "worldMapInDom": false,
+    "escFirstVisit": {
+      "story": false,
+      "campaign": true
+    }
+  },
+  "maps": {},
+  "lava": {},
+  "checks": [
+    {
+      "name": "história abre sozinha na 1a visita à campanha principal",
+      "ok": true,
+      "extra": ""
+    },
+    {
+      "name": "7 painéis narrativos visitados",
+      "ok": true,
+      "extra": "narrativos=7, total=8"
+    },
+    {
+      "name": "nenhum painel caiu no fallback de imagem",
+      "ok": true,
+      "extra": "1376x768 1376x768 1376x768 1376x768 1376x768 1376x768 1376x768 1376x768"
+    },
+    {
+      "name": "história terminou sozinha após o último painel (sem travar)",
+      "ok": true,
+      "extra": ""
+    },
+    {
+      "name": "seletor main x beta presente (2+ abas)",
+      "ok": true,
+      "extra": "[{\"text\":\"A Guerra do Mar Fendido (Aliança)\",\"selected\":\"true\"},{\"text\":\"A Guerra do Mar Fendido (Horda)\",\"selected\":\"false\"},{\"text\":\"Campanha Clássica (beta)\",\"selected\":\"false\"}]"
+    },
+    {
+      "name": "aba beta (Campanha Clássica) não mostra \"Rever história\"",
+      "ok": true,
+      "extra": "{\"hasReviewStory\":false,\"items\":8,\"provisional\":true}"
+    },
+    {
+      "name": "abas main (Aliança/Horda) mostram \"Rever história\"",
+      "ok": true,
+      "extra": "{\"hasReviewStory\":true,\"items\":12,\"provisional\":false}"
+    },
+    {
+      "name": "\"Rever história\" reabre e Esc volta à lista de campanha (sem iniciar partida)",
+      "ok": true,
+      "extra": "{\"story\":false,\"campaign\":true,\"mainMenu\":true,\"inGame\":false}"
+    },
+    {
+      "name": "MUNDO-9: mapa-múndi montado em alguma tela do fluxo de campanha",
+      "ok": false,
+      "extra": "(esperado FALHAR: worldMap.js só é importado por testes)"
+    },
+    {
+      "name": "1a visita: Esc na história pula a história e deixa a lista da campanha aberta",
+      "ok": true,
+      "extra": "{\"story\":false,\"campaign\":true}"
+    }
+  ],
+  "consoleErrors": [],
+  "files": [
+    "historia-painel-a-painel.jpg",
+    "campanha-menu-abas.jpg"
+  ],
+  "consoleErrorCount": 0
+}

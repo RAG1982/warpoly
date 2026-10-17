@@ -1,7 +1,7 @@
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, beforeAll } from 'vitest';
 import { GameManager } from '../../src/core/GameManager.js';
 import { Terrain } from '../../src/world/Terrain.js';
-import { getMap, registerMap, unregisterMap, listMaps } from '../../src/data/maps/index.js';
+import { getMap, registerMap, unregisterMap, listMaps, loadAllCampaignMaps } from '../../src/data/maps/index.js';
 import { validateMapDef } from '../../src/data/maps/validate.js';
 import { defaultAnchors, ANCHOR_NAME_RE } from '../../src/data/maps/anchors.js';
 import { getMission, listMissions, createMissionConfig } from '../../src/data/missions/index.js';
@@ -18,6 +18,7 @@ import { baseMission, makeMissionGm, runTicks, statusOf, teleport } from './help
 const clone = (o) => JSON.parse(JSON.stringify(o));
 const MUNDO7 = ['duelo-continental-1', 'duelo-continental-2', 'duelo-continental-3', 'ilha-unica-1', 'ilha-unica-2', 'ilha-unica-3'];
 const CAMPANHA = ['camp-01-baia-de-aurelan', 'camp-02-pouso-do-encontro', 'camp-03-pedra-mae']; // M2-03: mapas de campanha (com âncoras)
+beforeAll(async () => { await loadAllCampaignMaps(); }); // M2-28: mapas de campanha sob demanda
 const PRIMARY = { id: 'o', type: 'survive', priority: 'primary', seconds: 99999, title: 't' };
 const withSetup = (setup, over = {}) => baseMission({ autoVictory: false, objectives: [PRIMARY], setup, ...over });
 const spawnAt = (pt) => ({ type: 'spawn', owner: 'player', unitType: 'villager', count: 1, ...pt });

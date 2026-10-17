@@ -6,7 +6,7 @@
  * `window.mapEditor` expõe a API para capturas/depuração. Mapas exportados NÃO entram no registro do jogo (importe-os à mão).
  */
 import { t, applyI18n, setLanguage, getLanguage, LANGUAGES, onLanguageChange } from '../i18n/index.js';
-import { listMaps } from '../data/maps/index.js';
+import { listMapIds, peekMap, ensureMapLoaded } from '../data/maps/index.js'; // M2-28: mapas de campanha carregam sob demanda
 import { validateMapDef, SIZE_LIMITS, FOREST_SPECIES } from '../data/maps/validate.js';
 import { TILESETS, TILESET_IDS, resolveTilesetId } from '../data/tilesets.js';
 import { CRITTER_SPECIES_LIST } from '../data/critters.js';
@@ -380,11 +380,16 @@ function bindHeader() {
     const slug = name.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '').slice(0, 40);
     setModel(createModel({ size: Number($('new-size').value), fill: $('new-fill').value, name, id: slug.length >= 2 ? slug : 'meu-mapa' }));
   });
-  $('sel-game-map').addEventListener('change', (e) => {
+  $('sel-game-map').addEventListener('change', async (e) => {
     const id = e.target.value;
     e.target.value = '';
-    const def = listMaps({ includeHidden: true }).find((m) => m.id === id);
-    if (def) importText(JSON.stringify(def), true);
+    if (!id) return;
+    try {
+      const def = await ensureMapLoaded(id); // M2-28: mapa de campanha entra por import() dinâmico
+      importText(JSON.stringify(def), true);
+    } catch (err) {
+      console.error('[editor] falha ao carregar o mapa', id, err);
+    }
   });
   $('pv-light').addEventListener('click', () => setPreview('light'));
   $('pv-game').addEventListener('click', () => setPreview('game'));
@@ -406,7 +411,7 @@ function fillStaticSelects() {
   $('new-size').value = '128';
   $('new-fill').replaceChildren(el('option', { value: 'land', text: t('editor.fill.land') }), el('option', { value: 'water', text: t('editor.fill.water') }));
   const sel = $('sel-game-map');
-  sel.replaceChildren(el('option', { value: '', text: t('editor.fromGame') }), ...listMaps({ includeHidden: true }).map((m) => el('option', { value: m.id, text: t(`map.${m.id}.name`, { fallback: m.name || m.id }) })));
+  sel.replaceChildren(el('option', { value: '', text: t('editor.fromGame') }), ...listMapIds({ includeHidden: true }).map((id) => el('option', { value: id, text: t(`map.${id}.name`, { fallback: peekMap(id)?.name || id }) })));
   sel.value = '';
   const lang = $('sel-lang');
   lang.replaceChildren(...LANGUAGES.map((l) => el('option', { value: l.id, text: l.label })));

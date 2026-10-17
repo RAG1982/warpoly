@@ -58,7 +58,7 @@ async function main() {
   await import('../src/ai/registerAI.js');
   const { Terrain } = await import('../src/world/Terrain.js');
   const { createMatchConfig } = await import('../src/sim/MatchConfig.js');
-  const { getMap } = await import('../src/data/maps/index.js');
+  const { getMap, ensureMapLoaded } = await import('../src/data/maps/index.js');
   const { SIM_DT } = await import('../src/sim/constants.js');
   const { stateChecksum } = await import('../src/sim/checksum.js');
 
@@ -66,6 +66,7 @@ async function main() {
   if (opts.map) spec.mapId = opts.map;
   if (opts.difficulty) spec.difficulty = opts.difficulty;
   if (opts.victory) spec.victoryMode = opts.victory;
+  if (opts.map) await ensureMapLoaded(opts.map); // M2-28: mapas de campanha (camp-*) carregam sob demanda
   const cfg = createMatchConfig(spec);
   cfg.players.forEach((p, i) => {
     p.isAI = true;

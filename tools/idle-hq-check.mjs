@@ -31,13 +31,14 @@ const { GameManager } = await import('../src/core/GameManager.js');
 await import('../src/ai/registerAI.js');
 const { Terrain } = await import('../src/world/Terrain.js');
 const { createMatchConfig } = await import('../src/sim/MatchConfig.js');
-const { getMap } = await import('../src/data/maps/index.js');
+const { getMap, ensureMapLoaded } = await import('../src/data/maps/index.js');
 const { SIM_DT } = await import('../src/sim/constants.js');
 const { getBuildingDef } = await import('../src/data/index.js');
 
 const isHq = (b) => getBuildingDef(b.type).role === 'hq';
 
-function run(seed, map, diff, faction) {
+async function run(seed, map, diff, faction) {
+  await ensureMapLoaded(map); // M2-28
   const cfg = createMatchConfig({ seed, mapId: map, difficulty: diff, localFaction: faction, headless: true });
   cfg.players = cfg.players.slice(0, 2);
   cfg.players.forEach((p, i) => { p.isAI = i === 0; p.difficulty = diff; p.isLocal = i === 0; });
@@ -67,7 +68,7 @@ for (const diff of diffs) {
   for (const map of maps) {
     for (let s = first; s < first + seeds; s++) {
       const faction = s % 2 ? 'human' : 'orc';
-      const r = run(s, map, diff, faction);
+      const r = await run(s, map, diff, faction);
       rows.push(r);
       console.log(`${diff} ${map} seed ${s} ${faction}: 1ª construção ${r.firstBuilding ?? '—'} s · HQ ${r.hq ?? '—'} s · derrota ${r.defeated ? r.end : '—'} s`);
     }

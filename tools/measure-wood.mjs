@@ -18,7 +18,8 @@ const R = Number(opt('--radius', 60));
 const seed = Number(opt('--seed', 1));
 const only = opt('--maps', null)?.split(',');
 
-const { listMaps } = await import('../src/data/maps/index.js');
+const { listMaps, loadAllCampaignMaps } = await import('../src/data/maps/index.js');
+await loadAllCampaignMaps(); // M2-28: mapas de campanha carregam sob demanda
 const { measureWood } = await import('./lib/woodStats.mjs');
 
 const rows = [];

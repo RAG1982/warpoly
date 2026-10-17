@@ -15,7 +15,7 @@ import { validateNeutrals, validateOilWells, layoutAt } from '../../sim/MatchCon
 import { NAVAL_MAX_HEIGHT } from '../combat.js';
 import { TILESETS, TILESET_ALIASES } from '../tilesets.js';
 import { buildPathfinder, floodFill, isReached } from './generator.js';
-import { getMap } from './index.js';
+import { hasMap } from './index.js';
 import { decodeHeights, paintedNodes } from './painted.js';
 import { isLavaAt, decodeLavaGrid } from './lava.js';
 import { decodeBiomeGrid, MAX_BIOME_ID, BIOME, getBiomeAt } from './biome.js';
@@ -48,7 +48,7 @@ export function validateMapDef(mapDef, { connectivity = true, checkId = true } =
   const m = mapDef || {};
 
   if (typeof m.id !== 'string' || !MAP_ID_RE.test(m.id)) err('idInvalid');
-  else if (checkId && getMap(m.id)) err('idTaken', { id: m.id });
+  else if (checkId && hasMap(m.id)) err('idTaken', { id: m.id });
   if (typeof m.name !== 'string' || !m.name.trim()) err('nameEmpty');
   if (!isNum(m.size) || m.size < SIZE_LIMITS.min || m.size > SIZE_LIMITS.max) err('sizeRange', SIZE_LIMITS);
   if (!m.hidden && isNum(m.size) && m.size < MIN_PLAYABLE_SIZE) warn('sizeBelowMinPlayable', { min: MIN_PLAYABLE_SIZE, actual: m.size });

@@ -1,3 +1,5 @@
+> Histórico; fonte atual: docs/PLANO_FINAL.md
+
 # Changelog das alterações feitas na nuvem (2026-09-29 → 2026-10-13)
 
 > Cada item tem o PR de origem. "Mesclado" = no `master`; "Pendente" = ainda sem PR mesclado (ver `ESTADO_NUVEM.md` §3). Nada aqui foi visto num navegador: a verificação visual, de áudio e de GPU está no corpo de cada PR ("Verificação pendente (local)").

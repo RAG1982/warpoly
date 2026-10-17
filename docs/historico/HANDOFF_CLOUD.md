@@ -1,3 +1,5 @@
+> Histórico; fonte atual: docs/PLANO_FINAL.md
+
 # HANDOFF — Execução no Claude Code online (nuvem)
 
 > Roteiro para rodar parte do trabalho no **Claude Code na web** (claude.ai/code) sobre `github.com/RAG1982/warpoly`, em paralelo ao trabalho local do dono.

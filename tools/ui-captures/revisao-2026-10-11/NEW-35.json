@@ -5,20 +5,20 @@
       "me": 0,
       "foeId": 1,
       "G": {
-        "x": 22.502172005582686,
-        "z": 49.837168312888785
+        "x": -44.256711089903646,
+        "z": 19.715398245015372
       },
       "S": {
-        "x": 5.502172005582686,
-        "z": 66.83716831288879
+        "x": -32.23589580973234,
+        "z": 7.694582964844065
       },
       "D": {
-        "x": 21.902172005582685,
-        "z": 49.237168312888784
+        "x": -44.85671108990365,
+        "z": 19.11539824501537
       },
-      "catId": 276,
-      "dummyId": 277,
-      "gy": 2.467163190353615,
+      "catId": 296,
+      "dummyId": 297,
+      "gy": 2.6909006925097776,
       "range": 20,
       "minRange": 4,
       "cooldown": 3.2,
@@ -33,64 +33,64 @@
         {
           "type": "attackGround",
           "n": 1,
-          "x": 22.44,
-          "z": 49.81
+          "x": -44.31,
+          "z": 19.74
         }
       ],
       "state": "attackingGround",
       "groundTarget": {
-        "x": 22.437201721475436,
-        "z": 49.810189063596894
+        "x": -44.306593897710016,
+        "z": 19.738762743105685
       },
       "targetEntity": null,
       "pos": [
-        6.35,
-        65.66
+        -32.24,
+        7.69
       ]
     },
     "watchG": {
       "state": "attackingGround",
       "seconds": 15,
-      "fightFrames": 812,
-      "phaseErrMean": 0.249,
-      "phaseErrMax": 0.5,
-      "framesWithErrOver0_1": 0.802,
+      "fightFrames": 900,
+      "phaseErrMean": 0.009,
+      "phaseErrMax": 0.015,
+      "framesWithErrOver0_1": 0,
       "projectiles": 5,
-      "armReleases": 0,
+      "armReleases": 4,
       "shots": [
         {
-          "t": 1472,
-          "panim": 0.017,
-          "ptimer": 0,
-          "armRx": 0,
+          "t": 39,
+          "panim": 0.813,
+          "ptimer": 0.812,
+          "armRx": -0.011,
           "st": "attackingGround"
         },
         {
-          "t": 3417,
-          "panim": 0.967,
-          "ptimer": 0.609,
-          "armRx": -0.022,
-          "st": "attackingGround"
-        },
-        {
-          "t": 6667,
-          "panim": 0.216,
-          "ptimer": 0.609,
-          "armRx": 0.2,
-          "st": "attackingGround"
-        },
-        {
-          "t": 9918,
-          "panim": 0.466,
+          "t": 2649,
+          "panim": 0.614,
           "ptimer": 0.609,
           "armRx": 0.493,
           "st": "attackingGround"
         },
         {
-          "t": 13167,
-          "panim": 0.716,
+          "t": 5899,
+          "panim": 0.614,
           "ptimer": 0.609,
-          "armRx": -0.84,
+          "armRx": 0.492,
+          "st": "attackingGround"
+        },
+        {
+          "t": 9149,
+          "panim": 0.613,
+          "ptimer": 0.609,
+          "armRx": 0.492,
+          "st": "attackingGround"
+        },
+        {
+          "t": 12398,
+          "panim": 0.613,
+          "ptimer": 0.609,
+          "armRx": 0.492,
           "st": "attackingGround"
         }
       ]
@@ -98,89 +98,89 @@
     "result": {
       "hits": [
         {
-          "x": 22.44,
-          "z": 49.81
+          "x": -44.31,
+          "z": 19.74
         },
         {
-          "x": 22.44,
-          "z": 49.81
+          "x": -44.31,
+          "z": 19.74
         },
         {
-          "x": 22.44,
-          "z": 49.81
+          "x": -44.31,
+          "z": 19.74
         },
         {
-          "x": 22.44,
-          "z": 49.81
+          "x": -44.31,
+          "z": 19.74
         },
         {
-          "x": 22.44,
-          "z": 49.81
+          "x": -44.31,
+          "z": 19.74
         }
       ],
-      "dummyDamage": 152,
-      "dummyHpPct": 0.9985,
+      "dummyDamage": 635,
+      "dummyHpPct": 0.9937,
       "catPos": [
-        8.27,
-        63.77
+        -32.24,
+        7.69
       ],
       "fired": 5
     },
     "armGround": {
       "st": "attackingGround",
-      "ptimer": 0.688,
-      "panim": 0.499,
-      "armRx": 0.5
+      "ptimer": 0.734,
+      "panim": 0.738,
+      "armRx": -0.998
     },
     "armControl": {
       "st": "attacking",
-      "ptimer": 0.688,
-      "panim": 0.693,
-      "armRx": -0.904
+      "ptimer": 0.719,
+      "panim": 0.728,
+      "armRx": -0.996
     },
     "watchC": {
       "state": "attacking",
       "seconds": 11,
-      "fightFrames": 661,
-      "phaseErrMean": 0.005,
-      "phaseErrMax": 0.011,
+      "fightFrames": 659,
+      "phaseErrMean": 0.009,
+      "phaseErrMax": 0.015,
       "framesWithErrOver0_1": 0,
       "projectiles": 4,
-      "armReleases": 0,
+      "armReleases": 3,
       "shots": [
         {
-          "t": 13,
-          "panim": 0.703,
-          "ptimer": 0.703,
-          "armRx": -0.877,
+          "t": 45,
+          "panim": 0.754,
+          "ptimer": 0.75,
+          "armRx": -0.979,
           "st": "attacking"
         },
         {
-          "t": 2962,
-          "panim": 0.61,
+          "t": 2845,
+          "panim": 0.613,
           "ptimer": 0.609,
-          "armRx": -0.968,
+          "armRx": 0.492,
           "st": "attacking"
         },
         {
-          "t": 6213,
-          "panim": 0.609,
+          "t": 6094,
+          "panim": 0.613,
           "ptimer": 0.609,
-          "armRx": -0.967,
+          "armRx": 0.492,
           "st": "attacking"
         },
         {
-          "t": 9461,
-          "panim": 0.609,
+          "t": 9346,
+          "panim": 0.613,
           "ptimer": 0.609,
-          "armRx": -0.967,
+          "armRx": 0.492,
           "st": "attacking"
         }
       ]
     },
     "armAtShot": {
-      "ground": -0.034,
-      "control": -0.945
+      "ground": 0.392,
+      "control": 0.124
     },
     "minRange": {
       "d0": 2.12,
@@ -190,12 +190,12 @@
     },
     "mixedSetup": {
       "P": {
-        "x": -3.1696928493314123,
-        "z": 66.81641461275383,
-        "y": 2.5416723796902363
+        "x": -36.61475403304608,
+        "z": 13.315724741530293,
+        "y": 2.6828589059300776
       },
-      "catId": 276,
-      "gruntId": 292,
+      "catId": 296,
+      "gruntId": 312,
       "selected": [
         "catapult",
         "grunt"
@@ -206,14 +206,14 @@
         {
           "type": "attackGround",
           "n": 1,
-          "x": -3.21,
-          "z": 66.77
+          "x": -36.63,
+          "z": 13.3
         },
         {
           "type": "move",
           "n": 1,
-          "x": -3.21,
-          "z": 66.77
+          "x": -36.63,
+          "z": 13.3
         }
       ],
       "catState": "attackingGround",
@@ -233,22 +233,22 @@
     {
       "name": "o ponto do chão está na tela, fora da HUD",
       "ok": true,
-      "extra": "{\"x\":875.717489591817,\"y\":344.7534803193299,\"behind\":false}"
+      "extra": "{\"x\":472.97543174111445,\"y\":341.187346532123,\"behind\":false}"
     },
     {
       "name": "clique direito no chão emitiu exatamente 1 comando attackGround (sem move)",
       "ok": true,
-      "extra": "[{\"type\":\"attackGround\",\"n\":1,\"x\":22.44,\"z\":49.81}]"
+      "extra": "[{\"type\":\"attackGround\",\"n\":1,\"x\":-44.31,\"z\":19.74}]"
     },
     {
       "name": "estado attackingGround com groundTarget no ponto clicado e sem alvo-entidade",
       "ok": true,
-      "extra": "{\"x\":22.437201721475436,\"z\":49.810189063596894}"
+      "extra": "{\"x\":-44.306593897710016,\"z\":19.738762743105685}"
     },
     {
       "name": "a catapulta se aproximou até o alcance (≤ 20,5 e ≥ alcance mínimo 4) e disparou ≥ 3 vezes sem nova ordem",
       "ok": true,
-      "extra": "dist=19.9 disparos=5"
+      "extra": "dist=17.1 disparos=5"
     },
     {
       "name": "os impactos caem no ponto clicado (erro ≤ 0,5 u)",
@@ -258,27 +258,27 @@
     {
       "name": "o impacto em área causa dano ao boneco hostil colado ao ponto",
       "ok": true,
-      "extra": "dano total=152 (99.850 % de PV restante)"
+      "extra": "dano total=635 (99.370 % de PV restante)"
     },
     {
       "name": "controle: com ataque a entidade a animação do braço acompanha o ciclo de ataque (erro médio ≤ 0,05)",
       "ok": true,
-      "extra": "erro médio=0.005 máx=0.011"
+      "extra": "erro médio=0.009 máx=0.015"
     },
     {
       "name": "ataque no chão: a animação do braço acompanha o ciclo de ataque (erro médio ≤ 0,05)",
-      "ok": false,
-      "extra": "erro médio=0.249 máx=0.5 quadros com erro>0,1=0.802"
+      "ok": true,
+      "extra": "erro médio=0.009 máx=0.015 quadros com erro>0,1=0"
     },
     {
       "name": "ataque no chão: 1 lançamento do braço por projétil",
-      "ok": false,
-      "extra": "lançamentos do braço=0 projéteis=5"
+      "ok": true,
+      "extra": "lançamentos do braço=4 projéteis=5"
     },
     {
       "name": "no instante do disparo o braço está na mesma pose do controle (|Δ rx médio| ≤ 0,35)",
-      "ok": false,
-      "extra": "rx médio no disparo: chão=-0.034 controle=-0.945"
+      "ok": true,
+      "extra": "rx médio no disparo: chão=0.392 controle=0.124"
     },
     {
       "name": "ponto dentro do alcance mínimo: a catapulta recua até ≥ 4 e segue atacando o chão",
@@ -288,7 +288,7 @@
     {
       "name": "seleção mista: attackGround só para o cerco e move para o grunt",
       "ok": true,
-      "extra": "{\"issued\":[{\"type\":\"attackGround\",\"n\":1,\"x\":-3.21,\"z\":66.77},{\"type\":\"move\",\"n\":1,\"x\":-3.21,\"z\":66.77}],\"catState\":\"attackingGround\",\"gruntState\":\"moving\",\"gruntHasTarget\":true}"
+      "extra": "{\"issued\":[{\"type\":\"attackGround\",\"n\":1,\"x\":-36.63,\"z\":13.3},{\"type\":\"move\",\"n\":1,\"x\":-36.63,\"z\":13.3}],\"catState\":\"attackingGround\",\"gruntState\":\"moving\",\"gruntHasTarget\":true}"
     },
     {
       "name": "sem erros de console",

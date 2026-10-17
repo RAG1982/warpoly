@@ -29,10 +29,15 @@ function summarize(w, stateName) {
   const fight = w.samples.filter((s) => s.st === stateName && s.anim === 'fight');
   const err = fight.map((s) => cdist(s.panim, s.ptimer));
   // "disparos do braço": passagens de rx ≥ 0,3 para ≤ -0,5 (a catapulta lança o braço para a frente)
+  // M1-05: o lançamento dura ~0,12 do ciclo (dezenas de quadros): o detector antigo exigia a queda 0,3 → -0,5 entre DOIS quadros
+  // consecutivos (nunca ocorre, nem no controle). Agora: arma quando rx ≥ 0,3 e conta ao chegar a rx ≤ -0,5 (borda).
   let releases = 0;
-  for (let i = 1; i < w.samples.length; i++) {
-    const a = w.samples[i - 1].armRx, b = w.samples[i].armRx;
-    if (a !== null && b !== null && a >= 0.3 && b <= -0.5) releases++;
+  let armed = false;
+  for (let i = 0; i < w.samples.length; i++) {
+    const b = w.samples[i].armRx;
+    if (b === null) continue;
+    if (b >= 0.3) armed = true;
+    else if (b <= -0.5 && armed) { releases++; armed = false; }
   }
   return {
     state: stateName,
@@ -61,9 +66,14 @@ try {
     for (let r = 16; r <= 70 && !found; r += 3) {
       for (let a = 0; a < 360 && !found; a += 10) {
         const G = { x: hq.x + Math.cos((a * Math.PI) / 180) * r, z: hq.z + Math.sin((a * Math.PI) / 180) * r };
-        const Sp = { x: G.x - 17, z: G.z + 17 }; // à esquerda da tela (câmera padrão): o projétil vai da esquerda para a direita
         const D = { x: G.x - 0.6, z: G.z - 0.6 }; // boneco do outro lado do ponto (o raio do clique não o atravessa)
-        if (free(G.x, G.z) && free(Sp.x, Sp.z) && free(D.x, D.z) && free(G.x - 8.5, G.z + 8.5)) found = { G, S: Sp, D };
+        // M1-05: o lado da catapulta (a 17 u de G) tenta várias direções, começando pela diagonal original (-17,+17); a posição da base
+        // varia entre execuções e só com essa diagonal às vezes nenhum ponto passava (rio/mar do mapa).
+        for (const [ux, uz] of [[-1, 1], [1, -1], [-1, 0], [1, 0], [0, 1], [0, -1], [1, 1], [-1, -1]]) {
+          const k = 17 / Math.hypot(ux, uz);
+          const Sp = { x: G.x + ux * k, z: G.z + uz * k };
+          if (!found && free(G.x, G.z) && free(Sp.x, Sp.z) && free(D.x, D.z) && free(G.x + ux * k / 2, G.z + uz * k / 2)) found = { G, S: Sp, D };
+        }
       }
     }
     if (!found) return null;

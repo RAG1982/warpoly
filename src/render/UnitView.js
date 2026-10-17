@@ -414,7 +414,7 @@ export class UnitView {
 
     if (lodStep <= 0) return;
 
-    if (u.state === 'attacking' && u.hurtTimer <= 0 && animator.currentAnim === 'fight') {
+    if ((u.state === 'attacking' || u.state === 'attackingGround') && u.hurtTimer <= 0 && animator.currentAnim === 'fight') {
       // Progresso contínuo do ataque (attackTimer do último tick + fração do próximo ainda não
       // simulada) — evita o "degrau" de 20 Hz na animação de ataque.
       const t = Math.min(1, (u.attackTimer + alpha * SIM_DT) / u.effAttackCooldown);

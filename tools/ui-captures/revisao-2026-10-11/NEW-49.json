@@ -85,18 +85,26 @@
     },
     "setup": {
       "spot": {
-        "x": -34.952019020337815,
-        "z": 13.258268198792464
+        "x": -37.81434243653638,
+        "z": 14.02522544663956
       },
       "ids": [
+        286,
         287,
         288,
         289,
-        290
+        290,
+        291,
+        292,
+        293
       ],
       "variants": [
         1,
         1,
+        1,
+        0,
+        0,
+        0,
         0,
         0
       ],
@@ -106,9 +114,17 @@
         true,
         true,
         true,
+        true,
+        true,
+        true,
+        true,
         true
       ],
       "sameNode": [
+        false,
+        false,
+        false,
+        false,
         false,
         false,
         false,
@@ -116,50 +132,53 @@
       ]
     },
     "gameFrame": {
-      "p": 0.759,
+      "p": 0.801,
       "weaponRx": -3.08,
       "armRx": -1.4
     },
     "watch": {
       "frames": 841,
       "perUnit": {
+        "286": {
+          "variant": 1,
+          "fightFrames": 840,
+          "maxByPart": {
+            "torso": 0.0915,
+            "head": 0.0484,
+            "armL": 0.1345,
+            "armR": 0.3498,
+            "weaponR": 0.3435
+          },
+          "maxAtP": {
+            "torso": 0.566,
+            "head": 0.566,
+            "armL": 0.566,
+            "armR": 0.566,
+            "weaponR": 0.863
+          },
+          "jumps": [],
+          "states": {
+            "attacking/fight": 841
+          }
+        },
         "287": {
           "variant": 1,
           "fightFrames": 840,
           "maxByPart": {
-            "torso": 0.0917,
-            "head": 0.0486,
-            "armL": 0.1349,
-            "armR": 0.3507,
-            "weaponR": 0.3525
+            "torso": 0.0957,
+            "head": 0.0507,
+            "armL": 0.1407,
+            "armR": 0.3659,
+            "weaponR": 0.3419
           },
           "maxAtP": {
-            "torso": 0.574,
-            "head": 0.574,
-            "armL": 0.574,
-            "armR": 0.574,
-            "weaponR": 0.858
+            "torso": 0.592,
+            "head": 0.592,
+            "armL": 0.592,
+            "armR": 0.592,
+            "weaponR": 0.863
           },
-          "jumps": [
-            {
-              "part": "armR",
-              "rad": 0.347,
-              "p": 0.574,
-              "dtMs": 15
-            },
-            {
-              "part": "armR",
-              "rad": 0.347,
-              "p": 0.574,
-              "dtMs": 15
-            },
-            {
-              "part": "armR",
-              "rad": 0.347,
-              "p": 0.574,
-              "dtMs": 16
-            }
-          ],
+          "jumps": [],
           "states": {
             "attacking/fight": 841
           }
@@ -168,39 +187,20 @@
           "variant": 1,
           "fightFrames": 840,
           "maxByPart": {
-            "torso": 0.0917,
-            "head": 0.0486,
-            "armL": 0.1349,
-            "armR": 0.3507,
-            "weaponR": 0.3525
+            "torso": 0.0915,
+            "head": 0.0484,
+            "armL": 0.1345,
+            "armR": 0.3498,
+            "weaponR": 0.3435
           },
           "maxAtP": {
-            "torso": 0.574,
-            "head": 0.574,
-            "armL": 0.574,
-            "armR": 0.574,
-            "weaponR": 0.858
+            "torso": 0.566,
+            "head": 0.566,
+            "armL": 0.566,
+            "armR": 0.566,
+            "weaponR": 0.863
           },
-          "jumps": [
-            {
-              "part": "armR",
-              "rad": 0.347,
-              "p": 0.574,
-              "dtMs": 15
-            },
-            {
-              "part": "armR",
-              "rad": 0.347,
-              "p": 0.574,
-              "dtMs": 15
-            },
-            {
-              "part": "armR",
-              "rad": 0.347,
-              "p": 0.574,
-              "dtMs": 16
-            }
-          ],
+          "jumps": [],
           "states": {
             "attacking/fight": 841
           }
@@ -209,18 +209,18 @@
           "variant": 0,
           "fightFrames": 840,
           "maxByPart": {
-            "torso": 0.0746,
-            "head": 0.0395,
-            "armL": 0.1097,
-            "armR": 0.2853,
-            "weaponR": 0.2481
+            "torso": 0.0754,
+            "head": 0.0399,
+            "armL": 0.1109,
+            "armR": 0.2883,
+            "weaponR": 0.2484
           },
           "maxAtP": {
-            "torso": 0.401,
-            "head": 0.401,
-            "armL": 0.401,
-            "armR": 0.401,
-            "weaponR": 0.796
+            "torso": 0.393,
+            "head": 0.393,
+            "armL": 0.393,
+            "armR": 0.393,
+            "weaponR": 0.393
           },
           "jumps": [],
           "states": {
@@ -231,18 +231,84 @@
           "variant": 0,
           "fightFrames": 840,
           "maxByPart": {
-            "torso": 0.0746,
-            "head": 0.0395,
-            "armL": 0.1097,
-            "armR": 0.2853,
-            "weaponR": 0.2481
+            "torso": 0.0754,
+            "head": 0.0399,
+            "armL": 0.1109,
+            "armR": 0.2883,
+            "weaponR": 0.2484
           },
           "maxAtP": {
-            "torso": 0.401,
-            "head": 0.401,
-            "armL": 0.401,
-            "armR": 0.401,
-            "weaponR": 0.796
+            "torso": 0.393,
+            "head": 0.393,
+            "armL": 0.393,
+            "armR": 0.393,
+            "weaponR": 0.393
+          },
+          "jumps": [],
+          "states": {
+            "attacking/fight": 841
+          }
+        },
+        "291": {
+          "variant": 0,
+          "fightFrames": 840,
+          "maxByPart": {
+            "torso": 0.0754,
+            "head": 0.0399,
+            "armL": 0.1109,
+            "armR": 0.2883,
+            "weaponR": 0.2484
+          },
+          "maxAtP": {
+            "torso": 0.393,
+            "head": 0.393,
+            "armL": 0.393,
+            "armR": 0.393,
+            "weaponR": 0.393
+          },
+          "jumps": [],
+          "states": {
+            "attacking/fight": 841
+          }
+        },
+        "292": {
+          "variant": 0,
+          "fightFrames": 840,
+          "maxByPart": {
+            "torso": 0.0754,
+            "head": 0.0399,
+            "armL": 0.1109,
+            "armR": 0.2883,
+            "weaponR": 0.2484
+          },
+          "maxAtP": {
+            "torso": 0.393,
+            "head": 0.393,
+            "armL": 0.393,
+            "armR": 0.393,
+            "weaponR": 0.393
+          },
+          "jumps": [],
+          "states": {
+            "attacking/fight": 841
+          }
+        },
+        "293": {
+          "variant": 0,
+          "fightFrames": 840,
+          "maxByPart": {
+            "torso": 0.0754,
+            "head": 0.0399,
+            "armL": 0.1109,
+            "armR": 0.2883,
+            "weaponR": 0.2484
+          },
+          "maxAtP": {
+            "torso": 0.393,
+            "head": 0.393,
+            "armL": 0.393,
+            "armR": 0.393,
+            "weaponR": 0.393
           },
           "jumps": [],
           "states": {
@@ -292,24 +358,24 @@
       "extra": ""
     },
     {
-      "name": "o animador do jogo tem weaponR ligado nos 4 Arremessadores (variantes 0 e 1 presentes)",
+      "name": "o animador do jogo tem weaponR ligado nos 8 Arremessadores (variantes 0 e 1 presentes)",
       "ok": true,
-      "extra": "variantes=1,1,0,0"
+      "extra": "variantes=1,1,1,0,0,0,0,0"
     },
     {
-      "name": "os 4 Arremessadores lutaram (≥ 150 quadros de `fight` fora do cross-fade cada)",
+      "name": "os 8 Arremessadores lutaram (≥ 150 quadros de `fight` fora do cross-fade cada)",
       "ok": true,
-      "extra": "[840,840,840,840]"
+      "extra": "[840,840,840,840,840,840,840,840]"
     },
     {
       "name": "nenhum salto de pose entre quadros em nenhuma parte (passo > 0,3 rad E velocidade acima do máximo legítimo; as duas variantes)",
-      "ok": false,
-      "extra": "[[{\"part\":\"armR\",\"rad\":0.347,\"p\":0.574,\"dtMs\":15},{\"part\":\"armR\",\"rad\":0.347,\"p\":0.574,\"dtMs\":15},{\"part\":\"armR\",\"rad\":0.347,\"p\":0.574,\"dtMs\":16}],[{\"part\":\"armR\",\"rad\":0.347,\"p\":0.574,\"dtMs\":15},{\"part\":\"armR\",\"rad\":0.347,\"p\":0.574,\"dtMs\":15},{\"part\":\"armR\",\"rad\":0.347,\"p\":0.574,\"dtMs\":16}],[],[]]"
+      "ok": true,
+      "extra": "[[],[],[],[],[],[],[],[]]"
     },
     {
       "name": "maior passo por quadro no jogo ≤ 0,6 rad (arremesso é a fase mais rápida; o defeito era 2,3 rad)",
       "ok": true,
-      "extra": "maior passo=0.352 rad (quadros: mediana 16.7 ms, ≥ 50 ms: 0)"
+      "extra": "maior passo=0.366 rad (quadros: mediana 16.7 ms, ≥ 50 ms: 0)"
     },
     {
       "name": "sem erros de console",

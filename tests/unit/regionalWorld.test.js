@@ -82,9 +82,10 @@ describe('mapa sem biomeGrid = caminho antigo, idêntico ao de antes (referênci
 
   it('Water: mesmas malhas, cores, opacidade, espuma (quad de 4 vértices) e moitas; sem vertexColors nem lava', () => {
     const GOLDEN = {
-      verdejante: { names: ['DeepWaterBase', 'WaterSurface', 'ShoreFoam', 'WaterVegetationGroup'], color: 3977432, op: 0.86, foamStrength: 1.12, foamCol: 16777215, reeds: 4 },
+      // M1-05/NEW-52: o rio de continental-1v1 é fundo dentro da área jogável; as moitas (antes 4, nos cantos fora de jogo) somem.
+      verdejante: { names: ['DeepWaterBase', 'WaterSurface', 'ShoreFoam', 'WaterVegetationGroup'], color: 3977432, op: 0.86, foamStrength: 1.12, foamCol: 16777215, reeds: 0 },
       inverno: { names: ['DeepWaterBase', 'WaterSurface', 'ShoreFoam'], color: 8370134, op: 0.94, foamStrength: 1.36, foamCol: 16055295, reeds: 0 },
-      exuberante: { names: ['DeepWaterBase', 'WaterSurface', 'ShoreFoam', 'WaterVegetationGroup'], color: 3520457, op: 0.88, foamStrength: 1.36, foamCol: 16777215, reeds: 4 },
+      exuberante: { names: ['DeepWaterBase', 'WaterSurface', 'ShoreFoam', 'WaterVegetationGroup'], color: 3520457, op: 0.88, foamStrength: 1.36, foamCol: 16777215, reeds: 0 },
       vulcanico: { names: ['DeepWaterBase', 'WaterSurface', 'ShoreFoam'], color: 2767424, op: 0.92, foamStrength: 0.8, foamCol: 6968661, reeds: 0 }
     };
     for (const [ts, g] of Object.entries(GOLDEN)) {

@@ -707,10 +707,28 @@ def cor_de_uv(pixels, uvs):
     return np.mean([amostrar(pixels, p[0], p[1]) for p in pts], axis=0)
 
 
-def construir_atlas(f, dados, pecas, eh_time, atlas=512):
+BARICENTROS = [(1 / 3, 1 / 3, 1 / 3), (0.8, 0.1, 0.1), (0.1, 0.8, 0.1), (0.1, 0.1, 0.8), (0.45, 0.45, 0.1), (0.45, 0.1, 0.45),
+               (0.1, 0.45, 0.45), (0.94, 0.03, 0.03), (0.03, 0.94, 0.03), (0.03, 0.03, 0.94)]
+
+
+def cores_de_uv(pixels, uvs):
+    """Cores (sRGB 0..1) da textura em 10 pontos baricêntricos DENTRO da face (UV dos cantos; polígonos viram leque a partir do
+    1º canto): serve para exigir que a face inteira (e não só o centro) tenha a cor de um material (ex.: pano de TeamColor)."""
+    uv = np.array(uvs)
+    cores = []
+    for k in range(1, len(uv) - 1):
+        for a, b, c in BARICENTROS:
+            p = uv[0] * a + uv[k] * b + uv[k + 1] * c
+            cores.append(amostrar(pixels, p[0], p[1]))
+    return cores
+
+
+def construir_atlas(f, dados, pecas, eh_time, atlas=512, dilatacao=4, protecao=0):
     """Devolve (imagem sRGB float (atlas,atlas,3), info): textura do Tripo reamostrada e as faces de TeamColor em cinza.
     `eh_time(peça, i)` diz se a face original i da peça é de TeamColor (Brann: a capa toda; Oren: o pano azul-petróleo).
-    Os texels de TeamColor viram luma sRGB com ganho para o tecido ficar ~0.72 (multiplica a cor do time no jogo)."""
+    Os texels de TeamColor viram luma sRGB com ganho para o tecido ficar ~0.72 (multiplica a cor do time no jogo).
+    `dilatacao` = px que o rótulo de time avança sobre o vazio (calha entre ilhas UV); `protecao` > 0 impede essa dilatação a
+    menos de `protecao` px de uma face que NÃO é de time (atlas denso com pano e acabamento na mesma ilha: sem franja cinza)."""
     arr = reamostrar(f.pixels, atlas)
     res = arr.shape[0]
     # ocupação: triângulos UV das faces originais de cada peça
@@ -724,16 +742,18 @@ def construir_atlas(f, dados, pecas, eh_time, atlas=512):
                 tris.append(np.array([uv[0], uv[k], uv[k + 1]]))
                 vals.append(t)
     tris = np.array(tris)
-    # faces que não são de time primeiro, as de time por cima
-    ordem = np.argsort(np.array(vals) == 1, kind='stable')
+    # faces de time primeiro, as demais por cima: texel disputado (UV vizinha na mesma ilha) fica com a cor original, não vira cinza
+    ordem = np.argsort(np.array(vals) == 2, kind='stable')
     g = rasterizar(tris[ordem], np.array(vals)[ordem], res)
-    gd = dilatar_rotulos(g, 4)
+    gd = dilatar_rotulos(g, dilatacao)
     luma = arr @ np.array([0.299, 0.587, 0.114], dtype=np.float32)
     nucleo = (g == 1)
     mediana = float(np.median(luma[nucleo])) if nucleo.any() else 0.2
     ganho = 0.72 / max(mediana, 1e-3)
     cinza = np.clip(luma * ganho, 0.0, 1.0)
     capa = (gd == 1)
+    if protecao:
+        capa &= ~(dilatar_rotulos(np.where(g == 2, 2, 0).astype(np.int32), protecao) != 0)
     arr[capa] = cinza[capa][:, None]
     vals_a = np.array(vals)
     outros = rasterizar(tris[vals_a == 2], np.full(int((vals_a == 2).sum()), 2), res) != 0
@@ -1109,13 +1129,16 @@ def rotular_por_pesos(ctx, ids):
     # regras geométricas do herói
     for f in ids:
         rot[f] = H.regras(ctx, f, cen[f], rot[f])
-    # cada peça deve ser UMA região conexa
+    # cada peça deve ser UMA região conexa (exceto H.REGIOES_LIVRES)
+    livres = getattr(H, 'REGIOES_LIVRES', ())
     for _ in range(6):
         mudou = False
         por = {}
         for f in ids:
             por.setdefault(rot[f], []).append(f)
         for r, fl in por.items():
+            if r in livres:
+                continue                                  # peça que pode ter várias regiões (ex.: cajado dividido pelo punho)
             fs, vistos, comps = set(fl), set(), []
             for f in fl:
                 if f in vistos:
@@ -1200,7 +1223,8 @@ def executar(H):
     (todas as peças, na ordem de criação), CORPO (rótulos vindos dos pesos de pele), CAPAS (peças com aberturas de corte ->
     tampas; padrão CORPO), PECAS_TIME (peças inteiras em TeamColor), SUAVIZACAO, ATLAS, TEAM_DEFAULT, ZOOM_PREVIA, CABECA
     (centro da cabeça no jogo, prévia do rosto); opcionais: PAIS ({peça: pai}; padrão tudo na raiz), REPOUSO ({nó: graus}),
-    POSE ({osso: matriz 3x3}; repose por rig), ESPELHAR (padrão True).
+    POSE ({osso: matriz 3x3}; repose por rig), ESPELHAR (padrão True), REGIOES_LIVRES (rótulos que podem ter várias regiões
+    desconexas), DILATACAO_TIME/PROTECAO_TIME (ver construir_atlas), POSES_PREVIA (poses renderizadas; padrão caminhada/golpe/magia).
     Ganchos: classificar(sopa, S) -> (destino por ilha, info); cortes(S) -> [(eixo, valor, y_min|None)]; regras(ctx, f, c, nome);
     finalizar(ctx) -> {peça: pivô} (deixa ctx.dados em coordenadas locais); eh_time(ctx, peça, i) -> bool (face original);
     cor_time(rgb, peça) -> bool (tampas); poses() -> dict de poses; opcionais: ajustar_fonte(ctx), avaliar_fonte_extra(f),
@@ -1253,7 +1277,8 @@ def executar(H):
     piv = H.finalizar(ctx)
     avaliar_partes(dados, piv, H.PECAS)
     # atlas + UV das tampas
-    arr, info_a = construir_atlas(f, dados, H.PECAS, lambda p, i: dados[p]['time'][i], H.ATLAS)
+    arr, info_a = construir_atlas(f, dados, H.PECAS, lambda p, i: dados[p]['time'][i], H.ATLAS,
+                                  getattr(H, 'DILATACAO_TIME', 4), getattr(H, 'PROTECAO_TIME', 0))
     log('atlas %dx%d: %s' % (H.ATLAS, H.ATLAS, info_a))
     for p in capas:
         for t in dados[p]['tampas']:
@@ -1303,12 +1328,12 @@ def executar(H):
         rig.render('lado', (1.0, 0.2, 0.0), 30, zoom=z)
         rig.render('costas', (0.0, 0.25, -1.0), 30, zoom=z)
         rig.render('3q', (1.0, 0.95, 1.0), 30, zoom=z)
-        renderizar_poses(C, objs, rig, H.PECAS, H.poses(), zoom=z)
+        renderizar_poses(C, objs, rig, H.PECAS, H.poses(), nomes=getattr(H, 'POSES_PREVIA', ('caminhada', 'golpe', 'magia')), zoom=z)
         renderizar_rosto(C, rig, previas, H.CABECA, H.PREFIXO)
         antes = colorir_pecas(objs)
         rig.render('pecas', (-1.0, 0.8, 1.0), 30, zoom=z)
         restaurar_materiais(objs, antes)
-        renderizar_fonte(C, rig, f, sopa, objs)
         if hasattr(H, 'previa_extra'):
             H.previa_extra(ctx, rig, objs)
+        renderizar_fonte(C, rig, f, sopa, objs)
     log('FEITO')

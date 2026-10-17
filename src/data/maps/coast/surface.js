@@ -6,7 +6,7 @@
  * Altera `map` no lugar: define `map.sd`, `map.height` e `map.biome`.
  */
 import { fbm, smoothstep, clamp } from './noise.js';
-import { distanceTransform, boxBlur } from './grid.js';
+import { distanceTransform, boxBlur, labelComponents } from './grid.js';
 import { BIOME, LAVA_HEIGHT, FORD_HEIGHT, RIVER_BED_EDGE, RIVER_BED_CENTER } from './constants.js';
 import { lushMountain } from './entities.js';
 import { rotateIndex } from './rotate.js';
@@ -29,6 +29,14 @@ export function finalizeSurface(map) {
   const biome = new Uint8Array(N);
   const seed = map.options.seed | 0;
   const mountainK = map.options.mountain ?? 1; // M2-03: escala da cordilheira do continente exuberante (1 = como sempre; < 1 = colinas, sem neve nas bases)
+  // M2-04: lagos congelados (água que não toca o oceano): bioma gelo e altura 0,3 (raso: nem navio nem tropa)
+  let lakeLabels = null, oceanLabel = -1;
+  if (map.options.frozenLakes) {
+    const wm = new Uint8Array(N);
+    for (let c = 0; c < N; c++) wm[c] = land[c] ? 0 : 1;
+    const wl = labelComponents(wm, G, 1);
+    lakeLabels = wl.labels; oceanLabel = wl.labels[0];
+  }
   const lv = map.lava;
   const dLava = lv ? distanceTransform(lv.mask, G) : null;
   for (let j = 0; j < G; j++) {
@@ -37,6 +45,7 @@ export function finalizeSurface(map) {
       const c = j * G + i, x = (i + 0.5) * cell - half;
       const d = sd[c];
       if (!land[c]) {
+        if (lakeLabels && lakeLabels[c] >= 0 && lakeLabels[c] !== oceanLabel) { height[c] = 0.3; biome[c] = BIOME.ICE; continue; }
         height[c] = 0.55 - Math.min(4.1, Math.max(0, -d) * 0.32);
         biome[c] = BIOME.SEA;
         continue;
@@ -71,6 +80,10 @@ export function finalizeSurface(map) {
         h += (fbm(x * 0.12, z * 0.12, seed + 63, 3) - 0.4) * 2 * smoothstep(2, 7, dd);
       } else if (e.biome === 'ice') {
         b = dd < 2.2 ? BIOME.ICE : nz > 0.62 ? BIOME.ROCK : BIOME.SNOW;
+      } else if (e.biome === 'forest') {
+        // M2-04 (Cerne Verde): floresta densa com clareiras (ruído de baixa frequência) e colinas suaves; areia só na praia
+        h += (fbm(x * 0.06, z * 0.06, seed + 77, 3) - 0.5) * 0.9 * smoothstep(3, 12, dd);
+        b = nz > 0.64 && dd > 6 ? BIOME.GRASS : BIOME.FOREST;
       } else if (e.biome === 'swamp') {
         b = nz > 0.6 ? BIOME.GRASS : BIOME.SWAMP;
       } else if (e.biome === 'atoll') {

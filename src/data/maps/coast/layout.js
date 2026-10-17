@@ -485,6 +485,10 @@ export function planLayout(map, baked, spec, opts) {
       if (ents.size && !ents.has(ownerAt(x, z))) return false;
       if (bs.side === 'west' && x > -0.1 * map.size) return false;
       if (bs.side === 'east' && x < 0.1 * map.size) return false;
+      // M2-04: `sides` combina lados (ex.: ['west', 'south'] = quadrante sudoeste); 'north' = z < 0
+      for (const sd of bs.sides ?? []) {
+        if ((sd === 'west' && x > -0.1 * map.size) || (sd === 'east' && x < 0.1 * map.size) || (sd === 'north' && z > -0.1 * map.size) || (sd === 'south' && z < 0.1 * map.size)) return false;
+      }
       return prev.every((p) => hyp(x, z, p.x, p.z) >= minSep);
     });
     ranked.push(cands);

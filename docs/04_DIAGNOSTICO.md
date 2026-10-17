@@ -105,7 +105,7 @@ Medição de 2026-10-17, máquina quieta (nenhum soak nem outro agente; só o Ch
 
 Com a resolução dinâmica **ligada** (padrão do preset; o pixelRatio caiu para 0,95): combate100 41,7 FPS (40,3–43,1), massa300 15,9 FPS (15,3–16,4): sem diferença útil. Texturas vivas 72 / 106 / 110 e geometrias 155 / 258 / 340 (inicial / combate100 / massa300). Load = tempo de navegação até o jogo pronto (dev server, cache do vite quente).
 
-**Vereditos (F1-10c).** massa300 ≥ 45 FPS: **NÃO** (16,2; com ou sem LOD). combate100 ≥ 50 FPS: **NÃO** (42,6; sem SSAO passa: 70,5). O LOD **não** mudou nada mensurável (diferenças dentro do ruído: ±0,2 % em draw calls, FPS 16,2×16,4 e 42,6×42,0): o enquadramento do bench (zoom 1,0–1,8) deixa as unidades a menos de 90 u da câmera, abaixo do limiar do LOD de unidades. A meta de 55 FPS do preset não é atingida em combate.
+**Vereditos (F1-10c).** massa300 ≥ 45 FPS: **NÃO** (16,2; com ou sem LOD). combate100 ≥ 50 FPS: **NÃO** (42,6; sem SSAO passa: 70,5). O LOD **não** mudou nada mensurável (diferenças dentro do ruído: ±0,2 % em draw calls, FPS 16,2×16,4 e 42,6×42,0). Hipótese (não verificada): o enquadramento do bench (zoom 1,0–1,8) mantém as unidades a menos de 90 u do alvo da câmera, abaixo do limiar do LOD de unidades (`LOD_DISTANCES.unit`); um bench com a câmera mais afastada diria se o LOD ajuda. A meta de 55 FPS do preset não é atingida em combate.
 
 ### Decomposição do frame (1280×720, high, 3 execuções cada; "render CPU" = tempo dentro de `renderer.render`)
 
@@ -121,6 +121,8 @@ Com a resolução dinâmica **ligada** (padrão do preset; o pixelRatio caiu par
 | combate100 | `?fx=0` | 71,8 | 13,9 | 0,45 | 9,3 | 2 203 | 1,4 M |
 | combate100 | sombras desligadas | 60,3 | 16,6 | 0,53 | 11,5 | 2 514 | 1,4 M |
 | combate100 | 640×360 | 41,1 | 24,4 | 0,80 | 18,6 | 4 526 | 2,9 M |
+| massa300 | `?fx=-ssao` + sombras desligadas | 40,5 | 24,7 | 1,4 | 15,8 | 3 403 | 1,9 M |
+| combate100 | `?fx=-ssao` + sombras desligadas | 95,3 | 10,5 | 0,33 | 6,0 | 1 259 | 0,7 M |
 
 Leitura: o frame é **limitado pela CPU de submissão** (massa300: 47,8 ms de 61,2 ms dentro de `renderer.render`; baixar a resolução para 640×360 não muda o FPS; a simulação custa só 3,6 ms). Ao tirar o SSAO o frame de massa300 cai de 61 para 35 ms e o de combate100 de 23 para 14 ms, porque o SSAO **renderiza a cena inteira uma segunda vez** (passada de normais: os draw calls caem pela metade). Bloom/color grading/contorno juntos custam ~0 (`fx=0` ≈ `fx=-ssao`).
 
@@ -128,7 +130,7 @@ Leitura: o frame é **limitado pela CPU de submissão** (massa300: 47,8 ms de 61
 1. **Quantidade de draw calls por unidade** (~40 por unidade: 12,7 k em massa300, 4,4 k em combate100; inicial 533): submissão de CPU, 78 % do frame de massa300. Só cai com menos objetos por unidade (atlas/mesclagem, instancing, VAT: NEW-15/NEW-14).
 2. **Passada de normais do SSAO** (duplica a geometria): −26 ms em massa300 (61→35), −9 ms em combate100 (23→14). Um SSAO barato (depth-only/baixa resolução) ou só em `ultra` passa combate100 de 43 para ~70 FPS.
 3. **Passada de sombras** (as sombras também redesenham todas as unidades): −21 ms em massa300 (61→40, 16→25 FPS), −7 ms em combate100 (23→17, 43→60 FPS). Candidatos: `shadowUpdateInterval`, sombra só para unidades próximas/LOD de sombra, instancing dos casters.
-Fora do pódio: simulação (6 % do frame de massa300), resolução (irrelevante), LOD atual (sem efeito no enquadramento do bench). Para massa300 ≥ 45 FPS é preciso somar (1) com (2) e (3): sem SSAO nem sombras e com os draw calls atuais o estimado fica perto de 40–45 FPS; só atacando (1) a meta fecha.
+Fora do pódio: simulação (6 % do frame de massa300), resolução (irrelevante), LOD atual (sem efeito no enquadramento do bench). Medido somando (2) e (3): sem SSAO **e** sem sombras massa300 chega a 40,5 FPS (ainda < 45) e combate100 a 95,3 FPS; portanto combate100 ≥ 50 se resolve só com SSAO barato ou sombras mais baratas, e massa300 ≥ 45 exige também atacar (1).
 
 ### SSAO a 1920×1080, `?texq=high` (insumo da M5-03)
 
@@ -161,5 +163,5 @@ Confirma o NEW-27 (997→1 387 = +390): o custo é de ~330–420 draw calls **co
 
 ### Reproduzir
 ```bash
-bash tools/safe-run.sh --timeout 1500 -- node tools/bench/m1-03.mjs --part=A   # A..I (ver cabeçalho do script)
+bash tools/safe-run.sh --timeout 1500 -- node tools/bench/m1-03.mjs --part=A   # A..J (ver cabeçalho do script)
 ```

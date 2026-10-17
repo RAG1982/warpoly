@@ -319,6 +319,9 @@ async function main() {
       const cfgs = [];
       for (const s of ['massa300', 'combate100']) for (const v of V) cfgs.push({ scenario: s, width: v.w, height: v.h, query: v.q, overrides: v.ov, dynRes: false });
       await runMatrix(browser, cfgs, results);
+    } else if (PART === 'J') { // combinação: sem SSAO e sem sombras
+      const cfgs = ['massa300', 'combate100'].map((sc) => ({ scenario: sc, width: 1280, height: 720, query: 'fx=-ssao', overrides: { shadows: false }, dynRes: false }));
+      await runMatrix(browser, cfgs, results);
     } else if (PART === 'G') {
       await liveSsaoPart(chromium, results);
     } else if (PART === 'D') {

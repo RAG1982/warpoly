@@ -31,7 +31,7 @@ export const COAST_PRESETS = freeze({
     uso: '1×1 competitivo',
     tileset: 'exuberante',
     naval: false,
-    options: freeze({ size: 224, grid: 224, continents: 1, continentDims: [0.35, 0.27], symmetry: 'rotate', islands: 4, islets: 4, bays: 2, peninsulas: 1, roughness: 0.9, lava: false, rivers: 1 }),
+    options: freeze({ size: 224, grid: 224, continents: 1, continentDims: [0.35, 0.27], symmetry: 'rotate', islands: 4, islets: 4, bays: 2, peninsulas: 1, roughness: 0.9, lava: false, rivers: 1, snowMinCells: 400 }),
     layout: freeze({ bases: [{ entities: [0], side: 'west' }, { twinOf: 0 }] }),
     verify: freeze({ landRange: [0.25, 0.5], minRivers: 1 })
   }),
@@ -53,7 +53,7 @@ export const COAST_PRESETS = freeze({
     uso: 'tutorial / missão',
     tileset: 'exuberante',
     naval: false,
-    options: freeze({ size: 224, grid: 224, continents: 1, continentDims: [0.36, 0.3], islands: 0, islets: 3, bays: 2, peninsulas: 2, lava: false, rivers: 1 }),
+    options: freeze({ size: 224, grid: 224, continents: 1, continentDims: [0.36, 0.3], islands: 0, islets: 3, bays: 2, peninsulas: 2, lava: false, rivers: 1, snowMinCells: 400 }),
     layout: freeze({ bases: [{ entities: [0], side: 'west' }, { entities: [0], side: 'east' }], minSeparation: 70 }),
     verify: freeze({ landRange: [0.2, 0.5], minRivers: 1 })
   }),

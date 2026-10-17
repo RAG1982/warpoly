@@ -102,5 +102,40 @@ export function finalizeSurface(map) {
       height[c] = height[r] = h; sd[c] = sd[r] = d; biome[r] = biome[c];
     }
   }
+  softenIsolatedSnow(map, height, biome);
   map.sd = sd; map.height = height; map.biome = biome;
+}
+
+/**
+ * M2-26 · neve solta. O continente exuberante põe neve onde a cordilheira passa de 4,0 u; as bases ficam em terreno ondulado, então
+ * picos pequenos viram manchas brancas isoladas ao lado do QG. Com `options.snowMinCells` (padrão 0 = desligado, o comportamento de
+ * sempre), cada mancha de neve (4-vizinhança) de UM continente exuberante com menos que isso de células vira rocha (cume sem capa de
+ * neve; grama se for baixo): a neve só fica nas cordilheiras grandes. A neve das ilhas de gelo (`ice`) não é tocada. Só mexe no
+ * bioma (alturas, terra, rios, lava e posições ficam como estão), e o resultado é invariante à rotação de 180° (simetria do duelo).
+ */
+function softenIsolatedSnow(map, height, biome) {
+  const minCells = map.options.snowMinCells ?? 0;
+  if (!(minCells > 0)) return;
+  const { grid: G, owner, entities } = map;
+  const N = G * G;
+  const seen = new Uint8Array(N);
+  const stack = [];
+  for (let s = 0; s < N; s++) {
+    if (biome[s] !== BIOME.SNOW || seen[s]) continue;
+    const comp = [];
+    let lush = true;
+    seen[s] = 1; stack.push(s);
+    while (stack.length) {
+      const c = stack.pop();
+      comp.push(c);
+      if ((entities[owner[c]] ?? entities[0]).biome !== 'lush') lush = false;
+      const x = c % G, y = (c - x) / G;
+      if (x > 0 && biome[c - 1] === BIOME.SNOW && !seen[c - 1]) { seen[c - 1] = 1; stack.push(c - 1); }
+      if (x < G - 1 && biome[c + 1] === BIOME.SNOW && !seen[c + 1]) { seen[c + 1] = 1; stack.push(c + 1); }
+      if (y > 0 && biome[c - G] === BIOME.SNOW && !seen[c - G]) { seen[c - G] = 1; stack.push(c - G); }
+      if (y < G - 1 && biome[c + G] === BIOME.SNOW && !seen[c + G]) { seen[c + G] = 1; stack.push(c + G); }
+    }
+    if (!lush || comp.length >= minCells) continue;
+    for (const c of comp) biome[c] = height[c] >= 3.0 ? BIOME.ROCK : BIOME.GRASS;
+  }
 }

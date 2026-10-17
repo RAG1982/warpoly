@@ -1,5 +1,7 @@
 # TASKS — Lista de tarefas controlada do WarPoly AAA
 
+> **A execução atual está em [PLANO_FINAL.md](PLANO_FINAL.md) (fichas em [PLANO_FINAL_TAREFAS.md](PLANO_FINAL_TAREFAS.md)).** Este arquivo é o registro histórico até 2026-10-17.
+
 > **Fonte única de verdade da execução.** Todo agente (humano ou IA) lê este arquivo antes de começar e o atualiza ao iniciar/terminar uma tarefa.
 > Contexto obrigatório: [01_ARQUITETURA](01_ARQUITETURA.md) · [02_MECANICAS](02_MECANICAS.md) · [03_ASSETS](03_ASSETS_E_INSPETOR.md) · [04_DIAGNOSTICO](04_DIAGNOSTICO.md) · [05_PARIDADE_WC2](05_PARIDADE_WARCRAFT2.md) · [06_ROADMAP](06_ROADMAP_AAA.md)
 

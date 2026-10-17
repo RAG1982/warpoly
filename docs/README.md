@@ -22,6 +22,8 @@ RTS 3D low-poly para navegador (three.js + Vite), inspirado em **Warcraft II**. 
 | [BALANCEAMENTO](BALANCEAMENTO.md) | Resultados dos lotes de balanceamento |
 | [10_DEPLOY](10_DEPLOY.md) | Deploy estático, PWA, orçamento de desempenho |
 | [specs/](specs/README.md) | Especificações por tarefa com status (índice em `specs/README.md`) |
+| [PLANO_FINAL](PLANO_FINAL.md) | **Plano de execução até o 1.0**: diagnóstico, decisões do dono, marcos M0–M6, quadro de tarefas e *gates* |
+| [PLANO_FINAL_TAREFAS](PLANO_FINAL_TAREFAS.md) | Fichas autossuficientes das tarefas, prontas para entregar a um agente |
 | [TASKS](TASKS.md) | **Lista de tarefas controlada**: protocolo, lanes/agentes, ondas paralelas, status |
 
 Backups: `~/warpoly_backups/warpoly_full_2026-09-28.tar.gz` e branch `backup/pre-aaa-2026-09-28`.

@@ -31,7 +31,7 @@ não se aplica: o runtime decide a vitória/derrota (ver "Desfecho").
 ```
 
 **Textos** (`texto`) são `"string"` (todos os idiomas) ou `{"pt-BR": "...", "en": "..."}` (`pt-BR` obrigatório = base/fallback).
-Retratos são emoji/ícone provisório. Coordenadas são de mundo (x, z) dentro da área jogável do mapa.
+Retratos são emoji/ícone provisório. Coordenadas são de mundo (x, z) dentro da área jogável do mapa (ou, no lugar delas, âncoras do mapa: ver "Âncoras").
 
 ### Donos, áreas, seletores, tags
 
@@ -39,6 +39,23 @@ Retratos são emoji/ícone provisório. Coordenadas são de mundo (x, z) dentro 
 - **Área**: `{x, z, r}` (círculo) ou `{x1, z1, x2, z2}` (retângulo).
 - **Seletor** de entidades vivas: `{tag?, owner?, unitType?, buildingType?, role?, kind?: "unit"|"building"|"any", area?}`. Seletor de **mortes** (`destroy`, `dead`) exige `tag`, `unitType`, `buildingType` ou `role`, aceita `killedBy` (dono do último golpe) e não aceita `area`.
 - **Tags**: nomes dados a entidades por `spawn`/`tag`/`transfer` (`"tag": "x"`). Toda tag citada precisa ser criada em algum lugar (o validador confere).
+
+### Âncoras (M2-01): pontos por nome, não por coordenada
+
+Em qualquer lugar onde a missão aceita um ponto `{x, z}` (`spawn`, `spawnBuilding`, `order`, `camera`, `reveal`, `guard.area`, passos de `cutscene`, `area` de
+objetivo/condição, `escort`…), pode-se escrever `{ "anchor": "<nome>", "dx"?: n, "dz"?: n }`: o ponto vira `x = âncora.x + dx`, `z = âncora.z + dz`. Os demais campos
+do objeto são mantidos (`{ "anchor": "landingZone", "r": 8 }` é uma área circular; numa ação, `{ "type": "spawn", "anchor": "goldMine1", "dx": 6, … }`).
+As âncoras vêm do campo `anchors` do **mapa** (`src/data/maps/README.md`; padrão: `playerStart`, `enemyStart`, `ally1..n`, `goldMine1..n`, `stoneQuarry1..n`, `well1..n`,
+`forest1..n`, `neutralCamp1..n`, `ford1..n`, `landingZone`). Retângulos (`x1,z1,x2,z2`) não usam âncora.
+
+- **Resolução:** uma vez, no carregamento (`validateMission`/`assertMission` e o construtor do `MissionRuntime`, via `src/sim/missions/anchors.js`), antes do 1º tick. A sim,
+  o checksum, os saves e os replays só enxergam coordenadas; uma missão sem âncoras usa a MESMA definição (sem cópia). Determinístico: só soma números.
+- **Erros:** âncora inexistente, nome inválido, `dx`/`dz` não numérico ou `anchor` junto de `x`/`z` viram erro de validação com o caminho do campo, o nome, a missão
+  e o mapa (`setup[0](spawn): âncora "goldMine9" não existe (missão "x", mapa "y"; o mapa tem: …)`). Depois de resolvidas, as coordenadas passam nas checagens normais
+  (área jogável, pegada da construção). Mapa sem `anchors` (os antigos) recusa qualquer âncora.
+- **Exemplo:** `mission-anchors-demo.json` (`hidden`, em `duelo-continental-1`): resgate perto da `goldMine1`, torre inimiga perto de `enemyStart`, escolta até a `landingZone`;
+  nenhuma coordenada escrita à mão. Âncora é só para o autor: o checksum de uma missão com âncoras é igual ao da mesma missão com coordenadas literais.
+- **Não use** âncoras para mudar uma missão clássica: elas continuam com coordenadas (e nos mapas antigos, que não têm âncoras).
 
 ### Objetivos (`objectives[]`)
 

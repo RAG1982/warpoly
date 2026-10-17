@@ -261,7 +261,7 @@ Legenda de dependências: só IDs; "—" = pode começar já. **Dif.** = dificul
 | M2-07 | Mapas, lote 5: continentais da Horda (palcos 1, 10, 11, 12) | Difícil | G | S | M2-03 | MUNDO-7 | TODO |
 | M2-08 | Mapa-múndi ligado à tela de campanha | Média | M | S | M1-01 | MUNDO-9 | TODO |
 | M2-09 | Editor: pincéis de lava, bioma e passagem | Média | M | S | M2-03 | MUNDO-1 p.7 | TODO |
-| M2-10 | Espécies de árvore novas nos mapas (ART-02) | Média | M | S | M0-01 | ART-02 | TODO |
+| M2-10 | Espécies de árvore novas nos mapas (ART-02) | Média | M | S | M0-01 | ART-02 | DONE parcial (draw calls +6..15 por espécie > meta +4; JSON dos mapas só reassados nos lotes novos) |
 | M2-11 | IA de chefes: habilidades de herói na IA | Difícil | M | S | M0-01 | MUNDO-HEROIS R8 | DONE (2026-10-17; micro nível ≥ 2) |
 | M2-12 | Props de arenito e arbusto rolante enxuto | Média | M | SB | M0-01 | ART-01/03 | TODO |
 | M2-13 | Javali completo + Cercado de Javalis + ícones de bioma | Média | G | SB | M0-01 | ART-04/12 | TODO |

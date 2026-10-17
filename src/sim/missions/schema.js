@@ -7,6 +7,7 @@
  */
 import { UNITS, BUILDINGS, RESEARCH } from '../../data/index.js';
 import { getMap } from '../../data/maps/index.js';
+import { resolveAnchors } from './anchors.js';
 
 export const MISSION_FORMAT = 'warpolymission';
 /** Versão do FORMATO. Suba e escreva migração quando o JSON mudar de forma incompatível. */
@@ -407,6 +408,15 @@ export function validateMission(def, opts = {}) {
   c.tagRefs = []; c.varRefs = []; c.objRefs = []; c.trigRefs = [];
   c.tagDefs = new Set(); c.objAdded = new Set();
   if (!isObj(def)) return { ok: false, errors: ['a missão deve ser um objeto JSON'] };
+
+  // M2-01: troca `{anchor, dx?, dz?}` por `{x, z}` (pelo mapa da missão) e valida o resultado; âncora inexistente = erro com nome, missão e mapa.
+  // Sem o mapa (checkMap:false ou mapId desconhecido) só a sintaxe da âncora é conferida.
+  {
+    const anchorMap = isStr(def.mapId) && opts.checkMap !== false ? getMap(def.mapId) : null;
+    const r = resolveAnchors(def, anchorMap || null);
+    r.errors.forEach((e) => c.errors.push(e));
+    def = r.def;
+  }
 
   if (def.format !== MISSION_FORMAT) c.err('format', `deve ser "${MISSION_FORMAT}"`);
   if (def.version !== MISSION_VERSION) c.err('version', `versão ${def.version} não suportada (esperada ${MISSION_VERSION})`);

@@ -19,8 +19,10 @@ import { getMap } from './index.js';
 import { decodeHeights, paintedNodes } from './painted.js';
 import { isLavaAt, decodeLavaGrid } from './lava.js';
 import { decodeBiomeGrid, MAX_BIOME_ID, BIOME, getBiomeAt } from './biome.js';
+import { DRY, checkAnchors } from './anchors.js';
 
-export const DRY = 1.8; // limiar de "terra seca" (GameManager.canPlaceBuilding)
+export { DRY }; // limiar de "terra seca" (GameManager.canPlaceBuilding); definido em anchors.js (M2-01)
+
 export const FOREST_SPECIES = Object.freeze(['oak', 'pine', 'autumn', 'birch']); // F7-00b: bétula (`tree_birch.glb`)
 export const RESOURCE_TYPES = Object.freeze(['gold', 'stone', 'oil']);
 export const MAP_ID_RE = /^[a-z0-9][a-z0-9-]{1,47}$/;
@@ -155,6 +157,9 @@ export function validateMapDef(mapDef, { connectivity = true, checkId = true } =
     if (!isNum(f.x) || !isNum(f.z) || !(f.r > 0)) err('fordBad', { n: i + 1 });
     else if (h(f) < DRY) err('fordWet', { n: i + 1 });
   });
+
+  // --- âncoras (M2-01): nome, área jogável e terreno compatível ---
+  checkAnchors(m, err);
 
   // --- neutros e poços: os mesmos validadores do MatchConfig ---
   for (const check of [validateNeutrals, validateOilWells]) {

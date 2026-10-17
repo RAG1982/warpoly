@@ -14749,6 +14749,124 @@
       "radius": 6
     }
   ],
+  "anchors": {
+    "playerStart": {
+      "x": -64,
+      "z": 17
+    },
+    "enemyStart": {
+      "x": 56,
+      "z": -4
+    },
+    "goldMine1": {
+      "x": -79.6,
+      "z": 26
+    },
+    "stoneQuarry1": {
+      "x": -66.6,
+      "z": 31.8
+    },
+    "goldMine2": {
+      "x": 71.6,
+      "z": 5
+    },
+    "stoneQuarry2": {
+      "x": 58.6,
+      "z": 10.8
+    },
+    "well1": {
+      "x": -36,
+      "z": 16,
+      "water": true
+    },
+    "well2": {
+      "x": -38,
+      "z": 32,
+      "water": true
+    },
+    "well3": {
+      "x": 32,
+      "z": 6,
+      "water": true
+    },
+    "well4": {
+      "x": 30,
+      "z": -10,
+      "water": true
+    },
+    "forest1": {
+      "x": -77.9,
+      "z": -7.3
+    },
+    "forest2": {
+      "x": -84,
+      "z": 38
+    },
+    "forest3": {
+      "x": -66,
+      "z": 46
+    },
+    "forest4": {
+      "x": -82,
+      "z": 58
+    },
+    "forest5": {
+      "x": -92,
+      "z": 8
+    },
+    "forest6": {
+      "x": -82,
+      "z": -26
+    },
+    "forest7": {
+      "x": -62,
+      "z": -18
+    },
+    "forest8": {
+      "x": 62.1,
+      "z": -35.4
+    },
+    "forest9": {
+      "x": 84,
+      "z": 4
+    },
+    "forest10": {
+      "x": 64,
+      "z": 24
+    },
+    "forest11": {
+      "x": 82,
+      "z": 32
+    },
+    "forest12": {
+      "x": 82,
+      "z": -34
+    },
+    "forest13": {
+      "x": 66,
+      "z": 44
+    },
+    "forest14": {
+      "x": 66,
+      "z": -54
+    },
+    "ford1": {
+      "x": -66.27,
+      "z": -47.37
+    },
+    "ford2": {
+      "x": -71.91,
+      "z": -64.48
+    },
+    "ford3": {
+      "x": 83.39,
+      "z": -20.61
+    },
+    "landingZone": {
+      "x": -54,
+      "z": 46
+    }
+  },
   "meta": {
     "generator": "coast",
     "preset": "dois-continentes",

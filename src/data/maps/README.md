@@ -80,6 +80,15 @@ Cada mapa é um JSON em `src/data/maps/<id>.json`, registrado em `index.js` (`ge
   plano emissivo (1 draw call) a y = 0,8, acima da água (a lava assada tem altura 0,4), recortado pela grade; brilho 1,2–1,8 com pulso lento e duas camadas de
   fluxo em sentidos opostos; o terreno vizinho ganha borda incandescente (textura e cor de vértice) e a espuma/os juncos/as decorações evitam a lava.
   Vale com ou sem `biomeGrid`; `?lava=0` não desenha a lava emissiva.
+- **`anchors`** (M2-01, opcional): pontos nomeados para as missões — `{ "landingZone": { "x": -52, "z": -28 }, "well1": { "x": 70, "z": 10, "water": true } }`.
+  Missões escrevem `{ "anchor": "landingZone", "dx"?: n, "dz"?: n }` no lugar de `{ x, z }` (ver `src/data/missions/README.md`, "Âncoras"), resolvido no
+  carregamento da missão, antes da simulação (não entra no checksum). `validateMapDef` confere: nome `[a-zA-Z0-9_-]` (até 48), dentro da área jogável,
+  terra seca e sem lava por padrão; `water: true` exige água (`altura < waterLevel`). Mapa sem `anchors` é válido e igual a antes (mapas antigos e campanha
+  clássica não têm). Nomes padrão (`defaultAnchors`, `src/data/maps/anchors.js`; o assador `buildCoastWorld` os grava, entre `neutrals` e `meta`):
+  `playerStart` (`startSlots[0]`) · `enemyStart` (`[1]`) · `ally1..n` (`[2..]`) · `goldMine1..n` · `stoneQuarry1..n` · `well1..n` (poços de petróleo, `water: true`) ·
+  `forest1..n` · `neutralCamp1..n` (neutros `kind: "camp"`) · `ford1..n` · `landingZone` (praia de desembarque: terra seca com água a ≤ 4 u, a ≥ 30 u de
+  `playerStart` e a mais próxima dele; ausente se o mapa não tem praia). Âncoras escritas à mão (ex.: `lighthouse`, `townSite`) convivem com as padrão e nunca são
+  sobrescritas. Para gravar as padrão num JSON já assado sem regenerar o terreno: `node tools/add-map-anchors.mjs [arquivo…]` (idempotente; `--check` só confere).
 - **`roads`** (F7-04, opcional): estradas/trilhas pintadas na textura — `[{ "points": [[x, z], ...], "width": 2.2 }, ...]` (mundo; `width` opcional).
 - **`splatMasks`** (F7-04, opcional): manchas forçadas no splat — `[{ "layer": "dirt"|"sand"|"rock"|"snow"|"mud"|"grass"|"road", "x", "z", "r", "strength"? }]`
   (uma mancha `dirt` r=6 já é criada sob cada `startSlot`). Ignorado pelo tileset `verdejante`.

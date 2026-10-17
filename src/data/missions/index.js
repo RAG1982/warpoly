@@ -4,11 +4,12 @@
  * validadas) — usado por testes e, no futuro, pelo editor/campanhas (F8-05/06).
  */
 import missionDemo from './mission-demo.json';
+import missionAnchorsDemo from './mission-anchors-demo.json'; // M2-01: exemplo de âncoras (`hidden`: fora do menu)
 import { assertMission } from '../../sim/missions/schema.js';
 import { localize } from '../../sim/missions/text.js';
 
 const MISSIONS = new Map();
-const BUILTIN = Object.freeze([missionDemo]);
+const BUILTIN = Object.freeze([missionDemo, missionAnchorsDemo]);
 for (const m of BUILTIN) MISSIONS.set(m.id, m);
 
 /** Cores padrão por id de jogador (iguais às de `MatchConfig.PLAYER_COLORS`; cópia para evitar import circular). */

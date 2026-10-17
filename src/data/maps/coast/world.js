@@ -12,6 +12,7 @@ import { bakeTerrain, bakeToMapDef } from './bake.js';
 import { planLayout } from './layout.js';
 import { verifyCoastMap, verifyCoastWorld } from './verify.js';
 import { getCoastPreset } from './presets.js';
+import { defaultAnchors } from '../anchors.js';
 
 /** Id estável do mapa assado: `mundo-<preset>-<semente pedida>`. */
 export const coastMapId = (presetId, seed) => `mundo-${presetId}-${seed}`;
@@ -38,6 +39,7 @@ export function buildCoastWorld(presetOrId, { seed = 1, tries = 10, id = null, n
       maxPlayers: plan.startSlots.length, startSlots: plan.startSlots, resources: plan.resources, forests: plan.forests, fords: plan.fords, neutrals: plan.neutrals,
       biomeGrid: true, baked
     });
+    mapDef.anchors = defaultAnchors(mapDef); // M2-01: pontos nomeados para as missões (entre `neutrals` e `meta`)
     mapDef.meta = { generator: 'coast', preset: preset.id, seed, seedUsed: s };
     const world = verifyCoastWorld(mapDef, { naval: preset.naval });
     if (!world.ok) { attempts.push({ seed: s, stage: 'mundo', failures: world.failures }); continue; }

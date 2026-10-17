@@ -564,7 +564,7 @@ export const UNITS = {
     collisionRadius: 0.78,
     visionRadius: 20,
     ...RANGED_SCAN,
-    healthBarHeight: 3.0,
+    healthBarHeight: 4.3,
     cost: null,
     trainTime: null,
     icon: 'ui/icons/128/unit_hero_oren.webp',

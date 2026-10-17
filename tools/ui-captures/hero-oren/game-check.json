@@ -1,0 +1,767 @@
+{
+  "generated": "2026-10-17T12:33:29.760Z",
+  "rows": [
+    {
+      "id": "C0",
+      "name": "hero_oren.glb: 9 nós, Weapon>ArmR, Crystal>Weapon, Torso com Atlas+TeamColor, <= 20 draw calls",
+      "status": "PASS",
+      "detail": "nós=[ArmL,Crystal,Weapon,ArmR,Head,LegL,LegR,Torso,Mage] faltando=[] escudo=[] pai(Weapon)=ArmR pai(Crystal)=Weapon Torso=Atlas,TeamColor draw calls=12 triângulos=21060"
+    },
+    {
+      "id": "C1",
+      "name": "spawn hero_oren perto do HQ; animador no tipo mage",
+      "status": "PASS",
+      "detail": "id=282 tipo=hero_oren raiz=Mage escala=[1.863,1.863,1.863] unitType=mage filhos da raiz=[ArmL,ArmR,Head,LegL,LegR,Torso,SelectionRing] GET hero_oren.glb=200"
+    },
+    {
+      "id": "C10",
+      "name": "cast ao vivo: a view entra em cast (>= 3 quadros por magia) e as magias ferem o alvo",
+      "status": "PASS",
+      "detail": "Raio Arcano: quadros cast=36/92 anims=[idle,cast,fight] haste mín=0.890 Crystal máx=1.35; Tempestade: cast=133/133 anims=[cast] haste mín=0.870 Crystal máx=1.35; PV do alvo 5000 -> 4897 (Raio) -> 4865 (Tempestade); mana restante=160"
+    },
+    {
+      "id": "C2",
+      "name": "view com os 9 nós; Weapon>ArmR; Crystal>Weapon; Torso com Atlas+TeamColor; sem escudo",
+      "status": "PASS",
+      "detail": "faltando=[] Torso=Atlas,TeamColor pai(Weapon)=ArmR pai(Crystal)=Weapon nós=18"
+    },
+    {
+      "id": "C3",
+      "name": "rebind: userData e meshParts do animador (torso, head, armL, armR, legL, legR, weapon, crystal)",
+      "status": "PASS",
+      "detail": "nulos=[] userData={\"torso\":\"Torso\",\"head\":\"Head\",\"armL\":\"ArmL\",\"armR\":\"ArmR\",\"legL\":\"LegL\",\"legR\":\"LegR\",\"weapon\":\"Weapon\",\"crystal\":\"Crystal\"}"
+    },
+    {
+      "id": "C4",
+      "name": "idle/walk/fight/cast mexem as partes; cajado em pé (eixo y >= 0,98) em idle/walk/fight e >= 0,8 na cast; Crystal pulsa na cast",
+      "status": "PASS",
+      "detail": "walk dif máx=0.650 rad; cast armR.x mín=-2.3 rad; Crystal escala máx na cast=1.35; Weapon eixo y mundo mín idle/walk/fight=1 cast=0.8726; fight: armR 0,2=[0,0,0.176] 0,5=[0,0,0.3] (mage não tem golpe próprio: o ataque do mago é a cast); cast mov=0.460"
+    },
+    {
+      "id": "C5",
+      "name": "caminhada ao vivo por 1 s: pernas e braço balançam",
+      "status": "PASS",
+      "detail": "quadros=61 com walk=61 faixa legL.x=1.3 rad armR.x=1.1 rad deslocou=4.83 u"
+    },
+    {
+      "id": "C6",
+      "name": "TeamColor: cor de time vermelha muda o material TeamColor e não o Atlas",
+      "status": "PASS",
+      "detail": "TeamColor #2563eb -> #d02020; Atlas #ffffff -> #ffffff"
+    },
+    {
+      "id": "C7",
+      "name": "sem pageerror nem console.error (deprecações listadas à parte)",
+      "status": "PASS",
+      "detail": "erros=0 (deprecação=0); avisos=0"
+    },
+    {
+      "id": "C8",
+      "name": "Oren x mago comum a 3 u (altura da cabeça e do topo, em unidades de mundo, escala da raiz incluída)",
+      "status": "PASS",
+      "detail": "distância=3; Oren: raiz×1.863 cabeça=3.055 topo=4.01; mago: raiz×1.62 cabeça=2.596 topo=4.905; ambos na tela=true"
+    },
+    {
+      "id": "C9",
+      "name": "inspetor: hero_oren_glb carrega com os 9 nós",
+      "status": "PASS",
+      "detail": "nós=[Mage,ArmL,ArmL_1,ArmL_2,ArmR,ArmR_1,ArmR_2,Weapon,Crystal,Head,Head_1,Head_2,LegL,LegR,Torso,Torso_1,Torso_2]"
+    }
+  ],
+  "files": [
+    {
+      "name": "game-oren-no-jogo.png",
+      "kB": 802
+    },
+    {
+      "name": "game-oren-closeup.png",
+      "kB": 972
+    },
+    {
+      "name": "game-oren-cast.png",
+      "kB": 1028
+    },
+    {
+      "name": "game-oren-time-vermelho.png",
+      "kB": 1027
+    },
+    {
+      "name": "game-oren-vs-mago.png",
+      "kB": 904
+    },
+    {
+      "name": "inspetor-oren-idle.png",
+      "kB": 260
+    },
+    {
+      "name": "inspetor-oren-cast.png",
+      "kB": 273
+    }
+  ],
+  "data": {
+    "renderer": "ANGLE (AMD, Vulkan 1.4.318 (AMD Radeonâ¢ RX 7600 XT (RADV NAVI33) (0x00007480)), radv)",
+    "glbHttpStatus": 200,
+    "spawn": {
+      "id": 282,
+      "type": "hero_oren",
+      "visualBase": "hero_oren",
+      "me": 0,
+      "hq": {
+        "x": 32,
+        "z": -30
+      },
+      "spot": {
+        "x": 38,
+        "z": -19.607695154586736
+      },
+      "rootName": "Mage",
+      "rootScale": [
+        1.863,
+        1.863,
+        1.863
+      ],
+      "rootChildren": [
+        "ArmL",
+        "ArmR",
+        "Head",
+        "LegL",
+        "LegR",
+        "Torso",
+        "SelectionRing"
+      ],
+      "animUnitType": "mage"
+    },
+    "inspect": {
+      "found": {
+        "Mage": {
+          "parent": "",
+          "mats": [
+            "Atlas",
+            "TeamColor",
+            "(sem nome)"
+          ]
+        },
+        "Torso": {
+          "parent": "Mage",
+          "mats": [
+            "Atlas",
+            "TeamColor"
+          ]
+        },
+        "Head": {
+          "parent": "Mage",
+          "mats": [
+            "Atlas",
+            "TeamColor"
+          ]
+        },
+        "ArmL": {
+          "parent": "Mage",
+          "mats": [
+            "Atlas",
+            "TeamColor"
+          ]
+        },
+        "ArmR": {
+          "parent": "Mage",
+          "mats": [
+            "Atlas",
+            "TeamColor"
+          ]
+        },
+        "LegL": {
+          "parent": "Mage",
+          "mats": [
+            "Atlas"
+          ]
+        },
+        "LegR": {
+          "parent": "Mage",
+          "mats": [
+            "Atlas"
+          ]
+        },
+        "Weapon": {
+          "parent": "ArmR",
+          "mats": [
+            "Atlas"
+          ]
+        },
+        "Crystal": {
+          "parent": "Weapon",
+          "mats": [
+            "Atlas"
+          ]
+        }
+      },
+      "all": [
+        "Mage",
+        "ArmL",
+        "ArmL_1",
+        "ArmL_2",
+        "ArmR",
+        "ArmR_1",
+        "ArmR_2",
+        "Weapon",
+        "Crystal",
+        "Head",
+        "Head_1",
+        "Head_2",
+        "LegL",
+        "LegR",
+        "Torso",
+        "Torso_1",
+        "Torso_2",
+        "SelectionRing"
+      ],
+      "userData": {
+        "torso": "Torso",
+        "head": "Head",
+        "armL": "ArmL",
+        "armR": "ArmR",
+        "legL": "LegL",
+        "legR": "LegR",
+        "weapon": "Weapon",
+        "crystal": "Crystal"
+      },
+      "meshParts": {
+        "torso": "Torso",
+        "head": "Head",
+        "armL": "ArmL",
+        "armR": "ArmR",
+        "legL": "LegL",
+        "legR": "LegR",
+        "weapon": "Weapon",
+        "crystal": "Crystal"
+      },
+      "shieldGroup": null
+    },
+    "poses": {
+      "idle": {
+        "0.1": {
+          "armL": [
+            0.009,
+            0,
+            -0.01
+          ],
+          "armR": [
+            0.009,
+            0,
+            0.01
+          ],
+          "legL": [
+            0,
+            0,
+            0
+          ],
+          "torso": [
+            0,
+            0,
+            0
+          ],
+          "head": [
+            0.02,
+            0.007,
+            0
+          ],
+          "weapon": [
+            -0.009,
+            0,
+            -0.01
+          ],
+          "weaponUp": 1,
+          "crystalScale": 1
+        },
+        "0.5": {
+          "armL": [
+            0.03,
+            0,
+            0.018
+          ],
+          "armR": [
+            0.03,
+            0,
+            -0.018
+          ],
+          "legL": [
+            0,
+            0,
+            0
+          ],
+          "torso": [
+            0,
+            0,
+            0
+          ],
+          "head": [
+            0.011,
+            0.034,
+            0
+          ],
+          "weapon": [
+            -0.03,
+            0,
+            0.018
+          ],
+          "weaponUp": 1,
+          "crystalScale": 1
+        },
+        "0.8": {
+          "armL": [
+            0.018,
+            0,
+            0.016
+          ],
+          "armR": [
+            0.018,
+            0,
+            -0.016
+          ],
+          "legL": [
+            0,
+            0,
+            0
+          ],
+          "torso": [
+            0,
+            0,
+            0
+          ],
+          "head": [
+            -0.001,
+            0.047,
+            0
+          ],
+          "weapon": [
+            -0.018,
+            0,
+            0.016
+          ],
+          "weaponUp": 1,
+          "crystalScale": 1
+        }
+      },
+      "walk": {
+        "0": {
+          "armL": [
+            0,
+            0,
+            -0.01
+          ],
+          "armR": [
+            0,
+            0,
+            0.09
+          ],
+          "legL": [
+            0,
+            0,
+            0
+          ],
+          "torso": [
+            0.05,
+            0,
+            0.04
+          ],
+          "head": [
+            0.04,
+            0,
+            0
+          ],
+          "weapon": [
+            0,
+            0,
+            -0.09
+          ],
+          "weaponUp": 1,
+          "crystalScale": 1
+        },
+        "0.2": {
+          "armL": [
+            -0.55,
+            0,
+            -0.05
+          ],
+          "armR": [
+            0.55,
+            0,
+            0.05
+          ],
+          "legL": [
+            0.65,
+            0,
+            0
+          ],
+          "torso": [
+            0.05,
+            0.08,
+            0
+          ],
+          "head": [
+            0.04,
+            -0.04,
+            0
+          ],
+          "weapon": [
+            -0.55,
+            0,
+            -0.05
+          ],
+          "weaponUp": 1,
+          "crystalScale": 1
+        },
+        "0.4": {
+          "armL": [
+            0,
+            0,
+            -0.09
+          ],
+          "armR": [
+            0,
+            0,
+            0.01
+          ],
+          "legL": [
+            0,
+            0,
+            0
+          ],
+          "torso": [
+            0.05,
+            0,
+            -0.04
+          ],
+          "head": [
+            0.04,
+            0,
+            0
+          ],
+          "weapon": [
+            0,
+            0,
+            -0.01
+          ],
+          "weaponUp": 1,
+          "crystalScale": 1
+        }
+      },
+      "fight": {
+        "0.2": {
+          "armL": [
+            0,
+            0,
+            0
+          ],
+          "armR": [
+            0,
+            0,
+            0.176
+          ],
+          "legL": [
+            0,
+            0,
+            0
+          ],
+          "torso": [
+            0,
+            -0.118,
+            0.059
+          ],
+          "head": [
+            0,
+            0.071,
+            0
+          ],
+          "weapon": [
+            0,
+            0,
+            -0.176
+          ],
+          "weaponUp": 1,
+          "crystalScale": 1
+        },
+        "0.5": {
+          "armL": [
+            0,
+            0,
+            0
+          ],
+          "armR": [
+            0,
+            0,
+            0.3
+          ],
+          "legL": [
+            0,
+            0,
+            0
+          ],
+          "torso": [
+            0,
+            -0.2,
+            0.1
+          ],
+          "head": [
+            0,
+            0.12,
+            0
+          ],
+          "weapon": [
+            0,
+            0,
+            -0.3
+          ],
+          "weaponUp": 1,
+          "crystalScale": 1
+        },
+        "0.8": {
+          "armL": [
+            0,
+            0,
+            0
+          ],
+          "armR": [
+            0,
+            0,
+            0.176
+          ],
+          "legL": [
+            0,
+            0,
+            0
+          ],
+          "torso": [
+            0,
+            -0.118,
+            0.059
+          ],
+          "head": [
+            0,
+            0.071,
+            0
+          ],
+          "weapon": [
+            0,
+            0,
+            -0.176
+          ],
+          "weaponUp": 1,
+          "crystalScale": 1
+        }
+      },
+      "cast": {
+        "0.2": {
+          "armL": [
+            -2.07,
+            0,
+            -0.193
+          ],
+          "armR": [
+            -2.07,
+            0,
+            0.193
+          ],
+          "legL": [
+            0,
+            0,
+            0
+          ],
+          "torso": [
+            -0.108,
+            0,
+            0
+          ],
+          "head": [
+            -0.225,
+            0,
+            0
+          ],
+          "weapon": [
+            2.07,
+            0,
+            -0.193
+          ],
+          "weaponUp": 0.9597,
+          "crystalScale": 1.333
+        },
+        "0.5": {
+          "armL": [
+            -2.3,
+            0,
+            -0.25
+          ],
+          "armR": [
+            -2.3,
+            0,
+            0.25
+          ],
+          "legL": [
+            0,
+            0,
+            0
+          ],
+          "torso": [
+            -0.12,
+            0,
+            0
+          ],
+          "head": [
+            -0.25,
+            0,
+            0
+          ],
+          "weapon": [
+            2.3,
+            0,
+            -0.25
+          ],
+          "weaponUp": 0.9148,
+          "crystalScale": 1.35
+        },
+        "0.8": {
+          "armL": [
+            -2.3,
+            0,
+            -0.307
+          ],
+          "armR": [
+            -2.3,
+            0,
+            0.307
+          ],
+          "legL": [
+            0,
+            0,
+            0
+          ],
+          "torso": [
+            -0.12,
+            0,
+            0
+          ],
+          "head": [
+            -0.25,
+            0,
+            0
+          ],
+          "weapon": [
+            2.3,
+            0,
+            -0.307
+          ],
+          "weaponUp": 0.8726,
+          "crystalScale": 1.333
+        }
+      }
+    },
+    "walk": {
+      "frames": 61,
+      "walkFrames": 61,
+      "legRange": 1.3,
+      "armRange": 1.1,
+      "moved": 4.83
+    },
+    "pA": [
+      {
+        "px": 643,
+        "py": 402,
+        "inTela": true
+      }
+    ],
+    "pB": [
+      {
+        "px": 640,
+        "py": 360,
+        "inTela": true
+      }
+    ],
+    "liveCast": {
+      "bolt": {
+        "label": "hero_arcane_bolt",
+        "frames": 92,
+        "castFrames": 36,
+        "minUp": 0.8896061766503639,
+        "maxCrystal": 1.349999930912759,
+        "anims": [
+          "idle",
+          "cast",
+          "fight"
+        ]
+      },
+      "storm": {
+        "label": "hero_blizzard",
+        "frames": 133,
+        "castFrames": 133,
+        "minUp": 0.8701777834807587,
+        "maxCrystal": 1.3499999827281894,
+        "anims": [
+          "cast"
+        ]
+      },
+      "foeHpAfterBolt": 4897,
+      "foeHpAfterStorm": 4865,
+      "foeMax": 5000,
+      "mana": 160,
+      "foeId": 283
+    },
+    "team": {
+      "antes": {
+        "Atlas": "#ffffff",
+        "TeamColor": "#2563eb",
+        "": "#deb841"
+      },
+      "depois": {
+        "Atlas": "#ffffff",
+        "TeamColor": "#d02020",
+        "": "#deb841"
+      }
+    },
+    "cmp": {
+      "dist": 3,
+      "oren": {
+        "rootScaleY": 1.863,
+        "headRel": 3.055,
+        "topRel": 4.01
+      },
+      "mage": {
+        "rootScaleY": 1.62,
+        "headRel": 2.596,
+        "topRel": 4.905
+      },
+      "orenPos": [
+        49.72999999999984,
+        2.820487419809905,
+        -19.607695154586736
+      ],
+      "magePos": [
+        52.72999999999984,
+        2.6423218416400487,
+        -19.607695154586736
+      ]
+    },
+    "inspector": {
+      "names": [
+        "Mage",
+        "ArmL",
+        "ArmL_1",
+        "ArmL_2",
+        "ArmR",
+        "ArmR_1",
+        "ArmR_2",
+        "Weapon",
+        "Crystal",
+        "Head",
+        "Head_1",
+        "Head_2",
+        "LegL",
+        "LegR",
+        "Torso",
+        "Torso_1",
+        "Torso_2"
+      ],
+      "model": null
+    }
+  },
+  "errors": [],
+  "warnings": []
+}

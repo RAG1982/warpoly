@@ -147,11 +147,11 @@ async function runMatrix(browser, configs, results) {
 }
 
 // ---------------------------------------------------------------- parte D: neutros
-async function neutralsPart(browser, results, breakdown = false) {
-  for (const lod of breakdown ? [true] : [true, false]) {
-    const { ctx, page, errors } = await newPage(browser, 1280, 720, { dynRes: false });
+async function neutralsPart(browser, results, breakdown = false, opt = {}) {
+  for (const lod of breakdown || opt.limited ? [true] : [true, false]) {
+    const { ctx, page, errors } = await newPage(browser, 1280, 720, { dynRes: false, overrides: opt.overrides });
     try {
-      await page.goto(`${BASE}/?skipPreload&quality=high${lod ? '' : '&lod=0'}`, { waitUntil: 'domcontentloaded', timeout: TIMEOUT_MS });
+      await page.goto(`${BASE}/?skipPreload&quality=high${lod ? '' : '&lod=0'}${opt.query ? `&${opt.query}` : ''}`, { waitUntil: 'domcontentloaded', timeout: TIMEOUT_MS });
       await page.waitForFunction(() => window.game?.session?.entityViews && window.game.gameManager?.units?.length > 0, null, { timeout: TIMEOUT_MS, polling: 500 });
       await assertHardwareGpu(page);
       const setup = await page.evaluate(() => {
@@ -186,7 +186,7 @@ async function neutralsPart(browser, results, breakdown = false) {
         return { camps: camps.map((c) => [c.x, c.z]), counts: collect(), pixelRatio: r.getPixelRatio(), effects: { ...sm.postfx.effects } };
       });
       console.log(`[m1-03] D lod=${lod}`, JSON.stringify(setup));
-      const view = breakdown
+      const view = breakdown || opt.limited
         ? [
             { nome: 'acampamento neutro 1 (40,20)', x: 40, z: 20 },
             { nome: 'controle: base do jogador (32,-30)', x: 32, z: -30 },
@@ -197,7 +197,7 @@ async function neutralsPart(browser, results, breakdown = false) {
             { nome: 'controle: base do jogador (32,-30)', x: 32, z: -30 },
             { nome: 'controle: centro (0,0)', x: 0, z: 0 },
           ];
-      const hides = breakdown ? [false, ['bandidos'], ['acampamentos'], ['critters'], ['jazidas'], true] : [false, true];
+      const hides = opt.limited ? [false, true] : breakdown ? [false, ['bandidos'], ['acampamentos'], ['critters'], ['jazidas'], true] : [false, true];
       const rows = [];
       for (const v of view) {
         for (const hide of hides) {
@@ -323,6 +323,10 @@ async function main() {
       await liveSsaoPart(chromium, results);
     } else if (PART === 'D') {
       await neutralsPart(browser, results);
+    } else if (PART === 'H') { // neutros sem sombras e sem SSAO: de onde vêm as chamadas fora da tela?
+      await neutralsPart(browser, results, false, { limited: true, overrides: { shadows: false }, query: 'fx=-ssao' });
+    } else if (PART === 'I') { // só sem sombras
+      await neutralsPart(browser, results, false, { limited: true, overrides: { shadows: false } });
     } else if (PART === 'E') {
       await neutralsPart(browser, results, true);
     } else throw new Error(`parte desconhecida: ${PART}`);

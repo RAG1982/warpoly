@@ -1,0 +1,1177 @@
+{
+  "meta": {
+    "part": "A",
+    "createdAt": "2026-10-17T07:10:26.102Z",
+    "runs": 3,
+    "warmupS": 3,
+    "durationS": 10,
+    "headless": false,
+    "browser": "153.0.8010.12"
+  },
+  "results": [
+    {
+      "label": "inicial 1280x720 (padrão) dynRes=false",
+      "cfg": {
+        "scenario": "inicial",
+        "width": 1280,
+        "height": 720,
+        "query": "",
+        "dynRes": false
+      },
+      "discarded": {
+        "fps": 156.1,
+        "p1": 123.9,
+        "frameMs": 6.41,
+        "p99Ms": 7.6,
+        "simMs": 0.042,
+        "calls": 534,
+        "tris": 858918,
+        "heapMB": 113,
+        "texs": 72,
+        "geos": 153,
+        "loadMs": 5207,
+        "frames": 1561,
+        "pixelRatio": 1,
+        "preset": "high",
+        "effects": {
+          "bloom": true,
+          "ssao": true,
+          "colorGrading": true,
+          "selectionOutline": true
+        },
+        "dynRes": false,
+        "drawingBuffer": [
+          1280,
+          720
+        ],
+        "gpu": "ANGLE (AMD, Vulkan 1.4.318 (AMD Radeonâ¢ RX 7600 XT (RADV NAVI33) (0x00007480)), radv)",
+        "version": 2,
+        "errors": []
+      },
+      "runs": [
+        {
+          "fps": 155.8,
+          "p1": 123.3,
+          "frameMs": 6.42,
+          "p99Ms": 7.6,
+          "simMs": 0.046,
+          "calls": 541,
+          "tris": 861849,
+          "heapMB": 122.6,
+          "texs": 72,
+          "geos": 153,
+          "loadMs": 4361,
+          "frames": 1558,
+          "pixelRatio": 1,
+          "preset": "high",
+          "effects": {
+            "bloom": true,
+            "ssao": true,
+            "colorGrading": true,
+            "selectionOutline": true
+          },
+          "dynRes": false,
+          "drawingBuffer": [
+            1280,
+            720
+          ],
+          "gpu": "ANGLE (AMD, Vulkan 1.4.318 (AMD Radeonâ¢ RX 7600 XT (RADV NAVI33) (0x00007480)), radv)",
+          "version": 2,
+          "errors": []
+        },
+        {
+          "fps": 165,
+          "p1": 116.2,
+          "frameMs": 6.06,
+          "p99Ms": 7,
+          "simMs": 0.04,
+          "calls": 515,
+          "tris": 835846,
+          "heapMB": 130,
+          "texs": 72,
+          "geos": 155,
+          "loadMs": 4379,
+          "frames": 1650,
+          "pixelRatio": 1,
+          "preset": "high",
+          "effects": {
+            "bloom": true,
+            "ssao": true,
+            "colorGrading": true,
+            "selectionOutline": true
+          },
+          "dynRes": false,
+          "drawingBuffer": [
+            1280,
+            720
+          ],
+          "gpu": "ANGLE (AMD, Vulkan 1.4.318 (AMD Radeonâ¢ RX 7600 XT (RADV NAVI33) (0x00007480)), radv)",
+          "version": 2,
+          "errors": []
+        },
+        {
+          "fps": 160.6,
+          "p1": 134.1,
+          "frameMs": 6.23,
+          "p99Ms": 7.2,
+          "simMs": 0.042,
+          "calls": 543,
+          "tris": 883615,
+          "heapMB": 117.7,
+          "texs": 72,
+          "geos": 158,
+          "loadMs": 4539,
+          "frames": 1607,
+          "pixelRatio": 1,
+          "preset": "high",
+          "effects": {
+            "bloom": true,
+            "ssao": true,
+            "colorGrading": true,
+            "selectionOutline": true
+          },
+          "dynRes": false,
+          "drawingBuffer": [
+            1280,
+            720
+          ],
+          "gpu": "ANGLE (AMD, Vulkan 1.4.318 (AMD Radeonâ¢ RX 7600 XT (RADV NAVI33) (0x00007480)), radv)",
+          "version": 2,
+          "errors": []
+        }
+      ],
+      "summary": {
+        "fps": {
+          "mean": 160.5,
+          "min": 155.8,
+          "max": 165
+        },
+        "p1": {
+          "mean": 124.5,
+          "min": 116.2,
+          "max": 134.1
+        },
+        "frameMs": {
+          "mean": 6.2,
+          "min": 6.06,
+          "max": 6.42
+        },
+        "p99Ms": {
+          "mean": 7.3,
+          "min": 7,
+          "max": 7.6
+        },
+        "simMs": {
+          "mean": 0.043,
+          "min": 0.04,
+          "max": 0.05
+        },
+        "calls": {
+          "mean": 533,
+          "min": 515,
+          "max": 543
+        },
+        "tris": {
+          "mean": 860436.7,
+          "min": 835846,
+          "max": 883615
+        },
+        "heapMB": {
+          "mean": 123.4,
+          "min": 117.7,
+          "max": 130
+        },
+        "texs": {
+          "mean": 72,
+          "min": 72,
+          "max": 72
+        },
+        "geos": {
+          "mean": 155.3,
+          "min": 153,
+          "max": 158
+        },
+        "loadMs": {
+          "mean": 4426.3,
+          "min": 4361,
+          "max": 4539
+        },
+        "pixelRatio": {
+          "mean": 1,
+          "min": 1,
+          "max": 1
+        }
+      }
+    },
+    {
+      "label": "inicial 1280x720 lod=0 dynRes=false",
+      "cfg": {
+        "scenario": "inicial",
+        "width": 1280,
+        "height": 720,
+        "query": "lod=0",
+        "dynRes": false
+      },
+      "discarded": {
+        "fps": 163.6,
+        "p1": 132,
+        "frameMs": 6.11,
+        "p99Ms": 7.2,
+        "simMs": 0.041,
+        "calls": 552,
+        "tris": 845001,
+        "heapMB": 114.2,
+        "texs": 72,
+        "geos": 154,
+        "loadMs": 4398,
+        "frames": 1636,
+        "pixelRatio": 1,
+        "preset": "high",
+        "effects": {
+          "bloom": true,
+          "ssao": true,
+          "colorGrading": true,
+          "selectionOutline": true
+        },
+        "dynRes": false,
+        "drawingBuffer": [
+          1280,
+          720
+        ],
+        "gpu": "ANGLE (AMD, Vulkan 1.4.318 (AMD Radeonâ¢ RX 7600 XT (RADV NAVI33) (0x00007480)), radv)",
+        "version": 2,
+        "errors": []
+      },
+      "runs": [
+        {
+          "fps": 155,
+          "p1": 124.8,
+          "frameMs": 6.45,
+          "p99Ms": 7.5,
+          "simMs": 0.043,
+          "calls": 541,
+          "tris": 842578,
+          "heapMB": 111.3,
+          "texs": 72,
+          "geos": 155,
+          "loadMs": 4308,
+          "frames": 1551,
+          "pixelRatio": 1,
+          "preset": "high",
+          "effects": {
+            "bloom": true,
+            "ssao": true,
+            "colorGrading": true,
+            "selectionOutline": true
+          },
+          "dynRes": false,
+          "drawingBuffer": [
+            1280,
+            720
+          ],
+          "gpu": "ANGLE (AMD, Vulkan 1.4.318 (AMD Radeonâ¢ RX 7600 XT (RADV NAVI33) (0x00007480)), radv)",
+          "version": 2,
+          "errors": []
+        },
+        {
+          "fps": 151.6,
+          "p1": 89.2,
+          "frameMs": 6.6,
+          "p99Ms": 8.6,
+          "simMs": 0.045,
+          "calls": 538,
+          "tris": 882005,
+          "heapMB": 113.3,
+          "texs": 72,
+          "geos": 157,
+          "loadMs": 4404,
+          "frames": 1516,
+          "pixelRatio": 1,
+          "preset": "high",
+          "effects": {
+            "bloom": true,
+            "ssao": true,
+            "colorGrading": true,
+            "selectionOutline": true
+          },
+          "dynRes": false,
+          "drawingBuffer": [
+            1280,
+            720
+          ],
+          "gpu": "ANGLE (AMD, Vulkan 1.4.318 (AMD Radeonâ¢ RX 7600 XT (RADV NAVI33) (0x00007480)), radv)",
+          "version": 2,
+          "errors": []
+        },
+        {
+          "fps": 157.4,
+          "p1": 130.7,
+          "frameMs": 6.35,
+          "p99Ms": 7.4,
+          "simMs": 0.042,
+          "calls": 544,
+          "tris": 854644,
+          "heapMB": 130.7,
+          "texs": 72,
+          "geos": 158,
+          "loadMs": 4331,
+          "frames": 1575,
+          "pixelRatio": 1,
+          "preset": "high",
+          "effects": {
+            "bloom": true,
+            "ssao": true,
+            "colorGrading": true,
+            "selectionOutline": true
+          },
+          "dynRes": false,
+          "drawingBuffer": [
+            1280,
+            720
+          ],
+          "gpu": "ANGLE (AMD, Vulkan 1.4.318 (AMD Radeonâ¢ RX 7600 XT (RADV NAVI33) (0x00007480)), radv)",
+          "version": 2,
+          "errors": []
+        }
+      ],
+      "summary": {
+        "fps": {
+          "mean": 154.7,
+          "min": 151.6,
+          "max": 157.4
+        },
+        "p1": {
+          "mean": 114.9,
+          "min": 89.2,
+          "max": 130.7
+        },
+        "frameMs": {
+          "mean": 6.5,
+          "min": 6.35,
+          "max": 6.6
+        },
+        "p99Ms": {
+          "mean": 7.8,
+          "min": 7.4,
+          "max": 8.6
+        },
+        "simMs": {
+          "mean": 0.043,
+          "min": 0.04,
+          "max": 0.05
+        },
+        "calls": {
+          "mean": 541,
+          "min": 538,
+          "max": 544
+        },
+        "tris": {
+          "mean": 859742.3,
+          "min": 842578,
+          "max": 882005
+        },
+        "heapMB": {
+          "mean": 118.4,
+          "min": 111.3,
+          "max": 130.7
+        },
+        "texs": {
+          "mean": 72,
+          "min": 72,
+          "max": 72
+        },
+        "geos": {
+          "mean": 156.7,
+          "min": 155,
+          "max": 158
+        },
+        "loadMs": {
+          "mean": 4347.7,
+          "min": 4308,
+          "max": 4404
+        },
+        "pixelRatio": {
+          "mean": 1,
+          "min": 1,
+          "max": 1
+        }
+      }
+    },
+    {
+      "label": "combate100 1280x720 (padrão) dynRes=false",
+      "cfg": {
+        "scenario": "combate100",
+        "width": 1280,
+        "height": 720,
+        "query": "",
+        "dynRes": false
+      },
+      "discarded": {
+        "fps": 42.2,
+        "p1": 23.6,
+        "frameMs": 23.68,
+        "p99Ms": 35.1,
+        "simMs": 0.759,
+        "calls": 4345,
+        "tris": 2769150,
+        "heapMB": 124.1,
+        "texs": 106,
+        "geos": 256,
+        "loadMs": 4385,
+        "frames": 423,
+        "pixelRatio": 1,
+        "preset": "high",
+        "effects": {
+          "bloom": true,
+          "ssao": true,
+          "colorGrading": true,
+          "selectionOutline": true
+        },
+        "dynRes": false,
+        "drawingBuffer": [
+          1280,
+          720
+        ],
+        "gpu": "ANGLE (AMD, Vulkan 1.4.318 (AMD Radeonâ¢ RX 7600 XT (RADV NAVI33) (0x00007480)), radv)",
+        "version": 2,
+        "errors": []
+      },
+      "runs": [
+        {
+          "fps": 42.5,
+          "p1": 22.9,
+          "frameMs": 23.55,
+          "p99Ms": 38.3,
+          "simMs": 0.787,
+          "calls": 4393,
+          "tris": 2796553,
+          "heapMB": 139.3,
+          "texs": 106,
+          "geos": 257,
+          "loadMs": 4440,
+          "frames": 425,
+          "pixelRatio": 1,
+          "preset": "high",
+          "effects": {
+            "bloom": true,
+            "ssao": true,
+            "colorGrading": true,
+            "selectionOutline": true
+          },
+          "dynRes": false,
+          "drawingBuffer": [
+            1280,
+            720
+          ],
+          "gpu": "ANGLE (AMD, Vulkan 1.4.318 (AMD Radeonâ¢ RX 7600 XT (RADV NAVI33) (0x00007480)), radv)",
+          "version": 2,
+          "errors": []
+        },
+        {
+          "fps": 43.9,
+          "p1": 27.3,
+          "frameMs": 22.8,
+          "p99Ms": 35.1,
+          "simMs": 0.74,
+          "calls": 4317,
+          "tris": 2786307,
+          "heapMB": 124.1,
+          "texs": 107,
+          "geos": 261,
+          "loadMs": 4529,
+          "frames": 439,
+          "pixelRatio": 1,
+          "preset": "high",
+          "effects": {
+            "bloom": true,
+            "ssao": true,
+            "colorGrading": true,
+            "selectionOutline": true
+          },
+          "dynRes": false,
+          "drawingBuffer": [
+            1280,
+            720
+          ],
+          "gpu": "ANGLE (AMD, Vulkan 1.4.318 (AMD Radeonâ¢ RX 7600 XT (RADV NAVI33) (0x00007480)), radv)",
+          "version": 2,
+          "errors": []
+        },
+        {
+          "fps": 41.5,
+          "p1": 23.5,
+          "frameMs": 24.09,
+          "p99Ms": 35.3,
+          "simMs": 0.806,
+          "calls": 4509,
+          "tris": 2863626,
+          "heapMB": 126.4,
+          "texs": 105,
+          "geos": 255,
+          "loadMs": 4392,
+          "frames": 416,
+          "pixelRatio": 1,
+          "preset": "high",
+          "effects": {
+            "bloom": true,
+            "ssao": true,
+            "colorGrading": true,
+            "selectionOutline": true
+          },
+          "dynRes": false,
+          "drawingBuffer": [
+            1280,
+            720
+          ],
+          "gpu": "ANGLE (AMD, Vulkan 1.4.318 (AMD Radeonâ¢ RX 7600 XT (RADV NAVI33) (0x00007480)), radv)",
+          "version": 2,
+          "errors": []
+        }
+      ],
+      "summary": {
+        "fps": {
+          "mean": 42.6,
+          "min": 41.5,
+          "max": 43.9
+        },
+        "p1": {
+          "mean": 24.6,
+          "min": 22.9,
+          "max": 27.3
+        },
+        "frameMs": {
+          "mean": 23.5,
+          "min": 22.8,
+          "max": 24.09
+        },
+        "p99Ms": {
+          "mean": 36.2,
+          "min": 35.1,
+          "max": 38.3
+        },
+        "simMs": {
+          "mean": 0.778,
+          "min": 0.74,
+          "max": 0.81
+        },
+        "calls": {
+          "mean": 4406.3,
+          "min": 4317,
+          "max": 4509
+        },
+        "tris": {
+          "mean": 2815495.3,
+          "min": 2786307,
+          "max": 2863626
+        },
+        "heapMB": {
+          "mean": 129.9,
+          "min": 124.1,
+          "max": 139.3
+        },
+        "texs": {
+          "mean": 106,
+          "min": 105,
+          "max": 107
+        },
+        "geos": {
+          "mean": 257.7,
+          "min": 255,
+          "max": 261
+        },
+        "loadMs": {
+          "mean": 4453.7,
+          "min": 4392,
+          "max": 4529
+        },
+        "pixelRatio": {
+          "mean": 1,
+          "min": 1,
+          "max": 1
+        }
+      }
+    },
+    {
+      "label": "combate100 1280x720 lod=0 dynRes=false",
+      "cfg": {
+        "scenario": "combate100",
+        "width": 1280,
+        "height": 720,
+        "query": "lod=0",
+        "dynRes": false
+      },
+      "discarded": {
+        "fps": 42.4,
+        "p1": 25.5,
+        "frameMs": 23.59,
+        "p99Ms": 35.5,
+        "simMs": 0.767,
+        "calls": 4375,
+        "tris": 2764808,
+        "heapMB": 123.8,
+        "texs": 108,
+        "geos": 250,
+        "loadMs": 4274,
+        "frames": 424,
+        "pixelRatio": 1,
+        "preset": "high",
+        "effects": {
+          "bloom": true,
+          "ssao": true,
+          "colorGrading": true,
+          "selectionOutline": true
+        },
+        "dynRes": false,
+        "drawingBuffer": [
+          1280,
+          720
+        ],
+        "gpu": "ANGLE (AMD, Vulkan 1.4.318 (AMD Radeonâ¢ RX 7600 XT (RADV NAVI33) (0x00007480)), radv)",
+        "version": 2,
+        "errors": []
+      },
+      "runs": [
+        {
+          "fps": 41,
+          "p1": 26.9,
+          "frameMs": 24.37,
+          "p99Ms": 35.1,
+          "simMs": 0.802,
+          "calls": 4505,
+          "tris": 2853577,
+          "heapMB": 141.4,
+          "texs": 107,
+          "geos": 256,
+          "loadMs": 4388,
+          "frames": 411,
+          "pixelRatio": 1,
+          "preset": "high",
+          "effects": {
+            "bloom": true,
+            "ssao": true,
+            "colorGrading": true,
+            "selectionOutline": true
+          },
+          "dynRes": false,
+          "drawingBuffer": [
+            1280,
+            720
+          ],
+          "gpu": "ANGLE (AMD, Vulkan 1.4.318 (AMD Radeonâ¢ RX 7600 XT (RADV NAVI33) (0x00007480)), radv)",
+          "version": 2,
+          "errors": []
+        },
+        {
+          "fps": 42.9,
+          "p1": 27.2,
+          "frameMs": 23.29,
+          "p99Ms": 34.7,
+          "simMs": 0.764,
+          "calls": 4519,
+          "tris": 2859436,
+          "heapMB": 123.5,
+          "texs": 104,
+          "geos": 254,
+          "loadMs": 4505,
+          "frames": 430,
+          "pixelRatio": 1,
+          "preset": "high",
+          "effects": {
+            "bloom": true,
+            "ssao": true,
+            "colorGrading": true,
+            "selectionOutline": true
+          },
+          "dynRes": false,
+          "drawingBuffer": [
+            1280,
+            720
+          ],
+          "gpu": "ANGLE (AMD, Vulkan 1.4.318 (AMD Radeonâ¢ RX 7600 XT (RADV NAVI33) (0x00007480)), radv)",
+          "version": 2,
+          "errors": []
+        },
+        {
+          "fps": 42.1,
+          "p1": 26.9,
+          "frameMs": 23.78,
+          "p99Ms": 35.2,
+          "simMs": 0.813,
+          "calls": 4451,
+          "tris": 2797417,
+          "heapMB": 129.8,
+          "texs": 106,
+          "geos": 253,
+          "loadMs": 4553,
+          "frames": 421,
+          "pixelRatio": 1,
+          "preset": "high",
+          "effects": {
+            "bloom": true,
+            "ssao": true,
+            "colorGrading": true,
+            "selectionOutline": true
+          },
+          "dynRes": false,
+          "drawingBuffer": [
+            1280,
+            720
+          ],
+          "gpu": "ANGLE (AMD, Vulkan 1.4.318 (AMD Radeonâ¢ RX 7600 XT (RADV NAVI33) (0x00007480)), radv)",
+          "version": 2,
+          "errors": []
+        }
+      ],
+      "summary": {
+        "fps": {
+          "mean": 42,
+          "min": 41,
+          "max": 42.9
+        },
+        "p1": {
+          "mean": 27,
+          "min": 26.9,
+          "max": 27.2
+        },
+        "frameMs": {
+          "mean": 23.8,
+          "min": 23.29,
+          "max": 24.37
+        },
+        "p99Ms": {
+          "mean": 35,
+          "min": 34.7,
+          "max": 35.2
+        },
+        "simMs": {
+          "mean": 0.793,
+          "min": 0.76,
+          "max": 0.81
+        },
+        "calls": {
+          "mean": 4491.7,
+          "min": 4451,
+          "max": 4519
+        },
+        "tris": {
+          "mean": 2836810,
+          "min": 2797417,
+          "max": 2859436
+        },
+        "heapMB": {
+          "mean": 131.6,
+          "min": 123.5,
+          "max": 141.4
+        },
+        "texs": {
+          "mean": 105.7,
+          "min": 104,
+          "max": 107
+        },
+        "geos": {
+          "mean": 254.3,
+          "min": 253,
+          "max": 256
+        },
+        "loadMs": {
+          "mean": 4482,
+          "min": 4388,
+          "max": 4553
+        },
+        "pixelRatio": {
+          "mean": 1,
+          "min": 1,
+          "max": 1
+        }
+      }
+    },
+    {
+      "label": "massa300 1280x720 (padrão) dynRes=false",
+      "cfg": {
+        "scenario": "massa300",
+        "width": 1280,
+        "height": 720,
+        "query": "",
+        "dynRes": false
+      },
+      "discarded": {
+        "fps": 16.5,
+        "p1": 14.4,
+        "frameMs": 60.44,
+        "p99Ms": 69.4,
+        "simMs": 3.431,
+        "calls": 12701,
+        "tris": 7617191,
+        "heapMB": 138,
+        "texs": 110,
+        "geos": 334,
+        "loadMs": 4725,
+        "frames": 166,
+        "pixelRatio": 1,
+        "preset": "high",
+        "effects": {
+          "bloom": true,
+          "ssao": true,
+          "colorGrading": true,
+          "selectionOutline": true
+        },
+        "dynRes": false,
+        "drawingBuffer": [
+          1280,
+          720
+        ],
+        "gpu": "ANGLE (AMD, Vulkan 1.4.318 (AMD Radeonâ¢ RX 7600 XT (RADV NAVI33) (0x00007480)), radv)",
+        "version": 2,
+        "errors": []
+      },
+      "runs": [
+        {
+          "fps": 16,
+          "p1": 10.9,
+          "frameMs": 62.68,
+          "p99Ms": 87.1,
+          "simMs": 3.964,
+          "calls": 12724,
+          "tris": 7611813,
+          "heapMB": 127.2,
+          "texs": 111,
+          "geos": 338,
+          "loadMs": 4454,
+          "frames": 160,
+          "pixelRatio": 1,
+          "preset": "high",
+          "effects": {
+            "bloom": true,
+            "ssao": true,
+            "colorGrading": true,
+            "selectionOutline": true
+          },
+          "dynRes": false,
+          "drawingBuffer": [
+            1280,
+            720
+          ],
+          "gpu": "ANGLE (AMD, Vulkan 1.4.318 (AMD Radeonâ¢ RX 7600 XT (RADV NAVI33) (0x00007480)), radv)",
+          "version": 2,
+          "errors": []
+        },
+        {
+          "fps": 16.3,
+          "p1": 9.8,
+          "frameMs": 61.42,
+          "p99Ms": 86.9,
+          "simMs": 3.572,
+          "calls": 12618,
+          "tris": 7582203,
+          "heapMB": 143.4,
+          "texs": 110,
+          "geos": 339,
+          "loadMs": 4372,
+          "frames": 163,
+          "pixelRatio": 1,
+          "preset": "high",
+          "effects": {
+            "bloom": true,
+            "ssao": true,
+            "colorGrading": true,
+            "selectionOutline": true
+          },
+          "dynRes": false,
+          "drawingBuffer": [
+            1280,
+            720
+          ],
+          "gpu": "ANGLE (AMD, Vulkan 1.4.318 (AMD Radeonâ¢ RX 7600 XT (RADV NAVI33) (0x00007480)), radv)",
+          "version": 2,
+          "errors": []
+        },
+        {
+          "fps": 16.4,
+          "p1": 8.6,
+          "frameMs": 60.94,
+          "p99Ms": 85,
+          "simMs": 3.49,
+          "calls": 12736,
+          "tris": 7644126,
+          "heapMB": 122.2,
+          "texs": 110,
+          "geos": 342,
+          "loadMs": 4558,
+          "frames": 165,
+          "pixelRatio": 1,
+          "preset": "high",
+          "effects": {
+            "bloom": true,
+            "ssao": true,
+            "colorGrading": true,
+            "selectionOutline": true
+          },
+          "dynRes": false,
+          "drawingBuffer": [
+            1280,
+            720
+          ],
+          "gpu": "ANGLE (AMD, Vulkan 1.4.318 (AMD Radeonâ¢ RX 7600 XT (RADV NAVI33) (0x00007480)), radv)",
+          "version": 2,
+          "errors": []
+        }
+      ],
+      "summary": {
+        "fps": {
+          "mean": 16.2,
+          "min": 16,
+          "max": 16.4
+        },
+        "p1": {
+          "mean": 9.8,
+          "min": 8.6,
+          "max": 10.9
+        },
+        "frameMs": {
+          "mean": 61.7,
+          "min": 60.94,
+          "max": 62.68
+        },
+        "p99Ms": {
+          "mean": 86.3,
+          "min": 85,
+          "max": 87.1
+        },
+        "simMs": {
+          "mean": 3.675,
+          "min": 3.49,
+          "max": 3.96
+        },
+        "calls": {
+          "mean": 12692.7,
+          "min": 12618,
+          "max": 12736
+        },
+        "tris": {
+          "mean": 7612714,
+          "min": 7582203,
+          "max": 7644126
+        },
+        "heapMB": {
+          "mean": 130.9,
+          "min": 122.2,
+          "max": 143.4
+        },
+        "texs": {
+          "mean": 110.3,
+          "min": 110,
+          "max": 111
+        },
+        "geos": {
+          "mean": 339.7,
+          "min": 338,
+          "max": 342
+        },
+        "loadMs": {
+          "mean": 4461.3,
+          "min": 4372,
+          "max": 4558
+        },
+        "pixelRatio": {
+          "mean": 1,
+          "min": 1,
+          "max": 1
+        }
+      }
+    },
+    {
+      "label": "massa300 1280x720 lod=0 dynRes=false",
+      "cfg": {
+        "scenario": "massa300",
+        "width": 1280,
+        "height": 720,
+        "query": "lod=0",
+        "dynRes": false
+      },
+      "discarded": {
+        "fps": 15.8,
+        "p1": 8.7,
+        "frameMs": 63.41,
+        "p99Ms": 92.7,
+        "simMs": 3.802,
+        "calls": 12562,
+        "tris": 7624209,
+        "heapMB": 142.8,
+        "texs": 110,
+        "geos": 332,
+        "loadMs": 4353,
+        "frames": 158,
+        "pixelRatio": 1,
+        "preset": "high",
+        "effects": {
+          "bloom": true,
+          "ssao": true,
+          "colorGrading": true,
+          "selectionOutline": true
+        },
+        "dynRes": false,
+        "drawingBuffer": [
+          1280,
+          720
+        ],
+        "gpu": "ANGLE (AMD, Vulkan 1.4.318 (AMD Radeonâ¢ RX 7600 XT (RADV NAVI33) (0x00007480)), radv)",
+        "version": 2,
+        "errors": []
+      },
+      "runs": [
+        {
+          "fps": 16.4,
+          "p1": 9.7,
+          "frameMs": 60.84,
+          "p99Ms": 100.5,
+          "simMs": 3.445,
+          "calls": 12675,
+          "tris": 7675703,
+          "heapMB": 151.5,
+          "texs": 110,
+          "geos": 342,
+          "loadMs": 4367,
+          "frames": 166,
+          "pixelRatio": 1,
+          "preset": "high",
+          "effects": {
+            "bloom": true,
+            "ssao": true,
+            "colorGrading": true,
+            "selectionOutline": true
+          },
+          "dynRes": false,
+          "drawingBuffer": [
+            1280,
+            720
+          ],
+          "gpu": "ANGLE (AMD, Vulkan 1.4.318 (AMD Radeonâ¢ RX 7600 XT (RADV NAVI33) (0x00007480)), radv)",
+          "version": 2,
+          "errors": []
+        },
+        {
+          "fps": 16.4,
+          "p1": 11.6,
+          "frameMs": 60.87,
+          "p99Ms": 75.8,
+          "simMs": 3.421,
+          "calls": 12700,
+          "tris": 7709844,
+          "heapMB": 122.7,
+          "texs": 110,
+          "geos": 333,
+          "loadMs": 4345,
+          "frames": 165,
+          "pixelRatio": 1,
+          "preset": "high",
+          "effects": {
+            "bloom": true,
+            "ssao": true,
+            "colorGrading": true,
+            "selectionOutline": true
+          },
+          "dynRes": false,
+          "drawingBuffer": [
+            1280,
+            720
+          ],
+          "gpu": "ANGLE (AMD, Vulkan 1.4.318 (AMD Radeonâ¢ RX 7600 XT (RADV NAVI33) (0x00007480)), radv)",
+          "version": 2,
+          "errors": []
+        },
+        {
+          "fps": 16.4,
+          "p1": 9.9,
+          "frameMs": 60.91,
+          "p99Ms": 85.3,
+          "simMs": 3.492,
+          "calls": 12781,
+          "tris": 7766856,
+          "heapMB": 146.2,
+          "texs": 110,
+          "geos": 348,
+          "loadMs": 4393,
+          "frames": 165,
+          "pixelRatio": 1,
+          "preset": "high",
+          "effects": {
+            "bloom": true,
+            "ssao": true,
+            "colorGrading": true,
+            "selectionOutline": true
+          },
+          "dynRes": false,
+          "drawingBuffer": [
+            1280,
+            720
+          ],
+          "gpu": "ANGLE (AMD, Vulkan 1.4.318 (AMD Radeonâ¢ RX 7600 XT (RADV NAVI33) (0x00007480)), radv)",
+          "version": 2,
+          "errors": []
+        }
+      ],
+      "summary": {
+        "fps": {
+          "mean": 16.4,
+          "min": 16.4,
+          "max": 16.4
+        },
+        "p1": {
+          "mean": 10.4,
+          "min": 9.7,
+          "max": 11.6
+        },
+        "frameMs": {
+          "mean": 60.9,
+          "min": 60.84,
+          "max": 60.91
+        },
+        "p99Ms": {
+          "mean": 87.2,
+          "min": 75.8,
+          "max": 100.5
+        },
+        "simMs": {
+          "mean": 3.453,
+          "min": 3.42,
+          "max": 3.49
+        },
+        "calls": {
+          "mean": 12718.7,
+          "min": 12675,
+          "max": 12781
+        },
+        "tris": {
+          "mean": 7717467.7,
+          "min": 7675703,
+          "max": 7766856
+        },
+        "heapMB": {
+          "mean": 140.1,
+          "min": 122.7,
+          "max": 151.5
+        },
+        "texs": {
+          "mean": 110,
+          "min": 110,
+          "max": 110
+        },
+        "geos": {
+          "mean": 341,
+          "min": 333,
+          "max": 348
+        },
+        "loadMs": {
+          "mean": 4368.3,
+          "min": 4345,
+          "max": 4393
+        },
+        "pixelRatio": {
+          "mean": 1,
+          "min": 1,
+          "max": 1
+        }
+      }
+    }
+  ]
+}

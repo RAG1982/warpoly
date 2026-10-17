@@ -1,0 +1,325 @@
+{
+  "meta": {
+    "part": "G",
+    "createdAt": "2026-10-17T07:40:25.714Z",
+    "runs": 3,
+    "warmupS": 3,
+    "durationS": 10,
+    "headless": false,
+    "browser": "153.0.8010.12"
+  },
+  "results": [
+    {
+      "modo": "headless, flags da M1-01 (sem desligar vsync)",
+      "fx": "padrão",
+      "runs": [
+        {
+          "base": {
+            "fps": 60,
+            "fpsP1": 59.5,
+            "frames": 356,
+            "calls": 580
+          },
+          "wide": {
+            "fps": 60,
+            "fpsP1": 59.5,
+            "frames": 356,
+            "calls": 693
+          },
+          "pixelRatio": 0.9,
+          "effects": {
+            "bloom": true,
+            "ssao": true,
+            "colorGrading": true,
+            "selectionOutline": true
+          },
+          "preset": "high",
+          "dynRes": true,
+          "units": 12
+        },
+        {
+          "base": {
+            "fps": 60,
+            "fpsP1": 59.5,
+            "frames": 356,
+            "calls": 584
+          },
+          "wide": {
+            "fps": 60,
+            "fpsP1": 59.5,
+            "frames": 356,
+            "calls": 685
+          },
+          "pixelRatio": 1,
+          "effects": {
+            "bloom": true,
+            "ssao": true,
+            "colorGrading": true,
+            "selectionOutline": true
+          },
+          "preset": "high",
+          "dynRes": true,
+          "units": 12
+        },
+        {
+          "base": {
+            "fps": 60,
+            "fpsP1": 59.5,
+            "frames": 356,
+            "calls": 558
+          },
+          "wide": {
+            "fps": 60,
+            "fpsP1": 59.5,
+            "frames": 356,
+            "calls": 661
+          },
+          "pixelRatio": 1,
+          "effects": {
+            "bloom": true,
+            "ssao": true,
+            "colorGrading": true,
+            "selectionOutline": true
+          },
+          "preset": "high",
+          "dynRes": true,
+          "units": 12
+        }
+      ]
+    },
+    {
+      "modo": "headless, flags da M1-01 (sem desligar vsync)",
+      "fx": "&fx=-ssao",
+      "runs": [
+        {
+          "base": {
+            "fps": 60,
+            "fpsP1": 59.5,
+            "frames": 356,
+            "calls": 295
+          },
+          "wide": {
+            "fps": 60,
+            "fpsP1": 59.5,
+            "frames": 356,
+            "calls": 341
+          },
+          "pixelRatio": 1,
+          "effects": {
+            "bloom": true,
+            "ssao": false,
+            "colorGrading": true,
+            "selectionOutline": true
+          },
+          "preset": "high",
+          "dynRes": true,
+          "units": 12
+        },
+        {
+          "base": {
+            "fps": 60,
+            "fpsP1": 59.5,
+            "frames": 356,
+            "calls": 293
+          },
+          "wide": {
+            "fps": 60,
+            "fpsP1": 59.5,
+            "frames": 356,
+            "calls": 354
+          },
+          "pixelRatio": 1,
+          "effects": {
+            "bloom": true,
+            "ssao": false,
+            "colorGrading": true,
+            "selectionOutline": true
+          },
+          "preset": "high",
+          "dynRes": true,
+          "units": 12
+        },
+        {
+          "base": {
+            "fps": 60,
+            "fpsP1": 59.5,
+            "frames": 356,
+            "calls": 290
+          },
+          "wide": {
+            "fps": 60,
+            "fpsP1": 59.5,
+            "frames": 356,
+            "calls": 340
+          },
+          "pixelRatio": 1,
+          "effects": {
+            "bloom": true,
+            "ssao": false,
+            "colorGrading": true,
+            "selectionOutline": true
+          },
+          "preset": "high",
+          "dynRes": true,
+          "units": 12
+        }
+      ]
+    },
+    {
+      "modo": "com janela, flags do bench (sem limite de quadros)",
+      "fx": "padrão",
+      "runs": [
+        {
+          "base": {
+            "fps": 111.2,
+            "fpsP1": 95.2,
+            "frames": 665,
+            "calls": 588
+          },
+          "wide": {
+            "fps": 111.2,
+            "fpsP1": 68.5,
+            "frames": 664,
+            "calls": 699
+          },
+          "pixelRatio": 1,
+          "effects": {
+            "bloom": true,
+            "ssao": true,
+            "colorGrading": true,
+            "selectionOutline": true
+          },
+          "preset": "high",
+          "dynRes": true,
+          "units": 12
+        },
+        {
+          "base": {
+            "fps": 112.4,
+            "fpsP1": 98,
+            "frames": 672,
+            "calls": 578
+          },
+          "wide": {
+            "fps": 108.5,
+            "fpsP1": 97.1,
+            "frames": 649,
+            "calls": 682
+          },
+          "pixelRatio": 1,
+          "effects": {
+            "bloom": true,
+            "ssao": true,
+            "colorGrading": true,
+            "selectionOutline": true
+          },
+          "preset": "high",
+          "dynRes": true,
+          "units": 12
+        },
+        {
+          "base": {
+            "fps": 109.8,
+            "fpsP1": 98,
+            "frames": 657,
+            "calls": 594
+          },
+          "wide": {
+            "fps": 105.4,
+            "fpsP1": 94.3,
+            "frames": 630,
+            "calls": 703
+          },
+          "pixelRatio": 1,
+          "effects": {
+            "bloom": true,
+            "ssao": true,
+            "colorGrading": true,
+            "selectionOutline": true
+          },
+          "preset": "high",
+          "dynRes": true,
+          "units": 12
+        }
+      ]
+    },
+    {
+      "modo": "com janela, flags do bench (sem limite de quadros)",
+      "fx": "&fx=-ssao",
+      "runs": [
+        {
+          "base": {
+            "fps": 135.4,
+            "fpsP1": 119,
+            "frames": 810,
+            "calls": 304
+          },
+          "wide": {
+            "fps": 133,
+            "fpsP1": 122,
+            "frames": 796,
+            "calls": 359
+          },
+          "pixelRatio": 1,
+          "effects": {
+            "bloom": true,
+            "ssao": false,
+            "colorGrading": true,
+            "selectionOutline": true
+          },
+          "preset": "high",
+          "dynRes": true,
+          "units": 12
+        },
+        {
+          "base": {
+            "fps": 138.7,
+            "fpsP1": 122,
+            "frames": 829,
+            "calls": 288
+          },
+          "wide": {
+            "fps": 133.9,
+            "fpsP1": 119,
+            "frames": 801,
+            "calls": 338
+          },
+          "pixelRatio": 1,
+          "effects": {
+            "bloom": true,
+            "ssao": false,
+            "colorGrading": true,
+            "selectionOutline": true
+          },
+          "preset": "high",
+          "dynRes": true,
+          "units": 12
+        },
+        {
+          "base": {
+            "fps": 135.2,
+            "fpsP1": 103.1,
+            "frames": 809,
+            "calls": 295
+          },
+          "wide": {
+            "fps": 133.9,
+            "fpsP1": 119,
+            "frames": 800,
+            "calls": 350
+          },
+          "pixelRatio": 1,
+          "effects": {
+            "bloom": true,
+            "ssao": false,
+            "colorGrading": true,
+            "selectionOutline": true
+          },
+          "preset": "high",
+          "dynRes": true,
+          "units": 12
+        }
+      ]
+    }
+  ]
+}

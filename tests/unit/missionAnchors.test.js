@@ -17,6 +17,7 @@ import { baseMission, makeMissionGm, runTicks, statusOf, teleport } from './help
  */
 const clone = (o) => JSON.parse(JSON.stringify(o));
 const MUNDO7 = ['duelo-continental-1', 'duelo-continental-2', 'duelo-continental-3', 'ilha-unica-1', 'ilha-unica-2', 'ilha-unica-3'];
+const CAMPANHA = ['camp-01-baia-de-aurelan', 'camp-02-pouso-do-encontro', 'camp-03-pedra-mae']; // M2-03: mapas de campanha (com âncoras)
 const PRIMARY = { id: 'o', type: 'survive', priority: 'primary', seconds: 99999, title: 't' };
 const withSetup = (setup, over = {}) => baseMission({ autoVictory: false, objectives: [PRIMARY], setup, ...over });
 const spawnAt = (pt) => ({ type: 'spawn', owner: 'player', unitType: 'villager', count: 1, ...pt });
@@ -67,7 +68,7 @@ describe('âncoras no mapa: padrão derivado de slots, recursos, florestas, acam
 
   it('mapas antigos (campanha clássica e escaramuça) continuam sem âncoras', () => {
     for (const m of listMaps({ includeHidden: true })) {
-      if (!MUNDO7.includes(m.id)) expect(m.anchors, m.id).toBeUndefined();
+      if (!MUNDO7.includes(m.id) && !CAMPANHA.includes(m.id)) expect(m.anchors, m.id).toBeUndefined();
     }
   });
 });

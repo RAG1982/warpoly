@@ -28,6 +28,7 @@ export function finalizeSurface(map) {
   const height = new Float32Array(N);
   const biome = new Uint8Array(N);
   const seed = map.options.seed | 0;
+  const mountainK = map.options.mountain ?? 1; // M2-03: escala da cordilheira do continente exuberante (1 = como sempre; < 1 = colinas, sem neve nas bases)
   const lv = map.lava;
   const dLava = lv ? distanceTransform(lv.mask, G) : null;
   for (let j = 0; j < G; j++) {
@@ -50,7 +51,7 @@ export function finalizeSurface(map) {
       const nz2 = fbm(x * 0.11 + 40, z * 0.11 - 9, seed + 33, 3);
       const zn = (z - e.cz) / (e.rz || 1);
       if (e.biome === 'lush') {
-        const mount = lushMountain(e, x, z, dd, seed);
+        const mount = lushMountain(e, x, z, dd, seed) * mountainK;
         h += mount * 3.4;
         b = h > 4.0 ? BIOME.SNOW : h > 3.35 ? BIOME.ROCK : (zn > 0.12 && nz > 0.5) ? BIOME.SAVANNA : nz2 > 0.56 && dd > 4 ? BIOME.FOREST : BIOME.GRASS;
       } else if (e.biome === 'arid') {

@@ -3,6 +3,7 @@ import { getMap, listMaps, loadAllCampaignMaps } from '../../src/data/maps/index
 import { validateMapDef } from '../../src/data/maps/validate.js';
 import { buildPathfinder, floodFill, isReached } from '../../src/data/maps/generator.js';
 import { getHeightForMap } from '../../src/sim/terrainGenerators.js';
+import { Pathfinder } from '../../src/sim/Pathfinder.js';
 import { TILESETS } from '../../src/data/tilesets.js';
 import { decodeBiomeGrid, getBiomeAt, BIOME } from '../../src/data/maps/biome.js';
 import { isLavaAt, decodeLavaGrid, encodeLavaGrid } from '../../src/data/maps/lava.js';
@@ -215,7 +216,8 @@ describe('M2-05 · Fornalha (palco 8)', () => {
       for (let j = 0; j < n; j++) for (let i = 0; i < n; i++) if (Math.hypot(i - half - p.x, j - half - p.z) <= 8) g[j * n + i] = 1;
     }
     closed.lavaGrid = { ...closed.lavaGrid, data: encodeLavaGrid(g) };
-    const land2 = buildPathfinder(closed, 'land');
+    // o Pathfinder lê a altura (a lava assada vale 0,4): a lava nova também baixa o chão a 0,4
+    const land2 = new Pathfinder({ mapDef: closed, getHeight: (x, z) => (isLavaAt(closed, x, z) ? 0.4 : getHeightForMap(closed, x, z)) }, closed.playable / 2, 1.5, 'land');
     const seenW = floodFill(land2, s0.x, s0.z);
     const seenE = floodFill(land2, s1.x, s1.z);
     expect(isReached(land2, seenW, s1.x, s1.z)).toBe(false);

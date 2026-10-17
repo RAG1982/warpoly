@@ -19,10 +19,10 @@ export const coastMapId = (presetId, seed) => `mundo-${presetId}-${seed}`;
 
 /**
  * @param {string|object} presetOrId  id de `COAST_PRESETS` (ou um preset)
- * @param {{ seed?: number, tries?: number, id?: string, name?: string, tileset?: string }} [opts]
+ * @param {{ seed?: number, tries?: number, id?: string, name?: string, tileset?: string, woodTarget?: number }} [opts]  `woodTarget` (M2-05): meta de madeira por base (padrão 8000; exceção das ilhas pedregosa/gelada/deserta/vulcânica)
  * @returns {{ ok: boolean, preset: string, requestedSeed: number, seed: number|null, attempts: {seed:number, stage:string, failures:string[]}[], map?: object, baked?: object, plan?: object, mapDef?: object, verification?: object }}
  */
-export function buildCoastWorld(presetOrId, { seed = 1, tries = 10, id = null, name = null, tileset = null } = {}) {
+export function buildCoastWorld(presetOrId, { seed = 1, tries = 10, id = null, name = null, tileset = null, woodTarget = undefined } = {}) {
   const preset = getCoastPreset(presetOrId);
   const attempts = [];
   for (let k = 0; k < tries; k++) {
@@ -32,7 +32,7 @@ export function buildCoastWorld(presetOrId, { seed = 1, tries = 10, id = null, n
     if (!geo.ok) { attempts.push({ seed: s, stage: 'geografia', failures: geo.failures }); continue; }
     const playable = map.size - 12;
     const baked = bakeTerrain(map, { cell: 1 });
-    const plan = planLayout(map, baked, { ...preset.layout, naval: preset.naval }, { playable, seed: s });
+    const plan = planLayout(map, baked, { ...preset.layout, naval: preset.naval }, { playable, seed: s, woodTarget });
     if (!plan.ok) { attempts.push({ seed: s, stage: 'layout', failures: plan.failures }); continue; }
     const mapDef = bakeToMapDef(map, {
       id: id ?? coastMapId(preset.id, seed), name: name ?? preset.name, tileset: tileset ?? preset.tileset, cell: 1, playable,
@@ -41,7 +41,7 @@ export function buildCoastWorld(presetOrId, { seed = 1, tries = 10, id = null, n
     });
     mapDef.anchors = defaultAnchors(mapDef); // M2-01: pontos nomeados para as missões (entre `neutrals` e `meta`)
     mapDef.meta = { generator: 'coast', preset: preset.id, seed, seedUsed: s };
-    const world = verifyCoastWorld(mapDef, { naval: preset.naval });
+    const world = verifyCoastWorld(mapDef, { naval: preset.naval, woodTarget });
     if (!world.ok) { attempts.push({ seed: s, stage: 'mundo', failures: world.failures }); continue; }
     return { ok: true, preset: preset.id, requestedSeed: seed, seed: s, attempts, map, baked, plan, mapDef, verification: { geo, world } };
   }

@@ -45,7 +45,8 @@ export function generateLava(map, root) {
   for (let attempt = 0; attempt < 80; attempt++) {
     const wig = attempt < 40 ? 1 : attempt < 65 ? 0.5 : 0;
     const S = o.lavaStreams > 0 ? o.lavaStreams : (rng.next() < 0.45 ? 2 : 1);
-    const theta = rng.range(0, Math.PI);
+    const thetaRoll = rng.range(0, Math.PI);
+    const theta = o.lavaTheta ?? thetaRoll; // M2-05: `lavaTheta` (rad) fixa a direção do fluxo; o sorteio é consumido igual (mapas antigos inalterados)
     const offs = S === 1 ? [rng.range(-0.15, 0.15) * R] : (() => { const s = rng.range(0.28, 0.36) * R; return [-s, s]; })();
     const mask = new Uint8Array(N), passage = new Uint8Array(N);
     const streams = [];

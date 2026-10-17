@@ -46,6 +46,27 @@ export const CAMPAIGN_PRESETS = freeze({
     options: freeze({ size: 176, grid: 176, continents: 1, continentBiome: 'rocky', continentDims: [0.44, 0.36], islands: 0, islets: 0, bays: 3, peninsulas: 3, roughness: 1.15, lava: false, rivers: 0 }),
     layout: freeze({ bases: [{ entities: [0], side: 'west' }, { entities: [0], side: 'east' }], minSeparation: 66 }),
     verify: freeze({ landRange: [0.25, 0.8], minRivers: 0 })
+  }),
+  /** Palco 7 (M2-05): continente pantanoso com canais (rio com vaus), base do jogador a oeste e do aliado que trai a leste; o Salão inimigo vem por âncora. */
+  'camp-07-brejo-mudo': freeze({
+    id: 'camp-07-brejo-mudo', name: 'Brejo Mudo', uso: 'campanha, palco 7 (Liga e Clãs)', tileset: 'pantano', naval: false,
+    options: freeze({ size: 176, grid: 176, continents: 1, continentBiome: 'swamp', continentDims: [0.44, 0.36], islands: 0, islets: 0, bays: 3, peninsulas: 3, roughness: 1.0, lava: false, rivers: 1 }),
+    layout: freeze({ bases: [{ entities: [0], side: 'west' }, { entities: [0], side: 'east' }], minSeparation: 66 }),
+    verify: freeze({ landRange: [0.25, 0.8], minRivers: 1 })
+  }),
+  /** Palco 8 (M2-05): ilha vulcânica pequena (jogável ≤ 128 u) cortada por UM rio de lava norte-sul com passagens de rocha; Liga a oeste, Clãs (forja e santuário) a leste. */
+  'camp-08-fornalha': freeze({
+    id: 'camp-08-fornalha', name: 'Fornalha', uso: 'campanha, palco 8 (Liga e Clãs)', tileset: 'vulcanico', naval: true, woodTarget: 5000,
+    options: freeze({ size: 140, grid: 140, continents: 1, continentBiome: 'volcanic', continentDims: [0.42, 0.36], islands: 0, islets: 0, bays: 2, peninsulas: 2, roughness: 0.8, lava: true, lavaStreams: 1, lavaTheta: Math.PI / 2, lavaWidth: [4, 6], rivers: 0 }),
+    layout: freeze({ bases: [{ entities: [0], side: 'west' }, { entities: [0], side: 'east' }], minSeparation: 50 }),
+    verify: freeze({ landRange: [0.25, 0.8], minRivers: 0 })
+  }),
+  /** Palco 9 (M2-05): ilha deserta com dunas e três poços no meio; cabeça de ponte a oeste e base inimiga a leste. */
+  'camp-09-miragem': freeze({
+    id: 'camp-09-miragem', name: 'Miragem', uso: 'campanha, palco 9 (Liga e Clãs)', tileset: 'deserto', naval: false,
+    options: freeze({ size: 176, grid: 176, continents: 1, continentBiome: 'arid', continentDims: [0.44, 0.36], islands: 0, islets: 0, bays: 3, peninsulas: 3, roughness: 1.0, lava: false, rivers: 0 }),
+    layout: freeze({ bases: [{ entities: [0], side: 'west' }, { entities: [0], side: 'east' }], minSeparation: 66 }),
+    verify: freeze({ landRange: [0.25, 0.8], minRivers: 0 })
   })
 });
 
@@ -55,7 +76,10 @@ export const CAMPAIGN_IDS = Object.freeze(Object.keys(CAMPAIGN_PRESETS));
 export const CAMPAIGN_NAMES = freeze({
   'camp-01-baia-de-aurelan': { pt: 'Baía de Aurelan', en: 'Aurelan Bay' },
   'camp-02-pouso-do-encontro': { pt: 'Pouso do Encontro', en: 'Meeting Landing' },
-  'camp-03-pedra-mae': { pt: 'Pedra-Mãe', en: 'Mother Rock' }
+  'camp-03-pedra-mae': { pt: 'Pedra-Mãe', en: 'Mother Rock' },
+  'camp-07-brejo-mudo': { pt: 'Brejo Mudo', en: 'Mute Marsh' },
+  'camp-08-fornalha': { pt: 'Fornalha', en: 'The Furnace' },
+  'camp-09-miragem': { pt: 'Miragem', en: 'Mirage' }
 });
 
 // ---------------------------------------------------------------------------------------------------------------------------
@@ -307,7 +331,7 @@ function postPedra(ctx, extra) {
   extra.landingZone = extra.beach1; // praia da primeira onda (o `landingZone` padrão é só uma sugestão)
 }
 
-const POST = freeze({ 'camp-01-baia-de-aurelan': postBaia, 'camp-02-pouso-do-encontro': postPouso, 'camp-03-pedra-mae': postPedra });
+const POST = freeze({ 'camp-01-baia-de-aurelan': postBaia, 'camp-02-pouso-do-encontro': postPouso, 'camp-03-pedra-mae': postPedra, 'camp-07-brejo-mudo': () => {}, 'camp-08-fornalha': () => {}, 'camp-09-miragem': () => {} });
 
 // ---------------------------------------------------------------------------------------------------------------------------
 // Montagem
@@ -322,7 +346,7 @@ export function buildCampaignMap(id, { seed = 1, tries = 12 } = {}) {
   if (!preset) throw new Error(`campanha: mapa desconhecido "${id}" (${CAMPAIGN_IDS.join(', ')})`);
   const attempts = [];
   for (let k = 0; k < tries; k++) {
-    const world = buildCoastWorld(preset, { seed: seed + k, tries: 1, id, name: CAMPAIGN_NAMES[id].pt });
+    const world = buildCoastWorld(preset, { seed: seed + k, tries: 1, id, name: CAMPAIGN_NAMES[id].pt, woodTarget: preset.woodTarget });
     if (!world.ok) { attempts.push({ seed: seed + k, stage: world.attempts[0]?.stage ?? 'mundo', failures: world.attempts[0]?.failures ?? [] }); continue; }
     try {
       const out = finish(id, world, seed + k);

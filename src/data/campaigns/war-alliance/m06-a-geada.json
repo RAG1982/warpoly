@@ -8,8 +8,8 @@
     "en": "The Frost"
   },
   "subtitle": {
-    "pt-BR": "Aliança, missão 6",
-    "en": "Alliance, mission 6"
+    "pt-BR": "Liga de Aurelan, missão 6",
+    "en": "Aurelan League, mission 6"
   },
   "briefing": {
     "speaker": {
@@ -34,8 +34,8 @@
     {
       "id": 0,
       "name": {
-        "pt-BR": "Aliança de Aurelan",
-        "en": "Aurelan Alliance"
+        "pt-BR": "Liga de Aurelan",
+        "en": "Aurelan League"
       },
       "factionId": "human",
       "team": 0,

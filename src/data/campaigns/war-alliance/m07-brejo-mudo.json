@@ -8,8 +8,8 @@
     "en": "Silent Marsh"
   },
   "subtitle": {
-    "pt-BR": "Aliança, missão 7",
-    "en": "Alliance, mission 7"
+    "pt-BR": "Liga de Aurelan, missão 7",
+    "en": "Aurelan League, mission 7"
   },
   "briefing": {
     "speaker": {
@@ -34,8 +34,8 @@
     {
       "id": 0,
       "name": {
-        "pt-BR": "Aliança de Aurelan",
-        "en": "Aurelan Alliance"
+        "pt-BR": "Liga de Aurelan",
+        "en": "Aurelan League"
       },
       "factionId": "human",
       "team": 0,

@@ -8,8 +8,8 @@
     "en": "Tide of Pitch"
   },
   "subtitle": {
-    "pt-BR": "Horda, missão 4",
-    "en": "Horde, mission 4"
+    "pt-BR": "Clãs do Cinzal, missão 4",
+    "en": "Cinzal Clans, mission 4"
   },
   "briefing": {
     "speaker": {
@@ -34,8 +34,8 @@
     {
       "id": 0,
       "name": {
-        "pt-BR": "Horda do Cinzal",
-        "en": "Cinzal Horde"
+        "pt-BR": "Clãs do Cinzal",
+        "en": "Cinzal Clans"
       },
       "factionId": "orc",
       "team": 0,

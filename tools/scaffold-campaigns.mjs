@@ -375,7 +375,7 @@ function generateCampaign(faction, missions, dir, campId, campTitle, campSub, ca
       mapId: m.mapId,
       seed: 9000 + m.num * 17,
       players: [
-        { id: 0, name: { 'pt-BR': faction === 'human' ? 'Aliança de Aurelan' : 'Horda do Cinzal', en: faction === 'human' ? 'Aurelan Alliance' : 'Cinzal Horde' }, factionId: faction, team: 0, color: faction === 'human' ? '#2563eb' : '#dc2626', isLocal: true, startSlot: 0 },
+        { id: 0, name: { 'pt-BR': faction === 'human' ? 'Liga de Aurelan' : 'Clãs do Cinzal', en: faction === 'human' ? 'Aurelan League' : 'Cinzal Clans' }, factionId: faction, team: 0, color: faction === 'human' ? '#2563eb' : '#dc2626', isLocal: true, startSlot: 0 },
         { id: 1, name: { 'pt-BR': faction === 'human' ? 'Clãs do Cinzal' : 'Tropas de Aurelan', en: faction === 'human' ? 'Cinzal Clans' : 'Aurelan Troops' }, factionId: faction === 'human' ? 'orc' : 'human', team: 1, color: faction === 'human' ? '#dc2626' : '#2563eb', isAI: true, startSlot: 1 }
       ],
       startingResources: { wood: 400, gold: 400, stone: 150 },
@@ -425,8 +425,8 @@ generateCampaign(
   ALLIANCE_MISSIONS,
   ALLIANCE_DIR,
   'war-alliance',
-  { 'pt-BR': 'A Guerra do Mar Fendido (Aliança)', en: 'The Sundered Sea War (Alliance)' },
-  { 'pt-BR': 'A Marcha da Aliança de Aurelan (12 missões)', en: 'The March of the Aurelan Alliance (12 missions)' },
+  { 'pt-BR': 'A Guerra do Mar Fendido (Liga de Aurelan)', en: 'The Sundered Sea War (Aurelan League)' },
+  { 'pt-BR': 'A Marcha de Aurelan (12 missões)', en: 'The March of Aurelan (12 missions)' },
   {
     'pt-BR': 'O planeta Ondara despertou para a Guerra do Mar Fendido. Conduza os exércitos de Aurelan através dos Estilhaços, domine as ilhas estratégicas e estabeleça o Bastião supremo em Cinzara.',
     en: 'The world of Ondara has awakened to the Sundered Sea War. Lead the armies of Aurelan through the Shards, claim strategic islands, and establish the supreme Bastion in Cinzara.'
@@ -448,7 +448,7 @@ generateCampaign(
         en: 'Marshal Dorian and Captain Brann guard the strait; the Alliance victory is engraved in the stones of the sea.'
       }
     ],
-    credits: { 'pt-BR': 'Fim da Marcha da Aliança', en: 'End of the Alliance March' }
+    credits: { 'pt-BR': 'Fim da Marcha de Aurelan', en: 'End of the March of Aurelan' }
   }
 );
 
@@ -457,7 +457,7 @@ generateCampaign(
   HORDE_MISSIONS,
   HORDE_DIR,
   'war-horde',
-  { 'pt-BR': 'A Guerra do Mar Fendido (Horda)', en: 'The Sundered Sea War (Horde)' },
+  { 'pt-BR': 'A Guerra do Mar Fendido (Clãs do Cinzal)', en: 'The Sundered Sea War (Cinzal Clans)' },
   { 'pt-BR': 'O Caminho das Brasas do Cinzal (12 missões)', en: 'The Ember Road of the Cinzal (12 missions)' },
   {
     'pt-BR': 'A terra seca de Cinzara não perdoa. O chefe-de-brasa Skarn uniu os clãs para atravessar o Mar Fendido, tomar os Estilhaços e erguer a Cidadela de Ferro no continente verde.',

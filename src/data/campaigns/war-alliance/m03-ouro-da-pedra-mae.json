@@ -8,8 +8,8 @@
     "en": "Gold of the Mother Stone"
   },
   "subtitle": {
-    "pt-BR": "Aliança, missão 3",
-    "en": "Alliance, mission 3"
+    "pt-BR": "Liga de Aurelan, missão 3",
+    "en": "Aurelan League, mission 3"
   },
   "briefing": {
     "speaker": {
@@ -34,8 +34,8 @@
     {
       "id": 0,
       "name": {
-        "pt-BR": "Aliança de Aurelan",
-        "en": "Aurelan Alliance"
+        "pt-BR": "Liga de Aurelan",
+        "en": "Aurelan League"
       },
       "factionId": "human",
       "team": 0,

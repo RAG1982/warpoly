@@ -8,8 +8,8 @@
     "en": "Landing at Cape Aurora"
   },
   "subtitle": {
-    "pt-BR": "Horda, missão 10",
-    "en": "Horde, mission 10"
+    "pt-BR": "Clãs do Cinzal, missão 10",
+    "en": "Cinzal Clans, mission 10"
   },
   "briefing": {
     "speaker": {
@@ -34,8 +34,8 @@
     {
       "id": 0,
       "name": {
-        "pt-BR": "Horda do Cinzal",
-        "en": "Cinzal Horde"
+        "pt-BR": "Clãs do Cinzal",
+        "en": "Cinzal Clans"
       },
       "factionId": "orc",
       "team": 0,

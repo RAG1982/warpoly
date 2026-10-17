@@ -8,8 +8,8 @@
     "en": "Mirage"
   },
   "subtitle": {
-    "pt-BR": "Aliança, missão 9",
-    "en": "Alliance, mission 9"
+    "pt-BR": "Liga de Aurelan, missão 9",
+    "en": "Aurelan League, mission 9"
   },
   "briefing": {
     "speaker": {
@@ -34,8 +34,8 @@
     {
       "id": 0,
       "name": {
-        "pt-BR": "Aliança de Aurelan",
-        "en": "Aurelan Alliance"
+        "pt-BR": "Liga de Aurelan",
+        "en": "Aurelan League"
       },
       "factionId": "human",
       "team": 0,

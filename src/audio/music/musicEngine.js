@@ -60,7 +60,7 @@ const QUALITY = Object.freeze({ M: 'maj', m: 'min', d: 'dim', a: 'aug', s: 'sus4
 /** Empilhamentos (semitons somados a cada nota de um `pattern` com `stack`). */
 const STACKS = Object.freeze({
   fifths: [0, 7, 12], // quintas e oitavas: o som de metais militares (na execução usa a quinta do acorde)
-  tritone: [0, 6, 12], // trítono: ameaça (Horda)
+  tritone: [0, 6, 12], // trítono: ameaça (Clãs do Cinzal)
   octaves: [0, 12]
 });
 

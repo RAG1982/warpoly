@@ -4,7 +4,7 @@
   "id": "alliance-08-queda-do-cinzal",
   "hidden": true,
   "title": { "pt-BR": "A Queda do Cinzal", "en": "The Fall of the Cinzal" },
-  "subtitle": { "pt-BR": "Aliança, missão 8", "en": "Alliance, mission 8" },
+  "subtitle": { "pt-BR": "Liga de Aurelan, missão 8", "en": "Aurelan League, mission 8" },
   "briefing": {
     "speaker": { "pt-BR": "Marechal Dorian Vasques", "en": "Marshal Dorian Vasques" },
     "portrait": "🛡️",
@@ -25,7 +25,7 @@
   "players": [
     { "id": 0, "name": { "pt-BR": "Exército de Aurelan", "en": "Army of Aurelan" }, "factionId": "human", "team": 0, "color": "#2563eb", "isLocal": true, "startSlot": 0 },
     { "id": 1, "name": { "pt-BR": "Guarda Real", "en": "Royal Guard" }, "factionId": "human", "team": 0, "color": "#16a34a", "isAI": true, "startSlot": 3, "difficulty": "normal" },
-    { "id": 2, "name": { "pt-BR": "Horda do Cinzal", "en": "Cinzal Horde" }, "factionId": "orc", "team": 1, "color": "#dc2626", "isAI": true, "startSlot": 2, "difficulty": "normal" },
+    { "id": 2, "name": { "pt-BR": "Clãs do Cinzal", "en": "Cinzal Clans" }, "factionId": "orc", "team": 1, "color": "#dc2626", "isAI": true, "startSlot": 2, "difficulty": "normal" },
     { "id": 3, "name": { "pt-BR": "Clã das Lanças Quebradas", "en": "Broken Spear Clan" }, "factionId": "orc", "team": 1, "color": "#ea580c", "isAI": true, "startSlot": 1, "difficulty": "easy" }
   ],
   "startingResources": { "wood": 600, "gold": 600, "stone": 300 },

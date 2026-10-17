@@ -4,7 +4,7 @@
  * (tudo sintetizado, sem samples).
  *
  * ESTILO (feedback do dono): música ANIMADA, um pouco MILITAR e URGENTE, como a de Warcraft II.
- *  - Reino (Aliança): fanfarra heroica em modo maior/dórico — trompetes, metais em quintas/oitavas, pífaro, caixas e bumbo.
+ *  - Reino (Liga de Aurelan): fanfarra heroica em modo maior/dórico — trompetes, metais em quintas/oitavas, pífaro, caixas e bumbo.
  *  - Horda: percussão pesada (taiko/tambores), trompa de guerra, metais em trítono, modo frígio (2ª menor + 5ª diminuta).
  *  - As 3 primeiras variações de cada família (paz/combate × facção) são as CLÁSSICAS deste arquivo; as demais (candidatas
  *    novas) vêm de `tracksHuman.js`, `tracksOrc.js` e `tracksTitle.js`. O catálogo (`catalog.js`) diz quais tocam no jogo.

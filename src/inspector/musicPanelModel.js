@@ -46,7 +46,7 @@ export function metaLine(e) {
 /** Descrição completa para o cartão do player. */
 export function describeTrack(e) {
   if (!e) return null;
-  const faction = e.faction === 'human' ? 'Reino (Aliança)' : e.faction === 'orc' ? 'Horda' : 'Neutra';
+  const faction = e.faction === 'human' ? 'Reino (Liga de Aurelan)' : e.faction === 'orc' ? 'Horda' : 'Neutra';
   const cat = { title: 'Abertura', peace: 'Paz', combat: 'Combate', victory: 'Vitória', defeat: 'Derrota' }[e.category] || e.category;
   return {
     id: e.id,

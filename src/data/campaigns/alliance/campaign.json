@@ -7,7 +7,7 @@
   "order": 3,
   "betaLabel": { "pt-BR": "Campanha Clássica (beta)", "en": "Classic Campaign (beta)" },
   "provisional": true,
-  "title": {"pt-BR": "A Marcha da Aliança", "en": "The Alliance March"},
+  "title": {"pt-BR": "A Marcha de Aurelan", "en": "The March of Aurelan"},
   "subtitle": {"pt-BR": "Campanha do Reino de Aurelan (premissa provisória)", "en": "Kingdom of Aurelan campaign (provisional premise)"},
   "premise": {
     "pt-BR": "O Reino de Aurelan vive em paz há três gerações. Então os Clãs do Cinzal, expulsos de suas terras áridas além das Montanhas do Véu, se unem sob o chefe-de-brasa Skarn e descem sobre os vales. Sob o comando do Marechal Dorian Vasques, da Capitã Lyra Ventosa e da Rainha Sevelin, o reino precisa deter a vanguarda, libertar os cativos, resistir no Estreito de Alvorada, reabrir o Rio Turvo, armar-se, retomar as ilhas, sobreviver à traição de um falso aliado e, por fim, marchar sobre o próprio Planalto do Cinzal.",
@@ -26,7 +26,7 @@
       { "pt-BR": "A ameaça acabou, e o Reino de Aurelan amanheceu livre. A paz agora tem o preço da coragem de quem a defendeu, e nunca será esquecida.",
         "en": "The threat is over, and the Kingdom of Aurelan woke up free. Peace now bears the price of the courage of those who defended it, and it shall never be forgotten." }
     ],
-    "credits": { "pt-BR": "Fim da Marcha da Aliança", "en": "End of the Alliance March" }
+    "credits": { "pt-BR": "Fim da Marcha de Aurelan", "en": "End of the March of Aurelan" }
   },
   "heroes": [],
   "missions": [

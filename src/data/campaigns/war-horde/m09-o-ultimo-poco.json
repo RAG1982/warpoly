@@ -8,8 +8,8 @@
     "en": "The Last Well"
   },
   "subtitle": {
-    "pt-BR": "Horda, missão 9",
-    "en": "Horde, mission 9"
+    "pt-BR": "Clãs do Cinzal, missão 9",
+    "en": "Cinzal Clans, mission 9"
   },
   "briefing": {
     "speaker": {
@@ -34,8 +34,8 @@
     {
       "id": 0,
       "name": {
-        "pt-BR": "Horda do Cinzal",
-        "en": "Cinzal Horde"
+        "pt-BR": "Clãs do Cinzal",
+        "en": "Cinzal Clans"
       },
       "factionId": "orc",
       "team": 0,

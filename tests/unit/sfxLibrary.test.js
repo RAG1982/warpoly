@@ -52,7 +52,7 @@ describe('variantes: 3–4 por golpe, sorteadas pelo RNG de áudio (nunca Math.r
     }
   });
 
-  it('metal: lâmina, escudo e armadura diferem; aço (Aliança) difere de ferro (Horda)', () => {
+  it('metal: lâmina, escudo e armadura diferem; aço (Liga de Aurelan) difere de ferro (Clãs do Cinzal)', () => {
     const r = (opts) => hash(renderRecipe(LIBRARY.metalHit, { v: 1, ...opts }, { seed: 3 }).data);
     expect(new Set(METAL_KINDS.map((kind) => r({ kind }))).size).toBe(3);
     expect(r({ kind: 'blade', variant: 'steel' })).not.toBe(r({ kind: 'blade', variant: 'iron' }));

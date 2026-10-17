@@ -8,8 +8,8 @@
     "en": "Pitch Shallows"
   },
   "subtitle": {
-    "pt-BR": "Aliança, missão 4",
-    "en": "Alliance, mission 4"
+    "pt-BR": "Liga de Aurelan, missão 4",
+    "en": "Aurelan League, mission 4"
   },
   "briefing": {
     "speaker": {
@@ -34,8 +34,8 @@
     {
       "id": 0,
       "name": {
-        "pt-BR": "Aliança de Aurelan",
-        "en": "Aurelan Alliance"
+        "pt-BR": "Liga de Aurelan",
+        "en": "Aurelan League"
       },
       "factionId": "human",
       "team": 0,

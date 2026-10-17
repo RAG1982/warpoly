@@ -6,12 +6,12 @@
   "track": "main",
   "order": 1,
   "title": {
-    "pt-BR": "A Guerra do Mar Fendido (Aliança)",
-    "en": "The Sundered Sea War (Alliance)"
+    "pt-BR": "A Guerra do Mar Fendido (Liga de Aurelan)",
+    "en": "The Sundered Sea War (Aurelan League)"
   },
   "subtitle": {
-    "pt-BR": "A Marcha da Aliança de Aurelan (12 missões)",
-    "en": "The March of the Aurelan Alliance (12 missions)"
+    "pt-BR": "A Marcha de Aurelan (12 missões)",
+    "en": "The March of Aurelan (12 missions)"
   },
   "premise": {
     "pt-BR": "O planeta Ondara despertou para a Guerra do Mar Fendido. Conduza os exércitos de Aurelan através dos Estilhaços, domine as ilhas estratégicas e estabeleça o Bastião supremo em Cinzara.",
@@ -38,8 +38,8 @@
       }
     ],
     "credits": {
-      "pt-BR": "Fim da Marcha da Aliança",
-      "en": "End of the Alliance March"
+      "pt-BR": "Fim da Marcha de Aurelan",
+      "en": "End of the March of Aurelan"
     }
   },
   "missions": [

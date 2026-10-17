@@ -74,9 +74,9 @@ const INFO = {
 /** Fanfarras curtas (sfx): `sfx` é o nome em `sfxRecipes.js`. */
 const SFX_INFO = [
   { id: 'victory_human', title: 'Fanfarra de Vitória (Reino)', category: 'victory', faction: 'human', sfx: 'victoryFanfareHuman', mode: 'major', description: 'Arpejo ascendente de metais e acorde final de dó maior (tela final da campanha).', inGame: true },
-  { id: 'victory_orc', title: 'Fanfarra de Vitória (Horda)', category: 'victory', faction: 'orc', sfx: 'victoryFanfareOrc', mode: 'minor', description: 'Metais graves em lá menor que terminam numa quinta vazia, com golpe de tambor.', inGame: true },
+  { id: 'victory_orc', title: 'Fanfarra de Vitória (Clãs do Cinzal)', category: 'victory', faction: 'orc', sfx: 'victoryFanfareOrc', mode: 'minor', description: 'Metais graves em lá menor que terminam numa quinta vazia, com golpe de tambor.', inGame: true },
   { id: 'defeat_human', title: 'Derrota (Reino)', category: 'defeat', faction: 'human', sfx: 'defeatHuman', mode: 'minor', seconds: 3, description: 'Trompete que desce (mi–ré–dó–si) e se apaga num acorde de lá menor.', inGame: true, candidate: false },
-  { id: 'defeat_orc', title: 'Derrota (Horda)', category: 'defeat', faction: 'orc', sfx: 'defeatOrc', mode: 'phrygian', seconds: 3, description: 'Metais graves em trítono descendente, bordão que desaba de altura e um último golpe de tambor.', inGame: true, candidate: false }
+  { id: 'defeat_orc', title: 'Derrota (Clãs do Cinzal)', category: 'defeat', faction: 'orc', sfx: 'defeatOrc', mode: 'phrygian', seconds: 3, description: 'Metais graves em trítono descendente, bordão que desaba de altura e um último golpe de tambor.', inGame: true, candidate: false }
 ];
 
 // ------------------------------------------------------------------------------------------------ montagem

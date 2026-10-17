@@ -8,8 +8,8 @@
     "en": "Landing of the Meeting"
   },
   "subtitle": {
-    "pt-BR": "Aliança, missão 2",
-    "en": "Alliance, mission 2"
+    "pt-BR": "Liga de Aurelan, missão 2",
+    "en": "Aurelan League, mission 2"
   },
   "briefing": {
     "speaker": {
@@ -34,8 +34,8 @@
     {
       "id": 0,
       "name": {
-        "pt-BR": "Aliança de Aurelan",
-        "en": "Aurelan Alliance"
+        "pt-BR": "Liga de Aurelan",
+        "en": "Aurelan League"
       },
       "factionId": "human",
       "team": 0,

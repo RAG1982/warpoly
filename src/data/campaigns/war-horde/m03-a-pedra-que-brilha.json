@@ -8,8 +8,8 @@
     "en": "The Shining Stone"
   },
   "subtitle": {
-    "pt-BR": "Horda, missão 3",
-    "en": "Horde, mission 3"
+    "pt-BR": "Clãs do Cinzal, missão 3",
+    "en": "Cinzal Clans, mission 3"
   },
   "briefing": {
     "speaker": {
@@ -34,8 +34,8 @@
     {
       "id": 0,
       "name": {
-        "pt-BR": "Horda do Cinzal",
-        "en": "Cinzal Horde"
+        "pt-BR": "Clãs do Cinzal",
+        "en": "Cinzal Clans"
       },
       "factionId": "orc",
       "team": 0,

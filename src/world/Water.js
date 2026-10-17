@@ -183,10 +183,17 @@ export class Water {
    * 2. Translucent Animated Surface Mesh with Caustic Ripples & Low-Poly Wave Facets
    */
   createWaterMesh() {
-    const size = 150;
-    const segments = 64;
+    // M1-01: os 150 u fixos cobriam só o miolo dos mapas de 224 u (borda reta turquesa × azul-escuro à vista); agora a lâmina
+    // acompanha o mapa (mesma densidade de vértices e a mesma escala da textura de ondas dos mapas de ≤ 150 u).
+    const mapSize = (this.terrain && this.terrain.mapDef && this.terrain.mapDef.size) || 0;
+    const size = Math.max(150, mapSize + 8);
+    const segments = Math.round((64 * size) / 150);
     const geo = new THREE.PlaneGeometry(size, size, segments, segments);
     geo.rotateX(-Math.PI / 2);
+    if (size > 150) {
+      const uv = geo.attributes.uv;
+      for (let i = 0; i < uv.count; i++) uv.setXY(i, ((uv.getX(i) - 0.5) * size) / 150 + 0.5, ((uv.getY(i) - 0.5) * size) / 150 + 0.5);
+    }
 
     this.initialPositions = geo.attributes.position.array.slice();
 

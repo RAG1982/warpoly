@@ -14,7 +14,7 @@
  * GPU real obrigatória (assertHardwareGpu). 1920x1080, `?texq=low` (menu) e `?skipPreload&texq=low&play` (partidas). Sobe o próprio Vite (porta 5311,
  * `--strictPort`), UMA página por vez; browser e Vite fechados no `finally`.
  * Saída em tools/ui-captures/novo-mundo/: fichas JPEG (várias capturas por imagem) + resultado.json.
- * Variáveis: NM_PORT (porta), NM_ONLY_MAPS (lista separada por vírgula), CAPTURE_TMP (temporários).
+ * Variáveis: NM_TEXQ (low|high; padrão low), NM_PORT (porta), NM_ONLY_MAPS (lista separada por vírgula), CAPTURE_TMP (temporários).
  */
 import { chromium } from 'playwright';
 import { createServer } from 'vite';
@@ -34,6 +34,8 @@ const ALL_MAPS = ['duelo-continental-1', 'duelo-continental-2', 'duelo-continent
 const MAPS = process.env.NM_ONLY_MAPS ? process.env.NM_ONLY_MAPS.split(',') : ALL_MAPS;
 const ARGS = ['--use-angle=vulkan', '--enable-features=Vulkan', '--enable-gpu', '--ignore-gpu-blocklist',
   '--js-flags=--max-old-space-size=2048', '--renderer-process-limit=1', '--disable-dev-shm-usage', '--disable-extensions'];
+const TEXQ = process.env.NM_TEXQ || 'low'; // NM_TEXQ=high: mesma captura com texturas de qualidade alta (compara a nitidez)
+const SUFFIX = TEXQ === 'low' ? '' : `-texq-${TEXQ}`;
 const VIEWPORT = { width: 1920, height: 1080 };
 
 const result = { when: new Date().toISOString(), viewport: VIEWPORT, renderer: null, phases: PHASES, menu: {}, maps: {}, lava: {}, checks: [], consoleErrors: [], files: [] };
@@ -46,7 +48,7 @@ function check(name, ok, extra = '') {
 
 /** Monta uma ficha (JPEG) com várias capturas e rótulos; `panels`: { file, label, crop? }. */
 function sheet(outName, panels, { cols = 2, panelW = 960, quality = 80 } = {}) {
-  const out = path.join(OUT, outName);
+  const out = path.join(OUT, outName.replace(/\.jpg$/, `${SUFFIX}.jpg`));
   const spec = JSON.stringify({ out, cols, panelW, quality, panels });
   execFileSync('python3', ['-I', '-c', `
 import sys, json
@@ -381,7 +383,7 @@ try {
   if (PHASES.includes('mapas')) {
     for (const mapId of MAPS) {
       console.log(`\n=== ${mapId}`);
-      const { ctx, page, errors } = await openPage(`/?skipPreload&texq=low&play&map=${mapId}&faction=human`, { ready: GAME_READY });
+      const { ctx, page, errors } = await openPage(`/?skipPreload&texq=${TEXQ}&play&map=${mapId}&faction=human`, { ready: GAME_READY });
       await page.waitForTimeout(2500);
       const M = (result.maps[mapId] = { errors: [] });
       try {
@@ -390,7 +392,7 @@ try {
           const def = gm.terrain.mapDef;
           const me = gm.players.find((p) => !p.isAI) || gm.players[0];
           const hq = gm.buildings.find((b) => b.ownerId === me.id && /hq|townhall|castle/i.test(b.type || b.typeId || ''));
-          return { mapId: gm.matchConfig.mapId, tileset: def.tileset, size: def.size, hasBiomeGrid: !!def.biomeGrid, regions: !!(window.game.terrainView && window.game.terrainView.regions), styles: window.game.terrainView && window.game.terrainView.regions ? window.game.terrainView.regions.styles.map((s) => s.key) : null, hq: hq ? { x: hq.mesh.position.x, z: hq.mesh.position.z } : null };
+          return { mapId: gm.matchConfig.mapId, tileset: def.tileset, size: def.size, hasBiomeGrid: !!def.biomeGrid, regions: !!(window.game.session.terrainView && window.game.session.terrainView.regions), styles: window.game.session.terrainView && window.game.session.terrainView.regions ? window.game.session.terrainView.regions.styles.map((s) => s.key) : null, hq: hq ? { x: hq.mesh.position.x, z: hq.mesh.position.z } : null };
         });
         check(`${mapId}: partida carregou o mapa certo e o render é regional`, M.start.mapId === mapId && M.start.hasBiomeGrid && M.start.regions, JSON.stringify({ styles: M.start.styles }));
 
@@ -455,7 +457,7 @@ try {
         });
         check(`${mapId}: props (instâncias) a no máximo 0,9 u de altura do terreno`, bad.every((p) => p.floatN === 0), JSON.stringify(bad.map((p) => [p.name, p.floatN, p.maxFloat])));
         check(`${mapId}: props (instâncias) não afundados > 0,9 u`, bad.every((p) => p.sunkN === 0), JSON.stringify(bad.map((p) => [p.name, p.sunkN, p.minSunk])));
-        const wet = M.props.filter((p) => p.underwater > 0);
+        const wet = M.props.filter((p) => p.underwater > 0 && !/LilyPad|Lotus/.test(p.name)); // vitória-régia e lótus vivem na água
         check(`${mapId}: nenhuma árvore/decoração debaixo d'água`, wet.length === 0, JSON.stringify(wet.map((p) => [p.name, p.underwater])));
 
         // (6) ovelha (do mapa) + javali (inserido) em campo
@@ -517,6 +519,23 @@ try {
             const gm = window.game.gameManager;
             return { deposits: gm.resourceDeposits.length, depleted: window.__mine54.depleted, disposed: !!window.__mine54.dep.isDisposed, ruins: window.game.session.ruins ? window.game.session.ruins.slots.filter((s) => s.state !== 'free').length : null };
           });
+          // entulho da ruína: caixa (em relação ao relevo) das peças do slot ativo
+          after.debris = await page.evaluate(() => {
+            const gm = window.game.gameManager;
+            const out = [];
+            for (const s of window.game.session.ruins.slots) {
+              if (s.state === 'free' || !s.debris.geometry) continue;
+              const pos = s.debris.geometry.attributes.position; let lo = 1e9, hi = -1e9, worst = 0;
+              for (let i = 0; i < pos.count; i++) {
+                const wx = s.x + pos.getX(i), wz = s.z + pos.getZ(i);
+                const rel = s.baseY + s.debris.position.y + pos.getY(i) - gm.terrain.getHeight(wx, wz);
+                lo = Math.min(lo, rel); hi = Math.max(hi, rel); if (Math.abs(rel) > Math.abs(worst)) worst = rel;
+              }
+              out.push({ x: +s.x.toFixed(1), z: +s.z.toFixed(1), minRel: +lo.toFixed(2), maxRel: +hi.toFixed(2), opacity: +s.debris.material.opacity.toFixed(2), alpha: s.state });
+            }
+            return out;
+          });
+          console.log('entulho (altura relativa ao relevo):', JSON.stringify(after.debris));
           M.mine = { ...mine, after };
           check(`${mapId}: mina esgotada some da simulação e deixa ruína`, after.deposits === mine.before - 1 && after.depleted === 1 && after.disposed && (after.ruins === null || after.ruins > (mine.ruins || 0)), JSON.stringify({ antes: mine.before, depois: after }));
           sheet(`${mapId}-6-mina-desaba.jpg`, mFiles, { cols: 2, panelW: 960 });
@@ -547,7 +566,7 @@ try {
     const extra = 'dois-continentes-1.json';
     const id = 'dois-continentes-1';
     console.log(`\n=== lava em ${id} (mapa de pendentes/, registrado em memória)`);
-    const { ctx, page, errors } = await openPage(`/?skipPreload&texq=low&play&map=${id}&faction=human`, { ready: GAME_READY, extraMaps: [extra] });
+    const { ctx, page, errors } = await openPage(`/?skipPreload&texq=${TEXQ}&play&map=${id}&faction=human`, { ready: GAME_READY, extraMaps: [extra] });
     const L = result.lava;
     try {
       await page.waitForTimeout(2500);
@@ -603,7 +622,7 @@ try {
   if (browser) await browser.close().catch(() => {});
   if (vite) await vite.close().catch(() => {});
   result.consoleErrorCount = result.consoleErrors.length;
-  fs.writeFileSync(path.join(OUT, 'resultado.json'), JSON.stringify(result, null, 2) + '\n');
+  fs.writeFileSync(path.join(OUT, `resultado${SUFFIX}.json`), JSON.stringify(result, null, 2) + '\n');
   const failed = result.checks.filter((c) => !c.ok);
   console.log(`\nM1-01: ${result.checks.length - failed.length}/${result.checks.length} verificações OK; erros de console: ${result.consoleErrors.length}`);
   if (failed.length) console.log('FALHAS:\n - ' + failed.map((c) => `${c.name} ${c.extra}`).join('\n - '));

@@ -1,226 +1,998 @@
 {
-  "when": "2026-10-17T06:17:33.846Z",
+  "when": "2026-10-17T06:18:12.676Z",
   "viewport": {
     "width": 1920,
     "height": 1080
   },
-  "renderer": "ANGLE (AMD, Vulkan 1.4.318 (AMD Radeonâ¢ RX 7600 XT (RADV NAVI33) (0x00007480)), radv)",
+  "renderer": null,
   "phases": [
-    "menu"
+    "mapas"
   ],
-  "menu": {
-    "storyOpenedOnFirstVisit": true,
-    "panels": [
-      {
-        "dotActive": 0,
-        "dots": 7,
-        "art": {
-          "src": "/art/story/panel-1.png",
-          "w": 1376,
-          "h": 768,
-          "complete": true
+  "menu": {},
+  "maps": {
+    "duelo-continental-1": {
+      "errors": [],
+      "start": {
+        "mapId": "duelo-continental-1",
+        "tileset": "exuberante",
+        "size": 224,
+        "hasBiomeGrid": true,
+        "regions": false,
+        "styles": null,
+        "hq": {
+          "x": -28,
+          "z": -46
+        }
+      },
+      "perfStart": {
+        "fps": 60,
+        "fpsP1": 59.5,
+        "frames": 237,
+        "drawCalls": 277,
+        "triangles": 450278,
+        "geometries": 125,
+        "textures": 45
+      },
+      "spots": {
+        "counts": {
+          "mar": 32320,
+          "areia": 3011,
+          "grama": 7722,
+          "rocha": 2112,
+          "vulcânico": 556,
+          "neve": 1198,
+          "pântano": 728,
+          "gelo": 308,
+          "floresta": 2670
         },
-        "fallbackVisible": false,
-        "caption": "Antes de haver nomes, havia uma só terra, um só oceano e um só céu. Ondara era um mundo inteiro, e ninguém ainda o chamava de lar.",
-        "title": null,
-        "step": 0
-      },
-      {
-        "dotActive": 1,
-        "dots": 7,
-        "art": {
-          "src": "/art/story/panel-2.png",
-          "w": 1376,
-          "h": 768,
-          "complete": true
+        "centers": {
+          "1": {
+            "biome": 1,
+            "name": "areia",
+            "count": 3011,
+            "depth": 4,
+            "x": 59,
+            "z": 28
+          },
+          "2": {
+            "biome": 2,
+            "name": "grama",
+            "count": 7722,
+            "depth": 5,
+            "x": 36,
+            "z": 34
+          },
+          "6": {
+            "biome": 6,
+            "name": "rocha",
+            "count": 2112,
+            "depth": 4,
+            "x": -35,
+            "z": 79
+          },
+          "7": {
+            "biome": 7,
+            "name": "vulcânico",
+            "count": 556,
+            "depth": 6,
+            "x": 80,
+            "z": 71
+          },
+          "9": {
+            "biome": 9,
+            "name": "neve",
+            "count": 1198,
+            "depth": 3,
+            "x": 27,
+            "z": -16
+          },
+          "10": {
+            "biome": 10,
+            "name": "pântano",
+            "count": 728,
+            "depth": 5,
+            "x": 21,
+            "z": 84
+          },
+          "11": {
+            "biome": 11,
+            "name": "gelo",
+            "count": 308,
+            "depth": 1,
+            "x": 90,
+            "z": -80
+          },
+          "12": {
+            "biome": 12,
+            "name": "floresta",
+            "count": 2670,
+            "depth": 3,
+            "x": 38,
+            "z": -12
+          }
         },
-        "fallbackVisible": false,
-        "caption": "Então a terra se partiu. O mar entrou pela Fenda, e por milhões de anos dois continentes derivaram em silêncio, cada um sonhando o seu próprio mundo.",
-        "title": null,
-        "step": 1
-      },
-      {
-        "dotActive": 2,
-        "dots": 7,
-        "art": {
-          "src": "/art/story/panel-3.png",
-          "w": 1376,
-          "h": 768,
-          "complete": true
+        "transitions": [
+          {
+            "pair": "grama/floresta",
+            "contact": 3393,
+            "x": -15,
+            "z": -1
+          },
+          {
+            "pair": "rocha/neve",
+            "contact": 920,
+            "x": -30,
+            "z": 10
+          },
+          {
+            "pair": "grama/rocha",
+            "contact": 911,
+            "x": 5,
+            "z": 6
+          }
+        ],
+        "coast": {
+          "x": -18,
+          "z": 31
         },
-        "fallbackVisible": false,
-        "caption": "Em Velmara, entre montanhas nevadas, florestas e savanas, ergueram-se os homens, com seus rebanhos e seus grifos. Em Cinzara, entre dunas, pântanos e estepes, os clãs aprenderam a viver do pouco: javalis, brasas e vento.",
-        "title": null,
-        "step": 2
+        "size": 224,
+        "tileset": "exuberante"
       },
-      {
-        "dotActive": 3,
-        "dots": 7,
-        "art": {
-          "src": "/art/story/panel-4.png",
-          "w": 1376,
-          "h": 768,
-          "complete": true
+      "props": [
+        {
+          "name": "InstancedGrassTufts",
+          "n": 154,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
         },
-        "fallbackVisible": false,
-        "caption": "Os povos cresceram, e a fome de terra, de ouro, de madeira e de breu os lançou ao mar. Aurelan traçou cartas; os clãs queimaram mastros de cinza. Cada um buscava o que faltava em casa.",
-        "title": null,
-        "step": 3
-      },
-      {
-        "dotActive": 4,
-        "dots": 7,
-        "art": {
-          "src": "/art/story/panel-5.png",
-          "w": 1376,
-          "h": 768,
-          "complete": true
+        {
+          "name": "InstancedPebbles",
+          "n": 128,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
         },
-        "fallbackVisible": false,
-        "caption": "No meio do Mar Fendido, duas velas se avistaram. Ninguém sabe quem baixou o estandarte primeiro, nem de que lado partiu a primeira flecha. Só se sabe que o mar deixou de ser vazio.",
-        "title": null,
-        "step": 4
-      },
-      {
-        "dotActive": 5,
-        "dots": 7,
-        "art": {
-          "src": "/art/story/panel-6.png",
-          "w": 1376,
-          "h": 768,
-          "complete": true
+        {
+          "name": "InstancedBoulders",
+          "n": 26,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
         },
-        "fallbackVisible": false,
-        "caption": "Entre os dois mundos jaziam os Estilhaços: ilhas de pedra, brejo, fogo, gelo e areia, com ouro, madeira e petróleo à beira da água. Quem as dominasse teria uma ponte de guerra e a chave do oceano.",
-        "title": null,
-        "step": 5
-      },
-      {
-        "dotActive": 6,
-        "dots": 7,
-        "art": {
-          "src": "/art/story/panel-7-alliance.png",
-          "w": 1376,
-          "h": 768,
-          "complete": true
+        {
+          "name": "InstancedBushes",
+          "n": 15,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
         },
-        "fallbackVisible": false,
-        "caption": "Aurelan não queria a guerra, mas não cederia o mar. Na Baía de Aurelan, a Rainha Sevelin ergue o estandarte: tomar os Estilhaços e fincar uma fortaleza em terra inimiga, de onde o mar será nosso.",
-        "title": null,
-        "step": 6
-      },
-      {
-        "dotActive": 6,
-        "dots": 7,
-        "art": {
-          "src": "/art/world/mapa-mundi.png",
-          "w": 1376,
-          "h": 768,
-          "complete": true
+        {
+          "name": "InstancedBerries",
+          "n": 15,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
         },
-        "fallbackVisible": false,
-        "caption": null,
-        "title": "A Guerra do Mar Fendido",
-        "step": 7
-      }
-    ],
-    "tabs": [
-      {
-        "text": "A Guerra do Mar Fendido (Aliança)",
-        "selected": "true"
+        {
+          "name": "InstancedStumps",
+          "n": 10,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "InstancedMushrooms",
+          "n": 10,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "InstancedLilyPads",
+          "n": 8,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 8
+        },
+        {
+          "name": "InstancedLotus",
+          "n": 8,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 8
+        },
+        {
+          "name": "InstancedFlowerLeaves",
+          "n": 33,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "InstancedFlowerPetals",
+          "n": 33,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "df598d",
+          "n": 13,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "e0a532",
+          "n": 12,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "6c64c0",
+          "n": 6,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "c57e11",
+          "n": 6,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "a73bca",
+          "n": 1,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "d448e1",
+          "n": 8,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "d5ab88",
+          "n": 4,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "b65c89",
+          "n": 1,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "81b5ad",
+          "n": 1,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "da253e",
+          "n": 4,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "a9a3dc",
+          "n": 1,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "34ad21",
+          "n": 4,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "a3cba3",
+          "n": 9,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "4fc98f",
+          "n": 7,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "eab5f8",
+          "n": 6,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "476ef3",
+          "n": 11,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "d1c1a0",
+          "n": 1,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "a8cd02",
+          "n": 9,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "6d12b3",
+          "n": 1,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "54ed55",
+          "n": 5,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "b80e25",
+          "n": 1,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "5c72ee",
+          "n": 5,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "0d59c5",
+          "n": 2,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "862c96",
+          "n": 5,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "096134",
+          "n": 2,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "415121",
+          "n": 3,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "434c42",
+          "n": 2,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "8256af",
+          "n": 6,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "7ec275",
+          "n": 1,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "d839e8",
+          "n": 3,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "d93b65",
+          "n": 1,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "77de53",
+          "n": 2,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "f0a3f7",
+          "n": 1,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "5f5fb6",
+          "n": 4,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "d8cee8",
+          "n": 2,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "d465a5",
+          "n": 1,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "c03f04",
+          "n": 1,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "9404b6",
+          "n": 4,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "1c40f4",
+          "n": 2,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "00970f",
+          "n": 1,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "1983b7",
+          "n": 1,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "be3c09",
+          "n": 1,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "2fb1b3",
+          "n": 4,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "e289c8",
+          "n": 1,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "d92af3",
+          "n": 4,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "f88a28",
+          "n": 5,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "44bee6",
+          "n": 1,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "1a742b",
+          "n": 2,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "daae84",
+          "n": 6,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "aa2a2b",
+          "n": 8,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "cdbabc",
+          "n": 4,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "fecccf",
+          "n": 1,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "93aa1b",
+          "n": 1,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "2cea20",
+          "n": 6,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "a8943a",
+          "n": 1,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "65c2f0",
+          "n": 9,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "64888c",
+          "n": 7,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "c3d505",
+          "n": 11,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "5b3a4e",
+          "n": 9,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "6b5bcf",
+          "n": 5,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "743ab9",
+          "n": 2,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "94da2b",
+          "n": 6,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "815a85",
+          "n": 1,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "cd3f7e",
+          "n": 3,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "8e3ba3",
+          "n": 1,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        },
+        {
+          "name": "e2ce95",
+          "n": 2,
+          "floatN": 0,
+          "maxFloat": 0,
+          "sunkN": 0,
+          "minSunk": 0,
+          "underwater": 0
+        }
+      ],
+      "scene": {
+        "trees": 151,
+        "deposits": 4,
+        "critters": 8
       },
-      {
-        "text": "A Guerra do Mar Fendido (Horda)",
-        "selected": "false"
+      "critters": {
+        "ref": {
+          "x": -19.974490980062843,
+          "z": -28.308577614093764,
+          "species": "sheep"
+        },
+        "total": 11
       },
-      {
-        "text": "Campanha Clássica (beta)",
-        "selected": "false"
-      }
-    ],
-    "tab1": {
-      "hasReviewStory": true,
-      "items": 12,
-      "provisional": false
-    },
-    "tab2": {
-      "hasReviewStory": false,
-      "items": 8,
-      "provisional": true
-    },
-    "esc": {
-      "reopened": true,
-      "after": {
-        "story": false,
-        "campaign": true,
-        "mainMenu": true,
-        "inGame": false
-      }
-    },
-    "worldMapInDom": false,
-    "escFirstVisit": {
-      "story": false,
-      "campaign": true
+      "critterY": [
+        {
+          "sp": "sheep",
+          "y": 2.6,
+          "h": 2.6,
+          "root": 2.6
+        },
+        {
+          "sp": "sheep",
+          "y": 2.6,
+          "h": 2.6,
+          "root": 2.6
+        },
+        {
+          "sp": "sheep",
+          "y": 2.54,
+          "h": 2.54,
+          "root": 2.54
+        },
+        {
+          "sp": "sheep",
+          "y": 2.6,
+          "h": 2.6,
+          "root": 2.6
+        },
+        {
+          "sp": "sheep",
+          "y": 2.6,
+          "h": 2.6,
+          "root": 2.6
+        },
+        {
+          "sp": "sheep",
+          "y": 2.68,
+          "h": 2.68,
+          "root": 2.68
+        },
+        {
+          "sp": "sheep",
+          "y": 2.95,
+          "h": 2.95,
+          "root": 2.95
+        },
+        {
+          "sp": "sheep",
+          "y": 2.6,
+          "h": 2.6,
+          "root": 2.6
+        },
+        {
+          "sp": "boar",
+          "y": 3.01,
+          "h": 3.01,
+          "root": 3.01
+        },
+        {
+          "sp": "boar",
+          "y": 2.6,
+          "h": 2.6,
+          "root": 2.6
+        },
+        {
+          "sp": "boar",
+          "y": 2.92,
+          "h": 2.92,
+          "root": 2.92
+        }
+      ],
+      "mine": {
+        "x": -43.6,
+        "z": -37,
+        "before": 4,
+        "ruins": 0,
+        "after": {
+          "deposits": 3,
+          "depleted": 1,
+          "disposed": true,
+          "ruins": 1
+        }
+      },
+      "perfBase": {
+        "fps": 60,
+        "fpsP1": 59.5,
+        "frames": 206,
+        "drawCalls": 298,
+        "triangles": 441649,
+        "geometries": 351,
+        "textures": 54
+      },
+      "perfWide": {
+        "fps": 60,
+        "fpsP1": 59.5,
+        "frames": 206,
+        "drawCalls": 347,
+        "triangles": 369244,
+        "geometries": 353,
+        "textures": 54
+      },
+      "consoleErrors": []
     }
   },
-  "maps": {},
   "lava": {},
   "checks": [
     {
-      "name": "história abre sozinha na 1a visita à campanha principal",
-      "ok": true,
-      "extra": ""
-    },
-    {
-      "name": "7 painéis narrativos visitados",
-      "ok": true,
-      "extra": "narrativos=7, total=8"
-    },
-    {
-      "name": "nenhum painel caiu no fallback de imagem",
-      "ok": true,
-      "extra": "1376x768 1376x768 1376x768 1376x768 1376x768 1376x768 1376x768 1376x768"
-    },
-    {
-      "name": "história terminou sozinha após o último painel (sem travar)",
-      "ok": true,
-      "extra": ""
-    },
-    {
-      "name": "seletor main x beta presente (2+ abas)",
-      "ok": true,
-      "extra": "[{\"text\":\"A Guerra do Mar Fendido (Aliança)\",\"selected\":\"true\"},{\"text\":\"A Guerra do Mar Fendido (Horda)\",\"selected\":\"false\"},{\"text\":\"Campanha Clássica (beta)\",\"selected\":\"false\"}]"
-    },
-    {
-      "name": "aba beta (Campanha Clássica) não mostra \"Rever história\"",
-      "ok": true,
-      "extra": "{\"hasReviewStory\":false,\"items\":8,\"provisional\":true}"
-    },
-    {
-      "name": "abas main (Aliança/Horda) mostram \"Rever história\"",
-      "ok": true,
-      "extra": "{\"hasReviewStory\":true,\"items\":12,\"provisional\":false}"
-    },
-    {
-      "name": "\"Rever história\" reabre e Esc volta à lista de campanha (sem iniciar partida)",
-      "ok": true,
-      "extra": "{\"story\":false,\"campaign\":true,\"mainMenu\":true,\"inGame\":false}"
-    },
-    {
-      "name": "MUNDO-9: mapa-múndi montado em alguma tela do fluxo de campanha",
+      "name": "duelo-continental-1: partida carregou o mapa certo e o render é regional",
       "ok": false,
-      "extra": "(esperado FALHAR: worldMap.js só é importado por testes)"
+      "extra": "{\"styles\":null}"
     },
     {
-      "name": "1a visita: Esc na história pula a história e deixa a lista da campanha aberta",
+      "name": "duelo-continental-1: props (instâncias) a no máximo 0,9 u de altura do terreno",
       "ok": true,
-      "extra": "{\"story\":false,\"campaign\":true}"
+      "extra": "[]"
+    },
+    {
+      "name": "duelo-continental-1: props (instâncias) não afundados > 0,9 u",
+      "ok": true,
+      "extra": "[]"
+    },
+    {
+      "name": "duelo-continental-1: nenhuma árvore/decoração debaixo d'água",
+      "ok": false,
+      "extra": "[[\"InstancedLilyPads\",8],[\"InstancedLotus\",8]]"
+    },
+    {
+      "name": "duelo-continental-1: critters pousados no terreno (|y - altura| <= 0,8)",
+      "ok": true,
+      "extra": "[]"
+    },
+    {
+      "name": "duelo-continental-1: mina esgotada some da simulação e deixa ruína",
+      "ok": true,
+      "extra": "{\"antes\":4,\"depois\":{\"deposits\":3,\"depleted\":1,\"disposed\":true,\"ruins\":1}}"
+    },
+    {
+      "name": "duelo-continental-1: 0 erros de console/página/rede",
+      "ok": true,
+      "extra": ""
     }
   ],
   "consoleErrors": [],
   "files": [
-    "historia-painel-a-painel.jpg",
-    "campanha-menu-abas.jpg"
+    "duelo-continental-1-1-visao.jpg",
+    "duelo-continental-1-2-minimapa.jpg",
+    "duelo-continental-1-3-biomas.jpg",
+    "duelo-continental-1-4-transicoes-e-costa.jpg",
+    "duelo-continental-1-5-critters.jpg",
+    "duelo-continental-1-6-mina-desaba.jpg"
   ],
   "consoleErrorCount": 0
 }

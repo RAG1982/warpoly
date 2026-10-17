@@ -238,7 +238,7 @@ Legenda de dependências: só IDs; "—" = pode começar já. **Dif.** = dificul
 |---|---|---|---|---|---|---|---|
 | M1-01 | Verificação visual do Novo Mundo no jogo (GPU) | Média | M | S | M0-01 | MUNDO-4/5/9, NEW-54 | DONE (2026-10-17) |
 | M1-02 | Áudio: reconciliar `task/F7-08-verificacao` e rodar `audio-check` | Difícil | M | S | M0-01 | F7-08 | DONE (2026-10-17; escuta no G1) |
-| M1-03 | Medições: bench (F1-10c), draw calls de neutros, combate100 | Média | M | S | M0-01 | F1-10c, NEW-15, NEW-27 | TODO |
+| M1-03 | Medições: bench (F1-10c), draw calls de neutros, combate100 | Média | M | S | M0-01 | F1-10c, NEW-15, NEW-27 | DONE (2026-10-17: massa300 16 FPS, combate100 43 FPS; vai à M5-03) |
 | M1-04 | Replay online, PWA/carga por facção, save/load em missão | Média | M | S | M0-01 | F9-05, F10-05, F2-06 | DONE (2026-10-17) |
 | M1-05 | Correções pequenas (NEW-35, NEW-52, critério do m04, NEW-49) | Média | P | S | M0-01 | NEW-35/52/49, m04 | DONE (2026-10-17) |
 | M1-06 | `ilhas-4p`: florestas + portão de emergência da IA (opções 1+3) | Difícil | G | S | M0-01 | NEW-55 | DONE parcial (23/24; NEW-58 seed 16 aceita) |

@@ -35,6 +35,8 @@ export const GLB_MODELS = {
   orc_workshop: { url: `${BASE}models/orc_workshop.glb`, root: 'OrcWorkshop', type: null },
   // NEW-39: conjuradores, esqueleto, sapadores e construções arcanas (Blender)
   mage: { url: `${BASE}models/mage.glb`, root: 'Mage', type: 'mage' },
+  // Mestre Arcano Oren (hero_oren, M2-21): modelo do Tripo finalizado (Weapon = cajado filho de ArmR, Crystal pulsa no 'cast', pano em TeamColor)
+  hero_oren: { url: `${BASE}models/hero_oren.glb`, root: 'Mage', type: 'mage' },
   necromancer: { url: `${BASE}models/necromancer.glb`, root: 'Necromancer', type: 'necromancer' },
   skeleton: { url: `${BASE}models/skeleton.glb`, root: 'Skeleton', type: 'skeleton' },
   sapper: { url: `${BASE}models/sapper.glb`, root: 'Sapper', type: 'sapper' },

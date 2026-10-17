@@ -172,6 +172,13 @@ Lista (eu preparo no dia): tela de história e seletor de campanhas · uma parti
 **Fazer:** testes e correções para: jogador com 2 Centros (um criado por `spawnBuilding`); `{hq:N}` usa o maior nível dos Centros vivos; `UPGRADE_HQ` e cancelamento funcionam em qualquer um; população, entrega de recursos, rally e IA não quebram; vitória `regicide` e de missão com 2 Centros; perda de um Centro; HUD (card de evolução) mostra o Centro selecionado. Acrescentar uma missão sintética headless (em `tests/`) que faz o ciclo completo.
 **Pronto quando:** testes novos verdes; nenhum comportamento mudou para 1 Centro (checksum de `headless-match --seed 1` inalterado).
 
+### M2-28 · Carregar mapas de campanha sob demanda
+**Dif.** Difícil · **Esf.** M · **Exec.** S · **Roda:** GPU local (bundle/boot) · **Dep.:** M2-03 (deve terminar **antes** de M2-04)
+**Objetivo:** os 16 mapas de campanha (97–135 KB de JSON cada, ~2 MB no total) não entram no bundle de boot nem no `perf`.
+**Contexto:** `src/data/maps/index.js` importa cada mapa estaticamente (`import camp01 from './camp-01-baia-de-aurelan.json'`) e `getMap(id)` é síncrono; `MatchConfig`, `Terrain`, `MissionRuntime` e o menu dependem disso. Orçamento: `npm run perf` (bundle principal ≈ 530 kB, JS de boot ≈ 2,66 MB), `docs/10_DEPLOY.md`.
+**Fazer:** (1) mapas com `campaignOnly`/prefixo `camp-` viram *chunks* carregados por `import()`/`import.meta.glob` (lazy) e registrados em `MAPS` só depois do carregamento; (2) uma função assíncrona `loadMap(id)`/`ensureMapLoaded(id)` chamada antes de criar a partida de campanha (`MissionController`/`createMissionConfig`) e pelo editor; (3) `getMap` continua síncrono para mapas já carregados e lança erro claro para um mapa lazy ainda não carregado; o menu de Escaramuça não os lista (já são `hidden`); (4) testes: carregar, erro quando não carregado, ids do registro; os testes que usam `getMap('camp-…')` chamam `await loadMap`; (5) medir `npm run perf` antes/depois: bundle principal e JS de boot devem **não crescer** com os mapas novos; PWA/Service Worker: confirmar que os chunks entram no pré-cache ou carregam online sem quebrar o offline (`tools/preview-check.mjs`).
+**Pronto quando:** `npm test` verde; `headless-match` inalterado; bundle de boot sem os `camp-*`; a missão `mission-anchors-demo` e uma partida em `camp-03-pedra-mae` abrem no jogo; perf dentro de ±10 %.
+
 ### M2-03 … M2-07 · Mapas de campanha (16 mapas em 5 lotes)
 **Dif.** Difícil · **Esf.** G cada · **Exec.** S · **Roda:** Node (prévias em PNG) · **Dep.:** M2-01 (M2-04…07 também M2-03)
 **Objetivo:** os 16 palcos da campanha como mapas jogáveis, com contorno irregular, bioma certo, âncoras e recursos.

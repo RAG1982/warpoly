@@ -20,6 +20,8 @@ O que o build faz (`vite.config.js`):
 
 `public/manifest.webmanifest` + `public/sw.js`, registrado por `src/pwa.js` **só em produção** (`import.meta.env.PROD`, HTTPS ou localhost). Estratégia: pré-cache do shell (HTML, JS/CSS com hash); cache-first em runtime para `.glb`, ícones e demais arquivos da mesma origem; navegação rede-primeiro com fallback offline. Novo deploy ⇒ novo hash ⇒ caches antigos apagados no `activate`. As fontes do Google (style.css) não são cacheadas (origem cruzada): offline cai para a fonte do sistema. `npm run dev` não registra nada.
 
+**Mapas de campanha sob demanda (M2-28):** os `camp-*` são chunks próprios (`assets/camp-*-<hash>.js`, ~55 kB cada), fora do JS de boot (não contam em `initialJsBytes`; só `ensureMapLoaded` os baixa). Como o pré-cache do `sw.js` pega todo `assets/*.js`, eles são baixados na instalação do service worker e funcionam offline; sem SW (ou antes dele ativar) carregam online na hora de abrir a partida.
+
 ## GitHub Pages
 
 `.github/workflows/deploy.yml` (push em `master` ou manual): `npm ci` → lint → vitest → build com `BASE=/<nome-do-repo>/` → publica `dist/`. Ative em *Settings → Pages → Source: GitHub Actions*. Domínio próprio: troque `BASE` por `/`.

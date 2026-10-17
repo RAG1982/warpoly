@@ -4,7 +4,7 @@
  *  A) INSPETOR (`axethrower_glb`, GLB real, `animator.setTime(p)` para p = 0..1, passo 0,002, nas duas variantes de ataque):
  *     amplitude do salto máximo por quadro de cada parte (torso, cabeça, braços, `weaponR`) e a posição do machado em mundo;
  *     tira de 6 poses (0,30 / 0,50 / 0,59 / 0,61 / 0,70 / 0,79).
- *  B) JOGO (`?play&faction=orc`, animador e `UnitView` reais): 4 Arremessadores atacam um boneco hostil; amostra por quadro (rAF) as rotações
+ *  B) JOGO (`?play&faction=orc`, animador e `UnitView` reais): 8 Arremessadores atacam um boneco hostil; amostra por quadro (rAF) as rotações
  *     das partes durante o `fight` já fora do cross-fade e procura saltos > 0,5 rad entre quadros (o defeito original: 2,3 rad em p = 0,60 e 0,78).
  * Uso: bash tools/safe-run.sh --timeout 600 -- node tools/ui-captures/revisao-2026-10-11/NEW-49.mjs
  * Saída: NEW-49-1-inspetor-tira.png, NEW-49-2-jogo.png e NEW-49.json.
@@ -128,8 +128,8 @@ const warnings = [];
       const hq = gm.buildings.find((b) => b.ownerId === me && b.role === 'hq').mesh.position;
       const free = (x, z) => gm.canPlaceBuilding('orc_house', x, z, null, me);
       let spot = null;
-      for (let r = 14; r <= 40 && !spot; r += 3) {
-        for (let a = 0; a < 360 && !spot; a += 20) {
+      for (let r = 14; r <= 70 && !spot; r += 3) { // busca ampla (como no NEW-35): antes r <= 40 e 20 graus não achava espaço neste mapa
+        for (let a = 0; a < 360 && !spot; a += 10) {
           const x = hq.x + Math.cos((a * Math.PI) / 180) * r, z = hq.z + Math.sin((a * Math.PI) / 180) * r;
           if (free(x, z) && free(x - 7, z + 7) && free(x + 5, z - 5) && free(x - 3.5, z + 3.5)) spot = { x, z };
         }
@@ -139,7 +139,8 @@ const warnings = [];
       dummy.hp = dummy.maxHp = 100000;
       dummy.speed = 0;
       const axes = [];
-      for (let i = 0; i < 4; i++) axes.push(gm.spawnUnit('axethrower', spot.x - 3.5 - (i % 2) * 2.2 + (i > 1 ? 1.5 : 0), spot.z + 3.5 + (i % 2) * 2.2 - (i > 1 ? 1.5 : 0), me));
+      // M1-05: 8 Arremessadores (a variante de ataque vem do id; com 4 as duas variantes nem sempre apareciam e o check ficava instável)
+      for (let i = 0; i < 8; i++) axes.push(gm.spawnUnit('axethrower', spot.x - 3.5 - (i % 2) * 2.2 + (i > 1 ? 1.5 : 0) - Math.floor(i / 4) * 1.4, spot.z + 3.5 + (i % 2) * 2.2 - (i > 1 ? 1.5 : 0) + Math.floor(i / 4) * 1.4, me));
       gm.fogOfWar.revealArea(spot.x, spot.z, 24, 900);
       gm.issue({ type: 'attack', playerId: me, unitIds: axes.map((u) => u.id), targetId: dummy.id });
       // a view (UnitView) só existe depois de um quadro de render: espera dois quadros antes de consultá-la
@@ -153,7 +154,7 @@ const warnings = [];
     });
     if (!check('achou espaço aberto para o teste no jogo', !!data.setup)) throw new Error('sem espaço');
     console.log('cenário', JSON.stringify(data.setup));
-    check('o animador do jogo tem weaponR ligado nos 4 Arremessadores (variantes 0 e 1 presentes)', data.setup.weaponRFound.every(Boolean) && data.setup.variants.includes(0) && data.setup.variants.includes(1), `variantes=${data.setup.variants}`);
+    check('o animador do jogo tem weaponR ligado nos 8 Arremessadores (variantes 0 e 1 presentes)', data.setup.weaponRFound.every(Boolean) && data.setup.variants.includes(0) && data.setup.variants.includes(1), `variantes=${data.setup.variants}`);
     const C = { x: data.setup.spot.x - 1, z: data.setup.spot.z + 1 };
     await cam(page, C.x, 1.5, C.z, 0.5, Math.PI / 4, 2200);
 
@@ -189,8 +190,10 @@ const warnings = [];
                 if (!cur[k] || !x.prev[k]) continue;
                 const d = Math.max(Math.abs(cur[k][0] - x.prev[k][0]), Math.abs(cur[k][1] - x.prev[k][1]), Math.abs(cur[k][2] - x.prev[k][2]));
                 if (d > (rec.maxByPart[k] || 0)) { rec.maxByPart[k] = d; rec.maxAtP[k] = p; }
-                // salto = passo grande E velocidade angular acima do máximo legítimo da animação (~21/cooldown rad/s; margem de 1,45×)
-                if (d > 0.3 && d / dt > 30 / x.u.effAttackCooldown) rec.jumps.push({ part: k, rad: +d.toFixed(3), p: +p.toFixed(3), dtMs: Math.round(dt * 1000) });
+                // salto = passo grande E velocidade angular acima do máximo legítimo da animação. M1-05: medido no jogo, o pico legítimo é ~25 rad/s
+                // (variante 1, armR em p≈0,575 e weaponR em p≈0,87: 0,35 rad em 14 ms; = 34/cooldown de 1,35 s); o limiar antigo de 30/cooldown (22 rad/s)
+                // reprovava na borda. Novo limiar 45/cooldown (33 rad/s, 1,3× o pico); o defeito (2,3 rad num quadro de 16 ms) dá ~140 rad/s.
+                if (d > 0.3 && d / dt > 45 / x.u.effAttackCooldown) rec.jumps.push({ part: k, rad: +d.toFixed(3), p: +p.toFixed(3), dtMs: Math.round(dt * 1000) });
               }
             }
             x.prev = cur;
@@ -229,7 +232,7 @@ const warnings = [];
     }
     console.log('amostragem por quadro', JSON.stringify(data.watch), JSON.stringify(data.frameStats));
     const recs = Object.values(data.watch.perUnit);
-    check('os 4 Arremessadores lutaram (≥ 150 quadros de `fight` fora do cross-fade cada)', recs.length === 4 && recs.every((r) => r.fightFrames >= 150), JSON.stringify(recs.map((r) => r.fightFrames)));
+    check('os 8 Arremessadores lutaram (≥ 150 quadros de `fight` fora do cross-fade cada)', recs.length === 8 && recs.every((r) => r.fightFrames >= 150), JSON.stringify(recs.map((r) => r.fightFrames)));
     check('nenhum salto de pose entre quadros em nenhuma parte (passo > 0,3 rad E velocidade acima do máximo legítimo; as duas variantes)', recs.every((r) => r.jumps.length === 0), JSON.stringify(recs.map((r) => r.jumps.slice(0, 3))));
     const worstGame = Math.max(...recs.flatMap((r) => Object.values(r.maxByPart)));
     check('maior passo por quadro no jogo ≤ 0,6 rad (arremesso é a fase mais rápida; o defeito era 2,3 rad)', worstGame <= 0.6, `maior passo=${worstGame.toFixed(3)} rad (quadros: mediana ${data.frameStats.medianDtMs} ms, ≥ 50 ms: ${data.frameStats.over50ms})`);

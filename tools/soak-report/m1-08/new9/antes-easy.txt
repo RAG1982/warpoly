@@ -1,0 +1,28 @@
+easy continental-1v1 seed 1 human: 1ª construção 450.8 s · HQ 471.6 s · derrota — s
+easy continental-1v1 seed 2 orc: 1ª construção 452.40000000000003 s · HQ 482.90000000000003 s · derrota — s
+easy continental-1v1 seed 3 human: 1ª construção 496 s · HQ 496 s · derrota — s
+easy continental-1v1 seed 4 orc: 1ª construção 470.70000000000005 s · HQ 496.45000000000005 s · derrota — s
+easy continental-1v1 seed 5 human: 1ª construção 517.15 s · HQ 517.15 s · derrota — s
+easy continental-1v1 seed 6 orc: 1ª construção 475.35 s · HQ 506.3 s · derrota — s
+easy estreito-1v1 seed 1 human: 1ª construção 460.75 s · HQ 460.75 s · derrota — s
+easy estreito-1v1 seed 2 orc: 1ª construção 473.35 s · HQ 473.35 s · derrota — s
+easy estreito-1v1 seed 3 human: 1ª construção 455.15000000000003 s · HQ 455.15000000000003 s · derrota — s
+easy estreito-1v1 seed 4 orc: 1ª construção 456.5 s · HQ 456.5 s · derrota — s
+easy estreito-1v1 seed 5 human: 1ª construção 459.40000000000003 s · HQ 459.40000000000003 s · derrota — s
+easy estreito-1v1 seed 6 orc: 1ª construção 463.3 s · HQ 463.3 s · derrota — s
+easy campos-1v1 seed 1 human: 1ª construção 458.3 s · HQ 469.65000000000003 s · derrota — s
+easy campos-1v1 seed 2 orc: 1ª construção 457.70000000000005 s · HQ 467.90000000000003 s · derrota — s
+easy campos-1v1 seed 3 human: 1ª construção 462 s · HQ 462 s · derrota — s
+easy campos-1v1 seed 4 orc: 1ª construção 455.15000000000003 s · HQ 466.5 s · derrota — s
+easy campos-1v1 seed 5 human: 1ª construção 459.3 s · HQ 468.1 s · derrota — s
+easy campos-1v1 seed 6 orc: 1ª construção 456.20000000000005 s · HQ 466.8 s · derrota — s
+easy desfiladeiro-1v1 seed 1 human: 1ª construção 455.1 s · HQ 463.45000000000005 s · derrota — s
+easy desfiladeiro-1v1 seed 2 orc: 1ª construção 458.3 s · HQ 461.25 s · derrota — s
+easy desfiladeiro-1v1 seed 3 human: 1ª construção 450.20000000000005 s · HQ 462.90000000000003 s · derrota — s
+easy desfiladeiro-1v1 seed 4 orc: 1ª construção 454.3 s · HQ 463.90000000000003 s · derrota — s
+easy desfiladeiro-1v1 seed 5 human: 1ª construção 452.90000000000003 s · HQ 466.40000000000003 s · derrota — s
+easy desfiladeiro-1v1 seed 6 orc: 1ª construção 456.85 s · HQ 462.3 s · derrota — s
+
+| dificuldade | partidas | 1ª construção caiu (mín / mediana) | HQ caiu (mín / mediana) | HQ caiu antes de 360 s |
+|---|---|---|---|---|
+| easy | 24 | 450 s / 458 s | 455 s / 467 s | 0 |

@@ -320,3 +320,69 @@ describe('2 Centros: missão sintética (ciclo completo)', () => {
     expect(first.tierUpgrade).not.toBeNull();
   }, 60000);
 });
+
+describe('2 Centros: HUD (card de evolução do Centro selecionado)', () => {
+  /** `UIManager.updateHqTierCard` com elementos falsos: o card reflete SEMPRE o Centro que se passa (o selecionado). */
+  async function makeCard(gm) {
+    const { UIManager } = await import('../../src/ui/UIManager.js');
+    const el = () => ({ style: {}, innerText: '', innerHTML: '', title: '', disabled: false, classList: { add() {}, remove() {} }, querySelector: () => null });
+    const ui = {
+      gm, _hqIconKey: null, _icon: () => '',
+      bldHqTierSection: el(), bldHqTierLabel: el(), bldHqUpgradeBtn: el(), bldHqUpgradeBtnLabel: el(), bldHqUpgradeIcon: el(),
+      bldHqUpgradeProgressBar: el(), bldHqUpgradeProgressTrack: el()
+    };
+    return { ui, update: (b) => UIManager.prototype.updateHqTierCard.call(ui, b) };
+  }
+
+  it('mostra nível, botão e progresso do Centro passado, independente do outro', async () => {
+    const { gm, first, colony } = makeTwoHqGm();
+    rich(gm);
+    const { ui, update } = await makeCard(gm);
+    update(colony);
+    expect(ui.bldHqTierSection.style.display).toBe('flex');
+    const labelNivel1 = ui.bldHqTierLabel.innerText;
+    expect(ui.bldHqUpgradeBtn.disabled).toBe(false);
+    issue(gm, { type: CMD.UPGRADE_HQ, playerId: 0, buildingId: colony.id });
+    seconds(gm, 30);
+    update(colony); // em andamento: botão vira "cancelar" com a barra em ~50 %
+    const pct = parseFloat(ui.bldHqUpgradeProgressBar.style.width);
+    expect(pct).toBeGreaterThan(45);
+    expect(pct).toBeLessThan(55);
+    update(first); // o outro Centro: sem upgrade, barra zerada, botão de evoluir normal
+    expect(ui.bldHqUpgradeProgressBar.style.width).toBe('0%');
+    expect(ui.bldHqUpgradeBtn.disabled).toBe(false);
+    seconds(gm, 31);
+    update(colony);
+    expect(ui.bldHqTierLabel.innerText).not.toBe(labelNivel1); // nível 2 no card do Marco
+    update(first);
+    expect(ui.bldHqTierLabel.innerText).toBe(labelNivel1); // o card do Centro original segue no nível 1
+  });
+
+  it('tecla do Centro alterna entre os Centros vivos (com 1 Centro, seleciona sempre o mesmo)', async () => {
+    const { InputManager } = await import('../../src/core/InputManager.js');
+    const { gm, first, colony } = makeTwoHqGm();
+    const picked = [];
+    gm.selectSingle = (b) => { gm.selectedBuilding = b; picked.push(b); };
+    const sm = { cameraTarget: { copy() {} } };
+    const call = () => InputManager.prototype.centerOnHq.call({ gm, sm });
+    call(); call(); call();
+    expect(picked).toEqual([first, colony, first]);
+    kill(first);
+    gm.selectedBuilding = null;
+    picked.length = 0;
+    call(); call();
+    expect(picked).toEqual([colony, colony]); // um só vivo: o morto nunca é escolhido
+  });
+});
+
+describe('2 Centros: a IA treina no Centro que não está evoluindo', () => {
+  it('com o 1º Centro evoluindo, o Marco recebe a fila de aldeões da IA', () => {
+    const { gm, first, colony } = makeTwoHqGm({ owner: 1, aiAll: true });
+    rich(gm, 1);
+    first.tierUpgrade = { targetTier: 2, progress: 0, totalTime: 9999, cost: { gold: 0 } };
+    seconds(gm, 20);
+    expect(first.queue.length).toBe(0);
+    expect(colony.queue.length + gm.getUnitsOf(1).length).toBeGreaterThan(0);
+    expect(colony.queue.length).toBeGreaterThan(0);
+  }, 30000);
+});

@@ -50,16 +50,17 @@ describe('F5-04: estratégias', () => {
     gm.dispose();
   });
 
-  it('M1-08/NEW-9: no Normal (e no Fácil) a expedição não abre antes do atraso inicial do perfil (>= 5 min), nem no rush', () => {
+  it('M1-08/NEW-9: a expedição do Normal (inclusive no rush) e do Fácil só sai depois de 5 min', () => {
     const gm = makeGm({ difficulties: ['normal', 'easy'] });
-    for (const d of gm.aiDirectors) {
-      const prof = d.profile;
-      if (prof.id === 'normal') expect(prof.startDelay * (prof.rushDelayScale ?? 0.4)).toBeGreaterThanOrEqual(300);
-      else expect(prof.startDelay).toBeGreaterThanOrEqual(300); // Fácil nunca sorteia rush
-      d.strategy = STRATEGIES.rush;
-      d.simTime = prof.startDelay - 1;
-      expect(d.militaryManager.expeditionAllowed()).toBe(false);
-    }
+    const [n, e] = gm.aiDirectors;
+    n.strategy = STRATEGIES.rush; // o Fácil nunca sorteia rush
+    n.simTime = 299;
+    expect(n.militaryManager.expeditionAllowed()).toBe(false);
+    e.strategy = STRATEGIES.boom;
+    e.simTime = 299;
+    expect(e.militaryManager.expeditionAllowed()).toBe(false);
+    n.simTime = n.profile.startDelay;
+    expect(n.militaryManager.expeditionAllowed()).toBe(true);
     gm.dispose();
   });
 

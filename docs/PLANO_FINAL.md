@@ -236,17 +236,17 @@ Legenda de dependências: só IDs; "—" = pode começar já. **Dif.** = dificul
 ### M1 — Fechar o que já existe
 | ID | Tarefa | Dif. | Esf. | Exec. | Dep. | Origem | Status |
 |---|---|---|---|---|---|---|---|
-| M1-01 | Verificação visual do Novo Mundo no jogo (GPU) | Média | M | S | M0-01 | MUNDO-4/5/9, NEW-54 | TODO |
-| M1-02 | Áudio: reconciliar `task/F7-08-verificacao` e rodar `audio-check` | Difícil | M | S | M0-01 | F7-08 | TODO |
+| M1-01 | Verificação visual do Novo Mundo no jogo (GPU) | Média | M | S | M0-01 | MUNDO-4/5/9, NEW-54 | DONE (2026-10-17) |
+| M1-02 | Áudio: reconciliar `task/F7-08-verificacao` e rodar `audio-check` | Difícil | M | S | M0-01 | F7-08 | DONE (2026-10-17; escuta no G1) |
 | M1-03 | Medições: bench (F1-10c), draw calls de neutros, combate100 | Média | M | S | M0-01 | F1-10c, NEW-15, NEW-27 | TODO |
 | M1-04 | Replay online, PWA/carga por facção, save/load em missão | Média | M | S | M0-01 | F9-05, F10-05, F2-06 | TODO |
-| M1-05 | Correções pequenas (NEW-35, NEW-52, critério do m04, NEW-49) | Média | P | S | M0-01 | NEW-35/52/49, m04 | TODO |
-| M1-06 | `ilhas-4p`: florestas + portão de emergência da IA (opções 1+3) | Difícil | G | S | M0-01 | NEW-55 | TODO |
-| M1-07 | P-14: serraria perto de bosque (opção A) | Fácil | P | S | M0-01 | NEW-56 | TODO |
+| M1-05 | Correções pequenas (NEW-35, NEW-52, critério do m04, NEW-49) | Média | P | S | M0-01 | NEW-35/52/49, m04 | DONE (2026-10-17) |
+| M1-06 | `ilhas-4p`: florestas + portão de emergência da IA (opções 1+3) | Difícil | G | S | M0-01 | NEW-55 | DONE parcial (23/24; NEW-58 seed 16 aceita) |
+| M1-07 | P-14: serraria perto de bosque (opção A) | Fácil | P | S | M0-01 | NEW-56 | DONE (2026-10-17) |
 | M1-08 | Soak grande, NEW-51 e agressividade inicial da IA (NEW-9) | Média | M | S | M1-06 | NEW-51, NEW-9 | TODO |
 | M1-09 | Gate M1: regravar baselines, suíte completa, fechar `REVIEW` | Fácil | P | S | M1-01…08 | — | TODO |
 | M1-10 | **G1 — sua passada nº 1** (≈ 1 h) | — | — | V | M1-09 | — | TODO |
-| M1-11 | Renomear facções em UI e campanhas (D2 b): Aliança→Liga de Aurelan, Horda→Clãs do Cinzal | Média | M | S | M0-02 | D2 | TODO |
+| M1-11 | Renomear facções em UI e campanhas (D2 b): Aliança→Liga de Aurelan, Horda→Clãs do Cinzal | Média | M | S | M0-02 | D2 | DONE (2026-10-17) |
 
 ### M2 — Mundo jogável
 | ID | Tarefa | Dif. | Esf. | Exec. | Dep. | Origem | Status |
@@ -269,12 +269,14 @@ Legenda de dependências: só IDs; "—" = pode começar já. **Dif.** = dificul
 | M2-16 | Água, costa e praia | Média | G | S+SB | M0-01 | ART-08/09 | TODO |
 | M2-17 | Sub-bosque e pântano | Fácil | M | SB | M0-01 | ART-10 | TODO |
 | M2-18 | Efeitos ambientais (poeira, cinza, vapor, neve, lava) | Média | M | S | M2-14 | ART-11 | TODO |
-| M2-19 | Texturas de terreno por bioma (só se M1-01 reprovar) | Média | M | SB | M1-01 | ART-05 | TODO (condicional) |
+| M2-19 | Texturas de terreno por bioma (rocha, vulcânico, pântano, gelo, neve; **confirmada pela M1-01**) | Média | G | SB | M1-01 | ART-05 | TODO |
 | M2-20 | Herói Dorian: integração do `.blend` do dono (animações, jogo, inspetor, retrato) | Difícil | G | SB | `.blend` do dono | MUNDO-HEROIS | TODO |
 | M2-21 | Herói Oren: integração do `.blend` do dono | Difícil | G | SB | `.blend` do dono | MUNDO-HEROIS | TODO |
 | M2-22 | Herói Drogath: integração do `.blend` do dono | Difícil | G | SB | `.blend` do dono | MUNDO-HEROIS | TODO |
 | M2-23 | Herói Vozgul: integração do `.blend` do dono | Difícil | G | SB | `.blend` do dono | MUNDO-HEROIS | TODO |
 | M2-24 | Herói Skarn: integração do `.blend` do dono | Difícil | G | SB | `.blend` do dono | MUNDO-HEROIS | TODO |
+| M2-26 | Biomas: neve solta no `biomeGrid` dos mapas MUNDO-7 e minimapa com cor de bioma | Média | M | S | M1-01 | achados M1-01 | TODO |
+| M2-27 | Arte da história sem texto em inglês (painéis 3 e 5, cartão de título) | Média | M | V+S | D5 | achado M1-01 | TODO |
 | M2-25 | **G2 — sua passada nº 2** (aprovar prévias dos 16 mapas, ≈ 1 h) | — | — | V | M2-03…07 | — | TODO |
 
 ### M3 — Campanha da Aliança (`war-alliance`)

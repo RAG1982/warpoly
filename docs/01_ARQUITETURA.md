@@ -72,6 +72,7 @@ src/
   animation/UnitAnimator.js  Animações procedurais (idle/walk/fight/gather/hurt/die) — F2-07: movido de src/inspector/
   sim/EventBus.js, sim/events.js   Barramento de eventos da simulação (F2-07: ver seção "Eventos")
   audio/AudioEvents.js       Ouvinte: eventos → SoundManager (F2-07)
+  audio/AudioEngine.js       Mixer: música/efeitos → mestre → limitador → saturador suave (`SOFT_CLIP`, teto 1,0) → saída; verificação em navegador: `tools/audio-check.mjs` (M1-02; ver `docs/MUSICA.md` §8)
   models/
     units/*Model.js                      só os procedurais que restam (F7-00b limpeza): cerco, conjuradores, esqueleto, sapadores, aéreos, navais, critters, Olho Vigia (+ `axethrowerTextures.js`: textura do machado de arremesso)
     buildings/*Model.js + *Textures.js   só o que resta: Acampamento Bandido, Estábulo, Covil, Oficinas, torres arcanas/templos, navais, muralha (fallback) — os demais são `.glb`

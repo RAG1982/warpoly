@@ -154,7 +154,22 @@ todas as faixas do catálogo.
 título e descrição em PT-BR) — os testes (`musicTracksNew.test.js`) conferem escala, compasso, duração, tempos fortes em tons do
 acorde, saltos, orçamento de notas e que a faixa toca no `MusicPlayer`.
 
-## 8. Verificação pendente (local, com navegador e som)
+## 8. Verificação
+
+### 8.1 Automática: `tools/audio-check.mjs` (M1-02, passou em 2026-10-17)
+`bash tools/safe-run.sh --timeout 400 -- node tools/audio-check.mjs` (Chromium com GPU real, `--mute-audio`, vite próprio na porta 5247).
+Não ouve nada: confere contadores, logs e renderização OFFLINE (`OfflineAudioContext`). Cobre: automação muda por padrão; o
+`AudioContext` só nasce no primeiro clique (`?audio=med` e navegador comum); clique de seleção/ordem; batalha (efeitos,
+teto de vozes, música paz → combate da facção); cena visível (com a câmera longe nenhum efeito posicional chega ao motor, os
+que chegam estão no frustum); volumes por canal e persistência; tileset × facção (música e ambiência); e, offline, pico/RMS de
+música (**todas** as 37 faixas do catálogo no volume máximo), ambiência, as 39 variantes de receita de efeito e pisos de pior
+caso (golpes a cada 30 ms; 25 efeitos no mesmo instante). Critério central: nada passa de 1,0 (o `DynamicsCompressor` do mestre
+é seguido de um saturador suave, `SOFT_CLIP` em `src/audio/audioConfig.js`, que garante o teto também para vozes que começam
+juntas). Falha com `pageerror`/`console.error`. Resultado: 31 verificações OK, 0 falhas; maior pico de música 0,959; 25
+efeitos simultâneos no máximo = pico 1,0 sem nenhuma amostra acima. As falas foram removidas do jogo, então a verificação
+de fala/ducking da versão original da branch `task/F7-08-verificacao` não existe mais.
+
+### 8.2 Pendente: parte auditiva (G1, local, com som)
 
 - `/inspector.html` → **Músicas**: ouvir cada faixa e marcar as que ficam; testar "Ouvir transição paz → combate",
   "Só ouvir os marcados" e "Copiar seleção (JSON)".

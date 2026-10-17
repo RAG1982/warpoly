@@ -54,6 +54,7 @@ export function createFakeAudioContext({ sampleRate = 44100 } = {}) {
         attack: createFakeParam(0.003), release: createFakeParam(0.25), reduction: 0
       });
     },
+    createWaveShaper() { return node('shaper', { curve: null, oversample: 'none' }); },
     createStereoPanner() { return node('panner', { pan: createFakeParam(0) }); },
     createOscillator() { return source('osc', { type: 'sine', frequency: createFakeParam(440), detune: createFakeParam(0) }); },
     createBiquadFilter() {

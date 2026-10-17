@@ -85,7 +85,19 @@ Esforço do agente: **P** ≤ 2 h · **M** meio dia · **G** 1–2 dias · **GG*
 
 ## 4. Decisões
 
-### 4.1 Decisões suas (9)
+### 4.0 Decisões já respondidas pelo dono (2026-10-17)
+
+| Decisão | Resposta | Efeito no plano |
+|---|---|---|
+| D1 | **Só a Aliança primeiro** | 1.0 = M0–M3, M5, M6. **M4 (Horda) vira 1.1**, logo depois |
+| D3 | **Retomar a F5-03 depois da Aliança** | M5-01 confirmada (depois de M3-13) |
+| D4 | **O dono entrega os 5 heróis em `.blend` já com rig**; o agente adiciona animações e integra no jogo e no inspetor | M2-20…24 passam a depender dos arquivos do dono (sem Tripo/`generate_3d`/modelagem do zero) |
+| D6 | **HUD nova: sim**, o dono fornecerá imagens de referência | M5-06 confirmada; a maquete HTML nasce das imagens |
+| D7 | **Cortar heróis com XP** (e em escaramuça) | M5-12 **DROPPED** |
+| D8 | **Cancelar a Horda clássica (F8-06)** | F8-06 **DROPPED**; a Clássica fica com as 8 missões da Aliança |
+| D2, D5, D9 | **Aguardando resposta** (detalhes enviados na conversa) | D2 bloqueia M3-02; D5 e D9 não bloqueiam até M2-08/M6-03 |
+
+### 4.1 Decisões suas (9) — texto original das opções
 
 Cada uma tem uma **recomendação** e um **padrão**: se você não responder até o ponto indicado em "Bloqueia", sigo a recomendação.
 
@@ -215,8 +227,8 @@ Legenda de dependências: só IDs; "—" = pode começar já. **Dif.** = dificul
 ### M0 — Base limpa
 | ID | Tarefa | Dif. | Esf. | Exec. | Dep. | Origem | Status |
 |---|---|---|---|---|---|---|---|
-| M0-01 | Higiene do git (mesclar ART-04, preservar WIP, apagar o morto) | Fácil | P | S | — | — | TODO |
-| M0-02 | Reorganizar a documentação (histórico, TASKS enxuto, paridade, handoff) | Média | M | S | M0-01 | — | TODO |
+| M0-01 | Higiene do git (mesclar ART-04, preservar WIP, apagar o morto) | Fácil | P | S | — | — | DONE (2026-10-17) |
+| M0-02 | Reorganizar a documentação (histórico, TASKS enxuto, paridade, handoff) | Média | M | S | M0-01 | — | DONE (2026-10-17) |
 
 ### M1 — Fechar o que já existe
 | ID | Tarefa | Dif. | Esf. | Exec. | Dep. | Origem | Status |
@@ -254,11 +266,11 @@ Legenda de dependências: só IDs; "—" = pode começar já. **Dif.** = dificul
 | M2-17 | Sub-bosque e pântano | Fácil | M | SB | M0-01 | ART-10 | TODO |
 | M2-18 | Efeitos ambientais (poeira, cinza, vapor, neve, lava) | Média | M | S | M2-14 | ART-11 | TODO |
 | M2-19 | Texturas de terreno por bioma (só se M1-01 reprovar) | Média | M | SB | M1-01 | ART-05 | TODO (condicional) |
-| M2-20 | Herói Dorian: modelo, retrato, ícone | Difícil | G | SB | D4 | MUNDO-HEROIS | TODO |
-| M2-21 | Herói Oren | Difícil | G | SB | D4 | MUNDO-HEROIS | TODO |
-| M2-22 | Herói Drogath | Difícil | G | SB | D4 | MUNDO-HEROIS | TODO |
-| M2-23 | Herói Vozgul | Difícil | G | SB | D4 | MUNDO-HEROIS | TODO |
-| M2-24 | Herói Skarn | Difícil | G | SB | D4 | MUNDO-HEROIS | TODO |
+| M2-20 | Herói Dorian: integração do `.blend` do dono (animações, jogo, inspetor, retrato) | Difícil | G | SB | `.blend` do dono | MUNDO-HEROIS | TODO |
+| M2-21 | Herói Oren: integração do `.blend` do dono | Difícil | G | SB | `.blend` do dono | MUNDO-HEROIS | TODO |
+| M2-22 | Herói Drogath: integração do `.blend` do dono | Difícil | G | SB | `.blend` do dono | MUNDO-HEROIS | TODO |
+| M2-23 | Herói Vozgul: integração do `.blend` do dono | Difícil | G | SB | `.blend` do dono | MUNDO-HEROIS | TODO |
+| M2-24 | Herói Skarn: integração do `.blend` do dono | Difícil | G | SB | `.blend` do dono | MUNDO-HEROIS | TODO |
 | M2-25 | **G2 — sua passada nº 2** (aprovar prévias dos 16 mapas, ≈ 1 h) | — | — | V | M2-03…07 | — | TODO |
 
 ### M3 — Campanha da Aliança (`war-alliance`)
@@ -281,7 +293,7 @@ Legenda de dependências: só IDs; "—" = pode começar já. **Dif.** = dificul
 | M3-15 | **G3 — você joga as 12 missões** (≈ 4–5 h) | — | — | V | M3-14 | TODO |
 | M3-16 | Ajustes pós-playtest da Aliança | Média | M | S | M3-15 | TODO |
 
-### M4 — Campanha da Horda (`war-horde`) — 1.1 se D1 = (b)
+### M4 — Campanha da Horda (`war-horde`) — **1.1** (D1: Aliança primeiro)
 | ID | Tarefa | Dif. | Esf. | Exec. | Dep. | Status |
 |---|---|---|---|---|---|---|
 | M4-01 … M4-12 | Missões 1–12 da Horda (tabela na §7 de `PLANO_FINAL_TAREFAS.md`) | Média/Difícil | M–G | S | M3-13, M2-07 | TODO |
@@ -291,18 +303,18 @@ Legenda de dependências: só IDs; "—" = pode começar já. **Dif.** = dificul
 ### M5 — Polimento
 | ID | Tarefa | Dif. | Esf. | Exec. | Dep. | Origem | Status |
 |---|---|---|---|---|---|---|---|
-| M5-01 | IA: níveis de dificuldade + seletor (cond. D3=a) | Muito difícil | GG | S | M3-13 | F5-03 | TODO (condicional) |
+| M5-01 | IA: níveis de dificuldade + seletor (D3 = a) | Muito difícil | GG | S | M3-13 | F5-03 | TODO |
 | M5-02 | Rebalanceamento da árvore completa e dos heróis | Difícil | G | S | M3-13 | F3-11, NEW-30 | TODO |
 | M5-03 | Desempenho: ORM/texturas, CPU de animação, massa300 | Difícil | G | S | M1-03 | NEW-6, NEW-14, F1-10 | TODO |
 | M5-04 | Arte: Refinaria, Fundição, Forja Naval, Caldeirão | Média | G | SB | M0-01 | F7-00b | TODO |
 | M5-05 | Arte: Submersível, Tartaruga Colossal, Ovelha | Média | M | SB | M0-01 | F7-00b | TODO |
-| M5-06 | HUD nova (cond. D6=a): maquete, aprovação, implementação | Difícil | GG | S | M3-14 | ART-14 | TODO (condicional) |
+| M5-06 | HUD nova (D6 = sim): maquete a partir das imagens do dono, aprovação, implementação | Difícil | GG | S | M3-14 | ART-14 | TODO |
 | M5-07 | Música: seleção de faixas, tema da história, ambiência por bioma | Média | M | S+V | M1-02 | MUSICA | TODO |
 | M5-08 | Escala dos orcs e pendências de arte (NEW-32) | Fácil | P | SB | M1-10 | — | TODO |
 | M5-09 | Lint (53 avisos), código morto e `check-data-parity` | Fácil | M | H | — | F0-05, NEW-31 | TODO |
 | M5-10 | Fauna decorativa extra (ART-15) | Média | M | SB | M2-13 | ART-15 | TODO (opcional) |
 | M5-11 | **G5 — sua passada nº 5** (HUD, música, dificuldade, ≈ 2 h) | — | — | V | M5-01…07 | — | TODO |
-| M5-12 | Heróis com XP/escaramuça (só se D7 = b/c) | Muito difícil | GG | S | D7 | D6 | TODO (condicional) |
+| M5-12 | Heróis com XP/escaramuça | Muito difícil | GG | S | D7 | D6 | DROPPED (D7: cortado) |
 
 ### M6 — Lançamento
 | ID | Tarefa | Dif. | Esf. | Exec. | Dep. | Origem | Status |

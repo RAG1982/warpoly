@@ -22,6 +22,10 @@ import duelo3 from './duelo-continental-3.json';
 import ilhaUnica1 from './ilha-unica-1.json';
 import ilhaUnica2 from './ilha-unica-2.json';
 import ilhaUnica3 from './ilha-unica-3.json';
+// M2-03 (2026-10-17): mapas de campanha (`hidden: true`, fora da lista da Escaramuça), gerados por `tools/gen-campaign-maps.mjs`
+import camp01 from './camp-01-baia-de-aurelan.json';
+import camp02 from './camp-02-pouso-do-encontro.json';
+import camp03 from './camp-03-pedra-mae.json';
 // Navais (dois-continentes, arquipelago-vivo): em `pendentes/` até existir IA rival que ataque por mar (NEW-44). Fora do registro = fora do jogo e do boot.
 import { generateMap } from './generator.js';
 
@@ -41,6 +45,9 @@ const MAPS = Object.freeze({
   'ilha-unica-1': ilhaUnica1,
   'ilha-unica-2': ilhaUnica2,
   'ilha-unica-3': ilhaUnica3,
+  'camp-01-baia-de-aurelan': camp01,
+  'camp-02-pouso-do-encontro': camp02,
+  'camp-03-pedra-mae': camp03,
   tutorial // F6-09: mapa do tutorial (`hidden`: não aparece na lista da Escaramuça)
 });
 

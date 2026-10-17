@@ -197,3 +197,22 @@ O jogo **não** roda o gerador (o campo usa `sin/cos/exp`): ele roda em ferramen
 - **Testes:** `tests/unit/coast.test.js` (pureza, shim, determinismo, conectividade, lagoas, rota naval, simetria, ≤ 1 s por mapa), `coastRivers.test.js` (rios e
   vaus, travessia no Pathfinder) e `coastWorld.test.js` (presets, `validateMapDef` sem erros, madeira ≥ 8000 medida com o GameManager real, duelo simétrico,
   conectividade e rota naval, CLI). Mapas do MUNDO-7 registrados em `index.js` (2026-10-16): `duelo-continental-1..3` (sementes 1, 2, 3) e `ilha-unica-1..3` (sementes 1, 2, 3), com ouro de 7.500 por mina (a mina padrão de 2.500 esgotava no meio da partida). Os navais, `dois-continentes-1..3` (sementes 1, 2, 5) e `arquipelago-vivo-1..3` (sementes 1, 3, 4), ficam em `pendentes/`, fora do registro, até existir IA que ataque por mar (NEW-44): as bases estão em regiões de terra separadas por mar. Estado do soak e travamentos aceitos: ver `docs/TASKS.md` (MUNDO-7).
+
+## Mapas de campanha (M2-03 e seguintes · `tools/gen-campaign-maps.mjs`)
+
+Os palcos da campanha são mapas `painted` com `biomeGrid` (e `hidden: true`: não aparecem na lista da Escaramuça; `getMap`/`listMaps({ includeHidden: true })` os devolvem). Saem do assador de costas (`buildCoastWorld`) com um preset por palco e uma etapa de pós-processamento que acrescenta o que a ficha da missão exige (acampamento neutro, minas extras, âncoras nomeadas). Receita em `tools/lib/campaignMaps.mjs` (`CAMPAIGN_PRESETS`, funções `postBaia`/`postPouso`/`postPedra`); CLI e prévia em `tools/gen-campaign-maps.mjs`:
+
+```bash
+node tools/gen-campaign-maps.mjs --id camp-02-pouso-do-encontro --scan 20-44 --preview-dir /tmp/prev   # uma prévia PNG por semente
+node tools/gen-campaign-maps.mjs --id camp-02-pouso-do-encontro --seed 22 --tries 1 --preview docs/refs/mundo/previews/campanha/camp-02-pouso-do-encontro.png --write
+```
+
+A prévia mostra relevo e biomas, as bases (anel branco: azul = slot 0, vermelho = slot 1), minas (quadrado amarelo = ouro, cinza = pedra), bosques (círculo verde), vaus (círculo laranja), acampamentos (alvo vermelho) e as âncoras numeradas (cruz rosa = terra, azul claro = água; a lista sai no terminal). Todos têm ouro de 7.500 por mina e madeira ≥ 8.000 a ≤ 60 u de cada base. O assador ganhou a opção `mountain` (escala da cordilheira do continente `lush`, padrão 1 = como antes; `< 1` = colinas, sem neve junto às bases).
+
+| id | Tamanho / semente | Tileset | Conteúdo |
+|---|---|---|---|
+| `camp-01-baia-de-aurelan` (A01) | 176 (jogável 164) · semente 1 (`mountain` 0,8) | `exuberante` | continente com 4 enseadas e 2 penínsulas; slot 0 a oeste (jogador), slot 1 a leste (livre); 1 acampamento da Irmandade da Maré (`neutralCamp1`, 4 guardas, +300 de ouro, jazida de 3.000); âncoras `muralFenda` (praia afastada), `shipHorizon` (água, a vela da cutscene) e `landingZone` |
+| `camp-02-pouso-do-encontro` (A02 · H02) | 176 · semente 22 (`mountain` 0,35) | `verdejante` | ilha temperada com 1 rio e vaus; slot 0 = Liga (NO), slot 1 = Clãs (L); `pier1`/`pier1Water` (Cais da Liga) e `pier2`/`pier2Water` (barcaça dos Clãs); `logFort` (forte de troncos dos presos), `lighthouse` (Torre da Fenda, ponta de terra), `emissary1` (Emissário orc) e `emissary2` (Mensageiro humano), `patrol1..3` em volta do forte; `landingZone` = `pier1` |
+| `camp-03-pedra-mae` (A03 · H03) | 176 · semente 62 | `pedregoso` | ilha rochosa com 3 minas de ouro junto ao Paço (`colonyHall` = slot 0; `colonyGold1/2` + a padrão) e 2 na cabeça de ponte (slot 1; `bridgehead`, `bridgeheadSea`, `bridgeheadGold`); `beach1..3` (praias de pouso das ondas) com `seaLanding1..3` (água de onde as Barcaças chegam) e `fort1..3` (forte da colônia, na frente de cada praia); `landingZone` = `beach1` |
+
+Convenção dos palcos compartilhados (2 e 3): o slot 0 é o lado da Liga de Aurelan e o slot 1 o dos Clãs do Cinzal; a missão da Horda escolhe o `startSlot` e as âncoras do outro lado (`pier2`, `emissary2`, `bridgehead`…). Testes: `tests/unit/campaignMaps.test.js` (formato, `validateMapDef` sem erros nem avisos, ouro, madeira, âncoras alcançáveis por terra/mar, reprodutibilidade da semente). Soak e tentativas de semente: `tools/soak-report/m2-03/` e `docs/TASKS.md`/relatório da M2-03.

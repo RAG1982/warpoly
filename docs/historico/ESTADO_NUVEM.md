@@ -1,3 +1,5 @@
+> Histórico; fonte atual: docs/PLANO_FINAL.md
+
 # Estado do projeto para a nuvem — pronto, com falha, não iniciado
 
 > **Atualização 2026-10-13 (integração local):** `task/mundo-2026-10-13` (novo mundo parcial, mina que desaba, docs da nuvem `7497c72` e revisão visual de NEW-13/NEW-19 da branch `task/revisao-visual-2026-10-11`) mesclada no `master` e enviada ao `origin`. Testes: 149 arquivos / 1897 testes, 0 falhas; lint 0 erros; build ok. Seções 3, 4.1 e 6 atualizadas.

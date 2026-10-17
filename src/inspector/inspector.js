@@ -1318,7 +1318,7 @@ const MODEL_CATALOG = [
     sourceFile: 'tools/blender/build_critter_boar.py',
     create: createGlb('critter_boar'),
     description: 'Javali selvagem neutro (ART-04): tronco em cunha, crina de cerdas, focinho rosado e presas curtas, pernas curtas com cascos. Substituirá o procedural no jogo.',
-    notes: '6 draw calls (Body, Head e 4 pernas), 1 172 triângulos, atlas 512², 1,20 × 0,60 × 0,37 m, frente em +Z. Sem animação nesta entrega. Escala de jogo pendente (procedural mede ~2,58 m).',
+    notes: '6 draw calls (Body, Head e 4 pernas), 1 172 triângulos, atlas 512², escala ×1,4 na geometria: 0,51 × 0,84 × 1,87 m (L × A × P), frente em +Z. No jogo, CritterView aplica mais ×1,4: ~2,61 m de comprimento, como o procedural (2,58 m). Sem animação nesta entrega.',
   },
   {
     id: 'wall_human_glb',

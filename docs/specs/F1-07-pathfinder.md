@@ -2,7 +2,7 @@
 
 > **Status: ✅ PRONTA — DONE (PR #2, nuvem)**
 
-Leia antes: `docs/specs/_COMUM.md` (na nuvem, veja também `docs/HANDOFF_CLOUD.md`), `CLAUDE.md`, bug B8 em `docs/04_DIAGNOSTICO.md`.
+Leia antes: `docs/specs/_COMUM.md` (na nuvem, veja também `docs/historico/HANDOFF_CLOUD.md`), `CLAUDE.md`, bug B8 em `docs/04_DIAGNOSTICO.md`.
 
 ## Por quê
 `src/core/Pathfinder.js` (grade 1,5 u, A*):

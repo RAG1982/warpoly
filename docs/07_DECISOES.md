@@ -12,7 +12,7 @@ Registro das decisões do dono do projeto. Toda tarefa deve respeitá-las; mudan
 | D6 | 2026-09-29 | **Heróis na campanha e na escaramuça** (1 por jogador, Centro nível 2, níveis 1–5; opção "Sem heróis"). | F4-08 ampliada, setup de escaramuça |
 | D7 | 2026-09-29 | Nomes de unidades/construções de `docs/08_GAME_DESIGN.md` aprovados. | `src/data/names.js`, F6-09 |
 | D8 | 2026-10-11/12 | **Novo mundo**: planeta Ondara (humanos a oeste em Velmara, orcs a leste em Cinzara, 8 ilhas no Mar Fendido); 2 campanhas espelhadas de 12 missões; 3 heróis por facção; costas irregulares; biomas só visuais; **lava** só bloqueia (sem dano); a campanha atual + briefing da Horda ficam como "Clássica (beta)"; mapa-múndi ilustrativo. | `docs/specs/MUNDO-*.md` |
-| D9 | 2026-10-11 | F7-02 fica como está (`TeamColor`); F8-03 `painted` em `src/sim`; F8-05 premissa aprovada; F9-03 `checkEvery = 10` em jogo; `GLTFBuildingLoader` removido; falas das unidades removidas (2026-10-12); música: prioridade baixa. | TASKS, ESTADO_NUVEM §5 |
+| D9 | 2026-10-11 | F7-02 fica como está (`TeamColor`); F8-03 `painted` em `src/sim`; F8-05 premissa aprovada; F9-03 `checkEvery = 10` em jogo; `GLTFBuildingLoader` removido; falas das unidades removidas (2026-10-12); música: prioridade baixa. | TASKS (histórico), ESTADO_NUVEM (histórico) §5 |
 
 ## D2 — nomes provisórios (até o glossário da F3-00)
 

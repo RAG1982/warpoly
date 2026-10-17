@@ -1,7 +1,7 @@
 # MUNDO-HEROIS · Os seis heróis da Guerra do Mar Fendido (Capitão, Mago e Comandante por facção)
 
 > **Status: SPEC (proposta revisada com as decisões do dono de 2026-10-11; não iniciada)**. Escrita por Sonnet 5.5. **Só documento: nenhum código, nenhum JSON.** Complementa [`MUNDO-HISTORIA-CAMPANHA.md`](MUNDO-HISTORIA-CAMPANHA.md) (mundo, 12 missões por facção, `unlocks`) e [`MUNDO-BRIEFING-DONO.md`](MUNDO-BRIEFING-DONO.md).
-> Leia antes: `CLAUDE.md`, `docs/HANDOFF_CLOUD.md` (§2), `docs/specs/_COMUM.md`, `docs/specs/F4-08-herois.md`, `src/data/heroes.js`, `src/data/units.js` (`hero_*`), `src/data/abilities.js` (`hero_*`; cabeçalho = catálogo de efeitos) e `docs/08_GAME_DESIGN.md` §5.3b.
+> Leia antes: `CLAUDE.md`, `docs/historico/HANDOFF_CLOUD.md` (§2), `docs/specs/_COMUM.md`, `docs/specs/F4-08-herois.md`, `src/data/heroes.js`, `src/data/units.js` (`hero_*`), `src/data/abilities.js` (`hero_*`; cabeçalho = catálogo de efeitos) e `docs/08_GAME_DESIGN.md` §5.3b.
 > Executores: agentes **sonnet** na nuvem para dados/habilidades/i18n/retratos provisórios (§7); **modelo 3D, retrato final e voz são locais** (modelagem: Sonnet 5.5 no Blender local, nunca Haiku; o dono gera as imagens de referência antes).
 
 ---
@@ -295,7 +295,7 @@ Cada herói é **inimigo (chefe ou capitão de patrulha)** na campanha oposta, n
 
 ## 7. O que se implementa onde
 
-### 7.1 Nuvem (sem GPU/navegador; regras de `HANDOFF_CLOUD.md` §2)
+### 7.1 Nuvem (sem GPU/navegador; regras de `docs/historico/HANDOFF_CLOUD.md` §2)
 | Item | Arquivos | Verificação |
 |---|---|---|
 | **Dados dos heróis** (3 novos, 3 alterados) | `src/data/units.js` | `tests/unit/heroes.test.js` (estende: 6 heróis, `modelOf` válido, facção, unique) |

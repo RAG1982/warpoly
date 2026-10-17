@@ -1,3 +1,5 @@
+> Histórico; fonte atual: docs/PLANO_FINAL.md
+
 # AUD-1 · Auditoria do backlog NEW-1 … NEW-35
 
 Auditoria **somente documental** (nenhum item foi corrigido aqui). Base: `origin/master` em 2026-10-10 (`bece3a9` e seguintes), leitura do código e do histórico. Itens que já têm status no `docs/TASKS.md` (✅ `DONE`) não foram reauditados: NEW-3, 8, 10, 12, 17, 18, 21, 22, 23, 28, 32, 33 e o ⏸ NEW-20.

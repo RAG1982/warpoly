@@ -232,23 +232,77 @@ def faces_do_machado(f):
 
 
 def ajustar_fonte(ctx):
-    """Torna o machado um corpo rígido: as posições (e normais) dos vértices do machado = matriz de deformação do osso da mão x repouso
-    (os pesos de pele do Tripo para o cabeçote vinham de pescoço/ombro e deformariam o machado)."""
+    """Corrige a malha reposada antes de cortar:
+    1. o machado vira corpo RÍGIDO: posições (e normais) dos vértices = matriz de deformação do osso da mão x repouso (os pesos de pele
+       do Tripo para o cabeçote vinham de pescoço/ombro e o deformariam);
+    2. o pelo do manto (marrom claro, acima de y = 0,55) que tinha pesos de braço/mão (descansava junto ao cabo erguido) volta ao
+       repouso: o braço desce e o pelo fica no ombro;
+    3. faces fora do machado que ficaram esticadas (> 2x) entre o pelo e o cabo são removidas (eram a costura cabo-pelo)."""
     f = ctx.f
     ctx.axe = faces_do_machado(f)
     ESTADO['axe'] = ctx.axe
     D = f.deformacao['RightHand']
     Rn = D[:3, :3]
-    vs = sorted({int(f.loop_v[f.ls[i] + k]) for i in ctx.axe for k in range(f.lt[i])})
-    co_novo = (f.co_rest[vs] @ D[:3, :3].T) + D[:3, 3]
+    n = len(f.ls)
+    tri = np.array([f.loop_v[f.ls[i]:f.ls[i] + 3] for i in range(n)])
+    vs = sorted({int(v) for i in ctx.axe for v in tri[i]})
     f.co = f.co.copy()
-    f.co[vs] = co_novo
     f.cn = f.cn.copy()
+    f.co[vs] = f.co_rest[vs] @ Rn.T + D[:3, 3]
     for i in ctx.axe:
         l0 = f.ls[i]
-        f.cn[l0:l0 + f.lt[i]] = f.cn_rest[l0:l0 + f.lt[i]] @ Rn.T
+        f.cn[l0:l0 + 3] = f.cn_rest[l0:l0 + 3] @ Rn.T
+    # pelo do manto com pesos de braço: volta ao repouso
+    nv = len(f.co)
+    cor_v = np.zeros((nv, 3))
+    cont = np.zeros(nv)
+    for l in range(len(f.loop_v)):
+        v = f.loop_v[l]
+        cor_v[v] += HC.amostrar(f.pixels, f.uv[l][0], f.uv[l][1])
+        cont[v] += 1
+    cor_v /= np.maximum(cont, 1)[:, None]
+    arm = [i for i, b in enumerate(f.ossos) if b.startswith(('RightArm', 'RightForeArm', 'RightHand'))]
+    warm = f.W[:, arm].sum(axis=1)
+    eixo_machado = np.zeros(nv, bool)
+    eixo_machado[vs] = True
+    fix = np.array([eh_pelo(c) for c in cor_v]) & (f.co_rest[:, 1] > 0.55) & (warm < 0.97) & ~eixo_machado
+    f.co[fix] = f.co_rest[fix]
+    for l in range(len(f.loop_v)):
+        if fix[f.loop_v[l]]:
+            f.cn[l] = f.cn_rest[l]
+    # faces esticadas (costura cabo-pelo)
+    def comp(co):
+        a, b, c = co[tri[:, 0]], co[tri[:, 1]], co[tri[:, 2]]
+        return np.stack([np.linalg.norm(a - b, axis=1), np.linalg.norm(b - c, axis=1), np.linalg.norm(c - a, axis=1)], axis=1)
+    razao = (comp(f.co) / (comp(f.co_rest) + 1e-6)).max(axis=1)
+    ctx.removidas = {int(i) for i in np.where(razao > 2.0)[0] if i not in ctx.axe}
+    # estilhaços: pedaços pequenos (< 60 faces) que sobram soltos depois da remoção
+    resto = [i for i in range(n) if i not in ctx.axe and i not in ctx.removidas]
+    pai = list(range(nv))
+
+    def achar(x):
+        while pai[x] != x:
+            pai[x] = pai[pai[x]]
+            x = pai[x]
+        return x
+    for i in resto:
+        a = achar(tri[i][0])
+        for x in tri[i][1:]:
+            r = achar(x)
+            if r != a:
+                pai[r] = a
+    grupos = {}
+    for i in resto:
+        grupos.setdefault(achar(tri[i][0]), []).append(i)
+    estilhacos = [i for g in grupos.values() if len(g) < 60 for i in g]
+    ctx.removidas |= set(estilhacos)
+    ESTADO['removidas'] = ctx.removidas
     ctx.D_mao = D
-    log('machado rígido: %d vértices movidos com o osso RightHand (pulso %.1f° da posição neutra)' % (len(vs), ANGULO_PULSO))
+    dbg = os.environ.get('DROGATH_DEBUG_NPY')
+    if dbg:
+        np.save(dbg, f.co)
+    log('machado rígido: %d vértices com o osso RightHand (pulso %.1f° do neutro); pelo restaurado: %d vértices; faces removidas (esticadas + %d de estilhaços): %d' %
+        (len(vs), ANGULO_PULSO, int(fix.sum()), len(estilhacos), len(ctx.removidas)))
 
 
 def classificar(sopa, S):
@@ -256,6 +310,8 @@ def classificar(sopa, S):
     (nunca é cortado por planos) mesmo estando soldado ao corpo."""
     for f in ESTADO['axe']:
         sopa.comp[f] = 2
+    for f in ESTADO['removidas']:
+        sopa.vivo[f] = False
     info = {}
     for c in (0, 1, 2):
         idx = [f for f in range(len(sopa.fv)) if sopa.comp[f] == c]

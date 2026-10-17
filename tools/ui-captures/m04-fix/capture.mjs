@@ -136,7 +136,7 @@ try {
       const camp = gm.buildings.find((b) => b.type === 'bandit_camp' && b.mesh.position.x < 0);
       const area = gm.mission.objectives.get('deliver').def.area;
       return {
-        fort: { id: fort.id, type: fort.type, owner: fort.ownerId, x: fort.mesh.position.x, z: fort.mesh.position.z, hp: fort.hp, built: fort.isConstructed, rotY: fort.mesh.rotation.y },
+        fort: { id: fort.id, type: fort.type, owner: fort.ownerId, x: fort.mesh.position.x, z: fort.mesh.position.z, hp: fort.hp, maxHp: fort.maxHp, built: fort.isConstructed, rotY: fort.mesh.rotation.y },
         camp: { x: camp.mesh.position.x, z: camp.mesh.position.z },
         area,
         convoy: tag('convoy').map((u) => u.id),
@@ -148,7 +148,7 @@ try {
       };
     });
     console.log(JSON.stringify(info));
-    check('o forte é um castelo do jogador, concluído, com PV cheios', info.fort.type === 'castle' && info.fort.owner === 0 && info.fort.built && info.fort.hp === 1600);
+    check('o forte é um castelo do jogador, concluído, com PV cheios', info.fort.type === 'castle' && info.fort.owner === 0 && info.fort.built && info.fort.hp === info.fort.maxHp);
     check('os 4 carregadores têm markColor ciano', info.convoyMark.length === 4 && info.convoyMark.every((c) => c === '#22d3ee'));
     check('área de entrega centrada no forte', info.area.x === info.fort.x && info.area.z === info.fort.z);
 

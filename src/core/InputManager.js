@@ -299,7 +299,13 @@ export class InputManager {
   }
 
   centerOnHq() {
-    const hq = this.gm.buildings.find(b => (b.type === 'castle' || b.type === 'great_hall') && b.ownerId === this.gm.localPlayerId);
+    // M2-02: com 2+ Centros (Marco da Colônia) a tecla alterna entre os vivos; com 1 Centro seleciona sempre o mesmo.
+    const mine = this.gm.buildings.filter(b => (b.type === 'castle' || b.type === 'great_hall') && b.ownerId === this.gm.localPlayerId && !b.isDead);
+    let hq = mine[0];
+    if (mine.length > 1) {
+      const cur = mine.indexOf(this.gm.selectedBuilding);
+      if (cur >= 0) hq = mine[(cur + 1) % mine.length];
+    }
     if (hq) {
       this.sm.cameraTarget.copy(hq.mesh.position);
       this.gm.selectSingle(hq);

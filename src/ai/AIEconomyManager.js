@@ -178,14 +178,19 @@ export class AIEconomyManager {
     const lenB = buildings.length;
     let hq = null;
     let hasForge = false;
+    let upgrading = false;
     for (let i = 0; i < lenB; i++) {
       const b = buildings[i];
       if (b.ownerId === this.director.playerId && !b.isDead) {
-        if (!hq && b.type === this.director.hqType && b.isConstructed) hq = b;
+        // M2-02: com 2+ Centros (Marco da Colônia) evolui o de MAIOR nível (empate: o mais antigo) e nunca dois ao mesmo tempo.
+        if (b.type === this.director.hqType && b.isConstructed) {
+          if (b.tierUpgrade) upgrading = true;
+          if (!hq || b.tier > hq.tier) hq = b;
+        }
         if (b.type === this.director.forgeType && b.isConstructed) hasForge = true;
       }
     }
-    if (!hq || hq.tier >= 3 || hq.tierUpgrade) return;
+    if (!hq || hq.tier >= 3 || upgrading) return;
     if (this.director.woodOutlook().none) return; // NEW-44: o upgrade custa 400+ de madeira que não volta — vale mais em tropas
     // F5-04: a estratégia define quando evoluir (rush só depois de 8 min); `hqUpgradeAt` trabalhadores vivos.
     if (this.director.simTime <= 480 && this.director.strategy.hqUpgradeAt >= 99) return;
@@ -332,14 +337,15 @@ export class AIEconomyManager {
     for (let i = 0; i < lenB; i++) {
       const b = buildings[i];
       if (b.ownerId === this.director.playerId && b.type === this.director.hqType && b.isConstructed && !b.isDead) {
+        // F3-06: Centro em upgrade de nível não treina (fila pausada — ver `Building.queueUnit`). M2-02: com 2+ Centros, treina no
+        // primeiro que não esteja evoluindo (com 1 Centro o comportamento é o de sempre: em upgrade, não recruta).
+        if (b.tierUpgrade) continue;
         hq = b;
         break;
       }
     }
 
     if (!hq) return;
-    // F3-06: Centro em upgrade de nível não treina (fila pausada — ver `Building.queueUnit`).
-    if (hq.tierUpgrade) return;
 
     const queuedWorkers = (hq.queue ? hq.queue.length : 0);
     const totalWorkers = workerCount + queuedWorkers;

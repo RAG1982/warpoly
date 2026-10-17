@@ -15,6 +15,8 @@ import { BUILDINGS } from '../data/buildings.js';
 const BASE = (import.meta.env && import.meta.env.BASE_URL) || '/';
 export const GLB_MODELS = {
   grunt: { url: `${BASE}models/grunt.glb`, root: 'Grunt', type: 'grunt' },
+  // Drogath Punho-de-Brasa (hero_drogath, M2-22): modelo do Tripo finalizado (Weapon = machado filho de ArmR, faixas e manto em TeamColor)
+  hero_drogath: { url: `${BASE}models/hero_drogath.glb`, root: 'Grunt', type: 'grunt' },
   knight: { url: `${BASE}models/knight.glb`, root: 'Knight', type: 'knight' },
   // Capitão Brann (hero_brann): modelo do Tripo finalizado (commit 4df356b; martelo = Sword, capa = Cape, sem escudo)
   hero_brann: { url: `${BASE}models/hero_brann.glb`, root: 'Knight', type: 'knight' },

@@ -10,6 +10,9 @@
  *   B  idem combate100|massa300 com a resolução dinâmica padrão do preset (controle)
  *   C  SSAO a 1920×1080, texq=high: efeitos padrão × ?fx=-ssao × ?fx=0 (inicial e combate100)
  *   D  draw calls com a câmera sobre um acampamento neutro × sem neutros (NEW-27)
+ *   F  decomposição do custo do frame em combate100/massa300 (fx, sombras, resolução) + CPU de render
+ *   G  SSAO no jogo "vivo" (réplica da medição da M1-01: duelo-continental-1, 1080p, câmera da base e panorama)
+ *   E  decomposição do custo dos neutros (bandidos, acampamentos, critters, jazidas), preset high
  *
  * Cada configuração: 1 execução descartada (aquecimento: cache do Vite, shaders, JIT) + N medidas (padrão 3);
  * dentro de cada execução ainda há `benchWarmup` s descartados pelo próprio bench.
@@ -73,12 +76,13 @@ async function launch(chromium, width, height) {
   throw lastErr;
 }
 
-async function newPage(browser, width, height, { dynRes }) {
+async function newPage(browser, width, height, { dynRes, overrides = {} }) {
   const ctx = await browser.newContext({ viewport: { width, height }, deviceScaleFactor: 1 });
-  if (!dynRes) {
-    await ctx.addInitScript(() => {
-      try { localStorage.setItem('warpoly.qualityOverrides', JSON.stringify({ dynamicResolution: false })); } catch { /* */ }
-    });
+  const ov = { ...(dynRes ? {} : { dynamicResolution: false }), ...overrides };
+  if (Object.keys(ov).length) {
+    await ctx.addInitScript((o) => {
+      try { localStorage.setItem('warpoly.qualityOverrides', JSON.stringify(o)); } catch { /* */ }
+    }, ov);
   }
   const page = await ctx.newPage();
   const errors = [];
@@ -89,7 +93,7 @@ async function newPage(browser, width, height, { dynRes }) {
 
 /** Uma execução do bench; devolve o `window.__bench` enxuto. */
 async function benchOnce(browser, cfg) {
-  const { ctx, page, errors } = await newPage(browser, cfg.width, cfg.height, { dynRes: cfg.dynRes });
+  const { ctx, page, errors } = await newPage(browser, cfg.width, cfg.height, { dynRes: cfg.dynRes, overrides: cfg.overrides });
   try {
     const url = `${BASE}/?bench=${cfg.scenario}&benchWarmup=${WARMUP}&benchDuration=${DURATION}&quality=high${cfg.query ? `&${cfg.query}` : ''}`;
     await page.goto(url, { waitUntil: 'domcontentloaded', timeout: TIMEOUT_MS });
@@ -102,7 +106,7 @@ async function benchOnce(browser, cfg) {
     }
     return {
       fps: r.fps.avg, p1: r.fps.p1Low, frameMs: r.frameTimeMs.avg, p99Ms: r.fps.p99FrameMs, simMs: r.gameUpdateMs.avg,
-      calls: r.render.callsAvg, tris: r.render.trianglesAvg, heapMB: r.memory.jsHeapUsedMB, texs: r.memory.textures,
+      renderCpuMs: r.render.renderCpuMsAvg, calls: r.render.callsAvg, tris: r.render.trianglesAvg, heapMB: r.memory.jsHeapUsedMB, texs: r.memory.textures,
       geos: r.memory.geometries, loadMs: r.load.readyMs, frames: r.frames,
       pixelRatio: r.quality?.pixelRatioNow ?? r.env.rendererPixelRatio, preset: r.quality?.preset,
       effects: r.quality?.effects, dynRes: r.quality?.dynamicResolution, drawingBuffer: r.env.drawingBuffer,
@@ -112,7 +116,7 @@ async function benchOnce(browser, cfg) {
 }
 
 function summarize(runs) {
-  const keys = ['fps', 'p1', 'frameMs', 'p99Ms', 'simMs', 'calls', 'tris', 'heapMB', 'texs', 'geos', 'loadMs', 'pixelRatio'];
+  const keys = ['fps', 'p1', 'frameMs', 'p99Ms', 'simMs', 'renderCpuMs', 'calls', 'tris', 'heapMB', 'texs', 'geos', 'loadMs', 'pixelRatio'];
   const out = {};
   for (const k of keys) {
     const v = runs.map((r) => r[k]).filter((x) => Number.isFinite(x));
@@ -123,7 +127,7 @@ function summarize(runs) {
 
 async function runMatrix(browser, configs, results) {
   for (const cfg of configs) {
-    const label = `${cfg.scenario} ${cfg.width}x${cfg.height} ${cfg.query || '(padrão)'} dynRes=${cfg.dynRes}`;
+    const label = `${cfg.scenario} ${cfg.width}x${cfg.height} ${cfg.query || '(padrão)'} dynRes=${cfg.dynRes}${cfg.overrides ? ` ov=${JSON.stringify(cfg.overrides)}` : ''}`;
     console.log(`[m1-03] === ${label}`);
     let discarded;
     try {
@@ -143,8 +147,8 @@ async function runMatrix(browser, configs, results) {
 }
 
 // ---------------------------------------------------------------- parte D: neutros
-async function neutralsPart(browser, results) {
-  for (const lod of [true, false]) {
+async function neutralsPart(browser, results, breakdown = false) {
+  for (const lod of breakdown ? [true] : [true, false]) {
     const { ctx, page, errors } = await newPage(browser, 1280, 720, { dynRes: false });
     try {
       await page.goto(`${BASE}/?skipPreload&quality=high${lod ? '' : '&lod=0'}`, { waitUntil: 'domcontentloaded', timeout: TIMEOUT_MS });
@@ -158,12 +162,14 @@ async function neutralsPart(browser, results) {
         const st = window.__neu = { acc: { calls: 0, tris: 0 }, hide: false, roots: [] };
         const collect = () => {
           const out = []; const cnt = { bandidos: 0, acampamentos: 0, critters: 0, jazidas: 0 };
+          st.g = { bandidos: [], acampamentos: [], critters: [], jazidas: [] };
           g.session.entityViews.views.forEach((v, e) => {
             const name = e.constructor?.name; const root = v.root; if (!root) return;
             const nearCamp = camps.some((c) => Math.hypot(root.position.x - c.x, root.position.z - c.z) < 13);
-            if (e.ownerId === 99) { out.push(root); if (name === 'Unit') cnt.bandidos++; else cnt.acampamentos++; }
-            else if (name === 'Critter') { out.push(root); cnt.critters++; }
-            else if (name === 'ResourceDeposit' && nearCamp) { out.push(root); cnt.jazidas++; }
+            const add = (grp) => { out.push(root); st.g[grp].push(root); cnt[grp]++; };
+            if (e.ownerId === 99) add(name === 'Unit' ? 'bandidos' : 'acampamentos');
+            else if (name === 'Critter') add('critters');
+            else if (name === 'ResourceDeposit' && nearCamp) add('jazidas');
           });
           st.roots = out; return cnt;
         };
@@ -171,23 +177,30 @@ async function neutralsPart(browser, results) {
         const orig = r.render.bind(r);
         r.render = (...a) => {
           let saved = null;
-          if (st.hide) { saved = st.roots.map((o) => o.visible); st.roots.forEach((o) => { o.visible = false; }); }
+          let list = null;
+          if (st.hide) { list = st.hide === true ? st.roots : st.hide.flatMap((k) => st.g[k]); saved = list.map((o) => o.visible); list.forEach((o) => { o.visible = false; }); }
           orig(...a);
-          if (saved) st.roots.forEach((o, i) => { o.visible = saved[i]; });
+          if (saved) list.forEach((o, i) => { o.visible = saved[i]; });
           st.acc.calls += r.info.render.calls; st.acc.tris += r.info.render.triangles;
         };
         return { camps: camps.map((c) => [c.x, c.z]), counts: collect(), pixelRatio: r.getPixelRatio(), effects: { ...sm.postfx.effects } };
       });
       console.log(`[m1-03] D lod=${lod}`, JSON.stringify(setup));
-      const view = [
-        { nome: 'acampamento neutro 1 (40,20)', x: 40, z: 20 },
-        { nome: 'acampamento neutro 2 (-40,-20)', x: -40, z: -20 },
-        { nome: 'controle: base do jogador (32,-30)', x: 32, z: -30 },
-        { nome: 'controle: centro (0,0)', x: 0, z: 0 },
-      ];
+      const view = breakdown
+        ? [
+            { nome: 'acampamento neutro 1 (40,20)', x: 40, z: 20 },
+            { nome: 'controle: base do jogador (32,-30)', x: 32, z: -30 },
+          ]
+        : [
+            { nome: 'acampamento neutro 1 (40,20)', x: 40, z: 20 },
+            { nome: 'acampamento neutro 2 (-40,-20)', x: -40, z: -20 },
+            { nome: 'controle: base do jogador (32,-30)', x: 32, z: -30 },
+            { nome: 'controle: centro (0,0)', x: 0, z: 0 },
+          ];
+      const hides = breakdown ? [false, ['bandidos'], ['acampamentos'], ['critters'], ['jazidas'], true] : [false, true];
       const rows = [];
       for (const v of view) {
-        for (const hide of [false, true]) {
+        for (const hide of hides) {
           const samples = [];
           for (let k = 0; k < RUNS + 1; k++) { // 1ª amostra descartada
             const m = await page.evaluate(async ({ x, z, hide }) => {
@@ -207,12 +220,64 @@ async function neutralsPart(browser, results) {
             }, { x: v.x, z: v.z, hide });
             if (k > 0) samples.push(m);
           }
-          rows.push({ vista: v.nome, neutros: hide ? 'ocultos' : 'visíveis', calls: round(mean(samples.map((s) => s.calls)), 0), callsMin: round(Math.min(...samples.map((s) => s.calls)), 0), callsMax: round(Math.max(...samples.map((s) => s.calls)), 0), tris: round(mean(samples.map((s) => s.tris)), 0), fps: round(mean(samples.map((s) => s.fps)), 1) });
+          rows.push({ vista: v.nome, neutros: hide === true ? 'ocultos' : hide ? `só ${hide.join(',')} ocultos` : 'visíveis', calls: round(mean(samples.map((s) => s.calls)), 0), callsMin: round(Math.min(...samples.map((s) => s.calls)), 0), callsMax: round(Math.max(...samples.map((s) => s.calls)), 0), tris: round(mean(samples.map((s) => s.tris)), 0), fps: round(mean(samples.map((s) => s.fps)), 1) });
           console.log('[m1-03] D', lod ? 'lod' : 'sem-lod', JSON.stringify(rows[rows.length - 1]));
         }
       }
       results.push({ lod, setup, rows, errors: errors.slice(0, 5) });
     } finally { await ctx.close().catch(() => {}); }
+  }
+}
+
+// ---------------------------------------------------------------- parte G: SSAO no jogo vivo (réplica da M1-01)
+async function liveSsaoPart(chromium, results) {
+  const M101_ARGS = ['--use-angle=vulkan', '--enable-features=Vulkan', '--enable-gpu', '--ignore-gpu-blocklist',
+    '--js-flags=--max-old-space-size=2048', '--renderer-process-limit=1', '--disable-dev-shm-usage', '--disable-extensions'];
+  const modes = [
+    { nome: 'headless, flags da M1-01 (sem desligar vsync)', make: () => chromium.launch({ headless: true, args: M101_ARGS }) },
+    { nome: 'com janela, flags do bench (sem limite de quadros)', make: () => chromium.launch({ headless: false, args: [...GPU_ARGS, '--window-size=1920,1200'] }) },
+  ];
+  for (const mode of modes) {
+    const browser = await mode.make();
+    try {
+      for (const fx of ['', '&fx=-ssao']) {
+        const runs = [];
+        for (let i = 0; i < RUNS; i++) {
+          const ctx = await browser.newContext({ viewport: { width: 1920, height: 1080 }, deviceScaleFactor: 1 });
+          const page = await ctx.newPage();
+          try {
+            await page.goto(`${BASE}/?skipPreload&texq=high&quality=high&play&map=duelo-continental-1&faction=human${fx}`, { waitUntil: 'load', timeout: TIMEOUT_MS });
+            await page.waitForFunction(() => !!(window.game?.gameManager?.buildings?.length > 0 && window.game.sceneManager), null, { timeout: TIMEOUT_MS, polling: 500 });
+            await assertHardwareGpu(page);
+            const r = await page.evaluate(async () => {
+              const g = window.game; const gm = g.gameManager; const sm = g.sceneManager; const info = sm.renderer.info;
+              const me = gm.playerRegistry?.localPlayer;
+              const hq = gm.buildings.find((b) => b.ownerId === me?.id) || gm.buildings[0];
+              const wait = (ms) => new Promise((res) => setTimeout(res, ms));
+              const acc = { calls: 0, tris: 0 }; const orig = sm.renderer.render.bind(sm.renderer);
+              sm.renderer.render = (...a) => { orig(...a); acc.calls += info.render.calls; acc.tris += info.render.triangles; };
+              const perf = async (ms) => {
+                const samples = []; const calls = []; let last = performance.now(); const t0 = last; acc.calls = 0;
+                await new Promise((res) => { const tick = (t) => { samples.push(t - last); last = t; calls.push(acc.calls); acc.calls = 0; if (t - t0 < ms) requestAnimationFrame(tick); else res(); }; requestAnimationFrame(tick); });
+                const s = samples.slice(5).sort((a, b) => a - b); const avg = s.reduce((x, y) => x + y, 0) / s.length;
+                return { fps: +(1000 / avg).toFixed(1), fpsP1: +(1000 / s[Math.min(s.length - 1, Math.floor(s.length * 0.99))]).toFixed(1), frames: s.length, calls: Math.round(calls.slice(5).reduce((x, y) => x + y, 0) / (calls.length - 5)) };
+              };
+              gm.fogOfWar.setEnabled(true);
+              const setCam = (x, z, zoom) => { sm.cameraTarget.set(x, 0, z); sm.targetZoomLevel = zoom; sm.targetCameraAngle = Math.PI / 4; };
+              await wait(3000);
+              setCam(hq.mesh.position.x, hq.mesh.position.z, 1.0); await wait(1500);
+              const base = await perf(6000);
+              setCam(0, 0, 1.8); await wait(1500);
+              const wide = await perf(6000);
+              return { base, wide, pixelRatio: sm.renderer.getPixelRatio(), effects: { ...sm.postfx.effects }, preset: sm.quality?.current?.name, dynRes: sm.quality?.current?.dynamicResolution, units: gm.units.length + gm.enemies.length };
+            });
+            runs.push(r);
+            console.log(`[m1-03] G ${mode.nome} ${fx || 'padrão'} run ${i + 1}: base ${r.base.fps} FPS (p1 ${r.base.fpsP1}, ${r.base.frames} q.) | amplo ${r.wide.fps} (p1 ${r.wide.fpsP1}) | pr ${r.pixelRatio} fx ${JSON.stringify(r.effects)}`);
+          } catch (e) { console.error('[m1-03] G falhou:', e.message); } finally { await ctx.close().catch(() => {}); }
+        }
+        results.push({ modo: mode.nome, fx: fx || 'padrão', runs });
+      }
+    } finally { await browser.close().catch(() => {}); }
   }
 }
 
@@ -243,8 +308,23 @@ async function main() {
         cfgs.push({ scenario: s, width: 1920, height: 1080, query: q, dynRes: false });
       }
       await runMatrix(browser, cfgs, results);
+    } else if (PART === 'F') {
+      const V = [
+        { q: '', ov: undefined, w: 1280, h: 720 },
+        { q: 'fx=-ssao', ov: undefined, w: 1280, h: 720 },
+        { q: 'fx=0', ov: undefined, w: 1280, h: 720 },
+        { q: '', ov: { shadows: false }, w: 1280, h: 720 },
+        { q: '', ov: undefined, w: 640, h: 360 },
+      ];
+      const cfgs = [];
+      for (const s of ['massa300', 'combate100']) for (const v of V) cfgs.push({ scenario: s, width: v.w, height: v.h, query: v.q, overrides: v.ov, dynRes: false });
+      await runMatrix(browser, cfgs, results);
+    } else if (PART === 'G') {
+      await liveSsaoPart(chromium, results);
     } else if (PART === 'D') {
       await neutralsPart(browser, results);
+    } else if (PART === 'E') {
+      await neutralsPart(browser, results, true);
     } else throw new Error(`parte desconhecida: ${PART}`);
   } finally {
     const dir = resolve(__dirname, 'results'); mkdirSync(dir, { recursive: true });

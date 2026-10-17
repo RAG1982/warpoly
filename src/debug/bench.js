@@ -199,10 +199,12 @@ export function startBench(app) {
   // M1-03: com pós-processamento (EffectComposer) um quadro tem várias chamadas a `renderer.render`, e
   // `renderer.info.render.calls` (autoReset) só guarda a ÚLTIMA (um quadro cheio de efeitos lia "1 draw call").
   // Soma as passadas aqui; o laço de amostragem lê e zera a cada quadro.
-  const passAcc = { calls: 0, tris: 0 };
+  const passAcc = { calls: 0, tris: 0, ms: 0 };
   const origRender = renderer.render.bind(renderer);
   renderer.render = (...a) => {
+    const r0 = performance.now();
     origRender(...a);
+    passAcc.ms += performance.now() - r0; // tempo de CPU em renderer.render (inclui espera de fila da GPU)
     passAcc.calls += renderer.info.render.calls;
     passAcc.tris += renderer.info.render.triangles;
   };
@@ -248,6 +250,7 @@ export function startBench(app) {
   const frameTimes = [];
   const calls = [];
   const tris = [];
+  const renderMs = [];
   let firstFrameAt = null;
   let phaseStart = null;
   let last = null;
@@ -295,6 +298,7 @@ export function startBench(app) {
         callsMax: calls.length ? Math.max(...calls) : 0,
         trianglesAvg: Math.round(avg(tris)),
         trianglesMax: tris.length ? Math.max(...tris) : 0,
+        renderCpuMsAvg: round(avg(renderMs), 2), // M1-03
       },
       memory: {
         geometries: mem.geometries,
@@ -371,6 +375,7 @@ export function startBench(app) {
         phaseStart = now;
         passAcc.calls = 0;
         passAcc.tris = 0;
+        passAcc.ms = 0;
         applyCamera();
         measuring = true;
       } else {
@@ -380,8 +385,10 @@ export function startBench(app) {
       frameTimes.push(dt);
       calls.push(passAcc.calls);
       tris.push(passAcc.tris);
+      renderMs.push(passAcc.ms);
       passAcc.calls = 0;
       passAcc.tris = 0;
+      passAcc.ms = 0;
       if ((frameTimes.length & 15) === 0) status(` ${((now - phaseStart) / 1000).toFixed(1)}s`);
       if (now - phaseStart >= durationS * 1000) {
         finish();

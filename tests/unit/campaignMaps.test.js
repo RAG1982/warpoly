@@ -1,5 +1,5 @@
-import { describe, it, expect } from 'vitest';
-import { getMap, listMaps } from '../../src/data/maps/index.js';
+import { describe, it, expect, beforeAll } from 'vitest';
+import { getMap, listMaps, loadAllCampaignMaps } from '../../src/data/maps/index.js';
 import { validateMapDef } from '../../src/data/maps/validate.js';
 import { buildPathfinder, floodFill, isReached } from '../../src/data/maps/generator.js';
 import { getHeightForMap } from '../../src/sim/terrainGenerators.js';
@@ -16,6 +16,9 @@ import en from '../../src/i18n/en.json';
  * (slot 0 = lado da Liga de Aurelan, slot 1 = lado dos Clãs do Cinzal).
  */
 const IDS = ['camp-01-baia-de-aurelan', 'camp-02-pouso-do-encontro', 'camp-03-pedra-mae'];
+
+// M2-28: os mapas de campanha são carregados sob demanda (chunks); os testes os carregam antes de usar `getMap`.
+beforeAll(async () => { await loadAllCampaignMaps(); });
 const MIN_ANCHORS = {
   'camp-01-baia-de-aurelan': ['playerStart', 'enemyStart', 'goldMine1', 'goldMine2', 'neutralCamp1', 'landingZone', 'muralFenda', 'shipHorizon'],
   'camp-02-pouso-do-encontro': ['playerStart', 'enemyStart', 'goldMine1', 'landingZone', 'pier1', 'pier1Water', 'pier2', 'pier2Water', 'logFort', 'lighthouse', 'emissary1', 'emissary2', 'patrol1', 'patrol2', 'patrol3', 'expansion1', 'expansion2'],

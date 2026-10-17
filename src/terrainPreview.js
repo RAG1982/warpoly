@@ -9,7 +9,7 @@ import { TerrainView } from './render/TerrainView.js';
 import { Water } from './world/Water.js';
 import { Decorations } from './world/Decorations.js';
 import { TreeManager } from './world/TreeManager.js';
-import { listMaps, getMap, DEFAULT_MAP_ID } from './data/maps/index.js';
+import { listMaps, peekMap, DEFAULT_MAP_ID } from './data/maps/index.js';
 import { TILESETS, TILESET_IDS, resolveTilesetId } from './data/tilesets.js';
 
 const params = new URLSearchParams(location.search);
@@ -72,7 +72,7 @@ class Stage {
 }
 
 const state = {
-  mapId: getMap(params.get('map')) ? params.get('map') : DEFAULT_MAP_ID,
+  mapId: peekMap(params.get('map')) ? params.get('map') : DEFAULT_MAP_ID,
   tileset: resolveTilesetId(params.get('tileset') || 'verdejante'),
   compare: params.get('compare') === '1',
   stages: []
@@ -85,7 +85,7 @@ const elTags = document.getElementById('tags');
 
 function rebuild() {
   state.stages.forEach((s) => s.dispose());
-  const mapDef = getMap(state.mapId);
+  const mapDef = peekMap(state.mapId);
   const ids = state.compare ? TILESET_IDS : [state.tileset];
   state.stages = ids.map((id) => new Stage(id, mapDef));
   const half = mapDef.size / 2;

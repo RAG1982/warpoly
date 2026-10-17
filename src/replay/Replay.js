@@ -22,7 +22,7 @@
 import { stateChecksum } from '../sim/checksum.js';
 import { SIM_DT } from '../sim/constants.js';
 import { validateCommand } from '../sim/commands.js';
-import { getMap, registerGeneratedMap } from '../data/maps/index.js';
+import { getMap, hasMap, peekMap, registerGeneratedMap } from '../data/maps/index.js';
 
 export const REPLAY_FORMAT = 'warpolyreplay';
 /** Versão do formato do arquivo. */
@@ -198,15 +198,19 @@ export function parseReplay(json) {
   return r;
 }
 
-/** Garante que o mapa do replay exista (mapas gerados são registrados a partir de `mapGen`). Lança se não der. */
+/**
+ * Garante que o mapa do replay exista (mapas gerados são registrados a partir de `mapGen`). Lança se não der.
+ * M2-28: mapa de campanha ainda não carregado conta como existente (devolve `undefined`); o `main.js` o carrega
+ * (`ensureMapLoaded`) antes de criar a partida.
+ */
 export function ensureReplayMap(replay) {
   const id = replay.config.mapId;
-  if (!getMap(id)) {
+  if (!hasMap(id)) {
     if (!replay.mapGen) throw fail('map', `Mapa desconhecido "${id}".`);
     const def = registerGeneratedMap(replay.mapGen);
     if (def.id !== id) throw fail('map', `Mapa gerado não confere ("${def.id}" ≠ "${id}").`);
   }
-  return getMap(id);
+  return peekMap(id);
 }
 
 /** Checksum gravado exatamente em `tick` (ou undefined). */

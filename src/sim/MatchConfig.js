@@ -6,7 +6,7 @@
  * O GameManager cria as bases a partir dos slots do mapa (`initMapEntities`, `startSlots` de
  * `src/data/maps/<mapId>.json` — F2-05). Sem three.js nem DOM: testável em Node.
  */
-import { getMap, DEFAULT_MAP_ID } from '../data/maps/index.js';
+import { getMap, hasMap, DEFAULT_MAP_ID } from '../data/maps/index.js';
 import { getHeightForMap } from './terrainGenerators.js';
 import { resolveMissionDef } from '../data/missions/index.js';
 import { validateTechRestriction } from './techRestriction.js';
@@ -183,7 +183,7 @@ export function matchConfigFromSearch(search = '') {
     localFaction: params.get('faction') === 'orc' ? 'orc' : 'human',
     ffa: ffa === '1' || ffa === 'true',
     seed,
-    mapId: mapParam && getMap(mapParam) ? mapParam : DEFAULT_MAP_ID,
+    mapId: mapParam && hasMap(mapParam) ? mapParam : DEFAULT_MAP_ID,
     difficulty: params.get('difficulty') || DEFAULT_DIFFICULTY,
     victoryMode: params.get('victory') || DEFAULT_VICTORY_MODE
   });

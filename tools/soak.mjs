@@ -62,17 +62,18 @@ async function load() {
   await import('../src/ai/registerAI.js');
   const { Terrain } = await import('../src/world/Terrain.js');
   const { createMatchConfig, PLAYER_COLORS } = await import('../src/sim/MatchConfig.js');
-  const { getMap } = await import('../src/data/maps/index.js');
+  const { getMap, ensureMapLoaded } = await import('../src/data/maps/index.js');
   const { SIM_DT } = await import('../src/sim/constants.js');
   const { stateChecksum } = await import('../src/sim/checksum.js');
-  mods = { THREE, GameManager, Terrain, createMatchConfig, PLAYER_COLORS, getMap, SIM_DT, stateChecksum };
+  mods = { THREE, GameManager, Terrain, createMatchConfig, PLAYER_COLORS, getMap, ensureMapLoaded, SIM_DT, stateChecksum };
   return mods;
 }
 
 /** Roda uma partida; devolve resumo + `issues`. `detect=false` pula a amostragem (re-run de determinismo). */
 async function runMatch(c, opts, detect = true) {
-  const { GameManager, Terrain, createMatchConfig, PLAYER_COLORS, getMap, SIM_DT, stateChecksum } = await load();
+  const { GameManager, Terrain, createMatchConfig, PLAYER_COLORS, getMap, ensureMapLoaded, SIM_DT, stateChecksum } = await load();
   const cfg = createMatchConfig({ seed: c.seed, mapId: c.map, difficulty: c.difficulty, localFaction: c.faction, headless: true });
+  await ensureMapLoaded(c.map); // M2-28: mapas de campanha carregam sob demanda
   const mapDef = getMap(c.map);
   const want = mapDef.maxPlayers || cfg.players.length;
   if (want > 2) {

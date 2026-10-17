@@ -10,7 +10,7 @@
  *
  * `color` é o índice em `PLAYER_COLORS` (sempre único entre os jogadores); `team` 0..7.
  */
-import { getMap, listMaps, DEFAULT_MAP_ID } from '../data/maps/index.js';
+import { getMap, peekMap, listMaps, DEFAULT_MAP_ID } from '../data/maps/index.js';
 import {
   PLAYER_COLORS, DIFFICULTIES, DEFAULT_DIFFICULTY, VICTORY_MODES, DEFAULT_VICTORY_MODE,
   normalizeDifficulty, normalizeVictoryMode, randomSeed, validateMatchConfig
@@ -96,7 +96,7 @@ export function createSetup(mapId = DEFAULT_MAP_ID) {
 export function normalizeSetup(raw) {
   const src = raw && typeof raw === 'object' ? raw : {};
   const maps = listMaps();
-  const mapId = getMap(src.mapId) ? src.mapId : DEFAULT_MAP_ID;
+  const mapId = peekMap(src.mapId) ? src.mapId : DEFAULT_MAP_ID;
   const mapDef = getMap(mapId) || maps[0];
   const nColors = PLAYER_COLORS.length;
 
@@ -262,7 +262,7 @@ function safeStorage() {
 /** Lê o setup salvo (ou o padrão); chaves legadas do menu (`warpoly.faction/difficulty/map/victory`) valem de base. */
 export function loadSetup(storage = safeStorage()) {
   const get = (k) => { try { return storage ? storage.getItem(k) : null; } catch { return null; } };
-  const base = createSetup(getMap(get('warpoly.map')) ? get('warpoly.map') : DEFAULT_MAP_ID);
+  const base = createSetup(peekMap(get('warpoly.map')) ? get('warpoly.map') : DEFAULT_MAP_ID);
   const legacy = {
     ...base,
     localFaction: get('warpoly.faction') === 'orc' ? 'orc' : base.localFaction,

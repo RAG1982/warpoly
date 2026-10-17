@@ -9,7 +9,7 @@
  * - cores: a escolhida quando livre, senão a primeira livre.
  */
 import { PLAYER_COLORS, DEFAULT_DIFFICULTY, DEFAULT_VICTORY_MODE, normalizeVictoryMode, validateMatchConfig } from '../sim/MatchConfig.js';
-import { getMap, registerGeneratedMap, DEFAULT_MAP_ID } from '../data/maps/index.js';
+import { getMap, peekMap, registerGeneratedMap, DEFAULT_MAP_ID } from '../data/maps/index.js';
 
 export const MAX_ONLINE_PLAYERS = 8;
 
@@ -28,7 +28,7 @@ export function buildOnlineMatchConfig({ players, seed, config = {}, localNetId 
   }
   const sorted = [...players].sort((a, b) => a.id - b.id);
   const n = sorted.length;
-  let mapId = config.map && getMap(config.map) ? config.map : DEFAULT_MAP_ID;
+  let mapId = config.map && peekMap(config.map) ? config.map : DEFAULT_MAP_ID;
   if (getMap(mapId).maxPlayers < n) mapId = registerGeneratedMap({ seed, players: Math.max(2, n), size: 128 }).id;
 
   const teams = new Set(sorted.map((p) => p.team ?? 0));

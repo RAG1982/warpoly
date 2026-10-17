@@ -7,6 +7,7 @@ import { getTextureQuality } from './models/textureQuality.js';
 import { AssetPreloader } from './core/AssetPreloader.js';
 import { QualitySettings } from './core/QualitySettings.js';
 import { MatchSession } from './core/MatchSession.js';
+import { ensureMapLoaded } from './data/maps/index.js';
 import { GameStateMachine, GameState } from './core/GameStateMachine.js';
 import { createMatchConfig, matchConfigFromSearch, withNewSeed } from './sim/MatchConfig.js';
 import { shouldShowMainMenu, showMainMenu } from './ui/screens/MainMenu.js';
@@ -449,6 +450,10 @@ class GameApp {
     }
 
     this.assetsReady = true;
+    if (token !== this._loadToken || !this.fsm.is(S.LOADING)) return;
+
+    // M2-28: mapas de campanha (`camp-*`) vivem em chunks próprios; baixa o do mapa desta partida (no-op para os demais).
+    await ensureMapLoaded(config.mapId);
     if (token !== this._loadToken || !this.fsm.is(S.LOADING)) return;
 
     this.session = new MatchSession({ sceneManager: this.sceneManager, sound: this.sound, matchConfig: config, online });

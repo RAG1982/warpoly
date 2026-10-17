@@ -6,7 +6,7 @@
  * de parar no primeiro; `assertMission` lança `MissionError` com todos eles.
  */
 import { UNITS, BUILDINGS, RESEARCH } from '../../data/index.js';
-import { getMap } from '../../data/maps/index.js';
+import { peekMap, hasMap } from '../../data/maps/index.js'; // M2-28: mapa de campanha ainda não carregado não lança aqui
 import { resolveAnchors } from './anchors.js';
 
 export const MISSION_FORMAT = 'warpolymission';
@@ -412,7 +412,7 @@ export function validateMission(def, opts = {}) {
   // M2-01: troca `{anchor, dx?, dz?}` por `{x, z}` (pelo mapa da missão) e valida o resultado; âncora inexistente = erro com nome, missão e mapa.
   // Sem o mapa (checkMap:false ou mapId desconhecido) só a sintaxe da âncora é conferida.
   {
-    const anchorMap = isStr(def.mapId) && opts.checkMap !== false ? getMap(def.mapId) : null;
+    const anchorMap = isStr(def.mapId) && opts.checkMap !== false ? peekMap(def.mapId) : null;
     const r = resolveAnchors(def, anchorMap || null);
     r.errors.forEach((e) => c.errors.push(e));
     def = r.def;
@@ -440,8 +440,10 @@ export function validateMission(def, opts = {}) {
   let mapDef = null;
   if (!isStr(def.mapId)) c.err('mapId', 'obrigatório');
   else if (opts.checkMap !== false) {
-    mapDef = getMap(def.mapId);
-    if (!mapDef) c.err('mapId', `mapa desconhecido "${def.mapId}"`);
+    mapDef = peekMap(def.mapId);
+    // M2-28: mapa de campanha (lazy) ainda não carregado = existe, mas sem geometria aqui; as âncoras são resolvidas
+    // de novo no construtor do MissionRuntime, com o mapa já carregado.
+    if (!mapDef && !hasMap(def.mapId)) c.err('mapId', `mapa desconhecido "${def.mapId}"`);
   }
   if (mapDef) c.half = (mapDef.playable ?? mapDef.size) / 2;
   checkNum(c, 'seed', def.seed, { min: 0, int: true });

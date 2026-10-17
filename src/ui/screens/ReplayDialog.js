@@ -6,7 +6,7 @@ import './replay.css';
 import { t, getLanguage, getLocale, factionName } from '../../i18n/index.js';
 import { playerDisplayName } from '../uiText.js';
 import { REPLAY_EXT, formatTicks } from '../../replay/Replay.js';
-import { getMap } from '../../data/maps/index.js';
+import { peekMap } from '../../data/maps/index.js';
 
 const esc = (s) => String(s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]);
 
@@ -19,7 +19,7 @@ function titleOf(meta) {
 
 function metaLine(meta) {
   const s = meta.summary || {};
-  const map = getMap(s.mapId);
+  const map = peekMap(s.mapId);
   const when = meta.createdAt ? new Date(meta.createdAt).toLocaleString(getLocale()) : '';
   const parts = [map ? map.name : s.mapId, formatTicks((s.seconds || 0) * 20), when];
   if (s.online) parts.push(t('replay.online'));

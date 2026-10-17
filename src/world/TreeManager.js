@@ -3,6 +3,7 @@ import { mergeGeometries } from 'three/examples/jsm/utils/BufferGeometryUtils.js
 import { glbEnabled, glbTemplates } from '../entities/glbModels.js';
 import { getTileset } from '../data/tilesets.js';
 import { LOD_DISTANCES, lodLevelForDistance, lodEnabled } from '../render/lod.js';
+import { treeKeyOf } from '../data/treeSpecies.js';
 
 /** NEW-7: lado (unidades de mundo) do chunk espacial; cada tipo × chunk é um InstancedMesh com `boundingSphere` própria. */
 const CHUNK_SIZE = 32;
@@ -10,7 +11,19 @@ const CHUNK_SIZE = 32;
 const CHUNK_INITIAL_CAPACITY = 8;
 
 /** Cor da árvore reserva por tipo (sem textura): usada só quando o .glb não carregou. */
-const PLACEHOLDER_COLORS = { tree_oak: 0x3f7d3a, tree_pine: 0x2f6a44, tree_autumn: 0xd9791c, tree_birch: 0xb6d95a };
+const PLACEHOLDER_COLORS = {
+  tree_oak: 0x3f7d3a, tree_pine: 0x2f6a44, tree_autumn: 0xd9791c, tree_birch: 0xb6d95a,
+  tree_broad: 0x2c6a31, tree_palm: 0x4fa341, tree_acacia: 0x9c9a3c // M2-10
+};
+
+/** M2-10: contador de cada espécie (`type` → propriedade); `oak` é o destino de qualquer tipo desconhecido. */
+const COUNT_FIELD = { oak: 'oakCount', pine: 'pineCount', autumn: 'autumnCount', birch: 'birchCount', broad: 'broadCount', palm: 'palmCount', acacia: 'acaciaCount' };
+
+/**
+ * M2-10: se o centro da copa (média XZ dos vértices do terço de cima) fica a mais que isto do pé, o impostor de LOD desloca a copa
+ * junto (palmeira: ~1,6 u). Árvores de copa centrada (< limiar) mantêm o impostor idêntico ao de sempre.
+ */
+const CROWN_OFFSET_MIN = 0.5;
 
 /** `?glbtrees=0` ignora os .glb das árvores mesmo com os demais ligados (cai na árvore reserva). */
 function glbTreesEnabled() {
@@ -145,6 +158,25 @@ uniform vec3 uRegTint[${n}]; uniform float uRegDesat[${n}]; uniform vec3 uRegSno
 }
 
 /**
+ * M2-10: deslocamento XZ da copa em relação ao pé (média dos vértices acima de 60 % da altura), `{0,0}` quando ela é centrada.
+ * Só a palmeira (tronco inclinado, copa ~1,6 u ao lado) passa do limiar; as demais árvores não mudam.
+ */
+function crownOffset(geo) {
+  if (!geo.boundingBox) geo.computeBoundingBox();
+  const bb = geo.boundingBox;
+  const y0 = bb.min.y + (bb.max.y - bb.min.y) * 0.6;
+  const pos = geo.attributes.position;
+  let sx = 0, sz = 0, n = 0;
+  for (let i = 0; i < pos.count; i++) {
+    if (pos.getY(i) < y0) continue;
+    sx += pos.getX(i); sz += pos.getZ(i); n++;
+  }
+  if (!n) return { x: 0, z: 0 };
+  const x = sx / n, z = sz / n;
+  return Math.hypot(x, z) >= CROWN_OFFSET_MIN ? { x, z } : { x: 0, z: 0 };
+}
+
+/**
  * F1-10 item 3: geometria simplificada do impostor (copa em cone de 6 lados + tronco em cilindro de 4 lados, cores nos
  * vértices), dimensionada pela caixa da geometria real do tipo. Gerada uma única vez por tipo.
  */
@@ -156,7 +188,8 @@ function buildImpostorGeometry(key, srcGeo) {
   const trunk = new THREE.CylinderGeometry(r * 0.16, r * 0.22, h * 0.4, 4);
   trunk.translate(0, h * 0.2, 0);
   const crown = new THREE.ConeGeometry(r, h * 0.75, 6);
-  crown.translate(0, h * 0.25 + h * 0.375, 0);
+  const off = crownOffset(srcGeo);
+  crown.translate(off.x, h * 0.25 + h * 0.375, off.z);
   const paint = (g, hex) => {
     const c = new THREE.Color(hex);
     const n = g.attributes.position.count;
@@ -192,6 +225,11 @@ export class TreeManager {
     this.oakCount = 0;
     this.pineCount = 0;
     this.autumnCount = 0;
+    // M2-10 (ART-02): copa larga, palmeira e acácia — também sob demanda (`tree_broad|palm|acacia.glb` são lazy; o InstancedMesh só
+    // existe se o mapa tiver a espécie; sem o .glb carregado entra a árvore reserva).
+    this.broadCount = 0;
+    this.palmCount = 0;
+    this.acaciaCount = 0;
 
     // F7-00b: 4º tipo, a bétula (`tree_birch.glb`), criada sob demanda: nenhum mapa-base a usa por padrão, então sem árvore
     // `birch` registrada não existe InstancedMesh (nem chamada de desenho, nem vértices extras).
@@ -385,27 +423,13 @@ export class TreeManager {
 
   /** Quantas árvores do tipo já foram registradas. */
   countOf(type) {
-    if (type === 'pine') return this.pineCount;
-    if (type === 'autumn') return this.autumnCount;
-    if (type === 'birch') return this.birchCount;
-    return this.oakCount;
+    return this[COUNT_FIELD[type] || 'oakCount'];
   }
 
   registerTree(tree, x, y, z, rotY, scale, type) {
-    let key;
-    if (type === 'pine') {
-      key = 'tree_pine';
-      this.pineCount++;
-    } else if (type === 'autumn') {
-      key = 'tree_autumn';
-      this.autumnCount++;
-    } else if (type === 'birch') {
-      key = 'tree_birch';
-      this.birchCount++;
-    } else {
-      key = 'tree_oak';
-      this.oakCount++;
-    }
+    const field = COUNT_FIELD[type] || 'oakCount';
+    const key = treeKeyOf(type);
+    this[field]++;
     const mesh = this._getChunkMesh(key, x, z);
     const idx = this._allocInstance(mesh); // índice local ao chunk
     if (this._regions) { // MUNDO-5: estilo da região desta árvore (instanceColor.r = índice do estilo / 255)
@@ -479,5 +503,8 @@ export class TreeManager {
     this.pineCount = 0;
     this.autumnCount = 0;
     this.birchCount = 0;
+    this.broadCount = 0;
+    this.palmCount = 0;
+    this.acaciaCount = 0;
   }
 }

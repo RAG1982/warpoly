@@ -1,5 +1,7 @@
 import * as THREE from 'three';
 import { ModelFactory } from '../entities/ModelFactory.js';
+import { mergeGeometries } from 'three/examples/jsm/utils/BufferGeometryUtils.js';
+import { TREE_CROWN_PROXY } from '../data/treeSpecies.js';
 
 // Material invisível compartilhado dos hit-proxies de árvore (raycast/seleção).
 const hitProxyMaterial = new THREE.MeshBasicMaterial({ visible: false });
@@ -32,8 +34,18 @@ export class TreeView {
     this.basePos = new THREE.Vector3(x, y, z);
     if (treeManager) {
       treeManager.registerTree(this, x, y, z, tree.baseRotY, s, tree.treeType);
-      const hitGeo = new THREE.CylinderGeometry(0.85 * s, 1.1 * s, 4.5 * s, 6);
+      let hitGeo = new THREE.CylinderGeometry(0.85 * s, 1.1 * s, 4.5 * s, 6);
       hitGeo.translate(0, 2.25 * s, 0);
+      const crown = TREE_CROWN_PROXY[tree.treeType];
+      if (crown) { // M2-10: palmeira — a copa fica ao lado do pé; um 2º cilindro (girado com a árvore) a torna clicável
+        const c = new THREE.CylinderGeometry(crown.r * s, crown.r * s, crown.h * s, 8);
+        const a = tree.baseRotY;
+        c.translate(Math.cos(a) * crown.dx * s, crown.y * s, -Math.sin(a) * crown.dx * s);
+        const base = hitGeo;
+        hitGeo = mergeGeometries([base, c]);
+        base.dispose();
+        c.dispose();
+      }
       this.root = new THREE.Mesh(hitGeo, hitProxyMaterial);
       this.root.position.set(x, y, z);
     } else {

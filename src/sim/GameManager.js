@@ -26,6 +26,7 @@ import { CMD, makeCommand } from './commands.js';
 import { CommandQueue, COMMAND_DELAY_TICKS } from './CommandQueue.js';
 import { CommandExecutor } from './CommandExecutor.js';
 import { createRng } from './rng.js';
+import { treeMixFor } from '../data/treeSpecies.js';
 import { recordChecksum } from './checksum.js';
 import { CorpsePool } from './corpses.js';
 import { HazardPool } from './hazards.js';
@@ -731,7 +732,6 @@ export class GameManager {
    * base courtyards, resource deposits, and river crossings. Clusters vêm de `mapDef.forests`.
    */
   spawnWoodlands() {
-    const treeTypes = ['oak', 'pine', 'autumn'];
     const minTreeSpacing = 4.4; // Generous distance between trees for open meadows
 
     const mapDef = this.terrain.mapDef;
@@ -783,7 +783,7 @@ export class GameManager {
         });
         if (tooCloseToTree) continue;
 
-        const type = this.rngMap.next() < 0.65 ? preferredType : this.rngMap.pick(treeTypes);
+        const type = this.rngMap.next() < 0.65 ? preferredType : this.rngMap.pick(treeMixFor(preferredType));
         this.trees.push(this.registerEntity(new Tree(this.terrain, x, z, type, this.rngMap)));
         placed++;
       }

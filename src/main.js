@@ -11,7 +11,9 @@ import { GameStateMachine, GameState } from './core/GameStateMachine.js';
 import { createMatchConfig, matchConfigFromSearch, withNewSeed } from './sim/MatchConfig.js';
 import { shouldShowMainMenu, showMainMenu } from './ui/screens/MainMenu.js';
 import { PauseMenu } from './ui/screens/PauseMenu.js';
-import { ensureGlbLoaded } from './entities/glbModels.js';
+import { ensureGlbLoaded, ensureGlbKeys } from './entities/glbModels.js';
+import { getMap } from './data/maps/index.js';
+import { lazyTreeKeysOfMap } from './data/treeSpecies.js';
 import { SaveLoadDialog } from './ui/screens/SaveLoadDialog.js';
 import { SaveStore, AUTOSAVE_SLOT } from './core/SaveStore.js';
 import { captureSave, applySaveCommands, fastForward, finishFastForward } from './sim/SaveGame.js';
@@ -446,6 +448,13 @@ class GameApp {
         console.warn('[main.js] erro ao carregar .glb com skipPreload:', err);
         // continua com modelos procedurais
       }
+    }
+
+    // M2-10: espécies de árvore `lazy` (copa larga, palmeira, acácia) que o mapa usa — só elas, fora do boot.
+    try {
+      await ensureGlbKeys(lazyTreeKeysOfMap(getMap(config.mapId)));
+    } catch (err) {
+      console.warn('[main.js] erro ao carregar as árvores do mapa:', err); // o TreeManager usa a árvore reserva
     }
 
     this.assetsReady = true;

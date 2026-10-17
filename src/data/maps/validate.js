@@ -23,7 +23,9 @@ import { DRY, checkAnchors } from './anchors.js';
 
 export { DRY }; // limiar de "terra seca" (GameManager.canPlaceBuilding); definido em anchors.js (M2-01)
 
-export const FOREST_SPECIES = Object.freeze(['oak', 'pine', 'autumn', 'birch']); // F7-00b: bétula (`tree_birch.glb`)
+import { FOREST_SPECIES } from '../treeSpecies.js';
+
+export { FOREST_SPECIES }; // F7-00b: bétula; M2-10: `broad|palm|acacia` (fonte única em src/data/treeSpecies.js)
 export const RESOURCE_TYPES = Object.freeze(['gold', 'stone', 'oil']);
 export const MAP_ID_RE = /^[a-z0-9][a-z0-9-]{1,47}$/;
 export const SIZE_LIMITS = Object.freeze({ min: 64, max: 256 });

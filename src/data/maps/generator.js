@@ -24,6 +24,13 @@ import { Pathfinder } from '../../sim/Pathfinder.js';
 import { NAVAL_MAX_HEIGHT } from '../combat.js';
 
 export const GEN_LIMITS = Object.freeze({ minPlayers: 2, maxPlayers: 8, minSize: 96, maxSize: 192 });
+/** M2-10: espécies de árvore por tema do gerador (3 por tema; temas fora da tabela seguem com carvalho/pinheiro/outonal). */
+const THEME_SPECIES = Object.freeze({
+  verdejante: ['oak', 'pine', 'broad'],
+  ilhas: ['palm', 'oak', 'pine'],
+  devastadas: ['acacia', 'autumn', 'palm']
+});
+
 export const GEN_THEMES = Object.freeze(['verdejante', 'ilhas', 'inverno', 'devastadas', 'pantano']);
 export const GEN_SYMMETRIES = Object.freeze(['rotational', 'mirror']);
 
@@ -240,7 +247,8 @@ export function generateMap(options = {}) {
   // ---------- Florestas ----------
   const forests = [];
   const perSector = Math.round((o.naval ? 4 : 5) * o.forestDensity * (0.8 + rngScatter.next() * 0.5));
-  const species = ['oak', 'pine', 'autumn'];
+  // M2-10: três espécies por tema (sempre 3 ⇒ o mesmo sorteio `int(3)`; só o desenho muda): copa larga no exuberante, palmeira nas ilhas, acácia/palmeira nas devastadas.
+  const species = THEME_SPECIES[o.theme] || ['oak', 'pine', 'autumn'];
   for (let f = 0; f < perSector; f++) {
     const radius = r2(rngScatter.range(4.5, 6));
     const count = 5 + rngScatter.int(3);

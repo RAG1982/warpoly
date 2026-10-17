@@ -443,7 +443,7 @@ describe('TreeManager regional', () => {
   });
 
   it('as .glb das árvores NÃO têm cor de vértice (a classe de tinta viaja no instanceColor.r; cor de vértice a corromperia)', () => {
-    for (const name of ['tree_oak', 'tree_pine', 'tree_autumn', 'tree_birch']) {
+    for (const name of ['tree_oak', 'tree_pine', 'tree_autumn', 'tree_birch', 'tree_broad', 'tree_palm', 'tree_acacia']) {
       const buf = readFileSync(new URL(`../../public/models/${name}.glb`, import.meta.url));
       expect(buf.toString('utf8', 0, 4)).toBe('glTF');
       const json = JSON.parse(buf.subarray(20, 20 + buf.readUInt32LE(12)).toString('utf8'));

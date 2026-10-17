@@ -15,6 +15,8 @@
  * - armyCap        máximo de combatentes vivos que a IA treina (0 = sem limite; Fácil).
  * - research      ouro mínimo em caixa para pesquisar na Forja/Serraria (Difícil+ pesquisa mais cedo).
  * - startDelay     segundos de partida antes da 1ª expedição.
+ * - rushDelayScale fator de `startDelay` quando a estratégia sorteada é `rush` (M1-08/NEW-9: o Normal não pode abrir mais cedo
+ *                  que o `startDelay` só por ter sorteado rush; Difícil/Brutal mantêm o rush precoce).
  * - workerBonus    trabalhadores extras além do alvo da estratégia.
  * - scout          envia explorador.
  * - walls          constrói linha de muralha (F3-08).
@@ -23,22 +25,22 @@
 export const DIFFICULTY_PROFILES = Object.freeze({
   easy: Object.freeze({
     id: 'easy', maxApm: 20, tickInterval: 2.5, micro: 0, resourceBonus: 0, cheatVision: false,
-    attackBase: 3, assess: 0, assumeEnemy: 0, armyCap: 10, research: 400, startDelay: 420, workerBonus: -2, scout: false, walls: false, casters: false,
+    attackBase: 3, assess: 0, assumeEnemy: 0, armyCap: 10, research: 400, startDelay: 420, rushDelayScale: 0.4, workerBonus: -2, scout: false, walls: false, casters: false,
     strategies: Object.freeze({ boom: 2, turtle: 2 })
   }),
   normal: Object.freeze({
     id: 'normal', maxApm: 60, tickInterval: 1.0, micro: 1, resourceBonus: 0, cheatVision: false,
-    attackBase: 6, assess: 1.0, assumeEnemy: 0.8, armyCap: 0, research: 400, startDelay: 150, workerBonus: 0, scout: true, walls: true, casters: false,
+    attackBase: 6, assess: 1.0, assumeEnemy: 0.8, armyCap: 0, research: 400, startDelay: 390, rushDelayScale: 1, workerBonus: 0, scout: true, walls: true, casters: false,
     strategies: Object.freeze({ rush: 1, boom: 2, turtle: 1 })
   }),
   hard: Object.freeze({
     id: 'hard', maxApm: 120, tickInterval: 0.75, micro: 2, resourceBonus: 0, cheatVision: false,
-    attackBase: 6, assess: 1.2, assumeEnemy: 0.9, armyCap: 0, research: 120, startDelay: 90, workerBonus: 2, scout: true, walls: true, casters: true,
+    attackBase: 6, assess: 1.2, assumeEnemy: 0.9, armyCap: 0, research: 120, startDelay: 90, rushDelayScale: 0.4, workerBonus: 2, scout: true, walls: true, casters: true,
     strategies: Object.freeze({ rush: 2, boom: 2, turtle: 1, air: 1 })
   }),
   brutal: Object.freeze({
     id: 'brutal', maxApm: 240, tickInterval: 0.5, micro: 3, resourceBonus: 0.25, cheatVision: true,
-    attackBase: 7, assess: 1.2, assumeEnemy: 0, armyCap: 0, research: 60, startDelay: 0, workerBonus: 4, scout: true, walls: true, casters: true,
+    attackBase: 7, assess: 1.2, assumeEnemy: 0, armyCap: 0, research: 60, startDelay: 0, rushDelayScale: 0.4, workerBonus: 4, scout: true, walls: true, casters: true,
     strategies: Object.freeze({ rush: 2, boom: 2, turtle: 1, air: 1 })
   })
 });

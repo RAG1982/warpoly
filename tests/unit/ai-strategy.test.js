@@ -33,7 +33,7 @@ describe('F5-04: estratégias', () => {
   });
 
   it('rush sai antes que turtle: limite da 1ª onda e atraso inicial', () => {
-    const gm = makeGm({ difficulties: ['normal', 'normal'] });
+    const gm = makeGm({ difficulties: ['hard', 'hard'] });
     const mm = gm.aiDirectors[0].militaryManager;
     const d = gm.aiDirectors[0];
     d.strategy = STRATEGIES.rush;
@@ -47,6 +47,20 @@ describe('F5-04: estratégias', () => {
     expect(mm.expeditionAllowed()).toBe(true);
     d.strategy = STRATEGIES.turtle;
     expect(mm.expeditionAllowed()).toBe(false);
+    gm.dispose();
+  });
+
+  it('M1-08/NEW-9: a expedição do Normal (inclusive no rush) e do Fácil só sai depois de 5 min', () => {
+    const gm = makeGm({ difficulties: ['normal', 'easy'] });
+    const [n, e] = gm.aiDirectors;
+    n.strategy = STRATEGIES.rush; // o Fácil nunca sorteia rush
+    n.simTime = 299;
+    expect(n.militaryManager.expeditionAllowed()).toBe(false);
+    e.strategy = STRATEGIES.boom;
+    e.simTime = 299;
+    expect(e.militaryManager.expeditionAllowed()).toBe(false);
+    n.simTime = n.profile.startDelay;
+    expect(n.militaryManager.expeditionAllowed()).toBe(true);
     gm.dispose();
   });
 

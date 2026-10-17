@@ -251,7 +251,7 @@ Legenda de dependências: só IDs; "—" = pode começar já. **Dif.** = dificul
 ### M2 — Mundo jogável
 | ID | Tarefa | Dif. | Esf. | Exec. | Dep. | Origem | Status |
 |---|---|---|---|---|---|---|---|
-| M2-01 | Âncoras (pontos nomeados) em mapas e missões | Difícil | G | S | M0-01 | MUNDO-HISTORIA §3.2 | TODO |
+| M2-01 | Âncoras (pontos nomeados) em mapas e missões | Difícil | G | S | M0-01 | MUNDO-HISTORIA §3.2 | DONE (2026-10-17) |
 | M2-02 | Segundo Centro e `setTier`/`UPGRADE_HQ` com 2 Centros | Média | M | S | M0-01 | risco R3 | DONE (2026-10-17; R3 verificado) |
 | M2-03 | Mapas de campanha, lote 1: palcos 1 (Aliança), 2, 3 | Difícil | G | S | M2-01 | MUNDO-7 | TODO |
 | M2-04 | Mapas, lote 2: palcos 4, 5, 6 | Difícil | G | S | M2-03 | MUNDO-7 | TODO |

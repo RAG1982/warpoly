@@ -1,0 +1,72 @@
+{
+  "generated": "2026-10-21T22:43:13.986Z",
+  "rows": [
+    {
+      "id": "G1",
+      "name": "camp-09-miragem: .glb pedido pela rede; todo javali usa o .glb com animador válido",
+      "status": "PASS",
+      "detail": "pedidos=1 javalis=8 ovelhas=0 detalhe=[{\"id\":23,\"species\":\"boar\",\"hasView\":true,\"glb\":true,\"animator\":true,\"state\":\"idle\"},{\"id\":24,\"species\":\"boar\",\"hasView\":true,\"glb\":true,\"animator\":true,\"state\":\"idle\"},{\"id\":25,\"species\":\"boar\",\"hasView\":true,\"glb\":true,\"animator\":true,\"state\":\"idle\"},{\"id\":26,\"species\":\"boar\",\"hasView\":true,\"glb\":true,\"animator\":true,\"state\":\"idle\"}]"
+    },
+    {
+      "id": "G3",
+      "name": "estados: pernas mexem andando e correndo (amplitude maior ao correr); cabeça baixa ao pastar",
+      "status": "PASS",
+      "detail": "amplitude (max-min, rad) parado={\"Leg_FL\":0,\"Leg_FR\":0,\"Leg_BL\":0,\"Leg_BR\":0,\"Head\":1} andando={\"Leg_FL\":0.9,\"Leg_FR\":0.9,\"Leg_BL\":0.9,\"Leg_BR\":0.9,\"Head\":0.99} correndo={\"Leg_FL\":1.6,\"Leg_FR\":1.36,\"Leg_BL\":1.6,\"Leg_BR\":1.36,\"Head\":0.21}"
+    },
+    {
+      "id": "G3b",
+      "name": "carcaça: tombada (rot z ~ 90 graus) e acima do chão",
+      "status": "PASS",
+      "detail": "{\"y\":3.080112031049718,\"ground\":2.710112031049718,\"rotZ\":1.5707963267948966}"
+    },
+    {
+      "id": "G4",
+      "name": "Cercado de Javalis em jogo: malhas visíveis (draw calls) <= 20",
+      "status": "PASS",
+      "detail": "{\"meshes\":20,\"materials\":9,\"name\":\"Cercado de Javalis\",\"parts\":{\"PigFarm\":2,\"Scaffold\":6,\"Pig_Character\":12}}"
+    },
+    {
+      "id": "G2",
+      "name": "tutorial (só ovelhas): o .glb do javali NÃO é pedido",
+      "status": "PASS",
+      "detail": "pedidos=0 critters=[{\"id\":24,\"species\":\"sheep\",\"hasView\":true,\"glb\":false,\"animator\":false,\"state\":\"idle\"},{\"id\":25,\"species\":\"sheep\",\"hasView\":true,\"glb\":false,\"animator\":false,\"state\":\"idle\"},{\"id\":26,\"species\":\"sheep\",\"hasView\":true,\"glb\":false,\"animator\":false,\"state\":\"idle\"},{\"id\":27,\"species\":\"sheep\",\"hasView\":true,\"glb\":false,\"animator\":false,\"state\":\"idle\"}]"
+    },
+    {
+      "id": "G5",
+      "name": "?glb=0: javali procedural (sem .glb, sem animador)",
+      "status": "PASS",
+      "detail": "pedidos=0 [{\"id\":23,\"species\":\"boar\",\"hasView\":true,\"glb\":false,\"animator\":false,\"state\":\"idle\"},{\"id\":24,\"species\":\"boar\",\"hasView\":true,\"glb\":false,\"animator\":false,\"state\":\"idle\"},{\"id\":25,\"species\":\"boar\",\"hasView\":true,\"glb\":false,\"animator\":false,\"state\":\"idle\"}]"
+    },
+    {
+      "id": "I1-walk",
+      "name": "inspetor critter_boar_glb ?critter=walk",
+      "status": "PASS",
+      "detail": "{\"valid\":true,\"state\":\"walk\",\"head\":0,\"legFL\":0.45}"
+    },
+    {
+      "id": "I1-graze",
+      "name": "inspetor critter_boar_glb ?critter=graze",
+      "status": "PASS",
+      "detail": "{\"valid\":true,\"state\":\"graze\",\"head\":0.94,\"legFL\":0}"
+    },
+    {
+      "id": "I1-run",
+      "name": "inspetor critter_boar_glb ?critter=run",
+      "status": "PASS",
+      "detail": "{\"valid\":true,\"state\":\"run\",\"head\":-0.17,\"legFL\":-0.5}"
+    },
+    {
+      "id": "I2",
+      "name": "inspetor pig_farm_glb: nome Cercado de Javalis, <= 20 malhas",
+      "status": "PASS",
+      "detail": "{\"meshes\":2,\"badge\":\"🐗 Cercado de Javalis (Blender)\"}"
+    },
+    {
+      "id": "C7",
+      "name": "sem pageerror nem console.error",
+      "status": "PASS",
+      "detail": ""
+    }
+  ],
+  "errors": []
+}

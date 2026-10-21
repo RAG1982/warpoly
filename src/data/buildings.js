@@ -452,7 +452,7 @@ export const BUILDINGS = {
     passiveIncome: null,
     trains: [],
     dropoff: [],
-    icon: '/icoPorco.svg',
+    icon: '/icoJavali.png',
     description: 'Alimento e +5 de capacidade populacional'
   },
   orc_lumber_mill: {

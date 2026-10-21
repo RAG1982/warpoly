@@ -118,6 +118,7 @@ async function captureTarget(page, target) {
       window.__visualSeed(seed);
       app.selectModel(id);
       if (app.animator) { app.animator.pause(); app.animator.setTime(0); }
+      if (app.critterAnimator) app.critterAnimator.freeze(); // M2-13: javali parado na pose de repouso
       await new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r)));
       return { ok: app.currentModelItem?.id === id && !!app.currentModelObject, glb: !!app.currentModelItem?.glb };
     }, { id: target.id, seed: TARGET_SEED });

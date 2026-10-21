@@ -1,8 +1,9 @@
 import * as THREE from 'three';
+import { mergeGeometries } from 'three/examples/jsm/utils/BufferGeometryUtils.js';
 import { BuildingView } from '../../BuildingView.js';
 
 /**
- * PigFarm — Fazenda e Criatório de Javalis/Porcos dos Clãs Orcs
+ * PigFarm — Cercado de Javalis dos Clãs do Cinzal (id interno `pig_farm`; M2-13: nome e ícone de javali)
  *
  * Arquitetura (Engine & Gameplay):
  * - Extende `BuildingView` (a entidade de simulação é `Building`, em src/sim).
@@ -64,47 +65,38 @@ export class PigFarm extends BuildingView {
       flatShading: true
     });
 
-    // Corpo robusto/chunky
-    const bodyGeo = new THREE.BoxGeometry(0.75, 0.55, 1.1);
-    const body = new THREE.Mesh(bodyGeo, bodyMat);
-    body.position.y = 0.38;
-    pig.add(body);
+    // M2-13: orçamento do cercado <= 20 draw calls. Cada javali tem 4 malhas (antes 10): corpo+cabeça (pele), orelhas+patas (escuro)
+    // fundidos e só o focinho e o rabo soltos, porque a animação os move.
+    const part = (geo, x, y, z, rx = 0, rz = 0) => {
+      const m = new THREE.Matrix4().compose(new THREE.Vector3(x, y, z), new THREE.Quaternion().setFromEuler(new THREE.Euler(rx, 0, rz)), new THREE.Vector3(1, 1, 1));
+      return geo.clone().applyMatrix4(m);
+    };
 
-    // Cabeça
-    const headGeo = new THREE.BoxGeometry(0.5, 0.45, 0.45);
-    const head = new THREE.Mesh(headGeo, bodyMat);
-    head.position.set(0, 0.42, 0.65);
-    pig.add(head);
+    // Corpo robusto/chunky + cabeça
+    const skin = new THREE.Mesh(mergeGeometries([
+      part(new THREE.BoxGeometry(0.75, 0.55, 1.1), 0, 0.38, 0),
+      part(new THREE.BoxGeometry(0.5, 0.45, 0.45), 0, 0.42, 0.65)
+    ]), bodyMat);
+    skin.name = 'Pig_Skin';
+    pig.add(skin);
 
     // Focinho móvel
-    const snoutGeo = new THREE.BoxGeometry(0.28, 0.22, 0.18);
-    const snout = new THREE.Mesh(snoutGeo, darkMat);
+    const snout = new THREE.Mesh(new THREE.BoxGeometry(0.28, 0.22, 0.18), darkMat);
     snout.position.set(0, 0.35, 0.92);
     pig.add(snout);
     pig.userData.snout = snout;
 
-    // Orelhas caídas
+    // Orelhas caídas + 4 patas grossas
     const earGeo = new THREE.ConeGeometry(0.12, 0.25, 4);
-    const ear1 = new THREE.Mesh(earGeo, darkMat);
-    ear1.position.set(-0.25, 0.62, 0.62);
-    ear1.rotation.z = -0.4;
-    ear1.rotation.x = -0.2;
-    pig.add(ear1);
-
-    const ear2 = new THREE.Mesh(earGeo, darkMat);
-    ear2.position.set(0.25, 0.62, 0.62);
-    ear2.rotation.z = 0.4;
-    ear2.rotation.x = -0.2;
-    pig.add(ear2);
-
-    // 4 Patas grossas
     const legGeo = new THREE.BoxGeometry(0.16, 0.26, 0.16);
-    const legCoords = [[-0.26, -0.38], [0.26, -0.38], [-0.26, 0.38], [0.26, 0.38]];
-    legCoords.forEach(([lx, lz]) => {
-      const leg = new THREE.Mesh(legGeo, darkMat);
-      leg.position.set(lx, 0.13, lz);
-      pig.add(leg);
-    });
+    const dark = [
+      part(earGeo, -0.25, 0.62, 0.62, -0.2, -0.4),
+      part(earGeo, 0.25, 0.62, 0.62, -0.2, 0.4)
+    ];
+    for (const [lx, lz] of [[-0.26, -0.38], [0.26, -0.38], [-0.26, 0.38], [0.26, 0.38]]) dark.push(part(legGeo, lx, 0.13, lz));
+    const darkParts = new THREE.Mesh(mergeGeometries(dark), darkMat);
+    darkParts.name = 'Pig_Legs';
+    pig.add(darkParts);
 
     // Rabo em espiral
     const tailGeo = new THREE.CylinderGeometry(0.03, 0.03, 0.25, 4);

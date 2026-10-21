@@ -55,6 +55,7 @@ import { prepareStaticTemplate, isStaticMergeEnabled } from '../render/staticTem
 import { mergeUnitTemplate } from '../render/mergeUnitTemplate.js';
 import { skinUnitTemplate, isSkinEnabled } from '../render/skinUnitTemplate.js';
 import { ModelFactory } from '../entities/ModelFactory.js';
+import { CritterAnimator } from '../render/critterAnimator.js';
 import { ensureGlbLoaded } from '../entities/glbModels.js';
 import { setTeamColor, hasTeamMask, TEAM_PALETTE } from '../render/teamColor.js';
 
@@ -503,14 +504,14 @@ const MODEL_CATALOG = [
   },
   {
     id: 'pig_farm',
-    name: 'Fazenda de Porcos (Pig Farm)',
+    name: 'Cercado de Javalis (procedural)',
     category: 'buildings',
     faction: 'orc',
     type: 'building',
     icon: '🐖',
     sourceFile: 'src/render/buildings/orc/PigFarm.js',
     create: () => bldView(PigFarm, 'pig_farm'),
-    description: 'A emblemática fazenda dos Orcs. Cercado de toras rústicas com amarração de corda, chão de lama úmida com palha, cocho de comida, abrigo de palha e três javalis/porcos com rotinas autônomas fuçando e comendo no cercado.',
+    description: 'O emblemático cercado dos Clãs do Cinzal. Cercado de toras rústicas com amarração de corda, chão de lama úmida com palha, cocho de comida, abrigo de palha e três javalis/porcos com rotinas autônomas fuçando e comendo no cercado.',
     notes: 'VFX: 3 javalis com IA comportamental autônoma (vagam pelo cercado, comem no cocho, farejam o chão e balançam os rabos em espiral).'
   },
   {
@@ -1119,7 +1120,7 @@ const MODEL_CATALOG = [
   },
   {
     id: 'pig_farm_glb',
-    name: 'Chiqueiro de Porcos (Blender)',
+    name: 'Cercado de Javalis (Blender)',
     category: 'buildings',
     faction: 'orc',
     type: 'building',
@@ -1127,8 +1128,8 @@ const MODEL_CATALOG = [
     glb: 'pig_farm',
     sourceFile: 'tools/blender/build_pig_farm.py',
     create: createGlb('pig_farm'),
-    description: 'Criatório orc gerado pelo pipeline Blender (public/models/pig_farm.glb): curral de paliçada com porteira, lama, galpão de toras com palha, cochos e poste de abate. Os porcos são criados por PigFarm.js.',
-    notes: '2 draw calls, ~5,1 mil triângulos, atlas 1024², ~295 KB. Pegada ~6 (raio 2,8), altura ~4,3.'
+    description: 'Criatório orc gerado pelo pipeline Blender (public/models/pig_farm.glb): curral de paliçada com porteira, lama, galpão de toras com palha, cochos e poste de abate. Os javalis do cercado são criados em tempo de execução por PigFarm.js.',
+    notes: '2 draw calls (o cercado em jogo soma 3 javalis procedurais de 4 malhas cada = 14), ~5,1 mil triângulos, atlas 512² (M2-13: era 1024², regenerado com ATLAS=512), ~196 KB. Pegada ~6 (raio 2,8), altura ~4,3.'
   },
   {
     id: 'orc_lumber_mill_glb',
@@ -1622,8 +1623,8 @@ const MODEL_CATALOG = [
     glb: 'critter_boar',
     sourceFile: 'tools/blender/build_critter_boar.py',
     create: createGlb('critter_boar'),
-    description: 'Javali selvagem neutro (ART-04): tronco em cunha, crina de cerdas, focinho rosado e presas curtas, pernas curtas com cascos. Substituirá o procedural no jogo.',
-    notes: '6 draw calls (Body, Head e 4 pernas), 1 172 triângulos, atlas 512², escala ×1,4 na geometria: 0,51 × 0,84 × 1,87 m (L × A × P), frente em +Z. No jogo, CritterView aplica mais ×1,4: ~2,61 m de comprimento, como o procedural (2,58 m). Sem animação nesta entrega.',
+    description: 'Javali selvagem neutro (ART-04): tronco em cunha, crina de cerdas, focinho rosado e presas curtas, pernas curtas com cascos. Já é o modelo do jogo (CritterView, M2-13) com animações de andar, pastar e correr (nós Body, Head, Leg_*); o procedural é só reserva.',
+    notes: '6 draw calls (Body, Head e 4 pernas), 1 172 triângulos, atlas 512², escala ×1,4 na geometria: 0,51 × 0,84 × 1,87 m (L × A × P), frente em +Z. No jogo, CritterView aplica mais ×1,4: ~2,61 m de comprimento, como o procedural (2,58 m). Animação por rotação dos nós: no inspetor alterna andar, pastar e correr (?critter=walk, graze, run, idle ou dead fixa o estado).',
   },
   {
     id: 'wall_human_glb',
@@ -1860,6 +1861,7 @@ class ModelInspectorApp {
     this.currentBuildingInstance = null;
     this.particleSystem = null;
     this.animator = null;
+    this.critterAnimator = null;
     this.activeCategory = 'all';
     this.searchQuery = '';
     this.currentLighting = 'studio';
@@ -2219,6 +2221,9 @@ class ModelInspectorApp {
     } else {
       animSection.style.display = 'none';
       this.animator = null;
+      // M2-13: javali `.glb` anima andar/pastar/correr; `?critter=walk|graze|run|idle|dead` fixa o estado, sem o parâmetro alterna sozinho.
+      this.critterAnimator = item.glb === 'critter_boar' ? new CritterAnimator(model) : null;
+      this.critterClock = 0;
 
       if (this.currentBuildingInstance && buildingVfxSection) {
         buildingVfxSection.style.display = 'block';
@@ -2748,6 +2753,15 @@ class ModelInspectorApp {
     if (this.animator) {
       this.animator.update(dt);
       this.updateTimelineUI();
+    }
+
+    // M2-13: animação do javali (ciclo: andar 4 s, pastar 4 s, correr 3 s)
+    if (this.critterAnimator && this.critterAnimator.valid) {
+      const forced = new URLSearchParams(window.location.search).get('critter');
+      this.critterClock += dt;
+      const t = this.critterClock % 11;
+      this.critterAnimator.setState(forced || (t < 4 ? 'walk' : t < 8 ? 'graze' : 'run'));
+      this.critterAnimator.update(dt);
     }
 
     // Building procedural animation & VFX update

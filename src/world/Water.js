@@ -36,6 +36,28 @@ export function mergeByMaterial(root, name) {
   return out;
 }
 
+/**
+ * M2-16: tinta da água RASA por tileset-base (cor sRGB + quanto ela tinge, 0..1) e transparência extra na beirada. A água vai de
+ * "fundo" (cor do estilo, um pouco mais escura) a "raso" (tinta clara, mais translúcida, o fundo de areia aparece) pela profundidade
+ * do terreno sob cada vértice: o gradiente raso→fundo das costas. Só em mapas regionais (`biomeGrid`).
+ */
+const SHALLOW_TINT = {
+  default: { color: 0x9cf0e0, amount: 0.5 },
+  pantano: { color: 0xa3b45e, amount: 0.42 }, // lagoa turva: raso esverdeado de limo
+  inverno: { color: 0xdaf3ff, amount: 0.42 },
+  vulcanico: { color: 0x6c6a66, amount: 0.18 },
+  deserto: { color: 0x94f0d6, amount: 0.55 },
+  savana: { color: 0xa0e8c8, amount: 0.46 },
+  pedregoso: { color: 0xa9dde6, amount: 0.34 }
+};
+const SHALLOW_END = 1.5; // u de profundidade em que a tinta rasa some
+const DEEP_START = 1.4; // u a partir de onde a água escurece
+const DEEP_END = 4.5;
+const smooth01 = (a, b, x) => {
+  const t = Math.min(1, Math.max(0, (x - a) / (b - a)));
+  return t * t * (3 - 2 * t);
+};
+
 /** Água rasa própria para juncos/vitórias-régias: abaixo do nível d'água, mas longe do abismo. */
 const REED_MIN_DEPTH = 0.05;
 const REED_MAX_DEPTH = 0.6;
@@ -153,6 +175,50 @@ export class Water {
   }
 
   /**
+   * M2-16: aplica o gradiente raso→fundo às cores por vértice (RGBA linear) de `geo`: a profundidade vem do terreno sob o vértice
+   * (média de 5 amostras); perto da costa a cor vai para a tinta rasa do estilo e fica mais translúcida, longe dela escurece.
+   */
+  _applyDepthGradient(geo) {
+    const terrain = this.terrain, regions = this.regions;
+    const pos = geo.attributes.position;
+    const col = geo.attributes.color;
+    const tint = new THREE.Color();
+    const tintCache = new Map();
+    const tintOf = (def) => {
+      const id = def.baseId || def.id;
+      let v = tintCache.get(id);
+      if (!v) {
+        const cfg = SHALLOW_TINT[id] || SHALLOW_TINT.default;
+        v = { c: new THREE.Color(cfg.color), amount: cfg.amount };
+        tintCache.set(id, v);
+      }
+      return v;
+    };
+    const wl = this.waterLevel;
+    const lava = this.lavaInfo;
+    for (let i = 0; i < pos.count; i++) {
+      const x = pos.getX(i), z = pos.getZ(i);
+      if (lava && lava.isLavaAt(x, z)) continue;
+      const hMin = Math.min(
+        terrain.getHeight(x, z), terrain.getHeight(x + 1.2, z), terrain.getHeight(x - 1.2, z),
+        terrain.getHeight(x, z + 1.2), terrain.getHeight(x, z - 1.2)
+      );
+      const hAvg = (terrain.getHeight(x, z) + hMin) / 2;
+      const depth = wl - hAvg;
+      const shallow = 1 - smooth01(0.0, SHALLOW_END, depth);
+      const deep = smooth01(DEEP_START, DEEP_END, depth);
+      const t = tintOf(regions.styles[regions.waterStyleAt(x, z)].def);
+      tint.copy(t.c).convertSRGBToLinear();
+      const k = shallow * t.amount;
+      let r = col.getX(i), g = col.getY(i), b = col.getZ(i), a = col.getW(i);
+      r += (tint.r - r) * k; g += (tint.g - g) * k; b += (tint.b - b) * k;
+      const dk = 1 - 0.28 * deep;
+      col.setXYZW(i, r * dk, g * dk, b * dk, Math.min(1, a * (1 - 0.22 * shallow + 0.06 * deep)));
+    }
+    col.needsUpdate = true;
+  }
+
+  /**
    * 1. Deep Water Base Plane (Abyssal sapphire / ocean navy foundation)
    */
   createDeepWaterBase() {
@@ -208,6 +274,7 @@ export class Water {
         const w = def.water, c = [(w.color >> 16) & 255, (w.color >> 8) & 255, w.color & 255];
         return [c[0], c[1], c[2], w.opacity];
       });
+      this._applyDepthGradient(geo); // M2-16: raso turquesa → fundo escuro
     }
 
     this.surfaceMat = new THREE.MeshStandardMaterial({
@@ -272,7 +339,7 @@ export class Water {
       uLow: { value: low ? 1 : 0 },
       // MUNDO-5: regional = a cor da espuma vem do vértice (cor × `uFoam` branco); sem regiões, a cor do tileset como sempre
       uFoam: { value: new THREE.Color(regional ? 0xffffff : this.cfg.foam) },
-      uStrength: { value: this.cfg.foamStrength * 1.6 }
+      uStrength: { value: this.cfg.foamStrength * (regional ? 1.25 : 1.6) } // M2-16: espuma regional mais discreta
     };
     const baseCompile = THREE.Material.prototype.onBeforeCompile; // inclui o patch da névoa de guerra
     mat.onBeforeCompile = function foamOnBeforeCompile(shader, renderer) {

@@ -7,6 +7,7 @@ import { FogView } from '../render/FogView.js';
 import { getMap } from '../data/maps/index.js';
 import { Water } from '../world/Water.js';
 import { Decorations } from '../world/Decorations.js';
+import { CoastProps } from '../world/CoastProps.js';
 import { ParticleSystem } from '../entities/ParticleSystem.js';
 import { ModelFactory } from '../entities/ModelFactory.js';
 import { GameManager } from '../sim/GameManager.js';
@@ -71,6 +72,7 @@ export class MatchSession {
     sceneManager.applyTileset?.(this.terrainView.tileset); // F7-04: céu/névoa/ambiente do tileset do mapa
     this.water = new Water(scene, this.terrain);
     this.decorations = new Decorations(scene, this.terrain);
+    this.coastProps = new CoastProps(scene, this.terrain); // M2-16: conchas, estrelas-do-mar, caniço e barco naufragado (mapas regionais)
     this.particleSystem = new ParticleSystem(scene);
     this.vfx = null; // F7-05 (só fora do headless)
 
@@ -219,6 +221,7 @@ export class MatchSession {
     this.sceneManager.updateCamera(delta);
     this.water.update(elapsed);
     this.decorations?.applyLod(this.sceneManager.zoomLevel); // F1-10: decorações pequenas somem no zoom máximo
+    this.coastProps?.applyLod(this.sceneManager.zoomLevel);
     this.entityViews?.treeManager?.applyLod(this.sceneManager.cameraTarget); // F1-10: árvores distantes → impostor
     if (simulate) {
       const gm = this.gameManager;
@@ -338,7 +341,7 @@ export class MatchSession {
     this.gameManager.dispose();
 
     // 5. Solta as referências (o GC leva o resto).
-    this.terrain = this.terrainView = this.water = this.decorations = this.particleSystem = null;
+    this.terrain = this.terrainView = this.water = this.decorations = this.coastProps = this.particleSystem = null;
     this.gameManager = this.inputManager = this.uiManager = null;
     this._baseline = null;
   }

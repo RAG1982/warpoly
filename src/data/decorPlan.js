@@ -9,6 +9,7 @@
  */
 import { mulberry32, fnv1a } from '../sim/rng.js';
 import { DECOR_RULES, decorCountFor } from './biomeStyles.js';
+import { BIOME } from './maps/biome.js';
 
 /** Faixa de escala por categoria (como no caminho antigo). */
 const SCALE = {
@@ -75,6 +76,107 @@ export function planDecorations({ regions, getHeight, mapDef, lava = null, water
       out.push({ x, y: rule.water ? waterLevel + 0.03 : category === 'pebbles' ? h + 0.05 : h, z, rotY: spin, scale: sc, style });
     }
     plan[category] = out;
+  }
+  return plan;
+}
+
+// ---------------------------------------------------------------------------------------------
+// M2-16 · props de costa e praia (conchas, estrelas-do-mar, caniço, barco naufragado)
+// ---------------------------------------------------------------------------------------------
+
+/** Tipos de prop de costa: chave do `.glb` (lazy), quantidade-base (escala com a área, como `decorCountFor`), faixa de altura e pesos por bioma. */
+export const COAST_RULES = Object.freeze({
+  shell: {
+    key: 'coast_shell', base: 34, scale: [0.85, 1.25], minH: 0.52, maxH: 0.95, reach: 3.2,
+    weights: { [BIOME.SAND]: 1, [BIOME.SAVANNA]: 0.45, [BIOME.DESERT]: 0.5, [BIOME.STEPPE]: 0.4, [BIOME.GRASS]: 0.3, [BIOME.ROCK]: 0.12, [BIOME.VOLCANIC]: 0.1 }
+  },
+  starfish: {
+    key: 'coast_starfish', base: 20, scale: [0.85, 1.3], minH: 0.4, maxH: 0.66, reach: 2.2,
+    weights: { [BIOME.SAND]: 1, [BIOME.GRASS]: 0.2, [BIOME.SAVANNA]: 0.3, [BIOME.DESERT]: 0.3, [BIOME.STEPPE]: 0.25, [BIOME.ROCK]: 0.2 }
+  },
+  reed: {
+    key: 'coast_reed', base: 34, scale: [0.8, 1.25], minH: 0.2, maxH: 0.85, reach: 2.6,
+    weights: { [BIOME.SWAMP]: 1.5, [BIOME.FOREST]: 0.55, [BIOME.GRASS]: 0.5, [BIOME.SAVANNA]: 0.25, [BIOME.STEPPE]: 0.15 }
+  },
+  wreck: {
+    key: 'coast_wreck', base: 2, scale: [0.95, 1.3], minH: 0.1, maxH: 0.42, reach: 0,
+    weights: { [BIOME.SAND]: 1, [BIOME.GRASS]: 0.6, [BIOME.SAVANNA]: 0.8, [BIOME.DESERT]: 0.8, [BIOME.STEPPE]: 0.6, [BIOME.SWAMP]: 0.4, [BIOME.ROCK]: 0.5 }
+  }
+});
+export const COAST_KINDS = Object.freeze(Object.keys(COAST_RULES));
+
+/** Chaves de `GLB_MODELS` dos props de costa que um mapa usa (todos, se for regional com `biomeGrid`; senão nenhum). */
+export function coastKeysOfMap(mapDef) {
+  return mapDef && mapDef.biomeGrid ? COAST_KINDS.map((k) => COAST_RULES[k].key) : [];
+}
+
+const COAST_PROBES = [[1, 0], [-1, 0], [0, 1], [0, -1], [0.7, 0.7], [-0.7, 0.7], [0.7, -0.7], [-0.7, -0.7]];
+const WRECK_SPACING = 38;
+const WRECK_SLOT_CLEAR = 16;
+
+/**
+ * Posições dos props de costa de um mapa REGIONAL (determinístico por mapa e tipo; mesmo molde de `planDecorations`, mas fora de
+ * `DECOR_CATEGORIES`: nunca muda o plano das decorações existentes). Conchas/estrelas na areia e na costa seca de terra firme,
+ * caniço na margem de pântano/mata/grama, barcos naufragados raros em água rasa com terra à vista; nada junto de lava, bases e jazidas.
+ * @returns {Record<string, Array<{x:number,y:number,z:number,rotY:number,scale:number}>>}
+ */
+export function planCoastProps({ regions, getHeight, mapDef, lava = null, waterLevel = 0.5 }) {
+  const size = mapDef.size || regions.size;
+  const half = Math.max(8, (mapDef.playable || size - 8) / 2 - 3);
+  const slots = (mapDef.startSlots || []).filter((p) => p && Number.isFinite(p.x) && Number.isFinite(p.z));
+  const resources = (mapDef.resources || []).filter((p) => p && Number.isFinite(p.x) && Number.isFinite(p.z));
+  const k = Math.max(1, Math.min(3.5, (size / 140) * (size / 140)));
+  const plan = {};
+  for (const kind of COAST_KINDS) {
+    const rule = COAST_RULES[kind];
+    const rng = mulberry32(fnv1a(`${mapDef.id || 'mapa'}|coast|${kind}`));
+    const target = Math.max(rule.base, Math.round(rule.base * (kind === 'wreck' ? Math.min(k, 2) : k)));
+    const maxW = Math.max(...Object.values(rule.weights));
+    const [s0, s1] = rule.scale;
+    const out = [];
+    for (let attempt = 0; out.length < target && attempt < target * 400; attempt++) {
+      const x = (rng.next() * 2 - 1) * half;
+      const z = (rng.next() * 2 - 1) * half;
+      const keep = rng.next();
+      const spin = rng.next() * Math.PI * 2;
+      const sc = s0 + rng.next() * (s1 - s0);
+      const h = getHeight(x, z);
+      if (h < rule.minH || h > rule.maxH) continue;
+      if (lava && lava.distAt(x, z) < LAVA_CLEAR + 1.5) continue;
+      let b = regions.biomeAt(x, z);
+      if (kind === 'wreck') {
+        // sobre água rasa: o bioma da célula é mar; vale o da terra mais próxima (sonda a 5–9 u)
+        b = null;
+        let openSea = 0;
+        for (const [dx, dz] of COAST_PROBES) {
+          for (const r of [5, 9]) {
+            const px = x + dx * r, pz = z + dz * r;
+            const ph = getHeight(px, pz);
+            if (b === null && ph > waterLevel + 0.1 && ph < 2.2) {
+              const pb = regions.biomeAt(px, pz);
+              if (pb !== null && rule.weights[pb]) b = pb;
+            }
+            if (ph < waterLevel - 0.6) openSea++;
+          }
+        }
+        if (b === null || openSea < 3) continue; // precisa de terra à vista e mar aberto por perto
+      } else {
+        if (b === null || !rule.weights[b]) continue;
+        let near = false;
+        for (const [dx, dz] of COAST_PROBES) {
+          if (getHeight(x + dx * rule.reach, z + dz * rule.reach) < waterLevel - 0.05) { near = true; break; }
+        }
+        if (!near) continue;
+      }
+      const w = rule.weights[b] || 0;
+      if (w <= 0 || keep * maxW >= w) continue;
+      if (slots.some((p) => Math.hypot(p.x - x, p.z - z) < (kind === 'wreck' ? WRECK_SLOT_CLEAR : SLOT_CLEAR))) continue;
+      if (resources.some((p) => Math.hypot(p.x - x, p.z - z) < RESOURCE_CLEAR)) continue;
+      if (kind === 'wreck' && out.some((p) => Math.hypot(p.x - x, p.z - z) < WRECK_SPACING)) continue;
+      const y = kind === 'wreck' ? Math.max(h, waterLevel - 0.35) - 0.12 : kind === 'starfish' ? h + 0.02 : h;
+      out.push({ x, y, z, rotY: spin, scale: sc });
+    }
+    plan[kind] = out;
   }
   return plan;
 }

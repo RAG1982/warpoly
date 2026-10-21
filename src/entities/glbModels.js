@@ -103,6 +103,11 @@ export const GLB_MODELS = {
   grass_dry: { url: `${BASE}models/grass_dry.glb`, root: 'GrassDry', type: null, lazy: true },
   tumbleweed: { url: `${BASE}models/tumbleweed.glb`, root: 'Tumbleweed', type: null, lazy: true },
   critter_boar: { url: `${BASE}models/critter_boar.glb`, root: 'CritterBoar', type: null, lazy: true },
+  // M2-16: props de costa e praia (instanciados por `world/CoastProps.js`; carregam sob demanda nos mapas com `biomeGrid`)
+  coast_shell: { url: `${BASE}models/coast_shell.glb`, root: 'CoastShell', type: null, lazy: true },
+  coast_starfish: { url: `${BASE}models/coast_starfish.glb`, root: 'CoastStarfish', type: null, lazy: true },
+  coast_reed: { url: `${BASE}models/coast_reed.glb`, root: 'CoastReed', type: null, lazy: true },
+  coast_wreck: { url: `${BASE}models/coast_wreck.glb`, root: 'CoastWreck', type: null, lazy: true },
   // F7-00b lote 2 (grupo 3): blocos de muralha instanciados (`WallBatch`)
   wall_human: { url: `${BASE}models/wall_human.glb`, root: 'WallHuman', type: null },
   wall_orc: { url: `${BASE}models/wall_orc.glb`, root: 'WallOrc', type: null },

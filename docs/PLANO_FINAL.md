@@ -274,7 +274,7 @@ Legenda de dependências: só IDs; "—" = pode começar já. **Dif.** = dificul
 | M2-20 | Herói Dorian: integração do `.blend` do dono (animações, jogo, inspetor, retrato) | Difícil | G | SB | `.blend` do dono | MUNDO-HEROIS | TODO |
 | M2-21 | Herói Oren: integração do `.blend` do dono | Difícil | G | SB | `.blend` do dono | MUNDO-HEROIS | DONE (2026-10-17; hero_common.py pronta) |
 | M2-22 | Herói Drogath: integração do `.blend` do dono | Difícil | G | SB | `.blend` do dono | MUNDO-HEROIS | DONE (2026-10-20) |
-| M2-23 | Herói Vozgul: integração do `.blend` do dono | Difícil | G | SB | `.blend` do dono | MUNDO-HEROIS | TODO |
+| M2-23 | Herói Vozgul: integração do `.blend` do dono | Difícil | G | SB | `.blend` do dono | MUNDO-HEROIS | DONE (2026-10-20) |
 | M2-24 | Herói Skarn: integração do `.blend` do dono | Difícil | G | SB | `.blend` do dono | MUNDO-HEROIS | TODO |
 | M2-26 | Biomas: neve solta no `biomeGrid` dos mapas MUNDO-7 e minimapa com cor de bioma | Média | M | S | M1-01 | achados M1-01 | DONE (2026-10-17) |
 | M2-27 | Arte da história sem texto em inglês (painéis 3 e 5, cartão de título) | Média | M | V+S | D5 | achado M1-01 | TODO |

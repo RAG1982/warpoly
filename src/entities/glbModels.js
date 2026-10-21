@@ -18,6 +18,8 @@ export const GLB_MODELS = {
   // Drogath Punho-de-Brasa (hero_drogath, M2-22): modelo do Tripo finalizado (Weapon = machado filho de ArmR, faixas e manto em TeamColor)
   hero_drogath: { url: `${BASE}models/hero_drogath.glb`, root: 'Grunt', type: 'grunt' },
   knight: { url: `${BASE}models/knight.glb`, root: 'Knight', type: 'knight' },
+  // Marechal Dorian Vasques (hero_dorian, M2-20): modelo do Tripo finalizado (tipo `cavalier`: 4 patas HorseLeg*, Sword, capa no Torso e `Banner` = estandarte filho do Torso)
+  hero_dorian: { url: `${BASE}models/hero_dorian.glb`, root: 'Cavalier', type: 'cavalier' },
   // Capitão Brann (hero_brann): modelo do Tripo finalizado (commit 4df356b; martelo = Sword, capa = Cape, sem escudo)
   hero_brann: { url: `${BASE}models/hero_brann.glb`, root: 'Knight', type: 'knight' },
   archer: { url: `${BASE}models/archer.glb`, root: 'Archer', type: 'archer' },

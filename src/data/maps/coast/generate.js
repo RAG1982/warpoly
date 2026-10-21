@@ -153,7 +153,7 @@ export function generateCoast(options = {}) {
     const at = o.bigIslandAt?.[k] ?? [k % 2 ? 0.23 : -0.23, k < 2 ? -0.23 : 0.23];
     const r0 = 0.17 * o.size * o.bigIslandScale * rngB.range(0.92, 1.08);
     const e = {
-      id: `ilha-grande-${k + 1}`, kind: 'island', big: true, biome: BIG_ISLAND_BIOMES[k % BIG_ISLAND_BIOMES.length],
+      id: `ilha-grande-${k + 1}`, kind: 'island', big: true, biome: (o.bigIslandBiomes ?? BIG_ISLAND_BIOMES)[k % (o.bigIslandBiomes ?? BIG_ISLAND_BIOMES).length],
       cx: (at[0] + rngB.range(-0.025, 0.025)) * o.size, cz: (at[1] + rngB.range(-0.025, 0.025)) * o.size,
       rx: r0 * rngB.range(1, 1.15), rz: r0, rot: rngB.range(0, Math.PI), seed: (o.seed * 41 + k * 613) | 0, flipX: false,
       harmonics: makeHarmonics(rngB, o.roughness), noise: 0.62, warp: 0.42, rough: 1,

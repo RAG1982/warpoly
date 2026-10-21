@@ -489,6 +489,7 @@ export function planLayout(map, baked, spec, opts) {
       for (const sd of bs.sides ?? []) {
         if ((sd === 'west' && x > -0.1 * map.size) || (sd === 'east' && x < 0.1 * map.size) || (sd === 'north' && z > -0.1 * map.size) || (sd === 'south' && z < 0.1 * map.size)) return false;
       }
+      if (bs.where && !bs.where(x, z, map)) return false; // M2-06: filtro livre do preset (ex.: perto do estreito do Cabo Ferrugem)
       return prev.every((p) => hyp(x, z, p.x, p.z) >= minSep);
     });
     ranked.push(cands);

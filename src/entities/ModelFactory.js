@@ -53,6 +53,7 @@ import { createWallSegment } from '../models/buildings/WallModel.js';
 import { prepareStaticTemplate, isStaticMergeEnabled } from '../render/staticTemplates.js';
 import { mergeUnitTemplate } from '../render/mergeUnitTemplate.js';
 import { skinUnitTemplate, isSkinEnabled } from '../render/skinUnitTemplate.js';
+import { HQ_TIER_MODEL } from '../data/tiers.js';
 import { GLB_MODELS, glbEnabled, glbTemplates, loadGlbTemplates, setTeamColor } from './glbModels.js';
 
 /**
@@ -429,8 +430,14 @@ export class ModelFactory {
   }
 
   // --- Human Buildings ---
-  static createCastle() {
-    return this._glbOr('castle', () => this._placeholder('castle'));
+  /**
+   * Centro humano. M2-33: um modelo por nível (`HQ_TIER_MODEL.human`); sem o .glb do nível cai no `castle.glb` antigo e, sem
+   * ele, no bloco provisório.
+   * @param {number} [tier] nível do Centro (1..3)
+   */
+  static createCastle(tier = 1) {
+    const key = HQ_TIER_MODEL.human[Math.min(3, Math.max(1, tier | 0))];
+    return this._glbOr(key, () => this._glbOr('castle', () => this._placeholder('castle')));
   }
 
   static createLumberCamp() {
@@ -583,6 +590,14 @@ export class ModelFactory {
   /** F3-10 / MUNDO-TERRENO-MAPAS §5: critter decorativo (`sheep` | `boar` | `pig`). */
   static createCritter(species = 'sheep') {
     const norm = species === 'pig' ? 'boar' : (species || 'sheep');
+    // M2-13: javali com `.glb` (lazy, carregado só nos mapas com javalis); sem ele (rede, `?glb=0`) cai no procedural.
+    if (norm === 'boar' && glbEnabled) {
+      const glb = this.createGlbModel('critter_boar');
+      if (glb) {
+        glb.userData.glbCritter = true;
+        return glb;
+      }
+    }
     return this.getOrCreateModel(`critter_${norm}`, () => createCritter(norm));
   }
 

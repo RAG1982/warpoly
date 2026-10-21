@@ -102,3 +102,6 @@ No `critter_boar_close.png` a pelagem aparece um pouco mais clara e quente que n
 6. Ícone: `src/data/buildings.js` (`pig_farm`, `icon: '/icoPorco.svg'`) e `tools/check-data-parity.mjs` (linha do `pig_farm`) passam a `/icoJavali.png` junto com a mudança de nome para "Chiqueiro/Cercado de Javalis" (ART-12); manter o mesmo padrão de caminho dos outros ícones.
 7. Inspetor: a entrada nova faz o `npm run visual` falhar com "sem baseline" até gravar o alvo: `bash tools/safe-run.sh --timeout 1800 -- node tools/visual-regress.mjs --update --only 'inspector/critter_boar_glb'`.
 8. Docs: feito na integração ART-P0 (`docs/03_ASSETS_E_INSPETOR.md` e `docs/TASKS.md`).
+
+## 10. Integração no jogo (M2-13, 2026-10-21)
+Feito: `ModelFactory.createCritter('boar'|'pig')` usa o `.glb` quando carregado (procedural como reserva, sempre para a ovelha); `CritterView` anima os nós (`src/render/critterAnimator.js`): `idle` alterna pastar (`Head` +0,95) e cabeça erguida, `walk` (pernas ±0,45 em diagonais), `run` (±0,8 em galope, `Head` −0,12, `Body` +0,08), `dead` (pernas abertas; o `CritterView` ergue a carcaça 0,12 m). Carga lazy por mapa com `critterGlbKeysOfMap`. Capturas e verificações em `tools/ui-captures/m2-13/` (`check.mjs`, `check.json`). Os 6 draw calls ficam (sem mescla: as pernas animam). Cauda, focinho e presas seguem fixos (`--split` não foi preciso).

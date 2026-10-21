@@ -37,8 +37,27 @@ export const HQ_UPGRADE_COST = {
   3: { gold: 2000, wood: 800, stone: 600, oil: 200, time: 90 }
 };
 
-/** Modelo 3D por nível — todos `null` nesta fase (F7 troca o modelo; ver spec item 3). */
-export const HQ_TIER_MODEL = { 1: null, 2: null, 3: null };
+/**
+ * M2-33: chave do modelo 3D (`GLB_MODELS`) por facção e nível do Centro. Humanos têm um .glb por nível
+ * (`tools/blender/build_hq_human.py`); orcs seguem com o modelo único (`null` = o `GreatHall` procedural).
+ * Só leitura do render: a simulação nunca usa isto (o checksum do headless não muda).
+ */
+export const HQ_TIER_MODEL = {
+  human: { 1: 'hq_human_1', 2: 'hq_human_2', 3: 'hq_human_3' },
+  orc: { 1: null, 2: null, 3: null }
+};
+
+/**
+ * M2-33: dimensões VISUAIS do Centro humano por nível (só render; o raio de colisão da simulação continua o de
+ * `buildings.castle.collisionRadius` = 5,5 em qualquer nível, então pathfinder e entrega de recursos não mudam).
+ * `height` = altura do modelo (y) e `healthBarHeight` = onde fica a barra de vida/chamas; `chimney` = ponto (relativo ao
+ * centro, sem rotação) de onde sai a fumaça da chaminé (só o nível 1 tem chaminé); `footprint` = lado da pegada x/z.
+ */
+export const HQ_TIER_VIEW = {
+  1: { height: 9.0, footprint: 6.8, healthBarHeight: 10.0, chimney: { x: 1.3, y: 8.2, z: -1.6 } },
+  2: { height: 12.5, footprint: 8.2, healthBarHeight: 13.5, chimney: null },
+  3: { height: 15.5, footprint: 8.5, healthBarHeight: 16.5, chimney: null }
+};
 
 /** Nome PT-BR do nível `tier` da facção `factionId` ('human' | 'orc'). */
 export function getTierName(factionId, tier) {

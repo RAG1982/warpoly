@@ -65,3 +65,15 @@ export function getCritterForBiome(biome) {
   }
   return 'sheep';
 }
+
+/**
+ * M2-13: chaves `GLB_MODELS` dos critters que o mapa usa (hoje só o javali `.glb`, que é `lazy`). Para `ensureGlbKeys` antes da
+ * partida: mapa sem `neutrals` de javali/porco não baixa o `.glb`.
+ * @param {{neutrals?: Array<{kind: string, species?: string}>}} mapDef
+ * @returns {string[]}
+ */
+export function critterGlbKeysOfMap(mapDef) {
+  const list = (mapDef && mapDef.neutrals) || [];
+  const hasBoar = list.some((n) => n && n.kind === 'critters' && normalizeCritterSpecies(n.species) === 'boar');
+  return hasBoar ? ['critter_boar'] : [];
+}

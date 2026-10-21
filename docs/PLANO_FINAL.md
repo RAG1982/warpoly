@@ -271,7 +271,7 @@ Legenda de dependências: só IDs; "—" = pode começar já. **Dif.** = dificul
 | M2-17 | Sub-bosque e pântano | Fácil | M | SB | M0-01 | ART-10 | TODO |
 | M2-18 | Efeitos ambientais (poeira, cinza, vapor, neve, lava) | Média | M | S | M2-14 | ART-11 | TODO |
 | M2-19 | Texturas de terreno por bioma (rocha, vulcânico, pântano, gelo, neve; **confirmada pela M1-01**) | Média | G | SB | M1-01 | ART-05 | DONE (2026-10-17; procedural) |
-| M2-20 | Herói Dorian: integração do `.blend` do dono (animações, jogo, inspetor, retrato) | Difícil | G | SB | `.blend` do dono | MUNDO-HEROIS | TODO |
+| M2-20 | Herói Dorian: integração do `.blend` do dono (animações, jogo, inspetor, retrato) | Difícil | G | SB | `.blend` do dono | MUNDO-HEROIS | DONE (2026-10-20) |
 | M2-21 | Herói Oren: integração do `.blend` do dono | Difícil | G | SB | `.blend` do dono | MUNDO-HEROIS | DONE (2026-10-17; hero_common.py pronta) |
 | M2-22 | Herói Drogath: integração do `.blend` do dono | Difícil | G | SB | `.blend` do dono | MUNDO-HEROIS | DONE (2026-10-20) |
 | M2-23 | Herói Vozgul: integração do `.blend` do dono | Difícil | G | SB | `.blend` do dono | MUNDO-HEROIS | DONE (2026-10-20) |

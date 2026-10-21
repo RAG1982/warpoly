@@ -89,6 +89,9 @@ const PROP_SLOT_CLEAR = 10;
 const PROP_RESOURCE_CLEAR = 4.5;
 const PROP_LAVA_CLEAR = 2.2;
 
+/** Sondas (8 direções) para achar água/terra em volta de um ponto (props de costa, M2-16). */
+const SHORE_PROBES = [[1, 0], [-1, 0], [0, 1], [0, -1], [0.7, 0.7], [-0.7, 0.7], [0.7, -0.7], [-0.7, -0.7]];
+
 export const PROP_KEYS = Object.freeze(Object.keys(PROP_RULES));
 
 /**
@@ -123,19 +126,37 @@ export function planProps({ regions, getHeight, mapDef, lava = null, waterLevel 
         if (depth < rule.minDepth || depth > rule.maxDepth) continue;
         if (OPEN_SEA_PROBE.some(([dx, dz]) => getHeight(x + dx, z + dz) < waterLevel - OPEN_SEA_DEPTH)) continue;
         w = 1;
+      } else if (rule.offshore) {
+        // M2-16 (naufragado): água rasa; o bioma é o da terra mais próxima à vista (sonda a 5 e 9 u) e tem de haver mar aberto por perto
+        if (h < rule.minH || h > rule.maxH) continue;
+        let b = null, openSea = 0;
+        for (const [dx, dz] of SHORE_PROBES) {
+          for (const r of [5, 9]) {
+            const ph = getHeight(x + dx * r, z + dz * r);
+            if (b === null && ph > waterLevel + 0.1 && ph < 2.2) {
+              const pb = regions.biomeAt(x + dx * r, z + dz * r);
+              if (pb !== null && rule.weights[pb]) b = pb;
+            }
+            if (ph < waterLevel - 0.6) openSea++;
+          }
+        }
+        if (b === null || openSea < 3) continue;
+        w = rule.weights[b];
       } else {
         if (h < rule.minH || h > rule.maxH) continue;
         const b = regions.biomeAt(x, z);
         if (b === null) continue;
         w = rule.weights[b] || 0;
+        // M2-16 (costa): só colado à água (alguma sonda a `shore` u abaixo do nível d'água)
+        if (rule.shore && !SHORE_PROBES.some(([dx, dz]) => getHeight(x + dx * rule.shore, z + dz * rule.shore) < waterLevel - 0.05)) continue;
       }
       if (w <= 0 || keep * maxW >= w) continue;
       const style = regions.styleAt(x, z);
-      if (lava && lava.distAt(x, z) < PROP_LAVA_CLEAR) continue;
-      if (slots.some((p) => Math.hypot(p.x - x, p.z - z) < PROP_SLOT_CLEAR)) continue;
+      if (lava && lava.distAt(x, z) < PROP_LAVA_CLEAR + (rule.shore || rule.offshore ? 1.5 : 0)) continue;
+      if (slots.some((p) => Math.hypot(p.x - x, p.z - z) < (rule.slotClear || PROP_SLOT_CLEAR))) continue;
       if (resources.some((p) => Math.hypot(p.x - x, p.z - z) < PROP_RESOURCE_CLEAR)) continue;
       if (rule.spacing && out.some((p) => Math.hypot(p.x - x, p.z - z) < rule.spacing)) continue;
-      out.push({ x, y: (rule.water ? waterLevel : h) + (rule.lift || 0), z, rotY: spin, scale: sc, style });
+      out.push({ x, y: rule.offshore ? Math.max(h, waterLevel - 0.35) + (rule.lift || 0) : (rule.water ? waterLevel : h) + (rule.lift || 0), z, rotY: spin, scale: sc, style });
     }
     if (out.length) plan[key] = out;
   }

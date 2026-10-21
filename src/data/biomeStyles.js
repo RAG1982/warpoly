@@ -241,6 +241,24 @@ export const PROP_RULES = Object.freeze({
   mangrove_root: {
     legacyCount: 8, minH: 0.6, maxH: 1.6, lift: -0.1, scale: [1.2, 1.8], spacing: 7,
     weights: { [BIOME.SWAMP]: 1 }
+  },
+  // M2-16 · costa e praia (.glb pequenos; sem sombra projetada: 1 draw call cada). `shore`: só colado à água (sonda a N u);
+  // `offshore`: naufragado em água rasa com terra à vista e mar aberto por perto (o bioma é o da terra vizinha); `slotClear`: folga das bases
+  coast_shell: {
+    legacyCount: 34, minH: 0.52, maxH: 0.95, shore: 3.2, shadow: false, scale: [0.85, 1.25], spacing: 0,
+    weights: { [BIOME.SAND]: 1, [BIOME.SAVANNA]: 0.45, [BIOME.DESERT]: 0.5, [BIOME.STEPPE]: 0.4, [BIOME.GRASS]: 0.3, [BIOME.ROCK]: 0.12, [BIOME.VOLCANIC]: 0.1 }
+  },
+  coast_starfish: {
+    legacyCount: 20, minH: 0.4, maxH: 0.66, shore: 2.2, lift: 0.02, shadow: false, scale: [0.85, 1.3], spacing: 0,
+    weights: { [BIOME.SAND]: 1, [BIOME.GRASS]: 0.2, [BIOME.SAVANNA]: 0.3, [BIOME.DESERT]: 0.3, [BIOME.STEPPE]: 0.25, [BIOME.ROCK]: 0.2 }
+  },
+  coast_reed: {
+    legacyCount: 34, minH: 0.2, maxH: 0.85, shore: 2.6, shadow: false, scale: [0.8, 1.25], spacing: 0,
+    weights: { [BIOME.SWAMP]: 1.5, [BIOME.FOREST]: 0.55, [BIOME.GRASS]: 0.5, [BIOME.SAVANNA]: 0.25, [BIOME.STEPPE]: 0.15 }
+  },
+  coast_wreck: {
+    legacyCount: 2, minH: 0.1, maxH: 0.42, offshore: true, lift: -0.12, slotClear: 16, shadow: false, scale: [0.95, 1.3], spacing: 38,
+    weights: { [BIOME.SAND]: 1, [BIOME.GRASS]: 0.6, [BIOME.SAVANNA]: 0.8, [BIOME.DESERT]: 0.8, [BIOME.STEPPE]: 0.6, [BIOME.SWAMP]: 0.4, [BIOME.ROCK]: 0.5 }
   }
 });
 

@@ -1,12 +1,12 @@
 /**
- * AmbiencePlayer.js (F7-08) — camadas de ambiência SINTETIZADAS (sem arquivos): vento, água, grilos, neve e estrondo.
+ * AmbiencePlayer.js (F7-08) — camadas de ambiência SINTETIZADAS (sem arquivos): vento, água, grilos, neve, estrondo e lava (M2-18).
  * Ruído rosa/branco em loop + filtros com LFOs lentos (rajadas, borbulhar); os grilos são pulsos agendados.
  * `setMix` (níveis 0..1 por camada, ver `ambience.js`) cria as camadas que passam a ser audíveis e aposenta (fade + stop +
  * disconnect) as que zeraram. `update` roda ~4×/s (agenda os grilos e os cristais de neve).
  */
 
 /** Escala de cada camada (o nível 1 da mistura vira este ganho). */
-const LAYER_SCALE = Object.freeze({ wind: 0.5, water: 0.45, crickets: 0.5, snow: 0.22, rumble: 0.9 });
+const LAYER_SCALE = Object.freeze({ wind: 0.5, water: 0.45, crickets: 0.5, snow: 0.22, rumble: 0.9, lava: 0.7 });
 
 export class AmbiencePlayer {
   /**
@@ -147,6 +147,22 @@ export class AmbiencePlayer {
         this._lfo(0.05, 0.35, mod.gain, sources);
         break;
       }
+      case 'lava': {
+        // M2-18: lava — borbulhar grave e lento (ruído rosa passa-baixa com LFOs) + estalos/bolhas que estouram de vez em quando
+        mod.gain.value = 0.7;
+        const lp = this._filter('lowpass', 320, 1.1);
+        const bp = this._filter('bandpass', 140, 0.8);
+        const src = this._loop(this.noise.pink, 3);
+        src.connect(bp); bp.connect(lp); lp.connect(mod);
+        sources.push(src);
+        this._lfo(0.31, 0.22, mod.gain, sources);
+        this._lfo(1.7, 0.1, mod.gain, sources);
+        this._lfo(0.13, 90, lp.frequency, sources);
+        layer.tick = (now) => {
+          if (this.rng() < 0.45) this._pop(gain, now + this.rng() * 0.25);
+        };
+        break;
+      }
       case 'crickets': {
         mod.gain.value = 1;
         const voices = [0, 1].map((k) => {
@@ -197,6 +213,22 @@ export class AmbiencePlayer {
     g.gain.exponentialRampToValueAtTime(0.0001, t + 0.09);
     o.connect(g); g.connect(dest);
     o.start(t); o.stop(t + 0.1);
+  }
+
+  /** Bolha de lava que estoura: seno grave com queda rápida de altura. */
+  _pop(dest, t) {
+    const c = this.ctx;
+    const o = c.createOscillator();
+    o.type = 'sine';
+    const f0 = 110 + this.rng() * 90;
+    o.frequency.setValueAtTime(f0, t);
+    o.frequency.exponentialRampToValueAtTime(f0 * 0.45, t + 0.12);
+    const g = c.createGain();
+    g.gain.setValueAtTime(0.0001, t);
+    g.gain.exponentialRampToValueAtTime(0.16, t + 0.01);
+    g.gain.exponentialRampToValueAtTime(0.0001, t + 0.16);
+    o.connect(g); g.connect(dest);
+    o.start(t); o.stop(t + 0.18);
   }
 
   _destroy(layer) {

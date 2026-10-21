@@ -247,7 +247,8 @@ describe('Water regional', () => {
     const open = vertexAt(geo, -44, 44); // mar aberto (canto SO)
     const volc = vertexAt(geo, 0, 46); // 3 u da praia da ilha
     expect(near(open.color, TILESETS.exuberante.water.color, 0.03)).toBe(true);
-    expect(open.alpha).toBeCloseTo(TILESETS.exuberante.water.opacity, 2);
+    expect(open.alpha).toBeLessThanOrEqual(TILESETS.exuberante.water.opacity + 0.001); // M2-16: a beirada rasa fica até 20 % mais translúcida
+    expect(open.alpha).toBeGreaterThan(TILESETS.exuberante.water.opacity * 0.78);
     expect(near(volc.color, TILESETS.vulcanico.water.color, 0.08)).toBe(true);
     expect(volc.alpha).toBeGreaterThan(TILESETS.exuberante.water.opacity);
     // o tom do vizinho vulcânico (escuro) é bem mais escuro que o do mar base (turquesa)
@@ -266,7 +267,7 @@ describe('Water regional', () => {
         maxStep = Math.max(maxStep, Math.abs(col.getX(a) - col.getX(b)), Math.abs(col.getY(a) - col.getY(b)), Math.abs(col.getZ(a) - col.getZ(b)));
       }
     }
-    expect(maxStep).toBeLessThan(0.25); // turquesa → água escura de uma casa para a outra: no máximo ~1/4 da escala
+    expect(maxStep).toBeLessThan(0.45); // M2-16: + gradiente raso→fundo junto da costa. Turquesa → água escura de uma casa para a outra: no máximo ~1/4 da escala
   });
 
   it('a espuma é uma malha subdividida (1 draw call) com cor/força por região: espuma de cinza vulcânica perto da ilha, branca no mar base', () => {

@@ -12,6 +12,10 @@
  */
 import { getHeightForMap } from '../world/terrainGenerators.js';
 import { BIOME, gridOfBiome } from '../data/maps/biome.js';
+import { buildLavaInfo } from '../data/lavaRender.js';
+
+/** M2-18: cor da lava no minimapa (laranja de brasa; o miolo é mais claro, a borda mais escura) — vale também em mapa só com `lavaGrid`. */
+export const MINIMAP_LAVA = Object.freeze({ edge: { r: 196, g: 62, b: 20 }, core: { r: 255, g: 140, b: 48 } });
 
 const WATER = { r: 30, g: 72, b: 96 };
 const SAND = { r: 212, g: 190, b: 131 };
@@ -67,6 +71,8 @@ export function renderTerrainImage(mapDef, w, h, getHeight = (x, z) => getHeight
   const grid = bg ? gridOfBiome(bg) : null;
   const nodes = bg ? bg.nodes : 0;
   const cell = bg ? bg.cell || 1 : 1;
+  let lava = null;
+  try { lava = buildLavaInfo(mapDef); } catch { lava = null; }
 
   for (let py = 0; py < h; py++) {
     const z = (py / h - 0.5) * size;
@@ -78,7 +84,12 @@ export function renderTerrainImage(mapDef, w, h, getHeight = (x, z) => getHeight
         const bx = Math.round((x + size / 2) / cell), bz = Math.round((z + size / 2) / cell);
         if (bx >= 0 && bz >= 0 && bx < nodes && bz < nodes) biome = grid[bz * nodes + bx];
       }
-      const c = minimapColorAt(height, biome);
+      let c = minimapColorAt(height, biome);
+      if (lava && lava.isLavaAt(x, z)) {
+        const k = 0.5 + 0.5 * Math.sin(x * 0.37) * Math.sin(z * 0.31); // veios claros e escuros, como o fluxo da lava
+        const { edge, core } = MINIMAP_LAVA;
+        c = { r: edge.r + (core.r - edge.r) * k, g: edge.g + (core.g - edge.g) * k, b: edge.b + (core.b - edge.b) * k };
+      }
       const i = (py * w + px) * 4;
       data[i] = c.r;
       data[i + 1] = c.g;

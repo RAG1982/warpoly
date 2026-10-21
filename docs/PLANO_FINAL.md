@@ -282,7 +282,7 @@ Legenda de dependências: só IDs; "—" = pode começar já. **Dif.** = dificul
 | M2-30 | Trabalhador humano (Peão do dono): modelo, animações de coleta, jogo e inspetor; o antigo fica no inspetor | Difícil | G | SB | `peao+humano` | pedido do dono 2026-10-21 | TODO |
 | M2-31 | Arqueiro humano (modelo do dono): integração; o antigo fica no inspetor | Difícil | G | SB | `medieval+archer+3d+model` | pedido do dono | TODO |
 | M2-32 | Footman humano (FBX novo `footman (2)`: espada e escudo): integração; o antigo fica no inspetor | Difícil | G | SB | `footman (2)` | pedido do dono | TODO |
-| M2-33 | Centro humano em 3 níveis (Centro1, centro1-2, centro1-3): modelo por nível, troca no upgrade; os antigos ficam no inspetor | Difícil | G | SB | `Centro1`, `centro1-2`, `centro1-3` | pedido do dono | TODO |
+| M2-33 | Centro humano em 3 níveis (Centro1, centro1-2, centro1-3): modelo por nível, troca no upgrade; os antigos ficam no inspetor | Difícil | G | SB | `Centro1`, `centro1-2`, `centro1-3` | pedido do dono | DONE (2026-10-21) |
 | M2-25 | **G2 — sua passada nº 2** (aprovar prévias dos 16 mapas, ≈ 1 h) | — | — | V | M2-03…07 | — | TODO |
 
 ### M3 — Campanha da Aliança (`war-alliance`)

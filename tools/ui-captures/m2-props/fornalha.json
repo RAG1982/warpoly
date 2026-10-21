@@ -1,47 +1,47 @@
 {
-  "when": "2026-10-21T02:43:45.911Z",
+  "when": "2026-10-21T02:58:39.544Z",
   "mapId": "camp-08-fornalha",
   "perProp": {
     "rock_basalt_a": {
       "colocado": true,
       "instancias": 6,
-      "drawCallsCom": 267,
-      "drawCallsSem": 265,
+      "drawCallsCom": 270,
+      "drawCallsSem": 268,
       "delta": 2
     },
     "rock_basalt_b": {
       "colocado": true,
       "instancias": 8,
-      "drawCallsCom": 138,
-      "drawCallsSem": 136,
+      "drawCallsCom": 143,
+      "drawCallsSem": 141,
       "delta": 2
     },
     "volcano_cone": {
       "colocado": true,
       "instancias": 3,
-      "drawCallsCom": 207,
-      "drawCallsSem": 205,
+      "drawCallsCom": 211,
+      "drawCallsSem": 209,
       "delta": 2
     },
     "tree_burnt": {
       "colocado": true,
       "instancias": 10,
-      "drawCallsCom": 262,
-      "drawCallsSem": 261,
+      "drawCallsCom": 267,
+      "drawCallsSem": 266,
       "delta": 1
     },
     "fumarole": {
       "colocado": true,
       "instancias": 4,
-      "drawCallsCom": 277,
-      "drawCallsSem": 275,
+      "drawCallsCom": 279,
+      "drawCallsSem": 277,
       "delta": 2
     },
     "obsidian": {
       "colocado": true,
       "instancias": 6,
-      "drawCallsCom": 286,
-      "drawCallsSem": 284,
+      "drawCallsCom": 292,
+      "drawCallsSem": 290,
       "delta": 2
     }
   },
@@ -52,7 +52,9 @@
     "volcano_cone": 3,
     "tree_burnt": 10,
     "fumarole": 4,
-    "obsidian": 6
+    "obsidian": 6,
+    "tree_pine_snow": 8,
+    "rock_snow": 9
   },
   "meshesNoJogo": [
     "InstancedProp_rock_basalt_a:6",
@@ -60,8 +62,10 @@
     "InstancedProp_volcano_cone:3",
     "InstancedProp_tree_burnt:10",
     "InstancedProp_fumarole:4",
-    "InstancedProp_obsidian:6"
+    "InstancedProp_obsidian:6",
+    "InstancedProp_tree_pine_snow:8",
+    "InstancedProp_rock_snow:9"
   ],
-  "drawCallsTotal": 286,
+  "drawCallsTotal": 292,
   "errors": []
 }

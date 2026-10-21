@@ -197,7 +197,7 @@ async function runChecks(page) {
         const grip = new V(); P.toolGroup.getWorldPosition(grip);
         const local = P.armR.worldToLocal(grip.clone());
         // ponto mais baixo da ferramenta no mundo (vértices da malha)
-        let minY = 1e9, maxFwd = -1e9;
+        let minY = 1e9;
         const tmp = new V();
         const pos = P.toolGroup.geometry.attributes.position;
         for (let i = 0; i < pos.count; i += 7) {

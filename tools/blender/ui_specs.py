@@ -36,7 +36,7 @@ UNITS = {
     'villager': S('villager_v2', HUM),                       # M2-30: Aldeão v2 do Tripo (villager_v2.glb)
     'knight': S('knight_v2', HUM),                           # M2-32: Espadachim v2 do Tripo (knight_v2.glb)
     'cavalier': S('cavalier', CAV),
-    'archer': S('archer', HUM),
+    'archer': S('archer_v2', HUM),                           # M2-31: arqueiro do Tripo (archer_v2.glb); o archer.glb antigo é o reserva
     'ballista': S('ballista', SIEGE),
     'peon': S('peon', HUM),
     'grunt': S('grunt', HUM),
@@ -52,7 +52,7 @@ UNITS = {
     'catapult': S('catapult', SIEGE),
     'sapper': S('sapper', HUM),
     'arsonist': S('arsonist', HUM),
-    'ranger': S('archer', HUM, badge='rank'),
+    'ranger': S('archer_v2', HUM, badge='rank'),             # M2-31: mesmo modelo do arqueiro
     'berserker': S('axethrower', HUM, badge='rank'),
     'mage': S('mage', HUM),
     'necromancer': S('necromancer', HUM),
@@ -188,7 +188,7 @@ PORTRAITS = {
     'villager': P('villager_v2', dict(PORTRAIT_HUM, crop=0.5), ('fight', 0.3)),   # M2-30
     'knight': P('knight_v2', PORTRAIT_HUM, ('fight', 0.3)),   # M2-32
     'cavalier': P('cavalier', dict(PORTRAIT_FULL, crop=0.55, az=30, el=8), ('fight', 0.3)),
-    'archer': P('archer', PORTRAIT_HUM, ('fight', 0.6)),
+    'archer': P('archer_v2', dict(PORTRAIT_HUM, crop=0.58), ('fight', 0.6)),                 # M2-31: arqueiro do Tripo
     'ballista': P('ballista', PORTRAIT_FULL, ('fight', 0.45)),
     'peon': P('peon', PORTRAIT_HUM, ('fight', 0.3), faction='orc'),
     'grunt': P('grunt', PORTRAIT_HUM, ('fight', 0.3), faction='orc'),
@@ -216,7 +216,7 @@ PORTRAITS = {
     'iron_leviathan': P('orc_dreadnought', PORTRAIT_FULL, ('fight', 0.45), faction='orc'),
     'tanker_orc': P('orc_tanker', PORTRAIT_FULL, ('fight', 0.45), faction='orc'),
     'barge_orc': P('orc_barge', PORTRAIT_FULL, ('fight', 0.45), faction='orc'),
-    'ranger': P('archer', PORTRAIT_HUM, ('fight', 0.6), badge='rank'),
+    'ranger': P('archer_v2', dict(PORTRAIT_HUM, crop=0.58), ('fight', 0.6), badge='rank'),
     'berserker': P('axethrower', PORTRAIT_HUM, ('fight', 0.3), faction='orc', badge='rank'),
     'hero_brann': P('knight', PORTRAIT_HUM, ('fight', 0.3), badge='hero'),
     'hero_drogath': P('hero_drogath', PORTRAIT_HUM, ('fight', 0.3), faction='orc', badge='hero'),

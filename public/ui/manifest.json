@@ -154,10 +154,10 @@
   ]
  },
  "bytes": {
-  "total": 2882200,
+  "total": 2877232,
   "art": 281206,
-  "icons": 2300632,
-  "portraits": 300362
+  "icons": 2295926,
+  "portraits": 300100
  },
  "aliases": {
   "ability_debug_bolt": "ability_hero_arcane_bolt",

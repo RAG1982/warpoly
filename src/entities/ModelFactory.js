@@ -209,6 +209,9 @@ export class ModelFactory {
     ud.sword = clone.getObjectByName('Sword') || ud.sword;
     ud.shieldGroup = clone.getObjectByName('ShieldGroup') || ud.shieldGroup;
     ud.bow = clone.getObjectByName('Bow') || ud.bow;
+    // M2-31: cotovelos do arqueiro v2 (o UnitAnimator contra-gira o ForeArmL no disparo; o Bow é filho do ForeArmL)
+    ud.foreArmL = clone.getObjectByName('ForeArmL') || ud.foreArmL;
+    ud.foreArmR = clone.getObjectByName('ForeArmR') || ud.foreArmR;
     ud.weapon = clone.getObjectByName('Weapon') || ud.weapon;
     ud.toolGroup = clone.getObjectByName('ToolGroup') || ud.toolGroup;
     ud.axe = clone.getObjectByName('Axe') || ud.axe;
@@ -579,8 +582,9 @@ export class ModelFactory {
     return this._glbOr('catapult', () => this.getOrCreateModel('catapult', createCatapult, 'catapult'));
   }
 
+  /** M2-31: arqueiro v2 (Tripo) é o padrão; sem ele, o arqueiro antigo (`archer.glb`); sem ele, o bloco reserva. */
   static createArcher() {
-    return this._glbOr('archer', () => this._placeholder('archer', 'unit'));
+    return this._glbOr('archer_v2', () => this._glbOr('archer', () => this._placeholder('archer', 'unit')));
   }
 
   static createVillager() {

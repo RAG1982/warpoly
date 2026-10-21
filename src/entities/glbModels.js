@@ -27,6 +27,9 @@ export const GLB_MODELS = {
   // Capitão Brann (hero_brann): modelo do Tripo finalizado (commit 4df356b; martelo = Sword, capa = Cape, sem escudo)
   hero_brann: { url: `${BASE}models/hero_brann.glb`, root: 'Knight', type: 'knight' },
   archer: { url: `${BASE}models/archer.glb`, root: 'Archer', type: 'archer' },
+  // Arqueiro v2 (archer_v2, M2-31): modelo do Tripo finalizado; padrão do Arqueiro e do Patrulheiro (o `archer` acima é o reserva).
+  // Nós: Torso, Head, ArmL > ForeArmL > Bow (+ BowTip*/BowString*/DrawnArrow), ArmR > ForeArmR, LegL, LegR; tabardo em TeamColor.
+  archer_v2: { url: `${BASE}models/archer_v2.glb`, root: 'Archer', type: 'archer' },
   axethrower: { url: `${BASE}models/axethrower.glb`, root: 'Axethrower', type: 'axethrower' },
   villager: { url: `${BASE}models/villager.glb`, root: 'Villager', type: 'villager' },
   // M2-30: Aldeão humano v2 (camponês de barba ruiva do Tripo; picareta = `ToolGroup`, filha de ArmR; Pack > WoodBundle/GoldSack). Padrão no jogo; o `villager` acima é o fallback e segue no inspetor.
@@ -173,7 +176,7 @@ export const glbTemplates = new Map();
  * F10-05b: facção dona de cada .glb ('human' | 'orc' | 'neutral'), derivada de `faction` em src/data (unidade ou
  * construção com a mesma chave); chaves fora das tabelas (árvores, jazidas...) são 'neutral' = sempre carregadas.
  */
-const FACTION_OVERRIDES = { villager_v2: 'human', knight_v2: 'human', hq_human_1: 'human', hq_human_2: 'human', hq_human_3: 'human', orc_oil_platform: 'orc', orc_frigate: 'orc', orc_barge: 'orc', orc_dreadnought: 'orc', orc_tanker: 'orc' };
+const FACTION_OVERRIDES = { archer_v2: 'human', villager_v2: 'human', knight_v2: 'human', hq_human_1: 'human', hq_human_2: 'human', hq_human_3: 'human', orc_oil_platform: 'orc', orc_frigate: 'orc', orc_barge: 'orc', orc_dreadnought: 'orc', orc_tanker: 'orc' };
 export function glbFaction(key) {
   if (FACTION_OVERRIDES[key]) return FACTION_OVERRIDES[key];
   const f = (UNITS[key] && UNITS[key].faction) || (BUILDINGS[key] && BUILDINGS[key].faction) || 'neutral';

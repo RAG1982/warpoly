@@ -24,6 +24,8 @@ const FOCUS = path.join(OUT, 'focus.json');
 const EXTRA = process.env.M216_QUERY || '';
 const ARGS = ['--use-angle=vulkan', '--enable-features=Vulkan', '--enable-gpu', '--ignore-gpu-blocklist', '--js-flags=--max-old-space-size=2048', '--disable-dev-shm-usage', '--disable-extensions'];
 
+if (process.env.M216_UNCAP) ARGS.push('--disable-frame-rate-limit', '--disable-gpu-vsync'); // FPS sem teto de 60 (medição)
+
 const focusDb = fs.existsSync(FOCUS) ? JSON.parse(fs.readFileSync(FOCUS, 'utf8')) : {};
 const vite = await createServer({ root: ROOT, server: { port: PORT, strictPort: true, host: '127.0.0.1' }, logLevel: 'warn', clearScreen: false });
 await vite.listen();

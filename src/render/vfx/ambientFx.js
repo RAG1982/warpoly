@@ -20,12 +20,12 @@ const WIND = Object.freeze({ x: 1.7, z: 0.6 });
 
 /** Taxas-base (partículas por segundo, com densidade 1) de cada efeito. */
 export const AMBIENT_RATES = Object.freeze({
-  dust: 5, ash: 12, ember: 6, snow: 26, steam: 1.8, lavaSteam: 4, lavaEmber: 6, lavaHalo: 0.8
+  dust: 16, ash: 14, ember: 10, snow: 38, steam: 4, lavaSteam: 14, lavaEmber: 16, lavaHalo: 1.4
 });
 
 const COL = {
-  dust: rgb('#cdb98f'), ash: rgb('#4a4644'), ashLight: rgb('#7a7470'), ember: rgb('#ff8a2a'), fire: rgb('#ffc24a'),
-  snow: rgb('#f4f8ff'), steam: rgb('#e6e2dc'), lavaSteam: rgb('#c4aa9a'), halo: rgb('#ff5a14').map((v) => v * 0.4)
+  dust: rgb('#e0cfa6'), ash: rgb('#4a4644'), ashLight: rgb('#7a7470'), ember: rgb('#ff8a2a'), fire: rgb('#ffc24a'),
+  snow: rgb('#f4f8ff'), steam: rgb('#e6e2dc'), lavaSteam: rgb('#d8c4b6'), halo: rgb('#ff5a14').map((v) => v * 0.55)
 };
 const SIZE_SCALE = { solid: 1.5, smoke: 1.5, glow: 2.2 }; // o mesmo de vfxEmitters.put
 
@@ -112,24 +112,24 @@ export class AmbientFx {
     if (k.dust) {
       for (let n = this._count('dust', AMBIENT_RATES.dust, delta); n > 0; n--) {
         const p = this._pick(cx, cz, (x, z, h) => h > 0.8 && DUST_BIOMES.has(this._biomeOf(x, z)));
-        if (p) this._put('smoke', rng.range(2.6, 4.2), rng.range(0.5, 0.9), -0.02, p, WIND.x * rng.range(1.2, 2.2), rng.range(0.05, 0.25), WIND.z * rng.range(0.6, 2), COL.dust, 0.25);
+        if (p) this._put('smoke', rng.range(2.8, 4.4), rng.range(1.5, 2.6), -0.02, p, WIND.x * rng.range(1.2, 2.2), rng.range(0.05, 0.25), WIND.z * rng.range(0.6, 2), COL.dust, 0.25);
       }
     }
     if (k.ash) {
       const ok = (x, z, h) => h > 0.8 && ASH_BIOMES.has(this._biomeOf(x, z));
       for (let n = this._count('ash', AMBIENT_RATES.ash, delta); n > 0; n--) {
         const p = this._pick(cx, cz, ok);
-        if (p) this._put('solid', rng.range(5, 8), rng.range(0.035, 0.07), 0.03, p, WIND.x * rng.range(0.4, 1.0), rng.range(-0.55, -0.3), WIND.z * rng.range(0.3, 0.9), rng() < 0.7 ? COL.ash : COL.ashLight, rng.range(4.5, 8));
+        if (p) this._put('solid', rng.range(5, 8), rng.range(0.08, 0.14), 0.03, p, WIND.x * rng.range(0.4, 1.0), rng.range(-0.55, -0.3), WIND.z * rng.range(0.3, 0.9), rng() < 0.7 ? COL.ash : COL.ashLight, rng.range(4.5, 8));
       }
       for (let n = this._count('ember', AMBIENT_RATES.ember, delta); n > 0; n--) {
         const p = this._pick(cx, cz, ok);
-        if (p) this._put('glow', rng.range(2.2, 3.8), rng.range(0.05, 0.1), -0.3, p, WIND.x * rng.range(0.3, 0.8), rng.range(0.9, 1.8), WIND.z * rng.range(0.2, 0.6), rng() < 0.6 ? COL.ember : COL.fire, rng.range(0.2, 0.8));
+        if (p) this._put('glow', rng.range(2.2, 3.8), rng.range(0.09, 0.16), -0.3, p, WIND.x * rng.range(0.3, 0.8), rng.range(0.9, 1.8), WIND.z * rng.range(0.2, 0.6), rng() < 0.6 ? COL.ember : COL.fire, rng.range(0.2, 0.8));
       }
     }
     if (k.snow) {
       for (let n = this._count('snow', AMBIENT_RATES.snow, delta); n > 0; n--) {
         const p = this._pick(cx, cz, (x, z, h) => h > 0.6 && SNOW_BIOMES.has(this._biomeOf(x, z)));
-        if (p) this._put('solid', rng.range(4.2, 6.2), rng.range(0.03, 0.055), 0.02, p, WIND.x * rng.range(0.5, 1.1), rng.range(-1.5, -1.0), WIND.z * rng.range(0.2, 0.7), COL.snow, rng.range(5, 7.5));
+        if (p) this._put('solid', rng.range(4.2, 6.2), rng.range(0.07, 0.12), 0.02, p, WIND.x * rng.range(0.5, 1.1), rng.range(-1.5, -1.0), WIND.z * rng.range(0.2, 0.7), COL.snow, rng.range(5, 7.5));
       }
     }
     if (k.steam) {
@@ -137,7 +137,7 @@ export class AmbientFx {
       if (near.length) {
         for (let n = this._count('steam', AMBIENT_RATES.steam * near.length, delta); n > 0; n--) {
           const f = near[Math.floor(rng() * near.length)];
-          this._put('smoke', rng.range(2.4, 3.6), rng.range(0.45, 0.8), -0.12,
+          this._put('smoke', rng.range(2.6, 3.8), rng.range(1.1, 1.8), -0.12,
             { x: f.x + rng.signed(0.18), y: f.y, z: f.z + rng.signed(0.18) }, WIND.x * 0.45 + rng.signed(0.12), rng.range(1.0, 1.7), WIND.z * 0.45 + rng.signed(0.12), COL.steam, 0.9);
         }
       }
@@ -148,15 +148,15 @@ export class AmbientFx {
       const at = (p) => ({ x: p.x, y, z: p.z });
       for (let n = this._count('lavaSteam', AMBIENT_RATES.lavaSteam, delta); n > 0; n--) {
         const p = this._pick(cx, cz, ok, 10);
-        if (p) this._put('smoke', rng.range(2.4, 3.8), rng.range(0.5, 0.9), -0.1, at(p), WIND.x * 0.4 + rng.signed(0.1), rng.range(0.7, 1.3), WIND.z * 0.4 + rng.signed(0.1), COL.lavaSteam, 0.15);
+        if (p) this._put('smoke', rng.range(2.6, 4.0), rng.range(1.3, 2.2), -0.1, at(p), WIND.x * 0.4 + rng.signed(0.1), rng.range(1.0, 1.8), WIND.z * 0.4 + rng.signed(0.1), COL.lavaSteam, 0.15);
       }
       for (let n = this._count('lavaEmber', AMBIENT_RATES.lavaEmber, delta); n > 0; n--) {
         const p = this._pick(cx, cz, ok, 10);
-        if (p) this._put('glow', rng.range(1.2, 2.6), rng.range(0.05, 0.1), -0.4, at(p), rng.signed(0.4), rng.range(1.2, 2.6), rng.signed(0.4), rng() < 0.5 ? COL.ember : COL.fire, 0.2);
+        if (p) this._put('glow', rng.range(1.4, 2.8), rng.range(0.12, 0.2), -0.4, at(p), rng.signed(0.4), rng.range(1.6, 3.4), rng.signed(0.4), rng() < 0.5 ? COL.ember : COL.fire, 0.2);
       }
       for (let n = this._count('lavaHalo', AMBIENT_RATES.lavaHalo, delta); n > 0; n--) { // "luz" da lava: halo grande e fraco (entra no bloom)
         const p = this._pick(cx, cz, ok, 10);
-        if (p) this._put('glow', rng.range(2.2, 3.4), rng.range(0.9, 1.5), 0, at(p), 0, 0.05, 0, COL.halo, 0.35);
+        if (p) this._put('glow', rng.range(2.2, 3.4), rng.range(1.5, 2.4), 0, at(p), 0, 0.05, 0, COL.halo, 0.35);
       }
     }
   }

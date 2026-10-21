@@ -1,0 +1,808 @@
+{
+  "generated": "2026-10-21T02:21:50.648Z",
+  "rows": [
+    {
+      "id": "C0",
+      "name": "hero_vozgul.glb: 9 nós, Weapon>ArmR, Crystal>Weapon com material Flame, Torso com Atlas+TeamColor, <= 20 draw calls",
+      "status": "PASS",
+      "detail": "nós=[ArmL,Crystal,Weapon,ArmR,Head,LegL,LegR,Torso,Necromancer] faltando=[] escudo=[] pai(Weapon)=ArmR pai(Crystal)=Weapon Torso=Atlas,TeamColor draw calls=12 triângulos=21229"
+    },
+    {
+      "id": "C1",
+      "name": "spawn hero_vozgul perto do HQ; animador no tipo necromancer",
+      "status": "PASS",
+      "detail": "id=291 tipo=hero_vozgul raiz=Necromancer escala=[1.863,1.863,1.863] unitType=necromancer filhos da raiz=[ArmL,ArmR,Head,LegL,LegR,Torso,SelectionRing] GET hero_vozgul.glb=200"
+    },
+    {
+      "id": "C10",
+      "name": "cast ao vivo: a view entra em cast (>= 3 quadros por magia); Dreno fere o alvo e cura a heroína; Véu deixa o aliado invisível; Ancestrais erguem esqueletos",
+      "status": "PASS",
+      "detail": "hero_soul_drain: cast=30/106 anims=[idle,cast,fight] haste mín=0.915 chama máx=1.35; hero_ash_veil: cast=30/97 anims=[cast,idle,fight] haste mín=0.915 chama máx=1.35; hero_ancestors: cast=36/121 anims=[fight,cast,idle] haste mín=0.890 chama máx=1.35; PV do alvo 5000 -> 4900; PV dela 180 -> 210.5; aliado invisível=true; esqueletos 0 -> 3; mana restante=87"
+    },
+    {
+      "id": "C2",
+      "name": "view com os 9 nós; Weapon>ArmR; Crystal>Weapon; Torso com Atlas+TeamColor; chama com material Flame emissivo; sem escudo",
+      "status": "PASS",
+      "detail": "faltando=[] Torso=Atlas,TeamColor pai(Weapon)=ArmR pai(Crystal)=Weapon Crystal=Flame chama={\"name\":\"Flame\",\"emissive\":\"#ffffff\",\"intensity\":1} nós=18"
+    },
+    {
+      "id": "C3",
+      "name": "rebind: userData e meshParts do animador (torso, head, armL, armR, legL, legR, weapon, crystal)",
+      "status": "PASS",
+      "detail": "nulos=[] userData={\"torso\":\"Torso\",\"head\":\"Head\",\"armL\":\"ArmL\",\"armR\":\"ArmR\",\"legL\":\"LegL\",\"legR\":\"LegR\",\"weapon\":\"Weapon\",\"crystal\":\"Crystal\"}"
+    },
+    {
+      "id": "C4",
+      "name": "idle/walk/fight/cast mexem as partes; cajado em pé (eixo y >= 0,98) em idle/walk/fight e >= 0,8 na cast; Crystal pulsa na cast",
+      "status": "PASS",
+      "detail": "walk dif máx=0.650 rad; cast armR.x mín=-2.3 rad; Crystal escala máx na cast=1.35; Weapon eixo y mundo mín idle/walk/fight=1 cast=0.8726; fight: armR 0,2=[0,0,0] 0,5=[0,0,0] (necromante não tem golpe próprio: o ataque é a cast); cast mov=0.460"
+    },
+    {
+      "id": "C5",
+      "name": "caminhada ao vivo por 1 s: pernas e braço balançam",
+      "status": "PASS",
+      "detail": "quadros=61 com walk=59 faixa legL.x=1.3 rad armR.x=1.1 rad deslocou=4.4 u"
+    },
+    {
+      "id": "C6",
+      "name": "TeamColor: cor de time vermelha muda o material TeamColor e não o Atlas",
+      "status": "PASS",
+      "detail": "TeamColor #2563eb -> #d02020; Atlas #ffffff -> #ffffff"
+    },
+    {
+      "id": "C7",
+      "name": "sem pageerror nem console.error (deprecações listadas à parte)",
+      "status": "PASS",
+      "detail": "erros=0 (deprecação=0); avisos=0"
+    },
+    {
+      "id": "C8",
+      "name": "Vozgul x necromante comum a 3 u (altura da cabeça e do topo, em unidades de mundo, escala da raiz incluída)",
+      "status": "PASS",
+      "detail": "distância=3; Vozgul: raiz×1.863 cabeça=3.167 topo=4.008; necromante: raiz×1.62 cabeça=2.595 topo=5.77; ambos na tela=true"
+    },
+    {
+      "id": "C9",
+      "name": "inspetor: hero_vozgul_glb carrega com os 9 nós",
+      "status": "PASS",
+      "detail": "nós=[Necromancer,ArmL,ArmL_1,ArmL_2,ArmR,ArmR_1,ArmR_2,Weapon,Crystal,Head,Head_1,Head_2,LegL,LegR,Torso,Torso_1,Torso_2]"
+    }
+  ],
+  "files": [
+    {
+      "name": "game-vozgul-andar.png",
+      "kB": 960
+    },
+    {
+      "name": "game-vozgul-idle.png",
+      "kB": 763
+    },
+    {
+      "name": "game-vozgul-closeup.png",
+      "kB": 990
+    },
+    {
+      "name": "game-vozgul-dreno-de-alma.png",
+      "kB": 984
+    },
+    {
+      "name": "game-vozgul-ancestrais.png",
+      "kB": 994
+    },
+    {
+      "name": "game-vozgul-veu-de-cinzas.png",
+      "kB": 981
+    },
+    {
+      "name": "game-vozgul-time-vermelho.png",
+      "kB": 981
+    },
+    {
+      "name": "game-vozgul-vs-necromante.png",
+      "kB": 865
+    },
+    {
+      "name": "inspetor-vozgul-idle.png",
+      "kB": 267
+    },
+    {
+      "name": "inspetor-vozgul-cast.png",
+      "kB": 275
+    }
+  ],
+  "data": {
+    "renderer": "ANGLE (AMD, Vulkan 1.4.318 (AMD Radeonâ¢ RX 7600 XT (RADV NAVI33) (0x00007480)), radv)",
+    "glbHttpStatus": 200,
+    "spawn": {
+      "id": 291,
+      "type": "hero_vozgul",
+      "visualBase": "hero_vozgul",
+      "me": 0,
+      "hq": {
+        "x": 32,
+        "z": -30
+      },
+      "spot": {
+        "x": 38,
+        "z": -19.607695154586736
+      },
+      "rootName": "Necromancer",
+      "rootScale": [
+        1.863,
+        1.863,
+        1.863
+      ],
+      "rootChildren": [
+        "ArmL",
+        "ArmR",
+        "Head",
+        "LegL",
+        "LegR",
+        "Torso",
+        "SelectionRing"
+      ],
+      "animUnitType": "necromancer"
+    },
+    "inspect": {
+      "found": {
+        "Necromancer": {
+          "parent": "",
+          "mats": [
+            "Atlas",
+            "TeamColor",
+            "Flame",
+            "(sem nome)"
+          ]
+        },
+        "Torso": {
+          "parent": "Necromancer",
+          "mats": [
+            "Atlas",
+            "TeamColor"
+          ]
+        },
+        "Head": {
+          "parent": "Necromancer",
+          "mats": [
+            "Atlas",
+            "TeamColor"
+          ]
+        },
+        "ArmL": {
+          "parent": "Necromancer",
+          "mats": [
+            "Atlas",
+            "TeamColor"
+          ]
+        },
+        "ArmR": {
+          "parent": "Necromancer",
+          "mats": [
+            "Atlas",
+            "TeamColor",
+            "Flame"
+          ]
+        },
+        "LegL": {
+          "parent": "Necromancer",
+          "mats": [
+            "Atlas"
+          ]
+        },
+        "LegR": {
+          "parent": "Necromancer",
+          "mats": [
+            "Atlas"
+          ]
+        },
+        "Weapon": {
+          "parent": "ArmR",
+          "mats": [
+            "Atlas",
+            "Flame"
+          ]
+        },
+        "Crystal": {
+          "parent": "Weapon",
+          "mats": [
+            "Flame"
+          ]
+        }
+      },
+      "all": [
+        "Necromancer",
+        "ArmL",
+        "ArmL_1",
+        "ArmL_2",
+        "ArmR",
+        "ArmR_1",
+        "ArmR_2",
+        "Weapon",
+        "Crystal",
+        "Head",
+        "Head_1",
+        "Head_2",
+        "LegL",
+        "LegR",
+        "Torso",
+        "Torso_1",
+        "Torso_2",
+        "SelectionRing"
+      ],
+      "userData": {
+        "torso": "Torso",
+        "head": "Head",
+        "armL": "ArmL",
+        "armR": "ArmR",
+        "legL": "LegL",
+        "legR": "LegR",
+        "weapon": "Weapon",
+        "crystal": "Crystal"
+      },
+      "meshParts": {
+        "torso": "Torso",
+        "head": "Head",
+        "armL": "ArmL",
+        "armR": "ArmR",
+        "legL": "LegL",
+        "legR": "LegR",
+        "weapon": "Weapon",
+        "crystal": "Crystal"
+      },
+      "flame": {
+        "name": "Flame",
+        "emissive": "#ffffff",
+        "intensity": 1
+      },
+      "shieldGroup": null
+    },
+    "poses": {
+      "idle": {
+        "0.1": {
+          "armL": [
+            0.009,
+            0,
+            -0.01
+          ],
+          "armR": [
+            0.009,
+            0,
+            0.01
+          ],
+          "legL": [
+            0,
+            0,
+            0
+          ],
+          "torso": [
+            0,
+            0,
+            0
+          ],
+          "head": [
+            0.02,
+            0.007,
+            0
+          ],
+          "weapon": [
+            -0.009,
+            0,
+            -0.01
+          ],
+          "weaponUp": 1,
+          "crystalScale": 1
+        },
+        "0.5": {
+          "armL": [
+            0.03,
+            0,
+            0.018
+          ],
+          "armR": [
+            0.03,
+            0,
+            -0.018
+          ],
+          "legL": [
+            0,
+            0,
+            0
+          ],
+          "torso": [
+            0,
+            0,
+            0
+          ],
+          "head": [
+            0.011,
+            0.034,
+            0
+          ],
+          "weapon": [
+            -0.03,
+            0,
+            0.018
+          ],
+          "weaponUp": 1,
+          "crystalScale": 1
+        },
+        "0.8": {
+          "armL": [
+            0.018,
+            0,
+            0.016
+          ],
+          "armR": [
+            0.018,
+            0,
+            -0.016
+          ],
+          "legL": [
+            0,
+            0,
+            0
+          ],
+          "torso": [
+            0,
+            0,
+            0
+          ],
+          "head": [
+            -0.001,
+            0.047,
+            0
+          ],
+          "weapon": [
+            -0.018,
+            0,
+            0.016
+          ],
+          "weaponUp": 1,
+          "crystalScale": 1
+        }
+      },
+      "walk": {
+        "0": {
+          "armL": [
+            0,
+            0,
+            -0.01
+          ],
+          "armR": [
+            0,
+            0,
+            0.09
+          ],
+          "legL": [
+            0,
+            0,
+            0
+          ],
+          "torso": [
+            0.05,
+            0,
+            0.04
+          ],
+          "head": [
+            0.04,
+            0,
+            0
+          ],
+          "weapon": [
+            0,
+            0,
+            -0.09
+          ],
+          "weaponUp": 1,
+          "crystalScale": 1
+        },
+        "0.2": {
+          "armL": [
+            -0.55,
+            0,
+            -0.05
+          ],
+          "armR": [
+            0.55,
+            0,
+            0.05
+          ],
+          "legL": [
+            0.65,
+            0,
+            0
+          ],
+          "torso": [
+            0.05,
+            0.08,
+            0
+          ],
+          "head": [
+            0.04,
+            -0.04,
+            0
+          ],
+          "weapon": [
+            -0.55,
+            0,
+            -0.05
+          ],
+          "weaponUp": 1,
+          "crystalScale": 1
+        },
+        "0.4": {
+          "armL": [
+            0,
+            0,
+            -0.09
+          ],
+          "armR": [
+            0,
+            0,
+            0.01
+          ],
+          "legL": [
+            0,
+            0,
+            0
+          ],
+          "torso": [
+            0.05,
+            0,
+            -0.04
+          ],
+          "head": [
+            0.04,
+            0,
+            0
+          ],
+          "weapon": [
+            0,
+            0,
+            -0.01
+          ],
+          "weaponUp": 1,
+          "crystalScale": 1
+        }
+      },
+      "fight": {
+        "0.2": {
+          "armL": [
+            0,
+            0,
+            0
+          ],
+          "armR": [
+            0,
+            0,
+            0
+          ],
+          "legL": [
+            0,
+            0,
+            0
+          ],
+          "torso": [
+            0,
+            0,
+            0
+          ],
+          "head": [
+            0,
+            0,
+            0
+          ],
+          "weapon": [
+            0,
+            0,
+            0
+          ],
+          "weaponUp": 1,
+          "crystalScale": 1
+        },
+        "0.5": {
+          "armL": [
+            0,
+            0,
+            0
+          ],
+          "armR": [
+            0,
+            0,
+            0
+          ],
+          "legL": [
+            0,
+            0,
+            0
+          ],
+          "torso": [
+            0,
+            0,
+            0
+          ],
+          "head": [
+            0,
+            0,
+            0
+          ],
+          "weapon": [
+            0,
+            0,
+            0
+          ],
+          "weaponUp": 1,
+          "crystalScale": 1
+        },
+        "0.8": {
+          "armL": [
+            0,
+            0,
+            0
+          ],
+          "armR": [
+            0,
+            0,
+            0
+          ],
+          "legL": [
+            0,
+            0,
+            0
+          ],
+          "torso": [
+            0,
+            0,
+            0
+          ],
+          "head": [
+            0,
+            0,
+            0
+          ],
+          "weapon": [
+            0,
+            0,
+            0
+          ],
+          "weaponUp": 1,
+          "crystalScale": 1
+        }
+      },
+      "cast": {
+        "0.2": {
+          "armL": [
+            -2.07,
+            0,
+            -0.193
+          ],
+          "armR": [
+            -2.07,
+            0,
+            0.193
+          ],
+          "legL": [
+            0,
+            0,
+            0
+          ],
+          "torso": [
+            -0.108,
+            0,
+            0
+          ],
+          "head": [
+            -0.225,
+            0,
+            0
+          ],
+          "weapon": [
+            2.07,
+            0,
+            -0.193
+          ],
+          "weaponUp": 0.9597,
+          "crystalScale": 1.333
+        },
+        "0.5": {
+          "armL": [
+            -2.3,
+            0,
+            -0.25
+          ],
+          "armR": [
+            -2.3,
+            0,
+            0.25
+          ],
+          "legL": [
+            0,
+            0,
+            0
+          ],
+          "torso": [
+            -0.12,
+            0,
+            0
+          ],
+          "head": [
+            -0.25,
+            0,
+            0
+          ],
+          "weapon": [
+            2.3,
+            0,
+            -0.25
+          ],
+          "weaponUp": 0.9148,
+          "crystalScale": 1.35
+        },
+        "0.8": {
+          "armL": [
+            -2.3,
+            0,
+            -0.307
+          ],
+          "armR": [
+            -2.3,
+            0,
+            0.307
+          ],
+          "legL": [
+            0,
+            0,
+            0
+          ],
+          "torso": [
+            -0.12,
+            0,
+            0
+          ],
+          "head": [
+            -0.25,
+            0,
+            0
+          ],
+          "weapon": [
+            2.3,
+            0,
+            -0.307
+          ],
+          "weaponUp": 0.8726,
+          "crystalScale": 1.333
+        }
+      }
+    },
+    "walk": {
+      "frames": 61,
+      "walkFrames": 59,
+      "legRange": 1.3,
+      "armRange": 1.1,
+      "moved": 4.4
+    },
+    "pA": [
+      {
+        "px": 698,
+        "py": 436,
+        "inTela": true
+      }
+    ],
+    "pB": [
+      {
+        "px": 640,
+        "py": 360,
+        "inTela": true
+      }
+    ],
+    "liveCast": {
+      "drain": {
+        "label": "hero_soul_drain",
+        "frames": 106,
+        "castFrames": 30,
+        "minUp": 0.9147337766564181,
+        "maxCrystal": 1.3499998445537376,
+        "anims": [
+          "idle",
+          "cast",
+          "fight"
+        ]
+      },
+      "veil": {
+        "label": "hero_ash_veil",
+        "frames": 97,
+        "castFrames": 30,
+        "minUp": 0.9147590305539463,
+        "maxCrystal": 1.35,
+        "anims": [
+          "cast",
+          "idle",
+          "fight"
+        ]
+      },
+      "raise": {
+        "label": "hero_ancestors",
+        "frames": 121,
+        "castFrames": 36,
+        "minUp": 0.8896292408335776,
+        "maxCrystal": 1.35,
+        "anims": [
+          "fight",
+          "cast",
+          "idle"
+        ]
+      },
+      "hp0": 180,
+      "selfHp": 210.5,
+      "foeHp": 4900,
+      "foeMax": 5000,
+      "invisible": true,
+      "sk0": 0,
+      "sk1": 3,
+      "mana": 87,
+      "foeId": 293,
+      "allyId": 294
+    },
+    "team": {
+      "antes": {
+        "Atlas": "#ffffff",
+        "TeamColor": "#2563eb",
+        "Flame": "#ffffff",
+        "": "#deb841"
+      },
+      "depois": {
+        "Atlas": "#ffffff",
+        "TeamColor": "#d02020",
+        "Flame": "#ffffff",
+        "": "#deb841"
+      }
+    },
+    "cmp": {
+      "dist": 3,
+      "vozgul": {
+        "rootScaleY": 1.863,
+        "headRel": 3.167,
+        "topRel": 4.008
+      },
+      "mage": {
+        "rootScaleY": 1.62,
+        "headRel": 2.595,
+        "topRel": 5.77
+      },
+      "vozgulPos": [
+        52.945112438383454,
+        2.598918344502613,
+        -18.620050074246336
+      ],
+      "magePos": [
+        55.945112438383454,
+        2.4728140633940456,
+        -18.620050074246336
+      ]
+    },
+    "inspector": {
+      "names": [
+        "Necromancer",
+        "ArmL",
+        "ArmL_1",
+        "ArmL_2",
+        "ArmR",
+        "ArmR_1",
+        "ArmR_2",
+        "Weapon",
+        "Crystal",
+        "Head",
+        "Head_1",
+        "Head_2",
+        "LegL",
+        "LegR",
+        "Torso",
+        "Torso_1",
+        "Torso_2"
+      ],
+      "model": null
+    }
+  },
+  "errors": [],
+  "warnings": []
+}

@@ -15,7 +15,7 @@
  *  C9  inspetor.
  *  C10 cast ao vivo: Dreno de Alma (alvo inimigo: ela se cura), Véu de Cinzas (aliado fica invisível) e Chamado dos Ancestrais (sobre
  *      cadáveres: esqueletos aparecem); a view entra em 'cast' e a chama/cajado respondem.
- * Capturas: idle (zoom 1,0 e close-up), andar, as três magias, time vermelho, Vozgul x necromante, inspetor.
+ * Capturas: idle (zoom 1,0 = game-vozgul-idle e close-up), andar, as três magias, time vermelho, Vozgul x necromante, inspetor.
  * Uso: bash tools/safe-run.sh --timeout 600 -- node tools/ui-captures/hero-vozgul/game-check.mjs
  * Saída nesta pasta: game-*.png, inspetor-*.png, game-check.json
  */
@@ -300,13 +300,34 @@ async function runChecks(page) {
   rec('C5', 'caminhada ao vivo por 1 s: pernas e braço balançam', !walk.error && walk.walkFrames >= 10 && walk.legRange > 0.5 ? 'PASS' : 'FAIL',
     walk.error || `quadros=${walk.frames} com walk=${walk.walkFrames} faixa legL.x=${walk.legRange} rad armR.x=${walk.armRange} rad deslocou=${walk.moved} u`);
 
+  // captura andando (câmera perto, um comando de movimento de 14 u)
+  {
+    const w0 = await attempt(() => posOf(page, id));
+    if (!w0.error) {
+      await camTo(page, w0.x, w0.y + 1.2, w0.z, 0.5, 700);
+      await attempt(() => page.evaluate((uid) => {
+        const gm = window.game.gameManager;
+        const u = gm.entitiesById.get(uid);
+        for (let a = 0; a < 360; a += 30) {
+          const x = u.mesh.position.x + Math.cos((a * Math.PI) / 180) * 14, z = u.mesh.position.z + Math.sin((a * Math.PI) / 180) * 14;
+          if (!gm.pathfinder.isWater(x, z)) { const t = gm.pathfinder.findNearestWalkable(x, z); gm.issue({ type: 'move', playerId: gm.localPlayerId, unitIds: [uid], x: t.x, z: t.z }); return; }
+        }
+      }, id));
+      await sleep(450);
+      const w1 = await attempt(() => posOf(page, id));
+      await camTo(page, w1.x, w1.y + 1.2, w1.z, 0.5, 300);
+      await attempt(() => shot(page, 'game-vozgul-andar.png'));
+      await attempt(() => page.evaluate((uid) => { const gm = window.game.gameManager; gm.issue({ type: 'stop', playerId: gm.localPlayerId, unitIds: [uid] }); }, id));
+    }
+  }
+
   // ---------------------------------------------------------------- C8a: capturas do jogo
   const bPost = await attempt(() => posOf(page, id));
   if (!bPost.error) {
     const mid = { x: (spawn.hq.x + bPost.x) / 2, z: (spawn.hq.z + bPost.z) / 2 };
     await camTo(page, mid.x, 1.5, mid.z, 1.0, 1600);
     data.pA = await attempt(() => projectPts(page, [[bPost.x, bPost.y + 1.2, bPost.z]]));
-    await attempt(() => shot(page, 'game-vozgul-no-jogo.png'));
+    await attempt(() => shot(page, 'game-vozgul-idle.png'));
     await camTo(page, bPost.x, bPost.y + 1.2, bPost.z, 0.5, 1600);
     data.pB = await attempt(() => projectPts(page, [[bPost.x, bPost.y + 1.2, bPost.z]]));
     await attempt(() => shot(page, 'game-vozgul-closeup.png'));
@@ -319,7 +340,7 @@ async function runChecks(page) {
       const foe = gm.spawnUnit('knight', u.mesh.position.x + 7, u.mesh.position.z + 2, enemy);
       foe.speed = 0; foe.hp = foe.maxHp = 5000; foe.updateHealthBar();
       foe.isCombatUnit = () => false;
-      const ally = gm.spawnUnit('grunt', u.mesh.position.x - 3, u.mesh.position.z + 3, me);
+      const ally = gm.spawnUnit('peon', u.mesh.position.x - 3, u.mesh.position.z + 3, me);
       u.mana = u.maxMana;
       u.hp = u.maxHp - 60;
       const view = gm.entityViews.viewOf(u);

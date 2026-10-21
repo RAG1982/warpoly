@@ -42,6 +42,8 @@ describe('props .glb por bioma (PROP_RULES / planProps)', () => {
         if (rule.water) {
           expect(0.5 - h, `${key} profundidade`).toBeGreaterThanOrEqual(rule.minDepth);
           expect(0.5 - h).toBeLessThanOrEqual(rule.maxDepth);
+        } else if (rule.offshore) {
+          expect(h, `${key} em água rasa`).toBeLessThan(0.5); // M2-16: naufragado; o bioma é o da terra vizinha
         } else {
           expect(rule.weights[rm.biomeAt(it.x, it.z)] || 0, `${key} no bioma ${rm.biomeAt(it.x, it.z)}`).toBeGreaterThan(0);
           expect(h).toBeGreaterThanOrEqual(rule.minH);
@@ -59,6 +61,22 @@ describe('props .glb por bioma (PROP_RULES / planProps)', () => {
         }
       }
     }
+  });
+
+  it('props de costa (M2-16): colados à água, sem sombra projetada, naufragado em água rasa', () => {
+    const coast = ['coast_shell', 'coast_starfish', 'coast_reed', 'coast_wreck'];
+    for (const k of coast) {
+      expect(PROP_KEYS).toContain(k);
+      expect(PROP_RULES[k].shadow).toBe(false);
+    }
+    for (const k of ['coast_shell', 'coast_starfish', 'coast_reed']) {
+      for (const it of plan[k] || []) {
+        const wet = [[1, 0], [-1, 0], [0, 1], [0, -1], [0.7, 0.7], [-0.7, 0.7], [0.7, -0.7], [-0.7, -0.7]]
+          .some(([dx, dz]) => terrain.getHeight(it.x + dx * PROP_RULES[k].shore, it.z + dz * PROP_RULES[k].shore) < 0.45);
+        expect(wet, `${k} junto da água`).toBe(true);
+      }
+    }
+    expect((plan.coast_shell || []).length + (plan.coast_reed || []).length).toBeGreaterThan(0);
   });
 
   it('o deserto do mapa de teste recebe arenito e arbusto rolante', () => {

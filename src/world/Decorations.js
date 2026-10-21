@@ -5,6 +5,7 @@ import { getMapTileset, getTileset } from '../data/tilesets.js';
 import { getRegionMap } from '../data/biomeRegions.js';
 import { buildLavaInfo } from '../data/lavaRender.js';
 import { planDecorations, planProps } from '../data/decorPlan.js';
+import { PROP_RULES } from '../data/biomeStyles.js';
 import { glbTemplates, glbEnabled } from '../entities/glbModels.js';
 import { zoomHidesDecorations, lodEnabled } from '../render/lod.js';
 import {
@@ -171,7 +172,7 @@ export class Decorations {
       const geo = src.geometry.clone().applyMatrix4(src.matrixWorld);
       const im = new THREE.InstancedMesh(geo, src.material, items.length);
       im.name = `InstancedProp_${key}`;
-      im.castShadow = true;
+      im.castShadow = PROP_RULES[key].shadow !== false; // M2-16: props de costa não projetam sombra (0 draw calls extras)
       im.receiveShadow = true;
       for (let i = 0; i < items.length; i++) {
         const it = items[i];

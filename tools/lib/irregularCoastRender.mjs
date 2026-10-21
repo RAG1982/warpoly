@@ -59,6 +59,9 @@ export function renderBiomePreview(map, px = 768, view = { u0: 0, v0: 0, u1: 1, 
         r *= k; g *= k; b *= k;
         const foam = smooth(-1.1, 0, d) * 0.65 * (0.6 + 0.4 * caust);
         r = mix(r, 255, foam); g = mix(g, 255, foam); b = mix(b, 255, foam);
+        // M2-04: baixio/recife/gelo flutuante e lago congelado (água rasa com bioma próprio, altura > 0,12) aparecem pálidos sobre o mar
+        const sc = BIOME_RGB[biome[gj * G + gi]];
+        if (sc && height[gj * G + gi] > 0.12) { r = mix(r, mix(sc[0], 130, 0.45), 0.7); g = mix(g, mix(sc[1], 215, 0.45), 0.7); b = mix(b, mix(sc[2], 215, 0.45), 0.7); }
       } else {
         // cor do bioma: mistura bilinear das 4 células vizinhas, com a coordenada deformada por ruído (bordas orgânicas)
         const wu = u + (fbm(u * 40, v * 40, seed + 91, 2) - 0.5) * 0.012, wv = v + (fbm(u * 40 + 9, v * 40 - 3, seed + 92, 2) - 0.5) * 0.012;

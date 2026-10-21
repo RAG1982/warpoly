@@ -15,6 +15,7 @@ export * from './entities.js';
 export * from './lagoons.js';
 export * from './lavaStreams.js';
 export * from './rivers.js';
+export * from './shoals.js';
 export * from './surface.js';
 export * from './analyze.js';
 export * from './rotate.js';

@@ -255,7 +255,7 @@ Legenda de dependências: só IDs; "—" = pode começar já. **Dif.** = dificul
 | M2-02 | Segundo Centro e `setTier`/`UPGRADE_HQ` com 2 Centros | Média | M | S | M0-01 | risco R3 | DONE (2026-10-17; R3 verificado) |
 | M2-03 | Mapas de campanha, lote 1: palcos 1 (Aliança), 2, 3 | Difícil | G | S | M2-01 | MUNDO-7 | DONE (2026-10-17; prévias para o G2) |
 | M2-28 | Carregar os mapas de campanha sob demanda (cada JSON tem ~100–135 KB; 16 mapas somam ~2 MB no boot) | Difícil | M | S | M2-03 | achado M2-03 | DONE (2026-10-17) |
-| M2-04 | Mapas, lote 2: palcos 4, 5, 6 | Difícil | G | S | M2-03 | MUNDO-7 | TODO |
+| M2-04 | Mapas, lote 2: palcos 4, 5, 6 | Difícil | G | S | M2-03 | MUNDO-7 | DONE (2026-10-17; prévias para o G2) |
 | M2-05 | Mapas, lote 3: palcos 7, 8, 9 | Difícil | G | S | M2-03 | MUNDO-7 | TODO |
 | M2-06 | Mapas, lote 4: continentais da Aliança (palcos 10, 11, 12) | Difícil | G | S | M2-03 | MUNDO-7 | TODO |
 | M2-07 | Mapas, lote 5: continentais da Horda (palcos 1, 10, 11, 12) | Difícil | G | S | M2-03 | MUNDO-7 | TODO |

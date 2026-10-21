@@ -20,7 +20,7 @@
  * Índice de células `j * grid + i` (j = z, i = x); x/z em unidades de mundo, centro em (0,0), lado `size`.
  */
 import { mulberry32 } from '../../../sim/rng.js';
-import { smoothstep } from './noise.js';
+import { smoothstep, fbm } from './noise.js';
 import { labelComponents, distanceTransform, majorityFilter, keepLargest } from './grid.js';
 import { DEFAULT_OPTIONS } from './constants.js';
 import { ISLAND_TYPES, BIG_ISLAND_BIOMES, makeHarmonics, makeFeatures, continentEntity, islandEntity, entityField } from './entities.js';
@@ -28,6 +28,7 @@ import { resolveLagoons } from './lagoons.js';
 import { generateLava } from './lavaStreams.js';
 import { generateRivers } from './rivers.js';
 import { finalizeSurface } from './surface.js';
+import { applyShoals } from './shoals.js';
 import { analyzeMap } from './analyze.js';
 import { rotateIndex } from './rotate.js';
 
@@ -225,6 +226,53 @@ export function generateCoast(options = {}) {
     }
   }
 
+  // 3b. (M2-04) ilhotas espalhadas por todo o mapa (recifes): sorteio próprio, nenhum efeito quando `scatterIslets` é 0
+  if (o.scatterIslets > 0) {
+    const rngS = root.fork('scatter');
+    const zn = o.scatterZone * o.size;
+    for (let k = 0; k < o.scatterIslets; k++) {
+      const occ = distanceTransform(land, G);
+      for (let attempt = 0; attempt < 160; attempt++) {
+        const rr = rngS.range(o.scatterRadius[0], o.scatterRadius[1]);
+        const cx = rngS.range(-zn, zn), cz = rngS.range(-zn, zn);
+        const iC = Math.floor((cx + half) / cell), jC = Math.floor((cz + half) / cell);
+        if (iC < 0 || jC < 0 || iC >= G || jC >= G || occ[jC * G + iC] * cell < rr * 1.5 + o.gap) continue;
+        if (Math.max(Math.abs(cx), Math.abs(cz)) > half * 0.8) continue;
+        const e = {
+          id: `ilhota-s${k + 1}`, kind: 'islet', biome: 'islet', cx, cz, rx: rr, rz: rr * rngS.range(0.7, 1), rot: rngS.range(0, Math.PI), seed: (o.seed * 59 + k * 137) | 0,
+          flipX: false, harmonics: makeHarmonics(rngS, 0.9), noise: 0.5, warp: 0.25, rough: 0.8, features: []
+        };
+        const mask = buildMask(e, occ);
+        let area = 0; for (let c = 0; c < N; c++) area += mask[c];
+        if (area * cell * cell < 12) continue;
+        commitEntity(e, mask);
+        break;
+      }
+    }
+  }
+  // 3c. (M2-04) lagos interiores escavados no continente (antes de `resolveLagoons`, que mantém os de >= minLake células)
+  if (o.lakes > 0) {
+    const rngL = root.fork('lakes');
+    for (let k = 0; k < o.lakes; k++) {
+      const dWater = distanceTransform(land.map((v) => (v ? 0 : 1)), G); // em terra: distância (células) à água
+      for (let attempt = 0; attempt < 200; attempt++) {
+        const rr = rngL.range(o.lakeRadius[0], o.lakeRadius[1]);
+        const cx = rngL.range(-0.3, 0.3) * o.size, cz = rngL.range(-0.3, 0.3) * o.size;
+        const iC = Math.floor((cx + half) / cell), jC = Math.floor((cz + half) / cell);
+        if (!land[jC * G + iC] || dWater[jC * G + iC] * cell < rr * 1.5 + 8) continue;
+        const rb = rr * rngL.range(0.55, 0.9), rot = rngL.range(0, Math.PI), cs = Math.cos(rot), sn = Math.sin(rot), sd = (o.seed * 71 + k * 29) | 0;
+        for (let j = Math.max(0, jC - Math.ceil(rr * 1.6 / cell)); j <= Math.min(G - 1, jC + Math.ceil(rr * 1.6 / cell)); j++) {
+          for (let i = Math.max(0, iC - Math.ceil(rr * 1.6 / cell)); i <= Math.min(G - 1, iC + Math.ceil(rr * 1.6 / cell)); i++) {
+            const x = toX(i), z = toX(j), dx = x - cx, dz = z - cz;
+            const ex = (dx * cs + dz * sn) / rr, ez = (-dx * sn + dz * cs) / rb;
+            if (Math.hypot(ex, ez) + (fbm(x * 0.1, z * 0.1, sd, 3) - 0.5) * 0.6 < 1 && land[j * G + i]) { land[j * G + i] = 0; owner[j * G + i] = -1; }
+          }
+        }
+        break;
+      }
+    }
+  }
+
   // 4. lagoas: água não ligada ao oceano e pequena vira terra; grandes ficam como lagos
   const { lakes } = resolveLagoons(land, owner, G, o.minLake);
   for (const e of entities) { let a = 0; for (let c = 0; c < N; c++) if (owner[c] === e.index) a++; e.area = a * cell * cell; }
@@ -233,6 +281,7 @@ export function generateCoast(options = {}) {
   map.lava = o.lava ? generateLava(map, root) : null;
   map.rivers = o.rivers > 0 ? generateRivers(map, root) : null;
   finalizeSurface(map);
+  applyShoals(map, root);
   map.stats = analyzeMap(map);
   return map;
 }

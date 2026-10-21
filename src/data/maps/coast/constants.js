@@ -60,5 +60,16 @@ export const DEFAULT_OPTIONS = Object.freeze({
   lavaWidth: [3, 4], // largura do córrego em células da grade (3–4 células = 2,25–3 u com grid 256 / size 192)
   rivers: 0, // rios por continente (spec §2.2): 0 = sem rios; o rio nasce no interior, desce até a costa e tem vaus a cada ~25 u
   riverWidth: [3.4, 5], // largura do canal (u)
-  riverFordSpacing: 25 // distância média entre vaus ao longo do rio (u)
+  riverFordSpacing: 25, // distância média entre vaus ao longo do rio (u)
+  // M2-04 (campanha): tudo desligado por padrão ⇒ os mapas antigos saem iguais (nenhum sorteio novo é consumido)
+  scatterIslets: 0, // ilhotas espalhadas por todo o mapa (recifes do Baixio do Breu), sem depender de uma ilha-hospedeira
+  scatterRadius: [2.6, 5], // raio das ilhotas espalhadas (u)
+  scatterZone: 0.4, // metade do lado da zona de sorteio, em frações de `size`
+  lakes: 0, // lagos interiores escavados no continente (lagos congelados da Geada)
+  lakeRadius: [7, 12], // raio dos lagos (u)
+  frozenLakes: false, // lagos viram gelo: bioma gelo e altura 0,3 (raso: nem navio nem tropa)
+  shoals: 0, // manchas de mar raso espalhadas (`shoals.js`): recifes (areia) ou banquisa (gelo)
+  shoalRadius: [6, 14],
+  shoalBiome: 'sand', // 'sand' | 'ice'
+  shoalHeight: 0.3
 });

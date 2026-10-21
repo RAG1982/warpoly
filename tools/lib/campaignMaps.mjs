@@ -6,7 +6,7 @@
  * (acampamento neutro, minas extras, âncoras nomeadas) e confere tudo (`verifyCoastWorld`, âncoras alcançáveis por terra/mar).
  * Usado por `tools/gen-campaign-maps.mjs`. Puro (Node, sem DOM, sem `Math.random`); o resultado é gravado em `src/data/maps/<id>.json`.
  *
- * Palcos deste arquivo (lote M2-03): 1 Baía de Aurelan, 2 Pouso do Encontro, 3 Pedra-Mãe.
+ * Palcos deste arquivo: 1 Baía de Aurelan, 2 Pouso do Encontro, 3 Pedra-Mãe (lote M2-03); 4 Baixio do Breu, 5 Cerne Verde, 6 A Geada (lote M2-04).
  * Os palcos 2 e 3 servem às duas campanhas (Liga de Aurelan e Clãs do Cinzal): slot 0 = lado da Liga, slot 1 = lado dos Clãs, e as
  * âncoras trazem um par por lado quando a missão muda de dono (`pier1`/`pier2`, `emissary1`/`emissary2`).
  */
@@ -16,6 +16,7 @@ import { getHeightForMap } from '../../src/sim/terrainGenerators.js';
 import { buildPathfinder, floodFill, isReached } from '../../src/data/maps/generator.js';
 import { layoutAt } from '../../src/sim/MatchConfig.js';
 import { getBiomeAt, BIOME, decodeBiomeGrid, encodeRleBiomeGrid } from '../../src/data/maps/biome.js';
+import { speciesForBiome } from '../../src/data/treeSpecies.js';
 
 const hyp = (a, b) => Math.hypot(a.x - b.x, a.z - b.z);
 const r1 = (v) => Math.round(v * 10) / 10;
@@ -67,6 +68,27 @@ export const CAMPAIGN_PRESETS = freeze({
     options: freeze({ size: 176, grid: 176, continents: 1, continentBiome: 'arid', aridSwamp: false, continentDims: [0.44, 0.35], islands: 0, islets: 0, bays: 4, peninsulas: 2, roughness: 1.1, lava: false, rivers: 0 }),
     layout: freeze({ bases: [{ entities: [0], side: 'west' }, { entities: [0], side: 'east' }], minSeparation: 66 }),
     verify: freeze({ landRange: [0.25, 0.8], minRivers: 0 })
+  }),
+  /** Palco 4 (M2-04): atol de recifes; uma ilha comprida de "areia" com as bases nas pontas, ilhotas e baixios espalhados, poços de petróleo no mar fundo. */
+  'camp-04-baixio-do-breu': freeze({
+    id: 'camp-04-baixio-do-breu', name: 'Baixio do Breu', uso: 'campanha, palco 4 (frota)', tileset: 'exuberante', naval: true,
+    options: freeze({ size: 224, grid: 224, continents: 1, continentBiome: 'atoll', continentDims: [0.35, 0.18], islands: 0, islets: 0, scatterIslets: 14, scatterRadius: [2.8, 5.5], scatterZone: 0.42, bays: 3, peninsulas: 2, roughness: 1.1, gap: 12, lava: false, rivers: 0, shoals: 34, shoalRadius: [7, 15], shoalBiome: 'sand', shoalMinCoast: 4 }),
+    layout: freeze({ bases: [{ entities: [0], side: 'west' }, { entities: [0], side: 'east' }], minSeparation: 90 }),
+    verify: freeze({ landRange: [0.12, 0.5], minRivers: 0 })
+  }),
+  /** Palco 5 (M2-04): floresta densa com clareiras, rio curto com um vau; Liga a oeste, Clã a leste. */
+  'camp-05-cerne-verde': freeze({
+    id: 'camp-05-cerne-verde', name: 'Cerne Verde', uso: 'campanha, palco 5 (Liga e Clãs)', tileset: 'verdejante', naval: false,
+    options: freeze({ size: 176, grid: 176, continents: 1, continentBiome: 'forest', continentDims: [0.44, 0.36], islands: 0, islets: 0, bays: 3, peninsulas: 2, roughness: 1.0, lava: false, rivers: 1, riverFordSpacing: 40 }),
+    layout: freeze({ bases: [{ entities: [0], side: 'west' }, { entities: [0], side: 'east' }], minSeparation: 66 }),
+    verify: freeze({ landRange: [0.25, 0.8], minRivers: 1 })
+  }),
+  /** Palco 6 (M2-04): continente gelado com lagos congelados e banquisa; 4 bases: jogador (SO), Lanças Quebradas (L), Sal Cinzento (N) e o aliado Brumar (O/S). */
+  'camp-06-a-geada': freeze({
+    id: 'camp-06-a-geada', name: 'A Geada', uso: 'campanha, palco 6 (Prova de Fogo)', tileset: 'inverno', naval: false, woodTarget: 8000,
+    options: freeze({ size: 208, grid: 208, continents: 1, continentBiome: 'ice', continentDims: [0.44, 0.4], islands: 0, islets: 0, bays: 3, peninsulas: 3, roughness: 1.1, lava: false, rivers: 0, lakes: 3, frozenLakes: true, lakeRadius: [7, 11], shoals: 10, shoalRadius: [6, 12], shoalBiome: 'ice', shoalMinCoast: 3 }),
+    layout: freeze({ bases: [{ entities: [0], sides: ['west', 'south'] }, { entities: [0], sides: ['east', 'north'] }, { entities: [0], sides: ['east', 'south'] }, { entities: [0], sides: ['west', 'north'] }], minSeparation: 60 }),
+    verify: freeze({ landRange: [0.25, 0.85], minRivers: 0 })
   })
 });
 
@@ -79,7 +101,10 @@ export const CAMPAIGN_NAMES = freeze({
   'camp-03-pedra-mae': { pt: 'Pedra-Mãe', en: 'Mother Rock' },
   'camp-07-brejo-mudo': { pt: 'Brejo Mudo', en: 'Mute Marsh' },
   'camp-08-fornalha': { pt: 'Fornalha', en: 'The Furnace' },
-  'camp-09-miragem': { pt: 'Miragem', en: 'Mirage' }
+  'camp-09-miragem': { pt: 'Miragem', en: 'Mirage' },
+  'camp-04-baixio-do-breu': { pt: 'Baixio do Breu', en: 'Pitch Shoals' },
+  'camp-05-cerne-verde': { pt: 'Cerne Verde', en: 'Green Heart' },
+  'camp-06-a-geada': { pt: 'A Geada', en: 'The Frost' }
 });
 
 // ---------------------------------------------------------------------------------------------------------------------------
@@ -533,7 +558,161 @@ function postMiragem(ctx, extra) {
   }
 }
 
-const POST = freeze({ 'camp-01-baia-de-aurelan': postBaia, 'camp-02-pouso-do-encontro': postPouso, 'camp-03-pedra-mae': postPedra, 'camp-07-brejo-mudo': postBrejo, 'camp-08-fornalha': postFornalha, 'camp-09-miragem': postMiragem });
+// ---------------------------------------------------------------------------------------------------------------------------
+// Palcos 4–6 (M2-04)
+// ---------------------------------------------------------------------------------------------------------------------------
+const ptw = (p) => ({ ...pt(p), water: true });
+/** Fração (0–1) de pontos em dois anéis de raio `r` em torno de (x, z) que são água navegável do oceano (folga para frota). */
+function openSea(ctx, x, z, r) {
+  let n = 0, t = 0;
+  for (let a = 0; a < 16; a++) for (const k of [0.5, 1]) { t++; if (ctx.oceanOk(x + Math.cos((a / 16) * Math.PI * 2) * r * k, z + Math.sin((a / 16) * Math.PI * 2) * r * k)) n++; }
+  return n / t;
+}
+/** Fração de um anel de raio `rho` que é água (terreno abaixo da linha d'água). */
+function wetFrac(ctx, x, z, rho) {
+  let n = 0;
+  for (let k = 0; k < 16; k++) { const t = (k / 16) * Math.PI * 2; if (ctx.hAt(x + Math.cos(t) * rho, z + Math.sin(t) * rho) < ctx.m.waterLevel) n++; }
+  return n / 16;
+}
+const toward = (s, to, d) => { const L = hyp(s, to) || 1; return { x: s.x + ((to.x - s.x) / L) * d, z: s.z + ((to.z - s.z) / L) * d }; };
+/** Ponto de terra seca (folga `r`) alcançável e livre, o mais próximo de `p`. */
+const nearDry = (ctx, p, name, { r = 3, minR = 0, freeR = 3 } = {}) => need(ctx.scan({ test: (x, z) => ctx.dryClear(x, z, r) && ctx.reach(x, z) && ctx.free(x, z, freeR) && hyp({ x, z }, p) >= minR, score: (x, z) => hyp({ x, z }, p) }), name);
+/** Sorteio determinístico barato por posição (ordem estável de candidatos sem PRNG). */
+const jitter = (x, z) => { const v = Math.sin(x * 12.9898 + z * 78.233) * 43758.5453; return v - Math.floor(v); };
+
+/** Palco 4: espaço para Estaleiro/Doca em cada lado, naufrágios nos baixios, rotas das frotas roteirizadas. Poços (`well1..4`) vêm do assador. */
+function postBaixio(ctx, extra) {
+  const { m, s0, s1, half } = ctx;
+  const cache = new Map();
+  const wetSpot = (x, z) => { const k = x * 1000 + z; if (!cache.has(k)) cache.set(k, ctx.waterNear(x, z, 6, 18)); return cache.get(k); };
+  const yardFor = (s, other, name) => {
+    const p = need(ctx.scan({
+      step: 1,
+      test: (x, z) => ctx.isShore(x, z) && ctx.reach(x, z) && hyp({ x, z }, s) >= 14 && hyp({ x, z }, s) <= 54 && ctx.free(x, z, 5) && wetSpot(x, z) && openSea(ctx, wetSpot(x, z).x, wetSpot(x, z).z, 10) >= 0.55,
+      score: (x, z) => Math.abs(hyp({ x, z }, s) - 30) - 0.1 * hyp({ x, z }, other)
+    }), `o espaço do ${name}`);
+    ctx.take(p, 14);
+    return p;
+  };
+  // uma mina de expansão por lado: com 1 mina por base o ouro acaba e a partida IA×IA trava (soak, semente 5 hard)
+  addGold(ctx, s0, 'expansion1', extra, { dMin: 20, dMax: 40, target: 28 });
+  addGold(ctx, s1, 'expansion2', extra, { dMin: 20, dMax: 40, target: 28 });
+  const y1 = yardFor(s0, s1, 'Estaleiro da Liga'), y2 = yardFor(s1, s0, 'Doca do Clã');
+  extra.shipyard1 = pt(y1); extra.shipyard1Water = ptw(wetSpot(y1.x, y1.z));
+  extra.shipyard2 = pt(y2); extra.shipyard2Water = ptw(wetSpot(y2.x, y2.z));
+  // naufrágios: água navegável encostada num baixio (recife), longe da terra, dos poços, das docas e uns dos outros
+  const wells = m.resources.filter((r) => r.type === 'oil');
+  const placed = [extra.shipyard1Water, extra.shipyard2Water, ...wells];
+  const nearReef = (x, z) => { for (let a = 0; a < 12; a++) { const h = ctx.hAt(x + Math.cos((a / 12) * Math.PI * 2) * 5, z + Math.sin((a / 12) * Math.PI * 2) * 5); if (h > 0.15 && h < 0.45) return true; } return false; };
+  const awayFromLand = (x, z) => wetFrac(ctx, x, z, 9) >= 1;
+  const targets = [{ x: 0, z: 0 }, { x: -half * 0.45, z: half * 0.35 * (s0.z > 0 ? -1 : 1) }, { x: half * 0.45, z: half * 0.35 * (s0.z > 0 ? 1 : -1) }];
+  targets.forEach((t, i) => {
+    const w = need(ctx.scan({
+      step: 2,
+      test: (x, z) => ctx.oceanOk(x, z) && nearReef(x, z) && awayFromLand(x, z) && placed.every((q) => hyp({ x, z }, q) >= 24),
+      score: (x, z) => hyp({ x, z }, t)
+    }), `o naufrágio ${i + 1}`);
+    placed.push(w);
+    extra[`wreck${i + 1}`] = ptw(w);
+  });
+  // rotas das frotas roteirizadas: pontos de partida junto à borda (lado de cada base) e ponto de encontro no meio do mar
+  const edge = (to, name) => need(ctx.scan({ step: 4, test: (x, z) => Math.max(Math.abs(x), Math.abs(z)) >= half - 26 && ctx.oceanOk(x, z) && openSea(ctx, x, z, 8) >= 0.8, score: (x, z) => hyp({ x, z }, to) }), name);
+  extra.fleetStart1 = ptw(edge(s0, 'a partida da frota 1'));
+  extra.fleetStart2 = ptw(edge(s1, 'a partida da frota 2'));
+  extra.fleetMid = ptw(need(ctx.scan({ step: 3, test: (x, z) => ctx.oceanOk(x, z) && openSea(ctx, x, z, 10) >= 0.8, score: (x, z) => hyp({ x, z }, { x: 0, z: 0 }) }), 'o encontro das frotas'));
+}
+
+/** Palco 5: bosque sagrado (clareira cercada de árvores), ninho de grifos numa ponta, clareiras, Salão do Bosque de cada lado e mata densa extra. */
+function postCerne(ctx, extra) {
+  const { m, s0, s1 } = ctx;
+  const mid = { x: (s0.x + s1.x) / 2, z: (s0.z + s1.z) / 2 };
+  const grove = need(ctx.scan({
+    test: (x, z) => ctx.dryClear(x, z, 10) && ctx.reach(x, z) && ctx.free(x, z, 8) && hyp({ x, z }, s0) >= 38 && hyp({ x, z }, s1) >= 38,
+    score: (x, z) => hyp({ x, z }, mid)
+  }), 'o bosque sagrado');
+  ctx.take(grove, 24);
+  extra.sacredGrove = pt(grove);
+  const pick = (x, z, k) => speciesForBiome(getBiomeAt(m, x, z), false, (jitter(x, z) + k * 0.31) % 1);
+  for (let k = 0; k < 5; k++) { // anel de árvores em volta da clareira (as árvores nascem a 2–7 u do centro de cada bosque)
+    const a = (k / 5) * Math.PI * 2 + 0.4;
+    const x = r1(grove.x + Math.cos(a) * 16), z = r1(grove.z + Math.sin(a) * 16);
+    if (ctx.dryClear(x, z, 4)) m.forests.push({ x, z, count: 12, radius: 5, species: pick(x, z, k) });
+  }
+  const nest = need(ctx.scan({
+    step: 1,
+    test: (x, z) => ctx.dryClear(x, z, 2.5) && ctx.reach(x, z) && ctx.free(x, z, 6) && hyp({ x, z }, s0) >= 40 && hyp({ x, z }, s1) >= 40 && hyp({ x, z }, grove) >= 30,
+    score: (x, z) => -wetFrac(ctx, x, z, 10) * 60 - wetFrac(ctx, x, z, 18) * 30
+  }), 'o ninho de grifos');
+  ctx.take(nest, 14);
+  extra.gryphonNest = pt(nest);
+  // clareiras: uma a caminho do meio de cada lado e uma terceira fora do eixo
+  const perp = { x: -(s1.z - s0.z), z: s1.x - s0.x };
+  const Lp = Math.hypot(perp.x, perp.z) || 1;
+  const spots = [toward(s0, mid, 44), toward(s1, mid, 44), { x: mid.x + (perp.x / Lp) * 34, z: mid.z + (perp.z / Lp) * 34 }];
+  spots.forEach((p, i) => {
+    const c = need(ctx.scan({ test: (x, z) => ctx.dryClear(x, z, 9) && ctx.reach(x, z) && ctx.free(x, z, 6) && hyp({ x, z }, s0) >= 28 && hyp({ x, z }, s1) >= 28, score: (x, z) => hyp({ x, z }, p) }), `a clareira ${i + 1}`);
+    ctx.take(c, 16);
+    extra[`clearing${i + 1}`] = pt(c);
+  });
+  // Salão do Bosque (posto madeireiro) de cada lado: o do slot 1 é o alvo da Liga; o do slot 0, o do assalto da Horda
+  for (const [s, name] of [[s0, 'lumberHall1'], [s1, 'lumberHall2']]) {
+    const p = need(ctx.scan({ test: (x, z) => ctx.dryClear(x, z, 7) && ctx.reach(x, z) && ctx.free(x, z, 5) && hyp({ x, z }, s) >= 26 && hyp({ x, z }, s) <= 42, score: (x, z) => Math.abs(hyp({ x, z }, s) - 33) + 0.25 * hyp({ x, z }, mid) }), `o ${name}`);
+    ctx.take(p, 14);
+    extra[name] = pt(p);
+  }
+  // Oren e os dois Magos aliados chegam por perto do jogador (A05)
+  extra.orenStart = pt(ctx.take(nearDry(ctx, toward(s0, mid, 24), 'o ponto do Oren', { r: 4 }), 8));
+  // mata densa extra: bosques em toda a ilha, longe das bases, do bosque sagrado e dos já postos (mais madeira para a campanha)
+  let added = 0;
+  const scored = [];
+  for (let z = -ctx.half + 10; z <= ctx.half - 10; z += 5) for (let x = -ctx.half + 10; x <= ctx.half - 10; x += 5) scored.push({ x, z, k: jitter(x, z) });
+  scored.sort((a, b) => a.k - b.k);
+  for (const c of scored) {
+    if (added >= 14) break;
+    if (!ctx.dryClear(c.x, c.z, 4) || !ctx.reach(c.x, c.z) || !ctx.free(c.x, c.z, 4)) continue;
+    if (hyp(c, s0) < 30 || hyp(c, s1) < 30 || hyp(c, grove) < 24) continue;
+    if (m.forests.some((f) => hyp(c, f) < 16)) continue;
+    const x = r1(c.x), z = r1(c.z);
+    m.forests.push({ x, z, count: 14, radius: 10, species: pick(x, z, added) });
+    ctx.take({ x, z }, 14);
+    added++;
+  }
+}
+
+/** Palco 6: quatro bases (jogador, Lanças Quebradas, Sal Cinzento, aliado), Farol Boreal no meio, comboio entre o aliado e o jogador, lagos congelados. */
+function postGeada(ctx, extra) {
+  const { m } = ctx;
+  const S = m.startSlots;
+  extra.enemy1Start = pt(S[1]); extra.enemy2Start = pt(S[2]); extra.allyStart = pt(S[3]);
+  const maxD = (x, z) => Math.max(...S.map((s) => hyp({ x, z }, s)));
+  const light = need(ctx.scan({
+    test: (x, z) => ctx.dryClear(x, z, 6) && ctx.reach(x, z) && ctx.free(x, z, 8) && S.every((s) => hyp({ x, z }, s) >= 34),
+    score: (x, z) => maxD(x, z)
+  }), 'o Farol Boreal');
+  ctx.take(light, 16);
+  extra.lighthouse = pt(light);
+  extra.enemy1Fort = pt(ctx.take(nearDry(ctx, toward(S[1], light, 22), 'o forte dos Lanças Quebradas', { r: 5 }), 10));
+  extra.allyFort = pt(ctx.take(nearDry(ctx, toward(S[3], light, 20), 'o forte de Brumar', { r: 5 }), 10));
+  extra.allyHeroStart = pt(ctx.take(nearDry(ctx, toward(S[3], light, 10), 'a Dama Aurora', { r: 3 }), 6));
+  extra.convoyStart = pt(ctx.take(nearDry(ctx, toward(S[3], S[0], 26), 'o início do comboio', { r: 3 }), 6));
+  extra.convoyEnd = pt(ctx.take(nearDry(ctx, toward(S[0], S[3], 26), 'o fim do comboio', { r: 3 }), 6));
+  // uma mina de expansão por base (pouco ouro, mas o soak trava com 1 mina por lado)
+  S.forEach((s, i) => addGold(ctx, s, `expansion${i + 1}`, extra, { dMin: 22, dMax: 42, target: 30 }));
+  // lagos congelados: água rasa de gelo (bioma gelo) cercada de terra
+  const lakes = [];
+  const isLake = (x, z) => {
+    const h = ctx.hAt(x, z);
+    if (!(h > 0.15 && h < 0.45) || getBiomeAt(m, x, z) !== BIOME.ICE) return false;
+    let land = 0;
+    for (let a = 0; a < 8; a++) if (ctx.hAt(x + Math.cos((a / 8) * Math.PI * 2) * 15, z + Math.sin((a / 8) * Math.PI * 2) * 15) >= 1.8) land++;
+    return land >= 7;
+  };
+  for (let z = -ctx.half + 8; z <= ctx.half - 8; z += 3) for (let x = -ctx.half + 8; x <= ctx.half - 8; x += 3) if (isLake(x, z) && lakes.every((q) => hyp({ x, z }, q) >= 16)) lakes.push({ x, z });
+  if (lakes.length < 2) throw new Error('campanha: poucos lagos congelados');
+  lakes.slice(0, 3).forEach((p, i) => { extra[`lake${i + 1}`] = ptw(p); });
+}
+
+const POST = freeze({ 'camp-01-baia-de-aurelan': postBaia, 'camp-02-pouso-do-encontro': postPouso, 'camp-03-pedra-mae': postPedra, 'camp-04-baixio-do-breu': postBaixio, 'camp-05-cerne-verde': postCerne, 'camp-06-a-geada': postGeada, 'camp-07-brejo-mudo': postBrejo, 'camp-08-fornalha': postFornalha, 'camp-09-miragem': postMiragem });
 
 // ---------------------------------------------------------------------------------------------------------------------------
 // Montagem
@@ -581,12 +760,16 @@ function finish(id, world, seedUsed) {
     out[k] = v;
   }
   out.meta = { ...m.meta, campaign: id, seedUsed };
-  const verification = verifyCoastWorld(out, { naval: false, woodTarget: CAMPAIGN_PRESETS[id].woodTarget });
+  const preset = CAMPAIGN_PRESETS[id];
+  const verification = verifyCoastWorld(out, { naval: !!preset.naval, woodTarget: preset.woodTarget });
   if (!verification.ok) throw new Error('mundo: ' + verification.failures.slice(0, 2).join(' | '));
   // âncoras de terra alcançáveis a partir do slot 0 por terra; de água, no oceano
   const c2 = makeCtx(out);
   for (const [name, a] of Object.entries(anchors)) {
-    if (a.water) { if (!c2.oceanOk(a.x, a.z)) throw new Error(`âncora ${name}: água fora do oceano navegável`); }
+    if (a.water) {
+      if (/^lake/.test(name)) { if (!(c2.hAt(a.x, a.z) < out.waterLevel)) throw new Error(`âncora ${name}: lago fora da água`); } // lago congelado: água interior, não é oceano
+      else if (!c2.oceanOk(a.x, a.z)) throw new Error(`âncora ${name}: água fora do oceano navegável`);
+    }
     else if (!c2.reach(a.x, a.z) && !/^(well|ford)/.test(name)) throw new Error(`âncora ${name}: sem caminho por terra desde o slot 0`);
   }
   return { mapDef: out, extraAnchors: extra, verification };

@@ -1,0 +1,130 @@
+{
+ "opts": {
+  "count": 8,
+  "seedStart": 1,
+  "maps": [
+   "camp-06-a-geada"
+  ],
+  "maxTicks": 72000,
+  "recheck": 2,
+  "faction": null,
+  "difficulty": null,
+  "stallTicks": 2400,
+  "out": "tools/soak-report/m2-04/camp-06"
+ },
+ "wallMs": 283742,
+ "results": [
+  {
+   "seed": 1,
+   "map": "camp-06-a-geada",
+   "faction": "human",
+   "difficulty": "easy",
+   "finished": true,
+   "ticks": 34817,
+   "checksum": 107001477,
+   "peakEntities": 123,
+   "wallMs": 26392,
+   "issues": []
+  },
+  {
+   "seed": 2,
+   "map": "camp-06-a-geada",
+   "faction": "orc",
+   "difficulty": "easy",
+   "finished": true,
+   "ticks": 22652,
+   "checksum": 2982459765,
+   "peakEntities": 123,
+   "wallMs": 24128,
+   "issues": []
+  },
+  {
+   "seed": 3,
+   "map": "camp-06-a-geada",
+   "faction": "human",
+   "difficulty": "normal",
+   "finished": true,
+   "ticks": 12721,
+   "checksum": 2124598033,
+   "peakEntities": 214,
+   "wallMs": 21094,
+   "issues": []
+  },
+  {
+   "seed": 4,
+   "map": "camp-06-a-geada",
+   "faction": "orc",
+   "difficulty": "normal",
+   "finished": true,
+   "ticks": 9043,
+   "checksum": 2848199690,
+   "peakEntities": 216,
+   "wallMs": 16877,
+   "issues": []
+  },
+  {
+   "seed": 5,
+   "map": "camp-06-a-geada",
+   "faction": "human",
+   "difficulty": "hard",
+   "finished": true,
+   "ticks": 19926,
+   "checksum": 2068106890,
+   "peakEntities": 256,
+   "wallMs": 38234,
+   "issues": []
+  },
+  {
+   "seed": 6,
+   "map": "camp-06-a-geada",
+   "faction": "orc",
+   "difficulty": "hard",
+   "finished": true,
+   "ticks": 18272,
+   "checksum": 1596707638,
+   "peakEntities": 179,
+   "wallMs": 32438,
+   "issues": []
+  },
+  {
+   "seed": 7,
+   "map": "camp-06-a-geada",
+   "faction": "human",
+   "difficulty": "brutal",
+   "finished": true,
+   "ticks": 21932,
+   "checksum": 3242323910,
+   "peakEntities": 206,
+   "wallMs": 49185,
+   "issues": []
+  },
+  {
+   "seed": 8,
+   "map": "camp-06-a-geada",
+   "faction": "orc",
+   "difficulty": "brutal",
+   "finished": true,
+   "ticks": 6981,
+   "checksum": 1038048889,
+   "peakEntities": 130,
+   "wallMs": 9371,
+   "issues": []
+  }
+ ],
+ "rechecks": [
+  {
+   "seed": 1,
+   "map": "camp-06-a-geada",
+   "faction": "human",
+   "difficulty": "easy",
+   "diff": null
+  },
+  {
+   "seed": 5,
+   "map": "camp-06-a-geada",
+   "faction": "human",
+   "difficulty": "hard",
+   "diff": null
+  }
+ ]
+}

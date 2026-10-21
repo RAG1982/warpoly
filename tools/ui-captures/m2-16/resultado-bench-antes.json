@@ -1,0 +1,71 @@
+{
+ "when": "2026-10-21T22:35:47.093Z",
+ "label": "antes",
+ "maps": {
+  "camp-04-baixio-do-breu": {
+   "errors": [],
+   "views": [
+    "camp-04-baixio-do-breu-antes-1.jpg",
+    "camp-04-baixio-do-breu-antes-2.jpg",
+    "camp-04-baixio-do-breu-antes-3.jpg"
+   ],
+   "perf": {
+    "fps": 139.6,
+    "calls": 250,
+    "tris": 499072
+   }
+  },
+  "camp-07-brejo-mudo": {
+   "errors": [],
+   "views": [
+    "camp-07-brejo-mudo-antes-1.jpg",
+    "camp-07-brejo-mudo-antes-2.jpg",
+    "camp-07-brejo-mudo-antes-3.jpg"
+   ],
+   "perf": {
+    "fps": 178.8,
+    "calls": 296,
+    "tris": 482694
+   }
+  },
+  "camp-09-miragem": {
+   "errors": [],
+   "views": [
+    "camp-09-miragem-antes-1.jpg",
+    "camp-09-miragem-antes-2.jpg",
+    "camp-09-miragem-antes-3.jpg"
+   ],
+   "perf": {
+    "fps": 177,
+    "calls": 307,
+    "tris": 482956
+   }
+  },
+  "camp-06-a-geada": {
+   "errors": [],
+   "views": [
+    "camp-06-a-geada-antes-1.jpg",
+    "camp-06-a-geada-antes-2.jpg",
+    "camp-06-a-geada-antes-3.jpg"
+   ],
+   "perf": {
+    "fps": 159.6,
+    "calls": 163,
+    "tris": 377476
+   }
+  },
+  "camp-08-fornalha": {
+   "errors": [],
+   "views": [
+    "camp-08-fornalha-antes-1.jpg",
+    "camp-08-fornalha-antes-2.jpg",
+    "camp-08-fornalha-antes-3.jpg"
+   ],
+   "perf": {
+    "fps": 242.1,
+    "calls": 256,
+    "tris": 373368
+   }
+  }
+ }
+}

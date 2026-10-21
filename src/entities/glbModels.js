@@ -101,6 +101,26 @@ export const GLB_MODELS = {
   tree_palm: { url: `${BASE}models/tree_palm.glb`, root: 'TreePalm', type: null, lazy: true },
   tree_acacia: { url: `${BASE}models/tree_acacia.glb`, root: 'TreeAcacia', type: null, lazy: true },
   grass_dry: { url: `${BASE}models/grass_dry.glb`, root: 'GrassDry', type: null, lazy: true },
+  // M2-12 (ART-01): arenito em estratos
+  rock_sandstone_a: { url: `${BASE}models/rock_sandstone_a.glb`, root: 'RockSandstoneA', type: null, lazy: true },
+  rock_sandstone_b: { url: `${BASE}models/rock_sandstone_b.glb`, root: 'RockSandstoneB', type: null, lazy: true },
+  // M2-14 (ART-06): props vulcânicos
+  rock_basalt_a: { url: `${BASE}models/rock_basalt_a.glb`, root: 'RockBasaltA', type: null, lazy: true },
+  rock_basalt_b: { url: `${BASE}models/rock_basalt_b.glb`, root: 'RockBasaltB', type: null, lazy: true },
+  volcano_cone: { url: `${BASE}models/volcano_cone.glb`, root: 'VolcanoCone', type: null, lazy: true },
+  tree_burnt: { url: `${BASE}models/tree_burnt.glb`, root: 'TreeBurnt', type: null, lazy: true },
+  fumarole: { url: `${BASE}models/fumarole.glb`, root: 'Fumarole', type: null, lazy: true },
+  obsidian: { url: `${BASE}models/obsidian.glb`, root: 'Obsidian', type: null, lazy: true },
+  // M2-15 (ART-07): props de gelo e neve
+  ice_block_small: { url: `${BASE}models/ice_block_small.glb`, root: 'IceBlockSmall', type: null, lazy: true },
+  ice_block_large: { url: `${BASE}models/ice_block_large.glb`, root: 'IceBlockLarge', type: null, lazy: true },
+  tree_pine_snow: { url: `${BASE}models/tree_pine_snow.glb`, root: 'TreePineSnow', type: null, lazy: true },
+  rock_snow: { url: `${BASE}models/rock_snow.glb`, root: 'RockSnow', type: null, lazy: true },
+  // M2-17 (ART-10): sub-bosque e pântano
+  fern: { url: `${BASE}models/fern.glb`, root: 'Fern', type: null, lazy: true },
+  log_fallen: { url: `${BASE}models/log_fallen.glb`, root: 'LogFallen', type: null, lazy: true },
+  log_drowned: { url: `${BASE}models/log_drowned.glb`, root: 'LogDrowned', type: null, lazy: true },
+  mangrove_root: { url: `${BASE}models/mangrove_root.glb`, root: 'MangroveRoot', type: null, lazy: true },
   tumbleweed: { url: `${BASE}models/tumbleweed.glb`, root: 'Tumbleweed', type: null, lazy: true },
   critter_boar: { url: `${BASE}models/critter_boar.glb`, root: 'CritterBoar', type: null, lazy: true },
   // F7-00b lote 2 (grupo 3): blocos de muralha instanciados (`WallBatch`)

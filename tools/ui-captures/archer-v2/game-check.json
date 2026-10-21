@@ -1,0 +1,574 @@
+{
+  "generated": "2026-10-21T23:21:07.936Z",
+  "rows": [
+    {
+      "id": "C0",
+      "name": "archer_v2.glb: 15 nós com a hierarquia do arco, Torso com Atlas+TeamColor, <= 20 draw calls, 1 textura",
+      "status": "PASS",
+      "detail": "faltando=[] pais errados=[] Torso=Atlas,TeamColor draw calls=13 triângulos=22654 imagens=1"
+    },
+    {
+      "id": "C1",
+      "name": "archer e ranger usam o archer_v2 (ForeArmL na view); animador no tipo archer; raiz Archer",
+      "status": "PASS",
+      "detail": "archer: raiz=Archer escala=[1.62,1.62,1.62] unitType=archer ForeArmL=true; ranger: raiz=Archer unitType=archer ForeArmL=true; GET archer_v2.glb=200"
+    },
+    {
+      "id": "C10",
+      "name": "disparo ao vivo: a view entra em fight, a flecha nasce no arco (< 0,3 m do ponto do arco; a origem da sim fica a > 0,25 m) e volta à trajetória; o alvo perde PV",
+      "status": "PASS",
+      "detail": "quadros fight=266/268 anims=[idle,fight] flechas=4; 1º quadro: malha a 0 m do arco (origem da sim a 0.849 m); desvio da malha à trajetória em progress > 0,3 = 0 m; PV do alvo 5000 -> 4943"
+    },
+    {
+      "id": "C2",
+      "name": "view com os nós do arco e dos cotovelos; Torso com Atlas+TeamColor",
+      "status": "PASS",
+      "detail": "faltando=[] Torso=Atlas,TeamColor pai(Bow)=ForeArmL pai(ForeArmL)=ArmL pai(ForeArmR)=ArmR"
+    },
+    {
+      "id": "C3",
+      "name": "rebind: userData e meshParts do animador (torso..legR, bow, foreArmL, foreArmR, drawnArrow, updateBowString)",
+      "status": "PASS",
+      "detail": "nulos=[] userData={\"torso\":\"Torso\",\"head\":\"Head\",\"armL\":\"ArmL\",\"armR\":\"ArmR\",\"legL\":\"LegL\",\"legR\":\"LegR\",\"bow\":\"Bow\",\"foreArmL\":\"ForeArmL\",\"foreArmR\":\"ForeArmR\",\"drawnArrow\":\"DrawnArrow\",\"updateBowString\":\"function\"}"
+    },
+    {
+      "id": "C4",
+      "name": "disparo: arco em pé (eixo y >= 0,95), braço do arco reto (< 25°) e levantado, flecha só enquanto puxa, dedos no encaixe (<= 0,12 m)",
+      "status": "PASS",
+      "detail": "bow eixo y: repouso/andar mín=0.851 mira mín=0.995; ângulo ombro-cotovelo-arco máx na mira=14.7°; flecha=true; dedos-encaixe t0,4=0.085 t0,5=0.081 t0,62=0.007 m; barriga·frente t0,5=1; armL.x t0,5=-1.451; ForeArmR.x t0,5=-1.043; altura do arco t0,5=2.304"
+    },
+    {
+      "id": "C5",
+      "name": "caminhada ao vivo por 1 s: pernas e braço balançam",
+      "status": "PASS",
+      "detail": "quadros=61 com walk=60 faixa legL.x=1.3 rad armR.x=1.1 rad deslocou=4.3 u"
+    },
+    {
+      "id": "C6",
+      "name": "TeamColor: cor de time vermelha muda o material TeamColor e não o Atlas",
+      "status": "PASS",
+      "detail": "TeamColor #2563eb -> #d02020; Atlas #ffffff -> #ffffff"
+    },
+    {
+      "id": "C7",
+      "name": "sem pageerror nem console.error (deprecações listadas à parte)",
+      "status": "PASS",
+      "detail": "erros=0 (deprecação=0); avisos=0"
+    },
+    {
+      "id": "C9",
+      "name": "inspetor: archer_v2_glb carrega com os nós do arco",
+      "status": "PASS",
+      "detail": "nós=[Archer,ArmL,ForeArmL,Bow,BowStringBottom,BowStringTop,BowTipBottom,BowTipTop,DrawnArrow,ArmR,ForeArmR,Head,LegL,LegR,Torso,Torso_1,Torso_2]"
+    },
+    {
+      "id": "C9b",
+      "name": "inspetor: o archer_glb antigo continua carregando (Bow, sem ForeArmL)",
+      "status": "PASS",
+      "detail": "nós=[Archer,ArmL,Bow,BowStringBottom,BowStringTop,BowTipBottom,BowTipTop,DrawnArrow,ArmR,Head,Head_1,Head_2,LegL,LegR,Torso,Torso_1,Torso_2]"
+    }
+  ],
+  "files": [
+    {
+      "name": "game-archer-no-jogo.png",
+      "kB": 786
+    },
+    {
+      "name": "game-archer-flecha-no-arco.png",
+      "kB": 525
+    },
+    {
+      "name": "game-archer-flecha-em-voo.png",
+      "kB": 466
+    },
+    {
+      "name": "game-archer-idle.png",
+      "kB": 371
+    },
+    {
+      "name": "game-archer-andar.png",
+      "kB": 384
+    },
+    {
+      "name": "game-archer-disparo-mira.png",
+      "kB": 381
+    },
+    {
+      "name": "game-archer-disparo-corda-puxada.png",
+      "kB": 384
+    },
+    {
+      "name": "game-archer-disparo-solta.png",
+      "kB": 380
+    },
+    {
+      "name": "game-archer-disparo-lado.png",
+      "kB": 384
+    },
+    {
+      "name": "game-archer-disparo-frente.png",
+      "kB": 365
+    },
+    {
+      "name": "game-archer-morrer-inicio.png",
+      "kB": 368
+    },
+    {
+      "name": "game-archer-morrer-meio.png",
+      "kB": 379
+    },
+    {
+      "name": "game-archer-morrer-fim.png",
+      "kB": 327
+    },
+    {
+      "name": "game-archer-time-vermelho.png",
+      "kB": 371
+    },
+    {
+      "name": "game-ranger-idle.png",
+      "kB": 828
+    },
+    {
+      "name": "inspetor-archer-v2-idle.png",
+      "kB": 291
+    },
+    {
+      "name": "inspetor-archer-v2-fight.png",
+      "kB": 292
+    },
+    {
+      "name": "inspetor-archer-antigo.png",
+      "kB": 268
+    }
+  ],
+  "data": {
+    "renderer": "ANGLE (AMD, Vulkan 1.4.318 (AMD Radeonâ¢ RX 7600 XT (RADV NAVI33) (0x00007480)), radv)",
+    "glbHttpStatus": 200,
+    "spawn": {
+      "id": 286,
+      "type": "archer",
+      "me": 0,
+      "hq": {
+        "x": 32,
+        "z": -30
+      },
+      "spot": {
+        "x": 38,
+        "z": -19.607695154586736
+      },
+      "rootName": "Archer",
+      "rootScale": [
+        1.62,
+        1.62,
+        1.62
+      ],
+      "animUnitType": "archer",
+      "hasForeArmL": true
+    },
+    "rangerSpawn": {
+      "id": 287,
+      "type": "ranger",
+      "me": 0,
+      "hq": {
+        "x": 32,
+        "z": -30
+      },
+      "spot": {
+        "x": 38,
+        "z": -19.607695154586736
+      },
+      "rootName": "Archer",
+      "rootScale": [
+        1.62,
+        1.62,
+        1.62
+      ],
+      "animUnitType": "archer",
+      "hasForeArmL": true
+    },
+    "inspect": {
+      "found": {
+        "Archer": {
+          "parent": "",
+          "mats": [
+            "Atlas",
+            "TeamColor",
+            "(sem nome)"
+          ]
+        },
+        "Torso": {
+          "parent": "Archer",
+          "mats": [
+            "Atlas",
+            "TeamColor"
+          ]
+        },
+        "Head": {
+          "parent": "Archer",
+          "mats": [
+            "Atlas"
+          ]
+        },
+        "ArmL": {
+          "parent": "Archer",
+          "mats": [
+            "Atlas"
+          ]
+        },
+        "ForeArmL": {
+          "parent": "ArmL",
+          "mats": [
+            "Atlas"
+          ]
+        },
+        "ArmR": {
+          "parent": "Archer",
+          "mats": [
+            "Atlas"
+          ]
+        },
+        "ForeArmR": {
+          "parent": "ArmR",
+          "mats": [
+            "Atlas"
+          ]
+        },
+        "LegL": {
+          "parent": "Archer",
+          "mats": [
+            "Atlas"
+          ]
+        },
+        "LegR": {
+          "parent": "Archer",
+          "mats": [
+            "Atlas"
+          ]
+        },
+        "Bow": {
+          "parent": "ForeArmL",
+          "mats": [
+            "Atlas"
+          ]
+        },
+        "BowStringTop": {
+          "parent": "Bow",
+          "mats": [
+            "Atlas"
+          ]
+        },
+        "BowStringBottom": {
+          "parent": "Bow",
+          "mats": [
+            "Atlas"
+          ]
+        },
+        "DrawnArrow": {
+          "parent": "Bow",
+          "mats": [
+            "Atlas"
+          ]
+        }
+      },
+      "userData": {
+        "torso": "Torso",
+        "head": "Head",
+        "armL": "ArmL",
+        "armR": "ArmR",
+        "legL": "LegL",
+        "legR": "LegR",
+        "bow": "Bow",
+        "foreArmL": "ForeArmL",
+        "foreArmR": "ForeArmR",
+        "drawnArrow": "DrawnArrow",
+        "updateBowString": "function"
+      },
+      "meshParts": {
+        "torso": "Torso",
+        "head": "Head",
+        "armL": "ArmL",
+        "armR": "ArmR",
+        "legL": "LegL",
+        "legR": "LegR",
+        "bow": "Bow",
+        "foreArmL": "ForeArmL",
+        "foreArmR": "ForeArmR",
+        "drawnArrow": "DrawnArrow",
+        "updateBowString": "function"
+      }
+    },
+    "poses": {
+      "idle": {
+        "0.1": {
+          "bowUpY": 1,
+          "bellyDotFwd": 1,
+          "elbowAngleDeg": 87.3,
+          "armLx": 0.009,
+          "foreRx": 0,
+          "arrow": {
+            "vis": false,
+            "z": 0
+          },
+          "handToNock": 1.61,
+          "bowHeight": 1.846
+        },
+        "0.5": {
+          "bowUpY": 0.999,
+          "bellyDotFwd": 0.999,
+          "elbowAngleDeg": 91.1,
+          "armLx": 0.03,
+          "foreRx": 0,
+          "arrow": {
+            "vis": false,
+            "z": 0
+          },
+          "handToNock": 1.585,
+          "bowHeight": 1.855
+        },
+        "0.8": {
+          "bowUpY": 1,
+          "bellyDotFwd": 1,
+          "elbowAngleDeg": 88.9,
+          "armLx": 0.018,
+          "foreRx": 0,
+          "arrow": {
+            "vis": false,
+            "z": 0
+          },
+          "handToNock": 1.577,
+          "bowHeight": 1.847
+        }
+      },
+      "walk": {
+        "0": {
+          "bowUpY": 1,
+          "bellyDotFwd": 1,
+          "elbowAngleDeg": 85.6,
+          "armLx": 0,
+          "foreRx": 0,
+          "arrow": {
+            "vis": false,
+            "z": 0
+          },
+          "handToNock": 1.692,
+          "bowHeight": 1.839
+        },
+        "0.2": {
+          "bowUpY": 0.851,
+          "bellyDotFwd": 0.85,
+          "elbowAngleDeg": 103.8,
+          "armLx": -0.55,
+          "foreRx": 0,
+          "arrow": {
+            "vis": false,
+            "z": 0
+          },
+          "handToNock": 2.137,
+          "bowHeight": 2.192
+        },
+        "0.4": {
+          "bowUpY": 0.996,
+          "bellyDotFwd": 1,
+          "elbowAngleDeg": 85.6,
+          "armLx": 0,
+          "foreRx": 0,
+          "arrow": {
+            "vis": false,
+            "z": 0
+          },
+          "handToNock": 1.637,
+          "bowHeight": 1.856
+        }
+      },
+      "fight": {
+        "0.1": {
+          "bowUpY": 0.998,
+          "bellyDotFwd": 1,
+          "elbowAngleDeg": 36,
+          "armLx": -0.928,
+          "foreRx": -0.655,
+          "arrow": {
+            "vis": false,
+            "z": 0
+          },
+          "handToNock": 0.594,
+          "bowHeight": 2.075
+        },
+        "0.2": {
+          "bowUpY": 0.995,
+          "bellyDotFwd": 1,
+          "elbowAngleDeg": 15.8,
+          "armLx": -1.392,
+          "foreRx": -0.983,
+          "arrow": {
+            "vis": false,
+            "z": 0
+          },
+          "handToNock": 0.087,
+          "bowHeight": 2.278
+        },
+        "0.3": {
+          "bowUpY": 0.995,
+          "bellyDotFwd": 1,
+          "elbowAngleDeg": 14.7,
+          "armLx": -1.45,
+          "foreRx": -1.025,
+          "arrow": {
+            "vis": false,
+            "z": 0
+          },
+          "handToNock": 0.041,
+          "bowHeight": 2.304
+        },
+        "0.4": {
+          "bowUpY": 0.995,
+          "bellyDotFwd": 1,
+          "elbowAngleDeg": 14.7,
+          "armLx": -1.452,
+          "foreRx": -1.033,
+          "arrow": {
+            "vis": true,
+            "z": -0.101
+          },
+          "handToNock": 0.085,
+          "bowHeight": 2.305
+        },
+        "0.5": {
+          "bowUpY": 0.995,
+          "bellyDotFwd": 1,
+          "elbowAngleDeg": 14.7,
+          "armLx": -1.451,
+          "foreRx": -1.043,
+          "arrow": {
+            "vis": true,
+            "z": -0.219
+          },
+          "handToNock": 0.081,
+          "bowHeight": 2.304
+        },
+        "0.62": {
+          "bowUpY": 0.995,
+          "bellyDotFwd": 1,
+          "elbowAngleDeg": 14.7,
+          "armLx": -1.446,
+          "foreRx": -1.052,
+          "arrow": {
+            "vis": true,
+            "z": -0.315
+          },
+          "handToNock": 0.007,
+          "bowHeight": 2.302
+        },
+        "0.7": {
+          "bowUpY": 0.99,
+          "bellyDotFwd": 0.995,
+          "elbowAngleDeg": 14.3,
+          "armLx": -1.525,
+          "foreRx": -0.926,
+          "arrow": {
+            "vis": false,
+            "z": 0
+          },
+          "handToNock": 0.786,
+          "bowHeight": 2.337
+        },
+        "0.85": {
+          "bowUpY": 0.996,
+          "bellyDotFwd": 1,
+          "elbowAngleDeg": 22,
+          "armLx": -1.218,
+          "foreRx": -0.672,
+          "arrow": {
+            "vis": false,
+            "z": 0
+          },
+          "handToNock": 1.293,
+          "bowHeight": 2.199
+        }
+      }
+    },
+    "walk": {
+      "frames": 61,
+      "walkFrames": 60,
+      "legRange": 1.3,
+      "armRange": 1.1,
+      "moved": 4.3
+    },
+    "live": {
+      "fightFrames": 266,
+      "frames": 268,
+      "anims": [
+        "idle",
+        "fight"
+      ],
+      "arrows": 4,
+      "firstDistToBow": 0,
+      "simStartToBow": 0.849,
+      "laterOffset": 0,
+      "foeHp": 4943,
+      "foeMax": 5000,
+      "foeId": 288
+    },
+    "caught": {
+      "progress": 0
+    },
+    "team": {
+      "antes": {
+        "Atlas": "#ffffff",
+        "TeamColor": "#2563eb",
+        "": "#deb841"
+      },
+      "depois": {
+        "Atlas": "#ffffff",
+        "TeamColor": "#d02020",
+        "": "#deb841"
+      }
+    },
+    "inspector": {
+      "names": [
+        "Archer",
+        "ArmL",
+        "ForeArmL",
+        "Bow",
+        "BowStringBottom",
+        "BowStringTop",
+        "BowTipBottom",
+        "BowTipTop",
+        "DrawnArrow",
+        "ArmR",
+        "ForeArmR",
+        "Head",
+        "LegL",
+        "LegR",
+        "Torso",
+        "Torso_1",
+        "Torso_2"
+      ],
+      "model": null
+    },
+    "inspectorOld": {
+      "names": [
+        "Archer",
+        "ArmL",
+        "Bow",
+        "BowStringBottom",
+        "BowStringTop",
+        "BowTipBottom",
+        "BowTipTop",
+        "DrawnArrow",
+        "ArmR",
+        "Head",
+        "Head_1",
+        "Head_2",
+        "LegL",
+        "LegR",
+        "Torso",
+        "Torso_1",
+        "Torso_2"
+      ]
+    }
+  },
+  "errors": [],
+  "warnings": []
+}

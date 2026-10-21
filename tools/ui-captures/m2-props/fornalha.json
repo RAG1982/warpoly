@@ -1,0 +1,71 @@
+{
+  "when": "2026-10-21T02:58:39.544Z",
+  "mapId": "camp-08-fornalha",
+  "perProp": {
+    "rock_basalt_a": {
+      "colocado": true,
+      "instancias": 6,
+      "drawCallsCom": 270,
+      "drawCallsSem": 268,
+      "delta": 2
+    },
+    "rock_basalt_b": {
+      "colocado": true,
+      "instancias": 8,
+      "drawCallsCom": 143,
+      "drawCallsSem": 141,
+      "delta": 2
+    },
+    "volcano_cone": {
+      "colocado": true,
+      "instancias": 3,
+      "drawCallsCom": 211,
+      "drawCallsSem": 209,
+      "delta": 2
+    },
+    "tree_burnt": {
+      "colocado": true,
+      "instancias": 10,
+      "drawCallsCom": 267,
+      "drawCallsSem": 266,
+      "delta": 1
+    },
+    "fumarole": {
+      "colocado": true,
+      "instancias": 4,
+      "drawCallsCom": 279,
+      "drawCallsSem": 277,
+      "delta": 2
+    },
+    "obsidian": {
+      "colocado": true,
+      "instancias": 6,
+      "drawCallsCom": 292,
+      "drawCallsSem": 290,
+      "delta": 2
+    }
+  },
+  "mapIdAtivo": "camp-08-fornalha",
+  "plan": {
+    "rock_basalt_a": 6,
+    "rock_basalt_b": 8,
+    "volcano_cone": 3,
+    "tree_burnt": 10,
+    "fumarole": 4,
+    "obsidian": 6,
+    "tree_pine_snow": 8,
+    "rock_snow": 9
+  },
+  "meshesNoJogo": [
+    "InstancedProp_rock_basalt_a:6",
+    "InstancedProp_rock_basalt_b:8",
+    "InstancedProp_volcano_cone:3",
+    "InstancedProp_tree_burnt:10",
+    "InstancedProp_fumarole:4",
+    "InstancedProp_obsidian:6",
+    "InstancedProp_tree_pine_snow:8",
+    "InstancedProp_rock_snow:9"
+  ],
+  "drawCallsTotal": 292,
+  "errors": []
+}

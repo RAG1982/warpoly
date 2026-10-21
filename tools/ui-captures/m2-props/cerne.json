@@ -1,0 +1,31 @@
+{
+  "when": "2026-10-21T02:52:26.831Z",
+  "mapId": "camp-05-cerne-verde",
+  "perProp": {
+    "fern": {
+      "colocado": true,
+      "instancias": 22,
+      "drawCallsCom": 280,
+      "drawCallsSem": 279,
+      "delta": 1
+    },
+    "log_fallen": {
+      "colocado": true,
+      "instancias": 9,
+      "drawCallsCom": 130,
+      "drawCallsSem": 128,
+      "delta": 2
+    }
+  },
+  "mapIdAtivo": "camp-05-cerne-verde",
+  "plan": {
+    "fern": 22,
+    "log_fallen": 9
+  },
+  "meshesNoJogo": [
+    "InstancedProp_fern:22",
+    "InstancedProp_log_fallen:9"
+  ],
+  "drawCallsTotal": 130,
+  "errors": []
+}

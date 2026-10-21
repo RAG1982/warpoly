@@ -1,0 +1,55 @@
+{
+  "when": "2026-10-21T02:49:14.216Z",
+  "mapId": "camp-06-a-geada",
+  "perProp": {
+    "ice_block_small": {
+      "colocado": true,
+      "instancias": 22,
+      "drawCallsCom": 274,
+      "drawCallsSem": 272,
+      "delta": 2
+    },
+    "ice_block_large": {
+      "colocado": true,
+      "instancias": 9,
+      "drawCallsCom": 165,
+      "drawCallsSem": 163,
+      "delta": 2
+    },
+    "tree_pine_snow": {
+      "colocado": true,
+      "instancias": 18,
+      "drawCallsCom": 160,
+      "drawCallsSem": 158,
+      "delta": 2
+    },
+    "rock_snow": {
+      "colocado": true,
+      "instancias": 20,
+      "drawCallsCom": 100,
+      "drawCallsSem": 98,
+      "delta": 2
+    }
+  },
+  "mapIdAtivo": "camp-06-a-geada",
+  "plan": {
+    "rock_basalt_a": 12,
+    "rock_basalt_b": 18,
+    "obsidian": 13,
+    "ice_block_small": 22,
+    "ice_block_large": 9,
+    "tree_pine_snow": 18,
+    "rock_snow": 20
+  },
+  "meshesNoJogo": [
+    "InstancedProp_rock_basalt_a:12",
+    "InstancedProp_rock_basalt_b:18",
+    "InstancedProp_obsidian:13",
+    "InstancedProp_ice_block_small:22",
+    "InstancedProp_ice_block_large:9",
+    "InstancedProp_tree_pine_snow:18",
+    "InstancedProp_rock_snow:20"
+  ],
+  "drawCallsTotal": 100,
+  "errors": []
+}

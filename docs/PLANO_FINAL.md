@@ -263,19 +263,19 @@ Legenda de dependências: só IDs; "—" = pode começar já. **Dif.** = dificul
 | M2-09 | Editor: pincéis de lava, bioma e passagem | Média | M | S | M2-03 | MUNDO-1 p.7 | TODO |
 | M2-10 | Espécies de árvore novas nos mapas (ART-02) | Média | M | S | M0-01 | ART-02 | DONE parcial (draw calls +6..15 por espécie > meta +4; JSON dos mapas só reassados nos lotes novos) |
 | M2-11 | IA de chefes: habilidades de herói na IA | Difícil | M | S | M0-01 | MUNDO-HEROIS R8 | DONE (2026-10-17; micro nível ≥ 2) |
-| M2-12 | Props de arenito e arbusto rolante enxuto | Média | M | SB | M0-01 | ART-01/03 | TODO |
+| M2-12 | Props de arenito e arbusto rolante enxuto | Média | M | SB | M0-01 | ART-01/03 | DONE (2026-10-20) |
 | M2-13 | Javali completo + Cercado de Javalis + ícones de bioma | Média | G | SB | M0-01 | ART-04/12 | TODO |
-| M2-14 | Props vulcânicos e material de lava | Média | G | SB | M0-01 | ART-06 | TODO |
-| M2-15 | Props de gelo | Média | M | SB | M0-01 | ART-07 | TODO |
+| M2-14 | Props vulcânicos e material de lava | Média | G | SB | M0-01 | ART-06 | DONE (2026-10-20) |
+| M2-15 | Props de gelo | Média | M | SB | M0-01 | ART-07 | DONE (2026-10-20) |
 | M2-16 | Água, costa e praia | Média | G | S+SB | M0-01 | ART-08/09 | TODO |
-| M2-17 | Sub-bosque e pântano | Fácil | M | SB | M0-01 | ART-10 | TODO |
+| M2-17 | Sub-bosque e pântano | Fácil | M | SB | M0-01 | ART-10 | DONE (2026-10-20) |
 | M2-18 | Efeitos ambientais (poeira, cinza, vapor, neve, lava) | Média | M | S | M2-14 | ART-11 | TODO |
 | M2-19 | Texturas de terreno por bioma (rocha, vulcânico, pântano, gelo, neve; **confirmada pela M1-01**) | Média | G | SB | M1-01 | ART-05 | DONE (2026-10-17; procedural) |
-| M2-20 | Herói Dorian: integração do `.blend` do dono (animações, jogo, inspetor, retrato) | Difícil | G | SB | `.blend` do dono | MUNDO-HEROIS | TODO |
+| M2-20 | Herói Dorian: integração do `.blend` do dono (animações, jogo, inspetor, retrato) | Difícil | G | SB | `.blend` do dono | MUNDO-HEROIS | DONE (2026-10-20) |
 | M2-21 | Herói Oren: integração do `.blend` do dono | Difícil | G | SB | `.blend` do dono | MUNDO-HEROIS | DONE (2026-10-17; hero_common.py pronta) |
 | M2-22 | Herói Drogath: integração do `.blend` do dono | Difícil | G | SB | `.blend` do dono | MUNDO-HEROIS | DONE (2026-10-20) |
 | M2-23 | Herói Vozgul: integração do `.blend` do dono | Difícil | G | SB | `.blend` do dono | MUNDO-HEROIS | DONE (2026-10-20) |
-| M2-24 | Herói Skarn: integração do `.blend` do dono | Difícil | G | SB | `.blend` do dono | MUNDO-HEROIS | TODO |
+| M2-24 | Herói Skarn: integração do `.blend` do dono | Difícil | G | SB | `.blend` do dono | MUNDO-HEROIS | DONE (2026-10-20) |
 | M2-26 | Biomas: neve solta no `biomeGrid` dos mapas MUNDO-7 e minimapa com cor de bioma | Média | M | S | M1-01 | achados M1-01 | DONE (2026-10-17) |
 | M2-27 | Arte da história sem texto em inglês (painéis 3 e 5, cartão de título) | Média | M | V+S | D5 | achado M1-01 | TODO |
 | M2-29 | Revide inteligente: troca de alvo por proximidade e por colisão (pedido do dono) | Difícil | M | S | M0-01 | pedido do dono 2026-10-20 | TODO |

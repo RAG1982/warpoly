@@ -17,7 +17,11 @@ export const GLB_MODELS = {
   grunt: { url: `${BASE}models/grunt.glb`, root: 'Grunt', type: 'grunt' },
   // Drogath Punho-de-Brasa (hero_drogath, M2-22): modelo do Tripo finalizado (Weapon = machado filho de ArmR, faixas e manto em TeamColor)
   hero_drogath: { url: `${BASE}models/hero_drogath.glb`, root: 'Grunt', type: 'grunt' },
+  // Skarn, chefe-de-brasa (hero_skarn, M2-24): modelo do Tripo finalizado (Weapon = martelo de guerra gigante, filho de ArmR; faixas de couro em TeamColor)
+  hero_skarn: { url: `${BASE}models/hero_skarn.glb`, root: 'Ogre', type: 'ogre' },
   knight: { url: `${BASE}models/knight.glb`, root: 'Knight', type: 'knight' },
+  // Marechal Dorian Vasques (hero_dorian, M2-20): modelo do Tripo finalizado (tipo `cavalier`: 4 patas HorseLeg*, Sword, capa no Torso e `Banner` = estandarte filho do Torso)
+  hero_dorian: { url: `${BASE}models/hero_dorian.glb`, root: 'Cavalier', type: 'cavalier' },
   // Capitão Brann (hero_brann): modelo do Tripo finalizado (commit 4df356b; martelo = Sword, capa = Cape, sem escudo)
   hero_brann: { url: `${BASE}models/hero_brann.glb`, root: 'Knight', type: 'knight' },
   archer: { url: `${BASE}models/archer.glb`, root: 'Archer', type: 'archer' },
@@ -97,6 +101,26 @@ export const GLB_MODELS = {
   tree_palm: { url: `${BASE}models/tree_palm.glb`, root: 'TreePalm', type: null, lazy: true },
   tree_acacia: { url: `${BASE}models/tree_acacia.glb`, root: 'TreeAcacia', type: null, lazy: true },
   grass_dry: { url: `${BASE}models/grass_dry.glb`, root: 'GrassDry', type: null, lazy: true },
+  // M2-12 (ART-01): arenito em estratos
+  rock_sandstone_a: { url: `${BASE}models/rock_sandstone_a.glb`, root: 'RockSandstoneA', type: null, lazy: true },
+  rock_sandstone_b: { url: `${BASE}models/rock_sandstone_b.glb`, root: 'RockSandstoneB', type: null, lazy: true },
+  // M2-14 (ART-06): props vulcânicos
+  rock_basalt_a: { url: `${BASE}models/rock_basalt_a.glb`, root: 'RockBasaltA', type: null, lazy: true },
+  rock_basalt_b: { url: `${BASE}models/rock_basalt_b.glb`, root: 'RockBasaltB', type: null, lazy: true },
+  volcano_cone: { url: `${BASE}models/volcano_cone.glb`, root: 'VolcanoCone', type: null, lazy: true },
+  tree_burnt: { url: `${BASE}models/tree_burnt.glb`, root: 'TreeBurnt', type: null, lazy: true },
+  fumarole: { url: `${BASE}models/fumarole.glb`, root: 'Fumarole', type: null, lazy: true },
+  obsidian: { url: `${BASE}models/obsidian.glb`, root: 'Obsidian', type: null, lazy: true },
+  // M2-15 (ART-07): props de gelo e neve
+  ice_block_small: { url: `${BASE}models/ice_block_small.glb`, root: 'IceBlockSmall', type: null, lazy: true },
+  ice_block_large: { url: `${BASE}models/ice_block_large.glb`, root: 'IceBlockLarge', type: null, lazy: true },
+  tree_pine_snow: { url: `${BASE}models/tree_pine_snow.glb`, root: 'TreePineSnow', type: null, lazy: true },
+  rock_snow: { url: `${BASE}models/rock_snow.glb`, root: 'RockSnow', type: null, lazy: true },
+  // M2-17 (ART-10): sub-bosque e pântano
+  fern: { url: `${BASE}models/fern.glb`, root: 'Fern', type: null, lazy: true },
+  log_fallen: { url: `${BASE}models/log_fallen.glb`, root: 'LogFallen', type: null, lazy: true },
+  log_drowned: { url: `${BASE}models/log_drowned.glb`, root: 'LogDrowned', type: null, lazy: true },
+  mangrove_root: { url: `${BASE}models/mangrove_root.glb`, root: 'MangroveRoot', type: null, lazy: true },
   tumbleweed: { url: `${BASE}models/tumbleweed.glb`, root: 'Tumbleweed', type: null, lazy: true },
   critter_boar: { url: `${BASE}models/critter_boar.glb`, root: 'CritterBoar', type: null, lazy: true },
   // F7-00b lote 2 (grupo 3): blocos de muralha instanciados (`WallBatch`)

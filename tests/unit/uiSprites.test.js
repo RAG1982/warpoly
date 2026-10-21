@@ -214,7 +214,7 @@ const hasManifest = existsSync(manifestPath);
 const real = hasManifest ? JSON.parse(readFileSync(manifestPath, 'utf8')) : null;
 
 // Tipos que ainda não têm .glb (o jogo usa modelo procedural): ficam com o ícone antigo — ver docs/TASKS.md F7-09.
-const NO_GLB_UNITS = ['sheep', 'submersible', 'colossal_turtle', 'hero_dorian', 'hero_vozgul', 'hero_skarn'];
+const NO_GLB_UNITS = ['sheep', 'submersible', 'colossal_turtle', 'hero_dorian', 'hero_vozgul'];
 const NO_GLB_BUILDINGS = ['refinery', 'foundry', 'naval_forge', 'ash_cauldron'];
 const NO_SPRITE_ABILITIES = [
   'hero_cleave_strike', 'hero_shield_bash',

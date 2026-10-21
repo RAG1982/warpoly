@@ -42,6 +42,8 @@ export class AssetPreloader {
       { name: 'Arremessador Troll dos Clãs', fn: () => ModelFactory.createAxethrower() },
       { name: 'Ogro Campeão dos Clãs', fn: () => ModelFactory.createOgre() },
       { name: 'Castelo da Fortaleza', fn: () => ModelFactory.createCastle() },
+      { name: 'Fortaleza (nível 2)', fn: () => ModelFactory.createCastle(2) },
+      { name: 'Castelo de Aldária (nível 3)', fn: () => ModelFactory.createCastle(3) },
       { name: 'Quartel Militar', fn: () => ModelFactory.createBarracks() },
       { name: 'Casa Residencial', fn: () => ModelFactory.createCottage() },
       { name: 'Fazenda de Trigo', fn: () => ModelFactory.createFarm() },

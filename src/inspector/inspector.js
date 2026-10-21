@@ -1629,6 +1629,45 @@ const MODEL_CATALOG = [
     notes: '2 draw calls (Static_Mesh + Anim_Banners), ~8,7 mil triângulos, atlas 1024² com bake de cor e AO. Mesma pegada (raio 5,5) e altura (~9,5) do castelo procedural. Sockets: Socket_UnitSpawn, Socket_Rally.'
   },
   {
+    id: 'hq_human_1_glb',
+    name: 'Centro humano nível 1 · Paço Real (Tripo)',
+    category: 'buildings',
+    faction: 'human',
+    type: 'building',
+    icon: '🏰',
+    glb: 'hq_human_1',
+    sourceFile: 'tools/blender/build_hq_human.py',
+    create: createGlb('hq_human_1'),
+    description: 'Casa de enxaimel com telhado de palha e ardósia, chaminé de pedra, sacos e caixotes; bandeira azul em cor de time. Modelo do nível 1 do Centro humano (M2-33), o padrão no jogo; o castelo antigo continua em Castelo (Blender).',
+    notes: '2 draw calls (Atlas + TeamColor), 18,6 mil triângulos, atlas 512². Altura 9,0, pegada 7,6 x 7,2 (raio de colisão 5,5 da simulação, igual nos 3 níveis). Fumaça da chaminé em (1,5; 8,2; -1,8). Sockets: Socket_UnitSpawn, Socket_Rally.'
+  },
+  {
+    id: 'hq_human_2_glb',
+    name: 'Centro humano nível 2 · Fortaleza (Tripo)',
+    category: 'buildings',
+    faction: 'human',
+    type: 'building',
+    icon: '🏰',
+    glb: 'hq_human_2',
+    sourceFile: 'tools/blender/build_hq_human.py',
+    create: createGlb('hq_human_2'),
+    description: 'Casa-forte de pedra com ameias, portão de grade, torre central de telhado azul e bandeira de time. Modelo do nível 2 (M2-33): o BuildingView troca para ele quando o upgrade do Centro termina.',
+    notes: '2 draw calls (Atlas + TeamColor), 18,2 mil triângulos, atlas 512². Altura 12,5, pegada 8,3 x 8,5. Sockets: Socket_UnitSpawn, Socket_Rally.'
+  },
+  {
+    id: 'hq_human_3_glb',
+    name: 'Centro humano nível 3 · Castelo de Aldária (Tripo)',
+    category: 'buildings',
+    faction: 'human',
+    type: 'building',
+    icon: '🏰',
+    glb: 'hq_human_3',
+    sourceFile: 'tools/blender/build_hq_human.py',
+    create: createGlb('hq_human_3'),
+    description: 'Castelo de pedra com quatro torres de telhado cônico azul, torre de menagem, leões, estandartes e portão. Modelo do nível 3 (M2-33). Bandeiras e estandartes em cor de time.',
+    notes: '2 draw calls (Atlas + TeamColor), 19,3 mil triângulos, atlas 512². Altura 15,5, pegada 9,4 x 8,9. Sockets: Socket_UnitSpawn, Socket_Rally.'
+  },
+  {
     id: 'bandit_camp',
     name: 'Acampamento Bandido (Bandit Camp)',
     category: 'buildings',

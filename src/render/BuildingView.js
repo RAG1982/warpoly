@@ -6,7 +6,7 @@
  */
 import * as THREE from 'three';
 import { ModelFactory } from '../entities/ModelFactory.js';
-import { getBuildingDef } from '../data/index.js';
+import { getBuildingDef, HQ_TIER_VIEW } from '../data/index.js';
 import { syncOutline, resetOutline } from './postfx/outlineLayer.js';
 import { markRingMaterial } from './markRing.js';
 import { LOD_DISTANCES, lodLevelForDistance, lodEnabled, applyEntityLod } from './lod.js';
@@ -57,6 +57,9 @@ const _flameSmokePos = new THREE.Vector3();
 const _chimneyPos = new THREE.Vector3();
 const _chimneyOffsetGreatHall = new THREE.Vector3(-2.2, 9.8, -1.8);
 const _chimneyOffsetCottage = new THREE.Vector3(-2.1, 4.4, -0.6);
+const _chimneyOffsetHq = new THREE.Vector3(); // M2-33: chaminé do Centro humano nível 1 (HQ_TIER_VIEW[1].chimney)
+/** M2-33: duração (s) da animação de crescimento do modelo novo quando o Centro sobe de nível. */
+const HQ_SWAP_TIME = 0.9;
 
 export class BuildingView {
   /**
@@ -71,6 +74,9 @@ export class BuildingView {
 
     const _gm0 = building.gameManager;
     const _owner0 = _gm0 && _gm0.getPlayer ? _gm0.getPlayer(building.ownerId) : null;
+    /** M2-33: nível do modelo exibido (só `castle`; os demais ficam em 1). */
+    this._tier = building.tier || 1;
+    this._swapT = -1;
     this.fullMesh = this.createBuildingMesh(type, _owner0 && _owner0.factionId);
     this.fullMesh.userData.entity = building;
     this.scaffoldMesh = this.createScaffoldMesh();
@@ -137,7 +143,7 @@ export class BuildingView {
 
   createBuildingMesh(type, factionId = 'human') {
     switch (type) {
-      case 'castle': return ModelFactory.createCastle();
+      case 'castle': return ModelFactory.createCastle(this._tier); // M2-33: um modelo por nível do Centro
       case 'great_hall': return ModelFactory.createGreatHall();
       case 'lumber_camp': return ModelFactory.createLumberCamp();
       case 'orc_lumber_mill': return ModelFactory.createOrcLumberMill();
@@ -230,7 +236,42 @@ export class BuildingView {
   }
 
   getBuildingHeight() {
+    if (this.entity.type === 'castle') {
+      const v = HQ_TIER_VIEW[this._tier];
+      if (v) return v.healthBarHeight; // M2-33: altura do modelo do nível atual
+    }
     return getBuildingDef(this.entity.type).healthBarHeight;
+  }
+
+  /**
+   * M2-33: o Centro humano subiu de nível (`entity.tier`, fixado pela simulação em UPGRADE_HQ concluído; o evento
+   * `HQ_TIER_CHANGED` só avisa UI/áudio): troca o modelo por o do nível novo, preservando cor de time, contorno, LOD e raiz.
+   * Como a view lê `entity.tier` a cada quadro, partida carregada ou replay já nascem com o modelo certo (construtor).
+   */
+  swapHqModel(tier) {
+    this._tier = tier;
+    const old = this.fullMesh;
+    const fresh = this.createBuildingMesh(this.entity.type, 'human');
+    fresh.userData.entity = this.entity;
+    const gm = this.entity.gameManager;
+    const owner = gm && gm.getPlayer ? gm.getPlayer(this.entity.ownerId) : null;
+    if (owner && owner.color) ModelFactory.setTeamColor(fresh, owner.color);
+    this.root.remove(old);
+    this.root.add(fresh);
+    this.fullMesh = fresh;
+    resetOutline(this); // remarca as malhas novas no próximo `syncOutline` (o contador de contornos é reajustado)
+    this._lodCache = null;
+    this._lodLevel = 0;
+    this._swapT = 0;
+    this._smokeBurst = true;
+    this.updateConstructionState();
+    // a barra de vida e as chamas acompanham a altura do modelo novo
+    if (this.flamesGroup) {
+      this.mesh.remove(this.flamesGroup);
+      this.flamesGroup = null;
+      this.flameTongues = [];
+      this.flameClusters = [];
+    }
   }
 
   createHealthBar() {
@@ -450,6 +491,27 @@ export class BuildingView {
       this.updateConstructionState();
     }
 
+    // M2-33: troca de modelo do Centro humano ao mudar de nível (e animação curta de crescimento do modelo novo).
+    if (e.type === 'castle' && e.isConstructed && (e.tier || 1) !== this._tier) {
+      this.swapHqModel(e.tier || 1);
+    }
+    if (this._swapT >= 0 && e.isConstructed) {
+      this._swapT += frameDelta;
+      const k = Math.min(1, this._swapT / HQ_SWAP_TIME);
+      const ease = 1 - (1 - k) * (1 - k);
+      this.fullMesh.scale.set(0.94 + 0.06 * ease, 0.8 + 0.2 * ease, 0.94 + 0.06 * ease);
+      if (this._smokeBurst && gmEvents && live) {
+        this._smokeBurst = false;
+        for (let i = 0; i < 4; i++) {
+          const a = i * Math.PI / 2;
+          const rr = HQ_TIER_VIEW[this._tier] ? HQ_TIER_VIEW[this._tier].footprint * 0.45 : 3;
+          _chimneyPos.set(bp.x + Math.cos(a) * rr, bp.y + 0.8, bp.z + Math.sin(a) * rr);
+          gmEvents.emit(EVT.BUILDING_VFX, { buildingId: e.id, ownerId: e.ownerId, pos: posOf(_chimneyPos), kind: 'chimney_smoke' });
+        }
+      }
+      if (k >= 1) { this._swapT = -1; this.fullMesh.scale.set(1, 1, 1); }
+    }
+
     // F1-10 item 4: longe do alvo da câmera, oculta as partes `userData.lodDetail` (só `visible`).
     if (ctx && ctx.lodTarget) {
       const lvl = lodEnabled() ? lodLevelForDistance(ctx.lodTarget.distanceTo(this.root.position), LOD_DISTANCES.building, this._lodLevel) : 0;
@@ -519,12 +581,22 @@ export class BuildingView {
       this.updateCustomVFX(frameDelta, gameManager);
     }
 
-    // Cottage & Great Hall chimney smoke
-    if (live && e.isConstructed && (e.type === 'cottage' || e.type === 'great_hall') && gmEvents) {
+    // Cottage, Great Hall e Centro humano nível 1 (M2-33: só ele tem chaminé): fumaça da chaminé
+    const hqChimney = e.type === 'castle' && this._tier === 1 ? HQ_TIER_VIEW[1].chimney : null;
+    if (live && e.isConstructed && (e.type === 'cottage' || e.type === 'great_hall' || hqChimney) && gmEvents) {
       this.smokeTimer += frameDelta;
       if (this.smokeTimer >= 0.8) {
         this.smokeTimer = 0;
-        const chimneyOffset = e.type === 'great_hall' ? _chimneyOffsetGreatHall : _chimneyOffsetCottage;
+        let chimneyOffset;
+        if (hqChimney) {
+          // gira o deslocamento local pela rotação y da construção (a raiz pode estar virada)
+          const c = Math.cos(this.root.rotation.y);
+          const sn = Math.sin(this.root.rotation.y);
+          _chimneyOffsetHq.set(hqChimney.x * c + hqChimney.z * sn, hqChimney.y, -hqChimney.x * sn + hqChimney.z * c);
+          chimneyOffset = _chimneyOffsetHq;
+        } else {
+          chimneyOffset = e.type === 'great_hall' ? _chimneyOffsetGreatHall : _chimneyOffsetCottage;
+        }
         _chimneyPos.copy(this.root.position).add(chimneyOffset);
         gmEvents.emit(EVT.BUILDING_VFX, { buildingId: e.id, ownerId: e.ownerId, pos: posOf(_chimneyPos), kind: 'chimney_smoke' });
       }

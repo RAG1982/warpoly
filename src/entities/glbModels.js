@@ -17,6 +17,8 @@ export const GLB_MODELS = {
   grunt: { url: `${BASE}models/grunt.glb`, root: 'Grunt', type: 'grunt' },
   // Drogath Punho-de-Brasa (hero_drogath, M2-22): modelo do Tripo finalizado (Weapon = machado filho de ArmR, faixas e manto em TeamColor)
   hero_drogath: { url: `${BASE}models/hero_drogath.glb`, root: 'Grunt', type: 'grunt' },
+  // Skarn, chefe-de-brasa (hero_skarn, M2-24): modelo do Tripo finalizado (Weapon = martelo de guerra gigante, filho de ArmR; faixas de couro em TeamColor)
+  hero_skarn: { url: `${BASE}models/hero_skarn.glb`, root: 'Ogre', type: 'ogre' },
   knight: { url: `${BASE}models/knight.glb`, root: 'Knight', type: 'knight' },
   // Capitão Brann (hero_brann): modelo do Tripo finalizado (commit 4df356b; martelo = Sword, capa = Cape, sem escudo)
   hero_brann: { url: `${BASE}models/hero_brann.glb`, root: 'Knight', type: 'knight' },

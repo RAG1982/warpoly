@@ -130,6 +130,7 @@
    "unit_hero_brann",
    "unit_hero_drogath",
    "unit_hero_oren",
+   "unit_hero_skarn",
    "unit_iron_leviathan",
    "unit_knight",
    "unit_mage",
@@ -151,10 +152,10 @@
   ]
  },
  "bytes": {
-  "total": 2809084,
+  "total": 2835320,
   "art": 281206,
-  "icons": 2249312,
-  "portraits": 278566
+  "icons": 2268856,
+  "portraits": 285258
  },
  "aliases": {
   "ability_debug_bolt": "ability_hero_arcane_bolt",
@@ -209,6 +210,7 @@
    "hero_brann",
    "hero_drogath",
    "hero_oren",
+   "hero_skarn",
    "iron_leviathan",
    "knight",
    "mage",

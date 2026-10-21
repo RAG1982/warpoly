@@ -60,6 +60,7 @@ UNITS = {
     'hero_brann': S('knight', HUM, badge='hero'),
     'hero_drogath': S('hero_drogath', HUM, badge='hero'),   # M2-22: modelo próprio do Tripo
     'hero_oren': S('hero_oren', HUM, badge='hero'),          # M2-21: modelo próprio do Tripo (hero_oren.glb)
+    'hero_skarn': S('hero_skarn', dict(BIG, az=-30), badge='hero'),        # M2-24: modelo próprio do Tripo (hero_skarn.glb, com o martelo)
     'bandit': S('bandit', HUM),
     # navios (a barcaça e o petroleiro têm arte própria por facção)
     'tanker': S('tanker', SHIP),
@@ -218,6 +219,7 @@ PORTRAITS = {
     'hero_brann': P('knight', PORTRAIT_HUM, ('fight', 0.3), badge='hero'),
     'hero_drogath': P('hero_drogath', PORTRAIT_HUM, ('fight', 0.3), faction='orc', badge='hero'),
     'hero_oren': P('hero_oren', dict(PORTRAIT_HUM, crop=0.58), ('cast', 0.5), badge='hero'),
+    'hero_skarn': P('hero_skarn', dict(PORTRAIT_BIG, az=-26), ('fight', 0.3), faction='orc', badge='hero'),
 }
 
 # Cores de fundo do retrato por facção: (centro, borda) em hex sRGB; o estado de ataque esquenta o centro.

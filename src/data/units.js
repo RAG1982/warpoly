@@ -627,7 +627,7 @@ export const UNITS = {
     healthBarHeight: 5.2,
     cost: null,
     trainTime: null,
-    icon: 'ui/heroes/hero_skarn.svg',
+    icon: 'ui/icons/128/unit_hero_skarn.webp',
     description: 'Herói único: chefe-de-brasa supremo dos clãs do Cinzal',
     isWorker: false, isRanged: false, isCombat: true, projectile: null,
     maxMana: 180, startMana: 180, manaRegen: 1.2,

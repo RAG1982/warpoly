@@ -576,7 +576,8 @@ export class ModelFactory {
   }
 
   static createVillager() {
-    return this._glbOr('villager', () => this._placeholder('villager', 'unit'));
+    // M2-30: Aldeão v2 (Tripo) é o padrão; sem ele, o villager.glb antigo; sem ambos, o bloco reserva
+    return this._glbOr('villager_v2', () => this._glbOr('villager', () => this._placeholder('villager', 'unit')));
   }
 
   /** F3-10 / MUNDO-TERRENO-MAPAS §5: critter decorativo (`sheep` | `boar` | `pig`). */

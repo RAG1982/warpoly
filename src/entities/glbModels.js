@@ -27,6 +27,8 @@ export const GLB_MODELS = {
   archer: { url: `${BASE}models/archer.glb`, root: 'Archer', type: 'archer' },
   axethrower: { url: `${BASE}models/axethrower.glb`, root: 'Axethrower', type: 'axethrower' },
   villager: { url: `${BASE}models/villager.glb`, root: 'Villager', type: 'villager' },
+  // M2-30: Aldeão humano v2 (camponês de barba ruiva do Tripo; picareta = `ToolGroup`, filha de ArmR; Pack > WoodBundle/GoldSack). Padrão no jogo; o `villager` acima é o fallback e segue no inspetor.
+  villager_v2: { url: `${BASE}models/villager_v2.glb`, root: 'Villager', type: 'villager' },
   peon: { url: `${BASE}models/peon.glb`, root: 'Peon', type: 'peon' },
   ogre: { url: `${BASE}models/ogre.glb`, root: 'Ogre', type: 'ogre' },
   bandit: { url: `${BASE}models/bandit.glb`, root: 'Bandit', type: 'bandit' },
@@ -165,7 +167,7 @@ export const glbTemplates = new Map();
  * F10-05b: facção dona de cada .glb ('human' | 'orc' | 'neutral'), derivada de `faction` em src/data (unidade ou
  * construção com a mesma chave); chaves fora das tabelas (árvores, jazidas...) são 'neutral' = sempre carregadas.
  */
-const FACTION_OVERRIDES = { orc_oil_platform: 'orc', orc_frigate: 'orc', orc_barge: 'orc', orc_dreadnought: 'orc', orc_tanker: 'orc' };
+const FACTION_OVERRIDES = { villager_v2: 'human', orc_oil_platform: 'orc', orc_frigate: 'orc', orc_barge: 'orc', orc_dreadnought: 'orc', orc_tanker: 'orc' };
 export function glbFaction(key) {
   if (FACTION_OVERRIDES[key]) return FACTION_OVERRIDES[key];
   const f = (UNITS[key] && UNITS[key].faction) || (BUILDINGS[key] && BUILDINGS[key].faction) || 'neutral';

@@ -373,6 +373,19 @@ const MODEL_CATALOG = [
     notes: 'Rig plana (a do antigo VillagerModel.js, removido na F7-00b; Torso, Head, ArmL, ArmR, LegL, LegR, ToolGroup > Axe/Pickaxe/Hammer, Pack > WoodBundle/GoldSack). Atlas 512², rosto só em +Z.'
   },
   {
+    id: 'villager_v2_glb',
+    name: 'Camponês v2 (Tripo)',
+    category: 'units',
+    faction: 'human',
+    type: 'villager',
+    icon: '⛏️',
+    glb: 'villager_v2',
+    sourceFile: 'tools/blender/build_villager_v2.py',
+    create: createGlb('villager_v2'),
+    description: 'Aldeão humano v2: camponês de barba ruiva do Tripo finalizado no Blender (public/models/villager_v2.glb). Capuz de couro, colete sobre túnica azul (cor de time), cinto com bolsas e bolsa de moedas, picareta na mão direita; mochila de carga com feixe de lenha e saco de ouro/pedra (Pack).',
+    notes: 'Tipo villager: Torso, Head, ArmL, ArmR, LegL, LegR; a picareta é o ToolGroup, FILHO de ArmR (balança com o braço; o gesto de coleta serve para madeira, ouro e pedra). Pack > PackFrame/WoodBundle/GoldSack. É o padrão do jogo; o Camponês (Blender) antigo continua como fallback. ~22 mil triângulos, 14 draw calls, atlas 512².'
+  },
+  {
     id: 'bandit_glb',
     name: 'Bandido (Blender)',
     category: 'units',

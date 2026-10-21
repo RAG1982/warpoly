@@ -46,8 +46,8 @@ function oceanSeen(m, sea) {
 }
 
 describe('M2-03 · registro e formato', () => {
-  it('a receita conhece os nove palcos e traz nome pt-BR e en', () => {
-    expect(CAMPAIGN_IDS).toEqual(IDS);
+  it('a receita conhece os palcos de campanha e traz nome pt-BR e en', () => {
+    expect(CAMPAIGN_IDS).toEqual(expect.arrayContaining(IDS)); // M2-05: a receita tem também os palcos 7-9 (tests/unit/campaignMapsM205.test.js)
     for (const id of IDS) {
       expect(CAMPAIGN_NAMES[id].pt.length).toBeGreaterThan(3);
       expect(ptBR[`map.${id}.name`], id).toBe(CAMPAIGN_NAMES[id].pt);

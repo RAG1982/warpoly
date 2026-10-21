@@ -256,7 +256,7 @@ Legenda de dependências: só IDs; "—" = pode começar já. **Dif.** = dificul
 | M2-03 | Mapas de campanha, lote 1: palcos 1 (Aliança), 2, 3 | Difícil | G | S | M2-01 | MUNDO-7 | DONE (2026-10-17; prévias para o G2) |
 | M2-28 | Carregar os mapas de campanha sob demanda (cada JSON tem ~100–135 KB; 16 mapas somam ~2 MB no boot) | Difícil | M | S | M2-03 | achado M2-03 | DONE (2026-10-17) |
 | M2-04 | Mapas, lote 2: palcos 4, 5, 6 | Difícil | G | S | M2-03 | MUNDO-7 | DONE (2026-10-17; prévias para o G2) |
-| M2-05 | Mapas, lote 3: palcos 7, 8, 9 | Difícil | G | S | M2-03 | MUNDO-7 | TODO |
+| M2-05 | Mapas, lote 3: palcos 7, 8, 9 | Difícil | G | S | M2-03 | MUNDO-7 | DONE (2026-10-20; prévias para o G2) |
 | M2-06 | Mapas, lote 4: continentais da Aliança (palcos 10, 11, 12) | Difícil | G | S | M2-03 | MUNDO-7 | TODO |
 | M2-07 | Mapas, lote 5: continentais da Horda (palcos 1, 10, 11, 12) | Difícil | G | S | M2-03 | MUNDO-7 | TODO |
 | M2-08 | Mapa-múndi ligado à tela de campanha | Média | M | S | M1-01 | MUNDO-9 | TODO |
@@ -273,7 +273,7 @@ Legenda de dependências: só IDs; "—" = pode começar já. **Dif.** = dificul
 | M2-19 | Texturas de terreno por bioma (rocha, vulcânico, pântano, gelo, neve; **confirmada pela M1-01**) | Média | G | SB | M1-01 | ART-05 | DONE (2026-10-17; procedural) |
 | M2-20 | Herói Dorian: integração do `.blend` do dono (animações, jogo, inspetor, retrato) | Difícil | G | SB | `.blend` do dono | MUNDO-HEROIS | TODO |
 | M2-21 | Herói Oren: integração do `.blend` do dono | Difícil | G | SB | `.blend` do dono | MUNDO-HEROIS | DONE (2026-10-17; hero_common.py pronta) |
-| M2-22 | Herói Drogath: integração do `.blend` do dono | Difícil | G | SB | `.blend` do dono | MUNDO-HEROIS | TODO |
+| M2-22 | Herói Drogath: integração do `.blend` do dono | Difícil | G | SB | `.blend` do dono | MUNDO-HEROIS | DONE (2026-10-20) |
 | M2-23 | Herói Vozgul: integração do `.blend` do dono | Difícil | G | SB | `.blend` do dono | MUNDO-HEROIS | TODO |
 | M2-24 | Herói Skarn: integração do `.blend` do dono | Difícil | G | SB | `.blend` do dono | MUNDO-HEROIS | TODO |
 | M2-26 | Biomas: neve solta no `biomeGrid` dos mapas MUNDO-7 e minimapa com cor de bioma | Média | M | S | M1-01 | achados M1-01 | DONE (2026-10-17) |

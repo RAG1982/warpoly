@@ -41,7 +41,7 @@ export function buildCoastWorld(presetOrId, { seed = 1, tries = 10, id = null, n
     });
     mapDef.anchors = defaultAnchors(mapDef); // M2-01: pontos nomeados para as missões (entre `neutrals` e `meta`)
     mapDef.meta = { generator: 'coast', preset: preset.id, seed, seedUsed: s };
-    const world = verifyCoastWorld(mapDef, { naval: preset.naval });
+    const world = verifyCoastWorld(mapDef, { naval: preset.naval, woodTarget: preset.woodTarget });
     if (!world.ok) { attempts.push({ seed: s, stage: 'mundo', failures: world.failures }); continue; }
     return { ok: true, preset: preset.id, requestedSeed: seed, seed: s, attempts, map, baked, plan, mapDef, verification: { geo, world } };
   }

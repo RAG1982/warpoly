@@ -56,6 +56,8 @@ export const DEFAULT_OPTIONS = Object.freeze({
   lava: true, // córregos de lava na ilha vulcânica (Fornalha): divisor de áreas com passagens de rocha (spec §3.5)
   lavaStreams: 0, // 0 = auto (1 ou 2 córregos, por semente); 1 | 2 força
   lavaPassages: 0, // 0 = auto (1 ou 2 passagens por córrego, por semente); 1 | 2 força (por córrego)
+  aridSwamp: true, // M2-05: manchas de pântano junto à costa do continente árido (false = deserto limpo)
+  lavaTheta: null, // M2-05: direção do córrego (rad; 0 = leste-oeste, π/2 = norte-sul); null = sorteio por semente
   lavaWidth: [3, 4], // largura do córrego em células da grade (3–4 células = 2,25–3 u com grid 256 / size 192)
   rivers: 0, // rios por continente (spec §2.2): 0 = sem rios; o rio nasce no interior, desce até a costa e tem vaus a cada ~25 u
   riverWidth: [3.4, 5], // largura do canal (u)

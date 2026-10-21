@@ -1,0 +1,137 @@
+{
+ "opts": {
+  "count": 8,
+  "seedStart": 1,
+  "maps": [
+   "camp-07-brejo-mudo"
+  ],
+  "maxTicks": 72000,
+  "recheck": 3,
+  "faction": null,
+  "difficulty": null,
+  "stallTicks": 2400,
+  "out": "tools/soak-report/m2-05/camp-07-brejo-mudo"
+ },
+ "wallMs": 179764,
+ "results": [
+  {
+   "seed": 1,
+   "map": "camp-07-brejo-mudo",
+   "faction": "human",
+   "difficulty": "easy",
+   "finished": true,
+   "ticks": 13992,
+   "checksum": 2853594686,
+   "peakEntities": 63,
+   "wallMs": 8738,
+   "issues": []
+  },
+  {
+   "seed": 2,
+   "map": "camp-07-brejo-mudo",
+   "faction": "orc",
+   "difficulty": "easy",
+   "finished": true,
+   "ticks": 26998,
+   "checksum": 3768907222,
+   "peakEntities": 65,
+   "wallMs": 16420,
+   "issues": []
+  },
+  {
+   "seed": 3,
+   "map": "camp-07-brejo-mudo",
+   "faction": "human",
+   "difficulty": "normal",
+   "finished": true,
+   "ticks": 17259,
+   "checksum": 1334137702,
+   "peakEntities": 98,
+   "wallMs": 15595,
+   "issues": []
+  },
+  {
+   "seed": 4,
+   "map": "camp-07-brejo-mudo",
+   "faction": "orc",
+   "difficulty": "normal",
+   "finished": true,
+   "ticks": 11963,
+   "checksum": 1442147790,
+   "peakEntities": 91,
+   "wallMs": 10817,
+   "issues": []
+  },
+  {
+   "seed": 5,
+   "map": "camp-07-brejo-mudo",
+   "faction": "human",
+   "difficulty": "hard",
+   "finished": true,
+   "ticks": 43333,
+   "checksum": 32367751,
+   "peakEntities": 92,
+   "wallMs": 38727,
+   "issues": []
+  },
+  {
+   "seed": 6,
+   "map": "camp-07-brejo-mudo",
+   "faction": "orc",
+   "difficulty": "hard",
+   "finished": true,
+   "ticks": 21292,
+   "checksum": 586440353,
+   "peakEntities": 116,
+   "wallMs": 17447,
+   "issues": []
+  },
+  {
+   "seed": 7,
+   "map": "camp-07-brejo-mudo",
+   "faction": "human",
+   "difficulty": "brutal",
+   "finished": true,
+   "ticks": 9142,
+   "checksum": 4056749360,
+   "peakEntities": 79,
+   "wallMs": 6192,
+   "issues": []
+  },
+  {
+   "seed": 8,
+   "map": "camp-07-brejo-mudo",
+   "faction": "orc",
+   "difficulty": "brutal",
+   "finished": true,
+   "ticks": 8088,
+   "checksum": 163669024,
+   "peakEntities": 74,
+   "wallMs": 5368,
+   "issues": []
+  }
+ ],
+ "rechecks": [
+  {
+   "seed": 1,
+   "map": "camp-07-brejo-mudo",
+   "faction": "human",
+   "difficulty": "easy",
+   "diff": null
+  },
+  {
+   "seed": 3,
+   "map": "camp-07-brejo-mudo",
+   "faction": "human",
+   "difficulty": "normal",
+   "diff": null
+  },
+  {
+   "seed": 5,
+   "map": "camp-07-brejo-mudo",
+   "faction": "human",
+   "difficulty": "hard",
+   "diff": null
+  }
+ ]
+}

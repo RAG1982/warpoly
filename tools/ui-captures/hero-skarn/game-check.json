@@ -1,0 +1,194 @@
+{
+  "generated": "2026-10-21T02:31:34.542Z",
+  "rows": [
+    {
+      "id": "C0",
+      "name": "hero_skarn.glb: nós, Weapon>ArmR, Head/ArmL/ArmR>Torso, TeamColor, <= 20 draw calls",
+      "status": "PASS",
+      "detail": "draw calls=10 triângulos=25683 Torso=Atlas,TeamColor"
+    },
+    {
+      "id": "C1",
+      "name": "spawn hero_skarn; raiz Ogre; animador ogre",
+      "status": "PASS",
+      "detail": "id=281 escala=2.1870000000000003 nós={\"Ogre\":\"\",\"Torso\":\"Ogre\",\"Head\":\"Torso\",\"ArmL\":\"Torso\",\"ArmR\":\"Torso\",\"LegL\":\"Ogre\",\"LegR\":\"Ogre\",\"Weapon\":\"ArmR\"}"
+    },
+    {
+      "id": "C2",
+      "name": "rebind: userData e meshParts sem nulos",
+      "status": "PASS",
+      "detail": "nulos=[]"
+    },
+    {
+      "id": "C3",
+      "name": "idle/walk/fight/cast mexem as partes (perna balança, Torso inclina no golpe, braços sobem na cast)",
+      "status": "PASS",
+      "detail": "walk legL faixa=0.65; fight torso.x(0,2/0,5/0,8)=-0.01/-0.19/0.53; cast armR.x=-2.30; Weapon idle x=-0.785"
+    },
+    {
+      "id": "C4",
+      "name": "andar ao vivo: animador em walk",
+      "status": "PASS",
+      "detail": "{\"anim\":\"walk\"}"
+    },
+    {
+      "id": "C5",
+      "name": "golpe (fight), Rugido dos Clãs, Pacto de Sangue e Impacto no Solo (cast) entram nas animações e ferem o alvo",
+      "status": "PASS",
+      "detail": "golpe={\"fight\":148} rugido={\"fight\":54,\"cast\":30,\"idle\":5} pacto={\"fight\":42,\"cast\":24,\"idle\":6} ([\"bloodlust\",\"unholy_armor\",null,null,null,null,null,null]) impacto={\"fight\":73,\"cast\":30,\"idle\":6} PV alvo 6000 -> 5855 -> 5190"
+    },
+    {
+      "id": "C6",
+      "name": "TeamColor azul muda só o material TeamColor",
+      "status": "PASS",
+      "detail": "TeamColor #2563eb -> #2060d0; Atlas #ffffff -> #ffffff"
+    },
+    {
+      "id": "C7",
+      "name": "inspetor: hero_skarn_glb carrega com os nós",
+      "status": "PASS",
+      "detail": "Ogre,LegL,LegL_1,LegL_2,LegR,LegR_1,LegR_2,Torso,Torso_1,Torso_2,ArmL,ArmR,Weapon,Head"
+    },
+    {
+      "id": "C8",
+      "name": "sem pageerror nem console.error",
+      "status": "PASS",
+      "detail": "erros=0"
+    }
+  ],
+  "files": [
+    "game-skarn-idle.png",
+    "game-skarn-no-jogo.png",
+    "game-skarn-andar.png",
+    "game-skarn-golpe.png",
+    "game-skarn-rugido.png",
+    "game-skarn-pacto.png",
+    "game-skarn-impacto.png",
+    "game-skarn-time-azul.png",
+    "inspetor-skarn-idle.png",
+    "inspetor-skarn-golpe.png"
+  ],
+  "data": {
+    "spawn": {
+      "id": 281,
+      "me": 0,
+      "rootName": "Ogre",
+      "scale": 2.1870000000000003,
+      "anim": "ogre",
+      "nodes": {
+        "Ogre": "",
+        "Torso": "Ogre",
+        "Head": "Torso",
+        "ArmL": "Torso",
+        "ArmR": "Torso",
+        "LegL": "Ogre",
+        "LegR": "Ogre",
+        "Weapon": "ArmR"
+      },
+      "nulos": []
+    },
+    "poses": {
+      "idle": {
+        "0.25": {
+          "armR": 0.021213203435596423,
+          "legL": 0,
+          "torsoY": 0,
+          "torsoX": 0,
+          "weaponX": -0.7853982366644522
+        }
+      },
+      "walk": {
+        "0": {
+          "armR": 0,
+          "legL": 0,
+          "torsoY": 0,
+          "torsoX": 0.05,
+          "weaponX": -0.7853982366644522
+        },
+        "0.2": {
+          "armR": 0.55,
+          "legL": 0.65,
+          "torsoY": 0.08,
+          "torsoX": 0.05,
+          "weaponX": -0.7853982366644522
+        },
+        "0.4": {
+          "armR": -4.2114255688196447e-16,
+          "legL": -4.977139308605034e-16,
+          "torsoY": -6.125709918283119e-17,
+          "torsoX": 0.05,
+          "weaponX": -0.7853982366644522
+        }
+      },
+      "fight": {
+        "0.2": {
+          "armR": 0.03476825396825395,
+          "legL": 0,
+          "torsoY": -0.11755705045849461,
+          "torsoX": -0.006357623582766436,
+          "weaponX": -0.7641059410430839
+        },
+        "0.5": {
+          "armR": 1.0478670634920637,
+          "legL": 0,
+          "torsoY": -0.2,
+          "torsoX": -0.19160997732426308,
+          "weaponX": -0.3009750566893423
+        },
+        "0.8": {
+          "armR": -1.5,
+          "legL": 0,
+          "torsoY": -0.11755705045849466,
+          "torsoX": 0.5251949068652932,
+          "weaponX": -0.7853982366644522
+        }
+      },
+      "cast": {
+        "0.5": {
+          "armR": -2.3,
+          "legL": 0,
+          "torsoY": 0,
+          "torsoX": -0.12,
+          "weaponX": -0.7853982366644522
+        }
+      }
+    },
+    "live": {
+      "hit": {
+        "fight": 148
+      },
+      "cry": {
+        "fight": 54,
+        "cast": 30,
+        "idle": 5
+      },
+      "pact": {
+        "fight": 42,
+        "cast": 24,
+        "idle": 6
+      },
+      "pactStatus": [
+        "bloodlust",
+        "unholy_armor",
+        null,
+        null,
+        null,
+        null,
+        null,
+        null
+      ],
+      "ember": {
+        "fight": 73,
+        "cast": 30,
+        "idle": 6
+      },
+      "hp": [
+        6000,
+        5855,
+        5190
+      ],
+      "foeId": 282
+    }
+  },
+  "errors": []
+}

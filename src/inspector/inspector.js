@@ -424,6 +424,19 @@ const MODEL_CATALOG = [
     notes: 'Rig do tipo grunt (hierarquia do grunt.glb): o golpe torce o Torso e leva braços e cabeça; o Weapon repousa a -45° em x e o machado tem o gume para +Z. Braço direito reposado pelo rig (o FBX tinha o machado sobre o ombro); machado rígido ligado à mão. Faixas, tanga e atadura do cabo usam TeamColor. 13 draw calls, ~20,8 mil triângulos, atlas 512².'
   },
   {
+    id: 'hero_skarn_glb',
+    name: 'Skarn, chefe-de-brasa (herói, Tripo)',
+    category: 'units',
+    faction: 'orc',
+    type: 'ogre',
+    icon: '🔨',
+    glb: 'hero_skarn',
+    sourceFile: 'tools/blender/build_hero_skarn.py',
+    create: createGlb('hero_skarn'),
+    description: 'Herói orc Skarn, chefe-de-brasa: o maior herói do jogo (public/models/hero_skarn.glb). Ogro de pele verde-musgo com coroa de espetos, manto de pele nos ombros, duas lanternas de brasa sobre os ombros, placas de ferro negro, saiote de correntes e crânios na cintura. Nós Ogre, Torso (com Head, ArmL e ArmR), LegL, LegR e Weapon (martelo de guerra gigante, filho de ArmR).',
+    notes: 'Rig do tipo ogre (hierarquia do ogre.glb): o golpe levanta e esmaga como o Ogro; o Weapon repousa a -45° em x, cabo em pé, e a cabeça retangular do martelo tem as faces de impacto para ±Z. O corpo e o martelo vêm de dois FBX do Tripo (o martelo, sem rig, foi decimado e encaixado na mão direita reposada). Couro dos tassets em TeamColor; a brasa das lanternas é pintada na textura. 10 draw calls, ~25,7 mil triângulos, atlas 512².'
+  },
+  {
     id: 'axethrower_glb',
     name: 'Lanceiro-Machado Troll (Blender)',
     category: 'units',

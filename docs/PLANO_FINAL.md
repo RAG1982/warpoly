@@ -275,7 +275,7 @@ Legenda de dependências: só IDs; "—" = pode começar já. **Dif.** = dificul
 | M2-21 | Herói Oren: integração do `.blend` do dono | Difícil | G | SB | `.blend` do dono | MUNDO-HEROIS | DONE (2026-10-17; hero_common.py pronta) |
 | M2-22 | Herói Drogath: integração do `.blend` do dono | Difícil | G | SB | `.blend` do dono | MUNDO-HEROIS | DONE (2026-10-20) |
 | M2-23 | Herói Vozgul: integração do `.blend` do dono | Difícil | G | SB | `.blend` do dono | MUNDO-HEROIS | DONE (2026-10-20) |
-| M2-24 | Herói Skarn: integração do `.blend` do dono | Difícil | G | SB | `.blend` do dono | MUNDO-HEROIS | TODO |
+| M2-24 | Herói Skarn: integração do `.blend` do dono | Difícil | G | SB | `.blend` do dono | MUNDO-HEROIS | DONE (2026-10-20) |
 | M2-26 | Biomas: neve solta no `biomeGrid` dos mapas MUNDO-7 e minimapa com cor de bioma | Média | M | S | M1-01 | achados M1-01 | DONE (2026-10-17) |
 | M2-27 | Arte da história sem texto em inglês (painéis 3 e 5, cartão de título) | Média | M | V+S | D5 | achado M1-01 | TODO |
 | M2-29 | Revide inteligente: troca de alvo por proximidade e por colisão (pedido do dono) | Difícil | M | S | M0-01 | pedido do dono 2026-10-20 | TODO |

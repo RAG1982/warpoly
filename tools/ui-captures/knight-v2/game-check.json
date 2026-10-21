@@ -1,0 +1,1064 @@
+{
+  "generated": "2026-10-21T23:31:16.835Z",
+  "rows": [
+    {
+      "id": "C0",
+      "name": "knight_v2.glb: nós do knight, Sword>ArmR e ShieldGroup>ArmL (malhas), TeamColor no Torso e na Head, <= 20 draw calls",
+      "status": "PASS",
+      "detail": "faltando=[] pai(Sword)=ArmR pai(ShieldGroup)=ArmL Torso=Atlas,TeamColor Head=Atlas,TeamColor draw calls=14 triângulos=21417"
+    },
+    {
+      "id": "C1",
+      "name": "Espadachim humano do jogo é o v2: Sword filha de ArmR e ShieldGroup filho de ArmL (malhas); animador `knight`",
+      "status": "PASS",
+      "detail": "id=293 raiz=Knight escala=[1.62,1.62,1.62] unitType=knight pai(Sword)=ArmR pai(ShieldGroup)=ArmL nós=22"
+    },
+    {
+      "id": "C2",
+      "name": "Torso e Head com Atlas+TeamColor (tabardo e crista); espada sem TeamColor; rebind do animador completo",
+      "status": "PASS",
+      "detail": "nulos=[] Torso=Atlas,TeamColor Head=Atlas,TeamColor Sword=Atlas"
+    },
+    {
+      "id": "C3",
+      "name": "walk/fight mexem perna, braço, espada e escudo; a ponta da espada não entra no chão (minY >= -0,05, fora a morte) e espada/escudo ficam presos ao braço (o escudo só oscila 0,015 de altura na respiração do idle)",
+      "status": "PASS",
+      "detail": "walk legL dif=0.65 armR dif=0.55; fight armR dif=0.78 sword dif=0.56 shield dif=0.10; ponta mais baixa da espada (acima do pé) mín=1.039; dispersão da espada no espaço do ArmR=0.0000, do escudo no espaço do ArmL=0.0150; minY por animação: idle=2.065 walk=1.562 fight=1.039 hurt=2.122 die=0.524"
+    },
+    {
+      "id": "C4a",
+      "name": "andar ao vivo: animação walk vista na view",
+      "status": "PASS",
+      "detail": "{\"anim\":\"walk\",\"state\":\"moving\"}"
+    },
+    {
+      "id": "C4b",
+      "name": "golpe: animação fight (>= 10 quadros) e o alvo perde PV",
+      "status": "PASS",
+      "detail": "anims=[idle,fight] quadros fight=152 PV do alvo 5000 -> 4803"
+    },
+    {
+      "id": "C4c",
+      "name": "morte: o Espadachim entra em die (ou já saiu da partida)",
+      "status": "PASS",
+      "detail": "{\"gone\":true}"
+    },
+    {
+      "id": "C5",
+      "name": "TeamColor: cor de time vermelha muda o material TeamColor e não o Atlas",
+      "status": "PASS",
+      "detail": "TeamColor #2563eb -> #d02020; Atlas #ffffff -> #ffffff"
+    },
+    {
+      "id": "C6",
+      "name": "sem pageerror nem console.error (deprecações listadas à parte)",
+      "status": "PASS",
+      "detail": "erros=0; avisos=0"
+    },
+    {
+      "id": "C7",
+      "name": "Capitão Brann continua com o .glb próprio (Cape, martelo = Sword na raiz, sem ShieldGroup)",
+      "status": "PASS",
+      "detail": "{\"id\":301,\"cape\":true,\"shield\":false,\"swordParent\":\"Knight\"}"
+    },
+    {
+      "id": "I0",
+      "name": "inspetor: knight_glb (antigo: Sword e ShieldGroup na raiz) e knight_v2_glb (novo: filhos de ArmR e ArmL) carregam",
+      "status": "PASS",
+      "detail": "{\"antigo\":[\"Knight\",\"Knight\"],\"novo\":[\"ArmR\",\"ArmL\"],\"nodes\":21}"
+    }
+  ],
+  "files": [
+    {
+      "name": "game-knight-idle.png",
+      "kB": 150
+    },
+    {
+      "name": "game-knight-andando-a.png",
+      "kB": 184
+    },
+    {
+      "name": "game-knight-andando-b.png",
+      "kB": 203
+    },
+    {
+      "name": "game-knight-andando-c.png",
+      "kB": 211
+    },
+    {
+      "name": "game-knight-andando-costas.png",
+      "kB": 194
+    },
+    {
+      "name": "game-knight-golpe-a.png",
+      "kB": 167
+    },
+    {
+      "name": "game-knight-golpe-b.png",
+      "kB": 175
+    },
+    {
+      "name": "game-knight-golpe-c.png",
+      "kB": 175
+    },
+    {
+      "name": "game-knight-golpe-d.png",
+      "kB": 168
+    },
+    {
+      "name": "game-knight-morte-a.png",
+      "kB": 168
+    },
+    {
+      "name": "game-knight-morte-b.png",
+      "kB": 164
+    },
+    {
+      "name": "game-knight-time-vermelho.png",
+      "kB": 159
+    },
+    {
+      "name": "game-brann-intacto.png",
+      "kB": 191
+    },
+    {
+      "name": "inspetor-knight-v2-idle.png",
+      "kB": 302
+    },
+    {
+      "name": "inspetor-knight-v2-andar.png",
+      "kB": 305
+    },
+    {
+      "name": "inspetor-knight-v2-andar-b.png",
+      "kB": 295
+    },
+    {
+      "name": "inspetor-knight-v2-ataque-a.png",
+      "kB": 303
+    },
+    {
+      "name": "inspetor-knight-v2-ataque-b.png",
+      "kB": 297
+    },
+    {
+      "name": "inspetor-knight-v2-ataque-c.png",
+      "kB": 296
+    },
+    {
+      "name": "inspetor-knight-v2-morte.png",
+      "kB": 260
+    }
+  ],
+  "data": {
+    "renderer": "ANGLE (AMD, Vulkan 1.4.318 (AMD Radeonâ¢ RX 7600 XT (RADV NAVI33) (0x00007480)), radv)",
+    "spawn": {
+      "id": 293,
+      "me": 0,
+      "hq": {
+        "x": 32,
+        "z": -30
+      },
+      "rootName": "Knight",
+      "animUnitType": "knight",
+      "rootScale": [
+        1.62,
+        1.62,
+        1.62
+      ],
+      "names": [
+        "Knight",
+        "ArmL",
+        "ArmL_1",
+        "ArmL_2",
+        "ShieldGroup",
+        "ArmR",
+        "ArmR_1",
+        "ArmR_2",
+        "Sword",
+        "Head",
+        "Head_1",
+        "Head_2",
+        "LegL",
+        "LegL_1",
+        "LegL_2",
+        "LegR",
+        "LegR_1",
+        "LegR_2",
+        "Torso",
+        "Torso_1",
+        "Torso_2",
+        "SelectionRing"
+      ],
+      "swordIsMesh": true,
+      "swordParent": "ArmR",
+      "shieldIsMesh": true,
+      "shieldParent": "ArmL"
+    },
+    "inspect": {
+      "torsoMats": [
+        "Atlas",
+        "TeamColor"
+      ],
+      "headMats": [
+        "Atlas",
+        "TeamColor"
+      ],
+      "swordMats": [
+        "Atlas"
+      ],
+      "userData": {
+        "torso": "Torso",
+        "head": "Head",
+        "armL": "ArmL",
+        "armR": "ArmR",
+        "legL": "LegL",
+        "legR": "LegR",
+        "sword": "Sword",
+        "shieldGroup": "ShieldGroup"
+      },
+      "meshParts": {
+        "torso": "Torso",
+        "head": "Head",
+        "armL": "ArmL",
+        "armR": "ArmR",
+        "legL": "LegL",
+        "legR": "LegR",
+        "sword": "Sword",
+        "shieldGroup": "ShieldGroup"
+      }
+    },
+    "poses": {
+      "idle": {
+        "0.1": {
+          "armR": [
+            0.009,
+            0,
+            0.01
+          ],
+          "armL": [
+            0.009,
+            0,
+            -0.01
+          ],
+          "sword": [
+            0.515,
+            0,
+            -0.094
+          ],
+          "shield": [
+            0,
+            -0.288,
+            0
+          ],
+          "torso": [
+            0,
+            0,
+            0
+          ],
+          "legL": [
+            0,
+            0,
+            0
+          ],
+          "swLocal": [
+            0.311,
+            -0.325,
+            0.423
+          ],
+          "shLocal": [
+            -0.136,
+            -0.658,
+            0.221
+          ],
+          "swordMinY": 2.112
+        },
+        "0.5": {
+          "armR": [
+            0.03,
+            0,
+            -0.018
+          ],
+          "armL": [
+            0.03,
+            0,
+            0.018
+          ],
+          "sword": [
+            0.55,
+            0,
+            -0.08
+          ],
+          "shield": [
+            0,
+            -0.26,
+            0
+          ],
+          "torso": [
+            0,
+            0,
+            0
+          ],
+          "legL": [
+            0,
+            0,
+            0
+          ],
+          "swLocal": [
+            0.311,
+            -0.325,
+            0.423
+          ],
+          "shLocal": [
+            -0.136,
+            -0.648,
+            0.221
+          ],
+          "swordMinY": 2.065
+        },
+        "0.8": {
+          "armR": [
+            0.018,
+            0,
+            -0.016
+          ],
+          "armL": [
+            0.018,
+            0,
+            0.016
+          ],
+          "sword": [
+            0.529,
+            0,
+            -0.088
+          ],
+          "shield": [
+            0,
+            -0.276,
+            0
+          ],
+          "torso": [
+            0,
+            0,
+            0
+          ],
+          "legL": [
+            0,
+            0,
+            0
+          ],
+          "swLocal": [
+            0.311,
+            -0.325,
+            0.423
+          ],
+          "shLocal": [
+            -0.136,
+            -0.654,
+            0.221
+          ],
+          "swordMinY": 2.085
+        }
+      },
+      "walk": {
+        "0": {
+          "armR": [
+            0,
+            0,
+            0.09
+          ],
+          "armL": [
+            0,
+            0,
+            -0.01
+          ],
+          "sword": [
+            0.5,
+            0,
+            -0.1
+          ],
+          "shield": [
+            0,
+            -0.3,
+            0
+          ],
+          "torso": [
+            0.05,
+            0,
+            0.04
+          ],
+          "legL": [
+            0,
+            0,
+            0
+          ],
+          "swLocal": [
+            0.311,
+            -0.325,
+            0.423
+          ],
+          "shLocal": [
+            -0.136,
+            -0.663,
+            0.221
+          ],
+          "swordMinY": 2.17
+        },
+        "0.2": {
+          "armR": [
+            0.55,
+            0,
+            0.05
+          ],
+          "armL": [
+            -0.55,
+            0,
+            -0.05
+          ],
+          "sword": [
+            0.72,
+            0,
+            -0.1
+          ],
+          "shield": [
+            0,
+            -0.135,
+            0
+          ],
+          "torso": [
+            0.05,
+            0.08,
+            0
+          ],
+          "legL": [
+            0.65,
+            0,
+            0
+          ],
+          "swLocal": [
+            0.311,
+            -0.325,
+            0.423
+          ],
+          "shLocal": [
+            -0.136,
+            -0.663,
+            0.221
+          ],
+          "swordMinY": 1.562
+        },
+        "0.4": {
+          "armR": [
+            0,
+            0,
+            0.01
+          ],
+          "armL": [
+            0,
+            0,
+            -0.09
+          ],
+          "sword": [
+            0.5,
+            0,
+            -0.1
+          ],
+          "shield": [
+            0,
+            -0.3,
+            0
+          ],
+          "torso": [
+            0.05,
+            0,
+            -0.04
+          ],
+          "legL": [
+            0,
+            0,
+            0
+          ],
+          "swLocal": [
+            0.311,
+            -0.325,
+            0.423
+          ],
+          "shLocal": [
+            -0.136,
+            -0.663,
+            0.221
+          ],
+          "swordMinY": 2.127
+        },
+        "0.6": {
+          "armR": [
+            -0.55,
+            0,
+            0.05
+          ],
+          "armL": [
+            0.55,
+            0,
+            -0.05
+          ],
+          "sword": [
+            0.28,
+            0,
+            -0.1
+          ],
+          "shield": [
+            0,
+            -0.465,
+            0
+          ],
+          "torso": [
+            0.05,
+            -0.08,
+            0
+          ],
+          "legL": [
+            -0.65,
+            0,
+            0
+          ],
+          "swLocal": [
+            0.311,
+            -0.325,
+            0.423
+          ],
+          "shLocal": [
+            -0.136,
+            -0.663,
+            0.221
+          ],
+          "swordMinY": 2.647
+        }
+      },
+      "fight": {
+        "0.1": {
+          "armR": [
+            0.11,
+            0.024,
+            0.016
+          ],
+          "armL": [
+            0,
+            0,
+            0
+          ],
+          "sword": [
+            0.565,
+            0,
+            -0.1
+          ],
+          "shield": [
+            0,
+            -0.255,
+            0
+          ],
+          "torso": [
+            0,
+            0.037,
+            0
+          ],
+          "legL": [
+            0,
+            0,
+            0
+          ],
+          "swLocal": [
+            0.311,
+            -0.325,
+            0.423
+          ],
+          "shLocal": [
+            -0.136,
+            -0.663,
+            0.221
+          ],
+          "swordMinY": 1.998
+        },
+        "0.3": {
+          "armR": [
+            0.992,
+            0.22,
+            0.147
+          ],
+          "armL": [
+            0,
+            0,
+            0
+          ],
+          "sword": [
+            1.088,
+            0,
+            -0.1
+          ],
+          "shield": [
+            0,
+            0.104,
+            0
+          ],
+          "torso": [
+            0,
+            0.331,
+            0
+          ],
+          "legL": [
+            0,
+            0,
+            0
+          ],
+          "swLocal": [
+            0.311,
+            -0.325,
+            0.423
+          ],
+          "shLocal": [
+            -0.136,
+            -0.663,
+            0.221
+          ],
+          "swordMinY": 1.039
+        },
+        "0.5": {
+          "armR": [
+            -0.673,
+            -0.266,
+            -0.205
+          ],
+          "armL": [
+            0,
+            0,
+            0
+          ],
+          "sword": [
+            0.006,
+            0,
+            -0.1
+          ],
+          "shield": [
+            0,
+            -0.357,
+            0
+          ],
+          "torso": [
+            0,
+            -0.319,
+            0
+          ],
+          "legL": [
+            0,
+            0,
+            0
+          ],
+          "swLocal": [
+            0.311,
+            -0.325,
+            0.423
+          ],
+          "shLocal": [
+            -0.136,
+            -0.663,
+            0.221
+          ],
+          "swordMinY": 2.585
+        },
+        "0.7": {
+          "armR": [
+            -1.15,
+            -0.4,
+            0
+          ],
+          "armL": [
+            0,
+            0,
+            0
+          ],
+          "sword": [
+            -0.3,
+            0,
+            -0.1
+          ],
+          "shield": [
+            0,
+            -0.5,
+            0
+          ],
+          "torso": [
+            0,
+            -0.5,
+            0
+          ],
+          "legL": [
+            0,
+            0,
+            0
+          ],
+          "swLocal": [
+            0.311,
+            -0.325,
+            0.423
+          ],
+          "shLocal": [
+            -0.136,
+            -0.663,
+            0.221
+          ],
+          "swordMinY": 2.827
+        },
+        "0.9": {
+          "armR": [
+            -0.238,
+            -0.083,
+            0
+          ],
+          "armL": [
+            0,
+            0,
+            0
+          ],
+          "sword": [
+            0.335,
+            0,
+            -0.1
+          ],
+          "shield": [
+            0,
+            -0.341,
+            0
+          ],
+          "torso": [
+            0,
+            -0.103,
+            0
+          ],
+          "legL": [
+            0,
+            0,
+            0
+          ],
+          "swLocal": [
+            0.311,
+            -0.325,
+            0.423
+          ],
+          "shLocal": [
+            -0.136,
+            -0.663,
+            0.221
+          ],
+          "swordMinY": 2.414
+        }
+      },
+      "hurt": {
+        "0.1": {
+          "armR": [
+            -0.428,
+            0,
+            0.523
+          ],
+          "armL": [
+            -0.428,
+            0,
+            -0.523
+          ],
+          "sword": [
+            0.5,
+            0,
+            -0.1
+          ],
+          "shield": [
+            0,
+            -0.3,
+            0
+          ],
+          "torso": [
+            -0.333,
+            0,
+            0
+          ],
+          "legL": [
+            0.19,
+            0,
+            0
+          ],
+          "swLocal": [
+            0.311,
+            -0.325,
+            0.423
+          ],
+          "shLocal": [
+            -0.136,
+            -0.663,
+            0.221
+          ],
+          "swordMinY": 2.837
+        },
+        "0.4": {
+          "armR": [
+            0,
+            0,
+            0
+          ],
+          "armL": [
+            0,
+            0,
+            0
+          ],
+          "sword": [
+            0.5,
+            0,
+            -0.1
+          ],
+          "shield": [
+            0,
+            -0.3,
+            0
+          ],
+          "torso": [
+            0,
+            0,
+            0
+          ],
+          "legL": [
+            0,
+            0,
+            0
+          ],
+          "swLocal": [
+            0.311,
+            -0.325,
+            0.423
+          ],
+          "shLocal": [
+            -0.136,
+            -0.663,
+            0.221
+          ],
+          "swordMinY": 2.122
+        }
+      },
+      "die": {
+        "0.2": {
+          "armR": [
+            0.065,
+            0,
+            0.049
+          ],
+          "armL": [
+            0.065,
+            0,
+            -0.049
+          ],
+          "sword": [
+            0.5,
+            0,
+            -0.1
+          ],
+          "shield": [
+            0,
+            -0.3,
+            0
+          ],
+          "torso": [
+            0.065,
+            0,
+            0
+          ],
+          "legL": [
+            0.18,
+            0,
+            0
+          ],
+          "swLocal": [
+            0.311,
+            -0.325,
+            0.423
+          ],
+          "shLocal": [
+            -0.136,
+            -0.663,
+            0.221
+          ],
+          "swordMinY": 2.081
+        },
+        "0.6": {
+          "armR": [
+            0,
+            0,
+            0.224
+          ],
+          "armL": [
+            0,
+            0,
+            -0.224
+          ],
+          "sword": [
+            0.5,
+            0,
+            -0.1
+          ],
+          "shield": [
+            0,
+            -0.3,
+            0
+          ],
+          "torso": [
+            0,
+            0,
+            0
+          ],
+          "legL": [
+            0,
+            0,
+            0
+          ],
+          "swLocal": [
+            0.311,
+            -0.325,
+            0.423
+          ],
+          "shLocal": [
+            -0.136,
+            -0.663,
+            0.221
+          ],
+          "swordMinY": 2.401
+        },
+        "1.2": {
+          "armR": [
+            0,
+            0,
+            0.85
+          ],
+          "armL": [
+            0,
+            0,
+            -0.85
+          ],
+          "sword": [
+            0.5,
+            0,
+            -0.1
+          ],
+          "shield": [
+            0,
+            -0.3,
+            0
+          ],
+          "torso": [
+            0,
+            0,
+            0
+          ],
+          "legL": [
+            0,
+            0,
+            0
+          ],
+          "swLocal": [
+            0.311,
+            -0.325,
+            0.423
+          ],
+          "shLocal": [
+            -0.136,
+            -0.663,
+            0.221
+          ],
+          "swordMinY": 0.582
+        },
+        "2.5": {
+          "armR": [
+            0,
+            0,
+            0.85
+          ],
+          "armL": [
+            0,
+            0,
+            -0.85
+          ],
+          "sword": [
+            0.5,
+            0,
+            -0.1
+          ],
+          "shield": [
+            0,
+            -0.3,
+            0
+          ],
+          "torso": [
+            0,
+            0,
+            0
+          ],
+          "legL": [
+            0,
+            0,
+            0
+          ],
+          "swLocal": [
+            0.311,
+            -0.325,
+            0.423
+          ],
+          "shLocal": [
+            -0.136,
+            -0.663,
+            0.221
+          ],
+          "swordMinY": 0.524
+        }
+      }
+    },
+    "walk": {
+      "anim": "walk",
+      "state": "moving"
+    },
+    "fight": {
+      "anims": [
+        "idle",
+        "fight"
+      ],
+      "fightFrames": 152,
+      "foeHp": 4803,
+      "foeMax": 5000,
+      "foeId": 294
+    },
+    "team": {
+      "id": 300,
+      "antes": {
+        "Atlas": "#ffffff",
+        "TeamColor": "#2563eb",
+        "": "#deb841"
+      },
+      "depois": {
+        "Atlas": "#ffffff",
+        "TeamColor": "#d02020",
+        "": "#deb841"
+      }
+    },
+    "brann": {
+      "id": 301,
+      "cape": true,
+      "shield": false,
+      "swordParent": "Knight"
+    },
+    "inspector": {
+      "antigo": [
+        "Knight",
+        "Knight"
+      ],
+      "novo": [
+        "ArmR",
+        "ArmL"
+      ],
+      "nodes": 21
+    }
+  },
+  "errors": [],
+  "warnings": []
+}

@@ -16,7 +16,7 @@ import {
 import { FACTIONS, STARTING_RESOURCES } from './factions.js';
 import { CARRY, MINE_ENTER_TIME, MINE_SLOTS, RATE_BONUS, gatherMultiplier } from './economy.js';
 import {
-  TIER_NAMES, HQ_TIER_HP, HQ_TIER_ARMOR, HQ_TIER_GOLD_MULT, HQ_UPGRADE_COST, HQ_TIER_MODEL,
+  TIER_NAMES, HQ_TIER_HP, HQ_TIER_ARMOR, HQ_TIER_GOLD_MULT, HQ_UPGRADE_COST, HQ_TIER_MODEL, HQ_TIER_VIEW,
   getTierName, getHqUpgradeCost
 } from './tiers.js';
 import { RESOURCE_NAMES, getResourceName } from './names.js';
@@ -29,7 +29,7 @@ export {
   researchEffect, promotedType, describeLevel,
   FACTIONS, STARTING_RESOURCES,
   CARRY, MINE_ENTER_TIME, MINE_SLOTS, RATE_BONUS, gatherMultiplier,
-  TIER_NAMES, HQ_TIER_HP, HQ_TIER_ARMOR, HQ_TIER_GOLD_MULT, HQ_UPGRADE_COST, HQ_TIER_MODEL,
+  TIER_NAMES, HQ_TIER_HP, HQ_TIER_ARMOR, HQ_TIER_GOLD_MULT, HQ_UPGRADE_COST, HQ_TIER_MODEL, HQ_TIER_VIEW,
   getTierName, getHqUpgradeCost,
   RESOURCE_NAMES, getResourceName,
   ABILITIES, getAbility, abilityName, isDebugUrl

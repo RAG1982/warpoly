@@ -83,6 +83,13 @@ export const CAMPAIGN_PRESETS = freeze({
     options: freeze({ size: 208, grid: 208, continents: 1, continentBiome: 'steppe', continentCenter: [0.1, 0], continentDims: [0.44, 0.46], islands: 0, islets: 0, scatterIslets: 3, scatterRadius: [2.8, 4.5], scatterZone: 0.42, bays: 3, peninsulas: 2, roughness: 1.0, lava: false, rivers: 0 }),
     layout: freeze({ bases: [{ entities: [0], side: 'west' }, { entities: [0], sides: ['east', 'south'] }, { entities: [0], sides: ['east', 'north'] }], minSeparation: 62 }),
     verify: freeze({ landRange: [0.25, 0.8], minRivers: 0 })
+  }),
+  /** Palco 12 (M2-06): promontório de Cinzara apontando para 3 ilhas a oeste; o estreito entre a ponta e a ilha mais próxima é a zona de bloqueio. Slot 0 = Bastião, slot 1 = Skarn a leste. */
+  'camp-12-cabo-ferrugem': freeze({
+    id: 'camp-12-cabo-ferrugem', name: 'Cabo Ferrugem', uso: 'campanha, palco 12 (bastião e bloqueio)', tileset: 'deserto', naval: false,
+    options: freeze({ size: 224, grid: 224, continents: 1, continentBiome: 'arid', continentCenter: [0.2, 0], continentDims: [0.36, 0.44], islands: 0, islets: 0, bigIslands: 3, bigIslandAt: [[-0.3, -0.27], [-0.34, 0.04], [-0.28, 0.3]], bigIslandScale: 0.42, bigIslandBiomes: ['arid', 'rocky', 'arid'], gap: 12, bays: 3, peninsulas: 4, roughness: 1.1, lava: false, rivers: 0 }),
+    layout: freeze({ bases: [{ entities: [0], where: nearStrait }, { entities: [0], side: 'east' }], minSeparation: 70 }),
+    verify: freeze({ landRange: [0.2, 0.7], minRivers: 0 })
   })
 });
 
@@ -608,7 +615,70 @@ function postEstepe(ctx, extra) {
   S.forEach((s, i) => addGold(ctx, s, `expansion${i + 1}`, extra, { dMin: 20, dMax: 40, target: 28 }));
 }
 
-function postCabo() {}
+// ---- Palco 12: promontório e estreito ----
+const straitCache = new WeakMap();
+let lastStrait = null;
+/** Par mais próximo (ponta do continente, costa de uma ilha) do mapa gerado: o estreito do Cabo Ferrugem. */
+function straitOf(map) {
+  if (straitCache.has(map)) return straitCache.get(map);
+  const G = map.grid, cell = map.size / G, half = map.size / 2;
+  const at = (i, j) => (i < 0 || j < 0 || i >= G || j >= G ? 0 : map.land[j * G + i]);
+  const shore = (i, j) => at(i, j) && (!at(i + 1, j) || !at(i - 1, j) || !at(i, j + 1) || !at(i, j - 1));
+  const cont = [], isl = [];
+  for (let j = 0; j < G; j += 2) for (let i = 0; i < G; i += 2) {
+    if (!shore(i, j)) continue;
+    const o = map.owner[j * G + i];
+    (o === 0 ? cont : isl).push({ x: (i + 0.5) * cell - half, z: (j + 0.5) * cell - half });
+  }
+  let best = null, bd = Infinity;
+  for (const a of cont) for (const b of isl) { const d = hyp(a, b); if (d < bd) { bd = d; best = { c: a, i: b, d }; } }
+  const out = best ? { ...best, mid: { x: (best.c.x + best.i.x) / 2, z: (best.c.z + best.i.z) / 2 } } : null;
+  straitCache.set(map, out);
+  lastStrait = out;
+  return out;
+}
+/** Filtro de base do slot 0 do palco 12: o Bastião fica no promontório, a 20–46 u da ponta que forma o estreito. */
+function nearStrait(x, z, map) { const st = straitOf(map); return !!st && hyp({ x, z }, st.c) >= 20 && hyp({ x, z }, st.c) <= 46; }
+
+/** Palco 12: Bastião no promontório (slot 0), estreito entre a ponta e as ilhas, 3 docas inimigas no litoral, partida da frota e do chefe. */
+function postCabo(ctx, extra) {
+  const { m, s0, s1, half } = ctx;
+  const st = lastStrait;
+  if (!st) throw new Error('campanha: sem estreito');
+  extra.bastion = pt(s0);
+  const sw = need(ctx.oceanOk(st.mid.x, st.mid.z) ? st.mid : ctx.waterNear(st.mid.x, st.mid.z, 1, 10), 'o estreito');
+  extra.strait = ptw(sw);
+  if (st.d > 26) throw new Error(`campanha: estreito largo demais (${Math.round(st.d)} u)`);
+  // 3 docas orcs no litoral do continente voltado ao estreito: terra alcançável com água navegável diante
+  const docks = [];
+  for (let k = 0; k < 3; k++) {
+    const d = need(ctx.scan({
+      step: 1,
+      test: (x, z) => {
+        const ds = hyp({ x, z }, sw);
+        return ds >= 16 && ds <= 66 && hyp({ x, z }, s0) >= 24 && ctx.isShore(x, z) && ctx.reach(x, z) && ctx.free(x, z, 2)
+          && docks.every((q) => hyp({ x, z }, q) >= 20) && ctx.waterNear(x, z, 5, 14);
+      },
+      score: (x, z) => Math.abs(hyp({ x, z }, sw) - 40) + 0.05 * hyp({ x, z }, s1)
+    }), `a doca ${k + 1}`);
+    ctx.take(d, 9);
+    docks.push(d);
+    extra[`dock${k + 1}`] = pt(d);
+  }
+  // frota da Liga: dois pontos de mar aberto no oeste, ligados ao estreito pelo oceano
+  const f1 = openWater(ctx, { x: -half + 22, z: sw.z }, 0, 'a partida da frota');
+  extra.fleetStart = ptw(f1);
+  extra.fleetStart2 = ptw(openWater(ctx, f1, 10, 'a partida da frota 2', { minR: 8, maxR: 20, around: f1 }));
+  // chefe e ondas do ataque final: a leste, rumo ao Bastião
+  extra.bossStart = pt(ctx.take(nearDry(ctx, toward(s1, s0, 16), 'o chefe', { r: 4, freeR: 4 }), 8));
+  const L = hyp(s0, s1) || 1, px = -(s1.z - s0.z) / L, pz = (s1.x - s0.x) / L;
+  const w0 = toward(s0, s1, 72);
+  extra.waveStart1 = pt(ctx.take(nearDry(ctx, { x: w0.x + px * 24, z: w0.z + pz * 24 }, 'a onda 1', { r: 4, freeR: 4 }), 8));
+  extra.waveStart2 = pt(ctx.take(nearDry(ctx, { x: w0.x - px * 24, z: w0.z - pz * 24 }, 'a onda 2', { r: 4, freeR: 4 }), 8));
+  addGold(ctx, s0, 'expansion1', extra, { dMin: 20, dMax: 40, target: 28 });
+  addGold(ctx, s1, 'expansion2', extra, { dMin: 20, dMax: 40, target: 28 });
+  void m;
+}
 
 const POST = freeze({ 'camp-10-costa-ferrugem': (c, e) => postCosta(c, e), 'camp-11-estepe-do-vento': (c, e) => postEstepe(c, e), 'camp-12-cabo-ferrugem': (c, e) => postCabo(c, e), 'camp-01-baia-de-aurelan': postBaia, 'camp-02-pouso-do-encontro': postPouso, 'camp-03-pedra-mae': postPedra, 'camp-04-baixio-do-breu': postBaixio, 'camp-05-cerne-verde': postCerne, 'camp-06-a-geada': postGeada });
 

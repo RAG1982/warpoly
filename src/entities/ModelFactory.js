@@ -560,7 +560,8 @@ export class ModelFactory {
 
   // --- Human Units ---
   static createKnight() {
-    return this._glbOr('knight', () => this._placeholder('knight', 'unit'));
+    // M2-32: Espadachim v2 (Tripo) é o padrão; sem ele, o knight.glb antigo; sem ambos, o bloco reserva
+    return this._glbOr('knight_v2', () => this._glbOr('knight', () => this._placeholder('knight', 'unit')));
   }
 
   /** F4-01/NEW-33: cavaleiro montado (.glb do Blender; sem ele, o bloco reserva de `_placeholder`). */

@@ -13,7 +13,7 @@ import { setTeamColor } from '../entities/glbModels.js';
 
 const BASE = (import.meta.env && import.meta.env.BASE_URL) || '/';
 const MODELS = {
-  human: { hq: ['castle', 'Castle'], unit: ['knight', 'Knight'] },
+  human: { hq: ['castle', 'Castle'], unit: ['knight_v2', 'Knight'] },
   orc: { hq: ['great_hall', 'GreatHall'], unit: ['grunt', 'Grunt'] }
 };
 

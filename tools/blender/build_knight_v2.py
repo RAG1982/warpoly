@@ -53,6 +53,7 @@ OUT_PREVIAS = os.path.join(REPO, 'tools', 'ui-captures', 'knight-v2')
 
 # --- constantes do FBX (metros; x direita do mundo, y cima, z frente; antes do espelho em x) ---
 TOPO = 2.074           # altura final (topo da crista): igual ao knight.glb (visualScale.js usa 2,074 como referência)
+ESCALA = TOPO / 0.6923  # a crista do FBX vai a 0,6923 m (a ponta da espada reposada passa disso: não serve de referência)
 X0 = -0.006            # eixo de simetria (quadris)
 Z0 = -0.085            # centro dos pés em z
 OMBRO_X = 0.103        # |x - X0| do ombro (osso Arm): plano de corte do braço

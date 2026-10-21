@@ -223,6 +223,8 @@ export class ModelFactory {
     ud.drawnAxe = clone.getObjectByName('DrawnAxe') || ud.drawnAxe;
     ud.horn = clone.getObjectByName('Horn') || ud.horn;
     ud.mohawk = clone.getObjectByName('Mohawk') || ud.mohawk;
+    // M2-20: estandarte do Marechal Dorian (filho do Torso; balanço por seno no `UnitAnimator.applyBanner`)
+    ud.banner = clone.getObjectByName('Banner') || ud.banner;
     // F4-01: pernas do cavalo (cavalier) — balançam em fase alternada no `UnitAnimator`
     const horseLegs = HORSE_LEG_NAMES.map(n => clone.getObjectByName(n));
     if (horseLegs.every(Boolean)) ud.horseLegs = horseLegs;
@@ -629,6 +631,7 @@ export class ModelFactory {
       case 'peon': return this.createPeon();
       case 'grunt': return this.createGrunt();
       case 'hero_drogath': return this._glbOr('hero_drogath', () => this.createGrunt()); // Drogath Punho-de-Brasa: .glb próprio (Tripo); sem ele, o Talhador
+      case 'hero_dorian': return this._glbOr('hero_dorian', () => this.createCavalier()); // Marechal Dorian: .glb próprio (Tripo); sem ele, o Cavaleiro
       case 'axethrower': return this.createAxethrower();
       case 'ogre': return this.createOgre();
       case 'hero_skarn': return this._glbOr('hero_skarn', () => this.createOgre()); // Skarn: .glb próprio (Tripo + martelo); sem ele, o Ogro

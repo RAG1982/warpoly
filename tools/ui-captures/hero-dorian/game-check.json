@@ -1,0 +1,227 @@
+{
+  "generated": "2026-10-21T02:53:17.905Z",
+  "rows": [
+    {
+      "id": "C0",
+      "name": "hero_dorian.glb: nós, Banner>Torso, TeamColor em Horse/Torso/Banner, <= 20 draw calls",
+      "status": "PASS",
+      "detail": "draw calls=14 triângulos=23606 Horse=Atlas,TeamColor Torso=Atlas,TeamColor Banner=Atlas,TeamColor"
+    },
+    {
+      "id": "C1",
+      "name": "spawn hero_dorian; raiz Cavalier; animador cavalier",
+      "status": "PASS",
+      "detail": "id=283 escala=2.1060000000000003 nós={\"Cavalier\":\"\",\"Horse\":\"Cavalier\",\"HorseLegFL\":\"Cavalier\",\"HorseLegFR\":\"Cavalier\",\"HorseLegBL\":\"Cavalier\",\"HorseLegBR\":\"Cavalier\",\"Torso\":\"Cavalier\",\"Head\":\"Cavalier\",\"ArmL\":\"Cavalier\",\"ArmR\":\"Cavalier\",\"Sword\":\"Cavalier\",\"Banner\":\"Torso\"}"
+    },
+    {
+      "id": "C2",
+      "name": "rebind: userData e meshParts sem nulos (torso, head, braços, sword, banner, 4 patas)",
+      "status": "PASS",
+      "detail": "meshParts nulos=[] userData ausentes=[]"
+    },
+    {
+      "id": "C3",
+      "name": "idle/walk/fight/cast mexem as partes (patas em diagonal, Torso torce no golpe, braços sobem na cast, Banner balança)",
+      "status": "PASS",
+      "detail": "walk legFL faixa=0.70 diagonais=true; fight |torso.y| máx=0.62; cast armR.x=-2.30; Sword idle x=0.535; Banner idle |x|+|z|=0.039"
+    },
+    {
+      "id": "C4",
+      "name": "andar ao vivo: animador em walk",
+      "status": "PASS",
+      "detail": "{\"anim\":\"walk\"}"
+    },
+    {
+      "id": "C5",
+      "name": "golpe (fight), Estandarte de Aurelan, Escudos Cerrados e Carga do Marechal (cast) entram nas animações; a Carga fere o alvo",
+      "status": "PASS",
+      "detail": "golpe={\"fight\":147} estandarte={\"fight\":55,\"cast\":30,\"idle\":5} escudos={\"fight\":55,\"cast\":30,\"idle\":6} carga={\"cast\":30,\"idle\":6,\"fight\":73} PV alvo 6000 -> 5851 -> 5851 -> 5390"
+    },
+    {
+      "id": "C6",
+      "name": "TeamColor (vermelho, Horda) muda só o material TeamColor",
+      "status": "PASS",
+      "detail": "TeamColor #2563eb -> #d02020; Atlas #ffffff -> #ffffff"
+    },
+    {
+      "id": "C7",
+      "name": "inspetor: hero_dorian_glb carrega com os nós",
+      "status": "PASS",
+      "detail": "Cavalier,ArmL,ArmR,Head,Horse,Horse_1,Horse_2,HorseLegBL,HorseLegBR,HorseLegFL,HorseLegFR,Sword,Torso,Torso_1,Torso_2,Banner,Banner_1,Banner_2"
+    },
+    {
+      "id": "C8",
+      "name": "sem pageerror nem console.error",
+      "status": "PASS",
+      "detail": "erros=0"
+    }
+  ],
+  "files": [
+    "game-dorian-idle.png",
+    "game-dorian-no-jogo.png",
+    "game-dorian-andar.png",
+    "game-dorian-golpe.png",
+    "game-dorian-estandarte.png",
+    "game-dorian-escudos.png",
+    "game-dorian-carga.png",
+    "game-dorian-time-vermelho.png",
+    "inspetor-dorian-idle.png",
+    "inspetor-dorian-andar.png",
+    "inspetor-dorian-golpe.png"
+  ],
+  "data": {
+    "spawn": {
+      "id": 283,
+      "me": 0,
+      "rootName": "Cavalier",
+      "scale": 2.1060000000000003,
+      "anim": "cavalier",
+      "nodes": {
+        "Cavalier": "",
+        "Horse": "Cavalier",
+        "HorseLegFL": "Cavalier",
+        "HorseLegFR": "Cavalier",
+        "HorseLegBL": "Cavalier",
+        "HorseLegBR": "Cavalier",
+        "Torso": "Cavalier",
+        "Head": "Cavalier",
+        "ArmL": "Cavalier",
+        "ArmR": "Cavalier",
+        "Sword": "Cavalier",
+        "Banner": "Torso"
+      },
+      "nulos": [],
+      "semUd": []
+    },
+    "poses": {
+      "idle": {
+        "1": {
+          "armR": 3.673940397442059e-18,
+          "legFL": 0,
+          "legFR": 0,
+          "legBR": 0,
+          "torsoY": 0,
+          "swordX": 0.5,
+          "bannerX": 3.67394039744206e-18,
+          "bannerZ": -0.020234721893761052
+        },
+        "0.25": {
+          "armR": 0.021213203435596423,
+          "legFL": 0,
+          "legFR": 0,
+          "legBR": 0,
+          "torsoY": 0,
+          "swordX": 0.5353553390593274,
+          "bannerX": 0.021213203435596423,
+          "bannerZ": 0.018280264015780326
+        }
+      },
+      "walk": {
+        "0": {
+          "armR": 0,
+          "legFL": 0,
+          "legFR": 0,
+          "legBR": 0,
+          "torsoY": 0,
+          "swordX": 0.5,
+          "bannerX": 0,
+          "bannerZ": 0.033724536489601754
+        },
+        "0.2": {
+          "armR": 0.55,
+          "legFL": 0.7,
+          "legFR": -0.7,
+          "legBR": 0.7,
+          "torsoY": 0.08,
+          "swordX": 0.72,
+          "bannerX": 5.053215498074303e-17,
+          "bannerZ": -0.03372453648960175
+        },
+        "0.4": {
+          "armR": -4.2114255688196447e-16,
+          "legFL": -5.359996178497728e-16,
+          "legFR": 5.359996178497728e-16,
+          "legBR": -5.359996178497728e-16,
+          "torsoY": -6.125709918283119e-17,
+          "swordX": 0.49999999999999983,
+          "bannerX": 7.6571373978539e-17,
+          "bannerZ": 0.03372453648960177
+        }
+      },
+      "fight": {
+        "0.2": {
+          "armR": 0.0386225632653061,
+          "legFL": 0,
+          "legFR": 0,
+          "legBR": 0,
+          "torsoY": -0.10468286270339258,
+          "swordX": 0.5228874448979592,
+          "bannerX": 0.02938926261462368,
+          "bannerZ": -0.0217806078210193
+        },
+        "0.5": {
+          "armR": 1.1640306122448985,
+          "legFL": 0,
+          "legFR": 0,
+          "legBR": 0,
+          "torsoY": 0.18801020408163277,
+          "swordX": 1.1897959183673472,
+          "bannerX": -1.2246467991473533e-17,
+          "bannerZ": 0.033724536489601754
+        },
+        "0.8": {
+          "armR": -1.15,
+          "legFL": 0,
+          "legFR": 0,
+          "legBR": 0,
+          "torsoY": -0.6175570504584946,
+          "swordX": -0.30000000000000004,
+          "bannerX": -0.029389262614623643,
+          "bannerZ": -0.03278683847399239
+        }
+      },
+      "cast": {
+        "0.5": {
+          "armR": -2.3,
+          "legFL": 0,
+          "legFR": 0,
+          "legBR": 0,
+          "torsoY": 0,
+          "swordX": 0.49789566337490426,
+          "bannerX": -1.2246467991473533e-17,
+          "bannerZ": 0.033724536489601754
+        }
+      }
+    },
+    "live": {
+      "hit": {
+        "fight": 147
+      },
+      "hp": [
+        6000,
+        5851,
+        5851
+      ],
+      "foeId": 284
+    },
+    "casts": {
+      "banner": {
+        "fight": 55,
+        "cast": 30,
+        "idle": 5
+      },
+      "shield": {
+        "fight": 55,
+        "cast": 30,
+        "idle": 6
+      },
+      "charge": {
+        "cast": 30,
+        "idle": 6,
+        "fight": 73
+      },
+      "hpEnd": 5390
+    }
+  },
+  "errors": []
+}

@@ -106,6 +106,8 @@ export class UnitAnimator {
       drawnAxe: ud.drawnAxe,
       horn: ud.horn,
       mohawk: ud.mohawk,
+      // M2-20: estandarte do Marechal Dorian (`Banner`, filho do Torso)
+      banner: ud.banner || null,
       // F4-01: pernas do cavalo (só o modelo `cavalier`)
       horseLegFL: ud.horseLegs ? ud.horseLegs[0] : null,
       horseLegFR: ud.horseLegs ? ud.horseLegs[1] : null,
@@ -419,6 +421,9 @@ export class UnitAnimator {
     // F7-00b: tentáculos do Olho Vigia ondulam em todos os estados (pose reposta por quadro; ciclos inteiros por loop)
     if (this._tentacles.length) this.applyTentacles(time);
 
+    // M2-20: estandarte do Marechal Dorian balança em todos os estados (ciclos inteiros por loop)
+    if (parts.banner) this.applyBanner(time);
+
     // F7-06: carregando recurso (mochila nas costas) — tronco curvado, braços contidos, mochila balançando
     if (this.carrying && (uType === 'villager' || uType === 'peon') && (this.currentAnim === 'walk' || this.currentAnim === 'idle')) {
       if (parts.torso) parts.torso.rotation.x += CARRY_LEAN;
@@ -436,6 +441,22 @@ export class UnitAnimator {
       parts.weapon.rotation.x -= parts.armR.rotation.x;
       parts.weapon.rotation.z -= parts.armR.rotation.z;
     }
+  }
+
+  /**
+   * M2-20: estandarte do Marechal Dorian (`Banner`: haste + bandeira, filho do `Torso`; pivô na base da haste). Balanço simples por
+   * seno: inclina para a frente/trás (x) e para os lados (z) em torno da base, defasado; ciclos inteiros por loop (sem emenda). Ao
+   * andar, atacar ou lançar habilidade (Estandarte de Aurelan, Carga) a amplitude e a frequência dobram. O `Torso` já leva o nó junto.
+   */
+  applyBanner(time) {
+    const b = this.meshParts.banner;
+    const TAU = Math.PI * 2;
+    const phase = (time / this.getDuration()) % 1;
+    const fast = this.currentAnim === 'walk' || this.currentAnim === 'fight' || this.currentAnim === 'cast';
+    const k = fast ? 2 : 1;
+    const amp = fast ? 1.0 : 0.6;
+    b.rotation.x = Math.sin(TAU * phase * k) * 0.05 * amp;
+    b.rotation.z = Math.sin(TAU * phase * k + 1.3) * 0.035 * amp;
   }
 
   /**

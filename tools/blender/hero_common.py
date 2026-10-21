@@ -88,25 +88,38 @@ class Sopa:
         return np.mean([self.P[v] for v in self.fv[f]], axis=0)
 
     def cortar(self, ids, eixo, valor):
-        """Corta as faces `ids` pelo plano coordenada[eixo] = valor (0 = x, 1 = y). As duas metades herdam UV e normais
-        interpoladas e os vértices novos ficam exatamente no plano. Devolve {id: 'cima'|'baixo'} das faces resultantes."""
+        """Corta as faces `ids` pelo plano coordenada[eixo] = valor (0 = x, 1 = y, 2 = z) ou, se `eixo` for uma tupla
+        (normal, deslocamento), pelo plano oblíquo normal . p = deslocamento (`valor` ignorado; M2-20). As duas metades herdam UV
+        e normais interpoladas e os vértices novos ficam exatamente no plano. Devolve {id: 'cima'|'baixo'} das faces resultantes
+        ('cima' = lado de coordenada/produto escalar maior)."""
         y = valor
         lado = {}
         cache = {}      # aresta -> vértice novo
+        if isinstance(eixo, tuple):
+            nrm = np.asarray(eixo[0], float)
+            nrm = nrm / np.linalg.norm(nrm)
+            y = float(eixo[1])
+
+            def coord(p):
+                return float(nrm @ p)
+        else:
+            def coord(p):
+                return p[eixo]
 
         def vert_na_aresta(a, b):
             k = (min(a, b), max(a, b))
             if k not in cache:
                 pa, pb = self.P[k[0]], self.P[k[1]]
-                t = (y - pa[eixo]) / (pb[eixo] - pa[eixo])
+                t = (y - coord(pa)) / (coord(pb) - coord(pa))
                 p = pa + (pb - pa) * t
-                p[eixo] = y
+                if not isinstance(eixo, tuple):
+                    p[eixo] = y
                 cache[k] = self.add_vert(p, self.PS[k[0]] + (self.PS[k[1]] - self.PS[k[0]]) * t)
             return cache[k]
 
         for f in list(ids):
             v, uv, nn = self.fv[f], self.fuv[f], self.fn[f]
-            d = [self.P[i][eixo] - y for i in v]
+            d = [coord(self.P[i]) - y for i in v]
             if all(x >= -1e-9 for x in d) or all(x <= 1e-9 for x in d):
                 lado[f] = 'cima' if sum(d) >= 0 else 'baixo'
                 continue
@@ -537,8 +550,59 @@ def extrair_parte(sopa, ids, lacos, pixels=None):
             N.append([n, n, n])
             faces_tampa.append(len(F) - 1)
         tampas.append(dict(faces=faces_tampa, cor=cor, centro=c, n_arestas=len(laco), leque=usou_leque,
-                           imperfeitos=imperfeitos, borda=[e[2] for e in laco if e[2] is not None]))
+                           imperfeitos=imperfeitos, borda=[e[2] for e in laco if e[2] is not None],
+                           laco_verts=list(verts)))        # (M2-20) índices do laço em V (para prolongamentos)
     return dict(V=np.array(V), F=F, UV=UV, N=N, tampas=tampas, n_orig=len(ids))
+
+
+def prolongar_tampa(d, t, comprimento, encolher=0.85):
+    """(M2-20) Prolonga a abertura de corte `t` (dict de `extrair_parte`) da peça `d` como um tubo para DENTRO da peça vizinha:
+    anel novo = centro + (laço - centro) x `encolher` + normal da tampa x `comprimento`, paredes em quadriláteros (2 triângulos) e
+    nova tampa no topo. A tampa original fica (vira face interna escondida). Serve para esconder frestas quando a peça gira em
+    torno do corte (pescoço, ombro, quadril, cintura): o tubo continua dentro do sólido vizinho. Os rostos novos entram em
+    t['faces'] (recebem o UV liso da tampa) e em d['time'] (cor de time da tampa). Devolve o nº de faces criadas."""
+    verts = t['laco_verts']
+    V = list(d['V'])
+    c = np.asarray(t['centro'], float)
+    fi0 = t['faces'][0]
+    n = np.asarray(d['N'][fi0][0], float)
+    n = n / (np.linalg.norm(n) + 1e-12)
+    base = len(V)
+    m = len(verts)
+    for v in verts:
+        V.append(c + (np.asarray(V[v], float) - c) * encolher + n * comprimento)
+    novas = []
+
+    def nova_face(tri):
+        p0, p1, p2 = V[tri[0]], V[tri[1]], V[tri[2]]
+        nn = np.cross(p1 - p0, p2 - p0)
+        if np.linalg.norm(nn) < 1e-12:
+            return
+        nn = nn / np.linalg.norm(nn)
+        d['F'].append(list(tri))
+        d['UV'].append([np.zeros(2)] * 3)
+        d['N'].append([nn, nn, nn])
+        if 'time' in d:
+            d['time'].append(bool(t.get('time', False)))
+        novas.append(len(d['F']) - 1)
+    for k in range(m):
+        a, b = verts[k], verts[(k + 1) % m]
+        a2, b2 = base + k, base + (k + 1) % m
+        nova_face([b, a, a2])
+        nova_face([b, a2, b2])
+    ring = [V[base + k] for k in range(m)]
+    tris = triangular_laco(ring)
+    if tris is None:
+        V.append(c + n * comprimento)
+        ci = len(V) - 1
+        tris = [(k, (k + 1) % m, None) for k in range(m)]
+    else:
+        ci = None
+    for (i, j, k) in tris:
+        nova_face([base + k if k is not None else ci, base + j, base + i])
+    d['V'] = np.array(V)
+    t['faces'].extend(novas)
+    return len(novas)
 
 
 def triangular_laco(pts):
@@ -1017,7 +1081,9 @@ def renderizar_fonte(C, rig, f, sopa, objs):
 
 
 CORES_PECAS = {'Torso': '#9a9a9a', 'Head': '#e6c800', 'ArmL': '#22cc22', 'ArmR': '#ee2222', 'LegL': '#00ccee',
-               'LegR': '#dd00dd', 'Sword': '#4a5cff', 'Cape': '#ff8800', 'Weapon': '#4a5cff', 'Crystal': '#ff8800'}
+               'LegR': '#dd00dd', 'Sword': '#4a5cff', 'Cape': '#ff8800', 'Weapon': '#4a5cff', 'Crystal': '#ff8800',
+               'Horse': '#9a9a9a', 'HorseLegFL': '#ee4444', 'HorseLegFR': '#44ee44', 'HorseLegBL': '#4444ee', 'HorseLegBR': '#eeee44',
+               'Banner': '#ff8800'}
 
 
 def colorir_pecas(objs):
@@ -1187,12 +1253,14 @@ def segmentar(ctx, avaliar=False):
         H.avaliar_ilhas(sopa, destino, S)
     # 1. cortes planos (pernas, ombros...) só nas faces das ilhas 'corpo'
     ids0 = [f for f in range(len(sopa.fv)) if sopa.vivo[f] and destino[sopa.comp[f]] == 'corpo']
-    for eixo, valor, ymin in H.cortes(S):
+    for corte in H.cortes(S):
+        eixo, valor, ymin = corte[:3]
+        filtro = corte[3] if len(corte) > 3 else None        # (M2-20) filtro opcional: callable(centroide da face) -> bool
         alvo = [f for f in range(len(sopa.fv)) if sopa.vivo[f] and destino[sopa.comp[f]] == 'corpo'
-                and (ymin is None or sopa.centro(f)[1] >= ymin)]
+                and (ymin is None or sopa.centro(f)[1] >= ymin) and (filtro is None or filtro(sopa.centro(f)))]
         sopa.cortar(alvo, eixo, valor)
     ids = [f for f in range(len(sopa.fv)) if sopa.vivo[f] and destino[sopa.comp[f]] == 'corpo']
-    log('corpo: %d faces (%d antes dos cortes planos %s)' % (len(ids), len(ids0), [(e, round(v, 3)) for e, v, _ in H.cortes(S)]))
+    log('corpo: %d faces (%d antes dos cortes planos %s)' % (len(ids), len(ids0), [(c[0] if not isinstance(c[0], tuple) else 'obl', round(float(c[1]), 3)) for c in H.cortes(S)]))
     # 2. rótulos
     rot = rotular_por_pesos(ctx, ids)
     partes = {p: [] for p in H.PECAS}

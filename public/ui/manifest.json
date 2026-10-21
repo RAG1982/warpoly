@@ -128,6 +128,7 @@
    "unit_grunt",
    "unit_gryphon_rider",
    "unit_hero_brann",
+   "unit_hero_dorian",
    "unit_hero_drogath",
    "unit_hero_oren",
    "unit_hero_vozgul",
@@ -153,10 +154,10 @@
   ]
  },
  "bytes": {
-  "total": 2860120,
+  "total": 2883886,
   "art": 281206,
-  "icons": 2285946,
-  "portraits": 292968
+  "icons": 2302376,
+  "portraits": 300304
  },
  "aliases": {
   "ability_debug_bolt": "ability_hero_arcane_bolt",
@@ -209,6 +210,7 @@
    "grunt",
    "gryphon_rider",
    "hero_brann",
+   "hero_dorian",
    "hero_drogath",
    "hero_oren",
    "hero_vozgul",

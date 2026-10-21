@@ -437,6 +437,19 @@ const MODEL_CATALOG = [
     notes: 'Rig do tipo ogre (hierarquia do ogre.glb): o golpe levanta e esmaga como o Ogro; o Weapon repousa a -45° em x, cabo em pé, e a cabeça retangular do martelo tem as faces de impacto para ±Z. O corpo e o martelo vêm de dois FBX do Tripo (o martelo, sem rig, foi decimado e encaixado na mão direita reposada). Couro dos tassets em TeamColor; a brasa das lanternas é pintada na textura. 10 draw calls, ~25,7 mil triângulos, atlas 512².'
   },
   {
+    id: 'hero_dorian_glb',
+    name: 'Marechal Dorian Vasques (herói, Tripo)',
+    category: 'units',
+    faction: 'human',
+    type: 'cavalier',
+    icon: '🏇',
+    glb: 'hero_dorian',
+    sourceFile: 'tools/blender/build_hero_dorian.py',
+    create: createGlb('hero_dorian'),
+    description: 'Herói humano Dorian Vasques: modelo do Tripo (sem rig) segmentado por geometria no Blender (public/models/hero_dorian.glb). Cavalo de guerra com barda azul, cavaleiro de placas com elmo de pluma, capa longa, espada na cintura e estandarte de Aurelan nas costas. Nós Cavalier, Horse, HorseLegFL/FR/BL/BR, Torso (com a capa e o filho Banner), Head, ArmL, ArmR e Sword.',
+    notes: 'Rig do tipo cavalier (hierarquia do cavalier.glb): o animador balança as 4 patas e usa o ramo do knight para tronco, braços e espada. O nó novo Banner (haste + bandeira, filho do Torso, pivô na base da haste) balança por seno em UnitAnimator.applyBanner. Barda, capa e pano do estandarte usam TeamColor. 14 draw calls, ~23,6 mil triângulos, atlas 512².'
+  },
+  {
     id: 'axethrower_glb',
     name: 'Lanceiro-Machado Troll (Blender)',
     category: 'units',

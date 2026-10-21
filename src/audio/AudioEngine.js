@@ -248,8 +248,8 @@ export class AudioEngine {
   }
 
   /** Começa uma partida: música da facção (paz) e ambiência do tileset. */
-  beginMatch({ faction, tilesetId }) {
-    this.match = { faction, tilesetId };
+  beginMatch({ faction, tilesetId, lava = false }) {
+    this.match = lava ? { faction, tilesetId, lava: true } : { faction, tilesetId };
     this.director.reset(this.now());
     this._applyMusic();
     this._applyAmbience(true);
@@ -335,7 +335,7 @@ export class AudioEngine {
       return;
     }
     const night = nightFactor(this.sceneProbe ? this.sceneProbe() : {});
-    this.ambience.setMix(ambienceMix(this.match.tilesetId, { night }), force ? 2 : 4);
+    this.ambience.setMix(ambienceMix(this.match.tilesetId, { night, lava: this.match.lava }), force ? 2 : 4);
   }
 
   /** Um passo do relógio interno (temporizador a cada ~150 ms; testes chamam à mão). */

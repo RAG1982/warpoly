@@ -20,6 +20,9 @@ import { createVfxEvents } from '../render/VfxEvents.js';
 import { RuinsManager } from '../render/RuinsManager.js';
 import { VfxSystem } from '../render/vfx/VfxSystem.js';
 import { selectVfxLevel } from '../render/vfx/vfxConfig.js';
+import { AmbientFx } from '../render/vfx/ambientFx.js';
+import { buildLavaInfo } from '../data/lavaRender.js';
+import { gridOfBiome } from '../data/maps/biome.js';
 import { getTextureQuality } from '../models/textureQuality.js';
 import { QualitySettings } from './QualitySettings.js';
 import { HazardView } from '../render/HazardView.js';
@@ -140,12 +143,24 @@ export class MatchSession {
     if (!this.gameManager.headless) {
       // F7-08: nível de áudio do preset atual (`?audio=` força; automação fica muda) e tileset do mapa (ambiência)
       sound.setLevel?.(detectAudioLevel(QualitySettings.current, getTextureQuality()));
-      this._disposeAudioEvents = createAudioEvents(this.gameManager, sound, { tilesetId: this.terrainView.tileset && this.terrainView.tileset.id });
+      this._disposeAudioEvents = createAudioEvents(this.gameManager, sound, { tilesetId: this.terrainView.tileset && this.terrainView.tileset.id, lava: !!(this.terrain.mapDef && this.terrain.mapDef.lavaGrid) });
       // F7-05: partículas GPU em pool (nível por preset; `?vfx=off|low|med|high` força; `?texq=low` reduz).
       let vfxParam = null;
       try { vfxParam = new URLSearchParams(window.location.search).get('vfx'); } catch { /* sem window */ }
       const vfxLevel = selectVfxLevel(QualitySettings.current, getTextureQuality(), vfxParam);
       this.vfx = new VfxSystem(scene, vfxLevel, this.gameManager);
+      // M2-18: efeitos ambientais por bioma (poeira, cinzas/brasas, vapor de fumarola, nevasca, lava) só em vfx med/high; `?vfx=off` e `low` não os criam.
+      this.ambientFx = null;
+      if (vfxLevel === 'med' || vfxLevel === 'high') {
+        const mapDef = this.terrain.mapDef || {};
+        let biomes = new Set();
+        try { if (mapDef.biomeGrid) biomes = new Set(gridOfBiome(mapDef.biomeGrid)); } catch { /* grade inválida: sem efeitos de bioma */ }
+        const fx = new AmbientFx(this.vfx.layer, {
+          terrain: this.terrain, regions: this.decorations.regions, lava: buildLavaInfo(mapDef),
+          fumaroles: (this.decorations.propPlan && this.decorations.propPlan.fumarole) || [], biomes
+        });
+        if (fx.active) this.ambientFx = fx;
+      }
       this._disposeVfxEvents = createVfxEvents(this.gameManager, this.particleSystem, this.vfx);
       this.gameManager.hazardView = new HazardView(scene, this.gameManager); // F4-04b
       this.projectileViews = new ProjectileViews(this.gameManager, scene); // F2-08: malhas dos projéteis
@@ -236,6 +251,7 @@ export class MatchSession {
       this.sound?.setMatchTime?.(gm.gameTime); // música de paz ganha urgência com os minutos (só apresentação)
       this.projectileViews?.update(alpha);
       this.particleSystem.update(delta);
+      this.ambientFx?.update(delta, this.sceneManager.cameraTarget);
       this.vfx?.update(delta);
       this.ruins?.update(delta);
     } else {
@@ -316,6 +332,7 @@ export class MatchSession {
     this.particleSystem.dispose();
     this.vfx?.dispose();
     this.vfx = null;
+    this.ambientFx = null;
 
     // 3. Tudo o que a partida pôs na cena: remove e descarta o que não é compartilhado.
     const shared = collectSharedResources(ModelFactory);

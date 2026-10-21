@@ -20,10 +20,10 @@ import { listenerRanges, isAudible, mulMat4 } from './attenuation.js';
 /**
  * @param {import('../core/GameManager.js').GameManager} gm
  * @param {*} sound  `SoundManager` (ou falso nos testes)
- * @param {{tilesetId?:string|null}} [opts]  tileset do mapa (ambiência)
+ * @param {{tilesetId?:string|null, lava?:boolean}} [opts]  tileset do mapa (ambiência) e se o mapa tem lava (M2-18)
  * @returns {() => void} `dispose` — remove todos os ouvintes e 
  */
-export function createAudioEvents(gm, sound, { tilesetId = null } = {}) {
+export function createAudioEvents(gm, sound, { tilesetId = null, lava = false } = {}) {
   const offs = [];
   const on = (type, fn) => offs.push(gm.events.on(type, fn, true)); // true = apresentação (F2-06)
   const isLocal = (ownerId) => ownerId === gm.localPlayerId;
@@ -99,7 +99,7 @@ export function createAudioEvents(gm, sound, { tilesetId = null } = {}) {
 
   // --- partida: música da facção do jogador local + ambiência do tileset
   const lp = gm.localPlayer;
-  sound.beginMatch({ faction: lp && lp.factionId ? lp.factionId : 'human', tilesetId });
+  sound.beginMatch({ faction: lp && lp.factionId ? lp.factionId : 'human', tilesetId, ...(lava ? { lava: true } : {}) });
   sound.setSceneProbe(() => {
     const sm = gm.sceneManager;
     return sm ? { timeOfDay: sm.timeOfDay, dayNight: sm.dayNight } : {};

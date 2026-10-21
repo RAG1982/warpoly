@@ -702,11 +702,12 @@ export class UnitAnimator {
     if (uType === 'knight') {
       if (parts.shieldGroup) {
         parts.shieldGroup.rotation.y = -0.3 + armSwing * 0.3;
-        parts.shieldGroup.position.y += verticalBounce;
+        // M2-32: escudo e espada filhos dos braços (knight_v2) já sobem com o braço: sem o salto extra
+        if (parts.shieldGroup.parent !== parts.armL) parts.shieldGroup.position.y += verticalBounce;
       }
       if (parts.sword) {
         parts.sword.rotation.x = 0.5 + armSwing * 0.4;
-        parts.sword.position.y += verticalBounce;
+        if (parts.sword.parent !== parts.armR) parts.sword.position.y += verticalBounce;
       }
     } else if (uType === 'archer') {
       if (parts.bow) {

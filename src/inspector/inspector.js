@@ -86,6 +86,19 @@ const MODEL_CATALOG = [
     notes: 'Rig plana (a do antigo KnightModel.js, removido na F7-00b; o UnitAnimator anima Sword/braços com rotações independentes). Sem escudo (a referência não tem). 10 draw calls, ~4,2 mil triângulos, 213 KB. Rosto só na face frontal (+Z).'
   },
   {
+    id: 'knight_v2_glb',
+    name: 'Espadachim v2 (Tripo)',
+    category: 'units',
+    faction: 'human',
+    type: 'knight',
+    icon: '🛡️',
+    glb: 'knight_v2',
+    sourceFile: 'tools/blender/build_knight_v2.py',
+    create: createGlb('knight_v2'),
+    description: 'Espadachim humano v2: infantaria do Tripo finalizada no Blender (public/models/knight_v2.glb). Armadura de placas cinza e dourada, elmo com crista, tabardo azul, espada curta na mão direita e escudo azul com leão na esquerda. Tabardo, crista e mangas em TeamColor; o escudo mantém o azul heráldico. Nós Knight, Torso, Head, ArmL, ArmR, LegL, LegR, Sword e ShieldGroup.',
+    notes: 'Tipo knight: Sword é FILHA de ArmR e ShieldGroup FILHO de ArmL (acompanham o balanço do braço; o animador escreve a rotação de repouso x 0,5 / z −0,1 na espada e y −0,3 no escudo). Braços reposados pelo rig (A-pose, espada à frente, escudo no antebraço). 14 draw calls, ~21,4 mil triângulos, atlas 512². É o padrão do jogo; o Espadachim (Blender) antigo continua como fallback. O leão do escudo/tabardo está registrado para a auditoria de IP (M6-02).'
+  },
+  {
     id: 'hero_brann_glb',
     name: 'Capitão Brann (herói, Tripo)',
     category: 'units',

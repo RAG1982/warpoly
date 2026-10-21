@@ -582,6 +582,14 @@ export class ModelFactory {
   /** F3-10 / MUNDO-TERRENO-MAPAS §5: critter decorativo (`sheep` | `boar` | `pig`). */
   static createCritter(species = 'sheep') {
     const norm = species === 'pig' ? 'boar' : (species || 'sheep');
+    // M2-13: javali com `.glb` (lazy, carregado só nos mapas com javalis); sem ele (rede, `?glb=0`) cai no procedural.
+    if (norm === 'boar' && glbEnabled) {
+      const glb = this.createGlbModel('critter_boar');
+      if (glb) {
+        glb.userData.glbCritter = true;
+        return glb;
+      }
+    }
     return this.getOrCreateModel(`critter_${norm}`, () => createCritter(norm));
   }
 

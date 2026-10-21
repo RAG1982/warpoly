@@ -16,6 +16,7 @@ import { ensureGlbLoaded, ensureGlbKeys } from './entities/glbModels.js';
 import { getMap } from './data/maps/index.js';
 import { lazyTreeKeysOfMap } from './data/treeSpecies.js';
 import { propKeysOfMap } from './data/decorPlan.js';
+import { critterGlbKeysOfMap } from './data/critters.js';
 import { SaveLoadDialog } from './ui/screens/SaveLoadDialog.js';
 import { SaveStore, AUTOSAVE_SLOT } from './core/SaveStore.js';
 import { captureSave, applySaveCommands, fastForward, finishFastForward } from './sim/SaveGame.js';
@@ -463,7 +464,7 @@ class GameApp {
     // árvores `lazy` (copa larga, palmeira, acácia) e props .glb de bioma (`biomeGrid`) que o mapa usa — só esses, fora do boot.
     try {
       const mapDef = getMap(config.mapId);
-      await ensureGlbKeys([...lazyTreeKeysOfMap(mapDef), ...propKeysOfMap(mapDef)]);
+      await ensureGlbKeys([...lazyTreeKeysOfMap(mapDef), ...propKeysOfMap(mapDef), ...critterGlbKeysOfMap(mapDef)]);
     } catch (err) {
       console.warn('[main.js] erro ao carregar as árvores/props do mapa:', err); // árvore reserva; o prop só não aparece
     }

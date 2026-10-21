@@ -46,6 +46,26 @@ function createMesh(kind) {
   return m;
 }
 
+// M2-31: a simulação lança a flecha em (unidade + 1,68 em y); com o arqueiro v2 a flecha deve SAIR DO ARCO (que fica no lado -x,
+// na altura do encaixe). Só visual: acha o atirador pela posição de origem (a simulação não guarda quem atirou), mede o ponto do
+// arco (flecha encaixada, à frente do punho) no mundo e a malha parte dali, voltando à trajetória da simulação em ARROW_BLEND do voo.
+const ARROW_BLEND = 0.25;
+const BOW_MUZZLE = new THREE.Vector3(0.05, 0, 0.3); // no sistema do nó Bow: ao lado do arco (OFFSET_FLECHA) e à frente do encaixe
+const _tmp = new THREE.Vector3();
+function bowMuzzleOffset(gm, p) {
+  if (p.kind !== 'arrow' || !gm.entityViews || !gm.entityViews.views) return null;
+  for (const [e, v] of gm.entityViews.views) {
+    const mp = e.mesh && e.mesh.position;
+    if (!mp || mp.x !== p.start.x || mp.z !== p.start.z || !v.animator) continue;
+    const parts = v.animator.meshParts;
+    if (!parts || !parts.bow || !parts.foreArmL) return null; // arqueiro antigo: comportamento de sempre
+    parts.bow.updateWorldMatrix(true, false);
+    _tmp.copy(BOW_MUZZLE).applyMatrix4(parts.bow.matrixWorld);
+    return new THREE.Vector3(_tmp.x - p.start.x, _tmp.y - p.start.y, _tmp.z - p.start.z);
+  }
+  return null;
+}
+
 export class ProjectileViews {
   /**
    * @param {import('../core/GameManager.js').GameManager} gm
@@ -71,7 +91,7 @@ export class ProjectileViews {
         const mesh = createMesh(p.kind);
         mesh.position.set(p.pos.x, p.pos.y, p.pos.z);
         this.scene.add(mesh);
-        v = { mesh, seen: frame };
+        v = { mesh, seen: frame, off: bowMuzzleOffset(this.gm, p) };
         this.views.set(p, v);
       }
       v.seen = frame;
@@ -81,6 +101,10 @@ export class ProjectileViews {
         p.prev.y + (p.pos.y - p.prev.y) * alpha,
         p.prev.z + (p.pos.z - p.prev.z) * alpha
       );
+      if (v.off) {
+        const k = Math.max(0, 1 - p.progress / ARROW_BLEND);
+        if (k > 0) m.position.addScaledVector(v.off, k);
+      }
       if (p.kind === 'boulder') {
         m.rotation.x = p.spin; // gira em voo
       } else {

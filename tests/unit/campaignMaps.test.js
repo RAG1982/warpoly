@@ -16,8 +16,8 @@ import en from '../../src/i18n/en.json';
  * Os palcos 2 a 6 servem às duas campanhas (slot 0 = lado da Liga de Aurelan, slot 1 = lado dos Clãs do Cinzal). A Geada tem 4 vagas
  * (jogador, Lanças Quebradas, Sal Cinzento e o aliado Brumar).
  */
-const IDS = ['camp-01-baia-de-aurelan', 'camp-02-pouso-do-encontro', 'camp-03-pedra-mae', 'camp-04-baixio-do-breu', 'camp-05-cerne-verde', 'camp-06-a-geada'];
-const SLOTS = { 'camp-06-a-geada': 4 }; // as demais têm 2 vagas
+const IDS = ['camp-01-baia-de-aurelan', 'camp-02-pouso-do-encontro', 'camp-03-pedra-mae', 'camp-04-baixio-do-breu', 'camp-05-cerne-verde', 'camp-06-a-geada', 'camp-10-costa-ferrugem', 'camp-11-estepe-do-vento', 'camp-12-cabo-ferrugem'];
+const SLOTS = { 'camp-06-a-geada': 4, 'camp-11-estepe-do-vento': 3 }; // as demais têm 2 vagas
 
 // M2-28: os mapas de campanha são carregados sob demanda (chunks); os testes os carregam antes de usar `getMap`.
 beforeAll(async () => { await loadAllCampaignMaps(); });
@@ -27,9 +27,12 @@ const MIN_ANCHORS = {
   'camp-03-pedra-mae': ['playerStart', 'enemyStart', 'colonyHall', 'colonyGold1', 'colonyGold2', 'bridgeheadGold', 'beach1', 'beach2', 'beach3', 'seaLanding1', 'seaLanding2', 'seaLanding3', 'fort1', 'fort2', 'fort3', 'bridgehead', 'bridgeheadSea', 'landingZone'],
   'camp-04-baixio-do-breu': ['playerStart', 'enemyStart', 'well1', 'well2', 'well3', 'well4', 'shipyard1', 'shipyard1Water', 'shipyard2', 'shipyard2Water', 'wreck1', 'wreck2', 'wreck3', 'fleetStart1', 'fleetStart2', 'fleetMid'],
   'camp-05-cerne-verde': ['playerStart', 'enemyStart', 'goldMine1', 'sacredGrove', 'gryphonNest', 'clearing1', 'clearing2', 'clearing3', 'lumberHall1', 'lumberHall2', 'orenStart', 'ford1', 'landingZone'],
-  'camp-06-a-geada': ['playerStart', 'enemyStart', 'enemy1Start', 'enemy2Start', 'allyStart', 'lighthouse', 'enemy1Fort', 'allyFort', 'allyHeroStart', 'convoyStart', 'convoyEnd', 'expansion1', 'expansion2', 'expansion3', 'expansion4', 'lake1', 'lake2']
+  'camp-06-a-geada': ['playerStart', 'enemyStart', 'enemy1Start', 'enemy2Start', 'allyStart', 'lighthouse', 'enemy1Fort', 'allyFort', 'allyHeroStart', 'convoyStart', 'convoyEnd', 'expansion1', 'expansion2', 'expansion3', 'expansion4', 'lake1', 'lake2'],
+  'camp-10-costa-ferrugem': ['playerStart', 'enemyStart', 'landingZone', 'colonyMark', 'unloadSea', 'bargeStart1', 'bargeStart2', 'coastTower1', 'coastTower2', 'coastTower3', 'garrison', 'oldWell', 'expansion1', 'expansion2'],
+  'camp-11-estepe-do-vento': ['playerStart', 'enemyStart', 'colonyMark', 'skarnStart', 'hurganStart', 'landingZone', 'reinforceSea', 'convoyStart', 'convoyEnd', 'raid1', 'raid2', 'raid3', 'dissidentClan', 'expansion1', 'expansion2', 'expansion3'],
+  'camp-12-cabo-ferrugem': ['playerStart', 'enemyStart', 'bastion', 'strait', 'dock1', 'dock2', 'dock3', 'fleetStart', 'fleetStart2', 'bossStart', 'waveStart1', 'waveStart2', 'expansion1', 'expansion2']
 };
-const WATER = new Set(['shipHorizon', 'pier1Water', 'pier2Water', 'seaLanding1', 'seaLanding2', 'seaLanding3', 'bridgeheadSea', 'well1', 'well2', 'well3', 'well4', 'shipyard1Water', 'shipyard2Water', 'wreck1', 'wreck2', 'wreck3', 'fleetStart1', 'fleetStart2', 'fleetMid']);
+const WATER = new Set(['shipHorizon', 'pier1Water', 'pier2Water', 'seaLanding1', 'seaLanding2', 'seaLanding3', 'bridgeheadSea', 'well1', 'well2', 'well3', 'well4', 'shipyard1Water', 'shipyard2Water', 'wreck1', 'wreck2', 'wreck3', 'fleetStart1', 'fleetStart2', 'fleetMid', 'unloadSea', 'bargeStart1', 'bargeStart2', 'reinforceSea', 'strait', 'fleetStart']);
 const isLake = (name) => /^lake\d$/.test(name); // lago congelado (A Geada): água rasa interior, fora do oceano navegável
 const hyp = (a, b) => Math.hypot(a.x - b.x, a.z - b.z);
 
@@ -43,7 +46,7 @@ function oceanSeen(m, sea) {
 }
 
 describe('M2-03 · registro e formato', () => {
-  it('a receita conhece os seis palcos e traz nome pt-BR e en', () => {
+  it('a receita conhece os nove palcos e traz nome pt-BR e en', () => {
     expect(CAMPAIGN_IDS).toEqual(IDS);
     for (const id of IDS) {
       expect(CAMPAIGN_NAMES[id].pt.length).toBeGreaterThan(3);
@@ -53,7 +56,7 @@ describe('M2-03 · registro e formato', () => {
   });
 
   for (const id of IDS) {
-    it(`${id}: registrado como hidden (fora da Escaramuça), painted com biomeGrid, tileset existente, tamanho 96–224, 2 vagas (4 na Geada)`, () => {
+    it(`${id}: registrado como hidden (fora da Escaramuça), painted com biomeGrid, tileset existente, tamanho 96–224, 2 vagas (3 no 11, 4 na Geada)`, () => {
       const m = getMap(id);
       expect(m, id).toBeTruthy();
       expect(m.id).toBe(id);
@@ -304,5 +307,102 @@ describe('M2-04 · A Geada (gelo, lagos congelados, Farol Boreal, 4 vagas)', () 
     expect(hyp(m.anchors.convoyStart, m.startSlots[3])).toBeLessThan(hyp(m.anchors.convoyStart, m.startSlots[0]));
     expect(hyp(m.anchors.convoyEnd, m.startSlots[0])).toBeLessThan(hyp(m.anchors.convoyEnd, m.startSlots[3]));
     expect(m.resources.filter((r) => r.type === 'gold')).toHaveLength(8); // 1 padrão + 1 de expansão por base
+  });
+});
+
+// ---------------------------------------------------------------------------------------------------------------------------
+// M2-06: palcos 10 (Costa Ferrugem), 11 (Estepe do Vento) e 12 (Cabo Ferrugem), o continente orc visto pela Aliança
+// ---------------------------------------------------------------------------------------------------------------------------
+describe('M2-06 · Costa Ferrugem (desembarque)', () => {
+  const id = 'camp-10-costa-ferrugem';
+  it('continente árido com mar aberto a oeste; praia de desembarque com água navegável diante e Marco no sítio do slot 0', () => {
+    const m = getMap(id);
+    expect(m.tileset).toBe('deserto');
+    const sea = buildPathfinder(m, 'naval');
+    const ocean = oceanSeen(m, sea);
+    const a = m.anchors;
+    expect(a.colonyMark).toEqual({ x: m.startSlots[0].x, z: m.startSlots[0].z });
+    expect(hyp(a.landingZone, a.unloadSea)).toBeLessThanOrEqual(16);
+    for (const k of ['unloadSea', 'bargeStart1', 'bargeStart2']) expect(isReached(sea, ocean, a[k].x, a[k].z), k).toBe(true);
+    expect(hyp(a.landingZone, m.startSlots[0])).toBeGreaterThanOrEqual(30);
+    expect(hyp(a.landingZone, m.startSlots[0])).toBeLessThan(hyp(a.landingZone, m.startSlots[1]));
+    expect(hyp(a.bargeStart1, a.bargeStart2)).toBeLessThanOrEqual(26); // as duas Barcaças saem juntas
+  });
+  it('3 torres costeiras em volta da praia (11–26 u, afastadas entre si) e guarnição entre a praia e o interior', () => {
+    const a = getMap(id).anchors;
+    const t = [1, 2, 3].map((i) => a[`coastTower${i}`]);
+    for (const p of t) { expect(hyp(p, a.landingZone)).toBeGreaterThanOrEqual(11); expect(hyp(p, a.landingZone)).toBeLessThanOrEqual(26); }
+    for (let i = 0; i < 3; i++) for (let j = i + 1; j < 3; j++) expect(hyp(t[i], t[j])).toBeGreaterThanOrEqual(11);
+    expect(hyp(a.garrison, a.landingZone)).toBeGreaterThan(15);
+    expect(hyp(a.oldWell, a.landingZone)).toBeGreaterThanOrEqual(50);
+  });
+});
+
+describe('M2-06 · Estepe do Vento (colônia sob cerco)', () => {
+  const id = 'camp-11-estepe-do-vento';
+  it('interior de savana e estepe, 3 vagas ligadas por terra e Marco no slot 0', () => {
+    const m = getMap(id);
+    expect(m.tileset).toBe('savana');
+    const dry = countCells(m, (x, z) => getHeightForMap(m, x, z) > 1);
+    const sav = countCells(m, (x, z) => getHeightForMap(m, x, z) > 1 && [3, 4, 5].includes(biomeAtLocal(m, x, z)));
+    expect(sav / dry).toBeGreaterThan(0.7);
+    const land = buildPathfinder(m, 'land');
+    const seen = floodFill(land, m.startSlots[0].x, m.startSlots[0].z);
+    for (const s of m.startSlots) expect(isReached(land, seen, s.x, s.z)).toBe(true);
+    expect(m.anchors.colonyMark).toEqual({ x: m.startSlots[0].x, z: m.startSlots[0].z });
+    expect(m.anchors.skarnStart).toEqual({ x: m.startSlots[1].x, z: m.startSlots[1].z });
+    expect(m.anchors.hurganStart).toEqual({ x: m.startSlots[2].x, z: m.startSlots[2].z });
+  });
+  it('praia de reforço com mar navegável, 3 rotas de incursão rumo ao Marco e clã dissidente longe das bases inimigas', () => {
+    const m = getMap(id);
+    const a = m.anchors;
+    const sea = buildPathfinder(m, 'naval');
+    expect(isReached(sea, oceanSeen(m, sea), a.reinforceSea.x, a.reinforceSea.z)).toBe(true);
+    expect(hyp(a.landingZone, a.reinforceSea)).toBeLessThanOrEqual(16);
+    expect(hyp(a.landingZone, m.startSlots[0])).toBeLessThan(60);
+    for (const k of ['raid1', 'raid2', 'raid3']) expect(hyp(a[k], m.startSlots[0]), k).toBeLessThan(90);
+    for (const s of m.startSlots.slice(1)) expect(hyp(a.dissidentClan, s)).toBeGreaterThanOrEqual(38);
+  });
+});
+
+describe('M2-06 · Cabo Ferrugem (promontório, estreito e docas)', () => {
+  const id = 'camp-12-cabo-ferrugem';
+  it('Bastião no sítio do slot 0 perto do estreito, que é água do oceano estreita entre o promontório e uma ilha', () => {
+    const m = getMap(id);
+    const a = m.anchors;
+    expect(a.bastion).toEqual({ x: m.startSlots[0].x, z: m.startSlots[0].z });
+    expect(hyp(a.bastion, a.strait)).toBeLessThanOrEqual(60);
+    const sea = buildPathfinder(m, 'naval');
+    const ocean = oceanSeen(m, sea);
+    expect(isReached(sea, ocean, a.strait.x, a.strait.z)).toBe(true);
+    // há terra de ambos os lados do estreito em até 22 u (largura do canal <= ~26 u), e terra alcançável (continente) e isolada (ilha)
+    const land = buildPathfinder(m, 'land');
+    const seen = floodFill(land, m.startSlots[0].x, m.startSlots[0].z);
+    let cont = false, isle = false;
+    for (let k = 0; k < 48; k++) {
+      const t = (k / 48) * Math.PI * 2;
+      for (const rho of [8, 12, 16, 20]) {
+        const x = a.strait.x + Math.cos(t) * rho, z = a.strait.z + Math.sin(t) * rho;
+        if (getHeightForMap(m, x, z) < 1.8) continue;
+        if (isReached(land, seen, x, z)) cont = true; else isle = true;
+      }
+    }
+    expect(cont, 'continente junto ao estreito').toBe(true);
+    expect(isle, 'ilha junto ao estreito').toBe(true);
+  });
+  it('3 docas orcs no litoral do continente, com água navegável diante; frota e chefe/ondas nos lugares certos', () => {
+    const m = getMap(id);
+    const a = m.anchors;
+    const sea = buildPathfinder(m, 'naval');
+    const ocean = oceanSeen(m, sea);
+    const docks = [1, 2, 3].map((i) => a[`dock${i}`]);
+    for (let i = 0; i < 3; i++) {
+      expect(hyp(docks[i], a.strait), `doca ${i + 1} perto do estreito`).toBeLessThanOrEqual(66);
+      expect(hyp(docks[i], a.bastion)).toBeGreaterThanOrEqual(24);
+      for (let j = i + 1; j < 3; j++) expect(hyp(docks[i], docks[j])).toBeGreaterThanOrEqual(20);
+    }
+    for (const k of ['fleetStart', 'fleetStart2']) expect(isReached(sea, ocean, a[k].x, a[k].z), k).toBe(true);
+    expect(hyp(a.bossStart, m.startSlots[1])).toBeLessThan(hyp(a.bossStart, m.startSlots[0]));
+    for (const k of ['waveStart1', 'waveStart2']) expect(hyp(a[k], m.startSlots[0])).toBeGreaterThan(40);
   });
 });

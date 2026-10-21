@@ -1,0 +1,137 @@
+{
+ "opts": {
+  "count": 8,
+  "seedStart": 1,
+  "maps": [
+   "camp-11-estepe-do-vento"
+  ],
+  "maxTicks": 72000,
+  "recheck": 3,
+  "faction": null,
+  "difficulty": null,
+  "stallTicks": 2400,
+  "out": "tools/soak-report/m2-06/camp-11"
+ },
+ "wallMs": 141408,
+ "results": [
+  {
+   "seed": 1,
+   "map": "camp-11-estepe-do-vento",
+   "faction": "human",
+   "difficulty": "easy",
+   "finished": true,
+   "ticks": 10356,
+   "checksum": 1525024782,
+   "peakEntities": 93,
+   "wallMs": 11171,
+   "issues": []
+  },
+  {
+   "seed": 2,
+   "map": "camp-11-estepe-do-vento",
+   "faction": "orc",
+   "difficulty": "easy",
+   "finished": true,
+   "ticks": 11166,
+   "checksum": 1229459968,
+   "peakEntities": 93,
+   "wallMs": 27289,
+   "issues": []
+  },
+  {
+   "seed": 3,
+   "map": "camp-11-estepe-do-vento",
+   "faction": "human",
+   "difficulty": "normal",
+   "finished": true,
+   "ticks": 22067,
+   "checksum": 3901705707,
+   "peakEntities": 114,
+   "wallMs": 22160,
+   "issues": []
+  },
+  {
+   "seed": 4,
+   "map": "camp-11-estepe-do-vento",
+   "faction": "orc",
+   "difficulty": "normal",
+   "finished": true,
+   "ticks": 8874,
+   "checksum": 2249980548,
+   "peakEntities": 145,
+   "wallMs": 13582,
+   "issues": []
+  },
+  {
+   "seed": 5,
+   "map": "camp-11-estepe-do-vento",
+   "faction": "human",
+   "difficulty": "hard",
+   "finished": true,
+   "ticks": 5770,
+   "checksum": 4102273707,
+   "peakEntities": 81,
+   "wallMs": 5529,
+   "issues": []
+  },
+  {
+   "seed": 6,
+   "map": "camp-11-estepe-do-vento",
+   "faction": "orc",
+   "difficulty": "hard",
+   "finished": true,
+   "ticks": 4518,
+   "checksum": 2723752677,
+   "peakEntities": 72,
+   "wallMs": 3760,
+   "issues": []
+  },
+  {
+   "seed": 7,
+   "map": "camp-11-estepe-do-vento",
+   "faction": "human",
+   "difficulty": "brutal",
+   "finished": true,
+   "ticks": 5698,
+   "checksum": 2557128145,
+   "peakEntities": 128,
+   "wallMs": 6526,
+   "issues": []
+  },
+  {
+   "seed": 8,
+   "map": "camp-11-estepe-do-vento",
+   "faction": "orc",
+   "difficulty": "brutal",
+   "finished": true,
+   "ticks": 9501,
+   "checksum": 4083712023,
+   "peakEntities": 117,
+   "wallMs": 12978,
+   "issues": []
+  }
+ ],
+ "rechecks": [
+  {
+   "seed": 1,
+   "map": "camp-11-estepe-do-vento",
+   "faction": "human",
+   "difficulty": "easy",
+   "diff": null
+  },
+  {
+   "seed": 3,
+   "map": "camp-11-estepe-do-vento",
+   "faction": "human",
+   "difficulty": "normal",
+   "diff": null
+  },
+  {
+   "seed": 5,
+   "map": "camp-11-estepe-do-vento",
+   "faction": "human",
+   "difficulty": "hard",
+   "diff": null
+  }
+ ]
+}

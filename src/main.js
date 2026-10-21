@@ -15,7 +15,7 @@ import { PauseMenu } from './ui/screens/PauseMenu.js';
 import { ensureGlbLoaded, ensureGlbKeys } from './entities/glbModels.js';
 import { getMap } from './data/maps/index.js';
 import { lazyTreeKeysOfMap } from './data/treeSpecies.js';
-import { coastKeysOfMap } from './data/decorPlan.js';
+import { propKeysOfMap } from './data/decorPlan.js';
 import { SaveLoadDialog } from './ui/screens/SaveLoadDialog.js';
 import { SaveStore, AUTOSAVE_SLOT } from './core/SaveStore.js';
 import { captureSave, applySaveCommands, fastForward, finishFastForward } from './sim/SaveGame.js';
@@ -452,18 +452,21 @@ class GameApp {
       }
     }
 
-    // M2-10: espécies de árvore `lazy` (copa larga, palmeira, acácia) que o mapa usa — só elas, fora do boot.
-    try {
-      await ensureGlbKeys([...lazyTreeKeysOfMap(getMap(config.mapId)), ...coastKeysOfMap(getMap(config.mapId))]);
-    } catch (err) {
-      console.warn('[main.js] erro ao carregar as árvores do mapa:', err); // o TreeManager usa a árvore reserva
-    }
-
     this.assetsReady = true;
     if (token !== this._loadToken || !this.fsm.is(S.LOADING)) return;
 
     // M2-28: mapas de campanha (`camp-*`) vivem em chunks próprios; baixa o do mapa desta partida (no-op para os demais).
     await ensureMapLoaded(config.mapId);
+    if (token !== this._loadToken || !this.fsm.is(S.LOADING)) return;
+
+    // M2-10 (movido para depois do `ensureMapLoaded`: `getMap` de mapa de campanha ainda não carregado lança) e M2-12/14/15/17:
+    // árvores `lazy` (copa larga, palmeira, acácia) e props .glb de bioma (`biomeGrid`) que o mapa usa — só esses, fora do boot.
+    try {
+      const mapDef = getMap(config.mapId);
+      await ensureGlbKeys([...lazyTreeKeysOfMap(mapDef), ...propKeysOfMap(mapDef)]);
+    } catch (err) {
+      console.warn('[main.js] erro ao carregar as árvores/props do mapa:', err); // árvore reserva; o prop só não aparece
+    }
     if (token !== this._loadToken || !this.fsm.is(S.LOADING)) return;
 
     this.session = new MatchSession({ sceneManager: this.sceneManager, sound: this.sound, matchConfig: config, online });

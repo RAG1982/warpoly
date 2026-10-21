@@ -50,7 +50,7 @@ const SHALLOW_TINT = {
   savana: { color: 0xa0e8c8, amount: 0.46 },
   pedregoso: { color: 0xa9dde6, amount: 0.34 }
 };
-const SHALLOW_END = 1.5; // u de profundidade em que a tinta rasa some
+const SHALLOW_END = 2.6; // u de profundidade em que a tinta rasa some
 const DEEP_START = 1.4; // u a partir de onde a água escurece
 const DEEP_END = 4.5;
 const smooth01 = (a, b, x) => {
@@ -213,7 +213,7 @@ export class Water {
       let r = col.getX(i), g = col.getY(i), b = col.getZ(i), a = col.getW(i);
       r += (tint.r - r) * k; g += (tint.g - g) * k; b += (tint.b - b) * k;
       const dk = 1 - 0.28 * deep;
-      col.setXYZW(i, r * dk, g * dk, b * dk, Math.min(1, a * (1 - 0.22 * shallow + 0.06 * deep)));
+      col.setXYZW(i, r * dk, g * dk, b * dk, Math.min(1, a * (1 - 0.2 * shallow)));
     }
     col.needsUpdate = true;
   }

@@ -573,26 +573,28 @@ def build_tumbleweed():
         return Vector((rg.uniform(-s, s), rg.uniform(-s, s), rg.uniform(-s, s)))
 
     # miolo escuro: preenche o interior (visto pelas frestas da casca) por 24 triângulos
-    for k in range(74):      # arcos de círculo máximo em 4 estações; 60 % formam a casca, o resto o miolo emaranhado
+    # M2-12 (ART-03, enxuto): ~510 tris (era ~1700). 28 arcos de 3 pontos (60 % na casca, o resto no miolo), 9 galhos radiais
+    # que furam a casca e arrepiam a silhueta e 14 folhinhas secas; galhos mais grossos para a silhueta continuar cheia.
+    for k in range(28):
         a = rand_dir()
         ax = a.cross(rand_dir())
         if ax.length < 0.2:
             continue
         ax.normalize()
-        ang = math.radians(rg.uniform(60, 120))
+        ang = math.radians(rg.uniform(70, 130))
         shell = rg.random() < 0.6
         pts = []
-        for i in range(4):
-            q = Matrix.Rotation(ang * i / 3.0, 3, ax) @ a
-            rad = R * ((0.9 + 0.12 * rg.random()) if shell else (0.4 + 0.4 * rg.random()))
+        for i in range(3):
+            q = Matrix.Rotation(ang * i / 2.0, 3, ax) @ a
+            rad = R * ((0.92 + 0.10 * rg.random()) if shell else (0.4 + 0.4 * rg.random()))
             pts.append(tuple(cen + q * rad + jit(0.02)))
-        twig(mb, pts, [0.012, 0.011, 0.009, 0.005], keys[k % 3])
-    for k in range(22):      # galhos radiais: alguns furam a casca e arrepiam a silhueta
+        twig(mb, pts, [0.020, 0.017, 0.008], keys[k % 3])
+    for k in range(9):
         d = rand_dir()
-        r0, r1 = R * rg.uniform(0.15, 0.4), R * rg.uniform(0.95, 1.14)
-        twig(mb, [tuple(cen + d * r0), tuple(cen + d * (r0 + r1) * 0.5 + jit(0.02)), tuple(cen + d * r1)], [0.013, 0.01, 0.005],
+        r0, r1 = R * rg.uniform(0.15, 0.4), R * rg.uniform(0.98, 1.16)
+        twig(mb, [tuple(cen + d * r0), tuple(cen + d * (r0 + r1) * 0.5 + jit(0.02)), tuple(cen + d * r1)], [0.020, 0.016, 0.007],
              keys[(k + 1) % 3])
-    for k in range(20):      # folhinhas secas coladas na casca
+    for k in range(14):
         n = rand_dir()
         pos = cen + n * (R * rg.uniform(0.9, 1.02))
         t1 = n.cross(rand_dir())
@@ -600,7 +602,7 @@ def build_tumbleweed():
             continue
         t1.normalize()
         t2 = n.cross(t1)
-        a, b = rg.uniform(0.035, 0.055), rg.uniform(0.016, 0.026)
+        a, b = rg.uniform(0.04, 0.06), rg.uniform(0.02, 0.03)
         verts = [tuple(pos + t1 * a), tuple(pos + t2 * b), tuple(pos - t1 * a), tuple(pos - t2 * b)]
         add_sheet(mb, verts, [(0, 1, 2, 3)], 'twig_light')
     bush = mb.build(mats, parent=root)

@@ -4,7 +4,9 @@ import { getGraniteBoulderTextures, getRiverPebbleTextures } from '../models/env
 import { getMapTileset, getTileset } from '../data/tilesets.js';
 import { getRegionMap } from '../data/biomeRegions.js';
 import { buildLavaInfo } from '../data/lavaRender.js';
-import { planDecorations } from '../data/decorPlan.js';
+import { planDecorations, planProps } from '../data/decorPlan.js';
+import { PROP_RULES } from '../data/biomeStyles.js';
+import { glbTemplates, glbEnabled } from '../entities/glbModels.js';
 import { zoomHidesDecorations, lodEnabled } from '../render/lod.js';
 import {
   getFlowerTextures,
@@ -48,6 +50,15 @@ const REGIONAL_GROUPS = [
   { category: 'lilies', meshes: ['InstancedLilyPads', 'InstancedLotus'], tint: null },
   { category: 'flowers', meshes: ['InstancedFlowerLeaves', 'InstancedFlowerPetals'], tint: null }
 ];
+
+/** `?props=0` desliga os props .glb por bioma (diagnóstico). */
+function propsEnabled() {
+  try {
+    return typeof window === 'undefined' || new URLSearchParams(window.location.search).get('props') !== '0';
+  } catch (e) {
+    return true;
+  }
+}
 
 export class Decorations {
   /**
@@ -130,6 +141,51 @@ export class Decorations {
       }
     }
     this._lodHidden = null;
+    this._applyProps(regions, mapDef);
+  }
+
+  /**
+   * M2-12/14/15/17: props .glb por bioma (`planProps`; arenito, arbusto rolante, vulcânicos, gelo, sub-bosque...). Um InstancedMesh por
+   * modelo, só dos que o plano usou e cujo `.glb` já foi carregado (lazy: `ensureGlbKeys(propKeysOfMap(mapa))` antes da partida); sem o
+   * `.glb` (rede, `?glb=0`) o prop simplesmente não aparece. `?props=0` desliga. Só visual (nada na sim).
+   */
+  _applyProps(regions, mapDef) {
+    this.propMeshes = [];
+    if (!glbEnabled || !propsEnabled()) return;
+    const terrain = this.terrain;
+    const props = planProps({
+      regions,
+      getHeight: (x, z) => terrain.getHeight(x, z),
+      mapDef: { ...mapDef, size: mapDef.size || regions.size },
+      lava: buildLavaInfo(mapDef),
+      waterLevel: 0.5
+    });
+    this.propPlan = props;
+    const dummy = new THREE.Object3D();
+    for (const [key, items] of Object.entries(props)) {
+      const tpl = glbTemplates.get(key);
+      if (!tpl) continue;
+      tpl.updateMatrixWorld(true);
+      let src = null;
+      tpl.traverse((o) => { if (!src && o.isMesh) src = o; });
+      if (!src) continue;
+      const geo = src.geometry.clone().applyMatrix4(src.matrixWorld);
+      const im = new THREE.InstancedMesh(geo, src.material, items.length);
+      im.name = `InstancedProp_${key}`;
+      im.castShadow = PROP_RULES[key].shadow !== false; // M2-16: props de costa não projetam sombra (0 draw calls extras)
+      im.receiveShadow = true;
+      for (let i = 0; i < items.length; i++) {
+        const it = items[i];
+        dummy.position.set(it.x, it.y, it.z);
+        dummy.rotation.set(0, it.rotY, 0);
+        dummy.scale.setScalar(it.scale);
+        dummy.updateMatrix();
+        im.setMatrixAt(i, dummy.matrix);
+      }
+      im.instanceMatrix.needsUpdate = true;
+      this.group.add(im);
+      this.propMeshes.push(im);
+    }
   }
 
   /** Regrava as instâncias de `mesh` com `items` (posição/giro/escala) e, se `tintKey`, a cor de `style.decor[tintKey]` por instância. */

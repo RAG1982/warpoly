@@ -264,7 +264,7 @@ Legenda de dependências: só IDs; "—" = pode começar já. **Dif.** = dificul
 | M2-10 | Espécies de árvore novas nos mapas (ART-02) | Média | M | S | M0-01 | ART-02 | DONE parcial (draw calls +6..15 por espécie > meta +4; JSON dos mapas só reassados nos lotes novos) |
 | M2-11 | IA de chefes: habilidades de herói na IA | Difícil | M | S | M0-01 | MUNDO-HEROIS R8 | DONE (2026-10-17; micro nível ≥ 2) |
 | M2-12 | Props de arenito e arbusto rolante enxuto | Média | M | SB | M0-01 | ART-01/03 | DONE (2026-10-20) |
-| M2-13 | Javali completo + Cercado de Javalis + ícones de bioma | Média | G | SB | M0-01 | ART-04/12 | TODO |
+| M2-13 | Javali completo + Cercado de Javalis + ícones de bioma | Média | G | SB | M0-01 | ART-04/12 | DONE (2026-10-21) |
 | M2-14 | Props vulcânicos e material de lava | Média | G | SB | M0-01 | ART-06 | DONE (2026-10-20) |
 | M2-15 | Props de gelo | Média | M | SB | M0-01 | ART-07 | DONE (2026-10-20) |
 | M2-16 | Água, costa e praia | Média | G | S+SB | M0-01 | ART-08/09 | DONE (2026-10-21) |

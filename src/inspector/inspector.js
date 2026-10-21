@@ -387,6 +387,19 @@ const MODEL_CATALOG = [
     notes: 'Rig plana (a do antigo VillagerModel.js, removido na F7-00b; Torso, Head, ArmL, ArmR, LegL, LegR, ToolGroup > Axe/Pickaxe/Hammer, Pack > WoodBundle/GoldSack). Atlas 512², rosto só em +Z.'
   },
   {
+    id: 'villager_v2_glb',
+    name: 'Camponês v2 (Tripo)',
+    category: 'units',
+    faction: 'human',
+    type: 'villager',
+    icon: '⛏️',
+    glb: 'villager_v2',
+    sourceFile: 'tools/blender/build_villager_v2.py',
+    create: createGlb('villager_v2'),
+    description: 'Aldeão humano v2: camponês de barba ruiva do Tripo finalizado no Blender (public/models/villager_v2.glb). Capuz de couro, colete sobre túnica azul (cor de time), cinto com bolsas e bolsa de moedas, picareta na mão direita; mochila de carga com feixe de lenha e saco de ouro/pedra (Pack).',
+    notes: 'Tipo villager: Torso, Head, ArmL, ArmR, LegL, LegR; a picareta é o ToolGroup, FILHO de ArmR (balança com o braço; o gesto de coleta serve para madeira, ouro e pedra). Pack > PackFrame/WoodBundle/GoldSack. É o padrão do jogo; o Camponês (Blender) antigo continua como fallback. ~22 mil triângulos, 14 draw calls, atlas 512².'
+  },
+  {
     id: 'bandit_glb',
     name: 'Bandido (Blender)',
     category: 'units',
@@ -1689,6 +1702,45 @@ const MODEL_CATALOG = [
     create: createGlb('castle'),
     description: 'Versão gerada pelo pipeline Blender headless (public/models/castle.glb): torres com telhados cônicos azuis, muralhas com ameias, portão em arco, torre de menagem, salão, madeira e estandartes em cor de time.',
     notes: '2 draw calls (Static_Mesh + Anim_Banners), ~8,7 mil triângulos, atlas 1024² com bake de cor e AO. Mesma pegada (raio 5,5) e altura (~9,5) do castelo procedural. Sockets: Socket_UnitSpawn, Socket_Rally.'
+  },
+  {
+    id: 'hq_human_1_glb',
+    name: 'Centro humano nível 1 · Paço Real (Tripo)',
+    category: 'buildings',
+    faction: 'human',
+    type: 'building',
+    icon: '🏰',
+    glb: 'hq_human_1',
+    sourceFile: 'tools/blender/build_hq_human.py',
+    create: createGlb('hq_human_1'),
+    description: 'Casa de enxaimel com telhado de palha e ardósia, chaminé de pedra, sacos e caixotes; bandeira azul em cor de time. Modelo do nível 1 do Centro humano (M2-33), o padrão no jogo; o castelo antigo continua em Castelo (Blender).',
+    notes: '2 draw calls (Atlas + TeamColor), 18,6 mil triângulos, atlas 512². Altura 9,0, pegada 6,8 x 6,5 (raio de colisão 5,5 da simulação, igual nos 3 níveis; raio máximo dos vértices 4,3). Fumaça da chaminé em (1,3; 8,2; -1,6). Sockets: Socket_UnitSpawn, Socket_Rally.'
+  },
+  {
+    id: 'hq_human_2_glb',
+    name: 'Centro humano nível 2 · Fortaleza (Tripo)',
+    category: 'buildings',
+    faction: 'human',
+    type: 'building',
+    icon: '🏰',
+    glb: 'hq_human_2',
+    sourceFile: 'tools/blender/build_hq_human.py',
+    create: createGlb('hq_human_2'),
+    description: 'Casa-forte de pedra com ameias, portão de grade, torre central de telhado azul e bandeira de time. Modelo do nível 2 (M2-33): o BuildingView troca para ele quando o upgrade do Centro termina.',
+    notes: '2 draw calls (Atlas + TeamColor), 18,2 mil triângulos, atlas 512². Altura 12,5, pegada 8,1 x 8,3 (raio máximo dos vértices 5,4). Sockets: Socket_UnitSpawn, Socket_Rally.'
+  },
+  {
+    id: 'hq_human_3_glb',
+    name: 'Centro humano nível 3 · Castelo de Aldária (Tripo)',
+    category: 'buildings',
+    faction: 'human',
+    type: 'building',
+    icon: '🏰',
+    glb: 'hq_human_3',
+    sourceFile: 'tools/blender/build_hq_human.py',
+    create: createGlb('hq_human_3'),
+    description: 'Castelo de pedra com quatro torres de telhado cônico azul, torre de menagem, leões, estandartes e portão. Modelo do nível 3 (M2-33). Bandeiras e estandartes em cor de time.',
+    notes: '2 draw calls (Atlas + TeamColor), 19,3 mil triângulos, atlas 512². Altura 15,5, pegada 8,6 x 8,2 (raio máximo dos vértices 5,8: só as pontas dos leões/torres passam do raio 5,5). Sockets: Socket_UnitSpawn, Socket_Rally.'
   },
   {
     id: 'bandit_camp',

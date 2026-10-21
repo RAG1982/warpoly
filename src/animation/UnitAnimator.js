@@ -717,7 +717,8 @@ export class UnitAnimator {
     } else if (uType === 'villager') {
       if (parts.toolGroup) {
         parts.toolGroup.rotation.x = armSwing * 0.5;
-        parts.toolGroup.position.y += verticalBounce;
+        // M2-30: ferramenta empunhada (filha de ArmR, como a picareta do villager_v2) já acompanha a mão: sem o salto extra
+        if (parts.toolGroup.parent !== parts.armR) parts.toolGroup.position.y += verticalBounce;
       }
     } else if (uType === 'bandit') {
       if (parts.weapon) {

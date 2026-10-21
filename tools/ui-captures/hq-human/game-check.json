@@ -1,0 +1,230 @@
+{
+  "generated": "2026-10-21T22:58:54.893Z",
+  "rows": [
+    {
+      "id": "G0",
+      "name": "hq_human_{1,2,3}.glb: <= 20 draw calls, Atlas+TeamColor, 1 textura, altura cresce",
+      "status": "PASS",
+      "detail": "n1: 2 draws, 18615 tris, h=9.00 | n2: 2 draws, 18202 tris, h=12.50 | n3: 2 draws, 19326 tris, h=15.50"
+    },
+    {
+      "id": "G1",
+      "name": "nível 1 ao iniciar: modelo HqHuman1, colisão 5,5",
+      "status": "PASS",
+      "detail": "{\"type\":\"castle\",\"tier\":1,\"viewTier\":1,\"model\":\"HqHuman1\",\"collisionRadius\":5.5,\"barY\":10,\"pos\":{\"x\":32,\"z\":-30},\"faction\":\"human\"}"
+    },
+    {
+      "id": "G2-1",
+      "name": "nível 1: aldeões entregam ouro sem entrar no raio de colisão",
+      "status": "PASS",
+      "detail": "{\"tier\":1,\"workers\":2,\"goldDelta\":500,\"gatherEvents\":50,\"minDistToCenter\":6.16,\"collisionRadius\":5.5,\"moved\":2}"
+    },
+    {
+      "id": "G2-2",
+      "name": "nível 2: aldeões entregam ouro sem entrar no raio de colisão",
+      "status": "PASS",
+      "detail": "{\"tier\":2,\"workers\":2,\"goldDelta\":583,\"gatherEvents\":53,\"minDistToCenter\":6.19,\"collisionRadius\":5.5,\"moved\":2}"
+    },
+    {
+      "id": "G2-3",
+      "name": "nível 3: aldeões entregam ouro sem entrar no raio de colisão",
+      "status": "PASS",
+      "detail": "{\"tier\":3,\"workers\":2,\"goldDelta\":624,\"gatherEvents\":52,\"minDistToCenter\":6.22,\"collisionRadius\":5.5,\"moved\":2}"
+    },
+    {
+      "id": "G3-2",
+      "name": "UPGRADE_HQ → nível 2: evento, custo e troca de modelo",
+      "status": "PASS",
+      "detail": "{\"alvo\":2,\"started\":true,\"debited\":1000,\"modelDurante\":\"HqHuman1\",\"tier\":2,\"evento\":2,\"viewTier\":2,\"model\":\"HqHuman2\",\"hp\":2200,\"maxHp\":2200}"
+    },
+    {
+      "id": "G3-3",
+      "name": "UPGRADE_HQ → nível 3: evento, custo e troca de modelo",
+      "status": "PASS",
+      "detail": "{\"alvo\":3,\"started\":true,\"debited\":2000,\"modelDurante\":\"HqHuman2\",\"tier\":3,\"evento\":3,\"viewTier\":3,\"model\":\"HqHuman3\",\"hp\":1960,\"maxHp\":2800}"
+    },
+    {
+      "id": "G3b-2",
+      "name": "nível 2: selecionado, barra de vida visível acima do topo do modelo",
+      "status": "PASS",
+      "detail": "{\"barVisible\":true,\"barY\":16.72,\"topoModelo\":14.92,\"ringVisible\":true}"
+    },
+    {
+      "id": "G3b-3",
+      "name": "nível 3: selecionado, barra de vida visível acima do topo do modelo",
+      "status": "PASS",
+      "detail": "{\"barVisible\":true,\"barY\":19.72,\"topoModelo\":17.92,\"ringVisible\":true}"
+    },
+    {
+      "id": "G4",
+      "name": "2 Centros: o 1º no nível 3 e o 2º no nível 1, cada um com o seu modelo",
+      "status": "PASS",
+      "detail": "{\"first\":{\"tier\":3,\"model\":\"HqHuman3\"},\"colony\":{\"tier\":1,\"model\":\"HqHuman1\"},\"spot\":{\"x\":25.111698217428383,\"z\":-13.37016841479684},\"mid\":{\"x\":28.55584910871419,\"z\":-21.68508420739842}}"
+    },
+    {
+      "id": "G5",
+      "name": "TeamColor presente (cor do jogador) e Atlas intacto (branco)",
+      "status": "PASS",
+      "detail": "{\"teamMats\":1,\"atlasMats\":1,\"teamColor\":\"2563eb\",\"atlasColor\":\"ffffff\",\"playerColor\":\"#2563eb\"}"
+    },
+    {
+      "id": "G6",
+      "name": "sem pageerror nem console.error",
+      "status": "PASS",
+      "detail": "erros=0; avisos=0"
+    }
+  ],
+  "files": [
+    {
+      "name": "game-nivel1-jogo.png",
+      "kB": 743
+    },
+    {
+      "name": "game-nivel1-closeup.png",
+      "kB": 887
+    },
+    {
+      "name": "game-nivel1-coleta.png",
+      "kB": 711
+    },
+    {
+      "name": "game-nivel2-selecionado.png",
+      "kB": 699
+    },
+    {
+      "name": "game-nivel2-closeup.png",
+      "kB": 848
+    },
+    {
+      "name": "game-nivel2-coleta.png",
+      "kB": 750
+    },
+    {
+      "name": "game-nivel3-selecionado.png",
+      "kB": 699
+    },
+    {
+      "name": "game-nivel3-closeup.png",
+      "kB": 825
+    },
+    {
+      "name": "game-nivel3-coleta.png",
+      "kB": 754
+    },
+    {
+      "name": "game-dois-centros.png",
+      "kB": 532
+    }
+  ],
+  "data": {
+    "renderer": "ANGLE (AMD, Vulkan 1.4.318 (AMD Radeonâ¢ RX 7600 XT (RADV NAVI33) (0x00007480)), radv)",
+    "http": [
+      200,
+      200,
+      200
+    ],
+    "g1": {
+      "type": "castle",
+      "tier": 1,
+      "viewTier": 1,
+      "model": "HqHuman1",
+      "collisionRadius": 5.5,
+      "barY": 10,
+      "pos": {
+        "x": 32,
+        "z": -30
+      },
+      "faction": "human"
+    },
+    "gather1": {
+      "tier": 1,
+      "workers": 2,
+      "goldDelta": 500,
+      "gatherEvents": 50,
+      "minDistToCenter": 6.16,
+      "collisionRadius": 5.5,
+      "moved": 2
+    },
+    "subir2": {
+      "alvo": 2,
+      "started": true,
+      "debited": 1000,
+      "modelDurante": "HqHuman1",
+      "tier": 2,
+      "evento": 2,
+      "viewTier": 2,
+      "model": "HqHuman2",
+      "hp": 2200,
+      "maxHp": 2200
+    },
+    "barra2": {
+      "barVisible": true,
+      "barY": 16.72,
+      "topoModelo": 14.92,
+      "ringVisible": true
+    },
+    "gather2": {
+      "tier": 2,
+      "workers": 2,
+      "goldDelta": 583,
+      "gatherEvents": 53,
+      "minDistToCenter": 6.19,
+      "collisionRadius": 5.5,
+      "moved": 2
+    },
+    "subir3": {
+      "alvo": 3,
+      "started": true,
+      "debited": 2000,
+      "modelDurante": "HqHuman2",
+      "tier": 3,
+      "evento": 3,
+      "viewTier": 3,
+      "model": "HqHuman3",
+      "hp": 1960,
+      "maxHp": 2800
+    },
+    "barra3": {
+      "barVisible": true,
+      "barY": 19.72,
+      "topoModelo": 17.92,
+      "ringVisible": true
+    },
+    "gather3": {
+      "tier": 3,
+      "workers": 2,
+      "goldDelta": 624,
+      "gatherEvents": 52,
+      "minDistToCenter": 6.22,
+      "collisionRadius": 5.5,
+      "moved": 2
+    },
+    "two": {
+      "first": {
+        "tier": 3,
+        "model": "HqHuman3"
+      },
+      "colony": {
+        "tier": 1,
+        "model": "HqHuman1"
+      },
+      "spot": {
+        "x": 25.111698217428383,
+        "z": -13.37016841479684
+      },
+      "mid": {
+        "x": 28.55584910871419,
+        "z": -21.68508420739842
+      }
+    },
+    "teamColor": {
+      "teamMats": 1,
+      "atlasMats": 1,
+      "teamColor": "2563eb",
+      "atlasColor": "ffffff",
+      "playerColor": "#2563eb"
+    }
+  },
+  "errors": [],
+  "warnings": []
+}

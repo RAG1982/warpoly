@@ -1229,7 +1229,7 @@ def executar(H):
     Ganchos: classificar(sopa, S) -> (destino por ilha, info); cortes(S) -> [(eixo, valor, y_min|None)]; regras(ctx, f, c, nome);
     finalizar(ctx) -> {peça: pivô} (deixa ctx.dados em coordenadas locais); eh_time(ctx, peça, i) -> bool (face original);
     cor_time(rgb, peça) -> bool (tampas); poses() -> dict de poses; opcionais: ajustar_fonte(ctx), avaliar_fonte_extra(f),
-    avaliar_ilhas(sopa, destino, S), previa_extra(ctx, rig, objs)."""
+    avaliar_ilhas(sopa, destino, S), previa_extra(ctx, rig, objs), materiais_extra(ctx, objs) (depois de Atlas/TeamColor, antes do export)."""
     global NOME
     import types
     import bpy
@@ -1317,6 +1317,8 @@ def executar(H):
     bpy.context.view_layer.update()
     C.finalize_materials(list(objs.values()), img, team_default=H.TEAM_DEFAULT,
                          out_png=os.path.join(C.BUILD_DIR, H.ATLAS_NOME + '.png'))
+    if hasattr(H, 'materiais_extra'):
+        H.materiais_extra(ctx, objs)      # ex.: peça emissiva com material próprio (chama da Vozgul, M2-23)
     C.export_glb(raiz, out)
     st = C.stats(raiz, out)
     log('STATS ' + H.NOME, st)

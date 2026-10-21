@@ -40,6 +40,8 @@ export const GLB_MODELS = {
   // Mestre Arcano Oren (hero_oren, M2-21): modelo do Tripo finalizado (Weapon = cajado filho de ArmR, Crystal pulsa no 'cast', pano em TeamColor)
   hero_oren: { url: `${BASE}models/hero_oren.glb`, root: 'Mage', type: 'mage' },
   necromancer: { url: `${BASE}models/necromancer.glb`, root: 'Necromancer', type: 'necromancer' },
+  // Vozgul, a Profetisa (hero_vozgul, M2-23): modelo do Tripo finalizado (Weapon = cajado filho de ArmR, Crystal = chama verde emissiva (`Flame`) que pulsa no 'cast', fitas e faixas em TeamColor)
+  hero_vozgul: { url: `${BASE}models/hero_vozgul.glb`, root: 'Necromancer', type: 'necromancer' },
   skeleton: { url: `${BASE}models/skeleton.glb`, root: 'Skeleton', type: 'skeleton' },
   sapper: { url: `${BASE}models/sapper.glb`, root: 'Sapper', type: 'sapper' },
   arsonist: { url: `${BASE}models/arsonist.glb`, root: 'Arsonist', type: 'arsonist' },

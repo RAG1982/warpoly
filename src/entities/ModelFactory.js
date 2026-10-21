@@ -636,6 +636,7 @@ export class ModelFactory {
       case 'catapult': return this.createCatapult();
       case 'mage': return this._glbOr('mage', () => this.getOrCreateModel('mage', createMage, 'mage'));
       case 'hero_oren': return this._glbOr('hero_oren', () => this._glbOr('mage', () => this.getOrCreateModel('mage', createMage, 'mage'))); // Mestre Arcano Oren: .glb próprio (Tripo); sem ele, o Mago
+      case 'hero_vozgul': return this._glbOr('hero_vozgul', () => this._glbOr('necromancer', () => this.getOrCreateModel('necromancer', createNecromancer, 'necromancer'))); // Vozgul, a Profetisa: .glb próprio (Tripo); sem ele, o Necromante
       case 'necromancer': return this._glbOr('necromancer', () => this.getOrCreateModel('necromancer', createNecromancer, 'necromancer'));
       case 'sheep': return this.createCritter('sheep');
       case 'boar': return this.createCritter('boar');

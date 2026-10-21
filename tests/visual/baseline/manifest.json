@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-10-21T02:44:45.790Z",
+  "updatedAt": "2026-10-21T02:49:10.653Z",
   "chromium": "153.0.8010.12",
   "gpu": "ANGLE (AMD, Vulkan 1.4.318 (AMD Radeonâ¢ RX 7600 XT (RADV NAVI33) (0x00007480)), radv)",
   "resolutions": [
@@ -7,6 +7,6 @@
     "1920x1080",
     "390x844"
   ],
-  "targets": 134,
+  "targets": 138,
   "notes": "PNGs da baseline NAO ficam no git (gitignore); dependem de GPU real + Chromium acima. Regerar com npm run visual -- --update."
 }

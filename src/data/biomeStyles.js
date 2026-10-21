@@ -186,11 +186,11 @@ export const PROP_RULES = Object.freeze({
   // M2-14 · vulcânico
   rock_basalt_a: {
     legacyCount: 6, minH: 1.8, maxH: 99, scale: [1.2, 1.9], spacing: 9,
-    weights: { [BIOME.VOLCANIC]: 1, [BIOME.ROCK]: 0.3 }
+    weights: { [BIOME.VOLCANIC]: 1, [BIOME.ROCK]: 0.1 }
   },
   rock_basalt_b: {
     legacyCount: 8, minH: 1.8, maxH: 99, scale: [1.2, 1.9], spacing: 6,
-    weights: { [BIOME.VOLCANIC]: 1, [BIOME.ROCK]: 0.4 }
+    weights: { [BIOME.VOLCANIC]: 1, [BIOME.ROCK]: 0.2 }
   },
   volcano_cone: {
     legacyCount: 3, minH: 1.8, maxH: 99, scale: [1.4, 2.2], spacing: 14,
@@ -198,7 +198,7 @@ export const PROP_RULES = Object.freeze({
   },
   tree_burnt: {
     legacyCount: 10, minH: 1.8, maxH: 99, scale: [1.0, 1.5], spacing: 6,
-    weights: { [BIOME.VOLCANIC]: 1, [BIOME.ROCK]: 0.2 }
+    weights: { [BIOME.VOLCANIC]: 1 }
   },
   fumarole: {
     legacyCount: 4, minH: 1.8, maxH: 99, scale: [1.2, 1.8], spacing: 10,
@@ -206,7 +206,24 @@ export const PROP_RULES = Object.freeze({
   },
   obsidian: {
     legacyCount: 6, minH: 1.8, maxH: 99, scale: [1.2, 2.0], spacing: 7,
-    weights: { [BIOME.VOLCANIC]: 1, [BIOME.ROCK]: 0.3 }
+    weights: { [BIOME.VOLCANIC]: 1, [BIOME.ROCK]: 0.1 }
+  },
+  // M2-15 · neve e gelo
+  ice_block_small: {
+    legacyCount: 10, minH: 1.8, maxH: 99, scale: [1.2, 2.0], spacing: 5,
+    weights: { [BIOME.ICE]: 1, [BIOME.SNOW]: 0.25 }
+  },
+  ice_block_large: {
+    legacyCount: 4, minH: 1.8, maxH: 99, scale: [1.2, 1.8], spacing: 12,
+    weights: { [BIOME.ICE]: 1, [BIOME.SNOW]: 0.12 }
+  },
+  tree_pine_snow: {
+    legacyCount: 8, minH: 1.8, maxH: 99, scale: [0.9, 1.3], spacing: 6,
+    weights: { [BIOME.SNOW]: 1, [BIOME.ICE]: 0.2, [BIOME.ROCK]: 0.1 }
+  },
+  rock_snow: {
+    legacyCount: 9, minH: 1.8, maxH: 99, scale: [1.3, 2.2], spacing: 6,
+    weights: { [BIOME.SNOW]: 1, [BIOME.ICE]: 0.4, [BIOME.ROCK]: 0.5 }
   }
 });
 

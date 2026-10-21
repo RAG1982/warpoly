@@ -53,7 +53,7 @@ log = P.log
 def strata_paint(name, seed=0.0, cols=('#9a5a30', '#c58c55', '#e6c58a'), band_scale=9.0, band_dist=0.35, band_amt=1.0,
                  blot_scale=1.2, blot_amt=0.5, top='#efdcae', top_amt=0.6, side='#6a5c60', side_amt=0.14,
                  dust='#b89a68', dust_h=0.3, dust_amt=0.45, grain=22.0, grain_amt=0.12, crack_amt=0.2, crack_col='#5a4026',
-                 edge='#f2e4bd', edge_amt=0.4, edge_r=0.03, ao=(0.5, 0.6), facet_amt=0.12, vertical=False):
+                 edge='#f2e4bd', edge_amt=0.4, edge_r=0.03, ao=(0.5, 0.6), facet_amt=0.12, vertical=False, top_lo=0.45, top_hi=0.95):
     """Rocha sedimentar/ígnea em faixas: três tons (`cols`: escuro, médio, claro) distribuídos por faixas de altura do mundo
     (`band_scale` faixas por unidade, distorcidas por ruído), ou faixas verticais (`vertical=True`, colunas de basalto), manchas
     largas, grão, trincas, topo claro (`top`), lados frios (`side`), poeira no pé, desgaste de borda e oclusão ambiente."""
@@ -92,7 +92,7 @@ def strata_paint(name, seed=0.0, cols=('#9a5a30', '#c58c55', '#e6c58a'), band_sc
     col = bright(nb, col, nb.math('ADD', 1.0 - facet_amt / 2, nb.math('MULTIPLY', fn, facet_amt)))
     # luz de topo pintada, lados frios, poeira no pé
     col = bright(nb, col, nb.math('ADD', 0.88, nb.math('MULTIPLY', nz, 0.22)))
-    col = lerp_to(nb, col, smoothstep(nb, nz, 0.45, 0.95), top, top_amt)
+    col = lerp_to(nb, col, smoothstep(nb, nz, top_lo, top_hi), top, top_amt)
     col = lerp_to(nb, col, smoothstep(nb, nz, 0.5, -0.15), side, side_amt)
     col = lerp_to(nb, col, smoothstep(nb, gz, dust_h, 0.0), dust, dust_amt)
     col = edge_wear(nb, geo, col, edge_r, edge_amt, edge)
@@ -348,6 +348,94 @@ def mats_obsidian(seed):
 
 
 # ===========================================================================
+# M2-15 · gelo (paleta de `inverno:gelo`: gelo azulado #bcdef0, neve, rocha fria #7b8798)
+# ===========================================================================
+def mats_ice(seed, **kw):
+    p = dict(cols=('#5b97c4', '#8cc2e2', '#cfeaf8'), band_scale=3.0, band_dist=0.55, band_amt=1.0, blot_scale=1.6, blot_amt=0.9,
+             top='#f4fbff', top_amt=0.75, side='#4d78a8', side_amt=0.22, dust='#dff1fb', dust_h=0.25, dust_amt=0.45,
+             grain=10.0, grain_amt=0.06, crack_amt=0.55, crack_col='#f0fbff', edge='#ffffff', edge_amt=0.7, edge_r=0.04,
+             ao=(0.5, 0.45), facet_amt=0.28, top_lo=0.35, top_hi=0.85)
+    p.update(kw)
+    return {'ice': strata_paint('P_ice', seed=seed, **p)}
+
+
+ICE_SLAB = dict(chamfer=0.95, cut=(0.70, 0.88), chamfer_top=0.8, cut_top=(0.74, 0.90), chips=4, jitter=0.12, ridge=0.12,
+                taper=0.22, chip_cut=(0.80, 0.93))
+
+
+def build_ice_small(mats, root):
+    """Bloco de gelo de ~1,4 m: dois cristais facetados encostados (o maior inclinado), mais uma lasca; 1,1 m de altura."""
+    specs = [
+        (0.00, 0.00, 1.05, 0.50, 0.42, 20, (0, 6), 'slab', dict(ICE_SLAB, bottom=-0.20)),
+        (0.46, 0.20, 0.62, 0.30, 0.26, -35, (4, -10), 'slab', dict(ICE_SLAB, bottom=-0.18, chips=2)),
+        (-0.42, 0.34, 0.42, 0.20, 0.18, 50, (0, 8), 'slab', dict(ICE_SLAB, bottom=-0.15, chips=1, taper=0.15)),
+    ]
+    return [union_blocks('Ice', rock_blocks(701, specs, -0.20), -0.18, mats['ice'])]
+
+
+def build_ice_large(mats, root):
+    """Iceberg de ~3,4 x 2,8 m e 3 m de altura: quatro monólitos de pontas diferentes (o central alto e estreito, um baixo e
+    largo à direita, um inclinado à esquerda), com lascas no pé."""
+    specs = [
+        (0.00, 0.00, 3.00, 0.80, 0.70, 15, (2, 4), 'slab', dict(ICE_SLAB, bottom=-0.30, taper=0.30)),
+        (-0.95, 0.30, 2.05, 0.62, 0.55, -28, (-4, 12), 'slab', dict(ICE_SLAB, bottom=-0.28, taper=0.26)),
+        (1.05, -0.10, 1.55, 0.70, 0.62, 30, (3, -8), 'slab', dict(ICE_SLAB, bottom=-0.26, taper=0.20)),
+        (0.15, 0.85, 1.05, 0.55, 0.42, -10, (0, 0), 'slab', dict(ICE_SLAB, bottom=-0.24, taper=0.14, chips=3)),
+        (-0.30, -0.80, 1.45, 0.52, 0.45, 50, (6, 3), 'slab', dict(ICE_SLAB, bottom=-0.22, taper=0.24)),
+        (1.30, 0.80, 0.55, 0.30, 0.26, 20, (0, 0), 'boulder', dict(k=9, bottom=-0.18)),
+        (-1.55, -0.40, 0.45, 0.26, 0.22, -40, (0, 0), 'boulder', dict(k=9, bottom=-0.18)),
+    ]
+    return [union_blocks('Ice', rock_blocks(702, specs, -0.30), -0.28, mats['ice'])]
+
+
+def mats_snow_rock(seed):
+    return {'rock': strata_paint('P_snowrock', seed=seed, cols=('#5a626f', '#7a8391', '#9aa3b0'), band_scale=6.0, band_dist=0.4,
+                                 blot_scale=1.8, blot_amt=0.7, top='#ffffff', top_amt=0.96, side='#4b5668', side_amt=0.22,
+                                 dust='#d6e4ee', dust_h=0.22, dust_amt=0.5, grain=24.0, grain_amt=0.12, crack_amt=0.25,
+                                 crack_col='#2c323c', edge='#e9f2fa', edge_amt=0.35, edge_r=0.03, ao=(0.5, 0.6),
+                                 top_lo=0.18, top_hi=0.55)}
+
+
+def build_rock_snow(mats, root):
+    """Rocha com capa de neve de ~1,8 x 1,5 m e 1,05 m de altura: matacão principal com dois vizinhos; a neve cobre tudo que
+    olha para cima (pintura, limiar baixo) e deixa a rocha fria à mostra nas faces íngremes."""
+    specs = [
+        (0.00, 0.00, 1.05, 0.80, 0.66, 20, (0, 3), 'boulder', dict(k=18, tight=(0.82, 0.97))),
+        (0.80, 0.46, 0.58, 0.40, 0.34, -30, (0, 3), 'boulder', dict(k=13)),
+        (-0.72, 0.50, 0.40, 0.28, 0.24, 35, (0, 0), 'boulder', dict(k=10)),
+        (-0.30, -0.78, 0.36, 0.26, 0.22, 70, (0, 0), 'boulder', dict(k=10)),
+    ]
+    return [union_blocks('Rock', rock_blocks(703, specs, -0.22), -0.20, mats['rock'])]
+
+
+PINE_PAL = {
+    'bark_pine': dict(base='#4e3626', var='#2e2016', var_scale=6.0, var_amt=0.9, fine=0.16, fine_scale=40.0, top=0.25, ao=(0.8, 0.8)),
+    'needle': dict(base='#2a5a46', var='#183c32', var_scale=1.4, var_amt=1.0, fine=0.14, top=0.55, edge='#6ab0a0', edge_amt=0.3,
+                   edge_r=0.05, ao=(1.4, 1.0)),
+    'needle_light': dict(base='#356e58', var='#25503f', var_scale=1.8, var_amt=1.0, fine=0.12, top=0.6, ao=(1.2, 0.9)),
+    'snow': dict(base='#f6faff', var='#d4e4f2', var_scale=2.2, var_amt=1.0, fine=0.06, top=0.45, edge='#ffffff', edge_amt=0.3,
+                 edge_r=0.04, ao=(0.9, 0.5)),
+}
+
+
+def build_pine_snow(mats, root):
+    """Pinheiro nevado (~7,4 m, a silhueta de `tree_pine`): mesmo tronco e mesmos cinco andares de cone, em agulhas mais frias, com
+    uma capa de neve em cada andar (cone mais curto sobre a metade de cima, ligeiramente maior) e na ponta."""
+    mb = MeshBuilder('Tree')
+    mb.add(prim_cyl(0.54, 0.36, 2.2, 7, base=True), 'bark_pine', smooth=40)
+    mb.add(prim_cyl(0.36, 0.24, 2.4, 6, base=True), 'bark_pine', M((0, 2.2, 0)), smooth=40)
+    mb.add(prim_cyl(0.24, 0.12, 2.0, 5, base=True), 'bark_pine', M((0, 4.6, 0)), smooth=40)
+    for k, (r, h, y, seg) in enumerate(((2.35, 2.0, 1.4, 8), (1.95, 1.8, 2.75, 8), (1.5, 1.65, 3.95, 7),
+                                        (1.05, 1.45, 5.1, 6), (0.58, 1.25, 6.15, 5))):
+        rot = (0, k * 37, 0)
+        mb.add(prim_cone(r, h, seg), 'needle_light' if k % 2 else 'needle', M((0, y, 0), rot), smooth=0)
+        f = 0.50                                    # fração da altura coberta de neve (de cima para baixo)
+        mb.add(prim_cone(r * f * 1.10, h * f * 1.02, seg), 'snow', M((0, y + h * (1.0 - f) - 0.02, 0), rot), smooth=0)
+    mb.add(prim_cone(0.18, 0.6, 4), 'snow', M((0, 6.85, 0)), smooth=0)
+    return [mb.build(mats, parent=root)]
+
+
+# ===========================================================================
 # Registro dos modelos
 # ===========================================================================
 SPECS = {
@@ -370,11 +458,20 @@ SPECS = {
                      margin=0.008, angle=66.0, rough=0.9),
     'obsidian': dict(root='Obsidian', atlas=512, build=build_obsidian, mats=lambda: mats_obsidian(2.7),
                      margin=0.008, angle=66.0, rough=0.28),
+    # M2-15
+    'ice_block_small': dict(root='IceBlockSmall', atlas=512, build=build_ice_small, mats=lambda: mats_ice(1.2),
+                            margin=0.008, angle=66.0, rough=0.25),
+    'ice_block_large': dict(root='IceBlockLarge', atlas=512, build=build_ice_large, mats=lambda: mats_ice(5.2, blot_scale=0.9),
+                            margin=0.007, angle=66.0, rough=0.25),
+    'tree_pine_snow': dict(root='TreePineSnow', atlas=512, build=build_pine_snow, mats=lambda: C.make_paint_set(PINE_PAL),
+                           margin=0.01, angle=66.0, rough=0.85),
+    'rock_snow': dict(root='RockSnow', atlas=512, build=build_rock_snow, mats=lambda: mats_snow_rock(2.6),
+                      margin=0.007, angle=66.0, rough=0.88),
 }
 GROUPS = {
     'arenito': ['rock_sandstone_a', 'rock_sandstone_b'],
     'vulcanico': ['rock_basalt_a', 'rock_basalt_b', 'volcano_cone', 'tree_burnt', 'fumarole', 'obsidian'],
-    'gelo': [],
+    'gelo': ['ice_block_small', 'ice_block_large', 'tree_pine_snow', 'rock_snow'],
     'subosque': [],
 }
 BUDGET_TRIS = 600

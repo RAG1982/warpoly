@@ -587,7 +587,7 @@ export const UNITS = {
     healthBarHeight: 4.8,
     cost: null,
     trainTime: null,
-    icon: 'ui/heroes/hero_dorian.svg',
+    icon: 'ui/icons/128/unit_hero_dorian.webp',
     description: 'Herói único: comandante supremo da Guarda Real de Aurelan',
     isWorker: false, isRanged: false, isCombat: true, projectile: null,
     maxMana: 180, startMana: 180, manaRegen: 1.2,

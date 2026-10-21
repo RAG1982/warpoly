@@ -128,6 +128,7 @@
    "unit_grunt",
    "unit_gryphon_rider",
    "unit_hero_brann",
+   "unit_hero_dorian",
    "unit_hero_drogath",
    "unit_hero_oren",
    "unit_iron_leviathan",
@@ -151,10 +152,10 @@
   ]
  },
  "bytes": {
-  "total": 2809084,
+  "total": 2832850,
   "art": 281206,
-  "icons": 2249312,
-  "portraits": 278566
+  "icons": 2265742,
+  "portraits": 285902
  },
  "aliases": {
   "ability_debug_bolt": "ability_hero_arcane_bolt",
@@ -207,6 +208,7 @@
    "grunt",
    "gryphon_rider",
    "hero_brann",
+   "hero_dorian",
    "hero_drogath",
    "hero_oren",
    "iron_leviathan",

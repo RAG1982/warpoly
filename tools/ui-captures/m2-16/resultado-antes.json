@@ -1,0 +1,32 @@
+{
+ "when": "2026-10-21T10:18:43.413Z",
+ "label": "antes",
+ "maps": {
+  "camp-04-baixio-do-breu": {
+   "errors": [],
+   "views": [
+    "camp-04-baixio-do-breu-antes-1.jpg",
+    "camp-04-baixio-do-breu-antes-2.jpg",
+    "camp-04-baixio-do-breu-antes-3.jpg"
+   ],
+   "perf": {
+    "fps": 60,
+    "calls": 242,
+    "tris": 496946
+   }
+  },
+  "camp-07-brejo-mudo": {
+   "errors": [],
+   "views": [
+    "camp-07-brejo-mudo-antes-1.jpg",
+    "camp-07-brejo-mudo-antes-2.jpg",
+    "camp-07-brejo-mudo-antes-3.jpg"
+   ],
+   "perf": {
+    "fps": 60,
+    "calls": 291,
+    "tris": 480180
+   }
+  }
+ }
+}

@@ -267,9 +267,9 @@ Legenda de dependências: só IDs; "—" = pode começar já. **Dif.** = dificul
 | M2-13 | Javali completo + Cercado de Javalis + ícones de bioma | Média | G | SB | M0-01 | ART-04/12 | TODO |
 | M2-14 | Props vulcânicos e material de lava | Média | G | SB | M0-01 | ART-06 | DONE (2026-10-20) |
 | M2-15 | Props de gelo | Média | M | SB | M0-01 | ART-07 | DONE (2026-10-20) |
-| M2-16 | Água, costa e praia | Média | G | S+SB | M0-01 | ART-08/09 | TODO |
+| M2-16 | Água, costa e praia | Média | G | S+SB | M0-01 | ART-08/09 | DONE (2026-10-21) |
 | M2-17 | Sub-bosque e pântano | Fácil | M | SB | M0-01 | ART-10 | DONE (2026-10-20) |
-| M2-18 | Efeitos ambientais (poeira, cinza, vapor, neve, lava) | Média | M | S | M2-14 | ART-11 | TODO |
+| M2-18 | Efeitos ambientais (poeira, cinza, vapor, neve, lava) | Média | M | S | M2-14 | ART-11 | DONE (2026-10-21) |
 | M2-19 | Texturas de terreno por bioma (rocha, vulcânico, pântano, gelo, neve; **confirmada pela M1-01**) | Média | G | SB | M1-01 | ART-05 | DONE (2026-10-17; procedural) |
 | M2-20 | Herói Dorian: integração do `.blend` do dono (animações, jogo, inspetor, retrato) | Difícil | G | SB | `.blend` do dono | MUNDO-HEROIS | DONE (2026-10-20) |
 | M2-21 | Herói Oren: integração do `.blend` do dono | Difícil | G | SB | `.blend` do dono | MUNDO-HEROIS | DONE (2026-10-17; hero_common.py pronta) |

@@ -1129,7 +1129,7 @@ const MODEL_CATALOG = [
     sourceFile: 'tools/blender/build_pig_farm.py',
     create: createGlb('pig_farm'),
     description: 'Criatório orc gerado pelo pipeline Blender (public/models/pig_farm.glb): curral de paliçada com porteira, lama, galpão de toras com palha, cochos e poste de abate. Os javalis do cercado são criados em tempo de execução por PigFarm.js.',
-    notes: '2 draw calls, ~5,1 mil triângulos, atlas 1024², ~295 KB. Pegada ~6 (raio 2,8), altura ~4,3.'
+    notes: '2 draw calls (o cercado em jogo soma 3 javalis procedurais de 4 malhas cada = 14), ~5,1 mil triângulos, atlas 512² (M2-13: era 1024², regenerado com ATLAS=512), ~196 KB. Pegada ~6 (raio 2,8), altura ~4,3.'
   },
   {
     id: 'orc_lumber_mill_glb',

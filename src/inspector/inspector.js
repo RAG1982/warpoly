@@ -362,6 +362,19 @@ const MODEL_CATALOG = [
     notes: 'Rig plana (a do antigo ArcherModel.js, removido na F7-00b; Torso, Head, ArmL, ArmR, LegL, LegR; Bow em ArmL com BowStringTop/BowStringBottom, BowTipTop/BowTipBottom e DrawnArrow). O ModelFactory recria updateBowString a partir desses nós. Também é o modelo do Ranger.'
   },
   {
+    id: 'archer_v2_glb',
+    name: 'Arqueiro v2 (Tripo)',
+    category: 'units',
+    faction: 'human',
+    type: 'archer',
+    icon: '🏹',
+    glb: 'archer_v2',
+    sourceFile: 'tools/blender/build_archer_v2.py',
+    create: createGlb('archer_v2'),
+    description: 'Arqueiro humano v2 (M2-31): modelo do Tripo finalizado no Blender (public/models/archer_v2.glb). Capuz verde-azulado, tabardo azul com emblema (TeamColor), gibão de couro com ombreiras, aljava com flechas nas costas e arco longo na mão do arco (ArmL). É o padrão do Arqueiro e do Patrulheiro no jogo; o modelo antigo continua em "Arqueiro (Blender)".',
+    notes: 'Rig do tipo archer com dois cotovelos novos: ArmL > ForeArmL > Bow (+ BowTipTop/Bottom, BowStringTop/Bottom e DrawnArrow) e ArmR > ForeArmR. Malha espelhada em x (como o Brann): o braço esquerdo do FBX, que segura o arco, é o ArmL (-x), como no archer.glb antigo. No disparo o UnitAnimator contra-gira o ForeArmL (braço do arco reto, arco em pé) e dobra o ForeArmR (corda no encaixe, cotovelo recuado). 13 draw calls, ~22,6 mil triângulos, atlas 512².'
+  },
+  {
     id: 'villager_glb',
     name: 'Camponês (Blender)',
     category: 'units',

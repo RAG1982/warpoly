@@ -18,6 +18,16 @@ export const ANIMATION_DURATIONS = {
   cast: 1.0
 };
 
+/**
+ * M2-31: poses do braço da corda do arqueiro v2 (ArmR e ForeArmR, Euler XYZ em rad) para [corda solta com a flecha encaixada (A),
+ * corda puxada 0,32 (B), solta (C)]. A e B vêm da cinemática inversa que leva a ponta dos dedos ao encaixe do `Bow` com o cotovelo
+ * recuado à altura do ombro (pivôs do archer_v2.glb); C é o relaxamento depois do disparo.
+ */
+const ARCHER_V2_DRAW = {
+  armR: [[0.616, -0.448, -1.434], [1.176, -0.829, -0.747], [1.25, -0.9, -0.5]],
+  foreR: [[-1.024, 0.616, -0.724], [-1.052, 0.744, -1.118], [-0.8, 0.75, -0.9]]
+};
+
 /** F4-06: tipos de modelo com a animação de voo (`applyAir`). */
 const AIR_TYPES = new Set(['glider', 'war_balloon', 'gryphon_rider', 'war_serpent']);
 
@@ -90,6 +100,9 @@ export class UnitAnimator {
       sword: ud.sword,
       shieldGroup: ud.shieldGroup,
       bow: ud.bow,
+      // M2-31: cotovelos do arqueiro v2 (ForeArmL filho do ArmL com o Bow dentro; ForeArmR filho do ArmR)
+      foreArmL: ud.foreArmL || null,
+      foreArmR: ud.foreArmR || null,
       weapon: ud.weapon,
       toolGroup: ud.toolGroup,
       axe: ud.axe,
@@ -835,7 +848,73 @@ export class UnitAnimator {
     }
   }
 
+  /**
+   * M2-31: arqueiro v2 (`archer_v2.glb`). O braço do arco tem cotovelo (`ForeArmL`, filho do `ArmL`) e o `Bow` é filho do `ForeArmL`:
+   * o ArmL sobe como no modelo antigo e o ForeArmL contra-gira o ArmL inteiro (quaternion inverso), de modo que o antebraço, a mão e
+   * o arco mantêm a orientação de repouso (arco em pé, barriga para +Z) e o braço fica reto apontando para o alvo. O braço da corda
+   * tem cotovelo (`ForeArmR`): as poses abaixo (ArmR e ForeArmR em Euler XYZ) vêm de uma cinemática inversa que leva a ponta dos dedos
+   * ao encaixe da corda (A = corda solta, flecha encaixada; B = corda puxada 0,32) e a cotovelo recuado à altura do ombro.
+   */
+  applyArcherFightV2(p, parts) {
+    const A_R = ARCHER_V2_DRAW.armR[0], B_R = ARCHER_V2_DRAW.armR[1], C_R = ARCHER_V2_DRAW.armR[2];
+    const A_F = ARCHER_V2_DRAW.foreR[0], B_F = ARCHER_V2_DRAW.foreR[1], C_F = ARCHER_V2_DRAW.foreR[2];
+    const lerp3 = (a, b, t) => [a[0] + (b[0] - a[0]) * t, a[1] + (b[1] - a[1]) * t, a[2] + (b[2] - a[2]) * t];
+    let ease = 0; // 0 = repouso, 1 = braço do arco levantado
+    let armR = [0, 0, 0], foreR = [0, 0, 0];
+    let drawDist = 0;
+    let kick = 0;
+    if (p < 0.25) {
+      const t = p / 0.25;
+      ease = t * (2 - t);
+      armR = lerp3([0, 0, 0], A_R, ease);
+      foreR = lerp3([0, 0, 0], A_F, ease);
+      if (parts.torso) { parts.torso.rotation.y = ease * 0.55; parts.torso.rotation.x = ease * 0.05; }
+      if (parts.head) parts.head.rotation.y = -ease * 0.45;
+    } else if (p < 0.65) {
+      const t = (p - 0.25) / 0.4;
+      const e = t * t * (3 - 2 * t);
+      ease = 1;
+      drawDist = e * 0.32;
+      armR = lerp3(A_R, B_R, e);
+      foreR = lerp3(A_F, B_F, e);
+      if (parts.torso) parts.torso.rotation.y = 0.55 + e * 0.08;
+      if (parts.head) parts.head.rotation.y = -0.45;
+      if (parts.armL) parts.armL.rotation.x = -1.45 + Math.sin(t * 30) * 0.008 * e; // tensão do arco
+    } else if (p < 0.75) {
+      const t = (p - 0.65) / 0.1;
+      ease = 1;
+      kick = (1 - t) * 0.2;
+      armR = lerp3(B_R, C_R, t);
+      foreR = lerp3(B_F, C_F, t);
+      if (parts.torso) { parts.torso.rotation.y = 0.63 - t * 0.10; parts.torso.position.z -= (1 - t) * 0.03; }
+      if (parts.head) parts.head.rotation.y = -0.45;
+    } else {
+      const t = (p - 0.75) / 0.25;
+      const e = t * t;
+      ease = 1 - e;
+      armR = lerp3(C_R, [0, 0, 0], e);
+      foreR = lerp3(C_F, [0, 0, 0], e);
+      if (parts.torso) parts.torso.rotation.y = 0.53 * (1 - e);
+      if (parts.head) parts.head.rotation.y = -0.45 * (1 - e);
+    }
+    if (parts.updateBowString) parts.updateBowString(drawDist);
+    if (parts.armL) {
+      if (p < 0.25 || p >= 0.65) parts.armL.rotation.x = -1.45 * ease - (p >= 0.65 && p < 0.75 ? kick * 0.75 : 0);
+      parts.armL.rotation.y = 0.18 * ease;
+      parts.armL.rotation.z = -0.05 * ease;
+    }
+    if (parts.foreArmL && parts.armL) parts.foreArmL.quaternion.copy(parts.armL.quaternion).invert();
+    if (parts.bow) {
+      parts.bow.rotation.x = -kick; // o coice da corda empina a ponta do arco
+      parts.bow.rotation.y = 0;
+      parts.bow.rotation.z = -0.1 * ease;
+    }
+    if (parts.armR) parts.armR.rotation.set(armR[0], armR[1], armR[2]);
+    if (parts.foreArmR) parts.foreArmR.rotation.set(foreR[0], foreR[1], foreR[2]);
+  }
+
   applyArcherFight(p, parts) {
+    if (parts.foreArmL) { this.applyArcherFightV2(p, parts); return; }
     // Archer: Raise bow forward, draw string to cheek, aim, release arrow with snap recoil & recovery
     if (p < 0.25) {
       // Bow Raise & Sideways Archer Posture (0.0 -> 0.25)

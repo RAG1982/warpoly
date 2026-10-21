@@ -244,6 +244,19 @@ const MODEL_CATALOG = [
     notes: 'Rig de mago (type mage): o animador contra-gira o Weapon para o cajado ficar em pé e o Crystal pulsa no cast. Braços reposados pelo rig (o FBX estava em T-pose); a saia longa fica no Torso e só as botas viram LegL/LegR. O pano do robe usa TeamColor. 12 draw calls, ~21 mil triângulos, atlas 512².'
   },
   {
+    id: 'hero_vozgul_glb',
+    name: 'Vozgul, a Profetisa (herói, Tripo)',
+    category: 'units',
+    faction: 'orc',
+    type: 'necromancer',
+    icon: '💀',
+    glb: 'hero_vozgul',
+    sourceFile: 'tools/blender/build_hero_vozgul.py',
+    create: createGlb('hero_vozgul'),
+    description: 'Heroína orc Vozgul, a Profetisa: modelo do Tripo finalizado no Blender (public/models/hero_vozgul.glb). Capuz com galhadas de osso, manto longo rasgado de lã cinza-carvão, colares de dentes, bolsas, fitas e faixas vermelhas desbotadas (TeamColor) e cajado em espiral com crânio e chama verde-limão (material emissivo próprio).',
+    notes: 'Rig do necromante (type necromancer): o animador contra-gira o Weapon para o cajado ficar em pé e o Crystal (a chama) pulsa no cast. Braços reposados pelo rig (o FBX estava em T-pose); o manto de costas e a barra longa ficam no Torso (só as sandálias viram LegL/LegR); fitas fazem parte dos braços. 12 draw calls, ~21 mil triângulos, atlas 512².'
+  },
+  {
     id: 'necromancer_glb',
     name: 'Necromante das Cinzas (Blender)',
     category: 'units',

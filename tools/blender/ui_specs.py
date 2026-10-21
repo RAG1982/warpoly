@@ -33,7 +33,7 @@ def S(glb, fam, **over):
 
 # ---- unidades (chave -> .glb) ---------------------------------------------------------------------------------------
 UNITS = {
-    'villager': S('villager', HUM),
+    'villager': S('villager_v2', HUM),                       # M2-30: Aldeão v2 do Tripo (villager_v2.glb)
     'knight': S('knight', HUM),
     'cavalier': S('cavalier', CAV),
     'archer': S('archer', HUM),
@@ -185,7 +185,7 @@ def P(glb, fam, attack=('fight', 0.45), faction='human', **over):
 
 
 PORTRAITS = {
-    'villager': P('villager', dict(PORTRAIT_HUM, crop=0.5), ('fight', 0.3)),
+    'villager': P('villager_v2', dict(PORTRAIT_HUM, crop=0.5), ('fight', 0.3)),   # M2-30
     'knight': P('knight', PORTRAIT_HUM, ('fight', 0.3)),
     'cavalier': P('cavalier', dict(PORTRAIT_FULL, crop=0.55, az=30, el=8), ('fight', 0.3)),
     'archer': P('archer', PORTRAIT_HUM, ('fight', 0.6)),

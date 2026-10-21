@@ -279,7 +279,7 @@ Legenda de dependências: só IDs; "—" = pode começar já. **Dif.** = dificul
 | M2-26 | Biomas: neve solta no `biomeGrid` dos mapas MUNDO-7 e minimapa com cor de bioma | Média | M | S | M1-01 | achados M1-01 | DONE (2026-10-17) |
 | M2-27 | Arte da história sem texto em inglês (painéis 3 e 5, cartão de título) | Média | M | V+S | D5 | achado M1-01 | TODO |
 | M2-29 | Revide inteligente: troca de alvo por proximidade e por colisão (pedido do dono) | Difícil | M | S | M0-01 | pedido do dono 2026-10-20 | DONE (2026-10-21; checksum seed 1 = 1153486316) |
-| M2-30 | Trabalhador humano (Peão do dono): modelo, animações de coleta, jogo e inspetor; o antigo fica no inspetor | Difícil | G | SB | `peao+humano` | pedido do dono 2026-10-21 | TODO |
+| M2-30 | Trabalhador humano (Peão do dono): modelo, animações de coleta, jogo e inspetor; o antigo fica no inspetor | Difícil | G | SB | `peao+humano` | pedido do dono 2026-10-21 | DONE (2026-10-21) |
 | M2-31 | Arqueiro humano (modelo do dono): integração; o antigo fica no inspetor | Difícil | G | SB | `medieval+archer+3d+model` | pedido do dono | TODO |
 | M2-32 | Footman humano (FBX novo `footman (2)`: espada e escudo): integração; o antigo fica no inspetor | Difícil | G | SB | `footman (2)` | pedido do dono | TODO |
 | M2-33 | Centro humano em 3 níveis (Centro1, centro1-2, centro1-3): modelo por nível, troca no upgrade; os antigos ficam no inspetor | Difícil | G | SB | `Centro1`, `centro1-2`, `centro1-3` | pedido do dono | DONE (2026-10-21) |

@@ -112,6 +112,11 @@ export const GLB_MODELS = {
   ice_block_large: { url: `${BASE}models/ice_block_large.glb`, root: 'IceBlockLarge', type: null, lazy: true },
   tree_pine_snow: { url: `${BASE}models/tree_pine_snow.glb`, root: 'TreePineSnow', type: null, lazy: true },
   rock_snow: { url: `${BASE}models/rock_snow.glb`, root: 'RockSnow', type: null, lazy: true },
+  // M2-17 (ART-10): sub-bosque e pântano
+  fern: { url: `${BASE}models/fern.glb`, root: 'Fern', type: null, lazy: true },
+  log_fallen: { url: `${BASE}models/log_fallen.glb`, root: 'LogFallen', type: null, lazy: true },
+  log_drowned: { url: `${BASE}models/log_drowned.glb`, root: 'LogDrowned', type: null, lazy: true },
+  mangrove_root: { url: `${BASE}models/mangrove_root.glb`, root: 'MangroveRoot', type: null, lazy: true },
   tumbleweed: { url: `${BASE}models/tumbleweed.glb`, root: 'Tumbleweed', type: null, lazy: true },
   critter_boar: { url: `${BASE}models/critter_boar.glb`, root: 'CritterBoar', type: null, lazy: true },
   // F7-00b lote 2 (grupo 3): blocos de muralha instanciados (`WallBatch`)

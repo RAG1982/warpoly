@@ -167,7 +167,7 @@ export function decorCountFor(category, size) {
  * prop é `lazy` em `glbModels.js`: só carrega se o mapa tem um bioma com peso > 0 (`propKeysOfMap`). `weights`: bioma → peso;
  * `legacyCount`: instâncias num mapa de 140 u (escala pela área como as demais decorações); `scale`: faixa de escala; `spacing`:
  * distância mínima (u) entre instâncias do MESMO prop; `water: true`: só em água rasa (`minDepth`..`maxDepth`, como as vitórias-régias);
- * `minH`/`maxH`: faixa de altura do terreno. Só visual: nada aqui entra na sim nem no checksum.
+ * `minH`/`maxH`: faixa de altura do terreno; `lift`: deslocamento vertical (m, negativo afunda no chão). Só visual: nada aqui entra na sim nem no checksum.
  */
 export const PROP_RULES = Object.freeze({
   // M2-12 · deserto/estepe/savana
@@ -224,6 +224,23 @@ export const PROP_RULES = Object.freeze({
   rock_snow: {
     legacyCount: 9, minH: 1.8, maxH: 99, scale: [1.3, 2.2], spacing: 6,
     weights: { [BIOME.SNOW]: 1, [BIOME.ICE]: 0.4, [BIOME.ROCK]: 0.5 }
+  },
+  // M2-17 · sub-bosque (exuberante/floresta) e pântano; `lift` < 0 afunda o prop no chão (tronco e raiz na lama)
+  fern: {
+    legacyCount: 14, minH: 1.8, maxH: 99, scale: [1.4, 2.2], spacing: 3,
+    weights: { [BIOME.FOREST]: 1, [BIOME.SWAMP]: 0.7, [BIOME.GRASS]: 0.5 }
+  },
+  log_fallen: {
+    legacyCount: 6, minH: 1.8, maxH: 99, scale: [1.3, 1.9], spacing: 9,
+    weights: { [BIOME.FOREST]: 1, [BIOME.SWAMP]: 0.4, [BIOME.GRASS]: 0.25 }
+  },
+  log_drowned: {
+    legacyCount: 6, minH: 0.6, maxH: 1.8, lift: -0.1, scale: [1.0, 1.5], spacing: 9,
+    weights: { [BIOME.SWAMP]: 1 }
+  },
+  mangrove_root: {
+    legacyCount: 8, minH: 0.6, maxH: 1.6, lift: -0.1, scale: [1.2, 1.8], spacing: 7,
+    weights: { [BIOME.SWAMP]: 1 }
   }
 });
 

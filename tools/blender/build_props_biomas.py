@@ -41,6 +41,7 @@ import common as C  # noqa: E402
 from common import (MeshBuilder, M, prim_box, prim_rings, ring_h, prim_cyl, prim_cone,  # noqa: E402
                     prim_sphere, limb_rings, g, hex_lin)
 import build_props_rochas_cactos as P  # noqa: E402
+import build_vegetacao_seca_arvores as V  # noqa: E402
 from build_props_rochas_cactos import (new_paint, end_paint, smoothstep, lerp_to, bright, edge_wear,  # noqa: E402
                                        ambient_occlusion, stretch, flat_paint, union_blocks, rock_blocks)
 
@@ -436,6 +437,132 @@ def build_pine_snow(mats, root):
 
 
 # ===========================================================================
+# M2-17 · sub-bosque e pântano (paletas de `exuberante` e `pantano` em src/data/tilesets.js)
+# ===========================================================================
+FERN_PAL = {
+    'fern': dict(base='#3c8a3a', var='#256a2c', var_scale=2.2, var_amt=1.0, fine=0.12, top=0.6, edge='#8fd05a', edge_amt=0.3,
+                 edge_r=0.03, ao=(0.8, 0.8)),
+    'fern_light': dict(base='#66ae48', var='#468e3a', var_scale=2.4, var_amt=1.0, fine=0.12, top=0.62, edge='#b6e676',
+                       edge_amt=0.3, edge_r=0.03, ao=(0.8, 0.7)),
+    'rachis': dict(base='#a4ae5e', var='#83904a', var_scale=3.0, var_amt=1.0, fine=0.1, top=0.5, ao=(0.6, 0.5)),
+}
+
+
+def build_fern(mats, root):
+    """Samambaia (~1,5 m de diâmetro, 0,9 m de altura): 11 frondes em roseta, as jovens quase de pé no centro e as maduras
+    arqueando para fora e caindo; margem recortada e nervura central clara. As frondes são fitas de `V.frond`."""
+    rg = random.Random(811)
+    fr = MeshBuilder('Fern')
+    for k in range(11):
+        phi = (137.5 * k + 15.0) % 360.0
+        if k < 3:
+            v, f, fm = V.frond(phi, rg.uniform(62, 74), rg.uniform(35, 50), rg.uniform(0.7, 0.9), 0.12, n=6, zig=0.4, mid=0.012,
+                               drift=rg.uniform(-10, 10), curve=1.1)
+        else:
+            v, f, fm = V.frond(phi, rg.uniform(34, 48), rg.uniform(-42, -26), rg.uniform(1.25, 1.55), 0.20, n=6, zig=0.4, mid=0.014,
+                               drift=rg.uniform(-16, 16), curve=1.5)
+        fm = ['fern_light' if (m == 'a' and k % 3 == 1) else ('fern' if m == 'a' else 'rachis') for m in fm]
+        V.add_sheet(fr, v, f, None, fm, M((0.0, 0.05, 0.0)))
+    return [fr.build(mats, parent=root)]
+
+
+def mats_bark(seed, **kw):
+    p = dict(cols=('#33261b', '#52392a', '#745640'), band_scale=2.5, band_dist=0.6, vertical=True, blot_scale=2.5, blot_amt=0.8,
+             top='#6d5c3c', top_amt=0.3, side='#2a2a30', side_amt=0.12, dust='#4a3a28', dust_h=0.18, dust_amt=0.35, grain=34.0,
+             grain_amt=0.16, crack_amt=0.35, crack_col='#1d140e', edge='#8a6c4c', edge_amt=0.3, edge_r=0.02, ao=(0.3, 0.7),
+             facet_amt=0.12)
+    p.update(kw)
+    return strata_paint('P_bark', seed=seed, **p)
+
+
+def wood_mats(seed, **kw):
+    return {
+        'bark': mats_bark(seed, **kw),
+        'wood': flat_paint('P_wood', '#cfae74', '#a98450', fine=0.12, top=0.2, edge='#e8d4a0', edge_amt=0.3, ao=(0.2, 0.4)),
+        'moss': flat_paint('P_moss', '#5a8630', '#3e6a24', fine=0.14, top=0.4, edge='#9ac85a', edge_amt=0.3, ao=(0.3, 0.5)),
+        'fungus': flat_paint('P_fungus', '#e9dcc0', '#c8b48c', fine=0.1, top=0.35, edge='#fff4dc', edge_amt=0.3, ao=(0.2, 0.4)),
+    }
+
+
+def log_prim(path, radii, n=8):
+    return prim_rings(limb_rings(path, radii, n=n, up=(0, 1, 0)), cap0=False, cap1=False)
+
+
+def build_log_fallen(mats, root):
+    """Tronco caído (~3,3 m de comprimento, 0,8 m de diâmetro), deitado e com uma leve curva: uma ponta com o corte de
+    miolo claro e a outra quebrada em lascas, dois tocos de galho, musgo no topo e um cogumelo-prateleira."""
+    rg = random.Random(821)
+    mb = MeshBuilder('Log')
+    path = [(-1.7, 0.30, 0.00), (-0.6, 0.38, 0.05), (0.6, 0.40, 0.00), (1.7, 0.33, -0.08)]
+    radii = [0.34, 0.39, 0.38, 0.33]
+    mb.add(log_prim(path, radii), 'bark', smooth=0)
+    # corte da ponta -x (miolo claro): disco achatado de madeira
+    mb.add(prim_cyl(0.30, 0.30, 0.03, 8, base=False), 'wood', M((-1.71, 0.30, 0.0), (0, 0, 90)), smooth=0)
+    # ponta quebrada +x: três lascas em cunha
+    for k in range(4):
+        a = k * 90.0 + 20.0
+        mb.add(prim_box(0.2, 0.34, 0.12, taper=(0.2, 0.7), base=True), 'bark',
+               M((1.62, 0.33, -0.08), (a, -10, -90)) @ M((0, 0.0, 0.26)), smooth=0)
+    # tocos de galho
+    for (x, a, h) in ((-0.5, 40.0, 0.30), (0.7, -30.0, 0.25)):
+        mb.add(prim_cyl(0.10, 0.07, h, 5, base=True), 'bark', M((x, 0.52, 0.05), (a, 0, 0)), smooth=0)
+    # musgo no topo
+    for (x, z, sx, sz) in ((-0.9, 0.0, 0.40, 0.22), (0.1, 0.05, 0.55, 0.26), (1.1, -0.02, 0.35, 0.2)):
+        mb.add(prim_sphere(sx, 0.07, sz, 6, 3, y_min=0.0), 'moss', M((x, 0.66, z), (0, rg.uniform(-20, 20), 0)), smooth=0)
+    # cogumelo-prateleira na lateral
+    for (x, y, s) in ((0.35, 0.28, 0.16), (0.55, 0.40, 0.11)):
+        mb.add(prim_sphere(s, s * 0.35, s, 6, 3, y_min=0.0), 'fungus', M((x, y, 0.38), (80, 0, 0)), smooth=0)
+    return [mb.build(mats, parent=root)]
+
+
+def build_log_drowned(mats, root):
+    """Tronco afogado (~3,4 m), inclinado: uma ponta enterrada na lama e a outra erguida (~1,2 m), com um galho em Y quebrado,
+    musgo e limo na parte de baixo, três cogumelos-prateleira e o miolo à mostra na ponta quebrada."""
+    rg = random.Random(831)
+    mb = MeshBuilder('Log')
+    path = [(-1.5, -0.25, 0.10), (-0.7, 0.05, 0.05), (0.2, 0.40, 0.0), (1.1, 0.85, -0.06), (1.65, 1.15, -0.10)]
+    radii = [0.36, 0.34, 0.31, 0.27, 0.22]
+    mb.add(log_prim(path, radii), 'bark', smooth=0)
+    mb.add(prim_cyl(0.22, 0.20, 0.03, 8, base=False), 'wood', M((1.66, 1.16, -0.10), (0, 0, -61)), smooth=0)
+    # galho em Y quebrado saindo da parte alta
+    mb.add(log_prim([(0.9, 0.78, -0.04), (1.1, 1.25, 0.20), (1.15, 1.65, 0.34)], [0.12, 0.09, 0.05], n=6), 'bark', smooth=0)
+    mb.add(log_prim([(0.55, 0.62, 0.05), (0.40, 1.00, 0.30), (0.30, 1.30, 0.42)], [0.09, 0.07, 0.04], n=6), 'bark', smooth=0)
+    # limo/musgo no topo e na base
+    for (x, y, z, sx, sz) in ((-1.0, 0.18, 0.0, 0.42, 0.24), (-0.1, 0.52, 0.02, 0.45, 0.22), (0.6, 0.78, 0.0, 0.30, 0.18)):
+        mb.add(prim_sphere(sx, 0.07, sz, 6, 3, y_min=0.0), 'moss', M((x, y, z), (0, rg.uniform(-20, 20), -25)), smooth=0)
+    for (x, y, s) in ((0.0, 0.18, 0.15), (0.35, 0.34, 0.12), (-0.55, -0.02, 0.13)):
+        mb.add(prim_sphere(s, s * 0.35, s, 6, 3, y_min=0.0), 'fungus', M((x, y, 0.34), (80, 0, 0)), smooth=0)
+    return [mb.build(mats, parent=root)]
+
+
+def build_mangrove(mats, root):
+    """Raiz de mangue (~2,8 m de largura, 2,0 m de altura): tronco curto e torto, seis raízes-escora em arco que descem
+    do tronco e se enterram em volta, e uma pequena copa de folhas verde-escuras no alto."""
+    rg = random.Random(841)
+    mb = MeshBuilder('Mangrove')
+    trunk = [(0.0, -0.20, 0.0), (0.03, 0.50, 0.02), (0.0, 1.10, -0.02), (0.05, 1.55, 0.0)]
+    mb.add(prim_rings(limb_rings(trunk, [0.34, 0.26, 0.22, 0.16], n=7, up=(0, 0, 1)), cap0=False, cap1=True), 'bark', smooth=0)
+    for k in range(6):
+        a = TAU * k / 6 + rg.uniform(-0.25, 0.25)
+        ca, sa = math.cos(a), math.sin(a)
+        r1 = rg.uniform(1.0, 1.35)
+        y0 = rg.uniform(0.85, 1.2)
+        pts = [(ca * 0.12, y0, sa * 0.12), (ca * r1 * 0.45, y0 + 0.42, sa * r1 * 0.45), (ca * r1 * 0.85, y0 + 0.22, sa * r1 * 0.85),
+               (ca * r1, 0.35, sa * r1), (ca * r1 * 1.05, -0.20, sa * r1 * 1.05)]
+        mb.add(prim_rings(limb_rings(pts, [0.13, 0.11, 0.095, 0.085, 0.07], n=5, up=(0, 1, 0)), cap0=False, cap1=False), 'bark',
+               smooth=0)
+    for (x, y, z, rx, rz) in ((0.1, 1.85, 0.0, 0.62, 0.55), (-0.45, 1.65, 0.25, 0.42, 0.38), (0.45, 1.7, -0.2, 0.40, 0.36)):
+        mb.add(prim_sphere(rx, rx * 0.5, rz, 7, 3), 'leaf', M((x, y, z), (0, rg.uniform(0, 90), 0)), smooth=0)
+    return [mb.build(mats, parent=root)]
+
+
+def mats_mangrove():
+    m = wood_mats(3.9, cols=('#2c241a', '#463a2a', '#66553c'), dust='#3a3a22', dust_amt=0.45, dust_h=0.35)
+    m['leaf'] = flat_paint('P_leaf', '#3f7a34', '#2a5c2a', fine=0.14, top=0.6, edge='#8fc060', edge_amt=0.3, ao=(0.6, 0.7))
+    return m
+
+
+# ===========================================================================
 # Registro dos modelos
 # ===========================================================================
 SPECS = {
@@ -467,12 +594,22 @@ SPECS = {
                            margin=0.01, angle=66.0, rough=0.85),
     'rock_snow': dict(root='RockSnow', atlas=512, build=build_rock_snow, mats=lambda: mats_snow_rock(2.6),
                       margin=0.007, angle=66.0, rough=0.88),
+    # M2-17
+    'fern': dict(root='Fern', atlas=512, build=build_fern, mats=lambda: C.make_paint_set(FERN_PAL),
+                 margin=0.01, angle=70.0, rough=0.85),
+    'log_fallen': dict(root='LogFallen', atlas=512, build=build_log_fallen, mats=lambda: wood_mats(1.9),
+                       margin=0.008, angle=66.0, rough=0.92),
+    'log_drowned': dict(root='LogDrowned', atlas=512, build=build_log_drowned,
+                        mats=lambda: wood_mats(5.7, cols=('#2a2a22', '#454434', '#625f46'), dust='#2f3a22', dust_amt=0.5, dust_h=0.3),
+                        margin=0.008, angle=66.0, rough=0.92),
+    'mangrove_root': dict(root='MangroveRoot', atlas=512, build=build_mangrove, mats=mats_mangrove,
+                          margin=0.008, angle=66.0, rough=0.92),
 }
 GROUPS = {
     'arenito': ['rock_sandstone_a', 'rock_sandstone_b'],
     'vulcanico': ['rock_basalt_a', 'rock_basalt_b', 'volcano_cone', 'tree_burnt', 'fumarole', 'obsidian'],
     'gelo': ['ice_block_small', 'ice_block_large', 'tree_pine_snow', 'rock_snow'],
-    'subosque': [],
+    'subosque': ['fern', 'log_fallen', 'log_drowned', 'mangrove_root'],
 }
 BUDGET_TRIS = 600
 

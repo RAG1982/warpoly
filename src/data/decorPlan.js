@@ -135,7 +135,7 @@ export function planProps({ regions, getHeight, mapDef, lava = null, waterLevel 
       if (slots.some((p) => Math.hypot(p.x - x, p.z - z) < PROP_SLOT_CLEAR)) continue;
       if (resources.some((p) => Math.hypot(p.x - x, p.z - z) < PROP_RESOURCE_CLEAR)) continue;
       if (rule.spacing && out.some((p) => Math.hypot(p.x - x, p.z - z) < rule.spacing)) continue;
-      out.push({ x, y: rule.water ? waterLevel + (rule.lift || 0) : h, z, rotY: spin, scale: sc, style });
+      out.push({ x, y: (rule.water ? waterLevel : h) + (rule.lift || 0), z, rotY: spin, scale: sc, style });
     }
     if (out.length) plan[key] = out;
   }

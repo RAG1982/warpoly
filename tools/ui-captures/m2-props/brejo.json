@@ -1,0 +1,49 @@
+{
+  "when": "2026-10-21T02:52:06.799Z",
+  "mapId": "camp-07-brejo-mudo",
+  "perProp": {
+    "fern": {
+      "colocado": true,
+      "instancias": 22,
+      "drawCallsCom": 260,
+      "drawCallsSem": 258,
+      "delta": 2
+    },
+    "log_fallen": {
+      "colocado": true,
+      "instancias": 9,
+      "drawCallsCom": 201,
+      "drawCallsSem": 199,
+      "delta": 2
+    },
+    "log_drowned": {
+      "colocado": true,
+      "instancias": 9,
+      "drawCallsCom": 130,
+      "drawCallsSem": 128,
+      "delta": 2
+    },
+    "mangrove_root": {
+      "colocado": true,
+      "instancias": 13,
+      "drawCallsCom": 181,
+      "drawCallsSem": 179,
+      "delta": 2
+    }
+  },
+  "mapIdAtivo": "camp-07-brejo-mudo",
+  "plan": {
+    "fern": 22,
+    "log_fallen": 9,
+    "log_drowned": 9,
+    "mangrove_root": 13
+  },
+  "meshesNoJogo": [
+    "InstancedProp_fern:22",
+    "InstancedProp_log_fallen:9",
+    "InstancedProp_log_drowned:9",
+    "InstancedProp_mangrove_root:13"
+  ],
+  "drawCallsTotal": 181,
+  "errors": []
+}

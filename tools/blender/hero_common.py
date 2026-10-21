@@ -1083,7 +1083,7 @@ def renderizar_fonte(C, rig, f, sopa, objs):
 CORES_PECAS = {'Torso': '#9a9a9a', 'Head': '#e6c800', 'ArmL': '#22cc22', 'ArmR': '#ee2222', 'LegL': '#00ccee',
                'LegR': '#dd00dd', 'Sword': '#4a5cff', 'Cape': '#ff8800', 'Weapon': '#4a5cff', 'Crystal': '#ff8800',
                'Horse': '#9a9a9a', 'HorseLegFL': '#ee4444', 'HorseLegFR': '#44ee44', 'HorseLegBL': '#4444ee', 'HorseLegBR': '#eeee44',
-               'Banner': '#ff8800'}
+               'Banner': '#ff8800', 'ToolGroup': '#4a5cff'}
 
 
 def colorir_pecas(objs):

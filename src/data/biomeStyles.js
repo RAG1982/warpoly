@@ -157,3 +157,38 @@ export function decorCountFor(category, size) {
   const k = Math.max(1, Math.min(3.5, (size / 140) * (size / 140)));
   return Math.max(rule.legacyCount, Math.round(rule.legacyCount * k));
 }
+
+// ---------------------------------------------------------------------------------------------
+// Props .glb por bioma (M2-12/14/15/17 · ART-01/03/06/07/10): rochas, cactos, árvores mortas, gelo, troncos...
+// ---------------------------------------------------------------------------------------------
+
+/**
+ * Regras de colocação dos props .glb (`planProps` em `decorPlan.js`; render em `Decorations`, um InstancedMesh por `glb`). Cada
+ * prop é `lazy` em `glbModels.js`: só carrega se o mapa tem um bioma com peso > 0 (`propKeysOfMap`). `weights`: bioma → peso;
+ * `legacyCount`: instâncias num mapa de 140 u (escala pela área como as demais decorações); `scale`: faixa de escala; `spacing`:
+ * distância mínima (u) entre instâncias do MESMO prop; `water: true`: só em água rasa (`minDepth`..`maxDepth`, como as vitórias-régias);
+ * `minH`/`maxH`: faixa de altura do terreno. Só visual: nada aqui entra na sim nem no checksum.
+ */
+export const PROP_RULES = Object.freeze({
+  // M2-12 · deserto/estepe/savana
+  rock_sandstone_a: {
+    legacyCount: 5, minH: 1.8, maxH: 99, scale: [1.5, 2.5], spacing: 10,
+    weights: { [BIOME.DESERT]: 1, [BIOME.STEPPE]: 0.35, [BIOME.SAVANNA]: 0.1 }
+  },
+  rock_sandstone_b: {
+    legacyCount: 9, minH: 1.8, maxH: 99, scale: [1.2, 2.2], spacing: 6,
+    weights: { [BIOME.DESERT]: 1, [BIOME.STEPPE]: 0.5, [BIOME.SAVANNA]: 0.2 }
+  },
+  tumbleweed: {
+    legacyCount: 7, minH: 1.8, maxH: 99, scale: [1.2, 1.8], spacing: 5,
+    weights: { [BIOME.DESERT]: 1, [BIOME.STEPPE]: 1, [BIOME.SAVANNA]: 0.3 }
+  }
+});
+
+/** Quantas instâncias de um prop num mapa regional de lado `size` (mesma escala por área de `decorCountFor`). */
+export function propCountFor(key, size) {
+  const rule = PROP_RULES[key];
+  if (!rule) return 0;
+  const k = Math.max(1, Math.min(3.5, (size / 140) * (size / 140)));
+  return Math.max(rule.legacyCount, Math.round(rule.legacyCount * k));
+}

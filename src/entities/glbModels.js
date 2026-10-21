@@ -97,6 +97,9 @@ export const GLB_MODELS = {
   tree_palm: { url: `${BASE}models/tree_palm.glb`, root: 'TreePalm', type: null, lazy: true },
   tree_acacia: { url: `${BASE}models/tree_acacia.glb`, root: 'TreeAcacia', type: null, lazy: true },
   grass_dry: { url: `${BASE}models/grass_dry.glb`, root: 'GrassDry', type: null, lazy: true },
+  // M2-12 (ART-01): arenito em estratos
+  rock_sandstone_a: { url: `${BASE}models/rock_sandstone_a.glb`, root: 'RockSandstoneA', type: null, lazy: true },
+  rock_sandstone_b: { url: `${BASE}models/rock_sandstone_b.glb`, root: 'RockSandstoneB', type: null, lazy: true },
   tumbleweed: { url: `${BASE}models/tumbleweed.glb`, root: 'Tumbleweed', type: null, lazy: true },
   critter_boar: { url: `${BASE}models/critter_boar.glb`, root: 'CritterBoar', type: null, lazy: true },
   // F7-00b lote 2 (grupo 3): blocos de muralha instanciados (`WallBatch`)

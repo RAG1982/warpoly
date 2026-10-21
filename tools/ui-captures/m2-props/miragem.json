@@ -1,0 +1,40 @@
+{
+  "when": "2026-10-21T02:35:54.282Z",
+  "mapId": "camp-09-miragem",
+  "perProp": {
+    "rock_sandstone_a": {
+      "colocado": true,
+      "instancias": 8,
+      "drawCallsCom": 322,
+      "drawCallsSem": 320,
+      "delta": 2
+    },
+    "rock_sandstone_b": {
+      "colocado": true,
+      "instancias": 14,
+      "drawCallsCom": 158,
+      "drawCallsSem": 156,
+      "delta": 2
+    },
+    "tumbleweed": {
+      "colocado": true,
+      "instancias": 11,
+      "drawCallsCom": 273,
+      "drawCallsSem": 271,
+      "delta": 2
+    }
+  },
+  "mapIdAtivo": "camp-09-miragem",
+  "plan": {
+    "rock_sandstone_a": 8,
+    "rock_sandstone_b": 14,
+    "tumbleweed": 11
+  },
+  "meshesNoJogo": [
+    "InstancedProp_rock_sandstone_a:8",
+    "InstancedProp_rock_sandstone_b:14",
+    "InstancedProp_tumbleweed:11"
+  ],
+  "drawCallsTotal": 273,
+  "errors": []
+}

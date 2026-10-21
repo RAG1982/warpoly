@@ -140,6 +140,214 @@ def build_sandstone_b(mats, root):
 
 
 # ===========================================================================
+# M2-14 · vulcânico (paleta de `vulcanico` em src/data/tilesets.js: basalto #2b2528/#3a3436, cinza, lava laranja)
+# ===========================================================================
+TAU = 2.0 * math.pi
+BASALT = ('#262124', '#3a3336', '#52484b')
+
+
+def polar_ring(y, r, n, phase=0.0, rng=None, jit=0.0, rj=0.0):
+    """Anel horizontal de n pontos (raio r com sorteio de ±rj e deslocamento de ±jit): cones, montes e crateras facetados."""
+    pts = []
+    for i in range(n):
+        a = phase + TAU * i / n
+        rr = r * (1.0 + (rng.uniform(-rj, rj) if rng else 0.0))
+        dx, dz = (rng.uniform(-jit, jit), rng.uniform(-jit, jit)) if rng else (0.0, 0.0)
+        pts.append((math.cos(a) * rr + dx, y, math.sin(a) * rr + dz))
+    return pts
+
+
+def hex_col(rng, r, bottom, top, tilt=0.16, jit=0.03, flare=1.06, cap0=False, n=6):
+    """Coluna hexagonal de basalto: prisma de 6 lados com cada vértice deslocado um pouco (a junta nunca é perfeita), topo plano
+    inclinado (`tilt`) e base mais larga (`flare`). 16 tris sem a tampa de baixo."""
+    ph = rng.uniform(0.0, TAU / n)
+    tx, tz = rng.uniform(-tilt, tilt), rng.uniform(-tilt, tilt)
+    lo, hi = [], []
+    for i in range(n):
+        a = ph + TAU * i / n
+        x = math.cos(a) * r + rng.uniform(-jit, jit)
+        z = math.sin(a) * r + rng.uniform(-jit, jit)
+        lo.append((x * flare, bottom, z * flare))
+        hi.append((x, top + tx * x + tz * z, z))
+    return prim_rings([lo, hi], cap0=cap0, cap1=True)
+
+
+def mats_basalt(seed):
+    return {'rock': strata_paint('P_basalt', seed=seed, cols=BASALT, band_scale=3.0, band_dist=0.5, vertical=True, blot_scale=2.2,
+                                 blot_amt=0.6, top='#6b6063', top_amt=0.5, side='#2e2f3a', side_amt=0.18, dust='#4f4648',
+                                 dust_h=0.3, dust_amt=0.5, grain=34.0, grain_amt=0.14, crack_amt=0.3, crack_col='#141012',
+                                 edge='#8a7b7d', edge_amt=0.35, edge_r=0.02, ao=(0.4, 0.7), facet_amt=0.18)}
+
+
+def build_basalt_a(mats, root):
+    """Cluster de 10 colunas hexagonais (~2,2 m de altura no centro), em empacotamento hexagonal: o centro é o mais alto e a
+    altura cai para fora, com alturas e topos inclinados diferentes; uma coluna quebrada rente ao chão na borda."""
+    rng = random.Random(611)
+    mb = MeshBuilder('Basalt')
+    r, d = 0.36, 0.66
+    cells = [(0.0, 0.0, 2.15)]
+    for k in range(6):
+        a = TAU * k / 6 + 0.3
+        cells.append((math.cos(a) * d, math.sin(a) * d, rng.uniform(1.15, 1.75)))
+    for k in range(3):
+        a = TAU * (k * 2 + 0.5) / 6 + 0.3
+        cells.append((math.cos(a) * d * 1.9, math.sin(a) * d * 1.9, rng.uniform(0.45, 0.9)))
+    for (x, z, h) in cells:
+        mb.add(hex_col(rng, r * rng.uniform(0.93, 1.02), -0.30, h), 'rock', M((x, 0, z)), smooth=0)
+    return [mb.build(mats, parent=root)]
+
+
+def build_basalt_b(mats, root):
+    """Colunas baixas (0,35 a 1,2 m): cinco de pé em meia-lua, uma tombada de lado (comprida, sobre o chão) e um toco."""
+    rng = random.Random(622)
+    mb = MeshBuilder('Basalt')
+    r = 0.34
+    stand = [(-0.33, 0.0, 1.2), (0.33, 0.0, 0.95), (0.0, 0.58, 0.64), (0.66, 0.58, 0.46), (-0.66, 0.58, 0.38)]
+    for (x, z, h) in stand:
+        mb.add(hex_col(rng, r * rng.uniform(0.95, 1.0), -0.25, h), 'rock', M((x, 0, z)), smooth=0)
+    # coluna tombada: eixo ao longo de x (y do prisma girado 90° em z), apoiada no chão, em frente das de pé
+    mb.add(hex_col(rng, 0.30, 0.0, 1.45, tilt=0.12, cap0=True), 'rock', M((0.75, 0.29, 1.50), (0, 8, 90)), smooth=0)
+    mb.add(hex_col(rng, 0.28, -0.2, 0.22, tilt=0.3), 'rock', M((1.32, 0, 0.25)), smooth=0)
+    return [mb.build(mats, parent=root)]
+
+
+def build_volcano_cone(mats, root):
+    """Cone vulcânico pequeno (~3,8 m de diâmetro, 1,2 m de altura): 10 faces com raios sorteados, borda de cratera irregular
+    (dois dentes mais baixos) e boca de lava laranja; três filetes de lava escorrem pela encosta."""
+    rng = random.Random(633)
+    n = 10
+    prof = [(-0.30, 1.85), (0.32, 1.40), (0.90, 0.92), (1.32, 0.62)]
+    rings = [polar_ring(y, r, n, rng=rng, rj=0.08, jit=0.05) for (y, r) in prof]
+    # dentes na borda: dois vértices do anel de cima mais baixos
+    for i in (2, 7):
+        x, y, z = rings[-1][i]
+        rings[-1][i] = (x, y - 0.22, z)
+    mb = MeshBuilder('Cone')
+    mb.add(prim_rings(rings, cap0=False, cap1=False), 'rock', smooth=0)
+    # parede e boca da cratera (lava): da borda para dentro e para baixo
+    inner = [polar_ring(1.24, 0.52, n, rng=rng, rj=0.06), polar_ring(0.90, 0.38, n, rng=rng, rj=0.06),
+             polar_ring(0.62, 0.22, n, rng=rng, rj=0.06)]
+    mb.add(prim_rings(inner, cap0=False, cap1=True), 'lava', smooth=0)
+    # anel de ligação borda -> cratera (rocha escura)
+    mb.add(prim_rings([rings[-1], inner[0]], cap0=False, cap1=False), 'rock', smooth=0)
+    # filetes de lava escorrendo pela encosta: faixas que seguem os vértices dos anéis (u = índice + fração), um pouco acima da face
+    def on_ring(j, u):
+        i0 = int(math.floor(u)) % n
+        f = u - math.floor(u)
+        p0, p1 = Vector(rings[j][i0]), Vector(rings[j][(i0 + 1) % n])
+        p = p0 + (p1 - p0) * f
+        out = Vector((p.x, 0.0, p.z))
+        out.normalize()
+        return tuple(p + out * 0.05 + Vector((0.0, 0.03, 0.0)))
+    for (u0, du) in ((0.40, 0.14), (3.35, 0.16), (6.55, 0.13)):
+        left = [on_ring(j, u0 - du * (1.0 - 0.5 * j / 3.0)) for j in range(3, -1, -1)]
+        right = [on_ring(j, u0 + du * (1.0 - 0.5 * j / 3.0)) for j in range(3, -1, -1)]
+        mb.add(prim_rings([left, right], cap0=False, cap1=False, closed=False), 'lava_dark', smooth=0)
+    return [mb.build(mats, parent=root)]
+
+
+def mats_cone(seed):
+    m = mats_basalt(seed)
+    m['lava'] = flat_paint('P_lava', '#ff6a14', '#ffc23a', fine=0.12, top=0.0, emit=1.15)
+    m['lava_dark'] = flat_paint('P_lava_d', '#e2530f', '#ff8a24', fine=0.12, top=0.0, emit=1.05)
+    return m
+
+
+def build_tree_burnt(mats, root):
+    """Árvore queimada (~4,2 m): tronco carbonizado que afina e entorta até uma ponta quebrada, três galhos secos (um alto à
+    esquerda, um curto quebrado à direita e um caído) e um toco lateral; sem folhas. Brasas laranja nas trincas e na base
+    (pintura)."""
+    rng = random.Random(644)
+    mb = MeshBuilder('Burnt')
+
+    def limb(path, radii, n=7, cap=True):
+        return prim_rings(limb_rings(path, radii, n=n, up=(0, 0, 1)), cap0=False, cap1=cap)
+
+    trunk = [(0.0, -0.25, 0.0), (0.05, 0.55, 0.03), (0.14, 1.4, -0.02), (0.08, 2.3, -0.07), (0.20, 3.1, -0.10), (0.36, 3.85, -0.04)]
+    mb.add(limb(trunk, [0.62, 0.50, 0.40, 0.32, 0.22, 0.10], n=8), 'char', smooth=0)
+    # raízes expostas no pé: cunhas baixas
+    for k in range(4):
+        a = 0.8 + k * 1.6
+        mb.add(prim_box(0.75, 0.34, 0.26, taper=(0.4, 0.6), base=True),
+               'char', M((math.cos(a) * 0.50, -0.05, math.sin(a) * 0.50), (0, -math.degrees(a), 8)), smooth=0)
+    branches = [
+        [(0.10, 1.95, -0.05), (-0.45, 2.35, 0.02), (-1.05, 2.95, 0.10), (-1.55, 3.65, 0.12)],     # alto, para -x
+        [(0.12, 1.45, 0.0), (0.58, 1.78, 0.10), (1.00, 2.10, 0.16)],                              # curto, quebrado, para +x
+        [(0.20, 2.85, -0.08), (0.66, 3.25, -0.20), (1.00, 3.38, -0.55)],                          # fino alto, para +x/-z
+        [(0.05, 2.35, 0.10), (-0.20, 2.75, 0.60), (-0.35, 3.25, 1.05)],                           # para a frente (+z)
+        [(0.15, 2.6, -0.10), (0.40, 3.0, -0.60), (0.35, 3.55, -0.95)],                            # para trás
+    ]
+    radii = [[0.20, 0.15, 0.10, 0.04], [0.18, 0.13, 0.08], [0.12, 0.09, 0.035], [0.13, 0.10, 0.04], [0.11, 0.08, 0.03]]
+    for p, rr in zip(branches, radii):
+        mb.add(limb(p, rr, n=6), 'char', smooth=0)
+    # galho caído no chão, encostado no pé
+    fallen = [(0.55, 0.12, 0.55), (1.15, 0.15, 0.85), (1.85, 0.11, 1.05)]
+    mb.add(limb(fallen, [0.15, 0.12, 0.05], n=6), 'char', smooth=0)
+    return [mb.build(mats, parent=root)]
+
+
+def mats_burnt(seed):
+    return {'char': strata_paint('P_char', seed=seed, cols=('#0f0d0e', '#1d191a', '#322a29'), band_scale=2.0, band_dist=0.6, vertical=True,
+                                 blot_scale=3.0, blot_amt=0.7, top='#3a3030', top_amt=0.3, side='#15151c', side_amt=0.1,
+                                 dust='#c24e18', dust_h=0.40, dust_amt=0.45, grain=30.0, grain_amt=0.16, crack_amt=0.38,
+                                 crack_col='#f0661c', edge='#4a3c38', edge_amt=0.3, edge_r=0.02, ao=(0.3, 0.7), facet_amt=0.12)}
+
+
+def build_fumarole(mats, root):
+    """Respiradouro (~2,8 m de diâmetro, 0,6 m de altura): monte baixo de basalto com anel de crosta de enxofre amarelo ao
+    redor de uma boca escura, cinco cristais de enxofre em volta e três pedras soltas. O vapor é da M2-18."""
+    rng = random.Random(655)
+    n = 10
+    prof = [(-0.25, 1.50), (0.12, 1.22), (0.40, 0.95), (0.60, 0.66), (0.62, 0.50), (0.46, 0.40), (0.16, 0.24)]
+    band_mat = ['rock', 'rock', 'sulfur', 'sulfur', 'hole', 'hole']
+    rings = [polar_ring(y, r, n, rng=rng, rj=0.07, jit=0.04) for (y, r) in prof]
+    mb = MeshBuilder('Fumarole')
+    for i in range(len(rings) - 1):
+        mb.add(prim_rings([rings[i], rings[i + 1]], cap0=False, cap1=(i == len(rings) - 2)), band_mat[i], smooth=0)
+    for k in range(5):
+        a = TAU * k / 5 + 0.4
+        rr = rng.uniform(0.70, 0.82)
+        h = rng.uniform(0.18, 0.34)
+        mb.add(prim_cone(0.07, h, n=4), 'crystal', M((math.cos(a) * rr, 0.52, math.sin(a) * rr), (rng.uniform(-18, 18), 0, rng.uniform(-18, 18))),
+               smooth=0)
+    for (x, z, s) in ((1.05, 0.55, 0.20), (-0.95, 0.85, 0.16), (0.2, -1.2, 0.18)):
+        mb.add(prim_sphere(s, s * 0.75, s, 5, 3, y_min=-0.2), 'rock', M((x, 0.0, z)), smooth=0)
+    return [mb.build(mats, parent=root)]
+
+
+def mats_fumarole(seed):
+    m = mats_basalt(seed)
+    m['sulfur'] = flat_paint('P_sulfur', '#d8bb2c', '#a89520', fine=0.14, top=0.25, edge='#f5e46a', edge_amt=0.3, ao=(0.3, 0.5))
+    m['hole'] = flat_paint('P_hole', '#120d0e', '#241a18', fine=0.1, top=0.0)
+    m['crystal'] = flat_paint('P_crystal', '#f0d93a', '#d9b422', fine=0.08, top=0.4, edge='#fff6a0', edge_amt=0.4)
+    return m
+
+
+def build_obsidian(mats, root):
+    """Aglomerado de cristais de obsidiana (~1,5 m de altura): nove prismas hexagonais pontiagudos inclinados para fora (o
+    maior no centro), de base larga e topo em ponta, mais duas lascas pequenas. Arestas vivas com brilho pintado."""
+    rng = random.Random(666)
+    mb = MeshBuilder('Obsidian')
+    # (x, z, altura, raio, inclinação x, inclinação z)
+    shards = [(0.0, 0.0, 1.55, 0.26, 4, -6), (0.42, 0.18, 1.05, 0.20, 16, -20), (-0.40, 0.10, 0.95, 0.19, -8, 18),
+              (0.12, -0.42, 0.85, 0.18, -22, 5), (-0.18, 0.46, 0.70, 0.16, 20, 8), (0.64, -0.30, 0.55, 0.14, -14, -26),
+              (-0.66, -0.22, 0.48, 0.13, 6, 28), (0.40, 0.58, 0.42, 0.12, 24, -10), (-0.46, 0.62, 0.36, 0.11, 18, 20)]
+    for (x, z, h, r, tx, tz) in shards:
+        ph = rng.uniform(0.0, 1.0)
+        rings = [ring_h(-0.15, r, r, 6, phase=ph), ring_h(h * 0.70, r * 0.92, r * 0.92, 6, phase=ph + 0.1),
+                 ring_h(h, r * 0.22, r * 0.22, 6, phase=ph + 0.2)]
+        mb.add(prim_rings(rings, cap0=False, cap1=True), 'glass', M((x, 0.0, z), (tx, rng.uniform(0, 60), tz)), smooth=0)
+    return [mb.build(mats, parent=root)]
+
+
+def mats_obsidian(seed):
+    return {'glass': strata_paint('P_obsidian', seed=seed, cols=('#07050a', '#120e18', '#251d33'), band_scale=2.5, band_dist=0.6,
+                                  blot_scale=2.0, blot_amt=0.8, top='#7c6cae', top_amt=0.7, side='#1c1a2c', side_amt=0.2,
+                                  dust='#2a2326', dust_h=0.12, dust_amt=0.4, grain=14.0, grain_amt=0.08, crack_amt=0.0,
+                                  edge='#a698d8', edge_amt=0.85, edge_r=0.03, ao=(0.35, 0.65), facet_amt=0.5)}
+
+
+# ===========================================================================
 # Registro dos modelos
 # ===========================================================================
 SPECS = {
@@ -149,10 +357,23 @@ SPECS = {
     'rock_sandstone_b': dict(root='RockSandstoneB', atlas=512, build=build_sandstone_b,
                              mats=lambda: mats_sandstone(4.6, band_scale=11.0, grain=30.0, edge_r=0.022, dust_h=0.2),
                              margin=0.007, angle=66.0, rough=0.92),
+    # M2-14
+    'rock_basalt_a': dict(root='RockBasaltA', atlas=512, build=build_basalt_a, mats=lambda: mats_basalt(2.1),
+                          margin=0.007, angle=66.0, rough=0.9),
+    'rock_basalt_b': dict(root='RockBasaltB', atlas=512, build=build_basalt_b, mats=lambda: mats_basalt(6.4),
+                          margin=0.007, angle=66.0, rough=0.9),
+    'volcano_cone': dict(root='VolcanoCone', atlas=512, build=build_volcano_cone, mats=lambda: mats_cone(3.3),
+                         margin=0.008, angle=66.0, rough=0.9),
+    'tree_burnt': dict(root='TreeBurnt', atlas=512, build=build_tree_burnt, mats=lambda: mats_burnt(1.8),
+                       margin=0.008, angle=66.0, rough=0.95),
+    'fumarole': dict(root='Fumarole', atlas=512, build=build_fumarole, mats=lambda: mats_fumarole(4.2),
+                     margin=0.008, angle=66.0, rough=0.9),
+    'obsidian': dict(root='Obsidian', atlas=512, build=build_obsidian, mats=lambda: mats_obsidian(2.7),
+                     margin=0.008, angle=66.0, rough=0.28),
 }
 GROUPS = {
     'arenito': ['rock_sandstone_a', 'rock_sandstone_b'],
-    'vulcanico': [],
+    'vulcanico': ['rock_basalt_a', 'rock_basalt_b', 'volcano_cone', 'tree_burnt', 'fumarole', 'obsidian'],
     'gelo': [],
     'subosque': [],
 }

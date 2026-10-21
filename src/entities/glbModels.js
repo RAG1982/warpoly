@@ -100,6 +100,13 @@ export const GLB_MODELS = {
   // M2-12 (ART-01): arenito em estratos
   rock_sandstone_a: { url: `${BASE}models/rock_sandstone_a.glb`, root: 'RockSandstoneA', type: null, lazy: true },
   rock_sandstone_b: { url: `${BASE}models/rock_sandstone_b.glb`, root: 'RockSandstoneB', type: null, lazy: true },
+  // M2-14 (ART-06): props vulcânicos
+  rock_basalt_a: { url: `${BASE}models/rock_basalt_a.glb`, root: 'RockBasaltA', type: null, lazy: true },
+  rock_basalt_b: { url: `${BASE}models/rock_basalt_b.glb`, root: 'RockBasaltB', type: null, lazy: true },
+  volcano_cone: { url: `${BASE}models/volcano_cone.glb`, root: 'VolcanoCone', type: null, lazy: true },
+  tree_burnt: { url: `${BASE}models/tree_burnt.glb`, root: 'TreeBurnt', type: null, lazy: true },
+  fumarole: { url: `${BASE}models/fumarole.glb`, root: 'Fumarole', type: null, lazy: true },
+  obsidian: { url: `${BASE}models/obsidian.glb`, root: 'Obsidian', type: null, lazy: true },
   tumbleweed: { url: `${BASE}models/tumbleweed.glb`, root: 'Tumbleweed', type: null, lazy: true },
   critter_boar: { url: `${BASE}models/critter_boar.glb`, root: 'CritterBoar', type: null, lazy: true },
   // F7-00b lote 2 (grupo 3): blocos de muralha instanciados (`WallBatch`)

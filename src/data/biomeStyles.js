@@ -182,6 +182,31 @@ export const PROP_RULES = Object.freeze({
   tumbleweed: {
     legacyCount: 7, minH: 1.8, maxH: 99, scale: [1.2, 1.8], spacing: 5,
     weights: { [BIOME.DESERT]: 1, [BIOME.STEPPE]: 1, [BIOME.SAVANNA]: 0.3 }
+  },
+  // M2-14 · vulcânico
+  rock_basalt_a: {
+    legacyCount: 6, minH: 1.8, maxH: 99, scale: [1.2, 1.9], spacing: 9,
+    weights: { [BIOME.VOLCANIC]: 1, [BIOME.ROCK]: 0.3 }
+  },
+  rock_basalt_b: {
+    legacyCount: 8, minH: 1.8, maxH: 99, scale: [1.2, 1.9], spacing: 6,
+    weights: { [BIOME.VOLCANIC]: 1, [BIOME.ROCK]: 0.4 }
+  },
+  volcano_cone: {
+    legacyCount: 3, minH: 1.8, maxH: 99, scale: [1.4, 2.2], spacing: 14,
+    weights: { [BIOME.VOLCANIC]: 1 }
+  },
+  tree_burnt: {
+    legacyCount: 10, minH: 1.8, maxH: 99, scale: [1.0, 1.5], spacing: 6,
+    weights: { [BIOME.VOLCANIC]: 1, [BIOME.ROCK]: 0.2 }
+  },
+  fumarole: {
+    legacyCount: 4, minH: 1.8, maxH: 99, scale: [1.2, 1.8], spacing: 10,
+    weights: { [BIOME.VOLCANIC]: 1 }
+  },
+  obsidian: {
+    legacyCount: 6, minH: 1.8, maxH: 99, scale: [1.2, 2.0], spacing: 7,
+    weights: { [BIOME.VOLCANIC]: 1, [BIOME.ROCK]: 0.3 }
   }
 });
 

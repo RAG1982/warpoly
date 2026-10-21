@@ -66,6 +66,13 @@ describe('props .glb por bioma (PROP_RULES / planProps)', () => {
     expect(plan.tumbleweed.length).toBeGreaterThan(0);
   });
 
+  it('a ilha vulcânica do mapa de teste recebe props vulcânicos (M2-14), nunca no deserto', () => {
+    const volcanic = ['rock_basalt_a', 'rock_basalt_b', 'volcano_cone', 'tree_burnt', 'fumarole', 'obsidian'];
+    const n = volcanic.reduce((acc, k) => acc + (plan[k] ? plan[k].length : 0), 0);
+    expect(n).toBeGreaterThan(0);
+    for (const k of volcanic) for (const it of plan[k] || []) expect(rm.biomeAt(it.x, it.z)).not.toBe(4);
+  });
+
   it('propKeysOfMap lista só props de biomas presentes; mapa sem biomeGrid = nenhum', () => {
     const keys = propKeysOfMap(map);
     expect(keys).toContain('rock_sandstone_a');

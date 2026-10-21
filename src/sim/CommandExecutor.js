@@ -218,6 +218,7 @@ export const CommandExecutor = {
           if (!canTarget(units[i], target)) continue; // F4-06: camada aérea/terrestre (`src/sim/targeting.js`)
           units[i].orderQueue = null;
           units[i].orderAttack(target);
+          if (units[i].attackTarget === target) units[i]._explicitAttack = true; // M2-29: ordem do jogador/IA nunca é trocada pelo revide inteligente
         }
         break;
       }

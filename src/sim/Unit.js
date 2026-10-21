@@ -47,6 +47,8 @@ const _steerBuf = [];
 const _steerNb = [];
 /** F3-02: raio (u) em que um waypoint intermediário conta como alcançado. */
 const WAYPOINT_RADIUS = 1.4;
+const CHASE_BLOCK_T = 0.25; // M2-29: sem progresso por este tempo (s) com inimigo encostado = bloqueado
+const CHASE_BLOCK_REACH = 1.6; // M2-29: folga além do raio próprio para achar o bloqueador
 /** F3-02: a partir de quantas unidades no comando o caminho usa folga extra (modo largo do Pathfinder). */
 const WIDE_GROUP_SIZE = 6;
 const _unitBuf = [];
@@ -211,6 +213,10 @@ export class Unit {
     this._groupSize = 0;
     this._widePath = false;
     this._stuckT = 0;
+    this._explicitAttack = false; // M2-29
+    this._chaseStuckT = 0;
+    this._chaseLastX = NaN;
+    this._chaseLastZ = NaN;
     this._repaths = 0;
     this._mvLastX = NaN;
     this._mvLastZ = NaN;
@@ -666,6 +672,9 @@ export class Unit {
     this.buildTarget = null;
     this.repairTarget = null;
     this.hasFiredThisAttack = false;
+    this._explicitAttack = false; // M2-29: CommandExecutor (CMD.ATTACK) marca true depois
+    this._chaseStuckT = 0;
+    this._chaseLastX = NaN;
     const isBuilding = target && (target.fullMesh || target.isConstructed !== undefined);
     if (isBuilding) {
       this.objectiveTarget = target;
@@ -900,6 +909,14 @@ export class Unit {
           if (savedObjective) {
             this.objectiveTarget = savedObjective;
           }
+        } else if (!this.suicide && !this._explicitAttack && !this._isHolding && this.attackTarget &&
+          this.attackTarget !== attacker && !this.attackTarget.isDead && this.attackTarget.hp > 0 &&
+          this._closerThanTarget(attacker)) {
+          // M2-29 regra 2: já revidando um atacante (alvo-unidade, ordem não explícita): só troca se o
+          // novo atacante estiver MAIS PERTO que o alvo atual (distância de agora, empate mantém o alvo).
+          const savedObjective = this.objectiveTarget;
+          this.orderAttack(attacker, !!savedObjective);
+          if (savedObjective) this.objectiveTarget = savedObjective;
         }
       }
 
@@ -925,6 +942,39 @@ export class Unit {
         }
       }
     }
+  }
+
+  /** M2-29: `other` está estritamente mais perto (distância de centro, no plano) que o alvo atual? */
+  _closerThanTarget(other) {
+    const p = this.mesh.position;
+    const t = this.attackTarget.mesh.position;
+    const o = other.mesh.position;
+    return Math.hypot(o.x - p.x, o.z - p.z) < Math.hypot(t.x - p.x, t.z - p.z);
+  }
+
+  /**
+   * M2-29 regra 3: durante a perseguição de um alvo-unidade (ordem não explícita), sem progresso por
+   * `CHASE_BLOCK_T` com um inimigo encostado no caminho -> o bloqueador vira o alvo. Aliado/construção/
+   * árvore não contam (seguem a lógica de caminho existente). Determinístico: o mais perto, empate por id
+   * (via `findNearestHostileUnit`). Devolve true se trocou o alvo.
+   */
+  _chaseBlockCheck(delta, allUnits, step) {
+    const pos = this.mesh.position;
+    if (this._chaseLastX === this._chaseLastX) {
+      const moved = Math.hypot(pos.x - this._chaseLastX, pos.z - this._chaseLastZ);
+      if (moved < step * 0.3) this._chaseStuckT += delta;
+      else this._chaseStuckT = 0;
+    }
+    this._chaseLastX = pos.x;
+    this._chaseLastZ = pos.z;
+    if (this._chaseStuckT < CHASE_BLOCK_T) return false;
+    const blocker = this.findNearestHostileUnit(allUnits, (this.collisionRadius || 0.6) + CHASE_BLOCK_REACH);
+    this._chaseStuckT = 0;
+    if (!blocker || blocker === this.attackTarget || !canTarget(this, blocker) || !this._shoreOk(blocker)) return false;
+    this.attackTarget = blocker;
+    this.targetEntity = blocker;
+    this.hasFiredThisAttack = false;
+    return true;
   }
 
   die() {
@@ -2124,6 +2174,7 @@ export class Unit {
 
     // 1. Target dead or invalid: find next closest hostile or resume objective
     if (!this.attackTarget || this.attackTarget.isDead || this.attackTarget.hp <= 0 || !this._canSee(this.attackTarget)) { // F4-04: alvo invisível não detectado = perdido
+      this._explicitAttack = false; // M2-29: o alvo explícito acabou; o próximo é automático
       const nextUnit = this.findNearestHostileUnit(allUnits, scanRange);
       if (nextUnit) {
         this.attackTarget = nextUnit;
@@ -2220,9 +2271,14 @@ export class Unit {
         return;
       }
       this.hasFiredThisAttack = false;
+      // M2-29 regra 3: revide/aggro automático bloqueado por um inimigo troca o alvo para ele.
+      if (!this._explicitAttack && !isTargetBuilding && !this.suicide &&
+        this._chaseBlockCheck(delta, allUnits, this.speed * this.mods.speedMul * delta)) return;
       this.moveTowards(targetPos.x, targetPos.z, delta);
       return;
     }
+    this._chaseStuckT = 0;
+    this._chaseLastX = NaN;
 
     // 4a. F4-05: unidade suicida detona ao entrar em alcance (sem animação de golpe)
     if (this.suicide) {

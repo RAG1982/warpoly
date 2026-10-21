@@ -295,7 +295,7 @@ describe('sem restrição = comportamento e checksum do master', () => {
     skirmish.players.forEach((p) => { p.isAI = true; });
     expect(run(skirmish, 1500)).toBe(2385247165);
     expect(run(createMissionConfig('mission-demo'), 1200)).toBe(2809377963);
-    expect(run(createMatchConfig({ seed: 5, ffa: true, headless: true, mapId: 'ilhas-4p' }), 1000)).toBe(3082632561);
+    expect(run(createMatchConfig({ seed: 5, ffa: true, headless: true, mapId: 'ilhas-4p' }), 1000)).toBe(1953366667);
   }, 60000);
 
   it('techRestriction presente entra no checksum de forma estável; ausente/`undefined` não muda nada', () => {

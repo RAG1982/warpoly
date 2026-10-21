@@ -131,8 +131,8 @@
    "unit_hero_dorian",
    "unit_hero_drogath",
    "unit_hero_oren",
-   "unit_hero_vozgul",
    "unit_hero_skarn",
+   "unit_hero_vozgul",
    "unit_iron_leviathan",
    "unit_knight",
    "unit_mage",
@@ -154,10 +154,10 @@
   ]
  },
  "bytes": {
-  "total": 2883886,
+  "total": 2878918,
   "art": 281206,
-  "icons": 2302376,
-  "portraits": 300304
+  "icons": 2297670,
+  "portraits": 300042
  },
  "aliases": {
   "ability_debug_bolt": "ability_hero_arcane_bolt",
@@ -213,8 +213,8 @@
    "hero_dorian",
    "hero_drogath",
    "hero_oren",
-   "hero_vozgul",
    "hero_skarn",
+   "hero_vozgul",
    "iron_leviathan",
    "knight",
    "mage",

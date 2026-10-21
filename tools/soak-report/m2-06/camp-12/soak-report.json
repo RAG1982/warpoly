@@ -1,0 +1,137 @@
+{
+ "opts": {
+  "count": 8,
+  "seedStart": 1,
+  "maps": [
+   "camp-12-cabo-ferrugem"
+  ],
+  "maxTicks": 72000,
+  "recheck": 3,
+  "faction": null,
+  "difficulty": null,
+  "stallTicks": 2400,
+  "out": "tools/soak-report/m2-06/camp-12"
+ },
+ "wallMs": 162512,
+ "results": [
+  {
+   "seed": 1,
+   "map": "camp-12-cabo-ferrugem",
+   "faction": "human",
+   "difficulty": "easy",
+   "finished": true,
+   "ticks": 13663,
+   "checksum": 850983634,
+   "peakEntities": 61,
+   "wallMs": 7731,
+   "issues": []
+  },
+  {
+   "seed": 2,
+   "map": "camp-12-cabo-ferrugem",
+   "faction": "orc",
+   "difficulty": "easy",
+   "finished": true,
+   "ticks": 16276,
+   "checksum": 3160885807,
+   "peakEntities": 50,
+   "wallMs": 7238,
+   "issues": []
+  },
+  {
+   "seed": 3,
+   "map": "camp-12-cabo-ferrugem",
+   "faction": "human",
+   "difficulty": "normal",
+   "finished": true,
+   "ticks": 18293,
+   "checksum": 1629106037,
+   "peakEntities": 115,
+   "wallMs": 30742,
+   "issues": []
+  },
+  {
+   "seed": 4,
+   "map": "camp-12-cabo-ferrugem",
+   "faction": "orc",
+   "difficulty": "normal",
+   "finished": true,
+   "ticks": 27260,
+   "checksum": 3694718764,
+   "peakEntities": 145,
+   "wallMs": 23091,
+   "issues": []
+  },
+  {
+   "seed": 5,
+   "map": "camp-12-cabo-ferrugem",
+   "faction": "human",
+   "difficulty": "hard",
+   "finished": true,
+   "ticks": 13507,
+   "checksum": 2554140025,
+   "peakEntities": 100,
+   "wallMs": 12210,
+   "issues": []
+  },
+  {
+   "seed": 6,
+   "map": "camp-12-cabo-ferrugem",
+   "faction": "orc",
+   "difficulty": "hard",
+   "finished": true,
+   "ticks": 24605,
+   "checksum": 2094074653,
+   "peakEntities": 153,
+   "wallMs": 26912,
+   "issues": []
+  },
+  {
+   "seed": 7,
+   "map": "camp-12-cabo-ferrugem",
+   "faction": "human",
+   "difficulty": "brutal",
+   "finished": true,
+   "ticks": 11810,
+   "checksum": 3596518968,
+   "peakEntities": 92,
+   "wallMs": 8974,
+   "issues": []
+  },
+  {
+   "seed": 8,
+   "map": "camp-12-cabo-ferrugem",
+   "faction": "orc",
+   "difficulty": "brutal",
+   "finished": true,
+   "ticks": 14716,
+   "checksum": 2942400407,
+   "peakEntities": 101,
+   "wallMs": 11542,
+   "issues": []
+  }
+ ],
+ "rechecks": [
+  {
+   "seed": 1,
+   "map": "camp-12-cabo-ferrugem",
+   "faction": "human",
+   "difficulty": "easy",
+   "diff": null
+  },
+  {
+   "seed": 3,
+   "map": "camp-12-cabo-ferrugem",
+   "faction": "human",
+   "difficulty": "normal",
+   "diff": null
+  },
+  {
+   "seed": 5,
+   "map": "camp-12-cabo-ferrugem",
+   "faction": "human",
+   "difficulty": "hard",
+   "diff": null
+  }
+ ]
+}

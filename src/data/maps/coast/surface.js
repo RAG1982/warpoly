@@ -85,6 +85,14 @@ export function finalizeSurface(map) {
         // M2-04 (Cerne Verde): floresta densa com clareiras (ruído de baixa frequência) e colinas suaves; areia só na praia
         h += (fbm(x * 0.06, z * 0.06, seed + 77, 3) - 0.5) * 0.9 * smoothstep(3, 12, dd);
         b = nz > 0.64 && dd > 6 ? BIOME.GRASS : BIOME.FOREST;
+      } else if (e.biome === 'steppe') {
+        // M2-06 (Estepe do Vento): interior seco de savana e estepe, com manchas de deserto e rocha de arenito; dunas suaves, areia só na praia
+        h += (fbm(x * 0.05, z * 0.05, seed + 83, 3) - 0.5) * 0.8 * smoothstep(3, 12, dd);
+        const rockN = fbm(x * 0.07 - 17, z * 0.07 + 29, seed + 91, 3);
+        if (rockN > 0.7 && dd > 8) { b = BIOME.ROCK; h += (rockN - 0.7) * 5; }
+        else if (nz2 > 0.66 && dd > 6) b = BIOME.DESERT;
+        else if (nz > 0.5) b = BIOME.SAVANNA;
+        else b = BIOME.STEPPE;
       } else if (e.biome === 'swamp') {
         b = nz > 0.6 ? BIOME.GRASS : BIOME.SWAMP;
       } else if (e.biome === 'atoll') {

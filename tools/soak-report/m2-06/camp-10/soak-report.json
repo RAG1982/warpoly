@@ -1,0 +1,137 @@
+{
+ "opts": {
+  "count": 8,
+  "seedStart": 1,
+  "maps": [
+   "camp-10-costa-ferrugem"
+  ],
+  "maxTicks": 72000,
+  "recheck": 3,
+  "faction": null,
+  "difficulty": null,
+  "stallTicks": 2400,
+  "out": "tools/soak-report/m2-06/camp-10"
+ },
+ "wallMs": 173519,
+ "results": [
+  {
+   "seed": 1,
+   "map": "camp-10-costa-ferrugem",
+   "faction": "human",
+   "difficulty": "easy",
+   "finished": true,
+   "ticks": 14078,
+   "checksum": 1862385488,
+   "peakEntities": 62,
+   "wallMs": 9346,
+   "issues": []
+  },
+  {
+   "seed": 2,
+   "map": "camp-10-costa-ferrugem",
+   "faction": "orc",
+   "difficulty": "easy",
+   "finished": true,
+   "ticks": 27911,
+   "checksum": 3043583070,
+   "peakEntities": 61,
+   "wallMs": 16100,
+   "issues": []
+  },
+  {
+   "seed": 3,
+   "map": "camp-10-costa-ferrugem",
+   "faction": "human",
+   "difficulty": "normal",
+   "finished": true,
+   "ticks": 13380,
+   "checksum": 1462078791,
+   "peakEntities": 93,
+   "wallMs": 10891,
+   "issues": []
+  },
+  {
+   "seed": 4,
+   "map": "camp-10-costa-ferrugem",
+   "faction": "orc",
+   "difficulty": "normal",
+   "finished": true,
+   "ticks": 35878,
+   "checksum": 3004610045,
+   "peakEntities": 132,
+   "wallMs": 30378,
+   "issues": []
+  },
+  {
+   "seed": 5,
+   "map": "camp-10-costa-ferrugem",
+   "faction": "human",
+   "difficulty": "hard",
+   "finished": true,
+   "ticks": 17614,
+   "checksum": 393973379,
+   "peakEntities": 111,
+   "wallMs": 15553,
+   "issues": []
+  },
+  {
+   "seed": 6,
+   "map": "camp-10-costa-ferrugem",
+   "faction": "orc",
+   "difficulty": "hard",
+   "finished": true,
+   "ticks": 8556,
+   "checksum": 1848772829,
+   "peakEntities": 82,
+   "wallMs": 5691,
+   "issues": []
+  },
+  {
+   "seed": 7,
+   "map": "camp-10-costa-ferrugem",
+   "faction": "human",
+   "difficulty": "brutal",
+   "finished": true,
+   "ticks": 29487,
+   "checksum": 4008968672,
+   "peakEntities": 100,
+   "wallMs": 30305,
+   "issues": []
+  },
+  {
+   "seed": 8,
+   "map": "camp-10-costa-ferrugem",
+   "faction": "orc",
+   "difficulty": "brutal",
+   "finished": true,
+   "ticks": 21954,
+   "checksum": 2468710111,
+   "peakEntities": 94,
+   "wallMs": 20577,
+   "issues": []
+  }
+ ],
+ "rechecks": [
+  {
+   "seed": 1,
+   "map": "camp-10-costa-ferrugem",
+   "faction": "human",
+   "difficulty": "easy",
+   "diff": null
+  },
+  {
+   "seed": 3,
+   "map": "camp-10-costa-ferrugem",
+   "faction": "human",
+   "difficulty": "normal",
+   "diff": null
+  },
+  {
+   "seed": 5,
+   "map": "camp-10-costa-ferrugem",
+   "faction": "human",
+   "difficulty": "hard",
+   "diff": null
+  }
+ ]
+}

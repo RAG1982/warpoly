@@ -52,6 +52,7 @@ export const DEFAULT_OPTIONS = Object.freeze({
   bigIslands: 0, // ilhas grandes (do tamanho de um continente pequeno), uma por quadrante (arquipélago de 4 jogadores)
   bigIslandAt: null, // [[fx, fz], ...] centros das ilhas grandes em frações de `size` (null = os 4 quadrantes)
   bigIslandScale: 1, // multiplica o raio das ilhas grandes
+  bigIslandBiomes: null, // M2-06: biomas das ilhas grandes ('lush'|'arid'|'rocky'|…), em ciclo (null = `BIG_ISLAND_BIOMES`)
   lava: true, // córregos de lava na ilha vulcânica (Fornalha): divisor de áreas com passagens de rocha (spec §3.5)
   lavaStreams: 0, // 0 = auto (1 ou 2 córregos, por semente); 1 | 2 força
   lavaPassages: 0, // 0 = auto (1 ou 2 passagens por córrego, por semente); 1 | 2 força (por córrego)

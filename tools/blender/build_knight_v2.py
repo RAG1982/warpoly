@@ -27,7 +27,7 @@ O FBX está em T-pose: os braços são REPOSADOS pelo rig (hero_common.reposar).
 da mão (matriz de deformação) e são orientados pelo repouso do nó (a malha local sai com a rotação de repouso desfeita), de modo que
 o gume (+Z local) e a lâmina (+Y local) batem com o que o UnitAnimator espera. O Tripo segura a espada com a mão direita anatômica,
 em -x quando a figura olha para +Z; a convenção do jogo põe a arma em +x: a malha é ESPELHADA em x (ossos Left* -> ArmL/LegL em -x).
-TeamColor: o azul do tabardo, da crista, das mangas e do campo do escudo vira cinza no atlas (o dourado, o leão e o aço ficam).
+TeamColor: o azul do tabardo, da crista e das mangas vira cinza no atlas (o dourado e o aço ficam); o escudo mantém o azul heráldico.
 """
 import os
 import sys
@@ -329,13 +329,13 @@ def regras(ctx, f, c, nome):
 
 
 def eh_time(ctx, peca, i):
-    if peca == 'Sword':
-        return False
+    if peca in ('Sword', 'ShieldGroup'):
+        return False                  # o escudo mantém o azul heráldico: o leão dourado dividiria cada face com o azul
     return azul_numa_face(ctx, peca, i)
 
 
 def cor_time(rgb, peca):
-    return peca != 'Sword' and eh_azul(rgb)
+    return peca not in ('Sword', 'ShieldGroup') and eh_azul(rgb)
 
 
 def _atlas_so_azul():

@@ -1,5 +1,5 @@
 {
-  "generated": "2026-10-21T23:21:07.936Z",
+  "generated": "2026-10-21T23:30:47.347Z",
   "rows": [
     {
       "id": "C0",
@@ -17,7 +17,7 @@
       "id": "C10",
       "name": "disparo ao vivo: a view entra em fight, a flecha nasce no arco (< 0,3 m do ponto do arco; a origem da sim fica a > 0,25 m) e volta à trajetória; o alvo perde PV",
       "status": "PASS",
-      "detail": "quadros fight=266/268 anims=[idle,fight] flechas=4; 1º quadro: malha a 0 m do arco (origem da sim a 0.849 m); desvio da malha à trajetória em progress > 0,3 = 0 m; PV do alvo 5000 -> 4943"
+      "detail": "quadros fight=267/267 anims=[fight] flechas=4; 1º quadro: malha a 0 m do arco (origem da sim a 0.849 m); desvio da malha à trajetória em progress > 0,3 = 0 m; PV do alvo 5000 -> 4940"
     },
     {
       "id": "C2",
@@ -41,7 +41,7 @@
       "id": "C5",
       "name": "caminhada ao vivo por 1 s: pernas e braço balançam",
       "status": "PASS",
-      "detail": "quadros=61 com walk=60 faixa legL.x=1.3 rad armR.x=1.1 rad deslocou=4.3 u"
+      "detail": "quadros=61 com walk=61 faixa legL.x=1.3 rad armR.x=1.1 rad deslocou=4.51 u"
     },
     {
       "id": "C6",
@@ -71,63 +71,63 @@
   "files": [
     {
       "name": "game-archer-no-jogo.png",
-      "kB": 786
+      "kB": 780
     },
     {
       "name": "game-archer-flecha-no-arco.png",
-      "kB": 525
+      "kB": 648
     },
     {
       "name": "game-archer-flecha-em-voo.png",
-      "kB": 466
+      "kB": 642
     },
     {
       "name": "game-archer-idle.png",
-      "kB": 371
+      "kB": 501
     },
     {
       "name": "game-archer-andar.png",
-      "kB": 384
+      "kB": 501
     },
     {
       "name": "game-archer-disparo-mira.png",
-      "kB": 381
+      "kB": 501
     },
     {
       "name": "game-archer-disparo-corda-puxada.png",
-      "kB": 384
+      "kB": 501
     },
     {
       "name": "game-archer-disparo-solta.png",
-      "kB": 380
+      "kB": 501
     },
     {
       "name": "game-archer-disparo-lado.png",
-      "kB": 384
+      "kB": 501
     },
     {
       "name": "game-archer-disparo-frente.png",
-      "kB": 365
+      "kB": 580
     },
     {
       "name": "game-archer-morrer-inicio.png",
-      "kB": 368
+      "kB": 501
     },
     {
       "name": "game-archer-morrer-meio.png",
-      "kB": 379
+      "kB": 501
     },
     {
       "name": "game-archer-morrer-fim.png",
-      "kB": 327
+      "kB": 501
     },
     {
       "name": "game-archer-time-vermelho.png",
-      "kB": 371
+      "kB": 501
     },
     {
       "name": "game-ranger-idle.png",
-      "kB": 828
+      "kB": 788
     },
     {
       "name": "inspetor-archer-v2-idle.png",
@@ -146,7 +146,7 @@
     "renderer": "ANGLE (AMD, Vulkan 1.4.318 (AMD Radeonâ¢ RX 7600 XT (RADV NAVI33) (0x00007480)), radv)",
     "glbHttpStatus": 200,
     "spawn": {
-      "id": 286,
+      "id": 281,
       "type": "archer",
       "me": 0,
       "hq": {
@@ -167,7 +167,7 @@
       "hasForeArmL": true
     },
     "rangerSpawn": {
-      "id": 287,
+      "id": 282,
       "type": "ranger",
       "me": 0,
       "hq": {
@@ -490,25 +490,24 @@
     },
     "walk": {
       "frames": 61,
-      "walkFrames": 60,
+      "walkFrames": 61,
       "legRange": 1.3,
       "armRange": 1.1,
-      "moved": 4.3
+      "moved": 4.51
     },
     "live": {
-      "fightFrames": 266,
-      "frames": 268,
+      "fightFrames": 267,
+      "frames": 267,
       "anims": [
-        "idle",
         "fight"
       ],
       "arrows": 4,
       "firstDistToBow": 0,
       "simStartToBow": 0.849,
       "laterOffset": 0,
-      "foeHp": 4943,
+      "foeHp": 4940,
       "foeMax": 5000,
-      "foeId": 288
+      "foeId": 283
     },
     "caught": {
       "progress": 0

@@ -54,9 +54,9 @@ export const HQ_TIER_MODEL = {
  * centro, sem rotação) de onde sai a fumaça da chaminé (só o nível 1 tem chaminé); `footprint` = lado da pegada x/z.
  */
 export const HQ_TIER_VIEW = {
-  1: { height: 9.0, footprint: 7.6, healthBarHeight: 10.0, chimney: { x: 1.5, y: 8.2, z: -1.8 } },
-  2: { height: 12.5, footprint: 8.3, healthBarHeight: 13.5, chimney: null },
-  3: { height: 15.5, footprint: 9.4, healthBarHeight: 16.5, chimney: null }
+  1: { height: 9.0, footprint: 6.8, healthBarHeight: 10.0, chimney: { x: 1.3, y: 8.2, z: -1.6 } },
+  2: { height: 12.5, footprint: 8.2, healthBarHeight: 13.5, chimney: null },
+  3: { height: 15.5, footprint: 8.5, healthBarHeight: 16.5, chimney: null }
 };
 
 /** Nome PT-BR do nível `tier` da facção `factionId` ('human' | 'orc'). */

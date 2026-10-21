@@ -38,6 +38,7 @@ DL = '/home/rafael/Downloads'
 OUT_PREVIAS = os.path.join(REPO, 'tools', 'ui-captures', 'hq-human')
 TEAM_DEFAULT = '#3a66d6'
 ATLAS = 512
+RAIO_COLISAO = 5.5     # buildings.castle.collisionRadius (simulação): a pegada visual cabe nele (± o canto das torres)
 DILATACAO_TIME = 1
 PROTECAO_TIME = 1
 CRESCER = 4           # anéis de crescimento das sementes
@@ -49,13 +50,13 @@ FRACAO_TIME = 0.5      # fração das amostras (centro + cantos recuados) da fac
 #  COR_TIME: faixa de matiz (graus), saturação mínima e valor mínimo das faces que viram TeamColor (bandeiras/estandartes)
 LEVELS = {
     1: dict(fbx=DL + '/Centro1/tripo_convert_9627a66a-3732-4a93-ad72-20103b5f6cea.fbx', glb='hq_human_1.glb', raiz='HqHuman1',
-            atlas='hq_human_1_atlas', altura=9.0, sxz=10.0,
+            atlas='hq_human_1_atlas', altura=9.0, sxz=9.0,
             cor_time=dict(hue=(208, 250), sat=0.30, val=0.30), spawn=(0.0, 0.0, 4.9), rally=(0.0, 0.0, 6.9)),
     2: dict(fbx=DL + '/centro1-2/tripo_convert_6aa35e7d-d787-44ec-8238-2e39adeee0ba.fbx', glb='hq_human_2.glb', raiz='HqHuman2',
-            atlas='hq_human_2_atlas', altura=12.5, sxz=14.5,
+            atlas='hq_human_2_atlas', altura=12.5, sxz=14.2,
             cor_time=dict(hue=(222, 250), sat=0.30, val=0.28), z_bandeira=0.84, spawn=(0.0, 0.0, 5.2), rally=(0.0, 0.0, 7.2)),
     3: dict(fbx=DL + '/centro1-3/tripo_convert_82042048-7b13-4749-9f5f-79e92d9f7587.fbx', glb='hq_human_3.glb', raiz='HqHuman3',
-            atlas='hq_human_3_atlas', altura=15.5, sxz=18.0,
+            atlas='hq_human_3_atlas', altura=15.5, sxz=16.5,
             cor_time=dict(hue=(217, 250), sat=0.22, val=0.28), spawn=(0.0, 0.0, 5.4), rally=(0.0, 0.0, 7.4)),
 }
 
@@ -98,6 +99,9 @@ def construir(nivel, args):
     co[:, 1] = (co[:, 1] - (lo[1] + hi[1]) / 2) * L['sxz']
     co[:, 2] = (co[:, 2] - lo[2]) * (L['altura'] / (hi[2] - lo[2]))
     me.vertices.foreach_set('co', co.ravel())
+    r = np.hypot(co[:, 0], co[:, 1])
+    log('nível %d: raio máximo dos vértices ao centro %.2f (p99 %.2f; colisão da simulação = RAIO_COLISAO %.1f)' %
+        (nivel, r.max(), np.percentile(r, 99), RAIO_COLISAO))
     me.update()
     # textura original (512²)
     mat0 = me.materials[0]

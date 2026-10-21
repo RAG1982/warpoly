@@ -1,0 +1,137 @@
+{
+ "opts": {
+  "count": 8,
+  "seedStart": 1,
+  "maps": [
+   "camp-09-miragem"
+  ],
+  "maxTicks": 72000,
+  "recheck": 3,
+  "faction": null,
+  "difficulty": null,
+  "stallTicks": 2400,
+  "out": "tools/soak-report/m2-05/camp-09-miragem"
+ },
+ "wallMs": 159815,
+ "results": [
+  {
+   "seed": 1,
+   "map": "camp-09-miragem",
+   "faction": "human",
+   "difficulty": "easy",
+   "finished": true,
+   "ticks": 19096,
+   "checksum": 3695023012,
+   "peakEntities": 64,
+   "wallMs": 11912,
+   "issues": []
+  },
+  {
+   "seed": 2,
+   "map": "camp-09-miragem",
+   "faction": "orc",
+   "difficulty": "easy",
+   "finished": true,
+   "ticks": 36780,
+   "checksum": 1799799381,
+   "peakEntities": 60,
+   "wallMs": 20226,
+   "issues": []
+  },
+  {
+   "seed": 3,
+   "map": "camp-09-miragem",
+   "faction": "human",
+   "difficulty": "normal",
+   "finished": true,
+   "ticks": 15668,
+   "checksum": 2441492969,
+   "peakEntities": 102,
+   "wallMs": 13697,
+   "issues": []
+  },
+  {
+   "seed": 4,
+   "map": "camp-09-miragem",
+   "faction": "orc",
+   "difficulty": "normal",
+   "finished": true,
+   "ticks": 12676,
+   "checksum": 4271201893,
+   "peakEntities": 91,
+   "wallMs": 27330,
+   "issues": []
+  },
+  {
+   "seed": 5,
+   "map": "camp-09-miragem",
+   "faction": "human",
+   "difficulty": "hard",
+   "finished": true,
+   "ticks": 24394,
+   "checksum": 3786532735,
+   "peakEntities": 60,
+   "wallMs": 16739,
+   "issues": []
+  },
+  {
+   "seed": 6,
+   "map": "camp-09-miragem",
+   "faction": "orc",
+   "difficulty": "hard",
+   "finished": true,
+   "ticks": 8289,
+   "checksum": 2825371518,
+   "peakEntities": 66,
+   "wallMs": 5849,
+   "issues": []
+  },
+  {
+   "seed": 7,
+   "map": "camp-09-miragem",
+   "faction": "human",
+   "difficulty": "brutal",
+   "finished": true,
+   "ticks": 11215,
+   "checksum": 3346780082,
+   "peakEntities": 98,
+   "wallMs": 9830,
+   "issues": []
+  },
+  {
+   "seed": 8,
+   "map": "camp-09-miragem",
+   "faction": "orc",
+   "difficulty": "brutal",
+   "finished": true,
+   "ticks": 12493,
+   "checksum": 630171727,
+   "peakEntities": 92,
+   "wallMs": 11480,
+   "issues": []
+  }
+ ],
+ "rechecks": [
+  {
+   "seed": 1,
+   "map": "camp-09-miragem",
+   "faction": "human",
+   "difficulty": "easy",
+   "diff": null
+  },
+  {
+   "seed": 3,
+   "map": "camp-09-miragem",
+   "faction": "human",
+   "difficulty": "normal",
+   "diff": null
+  },
+  {
+   "seed": 5,
+   "map": "camp-09-miragem",
+   "faction": "human",
+   "difficulty": "hard",
+   "diff": null
+  }
+ ]
+}

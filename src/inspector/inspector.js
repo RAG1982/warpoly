@@ -398,6 +398,19 @@ const MODEL_CATALOG = [
     notes: 'Compatível com o UnitAnimator atual (mesmos nós e pivôs nas articulações). 8 draw calls, ~4,4 mil triângulos, 1 textura. Esqueleto e AnimationMixer ficam para a F7-00b.'
   },
   {
+    id: 'hero_drogath_glb',
+    name: 'Drogath Punho-de-Brasa (herói, Tripo)',
+    category: 'units',
+    faction: 'orc',
+    type: 'grunt',
+    icon: '🪓',
+    glb: 'hero_drogath',
+    sourceFile: 'tools/blender/build_hero_drogath.py',
+    create: createGlb('hero_drogath'),
+    description: 'Herói orc Drogath Punho-de-Brasa: modelo do Tripo finalizado no Blender (public/models/hero_drogath.glb). Pele verde-oliva, ombreira de ferro com espetos, manto de pele, correntes, braseiro na cintura e machado de duas mãos. Nós Grunt, Torso (com Head, ArmL e ArmR), LegL, LegR e Weapon (machado, filho de ArmR).',
+    notes: 'Rig do tipo grunt (hierarquia do grunt.glb): o golpe torce o Torso e leva braços e cabeça; o Weapon repousa a -45° em x e o machado tem o gume para +Z. Braço direito reposado pelo rig (o FBX tinha o machado sobre o ombro); machado rígido ligado à mão. Faixas, tanga e atadura do cabo usam TeamColor. 13 draw calls, ~20,8 mil triângulos, atlas 512².'
+  },
+  {
     id: 'axethrower_glb',
     name: 'Lanceiro-Machado Troll (Blender)',
     category: 'units',

@@ -58,7 +58,7 @@ UNITS = {
     'necromancer': S('necromancer', HUM),
     'skeleton': S('skeleton', HUM),
     'hero_brann': S('knight', HUM, badge='hero'),
-    'hero_drogath': S('grunt', HUM, badge='hero'),
+    'hero_drogath': S('hero_drogath', HUM, badge='hero'),   # M2-22: modelo próprio do Tripo
     'hero_oren': S('hero_oren', HUM, badge='hero'),          # M2-21: modelo próprio do Tripo (hero_oren.glb)
     'bandit': S('bandit', HUM),
     # navios (a barcaça e o petroleiro têm arte própria por facção)
@@ -216,7 +216,7 @@ PORTRAITS = {
     'ranger': P('archer', PORTRAIT_HUM, ('fight', 0.6), badge='rank'),
     'berserker': P('axethrower', PORTRAIT_HUM, ('fight', 0.3), faction='orc', badge='rank'),
     'hero_brann': P('knight', PORTRAIT_HUM, ('fight', 0.3), badge='hero'),
-    'hero_drogath': P('grunt', PORTRAIT_HUM, ('fight', 0.3), faction='orc', badge='hero'),
+    'hero_drogath': P('hero_drogath', PORTRAIT_HUM, ('fight', 0.3), faction='orc', badge='hero'),
     'hero_oren': P('hero_oren', dict(PORTRAIT_HUM, crop=0.58), ('cast', 0.5), badge='hero'),
 }
 

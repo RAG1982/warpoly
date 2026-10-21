@@ -547,7 +547,7 @@ export const UNITS = {
     healthBarHeight: 4.6,
     cost: null,
     trainTime: null,
-    icon: 'ui/heroes/hero_drogath.svg',
+    icon: 'ui/icons/128/unit_hero_drogath.webp',
     description: 'Herói único: chefe de guerra dos Clãs. Grito de Guerra enfurece a si mesmo',
     isWorker: false, isRanged: false, isCombat: true, projectile: null,
     maxMana: 150, startMana: 150, manaRegen: 1.2,

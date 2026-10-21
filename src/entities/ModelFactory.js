@@ -628,6 +628,7 @@ export class ModelFactory {
       case 'bandit': return this.createBandit();
       case 'peon': return this.createPeon();
       case 'grunt': return this.createGrunt();
+      case 'hero_drogath': return this._glbOr('hero_drogath', () => this.createGrunt()); // Drogath Punho-de-Brasa: .glb próprio (Tripo); sem ele, o Talhador
       case 'axethrower': return this.createAxethrower();
       case 'ogre': return this.createOgre();
       case 'cavalier': return this.createCavalier();

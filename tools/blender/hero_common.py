@@ -291,6 +291,7 @@ def carregar_fbx(caminho, pose=None):
 
     f.co = ler_coord(me, mw)
     f.co_rest = f.co
+    f.cn_rest = ler_normais(me, mw)                                           # normais de repouso por canto (peças rígidas pós-repose)
     f.loop_v = np.empty(nl, dtype=np.int64)
     me.loops.foreach_get('vertex_index', f.loop_v)
     f.ls = np.empty(npol, dtype=np.int64)

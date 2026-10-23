@@ -1,3 +1,4 @@
+import { fhypot } from './fmath.js';
 /**
  * formation.js — F3-02: formação de grupo (lógica pura, sem three.js/DOM; testável em Node).
  *
@@ -57,7 +58,7 @@ export function planFormation(members, dest) {
   // Direção da marcha (frente) e lateral (direita da marcha).
   let fx = dest.x - cx;
   let fz = dest.z - cz;
-  const len = Math.hypot(fx, fz);
+  const len = fhypot(fx, fz);
   if (len < 1e-6) {
     fx = 0;
     fz = 1;

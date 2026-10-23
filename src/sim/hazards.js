@@ -11,6 +11,7 @@
  *   (amigas também) em raio `radius`. Sem colisão.
  * Eventos (`EVT.HAZARD_SPAWNED/REMOVED`) só para apresentação; o estado entra no checksum (`stateChecksum`).
  */
+import { fcos, fhypot, fsin } from './fmath.js';
 import { SIM_DT } from './constants.js';
 import { computeDamage } from './combat.js';
 import { EVT } from './events.js';
@@ -71,7 +72,7 @@ export class HazardPool {
       const ang = (i / n) * Math.PI * 2;
       this._add({
         kind: 'rune', ownerId,
-        x: x + Math.cos(ang) * fx.radius, z: z + Math.sin(ang) * fx.radius,
+        x: x + fcos(ang) * fx.radius, z: z + fsin(ang) * fx.radius,
         life: fx.lifetime, trigger: fx.triggerRadius, blast: fx.blastRadius, damage: fx.damage
       });
     }
@@ -140,12 +141,12 @@ export class HazardPool {
       h.retarget = h.interval;
       const ang = gm.combatRng.next() * Math.PI * 2;
       const r = Math.sqrt(gm.combatRng.next()) * h.wander;
-      h.tx = h.ox + Math.cos(ang) * r;
-      h.tz = h.oz + Math.sin(ang) * r;
+      h.tx = h.ox + fcos(ang) * r;
+      h.tz = h.oz + fsin(ang) * r;
     }
     const dx = h.tx - h.x;
     const dz = h.tz - h.z;
-    const d = Math.hypot(dx, dz);
+    const d = fhypot(dx, dz);
     if (d > 1e-6) {
       const k = Math.min(1, (h.speed * dt) / d);
       h.x += dx * k;

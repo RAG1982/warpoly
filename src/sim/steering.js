@@ -1,3 +1,4 @@
+import { fhypot } from './fmath.js';
 /**
  * steering.js — F3-02: separação por steering (lógica pura, sem three.js/DOM; testável em Node).
  *
@@ -34,7 +35,7 @@ export function steerDirection(dx, dz, px, pz, radius, neighbors, gainScale = 1)
     const nb = neighbors[i];
     const ox = px - nb.x;
     const oz = pz - nb.z;
-    const d = Math.hypot(ox, oz);
+    const d = fhypot(ox, oz);
     const minD = radius + nb.radius + SEP_MARGIN;
     if (d >= minD) continue;
     const push = (minD - d) / minD;
@@ -58,7 +59,7 @@ export function steerDirection(dx, dz, px, pz, radius, neighbors, gainScale = 1)
     sx += dx * (MIN_FORWARD - fwd);
     sz += dz * (MIN_FORWARD - fwd);
   }
-  const len = Math.hypot(sx, sz);
+  const len = fhypot(sx, sz);
   if (len < 1e-6) return { x: dx, z: dz };
   return { x: sx / len, z: sz / len };
 }

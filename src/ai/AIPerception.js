@@ -1,3 +1,4 @@
+import { fhypot } from '../sim/fmath.js';
 import { getBuildingDef, getUnitDef, FACTIONS } from '../data/index.js';
 import { SIM_DT } from '../sim/constants.js';
 import { CMD } from '../sim/commands.js';
@@ -66,7 +67,7 @@ export class AIPerception {
       const me = director.baseCenter;
       for (let i = 0; i < map.startSlots.length; i++) {
         const s = map.startSlots[i];
-        if (Math.hypot(s.x - me.x, s.z - me.y) < 20) continue;
+        if (fhypot(s.x - me.x, s.z - me.y) < 20) continue;
         this.slotTargets.push({ x: s.x, z: s.z });
       }
     }
@@ -312,11 +313,11 @@ export class AIPerception {
     let bd = Infinity;
     for (let i = 0; i < this.slotTargets.length; i++) {
       const s = this.slotTargets[i];
-      const d = Math.hypot(s.x - me.x, s.z - me.y);
+      const d = fhypot(s.x - me.x, s.z - me.y);
       // slots já revistos sem construções inimigas são descartados
       if (this.isExplored(s.x, s.z) && !this.cheat) {
         let has = false;
-        for (const k of this.buildings.values()) if (Math.hypot(k.x - s.x, k.z - s.z) < 30) { has = true; break; }
+        for (const k of this.buildings.values()) if (fhypot(k.x - s.x, k.z - s.z) < 30) { has = true; break; }
         if (!has) continue;
       }
       if (d < bd) { bd = d; best = s; }
@@ -359,8 +360,8 @@ export class AIPerception {
     }
     const p = scout.mesh.position;
     const t = this._scoutTarget;
-    if (!t || Math.hypot(t.x - p.x, t.z - p.z) < 10 || scout.state === 'idle') {
-      if (t && t.slot >= 0 && Math.hypot(t.x - p.x, t.z - p.z) < 14) this._visitedSlots.add(t.slot);
+    if (!t || fhypot(t.x - p.x, t.z - p.z) < 10 || scout.state === 'idle') {
+      if (t && t.slot >= 0 && fhypot(t.x - p.x, t.z - p.z) < 14) this._visitedSlots.add(t.slot);
       this._scoutTarget = this.nextExploreTarget(p.x, p.z);
       if (!this._scoutTarget) { this.resetExplored(); this._scoutTarget = this.nextExploreTarget(p.x, p.z); }
       if (this._scoutTarget) {

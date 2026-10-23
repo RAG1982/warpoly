@@ -4,6 +4,7 @@
  * regravados nos saves/replays como se fossem do jogador. Apresentação (diálogo, câmera, som) sai como eventos `MISSION_*`.
  * Sem Math.random / Date.now: posições de spawn em espiral fixa.
  */
+import { fcos, fhypot, fsin } from '../fmath.js';
 import { EVT } from '../events.js';
 import { RESOURCE_TYPES } from '../Player.js';
 import { HQ_TIER_HP } from '../../data/tiers.js';
@@ -13,7 +14,7 @@ import { isAlive, resolveOwnerId, roleOf, selectEntities } from './selectors.js'
 export function ringOffset(i, spread = 1.8) {
   const ang = i * 2.399963229728653;
   const r = spread * Math.sqrt(i + 0.25);
-  return { dx: Math.cos(ang) * r, dz: Math.sin(ang) * r };
+  return { dx: fcos(ang) * r, dz: fsin(ang) * r };
 }
 
 function applyOrder(gm, unit, order) {
@@ -54,7 +55,7 @@ function clearTreesAround(gm, b) {
   const gap = (b.collisionRadius || 3.0) + TREE_CLEARANCE;
   for (const t of gm.trees) {
     if (t.isDisposed) continue;
-    if (Math.hypot(t.mesh.position.x - p.x, t.mesh.position.z - p.z) > gap + (t.collisionRadius || 0.75)) continue;
+    if (fhypot(t.mesh.position.x - p.x, t.mesh.position.z - p.z) > gap + (t.collisionRadius || 0.75)) continue;
     t.die();
     t.fallProgress = 1;
     t.dispose();

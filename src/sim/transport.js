@@ -6,6 +6,7 @@
  * do barco (a névoa de guerra continua enxergando por ele). Morre com o barco, sem cadáver (`killCargo`).
  * Margem = par (célula navegável, célula terrestre livre) a poucos metros — `findLandingSpot`.
  */
+import { fcos, fhypot, fsin } from './fmath.js';
 import { BOARD_DISTANCE } from '../data/combat.js';
 import { EVT } from './events.js';
 
@@ -15,7 +16,7 @@ const TAU = Math.PI * 2;
 export function boardEdgeDistance(boat, unit) {
   const a = boat.mesh.position;
   const b = unit.mesh.position;
-  return Math.hypot(a.x - b.x, a.z - b.z) - (boat.collisionRadius || 0) - (unit.collisionRadius || 0);
+  return fhypot(a.x - b.x, a.z - b.z) - (boat.collisionRadius || 0) - (unit.collisionRadius || 0);
 }
 
 /**
@@ -30,8 +31,8 @@ export function findLandingSpot(gm, x, z, maxR = 40) {
     const steps = r === 0 ? 1 : 24;
     for (let i = 0; i < steps; i++) {
       const a = (i / steps) * TAU;
-      const lx = x + Math.cos(a) * r;
-      const lz = z + Math.sin(a) * r;
+      const lx = x + fcos(a) * r;
+      const lz = z + fsin(a) * r;
       if (!lpf.isWalkableWorld(lx, lz) || !npf.nearNavigable(lx, lz, 3.5)) continue;
       const sea = nearestSea(npf, lx, lz);
       if (sea) return { sea, land: { x: lx, z: lz } };
@@ -46,8 +47,8 @@ function nearestSea(npf, x, z) {
     const steps = r === 0 ? 1 : 16;
     for (let i = 0; i < steps; i++) {
       const a = (i / steps) * TAU;
-      const sx = x + Math.cos(a) * r;
-      const sz = z + Math.sin(a) * r;
+      const sx = x + fcos(a) * r;
+      const sz = z + fsin(a) * r;
       if (npf.isWalkableWorld(sx, sz)) return { x: sx, z: sz };
     }
   }
@@ -62,8 +63,8 @@ export function findBoardingPoint(gm, boat) {
   for (let r = 0.75; r <= 16; r += 0.75) {
     for (let i = 0; i < 24; i++) {
       const a = (i / 24) * TAU;
-      const x = p.x + Math.cos(a) * r;
-      const z = p.z + Math.sin(a) * r;
+      const x = p.x + fcos(a) * r;
+      const z = p.z + fsin(a) * r;
       if (lpf.isWalkableWorld(x, z)) return { x, z };
     }
   }
@@ -126,8 +127,8 @@ export function unloadAll(gm, boat, land) {
     const u = list[i];
     const a = (i / Math.max(1, n)) * TAU;
     const rr = n > 1 ? 1.4 : 0;
-    let x = land.x + Math.cos(a) * rr;
-    let z = land.z + Math.sin(a) * rr;
+    let x = land.x + fcos(a) * rr;
+    let z = land.z + fsin(a) * rr;
     if (gm.pathfinder && !gm.pathfinder.isWalkableWorld(x, z)) {
       const s = gm.pathfinder.findNearestWalkable(x, z, 6);
       x = s.x;
@@ -191,7 +192,7 @@ export function updateBoarding(gm, unit, delta) {
     return;
   }
   unit._boardRetry += delta;
-  const moved = Math.hypot(boat.mesh.position.x - unit._boardAt.x, boat.mesh.position.z - unit._boardAt.z);
+  const moved = fhypot(boat.mesh.position.x - unit._boardAt.x, boat.mesh.position.z - unit._boardAt.z);
   const arrived = unit.state === 'idle';
   if (unit._boardRetry < 1 || (!arrived && moved < 4)) return;
   unit._boardRetry = 0;
@@ -224,8 +225,8 @@ export function updateUnloading(gm, boat) {
   const spot = boat._unloadOrder;
   if (!boat.cargo || boat.cargo.length === 0) { boat._unloadOrder = null; return; }
   const p = boat.mesh.position;
-  const dSea = Math.hypot(p.x - spot.sea.x, p.z - spot.sea.z);
-  const dLand = Math.hypot(p.x - spot.land.x, p.z - spot.land.z) - (boat.collisionRadius || 0);
+  const dSea = fhypot(p.x - spot.sea.x, p.z - spot.sea.z);
+  const dLand = fhypot(p.x - spot.land.x, p.z - spot.land.z) - (boat.collisionRadius || 0);
   const near = dSea <= 2.5 || dLand <= BOARD_DISTANCE + 1;
   if (near) {
     boat._unloadOrder = null;

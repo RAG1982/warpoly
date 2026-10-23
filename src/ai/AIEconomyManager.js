@@ -1,3 +1,4 @@
+import { fcos, fhypot, fsin } from '../sim/fmath.js';
 import { CMD } from '../sim/commands.js';
 import { repairCostFor, REPAIR_HP_FRACTION } from '../sim/repair.js';
 import { missingRequirements, missingUpgradeRequirements } from '../sim/requirements.js';
@@ -566,7 +567,7 @@ export class AIEconomyManager {
 
     const dx = enemyHq.x - me.x;
     const dz = enemyHq.z - me.y;
-    const len = Math.hypot(dx, dz) || 1;
+    const len = fhypot(dx, dz) || 1;
     const fx = dx / len;
     const fz = dz / len;
     const px = -fz; // perpendicular à direção do inimigo
@@ -585,8 +586,8 @@ export class AIEconomyManager {
     const workers = this.director.getOwnUnits()
       .filter(w => !w.isDead && w.type === this.director.workerType)
       .sort((a, b) => {
-        const da = Math.hypot(a.mesh.position.x - cx, a.mesh.position.z - cz) + (a.state === 'idle' ? 0 : 50);
-        const db = Math.hypot(b.mesh.position.x - cx, b.mesh.position.z - cz) + (b.state === 'idle' ? 0 : 50);
+        const da = fhypot(a.mesh.position.x - cx, a.mesh.position.z - cz) + (a.state === 'idle' ? 0 : 50);
+        const db = fhypot(b.mesh.position.x - cx, b.mesh.position.z - cz) + (b.state === 'idle' ? 0 : 50);
         return da - db || a.id - b.id;
       })
       .slice(0, 2)
@@ -1048,7 +1049,7 @@ export class AIEconomyManager {
     for (let i = 0; i < units.length; i++) {
       const u = units[i];
       if (u.isDead || u.type !== dir.workerType) continue;
-      const d = Math.hypot(u.mesh.position.x - site.x, u.mesh.position.z - site.z) + (u.state === 'idle' ? 0 : 50);
+      const d = fhypot(u.mesh.position.x - site.x, u.mesh.position.z - site.z) + (u.state === 'idle' ? 0 : 50);
       if (d < wd) { wd = d; w = u; }
     }
     return !!dir.issue({ type: CMD.PLACE_BUILDING, playerId: dir.playerId, buildingType: dir.lumberType, x: site.x, z: site.z, unitIds: w ? [w.id] : [] });
@@ -1069,8 +1070,8 @@ export class AIEconomyManager {
     for (let attempt = 0; attempt < 45; attempt++) {
       const angle = (attempt * 0.45) + (this.director.rng.next() * 0.3);
       const dist = 11.5 + (attempt % 3) * 4.5 + this.director.rng.next() * 3.0;
-      const testX = baseCenter.x + Math.cos(angle) * dist;
-      const testZ = baseCenter.y + Math.sin(angle) * dist;
+      const testX = baseCenter.x + fcos(angle) * dist;
+      const testZ = baseCenter.y + fsin(angle) * dist;
 
       if (this.gm.canPlaceBuilding(type, testX, testZ)) {
         chosenX = testX;

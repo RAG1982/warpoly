@@ -1,3 +1,4 @@
+import { fhypot } from '../sim/fmath.js';
 import { CMD } from '../sim/commands.js';
 import { getUnitDef } from '../data/index.js';
 import { hasStatus } from '../sim/statuses.js';
@@ -98,7 +99,7 @@ export class AIMicroManager {
     // libera quem chegou à base
     for (const id of this.retreating) {
       const u = this.gm.getEntity(id);
-      if (!u || u.isDead || (u.state === 'idle' && Math.hypot(u.mesh.position.x - base.x, u.mesh.position.z - base.y) < 40)) {
+      if (!u || u.isDead || (u.state === 'idle' && fhypot(u.mesh.position.x - base.x, u.mesh.position.z - base.y) < 40)) {
         this.retreating.delete(id);
         dir.unreserve(id);
       }
@@ -109,7 +110,7 @@ export class AIMicroManager {
       if (u.hp >= u.maxHp * RETREAT_HP || this.retreating.has(u.id)) continue;
       if (u.state !== 'attacking' && u.state !== 'attackMoving' && u.state !== 'moving') continue;
       const p = u.mesh.position;
-      if (Math.hypot(p.x - base.x, p.z - base.y) < 35) continue; // perto de casa luta até o fim
+      if (fhypot(p.x - base.x, p.z - base.y) < 35) continue; // perto de casa luta até o fim
       if (this._enemiesNear(p.x, p.z, 14).length === 0) continue;
       ids.push(u.id);
     }
@@ -157,7 +158,7 @@ export class AIMicroManager {
       const def = getUnitDef(u.type);
       if (def.isSiege) continue;
       const p = u.mesh.position;
-      if (Math.hypot(p.x - bp.x, p.z - bp.z) > (def.attackRange || 2) + 7) continue;
+      if (fhypot(p.x - bp.x, p.z - bp.z) > (def.attackRange || 2) + 7) continue;
       // só redireciona quem já luta contra unidade (não atrapalha cerco/construção)
       const t = u.targetEntity;
       if (t && (t.fullMesh || t.isConstructed !== undefined) && !def.isRanged) continue;
@@ -222,14 +223,14 @@ export class AIMicroManager {
       const m = melee.mesh.position;
       let dx = p.x - m.x;
       let dz = p.z - m.z;
-      const len = Math.hypot(dx, dz) || 1;
+      const len = fhypot(dx, dz) || 1;
       dx /= len; dz /= len;
       // foge em direção à base quando o vetor aponta para fora do mapa
       const home = dir.baseCenter;
-      const toHome = Math.hypot(home.x - p.x, home.y - p.z) || 1;
+      const toHome = fhypot(home.x - p.x, home.y - p.z) || 1;
       dx = dx * 0.7 + ((home.x - p.x) / toHome) * 0.3;
       dz = dz * 0.7 + ((home.y - p.z) / toHome) * 0.3;
-      const l2 = Math.hypot(dx, dz) || 1;
+      const l2 = fhypot(dx, dz) || 1;
       if (dir.issue({ type: CMD.MOVE, playerId: dir.playerId, unitIds: [u.id], x: p.x + (dx / l2) * KITE_STEP, z: p.z + (dz / l2) * KITE_STEP })) {
         this.kiting.set(u.id, now);
         this.stats.kites++;
@@ -268,7 +269,7 @@ export class AIMicroManager {
       if (def.isSiege || def.suicide || def.maxMana > 0) continue;
       if (u.targetEntity === t) continue;
       const p = u.mesh.position;
-      if (Math.hypot(p.x - sp.x, p.z - sp.z) > 26) continue;
+      if (fhypot(p.x - sp.x, p.z - sp.z) > 26) continue;
       const tg = u.targetEntity;
       const onBuilding = tg && (tg.fullMesh || tg.isConstructed !== undefined);
       if (u.state === 'idle' || u.state === 'moving' || onBuilding) escorts.push(u.id);
@@ -363,7 +364,7 @@ export class AIMicroManager {
     const base = this.director.baseCenter;
     let dx = target.x - base.x;
     let dz = target.z - base.y;
-    const len = Math.hypot(dx, dz) || 1;
+    const len = fhypot(dx, dz) || 1;
     dx /= len; dz /= len;
     // lado: o que ficar dentro do mapa (determinístico: sinal da coordenada X do alvo)
     const side = target.x >= 0 ? 1 : -1;
@@ -387,7 +388,7 @@ export class AIMicroManager {
       if (!u || u.isDead) { f.ids.delete(id); continue; }
       alive++;
       const p = u.mesh.position;
-      if (Math.hypot(p.x - f.wx, p.z - f.wz) < 9 || u.state === 'idle') arrived++;
+      if (fhypot(p.x - f.wx, p.z - f.wz) < 9 || u.state === 'idle') arrived++;
     }
     const target = this.gm.getEntity(f.targetId);
     const timeout = dir.simTime - f.since > 40;
@@ -425,12 +426,12 @@ export class AIMicroManager {
       const ab = resolveAbility(gm, c.abilities[a]);
       if (!ab || !canCast(gm, c, ab).ok) continue;
       const range = ab.range || 0;
-      const inRange = (e, extra = 4) => Math.hypot(e.mesh.position.x - cp.x, e.mesh.position.z - cp.z) <= range + extra;
+      const inRange = (e, extra = 4) => fhypot(e.mesh.position.x - cp.x, e.mesh.position.z - cp.z) <= range + extra;
       const clusterAt = (e, r) => {
         let n = 0;
         for (let k = 0; k < foes.length; k++) {
           const q = foes[k].mesh.position;
-          if (Math.hypot(q.x - e.mesh.position.x, q.z - e.mesh.position.z) <= r) n++;
+          if (fhypot(q.x - e.mesh.position.x, q.z - e.mesh.position.z) <= r) n++;
         }
         return n;
       };
@@ -490,7 +491,7 @@ export class AIMicroManager {
             if (u === c || u.state !== 'attacking' || hasStatus(u, status)) continue;
             const def = getUnitDef(u.type);
             if (def.isRanged || def.isSiege) continue;
-            if (Math.hypot(u.mesh.position.x - cp.x, u.mesh.position.z - cp.z) > range) continue;
+            if (fhypot(u.mesh.position.x - cp.x, u.mesh.position.z - cp.z) > range) continue;
             if (!best || u.hp > best.hp) best = u;
           }
           if (best) return { id: ab.id, targetId: best.id };
@@ -520,7 +521,7 @@ export class AIMicroManager {
   _planHeroCast(ab, c, foes, army, gm) {
     const cp = c.mesh.position;
     const range = ab.range || 0;
-    const distTo = e => Math.hypot(e.mesh.position.x - cp.x, e.mesh.position.z - cp.z);
+    const distTo = e => fhypot(e.mesh.position.x - cp.x, e.mesh.position.z - cp.z);
     const foesWithin = r => {
       let n = 0;
       for (let k = 0; k < foes.length; k++) if (distTo(foes[k]) <= r) n++;
@@ -530,7 +531,7 @@ export class AIMicroManager {
       let n = 0;
       for (let k = 0; k < foes.length; k++) {
         const q = foes[k].mesh.position;
-        if (Math.hypot(q.x - e.mesh.position.x, q.z - e.mesh.position.z) <= r) n++;
+        if (fhypot(q.x - e.mesh.position.x, q.z - e.mesh.position.z) <= r) n++;
       }
       return n;
     };
@@ -540,7 +541,7 @@ export class AIMicroManager {
       for (let k = 0; k < army.length; k++) {
         const u = army[k];
         if (u === c || u.state !== 'attacking' || hasStatus(u, st)) continue;
-        if (Math.hypot(u.mesh.position.x - cp.x, u.mesh.position.z - cp.z) <= r) n++;
+        if (fhypot(u.mesh.position.x - cp.x, u.mesh.position.z - cp.z) <= r) n++;
       }
       return n;
     };
@@ -592,7 +593,7 @@ export class AIMicroManager {
         for (let k = 0; k < own.length; k++) {
           const u = own[k];
           if (u.isDead || u.isDying || u.hp <= 0) continue;
-          if (Math.hypot(u.mesh.position.x - cp.x, u.mesh.position.z - cp.z) > range) continue;
+          if (fhypot(u.mesh.position.x - cp.x, u.mesh.position.z - cp.z) > range) continue;
           const ratio = u.hp / u.maxHp;
           if (ratio < br) { br = ratio; best = u; }
         }
@@ -655,7 +656,7 @@ export class AIMicroManager {
         for (let k = 0; k < army.length; k++) {
           const u = army[k];
           if (u === c || u.state !== 'attacking' || hasStatus(u, 'invisible')) continue;
-          if (Math.hypot(u.mesh.position.x - cp.x, u.mesh.position.z - cp.z) > range) continue;
+          if (fhypot(u.mesh.position.x - cp.x, u.mesh.position.z - cp.z) > range) continue;
           const ratio = u.hp / u.maxHp;
           if (ratio < br) { br = ratio; best = u; }
         }

@@ -1,3 +1,4 @@
+import { fhypot } from '../sim/fmath.js';
 import { getBuildingDef, getUnitDef } from '../data/index.js';
 import { missingUnitRequirements } from '../sim/requirements.js';
 import { CMD } from '../sim/commands.js';
@@ -140,7 +141,7 @@ export class AIMilitaryManager {
     for (const c of dir.perception.camps.values()) {
       const e = gm.getEntity(c.id);
       if (!e || e.isDead) continue;
-      const d = Math.hypot(c.x - base.x, c.z - base.y);
+      const d = fhypot(c.x - base.x, c.z - base.y);
       if (d <= CAMP_MAX_DIST && (d < bd || (d === bd && c.id < best.id))) { bd = d; best = c; }
     }
     if (!best) return;
@@ -186,7 +187,7 @@ export class AIMilitaryManager {
       let siegeIn = true;
       for (let i = 0; i < siege.length; i++) {
         const p = siege[i].mesh.position;
-        if (siege[i].state !== 'idle' && Math.hypot(p.x - op.siegeStage.x, p.z - op.siegeStage.z) > 8) siegeIn = false;
+        if (siege[i].state !== 'idle' && fhypot(p.x - op.siegeStage.x, p.z - op.siegeStage.z) > 8) siegeIn = false;
       }
       if (!siegeIn && now - op.stagedAt < STAGE_TIMEOUT) return;
       // lançamento: todos contra o alvo (o cerco já está atrás da linha e é mais lento)
@@ -212,7 +213,7 @@ export class AIMilitaryManager {
       let foe = null; let fd = Infinity;
       for (let j = 0; j < near.length; j++) {
         const q = near[j].mesh.position;
-        const d = Math.hypot(q.x - sp.x, q.z - sp.z) - (near[j].collisionRadius || 0.5) - (s.collisionRadius || 0.5);
+        const d = fhypot(q.x - sp.x, q.z - sp.z) - (near[j].collisionRadius || 0.5) - (s.collisionRadius || 0.5);
         if (d < minR && d < fd) { fd = d; foe = near[j]; }
       }
       if (!foe) continue;
@@ -225,7 +226,7 @@ export class AIMilitaryManager {
         cand.push(a);
       }
       const fp = foe.mesh.position;
-      const dd = u => Math.hypot(u.mesh.position.x - fp.x, u.mesh.position.z - fp.z);
+      const dd = u => fhypot(u.mesh.position.x - fp.x, u.mesh.position.z - fp.z);
       cand.sort((a, b) => dd(a) - dd(b) || a.id - b.id);
       const ids = cand.slice(0, 4).map(u => u.id);
       let ok;
@@ -234,7 +235,7 @@ export class AIMilitaryManager {
       } else {
         // sem escolta: recuar o cerco, afastando-se do inimigo além do alcance mínimo
         const dx = sp.x - fp.x; const dz = sp.z - fp.z;
-        const len = Math.hypot(dx, dz) || 1;
+        const len = fhypot(dx, dz) || 1;
         ok = dir.issue({ type: CMD.MOVE, playerId: dir.playerId, unitIds: [s.id], x: sp.x + dx / len * (minR + 5), z: sp.z + dz / len * (minR + 5) });
       }
       if (ok) op.cool.set(s.id, now);
@@ -284,9 +285,9 @@ export class AIMilitaryManager {
       const r = this._track.get(id);
       if (!r) { this._track.set(id, { x: p.x, z: p.z, t: now, n: 0 }); continue; }
       if (now - r.t < 8) continue;
-      const moved = Math.hypot(p.x - r.x, p.z - r.z);
+      const moved = fhypot(p.x - r.x, p.z - r.z);
       const t = u.targetEntity;
-      const inRange = t && t.mesh && Math.hypot(t.mesh.position.x - p.x, t.mesh.position.z - p.z) <= (getUnitDef(u.type).attackRange || 2) + (t.collisionRadius || 1) + 2;
+      const inRange = t && t.mesh && fhypot(t.mesh.position.x - p.x, t.mesh.position.z - p.z) <= (getUnitDef(u.type).attackRange || 2) + (t.collisionRadius || 1) + 2;
       r.n = moved < 3 && !inRange ? r.n + 1 : 0;
       r.x = p.x; r.z = p.z; r.t = now;
       if (r.n >= 2) stuck.push(u);
@@ -300,7 +301,7 @@ export class AIMilitaryManager {
       if (tgt && tgt.mesh && !tgt.isDead) {
         const tx = tgt.mesh.position.x; const tz = tgt.mesh.position.z;
         let dx = tx - cx; let dz = tz - cz;
-        const len = Math.hypot(dx, dz) || 1;
+        const len = fhypot(dx, dz) || 1;
         dx /= len; dz /= len;
         const side = (this._detours++ % 2 === 0) ? 1 : -1;
         const wx = cx + dx * len * 0.4 - dz * side * 18;
@@ -327,7 +328,7 @@ export class AIMilitaryManager {
         const u = this.gm.getEntity(id);
         if (!u || u.isDead) { g.ids.delete(id); this._detourOf.delete(id); continue; }
         alive++;
-        if (u.state === 'idle' || Math.hypot(u.mesh.position.x - g.wx, u.mesh.position.z - g.wz) < 8) arrived++;
+        if (u.state === 'idle' || fhypot(u.mesh.position.x - g.wx, u.mesh.position.z - g.wz) < 8) arrived++;
       }
       const target = this.gm.getEntity(g.targetId);
       if (alive === 0 || !target || target.isDead) { for (const id of g.ids) this._detourOf.delete(id); this._detourGroups.splice(gi, 1); continue; }
@@ -438,7 +439,7 @@ export class AIMilitaryManager {
       for (let i = 0; i < enemies.length; i++) {
         const e = enemies[i];
         if (e.isDead || e.type === workerType) continue;
-        if (Math.hypot(e.mesh.position.x - baseCenter.x, e.mesh.position.z - baseCenter.y) < 30) home++;
+        if (fhypot(e.mesh.position.x - baseCenter.x, e.mesh.position.z - baseCenter.y) < 30) home++;
       }
       recall = intruders.length >= 3 && home < intruders.length * 1.5;
     }
@@ -662,7 +663,7 @@ export class AIMilitaryManager {
       // NEW-42: a mesma marcha repetida 3× sem a célula virar "explorada" = destino que o exército não alcança
       // (ilha, penhasco, canto do mapa): descarta o ponto para a varredura seguir adiante em vez de ficar em laço.
       const lm = this._lastMarch;
-      if (lm && Math.hypot(lm.x - m.x, lm.z - m.z) < 1) lm.n++; else this._lastMarch = { x: m.x, z: m.z, n: 1 };
+      if (lm && fhypot(lm.x - m.x, lm.z - m.z) < 1) lm.n++; else this._lastMarch = { x: m.x, z: m.z, n: 1 };
       if (this._lastMarch.n >= 3) { dir.perception.markExploredAt(m.x, m.z); this._lastMarch = null; return; }
       const ids = units.map(u => u.id);
       if (dir.issue({ type: CMD.ATTACK_MOVE, playerId: dir.playerId, unitIds: ids, x: m.x, z: m.z })) {
@@ -726,7 +727,7 @@ export class AIMilitaryManager {
     if (siege.length === 0 || army.length < 2) return false;
     cx /= units.length; cz /= units.length;
     const dx = cx - target.x; const dz = cz - target.z;
-    const len = Math.hypot(dx, dz);
+    const len = fhypot(dx, dz);
     if (len < STAGE_MIN_DIST) return false;
     const ux = dx / len; const uz = dz / len;
     const stage = { x: target.x + ux * STAGE_DIST, z: target.z + uz * STAGE_DIST };

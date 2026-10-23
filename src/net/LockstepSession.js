@@ -178,7 +178,9 @@ export class LockstepSession {
 
   /** Enfileira um comando local (campos de `makeCommand`, sem `tick`); vai no próximo pacote a ser fechado. */
   queueCommand(fields) {
-    const cmd = { ...fields, playerId: this.localId };
+    // MP-01: o comando local passa pelo mesmo formato do fio (JSON). NaN/Infinity viram null aqui como nos
+    // pares remotos; sem isso o par local executava NaN e os outros null → desync.
+    const cmd = JSON.parse(JSON.stringify({ ...fields, playerId: this.localId }));
     delete cmd.tick;
     delete cmd.seqNo;
     const v = validateCommand(cmd);

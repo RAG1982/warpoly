@@ -332,7 +332,7 @@ Legenda de dependências: só IDs; "—" = pode começar já. **Dif.** = dificul
 ### M6 — Lançamento
 | ID | Tarefa | Dif. | Esf. | Exec. | Dep. | Origem | Status |
 |---|---|---|---|---|---|---|---|
-| M6-01 | Determinismo entre navegadores (trigonometria da sim) | Difícil | G | S | — | F9-03 risco | TODO |
+| M6-01 | Determinismo entre navegadores (trigonometria da sim) | Difícil | G | S | — | F9-03 risco | DONE (2026-10-23, via MP-04) |
 | M6-02 | Auditoria final de nomes/IP, créditos e licenças | Média | M | S+V | M1-11 | D2 | TODO |
 | M6-03 | Portar o sinalizador para Cloudflare Worker + Durable Object | Difícil | G | S+V | M6-01 | F9-02 | TODO |
 | M6-04 | Compatibilidade (Firefox/Safari) e hardware mínimo (D3) | Média | M | S+V | M5-03 | D3 | TODO |

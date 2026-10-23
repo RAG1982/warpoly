@@ -128,3 +128,6 @@
 .ms-brief-camp-tab { font: inherit; font-size: 0.8em; cursor: pointer; padding: 4px 8px; border-radius: 6px; border: 1px solid transparent; background: transparent; color: inherit; }
 .ms-brief-camp-tab[aria-selected="true"] { border-color: rgba(212, 175, 55, 0.6); background: rgba(212, 175, 55, 0.2); font-weight: 700; color: #ffd700; }
 .ms-brief-camp-tab:hover { background: rgba(212, 175, 55, 0.15); }
+/* M2-34 */
+.ms-brief-switch { font: inherit; font-size: 0.8em; justify-self: start; cursor: pointer; padding: 3px 8px; border-radius: 6px; border: 1px solid rgba(212, 175, 55, 0.4); background: transparent; color: inherit; }
+.ms-brief-switch:hover, .ms-brief-switch:focus-visible { background: rgba(212, 175, 55, 0.22); outline: none; }

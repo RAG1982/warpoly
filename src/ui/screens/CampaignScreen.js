@@ -24,9 +24,10 @@ export class CampaignScreen {
    * @param {import('../../campaign/progress.js').CampaignProgress} [o.progress]
    * @param {boolean} [o.unlockAll]  depuração: `?campaign=unlock`
    */
-  constructor({ onStart, onClose = null, progress = null, unlockAll = false }, parent = document.body) {
+  constructor({ onStart, onClose = null, onSwitch = null, progress = null, unlockAll = false }, parent = document.body) {
     this.onStart = onStart;
     this.onClose = onClose;
+    this.onSwitch = onSwitch; // M2-34: "Trocar campanha" → volta à tela de escolha
     this.progress = progress || getProgress();
     this.unlockAll = unlockAll;
     this.parent = parent;
@@ -83,7 +84,7 @@ export class CampaignScreen {
       if (!el || el.disabled) return;
       const act = el.dataset.cp;
       if (act === 'pick') { this.selected = el.dataset.id; this._render(); }
-      else if (act === 'pickCamp') { this.campaignId = el.dataset.id; this._pickDefault(); this._render(); }
+      else if (act === 'switchCamp') { this.close({ silent: true }); this.onSwitch?.(); }
       else if (act === 'start') {
         if (this._shouldAutoShowStory()) {
           this._openStory(() => this.onStart?.(this.campaignId, this.selected));
@@ -115,14 +116,14 @@ export class CampaignScreen {
     }
   }
 
-  close() {
+  close({ silent = false } = {}) {
     if (!this.root) return;
     document.removeEventListener('keydown', this._onKey, true);
     this._offLang?.();
     this._offLang = null;
     this.root.remove();
     this.root = null;
-    this.onClose?.();
+    if (!silent) this.onClose?.();
   }
 
   /** Seleciona a próxima missão disponível (ou a primeira se a campanha acabou). */
@@ -181,15 +182,9 @@ export class CampaignScreen {
     }
     const prov = def.provisional ? `<span class="ms-badge-prov" title="${esc(t('campaign.provisionalHint'))}">${esc(t('campaign.provisional'))}</span>` : '';
     const attempt = t('campaign.attempt', { n: this.progress.attemptNumber(def.id) });
-    const camps = listCampaigns();
-    const campsTabs = camps.length > 1
-      ? `<div class="ms-brief-camps" role="tablist">`
-        + camps.map((c) => {
-          const sel = c.id === this.campaignId;
-          const lbl = c.betaLabel ? localize(c.betaLabel, lang) : localize(c.title, lang);
-          return `<button type="button" class="ms-brief-camp-tab" data-cp="pickCamp" data-id="${esc(c.id)}" aria-selected="${sel}" role="tab">${esc(lbl)}</button>`;
-        }).join('')
-        + `</div>`
+    // M2-34: a escolha de campanha é a CampaignSelectScreen; aqui só um botão discreto para voltar a ela.
+    const campsTabs = this.onSwitch
+      ? `<button type="button" class="ms-brief-switch" data-cp="switchCamp">${esc(t('campaign.switch'))}</button>`
       : '';
 
     this.root.innerHTML = `<div class="ms-brief" role="dialog" aria-modal="true" aria-labelledby="cp-title">`

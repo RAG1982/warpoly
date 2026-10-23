@@ -26,6 +26,7 @@ import { t, onLanguageChange, getLanguage, setLanguage, mapName, factionName } f
 import { createTutorialConfig } from '../tutorial.js';
 import { MissionBriefing } from './MissionBriefing.js'; // F8-04
 import { createMissionConfig } from '../../data/missions/index.js';
+import { CampaignSelectScreen } from './CampaignSelectScreen.js';
 import { CampaignScreen } from './CampaignScreen.js'; // F8-05
 import { prepareCampaignMission, setActiveRun } from '../../campaign/index.js';
 
@@ -169,15 +170,28 @@ export class MainMenu {
 
   /** F8-05: "Campanha" > escolha de missão > Iniciar (config com carry-over; a vitória é gravada pelo main.js). */
   openCampaign() {
+    const params = new URLSearchParams(location.search);
+    const param = params.get('campaign');
+    const unlockAll = param === 'unlock';
+    const focusBtn = () => this.root?.querySelector('[data-action="campaign"]')?.focus({ preventScroll: true });
     if (!this.campaignScreen) {
-      const unlockAll = new URLSearchParams(location.search).get('campaign') === 'unlock';
       this.campaignScreen = new CampaignScreen({
         unlockAll,
         onStart: (campaignId, missionId) => this.startMission(missionId, campaignId, unlockAll),
-        onClose: () => this.root?.querySelector('[data-action="campaign"]')?.focus({ preventScroll: true })
+        onClose: focusBtn,
+        onSwitch: () => this.campaignSelect.open()
       });
     }
-    this.campaignScreen.open();
+    // M2-34: primeiro a tela só de escolha; escolher abre a lista de missões da campanha.
+    if (!this.campaignSelect) {
+      this.campaignSelect = new CampaignSelectScreen({
+        unlockAll,
+        param,
+        onPick: (id) => { this.campaignScreen.campaignId = id; this.campaignScreen.open(); },
+        onClose: focusBtn
+      });
+    }
+    this.campaignSelect.open();
   }
 
   startMission(missionId, campaignId = null, unlockAll = false) {
@@ -186,6 +200,7 @@ export class MainMenu {
     if (!campaignId) setActiveRun(null);
     this.briefing?.close();
     this.campaignScreen?.close();
+    this.campaignSelect?.close();
     this.root.classList.add('mm-leaving');
     const reduce = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
     const choice = { config, faction: config.players[0].factionId, difficulty: config.difficulty, mapId: config.mapId, victoryMode: config.victoryMode, mission: true };
@@ -201,6 +216,8 @@ export class MainMenu {
     this.briefing = null;
     this.campaignScreen?.close();
     this.campaignScreen = null;
+    this.campaignSelect?.close();
+    this.campaignSelect = null;
     this._offLang?.();
     this._disposePreview();
     clearTimeout(this._startTimer);

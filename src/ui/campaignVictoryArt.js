@@ -134,3 +134,9 @@ export function buildVictorySvg(faction) {
   </g>
 </svg>`;
 }
+
+/** M2-34: heráldica da facção sozinha (escudo do emblema da vitória), para a tela de escolha de campanha. */
+export function buildEmblemSvg(faction) {
+  const orc = faction === 'orc';
+  return `<svg class="cs-emblem-svg" viewBox="716 260 168 200" aria-hidden="true" focusable="false">${orc ? emblemOrc : emblemHuman}</svg>`;
+}

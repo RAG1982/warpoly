@@ -1,0 +1,53 @@
+/* M2-34 — tela de escolha de campanha. Paleta do menu: ouro #d4af37, creme #f5e4b2; azul #2f5fb3 (Liga), vermelho #a3281c (Cinzal). */
+.cs-overlay {
+  position: fixed; inset: 0; z-index: 100100; display: grid; place-items: center; padding: 24px; overflow-y: auto;
+  background: radial-gradient(ellipse 90% 80% at 50% 40%, rgba(14, 16, 24, 0.9) 0%, rgba(3, 4, 8, 0.97) 100%);
+  color: #f5e4b2; font-family: 'Cinzel', 'Georgia', serif; animation: cs-in 0.35s ease both;
+}
+.cs-screen { width: min(1040px, 100%); display: grid; justify-items: center; gap: 14px; }
+.cs-title { margin: 0; font-size: clamp(1.6rem, 3.4vw, 2.6rem); letter-spacing: 0.14em; text-transform: uppercase; color: #d4af37; text-shadow: 0 2px 18px rgba(212, 175, 55, 0.35); }
+.cs-subtitle { margin: 0 0 8px; opacity: 0.8; font-size: 1.05rem; text-align: center; }
+.cs-cards { display: grid; grid-template-columns: 1fr 1fr; gap: 28px; width: 100%; }
+.cs-card {
+  --acc: #d4af37; --glow: 212, 175, 55;
+  position: relative; display: flex; flex-direction: column; align-items: center; gap: 10px; padding: 26px 24px 22px;
+  font: inherit; color: inherit; text-align: center; cursor: pointer; border-radius: 16px;
+  border: 2px solid rgba(var(--glow), 0.45);
+  background: linear-gradient(180deg, rgba(var(--glow), 0.16) 0%, rgba(14, 12, 10, 0.92) 55%);
+  box-shadow: 0 14px 40px rgba(0, 0, 0, 0.6); transition: transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease;
+}
+.cs-card--human { --acc: #6f9be0; --glow: 79, 130, 214; }
+.cs-card--orc { --acc: #e0594a; --glow: 200, 70, 52; }
+.cs-card:hover, .cs-card:focus-visible {
+  transform: translateY(-6px) scale(1.02); border-color: var(--acc); outline: none;
+  box-shadow: 0 0 0 3px rgba(var(--glow), 0.45), 0 0 38px rgba(var(--glow), 0.55), 0 18px 46px rgba(0, 0, 0, 0.7);
+}
+.cs-card[aria-disabled="true"] { cursor: not-allowed; filter: grayscale(0.75) brightness(0.8); }
+.cs-card[aria-disabled="true"]:hover { transform: none; }
+.cs-card__top { display: flex; justify-content: space-between; align-items: center; width: 100%; min-height: 24px; flex-direction: row-reverse; }
+.cs-side { font-size: 0.8rem; letter-spacing: 0.18em; text-transform: uppercase; color: var(--acc); }
+.cs-badge { font-size: 0.75rem; letter-spacing: 0.1em; text-transform: uppercase; padding: 2px 10px; border-radius: 999px; border: 1px solid #e0a030; color: #e0a030; background: rgba(0, 0, 0, 0.4); }
+.cs-emblem { display: grid; place-items: center; width: 120px; height: 144px; filter: drop-shadow(0 4px 14px rgba(var(--glow), 0.55)); }
+.cs-emblem-svg { width: 100%; height: 100%; }
+.cs-name { font-size: clamp(1.4rem, 2.4vw, 2rem); font-weight: 700; color: #fff; letter-spacing: 0.05em; }
+.cs-sub { font-size: 0.9rem; color: var(--acc); opacity: 0.95; }
+.cs-premise { font-family: 'Georgia', serif; font-size: 1.02rem; line-height: 1.45; color: #f1e6c8; min-height: 2.9em; max-width: 36ch; }
+.cs-progress { display: grid; gap: 5px; width: 100%; margin-top: 6px; }
+.cs-bar { display: block; height: 8px; border-radius: 4px; background: rgba(255, 255, 255, 0.12); overflow: hidden; }
+.cs-bar > span { display: block; height: 100%; background: linear-gradient(90deg, var(--acc), #f5e4b2); }
+.cs-count { font-size: 0.85rem; opacity: 0.85; }
+.cs-beta { display: flex; justify-content: center; width: 100%; }
+.cs-card--small { flex-direction: row; flex-wrap: wrap; justify-content: center; padding: 12px 18px; gap: 12px; max-width: 520px; }
+.cs-card--small .cs-emblem, .cs-card--small .cs-premise, .cs-card--small .cs-sub, .cs-card--small .cs-side { display: none; }
+.cs-card--small .cs-card__top { width: auto; }
+.cs-card--small .cs-name { font-size: 1.05rem; }
+.cs-card--small .cs-progress { width: 100%; }
+.cs-hint { margin: 4px 0 0; font-size: 0.85rem; opacity: 0.6; }
+.cs-back {
+  font: inherit; cursor: pointer; padding: 8px 22px; border-radius: 8px; color: inherit; background: transparent;
+  border: 1px solid rgba(212, 175, 55, 0.5);
+}
+.cs-back:hover, .cs-back:focus-visible { background: rgba(212, 175, 55, 0.22); outline: none; }
+@media (max-width: 800px) { .cs-cards { grid-template-columns: 1fr; } }
+@media (prefers-reduced-motion: reduce) { .cs-overlay { animation: none; } .cs-card { transition: none; } .cs-card:hover, .cs-card:focus-visible { transform: none; } }
+@keyframes cs-in { from { opacity: 0; } to { opacity: 1; } }

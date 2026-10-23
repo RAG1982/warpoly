@@ -1606,7 +1606,11 @@ export class GameManager {
       this.isGameOver = true;
       this.gameWon = false;
       this._freezeResult();
-      return true;
+      // MP-01: numa partida online (lockstep, `netIssue` ligado) a derrota do jogador LOCAL não pode parar a sim
+      // deste par — os demais pares seguem e o checksum divergiria. Só o fim da partida para todos (regra
+      // determinística de times vivos, abaixo) congela a sim em todos os pares no mesmo tick.
+      if (!this.netIssue) return true;
+      return this.playerRegistry.aliveTeams().size <= 1;
     }
 
     if (this.playerRegistry.aliveTeams().size <= 1) {

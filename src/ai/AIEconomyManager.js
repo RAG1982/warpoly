@@ -1037,7 +1037,7 @@ export class AIEconomyManager {
     const gm = this.gm;
     const o = dir.woodOutlook();
     const pf = gm.pathfinder;
-    return findLumberSite(dir, o, (x, z) => gm.canPlaceBuilding(dir.lumberType, x, z) && (!pf || pointReachable(pf, o.region, x, z)));
+    return findLumberSite(dir, o, (x, z) => gm.canPlaceBuilding(dir.lumberType, x, z, null, dir.playerId) && (!pf || pointReachable(pf, o.region, x, z)));
   }
 
   /** NEW-44: PLACE_BUILDING da serraria em `site` ({x, z}) pelo trabalhador mais próximo (ocioso primeiro). */
@@ -1073,7 +1073,7 @@ export class AIEconomyManager {
       const testX = baseCenter.x + fcos(angle) * dist;
       const testZ = baseCenter.y + fsin(angle) * dist;
 
-      if (this.gm.canPlaceBuilding(type, testX, testZ)) {
+      if (this.gm.canPlaceBuilding(type, testX, testZ, null, this.director.playerId)) {
         chosenX = testX;
         chosenZ = testZ;
         break;

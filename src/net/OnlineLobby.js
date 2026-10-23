@@ -20,6 +20,8 @@ import { LockstepSession } from './LockstepSession.js';
 import { buildOnlineMatchConfig } from './onlineMatch.js';
 import { fnv1a } from '../sim/rng.js';
 import { listMaps, DEFAULT_MAP_ID } from '../data/maps/index.js';
+import { t as tr } from '../i18n/index.js';
+import { resolveSignalUrl } from './signalUrl.js';
 
 export const PROTOCOL_VERSION = 1;
 const OPEN_TIMEOUT_MS = 25000;
@@ -52,14 +54,19 @@ const el = (tag, props = {}, ...kids) => {
 
 /**
  * Abre o painel. `onStart({config, session, proxy, transport, names, localPlayerId})` é chamado uma vez.
+ * MP-02: `entry` (vindo da tela Multiplayer do menu) = `{mode:'create', name, public, signal, onBack}` ou
+ * `{mode:'join', name, code, signal, onBack}`: o lobby cria/entra assim que o servidor responde, e o botão
+ * "Voltar ao menu" chama `onBack`. Sem `entry` (`?online=1`) o comportamento é o de sempre.
  * @returns {{close: () => void}}
  */
-export function openOnlineLobby({ params, onStart }) {
+export function openOnlineLobby({ params, onStart, entry = null }) {
   const q = (k, d = null) => (params.has(k) ? params.get(k) : d);
-  const signalUrl = q('signal', `${location.protocol === 'https:' ? 'wss' : 'ws'}://${location.hostname}:8787`);
+  const signalUrl = entry?.signal ?? resolveSignalUrl({ param: q('signal'), protocol: location.protocol, hostname: location.hostname });
+  let pendingEntry = entry; // consumida uma vez, na primeira conexão
 
   const root = el('div', { id: 'online-lobby' });
-  root.style.cssText = 'position:fixed;inset:0;z-index:99999;background:#0b1020;color:#e5e7eb;font:14px/1.4 system-ui,sans-serif;display:flex;align-items:center;justify-content:center;overflow:auto';
+  // MP-02: aberto pelo menu, fica acima do menu principal (z-index 100000).
+  root.style.cssText = `position:fixed;inset:0;z-index:${entry ? 100200 : 99999};background:#0b1020;color:#e5e7eb;font:14px/1.4 system-ui,sans-serif;display:flex;align-items:center;justify-content:center;overflow:auto`;
   const card = el('div');
   card.style.cssText = 'background:#131a2e;border:1px solid #2b3556;border-radius:10px;padding:20px;min-width:320px;max-width:560px;width:92vw;display:grid;gap:10px';
   root.append(card);
@@ -68,9 +75,14 @@ export function openOnlineLobby({ params, onStart }) {
   title.style.margin = '0';
   const status = el('div', { id: 'ol-status', textContent: 'Desconectado.' });
   status.style.color = '#fbbf24';
-  const inName = el('input', { id: 'ol-name', value: q('nome', 'Jogador'), maxLength: 24 });
+  const inName = el('input', { id: 'ol-name', value: entry?.name ?? q('nome', 'Jogador'), maxLength: 24 });
   const inServer = el('input', { id: 'ol-server', value: signalUrl });
   const btnConnect = el('button', { id: 'ol-connect', textContent: 'Conectar' });
+  const serverRow = el('div', {}, 'Servidor: ', inServer, ' ', btnConnect);
+  serverRow.hidden = !!entry; // MP-02: vindo do menu, o servidor já foi testado pela tela de entrada
+  // MP-02: "Voltar ao menu" só existe quando a sala foi aberta pelo menu (`entry`).
+  const btnBack = el('button', { id: 'ol-back', textContent: tr('mp.lobbyBack') });
+  btnBack.hidden = !entry;
   const inCode = el('input', { id: 'ol-code', placeholder: 'Código da sala', maxLength: 8 });
   const btnCreate = el('button', { id: 'ol-create', textContent: 'Criar sala' });
   const btnJoin = el('button', { id: 'ol-join', textContent: 'Entrar' });
@@ -97,8 +109,8 @@ export function openOnlineLobby({ params, onStart }) {
   roomBox.style.display = 'none';
   card.append(
     title, status,
-    el('div', {}, 'Nome: ', inName), el('div', {}, 'Servidor: ', inServer, ' ', btnConnect),
-    menu, roomBox
+    el('div', {}, 'Nome: ', inName), serverRow,
+    menu, roomBox, el('div', {}, btnBack)
   );
   document.body.append(root);
 
@@ -149,6 +161,13 @@ export function openOnlineLobby({ params, onStart }) {
       }
       if (rejoinData) {
         sig.rejoinGame(rejoinData.code, rejoinData.token);
+        return;
+      }
+      if (pendingEntry && !state.room) {
+        const e = pendingEntry;
+        pendingEntry = null;
+        if (e.mode === 'create') sig.create(e.name, { public: e.public === true, config: { map: selMap.value } });
+        else sig.join(e.code, e.name);
         return;
       }
       const code = q('sala');
@@ -312,6 +331,13 @@ export function openOnlineLobby({ params, onStart }) {
   selFaction.onchange = () => sig.setup({ faction: selFaction.value });
   chkReady.onchange = () => sig.setReady(chkReady.checked);
   btnStart.onclick = () => sig.start();
+  btnBack.onclick = () => {
+    if (closed) return;
+    sig?.leave();
+    sig?.close();
+    close();
+    entry?.onBack?.();
+  };
 
   // F9-04: página recarregada no meio da partida: volta à vaga (token em sessionStorage).
   let rejoinData = null;

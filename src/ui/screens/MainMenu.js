@@ -28,6 +28,7 @@ import { MissionBriefing } from './MissionBriefing.js'; // F8-04
 import { createMissionConfig } from '../../data/missions/index.js';
 import { CampaignSelectScreen } from './CampaignSelectScreen.js';
 import { CampaignScreen } from './CampaignScreen.js'; // F8-05
+import { MultiplayerScreen } from './MultiplayerScreen.js'; // MP-02
 import { prepareCampaignMission, setActiveRun } from '../../campaign/index.js';
 
 const BYPASS_PARAMS = ['play', 'skipMenu', 'bench', 'skipPreload'];
@@ -77,8 +78,9 @@ export class MainMenu {
    * @param {(open: boolean) => void} [opts.onSetupChange]
    * @param {() => void} [opts.onLoadGame]  F2-06
    */
-  constructor(parent = document.body, { onStart = null, onSetupChange = null, onLoadGame = null, onOptions = null, onReplays = null } = {}) {
+  constructor(parent = document.body, { onStart = null, onSetupChange = null, onLoadGame = null, onOptions = null, onReplays = null, onOnline = null } = {}) {
     this.parent = parent;
+    this.onOnline = onOnline; // MP-02: entrada de criar/entrar sala (main.js abre o OnlineLobby)
     this.onReplays = onReplays; // F9-05: abre a lista de replays
     this.onOptions = onOptions; // F6-08
     this.onLoadGame = onLoadGame; // F2-06: abre o diálogo de slots de save
@@ -194,6 +196,20 @@ export class MainMenu {
     this.campaignSelect.open();
   }
 
+  /**
+   * MP-02: "Multiplayer" > tela de entrada (nome, criar sala, código, salas públicas). Criar/entrar entrega
+   * a entrada ao `onOnline` (main.js → OnlineLobby); "Voltar" do lobby reabre esta tela.
+   */
+  openMultiplayer() {
+    if (!this.multiplayer) {
+      this.multiplayer = new MultiplayerScreen({
+        onLaunch: (entry) => this.onOnline?.({ ...entry, onBack: () => this.openMultiplayer() }),
+        onClose: () => this.root?.querySelector('[data-action="multiplayer"]')?.focus({ preventScroll: true })
+      });
+    }
+    this.multiplayer.open();
+  }
+
   startMission(missionId, campaignId = null, unlockAll = false) {
     const lang = getLanguage() === 'en' ? 'en' : 'pt-BR';
     const config = campaignId ? prepareCampaignMission(campaignId, missionId, { lang, unlockAll }) : createMissionConfig(missionId, { lang });
@@ -212,6 +228,8 @@ export class MainMenu {
   }
 
   destroy() {
+    this.multiplayer?.dispose(); // MP-02
+    this.multiplayer = null;
     this.briefing?.close();
     this.briefing = null;
     this.campaignScreen?.close();
@@ -308,8 +326,8 @@ export class MainMenu {
             <button type="button" class="mm-btn" data-action="campaign">
               <span class="mm-btn__label">${t('menu.campaign')}</span><span class="mm-btn__hint">${t('menu.campaignHint')}</span>
             </button>
-            <button type="button" class="mm-btn" disabled aria-describedby="mm-soon-note">
-              <span class="mm-btn__label">${t('menu.multiplayer')}</span><span class="mm-badge">${t('menu.soon')}</span>
+            <button type="button" class="mm-btn" data-action="multiplayer" aria-haspopup="dialog">
+              <span class="mm-btn__label">${t('menu.multiplayer')}</span><span class="mm-btn__hint">${t('menu.multiplayerHint')}</span>
             </button>
             <button type="button" class="mm-btn" data-action="options" aria-haspopup="dialog">
               <span class="mm-btn__label">${t('menu.options')}</span>
@@ -321,7 +339,6 @@ export class MainMenu {
               <span class="mm-btn__label">${t('menu.credits')}</span>
             </button>
           </nav>
-          <p id="mm-soon-note" class="mm-sr">${t('menu.soonNote')}</p>
         </section>
 
         <!-- Sub-painel: Escaramuça -->
@@ -442,6 +459,7 @@ export class MainMenu {
       else if (action === 'tutorial') this.startTutorial();
       else if (action === 'missions') this.openMissions();
       else if (action === 'campaign') this.openCampaign();
+      else if (action === 'multiplayer') this.openMultiplayer();
       else if (action === 'start') this.start();
       else if (action === 'add-ai') this._apply(addAI(this.setup), { focus: '[data-sk="remove"]:last-of-type' });
       else if (action === 'roll-seed') {

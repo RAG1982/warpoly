@@ -91,3 +91,11 @@ export function fatan2(y, x) {
 export function fhypot(a, b, c = 0) {
   return Math.sqrt(a * a + b * b + c * c);
 }
+
+/**
+ * Tangente determinística (`fsin / fcos`), usada pela geração de mapas (src/data/maps, M6-04b). Domínio útil: |x| <= 1.4
+ * (o chamador garante; longe de π/2 o cosseno tende a 0 e a razão perde precisão). Erro < 1e-11 nesse intervalo.
+ */
+export function ftan(x) {
+  return fsin(x) / fcos(x);
+}

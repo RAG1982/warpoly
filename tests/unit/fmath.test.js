@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { fsin, fcos, fatan2, fhypot, FM_PI, FM_HALF_PI } from '../../src/sim/fmath.js';
+import { fsin, fcos, fatan2, fhypot, ftan, FM_PI, FM_HALF_PI } from '../../src/sim/fmath.js';
 
 const TOL = 1e-9; // exigência do M6-01 é < 1e-3 rad; a implementação fica bem abaixo disso.
 
@@ -97,5 +97,23 @@ describe('fmath: determinismo', () => {
     const before = fsin(0.777);
     fcos(9.1); fatan2(5, -2); fhypot(9, 9);
     expect(Object.is(fsin(0.777), before)).toBe(true);
+  });
+});
+
+describe('fmath: tangente (geração de mapas, M6-04b)', () => {
+  it('ftan bate com Math.tan em [-1.4, 1.4] (erro < 1e-11)', () => {
+    let max = 0;
+    for (let x = -1.4; x <= 1.4; x += 0.00041) max = Math.max(max, Math.abs(ftan(x) - Math.tan(x)));
+    expect(max).toBeLessThan(1e-11);
+  });
+
+  it('ftan nos valores usados pelo gerador (π/N limitado a 1.2) e tan(0) = 0', () => {
+    expect(ftan(0)).toBe(0);
+    expect(Math.abs(ftan(1.2) - Math.tan(1.2))).toBeLessThan(1e-11);
+    expect(Math.abs(ftan(FM_PI / 3) - Math.tan(FM_PI / 3))).toBeLessThan(1e-11);
+  });
+
+  it('ftan = fsin / fcos (mesmas operações IEEE, sem estado)', () => {
+    for (const x of [0.2, -0.9, 1.1]) expect(Object.is(ftan(x), fsin(x) / fcos(x))).toBe(true);
   });
 });

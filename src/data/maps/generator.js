@@ -22,6 +22,7 @@ import { mulberry32 } from '../../sim/rng.js';
 import { getHeightForMap } from '../../sim/terrainGenerators.js';
 import { Pathfinder } from '../../sim/Pathfinder.js';
 import { NAVAL_MAX_HEIGHT } from '../combat.js';
+import { fsin, fcos, ftan, fhypot } from '../../sim/fmath.js'; // M6-04b: trigonometria determinística (docs/09_MULTIPLAYER.md §4)
 
 export const GEN_LIMITS = Object.freeze({ minPlayers: 2, maxPlayers: 8, minSize: 96, maxSize: 192 });
 /** M2-10: espécies de árvore por tema do gerador (3 por tema; temas fora da tabela seguem com carvalho/pinheiro/outonal). */
@@ -47,7 +48,7 @@ const r2 = (v) => Math.round(v * 100) / 100 + 0;
 /** Menor lado de mapa que comporta `players` jogadores (bases afastadas o suficiente); no mínimo 96. */
 export function minMapSize(players, naval = false) {
   const p = naval ? PROFILES.naval : PROFILES.land;
-  const half = p.edge + p.sep / (2 * Math.sin(Math.PI / players));
+  const half = p.edge + p.sep / (2 * fsin(Math.PI / players));
   return Math.max(GEN_LIMITS.minSize, 2 * Math.ceil(half + 4));
 }
 
@@ -82,13 +83,13 @@ function normalizeOptions(opts = {}) {
 function makeSignedDistance(discs, bridges) {
   return (x, z) => {
     let d = Infinity;
-    for (const c of discs) d = Math.min(d, Math.hypot(x - c.x, z - c.z) - c.r);
+    for (const c of discs) d = Math.min(d, fhypot(x - c.x, z - c.z) - c.r);
     for (const b of bridges) {
       const dx = b.x2 - b.x1;
       const dz = b.z2 - b.z1;
       const lenSq = dx * dx + dz * dz || 1e-6;
       const u = Math.max(0, Math.min(1, ((x - b.x1) * dx + (z - b.z1) * dz) / lenSq));
-      d = Math.min(d, Math.hypot(x - (b.x1 + u * dx), z - (b.z1 + u * dz)) - b.w / 2);
+      d = Math.min(d, fhypot(x - (b.x1 + u * dx), z - (b.z1 + u * dz)) - b.w / 2);
     }
     return d;
   };
@@ -146,7 +147,7 @@ export function generateMap(options = {}) {
   const rb = prof.rb + (o.naval ? 0 : Math.round(rngShape.range(-1, 2)));
   const R = half - prof.edge;
   const theta0 = N <= 4 && N % 2 === 0 ? Math.PI / 4 : -Math.PI / 2;
-  const U = (i) => { const a = theta0 + (2 * Math.PI * i) / N; return { x: Math.cos(a), z: Math.sin(a) }; };
+  const U = (i) => { const a = theta0 + (2 * Math.PI * i) / N; return { x: fcos(a), z: fsin(a) }; };
   const flip = (i) => (mirror && i % 2 === 1 ? -1 : 1);
   /** Ponto do jogador `i` em coordenadas (rad = distância ao centro, tan = deslocamento lateral). */
   const at = (i, rad, tan) => {
@@ -156,7 +157,7 @@ export function generateMap(options = {}) {
   };
   const images = (rad, tan) => Array.from({ length: N }, (_, i) => at(i, rad, tan));
   const gapAngle = (k) => theta0 + (2 * Math.PI * k) / N + Math.PI / N;
-  const gapPoint = (k, rad) => ({ x: Math.cos(gapAngle(k)) * rad, z: Math.sin(gapAngle(k)) * rad });
+  const gapPoint = (k, rad) => ({ x: fcos(gapAngle(k)) * rad, z: fsin(gapAngle(k)) * rad });
 
   // ---------- Terreno: discos + pontes ----------
   const discs = [];
@@ -175,7 +176,7 @@ export function generateMap(options = {}) {
     let rE = R * 0.3;
     for (let f = 0.95; f >= 0.3; f -= 0.05) {
       const p = gapPoint(0, R * f);
-      if (Math.hypot(p.x - slots[0].x, p.z - slots[0].z) >= 26 && Math.hypot(p.x - slots[1].x, p.z - slots[1].z) >= 26) { rE = R * f; break; }
+      if (fhypot(p.x - slots[0].x, p.z - slots[0].z) >= 26 && fhypot(p.x - slots[1].x, p.z - slots[1].z) >= 26) { rE = R * f; break; }
     }
     for (let k = 0; k < N; k++) {
       const p = gapPoint(k, rE);
@@ -227,7 +228,7 @@ export function generateMap(options = {}) {
   const scatter = (radMin, radMax, minDepth, tries, minSlot) => {
     for (let t = 0; t < tries; t++) {
       const rad = rngScatter.range(radMin, radMax);
-      const w = Math.min(rad * Math.tan(Math.min(Math.PI / N, 1.2)), rb + 12);
+      const w = Math.min(rad * ftan(Math.min(Math.PI / N, 1.2)), rb + 12);
       const tan = rngScatter.range(-w, w);
       const imgs = images(rad, tan);
       let ok = true;
@@ -235,9 +236,9 @@ export function generateMap(options = {}) {
         const p = imgs[a];
         if (Math.max(Math.abs(p.x), Math.abs(p.z)) > half - 7) ok = false;
         else if (depth(p) < minDepth) ok = false;
-        else if (taken.some((q) => Math.hypot(p.x - q.x, p.z - q.z) < q.d)) ok = false;
-        else if (minSlot && slots.some((s) => Math.hypot(p.x - s.x, p.z - s.z) < minSlot)) ok = false;
-        for (let b = a + 1; b < imgs.length && ok; b++) if (Math.hypot(p.x - imgs[b].x, p.z - imgs[b].z) < 12) ok = false;
+        else if (taken.some((q) => fhypot(p.x - q.x, p.z - q.z) < q.d)) ok = false;
+        else if (minSlot && slots.some((s) => fhypot(p.x - s.x, p.z - s.z) < minSlot)) ok = false;
+        for (let b = a + 1; b < imgs.length && ok; b++) if (fhypot(p.x - imgs[b].x, p.z - imgs[b].z) < 12) ok = false;
       }
       if (ok) return imgs;
     }
@@ -357,12 +358,12 @@ export function verifyMap(mapDef, o = { naval: mapDef.generator?.naval }) {
       let coast = false;
       for (let rho = 8; rho <= 26 && !coast; rho += 1) {
         for (let a = 0; a < 24 && !coast; a++) {
-          const x = s.x + Math.cos((a / 24) * Math.PI * 2) * rho;
-          const z = s.z + Math.sin((a / 24) * Math.PI * 2) * rho;
+          const x = s.x + fcos((a / 24) * Math.PI * 2) * rho;
+          const z = s.z + fsin((a / 24) * Math.PI * 2) * rho;
           if (getHeightForMap(mapDef, x, z) >= 1.8 && sea.nearNavigable(x, z, 5.3)) {
             // alguma célula navegável alcançável pelo mar encostada no ponto
             for (let dx = -6; dx <= 6 && !coast; dx += 1.5) for (let dz = -6; dz <= 6 && !coast; dz += 1.5) {
-              if (Math.hypot(dx, dz) <= 5.3 && sea.isWalkableWorld(x + dx, z + dz) && isReached(sea, water, x + dx, z + dz)) coast = true;
+              if (fhypot(dx, dz) <= 5.3 && sea.isWalkableWorld(x + dx, z + dz) && isReached(sea, water, x + dx, z + dz)) coast = true;
             }
           }
         }

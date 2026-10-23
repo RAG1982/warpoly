@@ -9,6 +9,18 @@ import { fileURLToPath } from 'node:url';
 // Exceções: liste aqui "caminho/relativo.js" com a justificativa (hoje nenhuma).
 const EXCEPTIONS = new Set([]);
 
+// M6-04b: src/data também entra na cadeia de determinismo, mas só os arquivos que rodam NO CLIENTE durante a partida
+// (mapa gerado pela seed em `registerGeneratedMap` → generator.js). Lista explícita.
+const DATA_FILES = ['src/data/maps/generator.js'];
+// Ficam com Math.* em src/data, de propósito (não rodam na partida, ou não afetam o estado da sim nem o mapa jogado):
+// - src/data/maps/coast/** : assador offline (tools/gen-world-map.mjs, tools/gen-campaign-maps.mjs). O JSON assado é o dado que o
+//   cliente lê; a partida nunca roda o assador.
+// - src/data/maps/anchors.js : `defaultAnchors`/`findLandingZone` só rodam no assador offline (tools/, coast/world.js, testes); a sim
+//   importa só `ANCHOR_NAME_RE`. Convertê-lo mudou a âncora `landingZone` de camp-04 (-66,-22 → -6,-12), então fica com Math.*.
+// - src/data/maps/validate.js : validação do editor e dos testes; a sim não o importa.
+// - src/data/decorPlan.js e src/data/lavaRender.js : só render (world/Decorations, Lava, Water, TerrainView, AmbientFx); nada volta
+//   para a sim (props não bloqueiam caminho: sem colisão em Decorations).
+
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..', '..');
 const SCOPES = ['src/sim', 'src/ai'];
 const FORBIDDEN = /\bMath\.(sin|cos|tan|asin|acos|atan|atan2|pow|hypot|exp|log)\b/;
@@ -48,4 +60,14 @@ describe('sim/ai não chamam Math trigonométrico (M6-01)', () => {
     }
     expect(hits, `use src/sim/fmath.js em vez de Math.* nestas linhas:\n${hits.join('\n')}`).toEqual([]);
   });
+});
+
+describe('src/data convertido (M6-04b): geração de mapa no cliente', () => {
+  for (const rel of DATA_FILES) {
+    it(`${rel} existe e não chama Math trigonométrico`, () => {
+      const src = readFileSync(join(ROOT, rel), 'utf8');
+      const hits = codeLines(src).filter(({ text }) => FORBIDDEN.test(text)).map(({ n, text }) => `${rel}:${n}: ${text.trim()}`);
+      expect(hits, `use src/sim/fmath.js em vez de Math.* nestas linhas:\n${hits.join('\n')}`).toEqual([]);
+    });
+  }
 });

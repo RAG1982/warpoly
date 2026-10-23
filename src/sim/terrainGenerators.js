@@ -18,11 +18,12 @@
  * `loadHeightmap(url)` (suporte futuro ao editor F8-03) precisa de `Image`/canvas: vive em
  * `src/render/loadHeightmap.js` (F2-08c), reexportado por `src/world/terrainGenerators.js`.
  */
+import { fcos, fhypot, fsin } from './fmath.js';
 import { paintedHeight } from '../data/maps/painted.js';
 
 /** Ondulações suaves comuns às plataformas de terra dos dois geradores. */
 function rollingBumps(x, z) {
-  return Math.sin(x * 0.3) * 0.2 + Math.cos(z * 0.3) * 0.2 + Math.sin((x + z) * 0.14) * 0.12;
+  return fsin(x * 0.3) * 0.2 + fcos(z * 0.3) * 0.2 + fsin((x + z) * 0.14) * 0.12;
 }
 
 /**
@@ -50,14 +51,14 @@ export function continentalHeight(mapDef, x, z) {
   }
 
   // Vale do rio (diagonal x - z = 0, com curvatura orgânica) e seus vaus.
-  const riverBend = Math.sin((x + z) * bendFreq) * bendAmp;
+  const riverBend = fsin((x + z) * bendFreq) * bendAmp;
   const distToRiverLine = Math.abs(x - z - riverBend) / Math.SQRT2;
 
   if (distToRiverLine < halfWidth && maxCoord < start + 2) {
-    const isFord = fords.some((f) => Math.hypot(x - f.x, z - f.z) < f.r);
+    const isFord = fords.some((f) => fhypot(x - f.x, z - f.z) < f.r);
     if (isFord) {
       // Vau: terra seca e caminhável.
-      height = Math.max(height, 2.35 + Math.sin(x * 0.5) * 0.1);
+      height = Math.max(height, 2.35 + fsin(x * 0.5) * 0.1);
     } else {
       // Canal do rio, abaixo do nível da água.
       const riverDepthFactor = 1 - distToRiverLine / halfWidth;
@@ -88,7 +89,7 @@ function bridgeSignedDistance(x, z, bridge) {
   u = Math.max(0, Math.min(1, u));
   const px = x1 + u * dx;
   const pz = z1 + u * dz;
-  return Math.hypot(x - px, z - pz) - width / 2;
+  return fhypot(x - px, z - pz) - width / 2;
 }
 
 /**

@@ -28,7 +28,7 @@ export const REPLAY_FORMAT = 'warpolyreplay';
 /** Versão do formato do arquivo. */
 export const REPLAY_VERSION = 1;
 /** Versão das regras da simulação com que os replays são gravados (ver cabeçalho). */
-export const REPLAY_SIM_VERSION = 1;
+export const REPLAY_SIM_VERSION = 2; // 2: trigonometria da sim via src/sim/fmath.js (M6-01)
 /** Intervalo (ticks) entre checksums gravados: 200 ticks = 10 s. Múltiplo de 20 (cadência de `gm.checksums`). */
 export const CHECK_EVERY = 200;
 export const REPLAY_EXT = '.warpolyreplay';

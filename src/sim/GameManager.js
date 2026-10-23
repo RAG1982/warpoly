@@ -1,3 +1,4 @@
+import { fcos, fhypot, fsin } from './fmath.js';
 import { Unit } from './Unit.js';
 import { Building } from './Building.js';
 import { Wall } from './Wall.js';
@@ -661,7 +662,7 @@ export class GameManager {
         const phase = rng.next() * Math.PI * 2;
         for (let i = 0; i < n.guards; i++) {
           const ang = phase + (i / n.guards) * Math.PI * 2;
-          const bandit = this.spawnUnit('bandit', n.x + Math.cos(ang) * 5, n.z + Math.sin(ang) * 5, NEUTRAL_HOSTILE_ID);
+          const bandit = this.spawnUnit('bandit', n.x + fcos(ang) * 5, n.z + fsin(ang) * 5, NEUTRAL_HOSTILE_ID);
           bandit.homePos = { x: bandit.mesh.position.x, z: bandit.mesh.position.z };
         }
 
@@ -670,8 +671,8 @@ export class GameManager {
           let dz = n.z;
           for (let tries = 0; tries < 16; tries++) {
             const ang = rng.next() * Math.PI * 2;
-            const x = n.x + Math.cos(ang) * 9;
-            const z = n.z + Math.sin(ang) * 9;
+            const x = n.x + fcos(ang) * 9;
+            const z = n.z + fsin(ang) * 9;
             if (isLand(x, z)) { dx = x; dz = z; break; }
           }
           const dep = new ResourceDeposit(this.terrain, n.deposit.type, dx, dz);
@@ -686,8 +687,8 @@ export class GameManager {
           for (let tries = 0; tries < 8; tries++) {
             const ang = rng.next() * Math.PI * 2;
             const d = rng.next() * (n.radius || 6);
-            const cx = n.x + Math.cos(ang) * d;
-            const cz = n.z + Math.sin(ang) * d;
+            const cx = n.x + fcos(ang) * d;
+            const cz = n.z + fsin(ang) * d;
             if (isLand(cx, cz)) { x = cx; z = cz; break; }
           }
           const critter = new Critter(this, n.species, x, z, rng.fork(`critter:${critterSeq++}`), n.radius || 6);
@@ -748,8 +749,8 @@ export class GameManager {
         attempts++;
         const ang = this.rngMap.next() * Math.PI * 2;
         const dist = 2.0 + this.rngMap.next() * radius;
-        const x = centerX + Math.cos(ang) * dist;
-        const z = centerZ + Math.sin(ang) * dist;
+        const x = centerX + fcos(ang) * dist;
+        const z = centerZ + fsin(ang) * dist;
         const h = this.terrain.getHeight(x, z);
 
         // 1. Only plant trees on solid elevated grass plateaus
@@ -758,22 +759,22 @@ export class GameManager {
         // 2. CRITICAL: Never spawn trees inside or near any building footprint (bRad + 7.5 units)
         const nearBuilding = this.buildings.some(b => {
           const bRad = b.collisionRadius || 3.0;
-          return Math.hypot(x - b.mesh.position.x, z - b.mesh.position.z) < (bRad + 7.5);
+          return fhypot(x - b.mesh.position.x, z - b.mesh.position.z) < (bRad + 7.5);
         });
         if (nearBuilding) continue;
 
         // 3. Keep base courtyards and expansion zones completely clear of wild trees (26 unit radius)
         // Sempre as duas bases históricas (NE/SW) + qualquer slot extra ocupado.
-        if (courtyards.some(c => Math.hypot(x - c.x, z - c.z) < 26.0)) continue;
+        if (courtyards.some(c => fhypot(x - c.x, z - c.z) < 26.0)) continue;
 
         // 4. Never spawn on top of or hugging resource deposits (8.5 unit clearance)
         const nearDeposit = this.resourceDeposits.some(r => {
-          return Math.hypot(x - r.mesh.position.x, z - r.mesh.position.z) < 8.5;
+          return fhypot(x - r.mesh.position.x, z - r.mesh.position.z) < 8.5;
         });
         if (nearDeposit) continue;
 
         // 5. Keep river crossings / fords completely clear
-        if (fords.some(f => Math.hypot(x - f.x, z - f.z) < 9.0)) continue;
+        if (fords.some(f => fhypot(x - f.x, z - f.z) < 9.0)) continue;
 
         // 6. Check minimum distance to all already placed trees
         const tooCloseToTree = this.trees.some(t => {
@@ -845,7 +846,7 @@ export class GameManager {
       // do mesmo dono; contra as demais construções (ou de outros donos) vale como sempre.
       for (let i = 0; i < buildingHits.length; i++) {
         const e = buildingHits[i];
-        const d = Math.hypot(e.mesh.position.x - x, e.mesh.position.z - z);
+        const d = fhypot(e.mesh.position.x - x, e.mesh.position.z - z);
         const er = e.collisionRadius || 3.0;
         let gap = minBuildingGap;
         if (e.ownerId === ownerId) {
@@ -898,7 +899,7 @@ export class GameManager {
   hasNavigableWaterNear(x, z, dist) {
     for (let k = 0; k < 24; k++) {
       const a = (k / 24) * Math.PI * 2;
-      if (this.terrain.getHeight(x + Math.sin(a) * dist, z + Math.cos(a) * dist) <= NAVAL_MAX_HEIGHT) return true;
+      if (this.terrain.getHeight(x + fsin(a) * dist, z + fcos(a) * dist) <= NAVAL_MAX_HEIGHT) return true;
     }
     return false;
   }
@@ -918,8 +919,8 @@ export class GameManager {
       const d = r + 1.6 + ring * 1.5;
       for (let k = 0; k < 24; k++) {
         const step = Math.ceil(k / 2) * (Math.PI * 2 / 24) * (k % 2 === 0 ? 1 : -1);
-        const x = p.x + Math.sin(step) * d;
-        const z = p.z + Math.cos(step) * d;
+        const x = p.x + fsin(step) * d;
+        const z = p.z + fcos(step) * d;
         if (npf.isWalkableWorld(x, z)) {
           b.dockPoint = { x, z };
           return b.dockPoint;
@@ -937,7 +938,7 @@ export class GameManager {
     for (let i = 0; i < list.length; i++) {
       const d = list[i];
       if (d.type !== 'oil' || d.resourcesRemaining <= 0 || (d.platform && !d.platform.isDead)) continue;
-      const dist = Math.hypot(d.mesh.position.x - x, d.mesh.position.z - z);
+      const dist = fhypot(d.mesh.position.x - x, d.mesh.position.z - z);
       if (dist <= bestD) { bestD = dist; best = d; }
     }
     return best;
@@ -1258,7 +1259,7 @@ export class GameManager {
     const bRadius = b.collisionRadius || 3.0;
     this.trees.forEach(t => {
       if (t.hasStump) {
-        const d = Math.hypot(x - t.mesh.position.x, z - t.mesh.position.z);
+        const d = fhypot(x - t.mesh.position.x, z - t.mesh.position.z);
         if (d < bRadius + 0.5) {
           t.dispose();
         }
@@ -1296,7 +1297,7 @@ export class GameManager {
       if (!p || !Number.isFinite(p.x) || !Number.isFinite(p.z)) continue;
       let clash = false;
       for (let j = 0; j < valid.length; j++) {
-        if (Math.hypot(valid[j].x - p.x, valid[j].z - p.z) < minSelfDist) { clash = true; break; }
+        if (fhypot(valid[j].x - p.x, valid[j].z - p.z) < minSelfDist) { clash = true; break; }
       }
       if (clash) continue;
       if (!this.canPlaceBuilding(type, p.x, p.z, null, ownerId)) continue;
@@ -2057,8 +2058,8 @@ export class GameManager {
           // Ângulo derivado dos ids (determinístico) no lugar de Math.random() (F1-06).
           const angleDeg = ((u1.id * 73856093) ^ (u2.id * 19349663)) % 360;
           const angle = (angleDeg * Math.PI) / 180;
-          nx = Math.cos(angle);
-          nz = Math.sin(angle);
+          nx = fcos(angle);
+          nz = fsin(angle);
         } else {
           nx = dx / dist;
           nz = dz / dist;

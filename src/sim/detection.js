@@ -9,6 +9,7 @@
  *  - qualquer unidade aliada viva está a ≤ `DETECT_CONTACT_RADIUS` (contato).
  * Só varre `gm.allUnits`/`gm.buildings` quando o alvo está invisível (raro), então o custo é desprezível.
  */
+import { fhypot } from './fmath.js';
 import { DETECT_RADIUS, DETECT_CONTACT_RADIUS } from '../data/combat.js';
 import { getUnitDef, getBuildingDef } from '../data/index.js';
 
@@ -28,7 +29,7 @@ export function isDetectedBy(gm, target, ownerId) {
     const u = units[i];
     if (u === target || u.isDead || u.isDying || !u.mesh) continue;
     if (u.ownerId !== ownerId && !(gm.isAlly && gm.isAlly(ownerId, u.ownerId))) continue;
-    const d = Math.hypot(u.mesh.position.x - tp.x, u.mesh.position.z - tp.z);
+    const d = fhypot(u.mesh.position.x - tp.x, u.mesh.position.z - tp.z);
     if (d <= DETECT_CONTACT_RADIUS) return true;
     if (d <= DETECT_RADIUS && getUnitDef(u.type).detector) return true;
   }
@@ -38,7 +39,7 @@ export function isDetectedBy(gm, target, ownerId) {
     if (b.isDead || !b.isConstructed || !b.mesh) continue;
     if (getBuildingDef(b.type).role !== 'arcane') continue;
     if (b.ownerId !== ownerId && !(gm.isAlly && gm.isAlly(ownerId, b.ownerId))) continue;
-    if (Math.hypot(b.mesh.position.x - tp.x, b.mesh.position.z - tp.z) <= DETECT_RADIUS) return true;
+    if (fhypot(b.mesh.position.x - tp.x, b.mesh.position.z - tp.z) <= DETECT_RADIUS) return true;
   }
   return false;
 }

@@ -1,3 +1,4 @@
+import { fhypot } from './fmath.js';
 import { computeDamage } from './combat.js';
 import { canTarget } from './targeting.js';
 
@@ -45,7 +46,7 @@ export function applySplashDamage(gm, owner, damage, pos, radius, allUnits, edge
   let hits = 0;
   for (let i = 0; i < _all.length; i++) {
     const e = _all[i];
-    const d0 = Math.hypot(e.mesh.position.x - pos.x, e.mesh.position.z - pos.z);
+    const d0 = fhypot(e.mesh.position.x - pos.x, e.mesh.position.z - pos.z);
     const d = surface ? Math.max(0, d0 - (e.collisionRadius || 0)) : d0;
     if (d > radius) continue;
     const dmg = Math.max(1, Math.round(computeDamage(damage, e, gm.combatRng) * splashFalloff(d, radius, edge)));

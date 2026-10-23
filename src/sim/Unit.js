@@ -1,3 +1,4 @@
+import { fatan2, fcos, fhypot, fsin } from './fmath.js';
 import { Body, Vec3 } from './Body.js';
 import { applySplashDamage } from './splash.js';
 import { Building } from './Building.js';
@@ -710,13 +711,13 @@ export class Unit {
     const g = this.groundTarget;
     if (!g) { this.stop(); return; }
     const pos = this.mesh.position;
-    const dist = Math.hypot(g.x - pos.x, g.z - pos.z);
+    const dist = fhypot(g.x - pos.x, g.z - pos.z);
     if (dist < this.minAttackRange) {
       this.hasFiredThisAttack = false;
       let ax = pos.x - g.x;
       let az = pos.z - g.z;
-      const al = Math.hypot(ax, az);
-      if (al < 0.001) { ax = -Math.sin(this.mesh.rotation.y); az = -Math.cos(this.mesh.rotation.y); } else { ax /= al; az /= al; }
+      const al = fhypot(ax, az);
+      if (al < 0.001) { ax = -fsin(this.mesh.rotation.y); az = -fcos(this.mesh.rotation.y); } else { ax /= al; az /= al; }
       this.stepTowards(pos.x + ax * 2, pos.z + az * 2, this.speed * this.mods.speedMul * delta);
       if (this.hurtTimer <= 0) this._setAnim('walk');
       return;
@@ -726,7 +727,7 @@ export class Unit {
       this.moveTowards(g.x, g.z, delta);
       return;
     }
-    this.mesh.rotation.y = Math.atan2(g.x - pos.x, g.z - pos.z);
+    this.mesh.rotation.y = fatan2(g.x - pos.x, g.z - pos.z);
     if (this.hurtTimer <= 0) this._setAnim('fight');
     const progress = Math.min(1.0, this.attackTimer / this.effAttackCooldown);
     const gm = gameManager || this.gameManager;
@@ -949,7 +950,7 @@ export class Unit {
     const p = this.mesh.position;
     const t = this.attackTarget.mesh.position;
     const o = other.mesh.position;
-    return Math.hypot(o.x - p.x, o.z - p.z) < Math.hypot(t.x - p.x, t.z - p.z);
+    return fhypot(o.x - p.x, o.z - p.z) < fhypot(t.x - p.x, t.z - p.z);
   }
 
   /**
@@ -961,7 +962,7 @@ export class Unit {
   _chaseBlockCheck(delta, allUnits, step) {
     const pos = this.mesh.position;
     if (this._chaseLastX === this._chaseLastX) {
-      const moved = Math.hypot(pos.x - this._chaseLastX, pos.z - this._chaseLastZ);
+      const moved = fhypot(pos.x - this._chaseLastX, pos.z - this._chaseLastZ);
       if (moved < step * 0.3) this._chaseStuckT += delta;
       else this._chaseStuckT = 0;
     }
@@ -1046,7 +1047,7 @@ export class Unit {
     const curZ = this.mesh.position.z;
     const dx = targetX - curX;
     const dz = targetZ - curZ;
-    const dist = Math.hypot(dx, dz);
+    const dist = fhypot(dx, dz);
     if (dist < 0.05) return true;
 
     const move = Math.min(dist, maxDist);
@@ -1060,7 +1061,7 @@ export class Unit {
     if (this.layer === 'air') {
       this.mesh.position.x = nextX;
       this.mesh.position.z = nextZ;
-      this.mesh.rotation.y = Math.atan2(dirX, dirZ);
+      this.mesh.rotation.y = fatan2(dirX, dirZ);
       return (dist - move) < 0.15;
     }
 
@@ -1076,7 +1077,7 @@ export class Unit {
       this.mesh.position.x = nextX;
       this.mesh.position.z = nextZ;
       this.mesh.position.y = WATER_LEVEL;
-      this.mesh.rotation.y = Math.atan2(dirX, dirZ);
+      this.mesh.rotation.y = fatan2(dirX, dirZ);
       return (dist - move) < 0.15;
     }
 
@@ -1099,14 +1100,14 @@ export class Unit {
     this.mesh.position.z = nextZ;
     this.mesh.position.y = nextH;
 
-    this.mesh.rotation.y = Math.atan2(dirX, dirZ);
+    this.mesh.rotation.y = fatan2(dirX, dirZ);
     return (dist - move) < 0.15;
   }
 
   moveTowards(destX, destZ, delta, gameManager = this.gameManager) {
     const curX = this.mesh.position.x;
     const curZ = this.mesh.position.z;
-    const distToFinal = Math.hypot(destX - curX, destZ - curZ);
+    const distToFinal = fhypot(destX - curX, destZ - curZ);
     if (distToFinal < 0.1) return;
 
     let subTargetX = destX;
@@ -1119,12 +1120,12 @@ export class Unit {
       if (!los) {
         // Direct line blocked by water! Route through waypoints / fords
         const distFromLastDest = this.pathDestination
-          ? Math.hypot(destX - this.pathDestination.x, destZ - this.pathDestination.z)
+          ? fhypot(destX - this.pathDestination.x, destZ - this.pathDestination.z)
           : Infinity;
 
         // NEW-42: sem progresso por 1,5 s com um caminho velho (unidade empurrada para a margem da água, atravessada
         // a um waypoint que o relevo não deixa alcançar) — descarta o caminho para pedir um novo desta posição.
-        if (Math.hypot(curX - this._mtX, curZ - this._mtZ) < this.speed * delta * 0.3) this._mtStuck += delta;
+        if (fhypot(curX - this._mtX, curZ - this._mtZ) < this.speed * delta * 0.3) this._mtStuck += delta;
         else this._mtStuck = 0;
         this._mtX = curX;
         this._mtZ = curZ;
@@ -1156,7 +1157,7 @@ export class Unit {
 
         if (this.waypoints && this.waypointIndex < this.waypoints.length) {
           const wp = this.waypoints[this.waypointIndex];
-          const distToWp = Math.hypot(wp.x - curX, wp.z - curZ);
+          const distToWp = fhypot(wp.x - curX, wp.z - curZ);
           if (distToWp < 0.8 && this.waypointIndex < this.waypoints.length - 1) {
             this.waypointIndex++;
           }
@@ -1486,7 +1487,7 @@ export class Unit {
       tx = this.mesh.position.x;
       tz = this.mesh.position.z;
     }
-    const dist = Math.hypot(tx - this.mesh.position.x, tz - this.mesh.position.z) - ((t && t.collisionRadius) || 0);
+    const dist = fhypot(tx - this.mesh.position.x, tz - this.mesh.position.z) - ((t && t.collisionRadius) || 0);
 
     if (c.phase === 0) {
       if (dist > ab.range) {
@@ -1511,7 +1512,7 @@ export class Unit {
     }
 
     if (tx !== this.mesh.position.x || tz !== this.mesh.position.z) {
-      this.mesh.rotation.y = Math.atan2(tx - this.mesh.position.x, tz - this.mesh.position.z);
+      this.mesh.rotation.y = fatan2(tx - this.mesh.position.x, tz - this.mesh.position.z);
     }
     if (c.timer + 1e-9 >= (ab.castTime || 0)) {
       const check = canCast(gm, this, ab);
@@ -1566,7 +1567,7 @@ export class Unit {
   _updateGuardLeash(delta) {
     const p = this.mesh.position;
     const h = this.homePos;
-    const d = Math.hypot(p.x - h.x, p.z - h.z);
+    const d = fhypot(p.x - h.x, p.z - h.z);
     if (!this._returningHome) {
       if (d > (this.guardRadius ?? GUARD_LEASH)) {
         this._returningHome = true;
@@ -1672,7 +1673,7 @@ export class Unit {
     }
     const curX = this.mesh.position.x;
     const curZ = this.mesh.position.z;
-    const dist = Math.hypot(dest.x - curX, dest.z - curZ);
+    const dist = fhypot(dest.x - curX, dest.z - curZ);
     if (dist < 0.5) {
       this._patrolToB = !this._patrolToB;
       return;
@@ -1692,7 +1693,7 @@ export class Unit {
     const curZ = this.mesh.position.z;
     const targetX = this.targetPos.x;
     const targetZ = this.targetPos.z;
-    const dist = Math.hypot(targetX - curX, targetZ - curZ);
+    const dist = fhypot(targetX - curX, targetZ - curZ);
     const isLastLeg = !this.waypoints || this.waypointIndex >= this.waypoints.length - 1;
 
     // F3-02: velocidade efetiva (grupo anda na da unidade mais lenta).
@@ -1702,7 +1703,7 @@ export class Unit {
 
     // F3-02: progresso real desde o tick anterior (inclui empurrões da colisão) — detecta travamento.
     if (this._mvLastX === this._mvLastX) {
-      const moved = Math.hypot(curX - this._mvLastX, curZ - this._mvLastZ);
+      const moved = fhypot(curX - this._mvLastX, curZ - this._mvLastZ);
       if (moved < step * 0.3) this._stuckT += delta;
       else this._stuckT = Math.max(0, this._stuckT - delta);
     }
@@ -1830,7 +1831,7 @@ export class Unit {
     }
 
     const tp = dep.mesh.position;
-    const dist = Math.hypot(this.mesh.position.x - tp.x, this.mesh.position.z - tp.z);
+    const dist = fhypot(this.mesh.position.x - tp.x, this.mesh.position.z - tp.z);
     const contactDist = (dep.platform.collisionRadius || dep.collisionRadius) + this.collisionRadius + 0.25 + this._contactSlack();
     if (dist > contactDist) {
       this._loadT = 0;
@@ -1838,7 +1839,7 @@ export class Unit {
       return;
     }
 
-    this.mesh.rotation.y = Math.atan2(tp.x - this.mesh.position.x, tp.z - this.mesh.position.z);
+    this.mesh.rotation.y = fatan2(tp.x - this.mesh.position.x, tp.z - this.mesh.position.z);
     this.hasFiredThisAttack = false;
     if (this.hurtTimer <= 0) this._setAnim('idle');
     this._loadT += delta;
@@ -1880,7 +1881,7 @@ export class Unit {
     }
 
     const targetPos = this.gatherTarget.mesh.position;
-    const dist = Math.hypot(this.mesh.position.x - targetPos.x, this.mesh.position.z - targetPos.z);
+    const dist = fhypot(this.mesh.position.x - targetPos.x, this.mesh.position.z - targetPos.z);
     // Contact / collision perimeter with resource
     const targetRadius = this.gatherTarget.collisionRadius || (this.gatherTarget.type === 'tree' ? 0.75 : 3.4);
     const contactDist = targetRadius + this.collisionRadius + 0.25;
@@ -1893,7 +1894,7 @@ export class Unit {
     // In contact / collided with resource: face it.
     const dirX = targetPos.x - this.mesh.position.x;
     const dirZ = targetPos.z - this.mesh.position.z;
-    this.mesh.rotation.y = Math.atan2(dirX, dirZ);
+    this.mesh.rotation.y = fatan2(dirX, dirZ);
 
     // F3-04: madeira continua cortada "de fora" (corte contínuo). Ouro/pedra passam a exigir
     // entrar na mina/pedreira — ver `updateWaitingMine`/`updateInsideMine` (item 2 da spec).
@@ -2061,7 +2062,7 @@ export class Unit {
     }
 
     const targetPos = dropoff.mesh.position;
-    const dist = Math.hypot(this.mesh.position.x - targetPos.x, this.mesh.position.z - targetPos.z);
+    const dist = fhypot(this.mesh.position.x - targetPos.x, this.mesh.position.z - targetPos.z);
 
     // Contact / collision perimeter of dropoff building
     const dropoffRadius = dropoff.collisionRadius || (dropoff.type === 'castle' ? 5.5 : 3.2);
@@ -2099,7 +2100,7 @@ export class Unit {
     }
 
     const targetPos = this.buildTarget.mesh.position;
-    const dist = Math.hypot(this.mesh.position.x - targetPos.x, this.mesh.position.z - targetPos.z);
+    const dist = fhypot(this.mesh.position.x - targetPos.x, this.mesh.position.z - targetPos.z);
     const targetRadius = this.buildTarget.collisionRadius || 3.0;
     const contactDist = targetRadius + this.collisionRadius + 0.25 + this._contactSlack();
 
@@ -2111,7 +2112,7 @@ export class Unit {
     // In contact / collided with building scaffold: hammer it!
     const dirX = targetPos.x - this.mesh.position.x;
     const dirZ = targetPos.z - this.mesh.position.z;
-    this.mesh.rotation.y = Math.atan2(dirX, dirZ);
+    this.mesh.rotation.y = fatan2(dirX, dirZ);
 
     this.hasFiredThisAttack = false;
     if (this.hurtTimer <= 0) {
@@ -2137,14 +2138,14 @@ export class Unit {
     }
 
     const targetPos = t.mesh.position;
-    const dist = Math.hypot(this.mesh.position.x - targetPos.x, this.mesh.position.z - targetPos.z);
+    const dist = fhypot(this.mesh.position.x - targetPos.x, this.mesh.position.z - targetPos.z);
     const contactDist = (t.collisionRadius || 3.0) + this.collisionRadius + 0.25;
     if (dist > contactDist) {
       this.moveTowards(targetPos.x, targetPos.z, delta);
       return;
     }
 
-    this.mesh.rotation.y = Math.atan2(targetPos.x - this.mesh.position.x, targetPos.z - this.mesh.position.z);
+    this.mesh.rotation.y = fatan2(targetPos.x - this.mesh.position.x, targetPos.z - this.mesh.position.z);
     this.hasFiredThisAttack = false;
     if (this.hurtTimer <= 0) {
       this._setAnim('gather');
@@ -2223,7 +2224,7 @@ export class Unit {
 
     // 2. Target is alive: compute distance accounting for target collision radius
     const targetPos = this.attackTarget.mesh.position;
-    const dist = Math.hypot(this.mesh.position.x - targetPos.x, this.mesh.position.z - targetPos.z);
+    const dist = fhypot(this.mesh.position.x - targetPos.x, this.mesh.position.z - targetPos.z);
     const targetRadius = this.attackTarget.collisionRadius || (this.attackTarget.fullMesh ? 3.0 : 0.6);
     const effectiveRange = this.attackRange + targetRadius;
 
@@ -2248,8 +2249,8 @@ export class Unit {
         }
         let ax = this.mesh.position.x - targetPos.x;
         let az = this.mesh.position.z - targetPos.z;
-        const al = Math.hypot(ax, az);
-        if (al < 0.001) { ax = -Math.sin(this.mesh.rotation.y); az = -Math.cos(this.mesh.rotation.y); } else { ax /= al; az /= al; }
+        const al = fhypot(ax, az);
+        if (al < 0.001) { ax = -fsin(this.mesh.rotation.y); az = -fcos(this.mesh.rotation.y); } else { ax /= al; az /= al; }
         this.hasFiredThisAttack = false;
         this.stepTowards(this.mesh.position.x + ax * 2, this.mesh.position.z + az * 2, this.speed * this.mods.speedMul * delta);
         if (this.hurtTimer <= 0) this._setAnim('walk');
@@ -2289,7 +2290,7 @@ export class Unit {
     // 4. In range: Face target, drive attack animation synchronized with cooldown
     const dirX = targetPos.x - this.mesh.position.x;
     const dirZ = targetPos.z - this.mesh.position.z;
-    this.mesh.rotation.y = Math.atan2(dirX, dirZ);
+    this.mesh.rotation.y = fatan2(dirX, dirZ);
 
     // Animação 'fight': troca de estado só; o tempo é sincronizado com o cooldown em
     // renderUpdate (F1-09), de forma contínua (usa `alpha` para não "degrau" a 20 Hz).
@@ -2311,7 +2312,7 @@ export class Unit {
         const kind = this.projectileType;
         const startPos = projectileOriginAt(this.mesh.position);
         const tgt = this.attackTarget;
-        const flight = ballisticFlightTime(Math.hypot(tgt.mesh.position.x - startPos.x, tgt.mesh.position.z - startPos.z), kind);
+        const flight = ballisticFlightTime(fhypot(tgt.mesh.position.x - startPos.x, tgt.mesh.position.z - startPos.z), kind);
         _impactPoint.x = tgt.mesh.position.x + (tgt.velX || 0) * flight;
         _impactPoint.y = tgt.mesh.position.y;
         _impactPoint.z = tgt.mesh.position.z + (tgt.velZ || 0) * flight;
@@ -2413,13 +2414,13 @@ export class Unit {
     if (e.layer === 'naval' && this.layer === 'ground') {
       const p = this.mesh.position;
       const q = e.mesh.position;
-      if (Math.hypot(p.x - q.x, p.z - q.z) - (e.collisionRadius || 1) > this.attackRange) return false;
+      if (fhypot(p.x - q.x, p.z - q.z) - (e.collisionRadius || 1) > this.attackRange) return false;
     }
     if (this.minAttackRange <= 0) return true;
     if (this.minAttackRange > 0) {
       const p = this.mesh.position;
       const q = e.mesh.position;
-      const edge = Math.hypot(p.x - q.x, p.z - q.z) - (e.collisionRadius || (e.fullMesh ? 3.0 : 0.6));
+      const edge = fhypot(p.x - q.x, p.z - q.z) - (e.collisionRadius || (e.fullMesh ? 3.0 : 0.6));
       if (edge < this.minAttackRange) return false;
     }
     return true;

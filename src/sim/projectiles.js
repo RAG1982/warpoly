@@ -1,3 +1,4 @@
+import { fhypot, fsin } from './fmath.js';
 /**
  * projectiles.js — F2-08: projéteis como DADOS de simulação (sem three.js/DOM).
  *
@@ -28,7 +29,7 @@ export function ballisticPeak(dist) {
   return Math.min(9, Math.max(2, dist * 0.35));
 }
 
-const dist3 = (a, b) => Math.hypot(a.x - b.x, a.y - b.y, a.z - b.z);
+const dist3 = (a, b) => fhypot(a.x - b.x, a.y - b.y, a.z - b.z);
 
 export class Projectile {
   /**
@@ -74,7 +75,7 @@ export class Projectile {
     const s = this.start;
     const e = this.end;
     out.x = s.x + (e.x - s.x) * t;
-    out.y = s.y + (e.y - s.y) * t + Math.sin(t * Math.PI) * this.arc;
+    out.y = s.y + (e.y - s.y) * t + fsin(t * Math.PI) * this.arc;
     out.z = s.z + (e.z - s.z) * t;
     return out;
   }

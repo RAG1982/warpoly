@@ -1,3 +1,4 @@
+import { fhypot } from '../sim/fmath.js';
 import { isDropoffFor } from '../data/index.js';
 
 /**
@@ -145,7 +146,7 @@ export function analyzeWood(director) {
     trees.push(t);
     wood += t.woodRemaining;
     for (let k = 0; k < drops.length; k++) {
-      const d = Math.hypot(p.x - drops[k].x, p.z - drops[k].z);
+      const d = fhypot(p.x - drops[k].x, p.z - drops[k].z);
       if (d < nearest) nearest = d;
     }
   }
@@ -201,11 +202,11 @@ export function findLumberSite(director, outlook, canPlace) {
         if (dSq < reachSq) value += trees[i].woodRemaining * (1 - Math.sqrt(dSq) / SITE_REACH);
       }
       if (value < MIN_SITE_VALUE) continue;
-      const score = value - 0.5 * Math.hypot(x - base.x, z - base.y);
+      const score = value - 0.5 * fhypot(x - base.x, z - base.y);
       if (score <= bestScore) continue;
       let tooClose = false;
       for (let k = 0; k < drops.length; k++) {
-        if (Math.hypot(x - drops[k].x, z - drops[k].z) < MIN_DROP_GAP) { tooClose = true; break; }
+        if (fhypot(x - drops[k].x, z - drops[k].z) < MIN_DROP_GAP) { tooClose = true; break; }
       }
       if (tooClose || !canPlace(x, z)) continue;
       bestScore = score;

@@ -20,6 +20,7 @@
  *    construções costeiras). `new Pathfinder(terrain)` continua terrestre; o `GameManager` cria uma segunda
  *    instância `navalPathfinder` (fila e cache próprios).
  */
+import { fhypot } from './fmath.js';
 import { NAVAL_MAX_HEIGHT } from '../data/combat.js';
 
 /** Heap binário mínimo, com arrays tipados, usado pelo A* (chave = prioridade/fScore). */
@@ -343,7 +344,7 @@ export class Pathfinder {
    * @returns {boolean}
    */
   hasLineOfSight(x0, z0, x1, z1) {
-    const dist = Math.hypot(x1 - x0, z1 - z0);
+    const dist = fhypot(x1 - x0, z1 - z0);
     // Pontos coincidentes (dist ~0): sem segmento a testar, só o próprio ponto (NEW-4).
     if (dist < 1e-6) return this.isWalkableWorld(x0, z0);
 
@@ -479,7 +480,7 @@ export class Pathfinder {
     this._heap.clear();
 
     this.gScore[startIndex] = 0;
-    const h = (c, r) => Math.hypot(c - dest.c, r - dest.r);
+    const h = (c, r) => fhypot(c - dest.c, r - dest.r);
     this.fScore[startIndex] = h(start.c, start.r);
     this._heap.push(startIndex, this.fScore[startIndex]);
 

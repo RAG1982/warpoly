@@ -1,3 +1,4 @@
+import { fatan2, fcos, fhypot, fsin } from './fmath.js';
 import { NEUTRAL_OWNER_ID } from './EntityIds.js';
 import { Body } from './Body.js';
 import { CRITTER_SPECIES, normalizeCritterSpecies } from '../data/critters.js';
@@ -98,7 +99,7 @@ export class Critter {
       dx = p.x - attacker.mesh.position.x;
       dz = p.z - attacker.mesh.position.z;
     }
-    const len = Math.hypot(dx, dz) || 1;
+    const len = fhypot(dx, dz) || 1;
     this._fleeDx = dx / len;
     this._fleeDz = dz / len;
   }
@@ -137,7 +138,7 @@ export class Critter {
       if (this._walkable(nx, nz)) {
         p.x = nx;
         p.z = nz;
-        this.mesh.rotation.y = Math.atan2(this._fleeDx, this._fleeDz);
+        this.mesh.rotation.y = fatan2(this._fleeDx, this._fleeDz);
       }
       if (this.fleeTimer <= 0) {
         this.state = 'idle';
@@ -146,7 +147,7 @@ export class Critter {
     } else if (this.state === 'walking') {
       const dx = this.targetX - p.x;
       const dz = this.targetZ - p.z;
-      const d = Math.hypot(dx, dz);
+      const d = fhypot(dx, dz);
       if (d < 0.2) {
         this.state = 'idle';
         this.stepTimer = 2 + this.rng.next() * 4;
@@ -154,7 +155,7 @@ export class Critter {
         const step = Math.min(d, WALK_SPEED * dt);
         p.x += (dx / d) * step;
         p.z += (dz / d) * step;
-        this.mesh.rotation.y = Math.atan2(dx, dz);
+        this.mesh.rotation.y = fatan2(dx, dz);
       }
     } else {
       this.stepTimer -= dt;
@@ -162,8 +163,8 @@ export class Critter {
         // Novo ponto de passeio dentro do raio da origem (se cair na água, espera o próximo passo).
         const ang = this.rng.next() * Math.PI * 2;
         const dist = this.rng.next() * this.radius;
-        const tx = this.homeX + Math.cos(ang) * dist;
-        const tz = this.homeZ + Math.sin(ang) * dist;
+        const tx = this.homeX + fcos(ang) * dist;
+        const tz = this.homeZ + fsin(ang) * dist;
         if (this._walkable(tx, tz)) {
           this.targetX = tx;
           this.targetZ = tz;
@@ -178,7 +179,7 @@ export class Critter {
     // Balanço simples enquanto anda/foge (sem esqueleto).
     if (this.state === 'walking' || this.state === 'fleeing') {
       this._bob += dt * (this.state === 'fleeing' ? 14 : 7);
-      this.mesh.rotation.z = Math.sin(this._bob) * 0.08;
+      this.mesh.rotation.z = fsin(this._bob) * 0.08;
     } else {
       this.mesh.rotation.z = 0;
     }

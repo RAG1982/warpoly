@@ -6,6 +6,7 @@
  * Comandos para entidades mortas/inexistentes ou de outro dono são descartados
  * silenciosamente (autoria só gera `console.warn` em dev — ver `_warnForeign`).
  */
+import { fcos, fsin } from './fmath.js';
 import { CMD } from './commands.js';
 import { isDetectedBy } from './detection.js';
 import { canTarget } from './targeting.js';
@@ -395,8 +396,8 @@ function findBoardingSpotFor(gm, unit) {
     const steps = r === 0 ? 1 : 16;
     for (let i = 0; i < steps; i++) {
       const a = (i / steps) * Math.PI * 2;
-      const x = p.x + Math.cos(a) * r;
-      const z = p.z + Math.sin(a) * r;
+      const x = p.x + fcos(a) * r;
+      const z = p.z + fsin(a) * r;
       if (npf.isWalkableWorld(x, z)) return { x, z };
     }
   }

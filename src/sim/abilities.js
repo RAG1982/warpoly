@@ -5,6 +5,7 @@
  * `simStep` (mana, recarga e efeitos usam `SIM_DT`; RNG determinístico via `gm.combatRng`).
  * Catálogo de dados: `src/data/abilities.js`; status: `src/sim/statuses.js`.
  */
+import { fcos, fhypot, fsin } from './fmath.js';
 import { getAbility, isDebugUrl, abilityName } from '../data/abilities.js';
 import { UNITS } from '../data/units.js';
 import { Projectile, ballisticFlightTime } from './projectiles.js';
@@ -168,7 +169,7 @@ export function applyAbility(gm, caster, ability, target, x, z) {
               const u = buf[j];
               if (!isAlive(u) || u.fullMesh || u.isConstructed !== undefined) continue;
               if (!caster.isAlliedWith(u)) continue;
-              const dist = Math.hypot(u.mesh.position.x - px, u.mesh.position.z - pz);
+              const dist = fhypot(u.mesh.position.x - px, u.mesh.position.z - pz);
               if (dist <= fx.radius) targets.push(u);
             }
           } else {
@@ -177,7 +178,7 @@ export function applyAbility(gm, caster, ability, target, x, z) {
               const u = all[j];
               if (!isAlive(u) || u.fullMesh || u.isConstructed !== undefined) continue;
               if (!caster.isAlliedWith(u)) continue;
-              const dist = Math.hypot(u.mesh.position.x - px, u.mesh.position.z - pz);
+              const dist = fhypot(u.mesh.position.x - px, u.mesh.position.z - pz);
               if (dist <= fx.radius) targets.push(u);
             }
           }
@@ -250,7 +251,7 @@ function spawnSummons(gm, caster, unitType, count, x, z, lifetime) {
   for (let i = 0; i < count; i++) {
     const ang = (i / count) * Math.PI * 2;
     const off = count > 1 ? 1.5 : 0;
-    const u = gm.spawnUnit(unitType, x + Math.cos(ang) * off, z + Math.sin(ang) * off, caster.ownerId);
+    const u = gm.spawnUnit(unitType, x + fcos(ang) * off, z + fsin(ang) * off, caster.ownerId);
     if (!u) continue;
     u.summoned = true;
     if (lifetime > 0) u.lifetime = lifetime;
@@ -268,7 +269,7 @@ function fireLine(gm, caster, fx, target) {
   const cp = caster.mesh.position;
   const from = { x: cp.x, y: cp.y + 1.68, z: cp.z };
   const tp = target.mesh.position;
-  const dist = Math.hypot(tp.x - cp.x, tp.z - cp.z);
+  const dist = fhypot(tp.x - cp.x, tp.z - cp.z);
   let dx = (tp.x - cp.x) / (dist || 1);
   let dz = (tp.z - cp.z) / (dist || 1);
   if (dist < 1e-6) { dx = 0; dz = 1; }
@@ -297,7 +298,7 @@ function lineDamage(gm, caster, fx, x0, z0, dx, dz) {
     const uz = u.mesh.position.z - z0;
     let t = ux * dx + uz * dz;
     t = Math.max(0, Math.min(len, t));
-    const d = Math.hypot(ux - dx * t, uz - dz * t) - (u.collisionRadius || 0) * 0.5;
+    const d = fhypot(ux - dx * t, uz - dz * t) - (u.collisionRadius || 0) * 0.5;
     if (d <= r) _cand.push({ u, t });
   }
   _cand.sort((a, b) => a.t - b.t || a.u.id - b.u.id);
@@ -349,7 +350,7 @@ export function findAutocastTarget(gm, caster, ability) {
   for (let i = 0; i < list.length; i++) {
     const u = list[i];
     if (!isAlive(u)) continue;
-    const d = Math.hypot(u.mesh.position.x - p.x, u.mesh.position.z - p.z);
+    const d = fhypot(u.mesh.position.x - p.x, u.mesh.position.z - p.z);
     if (d > ability.range) continue;
     let score;
     if (ability.target === 'enemy' || ability.target === 'none' || ability.target === 'self') {

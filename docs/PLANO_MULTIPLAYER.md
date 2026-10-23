@@ -35,6 +35,8 @@ Criado em 2026-10-23. Complementa `docs/PLANO_FINAL.md` (marco M6) e `docs/09_MU
 
 Decidido por mim (sem consulta): anfitrião não é autoridade (já é assim); `protocolVersion` e `dataHash` exatos no handshake; Worker usa **Durable Object com backend SQLite** (exigência do plano gratuito) e **WebSocket Hibernation**; escaramuça online sem heróis (D7); salas públicas expiram sozinhas.
 
+**Respostas do dono (2026-10-23):** MP-D1 = Cloudflare Pages; MP-D2 = sem TURN no 1.0 (reavaliar após MP-11); implementação por agentes **Haiku 5.5** (exceção pedida pelo dono à regra de que Haiku só faz tarefas mecânicas; o coordenador revisa cada merge com mais rigor).
+
 ## 4. Tarefas, em ordem de execução
 
 Legenda: Dif. = dificuldade; Exec. S = agente Sonnet 5.5, V = você.

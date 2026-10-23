@@ -1,0 +1,74 @@
+{
+  "when": "2026-10-23T19:51:08.804Z",
+  "results": {
+    "menu: sem \"Em breve\" no Multiplayer": {
+      "ok": true,
+      "extra": ""
+    },
+    "A: mensagem de servidor indisponível": {
+      "ok": true,
+      "extra": "Servidor de partidas indisponível. Tente novamente. Tentar de novo"
+    },
+    "A: criar/entrar desabilitados": {
+      "ok": true,
+      "extra": ""
+    },
+    "A: \"Tentar de novo\" refaz a conexão e mostra a mensagem outra vez": {
+      "ok": true,
+      "extra": ""
+    },
+    "A: Esc fecha a tela e volta ao menu": {
+      "ok": true,
+      "extra": ""
+    },
+    "B: lista mostra a sala pública": {
+      "ok": true,
+      "extra": "BXTBXAna · 1/8 jogadores"
+    },
+    "B: sem mensagem de erro com o servidor no ar": {
+      "ok": true,
+      "extra": ""
+    },
+    "B: nome limitado a 24 caracteres": {
+      "ok": true,
+      "extra": "Bia da Silva Costa Perei"
+    },
+    "B: código curto mostra erro sem sair da tela": {
+      "ok": true,
+      "extra": ""
+    },
+    "B: setas na lista de salas mantêm o foco válido": {
+      "ok": true,
+      "extra": ""
+    },
+    "B: entrar pela lista abre o lobby com a sala": {
+      "ok": true,
+      "extra": "BXTBX"
+    },
+    "B: lobby de menu tem \"Voltar ao menu\" e esconde o campo de servidor": {
+      "ok": true,
+      "extra": ""
+    },
+    "B: \"Voltar ao menu\" no lobby reabre a tela Multiplayer": {
+      "ok": true,
+      "extra": ""
+    },
+    "B: Esc fecha e volta ao menu": {
+      "ok": true,
+      "extra": ""
+    },
+    "C: ?online=1 abre o lobby sem \"Voltar ao menu\" e com o campo de servidor": {
+      "ok": true,
+      "extra": ""
+    },
+    "C: ?online=1 conecta sozinho ao sinalizador": {
+      "ok": true,
+      "extra": "Conectado ao servidor."
+    },
+    "erros de página": {
+      "ok": true,
+      "extra": "[]"
+    }
+  },
+  "failed": []
+}

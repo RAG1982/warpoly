@@ -23,8 +23,9 @@ export class SignalingClient {
     this.autoReconnect = reconnect;
     this.maxRetries = maxRetries;
     this.pingMs = pingMs;
-    this._setTimer = setTimer;
-    this._clearTimer = clearTimer;
+    // Wrappers: chamar `setTimeout`/`clearTimeout` como método do cliente dá "Illegal invocation" no navegador.
+    this._setTimer = (fn, ms) => setTimer(fn, ms);
+    this._clearTimer = (id) => clearTimer(id);
     this._handlers = new Map();
     this._retries = 0;
     this._closedByUser = false;

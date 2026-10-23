@@ -163,6 +163,23 @@ class GameApp {
     });
   }
 
+  /**
+   * MP-02: Menu > Multiplayer > criar/entrar. Usa o mesmo OnlineLobby de `?online=1`, com a entrada da tela
+   * de entrada (`entry`). MAIN_MENU só vai a LOADING passando por MATCH_SETUP (como no menu de escaramuça).
+   */
+  async _startOnlineFromMenu(entry) {
+    const { openOnlineLobby } = await import('./net/OnlineLobby.js');
+    openOnlineLobby({
+      params: this.params,
+      entry,
+      onStart: (online) => {
+        this.online = online;
+        if (this.fsm.is(S.MAIN_MENU)) this.fsm.transition(S.MATCH_SETUP);
+        this.fsm.transition(S.LOADING, { config: online.config, online });
+      }
+    });
+  }
+
   // ------------------------------------------------------------------ ações
   pause() {
     if (this.replayCtl) return this.replayCtl.togglePause(); // F9-05: no replay o botão da HUD só pausa/retoma o replay
@@ -378,6 +395,7 @@ class GameApp {
       onStart: (choice) => this._onMenuStart(choice),
       onLoadGame: () => this.saveDialog.open('load'),
       onReplays: () => this.replayDialog.open(),
+      onOnline: (entry) => this._startOnlineFromMenu(entry),
       onSetupChange: (open) => {
         if (open && this.fsm.is(S.MAIN_MENU)) this.fsm.transition(S.MATCH_SETUP);
         else if (!open && this.fsm.is(S.MATCH_SETUP)) this.fsm.transition(S.MAIN_MENU);

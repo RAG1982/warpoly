@@ -289,8 +289,8 @@ Legenda de dependências: só IDs; "—" = pode começar já. **Dif.** = dificul
 ### M3 — Campanha da Aliança (`war-alliance`)
 | ID | Tarefa | Dif. | Esf. | Exec. | Dep. | Status |
 |---|---|---|---|---|---|---|
-| M3-01 | Harness de qualidade das 24 missões (cobertura + progressão + *playthrough* headless) | Difícil | M | S | M2-01 | TODO |
-| M3-02 | Missão 1 · Terra à Vista | Média | M | S | M3-01, M2-03 | TODO |
+| M3-01 | Harness de qualidade das 24 missões (cobertura + progressão + *playthrough* headless) | Difícil | M | S | M2-01 | DONE (2026-10-24) |
+| M3-02 | Missão 1 · Terra à Vista | Média | M | S | M3-01, M2-03 | DONE (2026-10-24; refeita após feedback do dono no G1) |
 | M3-03 | Missão 2 · O Pouso do Encontro | Média | M | S | M3-02, M2-03 | TODO |
 | M3-04 | Missão 3 · Ouro da Pedra-Mãe (entra o Brann) | Difícil | G | S | M3-03, M2-03 | TODO |
 | M3-05 | Missão 4 · O Baixio do Breu (naval roteirizado) | Difícil | G | S | M3-04, M2-04 | TODO |

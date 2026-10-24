@@ -122,6 +122,7 @@ describe('validateMission (F8-04)', () => {
   it('o demo cobre todos os tipos de objetivo e de ação', () => {
     const added = demo.triggers.flatMap((t) => t.actions).filter((a) => a.type === 'addObjective').map((a) => a.objective);
     const types = new Set([...demo.objectives, ...added].map((o) => o.type));
+    types.delete('train'); // M3-02: coberto em missionTrain.test.js
     expect([...types].sort()).toEqual(['build', 'collect', 'destroy', 'eliminate', 'escort', 'flag', 'rescue', 'survive']);
     const allActions = [...demo.setup, ...demo.triggers.flatMap((t) => t.actions)].map((a) => a.type);
     for (const a of ['spawn', 'giveResources', 'takeResources', 'setObjective', 'addObjective', 'revealObjective', 'reveal', 'setTeam', 'transfer', 'dialog', 'message', 'defeat', 'music', 'sound', 'camera', 'cutscene', 'setVar', 'incVar', 'enableTrigger', 'disableTrigger', 'tag', 'order']) {

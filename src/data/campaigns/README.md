@@ -98,3 +98,25 @@ naval, desembarque pela Barcaça, Fireball, Ordenação → Templário e Grifos 
 - `world-map.json` (`format: warpolyworldmap`): mapa-múndi **ilustrativo** (Velmara a oeste, Cinzara a leste, ilhas Estilhaços). Não é campanha nem é jogável. Renderizado por `src/ui/worldMap.js`.
 - A tela de abertura da história lê `src/data/story/world.json` (7 painéis, pt-BR e en; arte em `public/art/story/`).
 - Os testes de registro estão em `tests/unit/campaignSelector.test.js` e `tests/unit/campaignStory.test.js`. **Não há teste de jogabilidade nem de cobertura das 24 missões novas** (MUNDO-6).
+
+## Escrever uma missão do Novo Mundo (M3-01)
+
+Checklist para `war-alliance` / `war-horde` (fichas M3-02…M3-13 e M4-01…M4-12 em `docs/PLANO_FINAL_TAREFAS.md`):
+
+1. **Esqueleto → missão completa.** Sobrescreva `src/data/campaigns/<campanha>/mNN-*.json` mantendo `id` e `title`; `mapId` = o palco `camp-NN-…`
+   (`src/data/maps/camp-*.json`, **não editar**) e **toda posição por âncora** (`{ "anchor": "goldMine1", "dx": 4 }`; nomes em `anchors` do mapa).
+2. **Objetivos honestos e mensuráveis.** Título e condição dizem a mesma coisa; sempre que há contagem, use um tipo que a exponha no painel (`build`,
+   `train`, `collect`, `destroy`, `rescue`: mostram `n/N`). Encadeie com `active:false` + `setObjective` no gatilho do objetivo anterior; cada conclusão
+   dispara o diálogo seguinte. Primário + secundário + oculto. Com final em cutscene use `autoVictory:false` e a ação `victory` depois dela
+   (veja a m01: gatilho com `cooldown` serve de temporizador).
+3. **Texto.** Cutscene de abertura (gatilho `time` 0 com `cutscene`), ≥ 6 diálogos pt-BR/en, briefing + ≥ 2 dicas, `title`/`subtitle` bilíngues.
+4. **Liberações.** `unlocks` no `campaign.json` seguem as tabelas de `MUNDO-HISTORIA-CAMPANHA.md` §4.2/4.3 (o teste confere); heróis jogáveis só com `spawn`
+   depois de liberados.
+5. **Piso automático.** `tests/unit/campaignWorld.test.js` confere tudo acima nas 24 missões. Missão esqueleto fica na lista `PENDING`
+   (precisa falhar o piso); ao entregar, **tire-a de `PENDING`** e acrescente o roteiro (próximo item).
+6. **Playthrough.** Crie `tests/fixtures/campaign-playthrough/<missionId>.js` exportando `{ campaignId, targetMinutes, win, lose }` (passos em
+   `tests/unit/helpers/campaignHarness.js`: `wait/when/run/each/until`, contexto com `issue`, `anchor`, `slayTag`, `status`…). `tests/unit/campaignWorldPlaythrough.test.js`
+   roda sozinho: `win` vence em ≤ 2× a duração-alvo, `lose` derrota e o checksum é o mesmo em duas execuções. Prefira comandos reais (`CMD.PLACE_BUILDING`,
+   `CMD.TRAIN`, `CMD.ATTACK_MOVE`) e só use atalhos (teletransporte, dano) para encurtar caminhadas. Mapas `camp-*` são carregados sob demanda (`ensureMapLoaded`;
+   o harness já faz isso).
+7. **Captura.** `?campaign=unlock` abre a missão no jogo; capture briefing, cutscene, painel e fim em `tools/ui-captures/<ficha>/`.

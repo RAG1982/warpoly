@@ -93,6 +93,20 @@ const EVALUATORS = {
     return { status: cur >= def.amount ? 'completed' : null, cur, max: def.amount };
   },
 
+  /** M3-02: soma de min(treinadas, pedidas) por tipo — o contador n/N só sobe com unidade que SAIU do prédio de treino. */
+  train(rt, o) {
+    const def = o.def;
+    const ownerId = resolveOwnerId(rt.gm, def.owner ?? 'player');
+    const list = def.units ?? [{ type: def.unitType, count: def.count }];
+    let cur = 0;
+    let max = 0;
+    for (const u of list) {
+      cur += Math.min(u.count, rt.trainedCount(ownerId, u.type));
+      max += u.count;
+    }
+    return { status: cur >= max ? 'completed' : null, cur, max };
+  },
+
   eliminate(rt, o) {
     const def = o.def;
     const gm = rt.gm;

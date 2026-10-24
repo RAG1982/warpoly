@@ -13,7 +13,7 @@ export const MISSION_FORMAT = 'warpolymission';
 /** Versão do FORMATO. Suba e escreva migração quando o JSON mudar de forma incompatível. */
 export const MISSION_VERSION = 1;
 
-export const OBJECTIVE_TYPES = Object.freeze(['destroy', 'survive', 'escort', 'rescue', 'build', 'collect', 'eliminate', 'flag']);
+export const OBJECTIVE_TYPES = Object.freeze(['destroy', 'survive', 'escort', 'rescue', 'build', 'collect', 'train', 'eliminate', 'flag']);
 export const PRIORITIES = Object.freeze(['primary', 'secondary', 'hidden']);
 export const OBJECTIVE_STATUSES = Object.freeze(['inactive', 'active', 'completed', 'failed']);
 export const CONDITION_TYPES = Object.freeze(['time', 'every', 'area', 'dead', 'count', 'var', 'objective', 'resource', 'trigger', 'research']);
@@ -232,6 +232,18 @@ function checkObjectiveDef(c, path, o, { dynamic = false } = {}) {
       if (o.mode !== undefined && !['gathered', 'stock'].includes(o.mode)) c.err(`${p}.mode`, 'mode deve ser gathered|stock');
       checkOwner(c, `${p}.owner`, o.owner, { optional: true });
       break;
+    case 'train': { // M3-02: unidades TREINADAS (evento UNIT_TRAINED) pelo dono; `unitType`+`count` ou `units:[{type,count}]`
+      const list = o.units ?? (o.unitType !== undefined ? [{ type: o.unitType, count: o.count }] : null);
+      if (!Array.isArray(list) || list.length === 0) c.err(p, 'informe unitType+count ou units:[{type,count}]');
+      else {
+        list.forEach((u, i) => {
+          if (!isObj(u) || !UNITS[u.type]) c.err(`${p}.units[${i}].type`, `unidade desconhecida "${u && u.type}"`);
+          checkNum(c, `${p}.units[${i}].count`, u && u.count, { min: 1, max: 99, int: true });
+        });
+      }
+      checkOwner(c, `${p}.owner`, o.owner, { optional: true });
+      break;
+    }
     case 'eliminate':
       if (o.owners !== undefined) {
         if (!Array.isArray(o.owners) || o.owners.length === 0) c.err(`${p}.owners`, 'deve ser lista não vazia');

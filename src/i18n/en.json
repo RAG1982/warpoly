@@ -621,6 +621,8 @@
   "tut.kicker": "Tutorial",
   "tut.menu": "Main menu",
   "tut.progress": "{count}/{need}",
+  "tut.rival.title": "Destroy the rival base",
+  "tut.rival.text": "The orc rival is the final goal: destroy all of its buildings (walls do not count) to win the match. It does not attack, but its base is still standing.",
   "tut.select.text": "Click one of your villagers (or drag a box around them). Use W A S D or the arrow keys to move the camera and the mouse wheel to zoom.",
   "tut.select.title": "Select a worker",
   "tut.skip": "Skip tutorial",

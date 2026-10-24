@@ -177,6 +177,7 @@ export class MatchSession {
           onExit: () => document.dispatchEvent(new CustomEvent('warpoly:tutorial-exit'))
         })
         : null;
+      if (this.tutorialController) this.gameManager.victoryHold = () => this.tutorialController?.tutorial.holdsVictory === true;
       // F8-04: missão — painel de objetivos, diálogos, cutscenes e tela de fim (só apresentação).
       this.missionController = this.gameManager.mission
         ? new MissionController({ gm: this.gameManager, sceneManager, inputManager: this.inputManager, uiManager: this.uiManager, sound })

@@ -8,16 +8,37 @@ import { CMD } from '../../src/sim/commands.js';
 import { EVT } from '../../src/sim/events.js';
 import { SIM_DT } from '../../src/sim/constants.js';
 import {
-  Tutorial, TUTORIAL_STEPS, TUTORIAL_EVENT_TYPES, TUTORIAL_MAP_ID, createTutorialConfig
+  Tutorial, TUTORIAL_STEPS, TUTORIAL_EVENT_TYPES, TUTORIAL_MAP_ID, TUTORIAL_RIVAL_ID, createTutorialConfig
 } from '../../src/ui/tutorial.js';
 import ptBR from '../../src/i18n/pt-BR.json';
 import en from '../../src/i18n/en.json';
 
 const ME = 0;
 
+/** Eventos que concluem cada passo (sem o `poll`). */
+const FINISH = {
+  wood: (tut) => tut.handleEvent(EVT.RESOURCE_GATHERED, { ownerId: ME, type: 'wood', amount: 40 }),
+  gold: (tut) => tut.handleEvent(EVT.RESOURCE_GATHERED, { ownerId: ME, type: 'gold', amount: 40 }),
+  house: (tut) => tut.handleEvent(EVT.BUILDING_COMPLETED, { ownerId: ME, buildingType: 'cottage' }),
+  farm: (tut) => tut.handleEvent(EVT.BUILDING_COMPLETED, { ownerId: ME, buildingType: 'farm' }),
+  barracks: (tut) => tut.handleEvent(EVT.BUILDING_COMPLETED, { ownerId: ME, buildingType: 'barracks' }),
+  train: (tut) => { tut.handleEvent(EVT.UNIT_TRAINED, { ownerId: ME, unitType: 'knight' }); tut.handleEvent(EVT.UNIT_TRAINED, { ownerId: ME, unitType: 'archer' }); },
+  attack: (tut) => tut.handleEvent(EVT.CAMP_CLEARED, { byOwnerId: ME }),
+  rival: (tut) => tut.handleEvent(EVT.PLAYER_DEFEATED, { ownerId: TUTORIAL_RIVAL_ID, name: 'x' })
+};
+/** Conclui, em ordem, os passos `ids` (o 1º, `select`, pelo instantâneo de seleção). */
+function finishSteps(tut, ids) {
+  for (const id of ids) {
+    expect(tut.step.id).toBe(id);
+    if (id === 'select') tut.update({ selectedWorker: true });
+    else FINISH[id](tut);
+  }
+}
+const ALL_BEFORE_ATTACK = ['select', 'wood', 'gold', 'house', 'farm', 'barracks', 'train'];
+
 describe('tutorial — lógica pura (F6-09)', () => {
   it('passos em ordem e textos nos dois idiomas', () => {
-    expect(TUTORIAL_STEPS.map((s) => s.id)).toEqual(['select', 'wood', 'gold', 'house', 'farm', 'barracks', 'train', 'attack']);
+    expect(TUTORIAL_STEPS.map((s) => s.id)).toEqual(['select', 'wood', 'gold', 'house', 'farm', 'barracks', 'train', 'attack', 'rival']);
     for (const s of TUTORIAL_STEPS) {
       for (const k of [`tut.${s.id}.title`, `tut.${s.id}.text`]) {
         expect(ptBR[k], k).toBeTruthy();
@@ -60,10 +81,64 @@ describe('tutorial — lógica pura (F6-09)', () => {
     tut.handleEvent(EVT.CAMP_CLEARED, { byOwnerId: 1 });
     expect(tut.step.id).toBe('attack');
     tut.handleEvent(EVT.CAMP_CLEARED, { byOwnerId: ME });
+    expect(tut.step.id).toBe('rival');
+    expect(tut.finished).toBe(false);
+    // Destruir o próprio rival ou um neutro não conta; a base orc conclui o tutorial.
+    tut.handleEvent(EVT.PLAYER_DEFEATED, { ownerId: ME, name: 'você' });
+    expect(tut.step.id).toBe('rival');
+    tut.handleEvent(EVT.PLAYER_DEFEATED, { ownerId: TUTORIAL_RIVAL_ID, name: 'Rival' });
     expect(tut.finished).toBe(true);
     expect(tut.step).toBeNull();
-    expect(tut.progress).toEqual({ done: 8, total: 8 });
+    expect(tut.progress).toEqual({ done: 9, total: 9 });
     expect(states[0]).toBe('select');
+  });
+
+  it('acampamento destruído ANTES do passo attack: conclui na hora ao entrar nele', () => {
+    const tut = new Tutorial({ localPlayerId: ME });
+    finishSteps(tut, ['select', 'wood', 'gold', 'house', 'farm', 'barracks']);
+    // Durante o passo 'train' o jogador destrói o acampamento (evento de construção destruída por ele).
+    expect(tut.handleEvent(EVT.BUILDING_DESTROYED, { buildingType: 'bandit_camp', killerOwnerId: ME, ownerId: 2 })).toBe(true);
+    expect(tut.step.id).toBe('train');
+    tut.handleEvent(EVT.UNIT_TRAINED, { ownerId: ME, unitType: 'knight' });
+    tut.handleEvent(EVT.UNIT_TRAINED, { ownerId: ME, unitType: 'knight' });
+    // 'attack' já estava satisfeito: passa direto e fica em 'rival'.
+    expect(tut.step.id).toBe('rival');
+    expect(tut.progress).toEqual({ done: 8, total: 9 });
+  });
+
+  it('acampamento caído antes do passo attack também conta pelo estado do mundo (poll)', () => {
+    const tut = new Tutorial({ localPlayerId: ME });
+    finishSteps(tut, ALL_BEFORE_ATTACK);
+    expect(tut.step.id).toBe('attack');
+    tut.update({ campGone: false });
+    expect(tut.step.id).toBe('attack');
+    tut.update({ campGone: true });
+    expect(tut.step.id).toBe('rival');
+  });
+
+  it('base orc destruída ANTES do passo rival: conclui na hora (tutorial termina ao fim do attack)', () => {
+    const tut = new Tutorial({ localPlayerId: ME });
+    finishSteps(tut, ['select', 'wood', 'gold', 'house', 'farm', 'barracks']);
+    tut.handleEvent(EVT.PLAYER_DEFEATED, { ownerId: TUTORIAL_RIVAL_ID, name: 'Rival' });
+    expect(tut.step.id).toBe('train');
+    finishSteps(tut, ['train']);
+    expect(tut.step.id).toBe('attack');
+    tut.handleEvent(EVT.CAMP_CLEARED, { byOwnerId: ME });
+    expect(tut.finished).toBe(true);
+    expect(tut.progress).toEqual({ done: 9, total: 9 });
+  });
+
+  it('holdsVictory: vale enquanto o tutorial está em curso; some ao concluir ou pular', () => {
+    const tut = new Tutorial({ localPlayerId: ME });
+    expect(tut.holdsVictory).toBe(true);
+    finishSteps(tut, ALL_BEFORE_ATTACK);
+    FINISH.attack(tut);
+    expect(tut.holdsVictory).toBe(true);
+    FINISH.rival(tut);
+    expect(tut.holdsVictory).toBe(false);
+    const skipped = new Tutorial({ localPlayerId: ME });
+    skipped.skip();
+    expect(skipped.holdsVictory).toBe(false);
   });
 
   it('Pular encerra o tutorial e ignora eventos seguintes', () => {
@@ -170,12 +245,37 @@ describe('tutorial — percurso completo na simulação headless', () => {
     expect(camp).toBeTruthy();
     gm.issue({ type: CMD.ATTACK_MOVE, playerId: ME, unitIds: soldiers().map((u) => u.id), x: camp.mesh.position.x, z: camp.mesh.position.z });
     const t0 = elapsed();
-    while (tut.step && elapsed() - t0 < 200) {
+    while (tut.step && tut.step.id === 'attack' && elapsed() - t0 < 200) {
       run(20);
       if (!camp.isDead) gm.issue({ type: CMD.ATTACK, playerId: ME, unitIds: soldiers().map((u) => u.id), targetId: camp.id });
     }
+    expect(tut.step && tut.step.id, 'passo após o acampamento').toBe('rival');
+    expect(gm.isGameOver).toBe(false); // o rival ainda está de pé: a partida segue
+    // 9. destruir a base do rival (atalho: derruba as construções dele) — só então o tutorial termina e vence.
+    for (const b of gm.buildings.filter((x) => x.ownerId === TUTORIAL_RIVAL_ID && !x.isDead)) b.die();
+    run(40);
     expect(tut.finished, 'tutorial deveria estar concluído').toBe(true);
     expect(elapsed(), 'tempo de jogo').toBeLessThanOrEqual(8 * 60);
-    expect(gm.isGameOver).toBe(false); // o rival passivo mantém a partida aberta
+    expect(gm.isGameOver).toBe(true);
+    expect(gm.gameWon).toBe(true);
   }, 120000);
+
+  it('vitória por conquista não termina a partida enquanto o tutorial não chega ao fim (e volta com Pular)', () => {
+    const cfg = { ...createTutorialConfig(), headless: true };
+    const gm = new GameManager(new Terrain(getMap(cfg.mapId)), null, null, cfg);
+    const tut = new Tutorial({ localPlayerId: ME });
+    for (const type of TUTORIAL_EVENT_TYPES) gm.events.on(type, (p) => tut.handleEvent(type, p));
+    gm.victoryHold = () => tut.holdsVictory;
+    // Rival derrotado cedo (no passo 'select'): não pode encerrar a partida às cegas.
+    for (const b of gm.buildings.filter((x) => x.ownerId === TUTORIAL_RIVAL_ID && !x.isDead)) b.die();
+    const run = (ticks) => { for (let i = 0; i < ticks; i++) gm.simStep(SIM_DT); };
+    run(40);
+    expect(tut.step.id).toBe('select');
+    expect(gm.isGameOver).toBe(false);
+    expect(gm.gameWon).toBe(false);
+    tut.skip();
+    run(5);
+    expect(gm.isGameOver).toBe(true);
+    expect(gm.gameWon).toBe(true);
+  });
 });

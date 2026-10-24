@@ -5431,21 +5431,21 @@
     {
       "x": -32,
       "z": 28,
-      "count": 14,
+      "count": 6,
       "radius": 10,
       "species": "broad"
     },
     {
       "x": -14,
       "z": 20,
-      "count": 14,
+      "count": 7,
       "radius": 10,
       "species": "birch"
     },
     {
       "x": -12,
       "z": -18,
-      "count": 14,
+      "count": 7,
       "radius": 10,
       "species": "broad"
     },
@@ -5473,7 +5473,7 @@
     {
       "x": 18,
       "z": 38,
-      "count": 14,
+      "count": 6,
       "radius": 10,
       "species": "palm"
     },
@@ -5494,21 +5494,21 @@
     {
       "x": 24,
       "z": -10,
-      "count": 14,
+      "count": 2,
       "radius": 10,
       "species": "birch"
     },
     {
       "x": 4,
       "z": -12,
-      "count": 14,
+      "count": 9,
       "radius": 10,
       "species": "birch"
     },
     {
       "x": -2,
       "z": 18,
-      "count": 14,
+      "count": 2,
       "radius": 10,
       "species": "broad"
     },
@@ -5529,7 +5529,7 @@
     {
       "x": -3.4,
       "z": -14.1,
-      "count": 12,
+      "count": 2,
       "radius": 5,
       "species": "oak"
     },
@@ -5720,7 +5720,26 @@
     "preset": "camp-05-cerne-verde",
     "seed": 1,
     "seedUsed": 1,
-    "campaign": "camp-05-cerne-verde"
+    "campaign": "camp-05-cerne-verde",
+    "corridorThin": {
+      "width": 44,
+      "keepFrac": 0.33,
+      "clusters": 8,
+      "trees": [
+        262,
+        193
+      ],
+      "cut": [
+        3,
+        4,
+        11,
+        12,
+        13,
+        16,
+        2,
+        8
+      ]
+    }
   },
   "hidden": true
 }

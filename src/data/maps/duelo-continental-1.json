@@ -12893,14 +12893,14 @@
     {
       "x": -2,
       "z": -2,
-      "count": 14,
+      "count": 6,
       "radius": 10,
       "species": "oak"
     },
     {
       "x": 16,
       "z": -20,
-      "count": 14,
+      "count": 6,
       "radius": 10,
       "species": "autumn"
     },
@@ -12949,7 +12949,7 @@
     {
       "x": -16,
       "z": 20,
-      "count": 14,
+      "count": 6,
       "radius": 10,
       "species": "pine"
     },
@@ -13107,6 +13107,36 @@
     "generator": "coast",
     "preset": "duelo-continental",
     "seed": 1,
-    "seedUsed": 1
+    "seedUsed": 1,
+    "corridorThin": {
+      "width": 44,
+      "keepFrac": 0.33,
+      "clusters": 3,
+      "trees": [
+        196,
+        172
+      ],
+      "cut": [
+        4,
+        5,
+        12
+      ],
+      "original": [
+        14,
+        14,
+        14,
+        14,
+        14,
+        14,
+        14,
+        14,
+        14,
+        14,
+        14,
+        14,
+        14,
+        14
+      ]
+    }
   }
 }

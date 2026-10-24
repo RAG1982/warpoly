@@ -13375,21 +13375,21 @@
     {
       "x": -26,
       "z": 14,
-      "count": 14,
+      "count": 10,
       "radius": 10,
       "species": "oak"
     },
     {
       "x": -18,
       "z": -22,
-      "count": 14,
+      "count": 2,
       "radius": 10,
       "species": "pine"
     },
     {
       "x": -8,
       "z": -4,
-      "count": 14,
+      "count": 2,
       "radius": 10,
       "species": "pine"
     },
@@ -13431,21 +13431,21 @@
     {
       "x": 26,
       "z": -14,
-      "count": 14,
+      "count": 2,
       "radius": 10,
       "species": "birch"
     },
     {
       "x": 18,
       "z": 22,
-      "count": 14,
+      "count": 10,
       "radius": 10,
       "species": "pine"
     },
     {
       "x": 8,
       "z": 4,
-      "count": 14,
+      "count": 10,
       "radius": 10,
       "species": "oak"
     },
@@ -13607,6 +13607,41 @@
     "generator": "coast",
     "preset": "duelo-continental",
     "seed": 2,
-    "seedUsed": 2
+    "seedUsed": 2,
+    "corridorThin": {
+      "width": 44,
+      "keepFrac": 0.33,
+      "clusters": 6,
+      "trees": [
+        224,
+        176
+      ],
+      "cut": [
+        2,
+        3,
+        4,
+        10,
+        11,
+        12
+      ],
+      "original": [
+        14,
+        14,
+        14,
+        14,
+        14,
+        14,
+        14,
+        14,
+        14,
+        14,
+        14,
+        14,
+        14,
+        14,
+        14,
+        14
+      ]
+    }
   }
 }

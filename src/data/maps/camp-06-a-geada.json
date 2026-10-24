@@ -9484,21 +9484,21 @@
     {
       "x": -38,
       "z": -6,
-      "count": 14,
+      "count": 8,
       "radius": 10,
       "species": "pine"
     },
     {
       "x": -60,
       "z": -24,
-      "count": 14,
+      "count": 2,
       "radius": 10,
       "species": "pine"
     },
     {
       "x": -26,
       "z": 22,
-      "count": 14,
+      "count": 2,
       "radius": 10,
       "species": "autumn"
     },
@@ -9512,7 +9512,7 @@
     {
       "x": 44,
       "z": -4,
-      "count": 14,
+      "count": 6,
       "radius": 10,
       "species": "pine"
     },
@@ -9540,7 +9540,7 @@
     {
       "x": 10,
       "z": -24,
-      "count": 14,
+      "count": 2,
       "radius": 10,
       "species": "autumn"
     },
@@ -9568,7 +9568,7 @@
     {
       "x": -4,
       "z": 36,
-      "count": 14,
+      "count": 6,
       "radius": 10,
       "species": "autumn"
     },
@@ -9582,14 +9582,14 @@
     {
       "x": 4,
       "z": 58,
-      "count": 14,
+      "count": 6,
       "radius": 10,
       "species": "pine"
     },
     {
       "x": 30,
       "z": 8,
-      "count": 14,
+      "count": 6,
       "radius": 10,
       "species": "pine"
     },
@@ -9638,7 +9638,7 @@
     {
       "x": -38,
       "z": -46,
-      "count": 14,
+      "count": 6,
       "radius": 10,
       "species": "pine"
     },
@@ -9652,21 +9652,21 @@
     {
       "x": -26,
       "z": -30,
-      "count": 14,
+      "count": 8,
       "radius": 10,
       "species": "pine"
     },
     {
       "x": -56,
       "z": -38,
-      "count": 14,
+      "count": 12,
       "radius": 10,
       "species": "autumn"
     },
     {
       "x": -4,
       "z": -34,
-      "count": 14,
+      "count": 2,
       "radius": 10,
       "species": "autumn"
     },
@@ -9987,7 +9987,30 @@
     "preset": "camp-06-a-geada",
     "seed": 19,
     "seedUsed": 19,
-    "campaign": "camp-06-a-geada"
+    "campaign": "camp-06-a-geada",
+    "corridorThin": {
+      "width": 44,
+      "keepFrac": 0.33,
+      "clusters": 12,
+      "trees": [
+        462,
+        360
+      ],
+      "cut": [
+        5,
+        6,
+        7,
+        13,
+        29,
+        30,
+        31,
+        9,
+        17,
+        19,
+        20,
+        27
+      ]
+    }
   },
   "hidden": true
 }

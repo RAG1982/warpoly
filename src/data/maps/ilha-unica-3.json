@@ -9938,7 +9938,7 @@
     {
       "x": -12,
       "z": -8,
-      "count": 14,
+      "count": 10,
       "radius": 10,
       "species": "pine"
     },
@@ -9952,7 +9952,7 @@
     {
       "x": -2,
       "z": -26,
-      "count": 14,
+      "count": 4,
       "radius": 10,
       "species": "oak"
     },
@@ -9987,14 +9987,14 @@
     {
       "x": 10,
       "z": -28,
-      "count": 14,
+      "count": 6,
       "radius": 10,
       "species": "oak"
     },
     {
       "x": 2,
       "z": -8,
-      "count": 14,
+      "count": 5,
       "radius": 10,
       "species": "pine"
     },
@@ -10143,6 +10143,38 @@
     "generator": "coast",
     "preset": "ilha-unica",
     "seed": 3,
-    "seedUsed": 3
+    "seedUsed": 3,
+    "corridorThin": {
+      "width": 44,
+      "keepFrac": 0.33,
+      "clusters": 4,
+      "trees": [
+        210,
+        179
+      ],
+      "cut": [
+        3,
+        5,
+        10,
+        11
+      ],
+      "original": [
+        14,
+        14,
+        14,
+        14,
+        14,
+        14,
+        14,
+        14,
+        14,
+        14,
+        14,
+        14,
+        14,
+        14,
+        14
+      ]
+    }
   }
 }

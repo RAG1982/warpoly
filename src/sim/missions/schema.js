@@ -331,6 +331,7 @@ function checkAction(c, path, a, setup = false) {
       break;
     case 'reveal':
       if (a.all !== true) { checkXZ(c, p, a); checkNum(c, `${p}.radius`, a.radius, { min: 1, max: 400 }); }
+      if (a.ttl !== undefined) checkNum(c, `${p}.ttl`, a.ttl, { min: 0, max: 120 });
       break;
     case 'setTeam':
       checkOwner(c, `${p}.player`, a.player);

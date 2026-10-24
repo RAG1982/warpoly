@@ -142,7 +142,7 @@ const HANDLERS = {
     if (a.all) {
       const size = fog.worldWidth;
       fog.revealArea(0, 0, size);
-    } else fog.revealArea(a.x, a.z, a.radius);
+    } else fog.revealArea(a.x, a.z, a.radius, a.ttl || 0); // `ttl` (s): a visão atual persiste por esse tempo (cutscenes)
   },
 
   setTeam(rt, a) {

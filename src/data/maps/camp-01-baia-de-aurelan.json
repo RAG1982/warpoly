@@ -8593,14 +8593,14 @@
     {
       "x": -24,
       "z": 0.9,
-      "count": 7,
+      "count": 14,
       "radius": 10,
       "species": "pine"
     },
     {
       "x": -12,
       "z": -14,
-      "count": 9,
+      "count": 11,
       "radius": 10,
       "species": "birch"
     },
@@ -8635,7 +8635,7 @@
     {
       "x": -28,
       "z": 48,
-      "count": 14,
+      "count": 1,
       "radius": 10,
       "species": "palm"
     },
@@ -8656,14 +8656,14 @@
     {
       "x": 46,
       "z": 32,
-      "count": 14,
+      "count": 4,
       "radius": 10,
       "species": "pine"
     },
     {
       "x": 26,
       "z": 40,
-      "count": 14,
+      "count": 4,
       "radius": 10,
       "species": "autumn"
     },
@@ -8684,21 +8684,21 @@
     {
       "x": 10,
       "z": 52,
-      "count": 14,
+      "count": 1,
       "radius": 10,
       "species": "autumn"
     },
     {
       "x": 42,
       "z": 52,
-      "count": 14,
+      "count": 1,
       "radius": 10,
       "species": "acacia"
     },
     {
       "x": -10,
       "z": 46,
-      "count": 1,
+      "count": 4,
       "radius": 10,
       "species": "acacia"
     }
@@ -8723,15 +8723,41 @@
     },
     {
       "kind": "camp",
-      "x": -6,
-      "z": 24,
-      "guards": 4,
+      "x": 18,
+      "z": 46,
+      "guards": 7,
       "reward": {
-        "gold": 300
+        "gold": 100
       },
       "deposit": {
         "type": "gold",
-        "amount": 3000
+        "amount": 1500
+      }
+    },
+    {
+      "kind": "camp",
+      "x": 34,
+      "z": 46,
+      "guards": 7,
+      "reward": {
+        "gold": 100
+      },
+      "deposit": {
+        "type": "gold",
+        "amount": 1500
+      }
+    },
+    {
+      "kind": "camp",
+      "x": 24,
+      "z": 58,
+      "guards": 7,
+      "reward": {
+        "gold": 100
+      },
+      "deposit": {
+        "type": "gold",
+        "amount": 1500
       }
     }
   ],
@@ -8825,12 +8851,32 @@
       "z": 46
     },
     "neutralCamp1": {
-      "x": -6,
-      "z": 24
+      "x": 18,
+      "z": 46
+    },
+    "neutralCamp2": {
+      "x": 34,
+      "z": 46
+    },
+    "neutralCamp3": {
+      "x": 24,
+      "z": 58
     },
     "landingZone": {
       "x": -58,
       "z": 32
+    },
+    "banditCamp1": {
+      "x": 18,
+      "z": 46
+    },
+    "banditCamp2": {
+      "x": 34,
+      "z": 46
+    },
+    "banditCamp3": {
+      "x": 24,
+      "z": 58
     },
     "muralFenda": {
       "x": -30,
@@ -8839,6 +8885,11 @@
     "shipHorizon": {
       "x": 72,
       "z": -76,
+      "water": true
+    },
+    "orcSails": {
+      "x": 66,
+      "z": 70,
       "water": true
     }
   },
@@ -8851,20 +8902,24 @@
     "corridorThin": {
       "width": 44,
       "keepFrac": 0.2,
-      "clusters": 8,
+      "clusters": 12,
       "trees": [
         224,
-        137
+        90
       ],
       "cut": [
-        0,
         1,
         2,
         5,
+        6,
         7,
         12,
+        13,
+        14,
         15,
-        8
+        8,
+        9,
+        10
       ]
     }
   },

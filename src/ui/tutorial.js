@@ -4,14 +4,19 @@
  * Uma partida pequena e guiada (mapa `tutorial`, rival passivo — sem IA) cujos passos avançam por
  * eventos do `EventBus` da simulação (`EVT.*`) e, para o 1º passo, por um instantâneo da seleção:
  *
- *   select → wood → gold → house → farm → barracks → train → attack
+ *   select → wood → gold → house → farm → barracks → train → attack → rival
  *
- * O jogador aprende: selecionar, coletar madeira e ouro, construir casa/fazenda/quartel, treinar tropas e
- * atacar o Acampamento de Bandidos. `TutorialController` (DOM) mostra o painel de objetivo, setas e o botão Pular.
+ * O jogador aprende: selecionar, coletar madeira e ouro, construir casa/fazenda/quartel, treinar tropas, atacar o
+ * Acampamento de Bandidos e, por fim, destruir a base do rival orc (que dá a vitória da partida).
+ * `TutorialController` (DOM) mostra o painel de objetivo, setas e o botão Pular.
  *
- * Passo = `{ id, events: [{ type, match?(payload, ctx) -> número|boolean }], need, poll?(snap) -> boolean, focus }`
+ * Passo = `{ id, events: [{ type, match?(payload, ctx) -> número|boolean }], need, poll?(snap) -> boolean, focus,
+ *            remember? }`
  *  - `need`: quantidade a atingir (quando `match` devolve número, ele é somado; `true` conta 1).
- *  - `focus`: o que destacar — `{ kind: 'world', what }` (`worker`/`tree`/`gold`/`camp`/`barracks`) ou
+ *  - `remember`: o passo lembra os eventos ocorridos ANTES de ele virar o atual (ex.: o acampamento destruído
+ *    cedo). Passos `remember` são concluídos na hora ao entrar, se já estavam satisfeitos.
+ *  - `poll`: consulta o estado do mundo (`update(snapshot)`, ~4x/s) e conclui o passo quando verdadeiro.
+ *  - `focus`: o que destacar — `{ kind: 'world', what }` (`worker`/`tree`/`gold`/`camp`/`barracks`/`rivalBase`) ou
  *    `{ kind: 'ui', selector }` (botão da HUD); `fallback` vale quando o botão não está na tela (nada selecionado).
  * Textos em `tut.<id>.title|text`, no i18n.
  */
@@ -22,6 +27,8 @@ import { t } from '../i18n/index.js';
 export const TUTORIAL_MAP_ID = 'tutorial';
 /** Semente fixa: todo mundo joga o mesmo mapa (árvores, bandidos). */
 export const TUTORIAL_SEED = 1996;
+/** Dono do rival passivo (`createTutorialConfig`): o passo final é destruir a base dele. */
+export const TUTORIAL_RIVAL_ID = 1;
 
 const mine = (p, ctx, key = 'ownerId') => p && p[key] === ctx.localPlayerId;
 
@@ -65,12 +72,20 @@ export const TUTORIAL_STEPS = Object.freeze([
     fallback: { kind: 'world', what: 'barracks' }
   },
   {
-    id: 'attack', need: 1,
+    id: 'attack', need: 1, remember: true,
     events: [
       { type: EVT.CAMP_CLEARED, match: (p, ctx) => mine(p, ctx, 'byOwnerId') },
       { type: EVT.BUILDING_DESTROYED, match: (p, ctx) => p.buildingType === 'bandit_camp' && mine(p, ctx, 'killerOwnerId') }
     ],
+    poll: (snap) => !!snap.campGone,
     focus: { kind: 'world', what: 'camp' }
+  },
+  {
+    // Último passo: a vitória da partida (`victoryMode: 'conquest'`) só é liberada depois dele (ver `holdsVictory`).
+    id: 'rival', need: 1, remember: true,
+    events: [{ type: EVT.PLAYER_DEFEATED, match: (p) => (p.ownerId === TUTORIAL_RIVAL_ID ? 1 : 0) }],
+    poll: (snap) => !!snap.rivalDefeated,
+    focus: { kind: 'world', what: 'rivalBase' }
   }
 ]);
 
@@ -93,9 +108,20 @@ export function createTutorialConfig({ seed = TUTORIAL_SEED } = {}) {
     startingResources: { ...STARTING_RESOURCES, wood: 330, gold: 260 },
     players: [
       { id: 0, name: t('player.you'), factionId: 'human', team: 0, color: '#2563eb', isAI: false, isLocal: true, startSlot: 0 },
-      { id: 1, name: t('tutorial.rival'), factionId: 'orc', team: 1, color: '#dc2626', isAI: false, isLocal: false, startSlot: 1 }
+      { id: TUTORIAL_RIVAL_ID, name: t('tutorial.rival'), factionId: 'orc', team: 1, color: '#dc2626', isAI: false, isLocal: false, startSlot: 1 }
     ]
   };
+}
+
+/** Quanto um evento vale para um passo (soma dos `match`; `true` conta 1). */
+function gainOf(step, type, payload, ctx) {
+  let gained = 0;
+  for (const e of step.events) {
+    if (e.type !== type) continue;
+    const r = e.match ? e.match(payload, ctx) : true;
+    gained += typeof r === 'number' ? r : (r ? 1 : 0);
+  }
+  return gained;
 }
 
 export class Tutorial {
@@ -115,6 +141,10 @@ export class Tutorial {
   reset() {
     this.index = 0;
     this.count = 0;
+    /** Progresso dos passos `remember` (acumulado desde o início da partida, mesmo antes de virarem o atual). */
+    this.memo = {};
+    /** Último instantâneo recebido por `update` (usado ao concluir passos por eventos, ex.: entrar em `attack` já com o acampamento caído). */
+    this._snap = {};
     this.skipped = false;
     this.finished = false;
     this._notify();
@@ -127,6 +157,12 @@ export class Tutorial {
 
   get active() { return !this.finished && !this.skipped; }
 
+  /**
+   * Enquanto o tutorial está em curso, a partida não pode terminar por vitória por conquista (o rival pode cair
+   * antes do passo final). Terminado ou pulado, a regra normal volta a valer.
+   */
+  get holdsVictory() { return this.active; }
+
   /** `{ done, total }` — passos concluídos / total. */
   get progress() {
     return { done: this.finished ? this.steps.length : this.index, total: this.steps.length };
@@ -134,27 +170,36 @@ export class Tutorial {
 
   /** Eventos do barramento da simulação: `handleEvent(EVT.X, payload)`. */
   handleEvent(type, payload) {
-    const step = this.step;
-    if (!step) return false;
+    if (!this.active) return false;
     const ctx = { localPlayerId: this.localPlayerId };
-    let gained = 0;
-    for (const e of step.events) {
-      if (e.type !== type) continue;
-      const r = e.match ? e.match(payload, ctx) : true;
-      gained += typeof r === 'number' ? r : (r ? 1 : 0);
+    let changed = false;
+    for (const s of this.steps) {
+      if (!s.remember) continue;
+      const g = gainOf(s, type, payload, ctx);
+      if (g > 0) {
+        this.memo[s.id] = Math.min(s.need, (this.memo[s.id] || 0) + g);
+        changed = true;
+      }
     }
-    if (gained <= 0) return false;
-    this.count = Math.min(step.need, this.count + gained);
-    if (this.count >= step.need) this._advance();
-    else this._notify();
+    const step = this.step;
+    if (step && !step.remember) {
+      const g = gainOf(step, type, payload, ctx);
+      if (g > 0) {
+        this.count = Math.min(step.need, this.count + g);
+        changed = true;
+      }
+    }
+    if (!changed) return false;
+    this._settle(this._snap);
+    this._notify();
     return true;
   }
 
-  /** Instantâneo do estado (`{ selectedWorker }`), chamado ~4x/s: passos por `poll` (seleção). */
+  /** Instantâneo do estado (`{ selectedWorker, campGone, rivalDefeated }`), chamado ~4x/s: passos por `poll`. */
   update(snapshot) {
-    const step = this.step;
-    if (!step || !step.poll) return;
-    if (step.poll(snapshot || {})) this._advance();
+    this._snap = snapshot || {};
+    if (!this.active) return;
+    if (this._settle(this._snap)) this._notify();
   }
 
   /** Botão Pular: encerra o tutorial (a partida segue livre). */
@@ -164,11 +209,27 @@ export class Tutorial {
     this._notify();
   }
 
+  /**
+   * Conclui em sequência os passos já satisfeitos (por eventos lembrados, contagem ou `poll`).
+   * Devolve true se algum passo foi concluído.
+   */
+  _settle(snapshot) {
+    let moved = false;
+    while (this.active && this.step) {
+      const s = this.step;
+      const have = s.remember ? (this.memo[s.id] || 0) : this.count;
+      const done = have >= s.need || (!!snapshot && !!s.poll && s.poll(snapshot));
+      if (!done) break;
+      this._advance();
+      moved = true;
+    }
+    return moved;
+  }
+
   _advance() {
     this.index++;
     this.count = 0;
     if (this.index >= this.steps.length) this.finished = true;
-    this._notify();
   }
 
   _notify() {
@@ -182,7 +243,7 @@ export class Tutorial {
       index: this.index,
       total: this.steps.length,
       stepId: s ? s.id : null,
-      count: this.count,
+      count: s ? (s.remember ? (this.memo[s.id] || 0) : this.count) : 0,
       need: s ? s.need : 0,
       unit: s ? s.unit || null : null,
       finished: this.finished,

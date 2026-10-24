@@ -6,7 +6,7 @@
  */
 import * as THREE from 'three';
 import './screens/tutorial.css';
-import { Tutorial, TUTORIAL_EVENT_TYPES } from './tutorial.js';
+import { Tutorial, TUTORIAL_EVENT_TYPES, TUTORIAL_RIVAL_ID } from './tutorial.js';
 import { t, onLanguageChange, resourceName } from '../i18n/index.js';
 import { getUnitDef } from '../data/index.js';
 
@@ -125,8 +125,13 @@ export class TutorialController {
   }
 
   _snapshot() {
-    const sel = this.gm.selectedUnits || [];
-    return { selectedWorker: sel.some((u) => !u.isDead && getUnitDef(u.type).isWorker) };
+    const gm = this.gm;
+    const sel = gm.selectedUnits || [];
+    return {
+      selectedWorker: sel.some((u) => !u.isDead && getUnitDef(u.type).isWorker),
+      campGone: !(gm.buildings || []).some((b) => b.type === 'bandit_camp' && !b.isDead),
+      rivalDefeated: !!(gm.players || []).find((p) => p.id === TUTORIAL_RIVAL_ID)?.defeated
+    };
   }
 
   /** Posição de mundo do alvo `what` (ou null). */
@@ -150,6 +155,7 @@ export class TutorialController {
     if (what === 'gold') return nearest(gm.resourceDeposits, (r) => r.type === 'gold' && !r.isDead && (r.resourcesRemaining ?? 1) > 0, pos);
     if (what === 'camp') return nearest(gm.buildings, (b) => b.type === 'bandit_camp' && !b.isDead, pos);
     if (what === 'barracks') return nearest(gm.buildings, (b) => b.ownerId === me && !b.isDead && b.isConstructed && b.type === 'barracks', pos);
+    if (what === 'rivalBase') return nearest(gm.buildings, (b) => b.ownerId === TUTORIAL_RIVAL_ID && !b.isDead, pos);
     return null;
   }
 

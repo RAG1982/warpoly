@@ -122,6 +122,8 @@ export class GameManager {
     // Game state
     this.isGameOver = false;
     this.gameWon = false;
+    /** F6-09: `() => boolean` opcional (só o tutorial da UI): enquanto devolver true, a vitória por regra espera. */
+    this.victoryHold = null;
     this.gameSpeed = 1.0;
     this.isPaused = false;
     this.gameTime = 0;
@@ -1613,6 +1615,7 @@ export class GameManager {
       return this.playerRegistry.aliveTeams().size <= 1;
     }
 
+    if (this.victoryHold && this.victoryHold()) return false; // F6-09: o tutorial segura a vitória até o passo final
     if (this.playerRegistry.aliveTeams().size <= 1) {
       if (!this.gameWon) {
         this.gameWon = true;

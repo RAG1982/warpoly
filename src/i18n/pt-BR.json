@@ -621,6 +621,8 @@
   "tut.kicker": "Tutorial",
   "tut.menu": "Menu principal",
   "tut.progress": "{count}/{need}",
+  "tut.rival.title": "Destrua a base do rival",
+  "tut.rival.text": "O rival orc é o objetivo final: destrua todas as construções dele (muralhas não contam) para vencer a partida. Ele não ataca, mas a base está de pé.",
   "tut.select.text": "Clique num dos camponeses (ou arraste uma caixa ao redor deles). Use W A S D ou as setas para mover a câmera e a roda do mouse para o zoom.",
   "tut.select.title": "Selecione um trabalhador",
   "tut.skip": "Pular tutorial",

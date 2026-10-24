@@ -5,7 +5,7 @@ import { getMap, loadAllCampaignMaps } from '../../src/data/maps/index.js';
 const mk = () => ({
   id: 't', startSlots: [{ x: -60, z: 0, mirror: [-1, 1] }, { x: 60, z: 0, mirror: [1, 1] }], neutrals: [],
   forests: [
-    { x: -40, z: 0, count: 14, radius: 10, species: 'oak' }, // grove da serraria do slot 0 (dx -12 → x = -48): intocado
+    { x: -40, z: 0, count: 14, radius: 10, species: 'oak' }, // grove da serraria do slot 0 (dx -12 → x = -48), voltado para o corredor: também é afinado
     { x: -10, z: 2, count: 14, radius: 10, species: 'pine' },
     { x: 10, z: -3, count: 14, radius: 10, species: 'pine' },
     { x: 0, z: 40, count: 14, radius: 10, species: 'oak' } // longe do corredor
@@ -13,15 +13,15 @@ const mk = () => ({
 });
 
 describe('B-arvores-corredor · afinar corredor', () => {
-  it('só baixa o count dos bosques do corredor; posição, ordem e bosques da serraria/fora da faixa não mudam', () => {
+  it('só baixa o count dos bosques do corredor; posição e ordem não mudam e bosque fora da faixa fica intacto', () => {
     const m = mk();
     const r = thinCorridor(m, { seed: 1, label: 't' });
     expect(r.forests.map((f) => [f.x, f.z, f.species])).toEqual(m.forests.map((f) => [f.x, f.z, f.species]));
-    expect(r.forests[0].count).toBe(14);
+    expect(r.forests[0].count).toBeLessThan(14);
     expect(r.forests[3].count).toBe(14);
     expect(r.forests[1].count).toBeLessThan(14);
     expect(r.forests[2].count).toBeLessThan(14);
-    expect(r.forests[1].count + r.forests[2].count).toBeLessThanOrEqual(Math.ceil(28 * CORRIDOR_DEFAULTS.keepFrac) + 2);
+    expect(r.forests[1].count + r.forests[2].count).toBeLessThanOrEqual(Math.ceil(28 * CORRIDOR_DEFAULTS.keepFrac) + 3);
     expect(m.forests[1].count).toBe(14); // entrada não é alterada
   });
 

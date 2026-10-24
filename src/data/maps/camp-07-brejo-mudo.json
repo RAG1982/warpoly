@@ -6614,21 +6614,21 @@
     {
       "x": -34,
       "z": 2,
-      "count": 12,
+      "count": 14,
       "radius": 10,
       "species": "oak"
     },
     {
       "x": -12,
       "z": -22,
-      "count": 14,
+      "count": 1,
       "radius": 10,
       "species": "pine"
     },
     {
       "x": -10,
       "z": -42,
-      "count": 4,
+      "count": 1,
       "radius": 10,
       "species": "autumn"
     },
@@ -6642,7 +6642,7 @@
     {
       "x": -14,
       "z": -2,
-      "count": 3,
+      "count": 1,
       "radius": 10,
       "species": "oak"
     },
@@ -6656,7 +6656,7 @@
     {
       "x": 49.3,
       "z": -34.8,
-      "count": 14,
+      "count": 7,
       "radius": 10,
       "species": "oak"
     },
@@ -6670,14 +6670,14 @@
     {
       "x": 28,
       "z": 8,
-      "count": 6,
+      "count": 4,
       "radius": 10,
       "species": "oak"
     },
     {
       "x": 28,
       "z": -22,
-      "count": 6,
+      "count": 4,
       "radius": 10,
       "species": "oak"
     },
@@ -6698,7 +6698,7 @@
     {
       "x": 2,
       "z": -4,
-      "count": 2,
+      "count": 1,
       "radius": 10,
       "species": "oak"
     },
@@ -6926,16 +6926,17 @@
     "campaign": "camp-07-brejo-mudo",
     "corridorThin": {
       "width": 44,
-      "keepFrac": 0.33,
-      "clusters": 6,
+      "keepFrac": 0.2,
+      "clusters": 7,
       "trees": [
         210,
-        159
+        131
       ],
       "cut": [
-        1,
+        2,
         3,
         5,
+        7,
         13,
         9,
         10

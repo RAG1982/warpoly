@@ -8009,7 +8009,7 @@
     {
       "x": -31.9,
       "z": -14.7,
-      "count": 14,
+      "count": 6,
       "radius": 10,
       "species": "oak"
     },
@@ -8023,7 +8023,7 @@
     {
       "x": -14,
       "z": -22,
-      "count": 10,
+      "count": 8,
       "radius": 10,
       "species": "acacia"
     },
@@ -8037,14 +8037,14 @@
     {
       "x": -16,
       "z": -2,
-      "count": 8,
+      "count": 1,
       "radius": 10,
       "species": "palm"
     },
     {
       "x": -12,
       "z": -42,
-      "count": 7,
+      "count": 2,
       "radius": 10,
       "species": "palm"
     },
@@ -8058,7 +8058,7 @@
     {
       "x": 13,
       "z": -6.5,
-      "count": 14,
+      "count": 1,
       "radius": 10,
       "species": "palm"
     },
@@ -8079,14 +8079,14 @@
     {
       "x": 26,
       "z": 8,
-      "count": 6,
+      "count": 4,
       "radius": 10,
       "species": "autumn"
     },
     {
       "x": -2,
       "z": -20,
-      "count": 2,
+      "count": 1,
       "radius": 10,
       "species": "autumn"
     },
@@ -8100,7 +8100,7 @@
     {
       "x": -4,
       "z": -42,
-      "count": 2,
+      "count": 1,
       "radius": 10,
       "species": "palm"
     },
@@ -8307,16 +8307,18 @@
     "campaign": "camp-09-miragem",
     "corridorThin": {
       "width": 44,
-      "keepFrac": 0.33,
-      "clusters": 6,
+      "keepFrac": 0.2,
+      "clusters": 8,
       "trees": [
         210,
-        161
+        122
       ],
       "cut": [
+        0,
         2,
         4,
         5,
+        7,
         11,
         13,
         10

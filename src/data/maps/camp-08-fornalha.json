@@ -4926,7 +4926,7 @@
     {
       "x": -18.3,
       "z": -3,
-      "count": 14,
+      "count": 1,
       "radius": 10,
       "species": "birch"
     },
@@ -4940,7 +4940,7 @@
     {
       "x": 12,
       "z": -28,
-      "count": 5,
+      "count": 3,
       "radius": 10,
       "species": "birch"
     },
@@ -4961,7 +4961,7 @@
     {
       "x": 19.3,
       "z": -18.8,
-      "count": 14,
+      "count": 4,
       "radius": 10,
       "species": "oak"
     },
@@ -4989,7 +4989,7 @@
     {
       "x": 12,
       "z": 16,
-      "count": 6,
+      "count": 4,
       "radius": 10,
       "species": "oak"
     },
@@ -5196,14 +5196,16 @@
     "campaign": "camp-08-fornalha",
     "corridorThin": {
       "width": 44,
-      "keepFrac": 0.33,
-      "clusters": 2,
+      "keepFrac": 0.2,
+      "clusters": 4,
       "trees": [
         154,
-        137
+        110
       ],
       "cut": [
+        0,
         2,
+        5,
         9
       ]
     }

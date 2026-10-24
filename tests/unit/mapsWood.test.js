@@ -93,7 +93,7 @@ describe('campanha: coordenadas referenciadas pelas missões continuam válidas'
 });
 
 describe('madeira alcançável por jogador (meta: WOOD_TARGET a <= WOOD_RADIUS u do pátio)', () => {
-  const need = (id) => (id === 'estreito-1v1' ? 3500 : id === 'ilhas-4p' ? 2500 : WOOD_TARGET);
+  const need = (id) => (id === 'estreito-1v1' ? 3500 : id === 'ilhas-4p' ? 2500 : id === 'campos-1v1' ? 6000 : WOOD_TARGET); // campos-1v1: piso 6000 (afinar corredor, missão 1)
   for (const id of [...new Set(GROWN)]) {
     it(`${id}: todo jogador alcança >= ${need(id)} de madeira por terra a <= ${WOOD_RADIUS} u (seeds ${SEEDS.join(',')})`, () => {
       const m = getMap(id);

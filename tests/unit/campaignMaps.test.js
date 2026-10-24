@@ -5,8 +5,8 @@ import { buildPathfinder, floodFill, isReached } from '../../src/data/maps/gener
 import { getHeightForMap } from '../../src/sim/terrainGenerators.js';
 import { TILESETS } from '../../src/data/tilesets.js';
 import { decodeBiomeGrid } from '../../src/data/maps/biome.js';
-import { measureWood, WOOD_TARGET, WOOD_RADIUS } from '../../tools/lib/woodStats.mjs';
-import { buildCampaignMap, CAMPAIGN_IDS, CAMPAIGN_NAMES, GOLD_AMOUNT } from '../../tools/lib/campaignMaps.mjs';
+import { measureWood, WOOD_RADIUS } from '../../tools/lib/woodStats.mjs';
+import { buildCampaignMap, CAMPAIGN_IDS, CAMPAIGN_NAMES, GOLD_AMOUNT, CAMPAIGN_WOOD_FLOOR } from '../../tools/lib/campaignMaps.mjs';
 import ptBR from '../../src/i18n/pt-BR.json';
 import en from '../../src/i18n/en.json';
 
@@ -85,11 +85,11 @@ describe('M2-03 · registro e formato', () => {
       for (const g of gold) expect(g.amount).toBe(GOLD_AMOUNT);
     });
 
-    it(`${id}: madeira alcançável a ${WOOD_RADIUS} u >= ${WOOD_TARGET} por jogador (sementes de partida 1 e 2)`, () => {
+    it(`${id}: madeira alcançável a ${WOOD_RADIUS} u >= ${CAMPAIGN_WOOD_FLOOR} por jogador (sementes de partida 1 e 2)`, () => {
       for (const seed of [1, 2]) {
         const r = measureWood(getMap(id), { seed });
         r.gm.dispose?.();
-        for (const p of r.perPlayer) expect(p.wood, `${id} seed ${seed} slot ${p.slot}`).toBeGreaterThanOrEqual(WOOD_TARGET);
+        for (const p of r.perPlayer) expect(p.wood, `${id} seed ${seed} slot ${p.slot}`).toBeGreaterThanOrEqual(CAMPAIGN_WOOD_FLOOR);
       }
     });
 

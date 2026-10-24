@@ -12345,7 +12345,7 @@
     {
       "x": -25.6,
       "z": 14,
-      "count": 14,
+      "count": 3,
       "radius": 10,
       "species": "pine"
     },
@@ -12366,14 +12366,14 @@
     {
       "x": -14,
       "z": -24,
-      "count": 6,
+      "count": 4,
       "radius": 10,
       "species": "oak"
     },
     {
       "x": -10,
       "z": -4,
-      "count": 2,
+      "count": 4,
       "radius": 10,
       "species": "oak"
     },
@@ -12387,7 +12387,7 @@
     {
       "x": 8,
       "z": 4,
-      "count": 13,
+      "count": 1,
       "radius": 10,
       "species": "birch"
     },
@@ -12401,7 +12401,7 @@
     {
       "x": 25.6,
       "z": -14,
-      "count": 14,
+      "count": 3,
       "radius": 10,
       "species": "pine"
     },
@@ -12422,14 +12422,14 @@
     {
       "x": 14,
       "z": 24,
-      "count": 6,
+      "count": 4,
       "radius": 10,
       "species": "pine"
     },
     {
       "x": 10,
       "z": 4,
-      "count": 2,
+      "count": 4,
       "radius": 10,
       "species": "birch"
     },
@@ -12443,7 +12443,7 @@
     {
       "x": -8,
       "z": -4,
-      "count": 2,
+      "count": 6,
       "radius": 10,
       "species": "birch"
     },
@@ -12594,15 +12594,17 @@
     "seedUsed": 3,
     "corridorThin": {
       "width": 44,
-      "keepFrac": 0.33,
-      "clusters": 6,
+      "keepFrac": 0.2,
+      "clusters": 8,
       "trees": [
         224,
-        171
+        141
       ],
       "cut": [
+        0,
         4,
         6,
+        8,
         12,
         14,
         3,

@@ -5163,14 +5163,14 @@
     {
       "x": -7,
       "z": -14.7,
-      "count": 14,
+      "count": 5,
       "radius": 10,
       "species": "autumn"
     },
     {
       "x": 10,
       "z": -40,
-      "count": 6,
+      "count": 4,
       "radius": 10,
       "species": "pine"
     },
@@ -5198,7 +5198,7 @@
     {
       "x": 8,
       "z": -2,
-      "count": 5,
+      "count": 1,
       "radius": 10,
       "species": "autumn"
     },
@@ -5212,7 +5212,7 @@
     {
       "x": 12.6,
       "z": 4.3,
-      "count": 14,
+      "count": 4,
       "radius": 10,
       "species": "autumn"
     },
@@ -5233,14 +5233,14 @@
     {
       "x": 6,
       "z": -14,
-      "count": 5,
+      "count": 1,
       "radius": 10,
       "species": "pine"
     },
     {
       "x": 28,
       "z": -12,
-      "count": 6,
+      "count": 4,
       "radius": 10,
       "species": "pine"
     },
@@ -5254,7 +5254,7 @@
     {
       "x": 50,
       "z": -14,
-      "count": 6,
+      "count": 4,
       "radius": 10,
       "species": "pine"
     },
@@ -5268,7 +5268,7 @@
     {
       "x": 22,
       "z": -34,
-      "count": 4,
+      "count": 3,
       "radius": 10,
       "species": "pine"
     }
@@ -5470,14 +5470,16 @@
     "campaign": "camp-03-pedra-mae",
     "corridorThin": {
       "width": 44,
-      "keepFrac": 0.33,
-      "clusters": 6,
+      "keepFrac": 0.2,
+      "clusters": 8,
       "trees": [
         224,
-        172
+        138
       ],
       "cut": [
+        0,
         5,
+        7,
         10,
         15,
         1,

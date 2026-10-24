@@ -27,6 +27,8 @@ export const CORRIDOR_PARAMS = Object.freeze({ ...CORRIDOR_DEFAULTS });
 const hyp = (a, b) => Math.hypot(a.x - b.x, a.z - b.z);
 const r1 = (v) => Math.round(v * 10) / 10;
 
+/** Piso de madeira por base nos mapas de campanha (economia curta; 2ª passada de B-arvores-corredor): 6000 em vez de 8000; Fornalha segue com os 5000 próprios. */
+export const CAMPAIGN_WOOD_FLOOR = 6000;
 export const GOLD_AMOUNT = 7500; // padrão do MUNDO-7
 
 const freeze = (o) => Object.freeze(o);
@@ -961,11 +963,11 @@ function finish(id, world, seedUsed) {
   out.meta = { ...m.meta, campaign: id, seedUsed };
   const preset = CAMPAIGN_PRESETS[id];
   // afinar corredor: ≈ 2/3 das árvores da faixa entre as bases/acampamentos somem (visibilidade), sem tirar a madeira das bases
-  const woodMin = preset.woodTarget ?? 8000;
+  const woodMin = Math.min(preset.woodTarget ?? 8000, CAMPAIGN_WOOD_FLOOR);
   const thin = thinCorridor(out, { ...CORRIDOR_PARAMS, seed: seedUsed, label: id, woodMin, woodFn: makeWoodFn(out, { buildPathfinder, floodFill, isReached, estimateWood }) });
   out.forests = thin.forests;
   out.meta.corridorThin = { width: CORRIDOR_PARAMS.width, keepFrac: Math.round(CORRIDOR_PARAMS.keepFrac * 100) / 100, clusters: thin.thinned.length, trees: [thin.before, thin.after], cut: thin.thinned };
-  const verification = verifyCoastWorld(out, { naval: !!preset.naval, woodTarget: preset.woodTarget });
+  const verification = verifyCoastWorld(out, { naval: !!preset.naval, woodTarget: woodMin });
   if (!verification.ok) throw new Error('mundo: ' + verification.failures.slice(0, 2).join(' | '));
   // âncoras de terra alcançáveis a partir do slot 0 por terra; de água, no oceano
   const c2 = makeCtx(out);

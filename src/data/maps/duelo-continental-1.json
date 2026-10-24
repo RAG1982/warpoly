@@ -12893,14 +12893,14 @@
     {
       "x": -2,
       "z": -2,
-      "count": 6,
+      "count": 14,
       "radius": 10,
       "species": "oak"
     },
     {
       "x": 16,
       "z": -20,
-      "count": 6,
+      "count": 4,
       "radius": 10,
       "species": "autumn"
     },
@@ -12942,14 +12942,14 @@
     {
       "x": 2,
       "z": 2,
-      "count": 14,
+      "count": 11,
       "radius": 10,
       "species": "birch"
     },
     {
       "x": -16,
       "z": 20,
-      "count": 6,
+      "count": 1,
       "radius": 10,
       "species": "pine"
     },
@@ -13110,15 +13110,15 @@
     "seedUsed": 1,
     "corridorThin": {
       "width": 44,
-      "keepFrac": 0.33,
+      "keepFrac": 0.2,
       "clusters": 3,
       "trees": [
         196,
-        172
+        170
       ],
       "cut": [
-        4,
         5,
+        11,
         12
       ],
       "original": [

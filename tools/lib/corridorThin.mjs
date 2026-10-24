@@ -22,13 +22,13 @@ import { layoutAt } from '../../src/sim/MatchConfig.js';
 
 export const CORRIDOR_DEFAULTS = Object.freeze({
   width: 44, // largura da faixa (u); o pedido original falava em ~28, mas com 28 só ~15 % das árvores caem na faixa e a visão continua bloqueada pelos lados
-  keepFrac: 1 / 3, // fração das árvores do corredor que permanece (remove ≈ 2/3)
+  keepFrac: 0.2, // fração das árvores do corredor que permanece (remove ≈ 3/4; a medição real fica perto de 2/3 porque os bosques saturam)
   keepRadius: 30, // bosques a menos disto de uma base são "floresta de coleta": ficam na zona branda (`softFrac`)
-  softFrac: 0.45, // fração que permanece nos bosques da zona branda (perto da base, fora do bosque da serraria)
-  lumberRadius: 14, // bosques a ≤ isto da serraria do layout (a floresta de coleta de cada base): INTOCADOS
+  softFrac: 0.3, // fração que permanece nos bosques da zona branda (perto da base, fora do bosque da serraria)
+  lumberRadius: 14, // bosques a ≤ isto da serraria do layout = floresta de coleta de cada base: intocados SE ficam atrás/ao lado da base; os VOLTADOS para o corredor (rumo ao inimigo) são afinados como os demais
   reachFactor: 0.6, // quanto do raio do bosque conta para ele "estar" no corredor
   restoreStep: 2, // árvores devolvidas por passo da garantia de madeira
-  minKeep: 2, // todo bosque afinado mantém ao menos isto
+  minKeep: 1, // todo bosque afinado mantém ao menos isto
   woodMargin: 1.05 // folga de madeira exigida (igual a WOOD_VERIFY_MARGIN)
 });
 
@@ -69,9 +69,19 @@ export function thinCorridor(mapDef, opts = {}) {
   const lumbers = lumberSpots(mapDef);
   const inCorridor = [], soft = [];
   orig.forEach((f, i) => {
-    if (lumbers.some((l) => Math.hypot(f.x - l.x, f.z - l.z) <= o.lumberRadius)) return;
     const lim = o.width / 2 + f.radius * o.reachFactor;
     if (!segs.some((sg) => distToSegment(f, sg.a, sg.b) <= lim)) return;
+    if (lumbers.some((l) => Math.hypot(f.x - l.x, f.z - l.z) <= o.lumberRadius)) {
+      // floresta de coleta: só afina se estiver voltada para o corredor (do lado da base que olha o outro extremo da reta)
+      let own = 0, od = Infinity;
+      mapDef.startSlots.forEach((s, j) => { const d = Math.hypot(f.x - s.x, f.z - s.z); if (d < od) { od = d; own = j; } });
+      const base = mapDef.startSlots[own];
+      const ends = own === 0 ? segs.map((sg) => sg.b) : [mapDef.startSlots[0]];
+      const facing = ends.some((e) => (f.x - base.x) * (e.x - base.x) + (f.z - base.z) * (e.z - base.z) > 0);
+      if (!facing) return;
+      inCorridor.push(i);
+      return;
+    }
     if (mapDef.startSlots.some((s) => Math.hypot(f.x - s.x, f.z - s.z) < o.keepRadius)) soft.push(i);
     else inCorridor.push(i);
   });
@@ -80,7 +90,7 @@ export function thinCorridor(mapDef, opts = {}) {
 
   // pesos sorteados (RNG determinístico): bosquetes de cobertura (peso alto) e clareiras quase vazias (peso baixo)
   const rng = mulberry32(opts.seed ?? 1).fork(`corredor:${opts.label ?? mapDef.id}`);
-  const w = inCorridor.map(() => { const r = rng.next(); return r < 0.4 ? 1.8 + rng.next() * 1.2 : 0.1 + rng.next() * 0.5; });
+  const w = inCorridor.map(() => { const r = rng.next(); return r < 0.3 ? 1.8 + rng.next() * 1.2 : 0.1 + rng.next() * 0.5; });
   const totalIn = inCorridor.reduce((n, i) => n + orig[i].count, 0);
   const keepTotal = totalIn * o.keepFrac;
   const sw = w.reduce((a, b) => a + b, 0);

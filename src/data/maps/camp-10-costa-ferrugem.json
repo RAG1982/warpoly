@@ -12633,7 +12633,7 @@
     {
       "x": 0.3,
       "z": 21.4,
-      "count": 14,
+      "count": 1,
       "radius": 10,
       "species": "autumn"
     },
@@ -12654,7 +12654,7 @@
     {
       "x": 10,
       "z": 38,
-      "count": 2,
+      "count": 5,
       "radius": 10,
       "species": "autumn"
     },
@@ -12675,7 +12675,7 @@
     {
       "x": 20,
       "z": 20,
-      "count": 8,
+      "count": 4,
       "radius": 10,
       "species": "autumn"
     },
@@ -12689,14 +12689,14 @@
     {
       "x": 23.7,
       "z": -11.1,
-      "count": 14,
+      "count": 1,
       "radius": 10,
       "species": "palm"
     },
     {
       "x": 48,
       "z": 6,
-      "count": 6,
+      "count": 4,
       "radius": 10,
       "species": "palm"
     },
@@ -12717,21 +12717,21 @@
     {
       "x": 14,
       "z": -28,
-      "count": 5,
+      "count": 4,
       "radius": 10,
       "species": "pine"
     },
     {
       "x": 28,
       "z": 8,
-      "count": 2,
+      "count": 1,
       "radius": 10,
       "species": "autumn"
     },
     {
       "x": 4,
       "z": -10,
-      "count": 5,
+      "count": 1,
       "radius": 10,
       "species": "autumn"
     },
@@ -12919,16 +12919,18 @@
     "campaign": "camp-10-costa-ferrugem",
     "corridorThin": {
       "width": 44,
-      "keepFrac": 0.33,
-      "clusters": 7,
+      "keepFrac": 0.2,
+      "clusters": 9,
       "trees": [
         224,
-        160
+        125
       ],
       "cut": [
+        0,
         3,
         5,
         6,
+        8,
         12,
         13,
         14,

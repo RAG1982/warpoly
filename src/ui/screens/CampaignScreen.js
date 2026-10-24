@@ -46,7 +46,15 @@ export class CampaignScreen {
 
   _def() { return listCampaigns().find((c) => c.id === this.campaignId) || null; }
 
+  /** Ao entrar na campanha: história sempre que nenhuma missão foi concluída; com progresso, vai direto à lista. */
   _shouldAutoShowStory() {
+    const def = this._def();
+    if (!def || def.track === 'beta') return false;
+    return Object.keys(this.progress.completed(def.id) || {}).length === 0;
+  }
+
+  /** Ao clicar em Iniciar: só se a história nunca foi vista (evita repetir a que acabou de abrir na entrada). */
+  _shouldShowStoryOnStart() {
     const def = this._def();
     if (!def || def.track === 'beta') return false;
     return CampaignStoryModel.isFirstTime(this.campaignId, this.progress);
@@ -86,7 +94,7 @@ export class CampaignScreen {
       if (act === 'pick') { this.selected = el.dataset.id; this._render(); }
       else if (act === 'switchCamp') { this.close({ silent: true }); this.onSwitch?.(); }
       else if (act === 'start') {
-        if (this._shouldAutoShowStory()) {
+        if (this._shouldShowStoryOnStart()) {
           this._openStory(() => this.onStart?.(this.campaignId, this.selected));
         } else {
           this.onStart?.(this.campaignId, this.selected);

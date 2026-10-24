@@ -154,7 +154,7 @@ describe('resolução de âncoras em missões', () => {
 
 describe('campanha clássica inalterada', () => {
   it('nenhuma missão registrada além da demo de âncoras usa âncoras: a resolução devolve a mesma definição', () => {
-    const all = listMissions({ includeHidden: true }).filter((m) => m.id !== 'mission-anchors-demo');
+    const all = listMissions({ includeHidden: true }).filter((m) => m.id !== 'mission-anchors-demo' && !m.id.startsWith('war-')); // war-*: campanha do Novo Mundo usa âncoras (M3-02)
     expect(all.length).toBeGreaterThan(8);
     for (const def of all) {
       expect(JSON.stringify(def), def.id).not.toContain('"anchor"');

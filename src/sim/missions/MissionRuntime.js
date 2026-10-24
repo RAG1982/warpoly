@@ -55,8 +55,11 @@ export class MissionRuntime {
     this.deadIds = new Set();
     /** @type {Map<string, number>} `${owner}:${resource}` → total coletado */
     this._gathered = new Map();
+    /** @type {Map<string, number>} `${owner}:${unitType}` → unidades treinadas (evento UNIT_TRAINED; objetivo `train`) */
+    this._trained = new Map();
     this._events = [];
 
+    this._hasTrain = def.objectives.some((o) => o.type === 'train');
     for (const o of def.objectives) this._registerObjective(o);
     this.engine = new TriggerEngine(this, def.triggers || []);
 
@@ -64,7 +67,8 @@ export class MissionRuntime {
     this._offs = [
       bus.on(EVT.UNIT_DIED, (p) => this._events.push(['u', p])),
       bus.on(EVT.BUILDING_DESTROYED, (p) => this._events.push(['b', p])),
-      bus.on(EVT.RESOURCE_GATHERED, (p) => this._events.push(['g', p]))
+      bus.on(EVT.RESOURCE_GATHERED, (p) => this._events.push(['g', p])),
+      bus.on(EVT.UNIT_TRAINED, (p) => this._events.push(['t', p]))
     ];
 
     // Preparação inicial (tick 0): mesmas ações dos gatilhos, antes do primeiro passo.
@@ -127,6 +131,11 @@ export class MissionRuntime {
         this._gathered.set(key, (this._gathered.get(key) || 0) + p.amount);
         continue;
       }
+      if (k === 't') {
+        const key = `${p.ownerId}:${p.unitType}`;
+        this._trained.set(key, (this._trained.get(key) || 0) + 1);
+        continue;
+      }
       const isUnit = k === 'u';
       const id = isUnit ? p.unitId : p.buildingId;
       const type = isUnit ? p.unitType : p.buildingType;
@@ -143,6 +152,11 @@ export class MissionRuntime {
   /** Total coletado por `ownerId` do recurso `type` desde o início da missão. */
   gathered(ownerId, type) {
     return this._gathered.get(`${ownerId}:${type}`) || 0;
+  }
+
+  /** Unidades de `type` treinadas por `ownerId` desde o início da missão (objetivo `train`). */
+  trainedCount(ownerId, type) {
+    return this._trained.get(`${ownerId}:${type}`) || 0;
   }
 
   /** Mortes/destruições que casam com o seletor (`tag`: por id; senão tipo/papel/dono/`killedBy`). */
@@ -271,6 +285,7 @@ export class MissionRuntime {
     s += '|';
     for (const [k, e] of this.deaths) s += `d:${k}=${e.n};`;
     for (const [k, n] of this._gathered) s += `g:${k}=${n};`;
+    if (this._hasTrain) for (const [k, n] of this._trained) s += `tr:${k}=${n};`; // só com objetivo `train` (checksums antigos intactos)
     return s;
   }
 

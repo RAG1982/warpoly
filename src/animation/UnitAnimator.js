@@ -37,6 +37,8 @@ const NAVAL_TYPES = new Set(['tanker', 'frigate', 'war_galley', 'barge', 'dreadn
 /**
  * Class representing a modular animation controller for WarPoly units
  */
+const WAIST_FOLLOW_KEYS = ['head', 'armL', 'armR', 'sword', 'shieldGroup', 'bow', 'weapon', 'weaponL', 'weaponR', 'toolGroup', 'axe', 'pickaxe', 'hammer', 'plume', 'horn', 'mohawk', 'drawnAxe'];
+
 export class UnitAnimator {
   constructor(model = null, unitType = 'knight') {
     this.model = null;
@@ -453,6 +455,37 @@ export class UnitAnimator {
     if ((uType === 'mage' || uType === 'necromancer') && parts.weapon && parts.armR && parts.weapon.parent === parts.armR) {
       parts.weapon.rotation.x -= parts.armR.rotation.x;
       parts.weapon.rotation.z -= parts.armR.rotation.z;
+    }
+
+    // Braços/cabeça/armas irmãos do Torso acompanham a rotação de cintura do tronco (ombro grudado)
+    this.applyWaistFollow(parts);
+  }
+
+  /**
+   * Os nós rígidos (Torso, Head, ArmL, ArmR, armas…) são irmãos planos: girar o `Torso` não leva os braços junto e o ombro
+   * se descola do tronco. Aqui a rotação de cintura do Torso (relativa à pose de repouso) é aplicada a cada peça irmã em torno do
+   * pivô da cintura (posição do Torso em repouso): posição = pivô + R·(pos − pivô); rotação = R·rotação. Só peças cujo pai é o
+   * mesmo do Torso (filhos de outro nó, como Sword em ArmR ou ShieldGroup em ArmL, já vêm junto pela hierarquia).
+   */
+  applyWaistFollow(parts) {
+    const torso = parts.torso;
+    const base = this.baseTransforms.get('torso');
+    if (!torso || !base || !torso.parent || parts.horseLegFL || parts.foreArmL) return;
+    const dq = this._wfQ || (this._wfQ = new THREE.Quaternion());
+    const bq = this._wfB || (this._wfB = new THREE.Quaternion());
+    dq.copy(torso.quaternion);
+    bq.setFromEuler(base.rot).invert();
+    dq.multiply(bq);
+    if (Math.abs(dq.w) > 0.999999) return;
+    const v = this._wfV || (this._wfV = new THREE.Vector3());
+    const seen = new Set();
+    for (const key of WAIST_FOLLOW_KEYS) {
+      const o = parts[key];
+      if (!o || !o.isObject3D || o === torso || seen.has(o) || o.parent !== torso.parent) continue;
+      seen.add(o);
+      v.copy(o.position).sub(base.pos).applyQuaternion(dq).add(base.pos);
+      o.position.copy(v);
+      o.quaternion.premultiply(dq);
     }
   }
 

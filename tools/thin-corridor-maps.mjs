@@ -37,7 +37,7 @@ if (opt('--apply', null)) {
     const orig = m.meta?.corridorThin?.original;
     if (orig) m.forests.forEach((f, i) => { f.count = orig[i]; });
     const original = m.forests.map((f) => f.count);
-    const woodMin = 8000;
+    const woodMin = Number(opt('--wood-min', 8000)); // campos-1v1 (missão 1 provisória) usa 6000, como os mapas de campanha
     const thin = thinCorridor(m, { ...CORRIDOR_DEFAULTS, seed, label: id, woodMin, woodFn: makeWoodFn(m, { buildPathfinder, floodFill, isReached, estimateWood }) });
     m.forests = thin.forests;
     m.meta = { ...(m.meta ?? {}), corridorThin: { width: CORRIDOR_DEFAULTS.width, keepFrac: Math.round(CORRIDOR_DEFAULTS.keepFrac * 100) / 100, clusters: thin.thinned.length, trees: [thin.before, thin.after], cut: thin.thinned, original } };

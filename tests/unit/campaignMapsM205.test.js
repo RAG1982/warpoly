@@ -7,8 +7,8 @@ import { Pathfinder } from '../../src/sim/Pathfinder.js';
 import { TILESETS } from '../../src/data/tilesets.js';
 import { decodeBiomeGrid, getBiomeAt, BIOME } from '../../src/data/maps/biome.js';
 import { isLavaAt, decodeLavaGrid, encodeLavaGrid } from '../../src/data/maps/lava.js';
-import { measureWood, WOOD_TARGET, WOOD_RADIUS } from '../../tools/lib/woodStats.mjs';
-import { buildCampaignMap, CAMPAIGN_IDS, CAMPAIGN_NAMES, GOLD_AMOUNT } from '../../tools/lib/campaignMaps.mjs';
+import { measureWood, WOOD_RADIUS } from '../../tools/lib/woodStats.mjs';
+import { buildCampaignMap, CAMPAIGN_IDS, CAMPAIGN_NAMES, GOLD_AMOUNT, CAMPAIGN_WOOD_FLOOR } from '../../tools/lib/campaignMaps.mjs';
 import ptBR from '../../src/i18n/pt-BR.json';
 import en from '../../src/i18n/en.json';
 
@@ -21,7 +21,7 @@ const IDS = ['camp-07-brejo-mudo', 'camp-08-fornalha', 'camp-09-miragem'];
 beforeAll(async () => { await loadAllCampaignMaps(); }); // M2-28: mapas de campanha sob demanda
 
 /** Meta de madeira alcançável a 60 u (`measureWood`): os três cumprem os 8.000; a Fornalha só na geração (5.000 próprios por base, README de mapas) compartilha árvores pelas passagens. */
-const WOOD_MIN = { 'camp-07-brejo-mudo': WOOD_TARGET, 'camp-08-fornalha': WOOD_TARGET, 'camp-09-miragem': WOOD_TARGET };
+const WOOD_MIN = { 'camp-07-brejo-mudo': CAMPAIGN_WOOD_FLOOR, 'camp-08-fornalha': CAMPAIGN_WOOD_FLOOR, 'camp-09-miragem': CAMPAIGN_WOOD_FLOOR }; // piso 6000 (afinar corredor)
 const ANCHORS = {
   'camp-07-brejo-mudo': ['playerStart', 'allyStart', 'brakkaHall', 'boarPen1', 'boarPen2', 'brakkaGold', 'ironDepot', 'beach1', 'seaLanding1', 'beach2', 'seaLanding2', 'expansion1', 'expansion2', 'landingZone'],
   'camp-08-fornalha': ['playerStart', 'enemyStart', 'lavaPass1', 'calderaPeak', 'forge', 'forgeWater', 'sanctum', 'captiveCamp', 'captive1', 'captive2', 'captive3', 'captive4', 'captive5', 'captive6', 'lyraArrival', 'expansion1', 'expansion2', 'landingZone'],

@@ -15673,7 +15673,7 @@
     {
       "x": 3.5,
       "z": 47.4,
-      "count": 14,
+      "count": 1,
       "radius": 10,
       "species": "acacia"
     },
@@ -15701,7 +15701,7 @@
     {
       "x": 12,
       "z": 30,
-      "count": 2,
+      "count": 8,
       "radius": 10,
       "species": "palm"
     },
@@ -15722,14 +15722,14 @@
     {
       "x": -14,
       "z": 8,
-      "count": 13,
+      "count": 1,
       "radius": 10,
       "species": "autumn"
     },
     {
       "x": 26.2,
       "z": -56.6,
-      "count": 14,
+      "count": 7,
       "radius": 10,
       "species": "autumn"
     },
@@ -15743,7 +15743,7 @@
     {
       "x": 46,
       "z": -54,
-      "count": 14,
+      "count": 4,
       "radius": 10,
       "species": "oak"
     },
@@ -15757,14 +15757,14 @@
     {
       "x": 34,
       "z": -38,
-      "count": 10,
+      "count": 1,
       "radius": 10,
       "species": "palm"
     },
     {
       "x": 14,
       "z": -42,
-      "count": 2,
+      "count": 5,
       "radius": 10,
       "species": "autumn"
     },
@@ -15952,17 +15952,20 @@
     "campaign": "camp-12-cabo-ferrugem",
     "corridorThin": {
       "width": 44,
-      "keepFrac": 0.33,
-      "clusters": 4,
+      "keepFrac": 0.2,
+      "clusters": 7,
       "trees": [
         210,
-        181
+        139
       ],
       "cut": [
+        0,
         4,
         7,
+        8,
         12,
-        13
+        13,
+        10
       ]
     }
   },

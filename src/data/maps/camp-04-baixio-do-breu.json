@@ -9309,7 +9309,7 @@
     {
       "x": -8,
       "z": -2.2,
-      "count": 14,
+      "count": 1,
       "radius": 10,
       "species": "broad"
     },
@@ -9323,7 +9323,7 @@
     {
       "x": -20,
       "z": 14,
-      "count": 6,
+      "count": 4,
       "radius": 10,
       "species": "autumn"
     },
@@ -9337,14 +9337,14 @@
     {
       "x": 0,
       "z": 16,
-      "count": 2,
+      "count": 7,
       "radius": 10,
       "species": "pine"
     },
     {
       "x": 10,
       "z": -10,
-      "count": 12,
+      "count": 1,
       "radius": 10,
       "species": "palm"
     },
@@ -9365,14 +9365,14 @@
     {
       "x": 25.3,
       "z": 3.8,
-      "count": 14,
+      "count": 1,
       "radius": 10,
       "species": "autumn"
     },
     {
       "x": 40,
       "z": -18,
-      "count": 6,
+      "count": 4,
       "radius": 10,
       "species": "pine"
     },
@@ -9386,21 +9386,21 @@
     {
       "x": 30,
       "z": 26,
-      "count": 6,
+      "count": 4,
       "radius": 10,
       "species": "palm"
     },
     {
       "x": 20,
       "z": -16,
-      "count": 3,
+      "count": 1,
       "radius": 10,
       "species": "palm"
     },
     {
       "x": 12,
       "z": 18,
-      "count": 2,
+      "count": 6,
       "radius": 10,
       "species": "birch"
     },
@@ -9635,15 +9635,17 @@
     "campaign": "camp-04-baixio-do-breu",
     "corridorThin": {
       "width": 44,
-      "keepFrac": 0.33,
-      "clusters": 7,
+      "keepFrac": 0.2,
+      "clusters": 9,
       "trees": [
         238,
-        177
+        141
       ],
       "cut": [
+        0,
         4,
         5,
+        8,
         12,
         13,
         2,

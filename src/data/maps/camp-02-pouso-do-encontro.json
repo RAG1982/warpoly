@@ -9041,28 +9041,28 @@
     {
       "x": -12.6,
       "z": -30.9,
-      "count": 14,
+      "count": 5,
       "radius": 10,
       "species": "pine"
     },
     {
       "x": -6,
       "z": -58,
-      "count": 8,
+      "count": 4,
       "radius": 10,
       "species": "pine"
     },
     {
       "x": -22,
       "z": -14,
-      "count": 6,
+      "count": 1,
       "radius": 10,
       "species": "broad"
     },
     {
       "x": 6,
       "z": -42,
-      "count": 3,
+      "count": 2,
       "radius": 10,
       "species": "broad"
     },
@@ -9090,14 +9090,14 @@
     {
       "x": 8.3,
       "z": 5,
-      "count": 14,
+      "count": 3,
       "radius": 10,
       "species": "oak"
     },
     {
       "x": 24,
       "z": -38,
-      "count": 6,
+      "count": 4,
       "radius": 10,
       "species": "oak"
     },
@@ -9342,15 +9342,17 @@
     "campaign": "camp-02-pouso-do-encontro",
     "corridorThin": {
       "width": 44,
-      "keepFrac": 0.33,
-      "clusters": 5,
+      "keepFrac": 0.2,
+      "clusters": 7,
       "trees": [
         210,
-        168
+        136
       ],
       "cut": [
+        0,
         2,
         3,
+        7,
         12,
         1,
         8

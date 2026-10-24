@@ -30,9 +30,15 @@ try {
   await page.evaluate(() => { window.warpoly.skipPreload = true; });
   await page.waitForTimeout(600);
   await page.click('[data-action="campaign"]');
-  const skip = await page.waitForSelector('[data-story="skip"]', { timeout: 5000 }).catch(() => null);
+  await page.waitForSelector('[data-cs="pick"][data-id="war-alliance"]', { timeout: 30000 });
+  await page.click('[data-cs="pick"][data-id="war-alliance"]');
+  const skip = await page.waitForSelector('[data-story="skip"]', { timeout: 20000 }).catch(() => null);
   if (skip) { await skip.click(); await page.waitForSelector('.story-screen', { state: 'detached', timeout: 5000 }).catch(() => {}); }
-  await page.waitForSelector('[data-cp="pick"][data-id="war-alliance-01-terra-a-vista"]', { timeout: 10000 });
+  await page.waitForSelector('[data-cp="pick"][data-id="war-alliance-01-terra-a-vista"]', { timeout: 30000 }).catch(async (e) => {
+    await page.screenshot({ path: path.join(OUT, 'debug-menu.png') });
+    console.log('DOM:', await page.evaluate(() => document.body.innerText.slice(0, 600)));
+    throw e;
+  });
   await page.click('[data-cp="pick"][data-id="war-alliance-01-terra-a-vista"]');
   await page.waitForTimeout(500);
   await shot('01-briefing.png');
@@ -73,6 +79,9 @@ try {
   await page.waitForTimeout(3500);
   await shot('06-fim-vitoria.png');
   console.log(errors.length ? 'ERROS: ' + errors.join(' | ') : 'sem erros de console');
+} catch (e) {
+  console.log('FALHOU:', e.message.split('\n')[0]);
+  process.exitCode = 1;
 } finally {
   if (browser) await browser.close().catch(() => {});
   await vite.close();

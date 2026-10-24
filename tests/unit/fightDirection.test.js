@@ -89,7 +89,10 @@ describe('FightDirection - NEW-10', () => {
     it('should swing tool forward during gather', () => {
       animator.setTime(0.08 * ANIMATION_DURATIONS.gather);
       const armR = model.getObjectByName('ArmR');
-      const handZ = -Math.sin(armR.rotation.x);
+      // a rotação de cintura do Torso também leva o braço: mede-se a pose do braço no referencial do tronco
+      const torso = model.getObjectByName('Torso');
+      const q = torso.quaternion.clone().invert().multiply(armR.quaternion);
+      const handZ = -Math.sin(new THREE.Euler().setFromQuaternion(q).x);
       expect(handZ).toBeGreaterThan(0.28);
     });
   });

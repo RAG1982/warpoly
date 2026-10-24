@@ -62,18 +62,26 @@ try {
   await page.waitForFunction(() => window.game.gameManager.mission.trainedCount(0, 'knight') + window.game.gameManager.mission.trainedCount(0, 'archer') >= 3, null, { timeout: 120000 });
   await page.waitForTimeout(800);
   await shot('04-objetivo-treino-contador.png');
-  // acampamento destruído -> cutscene da vela -> fim
+  // tropa pronta -> objetivo "destruir os 3 acampamentos" abre; cai o 1º (contador 1/3); depois os outros -> cutscene da vela -> fim
   await page.evaluate(() => {
     const gm = window.game.gameManager;
     gm.mission.setObjectiveStatus('train-troops', 'completed');
   });
   await page.waitForTimeout(2500);
+  await shot('04b-objetivo-3-acampamentos-0de3.png');
   await page.evaluate(() => {
     const gm = window.game.gameManager;
     const k = gm.getUnitsOf(0).find((u) => !u.isDead);
-    for (const id of gm.mission.tags.get('smuggler_camp')) gm.entitiesById.get(id).takeDamage(1e6, k);
+    gm.entitiesById.get(gm.mission.tags.get('smuggler_camp1')[0])?.takeDamage(1e6, k);
   });
-  await page.waitForTimeout(7500);
+  await page.waitForTimeout(1800);
+  await shot('04c-contador-1de3-acampamentos.png');
+  await page.evaluate(() => {
+    const gm = window.game.gameManager;
+    const k = gm.getUnitsOf(0).find((u) => !u.isDead);
+    for (const id of gm.mission.tags.get('smuggler_camp')) gm.entitiesById.get(id)?.takeDamage(1e6, k);
+  });
+  await page.waitForTimeout(6000);
   await shot('05-cutscene-da-vela.png');
   await page.waitForFunction(() => window.game.gameManager.mission.outcome === 'victory', null, { timeout: 60000 });
   await page.waitForTimeout(3500);

@@ -252,17 +252,33 @@ function addGold(ctx, s, name, extra, { dMin = 20, dMax = 36, target = 26, plain
   return g;
 }
 
-/** Palco 1: acampamento da Irmandade da Maré entre as bases; Mural da Fenda numa enseada afastada; vela no horizonte. */
+/**
+ * Palco 1: o "reduto" da Irmandade da Maré = 3 acampamentos de contrabandistas juntos (≤ 18 u entre si), longe da base do jogador
+ * (≥ 70 u), ao norte (+z) da baía; Mural da Fenda numa enseada afastada; vela no horizonte. Âncoras `banditCamp1..3`.
+ */
+const BAIA_CAMP_GUARDS = [7, 7, 7]; // bandidos por acampamento (+ 2 Espadachins e 1 Arqueiro por script na missão; calibrado pelo teste de investida precoce da m01)
 function postBaia(ctx, extra) {
   const { m, s0, s1 } = ctx;
-  const camp = need(ctx.scan({
-    test: (x, z) => ctx.dryClear(x, z, 13) && ctx.plain(x, z) && ctx.reach(x, z) && hyp({ x, z }, s0) >= 36 && hyp({ x, z }, s1) >= 30 && ctx.free(x, z, 2),
-    score: (x, z) => Math.abs(hyp({ x, z }, s0) - 50) + 0.6 * Math.abs(hyp({ x, z }, s1) - 46)
-  }), 'o acampamento neutro');
-  ctx.take(camp, 16);
-  m.neutrals.push({ kind: 'camp', x: r1(camp.x), z: r1(camp.z), guards: 4, reward: { gold: 300 }, deposit: { type: 'gold', amount: 3000 } });
+  const camps = [];
+  const okSpot = (x, z) => ctx.dryClear(x, z, 7) && ctx.plain(x, z) && ctx.reach(x, z) && hyp({ x, z }, s1) >= 24 && ctx.free(x, z, 2);
+  const c1 = need(ctx.scan({
+    test: (x, z) => okSpot(x, z) && hyp({ x, z }, s0) >= 78 && z >= 18,
+    score: (x, z) => Math.abs(hyp({ x, z }, s0) - 84) + 0.4 * Math.abs(z - 40)
+  }), 'o acampamento 1 da Irmandade');
+  ctx.take(c1, 8); camps.push(c1);
+  for (let k = 2; k <= 3; k++) {
+    const ck = need(ctx.scan({
+      test: (x, z) => okSpot(x, z) && hyp({ x, z }, s0) >= 70 && camps.every((c) => hyp({ x, z }, c) >= 12 && hyp({ x, z }, c) <= 18),
+      score: (x, z) => camps.reduce((t, c) => t + Math.abs(hyp({ x, z }, c) - 16), 0)
+    }), `o acampamento ${k} da Irmandade`);
+    ctx.take(ck, 8); camps.push(ck);
+  }
+  camps.forEach((c, i) => {
+    m.neutrals.push({ kind: 'camp', x: r1(c.x), z: r1(c.z), guards: BAIA_CAMP_GUARDS[i], reward: { gold: 100 }, deposit: { type: 'gold', amount: 1500 } });
+    extra[`banditCamp${i + 1}`] = pt(c);
+  });
   const mural = need(ctx.scan({
-    test: (x, z) => ctx.reach(x, z) && ctx.isShore(x, z) && ctx.plain(x, z) && hyp({ x, z }, s0) >= 32 && hyp({ x, z }, s1) >= 28 && hyp({ x, z }, camp) >= 26 && ctx.free(x, z, 0),
+    test: (x, z) => ctx.reach(x, z) && ctx.isShore(x, z) && ctx.plain(x, z) && hyp({ x, z }, s0) >= 32 && hyp({ x, z }, s1) >= 28 && camps.every((c) => hyp({ x, z }, c) >= 26) && ctx.free(x, z, 0),
     score: (x, z) => Math.abs(hyp({ x, z }, s0) - 68)
   }), 'o Mural da Fenda');
   ctx.take(mural, 10);
@@ -274,6 +290,13 @@ function postBaia(ctx, extra) {
     score: (x, z) => -hyp({ x, z }, s0)
   }), 'a vela no horizonte');
   extra.shipHorizon = { ...pt(sail), water: true };
+  // frota orc avistada no fim: mar navegável a 24-60 u do reduto (visível da costa), com folga para 4 cascos em formação
+  const sails = need(ctx.scan({
+    step: 2,
+    test: (x, z) => [[0, 0], [5, 0], [-5, 0], [0, 5], [0, -5], [4, 4], [-4, -4]].every(([dx, dz]) => Math.abs(x + dx) <= ctx.half - 5 && Math.abs(z + dz) <= ctx.half - 5 && ctx.oceanOk(x + dx, z + dz)) && hyp({ x, z }, camps[1]) >= 24 && hyp({ x, z }, camps[1]) <= 60,
+    score: (x, z) => Math.abs(hyp({ x, z }, camps[1]) - 40)
+  }), 'a frota orc (orcSails)');
+  extra.orcSails = { ...pt(sails), water: true };
 }
 
 /** Palco 2: Cais de cada lado, forte de troncos no meio, Torre da Fenda numa ponta, Emissário/Mensageiro, patrulha. */

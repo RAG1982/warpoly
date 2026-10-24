@@ -1,7 +1,7 @@
 /**
  * Roteiro de playthrough da m01 "Terra à Vista" (M3-02). Tudo por comandos reais do jogador: Fazenda, Quartel e Casa
- * construídos pelos Aldeões, 7 soldados treinados no Quartel (3 Espadachins + 4 Arqueiros), marcha de ataque ao acampamento
- * da Irmandade da Maré. Só o desfecho do combate é de verdade também (sem teletransporte nem dano injetado).
+ * construídos pelos Aldeões, 7 soldados treinados no Quartel (3 Espadachins + 4 Arqueiros), marcha de ataque aos 3 acampamentos
+ * da Irmandade da Maré, um por vez. Só o desfecho do combate é de verdade também (sem teletransporte nem dano injetado).
  */
 export const campaignId = 'war-alliance';
 export const targetMinutes = 10; // ficha: 10–12 min; o harness aceita até 2×
@@ -38,7 +38,7 @@ function keepWorking(c) {
 const QUEUE = ['knight', 'knight', 'knight', 'archer', 'archer', 'archer', 'archer'];
 
 export const win = [
-  { name: 'fazenda', wait: 3, run: (c) => place(c, 'farm'), each: () => {}, until: (c) => !!c.bld('farm') },
+  { name: 'fazenda', wait: 25, run: (c) => place(c, 'farm'), each: () => {}, until: (c) => !!c.bld('farm') },
   { name: 'quartel', run: (c) => place(c, 'barracks'), each: () => {}, until: (c) => c.status('build-barracks') === 'completed' },
   { name: 'casa', run: (c) => place(c, 'cottage'), each: () => {}, until: (c) => !!c.bld('cottage', true) && c.mine('villager').length > 0 },
   {
@@ -65,13 +65,37 @@ export const win = [
     run: (c) => { if (c.status('destroy-camp') !== 'active') throw new Error('destroy-camp devia abrir com a tropa pronta'); },
     every: 40,
     each: (c) => {
-      const camp = c.anchor('neutralCamp1');
+      // um acampamento por vez: o mais próximo da tropa que ainda está de pé
       const army = c.mine().filter((u) => u.type === 'knight' || u.type === 'archer');
-      c.issue({ type: c.CMD.ATTACK_MOVE, unitIds: army.map((u) => u.id), x: camp.x, z: camp.z });
+      if (army.length === 0) return;
+      const cx = army.reduce((t, u) => t + u.mesh.position.x, 0) / army.length;
+      const cz = army.reduce((t, u) => t + u.mesh.position.z, 0) / army.length;
+      const alive = c.tagged('smuggler_camp').filter((b) => !b.isDead);
+      if (alive.length === 0) return;
+      const camp = alive.sort((a, b) => Math.hypot(a.mesh.position.x - cx, a.mesh.position.z - cz) - Math.hypot(b.mesh.position.x - cx, b.mesh.position.z - cz))[0];
+      c.issue({ type: c.CMD.ATTACK_MOVE, unitIds: army.map((u) => u.id), x: camp.mesh.position.x, z: camp.mesh.position.z });
       keepWorking(c);
     },
     until: (c) => c.status('destroy-camp') === 'completed',
-    timeout: 400
+    timeout: 600
+  }
+];
+
+/**
+ * Investida precoce: só os 3 soldados do início (2 Espadachins + 1 Arqueiro) marcham sobre o reduto sem treinar ninguém.
+ * Tem de terminar SEM vitória (os Espadachins caem e o reduto continua de pé).
+ */
+export const rush = [
+  {
+    name: 'investida',
+    wait: 1,
+    run: (c) => {
+      const p = c.anchor('banditCamp1');
+      c.issue({ type: c.CMD.ATTACK_MOVE, unitIds: c.mine().filter((u) => u.type !== 'villager').map((u) => u.id), x: p.x, z: p.z });
+    },
+    each: () => {},
+    until: (c) => c.seconds > 240 || c.mine('knight').length === 0,
+    timeout: 300
   }
 ];
 

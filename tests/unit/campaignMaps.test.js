@@ -22,7 +22,7 @@ const SLOTS = { 'camp-06-a-geada': 4, 'camp-11-estepe-do-vento': 3 }; // as dema
 // M2-28: os mapas de campanha são carregados sob demanda (chunks); os testes os carregam antes de usar `getMap`.
 beforeAll(async () => { await loadAllCampaignMaps(); });
 const MIN_ANCHORS = {
-  'camp-01-baia-de-aurelan': ['playerStart', 'enemyStart', 'goldMine1', 'goldMine2', 'neutralCamp1', 'landingZone', 'muralFenda', 'shipHorizon'],
+  'camp-01-baia-de-aurelan': ['playerStart', 'enemyStart', 'goldMine1', 'goldMine2', 'neutralCamp1', 'landingZone', 'muralFenda', 'shipHorizon', 'orcSails', 'banditCamp1', 'banditCamp2', 'banditCamp3'],
   'camp-02-pouso-do-encontro': ['playerStart', 'enemyStart', 'goldMine1', 'landingZone', 'pier1', 'pier1Water', 'pier2', 'pier2Water', 'logFort', 'lighthouse', 'emissary1', 'emissary2', 'patrol1', 'patrol2', 'patrol3', 'expansion1', 'expansion2'],
   'camp-03-pedra-mae': ['playerStart', 'enemyStart', 'colonyHall', 'colonyGold1', 'colonyGold2', 'bridgeheadGold', 'beach1', 'beach2', 'beach3', 'seaLanding1', 'seaLanding2', 'seaLanding3', 'fort1', 'fort2', 'fort3', 'bridgehead', 'bridgeheadSea', 'landingZone'],
   'camp-04-baixio-do-breu': ['playerStart', 'enemyStart', 'well1', 'well2', 'well3', 'well4', 'shipyard1', 'shipyard1Water', 'shipyard2', 'shipyard2Water', 'wreck1', 'wreck2', 'wreck3', 'fleetStart1', 'fleetStart2', 'fleetMid'],
@@ -32,7 +32,7 @@ const MIN_ANCHORS = {
   'camp-11-estepe-do-vento': ['playerStart', 'enemyStart', 'colonyMark', 'skarnStart', 'hurganStart', 'landingZone', 'reinforceSea', 'convoyStart', 'convoyEnd', 'raid1', 'raid2', 'raid3', 'dissidentClan', 'expansion1', 'expansion2', 'expansion3'],
   'camp-12-cabo-ferrugem': ['playerStart', 'enemyStart', 'bastion', 'strait', 'dock1', 'dock2', 'dock3', 'fleetStart', 'fleetStart2', 'bossStart', 'waveStart1', 'waveStart2', 'expansion1', 'expansion2']
 };
-const WATER = new Set(['shipHorizon', 'pier1Water', 'pier2Water', 'seaLanding1', 'seaLanding2', 'seaLanding3', 'bridgeheadSea', 'well1', 'well2', 'well3', 'well4', 'shipyard1Water', 'shipyard2Water', 'wreck1', 'wreck2', 'wreck3', 'fleetStart1', 'fleetStart2', 'fleetMid', 'unloadSea', 'bargeStart1', 'bargeStart2', 'reinforceSea', 'strait', 'fleetStart']);
+const WATER = new Set(['shipHorizon', 'orcSails', 'pier1Water', 'pier2Water', 'seaLanding1', 'seaLanding2', 'seaLanding3', 'bridgeheadSea', 'well1', 'well2', 'well3', 'well4', 'shipyard1Water', 'shipyard2Water', 'wreck1', 'wreck2', 'wreck3', 'fleetStart1', 'fleetStart2', 'fleetMid', 'unloadSea', 'bargeStart1', 'bargeStart2', 'reinforceSea', 'strait', 'fleetStart']);
 const isLake = (name) => /^lake\d$/.test(name); // lago congelado (A Geada): água rasa interior, fora do oceano navegável
 const hyp = (a, b) => Math.hypot(a.x - b.x, a.z - b.z);
 
@@ -126,16 +126,21 @@ describe('M2-03 · âncoras da ficha de cada missão', () => {
     });
   }
 
-  it('Baía de Aurelan: acampamento neutro (4 guardas, recompensa de ouro) a >= 25 u das bases e Mural da Fenda em terra', () => {
+  it('Baía de Aurelan: reduto de 3 acampamentos de bandidos (âncoras banditCamp1..3) juntos (≤ 18 u), ≥ 70 u da base do jogador e Mural da Fenda em terra', () => {
     const m = getMap('camp-01-baia-de-aurelan');
     const camps = m.neutrals.filter((n) => n.kind === 'camp');
-    expect(camps).toHaveLength(1);
-    expect(camps[0].guards).toBe(4);
-    expect(camps[0].reward.gold).toBeGreaterThan(0);
-    for (const s of m.startSlots) expect(hyp(camps[0], s)).toBeGreaterThanOrEqual(25);
-    expect(m.anchors.neutralCamp1).toEqual({ x: camps[0].x, z: camps[0].z });
+    expect(camps).toHaveLength(3);
+    camps.forEach((c, i) => {
+      expect(c.guards).toBeGreaterThanOrEqual(6);
+      expect(c.reward.gold).toBeGreaterThan(0);
+      expect(m.anchors[`banditCamp${i + 1}`]).toEqual({ x: c.x, z: c.z });
+      expect(m.anchors[`neutralCamp${i + 1}`]).toEqual({ x: c.x, z: c.z });
+      expect(hyp(c, m.startSlots[0])).toBeGreaterThanOrEqual(70);
+      expect(hyp(c, m.startSlots[1])).toBeGreaterThanOrEqual(24);
+      for (let j = i + 1; j < camps.length; j++) expect(hyp(c, camps[j])).toBeLessThanOrEqual(18);
+    });
     expect(hyp(m.anchors.muralFenda, m.anchors.playerStart)).toBeGreaterThan(30);
-    expect(hyp(m.anchors.muralFenda, camps[0])).toBeGreaterThan(20);
+    for (const c of camps) expect(hyp(m.anchors.muralFenda, c)).toBeGreaterThan(20);
   });
 
   it('Pouso do Encontro: rio com vaus, Cais de cada lado na costa com água navegável, forte de troncos entre as bases e Torre da Fenda numa ponta', () => {

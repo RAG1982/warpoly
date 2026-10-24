@@ -18,8 +18,8 @@
     },
     "portrait": "🛡️",
     "text": {
-      "pt-BR": "O Mar Fendido nos trouxe a esta baía, soldado. A Rainha quer um ponto de apoio firme na costa de Aurelan, e a Irmandade da Maré mantém UM acampamento de contrabandistas ao norte, saqueando os barcos que passam. Não há base inimiga aqui: a missão termina quando esse acampamento cair. Primeiro, construa um Quartel. Depois, treine 7 soldados (3 Espadachins e 4 Arqueiros). Então marcharemos e destruiremos o acampamento.",
-      "en": "The Sundered Sea brought us to this bay, soldier. The Queen wants a firm foothold on the Aurelan coast, and the Tide Brotherhood keeps ONE smuggler camp to the north, plundering passing boats. There is no enemy base here: the mission ends when that camp falls. First, build a Barracks. Then train 7 soldiers (3 Swordsmen and 4 Archers). Then we march and tear the camp down."
+      "pt-BR": "O Mar Fendido nos trouxe a esta baía, soldado. A Rainha quer um ponto de apoio firme na costa de Aurelan, e a Irmandade da Maré mantém TRÊS acampamentos de contrabandistas juntos, num reduto longe daqui, ao norte, saqueando os barcos que passam. Não há base inimiga: a missão termina quando os 3 acampamentos caírem. Eles são bem guardados: nem pense em ir com os soldados do início. Primeiro, construa um Quartel. Depois, treine tropas (no mínimo 3 Espadachins e 4 Arqueiros; quanto mais, melhor). Então marcharemos e derrubaremos os acampamentos, um de cada vez.",
+      "en": "The Sundered Sea brought us to this bay, soldier. The Queen wants a firm foothold on the Aurelan coast, and the Tide Brotherhood keeps THREE smuggler camps huddled together, a stronghold far from here to the north, plundering passing boats. There is no enemy base: the mission ends when all 3 camps fall. They are well guarded: do not even think of going with the starting soldiers. First, build a Barracks. Then train troops (at least 3 Swordsmen and 4 Archers; the more, the better). Then we march and tear the camps down, one at a time."
     },
     "hints": [
       {
@@ -35,12 +35,12 @@
         "en": "The Barracks needs a finished Farm. Build a Cottage too: without it your population stays capped and training stops."
       },
       {
-        "pt-BR": "Tropas treinadas só contam no objetivo se saírem do Quartel; os soldados do início não entram na conta.",
-        "en": "Only troops that come out of the Barracks count toward the objective; the starting soldiers do not."
+        "pt-BR": "Tropas treinadas só contam no objetivo se saírem do Quartel; os soldados do início não entram na conta. Treine mais que o mínimo: o reduto é bem guardado.",
+        "en": "Only troops that come out of the Barracks count toward the objective; the starting soldiers do not. Train more than the minimum: the stronghold is well guarded."
       },
       {
-        "pt-BR": "Para atacar: selecione os soldados e clique com o botão direito no acampamento (ou A e clique no chão).",
-        "en": "To attack: select your soldiers and right-click the camp (or press A and click the ground)."
+        "pt-BR": "Para atacar: selecione os soldados e clique com o botão direito num acampamento (ou A e clique no chão). Ataque um acampamento por vez e recue os feridos.",
+        "en": "To attack: select your soldiers and right-click a camp (or press A and click the ground). Take one camp at a time and pull the wounded back."
       }
     ]
   },
@@ -77,6 +77,99 @@
         "buildingType": "bandit_camp"
       },
       "tag": "smuggler_camp"
+    },
+    {
+      "type": "tag",
+      "select": {
+        "buildingType": "bandit_camp",
+        "area": {
+          "anchor": "banditCamp1",
+          "r": 6
+        }
+      },
+      "tag": "smuggler_camp1"
+    },
+    {
+      "type": "tag",
+      "select": {
+        "buildingType": "bandit_camp",
+        "area": {
+          "anchor": "banditCamp2",
+          "r": 6
+        }
+      },
+      "tag": "smuggler_camp2"
+    },
+    {
+      "type": "tag",
+      "select": {
+        "buildingType": "bandit_camp",
+        "area": {
+          "anchor": "banditCamp3",
+          "r": 6
+        }
+      },
+      "tag": "smuggler_camp3"
+    },
+    {
+      "type": "spawn",
+      "owner": "bandits",
+      "units": [
+        {
+          "type": "knight",
+          "count": 2
+        },
+        {
+          "type": "archer",
+          "count": 1
+        }
+      ],
+      "anchor": "banditCamp1",
+      "dx": 0,
+      "dz": 0,
+      "spread": 2.5,
+      "guard": true,
+      "tag": "camp_elite"
+    },
+    {
+      "type": "spawn",
+      "owner": "bandits",
+      "units": [
+        {
+          "type": "knight",
+          "count": 2
+        },
+        {
+          "type": "archer",
+          "count": 1
+        }
+      ],
+      "anchor": "banditCamp2",
+      "dx": 0,
+      "dz": 0,
+      "spread": 2.5,
+      "guard": true,
+      "tag": "camp_elite"
+    },
+    {
+      "type": "spawn",
+      "owner": "bandits",
+      "units": [
+        {
+          "type": "knight",
+          "count": 2
+        },
+        {
+          "type": "archer",
+          "count": 1
+        }
+      ],
+      "anchor": "banditCamp3",
+      "dx": 0,
+      "dz": 0,
+      "spread": 2.5,
+      "guard": true,
+      "tag": "camp_elite"
     }
   ],
   "objectives": [
@@ -115,8 +208,8 @@
         "en": "Train 7 soldiers: 3 Swordsmen and 4 Archers"
       },
       "description": {
-        "pt-BR": "Conta só as tropas treinadas no Quartel; os soldados do início não entram.",
-        "en": "Only troops trained at the Barracks count; the starting soldiers do not."
+        "pt-BR": "Conta só as tropas treinadas no Quartel; os soldados do início não entram. Treinar mais que isso ajuda.",
+        "en": "Only troops trained at the Barracks count; the starting soldiers do not. Training more than that helps."
       }
     },
     {
@@ -128,13 +221,14 @@
         "tag": "smuggler_camp"
       },
       "title": {
-        "pt-BR": "Destruir o acampamento de contrabandistas (1 no mapa) para vencer",
-        "en": "Destroy the smuggler camp (1 on the map) to win"
+        "pt-BR": "Destruir os 3 acampamentos de contrabandistas para vencer",
+        "en": "Destroy the 3 smuggler camps to win"
       },
       "description": {
-        "pt-BR": "Fica ao norte da baía, com 4 guardas. Destruí-lo encerra a missão.",
-        "en": "It lies north of the bay, with 4 guards. Destroying it ends the mission."
-      }
+        "pt-BR": "Ficam juntos, bem ao norte da baía, com guardas em cada um. Só contam depois que o objetivo abre; a missão termina quando os 3 caírem.",
+        "en": "They sit together, far north of the bay, with guards at each. They only count once this objective opens; the mission ends when all 3 fall."
+      },
+      "count": 3
     },
     {
       "id": "gold-500",
@@ -182,9 +276,15 @@
           "id": "on"
         },
         {
+          "type": "reveal",
+          "anchor": "banditCamp2",
+          "radius": 26,
+          "ttl": 14
+        },
+        {
           "type": "cutscene",
           "id": "landing",
-          "duration": 15,
+          "duration": 21,
           "skippable": true,
           "steps": [
             {
@@ -206,7 +306,7 @@
             },
             {
               "at": 6,
-              "anchor": "neutralCamp1",
+              "anchor": "banditCamp2",
               "dz": -6,
               "zoom": 1.1,
               "dialog": {
@@ -216,14 +316,14 @@
                 },
                 "portrait": "🛡️",
                 "text": {
-                  "pt-BR": "Ali ao norte, a fumaça do acampamento deles. Quatro guardas, pelo que vimos da praia.",
-                  "en": "There to the north, the smoke of their camp. Four guards, from what we saw from the beach."
+                  "pt-BR": "Ali ao norte, longe daqui: a fumaça de TRÊS acampamentos, colados uns nos outros. É o reduto da Irmandade, e cada um tem seus guardas.",
+                  "en": "There to the north, far from here: the smoke of THREE camps, huddled against each other. That is the Brotherhood's stronghold, and each camp has its own guards."
                 },
-                "duration": 4.5
+                "duration": 7.5
               }
             },
             {
-              "at": 11,
+              "at": 15,
               "anchor": "playerStart",
               "zoom": 1.0,
               "dialog": {
@@ -236,7 +336,7 @@
                   "pt-BR": "Esta é a nossa base. Aldeões na lida, soldado: o Quartel vem primeiro.",
                   "en": "This is our base. Villagers to work, soldier: the Barracks comes first."
                 },
-                "duration": 4
+                "duration": 5
               }
             }
           ]
@@ -247,7 +347,7 @@
       "id": "first-steps",
       "when": {
         "type": "time",
-        "at": 17
+        "at": 23
       },
       "actions": [
         {
@@ -258,10 +358,10 @@
           },
           "portrait": "🛡️",
           "text": {
-            "pt-BR": "Objetivo um: um Quartel. Ponha um Aldeão para erguer uma Fazenda e, em seguida, o Quartel. Mande outro para o ouro, vamos precisar.",
-            "en": "Objective one: a Barracks. Put a Villager on a Farm first, then the Barracks. Send another to the gold, we will need it."
+            "pt-BR": "Objetivo um: um Quartel. Ponha um Aldeão para erguer uma Fazenda e, em seguida, o Quartel. Mande outro para o ouro, vamos precisar de muita tropa: os três acampamentos não caem com os soldados do início.",
+            "en": "Objective one: a Barracks. Put a Villager on a Farm first, then the Barracks. Send another to the gold, we will need a lot of troops: the three camps will not fall to the starting soldiers."
           },
-          "duration": 8
+          "duration": 9
         }
       ]
     },
@@ -290,8 +390,8 @@
           },
           "portrait": "🛡️",
           "text": {
-            "pt-BR": "Quartel de pé! Agora treine 7 soldados: 3 Espadachins na frente e 4 Arqueiros atrás. O painel mostra quantos já saíram.",
-            "en": "Barracks standing! Now train 7 soldiers: 3 Swordsmen in front and 4 Archers behind. The panel shows how many have come out so far."
+            "pt-BR": "Quartel de pé! Agora treine soldados: no mínimo 3 Espadachins na frente e 4 Arqueiros atrás, mas leve mais se puder. O painel mostra quantos já saíram.",
+            "en": "Barracks standing! Now train soldiers: at least 3 Swordsmen in front and 4 Archers behind, but bring more if you can. The panel shows how many have come out so far."
           },
           "duration": 8
         }
@@ -306,14 +406,18 @@
       },
       "actions": [
         {
+          "type": "disableTrigger",
+          "id": "camp-early"
+        },
+        {
           "type": "setObjective",
           "id": "destroy-camp",
           "status": "active"
         },
         {
           "type": "reveal",
-          "anchor": "neutralCamp1",
-          "radius": 18
+          "anchor": "banditCamp2",
+          "radius": 30
         },
         {
           "type": "sound",
@@ -327,10 +431,10 @@
           },
           "portrait": "🛡️",
           "text": {
-            "pt-BR": "Sete soldados prontos! Junte todos, siga ao norte e derrube o acampamento da Irmandade. Espadachins na frente, Arqueiros atiram de longe.",
-            "en": "Seven soldiers ready! Gather them all, head north and tear down the Brotherhood camp. Swordsmen in front, Archers shoot from afar."
+            "pt-BR": "Tropa pronta! Junte todos, siga ao norte e derrube os 3 acampamentos da Irmandade, um de cada vez; o primeiro é o mais próximo. Espadachins na frente, Arqueiros atiram de longe. Se a tropa minguar, volte e treine mais.",
+            "en": "Troops ready! Gather everyone, head north and tear down the Brotherhood's 3 camps, one at a time, starting with the nearest. Swordsmen in front, Archers shoot from afar. If the force dwindles, fall back and train more."
           },
-          "duration": 8
+          "duration": 10
         }
       ]
     },
@@ -340,8 +444,8 @@
         "type": "area",
         "owner": "player",
         "area": {
-          "anchor": "neutralCamp1",
-          "r": 30
+          "anchor": "banditCamp1",
+          "r": 34
         }
       },
       "actions": [
@@ -353,10 +457,35 @@
           },
           "portrait": "🛡️",
           "text": {
-            "pt-BR": "Cuidado: aqui começa o território deles. Ataquem juntos, não um a um.",
-            "en": "Careful: their territory starts here. Attack together, not one by one."
+            "pt-BR": "Cuidado: aqui começa o território deles. Os três acampamentos se ajudam, então ataquem juntos, um acampamento por vez, e recuem se a coisa apertar.",
+            "en": "Careful: their territory starts here. The three camps back each other up, so strike together, one camp at a time, and fall back if it gets rough."
           },
-          "duration": 6
+          "duration": 8
+        }
+      ]
+    },
+    {
+      "id": "camp-early",
+      "when": {
+        "type": "dead",
+        "select": {
+          "tag": "smuggler_camp"
+        },
+        "count": 1
+      },
+      "actions": [
+        {
+          "type": "dialog",
+          "speaker": {
+            "pt-BR": "Sgt. Tomás Rocha",
+            "en": "Sgt. Tomás Rocha"
+          },
+          "portrait": "🛡️",
+          "text": {
+            "pt-BR": "Derrubaram um acampamento antes da hora? Bravura rara, soldado. Ele vale quando abrirmos a ordem de ataque, mas ainda faltam os outros: terminem o Quartel e o treino.",
+            "en": "You tore down a camp ahead of time? Rare bravery, soldier. It will count once the attack order opens, but the others still stand: finish the Barracks and the training."
+          },
+          "duration": 8
         }
       ]
     },
@@ -437,20 +566,27 @@
         {
           "type": "giveResources",
           "owner": "player",
-          "gold": 120,
+          "gold": 320,
           "wood": 60
         },
         {
           "type": "spawn",
           "owner": "neutral",
-          "unitType": "barge",
-          "anchor": "shipHorizon",
+          "units": [
+            {
+              "type": "war_galley",
+              "count": 4
+            }
+          ],
+          "anchor": "orcSails",
+          "spread": 4,
           "tag": "sail"
         },
         {
           "type": "reveal",
-          "anchor": "shipHorizon",
-          "radius": 24
+          "anchor": "orcSails",
+          "radius": 30,
+          "ttl": 16
         },
         {
           "type": "sound",
@@ -464,7 +600,7 @@
           "steps": [
             {
               "at": 0,
-              "anchor": "neutralCamp1",
+              "anchor": "banditCamp2",
               "zoom": 1.1,
               "dialog": {
                 "speaker": {
@@ -473,15 +609,15 @@
                 },
                 "portrait": "🛡️",
                 "text": {
-                  "pt-BR": "O acampamento caiu! A baía é nossa, soldado. Espólio da Irmandade: 120 de ouro e 60 de madeira.",
-                  "en": "The camp has fallen! The bay is ours, soldier. Brotherhood spoils: 120 gold and 60 wood."
+                  "pt-BR": "Os três acampamentos caíram! A baía é nossa, soldado. Espólio da Irmandade: 320 de ouro e 60 de madeira.",
+                  "en": "All three camps have fallen! The bay is ours, soldier. Brotherhood spoils: 320 gold and 60 wood."
                 },
                 "duration": 4.5
               }
             },
             {
               "at": 5,
-              "anchor": "shipHorizon",
+              "anchor": "orcSails",
               "zoom": 1.25,
               "dialog": {
                 "speaker": {
@@ -490,15 +626,15 @@
                 },
                 "portrait": "🛡️",
                 "text": {
-                  "pt-BR": "Espere... aquela vela no horizonte. Não é nossa. E não é de contrabandista nenhum.",
-                  "en": "Wait... that sail on the horizon. It is not ours. And it is no smuggler's."
+                  "pt-BR": "Espere... aquelas velas no horizonte: quatro cascos em formação. Não são nossas. E não são de contrabandista nenhum.",
+                  "en": "Wait... those sails on the horizon: four hulls in formation. They are not ours. And they are no smugglers'."
                 },
                 "duration": 4.5
               }
             },
             {
               "at": 9.5,
-              "anchor": "shipHorizon",
+              "anchor": "orcSails",
               "zoom": 1.35,
               "dialog": {
                 "speaker": {
@@ -507,8 +643,8 @@
                 },
                 "portrait": "👑",
                 "text": {
-                  "pt-BR": "Vimos também, sargento. Fortifiquem a baía e preparem-se: alguém do outro lado do mar acaba de nos encontrar.",
-                  "en": "We saw it too, sergeant. Fortify the bay and be ready: someone from across the sea has just found us."
+                  "pt-BR": "Vimos também, sargento: galés de guerra orcs. Fortifiquem a baía e preparem-se: alguém do outro lado do mar acaba de nos encontrar.",
+                  "en": "We saw them too, sergeant: orc war galleys. Fortify the bay and be ready: someone from across the sea has just found us."
                 },
                 "duration": 2.4
               }

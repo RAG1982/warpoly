@@ -264,8 +264,14 @@ describe('História de Abertura da Campanha (MUNDO-HISTORIA-CAMPANHA §2)', () =
       screen.campaignId = 'war-alliance';
       expect(screen._shouldAutoShowStory()).toBe(true);
 
-      // Após ser vista, não deve reabrir automaticamente
+      // Vista mas sem nenhuma missão concluída: a história ainda abre ao entrar na campanha
       CampaignStoryModel.markSeen('war-alliance', progress);
+      expect(screen._shouldAutoShowStory()).toBe(true);
+      // ...mas "Iniciar" não a repete (já foi vista)
+      expect(screen._shouldShowStoryOnStart()).toBe(false);
+
+      // Com missão concluída: vai direto à lista
+      progress.recordVictory('war-alliance', 'alliance-01', { seconds: 60 });
       expect(screen._shouldAutoShowStory()).toBe(false);
 
       // Campanha beta nunca abre história de abertura

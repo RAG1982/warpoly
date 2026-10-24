@@ -54,7 +54,13 @@ function overlay(img, m, anchorNames) {
   const half = m.playable / 2;
   // área jogável
   for (let t = -half; t <= half; t += 0.5) for (const [x, z] of [[t, -half], [t, half], [-half, t], [half, t]]) { const [a, b] = P({ x, z }); put(img, a, b, [255, 255, 255], 0.25); }
-  for (const f of m.forests) { const [a, b] = P(f); ring(img, a, b, f.radius * k, [20, 90, 30], 0.7); }
+  // bosques afinados no corredor (count menor que o original em meta.corridorThin) saem em verde-claro; o eixo do corredor, pontilhado branco
+  const cut = m.meta?.corridorThin?.cut ?? [];
+  m.forests.forEach((f, i) => { const [a, b] = P(f); ring(img, a, b, f.radius * k, cut.includes(i) ? [120, 220, 120] : [20, 90, 30], 0.7); });
+  for (const nb of [...m.startSlots.slice(1), ...m.neutrals.filter((n) => n.kind === 'camp')]) {
+    const a = P(m.startSlots[0]), b = P(nb), len = Math.hypot(b[0] - a[0], b[1] - a[1]);
+    for (let d = 0; d < len; d += 6) put(img, a[0] + ((b[0] - a[0]) * d) / len, a[1] + ((b[1] - a[1]) * d) / len, [255, 255, 255], 0.55);
+  }
   for (const f of m.fords) { const [a, b] = P(f); ring(img, a, b, Math.max(3, f.r * k), [255, 160, 40], 0.9); }
   for (const r of m.resources) {
     const [a, b] = P(r);

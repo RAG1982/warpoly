@@ -18,6 +18,11 @@ import { buildPathfinder, floodFill, isReached } from '../../src/data/maps/gener
 import { layoutAt } from '../../src/sim/MatchConfig.js';
 import { getBiomeAt, BIOME, decodeBiomeGrid, encodeRleBiomeGrid } from '../../src/data/maps/biome.js';
 import { speciesForBiome } from '../../src/data/treeSpecies.js';
+import { estimateWood } from '../../src/data/maps/coast/layout.js';
+import { thinCorridor, makeWoodFn, CORRIDOR_DEFAULTS } from './corridorThin.mjs';
+
+/** Parâmetros da etapa "afinar corredor" (largura da faixa em u, fração de árvores que fica, raio de floresta de coleta etc.): ver `corridorThin.mjs`. */
+export const CORRIDOR_PARAMS = Object.freeze({ ...CORRIDOR_DEFAULTS });
 
 const hyp = (a, b) => Math.hypot(a.x - b.x, a.z - b.z);
 const r1 = (v) => Math.round(v * 10) / 10;
@@ -955,6 +960,11 @@ function finish(id, world, seedUsed) {
   }
   out.meta = { ...m.meta, campaign: id, seedUsed };
   const preset = CAMPAIGN_PRESETS[id];
+  // afinar corredor: ≈ 2/3 das árvores da faixa entre as bases/acampamentos somem (visibilidade), sem tirar a madeira das bases
+  const woodMin = preset.woodTarget ?? 8000;
+  const thin = thinCorridor(out, { ...CORRIDOR_PARAMS, seed: seedUsed, label: id, woodMin, woodFn: makeWoodFn(out, { buildPathfinder, floodFill, isReached, estimateWood }) });
+  out.forests = thin.forests;
+  out.meta.corridorThin = { width: CORRIDOR_PARAMS.width, keepFrac: Math.round(CORRIDOR_PARAMS.keepFrac * 100) / 100, clusters: thin.thinned.length, trees: [thin.before, thin.after], cut: thin.thinned };
   const verification = verifyCoastWorld(out, { naval: !!preset.naval, woodTarget: preset.woodTarget });
   if (!verification.ok) throw new Error('mundo: ' + verification.failures.slice(0, 2).join(' | '));
   // âncoras de terra alcançáveis a partir do slot 0 por terra; de água, no oceano

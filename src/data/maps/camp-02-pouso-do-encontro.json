@@ -9048,21 +9048,21 @@
     {
       "x": -6,
       "z": -58,
-      "count": 14,
+      "count": 8,
       "radius": 10,
       "species": "pine"
     },
     {
       "x": -22,
       "z": -14,
-      "count": 14,
+      "count": 6,
       "radius": 10,
       "species": "broad"
     },
     {
       "x": 6,
       "z": -42,
-      "count": 14,
+      "count": 3,
       "radius": 10,
       "species": "broad"
     },
@@ -9097,7 +9097,7 @@
     {
       "x": 24,
       "z": -38,
-      "count": 14,
+      "count": 6,
       "radius": 10,
       "species": "oak"
     },
@@ -9125,7 +9125,7 @@
     {
       "x": 4,
       "z": -32,
-      "count": 14,
+      "count": 5,
       "radius": 10,
       "species": "birch"
     },
@@ -9339,7 +9339,23 @@
     "preset": "camp-02-pouso-do-encontro",
     "seed": 22,
     "seedUsed": 22,
-    "campaign": "camp-02-pouso-do-encontro"
+    "campaign": "camp-02-pouso-do-encontro",
+    "corridorThin": {
+      "width": 44,
+      "keepFrac": 0.33,
+      "clusters": 5,
+      "trees": [
+        210,
+        168
+      ],
+      "cut": [
+        2,
+        3,
+        12,
+        1,
+        8
+      ]
+    }
   },
   "hidden": true
 }

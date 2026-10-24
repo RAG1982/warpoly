@@ -8600,14 +8600,14 @@
     {
       "x": -12,
       "z": -14,
-      "count": 14,
+      "count": 7,
       "radius": 10,
       "species": "birch"
     },
     {
       "x": -10,
       "z": 14,
-      "count": 14,
+      "count": 8,
       "radius": 10,
       "species": "acacia"
     },
@@ -8628,7 +8628,7 @@
     {
       "x": -12,
       "z": 34,
-      "count": 14,
+      "count": 2,
       "radius": 10,
       "species": "acacia"
     },
@@ -8649,7 +8649,7 @@
     {
       "x": 6,
       "z": 32,
-      "count": 14,
+      "count": 6,
       "radius": 10,
       "species": "acacia"
     },
@@ -8677,7 +8677,7 @@
     {
       "x": -2,
       "z": -20,
-      "count": 14,
+      "count": 6,
       "radius": 10,
       "species": "birch"
     },
@@ -8698,7 +8698,7 @@
     {
       "x": -10,
       "z": 46,
-      "count": 14,
+      "count": 2,
       "radius": 10,
       "species": "acacia"
     }
@@ -8847,7 +8847,24 @@
     "preset": "camp-01-baia-de-aurelan",
     "seed": 1,
     "seedUsed": 1,
-    "campaign": "camp-01-baia-de-aurelan"
+    "campaign": "camp-01-baia-de-aurelan",
+    "corridorThin": {
+      "width": 44,
+      "keepFrac": 0.33,
+      "clusters": 6,
+      "trees": [
+        224,
+        171
+      ],
+      "cut": [
+        1,
+        2,
+        5,
+        12,
+        15,
+        8
+      ]
+    }
   },
   "hidden": true
 }

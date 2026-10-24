@@ -15701,7 +15701,7 @@
     {
       "x": 12,
       "z": 30,
-      "count": 14,
+      "count": 2,
       "radius": 10,
       "species": "palm"
     },
@@ -15722,7 +15722,7 @@
     {
       "x": -14,
       "z": 8,
-      "count": 14,
+      "count": 13,
       "radius": 10,
       "species": "autumn"
     },
@@ -15757,14 +15757,14 @@
     {
       "x": 34,
       "z": -38,
-      "count": 14,
+      "count": 10,
       "radius": 10,
       "species": "palm"
     },
     {
       "x": 14,
       "z": -42,
-      "count": 14,
+      "count": 2,
       "radius": 10,
       "species": "autumn"
     },
@@ -15949,7 +15949,22 @@
     "preset": "camp-12-cabo-ferrugem",
     "seed": 12,
     "seedUsed": 12,
-    "campaign": "camp-12-cabo-ferrugem"
+    "campaign": "camp-12-cabo-ferrugem",
+    "corridorThin": {
+      "width": 44,
+      "keepFrac": 0.33,
+      "clusters": 4,
+      "trees": [
+        210,
+        181
+      ],
+      "cut": [
+        4,
+        7,
+        12,
+        13
+      ]
+    }
   },
   "hidden": true
 }

@@ -9323,7 +9323,7 @@
     {
       "x": -20,
       "z": 14,
-      "count": 14,
+      "count": 6,
       "radius": 10,
       "species": "autumn"
     },
@@ -9337,14 +9337,14 @@
     {
       "x": 0,
       "z": 16,
-      "count": 14,
+      "count": 2,
       "radius": 10,
       "species": "pine"
     },
     {
       "x": 10,
       "z": -10,
-      "count": 14,
+      "count": 12,
       "radius": 10,
       "species": "palm"
     },
@@ -9372,7 +9372,7 @@
     {
       "x": 40,
       "z": -18,
-      "count": 14,
+      "count": 6,
       "radius": 10,
       "species": "pine"
     },
@@ -9386,21 +9386,21 @@
     {
       "x": 30,
       "z": 26,
-      "count": 14,
+      "count": 6,
       "radius": 10,
       "species": "palm"
     },
     {
       "x": 20,
       "z": -16,
-      "count": 14,
+      "count": 3,
       "radius": 10,
       "species": "palm"
     },
     {
       "x": 12,
       "z": 18,
-      "count": 14,
+      "count": 2,
       "radius": 10,
       "species": "birch"
     },
@@ -9632,7 +9632,25 @@
     "preset": "camp-04-baixio-do-breu",
     "seed": 10,
     "seedUsed": 10,
-    "campaign": "camp-04-baixio-do-breu"
+    "campaign": "camp-04-baixio-do-breu",
+    "corridorThin": {
+      "width": 44,
+      "keepFrac": 0.33,
+      "clusters": 7,
+      "trees": [
+        238,
+        177
+      ],
+      "cut": [
+        4,
+        5,
+        12,
+        13,
+        2,
+        9,
+        11
+      ]
+    }
   },
   "hidden": true
 }

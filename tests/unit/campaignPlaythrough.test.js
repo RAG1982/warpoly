@@ -334,6 +334,7 @@ describe('m04 Ponte do Rio Turvo: Forte Atalaia (NEW-53)', () => {
     for (const [dx, dz] of [[0, 0], [so, so], [-so, so], [so, -so], [-so, -so]]) expect(getHeightForMap(map, x + dx, z + dz)).toBeGreaterThanOrEqual(1.8);
     for (const f of map.fords) expect(Math.hypot(x - f.x, z - f.z)).toBeGreaterThan(10);
     // sem construção, jazida nem árvore viva sobre a pegada: o jogador poderia construir um castelo aqui (ignorando o próprio forte)
+    gm.canPlaceExtraHq = () => true; // ENG-WALL: o Forte é inimigo; as regras de Centro extra (distância de bases hostis) não são o assunto deste teste
     expect(gm.canPlaceBuilding('castle', x, z, fort, 0)).toBe(true);
     expect(gm.trees.filter((t) => !t.isDisposed && Math.hypot(t.mesh.position.x - x, t.mesh.position.z - z) < R + 3.5).length).toBe(0);
     expect(gm.trees.filter((t) => t.isDisposed).length).toBeGreaterThan(0); // a ação abriu a clareira

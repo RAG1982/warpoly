@@ -71,6 +71,9 @@ export class Building {
     /** F3-05: nº de trabalhadores com esta construção como alvo (recalculado por tick no GameManager). */
     this.workerCount = 0;
     this.cost = stats.cost;
+    /** ENG-WALL: progresso (de 100) por golpe de martelo (a cada 0,8 s por trabalhador); 10 = 8 s de obra, `buildTime` s => 80 / buildTime. */
+    const buildTime = getBuildingDef(type).buildTime;
+    this.buildHit = buildTime ? 80 / buildTime : 10;
     this.popGranted = stats.popGranted || 0;
     // F3-03: armadura da construção (corrige B5 — antes não existia). `towerDamage` é o
     // dano da torre em {basic, piercing, type}; `attackDamage` continua como soma derivada

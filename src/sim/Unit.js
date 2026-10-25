@@ -2130,7 +2130,7 @@ export class Unit {
     if (this.actionTimer >= 0.8) {
       this.actionTimer = 0;
       const gm = gameManager || this.gameManager;
-      this.buildTarget.construct(10, gm);
+      this.buildTarget.construct(this.buildTarget.buildHit || 10, gm);
       if (gm && gm.events) {
         gm.events.emit(EVT.WORKER_HAMMER, { pos: posOf(this.buildTarget.mesh.position), ownerId: this.ownerId });
       }

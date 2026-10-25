@@ -10,6 +10,8 @@
  * - coastal       F4-07a: construção costeira (Estaleiro/Refinaria/Fundição): centro em terra, com água navegável
  *                 encostada (`GameManager.canPlaceBuilding`). `platform: true` = plataforma de petróleo (sobre o poço, no mar).
  * - hp, cost {gold, wood, stone, oil?}, collisionRadius, popGranted.
+ * - buildTime     ENG-WALL: segundos de obra com UM trabalhador (opcional; ausente = 8 s, o ritmo padrão de 10 % a cada 0,8 s).
+ *                 Só o Centro construível (`castle`/`great_hall` no menu do trabalhador) declara; ver `Building.buildHit`.
  * - armor         F3-03: armadura da construção (corrige B5 — antes não existia). HQ/torres
  *                  20, muralhas 10 (quando existirem), demais 15 (design §6).
  * - visionRadius  Raio revelado na névoa de guerra.
@@ -29,6 +31,22 @@
 export const WALL_STEP = 2.4;
 /** F3-08: máximo de segmentos por comando PLACE_WALL. */
 export const WALL_MAX_POINTS = 60;
+/**
+ * ENG-WALL: muralha na praia. Altura mínima do CENTRO do segmento (a água é < 0,65; a grade de navegação só caminha em >= 0,68)
+ * e das 4 amostras da pegada (devem ser terra caminhável, nunca água). As demais construções exigem 1,8 (terra firme).
+ */
+export const WALL_MIN_HEIGHT = 0.8;
+export const WALL_FOOTPRINT_MIN_HEIGHT = 0.68;
+/**
+ * ENG-WALL: vão máximo (u) entre a borda do segmento e a água que o Pathfinder "sela" (bloqueia as células de praia do vão,
+ * em cone radial a partir do segmento). Vão maior que isso = muro afastado da água, passagem deixada aberta.
+ */
+export const WALL_SEAL_GAP = 4.0;
+/**
+ * ENG-WALL: segmentos do mesmo dono a até esta distância (u) entre centros são "ligados" no Pathfinder: o trecho entre os dois
+ * centros também é bloqueado (cápsula), senão a fileira a 2,4 u deixa um furo de 1 célula conforme o alinhamento com a grade.
+ */
+export const WALL_LINK_DIST = 3.0;
 
 const HQ_DROPOFF = ['wood', 'gold', 'stone'];
 const LUMBER_DROPOFF = ['wood'];
@@ -43,7 +61,9 @@ export const BUILDINGS = {
     role: 'hq',
     hp: 1600,
     armor: 20,
-    cost: { gold: 0, wood: 200, stone: 150 },
+    // ENG-WALL: Centro extra construível pelo trabalhador (limite e distâncias em src/data/tiers.js: HQ_MAX_PER_PLAYER...).
+    cost: { gold: 800, wood: 400, stone: 250 },
+    buildTime: 30,
     collisionRadius: 5.5,
     popGranted: 5,
     visionRadius: 26,
@@ -53,7 +73,7 @@ export const BUILDINGS = {
     trains: ['villager'],
     dropoff: HQ_DROPOFF,
     icon: '/icoCasa.svg',
-    description: 'Centro do reino: treina aldeões e recebe todos os recursos'
+    description: 'Centro do reino: treina aldeões e recebe todos os recursos. Erga Centros extras (até 3) perto de minas distantes'
   },
   cottage: {
     type: 'cottage',
@@ -403,7 +423,8 @@ export const BUILDINGS = {
     role: 'hq',
     hp: 1600, // F3-06 NEW-24: alinhado a HQ_TIER_HP[1] (src/data/tiers.js) — antes 1750.
     armor: 20,
-    cost: { gold: 0, wood: 220, stone: 140 },
+    cost: { gold: 800, wood: 400, stone: 250 }, // ENG-WALL: igual ao Paço Real (Centro extra construível)
+    buildTime: 30,
     collisionRadius: 5.5,
     popGranted: 5,
     visionRadius: 26,
@@ -413,7 +434,7 @@ export const BUILDINGS = {
     trains: ['peon'],
     dropoff: HQ_DROPOFF,
     icon: '/icoToca.svg',
-    description: 'Centro do clã: treina peões e recebe todos os recursos'
+    description: 'Centro do clã: treina peões e recebe todos os recursos. Erga Centros extras (até 3) perto de minas distantes'
   },
   orc_house: {
     type: 'orc_house',

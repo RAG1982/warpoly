@@ -11,10 +11,11 @@ import {
   abilityName as abilityNameT, abilityDesc, buildingDesc
 } from '../i18n/index.js';
 import {
-  unitLabel, buildingLabel, requirementsLine, resourceNodeName, formatClock, localizeSimText
+  unitLabel, unitDisplayLabel, buildingLabel, requirementsLine, resourceNodeName, formatClock, localizeSimText
 } from './uiText.js';
 import { initUiScale } from './uiScale.js';
 import { drawMinimapPings } from './minimapPings.js';
+import { drawMissionMinimap } from './missionMinimap.js';
 import { getBuildHotkey, getTrainHotkey, getResearchHotkey } from './hotkeys.js';
 import { buildCostHtml } from './Tooltip.js';
 import {
@@ -249,7 +250,7 @@ export class UIManager {
       set(this.mainPortraitAttack, attackSrc);
       box.classList.toggle('no-portrait', noPortrait);
       box.classList.toggle('hero', !!def.isHero);
-      box.title = unitLabel(u.type);
+      box.title = unitDisplayLabel(u); // M3-X1: nome da missão (displayName) quando houver
       box.style.display = '';
     }
     // histerese de 0,45 s: o `anim` da sim alterna fight/hurt/idle entre golpes; sem isso o retrato piscaria a cada troca
@@ -760,7 +761,7 @@ export class UIManager {
     const isUnit = !('isConstructed' in e);
     const owner = this.gm.getPlayer(e.ownerId);
     const side = owner && owner.isNeutralHostile ? t('hud.neutral') : t('hud.enemy');
-    const name = isUnit ? unitLabel(e.type) : buildingLabel(e.type);
+    const name = isUnit ? unitDisplayLabel(e) : buildingLabel(e.type);
     this.selectionTitle.innerText = `${name} (${side})`;
     this.selectionHpBar.style.width = `${Math.max(0, e.hp / e.maxHp) * 100}%`;
     this.selectionHp.innerText = `${Math.round(e.hp)} / ${e.maxHp} HP`;
@@ -800,7 +801,7 @@ export class UIManager {
       const isTanker = !!u.isTanker; // F4-07a: petroleiro (constrói a plataforma; coleta petróleo)
 
       const heroMark = getUnitDef(u.type).isHero ? '★ ' : ''; // F4-08
-      this.selectionTitle.innerText = heroMark + (count > 1 ? t('hud.multiSelect', { count, name: unitLabel(u.type) }) : unitLabel(u.type));
+      this.selectionTitle.innerText = heroMark + (count > 1 ? t('hud.multiSelect', { count, name: unitLabel(u.type) }) : unitDisplayLabel(u));
       this.updateSelectionPortraits(this.gm.selectedUnits);
       this.updateMainPortrait(this.gm.selectedUnits); // F7-09: retrato animável (idle/ataque) quando há UMA unidade
 
@@ -985,7 +986,7 @@ export class UIManager {
         ? `<img src="${pUrl}" class="selection-portrait-icon" alt="${unitLabel(unit.type)}" draggable="false" data-ui-sprite="portrait" data-fb-src="${getUnitDef(unit.type).icon}" data-fb-emoji="⚔️">`
         : this._unitIcon(unit.type, { cls: 'selection-portrait-icon is-icon', alt: unitLabel(unit.type), cssPx: 32 });
       return `
-        <button type="button" class="selection-portrait${getUnitDef(unit.type).isHero ? ' hero' : ''}" data-portrait-id="${unit.id}" title="${unitLabel(unit.type)}">
+        <button type="button" class="selection-portrait${getUnitDef(unit.type).isHero ? ' hero' : ''}" data-portrait-id="${unit.id}" title="${escHtml(unitDisplayLabel(unit))}">
           ${img}
           <div class="selection-portrait-hp-bg"><div class="selection-portrait-hp-fill" style="width: ${pct}%"></div></div>
         </button>
@@ -1546,6 +1547,8 @@ export class UIManager {
       this.gm.fogView.drawMinimapFog(ctx, w, h);
     }
 
+    // M3-X1: marcadores de objetivo, marcos explorados e unidades de escolta/resgate visíveis (sobre a névoa)
+    drawMissionMinimap(ctx, this.gm, toMap, fog);
     // F6-05: pings de alerta (ataque, mina esgotada) sobre a névoa
     if (this.alerts) drawMinimapPings(ctx, this.alerts.activePings(), toMap);
     if (this.allyPings) drawMinimapPings(ctx, this.allyPings.active(performance.now()), toMap); // F9-04: pings de aliados

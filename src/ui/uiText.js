@@ -4,7 +4,8 @@
  * Une `src/data/` (ids, defs) a `src/i18n` (nomes/descrições traduzidos) para a HUD e os menus não
  * repetirem a mesma lógica. Sem DOM; roda em Node (testável).
  */
-import { t, unitName, buildingName, researchName, tierName, translateSimText, resourceName } from '../i18n/index.js';
+import { t, getLanguage, unitName, buildingName, researchName, tierName, translateSimText, resourceName } from '../i18n/index.js';
+import { localize } from '../sim/missions/text.js';
 import { getUnitDef, getBuildingDef, BUILDINGS, RESEARCH, TIER_NAMES } from '../data/index.js';
 
 /** 'orc' | 'human' da facção do jogador local. */
@@ -14,11 +15,14 @@ export const factionKey = (gm) => (gm && gm.playerFaction === 'orc' ? 'orc' : 'h
 export const unitLabel = (type) => unitName(type, getUnitDef(type));
 export const buildingLabel = (type) => buildingName(type, getBuildingDef(type));
 
+/** M3-X1: nome da unidade no painel/tooltip — `displayName` da missão (ex.: 'Emissário') ou o nome do tipo. */
+export const unitDisplayLabel = (u) => (u && u.displayName ? localize(u.displayName, getLanguage()) : unitLabel(u.type));
+
 /** Nome localizado de uma entidade viva (unidade, construção ou nó de recurso). */
 export function entityLabel(e) {
   if (!e) return '';
   if (e.isConstructed !== undefined) return buildingLabel(e.type);
-  return unitLabel(e.type);
+  return unitDisplayLabel(e);
 }
 
 /** Texto localizado de um requisito faltante (`'barracks'`, `{hq:2}`, `{role}`, `{research}`). */

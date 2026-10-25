@@ -79,12 +79,53 @@ Comuns: `id`, `type`, `priority` (`primary` | `secondary` | `hidden`; padrão pr
 **Condições** (`when`, `condition`, `failWhen`): `{all:[…]}` · `{any:[…]}` · `{not:c}` · e:
 `time {at}` (s) · `every {seconds, start?}` · `area {owner?, area, count?, unitType?, tag?}` · `dead {select, count?}` · `count {select, op?, value}` (vivos; construções só concluídas) · `var {name, op?="==", value}` · `objective {id, status}` · `resource {owner?, resource, op?, value}` · `trigger {id}` (já disparou) · `research {owner?, id, level?=1}` (F8-05b: pesquisa concluída; combine com `flag` para objetivo "pesquise X"). `op` ∈ `== != > >= < <=` (padrão de `count`/`resource`: `>=`).
 
-**Ações**: `spawn {owner, x, z, unitType+count | units:[{type,count}], tag?, spread?, guard?, order?, markColor?}` · `spawnBuilding {owner, buildingType, x, z, tag?, facing?, markColor?}` · `setTier {owner?, tier: 2|3}` (F8-05b: eleva o Centro concluído do dono ao nível — a campanha concede o nível que a tecnologia liberada exige; não rebaixa) · `giveResources`/`takeResources {owner?, gold/wood/stone/oil}` · `setObjective {id, status}` · `addObjective {objective}` · `revealObjective {id}` · `reveal {x, z, radius | all:true, ttl?}` (névoa; `ttl` em s mantém a visão atual da área por esse tempo, para cutscenes) · `setTeam {player, team}` (diplomacia, inclusive `"bandits"`) · `transfer {select, to, tag?}` (unidades mudam de dono — resgate/captura) · `dialog {speaker?, portrait?, text, duration?}` · `message {text}` · `victory`/`defeat {text?}` · `music {id: on|off}` · `sound {id}` · `camera {x, z, zoom?}` · `cutscene {id?, duration, skippable?, steps:[{at, x?, z?, zoom?, dialog?}]}` · `setVar {name, value}` · `incVar {name, by?}` · `enableTrigger`/`disableTrigger {id}` · `tag {select, tag}` · `order {select, kind: move|attackMove|stop, x, z, release?}` · `guard {select, area?{x,z,r} | radius?, release?}` (F5-06: guarnição presa à área; `spawn.guard` aceita `true` ou `{r}`; `order.release`/`guard.release` soltam para um ataque programado). Ondas = `spawn`+`order` em gatilho `time`/`every`; ataque por morte = gatilho `dead` + `order release`.
+**Ações**: `spawn {owner, x, z, unitType+count | units:[{type,count}], tag?, spread?, guard?, order?, markColor?, displayName?}` · `spawnBuilding {owner, buildingType, x, z, tag?, facing?, markColor?}` · `setTier {owner?, tier: 2|3}` (F8-05b: eleva o Centro concluído do dono ao nível — a campanha concede o nível que a tecnologia liberada exige; não rebaixa) · `giveResources`/`takeResources {owner?, gold/wood/stone/oil}` · `setObjective {id, status}` · `addObjective {objective}` · `revealObjective {id}` · `reveal {x, z, radius | all:true, ttl?}` (névoa; `ttl` em s mantém a visão atual da área por esse tempo, para cutscenes) · `setTeam {player, team}` (diplomacia, inclusive `"bandits"`) · `transfer {select, to, tag?}` (unidades mudam de dono — resgate/captura) · `dialog {speaker?, portrait?, text, duration?}` · `message {text}` · `victory`/`defeat {text?}` · `music {id: on|off}` · `sound {id}` · `camera {x, z, zoom?}` · `cutscene {id?, duration, skippable?, steps:[{at, x?, z?, zoom?, dialog?}]}` · `setVar {name, value}` · `incVar {name, by?}` · `enableTrigger`/`disableTrigger {id}` · `tag {select, tag}` · `order {select, kind: move|attackMove|stop, x, z, release?}` · `guard {select, area?{x,z,r} | radius?, release?}` (F5-06: guarnição presa à área; `spawn.guard` aceita `true` ou `{r}`; `order.release`/`guard.release` soltam para um ataque programado) · `spawnLandmark {kind, x, z, tag?, scale?, facing?, label?, known?}` · `lightLandmark {tag}` (M3-X1, ver "Marcos e marcadores"). Ondas = `spawn`+`order` em gatilho `time`/`every`; ataque por morte = gatilho `dead` + `order release`.
 
 - **`spawnBuilding`** (NEW-53): cria uma construção já **concluída** do dono em (x, z) — o mesmo registro das construções iniciais das bases (`gm.createBuilding` + `gm.buildings`, população recalculada). `buildingType` é o tipo de `src/data/buildings.js` (o campo `type` já é o discriminador da ação; plataforma de petróleo não é aceita: precisa de poço); `facing` = giro em graus (0 = frente para +Z); `tag` marca a construção (objetivos `destroy`, condições `dead`/`count`, `tag` etc.). Validação: dono, tipo existente e **pegada inteira** (`x ± collisionRadius`) dentro da área jogável. A ação **não** procura outro lugar: confira terra firme/água no teste da missão. Árvores vivas dentro da folga de construção (`collisionRadius` + 3,5, a mesma que `canPlaceBuilding` exige do jogador) somem sem animação nem toco, para o ponto ficar tão livre quanto um onde o jogador poderia construir. Exemplo: o Forte Atalaia do m04 (`{"type":"spawnBuilding","owner":"player","buildingType":"castle","x":-47,"z":4,"facing":90,"tag":"fort"}`).
 - **`markColor`** (NEW-53, `spawn` e `spawnBuilding`): cor `#rrggbb` do **anel de seleção** das unidades/construções criadas (`unit.markColor`/`building.markColor`); sem ela o anel é dourado (do jogador) ou vermelho (demais). **Só render**: fica fora do checksum, de saves e de replays; o material é um por cor, compartilhado (`src/render/markRing.js`). Use uma cor clara que não seja dourado nem vermelho (ex.: os carregadores do m04 usam `#22d3ee`, ciano).
 
 As ações mexem na simulação **direto** (nunca `gm.issue`, que seria regravado nos saves/replays); diálogo, câmera, cutscene, música e som saem como eventos `EVT.MISSION_*` (só apresentação).
+
+### Marcos e marcadores (M3-X1)
+
+**Marco** (`spawnLandmark`): modelo procedural low-poly, sem colisão e sem textura nova. `kind`: `ruins` (colunas quebradas, arco e entulho), `truce_post` (mastro com bandeira branca, tenda e mesa) ou `shrine` (pedestal com cristal). Opcionais: `tag` (para `lightLandmark`), `scale` (0,5–2,5), `facing` (graus), `label` (texto; guardado, ainda não exibido), `known: true` (visível desde o início; padrão: só aparece depois de **explorado** pela névoa). O estado (posição, tag, `lit`) fica no `MissionRuntime` e entra no checksum. `lightLandmark {tag}` acende o marco uma vez (clarão dourado de ~3 s). Só a view (`src/render/LandmarkView.js`) desenha; a sim não usa o modelo.
+
+**Marcador de objetivo** (`marker` em qualquer objetivo): `{ "area": {x,z,r} | {"anchor", "r"}, "style": "goal" | "discover"?, "showWhen": "active" | "revealed"? }`. Desenha um anel pulsante no chão e uma coluna de luz fina na área, e um losango no minimapa (`goal` dourado, `discover` ciano). `active` (padrão) = enquanto o objetivo está ativo e **visível**; `revealed` = desde a revelação, mesmo inativo, até concluir/falhar. Objetivos **ocultos** só mostram marcador depois de `revealObjective`. Um objetivo `escort` ganha sozinho um marcador `goal` na sua `area` enquanto ativo. Objetivos `flag` de exploração não têm marcador por padrão (explorar é a graça); declare `marker` só se quiser.
+
+**Unidades de objetivo**: unidades vivas de `escort`/`rescue` ativos ganham um losango flutuante sobre a cabeça, só quando estão **visíveis** pela névoa, e um pip no minimapa com a `markColor` da unidade. `spawn.displayName {pt-BR, en}` troca o nome do tipo no painel de seleção e nos tooltips (só apresentação).
+
+### Receitas (copie e ajuste)
+
+**Missão secundária de exploração** (marco oculto + flag + recompensa). Ruínas em um canto do mapa, não mostradas no painel até achar:
+```jsonc
+// setup
+{ "type": "spawnLandmark", "kind": "ruins", "x": 34, "z": 26, "tag": "ruins", "label": {"pt-BR": "Ruínas", "en": "Ruins"} }
+// objetivo (sem marker: explorar é a graça)
+{ "id": "scout-ruins", "type": "flag", "priority": "hidden", "title": {…},
+  "condition": { "type": "area", "owner": "player", "area": { "x": 34, "z": 26, "r": 7 } } }
+// gatilho
+{ "id": "ruins-found", "when": { "type": "objective", "id": "scout-ruins", "status": "completed" },
+  "actions": [ {"type": "giveResources", "owner": "player", "gold": 150}, {"type": "lightLandmark", "tag": "ruins"} ] }
+```
+Use `"area"` com a mesma posição do marco; o raio da área é o de descoberta.
+
+**Resgate** (prisioneiro + transfer). Cativos de dono neutro, resgatados ao entrar numa área:
+```jsonc
+{ "type": "spawn", "owner": "neutral", "unitType": "villager", "count": 3, "x": -32, "z": -10, "tag": "captives" }
+// objetivo: { "id": "rescue-captives", "type": "rescue", "tag": "captives", "count": 3, … }
+// gatilho: { "when": {"type": "area", "owner": "player", "area": {"x": -32, "z": -10, "r": 9}}, "actions": [ {"type": "transfer", "select": {"tag": "captives"}, "to": "player"} ] }
+```
+
+**Emissário** (escolta com marco de destino). Uma unidade DISTINTA do resto do exército, com nome e anel próprios:
+```jsonc
+// regra: o tipo do emissário NÃO pode ser treinável na missão. Use um herói (cost: null, só entra por spawn), como hero_oren.
+// Confira em src/data/units.js: "cost": null = não treinável. Nunca use um tipo que o jogador treine nesta missão.
+{ "type": "spawn", "owner": "player", "unitType": "hero_oren", "count": 1, "x": -20, "z": 8, "tag": "envoy",
+  "displayName": {"pt-BR": "Emissário", "en": "Envoy"}, "markColor": "#f0abfc" }
+{ "type": "spawnLandmark", "kind": "truce_post", "x": 14, "z": -18, "tag": "truce-post", "known": true }
+// objetivo: { "id": "escort-envoy", "type": "escort", "tag": "envoy", "area": {"x": 14, "z": -18, "r": 6}, "description": {…"a leste, perto da bandeira branca"…} }
+```
+A `markColor` deve ser distinta de todas as cores de jogador (`PLAYER_COLORS` em `src/sim/MatchConfig.js`): `#f0abfc` é fúcsia claro, longe de rosa `#db2777` e roxo `#9333ea`. O marcador dourado da escolta mostra a área; o losango sobre o emissário mostra quem é.
 
 ### Desfecho
 

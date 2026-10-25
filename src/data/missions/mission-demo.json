@@ -13,7 +13,8 @@
     },
     "hints": [
       { "pt-BR": "Objetivos ocultos dão bônus: explore o mapa.", "en": "Hidden objectives grant bonuses: explore the map." },
-      { "pt-BR": "Esc pula as cutscenes.", "en": "Esc skips cutscenes." }
+      { "pt-BR": "Esc pula as cutscenes.", "en": "Esc skips cutscenes." },
+      { "pt-BR": "O emissário tem um anel dourado e um losango sobre a cabeça; o ponto de trégua fica marcado no mapa.", "en": "The envoy has a golden ring and a diamond over the head; the truce post is marked on the map." }
     ]
   },
   "mapId": "tutorial",
@@ -29,7 +30,12 @@
     { "type": "tag", "select": { "buildingType": "bandit_camp" }, "tag": "camp" },
     { "type": "tag", "select": { "unitType": "bandit", "owner": "bandits" }, "tag": "camp-guards" },
     { "type": "spawn", "owner": "neutral", "unitType": "villager", "count": 3, "x": -32, "z": -10, "tag": "captives" },
-    { "type": "spawn", "owner": "player", "unitType": "villager", "count": 1, "x": -20, "z": 8, "tag": "envoy" }
+    { "type": "spawn", "owner": "player", "unitType": "hero_oren", "count": 1, "x": -20, "z": 8, "tag": "envoy",
+      "displayName": { "pt-BR": "Emissário", "en": "Envoy" }, "markColor": "#f0abfc" },
+    { "type": "spawnLandmark", "kind": "truce_post", "x": 14, "z": -18, "tag": "truce-post", "known": true,
+      "label": { "pt-BR": "Ponto de trégua", "en": "Truce post" } },
+    { "type": "spawnLandmark", "kind": "ruins", "x": 34, "z": 26, "tag": "ruins", "facing": 30,
+      "label": { "pt-BR": "Ruínas esquecidas", "en": "Forgotten ruins" } }
   ],
 
   "objectives": [
@@ -49,7 +55,7 @@
     {
       "id": "escort-envoy", "type": "escort", "priority": "primary", "tag": "envoy", "area": { "x": 14, "z": -18, "r": 6 },
       "title": { "pt-BR": "Escoltar o emissário até o ponto de trégua", "en": "Escort the envoy to the truce post" },
-      "description": { "pt-BR": "Ele não pode morrer.", "en": "He must not die." }
+      "description": { "pt-BR": "Ele não pode morrer. O ponto de trégua fica a leste, perto da bandeira branca.", "en": "He must not die. The truce post lies to the east, by the white flag." }
     },
     {
       "id": "hold-the-line", "type": "survive", "priority": "secondary", "seconds": 120, "active": false,
@@ -183,6 +189,7 @@
       "id": "ruins-found", "when": { "type": "objective", "id": "scout-ruins", "status": "completed" },
       "actions": [
         { "type": "giveResources", "owner": "player", "gold": 150 },
+        { "type": "lightLandmark", "tag": "ruins" },
         { "type": "sound", "id": "victory" },
         { "type": "message", "text": { "pt-BR": "Ruínas encontradas: +150 de ouro!", "en": "Ruins found: +150 gold!" } }
       ]

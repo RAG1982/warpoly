@@ -9004,8 +9004,8 @@
   "resources": [
     {
       "type": "gold",
-      "x": -26.5,
-      "z": -62,
+      "x": -26,
+      "z": -18,
       "amount": 7500
     },
     {
@@ -9015,8 +9015,8 @@
     },
     {
       "type": "gold",
-      "x": 47.6,
-      "z": -19,
+      "x": 64,
+      "z": -10,
       "amount": 7500
     },
     {
@@ -9053,23 +9053,16 @@
       "species": "pine"
     },
     {
-      "x": -22,
-      "z": -14,
-      "count": 14,
-      "radius": 10,
-      "species": "broad"
-    },
-    {
       "x": 6,
       "z": -42,
-      "count": 4,
+      "count": 14,
       "radius": 10,
       "species": "broad"
     },
     {
       "x": 14,
       "z": -60,
-      "count": 3,
+      "count": 10,
       "radius": 10,
       "species": "pine"
     },
@@ -9090,7 +9083,7 @@
     {
       "x": 8.3,
       "z": 5,
-      "count": 1,
+      "count": 4,
       "radius": 10,
       "species": "oak"
     },
@@ -9100,13 +9093,6 @@
       "count": 4,
       "radius": 10,
       "species": "oak"
-    },
-    {
-      "x": 60,
-      "z": -2,
-      "count": 14,
-      "radius": 10,
-      "species": "broad"
     },
     {
       "x": 24,
@@ -9125,7 +9111,7 @@
     {
       "x": 4,
       "z": -32,
-      "count": 4,
+      "count": 14,
       "radius": 10,
       "species": "birch"
     },
@@ -9210,16 +9196,16 @@
       "z": -10
     },
     "goldMine1": {
-      "x": -26.5,
-      "z": -62
+      "x": -26,
+      "z": -18
     },
     "stoneQuarry1": {
       "x": -49.6,
       "z": -40
     },
     "goldMine2": {
-      "x": 47.6,
-      "z": -19
+      "x": 64,
+      "z": -10
     },
     "stoneQuarry2": {
       "x": 47.6,
@@ -9242,54 +9228,46 @@
       "z": -58
     },
     "forest3": {
-      "x": -22,
-      "z": -14
-    },
-    "forest4": {
       "x": 6,
       "z": -42
     },
-    "forest5": {
+    "forest4": {
       "x": 14,
       "z": -60
     },
-    "forest6": {
+    "forest5": {
       "x": -34,
       "z": 2
     },
-    "forest7": {
+    "forest6": {
       "x": -56,
       "z": -2
     },
-    "forest8": {
+    "forest7": {
       "x": 8.3,
       "z": 5
     },
-    "forest9": {
+    "forest8": {
       "x": 24,
       "z": -38
     },
-    "forest10": {
-      "x": 60,
-      "z": -2
-    },
-    "forest11": {
+    "forest9": {
       "x": 24,
       "z": 18
     },
-    "forest12": {
+    "forest10": {
       "x": 46,
       "z": 16
     },
-    "forest13": {
+    "forest11": {
       "x": 4,
       "z": -32
     },
-    "forest14": {
+    "forest12": {
       "x": 4,
       "z": 24
     },
-    "forest15": {
+    "forest13": {
       "x": 32,
       "z": 36
     },
@@ -9413,19 +9391,17 @@
     "corridorThin": {
       "width": 44,
       "keepFrac": 0.2,
-      "clusters": 7,
+      "clusters": 5,
       "trees": [
-        210,
-        136
+        182,
+        138
       ],
       "cut": [
         3,
         4,
         5,
         6,
-        7,
-        12,
-        8
+        7
       ]
     }
   },

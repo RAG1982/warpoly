@@ -255,6 +255,43 @@ function addGold(ctx, s, name, extra, { dMin = 20, dMax = 36, target = 26, plain
   return g;
 }
 
+/** Distância centro a centro da mina inicial ao Centro (M3-X3): ≈ 32 u, como `PEDRA_MINE_DIST`; borda a borda ≈ 23 u (Centro 5,5 + mina 3,4). */
+export const INITIAL_MINE_DIST = 32;
+/**
+ * M3-X3: a mina de ouro INICIAL de cada pátio saía colada ao Centro (15–18 u). Vai para ≈ 32 u dele (centro a centro, ±2 u), dos dois
+ * lados com a mesma distância (scan em passo de 1 u), em terra seca, com caminho de terra seca mina↔Centro, longe das outras minas e
+ * dos acampamentos/prisões/cais já postos (que não mudam). Se o anel de 32 u cair dentro de um bosque, o bosque que a mina ocupa
+ * (raio do bosque + 3,4) sai do mapa (`m.forests`): é a única mudança de árvores, e cada bosque removido é reportado. A quantidade (7.500) fica.
+ * Roda por último, com o mesmo método de `postPedra`.
+ */
+function moveInitialGold(ctx) {
+  const { m } = ctx;
+  const forestAvoid = (a) => m.forests.some((f) => f.x === a.x && f.z === a.z);
+  const freeOffForests = (p, extra) => ctx.avoid.every((a) => forestAvoid(a) || hyp(p, a) >= a.r + extra);
+  const covers = (p) => m.forests.filter((f) => hyp(p, f) < f.radius + 3.4);
+  for (const s of [ctx.s0, ctx.s1]) {
+    const old = m.resources.filter((r) => r.type === 'gold').reduce((a, b) => (hyp(b, s) < hyp(a, s) ? b : a));
+    ctx.avoid = ctx.avoid.filter((a) => !(a.x === old.x && a.z === old.z));
+    const straightDry = (p) => {
+      const L = hyp(p, s);
+      for (let k = 1; k < L; k++) {
+        const t = k / L, h = ctx.hAt(s.x + (p.x - s.x) * t, s.z + (p.z - s.z) * t);
+        if (h < 1.8 || h >= (m.cliffHeight ?? Infinity)) return false;
+      }
+      return true;
+    };
+    const g = need(ctx.scan({
+      step: 1,
+      test: (x, z) => ctx.dryClear(x, z, 4) && ctx.reach(x, z) && freeOffForests({ x, z }, 3) && Math.abs(hyp({ x, z }, s) - INITIAL_MINE_DIST) <= 2 && straightDry({ x, z }),
+      score: (x, z) => Math.abs(hyp({ x, z }, s) - INITIAL_MINE_DIST) + 6 * covers({ x, z }).length
+    }), 'a mina inicial (M3-X3)');
+    const cut = covers(g);
+    if (cut.length) m.forests = m.forests.filter((f) => !cut.includes(f));
+    ctx.take(g, 14);
+    old.x = r1(g.x); old.z = r1(g.z);
+  }
+}
+
 /**
  * Palco 1: o "reduto" da Irmandade da Maré = 3 acampamentos de contrabandistas juntos (≤ 18 u entre si), longe da base do jogador
  * (≥ 70 u), ao norte (+z) da baía; Mural da Fenda numa enseada afastada; vela no horizonte. Âncoras `banditCamp1..3`.
@@ -311,6 +348,7 @@ function postBaia(ctx, extra) {
   const captive1 = need(ctx.scan({ test: (x, z) => farLand(x, z) && hyp({ x, z }, ruins1) >= 40, score: (x, z) => -fromAll({ x, z }, [ruins1]) }), 'o pescador cativo da m01');
   ctx.take(captive1, 10);
   extra.captive1 = pt(captive1);
+  moveInitialGold(ctx);
 }
 
 /** Palco 2: Cais de cada lado, forte de troncos no meio, Torre da Fenda numa ponta, Emissário/Mensageiro, patrulha. */
@@ -378,6 +416,7 @@ function postPouso(ctx, extra) {
   }), 'as ruínas da m02');
   ctx.take(ruins1, 12);
   extra.ruins1 = pt(ruins1);
+  moveInitialGold(ctx);
 }
 
 /**

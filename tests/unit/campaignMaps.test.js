@@ -189,6 +189,45 @@ describe('M2-03 · âncoras da ficha de cada missão', () => {
 });
 
 // ---------------------------------------------------------------------------------------------------------------------------
+// M3-X3: minas de ouro iniciais dos palcos 1 e 2 afastadas do Centro (como a Pedra-Mãe)
+// ---------------------------------------------------------------------------------------------------------------------------
+describe('M3-X3 · minas iniciais dos palcos 1 e 2 afastadas do Centro', () => {
+  // Centro (Paço) de raio ≈ 5,5 u e mina de raio ≈ 3,4 u: borda a borda = centro a centro − 8,9 u
+  const EDGE = 8.9;
+  for (const id of ['camp-01-baia-de-aurelan', 'camp-02-pouso-do-encontro']) {
+    it(`${id}: a mina inicial de cada base fica a 30–34 u do Centro (centro a centro; borda a borda ≈ 22–30 u), com a mesma distância nos dois lados (±2 u)`, () => {
+      const m = getMap(id);
+      // a mina inicial é a âncora goldMine1/2 (as de expansão ficam mais longe ou são outras âncoras)
+      const init = [m.anchors.goldMine1, m.anchors.goldMine2];
+      for (const g of init) expect(m.resources.some((r) => r.type === 'gold' && r.x === g.x && r.z === g.z), 'âncora de mina sem jazida').toBe(true);
+      const d = m.startSlots.map((s, k) => hyp(init[k], s));
+      for (const v of d) {
+        expect(v).toBeGreaterThanOrEqual(30);
+        expect(v).toBeLessThanOrEqual(34);
+        expect(v - EDGE).toBeGreaterThanOrEqual(21);
+        expect(v - EDGE).toBeLessThanOrEqual(30);
+      }
+      expect(Math.abs(d[0] - d[1])).toBeLessThanOrEqual(2);
+    });
+
+    it(`${id}: a mina inicial está em terra firme, sem bosque por cima, com caminho de terra seca até o Centro`, () => {
+      const m = getMap(id);
+      for (const [k, s] of m.startSlots.entries()) {
+        const g = m.anchors[`goldMine${k + 1}`];
+        expect(getHeightForMap(m, g.x, g.z), 'mina sobre terra').toBeGreaterThanOrEqual(1.95);
+        for (const f of m.forests) expect(hyp(g, f), 'bosque sobre a mina').toBeGreaterThanOrEqual(f.radius);
+        const L = hyp(g, s);
+        for (let k = 1; k < L; k++) {
+          const t = k / L;
+          const h = getHeightForMap(m, s.x + (g.x - s.x) * t, s.z + (g.z - s.z) * t);
+          expect(h, `caminho mina↔Centro (${k} u)`).toBeGreaterThanOrEqual(1.8);
+        }
+      }
+    });
+  }
+});
+
+// ---------------------------------------------------------------------------------------------------------------------------
 // M2-04: palcos 4 (Baixio do Breu), 5 (Cerne Verde) e 6 (A Geada)
 // ---------------------------------------------------------------------------------------------------------------------------
 /** Conta células (passo 2 u) da área jogável com `test(x, z)` verdadeiro. */

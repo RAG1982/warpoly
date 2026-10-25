@@ -38,7 +38,7 @@ function keepWorking(c) {
   const tree = nearest(c.gm.trees.filter((t) => !t.isDead), home);
   c.mine('villager').forEach((u, i) => {
     if (u.state !== 'idle') return;
-    const target = i <= 2 ? gold : i === 3 && c.gm.getPlayer(0).resources.stone < 250 ? stone : tree;
+    const target = i <= 3 ? gold : i === 4 && c.gm.getPlayer(0).resources.stone < 250 ? stone : tree;
     c.issue({ type: c.CMD.GATHER, unitIds: [u.id], targetId: target.id });
   });
 }

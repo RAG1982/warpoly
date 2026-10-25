@@ -8568,8 +8568,8 @@
   "resources": [
     {
       "type": "gold",
-      "x": -67.6,
-      "z": 11,
+      "x": -24,
+      "z": 15,
       "amount": 7500
     },
     {
@@ -8579,8 +8579,8 @@
     },
     {
       "type": "gold",
-      "x": 41.6,
-      "z": 20,
+      "x": 33,
+      "z": -20,
       "amount": 7500
     },
     {
@@ -8600,14 +8600,14 @@
     {
       "x": -12,
       "z": -14,
-      "count": 11,
+      "count": 14,
       "radius": 10,
       "species": "birch"
     },
     {
       "x": -10,
       "z": 14,
-      "count": 1,
+      "count": 3,
       "radius": 10,
       "species": "acacia"
     },
@@ -8771,16 +8771,16 @@
       "z": 11
     },
     "goldMine1": {
-      "x": -67.6,
-      "z": 11
+      "x": -24,
+      "z": 15
     },
     "stoneQuarry1": {
       "x": -54.6,
       "z": 16.8
     },
     "goldMine2": {
-      "x": 41.6,
-      "z": 20
+      "x": 33,
+      "z": -20
     },
     "stoneQuarry2": {
       "x": 28.6,
@@ -8910,13 +8910,12 @@
     "corridorThin": {
       "width": 44,
       "keepFrac": 0.2,
-      "clusters": 12,
+      "clusters": 11,
       "trees": [
         224,
-        90
+        95
       ],
       "cut": [
-        1,
         2,
         5,
         6,

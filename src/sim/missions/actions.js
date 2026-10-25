@@ -74,6 +74,7 @@ const HANDLERS = {
         const unit = gm.spawnUnit(entry.type, a.x + dx, a.z + dz, owner);
         if (!unit) continue; // F4-08: herói único já criado nesta partida
         if (a.markColor) unit.markColor = a.markColor; // só apresentação (cor do anel de seleção): fora do checksum
+        if (a.displayName) unit.displayName = clone(a.displayName); // M3-X1: nome no painel de seleção (só apresentação)
         if (a.guard) setGuard(unit, { x: unit.mesh.position.x, z: unit.mesh.position.z, r: a.guard === true ? null : a.guard.r });
         if (a.tag) addTag(rt, a.tag, unit.id);
         applyOrder(gm, unit, a.order);
@@ -92,6 +93,16 @@ const HANDLERS = {
     clearTreesAround(gm, b);
     if (a.tag) addTag(rt, a.tag, b.id);
     gm.recalculatePopCap(); // casas/castelos concedem população
+  },
+
+  /** M3-X1: marco visual (ruína, posto de trégua, altar). Estado no `MissionRuntime`; a view só desenha. */
+  spawnLandmark(rt, a) {
+    rt.addLandmark(a);
+  },
+
+  /** M3-X1: acende os marcos com a tag (brilho de descoberta). Entra no estado da missão (save/replay). */
+  lightLandmark(rt, a) {
+    rt.lightLandmark(a.tag);
   },
 
   /**

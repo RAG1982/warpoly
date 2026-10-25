@@ -31,6 +31,8 @@ import { EntityViews } from '../render/EntityViews.js';
 import { createUiEvents } from '../ui/UiEvents.js';
 import { TutorialController } from '../ui/TutorialController.js';
 import { MissionController } from '../ui/MissionController.js';
+import { LandmarkView } from '../render/LandmarkView.js'; // M3-X1
+import { MissionMarkerView } from '../render/MissionMarkerView.js'; // M3-X1
 import { options } from '../ui/optionsStore.js';
 
 /**
@@ -117,6 +119,8 @@ export class MatchSession {
     // visual da névoa — antes do warm-up de shaders. Fora do headless.
     this.fogView = null;
     this.entityViews = null;
+    this.landmarkView = null; // M3-X1: marcos da missão
+    this.missionMarkers = null; // M3-X1: marcadores de objetivo
     if (!this.gameManager.headless) {
       const gm = this.gameManager;
       // Névoa (textura/shader, minimapa, fantasmas): criada com só terreno/água/decoração na cena (`markGroundMeshes`).
@@ -127,6 +131,10 @@ export class MatchSession {
       gm.entityViews = this.entityViews; // picking (InputManager)
       this.fogView.viewOf = e => this.entityViews.viewOf(e);
       this.entityViews.update();
+      if (gm.mission) { // M3-X1: só em partidas de missão
+        this.landmarkView = new LandmarkView(gm, scene);
+        this.missionMarkers = new MissionMarkerView(gm, scene);
+      }
     }
 
     this.focusCameraOnLocalBase();
@@ -280,6 +288,8 @@ export class MatchSession {
       }
     }
     this.entityViews?.update(delta, alpha);
+    this.landmarkView?.update(delta); // M3-X1
+    this.missionMarkers?.update(delta); // M3-X1
     gm.renderUpdate(delta, alpha); // despacha `events.flush()` (se não pausado)
     gm.events.flush();
   }
@@ -349,6 +359,10 @@ export class MatchSession {
     // 4. Views das entidades (árvores instanciadas, lotes de muralha) e da névoa; depois a simulação (IAs, entidades).
     this.entityViews?.dispose();
     this.entityViews = null;
+    this.landmarkView?.dispose(); // M3-X1
+    this.landmarkView = null;
+    this.missionMarkers?.dispose();
+    this.missionMarkers = null;
     this.fogView?.dispose();
     this.fogView = null;
     this.gameManager.fogView = null;

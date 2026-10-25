@@ -20,8 +20,13 @@ export const CONDITION_TYPES = Object.freeze(['time', 'every', 'area', 'dead', '
 export const ACTION_TYPES = Object.freeze([
   'spawn', 'spawnBuilding', 'setTier', 'giveResources', 'takeResources', 'setObjective', 'addObjective', 'revealObjective', 'reveal', 'setTeam',
   'transfer', 'dialog', 'message', 'victory', 'defeat', 'music', 'sound', 'camera', 'cutscene', 'setVar', 'incVar',
-  'enableTrigger', 'disableTrigger', 'tag', 'order', 'guard'
+  'enableTrigger', 'disableTrigger', 'tag', 'order', 'guard', 'spawnLandmark', 'lightLandmark'
 ]);
+/** M3-X1: marcos visuais (`spawnLandmark`): modelos procedurais baratos, só apresentação + estado de missão. */
+export const LANDMARK_KINDS = Object.freeze(['ruins', 'truce_post', 'shrine']);
+/** M3-X1: marcador de objetivo (`marker`): anel + coluna de luz na área; `goal` dourado, `discover` ciano. */
+export const MARKER_STYLES = Object.freeze(['goal', 'discover']);
+export const MARKER_SHOW = Object.freeze(['active', 'revealed']);
 export const OPS = Object.freeze(['==', '!=', '>', '>=', '<', '<=']);
 export const RESOURCES = Object.freeze(['gold', 'wood', 'stone', 'oil']);
 export const SOUND_IDS = Object.freeze(['victory', 'alarm', 'error', 'build', 'order', 'select', 'hammer', 'sword']);
@@ -192,6 +197,17 @@ function checkCondition(c, path, cond, ids) {
   void ids;
 }
 
+/** M3-X1: `marker {area:{x,z,r}, style?, showWhen?}` (área circular; `anchor` dentro de `area` também vale). */
+function checkMarker(c, path, m) {
+  if (!isObj(m)) return c.err(path, 'marcador deve ser um objeto {area, style?, showWhen?}');
+  for (const k of Object.keys(m)) if (!['area', 'style', 'showWhen'].includes(k)) c.err(`${path}.${k}`, 'campo desconhecido no marcador');
+  if (m.area === undefined) c.err(`${path}.area`, 'marcador precisa de "area" circular {x,z,r} (ou {anchor, r})');
+  else if (!isObj(m.area) || !('r' in m.area)) c.err(`${path}.area`, 'marcador usa área circular: {x,z,r}');
+  else checkArea(c, `${path}.area`, m.area);
+  if (m.style !== undefined && !MARKER_STYLES.includes(m.style)) c.err(`${path}.style`, `style deve ser ${MARKER_STYLES.join('|')}`);
+  if (m.showWhen !== undefined && !MARKER_SHOW.includes(m.showWhen)) c.err(`${path}.showWhen`, `showWhen deve ser ${MARKER_SHOW.join('|')}`);
+}
+
 function checkObjectiveDef(c, path, o, { dynamic = false } = {}) {
   if (!isObj(o)) return c.err(path, 'objetivo deve ser um objeto');
   if (!isStr(o.id) || !ID_RE.test(o.id)) c.err(`${path}.id`, 'id inválido (a-z, 0-9, _ ou -)');
@@ -201,6 +217,7 @@ function checkObjectiveDef(c, path, o, { dynamic = false } = {}) {
   checkText(c, `${path}.description`, o.description, { optional: true });
   if (o.active !== undefined && typeof o.active !== 'boolean') c.err(`${path}.active`, 'deve ser booleano');
   if (o.failWhen !== undefined) checkCondition(c, `${path}.failWhen`, o.failWhen);
+  if (o.marker !== undefined) checkMarker(c, `${path}.marker`, o.marker);
   const p = `${path}(${o.type})`;
   switch (o.type) {
     case 'destroy':
@@ -288,8 +305,22 @@ function checkAction(c, path, a, setup = false) {
       }
       if (a.guard !== undefined && !(typeof a.guard === 'boolean' || (isObj(a.guard) && typeof a.guard.r === 'number' && a.guard.r > 0))) c.err(`${p}.guard`, 'deve ser booleano ou {r>0}');
       checkMarkColor(c, `${p}.markColor`, a.markColor);
+      if (a.displayName !== undefined) checkText(c, `${p}.displayName`, a.displayName); // M3-X1: nome mostrado no painel (só apresentação)
       break;
     }
+    case 'spawnLandmark': { // M3-X1: marco visual (ruína, posto de trégua, altar) — estado de missão, sem colisão
+      if (!LANDMARK_KINDS.includes(a.kind)) c.err(`${p}.kind`, `kind deve ser ${LANDMARK_KINDS.join('|')}`);
+      checkXZ(c, p, a);
+      checkNum(c, `${p}.scale`, a.scale, { min: 0.5, max: 2.5, optional: true });
+      checkNum(c, `${p}.facing`, a.facing, { min: -360, max: 360, optional: true });
+      if (a.tag !== undefined) { if (!isStr(a.tag) || !ID_RE.test(a.tag)) c.err(`${p}.tag`, 'tag inválida'); else c.tagDefs.add(a.tag); }
+      checkText(c, `${p}.label`, a.label, { optional: true });
+      if (a.known !== undefined && typeof a.known !== 'boolean') c.err(`${p}.known`, 'deve ser booleano');
+      break;
+    }
+    case 'lightLandmark': // M3-X1: acende o(s) marco(s) com a tag (efeito de brilho)
+      if (!isStr(a.tag) || !ID_RE.test(a.tag)) c.err(`${p}.tag`, 'tag inválida'); else c.tagRefs.push([`${p}.tag`, a.tag]);
+      break;
     case 'spawnBuilding': {
       // Construção já concluída (forte aliado, torre inimiga…). `type` já é o discriminador da ação: o tipo da construção é `buildingType`.
       checkOwner(c, `${p}.owner`, a.owner);

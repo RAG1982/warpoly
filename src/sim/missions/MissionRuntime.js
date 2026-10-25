@@ -18,6 +18,8 @@ import { TriggerEngine } from './TriggerEngine.js';
 import { runAction } from './actions.js';
 import { resolveMissionAnchors } from './anchors.js';
 
+const clone = (v) => JSON.parse(JSON.stringify(v));
+
 /** Verificação "tudo destruído?" do jogador local (derrota por aniquilação), a cada 20 ticks. */
 const WIPE_CHECK_TICKS = 20;
 const NON_COUNTING_ROLES = new Set(['wall', 'platform']);
@@ -58,6 +60,8 @@ export class MissionRuntime {
     /** @type {Map<string, number>} `${owner}:${unitType}` → unidades treinadas (evento UNIT_TRAINED; objetivo `train`) */
     this._trained = new Map();
     this._events = [];
+    /** M3-X1: marcos (`spawnLandmark`): `{id, kind, x, z, scale, facing, tag, known, label, lit}`. `lit` = tick do brilho (0 = apagado). */
+    this.landmarks = [];
 
     this._hasTrain = def.objectives.some((o) => o.type === 'train');
     for (const o of def.objectives) this._registerObjective(o);
@@ -118,6 +122,59 @@ export class MissionRuntime {
     if ((status === 'completed' || status === 'failed') && !o.visible) o.visible = true;
     this.gm.events.emit(EVT.MISSION_OBJECTIVE, { id, status, priority: o.def.priority ?? 'primary', visible: o.visible });
     return true;
+  }
+
+  // ------------------------------------------------------------------ marcos (M3-X1)
+  /** Ação `spawnLandmark`: cria um marco (id sequencial = determinístico). */
+  addLandmark(a) {
+    const lm = {
+      id: this.landmarks.length + 1,
+      kind: a.kind,
+      x: a.x,
+      z: a.z,
+      scale: a.scale ?? 1,
+      facing: a.facing ?? 0,
+      tag: a.tag ?? null,
+      known: a.known === true, // visível sem explorar (padrão: só aparece quando explorado pela névoa)
+      label: a.label ? clone(a.label) : null, // só apresentação (fora do hash)
+      lit: 0
+    };
+    this.landmarks.push(lm);
+    return lm;
+  }
+
+  /** Ação `lightLandmark`: acende os marcos com a tag (só a primeira vez, para não redisparar o brilho). */
+  lightLandmark(tag) {
+    for (const lm of this.landmarks) if (lm.tag === tag && lm.lit === 0) lm.lit = this.tick + 1;
+  }
+
+  /** Estado dos marcos como dados puros (save/replay; a missão é reconstruída a partir da definição + comandos). */
+  landmarkState() {
+    return this.landmarks.map((lm) => ({ id: lm.id, kind: lm.kind, x: lm.x, z: lm.z, scale: lm.scale, facing: lm.facing, tag: lm.tag, known: lm.known, label: lm.label, lit: lm.lit }));
+  }
+
+  /** Restaura marcos de um `landmarkState()` (ex.: ao carregar um save). Substitui a lista atual. */
+  restoreLandmarkState(list) {
+    this.landmarks = (list || []).map((lm) => ({ ...lm, label: lm.label ? clone(lm.label) : null }));
+  }
+
+  /**
+   * Marcadores de objetivo visíveis agora (dados puros para a view/minimapa). Objetivo `escort` ganha marcador 'goal' na
+   * própria área enquanto ativo; `marker` declarado vale para qualquer tipo. Ocultos só aparecem depois de `revealObjective`.
+   * `showWhen`: 'active' (padrão) = enquanto ativo; 'revealed' = desde que revelado, mesmo inativo (até concluir/falhar).
+   * @returns {{id:string, style:'goal'|'discover', area:{x:number,z:number,r:number}}[]}
+   */
+  markers() {
+    const out = [];
+    for (const o of this.objectives.values()) {
+      const m = o.def.marker ?? (o.def.type === 'escort' ? { area: o.def.area, style: 'goal', showWhen: 'active' } : null);
+      if (!m || !m.area) continue;
+      const showWhen = m.showWhen ?? 'active';
+      const live = o.status === 'active' || o.status === 'inactive';
+      const on = o.visible && live && (showWhen === 'revealed' || o.status === 'active');
+      if (on) out.push({ id: o.id, style: m.style ?? 'goal', area: { x: m.area.x, z: m.area.z, r: m.area.r } });
+    }
+    return out;
   }
 
   // ------------------------------------------------------------------ contadores de eventos
@@ -286,6 +343,8 @@ export class MissionRuntime {
     for (const [k, e] of this.deaths) s += `d:${k}=${e.n};`;
     for (const [k, n] of this._gathered) s += `g:${k}=${n};`;
     if (this._hasTrain) for (const [k, n] of this._trained) s += `tr:${k}=${n};`; // só com objetivo `train` (checksums antigos intactos)
+    // M3-X1: marcos entram no hash só quando existem (missões sem marcos mantêm o checksum)
+    for (const lm of this.landmarks) s += `lm:${lm.id}:${lm.kind}:${lm.x}:${lm.z}:${lm.scale}:${lm.facing}:${lm.tag ?? ''}:${lm.known ? 1 : 0}:${lm.lit};`;
     return s;
   }
 

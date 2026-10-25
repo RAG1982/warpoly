@@ -349,7 +349,62 @@ function postPouso(ctx, extra) {
   // uma mina de expansão por lado: com só 2 minas o ouro acaba e a partida IA×IA trava (soak, semente 8 brutal)
   addGold(ctx, s0, 'expansion1', extra, { plain: true });
   addGold(ctx, s1, 'expansion2', extra, { plain: true });
+  postPousoBatedores(ctx, extra, { fort, s0, s1 });
   extra.landingZone = pt(pier1); // praia de desembarque desta ilha: a do Cais da Liga (o `landingZone` padrão é só uma sugestão)
+}
+
+/**
+ * M3-03 (missão 2): 2 acampamentos de bandidos (`banditCamp1/2`) entre a base da Liga e os Clãs, cada um com uma prisão de batedor
+ * (`scoutPrison1/2`) a ~11 u; e 4 prisões (`scoutPrison3..6`) ATRÁS da base orc, na direção oposta à base da Liga, a ≥ 38 u do pátio
+ * orc (além do raio onde a IA ergue torres, 11,5–27 u) e longe das minas de expansão. Cada prisão é um quadrado de 8 muralhas
+ * (a missão desenha por `spawnBuilding`; aqui só se escolhe o lugar, com 6 u de terra seca em volta).
+ */
+export const POUSO_CAMP_GUARDS = [6, 5];
+function postPousoBatedores(ctx, extra, { s0, s1 }) {
+  const { m } = ctx;
+  const L = hyp(s0, s1) || 1;
+  const dir = { x: (s1.x - s0.x) / L, z: (s1.z - s0.z) / L };
+  const dot = (p) => (p.x - s1.x) * dir.x + (p.z - s1.z) * dir.z;
+  const camps = [];
+  const campOk = (x, z) => ctx.dryClear(x, z, 9) && ctx.plain(x, z) && ctx.reach(x, z) && ctx.free(x, z, 3) && hyp({ x, z }, s1) >= 40;
+  // acampamento 1: ao sul do rio (margem oeste), rumo à península; acampamento 2: rota do norte, entre o Cais da Liga e o forte orc
+  const c1 = need(ctx.scan({
+    test: (x, z) => campOk(x, z) && hyp({ x, z }, s0) >= 40 && hyp({ x, z }, s0) <= 80 && z >= s0.z + 25 && x <= s0.x + 30,
+    score: (x, z) => Math.abs(hyp({ x, z }, s0) - 60)
+  }), 'o acampamento de bandidos 1');
+  ctx.take(c1, 8); camps.push(c1);
+  const c2 = need(ctx.scan({
+    test: (x, z) => campOk(x, z) && hyp({ x, z }, s0) >= 36 && hyp({ x, z }, s0) <= 70 && z <= s0.z + 22 && x >= s0.x + 18 && hyp({ x, z }, c1) >= 45,
+    score: (x, z) => Math.abs(hyp({ x, z }, s0) - 52) + 0.3 * Math.abs(hyp({ x, z }, s1) - 56)
+  }), 'o acampamento de bandidos 2');
+  ctx.take(c2, 8); camps.push(c2);
+  camps.forEach((c, i) => {
+    m.neutrals.push({ kind: 'camp', x: r1(c.x), z: r1(c.z), guards: POUSO_CAMP_GUARDS[i], reward: { gold: 100 }, deposit: { type: 'gold', amount: 1500 } });
+    extra[`banditCamp${i + 1}`] = pt(c);
+  });
+  const prisons = [];
+  // árvores dentro do quadrado somem sozinhas (spawnBuilding limpa), então bosques não contam; jazidas, pátios e âncoras já postas, sim
+  const clearOfStuff = (x, z, minRes = 12) => m.resources.every((r) => hyp({ x, z }, r) >= minRes) && m.startSlots.every((q) => hyp({ x, z }, q) >= 24) && Object.entries(extra).every(([k, a]) => !a || a.water || /^(forest|ford)/.test(k) || hyp({ x, z }, a) >= 8);
+  const prisonOk = (x, z) => ctx.dryClear(x, z, 5) && ctx.reach(x, z) && clearOfStuff(x, z) && prisons.every((q) => hyp({ x, z }, q) >= 14);
+  camps.forEach((c, i) => {
+    const p = need(ctx.scan({
+      step: 1,
+      test: (x, z) => prisonOk(x, z) && hyp({ x, z }, c) >= 10.5 && hyp({ x, z }, c) <= 15,
+      score: (x, z) => Math.abs(hyp({ x, z }, c) - 12) + 0.05 * hyp({ x, z }, s0)
+    }), `a prisão do batedor ${i + 1}`);
+    ctx.take(p, 9); prisons.push(p);
+    extra[`scoutPrison${i + 1}`] = pt(p);
+  });
+  // 4 prisões atrás da base orc: quanto mais longe do pátio orc e das outras, melhor, dentro do teto de 62 u do pátio
+  for (let k = 3; k <= 6; k++) {
+    const p = need(ctx.scan({
+      step: 2,
+      test: (x, z) => prisonOk(x, z) && clearOfStuff(x, z, 16) && hyp({ x, z }, s1) >= 38 && hyp({ x, z }, s1) <= 72 && dot({ x, z }) >= 12 && hyp({ x, z }, s0) >= 80,
+      score: (x, z) => Math.abs(hyp({ x, z }, s1) - 46) + (k > 3 ? 0.6 * Math.abs(Math.min(...prisons.slice(2).map((q) => hyp({ x, z }, q))) - 26) : 0)
+    }), `a prisão do batedor ${k}`);
+    ctx.take(p, 9); prisons.push(p);
+    extra[`scoutPrison${k}`] = pt(p);
+  }
 }
 
 /** Palco 3: ouro extra no Paço, três praias de pouso com seu ponto no mar e seu forte, cabeça de ponte dos Clãs. */

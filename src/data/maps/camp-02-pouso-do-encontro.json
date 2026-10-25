@@ -9041,56 +9041,56 @@
     {
       "x": -12.6,
       "z": -30.9,
-      "count": 5,
+      "count": 14,
       "radius": 10,
       "species": "pine"
     },
     {
       "x": -6,
       "z": -58,
-      "count": 4,
+      "count": 14,
       "radius": 10,
       "species": "pine"
     },
     {
       "x": -22,
       "z": -14,
-      "count": 1,
+      "count": 14,
       "radius": 10,
       "species": "broad"
     },
     {
       "x": 6,
       "z": -42,
-      "count": 2,
+      "count": 4,
       "radius": 10,
       "species": "broad"
     },
     {
       "x": 14,
       "z": -60,
-      "count": 14,
+      "count": 3,
       "radius": 10,
       "species": "pine"
     },
     {
       "x": -34,
       "z": 2,
-      "count": 14,
+      "count": 4,
       "radius": 10,
       "species": "birch"
     },
     {
       "x": -56,
       "z": -2,
-      "count": 14,
+      "count": 4,
       "radius": 10,
       "species": "broad"
     },
     {
       "x": 8.3,
       "z": 5,
-      "count": 3,
+      "count": 1,
       "radius": 10,
       "species": "oak"
     },
@@ -9125,7 +9125,7 @@
     {
       "x": 4,
       "z": -32,
-      "count": 5,
+      "count": 4,
       "radius": 10,
       "species": "birch"
     },
@@ -9172,6 +9172,32 @@
       "z": -10,
       "count": 4,
       "radius": 6
+    },
+    {
+      "kind": "camp",
+      "x": -64,
+      "z": 6,
+      "guards": 6,
+      "reward": {
+        "gold": 100
+      },
+      "deposit": {
+        "type": "gold",
+        "amount": 1500
+      }
+    },
+    {
+      "kind": "camp",
+      "x": 18,
+      "z": -50,
+      "guards": 5,
+      "reward": {
+        "gold": 100
+      },
+      "deposit": {
+        "type": "gold",
+        "amount": 1500
+      }
     }
   ],
   "anchors": {
@@ -9267,6 +9293,14 @@
       "x": 32,
       "z": 36
     },
+    "neutralCamp1": {
+      "x": -64,
+      "z": 6
+    },
+    "neutralCamp2": {
+      "x": 18,
+      "z": -50
+    },
     "ford1": {
       "x": -7.64,
       "z": -7.45
@@ -9332,6 +9366,38 @@
     "expansion2": {
       "x": 56,
       "z": 10
+    },
+    "banditCamp1": {
+      "x": -64,
+      "z": 6
+    },
+    "banditCamp2": {
+      "x": 18,
+      "z": -50
+    },
+    "scoutPrison1": {
+      "x": -53,
+      "z": 1
+    },
+    "scoutPrison2": {
+      "x": 6,
+      "z": -50
+    },
+    "scoutPrison3": {
+      "x": 32,
+      "z": 36
+    },
+    "scoutPrison4": {
+      "x": 48,
+      "z": 26
+    },
+    "scoutPrison5": {
+      "x": 72,
+      "z": 2
+    },
+    "scoutPrison6": {
+      "x": 18,
+      "z": 38
     }
   },
   "meta": {
@@ -9349,12 +9415,12 @@
         136
       ],
       "cut": [
-        0,
-        2,
         3,
+        4,
+        5,
+        6,
         7,
         12,
-        1,
         8
       ]
     }

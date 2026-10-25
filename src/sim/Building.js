@@ -8,6 +8,9 @@ import { computeDamage } from './combat.js';
 import { WATER_LEVEL } from '../data/combat.js';
 import { repairCostFor, cancelRefundFor, REPAIR_HP_FRACTION, CONSTRUCTION_MIN_HP_FRACTION } from './repair.js';
 
+/** Tamanho máximo da fila de treino e da fila de pesquisa (= 6 slots da HUD). */
+export const BUILDING_QUEUE_MAX = 6;
+
 /** Vector3 → objeto plano `{x,y,z}` (payload de evento: nunca referências a objetos three.js). */
 function posOf(v) {
   return { x: v.x, y: v.y, z: v.z };
@@ -88,9 +91,9 @@ export class Building {
     this.attackCooldown = stats.attackCooldown;
     this.attackTimer = 0;
 
-    // Training / Production queue & Research
+    // Training / Production queue & Research (RES-QUEUE: fila de pesquisas, [0] = em andamento)
     this.queue = [];
-    this.currentResearch = null;
+    this.researchQueue = [];
     this.researchSoundTimer = 0;
 
     // F3-06: nível do Centro (`role: 'hq'`). Outras construções ficam em `tier: 1` fixo
@@ -286,9 +289,14 @@ export class Building {
     this.isDisposed = true;
   }
 
+  /** Pesquisa em andamento (cabeça de `researchQueue`) ou null. Leitores legados (UI, IA, testes). */
+  get currentResearch() {
+    return this.researchQueue.length > 0 ? this.researchQueue[0] : null;
+  }
+
   queueUnit(unitType, gameManager) {
     // Maximum 6 slots in the training queue
-    if (this.queue.length >= 6) {
+    if (this.queue.length >= BUILDING_QUEUE_MAX) {
       return false;
     }
 
@@ -374,14 +382,18 @@ export class Building {
   }
 
   /**
-   * F3-07: inicia o PRÓXIMO nível de `upgradeId` (`RESEARCH`). Só constrói/pesquisa na construção
-   * cujo `role` bate com `RESEARCH[id].building` (Forja → 'forge', Serraria → 'lumber') e, se a
-   * pesquisa for de uma facção, só nessa facção. Falha silenciosa (sem debitar) se já no máximo,
-   * ocupada, duplicada em outra construção, requisito faltando ou sem recursos.
+   * F3-07 / RES-QUEUE: ENFILEIRA o PRÓXIMO nível de `upgradeId` (`RESEARCH`) na fila da construção
+   * (até `BUILDING_QUEUE_MAX`), como o treino de tropas: o custo é debitado ao enfileirar e devolvido
+   * integral se a pesquisa for cancelada (`cancelResearch`). A primeira da fila anda; as demais
+   * esperam. Só na construção cujo `role` bate com `RESEARCH[id].building` (Forja → 'forge',
+   * Serraria → 'lumber', …) e, se for de uma facção, só nessa facção. Falha silenciosa (sem debitar)
+   * se a fila estiver cheia, já no máximo, já pesquisada/na fila/em andamento pelo dono (em qualquer
+   * construção), requisito faltando (rechecado também ao assumir a cabeça; ver `promoteResearch`) ou
+   * sem recursos.
    */
   startResearch(upgradeId, gameManager) {
     if (!this.isConstructed || this.isDead) return false;
-    if (this.currentResearch) return false;
+    if (this.researchQueue.length >= BUILDING_QUEUE_MAX) return false;
 
     const research = RESEARCH[upgradeId];
     if (!research) return false;
@@ -397,7 +409,7 @@ export class Building {
     const nextLevel = owner.getResearchLevel(upgradeId) + 1;
     if (nextLevel > research.levels.length) return false;
 
-    // Outra construção do mesmo jogador já pesquisa o mesmo id?
+    // Já pesquisada, na fila ou em andamento em QUALQUER construção do dono? (não duplica)
     if (gm.isUpgradeResearching(upgradeId, this.ownerId)) return false;
 
     // F3-06/F3-07: requisitos do nível (construção/{hq:N}/{research:id}) — sem debitar.
@@ -407,26 +419,54 @@ export class Building {
     if (!owner.canAfford(lv.cost)) return false;
     owner.deduct(lv.cost);
 
-    this.currentResearch = {
+    this.researchQueue.push({
       id: upgradeId,
       level: nextLevel,
       progress: 0,
       totalTime: lv.time,
       cost: { ...lv.cost },
       cfg: UPGRADE_CONFIG[upgradeId]
-    };
-    this.researchSoundTimer = 0;
+    });
     return true;
   }
 
-  cancelResearch(gameManager) {
-    if (!this.currentResearch) return false;
-    const owner = this.getOwner(gameManager || this.gameManager);
-    if (owner) {
-      owner.add(this.currentResearch.cost);
-    }
-    this.currentResearch = null;
+  /**
+   * RES-QUEUE: cancela a pesquisa do slot `slot` da fila (0 = a em andamento) e devolve 100% do
+   * custo. Se era a cabeça, a próxima assume (com `promoteResearch`, que recheca os requisitos).
+   * Comandos antigos sem `slot` cancelam a cabeça (comportamento anterior).
+   */
+  cancelResearch(gameManager, slot = 0) {
+    if (!Number.isInteger(slot) || slot < 0 || slot >= this.researchQueue.length) return false;
+    const gm = gameManager || this.gameManager;
+    const item = this.researchQueue[slot];
+    const owner = this.getOwner(gm);
+    if (owner) owner.add(item.cost);
+    this.researchQueue.splice(slot, 1);
+    if (slot === 0) this.promoteResearch(gm);
     return true;
+  }
+
+  /**
+   * RES-QUEUE: garante que a cabeça da fila ainda pode ser pesquisada ao assumir (após conclusão ou
+   * cancelamento). Se deixou de valer (nível já atingido ou requisito faltando), devolve o custo,
+   * descarta o item, avisa o dono local e repete com o próximo. @returns {boolean} true se há cabeça.
+   */
+  promoteResearch(gameManager) {
+    const gm = gameManager || this.gameManager;
+    while (this.researchQueue.length > 0) {
+      const owner = this.getOwner(gm);
+      if (!gm || !owner) return true; // sem contexto de partida não há o que rechecar
+      const head = this.researchQueue[0];
+      const stillValid = owner.getResearchLevel(head.id) < head.level
+        && missingUpgradeRequirements(this.ownerId, head.id, gm, head.level).length === 0;
+      if (stillValid) return true;
+      owner.add(head.cost);
+      this.researchQueue.shift();
+      if (owner.isLocal && gm.events) {
+        gm.events.emit(EVT.NOTIFY, { ownerId: this.ownerId, text: '⚠️ Pesquisa removida da fila: requisito não cumprido (custo devolvido)' });
+      }
+    }
+    return false;
   }
 
   /**
@@ -576,8 +616,8 @@ export class Building {
     }
 
     // Forge Research processing
-    if (this.isConstructed && this.currentResearch) {
-      const r = this.currentResearch;
+    if (this.isConstructed && this.researchQueue.length > 0) {
+      const r = this.researchQueue[0];
       r.progress += delta;
 
       // Periodic anvil strikes and hammer clangs while researching
@@ -592,7 +632,7 @@ export class Building {
       if (r.progress >= r.totalTime) {
         const completedId = r.id;
         const completedLevel = r.level || 1;
-        this.currentResearch = null;
+        this.researchQueue.shift();
         const gm = gameManager || this.gameManager;
         if (gm) {
           gm.completeUpgrade(completedId, this.ownerId);
@@ -601,6 +641,8 @@ export class Building {
           gmEvents.emit(EVT.BUILDING_VFX, { buildingId: this.id, ownerId: this.ownerId, pos: posOf(this.mesh.position), kind: 'anvil_spark' });
           gmEvents.emit(EVT.RESEARCH_DONE, { ownerId: this.ownerId, upgradeId: completedId, level: completedLevel, pos: posOf(this.mesh.position) });
         }
+        // RES-QUEUE: a próxima da fila assume (recheca requisitos; ver `promoteResearch`).
+        this.promoteResearch(gm);
       }
     }
 

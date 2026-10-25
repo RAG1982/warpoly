@@ -24,6 +24,7 @@ import {
 } from './uiSprites.js';
 import { CMD } from '../sim/commands.js';
 import { isDetectedBy } from '../sim/detection.js';
+import { BUILDING_QUEUE_MAX } from '../sim/Building.js';
 import { resolveAbility, canCast, selectionAbilityUnits } from '../sim/abilities.js';
 import { buildPostGameModel } from './postGame.js';
 import { PostGameScreen } from './screens/PostGameScreen.js';
@@ -658,9 +659,17 @@ export class UIManager {
             return;
           }
 
-          if (b.currentResearch) {
+          // RES-QUEUE: a pesquisa entra na fila (como o treino); fila cheia, duplicata e custo são
+          // checados aqui só para feedback imediato — a validação final é do executor.
+          if (b.researchQueue.length >= BUILDING_QUEUE_MAX) {
             this.sound.playChop();
-            this.showNotification(t('hud.buildingBusy'));
+            this.showNotification(t('hud.researchQueueFull'));
+            return;
+          }
+
+          if (b.researchQueue.some(r => r.id === upgradeId)) {
+            this.sound.playChop();
+            this.showNotification(t('hud.researchDuplicate'));
             return;
           }
 
@@ -678,11 +687,11 @@ export class UIManager {
             return;
           }
 
-          // F2-02: comando RESEARCH — os checks acima (já pesquisado/ocupado/sem recursos)
-          // seguem client-side para feedback imediato; a validação final é do executor.
+          const wasQueued = b.researchQueue.length > 0;
+          // F2-02: comando RESEARCH — validação autoritativa (requisitos/custo/fila) no executor.
           this.gm.issue({ type: CMD.RESEARCH, playerId: this.gm.localPlayerId, buildingId: b.id, upgradeId });
           this.sound.playHammer();
-          this.showNotification(t('hud.researchStarted', { name: upgName }));
+          this.showNotification(t(wasQueued ? 'hud.researchQueued' : 'hud.researchStarted', { name: upgName }));
           this.renderBuildingTrainButtons(b);
           this.updateBuildingQueue(b);
         }
@@ -723,8 +732,10 @@ export class UIManager {
       if (queueSlot && this.gm.selectedBuilding) {
         const b = this.gm.selectedBuilding;
         if (researchRoleOf(b)) {
-          if (b.currentResearch) {
-            this.gm.issue({ type: CMD.CANCEL_RESEARCH, playerId: this.gm.localPlayerId, buildingId: b.id });
+          // RES-QUEUE: cancela o slot clicado (0 = em andamento); o custo volta e a fila anda.
+          const rSlot = parseInt(queueSlot.getAttribute('data-slot'), 10);
+          if (!isNaN(rSlot) && rSlot < b.researchQueue.length) {
+            this.gm.issue({ type: CMD.CANCEL_RESEARCH, playerId: this.gm.localPlayerId, buildingId: b.id, slot: rSlot });
             this.sound.playSelect();
             this.showNotification(t('hud.researchCancelled'));
             this.renderBuildingTrainButtons(b);
@@ -888,7 +899,7 @@ export class UIManager {
       // F3-07: assinatura dos níveis concluídos (muda a cada nível, não só a cada pesquisa nova).
       let playerResearchedCount = 0;
       if (this.gm.localPlayer) for (const lv of this.gm.localPlayer.researchLevels.values()) playerResearchedCount += lv;
-      const researchId = b.currentResearch ? b.currentResearch.id : null;
+      const researchId = (b.researchQueue || []).map(r => r.id).join(','); // RES-QUEUE: muda com a fila inteira
 
       if (this.currentBuilding !== b || (this.lastResearchedCount !== playerResearchedCount || (isForge && this.lastResearchId !== researchId))) {
         this.currentBuilding = b;
@@ -1176,39 +1187,35 @@ export class UIManager {
     if (!this.bldQueueSlots || this.bldQueueSlots.length === 0) return;
 
     if (researchRoleOf(b)) {
-      if (b.currentResearch) {
-        const r = b.currentResearch;
-        const cfg = r.cfg || UPGRADE_CONFIG[r.id];
-        const factionType = this.gm.playerFaction === 'orc' ? 'orc' : 'human';
-        const name = researchName(r.id, factionType, cfg);
-        const slot0 = this.bldQueueSlots[0];
-        if (slot0) {
-          slot0.className = 'bld-queue-slot filled active forge-slot';
-          this._setSlotHtml(slot0, `r|${r.id}`, () => this._icon(researchIconId(r.id, factionType), {
+      // RES-QUEUE: um slot por pesquisa enfileirada; [0] é a em andamento (barra de progresso).
+      const queue = b.researchQueue || [];
+      const factionType = this.gm.playerFaction === 'orc' ? 'orc' : 'human';
+      for (let i = 0; i < this.bldQueueSlots.length; i++) {
+        const slotEl = this.bldQueueSlots[i];
+        if (!slotEl) continue;
+        if (i < queue.length) {
+          const r = queue[i];
+          const cfg = r.cfg || UPGRADE_CONFIG[r.id];
+          const name = researchName(r.id, factionType, cfg);
+          const lvTxt = r.level && getMaxResearchLevel(r.id) > 1 ? ` ${r.level}/${getMaxResearchLevel(r.id)}` : '';
+          slotEl.className = 'bld-queue-slot filled forge-slot' + (i === 0 ? ' active' : '');
+          this._setSlotHtml(slotEl, `r|${r.id}|${factionType}`, () => this._icon(researchIconId(r.id, factionType), {
             cssPx: 30, cls: 'bld-slot-icon', alt: name, fallbackSrc: cfg ? cfg.icon : '/icoEspada.png', fallbackEmoji: '📜'
           }));
-          slot0.title = `${name}${r.level && getMaxResearchLevel(r.id) > 1 ? ` ${r.level}/${getMaxResearchLevel(r.id)}` : ''} (${t('hud.researching')}) - ${t('hud.clickCancel')}`;
-        }
-
-        for (let i = 1; i < 6; i++) {
-          const slotEl = this.bldQueueSlots[i];
-          if (!slotEl) continue;
+          slotEl.title = `${name}${lvTxt} (${t(i === 0 ? 'hud.researching' : 'hud.queued')}) - ${t('hud.clickCancel')}`;
+        } else {
           slotEl.className = 'bld-queue-slot empty';
           this._setSlotHtml(slotEl, '', () => '');
           slotEl.title = t('hud.emptySlot');
         }
+      }
 
+      if (queue.length > 0) {
+        const r = queue[0];
         const pct = Math.min(100, Math.max(0, (r.progress / r.totalTime) * 100));
         if (this.bldQueueProgressBar) this.bldQueueProgressBar.style.width = `${pct}%`;
         if (this.bldQueueProgressTrack) this.bldQueueProgressTrack.style.opacity = '1';
       } else {
-        for (let i = 0; i < 6; i++) {
-          const slotEl = this.bldQueueSlots[i];
-          if (!slotEl) continue;
-          slotEl.className = 'bld-queue-slot empty';
-          this._setSlotHtml(slotEl, '', () => '');
-          slotEl.title = t('hud.emptySlot');
-        }
         if (this.bldQueueProgressBar) this.bldQueueProgressBar.style.width = '0%';
         if (this.bldQueueProgressTrack) this.bldQueueProgressTrack.style.opacity = '0.35';
       }

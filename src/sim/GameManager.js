@@ -1050,7 +1050,8 @@ export class GameManager {
 
   isUpgradeResearching(upgradeId, owner = 'player') {
     const ownerId = this.resolveOwnerId(owner);
-    return this.buildings.some(b => b.ownerId === ownerId && b.currentResearch && b.currentResearch.id === upgradeId);
+    // RES-QUEUE: conta a pesquisa em andamento E as enfileiradas (não duplica entre construções).
+    return this.buildings.some(b => b.ownerId === ownerId && b.researchQueue && b.researchQueue.some(r => r.id === upgradeId));
   }
 
   /** F3-07: tipo efetivamente treinado para `unitType` (arqueiro → patrulheiro após `ranged_class`). */

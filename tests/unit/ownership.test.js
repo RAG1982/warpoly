@@ -31,7 +31,7 @@ function makeGm(specs) {
     isAlly: (a, b) => registry.isAlly(a, b),
     isUpgradeResearched: (id, ownerId) => registry.getPlayer(ownerId).getResearchLevel(id) >= 1,
     isUpgradeResearching: (id, ownerId) =>
-      gm.buildings.some((b) => b.ownerId === ownerId && b.currentResearch && b.currentResearch.id === id)
+      gm.buildings.some((b) => b.ownerId === ownerId && (b.researchQueue || []).some((r) => r.id === id))
   };
   return gm;
 }
@@ -44,7 +44,7 @@ function makeBuilding(gm, type, ownerId, extra = {}) {
     type,
     ownerId,
     queue: [],
-    currentResearch: null,
+    researchQueue: [], // RES-QUEUE: `currentResearch` é getter da cabeça da fila
     isConstructed: true,
     isDead: false,
     collisionRadius: 3.0,

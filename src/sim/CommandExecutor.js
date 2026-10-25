@@ -295,7 +295,7 @@ export const CommandExecutor = {
       case CMD.CANCEL_RESEARCH: {
         const building = resolveOwnedBuilding(gm, cmd, cmd.buildingId);
         if (!building) break;
-        building.cancelResearch(gm);
+        building.cancelResearch(gm, Number.isInteger(cmd.slot) ? cmd.slot : 0); // RES-QUEUE: slot (0 = em andamento)
         break;
       }
 

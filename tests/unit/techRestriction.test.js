@@ -247,7 +247,7 @@ describe('recusa de TRAIN / PLACE_BUILDING / RESEARCH fora do liberado (sem efei
     expect(forge2.currentResearch && forge2.currentResearch.id).toBe('melee_weapons');
     // nível 2: só com "melee_weapons@2"
     gm2.getPlayer(0).setResearchLevel('melee_weapons', 1);
-    forge2.currentResearch = null;
+    forge2.researchQueue.length = 0; // RES-QUEUE: `currentResearch` é só leitura (cabeça da fila)
     const m = missingUpgradeRequirements(0, 'melee_weapons', gm2);
     expect(m[0]).toMatchObject({ locked: true, kind: 'research', id: 'melee_weapons@2', mission: 7 });
   });

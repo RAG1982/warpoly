@@ -64,7 +64,7 @@ const REQUIRED_FIELDS = {
   [CMD.TRAIN]: ['buildingId', 'unitType'],
   [CMD.CANCEL_TRAIN]: ['buildingId', 'slot'],
   [CMD.RESEARCH]: ['buildingId', 'upgradeId'],
-  [CMD.CANCEL_RESEARCH]: ['buildingId'],
+  [CMD.CANCEL_RESEARCH]: ['buildingId'], // `slot` opcional (RES-QUEUE; ausente = 0, a em andamento)
   [CMD.UPGRADE_HQ]: ['buildingId'],
   [CMD.CANCEL_UPGRADE_HQ]: ['buildingId'],
   [CMD.RALLY]: ['buildingId', 'x', 'z'],

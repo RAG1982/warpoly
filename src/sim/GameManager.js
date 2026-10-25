@@ -757,6 +757,7 @@ export class GameManager {
 
         // 1. Only plant trees on solid elevated grass plateaus
         if (h < 1.9) continue;
+        if (this.terrain.isCliff?.(x, z)) continue; // M3-04: nada nasce sobre a crista
 
         // 2. CRITICAL: Never spawn trees inside or near any building footprint (bRad + 7.5 units)
         const nearBuilding = this.buildings.some(b => {
@@ -817,7 +818,7 @@ export class GameManager {
     if (bdef.platform) return !!this.findFreeOilDeposit(x, z);
 
     // 1. Terrain Height check and Lava check at center and 4 footprint perimeter samples
-    if (this.terrain.isLava?.(x, z)) return false;
+    if (this.terrain.isLava?.(x, z) || this.terrain.isCliff?.(x, z)) return false;
     const h = this.terrain.getHeight(x, z);
     if (h < 1.8) return false;
 
@@ -2010,12 +2011,14 @@ export class GameManager {
 
   _pushDry(p, dx, dz) {
     const t = this.terrain;
-    if (t.getHeight(p.x + dx, p.z + dz) >= 0.65) {
+    const cliff = t.isCliff; // M3-04: o empurrão da colisão também não joga ninguém sobre a crista
+    const dry = (x, z) => t.getHeight(x, z) >= 0.65 && !(cliff && cliff.call(t, x, z));
+    if (dry(p.x + dx, p.z + dz)) {
       p.x += dx;
       p.z += dz;
-    } else if (dx !== 0 && t.getHeight(p.x + dx, p.z) >= 0.65) {
+    } else if (dx !== 0 && dry(p.x + dx, p.z)) {
       p.x += dx;
-    } else if (dz !== 0 && t.getHeight(p.x, p.z + dz) >= 0.65) {
+    } else if (dz !== 0 && dry(p.x, p.z + dz)) {
       p.z += dz;
     } else {
       return;

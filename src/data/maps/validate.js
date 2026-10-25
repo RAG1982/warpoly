@@ -18,6 +18,7 @@ import { buildPathfinder, floodFill, isReached } from './generator.js';
 import { hasMap } from './index.js';
 import { decodeHeights, paintedNodes } from './painted.js';
 import { isLavaAt, decodeLavaGrid } from './lava.js';
+import { isCliffAt } from './cliff.js';
 import { decodeBiomeGrid, MAX_BIOME_ID, BIOME, getBiomeAt } from './biome.js';
 import { DRY, checkAnchors } from './anchors.js';
 
@@ -78,6 +79,7 @@ export function validateMapDef(mapDef, { connectivity = true, checkId = true } =
     }
     if (!okLava) err('lavaData');
   }
+  if (m.cliffHeight !== undefined && !(typeof m.cliffHeight === 'number' && m.cliffHeight >= 2 && m.cliffHeight <= 12)) err('cliffHeight', { value: String(m.cliffHeight) }); // M3-04
   if (m.biomeGrid) {
     const bg = m.biomeGrid;
     let okBiome = false;
@@ -126,6 +128,7 @@ export function validateMapDef(mapDef, { connectivity = true, checkId = true } =
     if (!inside(s)) err('slotOutside', { n: i + 1 });
     else if (h(s) < DRY) err('slotWet', { n: i + 1 });
     else if (isLava(s)) err('slotLava', { n: i + 1 });
+    else if (isCliffAt(m, s.x, s.z)) err('slotCliff', { n: i + 1 });
   });
 
   // --- recursos ---
@@ -136,6 +139,7 @@ export function validateMapDef(mapDef, { connectivity = true, checkId = true } =
       if (h(r) < m.waterLevel && h(r) > NAVAL_MAX_HEIGHT) err('oilShallow', { n: i + 1 });
     } else if (h(r) < DRY) err('resourceWet', { n: i + 1, type: r.type });
     if (isLava(r)) err('resourceLava', { n: i + 1, type: r.type });
+    if (r.type !== 'oil' && isCliffAt(m, r.x, r.z)) err('resourceCliff', { n: i + 1, type: r.type });
     if (r.amount !== undefined && !(r.amount > 0)) err('resourceAmount', { n: i + 1 });
   });
 

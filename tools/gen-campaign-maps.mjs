@@ -22,6 +22,8 @@ const { buildCampaignMap, CAMPAIGN_IDS, CAMPAIGN_PRESETS } = await import('./lib
 const { renderBiomePreview } = await import('./lib/irregularCoastRender.mjs');
 const { encodePng } = await import('./lib/png.mjs');
 const { validateMapDef } = await import('../src/data/maps/validate.js');
+const { getHeightForMap } = await import('../src/sim/terrainGenerators.js');
+const { getBiomeAt } = await import('../src/data/maps/biome.js');
 
 const args = process.argv.slice(2);
 const opt = (k, d) => { const i = args.indexOf(k); return i >= 0 ? args[i + 1] : d; };
@@ -100,8 +102,29 @@ function summarize(res) {
   return lines.join('\n');
 }
 
+/** M3-04: a prévia usa o relevo FINAL do mapa gravado (com a crista) e pinta os penhascos intransponíveis em marrom-escuro. */
+function finalMap(res) {
+  const m = res.mapDef, w = res.world.map, G = w.grid;
+  const height = new Float32Array(G * G), biome = new Uint8Array(G * G);
+  for (let j = 0; j < G; j++) for (let i = 0; i < G; i++) {
+    const x = -m.size / 2 + (i / (G - 1)) * m.size, z = -m.size / 2 + (j / (G - 1)) * m.size;
+    height[j * G + i] = getHeightForMap(m, x, z);
+    biome[j * G + i] = getBiomeAt(m, x, z);
+  }
+  return { ...w, height, biome };
+}
+function paintCliffs(img, m) {
+  if (typeof m.cliffHeight !== 'number') return;
+  for (let y = 0; y < img.height; y++) for (let x = 0; x < img.width; x++) {
+    const wx = -m.size / 2 + ((x + 0.5) / img.width) * m.size, wz = -m.size / 2 + ((y + 0.5) / img.height) * m.size;
+    const h = getHeightForMap(m, wx, wz);
+    if (h >= m.cliffHeight) put(img, x, y, [70, 52, 44], 0.78);
+    else if (h >= m.cliffHeight - 1.2 && h > 2) put(img, x, y, [70, 52, 44], 0.3);
+  }
+}
 function renderPreview(res, outPath) {
-  const img = renderBiomePreview(res.world.map, px);
+  const img = renderBiomePreview(finalMap(res), px);
+  paintCliffs(img, res.mapDef);
   const names = Object.keys(res.mapDef.anchors).filter((n) => !/^(forest|ford|stoneQuarry)\d+$/.test(n));
   overlay(img, res.mapDef, names);
   mkdirSync(dirname(outPath), { recursive: true });

@@ -6,7 +6,7 @@ import { getHeightForMap } from '../../src/sim/terrainGenerators.js';
 import { TILESETS } from '../../src/data/tilesets.js';
 import { decodeBiomeGrid } from '../../src/data/maps/biome.js';
 import { measureWood, WOOD_RADIUS } from '../../tools/lib/woodStats.mjs';
-import { buildCampaignMap, CAMPAIGN_IDS, CAMPAIGN_NAMES, GOLD_AMOUNT, CAMPAIGN_WOOD_FLOOR } from '../../tools/lib/campaignMaps.mjs';
+import { buildCampaignMap, CAMPAIGN_IDS, CAMPAIGN_NAMES, GOLD_AMOUNT, CAMPAIGN_WOOD_FLOOR, PEDRA_BIG_GOLD } from '../../tools/lib/campaignMaps.mjs';
 import ptBR from '../../src/i18n/pt-BR.json';
 import en from '../../src/i18n/en.json';
 
@@ -24,7 +24,7 @@ beforeAll(async () => { await loadAllCampaignMaps(); });
 const MIN_ANCHORS = {
   'camp-01-baia-de-aurelan': ['playerStart', 'enemyStart', 'goldMine1', 'goldMine2', 'neutralCamp1', 'landingZone', 'muralFenda', 'shipHorizon', 'orcSails', 'banditCamp1', 'banditCamp2', 'banditCamp3'],
   'camp-02-pouso-do-encontro': ['playerStart', 'enemyStart', 'goldMine1', 'landingZone', 'pier1', 'pier1Water', 'pier2', 'pier2Water', 'logFort', 'lighthouse', 'emissary1', 'emissary2', 'patrol1', 'patrol2', 'patrol3', 'expansion1', 'expansion2'],
-  'camp-03-pedra-mae': ['playerStart', 'enemyStart', 'colonyHall', 'colonyGold1', 'colonyGold2', 'bridgeheadGold', 'beach1', 'beach2', 'beach3', 'seaLanding1', 'seaLanding2', 'seaLanding3', 'fort1', 'fort2', 'fort3', 'bridgehead', 'bridgeheadSea', 'landingZone'],
+  'camp-03-pedra-mae': ['playerStart', 'enemyStart', 'colonyHall', 'colonyGold1', 'bridgeheadGold', 'passA', 'passB', 'passAPlayer', 'passBPlayer', 'wallA1', 'wallA2', 'wallA3', 'wallB1', 'wallB2', 'wallB3', 'towerA1', 'towerA2', 'towerB1', 'towerB2', 'orcMuster', 'shrine1', 'captive1', 'beach1', 'beach2', 'beach3', 'seaLanding1', 'seaLanding2', 'seaLanding3', 'fort1', 'fort2', 'fort3', 'bridgehead', 'bridgeheadSea', 'landingZone'],
   'camp-04-baixio-do-breu': ['playerStart', 'enemyStart', 'well1', 'well2', 'well3', 'well4', 'shipyard1', 'shipyard1Water', 'shipyard2', 'shipyard2Water', 'wreck1', 'wreck2', 'wreck3', 'fleetStart1', 'fleetStart2', 'fleetMid'],
   'camp-05-cerne-verde': ['playerStart', 'enemyStart', 'goldMine1', 'sacredGrove', 'gryphonNest', 'clearing1', 'clearing2', 'clearing3', 'lumberHall1', 'lumberHall2', 'orenStart', 'ford1', 'landingZone'],
   'camp-06-a-geada': ['playerStart', 'enemyStart', 'enemy1Start', 'enemy2Start', 'allyStart', 'lighthouse', 'enemy1Fort', 'allyFort', 'allyHeroStart', 'convoyStart', 'convoyEnd', 'expansion1', 'expansion2', 'expansion3', 'expansion4', 'lake1', 'lake2'],
@@ -82,7 +82,7 @@ describe('M2-03 · registro e formato', () => {
     it(`${id}: toda mina de ouro tem ${GOLD_AMOUNT}`, () => {
       const gold = getMap(id).resources.filter((r) => r.type === 'gold');
       expect(gold.length).toBeGreaterThanOrEqual(2);
-      for (const g of gold) expect(g.amount).toBe(GOLD_AMOUNT);
+      for (const g of gold) expect(g.amount).toBe(id === 'camp-03-pedra-mae' && g.amount === PEDRA_BIG_GOLD ? PEDRA_BIG_GOLD : GOLD_AMOUNT); // M3-04: a mina grande da Pedra-Mãe tem 12.000
     });
 
     it(`${id}: madeira alcançável a ${WOOD_RADIUS} u >= ${CAMPAIGN_WOOD_FLOOR} por jogador (sementes de partida 1 e 2)`, () => {
@@ -159,12 +159,17 @@ describe('M2-03 · âncoras da ficha de cada missão', () => {
     expect(m.resources.filter((r) => r.type === 'gold')).toHaveLength(4); // 2 por lado: com só 2 minas o ouro acabava e o soak travava
   });
 
-  it('Pedra-Mãe: ouro abundante junto ao Paço (>= 3 minas a <= 40 u), 3 praias de pouso afastadas com ponto no mar ligado por mar, 3 fortes e cabeça de ponte', () => {
+  it('Pedra-Mãe: minas iniciais a ~32 u do Paço (não coladas), mina grande atrás dos desfiladeiros, 3 praias de pouso afastadas com ponto no mar ligado por mar, 3 fortes e cabeça de ponte', () => {
     const m = getMap('camp-03-pedra-mae');
     expect(m.tileset).toBe('pedregoso');
     const hall = m.anchors.colonyHall;
     expect(hall).toEqual({ x: m.startSlots[0].x, z: m.startSlots[0].z });
-    expect(m.resources.filter((r) => r.type === 'gold' && hyp(r, hall) <= 40).length).toBeGreaterThanOrEqual(3);
+    // M3-04: a mina inicial de cada base foi afastada (era a ~15–18 u do Centro; agora ~32 u de centro a centro, ~23 u de borda a borda)
+    for (const s of m.startSlots) {
+      const near = m.resources.filter((r) => r.type === 'gold').map((r) => hyp(r, s)).sort((a, b) => a - b)[0];
+      expect(near, 'mina mais próxima do Centro').toBeGreaterThanOrEqual(28);
+      expect(near).toBeLessThanOrEqual(36);
+    }
     const beaches = [1, 2, 3].map((i) => m.anchors[`beach${i}`]);
     for (let i = 0; i < 3; i++) for (let j = i + 1; j < 3; j++) expect(hyp(beaches[i], beaches[j])).toBeGreaterThanOrEqual(40);
     const sea = buildPathfinder(m, 'naval');

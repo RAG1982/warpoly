@@ -1,0 +1,24 @@
+{
+  "shots": [
+    "01-briefing.png",
+    "02-cutscene-1-colonia-brann.png",
+    "03-cutscene-2-veio.png",
+    "04-cutscene-3-desfiladeiro.png",
+    "05-cutscene-4-acampamento-orc.png",
+    "06-cutscene-5-mervane.png",
+    "06b-aviso-centro-evoluido.png",
+    "07-inicio-objetivos-brann.png",
+    "08-mapa-crista-e-desfiladeiros.png",
+    "09-brann-heroi.png",
+    "10-desfiladeiro-A-fechado.png",
+    "11-desfiladeiro-B-fechado.png",
+    "12-onda-no-desfiladeiro-com-cerco.png",
+    "13-mineiros-cativos-guardados.png",
+    "14-mineiros-libertados-3de3.png",
+    "15-santuario-escondido.png",
+    "16-santuario-achado-ouro.png",
+    "17-cutscene-final.png",
+    "18-fim-vitoria.png"
+  ],
+  "errors": []
+}

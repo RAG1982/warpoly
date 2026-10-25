@@ -20,6 +20,7 @@
  */
 import { mulberry32 } from '../../sim/rng.js';
 import { getHeightForMap } from '../../sim/terrainGenerators.js';
+import { isCliffAt } from './cliff.js';
 import { Pathfinder } from '../../sim/Pathfinder.js';
 import { NAVAL_MAX_HEIGHT } from '../combat.js';
 import { fsin, fcos, ftan, fhypot } from '../../sim/fmath.js'; // M6-04b: trigonometria determinística (docs/09_MULTIPLAYER.md §4)
@@ -97,7 +98,7 @@ function makeSignedDistance(discs, bridges) {
 
 /** Pathfinder (terrestre ou naval) sobre um mapa gerado, sem `Terrain`/DOM. */
 export function buildPathfinder(mapDef, mode = 'land') {
-  const terrain = { mapDef, getHeight: (x, z) => getHeightForMap(mapDef, x, z) };
+  const terrain = { mapDef, getHeight: (x, z) => getHeightForMap(mapDef, x, z), isCliff: (x, z) => isCliffAt(mapDef, x, z) };
   return new Pathfinder(terrain, mapDef.playable / 2, 1.5, mode);
 }
 

@@ -18,17 +18,29 @@
     },
     "portrait": "⚔️",
     "text": {
-      "pt-BR": "Os orcs desembarcaram para tomar as minas de ouro. Segure a posição com muralhas e com a Guarda da Guarnição!",
-      "en": "The orcs have landed to seize the gold mines. Hold the line with walls and the Garrison Guard!"
+      "pt-BR": "Os Clãs do Cinzal desembarcaram a leste de Pedra-Mãe para tomar as minas de ouro da colônia. Entre nós e eles corre uma crista de rocha que ninguém atravessa: só DOIS desfiladeiros estreitos, ao meio da ilha, dão passagem. Feche-os com Muralha de Pedra e Torres de Vigia, treine Cavaleiros no Estábulo e segure a colônia por 7 minutos. Eu comando a guarnição, e se eu cair a colônia cai junto. O governador Mervane quer o ouro rendendo; eu quero meus homens vivos. As minas ficam atrás dos desfiladeiros: o que escavarem lá é o que a Liga vai ter.",
+      "en": "The Cinzal Clans have landed east of Mother Stone to seize the colony's gold mines. Between us and them runs a ridge of rock that nobody can cross: only TWO narrow passes, in the middle of the island, let anyone through. Close them with Stone Walls and Watchtowers, train Cavaliers at the Stable and hold the colony for 7 minutes. I command the garrison, and if I fall the colony falls with me. Governor Mervane wants the gold flowing; I want my men alive. The mines lie behind the passes: what you dig there is what the League will have."
     },
     "hints": [
       {
-        "pt-BR": "Concentre-se nos objetivos primários para avançar.",
-        "en": "Focus on primary objectives to advance."
+        "pt-BR": "A Muralha de Pedra só se constrói onde há terra firme: a passagem mais estreita de cada desfiladeiro fica dentro do círculo dourado no chão. Três blocos fecham cada passagem. Os orcs vão derrubar a muralha, então as Torres de Vigia atrás dela importam.",
+        "en": "Stone Walls can only go on solid ground: the narrowest point of each pass lies inside the golden circle on the ground. Three blocks close each pass. The orcs will tear the wall down, so the Watchtowers behind it matter."
+      },
+      {
+        "pt-BR": "O Estábulo Real exige o Quartel (que exige a Fazenda) e o Paço no nível 2, que a campanha já concede nesta missão. Construa também a Ferraria e pesquise Escudos Reforçados antes da terceira onda.",
+        "en": "The Royal Stable needs the Barracks (which needs the Farm) and the Keep at level 2, which the campaign already grants in this mission. Also build the Smithy and research Reinforced Shields before the third wave."
+      },
+      {
+        "pt-BR": "Capitão Brann é um HERÓI: tem mana e três habilidades (Z, X, C) e só existe um. Se ele morrer, a missão está perdida; deixe-o junto da muralha, não à frente dela.",
+        "en": "Captain Brann is a HERO: he has mana and three abilities (Z, X, C), and there is only one of him. If he dies the mission is lost; keep him by the wall, not in front of it."
+      },
+      {
+        "pt-BR": "A Catapulta orc alcança 20 de distância e derruba muralha. Cavaleiros saem do desfiladeiro e a pegam antes.",
+        "en": "The orc Catapult reaches 20 units and brings walls down. Cavaliers can sally from the pass and catch it first."
       }
     ]
   },
-  "mapId": "continental-1v1",
+  "mapId": "camp-03-pedra-mae",
   "seed": 9051,
   "players": [
     {
@@ -46,21 +58,28 @@
     {
       "id": 1,
       "name": {
-        "pt-BR": "Clãs do Cinzal",
-        "en": "Cinzal Clans"
+        "pt-BR": "Clã Presa-Negra",
+        "en": "Blackfang Clan"
       },
       "factionId": "orc",
       "team": 1,
       "color": "#dc2626",
       "isAI": true,
+      "difficulty": "easy",
       "startSlot": 1
     }
   ],
   "startingResources": {
-    "wood": 400,
-    "gold": 400,
-    "stone": 150
+    "wood": 500,
+    "gold": 500,
+    "stone": 300
   },
+  "vars": {
+    "wave": 0,
+    "miners_freed": 0,
+    "fin_clock": 0
+  },
+  "autoVictory": false,
   "setup": [
     {
       "type": "tag",
@@ -68,20 +87,1080 @@
         "buildingType": "great_hall"
       },
       "tag": "enemy_base"
+    },
+    {
+      "type": "spawn",
+      "owner": "player",
+      "unitType": "hero_brann",
+      "count": 1,
+      "anchor": "playerStart",
+      "dx": 0,
+      "dz": 13,
+      "tag": "brann"
+    },
+    {
+      "type": "spawn",
+      "owner": "neutral",
+      "unitType": "villager",
+      "count": 3,
+      "anchor": "captive1",
+      "spread": 2.2,
+      "tag": "miners",
+      "markColor": "#22d3ee",
+      "displayName": {
+        "pt-BR": "Mineiro cativo",
+        "en": "Captive miner"
+      }
+    },
+    {
+      "type": "spawn",
+      "owner": "enemy",
+      "units": [
+        {
+          "type": "grunt",
+          "count": 2
+        },
+        {
+          "type": "axethrower",
+          "count": 1
+        }
+      ],
+      "anchor": "captive1",
+      "dx": 5,
+      "spread": 2.5,
+      "tag": "miner_guard",
+      "guard": {
+        "r": 10
+      }
+    },
+    {
+      "type": "spawnBuilding",
+      "owner": "enemy",
+      "buildingType": "orc_watchtower",
+      "anchor": "orcTower1",
+      "tag": "orc_tower"
+    },
+    {
+      "type": "spawnBuilding",
+      "owner": "enemy",
+      "buildingType": "orc_watchtower",
+      "anchor": "orcTower2",
+      "tag": "orc_tower"
+    },
+    {
+      "type": "spawn",
+      "owner": "enemy",
+      "units": [
+        {
+          "type": "grunt",
+          "count": 4
+        },
+        {
+          "type": "axethrower",
+          "count": 2
+        }
+      ],
+      "anchor": "enemyStart",
+      "dx": -9,
+      "spread": 3,
+      "tag": "orc_guard",
+      "guard": {
+        "r": 16
+      }
+    },
+    {
+      "type": "spawnLandmark",
+      "kind": "shrine",
+      "anchor": "shrine1",
+      "tag": "shrine",
+      "label": {
+        "pt-BR": "Santuário da Pedra-Mãe",
+        "en": "Mother Stone Shrine"
+      }
     }
   ],
   "objectives": [
     {
-      "id": "primary-main",
-      "type": "destroy",
+      "id": "p-survive",
+      "type": "survive",
       "priority": "primary",
-      "select": {
-        "tag": "enemy_base"
+      "active": false,
+      "seconds": 420,
+      "title": {
+        "pt-BR": "Segure a colônia por 7 minutos",
+        "en": "Hold the colony for 7 minutes"
+      },
+      "description": {
+        "pt-BR": "O tempo corre a partir do desembarque orc. Se o Paço cair ou o Capitão Brann morrer, a missão está perdida.",
+        "en": "The clock runs from the orc landing. If the Keep falls or Captain Brann dies, the mission is lost."
+      }
+    },
+    {
+      "id": "p-gold",
+      "type": "collect",
+      "priority": "primary",
+      "resource": "gold",
+      "amount": 2000,
+      "mode": "gathered",
+      "title": {
+        "pt-BR": "Mantenha as minas rendendo: colete 2.000 de ouro",
+        "en": "Keep the mines producing: gather 2,000 gold"
+      },
+      "description": {
+        "pt-BR": "O ouro vem das minas atrás dos desfiladeiros: a inicial e o Veio, a maior. Aldeões mortos não minam; proteja a linha.",
+        "en": "The gold comes from the mines behind the passes: the starter and the Vein, the larger one. Dead villagers don't mine; protect the line."
+      }
+    },
+    {
+      "id": "s-towers",
+      "type": "build",
+      "priority": "secondary",
+      "buildingType": "watchtower",
+      "count": 2,
+      "title": {
+        "pt-BR": "Erguer 2 Torres de Vigia",
+        "en": "Raise 2 Watchtowers"
+      },
+      "description": {
+        "pt-BR": "Atrás da linha de muralha, ao alcance dos dois desfiladeiros.",
+        "en": "Behind the wall line, within reach of both passes."
+      }
+    },
+    {
+      "id": "s-walls",
+      "type": "build",
+      "priority": "secondary",
+      "buildingType": "wall_human",
+      "count": 6,
+      "marker": {
+        "area": {
+          "anchor": "ridgeMidPlayer",
+          "dx": 11.5,
+          "dz": 0.3,
+          "r": 20
+        },
+        "style": "goal"
       },
       "title": {
-        "pt-BR": "Defender as minas com Capitão Brann e muralhas",
-        "en": "Defend the mines with Captain Brann and walls"
+        "pt-BR": "Fechar os desfiladeiros: 6 trechos de Muralha de Pedra",
+        "en": "Close the passes: 6 Stone Wall sections"
+      },
+      "description": {
+        "pt-BR": "Três blocos por desfiladeiro, onde a passagem é mais estreita (dentro do círculo dourado).",
+        "en": "Three blocks per pass, where it is narrowest (inside the golden circle)."
       }
+    },
+    {
+      "id": "s-cavaliers",
+      "type": "train",
+      "priority": "secondary",
+      "units": [
+        {
+          "type": "cavalier",
+          "count": 4
+        }
+      ],
+      "title": {
+        "pt-BR": "Treinar 4 Cavaleiros",
+        "en": "Train 4 Cavaliers"
+      },
+      "description": {
+        "pt-BR": "No Estábulo Real. Só contam os treinados nesta missão.",
+        "en": "At the Royal Stable. Only those trained in this mission count."
+      }
+    },
+    {
+      "id": "s-rescue",
+      "type": "rescue",
+      "priority": "secondary",
+      "tag": "miners",
+      "count": 3,
+      "title": {
+        "pt-BR": "Libertar os 3 mineiros cativos",
+        "en": "Free the 3 captive miners"
+      },
+      "description": {
+        "pt-BR": "Exploradores orcs os prenderam no canto noroeste do platô, longe dos desfiladeiros. Derrote os guardas e eles voltam ao trabalho.",
+        "en": "Orc scouts hold them in the northwest corner of the plateau, far from the passes. Defeat the guards and they go back to work."
+      }
+    },
+    {
+      "id": "h-armor",
+      "type": "flag",
+      "priority": "hidden",
+      "condition": {
+        "type": "research",
+        "id": "melee_armor",
+        "level": 1
+      },
+      "failWhen": {
+        "type": "trigger",
+        "id": "wave-3"
+      },
+      "title": {
+        "pt-BR": "Escudos Reforçados antes da 3ª onda",
+        "en": "Reinforced Shields before the 3rd wave"
+      },
+      "description": {
+        "pt-BR": "Pesquise Escudos Reforçados na Ferraria antes de a terceira onda desembarcar.",
+        "en": "Research Reinforced Shields at the Smithy before the third wave lands."
+      }
+    },
+    {
+      "id": "h-shrine",
+      "type": "flag",
+      "priority": "hidden",
+      "active": true,
+      "condition": {
+        "type": "area",
+        "owner": "player",
+        "area": {
+          "anchor": "shrine1",
+          "r": 7
+        }
+      },
+      "title": {
+        "pt-BR": "O Santuário da Pedra-Mãe",
+        "en": "The Mother Stone Shrine"
+      },
+      "description": {
+        "pt-BR": "Um brilho no sul da ilha, longe de tudo. Mande alguém até lá.",
+        "en": "A glint in the south of the island, far from everything. Send someone there."
+      }
+    }
+  ],
+  "triggers": [
+    {
+      "id": "intro",
+      "when": {
+        "type": "time",
+        "at": 0
+      },
+      "actions": [
+        {
+          "type": "music",
+          "id": "on"
+        },
+        {
+          "type": "reveal",
+          "anchor": "passA",
+          "radius": 22,
+          "ttl": 38
+        },
+        {
+          "type": "reveal",
+          "anchor": "passB",
+          "radius": 22,
+          "ttl": 38
+        },
+        {
+          "type": "reveal",
+          "anchor": "colonyGold1",
+          "radius": 18,
+          "ttl": 38
+        },
+        {
+          "type": "reveal",
+          "anchor": "orcMuster",
+          "radius": 26,
+          "ttl": 38
+        },
+        {
+          "type": "cutscene",
+          "id": "stone",
+          "duration": 38,
+          "skippable": true,
+          "steps": [
+            {
+              "at": 0,
+              "anchor": "playerStart",
+              "zoom": 1.15,
+              "dialog": {
+                "speaker": {
+                  "pt-BR": "Capitão Brann",
+                  "en": "Captain Brann"
+                },
+                "portrait": "⚔️",
+                "text": {
+                  "pt-BR": "Pedra-Mãe. A colônia mineira da Liga: ouro no chão, pedra em volta e a minha guarnição, que é pouca. Eu sou Brann, capitão do forte, e a partir de agora o comando do campo é seu.",
+                  "en": "Mother Stone. The League's mining colony: gold in the ground, rock all around and my garrison, which is small. I am Brann, captain of the fort, and from now on the command of the field is yours."
+                },
+                "duration": 8
+              }
+            },
+            {
+              "at": 8,
+              "anchor": "colonyGold1",
+              "zoom": 1.1,
+              "dialog": {
+                "speaker": {
+                  "pt-BR": "Capitão Brann",
+                  "en": "Captain Brann"
+                },
+                "portrait": "⚔️",
+                "text": {
+                  "pt-BR": "Este é o Veio da Pedra-Mãe, a maior mina da ilha, e a outra mais perto do Paço. Os aldeões iam e voltavam em minutos. Os orcs sabem disso.",
+                  "en": "This is the Mother Stone Vein, the biggest mine on the island, and the other one nearer the Keep. The villagers went back and forth in minutes. The orcs know it."
+                },
+                "duration": 7
+              }
+            },
+            {
+              "at": 15,
+              "anchor": "passA",
+              "zoom": 1.05,
+              "dialog": {
+                "speaker": {
+                  "pt-BR": "Capitão Brann",
+                  "en": "Captain Brann"
+                },
+                "portrait": "⚔️",
+                "text": {
+                  "pt-BR": "A crista de rocha corta a ilha de lado a lado. Ninguém a escala, nem eles. Só há dois desfiladeiros: este e o do sul. Tudo que vier de leste passa por um dos dois.",
+                  "en": "The ridge of rock cuts the island from side to side. Nobody climbs it, not even them. There are only two passes: this one and the one to the south. Everything coming from the east goes through one of them."
+                },
+                "duration": 8
+              }
+            },
+            {
+              "at": 23,
+              "anchor": "orcMuster",
+              "zoom": 1.0,
+              "dialog": {
+                "speaker": {
+                  "pt-BR": "Capitão Brann",
+                  "en": "Captain Brann"
+                },
+                "portrait": "⚔️",
+                "text": {
+                  "pt-BR": "Atrás da crista, o acampamento do Presa-Negra. Eles ainda estão montando as armas. Em cinco minutos virão em ondas, cada vez mais pesadas, e na última com cerco.",
+                  "en": "Behind the ridge, the Blackfang camp. They are still putting their weapons together. In five minutes they will come in waves, each heavier than the last, and the last with siege."
+                },
+                "duration": 8
+              }
+            },
+            {
+              "at": 31,
+              "anchor": "playerStart",
+              "zoom": 1.1,
+              "dialog": {
+                "speaker": {
+                  "pt-BR": "Governador Mervane",
+                  "en": "Governor Mervane"
+                },
+                "portrait": "🎩",
+                "text": {
+                  "pt-BR": "Capitão, o ouro não pode parar de sair da mina por causa de uma escaramuça. Use as muralhas, use os homens que tiver. A Liga não paga para ver minério parado.",
+                  "en": "Captain, the gold cannot stop leaving the mine because of a skirmish. Use the walls, use the men you have. The League does not pay to see ore sit idle."
+                },
+                "duration": 7
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "tier-up",
+      "when": {
+        "type": "time",
+        "at": 40
+      },
+      "actions": [
+        {
+          "type": "setTier",
+          "owner": "player",
+          "tier": 2
+        },
+        {
+          "type": "sound",
+          "id": "build"
+        }
+      ]
+    },
+    {
+      "id": "first-steps",
+      "when": {
+        "type": "time",
+        "at": 52
+      },
+      "actions": [
+        {
+          "type": "dialog",
+          "speaker": {
+            "pt-BR": "Capitão Brann",
+            "en": "Captain Brann"
+          },
+          "portrait": "⚔️",
+          "duration": 9,
+          "text": {
+            "pt-BR": "Primeiro, o ouro: ponha os aldeões nas minas. Depois a Ferraria, o Estábulo e a pedra para a muralha. Em cinco minutos eles desembarcam.",
+            "en": "First, the gold: put the villagers on the mines. Then the Smithy, the Stable and stone for the wall. In five minutes they land."
+          }
+        }
+      ]
+    },
+    {
+      "id": "mervane-hint",
+      "when": {
+        "type": "time",
+        "at": 150
+      },
+      "actions": [
+        {
+          "type": "dialog",
+          "speaker": {
+            "pt-BR": "Governador Mervane",
+            "en": "Governor Mervane"
+          },
+          "portrait": "🎩",
+          "duration": 9,
+          "text": {
+            "pt-BR": "Capitão, três mineiros não voltaram do turno do noroeste. Se estiverem vivos, mande buscar: o registro de ouro fica errado sem eles.",
+            "en": "Captain, three miners did not come back from the northwest shift. If they are alive, send for them: the gold ledger goes wrong without them."
+          }
+        },
+        {
+          "type": "dialog",
+          "speaker": {
+            "pt-BR": "Capitão Brann",
+            "en": "Captain Brann"
+          },
+          "portrait": "⚔️",
+          "duration": 8,
+          "text": {
+            "pt-BR": "Registro, sempre o registro. Eles têm nome, governador. Vou buscar quando der, mas a muralha vem primeiro.",
+            "en": "The ledger, always the ledger. They have names, Governor. I will fetch them when I can, but the wall comes first."
+          }
+        }
+      ]
+    },
+    {
+      "id": "landing",
+      "when": {
+        "type": "time",
+        "at": 295
+      },
+      "actions": [
+        {
+          "type": "setObjective",
+          "id": "p-survive",
+          "status": "active"
+        },
+        {
+          "type": "sound",
+          "id": "alarm"
+        },
+        {
+          "type": "dialog",
+          "speaker": {
+            "pt-BR": "Capitão Brann",
+            "en": "Captain Brann"
+          },
+          "portrait": "⚔️",
+          "duration": 9,
+          "text": {
+            "pt-BR": "Velas na costa leste! Eles pousaram. Primeira leva a caminho dos desfiladeiros: muralhas fechadas, torres cheias, e ninguém sai sozinho.",
+            "en": "Sails on the east coast! They have landed. First wave heading for the passes: walls closed, towers manned, and nobody goes out alone."
+          }
+        }
+      ]
+    },
+    {
+      "id": "wave-1",
+      "when": {
+        "type": "time",
+        "at": 330
+      },
+      "actions": [
+        {
+          "type": "spawn",
+          "owner": "enemy",
+          "units": [
+            {
+              "type": "grunt",
+              "count": 3
+            },
+            {
+              "type": "axethrower",
+              "count": 2
+            }
+          ],
+          "anchor": "orcMuster",
+          "spread": 3.5,
+          "tag": "wave",
+          "order": {
+            "kind": "attackMove",
+            "anchor": "playerStart"
+          }
+        },
+        {
+          "type": "incVar",
+          "name": "wave"
+        },
+        {
+          "type": "message",
+          "text": {
+            "pt-BR": "Primeira onda orc: 5 guerreiros marcham para os desfiladeiros.",
+            "en": "First orc wave: 5 warriors march on the passes."
+          }
+        }
+      ]
+    },
+    {
+      "id": "wave-2",
+      "when": {
+        "type": "time",
+        "at": 420
+      },
+      "actions": [
+        {
+          "type": "spawn",
+          "owner": "enemy",
+          "units": [
+            {
+              "type": "grunt",
+              "count": 8
+            },
+            {
+              "type": "axethrower",
+              "count": 3
+            }
+          ],
+          "anchor": "orcMuster",
+          "spread": 3.5,
+          "tag": "wave",
+          "order": {
+            "kind": "attackMove",
+            "anchor": "playerStart"
+          }
+        },
+        {
+          "type": "incVar",
+          "name": "wave"
+        },
+        {
+          "type": "message",
+          "text": {
+            "pt-BR": "Segunda onda: 9 orcs, mais pesada.",
+            "en": "Second wave: 9 orcs, heavier."
+          }
+        }
+      ]
+    },
+    {
+      "id": "wave-3",
+      "when": {
+        "type": "time",
+        "at": 510
+      },
+      "actions": [
+        {
+          "type": "spawn",
+          "owner": "enemy",
+          "units": [
+            {
+              "type": "ogre",
+              "count": 1
+            },
+            {
+              "type": "grunt",
+              "count": 5
+            },
+            {
+              "type": "axethrower",
+              "count": 3
+            }
+          ],
+          "anchor": "orcMuster",
+          "spread": 3.5,
+          "tag": "wave",
+          "order": {
+            "kind": "attackMove",
+            "anchor": "playerStart"
+          }
+        },
+        {
+          "type": "incVar",
+          "name": "wave"
+        },
+        {
+          "type": "message",
+          "text": {
+            "pt-BR": "Terceira onda: Ogros! Escudos Reforçados fazem diferença agora.",
+            "en": "Third wave: Ogres! Reinforced Shields make a difference now."
+          }
+        },
+        {
+          "type": "dialog",
+          "speaker": {
+            "pt-BR": "Capitão Brann",
+            "en": "Captain Brann"
+          },
+          "portrait": "⚔️",
+          "duration": 8,
+          "text": {
+            "pt-BR": "Ogros! Eles quebram muralha como casca de ovo. Torres em cima deles e Cavaleiros prontos para sair do desfiladeiro.",
+            "en": "Ogres! They crack a wall like an eggshell. Towers on them, and Cavaliers ready to sally from the pass."
+          }
+        }
+      ]
+    },
+    {
+      "id": "siege-launch",
+      "when": {
+        "type": "time",
+        "at": 575
+      },
+      "actions": [
+        {
+          "type": "spawn",
+          "owner": "enemy",
+          "units": [
+            {
+              "type": "catapult",
+              "count": 1
+            }
+          ],
+          "anchor": "orcMuster",
+          "spread": 3,
+          "tag": "wave",
+          "order": {
+            "kind": "attackMove",
+            "anchor": "playerStart"
+          }
+        },
+        {
+          "type": "message",
+          "text": {
+            "pt-BR": "Uma Catapulta saiu do acampamento orc. Alcance 20: peguem-nas antes.",
+            "en": "A Catapult left the orc camp. Range 20: catch them first."
+          }
+        }
+      ]
+    },
+    {
+      "id": "wave-4",
+      "when": {
+        "type": "time",
+        "at": 600
+      },
+      "actions": [
+        {
+          "type": "spawn",
+          "owner": "enemy",
+          "units": [
+            {
+              "type": "ogre",
+              "count": 2
+            },
+            {
+              "type": "grunt",
+              "count": 4
+            },
+            {
+              "type": "axethrower",
+              "count": 3
+            }
+          ],
+          "anchor": "orcMuster",
+          "spread": 3.5,
+          "tag": "wave",
+          "order": {
+            "kind": "attackMove",
+            "anchor": "playerStart"
+          }
+        },
+        {
+          "type": "incVar",
+          "name": "wave"
+        },
+        {
+          "type": "message",
+          "text": {
+            "pt-BR": "Última onda: Ogros, guerreiros e cerco.",
+            "en": "Final wave: Ogres, warriors and siege."
+          }
+        },
+        {
+          "type": "dialog",
+          "speaker": {
+            "pt-BR": "Capitão Brann",
+            "en": "Captain Brann"
+          },
+          "portrait": "⚔️",
+          "duration": 8,
+          "text": {
+            "pt-BR": "A última leva, e com cerco. Se segurarmos esta, o Presa-Negra desiste da Pedra-Mãe.",
+            "en": "The last push, and with siege. If we hold this one, the Blackfangs give up on Mother Stone."
+          }
+        }
+      ]
+    },
+    {
+      "id": "forge-up",
+      "when": {
+        "type": "count",
+        "select": {
+          "buildingType": "forge",
+          "owner": "player"
+        },
+        "op": ">=",
+        "value": 1
+      },
+      "actions": [
+        {
+          "type": "sound",
+          "id": "build"
+        },
+        {
+          "type": "dialog",
+          "speaker": {
+            "pt-BR": "Capitão Brann",
+            "en": "Captain Brann"
+          },
+          "portrait": "⚔️",
+          "duration": 8,
+          "text": {
+            "pt-BR": "Ferraria de pé. Escudos Reforçados antes da terceira onda: ogro bate forte e armadura é o que segura o espadachim.",
+            "en": "Smithy is up. Reinforced Shields before the third wave: an ogre hits hard and armor is what keeps a swordsman on his feet."
+          }
+        }
+      ]
+    },
+    {
+      "id": "armor-reward",
+      "when": {
+        "type": "objective",
+        "id": "h-armor",
+        "status": "completed"
+      },
+      "actions": [
+        {
+          "type": "giveResources",
+          "owner": "player",
+          "gold": 150
+        },
+        {
+          "type": "sound",
+          "id": "victory"
+        },
+        {
+          "type": "message",
+          "text": {
+            "pt-BR": "Escudos Reforçados a tempo: +150 de ouro.",
+            "en": "Reinforced Shields in time: +150 gold."
+          }
+        }
+      ]
+    },
+    {
+      "id": "stable-up",
+      "when": {
+        "type": "count",
+        "select": {
+          "buildingType": "stable",
+          "owner": "player"
+        },
+        "op": ">=",
+        "value": 1
+      },
+      "actions": [
+        {
+          "type": "dialog",
+          "speaker": {
+            "pt-BR": "Capitão Brann",
+            "en": "Captain Brann"
+          },
+          "portrait": "⚔️",
+          "duration": 8,
+          "text": {
+            "pt-BR": "Estábulo pronto. Quatro Cavaleiros: eles correm mais que qualquer ogro e pegam a catapulta antes de ela firmar.",
+            "en": "Stable ready. Four Cavaliers: they outrun any ogre and catch the catapult before it sets."
+          }
+        }
+      ]
+    },
+    {
+      "id": "walls-closed",
+      "when": {
+        "type": "objective",
+        "id": "s-walls",
+        "status": "completed"
+      },
+      "actions": [
+        {
+          "type": "sound",
+          "id": "victory"
+        },
+        {
+          "type": "dialog",
+          "speaker": {
+            "pt-BR": "Capitão Brann",
+            "en": "Captain Brann"
+          },
+          "portrait": "⚔️",
+          "duration": 8,
+          "text": {
+            "pt-BR": "Os desfiladeiros estão fechados. Agora eles terão de quebrar pedra para passar, e o tempo é nosso.",
+            "en": "The passes are closed. Now they will have to break stone to get through, and time is ours."
+          }
+        }
+      ]
+    },
+    {
+      "id": "miners-near",
+      "when": {
+        "type": "area",
+        "owner": "player",
+        "area": {
+          "anchor": "captive1",
+          "r": 34
+        }
+      },
+      "actions": [
+        {
+          "type": "dialog",
+          "speaker": {
+            "pt-BR": "Capitão Brann",
+            "en": "Captain Brann"
+          },
+          "portrait": "⚔️",
+          "duration": 8,
+          "text": {
+            "pt-BR": "Ali: fumaça de acampamento. Os mineiros estão com os exploradores. Derrubem os guardas e eles são nossos.",
+            "en": "There: campfire smoke. The miners are with the scouts. Take down the guards and they are ours."
+          }
+        }
+      ]
+    },
+    {
+      "id": "free-miners",
+      "when": {
+        "type": "dead",
+        "select": {
+          "tag": "miner_guard"
+        },
+        "count": 3
+      },
+      "actions": [
+        {
+          "type": "transfer",
+          "select": {
+            "tag": "miners"
+          },
+          "to": "player"
+        },
+        {
+          "type": "incVar",
+          "name": "miners_freed",
+          "by": 3
+        },
+        {
+          "type": "sound",
+          "id": "build"
+        },
+        {
+          "type": "message",
+          "text": {
+            "pt-BR": "Mineiros libertados!",
+            "en": "Miners freed!"
+          }
+        }
+      ]
+    },
+    {
+      "id": "shrine-hint",
+      "when": {
+        "type": "var",
+        "name": "miners_freed",
+        "op": ">=",
+        "value": 3
+      },
+      "actions": [
+        {
+          "type": "revealObjective",
+          "id": "h-shrine"
+        },
+        {
+          "type": "dialog",
+          "speaker": {
+            "pt-BR": "Mineiro libertado",
+            "en": "Freed miner"
+          },
+          "portrait": "⛏️",
+          "duration": 10,
+          "text": {
+            "pt-BR": "Obrigado, capitão! Quando fugíamos vimos um brilho de pedra lá no sul, longe da mina, onde só vão os gatos. Eu juraria que era um santuário.",
+            "en": "Thank you, Captain! While we ran we saw a glint of stone far to the south, far from the mine, where only cats go. I would swear it was a shrine."
+          }
+        }
+      ]
+    },
+    {
+      "id": "shrine-found",
+      "when": {
+        "type": "objective",
+        "id": "h-shrine",
+        "status": "completed"
+      },
+      "actions": [
+        {
+          "type": "giveResources",
+          "owner": "player",
+          "gold": 200
+        },
+        {
+          "type": "lightLandmark",
+          "tag": "shrine"
+        },
+        {
+          "type": "sound",
+          "id": "victory"
+        },
+        {
+          "type": "message",
+          "text": {
+            "pt-BR": "Santuário da Pedra-Mãe encontrado: +200 de ouro.",
+            "en": "Mother Stone Shrine found: +200 gold."
+          }
+        }
+      ]
+    },
+    {
+      "id": "castle-fallen",
+      "when": {
+        "type": "count",
+        "select": {
+          "buildingType": "castle",
+          "owner": "player"
+        },
+        "op": "==",
+        "value": 0
+      },
+      "actions": [
+        {
+          "type": "defeat",
+          "text": {
+            "pt-BR": "O Paço caiu. A Pedra-Mãe é do Presa-Negra.",
+            "en": "The Keep has fallen. Mother Stone belongs to the Blackfangs."
+          }
+        }
+      ]
+    },
+    {
+      "id": "brann-fallen",
+      "when": {
+        "type": "dead",
+        "select": {
+          "tag": "brann"
+        },
+        "count": 1
+      },
+      "actions": [
+        {
+          "type": "defeat",
+          "text": {
+            "pt-BR": "O Capitão Brann caiu. Sem ele a guarnição se desfaz e a colônia cai.",
+            "en": "Captain Brann has fallen. Without him the garrison breaks and the colony falls."
+          }
+        }
+      ]
+    },
+    {
+      "id": "all-done",
+      "when": {
+        "all": [
+          {
+            "type": "objective",
+            "id": "p-survive",
+            "status": "completed"
+          },
+          {
+            "type": "objective",
+            "id": "p-gold",
+            "status": "completed"
+          }
+        ]
+      },
+      "actions": [
+        {
+          "type": "sound",
+          "id": "victory"
+        },
+        {
+          "type": "cutscene",
+          "id": "finale",
+          "duration": 18,
+          "skippable": true,
+          "steps": [
+            {
+              "at": 0,
+              "anchor": "ridgeMidPlayer",
+              "zoom": 1.1,
+              "dialog": {
+                "speaker": {
+                  "pt-BR": "Capitão Brann",
+                  "en": "Captain Brann"
+                },
+                "portrait": "⚔️",
+                "text": {
+                  "pt-BR": "Os desfiladeiros seguram. O Presa-Negra recua para a praia; a Pedra-Mãe é nossa, e a mina continua dando ouro.",
+                  "en": "The passes hold. The Blackfangs fall back to the beach; Mother Stone is ours, and the mine keeps giving gold."
+                },
+                "duration": 8
+              }
+            },
+            {
+              "at": 9,
+              "anchor": "playerStart",
+              "zoom": 1.1,
+              "dialog": {
+                "speaker": {
+                  "pt-BR": "Governador Mervane",
+                  "en": "Governor Mervane"
+                },
+                "portrait": "🎩",
+                "text": {
+                  "pt-BR": "Bom trabalho, capitão. O ouro fecha o mês com folga. Quanto aos homens, estarão no relatório, sob 'custos'.",
+                  "en": "Good work, Captain. The gold closes the month with room to spare. As for the men, they will be in the report, under 'costs'."
+                },
+                "duration": 8
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "finale-clock",
+      "when": {
+        "type": "trigger",
+        "id": "all-done"
+      },
+      "once": false,
+      "cooldown": 18,
+      "actions": [
+        {
+          "type": "incVar",
+          "name": "fin_clock",
+          "by": 1
+        }
+      ]
+    },
+    {
+      "id": "finale-victory",
+      "when": {
+        "type": "var",
+        "name": "fin_clock",
+        "op": ">=",
+        "value": 1
+      },
+      "actions": [
+        {
+          "type": "victory"
+        }
+      ]
     }
   ]
 }

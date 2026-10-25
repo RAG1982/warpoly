@@ -1089,13 +1089,15 @@ export class Unit {
 
     // WATER IMPASSABILITY: Units cannot enter or cross water!
     const nextH = this.terrain.getHeight(nextX, nextZ);
-    if (nextH < 0.65) {
+    // M3-04: crista/penhasco (`mapDef.cliffHeight`) bloqueia o passo como a água (mapas sem o campo: `isCliff` é sempre falso)
+    const cliff = this.terrain.isCliff;
+    if (nextH < 0.65 || (cliff && cliff.call(this.terrain, nextX, nextZ))) {
       // Impassable water obstacle! Try sliding along X or Z if one direction is on dry land
       const hX = this.terrain.getHeight(nextX, curZ);
       const hZ = this.terrain.getHeight(curX, nextZ);
-      if (hX >= 0.65) {
+      if (hX >= 0.65 && !(cliff && cliff.call(this.terrain, nextX, curZ))) {
         this.mesh.position.x = nextX;
-      } else if (hZ >= 0.65) {
+      } else if (hZ >= 0.65 && !(cliff && cliff.call(this.terrain, curX, nextZ))) {
         this.mesh.position.z = nextZ;
       }
       this.mesh.position.y = this.terrain.getHeight(this.mesh.position.x, this.mesh.position.z);
@@ -1217,7 +1219,7 @@ export class Unit {
         this.mesh.position.z = safe.z;
         this.mesh.position.y = WATER_LEVEL;
       }
-    } else if (this.layer !== 'air' && this.terrain.getHeight(this.mesh.position.x, this.mesh.position.z) < 0.65) {
+    } else if (this.layer !== 'air' && (this.terrain.getHeight(this.mesh.position.x, this.mesh.position.z) < 0.65 || (this.terrain.isCliff && this.terrain.isCliff(this.mesh.position.x, this.mesh.position.z)))) {
       if (gameManager && gameManager.pathfinder) {
         const safe = gameManager.pathfinder.findNearestWalkable(this.mesh.position.x, this.mesh.position.z);
         this.mesh.position.x = safe.x;

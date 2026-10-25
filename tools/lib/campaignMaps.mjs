@@ -20,6 +20,7 @@ import { getBiomeAt, BIOME, decodeBiomeGrid, encodeRleBiomeGrid } from '../../sr
 import { speciesForBiome } from '../../src/data/treeSpecies.js';
 import { estimateWood } from '../../src/data/maps/coast/layout.js';
 import { thinCorridor, makeWoodFn, CORRIDOR_DEFAULTS } from './corridorThin.mjs';
+import { carveRidge, narrowestCut, wallLine, sealedBy } from './cliffRidge.mjs';
 
 /** Parâmetros da etapa "afinar corredor" (largura da faixa em u, fração de árvores que fica, raio de floresta de coleta etc.): ver `corridorThin.mjs`. */
 export const CORRIDOR_PARAMS = Object.freeze({ ...CORRIDOR_DEFAULTS });
@@ -51,7 +52,7 @@ export const CAMPAIGN_PRESETS = freeze({
   }),
   /** Palco 3: ilha rochosa (pedregoso), base do Paço a oeste e cabeça de ponte a leste; ouro extra no Paço. */
   'camp-03-pedra-mae': freeze({
-    id: 'camp-03-pedra-mae', name: 'Pedra-Mãe', uso: 'campanha, palco 3 (Liga e Clãs)', tileset: 'pedregoso', naval: false,
+    id: 'camp-03-pedra-mae', name: 'Pedra-Mãe', uso: 'campanha, palco 3 (Liga e Clãs)', tileset: 'pedregoso', naval: false, woodTarget: 6300,
     options: freeze({ size: 176, grid: 176, continents: 1, continentBiome: 'rocky', continentDims: [0.44, 0.36], islands: 0, islets: 0, bays: 3, peninsulas: 3, roughness: 1.15, lava: false, rivers: 0 }),
     layout: freeze({ bases: [{ entities: [0], side: 'west' }, { entities: [0], side: 'east' }], minSeparation: 66 }),
     verify: freeze({ landRange: [0.25, 0.8], minRivers: 0 })
@@ -173,10 +174,12 @@ export function makeCtx(m) {
     plain: (x, z) => ![BIOME.SNOW, BIOME.ROCK, BIOME.ICE, BIOME.VOLCANIC, BIOME.LAVA].includes(getBiomeAt(m, x, z)),
     /** Terra seca com `r` u de folga em volta. */
     dryClear(x, z, r) {
-      if (hAt(x, z) < 1.95) return false;
+      const cl = m.cliffHeight ?? Infinity; // M3-04: crista/penhasco não é chão para construir
+      if (hAt(x, z) < 1.95 || hAt(x, z) >= cl) return false;
       for (let a = 0; a < 16; a++) {
         const t = (a / 16) * Math.PI * 2;
-        if (hAt(x + Math.cos(t) * r, z + Math.sin(t) * r) < 1.8 || hAt(x + Math.cos(t) * r * 0.5, z + Math.sin(t) * r * 0.5) < 1.8) return false;
+        const h1 = hAt(x + Math.cos(t) * r, z + Math.sin(t) * r), h2 = hAt(x + Math.cos(t) * r * 0.5, z + Math.sin(t) * r * 0.5);
+        if (h1 < 1.8 || h2 < 1.8 || h1 >= cl || h2 >= cl) return false;
       }
       return true;
     },
@@ -431,19 +434,131 @@ function postPousoBatedores(ctx, extra, { s0, s1 }) {
   }
 }
 
-/** Palco 3: ouro extra no Paço, três praias de pouso com seu ponto no mar e seu forte, cabeça de ponte dos Clãs. */
-function postPedra(ctx, extra) {
+/**
+ * Palco 3 (M3-04 · missão "Ouro da Pedra-Mãe"): ilha de pedra cortada de costa a costa por UMA CRISTA intransponível entre as bases, com 2
+ * desfiladeiros estreitos (`passA`/`passB`, ~6–7 u) que o jogador fecha com muralhas e os orcs precisam cruzar. As minas iniciais saem do
+ * pátio (≈ 32 u do Centro, não coladas) e há uma mina grande (12.000) logo atrás dos desfiladeiros, ao alcance das torres: a que a Liga defende com as muralhas.
+ * `prePedra` esculpe a crista ANTES do contexto de posicionamento (os pathfinders já enxergam a crista); `postPedra` põe o resto.
+ */
+export const PEDRA_RIDGE = freeze({ cliffHeight: 5, hTop: 7.4, core: 3.0, fall: 3.6, gapWidth: 6.2, gapRamp: 1.4, gapSep: 26, wave: 5.5, along: 0.5 });
+export const PEDRA_MINE_DIST = 32; // centro do Paço → centro da mina inicial (borda a borda ≈ 23 u: Paço 5,5 + mina 3,4)
+export const PEDRA_BIG_GOLD = 12000;
+function prePedra(m, world, seedUsed) {
+  const info = carveRidge(m, { getHeightForMap }, { ...PEDRA_RIDGE, seed: seedUsed });
+  const { F, band } = info;
+  // nada do gerador pode cair na crista (bases, jazidas, acampamentos): a semente seria recusada
+  const inBand = (p, extra = 3) => Math.abs(F.tOf(p.x, p.z) - F.wv(F.uOf(p.x, p.z))) <= band + extra;
+  for (const s of m.startSlots) if (Math.abs(F.side(s.x, s.z)) < band + 22) throw new Error('crista: base perto demais da crista');
+  for (const r of m.resources) if (inBand(r, 4)) throw new Error('crista: jazida na crista');
+  // bosques sobre a crista saem (os da borda perdem o centro); o piso de madeira é conferido no fim
+  m.forests = m.forests.filter((f) => Math.abs(F.tOf(f.x, f.z) - F.wv(F.uOf(f.x, f.z))) > band + f.radius * 0.5);
+  return info;
+}
+
+function postPedra(ctx, extra, world, ridge) {
   const { m, s0, s1 } = ctx;
-  // minas extras: 2 junto ao Paço (a Liga defende; os Clãs as capturam) e 1 na cabeça de ponte
-  addGold(ctx, s0, 'colonyGold1', extra);
-  addGold(ctx, s0, 'colonyGold2', extra);
-  addGold(ctx, s1, 'bridgeheadGold', extra);
-  // três praias onde as ondas (Barcaças) desembarcam, espalhadas em volta do Paço
+  const { F, gaps, band } = ridge;
+  const sideOf = (p) => F.side(p.x, p.z);
+  const u0 = (gaps[0].u + gaps[1].u) / 2;
+  // 1) minas iniciais: a mina do gerador (≈ 15–18 u do Centro, colada) sai e volta ≈ 32 u dali, do MESMO lado da crista que a base
+  [[s0, -1], [s1, +1]].forEach(([s, sgn], k) => {
+    const i = m.resources.findIndex((r) => r.type === 'gold' && hyp(r, s) < 26);
+    if (i < 0) throw new Error('campanha: sem mina inicial para mover');
+    const old = m.resources[i];
+    ctx.avoid = ctx.avoid.filter((a) => !(a.x === old.x && a.z === old.z));
+    const g = need(ctx.scan({
+      step: 1,
+      test: (x, z) => ctx.dryClear(x, z, 4) && ctx.reach(x, z) && ctx.free(x, z, 3) && sgn * sideOf({ x, z }) >= 14 && hyp({ x, z }, s) >= PEDRA_MINE_DIST - 4 && hyp({ x, z }, s) <= PEDRA_MINE_DIST + 4
+        && hyp({ x, z }, F.world(F.wv(F.uOf(x, z)), F.uOf(x, z))) >= 14,
+      score: (x, z) => Math.abs(hyp({ x, z }, s) - PEDRA_MINE_DIST) + 0.02 * Math.abs(F.uOf(x, z) - u0)
+    }), `a mina inicial ${k + 1}`);
+    ctx.take(g, 14);
+    m.resources[i] = { ...old, x: r1(g.x), z: r1(g.z) };
+  });
+  // 2) mina grande ("Veio da Pedra-Mãe", 12.000): do lado do Paço, ATRÁS dos desfiladeiros (a 8–16 u da crista, ao alcance das torres da linha de
+  //    muralha) e mais longe do Centro que a inicial: é ela que a Liga defende com as muralhas
+  const big = need(ctx.scan({
+    step: 1,
+    test: (x, z) => ctx.dryClear(x, z, 4) && ctx.reach(x, z) && ctx.free(x, z, 3) && sideOf({ x, z }) <= -(band + 8) && sideOf({ x, z }) >= -(band + 17) && Math.abs(F.uOf(x, z) - u0) <= 22 && hyp({ x, z }, s0) >= PEDRA_MINE_DIST + 6,
+    score: (x, z) => Math.abs(sideOf({ x, z }) + band + 12) + 0.5 * Math.abs(F.uOf(x, z) - u0)
+  }), 'a mina grande atrás dos desfiladeiros');
+  ctx.take(big, 14);
+  m.resources.push({ type: 'gold', x: r1(big.x), z: r1(big.z), amount: PEDRA_BIG_GOLD });
+  extra.colonyGold1 = pt(big);
+  // 3) 2ª mina dos orcs, atrás da base deles (7.500)
+  const back = need(ctx.scan({
+    step: 1,
+    test: (x, z) => ctx.dryClear(x, z, 5) && ctx.reach(x, z) && ctx.free(x, z, 4) && sideOf({ x, z }) >= band + 8 && hyp({ x, z }, s1) >= 30 && hyp({ x, z }, s1) <= 52,
+    score: (x, z) => Math.abs(hyp({ x, z }, s1) - 40)
+  }), 'a 2ª mina dos orcs');
+  ctx.take(back, 14);
+  m.resources.push({ type: 'gold', x: r1(back.x), z: r1(back.z), amount: GOLD_AMOUNT });
+  extra.bridgeheadGold = pt(back);
+  // 4) desfiladeiros: centro, bocas (lado do Paço e lado dos orcs) e a linha de muralha
+  gaps.forEach((g, i) => {
+    const mid = F.world(F.wv(g.u), g.u);
+    extra[`pass${'AB'[i]}`] = pt(mid);
+    extra[`pass${'AB'[i]}Player`] = pt(F.world(F.wv(g.u) - band - 1.5, g.u));
+    extra[`pass${'AB'[i]}Enemy`] = pt(F.world(F.wv(g.u) + band + 1.5, g.u));
+  });
+  // linhas de muralha (3 blocos por desfiladeiro = as 6 da missão): as duas linhas juntas têm de selar a ilha no Pathfinder real
+  const cuts = gaps.map((g) => narrowestCut(ctx.land, F, g));
+  const lines = cuts.map((c) => wallLine(F, c, 3));
+  if (!sealedBy(ctx.land, lines.flatMap((l) => l.walls), s0, s1)) throw new Error('crista: 3 muralhas por desfiladeiro não selam a passagem');
+  for (const [i, l] of lines.entries()) {
+    if (sealedBy(ctx.land, l.walls, s0, s1)) throw new Error('crista: um desfiladeiro sozinho selou a ilha (o outro está fechado?)');
+    const L = 'AB'[i];
+    l.walls.forEach((w, k) => { extra[`wall${L}${k + 1}`] = pt(w); });
+    // torres: o ponto de terra firme alcançável mais perto do desejado (5,5 u atrás da linha, ±5,2 u de lado), fora de qualquer muralha
+    l.towers.forEach((w0, k) => {
+      let w = null, bd = Infinity;
+      for (let dz = -9; dz <= 9; dz += 0.5) for (let dx = -9; dx <= 9; dx += 0.5) {
+        const x = w0.x + dx, z = w0.z + dz;
+        const d = Math.hypot(dx, dz);
+        if (d >= bd || F.tOf(x, z) > cuts[i].t - 3 || !ctx.dryClear(x, z, 3.2) || !ctx.reach(x, z) || !l.walls.every((q) => hyp({ x, z }, q) >= 4.5) || !m.forests.every((f) => hyp({ x, z }, f) >= f.radius + 4) || !m.resources.every((r) => hyp({ x, z }, r) >= 9)) continue;
+        bd = d; w = { x, z };
+      }
+      need(w, `a torre ${L}${k + 1}`);
+      extra[`tower${L}${k + 1}`] = pt(w);
+    });
+    extra[`pass${L}`] = pt(l.center);
+  }
+  extra.ridgeMidPlayer = pt(F.world(F.wv(u0) - band - 2, u0)); // entre os dois desfiladeiros, do lado do Paço (a crista em si é rocha)
+  // 5) acampamento orc (de onde as ondas saem): ponto seco entre a base e a crista, no eixo
+  extra.orcMuster = pt(need(ctx.scan({
+    test: (x, z) => ctx.dryClear(x, z, 5) && ctx.reach(x, z) && ctx.free(x, z, 0) && sideOf({ x, z }) >= band + 8 && sideOf({ x, z }) <= band + 22 && hyp({ x, z }, s1) >= 18 && m.resources.every((r) => hyp({ x, z }, r) >= 12),
+    score: (x, z) => Math.abs(F.uOf(x, z) - u0) + 0.2 * Math.abs(sideOf({ x, z }) - (band + 14))
+  }), 'o acampamento orc'));
+  // 5b) 2 torres da guarnição orc, 12–16 u do Salão rumo à crista, uma de cada lado (ponto de terra firme livre mais perto do desejado)
+  {
+    const ex = F.a, perp = F.n;
+    const base = { x: s1.x - ex.x * 13, z: s1.z - ex.z * 13 }; // o eixo aponta para os orcs: rumo à crista é o sentido contrário
+    [-9, 9].forEach((off, k) => {
+      const want = { x: base.x + perp.x * off, z: base.z + perp.z * off };
+      let w = null, bd = Infinity;
+      for (let dz = -7; dz <= 7; dz += 0.5) for (let dx = -7; dx <= 7; dx += 0.5) {
+        const x = want.x + dx, z = want.z + dz, dd = Math.hypot(dx, dz);
+        if (dd >= bd || !ctx.dryClear(x, z, 3.5) || !ctx.reach(x, z) || hyp({ x, z }, s1) < 11 || m.resources.some((r) => hyp({ x, z }, r) < 9)) continue;
+        bd = dd; w = { x, z };
+      }
+      extra[`orcTower${k + 1}`] = pt(need(w, `a torre orc ${k + 1}`));
+    });
+  }
+  // 6) cantos do platô do jogador: marco de exploração (santuário) e cativos (resgate), em terra firme do lado do Paço, longe de tudo e um do outro
+  const own = (x, z) => sideOf({ x, z }) <= -(band + 10) && ctx.dryClear(x, z, 5) && ctx.reach(x, z) && ctx.free(x, z, 3) && hyp({ x, z }, s0) >= 38;
+  const fromAll = (p, more = []) => Math.min(hyp(p, s0), ...gaps.map((g, i) => hyp(p, extra[`pass${'AB'[i]}`])), hyp(p, extra.colonyGold1), ...m.resources.map((r) => hyp(p, r)), ...more.map((q) => hyp(p, q)));
+  const ruins = need(ctx.scan({ step: 2, test: own, score: (x, z) => -fromAll({ x, z }) }), 'o santuário do platô');
+  ctx.take(ruins, 12);
+  extra.shrine1 = pt(ruins);
+  const captive = need(ctx.scan({ step: 2, test: (x, z) => own(x, z) && hyp({ x, z }, ruins) >= 34, score: (x, z) => -fromAll({ x, z }, [ruins]) }), 'o cativeiro dos mineiros');
+  ctx.take(captive, 12);
+  extra.captive1 = pt(captive);
+  // 7) praias de pouso, fortes e cabeça de ponte dos Clãs (usados pela missão da Horda, H03): como antes
   const cands = [];
   for (let z = -ctx.half + 6; z <= ctx.half - 6; z += 2) {
     for (let x = -ctx.half + 6; x <= ctx.half - 6; x += 2) {
       const d = hyp({ x, z }, s0);
-      if (d < 36 || d > 72 || hyp({ x, z }, s1) < 44) continue;
+      if (d < 36 || d > 84 || hyp({ x, z }, s1) < 40) continue;
       if (!ctx.isShore(x, z) || !ctx.reach(x, z) || !ctx.free(x, z, 3)) continue;
       const w = ctx.waterNear(x, z, 8, 18);
       if (!w) continue;
@@ -453,15 +568,14 @@ function postPedra(ctx, extra) {
   if (cands.length < 3) throw new Error('campanha: poucas praias para as ondas');
   const angDiff = (a, b) => Math.abs(Math.atan2(Math.sin(a - b), Math.cos(a - b)));
   const picked = [];
-  // primeiro: a praia mais próxima de 52 u; depois, a de maior separação angular (mín. 60°), com preferência por ~52 u
   picked.push(cands.reduce((a, c) => (Math.abs(c.d - 52) < Math.abs(a.d - 52) ? c : a)));
   for (let k = 1; k < 3; k++) {
     let best = null, bs = -Infinity;
     for (const c of cands) {
       const sep = Math.min(...picked.map((p) => angDiff(p.ang, c.ang)));
-      if (sep < 1.0) continue;
-      const s = sep * 40 - Math.abs(c.d - 52);
-      if (s > bs) { bs = s; best = c; }
+      if (sep < 0.7 || picked.some((p) => hyp(p, c) < 40)) continue;
+      const sc = sep * 40 - Math.abs(c.d - 52);
+      if (sc > bs) { bs = sc; best = c; }
     }
     if (!best) throw new Error('campanha: não achei a praia de pouso ' + (k + 1));
     picked.push(best);
@@ -472,15 +586,13 @@ function postPedra(ctx, extra) {
     extra[`seaLanding${i + 1}`] = { x: p.w.x, z: p.w.z, water: true };
     ctx.take(p, 10);
   });
-  // fortes da colônia (H03): um por praia, 14–18 u para dentro, rumo ao Paço
   picked.forEach((p, i) => {
     const L = hyp(p, s0) || 1;
     const aim = { x: p.x + ((s0.x - p.x) / L) * 16, z: p.z + ((s0.z - p.z) / L) * 16 };
-    const f = need(ctx.scan({ test: (x, z) => ctx.dryClear(x, z, 5) && ctx.reach(x, z) && ctx.free(x, z, 3), score: (x, z) => hyp({ x, z }, aim) }), `o forte ${i + 1}`);
+    const f = need(ctx.scan({ test: (x, z) => ctx.dryClear(x, z, 5) && ctx.reach(x, z) && ctx.freeNear(x, z, 3, 12) && Math.abs(F.side(x, z)) > band + 3, score: (x, z) => hyp({ x, z }, aim) }), `o forte ${i + 1}`);
     ctx.take(f, 10);
     extra[`fort${i + 1}`] = pt(f);
   });
-  // cabeça de ponte dos Clãs (H03): a praia mais próxima do slot 1 e o ponto no mar de onde as barcaças chegam
   const bh = need(ctx.scan({
     step: 1,
     test: (x, z) => ctx.isShore(x, z) && ctx.reach(x, z) && hyp({ x, z }, s1) >= 14 && hyp({ x, z }, s1) <= 40 && ctx.waterNear(x, z, 8, 18),
@@ -490,6 +602,7 @@ function postPedra(ctx, extra) {
   extra.bridgeheadSea = { ...ctx.waterNear(bh.x, bh.z, 8, 18), water: true };
   extra.colonyHall = pt(s0); // o Paço do governador: o pátio do slot 0
   extra.landingZone = extra.beach1; // praia da primeira onda (o `landingZone` padrão é só uma sugestão)
+  m.meta = { ...m.meta, ridge: { gaps: gaps.map((g) => g.u), ...PEDRA_RIDGE } };
 }
 
 // ---------------------------------------------------------------------------------------------------------------------------
@@ -1015,6 +1128,7 @@ function postCabo(ctx, extra) {
   void m;
 }
 
+const PRE = freeze({ 'camp-03-pedra-mae': prePedra }); // esculpe o terreno ANTES do contexto de posicionamento (M3-04)
 const POST = freeze({ 'camp-01-baia-de-aurelan': postBaia, 'camp-02-pouso-do-encontro': postPouso, 'camp-03-pedra-mae': postPedra, 'camp-04-baixio-do-breu': postBaixio, 'camp-05-cerne-verde': postCerne, 'camp-06-a-geada': postGeada, 'camp-07-brejo-mudo': postBrejo, 'camp-08-fornalha': postFornalha, 'camp-09-miragem': postMiragem, 'camp-10-costa-ferrugem': postCosta, 'camp-11-estepe-do-vento': postEstepe, 'camp-12-cabo-ferrugem': postCabo });
 
 // ---------------------------------------------------------------------------------------------------------------------------
@@ -1048,9 +1162,10 @@ function finish(id, world, seedUsed) {
   m.name = CAMPAIGN_NAMES[id].pt;
   m.hidden = true; // não aparece na lista da Escaramuça
   for (const r of m.resources) if (r.type === 'gold') r.amount = GOLD_AMOUNT;
+  const pre = PRE[id] ? PRE[id](m, world, seedUsed) : null;
   const ctx = makeCtx(m);
   const extra = {};
-  POST[id](ctx, extra, world);
+  POST[id](ctx, extra, world, pre);
   // âncoras: padrão (recalculadas com as jazidas/acampamentos novos) + as da ficha; as escritas à mão prevalecem
   const base = { ...m.anchors };
   delete m.anchors;

@@ -1,6 +1,7 @@
 import { getMap, DEFAULT_MAP_ID } from '../data/maps/index.js';
 import { getHeightForMap } from './terrainGenerators.js';
 import { isLavaAt } from '../data/maps/lava.js';
+import { isCliffAt } from '../data/maps/cliff.js';
 
 /**
  * Terreno orientado a dados (F2-05): tamanho, segmentos, altura, vaus e slots vêm de `mapDef`
@@ -32,6 +33,11 @@ export class Terrain {
     return isLavaAt(this.mapDef, x, z);
   }
 
+  /** M3-04: crista/penhasco intransponível (`mapDef.cliffHeight`; mapas sem o campo: sempre falso). */
+  isCliff(x, z) {
+    return isCliffAt(this.mapDef, x, z);
+  }
+
   getSurfaceType(x, z, h) {
     if (this.isLava(x, z)) return 'lava';
     if (h < 0.2) return 'water';
@@ -45,7 +51,7 @@ export class Terrain {
   }
 
   isWalkable(x, z) {
-    if (this.isLava(x, z)) return false;
+    if (this.isLava(x, z) || this.isCliff(x, z)) return false;
     return this.getHeight(x, z) >= 0.65;
   }
 }

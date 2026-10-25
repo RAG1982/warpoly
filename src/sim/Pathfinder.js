@@ -148,7 +148,7 @@ export class Pathfinder {
         // and strictly within the map's playable border (F2-05: this.bounds = mapDef.playable/2)
         // F4-07a: modo naval — água com profundidade suficiente (`h <= NAVAL_MAX_HEIGHT`).
         // Lava (MUNDO-TERRENO-MAPAS §3.5): intransponível para terrestre e naval.
-        const isLava = this.terrain.isLava?.(x, z);
+        const isLava = this.terrain.isLava?.(x, z) || this.terrain.isCliff?.(x, z); // M3-04: crista/penhasco bloqueia como a lava
         if (!isLava && (this.naval ? h <= NAVAL_MAX_HEIGHT : h >= 0.68) && maxCoord < this.bounds) {
           this.staticGrid[r * this.cols + c] = 1;
         } else {
@@ -165,7 +165,7 @@ export class Pathfinder {
    * @returns {boolean}
    */
   isWater(x, z) {
-    if (this.terrain.isLava?.(x, z)) return false;
+    if (this.terrain.isLava?.(x, z) || this.terrain.isCliff?.(x, z)) return false;
     const h = this.terrain.getHeight(x, z);
     return h < 0.65;
   }
@@ -176,7 +176,7 @@ export class Pathfinder {
    * Lava (MUNDO-TERRENO-MAPAS §3.5): intransponível para ambos os modos.
    */
   _terrainBlocked(x, z) {
-    if (this.terrain.isLava?.(x, z)) return true;
+    if (this.terrain.isLava?.(x, z) || this.terrain.isCliff?.(x, z)) return true;
     const h = this.terrain.getHeight(x, z);
     return this.naval ? h > NAVAL_MAX_HEIGHT : h < 0.65;
   }

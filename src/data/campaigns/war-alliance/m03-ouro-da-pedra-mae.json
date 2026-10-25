@@ -239,15 +239,16 @@
           "dz": 0.3,
           "r": 20
         },
-        "style": "goal"
+        "style": "goal",
+        "seconds": 60
       },
       "title": {
         "pt-BR": "Fechar os desfiladeiros: 6 trechos de Muralha de Pedra",
         "en": "Close the passes: 6 Stone Wall sections"
       },
       "description": {
-        "pt-BR": "Três blocos por desfiladeiro, onde a passagem é mais estreita (dentro do círculo dourado).",
-        "en": "Three blocks per pass, where it is narrowest (inside the golden circle)."
+        "pt-BR": "Três blocos por desfiladeiro, onde a passagem é mais estreita (o círculo dourado mostra a área só na abertura).",
+        "en": "Three blocks per pass, where it is narrowest (the golden circle shows the area only at the start)."
       }
     },
     {

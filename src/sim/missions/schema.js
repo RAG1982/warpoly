@@ -197,14 +197,15 @@ function checkCondition(c, path, cond, ids) {
   void ids;
 }
 
-/** M3-X1: `marker {area:{x,z,r}, style?, showWhen?}` (área circular; `anchor` dentro de `area` também vale). */
+/** M3-X1: `marker {area:{x,z,r}, style?, showWhen?, seconds?}` (área circular; `anchor` dentro de `area` também vale). */
 function checkMarker(c, path, m) {
   if (!isObj(m)) return c.err(path, 'marcador deve ser um objeto {area, style?, showWhen?}');
-  for (const k of Object.keys(m)) if (!['area', 'style', 'showWhen'].includes(k)) c.err(`${path}.${k}`, 'campo desconhecido no marcador');
+  for (const k of Object.keys(m)) if (!['area', 'style', 'showWhen', 'seconds'].includes(k)) c.err(`${path}.${k}`, 'campo desconhecido no marcador');
   if (m.area === undefined) c.err(`${path}.area`, 'marcador precisa de "area" circular {x,z,r} (ou {anchor, r})');
   else if (!isObj(m.area) || !('r' in m.area)) c.err(`${path}.area`, 'marcador usa área circular: {x,z,r}');
   else checkArea(c, `${path}.area`, m.area);
   if (m.style !== undefined && !MARKER_STYLES.includes(m.style)) c.err(`${path}.style`, `style deve ser ${MARKER_STYLES.join('|')}`);
+  if (m.seconds !== undefined && !(typeof m.seconds === 'number' && m.seconds > 0)) c.err(`${path}.seconds`, 'seconds deve ser um número > 0 (marcador some depois desse tempo de missão)');
   if (m.showWhen !== undefined && !MARKER_SHOW.includes(m.showWhen)) c.err(`${path}.showWhen`, `showWhen deve ser ${MARKER_SHOW.join('|')}`);
 }
 

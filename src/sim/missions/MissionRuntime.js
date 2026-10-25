@@ -161,7 +161,7 @@ export class MissionRuntime {
   /**
    * Marcadores de objetivo visíveis agora (dados puros para a view/minimapa). Objetivo `escort` ganha marcador 'goal' na
    * própria área enquanto ativo; `marker` declarado vale para qualquer tipo. Ocultos só aparecem depois de `revealObjective`.
-   * `showWhen`: 'active' (padrão) = enquanto ativo; 'revealed' = desde que revelado, mesmo inativo (até concluir/falhar).
+   * `seconds`: o marcador some depois desse tempo de missão (dica só na abertura). `showWhen`: 'active' (padrão) = enquanto ativo; 'revealed' = desde que revelado, mesmo inativo (até concluir/falhar).
    * @returns {{id:string, style:'goal'|'discover', area:{x:number,z:number,r:number}}[]}
    */
   markers() {
@@ -169,6 +169,7 @@ export class MissionRuntime {
     for (const o of this.objectives.values()) {
       const m = o.def.marker ?? (o.def.type === 'escort' ? { area: o.def.area, style: 'goal', showWhen: 'active' } : null);
       if (!m || !m.area) continue;
+      if (m.seconds !== undefined && this.elapsed >= m.seconds) continue; // dica de abertura: some depois de `seconds` s
       const showWhen = m.showWhen ?? 'active';
       const live = o.status === 'active' || o.status === 'inactive';
       const on = o.visible && live && (showWhen === 'revealed' || o.status === 'active');

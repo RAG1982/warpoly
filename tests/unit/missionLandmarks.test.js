@@ -112,6 +112,16 @@ describe('MissionRuntime: marcos e marcadores (M3-X1)', () => {
     expect(gm.mission.markers()).toEqual([]);
   });
 
+  it('marker.seconds: o marcador some depois desse tempo de missão (dica só da abertura)', () => {
+    const gm = makeMissionGm(baseMission({
+      objectives: [{ id: 'o1', type: 'survive', seconds: 600, title: 'x', marker: { area: { x: 0, z: 0, r: 5 }, seconds: 5 } }]
+    }));
+    expect(gm.mission.markers().map((m) => m.id)).toEqual(['o1']);
+    runTicks(gm, 6 * 20);
+    expect(gm.mission.markers()).toEqual([]);
+    expect(errorsOf(baseMission({ objectives: [{ id: 'o1', type: 'survive', seconds: 60, title: 'x', marker: { area: { x: 0, z: 0, r: 5 }, seconds: -1 } }] })).length).toBeGreaterThan(0);
+  });
+
   it('objetivo oculto com marcador só mostra depois de revealObjective', () => {
     const gm = makeMissionGm(baseMission({
       objectives: [

@@ -20,6 +20,9 @@ import { followBoat, detachFromBoat, killCargo, updateBoarding, updateUnloading 
 import { resolveAbility, canCast, needsEntityTarget, targetProblem, applyAbility, emitCastStart, findAutocastTarget, getChannel, applyChannelWave } from './abilities.js';
 import { hitTagFor } from './hitTag.js';
 
+/** Liga/desliga a animação de receber golpe (desligada: interrompia o ataque de unidades em combate). */
+const HURT_ANIM_ENABLED = false;
+
 /** F4-04: callback de expiração de status (módulo: sem closure por unidade). */
 function onStatusExpire(unit, id) {
   unit._statusExpired(id);
@@ -895,9 +898,12 @@ export class Unit {
       return;
     }
 
-    // Hurt recoil animation & red damage flash
-    this.hurtTimer = 0.45;
-    this._setAnim('hurt', true);
+    // Animação 'hurt' (recuo + flash) DESLIGADA: com muitos arqueiros ela travava a infantaria em combate
+    // (cada flecha reiniciava o recuo e interrompia o golpe). Religar só com estratégia que não atrapalhe o combate.
+    if (HURT_ANIM_ENABLED) {
+      this.hurtTimer = 0.45;
+      this._setAnim('hurt', true);
+    }
 
     // Retaliation & Call for help: combat troops strike back when attacked
     if (attacker && !attacker.isDead && attacker.hp > 0 && this.isHostileTo(attacker)) {

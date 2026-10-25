@@ -112,6 +112,41 @@ try {
       if (!st.foeDead) { fail = true; log(faction, 'FALHA: alvo não afundou'); }
     }
 
+
+    if (only === 'all' || only === 'oil') {
+      const info = await ev(() => {
+        const gm = window.game.gameManager; const me = gm.getPlayer(0);
+        const hq = gm.buildings.find((b) => b.ownerId === 0 && ['castle', 'great_hall'].includes(b.type)); hq.tier = 2;
+        Object.assign(me.resources, { gold: 5000, wood: 5000, stone: 2000, oil: 0 });
+        const F = me.factionId; const side = hq.mesh.position.x < 0 ? -1 : 1;
+        const well = gm.resourceDeposits.filter((d) => d.type === 'oil').sort((a, b) => Math.hypot(a.mesh.position.x - hq.mesh.position.x, a.mesh.position.z - hq.mesh.position.z) - Math.hypot(b.mesh.position.x - hq.mesh.position.x, b.mesh.position.z - hq.mesh.position.z))[0];
+        const spots = (type) => { const o = []; for (let x = side * 12; Math.abs(x) <= 56; x += side) for (let z = -44; z <= 44; z++) if (gm.canPlaceBuilding(type, x, z, 0)) o.push({ x, z }); return o.sort((a, b) => Math.hypot(a.x - well.mesh.position.x, a.z - well.mesh.position.z) - Math.hypot(b.x - well.mesh.position.x, b.z - well.mesh.position.z)); };
+        const bar = F === 'orc' ? 'orc_barracks' : 'barracks'; const ys = F === 'orc' ? 'ship_dock' : 'shipyard'; const rf = F === 'orc' ? 'ash_cauldron' : 'refinery';
+        const b0 = gm.createBuilding(bar, side * 30, 10, true, 0); gm.buildings.push(b0);
+        const y = spots(ys)[0]; const yard = gm.createBuilding(ys, y.x, y.z, true, 0); gm.buildings.push(yard);
+        const r = spots(rf).find((s) => Math.hypot(s.x - y.x, s.z - y.z) > 9); const ref = gm.createBuilding(rf, r.x, r.z, true, 0); gm.buildings.push(ref);
+        gm.issue({ type: 'train', playerId: 0, buildingId: yard.id, unitType: 'tanker' });
+        return { well: { x: well.mesh.position.x, z: well.mesh.position.z, id: well.id }, yard: y, ref: r };
+      });
+      await cam(info.well.x, info.well.z, 0.5);
+      await page.waitForTimeout(14000);
+      const tid = await ev(() => { const t = window.game.gameManager.allUnits.find((u) => u.type === 'tanker' && u.ownerId === 0); return t ? t.id : null; });
+      log(faction, 'petroleiro treinado:', tid);
+      if (tid === null) { fail = true; }
+      else {
+        await ev(([tid, w]) => window.game.gameManager.issue({ type: 'placeBuilding', playerId: 0, buildingType: 'oil_platform', x: w.x, z: w.z, unitIds: [tid] }), [tid, info.well]);
+        await page.waitForTimeout(20000); await shot('12-petroleo-plataforma');
+        await ev(([tid, w]) => window.game.gameManager.issue({ type: 'gather', playerId: 0, unitIds: [tid], targetId: w.id }), [tid, info.well]);
+        await page.waitForTimeout(12000); await shot('13-petroleo-coletando');
+        await cam(info.ref.x, info.ref.z, 0.5);
+        await page.waitForTimeout(10000); await shot('14-petroleo-refinaria');
+        const oil = await ev(() => window.game.gameManager.getPlayer(0).resources.oil);
+        log(faction, 'petróleo na conta:', oil);
+        if (!(oil > 0)) fail = true;
+        await cam(info.well.x, info.well.z, 0.9); await shot('15-petroleo-hud-mapa');
+      }
+    }
+
     log(faction, 'erros de página/console:', errors.length, errors.slice(0, 5));
     if (errors.length) fail = true;
     await ctx.close();

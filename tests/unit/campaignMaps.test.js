@@ -16,7 +16,7 @@ import en from '../../src/i18n/en.json';
  * Os palcos 2 a 6 servem às duas campanhas (slot 0 = lado da Liga de Aurelan, slot 1 = lado dos Clãs do Cinzal). A Geada tem 4 vagas
  * (jogador, Lanças Quebradas, Sal Cinzento e o aliado Brumar).
  */
-const IDS = ['camp-01-baia-de-aurelan', 'camp-02-pouso-do-encontro', 'camp-03-pedra-mae', 'camp-04-baixio-do-breu', 'camp-05-cerne-verde', 'camp-06-a-geada', 'camp-10-costa-ferrugem', 'camp-11-estepe-do-vento', 'camp-12-cabo-ferrugem'];
+const IDS = ['camp-01-baia-de-aurelan', 'camp-02-pouso-do-encontro', 'camp-03-pedra-mae', 'camp-05-cerne-verde', 'camp-06-a-geada', 'camp-10-costa-ferrugem', 'camp-11-estepe-do-vento', 'camp-12-cabo-ferrugem']; // M3-05: o palco 4 (dois continentes isolados) tem os seus testes em campaignM04.test.js
 const SLOTS = { 'camp-06-a-geada': 4, 'camp-11-estepe-do-vento': 3 }; // as demais têm 2 vagas
 
 // M2-28: os mapas de campanha são carregados sob demanda (chunks); os testes os carregam antes de usar `getMap`.
@@ -245,47 +245,7 @@ function biomeAtLocal(m, x, z) {
   return g[j * n + i];
 }
 
-describe('M2-04 · Baixio do Breu (recifes, petróleo, naufrágios)', () => {
-  const id = 'camp-04-baixio-do-breu';
-  it('mapa naval: 4 poços em água do oceano, baixios (água rasa que não é navegável) em boa parte do mar e ilhotas espalhadas', () => {
-    const m = getMap(id);
-    expect(m.size).toBe(224);
-    const sea = buildPathfinder(m, 'naval');
-    const ocean = oceanSeen(m, sea);
-    const wells = m.resources.filter((r) => r.type === 'oil');
-    expect(wells).toHaveLength(4);
-    for (const w of wells) {
-      expect(isReached(sea, ocean, w.x, w.z), `poço ${w.x},${w.z}`).toBe(true);
-      expect(getHeightForMap(m, w.x, w.z)).toBeLessThan(0.1);
-    }
-    wells.forEach((w, i) => expect(m.anchors[`well${i + 1}`]).toEqual({ x: w.x, z: w.z, water: true })); // well1..4 = os poços, nesta ordem
-    const reef = countCells(m, (x, z) => { const h = getHeightForMap(m, x, z); return h > 0.15 && h < 0.45; });
-    const open = countCells(m, (x, z) => getHeightForMap(m, x, z) < 0.05);
-    const total = countCells(m, () => true);
-    expect(reef / total, 'baixios').toBeGreaterThan(0.08); // "quase só água rasa e funda"
-    expect(open / total, 'água funda').toBeGreaterThan(0.4);
-    expect(m.resources.filter((r) => r.type === 'gold')).toHaveLength(4); // 1 padrão + 1 de expansão por lado: com 1 só o soak travava
-  });
-
-  it('espaço para Estaleiro/Doca: costa de cada lado com água funda ligada ao oceano; poços e naufrágios afastados entre si; frotas no mar principal', () => {
-    const m = getMap(id);
-    const sea = buildPathfinder(m, 'naval');
-    const ocean = oceanSeen(m, sea);
-    for (const k of ['shipyard1', 'shipyard2']) {
-      const a = m.anchors[k], w = m.anchors[`${k}Water`];
-      expect(hyp(a, w), k).toBeLessThanOrEqual(18);
-      expect(sea.nearNavigable(w.x, w.z, 1.5), k).toBe(true);
-      expect(isReached(sea, ocean, w.x, w.z), k).toBe(true);
-    }
-    expect(hyp(m.anchors.shipyard1, m.startSlots[0])).toBeLessThan(hyp(m.anchors.shipyard1, m.startSlots[1]));
-    expect(hyp(m.anchors.shipyard2, m.startSlots[1])).toBeLessThan(hyp(m.anchors.shipyard2, m.startSlots[0]));
-    const wrecks = [1, 2, 3].map((i) => m.anchors[`wreck${i}`]);
-    for (let i = 0; i < 3; i++) for (let j = i + 1; j < 3; j++) expect(hyp(wrecks[i], wrecks[j])).toBeGreaterThanOrEqual(24);
-    for (const w of wrecks) for (const r of m.resources.filter((q) => q.type === 'oil')) expect(hyp(w, r)).toBeGreaterThanOrEqual(24);
-    for (const k of ['fleetStart1', 'fleetStart2', 'fleetMid']) expect(isReached(sea, ocean, m.anchors[k].x, m.anchors[k].z), k).toBe(true);
-    expect(hyp(m.anchors.fleetStart1, m.startSlots[0])).toBeLessThan(hyp(m.anchors.fleetStart1, m.startSlots[1]));
-  });
-});
+// M3-05: o Baixio do Breu foi refeito (2 continentes isolados, 2 ilhotas, 6 poços): testes em tests/unit/campaignM04.test.js
 
 describe('M2-04 · Cerne Verde (floresta densa, clareiras, bosque sagrado, ninho de grifos)', () => {
   const id = 'camp-05-cerne-verde';

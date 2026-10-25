@@ -1,0 +1,43 @@
+{
+  "shots": [
+    "01-briefing.png",
+    "02-cutscene-1-base-brann.png",
+    "03-cutscene-2-costa-estaleiro.png",
+    "04-cutscene-3-pocos-do-meio.png",
+    "05-cutscene-4-ilhotas.png",
+    "06-cutscene-5-costa-orc-doca.png",
+    "07-cutscene-6-posto-do-cabo.png",
+    "07b-aviso-centro-evoluido.png",
+    "08-inicio-objetivos.png",
+    "09-mapa-dois-continentes-mar-e-ilhotas.png",
+    "10-bioma-liga-grama.png",
+    "11-bioma-cla-deserto-basalto.png",
+    "12-pocos-do-meio-e-patrulha.png",
+    "13-ilhota-norte-madeira-e-torres.png",
+    "14-estaleiro-e-refinaria.png",
+    "15-plataformas-sendo-erguidas.png",
+    "16-petroleiro-entregando-na-refinaria.png",
+    "17-barcaca-embarcou-6-tropas.png",
+    "18-barcaca-no-meio-do-canal.png",
+    "19-desembarque-na-ilhota-sul-bandidos.png",
+    "20-naufragos-resgatados.png",
+    "21-batalha-naval-1.png",
+    "22-batalha-naval-2.png",
+    "23-batalha-naval-fim.png",
+    "24-posto-do-cabo-centro-extra-e-mina.png",
+    "25-ruinas-do-farol-velho.png",
+    "26-doca-do-cla.png",
+    "27-cutscene-final.png",
+    "28-fim-vitoria.png"
+  ],
+  "errors": [],
+  "notes": [
+    "Estaleiro/Refinaria: {\"sy\":{\"x\":-48,\"z\":-27},\"rf\":{\"x\":-62,\"z\":-23}}",
+    "petróleo após 30 s de coleta: 1250",
+    "praia de embarque: {\"shore\":{\"x\":-47.75,\"z\":-5.75}}",
+    "carga da Barcaça: 6",
+    "Espadachins na ilhota: 6/6",
+    "resgate: [[\"s-rescue\",\"completed\",3],[\"h-ruins\",\"active\",0]]",
+    "após a batalha: {\"mine\":2,\"orc\":3}"
+  ]
+}

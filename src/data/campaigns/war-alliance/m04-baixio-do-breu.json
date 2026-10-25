@@ -18,17 +18,29 @@
     },
     "portrait": "⚔️",
     "text": {
-      "pt-BR": "As reservas de petróleo do Baixio são cruciais. Construa o Estaleiro, extraia petróleo e domine as águas.",
-      "en": "The oil reserves of the Shallows are crucial. Build the Shipyard, pump oil, and rule the waters."
+      "pt-BR": "O Baixio do Breu é um canal largo de águas escuras entre duas margens que não se tocam: a nossa, a oeste, e a dos Clãs do Cinzal, a leste. Do fundo do mar sobe breu (petróleo), e quem o bombeia domina as águas. Nenhum soldado atravessa esse mar a pé: tudo aqui se decide com navios. Erga o Estaleiro, treine Petroleiros e ponha DUAS Plataformas nos poços, com uma Refinaria na costa para receber o óleo. Dois poços ficam no meio do canal, entre duas ilhotas com madeira e chão para torres: serão disputados. A frota de Orvanna Maré-Negra patrulha o canal e virá em ondas. A caravela Estrela-d'Alva chega em cinco minutos. Eu comando a guarnição; se eu cair, a margem cai junto. E lembre: o ouro só entra no Paço, então uma mina longe pede um Centro novo ao lado dela.",
+      "en": "The Pitch Shallows are a wide channel of dark water between two shores that never touch: ours in the west and the Cinzal Clans' in the east. Pitch (oil) rises from the seabed, and whoever pumps it rules the waters. No soldier crosses this sea on foot: everything here is decided by ships. Raise the Shipyard, train Tankers and set TWO Platforms on the wells, with a Refinery on the coast to receive the oil. Two wells lie mid-channel, between two islets with timber and room for towers: they will be fought over. Orvanna Blacktide's fleet patrols the channel and will come in waves. The caravel Dawn Star arrives in five minutes. I command the garrison; if I fall, the shore falls with me. And remember: gold only enters the Keep, so a far-off mine needs a new Town Center beside it."
     },
     "hints": [
       {
-        "pt-BR": "Concentre-se nos objetivos primários para avançar.",
-        "en": "Focus on primary objectives to advance."
+        "pt-BR": "O Estaleiro e a Refinaria só se constroem na costa, onde há água funda encostada (o círculo dourado mostra o sítio do Estaleiro). O Estaleiro exige o Quartel, que já está de pé.",
+        "en": "The Shipyard and Refinery can only go on the coast, where deep water touches the shore (the golden circle shows the Shipyard site). The Shipyard needs the Barracks, which already stands."
+      },
+      {
+        "pt-BR": "O Petroleiro ergue a Plataforma sobre o poço (ordem de construir no poço) e depois coleta; o óleo só conta quando entregue na Refinaria. Fragatas custam 50 de petróleo cada.",
+        "en": "The Tanker raises the Platform on the well (build order on the well) and then gathers; oil only counts once delivered to the Refinery. Frigates cost 50 oil each."
+      },
+      {
+        "pt-BR": "A Barcaça leva 6 tropas de uma margem a outra: mande as tropas embarcarem (clique direito na Barcaça) e depois clique numa praia para desembarcar. Torres nas ilhotas protegem os poços do meio.",
+        "en": "The Barge carries 6 troops from shore to shore: send the troops aboard (right-click the Barge) and then click a beach to unload. Towers on the islets protect the mid-channel wells."
+      },
+      {
+        "pt-BR": "Só o Paço recebe ouro. A mina grande da ponta fica a mais de 60 passos: construa um Centro extra ao lado dela (tecla Q; 800 de ouro, máximo 3). Se um navio orc chegar à costa, soldados desembarcam: mantenha a frota no canal.",
+        "en": "Only the Keep takes gold. The big mine at the tip is more than 60 paces away: build an extra Town Center beside it (Q key; 800 gold, max 3). If an orc ship reaches the coast, soldiers land: keep your fleet in the channel."
       }
     ]
   },
-  "mapId": "estreito-1v1",
+  "mapId": "camp-04-baixio-do-breu",
   "seed": 9068,
   "players": [
     {
@@ -46,21 +58,28 @@
     {
       "id": 1,
       "name": {
-        "pt-BR": "Clãs do Cinzal",
-        "en": "Cinzal Clans"
+        "pt-BR": "Clã Maré-Negra",
+        "en": "Blacktide Clan"
       },
       "factionId": "orc",
       "team": 1,
       "color": "#dc2626",
       "isAI": true,
+      "difficulty": "easy",
       "startSlot": 1
     }
   ],
   "startingResources": {
-    "wood": 400,
-    "gold": 400,
-    "stone": 150
+    "wood": 700,
+    "gold": 900,
+    "stone": 200
   },
+  "vars": {
+    "rescued": 0,
+    "landings": 0,
+    "fin_clock": 0
+  },
+  "autoVictory": false,
   "setup": [
     {
       "type": "tag",
@@ -68,20 +87,1259 @@
         "buildingType": "great_hall"
       },
       "tag": "enemy_base"
+    },
+    {
+      "type": "spawn",
+      "owner": "player",
+      "unitType": "hero_brann",
+      "count": 1,
+      "anchor": "playerStart",
+      "dx": 0,
+      "dz": 13,
+      "tag": "brann"
+    },
+    {
+      "type": "spawnBuilding",
+      "owner": "player",
+      "buildingType": "barracks",
+      "anchor": "playerStart",
+      "dx": 12,
+      "dz": -6,
+      "tag": "garrison_barracks"
+    },
+    {
+      "type": "spawnBuilding",
+      "owner": "enemy",
+      "buildingType": "ship_dock",
+      "anchor": "shipyard2",
+      "tag": "orc_dock"
+    },
+    {
+      "type": "spawn",
+      "owner": "enemy",
+      "unitType": "war_galley",
+      "count": 2,
+      "anchor": "patrol1",
+      "spread": 4,
+      "tag": "patrol"
+    },
+    {
+      "type": "spawn",
+      "owner": "enemy",
+      "unitType": "war_galley",
+      "count": 1,
+      "anchor": "patrol2",
+      "spread": 4,
+      "tag": "patrol"
+    },
+    {
+      "type": "spawn",
+      "owner": "neutral",
+      "unitType": "villager",
+      "count": 3,
+      "anchor": "captive1",
+      "spread": 2.2,
+      "tag": "castaways",
+      "markColor": "#22d3ee",
+      "displayName": {
+        "pt-BR": "Náufrago",
+        "en": "Castaway"
+      }
+    },
+    {
+      "type": "spawn",
+      "owner": "bandits",
+      "unitType": "bandit",
+      "count": 3,
+      "anchor": "isletTower2b",
+      "spread": 2.2,
+      "tag": "islet_guard",
+      "guard": {
+        "r": 8
+      }
+    },
+    {
+      "type": "spawnLandmark",
+      "kind": "ruins",
+      "anchor": "ruins1",
+      "tag": "ruins",
+      "label": {
+        "pt-BR": "Ruínas do Farol Velho",
+        "en": "Old Beacon Ruins"
+      }
     }
   ],
   "objectives": [
     {
-      "id": "primary-main",
+      "id": "p-yard",
+      "type": "build",
+      "priority": "primary",
+      "buildingType": "shipyard",
+      "count": 1,
+      "marker": {
+        "area": {
+          "anchor": "shipyard1",
+          "r": 12
+        },
+        "style": "goal",
+        "seconds": 120
+      },
+      "title": {
+        "pt-BR": "Erguer o Estaleiro",
+        "en": "Raise the Shipyard"
+      },
+      "description": {
+        "pt-BR": "Na costa de leste da nossa margem (o círculo dourado). Exige o Quartel, que já existe.",
+        "en": "On the east coast of our shore (the golden circle). It needs the Barracks, which already exists."
+      }
+    },
+    {
+      "id": "p-platforms",
+      "type": "build",
+      "priority": "primary",
+      "buildingType": "oil_platform",
+      "count": 2,
+      "title": {
+        "pt-BR": "Erguer 2 Plataformas de petróleo",
+        "en": "Raise 2 Oil Platforms"
+      },
+      "description": {
+        "pt-BR": "O Petroleiro constrói a Plataforma sobre um poço do mar. Dois poços ficam perto da nossa costa; dois, no meio do canal.",
+        "en": "A Tanker builds the Platform on a sea well. Two wells lie near our coast; two mid-channel."
+      }
+    },
+    {
+      "id": "p-oil",
+      "type": "collect",
+      "priority": "primary",
+      "resource": "oil",
+      "amount": 2500,
+      "mode": "gathered",
+      "title": {
+        "pt-BR": "Bombear 2.500 de petróleo",
+        "en": "Pump 2,500 oil"
+      },
+      "description": {
+        "pt-BR": "Os Petroleiros levam o óleo da Plataforma à Refinaria, na costa. Sem Refinaria o óleo não entra.",
+        "en": "Tankers carry oil from the Platform to the Refinery on the coast. Without a Refinery no oil comes in."
+      }
+    },
+    {
+      "id": "p-patrol",
       "type": "destroy",
       "priority": "primary",
       "select": {
-        "tag": "enemy_base"
+        "tag": "patrol"
+      },
+      "count": 3,
+      "title": {
+        "pt-BR": "Afundar a frota de patrulha orc",
+        "en": "Sink the orc patrol fleet"
+      },
+      "description": {
+        "pt-BR": "Três Galés rondam o meio do canal, perto dos poços do lado dos Clãs.",
+        "en": "Three Galleys prowl mid-channel, near the wells on the Clans' side."
+      }
+    },
+    {
+      "id": "p-fleet",
+      "type": "destroy",
+      "priority": "primary",
+      "active": false,
+      "select": {
+        "tag": "orc_fleet"
+      },
+      "count": 15,
+      "title": {
+        "pt-BR": "Dominar o mar: afundar as 3 levas da frota orca",
+        "en": "Rule the sea: sink all 3 orc fleet waves"
+      },
+      "description": {
+        "pt-BR": "Orvanna manda 3 levas de navios (15 ao todo, a última com um Leviatã de Ferro). Afunde-os antes que cheguem à costa.",
+        "en": "Orvanna sends 3 fleet waves (15 ships in all, the last with an Iron Leviathan). Sink them before they reach the coast."
+      }
+    },
+    {
+      "id": "s-frigates",
+      "type": "train",
+      "priority": "secondary",
+      "units": [
+        {
+          "type": "frigate",
+          "count": 3
+        }
+      ],
+      "title": {
+        "pt-BR": "Treinar 3 Fragatas",
+        "en": "Train 3 Frigates"
+      },
+      "description": {
+        "pt-BR": "No Estaleiro; cada uma custa 50 de petróleo. Só contam as treinadas nesta missão.",
+        "en": "At the Shipyard; each costs 50 oil. Only those trained in this mission count."
+      }
+    },
+    {
+      "id": "s-outpost",
+      "type": "build",
+      "priority": "secondary",
+      "buildingType": "castle",
+      "count": 2,
+      "marker": {
+        "area": {
+          "anchor": "outpost1",
+          "r": 12
+        },
+        "style": "goal",
+        "seconds": 120
       },
       "title": {
-        "pt-BR": "Erguer um Estaleiro e Plataformas de Petróleo",
-        "en": "Raise a Shipyard and Oil Platforms"
+        "pt-BR": "Fundar o Posto do Cabo: um Centro extra",
+        "en": "Found Cape Post: an extra Town Center"
+      },
+      "description": {
+        "pt-BR": "O ouro só entra no Paço. Ao lado da mina grande, a norte e longe do Paço, o círculo dourado mostra onde cabe um Centro (tecla Q).",
+        "en": "Gold only enters the Keep. Beside the big mine, far north of the Keep, the golden circle shows where a Town Center fits (Q key)."
       }
+    },
+    {
+      "id": "s-rescue",
+      "type": "rescue",
+      "priority": "secondary",
+      "tag": "castaways",
+      "count": 3,
+      "title": {
+        "pt-BR": "Resgatar 3 náufragos na ilhota do sul",
+        "en": "Rescue 3 castaways on the southern islet"
+      },
+      "description": {
+        "pt-BR": "Bandidos da Irmandade da Maré os mantêm numa ilhota no meio do canal. Navios de guerra limpam a praia; uma Barcaça leva tropas.",
+        "en": "Brotherhood of the Tide bandits hold them on an islet mid-channel. Warships clear the beach; a Barge carries troops."
+      }
+    },
+    {
+      "id": "s-dock",
+      "type": "destroy",
+      "priority": "secondary",
+      "select": {
+        "tag": "orc_dock"
+      },
+      "count": 1,
+      "title": {
+        "pt-BR": "Destruir a Doca do Clã",
+        "en": "Destroy the Clan's Dock"
+      },
+      "description": {
+        "pt-BR": "É de onde saem os navios de Orvanna, na costa de leste. Fragatas e Couraçados alcançam a costa.",
+        "en": "It is where Orvanna's ships launch, on the east coast. Frigates and Dreadnoughts reach the shore."
+      }
+    },
+    {
+      "id": "h-ruins",
+      "type": "flag",
+      "priority": "hidden",
+      "active": true,
+      "condition": {
+        "type": "area",
+        "owner": "player",
+        "area": {
+          "anchor": "ruins1",
+          "r": 7
+        }
+      },
+      "title": {
+        "pt-BR": "As Ruínas do Farol Velho",
+        "en": "The Old Beacon Ruins"
+      },
+      "description": {
+        "pt-BR": "Uma ponta de terra no extremo noroeste da nossa margem. Mande alguém até lá.",
+        "en": "A spit of land at the far northwest of our shore. Send someone there."
+      }
+    },
+    {
+      "id": "h-stella",
+      "type": "flag",
+      "priority": "hidden",
+      "active": true,
+      "condition": {
+        "type": "objective",
+        "id": "p-fleet",
+        "status": "completed"
+      },
+      "failWhen": {
+        "type": "dead",
+        "select": {
+          "tag": "stella"
+        },
+        "count": 1
+      },
+      "title": {
+        "pt-BR": "Não perder a Estrela-d'Alva",
+        "en": "Do not lose the Dawn Star"
+      },
+      "description": {
+        "pt-BR": "Termine a missão com a caravela-insígnia ainda a flutuar.",
+        "en": "Finish the mission with the flagship caravel still afloat."
+      }
+    }
+  ],
+  "triggers": [
+    {
+      "id": "intro",
+      "when": {
+        "type": "time",
+        "at": 0
+      },
+      "actions": [
+        {
+          "type": "music",
+          "id": "on"
+        },
+        {
+          "type": "reveal",
+          "anchor": "shipyard1",
+          "radius": 22,
+          "ttl": 54
+        },
+        {
+          "type": "reveal",
+          "anchor": "wellMid1",
+          "radius": 26,
+          "ttl": 54
+        },
+        {
+          "type": "reveal",
+          "anchor": "islet2",
+          "radius": 22,
+          "ttl": 54
+        },
+        {
+          "type": "reveal",
+          "anchor": "islet1",
+          "radius": 20,
+          "ttl": 54
+        },
+        {
+          "type": "reveal",
+          "anchor": "shipyard2",
+          "radius": 26,
+          "ttl": 54
+        },
+        {
+          "type": "reveal",
+          "anchor": "outpost1",
+          "radius": 20,
+          "ttl": 54
+        },
+        {
+          "type": "cutscene",
+          "id": "baixio",
+          "duration": 52,
+          "skippable": true,
+          "steps": [
+            {
+              "at": 0,
+              "anchor": "playerStart",
+              "zoom": 1.15,
+              "dialog": {
+                "speaker": {
+                  "pt-BR": "Capitão Brann",
+                  "en": "Captain Brann"
+                },
+                "portrait": "⚔️",
+                "text": {
+                  "pt-BR": "Baixio do Breu. Duas margens, e entre elas um canal de água escura que ninguém atravessa a pé. Eu sou Brann, capitão da guarnição: o comando do campo é seu, comandante.",
+                  "en": "Pitch Shallows. Two shores, and between them a channel of dark water nobody crosses on foot. I am Brann, captain of the garrison: command of the field is yours, Commander."
+                },
+                "duration": 9
+              }
+            },
+            {
+              "at": 9,
+              "anchor": "shipyard1",
+              "zoom": 1.1,
+              "dialog": {
+                "speaker": {
+                  "pt-BR": "Capitão Brann",
+                  "en": "Captain Brann"
+                },
+                "portrait": "⚔️",
+                "text": {
+                  "pt-BR": "Esta é a nossa costa de leste. Aqui cabe o Estaleiro, e logo ao lado a Refinaria. O Quartel da guarnição já está de pé, é o que o Estaleiro exige.",
+                  "en": "This is our east coast. The Shipyard fits here, and the Refinery right beside it. The garrison Barracks already stands, which is what the Shipyard needs."
+                },
+                "duration": 8
+              }
+            },
+            {
+              "at": 17,
+              "anchor": "wellMid1",
+              "zoom": 1.05,
+              "dialog": {
+                "speaker": {
+                  "pt-BR": "Capitão Brann",
+                  "en": "Captain Brann"
+                },
+                "portrait": "⚔️",
+                "text": {
+                  "pt-BR": "O breu sobe do fundo em quatro poços perto das costas e em dois no meio do canal. Quem tiver plataformas ali terá petróleo; quem tiver petróleo terá navios.",
+                  "en": "Pitch rises from the seabed at four wells near the coasts and two mid-channel. Whoever holds platforms there will have oil; whoever has oil will have ships."
+                },
+                "duration": 8
+              }
+            },
+            {
+              "at": 25,
+              "anchor": "islet2",
+              "zoom": 1.1,
+              "dialog": {
+                "speaker": {
+                  "pt-BR": "Capitão Brann",
+                  "en": "Captain Brann"
+                },
+                "portrait": "⚔️",
+                "text": {
+                  "pt-BR": "Estas duas ilhotas guardam madeira e chão para torres. Uma torre ali vigia os poços do meio. Dizem que há náufragos na do sul, e bandidos em cima deles.",
+                  "en": "These two islets hold timber and room for towers. A tower there watches the mid-channel wells. They say there are castaways on the southern one, with bandits on top of them."
+                },
+                "duration": 8
+              }
+            },
+            {
+              "at": 33,
+              "anchor": "shipyard2",
+              "zoom": 1.0,
+              "dialog": {
+                "speaker": {
+                  "pt-BR": "Capitão Brann",
+                  "en": "Captain Brann"
+                },
+                "portrait": "⚔️",
+                "text": {
+                  "pt-BR": "A leste, a costa dos Clãs. Aquela Doca é de onde sai a frota de Orvanna Maré-Negra. Três Galés já rondam o canal; mais virão em ondas.",
+                  "en": "East, the Clans' coast. That Dock is where Orvanna Blacktide's fleet launches. Three Galleys already prowl the channel; more will come in waves."
+                },
+                "duration": 8
+              }
+            },
+            {
+              "at": 41,
+              "anchor": "outpost1",
+              "zoom": 1.05,
+              "dialog": {
+                "speaker": {
+                  "pt-BR": "Capitão Brann",
+                  "en": "Captain Brann"
+                },
+                "portrait": "⚔️",
+                "text": {
+                  "pt-BR": "E ao norte da nossa margem, a mina grande do Cabo, longe do Paço. Ouro só entra no Paço, comandante: lá vai um Centro novo.",
+                  "en": "And north on our shore, the big Cape mine, far from the Keep. Gold only enters the Keep, Commander: a new Town Center goes there."
+                },
+                "duration": 8
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "tier-up",
+      "when": {
+        "type": "time",
+        "at": 45
+      },
+      "actions": [
+        {
+          "type": "setTier",
+          "owner": "player",
+          "tier": 3
+        },
+        {
+          "type": "sound",
+          "id": "build"
+        }
+      ]
+    },
+    {
+      "id": "first-steps",
+      "when": {
+        "type": "time",
+        "at": 62
+      },
+      "actions": [
+        {
+          "type": "dialog",
+          "speaker": {
+            "pt-BR": "Capitão Brann",
+            "en": "Captain Brann"
+          },
+          "portrait": "⚔️",
+          "duration": 9,
+          "text": {
+            "pt-BR": "Primeiro o Estaleiro, depois a Refinaria e um Petroleiro. Ouro e madeira não vão faltar se os aldeões não pararem.",
+            "en": "Shipyard first, then the Refinery and a Tanker. Gold and timber will not run short if the villagers keep working."
+          }
+        }
+      ]
+    },
+    {
+      "id": "shipyard-up",
+      "when": {
+        "type": "count",
+        "select": {
+          "buildingType": "shipyard",
+          "owner": "player"
+        },
+        "op": ">=",
+        "value": 1
+      },
+      "actions": [
+        {
+          "type": "sound",
+          "id": "build"
+        },
+        {
+          "type": "giveResources",
+          "owner": "player",
+          "oil": 100
+        },
+        {
+          "type": "dialog",
+          "speaker": {
+            "pt-BR": "Brumar, do Porto",
+            "en": "Brumar of the Port"
+          },
+          "portrait": "⚓",
+          "duration": 9,
+          "text": {
+            "pt-BR": "Estaleiro erguido! Aqui é Brumar, do Porto: mandamos o primeiro lote de petróleo, 100 barris, para a Refinaria receber. O resto o senhor bombeia.",
+            "en": "Shipyard raised! Brumar of the Port here: we sent a first batch of oil, 100 barrels, so the Refinery has something to receive. The rest you pump yourself."
+          }
+        },
+        {
+          "type": "message",
+          "text": {
+            "pt-BR": "Brumar enviou 100 de petróleo.",
+            "en": "Brumar sent 100 oil."
+          }
+        }
+      ]
+    },
+    {
+      "id": "platform-up",
+      "when": {
+        "type": "count",
+        "select": {
+          "buildingType": "oil_platform",
+          "owner": "player"
+        },
+        "op": ">=",
+        "value": 1
+      },
+      "actions": [
+        {
+          "type": "sound",
+          "id": "build"
+        },
+        {
+          "type": "dialog",
+          "speaker": {
+            "pt-BR": "Capitão Brann",
+            "en": "Captain Brann"
+          },
+          "portrait": "⚔️",
+          "duration": 8,
+          "text": {
+            "pt-BR": "Primeira Plataforma. Agora o Petroleiro precisa levar o óleo à Refinaria. E guarde a costa: plataforma sem navio é alvo.",
+            "en": "First Platform. Now the Tanker has to carry the oil to the Refinery. And guard the coast: a platform without ships is a target."
+          }
+        }
+      ]
+    },
+    {
+      "id": "stella",
+      "when": {
+        "type": "time",
+        "at": 300
+      },
+      "actions": [
+        {
+          "type": "spawn",
+          "owner": "player",
+          "unitType": "frigate",
+          "count": 1,
+          "anchor": "stellaArrival",
+          "tag": "stella",
+          "markColor": "#f0abfc",
+          "displayName": {
+            "pt-BR": "Estrela-d'Alva",
+            "en": "Dawn Star"
+          },
+          "order": {
+            "kind": "move",
+            "anchor": "shipyard1Water",
+            "dx": -4,
+            "dz": -4
+          }
+        },
+        {
+          "type": "giveResources",
+          "owner": "player",
+          "oil": 80
+        },
+        {
+          "type": "sound",
+          "id": "alarm"
+        },
+        {
+          "type": "dialog",
+          "speaker": {
+            "pt-BR": "Capitã Isolda Marés",
+            "en": "Captain Isolda Tides"
+          },
+          "portrait": "⚓",
+          "duration": 9,
+          "text": {
+            "pt-BR": "Estrela-d'Alva chegando ao Baixio, comandante! Capitã Isolda Marés. Trago um casco de guerra e 80 barris de Brumar. Digam onde ancorar.",
+            "en": "Dawn Star arriving at the Shallows, Commander! Captain Isolda Tides. I bring a warship and 80 barrels from Brumar. Tell me where to anchor."
+          }
+        },
+        {
+          "type": "message",
+          "text": {
+            "pt-BR": "A caravela Estrela-d'Alva juntou-se à frota (+80 de petróleo).",
+            "en": "The caravel Dawn Star has joined the fleet (+80 oil)."
+          }
+        }
+      ]
+    },
+    {
+      "id": "orc-voice",
+      "when": {
+        "type": "time",
+        "at": 365
+      },
+      "actions": [
+        {
+          "type": "dialog",
+          "speaker": {
+            "pt-BR": "Orvanna Maré-Negra",
+            "en": "Orvanna Blacktide"
+          },
+          "portrait": "🌊",
+          "duration": 8,
+          "text": {
+            "pt-BR": "Aurelan quer o nosso breu? O canal é nosso. Primeira leva, ao mar. Quero as plataformas deles no fundo antes do meio-dia.",
+            "en": "Aurelan wants our pitch? The channel is ours. First wave, to sea. I want their platforms on the bottom before noon."
+          }
+        }
+      ]
+    },
+    {
+      "id": "wave-1",
+      "when": {
+        "type": "time",
+        "at": 380
+      },
+      "actions": [
+        {
+          "type": "spawn",
+          "owner": "enemy",
+          "units": [
+            {
+              "type": "war_galley",
+              "count": 4
+            }
+          ],
+          "anchor": "fleetStart2",
+          "spread": 4.5,
+          "tag": "orc_fleet",
+          "order": {
+            "kind": "attackMove",
+            "anchor": "well2"
+          }
+        },
+        {
+          "type": "setObjective",
+          "id": "p-fleet",
+          "status": "active"
+        },
+        {
+          "type": "sound",
+          "id": "alarm"
+        },
+        {
+          "type": "message",
+          "text": {
+            "pt-BR": "Primeira leva orca: 4 Galés rumo às Plataformas.",
+            "en": "First orc wave: 4 Galleys heading for the Platforms."
+          }
+        }
+      ]
+    },
+    {
+      "id": "wave-2",
+      "when": {
+        "type": "time",
+        "at": 540
+      },
+      "actions": [
+        {
+          "type": "spawn",
+          "owner": "enemy",
+          "units": [
+            {
+              "type": "war_galley",
+              "count": 6
+            }
+          ],
+          "anchor": "fleetStart2",
+          "spread": 4.5,
+          "tag": "orc_fleet",
+          "order": {
+            "kind": "attackMove",
+            "anchor": "shipyard1Water"
+          }
+        },
+        {
+          "type": "sound",
+          "id": "alarm"
+        },
+        {
+          "type": "message",
+          "text": {
+            "pt-BR": "Segunda leva: 6 Galés rumo ao Estaleiro.",
+            "en": "Second wave: 6 Galleys heading for the Shipyard."
+          }
+        },
+        {
+          "type": "dialog",
+          "speaker": {
+            "pt-BR": "Capitão Brann",
+            "en": "Captain Brann"
+          },
+          "portrait": "⚔️",
+          "duration": 9,
+          "text": {
+            "pt-BR": "Seis Galés rumo ao Estaleiro! Se uma encostar na praia, desembarca gente. Fragatas no canal, comandante, e torres na costa ajudam.",
+            "en": "Six Galleys heading for the Shipyard! If one touches the beach, people land. Frigates in the channel, Commander, and coast towers help."
+          }
+        }
+      ]
+    },
+    {
+      "id": "wave-3",
+      "when": {
+        "type": "time",
+        "at": 700
+      },
+      "actions": [
+        {
+          "type": "spawn",
+          "owner": "enemy",
+          "units": [
+            {
+              "type": "iron_leviathan",
+              "count": 1
+            },
+            {
+              "type": "war_galley",
+              "count": 4
+            }
+          ],
+          "anchor": "fleetStart2",
+          "spread": 4.5,
+          "tag": "orc_fleet",
+          "order": {
+            "kind": "attackMove",
+            "anchor": "shipyard1Water"
+          }
+        },
+        {
+          "type": "sound",
+          "id": "alarm"
+        },
+        {
+          "type": "message",
+          "text": {
+            "pt-BR": "Terceira leva: um Leviatã de Ferro e 4 Galés.",
+            "en": "Third wave: an Iron Leviathan and 4 Galleys."
+          }
+        },
+        {
+          "type": "dialog",
+          "speaker": {
+            "pt-BR": "Orvanna Maré-Negra",
+            "en": "Orvanna Blacktide"
+          },
+          "portrait": "🌊",
+          "duration": 8,
+          "text": {
+            "pt-BR": "O Leviatã não precisa chegar perto para afundar um Estaleiro. Que tentem pará-lo.",
+            "en": "The Leviathan need not come close to sink a Shipyard. Let them try to stop it."
+          }
+        }
+      ]
+    },
+    {
+      "id": "landing",
+      "when": {
+        "all": [
+          {
+            "type": "time",
+            "at": 330
+          },
+          {
+            "type": "area",
+            "owner": "enemy",
+            "area": {
+              "anchor": "shipyard1",
+              "r": 24
+            },
+            "unitType": "war_galley"
+          }
+        ]
+      },
+      "actions": [
+        {
+          "type": "spawn",
+          "owner": "enemy",
+          "units": [
+            {
+              "type": "grunt",
+              "count": 4
+            },
+            {
+              "type": "axethrower",
+              "count": 2
+            }
+          ],
+          "anchor": "beach1",
+          "spread": 3,
+          "tag": "landing",
+          "order": {
+            "kind": "attackMove",
+            "anchor": "playerStart"
+          }
+        },
+        {
+          "type": "incVar",
+          "name": "landings"
+        },
+        {
+          "type": "sound",
+          "id": "alarm"
+        },
+        {
+          "type": "dialog",
+          "speaker": {
+            "pt-BR": "Capitão Brann",
+            "en": "Captain Brann"
+          },
+          "portrait": "⚔️",
+          "duration": 8,
+          "text": {
+            "pt-BR": "Uma Galé encostou e soltou gente na praia! Guarnição, comigo! Era para ter ficado no canal.",
+            "en": "A Galley touched shore and put people on the beach! Garrison, with me! It should have been stopped in the channel."
+          }
+        }
+      ],
+      "once": false,
+      "cooldown": 75
+    },
+    {
+      "id": "patrol-sunk",
+      "when": {
+        "type": "dead",
+        "select": {
+          "tag": "patrol"
+        },
+        "count": 3
+      },
+      "actions": [
+        {
+          "type": "sound",
+          "id": "victory"
+        },
+        {
+          "type": "dialog",
+          "speaker": {
+            "pt-BR": "Capitão Brann",
+            "en": "Captain Brann"
+          },
+          "portrait": "⚔️",
+          "duration": 8,
+          "text": {
+            "pt-BR": "A patrulha foi ao fundo. O meio do canal é livre, por enquanto: ponham plataformas nos poços de lá.",
+            "en": "The patrol is on the bottom. The middle of the channel is free, for now: put platforms on the wells there."
+          }
+        }
+      ]
+    },
+    {
+      "id": "refinery-up",
+      "when": {
+        "type": "count",
+        "select": {
+          "buildingType": "refinery",
+          "owner": "player"
+        },
+        "op": ">=",
+        "value": 1
+      },
+      "actions": [
+        {
+          "type": "sound",
+          "id": "build"
+        },
+        {
+          "type": "dialog",
+          "speaker": {
+            "pt-BR": "Capitão Brann",
+            "en": "Captain Brann"
+          },
+          "portrait": "⚔️",
+          "duration": 7,
+          "text": {
+            "pt-BR": "Refinaria pronta. Agora o óleo vira Fragata, Barcaça e Couraçado.",
+            "en": "Refinery ready. Now oil becomes Frigates, Barges and Dreadnoughts."
+          }
+        }
+      ]
+    },
+    {
+      "id": "outpost-up",
+      "when": {
+        "type": "objective",
+        "id": "s-outpost",
+        "status": "completed"
+      },
+      "actions": [
+        {
+          "type": "sound",
+          "id": "victory"
+        },
+        {
+          "type": "giveResources",
+          "owner": "player",
+          "gold": 150
+        },
+        {
+          "type": "dialog",
+          "speaker": {
+            "pt-BR": "Capitão Brann",
+            "en": "Captain Brann"
+          },
+          "portrait": "⚔️",
+          "duration": 8,
+          "text": {
+            "pt-BR": "Posto do Cabo de pé: agora a mina grande rende de verdade. Mais 150 de ouro do tesouro de Aurelan.",
+            "en": "Cape Post up: now the big mine really pays. Another 150 gold from Aurelan's treasury."
+          }
+        }
+      ]
+    },
+    {
+      "id": "islet-near",
+      "when": {
+        "type": "area",
+        "owner": "player",
+        "area": {
+          "anchor": "islet2",
+          "r": 30
+        }
+      },
+      "actions": [
+        {
+          "type": "dialog",
+          "speaker": {
+            "pt-BR": "Capitão Brann",
+            "en": "Captain Brann"
+          },
+          "portrait": "⚔️",
+          "duration": 8,
+          "text": {
+            "pt-BR": "Ali, a ilhota do sul: fumaça de fogueira. Os náufragos estão com os bandidos. Acabem com os guardas e eles são nossos.",
+            "en": "There, the southern islet: campfire smoke. The castaways are with the bandits. Finish the guards and they are ours."
+          }
+        }
+      ]
+    },
+    {
+      "id": "free-castaways",
+      "when": {
+        "type": "dead",
+        "select": {
+          "tag": "islet_guard"
+        },
+        "count": 3
+      },
+      "actions": [
+        {
+          "type": "transfer",
+          "select": {
+            "tag": "castaways"
+          },
+          "to": "player"
+        },
+        {
+          "type": "incVar",
+          "name": "rescued",
+          "by": 3
+        },
+        {
+          "type": "sound",
+          "id": "build"
+        },
+        {
+          "type": "message",
+          "text": {
+            "pt-BR": "Náufragos resgatados!",
+            "en": "Castaways rescued!"
+          }
+        }
+      ]
+    },
+    {
+      "id": "ruins-hint",
+      "when": {
+        "type": "var",
+        "name": "rescued",
+        "op": ">=",
+        "value": 3
+      },
+      "actions": [
+        {
+          "type": "revealObjective",
+          "id": "h-ruins"
+        },
+        {
+          "type": "dialog",
+          "speaker": {
+            "pt-BR": "Náufrago resgatado",
+            "en": "Rescued castaway"
+          },
+          "portrait": "⛵",
+          "duration": 10,
+          "text": {
+            "pt-BR": "Obrigado, comandante! Quando o nosso barco virou, vimos um farol em ruínas na ponta noroeste da margem de Aurelan. Dizem que os antigos guardavam suprimentos lá.",
+            "en": "Thank you, Commander! When our boat capsized we saw a ruined beacon on the northwest tip of the Aurelan shore. They say the old ones kept supplies there."
+          }
+        }
+      ]
+    },
+    {
+      "id": "ruins-found",
+      "when": {
+        "type": "objective",
+        "id": "h-ruins",
+        "status": "completed"
+      },
+      "actions": [
+        {
+          "type": "giveResources",
+          "owner": "player",
+          "gold": 150,
+          "oil": 100
+        },
+        {
+          "type": "lightLandmark",
+          "tag": "ruins"
+        },
+        {
+          "type": "sound",
+          "id": "victory"
+        },
+        {
+          "type": "message",
+          "text": {
+            "pt-BR": "Ruínas do Farol Velho achadas: +150 de ouro e +100 de petróleo.",
+            "en": "Old Beacon Ruins found: +150 gold and +100 oil."
+          }
+        }
+      ]
+    },
+    {
+      "id": "dock-down",
+      "when": {
+        "type": "objective",
+        "id": "s-dock",
+        "status": "completed"
+      },
+      "actions": [
+        {
+          "type": "sound",
+          "id": "victory"
+        },
+        {
+          "type": "giveResources",
+          "owner": "player",
+          "gold": 200
+        },
+        {
+          "type": "dialog",
+          "speaker": {
+            "pt-BR": "Capitão Brann",
+            "en": "Captain Brann"
+          },
+          "portrait": "⚔️",
+          "duration": 8,
+          "text": {
+            "pt-BR": "A Doca do Clã arde. Sem ela, Orvanna perde o seu porto de lançamento. +200 de ouro.",
+            "en": "The Clan's Dock burns. Without it, Orvanna loses her launching port. +200 gold."
+          }
+        }
+      ]
+    },
+    {
+      "id": "castle-fallen",
+      "when": {
+        "type": "count",
+        "select": {
+          "buildingType": "castle",
+          "owner": "player"
+        },
+        "op": "==",
+        "value": 0
+      },
+      "actions": [
+        {
+          "type": "defeat",
+          "text": {
+            "pt-BR": "O Paço caiu. A margem de Aurelan é dos Clãs.",
+            "en": "The Keep has fallen. The Aurelan shore belongs to the Clans."
+          }
+        }
+      ]
+    },
+    {
+      "id": "brann-fallen",
+      "when": {
+        "type": "dead",
+        "select": {
+          "tag": "brann"
+        },
+        "count": 1
+      },
+      "actions": [
+        {
+          "type": "defeat",
+          "text": {
+            "pt-BR": "O Capitão Brann caiu. Sem ele a guarnição se desfaz e a margem cai.",
+            "en": "Captain Brann has fallen. Without him the garrison breaks and the shore falls."
+          }
+        }
+      ]
+    },
+    {
+      "id": "all-done",
+      "when": {
+        "all": [
+          {
+            "type": "objective",
+            "id": "p-yard",
+            "status": "completed"
+          },
+          {
+            "type": "objective",
+            "id": "p-platforms",
+            "status": "completed"
+          },
+          {
+            "type": "objective",
+            "id": "p-oil",
+            "status": "completed"
+          },
+          {
+            "type": "objective",
+            "id": "p-patrol",
+            "status": "completed"
+          },
+          {
+            "type": "objective",
+            "id": "p-fleet",
+            "status": "completed"
+          }
+        ]
+      },
+      "actions": [
+        {
+          "type": "sound",
+          "id": "victory"
+        },
+        {
+          "type": "cutscene",
+          "id": "finale",
+          "duration": 18,
+          "skippable": true,
+          "steps": [
+            {
+              "at": 0,
+              "anchor": "wellMid1",
+              "zoom": 1.1,
+              "dialog": {
+                "speaker": {
+                  "pt-BR": "Capitão Brann",
+                  "en": "Captain Brann"
+                },
+                "portrait": "⚔️",
+                "text": {
+                  "pt-BR": "Silêncio no canal. As Plataformas bombeiam e a frota orca está no fundo: o Baixio do Breu é da Liga.",
+                  "en": "Silence on the channel. The Platforms pump and the orc fleet is on the bottom: the Pitch Shallows belong to the League."
+                },
+                "duration": 8
+              }
+            },
+            {
+              "at": 9,
+              "anchor": "shipyard1",
+              "zoom": 1.1,
+              "dialog": {
+                "speaker": {
+                  "pt-BR": "Capitã Isolda Marés",
+                  "en": "Captain Isolda Tides"
+                },
+                "portrait": "⚓",
+                "text": {
+                  "pt-BR": "Estrela-d'Alva ao seu dispor para o que vier, comandante. Brumar manda dizer que o breu da Liga paga as próximas ilhas.",
+                  "en": "Dawn Star at your disposal for whatever comes, Commander. Brumar says the League's pitch pays for the next islands."
+                },
+                "duration": 8
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "finale-clock",
+      "when": {
+        "type": "trigger",
+        "id": "all-done"
+      },
+      "actions": [
+        {
+          "type": "incVar",
+          "name": "fin_clock",
+          "by": 1
+        }
+      ],
+      "once": false,
+      "cooldown": 18
+    },
+    {
+      "id": "finale-victory",
+      "when": {
+        "type": "var",
+        "name": "fin_clock",
+        "op": ">=",
+        "value": 1
+      },
+      "actions": [
+        {
+          "type": "victory"
+        }
+      ]
     }
   ]
 }

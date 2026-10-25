@@ -78,11 +78,11 @@ export const CAMPAIGN_PRESETS = freeze({
     layout: freeze({ bases: [{ entities: [0], side: 'west' }, { entities: [0], side: 'east' }], minSeparation: 66 }),
     verify: freeze({ landRange: [0.25, 0.8], minRivers: 0 })
   }),
-  /** Palco 4 (M2-04): atol de recifes; uma ilha comprida de "areia" com as bases nas pontas, ilhotas e baixios espalhados, poços de petróleo no mar fundo. */
+  /** Palco 4 (M3-05): dois continentes SEM ligação por terra (oeste exuberante = Liga, leste árido = Clãs) com ~90 u de mar entre as costas, 2 ilhotas no meio e poços no mar (2 por lado + 2 no meio). */
   'camp-04-baixio-do-breu': freeze({
-    id: 'camp-04-baixio-do-breu', name: 'Baixio do Breu', uso: 'campanha, palco 4 (frota)', tileset: 'exuberante', naval: true,
-    options: freeze({ size: 224, grid: 224, continents: 1, continentBiome: 'atoll', continentDims: [0.35, 0.18], islands: 0, islets: 0, scatterIslets: 14, scatterRadius: [2.8, 5.5], scatterZone: 0.42, bays: 3, peninsulas: 2, roughness: 1.1, gap: 12, lava: false, rivers: 0, shoals: 34, shoalRadius: [7, 15], shoalBiome: 'sand', shoalMinCoast: 4 }),
-    layout: freeze({ bases: [{ entities: [0], side: 'west' }, { entities: [0], side: 'east' }], minSeparation: 90 }),
+    id: 'camp-04-baixio-do-breu', name: 'Baixio do Breu', uso: 'campanha, palco 4 (frota)', tileset: 'exuberante', naval: true, isolated: true, woodTarget: 6300,
+    options: freeze({ size: 256, grid: 256, continents: 2, continentDims: [0.15, 0.4], continentSpacing: 0.37, gap: 16, islands: 0, islets: 0, scatterIslets: 2, scatterRadius: [13, 15.5], scatterZone: 0.16, bays: 3, peninsulas: 2, roughness: 1.0, mountain: 0.5, lava: false, aridSwamp: false, rivers: 0 }),
+    layout: freeze({ bases: [{ entities: [0], side: 'west' }, { entities: [1], side: 'east' }], minSeparation: 90 }),
     verify: freeze({ landRange: [0.12, 0.5], minRivers: 0 })
   }),
   /** Palco 5 (M2-04): floresta densa com clareiras, rio curto com um vau; Liga a oeste, Clã a leste. */
@@ -164,11 +164,15 @@ export function makeCtx(m) {
   const hAt = (x, z) => getHeightForMap(m, x, z);
   const s0 = m.startSlots[0];
   const seen0 = floodFill(land, s0.x, s0.z);
+  const seen1 = m.startSlots[1] ? floodFill(land, m.startSlots[1].x, m.startSlots[1].z) : seen0; // M3-05: mapas de dois continentes (cada base alcança só a sua terra)
   const oc = oceanSeed(sea, m.playable);
   const oceanSeen = oc ? floodFill(sea, oc.x, oc.z) : new Uint8Array(sea.numCells);
   const ctx = {
-    m, land, sea, half, hAt, s0, s1: m.startSlots[1], seen0, oceanSeen,
+    m, land, sea, half, hAt, s0, s1: m.startSlots[1], seen0, seen1, oceanSeen,
     reach: (x, z) => isReached(land, seen0, x, z),
+    /** Alcançável por terra a partir do slot 1 (mapas com dois continentes isolados). */
+    reach1: (x, z) => isReached(land, seen1, x, z),
+    reachAny: (x, z) => isReached(land, seen0, x, z) || isReached(land, seen1, x, z),
     oceanOk: (x, z) => hAt(x, z) < m.waterLevel && sea.isWalkableWorld(x, z) && isReached(sea, oceanSeen, x, z),
     /** Chão "comum" (nem neve, nem rocha nua, nem gelo): para acampamentos e marcos nos palcos verdes. */
     plain: (x, z) => ![BIOME.SNOW, BIOME.ROCK, BIOME.ICE, BIOME.VOLCANIC, BIOME.LAVA].includes(getBiomeAt(m, x, z)),
@@ -244,9 +248,9 @@ const pt = (p) => ({ x: r1(p.x), z: r1(p.z) });
 // ---------------------------------------------------------------------------------------------------------------------------
 
 /** Mina de ouro extra de `amount` GOLD_AMOUNT a `dMin`–`dMax` u do pátio `s` (expansão); registra em `m.resources` e devolve o ponto. */
-function addGold(ctx, s, name, extra, { dMin = 20, dMax = 36, target = 26, plain = false } = {}) {
+function addGold(ctx, s, name, extra, { dMin = 20, dMax = 36, target = 26, plain = false, reach = ctx.reach } = {}) {
   const g = need(ctx.scan({
-    test: (x, z) => ctx.dryClear(x, z, 5) && (!plain || ctx.plain(x, z)) && ctx.reach(x, z) && ctx.free(x, z, 4) && hyp({ x, z }, s) >= dMin && hyp({ x, z }, s) <= dMax,
+    test: (x, z) => ctx.dryClear(x, z, 5) && (!plain || ctx.plain(x, z)) && reach(x, z) && ctx.free(x, z, 4) && hyp({ x, z }, s) >= dMin && hyp({ x, z }, s) <= dMax,
     score: (x, z) => Math.abs(hyp({ x, z }, s) - target)
   }), `a mina extra ${name}`);
   ctx.take(g, 14);
@@ -282,7 +286,7 @@ function moveInitialGold(ctx) {
     };
     const g = need(ctx.scan({
       step: 1,
-      test: (x, z) => ctx.dryClear(x, z, 4) && ctx.reach(x, z) && freeOffForests({ x, z }, 3) && Math.abs(hyp({ x, z }, s) - INITIAL_MINE_DIST) <= 2 && straightDry({ x, z }),
+      test: (x, z) => ctx.dryClear(x, z, 4) && (s === ctx.s1 ? ctx.reach1 : ctx.reach)(x, z) && freeOffForests({ x, z }, 3) && Math.abs(hyp({ x, z }, s) - INITIAL_MINE_DIST) <= 2 && straightDry({ x, z }),
       score: (x, z) => Math.abs(hyp({ x, z }, s) - INITIAL_MINE_DIST) + 6 * covers({ x, z }).length
     }), 'a mina inicial (M3-X3)');
     const cut = covers(g);
@@ -866,46 +870,187 @@ const nearDry = (ctx, p, name, { r = 3, minR = 0, freeR = 3 } = {}) => need(ctx.
 /** Sorteio determinístico barato por posição (ordem estável de candidatos sem PRNG). */
 const jitter = (x, z) => { const v = Math.sin(x * 12.9898 + z * 78.233) * 43758.5453; return v - Math.floor(v); };
 
-/** Palco 4: espaço para Estaleiro/Doca em cada lado, naufrágios nos baixios, rotas das frotas roteirizadas. Poços (`well1..4`) vêm do assador. */
+/** Componentes de terra (4-vizinhos) da grade estática do pathfinder de terra: `[{ size, cx, cz, cells: índices }]`. */
+function landComponents(pf) {
+  const seen = new Uint8Array(pf.numCells);
+  const out = [];
+  for (let i = 0; i < pf.numCells; i++) {
+    if (seen[i] || !pf.staticGrid[i]) continue;
+    const st = [i]; seen[i] = 1;
+    const cells = [];
+    let sx = 0, sz = 0;
+    while (st.length) {
+      const k = st.pop(); cells.push(k);
+      const c = k % pf.cols, r = (k / pf.cols) | 0;
+      const w = pf.toWorld(c, r); sx += w.x; sz += w.z;
+      for (const [dc, dr] of [[1, 0], [-1, 0], [0, 1], [0, -1]]) {
+        const cc = c + dc, rr = r + dr;
+        if (cc < 0 || rr < 0 || cc >= pf.cols || rr >= pf.rows) continue;
+        const j = rr * pf.cols + cc;
+        if (pf.staticGrid[j] && !seen[j]) { seen[j] = 1; st.push(j); }
+      }
+    }
+    out.push({ size: cells.length, cx: sx / cells.length, cz: sz / cells.length, cells });
+  }
+  return out;
+}
+
+/** M3-05: o bioma do continente dos Clãs ganha manchas de basalto/rocha em volta da base e nas pontas (só visual; o resto segue deserto/estepe). */
+function paintOrcLand(ctx, s) {
+  const { m } = ctx;
+  paintBiome(m, s.x, s.z, 12, BIOME.VOLCANIC, [BIOME.DESERT, BIOME.STEPPE, BIOME.SAND, BIOME.SAVANNA]);
+  for (let k = 0; k < 7; k++) {
+    const a = k * 2.399 + 0.5, d = 24 + (k % 3) * 11;
+    const p = { x: s.x + Math.cos(a) * d, z: s.z + Math.sin(a) * d * 1.35 };
+    if (ctx.reach1(p.x, p.z)) paintBiome(m, p.x, p.z, 6 + (k % 3) * 2, k % 2 ? BIOME.ROCK : BIOME.VOLCANIC, [BIOME.DESERT, BIOME.STEPPE, BIOME.SAVANNA]);
+  }
+}
+
+/**
+ * Palco 4 (M3-05 · "O Baixio do Breu"): dois continentes sem ligação por terra (oeste exuberante = Liga, leste árido com basalto = Clãs) e ~90 u de mar entre as costas.
+ * Âncoras: `shipyard1/2` + `shipyard1Water/2Water` (Estaleiro da Liga e Doca do Clã), `refinery1/2`, `beach1/2` (praias de embarque, voltadas ao mar do meio),
+ * `farGold1/2` + `outpost1/2` (mina grande LONGE do Centro: pede um Centro extra no `outpost`), `expansion1/2`, `islet1/2` (ilhotas do meio, norte e sul) com
+ * `isletTower1a/1b/2a/2b` (pontos de torre) e `isletWood1/2` (bosque), `wellMid1/2` (poços contestados), `captive1` (náufragos na ilhota 2), `ruins1` (marco, ponta
+ * do continente da Liga), `fleetStart1/2` (partida das frotas), `patrol1/2` (patrulha orca), `stellaArrival` (água, chegada da Estrela-d'Alva), `shipWreck1/2` (naufrágios).
+ */
 function postBaixio(ctx, extra) {
   const { m, s0, s1, half } = ctx;
+  const sides = [{ s: s0, reach: ctx.reach, n: 1 }, { s: s1, reach: ctx.reach1, n: 2 }];
+  // 0) o chão dos Clãs: basalto em volta da base (visual)
+  paintOrcLand(ctx, s1);
+  // 1) minas: a inicial a ~32 u do Centro (moveInitialGold mais abaixo), uma de expansão por lado e uma MINA GRANDE longe (exige Centro extra)
+  for (const { s, reach, n } of sides) addGold(ctx, s, `expansion${n}`, extra, { dMin: 22, dMax: 44, target: 36, reach });
+  // a mina grande fica a 62–84 u do Centro, e o sítio do Centro extra a 15–22 u dela, do lado do Centro (≥ 24 u de qualquer outro Centro)
+  for (const { s, reach, n } of sides) {
+    const g = need(ctx.scan({
+      step: 2,
+      test: (x, z) => ctx.dryClear(x, z, 6) && reach(x, z) && ctx.free(x, z, 4) && hyp({ x, z }, s) >= 56 && hyp({ x, z }, s) <= 92,
+      score: (x, z) => Math.abs(hyp({ x, z }, s) - 72) + (n === 1 ? 0 : 0)
+    }), `a mina grande ${n}`);
+    ctx.take(g, 8);
+    m.resources.push({ type: 'gold', x: r1(g.x), z: r1(g.z), amount: 9000 });
+    extra[`farGold${n}`] = pt(g);
+    const o = need(ctx.scan({
+      step: 1,
+      test: (x, z) => ctx.dryClear(x, z, 7) && reach(x, z) && ctx.free(x, z, 0) && hyp({ x, z }, g) >= 12 && hyp({ x, z }, g) <= 24 && hyp({ x, z }, s) >= 36,
+      score: (x, z) => Math.abs(hyp({ x, z }, g) - 16) + 0.05 * hyp({ x, z }, s)
+    }), `o sítio do Centro extra ${n}`);
+    ctx.take(o, 14);
+    extra[`outpost${n}`] = pt(o);
+  }
+  // 2) Estaleiro/Doca, Refinaria e praias de embarque: costa voltada ao mar do meio, com água funda e aberta
   const cache = new Map();
   const wetSpot = (x, z) => { const k = x * 1000 + z; if (!cache.has(k)) cache.set(k, ctx.waterNear(x, z, 6, 18)); return cache.get(k); };
-  const yardFor = (s, other, name) => {
+  /** Mesmo critério de `canPlaceBuilding` para construção costeira: centro em terra seca e água NAVEGÁVEL (altura <= 0,1) a `r + 1,3` u, longe de bosques (as árvores nascem do bosque). */
+  const coastalOk = (x, z, r) => {
+    if (ctx.hAt(x, z) < 1.95) return false;
+    let wet = false;
+    for (let k = 0; k < 24 && !wet; k++) wet = ctx.hAt(x + Math.sin((k / 24) * Math.PI * 2) * (r + 1.3), z + Math.cos((k / 24) * Math.PI * 2) * (r + 1.3)) <= 0.1;
+    return wet && m.forests.every((f) => hyp({ x, z }, f) >= f.radius + r + 5.5);
+  };
+  const ownWell = (n) => { const w = m.resources.filter((r) => r.type === 'oil'); const s = n === 1 ? s0 : s1; return w.reduce((a, b) => (hyp(b, s) < hyp(a, s) ? b : a)); };
+  const yard = [];
+  for (const { s, reach, n } of sides) {
+    const other = n === 1 ? s1 : s0;
     const p = need(ctx.scan({
       step: 1,
-      test: (x, z) => ctx.isShore(x, z) && ctx.reach(x, z) && hyp({ x, z }, s) >= 14 && hyp({ x, z }, s) <= 54 && ctx.free(x, z, 5) && wetSpot(x, z) && openSea(ctx, wetSpot(x, z).x, wetSpot(x, z).z, 10) >= 0.55,
-      score: (x, z) => Math.abs(hyp({ x, z }, s) - 30) - 0.1 * hyp({ x, z }, other)
-    }), `o espaço do ${name}`);
-    ctx.take(p, 14);
-    return p;
-  };
-  // uma mina de expansão por lado: com 1 mina por base o ouro acaba e a partida IA×IA trava (soak, semente 5 hard)
-  addGold(ctx, s0, 'expansion1', extra, { dMin: 20, dMax: 40, target: 28 });
-  addGold(ctx, s1, 'expansion2', extra, { dMin: 20, dMax: 40, target: 28 });
-  const y1 = yardFor(s0, s1, 'Estaleiro da Liga'), y2 = yardFor(s1, s0, 'Doca do Clã');
-  extra.shipyard1 = pt(y1); extra.shipyard1Water = ptw(wetSpot(y1.x, y1.z));
-  extra.shipyard2 = pt(y2); extra.shipyard2Water = ptw(wetSpot(y2.x, y2.z));
-  // naufrágios: água navegável encostada num baixio (recife), longe da terra, dos poços, das docas e uns dos outros
+      test: (x, z) => coastalOk(x, z, 3.6) && reach(x, z) && hyp({ x, z }, s) >= 14 && hyp({ x, z }, s) <= 62 && ctx.free(x, z, 4) && wetSpot(x, z) && openSea(ctx, wetSpot(x, z).x, wetSpot(x, z).z, 8) >= 0.5 && hyp({ x, z }, ownWell(n)) <= 70,
+      score: (x, z) => 0.3 * Math.abs(hyp({ x, z }, s) - 32) + hyp({ x, z }, ownWell(n)) - 0.0 * hyp({ x, z }, other)
+    }), `o espaço do ${n === 1 ? 'Estaleiro da Liga' : 'Doca do Clã'}`);
+    ctx.take(p, 9);
+    yard.push(p);
+    extra[`shipyard${n}`] = pt(p);
+    extra[`shipyard${n}Water`] = ptw(wetSpot(p.x, p.z));
+  }
   const wells = m.resources.filter((r) => r.type === 'oil');
-  const placed = [extra.shipyard1Water, extra.shipyard2Water, ...wells];
-  const nearReef = (x, z) => { for (let a = 0; a < 12; a++) { const h = ctx.hAt(x + Math.cos((a / 12) * Math.PI * 2) * 5, z + Math.sin((a / 12) * Math.PI * 2) * 5); if (h > 0.15 && h < 0.45) return true; } return false; };
-  const awayFromLand = (x, z) => wetFrac(ctx, x, z, 9) >= 1;
-  const targets = [{ x: 0, z: 0 }, { x: -half * 0.45, z: half * 0.35 * (s0.z > 0 ? -1 : 1) }, { x: half * 0.45, z: half * 0.35 * (s0.z > 0 ? 1 : -1) }];
-  targets.forEach((t, i) => {
-    const w = need(ctx.scan({
-      step: 2,
-      test: (x, z) => ctx.oceanOk(x, z) && nearReef(x, z) && awayFromLand(x, z) && placed.every((q) => hyp({ x, z }, q) >= 24),
-      score: (x, z) => hyp({ x, z }, t)
-    }), `o naufrágio ${i + 1}`);
-    placed.push(w);
-    extra[`wreck${i + 1}`] = ptw(w);
+  sides.forEach(({ s, reach, n }, i) => {
+    const near = wells.filter((w) => hyp(w, s) < hyp(w, i === 0 ? s1 : s0)).sort((a, b) => hyp(a, s) - hyp(b, s));
+    const aim = near[0] ?? { x: s.x, z: s.z };
+    if (process.env.DBG) { let c = [0, 0, 0, 0, 0]; ctx.scan({ step: 1, test: (x, z) => { if (coastalOk(x, z, 3.4)) { c[0]++; if (reach(x, z)) { c[1]++; if (ctx.free(x, z, 0)) { c[2]++; if (hyp({ x, z }, yard[i]) >= 11) c[3]++; if (hyp({ x, z }, aim) <= 36) c[4]++; } } } return false; } }); console.error('DBG', n, c.join(','), JSON.stringify(aim), JSON.stringify(yard[i])); }
+    const r = need(ctx.scan({
+      step: 1,
+      test: (x, z) => coastalOk(x, z, 3.4) && reach(x, z) && ctx.free(x, z, 0) && hyp({ x, z }, yard[i]) >= 11 && hyp({ x, z }, yard[i]) <= 40 && hyp({ x, z }, aim) <= 60 && wetSpot(x, z),
+      score: (x, z) => hyp({ x, z }, aim)
+    }), `a Refinaria ${n}`);
+    ctx.take(r, 7);
+    extra[`refinery${n}`] = pt(r);
+    const b = need(ctx.scan({
+      step: 1,
+      test: (x, z) => ctx.isShore(x, z) && reach(x, z) && ctx.free(x, z, 0) && hyp({ x, z }, yard[i]) >= 14 && hyp({ x, z }, s) <= 60 && wetSpot(x, z) && openSea(ctx, wetSpot(x, z).x, wetSpot(x, z).z, 6) >= 0.5,
+      score: (x, z) => Math.abs(hyp({ x, z }, yard[i]) - 18)
+    }), `a praia ${n}`);
+    ctx.take(b, 6);
+    extra[`beach${n}`] = pt(b);
   });
-  // rotas das frotas roteirizadas: pontos de partida junto à borda (lado de cada base) e ponto de encontro no meio do mar
-  const edge = (to, name) => need(ctx.scan({ step: 4, test: (x, z) => Math.max(Math.abs(x), Math.abs(z)) >= half - 26 && ctx.oceanOk(x, z) && openSea(ctx, x, z, 8) >= 0.8, score: (x, z) => hyp({ x, z }, to) }), name);
-  extra.fleetStart1 = ptw(edge(s0, 'a partida da frota 1'));
-  extra.fleetStart2 = ptw(edge(s1, 'a partida da frota 2'));
-  extra.fleetMid = ptw(need(ctx.scan({ step: 3, test: (x, z) => ctx.oceanOk(x, z) && openSea(ctx, x, z, 10) >= 0.8, score: (x, z) => hyp({ x, z }, { x: 0, z: 0 }) }), 'o encontro das frotas'));
+  extra.landingZone = extra.beach1;
+  // 3) as duas ilhotas do meio (componentes de terra fora dos continentes), de norte (z menor) a sul
+  const comps = landComponents(ctx.land).filter((c) => !isReached(ctx.land, ctx.seen0, c.cx, c.cz) && !isReached(ctx.land, ctx.seen1, c.cx, c.cz) && c.size >= 25)
+    .sort((a, b) => a.cz - b.cz);
+  if (comps.length < 2) throw new Error(`baixio: menos de 2 ilhotas (${landComponents(ctx.land).map((c) => `${c.size}@${Math.round(c.cx)},${Math.round(c.cz)}`).join(' ')})`);
+  const isl = comps.slice(0, 2);
+  const lateForests = (ctx.lateForests = []);
+  isl.forEach((c, k) => {
+    const n = k + 1;
+    const cells = c.cells.map((i) => ctx.land.toWorld(i % ctx.land.cols, (i / ctx.land.cols) | 0));
+    const dry = cells.filter((w) => ctx.dryClear(w.x, w.z, 3.2)); // chão para torre (raio 2,5 + folga)
+    const dryW = cells.filter((w) => ctx.dryClear(w.x, w.z, 2.6));
+    if (dry.length < 4 || dryW.length < 4) throw new Error(`baixio: a ilhota ${n} não tem chão para torre`);
+    const ctr = dry.reduce((a, b) => (hyp(b, c) < hyp(a, c) ? b : a));
+    extra[`islet${n}`] = pt(ctr);
+    // o bosque (raio 3,2) fica de um lado e as duas torres do outro: uma torre exige ≥ 6,5 u de qualquer árvore (3,5 + raio 2,5 + 0,5)
+    let pick = null;
+    for (const W of dryW.slice().sort((a, b) => hyp(b, ctr) - hyp(a, ctr))) {
+      const far = dry.filter((w) => hyp(w, W) >= 3.2 + 7);
+      if (far.length < 2) continue;
+      const t1 = far.reduce((a, b) => (hyp(b, W) > hyp(a, W) ? b : a));
+      const rest = far.filter((w) => hyp(w, t1) >= 8);
+      if (!rest.length) continue;
+      const t2 = rest.reduce((a, b) => (hyp(b, W) + hyp(b, t1) > hyp(a, W) + hyp(a, t1) ? b : a));
+      pick = { W, t1, t2 };
+      break;
+    }
+    if (!pick) throw new Error(`baixio: a ilhota ${n} não comporta bosque e torres`);
+    extra[`isletTower${n}a`] = pt(pick.t1); extra[`isletTower${n}b`] = pt(pick.t2);
+    extra[`isletWood${n}`] = pt(pick.W);
+    lateForests.push({ x: r1(pick.W.x), z: r1(pick.W.z), count: 7, radius: 3.2, species: speciesForBiome(BIOME.GRASS, true, 0.5) });
+  });
+  // 4) poços contestados no meio do mar (água funda, ≥ 8 u de qualquer terra, ≥ 16 u de outro poço), um de cada lado do eixo norte-sul
+  const midZ = (extra.islet1.z + extra.islet2.z) / 2;
+  const deepSea = (x, z) => ctx.oceanOk(x, z) && ctx.hAt(x, z) <= 0.05 && wetFrac(ctx, x, z, 8) >= 1 && wetFrac(ctx, x, z, 4) >= 1;
+  [-13, 13].forEach((dx, k) => {
+    const w = need(ctx.scan({
+      step: 1,
+      test: (x, z) => deepSea(x, z) && m.resources.filter((r) => r.type === 'oil').every((q) => hyp({ x, z }, q) >= 16) && hyp({ x, z }, extra.islet1) >= 12 && hyp({ x, z }, extra.islet2) >= 12,
+      score: (x, z) => hyp({ x, z }, { x: dx, z: midZ })
+    }), `o poço do meio ${k + 1}`);
+    m.resources.push({ type: 'oil', x: r1(w.x), z: r1(w.z), amount: 5000 });
+    extra[`wellMid${k + 1}`] = ptw(w);
+  });
+  // 5) náufragos na ilhota 2 (resgate com barcaça/frota) e ruínas numa ponta do continente da Liga (exploração por terra)
+  const cap = need(ctx.scan({
+    step: 1,
+    test: (x, z) => ctx.hAt(x, z) >= 1.9 && hyp({ x, z }, extra.islet2) <= 11 && hyp({ x, z }, extra.isletTower2a) >= 4 && hyp({ x, z }, extra.isletTower2b) >= 4 && hyp({ x, z }, extra.isletWood2) >= 3.5,
+    score: (x, z) => hyp({ x, z }, extra.islet2)
+  }), 'os náufragos');
+  extra.captive1 = pt(cap);
+  const ru = need(ctx.scan({
+    test: (x, z) => ctx.dryClear(x, z, 4) && ctx.reach(x, z) && ctx.free(x, z, 2) && hyp({ x, z }, s0) >= 45 && hyp({ x, z }, extra.outpost1) >= 18 && hyp({ x, z }, extra.farGold1) >= 18,
+    score: (x, z) => -hyp({ x, z }, s0)
+  }), 'as ruínas');
+  ctx.take(ru, 12);
+  extra.ruins1 = pt(ru);
+  // 6) rotas das frotas: partida na água do Estaleiro/Doca; patrulha orca no meio-leste; chegada da Estrela-d'Alva na borda norte; naufrágios
+  extra.fleetStart1 = extra.shipyard1Water;
+  extra.fleetStart2 = extra.shipyard2Water;
+  extra.patrol1 = ptw(need(ctx.scan({ step: 2, test: (x, z) => deepSea(x, z) && x >= 8 && x <= 40, score: (x, z) => hyp({ x, z }, { x: 24, z: midZ - 24 }) }), 'a patrulha 1'));
+  extra.patrol2 = ptw(need(ctx.scan({ step: 2, test: (x, z) => deepSea(x, z) && x >= 8 && x <= 40, score: (x, z) => hyp({ x, z }, { x: 24, z: midZ + 24 }) }), 'a patrulha 2'));
+  extra.stellaArrival = ptw(need(ctx.scan({ step: 3, test: (x, z) => ctx.oceanOk(x, z) && openSea(ctx, x, z, 8) >= 0.85 && z <= -half + 24 && x <= 0, score: (x, z) => hyp({ x, z }, { x: -30, z: -half + 14 }) }), 'a chegada da Estrela-d\'Alva'));
+  const placed = [extra.shipyard1Water, extra.shipyard2Water, ...m.resources.filter((r) => r.type === 'oil')];
+  [{ x: -34, z: -half * 0.55 }, { x: -34, z: half * 0.55 }].forEach((t, i) => {
+    const w = need(ctx.scan({ step: 2, test: (x, z) => deepSea(x, z) && placed.every((q) => hyp({ x, z }, q) >= 22), score: (x, z) => hyp({ x, z }, t) }), `o naufrágio ${i + 1}`);
+    placed.push(w); extra[`shipWreck${i + 1}`] = ptw(w);
+  });
+  moveInitialGold(ctx);
 }
 
 /** Palco 5: bosque sagrado (clareira cercada de árvores), ninho de grifos numa ponta, clareiras, Salão do Bosque de cada lado e mata densa extra. */
@@ -1225,6 +1370,8 @@ function finish(id, world, seedUsed) {
   out.meta.corridorThin = { width: CORRIDOR_PARAMS.width, keepFrac: Math.round(CORRIDOR_PARAMS.keepFrac * 100) / 100, clusters: thin.thinned.length, trees: [thin.before, thin.after], cut: thin.thinned };
   const verification = verifyCoastWorld(out, { naval: !!preset.naval, woodTarget: woodMin });
   if (!verification.ok) throw new Error('mundo: ' + verification.failures.slice(0, 2).join(' | '));
+  // M3-05: bosques das ilhotas entram DEPOIS do afinar corredor e da verificação (que exige caminho por terra desde uma base: as ilhotas são de propósito inalcançáveis a pé)
+  if (ctx.lateForests?.length) out.forests.push(...ctx.lateForests);
   // âncoras de terra alcançáveis a partir do slot 0 por terra; de água, no oceano
   const c2 = makeCtx(out);
   for (const [name, a] of Object.entries(anchors)) {
@@ -1232,7 +1379,7 @@ function finish(id, world, seedUsed) {
       if (/^lake/.test(name)) { if (!(c2.hAt(a.x, a.z) < out.waterLevel)) throw new Error(`âncora ${name}: lago fora da água`); } // lago congelado: água interior, não é oceano
       else if (!c2.oceanOk(a.x, a.z)) throw new Error(`âncora ${name}: água fora do oceano navegável`);
     }
-    else if (!c2.reach(a.x, a.z) && !/^(well|ford)/.test(name)) throw new Error(`âncora ${name}: sem caminho por terra desde o slot 0`);
+    else if (!(preset.isolated ? c2.reachAny(a.x, a.z) : c2.reach(a.x, a.z)) && !/^(well|ford|islet|captive)/.test(name)) throw new Error(`âncora ${name}: sem caminho por terra desde o slot 0`);
   }
   return { mapDef: out, extraAnchors: extra, verification };
 }

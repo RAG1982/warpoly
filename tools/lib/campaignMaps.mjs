@@ -297,6 +297,17 @@ function postBaia(ctx, extra) {
     score: (x, z) => Math.abs(hyp({ x, z }, camps[1]) - 40)
   }), 'a frota orc (orcSails)');
   extra.orcSails = { ...pt(sails), water: true };
+  // M3-X2: secundárias da m01 — ruínas (exploração) e um pescador cativo (resgate), em terra firme, por terra, o mais longe possível
+  // das bases, dos acampamentos e do Mural (a terra é estreita: os cantos são mar). Postas por último: as posições acima não mudam.
+  const fromAll = (p, more = []) => Math.min(hyp(p, s0), hyp(p, s1), hyp(p, extra.muralFenda), ...camps.map((c) => hyp(p, c)), ...more.map((q) => hyp(p, q)));
+  const farLand = (x, z) => ctx.dryClear(x, z, 6) && ctx.plain(x, z) && ctx.reach(x, z) && ctx.free(x, z, 4) && camps.every((c) => hyp({ x, z }, c) >= 50)
+    && hyp({ x, z }, s0) >= 50 && hyp({ x, z }, s1) >= 36 && hyp({ x, z }, extra.muralFenda) >= 24;
+  const ruins1 = need(ctx.scan({ test: farLand, score: (x, z) => -fromAll({ x, z }) }), 'as ruínas da m01');
+  ctx.take(ruins1, 12);
+  extra.ruins1 = pt(ruins1);
+  const captive1 = need(ctx.scan({ test: (x, z) => farLand(x, z) && hyp({ x, z }, ruins1) >= 40, score: (x, z) => -fromAll({ x, z }, [ruins1]) }), 'o pescador cativo da m01');
+  ctx.take(captive1, 10);
+  extra.captive1 = pt(captive1);
 }
 
 /** Palco 2: Cais de cada lado, forte de troncos no meio, Torre da Fenda numa ponta, Emissário/Mensageiro, patrulha. */
@@ -351,6 +362,19 @@ function postPouso(ctx, extra) {
   addGold(ctx, s1, 'expansion2', extra, { plain: true });
   postPousoBatedores(ctx, extra, { fort, s0, s1 });
   extra.landingZone = pt(pier1); // praia de desembarque desta ilha: a do Cais da Liga (o `landingZone` padrão é só uma sugestão)
+  // M3-X2: secundária de exploração da m02 — ruínas em terra firme, longe da rota Liga–Clãs (segmento entre as bases), dos
+  // acampamentos, das prisões, dos Cais e da Torre; o mais afastado possível dos pontos de interesse. Posta por último.
+  const L2 = hyp(s0, s1) ** 2 || 1;
+  const rota = (p) => { const t = Math.max(0, Math.min(1, ((p.x - s0.x) * (s1.x - s0.x) + (p.z - s0.z) * (s1.z - s0.z)) / L2)); return hyp(p, { x: s0.x + t * (s1.x - s0.x), z: s0.z + t * (s1.z - s0.z) }); };
+  const others = Object.entries(extra).filter(([k, a]) => a && !a.water && /^(banditCamp|scoutPrison|emissary|pier|expansion|lighthouse|logFort)/.test(k)).map(([, a]) => a);
+  const fromAll = (p) => Math.min(rota(p), ...others.map((o) => hyp(p, o)));
+  const ruins1 = need(ctx.scan({
+    test: (x, z) => ctx.dryClear(x, z, 6) && ctx.plain(x, z) && ctx.reach(x, z) && ctx.free(x, z, 4)
+      && others.every((o) => hyp({ x, z }, o) >= 24) && rota({ x, z }) >= 22 && hyp({ x, z }, s0) >= 40 && hyp({ x, z }, s1) >= 40,
+    score: (x, z) => -fromAll({ x, z })
+  }), 'as ruínas da m02');
+  ctx.take(ruins1, 12);
+  extra.ruins1 = pt(ruins1);
 }
 
 /**

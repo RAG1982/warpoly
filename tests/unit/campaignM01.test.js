@@ -31,9 +31,12 @@ describe('m01 Terra à Vista · objetivos e diálogos', () => {
     camps.forEach((c, i) => expect(Math.hypot(c.mesh.position.x - a[i].x, c.mesh.position.z - a[i].z)).toBeLessThan(1));
     // guarnição pesada: 3 × (7 bandidos + 2 Espadachins + 1 Arqueiro) de bandidos
     const guards = gm.allUnits.filter((u) => u.ownerId === 99 && !u.isDead);
-    expect(guards.filter((u) => u.type === 'bandit')).toHaveLength(21);
-    expect(guards.filter((u) => u.type === 'knight')).toHaveLength(6);
-    expect(guards.filter((u) => u.type === 'archer')).toHaveLength(3);
+    // (M3-X2: os 3 bandidos que guardam o pescador cativo também são ownerId 99; ficam fora desta conta)
+    const fisherGuards = new Set(gm.mission.tags.get('fisher_guard'));
+    const campGuards = guards.filter((u) => !fisherGuards.has(u.id));
+    expect(campGuards.filter((u) => u.type === 'bandit')).toHaveLength(21);
+    expect(campGuards.filter((u) => u.type === 'knight')).toHaveLength(6);
+    expect(campGuards.filter((u) => u.type === 'archer')).toHaveLength(3);
   });
 
   it('investida precoce: os 3 soldados do início sozinhos NÃO vencem (Espadachins caem, os 3 acampamentos seguem de pé, objetivo de ataque nunca abre)', async () => {
@@ -179,5 +182,86 @@ describe('m01 Terra à Vista · objetivos e diálogos', () => {
     expect(snap).toContain('mural-fenda');
     expect(gm.mission.vars.mural).toBe(true);
     expect(gm.getPlayer(0).resources.gold).toBeGreaterThanOrEqual(before + 200 - 5);
+  }, 60000);
+});
+
+/**
+ * M3-X2 — secundárias da m01: ruínas de pedra (exploração, oculta até o aviso do capitão, +80 de ouro e marco aceso) e um pescador
+ * cativo (resgate, guardado por 3 bandidos: vira nosso ao chegar perto com os guardas mortos, +100 de ouro). Nenhuma muda a vitória.
+ */
+describe('m01 Terra à Vista · secundárias de exploração e resgate (M3-X2)', () => {
+  const d = (a, b) => Math.hypot(a.x - b.x, a.z - b.z);
+
+  it('ruínas e pescador em terra firme, longe das bases e dos acampamentos; os 3 bandidos guardam o pescador (dono neutro)', async () => {
+    const { gm } = await playMission('war-alliance', ID, [], { maxSeconds: 1 });
+    const A = gm.terrain.mapDef.anchors;
+    expect(gm.terrain.mapDef.id).toBe('camp-01-baia-de-aurelan');
+    for (const k of ['ruins1', 'captive1']) {
+      expect(A[k], k).toBeTruthy();
+      expect(A[k].water, `${k} em terra`).toBeFalsy();
+      for (const i of [1, 2, 3]) expect(d(A[k], A[`banditCamp${i}`]), `${k} longe do acampamento ${i}`).toBeGreaterThanOrEqual(50);
+      expect(d(A[k], A.playerStart), `${k} longe da base`).toBeGreaterThanOrEqual(50);
+    }
+    expect(d(A.ruins1, A.captive1)).toBeGreaterThanOrEqual(40);
+    const lm = gm.mission.landmarks.find((l) => l.tag === 'ruins');
+    expect(lm).toBeTruthy();
+    expect(Math.hypot(lm.x - A.ruins1.x, lm.z - A.ruins1.z)).toBeLessThan(0.5);
+    expect(lm.lit).toBe(0);
+    const cap = gm.mission.tags.get('fisher').map((i) => gm.entitiesById.get(i));
+    expect(cap).toHaveLength(1);
+    expect(cap[0].ownerId).toBe(-1);
+    expect(cap[0].type).toBe('villager');
+    const guards = gm.mission.tags.get('fisher_guard').map((i) => gm.entitiesById.get(i));
+    expect(guards).toHaveLength(3);
+    for (const g of guards) {
+      expect(g.ownerId).toBe(99);
+      expect(g.type).toBe('bandit');
+      expect(d({ x: g.mesh.position.x, z: g.mesh.position.z }, A.captive1)).toBeLessThan(6);
+    }
+  });
+
+  it('objetivos: a ruína é oculta (só aparece depois do aviso do capitão, ~60 s); o resgate é secundário e visível desde o início', async () => {
+    const { gm } = await playMission('war-alliance', ID, [], { maxSeconds: 1 });
+    const def = gm.mission.def;
+    expect(def.objectives.find((o) => o.id === 'find-ruins')).toMatchObject({ type: 'flag', priority: 'hidden' });
+    expect(def.objectives.find((o) => o.id === 'rescue-fisher')).toMatchObject({ type: 'rescue', priority: 'secondary', tag: 'fisher', count: 1 });
+    expect(gm.mission.objectives.get('find-ruins').visible).toBe(false);
+    expect(gm.mission.objectives.get('rescue-fisher').visible).toBe(true);
+    expect(def.objectives.filter((o) => o.priority === 'primary').map((o) => o.id)).toEqual(['build-barracks', 'train-troops', 'destroy-camp']);
+  });
+
+  it('o aviso do capitão (~60 s) revela as ruínas no painel', async () => {
+    let seen = null;
+    const run = await playMission('war-alliance', ID, [
+      { name: 'espera', wait: 62 },
+      { name: 'confere', wait: 1, run: (c) => { seen = c.gm.mission.objectives.get('find-ruins').visible; } }
+    ], { maxSeconds: 70 });
+    expect(seen).toBe(true);
+    void run;
+  }, 60000);
+
+  it('achar as ruínas (andar até elas) dá +80 de ouro, acende o marco e completa a secundária; a vitória não muda', async () => {
+    let before = 0;
+    const run = await playMission('war-alliance', ID, [
+      { name: 'dica', wait: 62 },
+      { name: 'vai', wait: 2, run: (c) => { before = c.gm.getPlayer(0).resources.gold; const p = c.anchor('ruins1'); c.teleport(c.mine('knight')[0], p.x, p.z); } },
+      { name: 'confere', wait: 1, run: (c) => { if (c.status('find-ruins') !== 'completed') throw new Error('as ruínas deviam estar achadas'); } }
+    ], { maxSeconds: 90 });
+    expect(run.gm.mission.objectives.get('find-ruins').status).toBe('completed');
+    expect(run.gm.mission.landmarks.find((l) => l.tag === 'ruins').lit).toBeGreaterThan(0);
+    expect(run.gm.getPlayer(0).resources.gold).toBeGreaterThanOrEqual(before + 80 - 5);
+    expect(run.outcome).toBeNull(); // secundária: a partida segue
+  }, 60000);
+
+  it('pescador: com os guardas vivos ele NÃO vira nosso; mortos os guardas, um soldado perto dele o libera (+100 de ouro, rescue concluído)', async () => {
+    let before = 0;
+    const run = await playMission('war-alliance', ID, [
+      { name: 'guardas-vivos', wait: 1, run: (c) => { before = c.gm.getPlayer(0).resources.gold; const p = c.anchor('captive1'); c.teleport(c.mine('knight')[0], p.x + 6, p.z); } },
+      // (só ao vivo: com os guardas vivos, nada muda; o soldado perto basta quando eles caem)
+      { name: 'ainda-neutro', wait: 1, run: (c) => { if (c.tagged('fisher')[0].ownerId !== -1) throw new Error('não pode ser libertado com guardas vivos'); c.slayTag('fisher_guard'); } },
+      { name: 'confere', wait: 2, run: (c) => { if (c.tagged('fisher')[0].ownerId !== 0) throw new Error('o pescador devia ser nosso (guardas mortos, soldado perto)'); } }
+    ], { maxSeconds: 60 });
+    expect(run.gm.mission.objectives.get('rescue-fisher').status).toBe('completed');
+    expect(run.gm.getPlayer(0).resources.gold).toBeGreaterThanOrEqual(before + 100 - 5);
   }, 60000);
 });

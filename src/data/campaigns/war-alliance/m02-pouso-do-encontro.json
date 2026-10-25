@@ -18,17 +18,33 @@
     },
     "portrait": "🏹",
     "text": {
-      "pt-BR": "Velas desconhecidas aportaram perto da Torre da Fenda. Forje armas na Ferraria e resgate nossos batedores.",
-      "en": "Unknown sails anchored near the Rift Tower. Forge weapons at the Smithy and rescue our scouts."
+      "pt-BR": "Velas desconhecidas aportaram junto à Torre da Fenda, e meus seis batedores sumiram na ilha. DOIS foram presos pela Irmandade da Maré, um perto de cada um dos dois acampamentos de bandidos. Os outros QUATRO estão trancados em cercados de muralha atrás do acampamento dos orcs do Clã Chama-Baixa, no leste, onde as torres deles não alcançam. Forje armas na Ferraria e pesquise Armas Forjadas antes de marchar. Você não precisa destruir a base orc: precisa trazer os seis de volta vivos. Para soltar um batedor, derrube um trecho do cercado.",
+      "en": "Unknown sails anchored near the Rift Tower, and my six scouts vanished on the island. TWO were caught by the Tide Brotherhood, one beside each of the two bandit camps. The other FOUR are locked in walled pens behind the camp of the Low Flame Clan orcs, in the east, out of reach of their towers. Forge weapons at the Smithy and research Forged Weapons before you march. You do not need to destroy the orc base: you need to bring all six home alive. To free a scout, tear down a stretch of his pen."
     },
     "hints": [
       {
-        "pt-BR": "Concentre-se nos objetivos primários para avançar.",
-        "en": "Focus on primary objectives to advance."
+        "pt-BR": "Construa a Ferraria (50 de ouro, 100 de madeira, 70 de pedra) com um Aldeão e pesquise Armas Forjadas nela.",
+        "en": "Build the Smithy (50 gold, 100 wood, 70 stone) with a Villager and research Forged Weapons there."
+      },
+      {
+        "pt-BR": "Para soltar um batedor, ataque qualquer trecho da muralha do cercado (botão direito na muralha). Os guardas do acampamento vêm primeiro.",
+        "en": "To free a scout, attack any stretch of the pen wall (right-click the wall). The camp guards come first."
+      },
+      {
+        "pt-BR": "A base orc fica ativa e manda ataques. Ela não precisa cair: contorne-a, solte os quatro do leste e traga todos vivos.",
+        "en": "The orc base stays active and sends attacks. It does not need to fall: go around it, free the four in the east and bring everyone back alive."
+      },
+      {
+        "pt-BR": "Se sobrarem menos de 6 batedores vivos, a missão falha. Mantenha-os atrás da tropa e use as Torres de Vigia para defender a base enquanto você está fora.",
+        "en": "If fewer than 6 scouts stay alive, the mission fails. Keep them behind the troops and use Watchtowers to guard the base while you are away."
+      },
+      {
+        "pt-BR": "Um orc de pano branco é um Emissário: poupá-lo rende uma recompensa.",
+        "en": "An orc with a white cloth is an Emissary: sparing him pays a reward."
       }
     ]
   },
-  "mapId": "desfiladeiro-1v1",
+  "mapId": "camp-02-pouso-do-encontro",
   "seed": 9034,
   "players": [
     {
@@ -46,14 +62,15 @@
     {
       "id": 1,
       "name": {
-        "pt-BR": "Clãs do Cinzal",
-        "en": "Cinzal Clans"
+        "pt-BR": "Clã Chama-Baixa",
+        "en": "Low Flame Clan"
       },
       "factionId": "orc",
       "team": 1,
       "color": "#dc2626",
       "isAI": true,
-      "startSlot": 1
+      "startSlot": 1,
+      "difficulty": "easy"
     }
   ],
   "startingResources": {
@@ -61,27 +78,1998 @@
     "gold": 400,
     "stone": 150
   },
+  "vars": {
+    "near_freed": 0,
+    "far_freed": 0,
+    "fin_clock": 0
+  },
+  "autoVictory": false,
   "setup": [
     {
       "type": "tag",
       "select": {
-        "buildingType": "great_hall"
+        "buildingType": "bandit_camp"
       },
-      "tag": "enemy_base"
+      "tag": "bandit_camp"
+    },
+    {
+      "type": "tag",
+      "select": {
+        "buildingType": "bandit_camp",
+        "area": {
+          "anchor": "banditCamp1",
+          "r": 6
+        }
+      },
+      "tag": "bandit_camp1"
+    },
+    {
+      "type": "tag",
+      "select": {
+        "buildingType": "bandit_camp",
+        "area": {
+          "anchor": "banditCamp2",
+          "r": 6
+        }
+      },
+      "tag": "bandit_camp2"
+    },
+    {
+      "type": "spawn",
+      "owner": "bandits",
+      "units": [
+        {
+          "type": "knight",
+          "count": 2
+        },
+        {
+          "type": "archer",
+          "count": 1
+        }
+      ],
+      "anchor": "banditCamp1",
+      "spread": 2.5,
+      "guard": true
+    },
+    {
+      "type": "spawn",
+      "owner": "bandits",
+      "units": [
+        {
+          "type": "knight",
+          "count": 1
+        },
+        {
+          "type": "archer",
+          "count": 1
+        }
+      ],
+      "anchor": "banditCamp2",
+      "spread": 2.5,
+      "guard": true
+    },
+    {
+      "type": "spawnBuilding",
+      "owner": "bandits",
+      "buildingType": "wall_human",
+      "anchor": "scoutPrison1",
+      "dx": -3.6,
+      "dz": -3.6,
+      "facing": 0,
+      "tag": "prison1",
+      "markColor": "#22d3ee"
+    },
+    {
+      "type": "spawnBuilding",
+      "owner": "bandits",
+      "buildingType": "wall_human",
+      "anchor": "scoutPrison1",
+      "dx": -3.6,
+      "dz": -1.2,
+      "facing": 90,
+      "tag": "prison1",
+      "markColor": "#22d3ee"
+    },
+    {
+      "type": "spawnBuilding",
+      "owner": "bandits",
+      "buildingType": "wall_human",
+      "anchor": "scoutPrison1",
+      "dx": -3.6,
+      "dz": 1.2,
+      "facing": 90,
+      "tag": "prison1",
+      "markColor": "#22d3ee"
+    },
+    {
+      "type": "spawnBuilding",
+      "owner": "bandits",
+      "buildingType": "wall_human",
+      "anchor": "scoutPrison1",
+      "dx": -3.6,
+      "dz": 3.6,
+      "facing": 0,
+      "tag": "prison1",
+      "markColor": "#22d3ee"
+    },
+    {
+      "type": "spawnBuilding",
+      "owner": "bandits",
+      "buildingType": "wall_human",
+      "anchor": "scoutPrison1",
+      "dx": -1.2,
+      "dz": -3.6,
+      "facing": 0,
+      "tag": "prison1",
+      "markColor": "#22d3ee"
+    },
+    {
+      "type": "spawnBuilding",
+      "owner": "bandits",
+      "buildingType": "wall_human",
+      "anchor": "scoutPrison1",
+      "dx": -1.2,
+      "dz": 3.6,
+      "facing": 0,
+      "tag": "prison1",
+      "markColor": "#22d3ee"
+    },
+    {
+      "type": "spawnBuilding",
+      "owner": "bandits",
+      "buildingType": "wall_human",
+      "anchor": "scoutPrison1",
+      "dx": 1.2,
+      "dz": -3.6,
+      "facing": 0,
+      "tag": "prison1",
+      "markColor": "#22d3ee"
+    },
+    {
+      "type": "spawnBuilding",
+      "owner": "bandits",
+      "buildingType": "wall_human",
+      "anchor": "scoutPrison1",
+      "dx": 1.2,
+      "dz": 3.6,
+      "facing": 0,
+      "tag": "prison1",
+      "markColor": "#22d3ee"
+    },
+    {
+      "type": "spawnBuilding",
+      "owner": "bandits",
+      "buildingType": "wall_human",
+      "anchor": "scoutPrison1",
+      "dx": 3.6,
+      "dz": -3.6,
+      "facing": 0,
+      "tag": "prison1",
+      "markColor": "#22d3ee"
+    },
+    {
+      "type": "spawnBuilding",
+      "owner": "bandits",
+      "buildingType": "wall_human",
+      "anchor": "scoutPrison1",
+      "dx": 3.6,
+      "dz": -1.2,
+      "facing": 90,
+      "tag": "prison1",
+      "markColor": "#22d3ee"
+    },
+    {
+      "type": "spawnBuilding",
+      "owner": "bandits",
+      "buildingType": "wall_human",
+      "anchor": "scoutPrison1",
+      "dx": 3.6,
+      "dz": 1.2,
+      "facing": 90,
+      "tag": "prison1",
+      "markColor": "#22d3ee"
+    },
+    {
+      "type": "spawnBuilding",
+      "owner": "bandits",
+      "buildingType": "wall_human",
+      "anchor": "scoutPrison1",
+      "dx": 3.6,
+      "dz": 3.6,
+      "facing": 0,
+      "tag": "prison1",
+      "markColor": "#22d3ee"
+    },
+    {
+      "type": "spawn",
+      "owner": "neutral",
+      "unitType": "archer",
+      "count": 1,
+      "anchor": "scoutPrison1",
+      "tag": "scout",
+      "markColor": "#22d3ee"
+    },
+    {
+      "type": "spawnBuilding",
+      "owner": "bandits",
+      "buildingType": "wall_human",
+      "anchor": "scoutPrison2",
+      "dx": -3.6,
+      "dz": -3.6,
+      "facing": 0,
+      "tag": "prison2",
+      "markColor": "#22d3ee"
+    },
+    {
+      "type": "spawnBuilding",
+      "owner": "bandits",
+      "buildingType": "wall_human",
+      "anchor": "scoutPrison2",
+      "dx": -3.6,
+      "dz": -1.2,
+      "facing": 90,
+      "tag": "prison2",
+      "markColor": "#22d3ee"
+    },
+    {
+      "type": "spawnBuilding",
+      "owner": "bandits",
+      "buildingType": "wall_human",
+      "anchor": "scoutPrison2",
+      "dx": -3.6,
+      "dz": 1.2,
+      "facing": 90,
+      "tag": "prison2",
+      "markColor": "#22d3ee"
+    },
+    {
+      "type": "spawnBuilding",
+      "owner": "bandits",
+      "buildingType": "wall_human",
+      "anchor": "scoutPrison2",
+      "dx": -3.6,
+      "dz": 3.6,
+      "facing": 0,
+      "tag": "prison2",
+      "markColor": "#22d3ee"
+    },
+    {
+      "type": "spawnBuilding",
+      "owner": "bandits",
+      "buildingType": "wall_human",
+      "anchor": "scoutPrison2",
+      "dx": -1.2,
+      "dz": -3.6,
+      "facing": 0,
+      "tag": "prison2",
+      "markColor": "#22d3ee"
+    },
+    {
+      "type": "spawnBuilding",
+      "owner": "bandits",
+      "buildingType": "wall_human",
+      "anchor": "scoutPrison2",
+      "dx": -1.2,
+      "dz": 3.6,
+      "facing": 0,
+      "tag": "prison2",
+      "markColor": "#22d3ee"
+    },
+    {
+      "type": "spawnBuilding",
+      "owner": "bandits",
+      "buildingType": "wall_human",
+      "anchor": "scoutPrison2",
+      "dx": 1.2,
+      "dz": -3.6,
+      "facing": 0,
+      "tag": "prison2",
+      "markColor": "#22d3ee"
+    },
+    {
+      "type": "spawnBuilding",
+      "owner": "bandits",
+      "buildingType": "wall_human",
+      "anchor": "scoutPrison2",
+      "dx": 1.2,
+      "dz": 3.6,
+      "facing": 0,
+      "tag": "prison2",
+      "markColor": "#22d3ee"
+    },
+    {
+      "type": "spawnBuilding",
+      "owner": "bandits",
+      "buildingType": "wall_human",
+      "anchor": "scoutPrison2",
+      "dx": 3.6,
+      "dz": -3.6,
+      "facing": 0,
+      "tag": "prison2",
+      "markColor": "#22d3ee"
+    },
+    {
+      "type": "spawnBuilding",
+      "owner": "bandits",
+      "buildingType": "wall_human",
+      "anchor": "scoutPrison2",
+      "dx": 3.6,
+      "dz": -1.2,
+      "facing": 90,
+      "tag": "prison2",
+      "markColor": "#22d3ee"
+    },
+    {
+      "type": "spawnBuilding",
+      "owner": "bandits",
+      "buildingType": "wall_human",
+      "anchor": "scoutPrison2",
+      "dx": 3.6,
+      "dz": 1.2,
+      "facing": 90,
+      "tag": "prison2",
+      "markColor": "#22d3ee"
+    },
+    {
+      "type": "spawnBuilding",
+      "owner": "bandits",
+      "buildingType": "wall_human",
+      "anchor": "scoutPrison2",
+      "dx": 3.6,
+      "dz": 3.6,
+      "facing": 0,
+      "tag": "prison2",
+      "markColor": "#22d3ee"
+    },
+    {
+      "type": "spawn",
+      "owner": "neutral",
+      "unitType": "archer",
+      "count": 1,
+      "anchor": "scoutPrison2",
+      "tag": "scout",
+      "markColor": "#22d3ee"
+    },
+    {
+      "type": "spawnBuilding",
+      "owner": "bandits",
+      "buildingType": "wall_orc",
+      "anchor": "scoutPrison3",
+      "dx": -3.6,
+      "dz": -3.6,
+      "facing": 0,
+      "tag": "prison3",
+      "markColor": "#22d3ee"
+    },
+    {
+      "type": "spawnBuilding",
+      "owner": "bandits",
+      "buildingType": "wall_orc",
+      "anchor": "scoutPrison3",
+      "dx": -3.6,
+      "dz": -1.2,
+      "facing": 90,
+      "tag": "prison3",
+      "markColor": "#22d3ee"
+    },
+    {
+      "type": "spawnBuilding",
+      "owner": "bandits",
+      "buildingType": "wall_orc",
+      "anchor": "scoutPrison3",
+      "dx": -3.6,
+      "dz": 1.2,
+      "facing": 90,
+      "tag": "prison3",
+      "markColor": "#22d3ee"
+    },
+    {
+      "type": "spawnBuilding",
+      "owner": "bandits",
+      "buildingType": "wall_orc",
+      "anchor": "scoutPrison3",
+      "dx": -3.6,
+      "dz": 3.6,
+      "facing": 0,
+      "tag": "prison3",
+      "markColor": "#22d3ee"
+    },
+    {
+      "type": "spawnBuilding",
+      "owner": "bandits",
+      "buildingType": "wall_orc",
+      "anchor": "scoutPrison3",
+      "dx": -1.2,
+      "dz": -3.6,
+      "facing": 0,
+      "tag": "prison3",
+      "markColor": "#22d3ee"
+    },
+    {
+      "type": "spawnBuilding",
+      "owner": "bandits",
+      "buildingType": "wall_orc",
+      "anchor": "scoutPrison3",
+      "dx": -1.2,
+      "dz": 3.6,
+      "facing": 0,
+      "tag": "prison3",
+      "markColor": "#22d3ee"
+    },
+    {
+      "type": "spawnBuilding",
+      "owner": "bandits",
+      "buildingType": "wall_orc",
+      "anchor": "scoutPrison3",
+      "dx": 1.2,
+      "dz": -3.6,
+      "facing": 0,
+      "tag": "prison3",
+      "markColor": "#22d3ee"
+    },
+    {
+      "type": "spawnBuilding",
+      "owner": "bandits",
+      "buildingType": "wall_orc",
+      "anchor": "scoutPrison3",
+      "dx": 1.2,
+      "dz": 3.6,
+      "facing": 0,
+      "tag": "prison3",
+      "markColor": "#22d3ee"
+    },
+    {
+      "type": "spawnBuilding",
+      "owner": "bandits",
+      "buildingType": "wall_orc",
+      "anchor": "scoutPrison3",
+      "dx": 3.6,
+      "dz": -3.6,
+      "facing": 0,
+      "tag": "prison3",
+      "markColor": "#22d3ee"
+    },
+    {
+      "type": "spawnBuilding",
+      "owner": "bandits",
+      "buildingType": "wall_orc",
+      "anchor": "scoutPrison3",
+      "dx": 3.6,
+      "dz": -1.2,
+      "facing": 90,
+      "tag": "prison3",
+      "markColor": "#22d3ee"
+    },
+    {
+      "type": "spawnBuilding",
+      "owner": "bandits",
+      "buildingType": "wall_orc",
+      "anchor": "scoutPrison3",
+      "dx": 3.6,
+      "dz": 1.2,
+      "facing": 90,
+      "tag": "prison3",
+      "markColor": "#22d3ee"
+    },
+    {
+      "type": "spawnBuilding",
+      "owner": "bandits",
+      "buildingType": "wall_orc",
+      "anchor": "scoutPrison3",
+      "dx": 3.6,
+      "dz": 3.6,
+      "facing": 0,
+      "tag": "prison3",
+      "markColor": "#22d3ee"
+    },
+    {
+      "type": "spawn",
+      "owner": "neutral",
+      "unitType": "archer",
+      "count": 1,
+      "anchor": "scoutPrison3",
+      "tag": "scout",
+      "markColor": "#22d3ee"
+    },
+    {
+      "type": "spawnBuilding",
+      "owner": "bandits",
+      "buildingType": "wall_orc",
+      "anchor": "scoutPrison4",
+      "dx": -3.6,
+      "dz": -3.6,
+      "facing": 0,
+      "tag": "prison4",
+      "markColor": "#22d3ee"
+    },
+    {
+      "type": "spawnBuilding",
+      "owner": "bandits",
+      "buildingType": "wall_orc",
+      "anchor": "scoutPrison4",
+      "dx": -3.6,
+      "dz": -1.2,
+      "facing": 90,
+      "tag": "prison4",
+      "markColor": "#22d3ee"
+    },
+    {
+      "type": "spawnBuilding",
+      "owner": "bandits",
+      "buildingType": "wall_orc",
+      "anchor": "scoutPrison4",
+      "dx": -3.6,
+      "dz": 1.2,
+      "facing": 90,
+      "tag": "prison4",
+      "markColor": "#22d3ee"
+    },
+    {
+      "type": "spawnBuilding",
+      "owner": "bandits",
+      "buildingType": "wall_orc",
+      "anchor": "scoutPrison4",
+      "dx": -3.6,
+      "dz": 3.6,
+      "facing": 0,
+      "tag": "prison4",
+      "markColor": "#22d3ee"
+    },
+    {
+      "type": "spawnBuilding",
+      "owner": "bandits",
+      "buildingType": "wall_orc",
+      "anchor": "scoutPrison4",
+      "dx": -1.2,
+      "dz": -3.6,
+      "facing": 0,
+      "tag": "prison4",
+      "markColor": "#22d3ee"
+    },
+    {
+      "type": "spawnBuilding",
+      "owner": "bandits",
+      "buildingType": "wall_orc",
+      "anchor": "scoutPrison4",
+      "dx": -1.2,
+      "dz": 3.6,
+      "facing": 0,
+      "tag": "prison4",
+      "markColor": "#22d3ee"
+    },
+    {
+      "type": "spawnBuilding",
+      "owner": "bandits",
+      "buildingType": "wall_orc",
+      "anchor": "scoutPrison4",
+      "dx": 1.2,
+      "dz": -3.6,
+      "facing": 0,
+      "tag": "prison4",
+      "markColor": "#22d3ee"
+    },
+    {
+      "type": "spawnBuilding",
+      "owner": "bandits",
+      "buildingType": "wall_orc",
+      "anchor": "scoutPrison4",
+      "dx": 1.2,
+      "dz": 3.6,
+      "facing": 0,
+      "tag": "prison4",
+      "markColor": "#22d3ee"
+    },
+    {
+      "type": "spawnBuilding",
+      "owner": "bandits",
+      "buildingType": "wall_orc",
+      "anchor": "scoutPrison4",
+      "dx": 3.6,
+      "dz": -3.6,
+      "facing": 0,
+      "tag": "prison4",
+      "markColor": "#22d3ee"
+    },
+    {
+      "type": "spawnBuilding",
+      "owner": "bandits",
+      "buildingType": "wall_orc",
+      "anchor": "scoutPrison4",
+      "dx": 3.6,
+      "dz": -1.2,
+      "facing": 90,
+      "tag": "prison4",
+      "markColor": "#22d3ee"
+    },
+    {
+      "type": "spawnBuilding",
+      "owner": "bandits",
+      "buildingType": "wall_orc",
+      "anchor": "scoutPrison4",
+      "dx": 3.6,
+      "dz": 1.2,
+      "facing": 90,
+      "tag": "prison4",
+      "markColor": "#22d3ee"
+    },
+    {
+      "type": "spawnBuilding",
+      "owner": "bandits",
+      "buildingType": "wall_orc",
+      "anchor": "scoutPrison4",
+      "dx": 3.6,
+      "dz": 3.6,
+      "facing": 0,
+      "tag": "prison4",
+      "markColor": "#22d3ee"
+    },
+    {
+      "type": "spawn",
+      "owner": "neutral",
+      "unitType": "archer",
+      "count": 1,
+      "anchor": "scoutPrison4",
+      "tag": "scout",
+      "markColor": "#22d3ee"
+    },
+    {
+      "type": "spawnBuilding",
+      "owner": "bandits",
+      "buildingType": "wall_orc",
+      "anchor": "scoutPrison5",
+      "dx": -3.6,
+      "dz": -3.6,
+      "facing": 0,
+      "tag": "prison5",
+      "markColor": "#22d3ee"
+    },
+    {
+      "type": "spawnBuilding",
+      "owner": "bandits",
+      "buildingType": "wall_orc",
+      "anchor": "scoutPrison5",
+      "dx": -3.6,
+      "dz": -1.2,
+      "facing": 90,
+      "tag": "prison5",
+      "markColor": "#22d3ee"
+    },
+    {
+      "type": "spawnBuilding",
+      "owner": "bandits",
+      "buildingType": "wall_orc",
+      "anchor": "scoutPrison5",
+      "dx": -3.6,
+      "dz": 1.2,
+      "facing": 90,
+      "tag": "prison5",
+      "markColor": "#22d3ee"
+    },
+    {
+      "type": "spawnBuilding",
+      "owner": "bandits",
+      "buildingType": "wall_orc",
+      "anchor": "scoutPrison5",
+      "dx": -3.6,
+      "dz": 3.6,
+      "facing": 0,
+      "tag": "prison5",
+      "markColor": "#22d3ee"
+    },
+    {
+      "type": "spawnBuilding",
+      "owner": "bandits",
+      "buildingType": "wall_orc",
+      "anchor": "scoutPrison5",
+      "dx": -1.2,
+      "dz": -3.6,
+      "facing": 0,
+      "tag": "prison5",
+      "markColor": "#22d3ee"
+    },
+    {
+      "type": "spawnBuilding",
+      "owner": "bandits",
+      "buildingType": "wall_orc",
+      "anchor": "scoutPrison5",
+      "dx": -1.2,
+      "dz": 3.6,
+      "facing": 0,
+      "tag": "prison5",
+      "markColor": "#22d3ee"
+    },
+    {
+      "type": "spawnBuilding",
+      "owner": "bandits",
+      "buildingType": "wall_orc",
+      "anchor": "scoutPrison5",
+      "dx": 1.2,
+      "dz": -3.6,
+      "facing": 0,
+      "tag": "prison5",
+      "markColor": "#22d3ee"
+    },
+    {
+      "type": "spawnBuilding",
+      "owner": "bandits",
+      "buildingType": "wall_orc",
+      "anchor": "scoutPrison5",
+      "dx": 1.2,
+      "dz": 3.6,
+      "facing": 0,
+      "tag": "prison5",
+      "markColor": "#22d3ee"
+    },
+    {
+      "type": "spawnBuilding",
+      "owner": "bandits",
+      "buildingType": "wall_orc",
+      "anchor": "scoutPrison5",
+      "dx": 3.6,
+      "dz": -3.6,
+      "facing": 0,
+      "tag": "prison5",
+      "markColor": "#22d3ee"
+    },
+    {
+      "type": "spawnBuilding",
+      "owner": "bandits",
+      "buildingType": "wall_orc",
+      "anchor": "scoutPrison5",
+      "dx": 3.6,
+      "dz": -1.2,
+      "facing": 90,
+      "tag": "prison5",
+      "markColor": "#22d3ee"
+    },
+    {
+      "type": "spawnBuilding",
+      "owner": "bandits",
+      "buildingType": "wall_orc",
+      "anchor": "scoutPrison5",
+      "dx": 3.6,
+      "dz": 1.2,
+      "facing": 90,
+      "tag": "prison5",
+      "markColor": "#22d3ee"
+    },
+    {
+      "type": "spawnBuilding",
+      "owner": "bandits",
+      "buildingType": "wall_orc",
+      "anchor": "scoutPrison5",
+      "dx": 3.6,
+      "dz": 3.6,
+      "facing": 0,
+      "tag": "prison5",
+      "markColor": "#22d3ee"
+    },
+    {
+      "type": "spawn",
+      "owner": "neutral",
+      "unitType": "archer",
+      "count": 1,
+      "anchor": "scoutPrison5",
+      "tag": "scout",
+      "markColor": "#22d3ee"
+    },
+    {
+      "type": "spawnBuilding",
+      "owner": "bandits",
+      "buildingType": "wall_orc",
+      "anchor": "scoutPrison6",
+      "dx": -3.6,
+      "dz": -3.6,
+      "facing": 0,
+      "tag": "prison6",
+      "markColor": "#22d3ee"
+    },
+    {
+      "type": "spawnBuilding",
+      "owner": "bandits",
+      "buildingType": "wall_orc",
+      "anchor": "scoutPrison6",
+      "dx": -3.6,
+      "dz": -1.2,
+      "facing": 90,
+      "tag": "prison6",
+      "markColor": "#22d3ee"
+    },
+    {
+      "type": "spawnBuilding",
+      "owner": "bandits",
+      "buildingType": "wall_orc",
+      "anchor": "scoutPrison6",
+      "dx": -3.6,
+      "dz": 1.2,
+      "facing": 90,
+      "tag": "prison6",
+      "markColor": "#22d3ee"
+    },
+    {
+      "type": "spawnBuilding",
+      "owner": "bandits",
+      "buildingType": "wall_orc",
+      "anchor": "scoutPrison6",
+      "dx": -3.6,
+      "dz": 3.6,
+      "facing": 0,
+      "tag": "prison6",
+      "markColor": "#22d3ee"
+    },
+    {
+      "type": "spawnBuilding",
+      "owner": "bandits",
+      "buildingType": "wall_orc",
+      "anchor": "scoutPrison6",
+      "dx": -1.2,
+      "dz": -3.6,
+      "facing": 0,
+      "tag": "prison6",
+      "markColor": "#22d3ee"
+    },
+    {
+      "type": "spawnBuilding",
+      "owner": "bandits",
+      "buildingType": "wall_orc",
+      "anchor": "scoutPrison6",
+      "dx": -1.2,
+      "dz": 3.6,
+      "facing": 0,
+      "tag": "prison6",
+      "markColor": "#22d3ee"
+    },
+    {
+      "type": "spawnBuilding",
+      "owner": "bandits",
+      "buildingType": "wall_orc",
+      "anchor": "scoutPrison6",
+      "dx": 1.2,
+      "dz": -3.6,
+      "facing": 0,
+      "tag": "prison6",
+      "markColor": "#22d3ee"
+    },
+    {
+      "type": "spawnBuilding",
+      "owner": "bandits",
+      "buildingType": "wall_orc",
+      "anchor": "scoutPrison6",
+      "dx": 1.2,
+      "dz": 3.6,
+      "facing": 0,
+      "tag": "prison6",
+      "markColor": "#22d3ee"
+    },
+    {
+      "type": "spawnBuilding",
+      "owner": "bandits",
+      "buildingType": "wall_orc",
+      "anchor": "scoutPrison6",
+      "dx": 3.6,
+      "dz": -3.6,
+      "facing": 0,
+      "tag": "prison6",
+      "markColor": "#22d3ee"
+    },
+    {
+      "type": "spawnBuilding",
+      "owner": "bandits",
+      "buildingType": "wall_orc",
+      "anchor": "scoutPrison6",
+      "dx": 3.6,
+      "dz": -1.2,
+      "facing": 90,
+      "tag": "prison6",
+      "markColor": "#22d3ee"
+    },
+    {
+      "type": "spawnBuilding",
+      "owner": "bandits",
+      "buildingType": "wall_orc",
+      "anchor": "scoutPrison6",
+      "dx": 3.6,
+      "dz": 1.2,
+      "facing": 90,
+      "tag": "prison6",
+      "markColor": "#22d3ee"
+    },
+    {
+      "type": "spawnBuilding",
+      "owner": "bandits",
+      "buildingType": "wall_orc",
+      "anchor": "scoutPrison6",
+      "dx": 3.6,
+      "dz": 3.6,
+      "facing": 0,
+      "tag": "prison6",
+      "markColor": "#22d3ee"
+    },
+    {
+      "type": "spawn",
+      "owner": "neutral",
+      "unitType": "archer",
+      "count": 1,
+      "anchor": "scoutPrison6",
+      "tag": "scout",
+      "markColor": "#22d3ee"
+    },
+    {
+      "type": "spawn",
+      "owner": "enemy",
+      "units": [
+        {
+          "type": "grunt",
+          "count": 2
+        },
+        {
+          "type": "axethrower",
+          "count": 2
+        }
+      ],
+      "anchor": "scoutPrison3",
+      "dx": 0,
+      "dz": -7,
+      "spread": 2.5,
+      "guard": {
+        "r": 12
+      },
+      "tag": "prison_guard"
+    },
+    {
+      "type": "spawn",
+      "owner": "enemy",
+      "units": [
+        {
+          "type": "grunt",
+          "count": 2
+        },
+        {
+          "type": "axethrower",
+          "count": 2
+        }
+      ],
+      "anchor": "scoutPrison4",
+      "dx": 0,
+      "dz": -7,
+      "spread": 2.5,
+      "guard": {
+        "r": 12
+      },
+      "tag": "prison_guard"
+    },
+    {
+      "type": "spawn",
+      "owner": "enemy",
+      "units": [
+        {
+          "type": "grunt",
+          "count": 2
+        },
+        {
+          "type": "axethrower",
+          "count": 2
+        }
+      ],
+      "anchor": "scoutPrison5",
+      "dx": 0,
+      "dz": -7,
+      "spread": 2.5,
+      "guard": {
+        "r": 12
+      },
+      "tag": "prison_guard"
+    },
+    {
+      "type": "spawn",
+      "owner": "enemy",
+      "units": [
+        {
+          "type": "grunt",
+          "count": 2
+        },
+        {
+          "type": "axethrower",
+          "count": 2
+        }
+      ],
+      "anchor": "scoutPrison6",
+      "dx": 0,
+      "dz": -7,
+      "spread": 2.5,
+      "guard": {
+        "r": 12
+      },
+      "tag": "prison_guard"
+    },
+    {
+      "type": "spawn",
+      "owner": "neutral",
+      "unitType": "ogre_mage",
+      "count": 1,
+      "anchor": "emissary1",
+      "tag": "emissary",
+      "markColor": "#f8fafc"
+    },
+    {
+      "type": "spawn",
+      "owner": "enemy",
+      "units": [
+        {
+          "type": "grunt",
+          "count": 3
+        },
+        {
+          "type": "axethrower",
+          "count": 1
+        }
+      ],
+      "anchor": "emissary1",
+      "dx": 8,
+      "dz": 8,
+      "spread": 3,
+      "guard": {
+        "r": 14
+      },
+      "tag": "orc_patrol"
     }
   ],
   "objectives": [
     {
-      "id": "primary-main",
-      "type": "destroy",
+      "id": "build-forge",
+      "type": "build",
       "priority": "primary",
-      "select": {
-        "tag": "enemy_base"
+      "buildingType": "forge",
+      "count": 1,
+      "title": {
+        "pt-BR": "Construir a Ferraria",
+        "en": "Build the Smithy"
+      },
+      "description": {
+        "pt-BR": "Aldeões constroem. A Ferraria custa 50 de ouro, 100 de madeira e 70 de pedra.",
+        "en": "Villagers build. The Smithy costs 50 gold, 100 wood and 70 stone."
+      }
+    },
+    {
+      "id": "research-weapons",
+      "type": "flag",
+      "priority": "primary",
+      "active": false,
+      "condition": {
+        "type": "research",
+        "id": "melee_weapons",
+        "level": 1
       },
       "title": {
-        "pt-BR": "Pesquisar Armas Forjadas e resgatar batedores",
-        "en": "Research Forged Weapons and rescue scouts"
+        "pt-BR": "Pesquisar Armas Forjadas na Ferraria",
+        "en": "Research Forged Weapons at the Smithy"
+      },
+      "description": {
+        "pt-BR": "Selecione a Ferraria e escolha Armas Forjadas (200 de ouro, 100 de madeira, 30 s).",
+        "en": "Select the Smithy and pick Forged Weapons (200 gold, 100 wood, 30 s)."
       }
+    },
+    {
+      "id": "rescue-scouts",
+      "type": "rescue",
+      "priority": "primary",
+      "tag": "scout",
+      "count": 6,
+      "title": {
+        "pt-BR": "Resgatar os 6 batedores (2 perto dos bandidos, 4 atrás dos orcs)",
+        "en": "Rescue the 6 scouts (2 near the bandits, 4 behind the orcs)"
+      },
+      "description": {
+        "pt-BR": "Cada batedor está preso num cercado de muralha. Derrube um trecho do muro e ele é seu. Se sobrarem menos de 6 vivos, a missão falha.",
+        "en": "Each scout is locked in a walled pen. Tear down one stretch of wall and he is yours. If fewer than 6 stay alive, the mission fails."
+      }
+    },
+    {
+      "id": "bandit-camps",
+      "type": "destroy",
+      "priority": "secondary",
+      "select": {
+        "tag": "bandit_camp",
+        "killedBy": "player"
+      },
+      "count": 2,
+      "title": {
+        "pt-BR": "Destruir os 2 acampamentos de bandidos (espólio)",
+        "en": "Destroy the 2 bandit camps (spoils)"
+      },
+      "description": {
+        "pt-BR": "Opcional. Recompensa: 250 de ouro e 80 de madeira.",
+        "en": "Optional. Reward: 250 gold and 80 wood."
+      }
+    },
+    {
+      "id": "emissary-honor",
+      "type": "flag",
+      "priority": "hidden",
+      "condition": {
+        "all": [
+          {
+            "type": "area",
+            "owner": "player",
+            "area": {
+              "anchor": "emissary1",
+              "r": 7
+            }
+          },
+          {
+            "type": "count",
+            "select": {
+              "tag": "emissary"
+            },
+            "op": ">=",
+            "value": 1
+          }
+        ]
+      },
+      "failWhen": {
+        "type": "dead",
+        "select": {
+          "tag": "emissary"
+        },
+        "count": 1
+      },
+      "title": {
+        "pt-BR": "Poupar o Emissário",
+        "en": "Spare the Emissary"
+      },
+      "description": {
+        "pt-BR": "Honra: o orc do pano branco não é inimigo.",
+        "en": "Honor: the orc with the white cloth is no enemy."
+      }
+    }
+  ],
+  "triggers": [
+    {
+      "id": "intro",
+      "when": {
+        "type": "time",
+        "at": 0
+      },
+      "actions": [
+        {
+          "type": "music",
+          "id": "on"
+        },
+        {
+          "type": "reveal",
+          "anchor": "banditCamp1",
+          "radius": 24,
+          "ttl": 34
+        },
+        {
+          "type": "reveal",
+          "anchor": "banditCamp2",
+          "radius": 24,
+          "ttl": 34
+        },
+        {
+          "type": "reveal",
+          "anchor": "enemyStart",
+          "radius": 28,
+          "ttl": 34
+        },
+        {
+          "type": "cutscene",
+          "id": "landing",
+          "duration": 33,
+          "skippable": true,
+          "steps": [
+            {
+              "at": 0,
+              "anchor": "landingZone",
+              "zoom": 1.15,
+              "dialog": {
+                "speaker": {
+                  "pt-BR": "Elara Pinheiral",
+                  "en": "Elara Pinheiral"
+                },
+                "portrait": "🏹",
+                "text": {
+                  "pt-BR": "Desembarcamos no Pouso do Encontro. Velas desconhecidas aportaram junto à Torre da Fenda e meus seis batedores sumiram na ilha. Vou mostrar onde estão.",
+                  "en": "We landed at the Meeting Landing. Unknown sails anchored near the Rift Tower and my six scouts vanished on the island. Let me show you where they are."
+                },
+                "duration": 7
+              }
+            },
+            {
+              "at": 7,
+              "anchor": "banditCamp1",
+              "zoom": 1.1,
+              "dialog": {
+                "speaker": {
+                  "pt-BR": "Elara Pinheiral",
+                  "en": "Elara Pinheiral"
+                },
+                "portrait": "🏹",
+                "text": {
+                  "pt-BR": "Dois foram pegos pela Irmandade da Maré. Ali a sudoeste, um acampamento de bandidos, e o cercado de muralha onde prenderam um dos meus.",
+                  "en": "Two were caught by the Tide Brotherhood. There to the southwest, a bandit camp, and the walled pen where they locked one of mine."
+                },
+                "duration": 7
+              }
+            },
+            {
+              "at": 14,
+              "anchor": "banditCamp2",
+              "zoom": 1.1,
+              "dialog": {
+                "speaker": {
+                  "pt-BR": "Elara Pinheiral",
+                  "en": "Elara Pinheiral"
+                },
+                "portrait": "🏹",
+                "text": {
+                  "pt-BR": "O outro está preso ao norte, junto a um segundo acampamento, na rota que leva ao leste.",
+                  "en": "The other is held to the north, beside a second camp, on the road that leads east."
+                },
+                "duration": 5.5
+              }
+            },
+            {
+              "at": 20,
+              "anchor": "enemyStart",
+              "zoom": 1,
+              "dialog": {
+                "speaker": {
+                  "pt-BR": "Elara Pinheiral",
+                  "en": "Elara Pinheiral"
+                },
+                "portrait": "🏹",
+                "text": {
+                  "pt-BR": "Ao leste, a fumaça do Clã Chama-Baixa: os orcs que desembarcaram. Os outros QUATRO batedores estão presos atrás deles, do outro lado da base, longe das torres que construírem.",
+                  "en": "To the east, the smoke of the Low Flame Clan: the orcs who landed. The other FOUR scouts are locked up behind them, past the far side of their base, away from any towers they raise."
+                },
+                "duration": 8.5
+              }
+            },
+            {
+              "at": 29,
+              "anchor": "playerStart",
+              "zoom": 1,
+              "dialog": {
+                "speaker": {
+                  "pt-BR": "Elara Pinheiral",
+                  "en": "Elara Pinheiral"
+                },
+                "portrait": "🏹",
+                "text": {
+                  "pt-BR": "Esta é a nossa base. Primeiro a Ferraria: sem armas melhores, nem pense em marchar.",
+                  "en": "This is our base. The Smithy first: without better weapons, do not even think of marching."
+                },
+                "duration": 4
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "first-steps",
+      "when": {
+        "type": "time",
+        "at": 36
+      },
+      "actions": [
+        {
+          "type": "dialog",
+          "speaker": {
+            "pt-BR": "Elara Pinheiral",
+            "en": "Elara Pinheiral"
+          },
+          "portrait": "🏹",
+          "text": {
+            "pt-BR": "Objetivo um: uma Ferraria. Ponha um Aldeão para construí-la (50 de ouro, 100 de madeira, 70 de pedra) e mande outro à Pedreira e à Mina. Os seis batedores só voltam vivos se formos fortes.",
+            "en": "Objective one: a Smithy. Put a Villager on it (50 gold, 100 wood, 70 stone) and send another to the Quarry and the Mine. The six scouts only come back alive if we are strong."
+          },
+          "duration": 9
+        }
+      ]
+    },
+    {
+      "id": "forge-up",
+      "when": {
+        "type": "objective",
+        "id": "build-forge",
+        "status": "completed"
+      },
+      "actions": [
+        {
+          "type": "setObjective",
+          "id": "research-weapons",
+          "status": "active"
+        },
+        {
+          "type": "sound",
+          "id": "build"
+        },
+        {
+          "type": "dialog",
+          "speaker": {
+            "pt-BR": "Elara Pinheiral",
+            "en": "Elara Pinheiral"
+          },
+          "portrait": "🏹",
+          "text": {
+            "pt-BR": "Ferraria de pé! Selecione-a e pesquise Armas Forjadas: os Espadachins vão bater mais forte. Enquanto isso, treine tropa no Quartel.",
+            "en": "Smithy standing! Select it and research Forged Weapons: your Swordsmen will hit harder. Meanwhile, train troops at the Barracks."
+          },
+          "duration": 8
+        }
+      ]
+    },
+    {
+      "id": "research-done",
+      "when": {
+        "type": "objective",
+        "id": "research-weapons",
+        "status": "completed"
+      },
+      "actions": [
+        {
+          "type": "sound",
+          "id": "victory"
+        },
+        {
+          "type": "dialog",
+          "speaker": {
+            "pt-BR": "Elara Pinheiral",
+            "en": "Elara Pinheiral"
+          },
+          "portrait": "🏹",
+          "text": {
+            "pt-BR": "Armas Forjadas prontas. Agora vá: acampamentos primeiro, depois contorne os orcs por onde der. A base deles continua de pé, e não precisamos derrubá-la.",
+            "en": "Forged Weapons ready. Now go: camps first, then swing around the orcs however you can. Their base still stands, and we do not need to bring it down."
+          },
+          "duration": 9
+        }
+      ]
+    },
+    {
+      "id": "camp-near",
+      "when": {
+        "type": "area",
+        "owner": "player",
+        "area": {
+          "anchor": "banditCamp1",
+          "r": 34
+        }
+      },
+      "actions": [
+        {
+          "type": "dialog",
+          "speaker": {
+            "pt-BR": "Elara Pinheiral",
+            "en": "Elara Pinheiral"
+          },
+          "portrait": "🏹",
+          "text": {
+            "pt-BR": "Território da Irmandade da Maré. O batedor está no cercado ao lado do acampamento: quebrem a muralha DEPOIS de limpar os guardas, ou ele vira alvo.",
+            "en": "Tide Brotherhood territory. The scout is in the pen beside the camp: break the wall AFTER clearing the guards, or he becomes a target."
+          },
+          "duration": 8
+        }
+      ]
+    },
+    {
+      "id": "free-1",
+      "when": {
+        "type": "dead",
+        "select": {
+          "tag": "prison1"
+        },
+        "count": 1
+      },
+      "actions": [
+        {
+          "type": "transfer",
+          "select": {
+            "unitType": "archer",
+            "owner": "neutral",
+            "area": {
+              "anchor": "scoutPrison1",
+              "r": 3.4
+            }
+          },
+          "to": "player"
+        },
+        {
+          "type": "incVar",
+          "name": "near_freed"
+        },
+        {
+          "type": "sound",
+          "id": "build"
+        },
+        {
+          "type": "message",
+          "text": {
+            "pt-BR": "Batedor libertado!",
+            "en": "Scout freed!"
+          }
+        }
+      ]
+    },
+    {
+      "id": "free-2",
+      "when": {
+        "type": "dead",
+        "select": {
+          "tag": "prison2"
+        },
+        "count": 1
+      },
+      "actions": [
+        {
+          "type": "transfer",
+          "select": {
+            "unitType": "archer",
+            "owner": "neutral",
+            "area": {
+              "anchor": "scoutPrison2",
+              "r": 3.4
+            }
+          },
+          "to": "player"
+        },
+        {
+          "type": "incVar",
+          "name": "near_freed"
+        },
+        {
+          "type": "sound",
+          "id": "build"
+        },
+        {
+          "type": "message",
+          "text": {
+            "pt-BR": "Batedor libertado!",
+            "en": "Scout freed!"
+          }
+        }
+      ]
+    },
+    {
+      "id": "free-3",
+      "when": {
+        "type": "dead",
+        "select": {
+          "tag": "prison3"
+        },
+        "count": 1
+      },
+      "actions": [
+        {
+          "type": "transfer",
+          "select": {
+            "unitType": "archer",
+            "owner": "neutral",
+            "area": {
+              "anchor": "scoutPrison3",
+              "r": 3.4
+            }
+          },
+          "to": "player"
+        },
+        {
+          "type": "incVar",
+          "name": "far_freed"
+        },
+        {
+          "type": "sound",
+          "id": "build"
+        },
+        {
+          "type": "message",
+          "text": {
+            "pt-BR": "Batedor libertado!",
+            "en": "Scout freed!"
+          }
+        }
+      ]
+    },
+    {
+      "id": "free-4",
+      "when": {
+        "type": "dead",
+        "select": {
+          "tag": "prison4"
+        },
+        "count": 1
+      },
+      "actions": [
+        {
+          "type": "transfer",
+          "select": {
+            "unitType": "archer",
+            "owner": "neutral",
+            "area": {
+              "anchor": "scoutPrison4",
+              "r": 3.4
+            }
+          },
+          "to": "player"
+        },
+        {
+          "type": "incVar",
+          "name": "far_freed"
+        },
+        {
+          "type": "sound",
+          "id": "build"
+        },
+        {
+          "type": "message",
+          "text": {
+            "pt-BR": "Batedor libertado!",
+            "en": "Scout freed!"
+          }
+        }
+      ]
+    },
+    {
+      "id": "free-5",
+      "when": {
+        "type": "dead",
+        "select": {
+          "tag": "prison5"
+        },
+        "count": 1
+      },
+      "actions": [
+        {
+          "type": "transfer",
+          "select": {
+            "unitType": "archer",
+            "owner": "neutral",
+            "area": {
+              "anchor": "scoutPrison5",
+              "r": 3.4
+            }
+          },
+          "to": "player"
+        },
+        {
+          "type": "incVar",
+          "name": "far_freed"
+        },
+        {
+          "type": "sound",
+          "id": "build"
+        },
+        {
+          "type": "message",
+          "text": {
+            "pt-BR": "Batedor libertado!",
+            "en": "Scout freed!"
+          }
+        }
+      ]
+    },
+    {
+      "id": "free-6",
+      "when": {
+        "type": "dead",
+        "select": {
+          "tag": "prison6"
+        },
+        "count": 1
+      },
+      "actions": [
+        {
+          "type": "transfer",
+          "select": {
+            "unitType": "archer",
+            "owner": "neutral",
+            "area": {
+              "anchor": "scoutPrison6",
+              "r": 3.4
+            }
+          },
+          "to": "player"
+        },
+        {
+          "type": "incVar",
+          "name": "far_freed"
+        },
+        {
+          "type": "sound",
+          "id": "build"
+        },
+        {
+          "type": "message",
+          "text": {
+            "pt-BR": "Batedor libertado!",
+            "en": "Scout freed!"
+          }
+        }
+      ]
+    },
+    {
+      "id": "first-near",
+      "when": {
+        "type": "var",
+        "name": "near_freed",
+        "op": ">=",
+        "value": 1
+      },
+      "actions": [
+        {
+          "type": "dialog",
+          "speaker": {
+            "pt-BR": "Elara Pinheiral",
+            "en": "Elara Pinheiral"
+          },
+          "portrait": "🏹",
+          "text": {
+            "pt-BR": "Um de volta! Muralha de Aurelan roubada por bandidos, olhe só. Ele conta que os outros quatro estão trancados pelos orcs, além da base deles.",
+            "en": "One back! Aurelan wall stolen by bandits, look at that. He says the other four are locked in by the orcs, beyond their base."
+          },
+          "duration": 8
+        }
+      ]
+    },
+    {
+      "id": "orcs-seen",
+      "when": {
+        "type": "area",
+        "owner": "player",
+        "area": {
+          "anchor": "emissary1",
+          "r": 26
+        }
+      },
+      "actions": [
+        {
+          "type": "dialog",
+          "speaker": {
+            "pt-BR": "Elara Pinheiral",
+            "en": "Elara Pinheiral"
+          },
+          "portrait": "🏹",
+          "text": {
+            "pt-BR": "Orcs adiante: uma patrulha do Clã Chama-Baixa. Não são bandidos, são soldados. Vá com a tropa junta, e não ataque o que não atacar primeiro.",
+            "en": "Orcs ahead: a Low Flame Clan patrol. They are not bandits, they are soldiers. Keep the troops together, and do not attack what has not attacked first."
+          },
+          "duration": 8
+        }
+      ]
+    },
+    {
+      "id": "emissary-met",
+      "when": {
+        "type": "objective",
+        "id": "emissary-honor",
+        "status": "completed"
+      },
+      "actions": [
+        {
+          "type": "giveResources",
+          "owner": "player",
+          "gold": 100
+        },
+        {
+          "type": "sound",
+          "id": "victory"
+        },
+        {
+          "type": "message",
+          "text": {
+            "pt-BR": "Emissário poupado: +100 de ouro.",
+            "en": "Emissary spared: +100 gold."
+          }
+        },
+        {
+          "type": "dialog",
+          "speaker": {
+            "pt-BR": "Emissário do Chama-Baixa",
+            "en": "Low Flame Emissary"
+          },
+          "portrait": "🏳️",
+          "text": {
+            "pt-BR": "Pano branco, soldado de Aurelan. Poupou-me, então escute: o capitão Drogath esconde quatro prisioneiros além da fogueira grande, e as patrulhas dele não vão ficar quietas por muito tempo. Cuidado com a emboscada.",
+            "en": "White cloth, Aurelan soldier. You spared me, so listen: Captain Drogath hides four prisoners beyond the big fire, and his patrols will not stay quiet for long. Beware the ambush."
+          },
+          "duration": 9
+        }
+      ]
+    },
+    {
+      "id": "far-zone",
+      "when": {
+        "type": "area",
+        "owner": "player",
+        "area": {
+          "anchor": "scoutPrison4",
+          "r": 30
+        }
+      },
+      "actions": [
+        {
+          "type": "dialog",
+          "speaker": {
+            "pt-BR": "Drogath Punho-de-Brasa",
+            "en": "Drogath Ember-Fist"
+          },
+          "portrait": "🔥",
+          "text": {
+            "pt-BR": "Aurelan chegou até aqui, é? Ninguém sabe quem atirou primeiro, humano. Mas eu sei quem atira por último.",
+            "en": "Aurelan came all this way, did you? No one knows who shot first, human. But I know who shoots last."
+          },
+          "duration": 7
+        }
+      ]
+    },
+    {
+      "id": "first-far",
+      "when": {
+        "type": "var",
+        "name": "far_freed",
+        "op": ">=",
+        "value": 1
+      },
+      "actions": [
+        {
+          "type": "dialog",
+          "speaker": {
+            "pt-BR": "Elara Pinheiral",
+            "en": "Elara Pinheiral"
+          },
+          "portrait": "🏹",
+          "text": {
+            "pt-BR": "Libertamos um dos quatro do leste! Quebrem os outros cercados e saiam: o Chama-Baixa vai correr atrás de nós.",
+            "en": "One of the four in the east is free! Break the other pens and get out: the Low Flame will chase us."
+          },
+          "duration": 7
+        }
+      ]
+    },
+    {
+      "id": "camps-spoils",
+      "when": {
+        "type": "objective",
+        "id": "bandit-camps",
+        "status": "completed"
+      },
+      "actions": [
+        {
+          "type": "giveResources",
+          "owner": "player",
+          "gold": 250,
+          "wood": 80
+        },
+        {
+          "type": "sound",
+          "id": "victory"
+        },
+        {
+          "type": "message",
+          "text": {
+            "pt-BR": "Acampamentos destruídos: +250 de ouro e +80 de madeira.",
+            "en": "Camps destroyed: +250 gold and +80 wood."
+          }
+        }
+      ]
+    },
+    {
+      "id": "raid-1",
+      "when": {
+        "type": "time",
+        "at": 300
+      },
+      "actions": [
+        {
+          "type": "spawn",
+          "owner": "enemy",
+          "units": [
+            {
+              "type": "grunt",
+              "count": 4
+            },
+            {
+              "type": "axethrower",
+              "count": 2
+            }
+          ],
+          "anchor": "enemyStart",
+          "dx": -12,
+          "dz": -6,
+          "spread": 3,
+          "tag": "raid",
+          "order": {
+            "kind": "attackMove",
+            "anchor": "playerStart"
+          }
+        },
+        {
+          "type": "message",
+          "text": {
+            "pt-BR": "Alerta: uma tropa orc marcha para a base!",
+            "en": "Alert: an orc warband is marching on the base!"
+          }
+        }
+      ]
+    },
+    {
+      "id": "raid-2",
+      "when": {
+        "type": "time",
+        "at": 500
+      },
+      "actions": [
+        {
+          "type": "spawn",
+          "owner": "enemy",
+          "units": [
+            {
+              "type": "grunt",
+              "count": 5
+            },
+            {
+              "type": "axethrower",
+              "count": 3
+            }
+          ],
+          "anchor": "enemyStart",
+          "dx": -12,
+          "dz": -6,
+          "spread": 3,
+          "tag": "raid",
+          "order": {
+            "kind": "attackMove",
+            "anchor": "playerStart"
+          }
+        },
+        {
+          "type": "message",
+          "text": {
+            "pt-BR": "Alerta: nova tropa orc a caminho da base!",
+            "en": "Alert: another orc warband is heading for the base!"
+          }
+        }
+      ]
+    },
+    {
+      "id": "scout-lost",
+      "when": {
+        "type": "objective",
+        "id": "rescue-scouts",
+        "status": "failed"
+      },
+      "actions": [
+        {
+          "type": "defeat",
+          "text": {
+            "pt-BR": "Um batedor caiu: sem os seis, a missão está perdida.",
+            "en": "A scout has fallen: without all six, the mission is lost."
+          }
+        }
+      ]
+    },
+    {
+      "id": "castle-fallen",
+      "when": {
+        "type": "count",
+        "select": {
+          "buildingType": "castle",
+          "owner": "player"
+        },
+        "op": "==",
+        "value": 0
+      },
+      "actions": [
+        {
+          "type": "defeat",
+          "text": {
+            "pt-BR": "O Paço Real caiu. A Liga perdeu a cabeça de ponte.",
+            "en": "The Keep has fallen. The League lost its beachhead."
+          }
+        }
+      ]
+    },
+    {
+      "id": "all-done",
+      "when": {
+        "all": [
+          {
+            "type": "objective",
+            "id": "build-forge",
+            "status": "completed"
+          },
+          {
+            "type": "objective",
+            "id": "research-weapons",
+            "status": "completed"
+          },
+          {
+            "type": "objective",
+            "id": "rescue-scouts",
+            "status": "completed"
+          }
+        ]
+      },
+      "actions": [
+        {
+          "type": "sound",
+          "id": "victory"
+        },
+        {
+          "type": "cutscene",
+          "id": "finale",
+          "duration": 14,
+          "skippable": true,
+          "steps": [
+            {
+              "at": 0,
+              "anchor": "landingZone",
+              "zoom": 1.1,
+              "dialog": {
+                "speaker": {
+                  "pt-BR": "Elara Pinheiral",
+                  "en": "Elara Pinheiral"
+                },
+                "portrait": "🏹",
+                "text": {
+                  "pt-BR": "Os seis estão vivos e a bordo. Vimos o suficiente: a Fenda trouxe os orcs até aqui, e não vieram para pescar.",
+                  "en": "All six are alive and aboard. We have seen enough: the Rift brought the orcs here, and they did not come to fish."
+                },
+                "duration": 7
+              }
+            },
+            {
+              "at": 7,
+              "anchor": "enemyStart",
+              "zoom": 1.2,
+              "dialog": {
+                "speaker": {
+                  "pt-BR": "Elara Pinheiral",
+                  "en": "Elara Pinheiral"
+                },
+                "portrait": "🏹",
+                "text": {
+                  "pt-BR": "Ninguém sabe quem atirou primeiro. Mas, depois de hoje, isso já não importa: o mar deixou de ser vazio.",
+                  "en": "No one knows who shot first. But after today it no longer matters: the sea is empty no more."
+                },
+                "duration": 7
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "finale-clock",
+      "when": {
+        "type": "trigger",
+        "id": "all-done"
+      },
+      "once": false,
+      "cooldown": 14,
+      "actions": [
+        {
+          "type": "incVar",
+          "name": "fin_clock",
+          "by": 1
+        }
+      ]
+    },
+    {
+      "id": "finale-victory",
+      "when": {
+        "type": "var",
+        "name": "fin_clock",
+        "op": ">=",
+        "value": 1
+      },
+      "actions": [
+        {
+          "type": "victory"
+        }
+      ]
     }
   ]
 }

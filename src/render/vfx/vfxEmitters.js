@@ -35,6 +35,7 @@ export function playFx(L, rng, d) {
     case 'construction': return construction(L, rng, d);
     case 'explosion': return explosion(L, rng, d);
     case 'magic': return magic(L, rng, d);
+    case 'fireworks': return fireworks(L, rng, d);
     default: return undefined;
   }
 }
@@ -184,6 +185,38 @@ function explosion(L, rng, d) {
       0, 0.4, 0, Math.cos(a) * s, rng.range(3, 6), Math.sin(a) * s, rng() < 0.5 ? COL.stoneDark : COL.woodDark);
   }
   put(L.glow, L, 0, 0.3, r * 1.1, 0, d.pos, 0, 0.8, 0, 0, 0, 0, COL.white);
+}
+
+/** Cores dos fogos (memoizadas uma vez no carregamento do módulo; nada alocado por disparo). */
+const FIREWORK_COLORS = ['#ffd34d', '#ff5566', '#55c7ff', '#7dff7a', '#e27bff', '#ffffff'].map(rgb);
+
+/**
+ * M3-03a: fogos de artifício sobre o Centro ao concluir um nível (~3 s). Quatro foguetes; cada um deixa um rastro
+ * (partículas com atraso crescente na mesma trajetória), estoura em esfera de faíscas com clarão branco no ápice.
+ * Tudo no pool `glow` (aditivo, bloom); a posição do estouro é aleatória só no render (RNG de render).
+ */
+function fireworks(L, rng, d) {
+  const h = d.height || 10;
+  const flight = 0.6; // s de subida
+  for (let s = 0; s < 4; s++) {
+    const t0 = s * 0.36;
+    const x = rng.signed(3.2), z = rng.signed(3.2);
+    const top = h - 2 + rng.range(3, 6); // estouro logo acima do telhado (h = altura do modelo do nível)
+    const vy = (top - (h - 1)) / flight;
+    const trail = scaleCount(6, L.density);
+    for (let i = 0; i < trail; i++) { // rastro: mesma trajetória, cada partícula sai um pouco depois
+      put(L.glow, L, t0 + i * 0.07, 0.3, 0.07 - i * 0.004, 0, d.pos, x, h - 1, z, 0, vy, 0, COL.spark);
+    }
+    const tb = t0 + flight; // momento do estouro
+    const col = FIREWORK_COLORS[(rng() * FIREWORK_COLORS.length) | 0];
+    put(L.glow, L, tb, 0.3, 1.4, 0, d.pos, x, top, z, 0, 0, 0, COL.white); // clarão
+    const n = scaleCount(30, L.density);
+    for (let i = 0; i < n; i++) { // esfera uniforme de faíscas (cosseno do polo uniforme)
+      const ct = rng.signed(1), st = Math.sqrt(1 - ct * ct), a = rng() * 6.283, sp = rng.range(2.5, 5.5);
+      put(L.glow, L, tb, rng.range(0.9, 1.4), rng.range(0.16, 0.26), 2.2, d.pos, x, top, z,
+        Math.cos(a) * st * sp, ct * sp, Math.sin(a) * st * sp, rng() < 0.7 ? col : COL.spark);
+    }
+  }
 }
 
 function magic(L, rng, d) {

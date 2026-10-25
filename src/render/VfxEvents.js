@@ -164,6 +164,8 @@ export function createVfxEvents(gm, particleSystem, vfx = null) {
       run(EVT.RESOURCE_DEPLETED, p, { radius: 3.4 });
     });
     on(EVT.EXPLOSION, (p) => { if (seen(p.ownerId, p.pos)) run(EVT.EXPLOSION, p, {}); });
+    // M3-03a: o Centro do jogador local subiu de nível => fogos de artifício sobre ele (IA não ganha VFX de jogador).
+    on(EVT.HQ_TIER_CHANGED, (p) => { if (p.ownerId === gm.localPlayerId) run(EVT.HQ_TIER_CHANGED, p, {}); });
     on(EVT.ABILITY_EFFECT, (p) => {
       const ab = resolveAbility(gm, p.abilityId);
       if (!ab || !ab.vfx || !isLocalOrExplored(p.ownerId, p.pos)) return;

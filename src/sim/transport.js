@@ -11,6 +11,10 @@ import { BOARD_DISTANCE } from '../data/combat.js';
 import { EVT } from './events.js';
 
 const TAU = Math.PI * 2;
+/** Quanto tempo (s) uma tropa espera na praia o barco que foi buscá-la. */
+const BOARD_WAIT = 90;
+/** Distância máxima (u) tropa↔barco para o barco ocioso chegar sozinho à praia. */
+const APPROACH_MAX = 9;
 
 /** Folga (u) da borda do barco à borda do terrestre em que se embarca/desembarca. */
 export function boardEdgeDistance(boat, unit) {
@@ -179,6 +183,45 @@ export function orderLoad(gm, unit, boat) {
   unit._boardTarget = boat;
   unit._boardAt = { x: boat.mesh.position.x, z: boat.mesh.position.z };
   unit._boardRetry = 0;
+  unit._boardTries = 0;
+  unit._boardWait = 0;
+  return true;
+}
+
+/** ENG-NAVAL: manda o barco à água navegável mais próxima do terrestre `unit` (a ≤ 2 do seu raio). Devolve `false` se não há. */
+function approachBoat(gm, boat, unit) {
+  const npf = gm.navalPathfinder;
+  if (!npf) return false;
+  const p = unit.mesh.position;
+  if (fhypot(p.x - boat.mesh.position.x, p.z - boat.mesh.position.z) > APPROACH_MAX) return false; // barco longe: o jogador manda a barcaça (spec F4-07b)
+  for (let r = 0; r <= 10; r += 1) {
+    const steps = r === 0 ? 1 : 16;
+    for (let i = 0; i < steps; i++) {
+      const a = (i / steps) * TAU;
+      const x = p.x + fcos(a) * r;
+      const z = p.z + fsin(a) * r;
+      if (!npf.isWalkableWorld(x, z)) continue;
+      if (fhypot(x - boat.mesh.position.x, z - boat.mesh.position.z) < 0.75) return false; // já está lá: nada a ganhar
+      boat.moveTo(x, z, gm);
+      return true;
+    }
+  }
+  return false;
+}
+
+/**
+ * ENG-NAVAL: ordem dada à BARCAÇA ("busque aquele soldado"): o barco vai à água junto da tropa e a tropa, parada na praia,
+ * embarca assim que ele chegar. (Antes só o barco andava e ninguém embarcava se ele estivesse longe de terra.)
+ */
+export function orderPickup(gm, boat, unit, spot) {
+  if (!canLoad(boat, unit)) return false;
+  boat.orderQueue = null;
+  if (spot) boat.moveTo(spot.x, spot.z, gm);
+  unit._boardTarget = boat;
+  unit._boardAt = { x: boat.mesh.position.x, z: boat.mesh.position.z };
+  unit._boardRetry = 0;
+  unit._boardTries = 0;
+  unit._boardWait = 0;
   return true;
 }
 
@@ -192,17 +235,29 @@ export function updateBoarding(gm, unit, delta) {
     return;
   }
   unit._boardRetry += delta;
+  unit._boardWait += delta;
   const moved = fhypot(boat.mesh.position.x - unit._boardAt.x, boat.mesh.position.z - unit._boardAt.z);
   const arrived = unit.state === 'idle';
   if (unit._boardRetry < 1 || (!arrived && moved < 4)) return;
   unit._boardRetry = 0;
-  if (arrived && moved < 1) { // parou na margem e o barco continua longe da costa: desiste
+  if (arrived && moved < 1) { // parou na margem e o barco continua longe da costa
+    // ENG-NAVAL: barco parado (sem ordem própria) se aproxima da tropa que espera na praia; só desiste se ele não puder chegar
+    if (unit._boardTries < 3 && boat.state === 'idle' && !boat._unloadOrder && approachBoat(gm, boat, unit)) {
+      unit._boardTries++;
+      unit._boardAt = { x: boat.mesh.position.x, z: boat.mesh.position.z };
+      return;
+    }
     unit._boardTarget = null;
     notify(gm, unit.ownerId, '⚠️ Barcaça longe da margem');
     return;
   }
   const pt = findBoardingPoint(gm, boat);
-  if (!pt) { unit._boardTarget = null; return; }
+  if (!pt) {
+    // ENG-NAVAL: barco ainda a caminho (longe de qualquer terra): a tropa espera na praia (no máx. BOARD_WAIT s)
+    if (boat.state !== 'idle' && unit.state === 'idle' && unit._boardWait < BOARD_WAIT) return;
+    unit._boardTarget = null;
+    return;
+  }
   unit.moveTo(pt.x, pt.z, gm);
   unit._boardTarget = boat;
   unit._boardAt = { x: boat.mesh.position.x, z: boat.mesh.position.z };

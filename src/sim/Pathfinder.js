@@ -431,6 +431,13 @@ export class Pathfinder {
       dest = this.toGrid(snapped.x, snapped.z);
     }
 
+    // ENG-NAVAL: busca naval com folga cujo destino fica rente à costa/baixio: a célula-alvo da busca vira a livre mais próxima (a
+    // perna final até o ponto exato é reta). Sem isso a busca larga nunca chegava e caía no caminho sem folga, que raspa os baixios.
+    if (this.naval && this._clear && !this._free(dest.c, dest.r)) {
+      const near = this._nearestClearCell(dest.c, dest.r, 6);
+      if (near) dest = near;
+    }
+
     const destIndex = dest.r * this.cols + dest.c;
 
     if (startIndex === destIndex) {
@@ -466,6 +473,21 @@ export class Pathfinder {
       smoothPath[smoothPath.length - 1] = { x: destX, z: destZ };
     }
     return smoothPath;
+  }
+
+  /** ENG-NAVAL: célula `_free` mais próxima (anel crescente, ordem fixa) de (c, r) em até `maxR` células, ou `null`. */
+  _nearestClearCell(c, r, maxR) {
+    let best = null;
+    let bestD = Infinity;
+    for (let dr = -maxR; dr <= maxR; dr++) {
+      for (let dc = -maxR; dc <= maxR; dc++) {
+        const d = dc * dc + dr * dr;
+        if (d >= bestD || d > maxR * maxR || !this._free(c + dc, r + dr)) continue;
+        bestD = d;
+        best = { c: c + dc, r: r + dr };
+      }
+    }
+    return best;
   }
 
   /** Busca A* com heap binário; devolve o caminho suavizado (string-pulling) até `dest`.

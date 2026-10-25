@@ -54,7 +54,7 @@ BLD = {
                     raiz='Cottage', atlas='cottage_atlas', escala=5.6, girar=0, tris=7200,
                     cor_time=dict(hue=(205, 250), sat=0.45, val=0.30), frente_extra=1.2),
     'lumber_camp': dict(fbx=DL + '/serraria/tripo_convert_afe019c6-ab73-4d0c-bc05-7f80883883f5.fbx', glb='lumber_camp.glb',
-                        raiz='LumberCamp', atlas='lumber_camp_atlas', escala=6.6, girar=0, tris=7200,
+                        raiz='LumberCamp', atlas='lumber_camp_atlas', escala=6.6, girar='auto', girar_extra=-90, largo=7.8, tris=7200,
                         cor_time=dict(hue=(205, 250), sat=0.30, val=0.30), frente_extra=1.2),
 }
 
@@ -113,12 +113,26 @@ def construir(nome, args):
     co = np.empty(len(me.vertices) * 3, dtype=np.float64)
     me.vertices.foreach_get('co', co)
     co = co.reshape(-1, 3)
+    if L['girar'] == 'auto':
+        # alinha o edifício aos eixos: ângulo (0-90°) que minimiza a área da caixa x/z (o Tripo o entrega na diagonal)
+        melhor = (1e18, 0.0)
+        for g in np.arange(0.0, 90.0, 0.5):
+            a = np.radians(g)
+            u = np.cos(a) * co[:, 0] - np.sin(a) * co[:, 1]
+            v = np.sin(a) * co[:, 0] + np.cos(a) * co[:, 1]
+            area = (u.max() - u.min()) * (v.max() - v.min())
+            if area < melhor[0]:
+                melhor = (area, g)
+        L = dict(L, girar=melhor[1] + L.get('girar_extra', 0))
+        log('%s: giro automático %.1f°' % (nome, melhor[1]))
     if L['girar']:
         a = np.radians(L['girar'])
         c, s = np.cos(a), np.sin(a)
         x, y = co[:, 0].copy(), co[:, 1].copy()
         co[:, 0], co[:, 1] = c * x - s * y, s * x + c * y
     lo, hi = co.min(axis=0), co.max(axis=0)
+    if L.get('largo'):   # escala pelo maior lado da pegada já alinhada
+        L = dict(L, escala=L['largo'] / max(hi[0] - lo[0], hi[1] - lo[1]))
     co[:, 0] = (co[:, 0] - (lo[0] + hi[0]) / 2) * L['escala']
     co[:, 1] = (co[:, 1] - (lo[1] + hi[1]) / 2) * L['escala']
     co[:, 2] = (co[:, 2] - lo[2]) * L['escala']

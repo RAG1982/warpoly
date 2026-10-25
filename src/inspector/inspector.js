@@ -1090,7 +1090,7 @@ const MODEL_CATALOG = [
     sourceFile: 'tools/blender/build_alliance_bld.py',
     create: createGlb('lumber_camp'),
     description: 'Serraria humana (ART-ALI-3, modelo do Tripo): galpão de enxaimel com roda d\'água, serra circular sobre cavalete e pilhas de toras na frente (+Z); remendos azuis do telhado em cor de time.',
-    notes: '2 draw calls, ~7,2 mil triângulos, atlas 512², ~170 KB. Pegada ~6,6 x 6,3 (raio de colisão 3,2), altura ~3,7.'
+    notes: '2 draw calls, ~7,2 mil triângulos, atlas 512², ~170 KB. Pegada ~7,8 x 5,9 (raio de colisão 3,2), altura ~3,7.'
   },
   {
     id: 'watchtower_glb',

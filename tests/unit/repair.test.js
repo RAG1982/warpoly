@@ -164,9 +164,9 @@ describe('obra: PV, cooperação e cancelamento (F3-05)', () => {
   it('PV da obra sobe com o progresso', () => {
     const gm = makeGm();
     const b = addTower(gm, 0, false);
-    expect(b.hp).toBeCloseTo(b.maxHp * 0.1, 0);
+    expect(Math.abs(b.hp - b.maxHp * 0.1)).toBeLessThanOrEqual(1); // PV inteiros arredondam
     b.construct(50, gm);
-    expect(b.hp).toBeCloseTo(b.maxHp * 0.55, 0);
+    expect(Math.abs(b.hp - b.maxHp * 0.55)).toBeLessThanOrEqual(1); // arredondamento de PV inteiros
     b.construct(50, gm);
     expect(b.isConstructed).toBe(true);
     expect(b.hp).toBeCloseTo(b.maxHp, 5);

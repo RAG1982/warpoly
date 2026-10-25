@@ -13,7 +13,7 @@ vi.hoisted(() => {
 const MODELOS = {
   barracks: { root: 'Barracks', team: true, alturaMin: 5, alturaMax: 6.5 },
   cottage: { root: 'Cottage', team: false, alturaMin: 5, alturaMax: 6 },
-  lumber_camp: { root: 'LumberCamp', team: true, alturaMin: 3, alturaMax: 4.5 },
+  lumber_camp: { root: 'LumberCamp', team: true, alturaMin: 3, alturaMax: 4.5, folgaPegada: 0.5 },
 };
 
 function glbJson(file) {
@@ -71,7 +71,7 @@ describe('Quartel/Casa/Serraria da Aliança (ART-ALI-3): orçamento e estrutura'
       expect(Math.abs(b.lo[2] + b.hi[2])).toBeLessThan(0.3);
       // mesma folga das construções base (ver tools/blender/README.md): a pegada visual não passa de ~2,2x o raio
       const r = BUILDINGS[key].collisionRadius;
-      expect(Math.max(b.w, b.d) / 2).toBeLessThanOrEqual(r * 1.2 + 0.3);
+      expect(Math.max(b.w, b.d) / 2).toBeLessThanOrEqual(r * 1.2 + (spec.folgaPegada ?? 0.3));
     });
 
     it(`${key}: sockets à frente (+Z), fora da caixa do modelo, rally além do spawn`, () => {

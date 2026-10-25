@@ -54,7 +54,7 @@ BLD = {
                     raiz='Cottage', atlas='cottage_atlas', escala=5.6, girar=0, tris=7200,
                     cor_time=dict(hue=(205, 250), sat=0.45, val=0.30), frente_extra=1.2),
     'lumber_camp': dict(fbx=DL + '/serraria/tripo_convert_afe019c6-ab73-4d0c-bc05-7f80883883f5.fbx', glb='lumber_camp.glb',
-                        raiz='LumberCamp', atlas='lumber_camp_atlas', escala=6.6, girar='auto', girar_extra=-90, largo=7.8, tris=7200,
+                        raiz='LumberCamp', atlas='lumber_camp_atlas', escala=6.6, girar='auto', girar_extra=-90, largo=8.5, tris=7200,
                         cor_time=dict(hue=(205, 250), sat=0.30, val=0.30), frente_extra=1.2),
 }
 

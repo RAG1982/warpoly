@@ -13,7 +13,7 @@ vi.hoisted(() => {
 const MODELOS = {
   barracks: { root: 'Barracks', team: true, alturaMin: 5, alturaMax: 6.5 },
   cottage: { root: 'Cottage', team: false, alturaMin: 5, alturaMax: 6 },
-  lumber_camp: { root: 'LumberCamp', team: true, alturaMin: 3, alturaMax: 4.5, folgaPegada: 0.5 },
+  lumber_camp: { root: 'LumberCamp', team: true, alturaMin: 3, alturaMax: 6, folgaPegada: 1.8 },
 };
 
 function glbJson(file) {

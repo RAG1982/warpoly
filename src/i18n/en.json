@@ -605,6 +605,8 @@
   "tier.orc.1": "Clan Hall",
   "tier.orc.2": "Bastion",
   "tier.orc.3": "Iron Citadel",
+  "hq.tierUp.title": "City Centre upgraded: {name}",
+  "hq.tierUp.hint": "The game keeps running. Click or press Esc to close.",
   "tut.attack.text": "Select your soldiers (drag a box or click them) and right-click the camp to attack. Destroy it to claim the reward!",
   "tut.attack.title": "Attack the Bandit Camp",
   "tut.barracks.text": "With the farm ready, pick the Barracks (key B) and place it. This is where you train soldiers.",

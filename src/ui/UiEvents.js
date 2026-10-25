@@ -8,6 +8,9 @@ import { UPGRADE_CONFIG } from '../core/UpgradeConfig.js';
 import { t, researchName, tierName } from '../i18n/index.js';
 import { buildingLabel, playerDisplayName } from './uiText.js';
 import { AlertCenter } from './alerts.js';
+import { techLock } from '../sim/techRestriction.js';
+import { hqTierUnlocks, hasAnyUnlock } from './hqTierUnlocks.js';
+import { HqTierPanel } from './screens/HqTierPanel.js';
 
 const ALERT_ICON = { attack: '⚔️', depleted: '⛏️', research: '🔥', built: '🏗️', food: '🌾' };
 
@@ -21,6 +24,7 @@ export function createUiEvents(gm, uiManager) {
   const on = (type, fn) => offs.push(gm.events.on(type, fn, true)); // true = apresentação (F2-06)
   const isLocal = ownerId => ownerId === gm.localPlayerId;
   const pos2d = (pos) => (pos ? { x: pos.x, z: pos.z } : null);
+  const tierPanel = new HqTierPanel(); // M3-03a: "Centro evoluído" (só o jogador local dispara; ver HQ_TIER_CHANGED)
 
   // F6-05: central de alertas (anti-spam, histórico p/ Espaço, pings do minimapa). Anexada à HUD
   // (`uiManager.alerts`) para o InputManager (Espaço) e o UIManager (minimapa, comida) usarem.
@@ -58,6 +62,11 @@ export function createUiEvents(gm, uiManager) {
     const player = gm.getPlayer(ownerId);
     const factionType = player && player.factionId === 'orc' ? 'orc' : 'human';
     uiManager.showNotification(`🏰 ${t('alert.tierDone', { name: tierName(factionType, tier) })}`);
+    // M3-03a: painel "Centro evoluído" com o que o nível libera (não pausa; `presentation` => mudo em save/replay).
+    const unlocks = hqTierUnlocks(tier, factionType, (kind, id, level) => !techLock(gm, ownerId, kind, id, level));
+    if (hasAnyUnlock(unlocks)) {
+      tierPanel.open({ title: t('hq.tierUp.title', { name: tierName(factionType, tier) }), unlocks, factionId: factionType });
+    }
   });
 
   // Jogador derrotado: mostrado para qualquer jogador (era assim antes — sem filtro de dono).
@@ -93,6 +102,7 @@ export function createUiEvents(gm, uiManager) {
     offs.forEach(off => off());
     offs.length = 0;
     alerts.clear();
+    tierPanel.close();
     if (uiManager.alerts === alerts) uiManager.alerts = null;
   };
 }

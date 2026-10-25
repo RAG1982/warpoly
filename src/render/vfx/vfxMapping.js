@@ -5,6 +5,7 @@
  * `{ fx, pos:{x,y,z}, ... }`.
  */
 import { EVT } from '../../sim/events.js';
+import { HQ_TIER_VIEW } from '../../data/tiers.js';
 
 /** Estágios da obra (0..3) conforme o progresso 0..100; concluída = 4. */
 export const CONSTRUCTION_STAGES = 4;
@@ -81,6 +82,10 @@ export function effectsForEvent(type, p, info = {}) {
       return [{ fx: 'construction', pos: at(p.pos), radius: info.radius || 2, stage: CONSTRUCTION_STAGES, done: true }];
     case EVT.EXPLOSION:
       return [{ fx: 'explosion', pos: at(p.pos), radius: p.radius || 2 }];
+    case EVT.HQ_TIER_CHANGED: { // M3-03a: Centro subiu de nível => fogos sobre o prédio (altura do modelo do nível)
+      const v = HQ_TIER_VIEW[p.tier] || HQ_TIER_VIEW[1];
+      return [{ fx: 'fireworks', pos: at(p.pos), height: v.height }];
+    }
     case EVT.ABILITY_EFFECT: {
       const v = info.vfx;
       if (!v) return [];

@@ -605,6 +605,8 @@
   "tier.orc.1": "Salão do Clã",
   "tier.orc.2": "Bastião",
   "tier.orc.3": "Cidadela de Ferro",
+  "hq.tierUp.title": "Centro evoluído: {name}",
+  "hq.tierUp.hint": "O jogo continua. Clique ou pressione Esc para fechar.",
   "tut.attack.text": "Selecione seus soldados (arraste uma caixa ou clique neles) e clique com o botão direito no acampamento para atacar. Destrua-o para ganhar a recompensa!",
   "tut.attack.title": "Ataque o Acampamento de Bandidos",
   "tut.barracks.text": "Com a fazenda pronta, escolha o Quartel (tecla B) e posicione-o. É onde você treina soldados.",

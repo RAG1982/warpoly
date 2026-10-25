@@ -120,7 +120,7 @@ describe('2 Centros: UPGRADE_HQ e CANCEL_UPGRADE_HQ em qualquer um', () => {
     issue(gm, { type: CMD.UPGRADE_HQ, playerId: 0, buildingId: colony.id });
     expect(colony.tierUpgrade).not.toBeNull();
     expect(first.tierUpgrade).toBeNull();
-    expect(gm.getPlayer(0).resources.gold).toBe(before.gold - 1000);
+    expect(gm.getPlayer(0).resources.gold).toBe(before.gold - 667);
     seconds(gm, 61);
     expect(colony.tier).toBe(2);
     expect(colony.maxHp).toBe(HQ_TIER_HP[2]);
@@ -138,7 +138,7 @@ describe('2 Centros: UPGRADE_HQ e CANCEL_UPGRADE_HQ em qualquer um', () => {
     issue(gm, { type: CMD.UPGRADE_HQ, playerId: 0, buildingId: first.id });
     seconds(gm, 20);
     issue(gm, { type: CMD.UPGRADE_HQ, playerId: 0, buildingId: colony.id });
-    expect(gm.getPlayer(0).resources.gold).toBe(g0 - 2000);
+    expect(gm.getPlayer(0).resources.gold).toBe(g0 - 1334);
     seconds(gm, 41); // o primeiro (60 s) conclui; o segundo (começou 20 s depois) ainda não
     expect(first.tier).toBe(2);
     expect(colony.tier).toBe(1);
@@ -157,7 +157,7 @@ describe('2 Centros: UPGRADE_HQ e CANCEL_UPGRADE_HQ em qualquer um', () => {
     issue(gm, { type: CMD.CANCEL_UPGRADE_HQ, playerId: 0, buildingId: colony.id });
     expect(colony.tierUpgrade).toBeNull();
     expect(first.tierUpgrade).not.toBeNull();
-    expect(gm.getPlayer(0).resources.gold).toBe(g0 - 1000);
+    expect(gm.getPlayer(0).resources.gold).toBe(g0 - 667);
     seconds(gm, 51);
     expect(first.tier).toBe(2);
     expect(colony.tier).toBe(1);

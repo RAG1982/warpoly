@@ -229,13 +229,13 @@ describe('plataforma e petroleiro (F4-07a)', () => {
 });
 
 describe('Centro nível 3 cobra petróleo (F4-07a; resolve o pendente NEW-24 da F3-06)', () => {
-  it('em mapa com poços: UPGRADE_HQ nível 3 cobra 200 de petróleo (e sem 200 não evolui)', () => {
-    expect(HQ_UPGRADE_COST[3].oil).toBe(200);
+  it('em mapa com poços: UPGRADE_HQ nível 3 cobra 133 de petróleo (e sem 133 não evolui)', () => {
+    expect(HQ_UPGRADE_COST[3].oil).toBe(133);
     const gm = makeNavalGm();
     const hq = hqOf(gm, 0);
     hq.tier = 2;
     const P = gm.getPlayer(0);
-    Object.assign(P.resources, { gold: 5000, wood: 5000, stone: 5000, oil: 199 });
+    Object.assign(P.resources, { gold: 5000, wood: 5000, stone: 5000, oil: 132 });
     gm.issue({ type: CMD.UPGRADE_HQ, playerId: 0, buildingId: hq.id });
     gm.simStep(0.05);
     expect(hq.tierUpgrade).toBeNull();
@@ -244,8 +244,8 @@ describe('Centro nível 3 cobra petróleo (F4-07a; resolve o pendente NEW-24 da 
     gm.issue({ type: CMD.UPGRADE_HQ, playerId: 0, buildingId: hq.id });
     gm.simStep(0.05);
     expect(hq.tierUpgrade).toBeTruthy();
-    expect(P.resources.oil).toBe(60);
-    expect(P.resources.gold).toBe(3000);
+    expect(P.resources.oil).toBe(127);
+    expect(P.resources.gold).toBe(3667);
     // cancelar devolve o petróleo
     gm.issue({ type: CMD.CANCEL_UPGRADE_HQ, playerId: 0, buildingId: hq.id });
     gm.simStep(0.05);

@@ -38,8 +38,8 @@ describe('tiers.js (dados puros)', () => {
   });
 
   it('getHqUpgradeCost: nível 2 e 3 batem com a spec', () => {
-    expect(getHqUpgradeCost(2)).toEqual({ gold: 1000, wood: 400, stone: 300, time: 60 });
-    expect(getHqUpgradeCost(3)).toEqual({ gold: 2000, wood: 800, stone: 600, oil: 200, time: 90 });
+    expect(getHqUpgradeCost(2)).toEqual({ gold: 667, wood: 267, stone: 200, time: 60 });
+    expect(getHqUpgradeCost(3)).toEqual({ gold: 1333, wood: 533, stone: 400, oil: 133, time: 90 });
     expect(getHqUpgradeCost(4)).toBeNull();
   });
 });
@@ -59,9 +59,9 @@ describe('Building.startTierUpgrade / CMD.UPGRADE_HQ (integração)', () => {
 
     expect(hq.tierUpgrade).not.toBeNull();
     const before = { ...owner.resources };
-    expect(before.gold).toBe(5000 - 1000);
-    expect(before.wood).toBe(5000 - 400);
-    expect(before.stone).toBe(5000 - 300);
+    expect(before.gold).toBe(5000 - 667);
+    expect(before.wood).toBe(5000 - 267);
+    expect(before.stone).toBe(5000 - 200);
 
     runTicks(gm, 60 - SIM_DT); // quase no fim: ainda não concluiu
     expect(hq.tier).toBe(1);

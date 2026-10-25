@@ -24,7 +24,8 @@ export const BUILD_HOTKEY_BY_ROLE = {
   foundry: 'I',
   platform: 'X',
   tower: 'T',
-  wall: 'M'
+  wall: 'M',
+  hq: 'Q' // ENG-WALL: Centro extra (H/S/A/P são ordens; Q só é tecla de treino em construções, o trabalhador não treina)
 };
 
 /** Treinar unidades: posicional, na ordem dos botões (até 5 unidades treináveis por construção — F4-07: Estaleiro). */

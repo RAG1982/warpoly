@@ -28,7 +28,7 @@ export const FACTIONS = {
     shipyard: 'shipyard', // F4-07
     refinery: 'refinery',
     foundry: 'foundry', // F4-07b
-    buildList: ['cottage', 'lumber_camp', 'farm', 'barracks', 'forge', 'stable', 'workshop', 'arcane_tower', 'temple', 'aviary', 'shipyard', 'refinery', 'foundry', 'watchtower', 'wall_human'],
+    buildList: ['cottage', 'lumber_camp', 'farm', 'barracks', 'forge', 'stable', 'workshop', 'arcane_tower', 'temple', 'aviary', 'shipyard', 'refinery', 'foundry', 'watchtower', 'wall_human', 'castle'],
     /** F4-07a: construções do Petroleiro (`WORKER_BUILD_LIST.tanker`). */
     tankerBuildList: ['oil_platform'],
     units: {
@@ -71,7 +71,7 @@ export const FACTIONS = {
     shipyard: 'ship_dock', // F4-07
     refinery: 'ash_cauldron',
     foundry: 'naval_forge', // F4-07b
-    buildList: ['orc_house', 'pig_farm', 'orc_lumber_mill', 'orc_barracks', 'orc_forge', 'ogre_den', 'orc_workshop', 'ash_sanctum', 'storm_altar', 'serpent_nest', 'ship_dock', 'ash_cauldron', 'naval_forge', 'orc_watchtower', 'wall_orc'],
+    buildList: ['orc_house', 'pig_farm', 'orc_lumber_mill', 'orc_barracks', 'orc_forge', 'ogre_den', 'orc_workshop', 'ash_sanctum', 'storm_altar', 'serpent_nest', 'ship_dock', 'ash_cauldron', 'naval_forge', 'orc_watchtower', 'wall_orc', 'great_hall'],
     tankerBuildList: ['oil_platform'],
     units: {
       worker: 'peon',

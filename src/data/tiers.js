@@ -38,6 +38,20 @@ export const HQ_UPGRADE_COST = {
 };
 
 /**
+ * ENG-WALL: Centros extras construíveis (Paço Real/Salão do Clã de nível 1 pelo menu do trabalhador). Limite por jogador
+ * (inicial + 2), distância mínima entre Centros do mesmo dono e afastamento de bases inimigas (ver `GameManager.canPlaceBuilding`).
+ * A obra leva `buildings.castle.buildTime` (30 s, metade do upgrade para o nível 2) e custa o `cost` do próprio tipo.
+ */
+export const HQ_MAX_PER_PLAYER = 3;
+/** Distância mínima (u) entre centros de dois Centros do mesmo dono (vivos ou em obra). */
+export const HQ_MIN_DISTANCE = 24;
+/** Um Centro novo fica a pelo menos esta distância (u) de qualquer Centro inimigo (hostil). */
+export const HQ_ENEMY_CLEARANCE = 40;
+/** Mina de ouro a menos de `HQ_ENEMY_MINE_RADIUS` de um Centro hostil é "mina inimiga": o Centro novo fica a `HQ_ENEMY_MINE_CLEARANCE` dela. */
+export const HQ_ENEMY_MINE_RADIUS = 36;
+export const HQ_ENEMY_MINE_CLEARANCE = 14;
+
+/**
  * M2-33: chave do modelo 3D (`GLB_MODELS`) por facção e nível do Centro. Humanos têm um .glb por nível
  * (`tools/blender/build_hq_human.py`); orcs seguem com o modelo único (`null` = o `GreatHall` procedural).
  * Só leitura do render: a simulação nunca usa isto (o checksum do headless não muda).

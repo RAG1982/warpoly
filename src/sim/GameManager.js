@@ -9,7 +9,7 @@ import { createAIDirector } from './aiRegistry.js';
 import { Pathfinder } from './Pathfinder.js';
 
 import {
-  STARTING_RESOURCES, FACTIONS, WALL_STEP, WALL_MAX_POINTS, getBuildingDef, getUnitDef, isDropoffFor, RESEARCH, getMaxResearchLevel, promotedType, getHqUpgradeCost
+  STARTING_RESOURCES, FACTIONS, WALL_STEP, WALL_MAX_POINTS, WALL_MIN_HEIGHT, WALL_FOOTPRINT_MIN_HEIGHT, WALL_SEAL_GAP, WALL_LINK_DIST, HQ_MAX_PER_PLAYER, HQ_MIN_DISTANCE, HQ_ENEMY_CLEARANCE, HQ_ENEMY_MINE_RADIUS, HQ_ENEMY_MINE_CLEARANCE, getBuildingDef, getUnitDef, isDropoffFor, RESEARCH, getMaxResearchLevel, promotedType, getHqUpgradeCost
 } from '../data/index.js';
 import { Player } from './Player.js';
 import { PlayerRegistry } from './PlayerRegistry.js';
@@ -245,13 +245,47 @@ export class GameManager {
         entity._navalBlocked = true;
       }
       if (this.pathfinder && (entity instanceof Building || entity instanceof Tree)) {
-        this.pathfinder.blockCircle(pos.x, pos.z, entity.collisionRadius || 0, +1);
+        this._pathBlock(entity, +1);
         entity._pathBlocked = true;
       } else if (this.pathfinder && entity instanceof ResourceDeposit) {
         // F3-02: minas só bloqueiam as buscas "largas" (grupos/unidades grandes) — ver Pathfinder.blockCircle(soft).
         this.pathfinder.blockCircle(pos.x, pos.z, entity.collisionRadius || 0, +1, true);
         entity._pathSoftBlocked = true;
       }
+    }
+  }
+
+  /**
+   * Bloqueio de navegação de uma construção/árvore (`delta` +1/-1; chamadas simétricas). ENG-WALL: muralha (a) sela o vão de praia
+   * até a água (`Pathfinder.blockCircle`, `sealGap`) e (b) liga-se às muralhas vizinhas do mesmo dono (≤ `WALL_LINK_DIST`),
+   * bloqueando também o trecho entre os centros (`Pathfinder.blockSegment`): a fileira não tem furo de 1 célula. Destruir um
+   * segmento desfaz o seu círculo, o seu selo e as ligações dele (o vão reaberto é o do círculo, como antes).
+   */
+  _pathBlock(entity, delta) {
+    const p = entity.mesh.position;
+    const r = entity.collisionRadius || 0;
+    const pf = this.pathfinder;
+    // Muralhas de jogador (humano/IA/aliado). As dos neutros (cercados de prisioneiros e acampamentos de missão) mantêm a malha antiga:
+    // foram afinadas com ela (ex.: campaignM02 "investida precoce") e a missão decide o que abrir.
+    if (!(entity instanceof Wall) || entity.ownerId === NEUTRAL_OWNER_ID || entity.ownerId === NEUTRAL_HOSTILE_ID) { pf.blockCircle(p.x, p.z, r, delta); return; }
+    pf.blockCircle(p.x, p.z, r, delta, false, WALL_SEAL_GAP);
+    if (delta > 0) {
+      const near = this.blockerGrid.queryRadius(p.x, p.z, WALL_LINK_DIST, e => e instanceof Wall && e !== entity && !e.isDead && e.ownerId === entity.ownerId && e._pathBlocked, this._wallLinkBuf || (this._wallLinkBuf = []));
+      for (let i = 0; i < near.length; i++) {
+        const o = near[i];
+        const q = o.mesh.position;
+        if (fhypot(q.x - p.x, q.z - p.z) > WALL_LINK_DIST) continue;
+        pf.blockSegment(p.x, p.z, q.x, q.z, r, +1);
+        (entity._wallLinks || (entity._wallLinks = [])).push(o);
+        (o._wallLinks || (o._wallLinks = [])).push(entity);
+      }
+    } else if (entity._wallLinks) {
+      for (const o of entity._wallLinks) {
+        const q = o.mesh.position;
+        pf.blockSegment(p.x, p.z, q.x, q.z, r, -1);
+        if (o._wallLinks) { const k = o._wallLinks.indexOf(entity); if (k >= 0) o._wallLinks.splice(k, 1); }
+      }
+      entity._wallLinks = null;
     }
   }
 
@@ -266,7 +300,7 @@ export class GameManager {
         entity._navalBlocked = false;
       }
       if (this.pathfinder && entity._pathBlocked) {
-        this.pathfinder.blockCircle(entity.mesh.position.x, entity.mesh.position.z, entity.collisionRadius || 0, -1);
+        this._pathBlock(entity, -1);
         entity._pathBlocked = false;
       }
       if (this.pathfinder && entity._pathSoftBlocked) {
@@ -818,9 +852,14 @@ export class GameManager {
     if (bdef.platform) return !!this.findFreeOilDeposit(x, z);
 
     // 1. Terrain Height check and Lava check at center and 4 footprint perimeter samples
+    // ENG-WALL: muralha pode ir até a praia (centro >= WALL_MIN_HEIGHT, pegada em terra caminhável >= WALL_FOOTPRINT_MIN_HEIGHT);
+    // as demais construções exigem terra firme (1,8). O vão até a água é selado no Pathfinder (`blockCircle` com `sealGap`).
+    const isWall = bdef.role === 'wall';
+    const minH = isWall ? WALL_MIN_HEIGHT : 1.8;
+    const minFootH = isWall ? WALL_FOOTPRINT_MIN_HEIGHT : 1.8;
     if (this.terrain.isLava?.(x, z) || this.terrain.isCliff?.(x, z)) return false;
     const h = this.terrain.getHeight(x, z);
-    if (h < 1.8) return false;
+    if (h < minH) return false;
 
     if (bdef.coastal) {
       // F4-07a: Estaleiro/Refinaria/Fundição — o centro é terra seca e há água NAVEGÁVEL encostada na construção (o casco
@@ -828,10 +867,10 @@ export class GameManager {
       if (!this.hasNavigableWaterNear(x, z, radius + 1.3)) return false;
     } else {
       const sampleOffset = radius * 0.75;
-      if (this.terrain.isLava?.(x + sampleOffset, z + sampleOffset) || this.terrain.getHeight(x + sampleOffset, z + sampleOffset) < 1.8) return false;
-      if (this.terrain.isLava?.(x - sampleOffset, z + sampleOffset) || this.terrain.getHeight(x - sampleOffset, z + sampleOffset) < 1.8) return false;
-      if (this.terrain.isLava?.(x + sampleOffset, z - sampleOffset) || this.terrain.getHeight(x + sampleOffset, z - sampleOffset) < 1.8) return false;
-      if (this.terrain.isLava?.(x - sampleOffset, z - sampleOffset) || this.terrain.getHeight(x - sampleOffset, z - sampleOffset) < 1.8) return false;
+      if (this.terrain.isLava?.(x + sampleOffset, z + sampleOffset) || this.terrain.getHeight(x + sampleOffset, z + sampleOffset) < minFootH) return false;
+      if (this.terrain.isLava?.(x - sampleOffset, z + sampleOffset) || this.terrain.getHeight(x - sampleOffset, z + sampleOffset) < minFootH) return false;
+      if (this.terrain.isLava?.(x + sampleOffset, z - sampleOffset) || this.terrain.getHeight(x + sampleOffset, z - sampleOffset) < minFootH) return false;
+      if (this.terrain.isLava?.(x - sampleOffset, z - sampleOffset) || this.terrain.getHeight(x - sampleOffset, z - sampleOffset) < minFootH) return false;
     }
 
     // 2. Minimum distance to other buildings (F1-06: blockerGrid.queryRadius já soma o raio
@@ -892,6 +931,46 @@ export class GameManager {
       }
     }
 
+    // 6. ENG-WALL: Centro extra (Paço Real/Salão do Clã) — limite por jogador, distância mínima entre os próprios Centros e
+    //    afastamento de bases/minas inimigas.
+    if (bdef.role === 'hq' && !this.canPlaceExtraHq(x, z, ignoreBuilding, ownerId)) return false;
+
+    return true;
+  }
+
+  /**
+   * ENG-WALL: regras exclusivas de um Centro construído pelo jogador (`canPlaceBuilding` chama; `placeBuilding` valida de novo).
+   * - no máximo `HQ_MAX_PER_PLAYER` Centros do dono (vivos ou em obra);
+   * - a `HQ_MIN_DISTANCE` ou mais de qualquer outro Centro do dono (para não colar);
+   * - a `HQ_ENEMY_CLEARANCE` ou mais de qualquer Centro hostil;
+   * - a `HQ_ENEMY_MINE_CLEARANCE` ou mais de uma mina de ouro "inimiga" (a menos de `HQ_ENEMY_MINE_RADIUS` de um Centro hostil).
+   * A IA não constrói Centros extras (só os humanos pela HUD); ver docs/02_MECANICAS.md.
+   */
+  canPlaceExtraHq(x, z, ignoreBuilding = null, ownerId = this._localPlayerId) {
+    let own = 0;
+    const hostileHqs = [];
+    for (let i = 0; i < this.buildings.length; i++) {
+      const b = this.buildings[i];
+      if (b.isDead || b === ignoreBuilding || b.role !== 'hq') continue;
+      const d = fhypot(b.mesh.position.x - x, b.mesh.position.z - z);
+      if (b.ownerId === ownerId) {
+        own++;
+        if (d < HQ_MIN_DISTANCE) return false;
+      } else if (this.isHostile(ownerId, b.ownerId)) {
+        if (d < HQ_ENEMY_CLEARANCE) return false;
+        hostileHqs.push(b);
+      }
+    }
+    if (own >= HQ_MAX_PER_PLAYER) return false;
+    if (hostileHqs.length > 0) {
+      for (let i = 0; i < this.resourceDeposits.length; i++) {
+        const r = this.resourceDeposits[i];
+        if (r.type !== 'gold' || r.resourcesRemaining <= 0) continue;
+        const rp = r.mesh.position;
+        if (fhypot(rp.x - x, rp.z - z) >= HQ_ENEMY_MINE_CLEARANCE) continue;
+        if (hostileHqs.some(h => fhypot(h.mesh.position.x - rp.x, h.mesh.position.z - rp.z) < HQ_ENEMY_MINE_RADIUS)) return false;
+      }
+    }
     return true;
   }
 
@@ -1190,6 +1269,12 @@ export class GameManager {
 
     if (!owner.canAfford(stats.cost)) {
       if (owner.isLocal) this.events.emit(EVT.NOTIFY, { ownerId, text: '⚠️ Recursos insuficientes!' });
+      return null;
+    }
+
+    // ENG-WALL: Centro extra — a regra do limite/distâncias vale também aqui (o comando pode vir de rede/replay sem passar pelo fantasma da HUD).
+    if (stats.role === 'hq' && !this.canPlaceBuilding(type, x, z, null, ownerId)) {
+      if (owner.isLocal) this.events.emit(EVT.NOTIFY, { ownerId, text: '⚠️ Local inválido para um novo Centro (máx. 3; longe de outros Centros e de bases inimigas)' });
       return null;
     }
 

@@ -125,6 +125,9 @@ export function techRestrictionOf(gm) {
 export function techLock(gm, playerId, kind, id, level = 1) {
   const c = techRestrictionOf(gm);
   if (!c || !c.players.has(playerId)) return null;
+  // ENG-WALL: o Centro extra (Paço Real/Salão do Clã pelo menu do trabalhador) está liberado em TODAS as missões: a tabela de `unlocks`
+  // (conferida contra MUNDO-HISTORIA-CAMPANHA.md §4) não o lista. Para escondê-lo numa missão, liste-o como `later` e remova esta exceção.
+  if (kind === 'buildings' && BUILDINGS[id] && BUILDINGS[id].role === 'hq') return null;
   let allowed;
   let token = id;
   if (kind === 'units') {

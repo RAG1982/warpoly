@@ -8,7 +8,7 @@
  * Módulo puro: sem three.js nem DOM, importável em Node (ver tools/check-data-parity.mjs).
  */
 import { UNITS, DEFAULT_UNIT, WORKER_STATS } from './units.js';
-import { BUILDINGS, DEFAULT_BUILDING, DEFAULT_BUILDING_ATTACK_COOLDOWN, WALL_STEP, WALL_MAX_POINTS } from './buildings.js';
+import { BUILDINGS, DEFAULT_BUILDING, DEFAULT_BUILDING_ATTACK_COOLDOWN, WALL_STEP, WALL_MAX_POINTS, WALL_MIN_HEIGHT, WALL_FOOTPRINT_MIN_HEIGHT, WALL_SEAL_GAP, WALL_LINK_DIST } from './buildings.js';
 import {
   UPGRADE_CONFIG, FORGE_UPGRADES, RESEARCH, researchIdsFor, getMaxResearchLevel, researchName,
   researchEffect, promotedType, describeLevel
@@ -17,6 +17,7 @@ import { FACTIONS, STARTING_RESOURCES } from './factions.js';
 import { CARRY, MINE_ENTER_TIME, MINE_SLOTS, RATE_BONUS, gatherMultiplier } from './economy.js';
 import {
   TIER_NAMES, HQ_TIER_HP, HQ_TIER_ARMOR, HQ_TIER_GOLD_MULT, HQ_UPGRADE_COST, HQ_TIER_MODEL, HQ_TIER_VIEW,
+  HQ_MAX_PER_PLAYER, HQ_MIN_DISTANCE, HQ_ENEMY_CLEARANCE, HQ_ENEMY_MINE_RADIUS, HQ_ENEMY_MINE_CLEARANCE,
   getTierName, getHqUpgradeCost
 } from './tiers.js';
 import { RESOURCE_NAMES, getResourceName } from './names.js';
@@ -24,12 +25,13 @@ import { ABILITIES, getAbility, abilityName, isDebugUrl } from './abilities.js';
 
 export {
   UNITS, DEFAULT_UNIT, WORKER_STATS,
-  BUILDINGS, DEFAULT_BUILDING, DEFAULT_BUILDING_ATTACK_COOLDOWN, WALL_STEP, WALL_MAX_POINTS,
+  BUILDINGS, DEFAULT_BUILDING, DEFAULT_BUILDING_ATTACK_COOLDOWN, WALL_STEP, WALL_MAX_POINTS, WALL_MIN_HEIGHT, WALL_FOOTPRINT_MIN_HEIGHT, WALL_SEAL_GAP, WALL_LINK_DIST,
   UPGRADE_CONFIG, FORGE_UPGRADES, RESEARCH, researchIdsFor, getMaxResearchLevel, researchName,
   researchEffect, promotedType, describeLevel,
   FACTIONS, STARTING_RESOURCES,
   CARRY, MINE_ENTER_TIME, MINE_SLOTS, RATE_BONUS, gatherMultiplier,
   TIER_NAMES, HQ_TIER_HP, HQ_TIER_ARMOR, HQ_TIER_GOLD_MULT, HQ_UPGRADE_COST, HQ_TIER_MODEL, HQ_TIER_VIEW,
+  HQ_MAX_PER_PLAYER, HQ_MIN_DISTANCE, HQ_ENEMY_CLEARANCE, HQ_ENEMY_MINE_RADIUS, HQ_ENEMY_MINE_CLEARANCE,
   getTierName, getHqUpgradeCost,
   RESOURCE_NAMES, getResourceName,
   ABILITIES, getAbility, abilityName, isDebugUrl

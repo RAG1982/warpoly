@@ -250,8 +250,11 @@ export class Pathfinder {
    * @param {number} radius
    * @param {1|-1} delta
    * @param {boolean} [soft]  F3-02: marca só `softBlock` (vale apenas nas buscas largas)
+   * @param {number} [sealGap]  ENG-WALL: > 0 = "selar a praia" (muralhas): além do círculo, bloqueia as células de terra do vão
+   *   entre a borda do círculo e a água/lava/penhasco (camada ESTÁTICA) quando esta fica a até `sealGap` u dela, em cone radial.
+   *   O conjunto selado depende só da geometria estática, então `-1` com os mesmos argumentos desfaz exatamente `+1`.
    */
-  blockCircle(x, z, radius, delta, soft = false) {
+  blockCircle(x, z, radius, delta, soft = false, sealGap = 0) {
     const layer = soft ? this.softBlock : this.dynamicBlock;
     const effRadius = radius - 0.3;
     if (effRadius <= 0) return;
@@ -273,7 +276,74 @@ export class Pathfinder {
         layer[i] = next < 0 ? 0 : next;
       }
     }
+    if (sealGap > 0 && !soft) this._sealShore(x, z, effRadius, delta, sealGap);
     this.version++;
+  }
+
+  /**
+   * ENG-WALL: marca/desmarca (`delta`) as células cujo centro está a até `radius - 0.3` do SEGMENTO (x0,z0)→(x1,z1) (cápsula).
+   * Usado para ligar muralhas vizinhas (fecha o furo de 1 célula entre dois círculos a 2,4 u). Camada dinâmica dura.
+   */
+  blockSegment(x0, z0, x1, z1, radius, delta) {
+    const eff = radius - 0.3;
+    if (eff <= 0) return;
+    const a = this.toGrid(Math.min(x0, x1) - eff, Math.min(z0, z1) - eff);
+    const b = this.toGrid(Math.max(x0, x1) + eff, Math.max(z0, z1) + eff);
+    const dx = x1 - x0;
+    const dz = z1 - z0;
+    const l2 = dx * dx + dz * dz;
+    const rSq = eff * eff;
+    for (let nr = a.r; nr <= b.r; nr++) {
+      for (let nc = a.c; nc <= b.c; nc++) {
+        const w = this.toWorld(nc, nr);
+        const t = l2 > 0 ? Math.max(0, Math.min(1, ((w.x - x0) * dx + (w.z - z0) * dz) / l2)) : 0;
+        const ex = w.x - (x0 + t * dx);
+        const ez = w.z - (z0 + t * dz);
+        if (ex * ex + ez * ez > rSq) continue;
+        const i = nr * this.cols + nc;
+        const next = this.dynamicBlock[i] + delta;
+        this.dynamicBlock[i] = next < 0 ? 0 : next;
+      }
+    }
+    this.version++;
+  }
+
+  /**
+   * ENG-WALL: bloqueia (`delta`) as células caminháveis FORA do círculo (x, z, effRadius) cujo raio, partindo do centro do
+   * círculo e passando pela célula, encontra uma célula intransponível estática (água, lava, penhasco) a até `effRadius + gap`
+   * do centro. Fecha o vão de praia entre a muralha e a água sem criar bloqueio fantasma: só depende do terreno estático.
+   */
+  _sealShore(x, z, effRadius, delta, gap) {
+    const reach = effRadius + gap;
+    const cellReach = Math.ceil(reach / this.cellSize) + 1;
+    const center = this.toGrid(x, z);
+    const stepLen = this.cellSize * 0.5;
+    const cols = this.cols;
+    for (let dr = -cellReach; dr <= cellReach; dr++) {
+      const nr = center.r + dr;
+      if (nr < 0 || nr >= this.rows) continue;
+      for (let dc = -cellReach; dc <= cellReach; dc++) {
+        const nc = center.c + dc;
+        if (nc < 0 || nc >= cols) continue;
+        const i = nr * cols + nc;
+        if (this.staticGrid[i] !== 1) continue;
+        const w = this.toWorld(nc, nr);
+        const dx = w.x - x;
+        const dz = w.z - z;
+        const d = fhypot(dx, dz);
+        if (d <= effRadius || d > reach) continue; // dentro do círculo: já bloqueada
+        const ux = dx / d;
+        const uz = dz / d;
+        let hit = false;
+        for (let t = d + stepLen; t <= reach + stepLen; t += stepLen) {
+          const g = this.toGrid(x + ux * t, z + uz * t);
+          if (this.staticGrid[g.r * cols + g.c] !== 1) { hit = true; break; }
+        }
+        if (!hit) continue;
+        const next = this.dynamicBlock[i] + delta;
+        this.dynamicBlock[i] = next < 0 ? 0 : next;
+      }
+    }
   }
 
   /**

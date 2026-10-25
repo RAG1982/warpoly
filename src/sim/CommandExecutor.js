@@ -12,7 +12,8 @@ import { isDetectedBy } from './detection.js';
 import { canTarget } from './targeting.js';
 import { EVT } from './events.js';
 import { planFormation, groupSpeed } from './formation.js';
-import { orderLoad, orderUnload } from './transport.js';
+import { orderLoad, orderUnload, orderPickup, boardEdgeDistance } from './transport.js';
+import { BOARD_DISTANCE } from '../data/combat.js';
 import { resolveAbility, needsEntityTarget, targetProblem, canCast, pickCaster } from './abilities.js';
 
 /** `console.warn` (sem gate de build — ver `_COMUM.md`: mais simples, sem custo em produção). */
@@ -365,8 +366,8 @@ export const CommandExecutor = {
             const boat = units[i];
             if (!(boat.transportCapacity > 0) || boat.cargo.length >= boat.transportCapacity) continue;
             const spot = findBoardingSpotFor(gm, target);
-            if (spot) boat.moveTo(spot.x, spot.z, gm);
-            orderLoad(gm, target, boat);
+            if (boardEdgeDistance(boat, target) <= BOARD_DISTANCE) orderLoad(gm, target, boat);
+            else orderPickup(gm, boat, target, spot);
             break;
           }
         }

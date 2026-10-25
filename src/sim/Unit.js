@@ -175,6 +175,8 @@ export class Unit {
     this.transportedBy = null;
     this._boardTarget = null;
     this._boardRetry = 0;
+    this._boardTries = 0;
+    this._boardWait = 0;
     this._unloadOrder = null;
     /** F4-07b: apresentação — segundos restantes com a rampa da barcaça aberta (embarque/desembarque); não entra no checksum. */
     this.rampT = 0;
@@ -1377,6 +1379,7 @@ export class Unit {
 
   /** F4-04: este jogador/unidade consegue enxergar/mirar `e`? (invisíveis só com detecção — `src/sim/detection.js`). */
   _canSee(e) {
+    if (e.transportedBy != null) return false; // ENG-NAVAL: passageiro de barcaça não é alvo (antes atiradores continuavam a feri-lo a bordo)
     if (!e.mods || !e.mods.invisible) return true;
     return isDetectedBy(this.gameManager, e, this.ownerId);
   }
@@ -1722,7 +1725,10 @@ export class Unit {
     // Waypoint intermediário: raio maior (a multidão não precisa tocar o canto exato — evita engarrafar nas quinas).
     let arriveR = isLastLeg ? 0.45 : WAYPOINT_RADIUS;
     if (isLastLeg && dist < 4 && gm && gm.unitGrid) arriveR += this._settleSlack(gm, targetX, targetZ);
-    if (dist < arriveR) {
+    // ENG-NAVAL: navio fora da linha do caminho (chegou de lado ao waypoint) não "corta caminho" para o seguinte: a reta dali pode
+    // atravessar o baixio/ilhota (o string-pulling raspa a costa). Só avança com visada livre; senão encosta no waypoint atual.
+    const navalBlindNext = this.layer === 'naval' && !isLastLeg && dist < arriveR && dist > 0.35 && this._nextLegBlocked(gm, curX, curZ);
+    if (dist < arriveR && !navalBlindNext) {
       // Check if there are more waypoints along the route
       if (this.waypoints && this.waypointIndex < this.waypoints.length - 1) {
         this.waypointIndex++;
@@ -1735,7 +1741,7 @@ export class Unit {
       return;
     }
 
-    if (this._stuckT > 0.5 && !isLastLeg && dist < 3.5) {
+    if (this._stuckT > 0.5 && !isLastLeg && dist < 3.5 && !(this.layer === 'naval' && this._nextLegBlocked(gm, curX, curZ))) {
       // Preso perto de um waypoint intermediário (quina que a colisão não deixa uma unidade grande alcançar): pula para o próximo.
       this.waypointIndex++;
       const nextWp = this.waypoints[this.waypointIndex];
@@ -1770,6 +1776,13 @@ export class Unit {
     if (this.hurtTimer <= 0) {
       this._setAnim('walk');
     }
+  }
+
+  /** ENG-NAVAL: de (x, z) não há visada naval livre até o PRÓXIMO waypoint? (navio fora da linha do caminho). */
+  _nextLegBlocked(gm, x, z) {
+    const pf = this._pf(gm);
+    const next = this.waypoints && this.waypoints[this.waypointIndex + 1];
+    return !!(pf && next && !pf.hasLineOfSight(x, z, next.x, next.z));
   }
 
   /**

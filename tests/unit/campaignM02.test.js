@@ -1,6 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import { playMission } from './helpers/campaignHarness.js';
 import { rush } from '../fixtures/campaign-playthrough/war-alliance-02-pouso-do-encontro.js';
+import { PLAYER_COLORS } from '../../src/sim/MatchConfig.js';
 
 /**
  * M3-03 — m02 "O Pouso do Encontro": 6 batedores presos em cercados de muralha (2 perto dos acampamentos de bandidos, 4 atrás da base orc),
@@ -129,5 +130,56 @@ describe('m02 Pouso do Encontro · dificuldade', () => {
     expect(run.gm.mission.objectives.get('rescue-scouts').cur).toBe(0);
     expect(run.gm.getUnitsOf(0).filter((u) => !u.isDead && u.type === 'knight')).toHaveLength(0);
     expect(run.gm.buildings.some((b) => b.type === 'bandit_camp' && !b.isDead && Math.hypot(b.mesh.position.x + 64, b.mesh.position.z - 6) < 2)).toBe(true); // o acampamento 1 segue de pé
+  }, 60000);
+});
+
+/**
+ * M3-X2 — m02: o Emissário tem nome e cor próprios (fora das cores de jogador); 1 secundária de exploração oculta: as Ruínas Esquecidas
+ * (no norte, fora das rotas e dos acampamentos), reveladas pelo primeiro batedor libertado; chegar lá dá +200 de ouro e acende o marco.
+ */
+describe('m02 Pouso do Encontro · emissário e secundária de exploração (M3-X2)', () => {
+  const d = (a, b) => Math.hypot(a.x - b.x, a.z - b.z);
+
+  it('Emissário com displayName e markColor próprios; ruínas em terra, longe dos acampamentos, das prisões e da rota Liga–Clãs', async () => {
+    const { gm } = await playMission('war-alliance', ID, [], { maxSeconds: 1 });
+    const em = gm.mission.def.setup.find((s) => s.tag === 'emissary');
+    expect(em.unitType).toBe('ogre_mage');
+    expect(em.displayName).toEqual({ 'pt-BR': 'Emissário', en: 'Envoy' });
+    expect(em.markColor).toBe('#f0abfc');
+    expect(PLAYER_COLORS).not.toContain(em.markColor);
+    const A = gm.terrain.mapDef.anchors;
+    expect(A.ruins1.water).toBeFalsy();
+    for (const k of [1, 2]) expect(d(A.ruins1, A[`banditCamp${k}`]), `longe do acampamento ${k}`).toBeGreaterThanOrEqual(30);
+    for (let k = 1; k <= 6; k++) expect(d(A.ruins1, A[`scoutPrison${k}`]), `longe da prisão ${k}`).toBeGreaterThanOrEqual(24);
+    expect(d(A.ruins1, A.emissary1)).toBeGreaterThanOrEqual(24);
+    // fora da rota direta entre as bases (segmento Liga–Clãs)
+    const s0 = A.playerStart, s1 = A.enemyStart, L2 = d(s0, s1) ** 2;
+    const t = Math.max(0, Math.min(1, ((A.ruins1.x - s0.x) * (s1.x - s0.x) + (A.ruins1.z - s0.z) * (s1.z - s0.z)) / L2));
+    expect(d(A.ruins1, { x: s0.x + t * (s1.x - s0.x), z: s0.z + t * (s1.z - s0.z) })).toBeGreaterThanOrEqual(22);
+    const lm = gm.mission.landmarks.find((l) => l.tag === 'ruins');
+    expect(lm).toBeTruthy();
+    expect(d(lm, A.ruins1)).toBeLessThan(0.5);
+    expect(gm.mission.def.objectives.find((o) => o.id === 'find-ruins')).toMatchObject({ type: 'flag', priority: 'hidden' });
+    expect(gm.mission.objectives.get('find-ruins').visible).toBe(false);
+  });
+
+  it('o primeiro batedor libertado revela as ruínas; chegar a elas dá +200 de ouro, acende o marco e não mexe na vitória', async () => {
+    let before = 0;
+    const run = await playMission('war-alliance', ID, [
+      // prisão distante (3): a guarda do acampamento não a cerca; a libertação é a mesma do teste "libertável"
+      { name: 'solta-3', wait: 2, run: (c) => { c.slayTag('prison_guard'); const w = c.tagged('prison3'); c.slay([w[3]]); } },
+      { name: 'revelado', wait: 1, run: (c) => {
+        if (!c.gm.mission.objectives.get('find-ruins').visible) throw new Error('as ruínas deviam aparecer após o batedor');
+        before = c.gm.getPlayer(0).resources.gold;
+        const p = c.anchor('ruins1');
+        c.teleport(c.mine('knight')[0], p.x, p.z);
+      } },
+      { name: 'confere', wait: 1, run: (c) => { if (c.status('find-ruins') !== 'completed') throw new Error('as ruínas deviam estar achadas'); } }
+    ], { maxSeconds: 30 });
+    expect(run.gm.mission.objectives.get('find-ruins').status).toBe('completed');
+    expect(run.gm.mission.landmarks.find((l) => l.tag === 'ruins').lit).toBeGreaterThan(0);
+    expect(run.gm.getPlayer(0).resources.gold).toBeGreaterThanOrEqual(before + 200 - 5);
+    expect(run.gm.mission.vars.far_freed).toBe(1);
+    expect(run.outcome).toBeNull();
   }, 60000);
 });

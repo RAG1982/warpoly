@@ -170,6 +170,43 @@
       "spread": 2.5,
       "guard": true,
       "tag": "camp_elite"
+    },
+    {
+      "type": "spawnLandmark",
+      "kind": "ruins",
+      "anchor": "ruins1",
+      "tag": "ruins",
+      "label": {
+        "pt-BR": "Ruínas de pedra",
+        "en": "Stone ruins"
+      }
+    },
+    {
+      "type": "spawn",
+      "owner": "neutral",
+      "unitType": "villager",
+      "count": 1,
+      "anchor": "captive1",
+      "tag": "fisher",
+      "markColor": "#a3e635",
+      "displayName": {
+        "pt-BR": "Pescador",
+        "en": "Fisherman"
+      }
+    },
+    {
+      "type": "spawn",
+      "owner": "bandits",
+      "units": [
+        {
+          "type": "bandit",
+          "count": 3
+        }
+      ],
+      "anchor": "captive1",
+      "spread": 3,
+      "tag": "fisher_guard",
+      "guard": true
     }
   ],
   "objectives": [
@@ -260,6 +297,38 @@
       "title": {
         "pt-BR": "Achar o Mural da Fenda",
         "en": "Find the Rift Mural"
+      }
+    },
+    {
+      "id": "find-ruins",
+      "type": "flag",
+      "priority": "hidden",
+      "title": {
+        "pt-BR": "Achar as ruínas de pedra, ao sudeste",
+        "en": "Find the stone ruins, to the southeast"
+      },
+      "condition": {
+        "type": "area",
+        "owner": "player",
+        "area": {
+          "anchor": "ruins1",
+          "r": 7
+        }
+      }
+    },
+    {
+      "id": "rescue-fisher",
+      "type": "rescue",
+      "priority": "secondary",
+      "tag": "fisher",
+      "count": 1,
+      "title": {
+        "pt-BR": "Resgatar o pescador cativo, ao sudeste",
+        "en": "Rescue the captive fisherman, to the southeast"
+      },
+      "description": {
+        "pt-BR": "Derrube os 3 bandidos que o guardam e leve um soldado até ele. Recompensa: +100 de ouro e um Pescador para a vila.",
+        "en": "Defeat the 3 bandits guarding him and bring a soldier to him. Reward: +100 gold and a Fisherman for the village."
       }
     }
   ],
@@ -681,6 +750,120 @@
       "actions": [
         {
           "type": "victory"
+        }
+      ]
+    },
+    {
+      "id": "side-hint",
+      "when": {
+        "type": "time",
+        "at": 60
+      },
+      "actions": [
+        {
+          "type": "revealObjective",
+          "id": "find-ruins"
+        },
+        {
+          "type": "dialog",
+          "speaker": {
+            "pt-BR": "Sgt. Tomás Rocha",
+            "en": "Sgt. Tomás Rocha"
+          },
+          "portrait": "🛡️",
+          "text": {
+            "pt-BR": "Soldado, um velho pescador falou de ruínas de pedra ao sudeste, bem longe dos acampamentos. Quem explora a baía acha coisas assim. E há um pescador cativo por ali, guardado por três bandidos: derrubem-nos e tragam o homem de volta.",
+            "en": "Soldier, an old fisherman spoke of stone ruins to the southeast, well away from the camps. Whoever scouts the bay finds things like that. And a captive fisherman is held out there, guarded by three bandits: take them down and bring the man back."
+          },
+          "duration": 10
+        }
+      ]
+    },
+    {
+      "id": "ruins-found",
+      "when": {
+        "type": "objective",
+        "id": "find-ruins",
+        "status": "completed"
+      },
+      "actions": [
+        {
+          "type": "giveResources",
+          "owner": "player",
+          "gold": 80
+        },
+        {
+          "type": "lightLandmark",
+          "tag": "ruins"
+        },
+        {
+          "type": "sound",
+          "id": "victory"
+        },
+        {
+          "type": "message",
+          "text": {
+            "pt-BR": "Ruínas de pedra encontradas: +80 de ouro.",
+            "en": "Stone ruins found: +80 gold."
+          }
+        }
+      ]
+    },
+    {
+      "id": "fisher-freed",
+      "when": {
+        "all": [
+          {
+            "type": "area",
+            "owner": "player",
+            "area": {
+              "anchor": "captive1",
+              "r": 8
+            }
+          },
+          {
+            "type": "count",
+            "select": {
+              "tag": "fisher_guard"
+            },
+            "op": "==",
+            "value": 0
+          }
+        ]
+      },
+      "actions": [
+        {
+          "type": "transfer",
+          "select": {
+            "tag": "fisher"
+          },
+          "to": "player"
+        }
+      ]
+    },
+    {
+      "id": "fisher-reward",
+      "when": {
+        "type": "objective",
+        "id": "rescue-fisher",
+        "status": "completed"
+      },
+      "actions": [
+        {
+          "type": "giveResources",
+          "owner": "player",
+          "gold": 100
+        },
+        {
+          "type": "sound",
+          "id": "build"
+        },
+        {
+          "type": "message",
+          "text": {
+            "pt-BR": "Pescador resgatado: +100 de ouro e um trabalhador a mais.",
+            "en": "Fisherman rescued: +100 gold and one more worker."
+          }
         }
       ]
     }

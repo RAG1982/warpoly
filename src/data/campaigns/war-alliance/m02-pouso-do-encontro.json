@@ -1089,7 +1089,11 @@
       "count": 1,
       "anchor": "emissary1",
       "tag": "emissary",
-      "markColor": "#f8fafc"
+      "markColor": "#f0abfc",
+      "displayName": {
+        "pt-BR": "Emissário",
+        "en": "Envoy"
+      }
     },
     {
       "type": "spawn",
@@ -1112,6 +1116,16 @@
         "r": 14
       },
       "tag": "orc_patrol"
+    },
+    {
+      "type": "spawnLandmark",
+      "kind": "ruins",
+      "anchor": "ruins1",
+      "tag": "ruins",
+      "label": {
+        "pt-BR": "Ruínas Esquecidas",
+        "en": "Forgotten Ruins"
+      }
     }
   ],
   "objectives": [
@@ -1220,6 +1234,23 @@
       "description": {
         "pt-BR": "Honra: o orc do pano branco não é inimigo.",
         "en": "Honor: the orc with the white cloth is no enemy."
+      }
+    },
+    {
+      "id": "find-ruins",
+      "type": "flag",
+      "priority": "hidden",
+      "title": {
+        "pt-BR": "Achar as Ruínas Esquecidas, ao norte da ilha",
+        "en": "Find the Forgotten Ruins, north of the island"
+      },
+      "condition": {
+        "type": "area",
+        "owner": "player",
+        "area": {
+          "anchor": "ruins1",
+          "r": 7
+        }
       }
     }
   ],
@@ -2068,6 +2099,74 @@
       "actions": [
         {
           "type": "victory"
+        }
+      ]
+    },
+    {
+      "id": "ruins-hint",
+      "when": {
+        "any": [
+          {
+            "type": "var",
+            "name": "near_freed",
+            "op": ">=",
+            "value": 1
+          },
+          {
+            "type": "var",
+            "name": "far_freed",
+            "op": ">=",
+            "value": 1
+          }
+        ]
+      },
+      "actions": [
+        {
+          "type": "revealObjective",
+          "id": "find-ruins"
+        },
+        {
+          "type": "dialog",
+          "speaker": {
+            "pt-BR": "Batedor libertado",
+            "en": "Freed scout"
+          },
+          "portrait": "🏹",
+          "text": {
+            "pt-BR": "Obrigado! Antes de cair nas mãos dos bandidos vi ruínas de pedra no norte da ilha, a oeste da Torre da Fenda, num canto onde ninguém passa. Vale a pena olhar.",
+            "en": "Thank you! Before the bandits caught me I saw stone ruins in the north of the island, west of the Rift Tower, in a corner nobody crosses. Worth a look."
+          },
+          "duration": 9
+        }
+      ]
+    },
+    {
+      "id": "ruins-found",
+      "when": {
+        "type": "objective",
+        "id": "find-ruins",
+        "status": "completed"
+      },
+      "actions": [
+        {
+          "type": "giveResources",
+          "owner": "player",
+          "gold": 200
+        },
+        {
+          "type": "lightLandmark",
+          "tag": "ruins"
+        },
+        {
+          "type": "sound",
+          "id": "victory"
+        },
+        {
+          "type": "message",
+          "text": {
+            "pt-BR": "Ruínas Esquecidas encontradas: +200 de ouro.",
+            "en": "Forgotten Ruins found: +200 gold."
+          }
         }
       ]
     }

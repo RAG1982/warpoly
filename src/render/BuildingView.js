@@ -56,7 +56,7 @@ const bldHpRedMat = new THREE.MeshBasicMaterial({ color: 0xef4444, depthTest: fa
 const _flameSmokePos = new THREE.Vector3();
 const _chimneyPos = new THREE.Vector3();
 const _chimneyOffsetGreatHall = new THREE.Vector3(-2.2, 9.8, -1.8);
-const _chimneyOffsetCottage = new THREE.Vector3(-2.1, 4.4, -0.6);
+const _chimneyOffsetCottage = new THREE.Vector3(2.3, 5.4, 0.0);
 const _chimneyOffsetHq = new THREE.Vector3(); // M2-33: chaminé do Centro humano nível 1 (HQ_TIER_VIEW[1].chimney)
 /** M2-33: duração (s) da animação de crescimento do modelo novo quando o Centro sobe de nível. */
 const HQ_SWAP_TIME = 0.9;

@@ -1,0 +1,138 @@
+{
+  "rows": [
+    {
+      "id": "G1",
+      "name": "edifícios novos com Static_Mesh e sockets",
+      "status": "PASS",
+      "detail": "{\"barracks\":{\"id\":286,\"model\":\"Barracks\",\"constructed\":true,\"meshes\":2,\"draws\":2,\"tris\":7199,\"hasStatic\":true,\"sockets\":[\"Socket_Rally\",\"Socket_UnitSpawn\"],\"collisionRadius\":3.5},\"cottage\":{\"id\":287,\"model\":\"Cottage\",\"constructed\":true,\"meshes\":1,\"draws\":1,\"tris\":7200,\"hasStatic\":true,\"sockets\":[\"Socket_Rally\",\"Socket_UnitSpawn\"],\"collisionRadius\":2.8},\"lumber_camp\":{\"id\":288,\"model\":\"LumberCamp\",\"constructed\":true,\"meshes\":2,\"draws\":2,\"tris\":7200,\"hasStatic\":true,\"sockets\":[\"Socket_Rally\",\"Socket_UnitSpawn\"],\"collisionRadius\":3.2}}"
+    },
+    {
+      "id": "G4",
+      "name": "draw calls por edifício <= 2 e tris <= 8000 na cena",
+      "status": "PASS",
+      "detail": "barracks: 2 draws 7199 tris | cottage: 1 draws 7200 tris | lumber_camp: 2 draws 7200 tris"
+    },
+    {
+      "id": "G2",
+      "name": "treino do quartel: unidade surge fora do raio de colisão",
+      "status": "PASS",
+      "detail": "{\"trained\":1,\"spawn\":[{\"dx\":1.73,\"dz\":5.87}],\"rally\":{\"dx\":2,\"dz\":6},\"r\":3.5}"
+    },
+    {
+      "id": "G3",
+      "name": "fumaça da chaminé da casa emitida",
+      "status": "PASS",
+      "detail": "{\"n\":1,\"first\":{\"x\":50.3,\"y\":8.215481037808752,\"z\":-18},\"cottage\":{\"x\":48,\"z\":-18}}"
+    },
+    {
+      "id": "G5",
+      "name": "sem erros de página/console",
+      "status": "PASS",
+      "detail": "nenhum"
+    }
+  ],
+  "data": {
+    "renderer": "ANGLE (AMD, Vulkan 1.4.318 (AMD Radeonâ¢ RX 7600 XT (RADV NAVI33) (0x00007480)), radv)",
+    "setup": {
+      "hx": 32,
+      "hz": -30,
+      "res": {
+        "barracks": {
+          "id": 286,
+          "x": 48,
+          "z": -30,
+          "t": "barracks",
+          "owner": 0,
+          "dead": false
+        },
+        "cottage": {
+          "id": 287,
+          "x": 48,
+          "z": -18,
+          "t": "cottage",
+          "owner": 0,
+          "dead": false
+        },
+        "lumber_camp": {
+          "id": 288,
+          "x": 48,
+          "z": -42,
+          "t": "lumber_camp",
+          "owner": 0,
+          "dead": false
+        }
+      }
+    },
+    "info": {
+      "barracks": {
+        "id": 286,
+        "model": "Barracks",
+        "constructed": true,
+        "meshes": 2,
+        "draws": 2,
+        "tris": 7199,
+        "hasStatic": true,
+        "sockets": [
+          "Socket_Rally",
+          "Socket_UnitSpawn"
+        ],
+        "collisionRadius": 3.5
+      },
+      "cottage": {
+        "id": 287,
+        "model": "Cottage",
+        "constructed": true,
+        "meshes": 1,
+        "draws": 1,
+        "tris": 7200,
+        "hasStatic": true,
+        "sockets": [
+          "Socket_Rally",
+          "Socket_UnitSpawn"
+        ],
+        "collisionRadius": 2.8
+      },
+      "lumber_camp": {
+        "id": 288,
+        "model": "LumberCamp",
+        "constructed": true,
+        "meshes": 2,
+        "draws": 2,
+        "tris": 7200,
+        "hasStatic": true,
+        "sockets": [
+          "Socket_Rally",
+          "Socket_UnitSpawn"
+        ],
+        "collisionRadius": 3.2
+      }
+    },
+    "g2": {
+      "trained": 1,
+      "spawn": [
+        {
+          "dx": 1.73,
+          "dz": 5.87
+        }
+      ],
+      "rally": {
+        "dx": 2,
+        "dz": 6
+      },
+      "r": 3.5
+    },
+    "g3": {
+      "n": 1,
+      "first": {
+        "x": 50.3,
+        "y": 8.215481037808752,
+        "z": -18
+      },
+      "cottage": {
+        "x": 48,
+        "z": -18
+      }
+    }
+  },
+  "errors": []
+}

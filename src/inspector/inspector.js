@@ -1035,10 +1035,10 @@ const MODEL_CATALOG = [
     type: 'building',
     icon: '⚔️',
     glb: 'barracks',
-    sourceFile: 'tools/blender/build_barracks.py',
+    sourceFile: 'tools/blender/build_alliance_bld.py',
     create: createGlb('barracks'),
-    description: 'Quartel humano gerado pelo pipeline Blender (public/models/barracks.glb): salão de enxaimel com portão em arco, telhado azul, torreta de vigia, pátio de treino com bonecos, alvo, racks de armas, cerca, escudos e flâmulas em cor de time.',
-    notes: '2 draw calls, ~5,8 mil triângulos, atlas 1024², ~314 KB. Pegada ~7 (raio 3,5), altura ~6. Sockets: Socket_UnitSpawn, Socket_Rally.'
+    description: 'Quartel humano (ART-ALI-3, modelo do Tripo): salão de enxaimel com telhado de ardósia, torreta de vigia com panos em cor de time e pátio de treino com bonecos e racks de armas voltado para +Z.',
+    notes: '2 draw calls, ~7,2 mil triângulos, atlas 512², ~174 KB. Pegada ~6,9 x 7,4 (raio de colisão 3,5), altura ~5,8. Sockets: Socket_UnitSpawn, Socket_Rally.'
   },
   {
     id: 'forge_glb',
@@ -1061,10 +1061,10 @@ const MODEL_CATALOG = [
     type: 'building',
     icon: '🏠',
     glb: 'cottage',
-    sourceFile: 'tools/blender/build_cottage.py',
+    sourceFile: 'tools/blender/build_alliance_bld.py',
     create: createGlb('cottage'),
-    description: 'Casa humana gerada pelo pipeline Blender (public/models/cottage.glb): enxaimel sobre pé de pedra, telhado azul íngreme com mansarda, chaminé de tijolo, alpendre, jardineira, lenha, cepo com machado e horta.',
-    notes: '2 draw calls, ~4,5 mil triângulos, atlas 1024², ~289 KB. Pegada ~5,4 (raio 2,8), altura ~5.'
+    description: 'Casa humana (ART-ALI-3, modelo do Tripo): enxaimel sobre pé de pedra, telhado de ardósia, chaminé de pedra no lado +X (fumaça do jogo) e porta dupla voltada para +Z.',
+    notes: '1 draw call (sem faces TeamColor: o modelo não tem pano/bandeira), ~7,2 mil triângulos, atlas 512², ~147 KB. Pegada ~5 x 4,7 (raio 2,8), altura ~5,6.'
   },
   {
     id: 'farm_glb',
@@ -1087,10 +1087,10 @@ const MODEL_CATALOG = [
     type: 'building',
     icon: '🪵',
     glb: 'lumber_camp',
-    sourceFile: 'tools/blender/build_lumber_camp.py',
+    sourceFile: 'tools/blender/build_alliance_bld.py',
     create: createGlb('lumber_camp'),
-    description: 'Serraria humana gerada pelo pipeline Blender (public/models/lumber_camp.glb): plataforma de toras, galpão aberto de vigas pesadas com telhado de ripas azuis, serra circular sobre cavalete, pirâmide de toras, tábuas, cepo e serragem.',
-    notes: '2 draw calls, ~4,3 mil triângulos, atlas 1024², ~302 KB. Pegada ~6,5 (raio 3,2), altura ~5.'
+    description: 'Serraria humana (ART-ALI-3, modelo do Tripo): galpão de enxaimel com roda d\'água, serra circular sobre cavalete e pilhas de toras na frente (+Z); remendos azuis do telhado em cor de time.',
+    notes: '2 draw calls, ~7,2 mil triângulos, atlas 512², ~170 KB. Pegada ~6,6 x 6,3 (raio de colisão 3,2), altura ~3,7.'
   },
   {
     id: 'watchtower_glb',

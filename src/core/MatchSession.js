@@ -73,6 +73,7 @@ export class MatchSession {
     // Mundo (F2-05: mapa orientado a dados — ver src/data/maps/README.md)
     this.terrain = new Terrain(getMap(matchConfig.mapId));
     this.terrainView = new TerrainView(scene, this.terrain); // F2-08c: malha do terreno (picking via `terrainView.mesh`)
+    sceneManager.setCameraBoundsFromMap?.(this.terrain.mapDef); // câmera alcança mapas grandes (antes ±55 fixo)
     sceneManager.applyTileset?.(this.terrainView.tileset); // F7-04: céu/névoa/ambiente do tileset do mapa
     this.water = new Water(scene, this.terrain);
     this.decorations = new Decorations(scene, this.terrain);

@@ -210,6 +210,12 @@ export class SceneManager {
    * F7-04: céu/névoa/ambiente do tileset (`src/data/tilesets.js`). O tileset legado (verdejante) mantém os valores
    * originais da cena; os demais tingem céu, névoa de distância e luz hemisférica (só no modo 'day').
    */
+  /** Limite da câmera (±) pela área jogável do mapa; mapas pequenos mantêm o mínimo histórico de 55. */
+  setCameraBoundsFromMap(mapDef) {
+    const play = (mapDef && (mapDef.playable || mapDef.size)) || 0;
+    this.cameraBound = Math.max(55, play / 2);
+  }
+
   applyTileset(def) {
     if (!this._baseAtmo) {
       this._baseAtmo = {
@@ -414,8 +420,9 @@ export class SceneManager {
     this.cameraTarget.addScaledVector(forward, moveForward);
 
     // Clamp camera within map bounds
-    this.cameraTarget.x = THREE.MathUtils.clamp(this.cameraTarget.x, -55, 55);
-    this.cameraTarget.z = THREE.MathUtils.clamp(this.cameraTarget.z, -55, 55);
+    const cb = this.cameraBound ?? 55; // mapas grandes (campanha, 176–256) ajustam via `setCameraBoundsFromMap`
+    this.cameraTarget.x = THREE.MathUtils.clamp(this.cameraTarget.x, -cb, cb);
+    this.cameraTarget.z = THREE.MathUtils.clamp(this.cameraTarget.z, -cb, cb);
   }
 
   zoomCamera(deltaZoom) {

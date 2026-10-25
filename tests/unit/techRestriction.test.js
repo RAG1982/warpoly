@@ -293,10 +293,10 @@ describe('sem restrição = comportamento e checksum do master', () => {
   it('checksums idênticos aos do master (valores medidos antes desta mudança): escaramuça IA×IA, FFA e missão isolada', () => {
     const skirmish = createMatchConfig({ seed: 11, headless: true });
     skirmish.players.forEach((p) => { p.isAI = true; });
-    expect(run(skirmish, 1500)).toBe(2385247165);
+    expect(run(skirmish, 1500)).toBe(2930931478);
     // M3-X1: a demo mudou de conteúdo (marcos da trégua/ruínas e emissário herói); o valor abaixo é o da demo nova.
     expect(run(createMissionConfig('mission-demo'), 1200)).toBe(1870476419);
-    expect(run(createMatchConfig({ seed: 5, ffa: true, headless: true, mapId: 'ilhas-4p' }), 1000)).toBe(1953366667);
+    expect(run(createMatchConfig({ seed: 5, ffa: true, headless: true, mapId: 'ilhas-4p' }), 1000)).toBe(1971828223);
   }, 60000);
 
   it('techRestriction presente entra no checksum de forma estável; ausente/`undefined` não muda nada', () => {

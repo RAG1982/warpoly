@@ -291,9 +291,9 @@ Legenda de dependências: só IDs; "—" = pode começar já. **Dif.** = dificul
 |---|---|---|---|---|---|---|
 | M3-01 | Harness de qualidade das 24 missões (cobertura + progressão + *playthrough* headless) | Difícil | M | S | M2-01 | DONE (2026-10-24) |
 | M3-02 | Missão 1 · Terra à Vista | Média | M | S | M3-01, M2-03 | DONE (2026-10-24; refeita após feedback do dono no G1) |
-| M3-03 | Missão 2 · O Pouso do Encontro | Média | M | S | M3-02, M2-03 | TODO |
-| M3-04 | Missão 3 · Ouro da Pedra-Mãe (entra o Brann) | Difícil | G | S | M3-03, M2-03 | TODO |
-| M3-05 | Missão 4 · O Baixio do Breu (naval roteirizado) | Difícil | G | S | M3-04, M2-04 | TODO |
+| M3-03 | Missão 2 · O Pouso do Encontro | Média | M | S | M3-02, M2-03 | DONE (2026-10-25; refeita após feedback: 6 batedores em cercados, 2 acampamentos, vitória sem destruir a base orc; dono ainda não rejogou) |
+| M3-04 | Missão 3 · Ouro da Pedra-Mãe (entra o Brann) | Difícil | G | S | M3-03, M2-03 | DONE (2026-10-25; crista com 2 desfiladeiros, Brann jogável, minas afastadas; muros ainda não decidem a missão — balanceamento a revisar no G3) |
+| M3-05 | Missão 4 · O Baixio do Breu (naval roteirizado) | Difícil | G | S | M3-04, M2-04 | DONE (2026-10-26; 2 continentes, 6 poços, frota roteirizada; correções pós-playtest: câmera, seleção, petróleo, canhão; dificuldade real após correção da grade espacial — a confirmar pelo dono) |
 | M3-06 | Missão 5 · O Cerne Verde | Média | M | S | M3-05, M2-04 | TODO |
 | M3-07 | Missão 6 · A Geada (Prova de Fogo, árvore completa) | Difícil | G | S | M3-06, M2-04 | TODO |
 | M3-08 | Missão 7 · O Brejo Mudo (traição) | Média | M | S | M3-07, M2-05 | TODO |
@@ -305,6 +305,27 @@ Legenda de dependências: só IDs; "—" = pode começar já. **Dif.** = dificul
 | M3-14 | Textos finais, epílogo, retratos de NPC, arte de vitória | Média | M | S+SB | M3-13 | TODO |
 | M3-15 | **G3 — você joga as 12 missões** (≈ 4–5 h) | — | — | V | M3-14 | TODO |
 | M3-16 | Ajustes pós-playtest da Aliança | Média | M | S | M3-15 | TODO |
+
+
+### Extras fora do plano (pedidos do dono, jogando a campanha — todos DONE e na `master`)
+| ID | O quê | Status |
+|---|---|---|
+| X-01 | Animação de "receber golpe" desligada (`HURT_ANIM_ENABLED=false`; travava a infantaria sob flechas) | DONE (2026-10-24) |
+| X-02 | ART-ALI-3: Quartel, Casa e Serraria da Aliança com modelos Tripo (≤ 2 draw calls, atlas 512²); serraria alinhada e ~30% maior | DONE (2026-10-24/25) |
+| X-03 | Upgrades do Centro −1/3 (667/267/200 · 1333/533/400/133 óleo); fogos de artifício + painel "o que o nível libera" (M3-03a) | DONE (2026-10-25) |
+| M3-X1 | Engine de missão: marcos (`spawnLandmark`/`lightLandmark`), marcadores de objetivo (`seconds`), Emissário com nome e cor de seleção própria | DONE (2026-10-25) |
+| M3-X2 | Secundárias de exploração e resgate em m01/m02 (+ lições do dono no Template, item 8) | DONE (2026-10-25) |
+| M3-X3 | Minas de ouro iniciais de m01/m02/m03 afastadas dos Centros (~32 u) | DONE (2026-10-25) |
+| M3-02b | m01 com 3 acampamentos, dificuldade, cutscene da vela | DONE (2026-10-24) |
+| RES-QUEUE | Pesquisas enfileiráveis nos slots da construção (como o treino) | DONE (2026-10-25) |
+| ENG-WALL | Muros até a beira da água (selo de praia) e Centros extras construíveis (`techLock` liberado) | DONE (2026-10-25) |
+| ENG-NAVAL | Transporte (LOAD/UNLOAD), caminho naval com folga, petróleo naval, testes | DONE (2026-10-25) |
+| X-04 | Torres +30% PV (watchtower 845, orc_watchtower 910) | DONE (2026-10-25) |
+| X-05 | Câmera: limite segue o tamanho do mapa (era ±55 fixo) — 3793aa5 | DONE (2026-10-26) |
+| X-06 | Grades espaciais seguem o tamanho do mapa (era ±70: cliques/hover não acertavam bases em x<−75; IA/colisão cegas fora) — 7fea888 | DONE (2026-10-26) |
+| X-07 | Petróleo: clique direito na plataforma pronta manda coletar; navios com canhão (bala, clarão, fumaça, som), tiro em terra ao alcance, navios +20%; `REPLAY_SIM_VERSION` 4 — 9cac7af | DONE (2026-10-26) |
+
+**Pendências abertas dessas frentes:** (1) o dono jogar m03 e m04 e dar feedback; (2) m03: muros não decidem a missão; (3) camp-02: mina de expansão (26 u) mais perto que a inicial (32 u); (4) Estrela-d'Alva é fragata treinável (contradiz o item 8e do Template); (5) frota orca da m04 é roteirizada, não IA; (6) fogos do upgrade fracos em qualidade baixa; (7) gerador `tools/lib/campaignMaps.mjs` ainda produz o `outpost1` antigo da camp-04 (JSON foi corrigido à mão, em (−90, −80)); (8) tutoriais e README de dados não cobrem o ENG-WALL; (9) revisar o impacto da grade corrigida em outras missões/mapas com bases longe do centro.
 
 ### M4 — Campanha da Horda (`war-horde`) — **1.1** (D1: Aliança primeiro)
 | ID | Tarefa | Dif. | Esf. | Exec. | Dep. | Status |

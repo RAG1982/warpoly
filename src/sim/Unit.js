@@ -178,6 +178,7 @@ export class Unit {
     this._boardTries = 0;
     this._boardWait = 0;
     this._unloadOrder = null;
+    this._landingOrder = null; // NAVAL-LANDING: ordem da missão para a tropa ao desembarcar
     /** F4-07b: apresentação — segundos restantes com a rampa da barcaça aberta (embarque/desembarque); não entra no checksum. */
     this.rampT = 0;
     /** F4-07b: submersível — invisível permanente; emerge ao atacar/sofrer dano e volta após `SUBMERGE_DELAY` s. */

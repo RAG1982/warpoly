@@ -283,10 +283,24 @@ export function updateUnloading(gm, boat) {
   const dSea = fhypot(p.x - spot.sea.x, p.z - spot.sea.z);
   const dLand = fhypot(p.x - spot.land.x, p.z - spot.land.z) - (boat.collisionRadius || 0);
   const near = dSea <= 2.5 || dLand <= BOARD_DISTANCE + 1;
-  if (near) {
+  // NAVAL-LANDING: barcaça de missão que parou antes da margem (canal estreito/raso) solta a tropa na terra mais próxima de ONDE ESTÁ
+  const stuck = !near && boat.state === 'idle' && !!boat._landingOrder;
+  if (near || stuck) {
     boat._unloadOrder = null;
-    unloadAll(gm, boat, spot.land);
+    const landed = boat.cargo.slice();
+    const alt = stuck ? findLandingSpot(gm, p.x, p.z, 24) : null;
+    unloadAll(gm, boat, alt ? alt.land : spot.land);
     boat.stop();
+    // NAVAL-LANDING: ordem de missão guardada na barcaça — a tropa desembarcada sai atacando (sem comando de jogador)
+    const o = boat._landingOrder;
+    if (o) {
+      boat._landingOrder = null;
+      for (const u of landed) {
+        if (u.isDead || u.isDying) continue;
+        if (o.kind === 'attackMove') u.orderAttackMove(o.x, o.z, gm);
+        else u.moveTo(o.x, o.z, gm);
+      }
+    }
   } else if (boat.state === 'idle') {
     boat._unloadOrder = null;
     notify(gm, boat.ownerId, '⚠️ Não foi possível chegar à margem');

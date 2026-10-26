@@ -18,7 +18,7 @@ export const PRIORITIES = Object.freeze(['primary', 'secondary', 'hidden']);
 export const OBJECTIVE_STATUSES = Object.freeze(['inactive', 'active', 'completed', 'failed']);
 export const CONDITION_TYPES = Object.freeze(['time', 'every', 'area', 'dead', 'count', 'var', 'objective', 'resource', 'trigger', 'research']);
 export const ACTION_TYPES = Object.freeze([
-  'spawn', 'spawnBuilding', 'setTier', 'giveResources', 'takeResources', 'setObjective', 'addObjective', 'revealObjective', 'reveal', 'setTeam',
+  'spawn', 'spawnLanding', 'spawnBuilding', 'setTier', 'giveResources', 'takeResources', 'setObjective', 'addObjective', 'revealObjective', 'reveal', 'setTeam',
   'transfer', 'dialog', 'message', 'victory', 'defeat', 'music', 'sound', 'camera', 'cutscene', 'setVar', 'incVar',
   'enableTrigger', 'disableTrigger', 'tag', 'order', 'guard', 'spawnLandmark', 'lightLandmark'
 ]);
@@ -307,6 +307,45 @@ function checkAction(c, path, a, setup = false) {
       if (a.guard !== undefined && !(typeof a.guard === 'boolean' || (isObj(a.guard) && typeof a.guard.r === 'number' && a.guard.r > 0))) c.err(`${p}.guard`, 'deve ser booleano ou {r>0}');
       checkMarkColor(c, `${p}.markColor`, a.markColor);
       if (a.displayName !== undefined) checkText(c, `${p}.displayName`, a.displayName); // M3-X1: nome mostrado no painel (só apresentação)
+      break;
+    }
+    case 'spawnLanding': { // NAVAL-LANDING: desembarque anfíbio — barcaça nasce na água com a tropa embarcada, navega até a margem, solta a carga e a tropa ataca
+      checkOwner(c, `${p}.owner`, a.owner);
+      checkXZ(c, p, a); // x/z = ponto de água onde a barcaça (e a escolta) nasce
+      if (!isObj(a.unloadAt)) c.err(`${p}.unloadAt`, 'informe o ponto de desembarque {x,z} (ou {anchor}) na costa');
+      else checkXZ(c, `${p}.unloadAt`, a.unloadAt);
+      const bargeType = a.bargeType ?? 'barge';
+      if (!UNITS[bargeType] || !(UNITS[bargeType].transportCapacity > 0)) c.err(`${p}.bargeType`, `"${bargeType}" não é um navio de transporte`);
+      let total = 0;
+      if (!Array.isArray(a.units) || a.units.length === 0) c.err(`${p}.units`, 'informe a tropa embarcada: units:[{type,count}]');
+      else {
+        a.units.forEach((u, i) => {
+          const def = UNITS[u && u.type];
+          if (!def) c.err(`${p}.units[${i}].type`, `unidade desconhecida "${u && u.type}"`);
+          else if (def.layer && def.layer !== 'ground') c.err(`${p}.units[${i}].type`, 'só unidades terrestres embarcam');
+          checkNum(c, `${p}.units[${i}].count`, u && u.count, { min: 1, max: 60, int: true });
+          if (u && isNum(u.count)) total += u.count;
+        });
+        const cap = UNITS[bargeType] && UNITS[bargeType].transportCapacity;
+        if (cap > 0 && total > cap) c.err(`${p}.units`, `a barcaça leva no máximo ${cap} unidades (pediu ${total})`);
+      }
+      if (a.escort !== undefined) {
+        if (!Array.isArray(a.escort)) c.err(`${p}.escort`, 'escolta deve ser uma lista [{type,count}]');
+        else a.escort.forEach((u, i) => {
+          const def = UNITS[u && u.type];
+          if (!def) c.err(`${p}.escort[${i}].type`, `unidade desconhecida "${u && u.type}"`);
+          else if (def.layer !== 'naval') c.err(`${p}.escort[${i}].type`, 'a escolta deve ser de navios');
+          checkNum(c, `${p}.escort[${i}].count`, u && u.count, { min: 1, max: 20, int: true });
+        });
+      }
+      for (const k of ['tag', 'bargeTag', 'escortTag']) {
+        if (a[k] !== undefined) { if (!isStr(a[k]) || !ID_RE.test(a[k])) c.err(`${p}.${k}`, 'tag inválida'); else c.tagDefs.add(a[k]); }
+      }
+      if (a.order !== undefined) {
+        if (!isObj(a.order) || !['attackMove', 'move'].includes(a.order.kind)) c.err(`${p}.order.kind`, 'kind deve ser attackMove|move');
+        else checkXZ(c, `${p}.order`, a.order);
+      }
+      checkMarkColor(c, `${p}.markColor`, a.markColor);
       break;
     }
     case 'spawnLandmark': { // M3-X1: marco visual (ruína, posto de trégua, altar) — estado de missão, sem colisão

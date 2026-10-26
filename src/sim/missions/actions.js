@@ -8,6 +8,7 @@ import { fcos, fhypot, fsin } from '../fmath.js';
 import { EVT } from '../events.js';
 import { RESOURCE_TYPES } from '../Player.js';
 import { HQ_TIER_HP } from '../../data/tiers.js';
+import { orderUnload, loadUnit, unloadAll } from '../transport.js';
 import { isAlive, resolveOwnerId, roleOf, selectEntities } from './selectors.js';
 
 /** Posição `i` de uma espiral de Fermat (ângulo áureo) ao redor do ponto — espalha spawns sem aleatoriedade. */
@@ -80,6 +81,52 @@ const HANDLERS = {
         applyOrder(gm, unit, a.order);
       }
     }
+  },
+
+  /**
+   * NAVAL-LANDING: desembarque anfíbio. A barcaça nasce na água (x, z) com a tropa JÁ embarcada (mesmas APIs de `transport.js`),
+   * a escolta de navios nasce junto; a barcaça navega até a margem de `unloadAt` (`orderUnload`), solta a carga e a tropa recebe
+   * `order` (`Unit.update` → `updateUnloading`). Barcaça morta antes do desembarque = carga afogada (`killCargo`, sem cadáver).
+   * Sem margem navegável perto de `unloadAt`, a tropa é posta em terra direto ali (nunca fica presa a bordo).
+   */
+  spawnLanding(rt, a) {
+    const gm = rt.gm;
+    const owner = resolveOwnerId(gm, a.owner);
+    const boat = gm.spawnUnit(a.bargeType ?? 'barge', a.x, a.z, owner);
+    if (!boat) return;
+    if (a.bargeTag) addTag(rt, a.bargeTag, boat.id);
+    if (a.markColor) boat.markColor = a.markColor;
+    let i = 0;
+    for (const entry of a.units) {
+      for (let k = 0; k < entry.count; k++) {
+        const u = gm.spawnUnit(entry.type, a.unloadAt.x, a.unloadAt.z, owner);
+        if (!u) continue;
+        if (a.markColor) u.markColor = a.markColor;
+        if (a.tag) addTag(rt, a.tag, u.id);
+        if (!loadUnit(gm, boat, u)) { u.moveTo(a.unloadAt.x, a.unloadAt.z, gm); applyOrder(gm, u, a.order); }
+        i++;
+      }
+    }
+    boat._landingOrder = a.order ? { kind: a.order.kind, x: a.order.x, z: a.order.z } : null;
+    if (!orderUnload(gm, boat, a.unloadAt.x, a.unloadAt.z) && boat.cargo.length) {
+      const list = boat.cargo.slice();
+      unloadAll(gm, boat, a.unloadAt);
+      for (const u of list) applyOrder(gm, u, a.order);
+    }
+    // escolta: navios de ataque ao lado da barcaça, avançando para o ponto de desembarque (atacam quem aparecer pelo caminho)
+    const goal = boat._unloadOrder ? boat._unloadOrder.sea : { x: a.unloadAt.x, z: a.unloadAt.z };
+    let j = 1;
+    for (const entry of a.escort ?? []) {
+      for (let k = 0; k < entry.count; k++) {
+        const { dx, dz } = ringOffset(j++, 3.2);
+        const ship = gm.spawnUnit(entry.type, a.x + dx, a.z + dz, owner);
+        if (!ship) continue;
+        if (a.markColor) ship.markColor = a.markColor;
+        addTag(rt, a.escortTag ?? 'escort', ship.id);
+        ship.orderAttackMove(goal.x, goal.z, gm);
+      }
+    }
+    void i;
   },
 
   /** Construção já CONCLUÍDA do dono em (x, z) — o mesmo registro das construções iniciais das bases (`_spawnStartingBase`). */

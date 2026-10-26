@@ -6,6 +6,7 @@ import { CMD } from '../../src/sim/commands.js';
 import { SIM_DT } from '../../src/sim/constants.js';
 import { validateMapDef } from '../../src/data/maps/validate.js';
 import { getBiomeAt, BIOME } from '../../src/data/maps/biome.js';
+import { runAction } from '../../src/sim/missions/actions.js';
 import { noNavy, rush, win } from '../fixtures/campaign-playthrough/war-alliance-04-baixio-do-breu.js';
 
 /**
@@ -264,4 +265,57 @@ describe('m04 Baixio do Breu · transporte por Barcaça entre margens e ilhotas 
     expect(barge.cargo.length).toBe(0);
     for (const m of men) { const s = gm.pathfinder.findNearestWalkable(m.mesh.position.x, m.mesh.position.z, 4); expect(compAt(gm.pathfinder, lc, s.x, s.z)).toBe(islet); }
   }, 120000);
+});
+
+describe('m04 Baixio do Breu · desembarque anfíbio orc (NAVAL-LANDING)', () => {
+  const landingAction = (gm) => gm.mission.def.triggers.find((t) => t.id === 'landing').actions.find((a) => a.type === 'spawnLanding');
+  const ents = (gm, tag) => (gm.mission.tags.get(tag) || []).map((i) => gm.entitiesById.get(i));
+
+  it('a leva nasce numa Barcaça na água (tropa embarcada, invisível) com 2 Galés de escolta; ninguém aparece em terra', async () => {
+    const { gm } = await boot([], 0.2);
+    expect(landingAction(gm)).toBeTruthy();
+    runAction(gm.mission, landingAction(gm));
+    const barge = ents(gm, 'landing_barge')[0];
+    expect(barge.type).toBe('barge');
+    expect(barge.ownerId).toBe(1);
+    expect(barge.layer).toBe('naval');
+    expect(barge.cargo).toHaveLength(6);
+    for (const u of ents(gm, 'landing')) { expect(u.transportedBy).toBe(barge.id); expect(u.mesh.visible).toBe(false); }
+    const esc = ents(gm, 'landing_escort');
+    expect(esc).toHaveLength(2);
+    expect(esc.every((u) => u.type === 'war_galley' && u.layer === 'naval')).toBe(true);
+    expect(d(pos(barge), gm.terrain.mapDef.anchors.fleetStart2)).toBeLessThan(5);
+  });
+
+  it('a Barcaça navega até a praia, solta a tropa (que parte para o ataque) e a escolta a acompanha', async () => {
+    const { gm } = await boot([], 0.2);
+    runAction(gm.mission, landingAction(gm));
+    const barge = ents(gm, 'landing_barge')[0];
+    const troops = ents(gm, 'landing');
+    for (let i = 0; i < 120 * 20 && barge.cargo.length; i++) gm.simStep(SIM_DT);
+    expect(barge.cargo).toHaveLength(0);
+    expect(barge.isDead).toBe(false);
+    const beach = gm.terrain.mapDef.anchors.beach1;
+    for (const u of troops) {
+      expect(u.transportedBy).toBe(null);
+      expect(u.mesh.visible).toBe(true);
+      expect(d(pos(u), beach)).toBeLessThan(40);
+    }
+    tick(gm, 40);
+    expect(troops.some((u) => u.state !== 'idle')).toBe(true);
+  }, 120000);
+
+  it('Barcaça afundada antes do desembarque: a carga se afoga (ninguém chega à praia)', async () => {
+    const { gm } = await boot([], 0.2);
+    runAction(gm.mission, landingAction(gm));
+    const barge = ents(gm, 'landing_barge')[0];
+    const troops = ents(gm, 'landing');
+    tick(gm, 20);
+    expect(barge.cargo.length).toBe(6);
+    barge.hp = 0;
+    barge.lastAttackerOwnerId = 0;
+    barge.die();
+    tick(gm, 40);
+    expect(troops.every((u) => u.isDead || u.isDying)).toBe(true);
+  });
 });

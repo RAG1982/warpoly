@@ -35,8 +35,8 @@
         "en": "The Barge carries 6 troops from shore to shore: send the troops aboard (right-click the Barge) and then click a beach to unload. Towers on the islets protect the mid-channel wells."
       },
       {
-        "pt-BR": "Só o Paço recebe ouro. A mina grande da ponta fica a mais de 60 passos: construa um Centro extra ao lado dela (tecla Q; 800 de ouro, máximo 3). Se um navio orc chegar à costa, soldados desembarcam: mantenha a frota no canal.",
-        "en": "Only the Keep takes gold. The big mine at the tip is more than 60 paces away: build an extra Town Center beside it (Q key; 800 gold, max 3). If an orc ship reaches the coast, soldiers land: keep your fleet in the channel."
+        "pt-BR": "Só o Paço recebe ouro. A mina grande da ponta fica a mais de 60 passos: construa um Centro extra ao lado dela (tecla Q; 800 de ouro, máximo 3). As tropas orcas chegam em Barcaças escoltadas por Galés: afunde a Barcaça antes da praia e a carga se afoga.",
+        "en": "Only the Keep takes gold. The big mine at the tip is more than 60 paces away: build an extra Town Center beside it (Q key; 800 gold, max 3). Orc troops come in Barges escorted by Galleys: sink the Barge before the beach and its cargo drowns."
       }
     ]
   },
@@ -821,8 +821,8 @@
           "portrait": "⚔️",
           "duration": 9,
           "text": {
-            "pt-BR": "Seis Galés rumo ao Estaleiro! Se uma encostar na praia, desembarca gente. Fragatas no canal, comandante, e torres na costa ajudam.",
-            "en": "Six Galleys heading for the Shipyard! If one touches the beach, people land. Frigates in the channel, Commander, and coast towers help."
+            "pt-BR": "Seis Galés rumo ao Estaleiro! Barcaças com tropa vêm atrás delas. Fragatas no canal, comandante, e torres na costa ajudam.",
+            "en": "Six Galleys heading for the Shipyard! Troop Barges follow them. Frigates in the channel, Commander, and coast towers help."
           }
         }
       ]
@@ -902,8 +902,12 @@
       },
       "actions": [
         {
-          "type": "spawn",
+          "type": "spawnLanding",
           "owner": "enemy",
+          "anchor": "fleetStart2",
+          "unloadAt": {
+            "anchor": "beach1"
+          },
           "units": [
             {
               "type": "grunt",
@@ -914,9 +918,15 @@
               "count": 2
             }
           ],
-          "anchor": "beach1",
-          "spread": 3,
+          "escort": [
+            {
+              "type": "war_galley",
+              "count": 2
+            }
+          ],
           "tag": "landing",
+          "bargeTag": "landing_barge",
+          "escortTag": "landing_escort",
           "order": {
             "kind": "attackMove",
             "anchor": "playerStart"
@@ -939,8 +949,8 @@
           "portrait": "⚔️",
           "duration": 8,
           "text": {
-            "pt-BR": "Uma Galé encostou e soltou gente na praia! Guarnição, comigo! Era para ter ficado no canal.",
-            "en": "A Galley touched shore and put people on the beach! Garrison, with me! It should have been stopped in the channel."
+            "pt-BR": "Uma Barcaça orca zarpou do Estaleiro inimigo com tropa a bordo, escoltada por Galés! Afundem-na antes que encoste na praia, ou guarnição, comigo!",
+            "en": "An orc Barge left the enemy Shipyard with troops aboard, escorted by Galleys! Sink it before it touches the beach, or garrison, with me!"
           }
         }
       ],

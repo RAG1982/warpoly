@@ -23,9 +23,9 @@ import { UNITS } from '../data/units.js';
 const NONE = Object.freeze([]);
 
 /** Projétil disparado -> receita do disparo. */
-export const FIRE_SFX = Object.freeze({ arrow: 'bow', axe: 'axeThrow', bolt: 'bolt', boulder: 'catapult' });
+export const FIRE_SFX = Object.freeze({ arrow: 'bow', axe: 'axeThrow', bolt: 'bolt', boulder: 'catapult', cannonball: 'cannon' });
 /** Projétil que acerta -> receita do impacto (flecha = carne/madeira, machado = crava, cerco = pedra). */
-export const HIT_SFX = Object.freeze({ arrow: 'arrowHit', axe: 'axeHit', bolt: 'stoneHit', boulder: 'stoneHit' });
+export const HIT_SFX = Object.freeze({ arrow: 'arrowHit', axe: 'axeHit', bolt: 'stoneHit', boulder: 'stoneHit', cannonball: 'stoneHit' });
 /** Margem de tela extra (fração) para o que é grande: o centro pode estar fora e o estrondo ainda ser visível. */
 const BIG_MARGIN = 0.25;
 
@@ -101,7 +101,7 @@ export function soundsForEvent(type, p, info = {}) {
       return audible ? [d(FIRE_SFX[p.kind] || 'bow', p.from, own ? 1.6 : 1.1)] : NONE;
     case EVT.PROJECTILE_HIT: {
       if (!audible) return NONE;
-      const siege = p.kind === 'bolt' || p.kind === 'boulder';
+      const siege = p.kind === 'bolt' || p.kind === 'boulder' || p.kind === 'cannonball';
       const hit = d(HIT_SFX[p.kind] || 'arrowHit', p.pos, siege ? 2 : own ? 1.4 : 1.0);
       if (siege) hit.margin = BIG_MARGIN / 2;
       return [hit];

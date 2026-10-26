@@ -19,7 +19,7 @@
  */
 export function defaultCanHitAir(def) {
   if (typeof def.canHitAir === 'boolean') return def.canHitAir;
-  const ballistic = (def.projectile === 'bolt' || def.projectile === 'boulder') && (def.splashRadius || 0) > 0;
+  const ballistic = (def.projectile === 'bolt' || def.projectile === 'boulder' || def.projectile === 'cannonball') && (def.splashRadius || 0) > 0;
   return !!def.isRanged && !ballistic;
 }
 

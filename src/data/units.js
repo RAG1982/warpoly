@@ -22,7 +22,7 @@
  * - healthBarHeight  Altura da barra de vida 3D acima do pé do modelo.
  * - cost {gold, wood, stone}, trainTime (s). `null` = não treinável.
  * - icon, description.
- * - isWorker, isRanged, isCombat, projectile ('arrow' | 'axe' | 'bolt' | 'boulder' | null).
+ * - isWorker, isRanged, isCombat, projectile ('arrow' | 'axe' | 'bolt' | 'boulder' | 'cannonball' | null).
  * - minAttackRange  F4-02: alcance mínimo (distância de borda; 0/ausente = sem). Alvo mais perto que
  *   isso não pode ser atacado: a unidade recua até `minAttackRange + 0,5` (cerco).
  * - splashRadius    F4-02: raio de dano em área no impacto (0/ausente = sem). 100% no centro → 50%
@@ -689,7 +689,7 @@ export const UNITS = {
     trainTime: 16,
     icon: '/icoNavio.svg',
     description: 'Naval. Navio de guerra rápido: ataca navios, aéreos e a costa',
-    isWorker: false, isRanged: true, isCombat: true, projectile: 'bolt',
+    isWorker: false, isRanged: true, isCombat: true, projectile: 'cannonball',
     layer: 'naval', canHitAir: true, canHitGround: true, canHitNaval: true, corpseless: true
   },
   barge: {
@@ -726,7 +726,7 @@ export const UNITS = {
     trainTime: 24,
     icon: '/icoNavio.svg',
     description: 'Naval. Artilharia de longo alcance contra navios e a costa (requer Centro nível 3 e Fundição)',
-    isWorker: false, isRanged: true, isCombat: true, projectile: 'boulder',
+    isWorker: false, isRanged: true, isCombat: true, projectile: 'cannonball',
     layer: 'naval', canHitAir: false, canHitGround: true, canHitNaval: true, isSiege: true, corpseless: true
   },
   submersible: {

@@ -15,9 +15,9 @@ import { fhypot, fsin } from './fmath.js';
  */
 
 /** Velocidade total (u/s) dos projéteis balísticos: a Balista atira mais rápido e mais raso. */
-export const BALLISTIC_SPEED = { bolt: 22, boulder: 14 };
+export const BALLISTIC_SPEED = { bolt: 22, boulder: 14, cannonball: 20 };
 /** Velocidade (u/s) dos projéteis que perseguem o alvo. */
-export const HOMING_SPEED = { arrow: 18, axe: 16 };
+export const HOMING_SPEED = { arrow: 18, axe: 16, cannonball: 24 };
 
 /** Tempo de voo (s) para uma distância 3D `dist` — usado também na previsão de mira. */
 export function ballisticFlightTime(dist, kind) {

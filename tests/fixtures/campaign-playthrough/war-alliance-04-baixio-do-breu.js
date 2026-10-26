@@ -68,7 +68,7 @@ function econ(c) {
   const unfinished = c.gm.buildings.find((x) => x.ownerId === 0 && !x.isDead && !x.isConstructed && x.role !== 'wall');
   if (unfinished) { const vs = builders(c); if (vs.length) c.issue({ type: c.CMD.BUILD, unitIds: vs, buildingId: unfinished.id }); }
   const castle = c.bld('castle');
-  if (castle && c.mine('villager').length < 9 && castle.queue.length === 0 && affordable(c, { gold: 60 })) c.issue({ type: c.CMD.TRAIN, buildingId: castle.id, unitType: 'villager' });
+  if (castle && c.mine('villager').length < 14 && castle.queue.length === 0 && affordable(c, { gold: 60 })) c.issue({ type: c.CMD.TRAIN, buildingId: castle.id, unitType: 'villager' });
   const popCap = c.gm.getPlayer(0).maxPopulation ?? 0;
   const pop = c.gm.getUnitsOf(0).filter((u) => !u.isDead).length;
   if (!unfinished && pop >= popCap - 3 && count(c, 'cottage') < 8 && affordable(c, { wood: 50 }) && c.seconds - (b.last.cottage ?? -99) > 15) { if (place(c, 'cottage', 10, c.anchor('shipyard1'))) b.last.cottage = c.seconds; }
@@ -96,7 +96,10 @@ function navy(c, unfinished) {
   });
   // Fragatas (a primeira leva só depois de a economia de óleo andar)
   const frig = c.mine('frigate');
-  if (frig.length + yard.queue.length < (c.seconds < 330 ? 4 : 9) && res(c).oil >= 50 && affordable(c, { gold: 200, wood: 100 }) && yard.queue.length < 2) c.issue({ type: c.CMD.TRAIN, buildingId: yard.id, unitType: 'frigate' });
+  if (frig.length + yard.queue.length < (c.seconds < 330 ? 6 : 12) && res(c).oil >= 50 && affordable(c, { gold: 200, wood: 100 }) && yard.queue.length < 2) c.issue({ type: c.CMD.TRAIN, buildingId: yard.id, unitType: 'frigate' });
+  // guarnição: com a esquadra de 6 Fragatas pronta, o ouro que sobra vira Cavaleiros do Quartel (as levas orcas desembarcam tropas de verdade)
+  const rax = c.bld('barracks');
+  if (rax && rax.isConstructed && frig.length >= 6 && rax.queue.length === 0 && c.mine('knight').length < 8 && affordable(c, { gold: 400, wood: 60, stone: 5 })) c.issue({ type: c.CMD.TRAIN, buildingId: rax.id, unitType: 'knight' });
   // Posto do Cabo (Centro extra) quando sobra ouro
   if (!unfinished && count(c, 'castle') < 2 && res(c).gold > 1000 && res(c).wood > 500 && res(c).stone >= 250 && c.seconds - (b.last.post ?? -99) > 30) { if (at(c, 'castle', 'outpost1', 4)) b.last.post = c.seconds; }
 }
@@ -109,9 +112,11 @@ function fleet(c) {
   const hunt = c.seconds > 150 && ships.length >= 5 && c.tagged('patrol').some((u) => !u.isDead);
   const spots = [c.anchor('patrol2'), c.anchor('patrol1')];
   const live = c.tagged('patrol').filter((u) => !u.isDead);
-  const target = hunt && live.length ? posOf(nearest(live, c.anchor('well2'))) : home;
+  // as levas orcas agora bombardeiam a costa da base (a grade espacial cobre o mapa todo): a esquadra intercepta quem chega perto do Paço
+  const raiders = c.gm.allUnits.filter((u) => !u.isDead && u.ownerId === 1 && u.layer === 'naval' && dist(posOf(u), c.anchor('playerStart')) < 55);
+  const target = raiders.length ? posOf(nearest(raiders, c.anchor('playerStart'))) : hunt && live.length ? posOf(nearest(live, c.anchor('well2'))) : home;
   ships.sort((a, b) => a.id - b.id).forEach((u) => {
-    if (u.state === 'idle' && dist(posOf(u), target) > 10) c.issue({ type: c.CMD.ATTACK_MOVE, unitIds: [u.id], x: target.x, z: target.z });
+    if ((u.state === 'idle' || raiders.length) && dist(posOf(u), target) > 10) c.issue({ type: c.CMD.ATTACK_MOVE, unitIds: [u.id], x: target.x, z: target.z });
   });
   void spots; void stella;
 }
@@ -119,6 +124,9 @@ function fleet(c) {
 function brann(c) {
   const brann = c.tagged('brann')[0];
   if (!brann || brann.isDead) return;
+  // Brann não persegue desembarcados até a baía (as Galés e o Leviatã orcos o alcançam na margem): volta ao Paço
+  const home = c.anchor('playerStart');
+  if (dist(posOf(brann), home) > 16) c.issue({ type: c.CMD.MOVE, unitIds: [brann.id], x: home.x + 6, z: home.z });
   const enemies = c.gm.allUnits.filter((u) => !u.isDead && u.ownerId === 1 && u.layer !== 'naval');
   const near = enemies.filter((u) => dist(posOf(u), posOf(brann)) < 9);
   if (near.length) {

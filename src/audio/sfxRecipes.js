@@ -313,12 +313,12 @@ export const SFX = {
 export const SFX_LIMITS = Object.freeze({
   perKey: Object.freeze({
     chop: 3, treeFall: 2, mineGold: 2, mineStone: 3, hammer: 3, anvil: 2, sword: 5, metalHit: 6, bow: 5, arrowHit: 4,
-    axeThrow: 3, axeHit: 3, bolt: 3, catapult: 2, stoneHit: 3, death: 4, explosion: 3, collapse: 2, shipSink: 2, cast: 3,
+    axeThrow: 3, axeHit: 3, bolt: 3, catapult: 2, cannon: 3, stoneHit: 3, death: 4, explosion: 3, collapse: 2, shipSink: 2, cast: 3,
     chime: 2, gather: 2
   }),
   minGap: Object.freeze({
     chop: 0.05, treeFall: 0.2, mineGold: 0.08, mineStone: 0.06, hammer: 0.05, anvil: 0.3, sword: 0.035, metalHit: 0.035,
-    bow: 0.035, arrowHit: 0.03, axeThrow: 0.05, axeHit: 0.04, bolt: 0.05, stoneHit: 0.05, death: 0.06, shipSink: 0.3,
+    bow: 0.035, arrowHit: 0.03, axeThrow: 0.05, axeHit: 0.04, bolt: 0.05, cannon: 0.08, stoneHit: 0.05, death: 0.06, shipSink: 0.3,
     gather: 0.12, chime: 0.1
   })
 });

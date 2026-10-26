@@ -35,4 +35,4 @@ export const BOARD_DISTANCE = 3;
 export const SUBMERGE_DELAY = 4;
 
 /** F4-07b: escala visual dos navios (os .glb do Blender têm proporção de construção; os terrestres usam 1,62). */
-export const NAVAL_MESH_SCALE = 0.8;
+export const NAVAL_MESH_SCALE = 0.96;

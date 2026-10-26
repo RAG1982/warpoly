@@ -152,7 +152,7 @@ describe('mapeamento evento -> receita', () => {
       [EVT.WORKER_CHOP, { ownerId: 0 }], [EVT.WORKER_CHOP, { ownerId: -1 }], [EVT.WORKER_MINE, { resource: 'gold' }], [EVT.WORKER_MINE, { resource: 'stone' }],
       [EVT.WORKER_HAMMER, {}], [EVT.BUILDING_VFX, { kind: 'anvil_spark' }], [EVT.MELEE_HIT, {}], [EVT.EXPLOSION, { radius: 3 }],
       [EVT.UNIT_DIED, { unitType: navalId }], [EVT.BUILDING_DESTROYED, {}],
-      ...['arrow', 'axe', 'bolt', 'boulder'].flatMap((kind) => [[EVT.PROJECTILE_FIRED, { kind, from: pos }], [EVT.PROJECTILE_HIT, { kind }]])
+      ...['arrow', 'axe', 'bolt', 'boulder', 'cannonball'].flatMap((kind) => [[EVT.PROJECTILE_FIRED, { kind, from: pos }], [EVT.PROJECTILE_HIT, { kind }]])
     ];
     for (const [type, p] of payloads) for (const d of soundsForEvent(type, { pos, ...p }, ctx)) used.add(d.sfx);
     for (const name of Object.keys(LIBRARY)) expect(used.has(name), `receita órfã: ${name}`).toBe(true);

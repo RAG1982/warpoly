@@ -156,7 +156,7 @@ export class Unit {
     this.minAttackRange = def.minAttackRange || 0;
     this.splashRadius = def.splashRadius || 0;
     /** F4-02: projétil balístico (`bolt`/`boulder`): não persegue, mira a posição prevista. */
-    this.isBallistic = (def.projectile === 'bolt' || def.projectile === 'boulder') && def.splashRadius > 0; // F4-04: 'bolt' sem área (Mago) é projétil comum
+    this.isBallistic = (def.projectile === 'bolt' || def.projectile === 'boulder' || def.projectile === 'cannonball') && def.splashRadius > 0; // F4-04: 'bolt' sem área (Mago) é projétil comum
     /** F4-05: unidade suicida (Sapadores/Incendiários) — detona no alcance (`_detonate`). */
     this.suicide = !!def.suicide;
     /** F4-04b: camada ('ground' | 'air') e imunidade total a dano (Olho Vigia). F4-06 estende `layer`. */
@@ -2457,6 +2457,9 @@ export class Unit {
     const npf = gm && gm.navalPathfinder;
     if (!npf) return true;
     const p = e.mesh.position;
+    const m = this.mesh.position;
+    // canhões alcançam qualquer alvo em terra dentro do alcance de ataque (distância de borda), não só o colado à margem
+    if (fhypot(m.x - p.x, m.z - p.z) - (e.collisionRadius || 0) <= this.attackRange) return true;
     return npf.nearNavigable(p.x, p.z, SHORE_REACH + (e.collisionRadius || 0));
   }
 

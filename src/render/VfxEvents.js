@@ -43,9 +43,19 @@ export function createVfxEvents(gm, particleSystem, vfx = null) {
 
   // --- F4-02: impacto do cerco — poeira de pedra + faíscas no ponto de queda ---
   on(EVT.PROJECTILE_HIT, ({ kind, pos }) => {
+    if (kind === 'cannonball') {
+      particleSystem.spawnExplosion(toVec(pos), 1.1);
+      return;
+    }
     if (kind !== 'bolt' && kind !== 'boulder') return;
     particleSystem.spawnStoneDust(toVec(pos));
     particleSystem.spawnHitSparks(toVec(pos));
+  });
+
+  // --- Canhão naval: clarão de boca de fogo + fumaça no ponto de disparo ---
+  on(EVT.PROJECTILE_FIRED, ({ kind, from }) => {
+    if (kind !== 'cannonball') return;
+    particleSystem.spawnMuzzleBlast(toVec(from));
   });
 
   // --- F4-05: explosão de sapador — clarão, anel, fagulhas, fumaça e tremor curto da câmera ---

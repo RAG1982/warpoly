@@ -38,7 +38,17 @@ function getBoulderTemplate() {
   return boulderTemplate;
 }
 
+let cannonballTemplate = null;
+function getCannonballTemplate() {
+  if (!cannonballTemplate) {
+    const mat = new THREE.MeshStandardMaterial({ color: 0x1f1f23, roughness: 0.5, metalness: 0.6 });
+    cannonballTemplate = new THREE.Mesh(new THREE.SphereGeometry(0.34, 10, 8), mat);
+  }
+  return cannonballTemplate;
+}
+
 function createMesh(kind) {
+  if (kind === 'cannonball') return ModelFactory.headless ? new THREE.Group() : getCannonballTemplate().clone();
   if (kind === 'axe') return getAxeTemplate().clone(true);
   if (kind === 'boulder') return ModelFactory.headless ? new THREE.Group() : getBoulderTemplate().clone();
   const m = ModelFactory.createArrow();
@@ -105,7 +115,7 @@ export class ProjectileViews {
         const k = Math.max(0, 1 - p.progress / ARROW_BLEND);
         if (k > 0) m.position.addScaledVector(v.off, k);
       }
-      if (p.kind === 'boulder') {
+      if (p.kind === 'boulder' || p.kind === 'cannonball') {
         m.rotation.x = p.spin; // gira em voo
       } else {
         m.lookAt(p.aim.x, p.aim.y, p.aim.z);

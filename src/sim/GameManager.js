@@ -1572,20 +1572,23 @@ export class GameManager {
         return;
       }
       // F4-07a: poço de petróleo — petroleiros coletam (plataforma própria pronta), erguem a plataforma (poço livre) ou ajudam a obra.
-      if (e instanceof ResourceDeposit && e.type === 'oil') {
+      // A plataforma pronta fica por cima do poço e é o que o mouse acerta: clique nela = clique no poço.
+      const oilWell = e instanceof ResourceDeposit && e.type === 'oil' ? e
+        : (e instanceof Building && e.role === 'platform' && e.deposit && e.ownerId === this._localPlayerId ? e.deposit : null);
+      if (oilWell) {
         const tankerIds = this.selectedUnits.filter(u => u.isTanker).map(u => u.id);
         const local = this._localPlayerId;
-        if (tankerIds.length > 0 && e.resourcesRemaining > 0) {
-          if (this.platformReady(e, local)) {
-            this.issue({ type: CMD.GATHER, playerId: local, unitIds: tankerIds, targetId: e.id, ...q });
+        if (tankerIds.length > 0 && oilWell.resourcesRemaining > 0) {
+          if (this.platformReady(oilWell, local)) {
+            this.issue({ type: CMD.GATHER, playerId: local, unitIds: tankerIds, targetId: oilWell.id, ...q });
             return;
           }
-          if (!e.platform || e.platform.isDead) {
-            this.issue({ type: CMD.PLACE_BUILDING, playerId: local, buildingType: 'oil_platform', x: e.mesh.position.x, z: e.mesh.position.z, unitIds: tankerIds });
+          if (!oilWell.platform || oilWell.platform.isDead) {
+            this.issue({ type: CMD.PLACE_BUILDING, playerId: local, buildingType: 'oil_platform', x: oilWell.mesh.position.x, z: oilWell.mesh.position.z, unitIds: tankerIds });
             return;
           }
-          if (e.platform.ownerId === local && !e.platform.isConstructed) {
-            this.issue({ type: CMD.BUILD, playerId: local, unitIds: tankerIds, buildingId: e.platform.id, ...q });
+          if (oilWell.platform.ownerId === local && !oilWell.platform.isConstructed) {
+            this.issue({ type: CMD.BUILD, playerId: local, unitIds: tankerIds, buildingId: oilWell.platform.id, ...q });
             return;
           }
         }

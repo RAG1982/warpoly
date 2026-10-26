@@ -124,6 +124,16 @@ export const LIBRARY = {
       }
     }
   },
+  cannon: { // tiro de canhão: estalo de pólvora + "bum" grave + cauda de ruído
+    dur: 1.1,
+    priority: 1.8,
+    play(c) {
+      hiss(c, 0, 'highpass', 1500, 0.7, 0.04, 0.34);
+      thump(c, 0, 150, 34, 0.45, 0.55);
+      hiss(c, 0.02, 'lowpass', 700, 0.9, 0.55, 0.3);
+      hiss(c, 0.12, 'lowpass', 240, 0.9, 0.7, 0.14);
+    }
+  },
   explosion: {
     dur: 2.0,
     priority: 3,

@@ -330,6 +330,20 @@ export class ParticleSystem {
     for (let i = 0; i < 3; i++) this.spawnSmokePuff(pos);
   }
 
+  /** Boca de fogo do canhão naval: clarão curto, fagulhas de fogo e nuvem de fumaça. */
+  spawnMuzzleBlast(pos) {
+    this.spawnExplosion(pos, 0.7);
+    for (let i = 0; i < 6; i++) {
+      this._spawnChip(
+        pos, this.fireMat,
+        0, 0, 0,
+        (Math.random() - 0.5) * 3.0, 0.5 + Math.random() * 1.5, (Math.random() - 0.5) * 3.0,
+        6.0, 0.2 + Math.random() * 0.15, 0.4
+      );
+    }
+    for (let i = 0; i < 4; i++) this.spawnSmokePuff(pos);
+  }
+
   // Chimney smoke puffs rising from cottages
   spawnSmokePuff(pos) {
     const e = this.smokePool.acquire();

@@ -1,6 +1,7 @@
 import { EVT } from './events.js';
 import { NEUTRAL_OWNER_ID } from './EntityIds.js';
 import { Body } from './Body.js';
+import { TREE_WOOD_LEGACY } from '../data/economy.js';
 
 /**
  * Árvore de simulação (F2-08b): só dados. A malha instanciada, o hit-proxy, a árvore caindo e o toco
@@ -17,8 +18,8 @@ export class Tree {
     this.terrain = terrain;
     this.type = 'tree';
     this.treeType = type;
-    this.woodRemaining = 120;
-    this.maxWood = 120;
+    this.woodRemaining = TREE_WOOD_LEGACY;
+    this.maxWood = TREE_WOOD_LEGACY;
     this.isDead = false;
     this.isDisposed = false;
     this.fallProgress = 0;

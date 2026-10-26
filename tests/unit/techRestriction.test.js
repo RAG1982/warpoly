@@ -296,7 +296,7 @@ describe('sem restrição = comportamento e checksum do master', () => {
     expect(run(skirmish, 1500)).toBe(2930931478);
     // M3-X1: a demo mudou de conteúdo (marcos da trégua/ruínas e emissário herói); o valor abaixo é o da demo nova.
     expect(run(createMissionConfig('mission-demo'), 1200)).toBe(1870476419);
-    expect(run(createMatchConfig({ seed: 5, ffa: true, headless: true, mapId: 'ilhas-4p' }), 1000)).toBe(1971828223);
+    expect(run(createMatchConfig({ seed: 5, ffa: true, headless: true, mapId: 'ilhas-4p' }), 1000)).toBe(2573619394); // árvores 180 de madeira, 1 em 3 descartada (mapas fora de LEGACY_TREE_MAPS)
   }, 60000);
 
   it('techRestriction presente entra no checksum de forma estável; ausente/`undefined` não muda nada', () => {

@@ -19,6 +19,12 @@ import { researchEffect } from './upgrades.js';
 export const CARRY = { gold: 10, wood: 10, stone: 8, oil: 100 }; // F4-07a: petróleo — 1 viagem do petroleiro
 
 export const MINE_ENTER_TIME = 1.5;
+/** Madeira por árvore: 120 nos mapas revisados (`mapDef.legacyTrees`), 180 nos demais — com `TREE_KEEP_PERIOD` (2 de cada 3 árvores) a madeira total do mapa se mantém e o mapa fica menos poluído. */
+export const TREE_WOOD_LEGACY = 120;
+/** Mapas já revisados com as árvores antigas (120 de madeira, sem descarte). */
+export const LEGACY_TREE_MAPS = new Set(['camp-01-baia-de-aurelan', 'camp-02-pouso-do-encontro', 'camp-03-pedra-mae', 'camp-04-baixio-do-breu', 'tutorial', 'continental-1v1']);
+export const TREE_WOOD = 180;
+export const TREE_KEEP_PERIOD = 3; // spawnWoodlands descarta 1 árvore a cada 3 sorteadas (a de índice 2 do trio)
 
 export const MINE_SLOTS = { gold: 1, stone: 2, oil: 1 };
 

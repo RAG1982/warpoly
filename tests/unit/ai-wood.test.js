@@ -78,11 +78,11 @@ describe('NEW-44: regiões terrestres e alcançabilidade', () => {
     expect(far.none).toBe(false);
     expect(far.far).toBe(true);
     expect(far.nearest).toBeGreaterThan(FAR_TREE_DIST);
-    // restam só 2 árvores: "acabando"
-    const keep = far.trees.slice(0, 2);
+    // resta só 1 árvore (180 de madeira): "acabando"
+    const keep = far.trees.slice(0, 1);
     killTrees(gm, t => !keep.includes(t));
     const low = refresh(d);
-    expect(low.count).toBe(2);
+    expect(low.count).toBe(1);
     expect(low.low).toBe(true);
     expect(low.none).toBe(false);
     gm.dispose();

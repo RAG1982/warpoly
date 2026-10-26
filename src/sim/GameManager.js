@@ -38,6 +38,7 @@ import { isPlayerDefeated } from './victory.js';
 import { MissionRuntime } from './missions/MissionRuntime.js';
 import { resolveMissionDef } from '../data/missions/index.js';
 import { missingRequirements, requirementsNotice } from './requirements.js';
+import { TREE_KEEP_PERIOD, TREE_WOOD, LEGACY_TREE_MAPS } from '../data/economy.js';
 import { NAVAL_MAX_HEIGHT, WATER_LEVEL } from '../data/combat.js';
 
 const EMPTY_LIST = Object.freeze([]);
@@ -780,6 +781,11 @@ export class GameManager {
     // Pátios das bases realmente usadas nesta partida (F2-05: slots vêm do mapa).
     const courtyards = this.players.map(p => p.startPos);
 
+    // Árvores "fantasma": sorteadas (consomem rngMap e contam no espaçamento) mas não entram no mundo — mantém as posições das demais.
+    const legacy = LEGACY_TREE_MAPS.has(mapDef.id); // mapas já revisados: árvores como antes (120 de madeira, sem descarte)
+    const ghosts = [];
+    let drawn = 0;
+
     const spawnCluster = (centerX, centerZ, targetCount, radius, preferredType = 'oak') => {
       let placed = 0;
       let attempts = 0;
@@ -818,15 +824,21 @@ export class GameManager {
         if (fords.some(f => fhypot(x - f.x, z - f.z) < 9.0)) continue;
 
         // 6. Check minimum distance to all already placed trees
-        const tooCloseToTree = this.trees.some(t => {
+        const tooClose = t => {
           const dx = t.mesh.position.x - x;
           const dz = t.mesh.position.z - z;
           return (dx * dx + dz * dz) < (minTreeSpacing * minTreeSpacing);
-        });
-        if (tooCloseToTree) continue;
+        };
+        if (this.trees.some(tooClose) || ghosts.some(tooClose)) continue;
 
         const type = this.rngMap.next() < 0.65 ? preferredType : this.rngMap.pick(treeMixFor(preferredType));
-        this.trees.push(this.registerEntity(new Tree(this.terrain, x, z, type, this.rngMap)));
+        const tree = new Tree(this.terrain, x, z, type, this.rngMap);
+        if (legacy) this.trees.push(this.registerEntity(tree));
+        else if (drawn++ % TREE_KEEP_PERIOD === TREE_KEEP_PERIOD - 1) ghosts.push(tree);
+        else {
+          tree.maxWood = tree.woodRemaining = TREE_WOOD;
+          this.trees.push(this.registerEntity(tree));
+        }
         placed++;
       }
     };

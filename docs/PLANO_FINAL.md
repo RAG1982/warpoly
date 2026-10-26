@@ -294,7 +294,7 @@ Legenda de dependências: só IDs; "—" = pode começar já. **Dif.** = dificul
 | M3-03 | Missão 2 · O Pouso do Encontro | Média | M | S | M3-02, M2-03 | DONE (2026-10-25; refeita após feedback: 6 batedores em cercados, 2 acampamentos, vitória sem destruir a base orc; dono ainda não rejogou) |
 | M3-04 | Missão 3 · Ouro da Pedra-Mãe (entra o Brann) | Difícil | G | S | M3-03, M2-03 | DONE (2026-10-25; crista com 2 desfiladeiros, Brann jogável, minas afastadas; muros ainda não decidem a missão — balanceamento a revisar no G3) |
 | M3-05 | Missão 4 · O Baixio do Breu (naval roteirizado) | Difícil | G | S | M3-04, M2-04 | DONE (2026-10-26; 2 continentes, 6 poços, frota roteirizada; correções pós-playtest: câmera, seleção, petróleo, canhão; dificuldade real após correção da grade espacial — a confirmar pelo dono) |
-| M3-06 | Missão 5 · O Cerne Verde | Média | M | S | M3-05, M2-04 | TODO |
+| M3-06 | Missão 5 · O Cerne Verde | Média | M | S | M3-05, M2-04 | DONE (branch task/M3-06; IA easy; Oren só NPC em diálogo, mapa tem 2 vagas; robô vence em 9,2 min — dono ainda não jogou) |
 | M3-07 | Missão 6 · A Geada (Prova de Fogo, árvore completa) | Difícil | G | S | M3-06, M2-04 | TODO |
 | M3-08 | Missão 7 · O Brejo Mudo (traição) | Média | M | S | M3-07, M2-05 | TODO |
 | M3-09 | Missão 8 · A Fornalha | Difícil | G | S | M3-08, M2-05, M2-14 | TODO |

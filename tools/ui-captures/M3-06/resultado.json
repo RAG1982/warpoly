@@ -1,0 +1,26 @@
+{
+  "shots": [
+    "01-briefing.png",
+    "02-cutscene-1-base-brann.png",
+    "03-cutscene-2-bosque-sagrado.png",
+    "04-cutscene-3-salao-do-bosque-vozgul.png",
+    "05-cutscene-4-ninho-de-grifos.png",
+    "06-cutscene-5-oren.png",
+    "06b-aviso-centro-evoluido.png",
+    "07-inicio-objetivos-brann.png",
+    "08-base-na-mata-densa.png",
+    "09-salao-do-bosque-torres-e-guarda.png",
+    "10-brann-heroi.png",
+    "11-torre-arcana-aviario-templo.png",
+    "12-oren-e-os-dois-magos.png",
+    "13-lenhadores-cativos-guardados.png",
+    "14-lenhadores-libertados-3de3.png",
+    "15-bosque-sagrado-escondido.png",
+    "16-bosque-sagrado-achado.png",
+    "17-leva-de-serpes-e-esqueletos.png",
+    "18-assalto-ao-salao-do-bosque.png",
+    "19-cutscene-final.png",
+    "20-fim-vitoria.png"
+  ],
+  "errors": []
+}

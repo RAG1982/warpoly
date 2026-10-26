@@ -18,17 +18,29 @@
     },
     "portrait": "🔮",
     "text": {
-      "pt-BR": "As florestas ancestrais guardam ninhos de grifos e energia arcana. Convoque os magos da Torre Arcana e proteja o bosque.",
-      "en": "The ancient forests harbor gryphon roosts and arcane power. Summon mages from the Arcane Tower and protect the grove."
+      "pt-BR": "O Cerne Verde é a floresta mais antiga dos Estilhaços: madeira para mil navios e um ninho de grifos no leste. O Clã Forja Negra montou ali o Salão do Bosque, um posto madeireiro que derruba o cerne para alimentar as fornalhas dos Clãs, e a profetisa Vozgul mantém necromantes e serpes de guerra de guarda. Corte madeira, erga a Torre Arcana e o Aviário e treine Magos e um Cavaleiro Grifo: contra serpes, só quem voa ou atira alto resolve, e os Magos queimam o que a espada não alcança. Colete 2.000 de madeira e destrua o Salão do Bosque. O Capitão Brann comanda o campo; se ele cair, o bosque cai junto. Eu chego com dois Magos para ajudar, por volta dos 4 minutos.",
+      "en": "The Green Core is the oldest forest in the Shards: timber for a thousand ships and a gryphon roost in the east. The Black Forge Clan built the Grove Hall there, a lumber post that fells the core to feed the Clans' furnaces, and the prophetess Vozgul keeps necromancers and war serpents on guard. Cut timber, raise the Arcane Tower and the Aviary and train Mages and a Gryphon Rider: against serpents only those who fly or shoot high will do, and Mages burn what a sword cannot reach. Gather 2,000 wood and destroy the Grove Hall. Captain Brann commands the field; if he falls, the grove falls with him. I arrive with two Mages to help, at about the 4-minute mark."
     },
     "hints": [
       {
-        "pt-BR": "Concentre-se nos objetivos primários para avançar.",
-        "en": "Focus on primary objectives to advance."
+        "pt-BR": "Torre Arcana (Mago), Templo e Aviário (Cavaleiro Grifo) exigem o Quartel e o Centro no nível 3, que a campanha já concede nesta missão logo depois da abertura. O Quartel exige a Fazenda.",
+        "en": "The Arcane Tower (Mage), Temple and Aviary (Gryphon Rider) need the Barracks and the Keep at level 3, which the campaign already grants in this mission right after the opening. The Barracks needs the Farm."
+      },
+      {
+        "pt-BR": "As serpes de guerra voam: espadachins não as alcançam. Arqueiros, Magos e Cavaleiros Grifo sim. Mantenha um grupo de atiradores junto do Centro e dos Lenhadores.",
+        "en": "War serpents fly: swordsmen cannot reach them. Archers, Mages and Gryphon Riders can. Keep a group of shooters by the Keep and the lumber camps."
+      },
+      {
+        "pt-BR": "Os Magos de Oren queimam com a Bola de Fogo (pesquise-a no Templo) e Lentidão desacelera um alvo. Mago é frágil: ponha-o atrás da linha. A madeira conta o que você coleta, não o que tem no estoque.",
+        "en": "Oren's Mages burn with the Fireball (research it at the Temple) and Slow slows a target. A Mage is fragile: keep it behind the line. Wood counts what you gather, not what is in stock."
+      },
+      {
+        "pt-BR": "O Capitão Brann é um HERÓI: tem mana e três habilidades (Z, X, C) e só existe um. Se ele morrer, a missão está perdida.",
+        "en": "Captain Brann is a HERO: he has mana and three abilities (Z, X, C), and there is only one of him. If he dies the mission is lost."
       }
     ]
   },
-  "mapId": "bosques-2v2",
+  "mapId": "camp-05-cerne-verde",
   "seed": 9085,
   "players": [
     {
@@ -46,21 +58,28 @@
     {
       "id": 1,
       "name": {
-        "pt-BR": "Clãs do Cinzal",
-        "en": "Cinzal Clans"
+        "pt-BR": "Clã Forja Negra",
+        "en": "Black Forge Clan"
       },
       "factionId": "orc",
       "team": 1,
       "color": "#dc2626",
       "isAI": true,
+      "difficulty": "easy",
       "startSlot": 1
     }
   ],
   "startingResources": {
-    "wood": 400,
-    "gold": 400,
-    "stone": 150
+    "wood": 700,
+    "gold": 900,
+    "stone": 300
   },
+  "vars": {
+    "fin_clock": 0,
+    "raids": 0,
+    "freed": 0
+  },
+  "autoVictory": false,
   "setup": [
     {
       "type": "tag",
@@ -68,20 +87,1124 @@
         "buildingType": "great_hall"
       },
       "tag": "enemy_base"
+    },
+    {
+      "type": "spawn",
+      "owner": "player",
+      "unitType": "hero_brann",
+      "count": 1,
+      "anchor": "playerStart",
+      "dx": 0,
+      "dz": 13,
+      "tag": "brann"
+    },
+    {
+      "type": "spawnBuilding",
+      "owner": "enemy",
+      "buildingType": "great_hall",
+      "anchor": "lumberHall2",
+      "tag": "grove_hall",
+      "facing": 200
+    },
+    {
+      "type": "spawnBuilding",
+      "owner": "enemy",
+      "buildingType": "orc_lumber_mill",
+      "anchor": "lumberHall2",
+      "dx": 9,
+      "dz": 9,
+      "tag": "grove_mill"
+    },
+    {
+      "type": "spawnBuilding",
+      "owner": "enemy",
+      "buildingType": "orc_watchtower",
+      "anchor": "lumberHall2",
+      "dx": -10,
+      "dz": -6,
+      "tag": "grove_tower"
+    },
+    {
+      "type": "spawnBuilding",
+      "owner": "enemy",
+      "buildingType": "orc_watchtower",
+      "anchor": "lumberHall2",
+      "dx": -9,
+      "dz": 9,
+      "tag": "grove_tower"
+    },
+    {
+      "type": "spawnBuilding",
+      "owner": "enemy",
+      "buildingType": "orc_watchtower",
+      "anchor": "lumberHall2",
+      "dx": 4,
+      "dz": -12,
+      "tag": "grove_tower"
+    },
+    {
+      "type": "spawn",
+      "owner": "enemy",
+      "units": [
+        {
+          "type": "necromancer",
+          "count": 3
+        },
+        {
+          "type": "skeleton",
+          "count": 6
+        },
+        {
+          "type": "grunt",
+          "count": 4
+        },
+        {
+          "type": "axethrower",
+          "count": 2
+        }
+      ],
+      "anchor": "lumberHall2",
+      "dx": -4,
+      "dz": 2,
+      "spread": 4,
+      "tag": "grove_guard",
+      "guard": {
+        "r": 16
+      }
+    },
+    {
+      "type": "spawn",
+      "owner": "enemy",
+      "unitType": "war_serpent",
+      "count": 3,
+      "anchor": "lumberHall2",
+      "dx": 4,
+      "dz": -6,
+      "spread": 3,
+      "tag": "grove_guard",
+      "guard": {
+        "r": 18
+      }
+    },
+    {
+      "type": "spawn",
+      "owner": "neutral",
+      "unitType": "villager",
+      "count": 3,
+      "anchor": "clearing2",
+      "spread": 2.2,
+      "tag": "woodcutters",
+      "markColor": "#22d3ee",
+      "displayName": {
+        "pt-BR": "Lenhador cativo",
+        "en": "Captive woodcutter"
+      }
+    },
+    {
+      "type": "spawn",
+      "owner": "enemy",
+      "units": [
+        {
+          "type": "grunt",
+          "count": 2
+        },
+        {
+          "type": "axethrower",
+          "count": 1
+        }
+      ],
+      "anchor": "clearing2",
+      "dx": 5,
+      "spread": 2.5,
+      "tag": "wood_guard",
+      "guard": {
+        "r": 10
+      }
+    },
+    {
+      "type": "spawnLandmark",
+      "kind": "shrine",
+      "anchor": "sacredGrove",
+      "tag": "grove_shrine",
+      "label": {
+        "pt-BR": "Bosque Sagrado",
+        "en": "Sacred Grove"
+      }
     }
   ],
   "objectives": [
     {
-      "id": "primary-main",
+      "id": "p-wood",
+      "type": "collect",
+      "priority": "primary",
+      "resource": "wood",
+      "amount": 2000,
+      "mode": "gathered",
+      "title": {
+        "pt-BR": "Colete 2.000 de madeira do Cerne",
+        "en": "Gather 2,000 wood from the Core"
+      },
+      "description": {
+        "pt-BR": "Conta só a madeira que seus lenhadores trazem aos depósitos. A mata é farta, mas as clareiras ficam longe: erga Serrarias perto dos bosques.",
+        "en": "Counts only wood your lumberjacks deliver. The forest is rich, but the clearings are far: raise lumber camps near the groves."
+      }
+    },
+    {
+      "id": "p-hall",
       "type": "destroy",
       "priority": "primary",
       "select": {
-        "tag": "enemy_base"
+        "tag": "grove_hall"
+      },
+      "count": 1,
+      "title": {
+        "pt-BR": "Destruir o Salão do Bosque",
+        "en": "Destroy the Grove Hall"
+      },
+      "description": {
+        "pt-BR": "O posto madeireiro do Clã Forja Negra, no meio da mata, com torres e guarda de necromantes e serpes.",
+        "en": "The Black Forge Clan's lumber post, in the middle of the forest, with towers and a guard of necromancers and serpents."
+      },
+      "marker": {
+        "area": {
+          "anchor": "lumberHall2",
+          "r": 14
+        },
+        "style": "goal",
+        "seconds": 90
+      }
+    },
+    {
+      "id": "s-arcane",
+      "type": "train",
+      "priority": "secondary",
+      "units": [
+        {
+          "type": "mage",
+          "count": 2
+        },
+        {
+          "type": "gryphon_rider",
+          "count": 1
+        }
+      ],
+      "title": {
+        "pt-BR": "Treinar 2 Magos e 1 Cavaleiro Grifo",
+        "en": "Train 2 Mages and 1 Gryphon Rider"
+      },
+      "description": {
+        "pt-BR": "Magos na Torre Arcana, Cavaleiro Grifo no Aviário. Só contam os treinados nesta missão (os magos de Oren não).",
+        "en": "Mages at the Arcane Tower, Gryphon Rider at the Aviary. Only those trained in this mission count (not Oren's mages)."
+      }
+    },
+    {
+      "id": "s-rescue",
+      "type": "rescue",
+      "priority": "secondary",
+      "tag": "woodcutters",
+      "count": 3,
+      "title": {
+        "pt-BR": "Libertar os 3 lenhadores cativos",
+        "en": "Free the 3 captive woodcutters"
+      },
+      "description": {
+        "pt-BR": "Batedores do Clã prenderam os lenhadores numa clareira ao sul da base, longe da mata cerrada. Derrote os guardas e eles trabalham para você.",
+        "en": "Clan scouts hold the woodcutters in a clearing south of the base, away from the dense forest. Defeat the guards and they work for you."
+      }
+    },
+    {
+      "id": "h-templar",
+      "type": "flag",
+      "priority": "hidden",
+      "condition": {
+        "all": [
+          {
+            "type": "research",
+            "id": "cavalry_class",
+            "level": 1
+          },
+          {
+            "type": "count",
+            "select": {
+              "unitType": "templar",
+              "owner": "player"
+            },
+            "op": ">=",
+            "value": 1
+          }
+        ]
       },
       "title": {
-        "pt-BR": "Treinar Magos e Grifos e purificar o bosque",
-        "en": "Train Mages and Gryphons and cleanse the grove"
+        "pt-BR": "Ordenação: o primeiro Templário",
+        "en": "Ordination: the first Templar"
+      },
+      "description": {
+        "pt-BR": "Pesquise Ordenação no Templo e treine um Cavaleiro: ele sai Templário. (+300 de ouro)",
+        "en": "Research Ordination at the Temple and train a Cavalier: it comes out a Templar. (+300 gold)"
       }
+    },
+    {
+      "id": "h-grove",
+      "type": "flag",
+      "priority": "hidden",
+      "active": true,
+      "condition": {
+        "type": "area",
+        "owner": "player",
+        "area": {
+          "anchor": "sacredGrove",
+          "r": 7
+        }
+      },
+      "title": {
+        "pt-BR": "O Bosque Sagrado",
+        "en": "The Sacred Grove"
+      },
+      "description": {
+        "pt-BR": "Um brilho entre as árvores mais velhas, ao sul do caminho entre as bases. Mande alguém até lá.",
+        "en": "A glint among the oldest trees, south of the path between the bases. Send someone there."
+      }
+    }
+  ],
+  "triggers": [
+    {
+      "id": "intro",
+      "when": {
+        "type": "time",
+        "at": 0
+      },
+      "actions": [
+        {
+          "type": "music",
+          "id": "on"
+        },
+        {
+          "type": "reveal",
+          "anchor": "sacredGrove",
+          "radius": 24,
+          "ttl": 40
+        },
+        {
+          "type": "reveal",
+          "anchor": "lumberHall2",
+          "radius": 28,
+          "ttl": 40
+        },
+        {
+          "type": "reveal",
+          "anchor": "gryphonNest",
+          "radius": 22,
+          "ttl": 40
+        },
+        {
+          "type": "reveal",
+          "anchor": "clearing2",
+          "radius": 18,
+          "ttl": 40
+        },
+        {
+          "type": "cutscene",
+          "id": "grove",
+          "duration": 38,
+          "skippable": true,
+          "steps": [
+            {
+              "at": 0,
+              "anchor": "playerStart",
+              "zoom": 1.15,
+              "dialog": {
+                "speaker": {
+                  "pt-BR": "Capitão Brann",
+                  "en": "Captain Brann"
+                },
+                "portrait": "⚔️",
+                "text": {
+                  "pt-BR": "Cerne Verde. A floresta mais antiga dos Estilhaços, e hoje o único lugar onde a Liga corta madeira para os navios. Eu sou Brann; o campo é seu, comandante. Madeira primeiro, depois magia.",
+                  "en": "Green Core. The oldest forest in the Shards, and today the only place where the League cuts timber for its ships. I am Brann; the field is yours, commander. Timber first, then magic."
+                },
+                "duration": 8
+              }
+            },
+            {
+              "at": 8,
+              "anchor": "sacredGrove",
+              "zoom": 1.1,
+              "dialog": {
+                "speaker": {
+                  "pt-BR": "Capitão Brann",
+                  "en": "Captain Brann"
+                },
+                "portrait": "⚔️",
+                "text": {
+                  "pt-BR": "No meio da mata há um bosque que os lenhadores não tocam: árvores mais velhas que a Liga, e um brilho que ninguém explicou. Respeito não custa madeira.",
+                  "en": "In the middle of the woods there is a grove the lumberjacks do not touch: trees older than the League, and a glint nobody has explained. Respect costs no timber."
+                },
+                "duration": 8
+              }
+            },
+            {
+              "at": 16,
+              "anchor": "lumberHall2",
+              "zoom": 1.05,
+              "dialog": {
+                "speaker": {
+                  "pt-BR": "Vozgul",
+                  "en": "Vozgul"
+                },
+                "portrait": "🕯️",
+                "text": {
+                  "pt-BR": "O Salão do Bosque derruba o cerne para as fornalhas dos Clãs. As árvores caem e as cinzas sobem. Meus necromantes e minhas serpes guardam a clareira; venham ver o que a madeira vira.",
+                  "en": "The Grove Hall fells the core for the Clans' furnaces. The trees fall and the ashes rise. My necromancers and my serpents guard the clearing; come and see what the timber becomes."
+                },
+                "duration": 8
+              }
+            },
+            {
+              "at": 24,
+              "anchor": "gryphonNest",
+              "zoom": 1.05,
+              "dialog": {
+                "speaker": {
+                  "pt-BR": "Capitão Brann",
+                  "en": "Captain Brann"
+                },
+                "portrait": "⚔️",
+                "text": {
+                  "pt-BR": "Ao leste, o ninho de grifos. Os grifos nunca serviram a ninguém, mas uma Torre Arcana e um Aviário resolvem o que a espada não alcança.",
+                  "en": "To the east, the gryphon roost. Gryphons never served anyone, but an Arcane Tower and an Aviary solve what the sword cannot reach."
+                },
+                "duration": 7
+              }
+            },
+            {
+              "at": 31,
+              "anchor": "playerStart",
+              "zoom": 1.1,
+              "dialog": {
+                "speaker": {
+                  "pt-BR": "Mestre Arcano Oren",
+                  "en": "Arcane Master Oren"
+                },
+                "portrait": "🔮",
+                "text": {
+                  "pt-BR": "Comandante, o Conselho me manda com dois Magos. Chego em poucos minutos. Antes disso, ponha lenhadores no cerne: a Torre Arcana come pedra, ouro e madeira.",
+                  "en": "Commander, the Council sends me with two Mages. I will arrive in a few minutes. Before that, put lumberjacks in the core: the Arcane Tower eats stone, gold and timber."
+                },
+                "duration": 7
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "tier-up",
+      "when": {
+        "type": "time",
+        "at": 40
+      },
+      "actions": [
+        {
+          "type": "setTier",
+          "owner": "player",
+          "tier": 3
+        },
+        {
+          "type": "sound",
+          "id": "build"
+        }
+      ]
+    },
+    {
+      "id": "first-steps",
+      "when": {
+        "type": "time",
+        "at": 52
+      },
+      "actions": [
+        {
+          "type": "dialog",
+          "speaker": {
+            "pt-BR": "Capitão Brann",
+            "en": "Captain Brann"
+          },
+          "portrait": "⚔️",
+          "duration": 10,
+          "text": {
+            "pt-BR": "Primeiro, aldeões no ouro e na madeira. Depois a Fazenda, o Quartel e a Torre Arcana. A floresta é densa: os lenhadores precisam de uma Serraria junto aos bosques.",
+            "en": "First, villagers on gold and timber. Then the Farm, the Barracks and the Arcane Tower. The forest is dense: lumberjacks need a lumber camp next to the groves."
+          }
+        }
+      ]
+    },
+    {
+      "id": "arcane-up",
+      "when": {
+        "type": "count",
+        "select": {
+          "buildingType": "arcane_tower",
+          "owner": "player"
+        },
+        "op": ">=",
+        "value": 1
+      },
+      "actions": [
+        {
+          "type": "sound",
+          "id": "build"
+        },
+        {
+          "type": "dialog",
+          "speaker": {
+            "pt-BR": "Capitão Brann",
+            "en": "Captain Brann"
+          },
+          "portrait": "⚔️",
+          "duration": 9,
+          "text": {
+            "pt-BR": "Torre Arcana de pé. Magos custam ouro, não madeira, e queimam de longe. Ponha-os atrás dos espadachins.",
+            "en": "Arcane Tower is up. Mages cost gold, not timber, and burn from afar. Keep them behind the swordsmen."
+          }
+        }
+      ]
+    },
+    {
+      "id": "aviary-up",
+      "when": {
+        "type": "count",
+        "select": {
+          "buildingType": "aviary",
+          "owner": "player"
+        },
+        "op": ">=",
+        "value": 1
+      },
+      "actions": [
+        {
+          "type": "sound",
+          "id": "build"
+        },
+        {
+          "type": "dialog",
+          "speaker": {
+            "pt-BR": "Capitão Brann",
+            "en": "Captain Brann"
+          },
+          "portrait": "⚔️",
+          "duration": 9,
+          "text": {
+            "pt-BR": "Aviário erguido. Um Cavaleiro Grifo enxerga longe e voa por cima da mata: use-o para achar as serpes antes que elas achem os lenhadores.",
+            "en": "Aviary raised. A Gryphon Rider sees far and flies over the woods: use it to find the serpents before they find the lumberjacks."
+          }
+        }
+      ]
+    },
+    {
+      "id": "temple-up",
+      "when": {
+        "type": "count",
+        "select": {
+          "buildingType": "temple",
+          "owner": "player"
+        },
+        "op": ">=",
+        "value": 1
+      },
+      "actions": [
+        {
+          "type": "sound",
+          "id": "build"
+        },
+        {
+          "type": "dialog",
+          "speaker": {
+            "pt-BR": "Capitão Brann",
+            "en": "Captain Brann"
+          },
+          "portrait": "⚔️",
+          "duration": 9,
+          "text": {
+            "pt-BR": "O Templo pesquisa Ordenação, e Magos aprendem Bola de Fogo e Cura aqui. Caro, mas muda uma luta.",
+            "en": "The Temple researches Ordination, and Mages learn Fireball and Heal here. Costly, but it changes a fight."
+          }
+        }
+      ]
+    },
+    {
+      "id": "oren-arrives",
+      "when": {
+        "type": "time",
+        "at": 240
+      },
+      "actions": [
+        {
+          "type": "spawn",
+          "owner": "neutral",
+          "unitType": "hero_oren",
+          "count": 1,
+          "anchor": "playerStart",
+          "dx": 12,
+          "dz": 9,
+          "tag": "oren",
+          "markColor": "#f0abfc",
+          "displayName": {
+            "pt-BR": "Mestre Oren",
+            "en": "Master Oren"
+          }
+        },
+        {
+          "type": "spawn",
+          "owner": "player",
+          "unitType": "mage",
+          "count": 2,
+          "anchor": "playerStart",
+          "dx": 9,
+          "dz": 11,
+          "spread": 2,
+          "tag": "oren_mages",
+          "markColor": "#f0abfc",
+          "displayName": {
+            "pt-BR": "Mago de Oren",
+            "en": "Oren's Mage"
+          }
+        },
+        {
+          "type": "sound",
+          "id": "victory"
+        },
+        {
+          "type": "dialog",
+          "speaker": {
+            "pt-BR": "Mestre Arcano Oren",
+            "en": "Arcane Master Oren"
+          },
+          "portrait": "🔮",
+          "duration": 10,
+          "text": {
+            "pt-BR": "Comandante, o Conselho me manda com dois Magos. Eles ficam sob o seu comando. A Bola de Fogo se pesquisa no Templo: pequena chama, grande estrago. Lentidão segura o que corre.",
+            "en": "Commander, the Council sends me with two Mages. They are under your command. Fireball is researched at the Temple: small flame, great damage. Slow holds what runs."
+          }
+        },
+        {
+          "type": "dialog",
+          "speaker": {
+            "pt-BR": "Capitão Brann",
+            "en": "Captain Brann"
+          },
+          "portrait": "⚔️",
+          "duration": 8,
+          "text": {
+            "pt-BR": "Mestre Oren. Dois Magos a mais valem um quartel. Fique atrás da linha e deixe que queimem o Salão quando chegarmos.",
+            "en": "Master Oren. Two more Mages are worth a barracks. Stay behind the line and let them burn the Hall when we arrive."
+          }
+        }
+      ]
+    },
+    {
+      "id": "raid-1",
+      "when": {
+        "type": "time",
+        "at": 360
+      },
+      "actions": [
+        {
+          "type": "spawn",
+          "owner": "enemy",
+          "units": [
+            {
+              "type": "war_serpent",
+              "count": 3
+            },
+            {
+              "type": "skeleton",
+              "count": 4
+            }
+          ],
+          "anchor": "enemyStart",
+          "dx": -10,
+          "spread": 3,
+          "tag": "raid",
+          "order": {
+            "kind": "attackMove",
+            "anchor": "playerStart"
+          }
+        },
+        {
+          "type": "incVar",
+          "name": "raids"
+        },
+        {
+          "type": "dialog",
+          "speaker": {
+            "pt-BR": "Vozgul",
+            "en": "Vozgul"
+          },
+          "portrait": "🕯️",
+          "duration": 8,
+          "text": {
+            "pt-BR": "Os homens da Liga cortam madeira como se o cerne fosse deles. Serpes: cubram a clareira de cinza.",
+            "en": "The League's men cut timber as if the core were theirs. Serpents: cover the clearing in ash."
+          }
+        },
+        {
+          "type": "message",
+          "text": {
+            "pt-BR": "Serpes de guerra e esqueletos do Forja Negra marcham para a base.",
+            "en": "Black Forge war serpents and skeletons march on the base."
+          }
+        }
+      ]
+    },
+    {
+      "id": "raid-2",
+      "when": {
+        "type": "time",
+        "at": 600
+      },
+      "actions": [
+        {
+          "type": "spawn",
+          "owner": "enemy",
+          "units": [
+            {
+              "type": "necromancer",
+              "count": 2
+            },
+            {
+              "type": "skeleton",
+              "count": 5
+            },
+            {
+              "type": "ogre",
+              "count": 3
+            }
+          ],
+          "anchor": "enemyStart",
+          "dx": -10,
+          "spread": 3,
+          "tag": "raid",
+          "order": {
+            "kind": "attackMove",
+            "anchor": "playerStart"
+          }
+        },
+        {
+          "type": "incVar",
+          "name": "raids"
+        },
+        {
+          "type": "message",
+          "text": {
+            "pt-BR": "Necromantes, esqueletos e ogros do Forja Negra saíram do Salão.",
+            "en": "Black Forge necromancers, skeletons and ogres left the Hall."
+          }
+        }
+      ]
+    },
+    {
+      "id": "raid-3",
+      "when": {
+        "type": "time",
+        "at": 840
+      },
+      "actions": [
+        {
+          "type": "spawn",
+          "owner": "enemy",
+          "units": [
+            {
+              "type": "war_serpent",
+              "count": 3
+            },
+            {
+              "type": "ogre",
+              "count": 4
+            },
+            {
+              "type": "grunt",
+              "count": 4
+            },
+            {
+              "type": "catapult",
+              "count": 1
+            }
+          ],
+          "anchor": "enemyStart",
+          "dx": -10,
+          "spread": 3,
+          "tag": "raid",
+          "order": {
+            "kind": "attackMove",
+            "anchor": "playerStart"
+          }
+        },
+        {
+          "type": "incVar",
+          "name": "raids"
+        },
+        {
+          "type": "message",
+          "text": {
+            "pt-BR": "Última leva do Forja Negra: serpes, ogros e guerreiros.",
+            "en": "Last Black Forge levy: serpents, ogres and warriors."
+          }
+        }
+      ]
+    },
+    {
+      "id": "wood-done",
+      "when": {
+        "type": "objective",
+        "id": "p-wood",
+        "status": "completed"
+      },
+      "actions": [
+        {
+          "type": "sound",
+          "id": "victory"
+        },
+        {
+          "type": "dialog",
+          "speaker": {
+            "pt-BR": "Capitão Brann",
+            "en": "Captain Brann"
+          },
+          "portrait": "⚔️",
+          "duration": 8,
+          "text": {
+            "pt-BR": "Duas mil de madeira nos depósitos. A Liga tem o que veio buscar. Agora o Salão do Bosque.",
+            "en": "Two thousand timber in the stores. The League has what it came for. Now the Grove Hall."
+          }
+        }
+      ]
+    },
+    {
+      "id": "grove-near",
+      "when": {
+        "type": "area",
+        "owner": "player",
+        "area": {
+          "anchor": "lumberHall2",
+          "r": 34
+        },
+        "count": 4
+      },
+      "actions": [
+        {
+          "type": "order",
+          "select": {
+            "tag": "oren_mages"
+          },
+          "kind": "attackMove",
+          "anchor": "lumberHall2"
+        },
+        {
+          "type": "dialog",
+          "speaker": {
+            "pt-BR": "Mestre Arcano Oren",
+            "en": "Arcane Master Oren"
+          },
+          "portrait": "🔮",
+          "duration": 9,
+          "text": {
+            "pt-BR": "Meus Magos vão com vocês. Queimem as torres primeiro: de longe, onde a guarda do Salão não alcança.",
+            "en": "My Mages go with you. Burn the towers first: from afar, where the Hall guard cannot reach."
+          }
+        }
+      ]
+    },
+    {
+      "id": "woodcutters-near",
+      "when": {
+        "type": "area",
+        "owner": "player",
+        "area": {
+          "anchor": "clearing2",
+          "r": 30
+        }
+      },
+      "actions": [
+        {
+          "type": "dialog",
+          "speaker": {
+            "pt-BR": "Capitão Brann",
+            "en": "Captain Brann"
+          },
+          "portrait": "⚔️",
+          "duration": 8,
+          "text": {
+            "pt-BR": "Fumaça de acampamento na clareira: os lenhadores estão com os batedores. Derrubem os guardas e eles voltam ao machado.",
+            "en": "Campfire smoke in the clearing: the lumberjacks are with the scouts. Take down the guards and they go back to the axe."
+          }
+        }
+      ]
+    },
+    {
+      "id": "free-woodcutters",
+      "when": {
+        "type": "dead",
+        "select": {
+          "tag": "wood_guard"
+        },
+        "count": 3
+      },
+      "actions": [
+        {
+          "type": "transfer",
+          "select": {
+            "tag": "woodcutters"
+          },
+          "to": "player"
+        },
+        {
+          "type": "incVar",
+          "name": "freed",
+          "by": 3
+        },
+        {
+          "type": "sound",
+          "id": "build"
+        },
+        {
+          "type": "message",
+          "text": {
+            "pt-BR": "Lenhadores libertados!",
+            "en": "Woodcutters freed!"
+          }
+        }
+      ]
+    },
+    {
+      "id": "templar-reward",
+      "when": {
+        "type": "objective",
+        "id": "h-templar",
+        "status": "completed"
+      },
+      "actions": [
+        {
+          "type": "giveResources",
+          "owner": "player",
+          "gold": 300
+        },
+        {
+          "type": "sound",
+          "id": "victory"
+        },
+        {
+          "type": "message",
+          "text": {
+            "pt-BR": "Primeiro Templário ordenado: +300 de ouro.",
+            "en": "First Templar ordained: +300 gold."
+          }
+        }
+      ]
+    },
+    {
+      "id": "grove-found",
+      "when": {
+        "type": "objective",
+        "id": "h-grove",
+        "status": "completed"
+      },
+      "actions": [
+        {
+          "type": "giveResources",
+          "owner": "player",
+          "wood": 250,
+          "gold": 150
+        },
+        {
+          "type": "lightLandmark",
+          "tag": "grove_shrine"
+        },
+        {
+          "type": "sound",
+          "id": "victory"
+        },
+        {
+          "type": "message",
+          "text": {
+            "pt-BR": "Bosque Sagrado encontrado: +250 de madeira e +150 de ouro.",
+            "en": "Sacred Grove found: +250 wood and +150 gold."
+          }
+        },
+        {
+          "type": "dialog",
+          "speaker": {
+            "pt-BR": "Mestre Arcano Oren",
+            "en": "Arcane Master Oren"
+          },
+          "portrait": "🔮",
+          "duration": 9,
+          "text": {
+            "pt-BR": "Este bosque é mais velho que a Liga e que os Clãs. Quem o deixou em pé sabia o que fazia. Leve o que ele dá e não corte nada daqui.",
+            "en": "This grove is older than the League and the Clans. Whoever left it standing knew what they were doing. Take what it gives and cut nothing here."
+          }
+        }
+      ]
+    },
+    {
+      "id": "hall-fallen",
+      "when": {
+        "type": "objective",
+        "id": "p-hall",
+        "status": "completed"
+      },
+      "actions": [
+        {
+          "type": "sound",
+          "id": "victory"
+        },
+        {
+          "type": "dialog",
+          "speaker": {
+            "pt-BR": "Vozgul",
+            "en": "Vozgul"
+          },
+          "portrait": "🕯️",
+          "duration": 8,
+          "text": {
+            "pt-BR": "O Salão cai e as cinzas sobem sem mim. Guardem esta clareira, Liga: a fornalha ainda tem fome.",
+            "en": "The Hall falls and the ashes rise without me. Keep this clearing, League: the furnace is still hungry."
+          }
+        }
+      ]
+    },
+    {
+      "id": "castle-fallen",
+      "when": {
+        "type": "count",
+        "select": {
+          "buildingType": "castle",
+          "owner": "player"
+        },
+        "op": "==",
+        "value": 0
+      },
+      "actions": [
+        {
+          "type": "defeat",
+          "text": {
+            "pt-BR": "O Paço caiu. O Cerne Verde é do Forja Negra.",
+            "en": "The Keep has fallen. The Green Core belongs to the Black Forge."
+          }
+        }
+      ]
+    },
+    {
+      "id": "brann-fallen",
+      "when": {
+        "type": "dead",
+        "select": {
+          "tag": "brann"
+        },
+        "count": 1
+      },
+      "actions": [
+        {
+          "type": "defeat",
+          "text": {
+            "pt-BR": "O Capitão Brann caiu. Sem ele o campo se desfaz e o bosque cai.",
+            "en": "Captain Brann has fallen. Without him the field breaks and the grove falls."
+          }
+        }
+      ]
+    },
+    {
+      "id": "all-done",
+      "when": {
+        "all": [
+          {
+            "type": "objective",
+            "id": "p-wood",
+            "status": "completed"
+          },
+          {
+            "type": "objective",
+            "id": "p-hall",
+            "status": "completed"
+          }
+        ]
+      },
+      "actions": [
+        {
+          "type": "sound",
+          "id": "victory"
+        },
+        {
+          "type": "cutscene",
+          "id": "finale",
+          "duration": 18,
+          "skippable": true,
+          "steps": [
+            {
+              "at": 0,
+              "anchor": "lumberHall2",
+              "zoom": 1.1,
+              "dialog": {
+                "speaker": {
+                  "pt-BR": "Capitão Brann",
+                  "en": "Captain Brann"
+                },
+                "portrait": "⚔️",
+                "text": {
+                  "pt-BR": "O Salão do Bosque é cinza, e o cerne volta a ser da floresta. Os Clãs recuam para o leste.",
+                  "en": "The Grove Hall is ash, and the core is the forest's again. The Clans fall back to the east."
+                },
+                "duration": 8
+              }
+            },
+            {
+              "at": 9,
+              "anchor": "playerStart",
+              "zoom": 1.1,
+              "dialog": {
+                "speaker": {
+                  "pt-BR": "Mestre Arcano Oren",
+                  "en": "Arcane Master Oren"
+                },
+                "portrait": "🔮",
+                "text": {
+                  "pt-BR": "Bom trabalho, comandante. Os Magos aprenderam hoje o que anos de estudo não ensinam. O Conselho vai querer saber das serpes, e eu quero saber o que Vozgul ainda esconde.",
+                  "en": "Good work, commander. The Mages learned today what years of study do not teach. The Council will want to hear about the serpents, and I want to know what Vozgul still hides."
+                },
+                "duration": 8
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "finale-clock",
+      "when": {
+        "type": "trigger",
+        "id": "all-done"
+      },
+      "once": false,
+      "cooldown": 18,
+      "actions": [
+        {
+          "type": "incVar",
+          "name": "fin_clock",
+          "by": 1
+        }
+      ]
+    },
+    {
+      "id": "finale-victory",
+      "when": {
+        "type": "var",
+        "name": "fin_clock",
+        "op": ">=",
+        "value": 1
+      },
+      "actions": [
+        {
+          "type": "victory"
+        }
+      ]
     }
   ]
 }

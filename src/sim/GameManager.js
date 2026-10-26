@@ -165,8 +165,12 @@ export class GameManager {
 
     // Grade espacial (F1-06): unitGrid = unidades (dinâmica, sincronizada 1x/tick em update());
     // blockerGrid = construções/depósitos/árvores vivas (inserida/removida em registerEntity/unregisterEntity).
-    this.unitGrid = new SpatialGrid();
-    this.blockerGrid = new SpatialGrid();
+    // Limites acompanham o mapa (>= ±70): fora da grade a posição era clampada e o raycast do
+    // mouse não achava entidades em bases de mapas grandes (ex.: missão 4, base em x=-95).
+    const gridHalf = Math.max(70, Math.ceil((this.terrain.mapDef.size || 0) / 2) + 10);
+    const gridBounds = { minX: -gridHalf, minZ: -gridHalf, maxX: gridHalf, maxZ: gridHalf };
+    this.unitGrid = new SpatialGrid(gridBounds);
+    this.blockerGrid = new SpatialGrid(gridBounds);
     // Buffers reutilizados por canPlaceBuilding (evita alocar em toda pré-visualização do fantasma).
     this._placeBuildingBuf = [];
     this._placeTreeBuf = [];

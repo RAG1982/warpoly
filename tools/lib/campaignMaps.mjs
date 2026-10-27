@@ -92,11 +92,14 @@ export const CAMPAIGN_PRESETS = freeze({
     layout: freeze({ bases: [{ entities: [0], side: 'west' }, { entities: [0], side: 'east' }], minSeparation: 155 }),
     verify: freeze({ landRange: [0.25, 0.8], minRivers: 1 })
   }),
-  /** Palco 6 (M2-04): continente gelado com lagos congelados e banquisa; 4 bases: jogador (SO), Lanças Quebradas (L), Sal Cinzento (N) e o aliado Brumar (O/S). */
+  /**
+   * Palco 6 (M2-04, refeito na M3-07): continente gelado de 320 com lagos congelados, banquisa e geleiras. 4 bases a ~140+ u uma da outra:
+   * Liga (SO), Brumar, o aliado de IA (SE), Lanças Quebradas (NE, o forte de Drogath) e Sal Cinzento (NO); o Farol Boreal fica no norte, num cabo.
+   */
   'camp-06-a-geada': freeze({
     id: 'camp-06-a-geada', name: 'A Geada', uso: 'campanha, palco 6 (Prova de Fogo)', tileset: 'inverno', naval: false, woodTarget: 8000,
-    options: freeze({ size: 208, grid: 208, continents: 1, continentBiome: 'ice', continentDims: [0.44, 0.4], islands: 0, islets: 0, bays: 3, peninsulas: 3, roughness: 1.1, lava: false, rivers: 0, lakes: 3, frozenLakes: true, lakeRadius: [7, 11], shoals: 10, shoalRadius: [6, 12], shoalBiome: 'ice', shoalMinCoast: 3 }),
-    layout: freeze({ bases: [{ entities: [0], sides: ['west', 'south'] }, { entities: [0], sides: ['east', 'north'] }, { entities: [0], sides: ['east', 'south'] }, { entities: [0], sides: ['west', 'north'] }], minSeparation: 60 }),
+    options: freeze({ size: 320, grid: 320, continents: 1, continentBiome: 'ice', continentDims: [0.46, 0.43], islands: 0, islets: 0, bays: 3, peninsulas: 3, roughness: 1.1, lava: false, rivers: 0, lakes: 5, frozenLakes: true, lakeRadius: [12, 19], shoals: 14, shoalRadius: [9, 18], shoalBiome: 'ice', shoalMinCoast: 3 }),
+    layout: freeze({ bases: [{ entities: [0], sides: ['west', 'south'] }, { entities: [0], sides: ['east', 'north'] }, { entities: [0], sides: ['west', 'north'] }, { entities: [0], sides: ['east', 'south'] }], minSeparation: 140 }),
     verify: freeze({ landRange: [0.25, 0.85], minRivers: 0 })
   }),
   /** Palco 10 (M2-06): a costa de Cinzara vista do mar. Continente árido a leste (terra a partir do meio), mar aberto a oeste; Marco da Colônia a oeste (slot 0), guarnição de Skarn a leste (slot 1). */
@@ -268,12 +271,12 @@ export const INITIAL_MINE_DIST = 32;
  * (raio do bosque + 3,4) sai do mapa (`m.forests`): é a única mudança de árvores, e cada bosque removido é reportado. A quantidade (7.500) fica.
  * Roda por último, com o mesmo método de `postPedra`.
  */
-function moveInitialGold(ctx) {
+function moveInitialGold(ctx, slots = [ctx.s0, ctx.s1]) {
   const { m } = ctx;
   const forestAvoid = (a) => m.forests.some((f) => f.x === a.x && f.z === a.z);
   const freeOffForests = (p, extra) => ctx.avoid.every((a) => forestAvoid(a) || hyp(p, a) >= a.r + extra);
   const covers = (p) => m.forests.filter((f) => hyp(p, f) < f.radius + 3.4);
-  for (const s of [ctx.s0, ctx.s1]) {
+  for (const s of slots) {
     const old = m.resources.filter((r) => r.type === 'gold').reduce((a, b) => (hyp(b, s) < hyp(a, s) ? b : a));
     ctx.avoid = ctx.avoid.filter((a) => !(a.x === old.x && a.z === old.z));
     const straightDry = (p) => {
@@ -486,6 +489,7 @@ function postPousoBatedores(ctx, extra, { s0, s1 }) {
 export const PEDRA_RIDGE = freeze({ cliffHeight: 5, hTop: 7.4, core: 3.0, fall: 3.6, gapWidth: 6.2, gapRamp: 1.4, gapSep: 26, wave: 5.5, along: 0.5 });
 export const PEDRA_MINE_DIST = 32; // centro do Paço → centro da mina inicial (borda a borda ≈ 23 u: Paço 5,5 + mina 3,4)
 export const PEDRA_BIG_GOLD = 12000;
+export const GEADA_LIGHT_GOLD = 5000; // M3-07: os 2 veios do Farol Boreal (A Geada) são menores que os das bases
 function prePedra(m, world, seedUsed) {
   const info = carveRidge(m, { getHeightForMap }, { ...PEDRA_RIDGE, seed: seedUsed });
   const { F, band } = info;
@@ -1110,26 +1114,110 @@ function postCerne(ctx, extra) {
   }
 }
 
-/** Palco 6: quatro bases (jogador, Lanças Quebradas, Sal Cinzento, aliado), Farol Boreal no meio, comboio entre o aliado e o jogador, lagos congelados. */
+/**
+ * Palco 6 (M3-07 · "A Geada", Prova de Fogo): continente gelado de 320 com 4 bases a ~140+ u uma da outra. Slot 0 = Liga (oeste/sudoeste), 1 = Clã Lanças
+ * Quebradas (nordeste: o forte de Drogath, `enemy1Fort` + `fortTower1..3`), 2 = Clã Sal Cinzento (noroeste), 3 = Brumar, o aliado de IA (leste/sudeste:
+ * `allyFort` + `allyTower1/2`, a Dama Aurora em `allyHeroStart`). O Farol Boreal (`lighthouse`) é um cabo de terra sobre o mar do norte, equidistante
+ * (disputado), com `lightSouth` (o acampamento avançado, atrás do cabo) e 2 veios de ouro menores (`lightGold1/2`). Comboio de Brumar: `convoyStart` (atrás
+ * do forte aliado) → `convoyAmbush` (a meio, onde o Sal Cinzento embosca) → `convoyEnd` (junto do Farol). Pontos de interesse: `ruins1` (Posto do
+ * Faroleiro, exploração), `captive1` (entreposto dos recrutas presos, resgate), `iceDock` (cais congelado do mar do norte) e 2 acampamentos de saqueadores
+ * (`neutralCamp1/2`). Cada base tem a mina inicial a ~32 u do Centro e uma de expansão; lagos congelados (`lake1..n`) e banquisa: gelo NÃO navegável.
+ */
 function postGeada(ctx, extra) {
   const { m } = ctx;
   const S = m.startSlots;
-  extra.enemy1Start = pt(S[1]); extra.enemy2Start = pt(S[2]); extra.allyStart = pt(S[3]);
-  const maxD = (x, z) => Math.max(...S.map((s) => hyp({ x, z }, s)));
+  const [s0, s1, s2, s3] = S;
+  extra.enemy1Start = pt(s1); extra.enemy2Start = pt(s2); extra.allyStart = pt(s3);
+  moveInitialGold(ctx, S);
+  const cen = { x: S.reduce((t, s) => t + s.x, 0) / 4, z: S.reduce((t, s) => t + s.z, 0) / 4 };
+  // 1) Farol Boreal: cabo de terra seca à beira do mar do norte (ponto de água navegável do oceano a 6–16 u), perto do centro das 4 bases, mas a >= 70 u de todas
   const light = need(ctx.scan({
-    test: (x, z) => ctx.dryClear(x, z, 6) && ctx.reach(x, z) && ctx.free(x, z, 8) && S.every((s) => hyp({ x, z }, s) >= 34),
-    score: (x, z) => maxD(x, z)
+    step: 2,
+    test: (x, z) => ctx.hAt(x, z) >= 2.1 && wetFrac(ctx, x, z, 9) <= 0.4 && ctx.reach(x, z) && ctx.free(x, z, 8) && S.every((s) => hyp({ x, z }, s) >= 70) && ctx.isShore(x, z) && ctx.waterNear(x, z, 6, 16),
+    score: (x, z) => hyp({ x, z }, { x: cen.x, z: cen.z - 20 })
   }), 'o Farol Boreal');
-  ctx.take(light, 16);
+  ctx.take(light, 20);
   extra.lighthouse = pt(light);
-  extra.enemy1Fort = pt(ctx.take(nearDry(ctx, toward(S[1], light, 22), 'o forte dos Lanças Quebradas', { r: 5 }), 10));
-  extra.allyFort = pt(ctx.take(nearDry(ctx, toward(S[3], light, 20), 'o forte de Brumar', { r: 5 }), 10));
-  extra.allyHeroStart = pt(ctx.take(nearDry(ctx, toward(S[3], light, 10), 'a Dama Aurora', { r: 3 }), 6));
-  extra.convoyStart = pt(ctx.take(nearDry(ctx, toward(S[3], S[0], 26), 'o início do comboio', { r: 3 }), 6));
-  extra.convoyEnd = pt(ctx.take(nearDry(ctx, toward(S[0], S[3], 26), 'o fim do comboio', { r: 3 }), 6));
-  // uma mina de expansão por base (pouco ouro, mas o soak trava com 1 mina por lado)
-  S.forEach((s, i) => addGold(ctx, s, `expansion${i + 1}`, extra, { dMin: 22, dMax: 42, target: 30 }));
-  // lagos congelados: água rasa de gelo (bioma gelo) cercada de terra
+  const sea = ctx.waterNear(light.x, light.z, 6, 16);
+  extra.lightSea = { ...pt(sea), water: true };
+  // acampamento avançado: ~30 u do cabo, para o lado do centro das bases (para o sul/interior)
+  extra.lightSouth = pt(ctx.take(nearDry(ctx, toward(light, cen, 30), 'o acampamento do Farol', { r: 6, freeR: 6 }), 10));
+  // 2) forte dos Lanças Quebradas (slot 1): o Salão (pátio) + 3 torres em arco do lado do Farol; Drogath no `enemy1Fort`
+  extra.enemy1Fort = pt(ctx.take(nearDry(ctx, toward(s1, light, 20), 'o forte dos Lanças Quebradas', { r: 5 }), 10));
+  const arc = (s, to, dist, offs, name, r = 3.6, minD = 11) => {
+    const L = hyp(s, to) || 1, ex = (to.x - s.x) / L, ez = (to.z - s.z) / L;
+    offs.forEach((off, k) => {
+      const want = { x: s.x + ex * dist - ez * off, z: s.z + ez * dist + ex * off };
+      extra[`${name}${k + 1}`] = pt(ctx.take(need(ctx.scan({ step: 1, test: (x, z) => ctx.dryClear(x, z, r) && ctx.reach(x, z) && ctx.freeNear(x, z, 2, 11) && hyp({ x, z }, s) >= minD, score: (x, z) => hyp({ x, z }, want) }), `${name}${k + 1}`), 5));
+    });
+  };
+  arc(s1, light, 19, [-21, -7, 7, 21], 'fortTower');
+  // posto avançado dos Lanças no cabo: 2 torres de cada lado do Farol, voltadas para o interior (a Liga tem de TOMAR o cabo)
+  arc(light, cen, 9, [-10, 10], 'lightTower', 3.2, 6);
+  // 3) forte de Brumar (slot 3, aliado): castelo + 2 torres do lado do Farol; a Dama Aurora e o início do comboio
+  extra.allyFort = pt(ctx.take(nearDry(ctx, toward(s3, light, 20), 'o forte de Brumar', { r: 5 }), 10));
+  arc(s3, light, 17, [-13, 13], 'allyTower');
+  extra.allyHeroStart = pt(ctx.take(nearDry(ctx, toward(s3, light, 10), 'a Dama Aurora', { r: 3 }), 6));
+  extra.convoyStart = pt(ctx.take(nearDry(ctx, toward(s3, cen, 16), 'o início do comboio', { r: 4 }), 8));
+  // o comboio sai de Brumar e vai ao Farol: `convoyEnd` = 20 u antes do cabo, no caminho de Brumar
+  extra.convoyEnd = pt(ctx.take(nearDry(ctx, toward(light, s3, 22), 'o destino do comboio', { r: 5, freeR: 5 }), 8));
+  extra.convoyAmbush = pt(ctx.take(nearDry(ctx, { x: (extra.convoyStart.x + extra.convoyEnd.x) / 2, z: (extra.convoyStart.z + extra.convoyEnd.z) / 2 }, 'a emboscada do comboio', { r: 5, freeR: 5 }), 8));
+  // 4) minas: uma de expansão por base (a ~46 u do pátio, atrás da base) e 2 veios menores (5.000) no Farol, um de cada lado do cabo
+  S.forEach((s, i) => addGold(ctx, s, `expansion${i + 1}`, extra, { dMin: 34, dMax: 56, target: 44 }));
+  [-1, 1].forEach((sg, k) => {
+    const L = hyp(light, cen) || 1, ex = (cen.x - light.x) / L, ez = (cen.z - light.z) / L;
+    const want = { x: light.x + ex * 18 - ez * 26 * sg, z: light.z + ez * 18 + ex * 26 * sg };
+    const g = need(ctx.scan({ test: (x, z) => ctx.dryClear(x, z, 5) && ctx.reach(x, z) && ctx.free(x, z, 4) && S.every((s) => hyp({ x, z }, s) >= 60), score: (x, z) => hyp({ x, z }, want) }), `o veio do Farol ${k + 1}`);
+    ctx.take(g, 14);
+    m.resources.push({ type: 'gold', x: r1(g.x), z: r1(g.z), amount: GEADA_LIGHT_GOLD });
+    extra[`lightGold${k + 1}`] = pt(g);
+  });
+  // 5) pontos de interesse
+  const far = (x, z, extraPts = []) => Math.min(...S.map((s) => hyp({ x, z }, s)), hyp({ x, z }, light), ...extraPts.map((q) => hyp({ x, z }, q)));
+  const okFar = (x, z) => ctx.dryClear(x, z, 6) && ctx.reach(x, z) && ctx.free(x, z, 5) && S.every((s) => hyp({ x, z }, s) >= 58) && hyp({ x, z }, light) >= 50;
+  // ruínas do Posto do Faroleiro (exploração): longe de tudo, para o lado oeste/sul (fora da rota dos inimigos)
+  const ruins = need(ctx.scan({ step: 2, test: (x, z) => okFar(x, z) && hyp({ x, z }, s0) <= 130, score: (x, z) => -far(x, z) }), 'as ruínas do Posto do Faroleiro');
+  ctx.take(ruins, 12);
+  extra.ruins1 = pt(ruins);
+  // entreposto dos recrutas presos: entre a Liga e o Sal Cinzento, ~64 u do pátio da Liga
+  const captive = need(ctx.scan({ step: 2, test: (x, z) => okFar(x, z) && hyp({ x, z }, ruins) >= 40, score: (x, z) => Math.abs(hyp({ x, z }, s0) - 64) + 0.5 * hyp({ x, z }, s2) / 4 }), 'o entreposto dos recrutas');
+  ctx.take(captive, 12);
+  extra.captive1 = pt(captive);
+  // cais congelado: praia do mar do norte entre o Farol e o Sal Cinzento
+  const dock = need(ctx.scan({
+    step: 2, test: (x, z) => ctx.isShore(x, z) && ctx.hAt(x, z) >= 2.1 && ctx.reach(x, z) && ctx.free(x, z, 4) && hyp({ x, z }, light) >= 40 && S.every((s) => hyp({ x, z }, s) >= 45) && ctx.waterNear(x, z, 6, 16),
+    score: (x, z) => hyp({ x, z }, { x: (light.x + s2.x) / 2, z: (light.z + s2.z) / 2 })
+  }), 'o cais congelado');
+  ctx.take(dock, 10);
+  extra.iceDock = pt(dock);
+  // mar aberto do norte, onde a barcaça do Sal Cinzento parte rumo ao cais (água navegável do oceano, com folga para um casco e a escolta)
+  const dockSea = need(ctx.scan({ step: 2, test: (x, z) => ctx.oceanOk(x, z) && openSea(ctx, x, z, 6) >= 0.9 && hyp({ x, z }, dock) >= 34 && hyp({ x, z }, dock) <= 70, score: (x, z) => Math.abs(hyp({ x, z }, dock) - 46) }), 'o mar diante do cais congelado');
+  extra.iceDockSea = ptw(dockSea);
+  // acampamentos de saqueadores (neutros hostis, ouro de recompensa): um perto do caminho Liga↔Farol e outro perto do caminho Brumar↔Farol
+  [[s0, 'o acampamento de saqueadores da Liga'], [s3, 'o acampamento de saqueadores de Brumar']].forEach(([s, name], k) => {
+    const c = need(ctx.scan({ step: 2, test: (x, z) => okFar(x, z) && hyp({ x, z }, ruins) >= 30 && hyp({ x, z }, captive) >= 30, score: (x, z) => Math.abs(hyp({ x, z }, s) - 72) + 0.6 * hyp({ x, z }, toward(s, light, 70)) / 4 }), name);
+    ctx.take(c, 12);
+    m.neutrals.push({ kind: 'camp', x: r1(c.x), z: r1(c.z), guards: 6 + k, reward: { gold: 200 }, deposit: { type: 'gold', amount: 2000 } });
+  });
+  // 6) tapetes de rocha azulada (só visual): em volta dos fortes e do Farol
+  for (const [p, r] of [[extra.enemy1Fort, 11], [extra.allyFort, 11], [light, 9], [ruins, 8], [captive, 7]]) paintBiome(m, p.x, p.z, r, BIOME.ROCK, [BIOME.SNOW, BIOME.ICE, BIOME.GRASS]);
+  // 7) mata extra: pinheiral em volta do Farol e do centro (madeira para o acampamento avançado) e bosques espalhados longe das bases
+  const pick = (x, z, k) => speciesForBiome(getBiomeAt(m, x, z), false, (jitter(x, z) + k * 0.31) % 1);
+  let added = 0;
+  const scored = [];
+  for (let z = -ctx.half + 10; z <= ctx.half - 10; z += 5) for (let x = -ctx.half + 10; x <= ctx.half - 10; x += 5) scored.push({ x, z, k: jitter(x, z) - (hyp({ x, z }, light) < 46 ? 0.6 : 0) });
+  scored.sort((a, b) => a.k - b.k);
+  for (const c of scored) {
+    if (added >= 26) break;
+    if (!ctx.dryClear(c.x, c.z, 4) || !ctx.reach(c.x, c.z) || !ctx.free(c.x, c.z, 4)) continue;
+    if (S.some((s) => hyp(c, s) < 34) || hyp(c, light) < 14 || hyp(c, extra.lightSouth) < 12) continue;
+    if (m.forests.some((f) => hyp(c, f) < 16)) continue;
+    const x = r1(c.x), z = r1(c.z);
+    m.forests.push({ x, z, count: 14, radius: 10, species: pick(x, z, added) });
+    ctx.take({ x, z }, 14);
+    added++;
+  }
+  // 8) lagos congelados: água rasa de gelo (bioma gelo) cercada de terra; as âncoras vão do maior para o menor
   const lakes = [];
   const isLake = (x, z) => {
     const h = ctx.hAt(x, z);
@@ -1138,9 +1226,9 @@ function postGeada(ctx, extra) {
     for (let a = 0; a < 8; a++) if (ctx.hAt(x + Math.cos((a / 8) * Math.PI * 2) * 15, z + Math.sin((a / 8) * Math.PI * 2) * 15) >= 1.8) land++;
     return land >= 7;
   };
-  for (let z = -ctx.half + 8; z <= ctx.half - 8; z += 3) for (let x = -ctx.half + 8; x <= ctx.half - 8; x += 3) if (isLake(x, z) && lakes.every((q) => hyp({ x, z }, q) >= 16)) lakes.push({ x, z });
+  for (let z = -ctx.half + 8; z <= ctx.half - 8; z += 3) for (let x = -ctx.half + 8; x <= ctx.half - 8; x += 3) if (isLake(x, z) && lakes.every((q) => hyp({ x, z }, q) >= 22)) lakes.push({ x, z });
   if (lakes.length < 2) throw new Error('campanha: poucos lagos congelados');
-  lakes.slice(0, 3).forEach((p, i) => { extra[`lake${i + 1}`] = ptw(p); });
+  lakes.slice(0, 5).forEach((p, i) => { extra[`lake${i + 1}`] = ptw(p); });
 }
 
 // ---------------------------------------------------------------------------------------------------------------------------

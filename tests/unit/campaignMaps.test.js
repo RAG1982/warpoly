@@ -6,7 +6,7 @@ import { getHeightForMap } from '../../src/sim/terrainGenerators.js';
 import { TILESETS } from '../../src/data/tilesets.js';
 import { decodeBiomeGrid } from '../../src/data/maps/biome.js';
 import { measureWood, WOOD_RADIUS } from '../../tools/lib/woodStats.mjs';
-import { buildCampaignMap, CAMPAIGN_IDS, CAMPAIGN_NAMES, GOLD_AMOUNT, CAMPAIGN_WOOD_FLOOR, PEDRA_BIG_GOLD } from '../../tools/lib/campaignMaps.mjs';
+import { buildCampaignMap, CAMPAIGN_IDS, CAMPAIGN_NAMES, GOLD_AMOUNT, CAMPAIGN_WOOD_FLOOR, PEDRA_BIG_GOLD, GEADA_LIGHT_GOLD } from '../../tools/lib/campaignMaps.mjs';
 import ptBR from '../../src/i18n/pt-BR.json';
 import en from '../../src/i18n/en.json';
 
@@ -27,12 +27,12 @@ const MIN_ANCHORS = {
   'camp-03-pedra-mae': ['playerStart', 'enemyStart', 'colonyHall', 'colonyGold1', 'bridgeheadGold', 'passA', 'passB', 'passAPlayer', 'passBPlayer', 'wallA1', 'wallA2', 'wallA3', 'wallB1', 'wallB2', 'wallB3', 'towerA1', 'towerA2', 'towerB1', 'towerB2', 'orcMuster', 'shrine1', 'captive1', 'beach1', 'beach2', 'beach3', 'seaLanding1', 'seaLanding2', 'seaLanding3', 'fort1', 'fort2', 'fort3', 'bridgehead', 'bridgeheadSea', 'landingZone'],
   'camp-04-baixio-do-breu': ['playerStart', 'enemyStart', 'well1', 'well2', 'well3', 'well4', 'shipyard1', 'shipyard1Water', 'shipyard2', 'shipyard2Water', 'wreck1', 'wreck2', 'wreck3', 'fleetStart1', 'fleetStart2', 'fleetMid'],
   'camp-05-cerne-verde': ['playerStart', 'enemyStart', 'goldMine1', 'sacredGrove', 'gryphonNest', 'clearing1', 'clearing2', 'clearing3', 'lumberHall1', 'lumberHall2', 'orenStart', 'ford1', 'landingZone'],
-  'camp-06-a-geada': ['playerStart', 'enemyStart', 'enemy1Start', 'enemy2Start', 'allyStart', 'lighthouse', 'enemy1Fort', 'allyFort', 'allyHeroStart', 'convoyStart', 'convoyEnd', 'expansion1', 'expansion2', 'expansion3', 'expansion4', 'lake1', 'lake2'],
+  'camp-06-a-geada': ['playerStart', 'enemyStart', 'enemy1Start', 'enemy2Start', 'allyStart', 'lighthouse', 'lightSea', 'lightSouth', 'lightTower1', 'lightTower2', 'lightGold1', 'lightGold2', 'enemy1Fort', 'fortTower1', 'fortTower2', 'fortTower3', 'fortTower4', 'allyFort', 'allyTower1', 'allyTower2', 'allyHeroStart', 'convoyStart', 'convoyAmbush', 'convoyEnd', 'expansion1', 'expansion2', 'expansion3', 'expansion4', 'ruins1', 'captive1', 'iceDock', 'iceDockSea', 'lake1', 'lake2', 'lake3'],
   'camp-10-costa-ferrugem': ['playerStart', 'enemyStart', 'landingZone', 'colonyMark', 'unloadSea', 'bargeStart1', 'bargeStart2', 'coastTower1', 'coastTower2', 'coastTower3', 'garrison', 'oldWell', 'expansion1', 'expansion2'],
   'camp-11-estepe-do-vento': ['playerStart', 'enemyStart', 'colonyMark', 'skarnStart', 'hurganStart', 'landingZone', 'reinforceSea', 'convoyStart', 'convoyEnd', 'raid1', 'raid2', 'raid3', 'dissidentClan', 'expansion1', 'expansion2', 'expansion3'],
   'camp-12-cabo-ferrugem': ['playerStart', 'enemyStart', 'bastion', 'strait', 'dock1', 'dock2', 'dock3', 'fleetStart', 'fleetStart2', 'bossStart', 'waveStart1', 'waveStart2', 'expansion1', 'expansion2']
 };
-const WATER = new Set(['shipHorizon', 'orcSails', 'pier1Water', 'pier2Water', 'seaLanding1', 'seaLanding2', 'seaLanding3', 'bridgeheadSea', 'well1', 'well2', 'well3', 'well4', 'shipyard1Water', 'shipyard2Water', 'wreck1', 'wreck2', 'wreck3', 'fleetStart1', 'fleetStart2', 'fleetMid', 'unloadSea', 'bargeStart1', 'bargeStart2', 'reinforceSea', 'strait', 'fleetStart']);
+const WATER = new Set(['shipHorizon', 'orcSails', 'pier1Water', 'pier2Water', 'seaLanding1', 'seaLanding2', 'seaLanding3', 'bridgeheadSea', 'well1', 'well2', 'well3', 'well4', 'shipyard1Water', 'shipyard2Water', 'wreck1', 'wreck2', 'wreck3', 'fleetStart1', 'fleetStart2', 'fleetMid', 'unloadSea', 'bargeStart1', 'bargeStart2', 'reinforceSea', 'strait', 'fleetStart', 'lightSea', 'iceDockSea']);
 const isLake = (name) => /^lake\d$/.test(name); // lago congelado (A Geada): água rasa interior, fora do oceano navegável
 const hyp = (a, b) => Math.hypot(a.x - b.x, a.z - b.z);
 
@@ -82,7 +82,7 @@ describe('M2-03 · registro e formato', () => {
     it(`${id}: toda mina de ouro tem ${GOLD_AMOUNT}`, () => {
       const gold = getMap(id).resources.filter((r) => r.type === 'gold');
       expect(gold.length).toBeGreaterThanOrEqual(2);
-      for (const g of gold) expect(g.amount).toBe(id === 'camp-03-pedra-mae' && g.amount === PEDRA_BIG_GOLD ? PEDRA_BIG_GOLD : GOLD_AMOUNT); // M3-04: a mina grande da Pedra-Mãe tem 12.000
+      for (const g of gold) expect(g.amount).toBe(id === 'camp-03-pedra-mae' && g.amount === PEDRA_BIG_GOLD ? PEDRA_BIG_GOLD : id === 'camp-06-a-geada' && g.amount === GEADA_LIGHT_GOLD ? GEADA_LIGHT_GOLD : GOLD_AMOUNT); // M3-04: a mina grande da Pedra-Mãe tem 12.000; M3-07: os 2 veios do Farol (A Geada) têm 5.000
     });
 
     it(`${id}: madeira alcançável a ${WOOD_RADIUS} u >= ${CAMPAIGN_WOOD_FLOOR} por jogador (sementes de partida 1 e 2)`, () => {
@@ -275,7 +275,7 @@ describe('M2-04 · Cerne Verde (floresta densa, clareiras, bosque sagrado, ninho
   });
 });
 
-describe('M2-04 · A Geada (gelo, lagos congelados, Farol Boreal, 4 vagas)', () => {
+describe('M2-04/M3-07 · A Geada (gelo, lagos congelados, Farol Boreal, 4 vagas)', () => {
   const id = 'camp-06-a-geada';
   it('4 vagas ligadas por terra, tileset de inverno e a terra é neve, gelo ou rocha', () => {
     const m = getMap(id);
@@ -305,17 +305,28 @@ describe('M2-04 · A Geada (gelo, lagos congelados, Farol Boreal, 4 vagas)', () 
     expect(floe).toBeGreaterThan(200); // banquisa + lagos (células de 2 u)
   });
 
-  it('Farol Boreal no meio (>= 34 u de toda base), forte inimigo e do aliado, comboio entre o aliado e o jogador e uma mina extra por base', () => {
+  it('M3-07: mapa de 320 com bases a >= 140 u uma da outra; Farol Boreal no cabo do mar do norte (>= 70 u de toda base), fortes do inimigo e do aliado, comboio de Brumar ao Farol e 10 minas de ouro', () => {
     const m = getMap(id);
-    for (const s of m.startSlots) expect(hyp(m.anchors.lighthouse, s)).toBeGreaterThanOrEqual(34);
+    expect(m.size).toBe(320);
+    for (let i = 0; i < 4; i++) for (let j = i + 1; j < 4; j++) expect(hyp(m.startSlots[i], m.startSlots[j]), `bases ${i}-${j}`).toBeGreaterThanOrEqual(140);
+    for (const s of m.startSlots) expect(hyp(m.anchors.lighthouse, s)).toBeGreaterThanOrEqual(70);
     expect(m.anchors.allyStart).toEqual({ x: m.startSlots[3].x, z: m.startSlots[3].z });
     expect(m.anchors.enemy1Start).toEqual({ x: m.startSlots[1].x, z: m.startSlots[1].z });
     expect(m.anchors.enemy2Start).toEqual({ x: m.startSlots[2].x, z: m.startSlots[2].z });
     expect(hyp(m.anchors.enemy1Fort, m.startSlots[1])).toBeLessThan(35);
     expect(hyp(m.anchors.allyFort, m.startSlots[3])).toBeLessThan(35);
     expect(hyp(m.anchors.convoyStart, m.startSlots[3])).toBeLessThan(hyp(m.anchors.convoyStart, m.startSlots[0]));
-    expect(hyp(m.anchors.convoyEnd, m.startSlots[0])).toBeLessThan(hyp(m.anchors.convoyEnd, m.startSlots[3]));
-    expect(m.resources.filter((r) => r.type === 'gold')).toHaveLength(8); // 1 padrão + 1 de expansão por base
+    expect(hyp(m.anchors.convoyEnd, m.anchors.lighthouse)).toBeLessThan(30);
+    // o Farol é um cabo: tem água navegável do oceano do norte a 6-16 u (`lightSea`)
+    expect(hyp(m.anchors.lighthouse, m.anchors.lightSea)).toBeLessThanOrEqual(16);
+    const golds = m.resources.filter((r) => r.type === 'gold');
+    expect(golds).toHaveLength(10); // 4 iniciais (a ~32 u do Centro) + 4 de expansão + 2 veios do Farol
+    expect(golds.filter((g) => g.amount === GEADA_LIGHT_GOLD)).toHaveLength(2);
+    for (const s of m.startSlots) {
+      const near = golds.map((g) => hyp(g, s)).sort((a, b) => a - b);
+      expect(near[0]).toBeGreaterThanOrEqual(30);
+      expect(near[0]).toBeLessThanOrEqual(34);
+    }
   });
 });
 

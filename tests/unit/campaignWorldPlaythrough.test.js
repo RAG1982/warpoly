@@ -30,7 +30,7 @@ describe('M3-01 · playthroughs das missões do Novo Mundo', () => {
         const run = await playMission(campaignId, id, win, { maxSeconds: (maxMinutes ?? targetMinutes * 2) * 60 });
         expect(run.outcome).toBe('victory');
         expect(run.seconds).toBeLessThanOrEqual(targetMinutes * 2 * 60);
-      }, 120000);
+      }, 300000); // M3-07: a m06 (4 jogadores, mapa 320) leva ~2 min de relógio
 
       it('o roteiro de derrota perde', async () => {
         const { campaignId, lose, targetMinutes } = await load();
@@ -44,7 +44,7 @@ describe('M3-01 · playthroughs das missões do Novo Mundo', () => {
         const b = await playMission(campaignId, id, win, { maxSeconds: targetMinutes * 2 * 60 });
         expect(a.checksum).toBe(b.checksum);
         expect(a.ticks).toBe(b.ticks);
-      }, 240000);
+      }, 600000);
     });
   }
 });

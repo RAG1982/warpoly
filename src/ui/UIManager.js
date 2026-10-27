@@ -734,6 +734,14 @@ export class UIManager {
         if (researchRoleOf(b)) {
           // RES-QUEUE: cancela o slot clicado (0 = em andamento); o custo volta e a fila anda.
           const rSlot = parseInt(queueSlot.getAttribute('data-slot'), 10);
+          // FIX-MAGE-TRAIN: slots depois das pesquisas são a fila de treino (Torre Arcana).
+          if (!isNaN(rSlot) && rSlot >= b.researchQueue.length && rSlot - b.researchQueue.length < b.queue.length) {
+            this.gm.issue({ type: CMD.CANCEL_TRAIN, playerId: this.gm.localPlayerId, buildingId: b.id, slot: rSlot - b.researchQueue.length });
+            this.sound.playSelect();
+            this.showNotification(t('hud.trainCancelled'));
+            this.updateBuildingQueue(b);
+            return;
+          }
           if (!isNaN(rSlot) && rSlot < b.researchQueue.length) {
             this.gm.issue({ type: CMD.CANCEL_RESEARCH, playerId: this.gm.localPlayerId, buildingId: b.id, slot: rSlot });
             this.sound.playSelect();
@@ -1005,13 +1013,37 @@ export class UIManager {
     }).join('');
   }
 
+  /** Botões de treino (`data-train`) da construção; vazio se ela não treina (FIX-MAGE-TRAIN: também usado pelas construções com pesquisa, ex.: Torre Arcana). */
+  _trainButtonsHtml(building) {
+    const trainable = (building.faction === 'player' && building.isConstructed)
+      ? BUILDING_TRAINABLE_UNITS[building.type]
+      : null;
+    if (!trainable || trainable.length === 0) return '';
+    return trainable.map((baseType, i) => {
+      const unitType = this.gm.resolveTrainType(baseType, 'player');
+      const cfg = UNIT_TRAIN_CONFIG[unitType];
+      if (!cfg) return '';
+      const hotkey = getTrainHotkey(i);
+      return `
+        <button class="bld-train-btn" data-train="${unitType}" title="${unitLabel(unitType)}${hotkey ? ` (${hotkey})` : ''}">
+          ${hotkey ? `<span class="bld-hotkey-badge">${hotkey}</span>` : ''}
+          ${this._unitIcon(unitType, { alt: unitLabel(unitType) })}
+          <div class="bld-hint-bubble">
+            <span class="bld-hint-title">${unitLabel(unitType)}${hotkey ? ` <span class="bld-hint-hotkey">(${hotkey})</span>` : ''}</span> - ${t('hud.cost')}: <span class="bld-cost-items" data-cost-unit="${unitType}"></span>
+          </div>
+        </button>
+      `;
+    }).join('');
+  }
+
   renderBuildingTrainButtons(building) {
     if (!this.bldTrainButtons) return;
 
     const researchRole = researchRoleOf(building);
     const isForge = building.faction === 'player' && building.isConstructed && !!researchRole;
     if (isForge) {
-      if (this.bldTrainLabel) this.bldTrainLabel.innerText = t(`hud.section.research.${researchRole}`);
+      const hasTrain = (BUILDING_TRAINABLE_UNITS[building.type] || []).length > 0;
+      if (this.bldTrainLabel) this.bldTrainLabel.innerText = hasTrain ? t(`hud.section.research.${researchRole}`).replace(/:$/, '') + ' · ' + t('hud.section.train') : t(`hud.section.research.${researchRole}`);
       if (this.bldQueueLabel) this.bldQueueLabel.innerText = t('hud.section.researchProgress');
       if (this.bldTrainSection) this.bldTrainSection.style.display = 'flex';
       if (this.bldQueueSection) this.bldQueueSection.style.display = 'flex';
@@ -1061,7 +1093,7 @@ export class UIManager {
             </div>
           </button>
         `;
-      }).join('');
+      }).join('') + this._trainButtonsHtml(building);
 
       this.updateBuildingCosts(building);
       return;
@@ -1084,21 +1116,7 @@ export class UIManager {
     if (this.bldTrainSection) this.bldTrainSection.style.display = 'flex';
     if (this.bldQueueSection) this.bldQueueSection.style.display = 'flex';
 
-    this.bldTrainButtons.innerHTML = trainable.map((baseType, i) => {
-      const unitType = this.gm.resolveTrainType(baseType, 'player');
-      const cfg = UNIT_TRAIN_CONFIG[unitType];
-      if (!cfg) return '';
-      const hotkey = getTrainHotkey(i);
-      return `
-        <button class="bld-train-btn" data-train="${unitType}" title="${unitLabel(unitType)}${hotkey ? ` (${hotkey})` : ''}">
-          ${hotkey ? `<span class="bld-hotkey-badge">${hotkey}</span>` : ''}
-          ${this._unitIcon(unitType, { alt: unitLabel(unitType) })}
-          <div class="bld-hint-bubble">
-            <span class="bld-hint-title">${unitLabel(unitType)}${hotkey ? ` <span class="bld-hint-hotkey">(${hotkey})</span>` : ''}</span> - ${t('hud.cost')}: <span class="bld-cost-items" data-cost-unit="${unitType}"></span>
-          </div>
-        </button>
-      `;
-    }).join('');
+    this.bldTrainButtons.innerHTML = this._trainButtonsHtml(building);
 
     this.updateBuildingCosts(building);
   }
@@ -1145,7 +1163,6 @@ export class UIManager {
         const nextCost = RESEARCH[upgId].levels[Math.min(this.gm.getResearchLevel(upgId, 'player'), getMaxResearchLevel(upgId) - 1)].cost;
         if (costContainer) costContainer.innerHTML = buildCostHtml(nextCost, this.gm.resources);
       });
-      return;
     }
 
     const trainable = BUILDING_TRAINABLE_UNITS[building.type];
@@ -1189,6 +1206,7 @@ export class UIManager {
     if (researchRoleOf(b)) {
       // RES-QUEUE: um slot por pesquisa enfileirada; [0] é a em andamento (barra de progresso).
       const queue = b.researchQueue || [];
+      const uq = b.queue || []; // FIX-MAGE-TRAIN: treino da Torre Arcana/Santuário, depois das pesquisas
       const factionType = this.gm.playerFaction === 'orc' ? 'orc' : 'human';
       for (let i = 0; i < this.bldQueueSlots.length; i++) {
         const slotEl = this.bldQueueSlots[i];
@@ -1203,6 +1221,13 @@ export class UIManager {
             cssPx: 30, cls: 'bld-slot-icon', alt: name, fallbackSrc: cfg ? cfg.icon : '/icoEspada.png', fallbackEmoji: '📜'
           }));
           slotEl.title = `${name}${lvTxt} (${t(i === 0 ? 'hud.researching' : 'hud.queued')}) - ${t('hud.clickCancel')}`;
+        } else if (i - queue.length < uq.length) {
+          const j = i - queue.length;
+          const item = uq[j];
+          const name = unitLabel(item.type);
+          slotEl.className = 'bld-queue-slot filled' + (j === 0 ? ' active' : '');
+          this._setSlotHtml(slotEl, `u|${item.type}`, () => this._unitIcon(item.type, { cssPx: 30, cls: 'bld-slot-icon', alt: name }));
+          slotEl.title = `${name} (${t(j === 0 ? 'hud.training' : 'hud.queued')}) - ${t('hud.clickCancel')}`;
         } else {
           slotEl.className = 'bld-queue-slot empty';
           this._setSlotHtml(slotEl, '', () => '');
@@ -1210,9 +1235,9 @@ export class UIManager {
         }
       }
 
-      if (queue.length > 0) {
-        const r = queue[0];
-        const pct = Math.min(100, Math.max(0, (r.progress / r.totalTime) * 100));
+      const head = queue.length > 0 ? queue[0] : uq[0];
+      if (head) {
+        const pct = Math.min(100, Math.max(0, (head.progress / head.totalTime) * 100));
         if (this.bldQueueProgressBar) this.bldQueueProgressBar.style.width = `${pct}%`;
         if (this.bldQueueProgressTrack) this.bldQueueProgressTrack.style.opacity = '1';
       } else {

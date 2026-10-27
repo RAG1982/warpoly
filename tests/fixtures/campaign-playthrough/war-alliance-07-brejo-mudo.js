@@ -15,7 +15,6 @@ const bot = (c) => (c.gm.__bot ||= { last: {}, launched: false });
 const res = (c) => c.gm.getPlayer(0).resources;
 const affordable = (c, cost) => Object.entries(cost).every(([k, v]) => (res(c)[k] || 0) >= v);
 const count = (c, type) => c.gm.buildings.filter((x) => x.ownerId === 0 && x.type === type && !x.isDead).length;
-const done = (c, type) => c.gm.buildings.some((x) => x.ownerId === 0 && x.type === type && !x.isDead && x.isConstructed);
 
 /** 3 Aldeões para obra: os mais próximos do Paço que não estejam construindo. */
 function builders(c, n = 3) {

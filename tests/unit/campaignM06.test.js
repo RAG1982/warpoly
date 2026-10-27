@@ -3,6 +3,8 @@ import '../../src/data/campaigns/index.js';
 import { playMission } from './helpers/campaignHarness.js';
 import { getMap, ensureMapLoaded } from '../../src/data/maps/index.js';
 import { LEGACY_TREE_MAPS, TREE_WOOD } from '../../src/data/economy.js';
+import { runAction } from '../../src/sim/missions/actions.js';
+import { getHeightForMap } from '../../src/world/terrainGenerators.js';
 import { UNITS } from '../../src/data/units.js';
 import { getCampaign } from '../../src/data/campaigns/index.js';
 import { availableTech } from '../../src/campaign/campaign.js';
@@ -45,7 +47,13 @@ describe('m06 A Geada · mapa', () => {
     const A = gm.terrain.mapDef.anchors;
     const land = ['playerStart', 'enemy1Start', 'enemy2Start', 'allyStart', 'lighthouse', 'lightSouth', 'enemy1Fort', 'fortTower1', 'fortTower2', 'fortTower3', 'allyFort', 'allyTower1', 'allyTower2',
       'allyHeroStart', 'convoyStart', 'convoyAmbush', 'convoyEnd', 'ruins1', 'captive1', 'iceDock', 'lightGold1', 'lightGold2', 'expansion1', 'expansion2', 'expansion3', 'expansion4', 'neutralCamp1', 'neutralCamp2'];
-    for (const k of land) { expect(A[k], k).toBeTruthy(); expect(gm.pathfinder.isWalkableWorld(A[k].x, A[k].z), `${k} caminhável`).toBe(true); }
+    const slots = new Set(['playerStart', 'enemy1Start', 'enemy2Start', 'allyStart']); // o pátio é o centro do Centro (ocupado): só conta que existe
+    const towers = /^(fortTower|lightTower|allyTower|neutralCamp)/; // a missão ergue uma torre (ou o acampamento neutro tem a sua jazida) aí: o chão é terra firme, mas a grade já está ocupada
+    for (const k of land) {
+      expect(A[k], k).toBeTruthy();
+      if (towers.test(k)) expect(getHeightForMap(gm.terrain.mapDef, A[k].x, A[k].z), `${k} em terra firme`).toBeGreaterThanOrEqual(1.8);
+      else if (!slots.has(k)) expect(gm.pathfinder.isWalkableWorld(A[k].x, A[k].z), `${k} caminhável`).toBe(true);
+    }
     for (const k of ['lightSea', 'iceDockSea', 'lake1', 'lake2']) { expect(A[k], k).toBeTruthy(); expect(A[k].water, k).toBe(true); }
     for (const k of ['lake1', 'lake2', 'lake3']) expect(gm.pathfinder.isWalkableWorld(A[k].x, A[k].z), `${k} (gelo) não é chão de tropa`).toBe(false);
   });
@@ -103,7 +111,7 @@ describe('m06 A Geada · jogadores, tecnologia e Brann', () => {
     expect(P[0].isLocal).toBe(true);
     expect(P.slice(1).every((p) => p.isAI)).toBe(true);
     expect(P.map((p) => p.startSlot)).toEqual([0, 3, 1, 2]);
-    expect(P.slice(1).map((p) => p.difficulty)).toEqual(['normal', 'normal', 'easy']);
+    expect(P.slice(1).map((p) => p.difficulty)).toEqual(['easy', 'easy', 'easy']); // a IA fica em easy: a dificuldade está nas levas roteirizadas, nos fortes e na guarda (como nas m03 a m05)
     expect(gm.isAlly(0, 1)).toBe(true);
     expect(gm.isHostile(0, 2) && gm.isHostile(0, 3) && gm.isHostile(1, 2) && gm.isHostile(1, 3)).toBe(true);
   });
@@ -155,7 +163,7 @@ describe('m06 A Geada · jogadores, tecnologia e Brann', () => {
     expect(by(def, 'hidden')).toEqual(['h-aurora', 'h-recruits', 'h-ruins']);
     const o = (id) => def.objectives.find((x) => x.id === id);
     expect(o('p-hold').condition).toMatchObject({ type: 'var', name: 'hold', op: '>=', value: 180 });
-    expect(o('p-fort')).toMatchObject({ type: 'destroy', select: { tag: 'fort_hall' } });
+    expect(o('p-fort')).toMatchObject({ type: 'destroy', select: { tag: 'fort_hall' }, active: false }); // ativa quando o Farol é mantido
     expect(o('p-ally').failWhen).toMatchObject({ type: 'dead', select: { tag: 'brumar_fort' } });
     expect(o('s-convoy')).toMatchObject({ type: 'escort', tag: 'convoy', count: 3, active: false });
     expect(o('s-arms')).toMatchObject({ type: 'train', units: [{ type: 'mage', count: 2 }, { type: 'ballista', count: 2 }, { type: 'cavalier', count: 2 }, { type: 'gryphon_rider', count: 1 }] });
@@ -166,7 +174,7 @@ describe('m06 A Geada · jogadores, tecnologia e Brann', () => {
 });
 
 describe('m06 A Geada · os dois fortes e os clãs', () => {
-  it('forte dos Lanças Quebradas: Salão (tag fort_hall) na base + 3 torres + guarda (5 guerreiros, 3 lanceiros, 2 ogros) + Drogath; o Salão do Sal Cinzento tem tag própria', async () => {
+  it('forte dos Lanças Quebradas: Salão (tag fort_hall) na base + 4 torres + guarda (5 guerreiros, 4 lanceiros, 2 ogros) + Drogath; posto avançado dos Lanças no Farol (2 torres + guarda); o Salão do Sal Cinzento tem tag própria', async () => {
     const { gm } = await boot();
     const A = gm.terrain.mapDef.anchors;
     const ent = (tag) => gm.mission.tags.get(tag).map((i) => gm.entitiesById.get(i));
@@ -179,12 +187,19 @@ describe('m06 A Geada · os dois fortes e os clãs', () => {
     expect(salt[0]).toMatchObject({ type: 'great_hall', ownerId: 3 });
     expect(d(posOf(salt[0]), A.enemy2Start)).toBeLessThan(1);
     const towers = ent('fort_tower');
-    expect(towers).toHaveLength(3);
+    expect(towers).toHaveLength(4);
     for (const t of towers) { expect(t.ownerId).toBe(2); expect(d(posOf(t), A.enemy1Start)).toBeLessThan(30); expect(d(posOf(t), A.lighthouse)).toBeLessThan(d(A.enemy1Start, A.lighthouse)); }
     const guards = ent('fort_guard');
     const n = (t) => guards.filter((u) => u.type === t).length;
-    expect({ grunt: n('grunt'), axe: n('axethrower'), ogre: n('ogre') }).toEqual({ grunt: 5, axe: 3, ogre: 2 });
+    expect({ grunt: n('grunt'), axe: n('axethrower'), ogre: n('ogre') }).toEqual({ grunt: 5, axe: 4, ogre: 2 });
     for (const u of guards) expect(gm.pathfinder.isWalkableWorld(u.mesh.position.x, u.mesh.position.z), `${u.type} #${u.id}`).toBe(true);
+    // posto avançado no Farol: a Liga tem de TOMAR o cabo (2 torres + 5 guerreiros, 3 lanceiros e 1 ogro de guarda)
+    const lt = ent('light_tower');
+    expect(lt).toHaveLength(2);
+    for (const t of lt) { expect(t.ownerId).toBe(2); expect(d(posOf(t), A.lighthouse)).toBeLessThan(30); }
+    const lg = ent('light_guard');
+    expect(lg).toHaveLength(9);
+    expect(lg.every((u) => u.ownerId === 2 && d(posOf(u), A.lighthouse) < 22)).toBe(true);
     const drogath = ent('drogath');
     expect(drogath).toHaveLength(1);
     expect(drogath[0]).toMatchObject({ type: 'hero_drogath', ownerId: 2 });
@@ -214,18 +229,19 @@ describe('m06 A Geada · os dois fortes e os clãs', () => {
     expect(d(posOf(aurora[0]), A.allyFort)).toBeLessThan(25);
   });
 
-  it('levas roteirizadas: Sal Cinzento aos 330 s (base da Liga), Lanças aos 450 (Farol), desembarque no cais aos 600, Lanças aos 720 (Brumar), Sal aos 840 (base), Lanças aos 1020 (Farol, com balões), Sal aos 1140 (Brumar)', async () => {
+  it('levas roteirizadas: Sal Cinzento aos 330 s (base da Liga), Lanças aos 450 e 660 (Farol), desembarque no cais aos 600, Lanças aos 720 (Brumar), Sal aos 840 (base), Lanças aos 1020 (Farol, com balões), Sal aos 1140 (Brumar)', async () => {
     const { gm } = await boot();
     const def = gm.mission.def;
     const A = gm.terrain.mapDef.anchors;
     const comp = (id) => Object.fromEntries(trig(def, id).actions.find((a) => a.type === 'spawn').units.map((u) => [u.type, u.count]));
     const spec = [
-      ['raid-s1', 330, 3, 'playerStart', { grunt: 4, axethrower: 2 }],
-      ['raid-l1', 450, 2, 'lighthouse', { grunt: 5, axethrower: 3 }],
-      ['raid-l2', 720, 2, 'allyFort', { ogre: 3, grunt: 4, catapult: 1 }],
-      ['raid-s2', 840, 3, 'playerStart', { ogre: 2, grunt: 5, arsonist: 2 }],
-      ['raid-l3', 1020, 2, 'lighthouse', { ogre: 4, grunt: 4, axethrower: 3, war_balloon: 2 }],
-      ['raid-s3', 1140, 3, 'allyFort', { grunt: 6, berserker: 3 }]
+      ['raid-s1', 330, 3, 'playerStart', { grunt: 5, axethrower: 3 }],
+      ['raid-l1', 450, 2, 'lighthouse', { grunt: 5, axethrower: 3, ogre: 1 }],
+      ['raid-l1b', 660, 2, 'lighthouse', { grunt: 6, axethrower: 3, ogre: 2 }],
+      ['raid-l2', 720, 2, 'allyFort', { ogre: 2, grunt: 4, catapult: 1 }],
+      ['raid-s2', 840, 3, 'playerStart', { ogre: 3, grunt: 6, arsonist: 2 }],
+      ['raid-l3', 1020, 2, 'lighthouse', { ogre: 5, grunt: 5, axethrower: 4, war_balloon: 3 }],
+      ['raid-s3', 1140, 3, 'allyFort', { grunt: 5, berserker: 3 }]
     ];
     for (const [id, at, owner, target, units] of spec) {
       expect(trig(def, id).when.at, id).toBe(at);
@@ -236,8 +252,8 @@ describe('m06 A Geada · os dois fortes e os clãs', () => {
       expect(d(a.order, A[target]), `${id} alvo ${target}`).toBeLessThan(0.5);
       expect(d(a, A[owner === 2 ? 'enemy1Start' : 'enemy2Start']), `${id} sai da base do clã`).toBeLessThan(20);
     }
-    // a 1ª sai: 6 unidades hostis (Sal Cinzento) aos 330 s
-    const run = await boot([{ name: 'espera', wait: 331, run: (c) => { expect(c.tagged('raid')).toHaveLength(6); expect(c.tagged('raid').every((u) => u.ownerId === 3)).toBe(true); } }], 335);
+    // a 1ª sai: 8 unidades hostis (Sal Cinzento) aos 330 s
+    const run = await boot([{ name: 'espera', wait: 331, run: (c) => { expect(c.tagged('raid')).toHaveLength(8); expect(c.tagged('raid').every((u) => u.ownerId === 3)).toBe(true); } }], 335);
     expect(run.outcome).toBeNull();
   }, 120000);
 
@@ -250,10 +266,12 @@ describe('m06 A Geada · os dois fortes e os clãs', () => {
     expect(d(t.unloadAt, A.iceDock)).toBeLessThan(0.5);
     expect(t.units).toEqual([{ type: 'grunt', count: 4 }, { type: 'axethrower', count: 2 }]);
     expect(d(t.order, A.lighthouse)).toBeLessThan(0.5);
-    const run = await boot([{ name: 'espera', wait: 601 }], 603);
+    // o gatilho dispara aos 600 s; um jogador parado perderia antes, então roda as ações do gatilho direto (como o jogo faria) e confere o resultado
+    const run = await boot([{ name: 'cais', wait: 2, run: (c) => { for (const a of trig(c.gm.mission.def, 'dock-landing').actions) runAction(c.gm.mission, a); } }, { name: 'espera', wait: 2 }], 8);
     const barge = run.gm.mission.tags.get('landing_barge').map((i) => run.gm.entitiesById.get(i));
     expect(barge).toHaveLength(1);
     expect(barge[0]).toMatchObject({ type: 'barge', ownerId: 3 });
+    expect(d(posOf(barge[0]), A.iceDockSea)).toBeLessThan(40);
     expect(run.gm.mission.tags.get('landing_escort')).toHaveLength(1);
     expect(run.gm.mission.tags.get('landing')).toHaveLength(6);
     expect(run.outcome).toBeNull();
@@ -263,10 +281,11 @@ describe('m06 A Geada · os dois fortes e os clãs', () => {
 describe('m06 A Geada · Farol Boreal (manter 3 minutos)', () => {
   const at = (c, name, dx = 0, dz = 0) => c.anchor(name, dx, dz);
   const sendTo = (c, name, n = 3) => { const p = at(c, name); c.mine().filter((u) => u.type !== 'villager').slice(0, n).forEach((u, i) => c.teleport(u, p.x + i * 1.5, p.z)); };
+  const clearCape = (c) => c.slayTag('light_guard'); // o posto avançado dos Lanças guarda o cabo: é preciso limpá-lo para manter
 
   it('com 2+ unidades no cabo e nenhum inimigo por perto o contador sobe (a lanterna acende); aos 180 s o primário se conclui', async () => {
     const run = await boot([
-      { name: 'ir', wait: 1, run: (c) => sendTo(c, 'lighthouse', 3) },
+      { name: 'ir', wait: 1, run: (c) => { clearCape(c); sendTo(c, 'lighthouse', 3); } },
       { name: 'meio', wait: 100, run: (c) => { expect(c.gm.mission.vars.hold).toBeGreaterThanOrEqual(95); expect(c.status('p-hold')).toBe('active'); } },
       { name: 'fim', wait: 95 }
     ], 200);
@@ -277,11 +296,11 @@ describe('m06 A Geada · Farol Boreal (manter 3 minutos)', () => {
   }, 120000);
 
   it('1 unidade só não basta; um inimigo na área zera o contador (e avisa)', async () => {
-    const one = await boot([{ name: 'ir', wait: 1, run: (c) => sendTo(c, 'lighthouse', 1) }, { name: 'espera', wait: 30 }], 40);
+    const one = await boot([{ name: 'ir', wait: 1, run: (c) => { clearCape(c); sendTo(c, 'lighthouse', 1); } }, { name: 'espera', wait: 30 }], 40);
     expect(one.gm.mission.vars.hold).toBe(0);
     let before = 0;
     const run = await boot([
-      { name: 'ir', wait: 1, run: (c) => sendTo(c, 'lighthouse', 3) },
+      { name: 'ir', wait: 1, run: (c) => { clearCape(c); sendTo(c, 'lighthouse', 3); } },
       { name: 'sobe', wait: 40, run: (c) => { before = c.gm.mission.vars.hold; expect(before).toBeGreaterThan(30); const p = at(c, 'lighthouse', 6, 4); const e = c.gm.spawnUnit('grunt', p.x, p.z, 2); e.markColor = '#ff0000'; } },
       { name: 'zera', wait: 2 }
     ], 50);
@@ -293,10 +312,11 @@ describe('m06 A Geada · Farol Boreal (manter 3 minutos)', () => {
 describe('m06 A Geada · comboio, recrutas e ocultas', () => {
   it('comboio de Brumar (secundária): 4 carregadores do jogador (nome e anel próprios) aos 480 s junto ao forte; a emboscada sai quando eles passam a meio caminho; 3 no destino concluem (+600 de ouro, +400 de madeira, +200 de pedra); 2 vivos = falha', async () => {
     const { gm } = await boot();
-    expect(gm.mission.objectives.get('s-convoy').status).toBe('pending');
+    expect(gm.mission.objectives.get('s-convoy').status).toBe('inactive');
     let before;
     const ok = await boot([
-      { name: 'chega', wait: 481 },
+      { name: 'calma', wait: 340, run: (c) => c.slayTag('raid') }, // um jogador parado perderia aos ~480 s: a 1ª leva do Sal Cinzento é desfeita para o teste chegar ao comboio
+      { name: 'chega', wait: 141 },
       { name: 'ver', wait: 1, run: (c) => {
         const cv = c.tagged('convoy');
         expect(cv).toHaveLength(4);
@@ -312,7 +332,7 @@ describe('m06 A Geada · comboio, recrutas e ocultas', () => {
     expect(after.gold).toBeGreaterThanOrEqual(before.gold + 550);
     expect(after.wood).toBeGreaterThanOrEqual(before.wood + 350);
     expect(after.stone).toBeGreaterThanOrEqual(before.stone + 150);
-    const lost = await boot([{ name: 'chega', wait: 481 }, { name: 'perde', wait: 1, run: (c) => c.slay(c.tagged('convoy').slice(0, 2)) }, { name: 'espera', wait: 3 }], 495);
+    const lost = await boot([{ name: 'calma', wait: 340, run: (c) => c.slayTag('raid') }, { name: 'chega', wait: 141 }, { name: 'perde', wait: 1, run: (c) => c.slay(c.tagged('convoy').slice(0, 2)) }, { name: 'espera', wait: 3 }], 495);
     expect(lost.gm.mission.objectives.get('s-convoy').status).toBe('failed');
     expect(lost.outcome).toBeNull(); // secundária não decide
   }, 120000);
@@ -422,7 +442,7 @@ describe('m06 A Geada · desfecho', () => {
     const hold = await boot([{ name: 'so-farol', wait: 1, run: (c) => c.gm.mission.setObjectiveStatus('p-hold', 'completed') }], 40);
     expect(hold.outcome).toBeNull();
     const fort = await boot([{ name: 'so-forte', wait: 1, run: (c) => c.slayTag('fort_hall') }], 40);
-    expect(fort.gm.mission.objectives.get('p-fort').status).toBe('completed');
+    expect(fort.gm.mission.objectives.get('p-fort').status).toBe('inactive'); // o forte só vale depois de acender o Farol (a lanterna rasga a névoa)
     expect(fort.outcome).toBeNull();
     const sec = await boot([{ name: 'sec', wait: 1, run: (c) => { for (const i of ['s-arms', 's-blizzard']) c.gm.mission.setObjectiveStatus(i, 'completed'); } }], 12);
     expect(sec.outcome).toBeNull();
@@ -430,6 +450,7 @@ describe('m06 A Geada · desfecho', () => {
     const fin = await boot([
       { name: 'pre', wait: 1, run: (c) => { before = c.gm.getPlayer(0).resources.gold; } },
       { name: 'farol', wait: 1, run: (c) => c.gm.mission.setObjectiveStatus('p-hold', 'completed') },
+      { name: 'ativa', wait: 1, run: (c) => { if (c.status('p-fort') !== 'active') throw new Error('p-fort devia ativar com o Farol'); } },
       { name: 'forte', wait: 1, run: (c) => c.slayTag('fort_hall') },
       { name: 'final', wait: 35 }
     ], 80);

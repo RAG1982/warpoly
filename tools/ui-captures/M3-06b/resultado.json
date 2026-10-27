@@ -1,0 +1,18 @@
+{
+  "shots": [
+    "01-briefing.png",
+    "01-base-da-alianca.png",
+    "02-base-dos-orcs.png",
+    "03-salao-do-bosque.png",
+    "04-bosque-sagrado.png",
+    "05-ninho-de-grifos.png",
+    "06-mapa-inteiro-camera-alta.png",
+    "07-minimapa.png"
+  ],
+  "errors": [],
+  "map": {
+    "size": 320,
+    "playable": 308,
+    "dist": 156.02884348735014
+  }
+}

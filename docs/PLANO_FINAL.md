@@ -296,7 +296,7 @@ Legenda de dependências: só IDs; "—" = pode começar já. **Dif.** = dificul
 | M3-05 | Missão 4 · O Baixio do Breu (naval roteirizado) | Difícil | G | S | M3-04, M2-04 | DONE (2026-10-26; 2 continentes, 6 poços, frota roteirizada; correções pós-playtest: câmera, seleção, petróleo, canhão; dificuldade real após correção da grade espacial — a confirmar pelo dono) |
 | M3-06 | Missão 5 · O Cerne Verde | Média | M | S | M3-05, M2-04 | DONE (branch task/M3-06; IA easy; Oren só NPC em diálogo, mapa tem 2 vagas; robô vence em 9,2 min — dono ainda não jogou) |
 | M3-07 | Missão 6 · A Geada (Prova de Fogo, árvore completa) | Difícil | G | S | M3-06, M2-04 | TODO |
-| M3-08 | Missão 7 · O Brejo Mudo (traição) | Média | M | S | M3-07, M2-05 | TODO |
+| M3-08 | Missão 7 · O Brejo Mudo (traição) | Média | M | S | M3-07, M2-05 | DONE (branch task/M3-08; mapa 320, bases ~151 u; traição aos 330 s; Brakka bandits; dono ainda não jogou) |
 | M3-09 | Missão 8 · A Fornalha | Difícil | G | S | M3-08, M2-05, M2-14 | TODO |
 | M3-10 | Missão 9 · Miragem | Difícil | G | S | M3-09, M2-05 | TODO |
 | M3-11 | Missão 10 · Desembarque na Costa Ferrugem (entra o Oren) | Difícil | G | S | M3-10, M2-06, M2-02 | TODO |

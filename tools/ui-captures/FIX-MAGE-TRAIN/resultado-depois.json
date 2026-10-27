@@ -1,0 +1,116 @@
+{
+  "shots": [
+    "torre-arcana.png",
+    "torre-arcana-fila.png",
+    "aviario.png",
+    "aviario-fila.png",
+    "templo.png"
+  ],
+  "errors": [],
+  "prefix": "depois",
+  "dbg": {
+    "tick": 807,
+    "hq": [
+      [
+        "castle",
+        3
+      ],
+      [
+        "lumber_camp",
+        1
+      ],
+      [
+        "cottage",
+        1
+      ]
+    ],
+    "cut": false
+  },
+  "R": {
+    "arcane_tower": {
+      "label": "MAGIAS · TREINAR UNIDADES",
+      "trainVisible": "flex",
+      "train": [
+        {
+          "id": "mage",
+          "disabled": false,
+          "title": "Mago Arcano (Q)"
+        }
+      ],
+      "upgrade": [
+        {
+          "id": "spell_fireball",
+          "disabled": false
+        },
+        {
+          "id": "spell_slow",
+          "disabled": false
+        },
+        {
+          "id": "spell_flameshield",
+          "disabled": false
+        },
+        {
+          "id": "spell_invisibility",
+          "disabled": false
+        },
+        {
+          "id": "spell_polymorph",
+          "disabled": false
+        },
+        {
+          "id": "spell_blizzard",
+          "disabled": false
+        }
+      ],
+      "queued": [
+        "mage",
+        "mage"
+      ]
+    },
+    "aviary": {
+      "label": "TREINAR UNIDADES",
+      "trainVisible": "flex",
+      "train": [
+        {
+          "id": "gryphon_rider",
+          "disabled": false,
+          "title": "Cavaleiro Grifo (Q)"
+        }
+      ],
+      "upgrade": [],
+      "queued": [
+        "gryphon_rider"
+      ]
+    },
+    "temple": {
+      "label": "CLASSE E MAGIAS SAGRADAS:",
+      "trainVisible": "flex",
+      "train": [],
+      "upgrade": [
+        {
+          "id": "cavalry_class",
+          "disabled": false
+        },
+        {
+          "id": "spell_holy_vision",
+          "disabled": true
+        },
+        {
+          "id": "spell_heal",
+          "disabled": true
+        },
+        {
+          "id": "spell_exorcism",
+          "disabled": true
+        }
+      ]
+    },
+    "objective": {
+      "status": "active",
+      "cur": 2,
+      "max": 3,
+      "queueLeft": 0
+    }
+  }
+}

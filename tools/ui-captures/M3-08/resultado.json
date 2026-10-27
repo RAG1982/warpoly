@@ -1,0 +1,22 @@
+{
+  "shots": [
+    "01-briefing.png",
+    "02-base-da-liga.png",
+    "03-paco-de-mervane.png",
+    "04-salao-de-brakka.png",
+    "05-cercado-de-javalis.png",
+    "06-ferraria-de-contrabando.png",
+    "07-mapa-inteiro-camera-alta.png",
+    "08-minimapa.png"
+  ],
+  "errors": [],
+  "map": {
+    "size": 320,
+    "playable": 308,
+    "bases": 150.6286825275983,
+    "hall": [
+      125.29964086141668,
+      124.03628501370073
+    ]
+  }
+}

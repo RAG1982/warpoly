@@ -57,11 +57,11 @@ export const CAMPAIGN_PRESETS = freeze({
     layout: freeze({ bases: [{ entities: [0], side: 'west' }, { entities: [0], side: 'east' }], minSeparation: 66 }),
     verify: freeze({ landRange: [0.25, 0.8], minRivers: 0 })
   }),
-  /** Palco 7 (M2-05): continente pantanoso com canais (rio com vaus), base do jogador a oeste e do aliado que trai a leste; o Salão inimigo vem por âncora. */
+  /** Palco 7 (M2-05; M3-08: ampliado a 320 como o palco 5, bases a ~156 u): pântano com canais (rio com vaus); base do jogador a oeste e do aliado que trai (Mervane) a leste; o Salão de Brakka fica ao norte, no meio do brejo. */
   'camp-07-brejo-mudo': freeze({
-    id: 'camp-07-brejo-mudo', name: 'Brejo Mudo', uso: 'campanha, palco 7 (Liga e Clãs)', tileset: 'pantano', naval: false,
-    options: freeze({ size: 176, grid: 176, continents: 1, continentBiome: 'swamp', continentDims: [0.44, 0.36], islands: 0, islets: 0, bays: 3, peninsulas: 3, roughness: 1.0, lava: false, rivers: 2 }),
-    layout: freeze({ bases: [{ entities: [0], side: 'west' }, { entities: [0], side: 'east' }], minSeparation: 66 }),
+    id: 'camp-07-brejo-mudo', name: 'Brejo Mudo', uso: 'campanha, palco 7 (Liga e Clãs)', tileset: 'pantano', naval: false, woodTarget: 8000,
+    options: freeze({ size: 320, grid: 320, continents: 1, continentBiome: 'swamp', continentDims: [0.44, 0.36], islands: 0, islets: 0, bays: 3, peninsulas: 3, roughness: 1.0, lava: false, rivers: 2, riverFordSpacing: 90 }),
+    layout: freeze({ bases: [{ entities: [0], side: 'west' }, { entities: [0], side: 'east' }], minSeparation: 150 }),
     verify: freeze({ landRange: [0.25, 0.8], minRivers: 2 })
   }),
   /** Palco 8 (M2-05): ilha vulcânica pequena (jogável ≤ 128 u) cortada por UM rio de lava norte-sul com passagens de rocha; Liga a oeste, Clãs (forja e santuário) a leste. */
@@ -664,18 +664,23 @@ function pickBeach(ctx, s, name, { dMin = 30, dMax = 62, target = 44, avoid = []
   return b;
 }
 
-/** Palco 7: Salão de Brakka com dois Cercados de Javalis, depósito de ferro do traidor, praias do desembarque da frota, expansões. */
+/**
+ * Palco 7 (M2-05; M3-08 ampliado a 320, bases a ~156 u): Salão de Brakka no brejo ao norte, a ~125 u de cada base (o Presa-Negra não é
+ * aliado de ninguém: fica longe das duas bases); dois Cercados de Javalis junto dele; depósito de ferro de contrabando de Mervane atrás da
+ * base dele; praias do desembarque da frota; expansões a 50–80 u de cada base (a mina de expansão é o que a campanha precisa ter longe).
+ */
 function postBrejo(ctx, extra) {
-  const { s0, s1 } = ctx;
-  // Salão do inimigo (Brakka em A07): platô livre longe das duas bases (as missões constroem o Salão e os cercados aqui)
+  const { m, s0, s1 } = ctx;
+  const mid = { x: (s0.x + s1.x) / 2, z: (s0.z + s1.z) / 2 };
+  // Salão de Brakka (Presa-Negra): platô livre ao norte do meio do mapa (z negativo), longe das duas bases
   const hall = need(ctx.scan({
-    test: (x, z) => ctx.dryClear(x, z, 15) && ctx.reach(x, z) && ctx.free(x, z, 10) && hyp({ x, z }, s0) >= 56 && hyp({ x, z }, s1) >= 56,
-    score: (x, z) => Math.abs(hyp({ x, z }, s0) - 72) + Math.abs(hyp({ x, z }, s1) - 72)
+    test: (x, z) => ctx.dryClear(x, z, 15) && ctx.reach(x, z) && ctx.free(x, z, 10) && hyp({ x, z }, s0) >= 95 && hyp({ x, z }, s1) >= 95 && hyp({ x, z }, mid) >= 60,
+    score: (x, z) => Math.abs(hyp({ x, z }, s0) - 125) + Math.abs(hyp({ x, z }, s1) - 125)
   }), 'o Salão de Brakka');
   ctx.take(hall, 22);
   extra.brakkaHall = pt(hall);
   for (let k = 0; k < 2; k++) {
-    const ang = Math.atan2(hall.z - (s0.z + s1.z) / 2, hall.x - (s0.x + s1.x) / 2) + (k ? 1 : -1) * 1.1;
+    const ang = Math.atan2(hall.z - mid.z, hall.x - mid.x) + (k ? 1 : -1) * 1.1;
     const aim = { x: hall.x + Math.cos(ang) * 17, z: hall.z + Math.sin(ang) * 17 };
     const pen = need(ctx.scan({ test: (x, z) => ctx.dryClear(x, z, 5) && ctx.reach(x, z) && ctx.free(x, z, 3) && hyp({ x, z }, hall) >= 13, score: (x, z) => hyp({ x, z }, aim) }), `o Cercado de Javalis ${k + 1}`);
     ctx.take(pen, 9);
@@ -684,22 +689,41 @@ function postBrejo(ctx, extra) {
   addGold(ctx, hall, 'brakkaGold', extra, { dMin: 20, dMax: 40, target: 28 });
   // depósito de ferro de contrabando do aliado que trai (atrás da base dele, longe da do jogador)
   const iron = need(ctx.scan({
-    test: (x, z) => ctx.dryClear(x, z, 5) && ctx.reach(x, z) && ctx.free(x, z, 4) && hyp({ x, z }, s1) >= 22 && hyp({ x, z }, s1) <= 36 && hyp({ x, z }, hall) >= 24,
+    test: (x, z) => ctx.dryClear(x, z, 5) && ctx.reach(x, z) && ctx.free(x, z, 4) && hyp({ x, z }, s1) >= 40 && hyp({ x, z }, s1) <= 56 && hyp({ x, z }, hall) >= 60,
     score: (x, z) => -hyp({ x, z }, s0)
   }), 'o depósito de ferro');
   ctx.take(iron, 10);
   extra.ironDepot = pt(iron);
-  extra.allyStart = pt(s1); // o aliado que trai aos 5:30 (Mervane/Hurgan) parte do slot 1
-  // praias do desembarque da frota de Aurelan (H07), uma em cada lado
-  const b1 = pickBeach(ctx, s0, 'a praia 1', { avoid: [{ p: hall, r: 24 }] });
-  const b2 = pickBeach(ctx, s1, 'a praia 2', { avoid: [{ p: hall, r: 24 }, { p: b1, r: 40 }] });
+  extra.allyStart = pt(s1); // o aliado que trai aos 5:30 (Mervane) parte do slot 1
+  // praias do desembarque da frota (uma em cada lado), a 50–100 u das bases
+  const b1 = pickBeach(ctx, s0, 'a praia 1', { dMin: 50, dMax: 100, target: 70, avoid: [{ p: hall, r: 40 }] });
+  const b2 = pickBeach(ctx, s1, 'a praia 2', { dMin: 50, dMax: 100, target: 70, avoid: [{ p: hall, r: 40 }, { p: b1, r: 60 }] });
   [b1, b2].forEach((b, i) => {
     extra[`beach${i + 1}`] = pt(b);
     extra[`seaLanding${i + 1}`] = { ...ctx.waterNear(b.x, b.z, 8, 18), water: true };
   });
   extra.landingZone = extra.beach1;
-  addGold(ctx, s0, 'expansion1', extra, { plain: true });
-  addGold(ctx, s1, 'expansion2', extra, { plain: true });
+  addGold(ctx, s0, 'expansion1', extra, { plain: true, dMin: 50, dMax: 80, target: 62 });
+  addGold(ctx, s1, 'expansion2', extra, { plain: true, dMin: 50, dMax: 80, target: 62 });
+  // M3-08: madeira ao alcance de cada base (a meta de 6.000 a 60 u): 3 matas de 14 árvores a 22–46 u de cada Paço, do lado do brejo
+  for (const s of [s0, s1]) {
+    const cands = [];
+    for (let z = -ctx.half + 10; z <= ctx.half - 10; z += 4) for (let x = -ctx.half + 10; x <= ctx.half - 10; x += 4) {
+      const d = hyp({ x, z }, s);
+      if (d >= 22 && d <= 46) cands.push({ x, z, s: Math.abs(d - 32) + jitter(x, z) });
+    }
+    cands.sort((a, b) => a.s - b.s);
+    let added = 0;
+    for (const c of cands) {
+      if (added >= 3) break;
+      if (!ctx.dryClear(c.x, c.z, 4) || !ctx.reach(c.x, c.z) || !ctx.free(c.x, c.z, 4)) continue;
+      if (m.forests.some((f) => hyp(c, f) < 18)) continue;
+      const x = r1(c.x), z = r1(c.z);
+      m.forests.push({ x, z, count: 14, radius: 10, species: speciesForBiome(getBiomeAt(m, x, z), false, jitter(x, z)) });
+      ctx.take({ x, z }, 14);
+      added++;
+    }
+  }
 }
 
 /** Palco 8: passagens de lava, Monte Caldeira, Forja Naval (na costa) e Santuário das Cinzas do lado dos Clãs, prisioneiros, chegada de Lyra. */

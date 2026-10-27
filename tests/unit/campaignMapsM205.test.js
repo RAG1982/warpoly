@@ -66,7 +66,7 @@ describe('M2-05 · registro e formato (palcos 7, 8 e 9)', () => {
       expect(decodeBiomeGrid(m.biomeGrid).length).toBe(m.biomeGrid.nodes ** 2);
       expect(TILESETS[m.tileset], m.tileset).toBeDefined();
       expect(m.size).toBeGreaterThanOrEqual(96);
-      expect(m.size).toBeLessThanOrEqual(192);
+      expect(m.size).toBeLessThanOrEqual(id === 'camp-07-brejo-mudo' ? 320 : 192); // M3-08: o Brejo Mudo foi ampliado a 320 (como o Cerne Verde, M3-06b)
       expect(m.startSlots).toHaveLength(2);
       expect(m.maxPlayers).toBe(2);
       const gold = m.resources.filter((r) => r.type === 'gold');
@@ -137,7 +137,7 @@ describe('M2-05 · Brejo Mudo (palco 7)', () => {
       expect(hyp(a[k], a.brakkaHall), k).toBeLessThanOrEqual(30);
     }
     expect(hyp(a.boarPen1, a.boarPen2)).toBeGreaterThanOrEqual(10);
-    expect(hyp(a.ironDepot, s1)).toBeLessThanOrEqual(40);
+    expect(hyp(a.ironDepot, s1)).toBeLessThanOrEqual(60); // M3-08: mapa de 320, depósito atrás do Paço de Mervane (40–56 u)
     expect(hyp(a.ironDepot, s1)).toBeLessThan(hyp(a.ironDepot, s0));
   });
 

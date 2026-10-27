@@ -112,12 +112,12 @@ describe('m05 Cerne Verde · o Salão do Bosque e as levas inimigas', () => {
     expect(gm.mission.def.players[1]).toMatchObject({ isAI: true, difficulty: 'easy' });
   });
 
-  it('3 levas roteirizadas (360, 600 e 840 s) saem da base inimiga rumo ao Paço: serpes+esqueletos, necromantes+esqueletos+ogros, serpes+ogros+guerreiros+catapulta', async () => {
+  it('3 levas roteirizadas (330, 570 e 810 s; a base inimiga está a ~156 u: chegam ~30 s depois) saem da base inimiga rumo ao Paço: serpes+esqueletos, necromantes+esqueletos+ogros, serpes+ogros+guerreiros+catapulta', async () => {
     const { gm } = await boot();
     const trig = (id) => gm.mission.def.triggers.find((t) => t.id === id);
     const A = gm.terrain.mapDef.anchors;
     const comp = (id) => Object.fromEntries(trig(id).actions.find((a) => a.type === 'spawn').units.map((u) => [u.type, u.count]));
-    expect([1, 2, 3].map((i) => trig(`raid-${i}`).when.at)).toEqual([360, 600, 840]);
+    expect([1, 2, 3].map((i) => trig(`raid-${i}`).when.at)).toEqual([330, 570, 810]);
     expect(comp('raid-1')).toEqual({ war_serpent: 3, skeleton: 4 });
     expect(comp('raid-2')).toEqual({ necromancer: 2, skeleton: 5, ogre: 3 });
     expect(comp('raid-3')).toEqual({ war_serpent: 3, ogre: 4, grunt: 4, catapult: 1 });
@@ -128,8 +128,8 @@ describe('m05 Cerne Verde · o Salão do Bosque e as levas inimigas', () => {
       expect(a.order.kind).toBe('attackMove');
       expect(d(a.order, A.playerStart)).toBeLessThan(0.5);
     }
-    // a 1ª chega: 7 unidades hostis no instante 360 s
-    const run = await boot([{ name: 'espera', wait: 361, run: (c) => { expect(c.tagged('raid')).toHaveLength(7); expect(c.tagged('raid').every((u) => u.ownerId === 1)).toBe(true); } }], 365);
+    // a 1ª sai: 7 unidades hostis no instante 330 s
+    const run = await boot([{ name: 'espera', wait: 331, run: (c) => { expect(c.tagged('raid')).toHaveLength(7); expect(c.tagged('raid').every((u) => u.ownerId === 1)).toBe(true); } }], 335);
     expect(run.outcome).toBeNull();
   }, 60000);
 });

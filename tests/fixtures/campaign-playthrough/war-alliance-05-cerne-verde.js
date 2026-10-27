@@ -6,7 +6,7 @@
  * (`rush`) não derruba o Salão do Bosque.
  */
 export const campaignId = 'war-alliance';
-export const targetMinutes = 12; // ficha: 18–22 min (jogador humano); o harness aceita até 2×. O robô não pensa nem olha a câmera e fecha em ~9 min.
+export const targetMinutes = 12; // ficha: 18–22 min (jogador humano); o harness aceita até 2×. O robô não pensa nem olha a câmera e fecha em ~16 min (M3-06b: mapa de 320, bases a ~156 u).
 
 const dist = (a, b) => Math.hypot(a.x - b.x, a.z - b.z);
 const posOf = (e) => ({ x: e.mesh.position.x, z: e.mesh.position.z });
@@ -94,12 +94,12 @@ function econ(c, { army = true } = {}) {
   if (!army) return;
   const rt = c.gm.mission;
   const arcane = c.bld('arcane_tower');
-  if (arcane && arcane.queue.length < 2 && rt.trainedCount(0, 'mage') + arcane.queue.length < 6) c.issue({ type: c.CMD.TRAIN, buildingId: arcane.id, unitType: 'mage' });
+  if (arcane && arcane.queue.length < 2 && c.mine('mage').length + arcane.queue.length < 6) c.issue({ type: c.CMD.TRAIN, buildingId: arcane.id, unitType: 'mage' });
   const aviary = c.bld('aviary');
   if (aviary && aviary.queue.length < 1 && rt.trainedCount(0, 'gryphon_rider') + aviary.queue.length < 2 && res(c).gold > 330) c.issue({ type: c.CMD.TRAIN, buildingId: aviary.id, unitType: 'gryphon_rider' });
   const barracks = c.bld('barracks');
   // magos e grifo têm prioridade no ouro; o Quartel treina com o que sobra (2 arqueiros para 1 espadachim: as serpes voam)
-  const reserve = arcane && rt.trainedCount(0, 'mage') < 4 ? 130 : 0;
+  const reserve = arcane && c.mine('mage').length < 4 ? 130 : 0; // M3-06b: repõe Magos perdidos nas levas (o mapa maior alonga a marcha)
   if (barracks && barracks.queue.length < 2 && res(c).gold > reserve + 40) {
     const n = rt.trainedCount(0, 'knight') + rt.trainedCount(0, 'archer');
     c.issue({ type: c.CMD.TRAIN, buildingId: barracks.id, unitType: n % 3 === 0 ? 'knight' : 'archer' });

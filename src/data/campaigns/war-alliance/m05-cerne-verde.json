@@ -308,8 +308,8 @@
         "en": "Free the 3 captive woodcutters"
       },
       "description": {
-        "pt-BR": "Batedores do Clã prenderam os lenhadores numa clareira ao sul da base, longe da mata cerrada. Derrote os guardas e eles trabalham para você.",
-        "en": "Clan scouts hold the woodcutters in a clearing south of the base, away from the dense forest. Defeat the guards and they work for you."
+        "pt-BR": "Batedores do Clã prenderam os lenhadores numa clareira no caminho entre as bases, a meio da mata cerrada. Derrote os guardas e eles trabalham para você.",
+        "en": "Clan scouts hold the woodcutters in a clearing on the road between the bases, deep in the dense forest. Defeat the guards and they work for you."
       }
     },
     {
@@ -361,7 +361,7 @@
         "en": "The Sacred Grove"
       },
       "description": {
-        "pt-BR": "Um brilho entre as árvores mais velhas, ao sul do caminho entre as bases. Mande alguém até lá.",
+        "pt-BR": "Um brilho entre as árvores mais velhas, ao sul do caminho entre as bases, a meio da travessia. Mande alguém até lá.",
         "en": "A glint among the oldest trees, south of the path between the bases. Send someone there."
       }
     }
@@ -704,7 +704,7 @@
       "id": "raid-1",
       "when": {
         "type": "time",
-        "at": 360
+        "at": 330
       },
       "actions": [
         {
@@ -759,7 +759,7 @@
       "id": "raid-2",
       "when": {
         "type": "time",
-        "at": 600
+        "at": 570
       },
       "actions": [
         {
@@ -805,7 +805,7 @@
       "id": "raid-3",
       "when": {
         "type": "time",
-        "at": 840
+        "at": 810
       },
       "actions": [
         {

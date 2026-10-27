@@ -29,7 +29,7 @@ import { FOREST_SPECIES } from '../treeSpecies.js';
 export { FOREST_SPECIES }; // F7-00b: bétula; M2-10: `broad|palm|acacia` (fonte única em src/data/treeSpecies.js)
 export const RESOURCE_TYPES = Object.freeze(['gold', 'stone', 'oil']);
 export const MAP_ID_RE = /^[a-z0-9][a-z0-9-]{1,47}$/;
-export const SIZE_LIMITS = Object.freeze({ min: 64, max: 256 });
+export const SIZE_LIMITS = Object.freeze({ min: 64, max: 320 });
 export const MIN_PLAYABLE_SIZE = 168; // Regra: todo mapa jogável de escaramuça tem no mínimo 168x168
 const CAMP_MIN_SLOT_DIST = 25;
 const FOREST_MIN_SLOT_DIST = 27;

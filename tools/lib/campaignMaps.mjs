@@ -88,8 +88,8 @@ export const CAMPAIGN_PRESETS = freeze({
   /** Palco 5 (M2-04): floresta densa com clareiras, rio curto com um vau; Liga a oeste, Clã a leste. */
   'camp-05-cerne-verde': freeze({
     id: 'camp-05-cerne-verde', name: 'Cerne Verde', uso: 'campanha, palco 5 (Liga e Clãs)', tileset: 'verdejante', naval: false,
-    options: freeze({ size: 176, grid: 176, continents: 1, continentBiome: 'forest', continentDims: [0.44, 0.36], islands: 0, islets: 0, bays: 3, peninsulas: 2, roughness: 1.0, lava: false, rivers: 1, riverFordSpacing: 40 }),
-    layout: freeze({ bases: [{ entities: [0], side: 'west' }, { entities: [0], side: 'east' }], minSeparation: 66 }),
+    options: freeze({ size: 320, grid: 320, continents: 1, continentBiome: 'forest', continentDims: [0.44, 0.36], islands: 0, islets: 0, bays: 3, peninsulas: 2, roughness: 1.0, lava: false, rivers: 1, riverFordSpacing: 90 }),
+    layout: freeze({ bases: [{ entities: [0], side: 'west' }, { entities: [0], side: 'east' }], minSeparation: 155 }),
     verify: freeze({ landRange: [0.25, 0.8], minRivers: 1 })
   }),
   /** Palco 6 (M2-04): continente gelado com lagos congelados e banquisa; 4 bases: jogador (SO), Lanças Quebradas (L), Sal Cinzento (N) e o aliado Brumar (O/S). */
@@ -1059,7 +1059,7 @@ function postCerne(ctx, extra) {
   const mid = { x: (s0.x + s1.x) / 2, z: (s0.z + s1.z) / 2 };
   const grove = need(ctx.scan({
     test: (x, z) => ctx.dryClear(x, z, 10) && ctx.reach(x, z) && ctx.free(x, z, 8) && hyp({ x, z }, s0) >= 38 && hyp({ x, z }, s1) >= 38,
-    score: (x, z) => hyp({ x, z }, mid)
+    score: (x, z) => hyp({ x, z }, { x: mid.x, z: mid.z + 16 }) // 16 u ao sul (z+) do caminho entre as bases
   }), 'o bosque sagrado');
   ctx.take(grove, 24);
   extra.sacredGrove = pt(grove);
@@ -1071,7 +1071,7 @@ function postCerne(ctx, extra) {
   }
   const nest = need(ctx.scan({
     step: 1,
-    test: (x, z) => ctx.dryClear(x, z, 2.5) && ctx.reach(x, z) && ctx.free(x, z, 6) && hyp({ x, z }, s0) >= 40 && hyp({ x, z }, s1) >= 40 && hyp({ x, z }, grove) >= 30,
+    test: (x, z) => ctx.dryClear(x, z, 2.5) && ctx.reach(x, z) && ctx.free(x, z, 6) && hyp({ x, z }, s0) >= 60 && hyp({ x, z }, s1) >= 60 && hyp({ x, z }, grove) >= 40 && x >= 30, // M3-06b: ninho a leste (o mapa é bem maior)
     score: (x, z) => -wetFrac(ctx, x, z, 10) * 60 - wetFrac(ctx, x, z, 18) * 30
   }), 'o ninho de grifos');
   ctx.take(nest, 14);
@@ -1079,7 +1079,7 @@ function postCerne(ctx, extra) {
   // clareiras: uma a caminho do meio de cada lado e uma terceira fora do eixo
   const perp = { x: -(s1.z - s0.z), z: s1.x - s0.x };
   const Lp = Math.hypot(perp.x, perp.z) || 1;
-  const spots = [toward(s0, mid, 44), toward(s1, mid, 44), { x: mid.x + (perp.x / Lp) * 34, z: mid.z + (perp.z / Lp) * 34 }];
+  const spots = [toward(s0, mid, 62), toward(s1, mid, 62), { x: mid.x + (perp.x / Lp) * 48, z: mid.z + (perp.z / Lp) * 48 }];
   spots.forEach((p, i) => {
     const c = need(ctx.scan({ test: (x, z) => ctx.dryClear(x, z, 9) && ctx.reach(x, z) && ctx.free(x, z, 6) && hyp({ x, z }, s0) >= 28 && hyp({ x, z }, s1) >= 28, score: (x, z) => hyp({ x, z }, p) }), `a clareira ${i + 1}`);
     ctx.take(c, 16);
@@ -1087,19 +1087,19 @@ function postCerne(ctx, extra) {
   });
   // Salão do Bosque (posto madeireiro) de cada lado: o do slot 1 é o alvo da Liga; o do slot 0, o do assalto da Horda
   for (const [s, name] of [[s0, 'lumberHall1'], [s1, 'lumberHall2']]) {
-    const p = need(ctx.scan({ test: (x, z) => ctx.dryClear(x, z, 7) && ctx.reach(x, z) && ctx.free(x, z, 5) && hyp({ x, z }, s) >= 26 && hyp({ x, z }, s) <= 42, score: (x, z) => Math.abs(hyp({ x, z }, s) - 33) + 0.25 * hyp({ x, z }, mid) }), `o ${name}`);
+    const p = need(ctx.scan({ test: (x, z) => ctx.dryClear(x, z, 7) && ctx.reach(x, z) && ctx.free(x, z, 5) && hyp({ x, z }, s) >= 30 && hyp({ x, z }, s) <= 50, score: (x, z) => Math.abs(hyp({ x, z }, s) - 40) + 0.25 * hyp({ x, z }, mid) }), `o ${name}`);
     ctx.take(p, 14);
     extra[name] = pt(p);
   }
   // Oren e os dois Magos aliados chegam por perto do jogador (A05)
-  extra.orenStart = pt(ctx.take(nearDry(ctx, toward(s0, mid, 24), 'o ponto do Oren', { r: 4 }), 8));
+  extra.orenStart = pt(ctx.take(nearDry(ctx, toward(s0, mid, 30), 'o ponto do Oren', { r: 4 }), 8));
   // mata densa extra: bosques em toda a ilha, longe das bases, do bosque sagrado e dos já postos (mais madeira para a campanha)
   let added = 0;
   const scored = [];
   for (let z = -ctx.half + 10; z <= ctx.half - 10; z += 5) for (let x = -ctx.half + 10; x <= ctx.half - 10; x += 5) scored.push({ x, z, k: jitter(x, z) });
   scored.sort((a, b) => a.k - b.k);
   for (const c of scored) {
-    if (added >= 14) break;
+    if (added >= 30) break; // M3-06b: mapa ~3,3x maior, mata extra proporcional
     if (!ctx.dryClear(c.x, c.z, 4) || !ctx.reach(c.x, c.z) || !ctx.free(c.x, c.z, 4)) continue;
     if (hyp(c, s0) < 30 || hyp(c, s1) < 30 || hyp(c, grove) < 24) continue;
     if (m.forests.some((f) => hyp(c, f) < 16)) continue;

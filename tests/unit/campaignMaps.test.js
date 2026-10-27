@@ -56,7 +56,7 @@ describe('M2-03 · registro e formato', () => {
   });
 
   for (const id of IDS) {
-    it(`${id}: registrado como hidden (fora da Escaramuça), painted com biomeGrid, tileset existente, tamanho 96–224, 2 vagas (3 no 11, 4 na Geada)`, () => {
+    it(`${id}: registrado como hidden (fora da Escaramuça), painted com biomeGrid, tileset existente, tamanho 96–320, 2 vagas (3 no 11, 4 na Geada)`, () => {
       const m = getMap(id);
       expect(m, id).toBeTruthy();
       expect(m.id).toBe(id);
@@ -68,7 +68,7 @@ describe('M2-03 · registro e formato', () => {
       expect(decodeBiomeGrid(m.biomeGrid).length).toBe(m.biomeGrid.nodes ** 2);
       expect(TILESETS[m.tileset], m.tileset).toBeDefined();
       expect(m.size).toBeGreaterThanOrEqual(96);
-      expect(m.size).toBeLessThanOrEqual(224);
+      expect(m.size).toBeLessThanOrEqual(320); // M3-06b: camp-05 tem 320
       expect(m.startSlots).toHaveLength(SLOTS[id] ?? 2);
       expect(m.maxPlayers).toBe(SLOTS[id] ?? 2);
     });

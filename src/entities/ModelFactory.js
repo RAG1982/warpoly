@@ -674,7 +674,7 @@ export class ModelFactory {
       case 'glider': return this._glbOr('glider', () => this.getOrCreateModel('glider', createGlider, 'glider'));
       case 'war_balloon': return this._glbOr('war_balloon', () => this.getOrCreateModel('war_balloon', createWarBalloon, 'war_balloon'));
       case 'gryphon_rider': return this._glbOr('gryphon_rider_v2', () => this._glbOr('gryphon_rider', () => this.getOrCreateModel('gryphon_rider', createGryphonRider, 'gryphon_rider')));
-      case 'war_serpent': return this._glbOr('war_serpent', () => this.getOrCreateModel('war_serpent', createWarSerpent, 'war_serpent'));
+      case 'war_serpent': return this._glbOr('war_serpent_v2', () => this._glbOr('war_serpent', () => this.getOrCreateModel('war_serpent', createWarSerpent, 'war_serpent')));
       // F4-07: naval (procedurais provisórios; .glb via `_glbOr` com a mesma chave)
       case 'tanker': return this._factionGlb('tanker', factionId) || this._glbOr('tanker', () => this.getOrCreateModel('tanker', createTanker));
       // F4-07b: navios de guerra (.glb por facção; procedural com `?glb=0`). O orc usa os tipos `war_galley/iron_leviathan/colossal_turtle` (`modelOf`).

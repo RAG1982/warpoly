@@ -1002,6 +1002,19 @@ const MODEL_CATALOG = [
     notes: 'Nós GryphonRider > Torso > Head, WingL > WingTipL, WingR > WingTipR, Tail (pivôs no pescoço, ombros, cotovelos das asas e garupa). O UnitAnimator.applyAir bate WingL/WingR em z (ponta atrasada), ondula a cauda e na morte mergulha com as asas dobradas. ~7,6 mil triângulos, 9 draw calls, atlas 512², ~184 KB. Base em y ~ 0 (a simulação aplica flyHeight 4,5).'
   },
   {
+    id: 'war_serpent_v2_glb',
+    name: 'Serpe de Guerra v2 (Tripo)',
+    category: 'units',
+    faction: 'orc',
+    type: 'war_serpent',
+    icon: '🐉',
+    glb: 'war_serpent_v2',
+    sourceFile: 'tools/blender/build_serpent_tripo.py',
+    create: createGlb('war_serpent_v2'),
+    description: 'Serpe de Guerra v2 (ART-SERPE): serpe alada de escamas escuras com membrana vermelha, crista dorsal, cabeça com chifres e presas, rédeas de corrente e cavaleiro orc selado, do Tripo finalizada no Blender (public/models/war_serpent_v2.glb). Armadura do cavaleiro e placa da sela em TeamColor. É o padrão do jogo; a Serpe de Guerra (Blender) antiga continua como reserva.',
+    notes: 'Nós WarSerpent > Torso > Head, WingL > WingTipL, WingR > WingTipR, Tail > TailTip (pivôs no pescoço, ombros, cotovelos das asas, garupa e meio da cauda). O UnitAnimator.applyAir bate as asas (ponta atrasada), ondula tronco e cauda em onda, dá o bote ao atacar (recua, projeta a cabeça) e na morte cai em espiral. 6,8 mil triângulos, 11 draw calls, atlas 512², ~196 KB. Base em y = 0 (a simulação aplica flyHeight).'
+  },
+  {
     id: 'war_serpent_glb',
     name: 'Serpe de Guerra (Blender)',
     category: 'units',

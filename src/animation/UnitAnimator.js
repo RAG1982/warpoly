@@ -30,6 +30,8 @@ const ARCHER_V2_DRAW = {
 
 /** F4-06: tipos de modelo com a animação de voo (`applyAir`). */
 const AIR_TYPES = new Set(['glider', 'war_balloon', 'gryphon_rider', 'war_serpent']);
+/** ART-GRIFO / ART-SERPE: aéreos com rig segmentado (pontas das asas, cauda) nos .glb v2; sem os nós a animação cai no padrão. */
+const SEGMENTED_AIR = new Set(['gryphon_rider', 'war_serpent']);
 
 /** F4-07: tipos de modelo naval (`applyNaval`: balanço de ondas no nó `Hull`, panos/bandeira, recuo dos canhões). */
 const NAVAL_TYPES = new Set(['tanker', 'frigate', 'war_galley', 'barge', 'dreadnought', 'iron_leviathan', 'submersible', 'colossal_turtle']);
@@ -140,9 +142,11 @@ export class UnitAnimator {
       wingR: ud.wingR || model.getObjectByName('WingR'),
       rotor: ud.rotor || model.getObjectByName('Rotor'),
       // ART-GRIFO: pontas das asas (filhas de WingL/WingR) e cauda do Cavaleiro Grifo (gryphon_rider_v2.glb); só nesse tipo
-      wingTipL: this.unitType === 'gryphon_rider' ? model.getObjectByName('WingTipL') : null,
-      wingTipR: this.unitType === 'gryphon_rider' ? model.getObjectByName('WingTipR') : null,
-      tail: this.unitType === 'gryphon_rider' ? model.getObjectByName('Tail') : null
+      wingTipL: SEGMENTED_AIR.has(this.unitType) ? model.getObjectByName('WingTipL') : null,
+      wingTipR: SEGMENTED_AIR.has(this.unitType) ? model.getObjectByName('WingTipR') : null,
+      tail: SEGMENTED_AIR.has(this.unitType) ? model.getObjectByName('Tail') : null,
+      // ART-SERPE: ponta da cauda (filha de Tail) da Serpe de Guerra (war_serpent_v2.glb); sem o nó (procedural/v1) fica null
+      tailTip: this.unitType === 'war_serpent' ? model.getObjectByName('TailTip') : null
     };
     // F4-07: navios — `Hull` (casco; balança), `Flag`/`Sail*` (panos e bandeira), `Cannon*`/`Turret*` (recuo/giro). Chaves numeradas
     // entram em `meshParts` para o reset de transformações (`resetTransforms`) tratá-las como as demais partes.
@@ -555,6 +559,43 @@ export class UnitAnimator {
       parts.tail.rotation.x = Math.sin(TAU * phase * (fast ? 2 : 1) + 0.4) * 0.1;
     }
     if (parts.head && parts.wingTipL && anim !== 'fight') parts.head.rotation.x = Math.sin(TAU * phase * (fast ? 2 : 1) + 0.5) * 0.06;
+    if (parts.tailTip) this.applySerpentBody(phase, parts, anim, fast);
+  }
+
+  /**
+   * ART-SERPE: corpo serpentino da Serpe de Guerra — a onda corre da cabeça à cauda (o tronco rola e guina em contrafase com a
+   * cauda, `TailTip` atrasa em relação a `Tail`), a cabeça acompanha e, ao atacar, dá o bote (recua, projeta o pescoço e volta).
+   * Só rotações/posições locais; sobrescreve o que `applyAir` pôs em `tail`/`head`.
+   */
+  applySerpentBody(phase, parts, anim, fast) {
+    const TAU = Math.PI * 2;
+    const w = TAU * phase * (fast ? 2 : 1);
+    const amp = fast ? 1.0 : 0.6;
+    if (parts.torso) {
+      parts.torso.rotation.z += Math.sin(w + 0.8) * 0.05 * amp;
+      parts.torso.rotation.y += Math.sin(w + 2.0) * 0.04 * amp;
+    }
+    if (parts.tail) {
+      parts.tail.rotation.y = Math.sin(w + 1.4) * 0.3 * amp;
+      parts.tail.rotation.x = Math.sin(w + 0.3) * 0.12 * amp;
+    }
+    parts.tailTip.rotation.y = Math.sin(w + 0.4) * 0.5 * amp;
+    parts.tailTip.rotation.x = Math.sin(w - 0.6) * 0.18 * amp;
+    if (parts.head && anim !== 'fight') {
+      parts.head.rotation.y = Math.sin(w + 2.6) * 0.1 * amp;
+      parts.head.rotation.x = Math.sin(w + 0.9) * 0.07 * amp;
+    }
+    if (parts.head && anim === 'fight') {
+      // bote: 0..0.35 recua (cabeça para cima), 0.35..0.55 golpe (cabeça desce e avança), resto recolhe
+      const q = phase;
+      const windup = q < 0.35 ? Math.sin((q / 0.35) * Math.PI * 0.5) : 0;
+      const strike = q >= 0.35 && q < 0.55 ? Math.sin(((q - 0.35) / 0.2) * Math.PI) : 0;
+      const recover = q >= 0.55 ? Math.cos(((q - 0.55) / 0.45) * Math.PI * 0.5) * 0.4 : 0;
+      parts.head.rotation.x = -0.4 * windup + 0.7 * strike - 0.16 * recover;
+      parts.head.position.z += 0.5 * strike - 0.15 * windup;
+      if (parts.torso) parts.torso.rotation.x += 0.1 * strike;
+      parts.tailTip.rotation.x += 0.3 * windup;
+    }
   }
 
   /**
@@ -578,6 +619,13 @@ export class UnitAnimator {
     if (parts.head) parts.head.rotation.x = Math.min(1, progress * 2) * 0.7;
     if (parts.tail) parts.tail.rotation.x = -Math.min(1, progress * 2) * 0.6;
     if (this.model) this.model.rotation.z = t * 2.6;
+    // ART-SERPE: queda em espiral — o tronco gira em parafuso e a cauda chicoteia atrás
+    if (parts.tailTip) {
+      if (parts.torso) parts.torso.rotation.y = t * TAU * 1.25;
+      parts.tailTip.rotation.y = Math.sin(TAU * progress * 3) * 0.6 * (1 - progress);
+      parts.tailTip.rotation.x = -Math.min(1, progress * 2) * 0.5;
+      if (parts.tail) parts.tail.rotation.y = Math.sin(TAU * progress * 2 + 1) * 0.4 * (1 - progress);
+    }
   }
 
   /**
@@ -1623,7 +1671,7 @@ export class UnitAnimator {
 
   // --- 6. FALL / DIE ANIMATION ---
   applyDie(time, progress, parts, uType) {
-    if (uType === 'gryphon_rider' && parts.wingTipL) {
+    if (SEGMENTED_AIR.has(uType) && parts.wingTipL) {
       this.applyAirDie(progress, parts);
       return;
     }

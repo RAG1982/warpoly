@@ -138,7 +138,11 @@ export class UnitAnimator {
       // F4-06: aéreos (asas/hélice)
       wingL: ud.wingL || model.getObjectByName('WingL'),
       wingR: ud.wingR || model.getObjectByName('WingR'),
-      rotor: ud.rotor || model.getObjectByName('Rotor')
+      rotor: ud.rotor || model.getObjectByName('Rotor'),
+      // ART-GRIFO: pontas das asas (filhas de WingL/WingR) e cauda do Cavaleiro Grifo (gryphon_rider_v2.glb); só nesse tipo
+      wingTipL: this.unitType === 'gryphon_rider' ? model.getObjectByName('WingTipL') : null,
+      wingTipR: this.unitType === 'gryphon_rider' ? model.getObjectByName('WingTipR') : null,
+      tail: this.unitType === 'gryphon_rider' ? model.getObjectByName('Tail') : null
     };
     // F4-07: navios — `Hull` (casco; balança), `Flag`/`Sail*` (panos e bandeira), `Cannon*`/`Turret*` (recuo/giro). Chaves numeradas
     // entram em `meshParts` para o reset de transformações (`resetTransforms`) tratá-las como as demais partes.
@@ -542,6 +546,38 @@ export class UnitAnimator {
     if (parts.wingR) parts.wingR.rotation.z = -flap;
     if (parts.rotor) parts.rotor.rotation.z = TAU * phase * (fast ? 4 : 1);
     if (parts.head && anim === 'fight') parts.head.rotation.x = 0.35 * Math.sin(phase * Math.PI);
+    // ART-GRIFO: a ponta da asa atrasa em relação ao ombro (dobra na batida), a cauda de leão ondula e a cabeça acompanha o bob
+    const lag = Math.sin(TAU * phase * (fast ? 4 : 2) - 0.9) * (fast ? 0.5 : 0.28);
+    if (parts.wingTipL) parts.wingTipL.rotation.z = lag;
+    if (parts.wingTipR) parts.wingTipR.rotation.z = -lag;
+    if (parts.tail) {
+      parts.tail.rotation.y = Math.sin(TAU * phase * (fast ? 2 : 1) + 1.1) * (fast ? 0.32 : 0.22);
+      parts.tail.rotation.x = Math.sin(TAU * phase * (fast ? 2 : 1) + 0.4) * 0.1;
+    }
+    if (parts.head && parts.wingTipL && anim !== 'fight') parts.head.rotation.x = Math.sin(TAU * phase * (fast ? 2 : 1) + 0.5) * 0.06;
+  }
+
+  /**
+   * ART-GRIFO: morte dos aéreos — mergulho de bico com asas dobradas para cima, giro em parafuso e queda até o chão
+   * (`Torso` desce `flyHeight`; só rotações/posição local, a posição de mundo do modelo continua do jogo).
+   */
+  applyAirDie(progress, parts) {
+    const t = Math.min(1, progress / 0.85);
+    const fall = t * t;
+    const TAU = Math.PI * 2;
+    if (parts.torso) {
+      parts.torso.rotation.x = Math.min(1, progress * 2.2) * 0.9;
+      parts.torso.position.y -= 4.4 * fall;
+    }
+    const fold = Math.min(1, progress * 3) * 1.15;
+    const flutter = Math.sin(TAU * progress * 3) * 0.18 * (1 - progress);
+    if (parts.wingL) parts.wingL.rotation.z = -fold + flutter;
+    if (parts.wingR) parts.wingR.rotation.z = fold - flutter;
+    if (parts.wingTipL) parts.wingTipL.rotation.z = -fold * 0.4;
+    if (parts.wingTipR) parts.wingTipR.rotation.z = fold * 0.4;
+    if (parts.head) parts.head.rotation.x = Math.min(1, progress * 2) * 0.7;
+    if (parts.tail) parts.tail.rotation.x = -Math.min(1, progress * 2) * 0.6;
+    if (this.model) this.model.rotation.z = t * 2.6;
   }
 
   /**
@@ -1587,6 +1623,10 @@ export class UnitAnimator {
 
   // --- 6. FALL / DIE ANIMATION ---
   applyDie(time, progress, parts, uType) {
+    if (uType === 'gryphon_rider' && parts.wingTipL) {
+      this.applyAirDie(progress, parts);
+      return;
+    }
     if (this.deathStyle !== 'cut') {
       this.applyDieStyled(progress, parts);
       return;

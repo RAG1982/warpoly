@@ -989,6 +989,19 @@ const MODEL_CATALOG = [
     notes: 'Nós Torso, Head, WingL, WingR. ~5,1 mil triângulos, 7 draw calls, atlas 512², ~270 KB.'
   },
   {
+    id: 'gryphon_rider_v2_glb',
+    name: 'Cavaleiro Grifo v2 (Tripo)',
+    category: 'units',
+    faction: 'human',
+    type: 'gryphon_rider',
+    icon: '🦅',
+    glb: 'gryphon_rider_v2',
+    sourceFile: 'tools/blender/build_gryphon_tripo.py',
+    create: createGlb('gryphon_rider_v2'),
+    description: 'Cavaleiro Grifo v2 (ART-GRIFO): grifo com anão-cavaleiro do Tripo finalizado no Blender (public/models/gryphon_rider_v2.glb). Cabeça de águia com bico dourado, peitoral de placas, corpo e cauda de leão, asas de penas, cavaleiro de elmo e martelo. Ombreiras e elmo do cavaleiro em TeamColor. É o padrão do jogo; o Cavaleiro Grifo (Blender) antigo continua como reserva.',
+    notes: 'Nós GryphonRider > Torso > Head, WingL > WingTipL, WingR > WingTipR, Tail (pivôs no pescoço, ombros, cotovelos das asas e garupa). O UnitAnimator.applyAir bate WingL/WingR em z (ponta atrasada), ondula a cauda e na morte mergulha com as asas dobradas. ~7,6 mil triângulos, 9 draw calls, atlas 512², ~184 KB. Base em y ~ 0 (a simulação aplica flyHeight 4,5).'
+  },
+  {
     id: 'war_serpent_glb',
     name: 'Serpe de Guerra (Blender)',
     category: 'units',

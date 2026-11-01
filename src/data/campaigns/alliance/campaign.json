@@ -41,7 +41,7 @@
     { "id": "alliance-05-ferro-e-brasa", "requires": ["alliance-04-ponte-do-rio-turvo"], "carryOver": {"resources": {"gold": 0.25, "wood": 0.25, "stone": 0.25}, "max": 300},
       "unlocks": { "units": ["ballista", "sapper"], "buildings": ["workshop"], "research": ["siege_damage", "woodcutting"], "heroes": ["hero_brann"] } },
     { "id": "alliance-06-ilhas-de-brasa", "requires": ["alliance-05-ferro-e-brasa"], "carryOver": {"resources": {"gold": 0.25, "wood": 0.25, "stone": 0.25}, "max": 300},
-      "unlocks": { "units": ["tanker", "barge", "frigate", "dreadnought", "submersible"], "buildings": ["shipyard", "refinery", "oil_platform", "foundry"], "research": ["naval_cannons", "naval_hulls"] } },
+      "unlocks": { "units": ["tanker", "barge", "frigate", "dreadnought"], "buildings": ["shipyard", "refinery", "oil_platform", "foundry"], "research": ["naval_cannons", "naval_hulls"] } },
     { "id": "alliance-07-traicao-presa-negra", "requires": ["alliance-06-ilhas-de-brasa"], "carryOver": {"resources": {"gold": 0.25, "wood": 0.25, "stone": 0.25}, "max": 300},
       "unlocks": { "units": ["mage", "templar", "glider", "gryphon_rider"], "buildings": ["arcane_tower", "temple", "aviary"], "research": ["cavalry_class", "spell_fireball", "spell_slow", "spell_heal", "spell_exorcism", "melee_weapons@2", "melee_armor@2", "ranged_ammo@2"], "heroes": ["hero_oren"] } },
     { "id": "alliance-08-queda-do-cinzal", "requires": ["alliance-07-traicao-presa-negra"], "carryOver": {"resources": {"gold": 0.25, "wood": 0.25, "stone": 0.25}, "max": 300},

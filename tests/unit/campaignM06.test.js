@@ -116,16 +116,16 @@ describe('m06 A Geada · jogadores, tecnologia e Brann', () => {
     expect(gm.isHostile(0, 2) && gm.isHostile(0, 3) && gm.isHostile(1, 2) && gm.isHostile(1, 3)).toBe(true);
   });
 
-  it('árvore COMPLETA liberada (16 unidades, 16 construções, todas as fichas), e tudo o que os objetivos exigem está liberado para o jogador local (nada travado por techLock)', async () => {
+  it('árvore COMPLETA liberada (15 unidades, 16 construções, todas as fichas), e tudo o que os objetivos exigem está liberado para o jogador local (nada travado por techLock)', async () => {
     const camp = getCampaign('war-alliance');
     const t = availableTech(camp, 5);
-    expect(t.units.size).toBe(16);
+    expect(t.units.size).toBe(15);
     expect(t.buildings.size).toBe(16);
     expect(t.heroes.has('hero_brann')).toBe(true);
     for (const r of ['spell_blizzard', 'spell_flameshield', 'spell_invisibility', 'spell_polymorph', 'spell_holy_vision', 'ranger_sight', 'ranger_marksman']) expect(t.research.has(r), r).toBe(true);
     const { gm } = await boot();
     const locked = (arr) => arr.filter((r) => r && r.locked);
-    for (const u of ['villager', 'knight', 'archer', 'cavalier', 'ballista', 'sapper', 'ranger', 'mage', 'templar', 'gryphon_rider', 'glider', 'tanker', 'barge', 'frigate', 'dreadnought', 'submersible']) {
+    for (const u of ['villager', 'knight', 'archer', 'cavalier', 'ballista', 'sapper', 'ranger', 'mage', 'templar', 'gryphon_rider', 'glider', 'tanker', 'barge', 'frigate', 'dreadnought']) {
       expect(locked(missingUnitRequirements(0, u, gm)), `unidade ${u}`).toEqual([]);
     }
     for (const b of ['cottage', 'lumber_camp', 'farm', 'barracks', 'forge', 'watchtower', 'stable', 'workshop', 'wall_human', 'arcane_tower', 'temple', 'aviary', 'shipyard', 'refinery', 'foundry', 'oil_platform']) {

@@ -15,7 +15,7 @@
     "hints": [
       { "pt-BR": "As duas ilhas se ligam por pontes de terra: elas são pontos de estrangulamento.", "en": "The two islands link through land bridges: they are chokepoints." },
       { "pt-BR": "Brumar é uma guarnição aliada controlada pela IA.", "en": "Brumar is an AI-controlled allied garrison." },
-      { "pt-BR": "Dica: o Estaleiro (novo, exigido) precisa de água funda encostada na costa e treina Petroleiro, Fragata, Barcaça, Couraçado e Submersível. Navios custam petróleo: Brumar envia um primeiro lote quando o Estaleiro ficar pronto.", "en": "Tip: the new, required Shipyard needs deep water against the shore and trains the Tanker, Frigate, Barge, Dreadnought and Submersible. Ships cost oil: Brumar sends a first batch once the Shipyard is done." },
+      { "pt-BR": "Dica: o Estaleiro (novo, exigido) precisa de água funda encostada na costa e treina Petroleiro, Fragata, Barcaça e Couraçado. Navios custam petróleo: Brumar envia um primeiro lote quando o Estaleiro ficar pronto.", "en": "Tip: the new, required Shipyard needs deep water against the shore and trains the Tanker, Frigate, Barge and Dreadnought. Ships cost oil: Brumar sends a first batch once the Shipyard is done." },
       { "pt-BR": "Dica: o Petroleiro ergue Plataformas sobre os poços do mar. O mar do norte e o do sul não se ligam: um Estaleiro na costa norte alcança o poço nordeste (guardado pela frota inimiga); um na costa sul, o poço de Brumar. A Refinaria aumenta a coleta e a Fundição melhora canhões e cascos.", "en": "Tip: the Tanker raises Platforms over the sea wells. The sea to the north and the sea to the south do not connect: a Shipyard on the north coast reaches the northeast well (guarded by the enemy fleet); one on the south coast reaches the Brumar well. The Refinery boosts the haul and the Foundry upgrades cannons and hulls." },
       { "pt-BR": "Dica: a Barcaça leva até 6 tropas (ordem de embarcar; depois, desembarcar na margem). Um desembarque na Praia Norte pega o inimigo pelas costas.", "en": "Tip: the Barge carries up to 6 troops (board order; then unload on a shore). A landing on the North Beach catches the enemy from behind." }
     ]
@@ -86,9 +86,9 @@
       ] },
     { "id": "platform-up", "when": { "type": "objective", "id": "oil-platform", "status": "completed" },
       "actions": [
-        { "type": "spawn", "owner": "player", "units": [{ "type": "dreadnought", "count": 1 }, { "type": "submersible", "count": 1 }], "x": -36, "z": -54 },
+        { "type": "spawn", "owner": "player", "units": [{ "type": "dreadnought", "count": 1 }, { "type": "frigate", "count": 1 }], "x": -36, "z": -54 },
         { "type": "giveResources", "owner": "player", "oil": 100 },
-        { "type": "dialog", "speaker": { "pt-BR": "Capitã Lyra", "en": "Captain Lyra" }, "portrait": "⚓", "text": { "pt-BR": "O petróleo jorra! A frota real envia um Couraçado e um Submersível. Dica: o Couraçado bombardeia de longe (não acerta o que está colado a ele); o Submersível é invisível até atacar e só fere navios.", "en": "The oil flows! The royal fleet sends a Dreadnought and a Submersible. Tip: the Dreadnought shells from afar (it cannot hit what is right next to it); the Submersible is invisible until it strikes and only hurts ships." } }
+        { "type": "dialog", "speaker": { "pt-BR": "Capitã Lyra", "en": "Captain Lyra" }, "portrait": "⚓", "text": { "pt-BR": "O petróleo jorra! A frota real envia um Couraçado e uma Fragata. Dica: o Couraçado bombardeia de longe (não acerta o que está colado a ele); a Fragata é rápida e ataca navios, aéreos e a costa.", "en": "The oil flows! The royal fleet sends a Dreadnought and a Frigate. Tip: the Dreadnought shells from afar (it cannot hit what is right next to it); the Frigate is fast and hits ships, aircraft and shore." } }
       ] },
     { "id": "fleet-sunk", "when": { "type": "objective", "id": "sink-fleet", "status": "completed" },
       "actions": [

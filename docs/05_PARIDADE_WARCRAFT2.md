@@ -50,7 +50,7 @@ Legenda: ✅ existe · 🟡 parcial · ❌ falta · ➕ diferencial do WarPoly �
 | Sapadores | Dwarven Demolition Squad / Goblin Sappers | Sapadores de Pólvora (`sapper`) / Incendiários (`arsonist`) | ✅ |
 | Aéreo batedor | Gnomish Flying Machine / Goblin Zeppelin | Planador de Engenho (`glider`) / Balão de Guerra (`war_balloon`) | ✅ |
 | Aéreo de ataque | Gryphon Rider / Dragon | Cavaleiro Grifo (`gryphon_rider`) / Serpe de Guerra (`war_serpent`) | ✅ |
-| Naval | Oil Tanker, Destroyer, Transport, Battleship, Submarine / Oil Tanker, Destroyer, Transport, Juggernaught, Turtle | `tanker`, `frigate`, `war_galley`, `barge`, `dreadnought`, `iron_leviathan`, `submersible`, `colossal_turtle` | ✅ |
+| Naval | Oil Tanker, Destroyer, Transport, Battleship / Oil Tanker, Destroyer, Transport, Juggernaught | `tanker`, `frigate`, `war_galley`, `barge`, `dreadnought`, `iron_leviathan` | ✅ |
 | Heróis (BtDP) | Turalyon, Khadgar… / Grom, Deathwing… | 6 heróis únicos em `units.js` (Brann, Oren, Dorian / Drogath, Vozgul, Skarn) com 3 habilidades cada; **sem XP/níveis** e só o Brann tem modelo `.glb` | 🟡 |
 | Neutros / critters | ovelhas, porcos, focas | `bandit` + `bandit_camp` (recompensa), critters `sheep` e `boar` (`critters.js`) | ✅ |
 

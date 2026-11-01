@@ -457,7 +457,7 @@ describe('campanha do Reino: liberação progressiva e cobertura de unidades (F8
       conjurador: ['mage', 'templar', 'necromancer', 'ogre_mage'],
       sapador: ['sapper', 'arsonist'],
       aerea: ['glider', 'gryphon_rider', 'war_balloon', 'war_serpent'],
-      naval: ['tanker', 'barge', 'frigate', 'dreadnought', 'submersible', 'war_galley', 'iron_leviathan', 'colossal_turtle'],
+      naval: ['tanker', 'barge', 'frigate', 'dreadnought', 'war_galley', 'iron_leviathan'],
       heroi: ['hero_brann', 'hero_oren', 'hero_drogath']
     };
     const catOf = (t) => Object.keys(CAT).find((c) => CAT[c].includes(t));

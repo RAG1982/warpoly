@@ -837,7 +837,6 @@ export class UIManager {
         <span>${this._stat('speed', '🏃')} ${t('hud.stat.speed')}: ${u.speed}</span>
         ${u.minAttackRange > 0 ? `<span>${this._stat('range', '🎯')} ${t('hud.stat.range')}: ${u.minAttackRange}–${u.attackRange}</span>` : (u.layer === 'naval' && u.attackRange > 0 ? `<span>${this._stat('range', '🎯')} ${t('hud.stat.range')}: ${u.attackRange}</span>` : '')}
         ${u.transportCapacity > 0 ? `<span data-cargo-count>${this._stat('cargo', '📦')} ${t('hud.stat.cargo')}: ${u.cargo.length}/${u.transportCapacity}</span>` : ''}
-        ${u.submersible ? `<span>${this._stat('submerged', '🫥')} ${t('hud.stat.submerged')}</span>` : ''}
         ${u.layer === 'air' ? `<span>${this._stat('air', '🪽')} ${t('hud.stat.air')}</span>` : ''}
         ${u.layer === 'naval' ? `<span>${this._stat('naval', '⚓')} ${t('hud.stat.naval')}</span>` : ''}
         ${u.suicide ? `<span>${this._stat('suicide', '💣')} ${t('hud.stat.suicide')}</span>` : ''}
@@ -1565,7 +1564,7 @@ export class UIManager {
     for (let i = 0; i < all.length; i++) {
       const u = all[i];
       if (u.isDead || u.isDying || u.transportedBy !== null) continue;
-      if (u.mods.invisible && !isDetectedBy(this.gm, u, localId)) continue; // F4-07b: submersível não detectado não aparece no minimapa
+      if (u.mods.invisible && !isDetectedBy(this.gm, u, localId)) continue; // invisível não detectado não aparece no minimapa
       const px = u.mesh.position.x;
       const pz = u.mesh.position.z;
       if (this.gm.isHostile(localId, u.ownerId) && fog && !fog.isVisible(px, pz)) continue;

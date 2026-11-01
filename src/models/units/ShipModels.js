@@ -101,29 +101,3 @@ export function createDreadnought(orc = false) {
   aft.scale.setScalar(0.9);
   return enableShadows(root);
 }
-
-export function createSubmersible(orc = false) {
-  const root = new THREE.Group();
-  root.name = orc ? 'ColossalTurtle' : 'Submersible';
-  const hull = new THREE.Group();
-  hull.name = 'Hull';
-  root.add(hull);
-  if (orc) {
-    const shell = part(hull, new THREE.SphereGeometry(1.2, 10, 6), NM.ironOrc, 0, 0.1, 0);
-    shell.scale.set(1.1, 0.7, 1.5);
-    part(hull, new THREE.SphereGeometry(0.42, 8, 6), NM.bone, 0, 0.2, 1.9); // cabeça
-    for (const [x, z] of [[-1.0, 0.9], [1.0, 0.9], [-1.0, -0.9], [1.0, -0.9]]) part(hull, B(0.7, 0.12, 0.4), NM.bone, x, -0.05, z);
-    for (const [x, z] of [[-0.5, 0.2], [0.5, 0.2], [0, -0.7]]) part(hull, new THREE.ConeGeometry(0.2, 0.5, 5), NM.bone, x, 0.85, z); // espinhos
-  } else {
-    const body = part(hull, C(0.8, 0.8, 4.0, 10), NM.iron, 0, 0.1, 0, Math.PI / 2, 0, 0);
-    body.scale.set(1, 1, 0.9);
-    part(hull, new THREE.SphereGeometry(0.8, 10, 6), NM.iron, 0, 0.1, 2.0).scale.set(1, 0.9, 1);
-    part(hull, new THREE.SphereGeometry(0.8, 10, 6), NM.ironDark, 0, 0.1, -2.0).scale.set(1, 0.9, 1);
-    part(hull, C(0.35, 0.4, 0.7, 8), NM.ironDark, 0, 0.9, 0.3); // torre de comando
-    part(hull, C(0.03, 0.03, 0.9, 4), NM.rust, 0.15, 1.6, 0.3); // periscópio
-    part(hull, B(1.5, 0.08, 0.5), NM.ironDark, 0, 0.1, -2.1); // leme
-  }
-  const flag = part(hull, B(0.4, 0.25, 0.04), NM.team, 0, 1.45, orc ? -0.6 : -0.1);
-  flag.name = 'Flag';
-  return enableShadows(root);
-}

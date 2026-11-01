@@ -44,8 +44,7 @@ export const FACTIONS = {
       tanker: 'tanker', // F4-07
       warship: 'frigate', // F4-07b
       transport: 'barge',
-      capital: 'dreadnought',
-      submarine: 'submersible'
+      capital: 'dreadnought'
     },
     startingBase: {
       buildings: { hq: 'castle', lumber: 'lumber_camp', house: 'cottage' },
@@ -86,8 +85,7 @@ export const FACTIONS = {
       tanker: 'tanker', // F4-07
       warship: 'war_galley', // F4-07b
       transport: 'barge',
-      capital: 'iron_leviathan',
-      submarine: 'colossal_turtle'
+      capital: 'iron_leviathan'
     },
     startingBase: {
       buildings: { hq: 'great_hall', lumber: 'orc_lumber_mill', house: 'pig_farm' },

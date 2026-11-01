@@ -511,7 +511,7 @@ describe('campanha do Reino: liberação progressiva e uso das novidades (F8-05b
     const gm8 = boot('alliance-08-queda-do-cinzal');
     // m08 libera todo o resto: nada do que a campanha menciona fica travado
     const all = {
-      units: ['knight', 'cavalier', 'ballista', 'sapper', 'mage', 'templar', 'glider', 'gryphon_rider', 'ranger', 'frigate', 'dreadnought', 'submersible', 'tanker', 'barge'],
+      units: ['knight', 'cavalier', 'ballista', 'sapper', 'mage', 'templar', 'glider', 'gryphon_rider', 'ranger', 'frigate', 'dreadnought', 'tanker', 'barge'],
       buildings: ['stable', 'workshop', 'arcane_tower', 'temple', 'aviary', 'shipyard', 'foundry', 'refinery']
     };
     for (const [kind, ids] of Object.entries(all)) for (const id of ids) expect(locked(gm8, kind, id), `${kind}:${id}`).toBeUndefined();
@@ -684,7 +684,7 @@ describe('campanha do Reino: liberação progressiva e uso das novidades (F8-05b
     return cond();
   };
 
-  it('06: Estaleiro (exigido), Petroleiro, Plataforma, Couraçado/Submersível, frota inimiga afundada e desembarque pela Barcaça (06b)', { timeout: 240000 }, () => {
+  it('06: Estaleiro (exigido), Petroleiro, Plataforma, Couraçado/Fragata, frota inimiga afundada e desembarque pela Barcaça (06b)', { timeout: 240000 }, () => {
     const gm = boot('alliance-06-ilhas-de-brasa');
     runTicks(gm, 5);
     expect(castle0(gm).tier).toBe(3);
@@ -724,7 +724,7 @@ describe('campanha do Reino: liberação progressiva e uso das novidades (F8-05b
     train(gm, yard, 'frigate', 4);
     expect(mine(gm, 'frigate').length).toBe(4);
     expect(money(gm).oil).toBe(oilBefore - 4 * getUnitDef('frigate').cost.oil);
-    const navy = () => [...mine(gm, 'dreadnought'), ...mine(gm, 'submersible'), ...mine(gm, 'frigate')];
+    const navy = () => [...mine(gm, 'dreadnought'), ...mine(gm, 'frigate')];
     navy().forEach((s, i) => place(gm, s, -4 + i * 3, -54));
     const alive = () => fleet.filter((g) => !g.isDead && !g.isDying);
     let guard = 0;
@@ -745,13 +745,12 @@ describe('campanha do Reino: liberação progressiva e uso das novidades (F8-05b
     issue(gm, { type: CMD.PLACE_BUILDING, buildingType: 'oil_platform', x: well.mesh.position.x, z: well.mesh.position.z, unitIds: [tanker.id] });
     expect(runUntil(gm, () => statusOf(gm, 'oil-platform') === 'completed', 200, 10, [2, 3])).toBe(true);
     expect(gm.buildings.some((b) => b.type === 'oil_platform' && b.ownerId === 0 && b.isConstructed)).toBe(true);
-    // recompensa: Couraçado e Submersível (navais de verdade)
+    // recompensa: Couraçado e Fragata (navais de verdade)
     const dread = mine(gm, 'dreadnought')[0];
-    const sub = mine(gm, 'submersible')[0];
-    expect(dread && sub).toBeTruthy();
+    const frigate = mine(gm, 'frigate').at(-1);
+    expect(dread && frigate).toBeTruthy();
     expect(dread.layer).toBe('naval');
     expect(gm.navalPathfinder.isWalkableWorld(dread.mesh.position.x, dread.mesh.position.z)).toBe(true);
-    expect(getUnitDef('submersible').submersible).toBe(true);
     expect(statusOf(gm, 'oil-platform')).toBe('completed');
   });
 

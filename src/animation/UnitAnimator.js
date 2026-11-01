@@ -34,7 +34,7 @@ const AIR_TYPES = new Set(['glider', 'war_balloon', 'gryphon_rider', 'war_serpen
 const SEGMENTED_AIR = new Set(['gryphon_rider', 'war_serpent']);
 
 /** F4-07: tipos de modelo naval (`applyNaval`: balanço de ondas no nó `Hull`, panos/bandeira, recuo dos canhões). */
-const NAVAL_TYPES = new Set(['tanker', 'frigate', 'war_galley', 'barge', 'dreadnought', 'iron_leviathan', 'submersible', 'colossal_turtle']);
+const NAVAL_TYPES = new Set(['tanker', 'frigate', 'war_galley', 'barge', 'dreadnought', 'iron_leviathan']);
 
 /**
  * Class representing a modular animation controller for WarPoly units

@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-/** F4-07b: confere navios de guerra, barcaça (LOAD/UNLOAD), submersível e Fundição no jogo. Rodar via tools/safe-run.sh. */
+/** F4-07b: confere navios de guerra, barcaça (LOAD/UNLOAD) e Fundição no jogo. Rodar via tools/safe-run.sh. */
 import { chromium } from 'playwright';
 import { createServer } from 'vite';
 import { assertHardwareGpu } from './lib/assertGpu.mjs';
@@ -52,15 +52,13 @@ try {
       const fsp = spots(ft).find(s => Math.hypot(s.x - ysp.x, s.z - ysp.z) > 9);
       const foundry = gm.createBuilding(ft, fsp.x, fsp.z, true, 0); gm.buildings.push(foundry);
       const T = (f, a, b) => (F === 'orc' ? a : b); // tipos por facção do jogador 0
-      const mine = { frigate: T(0, 'war_galley', 'frigate'), dread: T(0, 'iron_leviathan', 'dreadnought'), sub: T(0, 'colossal_turtle', 'submersible') };
-      const foe = { frigate: F === 'orc' ? 'frigate' : 'war_galley', dread: F === 'orc' ? 'dreadnought' : 'iron_leviathan', sub: F === 'orc' ? 'submersible' : 'colossal_turtle' };
+      const mine = { frigate: T(0, 'war_galley', 'frigate'), dread: T(0, 'iron_leviathan', 'dreadnought') };
+      const foe = { frigate: F === 'orc' ? 'frigate' : 'war_galley', dread: F === 'orc' ? 'dreadnought' : 'iron_leviathan' };
       const ids = {};
       const sx = side;
       ids.frig = [0, 1, 2].map(i => gm.spawnUnit(mine.frigate, sx * 4, -20 + sx * (i * 4 - 4), 0).id);
       ids.dread = gm.spawnUnit(mine.dread, sx * 8, -sx * 4, 0).id;
-      ids.sub = gm.spawnUnit(mine.sub, sx * 6, sx * 12, 0).id;
       ids.foe = [0, 1].map(i => gm.spawnUnit(foe.frigate, -sx * 6, -20 + sx * (i * 4), 1).id);
-      ids.foeSub = gm.spawnUnit(foe.sub, -sx * 4, 6, 1).id;
       ids.barge = gm.spawnUnit('barge', sx * 14, sx * 20, 0).id;
       const manType = F === 'orc' ? 'grunt' : 'knight';
       ids.men = [];
@@ -92,17 +90,13 @@ try {
     await page.evaluate((ids) => {
       const gm = window.game.gameManager;
       const alive = (i) => { const u = gm.entitiesById.get(i); return u && !u.isDead ? u : null; };
-      const mine = [...ids.frig, ids.dread, ids.sub].filter(alive);
+      const mine = [...ids.frig, ids.dread].filter(alive);
       for (const id of mine) gm.issue({ type: 'attackMove', playerId: 0, unitIds: [id], x: -gm.entitiesById.get(id).mesh.position.x, z: gm.entitiesById.get(id).mesh.position.z });
-      for (const id of [...ids.foe, ids.foeSub].filter(alive)) gm.issue({ type: 'attackMove', playerId: 1, unitIds: [id], x: -gm.entitiesById.get(id).mesh.position.x, z: gm.entitiesById.get(id).mesh.position.z });
+      for (const id of [...ids.foe].filter(alive)) gm.issue({ type: 'attackMove', playerId: 1, unitIds: [id], x: -gm.entitiesById.get(id).mesh.position.x, z: gm.entitiesById.get(id).mesh.position.z });
     }, info.ids);
     await cam(0, -14, 0.45);
     await page.waitForTimeout(3500); await shot('battle-1');
     await page.waitForTimeout(3500); await shot('battle-2');
-    // 5. submersível revelado
-    await page.evaluate((ids) => { const s = window.game.gameManager.entitiesById.get(ids.sub); s.breakInvisibility(); }, info.ids);
-    const subPos = await page.evaluate((ids) => { const s = window.game.gameManager.entitiesById.get(ids.sub); return { x: s.mesh.position.x, z: s.mesh.position.z, hp: s.hp }; }, info.ids);
-    await cam(subPos.x, subPos.z, 0.3); await shot('submersible');
     const res = await page.evaluate(() => { const gm = window.game.gameManager; return { tick: gm.currentTick, units: gm.allUnits.filter(u => u.layer === 'naval').length }; });
     console.log(faction, JSON.stringify(res));
     if (errors.length) { fail = true; console.error(faction, 'ERROS:', errors.slice(0, 8)); }

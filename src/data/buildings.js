@@ -320,10 +320,10 @@ export const BUILDINGS = {
     tower: null,
     passiveIncome: null,
     requires: ['barracks', { hq: 2 }],
-    trains: ['tanker', 'frigate', 'barge', 'dreadnought', 'submersible'],
+    trains: ['tanker', 'frigate', 'barge', 'dreadnought'],
     dropoff: [],
     icon: '/icoEstaleiro.svg',
-    description: 'Constrói navios na costa: petroleiros, fragatas, barcaças, couraçados e submersíveis (requer Quartel e Centro nível 2)'
+    description: 'Constrói navios na costa: petroleiros, fragatas, barcaças e couraçados (requer Quartel e Centro nível 2)'
   },
   refinery: {
     type: 'refinery',
@@ -367,7 +367,7 @@ export const BUILDINGS = {
     trains: [],
     dropoff: [],
     icon: '/icoForja.svg',
-    description: 'Pesquisa canhões e cascos navais; libera Couraçado e Submersível (requer Estaleiro e Centro nível 2)'
+    description: 'Pesquisa canhões e cascos navais; libera Couraçado (requer Estaleiro e Centro nível 2)'
   },
   oil_platform: {
     type: 'oil_platform',
@@ -681,10 +681,10 @@ export const BUILDINGS = {
     tower: null,
     passiveIncome: null,
     requires: ['orc_barracks', { hq: 2 }],
-    trains: ['tanker', 'war_galley', 'barge', 'iron_leviathan', 'colossal_turtle'],
+    trains: ['tanker', 'war_galley', 'barge', 'iron_leviathan'],
     dropoff: [],
     icon: '/icoEstaleiro.svg',
-    description: 'Constrói navios na costa: petroleiros, galés, barcaças, leviatãs e tartarugas (requer Quartel dos Clãs e Centro nível 2)'
+    description: 'Constrói navios na costa: petroleiros, galés, barcaças e leviatãs (requer Quartel dos Clãs e Centro nível 2)'
   },
   naval_forge: {
     type: 'naval_forge',
@@ -706,7 +706,7 @@ export const BUILDINGS = {
     trains: [],
     dropoff: [],
     icon: '/icoForjaOrc.svg',
-    description: 'Pesquisa canhões e cascos navais; libera Couraçado e Submersível (requer Doca do Clã e Centro nível 2)'
+    description: 'Pesquisa canhões e cascos navais; libera Leviatã (requer Doca do Clã e Centro nível 2)'
   },
   ash_cauldron: {
     type: 'ash_cauldron',

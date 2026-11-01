@@ -28,7 +28,6 @@ import {
   createFrigate,
   createBarge,
   createDreadnought,
-  createSubmersible,
   createShipyard,
   createShipDock,
   createPlatform,
@@ -674,11 +673,10 @@ export class ModelFactory {
       case 'war_serpent': return this._glbOr('war_serpent_v2', () => this._glbOr('war_serpent', () => this.getOrCreateModel('war_serpent', createWarSerpent, 'war_serpent')));
       // F4-07: naval (procedurais provisórios; .glb via `_glbOr` com a mesma chave)
       case 'tanker': return this._factionGlb('tanker', factionId) || this._glbOr('tanker', () => this.getOrCreateModel('tanker', createTanker));
-      // F4-07b: navios de guerra (.glb por facção; procedural com `?glb=0`). O orc usa os tipos `war_galley/iron_leviathan/colossal_turtle` (`modelOf`).
+      // F4-07b: navios de guerra (.glb por facção; procedural com `?glb=0`). O orc usa os tipos `war_galley/iron_leviathan` (`modelOf`).
       case 'frigate': return this._shipModel('frigate', factionId, createFrigate);
       case 'barge': return this._shipModel('barge', factionId, createBarge);
       case 'dreadnought': return this._shipModel('dreadnought', factionId, createDreadnought);
-      case 'submersible': return this.getOrCreateModel(factionId === 'orc' ? 'submersible_orc' : 'submersible', () => createSubmersible(factionId === 'orc')); // sem .glb
       case 'sapper': return this.createSapper();
       case 'arsonist': return this.createArsonist();
       default: return this.createVillager();

@@ -143,8 +143,7 @@
           "tanker",
           "barge",
           "war_galley",
-          "iron_leviathan",
-          "colossal_turtle"
+          "iron_leviathan"
         ],
         "buildings": [
           "ship_dock",

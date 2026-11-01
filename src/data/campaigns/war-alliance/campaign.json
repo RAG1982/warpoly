@@ -142,8 +142,7 @@
           "tanker",
           "barge",
           "frigate",
-          "dreadnought",
-          "submersible"
+          "dreadnought"
         ],
         "buildings": [
           "shipyard",

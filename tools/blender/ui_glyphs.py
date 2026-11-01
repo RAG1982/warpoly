@@ -924,13 +924,6 @@ def g_blast(gb):
     gb.hint = dict(az=0, el=4, fov=19)
 
 
-def g_bubbles(gb):
-    for (x, y, rr) in ((-0.35, -0.4, 0.48), (0.4, 0.1, 0.36), (-0.12, 0.62, 0.24)):
-        gb.sphere(rr, rr, rr * 0.6, 'glow_ice', t=(x, y, 0), nu=14, nv=9)
-        gb.sphere(rr * 0.25, rr * 0.35, rr * 0.2, 'white', t=(x - rr * 0.4, y + rr * 0.35, rr * 0.5), r=(0, 0, 30), nu=8, nv=5)
-    gb.hint = dict(az=0, el=4, fov=19)
-
-
 def g_people(gb):
     # dois bustos (população): o da frente azul, o de trás vermelho
     for (hx, bx, body, s) in ((0.5, 0.5, 'cloth_red', 0.85), (-0.25, -0.25, 'cloth_blue', 1.0)):
@@ -979,7 +972,7 @@ GLYPHS = {
     'axe_log': g_axe_log, 'longbow': g_longbow, 'target': g_target, 'eye_gold': g_eye_gold, 'axe_speed': g_axe_speed,
     'heart': g_heart, 'rage': g_rage,
     # atributos
-    'boot': g_boot, 'sack': g_sack, 'mana': g_mana, 'wing': g_wing, 'anchor': g_anchor, 'blast': g_blast, 'bubbles': g_bubbles,
+    'boot': g_boot, 'sack': g_sack, 'mana': g_mana, 'wing': g_wing, 'anchor': g_anchor, 'blast': g_blast,
     'people': g_people, 'hammer': g_hammer,
     # magias
     'fireball': g_fireball, 'slow': g_slow, 'flameshield': g_flameshield, 'polymorph': g_polymorph, 'blizzard': g_blizzard,

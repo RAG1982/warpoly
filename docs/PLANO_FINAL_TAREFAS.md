@@ -422,9 +422,9 @@ O **Template** acima vale para M4-01…M4-12. Antes de começar: M3-13 `DONE` (p
 **Fazer:** 4 `.glb` (≤ 20 draw calls, 512²), registro, inspetor, ícones/retratos (`render_icons.py`); remover o fallback procedural só depois de aprovado.
 **Pronto quando:** modelos no jogo e no inspetor; ícones no manifesto; baseline dos alvos novos.
 
-### M5-05 · Arte: Submersível, Tartaruga Colossal e Ovelha
+### M5-05 · Arte: Ovelha
 **Dif.** Média · **Esf.** M · **Exec.** SB · **Dep.:** M0-01
-**Fazer:** `submersible.glb`, `colossal_turtle.glb` (hoje herda `submersible` via `modelOf`) e `sheep.glb` (críter; ligar ao `CritterView`); ícones e retratos; mesmas regras.
+**Fazer:** `sheep.glb` (críter; ligar ao `CritterView`); ícones e retratos; mesmas regras.
 **Pronto quando:** no jogo e no inspetor; ícones no manifesto.
 
 ### M5-06 · HUD nova (condicional à D6 = a)

@@ -2,14 +2,13 @@ import { describe, it, expect } from 'vitest';
 import { CMD } from '../../src/sim/commands.js';
 import { EVT } from '../../src/sim/events.js';
 import { canTarget } from '../../src/sim/targeting.js';
-import { isDetectedBy } from '../../src/sim/detection.js';
 import { missingUnitRequirements } from '../../src/sim/requirements.js';
-import { UNITS, BUILDINGS, RESEARCH, getUnitDef, getBuildingDef, FACTIONS } from '../../src/data/index.js';
-import { NAVAL_MAX_HEIGHT, SUBMERGE_DELAY, BOARD_DISTANCE } from '../../src/data/combat.js';
+import { UNITS, BUILDINGS, RESEARCH, getBuildingDef, FACTIONS } from '../../src/data/index.js';
+import { NAVAL_MAX_HEIGHT, BOARD_DISTANCE } from '../../src/data/combat.js';
 import { makeNavalGm, run, build, hqOf, place, coastSpots } from './helpers/navalWorld.js';
 
 /**
- * ships.test.js — F4-07b: navios de guerra, Barcaça (LOAD/UNLOAD), Couraçado, Submersível, Fundição.
+ * ships.test.js — F4-07b: navios de guerra, Barcaça (LOAD/UNLOAD), Couraçado, Fundição.
  * `estreito-1v1`: canal navegável em x∈[-14,14] (humano a oeste, orc a leste); jogador 0 = humano, 1 = orc.
  */
 const still = (u) => { u.speed = 0; return u; };
@@ -45,20 +44,9 @@ describe('dados dos navios (F4-07b)', () => {
     }
   });
 
-  it('Submersível/Tartaruga: só ataca navios, invisível permanente', () => {
-    for (const [t, f, forge] of [['submersible', 'human', 'foundry'], ['colossal_turtle', 'orc', 'naval_forge']]) {
-      const u = UNITS[t];
-      expect(u.faction).toBe(f);
-      expect(u).toMatchObject({ hp: 200, speed: 4.4, armor: 0, attackRange: 9, attackCooldown: 2.0, canHitGround: false, canHitAir: false, canHitNaval: true, submersible: true, trainTime: 22 });
-      expect(u.damage).toEqual({ basic: 0, piercing: 60, type: 'piercing' });
-      expect(u.cost).toEqual({ gold: 300, wood: 150, stone: 0, oil: 100 });
-      expect(u.requires).toEqual([{ hq: 3 }, forge]);
-    }
-  });
-
   it('Estaleiro/Doca treinam a frota; Fundição/Fornalha: role foundry, costeira, 800 PV', () => {
-    expect(getBuildingDef('shipyard').trains).toEqual(['tanker', 'frigate', 'barge', 'dreadnought', 'submersible']);
-    expect(getBuildingDef('ship_dock').trains).toEqual(['tanker', 'war_galley', 'barge', 'iron_leviathan', 'colossal_turtle']);
+    expect(getBuildingDef('shipyard').trains).toEqual(['tanker', 'frigate', 'barge', 'dreadnought']);
+    expect(getBuildingDef('ship_dock').trains).toEqual(['tanker', 'war_galley', 'barge', 'iron_leviathan']);
     for (const [t, f, yard] of [['foundry', 'human', 'shipyard'], ['naval_forge', 'orc', 'ship_dock']]) {
       expect(BUILDINGS[t]).toMatchObject({ faction: f, role: 'foundry', coastal: true, hp: 800, armor: 15, collisionRadius: 3.4 });
       expect(BUILDINGS[t].cost).toEqual({ gold: 180, wood: 100, stone: 60 });
@@ -90,7 +78,7 @@ describe('treino e requisitos (F4-07b)', () => {
     return { gm, hq, p, yard, fs };
   }
 
-  it('Fragata/Barcaça exigem Centro 2; Couraçado/Submersível exigem Centro 3 + Fundição', () => {
+  it('Fragata/Barcaça exigem Centro 2; Couraçado exige Centro 3 + Fundição', () => {
     const { gm, hq, p, yard } = setup();
     expect(missingUnitRequirements(0, 'frigate', gm)).toEqual([{ hq: 2 }]);
     expect(yard.queueUnit('frigate', gm)).toBe(false);
@@ -100,14 +88,12 @@ describe('treino e requisitos (F4-07b)', () => {
     expect(yard.queueUnit('dreadnought', gm)).toBe(false);
     hq.tier = 3;
     expect(yard.queueUnit('dreadnought', gm)).toBe(false); // falta a Fundição
-    expect(yard.queueUnit('submersible', gm)).toBe(false);
     expect(missingUnitRequirements(0, 'dreadnought', gm)).toEqual(['foundry']);
     const spot = coastSpots(gm, 'foundry', -1, 3, 9).find((s) => Math.hypot(s.x - yard.mesh.position.x, s.z - yard.mesh.position.z) > 8);
     build(gm, 'foundry', 0, spot.x, spot.z);
     expect(missingUnitRequirements(0, 'dreadnought', gm)).toEqual([]);
     expect(yard.queueUnit('dreadnought', gm)).toBe(true);
-    expect(yard.queueUnit('submersible', gm)).toBe(true);
-    expect(p.resources.oil).toBe(9000 - 50 - 30 - 120 - 100);
+    expect(p.resources.oil).toBe(9000 - 50 - 30 - 120);
   });
 
   it('sem petróleo suficiente o treino é recusado (nada debitado)', () => {
@@ -142,11 +128,10 @@ describe('treino e requisitos (F4-07b)', () => {
 });
 
 describe('regras de alvo e combate naval (F4-07b)', () => {
-  it('canTarget: fragata atinge aéreo; couraçado não; submersível só navio; melee nunca atinge navio', () => {
+  it('canTarget: fragata atinge aéreo; couraçado não; melee nunca atinge navio', () => {
     const gm = makeNavalGm();
     const frigate = ship(gm, 'frigate', 0, -2, -20);
     const dread = ship(gm, 'dreadnought', 0, -2, -26);
-    const sub = ship(gm, 'submersible', 0, -2, -32);
     const enemyShip = ship(gm, 'frigate', 1, 8, -20);
     const glider = gm.spawnUnit('war_balloon', 0, 0, 1);
     const grunt = gm.spawnUnit('grunt', -30, 0, 1);
@@ -157,9 +142,6 @@ describe('regras de alvo e combate naval (F4-07b)', () => {
     expect(canTarget(dread, glider)).toBe(false);
     expect(canTarget(dread, enemyShip)).toBe(true);
     expect(canTarget(dread, grunt)).toBe(true);
-    expect(canTarget(sub, enemyShip)).toBe(true);
-    expect(canTarget(sub, grunt)).toBe(false);
-    expect(canTarget(sub, glider)).toBe(false);
     expect(canTarget(grunt, enemyShip)).toBe(false); // melee não atinge navio
     expect(canTarget(archer, enemyShip)).toBe(true);
   });
@@ -219,46 +201,6 @@ describe('regras de alvo e combate naval (F4-07b)', () => {
     expect(ordered).toBe(false);
     const shore = still(gm.spawnUnit('grunt', -17, -22, 1));
     expect(f._shoreOk(shore)).toBe(true);
-  });
-});
-
-describe('submersível (F4-07b)', () => {
-  it('invisível para inimigos sem detector; um detector (balão) o revela; emerge ao atacar e mergulha após 4 s', () => {
-    const gm = makeNavalGm();
-    const sub = still(ship(gm, 'submersible', 0, -2, -20));
-    const enemyShip = still(ship(gm, 'frigate', 1, 4, -20));
-    enemyShip.attackRange = 0;
-    expect(sub.mods.invisible).toBe(true);
-    expect(isDetectedBy(gm, sub, 1)).toBe(false);
-    expect(isDetectedBy(gm, sub, 0)).toBe(true);
-    // a fragata inimiga não o auto-ataca
-    run(gm, 2);
-    expect(sub.hp).toBe(sub.maxHp);
-    // o submersível ataca o navio inimigo e emerge
-    run(gm, 6);
-    expect(enemyShip.hp).toBeLessThan(enemyShip.maxHp);
-    // detector inimigo
-    const balloon = gm.spawnUnit('war_balloon', -2, -22, 1);
-    balloon.speed = 0;
-    expect(getUnitDef('war_balloon').detector).toBe(true);
-    expect(isDetectedBy(gm, sub, 1)).toBe(true);
-    balloon.die();
-    gm.simStep(0.05);
-    // sem atacar, volta a mergulhar depois de SUBMERGE_DELAY
-    sub.breakInvisibility();
-    expect(sub.mods.invisible).toBe(false);
-    enemyShip.die();
-    run(gm, SUBMERGE_DELAY + 1);
-    expect(sub.mods.invisible).toBe(true);
-  });
-
-  it('torpedo só em navio: ignora tropas na margem', () => {
-    const gm = makeNavalGm();
-    const sub = still(ship(gm, 'submersible', 0, -10, -20));
-    const g = still(gm.spawnUnit('grunt', -17, -20, 1));
-    run(gm, 8);
-    expect(g.hp).toBe(g.maxHp);
-    expect(sub.mods.invisible).toBe(true);
   });
 });
 
@@ -407,7 +349,7 @@ describe('simulação headless com navios (F4-07b)', () => {
       fleet.push(ship(gm, 'war_galley', 1, 4, -26 + i * 4));
     }
     fleet.push(ship(gm, 'dreadnought', 0, -6, -10), ship(gm, 'iron_leviathan', 1, 6, 10));
-    fleet.push(ship(gm, 'submersible', 0, -8, 4), ship(gm, 'colossal_turtle', 1, 8, -4));
+    fleet.push(ship(gm, 'frigate', 0, -8, 4), ship(gm, 'war_galley', 1, 8, -4));
     const barge = ship(gm, 'barge', 0, -14, -20);
     const m = gm.spawnUnit('knight', -17.5, -20, 0);
     gm.issue({ type: CMD.LOAD, playerId: 0, unitIds: [m.id], targetId: barge.id });

@@ -47,7 +47,19 @@ function getCannonballTemplate() {
   return cannonballTemplate;
 }
 
+// F-MAGE-BASE: orbe mágico do ataque básico do Mago ('arcane', azul-arcano) e do Necromante ('ash', cinza-esverdeado).
+const orbTemplates = {};
+function getOrbTemplate(kind) {
+  if (!orbTemplates[kind]) {
+    const color = kind === 'ash' ? 0xa3b18a : 0x7dd3fc;
+    const mat = new THREE.MeshBasicMaterial({ color });
+    orbTemplates[kind] = new THREE.Mesh(new THREE.SphereGeometry(0.2, 8, 6), mat);
+  }
+  return orbTemplates[kind];
+}
+
 function createMesh(kind) {
+  if (kind === 'arcane' || kind === 'ash') return ModelFactory.headless ? new THREE.Group() : getOrbTemplate(kind).clone();
   if (kind === 'cannonball') return ModelFactory.headless ? new THREE.Group() : getCannonballTemplate().clone();
   if (kind === 'axe') return getAxeTemplate().clone(true);
   if (kind === 'boulder') return ModelFactory.headless ? new THREE.Group() : getBoulderTemplate().clone();

@@ -57,6 +57,7 @@ export function targetProblem(caster, ability, target) {
   if (target.layer === 'air' && ability.hitsAir === false) return 'Alvo inválido: não atinge unidades aéreas.'; // F4-06
   if (ability.effects.some(e => e.kind === 'polymorph') && !canPolymorph(target)) return 'Alvo inválido: não pode ser transmutado.';
   if (ability.effects.some(e => e.kind === 'exorcism') && !getUnitDef(target.type).undead) return 'Alvo inválido: só funciona contra mortos-vivos.';
+  if (ability.livingOnly && getUnitDef(target.type).undead) return 'Alvo inválido: só cura unidades vivas.';
   return null;
 }
 
@@ -359,6 +360,7 @@ export function findAutocastTarget(gm, caster, ability) {
     } else if (ability.target === 'ally' || ability.target === 'unit') {
       if (!caster.isAlliedWith(u)) continue;
       if (heals && u.hp >= u.maxHp) continue;
+      if (ability.livingOnly && getUnitDef(u.type).undead) continue;
       if (ability.autocastBelow > 0 && u.hp / u.maxHp >= ability.autocastBelow) continue; // F4-04b: Cura só abaixo de 60 %
       score = u.hp / u.maxHp;
     } else continue;

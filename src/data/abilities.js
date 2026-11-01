@@ -54,7 +54,8 @@
  *        num círculo de `radius` (ver `src/sim/hazards.js`).
  *   {kind:'whirlwind', duration, wander, retarget, dps, radius, speed}  (F4-04b) cria um redemoinho errante.
  *   campos opcionais da habilidade: `autocastDefault` (auto-cast já ligado), `autocastBelow` (só cura aliados abaixo
- *        dessa fração de PV), `repeat` (a conjuração se repete no mesmo alvo enquanto ele precisar e houver mana).
+ *        dessa fração de PV), `repeat` (a conjuração se repete no mesmo alvo enquanto ele precisar e houver mana),
+ *        `livingOnly` (não pode ter como alvo mortos-vivos; auto-cast os ignora).
  *
  * Status de `STATUS_DEFS` usados: slow, haste, invisible, flameshield (Escudo de Chamas), unholy_armor (Armadura Profana).
  */
@@ -331,6 +332,51 @@ export const ABILITIES = {
     requires: [{ research: 'spell_heal' }],
     effects: [{ kind: 'heal', amount: 5 }],
     vfx: { kind: 'aura', color: '#4ade80', duration: 1 }
+  },
+  // F-MAGE-BASE: cura inicial do Mago humano (sem pesquisa). Mais fraca e mais cara em mana que `heal`
+  // (Templário, `spell_heal`), que continua exigindo a pesquisa.
+  mage_heal: {
+    id: 'mage_heal',
+    name: 'Cura Arcana',
+    icon: '✚',
+    description: 'Cura um aliado (3 PV por segundo, 8 de mana por PV) enquanto ele estiver ferido e houver mana. Auto-cast: cura aliados abaixo de 60% de PV.',
+    hotkey: 'G',
+    target: 'ally',
+    range: 7,
+    castTime: 1,
+    manaCost: 0,
+    manaPerHp: 8,
+    cooldown: 0,
+    autocast: true,
+    autocastDefault: true,
+    autocastBelow: 0.6,
+    repeat: true,
+    requires: [],
+    effects: [{ kind: 'heal', amount: 3 }],
+    vfx: { kind: 'aura', color: '#4ade80', duration: 1 }
+  },
+  // F-MAGE-BASE: cura inicial do Necromante das Cinzas (sem pesquisa). Só cura aliados VIVOS (`livingOnly`):
+  // mortos-vivos não são curados. Cura um pouco mais que `mage_heal`, mas cobra mana por PV.
+  bone_mend: {
+    id: 'bone_mend',
+    name: 'Cura das Cinzas',
+    icon: '🌫️',
+    description: 'Cura um aliado vivo (4 PV por segundo, 6 de mana por PV) enquanto ele estiver ferido e houver mana. Não cura mortos-vivos. Auto-cast: abaixo de 60% de PV.',
+    hotkey: 'G',
+    target: 'ally',
+    range: 8,
+    castTime: 1,
+    manaCost: 0,
+    manaPerHp: 6,
+    cooldown: 0,
+    autocast: true,
+    autocastDefault: true,
+    autocastBelow: 0.6,
+    repeat: true,
+    livingOnly: true,
+    requires: [],
+    effects: [{ kind: 'heal', amount: 4 }],
+    vfx: { kind: 'aura', color: '#a3b18a', duration: 1.2 }
   },
   exorcism: {
     id: 'exorcism',

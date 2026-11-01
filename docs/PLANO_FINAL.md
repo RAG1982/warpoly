@@ -297,7 +297,7 @@ Legenda de dependências: só IDs; "—" = pode começar já. **Dif.** = dificul
 | M3-06 | Missão 5 · O Cerne Verde | Média | M | S | M3-05, M2-04 | DONE (branch task/M3-06; IA easy; Oren só NPC em diálogo, mapa tem 2 vagas; robô vence em 9,2 min — dono ainda não jogou) |
 | M3-07 | Missão 6 · A Geada (Prova de Fogo, árvore completa) | Difícil | G | S | M3-06, M2-04 | DONE (branch task/M3-07; mapa 320, 4 bases ≥140 u; 3 IAs easy; dono ainda não jogou) |
 | M3-08 | Missão 7 · O Brejo Mudo (traição) | Média | M | S | M3-07, M2-05 | DONE (branch task/M3-08; mapa 320, bases ~151 u; traição aos 330 s; Brakka bandits; dono ainda não jogou) |
-| M3-09 | Missão 8 · A Fornalha | Difícil | G | S | M3-08, M2-05, M2-14 | TODO |
+| M3-09 | Missão 8 · A Fornalha | Difícil | G | S | M3-08, M2-05, M2-14 | DONE (2026-11-01) |
 | M3-10 | Missão 9 · Miragem | Difícil | G | S | M3-09, M2-05 | TODO |
 | M3-11 | Missão 10 · Desembarque na Costa Ferrugem (entra o Oren) | Difícil | G | S | M3-10, M2-06, M2-02 | TODO |
 | M3-12 | Missão 11 · Porto Albor (entra o Dorian) | Difícil | G | S | M3-11, M2-06, M2-02 | TODO |
@@ -340,7 +340,7 @@ Legenda de dependências: só IDs; "—" = pode começar já. **Dif.** = dificul
 | M5-01 | IA: níveis de dificuldade + seletor (D3 = a) | Muito difícil | GG | S | M3-13 | F5-03 | TODO |
 | M5-02 | Rebalanceamento da árvore completa e dos heróis | Difícil | G | S | M3-13 | F3-11, NEW-30 | TODO |
 | M5-03 | Desempenho: ORM/texturas, CPU de animação, massa300 | Difícil | G | S | M1-03 | NEW-6, NEW-14, F1-10 | TODO |
-| M5-04 | Arte: Refinaria, Fundição, Forja Naval, Caldeirão | Média | G | SB | M0-01 | F7-00b | TODO |
+| M5-04 | Arte: Refinaria, Fundição, Forja Naval, Caldeirão | Média | G | SB | M0-01 | F7-00b | DONE (2026-11-01) |
 | M5-05 | Arte: Submersível, Tartaruga Colossal, Ovelha | Média | M | SB | M0-01 | F7-00b | TODO |
 | M5-06 | HUD nova (D6 = sim): maquete a partir das imagens do dono, aprovação, implementação | Difícil | GG | S | M3-14 | ART-14 | TODO |
 | M5-07 | Música: seleção de faixas, tema da história, ambiência por bioma | Média | M | S+V | M1-02 | MUSICA | TODO |

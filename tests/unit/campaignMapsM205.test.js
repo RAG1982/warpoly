@@ -24,10 +24,10 @@ beforeAll(async () => { await loadAllCampaignMaps(); }); // M2-28: mapas de camp
 const WOOD_MIN = { 'camp-07-brejo-mudo': CAMPAIGN_WOOD_FLOOR, 'camp-08-fornalha': CAMPAIGN_WOOD_FLOOR, 'camp-09-miragem': CAMPAIGN_WOOD_FLOOR }; // piso 6000 (afinar corredor)
 const ANCHORS = {
   'camp-07-brejo-mudo': ['playerStart', 'allyStart', 'brakkaHall', 'boarPen1', 'boarPen2', 'brakkaGold', 'ironDepot', 'beach1', 'seaLanding1', 'beach2', 'seaLanding2', 'expansion1', 'expansion2', 'landingZone'],
-  'camp-08-fornalha': ['playerStart', 'enemyStart', 'lavaPass1', 'calderaPeak', 'forge', 'forgeWater', 'sanctum', 'captiveCamp', 'captive1', 'captive2', 'captive3', 'captive4', 'captive5', 'captive6', 'lyraArrival', 'expansion1', 'expansion2', 'landingZone'],
+  'camp-08-fornalha': ['playerStart', 'enemyStart', 'lavaPass1', 'calderaPeak', 'isletForge', 'isletForgeWater', 'isletCaptive', 'isletCaptiveWater', 'captive1', 'captive2', 'captive3', 'captive4', 'captive5', 'captive6', 'shipyard1', 'shipyard1Water', 'sanctum', 'lyraArrival', 'expansion1', 'expansion2', 'landingZone'],
   'camp-09-miragem': ['playerStart', 'enemyStart', 'waterWell1', 'waterWell2', 'waterWell3', 'ruins1', 'ruins2', 'ruins3', 'ruins4', 'fortSite1', 'fortSite2', 'bridgehead1', 'bridgehead1Sea', 'bridgehead2', 'bridgehead2Sea', 'nestSite', 'aviarySite', 'expansion1', 'expansion2', 'landingZone']
 };
-const WATER = new Set(['seaLanding1', 'seaLanding2', 'forgeWater', 'lyraArrival', 'bridgehead1Sea', 'bridgehead2Sea']);
+const WATER = new Set(['seaLanding1', 'seaLanding2', 'shipyard1Water', 'isletForgeWater', 'isletCaptiveWater', 'lyraArrival', 'bridgehead1Sea', 'bridgehead2Sea']);
 const hyp = (a, b) => Math.hypot(a.x - b.x, a.z - b.z);
 
 function oceanSeen(m, sea) {
@@ -66,7 +66,7 @@ describe('M2-05 · registro e formato (palcos 7, 8 e 9)', () => {
       expect(decodeBiomeGrid(m.biomeGrid).length).toBe(m.biomeGrid.nodes ** 2);
       expect(TILESETS[m.tileset], m.tileset).toBeDefined();
       expect(m.size).toBeGreaterThanOrEqual(96);
-      expect(m.size).toBeLessThanOrEqual(id === 'camp-07-brejo-mudo' ? 320 : 192); // M3-08: o Brejo Mudo foi ampliado a 320 (como o Cerne Verde, M3-06b)
+      expect(m.size).toBeLessThanOrEqual(id === 'camp-07-brejo-mudo' || id === 'camp-08-fornalha' ? 320 : 192); // M3-09: a Fornalha também foi a 320 // M3-08: o Brejo Mudo foi ampliado a 320 (como o Cerne Verde, M3-06b)
       expect(m.startSlots).toHaveLength(2);
       expect(m.maxPlayers).toBe(2);
       const gold = m.resources.filter((r) => r.type === 'gold');
@@ -107,7 +107,7 @@ describe('M2-05 · registro e formato (palcos 7, 8 e 9)', () => {
           expect(WATER.has(name) || /^well\d+$/.test(name), `${id}.${name} é água inesperada`).toBe(true);
           expect(getHeightForMap(m, a.x, a.z), name).toBeLessThan(m.waterLevel);
           expect(isReached(sea, ocean, a.x, a.z), `${id}.${name} no oceano navegável`).toBe(true);
-        } else if (!/^ford\d+$/.test(name)) {
+        } else if (!/^(ford\d+|islet|captive)/.test(name)) { // M3-09: ilhotas do mar (Forja, Magos) são de propósito inalcançáveis a pé
           expect(isReached(land, seenLand, a.x, a.z), `${id}.${name} por terra`).toBe(true);
         }
       }
@@ -156,19 +156,19 @@ describe('M2-05 · Brejo Mudo (palco 7)', () => {
   });
 });
 
-describe('M2-05 · Fornalha (palco 8)', () => {
+describe('M2-05 · Fornalha (palco 8; M3-09 a 320 com ilhotas no mar)', () => {
   const id = 'camp-08-fornalha';
   const lavaCells = (m) => decodeLavaGrid(m.lavaGrid.data);
 
-  it('vulcânica de 96–128 u de jogo: tileset vulcanico, lavaGrid com o rio de lava, chão vulcânico/rocha, forja e santuário', () => {
+  it('vulcânica de 320 de lado (jogável ≈ 308): tileset vulcanico, lavaGrid com 2 rios de lava, chão vulcânico/rocha, Monte Caldeira, Santuário e Estaleiro', () => {
     const m = getMap(id);
     expect(m.tileset).toBe('vulcanico');
-    expect(m.playable).toBeGreaterThanOrEqual(96);
-    expect(m.playable).toBeLessThanOrEqual(128);
+    expect(m.size).toBe(320);
+    expect(m.playable).toBeGreaterThanOrEqual(280);
     expect(m.lavaGrid).toBeTruthy();
-    expect(lavaCells(m).reduce((n, v) => n + v, 0)).toBeGreaterThan(150);
-    expect(biomeShare(m, [BIOME.VOLCANIC, BIOME.ROCK, BIOME.LAVA])).toBeGreaterThan(0.9);
-    expect(m.anchors.forge && m.anchors.sanctum).toBeTruthy();
+    expect(lavaCells(m).reduce((n, v) => n + v, 0)).toBeGreaterThan(400);
+    expect(biomeShare(m, [BIOME.VOLCANIC, BIOME.ROCK, BIOME.LAVA])).toBeGreaterThan(0.6);
+    for (const k of ['calderaPeak', 'sanctum', 'shipyard1', 'isletForge', 'isletCaptive']) expect(m.anchors[k], k).toBeTruthy();
   });
 
   it('a lava bloqueia terrestres e navais (sem dano) e as passagens de rocha são terra firme ao lado da lava', () => {
@@ -187,7 +187,7 @@ describe('M2-05 · Fornalha (palco 8)', () => {
     }
     expect(checked).toBeGreaterThan(5);
     const passes = Object.keys(m.anchors).filter((k) => /^lavaPass\d+$/.test(k));
-    expect(passes.length).toBeGreaterThanOrEqual(1);
+    expect(passes.length).toBeGreaterThanOrEqual(3);
     for (const k of passes) {
       const p = m.anchors[k];
       expect(isLavaAt(m, p.x, p.z), k).toBe(false);
@@ -198,16 +198,15 @@ describe('M2-05 · Fornalha (palco 8)', () => {
     }
   });
 
-  it('conectividade: as duas bases e tudo da ficha se alcançam por terra pelas passagens; com a lava fechando as passagens a ilha se parte em duas, cada lado com ouro', () => {
+  it('conectividade por terra: as duas bases, o Santuário, o Monte Caldeira e o Estaleiro se alcançam pelas passagens; fechadas as passagens, a base dos Clãs fica isolada', () => {
     const m = getMap(id);
     const [s0, s1] = m.startSlots;
     const land = buildPathfinder(m, 'land');
     const seen = floodFill(land, s0.x, s0.z);
-    for (const name of ['forge', 'sanctum', 'captiveCamp', 'calderaPeak', 'captive1', 'captive6', 'expansion1', 'expansion2']) {
+    for (const name of ['sanctum', 'calderaPeak', 'shipyard1', 'expansion1', 'expansion2']) {
       expect(isReached(land, seen, m.anchors[name].x, m.anchors[name].z), name).toBe(true);
     }
     expect(isReached(land, seen, s1.x, s1.z)).toBe(true);
-    // lava sobre as passagens: o terrestre não atravessa mais
     const closed = structuredClone(m);
     const g = lavaCells(closed).slice();
     const n = closed.lavaGrid.nodes, half = closed.size / 2;
@@ -216,42 +215,63 @@ describe('M2-05 · Fornalha (palco 8)', () => {
       for (let j = 0; j < n; j++) for (let i = 0; i < n; i++) if (Math.hypot(i - half - p.x, j - half - p.z) <= 8) g[j * n + i] = 1;
     }
     closed.lavaGrid = { ...closed.lavaGrid, data: encodeLavaGrid(g) };
-    // o Pathfinder lê a altura (a lava assada vale 0,4): a lava nova também baixa o chão a 0,4
     const land2 = new Pathfinder({ mapDef: closed, getHeight: (x, z) => (isLavaAt(closed, x, z) ? 0.4 : getHeightForMap(closed, x, z)) }, closed.playable / 2, 1.5, 'land');
     const seenW = floodFill(land2, s0.x, s0.z);
-    const seenE = floodFill(land2, s1.x, s1.z);
     expect(isReached(land2, seenW, s1.x, s1.z)).toBe(false);
     expect(isReached(land2, seenW, m.anchors.sanctum.x, m.anchors.sanctum.z)).toBe(false);
     const golds = m.resources.filter((r) => r.type === 'gold');
-    expect(golds.filter((p) => isReached(land2, seenW, p.x, p.z)).length).toBeGreaterThanOrEqual(2);
-    expect(golds.filter((p) => isReached(land2, seenE, p.x, p.z)).length).toBeGreaterThanOrEqual(2);
-    for (const q of m.resources.filter((r) => r.type === 'stone')) expect(isReached(land2, seenW, q.x, q.z) || isReached(land2, seenE, q.x, q.z)).toBe(true);
+    expect(golds.filter((p) => isReached(land2, seenW, p.x, p.z)).length).toBeGreaterThanOrEqual(1);
   });
 
-  it('forja na costa com água do oceano ligada por mar (Estaleiro e Leviatãs), poços de petróleo no mar, santuário e cativeiro do lado dos Clãs', () => {
+  it('ilhotas do Mar Fendido: a da Forja (Clãs) e a dos Magos (Liga) não se alcançam a pé de nenhuma base; cada uma tem água do oceano a ≤ 18 u', () => {
+    const m = getMap(id);
+    const [s0, s1] = m.startSlots;
+    const land = buildPathfinder(m, 'land');
+    const sea = buildPathfinder(m, 'naval');
+    const ocean = oceanSeen(m, sea);
+    const seen0 = floodFill(land, s0.x, s0.z), seen1 = floodFill(land, s1.x, s1.z);
+    const a = m.anchors;
+    for (const k of ['isletForge', 'isletCaptive']) {
+      expect(isReached(land, seen0, a[k].x, a[k].z), `${k} a pé desde a Liga`).toBe(false);
+      expect(isReached(land, seen1, a[k].x, a[k].z), `${k} a pé desde os Clãs`).toBe(false);
+      expect(land.isWalkableWorld(a[k].x, a[k].z), k).toBe(true);
+    }
+    expect(hyp(a.isletForge, s1)).toBeLessThan(hyp(a.isletForge, s0));
+    expect(hyp(a.isletCaptive, s0)).toBeLessThan(hyp(a.isletCaptive, s1));
+    for (const k of ['isletForge', 'isletCaptive']) {
+      let near = false;
+      for (let r = 6; r <= 18 && !near; r += 2) for (let t = 0; t < 16 && !near; t++) {
+        const x = a[k].x + Math.cos((t / 16) * Math.PI * 2) * r, z = a[k].z + Math.sin((t / 16) * Math.PI * 2) * r;
+        near = sea.isWalkableWorld(x, z) && isReached(sea, ocean, x, z);
+      }
+      expect(near, `${k} com mar aberto perto`).toBe(true);
+    }
+    for (let i = 1; i <= 6; i++) expect(hyp(a[`captive${i}`], a.isletCaptive), `captive${i}`).toBeLessThanOrEqual(6);
+    for (let i = 1; i <= 4; i++) expect(hyp(a[`isletGuard${i}`], a.isletForge), `isletGuard${i}`).toBeLessThanOrEqual(9);
+  });
+
+  it('Estaleiro na costa da Liga com água navegável ligada ao oceano; poços de petróleo no mar, todos alcançáveis por mar; Lyra chega pelo mar a oeste', () => {
     const m = getMap(id);
     const [s0, s1] = m.startSlots;
     const sea = buildPathfinder(m, 'naval');
     const ocean = oceanSeen(m, sea);
     const a = m.anchors;
-    expect(hyp(a.forge, a.forgeWater)).toBeLessThanOrEqual(22);
-    expect(isReached(sea, ocean, a.forgeWater.x, a.forgeWater.z)).toBe(true);
+    expect(hyp(a.shipyard1, s0)).toBeLessThanOrEqual(50);
+    expect(hyp(a.shipyard1, s1)).toBeGreaterThan(hyp(a.shipyard1, s0));
+    expect(isReached(sea, ocean, a.shipyard1Water.x, a.shipyard1Water.z)).toBe(true);
     const wells = m.resources.filter((r) => r.type === 'oil');
-    expect(wells.length).toBeGreaterThanOrEqual(4);
+    expect(wells.length).toBeGreaterThanOrEqual(2);
     for (const w of wells) expect(isReached(sea, ocean, w.x, w.z), `poço ${w.x},${w.z}`).toBe(true);
     expect(hyp(a.sanctum, s1)).toBeLessThan(hyp(a.sanctum, s0));
-    expect(hyp(a.forge, s1)).toBeLessThan(hyp(a.forge, s0));
-    for (let i = 1; i <= 6; i++) expect(hyp(a[`captive${i}`], a.captiveCamp)).toBeLessThanOrEqual(6);
-    expect(hyp(a.captiveCamp, a.sanctum)).toBeGreaterThanOrEqual(14);
-  });
-
-  it('Lyra chega pelo mar a oeste; o Monte Caldeira é o ponto mais alto perto do centro', () => {
-    const m = getMap(id);
-    const a = m.anchors;
     expect(a.lyraArrival.water).toBe(true);
     expect(a.lyraArrival.x).toBeLessThan(0);
-    expect(hyp(a.calderaPeak, { x: 0, z: 0 })).toBeLessThanOrEqual(24);
-    expect(getHeightForMap(m, a.calderaPeak.x, a.calderaPeak.z)).toBeGreaterThanOrEqual(3);
+  });
+
+  it('o Monte Caldeira é o ponto alto perto do centro (entre os rios)', () => {
+    const m = getMap(id);
+    const a = m.anchors;
+    expect(Math.abs(a.calderaPeak.x)).toBeLessThanOrEqual(40);
+    expect(getHeightForMap(m, a.calderaPeak.x, a.calderaPeak.z)).toBeGreaterThanOrEqual(1.9);
   });
 });
 

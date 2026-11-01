@@ -64,12 +64,15 @@ export const CAMPAIGN_PRESETS = freeze({
     layout: freeze({ bases: [{ entities: [0], side: 'west' }, { entities: [0], side: 'east' }], minSeparation: 150 }),
     verify: freeze({ landRange: [0.25, 0.8], minRivers: 2 })
   }),
-  /** Palco 8 (M2-05): ilha vulcânica pequena (jogável ≤ 128 u) cortada por UM rio de lava norte-sul com passagens de rocha; Liga a oeste, Clãs (forja e santuário) a leste. */
+  /**
+   * Palco 8 (M2-05; M3-09 refeito a 320): continente vulcânico com DOIS rios de lava norte-sul (3 áreas: Liga a oeste, Monte Caldeira no meio,
+   * Clãs a leste) ligadas por passagens de rocha; duas ilhotas no Mar Fendido: a dos Magos (cativeiro de Orsolo, a oeste) e a da Forja Naval (a leste).
+   */
   'camp-08-fornalha': freeze({
-    id: 'camp-08-fornalha', name: 'Fornalha', uso: 'campanha, palco 8 (Liga e Clãs)', tileset: 'vulcanico', naval: true, woodTarget: 5000,
-    options: freeze({ size: 140, grid: 140, continents: 1, continentBiome: 'volcanic', continentDims: [0.42, 0.36], islands: 0, islets: 0, bays: 2, peninsulas: 2, roughness: 0.8, lava: true, lavaStreams: 1, lavaTheta: Math.PI / 2, lavaWidth: [4, 6], rivers: 0 }),
-    layout: freeze({ bases: [{ entities: [0], side: 'west' }, { entities: [0], side: 'east' }], minSeparation: 50 }),
-    verify: freeze({ landRange: [0.25, 0.8], minRivers: 0 })
+    id: 'camp-08-fornalha', name: 'Fornalha', uso: 'campanha, palco 8 (Liga e Clãs; naval)', tileset: 'vulcanico', naval: true, woodTarget: 8000,
+    options: freeze({ size: 320, grid: 320, continents: 1, continentBiome: 'volcanic', continentDims: [0.42, 0.36], islands: 0, islets: 0, bigIslands: 2, bigIslandAt: [[-0.36, -0.3], [0.36, 0.3]], bigIslandScale: 0.3, bigIslandBiomes: ['rocky', 'rocky'], bays: 3, peninsulas: 2, roughness: 0.9, lava: true, lavaStreams: 2, lavaTheta: Math.PI / 2, lavaWidth: [5, 7], lavaPassages: 2, rivers: 0 }),
+    layout: freeze({ bases: [{ entities: [0], side: 'west' }, { entities: [0], side: 'east' }], minSeparation: 150 }),
+    verify: freeze({ landRange: [0.2, 0.8], minRivers: 0 })
   }),
   /** Palco 9 (M2-05): ilha deserta com dunas e três poços no meio; cabeça de ponte a oeste e base inimiga a leste. */
   'camp-09-miragem': freeze({
@@ -730,65 +733,100 @@ function postBrejo(ctx, extra) {
   }
 }
 
-/** Palco 8: passagens de lava, Monte Caldeira, Forja Naval (na costa) e Santuário das Cinzas do lado dos Clãs, prisioneiros, chegada de Lyra. */
+/**
+ * Palco 8 (M2-05; M3-09 refeito a 320): passagens de lava, Monte Caldeira no meio, Santuário das Cinzas (Clãs, na área leste, alvo primário),
+ * duas ilhotas do Mar Fendido (`landComponents` que não se alcançam por terra): a da Forja Naval (a leste, lado dos Clãs) e a dos Magos
+ * (a oeste, lado da Liga, com os 6 cativos de Orsolo). Estaleiro da Liga na costa; Lyra chega por mar aberto; ouro de expansão a 50–80 u de
+ * cada base; madeira: 3 matas de 14 árvores a 22–46 u de cada Paço (como no palco 7).
+ */
 function postFornalha(ctx, extra, world) {
-  const { m, s0, s1 } = ctx;
-  const half = ctx.half;
+  const { m, s0, s1, half } = ctx;
   const lava = world.map.lava;
   if (!lava) throw new Error('campanha: a ilha não ganhou rio de lava');
   // passagens de rocha (os vaus da lava): o centro de cada uma, ordenadas de norte (z menor) a sul
   const pass = [];
   for (const st of lava.streams) for (const p of st.passages) pass.push({ x: p.i + 0.5 - m.size / 2, z: p.j + 0.5 - m.size / 2 });
   pass.sort((a, b) => a.z - b.z);
-  if (!pass.length) throw new Error('campanha: sem passagem de rocha');
+  if (pass.length < 2) throw new Error('campanha: poucas passagens de rocha');
   pass.forEach((p, i) => { extra[`lavaPass${i + 1}`] = pt(p); });
-  // Monte Caldeira: o ponto mais alto, terra seca e alcançável, perto do centro da ilha
-  const ent = world.map.entities[0];
+  // Monte Caldeira: o ponto mais alto, terra seca e alcançável, no meio (área entre os dois rios)
   const peak = need(ctx.scan({
     step: 1,
-    test: (x, z) => ctx.reach(x, z) && hyp({ x, z }, { x: ent.cx, z: ent.cz }) <= 18 && ctx.hAt(x, z) >= 1.9 && ctx.free(x, z, 0),
-    score: (x, z) => -ctx.hAt(x, z)
+    test: (x, z) => ctx.reach(x, z) && Math.abs(x) <= 40 && ctx.hAt(x, z) >= 1.9 && ctx.dryClear(x, z, 4) && ctx.free(x, z, 2),
+    score: (x, z) => -ctx.hAt(x, z) + 0.02 * Math.abs(z)
   }), 'o Monte Caldeira');
   ctx.take(peak, 6);
   extra.calderaPeak = pt(peak);
-  // Forja Naval: na costa do lado dos Clãs, com água navegável do oceano a 8–18 u (o Estaleiro e os Leviatãs de Ferro)
-  const forge = need(ctx.scan({
-    step: 1,
-    test: (x, z) => ctx.isShore(x, z) && ctx.reach(x, z) && ctx.free(x, z, 4) && hyp({ x, z }, s1) >= 18 && hyp({ x, z }, s1) <= 44 && ctx.waterNear(x, z, 8, 18),
-    score: (x, z) => Math.abs(hyp({ x, z }, s1) - 28)
-  }), 'a Forja Naval');
-  ctx.take(forge, 11);
-  extra.forge = pt(forge);
-  extra.forgeWater = { ...ctx.waterNear(forge.x, forge.z, 8, 18), water: true };
-  // Santuário das Cinzas (Vozgul): terra firme entre a base dos Clãs e a passagem de lava, longe da costa
-  const toward = pass.reduce((a, p) => (hyp(p, s1) < hyp(a, s1) ? p : a));
-  const sanctum = need(ctx.scan({
-    test: (x, z) => ctx.dryClear(x, z, 7) && !ctx.isShore(x, z) && ctx.reach(x, z) && ctx.freeNear(x, z, 4, 15) && hyp({ x, z }, s1) >= 15 && hyp({ x, z }, s1) <= 30 && hyp({ x, z }, forge) >= 16,
-    score: (x, z) => Math.abs(hyp({ x, z }, s1) - 21) + 0.3 * hyp({ x, z }, toward)
-  }), 'o Santuário das Cinzas');
-  ctx.take(sanctum, 13);
-  extra.sanctum = pt(sanctum);
-  // prisioneiros (os magos de Orsolo): seis pontos num círculo de 4,5 u, no território dos Clãs mas fora do Santuário
-  const cc = need(ctx.scan({
-    test: (x, z) => ctx.dryClear(x, z, 7.5) && ctx.reach(x, z) && ctx.freeNear(x, z, 3, 14) && hyp({ x, z }, s1) >= 18 && hyp({ x, z }, s1) <= 56 && hyp({ x, z }, sanctum) >= 14 && hyp({ x, z }, forge) >= 12,
-    score: (x, z) => Math.abs(hyp({ x, z }, s1) - 32)
-  }), 'o cativeiro dos magos');
-  ctx.take(cc, 14);
-  extra.captiveCamp = pt(cc);
-  for (let k = 0; k < 6; k++) {
+  // ilhotas do mar: componentes de terra que nenhuma base alcança a pé; a dos Magos (mais perto de s0) e a da Forja (mais perto de s1)
+  const isles = landComponents(ctx.land).filter((c) => !isReached(ctx.land, ctx.seen0, c.cx, c.cz) && !isReached(ctx.land, ctx.seen1, c.cx, c.cz) && c.size >= 25);
+  if (isles.length < 2) throw new Error(`campanha: menos de 2 ilhotas (${isles.map((c) => c.size).join(',')})`);
+  const isleOf = (s) => isles.reduce((a, b) => (hyp({ x: b.cx, z: b.cz }, s) < hyp({ x: a.cx, z: a.cz }, s) ? b : a));
+  const cap = isleOf(s0), forge = isleOf(s1);
+  if (cap === forge) throw new Error('campanha: as duas ilhotas caíram na mesma');
+  const center = (c, name, r) => {
+    const dry = c.cells.map((k) => ctx.land.toWorld(k % ctx.land.cols, (k / ctx.land.cols) | 0)).filter((w) => ctx.dryClear(w.x, w.z, r));
+    if (!dry.length) throw new Error(`campanha: ${name} sem chão`);
+    return dry.reduce((a, b) => (hyp(b, { x: c.cx, z: c.cz }) < hyp(a, { x: c.cx, z: c.cz }) ? b : a));
+  };
+  const fc = center(forge, 'a ilhota da Forja', 5);
+  extra.isletForge = pt(fc);
+  extra.isletForgeWater = { ...need(ctx.waterNear(fc.x, fc.z, 6, 24), 'a água da Forja'), water: true }; // onde a esquadra para (alcance de 12 u)
+  for (let k = 0; k < 4; k++) { // guarda da Forja: 4 pontos em volta (âncoras de tropa)
+    const a = (k / 4) * Math.PI * 2 + 0.7;
+    extra[`isletGuard${k + 1}`] = pt({ x: fc.x + Math.cos(a) * 7, z: fc.z + Math.sin(a) * 7 });
+  }
+  const cc = center(cap, 'a ilhota dos Magos', 5);
+  extra.isletCaptive = pt(cc);
+  extra.isletCaptiveWater = { ...need(ctx.waterNear(cc.x, cc.z, 6, 24), 'a água da ilhota dos Magos'), water: true };
+  for (let k = 0; k < 6; k++) { // os 6 magos cativos (um deles é Orsolo) em círculo de 4,5 u no meio da ilhota
     const a = (k / 6) * Math.PI * 2 + 0.4;
     extra[`captive${k + 1}`] = pt({ x: cc.x + Math.cos(a) * 4.5, z: cc.z + Math.sin(a) * 4.5 });
   }
-  // chegada do esquadrão de grifos da Capitã Lyra: ponto de mar aberto na borda oeste, na altura da base da Liga
+  // Estaleiro da Liga: costa de terra seca a 20–45 u da base, com água navegável a 8–18 u
+  const yard = need(ctx.scan({
+    step: 1,
+    test: (x, z) => ctx.isShore(x, z) && ctx.reach(x, z) && ctx.free(x, z, 4) && hyp({ x, z }, s0) >= 20 && hyp({ x, z }, s0) <= 45 && !!ctx.waterNear(x, z, 8, 18),
+    score: (x, z) => Math.abs(hyp({ x, z }, s0) - 30)
+  }), 'o Estaleiro da Liga');
+  ctx.take(yard, 11);
+  extra.shipyard1 = pt(yard);
+  extra.shipyard1Water = { ...ctx.waterNear(yard.x, yard.z, 8, 18), water: true };
+  // Santuário das Cinzas (Clãs, alvo primário): terra firme na área leste, perto da base dos Clãs, longe da costa
+  const sanctum = need(ctx.scan({
+    test: (x, z) => ctx.dryClear(x, z, 7) && !ctx.isShore(x, z) && ctx.reach(x, z) && ctx.freeNear(x, z, 4, 15) && hyp({ x, z }, s1) >= 26 && hyp({ x, z }, s1) <= 46 && hyp({ x, z }, peak) >= 60,
+    score: (x, z) => Math.abs(hyp({ x, z }, s1) - 34)
+  }), 'o Santuário das Cinzas');
+  ctx.take(sanctum, 13);
+  extra.sanctum = pt(sanctum);
+  // chegada do esquadrão de grifos da Capitã Lyra: mar aberto a oeste, junto à base da Liga (aparece aos 8 min)
   const lyra = need(ctx.scan({
     step: 2,
     test: (x, z) => ctx.oceanOk(x, z) && x <= -half + 14,
     score: (x, z) => Math.abs(z - s0.z) + Math.abs(x + half - 8)
   }), 'a chegada de Lyra');
   extra.lyraArrival = { ...pt(lyra), water: true };
-  // uma mina de ouro de expansão por lado (com 2 minas o ouro acabava no soak dos outros palcos); sem filtro de bioma (a ilha é toda basalto)
-  addGold(ctx, s0, 'expansion1', extra, { dMin: 18, dMax: 40, target: 26 });
-  addGold(ctx, s1, 'expansion2', extra, { dMin: 18, dMax: 40, target: 26 });
+  // ouro de expansão: uma mina por lado, 50–80 u da base (o terreno é todo basalto: sem filtro de bioma)
+  addGold(ctx, s0, 'expansion1', extra, { dMin: 50, dMax: 80, target: 62 });
+  addGold(ctx, s1, 'expansion2', extra, { dMin: 50, dMax: 80, target: 62 });
+  // madeira ao alcance de cada base: 3 matas de 14 árvores a 22–46 u de cada Paço, como no palco 7
+  for (const s of [s0, s1]) {
+    const cands = [];
+    for (let z = -half + 10; z <= half - 10; z += 4) for (let x = -half + 10; x <= half - 10; x += 4) {
+      const d = hyp({ x, z }, s);
+      if (d >= 22 && d <= 46) cands.push({ x, z, s: Math.abs(d - 32) + jitter(x, z) });
+    }
+    cands.sort((a, b) => a.s - b.s);
+    let added = 0;
+    for (const c of cands) {
+      if (added >= 3) break;
+      if (!ctx.dryClear(c.x, c.z, 4) || !ctx.reach(c.x, c.z) || !ctx.free(c.x, c.z, 4)) continue;
+      if (m.forests.some((f) => hyp(c, f) < 18)) continue;
+      const x = r1(c.x), z = r1(c.z);
+      m.forests.push({ x, z, count: 14, radius: 10, species: speciesForBiome(getBiomeAt(m, x, z), false, jitter(x, z)) });
+      ctx.take({ x, z }, 14);
+      added++;
+    }
+  }
 }
 
 /** Pinta um tapete de `id` (raio `r`) em torno de (x, z) no `biomeGrid` do mapa (só visual); só sobre os biomos de `only` (se dado), nunca no mar nem na lava. */

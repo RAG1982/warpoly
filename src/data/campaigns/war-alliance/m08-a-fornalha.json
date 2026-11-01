@@ -3,85 +3,135 @@
   "version": 1,
   "id": "war-alliance-08-a-fornalha",
   "hidden": true,
-  "title": {
-    "pt-BR": "A Fornalha",
-    "en": "The Furnace"
-  },
-  "subtitle": {
-    "pt-BR": "Liga de Aurelan, missão 8",
-    "en": "Aurelan League, mission 8"
-  },
+  "title": { "pt-BR": "A Fornalha", "en": "The Furnace" },
+  "subtitle": { "pt-BR": "Liga de Aurelan, missão 8", "en": "Aurelan League, mission 8" },
   "briefing": {
-    "speaker": {
-      "pt-BR": "Mestre Arcano Oren",
-      "en": "Arcane Master Oren"
-    },
-    "portrait": "🔮",
+    "speaker": { "pt-BR": "Capitão Brann", "en": "Captain Brann" },
+    "portrait": "⚔️",
     "text": {
-      "pt-BR": "Na ilha vulcânica, rios de lava barram o caminho. Resgate os magos prisioneiros no Monte Caldeira.",
-      "en": "On the volcanic isle, rivers of lava bar the way. Rescue the captive mages at Mount Caldron."
+      "pt-BR": "A Fornalha é uma ilha de basalto cortada por dois rios de lava, do norte ao sul. Só há passagens de rocha nas margens, e a terra não basta: no Mar Fendido, uma ilhota guarda seis magos de Orsolo, e outra abriga a Forja Naval dos Clãs do Cinzal, onde o ferro vira navio. Destruam o Santuário das Cinzas, na área leste, e a Forja no mar. Libertem os magos. Vocês têm um Estaleiro na costa e o Centro já no nível 3: a árvore tecnológica inteira está à mão. A frota é a chave. Orsolo ainda está lá; o tempo dele é curto.",
+      "en": "The Furnace is a basalt isle cut by two rivers of lava, north to south. Its only crossings are rock passages at the banks, and land is not enough: in the Sundered Sea, one islet holds six of Orsolo's mages, and another houses the Clans' Naval Forge, where iron becomes ships. Destroy the Ash Sanctum in the eastern area, and the Forge at sea. Free the mages. You have a Shipyard on the coast and your Palace is already level 3: the whole tech tree is in reach. The fleet is the key. Orsolo is still there; his time is short."
     },
     "hints": [
-      {
-        "pt-BR": "Concentre-se nos objetivos primários para avançar.",
-        "en": "Focus on primary objectives to advance."
-      }
+      { "pt-BR": "Os rios de lava não têm vau de terra: só as passagens de rocha ligam as áreas. A frota vai onde o exército não passa.", "en": "The lava rivers have no land ford: only the rock passages link the areas. The fleet goes where the army cannot." },
+      { "pt-BR": "Dica: o Estaleiro fica na costa. Fragatas custam petróleo: ergam Plataformas nos poços do mar, perto da base, com uma Barcaça de Transporte.", "en": "Tip: the Shipyard stands on the coast. Frigates cost oil: raise Platforms on the sea wells near your base, with a Transport Barge." },
+      { "pt-BR": "Dica: a Forja Naval só pode ser atingida do mar. Fragatas têm alcance de 12 u a partir da água.", "en": "Tip: the Naval Forge can only be hit from the sea. Frigates reach 12 u from the water." },
+      { "pt-BR": "O Capitão Brann é um HERÓI: tem mana e três habilidades (Z, X, C) e só existe um. Se ele morrer, a missão está perdida.", "en": "Captain Brann is a HERO: he has mana and three abilities (Z, X, C), and there is only one of him. If he dies the mission is lost." }
     ]
   },
-  "mapId": "continental-1v1",
+  "mapId": "camp-08-fornalha",
   "seed": 9136,
   "players": [
-    {
-      "id": 0,
-      "name": {
-        "pt-BR": "Liga de Aurelan",
-        "en": "Aurelan League"
-      },
-      "factionId": "human",
-      "team": 0,
-      "color": "#2563eb",
-      "isLocal": true,
-      "startSlot": 0
-    },
-    {
-      "id": 1,
-      "name": {
-        "pt-BR": "Clãs do Cinzal",
-        "en": "Cinzal Clans"
-      },
-      "factionId": "orc",
-      "team": 1,
-      "color": "#dc2626",
-      "isAI": true,
-      "startSlot": 1
-    }
+    { "id": 0, "name": { "pt-BR": "Liga de Aurelan", "en": "Aurelan League" }, "factionId": "human", "team": 0, "color": "#2563eb", "isLocal": true, "startSlot": 0 },
+    { "id": 1, "name": { "pt-BR": "Clãs do Cinzal", "en": "Cinzal Clans" }, "factionId": "orc", "team": 1, "color": "#dc2626", "isAI": true, "difficulty": "easy", "startSlot": 1 }
   ],
-  "startingResources": {
-    "wood": 400,
-    "gold": 400,
-    "stone": 150
-  },
+  "startingResources": { "wood": 600, "gold": 900, "stone": 300 },
+  "vars": { "freed": false, "fin_clock": 0 },
+  "autoVictory": false,
   "setup": [
-    {
-      "type": "tag",
-      "select": {
-        "buildingType": "great_hall"
-      },
-      "tag": "enemy_base"
-    }
+    { "type": "spawn", "owner": "player", "unitType": "hero_brann", "count": 1, "anchor": "playerStart", "dx": 0, "dz": 13, "tag": "brann" },
+    { "type": "spawnBuilding", "owner": "player", "buildingType": "shipyard", "anchor": "shipyard1", "tag": "shipyard" },
+    { "type": "spawnBuilding", "owner": 1, "buildingType": "ash_sanctum", "anchor": "sanctum", "tag": "sanctum", "facing": 0 },
+    { "type": "spawnBuilding", "owner": 1, "buildingType": "naval_forge", "anchor": "isletForge", "tag": "naval_forge", "facing": 0 },
+    { "type": "spawn", "owner": 1, "units": [{ "type": "grunt", "count": 3 }, { "type": "axethrower", "count": 2 }], "anchor": "isletForge", "spread": 5, "tag": "forge_guard", "guard": { "r": 12 } },
+    { "type": "spawn", "owner": 1, "units": [{ "type": "grunt", "count": 4 }, { "type": "axethrower", "count": 2 }], "anchor": "isletCaptive", "spread": 5, "tag": "captive_guard", "guard": { "r": 12 } },
+    { "type": "spawn", "owner": "neutral", "unitType": "mage", "count": 5, "anchor": "isletCaptive", "spread": 3, "tag": "captives", "markColor": "#22d3ee", "displayName": { "pt-BR": "Mago cativo", "en": "Captive mage" } },
+    { "type": "spawn", "owner": 1, "units": [{ "type": "grunt", "count": 4 }, { "type": "axethrower", "count": 2 }, { "type": "ogre", "count": 1 }], "anchor": "sanctum", "dx": 6, "dz": 6, "spread": 4, "tag": "sanctum_guard", "guard": { "r": 16 } }
   ],
   "objectives": [
-    {
-      "id": "primary-main",
-      "type": "destroy",
-      "priority": "primary",
-      "select": {
-        "tag": "enemy_base"
-      },
-      "title": {
-        "pt-BR": "Cruzar as passagens de lava e libertar os magos",
-        "en": "Cross the lava crossings and free the mages"
-      }
-    }
+    { "id": "p-sanctum", "type": "destroy", "priority": "primary", "select": { "tag": "sanctum" }, "count": 1,
+      "title": { "pt-BR": "Destruir o Santuário das Cinzas", "en": "Destroy the Ash Sanctum" },
+      "description": { "pt-BR": "O santuário de Vozgul fica na área leste, atrás dos rios de lava, perto da base dos Clãs.", "en": "Vozgul's sanctum stands in the eastern area, behind the lava rivers, near the Clans' base." },
+      "marker": { "area": { "anchor": "sanctum", "r": 14 }, "style": "goal", "seconds": 120 } },
+    { "id": "p-forge", "type": "destroy", "priority": "primary", "select": { "tag": "naval_forge" }, "count": 1,
+      "title": { "pt-BR": "Destruir a Forja Naval na ilhota (só pelo mar)", "en": "Destroy the Naval Forge on the islet (sea only)" },
+      "description": { "pt-BR": "A Forja fica numa ilhota do Mar Fendido, a leste. Nenhuma tropa de terra chega lá: fragatas e barcaças.", "en": "The Forge stands on an islet of the Sundered Sea, to the east. No land troops reach it: frigates and barges only." },
+      "marker": { "area": { "anchor": "isletForge", "r": 20 }, "style": "goal", "seconds": 120 } },
+    { "id": "s-captives", "type": "rescue", "priority": "secondary", "tag": "captives", "count": 5,
+      "title": { "pt-BR": "Libertar 5 magos cativos na ilhota dos Magos", "en": "Free 5 captive mages on the Mages' islet" },
+      "description": { "pt-BR": "Seis magos foram presos. Orsolo é um deles: ele não sairá com vida. Os outros cinco ainda podem sair.", "en": "Six mages were taken. Orsolo is one of them: he will not walk out alive. The other five still can." } },
+    { "id": "s-frigates", "type": "train", "priority": "secondary", "unitType": "frigate", "count": 3,
+      "title": { "pt-BR": "Treinar 3 Fragatas no Estaleiro", "en": "Train 3 Frigates at the Shipyard" },
+      "description": { "pt-BR": "O Estaleiro da costa fabrica fragatas. Elas custam petróleo, que vem das plataformas nos poços do mar.", "en": "The coastal Shipyard builds frigates. They cost oil, which comes from platforms on the sea wells." } },
+    { "id": "s-mages", "type": "train", "priority": "secondary", "unitType": "mage", "count": 4,
+      "title": { "pt-BR": "Treinar 4 Magos na Torre Arcana", "en": "Train 4 Mages at the Arcane Tower" },
+      "description": { "pt-BR": "Magos da Torre Arcana: queimam o que a espada não alcança. Erga a torre no nível 3 do Paço.", "en": "Mages from the Arcane Tower: they burn what the sword cannot reach. Raise the tower from the level 3 Palace." } },
+    { "id": "h-rite", "type": "flag", "priority": "hidden",
+      "condition": { "type": "area", "owner": "player", "area": { "anchor": "sanctum", "r": 16 } },
+      "title": { "pt-BR": "Ouvir o rito das cinzas dentro do Santuário", "en": "Hear the ash rite inside the Sanctum" } }
+  ],
+  "triggers": [
+    { "id": "intro", "when": { "type": "time", "at": 0 },
+      "actions": [
+        { "type": "music", "id": "on" },
+        { "type": "reveal", "anchor": "isletCaptive", "radius": 30, "ttl": 50 },
+        { "type": "reveal", "anchor": "sanctum", "radius": 26, "ttl": 40 },
+        { "type": "cutscene", "id": "furnace", "duration": 38, "skippable": true,
+          "steps": [
+            { "at": 0, "anchor": "playerStart", "zoom": 1.15, "dialog": { "speaker": { "pt-BR": "Capitão Brann", "en": "Captain Brann" }, "portrait": "⚔️", "text": { "pt-BR": "Rios de lava, sem ponte. Só a frota atravessa isso. Vamos pelo mar.", "en": "Lava rivers, no bridges. Only the fleet crosses this. We go by sea." }, "duration": 8 } },
+            { "at": 9, "anchor": "isletCaptive", "zoom": 1.1, "dialog": { "speaker": { "pt-BR": "Mestre Orsolo", "en": "Master Orsolo" }, "portrait": "🗺️", "text": { "pt-BR": "Não me tirem daqui antes dos outros. Eu conheço o fogo; ele cobra à porta.", "en": "Do not take me out before the others. I know the fire; it charges at the door." }, "duration": 8 } },
+            { "at": 18, "anchor": "sanctum", "zoom": 1.05, "dialog": { "speaker": { "pt-BR": "Profetisa Vozgul", "en": "Prophetess Vozgul" }, "portrait": "🕯️", "text": { "pt-BR": "Vocês trazem fogo para a minha casa. Cada morto merece lembrança, até os de vocês.", "en": "You bring fire into my house. Every dead one deserves a memory, even yours." }, "duration": 8 } },
+            { "at": 27, "anchor": "playerStart", "zoom": 1.15, "dialog": { "speaker": { "pt-BR": "Capitão Brann", "en": "Captain Brann" }, "portrait": "⚔️", "text": { "pt-BR": "Fragatas primeiro, depois os cativos. Quem fica no mar não precisa de ponte.", "en": "Frigates first, then the captives. Whoever stays at sea needs no bridge." }, "duration": 8 } }
+          ] }
+      ] },
+    { "id": "full-tree", "when": { "type": "time", "at": 0 },
+      "actions": [
+        { "type": "setTier", "owner": "player", "tier": 3 },
+        { "type": "message", "text": { "pt-BR": "Árvore tecnológica completa liberada: o Paço está no nível 3 (Torre Arcana, Aviário, Estaleiro e Torres).", "en": "Full tech tree unlocked: the Palace is at level 3 (Arcane Tower, Aviary, Shipyard and Towers)." } }
+      ] },
+    { "id": "raid-1", "when": { "type": "time", "at": 300 },
+      "actions": [
+        { "type": "spawn", "owner": 1, "units": [{ "type": "grunt", "count": 4 }, { "type": "axethrower", "count": 2 }], "anchor": "sanctum", "spread": 3, "order": { "kind": "attackMove", "anchor": "playerStart" } },
+        { "type": "message", "text": { "pt-BR": "Primeira leva dos Clãs: Talhadores e Lanceiros-Machado descem o rio pela passagem norte.", "en": "First Clan wave: Grunts and Axe Throwers come down the river through the north passage." } }
+      ] },
+    { "id": "lyra", "when": { "type": "time", "at": 480 },
+      "actions": [
+        { "type": "spawn", "owner": "player", "unitType": "gryphon_rider", "count": 3, "anchor": "lyraArrival", "spread": 3 },
+        { "type": "dialog", "speaker": { "pt-BR": "Capitã Lyra", "en": "Captain Lyra" }, "portrait": "🦅", "text": { "pt-BR": "Esquadrão de grifos de Aurelan, chegando pelo mar! Os rios não nos seguram.", "en": "Aurelan gryphon squadron, arriving by sea! The rivers do not hold us." }, "duration": 7 }
+      ] },
+    { "id": "raid-2", "when": { "type": "time", "at": 540 },
+      "actions": [
+        { "type": "spawn", "owner": 1, "units": [{ "type": "ogre", "count": 1 }, { "type": "grunt", "count": 3 }, { "type": "axethrower", "count": 2 }], "anchor": "sanctum", "spread": 3, "order": { "kind": "attackMove", "anchor": "playerStart" } },
+        { "type": "message", "text": { "pt-BR": "Segunda leva: um Ogro lidera a travessia pela passagem sul.", "en": "Second wave: an Ogre leads the crossing by the south passage." } }
+      ] },
+    { "id": "raid-3", "when": { "type": "time", "at": 720 },
+      "actions": [
+        { "type": "spawn", "owner": 1, "units": [{ "type": "catapult", "count": 1 }, { "type": "grunt", "count": 4 }, { "type": "ogre", "count": 1 }], "anchor": "sanctum", "spread": 3, "order": { "kind": "attackMove", "anchor": "playerStart" } },
+        { "type": "message", "text": { "pt-BR": "Terceira leva: uma Catapulta vem com os Talhadores. Procure as torres.", "en": "Third wave: a Catapult comes with the Grunts. Look for the towers." } }
+      ] },
+    { "id": "captives-freed", "when": { "type": "dead", "select": { "tag": "captive_guard" }, "count": 6 },
+      "actions": [
+        { "type": "transfer", "select": { "tag": "captives" }, "to": "player" },
+        { "type": "setVar", "name": "freed", "value": true },
+        { "type": "sound", "id": "build" },
+        { "type": "dialog", "speaker": { "pt-BR": "Capitão Brann", "en": "Captain Brann" }, "portrait": "⚔️", "text": { "pt-BR": "Mestre Orsolo abriu a última cela com o próprio fogo e não saiu. Cinco magos estão livres; os cadernos dele ficam com Oren.", "en": "Master Orsolo opened the last cell with his own fire and did not come out. Five mages are free; his notebooks go to Oren." }, "duration": 9 }
+      ] },
+    { "id": "forge-down", "when": { "type": "objective", "id": "p-forge", "status": "completed" },
+      "actions": [
+        { "type": "sound", "id": "alarm" },
+        { "type": "message", "text": { "pt-BR": "A Forja Naval caiu no mar. O ferro dos Clãs agora chega só pela terra.", "en": "The Naval Forge has fallen into the sea. The Clans' iron now comes by land only." } }
+      ] },
+    { "id": "sanctum-down", "when": { "type": "objective", "id": "p-sanctum", "status": "completed" },
+      "actions": [
+        { "type": "dialog", "speaker": { "pt-BR": "Capitão Brann", "en": "Captain Brann" }, "portrait": "⚔️", "text": { "pt-BR": "O Santuário das Cinzas caiu. Falta a Forja, no mar.", "en": "The Ash Sanctum has fallen. Only the Forge at sea is left." }, "duration": 6 }
+      ] },
+    { "id": "all-done", "when": { "all": [
+        { "type": "objective", "id": "p-sanctum", "status": "completed" },
+        { "type": "objective", "id": "p-forge", "status": "completed" }
+      ] },
+      "actions": [
+        { "type": "sound", "id": "victory" },
+        { "type": "cutscene", "id": "finale", "duration": 12, "skippable": true,
+          "steps": [
+            { "at": 0, "anchor": "playerStart", "zoom": 1.1, "dialog": { "speaker": { "pt-BR": "Capitão Brann", "en": "Captain Brann" }, "portrait": "⚔️", "text": { "pt-BR": "A Fornalha esfriou. Orsolo não voltou, mas os magos voltaram com os cadernos.", "en": "The Furnace has cooled. Orsolo did not come back, but the mages came back with his notebooks." }, "duration": 6 } },
+            { "at": 6, "anchor": "playerStart", "zoom": 1.15, "dialog": { "speaker": { "pt-BR": "Mestre Oren", "en": "Master Oren" }, "portrait": "🔮", "text": { "pt-BR": "Os mapas de Orsolo mostram a costa de Cinzara. Sigamos para o outro lado do mar.", "en": "Orsolo's maps show the coast of Cinzara. Let us sail to the other side of the sea." }, "duration": 6 } }
+          ] }
+      ] },
+    { "id": "finale-clock", "when": { "type": "trigger", "id": "all-done" }, "actions": [ { "type": "incVar", "name": "fin_clock" } ] },
+    { "id": "finale-victory", "when": { "type": "var", "name": "fin_clock", "op": ">=", "value": 1 }, "actions": [ { "type": "victory" } ] },
+    { "id": "palace-fallen", "when": { "type": "count", "select": { "buildingType": "castle", "owner": "player" }, "op": "==", "value": 0 },
+      "actions": [ { "type": "defeat" } ] },
+    { "id": "brann-fallen", "when": { "type": "dead", "select": { "tag": "brann" }, "count": 1 },
+      "actions": [ { "type": "defeat" } ] }
   ]
 }

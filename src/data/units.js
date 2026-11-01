@@ -44,7 +44,7 @@
  *   `canHitGround:false` impede atacar o solo (batedores aéreos não atacam: ambos false). Ver `src/sim/targeting.js`.
  * - layer 'naval' / isTanker / carryCapacity / canHitNaval   F4-07: navios (`layer:'naval'`: só na água navegável, pathfinder naval; `canHitNaval` = pode atingir navios,
  *   padrão: atirador/cerco; melee nunca). `isTanker`+`carryCapacity`: petroleiro (coleta petróleo e ergue plataforma; não é `isWorker`).
- * - transportCapacity / submersible   F4-07b: barcaça (nº de terrestres embarcáveis); submersível (invisível permanente: reemerge ao atacar, volta após SUBMERGE_DELAY).
+ * - transportCapacity   F4-07b: barcaça (nº de terrestres embarcáveis).
  * - isSiege         F4-04: unidade de cerco (imune à Transmutação).
  * - isHero / unique / scaleMul   F4-08: herói de campanha. `unique` = 1 por partida (`gm.spawnUnit` recusa o 2º, mesmo após a
  *   morte do 1º); `isHero` = imune à Transmutação, barra de vida maior, destaque no HUD; `scaleMul` multiplica a escala do modelo.
@@ -672,7 +672,7 @@ export const UNITS = {
     layer: 'naval', isTanker: true, carryCapacity: 100, canHitAir: false, canHitGround: false, canHitNaval: false, corpseless: true
   },
 
-  // F4-07b: navios de guerra. Fragata/Galé, Couraçado/Leviatã e Submersível/Tartaruga são tipos por facção (mesmos números; o orc usa
+  // F4-07b: navios de guerra. Fragata/Galé e Couraçado/Leviatã são tipos por facção (mesmos números; o orc usa
   // o modelo do humano via `modelOf` + .glb orc por facção); a Barcaça é um tipo único (como o Petroleiro).
   frigate: {
     type: 'frigate',
@@ -729,24 +729,6 @@ export const UNITS = {
     isWorker: false, isRanged: true, isCombat: true, projectile: 'cannonball',
     layer: 'naval', canHitAir: false, canHitGround: true, canHitNaval: true, isSiege: true, corpseless: true
   },
-  submersible: {
-    type: 'submersible',
-    name: 'Submersível',
-    entityName: 'Submersível',
-    faction: 'human',
-    requires: [{ hq: 3 }, 'foundry'],
-    hp: 200, speed: 4.4, damage: { basic: 0, piercing: 60, type: 'piercing' }, attackRange: 9, attackCooldown: 2.0, armor: 0,
-    collisionRadius: 1.6,
-    visionRadius: 16,
-    ...RANGED_SCAN,
-    healthBarHeight: 2.4,
-    cost: { gold: 300, wood: 150, stone: 0, oil: 100 },
-    trainTime: 22,
-    icon: '/icoNavio.svg',
-    description: 'Naval. Invisível (só detectores o revelam); emerge ao atacar. Só ataca navios (requer Centro nível 3 e Fundição)',
-    isWorker: false, isRanged: true, isCombat: true, projectile: 'bolt',
-    layer: 'naval', canHitAir: false, canHitGround: false, canHitNaval: true, submersible: true, corpseless: true
-  },
 
   // --- Neutro ---
   bandit: {
@@ -772,7 +754,6 @@ export const UNITS = {
 const orcShip = (base, patch) => ({ ...UNITS[base], ...patch, faction: 'orc', modelOf: base, requires: UNITS[base].requires.map(r => (r === 'foundry' ? 'naval_forge' : r)) });
 UNITS.war_galley = orcShip('frigate', { type: 'war_galley', name: 'Galé de Guerra', entityName: 'Galé de Guerra', description: 'Naval. Galé de guerra veloz: ataca navios, aéreos e a costa' });
 UNITS.iron_leviathan = orcShip('dreadnought', { type: 'iron_leviathan', name: 'Leviatã de Ferro', entityName: 'Leviatã de Ferro', description: 'Naval. Artilharia de longo alcance contra navios e a costa (requer Centro nível 3 e Fornalha Naval)' });
-UNITS.colossal_turtle = orcShip('submersible', { type: 'colossal_turtle', name: 'Tartaruga Colossal', entityName: 'Tartaruga Colossal', description: 'Naval. Invisível (só detectores a revelam); emerge ao atacar. Só ataca navios (requer Centro nível 3 e Fornalha Naval)' });
 
 /** Valores usados quando o tipo não está em UNITS (mesmos fallbacks de antes da F0-06). */
 export const DEFAULT_UNIT = {

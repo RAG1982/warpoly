@@ -125,13 +125,12 @@ Upgrades de classe: Patrulheiro/Enfurecido (Serraria, nível 2): +alcance/+visã
 ### 5.2 Aéreas e navais
 | Papel | Humanos | Orcs | Notas | Nível |
 |---|---|---|---|---|
-| Batedor aéreo ✅ F4-06 | **Planador de Engenho** | **Balão de Guerra** | sem ataque; visão 30; detecta invisíveis/submersos; 110/60/20, PV 120 | 2 (Oficina) |
+| Batedor aéreo ✅ F4-06 | **Planador de Engenho** | **Balão de Guerra** | sem ataque; visão 30; detecta invisíveis; 110/60/20, PV 120 | 2 (Oficina) |
 | Ataque aéreo ✅ F4-06 | **Cavaleiro Grifo** | **Serpe de Guerra** | PV 350, 38 mágico em área r1,2, 250/100/0; só atingível por atiradores/torres/navios/magias | 3 (Aviário/Ninho) |
 | Petroleiro ✅ F4-07a | Petroleiro | Petroleiro | coleta petróleo, constrói plataforma | 2 |
 | Destróier ✅ F4-07b | **Fragata** | **Galé de Guerra** | anti-ar e anti-navio; PV 280, alcance 12; 200/100/0 +50 petróleo | 2 |
 | Transporte ✅ F4-07b | Barcaça | Barcaça | 6 unidades (`LOAD`/`UNLOAD`); PV 220; 150/100/0 +30 petróleo | 2 |
 | Pesado ✅ F4-07b | **Couraçado** | **Leviatã de Ferro** | longo alcance 22 (mín. 6), balístico em área, destrói costa; PV 520; 300/200/0 +120 petróleo | 3 (+Fundição) |
-| Submerso ✅ F4-07b | **Submersível** | **Tartaruga Colossal** | invisível exceto a detectores; só ataca navios; emerge ao atacar; PV 200; 300/150/0 +100 petróleo | 3 (+Fundição) |
 
 ### 5.3 Heróis (campanha **e** escaramuça — decisão D6)
 Humanos: Rainha Elyra (Templária), Mestre Arcano Oren, Capitão Brann. Orcs: Drogath Punho-de-Brasa (Talhador), Vozgul a Profetisa (Necromante), Grok Quebra-Muros (Ogro Feiticeiro).

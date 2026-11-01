@@ -63,7 +63,7 @@ const ALLIANCE_MISSIONS = [
       en: 'The oil reserves of the Shallows are crucial. Build the Shipyard, pump oil, and rule the waters.'
     },
     primary: { 'pt-BR': 'Erguer um Estaleiro e Plataformas de Petróleo', en: 'Raise a Shipyard and Oil Platforms' },
-    unlocks: { units: ['glider', 'tanker', 'barge', 'frigate', 'dreadnought', 'submersible'], buildings: ['shipyard', 'refinery', 'foundry', 'oil_platform'], research: ['naval_cannons', 'naval_hulls', 'naval_cannons@2', 'naval_hulls@2', 'siege_damage@2'] }
+    unlocks: { units: ['glider', 'tanker', 'barge', 'frigate', 'dreadnought'], buildings: ['shipyard', 'refinery', 'foundry', 'oil_platform'], research: ['naval_cannons', 'naval_hulls', 'naval_cannons@2', 'naval_hulls@2', 'siege_damage@2'] }
   },
   {
     num: 5,
@@ -234,7 +234,7 @@ const HORDE_MISSIONS = [
       en: 'Construct the Naval Dock and Oil Platforms. The Cinzal Clans\' War Galleys will rule the Shallows!'
     },
     primary: { 'pt-BR': 'Construir a Doca e Plataformas e afundar a patrulha', en: 'Build the Dock and Platforms and sink the patrol' },
-    unlocks: { units: ['tanker', 'barge', 'war_galley', 'iron_leviathan', 'colossal_turtle'], buildings: ['ship_dock', 'naval_forge', 'ash_cauldron', 'oil_platform'], research: ['naval_cannons', 'naval_hulls', 'naval_cannons@2', 'naval_hulls@2', 'siege_damage@2'] }
+    unlocks: { units: ['tanker', 'barge', 'war_galley', 'iron_leviathan'], buildings: ['ship_dock', 'naval_forge', 'ash_cauldron', 'oil_platform'], research: ['naval_cannons', 'naval_hulls', 'naval_cannons@2', 'naval_hulls@2', 'siege_damage@2'] }
   },
   {
     num: 5,

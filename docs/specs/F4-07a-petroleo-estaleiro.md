@@ -24,7 +24,7 @@ O 4º recurso (petróleo) está só declarado (`oil` em `tiers.js`, `RESOURCE_TY
 `src/core/Pathfinder.js` (`isWater`, `buildGrid`, `blockCircle`, `requestPath`, `processQueue`), `src/world/Terrain.js` (altura/nível da água, `mapDef`), `src/core/GameManager.js` (`spawnResourceDeposits`, `canPlaceBuilding`, `placeBuilding`), `src/entities/ResourceDeposit.js`, `src/entities/Unit.js` (`updateGathering`, `orderGather`, `depositResources`, estados), `src/sim/Player.js`, `src/data/tiers.js`/`economy.js`/`buildings.js`/`units.js`/`factions.js`, `src/data/maps/*.json` + `index.js` + `README.md`, `src/ui/UIManager.js` (contadores de recurso), `src/ui/screens/MainMenu.js` (lista de mapas), `src/sim/checksum.js`, `src/sim/MatchStats.js`.
 
 ## Não fazer
-Navios de guerra, transporte, desembarque, Fundição, submerso (F4-07b); IA naval avançada; ondas/maré; modelos no Blender (depois).
+Navios de guerra, transporte, desembarque, Fundição (F4-07b); IA naval avançada; ondas/maré; modelos no Blender (depois).
 
 ## Testes (Vitest)
 `oil.test.js`: `oil` em Player (gasto/reembolso); poço só em água; plataforma só sobre poço livre e com Centro 2; petroleiro extrai e entrega na Refinaria; Centro não aceita óleo; poço esgota; `UPGRADE_HQ` nível 3 cobra 200 petróleo; `naval.test.js`: grade naval (célula rasa bloqueia, canal navega), caminho naval contorna ilha, navio não entra em terra, Estaleiro só em costa; `maps.test.js`/`mapsHeadless.test.js` com `estreito-1v1` (2000 ticks sem exceção); `determinism.test.js` verde.

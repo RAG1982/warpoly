@@ -214,7 +214,7 @@ const hasManifest = existsSync(manifestPath);
 const real = hasManifest ? JSON.parse(readFileSync(manifestPath, 'utf8')) : null;
 
 // Tipos que ainda não têm .glb (o jogo usa modelo procedural): ficam com o ícone antigo — ver docs/TASKS.md F7-09.
-const NO_GLB_UNITS = ['sheep', 'submersible', 'colossal_turtle', 'hero_dorian', 'hero_vozgul'];
+const NO_GLB_UNITS = ['sheep', 'hero_dorian', 'hero_vozgul'];
 const NO_GLB_BUILDINGS = ['refinery', 'foundry', 'naval_forge', 'ash_cauldron'];
 const NO_SPRITE_ABILITIES = [
   'hero_cleave_strike', 'hero_shield_bash',
@@ -302,7 +302,7 @@ describe.skipIf(!hasManifest)('public/ui — sprites reais (F7-09)', () => {
     }
     for (const cmd of ['stop', 'repair', 'unload', 'cancel', 'upgrade_hq']) expect(commandIconId(cmd, 'human', m), cmd).not.toBeNull();
     // atributos da linha de status do card (UIManager._stat)
-    for (const n of ['attack', 'armor', 'speed', 'range', 'cargo', 'mana', 'air', 'naval', 'suicide', 'area', 'submerged', 'build', 'pop', 'tower']) {
+    for (const n of ['attack', 'armor', 'speed', 'range', 'cargo', 'mana', 'air', 'naval', 'suicide', 'area', 'build', 'pop', 'tower']) {
       expect(statIconId(n, m), `atributo ${n}`).not.toBeNull();
     }
     expect(commandIconId('upgrade_hq', 'orc', m)).toBe('command_upgrade_hq_orc');

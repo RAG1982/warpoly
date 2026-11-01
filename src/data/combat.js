@@ -31,8 +31,6 @@ export const OIL_LOAD_TIME = 3;
 export const SHORE_REACH = 2;
 /** F4-07b: distância máxima (borda a borda) entre a margem do terrestre e a barcaça para embarcar. */
 export const BOARD_DISTANCE = 3;
-/** F4-07b: segundos sem atacar até o submersível voltar a mergulhar (invisível). */
-export const SUBMERGE_DELAY = 4;
 
 /** F4-07b: escala visual dos navios (os .glb do Blender têm proporção de construção; os terrestres usam 1,62). */
 export const NAVAL_MESH_SCALE = 0.96;

@@ -53,7 +53,7 @@ export const RESEARCH = {
       { cost: { gold: 250, wood: 150, oil: 100 }, time: 40, bonus: { piercing: 8 }, requires: [] },
       { cost: { gold: 500, wood: 300, oil: 200 }, time: 60, bonus: { piercing: 8 }, requires: [{ hq: 3 }] }
     ],
-    appliesTo: ['frigate', 'war_galley', 'dreadnought', 'iron_leviathan', 'submersible', 'colossal_turtle'],
+    appliesTo: ['frigate', 'war_galley', 'dreadnought', 'iron_leviathan'],
     icon: '/icoEspada.png',
     name: { human: 'Canhões Reforçados', orc: 'Bocas de Fogo' }
   },
@@ -63,7 +63,7 @@ export const RESEARCH = {
       { cost: { gold: 200, wood: 200, oil: 80 }, time: 40, bonus: { armor: 3 }, requires: [] },
       { cost: { gold: 400, wood: 400, oil: 160 }, time: 60, bonus: { armor: 3 }, requires: [{ hq: 3 }] }
     ],
-    appliesTo: ['frigate', 'war_galley', 'dreadnought', 'iron_leviathan', 'submersible', 'colossal_turtle', 'barge', 'tanker'],
+    appliesTo: ['frigate', 'war_galley', 'dreadnought', 'iron_leviathan', 'barge', 'tanker'],
     icon: '/icoEscudo.png',
     name: { human: 'Cascos Blindados', orc: 'Cascos de Ferro' }
   },

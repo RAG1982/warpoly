@@ -10,10 +10,10 @@ import { CMD } from './commands.js';
 import { steerDirection, SEP_MARGIN } from './steering.js';
 import { EVT } from './events.js';
 import { REPAIR_INTERVAL, MAX_WORKERS_PER_BUILDING } from './repair.js';
-import { createStatusSlots, createMods, tickStatuses, clearStatuses, removeStatus, addStatus, STATUS_DEFS } from './statuses.js';
+import { createStatusSlots, createMods, tickStatuses, clearStatuses, removeStatus, STATUS_DEFS } from './statuses.js';
 import { isDetectedBy } from './detection.js';
 import { canTarget, defaultCanHitAir, defaultCanHitNaval } from './targeting.js';
-import { FLAMESHIELD_DAMAGE, WATER_LEVEL, NAVAL_MAX_HEIGHT, OIL_LOAD_TIME, SHORE_REACH, SUBMERGE_DELAY, NAVAL_MESH_SCALE } from '../data/combat.js';
+import { FLAMESHIELD_DAMAGE, WATER_LEVEL, NAVAL_MAX_HEIGHT, OIL_LOAD_TIME, SHORE_REACH, NAVAL_MESH_SCALE } from '../data/combat.js';
 import { getAbility } from '../data/abilities.js';
 import { visualScaleOf } from '../data/visualScale.js';
 import { followBoat, detachFromBoat, killCargo, updateBoarding, updateUnloading } from './transport.js';
@@ -85,7 +85,6 @@ function pickNearestInBuf(buf, x, z) {
 
 // F1-08: pontos de módulo reutilizados para calcular a origem/impacto do projétil (Projectile copia o valor recebido)
 const _projectileOrigin = { x: 0, y: 0, z: 0 };
-const SUBMERGED_FOREVER = 1e9;
 const _impactPoint = { x: 0, y: 0, z: 0 }; // F4-02: ponto previsto do cerco
 
 /** Origem do projétil: 1,68 u acima da posição `p` (reaproveita um objeto de módulo). */
@@ -181,10 +180,6 @@ export class Unit {
     this._landingOrder = null; // NAVAL-LANDING: ordem da missão para a tropa ao desembarcar
     /** F4-07b: apresentação — segundos restantes com a rampa da barcaça aberta (embarque/desembarque); não entra no checksum. */
     this.rampT = 0;
-    /** F4-07b: submersível — invisível permanente; emerge ao atacar/sofrer dano e volta após `SUBMERGE_DELAY` s. */
-    this.submersible = !!def.submersible;
-    this._surfaceT = 0;
-    if (this.submersible) addStatus(this, 'invisible', SUBMERGED_FOREVER);
     /** F4-02: velocidade estimada (u/s) medida pelo `GameManager` a cada tick — mira preditiva do cerco. */
     this.velX = 0;
     this.velZ = 0;
@@ -1252,12 +1247,8 @@ export class Unit {
     this.attackTimer += delta;
     this.actionTimer += delta;
     if (this.layer === 'air') this._updateFlightHeight(delta);
-    // F4-07b: submersível volta a mergulhar após `SUBMERGE_DELAY` s sem atacar/sofrer dano; embarque e desembarque pendentes.
+    // F4-07b: embarque e desembarque pendentes.
     if (this.rampT > 0) this.rampT -= delta;
-    if (this.submersible && !this.mods.invisible) {
-      this._surfaceT += delta;
-      if (this._surfaceT >= SUBMERGE_DELAY) addStatus(this, 'invisible', SUBMERGED_FOREVER);
-    }
     if (gameManager) {
       if (this._boardTarget) updateBoarding(gameManager, this, delta);
       if (this._unloadOrder) updateUnloading(gameManager, this);
@@ -1367,14 +1358,12 @@ export class Unit {
   }
 
   _notifyInvisibleEnded() {
-    if (this.submersible) return; // F4-07b: o submersível emerge/mergulha sem aviso
     const gm = this.gameManager;
     if (gm && gm.events) gm.events.emit(EVT.NOTIFY, { ownerId: this.ownerId, text: 'Invisibilidade terminou' });
   }
 
   /** F4-04: invisibilidade acaba (ao atacar, lançar ou sofrer dano). */
   breakInvisibility() {
-    this._surfaceT = 0; // F4-07b: reinicia a contagem do mergulho
     if (removeStatus(this, 'invisible')) this._notifyInvisibleEnded();
   }
 

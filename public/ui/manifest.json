@@ -109,7 +109,6 @@
    "stat_pop",
    "stat_range",
    "stat_speed",
-   "stat_submerged",
    "stat_suicide",
    "stat_tower",
    "unit_archer",
@@ -154,9 +153,9 @@
   ]
  },
  "bytes": {
-  "total": 2877232,
+  "total": 2864806,
   "art": 281206,
-  "icons": 2295926,
+  "icons": 2283500,
   "portraits": 300100
  },
  "aliases": {

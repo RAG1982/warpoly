@@ -146,7 +146,7 @@ STAT_ICONS = {
     'attack': dict(glyph='sword', outline=1.8), 'armor': dict(glyph='shield_human', outline=1.8), 'speed': dict(glyph='boot', outline=1.8),
     'range': dict(glyph='target', outline=1.8), 'cargo': dict(glyph='sack', outline=1.8), 'mana': dict(glyph='mana', outline=1.8),
     'air': dict(glyph='wing', outline=1.8), 'naval': dict(glyph='anchor', outline=1.8), 'suicide': dict(glyph='bomb', outline=1.8),
-    'area': dict(glyph='blast', outline=1.8), 'submerged': dict(glyph='bubbles', outline=1.8), 'build': dict(glyph='hammer', outline=1.8),
+    'area': dict(glyph='blast', outline=1.8), 'build': dict(glyph='hammer', outline=1.8),
     'pop': dict(glyph='people', outline=1.8), 'tower': dict(glyph='longbow', outline=1.8),
 }
 

@@ -162,6 +162,12 @@ function station(c, { attack = true } = {}) {
   // a marcha só sai depois da janela de defesa (430 s): a traição e as primeiras ondas são atendidas em casa
   const ready = attack && !b.launched && c.seconds >= 430 && troops.length >= TROOPS_BEFORE_LAUNCH && c.mine('mage').length >= 3;
   if (ready) b.launched = true;
+  // marcha: se o inimigo ataca o Paço (4+ unidades a 40 u dele), a tropa volta e luta em casa antes de retomar o alvo
+  const home = homeOf(c);
+  if (b.launched && troops.length && enemies.filter((u) => dist(posOf(u), home) < 40).length >= 4) {
+    c.issue({ type: c.CMD.ATTACK_MOVE, unitIds: troops.map((u) => u.id), x: home.x, z: home.z });
+    return;
+  }
   if (b.launched && t) {
     const p = posOf(t);
     const idle = troops.filter((u) => u.state === 'idle' || (u.state !== 'attacking' && dist(posOf(u), p) > 40 && u.state !== 'moving'));

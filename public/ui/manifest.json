@@ -30,6 +30,7 @@
    "ability_unholy_armor",
    "ability_whirlwind",
    "building_arcane_tower",
+   "building_ash_cauldron",
    "building_ash_sanctum",
    "building_aviary",
    "building_bandit_camp",
@@ -38,9 +39,11 @@
    "building_cottage",
    "building_farm",
    "building_forge",
+   "building_foundry",
    "building_gold_mine",
    "building_great_hall",
    "building_lumber_camp",
+   "building_naval_forge",
    "building_ogre_den",
    "building_oil_platform",
    "building_oil_platform_orc",
@@ -51,6 +54,7 @@
    "building_orc_watchtower",
    "building_orc_workshop",
    "building_pig_farm",
+   "building_refinery",
    "building_serpent_nest",
    "building_ship_dock",
    "building_shipyard",
@@ -154,9 +158,9 @@
   ]
  },
  "bytes": {
-  "total": 2877232,
+  "total": 2940326,
   "art": 281206,
-  "icons": 2295926,
+  "icons": 2359020,
   "portraits": 300100
  },
  "aliases": {

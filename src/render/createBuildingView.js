@@ -21,6 +21,8 @@ const VIEW_BY_TYPE = {
   ship_dock: NavalBuildingView,
   foundry: NavalBuildingView, // F4-07b
   naval_forge: NavalBuildingView,
+  refinery: NavalBuildingView, // M5-04: braço de carga (Anim_Crane) e fumaça (Anim_Smoke)
+  ash_cauldron: NavalBuildingView,
   oil_platform: NavalBuildingView
 };
 

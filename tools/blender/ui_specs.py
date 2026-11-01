@@ -80,7 +80,7 @@ BUILDINGS = {k: S(k, BLD, pose=None) for k in (
     'castle', 'cottage', 'lumber_camp', 'farm', 'barracks', 'forge', 'stable', 'workshop', 'aviary', 'arcane_tower',
     'temple', 'watchtower', 'shipyard', 'oil_platform', 'great_hall', 'orc_house', 'pig_farm', 'orc_lumber_mill',
     'orc_barracks', 'orc_forge', 'ogre_den', 'orc_workshop', 'serpent_nest', 'ash_sanctum', 'storm_altar',
-    'orc_watchtower', 'ship_dock', 'bandit_camp')}
+    'orc_watchtower', 'ship_dock', 'bandit_camp', 'refinery', 'foundry', 'naval_forge', 'ash_cauldron')}
 BUILDINGS['oil_platform_orc'] = S('orc_oil_platform', BLD, pose=None)
 # muralhas: o .glb é UM bloco; o ícone mostra três em fila para ler como muralha
 BUILDINGS['wall_human'] = S('wall_human', dict(BLD, el=24), pose=None, copies=[(-2.3, 0.0), (0.0, 0.0), (2.3, 0.0)])

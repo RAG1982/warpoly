@@ -1,0 +1,255 @@
+{
+  "rows": [
+    {
+      "id": "G1-refinery",
+      "name": "refinery: modelo novo (Refinery) com Static_Mesh, terminado",
+      "status": "PASS",
+      "detail": "{\"id\":288,\"model\":\"Refinery\",\"constructed\":true,\"meshes\":4,\"draws\":4,\"tris\":9372,\"hasStatic\":true,\"anim\":[\"Anim_Banners\",\"Anim_Crane\",\"Anim_Smoke\"],\"hasTeamColor\":true,\"collisionRadius\":3.4}"
+    },
+    {
+      "id": "G2-refinery",
+      "name": "refinery: draw calls <= 20",
+      "status": "PASS",
+      "detail": "4 draws, 9372 tris"
+    },
+    {
+      "id": "G4-refinery",
+      "name": "refinery: material TeamColor",
+      "status": "PASS",
+      "detail": ""
+    },
+    {
+      "id": "G1-foundry",
+      "name": "foundry: modelo novo (Foundry) com Static_Mesh, terminado",
+      "status": "PASS",
+      "detail": "{\"id\":289,\"model\":\"Foundry\",\"constructed\":true,\"meshes\":5,\"draws\":5,\"tris\":4950,\"hasStatic\":true,\"anim\":[\"Anim_Banners\",\"Anim_Banners_1\",\"Anim_Banners_2\",\"Anim_Crane\",\"Anim_Smoke\"],\"hasTeamColor\":true,\"collisionRadius\":3.4}"
+    },
+    {
+      "id": "G2-foundry",
+      "name": "foundry: draw calls <= 20",
+      "status": "PASS",
+      "detail": "5 draws, 4950 tris"
+    },
+    {
+      "id": "G4-foundry",
+      "name": "foundry: material TeamColor",
+      "status": "PASS",
+      "detail": ""
+    },
+    {
+      "id": "G3-refinery",
+      "name": "refinery: Anim_Crane oscila e Anim_Smoke emite fumaça",
+      "status": "PASS",
+      "detail": "{\"crane\":0.103,\"smokeEvents\":3}"
+    },
+    {
+      "id": "G3-foundry",
+      "name": "foundry: Anim_Crane oscila e Anim_Smoke emite fumaça",
+      "status": "PASS",
+      "detail": "{\"crane\":0.103,\"smokeEvents\":3}"
+    },
+    {
+      "id": "G1-naval_forge",
+      "name": "naval_forge: modelo novo (NavalForge) com Static_Mesh, terminado",
+      "status": "PASS",
+      "detail": "{\"id\":290,\"model\":\"NavalForge\",\"constructed\":true,\"meshes\":4,\"draws\":4,\"tris\":7118,\"hasStatic\":true,\"anim\":[\"Anim_Banners\",\"Anim_Crane\",\"Anim_Smoke\"],\"hasTeamColor\":true,\"collisionRadius\":3.4}"
+    },
+    {
+      "id": "G2-naval_forge",
+      "name": "naval_forge: draw calls <= 20",
+      "status": "PASS",
+      "detail": "4 draws, 7118 tris"
+    },
+    {
+      "id": "G4-naval_forge",
+      "name": "naval_forge: material TeamColor",
+      "status": "PASS",
+      "detail": ""
+    },
+    {
+      "id": "G1-ash_cauldron",
+      "name": "ash_cauldron: modelo novo (AshCauldron) com Static_Mesh, terminado",
+      "status": "PASS",
+      "detail": "{\"id\":291,\"model\":\"AshCauldron\",\"constructed\":true,\"meshes\":4,\"draws\":4,\"tris\":9476,\"hasStatic\":true,\"anim\":[\"Anim_Banners\",\"Anim_Crane\",\"Anim_Smoke\"],\"hasTeamColor\":true,\"collisionRadius\":3.4}"
+    },
+    {
+      "id": "G2-ash_cauldron",
+      "name": "ash_cauldron: draw calls <= 20",
+      "status": "PASS",
+      "detail": "4 draws, 9476 tris"
+    },
+    {
+      "id": "G4-ash_cauldron",
+      "name": "ash_cauldron: material TeamColor",
+      "status": "PASS",
+      "detail": ""
+    },
+    {
+      "id": "G3-naval_forge",
+      "name": "naval_forge: Anim_Crane oscila e Anim_Smoke emite fumaça",
+      "status": "PASS",
+      "detail": "{\"crane\":0.118,\"smokeEvents\":3}"
+    },
+    {
+      "id": "G3-ash_cauldron",
+      "name": "ash_cauldron: Anim_Crane oscila e Anim_Smoke emite fumaça",
+      "status": "PASS",
+      "detail": "{\"crane\":0.118,\"smokeEvents\":3}"
+    },
+    {
+      "id": "G5",
+      "name": "sem erros de página/console",
+      "status": "PASS",
+      "detail": "nenhum"
+    },
+    {
+      "id": "INSP-refinery_glb",
+      "name": "inspetor mostra refinery_glb",
+      "status": "PASS",
+      "detail": "Anim_Banners,Anim_Crane,Anim_Smoke,Socket_Rally,Socket_UnitSpawn,Static_Mesh"
+    },
+    {
+      "id": "INSP-foundry_glb",
+      "name": "inspetor mostra foundry_glb",
+      "status": "PASS",
+      "detail": "Anim_Banners,Anim_Banners_1,Anim_Banners_2,Anim_Crane,Anim_Smoke,Socket_Rally,Socket_UnitSpawn,Static_Mesh"
+    },
+    {
+      "id": "INSP-naval_forge_glb",
+      "name": "inspetor mostra naval_forge_glb",
+      "status": "PASS",
+      "detail": "Anim_Banners,Anim_Crane,Anim_Smoke,Socket_Rally,Socket_UnitSpawn,Static_Mesh"
+    },
+    {
+      "id": "INSP-ash_cauldron_glb",
+      "name": "inspetor mostra ash_cauldron_glb",
+      "status": "PASS",
+      "detail": "Anim_Banners,Anim_Crane,Anim_Smoke,Socket_Rally,Socket_UnitSpawn,Static_Mesh"
+    }
+  ],
+  "data": {
+    "setup_human": {
+      "hx": 32,
+      "hz": -30,
+      "res": {
+        "refinery": {
+          "id": 288,
+          "x": 50,
+          "z": -38
+        },
+        "foundry": {
+          "id": 289,
+          "x": 50,
+          "z": -22
+        }
+      }
+    },
+    "info_human": {
+      "refinery": {
+        "id": 288,
+        "model": "Refinery",
+        "constructed": true,
+        "meshes": 4,
+        "draws": 4,
+        "tris": 9372,
+        "hasStatic": true,
+        "anim": [
+          "Anim_Banners",
+          "Anim_Crane",
+          "Anim_Smoke"
+        ],
+        "hasTeamColor": true,
+        "collisionRadius": 3.4
+      },
+      "foundry": {
+        "id": 289,
+        "model": "Foundry",
+        "constructed": true,
+        "meshes": 5,
+        "draws": 5,
+        "tris": 4950,
+        "hasStatic": true,
+        "anim": [
+          "Anim_Banners",
+          "Anim_Banners_1",
+          "Anim_Banners_2",
+          "Anim_Crane",
+          "Anim_Smoke"
+        ],
+        "hasTeamColor": true,
+        "collisionRadius": 3.4
+      }
+    },
+    "g3_human": {
+      "refinery": {
+        "crane": 0.103,
+        "smokeEvents": 3
+      },
+      "foundry": {
+        "crane": 0.103,
+        "smokeEvents": 3
+      }
+    },
+    "setup_orc": {
+      "hx": -32,
+      "hz": 30,
+      "res": {
+        "naval_forge": {
+          "id": 290,
+          "x": -14,
+          "z": 22
+        },
+        "ash_cauldron": {
+          "id": 291,
+          "x": -14,
+          "z": 38
+        }
+      }
+    },
+    "info_orc": {
+      "naval_forge": {
+        "id": 290,
+        "model": "NavalForge",
+        "constructed": true,
+        "meshes": 4,
+        "draws": 4,
+        "tris": 7118,
+        "hasStatic": true,
+        "anim": [
+          "Anim_Banners",
+          "Anim_Crane",
+          "Anim_Smoke"
+        ],
+        "hasTeamColor": true,
+        "collisionRadius": 3.4
+      },
+      "ash_cauldron": {
+        "id": 291,
+        "model": "AshCauldron",
+        "constructed": true,
+        "meshes": 4,
+        "draws": 4,
+        "tris": 9476,
+        "hasStatic": true,
+        "anim": [
+          "Anim_Banners",
+          "Anim_Crane",
+          "Anim_Smoke"
+        ],
+        "hasTeamColor": true,
+        "collisionRadius": 3.4
+      }
+    },
+    "g3_orc": {
+      "naval_forge": {
+        "crane": 0.118,
+        "smokeEvents": 3
+      },
+      "ash_cauldron": {
+        "crane": 0.118,
+        "smokeEvents": 3
+      }
+    }
+  },
+  "errors": []
+}

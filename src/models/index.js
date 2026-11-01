@@ -30,12 +30,8 @@ export { createArsonist } from './units/ArsonistModel.js';
 // F4-07: naval/petróleo (procedurais provisórios)
 export { createTanker } from './units/TankerModel.js';
 export { createFrigate, createBarge, createDreadnought, createSubmersible } from './units/ShipModels.js'; // F4-07b
-export { createFoundry } from './buildings/FoundryModel.js';
-export { createNavalForge } from './buildings/NavalForgeModel.js';
 export { createShipyard } from './buildings/ShipyardModel.js';
 export { createShipDock } from './buildings/ShipDockModel.js';
-export { createRefinery } from './buildings/RefineryModel.js';
-export { createCauldron } from './buildings/CauldronModel.js';
 export { createPlatform } from './buildings/PlatformModel.js';
 export { createOilWell } from './environment/OilWellModel.js';
 // Machado de arremesso (projétil, `ProjectileViews`): o único getter que sobrou de `axethrowerTextures.js`

@@ -74,12 +74,16 @@ export const CAMPAIGN_PRESETS = freeze({
     layout: freeze({ bases: [{ entities: [0], side: 'west' }, { entities: [0], side: 'east' }], minSeparation: 150 }),
     verify: freeze({ landRange: [0.2, 0.8], minRivers: 0 })
   }),
-  /** Palco 9 (M2-05): ilha deserta com dunas e três poços no meio; cabeça de ponte a oeste e base inimiga a leste. */
+  /**
+   * Palco 9 (M2-05; M3-10 refeito a 320, naval): continente árido com dunas e três poços no meio, bases a ~150 u (cabeça de ponte a oeste,
+   * base dos Clãs a leste) e duas ilhas no Mar Fendido: a dos Náufragos (a oeste, lado da Liga, com 3 náufragos de Brumar) e uma ilha
+   * deserta a leste. Mar aberto em volta: a frota de Grok sai da água a leste e a barcaça da Liga desembarca na cabeça de ponte.
+   */
   'camp-09-miragem': freeze({
-    id: 'camp-09-miragem', name: 'Miragem', uso: 'campanha, palco 9 (Liga e Clãs)', tileset: 'deserto', naval: false,
-    options: freeze({ size: 176, grid: 176, continents: 1, continentBiome: 'arid', aridSwamp: false, continentDims: [0.44, 0.35], islands: 0, islets: 0, bays: 4, peninsulas: 2, roughness: 1.1, lava: false, rivers: 0 }),
-    layout: freeze({ bases: [{ entities: [0], side: 'west' }, { entities: [0], side: 'east' }], minSeparation: 66 }),
-    verify: freeze({ landRange: [0.25, 0.8], minRivers: 0 })
+    id: 'camp-09-miragem', name: 'Miragem', uso: 'campanha, palco 9 (Liga e Clãs; naval)', tileset: 'deserto', naval: true, woodTarget: 8000,
+    options: freeze({ size: 320, grid: 320, continents: 1, continentBiome: 'arid', aridSwamp: false, continentDims: [0.42, 0.36], islands: 0, islets: 0, bigIslands: 2, bigIslandAt: [[-0.38, 0.33], [0.38, -0.33]], bigIslandScale: 0.3, bigIslandBiomes: ['rocky', 'arid'], bays: 3, peninsulas: 2, roughness: 1.1, lava: false, rivers: 0 }),
+    layout: freeze({ bases: [{ entities: [0], side: 'west' }, { entities: [0], side: 'east' }], minSeparation: 150 }),
+    verify: freeze({ landRange: [0.2, 0.8], minRivers: 0 })
   }),
   /** Palco 4 (M3-05): dois continentes SEM ligação por terra (oeste exuberante = Liga, leste árido = Clãs) com ~90 u de mar entre as costas, 2 ilhotas no meio e poços no mar (2 por lado + 2 no meio). */
   'camp-04-baixio-do-breu': freeze({
@@ -848,7 +852,10 @@ function paintBiome(m, x, z, r, id, only = null) {
   m.biomeGrid = { ...bg, data: encodeRleBiomeGrid(grid) }; // objeto novo: o cache de `gridOfBiome` é por objeto
 }
 
-/** Palco 9: três poços no meio do deserto, ruínas, cabeça de ponte de cada lado, forte de cada lado, Ninho e Aviário. */
+/**
+ * Palco 9 (M3-10, naval): três poços no meio do deserto, ruínas, cabeça de ponte de cada lado (praia + água da barcaça), forte de cada lado,
+ * Ninho e Aviário; ilhota dos Náufragos no mar a oeste (3 náufragos de Brumar, guardados por bandidos) e a água de onde sai a frota de Grok.
+ */
 function postMiragem(ctx, extra) {
   const { m, s0, s1 } = ctx;
   const L = hyp(s0, s1) || 1;
@@ -905,6 +912,21 @@ function postMiragem(ctx, extra) {
   };
   behind(s1, s0, 'nestSite');
   behind(s0, s1, 'aviarySite');
+  // M3-10: ilhota dos Náufragos (mar, lado da Liga): a ilhota sem caminho a pé mais perto da base da Liga; os náufragos ficam no centro dela
+  const isles = landComponents(ctx.land).filter((c) => !isReached(ctx.land, ctx.seen0, c.cx, c.cz) && !isReached(ctx.land, ctx.seen1, c.cx, c.cz) && c.size >= 25);
+  if (!isles.length) throw new Error('campanha: nenhuma ilhota no mar (Miragem naval)');
+  const isle = isles.reduce((a, b) => (hyp({ x: b.cx, z: b.cz }, s0) < hyp({ x: a.cx, z: a.cz }, s0) ? b : a));
+  const dryIsle = isle.cells.map((k) => ctx.land.toWorld(k % ctx.land.cols, (k / ctx.land.cols) | 0)).filter((w) => ctx.dryClear(w.x, w.z, 4));
+  if (!dryIsle.length) throw new Error('campanha: a ilhota dos Náufragos não tem chão');
+  const cc = dryIsle.reduce((a, b) => (hyp(b, { x: isle.cx, z: isle.cz }) < hyp(a, { x: isle.cx, z: isle.cz }) ? b : a));
+  extra.isletCastaway = pt(cc);
+  extra.isletCastawayWater = { ...need(ctx.waterNear(cc.x, cc.z, 6, 24), 'a água da ilhota dos Náufragos'), water: true };
+  for (let k = 0; k < 3; k++) { // os 3 náufragos (âncoras de tropa/resgate), em triângulo de 3,5 u no centro
+    const a = (k / 3) * Math.PI * 2 + 0.3;
+    extra[`isletCastaway${k + 1}`] = pt({ x: cc.x + Math.cos(a) * 3.5, z: cc.z + Math.sin(a) * 3.5 });
+  }
+  // frota de Grok: água aberta a ~90 u da base dos Clãs (de onde a esquadra sai e cruza o mar até a cabeça de ponte da Liga)
+  extra.grokFleetStart = { ...pt(need(openWater(ctx, s1, 90, 'a frota de Grok'), 'a frota de Grok')), water: true };
   addGold(ctx, s0, 'expansion1', extra, { plain: true });
   addGold(ctx, s1, 'expansion2', extra, { plain: true });
   // oásis dos poços (visual): borda de estepe de 6,5 u e tapete de grama de 4 u

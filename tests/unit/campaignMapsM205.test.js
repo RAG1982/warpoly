@@ -25,9 +25,9 @@ const WOOD_MIN = { 'camp-07-brejo-mudo': CAMPAIGN_WOOD_FLOOR, 'camp-08-fornalha'
 const ANCHORS = {
   'camp-07-brejo-mudo': ['playerStart', 'allyStart', 'brakkaHall', 'boarPen1', 'boarPen2', 'brakkaGold', 'ironDepot', 'beach1', 'seaLanding1', 'beach2', 'seaLanding2', 'expansion1', 'expansion2', 'landingZone'],
   'camp-08-fornalha': ['playerStart', 'enemyStart', 'lavaPass1', 'calderaPeak', 'isletForge', 'isletForgeWater', 'isletCaptive', 'isletCaptiveWater', 'captive1', 'captive2', 'captive3', 'captive4', 'captive5', 'captive6', 'shipyard1', 'shipyard1Water', 'sanctum', 'lyraArrival', 'expansion1', 'expansion2', 'landingZone'],
-  'camp-09-miragem': ['playerStart', 'enemyStart', 'waterWell1', 'waterWell2', 'waterWell3', 'ruins1', 'ruins2', 'ruins3', 'ruins4', 'fortSite1', 'fortSite2', 'bridgehead1', 'bridgehead1Sea', 'bridgehead2', 'bridgehead2Sea', 'nestSite', 'aviarySite', 'expansion1', 'expansion2', 'landingZone']
+  'camp-09-miragem': ['playerStart', 'enemyStart', 'waterWell1', 'waterWell2', 'waterWell3', 'ruins1', 'ruins2', 'ruins3', 'ruins4', 'fortSite1', 'fortSite2', 'bridgehead1', 'bridgehead1Sea', 'bridgehead2', 'bridgehead2Sea', 'nestSite', 'aviarySite', 'expansion1', 'expansion2', 'landingZone', 'isletCastaway', 'isletCastawayWater', 'isletCastaway1', 'isletCastaway2', 'isletCastaway3', 'grokFleetStart']
 };
-const WATER = new Set(['seaLanding1', 'seaLanding2', 'shipyard1Water', 'isletForgeWater', 'isletCaptiveWater', 'lyraArrival', 'bridgehead1Sea', 'bridgehead2Sea']);
+const WATER = new Set(['seaLanding1', 'seaLanding2', 'shipyard1Water', 'isletForgeWater', 'isletCaptiveWater', 'lyraArrival', 'bridgehead1Sea', 'bridgehead2Sea', 'isletCastawayWater', 'grokFleetStart']);
 const hyp = (a, b) => Math.hypot(a.x - b.x, a.z - b.z);
 
 function oceanSeen(m, sea) {
@@ -66,7 +66,7 @@ describe('M2-05 · registro e formato (palcos 7, 8 e 9)', () => {
       expect(decodeBiomeGrid(m.biomeGrid).length).toBe(m.biomeGrid.nodes ** 2);
       expect(TILESETS[m.tileset], m.tileset).toBeDefined();
       expect(m.size).toBeGreaterThanOrEqual(96);
-      expect(m.size).toBeLessThanOrEqual(id === 'camp-07-brejo-mudo' || id === 'camp-08-fornalha' ? 320 : 192); // M3-09: a Fornalha também foi a 320 // M3-08: o Brejo Mudo foi ampliado a 320 (como o Cerne Verde, M3-06b)
+      expect(m.size).toBeLessThanOrEqual(id === 'camp-07-brejo-mudo' || id === 'camp-08-fornalha' || id === 'camp-09-miragem' ? 320 : 192); // M3-10: a Miragem foi a 320 (naval) // M3-09: a Fornalha também foi a 320 // M3-08: o Brejo Mudo foi ampliado a 320 (como o Cerne Verde, M3-06b)
       expect(m.startSlots).toHaveLength(2);
       expect(m.maxPlayers).toBe(2);
       const gold = m.resources.filter((r) => r.type === 'gold');

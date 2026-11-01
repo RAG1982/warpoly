@@ -3,85 +3,175 @@
   "version": 1,
   "id": "war-alliance-09-miragem",
   "hidden": true,
-  "title": {
-    "pt-BR": "Miragem",
-    "en": "Mirage"
-  },
-  "subtitle": {
-    "pt-BR": "Liga de Aurelan, missão 9",
-    "en": "Aurelan League, mission 9"
-  },
+  "title": { "pt-BR": "Miragem", "en": "Mirage" },
+  "subtitle": { "pt-BR": "Liga de Aurelan, missão 9", "en": "Aurelan League, mission 9" },
   "briefing": {
-    "speaker": {
-      "pt-BR": "Capitão Brann",
-      "en": "Captain Brann"
-    },
+    "speaker": { "pt-BR": "Capitão Brann", "en": "Captain Brann" },
     "portrait": "⚔️",
     "text": {
-      "pt-BR": "Os três poços de Miragem são a última parada antes da costa orc. Assegure a água e a cabeça de ponte.",
-      "en": "The three wells of Mirage are the final stop before the orc coast. Secure the water and the bridgehead."
+      "pt-BR": "Miragem é uma ilha deserta: dunas, ruínas e três poços de água, a última parada antes da costa dos Clãs. Depois da Fornalha, a Forja Naval caiu e o ferro dos Clãs vem só pela terra. Grok não aceitou a perda: reuniu tropa e uma esquadra para retomar a ilha. Desembarcamos pela barcaça na cabeça de ponte, ao norte. Segurem os três poços por um minuto inteiro. Afundem a esquadra de Grok antes que ela chegue à praia. E há náufragos de Brumar numa ilhota a nordeste, guardados por bandidos: tirem-nos de lá pelo mar.",
+      "en": "Mirage is a desert isle: dunes, ruins and three water wells, the last stop before the Clans' coast. After the Furnace, the Naval Forge fell and the Clans' iron comes by land only. Grok would not accept the loss: he gathered troops and a fleet to retake the isle. We land by barge at the bridgehead, to the north. Hold the three wells for one full minute. Sink Grok's fleet before it reaches the beach. And there are castaways from Brumar on an islet to the northeast, guarded by bandits: bring them out by sea."
     },
     "hints": [
-      {
-        "pt-BR": "Concentre-se nos objetivos primários para avançar.",
-        "en": "Focus on primary objectives to advance."
-      }
+      { "pt-BR": "A cabeça de ponte fica ao norte. A barcaça da Liga já desembarcou seis tropas; mantenha-as perto dos poços.", "en": "The bridgehead is to the north. The League's barge has already landed six troops; keep them near the wells." },
+      { "pt-BR": "Dica: a frota de Grok nasce no mar a leste e contorna a costa norte. Fragatas do Estaleiro (na costa, perto da base) a encontram antes da praia.", "en": "Tip: Grok's fleet is born at sea to the east and rounds the north coast. Frigates from the Shipyard (on the coast, near your base) meet it before the beach." },
+      { "pt-BR": "Dica: o islote dos náufragos só se alcança pelo mar. Uma Fragata limpa a praia; uma Barcaça leva o resgate.", "en": "Tip: the castaways' islet is reachable by sea only. A Frigate clears the beach; a Transport Barge brings the rescue." },
+      { "pt-BR": "O Capitão Brann é um HERÓI: tem mana e três habilidades (Z, X, C) e só existe um. Se ele morrer, a missão está perdida.", "en": "Captain Brann is a HERO: he has mana and three abilities (Z, X, C), and there is only one of him. If he dies the mission is lost." }
     ]
   },
-  "mapId": "ilhas-4p",
+  "mapId": "camp-09-miragem",
   "seed": 9153,
   "players": [
-    {
-      "id": 0,
-      "name": {
-        "pt-BR": "Liga de Aurelan",
-        "en": "Aurelan League"
-      },
-      "factionId": "human",
-      "team": 0,
-      "color": "#2563eb",
-      "isLocal": true,
-      "startSlot": 0
-    },
-    {
-      "id": 1,
-      "name": {
-        "pt-BR": "Clãs do Cinzal",
-        "en": "Cinzal Clans"
-      },
-      "factionId": "orc",
-      "team": 1,
-      "color": "#dc2626",
-      "isAI": true,
-      "startSlot": 1
-    }
+    { "id": 0, "name": { "pt-BR": "Liga de Aurelan", "en": "Aurelan League" }, "factionId": "human", "team": 0, "color": "#2563eb", "isLocal": true, "startSlot": 0 },
+    { "id": 1, "name": { "pt-BR": "Clãs do Cinzal", "en": "Cinzal Clans" }, "factionId": "orc", "team": 1, "color": "#dc2626", "isAI": true, "difficulty": "easy", "startSlot": 1 }
   ],
-  "startingResources": {
-    "wood": 400,
-    "gold": 400,
-    "stone": 150
-  },
+  "startingResources": { "wood": 600, "gold": 900, "stone": 300 },
+  "vars": { "hold": 0, "fin_clock": 0 },
+  "autoVictory": false,
   "setup": [
-    {
-      "type": "tag",
-      "select": {
-        "buildingType": "great_hall"
-      },
-      "tag": "enemy_base"
-    }
+    { "type": "spawn", "owner": "player", "unitType": "hero_brann", "count": 1, "anchor": "playerStart", "dx": 0, "dz": 13, "tag": "brann" },
+    { "type": "tag", "select": { "buildingType": "great_hall" }, "tag": "enemy_base" },
+    { "type": "spawn", "owner": "neutral", "unitType": "villager", "count": 3, "anchor": "isletCastaway", "spread": 2.2, "tag": "castaways", "markColor": "#22d3ee", "displayName": { "pt-BR": "Náufrago", "en": "Castaway" } },
+    { "type": "spawn", "owner": "bandits", "unitType": "bandit", "count": 4, "anchor": "isletCastaway1", "spread": 2.5, "tag": "islet_guard", "guard": { "r": 9 } },
+    { "type": "spawnLandmark", "kind": "ruins", "anchor": "ruins1", "tag": "ruins", "label": { "pt-BR": "Ruínas do Poço Velho", "en": "Old Well Ruins" } }
   ],
   "objectives": [
-    {
-      "id": "primary-main",
-      "type": "destroy",
-      "priority": "primary",
-      "select": {
-        "tag": "enemy_base"
-      },
-      "title": {
-        "pt-BR": "Capturar os três poços e repelir a contra-ofensiva",
-        "en": "Capture all three wells and repel the counter-offensive"
-      }
-    }
+    { "id": "p-wells", "type": "flag", "priority": "primary",
+      "condition": { "type": "var", "name": "hold", "op": ">=", "value": 60 },
+      "title": { "pt-BR": "Controlar os três poços por 1 minuto", "en": "Hold the three wells for 1 minute" },
+      "description": { "pt-BR": "Tenha ao menos uma unidade em cada poço ao mesmo tempo. O contador zera se um inimigo chegar a 12 u de um deles.", "en": "Have at least one unit at each well at the same time. The counter resets if an enemy comes within 12 u of one of them." },
+      "marker": { "area": { "anchor": "waterWell2", "r": 40 }, "style": "goal", "seconds": 240 } },
+    { "id": "p-grok", "type": "destroy", "priority": "primary", "select": { "tag": "grok" }, "count": 1,
+      "title": { "pt-BR": "Derrotar Grok, o chefe dos Clãs", "en": "Defeat Grok, the Clans' chief" },
+      "description": { "pt-BR": "Grok, um Ogro-Feiticeiro, comanda a contra-ofensiva por terra. Ele marcha para a cabeça de ponte aos 10 minutos.", "en": "Grok, an Ogre Mage, leads the land counter-offensive. He marches for the bridgehead at 10 minutes." } },
+    { "id": "p-fleet", "type": "destroy", "priority": "primary", "select": { "tag": "grok_fleet" }, "count": 8,
+      "title": { "pt-BR": "Afundar as 8 galés da esquadra de Grok", "en": "Sink Grok's 8 galleys" },
+      "description": { "pt-BR": "A esquadra nasce no mar a leste e vai à praia da cabeça de ponte, em duas levas (aos 11 e aos 14 minutos).", "en": "The fleet is born at sea to the east and heads to the bridgehead beach, in two waves (at 11 and 14 minutes)." },
+      "marker": { "area": { "anchor": "bridgehead1Sea", "r": 30 }, "style": "goal", "seconds": 240 } },
+    { "id": "s-castaways", "type": "rescue", "priority": "secondary", "tag": "castaways", "count": 3,
+      "title": { "pt-BR": "Resgatar 3 náufragos de Brumar na ilhota do nordeste", "en": "Rescue 3 Brumar castaways on the northeast islet" },
+      "description": { "pt-BR": "Bandidos os guardam numa ilhota no mar. Os bandidos precisam cair antes; depois a Barcaça leva os náufragos.", "en": "Bandits hold them on an islet at sea. The bandits must fall first; then a Transport Barge carries the castaways." } },
+    { "id": "s-frigates", "type": "train", "priority": "secondary", "unitType": "frigate", "count": 3,
+      "title": { "pt-BR": "Treinar 3 Fragatas no Estaleiro", "en": "Train 3 Frigates at the Shipyard" },
+      "description": { "pt-BR": "O Estaleiro fica na costa. Fragatas custam petróleo: erga uma Plataforma num poço do mar perto da base.", "en": "The Shipyard stands on the coast. Frigates cost oil: raise a Platform on a sea well near your base." } },
+    { "id": "s-mages", "type": "train", "priority": "secondary", "unitType": "mage", "count": 4,
+      "title": { "pt-BR": "Treinar 4 Magos na Torre Arcana", "en": "Train 4 Mages at the Arcane Tower" },
+      "description": { "pt-BR": "Os magos cuidam dos feridos e queimam o que a espada não alcança. Erga a Torre Arcana com o Paço no nível 3.", "en": "The mages heal the wounded and burn what the sword cannot reach. Raise the Arcane Tower with the Palace at level 3." } },
+    { "id": "h-ruins", "type": "flag", "priority": "hidden",
+      "condition": { "type": "area", "owner": "player", "area": { "anchor": "ruins1", "r": 12 } },
+      "title": { "pt-BR": "Ler as inscrições das ruínas do Poço Velho", "en": "Read the inscriptions of the Old Well ruins" } }
+  ],
+  "triggers": [
+    { "id": "intro", "when": { "type": "time", "at": 0 },
+      "actions": [
+        { "type": "music", "id": "on" },
+        { "type": "reveal", "anchor": "waterWell2", "radius": 30, "ttl": 40 },
+        { "type": "reveal", "anchor": "isletCastaway", "radius": 22, "ttl": 50 },
+        { "type": "cutscene", "id": "mirage", "duration": 34, "skippable": true,
+          "steps": [
+            { "at": 0, "anchor": "playerStart", "zoom": 1.15, "dialog": { "speaker": { "pt-BR": "Capitão Brann", "en": "Captain Brann" }, "portrait": "⚔️", "text": { "pt-BR": "Miragem. Dunas, ruínas e três poços. Sem água, não há cerco.", "en": "Mirage. Dunes, ruins and three wells. Without water, there is no siege." }, "duration": 8 } },
+            { "at": 9, "anchor": "bridgehead1", "zoom": 1.1, "dialog": { "speaker": { "pt-BR": "Capitão Brann", "en": "Captain Brann" }, "portrait": "⚔️", "text": { "pt-BR": "A barcaça desembarcou a cabeça de ponte. Daqui aos poços é uma marcha de um dia.", "en": "The barge landed the bridgehead. From here to the wells is a day's march." }, "duration": 8 } },
+            { "at": 18, "anchor": "enemyStart", "zoom": 1.05, "dialog": { "speaker": { "pt-BR": "Grok", "en": "Grok" }, "portrait": "🪓", "text": { "pt-BR": "Esses poços são nossos há três invernos. Vieram de barco? Voltem de barco.", "en": "These wells have been ours for three winters. You came by boat? Go back by boat." }, "duration": 8 } },
+            { "at": 27, "anchor": "playerStart", "zoom": 1.15, "dialog": { "speaker": { "pt-BR": "Capitão Brann", "en": "Captain Brann" }, "portrait": "⚔️", "text": { "pt-BR": "A esquadra dele sai do mar a leste. Afundem-na antes da praia. E os náufragos de Brumar esperam no nordeste.", "en": "His fleet comes out of the sea to the east. Sink it before the beach. And Brumar's castaways wait to the northeast." }, "duration": 7 } }
+          ] }
+      ] },
+    { "id": "landing-start", "when": { "type": "time", "at": 0 },
+      "actions": [
+        { "type": "spawnLanding", "owner": "player", "anchor": "bridgehead1Sea", "unloadAt": { "anchor": "bridgehead1" }, "bargeTag": "liga_barge", "tag": "landing_liga",
+          "units": [{ "type": "knight", "count": 3 }, { "type": "archer", "count": 3 }] },
+        { "type": "message", "text": { "pt-BR": "Barcaça da Liga: 6 tropas desembarcadas na cabeça de ponte, ao norte.", "en": "League barge: 6 troops landed at the bridgehead, to the north." } }
+      ] },
+    { "id": "full-tree", "when": { "type": "time", "at": 0 },
+      "actions": [
+        { "type": "setTier", "owner": "player", "tier": 3 },
+        { "type": "message", "text": { "pt-BR": "Árvore tecnológica completa liberada: o Paço está no nível 3 (Torre Arcana, Aviário, Estaleiro e Torres).", "en": "Full tech tree unlocked: the Palace is at level 3 (Arcane Tower, Aviary, Shipyard and Towers)." } }
+      ] },
+    { "id": "raid-1", "when": { "type": "time", "at": 240 },
+      "actions": [
+        { "type": "spawn", "owner": 1, "units": [{ "type": "grunt", "count": 4 }, { "type": "axethrower", "count": 2 }], "anchor": "enemyStart", "dx": -6, "dz": -6, "spread": 3, "order": { "kind": "attackMove", "anchor": "waterWell2" } },
+        { "type": "message", "text": { "pt-BR": "Primeira leva dos Clãs: Talhadores e Lanceiros-Machado marcham para o poço do centro.", "en": "First Clan wave: Grunts and Axe Throwers march for the central well." } }
+      ] },
+    { "id": "raid-2", "when": { "type": "time", "at": 420 },
+      "actions": [
+        { "type": "spawn", "owner": 1, "units": [{ "type": "ogre", "count": 1 }, { "type": "grunt", "count": 4 }, { "type": "axethrower", "count": 2 }], "anchor": "enemyStart", "dx": -8, "dz": 4, "spread": 3, "order": { "kind": "attackMove", "anchor": "waterWell3" } },
+        { "type": "message", "text": { "pt-BR": "Segunda leva: um Ogro lidera a travessia para o poço do leste.", "en": "Second wave: an Ogre leads the crossing to the eastern well." } }
+      ] },
+    { "id": "grok-march", "when": { "type": "time", "at": 600 },
+      "actions": [
+        { "type": "spawn", "owner": 1, "unitType": "ogre_mage", "count": 1, "anchor": "enemyStart", "dx": 0, "dz": -8, "tag": "grok", "displayName": { "pt-BR": "Grok", "en": "Grok" }, "markColor": "#f97316", "order": { "kind": "attackMove", "anchor": "bridgehead1" } },
+        { "type": "spawn", "owner": 1, "units": [{ "type": "catapult", "count": 1 }, { "type": "grunt", "count": 6 }, { "type": "ogre", "count": 1 }], "anchor": "enemyStart", "dx": -4, "dz": -8, "spread": 3, "tag": "grok_wave", "order": { "kind": "attackMove", "anchor": "bridgehead1" } },
+        { "type": "dialog", "speaker": { "pt-BR": "Grok", "en": "Grok" }, "portrait": "🪓", "text": { "pt-BR": "Ogro-feiticeiro e tropa na estrada! Quero a cabeça de ponte antes da noite.", "en": "Ogre mage and troops on the road! I want the bridgehead before nightfall." }, "duration": 8 }
+      ] },
+    { "id": "fleet-1", "when": { "type": "time", "at": 660 },
+      "actions": [
+        { "type": "spawn", "owner": 1, "units": [{ "type": "war_galley", "count": 4 }], "anchor": "grokFleetStart", "spread": 4, "tag": "grok_fleet", "order": { "kind": "attackMove", "anchor": "bridgehead1Sea" } },
+        { "type": "message", "text": { "pt-BR": "Esquadra de Grok: 4 galés saem do mar a leste, rumo à praia da cabeça de ponte.", "en": "Grok's fleet: 4 galleys leave the sea to the east, bound for the bridgehead beach." } }
+      ] },
+    { "id": "fleet-2", "when": { "type": "time", "at": 840 },
+      "actions": [
+        { "type": "spawn", "owner": 1, "units": [{ "type": "war_galley", "count": 4 }], "anchor": "grokFleetStart", "spread": 4, "tag": "grok_fleet", "order": { "kind": "attackMove", "anchor": "bridgehead1Sea" } },
+        { "type": "message", "text": { "pt-BR": "Segunda leva da esquadra: mais 4 galés. Afundem-nas antes da praia.", "en": "Second fleet wave: 4 more galleys. Sink them before the beach." } }
+      ] },
+    { "id": "wells-tick", "when": { "all": [
+        { "type": "area", "owner": "player", "area": { "anchor": "waterWell1", "r": 9 } },
+        { "type": "area", "owner": "player", "area": { "anchor": "waterWell2", "r": 9 } },
+        { "type": "area", "owner": "player", "area": { "anchor": "waterWell3", "r": 9 } }
+      ] },
+      "actions": [{ "type": "incVar", "name": "hold" }], "once": false, "cooldown": 1 },
+    { "id": "wells-reset", "when": { "all": [
+        { "type": "var", "name": "hold", "op": ">=", "value": 1 },
+        { "any": [
+          { "type": "area", "owner": "enemy", "area": { "anchor": "waterWell1", "r": 12 } },
+          { "type": "area", "owner": "enemy", "area": { "anchor": "waterWell2", "r": 12 } },
+          { "type": "area", "owner": "enemy", "area": { "anchor": "waterWell3", "r": 12 } }
+        ] }
+      ] },
+      "actions": [
+        { "type": "setVar", "name": "hold", "value": 0 },
+        { "type": "sound", "id": "alarm" },
+        { "type": "message", "text": { "pt-BR": "Um inimigo chegou a um dos poços: o contador de 1 minuto zerou.", "en": "An enemy reached one of the wells: the 1-minute counter reset." } }
+      ], "once": false, "cooldown": 10 },
+    { "id": "wells-30", "when": { "type": "var", "name": "hold", "op": "==", "value": 30 },
+      "actions": [{ "type": "message", "text": { "pt-BR": "Poços: meio minuto seguro. Falta meio.", "en": "Wells: half a minute secure. Half to go." } }] },
+    { "id": "wells-done", "when": { "type": "objective", "id": "p-wells", "status": "completed" },
+      "actions": [
+        { "type": "sound", "id": "build" },
+        { "type": "message", "text": { "pt-BR": "Os três poços são da Liga. Agora é segurar a praia até Grok aparecer.", "en": "The three wells are the League's. Now hold the beach until Grok shows up." } }
+      ] },
+    { "id": "free-castaways", "when": { "type": "dead", "select": { "tag": "islet_guard" }, "count": 4 },
+      "actions": [
+        { "type": "transfer", "select": { "tag": "castaways" }, "to": "player" },
+        { "type": "sound", "id": "build" },
+        { "type": "dialog", "speaker": { "pt-BR": "Capitão Brann", "en": "Captain Brann" }, "portrait": "⚔️", "text": { "pt-BR": "Os náufragos de Brumar estão a bordo. Três vidas salvas pelo mar.", "en": "Brumar's castaways are aboard. Three lives saved by the sea." }, "duration": 7 }
+      ] },
+    { "id": "grok-down", "when": { "type": "objective", "id": "p-grok", "status": "completed" },
+      "actions": [
+        { "type": "sound", "id": "victory" },
+        { "type": "dialog", "speaker": { "pt-BR": "Capitão Brann", "en": "Captain Brann" }, "portrait": "⚔️", "text": { "pt-BR": "Grok caiu. A contra-ofensiva dos Clãs perdeu o chefe.", "en": "Grok has fallen. The Clans' counter-offensive lost its chief." }, "duration": 7 }
+      ] },
+    { "id": "fleet-down", "when": { "type": "objective", "id": "p-fleet", "status": "completed" },
+      "actions": [
+        { "type": "sound", "id": "alarm" },
+        { "type": "message", "text": { "pt-BR": "A esquadra de Grok afundou. O mar fica da Liga.", "en": "Grok's fleet is sunk. The sea belongs to the League." } }
+      ] },
+    { "id": "all-done", "when": { "all": [
+        { "type": "objective", "id": "p-wells", "status": "completed" },
+        { "type": "objective", "id": "p-grok", "status": "completed" },
+        { "type": "objective", "id": "p-fleet", "status": "completed" }
+      ] },
+      "actions": [
+        { "type": "sound", "id": "victory" },
+        { "type": "cutscene", "id": "finale", "duration": 12, "skippable": true,
+          "steps": [
+            { "at": 0, "anchor": "waterWell2", "zoom": 1.1, "dialog": { "speaker": { "pt-BR": "Capitão Brann", "en": "Captain Brann" }, "portrait": "⚔️", "text": { "pt-BR": "Miragem é nossa: os três poços, a cabeça de ponte e o mar. Os Clãs perderam a última ilha antes da costa.", "en": "Mirage is ours: the three wells, the bridgehead and the sea. The Clans lost the last isle before their coast." }, "duration": 6 } },
+            { "at": 6, "anchor": "bridgehead1", "zoom": 1.15, "dialog": { "speaker": { "pt-BR": "Capitão Brann", "en": "Captain Brann" }, "portrait": "⚔️", "text": { "pt-BR": "Daqui se vê a costa de Cinzara. Este é o caminho de volta para o outro lado do mar.", "en": "From here you can see the coast of Cinzara. This is the way back to the other side of the sea." }, "duration": 6 } }
+          ] }
+      ] },
+    { "id": "finale-clock", "when": { "type": "trigger", "id": "all-done" }, "actions": [ { "type": "incVar", "name": "fin_clock" } ] },
+    { "id": "finale-victory", "when": { "type": "var", "name": "fin_clock", "op": ">=", "value": 1 }, "actions": [ { "type": "victory" } ] },
+    { "id": "palace-fallen", "when": { "type": "count", "select": { "buildingType": "castle", "owner": "player" }, "op": "==", "value": 0 },
+      "actions": [ { "type": "defeat" } ] },
+    { "id": "brann-fallen", "when": { "type": "dead", "select": { "tag": "brann" }, "count": 1 },
+      "actions": [ { "type": "defeat" } ] }
   ]
 }

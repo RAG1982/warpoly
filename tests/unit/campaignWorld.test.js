@@ -22,7 +22,7 @@ import { playMission } from './helpers/campaignHarness.js';
  * tire-a daqui e acrescente o roteiro em `tests/fixtures/campaign-playthrough/<missionId>.js`.
  */
 export const PENDING = new Set([
-  'war-alliance-09-miragem', 'war-alliance-10-desembarque-costa-ferrugem', 'war-alliance-11-porto-albor',
+  'war-alliance-10-desembarque-costa-ferrugem', 'war-alliance-11-porto-albor',
   'war-alliance-12-bastiao-do-cabo-ferrugem',
   'war-horde-01-cinzas-vermelhas', 'war-horde-02-velas-brancas', 'war-horde-03-a-pedra-que-brilha', 'war-horde-04-mare-de-breu',
   'war-horde-05-madeira-de-guerra', 'war-horde-06-fogo-no-gelo', 'war-horde-07-casa-no-brejo', 'war-horde-08-o-monte-caldeira',

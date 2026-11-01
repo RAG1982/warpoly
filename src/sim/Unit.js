@@ -2358,9 +2358,14 @@ export class Unit {
         // F3-03: o dano final (computeDamage, 1 valor de RNG) é calculado no impacto — a
         // armadura/tipo do alvo naquele instante decidem o resultado, não na hora do disparo.
         const arrow = new Projectile({ kind: projType, from: startPos, target: this.attackTarget, damage: this.getEffDamage(), onHit: (target, dmgObj, hitPos) => {
-          const dmg = computeDamage(dmgObj, target, gm.combatRng);
-          target.takeDamage(dmg, this, allUnits);
-          if (gmEvents) gmEvents.emit(EVT.PROJECTILE_HIT, { kind: projType, pos: posOf(hitPos), ownerId: this.ownerId });
+          // VFX-AIR: projétil com `splashRadius` (bola de fogo do Serpe, raio do Grifo) causa dano em área centrado no alvo, como o golpe antigo.
+          if (this.splashRadius > 0 && gm && gm.unitGrid && gm.blockerGrid) {
+            applySplashDamage(gm, this, dmgObj, target.mesh.position, this.splashRadius, allUnits, 0.5, true);
+          } else {
+            const dmg = computeDamage(dmgObj, target, gm.combatRng);
+            target.takeDamage(dmg, this, allUnits);
+          }
+          if (gmEvents) gmEvents.emit(EVT.PROJECTILE_HIT, { kind: projType, pos: posOf(hitPos), ownerId: this.ownerId, splashRadius: this.splashRadius });
         } });
         arrows.push(arrow);
         if (this.gameManager && this.gameManager.registerEntity) this.gameManager.registerEntity(arrow, this.ownerId);

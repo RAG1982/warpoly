@@ -33,6 +33,24 @@ const AIR_TYPES = new Set(['glider', 'war_balloon', 'gryphon_rider', 'war_serpen
 /** ART-GRIFO / ART-SERPE: aéreos com rig segmentado (pontas das asas, cauda) nos .glb v2; sem os nós a animação cai no padrão. */
 const SEGMENTED_AIR = new Set(['gryphon_rider', 'war_serpent']);
 
+/**
+ * VFX-AIR: boca de fogo da Serpe — esfera laranja no focinho (filha de `Head`), criada uma vez por modelo. Abre no recuo do bote
+ * e fica acesa até o disparo da bola de fogo (`applyMouth`). Geometria/material compartilhados entre as instâncias.
+ */
+const SERPENT_MOUTH_GEO = new THREE.SphereGeometry(0.13, 8, 6);
+const SERPENT_MOUTH_MAT = new THREE.MeshBasicMaterial({ color: 0xff7a1a });
+SERPENT_MOUTH_MAT.userData.bloom = true;
+function ensureSerpentMouth(head) {
+  const old = head.getObjectByName('Mouth');
+  if (old) return old;
+  const m = new THREE.Mesh(SERPENT_MOUTH_GEO, SERPENT_MOUTH_MAT);
+  m.name = 'Mouth';
+  m.position.set(0, -0.08, 0.36);
+  m.visible = false;
+  head.add(m);
+  return m;
+}
+
 /** F4-07: tipos de modelo naval (`applyNaval`: balanço de ondas no nó `Hull`, panos/bandeira, recuo dos canhões). */
 const NAVAL_TYPES = new Set(['tanker', 'frigate', 'war_galley', 'barge', 'dreadnought', 'iron_leviathan', 'submersible', 'colossal_turtle']);
 
@@ -168,6 +186,8 @@ export class UnitAnimator {
         else if (n.startsWith('Turret')) this.meshParts[`turret${turrets++}`] = node;
       });
     }
+    // VFX-AIR: a Serpe ganha a boca de fogo (`Mouth`), que abre no bote e de onde sai a bola de fogo.
+    if (this.unitType === 'war_serpent' && this.meshParts.head) this.meshParts.mouth = ensureSerpentMouth(this.meshParts.head);
     // F7-00b: Olho Vigia — tentáculos articulados (`Anim_Tentacle0..N`: pivô no ponto de fixação, malha em coordenadas locais).
     // Entram em `meshParts` (reset de transformações e cross-fade os tratam como as demais partes) e em `_tentacles`
     // (iteração por quadro sem montar chaves).
@@ -407,6 +427,7 @@ export class UnitAnimator {
 
     // F4-06: aéreos — balanço senoidal + batida de asas (ramo próprio; 'hurt'/'die' seguem o fluxo comum)
     if (AIR_TYPES.has(uType) && this.currentAnim !== 'hurt' && this.currentAnim !== 'die') {
+      if (parts.mouth) parts.mouth.visible = false; // a boca só acende no ataque (applyAir)
       this.applyAir(time, parts, this.currentAnim);
       return;
     }
@@ -560,6 +581,35 @@ export class UnitAnimator {
     }
     if (parts.head && parts.wingTipL && anim !== 'fight') parts.head.rotation.x = Math.sin(TAU * phase * (fast ? 2 : 1) + 0.5) * 0.06;
     if (parts.tailTip) this.applySerpentBody(phase, parts, anim, fast);
+    else if (anim === 'fight' && this.unitType === 'gryphon_rider') this.applyGryphonStrike(phase, parts);
+    if (parts.mouth) this.applyMouth(phase, parts, anim);
+  }
+
+  /**
+   * VFX-AIR: Cavaleiro Grifo dispara o raio — ergue a cabeça e abre as asas no recuo (0..0,4 do ciclo de ataque), a cabeça desce
+   * e o peito avança no golpe (0,4..0,6); o raio sai do bico no disparo (progress 0,60, `Unit`) e a pose recolhe depois.
+   */
+  applyGryphonStrike(q, parts) {
+    const windup = q < 0.4 ? Math.sin((q / 0.4) * Math.PI * 0.5) : (q < 0.62 ? 1 : Math.max(0, 1 - (q - 0.62) / 0.38));
+    const strike = q >= 0.4 && q < 0.6 ? Math.sin(((q - 0.4) / 0.2) * Math.PI) : 0;
+    if (parts.wingL) parts.wingL.rotation.z = 0.9 * windup - 0.5 * strike;
+    if (parts.wingR) parts.wingR.rotation.z = -(0.9 * windup - 0.5 * strike);
+    if (parts.head) parts.head.rotation.x = -0.5 * windup + 0.6 * strike;
+    if (parts.torso) parts.torso.rotation.x += -0.15 * windup + 0.2 * strike;
+  }
+
+  /**
+   * VFX-AIR: a boca da Serpe abre no recuo do bote (0..0,4), fica acesa até o disparo (0,6) e apaga em seguida; fora do ataque fica oculta.
+   */
+  applyMouth(q, parts, anim) {
+    let open = 0;
+    if (anim === 'fight') {
+      if (q < 0.4) open = q / 0.4;
+      else if (q < 0.62) open = 1;
+      else open = Math.max(0, 1 - (q - 0.62) / 0.25);
+    }
+    parts.mouth.visible = open > 0.02;
+    parts.mouth.scale.setScalar(0.5 + open);
   }
 
   /**
@@ -586,11 +636,11 @@ export class UnitAnimator {
       parts.head.rotation.x = Math.sin(w + 0.9) * 0.07 * amp;
     }
     if (parts.head && anim === 'fight') {
-      // bote: 0..0.35 recua (cabeça para cima), 0.35..0.55 golpe (cabeça desce e avança), resto recolhe
+      // bote (VFX-AIR): 0..0.4 recua (cabeça para cima, boca abre), 0.4..0.6 golpe (projeta o pescoço); a bola de fogo sai em 0.6
       const q = phase;
-      const windup = q < 0.35 ? Math.sin((q / 0.35) * Math.PI * 0.5) : 0;
-      const strike = q >= 0.35 && q < 0.55 ? Math.sin(((q - 0.35) / 0.2) * Math.PI) : 0;
-      const recover = q >= 0.55 ? Math.cos(((q - 0.55) / 0.45) * Math.PI * 0.5) * 0.4 : 0;
+      const windup = q < 0.4 ? Math.sin((q / 0.4) * Math.PI * 0.5) : 0;
+      const strike = q >= 0.4 && q < 0.6 ? Math.sin(((q - 0.4) / 0.2) * Math.PI) : 0;
+      const recover = q >= 0.6 ? Math.cos(((q - 0.6) / 0.4) * Math.PI * 0.5) * 0.4 : 0;
       parts.head.rotation.x = -0.4 * windup + 0.7 * strike - 0.16 * recover;
       parts.head.position.z += 0.5 * strike - 0.15 * windup;
       if (parts.torso) parts.torso.rotation.x += 0.1 * strike;

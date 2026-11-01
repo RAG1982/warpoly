@@ -115,8 +115,8 @@ export const EVT = Object.freeze({
  * EVT.WORKER_MINE    {pos:Pos, ownerId:number, resource:'gold'|'stone'}
  * EVT.WORKER_HAMMER  {pos:Pos, ownerId:number}
  *
- * EVT.PROJECTILE_FIRED {kind:'arrow'|'axe'|'bolt'|'boulder', from:Pos, ownerId:number}
- * EVT.PROJECTILE_HIT   {kind:'arrow'|'axe'|'bolt'|'boulder', pos:Pos, ownerId:number, splashRadius?:number}  (F4-02: bolt/boulder = cerco, impacto em área)
+ * EVT.PROJECTILE_FIRED {kind:'arrow'|'axe'|'bolt'|'boulder'|'fire'|'lightning', from:Pos, ownerId:number}
+ * EVT.PROJECTILE_HIT   {kind:'arrow'|'axe'|'bolt'|'boulder'|'fire'|'lightning', pos:Pos, ownerId:number, splashRadius?:number}  (F4-02: bolt/boulder = cerco, impacto em área; VFX-AIR: fire/lightning = aéreos à distância)
  * EVT.MELEE_HIT        {pos:Pos, ownerId:number}
  * EVT.EXPLOSION        {pos:Pos, radius:number, ownerId:number}  (F4-05)
  *

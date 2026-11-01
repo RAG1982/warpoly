@@ -23,9 +23,9 @@ import { UNITS } from '../data/units.js';
 const NONE = Object.freeze([]);
 
 /** Projétil disparado -> receita do disparo. */
-export const FIRE_SFX = Object.freeze({ arrow: 'bow', axe: 'axeThrow', bolt: 'bolt', boulder: 'catapult', cannonball: 'cannon' });
+export const FIRE_SFX = Object.freeze({ arrow: 'bow', axe: 'axeThrow', bolt: 'bolt', boulder: 'catapult', cannonball: 'cannon', fire: 'cannon', lightning: 'bolt' });
 /** Projétil que acerta -> receita do impacto (flecha = carne/madeira, machado = crava, cerco = pedra). */
-export const HIT_SFX = Object.freeze({ arrow: 'arrowHit', axe: 'axeHit', bolt: 'stoneHit', boulder: 'stoneHit', cannonball: 'stoneHit' });
+export const HIT_SFX = Object.freeze({ arrow: 'arrowHit', axe: 'axeHit', bolt: 'stoneHit', boulder: 'stoneHit', cannonball: 'stoneHit', fire: 'stoneHit', lightning: 'bolt' });
 /** Margem de tela extra (fração) para o que é grande: o centro pode estar fora e o estrondo ainda ser visível. */
 const BIG_MARGIN = 0.25;
 

@@ -174,6 +174,8 @@ export function createVfxEvents(gm, particleSystem, vfx = null) {
       run(EVT.RESOURCE_DEPLETED, p, { radius: 3.4 });
     });
     on(EVT.EXPLOSION, (p) => { if (seen(p.ownerId, p.pos)) run(EVT.EXPLOSION, p, {}); });
+    // VFX-AIR: impacto da bola de fogo e do raio (flash/explosão); as flechas e cercos não têm efeito aqui (lista vazia).
+    on(EVT.PROJECTILE_HIT, (p) => { if (p.kind === 'fire' || p.kind === 'lightning') { if (seen(p.ownerId, p.pos)) run(EVT.PROJECTILE_HIT, p, {}); } });
     // M3-03a: o Centro do jogador local subiu de nível => fogos de artifício sobre ele (IA não ganha VFX de jogador).
     on(EVT.HQ_TIER_CHANGED, (p) => { if (p.ownerId === gm.localPlayerId) run(EVT.HQ_TIER_CHANGED, p, {}); });
     on(EVT.ABILITY_EFFECT, (p) => {

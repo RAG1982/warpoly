@@ -86,6 +86,10 @@ export function effectsForEvent(type, p, info = {}) {
       const v = HQ_TIER_VIEW[p.tier] || HQ_TIER_VIEW[1];
       return [{ fx: 'fireworks', pos: at(p.pos), height: v.height }];
     }
+    case EVT.PROJECTILE_HIT: // VFX-AIR: impacto da bola de fogo (Serpe, explosão de chamas) e do raio (Grifo, flash + faíscas)
+      if (p.kind === 'fire') return [{ fx: 'fire_impact', pos: at(p.pos), radius: p.splashRadius || 1.2 }];
+      if (p.kind === 'lightning') return [{ fx: 'lightning_impact', pos: at(p.pos) }];
+      return [];
     case EVT.ABILITY_EFFECT: {
       const v = info.vfx;
       if (!v) return [];

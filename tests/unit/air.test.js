@@ -56,10 +56,11 @@ describe('dados aéreos (F4-06)', () => {
   });
 
   it('Ataque aéreo: números da spec e Aviário/Ninho exigem Quartel + Centro 3', () => {
-    for (const [t, f, b, barr] of [['gryphon_rider', 'human', 'aviary', 'barracks'], ['war_serpent', 'orc', 'serpent_nest', 'orc_barracks']]) {
+    // VFX-AIR: ataque à distância (alcance 8) com projétil próprio — raio (Grifo) e bola de fogo (Serpe); dano em área no impacto
+    for (const [t, f, b, barr, proj] of [['gryphon_rider', 'human', 'aviary', 'barracks', 'lightning'], ['war_serpent', 'orc', 'serpent_nest', 'orc_barracks', 'fire']]) {
       const u = UNITS[t];
       expect(u.faction).toBe(f);
-      expect(u).toMatchObject({ hp: 350, speed: 6.2, armor: 2, layer: 'air', canHitAir: true, canHitGround: true, attackRange: 2.5, attackCooldown: 1.6, splashRadius: 1.2, trainTime: 22 });
+      expect(u).toMatchObject({ hp: 350, speed: 6.2, armor: 2, layer: 'air', canHitAir: true, canHitGround: true, attackRange: 8, attackCooldown: 1.6, splashRadius: 1.2, trainTime: 22, isRanged: true, projectile: proj });
       expect(u.damage).toEqual({ basic: 0, piercing: 38, type: 'magic' });
       expect(u.cost).toEqual({ gold: 250, wood: 100, stone: 0 });
       expect(u.requires).toEqual([{ hq: 3 }]);

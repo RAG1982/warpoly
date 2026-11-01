@@ -172,7 +172,7 @@ export class MatchSession {
       }
       this._disposeVfxEvents = createVfxEvents(this.gameManager, this.particleSystem, this.vfx);
       this.gameManager.hazardView = new HazardView(scene, this.gameManager); // F4-04b
-      this.projectileViews = new ProjectileViews(this.gameManager, scene); // F2-08: malhas dos projéteis
+      this.projectileViews = new ProjectileViews(this.gameManager, scene, this.vfx); // F2-08: malhas dos projéteis; VFX-AIR: rastro de fogo e raio (partículas GPU)
       this._disposeUiEvents = createUiEvents(this.gameManager, this.uiManager);
       // NEW-19: ruínas visuais (só apresentação)
       this.ruins = new RuinsManager(this.gameManager, scene, QualitySettings);

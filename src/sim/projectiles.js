@@ -8,7 +8,7 @@ import { fhypot, fsin } from './fmath.js';
  * cada quadro e interpola `prev → pos` com o `alpha` do tick fixo (F1-09).
  *
  * Dois tipos:
- *  - homing (`'arrow'`, `'axe'`): persegue o alvo (rastreia `target.mesh.position + 1 u`), parábola de
+ *  - homing (`'arrow'`, `'axe'`, `'fire'` (bola de fogo do Serpe), `'lightning'` (raio do Grifo)): persegue o alvo (rastreia `target.mesh.position + 1 u`), parábola de
  *    altura `min(4,5; dist × 0,25)`; ao chegar chama `onHit(target, damage, hitPos)`.
  *  - balístico (`'bolt'`, `'boulder'` — cerco, F4-02): voa até um ponto FIXO (previsto no disparo) numa parábola de
  *    pico `clamp(dist × 0,35; 2; 9)`; ao chegar chama `onImpact(impactPos)` (dano em área no chamador).
@@ -17,7 +17,7 @@ import { fhypot, fsin } from './fmath.js';
 /** Velocidade total (u/s) dos projéteis balísticos: a Balista atira mais rápido e mais raso. */
 export const BALLISTIC_SPEED = { bolt: 22, boulder: 14, cannonball: 20 };
 /** Velocidade (u/s) dos projéteis que perseguem o alvo. */
-export const HOMING_SPEED = { arrow: 18, axe: 16, cannonball: 24 };
+export const HOMING_SPEED = { arrow: 18, axe: 16, cannonball: 24, fire: 20, lightning: 60 };
 
 /** Tempo de voo (s) para uma distância 3D `dist` — usado também na previsão de mira. */
 export function ballisticFlightTime(dist, kind) {

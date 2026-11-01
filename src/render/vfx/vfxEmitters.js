@@ -23,7 +23,8 @@ const COL = {
   bone: rgb('#d8d2bd'),
   wood: rgb('#8a6a42'), woodDark: rgb('#5a4129'), stone: rgb('#8e9296'), stoneDark: rgb('#5d6165'),
   smokeGrey: rgb('#8c8780'), smokeDark: rgb('#3d3a38'), dust: rgb('#b09c80'),
-  ember: rgb('#ff8a2a'), fire: rgb('#ffc24a'), spark: rgb('#ffe79a'), white: rgb('#fff6d8')
+  ember: rgb('#ff8a2a'), fire: rgb('#ffc24a'), spark: rgb('#ffe79a'), white: rgb('#fff6d8'),
+  arc: rgb('#9fdcff'), arcCore: rgb('#ffffff'), arcBlue: rgb('#3d8bff') // VFX-AIR: raio do Grifo
 };
 
 export function playFx(L, rng, d) {
@@ -36,6 +37,12 @@ export function playFx(L, rng, d) {
     case 'explosion': return explosion(L, rng, d);
     case 'magic': return magic(L, rng, d);
     case 'fireworks': return fireworks(L, rng, d);
+    case 'fire_muzzle': return fireMuzzle(L, rng, d);
+    case 'fire_trail': return fireTrail(L, rng, d);
+    case 'fire_impact': return fireImpact(L, rng, d);
+    case 'lightning_arc': return lightningArc(L, rng, d);
+    case 'lightning_muzzle': return lightningMuzzle(L, rng, d);
+    case 'lightning_impact': return lightningImpact(L, rng, d);
     default: return undefined;
   }
 }
@@ -259,5 +266,79 @@ function magic(L, rng, d) {
       }
       put(L.glow, L, 0, 0.3, Math.min(2.4, 0.8 + R * 0.3), 0, d.pos, 0, 1, 0, 0, 0, 0, col);
     }
+  }
+}
+
+/** VFX-AIR: boca de fogo da Serpe — clarão e brasas que saltam em todas as direções (pool glow, aditivo). */
+function fireMuzzle(L, rng, d) {
+  const n = scaleCount(14, L.density);
+  for (let i = 0; i < n; i++) {
+    const a = rng() * 6.283, s = rng.range(1.2, 3.6);
+    put(L.glow, L, 0, rng.range(0.25, 0.55), rng.range(0.1, 0.2), -0.6, d.pos,
+      0, 0, 0, Math.cos(a) * s * 0.6, rng.range(0.6, 2.4), Math.sin(a) * s * 0.6, rng() < 0.5 ? COL.fire : COL.ember);
+  }
+  put(L.glow, L, 0, 0.18, 0.7, 0, d.pos, 0, 0, 0, 0, 0, 0, COL.white);
+}
+
+/** VFX-AIR: rastro da bola de fogo — brasas que sobem e somem atrás do projétil (chamado a cada 2 quadros). */
+function fireTrail(L, rng, d) {
+  const n = scaleCount(3, L.density);
+  for (let i = 0; i < n; i++) {
+    put(L.glow, L, 0, rng.range(0.25, 0.5), rng.range(0.07, 0.13), -0.5, d.pos,
+      rng.signed(0.2), rng.signed(0.2), rng.signed(0.2), rng.signed(0.5), rng.range(0.5, 1.2), rng.signed(0.5),
+      rng() < 0.5 ? COL.ember : COL.fire);
+  }
+}
+
+/** VFX-AIR: impacto da bola de fogo — explosão de chamas (clarão, brasas, fumaça) mais labaredas que sobem. */
+function fireImpact(L, rng, d) {
+  const r = d.radius || 1.2;
+  explosion(L, rng, { pos: d.pos, radius: r });
+  const n = scaleCount(14, L.density);
+  for (let i = 0; i < n; i++) {
+    const a = rng() * 6.283, s = rng.range(1, 3.2) * (0.6 + r * 0.3);
+    put(L.glow, L, 0, rng.range(0.4, 0.9), rng.range(0.14, 0.26), -1.2, d.pos,
+      0, 0.4, 0, Math.cos(a) * s, rng.range(1, 3), Math.sin(a) * s, rng() < 0.5 ? COL.fire : COL.ember);
+  }
+}
+
+/**
+ * VFX-AIR: arco do raio (Grifo) — pontos ao longo de `from→to` com jitter senoidal (zero nas pontas), um zigue-zague
+ * reacendido a cada chamada. ~0,1 s de vida por ponto, aditivo, azul-branco.
+ */
+function lightningArc(L, rng, d) {
+  const a = d.from, b = d.to;
+  const dx = b.x - a.x, dy = b.y - a.y, dz = b.z - a.z;
+  const len = Math.hypot(dx, dy, dz);
+  if (!(len > 0.05)) return;
+  const steps = Math.max(3, Math.min(10, Math.round(len / 1.1)));
+  const amp = 0.28;
+  for (let i = 1; i < steps; i++) {
+    const t = i / steps, k = Math.sin(Math.PI * t);
+    const p = { x: a.x + dx * t + rng.signed(amp * k), y: a.y + dy * t + rng.signed(amp * k), z: a.z + dz * t + rng.signed(amp * k) };
+    put(L.glow, L, 0, rng.range(0.09, 0.16), rng.range(0.1, 0.16), 0, p, 0, 0, 0, 0, 0, 0, rng() < 0.6 ? COL.arcCore : COL.arc);
+  }
+}
+
+/** VFX-AIR: boca do raio — faíscas azuis saindo do bico e flash curto. */
+function lightningMuzzle(L, rng, d) {
+  const n = scaleCount(8, L.density);
+  for (let i = 0; i < n; i++) {
+    const a = rng() * 6.283, s = rng.range(1, 3);
+    put(L.glow, L, 0, rng.range(0.12, 0.25), rng.range(0.08, 0.14), 0, d.pos, 0, 0, 0,
+      Math.cos(a) * s, rng.signed(1.5), Math.sin(a) * s, rng() < 0.5 ? COL.arcCore : COL.arcBlue);
+  }
+  put(L.glow, L, 0, 0.12, 0.8, 0, d.pos, 0, 0, 0, 0, 0, 0, COL.arcCore);
+}
+
+/** VFX-AIR: impacto do raio — flash branco-azulado (~0,25 s) e faíscas radiais. */
+function lightningImpact(L, rng, d) {
+  put(L.glow, L, 0, 0.25, 0.8, 0, d.pos, 0, 0.5, 0, 0, 0, 0, COL.arcCore);
+  put(L.glow, L, 0, 0.3, 0.55, 0, d.pos, 0, 0.5, 0, 0, 0, 0, COL.arcBlue);
+  const n = scaleCount(16, L.density);
+  for (let i = 0; i < n; i++) {
+    const a = rng() * 6.283, s = rng.range(1.5, 4);
+    put(L.glow, L, 0, rng.range(0.25, 0.5), rng.range(0.07, 0.13), 6, d.pos, 0, 0.3, 0,
+      Math.cos(a) * s, rng.range(1.5, 4), Math.sin(a) * s, rng() < 0.5 ? COL.arcCore : COL.arc);
   }
 }

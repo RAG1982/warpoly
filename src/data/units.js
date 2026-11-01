@@ -22,8 +22,9 @@
  * - healthBarHeight  Altura da barra de vida 3D acima do pé do modelo.
  * - cost {gold, wood, stone}, trainTime (s). `null` = não treinável.
  * - icon, description.
- * - isWorker, isRanged, isCombat, projectile ('arrow' | 'axe' | 'bolt' | 'boulder' | 'cannonball' | 'arcane' | 'ash' | null).
+ * - isWorker, isRanged, isCombat, projectile ('arrow' | 'axe' | 'bolt' | 'boulder' | 'cannonball' | 'arcane' | 'ash' | 'fire' | 'lightning' | null).
  *   'arcane'/'ash' = orbe mágico do Mago/Necromante (projétil comum, teleguiado; ver ProjectileViews).
+ *   'fire' e 'lightning' (VFX-AIR) são projéteis que perseguem o alvo; com `splashRadius` o impacto causa dano em área.
  * - minAttackRange  F4-02: alcance mínimo (distância de borda; 0/ausente = sem). Alvo mais perto que
  *   isso não pode ser atacado: a unidade recua até `minAttackRange + 0,5` (cerco).
  * - splashRadius    F4-02: raio de dano em área no impacto (0/ausente = sem). 100% no centro → 50%
@@ -320,17 +321,17 @@ export const UNITS = {
     entityName: 'Cavaleiro Grifo',
     faction: 'human',
     requires: [{ hq: 3 }],
-    hp: 350, speed: 6.2, damage: { basic: 0, piercing: 38, type: 'magic' }, attackRange: 2.5, attackCooldown: 1.6, armor: 2,
+    hp: 350, speed: 6.2, damage: { basic: 0, piercing: 38, type: 'magic' }, attackRange: 8, attackCooldown: 1.6, armor: 2,
     splashRadius: 1.2,
     collisionRadius: 1.0,
     visionRadius: 20,
-    ...MELEE_SCAN,
+    ...RANGED_SCAN,
     healthBarHeight: 4.0,
     cost: { gold: 250, wood: 100, stone: 0 },
     trainTime: 22,
     icon: '/icoEspada.png',
-    description: 'Aéreo. Cavaleiro voador: dano mágico em área curta contra solo e ar. Imune a corpo a corpo e cerco',
-    isWorker: false, isRanged: false, isCombat: true, projectile: null,
+    description: 'Aéreo. Cavaleiro voador: dispara raios à distância que causam dano mágico em área curta contra solo e ar. Imune a corpo a corpo e cerco',
+    isWorker: false, isRanged: true, isCombat: true, projectile: 'lightning',
     layer: 'air', canHitAir: true, canHitGround: true, corpseless: true
   },
   war_serpent: {
@@ -339,17 +340,17 @@ export const UNITS = {
     entityName: 'Serpe de Guerra',
     faction: 'orc',
     requires: [{ hq: 3 }],
-    hp: 350, speed: 6.2, damage: { basic: 0, piercing: 38, type: 'magic' }, attackRange: 2.5, attackCooldown: 1.6, armor: 2,
+    hp: 350, speed: 6.2, damage: { basic: 0, piercing: 38, type: 'magic' }, attackRange: 8, attackCooldown: 1.6, armor: 2,
     splashRadius: 1.2,
     collisionRadius: 1.0,
     visionRadius: 20,
-    ...MELEE_SCAN,
+    ...RANGED_SCAN,
     healthBarHeight: 4.0,
     cost: { gold: 250, wood: 100, stone: 0 },
     trainTime: 22,
     icon: '/icoEspada.png',
-    description: 'Aéreo. Serpente alada: dano mágico em área curta contra solo e ar. Imune a corpo a corpo e cerco',
-    isWorker: false, isRanged: false, isCombat: true, projectile: null,
+    description: 'Aéreo. Serpente alada: cospe bolas de fogo à distância que causam dano mágico em área curta contra solo e ar. Imune a corpo a corpo e cerco',
+    isWorker: false, isRanged: true, isCombat: true, projectile: 'fire',
     layer: 'air', canHitAir: true, canHitGround: true, corpseless: true
   },
 

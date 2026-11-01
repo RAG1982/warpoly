@@ -58,11 +58,37 @@ function getOrbTemplate(kind) {
   return orbTemplates[kind];
 }
 
+// VFX-AIR: bola de fogo da Serpe de Guerra (casca laranja translúcida + núcleo amarelo, aditivo/bloom).
+let fireTemplate = null;
+function getFireTemplate() {
+  if (!fireTemplate) {
+    const outer = new THREE.Mesh(new THREE.SphereGeometry(0.34, 10, 8), new THREE.MeshBasicMaterial({ color: 0xff6a12, transparent: true, opacity: 0.85, depthWrite: false }));
+    outer.material.userData.bloom = true;
+    const core = new THREE.Mesh(new THREE.SphereGeometry(0.17, 8, 6), new THREE.MeshBasicMaterial({ color: 0xffe08a }));
+    core.material.userData.bloom = true;
+    fireTemplate = new THREE.Group();
+    fireTemplate.add(outer, core);
+  }
+  return fireTemplate;
+}
+
+// VFX-AIR: raio do Cavaleiro Grifo (orbe azul-branco; o rastro em zigue-zague são partículas do pool `glow`, ver `vfxEmitters`).
+let lightningTemplate = null;
+function getLightningTemplate() {
+  if (!lightningTemplate) {
+    lightningTemplate = new THREE.Mesh(new THREE.SphereGeometry(0.2, 8, 6), new THREE.MeshBasicMaterial({ color: 0xd8f4ff }));
+    lightningTemplate.material.userData.bloom = true;
+  }
+  return lightningTemplate;
+}
+
 function createMesh(kind) {
   if (kind === 'arcane' || kind === 'ash') return ModelFactory.headless ? new THREE.Group() : getOrbTemplate(kind).clone();
   if (kind === 'cannonball') return ModelFactory.headless ? new THREE.Group() : getCannonballTemplate().clone();
   if (kind === 'axe') return getAxeTemplate().clone(true);
   if (kind === 'boulder') return ModelFactory.headless ? new THREE.Group() : getBoulderTemplate().clone();
+  if (kind === 'fire') return getFireTemplate().clone(true);
+  if (kind === 'lightning') return getLightningTemplate().clone();
   const m = ModelFactory.createArrow();
   if (kind === 'bolt') m.scale.setScalar(2.4);
   return m;
@@ -74,18 +100,43 @@ function createMesh(kind) {
 const ARROW_BLEND = 0.25;
 const BOW_MUZZLE = new THREE.Vector3(0.05, 0, 0.3); // no sistema do nó Bow: ao lado do arco (OFFSET_FLECHA) e à frente do encaixe
 const _tmp = new THREE.Vector3();
-function bowMuzzleOffset(gm, p) {
-  if (p.kind !== 'arrow' || !gm.entityViews || !gm.entityViews.views) return null;
+function shooterAnimatorOf(gm, p) {
+  if (!gm.entityViews || !gm.entityViews.views) return null;
   for (const [e, v] of gm.entityViews.views) {
     const mp = e.mesh && e.mesh.position;
     if (!mp || mp.x !== p.start.x || mp.z !== p.start.z || !v.animator) continue;
-    const parts = v.animator.meshParts;
-    if (!parts || !parts.bow || !parts.foreArmL) return null; // arqueiro antigo: comportamento de sempre
-    parts.bow.updateWorldMatrix(true, false);
-    _tmp.copy(BOW_MUZZLE).applyMatrix4(parts.bow.matrixWorld);
-    return new THREE.Vector3(_tmp.x - p.start.x, _tmp.y - p.start.y, _tmp.z - p.start.z);
+    return v.animator;
   }
   return null;
+}
+function bowMuzzleOffset(gm, p) {
+  if (p.kind !== 'arrow') return null;
+  const an = shooterAnimatorOf(gm, p);
+  if (!an) return null;
+  const parts = an.meshParts;
+  if (!parts || !parts.bow || !parts.foreArmL) return null; // arqueiro antigo: comportamento de sempre
+  parts.bow.updateWorldMatrix(true, false);
+  _tmp.copy(BOW_MUZZLE).applyMatrix4(parts.bow.matrixWorld);
+  return new THREE.Vector3(_tmp.x - p.start.x, _tmp.y - p.start.y, _tmp.z - p.start.z);
+}
+
+// VFX-AIR: a bola de fogo sai da boca da Serpe (nó `Mouth`, filho de `Head`) e o raio do bico/peito do Grifo (`Head`).
+// Coordenadas locais do nó `Head` (cabeça de 0,42 de largura, frente em +Z).
+const ELEMENTAL_MUZZLE = Object.freeze({
+  fire: new THREE.Vector3(0, -0.08, 0.36),
+  lightning: new THREE.Vector3(0, -0.02, 0.5)
+});
+const _elemNode = { fire: 'mouth', lightning: 'head' };
+function elementalMuzzleOffset(gm, p) {
+  const local = ELEMENTAL_MUZZLE[p.kind];
+  if (!local) return null;
+  const an = shooterAnimatorOf(gm, p);
+  if (!an) return null;
+  const node = an.meshParts && an.meshParts[_elemNode[p.kind]];
+  if (!node) return null;
+  node.updateWorldMatrix(true, false);
+  _tmp.copy(local).applyMatrix4(node.matrixWorld);
+  return new THREE.Vector3(_tmp.x - p.start.x, _tmp.y - p.start.y, _tmp.z - p.start.z);
 }
 
 export class ProjectileViews {
@@ -93,12 +144,20 @@ export class ProjectileViews {
    * @param {import('../core/GameManager.js').GameManager} gm
    * @param {THREE.Scene} scene
    */
-  constructor(gm, scene) {
+  constructor(gm, scene, vfx = null) {
     this.gm = gm;
     this.scene = scene;
-    /** @type {Map<object, {mesh: THREE.Object3D, seen: number}>} */
+    /** VFX-AIR: partículas GPU (rastro de brasas, arco do raio, clarões de boca); null = sem partículas. */
+    this.vfx = vfx;
+    /** @type {Map<object, {mesh: THREE.Object3D, seen: number, off: THREE.Vector3|null, elem: boolean, origin: object|null}>} */
     this.views = new Map();
     this._frame = 0;
+  }
+
+  /** VFX-AIR: fogo/raio só aparecem onde o jogador enxerga (névoa), como os demais efeitos de combate. */
+  _visibleAt(pos) {
+    const fog = this.gm.fogOfWar;
+    return !fog || fog.isVisible(pos.x, pos.z);
   }
 
   /** Um quadro: cria/posiciona as malhas dos projéteis vivos e remove as dos que saíram da simulação. */
@@ -113,8 +172,13 @@ export class ProjectileViews {
         const mesh = createMesh(p.kind);
         mesh.position.set(p.pos.x, p.pos.y, p.pos.z);
         this.scene.add(mesh);
-        v = { mesh, seen: frame, off: bowMuzzleOffset(this.gm, p) };
+        const elem = p.kind === 'fire' || p.kind === 'lightning';
+        const off = elem ? elementalMuzzleOffset(this.gm, p) : bowMuzzleOffset(this.gm, p);
+        // origem visual = boca/bico do atirador (a simulação dispara do peito); o arco e o clarão nascem daí
+        const origin = elem ? { x: p.start.x + (off ? off.x : 0), y: p.start.y + (off ? off.y : 0), z: p.start.z + (off ? off.z : 0) } : null;
+        v = { mesh, seen: frame, off, elem, origin };
         this.views.set(p, v);
+        if (elem && this.vfx && this._visibleAt(origin)) this.vfx.play({ fx: p.kind === 'fire' ? 'fire_muzzle' : 'lightning_muzzle', pos: origin });
       }
       v.seen = frame;
       const m = v.mesh;
@@ -126,6 +190,15 @@ export class ProjectileViews {
       if (v.off) {
         const k = Math.max(0, 1 - p.progress / ARROW_BLEND);
         if (k > 0) m.position.addScaledVector(v.off, k);
+      }
+      if (v.elem) {
+        // VFX-AIR: a malha e as partículas de rastro só aparecem com a área visível (névoa de guerra)
+        const vis = this._visibleAt(m.position);
+        m.visible = vis;
+        if (vis && this.vfx && (frame & 1) === 0) {
+          if (p.kind === 'fire') this.vfx.play({ fx: 'fire_trail', pos: { x: m.position.x, y: m.position.y, z: m.position.z } });
+          else this.vfx.play({ fx: 'lightning_arc', from: v.origin, to: { x: m.position.x, y: m.position.y, z: m.position.z } });
+        }
       }
       if (p.kind === 'boulder' || p.kind === 'cannonball') {
         m.rotation.x = p.spin; // gira em voo

@@ -22,7 +22,8 @@
  * - healthBarHeight  Altura da barra de vida 3D acima do pé do modelo.
  * - cost {gold, wood, stone}, trainTime (s). `null` = não treinável.
  * - icon, description.
- * - isWorker, isRanged, isCombat, projectile ('arrow' | 'axe' | 'bolt' | 'boulder' | 'cannonball' | null).
+ * - isWorker, isRanged, isCombat, projectile ('arrow' | 'axe' | 'bolt' | 'boulder' | 'cannonball' | 'arcane' | 'ash' | null).
+ *   'arcane'/'ash' = orbe mágico do Mago/Necromante (projétil comum, teleguiado; ver ProjectileViews).
  * - minAttackRange  F4-02: alcance mínimo (distância de borda; 0/ausente = sem). Alvo mais perto que
  *   isso não pode ser atacado: a unidade recua até `minAttackRange + 0,5` (cerco).
  * - splashRadius    F4-02: raio de dano em área no impacto (0/ausente = sem). 100% no centro → 50%
@@ -467,10 +468,10 @@ export const UNITS = {
     cost: { gold: 120, wood: 0, stone: 0 },
     trainTime: 12,
     icon: '/icoEscudo.png', // provisório (ícone novo na F7)
-    description: 'Conjurador: bola de fogo, lentidão, escudo de chamas, invisibilidade, transmutação e nevasca',
-    isWorker: false, isRanged: true, isCombat: true, projectile: 'bolt',
+    description: 'Conjurador: ataque arcano à distância e cura desde o início; com pesquisa, bola de fogo, lentidão, escudo de chamas, invisibilidade, transmutação e nevasca',
+    isWorker: false, isRanged: true, isCombat: true, projectile: 'arcane',
     maxMana: 255, startMana: 85, manaRegen: 1,
-    abilities: ['fireball', 'slow', 'flameshield', 'invisibility', 'polymorph', 'blizzard']
+    abilities: ['mage_heal', 'fireball', 'slow', 'flameshield', 'invisibility', 'polymorph', 'blizzard']
   },
   necromancer: {
     type: 'necromancer',
@@ -486,10 +487,10 @@ export const UNITS = {
     cost: { gold: 120, wood: 0, stone: 0 },
     trainTime: 12,
     icon: '/icoEscudo.png', // provisório (ícone novo na F7)
-    description: 'Conjurador: toque da morte, pressa, erguer mortos, armadura profana, nuvem de cinzas e redemoinho',
-    isWorker: false, isRanged: true, isCombat: true, projectile: 'bolt',
+    description: 'Conjurador: ataque de cinzas à distância e cura desde o início; com pesquisa, toque da morte, pressa, erguer mortos, armadura profana, nuvem de cinzas e redemoinho',
+    isWorker: false, isRanged: true, isCombat: true, projectile: 'ash',
     maxMana: 255, startMana: 85, manaRegen: 1,
-    abilities: ['death_touch', 'haste_spell', 'raise_dead', 'unholy_armor', 'ash_cloud', 'whirlwind']
+    abilities: ['bone_mend', 'death_touch', 'haste_spell', 'raise_dead', 'unholy_armor', 'ash_cloud', 'whirlwind']
   },
   // Invocado por Erguer Mortos (não treinável, não consome suprimento... ver `lifetime`); morto-vivo.
   skeleton: {

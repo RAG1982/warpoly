@@ -163,8 +163,10 @@
   "portraits": 300100
  },
  "aliases": {
+  "ability_bone_mend": "ability_heal",
   "ability_debug_bolt": "ability_hero_arcane_bolt",
   "ability_debug_heal": "ability_heal",
+  "ability_mage_heal": "ability_heal",
   "research_cavalry_class": "unit_templar",
   "research_cavalry_class_orc": "unit_ogre_mage",
   "research_ranged_class": "unit_ranger",

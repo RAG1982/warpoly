@@ -47,6 +47,10 @@ export function createVfxEvents(gm, particleSystem, vfx = null) {
       particleSystem.spawnExplosion(toVec(pos), 1.1);
       return;
     }
+    if (kind === 'arcane' || kind === 'ash') { // F-MAGE-BASE: orbe do Mago/Necromante — faíscas, sem poeira de pedra
+      particleSystem.spawnHitSparks(toVec(pos));
+      return;
+    }
     if (kind !== 'bolt' && kind !== 'boulder') return;
     particleSystem.spawnStoneDust(toVec(pos));
     particleSystem.spawnHitSparks(toVec(pos));

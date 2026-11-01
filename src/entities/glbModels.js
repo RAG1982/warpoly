@@ -153,6 +153,11 @@ export const GLB_MODELS = {
   oil_platform: { url: `${BASE}models/oil_platform.glb`, root: 'OilPlatform', type: null },
   ship_dock: { url: `${BASE}models/ship_dock.glb`, root: 'ShipDock', type: null },
   orc_oil_platform: { url: `${BASE}models/orc_oil_platform.glb`, root: 'OrcOilPlatform', type: null },
+  // M5-04: refinaria, fundição, fornalha naval e caldeirão (Blender; substituem os procedurais de F4-07)
+  refinery: { url: `${BASE}models/refinery.glb`, root: 'Refinery', type: null },
+  foundry: { url: `${BASE}models/foundry.glb`, root: 'Foundry', type: null },
+  naval_forge: { url: `${BASE}models/naval_forge.glb`, root: 'NavalForge', type: null },
+  ash_cauldron: { url: `${BASE}models/ash_cauldron.glb`, root: 'AshCauldron', type: null },
   // ART-naval-ships: navios humanos (Blender)
   frigate: { url: `${BASE}models/frigate.glb`, root: 'Frigate', type: 'frigate' },
   barge: { url: `${BASE}models/barge.glb`, root: 'Barge', type: 'barge' },

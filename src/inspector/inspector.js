@@ -871,6 +871,58 @@ const MODEL_CATALOG = [
     notes: '6 draw calls (Static_Mesh + Anim_Banners TeamColor 2 materiais + Anim_Drill + Anim_Crane + Anim_Smoke), atlas 2048². Pegada ~5 x 5, altura ~7,5. Nós animáveis: Anim_Banners, Anim_Smoke, Anim_Crane, Anim_Drill. Sockets: Socket_UnitSpawn, Socket_Rally.'
   },
   {
+    id: 'refinery_glb',
+    name: 'Refinaria (Blender)',
+    category: 'buildings',
+    faction: 'human',
+    type: 'building',
+    icon: '🛢️',
+    glb: 'refinery',
+    sourceFile: 'tools/blender/build_refinery.py',
+    create: createGlb('refinery'),
+    description: 'Refinaria humana (public/models/refinery.glb, M5-04): torre de destilação de aço com plataforma e escada, coluna reatora, três tanques verticais com escada em espiral e cintas de time, tubulações com válvulas, casa de bombas de tijolo, chaminé de queima com chama e píer de tábuas com braço de carga. ~9 mil tris, 4 draw calls, atlas 512².',
+    notes: 'Nós: Static_Mesh, Anim_Banners (TeamColor), Anim_Crane (braço de carga, gira em Y), Anim_Smoke. Sockets: Socket_UnitSpawn (mar, +Z), Socket_Rally.'
+  },
+  {
+    id: 'foundry_glb',
+    name: 'Fundição (Blender)',
+    category: 'buildings',
+    faction: 'human',
+    type: 'building',
+    icon: '⚒️',
+    glb: 'foundry',
+    sourceFile: 'tools/blender/build_foundry.py',
+    create: createGlb('foundry'),
+    description: 'Fundição humana (public/models/foundry.glb, M5-04): galpão de pedra com enxaimel e telhado azul, forno de tijolo com boca incandescente e chaminé alta de anéis de pedra, bigorna, tanque de resfriamento, lingotes, canhões e âncoras de reserva, píer com mastro de guindaste e âncora pendurada. ~5 mil tris, 5 draw calls, atlas 512².',
+    notes: 'Nós: Static_Mesh, Anim_Banners (TeamColor), Anim_Crane (lança com âncora, gira em Y), Anim_Smoke. Sockets: Socket_UnitSpawn (mar, +Z), Socket_Rally.'
+  },
+  {
+    id: 'naval_forge_glb',
+    name: 'Fornalha Naval Orc (Blender)',
+    category: 'buildings',
+    faction: 'orc',
+    type: 'building',
+    icon: '⚒️',
+    glb: 'naval_forge',
+    sourceFile: 'tools/blender/build_naval_forge.py',
+    create: createGlb('naval_forge'),
+    description: 'Fornalha Naval orc (public/models/naval_forge.glb, M5-04): forja de placas de ferro negro com telhado de lâminas e crista de espinhos, boca incandescente com presas e crânio, duas chaminés em brasa, estaleiro de ferro (casco em esqueleto de costelas com esporão de osso), âncora e correntes, bigorna, tanque de têmpera e píer de toras com guindaste de ossos. ~7 mil tris, 4 draw calls, atlas 512².',
+    notes: 'Nós: Static_Mesh, Anim_Banners (TeamColor), Anim_Crane (lança com âncora, gira em Y), Anim_Smoke. Sockets: Socket_UnitSpawn (mar, +Z), Socket_Rally.'
+  },
+  {
+    id: 'ash_cauldron_glb',
+    name: 'Caldeirão de Cinzas Orc (Blender)',
+    category: 'buildings',
+    faction: 'orc',
+    type: 'building',
+    icon: '🔥',
+    glb: 'ash_cauldron',
+    sourceFile: 'tools/blender/build_ash_cauldron.py',
+    create: createGlb('ash_cauldron'),
+    description: 'Caldeirão de Cinzas orc (public/models/ash_cauldron.glb, M5-04): caldeirão enorme de placas de ferro rebitadas com borda de espinhos, óleo borbulhando, sobre fogueira de pedras e toras e três pernas de ferro e osso; crânios pendurados, escada de toras, calha de tábuas até o píer, totens de crânios, forca de ossos com balde e faixas de guerra em time. ~9,5 mil tris, 4 draw calls, atlas 512².',
+    notes: 'Nós: Static_Mesh, Anim_Banners (TeamColor), Anim_Crane (forca com balde, gira em Y), Anim_Smoke. Sockets: Socket_UnitSpawn (mar, +Z), Socket_Rally.'
+  },
+  {
     id: 'ash_sanctum_glb',
     name: 'Santuário das Cinzas (Blender)',
     category: 'buildings',

@@ -29,12 +29,8 @@ import {
   createBarge,
   createDreadnought,
   createSubmersible,
-  createFoundry,
-  createNavalForge,
   createShipyard,
   createShipDock,
-  createRefinery,
-  createCauldron,
   createPlatform,
   createOilWell,
   createWorkshop,
@@ -107,7 +103,8 @@ function unifySkeletons(root) {
 const PLACEHOLDER_SIZE_BY_KIND = { building: [4.5, 3, 4.5], unit: [0.8, 1.8, 0.8], tree: [1.6, 5, 1.6] };
 const PLACEHOLDER_SIZES = {
   castle: [6.5, 4.5, 6.5], great_hall: [6.5, 4.5, 6.5], cavalier: [0.9, 2, 2.2], ogre: [1.2, 2.6, 1.2],
-  gold_mine: [5, 3, 5], stone_quarry: [5, 3, 5]
+  gold_mine: [5, 3, 5], stone_quarry: [5, 3, 5],
+  refinery: [6.4, 4, 5.2], foundry: [6.4, 4, 5.2], naval_forge: [6.4, 4, 5.2], ash_cauldron: [6.4, 4, 5.2]
 };
 const placeholderGeometries = new Map();
 function placeholderGeometry(size) {
@@ -413,11 +410,11 @@ export class ModelFactory {
       // F4-07: naval/petróleo (procedurais provisórios; o .glb do Blender substitui via `_glbOr` com a mesma chave)
       case 'shipyard': return this._glbOr('shipyard', () => this.getOrCreateModel('shipyard', createShipyard));
       case 'ship_dock': return this._glbOr('ship_dock', () => this.getOrCreateModel('ship_dock', createShipDock));
-      case 'refinery': return this._glbOr('refinery', () => this.getOrCreateModel('refinery', createRefinery));
-      case 'ash_cauldron': return this._glbOr('ash_cauldron', () => this.getOrCreateModel('ash_cauldron', createCauldron));
+      case 'refinery': return this._glbOr('refinery', () => this._placeholder('refinery')); // M5-04: .glb do Blender
+      case 'ash_cauldron': return this._glbOr('ash_cauldron', () => this._placeholder('ash_cauldron'));
       case 'oil_platform': return this._factionGlb('oil_platform', factionId) || this._glbOr('oil_platform', () => this.getOrCreateModel('oil_platform', createPlatform));
-      case 'foundry': return this._glbOr('foundry', () => this.getOrCreateModel('foundry', createFoundry)); // F4-07b (sem .glb ainda)
-      case 'naval_forge': return this._glbOr('naval_forge', () => this.getOrCreateModel('naval_forge', createNavalForge));
+      case 'foundry': return this._glbOr('foundry', () => this._placeholder('foundry'));
+      case 'naval_forge': return this._glbOr('naval_forge', () => this._placeholder('naval_forge'));
       case 'workshop': return this.createWorkshop();
       case 'orc_workshop': return this.createOrcWorkshop();
       case 'wall_human': return createWallSegment('human');

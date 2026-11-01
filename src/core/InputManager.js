@@ -583,7 +583,7 @@ export class InputManager {
       } else {
         const targetColor = (this.hoveredEntity && this.hoveredEntity.faction === 'enemy') ? 0xef4444 : 0xdeb841;
         this.playClickDecal(this.groundIntersection, targetColor);
-        this.gm.issueOrder(this.hoveredEntity, this.groundIntersection, { queued: e.shiftKey });
+        this.gm.issueOrder(this.hoveredEntity, this.groundIntersection, { queued: e.shiftKey, attackGround: e.ctrlKey });
       }
     }
   }

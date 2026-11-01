@@ -1538,7 +1538,7 @@ export class GameManager {
    * MOVE (offsets por unidade) é calculada pelo `CommandExecutor`, não aqui: o comando
    * carrega só o ponto clicado.
    */
-  issueOrder(entityUnderCursor, groundPoint, { queued = false } = {}) {
+  issueOrder(entityUnderCursor, groundPoint, { queued = false, attackGround = false } = {}) {
     // F3-01: Shift = enfileira (MOVE/GATHER/BUILD/REPAIR; ATTACK ignora `queued`).
     const q = queued ? { queued: true } : null;
     this.selectedUnits = this.selectedUnits.filter(u => !u.isDead && !u.isDying && u.state !== 'dying');
@@ -1651,12 +1651,12 @@ export class GameManager {
 
     // Right-clicked ground: Move (o executor calcula a formação e evita água)
     if (groundPoint) {
-      // NEW-35: cerco selecionado dispara no ponto (ATTACK_GROUND); as demais unidades continuam em MOVE.
+      // NEW-35: cerco só dispara no ponto (ATTACK_GROUND) com Ctrl+clique direito; clique direito normal = MOVE (como o arqueiro).
       const siegeIds = [];
       const otherIds = [];
       for (let i = 0; i < this.selectedUnits.length; i++) {
         const u = this.selectedUnits[i];
-        (u.isBallistic ? siegeIds : otherIds).push(u.id);
+        (attackGround && u.isBallistic ? siegeIds : otherIds).push(u.id);
       }
       if (siegeIds.length > 0) this.issue({ type: CMD.ATTACK_GROUND, playerId: this._localPlayerId, unitIds: siegeIds, x: groundPoint.x, z: groundPoint.z });
       if (otherIds.length > 0) this.issue({ type: CMD.MOVE, playerId: this._localPlayerId, unitIds: otherIds, x: groundPoint.x, z: groundPoint.z, ...q });

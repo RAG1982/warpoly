@@ -400,8 +400,13 @@ describe('IA e cerco (F4-02)', () => {
     const issued = [];
     const orig = gm.issue.bind(gm);
     gm.issue = c => { issued.push(c.type); return orig(c); };
-    gm.issueOrder(null, { x: x + 2, y: 0, z: z + 2 });
+    gm.issueOrder(null, { x: x + 2, y: 0, z: z + 2 }, { attackGround: true });
     expect(issued.sort()).toEqual([CMD.ATTACK_GROUND, CMD.MOVE].sort());
+
+    // clique direito normal no chão: cerco também só se move (como o arqueiro)
+    issued.length = 0;
+    gm.issueOrder(null, { x: x + 2, y: 0, z: z + 2 });
+    expect(issued).toEqual([CMD.MOVE]);
   });
 
   it('ATTACK_GROUND: ponto dentro do alcance mínimo faz o cerco recuar antes de disparar', () => {

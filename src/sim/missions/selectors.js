@@ -84,6 +84,7 @@ export function selectEntities(rt, sel, { builtOnly = false } = {}) {
       const e = gm.entitiesById.get(ids[i]);
       if (!isAlive(e)) continue;
       if (sel.owner !== undefined && !ownerMatches(gm, sel.owner, e.ownerId)) continue;
+      if (sel.minTier !== undefined && (e.tier || 1) < sel.minTier) continue; // M3-12: Centro (Marco da Colônia) no nível mínimo
       out.push(e);
     }
     return out;
@@ -110,6 +111,7 @@ export function selectEntities(rt, sel, { builtOnly = false } = {}) {
       if (sel.buildingType !== undefined && b.type !== sel.buildingType) continue;
       if (sel.role !== undefined && roleOf(b.type) !== sel.role) continue;
       if (sel.owner !== undefined && !ownerMatches(gm, sel.owner, b.ownerId)) continue;
+      if (sel.minTier !== undefined && (b.tier || 1) < sel.minTier) continue; // M3-12
       if (area && !inArea(area, b.mesh.position.x, b.mesh.position.z)) continue;
       out.push(b);
     }

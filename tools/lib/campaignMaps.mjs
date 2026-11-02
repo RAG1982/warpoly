@@ -116,11 +116,15 @@ export const CAMPAIGN_PRESETS = freeze({
     layout: freeze({ bases: [{ entities: [0], side: 'west' }, { entities: [0], side: 'east' }], minSeparation: 70 }),
     verify: freeze({ landRange: [0.2, 0.7], minRivers: 0 })
   }),
-  /** Palco 11 (M2-06): interior de savana e estepe, costa a oeste para o Porto Albor (slot 0); Skarn a sudeste (slot 1) e Hurgan a nordeste (slot 2). */
+  /**
+   * Palco 11 (M2-06; M3-12 refeito a 352, naval): interior de savana e estepe, costa a oeste para o Porto Albor (slot 0); Skarn a sudeste (slot 1)
+   * e Hurgan a nordeste (slot 2, acampamento dissidente). Mar aberto a oeste com duas ilhas: a colônia recebe reforços por barcaça e a frota de
+   * cerco dos Clãs sai da água a leste. Bases a >= 150 u umas das outras.
+   */
   'camp-11-estepe-do-vento': freeze({
-    id: 'camp-11-estepe-do-vento', name: 'Estepe do Vento', uso: 'campanha, palco 11 (colônia sob cerco)', tileset: 'savana', naval: false,
-    options: freeze({ size: 208, grid: 208, continents: 1, continentBiome: 'steppe', continentCenter: [0.1, 0], continentDims: [0.44, 0.46], islands: 0, islets: 0, scatterIslets: 3, scatterRadius: [2.8, 4.5], scatterZone: 0.42, bays: 3, peninsulas: 2, roughness: 1.0, lava: false, rivers: 0 }),
-    layout: freeze({ bases: [{ entities: [0], side: 'west' }, { entities: [0], sides: ['east', 'south'] }, { entities: [0], sides: ['east', 'north'] }], minSeparation: 62 }),
+    id: 'camp-11-estepe-do-vento', name: 'Estepe do Vento', uso: 'campanha, palco 11 (colônia sob cerco; naval)', tileset: 'savana', naval: true,
+    options: freeze({ size: 352, grid: 352, continents: 1, continentBiome: 'steppe', continentCenter: [0.1, 0], continentDims: [0.44, 0.46], islands: 0, islets: 0, bigIslands: 2, bigIslandAt: [[-0.4, 0.3], [-0.38, -0.32]], bigIslandScale: 0.3, bigIslandBiomes: ['rocky', 'arid'], scatterIslets: 3, scatterRadius: [2.8, 4.5], scatterZone: 0.42, bays: 3, peninsulas: 2, roughness: 1.0, lava: false, rivers: 0 }),
+    layout: freeze({ bases: [{ entities: [0], side: 'west' }, { entities: [0], sides: ['east', 'south'] }, { entities: [0], sides: ['east', 'north'] }], minSeparation: 150 }),
     verify: freeze({ landRange: [0.25, 0.8], minRivers: 0 })
   }),
   /** Palco 12 (M2-06): promontório de Cinzara apontando para 3 ilhas a oeste; o estreito entre a ponta e a ilha mais próxima é a zona de bloqueio. Slot 0 = Bastião, slot 1 = Skarn a leste. */
@@ -1395,12 +1399,22 @@ function postEstepe(ctx, extra) {
   const { m, s0 } = ctx;
   const S = m.startSlots;
   const s1 = S[1], s2 = S[2];
-  extra.colonyMark = pt(s0);
   extra.skarnStart = pt(s1); extra.hurganStart = pt(s2);
   const { p: land, sea } = pickLanding(ctx, s0, s1, { dMin: 26, dMax: 54, target: 38 });
   ctx.take(land, 12);
   extra.landingZone = pt(land);
+  // M3-12: o Marco da Colônia (Porto Albor) fica na praia de desembarque, a 14–22 u da praia e longe de Skarn; o Paço (slot 0) fica no interior
+  const colony = need(ctx.scan({
+    test: (x, z) => ctx.dryClear(x, z, 6) && ctx.reach(x, z) && ctx.free(x, z, 6) && hyp({ x, z }, land) >= 14 && hyp({ x, z }, land) <= 22 && hyp({ x, z }, s1) >= 60,
+    score: (x, z) => Math.abs(hyp({ x, z }, land) - 18) + 0.2 * hyp({ x, z }, s0)
+  }), 'o Marco da Colônia');
+  ctx.take(colony, 14);
+  extra.colonyMark = pt(colony);
   extra.reinforceSea = ptw(sea); // Barcaças de reforço (a cada 4 min) chegam por aqui
+  // M3-12: frota de cerco dos Clãs: água aberta a ~90 u da base de Skarn (de onde as galés saem rumo à praia da colônia) e uma 2ª partida
+  const sf1 = openWater(ctx, s1, 90, 'a frota de cerco');
+  extra.siegeFleetStart = ptw(sf1);
+  extra.siegeFleetStart2 = ptw(openWater(ctx, sf1, 10, 'a frota de cerco 2', { minR: 8, maxR: 20, around: sf1 }));
   extra.convoyStart = pt(land);
   extra.convoyEnd = pt(ctx.take(nearDry(ctx, toward(s0, land, 14), 'o fim do comboio', { r: 3, freeR: 3 }), 6));
   // rotas das incursões: uma por base inimiga (a ~52 u do Marco, rumo ao inimigo) e uma pelo meio das duas

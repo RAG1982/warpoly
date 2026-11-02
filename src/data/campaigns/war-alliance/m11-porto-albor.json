@@ -3,85 +3,163 @@
   "version": 1,
   "id": "war-alliance-11-porto-albor",
   "hidden": true,
-  "title": {
-    "pt-BR": "Porto Albor",
-    "en": "Port Albor"
-  },
-  "subtitle": {
-    "pt-BR": "Liga de Aurelan, missão 11",
-    "en": "Aurelan League, mission 11"
-  },
+  "title": { "pt-BR": "Porto Albor", "en": "Port Albor" },
+  "subtitle": { "pt-BR": "Liga de Aurelan, missão 11", "en": "Aurelan League, mission 11" },
   "briefing": {
-    "speaker": {
-      "pt-BR": "Marechal Dorian Vasques",
-      "en": "Marshal Dorian Vasques"
-    },
-    "portrait": "👑",
+    "speaker": { "pt-BR": "Mestre Arcano Oren", "en": "Arcane Master Oren" },
+    "portrait": "🔮",
     "text": {
-      "pt-BR": "A segunda onda desembarca sob meu estandarte. Erga as defesas de Porto Albor e rompa o cerco inimigo.",
-      "en": "The second wave lands under my banner. Raise the defenses of Port Albor and break the enemy siege."
+      "pt-BR": "O Marco da Colônia nasceu na praia de Porto Albor, mas a Estepe do Vento não nos quer aqui. Skarn cercou a colônia com as levas do interior e vai pelo mar com uma esquadra de cerco. Evoluam o Marco a Fortaleza (nível 2) e aguentem doze minutos de incursões. As barcaças de reforço chegam a cada quatro minutos pela enseada: o Marechal Dorian vem com a segunda onda. E há um clã dissidente de Hurgan acampado no centro-norte; se os guardas caírem, os homens dele jurarão a bandeira da Liga.",
+      "en": "The Colony Outpost was born on the beach of Port Albor, but the Wind Steppe does not want us here. Skarn has ringed the colony with the inland hordes and comes by sea with a siege fleet. Upgrade the Outpost to a Fortress (level 2) and hold out for twelve minutes of raids. Reinforcement barges arrive every four minutes through the bay: Marshal Dorian comes with the second wave. And a dissident clan from Hurgan camps in the north-centre; if its guards fall, its men will swear to the League's banner."
     },
     "hints": [
-      {
-        "pt-BR": "Concentre-se nos objetivos primários para avançar.",
-        "en": "Focus on primary objectives to advance."
-      }
+      { "pt-BR": "O Marco da Colônia (Porto Albor) fica na praia, a oeste. Para evoluí-lo, escolha o Centro dele e use a evolução do Centro; o Paço continua no interior.", "en": "The Colony Outpost (Port Albor) stands on the beach, to the west. To upgrade it, select its Hall and use the Hall upgrade; the Palace stays inland." },
+      { "pt-BR": "Dica: as levas de terra saem do interior e miram as minas de ouro. Mantenha a tropa entre as minas e o Marco.", "en": "Tip: the land waves come from the interior and aim at the gold mines. Keep your troops between the mines and the Outpost." },
+      { "pt-BR": "Dica: a esquadra de cerco nasce no mar ao sul e vai à enseada dos reforços. Fragatas do Estaleiro (na costa, perto da base) a encontram antes do desembarque.", "en": "Tip: the siege fleet is born at sea to the south and heads for the reinforcement bay. Frigates from the Shipyard (on the coast, near the base) meet it before the landing." },
+      { "pt-BR": "O Capitão Brann é um HERÓI: tem mana e três habilidades (Z, X, C) e só existe um. Se ele morrer, a missão está perdida.", "en": "Captain Brann is a HERO: he has mana and three abilities (Z, X, C), and there is only one of him. If he dies the mission is lost." }
     ]
   },
-  "mapId": "vales-2v2",
+  "mapId": "camp-11-estepe-do-vento",
   "seed": 9187,
   "players": [
-    {
-      "id": 0,
-      "name": {
-        "pt-BR": "Liga de Aurelan",
-        "en": "Aurelan League"
-      },
-      "factionId": "human",
-      "team": 0,
-      "color": "#2563eb",
-      "isLocal": true,
-      "startSlot": 0
-    },
-    {
-      "id": 1,
-      "name": {
-        "pt-BR": "Clãs do Cinzal",
-        "en": "Cinzal Clans"
-      },
-      "factionId": "orc",
-      "team": 1,
-      "color": "#dc2626",
-      "isAI": true,
-      "startSlot": 1
-    }
+    { "id": 0, "name": { "pt-BR": "Liga de Aurelan", "en": "Aurelan League" }, "factionId": "human", "team": 0, "color": "#2563eb", "isLocal": true, "startSlot": 0 },
+    { "id": 1, "name": { "pt-BR": "Clãs do Cinzal", "en": "Cinzal Clans" }, "factionId": "orc", "team": 1, "color": "#dc2626", "isAI": true, "difficulty": "easy", "startSlot": 1 }
   ],
-  "startingResources": {
-    "wood": 400,
-    "gold": 400,
-    "stone": 150
-  },
+  "startingResources": { "wood": 600, "gold": 900, "stone": 300 },
+  "vars": { "fin_clock": 0 },
+  "autoVictory": false,
   "setup": [
-    {
-      "type": "tag",
-      "select": {
-        "buildingType": "great_hall"
-      },
-      "tag": "enemy_base"
-    }
+    { "type": "spawn", "owner": "player", "unitType": "hero_brann", "count": 1, "anchor": "playerStart", "dx": 0, "dz": 13, "tag": "brann" },
+    { "type": "spawn", "owner": "player", "unitType": "hero_oren", "count": 1, "anchor": "colonyMark", "dx": 0, "dz": 8, "tag": "oren" },
+    { "type": "spawnBuilding", "owner": "player", "buildingType": "castle", "anchor": "colonyMark", "tag": "colony", "facing": 0 },
+    { "type": "tag", "select": { "buildingType": "great_hall" }, "tag": "enemy_base" },
+    { "type": "spawn", "owner": "neutral", "unitType": "villager", "count": 3, "anchor": "dissidentClan", "spread": 2.2, "tag": "dissidents", "markColor": "#22d3ee", "displayName": { "pt-BR": "Dissidente", "en": "Dissident" } },
+    { "type": "spawn", "owner": "bandits", "unitType": "bandit", "count": 4, "anchor": "dissidentClan", "spread": 2.5, "tag": "clan_guard", "guard": { "r": 9 } },
+    { "type": "spawnLandmark", "kind": "ruins", "anchor": "dissidentClan", "tag": "ruins", "label": { "pt-BR": "Acampamento de Hurgan", "en": "Hurgan's Camp" } }
   ],
   "objectives": [
-    {
-      "id": "primary-main",
-      "type": "destroy",
-      "priority": "primary",
-      "select": {
-        "tag": "enemy_base"
-      },
-      "title": {
-        "pt-BR": "Comandar as tropas com Marechal Dorian e quebrar o cerco",
-        "en": "Command troops with Marshal Dorian and break the siege"
-      }
-    }
+    { "id": "p-colony", "type": "flag", "priority": "primary",
+      "condition": { "type": "count", "select": { "tag": "colony", "owner": "player", "minTier": 2 }, "op": ">=", "value": 1 },
+      "title": { "pt-BR": "Evoluir o Marco da Colônia a Fortaleza (nível 2)", "en": "Upgrade the Colony Outpost to a Fortress (level 2)" },
+      "description": { "pt-BR": "Use a evolução do Centro de Porto Albor (o Marco na praia). O Paço do interior não conta.", "en": "Use the Hall upgrade on the Port Albor Outpost (the beach Hall). The inland Palace does not count." } },
+    { "id": "p-hold", "type": "survive", "priority": "primary", "seconds": 720,
+      "title": { "pt-BR": "Resistir a 3 incursões por 12 minutos", "en": "Hold out against 3 raids for 12 minutes" },
+      "description": { "pt-BR": "Incursões aos 4, 7 e 10 minutos. Se o Marco cair, a colônia cai junto.", "en": "Raids at minutes 4, 7 and 10. If the Outpost falls, the colony falls with it." } },
+    { "id": "p-fleet", "type": "destroy", "priority": "primary", "select": { "tag": "siege_fleet" }, "count": 8,
+      "title": { "pt-BR": "Afundar as 8 galés da esquadra de cerco", "en": "Sink the siege fleet's 8 galleys" },
+      "description": { "pt-BR": "A esquadra de Skarn sai do mar ao sul em duas levas (aos 8 e aos 12 minutos) rumo à enseada dos reforços.", "en": "Skarn's fleet leaves the sea to the south in two waves (at 8 and 12 minutes), bound for the reinforcement bay." },
+      "marker": { "area": { "anchor": "reinforceSea", "r": 30 }, "style": "goal", "seconds": 240 } },
+    { "id": "s-clan", "type": "rescue", "priority": "secondary", "tag": "dissidents", "count": 3,
+      "title": { "pt-BR": "Converter o clã dissidente de Hurgan", "en": "Win over Hurgan's dissident clan" },
+      "description": { "pt-BR": "Os guardas bandidos precisam cair antes; depois os dissidentes juram a bandeira da Liga.", "en": "The bandit guards must fall first; then the dissidents swear to the League's banner." } },
+    { "id": "s-stable", "type": "build", "priority": "secondary", "buildingType": "stable", "count": 1,
+      "title": { "pt-BR": "Erguer um Estábulo na colônia", "en": "Raise a Stable in the colony" } },
+    { "id": "s-aviary", "type": "build", "priority": "secondary", "buildingType": "aviary", "count": 1,
+      "title": { "pt-BR": "Erguer um Aviário na colônia", "en": "Raise an Aviary in the colony" } },
+    { "id": "h-hurgan", "type": "flag", "priority": "hidden",
+      "condition": { "type": "area", "owner": "player", "area": { "anchor": "dissidentClan", "r": 14 } },
+      "title": { "pt-BR": "Ver o acampamento de Hurgan", "en": "See Hurgan's camp" } }
+  ],
+  "triggers": [
+    { "id": "intro", "when": { "type": "time", "at": 0 },
+      "actions": [
+        { "type": "music", "id": "on" },
+        { "type": "reveal", "anchor": "colonyMark", "radius": 30, "ttl": 40 },
+        { "type": "cutscene", "id": "porto-albor", "duration": 34, "skippable": true,
+          "steps": [
+            { "at": 0, "anchor": "playerStart", "zoom": 1.15, "dialog": { "speaker": { "pt-BR": "Capitão Brann", "en": "Captain Brann" }, "portrait": "⚔️", "text": { "pt-BR": "Porto Albor. A praia que tomamos está cercada. Se o Marco cair, a colônia cai.", "en": "Port Albor. The beach we took is surrounded. If the Outpost falls, the colony falls." }, "duration": 8 } },
+            { "at": 9, "anchor": "colonyMark", "zoom": 1.1, "dialog": { "speaker": { "pt-BR": "Mestre Oren", "en": "Master Oren" }, "portrait": "🔮", "text": { "pt-BR": "O Marco aguenta se for evoluído. Doze minutos, e a segunda onda chega com Dorian.", "en": "The Outpost holds if it is upgraded. Twelve minutes, and the second wave arrives with Dorian." }, "duration": 8 } },
+            { "at": 18, "anchor": "enemyStart", "zoom": 1.05, "dialog": { "speaker": { "pt-BR": "Skarn", "en": "Skarn" }, "portrait": "🪓", "text": { "pt-BR": "Essa praia é nossa. Vieram de barco? Vão morrer de barco.", "en": "This beach is ours. You came by boat? You will die by boat." }, "duration": 8 } },
+            { "at": 27, "anchor": "landingZone", "zoom": 1.15, "dialog": { "speaker": { "pt-BR": "Capitão Brann", "en": "Captain Brann" }, "portrait": "⚔️", "text": { "pt-BR": "A barcaça de reforço já está na enseada. Mantenham a praia.", "en": "The reinforcement barge is already in the bay. Hold the beach." }, "duration": 7 } }
+          ] }
+      ] },
+    { "id": "landing-1", "when": { "type": "time", "at": 0 },
+      "actions": [
+        { "type": "spawnLanding", "owner": "player", "anchor": "reinforceSea", "unloadAt": { "anchor": "landingZone" }, "bargeTag": "barge_1", "tag": "reinf_1",
+          "units": [{ "type": "knight", "count": 3 }, { "type": "archer", "count": 3 }] },
+        { "type": "message", "text": { "pt-BR": "Barcaça da Liga: 6 tropas desembarcadas na praia de Porto Albor.", "en": "League barge: 6 troops landed on the Port Albor beach." } }
+      ] },
+    { "id": "full-tree", "when": { "type": "time", "at": 0 },
+      "actions": [
+        { "type": "setTier", "owner": "player", "tier": 3, "exceptTag": "colony" },
+        { "type": "message", "text": { "pt-BR": "Paço no nível 3: Torre Arcana, Aviário, Estaleiro e Torres liberados. O Marco da Colônia segue no nível 1: evolua-o.", "en": "Palace at level 3: Arcane Tower, Aviary, Shipyard and Towers unlocked. The Colony Outpost stays at level 1: upgrade it." } }
+      ] },
+    { "id": "raid-1", "when": { "type": "time", "at": 240 },
+      "actions": [
+        { "type": "spawn", "owner": 1, "units": [{ "type": "grunt", "count": 4 }, { "type": "axethrower", "count": 2 }], "anchor": "raid1", "spread": 3, "order": { "kind": "attackMove", "anchor": "expansion1" } },
+        { "type": "message", "text": { "pt-BR": "Primeira incursão: Talhadores e Lanceiros-Machado atacam a mina de ouro do interior.", "en": "First raid: Grunts and Axe Throwers hit the inland gold mine." } }
+      ] },
+    { "id": "landing-2", "when": { "type": "time", "at": 240 },
+      "actions": [
+        { "type": "spawnLanding", "owner": "player", "anchor": "reinforceSea", "unloadAt": { "anchor": "landingZone" }, "bargeTag": "barge_2", "tag": "reinf_2",
+          "units": [{ "type": "knight", "count": 3 }, { "type": "archer", "count": 3 }] },
+        { "type": "message", "text": { "pt-BR": "Segunda barcaça de reforço: 6 tropas na praia.", "en": "Second reinforcement barge: 6 troops on the beach." } }
+      ] },
+    { "id": "raid-2", "when": { "type": "time", "at": 420 },
+      "actions": [
+        { "type": "spawn", "owner": 1, "units": [{ "type": "ogre", "count": 1 }, { "type": "grunt", "count": 4 }, { "type": "axethrower", "count": 2 }], "anchor": "raid2", "spread": 3, "order": { "kind": "attackMove", "anchor": "colonyMark" } },
+        { "type": "message", "text": { "pt-BR": "Segunda incursão: um Ogro lidera a tropa contra o Marco.", "en": "Second raid: an Ogre leads the troops against the Outpost." } }
+      ] },
+    { "id": "fleet-1", "when": { "type": "time", "at": 480 },
+      "actions": [
+        { "type": "spawn", "owner": 1, "units": [{ "type": "war_galley", "count": 4 }], "anchor": "siegeFleetStart", "spread": 4, "tag": "siege_fleet", "order": { "kind": "attackMove", "anchor": "reinforceSea" } },
+        { "type": "message", "text": { "pt-BR": "Esquadra de cerco: 4 galés saem do mar ao sul, rumo à enseada dos reforços.", "en": "Siege fleet: 4 galleys leave the sea to the south, bound for the reinforcement bay." } }
+      ] },
+    { "id": "landing-3", "when": { "type": "time", "at": 480 },
+      "actions": [
+        { "type": "spawnLanding", "owner": "player", "anchor": "reinforceSea", "unloadAt": { "anchor": "landingZone" }, "bargeTag": "barge_3", "tag": "dorian_wave",
+          "units": [{ "type": "hero_dorian", "count": 1 }, { "type": "knight", "count": 3 }, { "type": "archer", "count": 2 }] },
+        { "type": "message", "text": { "pt-BR": "Segunda onda: o Marechal Dorian desembarca com 5 tropas. Ele é jogável a partir daqui.", "en": "Second wave: Marshal Dorian lands with 5 troops. He is playable from here on." } }
+      ] },
+    { "id": "raid-3", "when": { "type": "time", "at": 600 },
+      "actions": [
+        { "type": "spawn", "owner": 1, "unitType": "hero_skarn", "count": 1, "anchor": "raid3", "dx": 0, "dz": -4, "tag": "skarn", "displayName": { "pt-BR": "Skarn", "en": "Skarn" }, "markColor": "#f97316", "order": { "kind": "attackMove", "anchor": "colonyMark" } },
+        { "type": "spawn", "owner": 1, "units": [{ "type": "catapult", "count": 1 }, { "type": "grunt", "count": 6 }, { "type": "ogre", "count": 1 }], "anchor": "raid3", "spread": 3, "tag": "skarn_wave", "order": { "kind": "attackMove", "anchor": "colonyMark" } },
+        { "type": "dialog", "speaker": { "pt-BR": "Skarn", "en": "Skarn" }, "portrait": "🪓", "text": { "pt-BR": "Terceira incursão: eu mesmo vou tomar o Marco.", "en": "Third raid: I will take the Outpost myself." }, "duration": 7 }
+      ] },
+    { "id": "fleet-2", "when": { "type": "time", "at": 720 },
+      "actions": [
+        { "type": "spawn", "owner": 1, "units": [{ "type": "war_galley", "count": 4 }], "anchor": "siegeFleetStart2", "spread": 4, "tag": "siege_fleet", "order": { "kind": "attackMove", "anchor": "reinforceSea" } },
+        { "type": "spawnLanding", "owner": "player", "anchor": "reinforceSea", "unloadAt": { "anchor": "landingZone" }, "bargeTag": "barge_4", "tag": "reinf_4",
+          "units": [{ "type": "knight", "count": 3 }, { "type": "archer", "count": 3 }] },
+        { "type": "message", "text": { "pt-BR": "Segunda leva da esquadra: mais 4 galés. Afundem-nas antes da enseada. Quarta barcaça de reforço a caminho.", "en": "Second fleet wave: 4 more galleys. Sink them before the bay. Fourth reinforcement barge on its way." } }
+      ] },
+    { "id": "clan-free", "when": { "type": "dead", "select": { "tag": "clan_guard" }, "count": 4 },
+      "actions": [
+        { "type": "transfer", "select": { "tag": "dissidents" }, "to": "player" },
+        { "type": "sound", "id": "build" },
+        { "type": "dialog", "speaker": { "pt-BR": "Mestre Oren", "en": "Master Oren" }, "portrait": "🔮", "text": { "pt-BR": "Os dissidentes de Hurgan juraram a bandeira da Liga. Três braços a mais para a colônia.", "en": "Hurgan's dissidents swore to the League's banner. Three more arms for the colony." }, "duration": 7 }
+      ] },
+    { "id": "fleet-down", "when": { "type": "objective", "id": "p-fleet", "status": "completed" },
+      "actions": [
+        { "type": "sound", "id": "alarm" },
+        { "type": "message", "text": { "pt-BR": "A esquadra de cerco afundou. O mar da enseada é da Liga.", "en": "The siege fleet is sunk. The bay's sea belongs to the League." } }
+      ] },
+    { "id": "colony-up", "when": { "type": "objective", "id": "p-colony", "status": "completed" },
+      "actions": [
+        { "type": "sound", "id": "build" },
+        { "type": "message", "text": { "pt-BR": "Porto Albor é uma Fortaleza. Os reforços agora entram por uma colônia de nível 2.", "en": "Port Albor is a Fortress. Reinforcements now enter through a level 2 colony." } }
+      ] },
+    { "id": "all-done", "when": { "all": [
+        { "type": "objective", "id": "p-colony", "status": "completed" },
+        { "type": "objective", "id": "p-hold", "status": "completed" },
+        { "type": "objective", "id": "p-fleet", "status": "completed" }
+      ] },
+      "actions": [
+        { "type": "sound", "id": "victory" },
+        { "type": "cutscene", "id": "finale", "duration": 12, "skippable": true,
+          "steps": [
+            { "at": 0, "anchor": "colonyMark", "zoom": 1.1, "dialog": { "speaker": { "pt-BR": "Capitão Brann", "en": "Captain Brann" }, "portrait": "⚔️", "text": { "pt-BR": "Porto Albor aguentou. Skarn perdeu a esquadra e a praia.", "en": "Port Albor held. Skarn lost the fleet and the beach." }, "duration": 6 } },
+            { "at": 6, "anchor": "landingZone", "zoom": 1.15, "dialog": { "speaker": { "pt-BR": "Marechal Dorian", "en": "Marshal Dorian" }, "portrait": "👑", "text": { "pt-BR": "Esta enseada é a porta do Mar Fendido. A Liga fica até o estreito.", "en": "This bay is the door of the Sundered Sea. The League stays until the strait." }, "duration": 6 } }
+          ] }
+      ] },
+    { "id": "finale-clock", "when": { "type": "trigger", "id": "all-done" }, "actions": [ { "type": "incVar", "name": "fin_clock" } ] },
+    { "id": "finale-victory", "when": { "type": "var", "name": "fin_clock", "op": ">=", "value": 1 }, "actions": [ { "type": "victory" } ] },
+    { "id": "palace-fallen", "when": { "type": "count", "select": { "buildingType": "castle", "owner": "player" }, "op": "==", "value": 0 },
+      "actions": [ { "type": "defeat" } ] },
+    { "id": "colony-fallen", "when": { "type": "dead", "select": { "tag": "colony" }, "count": 1 },
+      "actions": [ { "type": "defeat" } ] },
+    { "id": "brann-fallen", "when": { "type": "dead", "select": { "tag": "brann" }, "count": 1 },
+      "actions": [ { "type": "defeat" } ] }
   ]
 }

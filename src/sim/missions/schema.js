@@ -114,7 +114,7 @@ function checkTagRef(c, path, tag) {
 /** Seletor de entidades: `{tag?, owner?, unitType?, buildingType?, role?, kind?, area?, killedBy?}`. */
 function checkSelect(c, path, s, { forDeath = false } = {}) {
   if (!isObj(s)) return c.err(path, 'seletor deve ser um objeto');
-  const known = ['tag', 'owner', 'unitType', 'buildingType', 'role', 'kind', 'area', 'killedBy'];
+  const known = ['tag', 'owner', 'unitType', 'buildingType', 'role', 'kind', 'area', 'killedBy', 'minTier'];
   for (const k of Object.keys(s)) if (!known.includes(k)) c.err(`${path}.${k}`, 'campo desconhecido no seletor');
   if (s.tag !== undefined) checkTagRef(c, `${path}.tag`, s.tag);
   checkOwner(c, `${path}.owner`, s.owner, { optional: true });
@@ -122,6 +122,7 @@ function checkSelect(c, path, s, { forDeath = false } = {}) {
   if (s.unitType !== undefined && !UNITS[s.unitType]) c.err(`${path}.unitType`, `unidade desconhecida "${s.unitType}"`);
   if (s.buildingType !== undefined && !BUILDINGS[s.buildingType]) c.err(`${path}.buildingType`, `construção desconhecida "${s.buildingType}"`);
   if (s.role !== undefined && !isStr(s.role)) c.err(`${path}.role`, 'papel deve ser texto');
+  if (s.minTier !== undefined && !(Number.isInteger(s.minTier) && s.minTier >= 1 && s.minTier <= 3)) c.err(`${path}.minTier`, 'minTier deve ser 1, 2 ou 3');
   if (s.kind !== undefined && !['unit', 'building', 'any'].includes(s.kind)) c.err(`${path}.kind`, 'kind deve ser unit|building|any');
   if (s.area !== undefined) {
     if (forDeath) c.err(`${path}.area`, 'seletor de mortes não aceita área');
@@ -380,6 +381,7 @@ function checkAction(c, path, a, setup = false) {
     case 'setTier': // F8-05b: eleva o Centro do dono ao nível `tier`
       checkOwner(c, `${p}.owner`, a.owner, { optional: true });
       checkNum(c, `${p}.tier`, a.tier, { min: 2, max: 3, int: true });
+      if (a.exceptTag !== undefined) checkTagRef(c, `${p}.exceptTag`, a.exceptTag); // M3-12: poupa os Centros com esta tag (Marco da Colônia)
       break;
     case 'giveResources':
     case 'takeResources': {

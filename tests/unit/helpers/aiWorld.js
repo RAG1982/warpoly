@@ -6,7 +6,7 @@ import { getMap } from '../../../src/data/maps/index.js';
 import { SIM_DT } from '../../../src/sim/constants.js';
 
 /** Mundos reais em Node puro para os testes da IA (F5): GameManager headless, sem mocks de simulação. */
-export function makeGm({ seed = 1, ffa = false, difficulties = [], allAI = true, mapId } = {}) {
+export function makeGm({ seed = 1, ffa = false, difficulties = [], allAI = true, mapId = 'continental-1v1' } = {}) {
   const spec = { seed, headless: true, ffa };
   if (mapId) spec.mapId = mapId;
   const cfg = createMatchConfig(spec);

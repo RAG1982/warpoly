@@ -1,4 +1,5 @@
 import { describe, it, expect } from 'vitest';
+import { getMap } from '../../src/data/maps/index.js';
 import * as THREE from 'three';
 import { GameManager } from '../../src/core/GameManager.js';
 import { Terrain } from '../../src/world/Terrain.js';
@@ -16,7 +17,7 @@ const MIX = ['footman', 'footman', 'footman', 'archer', 'footman', 'knight', 'ba
 
 function makeGm(seed = 9) {
   const scene = new THREE.Scene();
-  const gm = new GameManager(new Terrain(), null, null, createMatchConfig({ seed, headless: true }));
+  const gm = new GameManager(new Terrain(getMap('continental-1v1')), null, null, createMatchConfig({ mapId: 'continental-1v1', seed, headless: true }));
   gm.aiDirectors.forEach(d => d.dispose?.());
   gm.aiDirectors = [];
   gm.aiDirector = null;

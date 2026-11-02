@@ -1,4 +1,5 @@
 import { describe, it, expect } from 'vitest';
+import { getMap } from '../../src/data/maps/index.js';
 import * as THREE from 'three';
 import { EntityViews } from '../../src/render/EntityViews.js';
 import { ModelFactory } from '../../src/entities/ModelFactory.js';
@@ -19,8 +20,8 @@ import { stateChecksum } from '../../src/sim/checksum.js';
 /** spells.test.js — F4-04: magias do Mago/Necromante, canalização, invisibilidade, polimorfia, cadáveres. */
 function makeGm(seed = 11) {
   const scene = new THREE.Scene();
-  const terrain = new Terrain();
-  const gm = new GameManager(terrain, null, null, createMatchConfig({ seed, headless: true }));
+  const terrain = new Terrain(getMap('continental-1v1'));
+  const gm = new GameManager(terrain, null, null, createMatchConfig({ mapId: 'continental-1v1', seed, headless: true }));
   return gm;
 }
 const hqOf = (gm, id) => gm.buildings.find(b => b.ownerId === id && (b.type === 'castle' || b.type === 'great_hall'));

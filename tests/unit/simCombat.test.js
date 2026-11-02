@@ -1,4 +1,5 @@
 import { describe, it, expect } from 'vitest';
+import { getMap } from '../../src/data/maps/index.js';
 import { GameManager } from '../../src/core/GameManager.js';
 import { Terrain } from '../../src/world/Terrain.js';
 import { createMatchConfig } from '../../src/sim/MatchConfig.js';
@@ -13,8 +14,8 @@ import { UNITS } from '../../src/data/units.js';
 /** F10-01 — combate com unidades reais: dano por tipo/armadura, morte, UNIT_DIED, kills, imunidade, área. */
 
 function makeGm(seed = 7) {
-  const cfg = createMatchConfig({ seed, headless: true });
-  const gm = new GameManager(new Terrain(), null, null, cfg);
+  const cfg = createMatchConfig({ mapId: 'continental-1v1', seed, headless: true });
+  const gm = new GameManager(new Terrain(getMap('continental-1v1')), null, null, cfg);
   gm.aiDirectors.forEach(d => d.dispose?.());
   gm.aiDirectors = [];
   gm.aiDirector = null;

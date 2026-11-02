@@ -45,6 +45,6 @@
     { "id": "alliance-07-traicao-presa-negra", "requires": ["alliance-06-ilhas-de-brasa"], "carryOver": {"resources": {"gold": 0.25, "wood": 0.25, "stone": 0.25}, "max": 300},
       "unlocks": { "units": ["mage", "templar", "glider", "gryphon_rider"], "buildings": ["arcane_tower", "temple", "aviary"], "research": ["cavalry_class", "spell_fireball", "spell_slow", "spell_heal", "spell_exorcism", "melee_weapons@2", "melee_armor@2", "ranged_ammo@2"], "heroes": ["hero_oren"] } },
     { "id": "alliance-08-queda-do-cinzal", "requires": ["alliance-07-traicao-presa-negra"], "carryOver": {"resources": {"gold": 0.25, "wood": 0.25, "stone": 0.25}, "max": 300},
-      "unlocks": { "units": ["ranger"], "research": ["ranged_class", "ranger_longbow", "ranger_sight", "ranger_marksman", "spell_flameshield", "spell_invisibility", "spell_polymorph", "spell_blizzard", "spell_holy_vision", "siege_damage@2", "naval_cannons@2", "naval_hulls@2"] } }
+      "unlocks": { "units": ["ranger"], "research": ["ranged_class", "ranger_longbow", "ranger_sight", "ranger_marksman", "spell_flameshield", "spell_invisibility", "spell_polymorph", "spell_blizzard", "spell_holy_vision", "siege_damage@2", "naval_cannons@2", "naval_hulls@2", "naval_range"] } }
   ]
 }

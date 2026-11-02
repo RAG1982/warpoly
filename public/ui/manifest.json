@@ -171,6 +171,7 @@
   "research_cavalry_class_orc": "unit_ogre_mage",
   "research_ranged_class": "unit_ranger",
   "research_ranged_class_orc": "unit_berserker",
+  "research_naval_range": "research_naval_cannons",
   "research_spell_ash_cloud": "ability_ash_cloud",
   "research_spell_blizzard": "ability_blizzard",
   "research_spell_bloodlust": "ability_bloodlust",

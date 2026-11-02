@@ -40,7 +40,7 @@ const UNLOCKS = {
     U(['cavalier', 'ballista', 'sapper', 'ranger'], ['stable', 'workshop', 'wall_human'],
       ['siege_damage', 'woodcutting', 'ranged_class', 'melee_weapons@2', 'melee_armor@2', 'ranged_ammo@2', 'ranger_longbow'], ['hero_brann']),
     U(['glider', 'tanker', 'barge', 'frigate', 'dreadnought'], ['shipyard', 'refinery', 'foundry', 'oil_platform'],
-      ['naval_cannons', 'naval_hulls', 'naval_cannons@2', 'naval_hulls@2', 'siege_damage@2']),
+      ['naval_cannons', 'naval_hulls', 'naval_cannons@2', 'naval_hulls@2', 'naval_range', 'siege_damage@2']),
     U(['mage', 'templar', 'gryphon_rider'], ['arcane_tower', 'temple', 'aviary'], ['cavalry_class', 'spell_fireball', 'spell_slow', 'spell_heal', 'spell_exorcism']),
     U([], [], ['ranger_sight', 'ranger_marksman', 'spell_flameshield', 'spell_invisibility', 'spell_polymorph', 'spell_blizzard', 'spell_holy_vision']),
     U(), U(), U(), U([], [], [], ['hero_oren']), U([], [], [], ['hero_dorian']), U()
@@ -51,7 +51,7 @@ const UNLOCKS = {
     U(['ogre', 'catapult', 'arsonist', 'berserker', 'war_balloon'], ['ogre_den', 'orc_workshop', 'wall_orc'],
       ['siege_damage', 'woodcutting', 'ranged_class', 'melee_weapons@2', 'melee_armor@2', 'ranged_ammo@2', 'berserker_range'], ['hero_drogath']),
     U(['tanker', 'barge', 'war_galley', 'iron_leviathan'], ['ship_dock', 'naval_forge', 'ash_cauldron', 'oil_platform'],
-      ['naval_cannons', 'naval_hulls', 'naval_cannons@2', 'naval_hulls@2', 'siege_damage@2']),
+      ['naval_cannons', 'naval_hulls', 'naval_cannons@2', 'naval_hulls@2', 'naval_range', 'siege_damage@2']),
     U(['necromancer', 'war_serpent', 'ogre_mage'], ['ash_sanctum', 'storm_altar', 'serpent_nest'], ['cavalry_class', 'spell_death_touch', 'spell_raise_dead', 'spell_eye', 'spell_bloodlust']),
     U([], [], ['berserker_regen', 'berserker_fury', 'spell_haste', 'spell_unholy_armor', 'spell_ash_cloud', 'spell_whirlwind', 'spell_runes']),
     U(), U(), U(), U([], [], [], ['hero_vozgul']), U([], [], [], ['hero_skarn']), U()

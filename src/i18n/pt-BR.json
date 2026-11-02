@@ -780,6 +780,8 @@
   "research.naval_cannons.orc": "Bocas de Fogo",
   "research.naval_hulls.human": "Cascos Blindados",
   "research.naval_hulls.orc": "Cascos de Ferro",
+  "research.naval_range.human": "Mira Telemétrica",
+  "research.naval_range.orc": "Olho de Corvo",
   "hud.section.research.foundry": "PESQUISAS NAVAIS:",
   "sim.bargeFull": "Barcaça cheia",
   "sim.bargeFar": "Barcaça longe da margem",

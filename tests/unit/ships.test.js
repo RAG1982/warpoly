@@ -19,7 +19,7 @@ describe('dados dos navios (F4-07b)', () => {
     for (const [t, f] of [['frigate', 'human'], ['war_galley', 'orc']]) {
       const u = UNITS[t];
       expect(u.faction).toBe(f);
-      expect(u).toMatchObject({ hp: 280, speed: 5.5, armor: 3, attackRange: 12, attackCooldown: 1.3, layer: 'naval', canHitAir: true, canHitGround: true, trainTime: 16 });
+      expect(u).toMatchObject({ hp: 280, speed: 5.5, armor: 3, attackRange: 15.6, attackCooldown: 1.3, layer: 'naval', canHitAir: true, canHitGround: true, trainTime: 16 });
       expect(u.damage).toEqual({ basic: 0, piercing: 26, type: 'piercing' });
       expect(u.cost).toEqual({ gold: 200, wood: 100, stone: 0, oil: 50 });
       expect(u.requires).toEqual([{ hq: 2 }]);
@@ -37,7 +37,7 @@ describe('dados dos navios (F4-07b)', () => {
     for (const [t, f, forge] of [['dreadnought', 'human', 'foundry'], ['iron_leviathan', 'orc', 'naval_forge']]) {
       const u = UNITS[t];
       expect(u.faction).toBe(f);
-      expect(u).toMatchObject({ hp: 520, speed: 3.6, armor: 6, attackRange: 22, minAttackRange: 6, attackCooldown: 3.4, splashRadius: 1.8, trainTime: 24, canHitAir: false });
+      expect(u).toMatchObject({ hp: 520, speed: 3.6, armor: 6, attackRange: 28.6, minAttackRange: 6, attackCooldown: 3.4, splashRadius: 1.8, trainTime: 24, canHitAir: false });
       expect(u.damage).toEqual({ basic: 90, piercing: 0, type: 'siege' });
       expect(u.cost).toEqual({ gold: 300, wood: 200, stone: 0, oil: 120 });
       expect(u.requires).toEqual([{ hq: 3 }, forge]);
@@ -63,6 +63,53 @@ describe('dados dos navios (F4-07b)', () => {
     }
     expect(RESEARCH.naval_cannons.levels[0].bonus.piercing).toBe(8);
     expect(RESEARCH.naval_hulls.levels[0].bonus.armor).toBe(3);
+  });
+});
+
+describe('NAVAL-RANGE: alcance dos navios de ataque e pesquisa Mira Telemétrica', () => {
+  it('alcance base +30 % nos 4 navios de ataque (fragata 12 → 15,6; couraçado 22 → 28,6; orcs herdam)', () => {
+    expect(UNITS.frigate.attackRange).toBeCloseTo(12 * 1.3, 6);
+    expect(UNITS.war_galley.attackRange).toBeCloseTo(12 * 1.3, 6);
+    expect(UNITS.dreadnought.attackRange).toBeCloseTo(22 * 1.3, 6);
+    expect(UNITS.iron_leviathan.attackRange).toBeCloseTo(22 * 1.3, 6);
+    // enxerga e persegue pelo menos até o alcance novo
+    for (const t of ['frigate', 'war_galley', 'dreadnought', 'iron_leviathan']) {
+      expect(UNITS[t].visionRadius).toBeGreaterThanOrEqual(UNITS[t].attackRange);
+      expect(UNITS[t].aggroRange).toBeGreaterThanOrEqual(UNITS[t].attackRange);
+    }
+  });
+
+  it('pesquisa naval_range: 1 nível, Fundição, +20 % do alcance BASE, navios de ataque', () => {
+    expect(RESEARCH.naval_range).toMatchObject({ building: 'foundry', appliesTo: ['frigate', 'war_galley', 'dreadnought', 'iron_leviathan'] });
+    expect(RESEARCH.naval_range.levels).toHaveLength(1);
+    expect(RESEARCH.naval_range.levels[0]).toMatchObject({ cost: { gold: 400, wood: 250, oil: 150 }, time: 50, requires: [{ hq: 3 }], bonus: { rangePct: 0.2 } });
+  });
+
+  it('naval_range aplica +20 % do alcance base nos navios vivos e nos novos; não afeta unidades terrestres', () => {
+    const gm = makeNavalGm();
+    hqOf(gm, 0).tier = 3;
+    Object.assign(gm.getPlayer(0).resources, { gold: 9000, wood: 9000, stone: 9000, oil: 9000 });
+    build(gm, 'barracks', 0, -30, 6);
+    const spots = coastSpots(gm, 'shipyard', -1, 2, 10);
+    build(gm, 'shipyard', 0, spots[0].x, spots[0].z);
+    const foundry = build(gm, 'foundry', 0, spots[1].x, spots[1].z);
+    const f = ship(gm, 'frigate', 0, -2, -20);
+    const d = ship(gm, 'dreadnought', 0, -2, -30);
+    const knight = gm.spawnUnit('knight', -30, 10, 0);
+    const kBase = knight.attackRange;
+    expect(foundry.startResearch('naval_range', gm)).toBe(true);
+    run(gm, RESEARCH.naval_range.levels[0].time + 1);
+    expect(gm.getResearchLevel('naval_range', 0)).toBe(1);
+    // vivos: +20 % do alcance base da definição (não do já bonificado)
+    expect(f.attackRange).toBeCloseTo(12 * 1.3 * 1.2, 6);
+    expect(d.attackRange).toBeCloseTo(22 * 1.3 * 1.2, 6);
+    // novos (treinados depois da pesquisa)
+    const f2 = ship(gm, 'frigate', 0, -2, -26);
+    const d2 = ship(gm, 'dreadnought', 0, -2, -36);
+    expect(f2.attackRange).toBeCloseTo(12 * 1.3 * 1.2, 6);
+    expect(d2.attackRange).toBeCloseTo(22 * 1.3 * 1.2, 6);
+    // terrestre intocado
+    expect(knight.attackRange).toBe(kBase);
   });
 });
 
@@ -196,7 +243,7 @@ describe('regras de alvo e combate naval (F4-07b)', () => {
   it('navio só mira terra a até SHORE_REACH da margem (tropa no interior é ignorada)', () => {
     const gm = makeNavalGm();
     const f = still(ship(gm, 'frigate', 0, -6, -20));
-    const inland = still(gm.spawnUnit('grunt', -22, -20, 1)); // ~16 de distância e longe da água
+    const inland = still(gm.spawnUnit('grunt', -26, -20, 1)); // ~20 de distância: além do alcance novo (15,6) + SHORE_REACH (2)
     const ordered = f._shoreOk(inland);
     expect(ordered).toBe(false);
     const shore = still(gm.spawnUnit('grunt', -17, -22, 1));

@@ -14,7 +14,7 @@
 - **Mundo**: o planeta **Ondara**. Dois continentes isolados por milhões de anos pela **Fenda** (hoje o **Mar Fendido**): **Velmara** (**oeste**; montanhas nevadas, florestas, savanas; exuberante; casa dos **humanos**, o Reino de Aurelan e a **Liga de Aurelan**) e **Cinzara** (**leste**; desertos, pântanos, estepes; casa dos **orcs**, os Clãs do Cinzal e a **União dos Clãs**). Entre eles, **Os Estilhaços**: oito ilhas de terrenos diferentes (pedregosa, vulcânica, pantanosa, gelada, deserta, florestal, recifes de petróleo e o ponto de encontro).
 - **Estrutura**: **duas campanhas espelhadas** (principal: "A Guerra do Mar Fendido", facções `human` e `orc`, 12 missões cada) sobre **os mesmos 12 "palcos"** (oito ilhas compartilhadas, vistas de lados opostos; quatro palcos continentais diferentes por facção). Cada lado conta a guerra do seu ponto de vista e **vence na sua história**; o final de cada uma é uma **fortaleza no continente do adversário que bloqueia o acesso às ilhas**, com **gancho aberto** para uma campanha futura.
 - **Mapa-múndi**: só **ilustrativo** (dois continentes e ilhas entre eles). **Não é jogável** nem navegável; as missões acontecem em mapas próprios que, se ficar interessante, podem ser **marcados** no mapa-múndi (§7.2).
-- **Liberação**: tutorial **progressivo nas missões 1–6**; **a árvore completa (15 unidades, 16 construções, 27 fichas de pesquisa por facção) está liberada a partir da missão 6** ("Prova de Fogo"); 7–12 sem restrição. **Sem "personagem novo por missão"**.
+- **Liberação**: tutorial **progressivo nas missões 1–6**; **a árvore completa (15 unidades, 16 construções, 28 fichas de pesquisa por facção) está liberada a partir da missão 6** ("Prova de Fogo"); 7–12 sem restrição. **Sem "personagem novo por missão"**.
 - **Heróis (6 no total)**: por facção, um **Capitão, um Mago e um Comandante**. Liga de Aurelan: **Brann** (m3), **Oren** (m10), **Dorian** (m11). Clãs do Cinzal: **Drogath** (m3), **Vozgul** (m10), **Skarn** (m11). Na m12 os três atuam juntos. Só 3 tipos novos em `units.js` (Dorian, Vozgul, Skarn) e 14 habilidades novas (efeitos existentes; uma extensão mínima de código). Detalhes, histórias e fichas de aparência em [`MUNDO-HEROIS.md`](MUNDO-HEROIS.md).
 - **Final**: a m12 é construir e defender uma **fortaleza** (o Centro evoluído ao nível 3 + torres + muralhas) no continente do adversário e **bloquear as rotas para as ilhas**. O chefe cai; um **sinal no horizonte** abre a continuação (expulsão ou conquista).
 - **Migração (decisão 7)**: a campanha atual da Liga de Aurelan (8 missões, `src/data/campaigns/alliance/`, id `alliance`) e o briefing dos Clãs do Cinzal (F8-06) **ficam intactos** numa entrada separada, rotulada **"Campanha Clássica (beta)"**; a campanha nova de 12 missões é a **principal**. O seletor de campanha tem duas entradas, o progresso é salvo **por campanha** e **nada da beta é apagado** (§7). Fauna: **javalis** no lugar de porcos (troca visual e de textos, §1.4).
@@ -377,7 +377,7 @@ Formato: **P** primário · **S** secundário · **O** oculto · **IA** inimigos
 | 1 | `villager`, `knight`, `archer` | `cottage`, `lumber_camp`, `farm`, `barracks` | — | — | 1 |
 | 2 | — | `forge`, `watchtower` | `melee_weapons`, `ranged_ammo`, `melee_armor` | — | 1 |
 | 3 | `cavalier`, `ballista`, `sapper`, `ranger` | `stable`, `workshop`, `wall_human` | `siege_damage`, `woodcutting`, `ranged_class`, `melee_weapons@2`, `melee_armor@2`, `ranged_ammo@2`, `ranger_longbow` | `hero_brann` (Capitão) | 2 |
-| 4 | `glider`, `tanker`, `barge`, `frigate`, `dreadnought` | `shipyard`, `refinery`, `foundry`, `oil_platform` | `naval_cannons`, `naval_hulls`, `naval_cannons@2`, `naval_hulls@2`, `siege_damage@2` | — | 3 |
+| 4 | `glider`, `tanker`, `barge`, `frigate`, `dreadnought` | `shipyard`, `refinery`, `foundry`, `oil_platform` | `naval_cannons`, `naval_hulls`, `naval_cannons@2`, `naval_hulls@2`, `naval_range`, `siege_damage@2` | — | 3 |
 | 5 | `mage`, `templar`, `gryphon_rider` | `arcane_tower`, `temple`, `aviary` | `cavalry_class`, `spell_fireball`, `spell_slow`, `spell_heal`, `spell_exorcism` | — | 3 |
 | 6 | — | — | `ranger_sight`, `ranger_marksman`, `spell_flameshield`, `spell_invisibility`, `spell_polymorph`, `spell_blizzard`, `spell_holy_vision` (†) | — | 3 |
 | 7–9 | — | — | — | — | 3 |
@@ -385,7 +385,7 @@ Formato: **P** primário · **S** secundário · **O** oculto · **IA** inimigos
 | 11 | — | — | — | `hero_dorian` (Comandante) | 3 |
 | 12 | — | — | — | — (reunião dos três) | 3 |
 
-Totais: 15 unidades (13 + Petroleiro e Barcaça neutros), 16 construções (15 + a Plataforma), 27 fichas de pesquisa.
+Totais: 15 unidades (13 + Petroleiro e Barcaça neutros), 16 construções (15 + a Plataforma), 28 fichas de pesquisa.
 
 ### 4.3 Tabela dos Clãs do Cinzal (`orc`, `factionId: 'orc'`)
 | # | `units` | `buildings` | `research` | `heroes` | Tier |
@@ -393,7 +393,7 @@ Totais: 15 unidades (13 + Petroleiro e Barcaça neutros), 16 construções (15 +
 | 1 | `peon`, `grunt`, `axethrower` | `orc_house`, `orc_lumber_mill`, `pig_farm`, `orc_barracks` | — | — | 1 |
 | 2 | — | `orc_forge`, `orc_watchtower` | `melee_weapons`, `ranged_ammo`, `melee_armor` | — | 1 |
 | 3 | `ogre`, `catapult`, `arsonist`, `berserker`, `war_balloon` | `ogre_den`, `orc_workshop`, `wall_orc` | `siege_damage`, `woodcutting`, `ranged_class`, `melee_weapons@2`, `melee_armor@2`, `ranged_ammo@2`, `berserker_range` | `hero_drogath` (Capitão) | 2 |
-| 4 | `tanker`, `barge`, `war_galley`, `iron_leviathan` | `ship_dock`, `naval_forge`, `ash_cauldron`, `oil_platform` | `naval_cannons`, `naval_hulls`, `naval_cannons@2`, `naval_hulls@2`, `siege_damage@2` | — | 3 |
+| 4 | `tanker`, `barge`, `war_galley`, `iron_leviathan` | `ship_dock`, `naval_forge`, `ash_cauldron`, `oil_platform` | `naval_cannons`, `naval_hulls`, `naval_cannons@2`, `naval_hulls@2`, `naval_range`, `siege_damage@2` | — | 3 |
 | 5 | `necromancer`, `war_serpent`, `ogre_mage` | `ash_sanctum`, `storm_altar`, `serpent_nest` | `cavalry_class`, `spell_death_touch`, `spell_raise_dead`, `spell_eye`, `spell_bloodlust` | — | 3 |
 | 6 | — | — | `berserker_regen`, `berserker_fury`, `spell_haste`, `spell_unholy_armor`, `spell_ash_cloud`, `spell_whirlwind`, `spell_runes` (†) | — | 3 |
 | 7–9 | — | — | — | — | 3 |

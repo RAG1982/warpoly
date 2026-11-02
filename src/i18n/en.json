@@ -780,6 +780,8 @@
   "research.naval_cannons.orc": "Fire Maws",
   "research.naval_hulls.human": "Armored Hulls",
   "research.naval_hulls.orc": "Iron Hulls",
+  "research.naval_range.human": "Telemetry Sights",
+  "research.naval_range.orc": "Crow's Eye",
   "hud.section.research.foundry": "NAVAL RESEARCH:",
   "sim.bargeFull": "Barge is full",
   "sim.bargeFar": "Barge is too far from the shore",

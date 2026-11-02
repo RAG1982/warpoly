@@ -6,7 +6,8 @@
  * (tipos de unidade afetados), name: {human, orc} }.
  *
  * - `bonus`  soma em stats da unidade: basic → damage.basic, piercing → damage.piercing,
- *            armor → armor, range → attackRange, sight → sightBonus (raio de visão).
+ *            armor → armor, range → attackRange, rangePct → attackRange em % do alcance BASE da
+ *            definição da unidade (0.2 = +20%; aplica-se também às unidades já treinadas), sight → sightBonus (raio de visão).
  * - `effect` woodMultiplier (coleta de madeira), regen (PV/s), promote ({archer:'ranger',...}).
  * - `requires` no formato de `src/sim/requirements.js` ({hq:N}, {research:'id', level?}, {role:'workshop'} (F4-02: construção concluída de qualquer tipo com esse `role`), tipo de construção).
  *
@@ -66,6 +67,16 @@ export const RESEARCH = {
     appliesTo: ['frigate', 'war_galley', 'dreadnought', 'iron_leviathan', 'barge', 'tanker'],
     icon: '/icoEscudo.png',
     name: { human: 'Cascos Blindados', orc: 'Cascos de Ferro' }
+  },
+  // Alcance em % do alcance base (+20%) para os navios de ataque; 1 nível, Fundição/Fornalha Naval.
+  naval_range: {
+    building: 'foundry',
+    levels: [
+      { cost: { gold: 400, wood: 250, oil: 150 }, time: 50, bonus: { rangePct: 0.2 }, requires: [{ hq: 3 }] }
+    ],
+    appliesTo: ['frigate', 'war_galley', 'dreadnought', 'iron_leviathan'],
+    icon: '/icoEspada.png',
+    name: { human: 'Mira Telemétrica', orc: 'Olho de Corvo' }
   },
   ranged_ammo: {
     building: 'lumber',
@@ -295,6 +306,7 @@ export function describeLevel(id, level) {
   if (b.piercing) parts.push(`+${b.piercing} dano perfurante`);
   if (b.armor) parts.push(`+${b.armor} armadura`);
   if (b.range) parts.push(`+${b.range} alcance`);
+  if (b.rangePct) parts.push(`+${Math.round(b.rangePct * 100)}% alcance`);
   if (b.sight) parts.push(`+${b.sight} visão`);
   const e = lv.effect || {};
   if (e.woodMultiplier) parts.push(`+${Math.round((e.woodMultiplier - 1) * 100)}% madeira coletada`);

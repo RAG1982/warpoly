@@ -140,6 +140,49 @@ export const CAMPAIGN_PRESETS = freeze({
     options: freeze({ size: 384, grid: 384, continents: 1, continentBiome: 'arid', aridSwamp: false, continentCenter: [0.2, 0], continentDims: [0.4, 0.46], islands: 0, islets: 0, bigIslands: 3, bigIslandAt: [[-0.34, -0.27], [-0.36, 0.04], [-0.3, 0.3]], bigIslandScale: 0.36, bigIslandBiomes: ['arid', 'rocky', 'arid'], gap: 12, bays: 3, peninsulas: 4, roughness: 1.1, lava: false, rivers: 0 }),
     layout: freeze({ bases: [{ entities: [0], where: nearStrait }, { entities: [0], side: 'east' }], minSeparation: 150 }),
     verify: freeze({ landRange: [0.15, 0.7], minRivers: 0 })
+  }),
+  /**
+   * Palco 1 da Horda (M2-07): Praia das Cinzas Vermelhas, a casa dos clãs. Continente árido (dunas, brejo ralo no limite) de 208 u com 4 enseadas e uma
+   * ilha rochosa ao largo (naval leve: pesca/petróleo opcional, sem frota obrigatória). Mesma receita de acampamentos da Baía de Aurelan (saqueadores, Mural da Fenda,
+   * velas brancas), Horda a oeste e o rival a leste; bioma e tileset trocados.
+   */
+  'camp-01-praia-das-cinzas': freeze({
+    id: 'camp-01-praia-das-cinzas', name: 'Praia das Cinzas Vermelhas', uso: 'campanha da Horda, palco 1 (casa dos clãs)', tileset: 'deserto', naval: true, woodTarget: 6300, farOil: 4,
+    options: freeze({ size: 208, grid: 208, continents: 1, continentBiome: 'arid', aridSwamp: false, continentCenter: [0.04, 0], continentDims: [0.44, 0.34], islands: 0, islets: 0, bigIslands: 1, bigIslandAt: [[0.06, -0.4]], bigIslandScale: 0.3, bigIslandBiomes: ['rocky'], scatterIslets: 2, scatterRadius: [2.6, 4], scatterZone: 0.45, bays: 5, peninsulas: 3, roughness: 1.1, mountain: 0.6, lava: false, rivers: 0 }),
+    layout: freeze({ bases: [{ entities: [0], side: 'west' }, { entities: [0], side: 'east' }], minSeparation: 90 }),
+    verify: freeze({ landRange: [0.2, 0.8], minRivers: 0 })
+  }),
+  /**
+   * Palco 10 da Horda (M2-07): Cabo Aurora, o desembarque em Velmara. Mesma geometria do mar da Costa Ferrugem (2 continentes a ~140 u de mar, ilha do meio com poços),
+   * com os papéis trocados: slot 0 = Horda na ilha-continente de Cinzara (leste), slot 1 = Liga na costa verde de Velmara (oeste). Tileset exuberante (a praia
+   * de desembarque e o Marco de Brasa-Alta ficam em terra verde).
+   */
+  'camp-10-cabo-aurora': freeze({
+    id: 'camp-10-cabo-aurora', name: 'Cabo Aurora', uso: 'campanha da Horda, palco 10 (desembarque; naval)', tileset: 'exuberante', naval: true, isolated: true, woodTarget: 6300, farOil: 6,
+    options: freeze({ size: 384, grid: 384, continents: 2, continentDims: [0.15, 0.38], continentSpacing: 0.33, gap: 16, islands: 0, islets: 0, bigIslands: 1, bigIslandAt: [[0, 0.2]], bigIslandScale: 0.5, bigIslandBiomes: ['rocky'], bays: 4, peninsulas: 3, roughness: 1.0, lava: false, aridSwamp: false, rivers: 0 }),
+    layout: freeze({ bases: [{ entities: [1], side: 'east' }, { entities: [0], side: 'west' }], minSeparation: 150 }),
+    verify: freeze({ landRange: [0.12, 0.5], minRivers: 0 })
+  }),
+  /**
+   * Palco 11 da Horda (M2-07): Savana de Âmbar, a colônia Brasa-Alta. Interior de savana (capim alto) de 352 u com costa a oeste; a colônia (slot 0) fica a oeste,
+   * as duas bases da Liga (slots 1 e 2) a sudeste e nordeste. Duas ilhas ao largo (reforço por barcaça e frota de cerco).
+   */
+  'camp-11-savana-de-ambar': freeze({
+    id: 'camp-11-savana-de-ambar', name: 'Savana de Âmbar', uso: 'campanha da Horda, palco 11 (Brasa-Alta sob cerco; naval)', tileset: 'savana', naval: true, farOil: 6,
+    options: freeze({ size: 352, grid: 352, continents: 1, continentBiome: 'steppe', continentCenter: [0.1, 0], continentDims: [0.44, 0.46], islands: 0, islets: 0, bigIslands: 2, bigIslandAt: [[-0.4, 0.3], [-0.38, -0.32]], bigIslandScale: 0.3, bigIslandBiomes: ['lush', 'rocky'], scatterIslets: 3, scatterRadius: [2.8, 4.5], scatterZone: 0.42, bays: 3, peninsulas: 2, roughness: 1.0, lava: false, rivers: 0 }),
+    layout: freeze({ bases: [{ entities: [0], side: 'west' }, { entities: [0], sides: ['east', 'south'] }, { entities: [0], sides: ['east', 'north'] }], minSeparation: 150 }),
+    verify: freeze({ landRange: [0.25, 0.8], minRivers: 0 })
+  }),
+  /**
+   * Palco 12 da Horda (M2-07): ponta leste do Cabo Aurora (cidadela de Brasa-Alta). Mesma geometria do Cabo Ferrugem (reaproveitada com outro tileset): promontório de Velmara (verde) apontando para 3 ilhas a OESTE; o
+   * estreito entre a ponta e a ilha mais próxima é a zona de bloqueio. Slot 0 = Cidadela da Horda (no cabo), slot 1 = Liga (Dorian) a leste (>= 150 u). Crista de falésia
+   * com 2 desfiladeiros entre as bases.
+   */
+  'camp-12-cabo-aurora-leste': freeze({
+    id: 'camp-12-cabo-aurora-leste', name: 'Cabo Aurora, ponta leste', uso: 'campanha da Horda, palco 12 (cidadela e bloqueio; naval)', tileset: 'exuberante', naval: true, woodTarget: 6300, farOil: 6,
+    options: freeze({ size: 384, grid: 384, continents: 1, continentBiome: 'lush', mountain: 0, continentCenter: [0.2, 0], continentDims: [0.4, 0.46], islands: 0, islets: 0, bigIslands: 3, bigIslandAt: [[-0.34, -0.27], [-0.36, 0.04], [-0.3, 0.3]], bigIslandScale: 0.36, bigIslandBiomes: ['lush', 'rocky', 'lush'], gap: 12, bays: 3, peninsulas: 4, roughness: 1.1, lava: false, rivers: 0 }),
+    layout: freeze({ bases: [{ entities: [0], where: nearStrait }, { entities: [0], side: 'east' }], minSeparation: 150 }),
+    verify: freeze({ landRange: [0.15, 0.7], minRivers: 0 })
   })
 });
 
@@ -158,7 +201,11 @@ export const CAMPAIGN_NAMES = freeze({
   'camp-06-a-geada': { pt: 'A Geada', en: 'The Frost' },
   'camp-10-costa-ferrugem': { pt: 'Costa Ferrugem', en: 'Rust Coast' },
   'camp-11-estepe-do-vento': { pt: 'Estepe do Vento', en: 'Wind Steppe' },
-  'camp-12-cabo-ferrugem': { pt: 'Cabo Ferrugem', en: 'Cape Rust' }
+  'camp-12-cabo-ferrugem': { pt: 'Cabo Ferrugem', en: 'Cape Rust' },
+  'camp-01-praia-das-cinzas': { pt: 'Praia das Cinzas Vermelhas', en: 'Red Ash Beach' },
+  'camp-10-cabo-aurora': { pt: 'Cabo Aurora', en: 'Dawn Cape' },
+  'camp-11-savana-de-ambar': { pt: 'Savana de Âmbar', en: 'Amber Savanna' },
+  'camp-12-cabo-aurora-leste': { pt: 'Cabo Aurora, ponta leste', en: 'Dawn Cape, East Point' }
 });
 
 // ---------------------------------------------------------------------------------------------------------------------------
@@ -1529,6 +1576,13 @@ function postEstepe(ctx, extra) {
   S.forEach((s, i) => addGold(ctx, s, `expansion${i + 1}`, extra, { dMin: 20, dMax: 40, target: 28 }));
 }
 
+/** Palco 11 da Horda (M2-07): a receita da Estepe do Vento + minas iniciais das 3 bases a ~32 u (regra do dono) e nomes das bases da Liga. */
+function postSavana(ctx, extra) {
+  postEstepe(ctx, extra);
+  extra.enemy1Start = extra.skarnStart; extra.enemy2Start = extra.hurganStart;
+  moveInitialGold(ctx, ctx.m.startSlots);
+}
+
 // ---- Palco 12: promontório e estreito ----
 const straitCache = new WeakMap();
 let lastStrait = null;
@@ -1570,6 +1624,7 @@ function postCabo(ctx, extra, world, ridge) {
   const { m, s0, s1 } = ctx;
   const { F, gaps, band } = ridge;
   const st = lastStrait;
+  const oilAmt = CAMPAIGN_PRESETS[m.id]?.farOil ? 10000 : 5000; // M2-07: poços 10000 nos mapas da Horda (os da Aliança mantêm 5000 para ficarem reproduzíveis)
   if (!st) throw new Error('campanha: sem estreito');
   const sideOf = (p) => F.side(p.x, p.z);
   extra.bastion = pt(s0);
@@ -1692,10 +1747,10 @@ function postCabo(ctx, extra, world, ridge) {
   const deepSea = (x, z) => ctx.oceanOk(x, z) && ctx.hAt(x, z) <= 0.05 && wetFrac(ctx, x, z, 8) >= 1 && wetFrac(ctx, x, z, 4) >= 1;
   const oilFree = (x, z) => m.resources.filter((q) => q.type === 'oil').every((q) => hyp({ x, z }, q) >= 16);
   const w5 = need(ctx.scan({ step: 1, test: (x, z) => deepSea(x, z) && oilFree(x, z) && hyp({ x, z }, sw) >= 22 && hyp({ x, z }, sw) <= 60, score: (x, z) => Math.abs(hyp({ x, z }, sw) - 36) }), 'o poço de petróleo 5');
-  m.resources.push({ type: 'oil', x: r1(w5.x), z: r1(w5.z), amount: 5000 });
+  m.resources.push({ type: 'oil', x: r1(w5.x), z: r1(w5.z), amount: oilAmt });
   extra.well5 = ptw(w5);
   const w6 = need(ctx.scan({ step: 1, test: (x, z) => deepSea(x, z) && oilFree(x, z) && hyp({ x, z }, w5) >= 18 && hyp({ x, z }, sw) <= 70, score: (x, z) => hyp({ x, z }, w5) }), 'o poço de petróleo 6');
-  m.resources.push({ type: 'oil', x: r1(w6.x), z: r1(w6.z), amount: 5000 });
+  m.resources.push({ type: 'oil', x: r1(w6.x), z: r1(w6.z), amount: oilAmt });
   extra.well6 = ptw(w6);
   const isles = landComponents(ctx.land).filter((c) => !isReached(ctx.land, ctx.seen0, c.cx, c.cz) && !isReached(ctx.land, ctx.seen1, c.cx, c.cz) && c.size >= 25).sort((a, b) => b.size - a.size);
   if (isles.length < 2) throw new Error('campanha: poucas ilhas (Cabo Ferrugem)');
@@ -1714,8 +1769,62 @@ function postCabo(ctx, extra, world, ridge) {
   m.meta = { ...m.meta, ridge: { gaps: gaps.map((g) => g.u), ...CABO_RIDGE } };
 }
 
-const PRE = freeze({ 'camp-03-pedra-mae': prePedra, 'camp-12-cabo-ferrugem': preCabo }); // esculpe o terreno ANTES do contexto de posicionamento (M3-04)
-const POST = freeze({ 'camp-01-baia-de-aurelan': postBaia, 'camp-02-pouso-do-encontro': postPouso, 'camp-03-pedra-mae': postPedra, 'camp-04-baixio-do-breu': postBaixio, 'camp-05-cerne-verde': postCerne, 'camp-06-a-geada': postGeada, 'camp-07-brejo-mudo': postBrejo, 'camp-08-fornalha': postFornalha, 'camp-09-miragem': postMiragem, 'camp-10-costa-ferrugem': postTravessia, 'camp-11-estepe-do-vento': postEstepe, 'camp-12-cabo-ferrugem': postCabo });
+
+// ---------------------------------------------------------------------------------------------------------------------------
+// M2-07: petróleo longe da costa das bases (regra do dono): exige escolta naval
+// ---------------------------------------------------------------------------------------------------------------------------
+/** Distância mínima (u) entre um poço e a costa da terra de qualquer base, e máxima até a costa mais próxima (rota navegável exposta). */
+export const FAR_OIL = freeze({ minShore: 42, maxShore: 120, spacing: 30, amount: 10000 });
+
+/** Pontos de costa (terra alcançável por uma base com água vizinha) de cada slot. */
+function shorePointsOf(ctx) {
+  const pts = [];
+  const seens = ctx.m.startSlots.length > 1 ? [ctx.seen0, ctx.seen1] : [ctx.seen0];
+  seens.forEach((seen, slot) => {
+    const list = [];
+    for (let j = 0; j < ctx.land.rows; j += 2) for (let i = 0; i < ctx.land.cols; i += 2) {
+      const w = ctx.land.toWorld(i, j);
+      if (!isReached(ctx.land, seen, w.x, w.z) || ctx.hAt(w.x, w.z) < 1.95) continue;
+      if ([[5, 0], [-5, 0], [0, 5], [0, -5]].some(([dx, dz]) => ctx.hAt(w.x + dx, w.z + dz) < ctx.m.waterLevel)) list.push(w);
+    }
+    pts.push(list);
+  });
+  return pts;
+}
+
+/**
+ * Troca TODOS os poços do mapa por `n` poços de FAR_OIL.amount em mar aberto a `minShore`..`maxShore` u da costa das bases (alternando as bases),
+ * ou em volta de ilhotas distantes, e devolve as novas posições (também grava `meta.oilFar` com as distâncias de cada poço).
+ */
+function relocateOil(ctx, n) {
+  const { m } = ctx;
+  m.resources = m.resources.filter((r) => r.type !== 'oil');
+  const shores = shorePointsOf(ctx);
+  const dShore = (x, z, k) => { let d = Infinity; for (const q of shores[k]) { const e = Math.hypot(x - q.x, z - q.z); if (e < d) d = e; } return d; };
+  const deepSea = (x, z) => ctx.oceanOk(x, z) && ctx.hAt(x, z) <= 0.05 && wetFrac(ctx, x, z, 8) >= 1 && wetFrac(ctx, x, z, 4) >= 1;
+  const placed = [];
+  const info = [];
+  for (let k = 0; k < n; k++) {
+    const b = k % shores.length;
+    const w = need(ctx.scan({
+      step: 2,
+      test: (x, z) => {
+        if (Math.abs(x) > ctx.half - 14 || Math.abs(z) > ctx.half - 14 || !deepSea(x, z) || !placed.every((q) => hyp({ x, z }, q) >= FAR_OIL.spacing)) return false;
+        const d = shores.map((_, i) => dShore(x, z, i));
+        return Math.min(...d) >= FAR_OIL.minShore && d[b] <= FAR_OIL.maxShore;
+      },
+      score: (x, z) => Math.abs(dShore(x, z, b) - (FAR_OIL.minShore + 16))
+    }), `o poço de petróleo distante ${k + 1}`);
+    placed.push(w);
+    m.resources.push({ type: 'oil', x: r1(w.x), z: r1(w.z), amount: FAR_OIL.amount });
+    info.push({ x: r1(w.x), z: r1(w.z), base: b, shore: shores.map((_, i) => Math.round(dShore(w.x, w.z, i))) });
+  }
+  m.meta = { ...m.meta, oilFar: info };
+  return placed;
+}
+
+const PRE = freeze({ 'camp-03-pedra-mae': prePedra, 'camp-12-cabo-ferrugem': preCabo, 'camp-12-cabo-aurora-leste': preCabo }); // esculpe o terreno ANTES do contexto de posicionamento (M3-04)
+const POST = freeze({ 'camp-01-baia-de-aurelan': postBaia, 'camp-02-pouso-do-encontro': postPouso, 'camp-03-pedra-mae': postPedra, 'camp-04-baixio-do-breu': postBaixio, 'camp-05-cerne-verde': postCerne, 'camp-06-a-geada': postGeada, 'camp-07-brejo-mudo': postBrejo, 'camp-08-fornalha': postFornalha, 'camp-09-miragem': postMiragem, 'camp-10-costa-ferrugem': postTravessia, 'camp-11-estepe-do-vento': postEstepe, 'camp-12-cabo-ferrugem': postCabo, 'camp-01-praia-das-cinzas': postBaia, 'camp-10-cabo-aurora': postTravessia, 'camp-11-savana-de-ambar': postSavana, 'camp-12-cabo-aurora-leste': postCabo });
 
 // ---------------------------------------------------------------------------------------------------------------------------
 // Montagem
@@ -1752,6 +1861,12 @@ function finish(id, world, seedUsed) {
   const ctx = makeCtx(m);
   const extra = {};
   POST[id](ctx, extra, world, pre);
+  if (CAMPAIGN_PRESETS[id].farOil) {
+    // M2-07: poços longe da costa das bases; as âncoras de poço (wellMid1/2, well5/6) seguem os primeiros poços novos
+    const n = m.resources.filter((r) => r.type === 'oil').length || CAMPAIGN_PRESETS[id].farOil;
+    const wells = relocateOil(ctx, n);
+    ['wellMid1', 'wellMid2', 'well5', 'well6'].filter((k) => extra[k]).forEach((k, i) => { extra[k] = ptw(wells[i]); });
+  }
   // âncoras: padrão (recalculadas com as jazidas/acampamentos novos) + as da ficha; as escritas à mão prevalecem
   const base = { ...m.anchors };
   delete m.anchors;

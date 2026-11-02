@@ -19,5 +19,9 @@ export const CAMPAIGN_MAP_LOADERS = Object.freeze({
   'camp-06-a-geada': () => import('./camp-06-a-geada.json'),
   'camp-10-costa-ferrugem': () => import('./camp-10-costa-ferrugem.json'),
   'camp-11-estepe-do-vento': () => import('./camp-11-estepe-do-vento.json'),
-  'camp-12-cabo-ferrugem': () => import('./camp-12-cabo-ferrugem.json')
+  'camp-12-cabo-ferrugem': () => import('./camp-12-cabo-ferrugem.json'),
+  'camp-01-praia-das-cinzas': () => import('./camp-01-praia-das-cinzas.json'),
+  'camp-10-cabo-aurora': () => import('./camp-10-cabo-aurora.json'),
+  'camp-11-savana-de-ambar': () => import('./camp-11-savana-de-ambar.json'),
+  'camp-12-cabo-aurora-leste': () => import('./camp-12-cabo-aurora-leste.json')
 });

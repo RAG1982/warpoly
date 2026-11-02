@@ -19,19 +19,19 @@
     "portrait": "👑",
     "text": {
       "pt-BR": "O Mar Fendido é a estrada dos clãs: de Cinzara saem as galés e as barcaças que sufocam as ilhas, e é aqui, no Cabo Ferrugem, que a Liga fecha essa estrada. Os três heróis estão juntos, Brann, Oren e eu, e a missão tem três atos. Ato I: evolua o Marco do Bastião ao nível 3 (Castelo de Aldária), erga 4 Torres de Vigia, 8 trechos de Muralha nos dois desfiladeiros da crista e 2 Balistas, enquanto os guarda-costas de Skarn testam a linha. Ato II: afunde ou arrase as 3 Docas dos Clãs no litoral norte e mantenha 2 navios de guerra no estreito por 90 segundos, sem um único inimigo na água, vencendo as frotas que tentarem romper. Ato III: Skarn, o chefe-de-brasa, virá com a guarda de ogros e serpentes por terra e com um assalto anfíbio por mar. Que o Bastião não caia: se o Marco cair, ou se Brann tombar, o cabo é perdido.",
-      "en": "The Sundered Sea is the clans' road: the galleys and barges that choke the isles sail out of Cinzara, and here at Cape Rust the League closes that road. The three heroes are together, Brann, Oren and I, and the mission has three acts. Act I: upgrade the Bastion Outpost to level 3 (Aldaria Castle), raise 4 Watch Towers, 8 Wall segments in the ridge's two passes and 2 Ballistae while Skarn's bodyguards probe the line. Act II: sink or raze the 3 Clan Docks on the north shore and hold 2 warships in the strait for 90 seconds with not one enemy on the water, beating the fleets that try to break through. Act III: Skarn, the Ember-Chief, comes with his guard of ogres and serpents by land and an amphibious assault by sea. The Bastion must not fall: if the Outpost falls, or if Brann is slain, the cape is lost."
+      "en": "The Sundered Sea is the clans' road: the galleys and barges that choke the isles sail out of Cinzara, and here at Cape Rust the League closes that road. The three heroes are together, Brann, Oren and I, and the mission has three acts. Act I: upgrade the Bastion Outpost to level 3 (Aldaria Castle), raise 4 Watchtowers, 8 Wall segments in the ridge's two passes and 2 Ballistas while Skarn's bodyguards probe the line. Act II: sink or raze the 3 Clan Docks on the north shore and hold 2 warships in the strait for 90 seconds with not one enemy on the water, beating the fleets that try to break through. Act III: Skarn, the Ember-Chief, comes with his guard of ogres and serpents by land and an amphibious assault by sea. The Bastion must not fall: if the Outpost falls, or if Brann is slain, the cape is lost."
     },
     "hints": [
       {
-        "pt-BR": "Ato I: a crista de falésia tem dois desfiladeiros (passA e passB), e as muralhas fecham a passagem de verdade: 4 trechos em cada um. As torres e as balistas ficam atrás, no alcance dos dois.",
+        "pt-BR": "Ato I: a crista de falésia tem dois desfiladeiros, e as muralhas fecham a passagem de verdade: 4 trechos em cada um. As torres e as balistas ficam atrás, no alcance dos dois.",
         "en": "Act I: the cliff ridge has two passes, and walls truly seal the way: 4 segments in each. Towers and ballistae stand behind them, covering both."
       },
       {
         "pt-BR": "Para evoluir o Marco do Bastião ao nível 3 use a evolução do Centro dele; custa ouro, madeira, pedra e petróleo. O Paço do cabo já está no nível 3 e libera a árvore toda, inclusive Estaleiro e Refinaria.",
-        "en": "To upgrade the Bastion Outpost to level 3 use its Hall upgrade; it costs gold, wood, stone and oil. The cape's Palace is already level 3 and unlocks the whole tree, Shipyard and Refinery included."
+        "en": "To upgrade the Bastion Outpost to level 3 use its Center upgrade; it costs gold, wood, stone and oil. The cape's Palace is already level 3 and unlocks the whole tree, Shipyard and Refinery included."
       },
       {
-        "pt-BR": "Ato II: as Docas ficam no litoral norte, atrás da crista; Fragatas e Encouraçados batem nelas do mar. Depois, 2 navios de guerra parados no estreito, e nenhum inimigo a 30 u dele, fazem o contador de 90 s correr.",
+        "pt-BR": "Ato II: as Docas ficam no litoral norte, atrás da crista; Fragatas e Couraçados batem nelas do mar. Depois, 2 navios de guerra parados no estreito, e nenhum inimigo a 30 u dele, fazem o contador de 90 s correr.",
         "en": "Act II: the Docks stand on the north shore, behind the ridge; Frigates and Dreadnoughts shell them from the sea. Then 2 warships holding the strait with no enemy within 30 u let the 90 s counter run."
       },
       {
@@ -264,7 +264,7 @@
       },
       "description": {
         "pt-BR": "Use a evolução do Centro do Marco do Bastião, atrás da crista. O Paço do cabo já está no nível 3 e não conta.",
-        "en": "Use the Hall upgrade on the Bastion Outpost behind the ridge. The cape's Palace is already level 3 and does not count."
+        "en": "Use the Center upgrade on the Bastion Outpost behind the ridge. The cape's Palace is already level 3 and does not count."
       },
       "marker": {
         "area": {
@@ -294,7 +294,7 @@
       },
       "title": {
         "pt-BR": "Ato I: erguer 4 Torres de Vigia no Bastião",
-        "en": "Act I: raise 4 Watch Towers at the Bastion"
+        "en": "Act I: raise 4 Watchtowers at the Bastion"
       },
       "description": {
         "pt-BR": "Na área do Bastião, junto aos dois desfiladeiros da crista (a nordeste do Marco).",
@@ -331,8 +331,8 @@
         "en": "Act I: raise 8 Wall segments in the passes"
       },
       "description": {
-        "pt-BR": "4 trechos em cada desfiladeiro (passA e passB) fecham a passagem entre a falésia. Os orcs terão de quebrar a muralha sob as torres.",
-        "en": "4 segments in each pass (passA and passB) close the gap between the cliffs. The orcs will have to break the wall under the towers."
+        "pt-BR": "4 trechos em cada desfiladeiro fecham a passagem entre a falésia. Os orcs terão de quebrar a muralha sob as torres.",
+        "en": "4 segments in each pass close the gap between the cliffs. The orcs will have to break the wall under the towers."
       },
       "marker": {
         "area": {
@@ -358,11 +358,11 @@
       },
       "title": {
         "pt-BR": "Ato I: ter 2 Balistas no Bastião",
-        "en": "Act I: have 2 Ballistae at the Bastion"
+        "en": "Act I: have 2 Ballistas at the Bastion"
       },
       "description": {
         "pt-BR": "A Oficina treina Balistas (Quartel e Centro nível 2). Clique direito move; Ctrl+clique ataca um ponto.",
-        "en": "The Workshop trains Ballistae (Barracks and Hall level 2). Right-click moves; Ctrl+click attacks a point."
+        "en": "The Workshop trains Ballistas (Barracks and Center level 2). Right-click moves; Ctrl+click attacks a point."
       }
     },
     {
@@ -406,7 +406,7 @@
         "en": "Act II: hold 2 warships in the strait for 90 seconds"
       },
       "description": {
-        "pt-BR": "Só conta depois que as 3 Docas caírem: 2 Fragatas/Encouraçados na zona do estreito e NENHUM inimigo a menos de 30 u. O contador zera se um inimigo entrar.",
+        "pt-BR": "Só conta depois que as 3 Docas caírem: 2 Fragatas/Couraçados na zona do estreito e NENHUM inimigo a menos de 30 u. O contador zera se um inimigo entrar.",
         "en": "It only counts once the 3 Docks have fallen: 2 Frigates/Dreadnoughts in the strait zone and NO enemy within 30 u. The counter resets if an enemy enters."
       },
       "marker": {
@@ -477,7 +477,7 @@
       },
       "description": {
         "pt-BR": "Magos curam a tropa na linha das torres. A Torre Arcana pede o Centro no nível 3.",
-        "en": "Mages heal the troops on the tower line. The Arcane Tower asks for the Hall at level 3."
+        "en": "Mages heal the troops on the tower line. The Arcane Tower asks for the Center at level 3."
       }
     },
     {
@@ -709,7 +709,7 @@
           "portrait": "👑",
           "text": {
             "pt-BR": "Brann! Vivo e de pé no fim do mundo. A Rainha Sevelin mandou dizer que o cabo é o último favor que ela pede a Aurelan.",
-            "en": "Brann! Alive and standing at the end of the world. Queen Sevelin sent word that the cape is the last favour she asks of Aurelan."
+            "en": "Brann! Alive and standing at the end of the world. Queen Sevelin sent word that the cape is the last favor she asks of Aurelan."
           },
           "duration": 9
         },
@@ -773,7 +773,7 @@
           "type": "message",
           "text": {
             "pt-BR": "Guarda-costas de Skarn: Talhadores e Lanceiros marcham para o desfiladeiro oeste.",
-            "en": "Skarn's bodyguards: Grunts and Axe Throwers march on the west pass."
+            "en": "Skarn's bodyguards: Slashers and Axe Throwers march on the west pass."
           }
         },
         {
@@ -880,7 +880,7 @@
           "type": "message",
           "text": {
             "pt-BR": "Terceira leva com uma catapulta: ela derruba muralha de longe. Combata-a com cavaleiros e Balistas.",
-            "en": "Third wave with a catapult: it breaks walls from afar. Hit it with knights and Ballistae."
+            "en": "Third wave with a catapult: it breaks walls from afar. Hit it with knights and Ballistas."
           }
         },
         {
@@ -946,8 +946,8 @@
         {
           "type": "message",
           "text": {
-            "pt-BR": "A frota da Aliança chega: 4 Fragatas e petróleo para o estaleiro.",
-            "en": "The Alliance fleet arrives: 4 Frigates and oil for the shipyard."
+            "pt-BR": "A frota da Liga chega: 4 Fragatas e petróleo para o estaleiro.",
+            "en": "The League fleet arrives: 4 Frigates and oil for the shipyard."
           }
         },
         {
@@ -1033,7 +1033,7 @@
                 },
                 "portrait": "⚔️",
                 "text": {
-                  "pt-BR": "Frotas do Cinzal vêm à água assim que sentirem o cheiro. Fragatas na frente, Encouraçados atrás. Vamos ao mar.",
+                  "pt-BR": "Frotas do Cinzal vêm à água assim que sentirem o cheiro. Fragatas na frente, Couraçados atrás. Vamos ao mar.",
                   "en": "The Cinzal fleets come to the water the moment they smell it. Frigates ahead, Dreadnoughts behind. To the sea."
                 },
                 "duration": 9
@@ -1271,7 +1271,7 @@
           },
           "portrait": "🔮",
           "text": {
-            "pt-BR": "Um Leviatã de Ferro! Foco no casco dele; as Fragatas o rodeiam enquanto os Encouraçados batem de longe.",
+            "pt-BR": "Um Leviatã de Ferro! Foco no casco dele; as Fragatas o rodeiam enquanto os Couraçados batem de longe.",
             "en": "An Iron Leviathan! Focus its hull; the Frigates circle it while the Dreadnoughts fire from afar."
           },
           "duration": 9
@@ -1628,8 +1628,8 @@
                 },
                 "portrait": "🪓",
                 "text": {
-                  "pt-BR": "Fecharam o meu mar? Então eu venho por terra, e as barcaças vêm pela praia. O Cinzal inteiro desce contigo, Brann.",
-                  "en": "You closed my sea? Then I come by land, and the barges come by the beach. The whole Cinzal descends with you, Brann."
+                  "pt-BR": "Fecharam o meu mar? Então eu venho por terra, e as barcaças vêm pela praia. O Cinzal inteiro desce sobre vocês, Brann.",
+                  "en": "You closed my sea? Then I come by land, and the barges come by the beach. The whole Cinzal descends upon you, Brann."
                 },
                 "duration": 9
               }
@@ -1713,8 +1713,8 @@
           },
           "portrait": "🦅",
           "text": {
-            "pt-BR": "Capitã Lyra Ventosa: dois grifos sobre o cabo! O céu é nosso, Marechal. Digam onde a brasa cai.",
-            "en": "Captain Lyra Windwhisper: two gryphons over the cape! The sky is ours, Marshal. Say where the ember falls."
+            "pt-BR": "Dois grifos sobre o cabo! O céu é nosso, Marechal. Digam onde a brasa cai.",
+            "en": "Two gryphons over the cape! The sky is ours, Marshal. Say where the ember falls."
           },
           "duration": 8
         },
@@ -1877,7 +1877,7 @@
           "portrait": "⚔️",
           "text": {
             "pt-BR": "A guarda está se partindo! Skarn está cada vez mais sozinho. Em cima dele!",
-            "en": "The guard is breaking! Skarn grows lonelier. On him!"
+            "en": "The guard is breaking! Skarn stands ever more alone. On him!"
           },
           "duration": 7
         }
@@ -2115,8 +2115,8 @@
                 },
                 "portrait": "📜",
                 "text": {
-                  "pt-BR": "O Marechal Dorian e a Capitã Lyra juraram guardar a ponta do mundo. Brann e Oren ensinaram aos recrutas o nome de cada ilha que custou sangue.",
-                  "en": "Marshal Dorian and Captain Lyra swore to guard the tip of the world. Brann and Oren taught the recruits the name of every island that cost blood."
+                  "pt-BR": "O Marechal Dorian e a Capitã Lyra juraram guardar a ponta do mundo. Brann e Oren ensinaram aos recrutas o nome de cada ilha que custou sangue; a Dama Aurora e a Estrela-d'Alva guardam o estreito.",
+                  "en": "Marshal Dorian and Captain Lyra swore to guard the tip of the world. Brann and Oren taught the recruits the name of every island that cost blood; Lady Aurora and the Dawn Star keep the strait."
                 },
                 "duration": 14
               }

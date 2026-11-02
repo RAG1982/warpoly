@@ -5,7 +5,7 @@
   "hidden": true,
   "title": {
     "pt-BR": "O Baixio do Breu",
-    "en": "Pitch Shallows"
+    "en": "The Pitch Shallows"
   },
   "subtitle": {
     "pt-BR": "Liga de Aurelan, missão 4",
@@ -19,7 +19,7 @@
     "portrait": "⚔️",
     "text": {
       "pt-BR": "O Baixio do Breu é um canal largo de águas escuras entre duas margens que não se tocam: a nossa, a oeste, e a dos Clãs do Cinzal, a leste. Do fundo do mar sobe breu (petróleo), e quem o bombeia domina as águas. Nenhum soldado atravessa esse mar a pé: tudo aqui se decide com navios. Erga o Estaleiro, treine Petroleiros e ponha DUAS Plataformas nos poços, com uma Refinaria na costa para receber o óleo. Dois poços ficam no meio do canal, entre duas ilhotas com madeira e chão para torres: serão disputados. A frota de Orvanna Maré-Negra patrulha o canal e virá em ondas. A caravela Estrela-d'Alva chega em cinco minutos. Eu comando a guarnição; se eu cair, a margem cai junto. E lembre: o ouro só entra no Paço, então uma mina longe pede um Centro novo ao lado dela.",
-      "en": "The Pitch Shallows are a wide channel of dark water between two shores that never touch: ours in the west and the Cinzal Clans' in the east. Pitch (oil) rises from the seabed, and whoever pumps it rules the waters. No soldier crosses this sea on foot: everything here is decided by ships. Raise the Shipyard, train Tankers and set TWO Platforms on the wells, with a Refinery on the coast to receive the oil. Two wells lie mid-channel, between two islets with timber and room for towers: they will be fought over. Orvanna Blacktide's fleet patrols the channel and will come in waves. The caravel Dawn Star arrives in five minutes. I command the garrison; if I fall, the shore falls with me. And remember: gold only enters the Keep, so a far-off mine needs a new Town Center beside it."
+      "en": "The Pitch Shallows are a wide channel of dark water between two shores that never touch: ours in the west and the Cinzal Clans' in the east. Pitch (oil) rises from the seabed, and whoever pumps it rules the waters. No soldier crosses this sea on foot: everything here is decided by ships. Raise the Shipyard, train Tankers and set TWO Platforms on the wells, with a Refinery on the coast to receive the oil. Two wells lie mid-channel, between two islets with timber and room for towers: they will be fought over. Orvanna Blacktide's fleet patrols the channel and will come in waves. The caravel Dawn Star arrives in five minutes. I command the garrison; if I fall, the shore falls with me. And remember: gold only enters the Palace, so a far-off mine needs a new Center beside it."
     },
     "hints": [
       {
@@ -36,7 +36,7 @@
       },
       {
         "pt-BR": "Só o Paço recebe ouro. A mina grande da ponta fica a mais de 60 passos: construa um Centro extra ao lado dela (tecla Q; 800 de ouro, máximo 3). As tropas orcas chegam em Barcaças escoltadas por Galés: afunde a Barcaça antes da praia e a carga se afoga.",
-        "en": "Only the Keep takes gold. The big mine at the tip is more than 60 paces away: build an extra Town Center beside it (Q key; 800 gold, max 3). Orc troops come in Barges escorted by Galleys: sink the Barge before the beach and its cargo drowns."
+        "en": "Only the Palace takes gold. The big mine at the tip is more than 60 paces away: build an extra Center beside it (Q key; 800 gold, max 3). Orc troops come in Barges escorted by Galleys: sink the Barge before the beach and its cargo drowns."
       }
     ]
   },
@@ -294,11 +294,11 @@
       },
       "title": {
         "pt-BR": "Fundar o Posto do Cabo: um Centro extra",
-        "en": "Found Cape Post: an extra Town Center"
+        "en": "Found Cape Post: an extra Center"
       },
       "description": {
         "pt-BR": "O ouro só entra no Paço. Ao lado da mina grande, a norte e longe do Paço, o círculo dourado mostra onde cabe um Centro (tecla Q).",
-        "en": "Gold only enters the Keep. Beside the big mine, far north of the Keep, the golden circle shows where a Town Center fits (Q key)."
+        "en": "Gold only enters the Palace. Beside the big mine, far north of the Palace, the golden circle shows where a Center fits (Q key)."
       }
     },
     {
@@ -313,7 +313,7 @@
       },
       "description": {
         "pt-BR": "Bandidos da Irmandade da Maré os mantêm numa ilhota no meio do canal. Navios de guerra limpam a praia; uma Barcaça leva tropas.",
-        "en": "Brotherhood of the Tide bandits hold them on an islet mid-channel. Warships clear the beach; a Barge carries troops."
+        "en": "Tide Brotherhood bandits hold them on an islet mid-channel. Warships clear the beach; a Barge carries troops."
       }
     },
     {
@@ -533,7 +533,7 @@
                 "portrait": "⚔️",
                 "text": {
                   "pt-BR": "E ao norte da nossa margem, a mina grande do Cabo, longe do Paço. Ouro só entra no Paço, comandante: lá vai um Centro novo.",
-                  "en": "And north on our shore, the big Cape mine, far from the Keep. Gold only enters the Keep, Commander: a new Town Center goes there."
+                  "en": "And north on our shore, the big Cape mine, far from the Palace. Gold only enters the Palace, Commander: a new Center goes there."
                 },
                 "duration": 8
               }
@@ -1217,7 +1217,7 @@
           "type": "defeat",
           "text": {
             "pt-BR": "O Paço caiu. A margem de Aurelan é dos Clãs.",
-            "en": "The Keep has fallen. The Aurelan shore belongs to the Clans."
+            "en": "The Palace has fallen. The Aurelan shore belongs to the Clans."
           }
         }
       ]

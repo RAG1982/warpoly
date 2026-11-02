@@ -10,10 +10,10 @@
     "portrait": "🔮",
     "text": {
       "pt-BR": "O Marco da Colônia nasceu na praia de Porto Albor, mas a Estepe do Vento não nos quer aqui. Skarn cercou a colônia com as levas do interior e vai pelo mar com uma esquadra de cerco. Evoluam o Marco a Fortaleza (nível 2) e aguentem doze minutos de incursões. As barcaças de reforço chegam a cada quatro minutos pela enseada: o Marechal Dorian vem com a segunda onda. E há um clã dissidente de Hurgan acampado no centro-norte; se os guardas caírem, os homens dele jurarão a bandeira da Liga.",
-      "en": "The Colony Outpost was born on the beach of Port Albor, but the Wind Steppe does not want us here. Skarn has ringed the colony with the inland hordes and comes by sea with a siege fleet. Upgrade the Outpost to a Fortress (level 2) and hold out for twelve minutes of raids. Reinforcement barges arrive every four minutes through the bay: Marshal Dorian comes with the second wave. And a dissident clan from Hurgan camps in the north-centre; if its guards fall, its men will swear to the League's banner."
+      "en": "The Colony Outpost was born on the beach of Port Albor, but the Wind Steppe does not want us here. Skarn has ringed the colony with the inland hordes and comes by sea with a siege fleet. Upgrade the Outpost to a Fortress (level 2) and hold out for twelve minutes of raids. Reinforcement barges arrive every four minutes through the bay: Marshal Dorian comes with the second wave. And a dissident clan from Hurgan camps in the north-central; if its guards fall, its men will swear to the League's banner."
     },
     "hints": [
-      { "pt-BR": "O Marco da Colônia (Porto Albor) fica na praia, a oeste. Para evoluí-lo, escolha o Centro dele e use a evolução do Centro; o Paço continua no interior.", "en": "The Colony Outpost (Port Albor) stands on the beach, to the west. To upgrade it, select its Hall and use the Hall upgrade; the Palace stays inland." },
+      { "pt-BR": "O Marco da Colônia (Porto Albor) fica na praia, a oeste. Para evoluí-lo, escolha o Centro dele e use a evolução do Centro; o Paço continua no interior.", "en": "The Colony Outpost (Port Albor) stands on the beach, to the west. To upgrade it, select its Center and use the Center upgrade; the Palace stays inland." },
       { "pt-BR": "Dica: as levas de terra saem do interior e miram as minas de ouro. Mantenha a tropa entre as minas e o Marco.", "en": "Tip: the land waves come from the interior and aim at the gold mines. Keep your troops between the mines and the Outpost." },
       { "pt-BR": "Dica: a esquadra de cerco nasce no mar ao sul e vai à enseada dos reforços. Fragatas do Estaleiro (na costa, perto da base) a encontram antes do desembarque.", "en": "Tip: the siege fleet is born at sea to the south and heads for the reinforcement bay. Frigates from the Shipyard (on the coast, near the base) meet it before the landing." },
       { "pt-BR": "O Capitão Brann é um HERÓI: tem mana e três habilidades (Z, X, C) e só existe um. Se ele morrer, a missão está perdida.", "en": "Captain Brann is a HERO: he has mana and three abilities (Z, X, C), and there is only one of him. If he dies the mission is lost." }
@@ -41,7 +41,7 @@
     { "id": "p-colony", "type": "flag", "priority": "primary",
       "condition": { "type": "count", "select": { "tag": "colony", "owner": "player", "minTier": 2 }, "op": ">=", "value": 1 },
       "title": { "pt-BR": "Evoluir o Marco da Colônia a Fortaleza (nível 2)", "en": "Upgrade the Colony Outpost to a Fortress (level 2)" },
-      "description": { "pt-BR": "Use a evolução do Centro de Porto Albor (o Marco na praia). O Paço do interior não conta.", "en": "Use the Hall upgrade on the Port Albor Outpost (the beach Hall). The inland Palace does not count." } },
+      "description": { "pt-BR": "Use a evolução do Centro de Porto Albor (o Marco na praia). O Paço do interior não conta.", "en": "Use the Center upgrade on the Port Albor Outpost (the beach Center). The inland Palace does not count." } },
     { "id": "p-hold", "type": "survive", "priority": "primary", "seconds": 720,
       "title": { "pt-BR": "Resistir a 3 incursões por 12 minutos", "en": "Hold out against 3 raids for 12 minutes" },
       "description": { "pt-BR": "Incursões aos 4, 7 e 10 minutos. Se o Marco cair, a colônia cai junto.", "en": "Raids at minutes 4, 7 and 10. If the Outpost falls, the colony falls with it." } },
@@ -87,7 +87,7 @@
     { "id": "raid-1", "when": { "type": "time", "at": 240 },
       "actions": [
         { "type": "spawn", "owner": 1, "units": [{ "type": "grunt", "count": 4 }, { "type": "axethrower", "count": 2 }], "anchor": "raid1", "spread": 3, "order": { "kind": "attackMove", "anchor": "expansion1" } },
-        { "type": "message", "text": { "pt-BR": "Primeira incursão: Talhadores e Lanceiros-Machado atacam a mina de ouro do interior.", "en": "First raid: Grunts and Axe Throwers hit the inland gold mine." } }
+        { "type": "message", "text": { "pt-BR": "Primeira incursão: Talhadores e Lanceiros-Machado atacam a mina de ouro do interior.", "en": "First raid: Slashers and Axe Throwers hit the inland gold mine." } }
       ] },
     { "id": "landing-2", "when": { "type": "time", "at": 240 },
       "actions": [

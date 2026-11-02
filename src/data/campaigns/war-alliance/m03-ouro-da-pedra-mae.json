@@ -28,7 +28,7 @@
       },
       {
         "pt-BR": "O Estábulo Real exige o Quartel (que exige a Fazenda) e o Paço no nível 2, que a campanha já concede nesta missão. Construa também a Ferraria e pesquise Escudos Reforçados antes da terceira onda.",
-        "en": "The Royal Stable needs the Barracks (which needs the Farm) and the Keep at level 2, which the campaign already grants in this mission. Also build the Smithy and research Reinforced Shields before the third wave."
+        "en": "The Royal Stable needs the Barracks (which needs the Farm) and the Palace at level 2, which the campaign already grants in this mission. Also build the Smithy and research Reinforced Shields before the third wave."
       },
       {
         "pt-BR": "Capitão Brann é um HERÓI: tem mana e três habilidades (Z, X, C) e só existe um. Se ele morrer, a missão está perdida; deixe-o junto da muralha, não à frente dela.",
@@ -192,7 +192,7 @@
       },
       "description": {
         "pt-BR": "O tempo corre a partir do desembarque orc. Se o Paço cair ou o Capitão Brann morrer, a missão está perdida.",
-        "en": "The clock runs from the orc landing. If the Keep falls or Captain Brann dies, the mission is lost."
+        "en": "The clock runs from the orc landing. If the Palace falls or Captain Brann dies, the mission is lost."
       }
     },
     {
@@ -208,7 +208,7 @@
       },
       "description": {
         "pt-BR": "O ouro vem das minas atrás dos desfiladeiros: a inicial e o Veio, a maior. Aldeões mortos não minam; proteja a linha.",
-        "en": "The gold comes from the mines behind the passes: the starter and the Vein, the larger one. Dead villagers don't mine; protect the line."
+        "en": "The gold comes from the mines behind the passes: the starter and the Vein, the larger one. Dead villagers do not mine; protect the line."
       }
     },
     {
@@ -401,7 +401,7 @@
                 "portrait": "⚔️",
                 "text": {
                   "pt-BR": "Este é o Veio da Pedra-Mãe, a maior mina da ilha, e a outra mais perto do Paço. Os aldeões iam e voltavam em minutos. Os orcs sabem disso.",
-                  "en": "This is the Mother Stone Vein, the biggest mine on the island, and the other one nearer the Keep. The villagers went back and forth in minutes. The orcs know it."
+                  "en": "This is the Mother Stone Vein, the biggest mine on the island, and the other one nearer the Palace. The villagers went back and forth in minutes. The orcs know it."
                 },
                 "duration": 7
               }
@@ -734,8 +734,8 @@
         {
           "type": "message",
           "text": {
-            "pt-BR": "Uma Catapulta saiu do acampamento orc. Alcance 20: peguem-nas antes.",
-            "en": "A Catapult left the orc camp. Range 20: catch them first."
+            "pt-BR": "Uma Catapulta saiu do acampamento orc. Alcance 20: peguem-na antes.",
+            "en": "A Catapult left the orc camp. Range 20: catch it first."
           }
         }
       ]
@@ -1044,7 +1044,7 @@
           "type": "defeat",
           "text": {
             "pt-BR": "O Paço caiu. A Pedra-Mãe é do Presa-Negra.",
-            "en": "The Keep has fallen. Mother Stone belongs to the Blackfangs."
+            "en": "The Palace has fallen. Mother Stone belongs to the Blackfangs."
           }
         }
       ]

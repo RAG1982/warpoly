@@ -10,7 +10,7 @@
     "portrait": "⚔️",
     "text": {
       "pt-BR": "O Brejo Mudo não tem nome de cidade, só de cheiro: juncos, lama e vitórias-régias sobre água rasa. Ele separa os nossos Paços, e o Governador Mervane, que vende ferro aos Clãs do Cinzal, jura que é nosso aliado. O Presa-Negra de Brakka tem o Salão no sul do brejo, a igual distância das duas bases, com dois Cercados de Javalis e uma guarda de Talhadores, Lanceiros-Machado, Ogros e uma Catapulta. Destrua o Salão e os Cercados, erga torres de vigia e treine Magos. Mas fique de olho em Mervane: aos 5 minutos e meio ele vai trair, abrir o brejo a Brakka e tentar tomar a sua casa. Sobreviva e destrua o Paço dele, a leste. A Ferraria de contrabando, atrás do Paço dele, é o cofre do ferro.",
-      "en": "The Silent Marsh has no city name, only a smell: reeds, mud and lily pads over shallow water. It separates our two Palaces, and Governor Mervane, who sells iron to the Cinzal Clans, swears he is our ally. Brakka's Blackfang have their Hall in the south of the marsh, equidistant from both bases, with two Boar Pens and a guard of Grunts, Axe Throwers, Ogres and a Catapult. Destroy the Hall and the Pens, raise watchtowers and train Mages. But keep an eye on Mervane: at five and a half minutes he will betray you, open the marsh to Brakka and try to take your home. Survive, then destroy his Palace in the east. The contraband Forge, behind his Palace, is the iron vault."
+      "en": "The Silent Marsh has no city name, only a smell: reeds, mud and lily pads over shallow water. It separates our two Palaces, and Governor Mervane, who sells iron to the Cinzal Clans, swears he is our ally. Brakka's Blackfang have their Hall in the south of the marsh, equidistant from both bases, with two Boar Pens and a guard of Slashers, Axe Throwers, Ogres and a Catapult. Destroy the Hall and the Pens, raise watchtowers and train Mages. But keep an eye on Mervane: at five and a half minutes he will betray you, open the marsh to Brakka and try to take your home. Survive, then destroy his Palace in the east. The contraband Forge, behind his Palace, is the iron vault."
     },
     "hints": [
       { "pt-BR": "O Governador Mervane começa aliado, com IA própria. Ele negocia, e não cumpre o que promete.", "en": "Governor Mervane starts as your ally, with his own AI. He bargains, and does not keep his word." },
@@ -86,7 +86,7 @@
     { "id": "castle-up", "when": { "type": "time", "at": 40 },
       "actions": [
         { "type": "setTier", "owner": "player", "tier": 3 },
-        { "type": "message", "text": { "pt-BR": "O seu Paço virou Castelo de nível 3: a Torre Arcana, o Aviário e as Torres de Vigia já estão ao seu alcance.", "en": "Your Palace is now a level 3 Castle: the Arcane Tower, the Aviary and the Watchtowers are within reach." } }
+        { "type": "message", "text": { "pt-BR": "O seu Paço subiu ao nível 3: a Torre Arcana, o Aviário e as Torres de Vigia já estão ao seu alcance.", "en": "Your Palace is now level 3: the Arcane Tower, the Aviary and the Watchtowers are within reach." } }
       ] },
     { "id": "signs", "when": { "type": "objective", "id": "h-signs", "status": "completed" },
       "actions": [
@@ -116,7 +116,7 @@
     { "id": "raid-1", "when": { "type": "time", "at": 390 },
       "actions": [
         { "type": "spawn", "owner": "bandits", "units": [{ "type": "grunt", "count": 3 }, { "type": "axethrower", "count": 2 }], "anchor": "brakkaHall", "spread": 3, "order": { "kind": "attackMove", "anchor": "playerStart" } },
-        { "type": "message", "text": { "pt-BR": "Onda de Brakka pelo brejo: Talhadores e Lanceiros-Machado.", "en": "Brakka's wave through the marsh: Grunts and Axe Throwers." } }
+        { "type": "message", "text": { "pt-BR": "Onda de Brakka pelo brejo: Talhadores e Lanceiros-Machado.", "en": "Brakka's wave through the marsh: Slashers and Axe Throwers." } }
       ] },
     { "id": "raid-2", "when": { "type": "time", "at": 570 },
       "actions": [
@@ -126,7 +126,7 @@
     { "id": "raid-3", "when": { "type": "time", "at": 750 },
       "actions": [
         { "type": "spawn", "owner": "bandits", "units": [{ "type": "catapult", "count": 1 }, { "type": "grunt", "count": 4 }, { "type": "ogre", "count": 1 }], "anchor": "brakkaHall", "spread": 3, "order": { "kind": "attackMove", "anchor": "playerStart" } },
-        { "type": "message", "text": { "pt-BR": "Terceira onda: uma Catapulta vem com os Talhadores. Procure as torres.", "en": "Third wave: a Catapult comes with the Grunts. Look for the towers." } }
+        { "type": "message", "text": { "pt-BR": "Terceira onda: uma Catapulta vem com os Talhadores. Procure as torres.", "en": "Third wave: a Catapult comes with the Slashers. Look for the towers." } }
       ] },
     { "id": "brakka-down", "when": { "type": "objective", "id": "p-brakka", "status": "completed" },
       "actions": [
@@ -146,7 +146,7 @@
         { "type": "sound", "id": "victory" },
         { "type": "cutscene", "id": "finale", "duration": 12, "skippable": true,
           "steps": [
-            { "at": 0, "anchor": "allyStart", "zoom": 1.1, "dialog": { "speaker": { "pt-BR": "Capitão Brann", "en": "Captain Brann" }, "portrait": "⚔️", "text": { "pt-BR": "O brejo é nosso, e ele fica mudo outra vez. Mervane foi o último traidor do vale.", "en": "The marsh is ours, and it is silent again. Mervane was the last traitor in the valley." }, "duration": 6 } },
+            { "at": 0, "anchor": "allyStart", "zoom": 1.1, "dialog": { "speaker": { "pt-BR": "Capitão Brann", "en": "Captain Brann" }, "portrait": "⚔️", "text": { "pt-BR": "O brejo é nosso, e ele fica mudo outra vez. Mervane foi o último traidor da Liga.", "en": "The marsh is ours, and it is silent again. Mervane was the last traitor of the League." }, "duration": 6 } },
             { "at": 6, "anchor": "playerStart", "zoom": 1.15, "dialog": { "speaker": { "pt-BR": "Mestre Oren", "en": "Master Oren" }, "portrait": "🔮", "text": { "pt-BR": "Os cadernos de Orsolo mostram que o ferro daqui ainda vai para o norte. Sigamos para o Cinzal.", "en": "Orsolo's notebooks show the iron from here still goes north. Let us march on the Cinzal." }, "duration": 6 } }
           ] }
       ] },

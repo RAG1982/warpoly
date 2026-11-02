@@ -15,7 +15,7 @@
     "hints": [
       { "pt-BR": "A cabeça de ponte fica ao norte. A barcaça da Liga já desembarcou seis tropas; mantenha-as perto dos poços.", "en": "The bridgehead is to the north. The League's barge has already landed six troops; keep them near the wells." },
       { "pt-BR": "Dica: a frota de Grok nasce no mar a leste e contorna a costa norte. Fragatas do Estaleiro (na costa, perto da base) a encontram antes da praia.", "en": "Tip: Grok's fleet is born at sea to the east and rounds the north coast. Frigates from the Shipyard (on the coast, near your base) meet it before the beach." },
-      { "pt-BR": "Dica: o islote dos náufragos só se alcança pelo mar. Uma Fragata limpa a praia; uma Barcaça leva o resgate.", "en": "Tip: the castaways' islet is reachable by sea only. A Frigate clears the beach; a Transport Barge brings the rescue." },
+      { "pt-BR": "Dica: a ilhota dos náufragos só se alcança pelo mar. Uma Fragata limpa a praia; uma Barcaça leva o resgate.", "en": "Tip: the castaways' islet is reachable by sea only. A Frigate clears the beach; a Transport Barge brings the rescue." },
       { "pt-BR": "O Capitão Brann é um HERÓI: tem mana e três habilidades (Z, X, C) e só existe um. Se ele morrer, a missão está perdida.", "en": "Captain Brann is a HERO: he has mana and three abilities (Z, X, C), and there is only one of him. If he dies the mission is lost." }
     ]
   },
@@ -42,7 +42,7 @@
       "description": { "pt-BR": "Tenha ao menos uma unidade em cada poço ao mesmo tempo. O contador zera se um inimigo chegar a 12 u de um deles.", "en": "Have at least one unit at each well at the same time. The counter resets if an enemy comes within 12 u of one of them." },
       "marker": { "area": { "anchor": "waterWell2", "r": 40 }, "style": "goal", "seconds": 240 } },
     { "id": "p-grok", "type": "destroy", "priority": "primary", "select": { "tag": "grok" }, "count": 1,
-      "title": { "pt-BR": "Derrotar Grok, o chefe dos Clãs", "en": "Defeat Grok, the Clans' chief" },
+      "title": { "pt-BR": "Derrotar Grok, o mestre de cerco dos Clãs", "en": "Defeat Grok, the Clans' siege master" },
       "description": { "pt-BR": "Grok, um Ogro-Feiticeiro, comanda a contra-ofensiva por terra. Ele marcha para a cabeça de ponte aos 10 minutos.", "en": "Grok, an Ogre Mage, leads the land counter-offensive. He marches for the bridgehead at 10 minutes." } },
     { "id": "p-fleet", "type": "destroy", "priority": "primary", "select": { "tag": "grok_fleet" }, "count": 8,
       "title": { "pt-BR": "Afundar as 8 galés da esquadra de Grok", "en": "Sink Grok's 8 galleys" },
@@ -89,7 +89,7 @@
     { "id": "raid-1", "when": { "type": "time", "at": 240 },
       "actions": [
         { "type": "spawn", "owner": 1, "units": [{ "type": "grunt", "count": 4 }, { "type": "axethrower", "count": 2 }], "anchor": "enemyStart", "dx": -6, "dz": -6, "spread": 3, "order": { "kind": "attackMove", "anchor": "waterWell2" } },
-        { "type": "message", "text": { "pt-BR": "Primeira leva dos Clãs: Talhadores e Lanceiros-Machado marcham para o poço do centro.", "en": "First Clan wave: Grunts and Axe Throwers march for the central well." } }
+        { "type": "message", "text": { "pt-BR": "Primeira leva dos Clãs: Talhadores e Lanceiros-Machado marcham para o poço do centro.", "en": "First Clan wave: Slashers and Axe Throwers march for the central well." } }
       ] },
     { "id": "raid-2", "when": { "type": "time", "at": 420 },
       "actions": [
@@ -100,7 +100,7 @@
       "actions": [
         { "type": "spawn", "owner": 1, "unitType": "ogre_mage", "count": 1, "anchor": "enemyStart", "dx": 0, "dz": -8, "tag": "grok", "displayName": { "pt-BR": "Grok", "en": "Grok" }, "markColor": "#f97316", "order": { "kind": "attackMove", "anchor": "bridgehead1" } },
         { "type": "spawn", "owner": 1, "units": [{ "type": "catapult", "count": 1 }, { "type": "grunt", "count": 6 }, { "type": "ogre", "count": 1 }], "anchor": "enemyStart", "dx": -4, "dz": -8, "spread": 3, "tag": "grok_wave", "order": { "kind": "attackMove", "anchor": "bridgehead1" } },
-        { "type": "dialog", "speaker": { "pt-BR": "Grok", "en": "Grok" }, "portrait": "🪓", "text": { "pt-BR": "Ogro-feiticeiro e tropa na estrada! Quero a cabeça de ponte antes da noite.", "en": "Ogre mage and troops on the road! I want the bridgehead before nightfall." }, "duration": 8 }
+        { "type": "dialog", "speaker": { "pt-BR": "Grok", "en": "Grok" }, "portrait": "🪓", "text": { "pt-BR": "Ogro-Feiticeiro e tropa na estrada! Quero a cabeça de ponte antes da noite.", "en": "Ogre mage and troops on the road! I want the bridgehead before nightfall." }, "duration": 8 }
       ] },
     { "id": "fleet-1", "when": { "type": "time", "at": 660 },
       "actions": [
@@ -147,7 +147,7 @@
     { "id": "grok-down", "when": { "type": "objective", "id": "p-grok", "status": "completed" },
       "actions": [
         { "type": "sound", "id": "victory" },
-        { "type": "dialog", "speaker": { "pt-BR": "Capitão Brann", "en": "Captain Brann" }, "portrait": "⚔️", "text": { "pt-BR": "Grok caiu. A contra-ofensiva dos Clãs perdeu o chefe.", "en": "Grok has fallen. The Clans' counter-offensive lost its chief." }, "duration": 7 }
+        { "type": "dialog", "speaker": { "pt-BR": "Capitão Brann", "en": "Captain Brann" }, "portrait": "⚔️", "text": { "pt-BR": "Grok caiu. A contra-ofensiva dos Clãs perdeu o comandante.", "en": "Grok has fallen. The Clans' counter-offensive lost its commander." }, "duration": 7 }
       ] },
     { "id": "fleet-down", "when": { "type": "objective", "id": "p-fleet", "status": "completed" },
       "actions": [
@@ -164,7 +164,7 @@
         { "type": "cutscene", "id": "finale", "duration": 12, "skippable": true,
           "steps": [
             { "at": 0, "anchor": "waterWell2", "zoom": 1.1, "dialog": { "speaker": { "pt-BR": "Capitão Brann", "en": "Captain Brann" }, "portrait": "⚔️", "text": { "pt-BR": "Miragem é nossa: os três poços, a cabeça de ponte e o mar. Os Clãs perderam a última ilha antes da costa.", "en": "Mirage is ours: the three wells, the bridgehead and the sea. The Clans lost the last isle before their coast." }, "duration": 6 } },
-            { "at": 6, "anchor": "bridgehead1", "zoom": 1.15, "dialog": { "speaker": { "pt-BR": "Capitão Brann", "en": "Captain Brann" }, "portrait": "⚔️", "text": { "pt-BR": "Daqui se vê a costa de Cinzara. Este é o caminho de volta para o outro lado do mar.", "en": "From here you can see the coast of Cinzara. This is the way back to the other side of the sea." }, "duration": 6 } }
+            { "at": 6, "anchor": "bridgehead1", "zoom": 1.15, "dialog": { "speaker": { "pt-BR": "Capitão Brann", "en": "Captain Brann" }, "portrait": "⚔️", "text": { "pt-BR": "Daqui se vê a costa de Cinzara. Este é o caminho para o outro lado do mar.", "en": "From here you can see the coast of Cinzara. This is the way to the other side of the sea." }, "duration": 6 } }
           ] }
       ] },
     { "id": "finale-clock", "when": { "type": "trigger", "id": "all-done" }, "actions": [ { "type": "incVar", "name": "fin_clock" } ] },

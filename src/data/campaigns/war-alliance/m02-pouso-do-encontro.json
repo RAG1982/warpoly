@@ -5,7 +5,7 @@
   "hidden": true,
   "title": {
     "pt-BR": "O Pouso do Encontro",
-    "en": "Landing of the Meeting"
+    "en": "The Meeting Landing"
   },
   "subtitle": {
     "pt-BR": "Liga de Aurelan, missão 2",
@@ -40,7 +40,7 @@
       },
       {
         "pt-BR": "Um orc de pano branco é um Emissário: poupá-lo rende uma recompensa.",
-        "en": "An orc with a white cloth is an Emissary: sparing him pays a reward."
+        "en": "An orc with a white cloth is an Envoy: sparing him pays a reward."
       }
     ]
   },
@@ -1229,7 +1229,7 @@
       },
       "title": {
         "pt-BR": "Poupar o Emissário",
-        "en": "Spare the Emissary"
+        "en": "Spare the Envoy"
       },
       "description": {
         "pt-BR": "Honra: o orc do pano branco não é inimigo.",
@@ -1791,14 +1791,14 @@
           "type": "message",
           "text": {
             "pt-BR": "Emissário poupado: +100 de ouro.",
-            "en": "Emissary spared: +100 gold."
+            "en": "Envoy spared: +100 gold."
           }
         },
         {
           "type": "dialog",
           "speaker": {
             "pt-BR": "Emissário do Chama-Baixa",
-            "en": "Low Flame Emissary"
+            "en": "Low Flame Envoy"
           },
           "portrait": "🏳️",
           "text": {
@@ -1997,7 +1997,7 @@
           "type": "defeat",
           "text": {
             "pt-BR": "O Paço Real caiu. A Liga perdeu a cabeça de ponte.",
-            "en": "The Keep has fallen. The League lost its beachhead."
+            "en": "The Palace has fallen. The League lost its beachhead."
           }
         }
       ]

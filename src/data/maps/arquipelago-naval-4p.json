@@ -301,73 +301,73 @@
       "type": "oil",
       "x": 61.52,
       "z": 61.52,
-      "amount": 5000
+      "amount": 10000
     },
     {
       "type": "oil",
       "x": -61.52,
       "z": 61.52,
-      "amount": 5000
+      "amount": 10000
     },
     {
       "type": "oil",
       "x": -61.52,
       "z": -61.52,
-      "amount": 5000
+      "amount": 10000
     },
     {
       "type": "oil",
       "x": 61.52,
       "z": -61.52,
-      "amount": 5000
+      "amount": 10000
     },
     {
       "type": "oil",
       "x": 0,
       "z": 31.33,
-      "amount": 5000
+      "amount": 10000
     },
     {
       "type": "oil",
       "x": -31.33,
       "z": 0,
-      "amount": 5000
+      "amount": 10000
     },
     {
       "type": "oil",
       "x": 0,
       "z": -31.33,
-      "amount": 5000
+      "amount": 10000
     },
     {
       "type": "oil",
       "x": 31.33,
       "z": 0,
-      "amount": 5000
+      "amount": 10000
     },
     {
       "type": "oil",
       "x": 0,
       "z": 47.33,
-      "amount": 5000
+      "amount": 10000
     },
     {
       "type": "oil",
       "x": -47.33,
       "z": 0,
-      "amount": 5000
+      "amount": 10000
     },
     {
       "type": "oil",
       "x": 0,
       "z": -47.33,
-      "amount": 5000
+      "amount": 10000
     },
     {
       "type": "oil",
       "x": 47.33,
       "z": 0,
-      "amount": 5000
+      "amount": 10000
     }
   ],
   "forests": [

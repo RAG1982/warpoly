@@ -104,7 +104,7 @@ describe('ResourceDeposit (jazidas)', () => {
 
   it('padrões de quantidade por tipo', () => {
     expect(new ResourceDeposit(terrain, 'gold', 0, 0).maxResources).toBe(2500);
-    expect(new ResourceDeposit(terrain, 'oil', 0, 0).maxResources).toBe(5000);
+    expect(new ResourceDeposit(terrain, 'oil', 0, 0).maxResources).toBe(10000);
   });
 
   it('vagas dentro da mina: excedente espera em fila FIFO e entra ao liberar', () => {

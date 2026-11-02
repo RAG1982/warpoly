@@ -14605,25 +14605,25 @@
       "type": "oil",
       "x": -90,
       "z": -82,
-      "amount": 5000
+      "amount": 10000
     },
     {
       "type": "oil",
       "x": -78,
       "z": -94,
-      "amount": 5000
+      "amount": 10000
     },
     {
       "type": "oil",
       "x": 68,
       "z": -8,
-      "amount": 5000
+      "amount": 10000
     },
     {
       "type": "oil",
       "x": 84,
       "z": -6,
-      "amount": 5000
+      "amount": 10000
     },
     {
       "type": "gold",

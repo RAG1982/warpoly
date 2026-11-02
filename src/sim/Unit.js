@@ -13,7 +13,7 @@ import { REPAIR_INTERVAL, MAX_WORKERS_PER_BUILDING } from './repair.js';
 import { createStatusSlots, createMods, tickStatuses, clearStatuses, removeStatus, STATUS_DEFS } from './statuses.js';
 import { isDetectedBy } from './detection.js';
 import { canTarget, defaultCanHitAir, defaultCanHitNaval } from './targeting.js';
-import { FLAMESHIELD_DAMAGE, WATER_LEVEL, NAVAL_MAX_HEIGHT, OIL_LOAD_TIME, SHORE_REACH, NAVAL_MESH_SCALE } from '../data/combat.js';
+import { FLAMESHIELD_DAMAGE, WATER_LEVEL, NAVAL_MAX_HEIGHT, OIL_LOAD_TIME, OIL_UNLOAD_TIME, SHORE_REACH, NAVAL_MESH_SCALE } from '../data/combat.js';
 import { getAbility } from '../data/abilities.js';
 import { visualScaleOf } from '../data/visualScale.js';
 import { followBoat, detachFromBoat, killCargo, updateBoarding, updateUnloading } from './transport.js';
@@ -231,6 +231,8 @@ export class Unit {
     this.carrying = { type: null, amount: 0, max: def.isTanker ? CARRY.oil : CARRY.wood };
     /** F4-07a: segundos já gastos carregando petróleo junto à plataforma (petroleiro). */
     this._loadT = 0;
+    /** OIL-BALANCE: segundos já gastos descarregando petróleo na Refinaria (petroleiro; `updateReturning`). */
+    this._unloadT = 0;
     // F3-04: timer de "dentro da mina/pedreira" (estado `insideMine`) — ver `updateInsideMine`.
     this._mineTimer = 0;
     this.actionTimer = 0;
@@ -2092,10 +2094,17 @@ export class Unit {
           });
         }
       }
+      // OIL-BALANCE: o petroleiro descarrega o petróleo em OIL_UNLOAD_TIME s junto à Refinaria (antes, instantâneo).
+      if (this.isTanker && this.carrying.amount > 0) {
+        this._unloadT += delta;
+        if (this._unloadT < OIL_UNLOAD_TIME) return;
+      }
+      this._unloadT = 0;
       this.depositResources(gameManager);
       return;
     }
 
+    this._unloadT = 0;
     this.moveTowards(targetPos.x, targetPos.z, delta);
   }
 

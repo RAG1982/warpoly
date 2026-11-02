@@ -381,7 +381,7 @@ function slotLayout(site, mirror, lumber) {
 
 /** Poços de petróleo só em água com profundidade navegável (`NAVAL_MAX_HEIGHT` = 0,1 menos uma folga) e `amount` padrão dos mapas navais. */
 const WELL_MAX_HEIGHT = 0.05;
-export const WELL_AMOUNT = 5000;
+export const WELL_AMOUNT = 10000; // OIL-BALANCE: 5000 → 10000 (custos de navio dobrados; poço dobrado para manter a oferta por partida)
 export const WELLS_PER_BASE = 2;
 
 /**

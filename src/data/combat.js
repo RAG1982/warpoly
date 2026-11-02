@@ -25,8 +25,10 @@ export const WATER_LEVEL = 0.5;
 export const NAVAL_MIN_DEPTH = 0.4;
 /** F4-07a: altura máxima do terreno em que um navio pode estar (`WATER_LEVEL − NAVAL_MIN_DEPTH`). */
 export const NAVAL_MAX_HEIGHT = WATER_LEVEL - NAVAL_MIN_DEPTH;
-/** F4-07a: segundos que o petroleiro leva para encher o tanque junto à plataforma (`carry_time`). */
-export const OIL_LOAD_TIME = 3;
+/** F4-07a: segundos que o petroleiro leva para encher o tanque junto à plataforma (`carry_time`). OIL-BALANCE: 3 → 6. */
+export const OIL_LOAD_TIME = 6;
+/** OIL-BALANCE: segundos que o petroleiro leva para descarregar na Refinaria/Caldeirão (antes a entrega era instantânea). */
+export const OIL_UNLOAD_TIME = 4;
 /** F4-07b: navios só atingem terra/construções a até esta distância (u) da margem navegável. */
 export const SHORE_REACH = 2;
 /** F4-07b: distância máxima (borda a borda) entre a margem do terrestre e a barcaça para embarcar. */

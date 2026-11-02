@@ -30,7 +30,7 @@
 | **Petróleo** 🔒 | Plataforma sobre poço no mar — **liberado só no Centro nível 2** (D1) | Refinaria/Estaleiro | navios, upgrades navais, cerco nível 2 |
 | **Suprimento** (população) | Casa/Toca (+5), Fazenda/Chiqueiro (+5), Centro (+5) | — | limite de exército (máx. 150) |
 
-- Carga por viagem: 10 ouro · 10 madeira · 8 pedra · 100 petróleo (petroleiro).
+- Carga por viagem: 10 ouro · 10 madeira · 8 pedra · 100 petróleo (petroleiro; OIL-BALANCE: encher leva 6 s junto à plataforma e descarregar 4 s na Refinaria).
 - Bônus: Serraria nível 2 (+25% madeira); Centro nível 2/3 (+10%/+20% ouro); Canteiro (+20% pedra).
 - **Decisão D5**: Casa/Toca **permanecem** (+5 suprimento, 50 madeira, nível 1); o **ouro passivo das fazendas foi removido** — ouro só vem de minas. Fazenda/Chiqueiro: +5 suprimento e desbloqueiam o Quartel (requisito), como no WC2.
 
@@ -63,7 +63,7 @@ variar ligeiramente com o RNG do mapa/IA vizinha.
 |---|---|---|---|---|
 | 1 | **Paço Real** | **Salão do Clã** | — | Fazenda, Quartel, Serraria, Ferraria, Torre de Vigia, Muralha; Trabalhador, Infantaria, Atirador |
 | 2 | **Fortaleza** | **Bastião** | 1000 ouro · 400 madeira · 300 pedra · 60 s | Estábulo/Covil, Oficina, **Estaleiro + petróleo**, Canteiro, upgrades de torre, nível 2 de pesquisas, classe avançada do atirador |
-| 3 | **Castelo de Aldária** | **Cidadela de Ferro** | 2000 ouro · 800 madeira · 600 pedra · 200 petróleo · 90 s | Templo/Altar, Torre Arcana/Santuário, Aviário/Ninho, cavalaria avançada, navios pesados |
+| 3 | **Castelo de Aldária** | **Cidadela de Ferro** | 2000 ouro · 800 madeira · 600 pedra · 266 petróleo · 90 s | Templo/Altar, Torre Arcana/Santuário, Aviário/Ninho, cavalaria avançada, navios pesados |
 
 Modelos: o Castelo atual (Blender) vira o **nível 3** humano; os níveis 1–2 precisam de modelos novos (F7). O Grande Salão atual vira o nível 2 orc.
 
@@ -128,9 +128,9 @@ Upgrades de classe: Patrulheiro/Enfurecido (Serraria, nível 2): +alcance/+visã
 | Batedor aéreo ✅ F4-06 | **Planador de Engenho** | **Balão de Guerra** | sem ataque; visão 30; detecta invisíveis; 110/60/20, PV 120 | 2 (Oficina) |
 | Ataque aéreo ✅ F4-06 | **Cavaleiro Grifo** | **Serpe de Guerra** | PV 350, 38 mágico em área r1,2, 250/100/0; só atingível por atiradores/torres/navios/magias | 3 (Aviário/Ninho) |
 | Petroleiro ✅ F4-07a | Petroleiro | Petroleiro | coleta petróleo, constrói plataforma | 2 |
-| Destróier ✅ F4-07b | **Fragata** | **Galé de Guerra** | anti-ar e anti-navio; PV 280, alcance 12; 200/100/0 +50 petróleo | 2 |
-| Transporte ✅ F4-07b | Barcaça | Barcaça | 6 unidades (`LOAD`/`UNLOAD`); PV 220; 150/100/0 +30 petróleo | 2 |
-| Pesado ✅ F4-07b | **Couraçado** | **Leviatã de Ferro** | longo alcance 22 (mín. 6), balístico em área, destrói costa; PV 520; 300/200/0 +120 petróleo | 3 (+Fundição) |
+| Destróier ✅ F4-07b | **Fragata** | **Galé de Guerra** | anti-ar e anti-navio; PV 280, alcance 12; 200/100/0 +100 petróleo | 2 |
+| Transporte ✅ F4-07b | Barcaça | Barcaça | 6 unidades (`LOAD`/`UNLOAD`); PV 220; 150/100/0 +60 petróleo | 2 |
+| Pesado ✅ F4-07b | **Couraçado** | **Leviatã de Ferro** | longo alcance 22 (mín. 6), balístico em área, destrói costa; PV 520; 300/200/0 +240 petróleo | 3 (+Fundição) |
 
 ### 5.3 Heróis (campanha **e** escaramuça — decisão D6)
 Humanos: Rainha Elyra (Templária), Mestre Arcano Oren, Capitão Brann. Orcs: Drogath Punho-de-Brasa (Talhador), Vozgul a Profetisa (Necromante), Grok Quebra-Muros (Ogro Feiticeiro).

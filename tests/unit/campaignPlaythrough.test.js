@@ -717,7 +717,7 @@ describe('campanha do Reino: liberação progressiva e uso das novidades (F8-05b
     const yard = build(gm, 'shipyard', spot.x, spot.z);
     settle(gm);
     expect(statusOf(gm, 'build-shipyard')).toBe('completed');
-    expect(money(gm).oil).toBe(oil0 + 150); // suprimentos de Brumar
+    expect(money(gm).oil).toBe(oil0 + 300); // suprimentos de Brumar
     // Frota: 4 Fragatas treinadas no Estaleiro (custam petróleo) atacam a frota inimiga (combate naval de verdade; só o trajeto é encurtado)
     give(gm, { oil: 600 });
     const oilBefore = money(gm).oil;

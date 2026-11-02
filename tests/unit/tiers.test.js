@@ -39,7 +39,7 @@ describe('tiers.js (dados puros)', () => {
 
   it('getHqUpgradeCost: nível 2 e 3 batem com a spec', () => {
     expect(getHqUpgradeCost(2)).toEqual({ gold: 667, wood: 267, stone: 200, time: 60 });
-    expect(getHqUpgradeCost(3)).toEqual({ gold: 1333, wood: 533, stone: 400, oil: 133, time: 90 });
+    expect(getHqUpgradeCost(3)).toEqual({ gold: 1333, wood: 533, stone: 400, oil: 266, time: 90 });
     expect(getHqUpgradeCost(4)).toBeNull();
   });
 });

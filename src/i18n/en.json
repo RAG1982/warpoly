@@ -180,6 +180,7 @@
   "hud.playAgain": "Play again",
   "hud.popGranted": "+{n} Population",
   "hud.population": "Population",
+  "hud.popCapQueue": "Population cap reached (including the queue)! Build more houses.",
   "hud.queueFull": "Training queue full! (Max 6)",
   "hud.queued": "Queued",
   "hud.repair": "Repair",

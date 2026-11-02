@@ -352,6 +352,17 @@ export class UIManager {
   }
 
   /** `severity` (F6-05): 'danger' | 'warn' | 'good' colore a borda do banner. */
+  /** População + unidades já na fila de treino >= teto? Avisa o jogador (antes era recusa silenciosa no sim). */
+  _popBlocked(ownerId) {
+    let queued = 0;
+    if (this.gm.buildings) this.gm.buildings.forEach((bld) => { if (bld.ownerId === ownerId && bld.queue) queued += bld.queue.length; });
+    if (this.gm.population + queued < this.gm.maxPopulation) return false;
+    this.sound.playChop();
+    if (this.gm.population >= this.gm.maxPopulation) this.alerts ? this.alerts.raise('food') : this.showNotification(t('alert.food'));
+    else this.showNotification(t('hud.popCapQueue'));
+    return true;
+  }
+
   showNotification(msg, duration = 4000, severity = null) {
     if (!this.notificationBox) return;
     this.notificationBox.innerText = localizeSimText(msg);
@@ -497,10 +508,7 @@ export class UIManager {
           this.showNotification(t('hud.queueFull'));
           return;
         }
-        if (this.gm.population >= this.gm.maxPopulation) {
-          this.alerts ? this.alerts.raise('food') : this.showNotification(t('alert.food'));
-          return;
-        }
+        if (this._popBlocked(b.ownerId)) return;
         if (cfg && !this.gm.canAfford(cfg.cost)) {
           this.sound.playChop();
           this.showNotification(t('hud.cantAffordTrain', { name: unitLabel(trainType) }));
@@ -710,10 +718,7 @@ export class UIManager {
             this.showNotification(t('hud.queueFull'));
             return;
           }
-          if (this.gm.population >= this.gm.maxPopulation) {
-            this.alerts ? this.alerts.raise('food') : this.showNotification(t('alert.food'));
-            return;
-          }
+          if (this._popBlocked(b.ownerId)) return;
           if (cfg && !this.gm.canAfford(cfg.cost)) {
             this.sound.playChop();
             this.showNotification(t('hud.cantAffordTrain', { name: unitLabel(trainType) }));

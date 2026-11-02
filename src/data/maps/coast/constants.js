@@ -72,5 +72,7 @@ export const DEFAULT_OPTIONS = Object.freeze({
   shoals: 0, // manchas de mar raso espalhadas (`shoals.js`): recifes (areia) ou banquisa (gelo)
   shoalRadius: [6, 14],
   shoalBiome: 'sand', // 'sand' | 'ice'
-  shoalHeight: 0.3
+  shoalHeight: 0.3,
+  continentBiomes: null, // SKIRMISH-MAPS: biomas dos 2 continentes (['ice', 'ice']); null = lush (oeste) × arid (leste)
+  bridges: null // SKIRMISH-MAPS: pontes de terra entre massas: [{ a, b, width, bow?, from?, to? }] (índices de entidade); null = nenhuma
 });

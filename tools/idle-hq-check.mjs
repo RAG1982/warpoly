@@ -4,7 +4,7 @@
  * Mede, por dificuldade, o tempo (segundos simulados) até a PRIMEIRA construção do parado cair, até o Centro (HQ) cair
  * e até ele ser derrotado (Destruir tudo). Node puro, determinístico (mesma seed ⇒ mesmos números).
  *
- *   node tools/idle-hq-check.mjs [--seeds 6] [--first 1] [--maps continental-1v1,estreito-1v1] [--diffs easy,normal,hard,brutal]
+ *   node tools/idle-hq-check.mjs [--seeds 6] [--first 1] [--maps duelo-continental-1,estreito-naval-1v1] [--diffs easy,normal,hard,brutal]
  *                                [--max-minutes 15] [--goal 360] [--json out.json]
  *
  * Sai com 0 se Fácil e Normal não derrubam o HQ antes de --goal segundos (padrão 360 = 6 min); 4 caso contrário.
@@ -21,7 +21,7 @@ const args = process.argv.slice(2);
 const opt = (n, d) => { const i = args.indexOf(n); return i >= 0 ? args[i + 1] : d; };
 const seeds = Number(opt('--seeds', 6));
 const first = Number(opt('--first', 1));
-const maps = opt('--maps', 'continental-1v1,estreito-1v1,campos-1v1,desfiladeiro-1v1').split(',');
+const maps = opt('--maps', 'duelo-continental-1,estreito-naval-1v1,vale-rio-1v1,desfiladeiro-lava-1v1').split(',');
 const diffs = opt('--diffs', 'easy,normal,hard,brutal').split(',');
 const maxMinutes = Number(opt('--max-minutes', 15));
 const goal = Number(opt('--goal', 360));

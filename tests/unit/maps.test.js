@@ -12,10 +12,15 @@ describe('mapas (src/data/maps/*.json)', () => {
     expect(getMap(DEFAULT_MAP_ID)).toBeTruthy();
   });
 
-  it('listMaps devolve pelo menos os 2 mapas da F2-05', () => {
+  it('SKIRMISH-MAPS: listMaps devolve os 12 mapas de Escaramuça (6 do MUNDO-7 + 6 novos) e esconde os 9 antigos (mantidos só para a campanha clássica/Horda)', () => {
     const ids = listMaps().map((m) => m.id);
-    expect(ids).toContain('continental-1v1');
-    expect(ids).toContain('ilhas-4p');
+    for (const id of ['duelo-continental-1', 'duelo-continental-2', 'duelo-continental-3', 'ilha-unica-1', 'ilha-unica-2', 'ilha-unica-3',
+      'estreito-naval-1v1', 'arquipelago-pontes-4p', 'vale-rio-1v1', 'desfiladeiro-lava-1v1', 'planalto-rocha-4p', 'bosques-antigos-2v2']) expect(ids).toContain(id);
+    for (const id of ['continental-1v1', 'ilhas-4p', 'estreito-1v1', 'campos-1v1', 'desfiladeiro-1v1', 'vales-2v2', 'bosques-2v2', 'planalto-ffa-4p', 'arquipelago-naval-4p']) {
+      expect(ids).not.toContain(id);
+      expect(getMap(id).hidden).toBe(true); // ainda existem: as campanhas clássica (alliance) e da Horda apontam para eles
+    }
+    expect(ids).toHaveLength(12);
   });
 
   it('NEW-43: ilhas-4p tem madeira suficiente (>= 8 árvores planejadas por jogador; antes só 12 nasciam e a economia travava)', () => {
@@ -40,7 +45,6 @@ describe('mapas (src/data/maps/*.json)', () => {
   });
 
   it('F4-07a: estreito-1v1 está registrado e tem 2 poços de petróleo; ilhas-4p ganhou 1 por margem', () => {
-    expect(listMaps().map((m) => m.id)).toContain('estreito-1v1');
     const oil = (id) => getMap(id).resources.filter((r) => r.type === 'oil');
     expect(oil('estreito-1v1').length).toBe(2);
     expect(oil('ilhas-4p').length).toBe(2);

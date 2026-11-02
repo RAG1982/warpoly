@@ -3,7 +3,7 @@
  * F2-08 — partida IA×IA headless em Node puro (sem Vite, navegador, DOM ou WebGL).
  *
  *   node tools/headless-match.js --seed 1
- *   node tools/headless-match.js --seed 7 --map ilhas-4p --difficulty hard --victory regicide --max-minutes 45
+ *   node tools/headless-match.js --seed 7 --map arquipelago-pontes-4p --difficulty hard --victory regicide --max-minutes 45
  *   node tools/headless-match.js --seed 3 --ffa --json
  *
  * Todos os jogadores viram IA (inclusive o "local"), a simulação roda em passos fixos de SIM_DT (20 Hz)

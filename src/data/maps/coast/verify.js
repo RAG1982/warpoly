@@ -35,7 +35,8 @@ export function verifyCoastMap(map, opts = {}) {
   const lv = map.lava, rv = map.rivers;
 
   // 1. cada entidade é UMA massa de terra e não há fragmentos soltos
-  if (st.landComponents !== entities.length) fail('componentes', `${st.landComponents} massas de terra para ${entities.length} entidades`);
+  const expectedComponents = entities.length - (o.bridges?.length ?? 0); // SKIRMISH-MAPS: cada ponte de terra funde duas massas numa
+  if (st.landComponents !== expectedComponents) fail('componentes', `${st.landComponents} massas de terra para ${entities.length} entidades${o.bridges?.length ? ` e ${o.bridges.length} pontes` : ''}`);
   st.entityComponents.forEach((n, k) => { if (n !== 1) fail('entidade-partida', `${entities[k].id} tem ${n} pedaços`); });
   for (const e of entities) if (!(e.area > 10)) fail('entidade-minuscula', `${e.id} com ${e.area.toFixed(1)} u²`);
 

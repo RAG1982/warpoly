@@ -3,7 +3,7 @@ import {
   createSetup, normalizeSetup, setMap, addAI, removeAI, cycleTeam, pickColor, assignSlots, validateSetup,
   buildMatchConfig, parseSeed, maxAIs, loadSetup, saveSetup, RESOURCE_PRESETS, STORAGE_KEY, MAX_TEAMS
 } from '../../src/ui/skirmishSetup.js';
-import { getMap, listMaps } from '../../src/data/maps/index.js';
+import { getMap, listMaps, DEFAULT_MAP_ID } from '../../src/data/maps/index.js';
 import { validateMatchConfig, PLAYER_COLORS } from '../../src/sim/MatchConfig.js';
 import { STARTING_RESOURCES } from '../../src/data/factions.js';
 
@@ -51,13 +51,13 @@ describe('skirmishSetup (F6-02)', () => {
   });
 
   it('removeAI mantém pelo menos 1', () => {
-    let s = addAI(createSetup('ilhas-4p'));
+    let s = addAI(createSetup('arquipelago-pontes-4p'));
     s = removeAI(removeAI(s, 0), 0);
     expect(s.ai).toHaveLength(1);
   });
 
   it('cores e slots únicos em toda combinação; trocar cor faz permuta', () => {
-    let s = createSetup('ilhas-4p');
+    let s = createSetup('arquipelago-pontes-4p');
     s = addAI(addAI(s));
     const colors = [s.localColor, ...s.ai.map((a) => a.color)];
     expect(new Set(colors).size).toBe(colors.length);
@@ -73,7 +73,7 @@ describe('skirmishSetup (F6-02)', () => {
   });
 
   it('cores duplicadas no storage são corrigidas', () => {
-    const n = normalizeSetup({ localColor: 2, ai: [{ color: 2 }, { color: 2 }, { color: 2 }], mapId: 'ilhas-4p' });
+    const n = normalizeSetup({ localColor: 2, ai: [{ color: 2 }, { color: 2 }, { color: 2 }], mapId: 'arquipelago-pontes-4p' });
     const c = [n.localColor, ...n.ai.map((a) => a.color)];
     expect(new Set(c).size).toBe(c.length);
     expect(c.every((x) => x >= 0 && x < PLAYER_COLORS.length)).toBe(true);
@@ -112,7 +112,7 @@ describe('skirmishSetup (F6-02)', () => {
   });
 
   it('facção aleatória da IA é determinística pela semente', () => {
-    const s = { ...createSetup('ilhas-4p'), ai: addAI(addAI(createSetup('ilhas-4p'))).ai.map((a) => ({ ...a, faction: 'random' })) };
+    const s = { ...createSetup('arquipelago-pontes-4p'), ai: addAI(addAI(createSetup('arquipelago-pontes-4p'))).ai.map((a) => ({ ...a, faction: 'random' })) };
     const a = buildMatchConfig(s, { seed: 99 }).players.map((p) => p.factionId);
     const b = buildMatchConfig(s, { seed: 99 }).players.map((p) => p.factionId);
     expect(a).toEqual(b);
@@ -138,19 +138,25 @@ describe('skirmishSetup (F6-02)', () => {
 
   it('persistência: ida e volta; lixo no storage vira padrão; chaves legadas valem de base', () => {
     const st = fakeStorage();
-    const s = addAI({ ...createSetup('ilhas-4p'), localFaction: 'orc', resources: 'high', seed: 'abc' });
+    const s = addAI({ ...createSetup('arquipelago-pontes-4p'), localFaction: 'orc', resources: 'high', seed: 'abc' });
     saveSetup(s, st);
     expect(loadSetup(st)).toEqual(normalizeSetup(s));
     const bad = fakeStorage({ [STORAGE_KEY]: '{nao é json' });
     expect(loadSetup(bad)).toEqual(createSetup());
     const junk = fakeStorage({ [STORAGE_KEY]: JSON.stringify({ mapId: 'x', ai: 'oops', resources: 'zzz', localFaction: 'elfo' }) });
     expect(loadSetup(junk)).toEqual(createSetup());
-    const legacy = loadSetup(fakeStorage({ 'warpoly.faction': 'orc', 'warpoly.difficulty': 'hard', 'warpoly.victory': 'regicide', 'warpoly.map': 'ilhas-4p' }));
+    const legacy = loadSetup(fakeStorage({ 'warpoly.faction': 'orc', 'warpoly.difficulty': 'hard', 'warpoly.victory': 'regicide', 'warpoly.map': 'arquipelago-pontes-4p' }));
     expect(legacy.localFaction).toBe('orc');
     expect(legacy.ai[0].difficulty).toBe('hard');
     expect(legacy.ai[0].faction).toBe('human');
     expect(legacy.victoryMode).toBe('regicide');
-    expect(legacy.mapId).toBe('ilhas-4p');
+    expect(legacy.mapId).toBe('arquipelago-pontes-4p');
+  });
+
+  it('SKIRMISH-MAPS: mapa antigo (hidden) salvo no storage cai no mapa padrão', () => {
+    expect(normalizeSetup({ mapId: 'ilhas-4p' }).mapId).toBe(DEFAULT_MAP_ID);
+    expect(normalizeSetup({ mapId: 'tutorial' }).mapId).toBe(DEFAULT_MAP_ID);
+    expect(loadSetup(fakeStorage({ 'warpoly.map': 'continental-1v1' })).mapId).toBe(DEFAULT_MAP_ID);
   });
 
   it('MatchConfig recusa startingResources inválido', () => {

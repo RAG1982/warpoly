@@ -2,7 +2,7 @@
 /**
  * tools/balance-sim.mjs — F3-11: simulação IA×IA em lote para balanceamento.
  * Uso: node --import tools/lib/register-json-loader.mjs tools/balance-sim.mjs \
- *        --games 200 --map continental-1v1 --minutes 20 --out tools/balance-report/ [--tag nome]
+ *        --games 200 --map duelo-continental-1 --minutes 20 --out tools/balance-report/ [--tag nome]
  * Sem DOM/WebGL. Sequencial (1 processo). Ignora o jogador neutro (id 99, time 99).
  * Partidas ímpares (índice 1, 3, …) trocam as facções de slot (cancela viés de posição).
  */
@@ -21,7 +21,7 @@ function arg(name, def) {
   return i >= 0 ? process.argv[i + 1] : def;
 }
 const GAMES = Number(arg('games', 200));
-const MAP = arg('map', 'continental-1v1');
+const MAP = arg('map', 'duelo-continental-1');
 const MINUTES = Number(arg('minutes', 20));
 const OUT = arg('out', 'tools/balance-report/');
 const TAG = arg('tag', '');

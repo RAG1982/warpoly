@@ -1,4 +1,5 @@
 import { describe, it, expect } from 'vitest';
+import { getMap } from '../../src/data/maps/index.js';
 import * as THREE from 'three';
 import { GameManager } from '../../src/core/GameManager.js';
 import { Terrain } from '../../src/world/Terrain.js';
@@ -17,8 +18,8 @@ import { Unit } from '../../src/entities/Unit.js';
  */
 function makeGm(seed = 7) {
   const scene = new THREE.Scene();
-  const terrain = new Terrain();
-  const cfg = createMatchConfig({ seed, headless: true });
+  const terrain = new Terrain(getMap('continental-1v1'));
+  const cfg = createMatchConfig({ mapId: 'continental-1v1', seed, headless: true });
   const gm = new GameManager(terrain, null, null, cfg);
   gm.debugAbilities = true;
   return gm;

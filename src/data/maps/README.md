@@ -97,23 +97,25 @@ Cada mapa é um JSON em `src/data/maps/<id>.json`, registrado em `index.js` (`ge
 
 ## Mapas
 
-- **`continental-1v1`** ("Vale do Rio"): mapa histórico (1×1, 2 jogadores) — convertido de
-  `Terrain.js`/`GameManager.js` sem mudar o resultado (checksum de determinismo idêntico ao
-  master, seed 42). `maxPlayers: 3`: o slot 2 (−14, −46) não faz parte do 1×1 padrão — existe só
-  para o teste/uso de FFA de 3 jogadores que já existia antes da F2-05 (`?ffa=1` no mapa padrão).
-- **`ilhas-4p`** ("Ilhas Gêmeas"): mapa FFA (4 slots, 2 ilhas ligadas por 2 pontes de terra,
-  ampliado para 168×168, playable 156). Jogue com `?map=ilhas-4p&ffa=1`.
-- **`estreito-1v1`** ("Estreito de Vaeloria"): mapa 1v1 naval (2 ilhas ligadas por ponte central, 2 poços de petróleo,
-  ampliado para 168×168, playable 160).
+- **Mapas de Escaramuça (SKIRMISH-MAPS, 2026-11-02)** — 12 mapas em `listMaps()`: `duelo-continental-1..3` e `ilha-unica-1..3` (MUNDO-7, tileset `exuberante`; o padrão `DEFAULT_MAP_ID` é `duelo-continental-1`) + 6 novos gerados pelo assador de costas (`tools/gen-skirmish-maps.mjs`, receita `tools/lib/skirmishMaps.mjs`; prévias em `docs/refs/mundo/previews/escaramuca/`). Os nomes bons dos 9 mapas antigos foram reaproveitados:
 
-- **Pacote skirmish (F8-01)**, gerados com `tools/gen-map.mjs` e salvos como JSON estático (ids e nomes em PT-BR; nomes traduzidos em `src/i18n/*.json`, chave `map.<id>.name`). Testes em `tests/unit/mapsSkirmish.test.js`:
-  - **`campos-1v1`** ("Campos Dourados"): 1×1, 192 (era 160). Gerado com `--seed 1 --players 2 --size 160 --forest 2` e depois ampliado à mão/por script (ver "Ampliação e florestas densas").
-  - **`desfiladeiro-1v1`** ("Desfiladeiro"): 1×1, 176 (era 144). Base: `--seed 2 --players 2 --size 144`.
-  - **`vales-2v2`** ("Vales Verdes"): 4 slots para 2v2, 176 (era 144). Base: `--seed 4 --players 4 --size 144`.
-  - **`bosques-2v2`** ("Bosques Antigos"): 4 slots para 2v2, 192 (era 160). Base: `--seed 5 --players 4 --size 160`.
-  - **`planalto-ffa-4p`** ("Planalto"): FFA de 4, 208 (era 176). Base: `--seed 3 --players 4 --size 176`.
-  - **`arquipelago-naval-4p`** ("Arquipélago"): naval, 4 slots, 224 (era 192; poços de petróleo e costa para Estaleiro). Base: `--seed 3 --players 4 --size 192 --naval --forest 2`.
-  - Não há mapa 1×1 de 96: com a regra de bosques a ≥ 27 dos pátios, o gerador não acha lugar para árvores suficientes nessa área (a seed 1 de 96 tinha 0 árvores). Ver também a nota de bosques no gerador abaixo.
+| id | Nome | Tamanho | Tileset (bioma) | Modo | Naval | Semente | Conteúdo |
+|---|---|---|---|---|---|---|---|
+| `estreito-naval-1v1` | Estreito de Vaeloria | 224 | `inverno` (neve/gelo) | 1×1 | sim | 1 | 2 continentes de gelo ligados por um istmo central de 13 u; o mar contorna o istmo ao norte e ao sul, com ilhotas; 2 poços por base + 2 disputados no mar |
+| `arquipelago-pontes-4p` | Arquipélago | 256 | `deserto` | FFA 4 | sim | 3 | 4 ilhas desérticas/rochosas nos cantos ligadas em cadeia por 3 pontes de terra (a 4ª aresta fica aberta: o mar do centro dá a volta), 2 ilhas no mar do meio; 2 poços por base + 4 disputados no centro |
+| `vale-rio-1v1` | Vale do Rio | 224 | `verdejante` | 1×1 | não | 1 | continente verde simétrico (180°) cortado por rios com 4 vaus |
+| `desfiladeiro-lava-1v1` | Desfiladeiro | 208 | `vulcanico` (lava) | 1×1 | não | 2 | ilha vulcânica partida por um rio de lava norte-sul (intransponível) com 2 passagens de rocha: o desfiladeiro |
+| `planalto-rocha-4p` | Planalto | 240 | `pedregoso` | FFA 4 | não | 6 | planalto rochoso, uma base em cada quadrante |
+| `bosques-antigos-2v2` | Bosques Antigos | 240 | `pantano` | 2×2 (4 vagas; times livres) | não | 7 | pântano de mata fechada, 1 rio com vau e 34 bosques |
+
+  Cobertura de biomas: deserto, neve (inverno) e lava (vulcânico) agora existem na Escaramuça; nenhum dos 6 repete o `exuberante` dos duelos/ilhas nem outro entre si. Cada mapa tem 1 mina de ouro inicial + 1 de expansão por base (7.500 cada), pedreiras, 2–4 acampamentos neutros (3–4 guardas, +300 de ouro, jazida de 3.000; a ≥ 34 u das bases, equidistantes das bases mais próximas), critters por bioma, bosques com madeira ≥ 8.000 (× 1,05) por jogador a ≤ 60 u (conferida com o `GameManager` real, partidas 1–3) e `validateMapDef` sem erros nem avisos. **Petróleo em dobro (regra nova):** todo poço dos mapas novos tem 10.000 (`OIL_AMOUNT`; o padrão antigo era 5.000).
+
+  **Navais e a IA:** a IA ainda não constrói navios nem cruza o mar (`AIPerception` trata navios como atiradores/trabalhadores; ver `docs/specs/MUNDO-HISTORIA-CAMPANHA.md` L7). Por isso os 2 navais têm **todas as bases ligadas por terra** (istmo/pontes; `validateMapDef` já avisa `slotsDisconnected` se não), e a IA×IA termina atacando por terra; o petróleo, as frotas e o domínio do mar são do jogador humano (e dos modos multiplayer humano×humano). Os navais do MUNDO-7 em `pendentes/` (bases em terras separadas por mar) continuam fora do registro.
+
+  **Gerador (opções novas, tudo desligado por padrão: os mapas antigos saem byte a byte iguais):** `bridges: [{ a, b, width, bow?, from?, to? }]` (pontes/istmos de terra entre entidades; `verifyCoastMap` espera uma massa a menos por ponte) e `continentBiomes: [oeste, leste]` (biomas dos 2 continentes). Reproduzir: `node tools/gen-skirmish-maps.mjs --id vale-rio-1v1 --seed 1 --write --preview docs/refs/mundo/previews/escaramuca/vale-rio-1v1.png` (`--scan 1-12 --preview-dir /tmp/prev` varre sementes; o ciclo é: prévia a olho → semente → `--write`). O piso de madeira usa folga na afinação do corredor (9.500, estimado) porque o sorteio real da partida pode ficar até ~30 % abaixo da estimativa; se faltar madeira real, a receita tenta sem afinar e depois rejeita a semente. Testes: `tests/unit/mapsSkirmish.test.js`.
+
+- **Mapas antigos (F2-05/F4-07a/F8-01), agora `hidden: true`:** `continental-1v1`, `ilhas-4p`, `estreito-1v1`, `campos-1v1`, `desfiladeiro-1v1`, `vales-2v2`, `bosques-2v2`, `planalto-ffa-4p`, `arquipelago-naval-4p` saíram da lista da Escaramuça (desenho antigo, não gerado pelo assador de costas), mas continuam em `getMap` porque as campanhas clássica (`alliance`, 8 missões) e da Horda (`war-horde`, 12 missões) ainda usam esses ids em `mapId`; sairão quando as missões ganharem palcos `camp-*` (M4). Ids salvos no storage da Escaramuça caem no mapa padrão (`isSkirmishMapId`). Os 12 testes antigos que citam esses ids (campanha, naval, terreno) seguem valendo sobre os JSON ocultos. As seções abaixo ("Ampliação e florestas densas" etc.) descrevem esse legado.
+- **Linha de base do mapa padrão (`duelo-continental-1`):** `node tools/headless-match.js --seed 1` termina aos 28 min simulados (33.620 ticks), vencedor time 1, **checksum 3977225031** (antes: `continental-1v1`, 1053930101). `tests/unit/techRestriction.test.js` fixa 1583894654 (IA×IA seed 11, 1.500 ticks) e 2663468213 (FFA 4 vagas `arquipelago-pontes-4p`, seed 5, 1.000 ticks). `createMatchConfig({ ffa: true })` sem mapa usa `FFA_MAP_ID` (`planalto-rocha-4p`): o padrão 1×1 só tem 2 vagas.
 - **`tutorial`** ("Campo de Treino", F6-09, `hidden`): 104×104, uma ilha só (`islands`), 2 slots (jogador SW, rival passivo NE), 1 acampamento de bandidos (2 guardas) como alvo; ver `src/ui/tutorial.js`. Não é validado por `maps.test.js` (usa `listMaps()`); `tests/unit/tutorial.test.js` repete as checagens de terra seca.
 
 ## Regras de Design de Mapas (Tamanho Mínimo, Unidades e Serrarias)
@@ -146,6 +148,8 @@ Feedback do dono: mapas pequenos e madeira acabando cedo. Medição (`node tools
 - Os JSON dos mapas ampliados foram gerados por script a partir dos originais e deixam de ser reproduzíveis por `tools/gen-map.mjs`.
 
 ## Adicionando um mapa
+
+(Mapa de Escaramuça gerado: acrescente um preset em `tools/lib/skirmishMaps.mjs`, varra sementes com `tools/gen-skirmish-maps.mjs --scan`, grave com `--write`, registre em `index.js`, nomes em `src/i18n/*.json` (`map.<id>.name`) e o caso em `tests/unit/mapsSkirmish.test.js`.)
 
 1. Crie `src/data/maps/<id>.json` seguindo o formato acima.
 2. Registre em `index.js` (import estático + entrada em `MAPS`).

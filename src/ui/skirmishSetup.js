@@ -42,6 +42,12 @@ export const DEFAULT_RESOURCES = 'standard';
 
 export const otherFaction = (f) => (f === 'orc' ? 'human' : 'orc');
 
+/** SKIRMISH-MAPS: o id é de um mapa selecionável na Escaramuça (existe e não é `hidden`: ids antigos salvos no storage caem no mapa padrão). */
+export function isSkirmishMapId(id) {
+  const m = peekMap(id);
+  return !!m && !m.hidden;
+}
+
 /** Máximo de IAs que o mapa comporta (`maxPlayers − 1`, limitado a 7). */
 export function maxAIs(mapDef) {
   const mp = mapDef && Number.isInteger(mapDef.maxPlayers) ? mapDef.maxPlayers : 2;
@@ -96,7 +102,7 @@ export function createSetup(mapId = DEFAULT_MAP_ID) {
 export function normalizeSetup(raw) {
   const src = raw && typeof raw === 'object' ? raw : {};
   const maps = listMaps();
-  const mapId = peekMap(src.mapId) ? src.mapId : DEFAULT_MAP_ID;
+  const mapId = isSkirmishMapId(src.mapId) ? src.mapId : DEFAULT_MAP_ID;
   const mapDef = getMap(mapId) || maps[0];
   const nColors = PLAYER_COLORS.length;
 
@@ -262,7 +268,7 @@ function safeStorage() {
 /** Lê o setup salvo (ou o padrão); chaves legadas do menu (`warpoly.faction/difficulty/map/victory`) valem de base. */
 export function loadSetup(storage = safeStorage()) {
   const get = (k) => { try { return storage ? storage.getItem(k) : null; } catch { return null; } };
-  const base = createSetup(peekMap(get('warpoly.map')) ? get('warpoly.map') : DEFAULT_MAP_ID);
+  const base = createSetup(isSkirmishMapId(get('warpoly.map')) ? get('warpoly.map') : DEFAULT_MAP_ID);
   const legacy = {
     ...base,
     localFaction: get('warpoly.faction') === 'orc' ? 'orc' : base.localFaction,

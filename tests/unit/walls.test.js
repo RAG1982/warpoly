@@ -1,4 +1,5 @@
 import { describe, it, expect } from 'vitest';
+import { getMap } from '../../src/data/maps/index.js';
 import * as THREE from 'three';
 import { GameManager } from '../../src/core/GameManager.js';
 import { Terrain } from '../../src/world/Terrain.js';
@@ -11,8 +12,8 @@ import { Wall } from '../../src/sim/Wall.js';
 /** Partida headless 1×1 (jogador 0 humano, IA orc no jogador 1). */
 function makeGm(seed = 7) {
   const scene = new THREE.Scene();
-  const terrain = new Terrain();
-  const cfg = createMatchConfig({ seed, headless: true });
+  const terrain = new Terrain(getMap('continental-1v1'));
+  const cfg = createMatchConfig({ mapId: 'continental-1v1', seed, headless: true });
   const gm = new GameManager(terrain, null, null, cfg);
   // Desliga as IAs: os testes controlam tudo à mão.
   gm.aiDirectors.forEach(d => d.dispose?.());
@@ -344,8 +345,8 @@ describe('exército derruba a muralha e chega ao alvo (F3-08, headless)', () => 
 describe('IA constrói uma linha curta de muralha (F3-08)', () => {
   it('com recursos sobrando emite PLACE_WALL uma única vez por partida (<= 8 segmentos)', () => {
     const scene = new THREE.Scene();
-    const terrain = new Terrain();
-    const gm = new GameManager(terrain, null, null, createMatchConfig({ seed: 7, headless: true }));
+    const terrain = new Terrain(getMap('continental-1v1'));
+    const gm = new GameManager(terrain, null, null, createMatchConfig({ mapId: 'continental-1v1', seed: 7, headless: true }));
     const director = gm.aiDirectors[0];
     const eco = director.economyManager;
     const p = gm.getPlayer(director.playerId);
@@ -365,8 +366,8 @@ describe('IA constrói uma linha curta de muralha (F3-08)', () => {
 
   it('não constrói na dificuldade fácil', () => {
     const scene = new THREE.Scene();
-    const terrain = new Terrain();
-    const gm = new GameManager(terrain, null, null, createMatchConfig({ seed: 7, headless: true, difficulty: 'easy' }));
+    const terrain = new Terrain(getMap('continental-1v1'));
+    const gm = new GameManager(terrain, null, null, createMatchConfig({ mapId: 'continental-1v1', seed: 7, headless: true, difficulty: 'easy' }));
     const director = gm.aiDirectors[0];
     const p = gm.getPlayer(director.playerId);
     p.resources.wood = 2000; p.resources.stone = 2000;

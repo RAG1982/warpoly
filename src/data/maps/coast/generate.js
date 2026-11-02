@@ -126,12 +126,12 @@ export function generateCoast(options = {}) {
   const sp = o.continentSpacing * o.size;
   if (o.continents === 2) {
     const dims2 = o.continentDims ?? [0.135, 0.34];
-    const cA = continentEntity('continente-oeste', 'lush', -sp, rngC.range(-0.03, 0.03) * o.size, rngC, o, (o.seed ^ 0x1111) | 0, dims2);
+    const cA = continentEntity('continente-oeste', o.continentBiomes?.[0] ?? 'lush', -sp, rngC.range(-0.03, 0.03) * o.size, rngC, o, (o.seed ^ 0x1111) | 0, dims2);
     let cB;
     if (o.symmetry === 'mirror') {
-      cB = { ...cA, id: 'continente-leste', biome: 'arid', cx: -cA.cx, cz: -cA.cz, flipX: true, rot: cA.rot, seed: (o.seed ^ 0x2222) | 0 };
+      cB = { ...cA, id: 'continente-leste', biome: o.continentBiomes?.[1] ?? 'arid', cx: -cA.cx, cz: -cA.cz, flipX: true, rot: cA.rot, seed: (o.seed ^ 0x2222) | 0 };
     } else {
-      cB = continentEntity('continente-leste', 'arid', sp, rngC.range(-0.03, 0.03) * o.size, rngC, o, (o.seed ^ 0x2222) | 0, dims2);
+      cB = continentEntity('continente-leste', o.continentBiomes?.[1] ?? 'arid', sp, rngC.range(-0.03, 0.03) * o.size, rngC, o, (o.seed ^ 0x2222) | 0, dims2);
     }
     for (const e of [cA, cB]) {
       e.index = entities.length; entities.push(e);
@@ -273,6 +273,37 @@ export function generateCoast(options = {}) {
     }
   }
 
+  // 3d. (SKIRMISH-MAPS) pontes de terra entre massas (istmos): `bridges: [{ a, b, width, bow? }]` com os índices das entidades (continentes primeiro,
+  // depois ilhas grandes, ilhas e ilhotas). Largura em u, com bordas irregulares (ruído) e um arco de `bow` u; o dono das células novas é a entidade
+  // mais próxima das pontas. Padrão `null` ⇒ nenhum sorteio nem célula muda (os mapas antigos saem iguais).
+  if (o.bridges?.length) {
+    for (let k = 0; k < o.bridges.length; k++) {
+      const br = o.bridges[k];
+      const ea = entities[br.a], eb = entities[br.b];
+      if (!ea || !eb) throw new Error(`coast: ponte ${k} com entidade inexistente (${br.a}, ${br.b})`);
+      const ax = br.from ? br.from[0] * o.size : ea.cx, az = br.from ? br.from[1] * o.size : ea.cz;
+      const bx = br.to ? br.to[0] * o.size : eb.cx, bz = br.to ? br.to[1] * o.size : eb.cz;
+      const L = Math.hypot(bx - ax, bz - az), bow = br.bow ?? 0, hw = (br.width ?? 12) / 2;
+      const sd2 = (o.seed * 83 + k * 211) | 0;
+      for (let j = 0; j < G; j++) {
+        const z = toX(j);
+        for (let i = 0; i < G; i++) {
+          const x = toX(i);
+          // coordenadas ao longo (t) e através (u) do segmento
+          const t = ((x - ax) * (bx - ax) + (z - az) * (bz - az)) / (L * L);
+          if (t < 0 || t > 1) continue;
+          const u = (-(x - ax) * (bz - az) + (z - az) * (bx - ax)) / L - bow * Math.sin(Math.PI * t);
+          const w = hw + (fbm(x * 0.07, z * 0.07, sd2, 3) - 0.5) * 5;
+          if (Math.abs(u) > w) continue;
+          const c = j * G + i;
+          if (land[c]) continue;
+          if (Math.max(Math.abs(x), Math.abs(z)) / half > 0.9) continue;
+          land[c] = 1;
+          owner[c] = t < 0.5 ? ea.index : eb.index;
+        }
+      }
+    }
+  }
   // 4. lagoas: água não ligada ao oceano e pequena vira terra; grandes ficam como lagos
   const { lakes } = resolveLagoons(land, owner, G, o.minLake);
   for (const e of entities) { let a = 0; for (let c = 0; c < N; c++) if (owner[c] === e.index) a++; e.area = a * cell * cell; }

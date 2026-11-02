@@ -333,7 +333,7 @@ animate() [rAF da aplicação, delta máx 0.1s; sem sessão (menu/loading) não 
   meia-largura da área jogável (a grade física é um pouco maior, `+3`, para consultas na borda não
   grudarem numa célula válida). `FogOfWar` usa `mapDef.size + 20` (mesma margem que o mapa
   continental sempre teve).
-- Dois mapas hoje: `continental-1v1` ("Vale do Rio", histórico — checksum de determinismo
+- (Histórico, F2-05; hoje a Escaramuça lista 12 mapas gerados, ver `src/data/maps/README.md`.) Dois mapas na época: `continental-1v1` ("Vale do Rio", histórico — checksum de determinismo
   idêntico ao de antes da F2-05) e `ilhas-4p` ("Ilhas Gêmeas", novo: 4 slots, 2 ilhas ligadas por
   2 pontes de terra, gerador `"islands"`). Menu de escaramuça lista os mapas via `listMaps()`
   (miniatura = mesmo renderizador do minimapa, `terrainMinimapImage.js`); `?map=<id>` na URL.
@@ -525,7 +525,7 @@ Camadas e regra de dependência (verificada por `tests/unit/layers.test.js`):
   `ui/UiEvents`, `render/HazardView`) já seguiam o padrão "view lê a sim".
 - **Partida headless em Node puro**: `node tools/headless-match.js --seed 1 [--map id] [--difficulty d] [--difficulties d0,d1,d2] [--victory modo] [--ffa]
   [--max-minutes N] [--json]` — todos os jogadores IA, passos fixos de 20 Hz até alguém vencer (código de saída 0; 2 = estourou o
-  limite; 1 = erro), imprime resumo e checksum final. Seed 1 (1×1): termina aos 7,3 min simulados em ~11 s (≈800 ticks/s). Funciona
+  limite; 1 = erro), imprime resumo e checksum final. Seed 1 (1×1, mapa padrão `duelo-continental-1`): termina aos 28 min simulados (33.620 ticks) em ~37 s (≈900 ticks/s), vencedor time 1, checksum 3977225031 (SKIRMISH-MAPS; antes, em `continental-1v1`: 7,3 min e 1053930101). Funciona
   porque `MatchConfig.headless` faz `ModelFactory` devolver `Group` vazio (F2-03) e o hook `tools/lib/jsonImportLoader.mjs` resolve os
   `.json` dos mapas. Teste: `tests/unit/headlessMatch.test.js` (processo separado; determinismo entre processos).
 - **F2-08b (parcial, branch `task/F2-08b`)**: `Tree`, `ResourceDeposit`, `Critter` (`src/sim/`) e `FogOfWar` + `FogGrid` (`src/sim/`) são

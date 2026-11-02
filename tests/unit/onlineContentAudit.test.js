@@ -273,34 +273,34 @@ function audit(sc) {
 const LONG = process.env.MP_AUDIT_LONG === '1';
 const LONG_TURNS = 9000; // 15 min de jogo
 
-// Mapas de tipos diferentes: ilhas (ilhas-4p), continental (continental-1v1), naval (arquipelago-naval-4p),
-// gerado (desfiladeiro-1v1) e o padrão para 8 jogadores (mapa gerado pela seed).
+// Mapas de tipos diferentes: terrestre 4p (planalto-rocha-4p), continental (duelo-continental-1), naval (arquipelago-pontes-4p),
+// lava (desfiladeiro-lava-1v1) e o padrão para 8 jogadores (mapa gerado pela seed).
 const SCENARIOS = [];
 // 4+ jogadores: 200 turnos (20 s de jogo); 2 jogadores: 300 (30 s). Dimensionado para a suíte rodar em < 90 s
 const add = (name, o) => SCENARIOS.push({ name, turns: o.humans + o.ai >= 4 ? 200 : 300, ...o });
 // 2 jogadores (humanos), 3 mapas
-for (const [map, s] of [['continental-1v1', 1], ['desfiladeiro-1v1', 2], ['campos-1v1', 3]]) add(`2H ${map} (escaramuça Centro+UPGRADE) #${s}`, { humans: 2, ai: 0, map, seed: s });
+for (const [map, s] of [['duelo-continental-1', 1], ['desfiladeiro-lava-1v1', 2], ['vale-rio-1v1', 3]]) add(`2H ${map} (escaramuça Centro+UPGRADE) #${s}`, { humans: 2, ai: 0, map, seed: s });
 // 2 humanos + 2 IA, naval e ilhas
-for (const [map, s] of [['ilhas-4p', 4], ['arquipelago-naval-4p', 5], ['planalto-ffa-4p', 6]]) add(`2H+2IA ${map} #${s}`, { humans: 2, ai: 2, map, seed: s });
+for (const [map, s] of [['bosques-antigos-2v2', 4], ['arquipelago-pontes-4p', 5], ['planalto-rocha-4p', 6]]) add(`2H+2IA ${map} #${s}`, { humans: 2, ai: 2, map, seed: s });
 // 3 humanos + 1 IA, 4 humanos, 4 jogadores em 2 mapas diferentes
-add('3H+1IA vales-2v2 #7', { humans: 3, ai: 1, map: 'vales-2v2', seed: 7 });
-add('4H ilhas-4p #8', { humans: 4, ai: 0, map: 'ilhas-4p', seed: 8 });
-add('4H arquipelago-naval-4p #9', { humans: 4, ai: 0, map: 'arquipelago-naval-4p', seed: 9 });
+add('3H+1IA bosques-antigos-2v2 #7', { humans: 3, ai: 1, map: 'bosques-antigos-2v2', seed: 7 });
+add('4H planalto-rocha-4p #8', { humans: 4, ai: 0, map: 'planalto-rocha-4p', seed: 8 });
+add('4H arquipelago-pontes-4p #9', { humans: 4, ai: 0, map: 'arquipelago-pontes-4p', seed: 9 });
 // 8 jogadores: 4H+4IA e 8H (mapa gerado pela seed da sala)
 add('4H+4IA mapa gerado #10', { humans: 4, ai: 4, seed: 10 });
 add('8H mapa gerado #11', { humans: 8, ai: 0, seed: 11 });
 // Variações de seed (mais partidas curtas, sem perda de cobertura)
-for (let s = 20; s < 24; s++) add(`2H continental-1v1 #${s}`, { humans: 2, ai: 0, map: 'continental-1v1', seed: s });
-for (let s = 24; s < 28; s++) add(`2H+2IA ilhas-4p #${s}`, { humans: 2, ai: 2, map: 'ilhas-4p', seed: s });
+for (let s = 20; s < 24; s++) add(`2H duelo-continental-1 #${s}`, { humans: 2, ai: 0, map: 'duelo-continental-1', seed: s });
+for (let s = 24; s < 28; s++) add(`2H+2IA planalto-rocha-4p #${s}`, { humans: 2, ai: 2, map: 'planalto-rocha-4p', seed: s });
 for (let s = 28; s < 31; s++) add(`4H+4IA mapa gerado #${s}`, { humans: 4, ai: 4, seed: s });
 // 2 jogadores em mais mapas (baratos) para chegar a 30+ partidas curtas
-for (const [map, s] of [['desfiladeiro-1v1', 32], ['desfiladeiro-1v1', 33], ['desfiladeiro-1v1', 34], ['campos-1v1', 35], ['campos-1v1', 36], ['campos-1v1', 37], ['continental-1v1', 38], ['continental-1v1', 39], ['estreito-1v1', 40], ['estreito-1v1', 41]]) add(`2H ${map} #${s}`, { humans: 2, ai: 0, map, seed: s });
+for (const [map, s] of [['desfiladeiro-lava-1v1', 32], ['desfiladeiro-lava-1v1', 33], ['desfiladeiro-lava-1v1', 34], ['vale-rio-1v1', 35], ['vale-rio-1v1', 36], ['vale-rio-1v1', 37], ['duelo-continental-1', 38], ['duelo-continental-1', 39], ['estreito-naval-1v1', 40], ['estreito-naval-1v1', 41]]) add(`2H ${map} #${s}`, { humans: 2, ai: 0, map, seed: s });
 // Partidas longas (15 min de jogo): só com MP_AUDIT_LONG=1
 if (LONG) {
-  add('LONGA 2H continental-1v1 #101', { humans: 2, ai: 0, map: 'continental-1v1', seed: 101, turns: LONG_TURNS });
-  add('LONGA 2H+2IA ilhas-4p #102', { humans: 2, ai: 2, map: 'ilhas-4p', seed: 102, turns: LONG_TURNS });
+  add('LONGA 2H duelo-continental-1 #101', { humans: 2, ai: 0, map: 'duelo-continental-1', seed: 101, turns: LONG_TURNS });
+  add('LONGA 2H+2IA planalto-rocha-4p #102', { humans: 2, ai: 2, map: 'planalto-rocha-4p', seed: 102, turns: LONG_TURNS });
   add('LONGA 4H+4IA mapa gerado #103', { humans: 4, ai: 4, seed: 103, turns: LONG_TURNS });
-  add('LONGA 4H arquipelago-naval-4p #104', { humans: 4, ai: 0, map: 'arquipelago-naval-4p', seed: 104, turns: LONG_TURNS });
+  add('LONGA 4H arquipelago-pontes-4p #104', { humans: 4, ai: 0, map: 'arquipelago-pontes-4p', seed: 104, turns: LONG_TURNS });
   add('LONGA 8H mapa gerado #105', { humans: 8, ai: 0, seed: 105, turns: LONG_TURNS });
 }
 
@@ -314,7 +314,7 @@ describe('MP-01 auditoria online do conteúdo novo (lockstep em memória)', () =
 
   it('regressão: comando local com coordenada NaN não diverge (o par local vê o mesmo que o fio entrega)', () => {
     const net = createMemoryNetwork({ latencyMs: 30, jitterMs: 10, seed: 9 });
-    const base = buildPeers({ humans: 2, ai: 0, map: 'continental-1v1', seed: 9 });
+    const base = buildPeers({ humans: 2, ai: 0, map: 'duelo-continental-1', seed: 9 });
     base.forEach((p, i) => {
       p.seed = 9 + i;
       p.boost = true;
@@ -340,7 +340,7 @@ describe('MP-01 auditoria online do conteúdo novo (lockstep em memória)', () =
 
   it('regressão: jogador humano derrotado (sem construções) não congela a sim dos demais pares', () => {
     const net = createMemoryNetwork({ latencyMs: 30, jitterMs: 10, seed: 21 });
-    const base = buildPeers({ humans: 2, ai: 1, map: 'ilhas-4p', seed: 40 });
+    const base = buildPeers({ humans: 2, ai: 1, map: 'planalto-rocha-4p', seed: 40 });
     base.forEach((p, i) => {
       p.seed = 40 + i;
       p.boost = true;

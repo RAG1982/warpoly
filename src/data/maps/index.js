@@ -5,6 +5,8 @@
  * pasta. Import estático (não fetch): funciona igual em Vite (jogo/inspetor) e em Node (Vitest,
  * headless), sem depender de DOM.
  */
+// SKIRMISH-MAPS: os 9 mapas antigos da Escaramuça (F2-05/F4-07a/F8-01) saíram da lista (`hidden: true`), mas continuam registrados: as campanhas
+// clássica (`alliance`) e da Horda (`war-horde`) ainda apontam para eles em `mapId`. Somem quando essas missões ganharem palcos `camp-*` (M4).
 import continental1v1 from './continental-1v1.json';
 import ilhas4p from './ilhas-4p.json';
 import estreito1v1 from './estreito-1v1.json'; // F4-07a: mapa com mar, canal e poços de petróleo
@@ -22,10 +24,17 @@ import duelo3 from './duelo-continental-3.json';
 import ilhaUnica1 from './ilha-unica-1.json';
 import ilhaUnica2 from './ilha-unica-2.json';
 import ilhaUnica3 from './ilha-unica-3.json';
+// SKIRMISH-MAPS: 6 mapas de Escaramuça gerados pelo assador de costas (`tools/gen-skirmish-maps.mjs`): dois navais (inverno, deserto) e 4 terrestres (verdejante, lava, pedra, pântano)
+import estreitoNaval1v1 from './estreito-naval-1v1.json';
+import arquipelagoPontes4p from './arquipelago-pontes-4p.json';
+import valeRio1v1 from './vale-rio-1v1.json';
+import desfiladeiroLava1v1 from './desfiladeiro-lava-1v1.json';
+import planaltoRocha4p from './planalto-rocha-4p.json';
+import bosquesAntigos2v2 from './bosques-antigos-2v2.json';
 // M2-28: os mapas de campanha (`camp-*`, M2-03…07; `hidden: true`) NÃO são importados aqui: ficam em chunks carregados
 // sob demanda (`campaignLoaders.js`, `ensureMapLoaded`), fora do bundle de boot.
 import { CAMPAIGN_MAP_LOADERS } from './campaignLoaders.js';
-// Navais (dois-continentes, arquipelago-vivo): em `pendentes/` até existir IA rival que ataque por mar (NEW-44). Fora do registro = fora do jogo e do boot.
+// Navais do MUNDO-7 (dois-continentes, arquipelago-vivo): em `pendentes/` (bases em terras separadas por mar; a IA não cruza o mar). Os navais da Escaramuça (SKIRMISH-MAPS) têm todas as bases ligadas por terra.
 import { generateMap } from './generator.js';
 
 const MAPS = Object.freeze({
@@ -44,6 +53,12 @@ const MAPS = Object.freeze({
   'ilha-unica-1': ilhaUnica1,
   'ilha-unica-2': ilhaUnica2,
   'ilha-unica-3': ilhaUnica3,
+  'estreito-naval-1v1': estreitoNaval1v1,
+  'arquipelago-pontes-4p': arquipelagoPontes4p,
+  'vale-rio-1v1': valeRio1v1,
+  'desfiladeiro-lava-1v1': desfiladeiroLava1v1,
+  'planalto-rocha-4p': planaltoRocha4p,
+  'bosques-antigos-2v2': bosquesAntigos2v2,
   tutorial // F6-09: mapa do tutorial (`hidden`: não aparece na lista da Escaramuça)
 });
 
@@ -51,7 +66,7 @@ const GENERATED = new Map(); // F8-02: mapas gerados registrados em runtime
 const LAZY_LOADED = new Map(); // M2-28: mapas de campanha já carregados (id → definição)
 const LAZY_PENDING = new Map(); // M2-28: carregamentos em andamento (id → Promise), para não importar duas vezes
 
-export const DEFAULT_MAP_ID = 'continental-1v1';
+export const DEFAULT_MAP_ID = 'duelo-continental-1'; // SKIRMISH-MAPS: era 'continental-1v1' (Vale do Rio antigo, agora hidden)
 
 const isLazyId = (id) => Object.prototype.hasOwnProperty.call(CAMPAIGN_MAP_LOADERS, id);
 

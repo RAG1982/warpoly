@@ -24,7 +24,7 @@ console.warn = filt(console.warn.bind(console));
 console.error = filt(console.error.bind(console));
 
 function parseArgs(argv) {
-  const o = { count: 100, seedStart: 1, maps: ['continental-1v1', 'estreito-1v1', 'ilhas-4p'], maxTicks: 72000, recheck: 3, faction: null, difficulty: null, stallTicks: 2400, out: 'tools/soak-report' };
+  const o = { count: 100, seedStart: 1, maps: ['duelo-continental-1', 'estreito-naval-1v1', 'arquipelago-pontes-4p'], maxTicks: 72000, recheck: 3, faction: null, difficulty: null, stallTicks: 2400, out: 'tools/soak-report' };
   for (let i = 0; i < argv.length; i++) {
     const a = argv[i];
     const next = () => argv[++i];
@@ -77,7 +77,7 @@ async function runMatch(c, opts, detect = true) {
   const mapDef = getMap(c.map);
   const want = mapDef.maxPlayers || cfg.players.length;
   if (want > 2) {
-    // Mapas com mais slots que jogadores (ilhas-4p): completa até maxPlayers, 2 times alternados.
+    // Mapas com mais slots que jogadores (arquipelago-pontes-4p): completa até maxPlayers, 2 times alternados.
     cfg.players = [];
     for (let k = 0; k < want; k++) {
       const orc = (k + (c.faction === 'orc' ? 1 : 0)) % 2 === 1;

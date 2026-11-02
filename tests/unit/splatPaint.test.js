@@ -46,13 +46,17 @@ const SCENARIOS = {
   savana_A: { tileset: 'savana', size: 96, h: 'A', startSlots: [{ x: -30, z: 0 }] }
 };
 
-/** FNV-1a dos bytes RGBA do código antigo (commit 82541c6): 96 × 96 e 64 × 64 px. */
+/**
+ * FNV-1a dos bytes RGBA do código antigo (commit 82541c6): 96 × 96 e 64 × 64 px.
+ * FIX-VOLCANIC-DARK: `vulcanico_A_masks` foi REGERADO depois da mudança de estilo da paleta vulcânica (chão e céu mais claros,
+ * para a missão 8 ficar legível). Os demais cenários continuam com os bytes originais.
+ */
 const GOLDEN_96 = {
-  inverno_A: '669faf6', exuberante_A_slots_masks: '51329e97', deserto_B: 'beeab268', vulcanico_A_masks: '5aa89b1a',
+  inverno_A: '669faf6', exuberante_A_slots_masks: '51329e97', deserto_B: 'beeab268', vulcanico_A_masks: 'a84e7f5b',
   pedregoso_B: 'c26512ac', pantano_A: '7115addb', devastadas_B_masks: 'be2c00c5', savana_A: '816b98f1'
 };
 const GOLDEN_64 = {
-  inverno_A: 'd799676b', exuberante_A_slots_masks: '3aaccb01', deserto_B: '96e96e9f', vulcanico_A_masks: '679ae8c4',
+  inverno_A: 'd799676b', exuberante_A_slots_masks: '3aaccb01', deserto_B: '96e96e9f', vulcanico_A_masks: 'f9775a6b',
   pedregoso_B: '340c0742', pantano_A: '676cb462', devastadas_B_masks: '137bc832', savana_A: '90d26f38'
 };
 

@@ -287,40 +287,41 @@ export const TILESETS = Object.freeze({
     id: 'vulcanico',
     name: 'Vulcânico',
     legacy: false,
-    // Basalto escuro, cinzas, rocha rubra, céu escuro de fumaça e árvores queimadas.
+    // Basalto escuro, cinzas, rocha rubra, céu de fumaça e árvores queimadas. FIX-VOLCANIC-DARK: chão e céu clareados
+    // (cinza-marrom quente) para as unidades ficarem legíveis; a lava continua o ponto mais brilhante do mapa.
     palette: {
-      grass: [0x3a3436, 0x2b2528],
-      dirt: 0x4a4244,
-      sand: 0x383234,
-      rock: 0x6b2f22,
-      snow: 0x8a7f7c,
-      mud: 0x221c1e,
-      road: 0x5a4e4e
+      grass: [0x6e5d55, 0x5e4f49],
+      dirt: 0x806c63,
+      sand: 0x74625b,
+      rock: 0x8c3f2c,
+      snow: 0xa39a95,
+      mud: 0x44383a,
+      road: 0x84736c
     },
     rules: { base: 'grass', patch: 'dirt', high: 'rock', shore: 'sand', patchAmount: 0.45, shoreTop: 1.3, highStart: 3.5, rockSlope: [0.48, 0.95], crack: 0.60 },
-    surface: { roughness: 0.95, cliff: 0x3d3032, strata: 0.25 },
-    water: { color: 0x2a3a40, opacity: 0.92, deep: 0x0f181c, foam: 0x6a5555, foamStrength: 0.50, plants: false },
-    grade: { tint: [1.12, 0.92, 0.84], sat: 0.95, contrast: 1.10, brightness: 0.94, vignette: 0.22 },
+    surface: { roughness: 0.95, cliff: 0x5a4a45, strata: 0.25 },
+    water: { color: 0x3a5560, opacity: 0.92, deep: 0x1b2c33, foam: 0x7a6a64, foamStrength: 0.50, plants: false },
+    grade: { tint: [1.08, 0.95, 0.88], sat: 0.98, contrast: 1.04, brightness: 1.04, vignette: 0.12 },
     atmosphere: {
-      sky: 0x6a4a40,
-      fogNear: 50,
-      fogFar: 200,
-      hemiSky: 0xd97555,
-      hemiGround: 0x2b2022,
-      fog: { color: 0x6a4a40, near: 50, far: 200 },
-      ambient: { sky: 0xd97555, ground: 0x2b2022, color: 0xd97555 },
-      sun: { color: 0xff7a40, intensity: 2.1 }
+      sky: 0x8a6252,
+      fogNear: 62,
+      fogFar: 240,
+      hemiSky: 0xffa878,
+      hemiGround: 0x4a3834,
+      fog: { color: 0x8a6252, near: 62, far: 240 },
+      ambient: { sky: 0xffa878, ground: 0x4a3834, color: 0xffa878 },
+      sun: { color: 0xff8f55, intensity: 2.1 }
     },
-    fog: { color: 0x6a4a40, near: 50, far: 200 },
-    ambient: { sky: 0xd97555, ground: 0x2b2022, color: 0xd97555 },
-    sun: { color: 0xff7a40, intensity: 2.1 },
+    fog: { color: 0x8a6252, near: 62, far: 240 },
+    ambient: { sky: 0xffa878, ground: 0x4a3834, color: 0xffa878 },
+    sun: { color: 0xff8f55, intensity: 2.1 },
     lighting: {
-      fog: { color: 0x6a4a40, near: 50, far: 200 },
-      ambient: { sky: 0xd97555, ground: 0x2b2022, color: 0xd97555 },
-      sun: { color: 0xff7a40, intensity: 2.1 }
+      fog: { color: 0x8a6252, near: 62, far: 240 },
+      ambient: { sky: 0xffa878, ground: 0x4a3834, color: 0xffa878 },
+      sun: { color: 0xff8f55, intensity: 2.1 }
     },
-    decor: { grass: 0x3a3436, flowers: false, pebbles: 0x4a4244, boulders: 0x3d3032, mushrooms: false, lilies: false, bushes: 0x2b2528 },
-    trees: { tint: { color: 0x222222, desat: 0.90, snow: null, snowAmount: 0 } }
+    decor: { grass: 0x6e5d55, flowers: false, pebbles: 0x806c63, boulders: 0x5a4a45, mushrooms: false, lilies: false, bushes: 0x4a3e3c },
+    trees: { tint: { color: 0x3a3230, desat: 0.80, snow: null, snowAmount: 0 } }
   },
 
   pedregoso: {

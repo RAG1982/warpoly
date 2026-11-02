@@ -1,0 +1,16 @@
+{
+  "phase": "depois",
+  "shots": [
+    "01-base-unidades-no-chao-vulcanico.png",
+    "02-passagem-rio-de-lava.png",
+    "03-santuario-das-cinzas.png",
+    "04-estaleiro-costa.png"
+  ],
+  "luma": {
+    "01-base-unidades-no-chao-vulcanico.png": 50.7,
+    "02-passagem-rio-de-lava.png": 50.31,
+    "03-santuario-das-cinzas.png": 37.6,
+    "04-estaleiro-costa.png": 46.71
+  },
+  "errors": []
+}

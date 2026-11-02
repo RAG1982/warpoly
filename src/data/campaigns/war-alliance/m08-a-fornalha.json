@@ -9,8 +9,8 @@
     "speaker": { "pt-BR": "Capitão Brann", "en": "Captain Brann" },
     "portrait": "⚔️",
     "text": {
-      "pt-BR": "A Fornalha é uma ilha de basalto cortada por dois rios de lava, do norte ao sul. Só há passagens de rocha nas margens, e a terra não basta: no Mar Fendido, uma ilhota guarda seis magos de Orsolo, e outra abriga a Forja Naval dos Clãs do Cinzal, onde o ferro vira navio. Destruam o Santuário das Cinzas, na área leste, e a Forja no mar. Libertem os magos. Vocês têm um Estaleiro na costa e o Centro já no nível 3: a árvore tecnológica inteira está à mão. A frota é a chave. Orsolo ainda está lá; o tempo dele é curto.",
-      "en": "The Furnace is a basalt isle cut by two rivers of lava, north to south. Its only crossings are rock passages at the banks, and land is not enough: in the Sundered Sea, one islet holds six of Orsolo's mages, and another houses the Clans' Naval Forge, where iron becomes ships. Destroy the Ash Sanctum in the eastern area, and the Forge at sea. Free the mages. You have a Shipyard on the coast and your Palace is already level 3: the whole tech tree is in reach. The fleet is the key. Orsolo is still there; his time is short."
+      "pt-BR": "A Fornalha é uma ilha de basalto cortada por dois rios de lava, do norte ao sul. Só há passagens de rocha nas margens, e a terra não basta: no Mar Fendido, uma ilhota guarda seis magos presos, entre eles Orsolo, e outra abriga a Forja Naval dos Clãs do Cinzal, onde o ferro vira navio. Destruam o Santuário das Cinzas, na área leste, e a Forja no mar. Libertem os magos. Vocês têm um Estaleiro na costa e o Centro já no nível 3: a árvore tecnológica inteira está à mão. A frota é a chave. Orsolo ainda está lá; o tempo dele é curto.",
+      "en": "The Furnace is a basalt isle cut by two rivers of lava, north to south. Its only crossings are rock passages at the banks, and land is not enough: in the Sundered Sea, one islet holds six captive mages, Orsolo among them, and another houses the Clans' Naval Forge, where iron becomes ships. Destroy the Ash Sanctum in the eastern area, and the Forge at sea. Free the mages. You have a Shipyard on the coast and your Palace is already level 3: the whole tech tree is in reach. The fleet is the key. Orsolo is still there; his time is short."
     },
     "hints": [
       { "pt-BR": "Os rios de lava não têm vau de terra: só as passagens de rocha ligam as áreas. A frota vai onde o exército não passa.", "en": "The lava rivers have no land ford: only the rock passages link the areas. The fleet goes where the army cannot." },
@@ -82,7 +82,7 @@
     { "id": "raid-1", "when": { "type": "time", "at": 300 },
       "actions": [
         { "type": "spawn", "owner": 1, "units": [{ "type": "grunt", "count": 4 }, { "type": "axethrower", "count": 2 }], "anchor": "sanctum", "spread": 3, "order": { "kind": "attackMove", "anchor": "playerStart" } },
-        { "type": "message", "text": { "pt-BR": "Primeira leva dos Clãs: Talhadores e Lanceiros-Machado descem o rio pela passagem norte.", "en": "First Clan wave: Grunts and Axe Throwers come down the river through the north passage." } }
+        { "type": "message", "text": { "pt-BR": "Primeira leva dos Clãs: Talhadores e Lanceiros-Machado descem o rio pela passagem norte.", "en": "First Clan wave: Slashers and Axe Throwers come down the river through the north passage." } }
       ] },
     { "id": "lyra", "when": { "type": "time", "at": 480 },
       "actions": [
@@ -97,7 +97,7 @@
     { "id": "raid-3", "when": { "type": "time", "at": 720 },
       "actions": [
         { "type": "spawn", "owner": 1, "units": [{ "type": "catapult", "count": 1 }, { "type": "grunt", "count": 4 }, { "type": "ogre", "count": 1 }], "anchor": "sanctum", "spread": 3, "order": { "kind": "attackMove", "anchor": "playerStart" } },
-        { "type": "message", "text": { "pt-BR": "Terceira leva: uma Catapulta vem com os Talhadores. Procure as torres.", "en": "Third wave: a Catapult comes with the Grunts. Look for the towers." } }
+        { "type": "message", "text": { "pt-BR": "Terceira leva: uma Catapulta vem com os Talhadores. Procure as torres.", "en": "Third wave: a Catapult comes with the Slashers. Look for the towers." } }
       ] },
     { "id": "captives-freed", "when": { "type": "dead", "select": { "tag": "captive_guard" }, "count": 6 },
       "actions": [

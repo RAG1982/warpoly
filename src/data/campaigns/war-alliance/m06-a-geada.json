@@ -18,13 +18,13 @@
     },
     "portrait": "⚔️",
     "text": {
-      "pt-BR": "Prova de Fogo. A Geada é um continente de neve e lagos congelados, e hoje a Liga põe em campo TODO o arsenal: cavalaria, cerco, Magos, Grifos. Dois clãs nos esperam: os Lanças Quebradas, no nordeste, com o forte de Drogath, e o Sal Cinzento, no noroeste. A leste fica o forte de Brumar, nosso aliado: se ele cair, a Geada cai. Ao norte, na cabeceira da baía, o Farol Boreal: tome-o, mantenha-o por 3 minutos sem um inimigo ali e derrube o forte dos Lanças.",
-      "en": "Trial by Fire. The Frost is a continent of snow and frozen lakes, and today the League fields its WHOLE arsenal: cavalry, siege, Mages, Gryphons. Two clans await us: the Broken Spears in the northeast, holding Drogath's fort, and the Grey Salt in the northwest. To the east lies Brumar's fort, our ally: if it falls, the Frost falls. In the north, at the head of the bay, the Boreal Lighthouse: take it, hold it for 3 minutes with no enemy there, and bring down the Spears' fort."
+      "pt-BR": "Prova de Fogo. A Geada é uma ilha de neve e lagos congelados, e hoje a Liga põe em campo TODO o arsenal: cavalaria, cerco, Magos, Grifos. Dois clãs nos esperam: os Lanças Quebradas, no nordeste, com o forte de Drogath, e o Sal Cinzento, no noroeste. A leste fica o forte de Brumar, nosso aliado: se ele cair, a Geada cai. Ao norte, na cabeceira da baía, o Farol Boreal: tome-o, mantenha-o por 3 minutos sem um inimigo ali e derrube o forte dos Lanças.",
+      "en": "Trial by Fire. The Frost is an island of snow and frozen lakes, and today the League fields its WHOLE arsenal: cavalry, siege, Mages, Gryphons. Two clans await us: the Broken Spears in the northeast, holding Drogath's fort, and the Grey Salt in the northwest. To the east lies Brumar's fort, our ally: if it falls, the Frost falls. In the north, at the head of the bay, the Boreal Lighthouse: take it, hold it for 3 minutes with no enemy there, and bring down the Spears' fort."
     },
     "hints": [
       {
         "pt-BR": "A árvore tecnológica está completa. A Torre Arcana, o Templo, o Aviário, o Estábulo e a Oficina exigem o Quartel e o Centro no nível 3, que a campanha concede logo depois da abertura. Cada tropa tem um papel: cerco derruba torres, arqueiros e Magos cobrem o ar (balões), cavalaria persegue.",
-        "en": "The tech tree is complete. The Arcane Tower, Temple, Aviary, Stable and Workshop need the Barracks and the Keep at level 3, which the campaign grants right after the opening. Every troop has a role: siege fells towers, archers and Mages cover the air (balloons), cavalry chases."
+        "en": "The tech tree is complete. The Arcane Tower, Temple, Aviary, Stable and Workshop need the Barracks and the Palace at level 3, which the campaign grants right after the opening. Every troop has a role: siege fells towers, archers and Mages cover the air (balloons), cavalry chases."
       },
       {
         "pt-BR": "O gelo dos lagos e da banquisa não é terreno: nem tropa nem navio passam. As rotas contornam os lagos; os cabos de terra viram gargalos. O Farol fica a ~157 u da base da Liga, a nordeste, e o posto avançado dos Lanças o guarda: limpe o cabo antes de manter. Leve tropa de sobra e uma Serraria para o acampamento do Farol.",
@@ -464,7 +464,7 @@
       },
       "description": {
         "pt-BR": "O Centro de Brumar, a leste, não pode cair: as levas dos clãs vão atingi-lo. Se cair, a missão falha.",
-        "en": "Brumar's Keep, in the east, must not fall: the clans' levies will hit it. If it falls, the mission fails."
+        "en": "Brumar's Palace, in the east, must not fall: the clans' levies will hit it. If it falls, the mission fails."
       },
       "marker": {
         "area": {
@@ -645,8 +645,8 @@
         "en": "The Lighthouse Keeper's Post"
       },
       "description": {
-        "pt-BR": "Uma torre caída na margem sul do continente, entre os lagos congelados, a mais de 100 u da base. Mande alguém até lá.",
-        "en": "A fallen tower on the continent's south shore, among the frozen lakes, over 100 u from the base. Send someone there."
+        "pt-BR": "Uma torre caída na margem sul da ilha, entre os lagos congelados, a mais de 100 u da base. Mande alguém até lá.",
+        "en": "A fallen tower on the island's south shore, among the frozen lakes, over 100 u from the base. Send someone there."
       }
     }
   ],
@@ -721,7 +721,7 @@
                 "portrait": "🛡️",
                 "text": {
                   "pt-BR": "Forte de Brumar, a leste. Sou a Dama Aurora, e esta é a retaguarda de vocês: enquanto o Centro de Brumar estiver de pé, a Liga tem para onde recuar. Se ele cair, a Geada inteira cai. Não me peçam para sair daqui; peçam-me para aguentar.",
-                  "en": "Brumar's fort, to the east. I am Lady Aurora, and this is your rear: as long as Brumar's Keep stands, the League has somewhere to fall back. If it falls, the whole Frost falls. Do not ask me to leave; ask me to hold."
+                  "en": "Brumar's fort, to the east. I am Lady Aurora, and this is your rear: as long as Brumar's Palace stands, the League has somewhere to fall back. If it falls, the whole Frost falls. Do not ask me to leave; ask me to hold."
                 },
                 "duration": 9
               }
@@ -801,7 +801,7 @@
           "type": "message",
           "text": {
             "pt-BR": "Árvore tecnológica completa liberada: Centro no nível 3.",
-            "en": "Full tech tree unlocked: Keep at level 3."
+            "en": "Full tech tree unlocked: Palace at level 3."
           }
         }
       ]
@@ -823,7 +823,7 @@
           "duration": 10,
           "text": {
             "pt-BR": "Aldeões no ouro e na madeira, depois a Fazenda e o Quartel. A mina inicial fica a leste do Centro, a uma boa caminhada (~32 u), e a de expansão, ao norte (~44 u); a pedra está logo a oeste. Não demore: as levas começam em poucos minutos.",
-            "en": "Villagers on gold and timber, then the Farm and the Barracks. The starting mine is a fair walk east of the Keep (~32 u), and the expansion mine lies north (~44 u); the stone is just to the west. Do not dawdle: the levies start in a few minutes."
+            "en": "Villagers on gold and timber, then the Farm and the Barracks. The starting mine is a fair walk east of the Palace (~32 u), and the expansion mine lies north (~44 u); the stone is just to the west. Do not dawdle: the levies start in a few minutes."
           }
         }
       ]
@@ -1018,14 +1018,14 @@
           "duration": 9,
           "text": {
             "pt-BR": "Poeira de sal no horizonte: o Sal Cinzento manda a primeira leva para a nossa base. Segurem a linha perto do Centro.",
-            "en": "Salt dust on the horizon: the Grey Salt sends its first levy to our base. Hold the line near the Keep."
+            "en": "Salt dust on the horizon: the Grey Salt sends its first levy to our base. Hold the line near the Palace."
           }
         },
         {
           "type": "message",
           "text": {
             "pt-BR": "Guerreiros e lanceiros do Sal Cinzento marcham para a base da Liga.",
-            "en": "Grey Salt warriors and axethrowers march on the League base."
+            "en": "Grey Salt warriors and Axe Throwers march on the League base."
           }
         }
       ]
@@ -2249,7 +2249,7 @@
           "type": "defeat",
           "text": {
             "pt-BR": "O Paço da Liga caiu. A Geada é dos clãs.",
-            "en": "The League Keep has fallen. The Frost belongs to the clans."
+            "en": "The League Palace has fallen. The Frost belongs to the clans."
           }
         }
       ]
@@ -2369,8 +2369,8 @@
                 },
                 "portrait": "🔮",
                 "text": {
-                  "pt-BR": "Bom trabalho, comandante. A Geada era o fim do tutorial: daqui em diante a Liga luta sem rodinhas. O brejo, ao sul, já está nos cadernos.",
-                  "en": "Good work, commander. The Frost was the end of the tutorial: from here on the League fights without training wheels. The marsh, to the south, is already in the notebooks."
+                  "pt-BR": "Bom trabalho, comandante. A Geada foi a última lição: daqui em diante a Liga luta sem amparo. O brejo, ao sul, já está nos cadernos.",
+                  "en": "Good work, commander. The Frost was the last lesson: from here on the League fights without a safety net. The marsh, to the south, is already in the notebooks."
                 },
                 "duration": 9
               }

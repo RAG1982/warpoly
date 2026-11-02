@@ -3,14 +3,14 @@
   "version": 1,
   "id": "war-alliance-10-desembarque-costa-ferrugem",
   "hidden": true,
-  "title": { "pt-BR": "Desembarque na Costa Ferrugem", "en": "Landing on Rust Coast" },
+  "title": { "pt-BR": "Desembarque na Costa Ferrugem", "en": "Landing on the Rust Coast" },
   "subtitle": { "pt-BR": "Liga de Aurelan, missão 10", "en": "Aurelan League, mission 10" },
   "briefing": {
     "speaker": { "pt-BR": "Capitão Brann", "en": "Captain Brann" },
     "portrait": "⚔️",
     "text": {
       "pt-BR": "Miragem ficou para trás. Agora é o outro lado do Mar Fendido: a costa de Cinzara, onde os Clãs têm as docas e a guarda. Nossa ilha fica a oeste; a praia de desembarque fica a leste, do outro lado de mais de cem unidades de mar aberto. Embarquem a tropa nas duas Barcaças, naveguem até a praia e fundem o Marco da Colônia atrás dela. Depois, derrubem as três docas dos Clãs para que a frota deles não saia do porto. Mestre Oren vem conosco: os cadernos de Orsolo mostram um poço velho no Farol, a ilha do meio, e só se chega lá pelo mar.",
-      "en": "Mirage is behind us. Now it's the other side of the Sundered Sea: Cinzara's coast, where the Clans keep their docks and guards. Our island lies to the west; the landing beach lies to the east, across more than a hundred units of open sea. Board the troops on the two Barges, sail to the beach and found the Colony Outpost behind it. Then bring down the Clans' three docks so their fleet cannot leave port. Master Oren comes with us: Orsolo's notebooks show an old well on the Lighthouse isle, in the middle of the sea, and it can only be reached by sea."
+      "en": "Mirage is behind us. Now comes the other side of the Sundered Sea: Cinzara's coast, where the Clans keep their docks and guards. Our island lies to the west; the landing beach lies to the east, across more than a hundred units of open sea. Board the troops on the two Barges, sail to the beach and found the Colony Outpost behind it. Then bring down the Clans' three docks so their fleet cannot leave port. Master Oren comes with us: Orsolo's notebooks show an old well on the Lighthouse isle, in the middle of the sea, and it can only be reached by sea."
     },
     "hints": [
       { "pt-BR": "Dica: a tropa embarca nas Barcaças com o comando de carga (clique direito na Barcaça, com as tropas selecionadas). A Barcaça leva até 6 unidades.", "en": "Tip: the troops board the Barges with the load command (right-click the Barge with the troops selected). A Barge carries up to 6 units." },
@@ -72,7 +72,7 @@
         { "type": "cutscene", "id": "shore", "duration": 34, "skippable": true,
           "steps": [
             { "at": 0, "anchor": "playerStart", "zoom": 1.15, "dialog": { "speaker": { "pt-BR": "Capitão Brann", "en": "Captain Brann" }, "portrait": "⚔️", "text": { "pt-BR": "Miragem ficou para trás. A costa de Cinzara está ali, do outro lado do mar.", "en": "Mirage is behind us. Cinzara's coast is out there, across the sea." }, "duration": 8 } },
-            { "at": 9, "anchor": "beach1", "zoom": 1.1, "dialog": { "speaker": { "pt-BR": "Mestre Oren", "en": "Master Oren" }, "portrait": "🔮", "text": { "pt-BR": "Os cadernos de Orsolo marcam a praia de desembarque. Ela fica no meio do mar, e só as Barcaças a alcançam.", "en": "Orsolo's notebooks mark the landing beach. It lies in the middle of the sea, and only Barges can reach it." }, "duration": 8 } },
+            { "at": 9, "anchor": "beach1", "zoom": 1.1, "dialog": { "speaker": { "pt-BR": "Mestre Oren", "en": "Master Oren" }, "portrait": "🔮", "text": { "pt-BR": "Os cadernos de Orsolo marcam a praia de desembarque. Ela fica do outro lado do mar aberto, e só as Barcaças a alcançam.", "en": "Orsolo's notebooks mark the landing beach. It lies across the open sea, and only Barges can reach it." }, "duration": 8 } },
             { "at": 18, "anchor": "dock1", "zoom": 1.05, "dialog": { "speaker": { "pt-BR": "Capitão Brann", "en": "Captain Brann" }, "portrait": "⚔️", "text": { "pt-BR": "Três docas orcs na costa. Derrubem-nas e a frota deles não sai do porto.", "en": "Three orc docks on the coast. Bring them down and their fleet cannot leave port." }, "duration": 8 } },
             { "at": 27, "anchor": "playerStart", "zoom": 1.15, "dialog": { "speaker": { "pt-BR": "Mestre Oren", "en": "Master Oren" }, "portrait": "🔮", "text": { "pt-BR": "Embarquem a tropa. A primeira Barcaça parte da praia da nossa ilha.", "en": "Board the troops. The first Barge leaves from our island's beach." }, "duration": 7 } }
           ] }
@@ -91,7 +91,7 @@
     { "id": "raid-1", "when": { "type": "time", "at": 300 },
       "actions": [
         { "type": "spawn", "owner": 1, "units": [{ "type": "grunt", "count": 6 }, { "type": "axethrower", "count": 3 }], "anchor": "enemyStart", "dx": -8, "dz": 6, "spread": 3, "order": { "kind": "attackMove", "anchor": "colonyMark" } },
-        { "type": "message", "text": { "pt-BR": "Primeira leva dos Clãs: Talhadores e Lanceiros-Machado marcham para a praia.", "en": "First Clan wave: Grunts and Axe Throwers march for the beach." } }
+        { "type": "message", "text": { "pt-BR": "Primeira leva dos Clãs: Talhadores e Lanceiros-Machado marcham para a praia.", "en": "First Clan wave: Slashers and Axe Throwers march for the beach." } }
       ] },
     { "id": "raid-2", "when": { "type": "time", "at": 480 },
       "actions": [

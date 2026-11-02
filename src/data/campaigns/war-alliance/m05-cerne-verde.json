@@ -24,11 +24,11 @@
     "hints": [
       {
         "pt-BR": "Torre Arcana (Mago), Templo e Aviário (Cavaleiro Grifo) exigem o Quartel e o Centro no nível 3, que a campanha já concede nesta missão logo depois da abertura. O Quartel exige a Fazenda.",
-        "en": "The Arcane Tower (Mage), Temple and Aviary (Gryphon Rider) need the Barracks and the Keep at level 3, which the campaign already grants in this mission right after the opening. The Barracks needs the Farm."
+        "en": "The Arcane Tower (Mage), Temple and Aviary (Gryphon Rider) need the Barracks and the Palace at level 3, which the campaign already grants in this mission right after the opening. The Barracks needs the Farm."
       },
       {
         "pt-BR": "As serpes de guerra voam: espadachins não as alcançam. Arqueiros, Magos e Cavaleiros Grifo sim. Mantenha um grupo de atiradores junto do Centro e dos Lenhadores.",
-        "en": "War serpents fly: swordsmen cannot reach them. Archers, Mages and Gryphon Riders can. Keep a group of shooters by the Keep and the lumber camps."
+        "en": "War serpents fly: swordsmen cannot reach them. Archers, Mages and Gryphon Riders can. Keep a group of shooters by the Palace and the lumber camps."
       },
       {
         "pt-BR": "Os Magos de Oren queimam com a Bola de Fogo (pesquise-a no Templo) e Lentidão desacelera um alvo. Mago é frágil: ponha-o atrás da linha. A madeira conta o que você coleta, não o que tem no estoque.",
@@ -1087,7 +1087,7 @@
           "type": "defeat",
           "text": {
             "pt-BR": "O Paço caiu. O Cerne Verde é do Forja Negra.",
-            "en": "The Keep has fallen. The Green Core belongs to the Black Forge."
+            "en": "The Palace has fallen. The Green Core belongs to the Black Forge."
           }
         }
       ]

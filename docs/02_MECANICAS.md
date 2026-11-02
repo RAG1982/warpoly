@@ -8,7 +8,9 @@
 
 RTS no estilo Warcraft II: **Reino Humano** vs **Clãs Orcs**, jogador contra uma ou mais IAs. Mapas orientados a dados (F2-05, `src/data/maps/<id>.json`, escolha em `?map=` ou no menu de escaramuça):
 
-- **`continental-1v1`** ("Vale do Rio", padrão, 1×1): 140×140 (área jogável ±55), continente com rio diagonal e 3 vaus (norte −16,−16 / centro 0,0 / sul 16,16). Base humana em (32,−30), orc em (−32,30). Slot extra (−14,−46) só usado em partidas FFA de teste (`?ffa=1`).
+> **SKIRMISH-MAPS (2026-11-02):** a Escaramuça lista hoje 12 mapas gerados (`duelo-continental-1..3`, `ilha-unica-1..3` e 6 novos: Estreito de Vaeloria, Arquipélago, Vale do Rio, Desfiladeiro, Planalto, Bosques Antigos; ver `src/data/maps/README.md`); o padrão é `duelo-continental-1`. Os mapas descritos abaixo são os antigos (`hidden`, só para as campanhas clássica e da Horda). Poços de petróleo dos mapas novos: 10.000 (o dobro do antigo 5.000).
+
+- **`continental-1v1`** ("Vale do Rio" antigo, ex-padrão, 1×1): 140×140 (área jogável ±55), continente com rio diagonal e 3 vaus (norte −16,−16 / centro 0,0 / sul 16,16). Base humana em (32,−30), orc em (−32,30). Slot extra (−14,−46) só usado em partidas FFA de teste (`?ffa=1`).
 - **`ilhas-4p`** ("Ilhas Gêmeas", novo): 128×128, FFA de 4 jogadores — 2 ilhas ligadas por 2 pontes de terra, 2 slots por ilha. Jogue com `?map=ilhas-4p&ffa=1`.
 
 **Vitória**: ser o último time com HQ (Castelo / Grande Salão) de pé. **Derrota**: perder o seu HQ (o jogador fica `defeated`; em FFA a partida segue até restar um time). Reinício = recarregar a página.

@@ -12,6 +12,8 @@ import { resolveMissionDef } from '../data/missions/index.js';
 import { validateTechRestriction } from './techRestriction.js';
 
 export { DEFAULT_MAP_ID };
+/** Mapa padrão do FFA de 3 jogadores quando nenhum mapa é pedido (o padrão 1×1 só tem 2 vagas). */
+export const FFA_MAP_ID = 'planalto-rocha-4p';
 
 /** Cores de jogador (índice = id). Azul, vermelho, verde, amarelo, roxo, laranja, ciano, rosa. */
 export const PLAYER_COLORS = Object.freeze([
@@ -110,11 +112,13 @@ export function createMatchConfig({
   localFaction = 'human',
   ffa = false,
   seed = null,
-  mapId = DEFAULT_MAP_ID,
+  mapId = null,
   difficulty = DEFAULT_DIFFICULTY,
   victoryMode = DEFAULT_VICTORY_MODE,
   headless = false
 } = {}) {
+  // SKIRMISH-MAPS: o mapa padrão é 1×1 (2 vagas); o FFA de 3 (`ffa: true`, `?ffa=1`) sem mapa explícito usa um mapa de 4 vagas.
+  mapId = mapId ?? (ffa ? FFA_MAP_ID : DEFAULT_MAP_ID);
   const local = localFaction === 'orc' ? 'orc' : 'human';
   const ai = otherFaction(local);
   const players = [
@@ -183,7 +187,7 @@ export function matchConfigFromSearch(search = '') {
     localFaction: params.get('faction') === 'orc' ? 'orc' : 'human',
     ffa: ffa === '1' || ffa === 'true',
     seed,
-    mapId: mapParam && hasMap(mapParam) ? mapParam : DEFAULT_MAP_ID,
+    mapId: mapParam && hasMap(mapParam) ? mapParam : null,
     difficulty: params.get('difficulty') || DEFAULT_DIFFICULTY,
     victoryMode: params.get('victory') || DEFAULT_VICTORY_MODE
   });

@@ -290,13 +290,13 @@ describe('sem restrição = comportamento e checksum do master', () => {
     expect(missingUpgradeRequirements(0, 'melee_weapons', gm)).toEqual([]);
   });
 
-  it('checksums idênticos aos do master (valores medidos antes desta mudança): escaramuça IA×IA, FFA e missão isolada', () => {
+  it('checksums de referência (SKIRMISH-MAPS: o mapa padrão agora é duelo-continental-1; antes 2930931478 em continental-1v1): escaramuça IA×IA, FFA e missão isolada', () => {
     const skirmish = createMatchConfig({ seed: 11, headless: true });
     skirmish.players.forEach((p) => { p.isAI = true; });
-    expect(run(skirmish, 1500)).toBe(2930931478);
+    expect(run(skirmish, 1500)).toBe(1583894654);
     // M3-X1: a demo mudou de conteúdo (marcos da trégua/ruínas e emissário herói); o valor abaixo é o da demo nova.
     expect(run(createMissionConfig('mission-demo'), 1200)).toBe(1870476419);
-    expect(run(createMatchConfig({ seed: 5, ffa: true, headless: true, mapId: 'ilhas-4p' }), 1000)).toBe(2573619394); // árvores 180 de madeira, 1 em 3 descartada (mapas fora de LEGACY_TREE_MAPS)
+    expect(run(createMatchConfig({ seed: 5, ffa: true, headless: true, mapId: 'arquipelago-pontes-4p' }), 1000)).toBe(2663468213); // SKIRMISH-MAPS: era ilhas-4p = 2573619394 (o mapa antigo segue hidden, só para a campanha clássica); mapa novo fora de LEGACY_TREE_MAPS
   }, 60000);
 
   it('techRestriction presente entra no checksum de forma estável; ausente/`undefined` não muda nada', () => {

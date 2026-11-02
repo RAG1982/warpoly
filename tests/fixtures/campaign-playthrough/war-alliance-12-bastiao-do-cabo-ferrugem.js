@@ -208,11 +208,13 @@ function econ(c, { army = true, navy = true } = {}) {
   if (!army) return;
   const rt = c.gm.mission;
   const arcane = c.bld('arcane_tower');
-  if (arcane && arcane.queue.length < 2 && c.mine('mage').length + arcane.queue.length < 4 && affordable(c, { gold: 150 })) c.issue({ type: c.CMD.TRAIN, buildingId: arcane.id, unitType: 'mage' });
+  if (arcane && !(navy && rt.vars.act === 2 && c.mine('frigate').length < FRIGATES_TARGET) && arcane.queue.length < 2 && c.mine('mage').length + arcane.queue.length < 4 && affordable(c, { gold: 150 })) c.issue({ type: c.CMD.TRAIN, buildingId: arcane.id, unitType: 'mage' });
   const workshop = c.bld('workshop');
   if (workshop && workshop.queue.length < 1 && c.mine('ballista').length + workshop.queue.length < BALLISTAS && affordable(c, { gold: 90, wood: 200, stone: 40 })) c.issue({ type: c.CMD.TRAIN, buildingId: workshop.id, unitType: 'ballista' });
   const barracks = c.bld('barracks');
-  if (barracks && barracks.queue.length < 3 && res(c).gold > 150 && c.mine().filter(isTroop).length < TROOPS_TARGET) {
+  // no Ato II o ouro vai primeiro para a frota (cascos custam o dobro de petróleo e a frota é o que abre o estreito)
+  const navyFirst = navy && rt.vars.act === 2 && c.mine('frigate').length < FRIGATES_TARGET && res(c).oil >= 100 && res(c).gold < 600;
+  if (barracks && !navyFirst && barracks.queue.length < 3 && res(c).gold > 150 && c.mine().filter(isTroop).length < TROOPS_TARGET) {
     const n = rt.trainedCount(0, 'knight') + rt.trainedCount(0, 'archer');
     c.issue({ type: c.CMD.TRAIN, buildingId: barracks.id, unitType: n % 3 === 0 ? 'knight' : 'archer' });
   }

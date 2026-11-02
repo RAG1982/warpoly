@@ -8,7 +8,7 @@
  * O roteiro `lose` (só a economia, sem desembarque) não vence e, ao chegar a 600 s, é aniquilado (precedente das m01, m04 e m05).
  */
 export const campaignId = 'war-alliance';
-export const targetMinutes = 15; // ficha: Difícil/G; o harness aceita até 2×. O robô venceu em ~9 min (522 s), com o Paço e Brann vivos.
+export const targetMinutes = 15; // ficha: Difícil/G; o harness aceita até 2×. Pós-merge o robô espera o grupo todo (24 unidades), repõe Barcaças e vence em ~17 min (1017 s), com o Paço e Brann vivos.
 
 const dist = (a, b) => Math.hypot(a.x - b.x, a.z - b.z);
 const posOf = (e) => ({ x: e.mesh.position.x, z: e.mesh.position.z });
@@ -118,10 +118,11 @@ const QUEUE = [
 ];
 
 const FRIGATES_TARGET = 4;
-const MAGES_TARGET = 2;
-const ARMY_MAX = 22; // teto de tropa treinada: a população (Paço + casas) precisa sobrar para as Fragatas
+const MAGES_TARGET = 4;
+const ARMY_MAX = 32; // teto de tropa treinada: a população (Paço + casas) precisa sobrar para as Fragatas
 
 /** Petróleo: depósito de poço mais perto de `anchorName` (a Plataforma nasce sobre ele). */
+const GO_MIN = 24; // pós-merge (cura dos Magos inimigos, alcance maior): só zarpa com o grupo todo, senão as levas matam a tropa aos poucos na praia
 const wellAt = (c, name) => {
   const p = c.anchor(name);
   return c.gm.resourceDeposits.find((d) => d.type === 'oil' && !d.isDead && dist(posOf(d), p) < 2);
@@ -151,6 +152,8 @@ function econ(c, { army = true, navy = true } = {}) {
       if (!d.platform) { if (affordable(c, { gold: 180, wood: 60 })) c.issue({ type: c.CMD.PLACE_BUILDING, buildingType: 'oil_platform', x: posOf(d).x, z: posOf(d).z, unitIds: [t.id] }); }
       else if (d.platform.isConstructed) c.issue({ type: c.CMD.GATHER, unitIds: [t.id], targetId: d.id });
     });
+    // reposição de Barcaças afundadas (a travessia é o único caminho até a praia)
+    if (c.mine('barge').length + yard.queue.length < 2 && res(c).oil >= 60 && affordable(c, { gold: 150, wood: 100 }) && yard.queue.length < 2) c.issue({ type: c.CMD.TRAIN, buildingId: yard.id, unitType: 'barge' });
     // Fragatas: a esquadra que limpa o mar (a patrulha e a frota de reforço)
     const frig = c.mine('frigate');
     if (frig.length + yard.queue.length < FRIGATES_TARGET && res(c).oil >= 100 && affordable(c, { gold: 200, wood: 100 }) && yard.queue.length < 2) c.issue({ type: c.CMD.TRAIN, buildingId: yard.id, unitType: 'frigate' });
@@ -187,8 +190,10 @@ function ferry(c) {
   const b = bot(c);
   const land = c.anchor('landingZone');
   const patrol = alive(c.tagged('patrol_galley')).length + galleysNear(c, c.anchor('unloadSea'), 90).length;
+  // pós-merge: as Barcaças podem afundar (alcance naval +30%); usa as que existirem (por id) e o Estaleiro repõe até 2
+  const boats = c.mine('barge').sort((x, y) => x.id - y.id);
   for (const tag of ['barge1', 'barge2']) {
-    const boat = alive(c.tagged(tag))[0];
+    const boat = boats[tag === 'barge1' ? 0 : 1];
     if (!boat) continue;
     const home = c.anchor(tag === 'barge1' ? 'bargeStart1' : 'bargeStart2');
     const st = (b.ferry[tag] ||= { mode: 'home' });
@@ -196,7 +201,8 @@ function ferry(c) {
       if (dist(posOf(boat), home) > 8 && boat.state !== 'moving') { c.issue({ type: c.CMD.MOVE, unitIds: [boat.id], x: home.x, z: home.z }); continue; }
       const booked = Object.values(b.ferry).flatMap((s) => s.ids ?? []);
       const w = waiting(c).filter((u) => !booked.includes(u.id));
-      if (w.length >= 1 && boat.cargo.length === 0 && dist(posOf(boat), home) <= 8) {
+      if (!b.go && w.length + Object.values(b.ferry).reduce((n, f) => n + (f.n ?? 0) * (f.mode === 'home' ? 0 : 1), 0) >= GO_MIN) b.go = true;
+      if (b.go && w.length >= 1 && boat.cargo.length === 0 && dist(posOf(boat), home) <= 8) {
         const take = w.slice(0, 6);
         c.issue({ type: c.CMD.LOAD, unitIds: take.map((u) => u.id), targetId: boat.id });
         st.mode = 'loading'; st.t = c.seconds; st.ids = take.map((u) => u.id); st.n = take.length;
@@ -208,7 +214,7 @@ function ferry(c) {
       if (patrol > 0) continue; // espera a esquadra limpar a rota
       // uma Barcaça de cada vez na margem: duas no mesmo ponto de água se travam e nenhuma solta a carga
       const other = tag === 'barge1' ? 'barge2' : 'barge1';
-      const otherBoat = alive(c.tagged(other))[0];
+      const otherBoat = boats[other === 'barge1' ? 0 : 1];
       if (b.ferry[other]?.mode === 'sailing' && otherBoat && otherBoat.cargo.length > 0) continue;
       c.issue({ type: c.CMD.UNLOAD, unitId: boat.id, x: land.x, z: land.z });
       st.mode = 'sailing'; st.t = c.seconds;
@@ -239,7 +245,7 @@ function ground(c) {
   }
   const docks = alive(c.tagged('orc_dock'));
   const marco = c.gm.buildings.some((x) => x.ownerId === 0 && x.type === 'great_hall' && !x.isDead);
-  if (docks.length && marco && front.length >= 5) {
+  if (docks.length && (marco ? front.length >= 5 : front.length >= 10)) {
     if (front.some((u) => u.state === 'idle')) c.issue({ type: c.CMD.ATTACK, unitIds: front.map((u) => u.id), targetId: nearest(docks, colony).id });
     return;
   }

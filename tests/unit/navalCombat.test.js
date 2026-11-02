@@ -23,7 +23,7 @@ describe('ordens de ataque naval (gm.issue)', () => {
     gm.events.on(EVT.UNIT_DIED, (e) => kills.push(e));
     gm.issue({ type: CMD.ATTACK, playerId: 0, unitIds: [a.id, b.id], targetId: enemy.id });
     run(gm, 10);
-    expect(dist(a, enemy)).toBeLessThan(13.5);
+    expect(dist(a, enemy)).toBeLessThan(17); // alcance da fragata 15,6 (12 +30%, NAVAL-RANGE): parte de ~35 u, logo precisa se aproximar
     run(gm, 30);
     expect(enemy.isDead).toBe(true);
     expect(kills.some((k) => k.unitType === 'war_galley')).toBe(true);
@@ -77,7 +77,7 @@ describe('ordens de ataque naval (gm.issue)', () => {
 });
 
 describe('artilharia costeira e torres', () => {
-  it('couraçado ATACA uma construção na costa dentro de 22 e a destrói; fora do alcance se aproxima antes', () => {
+  it('couraçado ATACA uma construção na costa dentro de 28,6 (22 +30%) e a destrói; fora do alcance se aproxima antes', () => {
     const gm = makeMapGm(pen1);
     const lc = components(gm.pathfinder);
     const east = compAt(gm.pathfinder, lc, 72, -1);
@@ -87,7 +87,7 @@ describe('artilharia costeira e torres', () => {
     gm.issue({ type: CMD.ATTACK, playerId: 0, unitIds: [d.id], targetId: tgt.id });
     run(gm, 30);
     expect(tgt.hp).toBeLessThan(tgt.maxHp);
-    expect(Math.hypot(d.mesh.position.x - tgt.mesh.position.x, d.mesh.position.z - tgt.mesh.position.z)).toBeLessThan(28);
+    expect(Math.hypot(d.mesh.position.x - tgt.mesh.position.x, d.mesh.position.z - tgt.mesh.position.z)).toBeLessThan(35); // alcance do couraçado 28,6 (22 +30%, NAVAL-RANGE) + meia pegada do Quartel; parte de ~40 u, fora do alcance
   });
 
   it('torre de vigia na costa atira em navio inimigo ao alcance; fragata revida e a derruba', () => {

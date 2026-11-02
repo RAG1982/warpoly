@@ -6,7 +6,7 @@
  * teletransporte nem dano injetado. O roteiro `lose` (mesma economia, sem tropa nem magos) PERDE para a traição e as levas.
  */
 export const campaignId = 'war-alliance';
-export const targetMinutes = 16; // ficha: 18–22 min (jogador humano); o harness aceita até 2×. O robô fecha em ~9,5 min (566 s), com o Paço e Brann vivos.
+export const targetMinutes = 16; // ficha: 18–22 min (jogador humano); o harness aceita até 2×. Pós-merge (cura autocast dos Magos, alcances maiores) o robô fecha em ~22 min (1322 s), com o Paço e Brann vivos.
 
 const dist = (a, b) => Math.hypot(a.x - b.x, a.z - b.z);
 const posOf = (e) => ({ x: e.mesh.position.x, z: e.mesh.position.z });
@@ -40,7 +40,7 @@ const place = (c, type, minR = 9) => placeAround(c, type, homeOf(c), minR, 44);
 const placeWide = (c, type, minR = 9) => placeAround(c, type, homeOf(c), minR, 64);
 
 /** Papéis dos aldeões, por ordem de id (2 de cada 3 no ouro; pedra só 1 em 9). Só os ociosos recebem tarefa nova. */
-const ROLES = ['gold', 'gold', 'wood', 'gold', 'gold', 'gold', 'gold', 'stone', 'gold', 'gold', 'wood', 'gold', 'gold', 'gold', 'gold', 'wood', 'gold', 'gold'];
+const ROLES = ['gold', 'gold', 'wood', 'gold', 'wood', 'gold', 'gold', 'stone', 'gold', 'wood', 'wood', 'gold', 'gold', 'wood', 'gold', 'wood', 'gold', 'wood'];
 function keepWorking(c) {
   const home = c.anchor('playerStart');
   const golds = c.gm.resourceDeposits.filter((r) => r.type === 'gold' && !r.isDead).sort((a, b) => dist(posOf(a), home) - dist(posOf(b), home));
@@ -79,7 +79,7 @@ const QUEUE = [
   { id: 'tower2', cost: 'watchtower', done: (c) => count(c, 'watchtower') >= 2, go: (c) => placeWide(c, 'watchtower', 12) }
 ];
 
-const TROOPS_BEFORE_LAUNCH = 24;
+const TROOPS_BEFORE_LAUNCH = 34; // pós-merge (cura autocast dos Magos inimigos, Grifo/Serpe à distância): marcha com mais tropa
 
 function econ(c, { army = true } = {}) {
   const b = bot(c);

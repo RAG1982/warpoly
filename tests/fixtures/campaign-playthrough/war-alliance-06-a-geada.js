@@ -8,7 +8,7 @@
  * não derruba o forte.
  */
 export const campaignId = 'war-alliance';
-export const targetMinutes = 20; // ficha: 20–25 min (jogador humano); o harness aceita até 2×. O robô não pensa nem olha a câmera e fecha em ~17 min (4 jogadores, mapa de 320: ~2 min de relógio por execução).
+export const targetMinutes = 20; // ficha: 20–25 min (jogador humano); o harness aceita até 2×. O robô não pensa nem olha a câmera e, pós-merge, fecha em ~30 min (1825 s; 4 jogadores, mapa de 320: ~2 min de relógio por execução).
 
 const dist = (a, b) => Math.hypot(a.x - b.x, a.z - b.z);
 const posOf = (e) => ({ x: e.mesh.position.x, z: e.mesh.position.z });
@@ -40,7 +40,7 @@ const homeOf = (c) => posOf(c.bld('castle'));
 const place = (c, type, minR = 9) => placeAround(c, type, homeOf(c), minR, 48);
 
 /** Papéis dos aldeões, por ordem de id. Muito ouro: o arsenal completo come ouro, madeira e pedra. */
-const ROLES = ['gold', 'gold', 'wood', 'gold', 'gold', 'wood', 'stone', 'gold', 'wood', 'gold', 'gold', 'wood', 'stone', 'gold', 'wood', 'gold', 'wood', 'gold'];
+const ROLES = ['gold', 'gold', 'wood', 'gold', 'gold', 'gold', 'stone', 'gold', 'wood', 'gold', 'gold', 'wood', 'stone', 'gold', 'gold', 'gold', 'wood', 'gold']; // pós-merge: o ouro é o gargalo (a madeira sobrava), menos lenhadores
 function keepWorking(c) {
   const home = c.anchor('playerStart');
   const golds = c.gm.resourceDeposits.filter((r) => r.type === 'gold' && !r.isDead).sort((a, b) => dist(posOf(a), home) - dist(posOf(b), home));
@@ -54,7 +54,7 @@ function keepWorking(c) {
     if (role === 'stone' && res(c).stone > 320) role = 'wood';
     if (role === 'gold' && res(c).gold > 1800) role = 'wood';
     if (role === 'wood' && res(c).wood > 1000) role = 'gold';
-    const target = role === 'stone' ? stone : role === 'wood' ? tree : golds[0];
+    const target = role === 'stone' ? stone : role === 'wood' ? tree : golds[i % Math.max(1, Math.min(golds.length, 2))]; // 2 minas mais perto do Paço
     if (target) c.issue({ type: c.CMD.GATHER, unitIds: [u.id], targetId: target.id });
   });
 }
@@ -116,9 +116,9 @@ function econ(c, { army = true } = {}) {
 }
 
 const isTroop = (u) => u.type !== 'villager' && u.type !== 'hero_brann';
-const TROOPS_BEFORE_LAUNCH = 22;
-const LAUNCH_AFTER = 540; // depois da 1ª investida pesada dos clãs (a IA Difícil dos Lanças Quebradas chega à base por volta dos 7 min)
-const STORM_TROOPS = 22; // tropa de campo (sem Aldeões nem Brann) para investir contra o forte dos Lanças
+const TROOPS_BEFORE_LAUNCH = 34; // pós-merge (cura dos Magos inimigos, Grifo/Serpe à distância): marcha com mais tropa
+const LAUNCH_AFTER = 720; // depois da 1ª investida pesada dos clãs (a IA Difícil dos Lanças Quebradas chega à base por volta dos 7 min)
+const STORM_TROOPS = 28; // tropa de campo (sem Aldeões nem Brann) para investir contra o forte dos Lanças
 const GUARD_SIZE = 10; // tropa que fica em casa contra as levas depois da 1ª marcha
 
 /**

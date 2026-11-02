@@ -31,7 +31,7 @@ const MIN_ANCHORS = {
   'camp-11-estepe-do-vento': ['playerStart', 'enemyStart', 'colonyMark', 'skarnStart', 'hurganStart', 'landingZone', 'reinforceSea', 'convoyStart', 'convoyEnd', 'raid1', 'raid2', 'raid3', 'dissidentClan', 'expansion1', 'expansion2', 'expansion3'],
   'camp-12-cabo-ferrugem': ['playerStart', 'enemyStart', 'bastion', 'strait', 'dock1', 'dock2', 'dock3', 'fleetStart', 'fleetStart2', 'bossStart', 'waveStart1', 'waveStart2', 'expansion1', 'expansion2']
 };
-const WATER = new Set(['shipHorizon', 'orcSails', 'pier1Water', 'pier2Water', 'seaLanding1', 'seaLanding2', 'seaLanding3', 'bridgeheadSea', 'well1', 'well2', 'well3', 'well4', 'shipyard1Water', 'shipyard2Water', 'wreck1', 'wreck2', 'wreck3', 'fleetStart1', 'fleetStart2', 'fleetMid', 'unloadSea', 'bargeStart1', 'bargeStart2', 'reinforceSea', 'strait', 'fleetStart', 'lightSea', 'iceDockSea']);
+const WATER = new Set(['shipHorizon', 'orcSails', 'pier1Water', 'pier2Water', 'seaLanding1', 'seaLanding2', 'seaLanding3', 'bridgeheadSea', 'well1', 'well2', 'well3', 'well4', 'shipyard1Water', 'shipyard2Water', 'wreck1', 'wreck2', 'wreck3', 'fleetStart1', 'fleetStart2', 'fleetMid', 'unloadSea', 'bargeStart1', 'bargeStart2', 'reinforceSea', 'strait', 'fleetStart', 'lightSea', 'iceDockSea', 'well5', 'well6', 'siegeFleetStart', 'siegeFleetStart2']); // M3-12: a Estepe do Vento tem 6 poços e a frota de cerco no mar
 const isLake = (name) => /^lake\d$/.test(name); // lago congelado (A Geada): água rasa interior, fora do oceano navegável
 const hyp = (a, b) => Math.hypot(a.x - b.x, a.z - b.z);
 
@@ -67,7 +67,7 @@ describe('M2-03 · registro e formato', () => {
       expect(decodeBiomeGrid(m.biomeGrid).length).toBe(m.biomeGrid.nodes ** 2);
       expect(TILESETS[m.tileset], m.tileset).toBeDefined();
       expect(m.size).toBeGreaterThanOrEqual(96);
-      expect(m.size).toBeLessThanOrEqual(320); // M3-06b: camp-05 tem 320
+      expect(m.size).toBeLessThanOrEqual(id === 'camp-11-estepe-do-vento' ? 384 : 320); // M3-06b: camp-05 tem 320; M3-12: a Estepe do Vento tem 352
       expect(m.startSlots).toHaveLength(SLOTS[id] ?? 2);
       expect(m.maxPlayers).toBe(SLOTS[id] ?? 2);
     });
@@ -334,7 +334,7 @@ describe('M2-04/M3-07 · A Geada (gelo, lagos congelados, Farol Boreal, 4 vagas)
 // ---------------------------------------------------------------------------------------------------------------------------
 describe('M2-06 · Estepe do Vento (colônia sob cerco)', () => {
   const id = 'camp-11-estepe-do-vento';
-  it('interior de savana e estepe, 3 vagas ligadas por terra e Marco no slot 0', () => {
+  it('interior de savana e estepe, 3 vagas ligadas por terra e Paço no slot 0 (Marco da Colônia na praia, M3-12)', () => {
     const m = getMap(id);
     expect(m.tileset).toBe('savana');
     const dry = countCells(m, (x, z) => getHeightForMap(m, x, z) > 1);
@@ -343,9 +343,32 @@ describe('M2-06 · Estepe do Vento (colônia sob cerco)', () => {
     const land = buildPathfinder(m, 'land');
     const seen = floodFill(land, m.startSlots[0].x, m.startSlots[0].z);
     for (const s of m.startSlots) expect(isReached(land, seen, s.x, s.z)).toBe(true);
-    expect(m.anchors.colonyMark).toEqual({ x: m.startSlots[0].x, z: m.startSlots[0].z });
     expect(m.anchors.skarnStart).toEqual({ x: m.startSlots[1].x, z: m.startSlots[1].z });
     expect(m.anchors.hurganStart).toEqual({ x: m.startSlots[2].x, z: m.startSlots[2].z });
+  });
+  it('M3-12: 352 de lado, bases a >= 150 u umas das outras; Marco da Colônia na praia (14–22 u do desembarque, longe do Paço e de Skarn)', () => {
+    const m = getMap(id);
+    expect(m.size).toBe(352);
+    for (let i = 0; i < 3; i++) for (let j = i + 1; j < 3; j++) expect(hyp(m.startSlots[i], m.startSlots[j]), `bases ${i}-${j}`).toBeGreaterThanOrEqual(150);
+    const a = m.anchors;
+    expect(hyp(a.colonyMark, a.landingZone)).toBeGreaterThanOrEqual(14);
+    expect(hyp(a.colonyMark, a.landingZone)).toBeLessThanOrEqual(22);
+    expect(hyp(a.colonyMark, m.startSlots[0])).toBeGreaterThanOrEqual(30);
+    expect(hyp(a.colonyMark, m.startSlots[1])).toBeGreaterThanOrEqual(60);
+  });
+  it('M3-12: frota de cerco com duas partidas no mar (água navegável, ligada ao oceano) e 6 poços de petróleo, 2 deles perto do Paço', () => {
+    const m = getMap(id);
+    const a = m.anchors;
+    const sea = buildPathfinder(m, 'naval');
+    const ocean = oceanSeen(m, sea);
+    for (const k of ['siegeFleetStart', 'siegeFleetStart2']) {
+      expect(a[k].water, k).toBe(true);
+      expect(isReached(sea, ocean, a[k].x, a[k].z), k).toBe(true);
+    }
+    expect(hyp(a.siegeFleetStart, m.startSlots[1])).toBeGreaterThanOrEqual(60);
+    const oil = m.resources.filter((r) => r.type === 'oil');
+    expect(oil.length).toBeGreaterThanOrEqual(4);
+    expect(Math.min(...oil.map((r) => hyp(r, m.startSlots[0])))).toBeLessThanOrEqual(30);
   });
   it('praia de reforço com mar navegável, 3 rotas de incursão rumo ao Marco e clã dissidente longe das bases inimigas', () => {
     const m = getMap(id);

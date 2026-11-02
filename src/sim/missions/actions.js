@@ -159,8 +159,10 @@ const HANDLERS = {
   setTier(rt, a) {
     const gm = rt.gm;
     const owner = resolveOwnerId(gm, a.owner ?? 'player');
+    const except = a.exceptTag !== undefined ? new Set(rt.tags.get(a.exceptTag) || []) : null;
     for (const b of gm.buildings) {
       if (b.ownerId !== owner || !isAlive(b) || b.isConstructed === false || roleOf(b.type) !== 'hq' || (b.tier || 1) >= a.tier) continue;
+      if (except && except.has(b.id)) continue;
       const pct = b.maxHp > 0 ? b.hp / b.maxHp : 1;
       b.tier = a.tier;
       b.tierUpgrade = null;

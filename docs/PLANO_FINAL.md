@@ -301,7 +301,7 @@ Legenda de dependências: só IDs; "—" = pode começar já. **Dif.** = dificul
 | M3-10 | Missão 9 · Miragem | Difícil | G | S | M3-09, M2-05 | DONE (2026-11-02) |
 | M3-11 | Missão 10 · Desembarque na Costa Ferrugem (entra o Oren) | Difícil | G | S | M3-10, M2-06, M2-02 | DONE (2026-11-02) |
 | M3-12 | Missão 11 · Porto Albor (entra o Dorian) | Difícil | G | S | M3-11, M2-06, M2-02 | DONE (2026-11-02) |
-| M3-13 | Missão 12 · O Bastião do Cabo Ferrugem (final) | Muito difícil | GG | S | M3-12, M2-06, M2-11 | TODO |
+| M3-13 | Missão 12 · O Bastião do Cabo Ferrugem (final) | Muito difícil | GG | S | M3-12, M2-06, M2-11 | DONE (2026-11-02) |
 | M3-14 | Textos finais, epílogo, retratos de NPC, arte de vitória | Média | M | S+SB | M3-13 | TODO |
 | M3-15 | **G3 — você joga as 12 missões** (≈ 4–5 h) | — | — | V | M3-14 | TODO |
 | M3-16 | Ajustes pós-playtest da Aliança | Média | M | S | M3-15 | TODO |

@@ -3,85 +3,135 @@
   "version": 1,
   "id": "war-alliance-10-desembarque-costa-ferrugem",
   "hidden": true,
-  "title": {
-    "pt-BR": "Desembarque na Costa Ferrugem",
-    "en": "Landing on Rust Coast"
-  },
-  "subtitle": {
-    "pt-BR": "Liga de Aurelan, missão 10",
-    "en": "Aurelan League, mission 10"
-  },
+  "title": { "pt-BR": "Desembarque na Costa Ferrugem", "en": "Landing on Rust Coast" },
+  "subtitle": { "pt-BR": "Liga de Aurelan, missão 10", "en": "Aurelan League, mission 10" },
   "briefing": {
-    "speaker": {
-      "pt-BR": "Mestre Arcano Oren",
-      "en": "Arcane Master Oren"
-    },
-    "portrait": "🔮",
+    "speaker": { "pt-BR": "Capitão Brann", "en": "Captain Brann" },
+    "portrait": "⚔️",
     "text": {
-      "pt-BR": "Chegamos ao continente de Cinzara. Mestre Oren lidera a cartografia arcana da cabeça de praia.",
-      "en": "We have reached the continent of Cinzara. Master Oren spearheads the arcane mapping of the beachhead."
+      "pt-BR": "Miragem ficou para trás. Agora é o outro lado do Mar Fendido: a costa de Cinzara, onde os Clãs têm as docas e a guarda. Nossa ilha fica a oeste; a praia de desembarque fica a leste, do outro lado de mais de cem unidades de mar aberto. Embarquem a tropa nas duas Barcaças, naveguem até a praia e fundem o Marco da Colônia atrás dela. Depois, derrubem as três docas dos Clãs para que a frota deles não saia do porto. Mestre Oren vem conosco: os cadernos de Orsolo mostram um poço velho no Farol, a ilha do meio, e só se chega lá pelo mar.",
+      "en": "Mirage is behind us. Now it's the other side of the Sundered Sea: Cinzara's coast, where the Clans keep their docks and guards. Our island lies to the west; the landing beach lies to the east, across more than a hundred units of open sea. Board the troops on the two Barges, sail to the beach and found the Colony Outpost behind it. Then bring down the Clans' three docks so their fleet cannot leave port. Master Oren comes with us: Orsolo's notebooks show an old well on the Lighthouse isle, in the middle of the sea, and it can only be reached by sea."
     },
     "hints": [
-      {
-        "pt-BR": "Concentre-se nos objetivos primários para avançar.",
-        "en": "Focus on primary objectives to advance."
-      }
+      { "pt-BR": "Dica: a tropa embarca nas Barcaças com o comando de carga (clique direito na Barcaça, com as tropas selecionadas). A Barcaça leva até 6 unidades.", "en": "Tip: the troops board the Barges with the load command (right-click the Barge with the troops selected). A Barge carries up to 6 units." },
+      { "pt-BR": "Dica: a Barcaça desembarca a carga na água junto da praia de Cinzara (Desembarcar). O Marco nasce quando uma unidade sua chega à praia.", "en": "Tip: the Barge unloads its cargo in the water beside Cinzara's beach (Unload). The Outpost is founded when one of your units reaches the beach." },
+      { "pt-BR": "Dica: o Estaleiro fica na costa, perto da base. Fragatas afundam galés a distância e não precisam de tropa em terra.", "en": "Tip: the Shipyard is on the coast, near your base. Frigates sink galleys at range and need no troops ashore." },
+      { "pt-BR": "O Capitão Brann é um HERÓI: tem mana e três habilidades (Z, X, C) e só existe um. Se ele morrer, a missão está perdida.", "en": "Captain Brann is a HERO: he has mana and three abilities (Z, X, C), and there is only one of him. If he dies the mission is lost." }
     ]
   },
-  "mapId": "estreito-1v1",
+  "mapId": "camp-10-costa-ferrugem",
   "seed": 9170,
   "players": [
-    {
-      "id": 0,
-      "name": {
-        "pt-BR": "Liga de Aurelan",
-        "en": "Aurelan League"
-      },
-      "factionId": "human",
-      "team": 0,
-      "color": "#2563eb",
-      "isLocal": true,
-      "startSlot": 0
-    },
-    {
-      "id": 1,
-      "name": {
-        "pt-BR": "Clãs do Cinzal",
-        "en": "Cinzal Clans"
-      },
-      "factionId": "orc",
-      "team": 1,
-      "color": "#dc2626",
-      "isAI": true,
-      "startSlot": 1
-    }
+    { "id": 0, "name": { "pt-BR": "Liga de Aurelan", "en": "Aurelan League" }, "factionId": "human", "team": 0, "color": "#2563eb", "isLocal": true, "startSlot": 0 },
+    { "id": 1, "name": { "pt-BR": "Clãs do Cinzal", "en": "Cinzal Clans" }, "factionId": "orc", "team": 1, "color": "#dc2626", "isAI": true, "difficulty": "easy", "startSlot": 1 }
   ],
-  "startingResources": {
-    "wood": 400,
-    "gold": 400,
-    "stone": 150
-  },
+  "startingResources": { "wood": 600, "gold": 1400, "stone": 300 },
+  "vars": { "fin_clock": 0 },
+  "autoVictory": false,
   "setup": [
-    {
-      "type": "tag",
-      "select": {
-        "buildingType": "great_hall"
-      },
-      "tag": "enemy_base"
-    }
+    { "type": "spawn", "owner": "player", "unitType": "hero_brann", "count": 1, "anchor": "playerStart", "dx": 0, "dz": 13, "tag": "brann" },
+    { "type": "spawn", "owner": "player", "unitType": "hero_oren", "count": 1, "anchor": "playerStart", "dx": 4, "dz": 13, "tag": "oren", "displayName": { "pt-BR": "Mestre Oren", "en": "Master Oren" }, "markColor": "#a78bfa" },
+    { "type": "spawn", "owner": "player", "unitType": "barge", "count": 1, "anchor": "bargeStart1", "tag": "barge1" },
+    { "type": "spawn", "owner": "player", "unitType": "barge", "count": 1, "anchor": "bargeStart2", "tag": "barge2" },
+    { "type": "spawn", "owner": "player", "units": [{ "type": "knight", "count": 6 }, { "type": "archer", "count": 6 }], "anchor": "beach1", "spread": 4, "tag": "liga_troops" },
+    { "type": "spawn", "owner": 1, "units": [{ "type": "grunt", "count": 6 }, { "type": "axethrower", "count": 3 }], "anchor": "garrison", "spread": 4, "tag": "coast_guard", "guard": { "r": 12 } },
+    { "type": "spawnBuilding", "owner": 1, "buildingType": "ship_dock", "anchor": "dock1", "tag": "orc_dock", "facing": 0 },
+    { "type": "spawnBuilding", "owner": 1, "buildingType": "ship_dock", "anchor": "dock2", "tag": "orc_dock", "facing": 0 },
+    { "type": "spawnBuilding", "owner": 1, "buildingType": "ship_dock", "anchor": "dock3", "tag": "orc_dock", "facing": 0 },
+    { "type": "spawn", "owner": 1, "unitType": "war_galley", "count": 3, "anchor": "patrolSea", "spread": 4, "tag": "patrol_galley", "guard": { "r": 16 } },
+    { "type": "spawnLandmark", "kind": "ruins", "anchor": "isletWell", "tag": "ruins", "label": { "pt-BR": "Poço Velho do Farol", "en": "Old Well of the Lighthouse" } }
   ],
   "objectives": [
-    {
-      "id": "primary-main",
-      "type": "destroy",
-      "priority": "primary",
-      "select": {
-        "tag": "enemy_base"
-      },
-      "title": {
-        "pt-BR": "Estabelecer o Marco da Colônia com Mestre Oren",
-        "en": "Establish the Colony Outpost with Master Oren"
-      }
-    }
+    { "id": "p-colony", "type": "flag", "priority": "primary",
+      "condition": { "type": "count", "select": { "buildingType": "great_hall", "owner": "player" }, "op": ">=", "value": 1 },
+      "title": { "pt-BR": "Estabelecer o Marco da Colônia na praia de Cinzara", "en": "Found the Colony Outpost on Cinzara's beach" },
+      "description": { "pt-BR": "Leve uma unidade sua até a praia de desembarque. O Marco nasce atrás da praia, com a guarda dos Clãs a 20 u.", "en": "Bring one of your units to the landing beach. The Outpost rises behind the beach, with the Clans' guard 20 u away." },
+      "marker": { "area": { "anchor": "landingZone", "r": 16 }, "style": "goal", "seconds": 240 } },
+    { "id": "p-docks", "type": "destroy", "priority": "primary", "select": { "tag": "orc_dock" }, "count": 3,
+      "title": { "pt-BR": "Destruir as 3 docas dos Clãs no litoral", "en": "Destroy the Clans' 3 docks on the coast" },
+      "description": { "pt-BR": "As docas ficam na costa de Cinzara, a leste da praia. Tropa em terra ou Fragatas pelo mar.", "en": "The docks stand on Cinzara's coast, east of the beach. Troops ashore or Frigates from the sea." } },
+    { "id": "s-galleys", "type": "destroy", "priority": "secondary", "select": { "tag": "patrol_galley" }, "count": 3,
+      "title": { "pt-BR": "Afundar a patrulha de 3 galés no Farol", "en": "Sink the 3-galley patrol at the Lighthouse" },
+      "description": { "pt-BR": "As galés patrulham o mar entre a ilha do meio e a praia. Só navios as alcançam bem.", "en": "The galleys patrol the sea between the middle isle and the beach. Only ships reach them well." } },
+    { "id": "s-oil", "type": "collect", "priority": "secondary", "resource": "oil", "amount": 300, "mode": "gathered",
+      "title": { "pt-BR": "Bombear 300 de petróleo de uma plataforma no mar", "en": "Pump 300 oil from a sea platform" },
+      "description": { "pt-BR": "Os poços de petróleo ficam no mar. Um Petroleiro ergue a Plataforma e a Refinaria recebe o óleo.", "en": "The oil wells lie in the sea. A Tanker raises the Platform and the Refinery receives the oil." } },
+    { "id": "s-mages", "type": "train", "priority": "secondary", "unitType": "mage", "count": 2,
+      "title": { "pt-BR": "Treinar 2 Magos na Torre Arcana", "en": "Train 2 Mages at the Arcane Tower" },
+      "description": { "pt-BR": "Os magos curam a tropa e queimam o que a espada não alcança. Erga a Torre Arcana com o Paço no nível 3.", "en": "The mages heal the troops and burn what the sword cannot reach. Raise the Arcane Tower with the Palace at level 3." } },
+    { "id": "h-well", "type": "flag", "priority": "hidden",
+      "condition": { "type": "area", "owner": "player", "area": { "anchor": "isletWell", "r": 14 } },
+      "title": { "pt-BR": "Achar o Poço Velho do Farol", "en": "Find the Old Well of the Lighthouse" } }
+  ],
+  "triggers": [
+    { "id": "intro", "when": { "type": "time", "at": 0 },
+      "actions": [
+        { "type": "music", "id": "on" },
+        { "type": "reveal", "anchor": "landingZone", "radius": 34, "ttl": 50 },
+        { "type": "reveal", "anchor": "isletWell", "radius": 26, "ttl": 40 },
+        { "type": "cutscene", "id": "shore", "duration": 34, "skippable": true,
+          "steps": [
+            { "at": 0, "anchor": "playerStart", "zoom": 1.15, "dialog": { "speaker": { "pt-BR": "Capitão Brann", "en": "Captain Brann" }, "portrait": "⚔️", "text": { "pt-BR": "Miragem ficou para trás. A costa de Cinzara está ali, do outro lado do mar.", "en": "Mirage is behind us. Cinzara's coast is out there, across the sea." }, "duration": 8 } },
+            { "at": 9, "anchor": "beach1", "zoom": 1.1, "dialog": { "speaker": { "pt-BR": "Mestre Oren", "en": "Master Oren" }, "portrait": "🔮", "text": { "pt-BR": "Os cadernos de Orsolo marcam a praia de desembarque. Ela fica no meio do mar, e só as Barcaças a alcançam.", "en": "Orsolo's notebooks mark the landing beach. It lies in the middle of the sea, and only Barges can reach it." }, "duration": 8 } },
+            { "at": 18, "anchor": "dock1", "zoom": 1.05, "dialog": { "speaker": { "pt-BR": "Capitão Brann", "en": "Captain Brann" }, "portrait": "⚔️", "text": { "pt-BR": "Três docas orcs na costa. Derrubem-nas e a frota deles não sai do porto.", "en": "Three orc docks on the coast. Bring them down and their fleet cannot leave port." }, "duration": 8 } },
+            { "at": 27, "anchor": "playerStart", "zoom": 1.15, "dialog": { "speaker": { "pt-BR": "Mestre Oren", "en": "Master Oren" }, "portrait": "🔮", "text": { "pt-BR": "Embarquem a tropa. A primeira Barcaça parte da praia da nossa ilha.", "en": "Board the troops. The first Barge leaves from our island's beach." }, "duration": 7 } }
+          ] }
+      ] },
+    { "id": "full-tree", "when": { "type": "time", "at": 0 },
+      "actions": [
+        { "type": "setTier", "owner": "player", "tier": 3 },
+        { "type": "message", "text": { "pt-BR": "Árvore tecnológica completa liberada: o Paço está no nível 3 (Torre Arcana, Aviário, Estaleiro e Torres).", "en": "Full tech tree unlocked: the Palace is at level 3 (Arcane Tower, Aviary, Shipyard and Towers)." } }
+      ] },
+    { "id": "landed", "when": { "type": "area", "owner": "player", "area": { "anchor": "landingZone", "r": 16 } },
+      "actions": [
+        { "type": "spawnBuilding", "owner": "player", "buildingType": "great_hall", "anchor": "colonyMark", "tag": "colony", "facing": 90 },
+        { "type": "sound", "id": "build" },
+        { "type": "dialog", "speaker": { "pt-BR": "Mestre Oren", "en": "Master Oren" }, "portrait": "🔮", "text": { "pt-BR": "O Marco da Colônia está erguido em Cinzara. A guarda dos Clãs vem por aí: segurem a praia.", "en": "The Colony Outpost stands in Cinzara. The Clans' guard is coming: hold the beach." }, "duration": 8 }
+      ], "once": true },
+    { "id": "raid-1", "when": { "type": "time", "at": 300 },
+      "actions": [
+        { "type": "spawn", "owner": 1, "units": [{ "type": "grunt", "count": 6 }, { "type": "axethrower", "count": 3 }], "anchor": "enemyStart", "dx": -8, "dz": 6, "spread": 3, "order": { "kind": "attackMove", "anchor": "colonyMark" } },
+        { "type": "message", "text": { "pt-BR": "Primeira leva dos Clãs: Talhadores e Lanceiros-Machado marcham para a praia.", "en": "First Clan wave: Grunts and Axe Throwers march for the beach." } }
+      ] },
+    { "id": "raid-2", "when": { "type": "time", "at": 480 },
+      "actions": [
+        { "type": "spawn", "owner": 1, "units": [{ "type": "ogre", "count": 1 }, { "type": "grunt", "count": 6 }, { "type": "axethrower", "count": 3 }], "anchor": "enemyStart", "dx": -8, "dz": -4, "spread": 3, "order": { "kind": "attackMove", "anchor": "colonyMark" } },
+        { "type": "message", "text": { "pt-BR": "Segunda leva: um Ogro lidera a tropa rumo ao Marco.", "en": "Second wave: an Ogre leads the troops toward the Outpost." } }
+      ] },
+    { "id": "fleet-raid", "when": { "type": "time", "at": 600 },
+      "actions": [
+        { "type": "spawn", "owner": 1, "unitType": "war_galley", "count": 3, "anchor": "patrolSea", "spread": 4, "tag": "raid_fleet", "order": { "kind": "attackMove", "anchor": "unloadSea" } },
+        { "type": "message", "text": { "pt-BR": "Três galés dos Clãs saem do Farol rumo à praia: afundem-nas antes que bloqueiem o desembarque.", "en": "Three Clan galleys leave the Lighthouse for the beach: sink them before they block the landing." } }
+      ] },
+    { "id": "raid-3", "when": { "type": "time", "at": 780 },
+      "actions": [
+        { "type": "spawn", "owner": 1, "units": [{ "type": "catapult", "count": 1 }, { "type": "grunt", "count": 8 }, { "type": "ogre", "count": 1 }], "anchor": "enemyStart", "dx": -10, "dz": 0, "spread": 3, "tag": "raid3", "order": { "kind": "attackMove", "anchor": "colonyMark" } },
+        { "type": "dialog", "speaker": { "pt-BR": "Capataz dos Clãs", "en": "Clan Overseer" }, "portrait": "🪓", "text": { "pt-BR": "Os de Aurelan chegaram de barco e acham que ficam. Levem tudo até a praia!", "en": "Aurelan's people came by boat and think they can stay. Bring everything to the beach!" }, "duration": 8 }
+      ] },
+    { "id": "docks-down", "when": { "type": "objective", "id": "p-docks", "status": "completed" },
+      "actions": [
+        { "type": "sound", "id": "victory" },
+        { "type": "message", "text": { "pt-BR": "As três docas dos Clãs caíram. A frota deles está presa no porto.", "en": "The Clans' three docks have fallen. Their fleet is trapped in port." } }
+      ] },
+    { "id": "galleys-down", "when": { "type": "objective", "id": "s-galleys", "status": "completed" },
+      "actions": [{ "type": "message", "text": { "pt-BR": "Patrulha do Farol afundada. O mar entre as ilhas é nosso.", "en": "Lighthouse patrol sunk. The sea between the isles is ours." } }] },
+    { "id": "brann-fallen", "when": { "type": "dead", "select": { "tag": "brann" }, "count": 1 },
+      "actions": [ { "type": "defeat" } ] },
+    { "id": "palace-fallen", "when": { "type": "count", "select": { "buildingType": "castle", "owner": "player" }, "op": "==", "value": 0 },
+      "actions": [ { "type": "defeat" } ] },
+    { "id": "all-done", "when": { "all": [
+        { "type": "objective", "id": "p-colony", "status": "completed" },
+        { "type": "objective", "id": "p-docks", "status": "completed" }
+      ] },
+      "actions": [
+        { "type": "sound", "id": "victory" },
+        { "type": "cutscene", "id": "finale", "duration": 12, "skippable": true,
+          "steps": [
+            { "at": 0, "anchor": "colonyMark", "zoom": 1.1, "dialog": { "speaker": { "pt-BR": "Mestre Oren", "en": "Master Oren" }, "portrait": "🔮", "text": { "pt-BR": "O Marco está de pé em Cinzara, e as docas dos Clãs estão no chão. O mar já é metade nosso.", "en": "The Outpost stands in Cinzara, and the Clans' docks lie in ruins. The sea is already half ours." }, "duration": 6 } },
+            { "at": 6, "anchor": "landingZone", "zoom": 1.15, "dialog": { "speaker": { "pt-BR": "Capitão Brann", "en": "Captain Brann" }, "portrait": "⚔️", "text": { "pt-BR": "Daqui se vê o caminho para o interior de Cinzara. A Liga desembarcou no continente orc.", "en": "From here the road to Cinzara's interior is in sight. The League has landed on the orc continent." }, "duration": 6 } }
+          ] }
+      ] },
+    { "id": "finale-clock", "when": { "type": "trigger", "id": "all-done" }, "actions": [ { "type": "incVar", "name": "fin_clock" } ] },
+    { "id": "finale-victory", "when": { "type": "var", "name": "fin_clock", "op": ">=", "value": 1 }, "actions": [ { "type": "victory" } ] }
   ]
 }

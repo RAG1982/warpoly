@@ -16,7 +16,7 @@ import en from '../../src/i18n/en.json';
  * Os palcos 2 a 6 servem às duas campanhas (slot 0 = lado da Liga de Aurelan, slot 1 = lado dos Clãs do Cinzal). A Geada tem 4 vagas
  * (jogador, Lanças Quebradas, Sal Cinzento e o aliado Brumar).
  */
-const IDS = ['camp-01-baia-de-aurelan', 'camp-02-pouso-do-encontro', 'camp-03-pedra-mae', 'camp-05-cerne-verde', 'camp-06-a-geada', 'camp-10-costa-ferrugem', 'camp-11-estepe-do-vento', 'camp-12-cabo-ferrugem']; // M3-05: o palco 4 (dois continentes isolados) tem os seus testes em campaignM04.test.js
+const IDS = ['camp-01-baia-de-aurelan', 'camp-02-pouso-do-encontro', 'camp-03-pedra-mae', 'camp-05-cerne-verde', 'camp-06-a-geada', 'camp-11-estepe-do-vento', 'camp-12-cabo-ferrugem']; // M3-05: o palco 4 (dois continentes isolados) tem os seus testes em campaignM04.test.js; o palco 10 (M3-11, naval) em campaignM10.test.js
 const SLOTS = { 'camp-06-a-geada': 4, 'camp-11-estepe-do-vento': 3 }; // as demais têm 2 vagas
 
 // M2-28: os mapas de campanha são carregados sob demanda (chunks); os testes os carregam antes de usar `getMap`.
@@ -28,7 +28,6 @@ const MIN_ANCHORS = {
   'camp-04-baixio-do-breu': ['playerStart', 'enemyStart', 'well1', 'well2', 'well3', 'well4', 'shipyard1', 'shipyard1Water', 'shipyard2', 'shipyard2Water', 'wreck1', 'wreck2', 'wreck3', 'fleetStart1', 'fleetStart2', 'fleetMid'],
   'camp-05-cerne-verde': ['playerStart', 'enemyStart', 'goldMine1', 'sacredGrove', 'gryphonNest', 'clearing1', 'clearing2', 'clearing3', 'lumberHall1', 'lumberHall2', 'orenStart', 'ford1', 'landingZone'],
   'camp-06-a-geada': ['playerStart', 'enemyStart', 'enemy1Start', 'enemy2Start', 'allyStart', 'lighthouse', 'lightSea', 'lightSouth', 'lightTower1', 'lightTower2', 'lightGold1', 'lightGold2', 'enemy1Fort', 'fortTower1', 'fortTower2', 'fortTower3', 'fortTower4', 'allyFort', 'allyTower1', 'allyTower2', 'allyHeroStart', 'convoyStart', 'convoyAmbush', 'convoyEnd', 'expansion1', 'expansion2', 'expansion3', 'expansion4', 'ruins1', 'captive1', 'iceDock', 'iceDockSea', 'lake1', 'lake2', 'lake3'],
-  'camp-10-costa-ferrugem': ['playerStart', 'enemyStart', 'landingZone', 'colonyMark', 'unloadSea', 'bargeStart1', 'bargeStart2', 'coastTower1', 'coastTower2', 'coastTower3', 'garrison', 'oldWell', 'expansion1', 'expansion2'],
   'camp-11-estepe-do-vento': ['playerStart', 'enemyStart', 'colonyMark', 'skarnStart', 'hurganStart', 'landingZone', 'reinforceSea', 'convoyStart', 'convoyEnd', 'raid1', 'raid2', 'raid3', 'dissidentClan', 'expansion1', 'expansion2', 'expansion3'],
   'camp-12-cabo-ferrugem': ['playerStart', 'enemyStart', 'bastion', 'strait', 'dock1', 'dock2', 'dock3', 'fleetStart', 'fleetStart2', 'bossStart', 'waveStart1', 'waveStart2', 'expansion1', 'expansion2']
 };
@@ -333,31 +332,6 @@ describe('M2-04/M3-07 · A Geada (gelo, lagos congelados, Farol Boreal, 4 vagas)
 // ---------------------------------------------------------------------------------------------------------------------------
 // M2-06: palcos 10 (Costa Ferrugem), 11 (Estepe do Vento) e 12 (Cabo Ferrugem), o continente orc visto pela Aliança
 // ---------------------------------------------------------------------------------------------------------------------------
-describe('M2-06 · Costa Ferrugem (desembarque)', () => {
-  const id = 'camp-10-costa-ferrugem';
-  it('continente árido com mar aberto a oeste; praia de desembarque com água navegável diante e Marco no sítio do slot 0', () => {
-    const m = getMap(id);
-    expect(m.tileset).toBe('deserto');
-    const sea = buildPathfinder(m, 'naval');
-    const ocean = oceanSeen(m, sea);
-    const a = m.anchors;
-    expect(a.colonyMark).toEqual({ x: m.startSlots[0].x, z: m.startSlots[0].z });
-    expect(hyp(a.landingZone, a.unloadSea)).toBeLessThanOrEqual(16);
-    for (const k of ['unloadSea', 'bargeStart1', 'bargeStart2']) expect(isReached(sea, ocean, a[k].x, a[k].z), k).toBe(true);
-    expect(hyp(a.landingZone, m.startSlots[0])).toBeGreaterThanOrEqual(30);
-    expect(hyp(a.landingZone, m.startSlots[0])).toBeLessThan(hyp(a.landingZone, m.startSlots[1]));
-    expect(hyp(a.bargeStart1, a.bargeStart2)).toBeLessThanOrEqual(26); // as duas Barcaças saem juntas
-  });
-  it('3 torres costeiras em volta da praia (11–26 u, afastadas entre si) e guarnição entre a praia e o interior', () => {
-    const a = getMap(id).anchors;
-    const t = [1, 2, 3].map((i) => a[`coastTower${i}`]);
-    for (const p of t) { expect(hyp(p, a.landingZone)).toBeGreaterThanOrEqual(11); expect(hyp(p, a.landingZone)).toBeLessThanOrEqual(26); }
-    for (let i = 0; i < 3; i++) for (let j = i + 1; j < 3; j++) expect(hyp(t[i], t[j])).toBeGreaterThanOrEqual(11);
-    expect(hyp(a.garrison, a.landingZone)).toBeGreaterThan(15);
-    expect(hyp(a.oldWell, a.landingZone)).toBeGreaterThanOrEqual(50);
-  });
-});
-
 describe('M2-06 · Estepe do Vento (colônia sob cerco)', () => {
   const id = 'camp-11-estepe-do-vento';
   it('interior de savana e estepe, 3 vagas ligadas por terra e Marco no slot 0', () => {

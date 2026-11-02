@@ -109,12 +109,15 @@ export const CAMPAIGN_PRESETS = freeze({
     layout: freeze({ bases: [{ entities: [0], sides: ['west', 'south'] }, { entities: [0], sides: ['east', 'north'] }, { entities: [0], sides: ['west', 'north'] }, { entities: [0], sides: ['east', 'south'] }], minSeparation: 140 }),
     verify: freeze({ landRange: [0.25, 0.85], minRivers: 0 })
   }),
-  /** Palco 10 (M2-06): a costa de Cinzara vista do mar. Continente árido a leste (terra a partir do meio), mar aberto a oeste; Marco da Colônia a oeste (slot 0), guarnição de Skarn a leste (slot 1). */
+  /**
+   * Palco 10 (M2-06; M3-11 refeito a 384, naval): Mar Fendido entre a ilha-continente da Liga (oeste, slot 0, sem ligação por terra) e Cinzara
+   * (leste, slot 1 = Clãs), ~140 u de mar aberto e uma ilha rochosa no meio (o Farol, com poço de petróleo e o Poço Velho).
+   */
   'camp-10-costa-ferrugem': freeze({
-    id: 'camp-10-costa-ferrugem', name: 'Costa Ferrugem', uso: 'campanha, palco 10 (desembarque)', tileset: 'deserto', naval: false,
-    options: freeze({ size: 208, grid: 208, continents: 1, continentBiome: 'arid', continentCenter: [0.18, 0], continentDims: [0.42, 0.44], islands: 0, islets: 0, scatterIslets: 5, scatterRadius: [2.8, 5], scatterZone: 0.42, bays: 4, peninsulas: 2, roughness: 1.1, lava: false, rivers: 0 }),
-    layout: freeze({ bases: [{ entities: [0], side: 'west' }, { entities: [0], side: 'east' }], minSeparation: 70 }),
-    verify: freeze({ landRange: [0.2, 0.7], minRivers: 0 })
+    id: 'camp-10-costa-ferrugem', name: 'Costa Ferrugem', uso: 'campanha, palco 10 (desembarque; naval)', tileset: 'deserto', naval: true, isolated: true, woodTarget: 6300,
+    options: freeze({ size: 384, grid: 384, continents: 2, continentDims: [0.15, 0.38], continentSpacing: 0.33, gap: 16, islands: 0, islets: 0, bigIslands: 1, bigIslandAt: [[0, -0.2]], bigIslandScale: 0.5, bigIslandBiomes: ['rocky'], bays: 3, peninsulas: 2, roughness: 1.0, lava: false, aridSwamp: false, rivers: 0 }),
+    layout: freeze({ bases: [{ entities: [0], side: 'west' }, { entities: [1], side: 'east' }], minSeparation: 150 }),
+    verify: freeze({ landRange: [0.12, 0.5], minRivers: 0 })
   }),
   /** Palco 11 (M2-06): interior de savana e estepe, costa a oeste para o Porto Albor (slot 0); Skarn a sudeste (slot 1) e Hurgan a nordeste (slot 2). */
   'camp-11-estepe-do-vento': freeze({
@@ -1347,47 +1350,136 @@ function openWater(ctx, from, d, name, { minR = 0, maxR = 1e9, around = null } =
   }), name);
 }
 
-/** Palco 10: praia de desembarque no mar aberto a oeste, 3 torres da guarda costeira em volta, guarnição, Poço Velho escondido, partida das 2 Barcaças. */
-function postCosta(ctx, extra) {
+/**
+ * Palco 10 (M3-11): travessia do Mar Fendido. Liga na ilha-continente de oeste (slot 0, estaleiro na costa e as 2 Barcaças na água junto da
+ * praia de partida `beach1`); Cinzara a leste (slot 1 = Clãs). A praia de desembarque (`landingZone`, `unloadSea`) fica na costa oeste de
+ * Cinzara, longe da base dos Clãs; o Marco da Colônia (`colonyMark`) está em terra seca atrás dela. Docas orcs (`dock1..3`) no litoral de
+ * Cinzara; a ilha rochosa do meio (o Farol) tem dois poços de petróleo do mar (`wellMid1/2`), a patrulha de galés (`patrolSea`) e o Poço
+ * Velho (`oldWell`), que só se alcança pelo mar.
+ */
+function postTravessia(ctx, extra) {
   const { m, s0, s1 } = ctx;
-  extra.colonyMark = pt(s0); // sítio do Marco da Colônia (`spawnBuilding`): o pátio do slot 0
-  const { p: land, sea } = pickLanding(ctx, s0, s1, { dMin: 30, dMax: 58, target: 44 });
-  ctx.take(land, 5);
-  extra.landingZone = pt(land);
-  extra.unloadSea = ptw(sea); // `UNLOAD`: água navegável junto à praia onde as Barcaças encostam
-  // partida das Barcaças: 2 pontos de mar aberto, a ~70 u da praia, lado a lado (`LOAD` é feito antes, a bordo)
-  const b1 = openWater(ctx, land, 70, 'a partida da Barcaça 1');
-  const b2 = openWater(ctx, land, 70, 'a partida da Barcaça 2', { minR: 10, maxR: 24, around: b1 });
-  extra.bargeStart1 = ptw(b1); extra.bargeStart2 = ptw(b2);
-  // guarda costeira: 3 torres a 11–26 u da praia, em direções diferentes (>= 0,45 rad), em terra firme alcançável
+  const cache = new Map();
+  const wetSpot = (x, z) => { const k = x * 1000 + z; if (!cache.has(k)) cache.set(k, ctx.waterNear(x, z, 6, 18)); return cache.get(k); };
+  /** Terra seca de construção costeira (mesmo critério de `canPlaceBuilding` de postBaixio) de raio `r`. */
+  const coastalOk = (x, z, r) => {
+    if (ctx.hAt(x, z) < 1.95) return false;
+    let wet = false;
+    for (let k = 0; k < 24 && !wet; k++) wet = ctx.hAt(x + Math.sin((k / 24) * Math.PI * 2) * (r + 1.3), z + Math.cos((k / 24) * Math.PI * 2) * (r + 1.3)) <= 0.1;
+    return wet && m.forests.every((f) => hyp({ x, z }, f) >= f.radius + r + 5.5);
+  };
+  const deepSea = (x, z) => ctx.oceanOk(x, z) && ctx.hAt(x, z) <= 0.05 && wetFrac(ctx, x, z, 8) >= 1 && wetFrac(ctx, x, z, 4) >= 1;
+  const reachS1 = ctx.reach1;
+
+  // 1) praia de desembarque: costa oeste de Cinzara (alcançável por terra a partir dos Clãs), mar aberto à frente, perto da Liga
+  const landing = need(ctx.scan({
+    step: 1,
+    test: (x, z) => {
+      if (!ctx.isShore(x, z) || !reachS1(x, z) || !ctx.free(x, z, 4)) return false;
+      const d1 = hyp({ x, z }, s1);
+      if (d1 < 62 || d1 > 130) return false;
+      const w = wetSpot(x, z);
+      return !!w && openSea(ctx, w.x, w.z, 8) >= 0.25;
+    },
+    score: (x, z) => hyp({ x, z }, s0)
+  }), 'a praia de desembarque');
+  ctx.take(landing, 6);
+  extra.landingZone = pt(landing);
+  extra.unloadSea = ptw(wetSpot(landing.x, landing.z));
+
+  // 2) Marco da Colônia: terra seca 14–24 u atrás da praia (por terra, na terra dos Clãs), longe da base deles
+  const colony = need(ctx.scan({
+    step: 1,
+    test: (x, z) => ctx.dryClear(x, z, 6) && reachS1(x, z) && ctx.free(x, z, 4) && hyp({ x, z }, landing) >= 14 && hyp({ x, z }, landing) <= 24 && hyp({ x, z }, s1) >= 60,
+    score: (x, z) => Math.abs(hyp({ x, z }, landing) - 18)
+  }), 'o Marco da Colônia');
+  ctx.take(colony, 14);
+  extra.colonyMark = pt(colony);
+  addGold(ctx, colony, 'colonyGold', extra, { dMin: 20, dMax: 36, target: 28, reach: reachS1 });
+
+  // 3) estaleiro da Liga na costa de oeste, praia de partida das Barcaças (`beach1`) e as duas Barcaças na água junto dela
+  const yardOk = (x, z) => coastalOk(x, z, 3.6) && ctx.reach(x, z) && hyp({ x, z }, s0) >= 14 && hyp({ x, z }, s0) <= 62 && ctx.free(x, z, 4) && !!wetSpot(x, z) && openSea(ctx, wetSpot(x, z).x, wetSpot(x, z).z, 8) >= 0.5;
+  const yard = need(ctx.scan({ step: 1, test: yardOk, score: (x, z) => Math.abs(hyp({ x, z }, s0) - 30) + 0.2 * hyp({ x, z }, landing) }), 'o estaleiro da Liga');
+  ctx.take(yard, 9);
+  extra.shipyard1 = pt(yard);
+  extra.shipyard1Water = ptw(wetSpot(yard.x, yard.z));
+  const beach = need(ctx.scan({
+    step: 1,
+    test: (x, z) => ctx.isShore(x, z) && ctx.reach(x, z) && ctx.free(x, z, 0) && hyp({ x, z }, s0) >= 12 && hyp({ x, z }, s0) <= 50 && !!wetSpot(x, z) && openSea(ctx, wetSpot(x, z).x, wetSpot(x, z).z, 6) >= 0.5,
+    score: (x, z) => hyp({ x, z }, yard) + 0.3 * hyp({ x, z }, landing)
+  }), 'a praia de partida da Liga');
+  ctx.take(beach, 6);
+  extra.beach1 = pt(beach);
+  // as Barcaças ficam coladas à praia (4–8 u da margem, ≥ 4 u uma da outra): o embarque (`findBoardingPoint`) só vale se a borda do barco chega à terra
+  const bargeAt = (name, taken) => need(ctx.scan({
+    step: 1,
+    test: (x, z) => ctx.oceanOk(x, z) && ctx.hAt(x, z) < m.waterLevel && hyp({ x, z }, beach) >= 4 && hyp({ x, z }, beach) <= 8 && taken.every((q) => hyp({ x, z }, q) >= 4),
+    score: (x, z) => hyp({ x, z }, beach)
+  }), name);
+  const bA = bargeAt('a Barcaça 1', []);
+  const bB = bargeAt('a Barcaça 2', [bA]);
+  extra.bargeStart1 = ptw(bA); extra.bargeStart2 = ptw(bB);
+
+  // 4) docas orcs no litoral de Cinzara, a 22–60 u da praia, espaçadas, longe do Marco
+  const docks = [];
+  for (let k = 0; k < 3; k++) {
+    const d = need(ctx.scan({
+      step: 1,
+      test: (x, z) => coastalOk(x, z, 3.6) && reachS1(x, z) && ctx.free(x, z, 4) && hyp({ x, z }, landing) >= 16 && hyp({ x, z }, landing) <= 70
+        && hyp({ x, z }, colony) >= 14 && hyp({ x, z }, s1) >= 24 && docks.every((q) => hyp({ x, z }, q) >= 16) && !!wetSpot(x, z),
+      score: (x, z) => Math.abs(hyp({ x, z }, landing) - 40) + 0.2 * hyp({ x, z }, colony)
+    }), `a doca ${k + 1}`);
+    ctx.take(d, 9);
+    docks.push(d);
+    extra[`dock${k + 1}`] = pt(d);
+  }
+
+  // 5) guarda costeira de Cinzara: 3 torres a 11–26 u da praia (em direções diferentes) e a guarnição entre a praia e a base dos Clãs
   const towers = [];
   for (let k = 0; k < 3; k++) {
     const t = need(ctx.scan({
       step: 1,
       test: (x, z) => {
-        const d = hyp({ x, z }, land);
-        return d >= 11 && d <= 26 && ctx.dryClear(x, z, 2.5) && ctx.reach(x, z) && ctx.free(x, z, -4)
-          && towers.every((q) => hyp({ x, z }, q) >= 11 && angDiff(Math.atan2(z - land.z, x - land.x), Math.atan2(q.z - land.z, q.x - land.x)) >= 0.45);
+        const d = hyp({ x, z }, landing);
+        return d >= 10 && d <= 30 && ctx.dryClear(x, z, 2.5) && reachS1(x, z) && ctx.free(x, z, -4) && hyp({ x, z }, colony) >= 8
+          && towers.every((q) => hyp({ x, z }, q) >= 9 && angDiff(Math.atan2(z - landing.z, x - landing.x), Math.atan2(q.z - landing.z, q.x - landing.x)) >= 0.3);
       },
-      score: (x, z) => Math.abs(hyp({ x, z }, land) - 18) + 0.15 * hyp({ x, z }, s0)
+      score: (x, z) => Math.abs(hyp({ x, z }, landing) - 18) + 0.15 * hyp({ x, z }, s1)
     }), `a torre costeira ${k + 1}`);
     ctx.take(t, 8);
     towers.push(t);
     extra[`coastTower${k + 1}`] = pt(t);
   }
-  // guarnição: acampamento da IA de Skarn atrás das torres, no caminho para o interior
-  extra.garrison = pt(ctx.take(nearDry(ctx, toward(land, s1, 34), 'a guarnição costeira', { r: 6, freeR: 5 }), 10));
-  // Poço Velho (objetivo opcional): ponto seco escondido, longe da praia e das bases
-  const well = need(ctx.scan({
-    test: (x, z) => ctx.dryClear(x, z, 4) && ctx.reach(x, z) && ctx.free(x, z, 6) && hyp({ x, z }, land) >= 52 && hyp({ x, z }, s0) >= 30 && hyp({ x, z }, s1) >= 30,
-    score: (x, z) => Math.abs(hyp({ x, z }, s0) - 64) + 0.4 * Math.abs(hyp({ x, z }, s1) - 56)
-  }), 'o Poço Velho');
-  ctx.take(well, 10);
-  extra.oldWell = pt(well);
-  // uma mina de expansão por lado (soak: com 1 mina por base o ouro acaba e a partida IA×IA trava)
-  addGold(ctx, s0, 'expansion1', extra, { dMin: 20, dMax: 40, target: 28 });
-  addGold(ctx, s1, 'expansion2', extra, { dMin: 20, dMax: 40, target: 28 });
-  void m;
+  const gar = need(ctx.scan({
+    step: 1,
+    test: (x, z) => ctx.dryClear(x, z, 6) && reachS1(x, z) && ctx.free(x, z, 5) && hyp({ x, z }, landing) >= 22 && hyp({ x, z }, s1) >= 40,
+    score: (x, z) => Math.abs(hyp({ x, z }, landing) - 30) + 0.3 * hyp({ x, z }, s1)
+  }), 'a guarnição costeira');
+  extra.garrison = pt(ctx.take(gar, 10));
+
+  // 6) ilha rochosa do meio (o Farol): a maior ilha sem caminho a pé; poços de petróleo do mar, patrulha e Poço Velho
+  const isles = landComponents(ctx.land).filter((c) => !isReached(ctx.land, ctx.seen0, c.cx, c.cz) && !isReached(ctx.land, ctx.seen1, c.cx, c.cz) && c.size >= 25);
+  if (!isles.length) throw new Error('campanha: nenhuma ilha no meio do mar (Costa Ferrugem naval)');
+  const isle = isles.reduce((a, b) => (b.size > a.size ? b : a));
+  const cells = isle.cells.map((i) => ctx.land.toWorld(i % ctx.land.cols, (i / ctx.land.cols) | 0));
+  const dryIsle = cells.filter((w) => ctx.dryClear(w.x, w.z, 4));
+  if (!dryIsle.length) throw new Error('campanha: o Farol não tem chão');
+  const farol = dryIsle.reduce((a, b) => (hyp(b, { x: isle.cx, z: isle.cz }) < hyp(a, { x: isle.cx, z: isle.cz }) ? b : a));
+  const isleC = { x: isle.cx, z: isle.cz };
+  extra.isletFarol = pt(farol);
+  extra.isletWell = pt(farol); // Poço Velho: no Farol, só por mar (o nome `islet*` isenta da regra de terra)
+  const ringOfSea = (r, test, score, name) => need(ctx.scan({ step: 1, test: (x, z) => hyp({ x, z }, isleC) >= r && hyp({ x, z }, isleC) <= r + 12 && test(x, z), score }), name);
+  const oilFree = (x, z) => m.resources.filter((q) => q.type === 'oil').every((q) => hyp({ x, z }, q) >= 16);
+  const well1 = ringOfSea(40, (x, z) => deepSea(x, z) && oilFree(x, z), (x, z) => hyp({ x, z }, { x: yard.x + 30, z: yard.z }), 'o poço de petróleo do mar 1');
+  m.resources.push({ type: 'oil', x: r1(well1.x), z: r1(well1.z), amount: 5000 });
+  extra.wellMid1 = ptw(well1);
+  const well2 = ringOfSea(40, (x, z) => deepSea(x, z) && oilFree(x, z) && hyp({ x, z }, well1) >= 16, (x, z) => hyp({ x, z }, { x: landing.x - 40, z: landing.z }), 'o poço de petróleo do mar 2');
+  m.resources.push({ type: 'oil', x: r1(well2.x), z: r1(well2.z), amount: 5000 });
+  extra.wellMid2 = ptw(well2);
+  extra.patrolSea = ptw(ringOfSea(50, (x, z) => deepSea(x, z) && hyp({ x, z }, landing) >= 40, (x, z) => hyp({ x, z }, { x: (landing.x + isleC.x) / 2, z: (landing.z + isleC.z) / 2 }), 'a patrulha de galés'));
+  // mina de expansão na ilha da Liga (sem ela a esquadra fica sem ouro: as Fragatas custam 200 de ouro cada)
+  addGold(ctx, s0, 'expansion1', extra, { dMin: 30, dMax: 50, target: 40 });
+  moveInitialGold(ctx);
 }
 
 /** Palco 11: Marco no sítio do slot 0, praia de reforço por mar, rotas das 3 incursões, clã dissidente, comboio praia→colônia. */
@@ -1485,7 +1577,7 @@ function postCabo(ctx, extra) {
 }
 
 const PRE = freeze({ 'camp-03-pedra-mae': prePedra }); // esculpe o terreno ANTES do contexto de posicionamento (M3-04)
-const POST = freeze({ 'camp-01-baia-de-aurelan': postBaia, 'camp-02-pouso-do-encontro': postPouso, 'camp-03-pedra-mae': postPedra, 'camp-04-baixio-do-breu': postBaixio, 'camp-05-cerne-verde': postCerne, 'camp-06-a-geada': postGeada, 'camp-07-brejo-mudo': postBrejo, 'camp-08-fornalha': postFornalha, 'camp-09-miragem': postMiragem, 'camp-10-costa-ferrugem': postCosta, 'camp-11-estepe-do-vento': postEstepe, 'camp-12-cabo-ferrugem': postCabo });
+const POST = freeze({ 'camp-01-baia-de-aurelan': postBaia, 'camp-02-pouso-do-encontro': postPouso, 'camp-03-pedra-mae': postPedra, 'camp-04-baixio-do-breu': postBaixio, 'camp-05-cerne-verde': postCerne, 'camp-06-a-geada': postGeada, 'camp-07-brejo-mudo': postBrejo, 'camp-08-fornalha': postFornalha, 'camp-09-miragem': postMiragem, 'camp-10-costa-ferrugem': postTravessia, 'camp-11-estepe-do-vento': postEstepe, 'camp-12-cabo-ferrugem': postCabo });
 
 // ---------------------------------------------------------------------------------------------------------------------------
 // Montagem

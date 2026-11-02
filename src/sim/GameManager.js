@@ -1231,6 +1231,8 @@ export class GameManager {
       if (b.piercing) unit.damage.piercing += b.piercing;
       if (b.armor) unit.armor = (unit.armor || 0) + b.armor;
       if (b.range) unit.attackRange += b.range;
+      // Alcance em percentual do alcance BASE da definição (ex.: 0.2 = +20%); não acumula sobre o já bonificado.
+      if (b.rangePct) unit.attackRange += getUnitDef(unit.type).attackRange * b.rangePct;
       if (b.sight) unit.sightBonus = (unit.sightBonus || 0) + b.sight;
     }
     if (lv.effect && lv.effect.regen && research.appliesTo) unit.regen = (unit.regen || 0) + lv.effect.regen;

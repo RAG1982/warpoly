@@ -299,7 +299,7 @@ Legenda de dependências: só IDs; "—" = pode começar já. **Dif.** = dificul
 | M3-08 | Missão 7 · O Brejo Mudo (traição) | Média | M | S | M3-07, M2-05 | DONE (branch task/M3-08; mapa 320, bases ~151 u; traição aos 330 s; Brakka bandits; dono ainda não jogou) |
 | M3-09 | Missão 8 · A Fornalha | Difícil | G | S | M3-08, M2-05, M2-14 | DONE (2026-11-01) |
 | M3-10 | Missão 9 · Miragem | Difícil | G | S | M3-09, M2-05 | DONE (2026-11-02) |
-| M3-11 | Missão 10 · Desembarque na Costa Ferrugem (entra o Oren) | Difícil | G | S | M3-10, M2-06, M2-02 | TODO |
+| M3-11 | Missão 10 · Desembarque na Costa Ferrugem (entra o Oren) | Difícil | G | S | M3-10, M2-06, M2-02 | DONE (2026-11-02) |
 | M3-12 | Missão 11 · Porto Albor (entra o Dorian) | Difícil | G | S | M3-11, M2-06, M2-02 | TODO |
 | M3-13 | Missão 12 · O Bastião do Cabo Ferrugem (final) | Muito difícil | GG | S | M3-12, M2-06, M2-11 | TODO |
 | M3-14 | Textos finais, epílogo, retratos de NPC, arte de vitória | Média | M | S+SB | M3-13 | TODO |

@@ -97,8 +97,8 @@ describe('dados F4-04b', () => {
     for (const id of ['spell_holy_vision', 'spell_heal', 'spell_exorcism', 'spell_eye', 'spell_bloodlust', 'spell_runes']) {
       expect(RESEARCH[id].building).toBe('temple');
       expect(RESEARCH[id].levels[0].requires).toContainEqual({ research: 'cavalry_class' });
-      expect(RESEARCH[id].levels[0].cost.gold).toBeGreaterThanOrEqual(500);
-      expect(RESEARCH[id].levels[0].cost.gold).toBeLessThanOrEqual(1000);
+      expect(RESEARCH[id].levels[0].cost.gold).toBeGreaterThanOrEqual(250);
+      expect(RESEARCH[id].levels[0].cost.gold).toBeLessThanOrEqual(500);
     }
     expect(UNITS.necromancer.abilities).toContain('whirlwind');
     expect(RESEARCH.spell_whirlwind.building).toBe('arcane');
@@ -120,7 +120,7 @@ describe('cavalry_class (Ordenação / Ritual das Tempestades)', () => {
     expect(stable.queueUnit('templar', gm)).toBe(false);
     gm.issue({ type: CMD.RESEARCH, playerId: 0, buildingId: temple.id, upgradeId: 'cavalry_class' });
     gm.simStep(SIM_DT);
-    expect(p.resources.gold).toBe(50000 - 1000);
+    expect(p.resources.gold).toBe(50000 - 500);
     run(gm, 61);
     expect(p.getResearchLevel('cavalry_class')).toBe(1);
     for (const c of cav) {

@@ -201,37 +201,37 @@ export const RESEARCH = {
   // Ogro → Ogro Feiticeiro (mecanismo `promote`); as magias dos novos conjuradores exigem a classe.
   cavalry_class: {
     building: 'temple',
-    levels: [{ cost: { gold: 1000 }, time: 60, effect: { promote: { cavalier: 'templar', ogre: 'ogre_mage' } }, requires: [{ hq: 3 }] }],
+    levels: [{ cost: { gold: 500 }, time: 60, effect: { promote: { cavalier: 'templar', ogre: 'ogre_mage' } }, requires: [{ hq: 3 }] }],
     icon: '/icoEspada.png', name: { human: 'Ordenação', orc: 'Ritual das Tempestades' }
   },
   spell_holy_vision: {
     building: 'temple', faction: 'human',
-    levels: [{ cost: { gold: 500 }, time: 40, effect: { unlock: 'holy_vision' }, requires: [{ research: 'cavalry_class' }] }],
+    levels: [{ cost: { gold: 250 }, time: 40, effect: { unlock: 'holy_vision' }, requires: [{ research: 'cavalry_class' }] }],
     icon: '/icoArco.png', name: { human: 'Vista Sagrada' }
   },
   spell_heal: {
     building: 'temple', faction: 'human',
-    levels: [{ cost: { gold: 700 }, time: 45, effect: { unlock: 'heal' }, requires: [{ research: 'cavalry_class' }] }],
+    levels: [{ cost: { gold: 350 }, time: 45, effect: { unlock: 'heal' }, requires: [{ research: 'cavalry_class' }] }],
     icon: '/icoEscudo.png', name: { human: 'Cura' }
   },
   spell_exorcism: {
     building: 'temple', faction: 'human',
-    levels: [{ cost: { gold: 1000 }, time: 60, effect: { unlock: 'exorcism' }, requires: [{ research: 'cavalry_class' }] }],
+    levels: [{ cost: { gold: 500 }, time: 60, effect: { unlock: 'exorcism' }, requires: [{ research: 'cavalry_class' }] }],
     icon: '/icoEspada.png', name: { human: 'Exorcismo' }
   },
   spell_eye: {
     building: 'temple', faction: 'orc',
-    levels: [{ cost: { gold: 500 }, time: 40, effect: { unlock: 'eye_of_watch' }, requires: [{ research: 'cavalry_class' }] }],
+    levels: [{ cost: { gold: 250 }, time: 40, effect: { unlock: 'eye_of_watch' }, requires: [{ research: 'cavalry_class' }] }],
     icon: '/icoArco.png', name: { orc: 'Olho Vigia' }
   },
   spell_bloodlust: {
     building: 'temple', faction: 'orc',
-    levels: [{ cost: { gold: 700 }, time: 45, effect: { unlock: 'bloodlust' }, requires: [{ research: 'cavalry_class' }] }],
+    levels: [{ cost: { gold: 350 }, time: 45, effect: { unlock: 'bloodlust' }, requires: [{ research: 'cavalry_class' }] }],
     icon: '/icoEspada.png', name: { orc: 'Sede de Batalha' }
   },
   spell_runes: {
     building: 'temple', faction: 'orc',
-    levels: [{ cost: { gold: 1000 }, time: 60, effect: { unlock: 'runes' }, requires: [{ research: 'cavalry_class' }] }],
+    levels: [{ cost: { gold: 500 }, time: 60, effect: { unlock: 'runes' }, requires: [{ research: 'cavalry_class' }] }],
     icon: '/icoEscudo.png', name: { orc: 'Runas Explosivas' }
   },
 };

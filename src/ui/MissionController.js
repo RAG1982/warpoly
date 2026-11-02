@@ -268,17 +268,19 @@ export class MissionController {
     if (this._endIn >= 0) {
       this._endIn -= delta;
       if (this._endIn < 0) {
-        this._endIn = -2;
-        if (this.cut) this._endCutscene(false);
-        this.dialogs.clear();
-        this._renderDialog();
-        this._renderPanel(true);
-        this.endBox.hidden = false;
-        this._renderEnd();
+        if (this.cut || this.dialogs.current) {
+          this._endIn = 0; // cutscene/falas de fim de missão terminam antes da tela de resultado
+        } else {
+          this._endIn = -2;
+          this._renderPanel(true);
+          this.endBox.hidden = false;
+          this._renderEnd();
+        }
       }
     }
-    if (!simulate) return;
-    if (this._announce && !this.cut && !this.dialogs.current && this.gm.currentTick > 40) this._showUnlocks();
+    // Com a missão encerrada a simulação para, mas a cutscene e as falas finais ainda precisam andar.
+    if (!simulate && this._endIn === -1) return;
+    if (simulate && this._announce && !this.cut && !this.dialogs.current && this.gm.currentTick > 40) this._showUnlocks();
     if (this.cut) {
       this.im.suspended = true; // reafirma (menu de pausa pode ter liberado)
       this._stepCutscene(delta);

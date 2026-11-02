@@ -130,12 +130,16 @@ export const CAMPAIGN_PRESETS = freeze({
     layout: freeze({ bases: [{ entities: [0], side: 'west' }, { entities: [0], sides: ['east', 'south'] }, { entities: [0], sides: ['east', 'north'] }], minSeparation: 150 }),
     verify: freeze({ landRange: [0.25, 0.8], minRivers: 0 })
   }),
-  /** Palco 12 (M2-06): promontório de Cinzara apontando para 3 ilhas a oeste; o estreito entre a ponta e a ilha mais próxima é a zona de bloqueio. Slot 0 = Bastião, slot 1 = Skarn a leste. */
+  /**
+   * Palco 12 (M2-06; M3-13 refeito a 384, naval): promontório de Cinzara apontando para 3 ilhas a oeste; o estreito entre a ponta e a ilha mais
+   * próxima é a zona de bloqueio. Slot 0 = Bastião (no cabo), slot 1 = Skarn a leste (>= 150 u). Mar aberto em volta: a frota da Liga e as
+   * frotas orcs navegam pelo estreito; 3 docas orcs no litoral do continente; crista de falésia com 2 desfiladeiros entre as bases.
+   */
   'camp-12-cabo-ferrugem': freeze({
-    id: 'camp-12-cabo-ferrugem', name: 'Cabo Ferrugem', uso: 'campanha, palco 12 (bastião e bloqueio)', tileset: 'deserto', naval: false,
-    options: freeze({ size: 224, grid: 224, continents: 1, continentBiome: 'arid', continentCenter: [0.2, 0], continentDims: [0.36, 0.44], islands: 0, islets: 0, bigIslands: 3, bigIslandAt: [[-0.3, -0.27], [-0.34, 0.04], [-0.28, 0.3]], bigIslandScale: 0.42, bigIslandBiomes: ['arid', 'rocky', 'arid'], gap: 12, bays: 3, peninsulas: 4, roughness: 1.1, lava: false, rivers: 0 }),
-    layout: freeze({ bases: [{ entities: [0], where: nearStrait }, { entities: [0], side: 'east' }], minSeparation: 70 }),
-    verify: freeze({ landRange: [0.2, 0.7], minRivers: 0 })
+    id: 'camp-12-cabo-ferrugem', name: 'Cabo Ferrugem', uso: 'campanha, palco 12 (bastião e bloqueio; naval)', tileset: 'deserto', naval: true, woodTarget: 6300,
+    options: freeze({ size: 384, grid: 384, continents: 1, continentBiome: 'arid', aridSwamp: false, continentCenter: [0.2, 0], continentDims: [0.4, 0.46], islands: 0, islets: 0, bigIslands: 3, bigIslandAt: [[-0.34, -0.27], [-0.36, 0.04], [-0.3, 0.3]], bigIslandScale: 0.36, bigIslandBiomes: ['arid', 'rocky', 'arid'], gap: 12, bays: 3, peninsulas: 4, roughness: 1.1, lava: false, rivers: 0 }),
+    layout: freeze({ bases: [{ entities: [0], where: nearStrait }, { entities: [0], side: 'east' }], minSeparation: 150 }),
+    verify: freeze({ landRange: [0.15, 0.7], minRivers: 0 })
   })
 });
 
@@ -504,8 +508,8 @@ export const PEDRA_RIDGE = freeze({ cliffHeight: 5, hTop: 7.4, core: 3.0, fall: 
 export const PEDRA_MINE_DIST = 32; // centro do Paço → centro da mina inicial (borda a borda ≈ 23 u: Paço 5,5 + mina 3,4)
 export const PEDRA_BIG_GOLD = 12000;
 export const GEADA_LIGHT_GOLD = 5000; // M3-07: os 2 veios do Farol Boreal (A Geada) são menores que os das bases
-function prePedra(m, world, seedUsed) {
-  const info = carveRidge(m, { getHeightForMap }, { ...PEDRA_RIDGE, seed: seedUsed });
+function prePedra(m, world, seedUsed, opts = PEDRA_RIDGE) {
+  const info = carveRidge(m, { getHeightForMap }, { ...opts, seed: seedUsed });
   const { F, band } = info;
   // nada do gerador pode cair na crista (bases, jazidas, acampamentos): a semente seria recusada
   const inBand = (p, extra = 3) => Math.abs(F.tOf(p.x, p.z) - F.wv(F.uOf(p.x, p.z))) <= band + extra;
@@ -1550,47 +1554,167 @@ function straitOf(map) {
 /** Filtro de base do slot 0 do palco 12: o Bastião fica no promontório, a 20–46 u da ponta que forma o estreito. */
 function nearStrait(x, z, map) { const st = straitOf(map); return !!st && hyp({ x, z }, st.c) >= 20 && hyp({ x, z }, st.c) <= 46; }
 
-/** Palco 12: Bastião no promontório (slot 0), estreito entre a ponta e as ilhas, 3 docas inimigas no litoral, partida da frota e do chefe. */
-function postCabo(ctx, extra) {
-  const { m, s0, s1, half } = ctx;
+/**
+ * Palco 12 (M3-13 · "O Bastião do Cabo Ferrugem"): promontório de Cinzara com o Bastião (slot 0) a oeste e a base de Skarn (slot 1) a leste.
+ * `preCabo` esculpe uma CRISTA de falésia entre as bases, a ~0,22 do eixo (≈ 55 u do Paço), com 2 desfiladeiros (`passA`/`passB`) onde a Liga ergue
+ * 8 trechos de muralha (4 por desfiladeiro: `wallA1..4`, `wallB1..4`) e 4 torres de vigia (`towerA1/2`, `towerB1/2`) + 2 balistas (`ballistaA/B`).
+ * O estreito (`strait`) fica entre a ponta do cabo e a ilha mais próxima; as 3 docas orcs (`dock1..3`) ficam no litoral dos Clãs (norte da crista).
+ * Marco do Bastião (`bastionHall`, Centro do Ato 1) atrás dos desfiladeiros. Frotas: `fleetStart/2` (Liga), `orcFleetStart/2` (orcs, no mar do norte),
+ * `assaultSea` + `assaultBeach` (assalto anfíbio do Ato 3), `reinforceSea` + `landingZone` (barcaças da Liga), poços de petróleo no mar perto do estreito
+ * (`well5`, `well6`), ilhotas com os náufragos (`isletCaptive`) e a relíquia oculta (`isletRuin`).
+ */
+export const CABO_RIDGE = freeze({ ...PEDRA_RIDGE, along: 0.22, gapSep: 30, wave: 4.5, gapWidth: 9 });
+function preCabo(m, world, seedUsed) { return prePedra(m, world, seedUsed, CABO_RIDGE); }
+
+function postCabo(ctx, extra, world, ridge) {
+  const { m, s0, s1 } = ctx;
+  const { F, gaps, band } = ridge;
   const st = lastStrait;
   if (!st) throw new Error('campanha: sem estreito');
+  const sideOf = (p) => F.side(p.x, p.z);
   extra.bastion = pt(s0);
   const sw = need(ctx.oceanOk(st.mid.x, st.mid.z) ? st.mid : ctx.waterNear(st.mid.x, st.mid.z, 1, 10), 'o estreito');
   extra.strait = ptw(sw);
   if (st.d > 26) throw new Error(`campanha: estreito largo demais (${Math.round(st.d)} u)`);
-  // 3 docas orcs no litoral do continente voltado ao estreito: terra alcançável com água navegável diante
+  const u0 = (gaps[0].u + gaps[1].u) / 2;
+  const coastalOk = (x, z, r) => {
+    if (ctx.hAt(x, z) < 1.95) return false;
+    let wet = false;
+    for (let k = 0; k < 24 && !wet; k++) wet = ctx.hAt(x + Math.sin((k / 24) * Math.PI * 2) * (r + 1.3), z + Math.cos((k / 24) * Math.PI * 2) * (r + 1.3)) <= 0.1;
+    return wet && m.forests.every((f) => hyp({ x, z }, f) >= f.radius + r + 5.5);
+  };
+  const cacheW = new Map();
+  const wetSpot = (x, z) => { const k = x * 1000 + z; if (!cacheW.has(k)) cacheW.set(k, ctx.waterNear(x, z, 6, 18)); return cacheW.get(k); };
+
+  // 1) desfiladeiros, linhas de muralha (4 por desfiladeiro = 8), torres (2 por desfiladeiro = 4) e balistas
+  gaps.forEach((g, i) => {
+    extra[`pass${'AB'[i]}Player`] = pt(F.world(F.wv(g.u) - band - 1.5, g.u));
+    extra[`pass${'AB'[i]}Enemy`] = pt(F.world(F.wv(g.u) + band + 1.5, g.u));
+  });
+  const cuts = gaps.map((g) => narrowestCut(ctx.land, F, g));
+  const lines = cuts.map((c) => wallLine(F, c, 4));
+  if (!sealedBy(ctx.land, lines.flatMap((l) => l.walls), s0, s1)) throw new Error('crista: 4 muralhas por desfiladeiro não selam a passagem');
+  for (const [i, l] of lines.entries()) {
+    if (sealedBy(ctx.land, l.walls, s0, s1)) throw new Error('crista: um desfiladeiro sozinho selou a ilha');
+    const L = 'AB'[i];
+    l.walls.forEach((w, k) => { extra[`wall${L}${k + 1}`] = pt(w); });
+    l.towers.forEach((w0, k) => {
+      let w = null, bd = Infinity;
+      for (let dz = -13; dz <= 13; dz += 0.5) for (let dx = -13; dx <= 13; dx += 0.5) {
+        const x = w0.x + dx, z = w0.z + dz;
+        const d = Math.hypot(dx, dz);
+        if (d >= bd || F.tOf(x, z) > cuts[i].t - 3 || !ctx.dryClear(x, z, 3.2) || !ctx.reach(x, z) || !l.walls.every((q) => hyp({ x, z }, q) >= 4.5) || !m.forests.every((f) => hyp({ x, z }, f) >= f.radius + 4) || !m.resources.every((r) => hyp({ x, z }, r) >= 9)) continue;
+        bd = d; w = { x, z };
+      }
+      need(w, `a torre ${L}${k + 1}`);
+      extra[`tower${L}${k + 1}`] = pt(w);
+      ctx.take(w, 5);
+    });
+    const bw0 = F.world(cuts[i].t - 12, cuts[i].mid);
+    const bw = need(ctx.scan({ step: 1, test: (x, z) => ctx.dryClear(x, z, 3) && ctx.reach(x, z) && ctx.free(x, z, 1) && F.tOf(x, z) <= cuts[i].t - 8 && hyp({ x, z }, bw0) <= 12, score: (x, z) => hyp({ x, z }, bw0) }), `a balista ${L}`);
+    ctx.take(bw, 4);
+    extra[`ballista${L}`] = pt(bw);
+    extra[`pass${L}`] = pt(l.center);
+  }
+
+  // 2) Marco do Bastião: terra seca do lado do Paço, entre ele e a crista, a 20-40 u do Paço e perto do meio dos desfiladeiros
+  const mid = F.world(F.wv(u0) - band - 14, u0);
+  const hall = need(ctx.scan({
+    step: 1,
+    test: (x, z) => ctx.dryClear(x, z, 6.5) && ctx.reach(x, z) && ctx.free(x, z, 5) && hyp({ x, z }, s0) >= 20 && hyp({ x, z }, s0) <= 40 && sideOf({ x, z }) <= -(band + 10),
+    score: (x, z) => hyp({ x, z }, mid)
+  }), 'o Marco do Bastião');
+  ctx.take(hall, 14);
+  extra.bastionHall = pt(hall);
+
+  // 3) docas orcs: litoral dos Clãs (lado norte da crista), com mar aberto à frente, espaçadas, longe da base de Skarn
   const docks = [];
   for (let k = 0; k < 3; k++) {
     const d = need(ctx.scan({
       step: 1,
       test: (x, z) => {
         const ds = hyp({ x, z }, sw);
-        return ds >= 16 && ds <= 66 && hyp({ x, z }, s0) >= 24 && ctx.isShore(x, z) && ctx.reach(x, z) && ctx.free(x, z, 2)
-          && docks.every((q) => hyp({ x, z }, q) >= 20) && ctx.waterNear(x, z, 5, 14);
+        return ds >= 50 && ds <= 190 && sideOf({ x, z }) >= band + 18 && hyp({ x, z }, s1) >= 40 && coastalOk(x, z, 3.6) && ctx.reach1(x, z) && ctx.free(x, z, 4)
+          && docks.every((q) => hyp({ x, z }, q) >= 24) && !!wetSpot(x, z) && openSea(ctx, wetSpot(x, z).x, wetSpot(x, z).z, 8) >= 0.4;
       },
-      score: (x, z) => Math.abs(hyp({ x, z }, sw) - 40) + 0.05 * hyp({ x, z }, s1)
+      score: (x, z) => Math.abs(hyp({ x, z }, sw) - 100) + 0.1 * Math.abs(hyp({ x, z }, s1) - 120)
     }), `a doca ${k + 1}`);
     ctx.take(d, 9);
     docks.push(d);
     extra[`dock${k + 1}`] = pt(d);
   }
-  // frota da Liga: dois pontos de mar aberto no oeste, ligados ao estreito pelo oceano
-  const f1 = openWater(ctx, { x: -half + 22, z: sw.z }, 0, 'a partida da frota');
+
+  // 4) praia de desembarque das barcaças da Liga (perto do Paço, mar aberto à frente) e praia do assalto anfíbio dos Clãs (do lado do Bastião)
+  const landing = need(ctx.scan({
+    step: 1,
+    test: (x, z) => ctx.isShore(x, z) && ctx.reach(x, z) && ctx.free(x, z, 4) && hyp({ x, z }, s0) >= 22 && hyp({ x, z }, s0) <= 46 && !!wetSpot(x, z) && openSea(ctx, wetSpot(x, z).x, wetSpot(x, z).z, 8) >= 0.5 && sideOf({ x, z }) <= -(band + 6),
+    score: (x, z) => Math.abs(hyp({ x, z }, s0) - 30)
+  }), 'a praia de desembarque');
+  ctx.take(landing, 8);
+  extra.landingZone = pt(landing);
+  extra.reinforceSea = ptw(wetSpot(landing.x, landing.z));
+  const assault = need(ctx.scan({
+    step: 1,
+    test: (x, z) => ctx.isShore(x, z) && ctx.reach(x, z) && ctx.free(x, z, 4) && hyp({ x, z }, s0) >= 36 && hyp({ x, z }, s0) <= 110 && hyp({ x, z }, landing) >= 26 && !!wetSpot(x, z) && openSea(ctx, wetSpot(x, z).x, wetSpot(x, z).z, 8) >= 0.5 && sideOf({ x, z }) <= -(band + 6),
+    score: (x, z) => Math.abs(hyp({ x, z }, s0) - 58) - 0.2 * hyp({ x, z }, landing)
+  }), 'a praia do assalto');
+  ctx.take(assault, 8);
+  extra.assaultBeach = pt(assault);
+  extra.assaultSea = ptw(wetSpot(assault.x, assault.z));
+
+  // 5) frotas: a da Liga parte do oeste do estreito; as orcs saem do mar aberto do norte e do oeste
+  const f1 = openWater(ctx, { x: sw.x - 50, z: sw.z }, 0, 'a partida da frota');
   extra.fleetStart = ptw(f1);
   extra.fleetStart2 = ptw(openWater(ctx, f1, 10, 'a partida da frota 2', { minR: 8, maxR: 20, around: f1 }));
-  // chefe e ondas do ataque final: a leste, rumo ao Bastião
+  const of1 = need(ctx.scan({
+    step: 4,
+    test: (x, z) => ctx.oceanOk(x, z) && openSea(ctx, x, z, 9) >= 0.8 && hyp({ x, z }, sw) >= 110 && hyp({ x, z }, sw) <= 190 && hyp({ x, z }, s1) >= 60 && sideOf({ x, z }) >= 0,
+    score: (x, z) => Math.abs(hyp({ x, z }, sw) - 140) + 0.3 * hyp({ x, z }, docks[0])
+  }), 'a frota orca');
+  extra.orcFleetStart = ptw(of1);
+  extra.orcFleetStart2 = ptw(openWater(ctx, of1, 10, 'a frota orca 2', { minR: 8, maxR: 22, around: of1 }));
+
+  // 6) chefe e ondas por terra: atrás da crista (lado dos Clãs), rumo ao Bastião; o chefe parte perto da base de Skarn
   extra.bossStart = pt(ctx.take(nearDry(ctx, toward(s1, s0, 16), 'o chefe', { r: 4, freeR: 4 }), 8));
-  const L = hyp(s0, s1) || 1, px = -(s1.z - s0.z) / L, pz = (s1.x - s0.x) / L;
-  const w0 = toward(s0, s1, 72);
-  extra.waveStart1 = pt(ctx.take(nearDry(ctx, { x: w0.x + px * 24, z: w0.z + pz * 24 }, 'a onda 1', { r: 4, freeR: 4 }), 8));
-  extra.waveStart2 = pt(ctx.take(nearDry(ctx, { x: w0.x - px * 24, z: w0.z - pz * 24 }, 'a onda 2', { r: 4, freeR: 4 }), 8));
-  addGold(ctx, s0, 'expansion1', extra, { dMin: 20, dMax: 40, target: 28 });
+  const raidAt = (aim, name) => need(ctx.scan({
+    step: 1,
+    test: (x, z) => ctx.dryClear(x, z, 4) && ctx.reach(x, z) && ctx.free(x, z, 4) && sideOf({ x, z }) >= band + 16 && sideOf({ x, z }) <= band + 46 && hyp({ x, z }, aim) <= 40,
+    score: (x, z) => hyp({ x, z }, aim)
+  }), name);
+  const pe = (i) => F.world(F.wv(gaps[i].u) + band + 26, gaps[i].u);
+  extra.waveStart1 = pt(ctx.take(raidAt(pe(0), 'a onda 1'), 8));
+  extra.waveStart2 = pt(ctx.take(raidAt(pe(1), 'a onda 2'), 8));
+  extra.raid3 = pt(ctx.take(raidAt(F.world(F.wv(u0) + band + 40, u0), 'a onda 3'), 8));
+  // guarnição de cada doca: ponto seco 10 u da doca, rumo a Skarn
+  docks.forEach((d, k) => { extra[`dockGuard${k + 1}`] = pt(ctx.take(nearDry(ctx, toward(d, s1, 10), `a guarda da doca ${k + 1}`, { r: 3, freeR: 3 }), 6)); });
+
+  // 7) poços de petróleo no mar perto do estreito e ilhotas (náufragos, relíquia)
+  const deepSea = (x, z) => ctx.oceanOk(x, z) && ctx.hAt(x, z) <= 0.05 && wetFrac(ctx, x, z, 8) >= 1 && wetFrac(ctx, x, z, 4) >= 1;
+  const oilFree = (x, z) => m.resources.filter((q) => q.type === 'oil').every((q) => hyp({ x, z }, q) >= 16);
+  const w5 = need(ctx.scan({ step: 1, test: (x, z) => deepSea(x, z) && oilFree(x, z) && hyp({ x, z }, sw) >= 22 && hyp({ x, z }, sw) <= 60, score: (x, z) => Math.abs(hyp({ x, z }, sw) - 36) }), 'o poço de petróleo 5');
+  m.resources.push({ type: 'oil', x: r1(w5.x), z: r1(w5.z), amount: 5000 });
+  extra.well5 = ptw(w5);
+  const w6 = need(ctx.scan({ step: 1, test: (x, z) => deepSea(x, z) && oilFree(x, z) && hyp({ x, z }, w5) >= 18 && hyp({ x, z }, sw) <= 70, score: (x, z) => hyp({ x, z }, w5) }), 'o poço de petróleo 6');
+  m.resources.push({ type: 'oil', x: r1(w6.x), z: r1(w6.z), amount: 5000 });
+  extra.well6 = ptw(w6);
+  const isles = landComponents(ctx.land).filter((c) => !isReached(ctx.land, ctx.seen0, c.cx, c.cz) && !isReached(ctx.land, ctx.seen1, c.cx, c.cz) && c.size >= 25).sort((a, b) => b.size - a.size);
+  if (isles.length < 2) throw new Error('campanha: poucas ilhas (Cabo Ferrugem)');
+  const dryOn = (isle, name) => {
+    const cells = isle.cells.map((i) => ctx.land.toWorld(i % ctx.land.cols, (i / ctx.land.cols) | 0)).filter((w) => ctx.dryClear(w.x, w.z, 3.5));
+    if (!cells.length) throw new Error(`campanha: ilha sem chão (${name})`);
+    return cells.reduce((a, b) => (hyp(b, { x: isle.cx, z: isle.cz }) < hyp(a, { x: isle.cx, z: isle.cz }) ? b : a));
+  };
+  const byStrait = isles.slice().sort((a, b) => hyp({ x: a.cx, z: a.cz }, sw) - hyp({ x: b.cx, z: b.cz }, sw));
+  extra.isletCaptive = pt(dryOn(byStrait[0], 'náufragos'));
+  extra.isletRuin = pt(dryOn(byStrait[1], 'relíquia'));
+
+  addGold(ctx, s0, 'expansion1', extra, { dMin: 24, dMax: 44, target: 32, reach: (x, z) => ctx.reach(x, z) && sideOf({ x, z }) <= -(band + 8) });
   addGold(ctx, s1, 'expansion2', extra, { dMin: 20, dMax: 40, target: 28 });
-  void m;
+  moveInitialGold(ctx);
+  m.meta = { ...m.meta, ridge: { gaps: gaps.map((g) => g.u), ...CABO_RIDGE } };
 }
 
-const PRE = freeze({ 'camp-03-pedra-mae': prePedra }); // esculpe o terreno ANTES do contexto de posicionamento (M3-04)
+const PRE = freeze({ 'camp-03-pedra-mae': prePedra, 'camp-12-cabo-ferrugem': preCabo }); // esculpe o terreno ANTES do contexto de posicionamento (M3-04)
 const POST = freeze({ 'camp-01-baia-de-aurelan': postBaia, 'camp-02-pouso-do-encontro': postPouso, 'camp-03-pedra-mae': postPedra, 'camp-04-baixio-do-breu': postBaixio, 'camp-05-cerne-verde': postCerne, 'camp-06-a-geada': postGeada, 'camp-07-brejo-mudo': postBrejo, 'camp-08-fornalha': postFornalha, 'camp-09-miragem': postMiragem, 'camp-10-costa-ferrugem': postTravessia, 'camp-11-estepe-do-vento': postEstepe, 'camp-12-cabo-ferrugem': postCabo });
 
 // ---------------------------------------------------------------------------------------------------------------------------

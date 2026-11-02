@@ -18,17 +18,29 @@
     },
     "portrait": "👑",
     "text": {
-      "pt-BR": "A batalha final: os três heróis juntos. Construa o Bastião supremo, feche o estreito naval e derrote Skarn!",
-      "en": "The final battle: all three heroes united. Build the supreme Bastion, close the naval strait, and defeat Skarn!"
+      "pt-BR": "O Mar Fendido é a estrada dos clãs: de Cinzara saem as galés e as barcaças que sufocam as ilhas, e é aqui, no Cabo Ferrugem, que a Liga fecha essa estrada. Os três heróis estão juntos, Brann, Oren e eu, e a missão tem três atos. Ato I: evolua o Marco do Bastião ao nível 3 (Castelo de Aldária), erga 4 Torres de Vigia, 8 trechos de Muralha nos dois desfiladeiros da crista e 2 Balistas, enquanto os guarda-costas de Skarn testam a linha. Ato II: afunde ou arrase as 3 Docas dos Clãs no litoral norte e mantenha 2 navios de guerra no estreito por 90 segundos, sem um único inimigo na água, vencendo as frotas que tentarem romper. Ato III: Skarn, o chefe-de-brasa, virá com a guarda de ogros e serpentes por terra e com um assalto anfíbio por mar. Que o Bastião não caia: se o Marco cair, ou se Brann tombar, o cabo é perdido.",
+      "en": "The Sundered Sea is the clans' road: the galleys and barges that choke the isles sail out of Cinzara, and here at Cape Rust the League closes that road. The three heroes are together, Brann, Oren and I, and the mission has three acts. Act I: upgrade the Bastion Outpost to level 3 (Aldaria Castle), raise 4 Watch Towers, 8 Wall segments in the ridge's two passes and 2 Ballistae while Skarn's bodyguards probe the line. Act II: sink or raze the 3 Clan Docks on the north shore and hold 2 warships in the strait for 90 seconds with not one enemy on the water, beating the fleets that try to break through. Act III: Skarn, the Ember-Chief, comes with his guard of ogres and serpents by land and an amphibious assault by sea. The Bastion must not fall: if the Outpost falls, or if Brann is slain, the cape is lost."
     },
     "hints": [
       {
-        "pt-BR": "Concentre-se nos objetivos primários para avançar.",
-        "en": "Focus on primary objectives to advance."
+        "pt-BR": "Ato I: a crista de falésia tem dois desfiladeiros (passA e passB), e as muralhas fecham a passagem de verdade: 4 trechos em cada um. As torres e as balistas ficam atrás, no alcance dos dois.",
+        "en": "Act I: the cliff ridge has two passes, and walls truly seal the way: 4 segments in each. Towers and ballistae stand behind them, covering both."
+      },
+      {
+        "pt-BR": "Para evoluir o Marco do Bastião ao nível 3 use a evolução do Centro dele; custa ouro, madeira, pedra e petróleo. O Paço do cabo já está no nível 3 e libera a árvore toda, inclusive Estaleiro e Refinaria.",
+        "en": "To upgrade the Bastion Outpost to level 3 use its Hall upgrade; it costs gold, wood, stone and oil. The cape's Palace is already level 3 and unlocks the whole tree, Shipyard and Refinery included."
+      },
+      {
+        "pt-BR": "Ato II: as Docas ficam no litoral norte, atrás da crista; Fragatas e Encouraçados batem nelas do mar. Depois, 2 navios de guerra parados no estreito, e nenhum inimigo a 30 u dele, fazem o contador de 90 s correr.",
+        "en": "Act II: the Docks stand on the north shore, behind the ridge; Frigates and Dreadnoughts shell them from the sea. Then 2 warships holding the strait with no enemy within 30 u let the 90 s counter run."
+      },
+      {
+        "pt-BR": "O Capitão Brann é um HERÓI: só existe um. Se ele morrer, a missão está perdida. Oren cura com magia e Dorian ergue o estandarte; a Capitã Lyra traz grifos no Ato III.",
+        "en": "Captain Brann is a HERO: there is only one of him. If he dies the mission is lost. Oren heals with magic and Dorian raises the banner; Captain Lyra brings gryphons in Act III."
       }
     ]
   },
-  "mapId": "planalto-ffa-4p",
+  "mapId": "camp-12-cabo-ferrugem",
   "seed": 9204,
   "players": [
     {
@@ -53,35 +65,2152 @@
       "team": 1,
       "color": "#dc2626",
       "isAI": true,
+      "difficulty": "easy",
       "startSlot": 1
     }
   ],
   "startingResources": {
-    "wood": 400,
-    "gold": 400,
-    "stone": 150
+    "wood": 1400,
+    "gold": 2400,
+    "stone": 900
   },
+  "vars": {
+    "act": 1,
+    "act2_clock": 0,
+    "act3_clock": 0,
+    "block": 0,
+    "fin_clock": 0
+  },
+  "autoVictory": false,
   "setup": [
+    {
+      "type": "spawn",
+      "owner": "player",
+      "unitType": "hero_brann",
+      "count": 1,
+      "anchor": "playerStart",
+      "dx": 0,
+      "dz": 13,
+      "tag": "brann"
+    },
+    {
+      "type": "spawnBuilding",
+      "owner": "player",
+      "buildingType": "castle",
+      "anchor": "bastionHall",
+      "tag": "bastion_hall",
+      "facing": 0
+    },
+    {
+      "type": "spawn",
+      "owner": "player",
+      "units": [
+        {
+          "type": "frigate",
+          "count": 2
+        }
+      ],
+      "anchor": "fleetStart",
+      "spread": 4,
+      "tag": "liga_fleet"
+    },
     {
       "type": "tag",
       "select": {
         "buildingType": "great_hall"
       },
       "tag": "enemy_base"
+    },
+    {
+      "type": "spawnBuilding",
+      "owner": 1,
+      "buildingType": "ship_dock",
+      "anchor": "dock1",
+      "tag": "orc_dock",
+      "facing": 0
+    },
+    {
+      "type": "spawn",
+      "owner": 1,
+      "units": [
+        {
+          "type": "grunt",
+          "count": 3
+        },
+        {
+          "type": "axethrower",
+          "count": 2
+        }
+      ],
+      "anchor": "dockGuard1",
+      "spread": 3,
+      "tag": "dock_guard",
+      "guard": {
+        "r": 12
+      }
+    },
+    {
+      "type": "spawnBuilding",
+      "owner": 1,
+      "buildingType": "ship_dock",
+      "anchor": "dock2",
+      "tag": "orc_dock",
+      "facing": 0
+    },
+    {
+      "type": "spawn",
+      "owner": 1,
+      "units": [
+        {
+          "type": "grunt",
+          "count": 3
+        },
+        {
+          "type": "axethrower",
+          "count": 2
+        }
+      ],
+      "anchor": "dockGuard2",
+      "spread": 3,
+      "tag": "dock_guard",
+      "guard": {
+        "r": 12
+      }
+    },
+    {
+      "type": "spawnBuilding",
+      "owner": 1,
+      "buildingType": "ship_dock",
+      "anchor": "dock3",
+      "tag": "orc_dock",
+      "facing": 0
+    },
+    {
+      "type": "spawn",
+      "owner": 1,
+      "units": [
+        {
+          "type": "grunt",
+          "count": 3
+        },
+        {
+          "type": "axethrower",
+          "count": 2
+        }
+      ],
+      "anchor": "dockGuard3",
+      "spread": 3,
+      "tag": "dock_guard",
+      "guard": {
+        "r": 12
+      }
+    },
+    {
+      "type": "spawn",
+      "owner": "neutral",
+      "unitType": "villager",
+      "count": 4,
+      "anchor": "isletCaptive",
+      "spread": 2.2,
+      "tag": "captives",
+      "markColor": "#22d3ee",
+      "displayName": {
+        "pt-BR": "Náufrago",
+        "en": "Castaway"
+      }
+    },
+    {
+      "type": "spawnLandmark",
+      "kind": "ruins",
+      "anchor": "isletRuin",
+      "tag": "ruins",
+      "label": {
+        "pt-BR": "Farol Velho do Cabo",
+        "en": "Old Lighthouse of the Cape"
+      }
+    },
+    {
+      "type": "spawnLandmark",
+      "kind": "shrine",
+      "anchor": "bastionHall",
+      "dx": 7,
+      "dz": 5,
+      "tag": "shrine",
+      "known": true,
+      "label": {
+        "pt-BR": "Pedra do Bastião",
+        "en": "Bastion Stone"
+      }
     }
   ],
   "objectives": [
     {
-      "id": "primary-main",
-      "type": "destroy",
+      "id": "p-hall",
+      "type": "flag",
       "priority": "primary",
-      "select": {
-        "tag": "enemy_base"
+      "condition": {
+        "type": "count",
+        "select": {
+          "tag": "bastion_hall",
+          "owner": "player",
+          "minTier": 3
+        },
+        "op": ">=",
+        "value": 1
       },
       "title": {
-        "pt-BR": "Erguer a fortaleza final e bloquear as rotas marítimas",
-        "en": "Raise the final fortress and blockade the sea routes"
+        "pt-BR": "Ato I: evoluir o Marco do Bastião ao nível 3 (Castelo de Aldária)",
+        "en": "Act I: upgrade the Bastion Outpost to level 3 (Aldaria Castle)"
+      },
+      "description": {
+        "pt-BR": "Use a evolução do Centro do Marco do Bastião, atrás da crista. O Paço do cabo já está no nível 3 e não conta.",
+        "en": "Use the Hall upgrade on the Bastion Outpost behind the ridge. The cape's Palace is already level 3 and does not count."
+      },
+      "marker": {
+        "area": {
+          "anchor": "bastionHall",
+          "r": 12
+        },
+        "style": "goal",
+        "seconds": 120
       }
+    },
+    {
+      "id": "p-towers",
+      "type": "flag",
+      "priority": "primary",
+      "condition": {
+        "type": "count",
+        "select": {
+          "buildingType": "watchtower",
+          "owner": "player",
+          "area": {
+            "anchor": "bastionHall",
+            "r": 60
+          }
+        },
+        "op": ">=",
+        "value": 4
+      },
+      "title": {
+        "pt-BR": "Ato I: erguer 4 Torres de Vigia no Bastião",
+        "en": "Act I: raise 4 Watch Towers at the Bastion"
+      },
+      "description": {
+        "pt-BR": "Na área do Bastião, junto aos dois desfiladeiros da crista (a nordeste do Marco).",
+        "en": "In the Bastion area, by the ridge's two passes (northeast of the Outpost)."
+      },
+      "marker": {
+        "area": {
+          "anchor": "passA",
+          "r": 16
+        },
+        "style": "goal",
+        "seconds": 150
+      }
+    },
+    {
+      "id": "p-walls",
+      "type": "flag",
+      "priority": "primary",
+      "condition": {
+        "type": "count",
+        "select": {
+          "buildingType": "wall_human",
+          "owner": "player",
+          "area": {
+            "anchor": "bastionHall",
+            "r": 60
+          }
+        },
+        "op": ">=",
+        "value": 8
+      },
+      "title": {
+        "pt-BR": "Ato I: erguer 8 trechos de Muralha nos desfiladeiros",
+        "en": "Act I: raise 8 Wall segments in the passes"
+      },
+      "description": {
+        "pt-BR": "4 trechos em cada desfiladeiro (passA e passB) fecham a passagem entre a falésia. Os orcs terão de quebrar a muralha sob as torres.",
+        "en": "4 segments in each pass (passA and passB) close the gap between the cliffs. The orcs will have to break the wall under the towers."
+      },
+      "marker": {
+        "area": {
+          "anchor": "passB",
+          "r": 16
+        },
+        "style": "goal",
+        "seconds": 150
+      }
+    },
+    {
+      "id": "p-ballistas",
+      "type": "flag",
+      "priority": "primary",
+      "condition": {
+        "type": "count",
+        "select": {
+          "unitType": "ballista",
+          "owner": "player"
+        },
+        "op": ">=",
+        "value": 2
+      },
+      "title": {
+        "pt-BR": "Ato I: ter 2 Balistas no Bastião",
+        "en": "Act I: have 2 Ballistae at the Bastion"
+      },
+      "description": {
+        "pt-BR": "A Oficina treina Balistas (Quartel e Centro nível 2). Clique direito move; Ctrl+clique ataca um ponto.",
+        "en": "The Workshop trains Ballistae (Barracks and Hall level 2). Right-click moves; Ctrl+click attacks a point."
+      }
+    },
+    {
+      "id": "p-docks",
+      "type": "destroy",
+      "priority": "primary",
+      "active": false,
+      "select": {
+        "tag": "orc_dock"
+      },
+      "count": 3,
+      "title": {
+        "pt-BR": "Ato II: destruir as 3 Docas dos Clãs no litoral",
+        "en": "Act II: destroy the Clans' 3 Docks on the coast"
+      },
+      "description": {
+        "pt-BR": "As Docas estão no litoral norte, atrás da crista, cada uma com guarda de terra. Navios de guerra as alcançam do mar; tropas, pelos desfiladeiros.",
+        "en": "The Docks stand on the north shore behind the ridge, each with a ground guard. Warships reach them from the sea; troops, through the passes."
+      },
+      "marker": {
+        "area": {
+          "anchor": "dock2",
+          "r": 42
+        },
+        "style": "goal"
+      }
+    },
+    {
+      "id": "p-strait",
+      "type": "flag",
+      "priority": "primary",
+      "active": false,
+      "condition": {
+        "type": "var",
+        "name": "block",
+        "op": ">=",
+        "value": 90
+      },
+      "title": {
+        "pt-BR": "Ato II: manter 2 navios de guerra no estreito por 90 segundos",
+        "en": "Act II: hold 2 warships in the strait for 90 seconds"
+      },
+      "description": {
+        "pt-BR": "Só conta depois que as 3 Docas caírem: 2 Fragatas/Encouraçados na zona do estreito e NENHUM inimigo a menos de 30 u. O contador zera se um inimigo entrar.",
+        "en": "It only counts once the 3 Docks have fallen: 2 Frigates/Dreadnoughts in the strait zone and NO enemy within 30 u. The counter resets if an enemy enters."
+      },
+      "marker": {
+        "area": {
+          "anchor": "strait",
+          "r": 22
+        },
+        "style": "goal"
+      }
+    },
+    {
+      "id": "p-skarn",
+      "type": "destroy",
+      "priority": "primary",
+      "active": false,
+      "select": {
+        "tag": "skarn"
+      },
+      "count": 1,
+      "title": {
+        "pt-BR": "Ato III: derrotar Skarn, o chefe-de-brasa",
+        "en": "Act III: defeat Skarn, the Ember-Chief"
+      },
+      "description": {
+        "pt-BR": "Skarn ataca o Bastião com a guarda de ogros e serpentes, e um assalto anfíbio pela praia sul. Derrube-o sem perder o Marco.",
+        "en": "Skarn attacks the Bastion with his guard of ogres and serpents and an amphibious assault on the south beach. Bring him down without losing the Outpost."
+      }
+    },
+    {
+      "id": "s-captives",
+      "type": "rescue",
+      "priority": "secondary",
+      "tag": "captives",
+      "count": 4,
+      "title": {
+        "pt-BR": "Resgatar os 4 náufragos da ilhota",
+        "en": "Rescue the 4 castaways on the islet"
+      },
+      "description": {
+        "pt-BR": "Uma ilhota a oeste do estreito. Um navio ou uma barcaça perto da praia basta para recolhê-los.",
+        "en": "An islet west of the strait. A ship or a barge near the beach is enough to pick them up."
+      }
+    },
+    {
+      "id": "s-fleet",
+      "type": "train",
+      "priority": "secondary",
+      "unitType": "frigate",
+      "count": 5,
+      "title": {
+        "pt-BR": "Treinar 5 Fragatas no Estaleiro",
+        "en": "Train 5 Frigates at the Shipyard"
+      },
+      "description": {
+        "pt-BR": "A Liga precisa de frota para o estreito. O petróleo vem das plataformas nos poços do mar.",
+        "en": "The League needs a fleet for the strait. Oil comes from platforms on the sea wells."
+      }
+    },
+    {
+      "id": "s-mages",
+      "type": "train",
+      "priority": "secondary",
+      "unitType": "mage",
+      "count": 3,
+      "title": {
+        "pt-BR": "Treinar 3 Magos para a muralha",
+        "en": "Train 3 Mages for the wall"
+      },
+      "description": {
+        "pt-BR": "Magos curam a tropa na linha das torres. A Torre Arcana pede o Centro no nível 3.",
+        "en": "Mages heal the troops on the tower line. The Arcane Tower asks for the Hall at level 3."
+      }
+    },
+    {
+      "id": "h-relic",
+      "type": "flag",
+      "priority": "hidden",
+      "condition": {
+        "type": "area",
+        "owner": "player",
+        "area": {
+          "anchor": "isletRuin",
+          "r": 16
+        }
+      },
+      "title": {
+        "pt-BR": "Achar o Farol Velho do Cabo",
+        "en": "Find the Old Lighthouse of the Cape"
+      }
+    }
+  ],
+  "triggers": [
+    {
+      "id": "intro",
+      "when": {
+        "type": "time",
+        "at": 0
+      },
+      "actions": [
+        {
+          "type": "music",
+          "id": "on"
+        },
+        {
+          "type": "reveal",
+          "anchor": "bastionHall",
+          "radius": 34,
+          "ttl": 50
+        },
+        {
+          "type": "reveal",
+          "anchor": "strait",
+          "radius": 26,
+          "ttl": 50
+        },
+        {
+          "type": "cutscene",
+          "id": "cabo-ferrugem",
+          "duration": 50,
+          "skippable": true,
+          "steps": [
+            {
+              "at": 0,
+              "anchor": "bastion",
+              "zoom": 1.1,
+              "dialog": {
+                "speaker": {
+                  "pt-BR": "Capitão Brann",
+                  "en": "Captain Brann"
+                },
+                "portrait": "⚔️",
+                "text": {
+                  "pt-BR": "O Cabo Ferrugem. Daqui se vê a crista, o estreito e, lá no fundo, as fogueiras do Cinzal. É aqui que a Liga fica.",
+                  "en": "Cape Rust. From here you see the ridge, the strait and, far off, the fires of the Cinzal. This is where the League stays."
+                },
+                "duration": 9
+              }
+            },
+            {
+              "at": 10,
+              "anchor": "strait",
+              "zoom": 1.2,
+              "dialog": {
+                "speaker": {
+                  "pt-BR": "Mestre Arcano Oren",
+                  "en": "Arcane Master Oren"
+                },
+                "portrait": "🔮",
+                "text": {
+                  "pt-BR": "O estreito é a garganta da Estrada dos Clãs. Quem segura a água segura as ilhas. Os cadernos de Orsolo marcam três docas ao norte.",
+                  "en": "The strait is the throat of the Clans' Road. Whoever holds the water holds the isles. Orsolo's notebooks mark three docks to the north."
+                },
+                "duration": 9
+              }
+            },
+            {
+              "at": 20,
+              "anchor": "passA",
+              "zoom": 1.1,
+              "dialog": {
+                "speaker": {
+                  "pt-BR": "Marechal Dorian Vasques",
+                  "en": "Marshal Dorian Vasques"
+                },
+                "portrait": "👑",
+                "text": {
+                  "pt-BR": "Dois desfiladeiros na falésia: muralha e torre fecham os dois. Brann, a linha é sua; Oren e eu chegamos pela enseada com as barcaças.",
+                  "en": "Two passes in the cliff: wall and tower close them both. Brann, the line is yours; Oren and I arrive through the cove with the barges."
+                },
+                "duration": 9
+              }
+            },
+            {
+              "at": 30,
+              "anchor": "enemyStart",
+              "zoom": 1.05,
+              "dialog": {
+                "speaker": {
+                  "pt-BR": "Skarn, chefe-de-brasa",
+                  "en": "Skarn, Ember-Chief"
+                },
+                "portrait": "🪓",
+                "text": {
+                  "pt-BR": "Uma muralha de pedra contra o Cinzal? Eu a derrubo com a mão. Venham de barco, venham de pé: a brasa não se apaga.",
+                  "en": "A stone wall against the Cinzal? I will knock it down with my hand. Come by boat, come on foot: the ember does not die."
+                },
+                "duration": 9
+              }
+            },
+            {
+              "at": 40,
+              "anchor": "landingZone",
+              "zoom": 1.15,
+              "dialog": {
+                "speaker": {
+                  "pt-BR": "Capitão Brann",
+                  "en": "Captain Brann"
+                },
+                "portrait": "⚔️",
+                "text": {
+                  "pt-BR": "A barcaça já dobra a ponta. Reunidos os três, o Bastião sai do papel. Mãos à obra.",
+                  "en": "The barge is already rounding the point. With the three of us together the Bastion leaves the page. To work."
+                },
+                "duration": 9
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "full-tree",
+      "when": {
+        "type": "time",
+        "at": 0
+      },
+      "actions": [
+        {
+          "type": "setTier",
+          "owner": "player",
+          "tier": 3,
+          "exceptTag": "bastion_hall"
+        },
+        {
+          "type": "setTier",
+          "owner": "player",
+          "tier": 2
+        },
+        {
+          "type": "giveResources",
+          "owner": "player",
+          "oil": 600
+        },
+        {
+          "type": "message",
+          "text": {
+            "pt-BR": "Paço no nível 3: a árvore toda está liberada. O Marco do Bastião nasce no nível 2: evolua-o ao 3 (Castelo de Aldária).",
+            "en": "Palace at level 3: the whole tree is unlocked. The Bastion Outpost starts at level 2: upgrade it to 3 (Aldaria Castle)."
+          }
+        }
+      ]
+    },
+    {
+      "id": "landing-1",
+      "when": {
+        "type": "time",
+        "at": 20
+      },
+      "actions": [
+        {
+          "type": "spawnLanding",
+          "owner": "player",
+          "anchor": "reinforceSea",
+          "unloadAt": {
+            "anchor": "landingZone"
+          },
+          "bargeTag": "barge_1",
+          "tag": "reunion",
+          "units": [
+            {
+              "type": "hero_oren",
+              "count": 1
+            },
+            {
+              "type": "hero_dorian",
+              "count": 1
+            },
+            {
+              "type": "knight",
+              "count": 4
+            }
+          ]
+        },
+        {
+          "type": "message",
+          "text": {
+            "pt-BR": "A barcaça da Liga atraca na praia do cabo com Oren, Dorian e 4 cavaleiros. Os três heróis estão reunidos.",
+            "en": "The League barge docks on the cape's beach with Oren, Dorian and 4 knights. The three heroes are reunited."
+          }
+        },
+        {
+          "type": "sound",
+          "id": "build"
+        }
+      ]
+    },
+    {
+      "id": "reunion-talk",
+      "when": {
+        "type": "time",
+        "at": 40
+      },
+      "actions": [
+        {
+          "type": "dialog",
+          "speaker": {
+            "pt-BR": "Marechal Dorian Vasques",
+            "en": "Marshal Dorian Vasques"
+          },
+          "portrait": "👑",
+          "text": {
+            "pt-BR": "Brann! Vivo e de pé no fim do mundo. A Rainha Sevelin mandou dizer que o cabo é o último favor que ela pede a Aurelan.",
+            "en": "Brann! Alive and standing at the end of the world. Queen Sevelin sent word that the cape is the last favour she asks of Aurelan."
+          },
+          "duration": 9
+        },
+        {
+          "type": "dialog",
+          "speaker": {
+            "pt-BR": "Capitão Brann",
+            "en": "Captain Brann"
+          },
+          "portrait": "⚔️",
+          "text": {
+            "pt-BR": "Dorian, Oren: os três, enfim. A crista nos dá uma vantagem rara, mas Skarn não vai esperar a muralha secar.",
+            "en": "Dorian, Oren: the three of us, at last. The ridge gives us a rare edge, but Skarn will not wait for the wall to dry."
+          },
+          "duration": 9
+        },
+        {
+          "type": "dialog",
+          "speaker": {
+            "pt-BR": "Mestre Arcano Oren",
+            "en": "Arcane Master Oren"
+          },
+          "portrait": "🔮",
+          "text": {
+            "pt-BR": "Cuido da cura e do petróleo. Sem frota não há estreito, e sem estreito o Mar Fendido não muda de lado.",
+            "en": "I will see to healing and oil. Without a fleet there is no strait, and without the strait the Sundered Sea does not change sides."
+          },
+          "duration": 9
+        }
+      ]
+    },
+    {
+      "id": "raid-1",
+      "when": {
+        "type": "time",
+        "at": 150
+      },
+      "actions": [
+        {
+          "type": "spawn",
+          "owner": 1,
+          "units": [
+            {
+              "type": "grunt",
+              "count": 4
+            },
+            {
+              "type": "axethrower",
+              "count": 2
+            }
+          ],
+          "anchor": "waveStart1",
+          "spread": 3,
+          "tag": "act1_wave",
+          "order": {
+            "kind": "attackMove",
+            "anchor": "bastionHall"
+          }
+        },
+        {
+          "type": "message",
+          "text": {
+            "pt-BR": "Guarda-costas de Skarn: Talhadores e Lanceiros marcham para o desfiladeiro oeste.",
+            "en": "Skarn's bodyguards: Grunts and Axe Throwers march on the west pass."
+          }
+        },
+        {
+          "type": "sound",
+          "id": "alarm"
+        }
+      ]
+    },
+    {
+      "id": "raid-2",
+      "when": {
+        "type": "time",
+        "at": 300
+      },
+      "actions": [
+        {
+          "type": "spawn",
+          "owner": 1,
+          "units": [
+            {
+              "type": "grunt",
+              "count": 5
+            },
+            {
+              "type": "axethrower",
+              "count": 3
+            },
+            {
+              "type": "ogre",
+              "count": 1
+            }
+          ],
+          "anchor": "waveStart2",
+          "spread": 3,
+          "tag": "act1_wave",
+          "order": {
+            "kind": "attackMove",
+            "anchor": "bastionHall"
+          }
+        },
+        {
+          "type": "message",
+          "text": {
+            "pt-BR": "Segunda leva: um Ogro lidera a tropa contra o desfiladeiro leste.",
+            "en": "Second wave: an Ogre leads the troops at the east pass."
+          }
+        },
+        {
+          "type": "dialog",
+          "speaker": {
+            "pt-BR": "Capitão Brann",
+            "en": "Captain Brann"
+          },
+          "portrait": "⚔️",
+          "text": {
+            "pt-BR": "Ogros contra a crista. Quem não tiver muralha, que tenha mago. Segurem atrás da linha das torres.",
+            "en": "Ogres against the ridge. Whoever has no wall, let him have a mage. Hold behind the tower line."
+          },
+          "duration": 8
+        },
+        {
+          "type": "sound",
+          "id": "alarm"
+        }
+      ]
+    },
+    {
+      "id": "raid-3",
+      "when": {
+        "type": "time",
+        "at": 450
+      },
+      "actions": [
+        {
+          "type": "spawn",
+          "owner": 1,
+          "units": [
+            {
+              "type": "catapult",
+              "count": 1
+            },
+            {
+              "type": "grunt",
+              "count": 6
+            },
+            {
+              "type": "ogre",
+              "count": 1
+            },
+            {
+              "type": "axethrower",
+              "count": 2
+            }
+          ],
+          "anchor": "raid3",
+          "spread": 3,
+          "tag": "act1_wave",
+          "order": {
+            "kind": "attackMove",
+            "anchor": "bastionHall"
+          }
+        },
+        {
+          "type": "message",
+          "text": {
+            "pt-BR": "Terceira leva com uma catapulta: ela derruba muralha de longe. Combata-a com cavaleiros e Balistas.",
+            "en": "Third wave with a catapult: it breaks walls from afar. Hit it with knights and Ballistae."
+          }
+        },
+        {
+          "type": "sound",
+          "id": "alarm"
+        }
+      ]
+    },
+    {
+      "id": "act1-done",
+      "when": {
+        "all": [
+          {
+            "type": "objective",
+            "id": "p-hall",
+            "status": "completed"
+          },
+          {
+            "type": "objective",
+            "id": "p-towers",
+            "status": "completed"
+          },
+          {
+            "type": "objective",
+            "id": "p-walls",
+            "status": "completed"
+          },
+          {
+            "type": "objective",
+            "id": "p-ballistas",
+            "status": "completed"
+          }
+        ]
+      },
+      "actions": [
+        {
+          "type": "setVar",
+          "name": "act",
+          "value": 2
+        },
+        {
+          "type": "giveResources",
+          "owner": "player",
+          "oil": 500
+        },
+        {
+          "type": "spawn",
+          "owner": "player",
+          "units": [
+            {
+              "type": "frigate",
+              "count": 4
+            }
+          ],
+          "anchor": "reinforceSea",
+          "spread": 4,
+          "tag": "reinf_fleet",
+          "order": {
+            "kind": "attackMove",
+            "anchor": "strait"
+          }
+        },
+        {
+          "type": "message",
+          "text": {
+            "pt-BR": "A frota da Aliança chega: 4 Fragatas e petróleo para o estaleiro.",
+            "en": "The Alliance fleet arrives: 4 Frigates and oil for the shipyard."
+          }
+        },
+        {
+          "type": "setObjective",
+          "id": "p-docks",
+          "status": "active"
+        },
+        {
+          "type": "setObjective",
+          "id": "p-strait",
+          "status": "active"
+        },
+        {
+          "type": "sound",
+          "id": "victory"
+        },
+        {
+          "type": "reveal",
+          "anchor": "dock1",
+          "radius": 22,
+          "ttl": 40
+        },
+        {
+          "type": "reveal",
+          "anchor": "dock2",
+          "radius": 22,
+          "ttl": 40
+        },
+        {
+          "type": "reveal",
+          "anchor": "dock3",
+          "radius": 22,
+          "ttl": 40
+        },
+        {
+          "type": "cutscene",
+          "id": "ato-2",
+          "duration": 30,
+          "skippable": true,
+          "steps": [
+            {
+              "at": 0,
+              "anchor": "bastionHall",
+              "zoom": 1.1,
+              "dialog": {
+                "speaker": {
+                  "pt-BR": "Marechal Dorian Vasques",
+                  "en": "Marshal Dorian Vasques"
+                },
+                "portrait": "👑",
+                "text": {
+                  "pt-BR": "O Bastião está de pé: Castelo, torres, muralha e balistas. Ato I cumprido.",
+                  "en": "The Bastion stands: Castle, towers, wall and ballistae. Act I done."
+                },
+                "duration": 8
+              }
+            },
+            {
+              "at": 9,
+              "anchor": "dock2",
+              "zoom": 1.05,
+              "dialog": {
+                "speaker": {
+                  "pt-BR": "Mestre Arcano Oren",
+                  "en": "Arcane Master Oren"
+                },
+                "portrait": "🔮",
+                "text": {
+                  "pt-BR": "As três docas ao norte são as pernas da frota orc. Derrubem-nas e depois fechem o estreito: noventa segundos de mar limpo.",
+                  "en": "The three docks to the north are the orc fleet's legs. Take them down and then close the strait: ninety seconds of clean water."
+                },
+                "duration": 9
+              }
+            },
+            {
+              "at": 19,
+              "anchor": "strait",
+              "zoom": 1.15,
+              "dialog": {
+                "speaker": {
+                  "pt-BR": "Capitão Brann",
+                  "en": "Captain Brann"
+                },
+                "portrait": "⚔️",
+                "text": {
+                  "pt-BR": "Frotas do Cinzal vêm à água assim que sentirem o cheiro. Fragatas na frente, Encouraçados atrás. Vamos ao mar.",
+                  "en": "The Cinzal fleets come to the water the moment they smell it. Frigates ahead, Dreadnoughts behind. To the sea."
+                },
+                "duration": 9
+              }
+            }
+          ]
+        },
+        {
+          "type": "message",
+          "text": {
+            "pt-BR": "Ato II: bloquear as rotas. Destrua as 3 Docas e mantenha 2 navios de guerra no estreito por 90 s.",
+            "en": "Act II: block the routes. Destroy the 3 Docks and hold 2 warships in the strait for 90 s."
+          }
+        }
+      ]
+    },
+    {
+      "id": "act2-clock",
+      "when": {
+        "all": [
+          {
+            "type": "var",
+            "name": "act",
+            "op": "==",
+            "value": 2
+          },
+          {
+            "type": "every",
+            "seconds": 1
+          }
+        ]
+      },
+      "once": false,
+      "actions": [
+        {
+          "type": "incVar",
+          "name": "act2_clock"
+        }
+      ]
+    },
+    {
+      "id": "landing-2",
+      "when": {
+        "type": "var",
+        "name": "act2_clock",
+        "op": ">=",
+        "value": 30
+      },
+      "actions": [
+        {
+          "type": "spawnLanding",
+          "owner": "player",
+          "anchor": "reinforceSea",
+          "unloadAt": {
+            "anchor": "landingZone"
+          },
+          "bargeTag": "barge_2",
+          "tag": "reinf_2",
+          "units": [
+            {
+              "type": "knight",
+              "count": 3
+            },
+            {
+              "type": "archer",
+              "count": 3
+            }
+          ]
+        },
+        {
+          "type": "message",
+          "text": {
+            "pt-BR": "Segunda barcaça de reforço: 6 tropas na praia do cabo.",
+            "en": "Second reinforcement barge: 6 troops on the cape beach."
+          }
+        }
+      ]
+    },
+    {
+      "id": "fleet-1",
+      "when": {
+        "type": "var",
+        "name": "act2_clock",
+        "op": ">=",
+        "value": 20
+      },
+      "actions": [
+        {
+          "type": "spawn",
+          "owner": 1,
+          "units": [
+            {
+              "type": "war_galley",
+              "count": 3
+            }
+          ],
+          "anchor": "orcFleetStart",
+          "spread": 4,
+          "tag": "orc_fleet",
+          "order": {
+            "kind": "attackMove",
+            "anchor": "strait"
+          }
+        },
+        {
+          "type": "message",
+          "text": {
+            "pt-BR": "Frota orca: 3 galés saem do mar do norte rumo ao estreito.",
+            "en": "Orc fleet: 3 galleys leave the northern sea bound for the strait."
+          }
+        },
+        {
+          "type": "sound",
+          "id": "alarm"
+        }
+      ]
+    },
+    {
+      "id": "fleet-2",
+      "when": {
+        "type": "var",
+        "name": "act2_clock",
+        "op": ">=",
+        "value": 170
+      },
+      "actions": [
+        {
+          "type": "spawn",
+          "owner": 1,
+          "units": [
+            {
+              "type": "war_galley",
+              "count": 4
+            }
+          ],
+          "anchor": "orcFleetStart2",
+          "spread": 4,
+          "tag": "orc_fleet",
+          "order": {
+            "kind": "attackMove",
+            "anchor": "strait"
+          }
+        },
+        {
+          "type": "message",
+          "text": {
+            "pt-BR": "Segunda frota: 4 galés rompem para o estreito.",
+            "en": "Second fleet: 4 galleys break for the strait."
+          }
+        },
+        {
+          "type": "sound",
+          "id": "alarm"
+        }
+      ]
+    },
+    {
+      "id": "land-raid-2",
+      "when": {
+        "type": "var",
+        "name": "act2_clock",
+        "op": ">=",
+        "value": 210
+      },
+      "actions": [
+        {
+          "type": "spawn",
+          "owner": 1,
+          "units": [
+            {
+              "type": "ogre",
+              "count": 2
+            },
+            {
+              "type": "grunt",
+              "count": 5
+            },
+            {
+              "type": "catapult",
+              "count": 1
+            }
+          ],
+          "anchor": "waveStart1",
+          "spread": 3,
+          "tag": "act2_wave",
+          "order": {
+            "kind": "attackMove",
+            "anchor": "bastionHall"
+          }
+        },
+        {
+          "type": "message",
+          "text": {
+            "pt-BR": "Levas de terra: ogros e uma catapulta tentam a muralha enquanto a frota segura o mar.",
+            "en": "Land levy: ogres and a catapult try the wall while the fleet holds the sea."
+          }
+        }
+      ]
+    },
+    {
+      "id": "fleet-3",
+      "when": {
+        "type": "var",
+        "name": "act2_clock",
+        "op": ">=",
+        "value": 330
+      },
+      "actions": [
+        {
+          "type": "spawn",
+          "owner": 1,
+          "units": [
+            {
+              "type": "war_galley",
+              "count": 4
+            },
+            {
+              "type": "iron_leviathan",
+              "count": 1
+            }
+          ],
+          "anchor": "orcFleetStart",
+          "spread": 5,
+          "tag": "orc_fleet",
+          "order": {
+            "kind": "attackMove",
+            "anchor": "strait"
+          }
+        },
+        {
+          "type": "dialog",
+          "speaker": {
+            "pt-BR": "Mestre Arcano Oren",
+            "en": "Arcane Master Oren"
+          },
+          "portrait": "🔮",
+          "text": {
+            "pt-BR": "Um Leviatã de Ferro! Foco no casco dele; as Fragatas o rodeiam enquanto os Encouraçados batem de longe.",
+            "en": "An Iron Leviathan! Focus its hull; the Frigates circle it while the Dreadnoughts fire from afar."
+          },
+          "duration": 9
+        },
+        {
+          "type": "sound",
+          "id": "alarm"
+        }
+      ]
+    },
+    {
+      "id": "docks-down",
+      "when": {
+        "type": "objective",
+        "id": "p-docks",
+        "status": "completed"
+      },
+      "actions": [
+        {
+          "type": "sound",
+          "id": "build"
+        },
+        {
+          "type": "dialog",
+          "speaker": {
+            "pt-BR": "Capitão Brann",
+            "en": "Captain Brann"
+          },
+          "portrait": "⚔️",
+          "text": {
+            "pt-BR": "As três docas arderam. Sem estaleiro no litoral, só o que já está na água ameaça o estreito. Agora é segurar a água.",
+            "en": "All three docks burned. With no yards on the coast only what is already afloat threatens the strait. Now hold the water."
+          },
+          "duration": 8
+        }
+      ]
+    },
+    {
+      "id": "hold-tick",
+      "when": {
+        "all": [
+          {
+            "type": "objective",
+            "id": "p-docks",
+            "status": "completed"
+          },
+          {
+            "any": [
+              {
+                "type": "area",
+                "owner": "player",
+                "unitType": "frigate",
+                "count": 2,
+                "area": {
+                  "anchor": "strait",
+                  "r": 22
+                }
+              },
+              {
+                "type": "area",
+                "owner": "player",
+                "unitType": "dreadnought",
+                "count": 2,
+                "area": {
+                  "anchor": "strait",
+                  "r": 22
+                }
+              },
+              {
+                "all": [
+                  {
+                    "type": "area",
+                    "owner": "player",
+                    "unitType": "frigate",
+                    "count": 1,
+                    "area": {
+                      "anchor": "strait",
+                      "r": 22
+                    }
+                  },
+                  {
+                    "type": "area",
+                    "owner": "player",
+                    "unitType": "dreadnought",
+                    "count": 1,
+                    "area": {
+                      "anchor": "strait",
+                      "r": 22
+                    }
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "not": {
+              "type": "area",
+              "owner": "enemy",
+              "area": {
+                "anchor": "strait",
+                "r": 30
+              }
+            }
+          }
+        ]
+      },
+      "once": false,
+      "cooldown": 1,
+      "actions": [
+        {
+          "type": "incVar",
+          "name": "block"
+        }
+      ]
+    },
+    {
+      "id": "hold-reset",
+      "when": {
+        "all": [
+          {
+            "type": "var",
+            "name": "block",
+            "op": ">=",
+            "value": 1
+          },
+          {
+            "type": "area",
+            "owner": "enemy",
+            "area": {
+              "anchor": "strait",
+              "r": 28
+            }
+          }
+        ]
+      },
+      "once": false,
+      "cooldown": 10,
+      "actions": [
+        {
+          "type": "setVar",
+          "name": "block",
+          "value": 0
+        },
+        {
+          "type": "message",
+          "text": {
+            "pt-BR": "Um inimigo entrou no estreito: o contador de 90 s zerou.",
+            "en": "An enemy entered the strait: the 90 s counter reset."
+          }
+        },
+        {
+          "type": "sound",
+          "id": "alarm"
+        }
+      ]
+    },
+    {
+      "id": "hold-30",
+      "when": {
+        "type": "var",
+        "name": "block",
+        "op": "==",
+        "value": 30
+      },
+      "once": false,
+      "cooldown": 40,
+      "actions": [
+        {
+          "type": "message",
+          "text": {
+            "pt-BR": "Estreito: 30 s seguros. Faltam 60.",
+            "en": "Strait: 30 s secure. 60 to go."
+          }
+        }
+      ]
+    },
+    {
+      "id": "hold-60",
+      "when": {
+        "type": "var",
+        "name": "block",
+        "op": "==",
+        "value": 60
+      },
+      "once": false,
+      "cooldown": 40,
+      "actions": [
+        {
+          "type": "message",
+          "text": {
+            "pt-BR": "Estreito: 60 s seguros. Faltam 30.",
+            "en": "Strait: 60 s secure. 30 to go."
+          }
+        }
+      ]
+    },
+    {
+      "id": "strait-closed",
+      "when": {
+        "type": "objective",
+        "id": "p-strait",
+        "status": "completed"
+      },
+      "actions": [
+        {
+          "type": "sound",
+          "id": "victory"
+        },
+        {
+          "type": "dialog",
+          "speaker": {
+            "pt-BR": "Marechal Dorian Vasques",
+            "en": "Marshal Dorian Vasques"
+          },
+          "portrait": "👑",
+          "text": {
+            "pt-BR": "Noventa segundos sem uma vela inimiga. O Mar Fendido ficou do nosso lado do cabo. Resta a brasa: Skarn.",
+            "en": "Ninety seconds without an enemy sail. The Sundered Sea lay on our side of the cape. What is left is the ember: Skarn."
+          },
+          "duration": 8
+        }
+      ]
+    },
+    {
+      "id": "act2-done",
+      "when": {
+        "all": [
+          {
+            "type": "objective",
+            "id": "p-docks",
+            "status": "completed"
+          },
+          {
+            "type": "objective",
+            "id": "p-strait",
+            "status": "completed"
+          }
+        ]
+      },
+      "actions": [
+        {
+          "type": "setVar",
+          "name": "act",
+          "value": 3
+        },
+        {
+          "type": "setObjective",
+          "id": "p-skarn",
+          "status": "active"
+        },
+        {
+          "type": "music",
+          "id": "off"
+        },
+        {
+          "type": "music",
+          "id": "on"
+        },
+        {
+          "type": "spawn",
+          "owner": 1,
+          "unitType": "hero_skarn",
+          "count": 1,
+          "anchor": "bossStart",
+          "tag": "skarn",
+          "order": {
+            "kind": "attackMove",
+            "anchor": "bastionHall"
+          },
+          "displayName": {
+            "pt-BR": "Skarn",
+            "en": "Skarn"
+          },
+          "markColor": "#f97316"
+        },
+        {
+          "type": "spawn",
+          "owner": 1,
+          "units": [
+            {
+              "type": "ogre",
+              "count": 4
+            },
+            {
+              "type": "ogre_mage",
+              "count": 2
+            },
+            {
+              "type": "war_serpent",
+              "count": 2
+            },
+            {
+              "type": "grunt",
+              "count": 6
+            },
+            {
+              "type": "catapult",
+              "count": 2
+            }
+          ],
+          "anchor": "bossStart",
+          "spread": 5,
+          "tag": "skarn_guard",
+          "order": {
+            "kind": "attackMove",
+            "anchor": "bastionHall"
+          }
+        },
+        {
+          "type": "spawnLanding",
+          "owner": 1,
+          "anchor": "assaultSea",
+          "unloadAt": {
+            "anchor": "assaultBeach"
+          },
+          "bargeTag": "assault_barge_1",
+          "tag": "assault_1",
+          "units": [
+            {
+              "type": "grunt",
+              "count": 4
+            },
+            {
+              "type": "axethrower",
+              "count": 2
+            }
+          ],
+          "escort": [
+            {
+              "type": "war_galley",
+              "count": 2
+            }
+          ],
+          "escortTag": "assault_1_escort",
+          "order": {
+            "kind": "attackMove",
+            "anchor": "bastionHall"
+          }
+        },
+        {
+          "type": "cutscene",
+          "id": "ato-3",
+          "duration": 32,
+          "skippable": true,
+          "steps": [
+            {
+              "at": 0,
+              "anchor": "bossStart",
+              "zoom": 1.05,
+              "dialog": {
+                "speaker": {
+                  "pt-BR": "Skarn, chefe-de-brasa",
+                  "en": "Skarn, Ember-Chief"
+                },
+                "portrait": "🪓",
+                "text": {
+                  "pt-BR": "Fecharam o meu mar? Então eu venho por terra, e as barcaças vêm pela praia. O Cinzal inteiro desce contigo, Brann.",
+                  "en": "You closed my sea? Then I come by land, and the barges come by the beach. The whole Cinzal descends with you, Brann."
+                },
+                "duration": 9
+              }
+            },
+            {
+              "at": 10,
+              "anchor": "assaultBeach",
+              "zoom": 1.15,
+              "dialog": {
+                "speaker": {
+                  "pt-BR": "Mestre Arcano Oren",
+                  "en": "Arcane Master Oren"
+                },
+                "portrait": "🔮",
+                "text": {
+                  "pt-BR": "Barcaças na praia do sul! É um assalto anfíbio: Fragatas à água, tropa à praia, e as torres cobrem a muralha.",
+                  "en": "Barges on the south beach! An amphibious assault: Frigates to the water, troops to the beach, and the towers cover the wall."
+                },
+                "duration": 9
+              }
+            },
+            {
+              "at": 20,
+              "anchor": "bastion",
+              "zoom": 1.1,
+              "dialog": {
+                "speaker": {
+                  "pt-BR": "Marechal Dorian Vasques",
+                  "en": "Marshal Dorian Vasques"
+                },
+                "portrait": "👑",
+                "text": {
+                  "pt-BR": "Ato III: ninguém passa. Ergam o estandarte e segurem o Marco. Derrubem Skarn e a guarda se parte.",
+                  "en": "Act III: none shall pass. Raise the banner and hold the Outpost. Bring Skarn down and his guard breaks."
+                },
+                "duration": 9
+              }
+            }
+          ]
+        },
+        {
+          "type": "message",
+          "text": {
+            "pt-BR": "Ato III: Skarn e a guarda avançam por terra; um assalto anfíbio desembarca na praia sul.",
+            "en": "Act III: Skarn and the guard advance by land; an amphibious assault lands on the south beach."
+          }
+        },
+        {
+          "type": "sound",
+          "id": "alarm"
+        }
+      ]
+    },
+    {
+      "id": "lyra-arrives",
+      "when": {
+        "type": "var",
+        "name": "act3_clock",
+        "op": ">=",
+        "value": 15
+      },
+      "actions": [
+        {
+          "type": "spawn",
+          "owner": "player",
+          "units": [
+            {
+              "type": "gryphon_rider",
+              "count": 2
+            }
+          ],
+          "anchor": "landingZone",
+          "spread": 3,
+          "tag": "lyra_wing"
+        },
+        {
+          "type": "dialog",
+          "speaker": {
+            "pt-BR": "Capitã Lyra Ventosa",
+            "en": "Captain Lyra Windwhisper"
+          },
+          "portrait": "🦅",
+          "text": {
+            "pt-BR": "Capitã Lyra Ventosa: dois grifos sobre o cabo! O céu é nosso, Marechal. Digam onde a brasa cai.",
+            "en": "Captain Lyra Windwhisper: two gryphons over the cape! The sky is ours, Marshal. Say where the ember falls."
+          },
+          "duration": 8
+        },
+        {
+          "type": "sound",
+          "id": "sword"
+        }
+      ]
+    },
+    {
+      "id": "act3-clock",
+      "when": {
+        "all": [
+          {
+            "type": "var",
+            "name": "act",
+            "op": "==",
+            "value": 3
+          },
+          {
+            "type": "every",
+            "seconds": 1
+          }
+        ]
+      },
+      "once": false,
+      "actions": [
+        {
+          "type": "incVar",
+          "name": "act3_clock"
+        }
+      ]
+    },
+    {
+      "id": "assault-2",
+      "when": {
+        "type": "var",
+        "name": "act3_clock",
+        "op": ">=",
+        "value": 60
+      },
+      "actions": [
+        {
+          "type": "spawnLanding",
+          "owner": 1,
+          "anchor": "assaultSea",
+          "unloadAt": {
+            "anchor": "assaultBeach"
+          },
+          "bargeTag": "assault_barge_2",
+          "tag": "assault_2",
+          "units": [
+            {
+              "type": "grunt",
+              "count": 4
+            },
+            {
+              "type": "axethrower",
+              "count": 1
+            },
+            {
+              "type": "ogre",
+              "count": 1
+            }
+          ],
+          "escort": [
+            {
+              "type": "war_galley",
+              "count": 2
+            }
+          ],
+          "escortTag": "assault_2_escort",
+          "order": {
+            "kind": "attackMove",
+            "anchor": "bastionHall"
+          }
+        },
+        {
+          "type": "message",
+          "text": {
+            "pt-BR": "Segunda barcaça orca na praia do sul, com 2 galés de escolta.",
+            "en": "Second orc barge on the south beach, with 2 galleys as escort."
+          }
+        },
+        {
+          "type": "sound",
+          "id": "alarm"
+        }
+      ]
+    },
+    {
+      "id": "assault-3",
+      "when": {
+        "type": "var",
+        "name": "act3_clock",
+        "op": ">=",
+        "value": 120
+      },
+      "actions": [
+        {
+          "type": "spawnLanding",
+          "owner": 1,
+          "anchor": "assaultSea",
+          "unloadAt": {
+            "anchor": "assaultBeach"
+          },
+          "bargeTag": "assault_barge_3",
+          "tag": "assault_3",
+          "units": [
+            {
+              "type": "grunt",
+              "count": 3
+            },
+            {
+              "type": "berserker",
+              "count": 2
+            },
+            {
+              "type": "ogre",
+              "count": 1
+            }
+          ],
+          "escort": [
+            {
+              "type": "war_galley",
+              "count": 1
+            }
+          ],
+          "escortTag": "assault_3_escort",
+          "order": {
+            "kind": "attackMove",
+            "anchor": "bastionHall"
+          }
+        },
+        {
+          "type": "message",
+          "text": {
+            "pt-BR": "Terceira barcaça: berserkers e um ogro desembarcam ao sul.",
+            "en": "Third barge: berserkers and an ogre land to the south."
+          }
+        }
+      ]
+    },
+    {
+      "id": "skarn-wounded",
+      "when": {
+        "type": "dead",
+        "select": {
+          "tag": "skarn_guard"
+        },
+        "count": 8
+      },
+      "actions": [
+        {
+          "type": "dialog",
+          "speaker": {
+            "pt-BR": "Capitão Brann",
+            "en": "Captain Brann"
+          },
+          "portrait": "⚔️",
+          "text": {
+            "pt-BR": "A guarda está se partindo! Skarn está cada vez mais sozinho. Em cima dele!",
+            "en": "The guard is breaking! Skarn grows lonelier. On him!"
+          },
+          "duration": 7
+        }
+      ]
+    },
+    {
+      "id": "skarn-down",
+      "when": {
+        "type": "objective",
+        "id": "p-skarn",
+        "status": "completed"
+      },
+      "actions": [
+        {
+          "type": "sound",
+          "id": "victory"
+        },
+        {
+          "type": "dialog",
+          "speaker": {
+            "pt-BR": "Skarn, chefe-de-brasa",
+            "en": "Skarn, Ember-Chief"
+          },
+          "portrait": "🪓",
+          "text": {
+            "pt-BR": "O martelo... pesa. O Cinzal... nunca foi só meu. Contem ao Mar Fendido que ele me viu cair.",
+            "en": "The hammer... is heavy. The Cinzal... was never mine alone. Tell the Sundered Sea it saw me fall."
+          },
+          "duration": 8
+        }
+      ]
+    },
+    {
+      "id": "captives-free",
+      "when": {
+        "type": "area",
+        "owner": "player",
+        "area": {
+          "anchor": "isletCaptive",
+          "r": 16
+        }
+      },
+      "actions": [
+        {
+          "type": "transfer",
+          "select": {
+            "tag": "captives"
+          },
+          "to": "player"
+        },
+        {
+          "type": "sound",
+          "id": "build"
+        },
+        {
+          "type": "dialog",
+          "speaker": {
+            "pt-BR": "Mestre Arcano Oren",
+            "en": "Arcane Master Oren"
+          },
+          "portrait": "🔮",
+          "text": {
+            "pt-BR": "Quatro náufragos de Brumar a bordo, magros e vivos. Dizem que viram as galés do Cinzal passar sem parar.",
+            "en": "Four castaways from Brumar aboard, thin but alive. They say they watched the Cinzal galleys pass without stopping."
+          },
+          "duration": 8
+        }
+      ]
+    },
+    {
+      "id": "relic-found",
+      "when": {
+        "type": "objective",
+        "id": "h-relic",
+        "status": "completed"
+      },
+      "actions": [
+        {
+          "type": "giveResources",
+          "owner": "player",
+          "gold": 400,
+          "oil": 150
+        },
+        {
+          "type": "lightLandmark",
+          "tag": "ruins"
+        },
+        {
+          "type": "sound",
+          "id": "build"
+        },
+        {
+          "type": "message",
+          "text": {
+            "pt-BR": "Farol Velho do Cabo: nas ruínas, um cofre de mapas e 400 de ouro, mais 150 de petróleo.",
+            "en": "Old Lighthouse of the Cape: in the ruins, a chest of charts and 400 gold, plus 150 oil."
+          }
+        }
+      ]
+    },
+    {
+      "id": "all-done",
+      "when": {
+        "all": [
+          {
+            "type": "objective",
+            "id": "p-hall",
+            "status": "completed"
+          },
+          {
+            "type": "objective",
+            "id": "p-towers",
+            "status": "completed"
+          },
+          {
+            "type": "objective",
+            "id": "p-walls",
+            "status": "completed"
+          },
+          {
+            "type": "objective",
+            "id": "p-ballistas",
+            "status": "completed"
+          },
+          {
+            "type": "objective",
+            "id": "p-docks",
+            "status": "completed"
+          },
+          {
+            "type": "objective",
+            "id": "p-strait",
+            "status": "completed"
+          },
+          {
+            "type": "objective",
+            "id": "p-skarn",
+            "status": "completed"
+          }
+        ]
+      },
+      "actions": [
+        {
+          "type": "sound",
+          "id": "victory"
+        },
+        {
+          "type": "reveal",
+          "anchor": "strait",
+          "radius": 40,
+          "ttl": 70
+        },
+        {
+          "type": "cutscene",
+          "id": "finale",
+          "duration": 66,
+          "skippable": true,
+          "steps": [
+            {
+              "at": 0,
+              "anchor": "bastionHall",
+              "zoom": 1.1,
+              "dialog": {
+                "speaker": {
+                  "pt-BR": "Capitão Brann",
+                  "en": "Captain Brann"
+                },
+                "portrait": "⚔️",
+                "text": {
+                  "pt-BR": "Skarn caiu, e o Bastião está de pé. O Cabo Ferrugem é da Liga.",
+                  "en": "Skarn has fallen, and the Bastion stands. Cape Rust belongs to the League."
+                },
+                "duration": 8
+              }
+            },
+            {
+              "at": 9,
+              "anchor": "passA",
+              "zoom": 1.1,
+              "dialog": {
+                "speaker": {
+                  "pt-BR": "Marechal Dorian Vasques",
+                  "en": "Marshal Dorian Vasques"
+                },
+                "portrait": "👑",
+                "text": {
+                  "pt-BR": "A crista guardou a muralha, e a muralha guardou o cabo. Que cada torre fique de olho no horizonte.",
+                  "en": "The ridge guarded the wall, and the wall guarded the cape. Let every tower keep watch on the horizon."
+                },
+                "duration": 8
+              }
+            },
+            {
+              "at": 18,
+              "anchor": "strait",
+              "zoom": 1.2,
+              "dialog": {
+                "speaker": {
+                  "pt-BR": "Crônica da Liga",
+                  "en": "League Chronicle"
+                },
+                "portrait": "📜",
+                "text": {
+                  "pt-BR": "Quando a última torre do Bastião do Cabo Ferrugem foi coroada, o Mar Fendido ficou, pela primeira vez, do lado de Aurelan. As rotas dos clãs para os Estilhaços calaram-se, e os estaleiros dos Clãs do Cinzal arderam em silêncio.",
+                  "en": "When the last tower of the Cape Rust Bastion was crowned, the Sundered Sea lay, for the first time, on Aurelan's side. The clans' routes to the Shards fell silent, and the Cinzal Clans' shipyards burned without a sound."
+                },
+                "duration": 14
+              }
+            },
+            {
+              "at": 33,
+              "anchor": "dock2",
+              "zoom": 1.1,
+              "dialog": {
+                "speaker": {
+                  "pt-BR": "Crônica da Liga",
+                  "en": "League Chronicle"
+                },
+                "portrait": "📜",
+                "text": {
+                  "pt-BR": "A Rainha Sevelin recebeu a notícia na Baía de Aurelan e não sorriu. O Mestre Oren redesenhou o mapa com os cadernos de Orsolo: onde havia vazio, agora havia uma fortaleza em terra alheia.",
+                  "en": "Queen Sevelin heard the news at Aurelan Bay and did not smile. Master Oren redrew the map from Orsolo's notebooks: where there had been emptiness, there now stood a fortress on foreign soil."
+                },
+                "duration": 14
+              }
+            },
+            {
+              "at": 48,
+              "anchor": "bastion",
+              "zoom": 1.1,
+              "dialog": {
+                "speaker": {
+                  "pt-BR": "Crônica da Liga",
+                  "en": "League Chronicle"
+                },
+                "portrait": "📜",
+                "text": {
+                  "pt-BR": "O Marechal Dorian e a Capitã Lyra juraram guardar a ponta do mundo. Brann e Oren ensinaram aos recrutas o nome de cada ilha que custou sangue.",
+                  "en": "Marshal Dorian and Captain Lyra swore to guard the tip of the world. Brann and Oren taught the recruits the name of every island that cost blood."
+                },
+                "duration": 14
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "finale-clock",
+      "when": {
+        "type": "trigger",
+        "id": "all-done"
+      },
+      "actions": [
+        {
+          "type": "incVar",
+          "name": "fin_clock"
+        }
+      ]
+    },
+    {
+      "id": "finale-victory",
+      "when": {
+        "type": "var",
+        "name": "fin_clock",
+        "op": ">=",
+        "value": 1
+      },
+      "actions": [
+        {
+          "type": "victory"
+        }
+      ]
+    },
+    {
+      "id": "palace-fallen",
+      "when": {
+        "type": "count",
+        "select": {
+          "buildingType": "castle",
+          "owner": "player"
+        },
+        "op": "==",
+        "value": 0
+      },
+      "actions": [
+        {
+          "type": "defeat"
+        }
+      ]
+    },
+    {
+      "id": "bastion-fallen",
+      "when": {
+        "type": "dead",
+        "select": {
+          "tag": "bastion_hall"
+        },
+        "count": 1
+      },
+      "actions": [
+        {
+          "type": "dialog",
+          "speaker": {
+            "pt-BR": "Marechal Dorian Vasques",
+            "en": "Marshal Dorian Vasques"
+          },
+          "portrait": "👑",
+          "text": {
+            "pt-BR": "O Marco do Bastião caiu. O cabo está perdido.",
+            "en": "The Bastion Outpost has fallen. The cape is lost."
+          },
+          "duration": 6
+        },
+        {
+          "type": "defeat"
+        }
+      ]
+    },
+    {
+      "id": "brann-fallen",
+      "when": {
+        "type": "dead",
+        "select": {
+          "tag": "brann"
+        },
+        "count": 1
+      },
+      "actions": [
+        {
+          "type": "defeat"
+        }
+      ]
     }
   ]
 }

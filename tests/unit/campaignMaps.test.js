@@ -29,9 +29,9 @@ const MIN_ANCHORS = {
   'camp-05-cerne-verde': ['playerStart', 'enemyStart', 'goldMine1', 'sacredGrove', 'gryphonNest', 'clearing1', 'clearing2', 'clearing3', 'lumberHall1', 'lumberHall2', 'orenStart', 'ford1', 'landingZone'],
   'camp-06-a-geada': ['playerStart', 'enemyStart', 'enemy1Start', 'enemy2Start', 'allyStart', 'lighthouse', 'lightSea', 'lightSouth', 'lightTower1', 'lightTower2', 'lightGold1', 'lightGold2', 'enemy1Fort', 'fortTower1', 'fortTower2', 'fortTower3', 'fortTower4', 'allyFort', 'allyTower1', 'allyTower2', 'allyHeroStart', 'convoyStart', 'convoyAmbush', 'convoyEnd', 'expansion1', 'expansion2', 'expansion3', 'expansion4', 'ruins1', 'captive1', 'iceDock', 'iceDockSea', 'lake1', 'lake2', 'lake3'],
   'camp-11-estepe-do-vento': ['playerStart', 'enemyStart', 'colonyMark', 'skarnStart', 'hurganStart', 'landingZone', 'reinforceSea', 'convoyStart', 'convoyEnd', 'raid1', 'raid2', 'raid3', 'dissidentClan', 'expansion1', 'expansion2', 'expansion3'],
-  'camp-12-cabo-ferrugem': ['playerStart', 'enemyStart', 'bastion', 'strait', 'dock1', 'dock2', 'dock3', 'fleetStart', 'fleetStart2', 'bossStart', 'waveStart1', 'waveStart2', 'expansion1', 'expansion2']
+  'camp-12-cabo-ferrugem': ['playerStart', 'enemyStart', 'bastion', 'bastionHall', 'strait', 'dock1', 'dock2', 'dock3', 'dockGuard1', 'dockGuard2', 'dockGuard3', 'fleetStart', 'fleetStart2', 'orcFleetStart', 'orcFleetStart2', 'assaultSea', 'assaultBeach', 'landingZone', 'reinforceSea', 'bossStart', 'waveStart1', 'waveStart2', 'raid3', 'passA', 'passB', 'wallA1', 'wallA4', 'wallB1', 'wallB4', 'towerA1', 'towerA2', 'towerB1', 'towerB2', 'ballistaA', 'ballistaB', 'well5', 'well6', 'isletCaptive', 'isletRuin', 'expansion1', 'expansion2']
 };
-const WATER = new Set(['shipHorizon', 'orcSails', 'pier1Water', 'pier2Water', 'seaLanding1', 'seaLanding2', 'seaLanding3', 'bridgeheadSea', 'well1', 'well2', 'well3', 'well4', 'shipyard1Water', 'shipyard2Water', 'wreck1', 'wreck2', 'wreck3', 'fleetStart1', 'fleetStart2', 'fleetMid', 'unloadSea', 'bargeStart1', 'bargeStart2', 'reinforceSea', 'strait', 'fleetStart', 'lightSea', 'iceDockSea', 'well5', 'well6', 'siegeFleetStart', 'siegeFleetStart2']); // M3-12: a Estepe do Vento tem 6 poços e a frota de cerco no mar
+const WATER = new Set(['shipHorizon', 'orcSails', 'pier1Water', 'pier2Water', 'seaLanding1', 'seaLanding2', 'seaLanding3', 'bridgeheadSea', 'well1', 'well2', 'well3', 'well4', 'shipyard1Water', 'shipyard2Water', 'wreck1', 'wreck2', 'wreck3', 'fleetStart1', 'fleetStart2', 'fleetMid', 'unloadSea', 'bargeStart1', 'bargeStart2', 'reinforceSea', 'strait', 'fleetStart', 'lightSea', 'iceDockSea', 'well5', 'well6', 'siegeFleetStart', 'siegeFleetStart2', 'orcFleetStart', 'orcFleetStart2', 'assaultSea']); // M3-13: frotas orcs e praia do assalto no mar; M3-12: a Estepe do Vento tem 6 poços e a frota de cerco no mar
 const isLake = (name) => /^lake\d$/.test(name); // lago congelado (A Geada): água rasa interior, fora do oceano navegável
 const hyp = (a, b) => Math.hypot(a.x - b.x, a.z - b.z);
 
@@ -67,7 +67,7 @@ describe('M2-03 · registro e formato', () => {
       expect(decodeBiomeGrid(m.biomeGrid).length).toBe(m.biomeGrid.nodes ** 2);
       expect(TILESETS[m.tileset], m.tileset).toBeDefined();
       expect(m.size).toBeGreaterThanOrEqual(96);
-      expect(m.size).toBeLessThanOrEqual(id === 'camp-11-estepe-do-vento' ? 384 : 320); // M3-06b: camp-05 tem 320; M3-12: a Estepe do Vento tem 352
+      expect(m.size).toBeLessThanOrEqual(['camp-11-estepe-do-vento', 'camp-12-cabo-ferrugem'].includes(id) ? 384 : 320); // M3-06b: camp-05 tem 320; M3-12: a Estepe do Vento tem 352; M3-13: o Cabo Ferrugem tem 384
       expect(m.startSlots).toHaveLength(SLOTS[id] ?? 2);
       expect(m.maxPlayers).toBe(SLOTS[id] ?? 2);
     });
@@ -118,6 +118,8 @@ describe('M2-03 · âncoras da ficha de cada missão', () => {
           expect(WATER.has(name), `${id}.${name} é água inesperada`).toBe(true);
           expect(getHeightForMap(m, a.x, a.z), name).toBeLessThan(m.waterLevel);
           expect(isReached(sea, ocean, a.x, a.z), `${id}.${name} no oceano navegável`).toBe(true);
+        } else if (id === 'camp-12-cabo-ferrugem' && /^islet/.test(name)) {
+          expect(getHeightForMap(m, a.x, a.z), `${name}: ilhota seca`).toBeGreaterThan(m.waterLevel); // M3-13: ilhotas só se alcançam de barco
         } else {
           expect(isReached(land, seenLand, a.x, a.z), `${id}.${name} por terra`).toBe(true);
         }
@@ -382,17 +384,19 @@ describe('M2-06 · Estepe do Vento (colônia sob cerco)', () => {
   });
 });
 
-describe('M2-06 · Cabo Ferrugem (promontório, estreito e docas)', () => {
+describe('M3-13 · Cabo Ferrugem (384, naval: crista de falésia, estreito, docas e praias)', () => {
   const id = 'camp-12-cabo-ferrugem';
-  it('Bastião no sítio do slot 0 perto do estreito, que é água do oceano estreita entre o promontório e uma ilha', () => {
+  it('mapa de 384 (o máximo), naval, bases a >= 150 u, Bastião no sítio do slot 0 perto do estreito, que é água do oceano entre o cabo e uma ilha', () => {
     const m = getMap(id);
     const a = m.anchors;
+    expect(m.size).toBe(384);
+    expect(hyp(m.startSlots[0], m.startSlots[1])).toBeGreaterThanOrEqual(150);
     expect(a.bastion).toEqual({ x: m.startSlots[0].x, z: m.startSlots[0].z });
     expect(hyp(a.bastion, a.strait)).toBeLessThanOrEqual(60);
     const sea = buildPathfinder(m, 'naval');
     const ocean = oceanSeen(m, sea);
     expect(isReached(sea, ocean, a.strait.x, a.strait.z)).toBe(true);
-    // há terra de ambos os lados do estreito em até 22 u (largura do canal <= ~26 u), e terra alcançável (continente) e isolada (ilha)
+    // há terra de ambos os lados do estreito em até 22 u, e terra alcançável (continente) e isolada (ilha)
     const land = buildPathfinder(m, 'land');
     const seen = floodFill(land, m.startSlots[0].x, m.startSlots[0].z);
     let cont = false, isle = false;
@@ -407,19 +411,64 @@ describe('M2-06 · Cabo Ferrugem (promontório, estreito e docas)', () => {
     expect(cont, 'continente junto ao estreito').toBe(true);
     expect(isle, 'ilha junto ao estreito').toBe(true);
   });
-  it('3 docas orcs no litoral do continente, com água navegável diante; frota e chefe/ondas nos lugares certos', () => {
+
+  it('crista de falésia (cliffHeight) entre as bases com 2 desfiladeiros: sem muralha as bases se alcançam; com as 8 muralhas (4 + 4) não; cada linha sozinha não sela', () => {
+    const m = getMap(id);
+    const a = m.anchors;
+    expect(m.cliffHeight).toBeGreaterThan(0);
+    expect(m.meta.ridge.gaps).toHaveLength(2);
+    const land = buildPathfinder(m, 'land');
+    const [s0, s1] = m.startSlots;
+    const reach = () => {
+      const seen = new Uint8Array(land.numCells);
+      const q = [];
+      const g = land.toGrid(s0.x, s0.z);
+      const goal = land.toGrid(s1.x, s1.z);
+      q.push(g.r * land.cols + g.c); seen[q[0]] = 1;
+      for (let h = 0; h < q.length; h++) {
+        const k = q[h], c = k % land.cols, r = (k - c) / land.cols;
+        if (r === goal.r && c === goal.c) return true;
+        for (const [dc, dr] of [[1, 0], [-1, 0], [0, 1], [0, -1]]) {
+          if (!land.isWalkable(c + dc, r + dr)) continue;
+          const kk = (r + dr) * land.cols + (c + dc);
+          if (!seen[kk]) { seen[kk] = 1; q.push(kk); }
+        }
+      }
+      return false;
+    };
+    const walls = (L) => [1, 2, 3, 4].map((k) => a[`wall${L}${k}`]);
+    const put = (ws, d) => { for (const w of ws) land.blockCircle(w.x, w.z, 1.5, d); };
+    expect(reach(), 'sem muralhas').toBe(true);
+    put(walls('A'), 1);
+    expect(reach(), 'só a linha A').toBe(true);
+    put(walls('B'), 1);
+    expect(reach(), 'as duas linhas').toBe(false);
+    put(walls('A'), -1);
+    expect(reach(), 'só a linha B').toBe(true);
+    put(walls('B'), -1);
+  });
+
+  it('3 docas orcs no litoral dos Clãs (norte da crista), com água navegável diante e guarda; praias de desembarque e do assalto perto do Bastião; frotas no oceano', () => {
     const m = getMap(id);
     const a = m.anchors;
     const sea = buildPathfinder(m, 'naval');
     const ocean = oceanSeen(m, sea);
     const docks = [1, 2, 3].map((i) => a[`dock${i}`]);
     for (let i = 0; i < 3; i++) {
-      expect(hyp(docks[i], a.strait), `doca ${i + 1} perto do estreito`).toBeLessThanOrEqual(66);
-      expect(hyp(docks[i], a.bastion)).toBeGreaterThanOrEqual(24);
-      for (let j = i + 1; j < 3; j++) expect(hyp(docks[i], docks[j])).toBeGreaterThanOrEqual(20);
+      expect(hyp(docks[i], a.bastion), `doca ${i + 1} longe do Bastião`).toBeGreaterThanOrEqual(60);
+      expect(hyp(docks[i], m.startSlots[1]), `doca ${i + 1} fora da base de Skarn`).toBeGreaterThanOrEqual(40);
+      expect(hyp(a[`dockGuard${i + 1}`], docks[i])).toBeLessThanOrEqual(20);
+      for (let j = i + 1; j < 3; j++) expect(hyp(docks[i], docks[j])).toBeGreaterThanOrEqual(24);
+      let wet = false;
+      for (let k = 0; k < 16 && !wet; k++) wet = getHeightForMap(m, docks[i].x + Math.cos(k / 16 * Math.PI * 2) * 8, docks[i].z + Math.sin(k / 16 * Math.PI * 2) * 8) < m.waterLevel;
+      expect(wet, `doca ${i + 1} com água ao lado`).toBe(true);
     }
-    for (const k of ['fleetStart', 'fleetStart2']) expect(isReached(sea, ocean, a[k].x, a[k].z), k).toBe(true);
+    for (const k of ['fleetStart', 'fleetStart2', 'orcFleetStart', 'orcFleetStart2', 'assaultSea', 'reinforceSea', 'well5', 'well6']) expect(isReached(sea, ocean, a[k].x, a[k].z), k).toBe(true);
+    expect(hyp(a.landingZone, a.bastion)).toBeLessThanOrEqual(46);
+    expect(hyp(a.assaultBeach, a.landingZone)).toBeGreaterThanOrEqual(26);
     expect(hyp(a.bossStart, m.startSlots[1])).toBeLessThan(hyp(a.bossStart, m.startSlots[0]));
-    for (const k of ['waveStart1', 'waveStart2']) expect(hyp(a[k], m.startSlots[0])).toBeGreaterThan(40);
+    expect(hyp(a.bastionHall, a.bastion)).toBeGreaterThanOrEqual(20);
+    expect(hyp(a.orcFleetStart, a.strait)).toBeGreaterThanOrEqual(100);
+    for (const k of ['waveStart1', 'waveStart2', 'raid3']) expect(hyp(a[k], m.startSlots[0]), k).toBeGreaterThan(40);
   });
 });

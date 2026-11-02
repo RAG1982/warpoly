@@ -5,6 +5,7 @@ import './mission.css';
 import { t, getLanguage, onLanguageChange } from '../../i18n/index.js';
 import { listMissions } from '../../data/missions/index.js';
 import { localize } from '../../sim/missions/text.js';
+import { portraitInnerHtml } from '../npcPortraits.js';
 
 const esc = (s) => String(s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]);
 
@@ -74,7 +75,7 @@ export class MissionBriefing {
       const hints = (m.briefing.hints || []).map((h) => `<li>${esc(localize(h, lang))}</li>`).join('');
       main = `<h3>${esc(localize(m.title, lang))}</h3>`
         + (m.subtitle ? `<p class="ms-brief-sub">${esc(localize(m.subtitle, lang))}</p>` : '')
-        + `<div class="ms-brief-talk"><div class="ms-portrait" aria-hidden="true">${esc(m.briefing.portrait || '📜')}</div><div class="ms-say">`
+        + `<div class="ms-brief-talk"><div class="ms-portrait" aria-hidden="true">${portraitInnerHtml(m.briefing, '📜')}</div><div class="ms-say">`
         + (m.briefing.speaker ? `<span class="ms-speaker">${esc(localize(m.briefing.speaker, lang))}</span>` : '')
         + `<p>${esc(localize(m.briefing.text, lang))}</p></div></div>`
         + `<div><h4 class="ms-h">${esc(t('mission.primary'))}</h4><ul class="ms-brief-hints">${prim}</ul>`

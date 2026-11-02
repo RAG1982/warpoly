@@ -9,6 +9,7 @@
 import './screens/mission.css';
 import { EVT } from '../sim/events.js';
 import { localize } from '../sim/missions/text.js';
+import { portraitInnerHtml } from './npcPortraits.js';
 import { t, getLanguage, onLanguageChange } from '../i18n/index.js';
 import { unlockAnnouncement } from './techText.js';
 import { getCampaignEndPlan, getProgress } from '../campaign/index.js';
@@ -129,7 +130,7 @@ export class MissionController {
     if (!d) { this.dialogBox.hidden = true; return; }
     const lang = this.lang();
     this.dialogBox.hidden = false;
-    this.dialogBox.innerHTML = `<div class="ms-portrait" aria-hidden="true">${esc(d.portrait || '💬')}</div>`
+    this.dialogBox.innerHTML = `<div class="ms-portrait" aria-hidden="true">${portraitInnerHtml(d, '💬')}</div>`
       + `<div class="ms-say">${d.speaker ? `<span class="ms-speaker">${esc(localize(d.speaker, lang))}</span>` : ''}<p>${esc(localize(d.text, lang))}</p></div>`
       + `<span class="ms-next">${esc(t('mission.dialogNext'))}</span>`;
   }

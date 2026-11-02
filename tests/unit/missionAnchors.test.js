@@ -18,7 +18,7 @@ import { baseMission, makeMissionGm, runTicks, statusOf, teleport } from './help
 const clone = (o) => JSON.parse(JSON.stringify(o));
 const MUNDO7 = ['duelo-continental-1', 'duelo-continental-2', 'duelo-continental-3', 'ilha-unica-1', 'ilha-unica-2', 'ilha-unica-3',
   'estreito-naval-1v1', 'arquipelago-pontes-4p', 'vale-rio-1v1', 'desfiladeiro-lava-1v1', 'planalto-rocha-4p', 'bosques-antigos-2v2']; // SKIRMISH-MAPS: os 6 novos também saem do assador de costas (com âncoras)
-const CAMPANHA = ['camp-01-baia-de-aurelan', 'camp-02-pouso-do-encontro', 'camp-03-pedra-mae', 'camp-04-baixio-do-breu', 'camp-05-cerne-verde', 'camp-06-a-geada', 'camp-07-brejo-mudo', 'camp-08-fornalha', 'camp-09-miragem', 'camp-10-costa-ferrugem', 'camp-11-estepe-do-vento', 'camp-12-cabo-ferrugem']; // M2-03/04/05/06: mapas de campanha (com âncoras)
+const CAMPANHA = ['camp-01-baia-de-aurelan', 'camp-02-pouso-do-encontro', 'camp-03-pedra-mae', 'camp-04-baixio-do-breu', 'camp-05-cerne-verde', 'camp-06-a-geada', 'camp-07-brejo-mudo', 'camp-08-fornalha', 'camp-09-miragem', 'camp-10-costa-ferrugem', 'camp-11-estepe-do-vento', 'camp-12-cabo-ferrugem', 'camp-01-praia-das-cinzas', 'camp-10-cabo-aurora', 'camp-11-savana-de-ambar', 'camp-12-cabo-aurora-leste']; // M2-07: mapas da Horda; M2-03/04/05/06: mapas de campanha (com âncoras)
 beforeAll(async () => { await loadAllCampaignMaps(); }); // M2-28: mapas de campanha sob demanda
 const PRIMARY = { id: 'o', type: 'survive', priority: 'primary', seconds: 99999, title: 't' };
 const withSetup = (setup, over = {}) => baseMission({ autoVictory: false, objectives: [PRIMARY], setup, ...over });

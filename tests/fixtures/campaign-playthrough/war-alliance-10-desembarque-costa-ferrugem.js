@@ -144,7 +144,7 @@ function econ(c, { army = true, navy = true } = {}) {
   const yard = c.bld('shipyard');
   if (navy && yard) {
     const tankers = c.mine('tanker');
-    if (tankers.length + yard.queue.length < 1 && affordable(c, { gold: 100, wood: 60 }) && yard.queue.length < 2) c.issue({ type: c.CMD.TRAIN, buildingId: yard.id, unitType: 'tanker' });
+    if (tankers.length + yard.queue.length < 2 && affordable(c, { gold: 100, wood: 60 }) && yard.queue.length < 2) c.issue({ type: c.CMD.TRAIN, buildingId: yard.id, unitType: 'tanker' });
     tankers.forEach((t) => {
       const d = wellAt(c, 'wellMid1');
       if (!d || t.state !== 'idle') return;
@@ -153,7 +153,7 @@ function econ(c, { army = true, navy = true } = {}) {
     });
     // Fragatas: a esquadra que limpa o mar (a patrulha e a frota de reforço)
     const frig = c.mine('frigate');
-    if (frig.length + yard.queue.length < FRIGATES_TARGET && res(c).oil >= 50 && affordable(c, { gold: 200, wood: 100 }) && yard.queue.length < 2) c.issue({ type: c.CMD.TRAIN, buildingId: yard.id, unitType: 'frigate' });
+    if (frig.length + yard.queue.length < FRIGATES_TARGET && res(c).oil >= 100 && affordable(c, { gold: 200, wood: 100 }) && yard.queue.length < 2) c.issue({ type: c.CMD.TRAIN, buildingId: yard.id, unitType: 'frigate' });
   }
   const q = QUEUE.find((x) => !x.done(c));
   if (q && !unfinished && affordable(c, OBRAS[q.cost]) && c.seconds - (b.last[q.id] ?? -99) > 12) { if (q.go(c)) b.last[q.id] = c.seconds; }

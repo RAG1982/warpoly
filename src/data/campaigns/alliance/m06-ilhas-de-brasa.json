@@ -81,13 +81,13 @@
       ] },
     { "id": "shipyard-up", "when": { "type": "objective", "id": "build-shipyard", "status": "completed" },
       "actions": [
-        { "type": "giveResources", "owner": "player", "gold": 150, "wood": 100, "oil": 150 },
+        { "type": "giveResources", "owner": "player", "gold": 150, "wood": 100, "oil": 300 },
         { "type": "dialog", "speaker": { "pt-BR": "Capitã Lyra", "en": "Captain Lyra" }, "portrait": "⚓", "text": { "pt-BR": "Estaleiro de pé! Brumar enviou ouro, madeira e 150 de petróleo. Treine um Petroleiro para erguer a Plataforma e Fragatas para a frota.", "en": "Shipyard up! Brumar sent gold, wood and 150 oil. Train a Tanker to raise the Platform and Frigates for the fleet." } }
       ] },
     { "id": "platform-up", "when": { "type": "objective", "id": "oil-platform", "status": "completed" },
       "actions": [
         { "type": "spawn", "owner": "player", "units": [{ "type": "dreadnought", "count": 1 }, { "type": "frigate", "count": 1 }], "x": -36, "z": -54 },
-        { "type": "giveResources", "owner": "player", "oil": 100 },
+        { "type": "giveResources", "owner": "player", "oil": 200 },
         { "type": "dialog", "speaker": { "pt-BR": "Capitã Lyra", "en": "Captain Lyra" }, "portrait": "⚓", "text": { "pt-BR": "O petróleo jorra! A frota real envia um Couraçado e uma Fragata. Dica: o Couraçado bombardeia de longe (não acerta o que está colado a ele); a Fragata é rápida e ataca navios, aéreos e a costa.", "en": "The oil flows! The royal fleet sends a Dreadnought and a Frigate. Tip: the Dreadnought shells from afar (it cannot hit what is right next to it); the Frigate is fast and hits ships, aircraft and shore." } }
       ] },
     { "id": "fleet-sunk", "when": { "type": "objective", "id": "sink-fleet", "status": "completed" },
@@ -109,7 +109,7 @@
       ] },
     { "id": "leviathan-sunk", "when": { "type": "objective", "id": "sink-leviathan", "status": "completed" },
       "actions": [
-        { "type": "giveResources", "owner": "player", "gold": 200, "oil": 100 },
+        { "type": "giveResources", "owner": "player", "gold": 200, "oil": 200 },
         { "type": "message", "text": { "pt-BR": "O Leviatã afundou! +200 de ouro e +100 de petróleo.", "en": "The Leviathan is down! +200 gold and +100 oil." } }
       ] },
     { "id": "ally-help", "when": { "type": "dead", "select": { "tag": "hall-sal" } },

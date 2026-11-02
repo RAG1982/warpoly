@@ -127,7 +127,7 @@ function econ(c, { army = true, navy = true } = {}) {
   const yard = c.bld('shipyard');
   if (navy && yard) {
     const tankers = c.mine('tanker');
-    if (tankers.length + yard.queue.length < 1 && affordable(c, { gold: 100, wood: 60 }) && yard.queue.length < 2) c.issue({ type: c.CMD.TRAIN, buildingId: yard.id, unitType: 'tanker' });
+    if (tankers.length + yard.queue.length < 2 && affordable(c, { gold: 100, wood: 60 }) && yard.queue.length < 2) c.issue({ type: c.CMD.TRAIN, buildingId: yard.id, unitType: 'tanker' });
     tankers.forEach((t) => {
       const d = wellAt(c, 'well1');
       if (!d || t.state !== 'idle') return;
@@ -136,7 +136,7 @@ function econ(c, { army = true, navy = true } = {}) {
     });
     // Fragatas: 4 na esquadra (a Forja pede 3); antes de qualquer tropa extra, porque sem frota a missão não anda
     const frig = c.mine('frigate');
-    if (frig.length + yard.queue.length < 4 && res(c).oil >= 50 && affordable(c, { gold: 200, wood: 100 }) && yard.queue.length < 2) c.issue({ type: c.CMD.TRAIN, buildingId: yard.id, unitType: 'frigate' });
+    if (frig.length + yard.queue.length < 4 && res(c).oil >= 100 && affordable(c, { gold: 200, wood: 100 }) && yard.queue.length < 2) c.issue({ type: c.CMD.TRAIN, buildingId: yard.id, unitType: 'frigate' });
   }
   if (!army) return;
   const rt = c.gm.mission;

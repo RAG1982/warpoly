@@ -2,7 +2,7 @@ import { MINE_SLOTS } from '../data/index.js';
 import { Body } from './Body.js';
 
 /** Quantidade padrão de cada tipo de jazida (petróleo: poço no mar, F4-07a). */
-const DEFAULT_AMOUNT = { gold: 2500, stone: 2500, oil: 5000 };
+const DEFAULT_AMOUNT = { gold: 2500, stone: 2500, oil: 10000 };
 
 export class ResourceDeposit {
   /** @param {number} [amount]  quantidade inicial (padrão por tipo; `mapDef.resources[].amount`) */

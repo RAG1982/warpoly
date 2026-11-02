@@ -79,12 +79,12 @@ describe('poços de petróleo no mapa (F4-07a)', () => {
     expect(() => validateOilWells({ ...base, resources: [{ type: 'oil', x: 0, z: -26, amount: 0 }] })).toThrow(/amount/);
   });
 
-  it('o poço vira ResourceDeposit oil (5000), em água, sem bloquear a grade terrestre; bloqueia a naval', () => {
+  it('o poço vira ResourceDeposit oil (10000), em água, sem bloquear a grade terrestre; bloqueia a naval', () => {
     const gm = makeNavalGm();
     const wells = gm.resourceDeposits.filter((d) => d.type === 'oil');
     expect(wells.length).toBe(2);
     for (const w of wells) {
-      expect(w.resourcesRemaining).toBe(5000);
+      expect(w.resourcesRemaining).toBe(10000);
       expect(w.platform).toBeNull();
       expect(gm.terrain.getHeight(w.mesh.position.x, w.mesh.position.z)).toBeLessThan(0.5);
       expect(gm.navalPathfinder.isWalkableWorld(w.mesh.position.x, w.mesh.position.z)).toBe(false); // bloqueio naval
@@ -166,7 +166,7 @@ describe('plataforma e petroleiro (F4-07a)', () => {
     expect(got.length).toBeGreaterThanOrEqual(3);
     expect(got.every((a) => a === 100)).toBe(true);
     expect(P.resources.oil).toBe(got.reduce((a, b) => a + b, 0));
-    expect(well.resourcesRemaining).toBe(5000 - P.resources.oil - tanker.carrying.amount);
+    expect(well.resourcesRemaining).toBe(10000 - P.resources.oil - tanker.carrying.amount);
   });
 
   it('o Centro NÃO aceita petróleo; só a Refinaria (sem Refinaria o petroleiro cheio para com aviso)', () => {
@@ -229,27 +229,27 @@ describe('plataforma e petroleiro (F4-07a)', () => {
 });
 
 describe('Centro nível 3 cobra petróleo (F4-07a; resolve o pendente NEW-24 da F3-06)', () => {
-  it('em mapa com poços: UPGRADE_HQ nível 3 cobra 133 de petróleo (e sem 133 não evolui)', () => {
-    expect(HQ_UPGRADE_COST[3].oil).toBe(133);
+  it('em mapa com poços: UPGRADE_HQ nível 3 cobra 266 de petróleo (e sem 266 não evolui)', () => {
+    expect(HQ_UPGRADE_COST[3].oil).toBe(266);
     const gm = makeNavalGm();
     const hq = hqOf(gm, 0);
     hq.tier = 2;
     const P = gm.getPlayer(0);
-    Object.assign(P.resources, { gold: 5000, wood: 5000, stone: 5000, oil: 132 });
+    Object.assign(P.resources, { gold: 5000, wood: 5000, stone: 5000, oil: 265 });
     gm.issue({ type: CMD.UPGRADE_HQ, playerId: 0, buildingId: hq.id });
     gm.simStep(0.05);
     expect(hq.tierUpgrade).toBeNull();
     expect(P.resources.gold).toBe(5000);
-    P.resources.oil = 260;
+    P.resources.oil = 532;
     gm.issue({ type: CMD.UPGRADE_HQ, playerId: 0, buildingId: hq.id });
     gm.simStep(0.05);
     expect(hq.tierUpgrade).toBeTruthy();
-    expect(P.resources.oil).toBe(127);
+    expect(P.resources.oil).toBe(266);
     expect(P.resources.gold).toBe(3667);
     // cancelar devolve o petróleo
     gm.issue({ type: CMD.CANCEL_UPGRADE_HQ, playerId: 0, buildingId: hq.id });
     gm.simStep(0.05);
-    expect(P.resources.oil).toBe(260);
+    expect(P.resources.oil).toBe(532);
   });
 
   it('em mapa SEM poços o petróleo é dispensado (senão o nível 3 seria inalcançável)', () => {

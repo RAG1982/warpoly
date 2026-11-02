@@ -96,7 +96,7 @@ function navy(c, unfinished) {
   });
   // Fragatas (a primeira leva só depois de a economia de óleo andar)
   const frig = c.mine('frigate');
-  if (frig.length + yard.queue.length < (c.seconds < 330 ? 6 : 12) && res(c).oil >= 50 && affordable(c, { gold: 200, wood: 100 }) && yard.queue.length < 2) c.issue({ type: c.CMD.TRAIN, buildingId: yard.id, unitType: 'frigate' });
+  if (frig.length + yard.queue.length < (c.seconds < 330 ? 6 : 12) && res(c).oil >= 100 && affordable(c, { gold: 200, wood: 100 }) && yard.queue.length < 2) c.issue({ type: c.CMD.TRAIN, buildingId: yard.id, unitType: 'frigate' });
   // guarnição: com a esquadra de 6 Fragatas pronta, o ouro que sobra vira Cavaleiros do Quartel (as levas orcas desembarcam tropas de verdade)
   const rax = c.bld('barracks');
   if (rax && rax.isConstructed && frig.length >= 6 && rax.queue.length === 0 && c.mine('knight').length < 8 && affordable(c, { gold: 400, wood: 60, stone: 5 })) c.issue({ type: c.CMD.TRAIN, buildingId: rax.id, unitType: 'knight' });

@@ -21,7 +21,7 @@ describe('dados dos navios (F4-07b)', () => {
       expect(u.faction).toBe(f);
       expect(u).toMatchObject({ hp: 280, speed: 5.5, armor: 3, attackRange: 12, attackCooldown: 1.3, layer: 'naval', canHitAir: true, canHitGround: true, trainTime: 16 });
       expect(u.damage).toEqual({ basic: 0, piercing: 26, type: 'piercing' });
-      expect(u.cost).toEqual({ gold: 200, wood: 100, stone: 0, oil: 50 });
+      expect(u.cost).toEqual({ gold: 200, wood: 100, stone: 0, oil: 100 });
       expect(u.requires).toEqual([{ hq: 2 }]);
     }
   });
@@ -29,7 +29,7 @@ describe('dados dos navios (F4-07b)', () => {
   it('Barcaça: sem ataque, capacidade 6, tipo único', () => {
     const u = UNITS.barge;
     expect(u).toMatchObject({ hp: 220, speed: 4.6, armor: 2, transportCapacity: 6, layer: 'naval', trainTime: 14, isCombat: false });
-    expect(u.cost).toEqual({ gold: 150, wood: 100, stone: 0, oil: 30 });
+    expect(u.cost).toEqual({ gold: 150, wood: 100, stone: 0, oil: 60 });
     expect(u.damage.basic + u.damage.piercing).toBe(0);
   });
 
@@ -39,7 +39,7 @@ describe('dados dos navios (F4-07b)', () => {
       expect(u.faction).toBe(f);
       expect(u).toMatchObject({ hp: 520, speed: 3.6, armor: 6, attackRange: 22, minAttackRange: 6, attackCooldown: 3.4, splashRadius: 1.8, trainTime: 24, canHitAir: false });
       expect(u.damage).toEqual({ basic: 90, piercing: 0, type: 'siege' });
-      expect(u.cost).toEqual({ gold: 300, wood: 200, stone: 0, oil: 120 });
+      expect(u.cost).toEqual({ gold: 300, wood: 200, stone: 0, oil: 240 });
       expect(u.requires).toEqual([{ hq: 3 }, forge]);
     }
   });
@@ -93,17 +93,17 @@ describe('treino e requisitos (F4-07b)', () => {
     build(gm, 'foundry', 0, spot.x, spot.z);
     expect(missingUnitRequirements(0, 'dreadnought', gm)).toEqual([]);
     expect(yard.queueUnit('dreadnought', gm)).toBe(true);
-    expect(p.resources.oil).toBe(9000 - 50 - 30 - 120);
+    expect(p.resources.oil).toBe(9000 - 100 - 60 - 240);
   });
 
   it('sem petróleo suficiente o treino é recusado (nada debitado)', () => {
     const { gm, hq, p, yard } = setup();
     hq.tier = 2;
-    p.resources.oil = 49;
+    p.resources.oil = 99;
     const gold = p.resources.gold;
     expect(yard.queueUnit('frigate', gm)).toBe(false);
     expect(p.resources.gold).toBe(gold);
-    p.resources.oil = 50;
+    p.resources.oil = 100;
     expect(yard.queueUnit('frigate', gm)).toBe(true);
     expect(p.resources.oil).toBe(0);
   });
@@ -319,18 +319,18 @@ describe('Fundição e pesquisas (F4-07b)', () => {
     expect(g.damage.piercing).toBe(base.p + 8);
     expect(g.armor).toBe(base.a + 3);
     // petróleo debitado
-    expect(gm.getPlayer(0).resources.oil).toBe(9000 - 100 - 80);
+    expect(gm.getPlayer(0).resources.oil).toBe(9000 - 200 - 160);
   });
 
   it('pesquisa exige a Fundição da facção e petróleo; nível 2 exige Centro 3', () => {
     const gm = makeNavalGm();
     hqOf(gm, 0).tier = 2;
-    Object.assign(gm.getPlayer(0).resources, { gold: 9000, wood: 9000, stone: 9000, oil: 50 });
+    Object.assign(gm.getPlayer(0).resources, { gold: 9000, wood: 9000, stone: 9000, oil: 100 });
     build(gm, 'barracks', 0, -30, 6);
     const spots = coastSpots(gm, 'shipyard', -1, 2, 10);
     build(gm, 'shipyard', 0, spots[0].x, spots[0].z);
     const foundry = build(gm, 'foundry', 0, spots[1].x, spots[1].z);
-    expect(foundry.startResearch('naval_cannons', gm)).toBe(false); // 50 < 100 de petróleo
+    expect(foundry.startResearch('naval_cannons', gm)).toBe(false); // 100 < 200 de petróleo
     gm.getPlayer(0).resources.oil = 9000;
     expect(foundry.startResearch('naval_cannons', gm)).toBe(true);
     run(gm, 41);

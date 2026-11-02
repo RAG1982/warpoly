@@ -50,8 +50,8 @@ export const RESEARCH = {
   naval_cannons: {
     building: 'foundry',
     levels: [
-      { cost: { gold: 250, wood: 150, oil: 100 }, time: 40, bonus: { piercing: 8 }, requires: [] },
-      { cost: { gold: 500, wood: 300, oil: 200 }, time: 60, bonus: { piercing: 8 }, requires: [{ hq: 3 }] }
+      { cost: { gold: 250, wood: 150, oil: 200 }, time: 40, bonus: { piercing: 8 }, requires: [] },
+      { cost: { gold: 500, wood: 300, oil: 400 }, time: 60, bonus: { piercing: 8 }, requires: [{ hq: 3 }] }
     ],
     appliesTo: ['frigate', 'war_galley', 'dreadnought', 'iron_leviathan'],
     icon: '/icoEspada.png',
@@ -60,8 +60,8 @@ export const RESEARCH = {
   naval_hulls: {
     building: 'foundry',
     levels: [
-      { cost: { gold: 200, wood: 200, oil: 80 }, time: 40, bonus: { armor: 3 }, requires: [] },
-      { cost: { gold: 400, wood: 400, oil: 160 }, time: 60, bonus: { armor: 3 }, requires: [{ hq: 3 }] }
+      { cost: { gold: 200, wood: 200, oil: 160 }, time: 40, bonus: { armor: 3 }, requires: [] },
+      { cost: { gold: 400, wood: 400, oil: 320 }, time: 60, bonus: { armor: 3 }, requires: [{ hq: 3 }] }
     ],
     appliesTo: ['frigate', 'war_galley', 'dreadnought', 'iron_leviathan', 'barge', 'tanker'],
     icon: '/icoEscudo.png',

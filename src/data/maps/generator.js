@@ -278,7 +278,7 @@ export function generateMap(options = {}) {
     const rOwn = R + rb + 5;
     for (let i = 0; i < N; i++) {
       const p = at(i, rOwn, 0);
-      resources.push({ type: 'oil', x: r2(p.x), z: r2(p.z), amount: 5000 });
+      resources.push({ type: 'oil', x: r2(p.x), z: r2(p.z), amount: 10000 });
     }
     // 1–2 poços por vão entre bases, na linha de espelho: menor raio com água livre; o segundo, mais afastado
     const wellRads = [];
@@ -290,7 +290,7 @@ export function generateMap(options = {}) {
     for (const rad of wellRads) {
       for (let k = 0; k < N; k++) {
         const p = gapPoint(k, rad);
-        resources.push({ type: 'oil', x: r2(p.x), z: r2(p.z), amount: 5000 });
+        resources.push({ type: 'oil', x: r2(p.x), z: r2(p.z), amount: 10000 });
       }
     }
   }

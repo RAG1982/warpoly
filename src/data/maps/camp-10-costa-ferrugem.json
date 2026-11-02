@@ -28076,25 +28076,25 @@
       "type": "oil",
       "x": -126,
       "z": -100,
-      "amount": 5000
+      "amount": 10000
     },
     {
       "type": "oil",
       "x": -128,
       "z": -84,
-      "amount": 5000
+      "amount": 10000
     },
     {
       "type": "oil",
       "x": 94,
       "z": -100,
-      "amount": 5000
+      "amount": 10000
     },
     {
       "type": "oil",
       "x": 94,
       "z": -116,
-      "amount": 5000
+      "amount": 10000
     },
     {
       "type": "gold",
@@ -28106,13 +28106,13 @@
       "type": "oil",
       "x": -41,
       "z": -82,
-      "amount": 5000
+      "amount": 10000
     },
     {
       "type": "oil",
       "x": 26,
       "z": -29,
-      "amount": 5000
+      "amount": 10000
     },
     {
       "type": "gold",

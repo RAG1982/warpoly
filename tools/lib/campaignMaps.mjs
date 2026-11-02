@@ -1114,7 +1114,7 @@ function postBaixio(ctx, extra) {
       test: (x, z) => deepSea(x, z) && m.resources.filter((r) => r.type === 'oil').every((q) => hyp({ x, z }, q) >= 16) && hyp({ x, z }, extra.islet1) >= 12 && hyp({ x, z }, extra.islet2) >= 12,
       score: (x, z) => hyp({ x, z }, { x: dx, z: midZ })
     }), `o poço do meio ${k + 1}`);
-    m.resources.push({ type: 'oil', x: r1(w.x), z: r1(w.z), amount: 5000 });
+    m.resources.push({ type: 'oil', x: r1(w.x), z: r1(w.z), amount: 10000 });
     extra[`wellMid${k + 1}`] = ptw(w);
   });
   // 5) náufragos na ilhota 2 (resgate com barcaça/frota) e ruínas numa ponta do continente da Liga (exploração por terra)
@@ -1471,10 +1471,10 @@ function postTravessia(ctx, extra) {
   const ringOfSea = (r, test, score, name) => need(ctx.scan({ step: 1, test: (x, z) => hyp({ x, z }, isleC) >= r && hyp({ x, z }, isleC) <= r + 12 && test(x, z), score }), name);
   const oilFree = (x, z) => m.resources.filter((q) => q.type === 'oil').every((q) => hyp({ x, z }, q) >= 16);
   const well1 = ringOfSea(40, (x, z) => deepSea(x, z) && oilFree(x, z), (x, z) => hyp({ x, z }, { x: yard.x + 30, z: yard.z }), 'o poço de petróleo do mar 1');
-  m.resources.push({ type: 'oil', x: r1(well1.x), z: r1(well1.z), amount: 5000 });
+  m.resources.push({ type: 'oil', x: r1(well1.x), z: r1(well1.z), amount: 10000 });
   extra.wellMid1 = ptw(well1);
   const well2 = ringOfSea(40, (x, z) => deepSea(x, z) && oilFree(x, z) && hyp({ x, z }, well1) >= 16, (x, z) => hyp({ x, z }, { x: landing.x - 40, z: landing.z }), 'o poço de petróleo do mar 2');
-  m.resources.push({ type: 'oil', x: r1(well2.x), z: r1(well2.z), amount: 5000 });
+  m.resources.push({ type: 'oil', x: r1(well2.x), z: r1(well2.z), amount: 10000 });
   extra.wellMid2 = ptw(well2);
   extra.patrolSea = ptw(ringOfSea(50, (x, z) => deepSea(x, z) && hyp({ x, z }, landing) >= 40, (x, z) => hyp({ x, z }, { x: (landing.x + isleC.x) / 2, z: (landing.z + isleC.z) / 2 }), 'a patrulha de galés'));
   // mina de expansão na ilha da Liga (sem ela a esquadra fica sem ouro: as Fragatas custam 200 de ouro cada)

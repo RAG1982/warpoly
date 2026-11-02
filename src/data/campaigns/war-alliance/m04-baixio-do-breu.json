@@ -601,7 +601,7 @@
         {
           "type": "giveResources",
           "owner": "player",
-          "oil": 100
+          "oil": 200
         },
         {
           "type": "dialog",
@@ -685,7 +685,7 @@
         {
           "type": "giveResources",
           "owner": "player",
-          "oil": 80
+          "oil": 160
         },
         {
           "type": "sound",
@@ -1150,7 +1150,7 @@
           "type": "giveResources",
           "owner": "player",
           "gold": 150,
-          "oil": 100
+          "oil": 200
         },
         {
           "type": "lightLandmark",

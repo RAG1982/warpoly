@@ -157,10 +157,10 @@
   ]
  },
  "bytes": {
-  "total": 2927900,
+  "total": 2975766,
   "art": 281206,
   "icons": 2346594,
-  "portraits": 300100
+  "portraits": 347966
  },
  "aliases": {
   "ability_bone_mend": "ability_heal",
@@ -254,5 +254,25 @@
    "height": 1080,
    "bytes": 107220
   }
+ },
+ "npcPortraits": {
+  "size": 128,
+  "dir": "portraits",
+  "prefix": "npc_",
+  "ext": "webp",
+  "ids": [
+   "aurora",
+   "brakka",
+   "brumar",
+   "elara",
+   "grok",
+   "isolda",
+   "lyra",
+   "mervane",
+   "orsolo",
+   "orvanna",
+   "sevelin",
+   "tomas_rocha"
+  ]
  }
 }

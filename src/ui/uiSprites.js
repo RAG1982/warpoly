@@ -41,6 +41,7 @@ export function normalizeManifest(raw) {
     aliases: raw.aliases && typeof raw.aliases === 'object' ? { ...raw.aliases } : {},
     portraitIds: new Set(Array.isArray(portraits.ids) ? portraits.ids : []),
     portraitSize: Number(portraits.size) || 128,
+    npcPortraitIds: new Set(Array.isArray(raw.npcPortraits && raw.npcPortraits.ids) ? raw.npcPortraits.ids : []), // M3-14
     art: raw.art && typeof raw.art === 'object' ? raw.art : {}
   };
 }

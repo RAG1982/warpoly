@@ -281,6 +281,7 @@ function checkDialogLike(c, path, a) {
   checkText(c, `${path}.text`, a.text);
   checkText(c, `${path}.speaker`, a.speaker, { optional: true });
   if (a.portrait !== undefined && !isStr(a.portrait)) c.err(`${path}.portrait`, 'retrato deve ser um emoji/texto curto');
+  if (a.portraitId !== undefined && !isStr(a.portraitId)) c.err(`${path}.portraitId`, 'portraitId deve ser o id do retrato de NPC (ex.: "sevelin")');
   checkNum(c, `${path}.duration`, a.duration, { min: 0.5, max: 120, optional: true });
 }
 

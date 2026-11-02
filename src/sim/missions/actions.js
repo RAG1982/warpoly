@@ -226,7 +226,7 @@ const HANDLERS = {
   },
 
   dialog(rt, a) {
-    rt.gm.events.emit(EVT.MISSION_DIALOG, { speaker: a.speaker, portrait: a.portrait, text: a.text, duration: a.duration });
+    rt.gm.events.emit(EVT.MISSION_DIALOG, { speaker: a.speaker, portrait: a.portrait, portraitId: a.portraitId, text: a.text, duration: a.duration });
   },
 
   message(rt, a) {

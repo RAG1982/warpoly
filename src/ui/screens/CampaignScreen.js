@@ -7,6 +7,7 @@ import { t, getLanguage, onLanguageChange } from '../../i18n/index.js';
 import { listCampaigns } from '../../data/campaigns/index.js';
 import { getMission } from '../../data/missions/index.js';
 import { localize } from '../../sim/missions/text.js';
+import { portraitInnerHtml } from '../npcPortraits.js';
 import { getProgress, nextMission } from '../../campaign/index.js';
 import { unlockNames } from '../techText.js';
 import { TECH_KINDS } from '../../sim/techRestriction.js';
@@ -178,7 +179,7 @@ export class CampaignScreen {
       const storyBtn = showStory ? `<button type="button" data-cp="reviewStory">${esc(t('story.review'))}</button>` : '';
       main = `<h3>${esc(localize(m.title, lang))}</h3>`
         + `<p class="ms-brief-sub">${esc(t(`campaign.status.${st}`))}${rec ? ` · ${esc(t('mission.time'))}: ${fmtTime(rec.seconds)}` : ''}</p>`
-        + `<div class="ms-brief-talk"><div class="ms-portrait" aria-hidden="true">${esc(m.briefing.portrait || '📜')}</div><div class="ms-say">`
+        + `<div class="ms-brief-talk"><div class="ms-portrait" aria-hidden="true">${portraitInnerHtml(m.briefing, '📜')}</div><div class="ms-say">`
         + (m.briefing.speaker ? `<span class="ms-speaker">${esc(localize(m.briefing.speaker, lang))}</span>` : '')
         + `<p>${esc(localize(m.briefing.text, lang))}</p></div></div>`
         + unlBlock

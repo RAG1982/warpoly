@@ -82,7 +82,7 @@ describe('NAVAL-RANGE: alcance dos navios de ataque e pesquisa Mira Telemétrica
   it('pesquisa naval_range: 1 nível, Fundição, +20 % do alcance BASE, navios de ataque', () => {
     expect(RESEARCH.naval_range).toMatchObject({ building: 'foundry', appliesTo: ['frigate', 'war_galley', 'dreadnought', 'iron_leviathan'] });
     expect(RESEARCH.naval_range.levels).toHaveLength(1);
-    expect(RESEARCH.naval_range.levels[0]).toMatchObject({ cost: { gold: 400, wood: 250, oil: 150 }, time: 50, requires: [{ hq: 3 }], bonus: { rangePct: 0.2 } });
+    expect(RESEARCH.naval_range.levels[0]).toMatchObject({ cost: { gold: 400, wood: 250, oil: 300 }, time: 50, requires: [{ hq: 3 }], bonus: { rangePct: 0.2 } });
   });
 
   it('naval_range aplica +20 % do alcance base nos navios vivos e nos novos; não afeta unidades terrestres', () => {

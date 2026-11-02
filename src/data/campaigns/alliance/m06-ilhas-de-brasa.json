@@ -82,7 +82,7 @@
     { "id": "shipyard-up", "when": { "type": "objective", "id": "build-shipyard", "status": "completed" },
       "actions": [
         { "type": "giveResources", "owner": "player", "gold": 150, "wood": 100, "oil": 300 },
-        { "type": "dialog", "speaker": { "pt-BR": "Capitã Lyra", "en": "Captain Lyra" }, "portrait": "⚓", "text": { "pt-BR": "Estaleiro de pé! Brumar enviou ouro, madeira e 150 de petróleo. Treine um Petroleiro para erguer a Plataforma e Fragatas para a frota.", "en": "Shipyard up! Brumar sent gold, wood and 150 oil. Train a Tanker to raise the Platform and Frigates for the fleet." } }
+        { "type": "dialog", "speaker": { "pt-BR": "Capitã Lyra", "en": "Captain Lyra" }, "portrait": "⚓", "text": { "pt-BR": "Estaleiro de pé! Brumar enviou ouro, madeira e 300 de petróleo. Treine um Petroleiro para erguer a Plataforma e Fragatas para a frota.", "en": "Shipyard up! Brumar sent gold, wood and 300 oil. Train a Tanker to raise the Platform and Frigates for the fleet." } }
       ] },
     { "id": "platform-up", "when": { "type": "objective", "id": "oil-platform", "status": "completed" },
       "actions": [

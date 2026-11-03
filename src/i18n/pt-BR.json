@@ -844,6 +844,8 @@
   "mission.secondary": "Objetivos secundários",
   "mission.bonus": "Bônus",
   "mission.toggle": "Recolher ou expandir os objetivos",
+  "mission.wellsProgress": "Poços ocupados: {held}/{total} · {secs} s",
+  "landmark.well": "Poço",
   "mission.dialogNext": "Clique para continuar",
   "mission.victory": "Missão cumprida",
   "mission.defeat": "Missão fracassada",

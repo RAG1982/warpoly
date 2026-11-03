@@ -134,6 +134,8 @@ const EVALUATORS = {
 
   flag(rt, o) {
     const ok = evalCondition(rt, o.def.condition);
+    const pg = o.def.progress; // opcional: barra de progresso lida de uma variável da missão (ex.: segundos seguros)
+    if (pg) return { status: ok ? 'completed' : null, cur: Math.min(pg.max, Math.max(0, rt.vars[pg.var] ?? 0)), max: pg.max };
     return { status: ok ? 'completed' : null, cur: ok ? 1 : 0, max: 1 };
   }
 };

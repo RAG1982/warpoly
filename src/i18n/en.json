@@ -844,6 +844,8 @@
   "mission.secondary": "Secondary objectives",
   "mission.bonus": "Bonus",
   "mission.toggle": "Collapse or expand objectives",
+  "mission.wellsProgress": "Wells held: {held}/{total} · {secs} s",
+  "landmark.well": "Well",
   "mission.dialogNext": "Click to continue",
   "mission.victory": "Mission accomplished",
   "mission.defeat": "Mission failed",

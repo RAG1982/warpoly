@@ -5,6 +5,8 @@ import { playMission } from './helpers/campaignHarness.js';
 import { getMap, ensureMapLoaded } from '../../src/data/maps/index.js';
 import { buildPathfinder, floodFill, isReached } from '../../src/data/maps/generator.js';
 import { LEGACY_TREE_MAPS, TREE_WOOD } from '../../src/data/economy.js';
+import { getLanguage, setLanguage } from '../../src/i18n/index.js';
+import { buildObjectivesModel } from '../../src/ui/missionPresentation.js';
 import { BUILDINGS } from '../../src/data/buildings.js';
 
 /**
@@ -176,6 +178,56 @@ describe('m09 Miragem · setup, narrativa e ondas', () => {
     ], 12);
     for (const id of r.gm.mission.tags.get('castaways')) expect(r.gm.entitiesById.get(id).ownerId).toBe(0);
   }, 60000);
+});
+
+describe('m09 Miragem · poços (marcos permanentes)', () => {
+  it('3 marcos water_well sempre visíveis (known), com rótulo pt-BR/en, raio 9 = o do gatilho wells-tick, em terra firme a ≥ 6 u da costa', async () => {
+    const { gm } = await boot();
+    const wells = gm.mission.landmarks.filter((l) => l.kind === 'water_well');
+    expect(wells).toHaveLength(3);
+    const m = gm.terrain.mapDef;
+    for (const [i, w] of wells.entries()) {
+      expect(w.known).toBe(true);
+      expect(w.label['pt-BR']).toBe('Poço');
+      expect(w.label.en).toBe('Well');
+      expect(w.radius).toBe(9);
+      const a = m.anchors[`waterWell${i + 1}`];
+      expect(d(w, a)).toBeLessThan(0.01);
+      expect(gm.terrain.getHeight(w.x, w.z)).toBeGreaterThan(m.waterLevel + 1);
+      for (let k = 0; k < 32; k++) { // nenhum ponto da água a menos de 6 u
+        const t = (k / 32) * Math.PI * 2;
+        for (const r of [3, 6]) expect(gm.terrain.getHeight(w.x + Math.cos(t) * r, w.z + Math.sin(t) * r), `poço ${i + 1} r=${r}`).toBeGreaterThan(m.waterLevel);
+      }
+    }
+    // os gatilhos usam o mesmo raio dos marcos
+    const tick = DEF.triggers.find((t) => t.id === 'wells-tick');
+    for (const c of tick.when.all) expect(c.area.r).toBe(9);
+  });
+
+  it('ocupação (wellStates): só unidade DENTRO do anel ocupa; inimigo perto contesta; fora do raio não conta; painel mostra "Poços ocupados: n/3"', async () => {
+    const { gm } = await boot([], 1);
+    const wells = gm.mission.landmarks.filter((l) => l.kind === 'water_well');
+    const st = () => { gm.simStep(1 / 20); return [...gm.mission.wellStates().values()]; };
+    expect(st()).toEqual([0, 0, 0]);
+    const mine = gm.getUnitsOf(0).filter((u) => u.type === 'footman' || u.type === 'peasant' || u.mesh);
+    const u = mine.find((x) => x.type !== undefined && !x.isDead);
+    const place = (unit, p, dx = 0) => { unit.mesh.position.x = p.x + dx; unit.mesh.position.z = p.z; };
+    place(u, wells[1], 12); // fora do anel (r 9)
+    expect(st()[1]).toBe(0);
+    place(u, wells[1], 5); // dentro
+    expect(st()[1]).toBe(1);
+    const snap = gm.mission.snapshot().objectives.find((o) => o.id === 'p-wells');
+    expect(snap.wells).toEqual({ occupied: 1, total: 3 });
+    const lang0 = getLanguage();
+    setLanguage('pt-BR', { persist: false });
+    expect(buildObjectivesModel({ objectives: [snap] }, 'pt-BR').primary[0].progress).toMatch(/^Poços ocupados: 1\/3 · \d+ s$/);
+    setLanguage('en', { persist: false });
+    expect(buildObjectivesModel({ objectives: [snap] }, 'en').primary[0].progress).toMatch(/^Wells held: 1\/3 · \d+ s$/);
+    setLanguage(lang0, { persist: false });
+    const foe = gm.getUnitsOf(1).find((x) => !x.isDead && x.mesh);
+    place(foe, wells[1], -11); // inimigo na folga (raio + 3)
+    expect(st()[1]).toBe(2);
+  });
 });
 
 describe('m09 Miragem · desfecho', () => {

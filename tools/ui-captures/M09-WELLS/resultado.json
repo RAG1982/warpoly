@@ -1,0 +1,14 @@
+{
+  "shots": [
+    "01-briefing.png",
+    "01-cutscene-poco-central.png",
+    "02-cutscene-poco-central.png",
+    "03-inicio-painel-objetivo.png",
+    "04-poco1-neutro.png",
+    "05-painel-progresso.png",
+    "06-poco1-ocupado.png",
+    "07-poco2-ocupado.png",
+    "08-poco3-contestado.png"
+  ],
+  "errors": []
+}

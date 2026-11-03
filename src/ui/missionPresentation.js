@@ -100,7 +100,10 @@ export function buildObjectivesModel(snap, lang = 'pt-BR') {
   const group = { primary: [], secondary: [], bonus: [] };
   for (const o of snap.objectives) {
     let progress = '';
-    if (o.status === 'active' && o.max > 1) {
+    if (o.status === 'active' && o.wells) {
+      const secs = Math.floor(o.cur);
+      progress = lang === 'en' ? `Wells held: ${o.wells.occupied}/${o.wells.total} · ${secs} s` : `Poços ocupados: ${o.wells.occupied}/${o.wells.total} · ${secs} s`;
+    } else if (o.status === 'active' && o.max > 1) {
       progress = o.unit === 'seconds' ? `${formatClock(o.cur)} / ${formatClock(o.max)}` : `${o.cur}/${o.max}`;
     }
     const row = { id: o.id, status: o.status, title: localize(o.title, lang), description: o.description ? localize(o.description, lang) : '', progress };

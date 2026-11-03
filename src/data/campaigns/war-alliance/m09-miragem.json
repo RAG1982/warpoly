@@ -14,6 +14,7 @@
     },
     "hints": [
       { "pt-BR": "A cabeça de ponte fica ao norte. A barcaça da Liga já desembarcou seis tropas; mantenha-as perto dos poços.", "en": "The bridgehead is to the north. The League's barge has already landed six troops; keep them near the wells." },
+      { "pt-BR": "Os três Poços ficam em terra firme no centro da ilha e aparecem no mapa e no minimapa (ponto azul-claro). Cada anel mostra a área de ocupação: ponha uma unidade dentro de cada um.", "en": "The three Wells stand on dry land in the middle of the isle and show on the map and the minimap (light-blue dot). Each ring shows the occupation area: put a unit inside every one." },
       { "pt-BR": "Dica: a frota de Grok nasce no mar a leste e contorna a costa norte. Fragatas do Estaleiro (na costa, perto da base) a encontram antes da praia.", "en": "Tip: Grok's fleet is born at sea to the east and rounds the north coast. Frigates from the Shipyard (on the coast, near your base) meet it before the beach." },
       { "pt-BR": "Dica: a ilhota dos náufragos só se alcança pelo mar. Uma Fragata limpa a praia; uma Barcaça leva o resgate.", "en": "Tip: the castaways' islet is reachable by sea only. A Frigate clears the beach; a Transport Barge brings the rescue." },
       { "pt-BR": "O Capitão Brann é um HERÓI: tem mana e três habilidades (Z, X, C) e só existe um. Se ele morrer, a missão está perdida.", "en": "Captain Brann is a HERO: he has mana and three abilities (Z, X, C), and there is only one of him. If he dies the mission is lost." }
@@ -33,14 +34,17 @@
     { "type": "tag", "select": { "buildingType": "great_hall" }, "tag": "enemy_base" },
     { "type": "spawn", "owner": "neutral", "unitType": "villager", "count": 3, "anchor": "isletCastaway", "spread": 2.2, "tag": "castaways", "markColor": "#22d3ee", "displayName": { "pt-BR": "Náufrago", "en": "Castaway" } },
     { "type": "spawn", "owner": "bandits", "unitType": "bandit", "count": 4, "anchor": "isletCastaway1", "spread": 2.5, "tag": "islet_guard", "guard": { "r": 9 } },
+    { "type": "spawnLandmark", "kind": "water_well", "anchor": "waterWell1", "radius": 9, "known": true, "tag": "wells", "label": { "pt-BR": "Poço", "en": "Well" } },
+    { "type": "spawnLandmark", "kind": "water_well", "anchor": "waterWell2", "radius": 9, "known": true, "tag": "wells", "label": { "pt-BR": "Poço", "en": "Well" } },
+    { "type": "spawnLandmark", "kind": "water_well", "anchor": "waterWell3", "radius": 9, "known": true, "tag": "wells", "label": { "pt-BR": "Poço", "en": "Well" } },
     { "type": "spawnLandmark", "kind": "ruins", "anchor": "ruins1", "tag": "ruins", "label": { "pt-BR": "Ruínas do Poço Velho", "en": "Old Well Ruins" } }
   ],
   "objectives": [
     { "id": "p-wells", "type": "flag", "priority": "primary",
       "condition": { "type": "var", "name": "hold", "op": ">=", "value": 60 },
+      "progress": { "var": "hold", "max": 60, "seconds": true, "landmarkKind": "water_well" },
       "title": { "pt-BR": "Controlar os três poços por 1 minuto", "en": "Hold the three wells for 1 minute" },
-      "description": { "pt-BR": "Tenha ao menos uma unidade em cada poço ao mesmo tempo. O contador zera se um inimigo chegar a 12 u de um deles.", "en": "Have at least one unit at each well at the same time. The counter resets if an enemy comes within 12 u of one of them." },
-      "marker": { "area": { "anchor": "waterWell2", "r": 40 }, "style": "goal", "seconds": 240 } },
+      "description": { "pt-BR": "Os três Poços (pedra, balde e palmeira) estão marcados no mapa e no minimapa. Ponha ao menos uma unidade DENTRO do anel de cada poço, ao mesmo tempo. O contador zera se um inimigo chegar perto de um deles.", "en": "The three Wells (stone, bucket and palm tree) are marked on the map and the minimap. Keep at least one unit INSIDE each well's ring at the same time. The counter resets if an enemy gets close to one." } },
     { "id": "p-grok", "type": "destroy", "priority": "primary", "select": { "tag": "grok" }, "count": 1,
       "title": { "pt-BR": "Derrotar Grok, o mestre de cerco dos Clãs", "en": "Defeat Grok, the Clans' siege master" },
       "description": { "pt-BR": "Grok, um Ogro-Feiticeiro, comanda a contra-ofensiva por terra. Ele marcha para a cabeça de ponte aos 10 minutos.", "en": "Grok, an Ogre Mage, leads the land counter-offensive. He marches for the bridgehead at 10 minutes." } },
@@ -70,7 +74,7 @@
         { "type": "cutscene", "id": "mirage", "duration": 34, "skippable": true,
           "steps": [
             { "at": 0, "anchor": "playerStart", "zoom": 1.15, "dialog": { "speaker": { "pt-BR": "Capitão Brann", "en": "Captain Brann" }, "portrait": "⚔️", "text": { "pt-BR": "Miragem. Dunas, ruínas e três poços. Sem água, não há cerco.", "en": "Mirage. Dunes, ruins and three wells. Without water, there is no siege." }, "duration": 8 } },
-            { "at": 9, "anchor": "bridgehead1", "zoom": 1.1, "dialog": { "speaker": { "pt-BR": "Capitão Brann", "en": "Captain Brann" }, "portrait": "⚔️", "text": { "pt-BR": "A barcaça desembarcou a cabeça de ponte. Daqui aos poços é uma marcha de um dia.", "en": "The barge landed the bridgehead. From here to the wells is a day's march." }, "duration": 8 } },
+            { "at": 9, "anchor": "waterWell2", "zoom": 1.1, "dialog": { "speaker": { "pt-BR": "Capitão Brann", "en": "Captain Brann" }, "portrait": "⚔️", "text": { "pt-BR": "Este é o Poço do centro: aro de pedra, balde e palmeira. Há outros dois, marcados no minimapa. Tropa dentro do anel de cada um.", "en": "This is the central Well: stone rim, bucket and palm tree. There are two more, marked on the minimap. Troops inside each one's ring." }, "duration": 8 } },
             { "at": 18, "anchor": "enemyStart", "zoom": 1.05, "dialog": { "speaker": { "pt-BR": "Grok", "en": "Grok" }, "portrait": "🪓", "text": { "pt-BR": "Esses poços são nossos há três invernos. Vieram de barco? Voltem de barco.", "en": "These wells have been ours for three winters. You came by boat? Go back by boat." }, "duration": 8 } },
             { "at": 27, "anchor": "playerStart", "zoom": 1.15, "dialog": { "speaker": { "pt-BR": "Capitão Brann", "en": "Captain Brann" }, "portrait": "⚔️", "text": { "pt-BR": "A esquadra dele sai do mar a leste. Afundem-na antes da praia. E os náufragos de Brumar esperam no nordeste.", "en": "His fleet comes out of the sea to the east. Sink it before the beach. And Brumar's castaways wait to the northeast." }, "duration": 7 } }
           ] }

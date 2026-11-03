@@ -3,6 +3,7 @@ import { AIMilitaryManager } from './AIMilitaryManager.js';
 import { AIPerception } from './AIPerception.js';
 import { AIMicroManager } from './AIMicroManager.js';
 import { AINavalManager } from './AINaval.js';
+import { AIAmphibiousManager } from './AIAmphibious.js';
 import { getAIProfile } from './AIProfile.js';
 import { pickStrategy } from './AIStrategy.js';
 import { analyzeWood } from './AIWood.js';
@@ -115,6 +116,7 @@ export class AIDirector {
     this.militaryManager = new AIMilitaryManager(this);
     this.microManager = new AIMicroManager(this); // F5-05
     this.navalManager = new AINavalManager(this); // AI-NAVAL
+    this.amphibious = new AIAmphibiousManager(this); // AI-AMPHIB: desembarque contra alvos sem rota terrestre
 
     // F5-03: bônus de coleta (só Brutal) — soma uma fração de cada coleta do próprio jogador.
     this._bonusAcc = { gold: 0, wood: 0, stone: 0 };
@@ -405,6 +407,7 @@ export class AIDirector {
       this._lastEco = this.simTime;
       this.economyManager.update(this.utilities.eco, this.utilities.housing);
       this.navalManager.update(); // AI-NAVAL: no-op sem poços de petróleo / litoral
+      this.amphibious.update(); // AI-AMPHIB: no-op sem operação anfíbia em curso
     }
 
     // 5. Coordinate Army Recruitment & Military Assault Expeditions

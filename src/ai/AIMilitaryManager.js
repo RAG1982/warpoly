@@ -378,6 +378,8 @@ export class AIMilitaryManager {
     const units = this.director.getOwnUnits();
     const workerType = this.director.workerType;
     const fleet = this.director.navalManager.managesFleet();
+    const amph = this.director.amphibious;
+    const amphOn = amph.enabled;
     // limpa ids mortos da onda
     for (const id of this.waveIds) {
       const e = this.gm.getEntity(id);
@@ -388,6 +390,7 @@ export class AIMilitaryManager {
     for (let i = 0; i < units.length; i++) {
       const e = units[i];
       if (e.isDead || e.type === workerType || (fleet && e.layer === 'naval') || this.director.isReserved(e.id)) continue; // AI-NAVAL: navios são da frota
+      if (amphOn && amph.excludes(e)) continue; // AI-AMPHIB: barcaças e passageiros da operação anfíbia não são tropa de linha
       if (op && op.ids.has(e.id)) continue; // NEW-34: a operação de cerco cuida das suas unidades
       if (this._campOp && this._campOp.ids.has(e.id)) continue; // NEW-25: idem para o ataque ao acampamento
       if (e.state !== 'idle' && e.state !== 'moving') continue;
@@ -434,6 +437,7 @@ export class AIMilitaryManager {
     const enemies = this.director.getOwnUnits();
     const workerType = this.director.workerType;
     const fleet = this.director.navalManager.managesFleet();
+    const amph = this.director.amphibious;
     // F5-03 (Difícil+, micro >= 2): reação completa — se a defesa em casa é menor que a invasão, as tropas
     // da onda que está fora também voltam para defender (Normal só usa as ociosas/em marcha).
     let recall = false;
@@ -450,6 +454,7 @@ export class AIMilitaryManager {
     for (let i = 0; i < enemies.length; i++) {
       const e = enemies[i];
       if (e.isDead || e.type === workerType || (fleet && e.layer === 'naval') || this.director.isReserved(e.id) || e.targetEntity === closestIntruder) continue;
+      if (amph.enabled && amph.excludes(e)) continue; // AI-AMPHIB
       const idle = e.state === 'idle' || e.state === 'moving';
       const away = recall && (e.state === 'attacking' || e.state === 'attackMoving') && !(getUnitDef(e.type).suicide);
       if (idle || away) {
@@ -665,9 +670,22 @@ export class AIMilitaryManager {
     if (!this.assessAttack(units)) return;
 
     const target = this.selectExpeditionTarget();
+    const amph = dir.amphibious;
+    if (target && amph.verdict(target.x, target.z) === 'sea') {
+      // AI-AMPHIB: alvo sem rota terrestre — a onda só sai por transporte anfíbio; sem ele a tropa fica em staging e NÃO há aviso de ataque
+      amph.requestAssault(units, target);
+      return;
+    }
     if (!target) {
       const m = dir.perception.marchTarget();
       if (!m) return;
+      // AI-AMPHIB: ponto de varredura em outra massa de terra (ilha): ninguém chega lá a pé. Slot inimigo provável = desembarque às
+      // cegas (a tropa explora em attack-move); célula qualquer = só marca como explorada (não vale uma viagem por mar).
+      if (amph.verdict(m.x, m.z) === 'sea') {
+        if (dir.perception.slotTargets.indexOf(m) >= 0) amph.requestAssault(units, { id: -1, x: m.x, z: m.z, ownerId: null });
+        else { dir.perception.markExploredAt(m.x, m.z); this._lastMarch = null; }
+        return;
+      }
       // NEW-42: a mesma marcha repetida 3× sem a célula virar "explorada" = destino que o exército não alcança
       // (ilha, penhasco, canto do mapa): descarta o ponto para a varredura seguir adiante em vez de ficar em laço.
       const lm = this._lastMarch;
@@ -758,19 +776,30 @@ export class AIMilitaryManager {
    * @returns {{id:number,x:number,z:number,ownerId:number}|null}
    */
   selectExpeditionTarget() {
+    // AI-AMPHIB: prefere alvos que o exército alcança a pé; só se nenhum é alcançável cai para a escolha antiga (e o desembarque cuida)
+    const amph = this.director.amphibious;
+    if (amph.enabled) {
+      const t = this._pickTarget(k => amph.landReachable(k.x, k.z));
+      if (t) return t;
+    }
+    return this._pickTarget(null);
+  }
+
+  _pickTarget(reach) {
     const per = this.director.perception;
     const base = this.director.baseCenter;
-    const tower = per.nearestBuilding(base.x, base.y, k => !!getBuildingDef(k.type).tower);
+    const tower = per.nearestBuilding(base.x, base.y, k => !!getBuildingDef(k.type).tower && (!reach || reach(k)));
     if (tower) return tower;
-    const hq = per.nearestBuilding(base.x, base.y, k => k.role === 'hq');
+    const hq = per.nearestBuilding(base.x, base.y, k => k.role === 'hq' && (!reach || reach(k)));
     if (hq) return hq;
-    const any = per.nearestBuilding(base.x, base.y, k => k.role !== 'platform'); // F4-07a: plataforma no mar é inalcançável por terra
+    const any = per.nearestBuilding(base.x, base.y, k => k.role !== 'platform' && (!reach || reach(k))); // F4-07a: plataforma no mar é inalcançável por terra
     if (any) return any;
     let best = null;
     let bd = Infinity;
     let bestLand = null;
     let bdLand = Infinity;
     for (const k of per.units.values()) {
+      if (reach && !reach(k)) continue;
       const d = (k.x - base.x) * (k.x - base.x) + (k.z - base.y) * (k.z - base.y);
       if (d < bd) { bd = d; best = k; }
       // F4-06: prefere alvo que o exército terrestre consegue atingir (não aéreo)

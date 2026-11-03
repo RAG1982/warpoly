@@ -80,10 +80,10 @@ async function main() {
   const { EVT } = await import('../src/sim/events.js');
   const { getUnitDef } = await import('../src/data/index.js');
   const naval = new Map();
-  const nv = id => { if (!naval.has(id)) naval.set(id, { tankers: 0, warships: 0, shipsLost: 0, shipKills: 0 }); return naval.get(id); };
+  const nv = id => { if (!naval.has(id)) naval.set(id, { tankers: 0, warships: 0, barges: 0, shipsLost: 0, shipKills: 0 }); return naval.get(id); };
   gm.events.on(EVT.UNIT_TRAINED, e => {
     const d = getUnitDef(e.unitType);
-    if (d && d.layer === 'naval') { if (d.isTanker) nv(e.ownerId).tankers++; else if (d.isCombat) nv(e.ownerId).warships++; }
+    if (d && d.layer === 'naval') { if (d.isTanker) nv(e.ownerId).tankers++; else if (d.isCombat) nv(e.ownerId).warships++; else if (d.transportCapacity > 0) nv(e.ownerId).barges++; }
   });
   gm.events.on(EVT.UNIT_DIED, e => {
     const d = getUnitDef(e.unitType);
@@ -120,7 +120,7 @@ async function main() {
     ticksPerSecond: Math.round(tick / Math.max(0.001, wallMs / 1000)),
     winnerTeam: snap.winnerTeam ?? null,
     checksum: stateChecksum(gm),
-    ai: gm.aiDirectors.map(d => ({ id: d.playerId, difficulty: d.difficulty, strategy: d.strategy.id, commands: d.commandsIssued, dropped: d.commandsDropped, apm: Math.round(d.commandsIssued / Math.max(1, tick * SIM_DT / 60)) })),
+    ai: gm.aiDirectors.map(d => ({ id: d.playerId, difficulty: d.difficulty, strategy: d.strategy.id, commands: d.commandsIssued, dropped: d.commandsDropped, apm: Math.round(d.commandsIssued / Math.max(1, tick * SIM_DT / 60)), amphibious: { operations: d.amphibious.operationsStarted, landings: d.amphibious.landings } })),
     perPlayer: snap.players.map(p => ({ id: p.id, name: p.name, faction: p.factionId, defeated: !!p.defeated, kills: p.unitsKilled, lost: p.unitsLost, buildingsDestroyed: p.buildingsDestroyed, buildingsLost: p.buildingsLost, score: Math.round(p.score), naval: nv(p.id) }))
   };
 
@@ -130,10 +130,10 @@ async function main() {
     console.log(`Partida IA×IA ${finished ? 'terminou' : 'NÃO terminou (limite de tempo)'} — seed ${summary.seed}, mapa ${summary.map}, ${summary.players} jogadores`);
     console.log(`  ${summary.ticks} ticks = ${summary.simMinutes} min simulados em ${(wallMs / 1000).toFixed(1)} s (${summary.ticksPerSecond} ticks/s)`);
     console.log(`  vencedor: time ${summary.winnerTeam === null ? '—' : summary.winnerTeam} · checksum ${summary.checksum}`);
-    for (const a of summary.ai) console.log(`  IA P${a.id}: ${a.difficulty}/${a.strategy}, ${a.commands} comandos (~${a.apm} APM, ${a.dropped} adiados)`);
+    for (const a of summary.ai) console.log(`  IA P${a.id}: ${a.difficulty}/${a.strategy}, ${a.commands} comandos (~${a.apm} APM, ${a.dropped} adiados)${a.amphibious.operations > 0 ? `; anfíbio: ${a.amphibious.operations} operações, ${a.amphibious.landings} desembarques` : ''}`);
     for (const p of summary.perPlayer) {
       console.log(`  P${p.id} ${p.name} (${p.faction})${p.defeated ? ' [derrotado]' : ''}: ${p.kills} abates / ${p.lost} baixas, ${p.buildingsDestroyed} destruídas / ${p.buildingsLost} perdidas, pontos ${p.score}`);
-      if (p.naval.tankers + p.naval.warships + p.naval.shipsLost + p.naval.shipKills > 0) console.log(`     navios: ${p.naval.tankers} petroleiros, ${p.naval.warships} de guerra produzidos; ${p.naval.shipKills} navios abatidos, ${p.naval.shipsLost} perdidos`);
+      if (p.naval.tankers + p.naval.warships + p.naval.barges + p.naval.shipsLost + p.naval.shipKills > 0) console.log(`     navios: ${p.naval.tankers} petroleiros, ${p.naval.warships} de guerra, ${p.naval.barges} barcaças produzidos; ${p.naval.shipKills} navios abatidos, ${p.naval.shipsLost} perdidos`);
     }
   }
   gm.dispose();

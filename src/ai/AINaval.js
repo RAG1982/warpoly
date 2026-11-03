@@ -72,6 +72,8 @@ export class AINavalManager {
     this._nextWaveAt = 0;
     this._retreating = new Set();
     this._focused = new Set();
+    /** AI-AMPHIB: navios de guerra reservados à escolta de um desembarque (a frota não os recruta para investidas). */
+    this.escortHold = new Set();
     this._buf = [];
   }
 
@@ -280,7 +282,9 @@ export class AINavalManager {
   /** O plano naval está ativo (já na hora de se preparar e o mapa permite)? Antecede `cfg.at` para juntar o Centro nível 2. */
   planActive() {
     const cfg = this.cfg;
-    if (!cfg || (this.director.simTime || 0) < cfg.at - PLAN_LEAD) return false;
+    if (!cfg) return false;
+    // AI-AMPHIB: um alvo só alcançável por mar (e sem barcaça) antecipa o plano naval
+    if ((this.director.simTime || 0) < cfg.at - PLAN_LEAD && !this.director.amphibious.demand()) return false;
     return this.feasible();
   }
 
@@ -304,6 +308,7 @@ export class AINavalManager {
     else if (!s.shipyard) { stage = 'yard'; cost = getBuildingDef(this.types.shipyard).cost; }
     else if (s.shipyard.isConstructed && s.platforms.length === 0 && s.platformsPending === 0) { stage = 'plat'; cost = getBuildingDef(this.types.platform).cost; }
     else if (s.shipyard.isConstructed && !s.refinery && s.platforms.length > 0) { stage = 'ref'; cost = getBuildingDef(this.types.refinery).cost; }
+    else if (s.shipyard.isConstructed && s.refinery && s.refinery.isConstructed && this.director.amphibious.demand()) { stage = 'barge'; cost = this.director.amphibious.transportCost(); }
     else if (s.shipyard.isConstructed && s.warships.length + s.queued.warship < this.fleetTarget()) { stage = 'ship'; cost = getUnitDef(this.types.warship).cost; }
     if (stage !== this._stage) { this._stage = stage; this._stageSince = this.director.simTime || 0; }
     // desiste da reserva de uma etapa que não anda (ex.: falta pedra/madeira que o ouro guardado não resolve)
@@ -393,7 +398,7 @@ export class AINavalManager {
     }
 
     // Construções costeiras (exigem Centro nível 2 e Quartel; ver `missingRequirements`).
-    if (now < cfg.at || eco.isWorkerEmergency() || eco.getLivingWorkerCount() < 5 || !dir.getConstructedBarracks()) return;
+    if ((now < cfg.at && !dir.amphibious.demand()) || eco.isWorkerEmergency() || eco.getLivingWorkerCount() < 5 || !dir.getConstructedBarracks()) return;
     const want = type => dir.canAfford(getBuildingDef(type).cost) && missingRequirements(pid, type, gm).length === 0;
     if (!s.shipyard) {
       if (want(t.shipyard)) {
@@ -439,6 +444,9 @@ export class AINavalManager {
     const haveT = s.tankers.length + s.queued.tanker;
     const wantT = s.platforms.length === 0 ? 1 : Math.min(cfg.tankers, 1 + 2 * s.platforms.length);
     if (haveT < wantT) { train(t.tanker); return; }
+
+    // AI-AMPHIB: barcaça para o desembarque pedido pelo exército (antes de navios de guerra: o petróleo é dela)
+    if (dir.amphibious.trainTransport(sy, train, s)) return;
 
     // Frota de guerra: só depois que o exército terrestre mínimo existe.
     if (dir.getCombatUnitCount() < 3) return;
@@ -547,7 +555,7 @@ export class AINavalManager {
           }
         }
         // reforços: navios ociosos juntam-se à investida
-        const idle = ships.filter(u => u.state === 'idle' && !wave.ids.has(u.id) && !this._retreating.has(u.id) && u.hp >= u.maxHp * MIN_HP);
+        const idle = ships.filter(u => u.state === 'idle' && !wave.ids.has(u.id) && !this._retreating.has(u.id) && !this.escortHold.has(u.id) && u.hp >= u.maxHp * MIN_HP);
         if (idle.length >= 2 && now >= this._nextWaveAt) {
           const ids = idle.map(u => u.id);
           if (dir.issue({ type: CMD.ATTACK_MOVE, playerId: pid, unitIds: ids, x: wave.sx, z: wave.sz })) {
@@ -561,7 +569,7 @@ export class AINavalManager {
 
     // nova investida
     if (now < this._nextWaveAt || now < cfg.at) return;
-    const ready = ships.filter(u => u.state === 'idle' && !this._retreating.has(u.id) && u.hp >= u.maxHp * MIN_HP);
+    const ready = ships.filter(u => u.state === 'idle' && !this._retreating.has(u.id) && !this.escortHold.has(u.id) && u.hp >= u.maxHp * MIN_HP);
     if (ready.length < cfg.attackAt) return;
     let cx = 0; let cz = 0;
     for (const u of ready) { cx += u.mesh.position.x; cz += u.mesh.position.z; }

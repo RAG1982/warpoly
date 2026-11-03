@@ -2,6 +2,7 @@ import { AIEconomyManager } from './AIEconomyManager.js';
 import { AIMilitaryManager } from './AIMilitaryManager.js';
 import { AIPerception } from './AIPerception.js';
 import { AIMicroManager } from './AIMicroManager.js';
+import { AINavalManager } from './AINaval.js';
 import { getAIProfile } from './AIProfile.js';
 import { pickStrategy } from './AIStrategy.js';
 import { analyzeWood } from './AIWood.js';
@@ -113,6 +114,7 @@ export class AIDirector {
     this.economyManager = new AIEconomyManager(this);
     this.militaryManager = new AIMilitaryManager(this);
     this.microManager = new AIMicroManager(this); // F5-05
+    this.navalManager = new AINavalManager(this); // AI-NAVAL
 
     // F5-03: bônus de coleta (só Brutal) — soma uma fração de cada coleta do próprio jogador.
     this._bonusAcc = { gold: 0, wood: 0, stone: 0 };
@@ -233,7 +235,7 @@ export class AIDirector {
     let count = 0;
     for (let i = 0; i < lenE; i++) {
       const e = enemies[i];
-      if (!e.isDead && e.type !== workerType) {
+      if (!e.isDead && e.type !== workerType && e.layer !== 'naval') { // AI-NAVAL: a frota tem gerente próprio
         count++;
       }
     }
@@ -351,7 +353,7 @@ export class AIDirector {
     const lenE = enemies.length;
     for (let i = 0; i < lenE; i++) {
       const e = enemies[i];
-      if (!e.isDead && e.type !== this.workerType) {
+      if (!e.isDead && e.type !== this.workerType && e.layer !== 'naval') {
         if (e.state === 'idle' || e.state === 'moving') {
           readyCombatTroops++;
         }
@@ -402,6 +404,7 @@ export class AIDirector {
     if (this.simTime - this._lastEco >= 1.0 - 1e-6) {
       this._lastEco = this.simTime;
       this.economyManager.update(this.utilities.eco, this.utilities.housing);
+      this.navalManager.update(); // AI-NAVAL: no-op sem poços de petróleo / litoral
     }
 
     // 5. Coordinate Army Recruitment & Military Assault Expeditions

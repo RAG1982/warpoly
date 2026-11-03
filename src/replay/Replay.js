@@ -28,7 +28,7 @@ export const REPLAY_FORMAT = 'warpolyreplay';
 /** Versão do formato do arquivo. */
 export const REPLAY_VERSION = 1;
 /** Versão das regras da simulação com que os replays são gravados (ver cabeçalho). */
-export const REPLAY_SIM_VERSION = 6; // 6: OIL-BALANCE (petroleiro: carga 6 s e descarga 4 s na Refinaria; custos em petróleo ×2; poços ×2); 5: desembarque anfíbio de missão (spawnLanding, m04 NAVAL-LANDING); 4: projétil 'cannonball' dos navios (tempo de voo e alcance contra terra); 2: trigonometria da sim via src/sim/fmath.js (M6-01); 3: fila de pesquisas (RES-QUEUE: RESEARCH com construção ocupada enfileira; CANCEL_RESEARCH aceita `slot`)
+export const REPLAY_SIM_VERSION = 7; // 7: AI-NAVAL (a IA constrói porto/refinaria/plataforma, treina frota e a usa; muda partidas com IA em mapas com mar + petróleo); 6: OIL-BALANCE (petroleiro: carga 6 s e descarga 4 s na Refinaria; custos em petróleo ×2; poços ×2); 5: desembarque anfíbio de missão (spawnLanding, m04 NAVAL-LANDING); 4: projétil 'cannonball' dos navios (tempo de voo e alcance contra terra); 2: trigonometria da sim via src/sim/fmath.js (M6-01); 3: fila de pesquisas (RES-QUEUE: RESEARCH com construção ocupada enfileira; CANCEL_RESEARCH aceita `slot`)
 /** Intervalo (ticks) entre checksums gravados: 200 ticks = 10 s. Múltiplo de 20 (cadência de `gm.checksums`). */
 export const CHECK_EVERY = 200;
 export const REPLAY_EXT = '.warpolyreplay';

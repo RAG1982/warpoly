@@ -379,7 +379,7 @@ export class AIPerception {
       if (u.isDead || u.isDying || u.type === dir.workerType || dir.isReserved(u.id)) continue;
       if (u.state !== 'idle') continue;
       const d = getUnitDef(u.type);
-      if (d.isSiege || d.suicide || d.maxMana > 0) continue;
+      if (d.isSiege || d.suicide || d.maxMana > 0 || d.layer === 'naval') continue;
       const cls = unitClassOf(u.type);
       const score = (cls === 'cavalry' ? 0 : cls === 'melee' ? 1 : 2) * 1000 + u.id;
       if (!best || score < best.score) best = { u, score };

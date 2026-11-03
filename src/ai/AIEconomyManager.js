@@ -123,6 +123,7 @@ export class AIEconomyManager {
    * e Centro nível 2. O débito/validação final é do executor (CMD.RESEARCH).
    */
   considerResearch() {
+    if (this.director.navalManager.saving()) return; // AI-NAVAL: pesquisas esperam o Centro nível 2 / Estaleiro
     const buildings = this.gm.buildings;
     const pid = this.director.playerId;
     const player = this.director.player;
@@ -194,8 +195,10 @@ export class AIEconomyManager {
     if (!hq || hq.tier >= 3 || upgrading) return;
     if (this.director.woodOutlook().none) return; // NEW-44: o upgrade custa 400+ de madeira que não volta — vale mais em tropas
     // F5-04: a estratégia define quando evoluir (rush só depois de 8 min); `hqUpgradeAt` trabalhadores vivos.
-    if (this.director.simTime <= 480 && this.director.strategy.hqUpgradeAt >= 99) return;
-    const need = this.director.simTime > 480 ? Math.min(8, this.director.strategy.hqUpgradeAt) : this.director.strategy.hqUpgradeAt;
+    // AI-NAVAL: com o plano naval ativo (mar + petróleo) o Centro nível 2 não espera a estratégia: 6 trabalhadores bastam.
+    const navalPlan = hq.tier < 2 && this.director.navalManager.planActive();
+    if (!navalPlan && this.director.simTime <= 480 && this.director.strategy.hqUpgradeAt >= 99) return;
+    const need = navalPlan ? 6 : this.director.simTime > 480 ? Math.min(8, this.director.strategy.hqUpgradeAt) : this.director.strategy.hqUpgradeAt;
     if (this.getLivingWorkerCount() < Math.min(need, 8 + Math.max(0, this.director.profile.workerBonus))) return;
     if (!this.director.getConstructedBarracks() || !hasForge) return;
 
@@ -281,7 +284,7 @@ export class AIEconomyManager {
 
     for (let i = 0; i < lenB; i++) {
       const b = buildings[i];
-      if (b.ownerId === this.director.playerId && !b.isDead && !b.isConstructed) {
+      if (b.ownerId === this.director.playerId && !b.isDead && !b.isConstructed && b.role !== 'platform') { // AI-NAVAL: plataforma é obra do petroleiro
         incomplete = b;
         break;
       }
@@ -374,6 +377,7 @@ export class AIEconomyManager {
     if (this.director.resources.wood >= 150 && this.director.resources.gold >= 80) {
       maxDesiredWorkers = st.richWorkers + wb;
     }
+    maxDesiredWorkers += this.director.navalManager.extraWorkers(); // AI-NAVAL: Centro nível 2 e Estaleiro custam caro
 
     if (totalWorkers >= maxDesiredWorkers) return;
 
@@ -475,7 +479,8 @@ export class AIEconomyManager {
     // Difícil+ também reinveste ouro parado em quartéis extras (produção em paralelo).
     const surplusBarracks = this.director.profile.micro >= 2 && workerCount >= 7 && this.director.resources.gold >= 300
       ? (this.director.profile.micro >= 3 ? 2 : 1) : 0;
-    if (!woodless && hasBarracks && barracksCount < this.director.strategy.barracks + surplusBarracks && workerCount >= 5 &&
+    const navalSaving = this.director.navalManager.saving(); // AI-NAVAL: juntando para o Centro nível 2 / Estaleiro
+    if (!woodless && !navalSaving && hasBarracks && barracksCount < this.director.strategy.barracks + surplusBarracks && workerCount >= 5 &&
         this.director.canAfford(this.director.costs.barracks) &&
         missingRequirements(this.director.playerId, this.director.barracksType, this.gm).length === 0) {
       this.placeBuilding(this.director.barracksType);
@@ -499,6 +504,8 @@ export class AIEconomyManager {
       this.placeBuilding(this.director.forgeType);
       return;
     }
+
+    if (navalSaving) return; // AI-NAVAL: o resto é opcional e disputa o ouro do Centro nível 2
 
     // 5b. F4-01: Estábulo/Covil quando o Centro é nível 2 (requisito checado por
     // `missingRequirements`), sobra ≥ 600 de ouro e já há ≥ 6 combatentes.
@@ -667,6 +674,11 @@ export class AIEconomyManager {
       } else {
         targetStone = 0;
       }
+    }
+
+    // AI-NAVAL: o Centro nível 2 pede pedra (200); com o plano naval ativo, ao menos 2 trabalhadores a juntam.
+    if (workerCount >= 6 && res.stone < 200 && this.director.navalManager.saving() && this.director.navalManager.planReserve().stone > res.stone) {
+      targetStone = Math.max(targetStone, 2);
     }
 
     // Safety: Ensure stone never claims all workers (always keep at least 1 wood and 1 gold if >= 2 workers)

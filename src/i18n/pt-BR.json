@@ -921,6 +921,8 @@
   "campaign.none": "Nenhuma campanha disponível.",
   "campaign.play": "Iniciar missão",
   "campaign.newAttempt": "Nova tentativa",
+  "campaign.difficulty": "Dificuldade da campanha",
+  "campaign.difficultyHint": "Muda a IA de todas as missões: Fácil um degrau abaixo, Difícil um acima do projeto da missão.",
   "campaign.attempt": "Tentativa {n}",
   "campaign.provisional": "PROVISÓRIA",
   "campaign.provisionalHint": "A premissa da campanha ainda aguarda aprovação.",

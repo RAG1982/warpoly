@@ -201,6 +201,12 @@ O orçamento de APM é um balde de fichas (capacidade = APM/6, reposição APM/6
 - Custos: a IA usa os **mesmos custos reais** de `src/data/`.
 - Calibragem: `tools/ai-ladder.mjs` (Difícil × Normal e Normal × Fácil, ≥ 10 seeds, lados alternados).
 
+**Níveis de dificuldade (M5-01, D3 = a)**
+- Fonte única dos números: `src/ai/AIProfile.js` (`DIFFICULTY_PROFILES`: Fácil/Normal/Difícil/Brutal; inclui `naval`, `boats`/`landCooldown`). Alavancas honestas: APM e atraso de reação, micro (0–3), nº de trabalhadores (`workerBonus`), pesquisa mais cedo (`research`), conjuradores, muralhas, olheiro, `startDelay`/ondas; só o **Brutal** tem bônus de coleta (+25 %) e visão total.
+- Escaramuça: seletor de dificuldade por IA (4 níveis) em `skirmishSetup`/`MainMenu`, persistido em `warpoly.skirmish*`.
+- Campanha: seletor global **Fácil / Normal / Difícil** na tela da campanha (`src/campaign/difficulty.js`, chave `warpoly.campaignDifficulty`). Desloca todas as IAs da missão em ±1 degrau em relação ao projeto da missão (Normal = config idêntica, replays/checksums intactos). O Brutal fica só na escaramuça.
+- Escada medida (`tools/ai-ladder.mjs --seeds 20`, 40 partidas por degrau, lados alternados, vitória = V + ½E): Normal × Fácil **100 %**; Difícil × Normal **57 % → 74 %** depois da rodada 1 (`workerBonus` 2 → 4, `research` 120 → 60); Brutal × Difícil **80 % → 76 %** (Difícil ficou mais forte; 29V 8D 3E). Todos os degraus ≥ 60 %; partidas não terminadas em 30 min simulados (empates): 1–3 por par de 40. Reproduzir: `tools/safe-run.sh --timeout 3000 -- node tools/ai-ladder.mjs --seeds 20 --pairs hard:normal,normal:easy,brutal:hard`.
+
 ## Condições de vitória (F3-09)
 
 `MatchConfig.victoryMode` (`?victory=regicide`, seletor no menu de escaramuça, chave `warpoly.victory`):

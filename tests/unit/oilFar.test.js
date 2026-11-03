@@ -17,17 +17,21 @@ const SPEC = {
   'camp-08-fornalha': { safe: [[0, 0]], far: [[1, 0]], total: 4, farMin: 55 },
   'camp-09-miragem': { safe: [[0, 0]], far: [[1, 0]], total: 4, farMin: 55 },
   'estreito-naval-1v1': { safe: [[0, 0], [2, 1]], far: [[1, 0], [3, 1]], total: 6, farMin: 50 },
+  // OIL-FAR-2: palcos 10–12 da Aliança. Costa Ferrugem: 4 (meio do canal) seguro-ish; 0, 1 e 5 longe. Cabo Ferrugem: 4 e 5 são poços de 5.000 (já a 56–63 u).
+  'camp-10-costa-ferrugem': { safe: [[4, 0]], far: [[0, 0], [1, 0], [5, 0]], total: 6, farMin: 55 },
+  'camp-11-estepe-do-vento': { safe: [[0, 0]], far: [[1, 0]], total: 6, farMin: 55 },
+  'camp-12-cabo-ferrugem': { safe: [[0, 0]], far: [[1, 0], [4, 0], [5, 0]], total: 6, farMin: 55, amounts: { 4: 5000, 5: 5000 } },
   'arquipelago-pontes-4p': { safe: [[0, 0], [2, 1], [4, 2]], far: [[1, 0], [3, 1], [5, 2], [7, 3]], total: 12, farMin: 50 }
 };
 
 describe('OIL-FAR · poços longe da costa', () => {
   for (const [id, spec] of Object.entries(SPEC)) {
-    it(`${id}: ${spec.total} poços de 10.000, todos no mar ligado ao oceano; 1 seguro-ish (>= 25 u) e os outros do jogador longe (>= ${spec.farMin} u de navegação da doca)`, () => {
+    it(`${id}: ${spec.total} poços (10.000 cada, salvo amounts), todos no mar ligado ao oceano; 1 seguro-ish (>= 25 u) e os outros do jogador longe (>= ${spec.farMin} u de navegação da doca)`, () => {
       const m = getMap(id);
       expect(FAR_OIL[id], 'receita FAR_OIL').toBeTypeOf('function');
       const oil = m.resources.filter((r) => r.type === 'oil');
       expect(oil).toHaveLength(spec.total);
-      for (const w of oil) expect(w.amount).toBe(10000);
+      oil.forEach((w, i) => expect(w.amount).toBe(spec.amounts?.[i] ?? 10000));
       const ctx = makeCtx(m);
       const docks = m.startSlots.map((s, i) => dockOf(ctx, s, m.anchors[`shipyard${i + 1}Water`] ?? null, id === 'arquipelago-pontes-4p' ? { x: -20, z: 20, maxNav: 130 } : null));
       const fields = docks.map((d) => navDist(ctx.sea, d.x, d.z));

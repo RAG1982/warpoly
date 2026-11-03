@@ -160,6 +160,22 @@ export const FAR_OIL = {
       { index: p * 2 + 1, player: p, min: 50, max: 85, target: 58, clearR: 6, lean: (p + 1) % 4, awayFrom: (p + 1) % 4, awayMin: 45 }
     ])
   }),
+  /** Costa Ferrugem (palco 10): o poço do meio do canal (índice 4, wellMid1, ~26 u da doca) fica como seguro-ish e o contestado (5, ~115 u) também; os dois da
+   *  costa oeste (0 e 1, atrás do Paço) vão para mar aberto rumo ao inimigo. A doca é a água do Estaleiro (shipyard1Water). */
+  'camp-10-costa-ferrugem': (ctx, extra) => ({
+    docks: dockPair(ctx, extra),
+    moves: [{ index: 0, player: 0, min: 55, max: 100, target: 66, lean: 1 }, { index: 1, player: 0, min: 80, max: 140, target: 95, lean: 1 }]
+  }),
+  /** Estepe do Vento (palco 11): poços da Liga (0 = seguro-ish, 1 = longe); os dos Clãs e do aliado ficam. */
+  'camp-11-estepe-do-vento': (ctx, extra) => ({
+    docks: dockPair(ctx, extra),
+    moves: [{ index: 0, player: 0, min: 27, max: 36, target: 30 }, { index: 1, player: 0, min: 60, max: 100, target: 68, lean: 1 }]
+  }),
+  /** Cabo Ferrugem (palco 12): poços da Liga 0 (seguro-ish) e 1 (longe); os de 5.000 (4 e 5, ~56–63 u, perto do estreito) e os do inimigo ficam. */
+  'camp-12-cabo-ferrugem': (ctx, extra) => ({
+    docks: dockPair(ctx, extra),
+    moves: [{ index: 0, player: 0, min: 27, max: 36, target: 30 }, { index: 1, player: 0, min: 60, max: 100, target: 68, lean: 1 }]
+  }),
   /** Miragem (palco 9): idem (poços da Liga: índices 0 e 1). */
   'camp-09-miragem': (ctx, extra) => ({
     docks: dockPair(ctx, extra),

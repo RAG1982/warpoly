@@ -235,7 +235,7 @@ function ground(c, { attack = true } = {}) {
   if (brann && !brann.isDead) {
     const home = c.anchor('bastionHall', 0, -6);
     const near = enemies.filter((u) => dist(posOf(u), posOf(brann)) < 12);
-    if (brann.hp < brann.maxHp * 0.4 && near.length >= 1) { c.issue({ type: c.CMD.MOVE, unitIds: [brann.id], x: c.anchor('playerStart').x, z: c.anchor('playerStart').z }); }
+    if (brann.hp < brann.maxHp * 0.75 && near.length >= 1) { c.issue({ type: c.CMD.MOVE, unitIds: [brann.id], x: c.anchor('playerStart').x, z: c.anchor('playerStart').z }); }
     else if (near.length >= 1) {
       c.issue({ type: c.CMD.CAST, unitIds: [brann.id], abilityId: 'hero_war_cry' });
       c.issue({ type: c.CMD.CAST, unitIds: [brann.id], abilityId: 'hero_defensive_stance' });
@@ -304,4 +304,18 @@ export const makeLoop = loop;
 export const win = loop({ army: true, navy: true, attack: true });
 /** Mesma economia, mas SEM treinar tropa, balistas, magos nem frota, e sem atacar: tem de perder para as levas. */
 export const noArmy = loop({ army: false, navy: false, attack: false });
-export const lose = noArmy;
+/** Pós AI-NAVAL a IA terrestre é mais lenta e a base sem tropa nem sempre cai a tempo: depois do Ato III o Capitão Brann sai sozinho contra o inimigo (derrota por Brann caído). */
+export const lose = [
+  { ...noArmy[0], until: (c) => c.gm.isGameOver || (c.gm.mission.vars.act >= 3 && (c.gm.mission.vars.act3_clock ?? 0) >= 60) },
+  {
+    name: 'brann-suicida',
+    every: 5,
+    each: (c) => {
+      const brann = c.tagged('brann')[0];
+      const foes = c.gm.allUnits.filter((u) => !u.isDead && u.ownerId === 1 && u.type !== 'peon');
+      if (brann && !brann.isDead && foes.length) c.issue({ type: c.CMD.ATTACK_MOVE, unitIds: [brann.id], x: posOf(nearest(foes, posOf(brann))).x, z: posOf(nearest(foes, posOf(brann))).z });
+    },
+    until: (c) => c.gm.isGameOver,
+    timeout: 1200
+  }
+];

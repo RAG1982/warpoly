@@ -254,6 +254,15 @@ export class AINavalManager {
 
   // --- Plano naval: integração com a economia/exército terrestres ---
 
+  /**
+   * Esta IA comanda os próprios navios (o mapa tem poços de petróleo e mar)? Sem isso o navio (ex.: escolta de desembarque de missão)
+   * continua sendo tropa comum do exército terrestre, como antes do AI-NAVAL.
+   */
+  managesFleet() {
+    if (this._manages === undefined) this._manages = !!this.cfg && !!this.gm.navalPathfinder && this.gm.hasOilWells;
+    return this._manages;
+  }
+
   /** Há mar acessível + poço de petróleo alcançável a partir da base? (busca de local do Estaleiro, cacheada) */
   feasible() {
     const cfg = this.cfg;

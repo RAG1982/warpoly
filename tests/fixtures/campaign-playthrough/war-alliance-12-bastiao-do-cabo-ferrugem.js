@@ -308,7 +308,7 @@ export const win = loop({ army: true, navy: true, attack: true });
 export const noArmy = loop({ army: false, navy: false, attack: false });
 /** Pós AI-NAVAL a IA terrestre é mais lenta e a base sem tropa nem sempre cai a tempo: depois do Ato III o Capitão Brann sai sozinho contra o inimigo (derrota por Brann caído). */
 export const lose = [
-  { ...noArmy[0], until: (c) => c.gm.isGameOver || (c.gm.mission.vars.act >= 3 && (c.gm.mission.vars.act3_clock ?? 0) >= 60) },
+  { ...noArmy[0], each: (c) => { econ(c, { army: false, navy: false }); }, until: (c) => c.gm.isGameOver || (c.gm.mission.vars.act >= 3 && (c.gm.mission.vars.act3_clock ?? 0) >= 60) },
   {
     name: 'brann-suicida',
     every: 5,

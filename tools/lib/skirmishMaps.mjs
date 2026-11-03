@@ -20,6 +20,7 @@ import { carveRidge } from './cliffRidge.mjs';
 import { registerMap, unregisterMap } from '../../src/data/maps/index.js';
 import { measureWood } from './woodStats.mjs';
 import { makeCtx, GOLD_AMOUNT } from './campaignMaps.mjs';
+import { applyFarOil } from './farOil.mjs'; // OIL-FAR: poços longe da costa
 
 const freeze = (o) => Object.freeze(o);
 const hyp = (a, b) => Math.hypot(a.x - b.x, a.z - b.z);
@@ -183,6 +184,7 @@ function finish(preset, world, seedUsed) {
   addExpansionGold(ctx, preset.extraGold ?? 0);
   addCamps(ctx, preset.camps ?? 0, preset.mode === 'ffa' ? 4 : 3);
   if (preset.naval) addContestedWells(ctx, preset.contestedWells ?? 0);
+  applyFarOil(preset.id, ctx, {}); // OIL-FAR
   // âncoras padrão recalculadas com as jazidas/acampamentos novos (antes de `meta`)
   delete m.anchors;
   const anchors = defaultAnchors(m);

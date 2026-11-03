@@ -87,7 +87,7 @@ describe('m04 Baixio do Breu · o mapa', () => {
     }
     const wells = gm.resourceDeposits.filter((r) => r.type === 'oil');
     expect(wells).toHaveLength(6);
-    // 2 poços perto de cada costa e 2 contestados no meio (x ≈ ±13)
+    // OIL-FAR: por costa, 1 poço seguro-ish (well1/well3) e 1 longe, em mar aberto (well2/well4); 2 contestados no meio (x ≈ ±13)
     expect(Math.abs(A.wellMid1.x)).toBeLessThan(20); expect(Math.abs(A.wellMid2.x)).toBeLessThan(20);
     expect(d(A.well1, A.playerStart)).toBeLessThan(d(A.well1, A.enemyStart));
     expect(d(A.well3, A.enemyStart)).toBeLessThan(d(A.well3, A.playerStart));

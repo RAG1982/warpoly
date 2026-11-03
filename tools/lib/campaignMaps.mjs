@@ -21,6 +21,7 @@ import { speciesForBiome } from '../../src/data/treeSpecies.js';
 import { estimateWood } from '../../src/data/maps/coast/layout.js';
 import { thinCorridor, makeWoodFn, CORRIDOR_DEFAULTS } from './corridorThin.mjs';
 import { carveRidge, narrowestCut, wallLine, sealedBy } from './cliffRidge.mjs';
+import { applyFarOil } from './farOil.mjs'; // OIL-FAR: poços longe da costa
 
 /** Parâmetros da etapa "afinar corredor" (largura da faixa em u, fração de árvores que fica, raio de floresta de coleta etc.): ver `corridorThin.mjs`. */
 export const CORRIDOR_PARAMS = Object.freeze({ ...CORRIDOR_DEFAULTS });
@@ -1867,6 +1868,7 @@ function finish(id, world, seedUsed) {
     const wells = relocateOil(ctx, n);
     ['wellMid1', 'wellMid2', 'well5', 'well6'].filter((k) => extra[k]).forEach((k, i) => { extra[k] = ptw(wells[i]); });
   }
+  applyFarOil(id, ctx, extra); // OIL-FAR
   // âncoras: padrão (recalculadas com as jazidas/acampamentos novos) + as da ficha; as escritas à mão prevalecem
   const base = { ...m.anchors };
   delete m.anchors;

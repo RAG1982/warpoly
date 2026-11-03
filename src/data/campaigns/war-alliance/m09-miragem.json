@@ -53,7 +53,7 @@
       "description": { "pt-BR": "Bandidos os guardam numa ilhota no mar. Os bandidos precisam cair antes; depois a Barcaça leva os náufragos.", "en": "Bandits hold them on an islet at sea. The bandits must fall first; then a Transport Barge carries the castaways." } },
     { "id": "s-frigates", "type": "train", "priority": "secondary", "unitType": "frigate", "count": 3,
       "title": { "pt-BR": "Treinar 3 Fragatas no Estaleiro", "en": "Train 3 Frigates at the Shipyard" },
-      "description": { "pt-BR": "O Estaleiro fica na costa. Fragatas custam petróleo: erga uma Plataforma num poço do mar perto da base.", "en": "The Shipyard stands on the coast. Frigates cost oil: raise a Platform on a sea well near your base." } },
+      "description": { "pt-BR": "O Estaleiro fica na costa. Fragatas custam petróleo: erga uma Plataforma no poço do mar mais próximo; o outro fica longe, em mar aberto: escolte o Petroleiro.", "en": "The Shipyard stands on the coast. Frigates cost oil: raise a Platform on the nearest sea well; the other lies far out in open sea: escort the Tanker." } },
     { "id": "s-mages", "type": "train", "priority": "secondary", "unitType": "mage", "count": 4,
       "title": { "pt-BR": "Treinar 4 Magos na Torre Arcana", "en": "Train 4 Mages at the Arcane Tower" },
       "description": { "pt-BR": "Os magos cuidam dos feridos e queimam o que a espada não alcança. Erga a Torre Arcana com o Paço no nível 3.", "en": "The mages heal the wounded and burn what the sword cannot reach. Raise the Arcane Tower with the Palace at level 3." } },

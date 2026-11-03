@@ -83,14 +83,16 @@ function navy(c, unfinished) {
   if (!unfinished && yard && !count(c, 'refinery') && affordable(c, { gold: 100, wood: 150, stone: 50 }) && c.seconds - (b.last.ref ?? -99) > 12) { if (at(c, 'refinery', 'refinery1')) b.last.ref = c.seconds; }
   if (!yard) return;
   const tankers = c.mine('tanker');
-  const wells = ['well1', 'well2', 'wellMid1', 'wellMid2'].map((n) => c.anchor(n));
+  const wells = ['well1', 'well2'].map((n) => c.anchor(n)); // OIL-FAR: well1 = poço seguro-ish (~30 u da doca); well2 = poço longe, exposto ao meio do canal
   const wellDeps = c.gm.resourceDeposits.filter((r) => r.type === 'oil');
   const depAt = (p) => wellDeps.find((d) => dist(posOf(d), p) < 2);
   if (tankers.length + yard.queue.length < 2 && affordable(c, { gold: 100, wood: 60 })) c.issue({ type: c.CMD.TRAIN, buildingId: yard.id, unitType: 'tanker' });
-  // Plataformas nos 2 poços da costa, um Petroleiro em cada; depois todos coletam
+  // Plataforma no poço seguro-ish (well1) logo; a do poço longe (well2) só quando a esquadra (5 Fragatas) limpou a patrulha orca do canal e pode escoltar o Petroleiro
+  const escort = c.mine('frigate').length >= 5 && c.tagged('patrol').every((u) => u.isDead);
   tankers.forEach((t, i) => {
-    const d = depAt(wells[i % 2]);
+    const d = depAt(wells[i === 1 && escort ? 1 : 0]);
     if (!d || t.state !== 'idle') return;
+    if (i === 1 && !escort) return;
     if (!d.platform || !d.platform.isConstructed) { if (!d.platform && affordable(c, { gold: 180, wood: 60 })) c.issue({ type: c.CMD.PLACE_BUILDING, buildingType: 'oil_platform', x: posOf(d).x, z: posOf(d).z, unitIds: [t.id] }); }
     else c.issue({ type: c.CMD.GATHER, unitIds: [t.id], targetId: d.id });
   });
@@ -104,17 +106,18 @@ function navy(c, unfinished) {
   if (!unfinished && count(c, 'castle') < 2 && res(c).gold > 1000 && res(c).wood > 500 && res(c).stone >= 250 && c.seconds - (b.last.post ?? -99) > 30) { if (at(c, 'castle', 'outpost1', 4)) b.last.post = c.seconds; }
 }
 
-/** Esquadra: fica no canal junto aos poços da costa; com 5+ Fragatas, caça a patrulha e depois volta. */
+/** Esquadra: fica na água do Estaleiro (entre a base e o poço seguro); com 5+ Fragatas, caça a patrulha e depois volta. Com a Plataforma do poço longe erguida, escolta-a (fica entre os dois poços). */
 function fleet(c) {
   const stella = c.tagged('stella')[0];
   const ships = [...c.mine('frigate')];
-  const home = c.anchor('well2', 8, -4);
+  const farPlat = c.gm.buildings.some((b) => b.ownerId === 0 && b.type === 'oil_platform' && !b.isDead && dist(posOf(b), c.anchor('well2')) < 3);
+  const home = farPlat && ships.length >= 4 ? { x: (c.anchor('well1').x + c.anchor('well2').x) / 2, z: (c.anchor('well1').z + c.anchor('well2').z) / 2 } : c.anchor('shipyard1Water');
   const hunt = c.seconds > 150 && ships.length >= 5 && c.tagged('patrol').some((u) => !u.isDead);
   const spots = [c.anchor('patrol2'), c.anchor('patrol1')];
   const live = c.tagged('patrol').filter((u) => !u.isDead);
   // as levas orcas agora bombardeiam a costa da base (a grade espacial cobre o mapa todo): a esquadra intercepta quem chega perto do Paço
   const raiders = c.gm.allUnits.filter((u) => !u.isDead && u.ownerId === 1 && u.layer === 'naval' && dist(posOf(u), c.anchor('playerStart')) < 55);
-  const target = raiders.length ? posOf(nearest(raiders, c.anchor('playerStart'))) : hunt && live.length ? posOf(nearest(live, c.anchor('well2'))) : home;
+  const target = raiders.length ? posOf(nearest(raiders, c.anchor('playerStart'))) : hunt && live.length ? posOf(nearest(live, home)) : home;
   ships.sort((a, b) => a.id - b.id).forEach((u) => {
     if ((u.state === 'idle' || raiders.length) && dist(posOf(u), target) > 10) c.issue({ type: c.CMD.ATTACK_MOVE, unitIds: [u.id], x: target.x, z: target.z });
   });

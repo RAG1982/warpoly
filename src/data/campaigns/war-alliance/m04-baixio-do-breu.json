@@ -204,8 +204,8 @@
         "en": "Raise 2 Oil Platforms"
       },
       "description": {
-        "pt-BR": "O Petroleiro constrói a Plataforma sobre um poço do mar. Dois poços ficam perto da nossa costa; dois, no meio do canal.",
-        "en": "A Tanker builds the Platform on a sea well. Two wells lie near our coast; two mid-channel."
+        "pt-BR": "O Petroleiro constrói a Plataforma sobre um poço do mar. Um poço fica a uma volta curta do nosso Estaleiro; os outros, em mar aberto, no meio do canal: escoltem o Petroleiro.",
+        "en": "A Tanker builds the Platform on a sea well. One well lies a short sail from our Shipyard; the others lie in open water mid-channel: escort the Tanker."
       }
     },
     {
@@ -481,8 +481,8 @@
                 },
                 "portrait": "⚔️",
                 "text": {
-                  "pt-BR": "O breu sobe do fundo em quatro poços perto das costas e em dois no meio do canal. Quem tiver plataformas ali terá petróleo; quem tiver petróleo terá navios.",
-                  "en": "Pitch rises from the seabed at four wells near the coasts and two mid-channel. Whoever holds platforms there will have oil; whoever has oil will have ships."
+                  "pt-BR": "O breu sobe do fundo em seis poços: um perto de cada costa e os outros em mar aberto, no meio do canal. Quem tiver plataformas ali terá petróleo; quem tiver petróleo terá navios.",
+                  "en": "Pitch rises from the seabed at six wells: one near each coast and the rest in open water mid-channel. Whoever holds platforms there will have oil; whoever has oil will have ships."
                 },
                 "duration": 8
               }
@@ -756,7 +756,7 @@
           "tag": "orc_fleet",
           "order": {
             "kind": "attackMove",
-            "anchor": "well2"
+            "anchor": "well1"
           }
         },
         {

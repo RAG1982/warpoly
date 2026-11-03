@@ -235,7 +235,9 @@ function ground(c, { attack = true } = {}) {
   if (brann && !brann.isDead) {
     const home = c.anchor('bastionHall', 0, -6);
     const near = enemies.filter((u) => dist(posOf(u), posOf(brann)) < 12);
-    if (brann.hp < brann.maxHp * 0.75 && near.length >= 1) { c.issue({ type: c.CMD.MOVE, unitIds: [brann.id], x: c.anchor('playerStart').x, z: c.anchor('playerStart').z }); }
+    const crowd = enemies.filter((u) => u.type !== 'peon' && u.layer !== 'naval' && dist(posOf(u), posOf(brann)) < 30).length;
+    const act3 = c.gm.mission.vars.act >= 3; // Ato III: Brann (derrota se cair) fica na retaguarda, longe do assalto de Skarn
+    if (act3 || (brann.hp < brann.maxHp * 0.75 && near.length >= 1) || crowd >= 4) { c.issue({ type: c.CMD.MOVE, unitIds: [brann.id], x: c.anchor('playerStart').x, z: c.anchor('playerStart').z }); }
     else if (near.length >= 1) {
       c.issue({ type: c.CMD.CAST, unitIds: [brann.id], abilityId: 'hero_war_cry' });
       c.issue({ type: c.CMD.CAST, unitIds: [brann.id], abilityId: 'hero_defensive_stance' });

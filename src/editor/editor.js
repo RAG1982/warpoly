@@ -10,17 +10,20 @@ import { listMapIds, peekMap, ensureMapLoaded } from '../data/maps/index.js'; //
 import { validateMapDef, SIZE_LIMITS, FOREST_SPECIES } from '../data/maps/validate.js';
 import { TILESETS, TILESET_IDS, resolveTilesetId } from '../data/tilesets.js';
 import { CRITTER_SPECIES_LIST } from '../data/critters.js';
+import { BIOME, BIOME_KEYS } from '../data/maps/biome.js';
+import { COAST_PRESET_IDS } from '../data/maps/coast/index.js';
 import {
-  createModel, applyTerrainBrush, placeItem, eraseAt, exportMap, exportJson, importMap, importForEditing, History, heightAt,
-  TERRAIN_TOOLS, ITEM_TOOLS
+  createModel, applyTerrainBrush, applyBiomeBrush, fillBiomeRegion, placeItem, eraseAt, exportMap, exportJson, exportLayerJson, importLayer,
+  importMap, importForEditing, regenerateCoast, replaceModel, History, heightAt, TERRAIN_TOOLS, BIOME_TOOLS, ITEM_TOOLS
 } from './mapModel.js';
+import { analyzeLava } from './gridCheck.js';
 import { saveMap, loadSaved, listSaved, deleteSaved, saveDraft, loadDraft } from './storage.js';
 import { View2D } from './view2d.js';
 import { Preview3D } from './preview3d.js';
 
 const $ = (id) => document.getElementById(id);
-const TOOL_COLORS = { raise: '#b58a5a', lower: '#5a7ab5', flatten: '#9aa0a8', smooth: '#c8c8d0', land: '#60984a', water: '#3a76b8', ford: '#e9d27a', start: '#4aa3ff', gold: '#ffd23a', stone: '#c3c8d0', oil: '#1a1a22', forest: '#2f8f3a', camp: '#ff5a4a', critters: '#ffffff', erase: '#ff8a7a' };
-const BRUSH_TOOLS = new Set(TERRAIN_TOOLS);
+const TOOL_COLORS = { raise: '#b58a5a', lower: '#5a7ab5', flatten: '#9aa0a8', smooth: '#c8c8d0', land: '#60984a', water: '#3a76b8', ford: '#e9d27a', start: '#4aa3ff', gold: '#ffd23a', stone: '#c3c8d0', oil: '#1a1a22', forest: '#2f8f3a', camp: '#ff5a4a', critters: '#ffffff', erase: '#ff8a7a', lava: '#ff6a2a', passage: '#8a8f98', biome: '#7ab05a', biomeFill: '#5aa0a0' };
+const BRUSH_TOOLS = new Set([...TERRAIN_TOOLS, 'biome']);
 
 let storage = null;
 try { storage = window.localStorage; } catch { storage = null; }
@@ -29,9 +32,10 @@ const state = {
   model: createModel({ size: 128, fill: 'land' }),
   history: null,
   tool: 'raise',
-  opts: { radius: 6, strength: 0.5, species: 'pine', count: 10, forestRadius: 7, guards: 4, rewardGold: 300, depositType: 'gold', depositAmount: 3000, critterSpecies: 'sheep', critterCount: 6, amount: '' },
+  opts: { radius: 6, strength: 0.5, species: 'pine', count: 10, forestRadius: 7, guards: 4, rewardGold: 300, depositType: 'gold', depositAmount: 3000, critterSpecies: 'sheep', critterCount: 6, amount: '', biome: BIOME.GRASS, preset: COAST_PRESET_IDS[0], seed: 1 },
   issues: { errors: [], warnings: [] },
-  previewMode: 'light'
+  previewMode: 'light',
+  showBiome: true
 };
 
 const view = new View2D($('view2d'));
@@ -77,8 +81,8 @@ function slider(key, min, max, step, labelKey, fmt = (v) => String(v)) {
 
 function selectOf(key, values, labelFn, labelKey) {
   const sel = el('select', {}, values.map((v) => el('option', { value: v, text: labelFn(v) })));
-  sel.value = state.opts[key];
-  sel.addEventListener('change', () => { state.opts[key] = sel.value; });
+  sel.value = String(state.opts[key]);
+  sel.addEventListener('change', () => { state.opts[key] = typeof state.opts[key] === 'number' ? Number(sel.value) : sel.value; });
   return field(t(labelKey), sel);
 }
 
@@ -100,9 +104,14 @@ function toolButton(id) {
 function renderOptions() {
   const box = el('div');
   const tool = state.tool;
-  if (BRUSH_TOOLS.has(tool)) {
+  if (tool === 'biome' || tool === 'biomeFill') {
+    box.append(selectOf('biome', BIOME_KEYS.map((_, i) => String(i)), (v) => t(`editor.biome.${BIOME_KEYS[Number(v)]}`), 'editor.opt.biome'));
+    if (tool === 'biome') box.append(slider('radius', 2, 20, 0.5, 'editor.opt.radius'));
+    else box.append(el('p', { class: 'hint', text: t('editor.hint.biomeFill') }));
+  } else if (BRUSH_TOOLS.has(tool)) {
     box.append(slider('radius', 2, 20, 0.5, 'editor.opt.radius'));
     if (tool === 'raise' || tool === 'lower') box.append(slider('strength', 0.1, 2, 0.1, 'editor.opt.strength'));
+    if (tool === 'lava' || tool === 'passage') box.append(el('p', { class: 'hint', text: t(`editor.hint.${tool}`) }));
   } else if (tool === 'gold' || tool === 'stone' || tool === 'oil') {
     box.append(numberOf('amount', 100, 100000, 100, 'editor.opt.amount'));
   } else if (tool === 'forest') {
@@ -152,12 +161,47 @@ function renderMeta() {
   return box;
 }
 
+function renderCoast() {
+  const box = el('div');
+  const sel = el('select', { id: 'coast-preset' }, COAST_PRESET_IDS.map((id) => el('option', { value: id, text: t(`editor.preset.${id}`, { fallback: id }) })));
+  sel.value = state.opts.preset;
+  sel.addEventListener('change', () => { state.opts.preset = sel.value; });
+  const seed = el('input', { id: 'coast-seed', type: 'number', min: 1, max: 999999, step: 1, value: state.opts.seed });
+  seed.addEventListener('input', () => { state.opts.seed = Math.max(1, Math.floor(Number(seed.value)) || 1); });
+  box.append(
+    field(t('editor.coast.preset'), sel),
+    field(t('editor.coast.seed'), seed),
+    el('button', { id: 'btn-regen', type: 'button', text: t('editor.coast.regen'), onclick: () => regenerate() }),
+    el('p', { class: 'hint', text: t('editor.coast.hint') })
+  );
+  return box;
+}
+
+function renderGrids() {
+  const box = el('div', { class: 'toolgrid' });
+  const btn = (id, key, fn) => el('button', { id, type: 'button', text: t(key), onclick: fn });
+  const chk = el('input', { type: 'checkbox', id: 'chk-biome' });
+  chk.checked = state.showBiome;
+  chk.addEventListener('change', () => { state.showBiome = chk.checked; view.showBiome = chk.checked; needsDraw = true; });
+  box.append(
+    btn('btn-biome-export', 'editor.grid.exportBiome', () => exportGrid('biome')),
+    btn('btn-biome-import', 'editor.grid.importBiome', () => { gridKind = 'biome'; $('file-grid').click(); }),
+    btn('btn-lava-export', 'editor.grid.exportLava', () => exportGrid('lava')),
+    btn('btn-lava-import', 'editor.grid.importLava', () => { gridKind = 'lava'; $('file-grid').click(); }),
+    el('label', { class: 'check' }, [chk, ` ${t('editor.grid.showBiome')}`])
+  );
+  return box;
+}
+
 function renderTools() {
   const root = $('tools');
   root.replaceChildren(
     el('div', { class: 'panel' }, [el('h2', { text: t('editor.section.terrain') }), el('div', { class: 'toolgrid' }, TERRAIN_TOOLS.map(toolButton))]),
+    el('div', { class: 'panel' }, [el('h2', { text: t('editor.section.biome') }), el('div', { class: 'toolgrid' }, BIOME_TOOLS.map(toolButton))]),
     el('div', { class: 'panel' }, [el('h2', { text: t('editor.section.items') }), el('div', { class: 'toolgrid' }, [...ITEM_TOOLS, 'erase'].map(toolButton))]),
     el('div', { class: 'panel' }, [el('h2', { text: t('editor.section.options') }), renderOptions()]),
+    el('div', { class: 'panel' }, [el('h2', { text: t('editor.section.coast') }), renderCoast()]),
+    el('div', { class: 'panel' }, [el('h2', { text: t('editor.section.grids') }), renderGrids()]),
     el('div', { class: 'panel' }, [el('h2', { text: t('editor.section.map') }), renderMeta()]),
     el('p', { class: 'hint', text: t('editor.hint.keys') })
   );
@@ -173,7 +217,11 @@ function issueText(i) {
 }
 
 export function runValidation() {
-  const res = validateMapDef(exportMap(state.model));
+  const base = validateMapDef(exportMap(state.model));
+  const extra = analyzeLava(state.model);
+  const errors = [...base.errors, ...extra.filter((i) => i.level === 'error')];
+  const warnings = [...base.warnings, ...extra.filter((i) => i.level === 'warning')];
+  const res = { ...base, ok: errors.length === 0, errors, warnings };
   state.issues = res;
   const sum = $('issues-summary');
   if (res.ok && res.warnings.length === 0) {
@@ -254,6 +302,7 @@ function stamp(tool, x, z, shift) {
   let useTool = tool;
   if (shift && tool === 'raise') useTool = 'lower';
   else if (shift && tool === 'lower') useTool = 'raise';
+  if (useTool === 'biome') return applyBiomeBrush(state.model, x, z, { radius: o.radius, biome: o.biome });
   return applyTerrainBrush(state.model, useTool, x, z, { radius: o.radius, strength: o.strength, level: stroke ? stroke.level : 0 });
 }
 
@@ -265,6 +314,10 @@ function onDown(ev) {
   const tool = ev.button === 2 ? 'erase' : state.tool;
   if (tool === 'erase') {
     if (eraseAt(state.model, x, z, 3)) { renderTools(); commit(); preview.markDirty(); }
+    return;
+  }
+  if (tool === 'biomeFill') {
+    if (fillBiomeRegion(state.model, x, z, state.opts.biome) > 0) commit();
     return;
   }
   if (BRUSH_TOOLS.has(tool)) {
@@ -348,6 +401,45 @@ function importText(text, fromGame = false) {
   }
 }
 
+let gridKind = 'biome';
+
+/** Baixa só o `biomeGrid` ou só o `lavaGrid` (`<id>.biomeGrid.json`). */
+export function exportGrid(kind) {
+  try {
+    download(`${state.model.id}.${kind}Grid.json`, exportLayerJson(state.model, kind));
+    message(t('editor.msg.gridExported', { file: `${state.model.id}.${kind}Grid.json` }));
+  } catch {
+    message(t('editor.msg.gridEmpty'));
+  }
+}
+
+/** Importa uma grade isolada (texto JSON) para o mapa aberto; desfazível. */
+export function importGridText(kind, text) {
+  try {
+    importLayer(state.model, kind, text);
+    commit();
+    message(t('editor.msg.gridImported'));
+    return true;
+  } catch (e) {
+    message(t('editor.msg.gridFailed', { msg: e.message }));
+    return false;
+  }
+}
+
+/** Regenera a costa pelo preset + semente escolhidos, no lugar do mapa atual (desfazível). */
+export function regenerate() {
+  const r = regenerateCoast(state.model, state.opts.preset, state.opts.seed);
+  if (!r.ok) { message(t('editor.msg.regenFailed')); return r; }
+  replaceModel(state.model, r.model);
+  preview.resetCamera(state.model.size);
+  preview.size = 0;
+  resizeViews();
+  renderTools();
+  commit();
+  message(r.seed === r.requestedSeed ? t('editor.msg.regenerated', { seed: r.seed }) : t('editor.msg.regeneratedAlt', { seed: r.requestedSeed, used: r.seed }));
+  return r;
+}
+
 function openSaved() {
   const ul = $('saved-list');
   const items = storage ? listSaved(storage) : [];
@@ -367,6 +459,11 @@ function bindHeader() {
   $('file-import').addEventListener('change', async (e) => {
     const f = e.target.files[0];
     if (f) importText(await f.text());
+    e.target.value = '';
+  });
+  $('file-grid').addEventListener('change', async (e) => {
+    const f = e.target.files[0];
+    if (f) importGridText(gridKind, await f.text());
     e.target.value = '';
   });
   $('btn-save').addEventListener('click', () => {
@@ -469,7 +566,7 @@ function init() {
 }
 
 window.mapEditor = {
-  state, view, preview, commit, setModel, undo, redo, runValidation, exportDownload, importText, setPreview, renderTools,
+  state, view, preview, commit, exportGrid, importGridText, regenerate, setModel, undo, redo, runValidation, exportDownload, importText, setPreview, renderTools,
   stamp: (tool, x, z) => { const ch = applyTerrainBrush(state.model, tool, x, z, { radius: state.opts.radius, strength: state.opts.strength, level: heightAt(state.model, x, z) }); needsDraw = true; preview.markDirty(false); return ch; },
   place: (tool, x, z, o) => { const it = placeItem(state.model, tool, x, z, o); return it; },
   redraw: () => { needsDraw = true; preview.markDirty(); }

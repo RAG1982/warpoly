@@ -3,6 +3,7 @@
  * vaus, bases, recursos, florestas, neutros e o cursor do pincel. Só leitura do modelo; as conversões tela↔mundo ficam aqui.
  */
 import { heightAtNode } from './mapModel.js';
+import { BIOME } from '../data/maps/biome.js';
 
 /** Cor RGB de uma altura (água funda → água → areia → grama → rocha → neve). */
 export function heightColor(h) {
@@ -14,6 +15,12 @@ export function heightColor(h) {
   return lerp([116, 112, 74], [236, 236, 240], clamp01((h - 4.2) / 5));
 }
 
+/** Cor RGB (translúcida na vista) de cada id de bioma; lava e passagem têm cores próprias. */
+export const BIOME_COLORS = Object.freeze([
+  [30, 70, 150], [226, 208, 140], [92, 160, 66], [190, 170, 80], [214, 170, 90], [160, 150, 90],
+  [128, 128, 134], [66, 56, 60], [255, 106, 42], [240, 244, 250], [92, 110, 70], [170, 214, 232], [30, 110, 48]
+]);
+
 const ITEM_COLORS = { gold: '#ffd23a', stone: '#c3c8d0', oil: '#1a1a22', start: '#4aa3ff', camp: '#ff5a4a', critters: '#ffffff', forest: '#2f8f3a', ford: '#e9d27a' };
 export const startColor = (i) => ['#4aa3ff', '#ff5a4a', '#46d36b', '#ffd23a', '#c47bff', '#ff9a3a', '#3ad6d0', '#ff7bc6'][i % 8];
 
@@ -24,6 +31,8 @@ export class View2D {
     this.ctx = canvas.getContext('2d');
     this.tex = document.createElement('canvas');
     this.showGrid = true;
+    this.showBiome = true;
+    this.overlay = document.createElement('canvas');
     this.cursor = null; // {x, z, radius, color}
     this.px = 1; // pixels de tela por unidade de mundo
   }
@@ -83,10 +92,38 @@ export class View2D {
     const half = model.cell / 2;
     ctx.drawImage(this.tex, 0, 0, n, n, -half * k, -half * k, canvas.width + model.cell * k, canvas.height + model.cell * k);
 
+    this.drawLayers(model);
     if (this.showGrid) this.drawGrid(model);
     this.drawPlayable(model);
     this.drawItems(model);
     if (this.cursor) this.drawCursor(model);
+  }
+
+  /** Bioma (translúcido, se ligado) e lava (laranja opaca, sempre) por cima do relevo. */
+  drawLayers(model) {
+    const { ctx, canvas } = this;
+    for (const [layer, kind] of [[model.biome, 'biome'], [model.lava, 'lava']]) {
+      if (!layer || (kind === 'biome' && !this.showBiome)) continue;
+      const n = layer.nodes;
+      this.overlay.width = n;
+      this.overlay.height = n;
+      const octx = this.overlay.getContext('2d');
+      const img = octx.createImageData(n, n);
+      for (let k = 0; k < n * n; k++) {
+        const v = layer.data[k];
+        let c = null;
+        let a = 0;
+        if (kind === 'lava') { if (v === 1) { c = BIOME_COLORS[BIOME.LAVA]; a = 235; } } else if (v !== BIOME.SEA && v !== BIOME.LAVA) { c = BIOME_COLORS[v]; a = 105; }
+        if (!c) continue;
+        img.data[k * 4] = c[0]; img.data[k * 4 + 1] = c[1]; img.data[k * 4 + 2] = c[2]; img.data[k * 4 + 3] = a;
+      }
+      octx.putImageData(img, 0, 0);
+      const half = layer.cell / 2;
+      const kx = canvas.width / model.size;
+      ctx.imageSmoothingEnabled = false;
+      ctx.drawImage(this.overlay, 0, 0, n, n, -half * kx, -half * kx, canvas.width + layer.cell * kx, canvas.height + layer.cell * kx);
+    }
+    ctx.imageSmoothingEnabled = true;
   }
 
   drawGrid(model) {

@@ -370,7 +370,7 @@ describe('M2-06 · Estepe do Vento (colônia sob cerco)', () => {
     expect(hyp(a.siegeFleetStart, m.startSlots[1])).toBeGreaterThanOrEqual(60);
     const oil = m.resources.filter((r) => r.type === 'oil');
     expect(oil.length).toBeGreaterThanOrEqual(4);
-    expect(Math.min(...oil.map((r) => hyp(r, m.startSlots[0])))).toBeLessThanOrEqual(30);
+    expect(Math.min(...oil.map((r) => hyp(r, m.startSlots[0])))).toBeLessThanOrEqual(55); // OIL-FAR-2: o poço seguro-ish fica a ~30 u de NAVEGAÇÃO da doca (não mais colado ao Paço)
   });
   it('praia de reforço com mar navegável, 3 rotas de incursão rumo ao Marco e clã dissidente longe das bases inimigas', () => {
     const m = getMap(id);

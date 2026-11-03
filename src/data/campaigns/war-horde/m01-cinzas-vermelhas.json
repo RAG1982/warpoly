@@ -18,17 +18,33 @@
     },
     "portrait": "🔥",
     "text": {
-      "pt-BR": "O Cinzal precisa de recursos e madeira. Monte o Acampamento de Guerra, treine guerreiros e expulse os saqueadores.",
-      "en": "The Cinzal needs timber and iron. Pitch the War Camp, train warriors, and drive out the raiders."
+      "pt-BR": "A terra seca de Cinzara não perdoa, filho do Cinzal, e a travessia do Mar Fendido nos deixou nesta praia de cinza vermelha. O chefe-de-brasa Skarn quer um ponto firme na costa, e a Irmandade da Maré mantém TRÊS acampamentos colados num reduto ao nordeste, saqueando os barcos que passam. Não há clã rival a derrotar aqui: a missão termina quando os 3 acampamentos caírem. Eles são bem guardados: nem pense em ir com os guerreiros do início. Primeiro, ponha um Cercado de Javalis de pé e erga o Acampamento de Guerra. Depois, treine tropas (no mínimo 3 Talhadores e 4 Lanceiros-Machado; quanto mais, melhor). Então o Clã marcha, um acampamento de cada vez.",
+      "en": "The dry land of Cinzara forgives no one, child of the Cinzal, and the crossing of the Sundered Sea has left us on this red-ash beach. Ember-chief Skarn wants a firm foothold on the coast, and the Tide Brotherhood keeps THREE camps huddled together in a stronghold to the northeast, plundering passing boats. There is no rival clan to beat here: the mission ends when all 3 camps fall. They are well guarded: do not even think of going with the starting warriors. First, raise a Boar Pen and then the War Camp. Then train troops (at least 3 Slashers and 4 Axe Throwers; the more, the better). Then the Clan marches, one camp at a time."
     },
     "hints": [
       {
-        "pt-BR": "Concentre-se nos objetivos primários para avançar.",
-        "en": "Focus on primary objectives to advance."
+        "pt-BR": "Câmera: W A S D ou as setas movem a vista; a roda do mouse aproxima e afasta.",
+        "en": "Camera: W A S D or the arrow keys move the view; the mouse wheel zooms in and out."
+      },
+      {
+        "pt-BR": "Lacaios constroem e coletam: selecione um e clique com o botão direito na Mina de Ouro ou numa árvore.",
+        "en": "Laborers build and gather: select one and right-click the Gold Mine or a tree."
+      },
+      {
+        "pt-BR": "O Acampamento de Guerra exige um Cercado de Javalis concluído. Erga também uma Toca: sem ela a população não passa do limite e o treino para.",
+        "en": "The War Camp needs a finished Boar Pen. Build a Burrow too: without it your population stays capped and training stops."
+      },
+      {
+        "pt-BR": "Tropas treinadas só contam no objetivo se saírem do Acampamento de Guerra; os guerreiros do início não entram na conta. Treine mais que o mínimo: o reduto é bem guardado.",
+        "en": "Only troops that come out of the War Camp count toward the objective; the starting warriors do not. Train more than the minimum: the stronghold is well guarded."
+      },
+      {
+        "pt-BR": "Para atacar: selecione os guerreiros e clique com o botão direito num acampamento (ou A e clique no chão). Derrube um acampamento por vez e recue os feridos.",
+        "en": "To attack: select your warriors and right-click a camp (or press A and click the ground). Take one camp at a time and pull the wounded back."
       }
     ]
   },
-  "mapId": "desfiladeiro-1v1",
+  "mapId": "camp-01-praia-das-cinzas",
   "seed": 9017,
   "players": [
     {
@@ -42,46 +58,814 @@
       "color": "#dc2626",
       "isLocal": true,
       "startSlot": 0
-    },
-    {
-      "id": 1,
-      "name": {
-        "pt-BR": "Tropas de Aurelan",
-        "en": "Aurelan Troops"
-      },
-      "factionId": "human",
-      "team": 1,
-      "color": "#2563eb",
-      "isAI": true,
-      "startSlot": 1
     }
   ],
   "startingResources": {
     "wood": 400,
-    "gold": 400,
+    "gold": 350,
     "stone": 150
   },
+  "vars": {
+    "fin_clock": 0,
+    "mural": false
+  },
+  "autoVictory": false,
   "setup": [
     {
       "type": "tag",
       "select": {
-        "buildingType": "castle"
+        "buildingType": "bandit_camp"
       },
-      "tag": "enemy_base"
+      "tag": "smuggler_camp"
+    },
+    {
+      "type": "tag",
+      "select": {
+        "buildingType": "bandit_camp",
+        "area": {
+          "anchor": "banditCamp1",
+          "r": 6
+        }
+      },
+      "tag": "smuggler_camp1"
+    },
+    {
+      "type": "tag",
+      "select": {
+        "buildingType": "bandit_camp",
+        "area": {
+          "anchor": "banditCamp2",
+          "r": 6
+        }
+      },
+      "tag": "smuggler_camp2"
+    },
+    {
+      "type": "tag",
+      "select": {
+        "buildingType": "bandit_camp",
+        "area": {
+          "anchor": "banditCamp3",
+          "r": 6
+        }
+      },
+      "tag": "smuggler_camp3"
+    },
+    {
+      "type": "spawn",
+      "owner": "bandits",
+      "units": [
+        {
+          "type": "knight",
+          "count": 2
+        },
+        {
+          "type": "archer",
+          "count": 1
+        }
+      ],
+      "anchor": "banditCamp1",
+      "dx": 0,
+      "dz": 0,
+      "spread": 2.5,
+      "guard": true,
+      "tag": "camp_elite"
+    },
+    {
+      "type": "spawn",
+      "owner": "bandits",
+      "units": [
+        {
+          "type": "knight",
+          "count": 2
+        },
+        {
+          "type": "archer",
+          "count": 1
+        }
+      ],
+      "anchor": "banditCamp2",
+      "dx": 0,
+      "dz": 0,
+      "spread": 2.5,
+      "guard": true,
+      "tag": "camp_elite"
+    },
+    {
+      "type": "spawn",
+      "owner": "bandits",
+      "units": [
+        {
+          "type": "knight",
+          "count": 2
+        },
+        {
+          "type": "archer",
+          "count": 1
+        }
+      ],
+      "anchor": "banditCamp3",
+      "dx": 0,
+      "dz": 0,
+      "spread": 2.5,
+      "guard": true,
+      "tag": "camp_elite"
+    },
+    {
+      "type": "spawnLandmark",
+      "kind": "ruins",
+      "anchor": "ruins1",
+      "tag": "ruins",
+      "label": {
+        "pt-BR": "Ruínas de pedra",
+        "en": "Stone ruins"
+      }
+    },
+    {
+      "type": "spawn",
+      "owner": "neutral",
+      "unitType": "peon",
+      "count": 1,
+      "anchor": "captive1",
+      "tag": "captive",
+      "markColor": "#a3e635",
+      "displayName": {
+        "pt-BR": "Lacaio cativo",
+        "en": "Captive Laborer"
+      }
+    },
+    {
+      "type": "spawn",
+      "owner": "bandits",
+      "units": [
+        {
+          "type": "bandit",
+          "count": 3
+        }
+      ],
+      "anchor": "captive1",
+      "spread": 3,
+      "tag": "captive_guard",
+      "guard": true
     }
   ],
   "objectives": [
     {
-      "id": "primary-main",
+      "id": "build-barracks",
+      "type": "build",
+      "priority": "primary",
+      "buildingType": "orc_barracks",
+      "count": 1,
+      "title": {
+        "pt-BR": "Erguer o Acampamento de Guerra",
+        "en": "Raise the War Camp"
+      },
+      "description": {
+        "pt-BR": "Lacaios constroem. O Acampamento de Guerra exige um Cercado de Javalis concluído.",
+        "en": "Laborers build. The War Camp needs a finished Boar Pen."
+      }
+    },
+    {
+      "id": "train-troops",
+      "type": "train",
+      "priority": "primary",
+      "active": false,
+      "units": [
+        {
+          "type": "grunt",
+          "count": 3
+        },
+        {
+          "type": "axethrower",
+          "count": 4
+        }
+      ],
+      "title": {
+        "pt-BR": "Treinar 7 guerreiros: 3 Talhadores e 4 Lanceiros-Machado",
+        "en": "Train 7 warriors: 3 Slashers and 4 Axe Throwers"
+      },
+      "description": {
+        "pt-BR": "Conta só as tropas treinadas no Acampamento de Guerra; os guerreiros do início não entram. Treinar mais que isso ajuda.",
+        "en": "Only troops trained at the War Camp count; the starting warriors do not. Training more than that helps."
+      }
+    },
+    {
+      "id": "destroy-camp",
       "type": "destroy",
       "priority": "primary",
+      "active": false,
       "select": {
-        "tag": "enemy_base"
+        "tag": "smuggler_camp"
       },
       "title": {
-        "pt-BR": "Erguer um Acampamento de Guerra e treinar guerreiros",
-        "en": "Raise a War Camp and train warriors"
+        "pt-BR": "Destruir os 3 acampamentos de saqueadores para vencer",
+        "en": "Destroy the 3 raider camps to win"
+      },
+      "description": {
+        "pt-BR": "Ficam juntos, ao nordeste da praia, com guardas em cada um. Só contam depois que o objetivo abre; a missão termina quando os 3 caírem.",
+        "en": "They sit together, northeast of the beach, with guards at each. They only count once this objective opens; the mission ends when all 3 fall."
+      },
+      "count": 3
+    },
+    {
+      "id": "gold-500",
+      "type": "collect",
+      "priority": "secondary",
+      "resource": "gold",
+      "amount": 500,
+      "title": {
+        "pt-BR": "Coletar 500 de ouro",
+        "en": "Gather 500 gold"
+      },
+      "description": {
+        "pt-BR": "Lacaios na Mina de Ouro. Recompensa: +100 de ouro.",
+        "en": "Laborers on the Gold Mine. Reward: +100 gold."
       }
+    },
+    {
+      "id": "mural-fenda",
+      "type": "flag",
+      "priority": "hidden",
+      "condition": {
+        "type": "area",
+        "owner": "player",
+        "area": {
+          "anchor": "muralFenda",
+          "r": 8
+        }
+      },
+      "title": {
+        "pt-BR": "Achar o Mural da Fenda",
+        "en": "Find the Rift Mural"
+      }
+    },
+    {
+      "id": "find-ruins",
+      "type": "flag",
+      "priority": "hidden",
+      "title": {
+        "pt-BR": "Achar as ruínas de pedra, ao norte",
+        "en": "Find the stone ruins, to the north"
+      },
+      "condition": {
+        "type": "area",
+        "owner": "player",
+        "area": {
+          "anchor": "ruins1",
+          "r": 7
+        }
+      }
+    },
+    {
+      "id": "rescue-captive",
+      "type": "rescue",
+      "priority": "secondary",
+      "tag": "captive",
+      "count": 1,
+      "title": {
+        "pt-BR": "Resgatar o Lacaio cativo, ao norte da praia",
+        "en": "Rescue the captive Laborer, north of the beach"
+      },
+      "description": {
+        "pt-BR": "Derrube os 3 bandidos que o guardam e leve um guerreiro até ele. Recompensa: +100 de ouro e um Lacaio para o clã.",
+        "en": "Defeat the 3 bandits guarding him and bring a warrior to him. Reward: +100 gold and one more Laborer for the clan."
+      }
+    }
+  ],
+  "triggers": [
+    {
+      "id": "intro",
+      "when": {
+        "type": "time",
+        "at": 0
+      },
+      "actions": [
+        {
+          "type": "music",
+          "id": "on"
+        },
+        {
+          "type": "reveal",
+          "anchor": "banditCamp2",
+          "radius": 26,
+          "ttl": 14
+        },
+        {
+          "type": "cutscene",
+          "id": "landing",
+          "duration": 21,
+          "skippable": true,
+          "steps": [
+            {
+              "at": 0,
+              "anchor": "landingZone",
+              "zoom": 1.15,
+              "dialog": {
+                "speaker": {
+                  "pt-BR": "Skarn, chefe-de-brasa",
+                  "en": "Skarn, ember-chief"
+                },
+                "portrait": "🔥",
+                "text": {
+                  "pt-BR": "Mensagem do chefe-de-brasa, trazida pela voz do corno de guerra: \"Brasa que não se mexe vira cinza. Finquem o Clã nesta praia, mostrem à Irmandade da Maré que a costa tem dono. Drogath comanda as dunas; Ulma guarda o Fogo. Não esperem por mim.\"",
+                  "en": "Message from the ember-chief, carried by the war horn: \"An ember that does not move turns to ash. Plant the Clan on this beach, show the Tide Brotherhood that the coast has an owner. Drogath commands the dunes; Ulma keeps the Fire. Do not wait for me.\""
+                },
+                "duration": 6
+              }
+            },
+            {
+              "at": 6,
+              "anchor": "banditCamp2",
+              "dz": -6,
+              "zoom": 1.1,
+              "dialog": {
+                "speaker": {
+                  "pt-BR": "Drogath Punho-de-Brasa",
+                  "en": "Drogath Ember-Fist"
+                },
+                "portrait": "🪓",
+                "text": {
+                  "pt-BR": "Ali ao nordeste, longe daqui: a fumaça de TRÊS acampamentos, colados uns nos outros. É o reduto da Irmandade, e cada um tem seus guardas. Ainda não é hora: primeiro o Clã se levanta.",
+                  "en": "There to the northeast, far from here: the smoke of THREE camps, huddled against each other. That is the Brotherhood's stronghold, and each has its own guards. Not yet the hour: first the Clan stands up."
+                },
+                "duration": 7.5
+              }
+            },
+            {
+              "at": 15,
+              "anchor": "playerStart",
+              "zoom": 1.0,
+              "dialog": {
+                "speaker": {
+                  "pt-BR": "Anciã Ulma",
+                  "en": "Elder Ulma"
+                },
+                "portrait": "🔥",
+                "text": {
+                  "pt-BR": "Esta é a nossa praia, filho do Cinzal. Lacaios na lida: o Cercado de Javalis vem primeiro, e o Acampamento de Guerra depois.",
+                  "en": "This is our beach, child of the Cinzal. Laborers to work: the Boar Pen comes first, and the War Camp after."
+                },
+                "duration": 5
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "first-steps",
+      "when": {
+        "type": "time",
+        "at": 23
+      },
+      "actions": [
+        {
+          "type": "dialog",
+          "speaker": {
+            "pt-BR": "Anciã Ulma",
+            "en": "Elder Ulma"
+          },
+          "portrait": "🔥",
+          "text": {
+            "pt-BR": "Objetivo um: o Acampamento de Guerra. Ponha um Lacaio para erguer um Cercado de Javalis e, em seguida, o Acampamento. Mande outro para o ouro, vamos precisar de muita tropa: os três acampamentos não caem com os guerreiros do início.",
+            "en": "Objective one: the War Camp. Put a Laborer on a Boar Pen first, then the War Camp. Send another to the gold, we will need a lot of troops: the three camps will not fall to the starting warriors."
+          },
+          "duration": 9
+        }
+      ]
+    },
+    {
+      "id": "barracks-up",
+      "when": {
+        "type": "objective",
+        "id": "build-barracks",
+        "status": "completed"
+      },
+      "actions": [
+        {
+          "type": "setObjective",
+          "id": "train-troops",
+          "status": "active"
+        },
+        {
+          "type": "sound",
+          "id": "build"
+        },
+        {
+          "type": "dialog",
+          "speaker": {
+            "pt-BR": "Drogath Punho-de-Brasa",
+            "en": "Drogath Ember-Fist"
+          },
+          "portrait": "🪓",
+          "text": {
+            "pt-BR": "Acampamento de pé! Agora treine guerreiros: no mínimo 3 Talhadores na frente e 4 Lanceiros-Machado atrás, mas leve mais se puder. O painel mostra quantos já saíram.",
+            "en": "War Camp standing! Now train warriors: at least 3 Slashers in front and 4 Axe Throwers behind, but bring more if you can. The panel shows how many have come out so far."
+          },
+          "duration": 8
+        }
+      ]
+    },
+    {
+      "id": "troops-ready",
+      "when": {
+        "type": "objective",
+        "id": "train-troops",
+        "status": "completed"
+      },
+      "actions": [
+        {
+          "type": "disableTrigger",
+          "id": "camp-early"
+        },
+        {
+          "type": "setObjective",
+          "id": "destroy-camp",
+          "status": "active"
+        },
+        {
+          "type": "reveal",
+          "anchor": "banditCamp2",
+          "radius": 30
+        },
+        {
+          "type": "sound",
+          "id": "victory"
+        },
+        {
+          "type": "dialog",
+          "speaker": {
+            "pt-BR": "Drogath Punho-de-Brasa",
+            "en": "Drogath Ember-Fist"
+          },
+          "portrait": "🪓",
+          "text": {
+            "pt-BR": "Tropa pronta! Junte todos, siga ao nordeste e derrube os 3 acampamentos da Irmandade, um de cada vez; o primeiro é o mais próximo. Talhadores na frente, Lanceiros-Machado atiram de longe. Se a tropa minguar, volte e treine mais.",
+            "en": "Troops ready! Gather everyone, head northeast and tear down the Brotherhood's 3 camps, one at a time, starting with the nearest. Slashers in front, Axe Throwers throw from afar. If the force dwindles, fall back and train more."
+          },
+          "duration": 10
+        }
+      ]
+    },
+    {
+      "id": "camp-near",
+      "when": {
+        "type": "area",
+        "owner": "player",
+        "area": {
+          "anchor": "banditCamp1",
+          "r": 34
+        }
+      },
+      "actions": [
+        {
+          "type": "dialog",
+          "speaker": {
+            "pt-BR": "Drogath Punho-de-Brasa",
+            "en": "Drogath Ember-Fist"
+          },
+          "portrait": "🪓",
+          "text": {
+            "pt-BR": "Cuidado: aqui começa o território deles. Os três acampamentos se ajudam, então ataquem juntos, um acampamento por vez, e recuem se a coisa apertar.",
+            "en": "Careful: their territory starts here. The three camps back each other up, so strike together, one camp at a time, and fall back if it gets rough."
+          },
+          "duration": 8
+        }
+      ]
+    },
+    {
+      "id": "camp-early",
+      "when": {
+        "type": "dead",
+        "select": {
+          "tag": "smuggler_camp"
+        },
+        "count": 1
+      },
+      "actions": [
+        {
+          "type": "dialog",
+          "speaker": {
+            "pt-BR": "Hurgan Lança-Partida",
+            "en": "Hurgan Broken-Spear"
+          },
+          "portrait": "🗡️",
+          "text": {
+            "pt-BR": "Derrubaram um acampamento antes da hora? Bravura rara, e o Clã das Lanças Quebradas aplaude de longe. Ele vale quando abrirmos a ordem de ataque, mas ainda faltam os outros: terminem o Acampamento de Guerra e o treino.",
+            "en": "You tore down a camp ahead of time? Rare bravery, and the Broken Spear Clan applauds from afar. It will count once the attack order opens, but the others still stand: finish the War Camp and the training."
+          },
+          "duration": 8
+        }
+      ]
+    },
+    {
+      "id": "gold-reward",
+      "when": {
+        "type": "objective",
+        "id": "gold-500",
+        "status": "completed"
+      },
+      "actions": [
+        {
+          "type": "giveResources",
+          "owner": "player",
+          "gold": 100
+        },
+        {
+          "type": "message",
+          "text": {
+            "pt-BR": "500 de ouro coletados: +100 de ouro de bônus.",
+            "en": "500 gold gathered: +100 bonus gold."
+          }
+        }
+      ]
+    },
+    {
+      "id": "mural-found",
+      "when": {
+        "type": "objective",
+        "id": "mural-fenda",
+        "status": "completed"
+      },
+      "actions": [
+        {
+          "type": "setVar",
+          "name": "mural",
+          "value": true
+        },
+        {
+          "type": "giveResources",
+          "owner": "player",
+          "gold": 100
+        },
+        {
+          "type": "sound",
+          "id": "victory"
+        },
+        {
+          "type": "message",
+          "text": {
+            "pt-BR": "Mural da Fenda encontrado: +100 de ouro.",
+            "en": "Rift Mural found: +100 gold."
+          }
+        },
+        {
+          "type": "dialog",
+          "speaker": {
+            "pt-BR": "Anciã Ulma",
+            "en": "Elder Ulma"
+          },
+          "portrait": "🔥",
+          "text": {
+            "pt-BR": "Um mural antigo, na rocha vermelha: gravuras de um mar que se parte ao meio e de ilhas caindo como cacos. É a Fenda, filho do Cinzal, e os nossos ancestrais já a conheciam.",
+            "en": "An ancient mural on the red rock: carvings of a sea splitting in two and of islands falling like shards. That is the Rift, child of the Cinzal, and our ancestors already knew it."
+          },
+          "duration": 9
+        }
+      ]
+    },
+    {
+      "id": "camp-spoils",
+      "when": {
+        "type": "objective",
+        "id": "destroy-camp",
+        "status": "completed"
+      },
+      "actions": [
+        {
+          "type": "giveResources",
+          "owner": "player",
+          "gold": 320,
+          "wood": 60
+        },
+        {
+          "type": "spawn",
+          "owner": "neutral",
+          "units": [
+            {
+              "type": "frigate",
+              "count": 4
+            }
+          ],
+          "anchor": "orcSails",
+          "spread": 4,
+          "tag": "sail"
+        },
+        {
+          "type": "reveal",
+          "anchor": "orcSails",
+          "radius": 30,
+          "ttl": 16
+        },
+        {
+          "type": "sound",
+          "id": "victory"
+        },
+        {
+          "type": "cutscene",
+          "id": "sail",
+          "duration": 12,
+          "skippable": true,
+          "steps": [
+            {
+              "at": 0,
+              "anchor": "banditCamp2",
+              "zoom": 1.1,
+              "dialog": {
+                "speaker": {
+                  "pt-BR": "Drogath Punho-de-Brasa",
+                  "en": "Drogath Ember-Fist"
+                },
+                "portrait": "🪓",
+                "text": {
+                  "pt-BR": "Os três acampamentos caíram! A praia é do Clã. Espólio da Irmandade: 320 de ouro e 60 de madeira.",
+                  "en": "All three camps have fallen! The beach belongs to the Clan. Brotherhood spoils: 320 gold and 60 wood."
+                },
+                "duration": 4.5
+              }
+            },
+            {
+              "at": 5,
+              "anchor": "orcSails",
+              "zoom": 1.25,
+              "dialog": {
+                "speaker": {
+                  "pt-BR": "Drogath Punho-de-Brasa",
+                  "en": "Drogath Ember-Fist"
+                },
+                "portrait": "🪓",
+                "text": {
+                  "pt-BR": "Espere... aquelas velas brancas no horizonte: quatro cascos em formação. Não são nossos. E não são de saqueador nenhum.",
+                  "en": "Wait... those white sails on the horizon: four hulls in formation. They are not ours. And they are no raiders'."
+                },
+                "duration": 4.5
+              }
+            },
+            {
+              "at": 9.5,
+              "anchor": "orcSails",
+              "zoom": 1.35,
+              "dialog": {
+                "speaker": {
+                  "pt-BR": "Anciã Ulma",
+                  "en": "Elder Ulma"
+                },
+                "portrait": "🔥",
+                "text": {
+                  "pt-BR": "O Fogo do Clã tremeu, e eu vi o mesmo que vocês: velas de Aurelan. Fortifiquem a praia e preparem-se: alguém do outro lado do mar acaba de nos encontrar.",
+                  "en": "The Clan Fire flickered, and I saw what you saw: Aurelan sails. Fortify the beach and be ready: someone from across the sea has just found us."
+                },
+                "duration": 2.4
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "finale-clock",
+      "when": {
+        "type": "objective",
+        "id": "destroy-camp",
+        "status": "completed"
+      },
+      "once": false,
+      "cooldown": 12,
+      "actions": [
+        {
+          "type": "incVar",
+          "name": "fin_clock",
+          "by": 1
+        }
+      ]
+    },
+    {
+      "id": "finale-victory",
+      "when": {
+        "type": "var",
+        "name": "fin_clock",
+        "op": ">=",
+        "value": 2
+      },
+      "actions": [
+        {
+          "type": "victory"
+        }
+      ]
+    },
+    {
+      "id": "side-hint",
+      "when": {
+        "type": "time",
+        "at": 60
+      },
+      "actions": [
+        {
+          "type": "revealObjective",
+          "id": "find-ruins"
+        },
+        {
+          "type": "dialog",
+          "speaker": {
+            "pt-BR": "Anciã Ulma",
+            "en": "Elder Ulma"
+          },
+          "portrait": "🔥",
+          "text": {
+            "pt-BR": "Filho do Cinzal, um velho pescador falou de ruínas de pedra ao norte, bem longe dos acampamentos. Quem explora a praia acha coisas assim. E há um Lacaio nosso cativo por ali, guardado por três bandidos: derrubem-nos e tragam-no de volta.",
+            "en": "Child of the Cinzal, an old fisherman spoke of stone ruins to the north, well away from the camps. Whoever scouts the beach finds things like that. And one of our Laborers is held captive out there, guarded by three bandits: take them down and bring him back."
+          },
+          "duration": 10
+        }
+      ]
+    },
+    {
+      "id": "ruins-found",
+      "when": {
+        "type": "objective",
+        "id": "find-ruins",
+        "status": "completed"
+      },
+      "actions": [
+        {
+          "type": "giveResources",
+          "owner": "player",
+          "gold": 80
+        },
+        {
+          "type": "lightLandmark",
+          "tag": "ruins"
+        },
+        {
+          "type": "sound",
+          "id": "victory"
+        },
+        {
+          "type": "message",
+          "text": {
+            "pt-BR": "Ruínas de pedra encontradas: +80 de ouro.",
+            "en": "Stone ruins found: +80 gold."
+          }
+        }
+      ]
+    },
+    {
+      "id": "captive-freed",
+      "when": {
+        "all": [
+          {
+            "type": "area",
+            "owner": "player",
+            "area": {
+              "anchor": "captive1",
+              "r": 8
+            }
+          },
+          {
+            "type": "count",
+            "select": {
+              "tag": "captive_guard"
+            },
+            "op": "==",
+            "value": 0
+          }
+        ]
+      },
+      "actions": [
+        {
+          "type": "transfer",
+          "select": {
+            "tag": "captive"
+          },
+          "to": "player"
+        }
+      ]
+    },
+    {
+      "id": "captive-reward",
+      "when": {
+        "type": "objective",
+        "id": "rescue-captive",
+        "status": "completed"
+      },
+      "actions": [
+        {
+          "type": "giveResources",
+          "owner": "player",
+          "gold": 100
+        },
+        {
+          "type": "sound",
+          "id": "build"
+        },
+        {
+          "type": "message",
+          "text": {
+            "pt-BR": "Lacaio resgatado: +100 de ouro e um trabalhador a mais.",
+            "en": "Laborer rescued: +100 gold and one more worker."
+          }
+        }
+      ]
     }
   ]
 }

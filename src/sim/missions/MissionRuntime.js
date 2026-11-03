@@ -167,9 +167,9 @@ export class MissionRuntime {
         for (let i = 0; i < us.length && !(mine && enemy); i++) {
           const u = us[i];
           if (!isAlive(u) || u.type === undefined || !u.mesh) continue;
-          const d = Math.hypot(u.mesh.position.x - w.x, u.mesh.position.z - w.z);
-          if (d > r + WELL_CONTEST) continue;
-          if (!mine && d <= r && ownerMatches(gm, 'player', u.ownerId)) mine = true;
+          const dx = u.mesh.position.x - w.x, dz = u.mesh.position.z - w.z, d2 = dx * dx + dz * dz;
+          if (d2 > (r + WELL_CONTEST) * (r + WELL_CONTEST)) continue;
+          if (!mine && d2 <= r * r && ownerMatches(gm, 'player', u.ownerId)) mine = true;
           else if (!enemy && ownerMatches(gm, 'enemy', u.ownerId)) enemy = true;
         }
         map.set(w.id, enemy ? 2 : mine ? 1 : 0);

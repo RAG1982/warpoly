@@ -10,7 +10,7 @@
 import * as THREE from 'three';
 import { mergeGeometries } from 'three/examples/jsm/utils/BufferGeometryUtils.js';
 import { excludeFromFog } from './fogOfWarShader.js';
-import { getLanguage } from '../i18n/index.js';
+import { getLanguage, t } from '../i18n/index.js';
 import { localize } from '../sim/missions/text.js';
 
 const C = {
@@ -240,7 +240,7 @@ export class LandmarkView {
     if (v.labelLang !== lang) {
       v.labelLang = lang;
       v.sprite.material.map?.dispose();
-      v.sprite.material.map = labelTexture(lm.label ? localize(lm.label, lang) : (lang === 'en' ? 'Well' : 'Poço'));
+      v.sprite.material.map = labelTexture(lm.label ? localize(lm.label, lang) : t('landmark.well'));
       v.sprite.material.needsUpdate = true;
     }
   }

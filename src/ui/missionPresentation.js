@@ -3,6 +3,7 @@
  * caminho de câmera por keyframes (cutscene), fila de diálogos e modelos de painel de objetivos / fim de missão.
  * A câmera é render (fora do checksum): nada aqui toca a simulação.
  */
+import { t } from '../i18n/index.js';
 import { localize } from '../sim/missions/text.js';
 
 /** Suavização (smoothstep) de 0..1. */
@@ -101,8 +102,7 @@ export function buildObjectivesModel(snap, lang = 'pt-BR') {
   for (const o of snap.objectives) {
     let progress = '';
     if (o.status === 'active' && o.wells) {
-      const secs = Math.floor(o.cur);
-      progress = lang === 'en' ? `Wells held: ${o.wells.occupied}/${o.wells.total} · ${secs} s` : `Poços ocupados: ${o.wells.occupied}/${o.wells.total} · ${secs} s`;
+      progress = t('mission.wellsProgress', { held: o.wells.occupied, total: o.wells.total, secs: Math.floor(o.cur) }); // idioma atual (o painel re-renderiza ao trocar)
     } else if (o.status === 'active' && o.max > 1) {
       progress = o.unit === 'seconds' ? `${formatClock(o.cur)} / ${formatClock(o.max)}` : `${o.cur}/${o.max}`;
     }

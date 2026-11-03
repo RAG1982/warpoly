@@ -5,6 +5,7 @@ import { playMission } from './helpers/campaignHarness.js';
 import { getMap, ensureMapLoaded } from '../../src/data/maps/index.js';
 import { buildPathfinder, floodFill, isReached } from '../../src/data/maps/generator.js';
 import { LEGACY_TREE_MAPS, TREE_WOOD } from '../../src/data/economy.js';
+import { getLanguage, setLanguage } from '../../src/i18n/index.js';
 import { buildObjectivesModel } from '../../src/ui/missionPresentation.js';
 import { BUILDINGS } from '../../src/data/buildings.js';
 
@@ -217,8 +218,12 @@ describe('m09 Miragem · poços (marcos permanentes)', () => {
     expect(st()[1]).toBe(1);
     const snap = gm.mission.snapshot().objectives.find((o) => o.id === 'p-wells');
     expect(snap.wells).toEqual({ occupied: 1, total: 3 });
+    const lang0 = getLanguage();
+    setLanguage('pt-BR', { persist: false });
     expect(buildObjectivesModel({ objectives: [snap] }, 'pt-BR').primary[0].progress).toMatch(/^Poços ocupados: 1\/3 · \d+ s$/);
+    setLanguage('en', { persist: false });
     expect(buildObjectivesModel({ objectives: [snap] }, 'en').primary[0].progress).toMatch(/^Wells held: 1\/3 · \d+ s$/);
+    setLanguage(lang0, { persist: false });
     const foe = gm.getUnitsOf(1).find((x) => !x.isDead && x.mesh);
     place(foe, wells[1], -11); // inimigo na folga (raio + 3)
     expect(st()[1]).toBe(2);

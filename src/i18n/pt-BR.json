@@ -1144,5 +1144,11 @@
   "critter.sheep": "Ovelha",
   "critter.sheep.desc": "Fauna dócil típica de campos verdejantes e zonas temperadas.",
   "critter.pig": "Porco",
-  "critter.pig.desc": "Animal criado em cercados e fazendas."
+  "critter.pig.desc": "Animal criado em cercados e fazendas.",
+  "worldmap.aria": "{title}: mapa das {n} missões da campanha",
+  "worldmap.state.completed": "concluída",
+  "worldmap.state.current": "missão atual",
+  "worldmap.state.available": "disponível",
+  "worldmap.state.locked": "bloqueada",
+  "campaign.list": "Missões"
 }

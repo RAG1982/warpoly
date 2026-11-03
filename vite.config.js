@@ -80,8 +80,14 @@ function packagingPlugin() {
 }
 
 // BASE configurável: `BASE=/warpoly/ npm run build` (GitHub Pages em subpasta); padrão './' (relativo, funciona em qualquer pasta).
+/** M2-08: arquivos de arte do mapa-múndi existentes em public/art/world (o jogo escolhe a melhor sem sondar 404). */
+function worldArtFiles() {
+  try { return readdirSync(resolve(__dirname, 'public/art/world')).filter((f) => /^mapa-mundi.*\.(webp|jpg|png)$/.test(f)); } catch { return []; }
+}
+
 export default defineConfig({
   base: process.env.BASE || './',
+  define: { __WORLD_ART_FILES__: JSON.stringify(worldArtFiles()) },
   plugins: [publicBasePlugin(), packagingPlugin()],
   // worktrees de agentes (.claude/worktrees) e capturas/baselines não são código-fonte: sem isso o
   // inotify esgota (ENOSPC) com dezenas de worktrees no repositório

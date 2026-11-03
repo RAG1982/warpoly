@@ -186,5 +186,25 @@
       { "missionIndex": 10, "stage": 11, "name": { "pt-BR": "Brasa Alta", "en": "High Embers" }, "x": 270, "y": 470 },
       { "missionIndex": 11, "stage": 12, "name": { "pt-BR": "Cidadela de Brasa Alta", "en": "High Embers Citadel" }, "x": 210, "y": 510 }
     ]
+  },
+  "art": {
+    "comment": "Pinos sobre a arte (public/art/world/mapa-mundi-clean.*): x/y em pixels da imagem width x height; a ordem segue campaignStages. Mover aqui, sem tocar em codigo.",
+    "width": 1024,
+    "height": 572,
+    "titleScroll": { "x": 380, "y": 40, "w": 262, "h": 52 },
+    "cartela": { "x": 366, "y": 28, "w": 292, "h": 76 },
+    "continentAt": { "war-alliance": ["velmara", "cinzara"], "war-horde": ["cinzara", "velmara"] },
+    "stages": {
+      "war-alliance": [
+        { "x": 372, "y": 318 }, { "x": 489, "y": 268 }, { "x": 523, "y": 243 }, { "x": 494, "y": 312 },
+        { "x": 559, "y": 266 }, { "x": 563, "y": 319 }, { "x": 522, "y": 345 }, { "x": 645, "y": 292 },
+        { "x": 655, "y": 413 }, { "x": 730, "y": 300 }, { "x": 785, "y": 362 }, { "x": 722, "y": 440 }
+      ],
+      "war-horde": [
+        { "x": 760, "y": 330 }, { "x": 489, "y": 268 }, { "x": 523, "y": 243 }, { "x": 494, "y": 312 },
+        { "x": 559, "y": 266 }, { "x": 563, "y": 319 }, { "x": 522, "y": 345 }, { "x": 645, "y": 292 },
+        { "x": 655, "y": 413 }, { "x": 392, "y": 292 }, { "x": 330, "y": 330 }, { "x": 250, "y": 300 }
+      ]
+    }
   }
 }

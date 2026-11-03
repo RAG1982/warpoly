@@ -1148,5 +1148,11 @@
   "critter.sheep": "Sheep",
   "critter.sheep.desc": "Docile creature wandering across lush pastures and temperate meadows.",
   "critter.pig": "Pig",
-  "critter.pig.desc": "Domestic animal bred in pens and farms."
+  "critter.pig.desc": "Domestic animal bred in pens and farms.",
+  "worldmap.aria": "{title}: map of the campaign's {n} missions",
+  "worldmap.state.completed": "completed",
+  "worldmap.state.current": "current mission",
+  "worldmap.state.available": "available",
+  "worldmap.state.locked": "locked",
+  "campaign.list": "Missions"
 }

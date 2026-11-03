@@ -11,6 +11,7 @@ import { portraitInnerHtml } from '../npcPortraits.js';
 import { getProgress, nextMission } from '../../campaign/index.js';
 import { unlockNames } from '../techText.js';
 import { TECH_KINDS } from '../../sim/techRestriction.js';
+import { worldMapHtml, attachWorldMapKeys } from '../worldMap.js';
 import { CampaignStory } from './CampaignStory.js';
 import { CampaignStoryModel } from '../campaignStoryModel.js';
 
@@ -92,7 +93,7 @@ export class CampaignScreen {
       const el = e.target.closest('[data-cp]');
       if (!el || el.disabled) return;
       const act = el.dataset.cp;
-      if (act === 'pick') { this.selected = el.dataset.id; this._render(); }
+      if (act === 'pick') { this._focusPin = el.classList.contains('wm-pin'); this.selected = el.dataset.id; this._render(); }
       else if (act === 'switchCamp') { this.close({ silent: true }); this.onSwitch?.(); }
       else if (act === 'start') {
         if (this._shouldShowStoryOnStart()) {
@@ -130,6 +131,8 @@ export class CampaignScreen {
     document.removeEventListener('keydown', this._onKey, true);
     this._offLang?.();
     this._offLang = null;
+    this._offKeys?.();
+    this._offKeys = null;
     this.root.remove();
     this.root = null;
     if (!silent) this.onClose?.();
@@ -196,10 +199,21 @@ export class CampaignScreen {
       ? `<button type="button" class="ms-brief-switch" data-cp="switchCamp">${esc(t('campaign.switch'))}</button>`
       : '';
 
-    this.root.innerHTML = `<div class="ms-brief" role="dialog" aria-modal="true" aria-labelledby="cp-title">`
+    // M2-08: mapa-múndi como fundo da lista (pinos = botões `data-cp="pick"`); a lista abaixo segue como alternativa.
+    const map = worldMapHtml({
+      campaignDef: def, progress: this.progress, unlockAll: this.unlockAll, lang,
+      currentId: nextMission(def, completed, opts), selectedId: this.selected,
+      titleOf: (id) => localize(getMission(id).title, lang)
+    });
+    this.root.innerHTML = `<div class="ms-brief ms-brief--map" role="dialog" aria-modal="true" aria-labelledby="cp-title">`
       + `<div class="ms-brief-list">${campsTabs}<h2 id="cp-title">${esc(localize(def.title, lang))}</h2>${prov}`
-      + `<p class="ms-brief-sub">${esc(attempt)}</p>${list}</div>`
+      + `<p class="ms-brief-sub">${esc(attempt)}</p>${map}<div class="ms-brief-items" role="group" aria-label="${esc(t('campaign.list'))}">${list}</div></div>`
       + `<div class="ms-brief-main"><p class="ms-brief-talk">${esc(localize(def.premise, lang))}</p>${main}</div></div>`;
-    this.root.querySelector('[data-cp="start"]:not([disabled])')?.focus({ preventScroll: true });
+    this._offKeys?.();
+    this._offKeys = attachWorldMapKeys(this.root);
+    const pin = this._focusPin && this.root.querySelector(`.wm-pin[data-id="${this.selected}"]`);
+    this._focusPin = false;
+    if (pin) { this.root.querySelectorAll('.wm-pin').forEach((p) => { p.tabIndex = -1; }); pin.tabIndex = 0; pin.focus({ preventScroll: true }); }
+    else this.root.querySelector('[data-cp="start"]:not([disabled])')?.focus({ preventScroll: true });
   }
 }

@@ -132,3 +132,16 @@
 /* M2-34 */
 .ms-brief-switch { font: inherit; font-size: 0.8em; justify-self: start; cursor: pointer; padding: 3px 8px; border-radius: 6px; border: 1px solid rgba(212, 175, 55, 0.4); background: transparent; color: inherit; }
 .ms-brief-switch:hover, .ms-brief-switch:focus-visible { background: rgba(212, 175, 55, 0.22); outline: none; }
+
+/* M2-08: tela de campanha com mapa-múndi (escala 1024 → 4K pelo font-size; ver worldMap.css) */
+.ms-brief--map {
+  font-size: clamp(14px, 0.5vw + 8px, 28px); width: min(96vw, 100em); max-height: 94vh;
+  grid-template-columns: minmax(0, 1.75fr) minmax(0, 1fr);
+}
+.ms-brief--map .ms-brief-list { gap: 8px; }
+.ms-brief--map .ms-brief-items { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 2px 8px; }
+.ms-brief--map .ms-brief-item { padding: 4px 8px; font-size: 0.9em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+@media (max-width: 700px) {
+  .ms-brief--map { grid-template-columns: 1fr; overflow-y: auto; }
+  .ms-brief--map .ms-brief-items { grid-template-columns: 1fr; }
+}

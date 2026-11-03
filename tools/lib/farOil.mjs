@@ -170,12 +170,12 @@ export const FAR_OIL = {
   /** Estepe do Vento (palco 11): poços da Liga (0 = seguro-ish, 1 = longe); os dos Clãs e do aliado ficam. */
   'camp-11-estepe-do-vento': (ctx, extra) => ({
     docks: dockPair(ctx, extra),
-    moves: [{ index: 0, player: 0, min: 27, max: 36, target: 30, avoid: [{ ...extra.reinforceSea, r: 30 }, { ...extra.landingZone, r: 30 }] }, { index: 1, player: 0, min: 60, max: 100, target: 68, lean: 1 }]
+    moves: [{ index: 0, player: 0, min: 27, max: 36, target: 30, avoid: [{ ...extra.reinforceSea, r: 42 }, { ...extra.landingZone, r: 42 }] }, { index: 1, player: 0, min: 60, max: 100, target: 68, lean: 1 }]
   }),
   /** Cabo Ferrugem (palco 12): poços da Liga 0 (seguro-ish) e 1 (longe); os de 5.000 (4 e 5, ~56–63 u, perto do estreito) e os do inimigo ficam. */
   'camp-12-cabo-ferrugem': (ctx, extra) => ({
     docks: dockPair(ctx, extra),
-    moves: [{ index: 0, player: 0, min: 27, max: 36, target: 30, avoid: [{ ...extra.reinforceSea, r: 30 }, { ...extra.landingZone, r: 30 }] }, { index: 1, player: 0, min: 60, max: 100, target: 68, lean: 1 }]
+    moves: [{ index: 0, player: 0, min: 27, max: 36, target: 30, clearR: 5, avoid: [{ ...extra.reinforceSea, r: 22 }, { ...extra.landingZone, r: 22 }] }, { index: 1, player: 0, min: 60, max: 100, target: 68, lean: 1 }]
   }),
   /** Miragem (palco 9): idem (poços da Liga: índices 0 e 1). */
   'camp-09-miragem': (ctx, extra) => ({

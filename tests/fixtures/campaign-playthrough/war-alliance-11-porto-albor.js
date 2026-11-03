@@ -89,8 +89,8 @@ function camp(c) {
   const tree = nearest(c.gm.trees.filter((t) => !t.isDead), home);
   return placeAround(c, 'lumber_camp', posOf(tree), 5, 20);
 }
-/** Estaleiro: na costa, ao lado do poço de petróleo da Liga (well1), onde as Fragatas saem. */
-const shipyard = (c) => placeGrid(c, 'shipyard', c.anchor('well1'), 30);
+/** Estaleiro: na costa perto da base (OIL-FAR-2: o poço well1 agora fica a ~30 u de navegação da doca, então o ponto da costa é fixo: o antigo local do poço), onde as Fragatas saem. */
+const shipyard = (c) => placeGrid(c, 'shipyard', { x: -62, z: -86 }, 30);
 /** Refinaria: na costa, perto do Estaleiro (recebe o petróleo dos petroleiros). */
 function refinery(c) {
   const yard = c.bld('shipyard');

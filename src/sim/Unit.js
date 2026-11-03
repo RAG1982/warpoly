@@ -2122,7 +2122,7 @@ export class Unit {
     const targetPos = this.buildTarget.mesh.position;
     const dist = fhypot(this.mesh.position.x - targetPos.x, this.mesh.position.z - targetPos.z);
     const targetRadius = this.buildTarget.collisionRadius || 3.0;
-    const contactDist = targetRadius + this.collisionRadius + 0.25 + this._contactSlack();
+    const contactDist = targetRadius + this.collisionRadius + 0.25 + this._contactSlack() + (this.buildTarget.coastal ? 1.5 : 0); // AI-NAVAL: o cais ocupa a beira; o construtor para na praia
 
     if (dist > contactDist) {
       this.moveTowards(targetPos.x, targetPos.z, delta);

@@ -45,7 +45,7 @@ export class AIMicroManager {
   _isArmy(u) {
     if (u.isDead || u.isDying || u.type === this.director.workerType) return false;
     const d = getUnitDef(u.type);
-    return !d.isWorker && d.isCombat !== false;
+    return !d.isWorker && d.isCombat !== false && d.layer !== 'naval'; // AI-NAVAL: a frota é do AINavalManager
   }
 
   _collectArmy() {

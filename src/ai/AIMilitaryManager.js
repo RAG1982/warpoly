@@ -41,7 +41,7 @@ const CAMP_COOLDOWN = 240;
 /** NEW-44: combatentes vivos (todos os não trabalhadores) de uma lista de unidades próprias. */
 function combatTotal(units) {
   let n = 0;
-  for (let i = 0; i < units.length; i++) if (!units[i].isDead && !getUnitDef(units[i].type).isWorker) n++;
+  for (let i = 0; i < units.length; i++) if (!units[i].isDead && !getUnitDef(units[i].type).isWorker && units[i].layer !== 'naval') n++;
   return n;
 }
 
@@ -355,7 +355,7 @@ export class AIMilitaryManager {
     if (dir.population >= dir.maxPopulation - 1) return true;
     let known = 0;
     const per = dir.perception;
-    for (const k of per.units.values()) if (k.cls !== 'worker') known += unitValue(k.type);
+    for (const k of per.units.values()) if (k.cls !== 'worker' && getUnitDef(k.type).layer !== 'naval') known += unitValue(k.type); // AI-NAVAL: frota inimiga não pesa no ataque terrestre
     for (const b of per.buildings.values()) if (getBuildingDef(b.type).tower) known += 120;
     const expected = dir.profile.assumeEnemy * 400 * Math.max(0, (dir.simTime || 0) / 60 - 1.5);
     const enemy = Math.max(known, expected) * 1.25;
@@ -385,7 +385,7 @@ export class AIMilitaryManager {
     const op = this._op;
     for (let i = 0; i < units.length; i++) {
       const e = units[i];
-      if (e.isDead || e.type === workerType || this.director.isReserved(e.id)) continue;
+      if (e.isDead || e.type === workerType || e.layer === 'naval' || this.director.isReserved(e.id)) continue; // AI-NAVAL: navios são da frota
       if (op && op.ids.has(e.id)) continue; // NEW-34: a operação de cerco cuida das suas unidades
       if (this._campOp && this._campOp.ids.has(e.id)) continue; // NEW-25: idem para o ataque ao acampamento
       if (e.state !== 'idle' && e.state !== 'moving') continue;
@@ -438,7 +438,7 @@ export class AIMilitaryManager {
       let home = 0;
       for (let i = 0; i < enemies.length; i++) {
         const e = enemies[i];
-        if (e.isDead || e.type === workerType) continue;
+        if (e.isDead || e.type === workerType || e.layer === 'naval') continue;
         if (fhypot(e.mesh.position.x - baseCenter.x, e.mesh.position.z - baseCenter.y) < 30) home++;
       }
       recall = intruders.length >= 3 && home < intruders.length * 1.5;
@@ -446,7 +446,7 @@ export class AIMilitaryManager {
     const ids = [];
     for (let i = 0; i < enemies.length; i++) {
       const e = enemies[i];
-      if (e.isDead || e.type === workerType || this.director.isReserved(e.id) || e.targetEntity === closestIntruder) continue;
+      if (e.isDead || e.type === workerType || e.layer === 'naval' || this.director.isReserved(e.id) || e.targetEntity === closestIntruder) continue;
       const idle = e.state === 'idle' || e.state === 'moving';
       const away = recall && (e.state === 'attacking' || e.state === 'attackMoving') && !(getUnitDef(e.type).suicide);
       if (idle || away) {
@@ -538,7 +538,11 @@ export class AIMilitaryManager {
     // NEW-44: a serraria avançada (remédio para árvores longe das entregas) tem a madeira reservada; só a defesa em andamento e
     // um exército mínimo passam à frente dela.
     const reserve = dir.utilities.def > 0 || combatTotal(enemies) < 4 ? 0 : dir.woodReserve;
-    const can = cost => dir.canAfford(cost) && (cost.wood || 0) + reserve <= dir.resources.wood;
+    // AI-NAVAL: com o exército mínimo pronto, o próximo passo naval (Centro nível 2, Estaleiro, navio) tem recursos reservados.
+    const nres = dir.utilities.def > 0 || combatTotal(enemies) < 6 ? null : dir.navalManager.planReserve();
+    const res = dir.resources;
+    const can = cost => dir.canAfford(cost) && (cost.wood || 0) + reserve <= res.wood &&
+      (!nres || ((cost.gold || 0) + nres.gold <= res.gold && (cost.wood || 0) + nres.wood + reserve <= res.wood));
 
     let recruitType = null;
     let trainAt = barracks;

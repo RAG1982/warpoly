@@ -4,7 +4,8 @@
  * Chamado por `UIManager.drawMinimap` depois da névoa, para aparecer por cima dela.
  */
 const MARK_COLOR = { goal: '#ffd700', discover: '#67e8f9' };
-const LANDMARK_COLOR = { ruins: '#d6d3d1', truce_post: '#fde68a', shrine: '#67e8f9' };
+const LANDMARK_COLOR = { ruins: '#d6d3d1', truce_post: '#fde68a', shrine: '#67e8f9', water_well: '#38bdf8' };
+const WELL_STATE_COLOR = ['#38bdf8', '#4ade80', '#f87171']; // neutro, ocupado, contestado
 
 function diamond(ctx, x, y, r) {
   ctx.beginPath();
@@ -32,9 +33,28 @@ export function drawMissionMinimap(ctx, gm, toMap, fog) {
     diamond(ctx, c.x, c.y, 4.5);
   }
   // 2. Marcos já explorados (ou sempre visíveis)
+  const wells = rt.wellStates();
   for (const lm of rt.landmarks) {
     if (!lm.known && fog && !fog.isExplored(lm.x, lm.z)) continue;
     const m = toMap(lm.x, lm.z);
+    if (lm.kind === 'water_well') { // poço: gota + anel de captura, sempre visível (cor = estado), por cima da névoa
+      const col = WELL_STATE_COLOR[wells.get(lm.id) ?? 0];
+      const edge = toMap(lm.x + (lm.radius ?? 9), lm.z);
+      ctx.globalAlpha = 1;
+      ctx.strokeStyle = col;
+      ctx.lineWidth = 1.5;
+      ctx.beginPath();
+      ctx.arc(m.x, m.y, Math.max(3.5, Math.abs(edge.x - m.x)), 0, Math.PI * 2);
+      ctx.stroke();
+      ctx.fillStyle = col;
+      ctx.beginPath();
+      ctx.arc(m.x, m.y, 2.6, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.strokeStyle = '#0b1220';
+      ctx.lineWidth = 1;
+      ctx.stroke();
+      continue;
+    }
     ctx.globalAlpha = 1;
     ctx.fillStyle = LANDMARK_COLOR[lm.kind] || '#e5e7eb';
     ctx.fillRect(m.x - 2, m.y - 2, 4, 4);

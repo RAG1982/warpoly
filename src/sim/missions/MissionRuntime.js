@@ -18,6 +18,10 @@ import { TriggerEngine } from './TriggerEngine.js';
 import { runAction } from './actions.js';
 import { resolveMissionAnchors } from './anchors.js';
 
+/** Raio padrão de ocupação de um poço (marco `water_well`) e folga extra para contar inimigo "contestando". */
+export const WELL_RADIUS = 9;
+const WELL_CONTEST = 3;
+
 const clone = (v) => JSON.parse(JSON.stringify(v));
 
 /** Verificação "tudo destruído?" do jogador local (derrota por aniquilação), a cada 20 ticks. */
@@ -137,10 +141,50 @@ export class MissionRuntime {
       tag: a.tag ?? null,
       known: a.known === true, // visível sem explorar (padrão: só aparece quando explorado pela névoa)
       label: a.label ? clone(a.label) : null, // só apresentação (fora do hash)
+      radius: a.radius ?? (a.kind === 'water_well' ? WELL_RADIUS : null), // raio de captura/ocupação (water_well)
       lit: 0
     };
     this.landmarks.push(lm);
     return lm;
+  }
+
+  /**
+   * Ocupação dos marcos `water_well` (apresentação + HUD; nenhuma escrita na sim): 0 = neutro, 1 = ocupado pelo jogador
+   * (ao menos uma unidade viva dentro do raio), 2 = contestado (inimigo a ≤ raio + 3 u, mesma folga do gatilho de zerar).
+   * Mesma regra do gatilho `wells-tick` (unidades vivas dentro do raio); em cache por tick.
+   * @returns {Map<number, number>} id do marco → estado
+   */
+  wellStates() {
+    if (this._wellCache && this._wellCache.tick === this.tick) return this._wellCache.map;
+    const map = new Map();
+    const wells = this.landmarks.filter((lm) => lm.kind === 'water_well');
+    if (wells.length) {
+      const gm = this.gm;
+      const us = gm.allUnits;
+      for (const w of wells) {
+        const r = w.radius ?? WELL_RADIUS;
+        let mine = false, enemy = false;
+        for (let i = 0; i < us.length && !(mine && enemy); i++) {
+          const u = us[i];
+          if (!isAlive(u) || u.type === undefined || !u.mesh) continue;
+          const dx = u.mesh.position.x - w.x, dz = u.mesh.position.z - w.z, d2 = dx * dx + dz * dz;
+          if (d2 > (r + WELL_CONTEST) * (r + WELL_CONTEST)) continue;
+          if (!mine && d2 <= r * r && ownerMatches(gm, 'player', u.ownerId)) mine = true;
+          else if (!enemy && ownerMatches(gm, 'enemy', u.ownerId)) enemy = true;
+        }
+        map.set(w.id, enemy ? 2 : mine ? 1 : 0);
+      }
+    }
+    this._wellCache = { tick: this.tick, map };
+    return map;
+  }
+
+  /** Resumo de ocupação dos marcos de um tipo (`progress.landmarkKind` do objetivo): `{occupied, total}`. */
+  _wellsSummary(kind) {
+    const st = this.wellStates();
+    let occupied = 0, total = 0;
+    for (const lm of this.landmarks) if (lm.kind === kind) { total++; if (st.get(lm.id) === 1) occupied++; }
+    return { occupied, total };
   }
 
   /** Ação `lightLandmark`: acende os marcos com a tag (só a primeira vez, para não redisparar o brilho). */
@@ -150,7 +194,7 @@ export class MissionRuntime {
 
   /** Estado dos marcos como dados puros (save/replay; a missão é reconstruída a partir da definição + comandos). */
   landmarkState() {
-    return this.landmarks.map((lm) => ({ id: lm.id, kind: lm.kind, x: lm.x, z: lm.z, scale: lm.scale, facing: lm.facing, tag: lm.tag, known: lm.known, label: lm.label, lit: lm.lit }));
+    return this.landmarks.map((lm) => ({ id: lm.id, kind: lm.kind, x: lm.x, z: lm.z, scale: lm.scale, facing: lm.facing, tag: lm.tag, known: lm.known, label: lm.label, radius: lm.radius ?? null, lit: lm.lit }));
   }
 
   /** Restaura marcos de um `landmarkState()` (ex.: ao carregar um save). Substitui a lista atual. */
@@ -326,7 +370,8 @@ export class MissionRuntime {
         description: o.def.description,
         cur: o.cur,
         max: o.max,
-        unit: o.def.type === 'survive' ? 'seconds' : (o.def.type === 'collect' ? o.def.resource : null)
+        unit: o.def.type === 'survive' || o.def.progress?.seconds ? 'seconds' : (o.def.type === 'collect' ? o.def.resource : null),
+        wells: o.def.progress?.landmarkKind ? this._wellsSummary(o.def.progress.landmarkKind) : null
       });
     }
     return { id: this.id, title: this.def.title, outcome: this.outcome, outcomeText: this.outcomeText, objectives };

@@ -1522,17 +1522,20 @@ export class UnitAnimator {
   }
 
   /**
-   * F4-02: Balista recua a besta ao soltar o virote; Catapulta arma (abaixa) o braço e o lança
+   * F4-02: Balista recua a besta ao soltar o virote; Catapulta arma (leva a ponta para trás) o braço e o lança
    * para a frente. Mantém `progress` 0,6 como instante do disparo.
    */
   applySiegeFight(p, parts, uType) {
     const arm = parts.siegeArm;
     const ease = t => t * t * (3 - 2 * t);
     if (uType === 'catapult') {
+      // o braço arremessa girando de trás para a frente: arma puxando a ponta para cima e para trás e, ao soltar,
+      // varre para a frente (passa perto da vertical em `progress` 0,6, o instante em que a pedra sai)
+      const BACK = -1.9;
       let rx;
-      if (p < 0.5) rx = 0.5 * ease(p / 0.5); // arma: braço desce
-      else if (p < 0.62) rx = 0.5 - 1.5 * ease((p - 0.5) / 0.12); // lança: sobe e vai para a frente
-      else rx = -1.0 * (1 - ease((p - 0.62) / 0.38)); // volta ao repouso
+      if (p < 0.52) rx = BACK * ease(p / 0.52); // arma: ponta sobe e recua
+      else if (p < 0.68) rx = BACK + (0.35 - BACK) * ((p - 0.52) / 0.16); // lança: varre para a frente
+      else rx = 0.35 * (1 - ease((p - 0.68) / 0.32)); // volta ao repouso
       arm.rotation.x += rx;
     } else {
       let dz;

@@ -23,7 +23,7 @@ export const ACTION_TYPES = Object.freeze([
   'enableTrigger', 'disableTrigger', 'tag', 'order', 'guard', 'spawnLandmark', 'lightLandmark'
 ]);
 /** M3-X1: marcos visuais (`spawnLandmark`): modelos procedurais baratos, só apresentação + estado de missão. */
-export const LANDMARK_KINDS = Object.freeze(['ruins', 'truce_post', 'shrine']);
+export const LANDMARK_KINDS = Object.freeze(['ruins', 'truce_post', 'shrine', 'water_well']);
 /** M3-X1: marcador de objetivo (`marker`): anel + coluna de luz na área; `goal` dourado, `discover` ciano. */
 export const MARKER_STYLES = Object.freeze(['goal', 'discover']);
 export const MARKER_SHOW = Object.freeze(['active', 'revealed']);
@@ -272,6 +272,13 @@ function checkObjectiveDef(c, path, o, { dynamic = false } = {}) {
       break;
     case 'flag':
       checkCondition(c, `${p}.condition`, o.condition);
+      if (o.progress !== undefined) { // barra de progresso: variável da missão (+ resumo de marcos ocupados)
+        if (!isObj(o.progress) || !isStr(o.progress.var)) c.err(`${p}.progress`, 'progress deve ser { var, max, seconds?, landmarkKind? }');
+        else {
+          checkNum(c, `${p}.progress.max`, o.progress.max, { min: 1 });
+          if (o.progress.landmarkKind !== undefined && !LANDMARK_KINDS.includes(o.progress.landmarkKind)) c.err(`${p}.progress.landmarkKind`, 'tipo de marco desconhecido');
+        }
+      }
       break;
   }
   void dynamic;
@@ -355,6 +362,7 @@ function checkAction(c, path, a, setup = false) {
       checkXZ(c, p, a);
       checkNum(c, `${p}.scale`, a.scale, { min: 0.5, max: 2.5, optional: true });
       checkNum(c, `${p}.facing`, a.facing, { min: -360, max: 360, optional: true });
+      checkNum(c, `${p}.radius`, a.radius, { min: 2, max: 40, optional: true }); // raio de captura (water_well)
       if (a.tag !== undefined) { if (!isStr(a.tag) || !ID_RE.test(a.tag)) c.err(`${p}.tag`, 'tag inválida'); else c.tagDefs.add(a.tag); }
       checkText(c, `${p}.label`, a.label, { optional: true });
       if (a.known !== undefined && typeof a.known !== 'boolean') c.err(`${p}.known`, 'deve ser booleano');

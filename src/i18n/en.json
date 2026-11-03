@@ -921,6 +921,8 @@
   "campaign.none": "No campaign available.",
   "campaign.play": "Start mission",
   "campaign.newAttempt": "New attempt",
+  "campaign.difficulty": "Campaign difficulty",
+  "campaign.difficultyHint": "Changes the AI in every mission: Easy one step below, Hard one above the mission design.",
   "campaign.attempt": "Attempt {n}",
   "campaign.provisional": "PROVISIONAL",
   "campaign.provisionalHint": "The campaign premise is still awaiting approval.",

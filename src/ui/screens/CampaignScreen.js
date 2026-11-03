@@ -8,7 +8,7 @@ import { listCampaigns } from '../../data/campaigns/index.js';
 import { getMission } from '../../data/missions/index.js';
 import { localize } from '../../sim/missions/text.js';
 import { portraitInnerHtml } from '../npcPortraits.js';
-import { getProgress, nextMission } from '../../campaign/index.js';
+import { getProgress, nextMission, CAMPAIGN_DIFFICULTIES, getCampaignDifficulty, setCampaignDifficulty } from '../../campaign/index.js';
 import { unlockNames } from '../techText.js';
 import { TECH_KINDS } from '../../sim/techRestriction.js';
 import { worldMapHtml, attachWorldMapKeys } from '../worldMap.js';
@@ -116,6 +116,9 @@ export class CampaignScreen {
       }
       else if (act === 'back') this.close();
     });
+    root.addEventListener('change', (e) => {
+      if (e.target.matches?.('[data-cp="difficulty"]')) { setCampaignDifficulty(e.target.value); this._render(); this.root?.querySelector('[data-cp="difficulty"]')?.focus({ preventScroll: true }); }
+    });
     this.parent.appendChild(root);
     this.root = root;
     document.addEventListener('keydown', this._onKey, true);
@@ -193,6 +196,9 @@ export class CampaignScreen {
         + `<button type="button" data-cp="new">${esc(t('campaign.newAttempt'))}</button>${storyBtn}<button type="button" data-cp="back">${esc(t('mission.back'))}</button></div>`;
     }
     const prov = def.provisional ? `<span class="ms-badge-prov" title="${esc(t('campaign.provisionalHint'))}">${esc(t('campaign.provisional'))}</span>` : '';
+    const curDiff = getCampaignDifficulty();
+    const diffSel = `<label class="ms-brief-diff"><span>${esc(t('campaign.difficulty'))}</span><select data-cp="difficulty" title="${esc(t('campaign.difficultyHint'))}">`
+      + CAMPAIGN_DIFFICULTIES.map((d) => `<option value="${d}"${d === curDiff ? ' selected' : ''}>${esc(t(`skirmish.diff.${d}`))}</option>`).join('') + '</select></label>';
     const attempt = t('campaign.attempt', { n: this.progress.attemptNumber(def.id) });
     // M2-34: a escolha de campanha é a CampaignSelectScreen; aqui só um botão discreto para voltar a ela.
     const campsTabs = this.onSwitch
@@ -207,7 +213,7 @@ export class CampaignScreen {
     });
     this.root.innerHTML = `<div class="ms-brief ms-brief--map" role="dialog" aria-modal="true" aria-labelledby="cp-title">`
       + `<div class="ms-brief-list">${campsTabs}<h2 id="cp-title">${esc(localize(def.title, lang))}</h2>${prov}`
-      + `<p class="ms-brief-sub">${esc(attempt)}</p>${map}<div class="ms-brief-items" role="group" aria-label="${esc(t('campaign.list'))}">${list}</div></div>`
+      + `<p class="ms-brief-sub">${esc(attempt)}</p>${diffSel}${map}<div class="ms-brief-items" role="group" aria-label="${esc(t('campaign.list'))}">${list}</div></div>`
       + `<div class="ms-brief-main"><p class="ms-brief-talk">${esc(localize(def.premise, lang))}</p>${main}</div></div>`;
     this._offKeys?.();
     this._offKeys = attachWorldMapKeys(this.root);

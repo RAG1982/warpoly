@@ -4,9 +4,11 @@
 import { getCampaign } from '../data/campaigns/index.js';
 import { getMission, createMissionConfig } from '../data/missions/index.js';
 import { CampaignProgress } from './progress.js';
+import { applyCampaignDifficulty } from './difficulty.js';
 import { isUnlocked, techRestrictionFor, campaignEndPlan } from './campaign.js';
 
 export * from './campaign.js';
+export * from './difficulty.js';
 export { CampaignProgress, memoryStorage, PROGRESS_KEY } from './progress.js';
 
 let progressSingleton = null;
@@ -47,6 +49,7 @@ export function createCampaignMissionConfig(campaignId, missionId, { progress = 
 export function prepareCampaignMission(campaignId, missionId, { lang = 'pt-BR', unlockAll = false, progress = getProgress() } = {}) {
   // `?campaign=unlock` (unlockAll) também libera toda a árvore tecnológica (depuração, F8-05b).
   const config = createCampaignMissionConfig(campaignId, missionId, { lang, unlockAll, progress, techAll: unlockAll });
+  applyCampaignDifficulty(config); // M5-01: nível global da campanha (Normal = sem mudança)
   setActiveRun({ campaignId, missionId, unlockAll });
   return config;
 }

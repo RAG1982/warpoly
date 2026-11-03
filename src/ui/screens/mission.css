@@ -133,6 +133,9 @@
 .ms-brief-switch { font: inherit; font-size: 0.8em; justify-self: start; cursor: pointer; padding: 3px 8px; border-radius: 6px; border: 1px solid rgba(212, 175, 55, 0.4); background: transparent; color: inherit; }
 .ms-brief-switch:hover, .ms-brief-switch:focus-visible { background: rgba(212, 175, 55, 0.22); outline: none; }
 
+.ms-brief-diff { display: flex; align-items: center; gap: 8px; font-size: 0.85em; }
+.ms-brief-diff select { font: inherit; padding: 2px 6px; border-radius: 6px; border: 1px solid rgba(212, 175, 55, 0.4); background: rgba(0, 0, 0, 0.35); color: inherit; }
+
 /* M2-08: tela de campanha com mapa-múndi (escala 1024 → 4K pelo font-size; ver worldMap.css) */
 .ms-brief--map {
   font-size: clamp(14px, 0.5vw + 8px, 28px); width: min(96vw, 100em); max-height: 94vh;

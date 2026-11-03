@@ -42,7 +42,7 @@ export const DIFFICULTY_PROFILES = Object.freeze({
   }),
   hard: Object.freeze({
     id: 'hard', maxApm: 120, tickInterval: 0.75, micro: 2, resourceBonus: 0, cheatVision: false,
-    attackBase: 6, assess: 1.2, assumeEnemy: 0.9, armyCap: 0, research: 120, startDelay: 90, rushDelayScale: 0.4, workerBonus: 2, scout: true, walls: true, casters: true,
+    attackBase: 6, assess: 1.2, assumeEnemy: 0.9, armyCap: 0, research: 60, startDelay: 90, rushDelayScale: 0.4, workerBonus: 4, scout: true, walls: true, casters: true,
     naval: Object.freeze({ at: 300, tankers: 3, platforms: 2, fleet: 4, maxFleet: 8, attackAt: 4, capital: 2, boats: 2, landCooldown: 50 }),
     strategies: Object.freeze({ rush: 2, boom: 2, turtle: 1, air: 1 })
   }),

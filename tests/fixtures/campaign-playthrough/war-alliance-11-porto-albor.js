@@ -218,7 +218,7 @@ function fleet(c, { attack = true } = {}) {
   const bay = c.anchor('reinforceSea');
   if (attack && !b.fleetOut && ships.length >= FRIGATES_BEFORE_SEA) b.fleetOut = true;
   if (!b.fleetOut) {
-    const home = c.anchor('well1', 6, 4);
+    const home = c.anchor('reinforceSea', 6, 4); // OIL-FAR-2: well1 agora fica a ~30 u de navegação da doca, longe da enseada dos reforços
     const idle = ships.filter((u) => u.state === 'idle' && dist(posOf(u), home) > 10);
     if (idle.length) c.issue({ type: c.CMD.MOVE, unitIds: idle.map((u) => u.id), x: home.x, z: home.z });
     return;

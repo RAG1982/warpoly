@@ -112,6 +112,7 @@ export function relocateWells(ctx, docks, moves, { minGap = 16, step = 1, edge =
         if (!(d >= mv.min && d <= mv.max)) continue;
         if (!deepSeaOk(ctx, x, z, mv.clearR ?? 8)) continue;
         if (!others.every((o) => hyp({ x, z }, o) >= minGap)) continue;
+        if (mv.avoid && mv.avoid.some((a) => hyp({ x, z }, a) < (a.r ?? 25))) continue; // não bloquear praia de desembarque/reforço da missão
         if (mv.awayFrom !== undefined && !(fields[mv.awayFrom].at(x, z) >= mv.awayMin)) continue;
         let s = Math.abs(d - mv.target);
         if (mv.safe) { let mn = Infinity; fields.forEach((ff, q) => { if (q !== mv.player && ff) mn = Math.min(mn, ff.at(x, z)); }); s -= 0.3 * Math.min(mn, 300); } // seguro-ish: longe das docas dos outros
@@ -169,12 +170,12 @@ export const FAR_OIL = {
   /** Estepe do Vento (palco 11): poços da Liga (0 = seguro-ish, 1 = longe); os dos Clãs e do aliado ficam. */
   'camp-11-estepe-do-vento': (ctx, extra) => ({
     docks: dockPair(ctx, extra),
-    moves: [{ index: 0, player: 0, min: 27, max: 36, target: 30 }, { index: 1, player: 0, min: 60, max: 100, target: 68, lean: 1 }]
+    moves: [{ index: 0, player: 0, min: 27, max: 36, target: 30, avoid: [{ ...extra.reinforceSea, r: 30 }, { ...extra.landingZone, r: 30 }] }, { index: 1, player: 0, min: 60, max: 100, target: 68, lean: 1 }]
   }),
   /** Cabo Ferrugem (palco 12): poços da Liga 0 (seguro-ish) e 1 (longe); os de 5.000 (4 e 5, ~56–63 u, perto do estreito) e os do inimigo ficam. */
   'camp-12-cabo-ferrugem': (ctx, extra) => ({
     docks: dockPair(ctx, extra),
-    moves: [{ index: 0, player: 0, min: 27, max: 36, target: 30 }, { index: 1, player: 0, min: 60, max: 100, target: 68, lean: 1 }]
+    moves: [{ index: 0, player: 0, min: 27, max: 36, target: 30, avoid: [{ ...extra.reinforceSea, r: 30 }, { ...extra.landingZone, r: 30 }] }, { index: 1, player: 0, min: 60, max: 100, target: 68, lean: 1 }]
   }),
   /** Miragem (palco 9): idem (poços da Liga: índices 0 e 1). */
   'camp-09-miragem': (ctx, extra) => ({

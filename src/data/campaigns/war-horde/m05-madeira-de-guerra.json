@@ -13,22 +13,34 @@
   },
   "briefing": {
     "speaker": {
-      "pt-BR": "Vozgul a Profetisa",
+      "pt-BR": "Vozgul, a Profetisa",
       "en": "Vozgul the Prophetess"
     },
     "portrait": "💀",
     "text": {
-      "pt-BR": "Cerne Verde tem madeira para mil frotas. Evoque os ancestrais e convoque as Serpes de Guerra.",
-      "en": "Green Core holds timber for a thousand fleets. Summon the ancestors and call upon War Serpents."
+      "pt-BR": "O Cerne Verde tem madeira para mil frotas, e Aurelan a guarda com um bosque-forte no meio da mata: um Forte com três torres, Magos que queimam de longe, Grifos que voam por cima dos machados, Arqueiros e o mago Oren. Corte 2.000 de madeira, erga o Santuário das Cinzas e o Ninho das Serpes, e destrua o bosque-forte. Contra o que voa, só Serpes de Guerra, Necromantes e Lanceiros-Machado resolvem. Drogath lidera; se ele cair, o assalto acaba. Narga Asa-Rota chega com uma serpe aos quatro minutos, e eu venho ensinar o Erguer Mortos com o respeito que os mortos pedem.",
+      "en": "Green Core has timber for a thousand fleets, and Aurelan guards it with a grove stronghold in the heart of the forest: a Fort with three towers, Mages that burn from afar, Gryphons that fly over axes, Archers and the mage Oren. Cut 2,000 wood, raise the Ash Sanctum and the Serpent Nest, and destroy the grove stronghold. Against what flies, only War Serpents, Necromancers and Axethrowers will do. Drogath leads; if he falls, the assault is over. Narga Broken-Wing arrives with a serpent at the four-minute mark, and I come to teach Raise Dead with the respect the dead ask for."
     },
     "hints": [
       {
-        "pt-BR": "Concentre-se nos objetivos primários para avançar.",
-        "en": "Focus on primary objectives to advance."
+        "pt-BR": "Santuário das Cinzas (Necromante), Ninho das Serpes (Serpe de Guerra) e Altar das Tempestades exigem o Acampamento de Guerra e o Salão no nível 3, que a campanha concede logo depois da abertura. O Acampamento exige o Cercado de Javalis; o Altar exige o Covil dos Ogros.",
+        "en": "The Ash Sanctum (Necromancer), Serpent Nest (War Serpent) and Storm Altar need the War Camp and the Hall at tier 3, which the campaign grants right after the opening. The War Camp needs the Boar Pen; the Altar needs the Ogre Den."
+      },
+      {
+        "pt-BR": "Os Grifos de Aurelan voam: Talhadores e Ogros não os alcançam. Lanceiros-Machado, Necromantes e Serpes de Guerra sim. Mantenha um grupo de atiradores junto do Salão e dos Moinhos.",
+        "en": "Aurelan's Gryphons fly: Grunts and Ogres cannot reach them. Axethrowers, Necromancers and War Serpents can. Keep a group of shooters by the Hall and the Mills."
+      },
+      {
+        "pt-BR": "Magos de Aurelan queimam de longe e são frágeis: ataque-os primeiro com Ogros e Drogath. A madeira conta o que você coleta, não o que tem em estoque.",
+        "en": "Aurelan's Mages burn from afar and are fragile: hit them first with Ogres and Drogath. Wood counts what you gather, not what is in stock."
+      },
+      {
+        "pt-BR": "Drogath é um HERÓI: tem mana e três habilidades (Z, X, C) e só existe um. Se ele morrer, a missão está perdida.",
+        "en": "Drogath is a HERO: he has mana and three abilities (Z, X, C), and there is only one. If he dies, the mission is lost."
       }
     ]
   },
-  "mapId": "bosques-2v2",
+  "mapId": "camp-05-cerne-verde",
   "seed": 9085,
   "players": [
     {
@@ -53,35 +65,1135 @@
       "team": 1,
       "color": "#2563eb",
       "isAI": true,
+      "difficulty": "easy",
       "startSlot": 1
     }
   ],
   "startingResources": {
-    "wood": 400,
-    "gold": 400,
-    "stone": 150
+    "wood": 700,
+    "gold": 900,
+    "stone": 300
   },
+  "vars": {
+    "fin_clock": 0,
+    "raids": 0
+  },
+  "autoVictory": false,
   "setup": [
     {
       "type": "tag",
       "select": {
-        "buildingType": "castle"
+        "buildingType": "castle",
+        "owner": "enemy"
       },
       "tag": "enemy_base"
+    },
+    {
+      "type": "spawn",
+      "owner": "player",
+      "unitType": "hero_drogath",
+      "count": 1,
+      "anchor": "playerStart",
+      "dx": 0,
+      "dz": 13,
+      "tag": "drogath"
+    },
+    {
+      "type": "spawnBuilding",
+      "owner": "enemy",
+      "buildingType": "castle",
+      "anchor": "lumberHall2",
+      "tag": "grove_fort",
+      "facing": 200
+    },
+    {
+      "type": "spawnBuilding",
+      "owner": "enemy",
+      "buildingType": "lumber_camp",
+      "anchor": "lumberHall2",
+      "tag": "grove_mill",
+      "dx": 9,
+      "dz": 9
+    },
+    {
+      "type": "spawnBuilding",
+      "owner": "enemy",
+      "buildingType": "watchtower",
+      "anchor": "lumberHall2",
+      "tag": "grove_tower",
+      "dx": -10,
+      "dz": -6
+    },
+    {
+      "type": "spawnBuilding",
+      "owner": "enemy",
+      "buildingType": "watchtower",
+      "anchor": "lumberHall2",
+      "tag": "grove_tower",
+      "dx": -9,
+      "dz": 9
+    },
+    {
+      "type": "spawnBuilding",
+      "owner": "enemy",
+      "buildingType": "watchtower",
+      "anchor": "lumberHall2",
+      "tag": "grove_tower",
+      "dx": 4,
+      "dz": -12
+    },
+    {
+      "type": "spawn",
+      "owner": "enemy",
+      "units": [
+        {
+          "type": "mage",
+          "count": 3
+        },
+        {
+          "type": "archer",
+          "count": 4
+        },
+        {
+          "type": "knight",
+          "count": 3
+        }
+      ],
+      "anchor": "lumberHall2",
+      "dx": -4,
+      "dz": 2,
+      "spread": 4,
+      "tag": "grove_guard",
+      "guard": {
+        "r": 16
+      }
+    },
+    {
+      "type": "spawn",
+      "owner": "enemy",
+      "unitType": "gryphon_rider",
+      "count": 3,
+      "anchor": "lumberHall2",
+      "dx": 4,
+      "dz": -6,
+      "spread": 3,
+      "tag": "grove_guard",
+      "guard": {
+        "r": 18
+      }
+    },
+    {
+      "type": "spawn",
+      "owner": "enemy",
+      "unitType": "hero_oren",
+      "count": 1,
+      "anchor": "lumberHall2",
+      "dx": -2,
+      "dz": 7,
+      "tag": "oren",
+      "guard": {
+        "r": 16
+      },
+      "displayName": {
+        "pt-BR": "Oren, mago do Bosque",
+        "en": "Oren, Grove mage"
+      }
+    },
+    {
+      "type": "spawnLandmark",
+      "kind": "shrine",
+      "anchor": "sacredGrove",
+      "tag": "grove_shrine",
+      "label": {
+        "pt-BR": "Bosque Sagrado",
+        "en": "Sacred Grove"
+      }
     }
   ],
   "objectives": [
     {
-      "id": "primary-main",
+      "id": "p-wood",
+      "type": "collect",
+      "priority": "primary",
+      "resource": "wood",
+      "amount": 2000,
+      "mode": "gathered",
+      "title": {
+        "pt-BR": "Coletar 2.000 de madeira do Cerne",
+        "en": "Gather 2,000 wood from the Core"
+      },
+      "description": {
+        "pt-BR": "Conta só a madeira que seus Lacaios levam ao Moinho de Madeira. A mata é farta, mas os bosques ficam longe: erga Serrarias junto deles.",
+        "en": "Counts only wood your Peons deliver to the Lumber Mill. The forest is rich, but the groves are far: raise Mills next to them."
+      }
+    },
+    {
+      "id": "p-hall",
       "type": "destroy",
       "priority": "primary",
       "select": {
-        "tag": "enemy_base"
+        "tag": "grove_fort"
+      },
+      "count": 1,
+      "title": {
+        "pt-BR": "Destruir o bosque-forte de Aurelan",
+        "en": "Destroy Aurelan's grove stronghold"
+      },
+      "description": {
+        "pt-BR": "O posto madeireiro fortificado de Aurelan, no meio da mata: um Forte com torres e guarda de Magos, Grifos e Arqueiros, e o mago Oren.",
+        "en": "Aurelan's fortified lumber post in the heart of the forest: a Fort with towers and a guard of Mages, Gryphons and Archers, and the mage Oren."
+      },
+      "marker": {
+        "area": {
+          "anchor": "lumberHall2",
+          "r": 14
+        },
+        "style": "goal",
+        "seconds": 90
+      }
+    },
+    {
+      "id": "s-necro",
+      "type": "train",
+      "priority": "secondary",
+      "units": [
+        {
+          "type": "necromancer",
+          "count": 2
+        },
+        {
+          "type": "war_serpent",
+          "count": 1
+        }
+      ],
+      "title": {
+        "pt-BR": "Treinar 2 Necromantes e 1 Serpe de Guerra",
+        "en": "Train 2 Necromancers and 1 War Serpent"
+      },
+      "description": {
+        "pt-BR": "Necromantes no Santuário das Cinzas, Serpe de Guerra no Ninho das Serpes. Só contam os treinados nesta missão (Narga não conta). Recompensa: +200 de ouro.",
+        "en": "Necromancers at the Ash Sanctum, War Serpent at the Serpent Nest. Only those trained in this mission count (Narga does not). Reward: +200 gold."
+      }
+    },
+    {
+      "id": "h-ritual",
+      "type": "flag",
+      "priority": "hidden",
+      "condition": {
+        "all": [
+          {
+            "type": "research",
+            "id": "cavalry_class",
+            "level": 1
+          },
+          {
+            "type": "count",
+            "select": {
+              "unitType": "ogre_mage",
+              "owner": "player"
+            },
+            "op": ">=",
+            "value": 1
+          }
+        ]
       },
       "title": {
-        "pt-BR": "Colher madeira e derrotar os magos do bosque",
-        "en": "Harvest timber and vanquish the grove mages"
+        "pt-BR": "Ritual das Tempestades: o primeiro Ogro Feiticeiro",
+        "en": "Storm Ritual: the first Ogre Mage"
+      },
+      "description": {
+        "pt-BR": "Pesquise o Ritual das Tempestades no Altar das Tempestades e treine um Ogro: ele sai Ogro Feiticeiro. (+300 de ouro)",
+        "en": "Research the Storm Ritual at the Storm Altar and train an Ogre: it comes out an Ogre Mage. (+300 gold)"
       }
+    },
+    {
+      "id": "h-grove",
+      "type": "flag",
+      "priority": "hidden",
+      "active": true,
+      "condition": {
+        "type": "area",
+        "owner": "player",
+        "area": {
+          "anchor": "sacredGrove",
+          "r": 7
+        }
+      },
+      "title": {
+        "pt-BR": "O Bosque Sagrado",
+        "en": "The Sacred Grove"
+      },
+      "description": {
+        "pt-BR": "Um brilho entre as árvores mais velhas, ao sul do caminho entre as bases. Mande alguém até lá.",
+        "en": "A glint among the oldest trees, south of the path between the bases. Send someone there."
+      }
+    }
+  ],
+  "triggers": [
+    {
+      "id": "intro",
+      "when": {
+        "type": "time",
+        "at": 0
+      },
+      "actions": [
+        {
+          "type": "music",
+          "id": "on"
+        },
+        {
+          "type": "reveal",
+          "anchor": "sacredGrove",
+          "radius": 24,
+          "ttl": 40
+        },
+        {
+          "type": "reveal",
+          "anchor": "lumberHall2",
+          "radius": 28,
+          "ttl": 40
+        },
+        {
+          "type": "reveal",
+          "anchor": "gryphonNest",
+          "radius": 22,
+          "ttl": 40
+        },
+        {
+          "type": "cutscene",
+          "id": "grove",
+          "duration": 39,
+          "skippable": true,
+          "steps": [
+            {
+              "at": 0,
+              "anchor": "playerStart",
+              "zoom": 1.15,
+              "dialog": {
+                "speaker": {
+                  "pt-BR": "Drogath Punho-de-Brasa",
+                  "en": "Drogath Ember-Fist"
+                },
+                "portrait": "🪓",
+                "text": {
+                  "pt-BR": "Cerne Verde: a floresta mais velha do Mar Fendido, e madeira para mil navios. Eu sou Drogath, e o chefe-de-brasa mandou que o Clã cortasse o que os homens de Aurelan não souberam guardar.",
+                  "en": "Green Core: the oldest forest of the Sundered Sea, and timber for a thousand ships. I am Drogath, and the ember-chief ordered the Clan to cut what Aurelan's men could not keep."
+                },
+                "duration": 8
+              }
+            },
+            {
+              "at": 8,
+              "anchor": "lumberHall2",
+              "zoom": 1.1,
+              "dialog": {
+                "speaker": {
+                  "pt-BR": "Drogath Punho-de-Brasa",
+                  "en": "Drogath Ember-Fist"
+                },
+                "portrait": "🪓",
+                "text": {
+                  "pt-BR": "No meio da mata, o bosque-forte de Aurelan: um Forte com torres e Magos que queimam de longe, e Grifos que ninguém alcança com machado. O Cerne está sob a guarda deles.",
+                  "en": "In the heart of the woods, Aurelan's grove stronghold: a Fort with towers and Mages that burn from afar, and Gryphons no axe can reach. The Core is under their guard."
+                },
+                "duration": 8
+              }
+            },
+            {
+              "at": 16,
+              "anchor": "gryphonNest",
+              "zoom": 1.05,
+              "dialog": {
+                "speaker": {
+                  "pt-BR": "Anciã Ulma",
+                  "en": "Elder Ulma"
+                },
+                "portrait": "🔥",
+                "text": {
+                  "pt-BR": "Contra o que voa, Drogath, o Clã tem as Serpes de Guerra e os Necromantes. Não é o caminho antigo, mas o Fogo do Clã também aprende.",
+                  "en": "Against what flies, Drogath, the Clan has War Serpents and Necromancers. It is not the old way, but the Clan Fire learns too."
+                },
+                "duration": 8
+              }
+            },
+            {
+              "at": 24,
+              "anchor": "sacredGrove",
+              "zoom": 1.05,
+              "dialog": {
+                "speaker": {
+                  "pt-BR": "Vozgul, a Profetisa",
+                  "en": "Vozgul the Prophetess"
+                },
+                "portrait": "💀",
+                "text": {
+                  "pt-BR": "Há um bosque aqui que as árvores guardam melhor que os homens. Eu chego em breve: trago o Erguer Mortos, e quem o usa deve pedir licença aos mortos antes.",
+                  "en": "There is a grove here the trees guard better than men do. I will arrive soon: I bring Raise Dead, and whoever uses it must ask the dead for leave first."
+                },
+                "duration": 8
+              }
+            },
+            {
+              "at": 32,
+              "anchor": "playerStart",
+              "zoom": 1.1,
+              "dialog": {
+                "speaker": {
+                  "pt-BR": "Drogath Punho-de-Brasa",
+                  "en": "Drogath Ember-Fist"
+                },
+                "portrait": "🪓",
+                "text": {
+                  "pt-BR": "Moinho de Madeira primeiro, e Lacaios no cerne. Depois o Santuário das Cinzas e o Ninho das Serpes. Narga Asa-Rota vem com as serpes por volta dos quatro minutos.",
+                  "en": "Lumber Mill first, and Peons in the core. Then the Ash Sanctum and the Serpent Nest. Narga Broken-Wing comes with the serpents around the four-minute mark."
+                },
+                "duration": 7
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "tier-up",
+      "when": {
+        "type": "time",
+        "at": 40
+      },
+      "actions": [
+        {
+          "type": "setTier",
+          "owner": "player",
+          "tier": 3
+        },
+        {
+          "type": "sound",
+          "id": "build"
+        },
+        {
+          "type": "message",
+          "text": {
+            "pt-BR": "Salão do Clã no nível 3: Santuário das Cinzas, Ninho das Serpes e Altar das Tempestades liberados.",
+            "en": "Clan Hall at tier 3: Ash Sanctum, Serpent Nest and Storm Altar unlocked."
+          }
+        }
+      ]
+    },
+    {
+      "id": "first-steps",
+      "when": {
+        "type": "time",
+        "at": 52
+      },
+      "actions": [
+        {
+          "type": "dialog",
+          "speaker": {
+            "pt-BR": "Drogath Punho-de-Brasa",
+            "en": "Drogath Ember-Fist"
+          },
+          "portrait": "🪓",
+          "duration": 10,
+          "text": {
+            "pt-BR": "Lacaios no ouro e na madeira, e um Moinho de Madeira junto dos bosques: a mata é densa e os depósitos longe. O Santuário das Cinzas exige o Acampamento de Guerra, que exige o Cercado de Javalis.",
+            "en": "Peons on gold and timber, and a Lumber Mill next to the groves: the forest is dense and the stores are far. The Ash Sanctum needs the War Camp, which needs the Boar Pen."
+          }
+        }
+      ]
+    },
+    {
+      "id": "sanctum-up",
+      "when": {
+        "type": "count",
+        "select": {
+          "buildingType": "ash_sanctum",
+          "owner": "player"
+        },
+        "op": ">=",
+        "value": 1
+      },
+      "actions": [
+        {
+          "type": "sound",
+          "id": "build"
+        },
+        {
+          "type": "dialog",
+          "speaker": {
+            "pt-BR": "Drogath Punho-de-Brasa",
+            "en": "Drogath Ember-Fist"
+          },
+          "portrait": "🪓",
+          "duration": 9,
+          "text": {
+            "pt-BR": "Santuário das Cinzas de pé. Necromantes custam ouro e madeira e queimam as almas de longe. Deixe-os atrás dos Ogros.",
+            "en": "Ash Sanctum is up. Necromancers cost gold and timber and burn souls from afar. Keep them behind the Ogres."
+          }
+        }
+      ]
+    },
+    {
+      "id": "nest-up",
+      "when": {
+        "type": "count",
+        "select": {
+          "buildingType": "serpent_nest",
+          "owner": "player"
+        },
+        "op": ">=",
+        "value": 1
+      },
+      "actions": [
+        {
+          "type": "sound",
+          "id": "build"
+        },
+        {
+          "type": "dialog",
+          "speaker": {
+            "pt-BR": "Drogath Punho-de-Brasa",
+            "en": "Drogath Ember-Fist"
+          },
+          "portrait": "🪓",
+          "duration": 9,
+          "text": {
+            "pt-BR": "O Ninho das Serpes! Serpe de Guerra voa e cospe fogo em área curta: ela alcança os Grifos de Aurelan, que machado nenhum alcança.",
+            "en": "The Serpent Nest! A War Serpent flies and spits fire in a short area: it reaches Aurelan's Gryphons, which no axe can."
+          }
+        }
+      ]
+    },
+    {
+      "id": "altar-up",
+      "when": {
+        "type": "count",
+        "select": {
+          "buildingType": "storm_altar",
+          "owner": "player"
+        },
+        "op": ">=",
+        "value": 1
+      },
+      "actions": [
+        {
+          "type": "sound",
+          "id": "build"
+        },
+        {
+          "type": "dialog",
+          "speaker": {
+            "pt-BR": "Vozgul, a Profetisa",
+            "en": "Vozgul the Prophetess"
+          },
+          "portrait": "💀",
+          "duration": 9,
+          "text": {
+            "pt-BR": "O Altar das Tempestades guarda o Ritual: um Ogro treinado depois dele sai Feiticeiro. Peça, não exija: a tempestade escolhe a quem atende.",
+            "en": "The Storm Altar keeps the Ritual: an Ogre trained after it comes out a Mage. Ask, do not demand: the storm picks whom it answers."
+          }
+        }
+      ]
+    },
+    {
+      "id": "allies-arrive",
+      "when": {
+        "type": "time",
+        "at": 240
+      },
+      "actions": [
+        {
+          "type": "spawn",
+          "owner": "neutral",
+          "unitType": "hero_vozgul",
+          "count": 1,
+          "anchor": "playerStart",
+          "dx": 12,
+          "dz": 14,
+          "tag": "vozgul",
+          "markColor": "#c084fc",
+          "displayName": {
+            "pt-BR": "Vozgul, a Profetisa",
+            "en": "Vozgul the Prophetess"
+          }
+        },
+        {
+          "type": "spawn",
+          "owner": "player",
+          "unitType": "war_serpent",
+          "count": 1,
+          "anchor": "playerStart",
+          "dx": 9,
+          "dz": 11,
+          "tag": "narga",
+          "markColor": "#a3e635",
+          "displayName": {
+            "pt-BR": "Narga Asa-Rota",
+            "en": "Narga Broken-Wing"
+          }
+        },
+        {
+          "type": "giveResources",
+          "owner": "player",
+          "gold": 100,
+          "wood": 100
+        },
+        {
+          "type": "sound",
+          "id": "victory"
+        },
+        {
+          "type": "dialog",
+          "speaker": {
+            "pt-BR": "Narga Asa-Rota",
+            "en": "Narga Broken-Wing"
+          },
+          "portrait": "🐉",
+          "duration": 9,
+          "text": {
+            "pt-BR": "Narga Asa-Rota, do Ninho Quebrado. Minha asa voa torta, mas o fogo vai reto. Obedeço a Drogath e a mais ninguém; os Grifos de Aurelan que se cuidem.",
+            "en": "Narga Broken-Wing, of the Broken Nest. My wing flies crooked, but the fire flies straight. I obey Drogath and no one else; Aurelan's Gryphons had better beware."
+          }
+        },
+        {
+          "type": "dialog",
+          "speaker": {
+            "pt-BR": "Vozgul, a Profetisa",
+            "en": "Vozgul the Prophetess"
+          },
+          "portrait": "💀",
+          "duration": 10,
+          "text": {
+            "pt-BR": "Drogath. O Erguer Mortos não é só um truque: quem levanta um morto assume uma dívida com ele. Peça com respeito, use por pouco tempo e devolva as cinzas ao chão quando a luta acabar.",
+            "en": "Drogath. Raise Dead is no mere trick: whoever lifts a dead one takes on a debt to it. Ask with respect, use it briefly and return the ashes to the ground when the fight is over."
+          }
+        }
+      ]
+    },
+    {
+      "id": "raid-1",
+      "when": {
+        "type": "time",
+        "at": 330
+      },
+      "actions": [
+        {
+          "type": "spawn",
+          "owner": "enemy",
+          "units": [
+            {
+              "type": "gryphon_rider",
+              "count": 3
+            },
+            {
+              "type": "archer",
+              "count": 4
+            }
+          ],
+          "anchor": "enemyStart",
+          "dx": -10,
+          "spread": 3,
+          "tag": "raid",
+          "order": {
+            "kind": "attackMove",
+            "anchor": "playerStart"
+          }
+        },
+        {
+          "type": "incVar",
+          "name": "raids"
+        },
+        {
+          "type": "dialog",
+          "speaker": {
+            "pt-BR": "Mestre Arcano Oren",
+            "en": "Arcane Master Oren"
+          },
+          "portrait": "🔮",
+          "duration": 8,
+          "text": {
+            "pt-BR": "Os orcs cortam o cerne como se fosse deles. Grifos: cubram o acampamento. A madeira de Aurelan não é do Clã.",
+            "en": "The orcs cut the core as if it were theirs. Gryphons: cover the camp. Aurelan's timber is not the Clan's."
+          }
+        },
+        {
+          "type": "message",
+          "text": {
+            "pt-BR": "Grifos e arqueiros de Aurelan marcham para a base.",
+            "en": "Aurelan's Gryphons and archers march on the base."
+          }
+        }
+      ]
+    },
+    {
+      "id": "raid-2",
+      "when": {
+        "type": "time",
+        "at": 570
+      },
+      "actions": [
+        {
+          "type": "spawn",
+          "owner": "enemy",
+          "units": [
+            {
+              "type": "mage",
+              "count": 3
+            },
+            {
+              "type": "knight",
+              "count": 5
+            },
+            {
+              "type": "archer",
+              "count": 2
+            }
+          ],
+          "anchor": "enemyStart",
+          "dx": -10,
+          "spread": 3,
+          "tag": "raid",
+          "order": {
+            "kind": "attackMove",
+            "anchor": "playerStart"
+          }
+        },
+        {
+          "type": "incVar",
+          "name": "raids"
+        },
+        {
+          "type": "message",
+          "text": {
+            "pt-BR": "Magos e espadachins de Aurelan marcham para a base.",
+            "en": "Aurelan's Mages and swordsmen march on the base."
+          }
+        }
+      ]
+    },
+    {
+      "id": "raid-3",
+      "when": {
+        "type": "time",
+        "at": 810
+      },
+      "actions": [
+        {
+          "type": "spawn",
+          "owner": "enemy",
+          "units": [
+            {
+              "type": "gryphon_rider",
+              "count": 3
+            },
+            {
+              "type": "knight",
+              "count": 4
+            },
+            {
+              "type": "archer",
+              "count": 3
+            },
+            {
+              "type": "ballista",
+              "count": 1
+            }
+          ],
+          "anchor": "enemyStart",
+          "dx": -10,
+          "spread": 3,
+          "tag": "raid",
+          "order": {
+            "kind": "attackMove",
+            "anchor": "playerStart"
+          }
+        },
+        {
+          "type": "incVar",
+          "name": "raids"
+        },
+        {
+          "type": "message",
+          "text": {
+            "pt-BR": "Última leva de Aurelan: Grifos, espadachins, arqueiros e Balista.",
+            "en": "Aurelan's last wave: Gryphons, swordsmen, archers and a Ballista."
+          }
+        }
+      ]
+    },
+    {
+      "id": "wood-done",
+      "when": {
+        "type": "objective",
+        "id": "p-wood",
+        "status": "completed"
+      },
+      "actions": [
+        {
+          "type": "sound",
+          "id": "victory"
+        },
+        {
+          "type": "dialog",
+          "speaker": {
+            "pt-BR": "Drogath Punho-de-Brasa",
+            "en": "Drogath Ember-Fist"
+          },
+          "portrait": "🪓",
+          "duration": 8,
+          "text": {
+            "pt-BR": "Duas mil de madeira nos depósitos: o Clã tem o que veio buscar. Agora o bosque-forte de Aurelan.",
+            "en": "Two thousand timber in the stores: the Clan has what it came for. Now Aurelan's grove stronghold."
+          }
+        }
+      ]
+    },
+    {
+      "id": "grove-near",
+      "when": {
+        "type": "area",
+        "owner": "player",
+        "area": {
+          "anchor": "lumberHall2",
+          "r": 34
+        },
+        "count": 4
+      },
+      "actions": [
+        {
+          "type": "order",
+          "select": {
+            "tag": "narga"
+          },
+          "kind": "attackMove",
+          "anchor": "lumberHall2"
+        },
+        {
+          "type": "dialog",
+          "speaker": {
+            "pt-BR": "Narga Asa-Rota",
+            "en": "Narga Broken-Wing"
+          },
+          "portrait": "🐉",
+          "duration": 8,
+          "text": {
+            "pt-BR": "Vejo as torres do alto: quatro vigias e um Forte. Queimem os Magos primeiro; eu cuido dos Grifos.",
+            "en": "I see the towers from above: watchers and a Fort. Burn the Mages first; I will handle the Gryphons."
+          }
+        },
+        {
+          "type": "dialog",
+          "speaker": {
+            "pt-BR": "Mestre Arcano Oren",
+            "en": "Arcane Master Oren"
+          },
+          "portrait": "🔮",
+          "duration": 8,
+          "text": {
+            "pt-BR": "Oren, mago do Bosque, guarda esta clareira. Passem pelo cerne e passem por mim.",
+            "en": "Oren, mage of the Grove, guards this clearing. Pass through the core and pass through me."
+          }
+        }
+      ]
+    },
+    {
+      "id": "oren-fallen",
+      "when": {
+        "type": "dead",
+        "select": {
+          "tag": "oren"
+        },
+        "count": 1
+      },
+      "actions": [
+        {
+          "type": "sound",
+          "id": "victory"
+        },
+        {
+          "type": "dialog",
+          "speaker": {
+            "pt-BR": "Drogath Punho-de-Brasa",
+            "en": "Drogath Ember-Fist"
+          },
+          "portrait": "🪓",
+          "duration": 7,
+          "text": {
+            "pt-BR": "O mago do Bosque caiu. A mata fica sem quem a defenda com magia.",
+            "en": "The Grove mage has fallen. The woods are left without anyone to defend them with magic."
+          }
+        }
+      ]
+    },
+    {
+      "id": "necro-reward",
+      "when": {
+        "type": "objective",
+        "id": "s-necro",
+        "status": "completed"
+      },
+      "actions": [
+        {
+          "type": "giveResources",
+          "owner": "player",
+          "gold": 200
+        },
+        {
+          "type": "sound",
+          "id": "victory"
+        },
+        {
+          "type": "message",
+          "text": {
+            "pt-BR": "2 Necromantes e 1 Serpe de Guerra treinados: +200 de ouro.",
+            "en": "2 Necromancers and 1 War Serpent trained: +200 gold."
+          }
+        }
+      ]
+    },
+    {
+      "id": "ritual-reward",
+      "when": {
+        "type": "objective",
+        "id": "h-ritual",
+        "status": "completed"
+      },
+      "actions": [
+        {
+          "type": "giveResources",
+          "owner": "player",
+          "gold": 300
+        },
+        {
+          "type": "sound",
+          "id": "victory"
+        },
+        {
+          "type": "message",
+          "text": {
+            "pt-BR": "Primeiro Ogro Feiticeiro: +300 de ouro.",
+            "en": "First Ogre Mage: +300 gold."
+          }
+        }
+      ]
+    },
+    {
+      "id": "grove-hint",
+      "when": {
+        "type": "time",
+        "at": 150
+      },
+      "actions": [
+        {
+          "type": "revealObjective",
+          "id": "h-grove"
+        },
+        {
+          "type": "dialog",
+          "speaker": {
+            "pt-BR": "Anciã Ulma",
+            "en": "Elder Ulma"
+          },
+          "portrait": "🔥",
+          "duration": 9,
+          "text": {
+            "pt-BR": "Filho do Cinzal, os batedores falam de árvores mais velhas que o Clã, ao sul do caminho. Quem passar lá, ouve a madeira.",
+            "en": "Child of the Cinzal, the scouts speak of trees older than the Clan, south of the path. Whoever passes there hears the wood."
+          }
+        }
+      ]
+    },
+    {
+      "id": "grove-found",
+      "when": {
+        "type": "objective",
+        "id": "h-grove",
+        "status": "completed"
+      },
+      "actions": [
+        {
+          "type": "giveResources",
+          "owner": "player",
+          "wood": 250,
+          "gold": 150
+        },
+        {
+          "type": "lightLandmark",
+          "tag": "grove_shrine"
+        },
+        {
+          "type": "sound",
+          "id": "victory"
+        },
+        {
+          "type": "message",
+          "text": {
+            "pt-BR": "Bosque Sagrado encontrado: +250 de madeira e +150 de ouro.",
+            "en": "Sacred Grove found: +250 wood and +150 gold."
+          }
+        }
+      ]
+    },
+    {
+      "id": "hall-fallen",
+      "when": {
+        "type": "objective",
+        "id": "p-hall",
+        "status": "completed"
+      },
+      "actions": [
+        {
+          "type": "sound",
+          "id": "victory"
+        },
+        {
+          "type": "dialog",
+          "speaker": {
+            "pt-BR": "Vozgul, a Profetisa",
+            "en": "Vozgul the Prophetess"
+          },
+          "portrait": "💀",
+          "duration": 8,
+          "text": {
+            "pt-BR": "O Forte cai e os mortos descansam. Guarde o cerne, Drogath: a fornalha ainda tem fome, mas o bosque merece resto.",
+            "en": "The Fort falls and the dead rest. Keep the core, Drogath: the furnace is still hungry, but the grove deserves some rest."
+          }
+        }
+      ]
+    },
+    {
+      "id": "all-done",
+      "when": {
+        "all": [
+          {
+            "type": "objective",
+            "id": "p-wood",
+            "status": "completed"
+          },
+          {
+            "type": "objective",
+            "id": "p-hall",
+            "status": "completed"
+          }
+        ]
+      },
+      "actions": [
+        {
+          "type": "sound",
+          "id": "victory"
+        },
+        {
+          "type": "cutscene",
+          "id": "finale",
+          "duration": 18,
+          "skippable": true,
+          "steps": [
+            {
+              "at": 0,
+              "anchor": "lumberHall2",
+              "zoom": 1.1,
+              "dialog": {
+                "speaker": {
+                  "pt-BR": "Drogath Punho-de-Brasa",
+                  "en": "Drogath Ember-Fist"
+                },
+                "portrait": "🪓",
+                "text": {
+                  "pt-BR": "O bosque-forte é cinza e o cerne é do Clã. Aurelan recua para o sul, e os Estilhaços ficam um passo mais perto.",
+                  "en": "The grove stronghold is ash and the core belongs to the Clan. Aurelan falls back to the south, and the Shards are one step closer."
+                },
+                "duration": 8
+              }
+            },
+            {
+              "at": 9,
+              "anchor": "playerStart",
+              "zoom": 1.1,
+              "dialog": {
+                "speaker": {
+                  "pt-BR": "Vozgul, a Profetisa",
+                  "en": "Vozgul the Prophetess"
+                },
+                "portrait": "💀",
+                "text": {
+                  "pt-BR": "Os mortos falam de gelo ao sul, onde a Geada guarda um farol. Pergunte a eles com respeito, Drogath: o próximo passo é na neve.",
+                  "en": "The dead speak of ice to the south, where the Frost guards a beacon. Ask them with respect, Drogath: the next step is in the snow."
+                },
+                "duration": 8
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "finale-clock",
+      "when": {
+        "type": "trigger",
+        "id": "all-done"
+      },
+      "once": false,
+      "cooldown": 18,
+      "actions": [
+        {
+          "type": "incVar",
+          "name": "fin_clock",
+          "by": 1
+        }
+      ]
+    },
+    {
+      "id": "finale-victory",
+      "when": {
+        "type": "var",
+        "name": "fin_clock",
+        "op": ">=",
+        "value": 1
+      },
+      "actions": [
+        {
+          "type": "victory"
+        }
+      ]
+    },
+    {
+      "id": "hall-lost",
+      "when": {
+        "type": "count",
+        "select": {
+          "buildingType": "great_hall",
+          "owner": "player"
+        },
+        "op": "==",
+        "value": 0
+      },
+      "actions": [
+        {
+          "type": "defeat",
+          "text": {
+            "pt-BR": "O Salão do Clã caiu. O Cerne Verde é de Aurelan.",
+            "en": "The Clan Hall has fallen. The Green Core belongs to Aurelan."
+          }
+        }
+      ]
+    },
+    {
+      "id": "drogath-fallen",
+      "when": {
+        "type": "dead",
+        "select": {
+          "tag": "drogath"
+        },
+        "count": 1
+      },
+      "actions": [
+        {
+          "type": "defeat",
+          "text": {
+            "pt-BR": "Drogath caiu. Sem o punho do Clã, o assalto ao bosque acabou.",
+            "en": "Drogath has fallen. Without the Clan's fist, the assault on the grove is over."
+          }
+        }
+      ]
     }
   ]
 }

@@ -22,7 +22,6 @@ import { playMission } from './helpers/campaignHarness.js';
  * tire-a daqui e acrescente o roteiro em `tests/fixtures/campaign-playthrough/<missionId>.js`.
  */
 export const PENDING = new Set([
-  'war-horde-02-velas-brancas',
   'war-horde-05-madeira-de-guerra', 'war-horde-06-fogo-no-gelo', 'war-horde-07-casa-no-brejo', 'war-horde-08-o-monte-caldeira',
   'war-horde-09-o-ultimo-poco', 'war-horde-10-cabo-aurora', 'war-horde-11-brasa-alta', 'war-horde-12-cidadela-de-brasa-alta'
 ]);

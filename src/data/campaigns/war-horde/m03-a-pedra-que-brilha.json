@@ -14,21 +14,33 @@
   "briefing": {
     "speaker": {
       "pt-BR": "Drogath Punho-de-Brasa",
-      "en": "Drogath Emberfist"
+      "en": "Drogath Ember-Fist"
     },
-    "portrait": "🔥",
+    "portrait": "🪓",
     "text": {
-      "pt-BR": "Pedra-Mãe está cheia de ouro humano. Com Drogath e os Ogros na dianteira, assalte a fortaleza da mina!",
-      "en": "Mother Stone is rich with human gold. With Drogath and the Ogres in the lead, storm the mine fortress!"
+      "pt-BR": "A Pedra-Mãe está cheia de ouro humano, e o chefe-de-brasa Skarn quer a ilha. Desta vez somos nós que atacamos: Aurelan guarda a colônia mineira com TRÊS fortes, cada um com torres, Balistas e Espadachins, e o Paço do governador Mervane fica a oeste, depois de uma crista de rocha com só dois desfiladeiros. O Capitão Brann comanda a guarnição. Você tem Drogath, o primeiro herói do Clã, e os Ogros e as Catapultas que a Pedra-Mãe nos liberou. Erga o Covil dos Ogros e a Oficina, treine 4 Ogros e 2 Catapultas, e então derrube os 3 fortes, um de cada vez, e o Paço. Se Drogath cair, o assalto acaba. O Clã Presa-Negra manda reforços aos poucos.",
+      "en": "Mother Stone is full of human gold, and ember-chief Skarn wants the island. This time we are the ones attacking: Aurelan guards the mining colony with THREE forts, each with towers, Ballistas and Swordsmen, and Governor Mervane's Palace lies to the west, past a rock ridge with only two passes. Captain Brann commands the garrison. You have Drogath, the Clan's first hero, and the Ogres and Catapults Mother Stone has unlocked for us. Raise the Ogre Den and the Workshop, train 4 Ogres and 2 Catapults, then bring down the 3 forts, one at a time, and the Palace. If Drogath falls, the assault is over. The Blackfang Clan sends reinforcements bit by bit."
     },
     "hints": [
       {
-        "pt-BR": "Concentre-se nos objetivos primários para avançar.",
-        "en": "Focus on primary objectives to advance."
+        "pt-BR": "Drogath é um HERÓI: tem mana e três habilidades (Z, X, C) e só existe um. Se ele morrer, a missão está perdida. Deixe-o atrás dos Ogros e use o Grito de Guerra quando a luta começar.",
+        "en": "Drogath is a HERO: he has mana and three abilities (Z, X, C) and there is only one. If he dies, the mission is lost. Keep him behind the Ogres and use War Cry when the fight starts."
+      },
+      {
+        "pt-BR": "O Covil dos Ogros exige o Acampamento de Guerra (que exige o Cercado de Javalis) e o Salão no nível 2, que a campanha já concede. A Oficina dos Engenhoqueiros treina as Catapultas (alcance 20, dano em área, cercos).",
+        "en": "The Ogre Den needs the War Camp (which needs the Boar Pen) and the Hall at tier 2, which the campaign already grants. The Tinkers' Workshop trains Catapults (range 20, area damage, siege)."
+      },
+      {
+        "pt-BR": "Torres e Balistas atiram em quem chega perto. Catapultas derrubam as torres de longe; Ogros ficam entre elas e os inimigos. Avance um forte por vez e recue os feridos.",
+        "en": "Towers and Ballistas shoot anyone who comes close. Catapults take down the towers from afar; Ogres stand between them and the enemy. Advance one fort at a time and pull the wounded back."
+      },
+      {
+        "pt-BR": "Os humanos contra-atacam pelos desfiladeiros. Uma Torre de Vigia e 4 trechos de Paliçada na cabeça de ponte (objetivos secundários) protegem os Lacaios.",
+        "en": "The humans counterattack through the passes. A Watchtower and 4 sections of Palisade on the bridgehead (secondary objectives) protect the Peons."
       }
     ]
   },
-  "mapId": "continental-1v1",
+  "mapId": "camp-03-pedra-mae",
   "seed": 9051,
   "players": [
     {
@@ -41,47 +53,1340 @@
       "team": 0,
       "color": "#dc2626",
       "isLocal": true,
-      "startSlot": 0
+      "startSlot": 1
     },
     {
       "id": 1,
       "name": {
-        "pt-BR": "Tropas de Aurelan",
-        "en": "Aurelan Troops"
+        "pt-BR": "Colônia de Pedra-Mãe",
+        "en": "Mother Stone Colony"
       },
       "factionId": "human",
       "team": 1,
       "color": "#2563eb",
       "isAI": true,
-      "startSlot": 1
+      "difficulty": "easy",
+      "startSlot": 0
     }
   ],
   "startingResources": {
-    "wood": 400,
-    "gold": 400,
-    "stone": 150
+    "wood": 1000,
+    "gold": 1100,
+    "stone": 400
   },
+  "vars": {
+    "raids": 0,
+    "fin_clock": 0
+  },
+  "autoVictory": false,
   "setup": [
     {
       "type": "tag",
       "select": {
-        "buildingType": "castle"
+        "buildingType": "castle",
+        "owner": "enemy"
       },
       "tag": "enemy_base"
+    },
+    {
+      "type": "tag",
+      "select": {
+        "unitType": "peon",
+        "owner": "player"
+      },
+      "tag": "peons0"
+    },
+    {
+      "type": "spawn",
+      "owner": "player",
+      "unitType": "hero_drogath",
+      "count": 1,
+      "anchor": "enemyStart",
+      "dx": -4,
+      "dz": 12,
+      "tag": "drogath"
+    },
+    {
+      "type": "spawnBuilding",
+      "owner": "enemy",
+      "buildingType": "barracks",
+      "anchor": "fort1",
+      "tag": "fort",
+      "facing": 0
+    },
+    {
+      "type": "tag",
+      "select": {
+        "buildingType": "barracks",
+        "owner": "enemy",
+        "area": {
+          "anchor": "fort1",
+          "r": 6
+        }
+      },
+      "tag": "fort1"
+    },
+    {
+      "type": "spawnBuilding",
+      "owner": "enemy",
+      "buildingType": "watchtower",
+      "anchor": "fort1",
+      "dx": 8,
+      "dz": -2,
+      "tag": "fort_tower"
+    },
+    {
+      "type": "spawnBuilding",
+      "owner": "enemy",
+      "buildingType": "watchtower",
+      "anchor": "fort1",
+      "dx": -8,
+      "dz": -2,
+      "tag": "fort_tower"
+    },
+    {
+      "type": "spawn",
+      "owner": "enemy",
+      "units": [
+        {
+          "type": "knight",
+          "count": 2
+        },
+        {
+          "type": "archer",
+          "count": 2
+        },
+        {
+          "type": "ballista",
+          "count": 1
+        }
+      ],
+      "anchor": "fort1",
+      "dz": -4,
+      "spread": 4,
+      "tag": "fort_guard",
+      "guard": {
+        "r": 16
+      }
+    },
+    {
+      "type": "spawnBuilding",
+      "owner": "enemy",
+      "buildingType": "barracks",
+      "anchor": "fort2",
+      "tag": "fort",
+      "facing": 0
+    },
+    {
+      "type": "tag",
+      "select": {
+        "buildingType": "barracks",
+        "owner": "enemy",
+        "area": {
+          "anchor": "fort2",
+          "r": 6
+        }
+      },
+      "tag": "fort2"
+    },
+    {
+      "type": "spawnBuilding",
+      "owner": "enemy",
+      "buildingType": "watchtower",
+      "anchor": "fort2",
+      "dx": 8,
+      "dz": -2,
+      "tag": "fort_tower"
+    },
+    {
+      "type": "spawnBuilding",
+      "owner": "enemy",
+      "buildingType": "watchtower",
+      "anchor": "fort2",
+      "dx": -8,
+      "dz": -2,
+      "tag": "fort_tower"
+    },
+    {
+      "type": "spawn",
+      "owner": "enemy",
+      "units": [
+        {
+          "type": "knight",
+          "count": 2
+        },
+        {
+          "type": "archer",
+          "count": 2
+        },
+        {
+          "type": "ballista",
+          "count": 1
+        }
+      ],
+      "anchor": "fort2",
+      "dz": -4,
+      "spread": 4,
+      "tag": "fort_guard",
+      "guard": {
+        "r": 16
+      }
+    },
+    {
+      "type": "spawnBuilding",
+      "owner": "enemy",
+      "buildingType": "barracks",
+      "anchor": "fort3",
+      "tag": "fort",
+      "facing": 0
+    },
+    {
+      "type": "tag",
+      "select": {
+        "buildingType": "barracks",
+        "owner": "enemy",
+        "area": {
+          "anchor": "fort3",
+          "r": 6
+        }
+      },
+      "tag": "fort3"
+    },
+    {
+      "type": "spawnBuilding",
+      "owner": "enemy",
+      "buildingType": "watchtower",
+      "anchor": "fort3",
+      "dx": 8,
+      "dz": -2,
+      "tag": "fort_tower"
+    },
+    {
+      "type": "spawnBuilding",
+      "owner": "enemy",
+      "buildingType": "watchtower",
+      "anchor": "fort3",
+      "dx": -8,
+      "dz": -2,
+      "tag": "fort_tower"
+    },
+    {
+      "type": "spawn",
+      "owner": "enemy",
+      "units": [
+        {
+          "type": "knight",
+          "count": 2
+        },
+        {
+          "type": "archer",
+          "count": 2
+        },
+        {
+          "type": "ballista",
+          "count": 1
+        }
+      ],
+      "anchor": "fort3",
+      "dz": -4,
+      "spread": 4,
+      "tag": "fort_guard",
+      "guard": {
+        "r": 16
+      }
+    },
+    {
+      "type": "spawn",
+      "owner": "enemy",
+      "unitType": "hero_brann",
+      "count": 1,
+      "anchor": "colonyHall",
+      "dx": 7,
+      "dz": 4,
+      "tag": "brann",
+      "guard": {
+        "r": 18
+      }
+    },
+    {
+      "type": "spawn",
+      "owner": "enemy",
+      "units": [
+        {
+          "type": "cavalier",
+          "count": 2
+        },
+        {
+          "type": "knight",
+          "count": 2
+        },
+        {
+          "type": "archer",
+          "count": 2
+        },
+        {
+          "type": "ballista",
+          "count": 1
+        }
+      ],
+      "anchor": "colonyHall",
+      "dx": 10,
+      "dz": 0,
+      "spread": 5,
+      "tag": "hall_guard",
+      "guard": {
+        "r": 20
+      }
+    },
+    {
+      "type": "spawnBuilding",
+      "owner": "enemy",
+      "buildingType": "watchtower",
+      "anchor": "colonyHall",
+      "dx": 14,
+      "dz": -8,
+      "tag": "hall_tower"
+    },
+    {
+      "type": "spawnBuilding",
+      "owner": "enemy",
+      "buildingType": "watchtower",
+      "anchor": "colonyHall",
+      "dx": 14,
+      "dz": 8,
+      "tag": "hall_tower"
+    },
+    {
+      "type": "spawnLandmark",
+      "kind": "shrine",
+      "anchor": "shrine1",
+      "tag": "shrine",
+      "label": {
+        "pt-BR": "Santuário da Pedra-Mãe",
+        "en": "Mother Stone Shrine"
+      }
     }
   ],
   "objectives": [
     {
-      "id": "primary-main",
+      "id": "p-den",
+      "type": "build",
+      "priority": "primary",
+      "buildingType": "ogre_den",
+      "count": 1,
+      "title": {
+        "pt-BR": "Erguer o Covil dos Ogros",
+        "en": "Raise the Ogre Den"
+      },
+      "description": {
+        "pt-BR": "Exige o Acampamento de Guerra e o Salão no nível 2, que a campanha já concede nesta missão. Lacaios constroem.",
+        "en": "Needs the War Camp and the Hall at tier 2, which the campaign already grants in this mission. Peons build."
+      }
+    },
+    {
+      "id": "p-army",
+      "type": "train",
+      "priority": "primary",
+      "active": false,
+      "units": [
+        {
+          "type": "ogre",
+          "count": 4
+        },
+        {
+          "type": "catapult",
+          "count": 2
+        }
+      ],
+      "title": {
+        "pt-BR": "Treinar 4 Ogros e 2 Catapultas",
+        "en": "Train 4 Ogres and 2 Catapults"
+      },
+      "description": {
+        "pt-BR": "Ogros saem do Covil; as Catapultas exigem a Oficina dos Engenhoqueiros. Conta só o que é treinado, não os reforços.",
+        "en": "Ogres come out of the Den; Catapults need the Tinkers' Workshop. Only trained units count, not reinforcements."
+      }
+    },
+    {
+      "id": "p-forts",
       "type": "destroy",
       "priority": "primary",
+      "active": false,
+      "select": {
+        "tag": "fort"
+      },
+      "count": 3,
+      "title": {
+        "pt-BR": "Destruir os 3 fortes da colônia",
+        "en": "Destroy the 3 colony forts"
+      },
+      "description": {
+        "pt-BR": "Cada forte é um Quartel fortificado, com torres e guarnição de Balistas. Um de cada vez; use as Catapultas contra as torres.",
+        "en": "Each fort is a fortified Barracks with towers and a Ballista garrison. One at a time; use the Catapults against the towers."
+      }
+    },
+    {
+      "id": "p-hall",
+      "type": "destroy",
+      "priority": "primary",
+      "active": false,
       "select": {
         "tag": "enemy_base"
       },
       "title": {
-        "pt-BR": "Assaltar a guarnição mineira com Drogath e ogros",
-        "en": "Storm the mining garrison with Drogath and ogres"
+        "pt-BR": "Destruir o Paço do governador Mervane",
+        "en": "Destroy Governor Mervane's Palace"
+      },
+      "description": {
+        "pt-BR": "O Paço fica a oeste, depois da crista de rocha, guardado pelo Capitão Brann e por Cavaleiros.",
+        "en": "The Palace lies to the west, past the rock ridge, guarded by Captain Brann and Cavaliers."
       }
+    },
+    {
+      "id": "s-gold",
+      "type": "collect",
+      "priority": "secondary",
+      "resource": "gold",
+      "amount": 1500,
+      "mode": "gathered",
+      "title": {
+        "pt-BR": "Tomar as 2 minas de ouro do lado leste: coletar 1500 de ouro",
+        "en": "Take the 2 gold mines on the east side: gather 1500 gold"
+      },
+      "description": {
+        "pt-BR": "Lacaios nas minas da cabeça de ponte. Recompensa: +150 de ouro.",
+        "en": "Peons on the bridgehead mines. Reward: +150 gold."
+      }
+    },
+    {
+      "id": "s-tower",
+      "type": "build",
+      "priority": "secondary",
+      "buildingType": "orc_watchtower",
+      "count": 1,
+      "marker": {
+        "area": {
+          "anchor": "bridgehead",
+          "r": 12
+        },
+        "style": "goal",
+        "seconds": 90
+      },
+      "title": {
+        "pt-BR": "Erguer uma Torre de Vigia na cabeça de ponte",
+        "en": "Raise a Watchtower at the bridgehead"
+      },
+      "description": {
+        "pt-BR": "Os humanos vão contra-atacar pelas passagens. Recompensa: +100 de ouro.",
+        "en": "The humans will counterattack through the passes. Reward: +100 gold."
+      }
+    },
+    {
+      "id": "s-walls",
+      "type": "build",
+      "priority": "secondary",
+      "buildingType": "wall_orc",
+      "count": 4,
+      "marker": {
+        "area": {
+          "anchor": "bridgehead",
+          "r": 12
+        },
+        "style": "goal",
+        "seconds": 90
+      },
+      "title": {
+        "pt-BR": "Fechar a cabeça de ponte: 4 trechos de Paliçada",
+        "en": "Seal the bridgehead: 4 sections of Palisade"
+      },
+      "description": {
+        "pt-BR": "A Paliçada (liberada agora) segura a infantaria inimiga sob as torres. Recompensa: +100 de ouro.",
+        "en": "The Palisade (unlocked now) holds enemy infantry under the towers. Reward: +100 gold."
+      }
+    },
+    {
+      "id": "h-honra",
+      "type": "flag",
+      "priority": "hidden",
+      "condition": {
+        "all": [
+          {
+            "type": "objective",
+            "id": "p-hall",
+            "status": "completed"
+          },
+          {
+            "type": "count",
+            "select": {
+              "tag": "peons0"
+            },
+            "op": ">=",
+            "value": 2
+          }
+        ]
+      },
+      "failWhen": {
+        "type": "dead",
+        "select": {
+          "tag": "peons0"
+        },
+        "count": 1
+      },
+      "title": {
+        "pt-BR": "Honra do Clã: nenhum Lacaio perdido",
+        "en": "Clan Honor: not a single Peon lost"
+      }
+    },
+    {
+      "id": "h-shrine",
+      "type": "flag",
+      "priority": "hidden",
+      "condition": {
+        "type": "area",
+        "owner": "player",
+        "area": {
+          "anchor": "shrine1",
+          "r": 7
+        }
+      },
+      "title": {
+        "pt-BR": "Achar o Santuário da Pedra-Mãe, ao norte",
+        "en": "Find the Mother Stone Shrine, to the north"
+      }
+    }
+  ],
+  "triggers": [
+    {
+      "id": "intro",
+      "when": {
+        "type": "time",
+        "at": 0
+      },
+      "actions": [
+        {
+          "type": "music",
+          "id": "on"
+        },
+        {
+          "type": "reveal",
+          "anchor": "fort2",
+          "radius": 24,
+          "ttl": 40
+        },
+        {
+          "type": "reveal",
+          "anchor": "passA",
+          "radius": 22,
+          "ttl": 40
+        },
+        {
+          "type": "reveal",
+          "anchor": "colonyHall",
+          "radius": 28,
+          "ttl": 40
+        },
+        {
+          "type": "reveal",
+          "anchor": "fort1",
+          "radius": 22,
+          "ttl": 40
+        },
+        {
+          "type": "cutscene",
+          "id": "stone",
+          "duration": 38,
+          "skippable": true,
+          "steps": [
+            {
+              "at": 0,
+              "anchor": "enemyStart",
+              "zoom": 1.15,
+              "dialog": {
+                "speaker": {
+                  "pt-BR": "Drogath Punho-de-Brasa",
+                  "en": "Drogath Ember-Fist"
+                },
+                "portrait": "🪓",
+                "text": {
+                  "pt-BR": "Aqui a terra é de pedra e o ouro brilha no chão: a Pedra-Mãe, a colônia mineira de Aurelan. Eu sou Drogath, do Clã Chama-Baixa, e o chefe-de-brasa mandou que o Clã abrisse esta ilha à força.",
+                  "en": "Here the ground is stone and gold glitters in it: Mother Stone, the mining colony of Aurelan. I am Drogath of the Low Flame Clan, and the ember-chief ordered the Clan to pry this island open by force."
+                },
+                "duration": 8
+              }
+            },
+            {
+              "at": 8,
+              "anchor": "fort2",
+              "zoom": 1.1,
+              "dialog": {
+                "speaker": {
+                  "pt-BR": "Drogath Punho-de-Brasa",
+                  "en": "Drogath Ember-Fist"
+                },
+                "portrait": "🪓",
+                "text": {
+                  "pt-BR": "Três fortes guardam a colônia, e cada um tem torres e Balistas. Este, perto da nossa praia, é o primeiro. Os outros dois ficam do outro lado da crista.",
+                  "en": "Three forts guard the colony, and each has towers and Ballistas. This one, near our beach, is the first. The other two lie on the far side of the ridge."
+                },
+                "duration": 7.5
+              }
+            },
+            {
+              "at": 16,
+              "anchor": "passA",
+              "zoom": 1.05,
+              "dialog": {
+                "speaker": {
+                  "pt-BR": "Drogath Punho-de-Brasa",
+                  "en": "Drogath Ember-Fist"
+                },
+                "portrait": "🪓",
+                "text": {
+                  "pt-BR": "A crista de rocha corta a ilha, e só há dois desfiladeiros. Quem passa por eles chega ao Paço do governador sem escalar nada.",
+                  "en": "The rock ridge cuts the island, and there are only two passes. Whoever goes through them reaches the governor's Palace without climbing anything."
+                },
+                "duration": 7.5
+              }
+            },
+            {
+              "at": 24,
+              "anchor": "colonyHall",
+              "zoom": 1.1,
+              "dialog": {
+                "speaker": {
+                  "pt-BR": "Capitão Brann",
+                  "en": "Captain Brann"
+                },
+                "portrait": "⚔️",
+                "text": {
+                  "pt-BR": "Lá longe, o Paço: o governador Mervane conta o ouro e eu conto os dias. Capitão Brann, comandante da guarnição. Se vierem, venham em peso, que eu não tenho pressa de morrer.",
+                  "en": "Far away, the Palace: Governor Mervane counts the gold and I count the days. Captain Brann, garrison commander. If they come, let them come in numbers, for I am in no hurry to die."
+                },
+                "duration": 7
+              }
+            },
+            {
+              "at": 31,
+              "anchor": "enemyStart",
+              "zoom": 1,
+              "dialog": {
+                "speaker": {
+                  "pt-BR": "Anciã Ulma",
+                  "en": "Elder Ulma"
+                },
+                "portrait": "🔥",
+                "text": {
+                  "pt-BR": "Você é o punho do Clã, Drogath, e o Fogo vai com você. Ponha os Lacaios para trabalhar: o Covil dos Ogros primeiro.",
+                  "en": "You are the Clan's fist, Drogath, and the Fire goes with you. Put the Peons to work: the Ogre Den first."
+                },
+                "duration": 6.5
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "tier-up",
+      "when": {
+        "type": "time",
+        "at": 40
+      },
+      "actions": [
+        {
+          "type": "setTier",
+          "owner": "player",
+          "tier": 2
+        },
+        {
+          "type": "sound",
+          "id": "build"
+        },
+        {
+          "type": "message",
+          "text": {
+            "pt-BR": "Salão do Clã no nível 2: Covil dos Ogros e Oficina liberados.",
+            "en": "Clan Hall at tier 2: Ogre Den and Workshop unlocked."
+          }
+        }
+      ]
+    },
+    {
+      "id": "first-steps",
+      "when": {
+        "type": "time",
+        "at": 50
+      },
+      "actions": [
+        {
+          "type": "dialog",
+          "speaker": {
+            "pt-BR": "Drogath Punho-de-Brasa",
+            "en": "Drogath Ember-Fist"
+          },
+          "portrait": "🪓",
+          "text": {
+            "pt-BR": "Primeiro o Covil dos Ogros: ele exige o Acampamento de Guerra, que exige o Cercado de Javalis. Depois a Oficina, para as Catapultas. Mande uns Lacaios para o ouro e outros para a pedra: Ogros e Catapultas comem pedra.",
+            "en": "First the Ogre Den: it needs the War Camp, which needs the Boar Pen. Then the Workshop, for Catapults. Send some Peons to the gold and others to the stone: Ogres and Catapults eat stone."
+          },
+          "duration": 10
+        }
+      ]
+    },
+    {
+      "id": "den-up",
+      "when": {
+        "type": "objective",
+        "id": "p-den",
+        "status": "completed"
+      },
+      "actions": [
+        {
+          "type": "setObjective",
+          "id": "p-army",
+          "status": "active"
+        },
+        {
+          "type": "sound",
+          "id": "build"
+        },
+        {
+          "type": "dialog",
+          "speaker": {
+            "pt-BR": "Drogath Punho-de-Brasa",
+            "en": "Drogath Ember-Fist"
+          },
+          "portrait": "🪓",
+          "text": {
+            "pt-BR": "Covil de pé! Treine 4 Ogros e erga a Oficina para 2 Catapultas. Ogro na frente, Catapulta atrás: a pedra voa mais longe que a flecha de uma torre.",
+            "en": "The Den stands! Train 4 Ogres and raise the Workshop for 2 Catapults. Ogres in front, Catapults behind: the stone flies farther than a tower's arrow."
+          },
+          "duration": 9
+        }
+      ]
+    },
+    {
+      "id": "brakka-arrives",
+      "when": {
+        "type": "time",
+        "at": 330
+      },
+      "actions": [
+        {
+          "type": "spawn",
+          "owner": "player",
+          "units": [
+            {
+              "type": "ogre",
+              "count": 1
+            }
+          ],
+          "anchor": "bridgehead",
+          "dx": 4,
+          "dz": 6,
+          "tag": "brakka",
+          "markColor": "#a3e635",
+          "displayName": {
+            "pt-BR": "Brakka Presa-Negra",
+            "en": "Brakka Blackfang"
+          }
+        },
+        {
+          "type": "spawn",
+          "owner": "player",
+          "units": [
+            {
+              "type": "grunt",
+              "count": 4
+            }
+          ],
+          "anchor": "bridgehead",
+          "dx": 6,
+          "dz": 10,
+          "spread": 3,
+          "tag": "blackfang"
+        },
+        {
+          "type": "giveResources",
+          "owner": "player",
+          "gold": 150,
+          "wood": 150
+        },
+        {
+          "type": "sound",
+          "id": "victory"
+        },
+        {
+          "type": "dialog",
+          "speaker": {
+            "pt-BR": "Brakka Presa-Negra",
+            "en": "Brakka Blackfang"
+          },
+          "portrait": "💪",
+          "text": {
+            "pt-BR": "Aqui é Brakka, do Clã Presa-Negra, e ninguém me chamou de aliado de graça: o ouro dessa ilha é meio meu. Trouxe um Ogro e quatro Talhadores, mais um pouco de ouro e madeira para a obra. Quebrem os fortes que eu quebro o resto.",
+            "en": "This is Brakka of the Blackfang Clan, and nobody called me an ally for free: half this island's gold is mine. I brought an Ogre and four Slashers, plus some gold and wood for the works. Break the forts and I will break the rest."
+          },
+          "duration": 10
+        }
+      ]
+    },
+    {
+      "id": "raid-1",
+      "when": {
+        "type": "time",
+        "at": 480
+      },
+      "actions": [
+        {
+          "type": "spawn",
+          "owner": "enemy",
+          "units": [
+            {
+              "type": "knight",
+              "count": 4
+            },
+            {
+              "type": "archer",
+              "count": 3
+            }
+          ],
+          "anchor": "passBPlayer",
+          "dx": -2,
+          "spread": 3,
+          "tag": "raid",
+          "order": {
+            "kind": "attackMove",
+            "anchor": "bridgehead"
+          }
+        },
+        {
+          "type": "incVar",
+          "name": "raids"
+        },
+        {
+          "type": "message",
+          "text": {
+            "pt-BR": "Contra-ataque humano pelo desfiladeiro sul!",
+            "en": "Human counterattack through the south pass!"
+          }
+        },
+        {
+          "type": "dialog",
+          "speaker": {
+            "pt-BR": "Drogath Punho-de-Brasa",
+            "en": "Drogath Ember-Fist"
+          },
+          "portrait": "🪓",
+          "text": {
+            "pt-BR": "Espadachins e Arqueiros descendo o desfiladeiro, rumo à nossa praia. Uma Torre de Vigia e uma Paliçada na cabeça de ponte valem mais que um grito.",
+            "en": "Swordsmen and Archers coming down the pass, headed for our beach. A Watchtower and a Palisade on the bridgehead are worth more than a shout."
+          },
+          "duration": 8
+        }
+      ]
+    },
+    {
+      "id": "raid-2",
+      "when": {
+        "type": "time",
+        "at": 840
+      },
+      "actions": [
+        {
+          "type": "spawn",
+          "owner": "enemy",
+          "units": [
+            {
+              "type": "cavalier",
+              "count": 3
+            },
+            {
+              "type": "knight",
+              "count": 4
+            },
+            {
+              "type": "ballista",
+              "count": 1
+            }
+          ],
+          "anchor": "passBPlayer",
+          "dx": -2,
+          "spread": 3,
+          "tag": "raid",
+          "order": {
+            "kind": "attackMove",
+            "anchor": "bridgehead"
+          }
+        },
+        {
+          "type": "incVar",
+          "name": "raids"
+        },
+        {
+          "type": "message",
+          "text": {
+            "pt-BR": "Segundo contra-ataque: Cavaleiros e Balista.",
+            "en": "Second counterattack: Cavaliers and a Ballista."
+          }
+        },
+        {
+          "type": "dialog",
+          "speaker": {
+            "pt-BR": "Capitão Brann",
+            "en": "Captain Brann"
+          },
+          "portrait": "⚔️",
+          "text": {
+            "pt-BR": "Mervane quer a praia de volta e eu lhe devo uma resposta. Cavaleiros, avante! Mandem uma lembrança ao Clã.",
+            "en": "Mervane wants the beach back and I owe him an answer. Cavaliers, forward! Send a reminder to the Clan."
+          },
+          "duration": 7
+        }
+      ]
+    },
+    {
+      "id": "army-ready",
+      "when": {
+        "type": "objective",
+        "id": "p-army",
+        "status": "completed"
+      },
+      "actions": [
+        {
+          "type": "setObjective",
+          "id": "p-forts",
+          "status": "active"
+        },
+        {
+          "type": "reveal",
+          "anchor": "fort2",
+          "radius": 26
+        },
+        {
+          "type": "sound",
+          "id": "victory"
+        },
+        {
+          "type": "dialog",
+          "speaker": {
+            "pt-BR": "Drogath Punho-de-Brasa",
+            "en": "Drogath Ember-Fist"
+          },
+          "portrait": "🪓",
+          "text": {
+            "pt-BR": "Tropa pronta! Junte Ogros e Catapultas e leve Drogath junto, mas atrás da linha: eu sou o punho, não o escudo. Os três fortes primeiro; só então o Paço. Comece pelo mais próximo, o do leste.",
+            "en": "Force ready! Gather Ogres and Catapults and bring Drogath along, but behind the line: I am the fist, not the shield. The three forts first; only then the Palace. Start with the nearest, the one in the east."
+          },
+          "duration": 10
+        }
+      ]
+    },
+    {
+      "id": "fort-first",
+      "when": {
+        "type": "dead",
+        "select": {
+          "tag": "fort"
+        },
+        "count": 1
+      },
+      "actions": [
+        {
+          "type": "sound",
+          "id": "victory"
+        },
+        {
+          "type": "dialog",
+          "speaker": {
+            "pt-BR": "Drogath Punho-de-Brasa",
+            "en": "Drogath Ember-Fist"
+          },
+          "portrait": "🪓",
+          "text": {
+            "pt-BR": "Um forte no chão! As Catapultas fazem o trabalho das torres. Agora as passagens: o desfiladeiro sul dá nos outros dois.",
+            "en": "One fort down! The Catapults do the towers' work. Now the passes: the south pass leads to the other two."
+          },
+          "duration": 8
+        }
+      ]
+    },
+    {
+      "id": "fort-second",
+      "when": {
+        "type": "dead",
+        "select": {
+          "tag": "fort"
+        },
+        "count": 2
+      },
+      "actions": [
+        {
+          "type": "sound",
+          "id": "victory"
+        },
+        {
+          "type": "dialog",
+          "speaker": {
+            "pt-BR": "Brakka Presa-Negra",
+            "en": "Brakka Blackfang"
+          },
+          "portrait": "💪",
+          "text": {
+            "pt-BR": "Dois! Eu prefiro o que racha por dentro. O terceiro é seu, Punho-de-Brasa.",
+            "en": "Two! I prefer what cracks from the inside. The third is yours, Ember-Fist."
+          },
+          "duration": 6
+        }
+      ]
+    },
+    {
+      "id": "forts-down",
+      "when": {
+        "type": "objective",
+        "id": "p-forts",
+        "status": "completed"
+      },
+      "actions": [
+        {
+          "type": "setObjective",
+          "id": "p-hall",
+          "status": "active"
+        },
+        {
+          "type": "reveal",
+          "anchor": "colonyHall",
+          "radius": 30
+        },
+        {
+          "type": "sound",
+          "id": "victory"
+        },
+        {
+          "type": "dialog",
+          "speaker": {
+            "pt-BR": "Drogath Punho-de-Brasa",
+            "en": "Drogath Ember-Fist"
+          },
+          "portrait": "🪓",
+          "text": {
+            "pt-BR": "Os três fortes caíram! Resta o Paço de Mervane, a oeste, e o Capitão Brann na frente dele. Não tenham pressa: Catapultas nas torres, Ogros no resto, e os Lacaios fora do tiro.",
+            "en": "All three forts have fallen! Only Mervane's Palace remains, to the west, with Captain Brann in front of it. No haste: Catapults on the towers, Ogres on the rest, and the Peons out of the line of fire."
+          },
+          "duration": 10
+        }
+      ]
+    },
+    {
+      "id": "hall-near",
+      "when": {
+        "type": "area",
+        "owner": "player",
+        "area": {
+          "anchor": "colonyHall",
+          "r": 40
+        }
+      },
+      "actions": [
+        {
+          "type": "dialog",
+          "speaker": {
+            "pt-BR": "Capitão Brann",
+            "en": "Captain Brann"
+          },
+          "portrait": "⚔️",
+          "text": {
+            "pt-BR": "Aqui termina o passeio, orc. O Paço não cai sem eu cair primeiro. Cavaleiros e Balistas, firmes!",
+            "en": "Here ends the stroll, orc. The Palace does not fall unless I fall first. Cavaliers and Ballistas, steady!"
+          },
+          "duration": 8
+        }
+      ]
+    },
+    {
+      "id": "brann-fallen",
+      "when": {
+        "type": "dead",
+        "select": {
+          "tag": "brann"
+        },
+        "count": 1
+      },
+      "actions": [
+        {
+          "type": "sound",
+          "id": "victory"
+        },
+        {
+          "type": "dialog",
+          "speaker": {
+            "pt-BR": "Governador Mervane",
+            "en": "Governor Mervane"
+          },
+          "portrait": "🎩",
+          "text": {
+            "pt-BR": "O capitão caiu? Mas ele era a minha guarda e a minha desculpa. Quem vai carregar o ouro agora?",
+            "en": "The captain has fallen? But he was my guard and my excuse. Who will carry the gold now?"
+          },
+          "duration": 7
+        }
+      ]
+    },
+    {
+      "id": "gold-reward",
+      "when": {
+        "type": "objective",
+        "id": "s-gold",
+        "status": "completed"
+      },
+      "actions": [
+        {
+          "type": "giveResources",
+          "owner": "player",
+          "gold": 150
+        },
+        {
+          "type": "message",
+          "text": {
+            "pt-BR": "1500 de ouro coletados: +150 de ouro de bônus.",
+            "en": "1500 gold gathered: +150 bonus gold."
+          }
+        }
+      ]
+    },
+    {
+      "id": "tower-reward",
+      "when": {
+        "type": "objective",
+        "id": "s-tower",
+        "status": "completed"
+      },
+      "actions": [
+        {
+          "type": "giveResources",
+          "owner": "player",
+          "gold": 100
+        },
+        {
+          "type": "sound",
+          "id": "build"
+        },
+        {
+          "type": "message",
+          "text": {
+            "pt-BR": "Torre da cabeça de ponte erguida: +100 de ouro.",
+            "en": "Bridgehead tower raised: +100 gold."
+          }
+        }
+      ]
+    },
+    {
+      "id": "walls-reward",
+      "when": {
+        "type": "objective",
+        "id": "s-walls",
+        "status": "completed"
+      },
+      "actions": [
+        {
+          "type": "giveResources",
+          "owner": "player",
+          "gold": 100
+        },
+        {
+          "type": "sound",
+          "id": "build"
+        },
+        {
+          "type": "message",
+          "text": {
+            "pt-BR": "Paliçada pronta: +100 de ouro.",
+            "en": "Palisade ready: +100 gold."
+          }
+        }
+      ]
+    },
+    {
+      "id": "shrine-hint",
+      "when": {
+        "type": "time",
+        "at": 150
+      },
+      "actions": [
+        {
+          "type": "revealObjective",
+          "id": "h-shrine"
+        },
+        {
+          "type": "dialog",
+          "speaker": {
+            "pt-BR": "Anciã Ulma",
+            "en": "Elder Ulma"
+          },
+          "portrait": "🔥",
+          "text": {
+            "pt-BR": "Filho do Cinzal, os batedores falam de um pedestal de pedra com um cristal, ao norte da colônia. Os humanos o chamam de Santuário. Quem passar por lá ouve a pedra.",
+            "en": "Child of the Cinzal, the scouts speak of a stone pedestal with a crystal, north of the colony. The humans call it a Shrine. Whoever passes there hears the stone."
+          },
+          "duration": 9
+        }
+      ]
+    },
+    {
+      "id": "shrine-found",
+      "when": {
+        "type": "objective",
+        "id": "h-shrine",
+        "status": "completed"
+      },
+      "actions": [
+        {
+          "type": "giveResources",
+          "owner": "player",
+          "gold": 120
+        },
+        {
+          "type": "lightLandmark",
+          "tag": "shrine"
+        },
+        {
+          "type": "sound",
+          "id": "victory"
+        },
+        {
+          "type": "message",
+          "text": {
+            "pt-BR": "Santuário da Pedra-Mãe encontrado: +120 de ouro.",
+            "en": "Mother Stone Shrine found: +120 gold."
+          }
+        }
+      ]
+    },
+    {
+      "id": "hall-fallen",
+      "when": {
+        "type": "objective",
+        "id": "p-hall",
+        "status": "completed"
+      },
+      "actions": [
+        {
+          "type": "sound",
+          "id": "victory"
+        },
+        {
+          "type": "cutscene",
+          "id": "finale",
+          "duration": 14,
+          "skippable": true,
+          "steps": [
+            {
+              "at": 0,
+              "anchor": "colonyHall",
+              "zoom": 1.1,
+              "dialog": {
+                "speaker": {
+                  "pt-BR": "Drogath Punho-de-Brasa",
+                  "en": "Drogath Ember-Fist"
+                },
+                "portrait": "🪓",
+                "text": {
+                  "pt-BR": "O Paço ruiu e a bandeira de Aurelan com ele. A Pedra-Mãe é do Clã: o ouro, a pedra e a crista inteira.",
+                  "en": "The Palace has crumbled and Aurelan's banner with it. Mother Stone belongs to the Clan: the gold, the stone and the whole ridge."
+                },
+                "duration": 6
+              }
+            },
+            {
+              "at": 7,
+              "anchor": "enemyStart",
+              "zoom": 1.1,
+              "dialog": {
+                "speaker": {
+                  "pt-BR": "Skarn, chefe-de-brasa",
+                  "en": "Skarn, ember-chief"
+                },
+                "portrait": "🔥",
+                "text": {
+                  "pt-BR": "Mensagem do corno de guerra: \"A Pedra que Brilha agora brilha para nós. Drogath, o Clã segue para o sul, onde o mar fica raso e preto. Os humanos têm navios.\"",
+                  "en": "Message by the war horn: \"The Shining Stone now shines for us. Drogath, the Clan goes south, where the sea turns shallow and black. The humans have ships.\""
+                },
+                "duration": 7
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "finale-clock",
+      "when": {
+        "type": "trigger",
+        "id": "hall-fallen"
+      },
+      "once": false,
+      "cooldown": 14,
+      "actions": [
+        {
+          "type": "incVar",
+          "name": "fin_clock",
+          "by": 1
+        }
+      ]
+    },
+    {
+      "id": "finale-victory",
+      "when": {
+        "type": "var",
+        "name": "fin_clock",
+        "op": ">=",
+        "value": 1
+      },
+      "actions": [
+        {
+          "type": "victory"
+        }
+      ]
+    },
+    {
+      "id": "hall-lost",
+      "when": {
+        "type": "count",
+        "select": {
+          "buildingType": "great_hall",
+          "owner": "player"
+        },
+        "op": "==",
+        "value": 0
+      },
+      "actions": [
+        {
+          "type": "defeat",
+          "text": {
+            "pt-BR": "O Salão do Clã caiu. A cabeça de ponte está perdida.",
+            "en": "The Clan Hall has fallen. The bridgehead is lost."
+          }
+        }
+      ]
+    },
+    {
+      "id": "drogath-fallen",
+      "when": {
+        "type": "dead",
+        "select": {
+          "tag": "drogath"
+        },
+        "count": 1
+      },
+      "actions": [
+        {
+          "type": "defeat",
+          "text": {
+            "pt-BR": "Drogath caiu. Sem o punho do Clã, o assalto acabou.",
+            "en": "Drogath has fallen. Without the Clan's fist, the assault is over."
+          }
+        }
+      ]
     }
   ]
 }

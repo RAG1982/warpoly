@@ -18,17 +18,29 @@
     },
     "portrait": "🔥",
     "text": {
-      "pt-BR": "Construa a Doca Naval e as Plataformas de Petróleo. As Galés de Guerra dos Clãs do Cinzal dominarão o Baixio!",
-      "en": "Construct the Naval Dock and Oil Platforms. The Cinzal Clans' War Galleys will rule the Shallows!"
+      "pt-BR": "O Baixio do Breu é um canal largo de águas escuras entre duas margens que não se tocam: a nossa, a leste, e a de Aurelan, a oeste. Do fundo do mar sobe breu (petróleo), e quem o bombeia domina as águas. Nenhum guerreiro atravessa esse mar a pé: aqui tudo se decide com navios. Erga a Doca do Clã, treine Petroleiros e ponha DUAS Plataformas nos poços, com um Caldeirão de Óleo na costa para receber o breu. Dois poços ficam no meio do canal, entre duas ilhotas com madeira e chão para torres: serão disputados. A esquadra de Aurelan patrulha o canal e virá em ondas, com Fragatas e, no fim, um Couraçado. Orvanna Maré-Negra, do clã aliado, chega com a sua Galé em cinco minutos. Eu comando a guarnição e o Fogo do Clã está comigo: se eu cair, a margem cai junto. E lembre: o ouro só entra no Salão do Clã, então uma mina longe pede um Salão novo ao lado dela.",
+      "en": "The Pitch Shallows is a wide channel of dark water between two shores that never touch: ours in the east, Aurelan's in the west. Pitch (oil) rises from the seabed, and whoever pumps it rules the waters. No warrior crosses this sea on foot: everything here is decided by ships. Raise the Clan Dock, train Tankers and set TWO Platforms on the wells, with an Oil Cauldron on the coast to take in the pitch. Two wells lie in mid-channel, between two islets with timber and ground for towers: they will be fought over. Aurelan's squadron patrols the channel and will come in waves, with Frigates and, at the end, a Dreadnought. Orvanna Blacktide, of the allied clan, arrives with her Galley in five minutes. I command the garrison and the Clan Fire is with me: if I fall, the shore falls with me. And remember: gold only goes into the Clan Hall, so a distant mine needs a new Hall beside it."
     },
     "hints": [
       {
-        "pt-BR": "Concentre-se nos objetivos primários para avançar.",
-        "en": "Focus on primary objectives to advance."
+        "pt-BR": "A Doca do Clã e o Caldeirão de Óleo só se constroem na costa, onde há água funda encostada (o círculo dourado mostra o sítio da Doca). A Doca exige o Acampamento de Guerra, que já está de pé.",
+        "en": "The Clan Dock and the Oil Cauldron can only be built on the coast, beside deep water (the golden circle marks the Dock site). The Dock requires the War Camp, which already stands."
+      },
+      {
+        "pt-BR": "O Petroleiro ergue a Plataforma sobre o poço (ordem de construir no poço) e depois coleta; o óleo só conta quando entregue no Caldeirão. Galés de Guerra custam 100 de petróleo cada.",
+        "en": "The Tanker raises the Platform over the well (build order on the well) and then gathers; oil only counts once delivered to the Cauldron. War Galleys cost 100 oil each."
+      },
+      {
+        "pt-BR": "A Barcaça leva 6 guerreiros de uma margem a outra: mande-os embarcar (clique direito na Barcaça) e depois clique numa praia para desembarcar. Torres nas ilhotas protegem os poços do meio.",
+        "en": "The Barge carries 6 warriors from shore to shore: order them aboard (right-click the Barge) and then click a beach to land. Towers on the islets protect the mid-channel wells."
+      },
+      {
+        "pt-BR": "Só o Salão do Clã recebe ouro. A mina grande da ponta fica a mais de 60 passos: construa um Salão extra ao lado dela (tecla Q; 800 de ouro, máximo 3). As tropas de Aurelan chegam em Barcaças escoltadas por Fragatas: afunde a Barcaça antes da praia e a carga se afoga.",
+        "en": "Only the Clan Hall takes gold. The big mine at the point is over 60 paces away: build an extra Hall beside it (key Q; 800 gold, maximum 3). Aurelan's troops arrive in Barges escorted by Frigates: sink the Barge before the beach and its cargo drowns."
       }
     ]
   },
-  "mapId": "estreito-1v1",
+  "mapId": "camp-04-baixio-do-breu",
   "seed": 9068,
   "players": [
     {
@@ -41,26 +53,33 @@
       "team": 0,
       "color": "#dc2626",
       "isLocal": true,
-      "startSlot": 0
+      "startSlot": 1
     },
     {
       "id": 1,
       "name": {
-        "pt-BR": "Tropas de Aurelan",
-        "en": "Aurelan Troops"
+        "pt-BR": "Frota de Aurelan",
+        "en": "Aurelan Fleet"
       },
       "factionId": "human",
       "team": 1,
       "color": "#2563eb",
       "isAI": true,
-      "startSlot": 1
+      "difficulty": "easy",
+      "startSlot": 0
     }
   ],
   "startingResources": {
-    "wood": 400,
-    "gold": 400,
-    "stone": 150
+    "wood": 700,
+    "gold": 900,
+    "stone": 200
   },
+  "vars": {
+    "rescued": 0,
+    "landings": 0,
+    "fin_clock": 0
+  },
+  "autoVictory": false,
   "setup": [
     {
       "type": "tag",
@@ -68,20 +87,1262 @@
         "buildingType": "castle"
       },
       "tag": "enemy_base"
+    },
+    {
+      "type": "spawn",
+      "owner": "player",
+      "unitType": "hero_drogath",
+      "count": 1,
+      "anchor": "enemyStart",
+      "dx": 0,
+      "dz": 13,
+      "tag": "drogath"
+    },
+    {
+      "type": "spawnBuilding",
+      "owner": "player",
+      "buildingType": "orc_barracks",
+      "anchor": "enemyStart",
+      "dx": -14,
+      "dz": 6,
+      "tag": "garrison_barracks"
+    },
+    {
+      "type": "spawnBuilding",
+      "owner": "enemy",
+      "buildingType": "shipyard",
+      "anchor": "shipyard1",
+      "tag": "human_dock"
+    },
+    {
+      "type": "spawn",
+      "owner": "enemy",
+      "unitType": "frigate",
+      "count": 2,
+      "anchor": "patrol1",
+      "dx": -48,
+      "dz": 0,
+      "spread": 4,
+      "tag": "patrol"
+    },
+    {
+      "type": "spawn",
+      "owner": "enemy",
+      "unitType": "frigate",
+      "count": 1,
+      "anchor": "patrol2",
+      "dx": -58,
+      "dz": 44,
+      "spread": 4,
+      "tag": "patrol"
+    },
+    {
+      "type": "spawn",
+      "owner": "neutral",
+      "unitType": "peon",
+      "count": 3,
+      "anchor": "captive1",
+      "spread": 2.2,
+      "tag": "castaways",
+      "markColor": "#22d3ee",
+      "displayName": {
+        "pt-BR": "Lacaio náufrago",
+        "en": "Castaway Peon"
+      }
+    },
+    {
+      "type": "spawn",
+      "owner": "bandits",
+      "unitType": "bandit",
+      "count": 3,
+      "anchor": "isletTower2b",
+      "spread": 2.2,
+      "tag": "islet_guard",
+      "guard": {
+        "r": 8
+      }
     }
   ],
   "objectives": [
     {
-      "id": "primary-main",
+      "id": "p-dock",
+      "type": "build",
+      "priority": "primary",
+      "buildingType": "ship_dock",
+      "count": 1,
+      "marker": {
+        "area": {
+          "anchor": "shipyard2",
+          "r": 12
+        },
+        "style": "goal",
+        "seconds": 120
+      },
+      "title": {
+        "pt-BR": "Erguer a Doca do Clã",
+        "en": "Raise the Clan Dock"
+      },
+      "description": {
+        "pt-BR": "Na costa de oeste da nossa margem (o círculo dourado). Exige o Acampamento de Guerra, que já existe.",
+        "en": "On the west coast of our shore (the golden circle). Requires the War Camp, which already exists."
+      }
+    },
+    {
+      "id": "p-platforms",
+      "type": "build",
+      "priority": "primary",
+      "buildingType": "oil_platform",
+      "count": 2,
+      "title": {
+        "pt-BR": "Erguer 2 Plataformas de petróleo",
+        "en": "Raise 2 Oil Platforms"
+      },
+      "description": {
+        "pt-BR": "O Petroleiro constrói a Plataforma sobre um poço do mar. Um poço fica a uma volta curta da nossa Doca; os outros, em mar aberto, no meio do canal: escoltem o Petroleiro.",
+        "en": "The Tanker builds the Platform over a sea well. One well is a short trip from our Dock; the others lie in open water mid-channel: escort the Tanker."
+      }
+    },
+    {
+      "id": "p-oil",
+      "type": "collect",
+      "priority": "primary",
+      "resource": "oil",
+      "amount": 2500,
+      "mode": "gathered",
+      "title": {
+        "pt-BR": "Bombear 2.500 de petróleo",
+        "en": "Pump 2,500 oil"
+      },
+      "description": {
+        "pt-BR": "Os Petroleiros levam o breu da Plataforma ao Caldeirão de Óleo, na costa. Sem Caldeirão o óleo não entra.",
+        "en": "Tankers carry the pitch from the Platform to the Oil Cauldron on the coast. Without a Cauldron the oil does not come in."
+      }
+    },
+    {
+      "id": "p-patrol",
       "type": "destroy",
       "priority": "primary",
       "select": {
-        "tag": "enemy_base"
+        "tag": "patrol"
+      },
+      "count": 3,
+      "title": {
+        "pt-BR": "Afundar a patrulha de Aurelan",
+        "en": "Sink Aurelan's patrol"
+      },
+      "description": {
+        "pt-BR": "Três Fragatas rondam o meio do canal, perto dos poços do lado de Aurelan.",
+        "en": "Three Frigates prowl mid-channel, near the wells on Aurelan's side."
+      }
+    },
+    {
+      "id": "p-fleet",
+      "type": "destroy",
+      "priority": "primary",
+      "active": false,
+      "select": {
+        "tag": "aurelan_fleet"
+      },
+      "count": 15,
+      "title": {
+        "pt-BR": "Dominar o mar: afundar as 3 levas da esquadra de Aurelan",
+        "en": "Rule the sea: sink Aurelan's 3 waves"
+      },
+      "description": {
+        "pt-BR": "Aurelan manda 3 levas de navios (15 ao todo, a última com um Couraçado). Afunde-os antes que cheguem à costa.",
+        "en": "Aurelan sends 3 waves of ships (15 in all, the last with a Dreadnought). Sink them before they reach the coast."
+      }
+    },
+    {
+      "id": "s-galleys",
+      "type": "train",
+      "priority": "secondary",
+      "units": [
+        {
+          "type": "war_galley",
+          "count": 3
+        }
+      ],
+      "title": {
+        "pt-BR": "Treinar 3 Galés de Guerra",
+        "en": "Train 3 War Galleys"
+      },
+      "description": {
+        "pt-BR": "Na Doca do Clã; cada uma custa 100 de petróleo. Só contam as treinadas nesta missão.",
+        "en": "At the Clan Dock; each costs 100 oil. Only those trained in this mission count."
+      }
+    },
+    {
+      "id": "s-escort",
+      "type": "destroy",
+      "priority": "secondary",
+      "select": {
+        "tag": "landing_escort"
+      },
+      "count": 3,
+      "title": {
+        "pt-BR": "Afundar 3 Fragatas de escolta das Barcaças",
+        "en": "Sink 3 Frigates escorting the Barges"
+      },
+      "description": {
+        "pt-BR": "Aurelan desembarca tropa na nossa praia em Barcaças escoltadas por Fragatas. Afunde três escoltas.",
+        "en": "Aurelan lands troops on our beach in Barges escorted by Frigates. Sink three escorts."
+      }
+    },
+    {
+      "id": "s-outpost",
+      "type": "build",
+      "priority": "secondary",
+      "buildingType": "great_hall",
+      "count": 2,
+      "marker": {
+        "area": {
+          "anchor": "outpost2",
+          "r": 12
+        },
+        "style": "goal",
+        "seconds": 120
       },
       "title": {
-        "pt-BR": "Construir a Doca e Plataformas e afundar a patrulha",
-        "en": "Build the Dock and Platforms and sink the patrol"
+        "pt-BR": "Fundar o Posto do Cabo: um Salão do Clã extra",
+        "en": "Found the Cape Post: an extra Clan Hall"
+      },
+      "description": {
+        "pt-BR": "O ouro só entra no Salão do Clã. Ao lado da mina grande, a sul e longe do Salão, o círculo dourado mostra onde cabe um Salão (tecla Q).",
+        "en": "Gold only goes into the Clan Hall. Beside the big mine, to the south and far from the Hall, the golden circle shows where a Hall fits (key Q)."
       }
+    },
+    {
+      "id": "s-rescue",
+      "type": "rescue",
+      "priority": "secondary",
+      "tag": "castaways",
+      "count": 3,
+      "title": {
+        "pt-BR": "Resgatar 3 Lacaios náufragos na ilhota",
+        "en": "Rescue 3 castaway Peons on the islet"
+      },
+      "description": {
+        "pt-BR": "Bandidos da Irmandade da Maré os mantêm numa ilhota no meio do canal. Navios de guerra limpam a praia; uma Barcaça leva guerreiros.",
+        "en": "Bandits of the Tide Brotherhood hold them on an islet in mid-channel. Warships clear the beach; a Barge carries warriors."
+      }
+    },
+    {
+      "id": "s-dock",
+      "type": "destroy",
+      "priority": "secondary",
+      "select": {
+        "tag": "human_dock"
+      },
+      "count": 1,
+      "title": {
+        "pt-BR": "Destruir o Estaleiro de Aurelan",
+        "en": "Destroy Aurelan's Shipyard"
+      },
+      "description": {
+        "pt-BR": "É de onde saem os navios e as Barcaças de Aurelan, na costa de oeste. Galés e Leviatãs alcançam a costa.",
+        "en": "It is where Aurelan's ships and Barges come from, on the west coast. Galleys and Leviathans reach the shore."
+      }
+    },
+    {
+      "id": "h-no-loss",
+      "type": "flag",
+      "priority": "hidden",
+      "active": true,
+      "condition": {
+        "type": "objective",
+        "id": "p-fleet",
+        "status": "completed"
+      },
+      "failWhen": {
+        "type": "dead",
+        "select": {
+          "unitType": "war_galley",
+          "owner": "player"
+        },
+        "count": 1
+      },
+      "title": {
+        "pt-BR": "Nenhuma Galé perdida",
+        "en": "Not a Galley lost"
+      },
+      "description": {
+        "pt-BR": "Termine o combate naval sem perder nenhuma Galé de Guerra (a de Orvanna conta).",
+        "en": "Finish the naval fight without losing a single War Galley (Orvanna's counts)."
+      }
+    }
+  ],
+  "triggers": [
+    {
+      "id": "intro",
+      "when": {
+        "type": "time",
+        "at": 0
+      },
+      "actions": [
+        {
+          "type": "music",
+          "id": "on"
+        },
+        {
+          "type": "reveal",
+          "anchor": "shipyard2",
+          "radius": 22,
+          "ttl": 54
+        },
+        {
+          "type": "reveal",
+          "anchor": "well3",
+          "radius": 26,
+          "ttl": 54
+        },
+        {
+          "type": "reveal",
+          "anchor": "islet2",
+          "radius": 22,
+          "ttl": 54
+        },
+        {
+          "type": "reveal",
+          "anchor": "islet1",
+          "radius": 20,
+          "ttl": 54
+        },
+        {
+          "type": "reveal",
+          "anchor": "shipyard1",
+          "radius": 26,
+          "ttl": 54
+        },
+        {
+          "type": "reveal",
+          "anchor": "outpost2",
+          "radius": 20,
+          "ttl": 54
+        },
+        {
+          "type": "cutscene",
+          "id": "baixio",
+          "duration": 52,
+          "skippable": true,
+          "steps": [
+            {
+              "at": 0,
+              "anchor": "enemyStart",
+              "zoom": 1.15,
+              "dialog": {
+                "speaker": {
+                  "pt-BR": "Drogath Punho-de-Brasa",
+                  "en": "Drogath Emberfist"
+                },
+                "portrait": "🔥",
+                "text": {
+                  "pt-BR": "Baixio do Breu. Duas margens, e entre elas um canal que engole quem não tem casco.",
+                  "en": "The Pitch Shallows. Two shores, and between them a channel that swallows anyone without a hull."
+                },
+                "duration": 9
+              }
+            },
+            {
+              "at": 9,
+              "anchor": "shipyard2",
+              "zoom": 1.1,
+              "dialog": {
+                "speaker": {
+                  "pt-BR": "Drogath Punho-de-Brasa",
+                  "en": "Drogath Emberfist"
+                },
+                "portrait": "🔥",
+                "text": {
+                  "pt-BR": "Esta é a nossa costa de oeste. Aqui cabe a Doca do Clã. Daqui sai a nossa esquadra.",
+                  "en": "This is our west coast. The Clan Dock fits here. Our squadron sails from this spot."
+                },
+                "duration": 8
+              }
+            },
+            {
+              "at": 17,
+              "anchor": "well3",
+              "zoom": 1.05,
+              "dialog": {
+                "speaker": {
+                  "pt-BR": "Drogath Punho-de-Brasa",
+                  "en": "Drogath Emberfist"
+                },
+                "portrait": "🔥",
+                "text": {
+                  "pt-BR": "O breu sobe do fundo em seis poços: um perto de casa, outros no meio do canal. Quem os bombeia, manda.",
+                  "en": "Pitch rises from the seabed in six wells: one near home, others mid-channel. Whoever pumps them, rules."
+                },
+                "duration": 8
+              }
+            },
+            {
+              "at": 25,
+              "anchor": "islet2",
+              "zoom": 1.1,
+              "dialog": {
+                "speaker": {
+                  "pt-BR": "Drogath Punho-de-Brasa",
+                  "en": "Drogath Emberfist"
+                },
+                "portrait": "🔥",
+                "text": {
+                  "pt-BR": "Estas duas ilhotas guardam madeira e chão para torres. Torre ali, poço protegido.",
+                  "en": "These two islets hold timber and ground for towers. A tower there, a protected well."
+                },
+                "duration": 8
+              }
+            },
+            {
+              "at": 33,
+              "anchor": "shipyard1",
+              "zoom": 1.0,
+              "dialog": {
+                "speaker": {
+                  "pt-BR": "Drogath Punho-de-Brasa",
+                  "en": "Drogath Emberfist"
+                },
+                "portrait": "🔥",
+                "text": {
+                  "pt-BR": "A oeste, a costa de Aurelan. Aquele Estaleiro é de onde saem as Fragatas e as Barcaças deles.",
+                  "en": "To the west, Aurelan's coast. That Shipyard is where their Frigates and Barges come from."
+                },
+                "duration": 8
+              }
+            },
+            {
+              "at": 41,
+              "anchor": "outpost2",
+              "zoom": 1.05,
+              "dialog": {
+                "speaker": {
+                  "pt-BR": "Drogath Punho-de-Brasa",
+                  "en": "Drogath Emberfist"
+                },
+                "portrait": "🔥",
+                "text": {
+                  "pt-BR": "E ao sul da nossa margem, a mina grande do Cabo, longe do Salão. Ouro só entra onde há um Salão.",
+                  "en": "And south of our shore, the big Cape mine, far from the Hall. Gold only goes in where a Hall stands."
+                },
+                "duration": 8
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "tier-up",
+      "when": {
+        "type": "time",
+        "at": 45
+      },
+      "actions": [
+        {
+          "type": "setTier",
+          "owner": "player",
+          "tier": 3
+        },
+        {
+          "type": "sound",
+          "id": "build"
+        }
+      ]
+    },
+    {
+      "id": "first-steps",
+      "when": {
+        "type": "time",
+        "at": 62
+      },
+      "actions": [
+        {
+          "type": "dialog",
+          "speaker": {
+            "pt-BR": "Drogath Punho-de-Brasa",
+            "en": "Drogath Emberfist"
+          },
+          "portrait": "🔥",
+          "duration": 9,
+          "text": {
+            "pt-BR": "Primeiro a Doca, depois o Caldeirão de Óleo e um Petroleiro. Sem breu não há esquadra.",
+            "en": "First the Dock, then the Oil Cauldron and a Tanker. Without pitch there is no squadron."
+          }
+        }
+      ]
+    },
+    {
+      "id": "dock-up",
+      "when": {
+        "type": "count",
+        "select": {
+          "buildingType": "ship_dock",
+          "owner": "player"
+        },
+        "op": ">=",
+        "value": 1
+      },
+      "actions": [
+        {
+          "type": "sound",
+          "id": "build"
+        },
+        {
+          "type": "giveResources",
+          "owner": "player",
+          "oil": 200
+        },
+        {
+          "type": "dialog",
+          "speaker": {
+            "pt-BR": "Orvanna Maré-Negra",
+            "en": "Orvanna Blacktide"
+          },
+          "portrait": "🌊",
+          "duration": 9,
+          "text": {
+            "pt-BR": "Doca erguida! Aqui é Orvanna Maré-Negra, do clã aliado: mandamos um primeiro tonel de breu para acender as suas Plataformas.",
+            "en": "Dock raised! This is Orvanna Blacktide of the allied clan: we send a first cask of pitch to start your Platforms."
+          }
+        },
+        {
+          "type": "message",
+          "text": {
+            "pt-BR": "Orvanna enviou 200 de petróleo.",
+            "en": "Orvanna sent 200 oil."
+          }
+        }
+      ]
+    },
+    {
+      "id": "platform-up",
+      "when": {
+        "type": "count",
+        "select": {
+          "buildingType": "oil_platform",
+          "owner": "player"
+        },
+        "op": ">=",
+        "value": 1
+      },
+      "actions": [
+        {
+          "type": "sound",
+          "id": "build"
+        },
+        {
+          "type": "dialog",
+          "speaker": {
+            "pt-BR": "Drogath Punho-de-Brasa",
+            "en": "Drogath Emberfist"
+          },
+          "portrait": "🔥",
+          "duration": 8,
+          "text": {
+            "pt-BR": "Primeira Plataforma. Agora o Petroleiro precisa levar o breu ao Caldeirão, e a esquadra precisa guardar o caminho.",
+            "en": "First Platform. Now the Tanker must carry the pitch to the Cauldron, and the squadron must guard the route."
+          }
+        }
+      ]
+    },
+    {
+      "id": "orvanna",
+      "when": {
+        "type": "time",
+        "at": 300
+      },
+      "actions": [
+        {
+          "type": "spawn",
+          "owner": "player",
+          "unitType": "war_galley",
+          "count": 1,
+          "anchor": "fleetStart2",
+          "dx": 0,
+          "dz": 54,
+          "tag": "orvanna",
+          "markColor": "#f0abfc",
+          "displayName": {
+            "pt-BR": "Orvanna Maré-Negra",
+            "en": "Orvanna Blacktide"
+          },
+          "order": {
+            "kind": "move",
+            "anchor": "shipyard2Water",
+            "dx": -4,
+            "dz": -4
+          }
+        },
+        {
+          "type": "giveResources",
+          "owner": "player",
+          "oil": 160
+        },
+        {
+          "type": "sound",
+          "id": "alarm"
+        },
+        {
+          "type": "dialog",
+          "speaker": {
+            "pt-BR": "Orvanna Maré-Negra",
+            "en": "Orvanna Blacktide"
+          },
+          "portrait": "🌊",
+          "duration": 9,
+          "text": {
+            "pt-BR": "A Galé de Orvanna chegando ao Baixio, Punho-de-Brasa! Capitã e casco ao seu dispor. Trouxe também breu para mais navios.",
+            "en": "Orvanna's Galley arriving at the Shallows, Emberfist! Captain and hull at your disposal. I also brought pitch for more ships."
+          }
+        },
+        {
+          "type": "message",
+          "text": {
+            "pt-BR": "A Galé de Orvanna juntou-se à esquadra (+160 de petróleo).",
+            "en": "Orvanna's Galley joined the squadron (+160 oil)."
+          }
+        }
+      ]
+    },
+    {
+      "id": "fleet-voice",
+      "when": {
+        "type": "time",
+        "at": 365
+      },
+      "actions": [
+        {
+          "type": "dialog",
+          "speaker": {
+            "pt-BR": "Frota de Aurelan",
+            "en": "Aurelan Fleet"
+          },
+          "portrait": "⚓",
+          "duration": 8,
+          "text": {
+            "pt-BR": "Clãs do Cinzal! O Baixio pertence a Aurelan. Primeira leva: dobrem o remo e afundem o que boiar com bandeira vermelha.",
+            "en": "Cinzal Clans! The Shallows belong to Aurelan. First wave: bend to the oar and sink whatever floats under a red flag."
+          }
+        }
+      ]
+    },
+    {
+      "id": "wave-1",
+      "when": {
+        "type": "time",
+        "at": 380
+      },
+      "actions": [
+        {
+          "type": "spawn",
+          "owner": "enemy",
+          "units": [
+            {
+              "type": "frigate",
+              "count": 4
+            }
+          ],
+          "anchor": "fleetStart1",
+          "spread": 4.5,
+          "tag": "aurelan_fleet",
+          "order": {
+            "kind": "attackMove",
+            "anchor": "well3"
+          }
+        },
+        {
+          "type": "setObjective",
+          "id": "p-fleet",
+          "status": "active"
+        },
+        {
+          "type": "sound",
+          "id": "alarm"
+        },
+        {
+          "type": "message",
+          "text": {
+            "pt-BR": "Primeira leva de Aurelan: 4 Fragatas rumo às Plataformas.",
+            "en": "Aurelan's first wave: 4 Frigates heading for the Platforms."
+          }
+        }
+      ]
+    },
+    {
+      "id": "wave-2",
+      "when": {
+        "type": "time",
+        "at": 540
+      },
+      "actions": [
+        {
+          "type": "spawn",
+          "owner": "enemy",
+          "units": [
+            {
+              "type": "frigate",
+              "count": 6
+            }
+          ],
+          "anchor": "fleetStart1",
+          "spread": 4.5,
+          "tag": "aurelan_fleet",
+          "order": {
+            "kind": "attackMove",
+            "anchor": "shipyard2Water"
+          }
+        },
+        {
+          "type": "sound",
+          "id": "alarm"
+        },
+        {
+          "type": "message",
+          "text": {
+            "pt-BR": "Segunda leva: 6 Fragatas rumo à Doca.",
+            "en": "Second wave: 6 Frigates heading for the Dock."
+          }
+        },
+        {
+          "type": "dialog",
+          "speaker": {
+            "pt-BR": "Drogath Punho-de-Brasa",
+            "en": "Drogath Emberfist"
+          },
+          "portrait": "🔥",
+          "duration": 9,
+          "text": {
+            "pt-BR": "Seis Fragatas rumo à Doca! Barcaças com tropa vêm depois: ataquem os navios, defendam a praia.",
+            "en": "Six Frigates for the Dock! Barges with troops follow: hit the ships, hold the beach."
+          }
+        }
+      ]
+    },
+    {
+      "id": "wave-3",
+      "when": {
+        "type": "time",
+        "at": 700
+      },
+      "actions": [
+        {
+          "type": "spawn",
+          "owner": "enemy",
+          "units": [
+            {
+              "type": "dreadnought",
+              "count": 1
+            },
+            {
+              "type": "frigate",
+              "count": 4
+            }
+          ],
+          "anchor": "fleetStart1",
+          "spread": 4.5,
+          "tag": "aurelan_fleet",
+          "order": {
+            "kind": "attackMove",
+            "anchor": "shipyard2Water"
+          }
+        },
+        {
+          "type": "sound",
+          "id": "alarm"
+        },
+        {
+          "type": "message",
+          "text": {
+            "pt-BR": "Terceira leva: um Couraçado e 4 Fragatas.",
+            "en": "Third wave: a Dreadnought and 4 Frigates."
+          }
+        },
+        {
+          "type": "dialog",
+          "speaker": {
+            "pt-BR": "Frota de Aurelan",
+            "en": "Aurelan Fleet"
+          },
+          "portrait": "⚓",
+          "duration": 8,
+          "text": {
+            "pt-BR": "O Couraçado não precisa chegar perto para afundar uma Doca. Terra à vista, fogo à vontade!",
+            "en": "The Dreadnought need not come near to sink a Dock. Land in sight, fire at will!"
+          }
+        }
+      ]
+    },
+    {
+      "id": "landing",
+      "when": {
+        "all": [
+          {
+            "type": "time",
+            "at": 330
+          },
+          {
+            "type": "area",
+            "owner": "enemy",
+            "area": {
+              "anchor": "shipyard2",
+              "r": 24
+            },
+            "unitType": "frigate"
+          }
+        ]
+      },
+      "actions": [
+        {
+          "type": "spawnLanding",
+          "owner": "enemy",
+          "anchor": "fleetStart1",
+          "unloadAt": {
+            "anchor": "beach2"
+          },
+          "units": [
+            {
+              "type": "knight",
+              "count": 4
+            },
+            {
+              "type": "archer",
+              "count": 2
+            }
+          ],
+          "escort": [
+            {
+              "type": "frigate",
+              "count": 2
+            }
+          ],
+          "tag": "landing",
+          "bargeTag": "landing_barge",
+          "escortTag": "landing_escort",
+          "order": {
+            "kind": "attackMove",
+            "anchor": "enemyStart"
+          }
+        },
+        {
+          "type": "incVar",
+          "name": "landings"
+        },
+        {
+          "type": "sound",
+          "id": "alarm"
+        },
+        {
+          "type": "dialog",
+          "speaker": {
+            "pt-BR": "Drogath Punho-de-Brasa",
+            "en": "Drogath Emberfist"
+          },
+          "portrait": "🔥",
+          "duration": 8,
+          "text": {
+            "pt-BR": "Uma Barcaça de Aurelan zarpou do Estaleiro inimigo com tropa! Afundem-na antes da praia!",
+            "en": "An Aurelan Barge sailed from the enemy Shipyard with troops! Sink it before the beach!"
+          }
+        }
+      ],
+      "once": false,
+      "cooldown": 75
+    },
+    {
+      "id": "patrol-sunk",
+      "when": {
+        "type": "dead",
+        "select": {
+          "tag": "patrol"
+        },
+        "count": 3
+      },
+      "actions": [
+        {
+          "type": "sound",
+          "id": "victory"
+        },
+        {
+          "type": "dialog",
+          "speaker": {
+            "pt-BR": "Drogath Punho-de-Brasa",
+            "en": "Drogath Emberfist"
+          },
+          "portrait": "🔥",
+          "duration": 8,
+          "text": {
+            "pt-BR": "A patrulha foi ao fundo. O meio do canal é livre, mas a esquadra de Aurelan não vai deixar assim.",
+            "en": "The patrol went down. The mid-channel is free, but Aurelan's squadron will not let it stay that way."
+          }
+        }
+      ]
+    },
+    {
+      "id": "cauldron-up",
+      "when": {
+        "type": "count",
+        "select": {
+          "buildingType": "ash_cauldron",
+          "owner": "player"
+        },
+        "op": ">=",
+        "value": 1
+      },
+      "actions": [
+        {
+          "type": "sound",
+          "id": "build"
+        },
+        {
+          "type": "dialog",
+          "speaker": {
+            "pt-BR": "Drogath Punho-de-Brasa",
+            "en": "Drogath Emberfist"
+          },
+          "portrait": "🔥",
+          "duration": 7,
+          "text": {
+            "pt-BR": "Caldeirão pronto. Agora o breu vira Galé, Barcaça e Leviatã.",
+            "en": "Cauldron ready. Now the pitch becomes Galley, Barge and Leviathan."
+          }
+        }
+      ]
+    },
+    {
+      "id": "outpost-up",
+      "when": {
+        "type": "objective",
+        "id": "s-outpost",
+        "status": "completed"
+      },
+      "actions": [
+        {
+          "type": "sound",
+          "id": "victory"
+        },
+        {
+          "type": "giveResources",
+          "owner": "player",
+          "gold": 150
+        },
+        {
+          "type": "dialog",
+          "speaker": {
+            "pt-BR": "Drogath Punho-de-Brasa",
+            "en": "Drogath Emberfist"
+          },
+          "portrait": "🔥",
+          "duration": 8,
+          "text": {
+            "pt-BR": "Posto do Cabo de pé: agora a mina grande rende de verdade. Ouro para mais cascos.",
+            "en": "Cape Post standing: now the big mine pays for real. Gold for more hulls."
+          }
+        }
+      ]
+    },
+    {
+      "id": "islet-near",
+      "when": {
+        "type": "area",
+        "owner": "player",
+        "area": {
+          "anchor": "islet2",
+          "r": 30
+        }
+      },
+      "actions": [
+        {
+          "type": "dialog",
+          "speaker": {
+            "pt-BR": "Drogath Punho-de-Brasa",
+            "en": "Drogath Emberfist"
+          },
+          "portrait": "🔥",
+          "duration": 8,
+          "text": {
+            "pt-BR": "Ali, a ilhota: fumaça de fogueira. Os Lacaios náufragos devem estar lá, e a Irmandade da Maré os guarda.",
+            "en": "There, the islet: campfire smoke. The castaway Peons must be there, with the Tide Brotherhood guarding them."
+          }
+        }
+      ]
+    },
+    {
+      "id": "free-castaways",
+      "when": {
+        "type": "dead",
+        "select": {
+          "tag": "islet_guard"
+        },
+        "count": 3
+      },
+      "actions": [
+        {
+          "type": "transfer",
+          "select": {
+            "tag": "castaways"
+          },
+          "to": "player"
+        },
+        {
+          "type": "incVar",
+          "name": "rescued",
+          "by": 3
+        },
+        {
+          "type": "sound",
+          "id": "build"
+        },
+        {
+          "type": "message",
+          "text": {
+            "pt-BR": "Lacaios resgatados!",
+            "en": "Peons rescued!"
+          }
+        }
+      ]
+    },
+    {
+      "id": "ulma-thanks",
+      "when": {
+        "type": "var",
+        "name": "rescued",
+        "op": ">=",
+        "value": 3
+      },
+      "actions": [
+        {
+          "type": "giveResources",
+          "owner": "player",
+          "gold": 100,
+          "wood": 100
+        },
+        {
+          "type": "dialog",
+          "speaker": {
+            "pt-BR": "Lacaio resgatado",
+            "en": "Rescued Peon"
+          },
+          "portrait": "⛵",
+          "duration": 9,
+          "text": {
+            "pt-BR": "Obrigado, Punho-de-Brasa! A Anciã Ulma mandou dizer: o Fogo do Clã pesa menos quando o clã volta inteiro. Tome estas cargas.",
+            "en": "Thank you, Emberfist! Elder Ulma sent word: the Clan Fire weighs less when the clan comes home whole. Take these loads."
+          }
+        },
+        {
+          "type": "message",
+          "text": {
+            "pt-BR": "Lacaios resgatados: +100 de ouro e +100 de madeira.",
+            "en": "Peons rescued: +100 gold and +100 wood."
+          }
+        }
+      ]
+    },
+    {
+      "id": "dock-down",
+      "when": {
+        "type": "objective",
+        "id": "s-dock",
+        "status": "completed"
+      },
+      "actions": [
+        {
+          "type": "sound",
+          "id": "victory"
+        },
+        {
+          "type": "giveResources",
+          "owner": "player",
+          "gold": 200
+        },
+        {
+          "type": "dialog",
+          "speaker": {
+            "pt-BR": "Drogath Punho-de-Brasa",
+            "en": "Drogath Emberfist"
+          },
+          "portrait": "🔥",
+          "duration": 8,
+          "text": {
+            "pt-BR": "O Estaleiro de Aurelan arde. Sem ele, a esquadra deles perde o porto e o fôlego.",
+            "en": "Aurelan's Shipyard burns. Without it their squadron loses its port and its breath."
+          }
+        }
+      ]
+    },
+    {
+      "id": "no-loss",
+      "when": {
+        "type": "objective",
+        "id": "h-no-loss",
+        "status": "completed"
+      },
+      "actions": [
+        {
+          "type": "giveResources",
+          "owner": "player",
+          "gold": 200,
+          "oil": 100
+        },
+        {
+          "type": "message",
+          "text": {
+            "pt-BR": "Nenhuma Galé perdida: +200 de ouro e +100 de petróleo.",
+            "en": "Not a Galley lost: +200 gold and +100 oil."
+          }
+        }
+      ]
+    },
+    {
+      "id": "hall-fallen",
+      "when": {
+        "type": "count",
+        "select": {
+          "buildingType": "great_hall",
+          "owner": "player"
+        },
+        "op": "==",
+        "value": 0
+      },
+      "actions": [
+        {
+          "type": "defeat",
+          "text": {
+            "pt-BR": "O Salão do Clã caiu. A margem dos Clãs é de Aurelan.",
+            "en": "The Clan Hall fell. The Clans' shore belongs to Aurelan."
+          }
+        }
+      ]
+    },
+    {
+      "id": "drogath-fallen",
+      "when": {
+        "type": "dead",
+        "select": {
+          "tag": "drogath"
+        },
+        "count": 1
+      },
+      "actions": [
+        {
+          "type": "defeat",
+          "text": {
+            "pt-BR": "Drogath caiu. Sem ele a guarnição se desfaz.",
+            "en": "Drogath fell. Without him the garrison scatters."
+          }
+        }
+      ]
+    },
+    {
+      "id": "all-done",
+      "when": {
+        "all": [
+          {
+            "type": "objective",
+            "id": "p-dock",
+            "status": "completed"
+          },
+          {
+            "type": "objective",
+            "id": "p-platforms",
+            "status": "completed"
+          },
+          {
+            "type": "objective",
+            "id": "p-oil",
+            "status": "completed"
+          },
+          {
+            "type": "objective",
+            "id": "p-patrol",
+            "status": "completed"
+          },
+          {
+            "type": "objective",
+            "id": "p-fleet",
+            "status": "completed"
+          }
+        ]
+      },
+      "actions": [
+        {
+          "type": "sound",
+          "id": "victory"
+        },
+        {
+          "type": "cutscene",
+          "id": "finale",
+          "duration": 18,
+          "skippable": true,
+          "steps": [
+            {
+              "at": 0,
+              "anchor": "well2",
+              "zoom": 1.1,
+              "dialog": {
+                "speaker": {
+                  "pt-BR": "Drogath Punho-de-Brasa",
+                  "en": "Drogath Emberfist"
+                },
+                "portrait": "🔥",
+                "text": {
+                  "pt-BR": "Silêncio no canal. As Plataformas bombeiam e a esquadra de Aurelan é casco no fundo. O breu é dos Clãs.",
+                  "en": "Silence in the channel. The Platforms pump and Aurelan's squadron is hulls on the seabed. The pitch belongs to the Clans."
+                },
+                "duration": 8
+              }
+            },
+            {
+              "at": 9,
+              "anchor": "shipyard2",
+              "zoom": 1.1,
+              "dialog": {
+                "speaker": {
+                  "pt-BR": "Orvanna Maré-Negra",
+                  "en": "Orvanna Blacktide"
+                },
+                "portrait": "🌊",
+                "text": {
+                  "pt-BR": "A Galé de Orvanna ao seu dispor para o que vier, Punho-de-Brasa. Que a próxima maré seja nossa.",
+                  "en": "Orvanna's Galley at your disposal for whatever comes, Emberfist. May the next tide be ours."
+                },
+                "duration": 8
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "finale-clock",
+      "when": {
+        "type": "trigger",
+        "id": "all-done"
+      },
+      "actions": [
+        {
+          "type": "incVar",
+          "name": "fin_clock",
+          "by": 1
+        }
+      ],
+      "once": false,
+      "cooldown": 18
+    },
+    {
+      "id": "finale-victory",
+      "when": {
+        "type": "var",
+        "name": "fin_clock",
+        "op": ">=",
+        "value": 1
+      },
+      "actions": [
+        {
+          "type": "victory"
+        }
+      ]
     }
   ]
 }

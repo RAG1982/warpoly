@@ -18,17 +18,33 @@
     },
     "portrait": "🪓",
     "text": {
-      "pt-BR": "Velas brancas humanas avistadas no Pouso do Encontro. Monte torres e forje lâminas afiadas na Forja.",
-      "en": "White human sails sighted at Meeting Landing. Build towers and forge sharp blades at the Forge."
+      "pt-BR": "Velas brancas humanas aportaram no Pouso do Encontro e as patrulhas de Aurelan pegaram QUATRO dos meus batedores: estão presos ao sul (dois) e ao leste (dois) da base humana, sob guarda de Espadachins e Arqueiros. A barcaça de resgate espera no cais, atrás do nosso Salão. Erga a Forja de Guerra e pesquise Lâminas de Guerra antes de marchar, e deixe uma Torre de Vigia junto ao Salão: a base humana manda tropas. Para soltar um batedor, mate os guardas e leve um guerreiro até ele. Depois, escolte os quatro vivos até o cais. Se um só cair, a missão está perdida.",
+      "en": "White human sails anchored at the Meeting Landing and Aurelan patrols caught FOUR of my scouts: they are held south (two) and east (two) of the human base, under guard of Swordsmen and Archers. The rescue barge waits at the pier, behind our Hall. Build the War Forge and research War Blades before you march, and leave a Watchtower by the Hall: the human base sends troops. To free a scout, kill his guards and bring a warrior to him. Then escort all four alive to the pier. If a single one falls, the mission is lost."
     },
     "hints": [
       {
-        "pt-BR": "Concentre-se nos objetivos primários para avançar.",
-        "en": "Focus on primary objectives to advance."
+        "pt-BR": "Construa a Forja de Guerra (50 de ouro, 100 de madeira, 70 de pedra) e pesquise Lâminas de Guerra nela: os Talhadores passam a bater mais forte.",
+        "en": "Build the War Forge (50 gold, 100 wood, 70 stone) and research War Blades there: Slashers will hit harder."
+      },
+      {
+        "pt-BR": "A Torre de Vigia (85 de madeira, 40 de pedra) defende o Salão enquanto a tropa está fora. Erga uma no lado leste, de onde vêm as tropas de Aurelan.",
+        "en": "The Watchtower (85 wood, 40 stone) guards the Hall while the troops are away. Raise one on the east side, where Aurelan troops come from."
+      },
+      {
+        "pt-BR": "Para soltar um batedor, mate TODOS os soldados de Aurelan ao redor dele e leve um guerreiro até perto. Com inimigos por perto ele continua preso. Os dois do sul ficam a 14 passos um do outro e contam como uma guarda só.",
+        "en": "To free a scout, kill ALL Aurelan soldiers around him and bring a warrior close. With enemies nearby he stays captive. The two in the south lie 14 paces apart and count as a single guard."
+      },
+      {
+        "pt-BR": "Depois de soltos, os batedores são seus: selecione-os e mande-os ao cais, atrás do Salão, com os guerreiros na frente deles.",
+        "en": "Once freed, the scouts are yours: select them and send them to the pier behind the Hall, with your warriors ahead of them."
+      },
+      {
+        "pt-BR": "Um humano de pano branco, no meio de uma patrulha, é um Mensageiro: poupá-lo rende uma recompensa.",
+        "en": "A human with a white cloth, in the middle of a patrol, is a Messenger: sparing him pays a reward."
       }
     ]
   },
-  "mapId": "campos-1v1",
+  "mapId": "camp-02-pouso-do-encontro",
   "seed": 9034,
   "players": [
     {
@@ -53,7 +69,8 @@
       "team": 1,
       "color": "#2563eb",
       "isAI": true,
-      "startSlot": 1
+      "startSlot": 1,
+      "difficulty": "easy"
     }
   ],
   "startingResources": {
@@ -61,27 +78,1353 @@
     "gold": 400,
     "stone": 150
   },
+  "vars": {
+    "freed": 0,
+    "fin_clock": 0
+  },
+  "autoVictory": false,
   "setup": [
     {
-      "type": "tag",
-      "select": {
-        "buildingType": "castle"
+      "type": "spawn",
+      "owner": "neutral",
+      "unitType": "axethrower",
+      "count": 1,
+      "anchor": "scoutPrison6",
+      "tag": "scout",
+      "markColor": "#22d3ee",
+      "displayName": {
+        "pt-BR": "Batedor preso",
+        "en": "Captive scout"
+      }
+    },
+    {
+      "type": "spawn",
+      "owner": "enemy",
+      "units": [
+        {
+          "type": "knight",
+          "count": 2
+        },
+        {
+          "type": "archer",
+          "count": 1
+        }
+      ],
+      "anchor": "scoutPrison6",
+      "dx": 0,
+      "dz": -6,
+      "spread": 2.5,
+      "guard": {
+        "r": 12
       },
-      "tag": "enemy_base"
+      "tag": "guard6"
+    },
+    {
+      "type": "spawn",
+      "owner": "neutral",
+      "unitType": "axethrower",
+      "count": 1,
+      "anchor": "scoutPrison3",
+      "tag": "scout",
+      "markColor": "#22d3ee",
+      "displayName": {
+        "pt-BR": "Batedor preso",
+        "en": "Captive scout"
+      }
+    },
+    {
+      "type": "spawn",
+      "owner": "enemy",
+      "units": [
+        {
+          "type": "knight",
+          "count": 2
+        },
+        {
+          "type": "archer",
+          "count": 1
+        }
+      ],
+      "anchor": "scoutPrison3",
+      "dx": 0,
+      "dz": -6,
+      "spread": 2.5,
+      "guard": {
+        "r": 12
+      },
+      "tag": "guard3"
+    },
+    {
+      "type": "spawn",
+      "owner": "neutral",
+      "unitType": "axethrower",
+      "count": 1,
+      "anchor": "scoutPrison4",
+      "tag": "scout",
+      "markColor": "#22d3ee",
+      "displayName": {
+        "pt-BR": "Batedor preso",
+        "en": "Captive scout"
+      }
+    },
+    {
+      "type": "spawn",
+      "owner": "enemy",
+      "units": [
+        {
+          "type": "knight",
+          "count": 3
+        },
+        {
+          "type": "archer",
+          "count": 2
+        }
+      ],
+      "anchor": "scoutPrison4",
+      "dx": 0,
+      "dz": -6,
+      "spread": 2.5,
+      "guard": {
+        "r": 12
+      },
+      "tag": "guard4"
+    },
+    {
+      "type": "spawn",
+      "owner": "neutral",
+      "unitType": "axethrower",
+      "count": 1,
+      "anchor": "scoutPrison5",
+      "tag": "scout",
+      "markColor": "#22d3ee",
+      "displayName": {
+        "pt-BR": "Batedor preso",
+        "en": "Captive scout"
+      }
+    },
+    {
+      "type": "spawn",
+      "owner": "enemy",
+      "units": [
+        {
+          "type": "knight",
+          "count": 3
+        },
+        {
+          "type": "archer",
+          "count": 2
+        }
+      ],
+      "anchor": "scoutPrison5",
+      "dx": 0,
+      "dz": -6,
+      "spread": 2.5,
+      "guard": {
+        "r": 12
+      },
+      "tag": "guard5"
+    },
+    {
+      "type": "spawn",
+      "owner": "neutral",
+      "unitType": "mage",
+      "count": 1,
+      "anchor": "emissary1",
+      "tag": "envoy",
+      "markColor": "#f0abfc",
+      "displayName": {
+        "pt-BR": "Mensageiro",
+        "en": "Messenger"
+      }
+    },
+    {
+      "type": "spawn",
+      "owner": "enemy",
+      "units": [
+        {
+          "type": "knight",
+          "count": 3
+        },
+        {
+          "type": "archer",
+          "count": 1
+        }
+      ],
+      "anchor": "emissary1",
+      "dx": 8,
+      "dz": 8,
+      "spread": 3,
+      "guard": {
+        "r": 14
+      },
+      "tag": "human_patrol"
+    },
+    {
+      "type": "spawn",
+      "owner": "neutral",
+      "unitType": "axethrower",
+      "count": 1,
+      "anchor": "pier1",
+      "dx": 5,
+      "dz": 3,
+      "tag": "rurga",
+      "markColor": "#facc15",
+      "displayName": {
+        "pt-BR": "Rurga Faro-Fino",
+        "en": "Rurga Keen-Scent"
+      }
+    },
+    {
+      "type": "spawn",
+      "owner": "player",
+      "unitType": "barge",
+      "count": 1,
+      "anchor": "pier1Water",
+      "tag": "rescue_barge",
+      "markColor": "#f0abfc",
+      "displayName": {
+        "pt-BR": "Barcaça de resgate",
+        "en": "Rescue barge"
+      }
+    },
+    {
+      "type": "spawnLandmark",
+      "kind": "ruins",
+      "anchor": "ruins1",
+      "tag": "ruins",
+      "label": {
+        "pt-BR": "Ruínas Esquecidas",
+        "en": "Forgotten Ruins"
+      }
     }
   ],
   "objectives": [
     {
-      "id": "primary-main",
-      "type": "destroy",
+      "id": "rescue-scouts",
+      "type": "rescue",
       "priority": "primary",
-      "select": {
-        "tag": "enemy_base"
+      "tag": "scout",
+      "count": 4,
+      "title": {
+        "pt-BR": "Resgatar os 4 batedores presos pelas patrulhas de Aurelan",
+        "en": "Rescue the 4 scouts held by Aurelan patrols"
+      },
+      "description": {
+        "pt-BR": "Cada batedor está sob guarda de Espadachins e Arqueiros, ao sul e ao leste da base humana. Mate os guardas e leve um guerreiro até ele. Se um batedor cair, a missão falha.",
+        "en": "Each scout is held by Swordsmen and Archers, south and east of the human base. Kill the guards and bring a warrior to him. If a scout falls, the mission fails."
+      }
+    },
+    {
+      "id": "escort-scouts",
+      "type": "escort",
+      "priority": "primary",
+      "active": false,
+      "tag": "scout",
+      "count": 4,
+      "area": {
+        "anchor": "pier1",
+        "r": 9
       },
       "title": {
-        "pt-BR": "Pesquisar Armas Forjadas e erguer Torres de Vigia",
-        "en": "Research Forged Weapons and erect Watchtowers"
+        "pt-BR": "Escoltar os 4 batedores até a barcaça, no cais da base",
+        "en": "Escort the 4 scouts to the barge, at the base pier"
+      },
+      "description": {
+        "pt-BR": "A barcaça espera junto ao cais, atrás do Salão. Todos os quatro precisam chegar vivos; as tropas de Aurelan vão tentar alcançá-los no caminho.",
+        "en": "The barge waits at the pier, behind the Hall. All four must arrive alive; Aurelan troops will try to catch them on the way."
       }
+    },
+    {
+      "id": "build-forge",
+      "type": "build",
+      "priority": "secondary",
+      "buildingType": "orc_forge",
+      "count": 1,
+      "title": {
+        "pt-BR": "Construir a Forja de Guerra",
+        "en": "Build the War Forge"
+      },
+      "description": {
+        "pt-BR": "Lacaios constroem. A Forja custa 50 de ouro, 100 de madeira e 70 de pedra.",
+        "en": "Laborers build. The Forge costs 50 gold, 100 wood and 70 stone."
+      }
+    },
+    {
+      "id": "research-weapons",
+      "type": "flag",
+      "priority": "secondary",
+      "active": false,
+      "condition": {
+        "type": "research",
+        "id": "melee_weapons",
+        "level": 1
+      },
+      "title": {
+        "pt-BR": "Pesquisar Lâminas de Guerra na Forja",
+        "en": "Research War Blades at the Forge"
+      },
+      "description": {
+        "pt-BR": "Selecione a Forja e escolha Lâminas de Guerra (200 de ouro, 100 de madeira, 30 s). Talhadores batem mais forte.",
+        "en": "Select the Forge and pick War Blades (200 gold, 100 wood, 30 s). Slashers hit harder."
+      }
+    },
+    {
+      "id": "build-tower",
+      "type": "build",
+      "priority": "secondary",
+      "buildingType": "orc_watchtower",
+      "count": 1,
+      "title": {
+        "pt-BR": "Erguer uma Torre de Vigia perto do Salão (+100 de madeira)",
+        "en": "Raise a Watchtower near the Hall (+100 wood)"
+      },
+      "description": {
+        "pt-BR": "Opcional. A Torre custa 85 de madeira e 40 de pedra e protege a base enquanto a tropa está fora. Recompensa: 100 de madeira.",
+        "en": "Optional. The Tower costs 85 wood and 40 stone and guards the base while the troops are away. Reward: 100 wood."
+      }
+    },
+    {
+      "id": "envoy-honor",
+      "type": "flag",
+      "priority": "hidden",
+      "condition": {
+        "all": [
+          {
+            "type": "area",
+            "owner": "player",
+            "area": {
+              "anchor": "emissary1",
+              "r": 7
+            }
+          },
+          {
+            "type": "count",
+            "select": {
+              "tag": "envoy"
+            },
+            "op": ">=",
+            "value": 1
+          }
+        ]
+      },
+      "failWhen": {
+        "type": "dead",
+        "select": {
+          "tag": "envoy"
+        },
+        "count": 1
+      },
+      "title": {
+        "pt-BR": "Poupar o Mensageiro",
+        "en": "Spare the Messenger"
+      },
+      "description": {
+        "pt-BR": "Honra: o humano de pano branco leva palavras, não armas.",
+        "en": "Honor: the human with the white cloth carries words, not weapons."
+      }
+    },
+    {
+      "id": "find-ruins",
+      "type": "flag",
+      "priority": "hidden",
+      "title": {
+        "pt-BR": "Achar as Ruínas Esquecidas, ao norte da ilha",
+        "en": "Find the Forgotten Ruins, north of the island"
+      },
+      "condition": {
+        "type": "area",
+        "owner": "player",
+        "area": {
+          "anchor": "ruins1",
+          "r": 7
+        }
+      }
+    }
+  ],
+  "triggers": [
+    {
+      "id": "intro",
+      "when": {
+        "type": "time",
+        "at": 0
+      },
+      "actions": [
+        {
+          "type": "music",
+          "id": "on"
+        },
+        {
+          "type": "reveal",
+          "anchor": "scoutPrison6",
+          "radius": 24,
+          "ttl": 30
+        },
+        {
+          "type": "reveal",
+          "anchor": "scoutPrison3",
+          "radius": 24,
+          "ttl": 30
+        },
+        {
+          "type": "reveal",
+          "anchor": "scoutPrison4",
+          "radius": 24,
+          "ttl": 30
+        },
+        {
+          "type": "reveal",
+          "anchor": "scoutPrison5",
+          "radius": 24,
+          "ttl": 30
+        },
+        {
+          "type": "reveal",
+          "anchor": "enemyStart",
+          "radius": 28,
+          "ttl": 30
+        },
+        {
+          "type": "cutscene",
+          "id": "landing",
+          "duration": 29,
+          "skippable": true,
+          "steps": [
+            {
+              "at": 0,
+              "anchor": "landingZone",
+              "zoom": 1.15,
+              "dialog": {
+                "speaker": {
+                  "pt-BR": "Rurga Faro-Fino",
+                  "en": "Rurga Keen-Scent"
+                },
+                "portrait": "🪓",
+                "text": {
+                  "pt-BR": "Pousamos no Pouso do Encontro. Velas brancas aportaram antes de nós e as patrulhas de Aurelan pegaram QUATRO dos meus batedores. A barcaça de resgate espera aqui, no cais da nossa base.",
+                  "en": "We landed at the Meeting Landing. White sails anchored before us and Aurelan patrols caught FOUR of my scouts. The rescue barge waits right here, at our base pier."
+                },
+                "duration": 7.5
+              }
+            },
+            {
+              "at": 7.5,
+              "anchor": "scoutPrison6",
+              "zoom": 1.1,
+              "dialog": {
+                "speaker": {
+                  "pt-BR": "Rurga Faro-Fino",
+                  "en": "Rurga Keen-Scent"
+                },
+                "portrait": "🪓",
+                "text": {
+                  "pt-BR": "Lá no sul, dois batedores presos, com Espadachins e Arqueiros em volta. Os outros dois estão mais a leste, cada um com a sua guarda.",
+                  "en": "Down south, two scouts held, with Swordsmen and Archers around them. The other two lie farther east, each with its own guard."
+                },
+                "duration": 7
+              }
+            },
+            {
+              "at": 14.5,
+              "anchor": "enemyStart",
+              "zoom": 1.2,
+              "dialog": {
+                "speaker": {
+                  "pt-BR": "Rurga Faro-Fino",
+                  "en": "Rurga Keen-Scent"
+                },
+                "portrait": "🪓",
+                "text": {
+                  "pt-BR": "Aquela é a base deles, no meio do caminho. Ninguém sabe quem atirou primeiro, mas eles estão armados e a gente não. Nada de pressa: forja, torres, tropa.",
+                  "en": "That is their base, in the middle of the way. No one knows who shot first, but they are armed and we are not. No hurry: forge, towers, troops."
+                },
+                "duration": 7.5
+              }
+            },
+            {
+              "at": 22,
+              "anchor": "playerStart",
+              "zoom": 1.0,
+              "dialog": {
+                "speaker": {
+                  "pt-BR": "Rurga Faro-Fino",
+                  "en": "Rurga Keen-Scent"
+                },
+                "portrait": "🪓",
+                "text": {
+                  "pt-BR": "Lacaios, ao trabalho. Quando a tropa estiver pronta, soltamos os quatro e voltamos todos juntos ao cais.",
+                  "en": "Laborers, to work. When the troops are ready, we free the four and all come back to the pier together."
+                },
+                "duration": 6.5
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "first-steps",
+      "when": {
+        "type": "time",
+        "at": 32
+      },
+      "actions": [
+        {
+          "speaker": {
+            "pt-BR": "Rurga Faro-Fino",
+            "en": "Rurga Keen-Scent"
+          },
+          "portrait": "🪓",
+          "text": {
+            "pt-BR": "Primeiro a Forja de Guerra: ponha um Lacaio para erguê-la (50 de ouro, 100 de madeira, 70 de pedra) e outro na Mina e na Pedreira. Sem armas melhores, os guardas de Aurelan nos engolem.",
+            "en": "First the War Forge: put a Laborer on it (50 gold, 100 wood, 70 stone) and another on the Mine and the Quarry. Without better weapons, Aurelan's guards swallow us."
+          },
+          "duration": 9,
+          "type": "dialog"
+        }
+      ]
+    },
+    {
+      "id": "forge-up",
+      "when": {
+        "type": "objective",
+        "id": "build-forge",
+        "status": "completed"
+      },
+      "actions": [
+        {
+          "type": "setObjective",
+          "id": "research-weapons",
+          "status": "active"
+        },
+        {
+          "type": "sound",
+          "id": "build"
+        },
+        {
+          "speaker": {
+            "pt-BR": "Rurga Faro-Fino",
+            "en": "Rurga Keen-Scent"
+          },
+          "portrait": "🪓",
+          "text": {
+            "pt-BR": "Forja de pé! Selecione-a e pesquise Lâminas de Guerra: os Talhadores batem mais forte. Erga também uma Torre de Vigia perto do Salão, a base humana manda tropas.",
+            "en": "Forge standing! Select it and research War Blades: Slashers hit harder. Raise a Watchtower near the Hall too, the human base sends troops."
+          },
+          "duration": 9,
+          "type": "dialog"
+        }
+      ]
+    },
+    {
+      "id": "research-done",
+      "when": {
+        "type": "objective",
+        "id": "research-weapons",
+        "status": "completed"
+      },
+      "actions": [
+        {
+          "type": "sound",
+          "id": "victory"
+        },
+        {
+          "speaker": {
+            "pt-BR": "Rurga Faro-Fino",
+            "en": "Rurga Keen-Scent"
+          },
+          "portrait": "🪓",
+          "text": {
+            "pt-BR": "Lâminas prontas. Agora a tropa marcha: primeiro os dois do sul, depois os dois do leste. Mate os guardas ANTES de chegar perto, ou o batedor vira alvo.",
+            "en": "Blades ready. Now the troops march: first the two in the south, then the two in the east. Kill the guards BEFORE getting close, or the scout becomes a target."
+          },
+          "duration": 9,
+          "type": "dialog"
+        }
+      ]
+    },
+    {
+      "id": "tower-up",
+      "when": {
+        "type": "objective",
+        "id": "build-tower",
+        "status": "completed"
+      },
+      "actions": [
+        {
+          "type": "giveResources",
+          "owner": "player",
+          "wood": 100
+        },
+        {
+          "type": "sound",
+          "id": "build"
+        },
+        {
+          "type": "message",
+          "text": {
+            "pt-BR": "Torre de Vigia erguida: +100 de madeira.",
+            "en": "Watchtower raised: +100 wood."
+          }
+        }
+      ]
+    },
+    {
+      "id": "guards-seen",
+      "when": {
+        "type": "area",
+        "owner": "player",
+        "area": {
+          "anchor": "scoutPrison6",
+          "r": 34
+        }
+      },
+      "actions": [
+        {
+          "speaker": {
+            "pt-BR": "Rurga Faro-Fino",
+            "en": "Rurga Keen-Scent"
+          },
+          "portrait": "🪓",
+          "text": {
+            "pt-BR": "Território de Aurelan. Dois batedores estão no meio dos guardas: limpe a guarda primeiro, depois chegue perto deles.",
+            "en": "Aurelan territory. Two scouts stand among the guards: clear the guard first, then get close to them."
+          },
+          "duration": 8,
+          "type": "dialog"
+        }
+      ]
+    },
+    {
+      "id": "free-6",
+      "when": {
+        "all": [
+          {
+            "type": "area",
+            "owner": "player",
+            "area": {
+              "anchor": "scoutPrison6",
+              "r": 8
+            }
+          },
+          {
+            "type": "count",
+            "select": {
+              "tag": "guard6"
+            },
+            "op": "==",
+            "value": 0
+          },
+          {
+            "type": "count",
+            "select": {
+              "tag": "guard3"
+            },
+            "op": "==",
+            "value": 0
+          },
+          {
+            "type": "count",
+            "select": {
+              "owner": "enemy",
+              "area": {
+                "anchor": "scoutPrison6",
+                "r": 16
+              }
+            },
+            "op": "==",
+            "value": 0
+          },
+          {
+            "type": "count",
+            "select": {
+              "owner": "enemy",
+              "area": {
+                "anchor": "scoutPrison3",
+                "r": 16
+              }
+            },
+            "op": "==",
+            "value": 0
+          }
+        ]
+      },
+      "actions": [
+        {
+          "type": "transfer",
+          "select": {
+            "unitType": "axethrower",
+            "owner": "neutral",
+            "area": {
+              "anchor": "scoutPrison6",
+              "r": 3.4
+            }
+          },
+          "to": "player"
+        },
+        {
+          "type": "incVar",
+          "name": "freed"
+        },
+        {
+          "type": "sound",
+          "id": "build"
+        },
+        {
+          "type": "message",
+          "text": {
+            "pt-BR": "Batedor libertado!",
+            "en": "Scout freed!"
+          }
+        }
+      ]
+    },
+    {
+      "id": "free-3",
+      "when": {
+        "all": [
+          {
+            "type": "area",
+            "owner": "player",
+            "area": {
+              "anchor": "scoutPrison3",
+              "r": 8
+            }
+          },
+          {
+            "type": "count",
+            "select": {
+              "tag": "guard6"
+            },
+            "op": "==",
+            "value": 0
+          },
+          {
+            "type": "count",
+            "select": {
+              "tag": "guard3"
+            },
+            "op": "==",
+            "value": 0
+          },
+          {
+            "type": "count",
+            "select": {
+              "owner": "enemy",
+              "area": {
+                "anchor": "scoutPrison6",
+                "r": 16
+              }
+            },
+            "op": "==",
+            "value": 0
+          },
+          {
+            "type": "count",
+            "select": {
+              "owner": "enemy",
+              "area": {
+                "anchor": "scoutPrison3",
+                "r": 16
+              }
+            },
+            "op": "==",
+            "value": 0
+          }
+        ]
+      },
+      "actions": [
+        {
+          "type": "transfer",
+          "select": {
+            "unitType": "axethrower",
+            "owner": "neutral",
+            "area": {
+              "anchor": "scoutPrison3",
+              "r": 3.4
+            }
+          },
+          "to": "player"
+        },
+        {
+          "type": "incVar",
+          "name": "freed"
+        },
+        {
+          "type": "sound",
+          "id": "build"
+        },
+        {
+          "type": "message",
+          "text": {
+            "pt-BR": "Batedor libertado!",
+            "en": "Scout freed!"
+          }
+        }
+      ]
+    },
+    {
+      "id": "free-4",
+      "when": {
+        "all": [
+          {
+            "type": "area",
+            "owner": "player",
+            "area": {
+              "anchor": "scoutPrison4",
+              "r": 8
+            }
+          },
+          {
+            "type": "count",
+            "select": {
+              "tag": "guard4"
+            },
+            "op": "==",
+            "value": 0
+          },
+          {
+            "type": "count",
+            "select": {
+              "owner": "enemy",
+              "area": {
+                "anchor": "scoutPrison4",
+                "r": 16
+              }
+            },
+            "op": "==",
+            "value": 0
+          }
+        ]
+      },
+      "actions": [
+        {
+          "type": "transfer",
+          "select": {
+            "unitType": "axethrower",
+            "owner": "neutral",
+            "area": {
+              "anchor": "scoutPrison4",
+              "r": 3.4
+            }
+          },
+          "to": "player"
+        },
+        {
+          "type": "incVar",
+          "name": "freed"
+        },
+        {
+          "type": "sound",
+          "id": "build"
+        },
+        {
+          "type": "message",
+          "text": {
+            "pt-BR": "Batedor libertado!",
+            "en": "Scout freed!"
+          }
+        }
+      ]
+    },
+    {
+      "id": "free-5",
+      "when": {
+        "all": [
+          {
+            "type": "area",
+            "owner": "player",
+            "area": {
+              "anchor": "scoutPrison5",
+              "r": 8
+            }
+          },
+          {
+            "type": "count",
+            "select": {
+              "tag": "guard5"
+            },
+            "op": "==",
+            "value": 0
+          },
+          {
+            "type": "count",
+            "select": {
+              "owner": "enemy",
+              "area": {
+                "anchor": "scoutPrison5",
+                "r": 16
+              }
+            },
+            "op": "==",
+            "value": 0
+          }
+        ]
+      },
+      "actions": [
+        {
+          "type": "transfer",
+          "select": {
+            "unitType": "axethrower",
+            "owner": "neutral",
+            "area": {
+              "anchor": "scoutPrison5",
+              "r": 3.4
+            }
+          },
+          "to": "player"
+        },
+        {
+          "type": "incVar",
+          "name": "freed"
+        },
+        {
+          "type": "sound",
+          "id": "build"
+        },
+        {
+          "type": "message",
+          "text": {
+            "pt-BR": "Batedor libertado!",
+            "en": "Scout freed!"
+          }
+        }
+      ]
+    },
+    {
+      "id": "first-freed",
+      "when": {
+        "type": "var",
+        "name": "freed",
+        "op": ">=",
+        "value": 1
+      },
+      "actions": [
+        {
+          "speaker": {
+            "pt-BR": "Batedor libertado",
+            "en": "Freed scout"
+          },
+          "portrait": "🏹",
+          "text": {
+            "pt-BR": "Obrigado, Clã! Eles nos prenderam sem dizer palavra. Os outros dois estão a leste da base deles, depois da fogueira grande. Não nos deixem para trás. E ouvi falar de ruínas de pedra ao norte da ilha: vale a pena olhar.",
+            "en": "Thank you, Clan! They seized us without a word. The other two are east of their base, past the big fire. Do not leave us behind. And I heard of stone ruins north of the island: worth a look."
+          },
+          "duration": 9,
+          "type": "dialog"
+        },
+        {
+          "type": "revealObjective",
+          "id": "find-ruins"
+        }
+      ]
+    },
+    {
+      "id": "east-zone",
+      "when": {
+        "type": "area",
+        "owner": "player",
+        "area": {
+          "anchor": "scoutPrison4",
+          "r": 30
+        }
+      },
+      "actions": [
+        {
+          "speaker": {
+            "pt-BR": "Rurga Faro-Fino",
+            "en": "Rurga Keen-Scent"
+          },
+          "portrait": "🪓",
+          "text": {
+            "pt-BR": "A base humana está logo ali. Soltem os batedores sem acordar a casa inteira, e recuem juntos.",
+            "en": "The human base is right there. Free the scouts without waking the whole house, and fall back together."
+          },
+          "duration": 7.5,
+          "type": "dialog"
+        }
+      ]
+    },
+    {
+      "id": "rescue-done",
+      "when": {
+        "type": "objective",
+        "id": "rescue-scouts",
+        "status": "completed"
+      },
+      "actions": [
+        {
+          "type": "setObjective",
+          "id": "escort-scouts",
+          "status": "active"
+        },
+        {
+          "type": "sound",
+          "id": "victory"
+        },
+        {
+          "speaker": {
+            "pt-BR": "Rurga Faro-Fino",
+            "en": "Rurga Keen-Scent"
+          },
+          "portrait": "🪓",
+          "text": {
+            "pt-BR": "Os quatro estão conosco! Agora é a parte difícil: levá-los ao cais, de volta à barcaça. Fiquem juntos, e que nenhum fique para trás.",
+            "en": "All four are with us! Now the hard part: taking them to the pier, back to the barge. Stay together, and leave no one behind."
+          },
+          "duration": 8.5,
+          "type": "dialog"
+        }
+      ]
+    },
+    {
+      "id": "escort-half",
+      "when": {
+        "all": [
+          {
+            "type": "objective",
+            "id": "escort-scouts",
+            "status": "active"
+          },
+          {
+            "type": "area",
+            "owner": "player",
+            "area": {
+              "anchor": "playerStart",
+              "r": 22
+            }
+          }
+        ]
+      },
+      "actions": [
+        {
+          "speaker": {
+            "pt-BR": "Rurga Faro-Fino",
+            "en": "Rurga Keen-Scent"
+          },
+          "portrait": "🪓",
+          "text": {
+            "pt-BR": "Já avisto a nossa base! Mais um pouco, o cais fica logo atrás do Salão.",
+            "en": "I can already see our base! A little more, the pier is just behind the Hall."
+          },
+          "duration": 6,
+          "type": "dialog"
+        }
+      ]
+    },
+    {
+      "id": "patrol-seen",
+      "when": {
+        "type": "area",
+        "owner": "player",
+        "area": {
+          "anchor": "emissary1",
+          "r": 26
+        }
+      },
+      "actions": [
+        {
+          "speaker": {
+            "pt-BR": "Rurga Faro-Fino",
+            "en": "Rurga Keen-Scent"
+          },
+          "portrait": "🪓",
+          "text": {
+            "pt-BR": "Uma patrulha de Aurelan adiante, e um humano de pano branco no meio dela. Pano branco é palavra, não arma. Não ataque o que não atacar primeiro.",
+            "en": "An Aurelan patrol ahead, and a human with a white cloth in the middle. White cloth means words, not weapons. Do not attack what has not attacked first."
+          },
+          "duration": 8.5,
+          "type": "dialog"
+        }
+      ]
+    },
+    {
+      "id": "envoy-met",
+      "when": {
+        "type": "objective",
+        "id": "envoy-honor",
+        "status": "completed"
+      },
+      "actions": [
+        {
+          "type": "giveResources",
+          "owner": "player",
+          "gold": 100
+        },
+        {
+          "type": "sound",
+          "id": "victory"
+        },
+        {
+          "type": "message",
+          "text": {
+            "pt-BR": "Mensageiro poupado: +100 de ouro.",
+            "en": "Messenger spared: +100 gold."
+          }
+        },
+        {
+          "speaker": {
+            "pt-BR": "Mensageiro de Aurelan",
+            "en": "Aurelan Messenger"
+          },
+          "portrait": "🏳️",
+          "text": {
+            "pt-BR": "Pano branco, guerreiro do Cinzal. Poupou-me, então escute: o capitão de Aurelan manda ouro e ferro da Pedra-Mãe sem parar, e o governador de lá não perdoa quem invade. Ninguém sabe quem atirou primeiro, mas ele pretende atirar por último.",
+            "en": "White cloth, Cinzal warrior. You spared me, so listen: Aurelan's captain ships gold and iron from the Mother Stone without pause, and the governor there forgives no intruder. No one knows who shot first, but he means to shoot last."
+          },
+          "duration": 10,
+          "type": "dialog"
+        }
+      ]
+    },
+    {
+      "id": "raid-1",
+      "when": {
+        "type": "time",
+        "at": 300
+      },
+      "actions": [
+        {
+          "type": "spawn",
+          "owner": "enemy",
+          "units": [
+            {
+              "type": "knight",
+              "count": 3
+            },
+            {
+              "type": "archer",
+              "count": 2
+            }
+          ],
+          "anchor": "enemyStart",
+          "dx": -12,
+          "dz": -6,
+          "spread": 3,
+          "tag": "raid",
+          "order": {
+            "kind": "attackMove",
+            "anchor": "playerStart"
+          }
+        },
+        {
+          "type": "message",
+          "text": {
+            "pt-BR": "Alerta: uma tropa de Aurelan marcha para a base!",
+            "en": "Alert: an Aurelan warband is marching on the base!"
+          }
+        }
+      ]
+    },
+    {
+      "id": "raid-2",
+      "when": {
+        "type": "time",
+        "at": 520
+      },
+      "actions": [
+        {
+          "type": "spawn",
+          "owner": "enemy",
+          "units": [
+            {
+              "type": "knight",
+              "count": 4
+            },
+            {
+              "type": "archer",
+              "count": 3
+            }
+          ],
+          "anchor": "enemyStart",
+          "dx": -12,
+          "dz": -6,
+          "spread": 3,
+          "tag": "raid",
+          "order": {
+            "kind": "attackMove",
+            "anchor": "playerStart"
+          }
+        },
+        {
+          "type": "message",
+          "text": {
+            "pt-BR": "Alerta: nova tropa de Aurelan a caminho da base!",
+            "en": "Alert: another Aurelan warband is heading for the base!"
+          }
+        }
+      ]
+    },
+    {
+      "id": "scout-lost",
+      "when": {
+        "type": "objective",
+        "id": "rescue-scouts",
+        "status": "failed"
+      },
+      "actions": [
+        {
+          "type": "defeat",
+          "text": {
+            "pt-BR": "Um batedor caiu: sem os quatro, a missão está perdida.",
+            "en": "A scout has fallen: without all four, the mission is lost."
+          }
+        }
+      ]
+    },
+    {
+      "id": "escort-lost",
+      "when": {
+        "type": "objective",
+        "id": "escort-scouts",
+        "status": "failed"
+      },
+      "actions": [
+        {
+          "type": "defeat",
+          "text": {
+            "pt-BR": "Um batedor caiu na volta: a barcaça zarpa sem todos.",
+            "en": "A scout fell on the way back: the barge sails without them all."
+          }
+        }
+      ]
+    },
+    {
+      "id": "hall-fallen",
+      "when": {
+        "type": "count",
+        "select": {
+          "buildingType": "great_hall",
+          "owner": "player"
+        },
+        "op": "==",
+        "value": 0
+      },
+      "actions": [
+        {
+          "type": "defeat",
+          "text": {
+            "pt-BR": "O Salão do Clã caiu. A cabeça de ponte está perdida.",
+            "en": "The Clan Hall has fallen. The beachhead is lost."
+          }
+        }
+      ]
+    },
+    {
+      "id": "finale",
+      "when": {
+        "type": "objective",
+        "id": "escort-scouts",
+        "status": "completed"
+      },
+      "actions": [
+        {
+          "type": "sound",
+          "id": "victory"
+        },
+        {
+          "type": "cutscene",
+          "id": "finale",
+          "duration": 14,
+          "skippable": true,
+          "steps": [
+            {
+              "at": 0,
+              "anchor": "landingZone",
+              "zoom": 1.1,
+              "dialog": {
+                "speaker": {
+                  "pt-BR": "Rurga Faro-Fino",
+                  "en": "Rurga Keen-Scent"
+                },
+                "portrait": "🪓",
+                "text": {
+                  "pt-BR": "Os quatro estão a bordo, vivos. Vimos o bastante: as velas brancas não vieram pescar, vieram ficar.",
+                  "en": "All four are aboard, alive. We have seen enough: the white sails did not come to fish, they came to stay."
+                },
+                "duration": 7
+              }
+            },
+            {
+              "at": 7,
+              "anchor": "enemyStart",
+              "zoom": 1.2,
+              "dialog": {
+                "speaker": {
+                  "pt-BR": "Rurga Faro-Fino",
+                  "en": "Rurga Keen-Scent"
+                },
+                "portrait": "🪓",
+                "text": {
+                  "pt-BR": "Ninguém sabe quem atirou primeiro. Depois de hoje, isso já não importa: o mar deixou de ser vazio.",
+                  "en": "No one knows who shot first. After today it no longer matters: the sea is empty no more."
+                },
+                "duration": 7
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "finale-clock",
+      "when": {
+        "type": "objective",
+        "id": "escort-scouts",
+        "status": "completed"
+      },
+      "once": false,
+      "cooldown": 14,
+      "actions": [
+        {
+          "type": "incVar",
+          "name": "fin_clock",
+          "by": 1
+        }
+      ]
+    },
+    {
+      "id": "finale-victory",
+      "when": {
+        "type": "var",
+        "name": "fin_clock",
+        "op": ">=",
+        "value": 2
+      },
+      "actions": [
+        {
+          "type": "victory"
+        }
+      ]
+    },
+    {
+      "id": "ruins-found",
+      "when": {
+        "type": "objective",
+        "id": "find-ruins",
+        "status": "completed"
+      },
+      "actions": [
+        {
+          "type": "giveResources",
+          "owner": "player",
+          "gold": 200
+        },
+        {
+          "type": "lightLandmark",
+          "tag": "ruins"
+        },
+        {
+          "type": "sound",
+          "id": "victory"
+        },
+        {
+          "type": "message",
+          "text": {
+            "pt-BR": "Ruínas Esquecidas encontradas: +200 de ouro.",
+            "en": "Forgotten Ruins found: +200 gold."
+          }
+        }
+      ]
     }
   ]
 }

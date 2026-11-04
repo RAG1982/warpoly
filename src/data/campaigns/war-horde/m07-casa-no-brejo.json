@@ -18,17 +18,33 @@
     },
     "portrait": "🔥",
     "text": {
-      "pt-BR": "Hurgan quebrou o juramento dos clãs. Defenda o Brejo Mudo e faça o traidor pagar com ferro.",
-      "en": "Hurgan broke the clan oath. Defend Silent Marsh and make the traitor pay in iron."
+      "pt-BR": "O Brejo Mudo é a nossa casa: juncos, lama e vitórias-régias sobre água rasa, e o único chão onde os clãs ainda se sentam juntos ao Fogo. Aqui o seu Salão do Clã guarda os Cercados de Javalis que alimentam a tropa, e a leste, do outro lado do brejo, está o Salão de Hurgan Lança-Partida, do Clã das Lanças Quebradas, que jurou ferro e fogo ao nosso lado. Aurelan não perdoa: a esquadra do Governador Mervane desce em Barcaças na praia a nordeste, com Cavaleiros, Arqueiros e Balistas. Segure o Salão, erga 3 Cercados e repila as cinco levas. Mas ouça o que o Fogo diz: o ferro de Mervane compra mais que lealdade. Aos 5 minutos e meio Hurgan vai quebrar o juramento e marchar contra nós. Tenha torres, tropa e Necromantes prontos, sobreviva e depois vá cobrar o traidor no Salão dele. A Forja de ferro dele, ao sudeste, é o cofre que o comprou. Eu comando a guarnição: se eu cair, a casa cai comigo.",
+      "en": "Silent Marsh is our home: reeds, mud and lily pads over shallow water, and the only ground where the clans still sit together at the Fire. Here your Clan Hall guards the Boar Pens that feed the troops, and in the east, across the marsh, stands the Hall of Hurgan Brokenspear of the Broken Spears clan, who swore iron and fire at our side. Aurelan does not forgive: Governor Mervane's squadron comes down in Barges onto the beach in the northeast, with Cavaliers, Archers and Ballistae. Hold the Hall, raise 3 Pens and drive off all five waves. But hear what the Fire says: Mervane's iron buys more than loyalty. At five and a half minutes Hurgan will break the oath and march against us. Have towers, troops and Necromancers ready, survive, and then go collect from the traitor in his own Hall. His iron Forge, in the southeast, is the vault that bought him. I command the garrison: if I fall, the house falls with me."
     },
     "hints": [
       {
-        "pt-BR": "Concentre-se nos objetivos primários para avançar.",
-        "en": "Focus on primary objectives to advance."
+        "pt-BR": "Hurgan começa como aliado e tem IA própria: ele não ataca você até a traição, aos 5:30. Depois disso, o Salão dele e a Forja de ferro viram alvos.",
+        "en": "Hurgan starts as an ally with his own AI: he will not attack you until the betrayal at 5:30. After that, his Hall and the iron Forge become targets."
+      },
+      {
+        "pt-BR": "As Barcaças de Aurelan desembarcam na praia a nordeste da base (Barcaça: 6 guerreiros). Afunde a Barcaça antes da praia e a carga se afoga; senão, receba a tropa nas torres.",
+        "en": "Aurelan's Barges land on the beach northeast of the base (a Barge carries 6 warriors). Sink the Barge before the beach and the cargo drowns; otherwise, meet the troops at your towers."
+      },
+      {
+        "pt-BR": "Torres de Vigia e Paliçadas seguram a traição. Erga 2 Torres antes dos 5 minutos e deixe o exército perto do Salão: o ataque de Hurgan chega pelo brejo, vindo do leste.",
+        "en": "Watchtowers and Palisades hold off the betrayal. Raise 2 Towers before the five-minute mark and keep the army near the Hall: Hurgan's attack comes across the marsh from the east."
+      },
+      {
+        "pt-BR": "Os Necromantes (Santuário das Cinzas) são frágeis e valem muito: o rito do Fogo pede 4 vivos ao mesmo tempo. Mantenha-os atrás da linha de frente.",
+        "en": "Necromancers (Ash Sanctum) are fragile and precious: the Fire's rite asks for 4 alive at the same time. Keep them behind the front line."
+      },
+      {
+        "pt-BR": "Drogath é um HERÓI: tem mana e habilidades (Z, X, C) e só existe um. Se ele morrer, a missão está perdida. Os Cercados de Javalis também não podem cair.",
+        "en": "Drogath is a HERO: he has mana and abilities (Z, X, C) and there is only one of him. If he dies the mission is lost. The Boar Pens must not fall either."
       }
     ]
   },
-  "mapId": "vales-2v2",
+  "mapId": "camp-07-brejo-mudo",
   "seed": 9119,
   "players": [
     {
@@ -46,42 +62,1385 @@
     {
       "id": 1,
       "name": {
-        "pt-BR": "Tropas de Aurelan",
-        "en": "Aurelan Troops"
+        "pt-BR": "Hurgan Lança-Partida",
+        "en": "Hurgan Brokenspear"
       },
-      "factionId": "human",
-      "team": 1,
-      "color": "#2563eb",
+      "factionId": "orc",
+      "team": 0,
+      "color": "#eab308",
       "isAI": true,
+      "difficulty": "easy",
       "startSlot": 1
     }
   ],
   "startingResources": {
-    "wood": 400,
-    "gold": 400,
-    "stone": 150
+    "wood": 600,
+    "gold": 800,
+    "stone": 300
   },
+  "vars": {
+    "betrayed": false,
+    "fin_clock": 0
+  },
+  "autoVictory": false,
   "setup": [
     {
       "type": "tag",
       "select": {
-        "buildingType": "castle"
+        "buildingType": "great_hall",
+        "owner": 1
       },
-      "tag": "enemy_base"
+      "tag": "traitor_hall"
+    },
+    {
+      "type": "spawn",
+      "owner": "player",
+      "unitType": "hero_drogath",
+      "count": 1,
+      "anchor": "playerStart",
+      "dx": 0,
+      "dz": 13,
+      "tag": "drogath"
+    },
+    {
+      "type": "spawn",
+      "owner": "player",
+      "unitType": "necromancer",
+      "count": 2,
+      "anchor": "playerStart",
+      "dx": -6,
+      "dz": 14,
+      "spread": 2.5
+    },
+    {
+      "type": "spawnBuilding",
+      "owner": "player",
+      "buildingType": "orc_barracks",
+      "anchor": "playerStart",
+      "dx": -14,
+      "dz": 6,
+      "tag": "garrison_barracks"
+    },
+    {
+      "type": "spawnBuilding",
+      "owner": 1,
+      "buildingType": "orc_forge",
+      "anchor": "ironDepot",
+      "tag": "iron_depot"
     }
   ],
   "objectives": [
     {
-      "id": "primary-main",
+      "id": "p-landings",
       "type": "destroy",
       "priority": "primary",
       "select": {
-        "tag": "enemy_base"
+        "tag": "aurelan_force"
+      },
+      "count": 44,
+      "title": {
+        "pt-BR": "Repelir as 5 levas de Aurelan na praia",
+        "en": "Drive off Aurelan's 5 waves on the beach"
+      },
+      "description": {
+        "pt-BR": "Cinco levas de Barcaças trazem 54 soldados de Aurelan para a praia nordeste. Destrua 44 deles (afundar a Barcaça afoga a carga).",
+        "en": "Five waves of Barges bring 54 Aurelan soldiers to the northeast beach. Destroy 44 of them (sinking the Barge drowns the cargo)."
+      },
+      "marker": {
+        "area": {
+          "anchor": "landingZone",
+          "r": 16
+        },
+        "style": "goal",
+        "seconds": 60
+      }
+    },
+    {
+      "id": "p-pens",
+      "type": "flag",
+      "priority": "primary",
+      "condition": {
+        "type": "count",
+        "select": {
+          "owner": "player",
+          "buildingType": "pig_farm"
+        },
+        "value": 3
       },
       "title": {
-        "pt-BR": "Derrotar o traidor Hurgan no Brejo Mudo",
-        "en": "Defeat the traitor Hurgan in Silent Marsh"
+        "pt-BR": "Erguer 3 Cercados de Javalis e segurá-los",
+        "en": "Raise 3 Boar Pens and hold them"
+      },
+      "description": {
+        "pt-BR": "Os Cercados alimentam a tropa. Depois de erguidos, se todos caírem a missão está perdida.",
+        "en": "The Pens feed the troops. Once raised, if they all fall the mission is lost."
       }
+    },
+    {
+      "id": "p-survive",
+      "type": "survive",
+      "priority": "primary",
+      "seconds": 240,
+      "active": false,
+      "title": {
+        "pt-BR": "Sobreviver 4 minutos à traição de Hurgan",
+        "en": "Survive four minutes of Hurgan's betrayal"
+      },
+      "description": {
+        "pt-BR": "Hurgan ataca com o próprio exército e Aurelan segue desembarcando. Não perca o Salão do Clã.",
+        "en": "Hurgan attacks with his own army while Aurelan keeps landing. Do not lose the Clan Hall."
+      }
+    },
+    {
+      "id": "p-traitor",
+      "type": "destroy",
+      "priority": "primary",
+      "select": {
+        "tag": "traitor_hall"
+      },
+      "count": 1,
+      "active": false,
+      "title": {
+        "pt-BR": "Destruir o Salão do traidor Hurgan",
+        "en": "Destroy the traitor Hurgan's Hall"
+      },
+      "description": {
+        "pt-BR": "Ativo com a traição, aos 5:30. O Salão de Hurgan fica a leste, do outro lado do brejo.",
+        "en": "Active with the betrayal, at 5:30. Hurgan's Hall is in the east, across the marsh."
+      },
+      "marker": {
+        "area": {
+          "anchor": "enemyStart",
+          "r": 16
+        },
+        "style": "goal",
+        "seconds": 90
+      }
+    },
+    {
+      "id": "s-depot",
+      "type": "destroy",
+      "priority": "secondary",
+      "select": {
+        "tag": "iron_depot"
+      },
+      "count": 1,
+      "active": false,
+      "title": {
+        "pt-BR": "Destruir a Forja de ferro do traidor",
+        "en": "Destroy the traitor's iron Forge"
+      },
+      "description": {
+        "pt-BR": "A Forja de Hurgan, a sudeste, guarda o ferro que Mervane pagou. Depois da traição ela deixa de ser aliada.",
+        "en": "Hurgan's Forge in the southeast keeps the iron Mervane paid. After the betrayal it is no longer an ally."
+      }
+    },
+    {
+      "id": "s-towers",
+      "type": "build",
+      "priority": "secondary",
+      "buildingType": "orc_watchtower",
+      "count": 2,
+      "title": {
+        "pt-BR": "Erguer 2 Torres de Vigia",
+        "en": "Raise 2 Watchtowers"
+      },
+      "description": {
+        "pt-BR": "Torres ao lado da base avisam e seguram as levas e a traição.",
+        "en": "Towers beside the base give warning and hold off the waves and the betrayal."
+      }
+    },
+    {
+      "id": "s-ogres",
+      "type": "train",
+      "priority": "secondary",
+      "units": [
+        {
+          "type": "ogre",
+          "count": 3
+        }
+      ],
+      "title": {
+        "pt-BR": "Treinar 3 Ogros",
+        "en": "Train 3 Ogres"
+      },
+      "description": {
+        "pt-BR": "Ogros do Covil aguentam o choque da traição. Só contam os treinados nesta missão.",
+        "en": "Ogres from the Den stand the shock of the betrayal. Only those trained in this mission count."
+      }
+    },
+    {
+      "id": "h-necro",
+      "type": "flag",
+      "priority": "hidden",
+      "condition": {
+        "type": "count",
+        "select": {
+          "owner": "player",
+          "unitType": "necromancer"
+        },
+        "value": 4
+      },
+      "title": {
+        "pt-BR": "Manter 4 Necromantes vivos ao mesmo tempo",
+        "en": "Keep 4 Necromancers alive at the same time"
+      },
+      "description": {
+        "pt-BR": "Os Necromantes guardam o rito do Fogo do Clã.",
+        "en": "The Necromancers keep the rite of the Clan Fire."
+      }
+    }
+  ],
+  "triggers": [
+    {
+      "id": "intro",
+      "when": {
+        "type": "time",
+        "at": 0
+      },
+      "actions": [
+        {
+          "type": "music",
+          "id": "on"
+        },
+        {
+          "type": "reveal",
+          "anchor": "landingZone",
+          "radius": 24,
+          "ttl": 40
+        },
+        {
+          "type": "reveal",
+          "anchor": "allyStart",
+          "radius": 24,
+          "ttl": 40
+        },
+        {
+          "type": "cutscene",
+          "id": "brejo",
+          "duration": 38,
+          "skippable": true,
+          "steps": [
+            {
+              "at": 0,
+              "anchor": "playerStart",
+              "zoom": 1.15,
+              "dialog": {
+                "speaker": {
+                  "pt-BR": "Drogath Punho-de-Brasa",
+                  "en": "Drogath Emberfist"
+                },
+                "portrait": "🔥",
+                "text": {
+                  "pt-BR": "Brejo Mudo. Lama, junco e silêncio: foi aqui que os clãs aprenderam a esperar. Este Salão é a nossa casa, e é dele que eu respondo.",
+                  "en": "Silent Marsh. Mud, reed and silence: it is here the clans learned to wait. This Hall is our home, and I answer for it."
+                },
+                "duration": 8
+              }
+            },
+            {
+              "at": 8,
+              "anchor": "landingZone",
+              "zoom": 1.1,
+              "dialog": {
+                "speaker": {
+                  "pt-BR": "Anciã Ulma",
+                  "en": "Elder Ulma"
+                },
+                "portrait": "🔥",
+                "text": {
+                  "pt-BR": "As velas brancas voltam. Mervane manda Barcaças à praia do nordeste. O Fogo do Clã pede que o Salão fique de pé.",
+                  "en": "The white sails return. Mervane sends Barges to the northeast beach. The Clan Fire asks that the Hall stay standing."
+                },
+                "duration": 8
+              }
+            },
+            {
+              "at": 16,
+              "anchor": "allyStart",
+              "zoom": 1.1,
+              "dialog": {
+                "speaker": {
+                  "pt-BR": "Hurgan Lança-Partida",
+                  "en": "Hurgan Brokenspear"
+                },
+                "portrait": "🗡️",
+                "text": {
+                  "pt-BR": "Os meus guerreiros ficam do lado leste, Punho-de-Brasa. Os Lanças Quebradas honram o juramento dos clãs. Quem duvida do meu ferro?",
+                  "en": "My warriors stay on the east side, Emberfist. The Broken Spears honor the oath of the clans. Who doubts my iron?"
+                },
+                "duration": 8
+              }
+            },
+            {
+              "at": 25,
+              "anchor": "playerStart",
+              "zoom": 1.15,
+              "dialog": {
+                "speaker": {
+                  "pt-BR": "Drogath Punho-de-Brasa",
+                  "en": "Drogath Emberfist"
+                },
+                "portrait": "🔥",
+                "text": {
+                  "pt-BR": "Ninguém duvida em voz alta. Cercados, torres e Necromantes: erga a casa primeiro. E vigie o que ele aperta com a outra mão.",
+                  "en": "No one doubts aloud. Pens, towers and Necromancers: raise the house first. And watch what he grips with the other hand."
+                },
+                "duration": 8
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "tier-up",
+      "when": {
+        "type": "time",
+        "at": 40
+      },
+      "actions": [
+        {
+          "type": "setTier",
+          "owner": "player",
+          "tier": 3
+        },
+        {
+          "type": "sound",
+          "id": "build"
+        },
+        {
+          "type": "message",
+          "text": {
+            "pt-BR": "Seu Salão do Clã subiu ao nível 3: o Santuário das Cinzas, o Covil dos Ogros e as Torres de Vigia estão ao seu alcance.",
+            "en": "Your Clan Hall is now level 3: the Ash Sanctum, the Ogre Den and the Watchtowers are within reach."
+          }
+        }
+      ]
+    },
+    {
+      "id": "hurgan-offer",
+      "when": {
+        "type": "time",
+        "at": 100
+      },
+      "actions": [
+        {
+          "type": "dialog",
+          "speaker": {
+            "pt-BR": "Hurgan Lança-Partida",
+            "en": "Hurgan Brokenspear"
+          },
+          "portrait": "🗡️",
+          "text": {
+            "pt-BR": "Aliado, vejo as velas no horizonte. Eu seguro o leste e você segura o norte. O ferro que a Liga paga a Aurelan não paga a nossa casa.",
+            "en": "Ally, I see the sails on the horizon. I hold the east and you hold the north. The iron the League pays Aurelan does not pay for our home."
+          },
+          "duration": 8
+        }
+      ]
+    },
+    {
+      "id": "wave-1",
+      "when": {
+        "type": "time",
+        "at": 150
+      },
+      "actions": [
+        {
+          "type": "spawnLanding",
+          "owner": "bandits",
+          "anchor": "seaLanding1",
+          "dx": 14,
+          "dz": 0,
+          "unloadAt": {
+            "anchor": "beach1"
+          },
+          "units": [
+            {
+              "type": "knight",
+              "count": 4
+            },
+            {
+              "type": "archer",
+              "count": 2
+            }
+          ],
+          "escort": [
+            {
+              "type": "frigate",
+              "count": 1
+            }
+          ],
+          "tag": "aurelan_force",
+          "bargeTag": "aurelan_fleet",
+          "escortTag": "aurelan_fleet",
+          "markColor": "#60a5fa",
+          "order": {
+            "kind": "attackMove",
+            "anchor": "playerStart"
+          }
+        },
+        {
+          "type": "sound",
+          "id": "alarm"
+        },
+        {
+          "type": "dialog",
+          "speaker": {
+            "pt-BR": "Frota de Aurelan",
+            "en": "Aurelan Fleet"
+          },
+          "portrait": "⚓",
+          "text": {
+            "pt-BR": "Primeira Barcaça rumo à praia do nordeste: Espadachins e Arqueiros. Afundem-na antes do desembarque!",
+            "en": "First Barge heading for the northeast beach: Swordsmen and Archers. Sink it before they land!"
+          },
+          "duration": 7
+        },
+        {
+          "type": "message",
+          "text": {
+            "pt-BR": "Primeira leva de Aurelan: 6 soldados numa Barcaça, com uma Fragata de escolta.",
+            "en": "Aurelan's first wave: 6 soldiers on a Barge, with a Frigate escort."
+          }
+        }
+      ]
+    },
+    {
+      "id": "pens-up",
+      "when": {
+        "type": "objective",
+        "id": "p-pens",
+        "status": "completed"
+      },
+      "actions": [
+        {
+          "type": "sound",
+          "id": "build"
+        },
+        {
+          "type": "giveResources",
+          "owner": "player",
+          "gold": 100
+        },
+        {
+          "type": "dialog",
+          "speaker": {
+            "pt-BR": "Anciã Ulma",
+            "en": "Elder Ulma"
+          },
+          "portrait": "🔥",
+          "text": {
+            "pt-BR": "Três Cercados de pé: a tropa tem o que comer. O Fogo agradece. Ainda há muito para segurar.",
+            "en": "Three Pens standing: the troops have food. The Fire is grateful. There is still much to hold."
+          },
+          "duration": 7
+        },
+        {
+          "type": "message",
+          "text": {
+            "pt-BR": "Cercados erguidos: +100 de ouro.",
+            "en": "Pens raised: +100 gold."
+          }
+        }
+      ]
+    },
+    {
+      "id": "wave-2",
+      "when": {
+        "type": "time",
+        "at": 260
+      },
+      "actions": [
+        {
+          "type": "spawnLanding",
+          "owner": "bandits",
+          "anchor": "seaLanding1",
+          "dx": 14,
+          "dz": 0,
+          "unloadAt": {
+            "anchor": "beach1"
+          },
+          "units": [
+            {
+              "type": "knight",
+              "count": 4
+            },
+            {
+              "type": "archer",
+              "count": 2
+            }
+          ],
+          "escort": [
+            {
+              "type": "frigate",
+              "count": 1
+            }
+          ],
+          "tag": "aurelan_force",
+          "bargeTag": "aurelan_fleet",
+          "escortTag": "aurelan_fleet",
+          "markColor": "#60a5fa",
+          "order": {
+            "kind": "attackMove",
+            "anchor": "playerStart"
+          }
+        },
+        {
+          "type": "spawnLanding",
+          "owner": "bandits",
+          "anchor": "seaLanding1",
+          "dx": 14,
+          "dz": 6,
+          "unloadAt": {
+            "anchor": "beach1"
+          },
+          "units": [
+            {
+              "type": "archer",
+              "count": 3
+            },
+            {
+              "type": "ballista",
+              "count": 1
+            },
+            {
+              "type": "cavalier",
+              "count": 1
+            },
+            {
+              "type": "knight",
+              "count": 1
+            }
+          ],
+          "escort": [],
+          "tag": "aurelan_force",
+          "bargeTag": "aurelan_fleet",
+          "escortTag": "aurelan_fleet",
+          "markColor": "#60a5fa",
+          "order": {
+            "kind": "attackMove",
+            "anchor": "playerStart"
+          }
+        },
+        {
+          "type": "sound",
+          "id": "alarm"
+        },
+        {
+          "type": "message",
+          "text": {
+            "pt-BR": "Segunda leva: duas Barcaças, com uma Balista e um Cavaleiro.",
+            "en": "Second wave: two Barges, with a Ballista and a Cavalier."
+          }
+        }
+      ]
+    },
+    {
+      "id": "suspicion",
+      "when": {
+        "type": "time",
+        "at": 300
+      },
+      "actions": [
+        {
+          "type": "reveal",
+          "anchor": "enemyStart",
+          "radius": 26,
+          "ttl": 25
+        },
+        {
+          "type": "dialog",
+          "speaker": {
+            "pt-BR": "Drogath Punho-de-Brasa",
+            "en": "Drogath Emberfist"
+          },
+          "portrait": "🔥",
+          "text": {
+            "pt-BR": "O Fogo anda estranho e as tropas de Hurgan mudaram de posição. Torres de pé, tropa em casa: algo vai acontecer.",
+            "en": "The Fire is restless and Hurgan's troops have shifted position. Towers up, troops at home: something is about to happen."
+          },
+          "duration": 8
+        }
+      ]
+    },
+    {
+      "id": "betray-by-time",
+      "when": {
+        "type": "time",
+        "at": 330
+      },
+      "actions": [
+        {
+          "type": "enableTrigger",
+          "id": "betray-now"
+        }
+      ]
+    },
+    {
+      "id": "betray-now",
+      "enabled": false,
+      "when": {
+        "type": "var",
+        "name": "betrayed",
+        "value": false
+      },
+      "actions": [
+        {
+          "type": "setVar",
+          "name": "betrayed",
+          "value": true
+        },
+        {
+          "type": "setTeam",
+          "player": 1,
+          "team": 1
+        },
+        {
+          "type": "setObjective",
+          "id": "p-traitor",
+          "status": "active"
+        },
+        {
+          "type": "setObjective",
+          "id": "p-survive",
+          "status": "active"
+        },
+        {
+          "type": "setObjective",
+          "id": "s-depot",
+          "status": "active"
+        },
+        {
+          "type": "reveal",
+          "anchor": "ironDepot",
+          "radius": 26,
+          "ttl": 30
+        },
+        {
+          "type": "sound",
+          "id": "alarm"
+        },
+        {
+          "type": "dialog",
+          "speaker": {
+            "pt-BR": "Hurgan Lança-Partida",
+            "en": "Hurgan Brokenspear"
+          },
+          "portrait": "🗡️",
+          "text": {
+            "pt-BR": "O juramento acabou, Punho-de-Brasa! O ferro de Mervane enche a barriga dos meus guerreiros, e o seu Fogo não enche nada.",
+            "en": "The oath is over, Emberfist! Mervane's iron fills my warriors' bellies, and your Fire fills nothing."
+          },
+          "duration": 7
+        },
+        {
+          "type": "spawnBuilding",
+          "owner": 1,
+          "buildingType": "orc_watchtower",
+          "anchor": "allyStart",
+          "dx": -12,
+          "dz": -8
+        },
+        {
+          "type": "spawnBuilding",
+          "owner": 1,
+          "buildingType": "orc_watchtower",
+          "anchor": "allyStart",
+          "dx": -12,
+          "dz": 10
+        },
+        {
+          "type": "spawn",
+          "owner": 1,
+          "units": [
+            {
+              "type": "grunt",
+              "count": 5
+            },
+            {
+              "type": "axethrower",
+              "count": 3
+            },
+            {
+              "type": "ogre",
+              "count": 1
+            }
+          ],
+          "anchor": "allyStart",
+          "spread": 3.5,
+          "order": {
+            "kind": "attackMove",
+            "anchor": "playerStart"
+          }
+        },
+        {
+          "type": "message",
+          "text": {
+            "pt-BR": "Hurgan traiu os clãs! O Salão dele e a Forja de ferro agora são alvos.",
+            "en": "Hurgan betrayed the clans! His Hall and the iron Forge are now targets."
+          }
+        }
+      ]
+    },
+    {
+      "id": "betray-reply",
+      "when": {
+        "type": "time",
+        "at": 345
+      },
+      "actions": [
+        {
+          "type": "dialog",
+          "speaker": {
+            "pt-BR": "Drogath Punho-de-Brasa",
+            "en": "Drogath Emberfist"
+          },
+          "portrait": "🔥",
+          "text": {
+            "pt-BR": "Eu avisei o Fogo. Em posição, guerreiros! Quem quebra o juramento dos clãs paga com ferro e com brasa.",
+            "en": "I warned the Fire. To your posts, warriors! Whoever breaks the oath of the clans pays in iron and in ember."
+          },
+          "duration": 7
+        }
+      ]
+    },
+    {
+      "id": "wave-3",
+      "when": {
+        "type": "time",
+        "at": 380
+      },
+      "actions": [
+        {
+          "type": "spawnLanding",
+          "owner": "bandits",
+          "anchor": "seaLanding1",
+          "dx": 14,
+          "dz": 0,
+          "unloadAt": {
+            "anchor": "beach1"
+          },
+          "units": [
+            {
+              "type": "knight",
+              "count": 4
+            },
+            {
+              "type": "archer",
+              "count": 2
+            }
+          ],
+          "escort": [
+            {
+              "type": "frigate",
+              "count": 2
+            }
+          ],
+          "tag": "aurelan_force",
+          "bargeTag": "aurelan_fleet",
+          "escortTag": "aurelan_fleet",
+          "markColor": "#60a5fa",
+          "order": {
+            "kind": "attackMove",
+            "anchor": "playerStart"
+          }
+        },
+        {
+          "type": "spawnLanding",
+          "owner": "bandits",
+          "anchor": "seaLanding1",
+          "dx": 14,
+          "dz": 6,
+          "unloadAt": {
+            "anchor": "beach1"
+          },
+          "units": [
+            {
+              "type": "cavalier",
+              "count": 2
+            },
+            {
+              "type": "ballista",
+              "count": 2
+            },
+            {
+              "type": "archer",
+              "count": 2
+            }
+          ],
+          "escort": [],
+          "tag": "aurelan_force",
+          "bargeTag": "aurelan_fleet",
+          "escortTag": "aurelan_fleet",
+          "markColor": "#60a5fa",
+          "order": {
+            "kind": "attackMove",
+            "anchor": "playerStart"
+          }
+        },
+        {
+          "type": "sound",
+          "id": "alarm"
+        },
+        {
+          "type": "dialog",
+          "speaker": {
+            "pt-BR": "Frota de Aurelan",
+            "en": "Aurelan Fleet"
+          },
+          "portrait": "⚓",
+          "text": {
+            "pt-BR": "O traidor abriu o leste. Terceira leva ao desembarque: Cavaleiros e Balistas para derrubar o Salão!",
+            "en": "The traitor opened the east. Third wave to land: Cavaliers and Ballistae to bring the Hall down!"
+          },
+          "duration": 7
+        },
+        {
+          "type": "message",
+          "text": {
+            "pt-BR": "Terceira leva de Aurelan, com Cavaleiros e Balistas, durante a traição.",
+            "en": "Aurelan's third wave, with Cavaliers and Ballistae, during the betrayal."
+          }
+        }
+      ]
+    },
+    {
+      "id": "hurgan-raid-2",
+      "when": {
+        "type": "time",
+        "at": 450
+      },
+      "actions": [
+        {
+          "type": "spawn",
+          "owner": 1,
+          "units": [
+            {
+              "type": "grunt",
+              "count": 6
+            },
+            {
+              "type": "axethrower",
+              "count": 3
+            },
+            {
+              "type": "ogre",
+              "count": 2
+            }
+          ],
+          "anchor": "allyStart",
+          "spread": 3.5,
+          "order": {
+            "kind": "attackMove",
+            "anchor": "playerStart"
+          }
+        },
+        {
+          "type": "message",
+          "text": {
+            "pt-BR": "Segunda onda de Hurgan pelo brejo: Talhadores, Lanceiros-Machado e 2 Ogros.",
+            "en": "Hurgan's second wave through the marsh: Slashers, Axe Throwers and 2 Ogres."
+          }
+        }
+      ]
+    },
+    {
+      "id": "wave-4",
+      "when": {
+        "type": "time",
+        "at": 520
+      },
+      "actions": [
+        {
+          "type": "spawnLanding",
+          "owner": "bandits",
+          "anchor": "seaLanding1",
+          "dx": 14,
+          "dz": 0,
+          "unloadAt": {
+            "anchor": "beach1"
+          },
+          "units": [
+            {
+              "type": "knight",
+              "count": 4
+            },
+            {
+              "type": "cavalier",
+              "count": 2
+            }
+          ],
+          "escort": [
+            {
+              "type": "frigate",
+              "count": 2
+            }
+          ],
+          "tag": "aurelan_force",
+          "bargeTag": "aurelan_fleet",
+          "escortTag": "aurelan_fleet",
+          "markColor": "#60a5fa",
+          "order": {
+            "kind": "attackMove",
+            "anchor": "playerStart"
+          }
+        },
+        {
+          "type": "spawnLanding",
+          "owner": "bandits",
+          "anchor": "seaLanding1",
+          "dx": 14,
+          "dz": 6,
+          "unloadAt": {
+            "anchor": "beach1"
+          },
+          "units": [
+            {
+              "type": "ballista",
+              "count": 2
+            },
+            {
+              "type": "archer",
+              "count": 2
+            },
+            {
+              "type": "knight",
+              "count": 2
+            }
+          ],
+          "escort": [],
+          "tag": "aurelan_force",
+          "bargeTag": "aurelan_fleet",
+          "escortTag": "aurelan_fleet",
+          "markColor": "#60a5fa",
+          "order": {
+            "kind": "attackMove",
+            "anchor": "playerStart"
+          }
+        },
+        {
+          "type": "sound",
+          "id": "alarm"
+        },
+        {
+          "type": "dialog",
+          "speaker": {
+            "pt-BR": "Frota de Aurelan",
+            "en": "Aurelan Fleet"
+          },
+          "portrait": "⚓",
+          "text": {
+            "pt-BR": "Quarta leva à praia. Mervane quer o brejo antes do inverno: ninguém recua!",
+            "en": "Fourth wave to the beach. Mervane wants the marsh before winter: nobody retreats!"
+          },
+          "duration": 7
+        },
+        {
+          "type": "message",
+          "text": {
+            "pt-BR": "Quarta leva de Aurelan: Cavaleiros, Balistas e Espadachins.",
+            "en": "Aurelan's fourth wave: Cavaliers, Ballistae and Swordsmen."
+          }
+        }
+      ]
+    },
+    {
+      "id": "hurgan-raid-3",
+      "when": {
+        "type": "time",
+        "at": 570
+      },
+      "actions": [
+        {
+          "type": "spawn",
+          "owner": 1,
+          "units": [
+            {
+              "type": "catapult",
+              "count": 1
+            },
+            {
+              "type": "ogre",
+              "count": 2
+            },
+            {
+              "type": "grunt",
+              "count": 4
+            }
+          ],
+          "anchor": "allyStart",
+          "spread": 3.5,
+          "order": {
+            "kind": "attackMove",
+            "anchor": "playerStart"
+          }
+        },
+        {
+          "type": "message",
+          "text": {
+            "pt-BR": "Terceira onda de Hurgan: uma Catapulta vem com os Ogros. Procure as torres.",
+            "en": "Hurgan's third wave: a Catapult comes with the Ogres. Look for the towers."
+          }
+        }
+      ]
+    },
+    {
+      "id": "wave-5",
+      "when": {
+        "type": "time",
+        "at": 640
+      },
+      "actions": [
+        {
+          "type": "spawnLanding",
+          "owner": "bandits",
+          "anchor": "seaLanding1",
+          "dx": 14,
+          "dz": 0,
+          "unloadAt": {
+            "anchor": "beach1"
+          },
+          "units": [
+            {
+              "type": "knight",
+              "count": 3
+            },
+            {
+              "type": "cavalier",
+              "count": 3
+            }
+          ],
+          "escort": [
+            {
+              "type": "frigate",
+              "count": 2
+            }
+          ],
+          "tag": "aurelan_force",
+          "bargeTag": "aurelan_fleet",
+          "escortTag": "aurelan_fleet",
+          "markColor": "#60a5fa",
+          "order": {
+            "kind": "attackMove",
+            "anchor": "playerStart"
+          }
+        },
+        {
+          "type": "spawnLanding",
+          "owner": "bandits",
+          "anchor": "seaLanding1",
+          "dx": 14,
+          "dz": 6,
+          "unloadAt": {
+            "anchor": "beach1"
+          },
+          "units": [
+            {
+              "type": "ballista",
+              "count": 2
+            },
+            {
+              "type": "archer",
+              "count": 4
+            }
+          ],
+          "escort": [],
+          "tag": "aurelan_force",
+          "bargeTag": "aurelan_fleet",
+          "escortTag": "aurelan_fleet",
+          "markColor": "#60a5fa",
+          "order": {
+            "kind": "attackMove",
+            "anchor": "playerStart"
+          }
+        },
+        {
+          "type": "sound",
+          "id": "alarm"
+        },
+        {
+          "type": "message",
+          "text": {
+            "pt-BR": "Última leva de Aurelan: Cavaleiros, Balistas e Arqueiros.",
+            "en": "Aurelan's last wave: Cavaliers, Ballistae and Archers."
+          }
+        }
+      ]
+    },
+    {
+      "id": "depot-down",
+      "when": {
+        "type": "objective",
+        "id": "s-depot",
+        "status": "completed"
+      },
+      "actions": [
+        {
+          "type": "giveResources",
+          "owner": "player",
+          "gold": 200
+        },
+        {
+          "type": "sound",
+          "id": "build"
+        },
+        {
+          "type": "dialog",
+          "speaker": {
+            "pt-BR": "Drogath Punho-de-Brasa",
+            "en": "Drogath Emberfist"
+          },
+          "portrait": "🔥",
+          "text": {
+            "pt-BR": "O cofre de ferro está em brasa. O que Mervane pagou, os clãs recuperam.",
+            "en": "The iron vault is aflame. What Mervane paid, the clans take back."
+          },
+          "duration": 7
+        },
+        {
+          "type": "message",
+          "text": {
+            "pt-BR": "Forja de ferro destruída: +200 de ouro.",
+            "en": "Iron Forge destroyed: +200 gold."
+          }
+        }
+      ]
+    },
+    {
+      "id": "necro-rite",
+      "when": {
+        "type": "objective",
+        "id": "h-necro",
+        "status": "completed"
+      },
+      "actions": [
+        {
+          "type": "giveResources",
+          "owner": "player",
+          "gold": 150
+        },
+        {
+          "type": "sound",
+          "id": "build"
+        },
+        {
+          "type": "dialog",
+          "speaker": {
+            "pt-BR": "Anciã Ulma",
+            "en": "Elder Ulma"
+          },
+          "portrait": "🔥",
+          "text": {
+            "pt-BR": "Quatro Necromantes ao redor do Fogo: o rito antigo se ouve de novo. O brejo lembra de cada nome.",
+            "en": "Four Necromancers around the Fire: the ancient rite is heard again. The marsh remembers every name."
+          },
+          "duration": 7
+        },
+        {
+          "type": "message",
+          "text": {
+            "pt-BR": "Rito do Fogo: +150 de ouro.",
+            "en": "Rite of the Fire: +150 gold."
+          }
+        }
+      ]
+    },
+    {
+      "id": "traitor-down",
+      "when": {
+        "type": "objective",
+        "id": "p-traitor",
+        "status": "completed"
+      },
+      "actions": [
+        {
+          "type": "dialog",
+          "speaker": {
+            "pt-BR": "Drogath Punho-de-Brasa",
+            "en": "Drogath Emberfist"
+          },
+          "portrait": "🔥",
+          "text": {
+            "pt-BR": "O Salão de Hurgan caiu. O brejo volta a ser silêncio, e o juramento dos clãs vale por quem o cumpriu.",
+            "en": "Hurgan's Hall has fallen. The marsh is silent again, and the oath of the clans is worth what those who kept it make of it."
+          },
+          "duration": 7
+        }
+      ]
+    },
+    {
+      "id": "all-done",
+      "when": {
+        "all": [
+          {
+            "type": "objective",
+            "id": "p-landings",
+            "status": "completed"
+          },
+          {
+            "type": "objective",
+            "id": "p-pens",
+            "status": "completed"
+          },
+          {
+            "type": "objective",
+            "id": "p-survive",
+            "status": "completed"
+          },
+          {
+            "type": "objective",
+            "id": "p-traitor",
+            "status": "completed"
+          }
+        ]
+      },
+      "actions": [
+        {
+          "type": "sound",
+          "id": "victory"
+        },
+        {
+          "type": "cutscene",
+          "id": "finale",
+          "duration": 14,
+          "skippable": true,
+          "steps": [
+            {
+              "at": 0,
+              "anchor": "playerStart",
+              "zoom": 1.1,
+              "dialog": {
+                "speaker": {
+                  "pt-BR": "Drogath Punho-de-Brasa",
+                  "en": "Drogath Emberfist"
+                },
+                "portrait": "🔥",
+                "text": {
+                  "pt-BR": "O brejo é nosso, e fica mudo outra vez. Hurgan comprou o seu fim com o ferro de Mervane.",
+                  "en": "The marsh is ours and falls silent again. Hurgan bought his end with Mervane's iron."
+                },
+                "duration": 8
+              }
+            },
+            {
+              "at": 7,
+              "anchor": "allyStart",
+              "zoom": 1.1,
+              "dialog": {
+                "speaker": {
+                  "pt-BR": "Anciã Ulma",
+                  "en": "Elder Ulma"
+                },
+                "portrait": "🔥",
+                "text": {
+                  "pt-BR": "O Fogo do Clã segue aceso. Agora, Punho-de-Brasa, o próximo passo é a Forja do Monte Caldeira.",
+                  "en": "The Clan Fire still burns. Now, Emberfist, the next step is the Forge of Caldron Mountain."
+                },
+                "duration": 8
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "finale-clock",
+      "when": {
+        "type": "trigger",
+        "id": "all-done"
+      },
+      "actions": [
+        {
+          "type": "incVar",
+          "name": "fin_clock"
+        }
+      ]
+    },
+    {
+      "id": "finale-victory",
+      "when": {
+        "type": "var",
+        "name": "fin_clock",
+        "op": ">=",
+        "value": 1
+      },
+      "actions": [
+        {
+          "type": "victory"
+        }
+      ]
+    },
+    {
+      "id": "hall-fallen",
+      "when": {
+        "type": "count",
+        "select": {
+          "buildingType": "great_hall",
+          "owner": "player"
+        },
+        "op": "==",
+        "value": 0
+      },
+      "actions": [
+        {
+          "type": "defeat",
+          "text": {
+            "pt-BR": "O Salão do Clã caiu. O Brejo Mudo pertence ao traidor e a Aurelan.",
+            "en": "The Clan Hall fell. Silent Marsh belongs to the traitor and Aurelan."
+          }
+        }
+      ]
+    },
+    {
+      "id": "pens-lost",
+      "when": {
+        "all": [
+          {
+            "type": "objective",
+            "id": "p-pens",
+            "status": "completed"
+          },
+          {
+            "type": "count",
+            "select": {
+              "buildingType": "pig_farm",
+              "owner": "player"
+            },
+            "op": "==",
+            "value": 0
+          }
+        ]
+      },
+      "actions": [
+        {
+          "type": "defeat",
+          "text": {
+            "pt-BR": "Os Cercados de Javalis caíram: sem comida, a tropa se dispersa.",
+            "en": "The Boar Pens fell: without food, the troops scatter."
+          }
+        }
+      ]
+    },
+    {
+      "id": "drogath-fallen",
+      "when": {
+        "type": "dead",
+        "select": {
+          "tag": "drogath"
+        },
+        "count": 1
+      },
+      "actions": [
+        {
+          "type": "defeat",
+          "text": {
+            "pt-BR": "Drogath caiu. O Fogo do Clã se apaga no brejo.",
+            "en": "Drogath has fallen. The Clan Fire dies out in the marsh."
+          }
+        }
+      ]
     }
   ]
 }

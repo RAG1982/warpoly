@@ -18,18 +18,30 @@
     },
     "portrait": "🔥",
     "text": {
-      "pt-BR": "Prova de Fogo: todo o poder militar dos clãs reunido. Quebre o Farol Boreal e derrote a frota humana.",
-      "en": "Trial by Fire: full clan might assembled. Shatter the Boreal Lighthouse and crush the human fleet."
+      "pt-BR": "Prova de Fogo. A Geada é uma ilha de neve e lagos congelados, e hoje os Clãs põem em campo TODO o seu poder: Ogros, Catapultas, Necromantes, Serpes de Guerra. Dois fortes de Aurelan nos esperam: o de Brumar, no nordeste, onde o Capitão Brann comanda a guarnição, e o da Guarda Real, no noroeste. A leste fica o forte do Clã Marés Negras, nosso aliado: se o Salão deles cair, a Geada cai. Ao norte, na cabeceira da baía, o Farol Boreal: tome-o, mantenha-o por 3 minutos sem um inimigo ali e derrube o forte de Brumar. Eu comando o campo e o Fogo do Clã está comigo: se eu cair, a missão acaba.",
+      "en": "Trial by Fire. The Frost is an island of snow and frozen lakes, and today the Clans field ALL their might: Ogres, Catapults, Necromancers, War Serpents. Two Aurelan forts await us: Brumar's, in the northeast, where Captain Brann commands the garrison, and the Royal Guard's, in the northwest. To the east lies the fort of the Black Tides Clan, our ally: if their Hall falls, the Frost falls. In the north, at the head of the bay, the Boreal Lighthouse: take it, hold it for 3 minutes with no enemy there, and bring down Brumar's fort. I command the field and the Clan Fire is with me: if I fall, the mission is over."
     },
     "hints": [
       {
-        "pt-BR": "Concentre-se nos objetivos primários para avançar.",
-        "en": "Focus on primary objectives to advance."
+        "pt-BR": "A árvore tecnológica está completa. O Santuário das Cinzas e o Ninho das Serpes exigem o Acampamento de Guerra e o Salão do Clã no nível 3, que a campanha concede logo depois da abertura; o Covil dos Ogros e a Oficina, o nível 2. Cada tropa tem um papel: Catapultas derrubam torres, Lanceiros, Necromantes e Serpes cobrem o ar (planadores), Ogros esmagam a linha.",
+        "en": "The tech tree is complete. The Ash Sanctum and the Serpent Nest need the War Camp and the Clan Hall at level 3, which the campaign grants right after the opening; the Ogre Den and the Workshop need level 2. Every troop has a role: Catapults fell towers, Axe Throwers, Necromancers and Serpents cover the air (gliders), Ogres crush the line."
+      },
+      {
+        "pt-BR": "O gelo dos lagos e da banquisa não é terreno: nem tropa nem navio passam. As rotas contornam os lagos; os cabos de terra viram gargalos. O Farol fica a ~157 u do seu Salão, a nordeste, e o posto avançado de Brumar o guarda: limpe o cabo antes de manter. Leve tropa de sobra e uma Serraria do Clã para o acampamento do Farol.",
+        "en": "The ice of the lakes and floes is no terrain: neither troops nor ships cross it. Routes skirt the lakes; the land capes become chokepoints. The Lighthouse is ~157 u from your Hall, to the northeast, and Brumar's outpost guards it: clear the cape before holding. Bring plenty of troops and a Clan Sawmill for the Lighthouse camp."
+      },
+      {
+        "pt-BR": "O Salão dos Marés Negras não pode cair, e as levas inimigas vão atingi-lo. Zarruk Fornalha, aliado de IA, o defende. Drogath é um HERÓI: tem mana e três habilidades (Z, X, C) e só existe um; se ele morrer, a missão está perdida.",
+        "en": "The Black Tides' Hall must not fall, and the enemy levies will hit it. Zarruk Furnace, an AI ally, defends it. Drogath is a HERO: he has mana and three abilities (Z, X, C), and there is only one of him; if he dies the mission is lost."
+      },
+      {
+        "pt-BR": "Quem toma o Farol tem a vista das duas costas. O contador de 3 minutos zera se um inimigo pisar na área, então limpe o cabo antes. Há também ruínas ao sul, um entreposto de talhadores presos a leste da base, acampamentos de saqueadores no caminho (200 de ouro cada) e um cais congelado no mar do norte: nem tudo está à vista.",
+        "en": "Whoever takes the Lighthouse sees both coasts. The 3-minute counter resets if an enemy steps into the area, so clear the cape first. There are also ruins in the south, a post of captive slashers east of the base, raider camps on the way (200 gold each) and a frozen dock on the northern sea: not everything is in plain sight."
       }
     ]
   },
-  "mapId": "arquipelago-naval-4p",
-  "seed": 9102,
+  "mapId": "camp-06-a-geada",
+  "seed": 9206,
   "players": [
     {
       "id": 0,
@@ -46,42 +58,2356 @@
     {
       "id": 1,
       "name": {
-        "pt-BR": "Tropas de Aurelan",
-        "en": "Aurelan Troops"
+        "pt-BR": "Clã Marés Negras",
+        "en": "Black Tides Clan"
+      },
+      "factionId": "orc",
+      "team": 0,
+      "color": "#ea580c",
+      "isAI": true,
+      "difficulty": "easy",
+      "startSlot": 3
+    },
+    {
+      "id": 2,
+      "name": {
+        "pt-BR": "Forte de Brumar",
+        "en": "Brumar's Fort"
       },
       "factionId": "human",
       "team": 1,
       "color": "#2563eb",
       "isAI": true,
+      "difficulty": "easy",
       "startSlot": 1
+    },
+    {
+      "id": 3,
+      "name": {
+        "pt-BR": "Guarda Real",
+        "en": "Royal Guard"
+      },
+      "factionId": "human",
+      "team": 1,
+      "color": "#0ea5e9",
+      "isAI": true,
+      "difficulty": "easy",
+      "startSlot": 2
     }
   ],
   "startingResources": {
-    "wood": 400,
-    "gold": 400,
-    "stone": 150
+    "wood": 700,
+    "gold": 800,
+    "stone": 300
   },
+  "vars": {
+    "hold": 0,
+    "fin_clock": 0,
+    "raids": 0,
+    "lost": 0
+  },
+  "autoVictory": false,
   "setup": [
     {
       "type": "tag",
       "select": {
-        "buildingType": "castle"
+        "buildingType": "castle",
+        "owner": 2
       },
-      "tag": "enemy_base"
+      "tag": "fort_hall"
+    },
+    {
+      "type": "tag",
+      "select": {
+        "buildingType": "castle",
+        "owner": 3
+      },
+      "tag": "guard_hall"
+    },
+    {
+      "type": "tag",
+      "select": {
+        "buildingType": "great_hall",
+        "owner": 1
+      },
+      "tag": "tide_fort"
+    },
+    {
+      "type": "spawn",
+      "owner": "player",
+      "unitType": "hero_drogath",
+      "count": 1,
+      "anchor": "playerStart",
+      "dx": 0,
+      "dz": 13,
+      "tag": "drogath"
+    },
+    {
+      "type": "spawnBuilding",
+      "owner": 2,
+      "buildingType": "watchtower",
+      "anchor": "fortTower1",
+      "tag": "fort_tower"
+    },
+    {
+      "type": "spawnBuilding",
+      "owner": 2,
+      "buildingType": "watchtower",
+      "anchor": "fortTower2",
+      "tag": "fort_tower"
+    },
+    {
+      "type": "spawnBuilding",
+      "owner": 2,
+      "buildingType": "watchtower",
+      "anchor": "fortTower3",
+      "tag": "fort_tower"
+    },
+    {
+      "type": "spawnBuilding",
+      "owner": 2,
+      "buildingType": "watchtower",
+      "anchor": "fortTower4",
+      "tag": "fort_tower"
+    },
+    {
+      "type": "spawn",
+      "owner": 2,
+      "units": [
+        {
+          "type": "knight",
+          "count": 5
+        },
+        {
+          "type": "archer",
+          "count": 4
+        },
+        {
+          "type": "cavalier",
+          "count": 2
+        }
+      ],
+      "anchor": "enemy1Fort",
+      "spread": 5,
+      "tag": "fort_guard",
+      "guard": {
+        "r": 18
+      }
+    },
+    {
+      "type": "spawnBuilding",
+      "owner": 2,
+      "buildingType": "watchtower",
+      "anchor": "lightTower1",
+      "tag": "light_tower"
+    },
+    {
+      "type": "spawnBuilding",
+      "owner": 2,
+      "buildingType": "watchtower",
+      "anchor": "lightTower2",
+      "tag": "light_tower"
+    },
+    {
+      "type": "spawn",
+      "owner": 2,
+      "units": [
+        {
+          "type": "knight",
+          "count": 5
+        },
+        {
+          "type": "archer",
+          "count": 3
+        },
+        {
+          "type": "cavalier",
+          "count": 1
+        }
+      ],
+      "anchor": "lighthouse",
+      "dz": 6,
+      "spread": 5,
+      "tag": "light_guard",
+      "guard": {
+        "r": 16
+      }
+    },
+    {
+      "type": "spawn",
+      "owner": 2,
+      "unitType": "hero_brann",
+      "count": 1,
+      "anchor": "enemy1Fort",
+      "dx": 3,
+      "dz": 3,
+      "tag": "brann",
+      "guard": {
+        "r": 16
+      },
+      "displayName": {
+        "pt-BR": "Brann, comandante do forte",
+        "en": "Brann, fort commander"
+      },
+      "markColor": "#ff8a65"
+    },
+    {
+      "type": "spawnBuilding",
+      "owner": 1,
+      "buildingType": "orc_watchtower",
+      "anchor": "allyTower1",
+      "tag": "tide_tower"
+    },
+    {
+      "type": "spawnBuilding",
+      "owner": 1,
+      "buildingType": "orc_watchtower",
+      "anchor": "allyTower2",
+      "tag": "tide_tower"
+    },
+    {
+      "type": "spawn",
+      "owner": "ally",
+      "unitType": "arsonist",
+      "count": 1,
+      "anchor": "allyHeroStart",
+      "tag": "zarruk",
+      "guard": {
+        "r": 12
+      },
+      "markColor": "#f0abfc",
+      "displayName": {
+        "pt-BR": "Zarruk Fornalha",
+        "en": "Zarruk Furnace"
+      }
+    },
+    {
+      "type": "spawn",
+      "owner": "ally",
+      "units": [
+        {
+          "type": "grunt",
+          "count": 4
+        },
+        {
+          "type": "axethrower",
+          "count": 3
+        }
+      ],
+      "anchor": "allyFort",
+      "spread": 4,
+      "tag": "tide_guard",
+      "guard": {
+        "r": 20
+      }
+    },
+    {
+      "type": "spawn",
+      "owner": "neutral",
+      "unitType": "grunt",
+      "count": 4,
+      "anchor": "captive1",
+      "spread": 2.2,
+      "tag": "recruits",
+      "markColor": "#22d3ee",
+      "displayName": {
+        "pt-BR": "Talhador preso",
+        "en": "Captive Slasher"
+      }
+    },
+    {
+      "type": "spawn",
+      "owner": 3,
+      "units": [
+        {
+          "type": "knight",
+          "count": 3
+        },
+        {
+          "type": "archer",
+          "count": 1
+        }
+      ],
+      "anchor": "captive1",
+      "dx": 5,
+      "spread": 2.5,
+      "tag": "recruit_guard",
+      "guard": {
+        "r": 10
+      }
+    },
+    {
+      "type": "spawnLandmark",
+      "kind": "shrine",
+      "anchor": "lighthouse",
+      "tag": "beacon",
+      "known": true,
+      "label": {
+        "pt-BR": "Farol Boreal",
+        "en": "Boreal Lighthouse"
+      }
+    },
+    {
+      "type": "spawnLandmark",
+      "kind": "ruins",
+      "anchor": "ruins1",
+      "tag": "keeper_post",
+      "label": {
+        "pt-BR": "Posto do Faroleiro",
+        "en": "Lighthouse Keeper's Post"
+      }
+    },
+    {
+      "type": "spawnLandmark",
+      "kind": "ruins",
+      "anchor": "iceDock",
+      "tag": "ice_dock",
+      "scale": 0.8,
+      "known": true,
+      "label": {
+        "pt-BR": "Cais Congelado",
+        "en": "Frozen Dock"
+      }
     }
   ],
   "objectives": [
     {
-      "id": "primary-main",
-      "type": "destroy",
+      "id": "p-hold",
+      "type": "flag",
       "priority": "primary",
-      "select": {
-        "tag": "enemy_base"
+      "condition": {
+        "type": "var",
+        "name": "hold",
+        "op": ">=",
+        "value": 180
       },
       "title": {
-        "pt-BR": "Conquistar o Farol Boreal no gelo",
-        "en": "Conquer the Boreal Lighthouse on the ice"
+        "pt-BR": "Tomar e manter o Farol Boreal por 3 minutos",
+        "en": "Take and hold the Boreal Lighthouse for 3 minutes"
+      },
+      "description": {
+        "pt-BR": "O Farol fica no cabo ao norte, na cabeceira da baía. Tenha ao menos 2 unidades na área e NENHUM inimigo por perto: o contador zera se um inimigo pisar ali.",
+        "en": "The Lighthouse stands on the cape in the north, at the head of the bay. Keep at least 2 units in the area and NO enemy nearby: the counter resets if an enemy steps in."
+      },
+      "marker": {
+        "area": {
+          "anchor": "lighthouse",
+          "r": 13
+        },
+        "style": "goal",
+        "seconds": 120
       }
+    },
+    {
+      "id": "p-fort",
+      "type": "destroy",
+      "priority": "primary",
+      "active": false,
+      "select": {
+        "tag": "fort_hall"
+      },
+      "count": 1,
+      "title": {
+        "pt-BR": "Destruir o forte de Brumar",
+        "en": "Destroy Brumar's fort"
+      },
+      "description": {
+        "pt-BR": "Só depois de acender o Farol: a lanterna rasga a névoa de gelo e mostra o caminho. O Paço de Brumar, no nordeste, tem 4 torres, a guarda de espadachins e cavaleiros e o próprio Capitão Brann. Leve Catapultas para as torres e Necromantes para o resto.",
+        "en": "Only after lighting the Lighthouse: the lantern tears through the ice fog and shows the way. Brumar's Palace, in the northeast, has 4 towers, a guard of swordsmen and horsemen and Captain Brann himself. Bring Catapults for the towers and Necromancers for the rest."
+      },
+      "marker": {
+        "area": {
+          "anchor": "enemy1Fort",
+          "r": 16
+        },
+        "style": "goal",
+        "seconds": 90
+      }
+    },
+    {
+      "id": "p-ally",
+      "type": "flag",
+      "priority": "primary",
+      "condition": {
+        "all": [
+          {
+            "type": "objective",
+            "id": "p-hold",
+            "status": "completed"
+          },
+          {
+            "type": "objective",
+            "id": "p-fort",
+            "status": "completed"
+          },
+          {
+            "type": "count",
+            "select": {
+              "buildingType": "great_hall",
+              "owner": 1
+            },
+            "op": ">=",
+            "value": 1
+          }
+        ]
+      },
+      "failWhen": {
+        "type": "dead",
+        "select": {
+          "tag": "tide_fort"
+        },
+        "count": 1
+      },
+      "title": {
+        "pt-BR": "Manter o Salão dos Marés Negras de pé",
+        "en": "Keep the Black Tides' Hall standing"
+      },
+      "description": {
+        "pt-BR": "O Salão do Clã aliado, a leste, não pode cair: as levas de Aurelan vão atingi-lo. Se cair, a missão falha.",
+        "en": "The allied clan's Hall, in the east, must not fall: Aurelan's levies will hit it. If it falls, the mission fails."
+      },
+      "marker": {
+        "area": {
+          "anchor": "allyFort",
+          "r": 14
+        },
+        "style": "goal",
+        "seconds": 60
+      }
+    },
+    {
+      "id": "s-convoy",
+      "type": "escort",
+      "priority": "secondary",
+      "active": false,
+      "tag": "convoy",
+      "count": 3,
+      "area": {
+        "anchor": "convoyEnd",
+        "r": 8
+      },
+      "title": {
+        "pt-BR": "Escoltar o comboio dos Marés Negras até o Farol",
+        "en": "Escort the Black Tides convoy to the Lighthouse"
+      },
+      "description": {
+        "pt-BR": "Quatro carregadores saem do forte dos Marés Negras, a leste, com suprimentos para o acampamento do Farol. Leve-os pelo centro até o círculo dourado a sudeste do cabo; pelo menos 3 têm de chegar. A Guarda Real embosca a meio caminho.",
+        "en": "Four porters leave the Black Tides' fort, in the east, with supplies for the Lighthouse camp. Take them through the middle to the golden circle southeast of the cape; at least 3 must arrive. The Royal Guard ambushes halfway."
+      },
+      "marker": {
+        "area": {
+          "anchor": "convoyEnd",
+          "r": 8
+        },
+        "style": "goal",
+        "showWhen": "active"
+      }
+    },
+    {
+      "id": "s-arms",
+      "type": "train",
+      "priority": "secondary",
+      "units": [
+        {
+          "type": "necromancer",
+          "count": 2
+        },
+        {
+          "type": "catapult",
+          "count": 2
+        },
+        {
+          "type": "ogre",
+          "count": 2
+        },
+        {
+          "type": "war_serpent",
+          "count": 1
+        }
+      ],
+      "title": {
+        "pt-BR": "Armas combinadas: 2 Necromantes, 2 Catapultas, 2 Ogros e 1 Serpe de Guerra",
+        "en": "Combined arms: 2 Necromancers, 2 Catapults, 2 Ogres and 1 War Serpent"
+      },
+      "description": {
+        "pt-BR": "Necromantes no Santuário das Cinzas, Catapultas na Oficina, Ogros no Covil e a Serpe no Ninho. Só contam os treinados nesta missão. (+400 de ouro)",
+        "en": "Necromancers at the Ash Sanctum, Catapults at the Workshop, Ogres at the Den and the Serpent at the Nest. Only those trained in this mission count. (+400 gold)"
+      }
+    },
+    {
+      "id": "s-cloud",
+      "type": "flag",
+      "priority": "secondary",
+      "condition": {
+        "type": "research",
+        "id": "spell_ash_cloud",
+        "level": 1
+      },
+      "title": {
+        "pt-BR": "Pesquisar Nuvem de Cinzas no Santuário",
+        "en": "Research Ash Cloud at the Sanctum"
+      },
+      "description": {
+        "pt-BR": "A magia mais nova da árvore: uma nuvem de cinzas sobre uma área. Custa 600 de ouro. (+300 de ouro)",
+        "en": "The newest spell of the tree: a cloud of ash over an area. Costs 600 gold. (+300 gold)"
+      }
+    },
+    {
+      "id": "s-guard",
+      "type": "destroy",
+      "priority": "secondary",
+      "select": {
+        "tag": "guard_hall"
+      },
+      "count": 1,
+      "title": {
+        "pt-BR": "Derrubar o Paço da Guarda Real",
+        "en": "Bring down the Royal Guard's Palace"
+      },
+      "description": {
+        "pt-BR": "A Guarda Real, no noroeste, saqueia as costas e manda barcaças ao cais congelado. Sem o Paço, as levas dela cessam. (+500 de ouro)",
+        "en": "The Royal Guard, in the northwest, raids the coasts and sends barges to the frozen dock. Without its Palace its levies stop. (+500 gold)"
+      },
+      "marker": {
+        "area": {
+          "anchor": "enemy2Start",
+          "r": 14
+        },
+        "style": "goal",
+        "showWhen": "revealed"
+      }
+    },
+    {
+      "id": "h-zarruk",
+      "type": "flag",
+      "priority": "hidden",
+      "active": true,
+      "condition": {
+        "all": [
+          {
+            "type": "objective",
+            "id": "p-hold",
+            "status": "completed"
+          },
+          {
+            "type": "objective",
+            "id": "p-fort",
+            "status": "completed"
+          }
+        ]
+      },
+      "failWhen": {
+        "type": "dead",
+        "select": {
+          "tag": "zarruk"
+        },
+        "count": 1
+      },
+      "title": {
+        "pt-BR": "Zarruk de pé",
+        "en": "Zarruk standing"
+      },
+      "description": {
+        "pt-BR": "Termine a missão com Zarruk Fornalha, que guarda o Salão dos Marés Negras, ainda vivo. (+400 de ouro)",
+        "en": "Finish the mission with Zarruk Furnace, who guards the Black Tides' Hall, still alive. (+400 gold)"
+      }
+    },
+    {
+      "id": "h-recruits",
+      "type": "rescue",
+      "priority": "hidden",
+      "tag": "recruits",
+      "count": 4,
+      "title": {
+        "pt-BR": "Nenhum Talhador para trás: libertar os 4 presos",
+        "en": "No Slasher left behind: free the 4 captives"
+      },
+      "description": {
+        "pt-BR": "Batedores da Guarda Real prenderam 4 Talhadores num entreposto de gelo, a leste da base, depois do lago. Cada um carrega o fogo do clã. (+250 de ouro)",
+        "en": "Royal Guard scouts locked 4 Slashers in an ice post east of the base, past the lake. Each one carries the clan fire. (+250 gold)"
+      }
+    },
+    {
+      "id": "h-ruins",
+      "type": "flag",
+      "priority": "hidden",
+      "active": true,
+      "condition": {
+        "type": "area",
+        "owner": "player",
+        "area": {
+          "anchor": "ruins1",
+          "r": 7
+        }
+      },
+      "title": {
+        "pt-BR": "O Posto do Faroleiro",
+        "en": "The Lighthouse Keeper's Post"
+      },
+      "description": {
+        "pt-BR": "Uma torre caída na margem sul da ilha, entre os lagos congelados, a mais de 100 u da base. Mande alguém até lá.",
+        "en": "A fallen tower on the island's south shore, among the frozen lakes, over 100 u from the base. Send someone there."
+      }
+    }
+  ],
+  "triggers": [
+    {
+      "id": "intro",
+      "when": {
+        "type": "time",
+        "at": 0
+      },
+      "actions": [
+        {
+          "type": "music",
+          "id": "on"
+        },
+        {
+          "type": "reveal",
+          "anchor": "lighthouse",
+          "radius": 26,
+          "ttl": 44
+        },
+        {
+          "type": "reveal",
+          "anchor": "enemy1Fort",
+          "radius": 26,
+          "ttl": 44
+        },
+        {
+          "type": "reveal",
+          "anchor": "allyFort",
+          "radius": 24,
+          "ttl": 44
+        },
+        {
+          "type": "reveal",
+          "anchor": "enemy2Start",
+          "radius": 24,
+          "ttl": 44
+        },
+        {
+          "type": "cutscene",
+          "id": "frost",
+          "duration": 46,
+          "skippable": true,
+          "steps": [
+            {
+              "at": 0,
+              "anchor": "playerStart",
+              "zoom": 1.15,
+              "dialog": {
+                "speaker": {
+                  "pt-BR": "Drogath Punho-de-Brasa",
+                  "en": "Drogath Emberfist"
+                },
+                "portrait": "🔥",
+                "text": {
+                  "pt-BR": "A Geada. Neve até o joelho, lagos que parecem terra firme e um vento que corta o rosto. Eu sou Drogath; o campo é seu, chefe do clã. Hoje os Clãs usam tudo o que aprenderam: não há mais \"ainda não\". É a nossa prova de fogo.",
+                  "en": "The Frost. Snow to the knee, lakes that look like solid ground and a wind that cuts the face. I am Drogath; the field is yours, clan chief. Today the Clans use everything they have learned: there is no \"not yet\" anymore. This is our trial by fire."
+                },
+                "duration": 9
+              }
+            },
+            {
+              "at": 9,
+              "anchor": "allyFort",
+              "zoom": 1.1,
+              "dialog": {
+                "speaker": {
+                  "pt-BR": "Zarruk Fornalha",
+                  "en": "Zarruk Furnace"
+                },
+                "portrait": "🧨",
+                "text": {
+                  "pt-BR": "Salão dos Marés Negras, a leste. Sou Zarruk Fornalha, e esta é a retaguarda de vocês: enquanto o nosso Salão estiver de pé, os Clãs têm onde recuar. Se ele cair, a Geada inteira cai. Não me peçam para sair daqui; peçam-me para queimar quem chegar.",
+                  "en": "The Black Tides' Hall, to the east. I am Zarruk Furnace, and this is your rear: as long as our Hall stands, the Clans have somewhere to fall back. If it falls, the whole Frost falls. Do not ask me to leave; ask me to burn whoever comes."
+                },
+                "duration": 9
+              }
+            },
+            {
+              "at": 18,
+              "anchor": "lighthouse",
+              "zoom": 1.05,
+              "dialog": {
+                "speaker": {
+                  "pt-BR": "Drogath Punho-de-Brasa",
+                  "en": "Drogath Emberfist"
+                },
+                "portrait": "🔥",
+                "text": {
+                  "pt-BR": "Ao norte, o Farol Boreal. Quem o tem vê as duas costas do mar do norte. Fica longe de todas as bases e é de ninguém: temos de tomá-lo e segurá-lo por três minutos sem um inimigo pisar ali.",
+                  "en": "In the north, the Boreal Lighthouse. Whoever holds it sees both coasts of the northern sea. It is far from every base and belongs to no one: we must take it and hold it for three minutes without an enemy setting foot there."
+                },
+                "duration": 9
+              }
+            },
+            {
+              "at": 27,
+              "anchor": "enemy1Fort",
+              "zoom": 1.05,
+              "dialog": {
+                "speaker": {
+                  "pt-BR": "Capitão Brann",
+                  "en": "Captain Brann"
+                },
+                "portrait": "⚔️",
+                "text": {
+                  "pt-BR": "Os Clãs vieram com toda a brasa que têm. Bom. Brumar guarda este forte, e o gelo não perdoa quem corre. Venham tomar o Farol; eu espero aqui, onde a neve é pisada, com a guarnição inteira.",
+                  "en": "The Clans came with every ember they have. Good. Brumar guards this fort, and the ice forgives no one who runs. Come take the Lighthouse; I wait here, where the snow is trampled, with the whole garrison."
+                },
+                "duration": 9
+              }
+            },
+            {
+              "at": 36,
+              "anchor": "enemy2Start",
+              "zoom": 1.05,
+              "dialog": {
+                "speaker": {
+                  "pt-BR": "Drogath Punho-de-Brasa",
+                  "en": "Drogath Emberfist"
+                },
+                "portrait": "🔥",
+                "text": {
+                  "pt-BR": "No noroeste, a Guarda Real: aço, gelo e disciplina. São duas frentes, chefe do clã, e uma tropa só nunca bastou. Economia primeiro, depois Acampamento, Santuário, Oficina, Covil e o Ninho. Prova de fogo é isso.",
+                  "en": "In the northwest, the Royal Guard: steel, ice and discipline. Two fronts, clan chief, and a single troop type never sufficed. Economy first, then War Camp, Sanctum, Workshop, Den and the Nest. That is what a trial by fire is."
+                },
+                "duration": 10
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "tier-up",
+      "when": {
+        "type": "time",
+        "at": 50
+      },
+      "actions": [
+        {
+          "type": "setTier",
+          "owner": "player",
+          "tier": 3
+        },
+        {
+          "type": "sound",
+          "id": "build"
+        },
+        {
+          "type": "message",
+          "text": {
+            "pt-BR": "Árvore tecnológica completa liberada: Salão do Clã no nível 3.",
+            "en": "Full tech tree unlocked: Clan Hall at level 3."
+          }
+        }
+      ]
+    },
+    {
+      "id": "first-steps",
+      "when": {
+        "type": "time",
+        "at": 62
+      },
+      "actions": [
+        {
+          "type": "dialog",
+          "speaker": {
+            "pt-BR": "Drogath Punho-de-Brasa",
+            "en": "Drogath Emberfist"
+          },
+          "portrait": "🔥",
+          "duration": 10,
+          "text": {
+            "pt-BR": "Lacaios no ouro e na madeira, depois o Cercado de Javalis e o Acampamento de Guerra. A mina inicial fica a leste do Salão, a uma boa caminhada (~32 u), e a de expansão, ao norte (~44 u); a pedra está logo a oeste. Não demore: as levas começam em poucos minutos.",
+            "en": "Laborers on gold and timber, then the Boar Pen and the War Camp. The starting mine is a fair walk east of the Hall (~32 u), and the expansion mine lies north (~44 u); the stone is just to the west. Do not dawdle: the levies start in a few minutes."
+          }
+        }
+      ]
+    },
+    {
+      "id": "arms-hint",
+      "when": {
+        "type": "time",
+        "at": 150
+      },
+      "actions": [
+        {
+          "type": "dialog",
+          "speaker": {
+            "pt-BR": "Anciã Ulma",
+            "en": "Elder Ulma"
+          },
+          "portrait": "🕯️",
+          "duration": 10,
+          "text": {
+            "pt-BR": "Filho do Clã, o Fogo me mostrou os últimos cadernos: o Santuário das Cinzas pesquisa a Nuvem de Cinzas, e a Oficina entrega Catapultas que derrubam torres de longe. Na neve, quem junta brasa, magia e cerco vence quem só tem machado.",
+            "en": "Child of the Clan, the Fire showed me the last notebooks: the Ash Sanctum researches Ash Cloud, and the Workshop delivers Catapults that fell towers from afar. In the snow, whoever joins ember, magic and siege beats whoever has only an axe."
+          }
+        }
+      ]
+    },
+    {
+      "id": "workshop-up",
+      "when": {
+        "type": "count",
+        "select": {
+          "buildingType": "orc_workshop",
+          "owner": "player"
+        },
+        "op": ">=",
+        "value": 1
+      },
+      "actions": [
+        {
+          "type": "sound",
+          "id": "build"
+        },
+        {
+          "type": "dialog",
+          "speaker": {
+            "pt-BR": "Drogath Punho-de-Brasa",
+            "en": "Drogath Emberfist"
+          },
+          "portrait": "🔥",
+          "duration": 9,
+          "text": {
+            "pt-BR": "Oficina de pé. A Catapulta alcança longe e derruba as torres do forte de Brumar sem entrar no alcance delas. Proteja-a: ela é lenta e frágil de perto.",
+            "en": "Workshop is up. The Catapult reaches far and fells the towers of Brumar's fort from outside their range. Guard it: it is slow and fragile up close."
+          }
+        }
+      ]
+    },
+    {
+      "id": "den-up",
+      "when": {
+        "type": "count",
+        "select": {
+          "buildingType": "ogre_den",
+          "owner": "player"
+        },
+        "op": ">=",
+        "value": 1
+      },
+      "actions": [
+        {
+          "type": "sound",
+          "id": "build"
+        },
+        {
+          "type": "dialog",
+          "speaker": {
+            "pt-BR": "Drogath Punho-de-Brasa",
+            "en": "Drogath Emberfist"
+          },
+          "portrait": "🔥",
+          "duration": 9,
+          "text": {
+            "pt-BR": "Covil dos Ogros erguido. Ogros esmagam a linha de espadachins e perseguem arqueiros, mas não passam por lagos nem pela banquisa: olhe o mapa antes de mandá-los.",
+            "en": "Ogre Den raised. Ogres crush the swordsmen's line and chase archers, but they cannot cross lakes or floes: check the map before sending them."
+          }
+        }
+      ]
+    },
+    {
+      "id": "sanctum-up",
+      "when": {
+        "type": "count",
+        "select": {
+          "buildingType": "ash_sanctum",
+          "owner": "player"
+        },
+        "op": ">=",
+        "value": 1
+      },
+      "actions": [
+        {
+          "type": "sound",
+          "id": "build"
+        },
+        {
+          "type": "dialog",
+          "speaker": {
+            "pt-BR": "Drogath Punho-de-Brasa",
+            "en": "Drogath Emberfist"
+          },
+          "portrait": "🔥",
+          "duration": 9,
+          "text": {
+            "pt-BR": "Santuário das Cinzas de pé. Necromantes custam ouro, queimam de longe e a Nuvem de Cinzas limpa grupos. Ponha-os atrás dos Talhadores.",
+            "en": "Ash Sanctum is up. Necromancers cost gold, burn from afar and Ash Cloud clears groups. Keep them behind the Slashers."
+          }
+        }
+      ]
+    },
+    {
+      "id": "nest-up",
+      "when": {
+        "type": "count",
+        "select": {
+          "buildingType": "serpent_nest",
+          "owner": "player"
+        },
+        "op": ">=",
+        "value": 1
+      },
+      "actions": [
+        {
+          "type": "sound",
+          "id": "build"
+        },
+        {
+          "type": "dialog",
+          "speaker": {
+            "pt-BR": "Drogath Punho-de-Brasa",
+            "en": "Drogath Emberfist"
+          },
+          "portrait": "🔥",
+          "duration": 9,
+          "text": {
+            "pt-BR": "Ninho das Serpes erguido. Os planadores de Aurelan voam: Lanceiros, Necromantes e Serpes os alcançam, machados de perto não. E uma Serpe vê o Farol de longe.",
+            "en": "Serpent Nest raised. Aurelan's gliders fly: Axe Throwers, Necromancers and Serpents reach them, axes up close do not. And a Serpent sees the Lighthouse from afar."
+          }
+        }
+      ]
+    },
+    {
+      "id": "raid-s1",
+      "when": {
+        "type": "time",
+        "at": 330
+      },
+      "actions": [
+        {
+          "type": "spawn",
+          "owner": 3,
+          "units": [
+            {
+              "type": "knight",
+              "count": 5
+            },
+            {
+              "type": "archer",
+              "count": 3
+            }
+          ],
+          "anchor": "enemy2Start",
+          "dx": 10,
+          "dz": 8,
+          "spread": 3,
+          "tag": "raid",
+          "order": {
+            "kind": "attackMove",
+            "anchor": "playerStart"
+          }
+        },
+        {
+          "type": "incVar",
+          "name": "raids"
+        },
+        {
+          "type": "dialog",
+          "speaker": {
+            "pt-BR": "Drogath Punho-de-Brasa",
+            "en": "Drogath Emberfist"
+          },
+          "portrait": "🔥",
+          "duration": 9,
+          "text": {
+            "pt-BR": "Poeira de gelo no horizonte: a Guarda Real manda a primeira leva para a nossa base. Segurem a linha perto do Salão.",
+            "en": "Ice dust on the horizon: the Royal Guard sends its first levy to our base. Hold the line near the Hall."
+          }
+        },
+        {
+          "type": "message",
+          "text": {
+            "pt-BR": "Espadachins e arqueiros da Guarda Real marcham para a base dos Clãs.",
+            "en": "Royal Guard swordsmen and archers march on the Clans' base."
+          }
+        }
+      ]
+    },
+    {
+      "id": "raid-l1",
+      "when": {
+        "type": "time",
+        "at": 450
+      },
+      "actions": [
+        {
+          "type": "spawn",
+          "owner": 2,
+          "units": [
+            {
+              "type": "knight",
+              "count": 5
+            },
+            {
+              "type": "archer",
+              "count": 3
+            },
+            {
+              "type": "cavalier",
+              "count": 1
+            }
+          ],
+          "anchor": "enemy1Start",
+          "dx": -12,
+          "dz": 6,
+          "spread": 3,
+          "tag": "raid",
+          "order": {
+            "kind": "attackMove",
+            "anchor": "lighthouse"
+          }
+        },
+        {
+          "type": "incVar",
+          "name": "raids"
+        },
+        {
+          "type": "dialog",
+          "speaker": {
+            "pt-BR": "Capitão Brann",
+            "en": "Captain Brann"
+          },
+          "portrait": "⚔️",
+          "duration": 8,
+          "text": {
+            "pt-BR": "O Farol não é de quem chega primeiro, é de quem fica. Guarnição de Brumar: ao cabo.",
+            "en": "The Lighthouse belongs not to whoever arrives first but to whoever stays. Brumar garrison: to the cape."
+          }
+        },
+        {
+          "type": "message",
+          "text": {
+            "pt-BR": "A guarnição de Brumar marcha para o Farol Boreal.",
+            "en": "Brumar's garrison marches on the Boreal Lighthouse."
+          }
+        }
+      ]
+    },
+    {
+      "id": "raid-l1b",
+      "when": {
+        "type": "time",
+        "at": 660
+      },
+      "actions": [
+        {
+          "type": "spawn",
+          "owner": 2,
+          "units": [
+            {
+              "type": "knight",
+              "count": 6
+            },
+            {
+              "type": "archer",
+              "count": 3
+            },
+            {
+              "type": "cavalier",
+              "count": 2
+            }
+          ],
+          "anchor": "enemy1Start",
+          "dx": -12,
+          "dz": 6,
+          "spread": 3,
+          "tag": "raid",
+          "order": {
+            "kind": "attackMove",
+            "anchor": "lighthouse"
+          }
+        },
+        {
+          "type": "incVar",
+          "name": "raids"
+        },
+        {
+          "type": "message",
+          "text": {
+            "pt-BR": "Uma segunda leva de Brumar marcha para o Farol Boreal.",
+            "en": "A second Brumar levy marches on the Boreal Lighthouse."
+          }
+        }
+      ]
+    },
+    {
+      "id": "convoy-start",
+      "when": {
+        "type": "time",
+        "at": 480
+      },
+      "actions": [
+        {
+          "type": "spawn",
+          "owner": "player",
+          "unitType": "peon",
+          "count": 4,
+          "anchor": "convoyStart",
+          "spread": 2.2,
+          "tag": "convoy",
+          "markColor": "#22d3ee",
+          "displayName": {
+            "pt-BR": "Carregador dos Marés Negras",
+            "en": "Black Tides porter"
+          }
+        },
+        {
+          "type": "setObjective",
+          "id": "s-convoy",
+          "status": "active"
+        },
+        {
+          "type": "sound",
+          "id": "victory"
+        },
+        {
+          "type": "dialog",
+          "speaker": {
+            "pt-BR": "Orvanna Maré-Negra",
+            "en": "Orvanna Blacktide"
+          },
+          "portrait": "🌊",
+          "duration": 10,
+          "text": {
+            "pt-BR": "Chefe do clã, o comboio dos Marés Negras está pronto: quatro carregadores com ouro, madeira e pedra para o acampamento do Farol. Venham buscá-los; eu só tenho gente para guardar o Salão. Peçam a Zarruk que fique, e escoltem-nos pelo meio.",
+            "en": "Clan chief, the Black Tides convoy is ready: four porters with gold, timber and stone for the Lighthouse camp. Come fetch them; I only have folk to guard the Hall. Ask Zarruk to stay, and escort them through the middle."
+          }
+        }
+      ]
+    },
+    {
+      "id": "convoy-ambush",
+      "when": {
+        "type": "area",
+        "owner": "player",
+        "tag": "convoy",
+        "area": {
+          "anchor": "convoyAmbush",
+          "r": 26
+        }
+      },
+      "actions": [
+        {
+          "type": "spawn",
+          "owner": 3,
+          "units": [
+            {
+              "type": "knight",
+              "count": 5
+            },
+            {
+              "type": "archer",
+              "count": 3
+            }
+          ],
+          "anchor": "convoyAmbush",
+          "dx": 0,
+          "dz": -16,
+          "spread": 3,
+          "tag": "ambush",
+          "order": {
+            "kind": "attackMove",
+            "anchor": "convoyEnd"
+          }
+        },
+        {
+          "type": "sound",
+          "id": "alarm"
+        },
+        {
+          "type": "dialog",
+          "speaker": {
+            "pt-BR": "Carregador dos Marés Negras",
+            "en": "Black Tides porter"
+          },
+          "portrait": "📦",
+          "duration": 7,
+          "text": {
+            "pt-BR": "Emboscada! A Guarda Real saiu das rochas azuis! Socorro, chefe do clã!",
+            "en": "Ambush! The Royal Guard burst from the blue rocks! Help, clan chief!"
+          }
+        }
+      ]
+    },
+    {
+      "id": "convoy-done",
+      "when": {
+        "type": "objective",
+        "id": "s-convoy",
+        "status": "completed"
+      },
+      "actions": [
+        {
+          "type": "giveResources",
+          "owner": "player",
+          "gold": 600,
+          "wood": 400,
+          "stone": 200
+        },
+        {
+          "type": "sound",
+          "id": "victory"
+        },
+        {
+          "type": "message",
+          "text": {
+            "pt-BR": "O comboio dos Marés Negras chegou ao Farol: +600 de ouro, +400 de madeira, +200 de pedra.",
+            "en": "The Black Tides convoy reached the Lighthouse: +600 gold, +400 wood, +200 stone."
+          }
+        },
+        {
+          "type": "dialog",
+          "speaker": {
+            "pt-BR": "Orvanna Maré-Negra",
+            "en": "Orvanna Blacktide"
+          },
+          "portrait": "🌊",
+          "duration": 8,
+          "text": {
+            "pt-BR": "Os carregadores chegaram inteiros. Os Marés Negras pagam o que devem ao Cinzal: aproveitem o acampamento do Farol.",
+            "en": "The porters arrived whole. The Black Tides pay what they owe the Cinzal: make use of the Lighthouse camp."
+          }
+        }
+      ]
+    },
+    {
+      "id": "convoy-failed",
+      "when": {
+        "type": "objective",
+        "id": "s-convoy",
+        "status": "failed"
+      },
+      "actions": [
+        {
+          "type": "message",
+          "text": {
+            "pt-BR": "O comboio dos Marés Negras foi perdido.",
+            "en": "The Black Tides convoy was lost."
+          }
+        }
+      ]
+    },
+    {
+      "id": "dock-landing",
+      "when": {
+        "type": "time",
+        "at": 600
+      },
+      "actions": [
+        {
+          "type": "spawnLanding",
+          "owner": 3,
+          "anchor": "iceDockSea",
+          "unloadAt": {
+            "anchor": "iceDock"
+          },
+          "units": [
+            {
+              "type": "knight",
+              "count": 4
+            },
+            {
+              "type": "archer",
+              "count": 2
+            }
+          ],
+          "escort": [
+            {
+              "type": "frigate",
+              "count": 1
+            }
+          ],
+          "tag": "landing",
+          "bargeTag": "landing_barge",
+          "escortTag": "landing_escort",
+          "order": {
+            "kind": "attackMove",
+            "anchor": "lighthouse"
+          }
+        },
+        {
+          "type": "incVar",
+          "name": "raids"
+        },
+        {
+          "type": "sound",
+          "id": "alarm"
+        },
+        {
+          "type": "dialog",
+          "speaker": {
+            "pt-BR": "Drogath Punho-de-Brasa",
+            "en": "Drogath Emberfist"
+          },
+          "portrait": "🔥",
+          "duration": 9,
+          "text": {
+            "pt-BR": "Uma barcaça no mar do norte, rumo ao cais congelado! A Guarda Real desembarca a oeste do Farol para pegar nossa tropa pelo flanco. Quem estiver no cabo, de olho no oeste.",
+            "en": "A barge on the northern sea, heading for the frozen dock! The Royal Guard lands west of the Lighthouse to catch our troops on the flank. Whoever is on the cape, watch the west."
+          }
+        }
+      ]
+    },
+    {
+      "id": "raid-l2",
+      "when": {
+        "type": "time",
+        "at": 720
+      },
+      "actions": [
+        {
+          "type": "spawn",
+          "owner": 2,
+          "units": [
+            {
+              "type": "cavalier",
+              "count": 2
+            },
+            {
+              "type": "knight",
+              "count": 4
+            },
+            {
+              "type": "ballista",
+              "count": 1
+            }
+          ],
+          "anchor": "enemy1Start",
+          "dx": 0,
+          "dz": 12,
+          "spread": 3,
+          "tag": "raid",
+          "order": {
+            "kind": "attackMove",
+            "anchor": "allyFort"
+          }
+        },
+        {
+          "type": "incVar",
+          "name": "raids"
+        },
+        {
+          "type": "dialog",
+          "speaker": {
+            "pt-BR": "Zarruk Fornalha",
+            "en": "Zarruk Furnace"
+          },
+          "portrait": "🧨",
+          "duration": 9,
+          "text": {
+            "pt-BR": "Cavaleiros e uma balista vindos do nordeste, rumo ao Salão! Estamos de pé, mas não aguentamos sozinhos para sempre.",
+            "en": "Horsemen and a ballista from the northeast, bound for the Hall! We stand, but we cannot hold alone forever."
+          }
+        },
+        {
+          "type": "message",
+          "text": {
+            "pt-BR": "Cavaleiros e uma balista de Brumar marcham para o Salão dos Marés Negras.",
+            "en": "Brumar horsemen and a ballista march on the Black Tides' Hall."
+          }
+        }
+      ]
+    },
+    {
+      "id": "raid-s2",
+      "when": {
+        "type": "time",
+        "at": 840
+      },
+      "actions": [
+        {
+          "type": "spawn",
+          "owner": 3,
+          "units": [
+            {
+              "type": "cavalier",
+              "count": 3
+            },
+            {
+              "type": "knight",
+              "count": 6
+            },
+            {
+              "type": "sapper",
+              "count": 2
+            }
+          ],
+          "anchor": "enemy2Start",
+          "dx": 10,
+          "dz": 10,
+          "spread": 3,
+          "tag": "raid",
+          "order": {
+            "kind": "attackMove",
+            "anchor": "playerStart"
+          }
+        },
+        {
+          "type": "incVar",
+          "name": "raids"
+        },
+        {
+          "type": "message",
+          "text": {
+            "pt-BR": "Cavaleiros e sapadores da Guarda Real marcham para a base dos Clãs.",
+            "en": "Royal Guard horsemen and sappers march on the Clans' base."
+          }
+        }
+      ]
+    },
+    {
+      "id": "raid-l3",
+      "when": {
+        "type": "time",
+        "at": 1020
+      },
+      "actions": [
+        {
+          "type": "spawn",
+          "owner": 2,
+          "units": [
+            {
+              "type": "cavalier",
+              "count": 5
+            },
+            {
+              "type": "knight",
+              "count": 5
+            },
+            {
+              "type": "archer",
+              "count": 4
+            },
+            {
+              "type": "glider",
+              "count": 3
+            }
+          ],
+          "anchor": "enemy1Start",
+          "dx": -12,
+          "dz": 6,
+          "spread": 3,
+          "tag": "raid",
+          "order": {
+            "kind": "attackMove",
+            "anchor": "lighthouse"
+          }
+        },
+        {
+          "type": "incVar",
+          "name": "raids"
+        },
+        {
+          "type": "dialog",
+          "speaker": {
+            "pt-BR": "Capitão Brann",
+            "en": "Captain Brann"
+          },
+          "portrait": "⚔️",
+          "duration": 8,
+          "text": {
+            "pt-BR": "Planadores sobre o gelo: machados de perto não os alcançam. Mostrem aos Clãs o que é uma prova de fogo.",
+            "en": "Gliders over the ice: axes up close cannot reach them. Show the Clans what a trial by fire is."
+          }
+        },
+        {
+          "type": "message",
+          "text": {
+            "pt-BR": "Cavaleiros, espadachins e planadores de Brumar marcham para o Farol.",
+            "en": "Brumar horsemen, swordsmen and gliders march on the Lighthouse."
+          }
+        }
+      ]
+    },
+    {
+      "id": "raid-s3",
+      "when": {
+        "type": "time",
+        "at": 1140
+      },
+      "actions": [
+        {
+          "type": "spawn",
+          "owner": 3,
+          "units": [
+            {
+              "type": "knight",
+              "count": 5
+            },
+            {
+              "type": "ranger",
+              "count": 3
+            }
+          ],
+          "anchor": "enemy2Start",
+          "dx": 14,
+          "dz": 12,
+          "spread": 3,
+          "tag": "raid",
+          "order": {
+            "kind": "attackMove",
+            "anchor": "allyFort"
+          }
+        },
+        {
+          "type": "incVar",
+          "name": "raids"
+        },
+        {
+          "type": "dialog",
+          "speaker": {
+            "pt-BR": "Zarruk Fornalha",
+            "en": "Zarruk Furnace"
+          },
+          "portrait": "🧨",
+          "duration": 8,
+          "text": {
+            "pt-BR": "A Guarda Real também vem pelo Salão! Qualquer ajuda agora vale mais que ouro.",
+            "en": "The Royal Guard comes for the Hall too! Any help now is worth more than gold."
+          }
+        },
+        {
+          "type": "message",
+          "text": {
+            "pt-BR": "Patrulheiros e espadachins da Guarda Real marcham para o Salão dos Marés Negras.",
+            "en": "Royal Guard rangers and swordsmen march on the Black Tides' Hall."
+          }
+        }
+      ]
+    },
+    {
+      "id": "tide-relief-1",
+      "when": {
+        "type": "time",
+        "at": 480
+      },
+      "actions": [
+        {
+          "type": "spawn",
+          "owner": 1,
+          "units": [
+            {
+              "type": "grunt",
+              "count": 6
+            },
+            {
+              "type": "axethrower",
+              "count": 4
+            }
+          ],
+          "anchor": "allyFort",
+          "dx": 0,
+          "dz": 6,
+          "spread": 4,
+          "tag": "tide_guard",
+          "guard": {
+            "r": 24
+          }
+        },
+        {
+          "type": "message",
+          "text": {
+            "pt-BR": "Os Marés Negras mandam guarnição de reforço ao Salão (6 Talhadores e 4 Lanceiros).",
+            "en": "The Black Tides send reinforcements to the Hall (6 Slashers and 4 Axe Throwers)."
+          }
+        }
+      ]
+    },
+    {
+      "id": "tide-relief-2",
+      "when": {
+        "type": "time",
+        "at": 780
+      },
+      "actions": [
+        {
+          "type": "spawn",
+          "owner": 1,
+          "units": [
+            {
+              "type": "grunt",
+              "count": 6
+            },
+            {
+              "type": "axethrower",
+              "count": 5
+            },
+            {
+              "type": "catapult",
+              "count": 2
+            }
+          ],
+          "anchor": "allyFort",
+          "dx": 0,
+          "dz": 6,
+          "spread": 4,
+          "tag": "tide_guard",
+          "guard": {
+            "r": 24
+          }
+        },
+        {
+          "type": "message",
+          "text": {
+            "pt-BR": "Nova guarnição dos Marés Negras chega ao Salão (Talhadores, Lanceiros e 2 Catapultas).",
+            "en": "A new Black Tides garrison reaches the Hall (Slashers, Axe Throwers and 2 Catapults)."
+          }
+        }
+      ]
+    },
+    {
+      "id": "tide-relief-3",
+      "when": {
+        "type": "time",
+        "at": 1080
+      },
+      "actions": [
+        {
+          "type": "spawn",
+          "owner": 1,
+          "units": [
+            {
+              "type": "grunt",
+              "count": 7
+            },
+            {
+              "type": "axethrower",
+              "count": 5
+            }
+          ],
+          "anchor": "allyFort",
+          "dx": 0,
+          "dz": 6,
+          "spread": 4,
+          "tag": "tide_guard",
+          "guard": {
+            "r": 24
+          }
+        },
+        {
+          "type": "message",
+          "text": {
+            "pt-BR": "A última guarnição dos Marés Negras chega ao Salão.",
+            "en": "The last Black Tides garrison reaches the Hall."
+          }
+        }
+      ]
+    },
+    {
+      "id": "tide-hit",
+      "when": {
+        "type": "area",
+        "owner": "enemy",
+        "area": {
+          "anchor": "allyFort",
+          "r": 30
+        }
+      },
+      "actions": [
+        {
+          "type": "sound",
+          "id": "alarm"
+        },
+        {
+          "type": "dialog",
+          "speaker": {
+            "pt-BR": "Orvanna Maré-Negra",
+            "en": "Orvanna Blacktide"
+          },
+          "portrait": "🌊",
+          "duration": 8,
+          "text": {
+            "pt-BR": "Estamos sob ataque! Mandem socorro ao Salão dos Marés Negras!",
+            "en": "We are under attack! Send help to the Black Tides' Hall!"
+          }
+        }
+      ],
+      "once": false,
+      "cooldown": 120
+    },
+    {
+      "id": "hold-tick",
+      "when": {
+        "all": [
+          {
+            "type": "area",
+            "owner": "player",
+            "area": {
+              "anchor": "lighthouse",
+              "r": 13
+            },
+            "count": 2
+          },
+          {
+            "not": {
+              "type": "area",
+              "owner": "enemy",
+              "area": {
+                "anchor": "lighthouse",
+                "r": 20
+              }
+            }
+          }
+        ]
+      },
+      "actions": [
+        {
+          "type": "incVar",
+          "name": "hold"
+        }
+      ],
+      "once": false,
+      "cooldown": 1
+    },
+    {
+      "id": "hold-reset",
+      "when": {
+        "all": [
+          {
+            "type": "var",
+            "name": "hold",
+            "op": ">=",
+            "value": 1
+          },
+          {
+            "type": "area",
+            "owner": "enemy",
+            "area": {
+              "anchor": "lighthouse",
+              "r": 14
+            }
+          }
+        ]
+      },
+      "actions": [
+        {
+          "type": "setVar",
+          "name": "hold",
+          "value": 0
+        },
+        {
+          "type": "incVar",
+          "name": "lost"
+        },
+        {
+          "type": "sound",
+          "id": "alarm"
+        },
+        {
+          "type": "message",
+          "text": {
+            "pt-BR": "Um inimigo pisou no Farol: o contador de 3 minutos zerou.",
+            "en": "An enemy stepped on the Lighthouse: the 3-minute counter reset."
+          }
+        }
+      ],
+      "once": false,
+      "cooldown": 10
+    },
+    {
+      "id": "hold-taken",
+      "when": {
+        "type": "area",
+        "owner": "player",
+        "area": {
+          "anchor": "lighthouse",
+          "r": 13
+        },
+        "count": 2
+      },
+      "actions": [
+        {
+          "type": "lightLandmark",
+          "tag": "beacon"
+        },
+        {
+          "type": "sound",
+          "id": "build"
+        },
+        {
+          "type": "dialog",
+          "speaker": {
+            "pt-BR": "Drogath Punho-de-Brasa",
+            "en": "Drogath Emberfist"
+          },
+          "portrait": "🔥",
+          "duration": 9,
+          "text": {
+            "pt-BR": "A lanterna do Farol acendeu: o fogo do Clã no meio do gelo. Agora é segurar: três minutos sem um inimigo no cabo. Torres e lanceiros no cabo; Necromantes atrás.",
+            "en": "The Lighthouse lantern is lit: the Clan fire in the middle of the ice. Now we hold: three minutes with no enemy on the cape. Towers and axe throwers on the cape; Necromancers behind."
+          }
+        }
+      ]
+    },
+    {
+      "id": "hold-60",
+      "when": {
+        "type": "var",
+        "name": "hold",
+        "op": "==",
+        "value": 60
+      },
+      "actions": [
+        {
+          "type": "message",
+          "text": {
+            "pt-BR": "Farol: 1 minuto seguro. Faltam 2.",
+            "en": "Lighthouse: 1 minute secure. 2 to go."
+          }
+        }
+      ],
+      "once": false,
+      "cooldown": 30
+    },
+    {
+      "id": "hold-120",
+      "when": {
+        "type": "var",
+        "name": "hold",
+        "op": "==",
+        "value": 120
+      },
+      "actions": [
+        {
+          "type": "message",
+          "text": {
+            "pt-BR": "Farol: 2 minutos seguros. Falta 1.",
+            "en": "Lighthouse: 2 minutes secure. 1 to go."
+          }
+        }
+      ],
+      "once": false,
+      "cooldown": 30
+    },
+    {
+      "id": "hold-done",
+      "when": {
+        "type": "objective",
+        "id": "p-hold",
+        "status": "completed"
+      },
+      "actions": [
+        {
+          "type": "sound",
+          "id": "victory"
+        },
+        {
+          "type": "setObjective",
+          "id": "p-fort",
+          "status": "active"
+        },
+        {
+          "type": "reveal",
+          "anchor": "enemy1Fort",
+          "radius": 30,
+          "ttl": 30
+        },
+        {
+          "type": "dialog",
+          "speaker": {
+            "pt-BR": "Drogath Punho-de-Brasa",
+            "en": "Drogath Emberfist"
+          },
+          "portrait": "🔥",
+          "duration": 9,
+          "text": {
+            "pt-BR": "Três minutos. O Farol Boreal é dos Clãs: a lanterna rasgou a névoa e daqui vemos o forte de Brumar, a nordeste, com Brann na porta. Agora é a vez dele.",
+            "en": "Three minutes. The Boreal Lighthouse is the Clans': the lantern tore through the fog and from here we see Brumar's fort, to the northeast, with Brann at the gate. Now it is his turn."
+          }
+        }
+      ]
+    },
+    {
+      "id": "recruits-near",
+      "when": {
+        "type": "area",
+        "owner": "player",
+        "area": {
+          "anchor": "captive1",
+          "r": 32
+        }
+      },
+      "actions": [
+        {
+          "type": "dialog",
+          "speaker": {
+            "pt-BR": "Drogath Punho-de-Brasa",
+            "en": "Drogath Emberfist"
+          },
+          "portrait": "🔥",
+          "duration": 9,
+          "text": {
+            "pt-BR": "Fumaça de acampamento no entreposto de gelo: são Talhadores nossos, presos pelos batedores. Derrubem os guardas e eles voltam às fileiras.",
+            "en": "Campfire smoke at the ice post: those are our Slashers, held by the scouts. Take down the guards and they rejoin the ranks."
+          }
+        }
+      ]
+    },
+    {
+      "id": "free-recruits",
+      "when": {
+        "type": "dead",
+        "select": {
+          "tag": "recruit_guard"
+        },
+        "count": 4
+      },
+      "actions": [
+        {
+          "type": "transfer",
+          "select": {
+            "tag": "recruits"
+          },
+          "to": "player"
+        },
+        {
+          "type": "sound",
+          "id": "build"
+        },
+        {
+          "type": "message",
+          "text": {
+            "pt-BR": "Talhadores libertados!",
+            "en": "Slashers freed!"
+          }
+        }
+      ]
+    },
+    {
+      "id": "recruits-reward",
+      "when": {
+        "type": "objective",
+        "id": "h-recruits",
+        "status": "completed"
+      },
+      "actions": [
+        {
+          "type": "giveResources",
+          "owner": "player",
+          "gold": 250
+        },
+        {
+          "type": "sound",
+          "id": "victory"
+        },
+        {
+          "type": "message",
+          "text": {
+            "pt-BR": "Os 4 Talhadores voltaram às fileiras: +250 de ouro.",
+            "en": "The 4 Slashers are back in the ranks: +250 gold."
+          }
+        },
+        {
+          "type": "dialog",
+          "speaker": {
+            "pt-BR": "Drogath Punho-de-Brasa",
+            "en": "Drogath Emberfist"
+          },
+          "portrait": "🔥",
+          "duration": 8,
+          "text": {
+            "pt-BR": "Quatro machados de volta ao Clã. Ninguém fica para trás enquanto o Fogo estiver aceso.",
+            "en": "Four axes back with the Clan. No one is left behind while the Fire burns."
+          }
+        }
+      ]
+    },
+    {
+      "id": "arms-reward",
+      "when": {
+        "type": "objective",
+        "id": "s-arms",
+        "status": "completed"
+      },
+      "actions": [
+        {
+          "type": "giveResources",
+          "owner": "player",
+          "gold": 400
+        },
+        {
+          "type": "sound",
+          "id": "victory"
+        },
+        {
+          "type": "message",
+          "text": {
+            "pt-BR": "Armas combinadas: +400 de ouro.",
+            "en": "Combined arms: +400 gold."
+          }
+        }
+      ]
+    },
+    {
+      "id": "cloud-reward",
+      "when": {
+        "type": "objective",
+        "id": "s-cloud",
+        "status": "completed"
+      },
+      "actions": [
+        {
+          "type": "giveResources",
+          "owner": "player",
+          "gold": 300
+        },
+        {
+          "type": "sound",
+          "id": "victory"
+        },
+        {
+          "type": "message",
+          "text": {
+            "pt-BR": "Nuvem de Cinzas pesquisada: +300 de ouro.",
+            "en": "Ash Cloud researched: +300 gold."
+          }
+        },
+        {
+          "type": "dialog",
+          "speaker": {
+            "pt-BR": "Anciã Ulma",
+            "en": "Elder Ulma"
+          },
+          "portrait": "🕯️",
+          "duration": 9,
+          "text": {
+            "pt-BR": "A Nuvem de Cinzas é a magia mais cruel do caderno, e a mais justa contra quem ataca em bando. Use-a onde eles se amontoam, não onde estamos nós.",
+            "en": "Ash Cloud is the notebook's cruelest spell, and the fairest against those who attack in packs. Use it where they bunch up, not where we stand."
+          }
+        }
+      ]
+    },
+    {
+      "id": "guard-reward",
+      "when": {
+        "type": "objective",
+        "id": "s-guard",
+        "status": "completed"
+      },
+      "actions": [
+        {
+          "type": "giveResources",
+          "owner": "player",
+          "gold": 500
+        },
+        {
+          "type": "sound",
+          "id": "victory"
+        },
+        {
+          "type": "message",
+          "text": {
+            "pt-BR": "O Paço da Guarda Real caiu: +500 de ouro.",
+            "en": "The Royal Guard's Palace fell: +500 gold."
+          }
+        }
+      ]
+    },
+    {
+      "id": "ruins-found",
+      "when": {
+        "type": "objective",
+        "id": "h-ruins",
+        "status": "completed"
+      },
+      "actions": [
+        {
+          "type": "giveResources",
+          "owner": "player",
+          "wood": 300,
+          "gold": 200,
+          "stone": 150
+        },
+        {
+          "type": "lightLandmark",
+          "tag": "keeper_post"
+        },
+        {
+          "type": "sound",
+          "id": "victory"
+        },
+        {
+          "type": "message",
+          "text": {
+            "pt-BR": "Posto do Faroleiro encontrado: +300 de madeira, +200 de ouro, +150 de pedra.",
+            "en": "Lighthouse Keeper's Post found: +300 wood, +200 gold, +150 stone."
+          }
+        },
+        {
+          "type": "dialog",
+          "speaker": {
+            "pt-BR": "Drogath Punho-de-Brasa",
+            "en": "Drogath Emberfist"
+          },
+          "portrait": "🔥",
+          "duration": 9,
+          "text": {
+            "pt-BR": "Um diário de faroleiro, e um estoque que ele deixou para quem viesse. Sinal de que o Farol sempre foi de quem o acende, não de quem o conquista.",
+            "en": "A keeper's diary, and a store he left for whoever came. A sign that the Lighthouse always belonged to whoever lights it, not whoever conquers it."
+          }
+        }
+      ]
+    },
+    {
+      "id": "zarruk-reward",
+      "when": {
+        "type": "objective",
+        "id": "h-zarruk",
+        "status": "completed"
+      },
+      "actions": [
+        {
+          "type": "giveResources",
+          "owner": "player",
+          "gold": 400
+        },
+        {
+          "type": "message",
+          "text": {
+            "pt-BR": "Zarruk Fornalha seguiu de pé: +400 de ouro.",
+            "en": "Zarruk Furnace remained standing: +400 gold."
+          }
+        }
+      ]
+    },
+    {
+      "id": "brann-fallen",
+      "when": {
+        "type": "dead",
+        "select": {
+          "tag": "brann"
+        },
+        "count": 1
+      },
+      "actions": [
+        {
+          "type": "sound",
+          "id": "victory"
+        },
+        {
+          "type": "dialog",
+          "speaker": {
+            "pt-BR": "Capitão Brann",
+            "en": "Captain Brann"
+          },
+          "portrait": "⚔️",
+          "duration": 8,
+          "text": {
+            "pt-BR": "O gelo me leva sem raiva. Digam à Guarda que o forte caiu de pé.",
+            "en": "The ice takes me without anger. Tell the Guard the fort fell standing."
+          }
+        }
+      ]
+    },
+    {
+      "id": "fort-fallen",
+      "when": {
+        "type": "objective",
+        "id": "p-fort",
+        "status": "completed"
+      },
+      "actions": [
+        {
+          "type": "sound",
+          "id": "victory"
+        },
+        {
+          "type": "dialog",
+          "speaker": {
+            "pt-BR": "Drogath Punho-de-Brasa",
+            "en": "Drogath Emberfist"
+          },
+          "portrait": "🔥",
+          "duration": 9,
+          "text": {
+            "pt-BR": "O Paço de Brumar é cinza. Se o Farol é nosso, a Geada é nossa. Só falta provar que sabemos segurá-la.",
+            "en": "Brumar's Palace is ash. If the Lighthouse is ours, the Frost is ours. All that is left is to prove we can hold it."
+          }
+        }
+      ]
+    },
+    {
+      "id": "hall-fallen",
+      "when": {
+        "type": "count",
+        "select": {
+          "buildingType": "great_hall",
+          "owner": "player"
+        },
+        "op": "==",
+        "value": 0
+      },
+      "actions": [
+        {
+          "type": "defeat",
+          "text": {
+            "pt-BR": "O Salão do Clã caiu. A Geada é de Aurelan.",
+            "en": "The Clan Hall has fallen. The Frost belongs to Aurelan."
+          }
+        }
+      ]
+    },
+    {
+      "id": "drogath-fallen",
+      "when": {
+        "type": "dead",
+        "select": {
+          "tag": "drogath"
+        },
+        "count": 1
+      },
+      "actions": [
+        {
+          "type": "defeat",
+          "text": {
+            "pt-BR": "Drogath caiu. Sem ele o campo se desfaz e o gelo toma o Farol.",
+            "en": "Drogath has fallen. Without him the field breaks and the ice takes the Lighthouse."
+          }
+        }
+      ]
+    },
+    {
+      "id": "tide-fallen",
+      "when": {
+        "type": "dead",
+        "select": {
+          "tag": "tide_fort"
+        },
+        "count": 1
+      },
+      "actions": [
+        {
+          "type": "defeat",
+          "text": {
+            "pt-BR": "O Salão dos Marés Negras caiu. Sem a retaguarda, os Clãs não têm onde recuar na Geada.",
+            "en": "The Black Tides' Hall has fallen. Without the rear, the Clans have nowhere to fall back in the Frost."
+          }
+        }
+      ]
+    },
+    {
+      "id": "all-done",
+      "when": {
+        "all": [
+          {
+            "type": "objective",
+            "id": "p-hold",
+            "status": "completed"
+          },
+          {
+            "type": "objective",
+            "id": "p-fort",
+            "status": "completed"
+          },
+          {
+            "type": "objective",
+            "id": "p-ally",
+            "status": "completed"
+          }
+        ]
+      },
+      "actions": [
+        {
+          "type": "sound",
+          "id": "victory"
+        },
+        {
+          "type": "cutscene",
+          "id": "finale",
+          "duration": 28,
+          "skippable": true,
+          "steps": [
+            {
+              "at": 0,
+              "anchor": "lighthouse",
+              "zoom": 1.1,
+              "dialog": {
+                "speaker": {
+                  "pt-BR": "Drogath Punho-de-Brasa",
+                  "en": "Drogath Emberfist"
+                },
+                "portrait": "🔥",
+                "text": {
+                  "pt-BR": "O Farol Boreal é nosso e o forte de Brumar é cinza. Os Clãs provaram o que sabiam: brasa, magia, cerco e asas, juntos, sobre o gelo.",
+                  "en": "The Boreal Lighthouse is ours and Brumar's fort is ash. The Clans proved what they knew: ember, magic, siege and wings, together, over the ice."
+                },
+                "duration": 9
+              }
+            },
+            {
+              "at": 9,
+              "anchor": "allyFort",
+              "zoom": 1.1,
+              "dialog": {
+                "speaker": {
+                  "pt-BR": "Zarruk Fornalha",
+                  "en": "Zarruk Furnace"
+                },
+                "portrait": "🧨",
+                "text": {
+                  "pt-BR": "O Salão ficou de pé, e eu com ele. Digam ao chefe-de-brasa que a retaguarda aguentou. O Clã pode seguir para o brejo.",
+                  "en": "The Hall stood, and I with it. Tell the ember-chief the rear held. The Clan may go on to the marsh."
+                },
+                "duration": 9
+              }
+            },
+            {
+              "at": 18,
+              "anchor": "playerStart",
+              "zoom": 1.1,
+              "dialog": {
+                "speaker": {
+                  "pt-BR": "Anciã Ulma",
+                  "en": "Elder Ulma"
+                },
+                "portrait": "🕯️",
+                "text": {
+                  "pt-BR": "Bom trabalho, filho do Clã. A Geada foi a última lição: daqui em diante os Clãs lutam sem amparo. O Fogo guarda o resto do caminho.",
+                  "en": "Good work, child of the Clan. The Frost was the last lesson: from here on the Clans fight without a safety net. The Fire keeps the rest of the road."
+                },
+                "duration": 9
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "finale-clock",
+      "when": {
+        "type": "trigger",
+        "id": "all-done"
+      },
+      "actions": [
+        {
+          "type": "incVar",
+          "name": "fin_clock",
+          "by": 1
+        }
+      ],
+      "once": false,
+      "cooldown": 28
+    },
+    {
+      "id": "finale-victory",
+      "when": {
+        "type": "var",
+        "name": "fin_clock",
+        "op": ">=",
+        "value": 1
+      },
+      "actions": [
+        {
+          "type": "victory"
+        }
+      ]
     }
   ]
 }

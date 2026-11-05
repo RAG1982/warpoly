@@ -3,85 +3,147 @@
   "version": 1,
   "id": "war-horde-10-cabo-aurora",
   "hidden": true,
-  "title": {
-    "pt-BR": "Desembarque no Cabo Aurora",
-    "en": "Landing at Cape Aurora"
-  },
-  "subtitle": {
-    "pt-BR": "Clãs do Cinzal, missão 10",
-    "en": "Cinzal Clans, mission 10"
-  },
+  "title": { "pt-BR": "Desembarque no Cabo Aurora", "en": "Landing at Cape Aurora" },
+  "subtitle": { "pt-BR": "Clãs do Cinzal, missão 10", "en": "Cinzal Clans, mission 10" },
   "briefing": {
-    "speaker": {
-      "pt-BR": "Vozgul a Profetisa",
-      "en": "Vozgul the Prophetess"
-    },
+    "speaker": { "pt-BR": "Vozgul, a Profetisa", "en": "Vozgul, the Prophetess" },
     "portrait": "💀",
     "text": {
-      "pt-BR": "Os Clãs do Cinzal pisaram nas terras de Velmara. Acalme as marés e estabeleça o Marco de Brasa-Alta.",
-      "en": "The Cinzal Clans have set foot on Velmara's shores. Calm the tides and raise the Highember Outpost."
+      "pt-BR": "O último poço ficou para trás e a Anciã Ulma descansa no Fogo. Agora é o outro lado do Mar Fendido: Velmara, a terra verde, onde Aurelan guarda a costa com três torres e uma guarnição. A nossa ilha fica a leste; a praia do Cabo Aurora fica a oeste, depois de mais de cem passos de mar aberto. Embarquem a tropa nas duas Barcaças, naveguem até a praia e fundem o Marco da Colônia, Brasa-Alta, atrás dela. Depois derrubem as três torres da guarda costeira, para que a esquadra de Aurelan não feche o desembarque. Drogath comanda a tropa; eu vou com ele: o Fogo me mostra um bosque de orvalho na ilha do Farol, ao norte, e só se chega lá pelo mar.",
+      "en": "The last well is behind us and Elder Ulma rests in the Fire. Now comes the far side of the Sundered Sea: Velmara, the green land, where Aurelan holds the coast with three towers and a garrison. Our island lies to the east; Cape Aurora's beach lies to the west, across more than a hundred paces of open sea. Board the troops on the two Barges, sail to the beach and found the Colony Outpost, Highember, behind it. Then bring down the three coastal towers so that Aurelan's squadron cannot close the landing. Drogath leads the troops; I go with him: the Fire shows me a dew grove on the Lighthouse isle, to the north, and it can only be reached by sea."
     },
     "hints": [
-      {
-        "pt-BR": "Concentre-se nos objetivos primários para avançar.",
-        "en": "Focus on primary objectives to advance."
-      }
+      { "pt-BR": "Dica: a tropa embarca nas Barcaças com o comando de carga (clique direito na Barcaça, com as tropas selecionadas). Cada Barcaça leva até 6 unidades.", "en": "Tip: the troops board the Barges with the load command (right-click the Barge with the troops selected). Each Barge carries up to 6 units." },
+      { "pt-BR": "Dica: a Barcaça solta a carga na água junto da praia de Velmara (Desembarcar). O Marco nasce quando uma unidade sua chega à praia, mas as torres da guarda costeira alcançam a margem.", "en": "Tip: the Barge unloads its cargo in the water beside Velmara's beach (Unload). The Outpost is founded when one of your units reaches the beach, but the coastal towers reach the shore." },
+      { "pt-BR": "Dica: a Doca do Clã fica na costa da ilha, perto do Salão. Galés de Guerra afundam as fragatas de Aurelan a distância e abrem a rota das Barcaças. Esta missão libera o petróleo inicial: use-o nas Galés.", "en": "Tip: the Clan Dock stands on the island's coast, near the Hall. War Galleys sink Aurelan's frigates at range and open the Barges' route. This mission grants starting oil: spend it on Galleys." },
+      { "pt-BR": "Vozgul entra como herói jogável nesta missão (Z, X, C). Drogath é o herói único da tropa: se ele morrer, a missão está perdida.", "en": "Vozgul joins as a playable hero in this mission (Z, X, C). Drogath is the troop's sole hero: if he dies, the mission is lost." }
     ]
   },
-  "mapId": "estreito-1v1",
+  "mapId": "camp-10-cabo-aurora",
   "seed": 9170,
   "players": [
-    {
-      "id": 0,
-      "name": {
-        "pt-BR": "Clãs do Cinzal",
-        "en": "Cinzal Clans"
-      },
-      "factionId": "orc",
-      "team": 0,
-      "color": "#dc2626",
-      "isLocal": true,
-      "startSlot": 0
-    },
-    {
-      "id": 1,
-      "name": {
-        "pt-BR": "Tropas de Aurelan",
-        "en": "Aurelan Troops"
-      },
-      "factionId": "human",
-      "team": 1,
-      "color": "#2563eb",
-      "isAI": true,
-      "startSlot": 1
-    }
+    { "id": 0, "name": { "pt-BR": "Clãs do Cinzal", "en": "Cinzal Clans" }, "factionId": "orc", "team": 0, "color": "#dc2626", "isLocal": true, "startSlot": 0 },
+    { "id": 1, "name": { "pt-BR": "Guarnição de Aurelan", "en": "Aurelan Garrison" }, "factionId": "human", "team": 1, "color": "#2563eb", "isAI": true, "difficulty": "easy", "startSlot": 1 }
   ],
-  "startingResources": {
-    "wood": 400,
-    "gold": 400,
-    "stone": 150
-  },
+  "startingResources": { "wood": 600, "gold": 1400, "stone": 300 },
+  "vars": { "fin_clock": 0 },
+  "autoVictory": false,
   "setup": [
-    {
-      "type": "tag",
-      "select": {
-        "buildingType": "castle"
-      },
-      "tag": "enemy_base"
-    }
+    { "type": "tag", "select": { "buildingType": "great_hall", "owner": "player" }, "tag": "home_hall" },
+    { "type": "spawn", "owner": "player", "unitType": "hero_drogath", "count": 1, "anchor": "playerStart", "dx": 0, "dz": 13, "tag": "drogath" },
+    { "type": "spawn", "owner": "player", "unitType": "hero_vozgul", "count": 1, "anchor": "playerStart", "dx": 4, "dz": 13, "tag": "vozgul", "markColor": "#a78bfa" },
+    { "type": "spawn", "owner": "player", "unitType": "barge", "count": 1, "anchor": "bargeStart1", "tag": "barge1" },
+    { "type": "spawn", "owner": "player", "unitType": "barge", "count": 1, "anchor": "bargeStart2", "tag": "barge2" },
+    { "type": "spawn", "owner": "player", "units": [{ "type": "grunt", "count": 6 }, { "type": "axethrower", "count": 6 }], "anchor": "beach1", "spread": 4, "tag": "clan_troops" },
+    { "type": "spawnBuilding", "owner": 1, "buildingType": "watchtower", "anchor": "coastTower1", "tag": "coast_tower", "facing": 0 },
+    { "type": "spawnBuilding", "owner": 1, "buildingType": "watchtower", "anchor": "coastTower2", "tag": "coast_tower", "facing": 0 },
+    { "type": "spawnBuilding", "owner": 1, "buildingType": "watchtower", "anchor": "coastTower3", "tag": "coast_tower", "facing": 0 },
+    { "type": "spawn", "owner": 1, "units": [{ "type": "knight", "count": 4 }, { "type": "archer", "count": 3 }], "anchor": "coastTower2", "dx": -6, "dz": -4, "spread": 4, "tag": "coast_guard", "guard": { "r": 12 } },
+    { "type": "spawn", "owner": 1, "unitType": "frigate", "count": 3, "anchor": "patrolSea", "spread": 4, "tag": "patrol_frigate", "guard": { "r": 16 } },
+    { "type": "spawnLandmark", "kind": "shrine", "anchor": "isletWell", "tag": "grove", "label": { "pt-BR": "Bosque do Orvalho", "en": "Dew Grove" } }
   ],
   "objectives": [
-    {
-      "id": "primary-main",
-      "type": "destroy",
-      "priority": "primary",
-      "select": {
-        "tag": "enemy_base"
-      },
-      "title": {
-        "pt-BR": "Estabelecer a colônia com Vozgul",
-        "en": "Establish the colony outpost with Vozgul"
-      }
-    }
+    { "id": "p-colony", "type": "flag", "priority": "primary",
+      "condition": { "type": "count", "select": { "tag": "colony" }, "op": ">=", "value": 1 },
+      "title": { "pt-BR": "Fundar o Marco da Colônia, Brasa-Alta, na praia de Velmara", "en": "Found the Colony Outpost, Highember, on Velmara's beach" },
+      "description": { "pt-BR": "Leve uma unidade sua até a praia de desembarque, a oeste. O Marco nasce atrás da praia, sob o alcance das torres de Aurelan.", "en": "Bring one of your units to the landing beach in the west. The Outpost rises behind the beach, within reach of Aurelan's towers." },
+      "marker": { "area": { "anchor": "landingZone", "r": 16 }, "style": "goal", "seconds": 240 } },
+    { "id": "p-towers", "type": "destroy", "priority": "primary", "select": { "tag": "coast_tower" }, "count": 3,
+      "title": { "pt-BR": "Destruir as 3 Torres da guarda costeira", "en": "Destroy the 3 coastal guard Towers" },
+      "description": { "pt-BR": "As torres de Aurelan guardam a costa a noroeste da praia. Tropa em terra ou Galés pelo mar.", "en": "Aurelan's towers guard the coast northwest of the beach. Troops ashore or Galleys from the sea." } },
+    { "id": "s-barges", "type": "flag", "priority": "secondary",
+      "condition": { "type": "objective", "id": "p-colony", "status": "completed" },
+      "failWhen": { "type": "dead", "select": { "unitType": "barge", "owner": "player" }, "count": 2 },
+      "title": { "pt-BR": "Perder no máximo uma Barcaça na travessia", "en": "Lose at most one Barge in the crossing" },
+      "description": { "pt-BR": "Fundar o Marco sem perder as duas Barcaças. A segunda Barcaça perdida cancela este objetivo.", "en": "Found the Outpost without losing both Barges. The second Barge lost cancels this objective." } },
+    { "id": "s-patrol", "type": "destroy", "priority": "secondary", "select": { "tag": "patrol_frigate" }, "count": 3,
+      "title": { "pt-BR": "Afundar a patrulha de 3 Fragatas no Farol", "en": "Sink the 3-frigate patrol at the Lighthouse" },
+      "description": { "pt-BR": "As fragatas patrulham o mar entre a ilha do meio e a praia. Só navios as alcançam bem.", "en": "The frigates patrol the sea between the middle isle and the beach. Only ships reach them well." } },
+    { "id": "s-necros", "type": "train", "priority": "secondary", "unitType": "necromancer", "count": 2,
+      "title": { "pt-BR": "Treinar 2 Necromantes no Santuário das Cinzas", "en": "Train 2 Necromancers at the Ash Sanctum" },
+      "description": { "pt-BR": "Os Necromantes erguem mortos e drenam a vida do inimigo. Erga o Santuário das Cinzas com o Salão no nível 3.", "en": "Necromancers raise the dead and drain the enemy's life. Raise the Ash Sanctum with the Hall at level 3." } },
+    { "id": "h-grove", "type": "flag", "priority": "hidden",
+      "condition": { "type": "area", "owner": "player", "area": { "anchor": "isletWell", "r": 14 } },
+      "title": { "pt-BR": "Achar o Bosque do Orvalho", "en": "Find the Dew Grove" } }
+  ],
+  "triggers": [
+    { "id": "intro", "when": { "type": "time", "at": 0 },
+      "actions": [
+        { "type": "music", "id": "on" },
+        { "type": "reveal", "anchor": "landingZone", "radius": 34, "ttl": 50 },
+        { "type": "reveal", "anchor": "isletWell", "radius": 26, "ttl": 40 },
+        { "type": "cutscene", "id": "shore", "duration": 34, "skippable": true,
+          "steps": [
+            { "at": 0, "anchor": "playerStart", "zoom": 1.15, "dialog": { "speaker": { "pt-BR": "Drogath Punho-de-Brasa", "en": "Drogath Emberfist" }, "portrait": "🔥", "text": { "pt-BR": "O último poço ficou para trás. Velmara está ali, do outro lado do mar, e os Clãs vão pisá-la.", "en": "The last well is behind us. Velmara lies out there across the sea, and the Clans will set foot on it." }, "duration": 8 } },
+            { "at": 9, "anchor": "beach1", "zoom": 1.1, "dialog": { "speaker": { "pt-BR": "Vozgul, a Profetisa", "en": "Vozgul, the Prophetess" }, "portrait": "💀", "text": { "pt-BR": "O Fogo marca a praia do Cabo Aurora. Fica do outro lado do mar aberto, e só as Barcaças a alcançam.", "en": "The Fire marks Cape Aurora's beach. It lies across the open sea, and only Barges can reach it." }, "duration": 8 } },
+            { "at": 18, "anchor": "coastTower2", "zoom": 1.05, "dialog": { "speaker": { "pt-BR": "Drogath Punho-de-Brasa", "en": "Drogath Emberfist" }, "portrait": "🔥", "text": { "pt-BR": "Três torres de Aurelan guardam a costa. Derrubem-nas e a margem é nossa.", "en": "Three Aurelan towers guard the coast. Bring them down and the shore is ours." }, "duration": 8 } },
+            { "at": 27, "anchor": "playerStart", "zoom": 1.15, "dialog": { "speaker": { "pt-BR": "Vozgul, a Profetisa", "en": "Vozgul, the Prophetess" }, "portrait": "💀", "text": { "pt-BR": "Embarquem a tropa. A primeira Barcaça parte da praia da nossa ilha.", "en": "Board the troops. The first Barge leaves from our island's beach." }, "duration": 7 } }
+          ] }
+      ] },
+    { "id": "full-tree", "when": { "type": "time", "at": 0 },
+      "actions": [
+        { "type": "setTier", "owner": "player", "tier": 3 },
+        { "type": "giveResources", "owner": "player", "oil": 1500 },
+        { "type": "message", "text": { "pt-BR": "Árvore tecnológica completa liberada: o Salão está no nível 3 (Santuário das Cinzas, Doca, Torres). Petróleo inicial: 1500.", "en": "Full tech tree unlocked: the Hall is at level 3 (Ash Sanctum, Dock, Towers). Starting oil: 1500." } }
+      ] },
+    { "id": "landed", "when": { "type": "area", "owner": "player", "area": { "anchor": "landingZone", "r": 16 } },
+      "actions": [
+        { "type": "spawnBuilding", "owner": "player", "buildingType": "great_hall", "anchor": "colonyMark", "tag": "colony", "facing": 90 },
+        { "type": "sound", "id": "build" },
+        { "type": "dialog", "speaker": { "pt-BR": "Vozgul, a Profetisa", "en": "Vozgul, the Prophetess" }, "portrait": "💀", "text": { "pt-BR": "Brasa-Alta está erguida em Velmara. A guarnição de Aurelan vem por aí: segurem a praia.", "en": "Highember stands in Velmara. Aurelan's garrison is coming: hold the beach." }, "duration": 8 }
+      ], "once": true },
+    { "id": "raid-1", "when": { "type": "time", "at": 300 },
+      "actions": [
+        { "type": "spawn", "owner": 1, "units": [{ "type": "knight", "count": 6 }, { "type": "archer", "count": 3 }], "anchor": "enemyStart", "dx": 8, "dz": 6, "spread": 3, "order": { "kind": "attackMove", "anchor": "colonyMark" } },
+        { "type": "message", "text": { "pt-BR": "Primeira leva de Aurelan: Cavaleiros-de-Armas e Arqueiros marcham para a praia.", "en": "Aurelan's first wave: men-at-arms and Archers march for the beach." } }
+      ] },
+    { "id": "raid-2", "when": { "type": "time", "at": 480 },
+      "actions": [
+        { "type": "spawn", "owner": 1, "units": [{ "type": "ballista", "count": 1 }, { "type": "knight", "count": 6 }, { "type": "archer", "count": 3 }], "anchor": "enemyStart", "dx": 8, "dz": -4, "spread": 3, "order": { "kind": "attackMove", "anchor": "colonyMark" } },
+        { "type": "message", "text": { "pt-BR": "Segunda leva: uma Balista lidera a tropa rumo ao Marco.", "en": "Second wave: a Ballista leads the troops toward the Outpost." } }
+      ] },
+    { "id": "fleet-raid", "when": { "type": "time", "at": 600 },
+      "actions": [
+        { "type": "spawn", "owner": 1, "unitType": "frigate", "count": 3, "anchor": "patrolSea", "spread": 4, "tag": "raid_fleet", "order": { "kind": "attackMove", "anchor": "unloadSea" } },
+        { "type": "message", "text": { "pt-BR": "Três fragatas de Aurelan saem do Farol rumo à praia: afundem-nas antes que bloqueiem o desembarque.", "en": "Three Aurelan frigates leave the Lighthouse for the beach: sink them before they block the landing." } }
+      ] },
+    { "id": "raid-3", "when": { "type": "time", "at": 780 },
+      "actions": [
+        { "type": "spawn", "owner": 1, "units": [{ "type": "ballista", "count": 2 }, { "type": "knight", "count": 8 }, { "type": "cavalier", "count": 2 }], "anchor": "enemyStart", "dx": 10, "dz": 0, "spread": 3, "tag": "raid3", "order": { "kind": "attackMove", "anchor": "colonyMark" } },
+        { "type": "dialog", "speaker": { "pt-BR": "Comandante da Guarda", "en": "Guard Commander" }, "portrait": "🛡️", "text": { "pt-BR": "Os Clãs vieram de barco e acham que ficam. Levem tudo até a praia e joguem-nos de volta ao mar!", "en": "The Clans came by boat and think they can stay. Bring everything to the beach and throw them back into the sea!" }, "duration": 8 }
+      ] },
+    { "id": "towers-down", "when": { "type": "objective", "id": "p-towers", "status": "completed" },
+      "actions": [
+        { "type": "sound", "id": "victory" },
+        { "type": "message", "text": { "pt-BR": "As três torres da guarda costeira caíram. A margem de Brasa-Alta é nossa.", "en": "The three coastal guard towers have fallen. Highember's shore is ours." } }
+      ] },
+    { "id": "patrol-down", "when": { "type": "objective", "id": "s-patrol", "status": "completed" },
+      "actions": [{ "type": "message", "text": { "pt-BR": "Patrulha do Farol afundada. O mar entre as ilhas é nosso.", "en": "Lighthouse patrol sunk. The sea between the isles is ours." } }] },
+    { "id": "barge-lost", "when": { "type": "dead", "select": { "unitType": "barge", "owner": "player" }, "count": 1 },
+      "actions": [{ "type": "message", "text": { "pt-BR": "Uma Barcaça afundou. Com a segunda perdida, o Fogo não perdoa a travessia.", "en": "A Barge has sunk. If the second is lost, the Fire will not forgive the crossing." } }] },
+    { "id": "grove-found", "when": { "type": "objective", "id": "h-grove", "status": "completed" },
+      "actions": [
+        { "type": "lightLandmark", "tag": "grove" },
+        { "type": "giveResources", "owner": "player", "gold": 150 },
+        { "type": "dialog", "speaker": { "pt-BR": "Vozgul, a Profetisa", "en": "Vozgul, the Prophetess" }, "portrait": "💀", "text": { "pt-BR": "O orvalho do bosque guarda a voz dos antigos. O Fogo nos deu 150 de ouro de oferenda.", "en": "The grove's dew holds the voice of the elders. The Fire gave us 150 gold as an offering." }, "duration": 7 }
+      ] },
+    { "id": "drogath-fallen", "when": { "type": "dead", "select": { "tag": "drogath" }, "count": 1 },
+      "actions": [ { "type": "defeat", "text": { "pt-BR": "Drogath caiu. O Fogo do Clã se apaga na travessia.", "en": "Drogath has fallen. The Clan Fire dies out in the crossing." } } ] },
+    { "id": "hall-fallen", "when": { "type": "count", "select": { "tag": "home_hall" }, "op": "==", "value": 0 },
+      "actions": [ { "type": "defeat", "text": { "pt-BR": "O Salão do Clã caiu. A ilha dos Clãs ficou sem chão e sem fogo.", "en": "The Clan Hall fell. The Clans' island is left without ground or fire." } } ] },
+    { "id": "all-done", "when": { "all": [
+        { "type": "objective", "id": "p-colony", "status": "completed" },
+        { "type": "objective", "id": "p-towers", "status": "completed" }
+      ] },
+      "actions": [
+        { "type": "sound", "id": "victory" },
+        { "type": "cutscene", "id": "finale", "duration": 12, "skippable": true,
+          "steps": [
+            { "at": 0, "anchor": "colonyMark", "zoom": 1.1, "dialog": { "speaker": { "pt-BR": "Vozgul, a Profetisa", "en": "Vozgul, the Prophetess" }, "portrait": "💀", "text": { "pt-BR": "Brasa-Alta está de pé em Velmara e as torres de Aurelan estão no chão. O mar já é metade nosso.", "en": "Highember stands in Velmara and Aurelan's towers lie in ruins. The sea is already half ours." }, "duration": 6 } },
+            { "at": 6, "anchor": "landingZone", "zoom": 1.15, "dialog": { "speaker": { "pt-BR": "Drogath Punho-de-Brasa", "en": "Drogath Emberfist" }, "portrait": "🔥", "text": { "pt-BR": "Daqui se vê o caminho para o interior. Os Clãs pisaram na terra verde, e o Fogo veio junto.", "en": "From here the road to the interior is in sight. The Clans have set foot on the green land, and the Fire came along." }, "duration": 6 } }
+          ] }
+      ] },
+    { "id": "finale-clock", "when": { "type": "trigger", "id": "all-done" }, "actions": [ { "type": "incVar", "name": "fin_clock" } ] },
+    { "id": "finale-victory", "when": { "type": "var", "name": "fin_clock", "op": ">=", "value": 1 }, "actions": [ { "type": "victory" } ] }
   ]
 }

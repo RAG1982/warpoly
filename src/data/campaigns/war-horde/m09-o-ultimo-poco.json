@@ -18,17 +18,33 @@
     },
     "portrait": "🔥",
     "text": {
-      "pt-BR": "Os poços de Miragem dão água à travessia. Assegure a última ilha antes de Velmara.",
-      "en": "The wells of Mirage provide water for the crossing. Secure the final isle before Velmara."
+      "pt-BR": "Miragem é a última ilha antes de Velmara: dunas, ruínas e três poços de água, o último gole de água doce do Mar Fendido. Quem segura os poços segura a travessia, e a Anciã Ulma, que carrega o Fogo do Clã desde as secas de Cinzara, pediu para vê-los antes de o inverno chegar. Desembarcamos pela Barcaça na cabeça de ponte, a noroeste do Salão, e o Salão já nos espera. Tome os três poços e mantenha um guerreiro dentro do anel de cada um por um minuto inteiro. Erga o Forte do Poço, três Torres de Vigia no sítio marcado ao norte do Salão, e resista por oito minutos. O Marechal Dorian Vasques, estrategista da Guarda Real, não aceita perder a ilha: ele vem por terra com Cavaleiros, Balistas e Grifos. Prepare Lanceiros-Machado e Serpes de Guerra contra os voadores. O Aviário de Aurelan fica atrás da base deles, na ponta noroeste da ilha. Eu comando o campo: se eu cair, o Fogo se apaga na areia.",
+      "en": "Mirage is the last isle before Velmara: dunes, ruins and three water wells, the last sweet water of the Sundered Sea. Whoever holds the wells holds the crossing, and Elder Ulma, who has carried the Clan Fire since the droughts of Cinzara, asked to see them before winter comes. We land by Barge at the bridgehead, northwest of the Hall, and the Hall already waits for us. Take the three wells and keep a warrior inside each one's ring for one full minute. Raise the Well Fort, three Watchtowers on the marked site north of the Hall, and hold out for eight minutes. Marshal Dorian Vasques, strategist of the Royal Guard, will not accept losing the isle: he comes by land with Cavaliers, Ballistae and Gryphons. Ready Axe Throwers and War Serpents against the flyers. Aurelan's Aviary stands behind their base, on the northwest tip of the isle. I command the field: if I fall, the Fire dies out on the sand."
     },
     "hints": [
       {
-        "pt-BR": "Concentre-se nos objetivos primários para avançar.",
-        "en": "Focus on primary objectives to advance."
+        "pt-BR": "A cabeça de ponte fica a noroeste do Salão. A Barcaça do Clã já desembarcou seis guerreiros; leve-os aos poços antes que as levas de Dorian cheguem.",
+        "en": "The bridgehead is northwest of the Hall. The Clan's Barge has already landed six warriors; take them to the wells before Dorian's waves arrive."
+      },
+      {
+        "pt-BR": "Os três Poços ficam em terra firme no meio da ilha e aparecem no mapa e no minimapa. Ponha uma unidade DENTRO do anel de cada um ao mesmo tempo. O contador zera se um inimigo chegar perto de um deles.",
+        "en": "The three Wells stand on dry land in the middle of the isle and show on the map and the minimap. Keep a unit INSIDE every ring at the same time. The counter resets if an enemy gets near one."
+      },
+      {
+        "pt-BR": "O Forte do Poço são 3 Torres de Vigia no sítio marcado, entre o Salão e o poço do leste. Tropa atrás das torres vale o dobro. Torres e Lanceiros-Machado atiram nos Grifos; Serpes de Guerra também.",
+        "en": "The Well Fort is 3 Watchtowers on the marked site, between the Hall and the eastern well. Troops behind the towers are worth double. Towers and Axe Throwers shoot the Gryphons; so do War Serpents."
+      },
+      {
+        "pt-BR": "Dorian marcha aos 6:20 com Cavaleiros e Balistas, os Grifos voam direto ao Salão aos 7:20 e o último golpe vem aos 7:50. Reforços das Marés Negras chegam por Barcaça aos 5 minutos.",
+        "en": "Dorian marches at 6:20 with Cavaliers and Ballistae, the Gryphons fly straight to the Hall at 7:20 and the final blow comes at 7:50. Reinforcements from the Black Tides arrive by Barge at 5 minutes."
+      },
+      {
+        "pt-BR": "Drogath é um HERÓI: tem mana e habilidades (Z, X, C) e só existe um. Se ele morrer, a missão está perdida. O Salão do Clã também não pode cair.",
+        "en": "Drogath is a HERO: he has mana and abilities (Z, X, C) and there is only one of him. If he dies the mission is lost. The Clan Hall must not fall either."
       }
     ]
   },
-  "mapId": "ilhas-4p",
+  "mapId": "camp-09-miragem",
   "seed": 9153,
   "players": [
     {
@@ -41,7 +57,7 @@
       "team": 0,
       "color": "#dc2626",
       "isLocal": true,
-      "startSlot": 0
+      "startSlot": 1
     },
     {
       "id": 1,
@@ -53,14 +69,21 @@
       "team": 1,
       "color": "#2563eb",
       "isAI": true,
-      "startSlot": 1
+      "difficulty": "easy",
+      "startSlot": 0
     }
   ],
   "startingResources": {
-    "wood": 400,
-    "gold": 400,
-    "stone": 150
+    "wood": 700,
+    "gold": 900,
+    "stone": 250
   },
+  "vars": {
+    "hold": 0,
+    "breaches": 0,
+    "fin_clock": 0
+  },
+  "autoVictory": false,
   "setup": [
     {
       "type": "tag",
@@ -68,20 +91,1328 @@
         "buildingType": "castle"
       },
       "tag": "enemy_base"
+    },
+    {
+      "type": "spawn",
+      "owner": "player",
+      "unitType": "hero_drogath",
+      "count": 1,
+      "anchor": "enemyStart",
+      "dx": 0,
+      "dz": 13,
+      "tag": "drogath"
+    },
+    {
+      "type": "spawnBuilding",
+      "owner": "player",
+      "buildingType": "orc_barracks",
+      "anchor": "enemyStart",
+      "dx": -14,
+      "dz": -8,
+      "tag": "garrison_barracks"
+    },
+    {
+      "type": "spawnBuilding",
+      "owner": 1,
+      "buildingType": "aviary",
+      "anchor": "aviarySite",
+      "tag": "aurelan_aviary"
+    },
+    {
+      "type": "spawnLandmark",
+      "kind": "water_well",
+      "anchor": "waterWell1",
+      "radius": 9,
+      "known": true,
+      "tag": "wells",
+      "label": {
+        "pt-BR": "Poço",
+        "en": "Well"
+      }
+    },
+    {
+      "type": "spawnLandmark",
+      "kind": "water_well",
+      "anchor": "waterWell2",
+      "radius": 9,
+      "known": true,
+      "tag": "wells",
+      "label": {
+        "pt-BR": "Poço",
+        "en": "Well"
+      }
+    },
+    {
+      "type": "spawnLandmark",
+      "kind": "water_well",
+      "anchor": "waterWell3",
+      "radius": 9,
+      "known": true,
+      "tag": "wells",
+      "label": {
+        "pt-BR": "Poço",
+        "en": "Well"
+      }
+    },
+    {
+      "type": "spawnLandmark",
+      "kind": "ruins",
+      "anchor": "ruins1",
+      "tag": "ruins",
+      "label": {
+        "pt-BR": "Ruínas do Poço Velho",
+        "en": "Old Well Ruins"
+      }
     }
   ],
   "objectives": [
     {
-      "id": "primary-main",
+      "id": "p-wells",
+      "type": "flag",
+      "priority": "primary",
+      "condition": {
+        "type": "var",
+        "name": "hold",
+        "op": ">=",
+        "value": 60
+      },
+      "progress": {
+        "var": "hold",
+        "max": 60,
+        "seconds": true,
+        "landmarkKind": "water_well"
+      },
+      "title": {
+        "pt-BR": "Tomar os três poços e segurá-los por 1 minuto",
+        "en": "Take the three wells and hold them for 1 minute"
+      },
+      "description": {
+        "pt-BR": "Ponha ao menos uma unidade DENTRO do anel de cada poço, ao mesmo tempo. O contador zera se um inimigo chegar perto de um deles.",
+        "en": "Keep at least one unit INSIDE each well's ring at the same time. The counter resets if an enemy gets near one."
+      }
+    },
+    {
+      "id": "p-fort",
+      "type": "flag",
+      "priority": "primary",
+      "condition": {
+        "type": "count",
+        "select": {
+          "owner": "player",
+          "buildingType": "orc_watchtower",
+          "area": {
+            "anchor": "fortSite2",
+            "r": 24
+          }
+        },
+        "op": ">=",
+        "value": 3
+      },
+      "title": {
+        "pt-BR": "Erguer o Forte do Poço: 3 Torres de Vigia no sítio marcado",
+        "en": "Raise the Well Fort: 3 Watchtowers on the marked site"
+      },
+      "description": {
+        "pt-BR": "O sítio fica ao norte do Salão, a caminho do poço do leste, marcado no mapa. Só contam torres concluídas dentro do anel.",
+        "en": "The site lies north of the Hall, on the way to the eastern well, marked on the map. Only finished towers inside the ring count."
+      },
+      "marker": {
+        "area": {
+          "anchor": "fortSite2",
+          "r": 18
+        },
+        "style": "goal",
+        "seconds": 120
+      }
+    },
+    {
+      "id": "p-survive",
+      "type": "survive",
+      "priority": "primary",
+      "seconds": 480,
+      "title": {
+        "pt-BR": "Resistir 8 minutos à contra-ofensiva do Marechal Dorian",
+        "en": "Hold out 8 minutes against Marshal Dorian's counter-offensive"
+      },
+      "description": {
+        "pt-BR": "Dorian marcha aos 6:20, os Grifos chegam aos 7:20 e o último golpe vem aos 7:50. Não perca o Salão do Clã.",
+        "en": "Dorian marches at 6:20, the Gryphons arrive at 7:20 and the final blow comes at 7:50. Do not lose the Clan Hall."
+      }
+    },
+    {
+      "id": "p-dorian",
       "type": "destroy",
       "priority": "primary",
       "select": {
-        "tag": "enemy_base"
+        "tag": "dorian_force"
+      },
+      "count": 36,
+      "title": {
+        "pt-BR": "Repelir a contra-ofensiva: destruir 36 soldados de Dorian",
+        "en": "Repel the counter-offensive: destroy 36 of Dorian's soldiers"
+      },
+      "description": {
+        "pt-BR": "A força de Dorian soma 42 soldados em três levas (6:20, 7:20 e 7:50). O Marechal em pessoa recua ferido no fim: não é preciso derrubá-lo.",
+        "en": "Dorian's force totals 42 soldiers in three waves (6:20, 7:20 and 7:50). The Marshal himself withdraws wounded at the end: he need not fall."
+      }
+    },
+    {
+      "id": "s-aviary",
+      "type": "destroy",
+      "priority": "secondary",
+      "select": {
+        "tag": "aurelan_aviary"
+      },
+      "count": 1,
+      "title": {
+        "pt-BR": "Destruir o Aviário de Aurelan",
+        "en": "Destroy Aurelan's Aviary"
+      },
+      "description": {
+        "pt-BR": "O Aviário fica atrás da base de Aurelan, na ponta noroeste da ilha, bem longe da cabeça de ponte. Sem ele, não há mais Grifos.",
+        "en": "The Aviary stands behind Aurelan's base, on the northwest tip of the isle, far from the bridgehead. Without it there are no more Gryphons."
+      }
+    },
+    {
+      "id": "s-serpents",
+      "type": "train",
+      "priority": "secondary",
+      "units": [
+        {
+          "type": "war_serpent",
+          "count": 2
+        }
+      ],
+      "title": {
+        "pt-BR": "Treinar 2 Serpes de Guerra",
+        "en": "Train 2 War Serpents"
+      },
+      "description": {
+        "pt-BR": "O Ninho das Serpes pede o Salão no nível 3. As Serpes caçam voadores: os Grifos de Dorian chegam aos 7:20.",
+        "en": "The Serpent Nest needs the Hall at level 3. Serpents hunt flyers: Dorian's Gryphons arrive at 7:20."
+      }
+    },
+    {
+      "id": "s-lancers",
+      "type": "train",
+      "priority": "secondary",
+      "units": [
+        {
+          "type": "axethrower",
+          "count": 6
+        }
+      ],
+      "title": {
+        "pt-BR": "Treinar 6 Lanceiros-Machado",
+        "en": "Train 6 Axe Throwers"
+      },
+      "description": {
+        "pt-BR": "Lanceiros-Machado atiram no ar e no chão: são o antiaéreo do Acampamento. Só contam os treinados nesta missão.",
+        "en": "Axe Throwers shoot both air and ground: they are the Camp's anti-air. Only those trained in this mission count."
+      }
+    },
+    {
+      "id": "h-intact",
+      "type": "flag",
+      "priority": "hidden",
+      "condition": {
+        "all": [
+          {
+            "type": "objective",
+            "id": "p-dorian",
+            "status": "completed"
+          },
+          {
+            "type": "var",
+            "name": "breaches",
+            "op": "==",
+            "value": 0
+          }
+        ]
       },
       "title": {
-        "pt-BR": "Garantir os poços de água e a cabeça de ponte",
-        "en": "Secure the water wells and the bridgehead"
+        "pt-BR": "Poços intactos: nenhum soldado de Dorian chega a um poço",
+        "en": "Wells untouched: none of Dorian's soldiers reaches a well"
+      },
+      "description": {
+        "pt-BR": "Barre a contra-ofensiva antes dos poços. Água limpa é Fogo aceso.",
+        "en": "Stop the counter-offensive before the wells. Clean water is a lit Fire."
       }
+    }
+  ],
+  "triggers": [
+    {
+      "id": "intro",
+      "when": {
+        "type": "time",
+        "at": 0
+      },
+      "actions": [
+        {
+          "type": "music",
+          "id": "on"
+        },
+        {
+          "type": "reveal",
+          "anchor": "waterWell3",
+          "radius": 30,
+          "ttl": 40
+        },
+        {
+          "type": "reveal",
+          "anchor": "waterWell2",
+          "radius": 30,
+          "ttl": 40
+        },
+        {
+          "type": "cutscene",
+          "id": "miragem",
+          "duration": 40,
+          "skippable": true,
+          "steps": [
+            {
+              "at": 0,
+              "anchor": "enemyStart",
+              "zoom": 1.15,
+              "dialog": {
+                "speaker": {
+                  "pt-BR": "Drogath Punho-de-Brasa",
+                  "en": "Drogath Emberfist"
+                },
+                "portrait": "🔥",
+                "text": {
+                  "pt-BR": "Miragem. Areia, pedra quebrada e três poços. A última água antes de Velmara, e a Anciã quis vê-la de pé.",
+                  "en": "Mirage. Sand, broken stone and three wells. The last water before Velmara, and the Elder wanted to see it standing."
+                },
+                "duration": 8
+              }
+            },
+            {
+              "at": 9,
+              "anchor": "waterWell3",
+              "zoom": 1.1,
+              "dialog": {
+                "speaker": {
+                  "pt-BR": "Anciã Ulma",
+                  "en": "Elder Ulma"
+                },
+                "portrait": "🔥",
+                "text": {
+                  "pt-BR": "Este é o poço do leste. Seco por fora e vivo por dentro, como o clã. Leve o Fogo até ele, Punho-de-Brasa, e depois ao outro lado do mar.",
+                  "en": "This is the eastern well. Dry outside and alive within, like the clan. Carry the Fire to it, Emberfist, and then to the other side of the sea."
+                },
+                "duration": 8
+              }
+            },
+            {
+              "at": 18,
+              "anchor": "waterWell2",
+              "zoom": 1.1,
+              "dialog": {
+                "speaker": {
+                  "pt-BR": "Drogath Punho-de-Brasa",
+                  "en": "Drogath Emberfist"
+                },
+                "portrait": "🔥",
+                "text": {
+                  "pt-BR": "O poço do centro. Segure os três ao mesmo tempo e Aurelan terá de vir buscá-los. Eles virão: Dorian não perde ilhas sem lutar.",
+                  "en": "The central well. Hold all three at once and Aurelan will have to come for them. They will come: Dorian does not lose isles without a fight."
+                },
+                "duration": 8
+              }
+            },
+            {
+              "at": 27,
+              "anchor": "playerStart",
+              "zoom": 1.05,
+              "dialog": {
+                "speaker": {
+                  "pt-BR": "Marechal Dorian",
+                  "en": "Marshal Dorian"
+                },
+                "portrait": "👑",
+                "text": {
+                  "pt-BR": "Os clãs desceram em Miragem. Que bebam esta noite, se quiserem. Ao amanhecer, a água volta a ser da Liga.",
+                  "en": "The clans have come down on Mirage. Let them drink tonight if they wish. By dawn, the water belongs to the League again."
+                },
+                "duration": 8
+              }
+            },
+            {
+              "at": 35,
+              "anchor": "enemyStart",
+              "zoom": 1.15,
+              "dialog": {
+                "speaker": {
+                  "pt-BR": "Drogath Punho-de-Brasa",
+                  "en": "Drogath Emberfist"
+                },
+                "portrait": "🔥",
+                "text": {
+                  "pt-BR": "Cabeça de ponte em pé, poços à frente. Vamos.",
+                  "en": "Bridgehead standing, wells ahead. Let us go."
+                },
+                "duration": 5
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "landing-start",
+      "when": {
+        "type": "time",
+        "at": 0
+      },
+      "actions": [
+        {
+          "type": "spawnLanding",
+          "owner": "player",
+          "anchor": "bridgehead2Sea",
+          "unloadAt": {
+            "anchor": "bridgehead2"
+          },
+          "bargeTag": "clan_barge",
+          "tag": "landing_clan",
+          "units": [
+            {
+              "type": "grunt",
+              "count": 3
+            },
+            {
+              "type": "axethrower",
+              "count": 3
+            }
+          ]
+        },
+        {
+          "type": "message",
+          "text": {
+            "pt-BR": "Barcaça do Clã: 6 guerreiros desembarcaram na cabeça de ponte, a noroeste do Salão.",
+            "en": "Clan Barge: 6 warriors landed at the bridgehead, northwest of the Hall."
+          }
+        }
+      ]
+    },
+    {
+      "id": "tier-up",
+      "when": {
+        "type": "time",
+        "at": 40
+      },
+      "actions": [
+        {
+          "type": "setTier",
+          "owner": "player",
+          "tier": 3
+        },
+        {
+          "type": "sound",
+          "id": "build"
+        },
+        {
+          "type": "message",
+          "text": {
+            "pt-BR": "Seu Salão do Clã subiu ao nível 3: o Covil dos Ogros, as Torres de Vigia e o Ninho das Serpes estão ao seu alcance.",
+            "en": "Your Clan Hall is now level 3: the Ogre Den, the Watchtowers and the Serpent Nest are within reach."
+          }
+        }
+      ]
+    },
+    {
+      "id": "raid-1",
+      "when": {
+        "type": "time",
+        "at": 150
+      },
+      "actions": [
+        {
+          "type": "spawn",
+          "owner": 1,
+          "units": [
+            {
+              "type": "knight",
+              "count": 4
+            },
+            {
+              "type": "archer",
+              "count": 2
+            }
+          ],
+          "anchor": "playerStart",
+          "dx": 10,
+          "dz": 12,
+          "spread": 3.5,
+          "tag": "aurelan_raid",
+          "order": {
+            "kind": "attackMove",
+            "anchor": "waterWell1"
+          }
+        },
+        {
+          "type": "sound",
+          "id": "alarm"
+        },
+        {
+          "type": "message",
+          "text": {
+            "pt-BR": "Primeira leva de Aurelan: Espadachins e Arqueiros marcham para o poço do oeste.",
+            "en": "Aurelan's first wave: Swordsmen and Archers march for the western well."
+          }
+        }
+      ]
+    },
+    {
+      "id": "raid-2",
+      "when": {
+        "type": "time",
+        "at": 270
+      },
+      "actions": [
+        {
+          "type": "spawn",
+          "owner": 1,
+          "units": [
+            {
+              "type": "knight",
+              "count": 4
+            },
+            {
+              "type": "archer",
+              "count": 3
+            },
+            {
+              "type": "ballista",
+              "count": 1
+            }
+          ],
+          "anchor": "playerStart",
+          "dx": 10,
+          "dz": 12,
+          "spread": 3.5,
+          "tag": "aurelan_raid",
+          "order": {
+            "kind": "attackMove",
+            "anchor": "waterWell2"
+          }
+        },
+        {
+          "type": "sound",
+          "id": "alarm"
+        },
+        {
+          "type": "message",
+          "text": {
+            "pt-BR": "Segunda leva: Espadachins, Arqueiros e uma Balista rumo ao poço do centro.",
+            "en": "Second wave: Swordsmen, Archers and a Ballista toward the central well."
+          }
+        }
+      ]
+    },
+    {
+      "id": "mares-negras",
+      "when": {
+        "type": "time",
+        "at": 300
+      },
+      "actions": [
+        {
+          "type": "spawnLanding",
+          "owner": "player",
+          "anchor": "bridgehead2Sea",
+          "unloadAt": {
+            "anchor": "bridgehead2"
+          },
+          "bargeTag": "tides_barge",
+          "tag": "tides_force",
+          "markColor": "#38bdf8",
+          "units": [
+            {
+              "type": "ogre",
+              "count": 2
+            },
+            {
+              "type": "grunt",
+              "count": 4
+            }
+          ]
+        },
+        {
+          "type": "sound",
+          "id": "build"
+        },
+        {
+          "type": "dialog",
+          "speaker": {
+            "pt-BR": "Orvanna Maré-Negra",
+            "en": "Orvanna Blacktide"
+          },
+          "portrait": "⚓",
+          "text": {
+            "pt-BR": "As Marés Negras mandam o que a maré aguenta: dois Ogros e quatro Talhadores. Dorian está a caminho, Punho-de-Brasa. Eu o vi na praia deles.",
+            "en": "The Black Tides send what the tide can bear: two Ogres and four Slashers. Dorian is on his way, Emberfist. I saw him on their beach."
+          },
+          "duration": 8
+        },
+        {
+          "type": "message",
+          "text": {
+            "pt-BR": "Reforços das Marés Negras: 2 Ogros e 4 Talhadores desembarcam na cabeça de ponte.",
+            "en": "Black Tides reinforcements: 2 Ogres and 4 Slashers land at the bridgehead."
+          }
+        }
+      ]
+    },
+    {
+      "id": "dorian-march",
+      "when": {
+        "type": "time",
+        "at": 380
+      },
+      "actions": [
+        {
+          "type": "spawn",
+          "owner": 1,
+          "unitType": "cavalier",
+          "count": 1,
+          "anchor": "playerStart",
+          "dx": 8,
+          "dz": 10,
+          "tag": "dorian",
+          "displayName": {
+            "pt-BR": "Marechal Dorian",
+            "en": "Marshal Dorian"
+          },
+          "markColor": "#f97316",
+          "order": {
+            "kind": "attackMove",
+            "anchor": "fortSite2"
+          }
+        },
+        {
+          "type": "spawn",
+          "owner": 1,
+          "units": [
+            {
+              "type": "cavalier",
+              "count": 3
+            },
+            {
+              "type": "knight",
+              "count": 8
+            },
+            {
+              "type": "archer",
+              "count": 5
+            },
+            {
+              "type": "ballista",
+              "count": 3
+            }
+          ],
+          "anchor": "playerStart",
+          "dx": 12,
+          "dz": 14,
+          "spread": 3.5,
+          "tag": "dorian_force",
+          "order": {
+            "kind": "attackMove",
+            "anchor": "fortSite2"
+          }
+        },
+        {
+          "type": "sound",
+          "id": "alarm"
+        },
+        {
+          "type": "dialog",
+          "speaker": {
+            "pt-BR": "Marechal Dorian",
+            "en": "Marshal Dorian"
+          },
+          "portrait": "👑",
+          "text": {
+            "pt-BR": "Cavaleiros à frente, Balistas atrás. Quero o sítio do forte deles em cinzas antes de erguerem a segunda torre.",
+            "en": "Cavaliers to the front, Ballistae behind. I want their fort site in ashes before they raise the second tower."
+          },
+          "duration": 8
+        },
+        {
+          "type": "message",
+          "text": {
+            "pt-BR": "O Marechal Dorian marcha para o Forte do Poço com 19 soldados.",
+            "en": "Marshal Dorian marches on the Well Fort with 19 soldiers."
+          }
+        }
+      ]
+    },
+    {
+      "id": "gryphons",
+      "when": {
+        "type": "time",
+        "at": 440
+      },
+      "actions": [
+        {
+          "type": "spawn",
+          "owner": 1,
+          "units": [
+            {
+              "type": "gryphon_rider",
+              "count": 4
+            }
+          ],
+          "anchor": "playerStart",
+          "dx": 14,
+          "dz": 16,
+          "spread": 3.5,
+          "tag": "dorian_force",
+          "order": {
+            "kind": "attackMove",
+            "anchor": "enemyStart"
+          }
+        },
+        {
+          "type": "sound",
+          "id": "alarm"
+        },
+        {
+          "type": "dialog",
+          "speaker": {
+            "pt-BR": "Marechal Dorian",
+            "en": "Marshal Dorian"
+          },
+          "portrait": "👑",
+          "text": {
+            "pt-BR": "Grifos pelo ar, direto ao Salão. Que a areia não esconda ninguém.",
+            "en": "Gryphons by air, straight to the Hall. Let the sand hide no one."
+          },
+          "duration": 7
+        },
+        {
+          "type": "message",
+          "text": {
+            "pt-BR": "Quatro Grifos de Aurelan voam direto ao Salão do Clã. Lanceiros, Serpes e Torres!",
+            "en": "Four Aurelan Gryphons fly straight to the Clan Hall. Axe Throwers, Serpents and Towers!"
+          }
+        }
+      ]
+    },
+    {
+      "id": "last-push",
+      "when": {
+        "type": "time",
+        "at": 470
+      },
+      "actions": [
+        {
+          "type": "spawn",
+          "owner": 1,
+          "units": [
+            {
+              "type": "cavalier",
+              "count": 4
+            },
+            {
+              "type": "knight",
+              "count": 8
+            },
+            {
+              "type": "archer",
+              "count": 4
+            },
+            {
+              "type": "ballista",
+              "count": 3
+            }
+          ],
+          "anchor": "playerStart",
+          "dx": 12,
+          "dz": 14,
+          "spread": 3.5,
+          "tag": "dorian_force",
+          "order": {
+            "kind": "attackMove",
+            "anchor": "enemyStart"
+          }
+        },
+        {
+          "type": "sound",
+          "id": "alarm"
+        },
+        {
+          "type": "message",
+          "text": {
+            "pt-BR": "Último golpe de Dorian: Cavaleiros, Espadachins e Balistas marcham direto ao Salão.",
+            "en": "Dorian's final blow: Cavaliers, Swordsmen and Ballistae march straight on the Hall."
+          }
+        }
+      ]
+    },
+    {
+      "id": "wells-tick",
+      "when": {
+        "all": [
+          {
+            "type": "area",
+            "owner": "player",
+            "area": {
+              "anchor": "waterWell1",
+              "r": 9
+            }
+          },
+          {
+            "type": "area",
+            "owner": "player",
+            "area": {
+              "anchor": "waterWell2",
+              "r": 9
+            }
+          },
+          {
+            "type": "area",
+            "owner": "player",
+            "area": {
+              "anchor": "waterWell3",
+              "r": 9
+            }
+          }
+        ]
+      },
+      "actions": [
+        {
+          "type": "incVar",
+          "name": "hold"
+        }
+      ],
+      "once": false,
+      "cooldown": 1
+    },
+    {
+      "id": "wells-reset",
+      "when": {
+        "all": [
+          {
+            "type": "var",
+            "name": "hold",
+            "op": ">=",
+            "value": 1
+          },
+          {
+            "any": [
+              {
+                "type": "area",
+                "owner": "enemy",
+                "area": {
+                  "anchor": "waterWell1",
+                  "r": 12
+                }
+              },
+              {
+                "type": "area",
+                "owner": "enemy",
+                "area": {
+                  "anchor": "waterWell2",
+                  "r": 12
+                }
+              },
+              {
+                "type": "area",
+                "owner": "enemy",
+                "area": {
+                  "anchor": "waterWell3",
+                  "r": 12
+                }
+              }
+            ]
+          }
+        ]
+      },
+      "actions": [
+        {
+          "type": "setVar",
+          "name": "hold",
+          "value": 0
+        },
+        {
+          "type": "sound",
+          "id": "alarm"
+        },
+        {
+          "type": "message",
+          "text": {
+            "pt-BR": "Um inimigo chegou a um dos poços: o contador de 1 minuto zerou.",
+            "en": "An enemy reached one of the wells: the 1-minute counter reset."
+          }
+        }
+      ],
+      "once": false,
+      "cooldown": 10
+    },
+    {
+      "id": "wells-30",
+      "when": {
+        "type": "var",
+        "name": "hold",
+        "op": "==",
+        "value": 30
+      },
+      "actions": [
+        {
+          "type": "message",
+          "text": {
+            "pt-BR": "Poços: meio minuto seguro. Falta meio.",
+            "en": "Wells: half a minute secure. Half to go."
+          }
+        }
+      ]
+    },
+    {
+      "id": "wells-done",
+      "when": {
+        "type": "objective",
+        "id": "p-wells",
+        "status": "completed"
+      },
+      "actions": [
+        {
+          "type": "sound",
+          "id": "build"
+        },
+        {
+          "type": "giveResources",
+          "owner": "player",
+          "gold": 150
+        },
+        {
+          "type": "dialog",
+          "speaker": {
+            "pt-BR": "Anciã Ulma",
+            "en": "Elder Ulma"
+          },
+          "portrait": "🔥",
+          "text": {
+            "pt-BR": "A água é nossa por esta noite. Bebam, filhos do Cinzal. O resto é para quem aguenta o amanhecer.",
+            "en": "The water is ours this night. Drink, children of the Cinzal. The rest is for those who endure the dawn."
+          },
+          "duration": 8
+        },
+        {
+          "type": "message",
+          "text": {
+            "pt-BR": "Os três poços estão com o Clã: +150 de ouro.",
+            "en": "The three wells belong to the Clan: +150 gold."
+          }
+        }
+      ]
+    },
+    {
+      "id": "fort-done",
+      "when": {
+        "type": "objective",
+        "id": "p-fort",
+        "status": "completed"
+      },
+      "actions": [
+        {
+          "type": "sound",
+          "id": "build"
+        },
+        {
+          "type": "giveResources",
+          "owner": "player",
+          "gold": 100
+        },
+        {
+          "type": "dialog",
+          "speaker": {
+            "pt-BR": "Drogath Punho-de-Brasa",
+            "en": "Drogath Emberfist"
+          },
+          "portrait": "🔥",
+          "text": {
+            "pt-BR": "O Forte do Poço está de pé. Agora que venham: a muralha não pergunta de onde veio o vento.",
+            "en": "The Well Fort stands. Let them come: the wall does not ask where the wind came from."
+          },
+          "duration": 7
+        },
+        {
+          "type": "message",
+          "text": {
+            "pt-BR": "Forte do Poço erguido: +100 de ouro.",
+            "en": "Well Fort raised: +100 gold."
+          }
+        }
+      ]
+    },
+    {
+      "id": "breach-watch",
+      "when": {
+        "any": [
+          {
+            "type": "area",
+            "owner": "enemy",
+            "tag": "dorian_force",
+            "area": {
+              "anchor": "waterWell1",
+              "r": 10
+            }
+          },
+          {
+            "type": "area",
+            "owner": "enemy",
+            "tag": "dorian_force",
+            "area": {
+              "anchor": "waterWell2",
+              "r": 10
+            }
+          },
+          {
+            "type": "area",
+            "owner": "enemy",
+            "tag": "dorian_force",
+            "area": {
+              "anchor": "waterWell3",
+              "r": 10
+            }
+          }
+        ]
+      },
+      "actions": [
+        {
+          "type": "incVar",
+          "name": "breaches"
+        }
+      ],
+      "once": false,
+      "cooldown": 5
+    },
+    {
+      "id": "aviary-down",
+      "when": {
+        "type": "objective",
+        "id": "s-aviary",
+        "status": "completed"
+      },
+      "actions": [
+        {
+          "type": "giveResources",
+          "owner": "player",
+          "gold": 250
+        },
+        {
+          "type": "sound",
+          "id": "build"
+        },
+        {
+          "type": "dialog",
+          "speaker": {
+            "pt-BR": "Drogath Punho-de-Brasa",
+            "en": "Drogath Emberfist"
+          },
+          "portrait": "🔥",
+          "text": {
+            "pt-BR": "O Aviário ardeu. Sem ninho, não há Grifos. A Liga que aprenda a andar.",
+            "en": "The Aviary has burned. Without a roost there are no Gryphons. Let the League learn to walk."
+          },
+          "duration": 7
+        },
+        {
+          "type": "message",
+          "text": {
+            "pt-BR": "Aviário destruído: +250 de ouro.",
+            "en": "Aviary destroyed: +250 gold."
+          }
+        }
+      ]
+    },
+    {
+      "id": "serpents-ready",
+      "when": {
+        "type": "objective",
+        "id": "s-serpents",
+        "status": "completed"
+      },
+      "actions": [
+        {
+          "type": "giveResources",
+          "owner": "player",
+          "gold": 100
+        },
+        {
+          "type": "sound",
+          "id": "build"
+        },
+        {
+          "type": "message",
+          "text": {
+            "pt-BR": "Serpes de Guerra prontas para os Grifos: +100 de ouro.",
+            "en": "War Serpents ready for the Gryphons: +100 gold."
+          }
+        }
+      ]
+    },
+    {
+      "id": "lancers-ready",
+      "when": {
+        "type": "objective",
+        "id": "s-lancers",
+        "status": "completed"
+      },
+      "actions": [
+        {
+          "type": "giveResources",
+          "owner": "player",
+          "gold": 100
+        },
+        {
+          "type": "sound",
+          "id": "build"
+        },
+        {
+          "type": "message",
+          "text": {
+            "pt-BR": "Lanceiros-Machado treinados: +100 de ouro.",
+            "en": "Axe Throwers trained: +100 gold."
+          }
+        }
+      ]
+    },
+    {
+      "id": "dorian-retreat",
+      "when": {
+        "type": "objective",
+        "id": "p-dorian",
+        "status": "completed"
+      },
+      "actions": [
+        {
+          "type": "order",
+          "select": {
+            "tag": "dorian"
+          },
+          "kind": "move",
+          "anchor": "playerStart"
+        },
+        {
+          "type": "dialog",
+          "speaker": {
+            "pt-BR": "Marechal Dorian",
+            "en": "Marshal Dorian"
+          },
+          "portrait": "👑",
+          "text": {
+            "pt-BR": "Recuar. Esta água custa mais do que vale hoje. Voltaremos com o inverno.",
+            "en": "Fall back. This water costs more than it is worth today. We will return with winter."
+          },
+          "duration": 7
+        },
+        {
+          "type": "message",
+          "text": {
+            "pt-BR": "Dorian recua ferido para a base. A contra-ofensiva de Aurelan está quebrada.",
+            "en": "Dorian withdraws wounded to his base. Aurelan's counter-offensive is broken."
+          }
+        }
+      ]
+    },
+    {
+      "id": "survive-done",
+      "when": {
+        "type": "objective",
+        "id": "p-survive",
+        "status": "completed"
+      },
+      "actions": [
+        {
+          "type": "sound",
+          "id": "victory"
+        },
+        {
+          "type": "message",
+          "text": {
+            "pt-BR": "Oito minutos de pé. O Fogo do Clã segue aceso.",
+            "en": "Eight minutes standing. The Clan Fire still burns."
+          }
+        }
+      ]
+    },
+    {
+      "id": "all-done",
+      "when": {
+        "all": [
+          {
+            "type": "objective",
+            "id": "p-wells",
+            "status": "completed"
+          },
+          {
+            "type": "objective",
+            "id": "p-fort",
+            "status": "completed"
+          },
+          {
+            "type": "objective",
+            "id": "p-survive",
+            "status": "completed"
+          },
+          {
+            "type": "objective",
+            "id": "p-dorian",
+            "status": "completed"
+          }
+        ]
+      },
+      "actions": [
+        {
+          "type": "sound",
+          "id": "victory"
+        },
+        {
+          "type": "cutscene",
+          "id": "finale",
+          "duration": 36,
+          "skippable": true,
+          "steps": [
+            {
+              "at": 0,
+              "anchor": "waterWell3",
+              "zoom": 1.1,
+              "dialog": {
+                "speaker": {
+                  "pt-BR": "Anciã Ulma",
+                  "en": "Elder Ulma"
+                },
+                "portrait": "🔥",
+                "text": {
+                  "pt-BR": "Aqui, Punho-de-Brasa. Estas mãos carregaram o braseiro por três invernos e agora pesam como pedra. A água chegou, e eu cheguei com ela.",
+                  "en": "Here, Emberfist. These hands carried the brazier for three winters and now weigh like stone. The water has come, and I have come with it."
+                },
+                "duration": 9
+              }
+            },
+            {
+              "at": 10,
+              "anchor": "waterWell3",
+              "zoom": 1.2,
+              "dialog": {
+                "speaker": {
+                  "pt-BR": "Anciã Ulma",
+                  "en": "Elder Ulma"
+                },
+                "portrait": "🔥",
+                "text": {
+                  "pt-BR": "O fogo é do clã, não do chefe. Leve-o ao outro lado do mar. Não o guarde: acenda-o. Foi bom ver tanta água.",
+                  "en": "The fire belongs to the clan, not to the chief. Carry it across the sea. Do not keep it: kindle it. It was good to see so much water."
+                },
+                "duration": 9
+              }
+            },
+            {
+              "at": 20,
+              "anchor": "enemyStart",
+              "zoom": 1.1,
+              "dialog": {
+                "speaker": {
+                  "pt-BR": "Drogath Punho-de-Brasa",
+                  "en": "Drogath Emberfist"
+                },
+                "portrait": "🔥",
+                "text": {
+                  "pt-BR": "A Anciã Ulma deitou a cabeça à beira do poço e não se levantou. Ela se foi como o clã vive: devagar, até a última gota.",
+                  "en": "Elder Ulma laid her head by the well and did not rise. She went the way the clan lives: slowly, down to the last drop."
+                },
+                "duration": 8
+              }
+            },
+            {
+              "at": 29,
+              "anchor": "waterWell3",
+              "zoom": 1.15,
+              "dialog": {
+                "speaker": {
+                  "pt-BR": "Drogath Punho-de-Brasa",
+                  "en": "Drogath Emberfist"
+                },
+                "portrait": "🔥",
+                "text": {
+                  "pt-BR": "Eu levo o Fogo. Em Velmara, a primeira brasa será dela.",
+                  "en": "I carry the Fire. In Velmara, the first ember will be hers."
+                },
+                "duration": 7
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "finale-clock",
+      "when": {
+        "type": "trigger",
+        "id": "all-done"
+      },
+      "actions": [
+        {
+          "type": "incVar",
+          "name": "fin_clock"
+        }
+      ]
+    },
+    {
+      "id": "finale-victory",
+      "when": {
+        "type": "var",
+        "name": "fin_clock",
+        "op": ">=",
+        "value": 1
+      },
+      "actions": [
+        {
+          "type": "victory"
+        }
+      ]
+    },
+    {
+      "id": "hall-fallen",
+      "when": {
+        "type": "count",
+        "select": {
+          "buildingType": "great_hall",
+          "owner": "player"
+        },
+        "op": "==",
+        "value": 0
+      },
+      "actions": [
+        {
+          "type": "defeat",
+          "text": {
+            "pt-BR": "O Salão do Clã caiu. A última água de Miragem volta à Liga.",
+            "en": "The Clan Hall fell. Mirage's last water goes back to the League."
+          }
+        }
+      ]
+    },
+    {
+      "id": "drogath-fallen",
+      "when": {
+        "type": "dead",
+        "select": {
+          "tag": "drogath"
+        },
+        "count": 1
+      },
+      "actions": [
+        {
+          "type": "defeat",
+          "text": {
+            "pt-BR": "Drogath caiu. O Fogo do Clã se apaga na areia de Miragem.",
+            "en": "Drogath has fallen. The Clan Fire dies out on the sands of Mirage."
+          }
+        }
+      ]
     }
   ]
 }

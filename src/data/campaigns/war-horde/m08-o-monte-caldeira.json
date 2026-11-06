@@ -13,23 +13,35 @@
   },
   "briefing": {
     "speaker": {
-      "pt-BR": "Vozgul a Profetisa",
-      "en": "Vozgul the Prophetess"
+      "pt-BR": "Profetisa Vozgul",
+      "en": "Prophetess Vozgul"
     },
     "portrait": "💀",
     "text": {
-      "pt-BR": "A Fornalha é sagrada. Defenda a forja central enquanto os ritos de cinza inflamam a montanha.",
-      "en": "The Furnace is sacred. Defend the central forge while the ash rites ignite the mountain."
+      "pt-BR": "A Fornalha é uma ilha de basalto cortada por dois rios de lava, do norte ao sul, e no meio dela dorme o Monte Caldeira. É aqui, no Santuário das Cinzas e junto à Fornalha Naval, que eu conduzo o rito que os clãs esperam desde o primeiro naufrágio: dez minutos de cântico, e depois o ferro do Mar Fendido será nosso. Eu não posso erguer a espada e cantar ao mesmo tempo. Vocês podem. A leste do monte fica o seu Salão do Clã, com o Santuário ao norte e a Fornalha Naval com a Doca e o Caldeirão na margem sul do lago. Aurelan sabe do rito: o Governador manda tropa pelas passagens de rocha dos rios de lava (não há vau, só quatro passagens), os navios entram pelo lago e o esquadrão de grifos de Lyra cai do ar. O Mestre Oren, que lê o fogo melhor do que muitos dos nossos, vem com eles. Segurem o Santuário e a Fornalha até o fim do rito e, enquanto isso, ergam dois Leviatãs de Ferro: eles serão a nossa resposta ao Mar Fendido. Se a Fornalha, o Santuário ou o Salão cair, o rito se apaga. Drogath comanda a guarnição: se ele cair, o monte cai com ele. Zarruk Fornalha guarda a Fornalha com o fogo dele; cuidem dele, a oficina precisa de mãos como as dele.",
+      "en": "The Furnace is a basalt isle cut by two rivers of lava, north to south, and in its middle sleeps Mount Caldron. It is here, at the Ash Sanctum and beside the Naval Forge, that I lead the rite the clans have awaited since the first shipwreck: ten minutes of chant, and then the iron of the Sundered Sea will be ours. I cannot raise a sword and chant at the same time. You can. East of the mountain lies your Clan Hall, with the Sanctum to the north and the Naval Forge, the Dock and the Cauldron on the south shore of the lake. Aurelan knows of the rite: the Governor sends troops through the rock passages of the lava rivers (there is no ford, only four passages), ships enter by the lake, and Lyra's gryphon squadron drops from the sky. Master Oren, who reads fire better than many of our own, comes with them. Hold the Sanctum and the Forge until the rite ends and, meanwhile, raise two Iron Leviathans: they will be our answer to the Sundered Sea. If the Forge, the Sanctum or the Hall falls, the rite goes out. Drogath commands the garrison: if he falls, the mountain falls with him. Zarruk Furnace guards the Forge with his fire; look after him, the workshop needs hands like his."
     },
     "hints": [
       {
-        "pt-BR": "Concentre-se nos objetivos primários para avançar.",
-        "en": "Focus on primary objectives to advance."
+        "pt-BR": "Os rios de lava não têm vau: só as 4 passagens de rocha ligam as áreas. A passagem leste fica a poucos passos do Salão: torres e tropa ali seguram a leva.",
+        "en": "The lava rivers have no ford: only the 4 rock passages link the areas. The east passage lies a few steps from the Hall: towers and troops there hold off the wave."
+      },
+      {
+        "pt-BR": "O Santuário (norte) e a Fornalha Naval (margem sul do lago) são alvos separados. Cada leva escolhe um dos dois: divida a tropa ou ponha torres perto dos dois.",
+        "en": "The Sanctum (north) and the Naval Forge (south shore of the lake) are separate targets. Each wave picks one of the two: split the troops or put towers near both."
+      },
+      {
+        "pt-BR": "Leviatã de Ferro: 300 de ouro, 200 de madeira e 240 de petróleo, na Doca, com o Salão no nível 3 e a Fornalha Naval de pé. Erga uma Plataforma no poço do lago e mande o Petroleiro bombear.",
+        "en": "Iron Leviathan: 300 gold, 200 wood and 240 oil, at the Dock, with the Hall at level 3 and the Naval Forge standing. Raise a Platform on the lake well and send the Tanker to pump."
+      },
+      {
+        "pt-BR": "Drogath é um HERÓI: tem mana e habilidades (Z, X, C) e só existe um. Se ele morrer, a missão está perdida. Zarruk é um Incendiário aliado: se ele sobreviver ao rito, há recompensa.",
+        "en": "Drogath is a HERO: he has mana and abilities (Z, X, C) and there is only one of him. If he dies the mission is lost. Zarruk is an allied Arsonist: if he survives the rite, there is a reward."
       }
     ]
   },
-  "mapId": "continental-1v1",
-  "seed": 9136,
+  "mapId": "camp-08-fornalha",
+  "seed": 9143,
   "players": [
     {
       "id": 0,
@@ -41,7 +53,7 @@
       "team": 0,
       "color": "#dc2626",
       "isLocal": true,
-      "startSlot": 0
+      "startSlot": 1
     },
     {
       "id": 1,
@@ -53,35 +65,1085 @@
       "team": 1,
       "color": "#2563eb",
       "isAI": true,
-      "startSlot": 1
+      "difficulty": "easy",
+      "startSlot": 0
     }
   ],
   "startingResources": {
-    "wood": 400,
-    "gold": 400,
-    "stone": 150
+    "wood": 800,
+    "gold": 1100,
+    "stone": 350
   },
+  "vars": {
+    "fin_clock": 0
+  },
+  "autoVictory": false,
   "setup": [
     {
-      "type": "tag",
-      "select": {
-        "buildingType": "castle"
+      "type": "spawn",
+      "owner": "player",
+      "unitType": "hero_drogath",
+      "count": 1,
+      "anchor": "enemyStart",
+      "dx": 0,
+      "dz": 13,
+      "tag": "drogath"
+    },
+    {
+      "type": "spawnBuilding",
+      "owner": "player",
+      "buildingType": "orc_barracks",
+      "anchor": "enemyStart",
+      "dx": -14,
+      "dz": 6,
+      "tag": "garrison_barracks"
+    },
+    {
+      "type": "spawnBuilding",
+      "owner": "player",
+      "buildingType": "ash_sanctum",
+      "anchor": "sanctum",
+      "tag": "sanctum"
+    },
+    {
+      "type": "spawnBuilding",
+      "owner": "player",
+      "buildingType": "ship_dock",
+      "anchor": "enemyStart",
+      "dx": 5,
+      "dz": -14,
+      "tag": "dock"
+    },
+    {
+      "type": "spawnBuilding",
+      "owner": "player",
+      "buildingType": "naval_forge",
+      "anchor": "enemyStart",
+      "dx": -7,
+      "dz": -26,
+      "tag": "forge"
+    },
+    {
+      "type": "spawnBuilding",
+      "owner": "player",
+      "buildingType": "ash_cauldron",
+      "anchor": "enemyStart",
+      "dx": -3,
+      "dz": -19,
+      "tag": "cauldron"
+    },
+    {
+      "type": "spawn",
+      "owner": "player",
+      "units": [
+        {
+          "type": "grunt",
+          "count": 3
+        },
+        {
+          "type": "axethrower",
+          "count": 2
+        }
+      ],
+      "anchor": "enemyStart",
+      "dx": -8,
+      "dz": 12,
+      "spread": 3
+    },
+    {
+      "type": "spawn",
+      "owner": "player",
+      "unitType": "arsonist",
+      "count": 1,
+      "anchor": "enemyStart",
+      "dx": -8,
+      "dz": -22,
+      "tag": "zarruk",
+      "guard": {
+        "r": 12
       },
-      "tag": "enemy_base"
+      "markColor": "#f0abfc",
+      "displayName": {
+        "pt-BR": "Zarruk Fornalha",
+        "en": "Zarruk Furnace"
+      }
+    },
+    {
+      "type": "spawn",
+      "owner": 1,
+      "units": [
+        {
+          "type": "knight",
+          "count": 3
+        },
+        {
+          "type": "archer",
+          "count": 2
+        }
+      ],
+      "anchor": "isletCaptive",
+      "spread": 5,
+      "tag": "captive_guard",
+      "guard": {
+        "r": 12
+      }
+    },
+    {
+      "type": "spawn",
+      "owner": "neutral",
+      "unitType": "grunt",
+      "count": 4,
+      "anchor": "isletCaptive",
+      "spread": 3,
+      "tag": "captives",
+      "markColor": "#22d3ee",
+      "displayName": {
+        "pt-BR": "Guarda do clã preso",
+        "en": "Captive clan guard"
+      }
     }
   ],
   "objectives": [
     {
-      "id": "primary-main",
-      "type": "destroy",
+      "id": "p-rite",
+      "type": "survive",
       "priority": "primary",
-      "select": {
-        "tag": "enemy_base"
+      "seconds": 600,
+      "title": {
+        "pt-BR": "Segurar o Santuário e a Fornalha durante o rito de Vozgul (10 min)",
+        "en": "Hold the Sanctum and the Forge during Vozgul's rite (10 min)"
+      },
+      "description": {
+        "pt-BR": "O rito dura dez minutos. Se o Santuário das Cinzas, a Fornalha Naval ou o Salão do Clã caírem antes do fim, o rito se apaga e a missão está perdida.",
+        "en": "The rite lasts ten minutes. If the Ash Sanctum, the Naval Forge or the Clan Hall falls before the end, the rite goes out and the mission is lost."
+      },
+      "marker": {
+        "area": {
+          "anchor": "sanctum",
+          "r": 14
+        },
+        "style": "goal",
+        "seconds": 60
+      }
+    },
+    {
+      "id": "p-leviathans",
+      "type": "train",
+      "priority": "primary",
+      "units": [
+        {
+          "type": "iron_leviathan",
+          "count": 2
+        }
+      ],
+      "title": {
+        "pt-BR": "Concluir 2 Leviatãs de Ferro na Doca",
+        "en": "Complete 2 Iron Leviathans at the Dock"
+      },
+      "description": {
+        "pt-BR": "A Doca, com o Salão no nível 3 e a Fornalha Naval, forja os Leviatãs. Cada um custa 300 de ouro, 200 de madeira e 240 de petróleo: erga uma Plataforma no poço do lago.",
+        "en": "The Dock, with the Hall at level 3 and the Naval Forge, forges the Leviathans. Each costs 300 gold, 200 wood and 240 oil: raise a Platform on the lake well."
+      },
+      "marker": {
+        "area": {
+          "anchor": "enemyStart",
+          "r": 16
+        },
+        "style": "goal",
+        "seconds": 40
+      }
+    },
+    {
+      "id": "s-guards",
+      "type": "rescue",
+      "priority": "secondary",
+      "tag": "captives",
+      "count": 4,
+      "title": {
+        "pt-BR": "Libertar 4 guardas do clã presos na ilhota oeste",
+        "en": "Free 4 captive clan guards on the western islet"
+      },
+      "description": {
+        "pt-BR": "Aurelan prendeu guardas do clã numa ilhota do Mar Fendido, a oeste, junto à base dela. Só se chega pelo mar: mate os captores e eles voltam ao clã.",
+        "en": "Aurelan took clan guards to an islet of the Sundered Sea, in the west, beside its base. It can only be reached by sea: kill the captors and they return to the clan."
+      }
+    },
+    {
+      "id": "s-towers",
+      "type": "build",
+      "priority": "secondary",
+      "buildingType": "orc_watchtower",
+      "count": 3,
+      "title": {
+        "pt-BR": "Erguer 3 Torres de Vigia",
+        "en": "Raise 3 Watchtowers"
+      },
+      "description": {
+        "pt-BR": "Torres junto à passagem leste e perto do Santuário seguram as levas enquanto a tropa se reúne.",
+        "en": "Towers by the east passage and near the Sanctum hold off the waves while the troops gather."
+      }
+    },
+    {
+      "id": "s-galleys",
+      "type": "train",
+      "priority": "secondary",
+      "unitType": "war_galley",
+      "count": 2,
+      "title": {
+        "pt-BR": "Treinar 2 Galés de Guerra",
+        "en": "Train 2 War Galleys"
+      },
+      "description": {
+        "pt-BR": "Galés de Guerra guardam o lago contra os navios de Aurelan até os Leviatãs ficarem prontos.",
+        "en": "War Galleys guard the lake against Aurelan's ships until the Leviathans are ready."
+      }
+    },
+    {
+      "id": "h-zarruk",
+      "type": "flag",
+      "priority": "hidden",
+      "active": true,
+      "condition": {
+        "type": "objective",
+        "id": "p-rite",
+        "status": "completed"
+      },
+      "failWhen": {
+        "type": "dead",
+        "select": {
+          "tag": "zarruk"
+        },
+        "count": 1
       },
       "title": {
-        "pt-BR": "Segurar a forja vulcânica durante o rito",
-        "en": "Hold the volcanic forge during the rite"
+        "pt-BR": "Zarruk de pé ao fim do rito",
+        "en": "Zarruk standing at the rite's end"
+      },
+      "description": {
+        "pt-BR": "Termine o rito com Zarruk Fornalha vivo. (+400 de ouro)",
+        "en": "Finish the rite with Zarruk Furnace alive. (+400 gold)"
       }
+    }
+  ],
+  "triggers": [
+    {
+      "id": "intro",
+      "when": {
+        "type": "time",
+        "at": 0
+      },
+      "actions": [
+        {
+          "type": "music",
+          "id": "on"
+        },
+        {
+          "type": "giveResources",
+          "owner": "player",
+          "oil": 150
+        },
+        {
+          "type": "reveal",
+          "anchor": "sanctum",
+          "radius": 26,
+          "ttl": 40
+        },
+        {
+          "type": "reveal",
+          "anchor": "lavaPass4",
+          "radius": 24,
+          "ttl": 40
+        },
+        {
+          "type": "cutscene",
+          "id": "caldeira",
+          "duration": 38,
+          "skippable": true,
+          "steps": [
+            {
+              "at": 0,
+              "anchor": "sanctum",
+              "zoom": 1.15,
+              "dialog": {
+                "speaker": {
+                  "pt-BR": "Profetisa Vozgul",
+                  "en": "Prophetess Vozgul"
+                },
+                "portrait": "💀",
+                "text": {
+                  "pt-BR": "O Monte Caldeira respira. Eu canto, vocês seguram. Que nenhuma lâmina humana toque o Santuário antes de o último verso soar.",
+                  "en": "Mount Caldron breathes. I chant, you hold. Let no human blade touch the Sanctum before the last verse sounds."
+                },
+                "duration": 8
+              }
+            },
+            {
+              "at": 9,
+              "anchor": "lavaPass4",
+              "zoom": 1.1,
+              "dialog": {
+                "speaker": {
+                  "pt-BR": "Drogath Punho-de-Brasa",
+                  "en": "Drogath Emberfist"
+                },
+                "portrait": "🔥",
+                "text": {
+                  "pt-BR": "Os rios de lava são a nossa muralha, e só têm quatro portas. Esta, a oeste do Salão, é a mais curta. Quem passar por ela passa por mim.",
+                  "en": "The lava rivers are our wall, and they have only four gates. This one, west of the Hall, is the shortest. Whoever passes through it passes through me."
+                },
+                "duration": 8
+              }
+            },
+            {
+              "at": 18,
+              "anchor": "enemyStart",
+              "zoom": 1.1,
+              "dialog": {
+                "speaker": {
+                  "pt-BR": "Zarruk Fornalha",
+                  "en": "Zarruk Furnace"
+                },
+                "portrait": "🔨",
+                "text": {
+                  "pt-BR": "A Fornalha Naval está acesa, chefe. Dois Leviatãs de Ferro pedem ouro, madeira e muito breu. Eu cuido do fogo, vocês cuidam do óleo.",
+                  "en": "The Naval Forge is lit, chief. Two Iron Leviathans ask for gold, wood and plenty of pitch. I tend the fire, you tend the oil."
+                },
+                "duration": 8
+              }
+            },
+            {
+              "at": 27,
+              "anchor": "playerStart",
+              "zoom": 1.05,
+              "dialog": {
+                "speaker": {
+                  "pt-BR": "Mestre Oren",
+                  "en": "Master Oren"
+                },
+                "portrait": "🔮",
+                "text": {
+                  "pt-BR": "Vozgul canta há dias. Se eu leio o fogo direito, o rito dura dez minutos. Dez minutos de vento a favor, e nós chegamos primeiro.",
+                  "en": "Vozgul has chanted for days. If I read the fire right, the rite takes ten minutes. Ten minutes of fair wind, and we arrive first."
+                },
+                "duration": 8
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "full-tree",
+      "when": {
+        "type": "time",
+        "at": 0
+      },
+      "actions": [
+        {
+          "type": "setTier",
+          "owner": "player",
+          "tier": 3
+        },
+        {
+          "type": "message",
+          "text": {
+            "pt-BR": "Salão do Clã no nível 3: Covil dos Ogros, Altar, Ninho, Doca e Fornalha Naval ao alcance. O rito de Vozgul começou: 10 minutos.",
+            "en": "Clan Hall at level 3: Ogre Den, Altar, Nest, Dock and Naval Forge within reach. Vozgul's rite has begun: 10 minutes."
+          }
+        }
+      ]
+    },
+    {
+      "id": "rite-150",
+      "when": {
+        "type": "time",
+        "at": 150
+      },
+      "actions": [
+        {
+          "type": "dialog",
+          "speaker": {
+            "pt-BR": "Profetisa Vozgul",
+            "en": "Prophetess Vozgul"
+          },
+          "portrait": "💀",
+          "text": {
+            "pt-BR": "Primeiro verso: a rocha ouve. Seguro o fôlego por vocês; segurem a linha por mim.",
+            "en": "First verse: the rock listens. I hold my breath for you; hold the line for me."
+          },
+          "duration": 7
+        }
+      ]
+    },
+    {
+      "id": "rite-300",
+      "when": {
+        "type": "time",
+        "at": 300
+      },
+      "actions": [
+        {
+          "type": "dialog",
+          "speaker": {
+            "pt-BR": "Profetisa Vozgul",
+            "en": "Prophetess Vozgul"
+          },
+          "portrait": "💀",
+          "text": {
+            "pt-BR": "Metade do cântico. A lava sobe sob as botas dos humanos, mas eles ainda vêm. Cada morto de vocês merece lembrança; cada morto deles também.",
+            "en": "Half the chant. The lava rises under the humans' boots, yet they still come. Each of your dead deserves remembrance; so does each of theirs."
+          },
+          "duration": 8
+        }
+      ]
+    },
+    {
+      "id": "rite-450",
+      "when": {
+        "type": "time",
+        "at": 450
+      },
+      "actions": [
+        {
+          "type": "dialog",
+          "speaker": {
+            "pt-BR": "Profetisa Vozgul",
+            "en": "Prophetess Vozgul"
+          },
+          "portrait": "💀",
+          "text": {
+            "pt-BR": "Terceiro verso. Sinto Oren entre eles, lendo o meu fogo como eu o leio. Ele sabe onde dói. Protejam a Fornalha.",
+            "en": "Third verse. I feel Oren among them, reading my fire as I read it. He knows where it hurts. Protect the Forge."
+          },
+          "duration": 8
+        }
+      ]
+    },
+    {
+      "id": "rite-540",
+      "when": {
+        "type": "time",
+        "at": 540
+      },
+      "actions": [
+        {
+          "type": "sound",
+          "id": "alarm"
+        },
+        {
+          "type": "dialog",
+          "speaker": {
+            "pt-BR": "Profetisa Vozgul",
+            "en": "Prophetess Vozgul"
+          },
+          "portrait": "💀",
+          "text": {
+            "pt-BR": "Falta um minuto e meio. O monte vai acordar. Que ninguém abandone o posto.",
+            "en": "A minute and a half left. The mountain will wake. Let no one leave their post."
+          },
+          "duration": 7
+        }
+      ]
+    },
+    {
+      "id": "wave-1",
+      "when": {
+        "type": "time",
+        "at": 150
+      },
+      "actions": [
+        {
+          "type": "spawn",
+          "owner": 1,
+          "units": [
+            {
+              "type": "knight",
+              "count": 4
+            },
+            {
+              "type": "archer",
+              "count": 3
+            }
+          ],
+          "anchor": "playerStart",
+          "spread": 3.5,
+          "tag": "aurelan_force",
+          "order": {
+            "kind": "attackMove",
+            "anchor": "enemyStart"
+          },
+          "markColor": "#60a5fa"
+        },
+        {
+          "type": "message",
+          "text": {
+            "pt-BR": "Primeira leva de Aurelan: Cavaleiros e Arqueiros cruzam a passagem oeste do monte.",
+            "en": "Aurelan's first wave: Knights and Archers cross the mountain's west passage."
+          }
+        }
+      ]
+    },
+    {
+      "id": "wave-2",
+      "when": {
+        "type": "time",
+        "at": 270
+      },
+      "actions": [
+        {
+          "type": "spawn",
+          "owner": 1,
+          "units": [
+            {
+              "type": "knight",
+              "count": 3
+            },
+            {
+              "type": "archer",
+              "count": 3
+            },
+            {
+              "type": "ballista",
+              "count": 1
+            }
+          ],
+          "anchor": "playerStart",
+          "spread": 3.5,
+          "tag": "aurelan_force",
+          "order": {
+            "kind": "attackMove",
+            "anchor": "sanctum"
+          },
+          "markColor": "#60a5fa"
+        },
+        {
+          "type": "message",
+          "text": {
+            "pt-BR": "Segunda leva: uma Balista segue para o Santuário pelo norte.",
+            "en": "Second wave: a Ballista heads for the Sanctum from the north."
+          }
+        }
+      ]
+    },
+    {
+      "id": "wave-3",
+      "when": {
+        "type": "time",
+        "at": 380
+      },
+      "actions": [
+        {
+          "type": "spawn",
+          "owner": 1,
+          "units": [
+            {
+              "type": "frigate",
+              "count": 2
+            }
+          ],
+          "anchor": "well2",
+          "spread": 4,
+          "tag": "aurelan_force",
+          "order": {
+            "kind": "attackMove",
+            "anchor": "well3"
+          },
+          "markColor": "#60a5fa"
+        },
+        {
+          "type": "spawn",
+          "owner": 1,
+          "units": [
+            {
+              "type": "knight",
+              "count": 4
+            },
+            {
+              "type": "mage",
+              "count": 2
+            }
+          ],
+          "anchor": "playerStart",
+          "spread": 3.5,
+          "tag": "aurelan_force",
+          "markColor": "#60a5fa",
+          "order": {
+            "kind": "attackMove",
+            "anchor": "enemyStart"
+          }
+        },
+        {
+          "type": "message",
+          "text": {
+            "pt-BR": "Fragatas de Aurelan entram pelo lago: protejam a Doca e a Fornalha Naval.",
+            "en": "Aurelan Frigates enter the lake: protect the Dock and the Naval Forge."
+          }
+        }
+      ]
+    },
+    {
+      "id": "lyra-arrives",
+      "when": {
+        "type": "time",
+        "at": 450
+      },
+      "actions": [
+        {
+          "type": "spawn",
+          "owner": 1,
+          "unitType": "gryphon_rider",
+          "count": 3,
+          "anchor": "lyraArrival",
+          "spread": 3,
+          "tag": "aurelan_force",
+          "markColor": "#60a5fa",
+          "order": {
+            "kind": "attackMove",
+            "anchor": "sanctum"
+          }
+        },
+        {
+          "type": "dialog",
+          "speaker": {
+            "pt-BR": "Capitã Lyra",
+            "en": "Captain Lyra"
+          },
+          "portrait": "🦅",
+          "text": {
+            "pt-BR": "Esquadrão de grifos de Aurelan sobre o Monte Caldeira! Os rios de lava não nos seguram.",
+            "en": "Aurelan gryphon squadron over Mount Caldron! The lava rivers do not hold us."
+          },
+          "duration": 7
+        },
+        {
+          "type": "message",
+          "text": {
+            "pt-BR": "O esquadrão de grifos de Lyra voa para o Santuário: Arqueiros, Torres e Magos contra o ar.",
+            "en": "Lyra's gryphon squadron flies to the Sanctum: Archers, Towers and Mages against the air."
+          }
+        }
+      ]
+    },
+    {
+      "id": "wave-4",
+      "when": {
+        "type": "time",
+        "at": 510
+      },
+      "actions": [
+        {
+          "type": "spawn",
+          "owner": 1,
+          "units": [
+            {
+              "type": "cavalier",
+              "count": 2
+            },
+            {
+              "type": "knight",
+              "count": 5
+            },
+            {
+              "type": "ballista",
+              "count": 2
+            }
+          ],
+          "anchor": "playerStart",
+          "spread": 3.5,
+          "tag": "aurelan_force",
+          "order": {
+            "kind": "attackMove",
+            "anchor": "sanctum"
+          },
+          "markColor": "#60a5fa"
+        },
+        {
+          "type": "spawn",
+          "owner": 1,
+          "unitType": "mage",
+          "count": 1,
+          "anchor": "playerStart",
+          "dx": 2,
+          "dz": 2,
+          "tag": "oren",
+          "markColor": "#a78bfa",
+          "displayName": {
+            "pt-BR": "Mestre Oren",
+            "en": "Master Oren"
+          },
+          "order": {
+            "kind": "attackMove",
+            "anchor": "enemyStart"
+          }
+        },
+        {
+          "type": "dialog",
+          "speaker": {
+            "pt-BR": "Mestre Oren",
+            "en": "Master Oren"
+          },
+          "portrait": "🔮",
+          "text": {
+            "pt-BR": "O fogo dos Clãs também sabe cair. Eu só preciso apontar onde.",
+            "en": "The Clans' fire also knows how to fall. I need only point out where."
+          },
+          "duration": 7
+        },
+        {
+          "type": "message",
+          "text": {
+            "pt-BR": "Quinta leva: Cavaleiros e duas Balistas marcham para o Santuário, com Oren à frente.",
+            "en": "Fifth wave: Cavaliers and two Ballistae march on the Sanctum, with Oren in the lead."
+          }
+        }
+      ]
+    },
+    {
+      "id": "wave-5",
+      "when": {
+        "type": "time",
+        "at": 570
+      },
+      "actions": [
+        {
+          "type": "spawn",
+          "owner": 1,
+          "units": [
+            {
+              "type": "knight",
+              "count": 5
+            },
+            {
+              "type": "archer",
+              "count": 4
+            },
+            {
+              "type": "cavalier",
+              "count": 2
+            }
+          ],
+          "anchor": "playerStart",
+          "spread": 3.5,
+          "tag": "aurelan_force",
+          "order": {
+            "kind": "attackMove",
+            "anchor": "enemyStart"
+          },
+          "markColor": "#60a5fa"
+        },
+        {
+          "type": "message",
+          "text": {
+            "pt-BR": "Última leva antes do fim do rito: tudo o que Aurelan tem vem pela passagem oeste.",
+            "en": "Last wave before the rite ends: all Aurelan has comes through the west passage."
+          }
+        }
+      ]
+    },
+    {
+      "id": "rite-done",
+      "when": {
+        "type": "objective",
+        "id": "p-rite",
+        "status": "completed"
+      },
+      "actions": [
+        {
+          "type": "sound",
+          "id": "victory"
+        },
+        {
+          "type": "reveal",
+          "anchor": "sanctum",
+          "radius": 26,
+          "ttl": 20
+        },
+        {
+          "type": "dialog",
+          "speaker": {
+            "pt-BR": "Profetisa Vozgul",
+            "en": "Prophetess Vozgul"
+          },
+          "portrait": "💀",
+          "text": {
+            "pt-BR": "O último verso soou. O Monte Caldeira é nosso, e o ferro do Mar Fendido agora tem dono. Falta a Doca dar os Leviatãs.",
+            "en": "The last verse has sounded. Mount Caldron is ours, and the iron of the Sundered Sea now has an owner. The Dock must still give the Leviathans."
+          },
+          "duration": 8
+        }
+      ]
+    },
+    {
+      "id": "leviathans-up",
+      "when": {
+        "type": "objective",
+        "id": "p-leviathans",
+        "status": "completed"
+      },
+      "actions": [
+        {
+          "type": "sound",
+          "id": "build"
+        },
+        {
+          "type": "dialog",
+          "speaker": {
+            "pt-BR": "Zarruk Fornalha",
+            "en": "Zarruk Furnace"
+          },
+          "portrait": "🔨",
+          "text": {
+            "pt-BR": "Dois Leviatãs de Ferro na água. O mar vai aprender o nosso nome.",
+            "en": "Two Iron Leviathans on the water. The sea will learn our name."
+          },
+          "duration": 7
+        }
+      ]
+    },
+    {
+      "id": "captives-freed",
+      "when": {
+        "type": "dead",
+        "select": {
+          "tag": "captive_guard"
+        },
+        "count": 5
+      },
+      "actions": [
+        {
+          "type": "transfer",
+          "select": {
+            "tag": "captives"
+          },
+          "to": "player"
+        },
+        {
+          "type": "sound",
+          "id": "build"
+        },
+        {
+          "type": "dialog",
+          "speaker": {
+            "pt-BR": "Drogath Punho-de-Brasa",
+            "en": "Drogath Emberfist"
+          },
+          "portrait": "🔥",
+          "text": {
+            "pt-BR": "Os guardas presos estão de volta ao Fogo do Clã. Quatro bocas a mais para a guarnição.",
+            "en": "The captive guards are back at the Clan Fire. Four more mouths for the garrison."
+          },
+          "duration": 7
+        }
+      ]
+    },
+    {
+      "id": "zarruk-ok",
+      "when": {
+        "type": "objective",
+        "id": "h-zarruk",
+        "status": "completed"
+      },
+      "actions": [
+        {
+          "type": "giveResources",
+          "owner": "player",
+          "gold": 400
+        },
+        {
+          "type": "sound",
+          "id": "build"
+        },
+        {
+          "type": "dialog",
+          "speaker": {
+            "pt-BR": "Zarruk Fornalha",
+            "en": "Zarruk Furnace"
+          },
+          "portrait": "🔨",
+          "text": {
+            "pt-BR": "Ainda de pé, chefe, e com a barba queimada. Bom sinal: o ferro paga o fogo.",
+            "en": "Still standing, chief, beard scorched. A good sign: iron pays the fire."
+          },
+          "duration": 7
+        },
+        {
+          "type": "message",
+          "text": {
+            "pt-BR": "Zarruk sobreviveu ao rito: +400 de ouro.",
+            "en": "Zarruk survived the rite: +400 gold."
+          }
+        }
+      ]
+    },
+    {
+      "id": "all-done",
+      "when": {
+        "all": [
+          {
+            "type": "objective",
+            "id": "p-rite",
+            "status": "completed"
+          },
+          {
+            "type": "objective",
+            "id": "p-leviathans",
+            "status": "completed"
+          }
+        ]
+      },
+      "actions": [
+        {
+          "type": "sound",
+          "id": "victory"
+        },
+        {
+          "type": "cutscene",
+          "id": "finale",
+          "duration": 15,
+          "skippable": true,
+          "steps": [
+            {
+              "at": 0,
+              "anchor": "enemyStart",
+              "zoom": 1.1,
+              "dialog": {
+                "speaker": {
+                  "pt-BR": "Drogath Punho-de-Brasa",
+                  "en": "Drogath Emberfist"
+                },
+                "portrait": "🔥",
+                "text": {
+                  "pt-BR": "O Monte Caldeira não caiu. Os Leviatãs de Ferro já cortam o lago. Aurelan sentiu o calor do nosso rito.",
+                  "en": "Mount Caldron has not fallen. The Iron Leviathans already cut the lake. Aurelan has felt the heat of our rite."
+                },
+                "duration": 8
+              }
+            },
+            {
+              "at": 7,
+              "anchor": "sanctum",
+              "zoom": 1.1,
+              "dialog": {
+                "speaker": {
+                  "pt-BR": "Profetisa Vozgul",
+                  "en": "Prophetess Vozgul"
+                },
+                "portrait": "💀",
+                "text": {
+                  "pt-BR": "O Mar Fendido já não nos fecha o caminho. Para além dele há um último poço de água, e quem o tiver, tem a travessia.",
+                  "en": "The Sundered Sea no longer shuts our road. Beyond it lies a last well of water, and whoever holds it holds the crossing."
+                },
+                "duration": 8
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "finale-clock",
+      "when": {
+        "type": "trigger",
+        "id": "all-done"
+      },
+      "actions": [
+        {
+          "type": "incVar",
+          "name": "fin_clock"
+        }
+      ]
+    },
+    {
+      "id": "finale-victory",
+      "when": {
+        "type": "var",
+        "name": "fin_clock",
+        "op": ">=",
+        "value": 1
+      },
+      "actions": [
+        {
+          "type": "victory"
+        }
+      ]
+    },
+    {
+      "id": "hall-fallen",
+      "when": {
+        "type": "count",
+        "select": {
+          "buildingType": "great_hall",
+          "owner": "player"
+        },
+        "op": "==",
+        "value": 0
+      },
+      "actions": [
+        {
+          "type": "defeat",
+          "text": {
+            "pt-BR": "O Salão do Clã caiu. O Monte Caldeira esfria.",
+            "en": "The Clan Hall fell. Mount Caldron cools."
+          }
+        }
+      ]
+    },
+    {
+      "id": "sanctum-fallen",
+      "when": {
+        "type": "dead",
+        "select": {
+          "tag": "sanctum"
+        },
+        "count": 1
+      },
+      "actions": [
+        {
+          "type": "defeat",
+          "text": {
+            "pt-BR": "O Santuário das Cinzas caiu. O rito de Vozgul se apagou.",
+            "en": "The Ash Sanctum fell. Vozgul's rite went out."
+          }
+        }
+      ]
+    },
+    {
+      "id": "forge-fallen",
+      "when": {
+        "type": "dead",
+        "select": {
+          "tag": "forge"
+        },
+        "count": 1
+      },
+      "actions": [
+        {
+          "type": "defeat",
+          "text": {
+            "pt-BR": "A Fornalha Naval caiu. Sem ela não há Leviatãs, e sem Leviatãs não há travessia.",
+            "en": "The Naval Forge fell. Without it there are no Leviathans, and without Leviathans there is no crossing."
+          }
+        }
+      ]
+    },
+    {
+      "id": "drogath-fallen",
+      "when": {
+        "type": "dead",
+        "select": {
+          "tag": "drogath"
+        },
+        "count": 1
+      },
+      "actions": [
+        {
+          "type": "defeat",
+          "text": {
+            "pt-BR": "Drogath caiu. O Fogo do Clã se apaga no monte.",
+            "en": "Drogath has fallen. The Clan Fire dies out on the mountain."
+          }
+        }
+      ]
     }
   ]
 }

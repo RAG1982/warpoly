@@ -13,22 +13,34 @@
   },
   "briefing": {
     "speaker": {
-      "pt-BR": "Skarn chefe-de-brasa",
-      "en": "Skarn Ember-Chief"
+      "pt-BR": "Skarn, chefe-de-brasa",
+      "en": "Skarn, Ember-Chief"
     },
     "portrait": "👑",
     "text": {
-      "pt-BR": "Eu cheguei com a frota principal. Sob a coroa de ferro, esmague a resistência da Liga de Aurelan na savana!",
-      "en": "I have arrived with the main fleet. Beneath the iron crown, crush the Aurelan League resistance on the savanna!"
+      "pt-BR": "O Marco da Colônia, Brasa-Alta, está de pé na praia da Savana de Âmbar, e a Liga de Aurelan já fechou o cerco: levas de terra miram as minas do interior e uma esquadra de fragatas vem do mar ao sul. Eu cruzo com a segunda onda de barcaças. Até lá, Drogath guarda o Salão e Vozgul fica com a colônia. Evoluam o Marco a Bastião (nível 2) e aguentem doze minutos de incursões: aos 4, 7 e 10 minutos, com a Capitã Lyra e os grifos na última. As barcaças de reforço chegam a cada quatro minutos pela enseada, então afundem as 8 fragatas antes que fechem o mar. Grok comanda o cerco por nós. E há um posto avançado da Liga no centro-norte; se os guardas caírem, os homens dele juram ao Fogo.",
+      "en": "The Colony Outpost, Highember, stands on the beach of the Amber Savanna, and the Aurelan League has already closed the ring: land waves aim for the inland mines and a squadron of frigates comes from the sea to the south. I cross with the second wave of barges. Until then, Drogath guards the Hall and Vozgul stays with the colony. Upgrade the Outpost to a Bastion (level 2) and hold out for twelve minutes of raids: at minutes 4, 7 and 10, with Captain Lyra and her gryphons in the last. Reinforcement barges arrive every four minutes through the bay, so sink the 8 frigates before they close the sea. Grok leads the siege defense for us. And a League outpost lies in the north-central; if its guards fall, its men will swear to the Fire."
     },
     "hints": [
       {
-        "pt-BR": "Concentre-se nos objetivos primários para avançar.",
-        "en": "Focus on primary objectives to advance."
+        "pt-BR": "O Marco da Colônia (Brasa-Alta) fica na praia, a oeste. Para evoluí-lo, escolha o Salão dele (o Marco) e use a evolução do Centro; o Salão do Clã continua no interior.",
+        "en": "The Colony Outpost (Highember) stands on the beach, to the west. To upgrade it, select its Hall (the Outpost) and use the Center upgrade; the Clan Hall stays inland."
+      },
+      {
+        "pt-BR": "Dica: as levas de terra saem do interior e miram as minas de ouro. Mantenha a tropa entre as minas e o Marco; a economia trabalha sob ataque.",
+        "en": "Tip: the land waves come from the interior and aim at the gold mines. Keep your troops between the mines and the Outpost; the economy works under attack."
+      },
+      {
+        "pt-BR": "Dica: a esquadra de cerco nasce no mar ao sul e vai à enseada dos reforços. Galés de Guerra da Doca do Clã (na costa, perto da base) a encontram antes do desembarque. Os Lanceiros-Machado e os Necromantes derrubam os grifos da última leva.",
+        "en": "Tip: the siege fleet is born at sea to the south and heads for the reinforcement bay. War Galleys from the Clan Dock (on the coast, near the base) meet it before the landing. Axe Throwers and Necromancers bring down the last wave's gryphons."
+      },
+      {
+        "pt-BR": "Drogath é o herói do Clã: se ele morrer, a missão está perdida. Vozgul e Skarn (que chega na segunda onda, aos 8 minutos) também têm mana e três habilidades (Z, X, C).",
+        "en": "Drogath is the Clan's hero: if he dies, the mission is lost. Vozgul and Skarn (who arrives with the second wave, at 8 minutes) also have mana and three abilities (Z, X, C)."
       }
     ]
   },
-  "mapId": "vales-2v2",
+  "mapId": "camp-11-savana-de-ambar",
   "seed": 9187,
   "players": [
     {
@@ -46,42 +58,977 @@
     {
       "id": 1,
       "name": {
-        "pt-BR": "Tropas de Aurelan",
-        "en": "Aurelan Troops"
+        "pt-BR": "Liga de Aurelan",
+        "en": "Aurelan League"
       },
       "factionId": "human",
       "team": 1,
       "color": "#2563eb",
       "isAI": true,
+      "difficulty": "easy",
       "startSlot": 1
     }
   ],
   "startingResources": {
-    "wood": 400,
-    "gold": 400,
-    "stone": 150
+    "wood": 600,
+    "gold": 900,
+    "stone": 300
   },
+  "vars": {
+    "fin_clock": 0
+  },
+  "autoVictory": false,
   "setup": [
     {
       "type": "tag",
       "select": {
-        "buildingType": "castle"
+        "buildingType": "great_hall",
+        "owner": "player"
       },
-      "tag": "enemy_base"
+      "tag": "home_hall"
+    },
+    {
+      "type": "spawn",
+      "owner": "player",
+      "unitType": "hero_drogath",
+      "count": 1,
+      "anchor": "playerStart",
+      "dx": 0,
+      "dz": 13,
+      "tag": "drogath"
+    },
+    {
+      "type": "spawn",
+      "owner": "player",
+      "unitType": "hero_vozgul",
+      "count": 1,
+      "anchor": "colonyMark",
+      "dx": 0,
+      "dz": 8,
+      "tag": "vozgul",
+      "markColor": "#a78bfa"
+    },
+    {
+      "type": "spawn",
+      "owner": "player",
+      "unitType": "ogre_mage",
+      "count": 1,
+      "anchor": "colonyMark",
+      "dx": 6,
+      "dz": 6,
+      "tag": "grok",
+      "markColor": "#f59e0b",
+      "displayName": {
+        "pt-BR": "Grok",
+        "en": "Grok"
+      }
+    },
+    {
+      "type": "spawnBuilding",
+      "owner": "player",
+      "buildingType": "great_hall",
+      "anchor": "colonyMark",
+      "tag": "colony",
+      "facing": 0
+    },
+    {
+      "type": "spawn",
+      "owner": "neutral",
+      "unitType": "villager",
+      "count": 3,
+      "anchor": "dissidentClan",
+      "spread": 2.2,
+      "tag": "outpost_folk",
+      "markColor": "#22d3ee",
+      "displayName": {
+        "pt-BR": "Homem do posto",
+        "en": "Outpost hand"
+      }
+    },
+    {
+      "type": "spawn",
+      "owner": "bandits",
+      "unitType": "bandit",
+      "count": 4,
+      "anchor": "dissidentClan",
+      "spread": 2.5,
+      "tag": "outpost_guard",
+      "guard": {
+        "r": 9
+      }
+    },
+    {
+      "type": "spawnLandmark",
+      "kind": "ruins",
+      "anchor": "dissidentClan",
+      "tag": "ruins",
+      "label": {
+        "pt-BR": "Posto Avançado da Liga",
+        "en": "League Outpost"
+      }
     }
   ],
   "objectives": [
     {
-      "id": "primary-main",
+      "id": "p-colony",
+      "type": "flag",
+      "priority": "primary",
+      "condition": {
+        "type": "count",
+        "select": {
+          "tag": "colony",
+          "owner": "player",
+          "minTier": 2
+        },
+        "op": ">=",
+        "value": 1
+      },
+      "title": {
+        "pt-BR": "Evoluir o Marco da Colônia a Bastião (nível 2)",
+        "en": "Upgrade the Colony Outpost to a Bastion (level 2)"
+      },
+      "description": {
+        "pt-BR": "Use a evolução do Centro de Brasa-Alta (o Marco na praia). O Salão do Clã do interior não conta.",
+        "en": "Use the Center upgrade on the Highember Outpost (the beach Hall). The inland Clan Hall does not count."
+      }
+    },
+    {
+      "id": "p-hold",
+      "type": "survive",
+      "priority": "primary",
+      "seconds": 720,
+      "title": {
+        "pt-BR": "Resistir a 3 incursões por 12 minutos",
+        "en": "Hold out against 3 raids for 12 minutes"
+      },
+      "description": {
+        "pt-BR": "Incursões aos 4, 7 e 10 minutos, com Lyra e os grifos na última. Se o Marco cair, a colônia cai junto.",
+        "en": "Raids at minutes 4, 7 and 10, with Lyra and the gryphons in the last. If the Outpost falls, the colony falls with it."
+      }
+    },
+    {
+      "id": "p-fleet",
       "type": "destroy",
       "priority": "primary",
       "select": {
-        "tag": "enemy_base"
+        "tag": "siege_fleet"
       },
+      "count": 8,
       "title": {
-        "pt-BR": "Comandar as forças com Skarn e tomar a savana",
-        "en": "Command forces with Skarn and seize the savanna"
+        "pt-BR": "Afundar as 8 fragatas da esquadra de cerco",
+        "en": "Sink the siege fleet's 8 frigates"
+      },
+      "description": {
+        "pt-BR": "A esquadra de Aurelan sai do mar ao sul em duas levas (aos 8 e aos 12 minutos) rumo à enseada dos reforços.",
+        "en": "Aurelan's fleet leaves the sea to the south in two waves (at 8 and 12 minutes), bound for the reinforcement bay."
+      },
+      "marker": {
+        "area": {
+          "anchor": "reinforceSea",
+          "r": 30
+        },
+        "style": "goal",
+        "seconds": 240
       }
+    },
+    {
+      "id": "s-den",
+      "type": "build",
+      "priority": "secondary",
+      "buildingType": "ogre_den",
+      "count": 1,
+      "title": {
+        "pt-BR": "Erguer um Covil de Ogros na colônia",
+        "en": "Raise an Ogre Den in the colony"
+      },
+      "description": {
+        "pt-BR": "O Covil treina Ogros para segurar as levas de terra.",
+        "en": "The Den trains Ogres to hold the land waves."
+      }
+    },
+    {
+      "id": "s-nest",
+      "type": "build",
+      "priority": "secondary",
+      "buildingType": "serpent_nest",
+      "count": 1,
+      "title": {
+        "pt-BR": "Erguer um Ninho de Serpes na colônia",
+        "en": "Raise a Serpent Nest in the colony"
+      },
+      "description": {
+        "pt-BR": "As Serpes de Guerra voam e respondem aos grifos de Aurelan. Exige o Salão no nível 3.",
+        "en": "War Serpents fly and answer Aurelan's gryphons. It needs the Hall at level 3."
+      }
+    },
+    {
+      "id": "h-post",
+      "type": "rescue",
+      "priority": "hidden",
+      "tag": "outpost_folk",
+      "count": 3,
+      "title": {
+        "pt-BR": "Converter o posto avançado da Liga",
+        "en": "Win over the League outpost"
+      },
+      "description": {
+        "pt-BR": "Derrube os 4 guardas do posto e seus 3 homens juram ao Fogo do Clã.",
+        "en": "Bring down the outpost's 4 guards and its 3 men swear to the Clan Fire."
+      }
+    }
+  ],
+  "triggers": [
+    {
+      "id": "intro",
+      "when": {
+        "type": "time",
+        "at": 0
+      },
+      "actions": [
+        {
+          "type": "music",
+          "id": "on"
+        },
+        {
+          "type": "reveal",
+          "anchor": "colonyMark",
+          "radius": 30,
+          "ttl": 40
+        },
+        {
+          "type": "cutscene",
+          "id": "brasa-alta",
+          "duration": 42,
+          "skippable": true,
+          "steps": [
+            {
+              "at": 0,
+              "anchor": "playerStart",
+              "zoom": 1.15,
+              "dialog": {
+                "speaker": {
+                  "pt-BR": "Drogath Punho-de-Brasa",
+                  "en": "Drogath Emberfist"
+                },
+                "portrait": "🔥",
+                "text": {
+                  "pt-BR": "Brasa-Alta está cercada. Se o Marco cair, a colônia cai e o Fogo apaga no escuro.",
+                  "en": "Highember is surrounded. If the Outpost falls, the colony falls and the Fire goes out in the dark."
+                },
+                "duration": 8
+              }
+            },
+            {
+              "at": 9,
+              "anchor": "colonyMark",
+              "zoom": 1.1,
+              "dialog": {
+                "speaker": {
+                  "pt-BR": "Vozgul, a Profetisa",
+                  "en": "Vozgul, the Prophetess"
+                },
+                "portrait": "💀",
+                "text": {
+                  "pt-BR": "O Marco aguenta se for evoluído a Bastião. Doze minutos, e a segunda onda chega com o chefe.",
+                  "en": "The Outpost holds if it is upgraded to a Bastion. Twelve minutes, and the second wave arrives with the chief."
+                },
+                "duration": 8
+              }
+            },
+            {
+              "at": 18,
+              "anchor": "enemyStart",
+              "zoom": 1.05,
+              "dialog": {
+                "speaker": {
+                  "pt-BR": "Capitã Lyra Ventosa",
+                  "en": "Captain Lyra Windrider"
+                },
+                "portrait": "🦅",
+                "text": {
+                  "pt-BR": "A savana é da Liga. Os Clãs vieram de barco e vão morrer de barco; meus grifos abrem o céu.",
+                  "en": "The savanna belongs to the League. The Clans came by boat and will die by boat; my gryphons open the sky."
+                },
+                "duration": 8
+              }
+            },
+            {
+              "at": 27,
+              "anchor": "colonyMark",
+              "zoom": 1.1,
+              "dialog": {
+                "speaker": {
+                  "pt-BR": "Grok, Ogro Feiticeiro",
+                  "en": "Grok, Ogre Mage"
+                },
+                "portrait": "⚡",
+                "text": {
+                  "pt-BR": "Eu sei de cerco. Segurem as minas, eu seguro a praia: cada leva tem um furo, e eu o acho.",
+                  "en": "I know sieges. Hold the mines, I hold the beach: every wave has a gap, and I find it."
+                },
+                "duration": 8
+              }
+            },
+            {
+              "at": 35,
+              "anchor": "landingZone",
+              "zoom": 1.15,
+              "dialog": {
+                "speaker": {
+                  "pt-BR": "Drogath Punho-de-Brasa",
+                  "en": "Drogath Emberfist"
+                },
+                "portrait": "🔥",
+                "text": {
+                  "pt-BR": "A barcaça de reforço já está na enseada. Mantenham a praia.",
+                  "en": "The reinforcement barge is already in the bay. Hold the beach."
+                },
+                "duration": 7
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "landing-1",
+      "when": {
+        "type": "time",
+        "at": 0
+      },
+      "actions": [
+        {
+          "type": "spawnLanding",
+          "owner": "player",
+          "anchor": "reinforceSea",
+          "unloadAt": {
+            "anchor": "landingZone"
+          },
+          "bargeTag": "barge_1",
+          "tag": "reinf_1",
+          "units": [
+            {
+              "type": "grunt",
+              "count": 3
+            },
+            {
+              "type": "axethrower",
+              "count": 3
+            }
+          ]
+        },
+        {
+          "type": "message",
+          "text": {
+            "pt-BR": "Barcaça do Clã: 6 guerreiros desembarcados na praia de Brasa-Alta.",
+            "en": "Clan barge: 6 warriors landed on the Highember beach."
+          }
+        }
+      ]
+    },
+    {
+      "id": "full-tree",
+      "when": {
+        "type": "time",
+        "at": 0
+      },
+      "actions": [
+        {
+          "type": "setTier",
+          "owner": "player",
+          "tier": 3,
+          "exceptTag": "colony"
+        },
+        {
+          "type": "giveResources",
+          "owner": "player",
+          "oil": 800
+        },
+        {
+          "type": "message",
+          "text": {
+            "pt-BR": "Salão do Clã no nível 3: Santuário, Doca, Covil, Ninho e Torres liberados. O Marco da Colônia segue no nível 1: evolua-o. Petróleo inicial: 800.",
+            "en": "Clan Hall at level 3: Sanctum, Dock, Den, Nest and Towers unlocked. The Colony Outpost stays at level 1: upgrade it. Starting oil: 800."
+          }
+        }
+      ]
+    },
+    {
+      "id": "raid-1",
+      "when": {
+        "type": "time",
+        "at": 240
+      },
+      "actions": [
+        {
+          "type": "spawn",
+          "owner": 1,
+          "units": [
+            {
+              "type": "knight",
+              "count": 4
+            },
+            {
+              "type": "archer",
+              "count": 2
+            }
+          ],
+          "anchor": "raid1",
+          "spread": 3,
+          "order": {
+            "kind": "attackMove",
+            "anchor": "expansion1"
+          }
+        },
+        {
+          "type": "message",
+          "text": {
+            "pt-BR": "Primeira incursão: Cavaleiros-de-Armas e Arqueiros de Aurelan atacam a mina de ouro do interior.",
+            "en": "First raid: Aurelan men-at-arms and Archers hit the inland gold mine."
+          }
+        }
+      ]
+    },
+    {
+      "id": "landing-2",
+      "when": {
+        "type": "time",
+        "at": 240
+      },
+      "actions": [
+        {
+          "type": "spawnLanding",
+          "owner": "player",
+          "anchor": "reinforceSea",
+          "unloadAt": {
+            "anchor": "landingZone"
+          },
+          "bargeTag": "barge_2",
+          "tag": "reinf_2",
+          "units": [
+            {
+              "type": "grunt",
+              "count": 3
+            },
+            {
+              "type": "axethrower",
+              "count": 3
+            }
+          ]
+        },
+        {
+          "type": "message",
+          "text": {
+            "pt-BR": "Segunda barcaça de reforço: 6 guerreiros na praia.",
+            "en": "Second reinforcement barge: 6 warriors on the beach."
+          }
+        }
+      ]
+    },
+    {
+      "id": "raid-2",
+      "when": {
+        "type": "time",
+        "at": 420
+      },
+      "actions": [
+        {
+          "type": "spawn",
+          "owner": 1,
+          "units": [
+            {
+              "type": "ballista",
+              "count": 1
+            },
+            {
+              "type": "knight",
+              "count": 4
+            },
+            {
+              "type": "archer",
+              "count": 2
+            }
+          ],
+          "anchor": "raid2",
+          "spread": 3,
+          "order": {
+            "kind": "attackMove",
+            "anchor": "colonyMark"
+          }
+        },
+        {
+          "type": "message",
+          "text": {
+            "pt-BR": "Segunda incursão: uma Balista lidera a tropa contra o Marco.",
+            "en": "Second raid: a Ballista leads the troops against the Outpost."
+          }
+        }
+      ]
+    },
+    {
+      "id": "fleet-1",
+      "when": {
+        "type": "time",
+        "at": 480
+      },
+      "actions": [
+        {
+          "type": "spawn",
+          "owner": 1,
+          "units": [
+            {
+              "type": "frigate",
+              "count": 4
+            }
+          ],
+          "anchor": "siegeFleetStart",
+          "spread": 4,
+          "tag": "siege_fleet",
+          "order": {
+            "kind": "attackMove",
+            "anchor": "reinforceSea"
+          }
+        },
+        {
+          "type": "message",
+          "text": {
+            "pt-BR": "Esquadra de cerco: 4 fragatas saem do mar ao sul, rumo à enseada dos reforços.",
+            "en": "Siege fleet: 4 frigates leave the sea to the south, bound for the reinforcement bay."
+          }
+        }
+      ]
+    },
+    {
+      "id": "landing-3",
+      "when": {
+        "type": "time",
+        "at": 480
+      },
+      "actions": [
+        {
+          "type": "spawnLanding",
+          "owner": "player",
+          "anchor": "reinforceSea",
+          "unloadAt": {
+            "anchor": "landingZone"
+          },
+          "bargeTag": "barge_3",
+          "tag": "skarn_wave",
+          "units": [
+            {
+              "type": "hero_skarn",
+              "count": 1
+            },
+            {
+              "type": "grunt",
+              "count": 3
+            },
+            {
+              "type": "axethrower",
+              "count": 2
+            }
+          ]
+        },
+        {
+          "speaker": {
+            "pt-BR": "Skarn, chefe-de-brasa",
+            "en": "Skarn, Ember-Chief"
+          },
+          "portrait": "👑",
+          "text": {
+            "pt-BR": "Cheguei com a segunda onda. Brasa-Alta não fecha: o Cinzal precisa do mar, e o mar passa por aqui.",
+            "en": "I came with the second wave. Highember will not close: the Cinzal needs the sea, and the sea runs through here."
+          },
+          "duration": 8,
+          "type": "dialog"
+        },
+        {
+          "type": "message",
+          "text": {
+            "pt-BR": "Segunda onda: Skarn desembarca com 5 guerreiros. Ele é jogável a partir daqui.",
+            "en": "Second wave: Skarn lands with 5 warriors. He is playable from here on."
+          }
+        }
+      ]
+    },
+    {
+      "id": "raid-3",
+      "when": {
+        "type": "time",
+        "at": 600
+      },
+      "actions": [
+        {
+          "type": "spawn",
+          "owner": 1,
+          "unitType": "gryphon_rider",
+          "count": 1,
+          "anchor": "raid3",
+          "dx": 0,
+          "dz": -4,
+          "tag": "lyra",
+          "displayName": {
+            "pt-BR": "Lyra Ventosa",
+            "en": "Lyra Windrider"
+          },
+          "markColor": "#f97316",
+          "order": {
+            "kind": "attackMove",
+            "anchor": "colonyMark"
+          }
+        },
+        {
+          "type": "spawn",
+          "owner": 1,
+          "units": [
+            {
+              "type": "gryphon_rider",
+              "count": 2
+            },
+            {
+              "type": "ballista",
+              "count": 1
+            },
+            {
+              "type": "knight",
+              "count": 6
+            },
+            {
+              "type": "cavalier",
+              "count": 1
+            }
+          ],
+          "anchor": "raid3",
+          "spread": 3,
+          "tag": "lyra_wave",
+          "order": {
+            "kind": "attackMove",
+            "anchor": "colonyMark"
+          }
+        },
+        {
+          "speaker": {
+            "pt-BR": "Capitã Lyra Ventosa",
+            "en": "Captain Lyra Windrider"
+          },
+          "portrait": "🦅",
+          "text": {
+            "pt-BR": "Terceira incursão: grifos, ao céu! Quero o Marco no chão antes do pôr do sol.",
+            "en": "Third raid: gryphons, to the sky! I want the Outpost on the ground before sundown."
+          },
+          "duration": 7,
+          "type": "dialog"
+        }
+      ]
+    },
+    {
+      "id": "fleet-2",
+      "when": {
+        "type": "time",
+        "at": 720
+      },
+      "actions": [
+        {
+          "type": "spawn",
+          "owner": 1,
+          "units": [
+            {
+              "type": "frigate",
+              "count": 4
+            }
+          ],
+          "anchor": "siegeFleetStart2",
+          "spread": 4,
+          "tag": "siege_fleet",
+          "order": {
+            "kind": "attackMove",
+            "anchor": "reinforceSea"
+          }
+        },
+        {
+          "type": "spawnLanding",
+          "owner": "player",
+          "anchor": "reinforceSea",
+          "unloadAt": {
+            "anchor": "landingZone"
+          },
+          "bargeTag": "barge_4",
+          "tag": "reinf_4",
+          "units": [
+            {
+              "type": "grunt",
+              "count": 3
+            },
+            {
+              "type": "axethrower",
+              "count": 3
+            }
+          ]
+        },
+        {
+          "type": "message",
+          "text": {
+            "pt-BR": "Segunda leva da esquadra: mais 4 fragatas. Afundem-nas antes da enseada. Quarta barcaça de reforço a caminho.",
+            "en": "Second fleet wave: 4 more frigates. Sink them before the bay. Fourth reinforcement barge on its way."
+          }
+        }
+      ]
+    },
+    {
+      "id": "post-free",
+      "when": {
+        "type": "dead",
+        "select": {
+          "tag": "outpost_guard"
+        },
+        "count": 4
+      },
+      "actions": [
+        {
+          "type": "transfer",
+          "select": {
+            "tag": "outpost_folk"
+          },
+          "to": "player"
+        },
+        {
+          "type": "sound",
+          "id": "build"
+        },
+        {
+          "speaker": {
+            "pt-BR": "Vozgul, a Profetisa",
+            "en": "Vozgul, the Prophetess"
+          },
+          "portrait": "💀",
+          "text": {
+            "pt-BR": "Os homens do posto juraram ao Fogo do Clã. Três braços a mais para a colônia.",
+            "en": "The outpost's men swore to the Clan Fire. Three more arms for the colony."
+          },
+          "duration": 7,
+          "type": "dialog"
+        }
+      ]
+    },
+    {
+      "id": "fleet-down",
+      "when": {
+        "type": "objective",
+        "id": "p-fleet",
+        "status": "completed"
+      },
+      "actions": [
+        {
+          "type": "sound",
+          "id": "alarm"
+        },
+        {
+          "type": "message",
+          "text": {
+            "pt-BR": "A esquadra de cerco afundou. O mar da enseada é dos Clãs.",
+            "en": "The siege fleet is sunk. The bay's sea belongs to the Clans."
+          }
+        }
+      ]
+    },
+    {
+      "id": "colony-up",
+      "when": {
+        "type": "objective",
+        "id": "p-colony",
+        "status": "completed"
+      },
+      "actions": [
+        {
+          "type": "sound",
+          "id": "build"
+        },
+        {
+          "speaker": {
+            "pt-BR": "Grok, Ogro Feiticeiro",
+            "en": "Grok, Ogre Mage"
+          },
+          "portrait": "⚡",
+          "text": {
+            "pt-BR": "Brasa-Alta é um Bastião agora. Muralha de cinza: quem vier pela praia vai gastar o fôlego nela.",
+            "en": "Highember is a Bastion now. A wall of ash: whoever comes by the beach will spend their breath on it."
+          },
+          "duration": 7,
+          "type": "dialog"
+        }
+      ]
+    },
+    {
+      "id": "all-done",
+      "when": {
+        "all": [
+          {
+            "type": "objective",
+            "id": "p-colony",
+            "status": "completed"
+          },
+          {
+            "type": "objective",
+            "id": "p-hold",
+            "status": "completed"
+          },
+          {
+            "type": "objective",
+            "id": "p-fleet",
+            "status": "completed"
+          }
+        ]
+      },
+      "actions": [
+        {
+          "type": "sound",
+          "id": "victory"
+        },
+        {
+          "type": "cutscene",
+          "id": "finale",
+          "duration": 19,
+          "skippable": true,
+          "steps": [
+            {
+              "at": 0,
+              "anchor": "colonyMark",
+              "zoom": 1.1,
+              "dialog": {
+                "speaker": {
+                  "pt-BR": "Skarn, chefe-de-brasa",
+                  "en": "Skarn, Ember-Chief"
+                },
+                "portrait": "👑",
+                "text": {
+                  "pt-BR": "Brasa-Alta aguentou. A Liga perdeu a esquadra e a praia, e o chefe-de-brasa não recua.",
+                  "en": "Highember held. The League lost its fleet and the beach, and the ember-chief does not retreat."
+                },
+                "duration": 6
+              }
+            },
+            {
+              "at": 6,
+              "anchor": "landingZone",
+              "zoom": 1.15,
+              "dialog": {
+                "speaker": {
+                  "pt-BR": "Vozgul, a Profetisa",
+                  "en": "Vozgul, the Prophetess"
+                },
+                "portrait": "💀",
+                "text": {
+                  "pt-BR": "O Fogo marca o fim do cerco. Daqui, a ponta leste do Cabo Aurora é um passo.",
+                  "en": "The Fire marks the end of the siege. From here, the eastern point of Cape Aurora is one step away."
+                },
+                "duration": 6
+              }
+            },
+            {
+              "at": 12,
+              "anchor": "colonyMark",
+              "zoom": 1.1,
+              "dialog": {
+                "speaker": {
+                  "pt-BR": "Drogath Punho-de-Brasa",
+                  "en": "Drogath Emberfist"
+                },
+                "portrait": "🔥",
+                "text": {
+                  "pt-BR": "Uma cidadela na terra verde, de onde ninguém mais nos fechará o mar. É a próxima.",
+                  "en": "A citadel in the green land, from where no one will shut us from the sea again. That is next."
+                },
+                "duration": 6
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "finale-clock",
+      "when": {
+        "type": "trigger",
+        "id": "all-done"
+      },
+      "actions": [
+        {
+          "type": "incVar",
+          "name": "fin_clock"
+        }
+      ]
+    },
+    {
+      "id": "finale-victory",
+      "when": {
+        "type": "var",
+        "name": "fin_clock",
+        "op": ">=",
+        "value": 1
+      },
+      "actions": [
+        {
+          "type": "victory"
+        }
+      ]
+    },
+    {
+      "id": "hall-fallen",
+      "when": {
+        "type": "count",
+        "select": {
+          "tag": "home_hall"
+        },
+        "op": "==",
+        "value": 0
+      },
+      "actions": [
+        {
+          "type": "defeat",
+          "text": {
+            "pt-BR": "O Salão do Clã caiu. Brasa-Alta ficou sem retaguarda.",
+            "en": "The Clan Hall fell. Highember is left without a rear."
+          }
+        }
+      ]
+    },
+    {
+      "id": "colony-fallen",
+      "when": {
+        "type": "dead",
+        "select": {
+          "tag": "colony"
+        },
+        "count": 1
+      },
+      "actions": [
+        {
+          "type": "defeat",
+          "text": {
+            "pt-BR": "O Marco de Brasa-Alta caiu. A colônia caiu com ele.",
+            "en": "The Highember Outpost fell. The colony fell with it."
+          }
+        }
+      ]
+    },
+    {
+      "id": "drogath-fallen",
+      "when": {
+        "type": "dead",
+        "select": {
+          "tag": "drogath"
+        },
+        "count": 1
+      },
+      "actions": [
+        {
+          "type": "defeat",
+          "text": {
+            "pt-BR": "Drogath caiu. O Fogo do Clã se apaga na savana.",
+            "en": "Drogath has fallen. The Clan Fire dies out on the savanna."
+          }
+        }
+      ]
     }
   ]
 }

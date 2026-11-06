@@ -23,7 +23,7 @@ import { playMission } from './helpers/campaignHarness.js';
  */
 export const PENDING = new Set([
   'war-horde-08-o-monte-caldeira',
-  'war-horde-09-o-ultimo-poco', 'war-horde-10-cabo-aurora', 'war-horde-11-brasa-alta', 'war-horde-12-cidadela-de-brasa-alta'
+  'war-horde-09-o-ultimo-poco', 'war-horde-10-cabo-aurora', 'war-horde-11-brasa-alta'
 ]);
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '../..');

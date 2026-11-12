@@ -31,6 +31,9 @@ export const GLB_MODELS = {
   // Nós: Torso, Head, ArmL > ForeArmL > Bow (+ BowTip*/BowString*/DrawnArrow), ArmR > ForeArmR, LegL, LegR; tabardo em TeamColor.
   archer_v2: { url: `${BASE}models/archer_v2.glb`, root: 'Archer', type: 'archer' },
   axethrower: { url: `${BASE}models/axethrower.glb`, root: 'Axethrower', type: 'axethrower' },
+  // Lanceiro-Machado troll v2 (Tripo finalizado no Blender, tools/blender/build_axethrower_v2.py): padrão do axethrower e do berserker; o `axethrower` acima é o reserva (e segue no inspetor).
+  // Nós aninhados: Torso > Head, ArmL, ArmR > WeaponR (um só machado, gume em +Z, repouso -45° em x); LegL, LegR na raiz.
+  axethrower_v2: { url: `${BASE}models/axethrower_v2.glb`, root: 'Axethrower', type: 'axethrower' },
   villager: { url: `${BASE}models/villager.glb`, root: 'Villager', type: 'villager' },
   // M2-30: Aldeão humano v2 (camponês de barba ruiva do Tripo; picareta = `ToolGroup`, filha de ArmR; Pack > WoodBundle/GoldSack). Padrão no jogo; o `villager` acima é o fallback e segue no inspetor.
   villager_v2: { url: `${BASE}models/villager_v2.glb`, root: 'Villager', type: 'villager' },
@@ -196,7 +199,7 @@ export const glbTemplates = new Map();
  * F10-05b: facção dona de cada .glb ('human' | 'orc' | 'neutral'), derivada de `faction` em src/data (unidade ou
  * construção com a mesma chave); chaves fora das tabelas (árvores, jazidas...) são 'neutral' = sempre carregadas.
  */
-const FACTION_OVERRIDES = { archer_v2: 'human', gryphon_rider_v2: 'human', war_serpent_v2: 'orc', villager_v2: 'human', forge_v2: 'human', peon_v2: 'orc', knight_v2: 'human', hq_human_1: 'human', hq_human_2: 'human', hq_human_3: 'human', hq_orc_1: 'orc', hq_orc_2: 'orc', hq_orc_3: 'orc', orc_oil_platform: 'orc', orc_frigate: 'orc', orc_barge: 'orc', orc_dreadnought: 'orc', orc_tanker: 'orc' };
+const FACTION_OVERRIDES = { archer_v2: 'human', gryphon_rider_v2: 'human', war_serpent_v2: 'orc', villager_v2: 'human', axethrower_v2: 'orc', forge_v2: 'human', peon_v2: 'orc', knight_v2: 'human', hq_human_1: 'human', hq_human_2: 'human', hq_human_3: 'human', hq_orc_1: 'orc', hq_orc_2: 'orc', hq_orc_3: 'orc', orc_oil_platform: 'orc', orc_frigate: 'orc', orc_barge: 'orc', orc_dreadnought: 'orc', orc_tanker: 'orc' };
 export function glbFaction(key) {
   if (FACTION_OVERRIDES[key]) return FACTION_OVERRIDES[key];
   const f = (UNITS[key] && UNITS[key].faction) || (BUILDINGS[key] && BUILDINGS[key].faction) || 'neutral';

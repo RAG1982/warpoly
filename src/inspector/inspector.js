@@ -516,6 +516,19 @@ const MODEL_CATALOG = [
     notes: 'Rig aninhada (a do antigo AxethrowerModel.js, removido na F7-00b; Torso > Head/ArmL/ArmR > WeaponL/WeaponR; LegL/LegR na raiz; Mohawk em Head). Também é o modelo do Berserker.'
   },
   {
+    id: 'axethrower_v2_glb',
+    name: 'Lanceiro-Machado Troll v2 (Tripo)',
+    category: 'units',
+    faction: 'orc',
+    type: 'axethrower',
+    icon: '🪓',
+    glb: 'axethrower_v2',
+    sourceFile: 'tools/blender/build_axethrower_v2.py',
+    create: createGlb('axethrower_v2'),
+    description: 'Troll v2: pele azul-esverdeada, crista laranja, presas, ombreiras de espinhos e de couro, bandoleira, cintos e tanga em cor de time (Tripo finalizado no Blender, public/models/axethrower_v2.glb), com braços reposados da T-pose e um machado de arremesso na mão direita. Padrão do Lanceiro-Machado e do Berserker.',
+    notes: 'Tipo axethrower, rig aninhada: Torso > Head, ArmL, ArmR > WeaponR (repouso -45° em x, gume em +Z); LegL, LegR na raiz. Um só machado (o antigo tinha WeaponL e WeaponR). ~8,7 mil triângulos, atlas 512².'
+  },
+  {
     id: 'ogre_glb',
     name: 'Ogro (Blender)',
     category: 'units',

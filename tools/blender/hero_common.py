@@ -1096,7 +1096,7 @@ def colorir_pecas(objs):
         m = bpy.data.materials.new('dbg_' + p)
         m.use_nodes = True
         b = m.node_tree.nodes['Principled BSDF']
-        b.inputs['Base Color'].default_value = C.hex_lin(cores[p])
+        b.inputs['Base Color'].default_value = C.hex_lin(cores.get(p, cores.get('Weapon', '#4466ff')))
         b.inputs['Roughness'].default_value = 0.85
         antes[p] = (list(o.data.materials), [q.material_index for q in o.data.polygons])
         o.data.materials.clear()

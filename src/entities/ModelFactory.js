@@ -619,7 +619,7 @@ export class ModelFactory {
   }
 
   static createAxethrower() {
-    return this._glbOr('axethrower', () => this._placeholder('axethrower', 'unit'));
+    return this._glbOr('axethrower_v2', () => this._glbOr('axethrower', () => this._placeholder('axethrower', 'unit')));
   }
 
   static createOgre() {

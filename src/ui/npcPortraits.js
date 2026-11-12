@@ -23,7 +23,13 @@ export const NPC_SPEAKERS = Object.freeze({
   aurora: { words: ['aurora'] },
   brakka: { words: ['brakka'] },
   grok: { words: ['grok'] },
-  orvanna: { words: ['orvanna'] }
+  orvanna: { words: ['orvanna'] },
+  // M4-13: campanha da Horda
+  ulma: { words: ['ulma'] },
+  hurgan: { words: ['hurgan'] },
+  narga: { words: ['narga'] },
+  rurga: { words: ['rurga'] },
+  zarruk: { words: ['zarruk'] }
 });
 
 /** Heróis: falante -> retrato de unidade existente. */

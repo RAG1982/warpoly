@@ -9,8 +9,8 @@ const ROOT = path.resolve(__dirname, '../..');
 const manifestRaw = JSON.parse(fs.readFileSync(path.join(ROOT, 'public/ui/manifest.json'), 'utf8'));
 const manifest = normalizeManifest(manifestRaw);
 
-function collectSpeakers() {
-  const dir = path.join(ROOT, 'src/data/campaigns/war-alliance');
+function collectSpeakers(campaign = 'war-alliance') {
+  const dir = path.join(ROOT, 'src/data/campaigns', campaign);
   const out = [];
   const walk = (o) => {
     if (Array.isArray(o)) o.forEach(walk);
@@ -45,6 +45,23 @@ describe('retratos de NPC (M3-14)', () => {
     for (const id of ['sevelin', 'orsolo', 'lyra', 'mervane', 'tomas_rocha', 'elara', 'brumar', 'isolda', 'aurora', 'brakka', 'grok', 'orvanna']) {
       expect(resolved.has(id), id).toBe(true);
     }
+  });
+
+  it('M4-13: todo falante nomeado da Horda tem retrato (NPC ou herói); papéis genéricos ficam no emoji', () => {
+    const named = ['ulma', 'hurgan', 'narga', 'rurga', 'zarruk', 'brakka', 'grok', 'orvanna', 'lyra', 'mervane',
+      'hero_brann', 'hero_dorian', 'hero_oren', 'hero_drogath', 'hero_vozgul', 'hero_skarn'];
+    const resolved = new Set();
+    for (const d of collectSpeakers('war-horde')) {
+      const id = npcPortraitIdForSpeaker(d.speaker);
+      if (!id) continue;
+      resolved.add(id);
+      const url = npcPortraitUrl(d, manifest, '/');
+      expect(url, JSON.stringify(d.speaker)).toBeTruthy();
+      expect(fs.existsSync(path.join(ROOT, 'public', url)), url).toBe(true);
+    }
+    for (const id of named) expect(resolved.has(id), id).toBe(true);
+    for (const w of ['Hurgan', 'Ulma', 'Narga', 'Rurga', 'Zarruk']) expect(npcPortraitIdForSpeaker(w + ' X')).toBeTruthy();
+    expect(npcPortraitIdForSpeaker({ 'pt-BR': 'Carregador dos Marés Negras', en: 'Black Tides porter' })).toBeNull();
   });
 
   it('nomes pt-BR e en resolvem o mesmo NPC; papéis genéricos ficam sem retrato', () => {

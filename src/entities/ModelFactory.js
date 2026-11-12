@@ -488,7 +488,7 @@ export class ModelFactory {
   }
 
   static createHumanForge() {
-    return this._glbOr('forge', () => this._placeholder('forge'));
+    return this._glbOr('forge_v2', () => this._glbOr('forge', () => this._placeholder('forge')));
   }
 
   // --- Orc Buildings ---

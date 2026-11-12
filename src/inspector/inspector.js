@@ -1886,6 +1886,19 @@ const MODEL_CATALOG = [
     notes: '2 draw calls (Atlas + TeamColor), 6,8 mil triângulos, altura 13,5, pegada 8,8. Atlas 512². O Tripo não pintou panos de time: os dois mastros com bandeira são acrescentados pelo script (texels livres do atlas). Sockets: Socket_UnitSpawn, Socket_Rally.'
   },
   {
+    id: 'forge_v2_glb',
+    name: 'Ferraria Real v2 (Tripo)',
+    category: 'buildings',
+    faction: 'human',
+    type: 'building',
+    icon: '⚒️',
+    glb: 'forge_v2',
+    sourceFile: 'tools/blender/build_forge_v2.py',
+    create: createGlb('forge_v2'),
+    description: 'Oficina de enxaimel com telhado de ardósia azul, fornalha aberta com brasas, chaminé de pedra, bigorna sobre cepo e carvão (Tripo finalizado no Blender, public/models/forge_v2.glb). O mastro com bandeira de time é acrescentado pelo script. Padrão da Ferraria Real; a Forja Real (Blender) antiga continua como reserva.',
+    notes: '2 draw calls (Atlas + TeamColor), 7,5 mil triângulos, atlas 512². Altura 5,0, pegada 6,6 x 6,8 (raio de colisão 3,4). Sockets: Socket_UnitSpawn, Socket_Rally.'
+  },
+  {
     id: 'bandit_camp',
     name: 'Acampamento Bandido (Bandit Camp)',
     category: 'buildings',

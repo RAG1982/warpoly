@@ -168,7 +168,7 @@ export const BUILDINGS = {
     collisionRadius: 3.4,
     popGranted: 0,
     visionRadius: 22,
-    healthBarHeight: 7.3,
+    healthBarHeight: 6.0, // forge_v2.glb (altura 5,0)
     tower: null,
     passiveIncome: null,
     trains: [],

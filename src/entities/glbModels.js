@@ -91,6 +91,8 @@ export const GLB_MODELS = {
   // F7-00b lote 1 (grupo 2)
   barracks: { url: `${BASE}models/barracks.glb`, root: 'Barracks', type: null },
   forge: { url: `${BASE}models/forge.glb`, root: 'Forge', type: null },
+  // Ferraria Real v2 (Tripo, sem rig; tools/blender/build_forge_v2.py): padrão do `forge`; o `forge` acima é o reserva (e segue no inspetor).
+  forge_v2: { url: `${BASE}models/forge_v2.glb`, root: 'Forge', type: null },
   cottage: { url: `${BASE}models/cottage.glb`, root: 'Cottage', type: null },
   farm: { url: `${BASE}models/farm.glb`, root: 'Farm', type: null },
   lumber_camp: { url: `${BASE}models/lumber_camp.glb`, root: 'LumberCamp', type: null },
@@ -194,7 +196,7 @@ export const glbTemplates = new Map();
  * F10-05b: facção dona de cada .glb ('human' | 'orc' | 'neutral'), derivada de `faction` em src/data (unidade ou
  * construção com a mesma chave); chaves fora das tabelas (árvores, jazidas...) são 'neutral' = sempre carregadas.
  */
-const FACTION_OVERRIDES = { archer_v2: 'human', gryphon_rider_v2: 'human', war_serpent_v2: 'orc', villager_v2: 'human', peon_v2: 'orc', knight_v2: 'human', hq_human_1: 'human', hq_human_2: 'human', hq_human_3: 'human', hq_orc_1: 'orc', hq_orc_2: 'orc', hq_orc_3: 'orc', orc_oil_platform: 'orc', orc_frigate: 'orc', orc_barge: 'orc', orc_dreadnought: 'orc', orc_tanker: 'orc' };
+const FACTION_OVERRIDES = { archer_v2: 'human', gryphon_rider_v2: 'human', war_serpent_v2: 'orc', villager_v2: 'human', forge_v2: 'human', peon_v2: 'orc', knight_v2: 'human', hq_human_1: 'human', hq_human_2: 'human', hq_human_3: 'human', hq_orc_1: 'orc', hq_orc_2: 'orc', hq_orc_3: 'orc', orc_oil_platform: 'orc', orc_frigate: 'orc', orc_barge: 'orc', orc_dreadnought: 'orc', orc_tanker: 'orc' };
 export function glbFaction(key) {
   if (FACTION_OVERRIDES[key]) return FACTION_OVERRIDES[key];
   const f = (UNITS[key] && UNITS[key].faction) || (BUILDINGS[key] && BUILDINGS[key].faction) || 'neutral';

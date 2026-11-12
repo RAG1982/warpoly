@@ -219,6 +219,26 @@ def rot_eixo(eixo, graus):
     return np.eye(3) + math.sin(t) * K + (1 - math.cos(t)) * (K @ K)
 
 
+def pose_dedos(Rh, xt, zt, lado='Left', dobras=(70.0, 85.0, 55.0), polegar=(15.0, 30.0, 25.0), fator=None):
+    """Poses dos DEDOS para fechar o punho em torno de um cabo paralelo ao eixo `zt` do repouso da mão (linha dos nós dos dedos).
+    `Rh` = rotação absoluta da mão; `xt` = eixo da mão (dedos) e `zt` = eixo do cabo, ambos no repouso. Cada falange dobra, em torno de
+    `zt`, para o lado da palma (-y do repouso); a rotação absoluta é Rh x R(zt, -soma das dobras). O polegar dobra em torno de `xt`."""
+    fator = fator or {'Index': 0.85, 'Middle': 1.0, 'Ring': 1.0, 'Pinky': 1.05}
+    pose = {}
+    for dedo, k in fator.items():
+        acum = 0.0
+        for j in (1, 2, 3):
+            acum += dobras[j - 1] * k
+            pose['%sHand%s%d' % (lado, dedo, j)] = Rh @ rot_eixo(zt, -acum)
+        pose['%sHand%s4' % (lado, dedo)] = pose['%sHand%s3' % (lado, dedo)]
+    acum = 0.0
+    for j in (1, 2, 3):
+        acum += polegar[j - 1]
+        pose['%sHandThumb%d' % (lado, j)] = Rh @ rot_eixo(xt, acum)
+    pose['%sHandThumb4' % lado] = pose['%sHandThumb3' % lado]
+    return pose
+
+
 def reposar(arm, pose):
     """REPOSE por rig. `pose` = {osso Mixamo (sem prefixo): matriz 3x3 numpy no sistema do JOGO} com a rotação ABSOLUTA do osso
     em relação ao repouso, em torno da própria cabeça; ossos fora do dicionário herdam a rotação do pai. A cabeça de cada osso
@@ -1401,6 +1421,13 @@ def executar(H):
         rig.render('3q', (1.0, 0.95, 1.0), 30, zoom=z)
         renderizar_poses(C, objs, rig, H.PECAS, H.poses(), nomes=getattr(H, 'POSES_PREVIA', ('caminhada', 'golpe', 'magia')), zoom=z)
         renderizar_rosto(C, rig, previas, H.CABECA, H.PREFIXO)
+        if getattr(H, 'ARMA_NO', None) in objs:
+            from mathutils import Vector
+            centro_antes = rig.center.copy()
+            rig.center = Vector(objs[H.ARMA_NO].matrix_world.translation)      # empunhadura = pivô do nó da arma
+            for n, d in (('f', (0.0, 0.2, 1.0)), ('l', (1.0, 0.2, 0.2)), ('i', (-1.0, 0.2, 0.3)), ('c', (0.3, 0.9, 0.9))):
+                rig.render('mao_' + n, d, 20, dist=2.2)
+            rig.center = centro_antes
         antes = colorir_pecas(objs)
         rig.render('pecas', (-1.0, 0.8, 1.0), 30, zoom=z)
         restaurar_materiais(objs, antes)

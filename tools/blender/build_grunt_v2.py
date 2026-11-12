@@ -91,7 +91,7 @@ POSES_PREVIA = ('caminhada', 'golpe_a', 'golpe_b')
 # Repose dos braços (coordenadas do jogo, antes de qualquer corte; sem espelho)
 # ---------------------------------------------------------------------------
 HASTE_REPOUSO = np.array([0.376, 0.262, -0.007])  # ponto do cabo do machado no Tripo (a ~0,09 do punho, não dentro dele)
-GRIP_REPOUSO = np.array([0.285, 0.262, 0.012])   # onde o cabo deve passar: no centro do punho (LeftHandMiddle2), no repouso
+GRIP_REPOUSO = np.array([0.258, 0.262, 0.009])   # eixo do cabo no repouso da mão: dentro do punho fechado (sob a palma, na curva dos dedos)
 DESLOC_HASTE = GRIP_REPOUSO - HASTE_REPOUSO
 R180 = np.eye(3)     # as duas lâminas são simétricas: sem giro em torno do cabo
 LAMBDA = 20.0     # inclinação da haste para a frente (graus a partir da vertical)
@@ -137,7 +137,17 @@ def resolver_pose():
     xn = f1
     yn = _unit(d - (d @ xn) * xn)
     zn = np.cross(xn, yn)
-    Rh = np.stack([xn, yn, zn], axis=1) @ np.stack([xt, yt, zt], axis=1).T
+    # PUNHO FECHADO: o cabo (eixo y do repouso no Tripo, que atravessava a palma aberta) passa a correr ao longo da linha dos nós dos
+    # dedos (z do repouso da mão); a palma fica voltada para dentro e os dedos dobram em torno do cabo.
+    ztn = _unit(np.array([0.0, 0.0, 1.0]) - xt[2] * xt)
+    ytn = np.cross(ztn, xt)
+    xnn = xn
+    znn = _unit(d - (d @ xnn) * xnn)
+    ynn = np.cross(znn, xnn)
+    Rh = np.stack([xnn, ynn, znn], axis=1) @ np.stack([xt, ytn, ztn], axis=1).T
+    global RFIX
+    RFIX = np.stack([xt, ztn, -ytn], axis=1) @ np.stack([xt, yt, zt], axis=1).T   # leva o cabo do Tripo (y) para a linha dos nós (z)
+    pose.update(HC.pose_dedos(Rh, xt, ztn))
     pose['LeftArm'] = Ra
     pose['LeftForeArm'] = Rf
     pose['LeftHand'] = Rh
@@ -153,7 +163,9 @@ def resolver_pose():
     return pose
 
 
+RFIX = np.eye(3)
 POSE = resolver_pose()
+ARMA_NO = 'Weapon'     # nó cuja origem é a empunhadura (prévias de close-up da mão)
 ESTADO = {}
 
 
@@ -211,13 +223,13 @@ def ajustar_fonte(ctx):
     vs = sorted({int(v) for i in pick for v in tri[i]})
     f.co = f.co.copy()
     f.cn = f.cn.copy()
-    pr = (f.co_rest[vs] + DESLOC_HASTE - GRIP_REPOUSO) @ R180.T + GRIP_REPOUSO   # desloca para o punho e gira 180° no cabo
+    pr = ((f.co_rest[vs] + DESLOC_HASTE - GRIP_REPOUSO) @ R180.T) @ RFIX.T + GRIP_REPOUSO   # desloca para o punho e gira 180° no cabo
     f.co[vs] = pr @ Rn.T + D[:3, 3]
     for i in pick:
         l0 = f.ls[i]
-        f.cn[l0:l0 + 3] = (f.cn_rest[l0:l0 + 3] @ R180.T) @ Rn.T
+        f.cn[l0:l0 + 3] = ((f.cn_rest[l0:l0 + 3] @ R180.T) @ RFIX.T) @ Rn.T
     ESTADO['grip'] = Rn @ GRIP_REPOUSO + D[:3, 3]
-    ESTADO['haste_dir'] = Rn @ np.array([0.0, 1.0, 0.0])
+    ESTADO['haste_dir'] = Rn @ RFIX @ np.array([0.0, 1.0, 0.0])
     ESTADO['pequenas'] = {i for g in grupos if len(g) < 5 for i in g}
     log('picareta: %d faces, %d vértices, rígida no osso LeftHand; empunhadura (jogo, antes da escala) %s; haste aponta %s' %
         (len(pick), len(vs), np.round(ESTADO['grip'], 3), np.round(ESTADO['haste_dir'], 3)))

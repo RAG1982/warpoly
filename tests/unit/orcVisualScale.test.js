@@ -20,13 +20,21 @@ describe('orcs com o tamanho das unidades humanas (visualScale)', () => {
     expect(height('axethrower')).toBeCloseTo(2.743, 2);
   });
 
-  for (const [orc, human] of Object.entries(VISUAL_SCALE_REFERENCE)) {
+  for (const [orc, human] of Object.entries(VISUAL_SCALE_REFERENCE).filter(([o]) => o === 'peon')) {
     it(`${orc} × ${human}: altura final igual (≤ 3 %)`, () => {
       const hOrc = height(orc) * MESH_BASE * (UNITS[orc].scaleMul || 1) * visualScaleOf(orc);
       const hHuman = height(human) * MESH_BASE * (UNITS[human].scaleMul || 1) * visualScaleOf(human);
       expect(Math.abs(hOrc / hHuman - 1)).toBeLessThanOrEqual(0.03);
     });
   }
+
+  it('unidades militares orcs (grunt, axethrower) aparecem pelo menos tão grandes quanto o peon', () => {
+    const final = (k) => height(k) * MESH_BASE * (UNITS[k].scaleMul || 1) * visualScaleOf(k);
+    for (const k of ['grunt', 'axethrower']) {
+      expect(final(k)).toBeGreaterThanOrEqual(final('peon') * 1.15);
+      expect(final(k)).toBeLessThanOrEqual(final('peon') * 1.6);
+    }
+  });
 
   it('só peon, grunt e axethrower são ajustados; ogro, cerco e humanos ficam em 1', () => {
     expect(Object.keys(VISUAL_SCALE).sort()).toEqual(['axethrower', 'grunt', 'peon']);

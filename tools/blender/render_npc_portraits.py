@@ -34,6 +34,12 @@ NPCS = {
     'brakka': dict(glb='ogre', team='#6b3a2a', acc='tusks', faction='orc', crop=0.4, az=22),
     'grok': dict(glb='grunt', team='#5c6b2e', acc=None, faction='orc', az=24),
     'orvanna': dict(glb='necromancer', team='#1f6f7a', acc=None, faction='orc', az=18),
+    # M4-13: falantes da campanha da Horda
+    'ulma': dict(glb='necromancer', team='#7a3fa0', acc=None, faction='orc', az=20),
+    'hurgan': dict(glb='grunt_v2', team='#8a2f2f', acc='plume', faction='orc', az=24),
+    'narga': dict(glb='gryphon_rider_v2', team='#b5532a', acc=None, faction='orc', crop=0.5, az=24),
+    'rurga': dict(glb='axethrower_v2', team='#3f6b34', acc=None, faction='orc', az=22),
+    'zarruk': dict(glb='peon_v2', team='#c9792b', acc=None, faction='orc', az=22),
 }
 
 

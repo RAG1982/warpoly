@@ -157,10 +157,10 @@
   ]
  },
  "bytes": {
-  "total": 2975766,
+  "total": 2991162,
   "art": 281206,
   "icons": 2346594,
-  "portraits": 347966
+  "portraits": 363362
  },
  "aliases": {
   "ability_bone_mend": "ability_heal",
@@ -266,13 +266,18 @@
    "brumar",
    "elara",
    "grok",
+   "hurgan",
    "isolda",
    "lyra",
    "mervane",
+   "narga",
    "orsolo",
    "orvanna",
+   "rurga",
    "sevelin",
-   "tomas_rocha"
+   "tomas_rocha",
+   "ulma",
+   "zarruk"
   ]
  }
 }

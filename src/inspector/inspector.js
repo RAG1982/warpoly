@@ -464,6 +464,19 @@ const MODEL_CATALOG = [
     notes: 'Compatível com o UnitAnimator atual (mesmos nós e pivôs nas articulações). 8 draw calls, ~4,4 mil triângulos, 1 textura. Esqueleto e AnimationMixer ficam para a F7-00b.'
   },
   {
+    id: 'grunt_v2_glb',
+    name: 'Guerreiro Orc v2 (Tripo)',
+    category: 'units',
+    faction: 'orc',
+    type: 'grunt',
+    icon: '⚔️',
+    glb: 'grunt_v2',
+    sourceFile: 'tools/blender/build_grunt_v2.py',
+    create: createGlb('grunt_v2'),
+    description: 'Guerreiro orc v2: elmo de ferro com chifres, ombreiras de espinhos, bandoleira, braçadeiras, botas de ferro e tanga em cor de time (Tripo finalizado no Blender, public/models/grunt_v2.glb), com braços reposados da T-pose e machado de duas lâminas na mão direita. Padrão do Guerreiro; o antigo continua como reserva.',
+    notes: 'Tipo grunt, rig aninhada: Torso > Head, ArmL, ArmR > Weapon (repouso -45° em x); LegL, LegR na raiz. ~8,5 mil triângulos, 10 draw calls, atlas 512².'
+  },
+  {
     id: 'hero_drogath_glb',
     name: 'Drogath Punho-de-Brasa (herói, Tripo)',
     category: 'units',

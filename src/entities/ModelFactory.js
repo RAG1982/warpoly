@@ -615,7 +615,7 @@ export class ModelFactory {
   }
 
   static createGrunt() {
-    return this._glbOr('grunt', () => this._placeholder('grunt', 'unit'));
+    return this._glbOr('grunt_v2', () => this._glbOr('grunt', () => this._placeholder('grunt', 'unit')));
   }
 
   static createAxethrower() {

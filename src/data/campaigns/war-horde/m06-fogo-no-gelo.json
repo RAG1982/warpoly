@@ -24,7 +24,7 @@
     "hints": [
       {
         "pt-BR": "A árvore tecnológica está completa. O Santuário das Cinzas e o Ninho das Serpes exigem o Acampamento de Guerra e o Salão do Clã no nível 3, que a campanha concede logo depois da abertura; o Covil dos Ogros e a Oficina, o nível 2. Cada tropa tem um papel: Catapultas derrubam torres, Lanceiros, Necromantes e Serpes cobrem o ar (planadores), Ogros esmagam a linha.",
-        "en": "The tech tree is complete. The Ash Sanctum and the Serpent Nest need the War Camp and the Clan Hall at level 3, which the campaign grants right after the opening; the Ogre Den and the Workshop need level 2. Every troop has a role: Catapults fell towers, Axe Throwers, Necromancers and Serpents cover the air (gliders), Ogres crush the line."
+        "en": "The tech tree is complete. The Ash Sanctum and the Serpent Nest need the War Camp and the Clan Hall at tier 3, which the campaign grants right after the opening; the Ogre Den and the Workshop need tier 2. Every troop has a role: Catapults fell towers, Axe Throwers, Necromancers and Serpents cover the air (gliders), Ogres crush the line."
       },
       {
         "pt-BR": "O gelo dos lagos e da banquisa não é terreno: nem tropa nem navio passam. As rotas contornam os lagos; os cabos de terra viram gargalos. O Farol fica a ~157 u do seu Salão, a nordeste, e o posto avançado de Brumar o guarda: limpe o cabo antes de manter. Leve tropa de sobra e uma Serraria do Clã para o acampamento do Farol.",
@@ -623,7 +623,7 @@
         "en": "No Slasher left behind: free the 4 captives"
       },
       "description": {
-        "pt-BR": "Batedores da Guarda Real prenderam 4 Talhadores num entreposto de gelo, a leste da base, depois do lago. Cada um carrega o fogo do clã. (+250 de ouro)",
+        "pt-BR": "Batedores da Guarda Real prenderam 4 Talhadores num entreposto de gelo, a leste da base, depois do lago. Cada um carrega o Fogo do Clã. (+250 de ouro)",
         "en": "Royal Guard scouts locked 4 Slashers in an ice post east of the base, past the lake. Each one carries the clan fire. (+250 gold)"
       }
     },
@@ -801,7 +801,7 @@
           "type": "message",
           "text": {
             "pt-BR": "Árvore tecnológica completa liberada: Salão do Clã no nível 3.",
-            "en": "Full tech tree unlocked: Clan Hall at level 3."
+            "en": "Full tech tree unlocked: Clan Hall at tier 3."
           }
         }
       ]
@@ -1840,8 +1840,8 @@
           "portrait": "🔥",
           "duration": 9,
           "text": {
-            "pt-BR": "A lanterna do Farol acendeu: o fogo do Clã no meio do gelo. Agora é segurar: três minutos sem um inimigo no cabo. Torres e lanceiros no cabo; Necromantes atrás.",
-            "en": "The Lighthouse lantern is lit: the Clan fire in the middle of the ice. Now we hold: three minutes with no enemy on the cape. Towers and axe throwers on the cape; Necromancers behind."
+            "pt-BR": "A lanterna do Farol acendeu: o Fogo do Clã no meio do gelo. Agora é segurar: três minutos sem um inimigo no cabo. Torres e lanceiros no cabo; Necromantes atrás.",
+            "en": "The Lighthouse lantern is lit: the Clan Fire in the middle of the ice. Now we hold: three minutes with no enemy on the cape. Towers and axe throwers on the cape; Necromancers behind."
           }
         }
       ]

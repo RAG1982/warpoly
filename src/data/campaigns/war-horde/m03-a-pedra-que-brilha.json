@@ -14,7 +14,7 @@
   "briefing": {
     "speaker": {
       "pt-BR": "Drogath Punho-de-Brasa",
-      "en": "Drogath Ember-Fist"
+      "en": "Drogath Emberfist"
     },
     "portrait": "🪓",
     "text": {
@@ -28,7 +28,7 @@
       },
       {
         "pt-BR": "O Covil dos Ogros exige o Acampamento de Guerra (que exige o Cercado de Javalis) e o Salão no nível 2, que a campanha já concede. A Oficina dos Engenhoqueiros treina as Catapultas (alcance 20, dano em área, cercos).",
-        "en": "The Ogre Den needs the War Camp (which needs the Boar Pen) and the Hall at tier 2, which the campaign already grants. The Tinkers' Workshop trains Catapults (range 20, area damage, siege)."
+        "en": "The Ogre Den needs the War Camp (which needs the Boar Pen) and the Hall at tier 2, which the campaign already grants. The Tinkerers Workshop trains Catapults (range 20, area damage, siege)."
       },
       {
         "pt-BR": "Torres e Balistas atiram em quem chega perto. Catapultas derrubam as torres de longe; Ogros ficam entre elas e os inimigos. Avance um forte por vez e recue os feridos.",
@@ -36,7 +36,7 @@
       },
       {
         "pt-BR": "Os humanos contra-atacam pelos desfiladeiros. Uma Torre de Vigia e 4 trechos de Paliçada na cabeça de ponte (objetivos secundários) protegem os Lacaios.",
-        "en": "The humans counterattack through the passes. A Watchtower and 4 sections of Palisade on the bridgehead (secondary objectives) protect the Peons."
+        "en": "The humans counterattack through the passes. A Watchtower and 4 sections of Palisade on the bridgehead (secondary objectives) protect the Laborers."
       }
     ]
   },
@@ -380,7 +380,7 @@
       },
       "description": {
         "pt-BR": "Exige o Acampamento de Guerra e o Salão no nível 2, que a campanha já concede nesta missão. Lacaios constroem.",
-        "en": "Needs the War Camp and the Hall at tier 2, which the campaign already grants in this mission. Peons build."
+        "en": "Needs the War Camp and the Hall at tier 2, which the campaign already grants in this mission. Laborers build."
       }
     },
     {
@@ -404,7 +404,7 @@
       },
       "description": {
         "pt-BR": "Ogros saem do Covil; as Catapultas exigem a Oficina dos Engenhoqueiros. Conta só o que é treinado, não os reforços.",
-        "en": "Ogres come out of the Den; Catapults need the Tinkers' Workshop. Only trained units count, not reinforcements."
+        "en": "Ogres come out of the Den; Catapults need the Tinkerers Workshop. Only trained units count, not reinforcements."
       }
     },
     {
@@ -455,7 +455,7 @@
       },
       "description": {
         "pt-BR": "Lacaios nas minas da cabeça de ponte. Recompensa: +150 de ouro.",
-        "en": "Peons on the bridgehead mines. Reward: +150 gold."
+        "en": "Laborers on the bridgehead mines. Reward: +150 gold."
       }
     },
     {
@@ -534,7 +534,7 @@
       },
       "title": {
         "pt-BR": "Honra do Clã: nenhum Lacaio perdido",
-        "en": "Clan Honor: not a single Peon lost"
+        "en": "Clan Honor: not a single Laborer lost"
       }
     },
     {
@@ -604,7 +604,7 @@
               "dialog": {
                 "speaker": {
                   "pt-BR": "Drogath Punho-de-Brasa",
-                  "en": "Drogath Ember-Fist"
+                  "en": "Drogath Emberfist"
                 },
                 "portrait": "🪓",
                 "text": {
@@ -621,7 +621,7 @@
               "dialog": {
                 "speaker": {
                   "pt-BR": "Drogath Punho-de-Brasa",
-                  "en": "Drogath Ember-Fist"
+                  "en": "Drogath Emberfist"
                 },
                 "portrait": "🪓",
                 "text": {
@@ -638,7 +638,7 @@
               "dialog": {
                 "speaker": {
                   "pt-BR": "Drogath Punho-de-Brasa",
-                  "en": "Drogath Ember-Fist"
+                  "en": "Drogath Emberfist"
                 },
                 "portrait": "🪓",
                 "text": {
@@ -677,7 +677,7 @@
                 "portrait": "🔥",
                 "text": {
                   "pt-BR": "Você é o punho do Clã, Drogath, e o Fogo vai com você. Ponha os Lacaios para trabalhar: o Covil dos Ogros primeiro.",
-                  "en": "You are the Clan's fist, Drogath, and the Fire goes with you. Put the Peons to work: the Ogre Den first."
+                  "en": "You are the Clan's fist, Drogath, and the Fire goes with you. Put the Laborers to work: the Ogre Den first."
                 },
                 "duration": 6.5
               }
@@ -722,12 +722,12 @@
           "type": "dialog",
           "speaker": {
             "pt-BR": "Drogath Punho-de-Brasa",
-            "en": "Drogath Ember-Fist"
+            "en": "Drogath Emberfist"
           },
           "portrait": "🪓",
           "text": {
             "pt-BR": "Primeiro o Covil dos Ogros: ele exige o Acampamento de Guerra, que exige o Cercado de Javalis. Depois a Oficina, para as Catapultas. Mande uns Lacaios para o ouro e outros para a pedra: Ogros e Catapultas comem pedra.",
-            "en": "First the Ogre Den: it needs the War Camp, which needs the Boar Pen. Then the Workshop, for Catapults. Send some Peons to the gold and others to the stone: Ogres and Catapults eat stone."
+            "en": "First the Ogre Den: it needs the War Camp, which needs the Boar Pen. Then the Workshop, for Catapults. Send some Laborers to the gold and others to the stone: Ogres and Catapults eat stone."
           },
           "duration": 10
         }
@@ -754,7 +754,7 @@
           "type": "dialog",
           "speaker": {
             "pt-BR": "Drogath Punho-de-Brasa",
-            "en": "Drogath Ember-Fist"
+            "en": "Drogath Emberfist"
           },
           "portrait": "🪓",
           "text": {
@@ -875,7 +875,7 @@
           "type": "dialog",
           "speaker": {
             "pt-BR": "Drogath Punho-de-Brasa",
-            "en": "Drogath Ember-Fist"
+            "en": "Drogath Emberfist"
           },
           "portrait": "🪓",
           "text": {
@@ -971,7 +971,7 @@
           "type": "dialog",
           "speaker": {
             "pt-BR": "Drogath Punho-de-Brasa",
-            "en": "Drogath Ember-Fist"
+            "en": "Drogath Emberfist"
           },
           "portrait": "🪓",
           "text": {
@@ -1000,7 +1000,7 @@
           "type": "dialog",
           "speaker": {
             "pt-BR": "Drogath Punho-de-Brasa",
-            "en": "Drogath Ember-Fist"
+            "en": "Drogath Emberfist"
           },
           "portrait": "🪓",
           "text": {
@@ -1034,7 +1034,7 @@
           "portrait": "💪",
           "text": {
             "pt-BR": "Dois! Eu prefiro o que racha por dentro. O terceiro é seu, Punho-de-Brasa.",
-            "en": "Two! I prefer what cracks from the inside. The third is yours, Ember-Fist."
+            "en": "Two! I prefer what cracks from the inside. The third is yours, Emberfist."
           },
           "duration": 6
         }
@@ -1066,12 +1066,12 @@
           "type": "dialog",
           "speaker": {
             "pt-BR": "Drogath Punho-de-Brasa",
-            "en": "Drogath Ember-Fist"
+            "en": "Drogath Emberfist"
           },
           "portrait": "🪓",
           "text": {
             "pt-BR": "Os três fortes caíram! Resta o Paço de Mervane, a oeste, e o Capitão Brann na frente dele. Não tenham pressa: Catapultas nas torres, Ogros no resto, e os Lacaios fora do tiro.",
-            "en": "All three forts have fallen! Only Mervane's Palace remains, to the west, with Captain Brann in front of it. No haste: Catapults on the towers, Ogres on the rest, and the Peons out of the line of fire."
+            "en": "All three forts have fallen! Only Mervane's Palace remains, to the west, with Captain Brann in front of it. No haste: Catapults on the towers, Ogres on the rest, and the Laborers out of the line of fire."
           },
           "duration": 10
         }
@@ -1287,7 +1287,7 @@
               "dialog": {
                 "speaker": {
                   "pt-BR": "Drogath Punho-de-Brasa",
-                  "en": "Drogath Ember-Fist"
+                  "en": "Drogath Emberfist"
                 },
                 "portrait": "🪓",
                 "text": {
@@ -1304,7 +1304,7 @@
               "dialog": {
                 "speaker": {
                   "pt-BR": "Skarn, chefe-de-brasa",
-                  "en": "Skarn, ember-chief"
+                  "en": "Skarn, Ember-Chief"
                 },
                 "portrait": "🔥",
                 "text": {

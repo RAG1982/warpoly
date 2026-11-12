@@ -19,7 +19,7 @@
     "portrait": "👑",
     "text": {
       "pt-BR": "O Marco da Colônia, Brasa-Alta, está de pé na praia da Savana de Âmbar, e a Liga de Aurelan já fechou o cerco: levas de terra miram as minas do interior e uma esquadra de fragatas vem do mar ao sul. Eu cruzo com a segunda onda de barcaças. Até lá, Drogath guarda o Salão e Vozgul fica com a colônia. Evoluam o Marco a Bastião (nível 2) e aguentem doze minutos de incursões: aos 4, 7 e 10 minutos, com a Capitã Lyra e os grifos na última. As barcaças de reforço chegam a cada quatro minutos pela enseada, então afundem as 8 fragatas antes que fechem o mar. Grok comanda o cerco por nós. E há um posto avançado da Liga no centro-norte; se os guardas caírem, os homens dele juram ao Fogo.",
-      "en": "The Colony Outpost, Highember, stands on the beach of the Amber Savanna, and the Aurelan League has already closed the ring: land waves aim for the inland mines and a squadron of frigates comes from the sea to the south. I cross with the second wave of barges. Until then, Drogath guards the Hall and Vozgul stays with the colony. Upgrade the Outpost to a Bastion (level 2) and hold out for twelve minutes of raids: at minutes 4, 7 and 10, with Captain Lyra and her gryphons in the last. Reinforcement barges arrive every four minutes through the bay, so sink the 8 frigates before they close the sea. Grok leads the siege defense for us. And a League outpost lies in the north-central; if its guards fall, its men will swear to the Fire."
+      "en": "The Colony Outpost, Highember, stands on the beach of the Amber Savanna, and the Aurelan League has already closed the ring: land waves aim for the inland mines and a squadron of frigates comes from the sea to the south. I cross with the second wave of barges. Until then, Drogath guards the Hall and Vozgul stays with the colony. Upgrade the Outpost to a Bastion (tier 2) and hold out for twelve minutes of raids: at minutes 4, 7 and 10, with Captain Lyra and her gryphons in the last. Reinforcement barges arrive every four minutes through the bay, so sink the 8 frigates before they close the sea. Grok leads the siege defense for us. And a League outpost lies in the north-central; if its guards fall, its men will swear to the Fire."
     },
     "hints": [
       {
@@ -185,7 +185,7 @@
       },
       "title": {
         "pt-BR": "Evoluir o Marco da Colônia a Bastião (nível 2)",
-        "en": "Upgrade the Colony Outpost to a Bastion (level 2)"
+        "en": "Upgrade the Colony Outpost to a Bastion (tier 2)"
       },
       "description": {
         "pt-BR": "Use a evolução do Centro de Brasa-Alta (o Marco na praia). O Salão do Clã do interior não conta.",
@@ -258,7 +258,7 @@
       },
       "description": {
         "pt-BR": "As Serpes de Guerra voam e respondem aos grifos de Aurelan. Exige o Salão no nível 3.",
-        "en": "War Serpents fly and answer Aurelan's gryphons. It needs the Hall at level 3."
+        "en": "War Serpents fly and answer Aurelan's gryphons. It needs the Hall at tier 3."
       }
     },
     {
@@ -359,7 +359,7 @@
               "dialog": {
                 "speaker": {
                   "pt-BR": "Grok, Ogro Feiticeiro",
-                  "en": "Grok, Ogre Mage"
+                  "en": "Grok, Ogre Shaman"
                 },
                 "portrait": "⚡",
                 "text": {
@@ -448,7 +448,7 @@
           "type": "message",
           "text": {
             "pt-BR": "Salão do Clã no nível 3: Santuário, Doca, Covil, Ninho e Torres liberados. O Marco da Colônia segue no nível 1: evolua-o. Petróleo inicial: 800.",
-            "en": "Clan Hall at level 3: Sanctum, Dock, Den, Nest and Towers unlocked. The Colony Outpost stays at level 1: upgrade it. Starting oil: 800."
+            "en": "Clan Hall at tier 3: Sanctum, Dock, Den, Nest and Towers unlocked. The Colony Outpost stays at tier 1: upgrade it. Starting oil: 800."
           }
         }
       ]
@@ -483,7 +483,7 @@
         {
           "type": "message",
           "text": {
-            "pt-BR": "Primeira incursão: Cavaleiros-de-Armas e Arqueiros de Aurelan atacam a mina de ouro do interior.",
+            "pt-BR": "Primeira incursão: Homens de armas e Arqueiros de Aurelan atacam a mina de ouro do interior.",
             "en": "First raid: Aurelan men-at-arms and Archers hit the inland gold mine."
           }
         }
@@ -846,7 +846,7 @@
         {
           "speaker": {
             "pt-BR": "Grok, Ogro Feiticeiro",
-            "en": "Grok, Ogre Mage"
+            "en": "Grok, Ogre Shaman"
           },
           "portrait": "⚡",
           "text": {

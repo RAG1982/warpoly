@@ -147,7 +147,7 @@
       "markColor": "#22d3ee",
       "displayName": {
         "pt-BR": "Lacaio náufrago",
-        "en": "Castaway Peon"
+        "en": "Castaway Laborer"
       }
     },
     {
@@ -320,7 +320,7 @@
       "count": 3,
       "title": {
         "pt-BR": "Resgatar 3 Lacaios náufragos na ilhota",
-        "en": "Rescue 3 castaway Peons on the islet"
+        "en": "Rescue 3 castaway Laborers on the islet"
       },
       "description": {
         "pt-BR": "Bandidos da Irmandade da Maré os mantêm numa ilhota no meio do canal. Navios de guerra limpam a praia; uma Barcaça leva guerreiros.",
@@ -1062,7 +1062,7 @@
           "duration": 8,
           "text": {
             "pt-BR": "Ali, a ilhota: fumaça de fogueira. Os Lacaios náufragos devem estar lá, e a Irmandade da Maré os guarda.",
-            "en": "There, the islet: campfire smoke. The castaway Peons must be there, with the Tide Brotherhood guarding them."
+            "en": "There, the islet: campfire smoke. The castaway Laborers must be there, with the Tide Brotherhood guarding them."
           }
         }
       ]
@@ -1097,7 +1097,7 @@
           "type": "message",
           "text": {
             "pt-BR": "Lacaios resgatados!",
-            "en": "Peons rescued!"
+            "en": "Laborers rescued!"
           }
         }
       ]
@@ -1121,7 +1121,7 @@
           "type": "dialog",
           "speaker": {
             "pt-BR": "Lacaio resgatado",
-            "en": "Rescued Peon"
+            "en": "Rescued Laborer"
           },
           "portrait": "⛵",
           "duration": 9,
@@ -1134,7 +1134,7 @@
           "type": "message",
           "text": {
             "pt-BR": "Lacaios resgatados: +100 de ouro e +100 de madeira.",
-            "en": "Peons rescued: +100 gold and +100 wood."
+            "en": "Laborers rescued: +100 gold and +100 wood."
           }
         }
       ]

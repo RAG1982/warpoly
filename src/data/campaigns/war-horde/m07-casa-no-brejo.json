@@ -19,7 +19,7 @@
     "portrait": "🔥",
     "text": {
       "pt-BR": "O Brejo Mudo é a nossa casa: juncos, lama e vitórias-régias sobre água rasa, e o único chão onde os clãs ainda se sentam juntos ao Fogo. Aqui o seu Salão do Clã guarda os Cercados de Javalis que alimentam a tropa, e a leste, do outro lado do brejo, está o Salão de Hurgan Lança-Partida, do Clã das Lanças Quebradas, que jurou ferro e fogo ao nosso lado. Aurelan não perdoa: a esquadra do Governador Mervane desce em Barcaças na praia a nordeste, com Cavaleiros, Arqueiros e Balistas. Segure o Salão, erga 3 Cercados e repila as cinco levas. Mas ouça o que o Fogo diz: o ferro de Mervane compra mais que lealdade. Aos 5 minutos e meio Hurgan vai quebrar o juramento e marchar contra nós. Tenha torres, tropa e Necromantes prontos, sobreviva e depois vá cobrar o traidor no Salão dele. A Forja de ferro dele, ao sudeste, é o cofre que o comprou. Eu comando a guarnição: se eu cair, a casa cai comigo.",
-      "en": "Silent Marsh is our home: reeds, mud and lily pads over shallow water, and the only ground where the clans still sit together at the Fire. Here your Clan Hall guards the Boar Pens that feed the troops, and in the east, across the marsh, stands the Hall of Hurgan Brokenspear of the Broken Spears clan, who swore iron and fire at our side. Aurelan does not forgive: Governor Mervane's squadron comes down in Barges onto the beach in the northeast, with Cavaliers, Archers and Ballistae. Hold the Hall, raise 3 Pens and drive off all five waves. But hear what the Fire says: Mervane's iron buys more than loyalty. At five and a half minutes Hurgan will break the oath and march against us. Have towers, troops and Necromancers ready, survive, and then go collect from the traitor in his own Hall. His iron Forge, in the southeast, is the vault that bought him. I command the garrison: if I fall, the house falls with me."
+      "en": "Silent Marsh is our home: reeds, mud and lily pads over shallow water, and the only ground where the clans still sit together at the Fire. Here your Clan Hall guards the Boar Pens that feed the troops, and in the east, across the marsh, stands the Hall of Hurgan Brokenspear of the Broken Spears Clan, who swore iron and fire at our side. Aurelan does not forgive: Governor Mervane's squadron comes down in Barges onto the beach in the northeast, with Cavaliers, Archers and Ballistae. Hold the Hall, raise 3 Pens and drive off all five waves. But hear what the Fire says: Mervane's iron buys more than loyalty. At five and a half minutes Hurgan will break the oath and march against us. Have towers, troops and Necromancers ready, survive, and then go collect from the traitor in his own Hall. His iron Forge, in the southeast, is the vault that bought him. I command the garrison: if I fall, the house falls with me."
     },
     "hints": [
       {
@@ -413,7 +413,7 @@
           "type": "message",
           "text": {
             "pt-BR": "Seu Salão do Clã subiu ao nível 3: o Santuário das Cinzas, o Covil dos Ogros e as Torres de Vigia estão ao seu alcance.",
-            "en": "Your Clan Hall is now level 3: the Ash Sanctum, the Ogre Den and the Watchtowers are within reach."
+            "en": "Your Clan Hall is now tier 3: the Ash Sanctum, the Ogre Den and the Watchtowers are within reach."
           }
         }
       ]
@@ -1336,7 +1336,7 @@
                 "portrait": "🔥",
                 "text": {
                   "pt-BR": "O Fogo do Clã segue aceso. Agora, Punho-de-Brasa, o próximo passo é a Forja do Monte Caldeira.",
-                  "en": "The Clan Fire still burns. Now, Emberfist, the next step is the Forge of Caldron Mountain."
+                  "en": "The Clan Fire still burns. Now, Emberfist, the next step is the Forge of Cauldron Mountain."
                 },
                 "duration": 8
               }

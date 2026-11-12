@@ -14,12 +14,12 @@
   "briefing": {
     "speaker": {
       "pt-BR": "Vozgul, a Profetisa",
-      "en": "Vozgul the Prophetess"
+      "en": "Vozgul, the Prophetess"
     },
     "portrait": "💀",
     "text": {
       "pt-BR": "O Cerne Verde tem madeira para mil frotas, e Aurelan a guarda com um bosque-forte no meio da mata: um Forte com três torres, Magos que queimam de longe, Grifos que voam por cima dos machados, Arqueiros e o mago Oren. Corte 2.000 de madeira, erga o Santuário das Cinzas e o Ninho das Serpes, e destrua o bosque-forte. Contra o que voa, só Serpes de Guerra, Necromantes e Lanceiros-Machado resolvem. Drogath lidera; se ele cair, o assalto acaba. Narga Asa-Rota chega com uma serpe aos quatro minutos, e eu venho ensinar o Erguer Mortos com o respeito que os mortos pedem.",
-      "en": "Green Core has timber for a thousand fleets, and Aurelan guards it with a grove stronghold in the heart of the forest: a Fort with three towers, Mages that burn from afar, Gryphons that fly over axes, Archers and the mage Oren. Cut 2,000 wood, raise the Ash Sanctum and the Serpent Nest, and destroy the grove stronghold. Against what flies, only War Serpents, Necromancers and Axethrowers will do. Drogath leads; if he falls, the assault is over. Narga Broken-Wing arrives with a serpent at the four-minute mark, and I come to teach Raise Dead with the respect the dead ask for."
+      "en": "Green Core has timber for a thousand fleets, and Aurelan guards it with a grove stronghold in the heart of the forest: a Fort with three towers, Mages that burn from afar, Gryphons that fly over axes, Archers and the mage Oren. Cut 2,000 wood, raise the Ash Sanctum and the Serpent Nest, and destroy the grove stronghold. Against what flies, only War Serpents, Necromancers and Axe Throwers will do. Drogath leads; if he falls, the assault is over. Narga Broken-Wing arrives with a serpent at the four-minute mark, and I come to teach Raise Dead with the respect the dead ask for."
     },
     "hints": [
       {
@@ -27,8 +27,8 @@
         "en": "The Ash Sanctum (Necromancer), Serpent Nest (War Serpent) and Storm Altar need the War Camp and the Hall at tier 3, which the campaign grants right after the opening. The War Camp needs the Boar Pen; the Altar needs the Ogre Den."
       },
       {
-        "pt-BR": "Os Grifos de Aurelan voam: Talhadores e Ogros não os alcançam. Lanceiros-Machado, Necromantes e Serpes de Guerra sim. Mantenha um grupo de atiradores junto do Salão e dos Moinhos.",
-        "en": "Aurelan's Gryphons fly: Grunts and Ogres cannot reach them. Axethrowers, Necromancers and War Serpents can. Keep a group of shooters by the Hall and the Mills."
+        "pt-BR": "Os Grifos de Aurelan voam: Talhadores e Ogros não os alcançam. Lanceiros-Machado, Necromantes e Serpes de Guerra sim. Mantenha um grupo de atiradores junto do Salão e das Serrarias.",
+        "en": "Aurelan's Gryphons fly: Slashers and Ogres cannot reach them. Axe Throwers, Necromancers and War Serpents can. Keep a group of shooters by the Hall and the Sawmills."
       },
       {
         "pt-BR": "Magos de Aurelan queimam de longe e são frágeis: ataque-os primeiro com Ogros e Drogath. A madeira conta o que você coleta, não o que tem em estoque.",
@@ -223,8 +223,8 @@
         "en": "Gather 2,000 wood from the Core"
       },
       "description": {
-        "pt-BR": "Conta só a madeira que seus Lacaios levam ao Moinho de Madeira. A mata é farta, mas os bosques ficam longe: erga Serrarias junto deles.",
-        "en": "Counts only wood your Peons deliver to the Lumber Mill. The forest is rich, but the groves are far: raise Mills next to them."
+        "pt-BR": "Conta só a madeira que seus Lacaios levam à Serraria do Clã. A mata é farta, mas os bosques ficam longe: erga Serrarias junto deles.",
+        "en": "Counts only wood your Laborers deliver to the Clan Sawmill. The forest is rich, but the groves are far: raise Sawmills next to them."
       }
     },
     {
@@ -299,11 +299,11 @@
       },
       "title": {
         "pt-BR": "Ritual das Tempestades: o primeiro Ogro Feiticeiro",
-        "en": "Storm Ritual: the first Ogre Mage"
+        "en": "Storm Ritual: the first Ogre Shaman"
       },
       "description": {
         "pt-BR": "Pesquise o Ritual das Tempestades no Altar das Tempestades e treine um Ogro: ele sai Ogro Feiticeiro. (+300 de ouro)",
-        "en": "Research the Storm Ritual at the Storm Altar and train an Ogre: it comes out an Ogre Mage. (+300 gold)"
+        "en": "Research the Storm Ritual at the Storm Altar and train an Ogre: it comes out an Ogre Shaman. (+300 gold)"
       }
     },
     {
@@ -372,7 +372,7 @@
               "dialog": {
                 "speaker": {
                   "pt-BR": "Drogath Punho-de-Brasa",
-                  "en": "Drogath Ember-Fist"
+                  "en": "Drogath Emberfist"
                 },
                 "portrait": "🪓",
                 "text": {
@@ -389,7 +389,7 @@
               "dialog": {
                 "speaker": {
                   "pt-BR": "Drogath Punho-de-Brasa",
-                  "en": "Drogath Ember-Fist"
+                  "en": "Drogath Emberfist"
                 },
                 "portrait": "🪓",
                 "text": {
@@ -423,7 +423,7 @@
               "dialog": {
                 "speaker": {
                   "pt-BR": "Vozgul, a Profetisa",
-                  "en": "Vozgul the Prophetess"
+                  "en": "Vozgul, the Prophetess"
                 },
                 "portrait": "💀",
                 "text": {
@@ -440,12 +440,12 @@
               "dialog": {
                 "speaker": {
                   "pt-BR": "Drogath Punho-de-Brasa",
-                  "en": "Drogath Ember-Fist"
+                  "en": "Drogath Emberfist"
                 },
                 "portrait": "🪓",
                 "text": {
-                  "pt-BR": "Moinho de Madeira primeiro, e Lacaios no cerne. Depois o Santuário das Cinzas e o Ninho das Serpes. Narga Asa-Rota vem com as serpes por volta dos quatro minutos.",
-                  "en": "Lumber Mill first, and Peons in the core. Then the Ash Sanctum and the Serpent Nest. Narga Broken-Wing comes with the serpents around the four-minute mark."
+                  "pt-BR": "Serraria do Clã primeiro, e Lacaios no cerne. Depois o Santuário das Cinzas e o Ninho das Serpes. Narga Asa-Rota vem com as serpes por volta dos quatro minutos.",
+                  "en": "Clan Sawmill first, and Laborers in the core. Then the Ash Sanctum and the Serpent Nest. Narga Broken-Wing comes with the serpents around the four-minute mark."
                 },
                 "duration": 7
               }
@@ -490,13 +490,13 @@
           "type": "dialog",
           "speaker": {
             "pt-BR": "Drogath Punho-de-Brasa",
-            "en": "Drogath Ember-Fist"
+            "en": "Drogath Emberfist"
           },
           "portrait": "🪓",
           "duration": 10,
           "text": {
-            "pt-BR": "Lacaios no ouro e na madeira, e um Moinho de Madeira junto dos bosques: a mata é densa e os depósitos longe. O Santuário das Cinzas exige o Acampamento de Guerra, que exige o Cercado de Javalis.",
-            "en": "Peons on gold and timber, and a Lumber Mill next to the groves: the forest is dense and the stores are far. The Ash Sanctum needs the War Camp, which needs the Boar Pen."
+            "pt-BR": "Lacaios no ouro e na madeira, e uma Serraria do Clã junto dos bosques: a mata é densa e os depósitos longe. O Santuário das Cinzas exige o Acampamento de Guerra, que exige o Cercado de Javalis.",
+            "en": "Laborers on gold and timber, and a Clan Sawmill next to the groves: the forest is dense and the stores are far. The Ash Sanctum needs the War Camp, which needs the Boar Pen."
           }
         }
       ]
@@ -521,7 +521,7 @@
           "type": "dialog",
           "speaker": {
             "pt-BR": "Drogath Punho-de-Brasa",
-            "en": "Drogath Ember-Fist"
+            "en": "Drogath Emberfist"
           },
           "portrait": "🪓",
           "duration": 9,
@@ -552,7 +552,7 @@
           "type": "dialog",
           "speaker": {
             "pt-BR": "Drogath Punho-de-Brasa",
-            "en": "Drogath Ember-Fist"
+            "en": "Drogath Emberfist"
           },
           "portrait": "🪓",
           "duration": 9,
@@ -583,13 +583,13 @@
           "type": "dialog",
           "speaker": {
             "pt-BR": "Vozgul, a Profetisa",
-            "en": "Vozgul the Prophetess"
+            "en": "Vozgul, the Prophetess"
           },
           "portrait": "💀",
           "duration": 9,
           "text": {
             "pt-BR": "O Altar das Tempestades guarda o Ritual: um Ogro treinado depois dele sai Feiticeiro. Peça, não exija: a tempestade escolhe a quem atende.",
-            "en": "The Storm Altar keeps the Ritual: an Ogre trained after it comes out a Mage. Ask, do not demand: the storm picks whom it answers."
+            "en": "The Storm Altar keeps the Ritual: an Ogre trained after it comes out a Shaman. Ask, do not demand: the storm picks whom it answers."
           }
         }
       ]
@@ -613,7 +613,7 @@
           "markColor": "#c084fc",
           "displayName": {
             "pt-BR": "Vozgul, a Profetisa",
-            "en": "Vozgul the Prophetess"
+            "en": "Vozgul, the Prophetess"
           }
         },
         {
@@ -658,7 +658,7 @@
           "type": "dialog",
           "speaker": {
             "pt-BR": "Vozgul, a Profetisa",
-            "en": "Vozgul the Prophetess"
+            "en": "Vozgul, the Prophetess"
           },
           "portrait": "💀",
           "duration": 10,
@@ -836,7 +836,7 @@
           "type": "dialog",
           "speaker": {
             "pt-BR": "Drogath Punho-de-Brasa",
-            "en": "Drogath Ember-Fist"
+            "en": "Drogath Emberfist"
           },
           "portrait": "🪓",
           "duration": 8,
@@ -913,7 +913,7 @@
           "type": "dialog",
           "speaker": {
             "pt-BR": "Drogath Punho-de-Brasa",
-            "en": "Drogath Ember-Fist"
+            "en": "Drogath Emberfist"
           },
           "portrait": "🪓",
           "duration": 7,
@@ -971,7 +971,7 @@
           "type": "message",
           "text": {
             "pt-BR": "Primeiro Ogro Feiticeiro: +300 de ouro.",
-            "en": "First Ogre Mage: +300 gold."
+            "en": "First Ogre Shaman: +300 gold."
           }
         }
       ]
@@ -1049,7 +1049,7 @@
           "type": "dialog",
           "speaker": {
             "pt-BR": "Vozgul, a Profetisa",
-            "en": "Vozgul the Prophetess"
+            "en": "Vozgul, the Prophetess"
           },
           "portrait": "💀",
           "duration": 8,
@@ -1094,7 +1094,7 @@
               "dialog": {
                 "speaker": {
                   "pt-BR": "Drogath Punho-de-Brasa",
-                  "en": "Drogath Ember-Fist"
+                  "en": "Drogath Emberfist"
                 },
                 "portrait": "🪓",
                 "text": {
@@ -1111,7 +1111,7 @@
               "dialog": {
                 "speaker": {
                   "pt-BR": "Vozgul, a Profetisa",
-                  "en": "Vozgul the Prophetess"
+                  "en": "Vozgul, the Prophetess"
                 },
                 "portrait": "💀",
                 "text": {

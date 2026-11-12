@@ -91,7 +91,12 @@ PECAS_TIME = []
 REGIOES_LIVRES = ('ToolGroup',)
 POSES_PREVIA = ('caminhada', 'golpe', 'coleta_a', 'coleta_b', 'carregar')
 poses = V2.poses
-materiais_extra = V2.materiais_extra
+
+
+def materiais_extra(ctx, objs):
+    """Mochila de carga na ALTURA DAS COSTAS do Lacaio (corcunda, tronco alto): o Aldeão a põe em y = 1,0; aqui o dorso fica mais alto."""
+    V2.materiais_extra(ctx, objs, pack_y=PACK_Y, banda=(PACK_Y - 0.25, PACK_Y + 0.25), escala=PACK_ESCALA)
+
 
 # ---------------------------------------------------------------------------
 # Repose dos braços (coordenadas do jogo, antes de qualquer corte; sem espelho)
@@ -171,6 +176,8 @@ def resolver_pose():
 
 RFIX = np.eye(3)
 POSE = resolver_pose()
+PACK_Y = 1.85          # altura da mochila (costas, entre a cintura e os ombros); o Aldeão usa 1,0
+PACK_ESCALA = 1.15
 ARMA_NO = 'ToolGroup'     # nó cuja origem é a empunhadura (prévias de close-up da mão)
 ESTADO = {}
 

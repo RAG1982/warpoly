@@ -240,7 +240,7 @@ def _malha(nome, bm_fn, material, pai, local):
     return o
 
 
-def materiais_extra(ctx, objs):
+def materiais_extra(ctx, objs, pack_y=1.0, banda=(0.95, 1.35), escala=1.0):
     """Mochila de carga (Pack): armação de couro, feixe de lenha e saco de ouro/pedra, em materiais lisos. Ocultos no jogo
     (`ModelFactory._workerGlbDefaults`) e ligados por `UnitView._applyCarry`."""
     import bpy
@@ -249,11 +249,12 @@ def materiais_extra(ctx, objs):
     from mathutils import Matrix
     raiz = objs['Torso'].parent
     V = ctx.dados['Torso']['V'] + ctx.piv['Torso']
-    meio = V[(V[:, 1] > 0.95) & (V[:, 1] < 1.35)]
+    meio = V[(V[:, 1] > banda[0]) & (V[:, 1] < banda[1])]
     costas = float(np.percentile(meio[:, 2], 5))
-    pack_y, pack_z = 1.0, round(costas - 0.10, 3)
+    pack_z = round(costas - 0.10 * escala, 3)
     log('costas do Torso z=%.3f -> Pack em (0, %.2f, %.3f)' % (costas, pack_y, pack_z))
     pack = C.make_empty('Pack', location=(0.0, pack_y, pack_z), parent=raiz)
+    pack.scale = (escala, escala, escala)
     m_couro = _material('PackLeather', '#5a3a20')
     m_saco = _material('PackSack', '#b79a63', 0.95)
     m_lenha = _material('PackWood', '#7b5230')

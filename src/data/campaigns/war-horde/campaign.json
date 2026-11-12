@@ -4,7 +4,6 @@
   "id": "war-horde",
   "factionId": "orc",
   "track": "main",
-  "comingSoon": true,
   "order": 2,
   "title": {
     "pt-BR": "A Guerra do Mar Fendido (Clãs do Cinzal)",

@@ -19,7 +19,7 @@ describe('Tela de escolha de campanha (M2-34)', () => {
     expect(showBetaFor(null)).toBe(false);
   });
 
-  it('cartões trazem facção, progresso via CampaignProgress e rótulo "em breve" da Horda', () => {
+  it('cartões trazem facção, progresso via CampaignProgress; a Horda está jogável (12 missões prontas)', () => {
     const progress = new CampaignProgress(memoryStorage());
     progress.recordVictory('war-alliance', 'war-alliance-01-terra-a-vista', { seconds: 100 });
     const { main } = buildCampaignCards(camps, progress);
@@ -28,12 +28,12 @@ describe('Tela de escolha de campanha (M2-34)', () => {
     expect([a.done, a.total]).toEqual([1, 12]);
     expect([h.done, h.total]).toEqual([0, 12]);
     expect(a.playable).toBe(true);
-    expect(h.comingSoon).toBe(true);
-    expect(h.playable).toBe(false);
+    expect(h.comingSoon).toBe(false);
+    expect(h.playable).toBe(true);
   });
 
   it('campanha em breve abre com unlockAll ou ?campaign=<id>', () => {
-    const horde = camps.find((c) => c.id === 'war-horde');
+    const horde = { ...camps.find((c) => c.id === 'war-horde'), comingSoon: true };
     expect(isCampaignPlayable(horde, {})).toBe(false);
     expect(isCampaignPlayable(horde, { unlockAll: true })).toBe(true);
     expect(isCampaignPlayable(horde, { param: 'war-horde' })).toBe(true);

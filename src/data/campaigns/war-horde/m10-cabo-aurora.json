@@ -61,7 +61,7 @@
       "description": { "pt-BR": "As fragatas patrulham o mar entre a ilha do meio e a praia. Só navios as alcançam bem.", "en": "The frigates patrol the sea between the middle isle and the beach. Only ships reach them well." } },
     { "id": "s-necros", "type": "train", "priority": "secondary", "unitType": "necromancer", "count": 2,
       "title": { "pt-BR": "Treinar 2 Necromantes no Santuário das Cinzas", "en": "Train 2 Necromancers at the Ash Sanctum" },
-      "description": { "pt-BR": "Os Necromantes erguem mortos e drenam a vida do inimigo. Erga o Santuário das Cinzas com o Salão no nível 3.", "en": "Necromancers raise the dead and drain the enemy's life. Raise the Ash Sanctum with the Hall at level 3." } },
+      "description": { "pt-BR": "Os Necromantes erguem mortos e drenam a vida do inimigo. Erga o Santuário das Cinzas com o Salão no nível 3.", "en": "Necromancers raise the dead and drain the enemy's life. Raise the Ash Sanctum with the Hall at tier 3." } },
     { "id": "h-grove", "type": "flag", "priority": "hidden",
       "condition": { "type": "area", "owner": "player", "area": { "anchor": "isletWell", "r": 14 } },
       "title": { "pt-BR": "Achar o Bosque do Orvalho", "en": "Find the Dew Grove" } }
@@ -84,7 +84,7 @@
       "actions": [
         { "type": "setTier", "owner": "player", "tier": 3 },
         { "type": "giveResources", "owner": "player", "oil": 1500 },
-        { "type": "message", "text": { "pt-BR": "Árvore tecnológica completa liberada: o Salão está no nível 3 (Santuário das Cinzas, Doca, Torres). Petróleo inicial: 1500.", "en": "Full tech tree unlocked: the Hall is at level 3 (Ash Sanctum, Dock, Towers). Starting oil: 1500." } }
+        { "type": "message", "text": { "pt-BR": "Árvore tecnológica completa liberada: o Salão está no nível 3 (Santuário das Cinzas, Doca, Torres). Petróleo inicial: 1500.", "en": "Full tech tree unlocked: the Hall is at tier 3 (Ash Sanctum, Dock, Towers). Starting oil: 1500." } }
       ] },
     { "id": "landed", "when": { "type": "area", "owner": "player", "area": { "anchor": "landingZone", "r": 16 } },
       "actions": [
@@ -95,7 +95,7 @@
     { "id": "raid-1", "when": { "type": "time", "at": 300 },
       "actions": [
         { "type": "spawn", "owner": 1, "units": [{ "type": "knight", "count": 6 }, { "type": "archer", "count": 3 }], "anchor": "enemyStart", "dx": 8, "dz": 6, "spread": 3, "order": { "kind": "attackMove", "anchor": "colonyMark" } },
-        { "type": "message", "text": { "pt-BR": "Primeira leva de Aurelan: Cavaleiros-de-Armas e Arqueiros marcham para a praia.", "en": "Aurelan's first wave: men-at-arms and Archers march for the beach." } }
+        { "type": "message", "text": { "pt-BR": "Primeira leva de Aurelan: Homens de armas e Arqueiros marcham para a praia.", "en": "Aurelan's first wave: men-at-arms and Archers march for the beach." } }
       ] },
     { "id": "raid-2", "when": { "type": "time", "at": 480 },
       "actions": [

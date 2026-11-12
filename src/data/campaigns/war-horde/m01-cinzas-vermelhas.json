@@ -363,7 +363,7 @@
               "dialog": {
                 "speaker": {
                   "pt-BR": "Skarn, chefe-de-brasa",
-                  "en": "Skarn, ember-chief"
+                  "en": "Skarn, Ember-Chief"
                 },
                 "portrait": "🔥",
                 "text": {
@@ -381,7 +381,7 @@
               "dialog": {
                 "speaker": {
                   "pt-BR": "Drogath Punho-de-Brasa",
-                  "en": "Drogath Ember-Fist"
+                  "en": "Drogath Emberfist"
                 },
                 "portrait": "🪓",
                 "text": {
@@ -455,7 +455,7 @@
           "type": "dialog",
           "speaker": {
             "pt-BR": "Drogath Punho-de-Brasa",
-            "en": "Drogath Ember-Fist"
+            "en": "Drogath Emberfist"
           },
           "portrait": "🪓",
           "text": {
@@ -496,7 +496,7 @@
           "type": "dialog",
           "speaker": {
             "pt-BR": "Drogath Punho-de-Brasa",
-            "en": "Drogath Ember-Fist"
+            "en": "Drogath Emberfist"
           },
           "portrait": "🪓",
           "text": {
@@ -522,7 +522,7 @@
           "type": "dialog",
           "speaker": {
             "pt-BR": "Drogath Punho-de-Brasa",
-            "en": "Drogath Ember-Fist"
+            "en": "Drogath Emberfist"
           },
           "portrait": "🪓",
           "text": {
@@ -547,12 +547,12 @@
           "type": "dialog",
           "speaker": {
             "pt-BR": "Hurgan Lança-Partida",
-            "en": "Hurgan Broken-Spear"
+            "en": "Hurgan Brokenspear"
           },
           "portrait": "🗡️",
           "text": {
             "pt-BR": "Derrubaram um acampamento antes da hora? Bravura rara, e o Clã das Lanças Quebradas aplaude de longe. Ele vale quando abrirmos a ordem de ataque, mas ainda faltam os outros: terminem o Acampamento de Guerra e o treino.",
-            "en": "You tore down a camp ahead of time? Rare bravery, and the Broken Spear Clan applauds from afar. It will count once the attack order opens, but the others still stand: finish the War Camp and the training."
+            "en": "You tore down a camp ahead of time? Rare bravery, and the Broken Spears Clan applauds from afar. It will count once the attack order opens, but the others still stand: finish the War Camp and the training."
           },
           "duration": 8
         }
@@ -674,7 +674,7 @@
               "dialog": {
                 "speaker": {
                   "pt-BR": "Drogath Punho-de-Brasa",
-                  "en": "Drogath Ember-Fist"
+                  "en": "Drogath Emberfist"
                 },
                 "portrait": "🪓",
                 "text": {
@@ -691,7 +691,7 @@
               "dialog": {
                 "speaker": {
                   "pt-BR": "Drogath Punho-de-Brasa",
-                  "en": "Drogath Ember-Fist"
+                  "en": "Drogath Emberfist"
                 },
                 "portrait": "🪓",
                 "text": {

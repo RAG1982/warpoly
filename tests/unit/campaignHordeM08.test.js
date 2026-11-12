@@ -107,7 +107,7 @@ describe('m08 O Monte Caldeira · a missão', () => {
     expect(run.outcome).toBeNull();
     const def = run.gm.mission.def;
     const text = JSON.stringify(def);
-    expect(text).toContain('Profetisa Vozgul');
+    expect(text).toContain('Vozgul, a Profetisa');
     const spawns = [...def.setup, ...def.triggers.flatMap((t) => t.actions)].filter((a) => a.type === 'spawn');
     for (const a of spawns) expect(JSON.stringify(a.unitType ?? a.units)).not.toMatch(/vozgul/i);
   }, 60000);

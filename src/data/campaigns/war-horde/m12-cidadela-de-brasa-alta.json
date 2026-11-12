@@ -19,7 +19,7 @@
     "portrait": "🪓",
     "text": {
       "pt-BR": "A Fenda é a nossa estrada, e é na ponta leste do Cabo Aurora que o Cinzal a fecha por trás de nós. Os três heróis estão juntos, Drogath, Vozgul e eu, e Grok comanda os cercos. A missão tem três atos. Ato I: evolua o Marco da Cidadela ao nível 3 (a Cidadela de Ferro), erga 4 Torres de Vigia, 8 trechos de Paliçada de Ferro nos dois desfiladeiros da crista e 2 Catapultas, enquanto a guarda de Dorian testa a linha. Ato II: afunde ou arrase as 3 Docas de Aurelan no litoral norte, a de Brumar entre elas, e mantenha 2 galés no estreito por 90 segundos, sem um único inimigo na água, vencendo as frotas que tentarem romper. Ato III: o Marechal Dorian Vasques virá com cavaleiros, magos e grifos por terra e com um assalto anfíbio por mar. Quebre a guarda dele e ele foge ferido, ou derrube-o antes. Se o Marco cair, ou se Drogath tombar, o cabo é perdido.",
-      "en": "The Rift is our road, and it is on the eastern tip of Cape Aurora that the Cinzal closes it behind us. The three heroes are together, Drogath, Vozgul and I, and Grok commands the sieges. The mission has three acts. Act I: upgrade the Citadel Outpost to level 3 (the Iron Citadel), raise 4 Watchtowers, 8 Iron Palisade segments in the ridge's two passes and 2 Catapults while Dorian's guard probes the line. Act II: sink or raze Aurelan's 3 Docks on the north shore, Brumar's among them, and hold 2 galleys in the strait for 90 seconds with not one enemy on the water, beating the fleets that try to break through. Act III: Marshal Dorian Vasques comes with knights, mages and gryphons by land and an amphibious assault by sea. Break his guard and he flees wounded, or bring him down first. If the Outpost falls, or if Drogath is slain, the cape is lost."
+      "en": "The Rift is our road, and it is on the eastern tip of Cape Aurora that the Cinzal closes it behind us. The three heroes are together, Drogath, Vozgul and I, and Grok commands the sieges. The mission has three acts. Act I: upgrade the Citadel Outpost to tier 3 (the Iron Citadel), raise 4 Watchtowers, 8 Iron Palisade segments in the ridge's two passes and 2 Catapults while Dorian's guard probes the line. Act II: sink or raze Aurelan's 3 Docks on the north shore, Brumar's among them, and hold 2 galleys in the strait for 90 seconds with not one enemy on the water, beating the fleets that try to break through. Act III: Marshal Dorian Vasques comes with cavaliers, mages and gryphons by land and an amphibious assault by sea. Break his guard and he flees wounded, or bring him down first. If the Outpost falls, or if Drogath is slain, the cape is lost."
     },
     "hints": [
       {
@@ -28,7 +28,7 @@
       },
       {
         "pt-BR": "Para evoluir o Marco da Cidadela ao nível 3 use a evolução do Centro dele; custa ouro, madeira, pedra e petróleo. O Salão do Clã do cabo já está no nível 3 e libera a árvore toda, inclusive a Doca do Clã e o Caldeirão de Óleo.",
-        "en": "To upgrade the Citadel Outpost to level 3 use its Center upgrade; it costs gold, wood, stone and oil. The cape's Clan Hall is already level 3 and unlocks the whole tree, the Clan Dock and Oil Cauldron included."
+        "en": "To upgrade the Citadel Outpost to tier 3 use its Center upgrade; it costs gold, wood, stone and oil. The cape's Clan Hall is already tier 3 and unlocks the whole tree, the Clan Dock and Oil Cauldron included."
       },
       {
         "pt-BR": "Ato II: as Docas ficam no litoral norte, atrás da crista; galés e Leviatãs batem nelas do mar. Depois, 2 navios parados no estreito, e nenhum inimigo a 30 u dele, fazem o contador de 90 s correr.",
@@ -319,11 +319,11 @@
       },
       "title": {
         "pt-BR": "Ato I: evoluir o Marco da Cidadela ao nível 3 (Cidadela de Ferro)",
-        "en": "Act I: upgrade the Citadel Outpost to level 3 (Iron Citadel)"
+        "en": "Act I: upgrade the Citadel Outpost to tier 3 (Iron Citadel)"
       },
       "description": {
         "pt-BR": "Use a evolução do Centro do Marco da Cidadela, atrás da crista. O Salão do Clã do cabo já está no nível 3 e não conta.",
-        "en": "Use the Center upgrade on the Citadel Outpost behind the ridge. The cape's Clan Hall is already level 3 and does not count."
+        "en": "Use the Center upgrade on the Citadel Outpost behind the ridge. The cape's Clan Hall is already tier 3 and does not count."
       },
       "marker": {
         "area": {
@@ -420,8 +420,8 @@
         "en": "Act I: have 2 Catapults at the Citadel"
       },
       "description": {
-        "pt-BR": "A Oficina dos Engenhoqueiros treina Catapultas (Quartel e Centro nível 2). Clique direito move; Ctrl+clique ataca um ponto.",
-        "en": "The Tinkerers' Workshop trains Catapults (Barracks and Center level 2). Right-click moves; Ctrl+click attacks a point."
+        "pt-BR": "A Oficina dos Engenhoqueiros treina Catapultas (Acampamento de Guerra e Centro nível 2). Clique direito move; Ctrl+clique ataca um ponto.",
+        "en": "The Tinkerers Workshop trains Catapults (War Camp and Center tier 2). Right-click moves; Ctrl+click attacks a point."
       }
     },
     {
@@ -517,7 +517,7 @@
       },
       "description": {
         "pt-BR": "Dorian ataca a Cidadela com a guarda de cavaleiros, magos e grifos, e um assalto anfíbio pela praia sul. Quebre a guarda dele: ferido, ele recua para a base. Derrube-o antes, se puder, sem perder o Marco.",
-        "en": "Dorian attacks the Citadel with his guard of knights, mages and gryphons, and an amphibious assault on the south beach. Break his guard: wounded, he falls back to his base. Bring him down first if you can, without losing the Outpost."
+        "en": "Dorian attacks the Citadel with his guard of cavaliers, mages and gryphons, and an amphibious assault on the south beach. Break his guard: wounded, he falls back to his base. Bring him down first if you can, without losing the Outpost."
       }
     },
     {
@@ -774,7 +774,7 @@
           "type": "message",
           "text": {
             "pt-BR": "Salão do Clã no nível 3: a árvore toda está liberada. O Marco da Cidadela nasce no nível 2: evolua-o ao 3 (Cidadela de Ferro).",
-            "en": "Clan Hall at level 3: the whole tree is unlocked. The Citadel Outpost starts at level 2: upgrade it to 3 (Iron Citadel)."
+            "en": "Clan Hall at tier 3: the whole tree is unlocked. The Citadel Outpost starts at tier 2: upgrade it to 3 (Iron Citadel)."
           }
         }
       ]
@@ -903,7 +903,7 @@
           "type": "message",
           "text": {
             "pt-BR": "Guarda de Dorian: Cavaleiros e Arqueiros marcham para o desfiladeiro oeste.",
-            "en": "Dorian's guard: Knights and Archers march on the west pass."
+            "en": "Dorian's guard: Cavaliers and Archers march on the west pass."
           }
         },
         {
@@ -1816,7 +1816,7 @@
                 "portrait": "🔮",
                 "text": {
                   "pt-BR": "Barcaças pela praia sul, Cavaleiros pelo vale, grifos no ar. O Fogo me mostra tudo, e ele não conta bom fim para quem recuar.",
-                  "en": "Barges on the south beach, Knights through the vale, gryphons in the air. The Fire shows me everything, and it tells no good end for whoever retreats."
+                  "en": "Barges on the south beach, Cavaliers through the vale, gryphons in the air. The Fire shows me everything, and it tells no good end for whoever retreats."
                 },
                 "duration": 9
               }

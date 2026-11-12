@@ -289,7 +289,7 @@
       },
       "description": {
         "pt-BR": "O Ninho das Serpes pede o Salão no nível 3. As Serpes caçam voadores: os Grifos de Dorian chegam aos 7:20.",
-        "en": "The Serpent Nest needs the Hall at level 3. Serpents hunt flyers: Dorian's Gryphons arrive at 7:20."
+        "en": "The Serpent Nest needs the Hall at tier 3. Serpents hunt flyers: Dorian's Gryphons arrive at 7:20."
       }
     },
     {
@@ -515,7 +515,7 @@
           "type": "message",
           "text": {
             "pt-BR": "Seu Salão do Clã subiu ao nível 3: o Covil dos Ogros, as Torres de Vigia e o Ninho das Serpes estão ao seu alcance.",
-            "en": "Your Clan Hall is now level 3: the Ogre Den, the Watchtowers and the Serpent Nest are within reach."
+            "en": "Your Clan Hall is now tier 3: the Ogre Den, the Watchtowers and the Serpent Nest are within reach."
           }
         }
       ]

@@ -385,7 +385,7 @@ describe('IA e cerco (F4-02)', () => {
     gm.simStep(SIM_DT);
     expect(siege.state).toBe('attackingGround');
     expect(knight.state).not.toBe('attackingGround');
-    run(gm, 8);
+    run(gm, 20); // o intervalo entre disparos agora é respeitado mesmo com a retaliação do alvo: o grunt cai mais tarde
     expect(enemy.hp).toBeLessThan(hp0);
     expect(siege.attackTarget).toBe(null);
 

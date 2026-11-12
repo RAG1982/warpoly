@@ -237,6 +237,8 @@ export class Unit {
     this._mineTimer = 0;
     this.actionTimer = 0;
     this.attackTimer = 0;
+    this._hasFired = false;
+    this._sinceFire = Infinity; // segundos desde o último disparo (trava de intervalo: ver `hasFiredThisAttack`)
     this.walkTimer = 0;
     this.isDead = false;
     this.lastAttackerOwnerId = null; // F3-09
@@ -324,6 +326,21 @@ export class Unit {
   /** F3-03: dano total legado (`basic + piercing`), derivado — leitura por AI/HUD; nunca escrito. */
   get attack() {
     return this.damage.basic + this.damage.piercing;
+  }
+
+  /**
+   * Trava do intervalo de ataque. Vários pontos da IA/comandos zeram `hasFiredThisAttack` (novo comando de ataque, troca de alvo,
+   * perseguição) sem zerar `attackTimer`; com o progresso do ciclo já em ≥ 60 %, cada clique do jogador fazia a unidade disparar
+   * de novo no tick seguinte (catapulta atirando várias pedras, construção caindo rápido). Agora o getter continua `true` até
+   * passar `effAttackCooldown` desde o ÚLTIMO disparo, qualquer que seja a origem do reset.
+   */
+  get hasFiredThisAttack() {
+    return this._hasFired || this._sinceFire < this.effAttackCooldown;
+  }
+
+  set hasFiredThisAttack(v) {
+    this._hasFired = !!v;
+    if (v) this._sinceFire = 0;
   }
 
   /** F4-03: cooldown de ataque efetivo (status `attackSpeedMul` divide o cooldown). */
@@ -1247,6 +1264,7 @@ export class Unit {
     }
 
     this.attackTimer += delta;
+    this._sinceFire += delta;
     this.actionTimer += delta;
     if (this.layer === 'air') this._updateFlightHeight(delta);
     // F4-07b: embarque e desembarque pendentes.

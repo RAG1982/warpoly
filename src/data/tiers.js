@@ -53,12 +53,12 @@ export const HQ_ENEMY_MINE_CLEARANCE = 14;
 
 /**
  * M2-33: chave do modelo 3D (`GLB_MODELS`) por facção e nível do Centro. Humanos têm um .glb por nível
- * (`tools/blender/build_hq_human.py`); orcs seguem com o modelo único (`null` = o `GreatHall` procedural).
+ * (`tools/blender/build_hq_human.py`); orcs também têm um .glb por nível (`tools/blender/build_hq_orc.py`; sem ele cai no `great_hall.glb` antigo).
  * Só leitura do render: a simulação nunca usa isto (o checksum do headless não muda).
  */
 export const HQ_TIER_MODEL = {
   human: { 1: 'hq_human_1', 2: 'hq_human_2', 3: 'hq_human_3' },
-  orc: { 1: null, 2: null, 3: null }
+  orc: { 1: 'hq_orc_1', 2: 'hq_orc_2', 3: 'hq_orc_3' }
 };
 
 /**
@@ -72,6 +72,22 @@ export const HQ_TIER_VIEW = {
   2: { height: 12.5, footprint: 8.2, healthBarHeight: 13.5, chimney: null },
   3: { height: 15.5, footprint: 8.5, healthBarHeight: 16.5, chimney: null }
 };
+
+/**
+ * Dimensões VISUAIS do Centro orc por nível (mesmos campos de `HQ_TIER_VIEW`; só render). Salão do Clã -> Bastião -> Cidadela de Ferro.
+ * A Cidadela de Ferro não tem chaminé.
+ */
+export const HQ_TIER_VIEW_ORC = {
+  1: { height: 8.0, footprint: 8.6, healthBarHeight: 9.0, chimney: { x: 1.8, y: 7.6, z: -1.8 } },
+  2: { height: 11.5, footprint: 8.2, healthBarHeight: 12.5, chimney: { x: 3.4, y: 11.4, z: -1.5 } },
+  3: { height: 13.5, footprint: 8.8, healthBarHeight: 14.5, chimney: null }
+};
+
+/** Visual do Centro (`HQ_TIER_VIEW`/`HQ_TIER_VIEW_ORC`) da facção e nível; cai no nível 1 da facção. */
+export function hqTierView(factionId, tier) {
+  const t = factionId === 'orc' ? HQ_TIER_VIEW_ORC : HQ_TIER_VIEW;
+  return t[tier] || t[1];
+}
 
 /** Nome PT-BR do nível `tier` da facção `factionId` ('human' | 'orc'). */
 export function getTierName(factionId, tier) {

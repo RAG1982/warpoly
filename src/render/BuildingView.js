@@ -6,7 +6,7 @@
  */
 import * as THREE from 'three';
 import { ModelFactory } from '../entities/ModelFactory.js';
-import { getBuildingDef, HQ_TIER_VIEW } from '../data/index.js';
+import { getBuildingDef, HQ_TIER_VIEW, hqTierView } from '../data/index.js';
 import { syncOutline, resetOutline } from './postfx/outlineLayer.js';
 import { markRingMaterial } from './markRing.js';
 import { LOD_DISTANCES, lodLevelForDistance, lodEnabled, applyEntityLod } from './lod.js';
@@ -55,7 +55,6 @@ const bldHpRedMat = new THREE.MeshBasicMaterial({ color: 0xef4444, depthTest: fa
 // F1-08: vetores de módulo reutilizados por frame (evita alocação em update/VFX)
 const _flameSmokePos = new THREE.Vector3();
 const _chimneyPos = new THREE.Vector3();
-const _chimneyOffsetGreatHall = new THREE.Vector3(-2.2, 9.8, -1.8);
 const _chimneyOffsetCottage = new THREE.Vector3(2.3, 5.4, 0.0);
 const _chimneyOffsetHq = new THREE.Vector3(); // M2-33: chaminé do Centro humano nível 1 (HQ_TIER_VIEW[1].chimney)
 /** M2-33: duração (s) da animação de crescimento do modelo novo quando o Centro sobe de nível. */
@@ -144,7 +143,7 @@ export class BuildingView {
   createBuildingMesh(type, factionId = 'human') {
     switch (type) {
       case 'castle': return ModelFactory.createCastle(this._tier); // M2-33: um modelo por nível do Centro
-      case 'great_hall': return ModelFactory.createGreatHall();
+      case 'great_hall': return ModelFactory.createGreatHall(this._tier); // um modelo por nível do Centro orc
       case 'lumber_camp': return ModelFactory.createLumberCamp();
       case 'orc_lumber_mill': return ModelFactory.createOrcLumberMill();
       case 'cottage': return ModelFactory.createCottage();
@@ -236,8 +235,8 @@ export class BuildingView {
   }
 
   getBuildingHeight() {
-    if (this.entity.type === 'castle') {
-      const v = HQ_TIER_VIEW[this._tier];
+    if (this.entity.type === 'castle' || this.entity.type === 'great_hall') {
+      const v = hqTierView(this.entity.type === 'castle' ? 'human' : 'orc', this._tier);
       if (v) return v.healthBarHeight; // M2-33: altura do modelo do nível atual
     }
     return getBuildingDef(this.entity.type).healthBarHeight;
@@ -492,7 +491,7 @@ export class BuildingView {
     }
 
     // M2-33: troca de modelo do Centro humano ao mudar de nível (e animação curta de crescimento do modelo novo).
-    if (e.type === 'castle' && e.isConstructed && (e.tier || 1) !== this._tier) {
+    if ((e.type === 'castle' || e.type === 'great_hall') && e.isConstructed && (e.tier || 1) !== this._tier) {
       this.swapHqModel(e.tier || 1);
     }
     if (this._swapT >= 0 && e.isConstructed) {
@@ -504,7 +503,7 @@ export class BuildingView {
         this._smokeBurst = false;
         for (let i = 0; i < 4; i++) {
           const a = i * Math.PI / 2;
-          const rr = HQ_TIER_VIEW[this._tier] ? HQ_TIER_VIEW[this._tier].footprint * 0.45 : 3;
+          const rr = hqTierView(e.type === 'great_hall' ? 'orc' : 'human', this._tier).footprint * 0.45;
           _chimneyPos.set(bp.x + Math.cos(a) * rr, bp.y + 0.8, bp.z + Math.sin(a) * rr);
           gmEvents.emit(EVT.BUILDING_VFX, { buildingId: e.id, ownerId: e.ownerId, pos: posOf(_chimneyPos), kind: 'chimney_smoke' });
         }
@@ -582,8 +581,8 @@ export class BuildingView {
     }
 
     // Cottage, Great Hall e Centro humano nível 1 (M2-33: só ele tem chaminé): fumaça da chaminé
-    const hqChimney = e.type === 'castle' && this._tier === 1 ? HQ_TIER_VIEW[1].chimney : null;
-    if (live && e.isConstructed && (e.type === 'cottage' || e.type === 'great_hall' || hqChimney) && gmEvents) {
+    const hqChimney = e.type === 'castle' ? (this._tier === 1 ? HQ_TIER_VIEW[1].chimney : null) : (e.type === 'great_hall' ? hqTierView('orc', this._tier).chimney : null);
+    if (live && e.isConstructed && (e.type === 'cottage' || hqChimney) && gmEvents) {
       this.smokeTimer += frameDelta;
       if (this.smokeTimer >= 0.8) {
         this.smokeTimer = 0;
@@ -595,7 +594,7 @@ export class BuildingView {
           _chimneyOffsetHq.set(hqChimney.x * c + hqChimney.z * sn, hqChimney.y, -hqChimney.x * sn + hqChimney.z * c);
           chimneyOffset = _chimneyOffsetHq;
         } else {
-          chimneyOffset = e.type === 'great_hall' ? _chimneyOffsetGreatHall : _chimneyOffsetCottage;
+          chimneyOffset = _chimneyOffsetCottage;
         }
         _chimneyPos.copy(this.root.position).add(chimneyOffset);
         gmEvents.emit(EVT.BUILDING_VFX, { buildingId: e.id, ownerId: e.ownerId, pos: posOf(_chimneyPos), kind: 'chimney_smoke' });

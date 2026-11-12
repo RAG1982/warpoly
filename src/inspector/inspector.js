@@ -1847,6 +1847,45 @@ const MODEL_CATALOG = [
     notes: '2 draw calls (Atlas + TeamColor), 19,3 mil triângulos, atlas 512². Altura 15,5, pegada 8,6 x 8,2 (raio máximo dos vértices 5,8: só as pontas dos leões/torres passam do raio 5,5). Sockets: Socket_UnitSpawn, Socket_Rally.'
   },
   {
+    id: 'hq_orc_1_glb',
+    name: 'Centro orc nível 1 · Salão do Clã (Tripo)',
+    category: 'buildings',
+    faction: 'orc',
+    type: 'building',
+    icon: '🏚️',
+    glb: 'hq_orc_1',
+    sourceFile: 'tools/blender/build_hq_orc.py',
+    create: createGlb('hq_orc_1'),
+    description: 'Cabana de toras e peles com telhado de couro, crânio de fera e chifres na entrada, chaminé de pedra; bandeiras de time ladeando a porta. Modelo do nível 1 do Centro orc: o BuildingView troca de modelo quando o upgrade do Centro termina.',
+    notes: '2 draw calls (Atlas + TeamColor), 6,7 mil triângulos, altura 8,0, pegada 8,6. Atlas 512². O Tripo não pintou panos de time: os dois mastros com bandeira são acrescentados pelo script (texels livres do atlas). Sockets: Socket_UnitSpawn, Socket_Rally.'
+  },
+  {
+    id: 'hq_orc_2_glb',
+    name: 'Centro orc nível 2 · Bastião (Tripo)',
+    category: 'buildings',
+    faction: 'orc',
+    type: 'building',
+    icon: '🏚️',
+    glb: 'hq_orc_2',
+    sourceFile: 'tools/blender/build_hq_orc.py',
+    create: createGlb('hq_orc_2'),
+    description: 'Casa-forte de pedra e madeira com telhado de peles e ferro, espinhos e chifres, chaminé de pedra; bandeiras de time. Modelo do nível 2 do Centro orc: o BuildingView troca de modelo quando o upgrade do Centro termina.',
+    notes: '2 draw calls (Atlas + TeamColor), 23 mil triângulos, altura 11,5, pegada 8,2. Atlas 512². O Tripo não pintou panos de time: os dois mastros com bandeira são acrescentados pelo script (texels livres do atlas). Sockets: Socket_UnitSpawn, Socket_Rally.'
+  },
+  {
+    id: 'hq_orc_3_glb',
+    name: 'Centro orc nível 3 · Cidadela de Ferro (Tripo)',
+    category: 'buildings',
+    faction: 'orc',
+    type: 'building',
+    icon: '🏚️',
+    glb: 'hq_orc_3',
+    sourceFile: 'tools/blender/build_hq_orc.py',
+    create: createGlb('hq_orc_3'),
+    description: 'Fortaleza de ferro com ameias e guaritas eriçadas de espinhos e presas; bandeiras de time. Modelo do nível 3 do Centro orc: o BuildingView troca de modelo quando o upgrade do Centro termina.',
+    notes: '2 draw calls (Atlas + TeamColor), 6,8 mil triângulos, altura 13,5, pegada 8,8. Atlas 512². O Tripo não pintou panos de time: os dois mastros com bandeira são acrescentados pelo script (texels livres do atlas). Sockets: Socket_UnitSpawn, Socket_Rally.'
+  },
+  {
     id: 'bandit_camp',
     name: 'Acampamento Bandido (Bandit Camp)',
     category: 'buildings',

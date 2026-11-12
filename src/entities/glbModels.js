@@ -45,6 +45,10 @@ export const GLB_MODELS = {
   hq_human_1: { url: `${BASE}models/hq_human_1.glb`, root: 'HqHuman1', type: null },
   hq_human_2: { url: `${BASE}models/hq_human_2.glb`, root: 'HqHuman2', type: null },
   hq_human_3: { url: `${BASE}models/hq_human_3.glb`, root: 'HqHuman3', type: null },
+  // Centro orc em 3 níveis (Tripo, sem rig; tools/blender/build_hq_orc.py): o `BuildingView` troca o modelo quando `entity.tier` muda (`HQ_TIER_MODEL.orc`)
+  hq_orc_1: { url: `${BASE}models/hq_orc_1.glb`, root: 'HqOrc1', type: null },
+  hq_orc_2: { url: `${BASE}models/hq_orc_2.glb`, root: 'HqOrc2', type: null },
+  hq_orc_3: { url: `${BASE}models/hq_orc_3.glb`, root: 'HqOrc3', type: null },
   cavalier: { url: `${BASE}models/cavalier.glb`, root: 'Cavalier', type: 'cavalier' },
   stable: { url: `${BASE}models/stable.glb`, root: 'Stable', type: null },
   ogre_den: { url: `${BASE}models/ogre_den.glb`, root: 'OgreDen', type: null },
@@ -190,7 +194,7 @@ export const glbTemplates = new Map();
  * F10-05b: facção dona de cada .glb ('human' | 'orc' | 'neutral'), derivada de `faction` em src/data (unidade ou
  * construção com a mesma chave); chaves fora das tabelas (árvores, jazidas...) são 'neutral' = sempre carregadas.
  */
-const FACTION_OVERRIDES = { archer_v2: 'human', gryphon_rider_v2: 'human', war_serpent_v2: 'orc', villager_v2: 'human', peon_v2: 'orc', knight_v2: 'human', hq_human_1: 'human', hq_human_2: 'human', hq_human_3: 'human', orc_oil_platform: 'orc', orc_frigate: 'orc', orc_barge: 'orc', orc_dreadnought: 'orc', orc_tanker: 'orc' };
+const FACTION_OVERRIDES = { archer_v2: 'human', gryphon_rider_v2: 'human', war_serpent_v2: 'orc', villager_v2: 'human', peon_v2: 'orc', knight_v2: 'human', hq_human_1: 'human', hq_human_2: 'human', hq_human_3: 'human', hq_orc_1: 'orc', hq_orc_2: 'orc', hq_orc_3: 'orc', orc_oil_platform: 'orc', orc_frigate: 'orc', orc_barge: 'orc', orc_dreadnought: 'orc', orc_tanker: 'orc' };
 export function glbFaction(key) {
   if (FACTION_OVERRIDES[key]) return FACTION_OVERRIDES[key];
   const f = (UNITS[key] && UNITS[key].faction) || (BUILDINGS[key] && BUILDINGS[key].faction) || 'neutral';

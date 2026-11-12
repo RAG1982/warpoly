@@ -89,7 +89,7 @@ describe('registro dos modelos do Centro humano (M2-33)', () => {
       expect(HQ_TIER_MODEL.human[n]).toBe(`hq_human_${n}`);
     }
     expect(GLB_MODELS.castle).toMatchObject({ root: 'Castle' });
-    expect(HQ_TIER_MODEL.orc[1]).toBeNull(); // orcs: modelo único
+    expect(HQ_TIER_MODEL.orc[1]).toBe('hq_orc_1'); // orcs: um modelo por nível (hqOrcGlb.test.js)
   });
 
   it('o inspetor lista os três níveis e o castelo antigo', () => {

@@ -492,8 +492,10 @@ export class ModelFactory {
   }
 
   // --- Orc Buildings ---
-  static createGreatHall() {
-    return this._glbOr('great_hall', () => this._placeholder('great_hall'));
+  /** Centro orc: um modelo por nível (`HQ_TIER_MODEL.orc`); sem o .glb do nível cai no `great_hall.glb` antigo e, sem ele, no bloco provisório. */
+  static createGreatHall(tier = 1) {
+    const key = HQ_TIER_MODEL.orc[Math.min(3, Math.max(1, tier | 0))];
+    return this._glbOr(key, () => this._glbOr('great_hall', () => this._placeholder('great_hall')));
   }
 
   static createOrcBarracks() {

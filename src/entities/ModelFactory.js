@@ -608,7 +608,8 @@ export class ModelFactory {
 
   // --- Orc Units ---
   static createPeon() {
-    return this._glbOr('peon', () => this._placeholder('peon', 'unit'));
+    // Lacaio v2 (Tripo) é o padrão; sem ele, o peon.glb antigo; sem ambos, o bloco reserva
+    return this._glbOr('peon_v2', () => this._glbOr('peon', () => this._placeholder('peon', 'unit')));
   }
 
   static createGrunt() {

@@ -425,6 +425,19 @@ const MODEL_CATALOG = [
     notes: 'Rig plana (a do antigo BanditModel.js, removido na F7-00b; Weapon é irmã dos braços). Neutro: o TeamColor guarda só o trapo/bandana (vermelho-sujo). Rosto só na face frontal (+Z).'
   },
   {
+    id: 'peon_v2_glb',
+    name: 'Lacaio v2 (Tripo)',
+    category: 'units',
+    faction: 'orc',
+    type: 'peon',
+    icon: '⛏️',
+    glb: 'peon_v2',
+    sourceFile: 'tools/blender/build_peon_v2.py',
+    create: createGlb('peon_v2'),
+    description: 'Lacaio orc v2: trabalhador corpulento do Tripo finalizado no Blender (public/models/peon_v2.glb), com braços reposados da T-pose. Pele verde-oliva, presas, avental e bandoleira em cor de time, ataduras e botas de pano, picareta na mão direita; mochila de carga com feixe de lenha e saco de ouro/pedra (Pack).',
+    notes: 'Tipo peon: Torso, Head, ArmL, ArmR, LegL, LegR; a picareta é o ToolGroup, FILHO de ArmR (balança com o braço; o gesto de coleta serve para madeira, ouro e pedra). Pack > PackFrame/WoodBundle/GoldSack. É o padrão do jogo; o Lacaio (Blender) antigo continua como fallback. ~9 mil triângulos, 13 draw calls, atlas 512².'
+  },
+  {
     id: 'peon_glb',
     name: 'Lacaio (Blender)',
     category: 'units',

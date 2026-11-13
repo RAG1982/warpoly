@@ -113,7 +113,9 @@
 .ms-brief-talk { display: flex; gap: 14px; align-items: flex-start; }
 .ms-brief-talk p { margin: 0; line-height: 1.5; color: #f1e6c8; }
 .ms-brief-hints { margin: 0; padding-left: 18px; opacity: 0.8; font-size: 0.9em; }
-.ms-brief-actions { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 4px; }
+.ms-brief-actions { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 4px;
+  /* botões sempre visíveis mesmo com briefing longo */
+  position: sticky; bottom: -20px; padding: 10px 0 20px; background: linear-gradient(to bottom, transparent, rgba(18, 16, 13, 0.98) 30%); }
 @media (max-width: 700px) {
   .ms-brief { grid-template-columns: 1fr; }
   .ms-brief-list { border-right: 0; border-bottom: 1px solid rgba(212, 175, 55, 0.3); }

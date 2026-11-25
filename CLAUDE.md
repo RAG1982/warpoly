@@ -25,6 +25,10 @@ RTS 3D low-poly no navegador (three.js + Vite, JS ES modules), inspirado em **Wa
 - No navegador de teste use `?texq=low` quando existir e `?skipPreload` sempre que a medição não for de load.
 - Scripts de navegador abortam se o WebGL for de software (SwiftShader/llvmpipe) — use tools/lib/assertGpu.mjs em qualquer script Playwright novo.
 - Encerre o dev server (vite) e navegadores ao terminar; nunca deixe processos órfãos.
+- Exceção (decisão do dono, 2026-11-25): o ComfyUI (`~/ai/ComfyUI`) fica no ar como serviço systemd do usuário
+  com o modelo carregado, via `~/ai/workflows/comfyui-server.sh start` (teto de RAM 22G, fora da trava do
+  safe-run). Não o desligue nem troque de modelo sem o dono pedir. Antes de Blender, Playwright, `npm run bench`
+  ou `npm run smoke`, rode `comfyui-server.sh free` para descarregar os modelos da VRAM/RAM.
 - No máximo 3 agentes em paralelo (só 1 processo pesado por vez, garantido pela trava).
 
 ## Regras

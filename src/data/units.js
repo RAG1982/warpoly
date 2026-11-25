@@ -345,7 +345,7 @@ export const UNITS = {
     collisionRadius: 1.0,
     visionRadius: 20,
     ...RANGED_SCAN,
-    healthBarHeight: 4.0,
+    healthBarHeight: 6.0,
     cost: { gold: 250, wood: 100, stone: 0 },
     trainTime: 22,
     icon: '/icoEspada.png',

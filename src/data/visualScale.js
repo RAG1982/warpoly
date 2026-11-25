@@ -19,7 +19,9 @@
 export const VISUAL_SCALE = Object.freeze({
   peon: 0.8516,
   grunt: 0.93,
-  axethrower: 0.95
+  axethrower: 0.95,
+  // Serpe de Guerra: +50 % (decisão do dono, 2026-11-25); só render, o raio de colisão e o alcance não mudam
+  war_serpent: 1.5
 });
 
 /** Contraparte humana usada para igualar a altura (documentação + teste). */

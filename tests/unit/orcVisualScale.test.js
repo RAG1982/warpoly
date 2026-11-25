@@ -36,8 +36,9 @@ describe('orcs com o tamanho das unidades humanas (visualScale)', () => {
     }
   });
 
-  it('só peon, grunt e axethrower são ajustados; ogro, cerco e humanos ficam em 1', () => {
-    expect(Object.keys(VISUAL_SCALE).sort()).toEqual(['axethrower', 'grunt', 'peon']);
+  it('só peon, grunt, axethrower e a Serpe de Guerra (+50 %) são ajustados; ogro, cerco e humanos ficam em 1', () => {
+    expect(Object.keys(VISUAL_SCALE).sort()).toEqual(['axethrower', 'grunt', 'peon', 'war_serpent']);
+    expect(visualScaleOf('war_serpent')).toBe(1.5);
     for (const t of ['villager', 'knight', 'archer', 'ogre', 'catapult', 'ballista', 'cavalier']) expect(visualScaleOf(t)).toBe(1);
   });
 

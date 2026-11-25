@@ -286,19 +286,43 @@ def reposar(arm, pose):
     return deform
 
 
-def carregar_fbx(caminho, pose=None):
+def _ligada_a_cor_base(m, no):
+    """False só se OUTRA imagem alimenta a Base Color do Principled direto (o glTF do TRELLIS traz também mapas de metal/rugosidade e
+    normal, que não podem virar o atlas de cor); nos demais casos (FBX do Tripo, ligações indiretas) vale a primeira imagem."""
+    for n in m.node_tree.nodes:
+        if n.bl_idname == 'ShaderNodeBsdfPrincipled' and n.inputs['Base Color'].is_linked:
+            diretos = [l.from_node for l in n.inputs['Base Color'].links if l.from_node.bl_idname == 'ShaderNodeTexImage']
+            if diretos:
+                return no in diretos
+    return True
+
+
+def carregar_fbx(caminho, pose=None, decimar=None):
     """Importa o FBX (use_image_search=True: o Blender acha a textura na pasta .fbm) e devolve os dados crus em coordenadas do jogo.
     `pose` (opcional) = dicionário de `reposar`: a malha lida é a DEFORMADA (f.co); o repouso original fica em f.co_rest e as
     matrizes de deformação por osso (coordenadas do jogo, 4x4 numpy) em f.deformacao. f.pos_ossos = cabeças de repouso,
     f.pos_pose = cabeças após o repose (iguais sem pose)."""
     import bpy
     bpy.ops.wm.read_factory_settings(use_empty=True)
-    bpy.ops.import_scene.fbx(filepath=caminho, use_image_search=True)
+    if caminho.lower().endswith(('.glb', '.gltf')):
+        bpy.ops.import_scene.gltf(filepath=caminho)            # glTF: Y para cima já convertido pelo importador (Blender Z-cima)
+    else:
+        bpy.ops.import_scene.fbx(filepath=caminho, use_image_search=True)
     objs = list(bpy.data.objects)
     malhas = [o for o in objs if o.type == 'MESH']
     if len(malhas) != 1:
         raise RuntimeError('esperava 1 malha no FBX, achei %d' % len(malhas))
     mo = malhas[0]
+    if decimar:
+        # reduz a malha densa (ex.: TRELLIS ~50 mil triângulos) mantendo as UV: colapso por aresta, só triângulos
+        bpy.context.view_layer.objects.active = mo
+        mo.select_set(True)
+        md = mo.modifiers.new('dec', 'DECIMATE')
+        md.decimate_type = 'COLLAPSE'
+        md.ratio = float(decimar)
+        md.use_collapse_triangulate = True
+        bpy.ops.object.modifier_apply(modifier='dec')
+        log('decimação: razão %.3f -> %d triângulos' % (decimar, sum(len(p.vertices) - 2 for p in mo.data.polygons)))
     me = mo.data
     f = Fonte()
     f.caminho = caminho
@@ -388,7 +412,7 @@ def carregar_fbx(caminho, pose=None):
                     info['roughness'] = round(n.inputs['Roughness'].default_value, 3)
                 if n.bl_idname == 'ShaderNodeNormalMap':
                     info['normal_map_color_ligado'] = n.inputs['Color'].is_linked
-                if n.bl_idname == 'ShaderNodeTexImage' and n.image is not None and f.imagem is None:
+                if n.bl_idname == 'ShaderNodeTexImage' and n.image is not None and f.imagem is None and _ligada_a_cor_base(m, n):
                     im = n.image
                     f.imagem = dict(nome=im.name, caminho=bpy.path.abspath(im.filepath), origem=im.source,
                                     empacotada=bool(im.packed_file), tamanho=list(im.size),
@@ -1329,7 +1353,7 @@ def executar(H):
     out = next((a.split('=', 1)[1] for a in args if a.startswith('--glb=')), H.OUT_GLB)
     previas = next((a.split('=', 1)[1] for a in args if a.startswith('--previas=')), H.OUT_PREVIAS)
     log('FBX:', caminho)
-    f = carregar_fbx(caminho, getattr(H, 'POSE', None))
+    f = carregar_fbx(caminho, getattr(H, 'POSE', None), getattr(H, 'DECIMAR', None))
     if avaliar:
         avaliar_fonte(f)
         if hasattr(H, 'avaliar_fonte_extra'):

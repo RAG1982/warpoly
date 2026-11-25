@@ -80,6 +80,9 @@ export const GLB_MODELS = {
   storm_altar: { url: `${BASE}models/storm_altar.glb`, root: 'StormAltar', type: null },
   watching_eye: { url: `${BASE}models/watching_eye.glb`, root: 'WatchingEye', type: 'watching_eye' },
   templar: { url: `${BASE}models/templar.glb`, root: 'Templar', type: 'cavalier' },
+  // Paladino v2 (Templário; TRELLIS finalizado no Blender, tools/blender/build_templar_v2.py): padrão do `templar`; o `templar` acima é o reserva (e segue no inspetor).
+  // Nós: Horse, HorseLegFL/FR/BL/BR, HorseHead, HorseTail, Torso > Head > Plume, Cape, ArmL, ArmR > Sword (punhos fechados na malha).
+  templar_v2: { url: `${BASE}models/templar_v2.glb`, root: 'Templar', type: 'cavalier' },
   ogre_mage: { url: `${BASE}models/ogre_mage.glb`, root: 'OgreMage', type: 'ogre' },
   // F7-00b lote 1 (grupo 1)
   glider: { url: `${BASE}models/glider.glb`, root: 'Glider', type: 'glider' },
@@ -202,7 +205,7 @@ export const glbTemplates = new Map();
  * F10-05b: facção dona de cada .glb ('human' | 'orc' | 'neutral'), derivada de `faction` em src/data (unidade ou
  * construção com a mesma chave); chaves fora das tabelas (árvores, jazidas...) são 'neutral' = sempre carregadas.
  */
-const FACTION_OVERRIDES = { archer_v2: 'human', gryphon_rider_v2: 'human', war_serpent_v2: 'orc', villager_v2: 'human', grunt_v2: 'orc', axethrower_v2: 'orc', forge_v2: 'human', peon_v2: 'orc', knight_v2: 'human', hq_human_1: 'human', hq_human_2: 'human', hq_human_3: 'human', hq_orc_1: 'orc', hq_orc_2: 'orc', hq_orc_3: 'orc', orc_oil_platform: 'orc', orc_frigate: 'orc', orc_barge: 'orc', orc_dreadnought: 'orc', orc_tanker: 'orc' };
+const FACTION_OVERRIDES = { archer_v2: 'human', gryphon_rider_v2: 'human', war_serpent_v2: 'orc', villager_v2: 'human', grunt_v2: 'orc', axethrower_v2: 'orc', forge_v2: 'human', peon_v2: 'orc', knight_v2: 'human', templar_v2: 'human', hq_human_1: 'human', hq_human_2: 'human', hq_human_3: 'human', hq_orc_1: 'orc', hq_orc_2: 'orc', hq_orc_3: 'orc', orc_oil_platform: 'orc', orc_frigate: 'orc', orc_barge: 'orc', orc_dreadnought: 'orc', orc_tanker: 'orc' };
 export function glbFaction(key) {
   if (FACTION_OVERRIDES[key]) return FACTION_OVERRIDES[key];
   const f = (UNITS[key] && UNITS[key].faction) || (BUILDINGS[key] && BUILDINGS[key].faction) || 'neutral';

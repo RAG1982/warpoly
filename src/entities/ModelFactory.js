@@ -225,6 +225,11 @@ export class ModelFactory {
     ud.mohawk = clone.getObjectByName('Mohawk') || ud.mohawk;
     // M2-20: estandarte do Marechal Dorian (filho do Torso; balanço por seno no `UnitAnimator.applyBanner`)
     ud.banner = clone.getObjectByName('Banner') || ud.banner;
+    // Paladino v2: cavalo articulado (cabeça/pescoço e cauda), capa e corpo do cavalo (`Horse`) — só o `templar_v2` tem esses nós
+    ud.horseHead = clone.getObjectByName('HorseHead') || ud.horseHead;
+    ud.horseTail = clone.getObjectByName('HorseTail') || ud.horseTail;
+    ud.horseBody = ud.horseHead ? clone.getObjectByName('Horse') : null;
+    ud.cape = clone.getObjectByName('Cape') || ud.cape;
     // F4-01: pernas do cavalo (cavalier) — balançam em fase alternada no `UnitAnimator`
     const horseLegs = HORSE_LEG_NAMES.map(n => clone.getObjectByName(n));
     if (horseLegs.every(Boolean)) ud.horseLegs = horseLegs;
@@ -667,7 +672,7 @@ export class ModelFactory {
       case 'pig': return this.createCritter('boar');
       case 'watching_eye': return this._glbOr('watching_eye', () => this.getOrCreateModel('watching_eye', createWatchingEye));
       // NEW-40: classes avançadas com .glb próprio (sem .glb, caem no modelo da unidade base)
-      case 'templar': return this._glbOr('templar', () => this.createCavalier());
+      case 'templar': return this._glbOr('templar_v2', () => this._glbOr('templar', () => this.createCavalier())); // Paladino v2 (Tripo/TRELLIS) é o padrão
       case 'ogre_mage': return this._glbOr('ogre_mage', () => this.createOgre());
       // F4-06: aéreos (procedurais provisórios; Blender na F7)
       case 'glider': return this._glbOr('glider', () => this.getOrCreateModel('glider', createGlider, 'glider'));

@@ -143,6 +143,11 @@ export class UnitAnimator {
       mohawk: ud.mohawk,
       // M2-20: estandarte do Marechal Dorian (`Banner`, filho do Torso)
       banner: ud.banner || null,
+      // Paladino v2 (`templar_v2`): cavalo articulado — cabeça/pescoço, cauda, corpo e capa (só esse modelo tem os nós; os demais ficam null)
+      horseHead: ud.horseHead || null,
+      horseTail: ud.horseTail || null,
+      horseBody: ud.horseBody || null,
+      cape: ud.cape || null,
       // F4-01: pernas do cavalo (só o modelo `cavalier`)
       horseLegFL: ud.horseLegs ? ud.horseLegs[0] : null,
       horseLegFR: ud.horseLegs ? ud.horseLegs[1] : null,
@@ -486,8 +491,199 @@ export class UnitAnimator {
       parts.weapon.rotation.z -= parts.armR.rotation.z;
     }
 
+    // Paladino v2: passo, respiração, empinada no golpe, reação à dor e queda do cavalo articulado (por cima da pose do cavaleiro)
+    if (parts.horseHead) this.applyMounted(time, progress, parts, this.currentAnim);
+
     // Braços/cabeça/armas irmãos do Torso acompanham a rotação de cintura do tronco (ombro grudado)
     this.applyWaistFollow(parts);
+  }
+
+  /**
+   * Paladino v2 (`templar_v2`, tipo `cavalier`): animação do conjunto cavalo + cavaleiro. Roda DEPOIS da pose base do tipo (que trata o
+   * cavaleiro como `knight`) e só existe quando o modelo tem `HorseHead`. No passo e no idle sobrescreve o cavaleiro (balanço de braços
+   * de infantaria não serve a quem cavalga); no golpe, na magia, na dor e na morte só acrescenta a reação do cavalo.
+   * Rotação em x positiva = ponta de uma peça que aponta para +Z desce (cabeça do cavalo para baixo; pluma/capa/cauda pendem para trás
+   * com x positivo nos nós que pendem para baixo e negativo na pluma, que aponta para cima).
+   * Os ciclos usam harmônicas INTEIRAS do loop (idle 2,0 s, passo 0,8 s, magia 1,0 s): sem emenda ao reiniciar.
+   */
+  applyMounted(time, progress, parts, anim) {
+    const TAU = Math.PI * 2;
+    const P = parts;
+    const base = (k) => this.baseTransforms.get(k);
+    const legs = [P.horseLegFL, P.horseLegFR, P.horseLegBL, P.horseLegBR];
+    const keys = ['horseLegFL', 'horseLegFR', 'horseLegBL', 'horseLegBR'];
+    const dur = this.getDuration();
+    const ph = (time / dur) % 1;
+
+    // gira o corpo todo (cavalo + cavaleiro + pernas) em torno dos cascos traseiros: empinada (theta < 0) ou mergulho (theta > 0)
+    const pitchBody = (theta) => {
+      if (!theta) return;
+      const c = Math.cos(theta);
+      const sn = Math.sin(theta);
+      const cy = 0;
+      const cz = -0.6;
+      const mover = (obj, key, rot) => {
+        const b = base(key);
+        if (!obj || !b) return;
+        const dy = b.pos.y - cy;
+        const dz = b.pos.z - cz;
+        obj.position.y = cy + dy * c - dz * sn;
+        obj.position.z = cz + dy * sn + dz * c;
+        obj.rotation.x += rot;
+      };
+      mover(P.horseBody, 'horseBody', theta);
+      mover(P.horseHead, 'horseHead', theta);
+      mover(P.horseTail, 'horseTail', theta);
+      mover(P.torso, 'torso', theta);
+      mover(P.horseLegFL, 'horseLegFL', theta);
+      mover(P.horseLegFR, 'horseLegFR', theta);
+      mover(P.horseLegBL, 'horseLegBL', 0);
+      mover(P.horseLegBR, 'horseLegBR', 0);
+    };
+    // sobe/desce o corpo (as pernas ficam: o tubo de cada coxa cobre a folga)
+    const body = (dy) => {
+      for (const o of [P.horseBody, P.horseHead, P.horseTail, P.torso]) if (o) o.position.y += dy;
+    };
+    const set = (o, x, y, z) => { if (o) { if (x !== undefined) o.rotation.x = x; if (y !== undefined) o.rotation.y = y; if (z !== undefined) o.rotation.z = z; } };
+    const add = (o, x, y, z) => { if (o) { o.rotation.x += x || 0; o.rotation.y += y || 0; o.rotation.z += z || 0; } };
+    const reset = (o, key) => { const b = base(key); if (o && b) { o.position.copy(b.pos); } };
+
+    if (anim === 'walk') {
+      const f = (TAU * time) / ANIMATION_DURATIONS.walk;
+      const s = Math.sin(f);
+      const c = Math.cos(f);
+      // trote em diagonais (FL+BR contra FR+BL); o casco sobe na fase de balanço
+      const sw = 0.62;
+      const lift = 0.11;
+      set(P.horseLegFL, sw * s, 0, 0); set(P.horseLegBR, sw * s, 0, 0);
+      set(P.horseLegFR, -sw * s, 0, 0); set(P.horseLegBL, -sw * s, 0, 0);
+      reset(P.horseLegFL, 'horseLegFL'); reset(P.horseLegBR, 'horseLegBR'); reset(P.horseLegFR, 'horseLegFR'); reset(P.horseLegBL, 'horseLegBL');
+      P.horseLegFL.position.y += lift * Math.max(0, -s); P.horseLegBR.position.y += lift * Math.max(0, -s);
+      P.horseLegFR.position.y += lift * Math.max(0, s); P.horseLegBL.position.y += lift * Math.max(0, s);
+      // corpo: dois saltos por passada (suspensão do trote) e leve caturra para a frente
+      for (const [o, k] of [[P.horseBody, 'horseBody'], [P.horseHead, 'horseHead'], [P.horseTail, 'horseTail'], [P.torso, 'torso'], [P.head, 'head']]) reset(o, k);
+      const bob = 0.05 * Math.abs(c) - 0.02;
+      body(bob);
+      set(P.horseBody, 0.012 * Math.sin(2 * f + 0.4), 0, 0.012 * s);
+      // cabeça do cavalo: balança uma vez por passada e acompanha o trote com um leve giro
+      set(P.horseHead, 0.07 * Math.sin(f + 0.6) + 0.03, 0.03 * Math.sin(f + 1.0), 0.03 * s);
+      // cauda e capa flutuam para trás (x positivo = ponta para trás), defasadas do corpo
+      set(P.horseTail, 0.24 + 0.11 * Math.sin(f - 1.0), 0, 0.13 * Math.sin(f - 0.3));
+      set(P.cape, 0.22 + 0.06 * Math.sin(2 * f - 0.6), 0, 0.035 * Math.sin(f - 0.5));
+      set(P.plume, -0.16 + 0.09 * Math.sin(2 * f - 1.2), 0, 0.05 * s);
+      // cavaleiro: tronco inclinado, balanço lateral oposto ao do cavalo, cabeça firme e mãos nas rédeas
+      set(P.torso, 0.06 + 0.018 * Math.sin(2 * f + 0.4), 0.035 * s, -0.03 * s);
+      set(P.head, -0.04 + 0.02 * Math.sin(2 * f), -0.035 * s, 0.02 * s);
+      set(P.armL, -0.05 * c, 0, -0.02);
+      set(P.armR, 0.04 * c, 0, 0.02);
+      set(P.sword, 0.5 + 0.07 * Math.sin(2 * f + 0.3), 0, -0.1 + 0.03 * s);
+      return;
+    }
+
+    if (anim === 'idle') {
+      const th = TAU * ph;
+      const br = Math.sin(th);
+      for (const [o, k] of [[P.horseBody, 'horseBody'], [P.horseHead, 'horseHead'], [P.horseTail, 'horseTail'], [P.torso, 'torso'], [P.head, 'head']]) reset(o, k);
+      body(0.014 * br);
+      // cabeça do cavalo olha em volta devagar; cauda espanta moscas; capa e pluma respiram
+      set(P.horseHead, 0.035 * br + 0.02, 0.11 * Math.sin(th + 0.5), 0.02 * Math.sin(2 * th));
+      set(P.horseTail, 0.05 + 0.03 * br, 0, 0.14 * Math.sin(2 * th + 0.3));
+      set(P.cape, 0.03 + 0.025 * Math.sin(th + 0.8), 0, 0.012 * Math.sin(2 * th));
+      set(P.plume, -0.05 + 0.03 * Math.sin(th), 0, 0.05 * Math.sin(2 * th));
+      set(P.torso, 0.015 * br, 0.02 * Math.sin(th + 1.0), 0);
+      if (P.torso) P.torso.scale.y = 1 + br * 0.015;
+      set(P.head, 0.02 * Math.cos(2 * th), 0.05 * Math.sin(th + 0.4), 0);
+      set(P.armL, 0.03 * br, 0, -0.03 + 0.02 * Math.sin(2 * th));
+      set(P.armR, 0.03 * br, 0, 0.03 - 0.02 * Math.sin(2 * th));
+      set(P.sword, 0.5 + 0.05 * br, 0, -0.1 + 0.02 * br);
+      for (const k of keys) { const o = P[k]; set(o, 0, 0, 0); reset(o, k); }
+      // variantes: 1 = olha em volta (o cavalo vira a cabeça junto); 2 = bate a pata dianteira e sacode a cabeça
+      if (this._idleVar !== 0) {
+        const env = idleEnvelope(time / ANIMATION_DURATIONS.idle);
+        const p = time / ANIMATION_DURATIONS.idle;
+        if (this._idleVar === 1) {
+          add(P.horseHead, 0, 0.45 * Math.sin(p * TAU) * env, 0);
+          add(P.torso, 0, 0.10 * Math.sin(p * TAU) * env, 0);
+        } else {
+          const pata = Math.max(0, Math.sin(p * TAU * 2)) * env;
+          set(P.horseLegFL, -0.85 * pata, 0, 0);
+          if (P.horseLegFL) P.horseLegFL.position.y += 0.16 * pata;
+          add(P.horseHead, -0.20 * Math.sin(p * TAU * 2) * env, 0, 0);
+          add(P.horseTail, -0.20 * env, 0, 0);
+        }
+      }
+      return;
+    }
+
+    if (anim === 'fight') {
+      const p = attackProgress(progress, this.attackVariant);
+      // empina no preparo, afunda o peso no golpe e volta; o cavalo bate as patas dianteiras
+      let theta = 0; let cabeca = 0; let patas = 0; let cauda = 0; let queda = 0;
+      if (p < 0.35) {
+        const e = (p / 0.35) ** 2;
+        theta = -0.11 * e; cabeca = -0.22 * e; patas = -0.6 * e; cauda = -0.25 * e; queda = 0.08 * e;
+      } else if (p < 0.60) {
+        const t = (p - 0.35) / 0.25;
+        const e = Math.sin((t * Math.PI) / 2);
+        theta = -0.11 + 0.15 * e; cabeca = -0.22 + 0.42 * e; patas = -0.6 + 0.65 * e; cauda = -0.25 + 0.1 * e; queda = 0.08 * (1 - e) - 0.03 * e;
+      } else if (p < 0.78) {
+        theta = 0.04; cabeca = 0.2; patas = 0.05; cauda = -0.15; queda = -0.03;
+      } else {
+        const t = (p - 0.78) / 0.22;
+        const e = t * (2 - t);
+        theta = 0.04 * (1 - e); cabeca = 0.2 * (1 - e); patas = 0.05 * (1 - e); cauda = -0.15 * (1 - e); queda = -0.03 * (1 - e);
+      }
+      pitchBody(theta);
+      body(queda);
+      add(P.horseHead, cabeca, 0, 0);
+      add(P.horseTail, cauda, 0, 0);
+      set(P.horseLegFL, patas, 0, 0); set(P.horseLegFR, patas * 0.85, 0, 0);
+      if (patas < 0) { P.horseLegFL.position.y += -patas * 0.2; P.horseLegFR.position.y += -patas * 0.17; }
+      add(P.cape, 0.12 * Math.sin(Math.PI * p), 0, 0);
+      add(P.plume, -0.10 * Math.sin(Math.PI * p), 0, 0);
+      return;
+    }
+
+    if (anim === 'cast') {
+      const raise = Math.min(1, progress * 4) * 0.5 + 0.5;
+      const f = TAU * ph;
+      add(P.horseHead, -0.25 * raise + 0.03 * Math.sin(3 * f), 0.05 * Math.sin(2 * f), 0);
+      set(P.horseTail, -0.22 * raise + 0.05 * Math.sin(3 * f), 0, 0.10 * Math.sin(2 * f));
+      set(P.cape, 0.12 * raise + 0.08 * Math.sin(3 * f), 0, 0.04 * Math.sin(2 * f));
+      set(P.plume, -0.12 + 0.07 * Math.sin(3 * f), 0, 0.04 * Math.sin(2 * f));
+      const pata = Math.max(0, Math.sin(f * 2)) * raise;
+      set(P.horseLegFL, -0.35 * pata, 0, 0);
+      if (P.horseLegFL) P.horseLegFL.position.y += 0.06 * pata;
+      body(0.02 * Math.sin(f));
+      return;
+    }
+
+    if (anim === 'hurt') {
+      const env = progress < 0.25 ? Math.sin(((progress / 0.25) * Math.PI) / 2) : Math.max(0, 1 - (progress - 0.25) / 0.4);
+      const tremor = Math.sin(progress * 40) * 0.04 * env;
+      pitchBody(-0.07 * env);
+      add(P.horseHead, -0.42 * env, 0.18 * env + tremor, 0);
+      add(P.horseTail, -0.35 * env, 0, 0.1 * tremor * 10);
+      add(P.cape, -0.18 * env, 0, 0);
+      add(P.plume, 0.12 * env, 0, 0);
+      set(P.horseLegFL, -0.5 * env, 0, 0); set(P.horseLegFR, -0.35 * env, 0, 0);
+      if (P.horseLegFL) P.horseLegFL.position.y += 0.1 * env;
+      return;
+    }
+
+    if (anim === 'die') {
+      // os joelhos cedem, o pescoço cai e o cavalo afunda; o conjunto tomba pela rotação do modelo (applyDie)
+      const crouch = Math.min(1, progress / 0.3);
+      const e = crouch * crouch * (3 - 2 * crouch);
+      body(-0.30 * e);
+      add(P.horseHead, 0.55 * e, 0.10 * e, 0);
+      add(P.horseTail, 0.10 * e, 0, 0);
+      add(P.cape, 0.15 * e, 0, 0);
+      add(P.plume, -0.2 * e, 0, 0);
+      set(P.horseLegFL, -1.0 * e, 0, 0); set(P.horseLegFR, -0.85 * e, 0, 0);
+      set(P.horseLegBL, 0.45 * e, 0, 0); set(P.horseLegBR, 0.55 * e, 0, 0);
+      for (const l of legs) if (l) l.position.y -= 0.18 * e;
+    }
   }
 
   /**

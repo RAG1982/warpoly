@@ -1027,6 +1027,19 @@ const MODEL_CATALOG = [
     notes: 'Mesma rig do Cavaleiro (Horse, HorseLeg*, Torso, Head, ArmL/ArmR, Sword, ShieldGroup). ~9 mil triângulos, 14 draw calls, atlas 512². Animações do UnitAnimator como `cavalier`.'
   },
   {
+    id: 'templar_v2_glb',
+    name: 'Paladino v2 (Blender)',
+    category: 'units',
+    faction: 'human',
+    type: 'cavalier',
+    icon: '🐎',
+    glb: 'templar_v2',
+    sourceFile: 'tools/blender/build_templar_v2.py',
+    create: createGlb('templar_v2'),
+    description: 'Paladino humano v2: modelo do TRELLIS (ComfyUI, sem rig) segmentado por geometria no Blender (public/models/templar_v2.glb). Cavaleiro de placas azul e dourado com elmo de pluma, capa e espada longa, sobre cavalo de guerra com gualdrapa e borlas. Os braços foram reposados da T-pose e as mãos viraram punhos fechados em torno da empunhadura.',
+    notes: 'Tipo `cavalier` (4 patas, Torso > Head/ArmL/ArmR/Cape, Sword filha de ArmR) mais HorseHead, HorseTail, Horse e Plume, que o UnitAnimator usa no passo, na pose de ataque, nas magias, na dor e na morte. Capa, pluma e gualdrapa em TeamColor. 18 draw calls, ~38 mil triângulos, atlas 512².'
+  },
+  {
     id: 'ogre_mage_glb',
     name: 'Ogro Feiticeiro (Blender)',
     category: 'units',

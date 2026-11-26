@@ -240,7 +240,7 @@ def _malha(nome, bm_fn, material, pai, local):
     return o
 
 
-def materiais_extra(ctx, objs, pack_y=1.0, banda=(0.95, 1.35), escala=1.0):
+def materiais_extra(ctx, objs, pack_y=1.18, banda=(0.95, 1.35), escala=1.0):   # pack_y 1,18: meio das costas do Aldeão (antes 1,0, na cintura)
     """Mochila de carga (Pack): armação de couro, feixe de lenha e saco de ouro/pedra, em materiais lisos. Ocultos no jogo
     (`ModelFactory._workerGlbDefaults`) e ligados por `UnitView._applyCarry`."""
     import bpy

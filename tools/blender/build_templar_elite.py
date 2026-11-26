@@ -282,8 +282,8 @@ def _tampa(dados, peca, modo):
 # pose de repouso do braço (baked na malha: o UnitAnimator escreve rotações absolutas no ArmL/ArmR, então o repouso é o zero do nó)
 K_BRACO = 1.7                                 # estica o braço ao longo do eixo x antes de reposá-lo (a ombreira grande do elite esconde o braço)
 ELB = 0.255                                   # |x| do cotovelo (centro da mistura)
-BRACO_U = np.array([0.32, -0.88, 0.36])      # braço: para baixo, um pouco para fora e para a frente (lado direito; o esquerdo espelha x)
-BRACO_F = np.array([0.06, -0.30, 0.95])      # antebraço: para a frente, o punho à altura da sela
+BRACO_U = np.array([0.14, -0.96, 0.24])      # braço: para baixo, um pouco para fora e para a frente (lado direito; o esquerdo espelha x)
+BRACO_F = np.array([-0.10, -0.30, 0.95])      # antebraço: para a frente, o punho à altura da sela
 COTOVELO_X = (0.235, 0.275)                   # |x| do GLB: faixa de mistura entre o braço e o antebraço
 
 

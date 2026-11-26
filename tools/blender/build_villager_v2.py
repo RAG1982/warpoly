@@ -268,13 +268,13 @@ def materiais_extra(ctx, objs, pack_y=1.0, banda=(0.95, 1.35), escala=1.0):
                                   matrix=Matrix.Diagonal((0.26, 0.22, 0.30, 1.0)))
         bmesh.ops.create_cone(bm, cap_ends=True, segments=10, radius1=0.10, radius2=0.06, depth=0.18,
                               matrix=Matrix.Translation((0, 0, 0.32)))
-    _malha('GoldSack', saco, m_saco, pack, (0.0, 0.0, -0.20))
+    _malha('GoldSack', saco, m_saco, pack, (0.0, 0.0, -0.16))      # a carga encosta nas costas (antes -0,20: a lenha parecia flutuar)
 
     def lenha(bm):
         for (y, z) in ((-0.085, -0.085), (0.085, -0.085), (0.0, 0.065)):
             bmesh.ops.create_cone(bm, cap_ends=True, segments=10, radius1=0.085, radius2=0.085, depth=0.85,
                                   matrix=Matrix.Translation((0, y, z)) @ Matrix.Rotation(math.radians(90), 4, 'Y'))
-    _malha('WoodBundle', lenha, m_lenha, pack, (0.0, 0.0, -0.20))
+    _malha('WoodBundle', lenha, m_lenha, pack, (0.0, 0.0, -0.08))
     bpy.context.view_layer.update()
 
 

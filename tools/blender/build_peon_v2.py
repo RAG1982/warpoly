@@ -95,7 +95,7 @@ poses = V2.poses
 
 def materiais_extra(ctx, objs):
     """Mochila de carga na ALTURA DAS COSTAS do Lacaio (corcunda, tronco alto): o Aldeão a põe em y = 1,0; aqui o dorso fica mais alto."""
-    V2.materiais_extra(ctx, objs, pack_y=PACK_Y, banda=(PACK_Y - 0.25, PACK_Y + 0.25), escala=PACK_ESCALA)
+    V2.materiais_extra(ctx, objs, pack_y=PACK_Y, banda=(PACK_Y - 0.25, PACK_Y + 0.25), escala=PACK_ESCALA, armacao_esp=0.08, armacao_y=0.0)
 
 
 # ---------------------------------------------------------------------------

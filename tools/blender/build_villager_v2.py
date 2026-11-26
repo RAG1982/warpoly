@@ -240,7 +240,7 @@ def _malha(nome, bm_fn, material, pai, local):
     return o
 
 
-def materiais_extra(ctx, objs, pack_y=1.18, banda=(0.95, 1.35), escala=1.0):   # pack_y 1,18: meio das costas do Aldeão (antes 1,0, na cintura)
+def materiais_extra(ctx, objs, pack_y=1.18, banda=(0.95, 1.35), escala=1.0, armacao_esp=0.12, armacao_y=-0.04):   # pack_y 1,18: meio das costas do Aldeão (antes 1,0, na cintura)
     """Mochila de carga (Pack): armação de couro, feixe de lenha e saco de ouro/pedra, em materiais lisos. Ocultos no jogo
     (`ModelFactory._workerGlbDefaults`) e ligados por `UnitView._applyCarry`."""
     import bpy
@@ -260,8 +260,8 @@ def materiais_extra(ctx, objs, pack_y=1.18, banda=(0.95, 1.35), escala=1.0):   #
     m_lenha = _material('PackWood', '#7b5230')
 
     def armacao(bm):
-        bmesh.ops.create_cube(bm, size=1.0, matrix=Matrix.Diagonal((0.5, 0.08, 0.5, 1.0)) @ Matrix.Translation((0, 0, 0)))
-    _malha('PackFrame', armacao, m_couro, pack, (0.0, 0.0, 0.0))
+        bmesh.ops.create_cube(bm, size=1.0, matrix=Matrix.Diagonal((0.5, armacao_esp, 0.5, 1.0)) @ Matrix.Translation((0, 0, 0)))
+    _malha('PackFrame', armacao, m_couro, pack, (0.0, armacao_y, 0.0))      # Aldeão: placa mais grossa (0,12) e 0,04 mais perto das costas; a lenha fica onde estava
 
     def saco(bm):
         bmesh.ops.create_uvsphere(bm, u_segments=14, v_segments=9, radius=1.0,

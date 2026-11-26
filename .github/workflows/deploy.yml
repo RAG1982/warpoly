@@ -4,6 +4,11 @@ on:
   push:
     branches: [master]
   workflow_dispatch:
+    inputs:
+      skip_tests:
+        description: 'Publicar sem rodar a suíte (só em publicação manual; os testes rodam localmente)'
+        type: boolean
+        default: false
 
 permissions:
   contents: read
@@ -26,6 +31,7 @@ jobs:
       - run: npm ci
       - run: npm run lint
       - run: npx vitest run
+        if: ${{ !inputs.skip_tests }}
       # BASE = subpasta do repositório (https://<usuario>.github.io/<repo>/). Para domínio próprio, use BASE=/.
       - run: npm run build
         env:

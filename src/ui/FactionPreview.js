@@ -61,8 +61,8 @@ export class FactionPreview {
     this.renderer.outputColorSpace = THREE.SRGBColorSpace;
     this.scene = new THREE.Scene();
     this.camera = new THREE.PerspectiveCamera(32, 1, 0.1, 100);
-    this.camera.position.set(0, 3.4, 10.4);
-    this.camera.lookAt(0, 2.15, 0);
+    this.camera.position.set(0, 3.7, 11.4);
+    this.camera.lookAt(0, 2.5, 0);
     this.scene.add(new THREE.HemisphereLight(0xfff1d0, 0x2a2438, 1.35));
     const sun = new THREE.DirectionalLight(0xffe2b0, 2.4);
     sun.position.set(4, 7, 5);
@@ -97,7 +97,7 @@ export class FactionPreview {
     if (token !== this._token || !this.renderer) return;
     this.pivot.clear();
     const hqObj = hq.clone(true);
-    normalize(hqObj, 4.6);
+    normalize(hqObj, 5.4);
     hqObj.position.z -= 0.5;
     const unitObj = unit.clone(true);
     normalize(unitObj, 1.9);

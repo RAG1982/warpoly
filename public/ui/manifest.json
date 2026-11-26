@@ -157,8 +157,8 @@
   ]
  },
  "bytes": {
-  "total": 2991162,
-  "art": 281206,
+  "total": 2927628,
+  "art": 217672,
   "icons": 2346594,
   "portraits": 363362
  },
@@ -246,13 +246,13 @@
    "file": "art/menu.webp",
    "width": 1920,
    "height": 1080,
-   "bytes": 173986
+   "bytes": 121910
   },
   "loading": {
    "file": "art/loading.webp",
    "width": 1920,
    "height": 1080,
-   "bytes": 107220
+   "bytes": 95762
   }
  },
  "npcPortraits": {

@@ -26,6 +26,21 @@ import ui_scene as SC  # noqa: E402
 
 W, H = 1920, 1080
 
+# Modelos v2 que o jogo usa hoje (ModelFactory/glbModels). As cenas abaixo citam as chaves antigas; este mapa troca cada uma
+# pelo .glb atual e por um fator de escala (os Centros de nível 3 são mais altos e estreitos que o castelo/Grande Salão antigos).
+ART_MODELS = {
+    'castle': ('hq_human_3', 0.95), 'great_hall': ('hq_orc_3', 0.95),
+    'knight': ('knight_v2', 1.0), 'archer': ('archer_v2', 1.0), 'cavalier': ('templar_v2', 1.0),
+    'grunt': ('grunt_v2', 1.0), 'axethrower': ('axethrower_v2', 1.0),
+    'gryphon_rider': ('gryphon_rider_v2', 1.0), 'war_serpent': ('war_serpent_v2', 1.0),
+}
+
+
+class ArtLibrary(SC.Library):
+    def instance(self, key, loc, yaw_deg=0.0, scale=1.0, pose=None, team=None):
+        key, k = ART_MODELS.get(key, (key, 1.0))
+        return super().instance(key, loc, yaw_deg, scale * k, pose, team)
+
 
 def setup(scale, samples):
     sc = U.setup_scene(res=512, samples=samples, transparent=False)
@@ -218,7 +233,7 @@ HAZE = {
 def render_art(name, scale, samples, out_dir, quality):
     t0 = time.time()
     poses = U.load_poses()
-    lib = SC.Library(poses)
+    lib = ArtLibrary(poses)
     BUILDERS[name](lib, scale, samples)
     bpy.context.view_layer.update()
     arr = U.render_rgba('art_' + name)                       # RGBA (fundo opaco)

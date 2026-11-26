@@ -13,8 +13,9 @@ import { setTeamColor } from '../entities/glbModels.js';
 
 const BASE = (import.meta.env && import.meta.env.BASE_URL) || '/';
 const MODELS = {
-  human: { hq: ['castle', 'Castle'], unit: ['knight_v2', 'Knight'] },
-  orc: { hq: ['great_hall', 'GreatHall'], unit: ['grunt', 'Grunt'] }
+  // Mesmos modelos do jogo hoje: Centro de nível 3 (hq_*_3) e a unidade v2 da facção
+  human: { hq: ['hq_human_3', 'HqHuman3'], unit: ['knight_v2', 'Knight'] },
+  orc: { hq: ['hq_orc_3', 'HqOrc3'], unit: ['grunt_v2', 'Grunt'] }
 };
 
 const cache = new Map(); // url → Promise<THREE.Object3D>

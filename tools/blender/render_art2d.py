@@ -206,10 +206,10 @@ def build_loading(lib, scale, samples):
     place_ground(lib, terrain, 'watchtower', -66, 105, 20, 1.3)
     place_ground(lib, terrain, 'orc_watchtower', 24, 108, -20, 1.4)
     # duelo: heróis em primeiro plano, de perfil, um de cada lado
-    kz = SC.ground_z(terrain, -2.7, 7.6)
-    lib.instance('knight', (-2.7, 7.6, kz), 78, 1.0, 'fight_0.3')
-    gz = SC.ground_z(terrain, 2.7, 8.0)
-    lib.instance('grunt', (2.7, 8.0, gz), -80, 1.0, 'fight_0.3')
+    kz = SC.ground_z(terrain, -2.7, 10.6)
+    lib.instance('knight', (-2.7, 10.6, kz), 78, 1.0, 'fight_0.3')
+    gz = SC.ground_z(terrain, 2.7, 11.0)
+    lib.instance('grunt', (2.7, 11.0, gz), -80, 1.0, 'fight_0.3')
     # tropas ao fundo, em filas
     for i in range(5):
         place_ground(lib, terrain, 'knight', -9 - i * 2.2, 22 + i * 1.8 + rng.uniform(-0.5, 0.5), 80 + rng.uniform(-10, 10), 1.0, 'idle')
@@ -218,7 +218,7 @@ def build_loading(lib, scale, samples):
         place_ground(lib, terrain, 'axethrower', 14 + i * 2.0, 30 + i * 1.6 + rng.uniform(-0.5, 0.5), -80 + rng.uniform(-10, 10), 1.0, 'idle')
     scatter_trees(lib, terrain, rng, 240, ((-150, 150), (-10, 250)), [(-44, 122, 24), (46, 130, 24)], lambda x, y: (y < 70 and abs(x) < 32) or y < 8)
     SC.scatter_embers(rng, 120, ((-9, 9), (2, 34), (0.5, 6.0)), size=(0.025, 0.07))
-    return make_cam((0.3, -3.6, 1.3), (0.0, 12.0, 1.55), 44.0, focus=11.5, fstop=3.5)
+    return make_cam((0.3, -3.6, 1.3), (0.0, 12.0, 1.55), 44.0, focus=14.5, fstop=3.5)
 
 
 BUILDERS = {'menu': build_menu, 'loading': build_loading}

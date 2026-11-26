@@ -81,7 +81,7 @@ const OBRAS = {
   stable: { gold: 200, wood: 60, stone: 40 }, aviary: { gold: 300, wood: 150, stone: 60 }
 };
 /** Evolução do Marco a nível 2 (tiers.js: HQ_UPGRADE_COST[2]). */
-const MARCO_LV2 = { gold: 667, wood: 267, stone: 200 };
+const MARCO_LV2 = { gold: 600, wood: 300, stone: 200 };
 
 /** Serraria junto da árvore mais próxima da base. */
 function camp(c) {

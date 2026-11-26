@@ -33,7 +33,7 @@ export const HQ_TIER_GOLD_MULT = { 1: 1.0, 2: 1.10, 3: 1.20 };
  * Custo/tempo do upgrade para o nível indicado (2 ou 3). F4-07a: `oil` é cobrado.
  */
 export const HQ_UPGRADE_COST = {
-  2: { gold: 667, wood: 267, stone: 200, time: 60 },
+  2: { gold: 600, wood: 300, stone: 200, time: 60 },
   3: { gold: 1333, wood: 533, stone: 400, oil: 266, time: 90 }
 };
 

@@ -217,7 +217,7 @@ describe('Centro extra: funciona como Centro (entrega, treino, upgrade, derrota)
     expect(gm.getUnitsOf(0).length).toBe(n0 + 1);
     const g0 = gm.getPlayer(0).resources.gold;
     issue(gm, { type: CMD.UPGRADE_HQ, playerId: 0, buildingId: b.id });
-    expect(g0 - gm.getPlayer(0).resources.gold).toBe(667);
+    expect(g0 - gm.getPlayer(0).resources.gold).toBe(600);
     seconds(gm, 61);
     expect(b.tier).toBe(2);
     expect(b.maxHp).toBe(HQ_TIER_HP[2]);

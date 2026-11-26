@@ -79,6 +79,8 @@ export const GLB_MODELS = {
   temple: { url: `${BASE}models/temple.glb`, root: 'Temple', type: null },
   storm_altar: { url: `${BASE}models/storm_altar.glb`, root: 'StormAltar', type: null },
   watching_eye: { url: `${BASE}models/watching_eye.glb`, root: 'WatchingEye', type: 'watching_eye' },
+  // Paladino de Elite (Templário; TRELLIS finalizado no Blender, tools/blender/build_templar_elite.py): padrão do `templar` (cavalo com barda de placas, crina e cauda dourada, sem capa).
+  // Mesmos nós do templar_v2 (Horse, HorseLeg*, HorseHead, HorseTail; Torso > Head > Plume, ArmL, ArmR > Sword).
   templar: { url: `${BASE}models/templar.glb`, root: 'Templar', type: 'cavalier' },
   // Paladino v2 (Templário; TRELLIS finalizado no Blender, tools/blender/build_templar_v2.py): padrão do `templar`; o `templar` acima é o reserva (e segue no inspetor).
   // Nós: Horse, HorseLegFL/FR/BL/BR, HorseHead, HorseTail, Torso > Head > Plume, Cape, ArmL, ArmR > Sword (punhos fechados na malha).

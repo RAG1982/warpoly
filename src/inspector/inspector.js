@@ -1021,10 +1021,10 @@ const MODEL_CATALOG = [
     type: 'cavalier',
     icon: '🐎',
     glb: 'templar',
-    sourceFile: 'tools/blender/build_templar.py',
+    sourceFile: 'tools/blender/build_templar_elite.py',
     create: createGlb('templar'),
-    description: 'Cavaleiro consagrado gerado a partir do Cavaleiro (public/models/templar.glb): armadura branca com frisos de ouro vivo, cavalo branco, tabardo e gualdrapa em cor de time com emblema de sol (também no escudo e no peitoral do cavalo, voltados para +Z), elmo com crista alta de plumas brancas e disco solar na testa.',
-    notes: 'Mesma rig do Cavaleiro (Horse, HorseLeg*, Torso, Head, ArmL/ArmR, Sword, ShieldGroup). ~9 mil triângulos, 14 draw calls, atlas 512². Animações do UnitAnimator como `cavalier`.'
+    description: 'Paladino de Elite (public/models/templar.glb): TRELLIS finalizado no Blender (tools/blender/build_templar_elite.py). Cavaleiro de placas azul e dourado sobre cavalo com barda, crina e cauda douradas, pluma e faixas em cor de time; cavalo articulado (cabeça, cauda e patas).',
+    notes: 'Mesma rig do Paladino v2 (Horse, HorseLeg*, HorseHead, HorseTail, Torso > Head > Plume, ArmL/ArmR > Sword; sem capa). ~38 mil triângulos, 16 componentes, atlas 512². Animações do UnitAnimator como `cavalier` (com o cavalo articulado).'
   },
   {
     id: 'templar_v2_glb',

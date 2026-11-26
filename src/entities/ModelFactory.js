@@ -572,7 +572,8 @@ export class ModelFactory {
 
   /** F4-01/NEW-33: cavaleiro montado (.glb do Blender; sem ele, o bloco reserva de `_placeholder`). */
   static createCavalier() {
-    return this._glbOr('cavalier', () => this._placeholder('cavalier', 'unit'));
+    // Paladino v2 (TRELLIS, build_templar_v2.py) é o padrão do Cavaleiro; sem ele, o cavalier.glb antigo
+    return this._glbOr('templar_v2', () => this._glbOr('cavalier', () => this._placeholder('cavalier', 'unit')));
   }
 
   /** F4-02: balista (cerco humano, procedural). */
@@ -672,7 +673,7 @@ export class ModelFactory {
       case 'pig': return this.createCritter('boar');
       case 'watching_eye': return this._glbOr('watching_eye', () => this.getOrCreateModel('watching_eye', createWatchingEye));
       // NEW-40: classes avançadas com .glb próprio (sem .glb, caem no modelo da unidade base)
-      case 'templar': return this._glbOr('templar_v2', () => this._glbOr('templar', () => this.createCavalier())); // Paladino v2 (Tripo/TRELLIS) é o padrão
+      case 'templar': return this._glbOr('templar', () => this.createCavalier()); // o dono vai gerar um modelo próprio do Templário; até lá, o .glb antigo
       case 'ogre_mage': return this._glbOr('ogre_mage', () => this.createOgre());
       // F4-06: aéreos (procedurais provisórios; Blender na F7)
       case 'glider': return this._glbOr('glider', () => this.getOrCreateModel('glider', createGlider, 'glider'));

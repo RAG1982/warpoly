@@ -61,8 +61,8 @@ export class FactionPreview {
     this.renderer.outputColorSpace = THREE.SRGBColorSpace;
     this.scene = new THREE.Scene();
     this.camera = new THREE.PerspectiveCamera(32, 1, 0.1, 100);
-    this.camera.position.set(0, 3.1, 9.2);
-    this.camera.lookAt(0, 1.7, 0);
+    this.camera.position.set(0, 3.4, 10.4);
+    this.camera.lookAt(0, 2.15, 0);
     this.scene.add(new THREE.HemisphereLight(0xfff1d0, 0x2a2438, 1.35));
     const sun = new THREE.DirectionalLight(0xffe2b0, 2.4);
     sun.position.set(4, 7, 5);
@@ -97,11 +97,13 @@ export class FactionPreview {
     if (token !== this._token || !this.renderer) return;
     this.pivot.clear();
     const hqObj = hq.clone(true);
-    normalize(hqObj, 3.4);
-    hqObj.position.z -= 0.6;
+    normalize(hqObj, 4.6);
+    hqObj.position.z -= 0.5;
     const unitObj = unit.clone(true);
     normalize(unitObj, 1.9);
-    unitObj.position.set(1.7, unitObj.position.y, 1.9);
+    // a porta do Centro fica em +Z: a unidade para logo diante dela, quase encostada, um pouco à direita
+    const hb = new THREE.Box3().setFromObject(hqObj);
+    unitObj.position.set(0.55, unitObj.position.y, hb.max.z + 0.35);
     this.pivot.add(hqObj, unitObj);
     this.pivot.rotation.y = -0.5;
     this._applyColor();

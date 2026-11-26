@@ -64,7 +64,7 @@ YL = -0.34 + SH        # plano das patas: abaixo da gualdrapa e das borlas
 YW = 0.055 + SH         # plano da cintura do cavaleiro (acima do saiote de placas)
 YN = 0.316 + SH        # plano do pescoço do cavaleiro (abaixo do elmo)
 XA = 0.20             # |x| do plano do ombro (depois da ombreira)
-XW = 0.28             # |x| do plano do pulso (a mão aberta fica além; é trocada por um punho fechado)
+XW = 0.31             # |x| do plano do pulso (a mão aberta fica além; é trocada por um punho fechado)
 SUAVIZACAO = 0
 ATLAS = 512
 DILATACAO_TIME = 2
@@ -209,12 +209,12 @@ def zona_pescoco_cav(c, S):
 
 def zona_ombro(c, S):
     x, y, z = u(c, S)
-    return XA - 0.03 < abs(x) < XA + 0.03 and -0.075 < z < 0.115 and 0.14 + SH < y < 0.31 + SH
+    return XA - 0.03 < abs(x) < XA + 0.03 and -0.075 < z < 0.115 and 0.14 + SH < y < 0.345 + SH
 
 
 def zona_pulso(c, S):
     x, y, z = u(c, S)
-    return XW - 0.03 < abs(x) < XW + 0.03 and -0.075 < z < 0.115 and 0.14 + SH < y < 0.31 + SH
+    return XW - 0.03 < abs(x) < XW + 0.03 and -0.075 < z < 0.115 and 0.14 + SH < y < 0.345 + SH
 
 
 def zona_cintura(c, S):
@@ -247,7 +247,7 @@ def regras(ctx, f, c, nome):
     if z > 0.10 and (z > 0.15 or y < YW) and PESC_N[1] * (y - SH) + PESC_N[2] * z > 0.15:
         return 'HorseHead'
     # 3. mãos (além do pulso) e braços (entre o ombro e o pulso)
-    if abs(x) > XA and 0.14 + SH < y < 0.31 + SH and -0.075 < z < 0.115:
+    if abs(x) > XA and 0.14 + SH < y < 0.345 + SH and -0.075 < z < 0.115:
         lado = 'L' if x < 0 else 'R'
         return ('Hand' if abs(x) > XW else 'Arm') + lado
     # 4. elmo (acima do plano do pescoço)
@@ -280,9 +280,11 @@ def _tampa(dados, peca, modo):
 # Geometria gerada: punhos fechados e espada
 # ---------------------------------------------------------------------------
 # pose de repouso do braço (baked na malha: o UnitAnimator escreve rotações absolutas no ArmL/ArmR, então o repouso é o zero do nó)
+K_BRACO = 1.7                                 # estica o braço ao longo do eixo x antes de reposá-lo (a ombreira grande do elite esconde o braço)
+ELB = 0.255                                   # |x| do cotovelo (centro da mistura)
 BRACO_U = np.array([0.32, -0.88, 0.36])      # braço: para baixo, um pouco para fora e para a frente (lado direito; o esquerdo espelha x)
 BRACO_F = np.array([0.06, -0.30, 0.95])      # antebraço: para a frente, o punho à altura da sela
-COTOVELO_X = (0.215, 0.255)                   # |x| do GLB: faixa de mistura entre o braço e o antebraço
+COTOVELO_X = (0.235, 0.275)                   # |x| do GLB: faixa de mistura entre o braço e o antebraço
 
 
 def _unit(v):
@@ -317,7 +319,9 @@ def repousar_braco(ctx, peca, pivo, lado):
     R2 = _rot_de_para(u1, f1)
     V = d['V']
     w = _suave((np.abs(V[:, 0] / S + X0) - COTOVELO_X[0]) / (COTOVELO_X[1] - COTOVELO_X[0]))
-    cot = pivo + u0 * ((0.235 - XA) * S)
+    V = V.copy()
+    V[:, 0] = pivo[0] + (V[:, 0] - pivo[0]) * K_BRACO                   # estira o braço ao longo de x (a mistura w usa o x original)
+    cot = pivo + u0 * ((ELB - XA) * S * K_BRACO)
     cot1 = pivo + R1 @ (cot - pivo)
     A = pivo + (V - pivo) @ R1.T
     B = cot1 + (A - cot1) @ R2.T
@@ -331,7 +335,8 @@ def repousar_braco(ctx, peca, pivo, lado):
         d['N'][k] = nn
     # pulso: o centro do anel de corte do pulso, levado pela mesma deformação
     tw = max(d['tampas'], key=lambda t: abs(t['centro'][0] - pivo[0]))
-    c0 = tw['centro']
+    c0 = tw['centro'].copy()
+    c0[0] = pivo[0] + (c0[0] - pivo[0]) * K_BRACO
     A0 = pivo + R1 @ (c0 - pivo)
     B0 = cot1 + R2 @ (A0 - cot1)
     return B0, f1 / np.linalg.norm(f1)
@@ -526,6 +531,12 @@ def finalizar(ctx):
     centros = {}
     for p, lado in (('ArmL', -1), ('ArmR', 1)):
         pulso, f1 = repousar_braco(ctx, p, piv[p], lado)
+        # braço superior gerado: no elite a ombreira cobre o braço da T-pose e, ao reposar, sobra um vão entre o ombro e o antebraço
+        u1 = _unit(BRACO_U * np.array([lado, 1, 1]))
+        comp_ub = (ELB - XA) * S * K_BRACO + 0.03 * S
+        e1 = _unit(np.cross(u1, np.array([0.0, 0.0, 1.0])))
+        e2 = _unit(np.cross(u1, e1))
+        anexar(dados[p], elipsoide(piv[p] + u1 * (comp_ub * 0.45), (u1, e1, e2), (comp_ub * 0.62, 0.040 * S, 0.040 * S), expo=0.8), cor_aco, f_aco)
         centros[p] = construir_punho(ctx, dados[p], pulso, f1, lado, g, f_mao, cor_mao)
         log('%s: pulso em %s, punho em %s' % (p, np.round(pulso, 3), np.round(centros[p], 3)))
     # espada na mão direita
